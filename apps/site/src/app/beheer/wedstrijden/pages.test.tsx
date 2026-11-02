@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matchChanges, matches, type NewMatch, players } from '@fansite/db/schema'
+import { adminUsers, matchChanges, matchEdits, matches, type NewMatch, players } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -524,6 +524,54 @@ describe('the match', () => {
 
       const html = await list({ tonen: 'alles' })
 
+      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
+    })
+
+    it('tags the match "Wikipedia wijkt af" next to "Aangepast", and finds it under "Aangepast"', async () => {
+      await withDifference()
+      await addMatch({ round: 'Speelronde 12' })
+
+      const html = await list({ tonen: 'aangepast' })
+
+      expect(html).toContain('Aangepast (1)')
+      expect(html).toContain('<span class="hf-tag hf-tag-highlight">Aangepast</span>')
+      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
+      expect(html).toContain('N.E.C.')
+      expect(html).not.toContain('Speelronde 12')
+    })
+
+    it('finds the match of an earlier season at the address of the start page', async () => {
+      const id = await addMatch({ round: 'Speelronde 3', season: '2024/25' })
+
+      await database.db.insert(matchEdits).values({
+        beforeGoals: '',
+        beforeMatch: '',
+        editedAt: new Date(),
+        editedBy: userId,
+        goalsEdited: false,
+        kickoffEdited: false,
+        matchId: id,
+        reason: 'x',
+        resultEdited: true,
+      })
+      await database.db.insert(matchChanges).values({
+        changed: 'uitslag',
+        class: 'suspicious',
+        competition: 'Eredivisie',
+        firstSeenAt: new Date('2026-11-02T10:00:00Z'),
+        lastSeenAt: new Date('2026-11-02T10:00:00Z'),
+        matchId: id,
+        oldValue: 'a',
+        part: 'result',
+        reason: 'x',
+        round: 'Speelronde 3',
+        season: '2024/25',
+        status: 'pending',
+      })
+
+      const html = await list({ seizoen: '2024-25', tonen: 'aangepast' })
+
+      expect(html).toContain('N.E.C.')
       expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
     })
 

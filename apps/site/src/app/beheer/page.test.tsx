@@ -1,3 +1,4 @@
+import { seasonOf } from '@fansite/db/season'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -26,13 +27,15 @@ vi.mock('next/navigation', () => ({
 
 beforeEach(() => {
   countWaitingDifferences.mockReset()
-  countWaitingDifferences.mockResolvedValue(0)
+  countWaitingDifferences.mockResolvedValue({ seasons: [], total: 0 })
   findSession.mockReset()
   loginLinkWorks.mockReset()
   requireRole.mockReset()
   sessionToken.mockReset()
   sessionToken.mockResolvedValue(undefined)
 })
+
+const currentSeason = seasonOf(new Date())
 
 /** The h1s, h2s and so on of some markup, as text. */
 const headings = (html: string) =>
@@ -83,19 +86,38 @@ describe('the admin', () => {
 
   it('tells a beheerder how many differences with Wikipedia wait for a decision, and nobody else', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
-    countWaitingDifferences.mockResolvedValue(1)
+    countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 1 })
     expect(renderToStaticMarkup(await AdminPage())).toContain('(1 afwijking van Wikipedia wacht op een besluit)')
 
-    countWaitingDifferences.mockResolvedValue(3)
+    countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 3 })
     expect(renderToStaticMarkup(await AdminPage())).toContain('(3 afwijkingen van Wikipedia wachten op een besluit)')
 
-    countWaitingDifferences.mockResolvedValue(0)
+    countWaitingDifferences.mockResolvedValue({ seasons: [], total: 0 })
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
 
-    countWaitingDifferences.mockResolvedValue(3)
+    countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 3 })
     requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
     expect(countWaitingDifferences).toHaveBeenCalledTimes(3)
+  })
+
+  it('links the message to the list of the changed matches of the season that holds the differences', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    const link = async () =>
+      (renderToStaticMarkup(await AdminPage()).match(/<a href="([^"]*)">Wedstrijden invullen of verbeteren<\/a>/) ??
+        [])[1]
+    const slug = currentSeason.replace('/', '-')
+
+    // Without a waiting difference the link stays what it was: the list as it opens.
+    expect(await link()).toBe('/beheer/wedstrijden')
+
+    // The current season wins when it has some, whatever other seasons hold.
+    countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason, '2024/25'], total: 2 })
+    expect(await link()).toBe(`/beheer/wedstrijden?seizoen=${slug}&amp;tonen=aangepast`)
+
+    // Otherwise the newest season that has some, which is the first the count gives.
+    countWaitingDifferences.mockResolvedValue({ seasons: ['2024/25', '2023/24'], total: 2 })
+    expect(await link()).toBe('/beheer/wedstrijden?seizoen=2024-25&amp;tonen=aangepast')
   })
 
   it('shows nothing to somebody without a session', async () => {

@@ -51,7 +51,7 @@ De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (
 - **Wikipedia zegt iets anders:** jouw invoer blijft staan.
   De import schrijft het verschil één keer op, met beide waarden, in het logboek en in de waarschuwing van de import (`pnpm run import:status`).
   De beheerders krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd het label "Wikipedia wijkt af".
-  De startpagina van het beheer zegt hoeveel afwijkingen op een besluit wachten.
+  De startpagina van het beheer zegt hoeveel afwijkingen op een besluit wachten, en de koppeling erbij opent de lijst "Aangepast" van het seizoen waar ze staan.
 
 De uitslag en de doelpunten tellen apart.
 Wikipedia zet meestal eerst de uitslag, en pas later de doelpuntenmakers.

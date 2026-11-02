@@ -19,7 +19,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { MatchEntry } from './match-form'
 
 import { createAccount } from './accounts'
-import { findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entries'
+import { countWaitingDifferences, findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entries'
 
 let database: TestDatabase
 let userId: number
@@ -506,5 +506,56 @@ describe('listAdminMatches and findMatch', () => {
     expect(found?.edit).toMatchObject({ editedByEmail: 'sanne@example.org', resultEdited: true })
     expect(found?.squad.map((player) => player.name)).toEqual(['Bernt Klaverboer', 'Luca Oyen'])
     expect(await findMatch(database.db, 99_999)).toBeUndefined()
+  })
+})
+
+describe('countWaitingDifferences', () => {
+  /** A difference of a match, waiting for a decision unless the values say otherwise. */
+  async function addDifference(matchId: null | number, overrides: Partial<typeof matchChanges.$inferInsert> = {}) {
+    await database.db.insert(matchChanges).values({
+      changed: 'uitslag',
+      class: 'suspicious',
+      competition: 'Eredivisie',
+      firstSeenAt: t0,
+      lastSeenAt: t0,
+      matchId,
+      oldValue: 'a',
+      part: 'result',
+      reason: 'x',
+      round: 'Speelronde 11',
+      season: '2026/27',
+      status: 'pending',
+      ...overrides,
+    })
+  }
+
+  it('counts nothing, and names no season, when no difference waits', async () => {
+    expect(await countWaitingDifferences(database.db)).toEqual({ seasons: [], total: 0 })
+  })
+
+  it('counts the differences in all seasons and names the seasons, the newest first', async () => {
+    const now = await addMatch()
+    const before = await addMatch({ season: '2024/25' })
+    const older = await addMatch({ season: '2023/24' })
+
+    await addDifference(before, { season: '2024/25' })
+    await addDifference(older, { season: '2023/24' })
+    await addDifference(now, { part: 'goals' })
+    await addDifference(now)
+
+    expect(await countWaitingDifferences(database.db)).toEqual({
+      seasons: ['2026/27', '2024/25', '2023/24'],
+      total: 4,
+    })
+  })
+
+  it('leaves out what does not wait for a decision: a decided difference, a change of Wikipedia and a deleted match', async () => {
+    const id = await addMatch()
+
+    await addDifference(id, { status: 'rejected' })
+    await addDifference(id, { part: null })
+    await addDifference(null)
+
+    expect(await countWaitingDifferences(database.db)).toEqual({ seasons: [], total: 0 })
   })
 })
