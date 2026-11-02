@@ -45,25 +45,41 @@ for (const [name, javaScriptEnabled, title] of [
       }
 
       // With a reason: the item is hidden, the page says when it is gone from the site, and the
-      // search is kept.
+      // search is kept. The item leaves the group on the site, so it is not in the list now.
       await itemOf(page, title).getByLabel('Reden').fill('Fout in het bericht')
       await itemOf(page, title)
         .getByRole('button', { name: `Verberg: ${title}` })
         .click()
       await expect(page.getByRole('heading', { name: 'Verborgen' })).toBeVisible()
       await expect(page.getByText(`${title}. Staat binnen vijf minuten niet meer op de site.`)).toBeVisible()
-      await expect(itemOf(page, title).getByText('Reden: Fout in het bericht')).toBeVisible()
+      await expect(page.getByRole('link', { name: title })).toBeHidden()
       await expect(page.getByLabel('Zoeken')).toHaveValue(title)
       if (javaScriptEnabled) {
         // axe is a script that runs in the page, so it can't check a page without JavaScript.
         expect(await checkPage(page)).toEqual([])
       }
 
-      // Shown again.
+      // It is in the other group, with who hid it and why, and the search is kept there too.
+      await page.getByRole('link', { exact: true, name: 'Niet op de site' }).click()
+      await expect(page.getByRole('link', { exact: true, name: 'Niet op de site' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+      await expect(page.getByLabel('Zoeken')).toHaveValue(title)
+      await expect(itemOf(page, title).getByText('Reden: Fout in het bericht')).toBeVisible()
+      await expect(itemOf(page, title).getByText(/door .+@.+\. Reden/)).toBeVisible()
+      if (javaScriptEnabled) {
+        expect(await checkPage(page)).toEqual([])
+      }
+
+      // Shown again: it goes back to the group on the site, and the page stays on the group it
+      // was in.
       await itemOf(page, title)
         .getByRole('button', { name: `Toon weer: ${title}` })
         .click()
       await expect(page.getByRole('heading', { name: 'Weer getoond' })).toBeVisible()
+      await expect(page.getByRole('link', { name: title })).toBeHidden()
+      await page.getByRole('link', { exact: true, name: 'Op de site' }).click()
       await expect(itemOf(page, title).getByRole('button', { name: `Verberg: ${title}` })).toBeVisible()
       if (javaScriptEnabled) {
         // axe is a script that runs in the page, so it can't check a page without JavaScript.

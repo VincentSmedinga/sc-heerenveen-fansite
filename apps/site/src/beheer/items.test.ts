@@ -6,7 +6,19 @@ import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createAccount } from './accounts'
-import { findItem, hideItem, listItems, listLength, parseItemId, parseReason, parseSearch, showItem } from './items'
+import {
+  findItem,
+  hideItem,
+  type ItemFilter,
+  listItems,
+  listLength,
+  parseEditorsOnly,
+  parseGroup,
+  parseItemId,
+  parseReason,
+  parseSearch,
+  showItem,
+} from './items'
 import { addItem, addSource } from './test-items'
 
 let database: TestDatabase
@@ -30,54 +42,124 @@ beforeEach(async () => {
   ids = await addSource(database)
 })
 
-const titles = async (search = '') => (await listItems(database.db, search)).map((item) => item.title)
+const now = new Date('2026-11-02T12:00:00Z')
+
+const titles = async (search = '', filter: ItemFilter = {}) =>
+  (await listItems(database.db, search, { now, ...filter })).map((item) => item.title)
+
+const offSite = (editorsOnly = false): ItemFilter => ({ editorsOnly, group: 'not-on-site' })
 
 describe('listItems', () => {
-  it('gives the items newest first, hidden ones too', async () => {
+  it('gives the items on the site newest first, and by default', async () => {
     await addItem(database, ids, 'oud', { publishedAt: new Date('2026-10-18T08:00:00Z') })
     await addItem(database, ids, 'nieuw', { publishedAt: new Date('2026-10-21T08:00:00Z') })
-    await addItem(database, ids, 'verborgen', {
-      hiddenAt: new Date('2026-10-22T08:00:00Z'),
-      hiddenReason: 'Fout in het bericht',
-      publishedAt: new Date('2026-10-20T08:00:00Z'),
+    await addItem(database, ids, 'midden', { publishedAt: new Date('2026-10-20T08:00:00Z') })
+
+    expect(await titles()).toEqual(['Kop nieuw', 'Kop midden', 'Kop oud'])
+    expect(await titles('', { group: 'on-site' })).toEqual(['Kop nieuw', 'Kop midden', 'Kop oud'])
+  })
+
+  describe('which group an item is in', () => {
+    beforeEach(async () => {
+      await addItem(database, ids, 'gewoon', { publishedAt: new Date('2026-10-21T08:00:00Z') })
+      await addItem(database, ids, 'verborgen', {
+        hiddenAt: new Date('2026-10-22T08:00:00Z'),
+        hiddenBy: userId,
+        hiddenReason: 'Fout in het bericht',
+        publishedAt: new Date('2026-10-20T08:00:00Z'),
+      })
+      await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-19T08:00:00Z'), relevance: 'doubtful' })
+      await addItem(database, ids, 'elders', { publishedAt: new Date('2026-10-18T08:00:00Z'), relevance: 'irrelevant' })
+      await addItem(database, ids, 'straks', { publishedAt: new Date('2026-11-02T12:00:01Z') })
+      await addItem(database, ids, 'nu', { publishedAt: now })
     })
 
-    expect(await titles()).toEqual(['Kop nieuw', 'Kop verborgen', 'Kop oud'])
+    it('puts only an item that is shown, relevant and published on the site', async () => {
+      expect(await titles()).toEqual(['Kop nu', 'Kop gewoon'])
+    })
+
+    it('puts all the others off the site: hidden, doubtful, not about the club and still to come', async () => {
+      expect(await titles('', offSite())).toEqual(['Kop straks', 'Kop verborgen', 'Kop twijfel', 'Kop elders'])
+    })
+
+    it('keeps to what editors hid when asked, and asks nothing of the group on the site', async () => {
+      expect(await titles('', offSite(true))).toEqual(['Kop verborgen'])
+      expect(await titles('', { editorsOnly: true, group: 'on-site' })).toEqual(['Kop nu', 'Kop gewoon'])
+    })
+
+    it('puts every item in one group and never in both', async () => {
+      const on = await titles()
+      const off = await titles('', offSite())
+
+      expect([...on, ...off].toSorted()).toEqual(
+        ['Kop elders', 'Kop gewoon', 'Kop nu', 'Kop straks', 'Kop twijfel', 'Kop verborgen'].toSorted(),
+      )
+    })
+
+    it('moves an item whose time has come to the group on the site', async () => {
+      const later = new Date('2026-11-02T12:00:01Z')
+
+      expect(await titles('', { now: later })).toEqual(['Kop straks', 'Kop nu', 'Kop gewoon'])
+      expect(await titles('', { ...offSite(), now: later })).toEqual(['Kop verborgen', 'Kop twijfel', 'Kop elders'])
+    })
+
+    it('gives the importer’s leftovers their relevance and the hidden one its time', async () => {
+      const found = await listItems(database.db, '', { ...offSite(), now })
+
+      expect(found.map((item) => item.relevance)).toEqual(['relevant', 'relevant', 'doubtful', 'irrelevant'])
+      expect(found[1]?.hiddenAt).toEqual(new Date('2026-10-22T08:00:00Z'))
+    })
   })
 
-  it('gives the items the importer found doubtful or not about the club too, so a moderator finds them', async () => {
-    await addItem(database, ids, 'club', { publishedAt: new Date('2026-10-21T08:00:00Z') })
-    await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-20T08:00:00Z'), relevance: 'doubtful' })
-    await addItem(database, ids, 'elders', { publishedAt: new Date('2026-10-19T08:00:00Z'), relevance: 'irrelevant' })
+  it('gives the email address of the account that hid an item, and nothing for an item that is not hidden', async () => {
+    await addItem(database, ids, 'verborgen', {
+      hiddenAt: new Date('2026-10-22T08:00:00Z'),
+      hiddenBy: userId,
+      hiddenReason: 'Fout in het bericht',
+    })
+    await addItem(database, ids, 'gewoon', { publishedAt: new Date('2026-10-21T08:00:00Z') })
 
-    expect(await titles()).toEqual(['Kop club', 'Kop twijfel', 'Kop elders'])
-    expect((await listItems(database.db, '')).map((item) => item.relevance)).toEqual([
-      'relevant',
-      'doubtful',
-      'irrelevant',
+    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByEmail)).toEqual([
+      'jelle@example.org',
     ])
+    expect((await listItems(database.db, '', { now })).map((item) => item.hiddenByEmail)).toEqual([null])
   })
 
-  it('gives the newest 50 and no more', async () => {
+  it('still gives a hidden item whose account has no row, without an address', async () => {
+    await addItem(database, ids, 'verborgen', { hiddenAt: new Date('2026-10-22T08:00:00Z'), hiddenReason: 'Fout' })
+
+    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByEmail)).toEqual([null])
+  })
+
+  it('gives the newest 50 of each group and no more', async () => {
     for (let number = 0; number < listLength + 5; number++) {
       await addItem(database, ids, `k${number}`, { publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)) })
+      await addItem(database, ids, `x${number}`, {
+        publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)),
+        relevance: 'irrelevant',
+      })
     }
 
     const found = await titles()
+    const others = await titles('', offSite())
 
     expect(listLength).toBe(50)
     expect(found).toHaveLength(50)
     expect(found[0]).toBe('Kop k54')
     expect(found.at(-1)).toBe('Kop k5')
+    expect(others).toHaveLength(50)
+    expect(others[0]).toBe('Kop x54')
+    expect(others.at(-1)).toBe('Kop x5')
   })
 
-  it('gives the source, the headline, the link, the time, the paywall and whether it is hidden, and no key', async () => {
+  it('gives the source, the headline, the link, the time, the paywall and who hid it, and no key', async () => {
     await addItem(database, ids, 'een', { paywalled: true })
 
     const [item] = await listItems(database.db, '')
 
     expect(Object.keys(item ?? {}).toSorted()).toEqual([
       'hiddenAt',
+      'hiddenByEmail',
       'hiddenReason',
       'id',
       'paywalled',
@@ -107,10 +189,21 @@ describe('listItems', () => {
       expect((await titles('krant.test/sport')).toSorted()).toEqual(['100% zeker: uitslag', 'Heerenveen wint van Ajax'])
     })
 
-    it('finds a hidden item too, so a request to remove it can be answered', async () => {
+    it('finds a hidden item in the group off the site, so a request to remove it can be answered', async () => {
       await database.db.update(items).set({ hiddenAt: new Date() }).where(eq(items.key, 'b'))
 
-      expect(await titles('voorzitter')).toEqual(['Bestuur kiest nieuwe voorzitter'])
+      expect(await titles('voorzitter')).toEqual([])
+      expect(await titles('voorzitter', offSite())).toEqual(['Bestuur kiest nieuwe voorzitter'])
+      expect(await titles('voorzitter', offSite(true))).toEqual(['Bestuur kiest nieuwe voorzitter'])
+    })
+
+    it('searches each group on its own', async () => {
+      await database.db.update(items).set({ relevance: 'irrelevant' }).where(eq(items.key, 'a'))
+
+      expect(await titles('wint van')).toEqual([])
+      expect(await titles('wint van', offSite())).toEqual(['Heerenveen wint van Ajax'])
+      expect(await titles('wint van', offSite(true))).toEqual([])
+      expect(await titles('voorzitter', offSite())).toEqual([])
     })
 
     it('takes % and _ as themselves and no pattern', async () => {
@@ -130,8 +223,9 @@ describe('listItems', () => {
       expect(await titles('bestaat niet')).toEqual([])
     })
 
-    it('gives all items for no text', async () => {
+    it('gives all items of the group for no text', async () => {
       expect(await titles('')).toHaveLength(3)
+      expect(await titles('', offSite())).toEqual([])
     })
   })
 })
@@ -330,5 +424,32 @@ describe('parseSearch', () => {
 
   it.each([undefined, '', '   ', ['a', 'b'], ['a']])('gives nothing for %j', (value) => {
     expect(parseSearch(value)).toBe('')
+  })
+})
+
+describe('parseGroup', () => {
+  it('gives the group off the site for niet-op-de-site only', () => {
+    expect(parseGroup('niet-op-de-site')).toBe('not-on-site')
+  })
+
+  it.each([undefined, '', 'op-de-site', 'Niet-op-de-site', 'alles', ['niet-op-de-site'], ['x', 'niet-op-de-site']])(
+    'falls back to the group on the site for %j',
+    (value) => {
+      expect(parseGroup(value)).toBe('on-site')
+    },
+  )
+})
+
+describe('parseEditorsOnly', () => {
+  it('is on for 1 under the group off the site', () => {
+    expect(parseEditorsOnly('1', 'not-on-site')).toBe(true)
+  })
+
+  it.each([undefined, '', '0', 'true', 'on', ['1']])('is off for %j', (value) => {
+    expect(parseEditorsOnly(value, 'not-on-site')).toBe(false)
+  })
+
+  it('is off under the group on the site, where no hidden item can be', () => {
+    expect(parseEditorsOnly('1', 'on-site')).toBe(false)
   })
 })

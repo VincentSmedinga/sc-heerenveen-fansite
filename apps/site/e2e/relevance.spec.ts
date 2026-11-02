@@ -30,13 +30,24 @@ test.describe('the items that are not relevant', () => {
     })
   }
 
-  test('are in the list of the admin, with what the importer found', async ({ baseURL, context, page }) => {
+  test('are in the list of the admin that is not on the site, with what the importer found', async ({
+    baseURL,
+    context,
+    page,
+  }) => {
     await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname)])
     await page.goto('/beheer/berichten?q=Verzonnen')
+
+    await expect(page.getByRole('link', { name: doubtful?.title ?? '' })).toBeHidden()
+    await expect(page.getByRole('link', { name: irrelevant?.title ?? '' })).toBeHidden()
+
+    await page.goto('/beheer/berichten?q=Verzonnen&toon=niet-op-de-site')
 
     await expect(page.getByRole('link', { name: doubtful?.title ?? '' })).toBeVisible()
     await expect(page.getByRole('link', { name: irrelevant?.title ?? '' })).toBeVisible()
     await expect(page.getByText('twijfelgeval, niet op de site')).toBeVisible()
     await expect(page.getByText('niet over de club, niet op de site')).toBeVisible()
+    // The importer leaves them off the site, so hiding them would do nothing: no form for it.
+    await expect(page.getByRole('button', { name: /^Verberg:/ })).toBeHidden()
   })
 })
