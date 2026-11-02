@@ -31,7 +31,7 @@ import {
 } from './classify-change.ts'
 import { clubFullNames } from './club-names.ts'
 import { importEditedMatch, mergeEntry, readEdits } from './edited-matches.ts'
-import { matchClubNames, storeResults } from './league-results.ts'
+import { matchClubNames, playedWarning, storeResults } from './league-results.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import {
   decide,
@@ -579,7 +579,8 @@ async function readAndStore(
     }
   }
 
-  const named = matchClubNames(readLeagueResults(textOf('programme')).results, table.rows)
+  const everyClub = readLeagueResults(textOf('programme'))
+  const named = matchClubNames(everyClub.results, table.rows)
 
   problems.push(...checkMatches(found), ...checkStandings(table.rows, found), ...checkResults(named.results))
 
@@ -651,7 +652,10 @@ async function readAndStore(
     season,
     standings: table.rows.length,
     validOn,
-    warnings: stored.warnings,
+    warnings: [
+      ...stored.warnings,
+      ...resultWarnings(everyClub.unread, playedWarning(named.results, table.rows, named.strangers)),
+    ],
   }
 }
 
@@ -685,6 +689,17 @@ async function readSeason(
   }
 
   return report
+}
+
+/**
+ * The warnings about the results of every club: the played matches the page lists that could
+ * not be read, and a club with another number of results than the table says (`playedWarning`).
+ */
+function resultWarnings(unread: string[], played: string | undefined): string[] {
+  return [
+    ...(unread.length === 0 ? [] : [`league results left out: ${unread.join('; ')}`]),
+    ...(played === undefined ? [] : [played]),
+  ]
 }
 
 /** One row of the table, with the season and the day it holds for. */

@@ -14,6 +14,9 @@ import { clubFullNames } from './club-names.ts'
 /** How many results the import added, changed, left as they were and removed. */
 export type ResultCounts = { added: number; removed: number; unchanged: number; updated: number }
 
+/** The most names of clubs a warning about the results lists. */
+const mostClubsListed = 6
+
 /**
  * Makes the clubs of the results the clubs of the table, so the two can be joined on the name.
  * A name is the club of the table when the two are the same apart from the case, or when
@@ -45,6 +48,40 @@ export function matchClubNames(
     })),
     strangers: [...strangers].sort((a, b) => a.localeCompare(b, 'nl')),
   }
+}
+
+/**
+ * The warning when the results do not agree with the table: a club that has played another
+ * number of matches than the table says, or a club the table does not have. It is a warning
+ * and not an error, because Wikipedia updates the table and the programme at different
+ * moments, and the data stays. Undefined when they agree, and when the page has no results of
+ * other clubs (`results` is empty), since the table is then empty by design.
+ */
+export function playedWarning(
+  results: ReadResult[],
+  rows: Pick<ReadStandingsRow, 'club' | 'played'>[],
+  strangers: string[],
+): string | undefined {
+  if (results.length === 0) {
+    return undefined
+  }
+
+  const played = new Map<string, number>()
+
+  for (const result of results) {
+    played.set(result.homeClub, (played.get(result.homeClub) ?? 0) + 1)
+    played.set(result.awayClub, (played.get(result.awayClub) ?? 0) + 1)
+  }
+
+  const differing = rows
+    .filter((row) => (played.get(row.club) ?? 0) !== row.played)
+    .map((row) => `${row.club} ${played.get(row.club) ?? 0} results against ${row.played} played`)
+  const parts = [
+    ...(differing.length === 0 ? [] : [`the results do not agree with the table: ${listed(differing)}`]),
+    ...(strangers.length === 0 ? [] : [`results of a club the table does not have: ${listed(strangers)}`]),
+  ]
+
+  return parts.length === 0 ? undefined : `league results: ${parts.join('; ')}`
 }
 
 /**
@@ -107,4 +144,9 @@ function clubKey(name: string): string {
 
 function keyOf(homeClub: string, awayClub: string): string {
   return `${homeClub}|${awayClub}`.toLowerCase()
+}
+
+/** The first names of a list, with `…` when there are more. */
+function listed(names: string[]): string {
+  return `${names.slice(0, mostClubsListed).join(', ')}${names.length > mostClubsListed ? ', …' : ''}`
 }

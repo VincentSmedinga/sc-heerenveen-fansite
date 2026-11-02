@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ReadResult } from './read-wikipedia.ts'
 
-import { matchClubNames } from './league-results.ts'
+import { matchClubNames, playedWarning } from './league-results.ts'
 import { readLeagueResults, readStandings } from './read-wikipedia.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
@@ -74,5 +74,45 @@ describe.each([
         row.played,
       )
     }
+  })
+})
+
+describe('the warning when the results do not agree with the table', () => {
+  const table = [
+    { club: 'Ajax', played: 2 },
+    { club: 'FC Twente', played: 1 },
+    { club: 'sc Heerenveen', played: 1 },
+  ]
+  const results = [result('Ajax', 'FC Twente'), result('sc Heerenveen', 'Ajax')]
+
+  it('says nothing when every club has played what the table says', () => {
+    expect(playedWarning(results, table, [])).toBeUndefined()
+  })
+
+  it('says nothing for a page without the results of other clubs, whatever the table says', () => {
+    expect(playedWarning([], table, [])).toBeUndefined()
+  })
+
+  it('names each club that has another number, with both numbers', () => {
+    expect(playedWarning(results, [{ club: 'Ajax', played: 3 }, ...table.slice(1)], [])).toBe(
+      'league results: the results do not agree with the table: Ajax 2 results against 3 played',
+    )
+    expect(playedWarning(results.slice(0, 1), table, [])).toBe(
+      'league results: the results do not agree with the table: Ajax 1 results against 2 played, sc Heerenveen 0 results against 1 played',
+    )
+  })
+
+  it('names a club the table does not have', () => {
+    expect(playedWarning(results, table, ['FC Volendam'])).toBe(
+      'league results: results of a club the table does not have: FC Volendam',
+    )
+  })
+
+  it('lists the first six clubs and shows there are more', () => {
+    const clubs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map((club) => ({ club, played: 5 }))
+
+    expect(playedWarning([result('A', 'B')], clubs, [])).toBe(
+      'league results: the results do not agree with the table: A 1 results against 5 played, B 1 results against 5 played, C 0 results against 5 played, D 0 results against 5 played, E 0 results against 5 played, F 0 results against 5 played, …',
+    )
   })
 })

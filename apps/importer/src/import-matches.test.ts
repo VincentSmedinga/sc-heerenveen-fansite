@@ -545,6 +545,52 @@ describe('the results of every club in the league', () => {
     expect(stored.filter((row) => row.season === '2027/28')).toHaveLength(90)
   })
 
+  describe('a club with another number of results than the table says', () => {
+    const missing = 'league results: the results do not agree with the table: '
+    const withoutCambuur = () => original.programme.replace(cambuurExcelsior, '|team1 = [[SC Cambuur]]\n|score = ')
+
+    it('warns in the report, the log and the health, and keeps the data', async () => {
+      const { server } = await serve({ programme: withoutCambuur() })
+
+      const report = await importAt(server, first)
+      const warning = `${missing}SC Cambuur 9 results against 10 played, Excelsior Rotterdam 9 results against 10 played`
+
+      expect(report).toMatchObject({ kind: 'imported', results: { added: 89 }, warnings: [warning] })
+      expect(formatMatchReport(report).split('\n')).toContain(`Matches 2026/27: warning, ${warning}`)
+      expect(await health()).toMatchObject({
+        failuresInARow: 0,
+        lastError: null,
+        lastOutcome: 'imported',
+        lastWarning: warning,
+      })
+      expect(await results()).toHaveLength(89)
+    })
+
+    it('stops warning when the page agrees with the table again', async () => {
+      const { server } = await serve({ programme: withoutCambuur() })
+
+      await importAt(server, first)
+
+      const { server: whole } = await serve()
+
+      expect(await importAt(whole, later)).toMatchObject({ results: { added: 1 }, warnings: [] })
+    })
+
+    it('says which played match it could not read, and imports the rest', async () => {
+      const unreadable = original.programme.replace(
+        '== Speelronde 12 ==\n',
+        '== Speelronde 12 ==\n{{Footballbox2|date=14 november 2026|team1=[[SC Cambuur]]|score=2 – 2 [1 – 1]|team2=[[FC Utrecht]]}}\n',
+      )
+      const { server } = await serve({ programme: unreadable })
+
+      expect(await importAt(server, first)).toMatchObject({
+        kind: 'imported',
+        results: { added: 90 },
+        warnings: ["league results left out: Speelronde 12: a score we do not know: '2 – 2 [1 – 1]'"],
+      })
+    })
+  })
+
   it('stops on a club that is at home against another club twice, and keeps the last good copy', async () => {
     const { server } = await serve()
 
