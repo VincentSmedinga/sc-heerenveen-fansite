@@ -3294,6 +3294,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het vlak is het zachte vlak met zijn rand, zodat de melding op een witte kaart en op de pagina te zien is.
 - **Alternatieven:** een melding met een kop (elke opslag zou een kop aan de pagina toevoegen); een kaart met `role="status"` (een kaart is een blok van de pagina, een melding is een regel); `role="alert"` (die onderbreekt de lezer, en een opgeslagen invoer is geen fout).
 
+### Een Disclosure is een `details` met een samenvatting van minstens 44 pixels
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Disclosure` (#594): een `details` met een samenvatting en een pijl die omdraait als het blok open is.
+  - **Het doel:** de samenvatting is minstens 44 pixels hoog, zoals de knoppen en de velden.
+  - **Zonder JavaScript:** het blok werkt met alleen HTML, en het toetsenbord en de schermlezer doen de rest.
+  - **Geen animatie van de hoogte:** de pijl draait, het blok springt open.
+- **Waarom:** in de beheerschermen (#592) hoort een actie als "Invoer weghalen" achter een bewuste stap.
+  Een `details` is daar het element voor, en het kost geen script.
+  `WikipediaCredit` animeert de hoogte met `interpolate-size` en `::details-content`; dat is veel CSS voor een blok dat zelden opent.
+- **Alternatieven:** een animatie zoals `WikipediaCredit` (zie boven); een knop die een blok toont met JavaScript (werkt zonder script niet); het blok altijd open (de rode knop staat dan altijd in beeld).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
