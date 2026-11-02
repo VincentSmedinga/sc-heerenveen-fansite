@@ -710,6 +710,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het bij richtlijnen houden zonder cijfers (een wachtrij of een vrije plek was elke keer een reden om ze te passeren).
   Een vast aantal Builders van één (te langzaam voor de week).
   Een Coordinator-sessie per dag (een natuurlijk breekpunt is beter dan een kloktijd).
+- **Later:** zie _Elk nieuw issue start meteen een Specifier, die zichzelf archiveert_ (2 november 2026): de grens voor het specificeren is hooguit twee rondes, in de sessie van de Specifier.
 - **Herzien:** als de grenzen te strak blijken voor de snelheid die we willen, of als het plafond niet meer knelt.
 
 ### Een Specifier voor een lang gesprek, en de Action List voor de status
@@ -723,7 +724,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een aparte sessie voor projectbeheer of een persoonlijke assistent (die heeft dezelfde gegevens nodig, dus elke bijwerking wekt hem ook).
   Alles in de sessie van de Coordinator laten (de situatie van vandaag).
 - **Later:** dit herziet het deel over de Coordinator in _Een model per rol_: de Specifier krijgt Sonnet, of een sterker model bij veel oordeel, en de Coordinator start een verse sessie bij ongeveer 300.000 tokens en niet per taak.
+- **Later:** zie _Elk nieuw issue start meteen een Specifier, die zichzelf archiveert_ (2 november 2026): het gaat nu om elk nieuw issue en niet alleen om een gesprek van meer dan één ronde.
 - **Herzien:** als de Specifier in de praktijk te veel van de Coordinator vraagt om over te dragen.
+
+### Elk nieuw issue start meteen een Specifier, die zichzelf archiveert
+
+- **Datum:** 2 november 2026
+- **Besluit:** vraagt de projecteigenaar om een nieuw issue, of om een bestaand issue uit te werken, dan start de Coordinator meteen een Specifier in een eigen sessie, zonder keuzekaart.
+  De Specifier maakt het issue aan, zet het op het bord als "Te doen", werkt het uit in hooguit twee rondes en archiveert zichzelf als het issue is goedgekeurd en er niets meer openstaat.
+  De Specifier meldt de goedkeuring in één bericht aan de Coordinator, die de Action List bijwerkt.
+  De Coordinator schrijft alleen zelf een issue als de projecteigenaar zegt dat hij het gewoon moet opschrijven.
+- **Waarom:** de projecteigenaar vroeg erom op 2 november 2026.
+  Een issue schrijven vraagt code en beslissingen lezen, en die context draagt de Coordinator daarna bij elke beurt mee.
+  Een sessie die klaar is, kost alleen nog ruimte in de lijst, dus ze archiveert zichzelf.
+- **Nadeel:** elk issue kost een verse sessie die de regels van het project één keer leest.
+- **Alternatieven:** de Coordinator specificeert een klein issue zelf in één ronde (de werkwijze van eerder die dag; ook een klein issue vult zijn context).
+  De Coordinator archiveert de sessie van een Specifier (een extra beurt voor elk issue).
+  Een app-instelling voor archiveren (die bestaat alleen voor een gesloten pull request en voor inactiviteit, en een Specifier heeft geen pull request).
+- **Later:** dit herziet het besluit over de ronden in _Zuinig werken is een regel, met harde grenzen_ (één ronde voor de Coordinator, twee voor een Specifier): alleen een Specifier specificeert nog, in hooguit twee rondes.
+  Het herziet ook _Een Specifier voor een lang gesprek, en de Action List voor de status_: elk nieuw issue gaat naar een Specifier, niet alleen een lang gesprek.
 
 ## Hosting en data
 

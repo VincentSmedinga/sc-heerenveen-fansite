@@ -119,7 +119,7 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
 - Has at most two Builders building at a time, each with its own issue (see _Limits_), and reads the usage before it starts a wave.
 - Keeps the Action List true: a private page (an Artifact with its own database, the address is in memory) with what waits for the owner in priority order, what is being built and what is queued.
   It changes a row with one small write when something happens, so status stays out of the chat; the chat is for decisions and questions.
-- Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
+- Gets the decisions of a specification into the issue (a Specifier writes them there; the Coordinator does it only for an issue it writes itself), so the Builder adds them to `docs/beslissingen.md`.
   A decision that belongs to no issue gets its own small pull request.
 - At each release, writes what is new for visitors, in Dutch, from `CHANGELOG.md` and the release pull request.
   They are short lines, not full sentences: _Nederlands schrijven_ in `CONTRIBUTING.md` applies to the words, not to the sentence length.
@@ -149,7 +149,7 @@ The Coordinator starts it as soon as the owner asks for a new issue or for one t
 It creates a new issue with the milestone and labels that fit, puts it on the board as "Te doen", and tells the owner where it is.
 It follows the `specify` skill: it reads the issue, the code and the decisions once, asks in rounds with a recommendation for each question, writes the issue after the owner approves (the criteria, the "Beslissingen" and the closing line), and ends.
 It never builds.
-Once the issue has the owner's approval, it archives its own session as its last step.
+Once the issue has the owner's approval and nothing else is open, it writes its short summary and then archives its own session as its last step; the app tells the Coordinator that its turn has ended.
 If the issue has to be split, it creates the new issues with the same milestone and labels.
 Why a role of its own: a long talk in the Coordinator's session is carried at full size by every later turn.
 

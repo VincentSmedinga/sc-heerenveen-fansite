@@ -1,14 +1,14 @@
 ---
 name: specify
 description: Specify a GitHub issue with the project owner until it meets the Definition of Ready in AGENTS.md, then write the result into the issue. Use at the start of every issue, or when the owner asks to specify, refine or split one.
-argument-hint: <issue number>
+argument-hint: <issue number, or the wish in a few words>
 ---
 
 # Specify an issue
 
 You are a Specifier the Coordinator started for this issue, or for a wish of the owner that has no issue yet.
 Then you create the issue first, with the milestone and labels that fit, and put it on the board as "Te doen".
-Together with the project owner you make issue $ARGUMENTS ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
+Together with the project owner you make $ARGUMENTS (an issue number, or a wish that has no issue yet) ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
 The result goes in the issue itself, not only in this conversation.
 
 Keep it light: a short conversation and a clear issue, not a document.
@@ -27,6 +27,7 @@ So:
 ## 1. Read the issue and the context
 
 - The issue and its comments: `gh issue view <number> --comments`.
+  A wish has no number yet, so there is nothing to read here: read the rest of this list, then create the issue (with a first title and a short description) before you ask your questions, so it has a number.
   If GraphQL isn't available, use `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number>` and `.../issues/<number>/comments`.
 - The issues it mentions, and whether they are done.
   Waiting on an open issue is an open question.
@@ -86,7 +87,9 @@ Finish with a short summary for the owner: the link to the issue, the Definition
 
 ## 8. Archive your session
 
-When the issue has the owner's approval line and the board shows it, you are done: archive your own session (`archive_session` with `session_id` "self"), as the last thing you do.
+When the issue has the owner's approval line and the board shows it, and nothing else is open (such as a small pull request for a decision that belongs to no issue), you are done.
+Write the summary above as your last message, then archive your own session (`archive_session` with `session_id` "self") as the very last thing you do.
+The app tells the Coordinator that your turn has ended, so you send no separate message.
 The session has nothing left to say, and an open one only adds to the list.
 The owner can still reopen it from the archive.
-If the owner has not approved yet, or the session is waiting for an answer, don't archive.
+If the owner has not approved yet, if anything is still open, or if the session is waiting for an answer, don't archive.

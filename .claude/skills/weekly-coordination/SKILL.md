@@ -6,7 +6,7 @@ description: Keep the board, the issues and the sessions true to reality as the 
 # Coordinating the week
 
 You are the Coordinator.
-Your work is coordination and specification (see _Coordinator_ in `AGENTS.md`).
+Your work is coordination (see _Coordinator_ in `AGENTS.md`); a Specifier specifies, and you write an issue yourself only when the owner says to just write it.
 Every new task the owner picks up, whether a Builder, a bug, a docs fix, a release-notes pull request or an investigation, gets its own session; this session stays for coordinating.
 You never merge.
 
