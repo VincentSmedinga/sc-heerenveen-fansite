@@ -43,14 +43,26 @@ export type RemoveOutcome = 'done' | 'missing' | 'none'
 /** What an entry did. */
 export type SaveOutcome = { parts: MatchPart[]; status: 'saved' } | { status: 'missing' } | { status: 'unchanged' }
 
-/** How many differences wait for a decision, in all seasons: the number on the start page. */
-export async function countWaitingDifferences(db: Pick<Database, 'select'>): Promise<number> {
-  const [row] = await db
-    .select({ total: count() })
+/**
+ * The differences that wait for a decision, in all seasons: how many, and the seasons they are
+ * in, the newest first. The start page tells the number and links to a season in the list.
+ */
+export async function countWaitingDifferences(
+  db: Pick<Database, 'select'>,
+): Promise<{ seasons: string[]; total: number }> {
+  const found = await db
+    .select({ season: matchChanges.season, total: count() })
     .from(matchChanges)
     .where(and(eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part), isNotNull(matchChanges.matchId)))
+    .groupBy(matchChanges.season)
 
-  return row?.total ?? 0
+  return {
+    seasons: found
+      .map((row) => row.season)
+      .sort()
+      .reverse(),
+    total: found.reduce((sum, row) => sum + row.total, 0),
+  }
 }
 
 /**

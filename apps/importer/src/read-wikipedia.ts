@@ -287,8 +287,10 @@ export function readCup(text: string): ReadProgramme {
  * Reads the programme and the results of the league: the matches of sc Heerenveen, and
  * the day of the last match anyone played, which is the day the table holds for. A match
  * under a heading that is not a round of the league (a play-off) is not part of the
- * league and is left out. A block for a match that was stopped is the match, and the later
- * block for the same two clubs only finishes it (see `restOf`).
+ * league and is left out. A match that was postponed and played later is under `Inhaalronde`
+ * with its score, and counts for the round it was postponed from (see `leagueRoundOf`). A block
+ * for a match that was stopped is the match, and the later block for the same two clubs only
+ * finishes it (see `restOf`).
  */
 export function readLeague(text: string): ReadProgramme {
   const boxes = matchBoxes(text)
@@ -302,7 +304,7 @@ export function readLeague(text: string): ReadProgramme {
   let lastPlayedOn: null | string = null
 
   for (const box of boxes) {
-    const round = box.heading !== null && /^Speelronde \d{1,2}$/u.test(box.heading) ? box.heading : null
+    const round = leagueRoundOf(box, boxes)
 
     if (round === null) {
       continue
@@ -315,7 +317,7 @@ export function readLeague(text: string): ReadProgramme {
       lastPlayedOn = day.isoDate
     }
     if (isOurs(box) && !isRestOfStopped(box, boxes)) {
-      const match = readMatch(box, 'Eredivisie', round, restOf(box, boxes))
+      const match = readMatch(box, 'Eredivisie', round.name, restOf(box, boxes))
 
       if (typeof match === 'string') {
         problems.push(match)
@@ -332,12 +334,12 @@ export function readLeague(text: string): ReadProgramme {
 
 /**
  * Reads the results of the league for every club, from the same page as `readLeague`: one for
- * each match under a round of the league that has a score. A match that is planned, postponed
- * or stopped and not finished has none. A match that was stopped and finished later is one
- * result with the final score, on the day of the block that finishes it, and who was at home
- * is as the block that began it has it (see `restOf`). A page with the results of sc
- * Heerenveen only, as the older pages are, gives no results at all: the form of a club over
- * its last matches needs all of them.
+ * each match under a round of the league, an `Inhaalronde` too, that has a score. A match that
+ * is planned, postponed or stopped and not finished has none. A match that was stopped and
+ * finished later is one result with the final score, on the day of the block that finishes it,
+ * and who was at home is as the block that began it has it (see `restOf`). A page with the
+ * results of sc Heerenveen only, as the older pages are, gives no results at all: the form of
+ * a club over its last matches needs all of them.
  */
 export function readLeagueResults(text: string): ReadResults {
   const boxes = matchBoxes(text)
@@ -346,9 +348,9 @@ export function readLeagueResults(text: string): ReadResults {
   let others = false
 
   for (const box of boxes) {
-    const round = box.heading !== null ? /^Speelronde (\d{1,2})$/u.exec(box.heading)?.[1] : undefined
+    const round = leagueRoundOf(box, boxes)
 
-    if (round === undefined || isRestOfStopped(box, boxes)) {
+    if (round === null || isRestOfStopped(box, boxes)) {
       continue
     }
 
@@ -383,7 +385,7 @@ export function readLeagueResults(text: string): ReadResults {
       homeClub,
       homeGoals: sameSides ? score.home : score.away,
       playedOn: day.isoDate,
-      round: Number(round),
+      round: round.number,
     })
   }
 
@@ -591,6 +593,11 @@ function findTemplates(text: string, start: RegExp): Template[] {
   return templates
 }
 
+/** Whether a block has a score of some kind, so is not waiting for the match or called off. */
+function hasResult(box: Template): boolean {
+  return !['none', 'postponed'].includes(parseScore(box.params.get('score') ?? '').kind)
+}
+
 function isOurs(box: Template): boolean {
   return [box.params.get('team1'), box.params.get('team2')].some(
     (team) => team !== undefined && linkTarget(team).toLowerCase() === ourClub.toLowerCase(),
@@ -610,6 +617,33 @@ function isRestOfStopped(box: Template, boxes: Template[]): boolean {
       clubsOf(other) === clubsOf(box) &&
       parseScore(other.params.get('score') ?? '').kind === 'stopped',
   )
+}
+
+/**
+ * The round of the league a block counts for, or null when it counts for none. A block under
+ * `Speelronde 17` is in that round. A match that was postponed is on the page twice: a block
+ * without a score under its own round, and the block with the score under `Inhaalronde 17`,
+ * where the number is the round it was postponed from. The second one is in round 17 as well,
+ * and replaces the first. A block under an `Inhaalronde` without a score is nothing yet, and
+ * the block of the round stays as it is.
+ */
+function leagueRoundOf(box: Template, boxes: Template[]): null | { name: string; number: number } {
+  const found = /^(Speelronde|Inhaalronde) (\d{1,2})$/u.exec(box.heading ?? '')
+
+  if (found === null) {
+    return null
+  }
+
+  const digits = found[2] ?? ''
+  const counts =
+    found[1] === 'Inhaalronde'
+      ? hasResult(box)
+      : hasResult(box) ||
+        !boxes.some(
+          (other) => other.heading === `Inhaalronde ${digits}` && clubsOf(other) === clubsOf(box) && hasResult(other),
+        )
+
+  return counts ? { name: `Speelronde ${digits}`, number: Number(digits) } : null
 }
 
 /**
