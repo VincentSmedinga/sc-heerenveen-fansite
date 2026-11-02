@@ -6009,6 +6009,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We hebben nog geen uitgestelde wedstrijd op de pagina gezien, dus de herkenning is een aanname.
   Schrijft Wikipedia het anders, dan geeft de import een fout en blijft de laatste goede versie staan.
 - **Alternatieven:** de wedstrijd verbergen tot er een nieuwe datum is.
+- **Later:** zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_: de pagina heeft een uitgestelde wedstrijd twee keer, en het blok onder `Inhaalronde <nummer>` met een uitslag vervangt dat zonder uitslag.
+  Een uitgestelde wedstrijd zonder uitslag blijft staan zoals hier.
 
 ### Het weer valt buiten dit werk
 
@@ -6863,6 +6865,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De dag van een gestaakte wedstrijd is die van het restant, en `matches.match_date` heeft die van het begin (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_): voor de vorm telt het einde.
   Na het samenvoegen is de tabel leeg voor de eerdere seizoenen tot de Coördinator `Import season` heeft gedraaid.
 - **Alternatieven:** de wedstrijden van andere clubs in `matches` (die tabel is voor sc Heerenveen, met doelpunten, club, beoordeling en vermeldingen, en alle queries van de site zouden ze moeten uitsluiten); `clubs` en een sleutel met `club_id` (de stand heeft die niet, en de koppeling zou een tweede plek zijn waar de namen kunnen verschillen); de uitslagen elke keer uit de pagina lezen op de site (de site leest Wikipedia niet); een fout bij een afwijking van de stand (een uur verschil tussen twee pagina's houdt dan de hele import tegen).
+- **Later:** zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_: `readLeagueResults` leest ook de blokken met een score onder `Inhaalronde <nummer>`, met dat nummer als ronde.
+  De rest blijft zoals hier.
+
+### Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag
+
+- **Datum:** 2 november 2026
+- **Besluit:** `readLeague` en `readLeagueResults` lezen ook de koppen `Inhaalronde <nummer>` als ronde van de competitie (#608).
+  - **Waarom die kop bestaat:** een uitgestelde wedstrijd staat op de pagina twee keer: een blok zonder uitslag in de oorspronkelijke ronde (`Afgelast`, `Uitgesteld` of leeg) en, na het spelen, een blok met de uitslag onder `Inhaalronde <nummer>`.
+    Zo staan RKC Waalwijk - Go Ahead Eagles (`Inhaalronde 17`) en Go Ahead Eagles - RKC Waalwijk (`Inhaalronde 25`) in 2022/23.
+  - **De ronde:** het nummer in de kop.
+    Een wedstrijd van sc Heerenveen onder `Inhaalronde 17` heeft dus de ronde `Speelronde 17`, en een uitslag van een andere club heeft ronde 17.
+    Een kop die geen ronde is, zoals de play-offs, of een kop als `Inhaalronde` zonder nummer, blijft buiten de competitie.
+  - **Wat vervangen wordt:** heeft het blok onder `Inhaalronde <n>` een score en heeft het blok onder `Speelronde <n>` voor dezelfde twee clubs er geen (leeg, uitgesteld of afgelast), dan telt alleen het eerste.
+    Voor sc Heerenveen is het één wedstrijd met de speeldatum en de uitslag van de inhaalwedstrijd, zodat een gespeelde wedstrijd niet als uitgesteld blijft staan.
+    Voor de uitslagen van alle clubs staat de wedstrijd er één keer in, met de dag van de inhaalwedstrijd en het nummer van de ronde waaruit hij is uitgesteld.
+  - **Wat nooit vervangt:** een blok onder een inhaalronde zonder score, uitgesteld of afgelast.
+    Dat is een wedstrijd die een nieuwe datum heeft maar nog niet is gespeeld; het blok van de ronde blijft staan als "Uitgesteld" en de import neemt de nieuwe datum pas over als er een uitslag is.
+  - **De dag van de laatste wedstrijd:** een wedstrijd onder een inhaalronde telt mee voor de dag waarvoor de stand geldt (`lastPlayedOn`), want de stand telt hem ook.
+- **Waarom:** na de uitrol van #601 misten in vijf van de zes seizoenen 1 tot 6 uitslagen (300 van de 306 in 2020/21), en de waarschuwing "Ajax 33 results against 34 played" meldde het.
+  De kaart Stand met de laatste vijf wedstrijden (#602) heeft de uitslagen van alle clubs volledig nodig, en een uitgestelde wedstrijd van ons zelf kon als uitgesteld blijven staan terwijl hij was gespeeld.
+  De ronde uit het nummer van de kop houdt de sleutel van `matches` (seizoen, competitie, ronde) gelijk aan die van het blok in de oorspronkelijke ronde, dus de bestaande wedstrijd wordt bijgewerkt en er komt geen tweede.
+- **Niet gedekt:** een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt.
+  `restOf` zoekt het restant onder dezelfde kop, dus het blok onder de inhaalronde blijft dan een wedstrijd naast het gestaakte blok en de import geeft een fout.
+  We hebben dat niet op een pagina gezien; komt het voor, dan volgt een eigen issue.
+- **Alternatieven:** een eigen ronde `Inhaalronde 17` voor de wedstrijd van sc Heerenveen (de wedstrijd staat dan twee keer in `matches`, een keer uitgesteld en een keer gespeeld, en het programma van de site toont er twee); de wedstrijd laten staan zoals hij was en alleen de uitslagen aanvullen (een uitgestelde wedstrijd van ons blijft dan uitgesteld terwijl hij is gespeeld); een inhaalblok zonder score ook laten vervangen (de nieuwe datum is dan zichtbaar, maar een wedstrijd die nog niet is gespeeld zou de oorspronkelijke vervangen en we zagen zo'n blok niet).
 
 ## Redactie
 
