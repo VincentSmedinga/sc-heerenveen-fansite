@@ -132,6 +132,13 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('hooguit 7 dagen')
   })
 
+  it('says that the browser of that editor also keeps a sign for the menu, which holds nothing and goes nowhere', () => {
+    const paragraph = html.match(/<p[^>]*>(Alleen een redacteur.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('bewaart de browser van die redacteur een teken dat zegt: hier is iemand ingelogd')
+    expect(paragraph).toContain('Het teken bevat geen gegevens, gaat nergens heen en verandert alleen dat menu')
+  })
+
   it('says in paragraphs, not a list, what the counting, the logs, the theme, the cookie of the admin, email, other sites, questions and complaints are about', () => {
     const paragraphs = [...withoutIcons(plain).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
