@@ -259,7 +259,7 @@ for (const [name, javaScriptEnabled] of [
         // The form has the goal already. A goal that is added comes after it, with the focus.
         await expect(page.locator('#doelpunt-1-kant')).toBeVisible()
         await page.getByRole('button', { name: 'Doelpunt toevoegen' }).click()
-        await expect(page.locator('#doelpunt-2-kant')).toBeFocused()
+        await expect(page.locator('#doelpunt-2-minuut')).toBeFocused()
         // A goal that is taken away leaves the focus on the button that adds one.
         await page.getByRole('button', { name: 'Doelpunt 2 weghalen' }).click()
         await expect(page.locator('#doelpunt-2-kant')).toHaveCount(0)

@@ -285,7 +285,7 @@ describe('submitMatch', () => {
     expect(await log()).toEqual([])
   })
 
-  it('adds a goal and keeps what was filled in, with the focus on the first field of the new goal', async () => {
+  it('adds a goal and keeps what was filled in, with the focus on the first field of the new goal, the minute', async () => {
     const formData = form({ 'doelpunt-1-kant': 'wij', 'doelpunt-1-minuut': '12' })
 
     formData.set('knop', 'doelpunt-toevoegen')
@@ -294,7 +294,7 @@ describe('submitMatch', () => {
 
     expect(result).toMatchObject({
       errors: {},
-      focus: 'doelpunt-2-kant',
+      focus: 'doelpunt-2-minuut',
       values: { doelpunten: [{ kant: 'wij', minuut: '12' }, { ...emptyGoal }] },
     })
     expect(await edits()).toEqual([])
@@ -314,7 +314,7 @@ describe('submitMatch', () => {
     last.set('knop', 'doelpunt-weghalen-3')
 
     expect(await submit(matchId, first)).toMatchObject({
-      focus: 'doelpunt-1-kant',
+      focus: 'doelpunt-1-minuut',
       values: { doelpunten: [{ minuut: '20' }, { minuut: '30' }] },
     })
     expect(await submit(matchId, last)).toMatchObject({

@@ -150,6 +150,10 @@ describe('radio-group.css', () => {
     expect(css).toContain('min-block-size: var(--hf-size-control);')
   })
 
+  it('gives the legend the colour of the text, so it looks like the label of a field', () => {
+    expect(css).toMatch(/> legend \{[^}]*color: var\(--hf-colour-text-default\);/u)
+  })
+
   it('puts the options next to each other where they fit, and under each other where they do not', () => {
     expect(css).toMatch(/\.hf-radio-group-options \{[^}]*display: flex;[^}]*flex-wrap: wrap;/u)
   })

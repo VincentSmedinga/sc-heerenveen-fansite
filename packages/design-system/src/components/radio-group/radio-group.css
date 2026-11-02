@@ -15,7 +15,9 @@
     min-inline-size: 0;
     padding: 0;
 
+    /* The legend looks like the label of a field, not like the legend of a fieldset. */
     > legend {
+      color: var(--hf-colour-text-default);
       padding: 0;
     }
   }
