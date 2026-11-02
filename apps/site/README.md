@@ -320,7 +320,9 @@ De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de 
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden, stand en uitslagen van alle clubs van de seed (`madeUpMatches`, `madeUpTable` en `madeUpLeagueResults`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
-Voor de pagina van Testdorp FC zet ze er drie oudere wedstrijden bij (`e2e/older-meetings.ts`), zodat die club vijf gespeelde wedstrijden heeft en zijn pagina de rij "Laatste wedstrijden" toont; de andere clubs hebben er minder en hebben geen rij.
+Voor de pagina van Testdorp FC zet ze er drie oudere wedstrijden bij (`e2e/older-meetings.ts`).
+Die club heeft dan vijf gespeelde wedstrijden en zijn pagina toont de rij "Laatste wedstrijden".
+De andere clubs hebben er minder en hebben geen rij.
 
 ## De statistieken
 
