@@ -1,21 +1,22 @@
 /*
- * A table of rows of fields. Where the table has room, it is a table: the headers of the
- * columns are the labels, and the label of each field is only for a screen reader. Where it has
- * not, every row is a block, with all the labels in view. The room is that of the table itself,
- * not of the window, so the table is right on any page, also in a narrow column. A table has
- * the room when it is 48rem wide: the row header and the button take 14.5rem, and the fields
- * share the 33.5rem that is left. That is also less than the main column of a wide page
- * (Page.Main with `wide`), so the table stays in one piece there.
+ * A table of rows of fields. Every row has its own labels, in one or two lines of fields,
+ * next to the number of the row and the button that removes it. The room is that of the
+ * table itself, not of the window, so the table is right on any page, also in a narrow
+ * column. Where the table is narrower than 40rem every row is a block, with the number and
+ * the button on top and the lines under them, so nothing scrolls sideways. From 40rem the
+ * lines stand next to the number and the button, and the rows are separated by a line. That
+ * is less than the main column of a wide page (Page.Main with `wide`), so the table stays in
+ * one piece there.
  *
- * On a phone the table elements get another `display`. Some screen readers then drop the table
- * from the page. That costs nothing here, because every field has a full label of its own, with
- * the name of the row in it, and the header of the row stays in the text.
+ * The table elements get another `display`. Some screen readers then drop the table from the
+ * page. That costs nothing here, because every field has a full label of its own, with the name
+ * of the row in it, and the header of the row stays in the text.
  */
 
 @layer hf.components {
   .hf-input-table {
-    /* The height of a field, which the row header is centred on. */
-    --hf-input-table-control: 2.75rem;
+    /* The height of a field, which the number of the row and the button are as high as. */
+    --hf-input-table-control: var(--hf-size-control);
 
     container-type: inline-size;
 
@@ -24,22 +25,10 @@
     }
   }
 
-  /*
-   * A field in a cell stands without the space under it, which the cell and the row take care
-   * of, and its error stays above it, so the fields of a row stand level at the bottom.
-   */
-  .hf-input-table-field > :is(input, select, textarea) {
-    margin-block-end: 0;
-  }
-
-  /* The block of a row: the default, for a table that is narrower than 48rem. */
-  .hf-input-table table,
-  .hf-input-table tbody {
+  /* The block of a row: the default, for a table that is narrower than 40rem. */
+  .hf-input-table :is(table, tbody, tr, th, td) {
     display: block;
-  }
-
-  .hf-input-table thead {
-    display: none;
+    padding: 0;
   }
 
   .hf-input-table tbody {
@@ -54,99 +43,106 @@
     box-sizing: border-box;
     display: grid;
     gap: var(--hf-space-m);
-    grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+    grid-template-areas:
+      'number action'
+      'first first'
+      'second second';
+    grid-template-columns: 1fr auto;
     padding: var(--hf-space-m);
   }
 
-  .hf-input-table :is(th, td) {
-    display: block;
-    padding: 0;
+  .hf-input-table tbody th {
+    align-items: center;
+    color: var(--hf-colour-text-heading);
+    display: flex;
+    font-weight: var(--hf-strong-font-weight);
+    grid-area: number;
+    min-block-size: var(--hf-input-table-control);
   }
 
-  .hf-input-table tbody th {
-    color: var(--hf-colour-text-heading);
-    font-weight: var(--hf-strong-font-weight);
-    grid-column: 1 / -1;
+  .hf-input-table-line-1 {
+    grid-area: first;
+  }
+
+  .hf-input-table-line-2 {
+    grid-area: second;
   }
 
   .hf-input-table td.hf-input-table-action {
-    grid-column: 1 / -1;
+    grid-area: action;
   }
 
-  @container (inline-size >= 48rem) {
-    .hf-input-table table {
-      display: table;
-      table-layout: fixed;
+  /* A line of fields: they share it, and wrap under each other where it is too narrow. */
+  .hf-input-table :is(.hf-input-table-line-1, .hf-input-table-line-2) {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-m) var(--hf-space-l);
+  }
+
+  /*
+   * A field and what is around it stand without the space under them: the line takes care of
+   * it, and an error stays above the field, so the fields of a line stand level at the bottom.
+   */
+  .hf-input-table-item {
+    border: 0;
+    flex: 1 1 11rem;
+    margin: 0;
+
+    /* Never wider than the line: a group of radio buttons with long names wraps instead. */
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    padding: 0;
+
+    &[hidden] {
+      display: none;
     }
 
-    .hf-input-table thead {
-      display: table-header-group;
+    > .hf-radio-group {
+      margin-block-end: 0;
     }
+  }
 
+  .hf-input-table-field > :is(input, select, textarea) {
+    margin-block-end: 0;
+  }
+
+  /*
+   * A short answer is as wide as its label, which is the word that cannot break, and no less
+   * than room for a few digits. An answer of a few words is as wide as that answer.
+   */
+  .hf-input-table-narrow {
+    flex: 0 0 auto;
+    inline-size: min-content;
+    min-inline-size: 4.5rem;
+  }
+
+  .hf-input-table-natural {
+    flex: 0 0 auto;
+    min-inline-size: 0;
+  }
+
+  @container (inline-size >= 40rem) {
     .hf-input-table tbody {
-      display: table-row-group;
+      gap: 0;
     }
 
     .hf-input-table tr {
       border: 0;
-      border-radius: 0;
-      display: table-row;
-      padding: 0;
-    }
-
-    .hf-input-table tbody tr {
       border-block-start: 1px solid;
       border-block-start-color: var(--hf-colour-border-default);
+      border-radius: 0;
+      grid-template-areas:
+        'number first action'
+        '. second .';
+      grid-template-columns: 2.5rem 1fr auto;
+      padding: var(--hf-space-m) 0;
     }
 
-    .hf-input-table :is(th, td) {
-      display: table-cell;
-      padding-block: var(--hf-space-s);
-      padding-inline: var(--hf-space-xs);
-      vertical-align: bottom;
-    }
-
-    .hf-input-table :is(th, td):first-child {
-      padding-inline-start: 0;
-    }
-
-    .hf-input-table :is(th, td):last-child {
-      padding-inline-end: 0;
-    }
-
-    /*
-     * The row header stands level with the text in the fields: the height of a field is
-     * --hf-input-table-control, and the text is in the middle of it.
-     */
-    .hf-input-table tbody th {
-      padding-block-end: calc((var(--hf-input-table-control) - 1lh) / 2 + var(--hf-space-s));
-    }
-
-    .hf-input-table .hf-input-table-name {
-      inline-size: 7.5rem;
-    }
-
-    .hf-input-table .hf-input-table-narrow {
-      inline-size: 6rem;
-    }
-
-    .hf-input-table th.hf-input-table-action {
-      inline-size: 7rem;
-    }
-
-    /* "(niet verplicht)" stands under the name, so a narrow column keeps its width. */
-    .hf-input-table .hf-input-table-status {
-      display: block;
-    }
-
-    /* The labels of the fields are for a screen reader only, as the headers show them. */
-    .hf-input-table-field > .hf-field-label {
-      block-size: 1px;
-      clip-path: inset(50%);
-      inline-size: 1px;
-      overflow: hidden;
-      position: absolute;
-      white-space: nowrap;
+    /* The number and the button stand level with the fields of the first line. */
+    .hf-input-table tbody th,
+    .hf-input-table td.hf-input-table-action {
+      align-self: end;
     }
   }
 }

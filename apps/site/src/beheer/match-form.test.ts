@@ -31,7 +31,7 @@ function filled(overrides: Partial<MatchValues['velden']> = {}, goals: MatchValu
 }
 
 const ours = { ...emptyGoal, kant: 'wij', minuut: '12', speler: '11' }
-const theirs = { ...emptyGoal, kant: 'zij', minuut: '40', naam: 'Sibbing', speler: 'andere' }
+const theirs = { ...emptyGoal, kant: 'zij', minuut: '40', naam: 'Sibbing' }
 
 describe('validate', () => {
   it('understands a played match: the kick-off in UTC, the result, and no goals', () => {
@@ -187,7 +187,7 @@ describe('validate', () => {
   })
 
   it('links a scorer of ours to the squad and keeps a player of the opponent apart, own goals included', () => {
-    const own = { ...emptyGoal, kant: 'wij', minuut: '30', naam: 'Sibbing', soort: 'eigen', speler: 'andere' }
+    const own = { ...emptyGoal, kant: 'wij', minuut: '30', naam: 'Sibbing', soort: 'eigen' }
     const ourOwn = { ...emptyGoal, kant: 'zij', minuut: '60', soort: 'eigen', speler: '12' }
     const checked = validate(filled({ 'uitslag-wij': '1', 'uitslag-zij': '1' }, [own, ourOwn]), league)
 
@@ -196,10 +196,27 @@ describe('validate', () => {
       { ours: true, ownGoal: true, player: 'Sibbing', playerId: null },
       { ours: false, ownGoal: true, player: 'Bernt Klaverboer', playerId: 12 },
     ])
-    // A player of the opponent is not chosen from the squad, and ours has no typed name.
-    expect(validate(filled({}, [{ ...theirs, speler: '11' }]), league).errors).toHaveProperty('doelpunt-1-speler')
-    expect(validate(filled({}, [{ ...ours, naam: 'Oyen' }]), league).errors).toHaveProperty('doelpunt-1-naam')
+    // A scorer of ours must be in the squad, and one of the opponent must be named.
     expect(validate(filled({}, [{ ...ours, speler: '99' }]), league).errors).toHaveProperty('doelpunt-1-speler')
+    expect(validate(filled({}, [{ ...ours, speler: '' }]), league).errors).toHaveProperty('doelpunt-1-speler')
+    expect(validate(filled({}, [{ ...theirs, naam: '' }]), league).errors).toHaveProperty('doelpunt-1-naam')
+  })
+
+  it('does not look at the field that does not ask for the scorer', () => {
+    // A form without JavaScript can send both. `readValues` wipes the one that does not fit.
+    const checked = validate(
+      filled({ 'uitslag-wij': '1', 'uitslag-zij': '1' }, [
+        { ...ours, naam: 'Oyen' },
+        { ...theirs, speler: '11' },
+      ]),
+      league,
+    )
+
+    expect(checked.errors).toBeUndefined()
+    expect(checked.entry?.goals).toMatchObject([
+      { player: 'Luca Oyen', playerId: 11 },
+      { player: 'Sibbing', playerId: null },
+    ])
   })
 
   it('asks for a reason, and takes it as one line', () => {
@@ -228,6 +245,30 @@ describe('readValues and readButton', () => {
       { ...emptyGoal, extra: '', kant: 'wij', minuut: '12', soort: '' },
       { ...emptyGoal, extra: '', kant: '', minuut: '77', soort: '' },
     ])
+  })
+
+  it('wipes the field that does not ask for the scorer, as the team and the kind decide', () => {
+    const read = (goal: Record<string, string>) => {
+      const formData = new FormData()
+
+      for (const [name, value] of Object.entries({ minuut: '5', naam: 'Sibbing', speler: '11', ...goal })) {
+        formData.set(`doelpunt-1-${name}`, value)
+      }
+
+      const [read] = readValues(formData).doelpunten
+
+      return { naam: read?.naam, speler: read?.speler }
+    }
+
+    // Ours, a player of ours: the squad. The opponent, a player of theirs: a name.
+    expect(read({ kant: 'wij', soort: 'gewoon' })).toEqual({ naam: '', speler: '11' })
+    expect(read({ kant: 'wij', soort: 'strafschop' })).toEqual({ naam: '', speler: '11' })
+    expect(read({ kant: 'zij', soort: 'gewoon' })).toEqual({ naam: 'Sibbing', speler: '' })
+    // An own goal of the opponent is scored by a player of ours, and one of ours by theirs.
+    expect(read({ kant: 'zij', soort: 'eigen' })).toEqual({ naam: '', speler: '11' })
+    expect(read({ kant: 'wij', soort: 'eigen' })).toEqual({ naam: 'Sibbing', speler: '' })
+    // Without a team it is not known which fits, so neither is wiped.
+    expect(read({ kant: '', soort: 'gewoon' })).toEqual({ naam: 'Sibbing', speler: '11' })
   })
 
   it('knows the three buttons, and takes anything else for a save', () => {
@@ -294,9 +335,11 @@ describe('valuesOf', () => {
       'uitslag-zij': '1',
       verlenging: 'nee',
     })
+    // The result is 2-1, so the form has a third goal for the one that is not stored.
     expect(values.doelpunten).toEqual([
       { extra: '', kant: 'wij', minuut: '12', naam: '', soort: 'strafschop', speler: '11' },
-      { extra: '2', kant: 'zij', minuut: '40', naam: 'Sibbing', soort: 'gewoon', speler: 'andere' },
+      { extra: '2', kant: 'zij', minuut: '40', naam: 'Sibbing', soort: 'gewoon', speler: '' },
+      emptyGoal,
     ])
   })
 

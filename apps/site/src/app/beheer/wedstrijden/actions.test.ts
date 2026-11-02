@@ -146,7 +146,7 @@ async function threeGoals() {
     'doelpunt-2-minuut': '40',
     'doelpunt-2-naam': 'Sibbing',
     'doelpunt-2-soort': 'gewoon',
-    'doelpunt-2-speler': 'andere',
+    'doelpunt-2-speler': '',
     'doelpunt-3-kant': 'wij',
     'doelpunt-3-minuut': '77',
     'doelpunt-3-naam': '',
@@ -216,6 +216,68 @@ describe('submitMatch', () => {
     expect(await edits()).toEqual([])
   })
 
+  it('does not take the rows that nobody filled in for goals, so a result without its scorers saves', async () => {
+    const empty = { ...emptyGoal, kant: '' }
+    const rows = Object.fromEntries(
+      [1, 2, 3].flatMap((number) =>
+        Object.entries(empty).map(([field, value]) => [`doelpunt-${number}-${field}`, value]),
+      ),
+    )
+
+    expect(await submit(matchId, form(rows))).toEqual({ redirect: `/beheer/wedstrijden/${matchId}?gedaan=opgeslagen` })
+    expect(await database.db.select().from(matchGoals)).toEqual([])
+  })
+
+  it('gives the form back with as many goals as the result asks for, the filled ones first', async () => {
+    const result = await submit(
+      matchId,
+      form({
+        'doelpunt-1-kant': 'wij',
+        'doelpunt-1-minuut': '12',
+        'doelpunt-1-speler': await oyenId(),
+        'doelpunt-2-kant': '',
+        'doelpunt-2-soort': 'gewoon',
+        reden: '',
+      }),
+    )
+
+    expect(result).toMatchObject({
+      errors: { reden: expect.any(String) },
+      values: { doelpunten: [{ kant: 'wij', minuut: '12' }, { ...emptyGoal }, { ...emptyGoal }] },
+    })
+  })
+
+  it('keeps only the field that asks for the scorer, so a player of the opponent has no squad player', async () => {
+    const oyen = await oyenId()
+    const formData = form({
+      'doelpunt-1-kant': 'zij',
+      'doelpunt-1-minuut': '40',
+      'doelpunt-1-naam': 'Sibbing',
+      'doelpunt-1-soort': 'gewoon',
+      'doelpunt-1-speler': oyen,
+      'doelpunt-2-kant': 'wij',
+      'doelpunt-2-minuut': '50',
+      'doelpunt-2-naam': 'Oyen',
+      'doelpunt-2-soort': 'gewoon',
+      'doelpunt-2-speler': oyen,
+      'doelpunt-3-kant': 'wij',
+      'doelpunt-3-minuut': '60',
+      'doelpunt-3-soort': 'gewoon',
+      'doelpunt-3-speler': oyen,
+      'uitslag-wij': '2',
+      'uitslag-zij': '1',
+    })
+
+    expect(await submit(matchId, formData)).toEqual({ redirect: `/beheer/wedstrijden/${matchId}?gedaan=opgeslagen` })
+    expect(
+      (await database.db.select().from(matchGoals)).map((goal) => [goal.minute, goal.player, goal.playerId !== null]),
+    ).toEqual([
+      [40, 'Sibbing', false],
+      [50, 'Luca Oyen', true],
+      [60, 'Luca Oyen', true],
+    ])
+  })
+
   it('says it saved nothing when nothing changed', async () => {
     const same = form({ 'aftrap-tijd': '18:45', status: 'scheduled', 'uitslag-wij': '', 'uitslag-zij': '' })
 
@@ -223,7 +285,7 @@ describe('submitMatch', () => {
     expect(await log()).toEqual([])
   })
 
-  it('adds a goal and keeps what was filled in, with the focus on the first field of the new goal', async () => {
+  it('adds a goal and keeps what was filled in, with the focus on the first field of the new goal, the minute', async () => {
     const formData = form({ 'doelpunt-1-kant': 'wij', 'doelpunt-1-minuut': '12' })
 
     formData.set('knop', 'doelpunt-toevoegen')
@@ -232,7 +294,7 @@ describe('submitMatch', () => {
 
     expect(result).toMatchObject({
       errors: {},
-      focus: 'doelpunt-2-kant',
+      focus: 'doelpunt-2-minuut',
       values: { doelpunten: [{ kant: 'wij', minuut: '12' }, { ...emptyGoal }] },
     })
     expect(await edits()).toEqual([])
@@ -252,7 +314,7 @@ describe('submitMatch', () => {
     last.set('knop', 'doelpunt-weghalen-3')
 
     expect(await submit(matchId, first)).toMatchObject({
-      focus: 'doelpunt-1-kant',
+      focus: 'doelpunt-1-minuut',
       values: { doelpunten: [{ minuut: '20' }, { minuut: '30' }] },
     })
     expect(await submit(matchId, last)).toMatchObject({

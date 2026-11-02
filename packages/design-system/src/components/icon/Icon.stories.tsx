@@ -8,9 +8,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een camera, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een zon en een maan.',
+          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een camera, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een diskette om op te slaan, een zon, een maan en een prullenbak.',
           'We tekenen ze zelf, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
-          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `SegmentedControl` en een `Heading` met een anker tekenen het voor je.',
+          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `IconButton`, een `SegmentedControl` en een `Heading` met een anker tekenen het voor je.',
           '',
           '**De stijl.**',
           'Een pictogram is een lijn met ronde uiteinden en ronde hoeken, zonder vulling, en het blijft binnen zijn vierkant.',
@@ -54,7 +54,9 @@ const labels: Record<IconName, string> = {
   link: 'Schakel',
   moon: 'Maan',
   plus: 'Plus',
+  save: 'Diskette',
   sun: 'Zon',
+  trash: 'Prullenbak',
 }
 
 const cell = (name: string, icon: React.ReactNode, key: string) => (

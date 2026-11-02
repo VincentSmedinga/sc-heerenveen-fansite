@@ -12,7 +12,9 @@ export const iconNames = [
   'link',
   'moon',
   'plus',
+  'save',
   'sun',
+  'trash',
 ] as const
 
 /** The icons that have two drawings, a line and a filled one. */
@@ -107,6 +109,15 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M2.5 8h11" />
     </>
   ),
+  // A floppy disk, as everyone knows it: the body with a cut corner, the label slot on top and
+  // the label at the bottom.
+  save: (
+    <>
+      <path d="M3.5 2.5h7l3 3v7a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" />
+      <path d="M5.5 2.5v3h4.5v-3" />
+      <path d="M5 13.5v-4h6v4" />
+    </>
+  ),
   sun: (
     <>
       <circle cx="8" cy="8" r="3" />
@@ -120,6 +131,16 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="m4.1 11.9-.7.7" />
     </>
   ),
+  // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.
+  trash: (
+    <>
+      <path d="M2.5 4.5h11" />
+      <path d="M6 4.5V3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1.5" />
+      <path d="m4 4.5.6 8.2a1 1 0 0 0 1 .8h4.8a1 1 0 0 0 1-.8l.6-8.2" />
+      <path d="M6.75 7v4" />
+      <path d="M9.25 7v4" />
+    </>
+  ),
 }
 
 /**
@@ -127,7 +148,7 @@ const drawings: Record<IconName, ReactNode> = {
  * the text around it, also under the mouse, with the focus and in forced colours. A link or a
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
- * in icon.css. It is not exported from the package: Link, Button, SegmentedControl,
+ * in icon.css. It is not exported from the package: Link, Button, IconButton, SegmentedControl,
  * NewsItem, Navigation, a Heading with an anchor, the button for an image of a Card,
  * Page.TopLink and WikipediaCredit draw it for the visitor. ThemeButton draws
  * its own sun and moon, because they turn into each other.

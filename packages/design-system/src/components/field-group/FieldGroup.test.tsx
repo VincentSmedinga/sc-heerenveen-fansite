@@ -79,6 +79,6 @@ describe('field-group.css', () => {
   })
 
   it('keeps the two fields with a separator in a row at any width', () => {
-    expect(css).toContain('grid-template-columns: minmax(0, 16rem) auto minmax(0, 16rem);')
+    expect(css).toContain('grid-template-columns: fit-content(16rem) auto fit-content(16rem);')
   })
 })

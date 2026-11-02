@@ -250,6 +250,18 @@ describe('the list', () => {
     expect(await list({ seizoen: 'onzin' })).toContain('N.E.C.')
   })
 
+  it('says how soon what is saved shows, for the season of the list', async () => {
+    await addMatch({ round: 'Speelronde 3', season: '2025/26' })
+    await addMatch()
+
+    const current = await list()
+    const earlier = await list({ seizoen: '2025-26' })
+
+    expect(current).toContain('Wat je opslaat, staat binnen vijf minuten op de site.')
+    expect(earlier).toContain('Wat je opslaat, staat binnen een uur op de site.')
+    expect(`${current}${earlier}`).not.toMatch(/meteen/u)
+  })
+
   it('has a season picker next to the title when there is more than one season', async () => {
     await addMatch({ round: 'Speelronde 3', season: '2025/26' })
     await addMatch()
@@ -390,13 +402,116 @@ describe('the match', () => {
 
     const html = await form(id)
 
-    expect(html).toContain('<th scope="row">Doelpunt 1</th>')
+    // The row header shows the number, and keeps the name of the goal for a screen reader.
+    expect(html).toContain(
+      '<th scope="row"><span aria-hidden="true">1</span><span class="hf-visually-hidden">Doelpunt 1</span></th>',
+    )
     // The six fields of the goal each say which goal they are for, and so does the button.
     expect(html.match(/, doelpunt 1<\/span>/g)).toHaveLength(6)
-    expect(html).toMatch(/Weghalen <span class="hf-visually-hidden">doelpunt 1<\/span>/u)
-    expect(html).toContain('value="doelpunt-weghalen-1" name="knop"')
+    expect(html).toMatch(/<button [^>]*aria-label="Doelpunt 1 weghalen" title="Doelpunt 1 weghalen"/u)
+    expect(html).toContain('value="doelpunt-weghalen-1"')
     expect(html).toContain('Luca Oyen')
-    expect(html).toContain('Andere speler')
+    expect(html).not.toContain('Andere speler</option>')
+  })
+
+  it('asks for the squad for a goal of ours and for a name for a goal of the opponent, and keeps the other', async () => {
+    const id = await addMatch()
+    const goal = (minute: number, ours: boolean) => ({
+      minute,
+      ours,
+      ownGoal: false,
+      penalty: false,
+      player: ours ? 'Oyen' : 'Sibbing',
+      playerId: null,
+      stoppageMinutes: null,
+      wikipediaPage: null,
+    })
+
+    await database.db.insert(players).values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season })
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      {
+        goals: [goal(12, true), goal(40, false)],
+        kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
+        result: {
+          afterNinetyAgainst: null,
+          afterNinetyFor: null,
+          extraTime: false,
+          goalsAgainst: 1,
+          goalsFor: 1,
+          penaltiesAgainst: null,
+          penaltiesFor: null,
+          status: 'played',
+        },
+      },
+      'Wikipedia is achter',
+    )
+
+    const html = await form(id)
+    const hidden = [
+      ...html.matchAll(
+        /<fieldset class="hf-input-table-item[^"]*" disabled="" hidden="" role="none"><div[^>]*><label [^>]*for="([^"]+)"/g,
+      ),
+    ].map(([, field]) => field)
+
+    expect(hidden).toEqual(['doelpunt-1-naam', 'doelpunt-2-speler'])
+    // What the hidden field holds stays in the page, and is not sent.
+    expect(html).toMatch(/name="doelpunt-2-naam" value="Sibbing"/u)
+  })
+
+  it('has as many goals as the result adds up to, empty ones for the goals that are not stored', async () => {
+    const id = await addMatch()
+
+    await editMatch(id)
+
+    const html = await form(id)
+
+    expect(html.match(/<th scope="row">/g)).toHaveLength(3)
+    expect(html).toContain('for="doelpunt-3-minuut"')
+  })
+
+  it('says nowhere that a field is not required, also for the cup', async () => {
+    const id = await addMatch({ competition: 'KNVB Beker' })
+
+    await editMatch(id)
+
+    const html = await form(id)
+
+    expect(html).toContain('id="verlenging"')
+    expect(html).not.toContain('niet verplicht')
+    expect(html).not.toContain('(niet')
+    // A field that has to be filled in stays required for the browser and a screen reader.
+    expect(html).toMatch(/id="aftrap-datum" required=""/u)
+    expect(html).toMatch(/id="doelpunt-1-minuut" required=""/u)
+    expect(html).not.toMatch(/id="aftrap-tijd" required=""/u)
+  })
+
+  it('has a radio group for the team of a goal and for extra time, and a list for the three kinds', async () => {
+    const id = await addMatch({ competition: 'KNVB Beker' })
+
+    await editMatch(id)
+
+    const html = await form(id)
+
+    expect(html).toMatch(/<fieldset class="hf-radio-group"><legend>Was er verlenging\?<\/legend>/u)
+    expect(html).toMatch(/<legend>Team<span class="hf-visually-hidden">, doelpunt 1<\/span><\/legend>/u)
+    expect(html).toMatch(/type="radio" name="doelpunt-1-kant" value="wij"/u)
+    expect(html).toContain('<select class="hf-width-natural" name="doelpunt-1-soort"')
+    expect(html).toMatch(/<select [^>]*name="status"/u)
+  })
+
+  it('says how soon a save shows, from the time the data is kept, and longer for an earlier season', async () => {
+    const current = await form(await addMatch())
+    const past = await form(await addMatch({ round: 'Speelronde 1', season: '2025/26' }))
+
+    expect(current).toContain('Staat binnen vijf minuten op de site.')
+    expect(past).toContain('Staat binnen een uur op de site.')
+    expect(await form(await addMatch({ round: 'Speelronde 12' }), { gedaan: 'opgeslagen' })).toContain(
+      'Je invoer is bewaard. Staat binnen vijf minuten op de site.',
+    )
+    expect(`${current}${past}`).not.toMatch(/meteen|staat nu/u)
   })
 
   it('tells what the editors entered, who did it and why, and the button to take it away with its own reason', async () => {

@@ -3,7 +3,8 @@
 Voor beheerders.
 Soms heeft Wikipedia de uitslag nog niet, of staat er een fout in.
 Een dag na een wedstrijd zeggen onze pagina's dan nog "Gegevens nog niet beschikbaar".
-Op `/beheer/wedstrijden` vul je de wedstrijd zelf in, en iedereen ziet het meteen.
+Op `/beheer/wedstrijden` vul je de wedstrijd zelf in, en iedereen ziet het binnen vijf minuten.
+Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de site bewaart die gegevens langer.
 
 ## Invullen
 
@@ -20,10 +21,15 @@ Op `/beheer/wedstrijden` vul je de wedstrijd zelf in, en iedereen ziet het metee
    - de **uitslag**, bij een gespeelde wedstrijd.
      De clubs staan in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop.
      Bij de beker en de play-offs staat er een kaart met de verlenging, de stand na 90 minuten en de strafschoppen;
-   - de **doelpunten**, in een tabel: per doelpunt het team dat het krijgt, de minuut met eventueel blessuretijd, de soort (gewoon, strafschop of eigen doelpunt) en de speler.
-     Met "Doelpunt toevoegen" komt er een rij bij, en met "Weghalen" gaat een rij weg.
-     Een speler van sc Heerenveen kies je uit de selectie.
-     Maakte een speler van de tegenstander het doelpunt, kies dan "Andere speler" en schrijf zijn naam zoals Wikipedia hem schrijft.
+   - de **doelpunten**, in een tabel met twee regels per doelpunt: de minuut, de blessuretijd en de soort (gewoon, strafschop of eigen doelpunt), en daaronder het team dat het doelpunt krijgt en de speler.
+     Vul je de uitslag in, dan krijg je zoveel doelpunten als de uitslag vraagt.
+     Een doelpunt dat je niet invult, telt niet mee.
+     Met "Doelpunt toevoegen" komt er een rij bij, en de prullenbak bij een doelpunt haalt het weg.
+     Wie het doelpunt maakte, volgt uit het team en de soort.
+     Maakte een speler van sc Heerenveen het doelpunt, dan kies je hem uit de selectie.
+     Maakte een speler van de tegenstander het doelpunt, dan schrijf je zijn naam zoals Wikipedia hem schrijft.
+     Dat geldt ook bij een eigen doelpunt: dat maakte een speler van het andere team.
+     Zonder JavaScript past het formulier zich pas aan als je een knop kiest.
 4. Schrijf bij "Reden" waarom je dit invult.
    Dat is verplicht, en het komt in het logboek.
    Het veld staat in het blok "Opslaan" naast het formulier, en op een telefoon onder het formulier.

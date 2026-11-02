@@ -20,6 +20,7 @@ const meta = preview.meta({
           '- Een hulptekst of foutmelding die over meer regels loopt, breekt in balans: de woorden zijn over de regels verdeeld.',
           '- Een veld is verplicht, tenzij je `required={false}` zet. We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat.',
           '  Alleen een veld dat niet verplicht is, zegt dat in het label: "(niet verplicht)". Het veld zelf krijgt het attribuut `required`, dus een schermlezer zegt het ook.',
+          '  Een formulier waarin de meeste velden niet verplicht zijn en de invuller dat weet, laat de woorden weg met `hideOptional`. Het attribuut `required` blijft.',
           '',
           'Een placeholder is geen label: een veld zonder label bestaat niet.',
           'Zet voor een veld met persoonsgegevens `autoComplete` op het veld, zoals `name` of `email`, zodat de browser het kan invullen.',
@@ -55,6 +56,12 @@ const renderHint = () => (
   </Field>
 )
 
+const renderHidden = () => (
+  <Field hideOptional id="tijd" label="Tijd" required={false}>
+    <Input name="tijd" type="time" />
+  </Field>
+)
+
 const renderError = () => (
   <Field error="Vul een e-mailadres in, zoals naam@voorbeeld.nl." id="e-mail" label="E-mailadres">
     <Input autoComplete="email" defaultValue="jelle" name="e-mail" type="email" />
@@ -76,3 +83,5 @@ export const HintDark = meta.story({ globals: { theme: 'dark' }, name: 'Met hulp
 export const ErrorLight = meta.story({ globals: { theme: 'light' }, name: 'Met fout, licht', render: renderError })
 
 export const ErrorDark = meta.story({ globals: { theme: 'dark' }, name: 'Met fout, donker', render: renderError })
+
+export const HiddenOptional = meta.story({ name: 'Zonder "niet verplicht"', render: renderHidden })

@@ -118,7 +118,7 @@ describe('Button', () => {
     ]
 
     expect(elements).toHaveLength(1)
-    expect(buttonIcons).toEqual(['envelope', 'plus'])
+    expect(buttonIcons).toEqual(['envelope', 'plus', 'save'])
   })
 
   it('needs a type, because a button in a form sends the form unless it says otherwise', () => {

@@ -14,6 +14,13 @@ export type FieldProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'id'
    */
   error?: string | undefined
   /**
+   * Leaves "(niet verplicht)" out of the label of a field that is not required. For a form in
+   * which most fields are optional and the editor knows it, so the words would only repeat. The
+   * field keeps its `required`, so a screen reader and the browser still say which fields have
+   * to be filled in. Without it, the label says it. It does nothing for a required field.
+   */
+  hideOptional?: boolean
+  /**
    * Extra help under the label, such as the format of the answer. Plain text only: some screen
    * readers, such as VoiceOver, skip a link or a list in a description, so the reader would not
    * hear it.
@@ -48,7 +55,17 @@ type FieldControlProps = {
  * error also gets `aria-invalid`. The error is text and starts with "Fout:" for a screen
  * reader, so a red border is never the only sign. field.css gives it its look.
  */
-export const Field = ({ children, className, error, hint, id, label, required = true, ...props }: FieldProps) => {
+export const Field = ({
+  children,
+  className,
+  error,
+  hideOptional = false,
+  hint,
+  id,
+  label,
+  required = true,
+  ...props
+}: FieldProps) => {
   const hintId = `${id}-hint`
   const errorId = `${id}-error`
   const describedBy = [hint ? hintId : undefined, error ? errorId : undefined].filter(Boolean).join(' ')
@@ -57,7 +74,7 @@ export const Field = ({ children, className, error, hint, id, label, required = 
     <div className={classNames('hf-field', className)} {...props}>
       <label className="hf-field-label" htmlFor={id} id={`${id}-label`}>
         {label}
-        {required ? null : (
+        {required || hideOptional ? null : (
           <>
             {' '}
             <span className="hf-field-status">(niet verplicht)</span>

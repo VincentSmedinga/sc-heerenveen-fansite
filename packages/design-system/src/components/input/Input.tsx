@@ -24,6 +24,13 @@ export const inputTypes = [
   'week',
 ] as const
 
+/**
+ * The widths an Input can have. `default` is the whole line, up to a maximum. `narrow` is for a
+ * few characters, such as a score or a minute. `natural` is the width the browser gives the
+ * kind of answer, such as a date or a time.
+ */
+export const inputWidths = ['default', 'narrow', 'natural'] as const
+
 export type InputProps = Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'type'> & {
   /**
    * `default` is the standard size. `small` is lower, for a field next to the content. It takes
@@ -32,7 +39,18 @@ export type InputProps = Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'type'
   size?: Size
   /** The kind of text field. Without it, it is `text`. */
   type?: InputType
+  /**
+   * How wide the field is, to fit the answer: `narrow` for a few characters, `natural` for a
+   * date or a time. A field that is too narrow for what people write is worse than one that is
+   * too wide, so use `default` for a name or a sentence.
+   */
+  width?: InputWidth
 }
+
+export type InputWidth = (typeof inputWidths)[number]
+
+/** The class for a width. The standard width has none, so nothing changes without `width`. */
+const widthClassName = (width: InputWidth) => (width === 'default' ? undefined : `hf-width-${width}`)
 
 export type InputType = (typeof inputTypes)[number]
 
@@ -41,6 +59,6 @@ export type InputType = (typeof inputTypes)[number]
  * field with personal data pass `autoComplete`, such as `name` or `email`, so the browser can
  * fill it in.
  */
-export const Input = ({ className, size = 'default', type = 'text', ...props }: InputProps) => (
-  <input className={classNames(sizeClassName(size), className)} type={type} {...props} />
+export const Input = ({ className, size = 'default', type = 'text', width = 'default', ...props }: InputProps) => (
+  <input className={classNames(sizeClassName(size), widthClassName(width), className)} type={type} {...props} />
 )

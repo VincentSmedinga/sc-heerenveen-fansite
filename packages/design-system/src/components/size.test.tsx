@@ -127,3 +127,21 @@ describe('the small size in CSS', () => {
     expect(css.slice(css.indexOf('&.hf-size-small'))).toMatch(/&\.hf-size-small \{[^}]*padding: 0;/)
   })
 })
+
+describe('the height of a field and a list in CSS', () => {
+  const css = read('base/forms.css')
+
+  it('is set for both in one rule, so they are as high as each other whatever is inside', () => {
+    expect(css).toMatch(/\),\s*select \{\s*block-size: var\(--hf-size-control\);\s*\}/)
+    expect(css).toMatch(
+      /input\.hf-size-small,\s*select\.hf-size-small \{\s*block-size: var\(--hf-size-control-small\);/,
+    )
+  })
+
+  it('puts every rule for a width inside @supports when the browser may not know it', () => {
+    const outside = css.slice(0, css.indexOf('@supports (field-sizing: content)'))
+
+    expect(outside).not.toContain('field-sizing')
+    expect(css).toContain('field-sizing: content;')
+  })
+})

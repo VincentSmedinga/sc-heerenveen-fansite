@@ -40,19 +40,21 @@
   /*
    * With a sign between the first two fields, such as the dash of a score, the fields stay in
    * a row, whatever the width. The sign stands level with the fields, as tall as one, and the
-   * label of a field may wrap above it. The tracks stay together at the start, or the sign
-   * would take the room that is left over and push the second field away.
+   * label of a field may wrap above it. The tracks stay together at the start, and take the
+   * width of their field, up to 16rem, so a narrow field such as a score has its sign next to
+   * it and the sign does not take the room that is left over and push the second field away.
    */
   .hf-field-group-separated {
     align-items: end;
+    column-gap: var(--hf-space-s);
     justify-content: start;
-    grid-template-columns: minmax(0, 16rem) auto minmax(0, 16rem);
+    grid-template-columns: fit-content(16rem) auto fit-content(16rem);
   }
 
   .hf-field-group-separator {
     align-items: center;
     color: var(--hf-colour-text-secondary);
     display: flex;
-    min-block-size: 2.75rem;
+    min-block-size: var(--hf-size-control);
   }
 }

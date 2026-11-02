@@ -12,7 +12,7 @@ import { type Size, sizeClassName } from '../size'
 export const buttonAppearances = ['default', 'soft', 'danger'] as const
 
 /** The icons a Button can have, in front of its text. */
-export const buttonIcons = ['envelope', 'plus'] as const
+export const buttonIcons = ['envelope', 'plus', 'save'] as const
 
 /** What a Button does in a form: send it, reset it, or nothing by itself. */
 export const buttonTypes = ['submit', 'button', 'reset'] as const
@@ -30,8 +30,8 @@ export type ButtonProps = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   appearance?: ButtonAppearance
   /**
    * An icon in front of the text, because it says what the button does: `envelope` to send,
-   * `plus` to add or load more. The button is named by its text alone: the icon is hidden from
-   * assistive technology.
+   * `plus` to add or load more, `save` to save. The button is named by its text alone: the icon
+   * is hidden from assistive technology.
    */
   icon?: ButtonIcon
   /**

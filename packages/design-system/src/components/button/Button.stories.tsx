@@ -59,6 +59,7 @@ const meta = preview.meta({
           '',
           '- `envelope`: een envelop, voor een knop die iets verstuurt, zoals "Versturen".',
           '- `plus`: een plus, voor een knop die er meer bij laadt, zoals "Laad 5 meer".',
+          '- `save`: een diskette, voor een knop die bewaart wat je invulde, zoals "Opslaan".',
           '',
           'Een knop heet voor een schermlezer zijn tekst alleen: het pictogram is verborgen.',
           'Het pictogram heeft de kleur van de tekst, ook onder de muis, en blijft bij het eerste woord als de tekst afbreekt.',
@@ -126,18 +127,21 @@ const withIcons = () => (
     <Button appearance="soft" icon="plus" type="button">
       Laad 5 meer
     </Button>
+    <Button icon="save" type="button">
+      Opslaan
+    </Button>
   </div>
 )
 
 export const IconsLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Met een envelop en een plus, licht',
+  name: 'Met een envelop, een plus en een diskette, licht',
   render: withIcons,
 })
 
 export const IconsDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Met een envelop en een plus, donker',
+  name: 'Met een envelop, een plus en een diskette, donker',
   render: withIcons,
 })
 

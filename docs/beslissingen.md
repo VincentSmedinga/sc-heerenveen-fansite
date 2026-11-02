@@ -2317,6 +2317,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat en hoeft geen label.
   Een woord als "niet verplicht" kan iedereen lezen, en een sterretje hoeft niemand te raden (3.3.2).
   Een schermlezer zegt dat een veld verplicht is, want het veld heeft het attribuut `required`.
+- **Later:** zie _Een veld kan "niet verplicht" weglaten, en de wedstrijdschermen doen dat_.
+  Wat hier staat blijft de gewone staat; `hideOptional` laat het woord weg.
 - **Alternatieven:** een render-prop (`{(veld) => <Input {...veld} />}`), die explicieter is maar elk veld langer maakt; of een context, die in een servercomponent niet werkt zonder dat `Field` een clientcomponent wordt.
   Of een `id` die `useId` maakt: de `ErrorSummary` kent die niet, tenzij de pagina hem doorgeeft.
   Of een hulptekst van het type `ReactNode`, zodat er een link in kan; dat raden we af, want sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over.
@@ -3390,6 +3392,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een media query op de breedte van het venster; die klopt niet in een smalle kolom.
   Een lijst met kaarten op elke breedte, zoals nu; dat vult een scherm met een paar doelpunten.
   Rollen (`role`) op de tabel en zijn rijen zetten om de tabelbetekenis op de telefoon te houden; elk veld is al volledig benoemd, dus ze voegen niets toe en moeten we bijhouden.
+- **Later:** zie _Een rij van een tabel om in te vullen heeft twee regels, een nummer en een prullenbak_.
+  De tabel is nu een blok per rij met twee regels, vanaf 40 rem naast het nummer en de knop, en zonder kolomkoppen.
+  Wat blijft: de breedte is die van de tabel zelf, en elk veld heeft een volledig label.
 
 ### Dichtheid is een klasse die tokens verandert, los van het kleurthema
 
@@ -3451,6 +3456,98 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** twee tabellen, een voor een breed en een voor een smal scherm; dat zet de gegevens twee keer in de pagina en een schermlezer leest ze allebei.
   Alleen drie kolommen op elke breedte, met de datum en de competitie onder de wedstrijd; dat verspilt de ruimte van een brede pagina.
   Een media query op het venster; die klopt niet in een smalle kolom.
+
+### Een veld kan "niet verplicht" weglaten, en de wedstrijdschermen doen dat
+
+- **Datum:** 2 november 2026
+- **Besluit:** `Field`, `RadioGroup` en een kolom van `InputTable` hebben de eigenschap `hideOptional`.
+  Die laat "(niet verplicht)" weg uit het label van wat niet verplicht is.
+  - Het veld houdt zijn `required`, of het ontbreken ervan.
+    Een schermlezer en de browser zeggen dus nog wat ze zeiden.
+  - Zonder `hideOptional` verandert niets, dus alle andere formulieren blijven zoals ze zijn.
+  - De wedstrijdschermen van het beheer gebruiken het overal.
+- **Waarom:** een redacteur komt vaker en leert hoe het werkt, en in een formulier waar bijna alles leeg mag, herhaalt het woord zich in elk label.
+  De projecteigenaar vroeg om schermen die korter en rustiger zijn (#615).
+  Wat verplicht is, blijft verplicht voor HTML; alleen het woord verdwijnt.
+- **Nadeel:** het scherm zegt niet meer welk veld leeg mag.
+  De foutmelding zegt wat ontbreekt.
+- **Alternatieven:** "(verplicht)" bij wat moet; dat draait de gewone staat om, en verandert elk formulier.
+  Het woord overal weghalen; de publieke formulieren zijn voor lezers die het woord helpt.
+
+### Een keuze uit twee waarden is een groep keuzerondjes, een keuze uit meer is een `Select`
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem heeft `RadioGroup`: een `fieldset` met een `legend` en twee of drie keuzerondjes naast elkaar.
+  - De legenda, de hulptekst en de fout horen bij elkaar zoals bij een `Field`.
+    De `id` is die van het eerste keuzerondje, zodat een link in de foutenlijst erheen gaat.
+  - Het werkt zonder JavaScript en met het toetsenbord: de pijltjes lopen langs de rondjes.
+  - Een keuze uit drie of meer waarden, zoals de status of de soort van een doelpunt, blijft een `Select`.
+  - De wedstrijdschermen gebruiken het voor het team van een doelpunt en voor de verlenging.
+- **Waarom:** bij twee waarden zie je allebei in één blik, en kiezen kost één tik in plaats van twee.
+  Een keuzerondje is wat een schermlezer en de browser voor "één van twee" kennen.
+  Het besluit over de schakelaar voor licht en donker (_Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten_) wees keuzerondjes af, omdat die keuze meteen werkt en geen veld van een formulier is.
+  Dit is een veld dat het formulier verstuurt.
+- **Nadeel:** de groep neemt meer ruimte dan een `Select`, en past niet bij lange keuzes.
+  De fieldset heeft geen `aria-invalid`; de fout staat in tekst en hoort erbij met `aria-describedby`.
+- **Alternatieven:** een `Select` voor twee waarden, zoals het was; die verbergt de andere waarde achter een tik.
+  `SegmentedControl`; die is voor een keuze die meteen werkt, met JavaScript.
+
+### Een veld en een lijst zijn even hoog, en een veld heeft een breedte die bij het antwoord past
+
+- **Datum:** 2 november 2026
+- **Besluit:** `Input` en `Select` zetten hun hoogte (`block-size`) op het token voor de hoogte van een knop, in beide maten.
+  Een verhaal meet in de browser dat ze even hoog zijn, gewoon en compact (`Tokens/Dichtheid`).
+  - `Input` heeft `width`: `default` (de hele regel, tot een maximum), `narrow` (een paar tekens, voor een score of een minuut) en `natural` (de breedte die de browser aan een datum of een tijd geeft).
+  - `Select` heeft `width`: `default` en `natural` (zo breed als de keuze die hij laat zien).
+  - Waar de browser `field-sizing: content` kent, past een smal veld zich aan de inhoud aan, en een lijst aan zijn keuze.
+    De browsers die het niet kennen, houden een vaste breedte of de breedte die ze zelf geven; het staat in `@supports`.
+  - Zonder `width` verandert niets.
+- **Waarom:** in de compacte dichtheid was een `Input` 36,5 pixels hoog en een `Select` 36.
+  Chrome geeft een lijst een regelhoogte van `normal` en neemt `line-height` niet over, dus alleen een minimale hoogte hield ze niet gelijk.
+  Een score, een minuut en een tijd hebben geen veld van 30 rem nodig, en een rustig scherm laat dat zien.
+- **Nadeel:** een vaste hoogte laat de tekst in een veld niet groeien als de tekstmaat toeneemt; de hoogte is in rem, dus ze groeit met de grootte van de letters in de browser.
+- **Alternatieven:** `line-height` op de lijst zetten; Chrome negeert dat.
+  De hoogte aan de inhoud overlaten, zoals het was.
+  Een breedte in rem per veld; de maat hoort bij het antwoord, en een veld met een vaste breedte past niet bij een andere lettergrootte.
+
+### Een knop met alleen een pictogram heeft een verplichte naam
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem heeft de pictogrammen `save` (een diskette) en `trash` (een prullenbak), en de knop `IconButton`.
+  - `IconButton` laat alleen een pictogram zien en heeft een verplichte `label`.
+    Die is zijn naam voor een schermlezer (`aria-label`) en de tekst die verschijnt als je er met de muis op blijft staan (`title`).
+  - Hij is even groot als een `Button`, en zacht tenzij je iets anders kiest.
+  - `Button` krijgt `icon="save"` voor "Opslaan".
+    De bestaande knoppen veranderen niet.
+- **Waarom:** een rij met "Weghalen" bij elk doelpunt is onrustig, en een prullenbak kent iedereen.
+  Een naam die verplicht is, voorkomt een knop waar een schermlezer niets van zegt.
+- **Nadeel:** `title` verschijnt niet met het toetsenbord of bij aanraking, dus de prullenbak moet zonder woorden duidelijk zijn.
+  Daarom is het pictogram alleen voor wat iedereen kent.
+- **Alternatieven:** een knop met tekst zoals het was; dat herhaalt het woord in elke rij.
+  Een pictogram met tekst; dat is even breed als de tekst.
+  Een eigenschap op `Button` die de tekst verbergt; dan verandert `Button` voor elke gebruiker, en de naam is niet verplicht.
+
+### Een rij van een tabel om in te vullen heeft twee regels, een nummer en een prullenbak
+
+- **Datum:** 2 november 2026
+- **Besluit:** een rij van `InputTable` heeft een of twee regels velden, naast het nummer van de rij en de knop om haar weg te halen.
+  - Elk veld heeft zijn eigen zichtbare label, met de rij erin voor een schermlezer ("Minuut, doelpunt 2").
+    De kolomkoppen zijn weg, want twee regels delen geen koppen.
+  - Een kolom kiest zijn regel (`line`) en zijn ruimte (`width`: `default`, `narrow` of `natural`).
+  - De rijkop is het nummer ("2"), met de naam voor een schermlezer ("Doelpunt 2"); de knop heet "Doelpunt 2 weghalen".
+  - Een veld is een `control` in een `Field`, of een `group`, zoals een `RadioGroup`.
+  - Een veld dat niet bij de rij past is `hidden`: het is niet te zien en gaat niet mee met het formulier, maar het houdt wat erin stond.
+    De tabel zet het in een `fieldset` die `disabled` is, dus ook een groep gaat niet mee.
+  - Waar de tabel smaller is dan 40 rem, is elke rij een blok met het nummer en de knop bovenaan.
+    De breedte is die van de tabel zelf, zoals eerder.
+- **Waarom:** de projecteigenaar wil een doelpunt op twee regels, eerst de minuut, de blessuretijd en de soort, dan het team en de speler (#615).
+  Dat past niet onder kolomkoppen, en een veld dat wisselt tussen een lijst en een naam heeft een plek nodig waar het niet meetelt als het niet past.
+  Een gedeactiveerde `fieldset` is HTML en werkt zonder JavaScript.
+- **Nadeel:** de labels staan in elke rij, ook bij een lange lijst.
+  Een tabel met veel rijen is langer dan er een met kolomkoppen zou zijn.
+- **Alternatieven:** de kolomkoppen houden met twee kopregels; de regels hebben dan niets met elkaar te maken.
+  Een veld weghalen uit de pagina als het niet past; dan is wat de redacteur typte weg bij een vergissing.
+  Een attribuut `disabled` op elk veld apart; dan moet de aanroeper het bij elk soort veld onthouden.
 
 ## Site
 
@@ -6767,6 +6864,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_ en _Het blok om op te slaan staat in de zijbalk en hoort bij het formulier met het attribuut `form`_.
   De knop voor een doelpunt heet nu "Weghalen doelpunt 2", de doelpunten zijn een tabel en geen kaart per doelpunt, en "Invoer weghalen" is een uitklapblok in de zijbalk.
   De rest blijft: een formulier dat zonder JavaScript werkt, de verborgen eerste knop, de focus en de ene speler.
+- **Later:** zie _Wie een doelpunt maakte volgt uit het team en de soort, en het formulier vraagt één vorm_.
+  Een veld dat niet past, geeft geen fout meer, en "Andere speler" is geen optie meer.
 
 ### Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde
 
@@ -7103,6 +7202,58 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het blok om op te slaan twee keer maken, een in de hoofdkolom en een in de zijbalk; dan zijn er twee velden "Reden" met dezelfde naam.
   Een vaste balk onderaan met JavaScript; dat werkt niet zonder JavaScript en het ontwerp wil geen vaste balk op een telefoon.
   De seizoenen van de lijst uit de cache van de publieke pagina's halen; een wedstrijd die een minuut geleden is toegevoegd, staat er dan niet, en de redactie moet hem zien.
+
+### Wie een doelpunt maakte volgt uit het team en de soort, en het formulier vraagt één vorm
+
+- **Datum:** 2 november 2026
+- **Besluit:** het formulier van een wedstrijd laat bij een doelpunt maar één veld zien voor de speler: de keuze uit de selectie, of het veld voor de naam van een andere speler (#615).
+  - Maakte een speler van sc Heerenveen het doelpunt, dan is het de keuze uit de selectie.
+    Dat is het geval als het team sc Heerenveen is en de soort gewoon of strafschop, of als het team de tegenstander is en de soort een eigen doelpunt.
+  - Bij elk ander doelpunt is het het veld voor de naam.
+  - Zolang er geen team is gekozen, staat de keuze uit de selectie.
+  - De vorm die niet past, is verborgen en gaat niet mee met het formulier.
+    Met JavaScript blijft wat erin stond een poos in het formulier, zodat een vergissing niet alles wist.
+  - De server leest alleen de vorm die past en wist de andere, ook als hij toch binnenkomt.
+    Zonder JavaScript past het formulier zich aan als de server het opnieuw maakt, dus na een knop.
+  - De keuze heeft geen optie "Andere speler" meer.
+- **Waarom:** de redacteur hoeft niet te kiezen welk veld bij het doelpunt hoort; het volgt uit wat hij al koos.
+  De projecteigenaar koos dit boven de selectie verbergen zodra de tegenstander gekozen is, want een eigen doelpunt van de tegenstander is een speler van ons.
+- **Nadeel:** zonder JavaScript staat het veld voor de naam pas in beeld als de server het formulier terugstuurt.
+  Het geeft dan één fout, bij dat veld.
+- **Alternatieven:** de selectie verbergen zodra het team de tegenstander is; dat verbergt haar bij een eigen doelpunt, dat een speler van ons maakt.
+  Beide velden laten staan en een fout geven bij het veld dat niet past, zoals het was.
+- **Later:** vervangt een zin van _Het formulier van een wedstrijd werkt zonder JavaScript, met één veld voor de speler_.
+  Een veld dat niet past, geeft nu geen fout meer: de server wist het.
+
+### Het aantal doelpunten in het formulier volgt de eindstand, en een doelpunt dat niemand invulde telt niet
+
+- **Datum:** 2 november 2026
+- **Besluit:** het formulier van een wedstrijd heeft zoveel doelpunten als de eindstand optelt (#615).
+  - Met JavaScript voegt het formulier doelpunten toe of haalt het ze weg, zodra een van de twee scores verandert.
+    Het haalt alleen doelpunten weg die niemand invulde, van onderen af, en nooit een doelpunt waarin iets staat.
+    Een doelpunt dat met de knop is toegevoegd, blijft staan tot de eindstand verandert.
+  - Zonder JavaScript heeft het formulier zoveel doelpunten als de uitslag vraagt als de pagina opent, en na een opslag met fouten.
+    De knoppen om een doelpunt toe te voegen of weg te halen vullen niet aan, want dan zou "weghalen" een nieuw doelpunt maken.
+  - Een doelpunt waarin niets is ingevuld, telt bij het opslaan niet als doelpunt, dus een uitslag zonder doelpuntenmakers kan opgeslagen worden.
+  - De velden van een doelpunt staan in de volgorde van het formulier: de minuut, de blessuretijd, de soort, het team en de speler.
+  - Het formulier maakt hoogstens 20 doelpunten, hoe hoog de scores ook zijn.
+- **Waarom:** de eindstand zegt hoeveel doelpunten er zijn, dus de redacteur hoeft ze niet te tellen en bij te maken.
+  Een uitslag zonder doelpunten mag (zie _Het formulier van een wedstrijd werkt zonder JavaScript, met één veld voor de speler_); lege rijen mogen het opslaan dus niet tegenhouden.
+- **Nadeel:** een rij die de redacteur niet wil, haalt hij zelf weg of laat hij leeg; een leeg doelpunt dat hij bedoelde, valt zonder melding weg.
+- **Alternatieven:** de rijen pas maken na een rondje naar de server; dat werkt niet met een snelle invoer.
+  Lege rijen als fout geven; dan moet de redacteur ze één voor één weghalen.
+  Elke wijziging van het formulier de rijen laten volgen; dan haalt het formulier een doelpunt weg dat de redacteur net had toegevoegd.
+
+### Wat de redactie opslaat, staat binnen vijf minuten op de site, of binnen een uur
+
+- **Datum:** 2 november 2026
+- **Besluit:** de teksten in het beheer die zeggen wanneer een wijziging op de site staat, zijn "binnen vijf minuten" voor een wedstrijd van het huidige seizoen en "binnen een uur" voor een eerder seizoen (#615).
+  De woorden komen uit de perioden waarvoor de site de gegevens bewaart (`currentSeasonPeriod` en `pastSeasonPeriod` in `matches.ts`), dus ze volgen die als ze veranderen.
+- **Waarom:** "meteen" klopte niet.
+  De site bewaart de gegevens van het huidige seizoen vijf minuten en die van een eerder seizoen een uur.
+- **Nadeel:** de tekst noemt het ergste geval, en een bezoeker kan de wijziging eerder zien.
+- **Alternatieven:** de gegevens van het seizoen vers laden bij het opslaan; dat vraagt een nieuwe manier om de cache van de publieke pagina's te legen, en het issue vroeg er niet om.
+  Een vaste tekst; dan klopt hij niet meer als een periode verandert.
 
 ## Redactie
 

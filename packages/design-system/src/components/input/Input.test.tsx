@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Input, inputTypes } from './Input'
+import { Input, inputTypes, inputWidths } from './Input'
 
 describe('Input', () => {
   it('is a text field by default', () => {
@@ -44,5 +44,19 @@ describe('Input', () => {
     ]
 
     expect(elements).toHaveLength(1)
+  })
+
+  it('has no width class by default, and one for each other width', () => {
+    expect(inputWidths).toEqual(['default', 'narrow', 'natural'])
+
+    const { rerender } = render(<Input aria-label="Minuut" />)
+
+    expect(screen.getByRole('textbox').hasAttribute('class')).toBe(false)
+
+    rerender(<Input aria-label="Minuut" className="extra" size="small" width="narrow" />)
+    expect(screen.getByRole('textbox').className).toBe('hf-size-small hf-width-narrow extra')
+
+    rerender(<Input aria-label="Datum" type="date" width="natural" />)
+    expect(document.querySelector('input')?.className).toBe('hf-width-natural')
   })
 })

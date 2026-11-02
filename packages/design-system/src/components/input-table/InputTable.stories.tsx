@@ -22,20 +22,26 @@ const meta = preview.meta({
     },
     columns: {
       description:
-        'De kolommen van links naar rechts. `width: "narrow"` is voor een kort antwoord, zoals een minuut, en `required: false` voor een kolom die niet verplicht is.',
-      table: { type: { summary: '{ name: string; required?: boolean; width?: "default" | "narrow" }[]' } },
+        'De kolommen van links naar rechts. `line: 2` zet de velden van een kolom op de tweede regel van de rij. `width` is `"narrow"` voor een kort antwoord, zoals een minuut, `"natural"` voor een antwoord van een paar woorden en anders `"default"`. `required: false` is voor een kolom die niet verplicht is, en `hideOptional` laat dan "niet verplicht" weg.',
+      table: {
+        type: {
+          summary:
+            '{ hideOptional?: boolean; line?: 1 | 2; name: string; required?: boolean; width?: "default" | "narrow" | "natural" }[]',
+        },
+      },
     },
     empty: {
       description: 'Wat er staat als er nog geen rijen zijn, zoals een regel tekst. De knop om toe te voegen blijft.',
       table: { type: { summary: 'ReactNode' } },
     },
     removeLabel: {
-      description: 'De tekst van de knop die een rij weghaalt. Een schermlezer hoort er de naam van de rij achter.',
+      description:
+        'Wat de knop zegt die een rij weghaalt, voor een schermlezer en als tekst bij aanwijzen: de naam van de rij en dan dit, zoals "Doelpunt 2 weghalen". De knop zelf is een prullenbak.',
       table: { type: { summary: 'string' } },
     },
     rows: {
       description:
-        'De rijen van boven naar beneden. Elke rij heeft een `header` (de naam van de rij), `fields` (één veld per kolom) en `remove` (de verzendknop om haar weg te halen).',
+        'De rijen van boven naar beneden. Elke rij heeft een `header` (de naam van de rij), een `mark` (wat je ziet als rijkop, zoals het nummer), `fields` (één veld per kolom) en `remove` (de verzendknop om haar weg te halen). Een veld heeft een `control` in een `Field`, of een `group` zoals een `RadioGroup`, en kan `hidden` zijn.',
       table: { type: { summary: 'InputTableRow[]' } },
     },
   },
@@ -45,14 +51,14 @@ const meta = preview.meta({
       description: {
         component: [
           'Een tabel om in te vullen, voor een lijst waarin de redacteur steeds hetzelfde invult, zoals de doelpunten van een wedstrijd.',
-          'De koppen van de kolommen zijn de labels die je ziet.',
-          'Elk veld heeft ook een label voor een schermlezer, met de rij erin: "Minuut, doelpunt 2".',
-          'Een kolom die niet verplicht is (`required: false`) zegt dat in zijn kop: "niet verplicht".',
-          'Elke rij heeft een knop om haar weg te halen en onder de tabel staat een knop om een rij toe te voegen.',
+          'Elk veld heeft zijn eigen label, met de rij erin voor een schermlezer: "Minuut, doelpunt 2".',
+          'Een rij kan twee regels velden hebben, naast het nummer van de rij en de knop om haar weg te halen.',
+          'De knop is een prullenbak met een naam voor een schermlezer en een tekst bij aanwijzen, en onder de tabel staat een knop om een rij toe te voegen.',
           'Beide zijn verzendknoppen, dus het werkt ook zonder JavaScript: de server antwoordt met het formulier, met de rij erbij of eraf.',
+          'Een veld dat niet bij een rij past kan `hidden` zijn: het is dan niet te zien en gaat niet mee met het formulier, maar wat erin stond blijft staan.',
           'Zet de tabel in een `Form`, onder een kop die zegt wat erin staat. Dat formulier is dan even breed als zijn ouder.',
           '',
-          'Waar de tabel niet past, zoals op een telefoon, wordt elke rij een blok met alle labels in beeld, zodat er niets zijwaarts schuift.',
+          'Waar de tabel niet past, zoals op een telefoon, wordt elke rij een blok met het nummer en de knop bovenaan, zodat er niets zijwaarts schuift.',
           'Op een brede pagina (`Page.Main` met `wide`) blijft de tabel in één stuk.',
         ].join('\n'),
       },
@@ -107,12 +113,30 @@ export const Phone = meta.story({
   parameters: {
     docs: {
       description: {
-        story:
-          'Op een telefoon is elke rij een blok met alle labels in beeld, in plaats van een tabel die zijwaarts schuift.',
+        story: 'Op een telefoon is elke rij een blok, in plaats van een tabel die zijwaarts schuift.',
       },
     },
     layout: 'fullscreen',
   },
   render,
   tags: ['!autodocs'],
+})
+
+export const WithHiddenField = meta.story({
+  args: {
+    rows: exampleGoals().map((row, index) => ({
+      ...row,
+      fields: row.fields.map((field, position) => ({ ...field, hidden: index === 0 && position === 4 })),
+    })),
+  },
+  name: 'Met een veld dat niet past',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Bij het eerste doelpunt past het veld voor de speler niet: het is niet te zien en gaat niet mee.',
+      },
+    },
+    layout: 'padded',
+  },
+  render,
 })

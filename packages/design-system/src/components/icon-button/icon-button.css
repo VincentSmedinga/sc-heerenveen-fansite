@@ -1,0 +1,25 @@
+/*
+ * A button with only an icon. It is a square as wide as it is high, with the icon in the
+ * middle, so it is as easy to hit as a button with text. The icon is a little larger than in
+ * a button with text, because there is no text for it to stand next to.
+ */
+
+@layer hf.components {
+  .hf-icon-button {
+    display: inline-grid;
+    inline-size: var(--hf-size-control);
+    padding: 0;
+    place-items: center;
+
+    &.hf-size-small {
+      inline-size: var(--hf-size-control-small);
+    }
+
+    > .hf-icon {
+      --hf-icon-size: 1.25;
+
+      margin: 0;
+      vertical-align: baseline;
+    }
+  }
+}

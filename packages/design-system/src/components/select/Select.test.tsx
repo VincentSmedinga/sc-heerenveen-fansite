@@ -51,4 +51,13 @@ describe('Select.Option', () => {
   it('is called Select.Option in the developer tools and the code examples', () => {
     expect(Select.Option.displayName).toBe('Select.Option')
   })
+
+  it('has no width class by default, and one for the natural width', () => {
+    const { rerender } = render(<Select aria-label="Soort" />)
+
+    expect(screen.getByRole('combobox').hasAttribute('class')).toBe(false)
+
+    rerender(<Select aria-label="Soort" size="small" width="natural" />)
+    expect(screen.getByRole('combobox').className).toBe('hf-size-small hf-width-natural')
+  })
 })

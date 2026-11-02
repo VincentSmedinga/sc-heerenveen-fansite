@@ -51,6 +51,30 @@
     padding-inline: var(--hf-space-s);
   }
 
+  /*
+   * A field and a list are exactly as high as a button, whatever is inside: a list does not
+   * take a line height of its own in every browser, so a minimum height alone leaves them
+   * apart when the text is higher than the minimum.
+   */
+  input:is(
+    :not([type]),
+    [type='date'],
+    [type='datetime-local'],
+    [type='email'],
+    [type='month'],
+    [type='number'],
+    [type='password'],
+    [type='search'],
+    [type='tel'],
+    [type='text'],
+    [type='time'],
+    [type='url'],
+    [type='week']
+  ),
+  select {
+    block-size: var(--hf-size-control);
+  }
+
   ::placeholder {
     color: var(--hf-colour-text-secondary);
     opacity: 1;
@@ -93,8 +117,42 @@
   /* The small size of a text field and a list. A textarea has no small size. */
   input.hf-size-small,
   select.hf-size-small {
+    block-size: var(--hf-size-control-small);
     font-size: var(--hf-meta-font-size);
     min-block-size: var(--hf-size-control-small);
     padding-block: var(--hf-space-xs);
+  }
+
+  /*
+   * Widths that fit the answer. Without one, a field is as wide as the line, up to a maximum.
+   * `narrow` is for a few characters, such as a score or a minute; `natural` is the width
+   * the browser gives the kind of answer, such as a date or a time, or the longest choice of
+   * a list. Neither is ever wider than the line.
+   */
+  input.hf-width-narrow {
+    inline-size: calc(4ch + 2 * var(--hf-space-s) + 2px);
+    max-inline-size: 100%;
+  }
+
+  input.hf-width-natural,
+  select.hf-width-natural {
+    inline-size: auto;
+    max-inline-size: 100%;
+  }
+
+  /*
+   * Not Baseline widely available yet. The field or the list then takes the width of what is in
+   * it, and a narrow field never gets narrower than three characters.
+   */
+  @supports (field-sizing: content) {
+    input.hf-width-narrow {
+      field-sizing: content;
+      inline-size: auto;
+      min-inline-size: calc(3ch + 2 * var(--hf-space-s) + 2px);
+    }
+
+    select.hf-width-natural {
+      field-sizing: content;
+    }
   }
 }
