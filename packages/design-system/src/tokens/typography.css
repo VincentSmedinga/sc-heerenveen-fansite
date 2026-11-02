@@ -86,6 +86,26 @@
      * (weight-css.test.ts checks that).
      */
 
+    /*
+     * Sizes that no type style above covers, by intent like the weights. The bars and the menu
+     * in the header have a size of their own, and so do the figures people look up.
+     */
+
+    /* The menu in the header: 16px at 360px, 18px from 1280px */
+    --hf-menu-font-size: clamp(1rem, 0.93rem + 0.34vw, 1.125rem);
+
+    /* The bar with sub-pages in the header */
+    --hf-submenu-font-size: 1rem;
+
+    /* The bar "Op deze pagina" */
+    --hf-anchor-font-size: 1rem;
+
+    /* A mark in a row of marks */
+    --hf-figure-font-size: 1.125rem;
+
+    /* The total in the hole of a donut */
+    --hf-figure-large-font-size: 1.5rem;
+
     /* Emphasis: strong, b, buttons, our club, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 

@@ -201,10 +201,15 @@
    * a screen from 36rem wide.
    * From 52rem the sidebar is a column of 24rem at most, in which two cells never fit, so no
    * media query is needed.
+   * The column takes the gap again from the space token: a custom property is resolved where it is
+   * declared, so a column with another density than the Page.Body would otherwise keep the gap
+   * of the Page.Body.
    */
   .hf-page-main,
   .hf-page-cells,
   .hf-page-sidebar {
+    --hf-page-body-cell-gap: var(--hf-space-xl);
+
     align-content: start;
     display: grid;
     gap: var(--hf-page-body-cell-gap);

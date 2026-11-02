@@ -30,7 +30,7 @@
 
   .hf-mark-row-mark {
     color: var(--hf-chart-colour);
-    font-size: 1.125rem;
+    font-size: var(--hf-figure-font-size);
     font-weight: var(--hf-figure-font-weight);
     line-height: 1.25;
   }

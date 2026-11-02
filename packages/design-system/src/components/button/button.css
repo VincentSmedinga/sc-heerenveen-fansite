@@ -18,8 +18,8 @@
     color: var(--hf-colour-text-on-button);
     cursor: pointer;
     font-weight: var(--hf-strong-font-weight);
-    min-block-size: 2.75rem;
-    min-inline-size: 2.75rem;
+    min-block-size: var(--hf-size-control);
+    min-inline-size: var(--hf-size-control);
     padding-block: var(--hf-space-s);
     padding-inline: var(--hf-space-m);
 

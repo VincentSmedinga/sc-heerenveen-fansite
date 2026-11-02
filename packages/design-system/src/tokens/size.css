@@ -1,12 +1,18 @@
 /*
- * Size tokens: the height of the small size of buttons and fields. The standard size is 2.75rem
- * (44 pixels) and is written where it is used. The small size is lower than the 44 pixels of the
- * standard, and still well above the 24 by 24 pixels that WCAG 2.5.8 asks for. The chapter Maten
- * van knoppen en velden in Storybook says when to take which.
+ * Size tokens: the height of buttons and fields, in the standard size and the small size. The
+ * standard size is 44 pixels, the small size is lower, and both are well above the 24 by 24
+ * pixels that WCAG 2.5.8 asks for. The chapter Maten van knoppen en velden in Storybook says
+ * when to take which. A component takes the height from the token and writes no number of its
+ * own; the density (see density.css) can lower both.
+ *
+ * The icon buttons of the header, the footer and the cards, and the links of the main menu,
+ * have a target of 44 pixels of their own: they are not buttons or fields and stay as they are
+ * at every density.
  */
 
 @layer hf.tokens {
   :root {
+    --hf-size-control: 2.75rem;
     --hf-size-control-small: 2.25rem;
   }
 }
