@@ -1091,6 +1091,58 @@ describe('importing the sport feed of De Gelderlander, the way the register has 
     ])
     expect(shown.every((item) => item.sourceName === 'De Gelderlander')).toBe(true)
   })
+
+  describe('around the cup match against De Treffers on 1 December 2026', () => {
+    const treffersRun = new Date('2026-12-06T12:00:00Z')
+    const cupMatch = [{ matchDate: '2026-12-01', opponent: 'De Treffers', status: 'scheduled' as const }]
+
+    const treffersItem = (slug: string, published: string, title: string) => `<item>
+      <title>${title}</title>
+      <link>https://gld.test/sport/${slug}~ag3000000/</link>
+      <pubDate>${published}</pubDate>
+      <guid>https://gld.test/sport/${slug}~ag3000000/</guid>
+      <dpp:paid>false</dpp:paid>
+    </item>`
+
+    /** A made-up feed: a headline at each edge of the window, and one about goals. */
+    const treffersFeed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dpp="https://www.dpgmedia.cloud/paidrss" version="2.0">
+  <channel>
+    <title>Sport (verzonnen)</title>
+    <link>https://gld.test</link>
+    <description>Een verzonnen feed.</description>
+    ${treffersItem('27-november', 'Fri, 27 Nov 2026 12:00:00 GMT', 'De Treffers bereidt zich voor op de beker')}
+    ${treffersItem('28-november', 'Sat, 28 Nov 2026 12:00:00 GMT', 'De Treffers kijkt uit naar de beker')}
+    ${treffersItem('4-december', 'Fri, 04 Dec 2026 12:00:00 GMT', 'De Treffers kijkt terug op de beker')}
+    ${treffersItem('5-december', 'Sat, 05 Dec 2026 12:00:00 GMT', 'De Treffers pakt de competitie weer op')}
+    ${treffersItem('30-november', 'Mon, 30 Nov 2026 12:00:00 GMT', 'De treffers van Napoli, Koopmeiners en Lang')}
+  </channel>
+</rss>`
+
+    async function importAround(matchDays: readonly MatchDay[]) {
+      const server = await serve(treffersFeed)
+
+      await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), treffersRun, matchDays)
+
+      return relevanceByTitle()
+    }
+
+    it('makes a headline about De Treffers relevant from 28 November to 4 December, and not outside it', async () => {
+      expect(await importAround(cupMatch)).toEqual({
+        // 27 November is four days before 1 December, and 5 December four days after.
+        'De Treffers bereidt zich voor op de beker': 'irrelevant',
+        'De Treffers kijkt terug op de beker': 'relevant',
+        'De Treffers kijkt uit naar de beker': 'relevant',
+        'De Treffers pakt de competitie weer op': 'irrelevant',
+        // "De treffers" is the plural of the word for a goal here, also inside the window.
+        'De treffers van Napoli, Koopmeiners en Lang': 'irrelevant',
+      })
+    })
+
+    it('leaves every one of the headlines irrelevant without the match', async () => {
+      expect(Object.values(await importAround([]))).toEqual(Array.from({ length: 5 }, () => 'irrelevant'))
+    })
+  })
 })
 
 describe('importing the football feed of ESPN NL, the way the register has it', () => {

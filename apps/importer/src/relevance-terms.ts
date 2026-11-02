@@ -225,8 +225,14 @@ export const otherClubs: readonly string[] = otherClubGroups.flat()
  * Clubs abroad that share a name with a club on the list, as headlines write them. The rule of
  * the opponent leaves these phrases out first, so "Sparta Praag wint in Praag" is not about
  * Sparta Rotterdam. Add a phrase when a headline shows that we need it.
+ *
+ * "de treffers van" is here for another reason: the amateur club De Treffers (Groesbeek) is
+ * also the plural of the Dutch word for a goal, as in "De treffers van Napoli, Koopmeiners en
+ * Lang". The comparison ignores case, so the words can't tell the two apart; the phrase can.
+ * A headline about the club ("De Treffers verrast Heracles", "De Treffers-trainer Janssen
+ * kijkt vooruit") does not have the phrase and stays `relevant`.
  */
-export const namesakeClubs = ['sparta praag', 'sparta prague'] as const
+export const namesakeClubs = ['sparta praag', 'sparta prague', 'de treffers van'] as const
 
 /**
  * The words that start or end the name of a club without being part of the name: FC, SC, VV,
