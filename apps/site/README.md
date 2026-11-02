@@ -490,6 +490,8 @@ Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nulle
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
 De pagina heeft twee kolommen.
 De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
+Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
+De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
 Ze heeft drie delen:
 

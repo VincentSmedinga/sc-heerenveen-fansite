@@ -1,3 +1,5 @@
+import type { FormResult } from '@fansite/design-system'
+
 import {
   findClubBySlug,
   listAllWikipediaPages,
@@ -88,6 +90,28 @@ export function tallyOf(meetings: readonly Meeting[]): Tally {
   }
 
   return tally
+}
+
+/** How many of the latest meetings the row Laatste wedstrijden shows, and needs. */
+const lastCount = 5
+
+/**
+ * The results of the latest five meetings from the side of sc Heerenveen, as `W`, `G` and `V`
+ * by the score `tallyOf` counts, the oldest first and the newest last, as a `MarkRow` has
+ * them. The meetings are given newest first. With fewer than five there is no row: it is
+ * undefined, because a row that is half empty reads as a gap.
+ */
+export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | undefined {
+  if (meetings.length < lastCount) {
+    return undefined
+  }
+
+  return meetings
+    .slice(0, lastCount)
+    .map(({ goalsAgainst, goalsFor }): FormResult =>
+      goalsFor > goalsAgainst ? 'W' : goalsFor === goalsAgainst ? 'G' : 'V',
+    )
+    .reverse()
 }
 
 const difference = (meeting: Meeting) => meeting.goalsFor - meeting.goalsAgainst

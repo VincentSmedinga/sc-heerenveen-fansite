@@ -5,6 +5,7 @@ import {
   DataTable,
   Heading,
   List,
+  MarkRow,
   RecordTable,
   ShortMatch,
   ShortStaff,
@@ -14,11 +15,10 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
-import type { ClubSummary, Meeting, Stadium } from './opponents'
-
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
-import { imageCredit, metaSeparator } from './MatchViews'
+import { imageCredit, markOf, metaSeparator } from './MatchViews'
+import { type ClubSummary, lastResultsOf, type Meeting, type Stadium } from './opponents'
 
 /**
  * What the cards of the opponents say about the matches they count: all the played matches
@@ -68,17 +68,21 @@ const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + re
 
 /**
  * The card of the page of a club with every match against it that was played, the newest
- * first, as short lines. Above each line stand the season and the competition, and the line has
- * the day, the name as Wikipedia wrote the club in that match (so an earlier name shows), where
- * it was played and the result from our side. It is the main content of the page, so it has
- * the white surface.
+ * first, as short lines, with the row Laatste wedstrijden above them when there are five or
+ * more (see `lastResultsOf`). Above each line stand the season and the competition, and the
+ * line has the day, the name as Wikipedia wrote the club in that match (so an earlier name
+ * shows), where it was played and the result from our side. It is the main content of the page,
+ * so it has the white surface.
  */
 export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
+  const last = lastResultsOf(meetings)
+
   return (
     <Card aria-labelledby="wedstrijden">
       <Heading id="wedstrijden" level={2}>
         Wedstrijden
       </Heading>
+      {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
       <List role="list">
         {meetings.map((match) => (
           <List.Item key={match.id}>
