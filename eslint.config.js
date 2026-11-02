@@ -99,6 +99,44 @@ export default defineConfig([
     },
   },
   {
+    // A specifier that climbs two or more folders says nothing about where the file is and
+    // breaks when a file moves. In the site, a file in src is reached with the prefix #src,
+    // which `imports` in package.json and `paths` in tsconfig.json both define (see
+    // docs/beslissingen.md). One folder up (../x) and the same folder (./x) stay as they are.
+    files: ['apps/site/{e2e,src}/**/*.{ts,tsx}'],
+    name: 'fansite/site-import-prefix',
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              message: 'Import a file in src with the prefix #src, such as #src/archive, not with ../../',
+              regex: String.raw`^\.\./\.\./`,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // The same for the module in vi.mock and vi.importActual, which the rule above doesn't see.
+    // Only tests call them, and the next block leaves tests out, so the two don't override each
+    // other.
+    files: ['apps/site/src/**/*.test.{ts,tsx}'],
+    name: 'fansite/site-import-prefix-mocks',
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          message: 'Name the module with the prefix #src, such as #src/archive, not with ../../',
+          selector:
+            'CallExpression[callee.object.name="vi"][callee.property.name=/^(?:doMock|importActual|importMock|mock)$/] > Literal.arguments:first-child[value=/^\\.\\.\\/\\.\\.\\//]',
+        },
+      ],
+    },
+  },
+  {
     // The site's templates hold no HTML, only components from the design system (see
     // docs/beslissingen.md). In JSX a lowercase name is an HTML or SVG element, and a
     // capitalised one a component. This covers every component in the site, so a page can't

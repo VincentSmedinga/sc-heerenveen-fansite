@@ -153,6 +153,9 @@ printf '%s\n' '<titel>' | pnpm exec commitlint
   We voegen samen met squash.
   De titel van de pull request wordt dan de commit op `main`, en release-please maakt daar de changelog van.
   commitlint controleert commitberichten in een git hook en titels van pull requests in CI.
+- **Imports in de site:** in `apps/site` noem je een bestand in `src` met `#src/archive`, niet met `../../archive`.
+  `pnpm lint` faalt op de tweede vorm.
+  Een import uit dezelfde map of de map erboven blijft zoals hij is.
 - **Taal:** alles wat openbaar is, is Nederlands: issues, beschrijvingen van pull requests, documentatie, Storybook en alle tekst op de site.
   Code, commentaar, commitberichten, titels van pull requests en het gereedschap voor agents (`AGENTS.md` en `.claude/`) zijn Brits Engels: `colour`, `initialise`.
   Hoe je het Nederlands schrijft, staat hieronder.

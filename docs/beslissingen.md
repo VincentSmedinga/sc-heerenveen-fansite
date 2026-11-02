@@ -5476,6 +5476,32 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dan telt de wedstrijd niet voor die tegenstander als de naam anders is dan in de stand.
 - **Alternatieven:** de uitslagen bij de wedstrijden van het seizoen in `getMatchData` laden (elke pagina betaalt voor een vraag die alleen deze kaart nodig heeft); de schakelaar altijd tonen en bij een onvolledig seizoen een melding geven (een tabel die verkeerd kan zijn, of een kaart met een melding die bezoekers niets zegt); de uitslagen van sc Heerenveen uit `league_results` nemen (de uitslag die de redactie invulde zou dan niet meetellen); de keuze in de seizoenskiezer meenemen (een seizoen zonder schakelaar zou dan een keuze krijgen die het niet kent); een onbekende waarde "niet gevonden" laten geven, zoals `?competitie=` (een gedeelde koppeling naar een seizoen dat later geen schakelaar meer heeft, werkt dan niet meer).
 
+### In de site noemt een import een bestand in `src` met `#src/`, niet met `../../`
+
+- **Datum:** 2 november 2026
+- **Besluit:** in `apps/site/src` en `apps/site/e2e` gebruikt elke import die twee of meer mappen omhoog gaat het voorvoegsel `#src/`: `#src/archive` in plaats van `../../archive`.
+  - **Wat blijft:** een import uit dezelfde map (`./x`) of de map erboven (`../x`) blijft zoals hij is.
+    Dat geldt ook voor een pad naar buiten `src`, zoals `new URL('../../../packages/…', import.meta.url)`: dat is een bestandspad en geen import.
+  - **Waar het staat:** `imports` in `apps/site/package.json` (`"#src/*": "./src/*"`) en `paths` in `apps/site/tsconfig.json` (`"#src/*": ["./src/*"]`).
+    Ze zeggen hetzelfde.
+    Node en Vitest lezen `imports`.
+    TypeScript probeert bij het doel van `imports` geen extensies, dus `#src/archive` zonder `.ts` vindt het alleen via `paths`.
+  - **Wat Node rechtstreeks laadt:** een bestand dat Node zelf laadt, zoals `src/icon-sets.ts` en wat de scripts in `apps/site/scripts` importeren, schrijft de extensie erbij (`#src/icon-sets.ts`), net als bij `./x.ts` nu.
+    Die bestanden gebruiken nu alleen `./`.
+  - **De lintregel:** `fansite/site-import-prefix` in `eslint.config.js` weigert een nieuwe import van `../../` in de site, ook de module in `vi.mock` en `vi.importActual`, en noemt het voorvoegsel in de melding.
+  - **De omzetting:** `apps/site/scripts/use-import-prefix.js` zette 394 imports in 105 bestanden om, met ESLint `--fix` achteraf voor de volgorde.
+    Het script blijft staan voor een branch die na de samenvoeging nog zulke imports heeft.
+  - **Waar het niet geldt:** `apps/importer` en `packages/*`, waar de paden kort zijn.
+    Een pakket in de werkruimte heet al `@fansite/…` en blijft zo.
+- **Waarom:** `../../../season-page` zegt niet waar een bestand staat, breekt als je een bestand verplaatst, en maakt elk nieuw bestand diep in `app/` lastiger te lezen.
+  Het kwam naar boven toen de Builder van #599 dertien van zulke regels schreef.
+  Eén afspraak voor de hele site is beter dan een oplossing per pull request.
+  `#` is het enige voorvoegsel dat `imports` in `package.json` toestaat, en het botst niet met een pakket zoals `@fansite/db`.
+- **Nadeel:** het voorvoegsel staat op twee plaatsen (`package.json` en `tsconfig.json`).
+  `#src` is voor de volgorde van imports een eigen groep, tussen de pakketten en de `../`-imports, met een lege regel erboven en eronder.
+  Een branch die vóór deze wijziging is gemaakt, krijgt een samenvoegconflict in elk bestand waar de importregels zijn omgezet.
+- **Alternatieven:** alleen `paths` in `tsconfig.json` met `@/` of `~/` (Node laadt `scripts` en `vitest.config.ts` rechtstreeks en kent het niet, en Vitest heeft er een plug-in voor nodig); alleen `imports` met `#src/*` (TypeScript vindt een import zonder `.ts` dan niet); overal `.ts` schrijven bij het voorvoegsel (honderden regels meer om te wijzigen, en een andere schrijfwijze dan de rest van de code); een `baseUrl` met kale paden als `season-page` (botst met pakketnamen); de regels laten zoals ze zijn en alleen een lintregel tegen drie mappen omhoog (de helft van het probleem blijft).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
