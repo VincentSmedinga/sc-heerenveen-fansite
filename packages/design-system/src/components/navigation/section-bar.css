@@ -1,0 +1,22 @@
+/* The bar with the screens of one part of the site, under the main menu (SectionBar). */
+
+@layer hf.components {
+  /*
+   * A band from edge to edge in the tint of the bar with sub-pages, right under the main menu
+   * (which ends in 0.5rem of the blue of the header). The links are the pills of that bar
+   * (.hf-navigation-sublink), in a row that scrolls like it. The padding on the start side is
+   * the inset of the page less the padding of a pill, so the text of the first link is in line
+   * with the menu above; the row runs on to the edge of the screen on the end side, as the bar
+   * of sub-pages does.
+   */
+  .hf-section-bar {
+    --hf-colour-focus: var(--hf-colour-focus-on-header);
+
+    background-color: var(--hf-colour-background-submenu);
+    box-sizing: border-box;
+    color: var(--hf-colour-text-on-header);
+    display: flex;
+    padding-inline: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - var(--hf-space-s))
+      max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
+  }
+}

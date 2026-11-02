@@ -85,6 +85,8 @@ export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Matc
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps, NavigationSubitem } from './components/navigation/Navigation'
 export { NavigationBar } from './components/navigation/NavigationBar'
+export { SectionBar } from './components/navigation/SectionBar'
+export type { SectionBarItem, SectionBarProps } from './components/navigation/SectionBar'
 export { NewsItem } from './components/news-item/NewsItem'
 export type { NewsItemProps } from './components/news-item/NewsItem'
 export { Notice } from './components/notice/Notice'
