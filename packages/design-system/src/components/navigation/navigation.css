@@ -235,16 +235,16 @@
   }
 
   /*
-   * The bar with the sub-pages of the item the visitor is on (NavigationBar), and the bar on its
-   * own, with the screens of a part of the site such as the admin (NavigationBar with a label).
-   * Both are a band on a tint of the header (see the roles in colour.css), with no line between
-   * it and the menu above. It is a flex row of the row of links, which scrolls. The row, the
-   * list and the fade are the ones of the bar "Op deze pagina" (see shortcuts.css), so they
-   * scroll, snap and fade alike. Unlike that bar it has no label on the page, is never sticky
-   * and is not gone on a wide screen: sub-pages are navigation, and the bar holds the site
-   * together on every width. This rule is what the two have in common; what belongs to one of
-   * them is below it. A flex item is not narrower than its content by default, and the row of
-   * links is long, so the bar may shrink to the width it is given.
+   * The bar with the sub-pages of the item the visitor is on (NavigationBar), and the bar on
+   * its own, with the screens of a part of the site such as the admin (NavigationBar with a
+   * label). Both are a band on a tint of the header (see the roles in colour.css), with no line
+   * between it and the menu above. It is a flex row of the row of links, which scrolls. The
+   * row, the list and the fade are the ones of the bar "Op deze pagina" (see shortcuts.css), so
+   * they scroll, snap and fade alike. Unlike that bar it has no label on the page, is never
+   * sticky and is not gone on a wide screen: sub-pages are navigation, and the bar holds the
+   * site together on every width. This rule is what the two have in common; what belongs to one
+   * of them is below it. A flex item is not narrower than its content by default, and the row
+   * of links is long, so the bar may shrink to the width it is given.
    */
   .hf-navigation-bar {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
