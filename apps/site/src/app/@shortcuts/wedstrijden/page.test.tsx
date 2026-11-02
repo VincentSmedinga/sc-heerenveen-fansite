@@ -75,8 +75,8 @@ describe('the bar of /wedstrijden', () => {
       ['#programma', 'Programma'],
       ['#uitslagen', 'Uitslagen'],
       ['#stand', 'Stand'],
-      ['#hoofdtrainer', 'Hoofdtrainer'],
       ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
+      ['#hoofdtrainer', 'Hoofdtrainer'],
     ])
   })
 

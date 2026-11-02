@@ -137,7 +137,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="eindstand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#eindstand">Eindstand</a></h2>',
     )
     expect(html).toContain('<caption class="hf-visually-hidden">Eindstand op ')
-    expect(html).toContain('aria-label="De eindstand"')
+    expect(html).toContain('aria-label="De eindstand en hoe vaak welke uitslag"')
     expect(html).toContain('aria-labelledby="eindstand"')
     expect(html).not.toContain('id="stand"')
     expect(html).not.toContain('>Stand</')

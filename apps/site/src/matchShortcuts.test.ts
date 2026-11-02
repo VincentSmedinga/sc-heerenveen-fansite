@@ -8,9 +8,9 @@ describe('matchShortcutsOf', () => {
     expect(matchShortcutsOf(true)).toHaveLength(4)
   })
 
-  it('ends with the card Hoe vaak welke uitslag, the last card on a narrow screen', () => {
-    expect(matchShortcutsOf(true).at(-1)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
-    expect(matchShortcutsOf(false).at(-1)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
+  it('has the card Hoe vaak welke uitslag straight after the table', () => {
+    expect(matchShortcutsOf(true).at(3)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
+    expect(matchShortcutsOf(false).at(2)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
     expect(scoreCountsCard.id).toBe('hoe-vaak-welke-uitslag')
   })
 
@@ -40,10 +40,10 @@ describe('matchShortcutsOf', () => {
 })
 
 describe('matchShortcutsOf with head coaches', () => {
-  it('has a link to the card Hoofdtrainer straight after the table for one coach', () => {
+  it('has a link to the card Hoofdtrainer after the card with the scores for one coach', () => {
     const hrefs = matchShortcutsOf(true, 1).map(({ href }) => href)
 
-    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoofdtrainer', '#hoe-vaak-welke-uitslag'])
+    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoe-vaak-welke-uitslag', '#hoofdtrainer'])
     expect(matchShortcutsOf(true, 1)).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainer' })
   })
 
@@ -53,8 +53,8 @@ describe('matchShortcutsOf with head coaches', () => {
     expect(links.map(({ href }) => href)).toEqual([
       '#uitslagen',
       '#eindstand',
-      '#hoofdtrainer',
       '#hoe-vaak-welke-uitslag',
+      '#hoofdtrainer',
     ])
     expect(links).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainers' })
   })

@@ -8,7 +8,7 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { lastFiveOf } from '#src/last-five'
 import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason } from '#src/matches'
-import { coachesCardOf, standingsCardOf } from '#src/matchShortcuts'
+import { coachesCardOf, scoreCountsCard, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
   imageCredit,
@@ -138,9 +138,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
         </Card>
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
-          the results: the table and the head coaches. */}
+          the results: the table, how often each score was played, and the head coaches. */}
       <Page.Sidebar
-        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
+        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 ? `, ${scoreCountsCard.name.toLowerCase()} en de ${coachesCard.name.toLowerCase()}` : ` en ${scoreCountsCard.name.toLowerCase()}`}`}
         wide
       >
         <Card
@@ -180,8 +180,8 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             </>
           )}
         </Card>
-        <CoachesCard coaches={data.coaches} />
         <ScoreCountsCard matches={results} season={imageSeason} />
+        <CoachesCard coaches={data.coaches} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
         )}

@@ -254,9 +254,9 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 `/wedstrijden` toont het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) in het lopende seizoen, en daarnaast de hoofdtrainers en hoe vaak welke uitslag voorkwam.
 De negen andere kaarten met cijfers staan op `/statistieken` (zie _De statistieken_).
-Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder hoe vaak welke uitslag en de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Statistieken waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
-Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Programma, Uitslagen, Stand, Hoofdtrainer en Hoe vaak welke uitslag) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
+Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Programma, Uitslagen, Stand, Hoe vaak welke uitslag en Hoofdtrainer) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand heeft een zacht vlak (`surface="soft"`), de hoofdtrainers een sterk vlak, en het programma en de uitslagen zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
@@ -275,7 +275,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een weekend telt tot het einde van zijn laatste dag.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
-- **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, direct onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
+- **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand en onder Hoe vaak welke uitslag, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
   Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitStaffName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
   Een seizoen met één trainer toont alleen de naam.
@@ -283,7 +283,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026").
   De namen zijn geen links en de kaart heeft geen bronvermelding van zichzelf: de bron staat onderaan de pagina.
   Een seizoen zonder trainer in de tabel heeft de kaart niet, en dan ook geen link in de balk "Op deze pagina:".
-- **Hoe vaak welke uitslag:** de laatste kaart van de zijbalk (`surface="warm"`, anker `#hoe-vaak-welke-uitslag`, `ScoreCountsCard` in `src/MatchViews.tsx`), met een donutdiagram en een tabel van de uitslagen die sc Heerenveen dit seizoen haalde.
+- **Hoe vaak welke uitslag:** een kaart in de zijbalk, direct onder de stand en boven de hoofdtrainer (`surface="warm"`, anker `#hoe-vaak-welke-uitslag`, `ScoreCountsCard` in `src/MatchViews.tsx`), met een donutdiagram en een tabel van de uitslagen die sc Heerenveen dit seizoen haalde.
   Het zijn dezelfde gespeelde wedstrijden als in de lijst Uitslagen, de Eredivisie en de beker, zonder schakelaar.
   Een bekerwedstrijd telt met de stand na verlenging, dus 1–1 en dan winnen na strafschoppen is gelijk.
   Elke uitslag staat vanuit sc Heerenveen gezien, onze doelpunten eerst ("4–0" is een winst en "0–1" een nederlaag), en de volgorde is eerst alle winsten, dan de gelijke spelen, dan de nederlagen, binnen een groep van groot naar klein doelsaldo en dan het grootste aantal doelpunten eerst (`scoreCountsOf` in `src/matches.ts`).

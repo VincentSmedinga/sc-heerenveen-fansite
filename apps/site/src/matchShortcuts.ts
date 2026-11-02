@@ -1,4 +1,4 @@
-/** The name and the anchor of the card with how often each score was played, the last card. */
+/** The name and the anchor of the card with how often each score was played, under Stand. */
 export const scoreCountsCard = { id: 'hoe-vaak-welke-uitslag', name: 'Hoe vaak welke uitslag' } as const
 
 /**
@@ -34,8 +34,8 @@ export const coachesCardOf = (coachCount: number) =>
 /**
  * The links of the bar for the page of a season, in the order of the cards: all of them for the
  * current season, and for a season that is over the same without Programma, which has no card
- * there, and with Eindstand for Stand. The card with the head coaches, straight after the
- * table, has a link when the season has a coach in the table (`coachCount` above 0).
+ * there, and with Eindstand for Stand. The card with the head coaches, after the one with the
+ * scores, has a link when the season has a coach in the table (`coachCount` above 0).
  */
 export const matchShortcutsOf = (current: boolean, coachCount = 0): Shortcut[] => {
   const standings = standingsCardOf(current)
@@ -47,14 +47,15 @@ export const matchShortcutsOf = (current: boolean, coachCount = 0): Shortcut[] =
       continue
     }
 
-    if (shortcut.href !== '#stand') {
-      links.push(shortcut)
+    if (shortcut.href === '#stand') {
+      links.push({ href: `#${standings.id}`, label: standings.name })
       continue
     }
 
-    links.push({ href: `#${standings.id}`, label: standings.name })
+    links.push(shortcut)
 
-    if (coachCount > 0) {
+    // The card with the head coaches comes after the one with the scores, under the table.
+    if (shortcut.href === `#${scoreCountsCard.id}` && coachCount > 0) {
       links.push({ href: `#${coaches.id}`, label: coaches.name })
     }
   }

@@ -5607,9 +5607,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen
 
 - **Datum:** 2 november 2026
-- **Besluit:** de kaart "Hoe vaak welke uitslag" staat als laatste kaart in de zijbalk van `/wedstrijden` en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
+- **Besluit:** de kaart "Hoe vaak welke uitslag" staat in de zijbalk van `/wedstrijden`, direct onder de stand en boven de hoofdtrainer, en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
   Een bekerwedstrijd telt met de stand na verlenging, zonder strafschoppen.
-  De balk "Op deze pagina:" heeft er een link naar, na Hoofdtrainer.
+  De balk "Op deze pagina:" heeft er een link naar, na Stand.
 - **Waarom:** de projecteigenaar wil de kaart op Wedstrijden, naast de lijst van de uitslagen die hij samenvat.
   Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
   De pagina heeft geen schakelaar tussen Eredivisie en alle wedstrijden.
@@ -9736,6 +9736,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   "hele seizoen" bij de enige trainer (de naam zegt het al).
   Een "van … tot …" bij elke trainer (de regel wordt lang, en de dag van het begin van een trainer is de dag van het einde van de vorige).
   Een eigen lijstregel met eigen CSS (dubbel werk, en de twee lijsten gaan dan uit elkaar lopen).
+- **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): de kaart "Hoe vaak welke uitslag" staat tussen de stand en de hoofdtrainer, dus Hoofdtrainer is de laatste kaart van de zijbalk en de link staat na die van Hoe vaak welke uitslag.
 
 ### De hoofdtrainers staan in de seed met de laatste dag, en een afgeleide laatste dag is de dag voor de opvolger
 

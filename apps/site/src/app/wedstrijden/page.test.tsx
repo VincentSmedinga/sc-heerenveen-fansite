@@ -123,7 +123,9 @@ describe('the page /wedstrijden', () => {
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(sidebar).toMatch(/^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand">/)
+    expect(sidebar).toMatch(
+      /^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand en hoe vaak welke uitslag">/,
+    )
     expect(main.match(/<h1/g)).toHaveLength(1)
     expect(main).toContain('id="programma"')
     expect(main.indexOf('id="programma"')).toBeLessThan(main.indexOf('id="uitslagen"'))
@@ -245,13 +247,13 @@ describe('the page /wedstrijden', () => {
     expect(html).toContain('href="#stand">Stand</a>')
     expect(html).not.toContain('Eindstand')
     expect(html).not.toContain('eindstand')
-    expect(html).toContain('aria-label="De stand"')
+    expect(html).toContain('aria-label="De stand en hoe vaak welke uitslag"')
   })
 
   describe('the card Hoe vaak welke uitslag', () => {
     const card = async () => section(await render(), 'hoe-vaak-welke-uitslag')
 
-    it('is the last card of the sidebar, after the table, with the heading at level 2 and an anchor', async () => {
+    it('is a card of the sidebar right after the table, with the heading at level 2 and an anchor', async () => {
       const html = await render()
       const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
 
@@ -987,13 +989,15 @@ describe('the head coaches of the season', () => {
     expect(card).not.toContain('wikipedia')
   })
 
-  it('is a card with the strong blue surface in the sidebar right after the table, named by its heading, without a source of its own', async () => {
+  it('is a card with the strong blue surface in the sidebar after the table and the scores, named by its heading, without a source of its own', async () => {
     withCoaches([veldman])
 
     const { card, html } = await coachesCard()
 
     expect(html).toContain('<section class="hf-card hf-card-strong" aria-labelledby="hoofdtrainer">')
-    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="hoe-vaak-welke-uitslag"'))
+    expect(html.indexOf('id="hoe-vaak-welke-uitslag"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html).toContain('aria-label="De stand, hoe vaak welke uitslag en de hoofdtrainer"')
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('hf-wikipedia-credit'))
     expect(card).not.toContain('hf-wikipedia-credit')
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(6)
