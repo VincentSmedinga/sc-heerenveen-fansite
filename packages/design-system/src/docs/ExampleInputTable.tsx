@@ -5,15 +5,16 @@ import {
   type InputTableRow,
 } from '../components/input-table/InputTable'
 import { Input } from '../components/input/Input'
+import { RadioGroup } from '../components/radio-group/RadioGroup'
 import { Select } from '../components/select/Select'
 
-/** The columns of the example: team, minute, added time, kind of goal and player. */
+/** The columns of the example: minute, added time and kind of goal, then team and player. */
 export const exampleColumns: InputTableColumn[] = [
-  { name: 'Team' },
   { name: 'Minuut', width: 'narrow' },
-  { name: 'Blessuretijd', required: false, width: 'narrow' },
-  { name: 'Soort' },
-  { name: 'Speler' },
+  { hideOptional: true, name: 'Blessuretijd', required: false, width: 'narrow' },
+  { name: 'Soort', width: 'natural' },
+  { line: 2, name: 'Team', width: 'natural' },
+  { line: 2, name: 'Speler' },
 ]
 
 // Made-up goals of a made-up match.
@@ -29,15 +30,6 @@ const goalRow = (goal: (typeof goals)[number], index: number, errors: boolean): 
   return {
     fields: [
       {
-        control: (
-          <Select defaultValue={goal.team} name={`team-${number}`}>
-            <Select.Option value="thuis">Testclub</Select.Option>
-            <Select.Option value="uit">FC Voorbeeld</Select.Option>
-          </Select>
-        ),
-        id: `team-${number}`,
-      },
-      {
         control: <Input defaultValue={goal.minute} inputMode="numeric" name={`minuut-${number}`} />,
         id: `minuut-${number}`,
       },
@@ -47,7 +39,7 @@ const goalRow = (goal: (typeof goals)[number], index: number, errors: boolean): 
       },
       {
         control: (
-          <Select defaultValue={goal.kind} name={`soort-${number}`}>
+          <Select defaultValue={goal.kind} name={`soort-${number}`} width="natural">
             <Select.Option value="gewoon">Gewoon</Select.Option>
             <Select.Option value="strafschop">Strafschop</Select.Option>
             <Select.Option value="eigen">Eigen doelpunt</Select.Option>
@@ -56,12 +48,28 @@ const goalRow = (goal: (typeof goals)[number], index: number, errors: boolean): 
         id: `soort-${number}`,
       },
       {
+        group: (legend) => (
+          <RadioGroup
+            id={`team-${number}`}
+            legend={legend}
+            name={`team-${number}`}
+            options={[
+              { label: 'Testclub', value: 'thuis' },
+              { label: 'FC Voorbeeld', value: 'uit' },
+            ]}
+            value={goal.team}
+          />
+        ),
+        id: `team-${number}`,
+      },
+      {
         control: <Input defaultValue={goal.player} name={`speler-${number}`} />,
         error: errors && goal.player === '' ? 'Vul de naam van de speler in.' : undefined,
         id: `speler-${number}`,
       },
     ],
     header: `Doelpunt ${number}`,
+    mark: String(number),
     remove: { name: 'actie', value: `weghalen-${number}` },
   }
 }
