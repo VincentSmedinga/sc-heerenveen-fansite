@@ -61,7 +61,7 @@ describe('DataTable', () => {
     render(
       <DataTable
         caption="Uitslagen"
-        columns={['Stand', { abbreviation: 'GL', name: 'gelijk' }, 'Punten']}
+        columns={['Stand', { abbreviation: 'G', name: 'gelijk' }, 'Punten']}
         rows={[{ cells: [2, 7], header: 'Voor' }]}
       />,
     )
@@ -69,7 +69,7 @@ describe('DataTable', () => {
     const header = screen.getAllByRole('columnheader')[1] as HTMLElement
 
     expect(header.querySelector('abbr')?.getAttribute('title')).toBe('Gelijk')
-    expect(header.querySelector('[aria-hidden="true"]')?.textContent).toBe('GL')
+    expect(header.querySelector('[aria-hidden="true"]')?.textContent).toBe('G')
     expect(header.querySelector('.hf-visually-hidden')?.textContent).toBe('gelijk')
     expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
     expect(header.getAttribute('scope')).toBe('col')

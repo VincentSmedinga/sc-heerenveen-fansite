@@ -900,7 +900,7 @@ describe('the page /statistieken', () => {
         'Eerste doelpunt',
         '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
         '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
-        '<abbr title="Gelijk"><span aria-hidden="true">GL</span><span class="hf-visually-hidden">gelijk</span></abbr>',
+        '<abbr title="Gelijk"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gelijk</span></abbr>',
         '<abbr title="Verlies"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verlies</span></abbr>',
         '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
       ])
@@ -924,7 +924,7 @@ describe('the page /statistieken', () => {
     it('explains the abbreviations of the columns in a line under the tables and the sentences', async () => {
       const card = section(await render(), 'hoe-de-wedstrijden-verlopen')
 
-      expect(card).toContain('G gespeeld, W winst, GL gelijk, V verlies, P punten')
+      expect(card).toContain('G gespeeld, W winst, G gelijk, V verlies, P punten')
       expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
       expect(card.indexOf('Na een voorsprong')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
     })

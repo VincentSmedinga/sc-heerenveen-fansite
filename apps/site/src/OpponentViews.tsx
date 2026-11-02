@@ -8,6 +8,8 @@ import {
   RecordTable,
   ShortMatch,
   ShortStaff,
+  tableColumns,
+  tableLegend,
   Text,
   WikipediaCredit,
 } from '@fansite/design-system'
@@ -40,13 +42,26 @@ export function BasedOnSince({ choice, played, since }: { choice: CompetitionCho
 const clubColumns = (choice: CompetitionChoice) =>
   [
     { name: 'Club', sortable: true },
-    { abbreviation: 'G', name: 'gespeeld', sortable: true },
-    { abbreviation: 'W', name: 'gewonnen', sortable: true },
-    { abbreviation: 'GL', name: 'gelijk', sortable: true },
-    { abbreviation: 'V', name: 'verloren', sortable: true },
-    { abbreviation: 'D', name: 'doelpunten', sortable: true },
-    ...(choice === 'league' ? [{ abbreviation: 'P', name: 'punten', sortable: true }] : []),
+    ...[
+      tableColumns.played,
+      tableColumns.won,
+      tableColumns.drawn,
+      tableColumns.lost,
+      tableColumns.goals,
+      ...(choice === 'league' ? [tableColumns.points] : []),
+    ].map((column) => ({ ...column, sortable: true })),
   ] as const
+
+/** The legend under the list: the columns of the table, with what the goals hold. */
+const clubLegend = (choice: CompetitionChoice) =>
+  tableLegend([
+    tableColumns.played,
+    tableColumns.won,
+    tableColumns.drawn,
+    tableColumns.lost,
+    { ...tableColumns.goals, note: 'voor–tegen' },
+    ...(choice === 'league' ? [tableColumns.points] : []),
+  ])
 
 /** The points against a club in the Eredivisie: 3 for a win and 1 for a draw. */
 const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
@@ -130,9 +145,7 @@ export function ClubsCard({
               href: `${address}/${record.slug}${query}`,
             }))}
           />
-          <Text appearance="meta">
-            {`G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)${choice === 'league' ? ', P punten' : ''}`}
-          </Text>
+          <Text appearance="meta">{clubLegend(choice)}</Text>
           <BasedOnSince choice={choice} played={played} since={since} />
         </>
       )}

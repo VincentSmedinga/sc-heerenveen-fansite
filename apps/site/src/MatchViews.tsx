@@ -17,6 +17,8 @@ import {
   ShortMatch,
   ShortStaff,
   StandingsTable,
+  tableColumns,
+  tableLegend,
   Text,
   TopScorersTable,
   WikipediaCredit,
@@ -278,14 +280,14 @@ const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, 
 /**
  * The columns are abbreviations, because five columns with whole words are wider than a phone
  * and than the sidebar of a small desktop. The line under the two sentences explains them, with
- * `G gespeeld` as the table of the standings has it.
+ * the same letters and words as every other table (`tableColumns`).
  */
 const flowColumns = [
-  { abbreviation: 'G', name: 'gespeeld' },
-  { abbreviation: 'W', name: 'winst' },
-  { abbreviation: 'GL', name: 'gelijk' },
-  { abbreviation: 'V', name: 'verlies' },
-  { abbreviation: 'P', name: 'punten' },
+  tableColumns.played,
+  tableColumns.won,
+  tableColumns.drawn,
+  tableColumns.lost,
+  tableColumns.points,
 ] as const
 
 const measureNames: Record<LeagueMeasure, string> = {
@@ -501,7 +503,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
               ? 'Na een voorsprong liet sc Heerenveen nog geen winst liggen.'
               : `Na een voorsprong haalde sc Heerenveen in ${notWonAfterLead === 1 ? '1 wedstrijd' : `${notWonAfterLead} wedstrijden`} geen winst.`}
           </Text>
-          <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
+          <Text appearance="meta">{tableLegend(flowColumns)}</Text>
           <BasedOn known={known} played={played} />
           {unknownFirstGoal > 0 && (
             <Text appearance="meta">

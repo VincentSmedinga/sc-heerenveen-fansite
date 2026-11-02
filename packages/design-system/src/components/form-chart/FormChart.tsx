@@ -4,6 +4,7 @@ import { BarChart } from '../bar-chart/BarChart'
 import { movingAverage } from '../chart/trend'
 import { classNames } from '../classNames'
 import { MarkRow } from '../mark-row/MarkRow'
+import { tableColumns } from '../table-columns'
 import { Text } from '../text/Text'
 import { formOf, type FormResult, pointsOf, slots } from './form'
 
@@ -49,7 +50,9 @@ export const FormChart = ({ className, matches = 34, results, window: span = 5, 
         <BarChart.Trend values={Array.from({ length: matches }, (_, index) => line[index] ?? null)} />
       </BarChart>
       <Text appearance="meta" className="hf-form-chart-key">
-        <b>W</b> winst (3 punten), <b>G</b> gelijk (1), <b>V</b> verlies (0).
+        <b>{tableColumns.won.abbreviation}</b> {tableColumns.won.name} (3 punten),{' '}
+        <b>{tableColumns.drawn.abbreviation}</b> {tableColumns.drawn.name} (1), <b>{tableColumns.lost.abbreviation}</b>{' '}
+        {tableColumns.lost.name} (0).
       </Text>
       <Text appearance="meta" className="hf-form-chart-line">
         {latest === null

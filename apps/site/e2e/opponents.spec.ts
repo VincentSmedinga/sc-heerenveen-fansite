@@ -133,7 +133,7 @@ test.describe('sorting the list', () => {
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     ).toBe(true)
-    for (const name of ['Club', 'G gespeeld', 'W gewonnen', 'GL gelijk', 'V verloren', 'D doelpunten', 'P punten']) {
+    for (const name of ['Club', 'G gespeeld', 'W winst', 'G gelijk', 'V verlies', 'D doelpunten', 'P punten']) {
       const box = await page.getByRole('button', { exact: true, name }).boundingBox()
 
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)

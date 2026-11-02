@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
+import { tableColumns } from '../table-columns'
 
 export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
@@ -58,8 +59,8 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
             <th scope="col">Speler</th>
             <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
               <abbr title="Doelpunten">
-                <span aria-hidden="true">D</span>
-                <span className="hf-visually-hidden">doelpunten</span>
+                <span aria-hidden="true">{tableColumns.goals.abbreviation}</span>
+                <span className="hf-visually-hidden">{tableColumns.goals.name}</span>
               </abbr>
             </th>
           </tr>
@@ -80,7 +81,7 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
         </tbody>
       </table>
       <p className="hf-meta hf-bar-legend">
-        <b>D</b> doelpunten
+        <b>{tableColumns.goals.abbreviation}</b> {tableColumns.goals.name}
       </p>
     </div>
   )

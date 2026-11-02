@@ -13,7 +13,7 @@ const props: DataTableProps = {
   columns: [
     { name: 'Club', sortable: true },
     { abbreviation: 'G', name: 'gespeeld', sortable: true },
-    { abbreviation: 'W', name: 'gewonnen', sortable: true },
+    { abbreviation: 'W', name: 'winst', sortable: true },
     { abbreviation: 'D', name: 'doelpunten' },
   ],
   rows: [
@@ -38,7 +38,7 @@ describe('DataTable with sortable columns', () => {
     expect([...table.querySelectorAll('thead th')].map((header) => header.textContent)).toEqual([
       'Club',
       'Ggespeeld',
-      'Wgewonnen',
+      'Wwinst',
       'Ddoelpunten',
     ])
     expect([...table.querySelectorAll('tbody th')].map((header) => header.textContent)).toEqual([
@@ -54,13 +54,30 @@ describe('DataTable with sortable columns', () => {
     render(<DataTable {...props} />)
 
     expect(screen.getByRole('button', { name: 'G gespeeld' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'W gewonnen' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'W winst' })).toBeTruthy()
+  })
+
+  it('names two columns with the same letter differently, so a visitor can tell the buttons apart', () => {
+    render(
+      <DataTable
+        caption="De tegenstanders van sc Heerenveen"
+        columns={[
+          'Club',
+          { abbreviation: 'G', name: 'gespeeld', sortable: true },
+          { abbreviation: 'G', name: 'gelijk', sortable: true },
+        ]}
+        rows={[{ cells: [4, 1], header: 'Alkmaar' }]}
+      />,
+    )
+
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['G gespeeld', 'G gelijk'])
+    expect(button('G gespeeld')).not.toBe(button('G gelijk'))
   })
 
   it('makes the headers of the sortable columns buttons, and leaves the other headers as text', () => {
     render(<DataTable {...props} />)
 
-    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Club', 'G gespeeld', 'W gewonnen'])
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Club', 'G gespeeld', 'W winst'])
     expect(button('G gespeeld').getAttribute('type')).toBe('button')
     expect(within(screen.getByRole('columnheader', { name: 'doelpunten' })).queryByRole('button')).toBeNull()
     expect(order()).toEqual(['Alkmaar', 'Breda', 'Cambuur', 'Dalen'])
@@ -109,7 +126,7 @@ describe('DataTable with sortable columns', () => {
 
     fireEvent.click(button('G gespeeld'))
     fireEvent.click(button('G gespeeld'))
-    fireEvent.click(button('W gewonnen'))
+    fireEvent.click(button('W winst'))
 
     expect(order()).toEqual(['Breda', 'Alkmaar', 'Dalen', 'Cambuur'])
     expect(screen.getAllByRole('columnheader').map((header) => header.getAttribute('aria-sort'))).toEqual([

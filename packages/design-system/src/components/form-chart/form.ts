@@ -2,6 +2,8 @@ import type { BarChartBar } from '../bar-chart/BarChart'
 import type { ChartTone } from '../chart/tones'
 import type { MarkRowMark } from '../mark-row/MarkRow'
 
+import { tableColumns } from '../table-columns'
+
 /** The results of a match: `W` won (winst), `G` drawn (gelijk) and `V` lost (verlies). */
 export const formResults = ['W', 'G', 'V'] as const
 
@@ -14,7 +16,12 @@ export const pointsOf = (result: FormResult): number => (result === 'W' ? 3 : re
 export const toneOf = (result: FormResult): ChartTone =>
   result === 'W' ? 'positive' : result === 'G' ? 'neutral' : 'negative'
 
-const labels: Record<FormResult, string> = { G: 'gelijk', V: 'verlies', W: 'winst' }
+/** The words are those of the columns under the tables, so the two agree. */
+const labels: Record<FormResult, string> = {
+  G: tableColumns.drawn.name,
+  V: tableColumns.lost.name,
+  W: tableColumns.won.name,
+}
 
 /** The latest `count` results as marks, the oldest first, with the word for a screen reader. */
 export const formOf = (results: readonly FormResult[], count = 5): MarkRowMark[] =>

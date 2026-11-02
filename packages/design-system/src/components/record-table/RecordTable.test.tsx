@@ -25,12 +25,12 @@ describe('RecordTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has the columns G, W, L, V, P and D, with a column header with scope for each', () => {
+  it('has the columns G, W, G, V, P and S, with a column header with scope for each', () => {
     render(<RecordTable {...props} />)
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('[aria-hidden="true"]')?.textContent),
-    ).toEqual([undefined, 'G', 'W', 'L', 'V', 'P', 'D'])
+    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'P', 'S'])
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
   })
 
@@ -45,7 +45,7 @@ describe('RecordTable', () => {
   it('names every column header by its full word for a screen reader', () => {
     render(<RecordTable {...props} />)
 
-    for (const name of ['gespeeld', 'gewonnen', 'gelijk', 'verloren', 'punten', 'doelsaldo']) {
+    for (const name of ['gespeeld', 'winst', 'gelijk', 'verlies', 'punten', 'doelsaldo']) {
       expect(screen.getByRole('columnheader', { name })).toBeTruthy()
     }
   })
@@ -122,7 +122,7 @@ describe('RecordTable', () => {
     expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
     expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6'])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, L gelijk, V verloren, D doelsaldo',
+      'G gespeeld, W winst, G gelijk, V verlies, S doelsaldo',
     )
   })
 
@@ -137,14 +137,14 @@ describe('RecordTable', () => {
 
     expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
       'Gespeeld',
-      'Gewonnen',
+      'Winst',
       'Gelijk',
-      'Verloren',
+      'Verlies',
       'Punten',
       'Doelsaldo',
     ])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, L gelijk, V verloren, P punten, D doelsaldo',
+      'G gespeeld, W winst, G gelijk, V verlies, P punten, S doelsaldo',
     )
   })
 
