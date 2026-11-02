@@ -5,7 +5,7 @@
 // GitHub. Each server opens on the page that the branch changes: the page of the site, and the
 // component or document of Storybook, found from the files that differ from main. `pnpm
 // review:stop` stops them. The decision "Een branch bekijk je met pnpm review, in één vaste
-// map" in docs/beslissingen.md says why.
+// map" in docs/beslissingen/werkwijze.md says why.
 //
 //   pnpm review <number of a pull request, or name of a branch>
 //   pnpm review:stop

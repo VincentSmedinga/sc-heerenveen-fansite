@@ -17,7 +17,7 @@ import {
 /**
  * Decides from the headline whether an item is about sc Heerenveen. A pure function: the same
  * headline and opponents always give the same answer, and nothing else is read (the importer
- * keeps no intro or category, see `docs/beslissingen.md`).
+ * keeps no intro or category, see `docs/beslissingen/importer.md`).
  *
  * - `relevant`: the headline names "sc Heerenveen" or the Frisian "sc Hearrenfean", a club
  *   legend (Abe Lenstra) or the full name of someone from the club, or it names "Heerenveen" or

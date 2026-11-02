@@ -7,7 +7,7 @@ Dit document is de enige plek met de lijst; de andere documenten verwijzen hiern
 Ons eigen forum, sc Heerenveen Forum, staat ook in het register (#15); het is geen nieuwsbron en valt buiten deze beoordeling.
 
 De besluiten zijn voorstellen, tot de projecteigenaar de pull request samenvoegt.
-Het beleid erachter staat in _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_ in [`beslissingen.md`](beslissingen.md).
+Het beleid erachter staat in _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_ in [`beslissingen/importer.md`](beslissingen/importer.md).
 
 ## De controle van 24 oktober 2026
 
@@ -770,7 +770,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
   - Link: de pagina van de aflevering op `omny.fm`, zoals `https://omny.fm/shows/omroep-abe/<aflevering>`.
   - Verzoeken: de feed stuurt een `ETag`, dus een run zonder nieuwe aflevering krijgt "niet gewijzigd" in plaats van de feed van bijna 1 MB.
 - **`robots.txt`:** op `www.omnycontent.com` staat `Allow: /` voor iedereen.
-- **Beschrijving:** in het register staat de tekst van de maker uit het kanaal van de feed, zonder de HTML (zie _De beschrijving van een podcast is die van de maker_ in [`beslissingen.md`](beslissingen.md)).
+- **Beschrijving:** in het register staat de tekst van de maker uit het kanaal van de feed, zonder de HTML (zie _De beschrijving van een podcast is die van de maker_ in [`beslissingen/importer.md`](beslissingen/importer.md)).
 - **Meer tonen:** alleen met toestemming van de Leeuwarder Courant; het artwork en de beschrijving of shownotes van een aflevering bewaren we niet.
 - **Besluit: nemen.**
   De podcast gaat bijna helemaal over de club, heeft een pagina per aflevering en laat ons de feed lezen.
@@ -820,7 +820,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 
 ## Wikipedia, voor de wedstrijden
 
-De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse Wikipedia, onder CC BY-SA 4.0 (zie [`beslissingen.md`](beslissingen.md)).
+De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse Wikipedia, onder CC BY-SA 4.0 (zie [`beslissingen/importer.md`](beslissingen/importer.md)).
 De import leest per seizoen vier pagina's, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
 
 - `Eredivisie <seizoen> (mannenvoetbal)`: de stand;

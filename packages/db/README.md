@@ -3,6 +3,7 @@
 De database van de site en de importer: het schema in TypeScript, de migraties en een seed met testbronnen voor lokaal gebruik en de echte bronnen.
 De database is MariaDB 10.11, met Drizzle.
 De naam is voorlopig.
+De keuzes over de database staan in [`docs/beslissingen/hosting-en-data.md`](../../docs/beslissingen/hosting-en-data.md).
 
 ## Aan de slag
 
@@ -294,7 +295,7 @@ Elke opdracht ervan kan opnieuw draaien, want MariaDB kan een `ALTER TABLE` niet
 
 ## De tabellen voor het tellen van bezoeken
 
-De site telt paginaweergaven en unieke bezoekers per dag, zonder iemand te volgen (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)).
+De site telt paginaweergaven en unieke bezoekers per dag, zonder iemand te volgen (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`docs/beslissingen/redactie.md`](../../docs/beslissingen/redactie.md)).
 Een dag is een dag in Nederland (Europe/Amsterdam).
 
 | Tabel            | Wat erin staat                                                                              | Blijft het?                |

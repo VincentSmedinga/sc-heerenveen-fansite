@@ -10,7 +10,7 @@ const pullRequest = (files, forced = false) => decide({ event: 'pull_request', f
 const storiesFor = (files, forced = false) => decideStories({ event: 'pull_request', files, forced })
 
 test('skips the checks of the site for a pull request that only changes documentation', () => {
-  assert.deepEqual(pullRequest(['docs/beslissingen.md', 'docs/bronnen.md']), {
+  assert.deepEqual(pullRequest(['docs/beslissingen/werkwijze.md', 'docs/bronnen.md']), {
     reason: 'Controles van de site overgeslagen: alleen docs/ gewijzigd',
     site: false,
   })

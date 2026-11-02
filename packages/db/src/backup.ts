@@ -19,8 +19,8 @@ const day = 24 * 60 * 60 * 1000
  * that the site or the importer promises to throw away, and 14 days of dumps would keep it:
  *
  * - `visitor_hashes` and `visitor_salts`: the visit counters throw them away at the end of the
- *   day (see _We tellen paginaweergaven en unieke bezoekers per dag_ in docs/beslissingen.md),
- *   and the salt turns the hashes back into addresses;
+ *   day (see _We tellen paginaweergaven en unieke bezoekers per dag_ in
+ *   docs/beslissingen/redactie.md), and the salt turns the hashes back into addresses;
  * - `discussions`: the screen name of the last commenter, which the importer replaces at every
  *   run (see the Redactie chapter in Storybook);
  * - `admin_sessions` and `admin_login_links`: a restore would bring back a session or a link

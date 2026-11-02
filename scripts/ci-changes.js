@@ -4,7 +4,7 @@
 // outputs, `site` and `stories`. The job "Lint, typecheck, test and build" (scripts/ci-gate.js)
 // fails when one of those jobs ran and shouldn't have, or was skipped and shouldn't have been.
 // The decision "CI slaat de controles van de site over bij wijzigingen die ze niet raken" in
-// docs/beslissingen.md says why.
+// docs/beslissingen/werkwijze.md says why.
 //
 //   node scripts/ci-changes.js
 //

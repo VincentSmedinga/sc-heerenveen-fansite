@@ -350,7 +350,7 @@ export const footballWords = [
  * The words of winning and losing are on the list, like "wint" and "verliest" for Dutch: "wûn"
  * (won) and "ferlear" (lost). A headline such as "Frou wûn lotterij yn Hearrenfean" becomes
  * `relevant`, which a moderator hides. A club headline we miss is worse (see
- * `docs/beslissingen.md`, _Een volledige naam is genoeg, en "wint" en "verliest" zijn
+ * `docs/beslissingen/importer.md`, _Een volledige naam is genoeg, en "wint" en "verliest" zijn
  * voetbalwoorden_).
  */
 export const frisianFootballWords = [

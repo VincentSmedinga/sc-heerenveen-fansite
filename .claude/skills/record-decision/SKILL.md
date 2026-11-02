@@ -1,12 +1,12 @@
 ---
 name: record-decision
-description: Write a decision into docs/beslissingen.md in the fixed format, in the right section, with Later lines on the decisions it replaces. Use as the Builder or the Coordinator when a real choice between alternatives is made.
+description: Write a decision into the file of its section in docs/beslissingen/ in the fixed format, with Later lines on the decisions it replaces. Use as the Builder or the Coordinator when a real choice between alternatives is made.
 argument-hint: <title of the decision>
 ---
 
 # Record a decision
 
-`docs/beslissingen.md` holds what we decided and why, in Dutch.
+`docs/beslissingen/` holds what we decided and why, in Dutch, in a file for each section.
 A pull request is done when the decisions it makes are in it (_Definition of Done_ in `AGENTS.md`).
 
 ## Is it a decision?
@@ -20,14 +20,14 @@ A pull request is done when the decisions it makes are in it (_Definition of Don
 
 ## Where
 
-The file has the sections _Project_, _Werkwijze_, _Hosting en data_, _Werkruimte_, _Designsysteem_, _Site_, _Importer_ and _Redactie_.
-Put the decision at the end of the section it belongs to; a section runs roughly by date, newest last, and a decision about a topic may sit next to the older ones on that topic.
-Read the entries around it first, and every older decision it touches.
+`docs/beslissingen/index.md` lists the sections and the file of each: _Project_, _Werkwijze_, _Hosting en data_, _Werkruimte_, _Designsysteem_, _Site_, _Importer_ and _Redactie_.
+Put the decision at the end of the file of the section it belongs to; a file runs roughly by date, newest last, and a decision about a topic may sit next to the older ones on that topic.
+Read the entries around it first, and every older decision it touches (`git grep -n '^## <title>' docs/beslissingen/` finds a title).
 
 ## The format
 
 ```markdown
-### <Title: the decision as a statement>
+## <Title: the decision as a statement>
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** what we do, in a sentence or two.
@@ -53,6 +53,6 @@ Read the entries around it first, and every older decision it touches.
 
 ## Check
 
-- `pnpm exec prettier --check docs/beslissingen.md`.
+- `pnpm exec prettier --check docs/beslissingen`.
 - The sentence check from the final check in `AGENTS.md` prints nothing for the lines you added.
 - Each fact in it (numbers, file names, test names) matches the code.

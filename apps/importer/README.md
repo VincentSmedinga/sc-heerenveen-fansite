@@ -5,6 +5,7 @@ Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS
 Welke nieuwsbronnen en podcasts we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
+De keuzes over de importer staan in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 
 ## De import draaien
 
@@ -290,7 +291,7 @@ De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is 
 Een kop over de tegenstander van een wedstrijd rond de publicatie is ook `relevant` (zie _Koppen over de tegenstander_).
 Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
 Het filter kent ook de Friese schrijfwijze (zie _Friese woorden_).
-De keuzes staan in `docs/beslissingen.md`, onder _De regels van het filter_.
+De keuzes staan in `docs/beslissingen/importer.md`, onder _De regels van het filter_.
 De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
 Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
 Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van een uitkomst (#76), komen later.
@@ -436,7 +437,7 @@ Een kop erbij zetten gaat zo:
    Zet een kop in `knownFalsePositives` als het filter de kop toont en de projecteigenaar dat niet wil, en schrijf in een commentaar waarom we dat accepteren.
 2. Draai `pnpm --filter importer test`.
    Geeft het filter een andere waarde, dan staat de kop in de melding van de test.
-3. Past de kop niet bij de regels of de lijsten, verander die dan niet in dezelfde pull request: leg het de projecteigenaar voor, en schrijf een besluit in `docs/beslissingen.md`.
+3. Past de kop niet bij de regels of de lijsten, verander die dan niet in dezelfde pull request: leg het de projecteigenaar voor, en schrijf een besluit in `docs/beslissingen/importer.md`.
 
 ## De regionale feed van Omrop Fryslân
 
@@ -444,7 +445,7 @@ Omrop Fryslân is een bron met de feed `https://www.omropfryslan.nl/rss/index.xm
 De club is er een klein deel van, dus de feed staat in de seed op `club`.
 De adapter leest hem zonder aanpassing: RSS 2.0, tijden met een zone, geen teken voor een betaalmuur.
 Een run van 25 oktober 2026 bewaarde alle 50 berichten, en het filter vond er 2 `relevant`, 4 `doubtful` en 44 `irrelevant`.
-Na de run veranderden de regels (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ in `docs/beslissingen.md`), en dezelfde 50 koppen geven nu 4, 2 en 44 (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+Na de run veranderden de regels (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ in `docs/beslissingen/importer.md`), en dezelfde 50 koppen geven nu 4, 2 en 44 (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
 De Friese schrijfwijze en de Friese voetbalwoorden (#270) veranderden daar niets aan, want de feed had op die dag geen Friestalige kop over de club.
 De test in `src/import-feeds.test.ts` ("importing a regional feed, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/regional-sample.xml`](src/fixtures/regional-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft per bericht ook een intro, een categorie en een foto, om te laten zien dat de adapter ze niet bewaart.
@@ -680,7 +681,7 @@ Een eigen adapter of eigen tabellen zijn er niet.
   Een duur van meer dan een dag, een nummer of seizoen van 0 of boven 99999, en een waarde die geen geheel getal is, telt als "niet gegeven": de aflevering blijft staan, zonder dat feit.
   De import leest dit uit elke feed, ook uit een nieuwsfeed, die ze niet heeft.
 - **Niets extra:** geen artwork, beschrijving of shownotes van een aflevering, geen soort aflevering (`episodeType`) en geen adres van het MP3-bestand.
-  De beschrijving van de podcast zelf staat in de seed, als tekst van de maker (zie _De beschrijving van een podcast is die van de maker_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)); de import leest hem niet.
+  De beschrijving van de podcast zelf staat in de seed, als tekst van de maker (zie _De beschrijving van een podcast is die van de maker_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)); de import leest hem niet.
 - **Rooster:** podcasts hebben geen rooster van zichzelf.
   Ze gaan mee in de run van elke 15 minuten, met de `ETag` die beide bronnen sturen, dus `pnpm run import:status` toont ze zoals de andere feeds.
 - **Niet in het nieuws:** `listRecentItems` in `@fansite/db` slaat bronnen van het soort podcast over, dus afleveringen komen niet in "Laatste nieuws".
@@ -734,7 +735,7 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 ## De wedstrijden en de stand
 
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
-Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 De gegevens vallen onder CC BY-SA 4.0.
 Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen.
 Een seizoen begint op 1 juli en heet `2026/27`.
@@ -1322,7 +1323,7 @@ pnpm run import:seasons 2020/21
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
 Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026 in Breda, het tweede de definitieve uitslag 2–0 op 11 mei in het Abe Lenstra Stadion, met een voetnoot bij de datum.
-De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)):
+De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)):
 
 - Een blok waarvan de score met "Gestaakt" begint, is de wedstrijd.
   Het geeft het stadion, thuis of uit, de datum en de aftrap, zodat de cijfers per stadion de wedstrijd tellen voor de plek waar hij begon.
@@ -1346,7 +1347,7 @@ Een wedstrijd die is uitgesteld en later gespeeld, staat op de pagina twee keer.
 Het eerste blok staat in de oorspronkelijke ronde en heeft geen score, of de score "Afgelast" of "Uitgesteld".
 Het tweede staat onder een kop `Inhaalronde <nummer>` en heeft de uitslag.
 In 2022/23 zijn dat RKC Waalwijk – Go Ahead Eagles (`Inhaalronde 17`) en Go Ahead Eagles – RKC Waalwijk (`Inhaalronde 25`).
-De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)):
+De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)):
 
 - Een kop `Inhaalronde <nummer>` is een ronde van de competitie, en het nummer is de ronde van de wedstrijd.
   Een wedstrijd van sc Heerenveen onder `Inhaalronde 17` heeft dus de ronde `Speelronde 17`, dezelfde sleutel als het blok in de oorspronkelijke ronde.
@@ -1372,7 +1373,7 @@ De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waar
 De import leest ook de selectie van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, voor de lijst met spelers op de zoekpagina (#107) en voor de optredens, doelpunten en assists per speler (#407).
 Hij bewaart haar in `players`, de cijfers in `player_season_stats`, de gezondheid in `squad_imports` en de pagina in `wikipedia_pages` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 De bron, de licentie (CC BY-SA 4.0), de controles en het uur tussen twee lezingen zijn die van de wedstrijden.
-Waarom dezelfde bron en waarom de zoekterm een eigen kolom is, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+Waarom dezelfde bron en waarom de zoekterm een eigen kolom is, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 
 ### Welke pagina
 

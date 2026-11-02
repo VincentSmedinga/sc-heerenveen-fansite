@@ -115,8 +115,8 @@ export const testSources = [
  * The real sources, with the feeds we read. They get the strictest policy, because none has
  * given permission yet: only the headline, the link and the name. The descriptions of news
  * sources are in our own words; the description of a podcast is the text its maker puts in the
- * channel of its feed, as it is written but without the HTML (see `docs/beslissingen.md`).
- * `docs/bronnen.md` says which sources belong here and why.
+ * channel of its feed, as it is written but without the HTML (see
+ * `docs/beslissingen/importer.md`). `docs/bronnen.md` says which sources belong here and why.
  *
  * Every source that can have headlines has a `slug`, the fixed name of the source in the
  * address of the news archive (`/nieuws?bron=<slug>`). It stays the same when the name changes,

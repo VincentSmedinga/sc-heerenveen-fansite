@@ -47,7 +47,7 @@ Your prompt doesn't contain them.
    `CONTRIBUTING.md`: the conventions and the code and security checklist.
 2. `docs/toegankelijkheid.md`: the accessibility checklist.
 3. `packages/design-system/src/docs/editorial.mdx`: the editorial principles and, at the end, the checklist for the review.
-4. The parts of `docs/beslissingen.md` that touch the change.
+4. The file in `docs/beslissingen/` of the section the change touches (`index.md` lists the sections), not the whole folder.
 
 ## 2. Read the issue and the pull request
 
@@ -113,7 +113,7 @@ Severity:
 - **Blokkerend:** must be fixed before merging.
   An acceptance criterion not met, a failing check, a security problem, a failure of WCAG 2.2 AA, or a breach of an editorial principle.
 - **Belangrijk:** should be fixed in this pull request.
-  A broken convention, a missing test or story, a decision missing from `docs/beslissingen.md`.
+  A broken convention, a missing test or story, a decision missing from `docs/beslissingen/`.
 - **Klein:** optional.
   The Builder may leave it.
 

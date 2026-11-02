@@ -65,7 +65,7 @@ Do it once: a run reads every enabled feed in the register and the Wikipedia pag
 
 - `apps/importer/README.md`: a section "De voetbalfeed van …" (or the like) in the style of the last one, and the source in the sentence that lists the sources with a filter.
   Look for other sentences that name all sources: `git grep -n "<name of the previous source>"`.
-- `docs/beslissingen.md`: a decision "We nemen …", in the fixed format, with the date.
+- `docs/beslissingen/importer.md`: a decision "We nemen …", in the fixed format, with the date.
   If the source changes an earlier decision, add a **Later:** line there.
 - `docs/bronnen.md`: finish the entry with the numbers from step 5 and what the importer does.
 

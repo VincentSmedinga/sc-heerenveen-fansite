@@ -3,7 +3,7 @@
 De MCP-server van het designsysteem, op <https://ds.heerenveen.org/mcp>.
 Hij geeft de documentatie van de gepubliceerde Storybook aan agents: de gereedschappen `docs-list`, `docs-show` en `docs-show-story` van `@storybook/mcp`.
 Hoe hij op de hosting draait en wat de eigenaar daarvoor instelt, staat in [`docs/designsysteem-publiceren.md`](../../docs/designsysteem-publiceren.md).
-De keuzes erachter staan in [`docs/beslissingen.md`](../../docs/beslissingen.md), onder _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
+De keuzes erachter staan in [`docs/beslissingen/hosting-en-data.md`](../../docs/beslissingen/hosting-en-data.md), onder _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
 
 `@storybook/mcp` is een bibliotheek, geen server, en nog een voorbeeldversie ("preview") waarvan de API kan veranderen.
 De versie staat daarom vast op die van Storybook (10.6.3), en gaat pas omhoog als iemand dat bewust doet en de test hieronder nog slaagt.

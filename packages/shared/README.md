@@ -2,6 +2,7 @@
 
 Hulpfuncties die de site en de importer allebei gebruiken.
 De naam is voorlopig.
+De keuzes over de hosting en de adressen staan in [`docs/beslissingen/hosting-en-data.md`](../../docs/beslissingen/hosting-en-data.md).
 
 ## Omgevingsvariabelen controleren
 

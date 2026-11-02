@@ -7,7 +7,7 @@ argument-hint: <issue number>
 # Components and stories
 
 You are the Builder of issue $ARGUMENTS, and it touches the design system.
-The conventions are in `packages/design-system/README.md` (_Afspraken_), the decisions in `docs/beslissingen.md`, and the Storybook server's own instructions are generic: where they differ, ours win.
+The conventions are in `packages/design-system/README.md` (_Afspraken_), the decisions in `docs/beslissingen/designsysteem.md`, and the Storybook server's own instructions are generic: where they differ, ours win.
 Use `builder-workflow` for everything around this.
 
 ## 1. Ask the Storybook server first
@@ -40,11 +40,11 @@ Copy the shape of the meta in `src/components/card/Card.stories.tsx`:
 - made-up content only: `Testkrant`, `Testclub`, links as `#…`, no real headlines, names or addresses.
 
 Two things in that file are the older manner, and you don't copy them: a light and a dark story for each variant, and the `union()` helper that writes the union types into `table.type.summary` (the compiler gives `unknown[number]` for the lists).
-The owner decided on 23 October 2026 (_Een pagina in Storybook is kort, met het voorbeeld en een story per variant_ in `docs/beslissingen.md`, and _Een pagina in Storybook_ in the README of the design system) to change both.
+The owner decided on 23 October 2026 (_Een pagina in Storybook is kort, met het voorbeeld en een story per variant_ in `docs/beslissingen/designsysteem.md`, and _Een pagina in Storybook_ in the README of the design system) to change both.
 The page of a component is short:
 
 - **Text:** one paragraph on why the component exists and when to choose it.
-  No rem, px, breakpoints or margins: those belong in the code and in `docs/beslissingen.md`.
+  No rem, px, breakpoints or margins: those belong in the code and in `docs/beslissingen/designsysteem.md`.
   A usage rule a reader needs may be one sentence.
 - **Stories:** the example with controls, and one story for each variant that looks different (not for each prop).
   Light and dark come from the theme switch of Storybook; a component that changes with the theme itself, such as on a dark surface, gets its own dark story (`globals: { theme: 'dark' }`).

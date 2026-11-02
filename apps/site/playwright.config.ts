@@ -49,9 +49,9 @@ export default defineConfig({
   // Puts the made-up headlines and discussions in the database for the homepage, once the site
   // is up and before the first test.
   globalSetup: './e2e/global-setup.ts',
-  // Chromium only (see docs/beslissingen.md). Locally the Chromium of Playwright, installed
-  // once with `pnpm --filter site exec playwright install chromium`. In CI the Google Chrome of
-  // the runner, which saves the install (see docs/beslissingen.md).
+  // Chromium only (see docs/beslissingen/werkruimte.md). Locally the Chromium of Playwright,
+  // installed once with `pnpm --filter site exec playwright install chromium`. In CI the Google
+  // Chrome of the runner, which saves the install (see docs/beslissingen/werkruimte.md).
   projects: [
     {
       name: 'chromium',
@@ -73,7 +73,7 @@ export default defineConfig({
   testDir: 'e2e',
   use: { baseURL: origin },
   // Two browsers at a time while sessions share the computer. The default is half the cores,
-  // five on the owner's computer. CI keeps it (see docs/beslissingen.md).
+  // five on the owner's computer. CI keeps it (see docs/beslissingen/werkwijze.md).
   ...(process.env['CI'] === undefined ? { workers: 2 } : {}),
   webServer: [
     {

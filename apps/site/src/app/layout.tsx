@@ -31,7 +31,8 @@ export const metadata: Metadata = {
   // The icon for the tab is the SVG, and browsers that don't read SVG or ask for /favicon.ico
   // themselves get the ICO. The PNGs for the home screen of an iPhone and for the manifest are
   // in app/manifest.ts. All are made by scripts/make-icons.js. The status bar of the app is
-  // see-through, so the header runs under it (see the decision in docs/beslissingen.md).
+  // see-through, so the header runs under it (see the decision in
+  // docs/beslissingen/redactie.md).
   appleWebApp: { statusBarStyle: 'black-translucent', title: 'Fansite' },
   icons: {
     apple: { sizes: '180x180', type: 'image/png', url: '/apple-touch-icon.png' },

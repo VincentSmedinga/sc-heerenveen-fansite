@@ -2,7 +2,7 @@
 // to each other on one computer don't meet on the shared ones. The folder name of the worktree
 // decides both: the same folder always gets the same database and the same ports, and another
 // folder gets others. The decision "Elke werkmap heeft een eigen database en eigen poorten" in
-// docs/beslissingen.md says why.
+// docs/beslissingen/werkwijze.md says why.
 //
 //   node scripts/worktree-env.js                      shows what this folder gets
 //   node scripts/worktree-env.js run [--database [--seed]] [--ports a,b] -- <command> [...]
