@@ -149,6 +149,19 @@ describe('InputTable', () => {
     expect(screen.getByRole('textbox', { name: 'Minuut, doelpunt 2 (niet verplicht)' })).toBeTruthy()
   })
 
+  it('leaves "niet verplicht" out with hideOptional, and keeps the fields as they were', () => {
+    render(
+      <InputTable
+        {...props}
+        columns={[{ name: 'Team' }, { hideOptional: true, name: 'Minuut', required: false, width: 'narrow' }]}
+      />,
+    )
+
+    expect(screen.getByRole('textbox', { name: 'Minuut, doelpunt 1' }).hasAttribute('required')).toBe(false)
+    expect(screen.getByRole('columnheader', { name: 'Minuut' }).querySelector('.hf-field-status')).toBeNull()
+    expect(document.querySelector('.hf-field-status')).toBeNull()
+  })
+
   it('says nothing about it for a column that is required, and makes its fields required', () => {
     render(<InputTable {...props} />)
 

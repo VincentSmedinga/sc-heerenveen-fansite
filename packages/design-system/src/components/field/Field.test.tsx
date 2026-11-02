@@ -52,6 +52,23 @@ describe('Field', () => {
     ).toBe(false)
   })
 
+  it('leaves "niet verplicht" out of the label with hideOptional, and keeps the field as it was', () => {
+    render(
+      <>
+        <Field hideOptional id="link" label="Link naar het bericht" required={false}>
+          <Input />
+        </Field>
+        <Field hideOptional id="naam" label="Naam">
+          <Input />
+        </Field>
+      </>,
+    )
+
+    expect(screen.getByRole('textbox', { name: 'Link naar het bericht' }).hasAttribute('required')).toBe(false)
+    expect(screen.getByRole('textbox', { name: 'Naam' }).hasAttribute('required')).toBe(true)
+    expect(document.querySelector('.hf-field-status')).toBeNull()
+  })
+
   it('has no description and is not invalid when there is no hint and no error', () => {
     render(
       <Field id="naam" label="Naam">

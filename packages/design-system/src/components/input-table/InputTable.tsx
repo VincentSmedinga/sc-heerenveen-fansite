@@ -11,6 +11,11 @@ export type InputTableButton = {
 }
 
 export type InputTableColumn = {
+  /**
+   * Leaves "niet verplicht" out of the header and the labels of a column that is not required,
+   * as `hideOptional` does in a Field. The fields keep their `required`.
+   */
+  hideOptional?: boolean
   /** The header of the column, shown above the fields and the visible label of each field. */
   name: string
   /**
@@ -114,7 +119,7 @@ export const InputTable = ({
                 scope="col"
               >
                 {column.name}
-                {column.required === false ? (
+                {column.required === false && column.hideOptional !== true ? (
                   <>
                     {' '}
                     <span className="hf-field-status hf-input-table-status">(niet verplicht)</span>
@@ -136,6 +141,7 @@ export const InputTable = ({
                   <Field
                     className="hf-input-table-field"
                     error={field.error}
+                    hideOptional={columns[index]?.hideOptional === true}
                     id={field.id}
                     label={
                       <>
