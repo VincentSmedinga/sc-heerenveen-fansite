@@ -5491,7 +5491,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eerlijk bijschrift met de werkelijke dag is beter dan geen schakelaar.
   De stand over de laatste vijf wedstrijden zegt aan het eind van een seizoen weinig, net als de laatste vijf wedstrijden bij de reeksen (zie _Een eerder seizoen toont bij de reeksen alleen de langste_).
 - **Nadeel:** een club met één uitslag minder mist in "Laatste 5" zijn laatste wedstrijd, tot de bron is bijgewerkt.
-  Het bijschrift is het enige wat dat zegt.
+  Het bijschrift noemt de dag van de laatste uitslag, maar alleen een schermlezer krijgt dat bijschrift: wie ziet, merkt het niet.
 - **Alternatieven:** de strikte regel houden (de schakelaar verschijnt zelden); nooit controleren (een ontbrekende wedstrijd kan onopgemerkt een verkeerde stand geven); de schakelaar in elk seizoen laten staan, zoals #602 deed (een eindstand over vijf wedstrijden zegt weinig).
 
 ### In de site noemt een import een bestand in `src` met `#src/`, niet met `../../`
