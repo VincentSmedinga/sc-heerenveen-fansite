@@ -4,22 +4,31 @@
  * group and looks like the label of a field, so the group stands level with the fields around
  * it. The radio buttons are next to each other where they fit, and each is a row as high as a
  * field (--hf-size-control), so the group lines up with a field next to it and a finger can
- * hit it. The whole label can be clicked. The space under the group is the space under a
- * field.
+ * hit it. The whole label can be clicked. The space under the group is not the group's: the
+ * form it is in sets it (see utilities/flow.css).
  */
 
 @layer hf.components {
   .hf-radio-group {
     border: 0;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
     padding: 0;
 
     /* The legend looks like the label of a field, not like the legend of a fieldset. */
     > legend {
       color: var(--hf-colour-text-default);
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
+      margin-block-end: var(--hf-space-xs);
       padding: 0;
+
+      /* Close to the hint and the error, as the label of a field is. */
+      &:has(+ .hf-field-text) {
+        /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
+        margin-block-end: 0.125rem;
+      }
     }
   }
 
@@ -27,8 +36,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0 var(--hf-space-l);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block-start: var(--hf-space-xs);
   }
 
   .hf-radio-group-label {

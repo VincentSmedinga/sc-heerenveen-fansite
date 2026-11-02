@@ -90,15 +90,18 @@
    */
   li > :not(.hf-short-match):has(+ .hf-short-match) {
     border-block-start: 1px solid var(--hf-colour-border-default);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: var(--hf-space-m) 0;
     padding-block-start: var(--hf-space-s);
   }
 
   li:first-child > :not(.hf-short-match):has(+ .hf-short-match) {
     border-block-start: 0;
-    margin-block-start: 0;
     padding-block-start: 0;
+  }
+
+  /* The space between the items of a list whose items have a name is the gap of the list. */
+  :is(ul, ol):has(> li > :not(.hf-short-match) + .hf-short-match) {
+    display: grid;
+    gap: var(--hf-space-m);
   }
 
   li > :not(.hf-short-match) + .hf-short-match {

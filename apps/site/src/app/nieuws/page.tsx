@@ -140,6 +140,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
             <Card as="div" surface="soft">
               <Form action="/nieuws" autoComplete="off" method="get">
                 <CheckboxGroup
+                  className="hf-space-end-s"
                   legend="Bronnen"
                   name="bron"
                   options={sources.map((item) => ({ label: item.name, value: item.slug }))}

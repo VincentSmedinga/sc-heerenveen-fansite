@@ -50,7 +50,7 @@ const meta = preview.meta({
 const inCard = (args: Parameters<typeof CheckboxGroup>[0]) => (
   <Card as="div" surface="soft">
     <Form action="/nieuws" method="get" onSubmit={(event) => event.preventDefault()}>
-      <CheckboxGroup {...args} />
+      <CheckboxGroup className="hf-space-end-s" {...args} />
       <Button type="submit">Toon</Button>
     </Form>
   </Card>

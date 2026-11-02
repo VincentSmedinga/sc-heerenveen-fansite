@@ -10,14 +10,6 @@
     column-gap: var(--hf-space-s);
     display: flex;
     flex-wrap: wrap;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: 0 var(--hf-space-s);
-  }
-
-  /* A list under the row has lines of its own, so it gets the space of a paragraph. */
-  .hf-mark-row + :is(ul, ol) {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block-start: var(--hf-space-m);
   }
 
   .hf-mark-row-title {

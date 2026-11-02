@@ -35,7 +35,7 @@ const meta = preview.meta({
 })
 
 const render = () => (
-  <>
+  <div className="hf-flow">
     <Field id="naam" label="Naam">
       <Input autoComplete="name" name="naam" />
     </Field>
@@ -45,7 +45,7 @@ const render = () => (
     <Field id="link" label="Link naar het bericht" required={false}>
       <Input name="link" type="url" />
     </Field>
-  </>
+  </div>
 )
 
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
@@ -63,7 +63,7 @@ export const SmallLight = meta.story({ globals: { theme: 'light' }, name: 'Klein
 export const SmallDark = meta.story({ globals: { theme: 'dark' }, name: 'Kleine maat, donker', render: small })
 
 const widths = () => (
-  <>
+  <div className="hf-flow">
     <Field id="minuut" label="Minuut">
       <Input inputMode="numeric" name="minuut" width="narrow" />
     </Field>
@@ -76,7 +76,7 @@ const widths = () => (
     <Field id="naam-lang" label="Naam">
       <Input name="naam-lang" />
     </Field>
-  </>
+  </div>
 )
 
 export const Widths = meta.story({ name: 'Breedtes die bij het antwoord passen', render: widths })

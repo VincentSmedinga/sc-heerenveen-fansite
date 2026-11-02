@@ -13,11 +13,12 @@
     display: grid;
     gap: var(--hf-space-l) var(--hf-space-m);
     grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: var(--hf-space-m) var(--hf-space-l);
   }
 
   .hf-donut-chart {
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: minmax(0, 1fr);
     inline-size: 100%;
     margin-inline: auto;
     max-inline-size: 20rem;
@@ -53,8 +54,6 @@
   .hf-donut-chart-title {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0 var(--hf-space-xs);
   }
 
   .hf-donut-chart-plot {

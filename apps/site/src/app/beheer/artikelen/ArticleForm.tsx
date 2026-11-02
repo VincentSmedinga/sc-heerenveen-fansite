@@ -127,7 +127,7 @@ export function ArticleForm({
           <Input autoComplete="off" defaultValue={values.auteur} name="auteur" />
         </Field>
         {/* Opslaan stays the first button: it is the one the Enter key presses. */}
-        <Button disabled={pending} type="submit">
+        <Button className="hf-space-end-0" disabled={pending} type="submit">
           {status === 'new' ? 'Opslaan als concept' : 'Opslaan'}
         </Button>
         {status === 'draft' ? (

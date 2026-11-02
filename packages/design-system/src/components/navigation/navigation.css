@@ -82,7 +82,7 @@
       border-block-start: 1px solid var(--hf-colour-border-on-header);
       content: '';
       flex: 0 0 100%;
-      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The row of links under the line is a flex row; a gap would also open between every other row of links, and this space is only under the line. */
       margin-block-end: var(--hf-space-xs);
       order: -1;
     }

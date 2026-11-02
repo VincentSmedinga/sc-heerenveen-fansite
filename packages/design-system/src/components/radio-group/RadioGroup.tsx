@@ -85,15 +85,19 @@ export const RadioGroup = ({
           </>
         )}
       </legend>
-      {hint ? (
-        <Text appearance="meta" className="hf-field-hint" id={hintId}>
-          {hint}
-        </Text>
-      ) : null}
-      {error ? (
-        <Text className="hf-field-error" id={errorId}>
-          <span className="hf-visually-hidden">Fout:</span> {error}
-        </Text>
+      {hint || error ? (
+        <div className="hf-field-text">
+          {hint ? (
+            <Text appearance="meta" className="hf-field-hint" id={hintId}>
+              {hint}
+            </Text>
+          ) : null}
+          {error ? (
+            <Text className="hf-field-error" id={errorId}>
+              <span className="hf-visually-hidden">Fout:</span> {error}
+            </Text>
+          ) : null}
+        </div>
       ) : null}
       <div className="hf-radio-group-options">
         {options.map((option, index) => (

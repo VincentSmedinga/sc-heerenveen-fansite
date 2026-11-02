@@ -11,6 +11,9 @@
    * own size, so the bars inside it query the width of the place the table sits in, not the
    * screen. It is positioned too, so the hidden words in the column headers
    * (hf-visually-hidden, which is absolute) stay in it and the page does not get wider.
+   * The table and its legend are one block: the place is a large block in the flow
+   * (utilities/flow.css), so the large space is under the legend, and between the table and
+   * the legend is the medium space, the gap of the place.
    */
   .hf-bar-place {
     --hf-bar-gap: var(--hf-space-m);
@@ -18,23 +21,10 @@
 
     container-name: hf-bar-place;
     container-type: inline-size;
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: minmax(0, 1fr);
     position: relative;
-  }
-
-  /*
-   * The table and its legend are one block: the place is a large block in the flow
-   * (utilities/flow.css), so the large space is under the legend, and between the table and
-   * the legend is the medium space. Without a legend the table is the last in its place,
-   * which is a container with its own formatting context, so the space would stay inside it:
-   * it has none then.
-   */
-  .hf-bar-place > table {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the table and its legend becomes a gap in #655. */
-    margin-block-end: var(--hf-space-m);
-
-    &:last-child {
-      margin-block-end: 0;
-    }
   }
 
   .hf-bar-table {

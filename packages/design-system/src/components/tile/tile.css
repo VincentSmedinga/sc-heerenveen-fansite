@@ -52,7 +52,9 @@
   }
 
   .hf-tile-body {
+    display: grid;
     flex: 1;
+    gap: var(--hf-space-xs);
     min-inline-size: 0;
 
     > :last-child {
@@ -62,13 +64,8 @@
 
   /*
    * The heading sits close to its line of text, closer than a heading sits to the text of a
-   * card.
+   * card: the gap of the body.
    */
-  .hf-tile-title {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0 var(--hf-space-xs);
-  }
-
   .hf-tile-text {
     margin-block: 0;
   }

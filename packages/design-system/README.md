@@ -73,7 +73,7 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
 - **Box-model:** een regel die padding of een rand zet op een element met een maat, zet ook `box-sizing: border-box`.
   Er is geen globale regel op `*`.
 - **Verticale ruimte:** een onderdeel zet geen marge en geen `padding-block` naar buiten.
-  De container bepaalt de ruimte tussen zijn kinderen: `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure` en elk element met `hf-flow`, met de regels in `src/utilities/flow.css` en in het hoofdstuk Ruimte van Storybook.
+  De container bepaalt de ruimte tussen zijn kinderen: `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure`, een `Form` met velden en elk element met `hf-flow`, met de regels in `src/utilities/flow.css` en in het hoofdstuk Ruimte van Storybook.
   Een uitzondering voor één exemplaar krijgt een hulpklasse `hf-space-end-0`, `-xs`, `-s`, `-m` of `-l` (`src/utilities/space-end.css`).
   Een nieuw groot blok, zoals een tabel of een grafiek, komt in de lijst in `flow.css`.
   De ruimte tussen de eigen delen van een onderdeel komt van `gap`.

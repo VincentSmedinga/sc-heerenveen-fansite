@@ -72,25 +72,27 @@ export const Field = ({
 
   return (
     <div className={classNames('hf-field', className)} {...props}>
-      <label className="hf-field-label" htmlFor={id} id={`${id}-label`}>
-        {label}
-        {required || hideOptional ? null : (
-          <>
-            {' '}
-            <span className="hf-field-status">(niet verplicht)</span>
-          </>
-        )}
-      </label>
-      {hint ? (
-        <Text appearance="meta" className="hf-field-hint" id={hintId}>
-          {hint}
-        </Text>
-      ) : null}
-      {error ? (
-        <Text className="hf-field-error" id={errorId}>
-          <span className="hf-visually-hidden">Fout:</span> {error}
-        </Text>
-      ) : null}
+      <div className="hf-field-text">
+        <label className="hf-field-label" htmlFor={id} id={`${id}-label`}>
+          {label}
+          {required || hideOptional ? null : (
+            <>
+              {' '}
+              <span className="hf-field-status">(niet verplicht)</span>
+            </>
+          )}
+        </label>
+        {hint ? (
+          <Text appearance="meta" className="hf-field-hint" id={hintId}>
+            {hint}
+          </Text>
+        ) : null}
+        {error ? (
+          <Text className="hf-field-error" id={errorId}>
+            <span className="hf-visually-hidden">Fout:</span> {error}
+          </Text>
+        ) : null}
+      </div>
       {cloneElement(Children.only(children), {
         'aria-describedby': describedBy || undefined,
         'aria-invalid': error ? true : undefined,

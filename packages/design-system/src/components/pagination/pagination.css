@@ -10,8 +10,6 @@
     display: grid;
     gap: 0 var(--hf-space-m);
     grid-template-columns: 1fr auto 1fr;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block-start: var(--hf-space-m);
   }
 
   /* The target is at least 44 pixels high (36 in the small size), above the 24 of WCAG. */

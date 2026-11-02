@@ -165,6 +165,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             </Field>
             {group === 'not-on-site' ? (
               <CheckboxGroup
+                className="hf-space-end-s"
                 legend="Filter"
                 name="redactie"
                 options={[{ label: 'Alleen door de redactie verborgen', value: '1' }]}

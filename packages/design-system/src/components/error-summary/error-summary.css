@@ -7,8 +7,6 @@
     border-color: var(--hf-colour-text-accent);
     border-radius: 0.25rem;
     box-sizing: border-box;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: 0 var(--hf-space-l);
 
     /* The last item has no space under it: the box has the space the list used to bring. */
     padding-block: var(--hf-space-m) var(--hf-space-l);

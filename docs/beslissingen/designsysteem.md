@@ -2264,6 +2264,8 @@
 - **Alternatieven:** de basiselementen een eigen `margin-block: 0` in elke kaart laten zetten (dan moet elk onderdeel het kennen).
   `hf-flow` op `body` of op elk onderdeel zetten (de stroom hoort bij een container die weet wat er in staat).
   Een `dd` zonder marge, met een wrapper om elke term en beschrijving (de HTML wordt omslachtiger voor een lijst die de site niet gebruikt).
+- **Later:** zie _Onderdelen en formulieren zetten geen verticale witruimte naar buiten_ (3 november 2026).
+  De marge van `input`, `select` en `textarea` in `base/forms.css` is weg; de ruimte onder een veld komt van het formulier of de groep, en de ruimte boven het veld van de `gap` van `Field`.
 
 ## De overgang van de schakelaar heeft een naam per plek
 
@@ -2287,3 +2289,30 @@
 - **Alternatieven:** de overgang laten beginnen op de nieuwe pagina, met de knop op de oude keuze (de nieuwe pagina kent de oude keuze alleen met een script in `pageswap` en `pagereveal`, dat we in #500 uitsloten, en het laat ook bij een wissel tussen verschillende schakelaars iets schuiven).
   `view-transition-name` alleen op de knop en niet op de letters (de letters liggen dan onder de knop).
   De overgang met een script uitzetten voor schakelaars op een andere plek (meer code, werkt niet zonder script).
+
+## Onderdelen en formulieren zetten geen verticale witruimte naar buiten
+
+- **Datum:** 3 november 2026
+- **Besluit:** de onderdelen en de formulieren zetten geen verticale marge meer naar buiten, en de ruimte tussen hun eigen delen komt van `gap` (#655).
+  Daarna wijst geen commentaar meer naar een issue.
+  De ruimte tussen de delen van een onderdeel is een `gap` van het onderdeel zelf: `Match`, `DiscussionItem`, de tegel (`Tile`), de plek van een tabel met zijn legenda (`.hf-bar-place`), `DonutChart`, de editor en het formulier voor een link daarin, `Field`, `FieldGroup` en `RadioGroup`.
+  Een optische correctie van 0,125 rem is een getal, ook als `gap`.
+  `Field` zet het label, de hint en de fout in een blok van zichzelf, `hf-field-text`, met `gap` 0,125 rem, en het veld staat daaronder op `gap` klein.
+  `RadioGroup` doet hetzelfde met de hint en de fout.
+  Een `Form` met velden is een stroomcontainer, behalve een formulier van kaarten, dat een raster is: daar zou een marge bij de `gap` komen.
+  Wat dichterbij of verder weg staat dan de stroom zegt, krijgt een hulpklasse: `FormChart` is een `hf-flow` met `hf-space-end-s` op de rij met letters en `hf-space-end-xs` op de toelichting, en een `CheckboxGroup` in een formulier met een knop krijgt `hf-space-end-s`.
+  Vier marges blijven, elk met de reden bij de regel: de ruimte onder de `legend` van een fieldset (`FieldGroup`, `RadioGroup` en `CheckboxGroup`), omdat een `gap` de legenda niet bereikt; de marge van de open lijst van `Select`, omdat die lijst een popover buiten de stroom is; de ruimte onder de lijn van de navigatie in de header, omdat een `gap` ook tussen elke andere rij links zou komen; en de ruimte boven de links in de footer van `Page`, omdat een `gap` ook tussen de twee regels tekst zou komen.
+  Een lijst met regels die elk een naam boven een `ShortMatch` hebben, is een raster met `gap` gemiddeld, in plaats van een marge boven elke naam.
+- **Waarom:** een onderdeel kent zijn omgeving niet.
+  Zette het zelf een marge, dan hing de ruimte af van wat er toevallig naast stond, en moest de stroom die marge overschrijven.
+  Met de `gap` van het onderdeel is de ruimte tussen zijn delen één plek, en wijst stylelint elke marge af die niet blijft.
+- **Gevolg:** op de site verandert niets.
+  We maten de plaats en de maat van elk element op 50 pagina's, in licht, op 390 en 900 pixels, voor en na de wijziging, op Wedstrijden, Statistieken, Tegenstanders en de schermen van het beheer.
+  De meting vond één verschil, dat de wijziging zelf maakte: in het formulier van een concept in het beheer kreeg de eerste van twee knoppen naast elkaar de ruimte van de stroom.
+  De eerste knop heeft nu `hf-space-end-0`, en de meting vindt daarna geen verschil meer.
+  `DiscussionItem` houdt de 1 pixel die de titel in een regel tekst lager stond, als `padding-block-start` van het item.
+  In de stories zijn er verschillen op een paar plekken, allemaal ruimte die weg is waar niets erboven of eronder staat: een los onderdeel heeft geen ruimte meer boven zich (`BarChart`, `Pagination`, `WikipediaCredit`), een formulier van kaarten heeft geen ruimte meer onder het laatste veld in een kaart, de rijen in de story Maten van knoppen en velden en in de story over gelijke hoogtes hadden de marge van het veld als ruimte tussen de rijen, een formulier met de editor heeft de ruimte van de stroom tussen de editor en de knop, en de `Honeypot` (die niemand ziet) is 4 pixels korter.
+- **Alternatieven:** het label, de hint, de fout en het veld in één `gap` van 0,125 rem (het veld staat dan te dicht op het label).
+  Een `grid` met `gap` op de fieldset en de legenda erin (de legenda is niet te bereiken met een `gap`).
+  Een hulpklasse op elk veld in plaats van een stroom in het formulier (veel klassen, en een Builder vergeet ze).
+  Een `Form` die altijd een stroom is (een formulier van kaarten is een raster, en de marges komen dan bij de `gap`).

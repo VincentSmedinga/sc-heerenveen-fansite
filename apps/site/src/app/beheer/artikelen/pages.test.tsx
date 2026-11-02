@@ -201,7 +201,9 @@ describe('the new article', () => {
       expect(html, name).toMatch(new RegExp(`<(?:input|textarea)[^>]*name="${name}"`, 'u'))
     }
 
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['<button type="submit">Opslaan als concept</button>'])
+    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+      '<button class="hf-space-end-0" type="submit">Opslaan als concept</button>',
+    ])
     expect(html).toContain('de redactie')
     expect(html).toContain('Hoogstens 20.000 tekens')
     expect(html).not.toContain('Er is iets mis')
@@ -238,7 +240,7 @@ describe('the article', () => {
     expect(html).toMatch(/<input[^>]*name="titel"[^>]*value="Welkom"|<input[^>]*value="Welkom"[^>]*name="titel"/u)
     expect(html).toMatch(/<textarea[^>]*name="tekst"[^>]*>Een alinea met \*\*vet\*\*\./u)
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
-      '<button type="submit">Opslaan</button>',
+      '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
     ])
     expect(html).not.toContain('readonly')
@@ -258,7 +260,7 @@ describe('the article', () => {
     expect(html).toContain('staat sinds 21 oktober 2026 op de site')
     expect(html).toMatch(/<input[^>]*name="adres"[^>]*readOnly=""|<input[^>]*readOnly=""[^>]*name="adres"/u)
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
-      '<button type="submit">Opslaan</button>',
+      '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit">Intrekken</button>',
     ])
   })
@@ -424,7 +426,7 @@ describe('the earlier versions on the page of the article', () => {
     const html = await edit(await editedArticle())
 
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
-      '<button type="submit">Opslaan</button>',
+      '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
     ])
     expect(html).not.toMatch(/terugzetten|verwijder/iu)

@@ -453,7 +453,7 @@ describe('the match', () => {
     const html = await form(id)
     const hidden = [
       ...html.matchAll(
-        /<fieldset class="hf-input-table-item[^"]*" disabled="" hidden="" role="none"><div[^>]*><label [^>]*for="([^"]+)"/g,
+        /<fieldset class="hf-input-table-item[^"]*" disabled="" hidden="" role="none"><div[^>]*><div[^>]*><label [^>]*for="([^"]+)"/g,
       ),
     ].map(([, field]) => field)
 

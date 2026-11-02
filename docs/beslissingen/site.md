@@ -1413,6 +1413,8 @@
 - **Alternatieven:** de naam onder de wedstrijd laten (nu).
   Een `h3` boven elke regel (zes koppen in een kleine kaart, te zwaar).
   Een eigenschap voor de naam op `ShortMatch` (een nieuwe API in het designsysteem, terwijl de CSS al genoeg is).
+- **Later:** zie _Onderdelen en formulieren zetten geen verticale witruimte naar buiten_ in `designsysteem.md` (3 november 2026).
+  De ruimte boven de lijn van een regel met een naam is niet meer een marge op de naam maar de `gap` van de lijst, en is even groot.
 
 ## Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron
 

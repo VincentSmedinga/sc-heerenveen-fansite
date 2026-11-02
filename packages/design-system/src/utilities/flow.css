@@ -1,9 +1,10 @@
 /*
  * The flow: the vertical space between the direct children of a container. A card, a cell, an
- * introduction, an article, the content of a disclosure and any element with hf-flow decide
- * the space between what is in them. An element or a component sets no space to the outside
- * of its own, because it does not know its surroundings; stylelint keeps it that way (see
- * stylelint.config.js). The chapter Ruimte in Storybook says the rules in words.
+ * introduction, an article, the content of a disclosure, a form of fields and any element
+ * with hf-flow decide the space between what is in them. An element or a component sets no
+ * space to the outside of its own, because it does not know its surroundings; stylelint keeps
+ * it that way (see stylelint.config.js). The chapter Ruimte in Storybook says the rules in
+ * words.
  *
  * Each child gets space under it, by what it is, and none above it:
  * - a heading: the large step;
@@ -25,12 +26,21 @@
  * last child comes last, and the container is in :where(), so it adds no specificity.
  *
  * A flow container is an ordinary block, not a grid or a flex container: there a margin adds
- * to the gap. A component that is a card itself, such as a tile, keeps the space between its
- * own parts with a utility class on the part, or with its parts in an element of their own.
+ * to the gap. So a form of cards, which is a grid, is not one (see form.css). A component that
+ * is a card itself, such as a tile, keeps the space between its own parts with a utility class
+ * on the part, or with its parts in an element of their own.
  */
 
 @layer hf.flow {
-  :where(.hf-card, .hf-page-cell, .hf-page-intro, .hf-article, .hf-disclosure-content, .hf-flow) {
+  :where(
+    .hf-card,
+    .hf-page-cell,
+    .hf-page-intro,
+    .hf-article,
+    .hf-disclosure-content,
+    .hf-flow,
+    .hf-form:not(:has(> .hf-card))
+  ) {
     > * {
       margin-block: 0 var(--hf-space-m);
     }

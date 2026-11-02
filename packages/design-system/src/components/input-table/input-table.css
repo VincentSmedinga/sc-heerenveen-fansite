@@ -97,14 +97,6 @@
     &[hidden] {
       display: none;
     }
-
-    > .hf-radio-group {
-      margin-block-end: 0;
-    }
-  }
-
-  .hf-input-table-field > :is(input, select, textarea) {
-    margin-block-end: 0;
   }
 
   /*

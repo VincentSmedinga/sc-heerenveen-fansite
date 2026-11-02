@@ -7,6 +7,9 @@
 @layer hf.components {
   /* A long club name or stadium breaks instead of making the page scroll sideways. */
   .hf-match {
+    display: grid;
+    gap: 0.125rem;
+    grid-template-columns: minmax(0, 1fr);
     overflow-wrap: anywhere;
     padding-block: var(--hf-space-m);
   }
@@ -26,8 +29,6 @@
   .hf-match-clubs {
     font-size: var(--hf-body-font-size);
     font-weight: var(--hf-headline-font-weight);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem;
   }
 
   .hf-match-own {
@@ -96,8 +97,6 @@
    */
   .hf-match-goals {
     font-size: var(--hf-meta-font-size);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem;
   }
 
   .hf-match-goal-ours {
@@ -132,17 +131,6 @@
    */
   .hf-match-missing {
     color: var(--hf-colour-text-missing);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem 0;
-  }
-
-  /*
-   * The note is the very last line, in the same secondary colour as the lines above it, and a
-   * little apart from the line before.
-   */
-  .hf-match-note {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem 0;
   }
 
   /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */

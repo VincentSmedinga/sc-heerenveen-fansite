@@ -17,8 +17,8 @@ const labels = { default: 'Standaard', small: 'Klein' } as const
 const Row = ({ size }: { size: (typeof sizes)[number] }) => (
   <section aria-label={labels[size]} style={{ display: 'grid', gap: '1rem', justifyItems: 'start' }}>
     <h3 className="hf-heading-4 hf-space-end-l">{labels[size]}</h3>
-    <div style={{ alignItems: 'end', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-      <div style={{ display: 'flex', gap: '1rem', marginBlockEnd: '1rem' }}>
+    <div style={{ alignItems: 'end', display: 'flex', flexWrap: 'wrap', gap: '2rem 1rem', paddingBlockEnd: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem' }}>
         <Button size={size} type="button">
           Versturen
         </Button>
@@ -37,6 +37,7 @@ const Row = ({ size }: { size: (typeof sizes)[number] }) => (
       </Field>
     </div>
     <SegmentedLinks
+      className="hf-space-end-m"
       label={`Welke wedstrijden, ${labels[size].toLowerCase()}`}
       options={[
         { href: '#alle-wedstrijden', label: 'Alle wedstrijden', value: 'all' },

@@ -7,8 +7,6 @@
   /* An address in a link breaks instead of making the page scroll sideways. */
   .hf-wikipedia-credit {
     color: var(--hf-colour-text-secondary);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: var(--hf-space-m) 0;
     overflow-wrap: anywhere;
 
     /* The paragraph inside the fold is the text of the credit and has no space of its own. */

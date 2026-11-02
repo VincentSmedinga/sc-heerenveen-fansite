@@ -60,8 +60,8 @@ const rules = (css: string) =>
 
 const headings = ':is(h1, h2, h3, h4, h5, h6)'
 const containers = block(
-  flow,
-  ':where(.hf-card, .hf-page-cell, .hf-page-intro, .hf-article, .hf-disclosure-content, .hf-flow)',
+  flow.replaceAll(/\s+/gu, ' '),
+  ':where( .hf-card, .hf-page-cell, .hf-page-intro, .hf-article, .hf-disclosure-content, .hf-flow, .hf-form:not(:has(> .hf-card)) )',
 )
 const containerRules = rules(containers)
 const everyChild = containerRules.find((rule) => rule.selectors.includes('> *'))
@@ -74,7 +74,7 @@ describe('the flow', () => {
     expect(read('layers.css')).toContain('hf.components, hf.flow, hf.utilities;')
   })
 
-  it('holds the containers: a card, a cell, an introduction, an article, the content of a disclosure and hf-flow', () => {
+  it('holds the containers: a card, a cell, an introduction, an article, the content of a disclosure, a form of fields and hf-flow', () => {
     expect(containers).not.toBe('')
   })
 
