@@ -5489,6 +5489,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - **Wat Node rechtstreeks laadt:** een bestand dat Node zelf laadt, zoals `src/icon-sets.ts` en wat de scripts in `apps/site/scripts` importeren, schrijft de extensie erbij (`#src/icon-sets.ts`), net als bij `./x.ts` nu.
     Die bestanden gebruiken nu alleen `./`.
   - **De lintregel:** `fansite/site-import-prefix` in `eslint.config.js` weigert een nieuwe import van `../../` in de site, ook de module in `vi.mock` en `vi.importActual`, en noemt het voorvoegsel in de melding.
+    Een dynamische `import('../../x')` ziet de regel niet, het script zet hem wel om.
   - **De omzetting:** `apps/site/scripts/use-import-prefix.js` zette 394 imports in 105 bestanden om, met ESLint `--fix` achteraf voor de volgorde.
     Het script blijft staan voor een branch die na de samenvoeging nog zulke imports heeft.
   - **Waar het niet geldt:** `apps/importer` en `packages/*`, waar de paden kort zijn.
