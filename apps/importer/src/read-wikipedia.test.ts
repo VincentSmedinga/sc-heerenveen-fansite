@@ -2,7 +2,16 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { checkGoals } from './check-wikipedia.ts'
-import { linkedPage, pageTitles, pageUrl, readCup, readLeague, readPlayoffs, readStandings } from './read-wikipedia.ts'
+import {
+  linkedPage,
+  pageTitles,
+  pageUrl,
+  readCup,
+  readLeague,
+  readLeagueResults,
+  readPlayoffs,
+  readStandings,
+} from './read-wikipedia.ts'
 
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
@@ -301,6 +310,139 @@ describe('the programme and the results', () => {
   it('ignores a comment, which can hold a bar or braces', () => {
     expect(readLeague(leagueWith('<!-- {{Footballbox2 | team1 = [[sc Heerenveen]] }} -->', box({})))).toMatchObject({
       matches: [{ opponent: 'FC Twente' }],
+    })
+  })
+})
+
+describe('the results of every club in the league', () => {
+  const other = (fields: Record<string, string>) =>
+    box({ score: '1 – 0', team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]', ...fields })
+
+  it('reads a result for each played match under a round of the league, from the home club', () => {
+    const page = `== Speelronde 3 ==\n${other({ date: '23 augustus 2026', score: '2 – 2' })}\n${box({ date: '22 augustus 2026', score: '0 – 3', team1: '[[PSV (voetbalclub)|PSV]]' })}\n== Speelronde 12 ==\n${other({ date: '8 november 2026', score: '4 – 1', team1: '[[Feyenoord]]', team2: '[[N.E.C.]]' })}`
+
+    expect(readLeagueResults(page)).toEqual({
+      results: [
+        { awayClub: 'Feyenoord', awayGoals: 2, homeClub: 'Ajax', homeGoals: 2, playedOn: '2026-08-23', round: 3 },
+        { awayClub: 'FC Twente', awayGoals: 3, homeClub: 'PSV', homeGoals: 0, playedOn: '2026-08-22', round: 3 },
+        { awayClub: 'N.E.C.', awayGoals: 1, homeClub: 'Feyenoord', homeGoals: 4, playedOn: '2026-11-08', round: 12 },
+      ],
+      unread: [],
+    })
+  })
+
+  it('leaves out a match that is planned, postponed or stopped and not finished', () => {
+    const page = leagueWith(
+      other({ score: ' – ' }),
+      other({ score: 'Uitgesteld', team1: '[[FC Utrecht]]' }),
+      other({ score: "Gestaakt 64' (1 – 3)", team1: '[[Sparta Rotterdam]]' }),
+      other({ score: '3 – 0', team1: '[[PEC Zwolle]]' }),
+    )
+
+    expect(readLeagueResults(page).results.map((result) => result.homeClub)).toEqual(['PEC Zwolle'])
+  })
+
+  it('keeps a postponed match under its round, with the day it was played on', () => {
+    const page = `${leagueWith(other({ date: '20 september 2026', score: '1 – 1' }))}${other({ date: '16 december 2026', score: '2 – 1', team1: '[[FC Utrecht]]' })}`
+
+    expect(readLeagueResults(page).results).toMatchObject([
+      { homeClub: 'Ajax', playedOn: '2026-09-20', round: 12 },
+      { homeClub: 'FC Utrecht', playedOn: '2026-12-16', round: 12 },
+    ])
+  })
+
+  it('counts a match that was stopped and finished later once, with the final score and the day of the rest', () => {
+    const page = leagueWith(
+      other({
+        date: '5 september 2026',
+        score: "Gestaakt 64' (1 – 3)",
+        team1: '[[FC Utrecht]]',
+        team2: '[[Go Ahead Eagles]]',
+      }),
+      other({ date: '9 september 2026', score: '2 – 3', team1: '[[FC Utrecht]]', team2: '[[Go Ahead Eagles]]' }),
+    )
+
+    expect(readLeagueResults(page)).toEqual({
+      results: [
+        {
+          awayClub: 'Go Ahead Eagles',
+          awayGoals: 3,
+          homeClub: 'FC Utrecht',
+          homeGoals: 2,
+          playedOn: '2026-09-09',
+          round: 12,
+        },
+      ],
+      unread: [],
+    })
+  })
+
+  it('takes the home club from the block that began a stopped match, whichever way round the rest names them', () => {
+    const page = leagueWith(
+      other({
+        date: '5 september 2026',
+        score: "Gestaakt 64' (1 – 3)",
+        team1: '[[FC Utrecht]]',
+        team2: '[[Go Ahead Eagles]]',
+      }),
+      other({ date: '9 september 2026', score: '3 – 2', team1: '[[Go Ahead Eagles]]', team2: '[[FC Utrecht]]' }),
+    )
+
+    expect(readLeagueResults(page).results).toMatchObject([
+      { awayClub: 'Go Ahead Eagles', awayGoals: 3, homeClub: 'FC Utrecht', homeGoals: 2 },
+    ])
+  })
+
+  it('reads the real page of 2025/26 with the stopped match of sc Heerenveen as one result with the final score', () => {
+    const { results } = readLeagueResults(seasonProgramme)
+
+    expect(results.filter((result) => result.round === 33 && result.awayClub === 'sc Heerenveen')).toEqual([
+      {
+        awayClub: 'sc Heerenveen',
+        awayGoals: 0,
+        homeClub: 'NAC Breda',
+        homeGoals: 2,
+        playedOn: '2026-05-11',
+        round: 33,
+      },
+    ])
+  })
+
+  it('gives nothing for a page that has the matches of sc Heerenveen only', () => {
+    const page = leagueWith(
+      box({ score: '1 – 0' }),
+      box({ score: '2 – 0', team1: '[[FC Utrecht]]', team2: '[[sc Heerenveen]]' }),
+    )
+
+    expect(readLeagueResults(page)).toEqual({ results: [], unread: [] })
+    expect(readLeague(page)).toMatchObject({ kind: 'read' })
+  })
+
+  it('keeps the results of sc Heerenveen while the matches of the other clubs are still to be played', () => {
+    const page = leagueWith(box({ score: '1 – 0' }), other({ score: ' – ' }))
+
+    expect(readLeagueResults(page).results).toMatchObject([{ awayClub: 'FC Twente', homeClub: 'sc Heerenveen' }])
+  })
+
+  it('leaves out a match under a heading that is not a round of the league', () => {
+    const page = `== Play-offs ==\n${other({})}\n${leagueWith(other({ team1: '[[FC Utrecht]]' }))}`
+
+    expect(readLeagueResults(page).results.map((result) => result.homeClub)).toEqual(['FC Utrecht'])
+  })
+
+  it('says which played match it could not read, and reads the rest', () => {
+    const page = leagueWith(
+      other({ score: '2 – 2 [1 – 1]' }),
+      other({ date: 'zondag', team1: '[[FC Utrecht]]' }),
+      other({ team1: '[[PEC Zwolle]]' }),
+    )
+
+    expect(readLeagueResults(page)).toEqual({
+      results: [expect.objectContaining({ homeClub: 'PEC Zwolle' })],
+      unread: [
+        "Speelronde 12: Ajax - Feyenoord has a score we do not know: '2 – 2 [1 – 1]'",
+        'Speelronde 12: FC Utrecht - Feyenoord has no date or no club names we can use',
+      ],
     })
   })
 })

@@ -7,7 +7,7 @@
 import { playerPositions } from '@fansite/db/schema'
 
 import type { ReadPlayer } from './read-squad.ts'
-import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
+import type { ReadMatch, ReadResult, ReadStandingsRow } from './read-wikipedia.ts'
 
 import { nameKey } from './read-squad.ts'
 
@@ -67,6 +67,34 @@ export function checkMatches(matches: ReadMatch[]): string[] {
   }
   if (new Set(matches.map((match) => `${match.competition}|${match.round}`)).size !== matches.length) {
     problems.push('two matches are in the same round of the same competition')
+  }
+
+  return problems
+}
+
+/**
+ * Checks the results of the league: a club does not play itself, a round is one of the 34, and
+ * a club is at home against another club once in a season. Returns what is wrong, or nothing.
+ * It does not check how many matches each club has: that is a warning, since a match can be
+ * missing on the page for a day (see `playedWarning`).
+ */
+export function checkResults(results: ReadResult[]): string[] {
+  const problems: string[] = []
+  const seen = new Set<string>()
+
+  for (const result of results) {
+    const key = `${result.homeClub}|${result.awayClub}`.toLowerCase()
+
+    if (result.homeClub.toLowerCase() === result.awayClub.toLowerCase()) {
+      problems.push(`${result.homeClub} plays itself in round ${result.round}`)
+    }
+    if (result.round < 1 || result.round > leagueMatches) {
+      problems.push(`${result.homeClub} - ${result.awayClub} is in round ${result.round}, not 1 to ${leagueMatches}`)
+    }
+    if (seen.has(key)) {
+      problems.push(`${result.homeClub} is at home against ${result.awayClub} twice in the results`)
+    }
+    seen.add(key)
   }
 
   return problems

@@ -6,6 +6,7 @@ import {
   clubs,
   feeds,
   items,
+  leagueResults,
   matchChanges,
   matches,
   matchGoals,
@@ -74,6 +75,7 @@ beforeEach(async () => {
     'club_names',
     'clubs',
     'players',
+    'league_results',
     'standings',
     'wikipedia_pages',
     'match_imports',
@@ -138,6 +140,10 @@ async function serve(pages: { [Kind in keyof ServedPages]?: null | ServedPages[K
 /** Everything the import writes, to see that a failing run changed none of it. */
 async function snapshot() {
   return {
+    leagueResults: await database.db
+      .select()
+      .from(leagueResults)
+      .orderBy(asc(leagueResults.season), asc(leagueResults.homeClub), asc(leagueResults.awayClub)),
     matches: await database.db.select().from(matches).orderBy(asc(matches.id)),
     pages: await database.db.select().from(wikipediaPages).orderBy(asc(wikipediaPages.title)),
     standings: await database.db.select().from(standings).orderBy(asc(standings.season), asc(standings.position)),
@@ -171,6 +177,7 @@ describe('the first import, into an empty database', () => {
       clubs: expect.any(Array),
       kind: 'imported',
       matches: { added: 35, held: 0, removed: 0, unchanged: 0, updated: 0 },
+      results: expect.objectContaining({ removed: 0 }),
       season,
       standings: 18,
       validOn: '2026-10-24',
@@ -359,6 +366,251 @@ describe('reading again', () => {
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 12'))).toMatchObject([
       { kickoffAt: new Date('2027-01-20T19:00:00Z'), status: 'scheduled' },
     ])
+  })
+})
+
+describe('the results of every club in the league', () => {
+  const results = () =>
+    database.db.select().from(leagueResults).orderBy(asc(leagueResults.round), asc(leagueResults.homeClub))
+  const pairOf = (home: string, away: string) =>
+    database.db
+      .select()
+      .from(leagueResults)
+      .where(and(eq(leagueResults.homeClub, home), eq(leagueResults.awayClub, away)))
+  const later = new Date(first.getTime() + hours(1))
+  /** The page without the matches of other clubs, as the older pages have it. */
+  const onlyOurs = (programme: string) =>
+    programme.replace(/\{\{Footballbox2(?:\|[^\n]*\}\}|\n(?:\|[^\n]*\n)*?\}\})\n/gu, (box) =>
+      box.includes('sc Heerenveen') ? box : '',
+    )
+  /** The match of Cambuur at home against Excelsior, which the page has over several lines. */
+  const cambuurExcelsior = '|team1 = [[SC Cambuur]]\n|score = 0 – 4'
+
+  it('stores a result for each played league match of every club: 10 rounds of 9 matches, in the names of the table', async () => {
+    const { server } = await serve()
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ results: { added: 90, removed: 0, unchanged: 0, updated: 0 } })
+
+    const stored = await results()
+
+    expect(stored).toHaveLength(90)
+    expect(stored.every((row) => row.season === season)).toBe(true)
+    expect(await pairOf('SC Cambuur', 'Excelsior Rotterdam')).toEqual([
+      {
+        awayClub: 'Excelsior Rotterdam',
+        awayGoals: 4,
+        homeClub: 'SC Cambuur',
+        homeGoals: 0,
+        playedOn: '2026-08-07',
+        round: 1,
+        season,
+      },
+    ])
+    // Home and away are as the page has them: we are at home in round 1 and away in round 2.
+    expect(await pairOf('sc Heerenveen', 'FC Twente')).toMatchObject([{ awayGoals: 0, homeGoals: 1, round: 1 }])
+    expect(await pairOf('Ajax', 'sc Heerenveen')).toMatchObject([{ awayGoals: 2, homeGoals: 2, round: 2 }])
+
+    // Every club of the table is in the results, written the same way, and no other club is.
+    const table = (await database.db.select().from(standings)).map((row) => row.club).sort()
+    const named = [...new Set(stored.flatMap((row) => [row.homeClub, row.awayClub]))].sort()
+
+    expect(named).toEqual(table)
+    expect(table).toHaveLength(18)
+  })
+
+  it('has as many results for each club as the table says it has played', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const stored = await results()
+
+    for (const row of await database.db.select().from(standings)) {
+      expect(stored.filter((result) => result.homeClub === row.club || result.awayClub === row.club)).toHaveLength(
+        row.played,
+      )
+    }
+  })
+
+  it('counts a match that was stopped and finished later once, with the final score and the day of the rest', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    expect(await pairOf('FC Utrecht', 'Go Ahead Eagles')).toMatchObject([
+      { awayGoals: 3, homeGoals: 2, playedOn: '2026-09-09', round: 5 },
+    ])
+  })
+
+  it('leaves a match that was stopped out until the rest has been played, and then adds it', async () => {
+    const stopped = original.programme.replace(
+      /\{\{Footballbox2\|date=9 september 2026[^\n]*Go Ahead Eagles\]\]\}\}\n/u,
+      '',
+    )
+
+    expect(stopped).not.toBe(original.programme)
+
+    const { server } = await serve({ programme: stopped })
+
+    expect(await importAt(server, first)).toMatchObject({ results: { added: 89 } })
+    expect(await pairOf('FC Utrecht', 'Go Ahead Eagles')).toEqual([])
+
+    const { server: finished } = await serve()
+
+    expect(await importAt(finished, later)).toMatchObject({
+      results: { added: 1, removed: 0, unchanged: 89, updated: 0 },
+    })
+    expect(await pairOf('FC Utrecht', 'Go Ahead Eagles')).toHaveLength(1)
+  })
+
+  it('leaves a postponed match out, and adds it when it has been played', async () => {
+    const postponed = original.programme.replace(`${cambuurExcelsior}`, '|team1 = [[SC Cambuur]]\n|score = Uitgesteld')
+    const { server } = await serve({ programme: postponed })
+
+    expect(postponed).not.toBe(original.programme)
+    expect(await importAt(server, first)).toMatchObject({ results: { added: 89 } })
+    expect(await pairOf('SC Cambuur', 'Excelsior Rotterdam')).toEqual([])
+
+    const { server: played } = await serve()
+
+    expect(await importAt(played, later)).toMatchObject({ results: { added: 1, unchanged: 89 } })
+    expect(await pairOf('SC Cambuur', 'Excelsior Rotterdam')).toHaveLength(1)
+  })
+
+  it('finds nothing changed in a second import', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await snapshot()
+    const report = await importAt(server, later)
+
+    expect(report).toMatchObject({ results: { added: 0, removed: 0, unchanged: 90, updated: 0 } })
+    expect(formatMatchReport(report).split('\n')[1]).toBe(
+      'Matches 2026/27: league results of all clubs: 0 new, 0 updated, 90 unchanged, 0 removed',
+    )
+    expect((await snapshot()).leagueResults).toEqual(before.leagueResults)
+  })
+
+  it('takes a corrected result over, and a result that leaves the page goes', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const corrected = original.programme
+      .replace(cambuurExcelsior, '|team1 = [[SC Cambuur]]\n|score = 1 – 4')
+      .replace(/\{\{Footballbox2\|[^\n]*Telstar[^\n]*\}\}\n/u, '')
+    const { server: changed } = await serve({ programme: corrected })
+
+    expect(await importAt(changed, later)).toMatchObject({
+      results: { added: 0, removed: 1, unchanged: 88, updated: 1 },
+    })
+    expect(await pairOf('SC Cambuur', 'Excelsior Rotterdam')).toMatchObject([{ awayGoals: 4, homeGoals: 1 }])
+    expect(await results()).toHaveLength(89)
+  })
+
+  it('writes a club of the page under the name of the table when a list of spellings has them as one club', async () => {
+    const spelled = original.programme.replaceAll('[[Excelsior Rotterdam]]', '[[Excelsior Rotterdam|Excelsior]]')
+    const { server } = await serve({ programme: spelled })
+
+    expect(spelled).not.toBe(original.programme)
+    await importAt(server, first)
+    expect(await pairOf('SC Cambuur', 'Excelsior Rotterdam')).toHaveLength(1)
+    expect((await results()).some((row) => row.homeClub === 'Excelsior' || row.awayClub === 'Excelsior')).toBe(false)
+  })
+
+  it('stores no results, and no error, for a page without the matches of other clubs', async () => {
+    const { server } = await serve({ programme: onlyOurs(original.programme) })
+
+    expect(await importAt(server, first)).toMatchObject({
+      kind: 'imported',
+      results: { added: 0, removed: 0, unchanged: 0, updated: 0 },
+      warnings: [],
+    })
+    expect(await results()).toEqual([])
+    expect(await database.db.select().from(matches)).toHaveLength(35)
+  })
+
+  it('leaves the results of an earlier season as they are when a new season starts', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await importAt(server, new Date('2027-07-15T12:00:00Z'))
+
+    const stored = await results()
+
+    expect(stored.filter((row) => row.season === season)).toHaveLength(90)
+    expect(stored.filter((row) => row.season === '2027/28')).toHaveLength(90)
+  })
+
+  describe('a club with another number of results than the table says', () => {
+    const missing = 'league results: the results do not agree with the table: '
+    const withoutCambuur = () => original.programme.replace(cambuurExcelsior, '|team1 = [[SC Cambuur]]\n|score = ')
+
+    it('warns in the report, the log and the health, and keeps the data', async () => {
+      const { server } = await serve({ programme: withoutCambuur() })
+
+      const report = await importAt(server, first)
+      const warning = `${missing}SC Cambuur 9 results against 10 played, Excelsior Rotterdam 9 results against 10 played`
+
+      expect(report).toMatchObject({ kind: 'imported', results: { added: 89 }, warnings: [warning] })
+      expect(formatMatchReport(report).split('\n')).toContain(`Matches 2026/27: warning, ${warning}`)
+      expect(await health()).toMatchObject({
+        failuresInARow: 0,
+        lastError: null,
+        lastOutcome: 'imported',
+        lastWarning: warning,
+      })
+      expect(await results()).toHaveLength(89)
+    })
+
+    it('stops warning when the page agrees with the table again', async () => {
+      const { server } = await serve({ programme: withoutCambuur() })
+
+      await importAt(server, first)
+
+      const { server: whole } = await serve()
+
+      expect(await importAt(whole, later)).toMatchObject({ results: { added: 1 }, warnings: [] })
+    })
+
+    it('says which played match it could not read, and imports the rest', async () => {
+      const unreadable = original.programme.replace(
+        '== Speelronde 12 ==\n',
+        '== Speelronde 12 ==\n{{Footballbox2|date=14 november 2026|team1=[[SC Cambuur]]|score=2 – 2 [1 – 1]|team2=[[FC Utrecht]]}}\n',
+      )
+      const { server } = await serve({ programme: unreadable })
+
+      expect(await importAt(server, first)).toMatchObject({
+        kind: 'imported',
+        results: { added: 90 },
+        warnings: [
+          "league results left out: Speelronde 12: SC Cambuur - FC Utrecht has a score we do not know: '2 – 2 [1 – 1]'",
+        ],
+      })
+    })
+  })
+
+  it('stops on a club that is at home against another club twice, and keeps the last good copy', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await snapshot()
+    const twice = original.programme.replace(
+      '== Speelronde 12 ==\n',
+      '== Speelronde 12 ==\n{{Footballbox2|date=14 november 2026|team1=[[SC Cambuur]]|score=1 – 0|team2=[[Excelsior Rotterdam]]}}\n',
+    )
+    const { server: broken } = await serve({ programme: twice })
+
+    expect(twice).not.toBe(original.programme)
+    expect(await importAt(broken, later)).toMatchObject({
+      kind: 'error',
+      message: 'SC Cambuur is at home against Excelsior Rotterdam twice in the results',
+    })
+    expect(await snapshot()).toEqual(before)
   })
 })
 
@@ -905,9 +1157,11 @@ describe('the clubs of the opponents', () => {
 
     await importAt(server, first)
 
+    // The match of ours is written over several lines: `= [[` has a space that the one-line
+    // matches of the other clubs lack.
     const renamed = original.programme.replace(
-      '[[Telstar (voetbalclub)|Telstar]]',
-      '[[Telstar (voetbalclub)|Telstar 1963]]',
+      '= [[Telstar (voetbalclub)|Telstar]]',
+      '= [[Telstar (voetbalclub)|Telstar 1963]]',
     )
 
     expect(renamed).not.toBe(original.programme)
@@ -1150,7 +1404,7 @@ describe('the clubs of the opponents', () => {
 
     await importAt(server, first)
 
-    const relinked = original.programme.replace('[[AZ (voetbalclub)|AZ]]', '[[AZ (2)|AZ]]')
+    const relinked = original.programme.replace('= [[AZ (voetbalclub)|AZ]]', '= [[AZ (2)|AZ]]')
 
     expect(relinked).not.toBe(original.programme)
 
@@ -1173,6 +1427,7 @@ describe('the lines of a report', () => {
       clubs: [],
       kind: 'imported',
       matches: counts,
+      results: { added: 3, removed: 0, unchanged: 0, updated: 1 },
       season,
       standings: 18,
       validOn: '2026-10-24',
@@ -1180,7 +1435,7 @@ describe('the lines of a report', () => {
     })
     const failed = formatMatchReport({ kind: 'error', message: 'a\u001bb\nc', season })
 
-    expect(imported.split('\n')).toHaveLength(2)
+    expect(imported.split('\n')).toHaveLength(3)
     expect(imported).not.toContain('\u001b')
     expect(failed.split('\n')).toHaveLength(1)
     expect(failed).not.toContain('\u001b')
@@ -1844,7 +2099,7 @@ describe('a read that fails a check or a page that has changed', () => {
     const report = await importAt(server, first)
 
     expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining('HTTP 404') })
-    expect(await snapshot()).toEqual({ matches: [], pages: [], standings: [] })
+    expect(await snapshot()).toEqual({ leagueResults: [], matches: [], pages: [], standings: [] })
   })
 
   it('waits as long as Wikipedia asks, and counts it as no failure', async () => {
@@ -1999,6 +2254,7 @@ describe('the import command', () => {
     expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
+      'Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed',
     ])
     expect(await database.db.select().from(items)).toHaveLength(1)
   })
