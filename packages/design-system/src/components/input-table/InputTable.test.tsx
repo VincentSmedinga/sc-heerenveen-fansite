@@ -137,29 +137,23 @@ describe('InputTable', () => {
     expect(screen.getByRole('button', { name: 'Doelpunt toevoegen' })).toBeTruthy()
   })
 
-  it('marks a field that is not required as not required', () => {
-    const [first, ...others] = props.rows
-
-    render(
-      <InputTable
-        {...props}
-        rows={[
-          {
-            ...(first as InputTableProps['rows'][number]),
-            fields: [
-              ...(first?.fields.slice(0, 1) ?? []),
-              { control: <Input name="minuut-1" />, id: 'minuut-1', required: false },
-            ],
-          },
-          ...others,
-        ]}
-      />,
-    )
+  it('marks the fields of a column that is not required as not required, in the label and in the header', () => {
+    render(<InputTable {...props} columns={[{ name: 'Team' }, { name: 'Minuut', required: false, width: 'narrow' }]} />)
 
     const field = screen.getByRole('textbox', { name: /^Minuut, doelpunt 1/u })
+    const header = screen.getByRole('columnheader', { name: /^Minuut/u })
 
     expect(field.hasAttribute('required')).toBe(false)
     expect(document.querySelector('label[for="minuut-1"]')?.textContent).toContain('(niet verplicht)')
+    expect(header.querySelector('.hf-field-status')?.textContent).toBe('(niet verplicht)')
+    expect(screen.getByRole('textbox', { name: 'Minuut, doelpunt 2 (niet verplicht)' })).toBeTruthy()
+  })
+
+  it('says nothing about it for a column that is required, and makes its fields required', () => {
+    render(<InputTable {...props} />)
+
+    expect(screen.getByRole('textbox', { name: 'Minuut, doelpunt 1' }).hasAttribute('required')).toBe(true)
+    expect(document.querySelector('thead .hf-field-status')).toBeNull()
   })
 
   it('has the hf-input-table class and passes on other attributes and a class', () => {

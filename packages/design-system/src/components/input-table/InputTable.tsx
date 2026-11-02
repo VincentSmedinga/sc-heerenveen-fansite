@@ -13,6 +13,12 @@ export type InputTableButton = {
 export type InputTableColumn = {
   /** The header of the column, shown above the fields and the visible label of each field. */
   name: string
+  /**
+   * Whether the fields of the column have to be filled in, as in a Field. Without it, they do.
+   * A column that is not required says so in its header, in words: "niet verplicht". The header
+   * is the label the eye sees where the table has room, so the status is there too.
+   */
+  required?: boolean
   /** `narrow` is for a short answer, such as a minute: the column takes less room. */
   width?: 'default' | 'narrow'
 }
@@ -24,8 +30,6 @@ export type InputTableField = {
   error?: string | undefined
   /** The `id` of the field. An ErrorSummary links to it, so it must be unique on the page. */
   id: string
-  /** Whether the field has to be filled in, as in a Field. Without it, it does. */
-  required?: boolean
 }
 
 export type InputTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
@@ -110,6 +114,12 @@ export const InputTable = ({
                 scope="col"
               >
                 {column.name}
+                {column.required === false ? (
+                  <>
+                    {' '}
+                    <span className="hf-field-status hf-input-table-status">(niet verplicht)</span>
+                  </>
+                ) : null}
               </th>
             ))}
             <th className="hf-input-table-action" scope="col">
@@ -133,14 +143,14 @@ export const InputTable = ({
                         <span className="hf-visually-hidden">, {lowerFirst(row.header)}</span>
                       </>
                     }
-                    required={field.required ?? true}
+                    required={columns[index]?.required ?? true}
                   >
                     {field.control}
                   </Field>
                 </td>
               ))}
               <td className="hf-input-table-action">
-                <Button appearance="soft" name={row.remove.name} size="small" type="submit" value={row.remove.value}>
+                <Button appearance="soft" name={row.remove.name} type="submit" value={row.remove.value}>
                   {removeLabel} <span className="hf-visually-hidden">{lowerFirst(row.header)}</span>
                 </Button>
               </td>

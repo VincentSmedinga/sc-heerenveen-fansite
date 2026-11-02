@@ -21,8 +21,9 @@ const meta = preview.meta({
       table: { type: { summary: '{ label: string; name: string; value?: string }' } },
     },
     columns: {
-      description: 'De kolommen van links naar rechts. `width: "narrow"` is voor een kort antwoord, zoals een minuut.',
-      table: { type: { summary: '{ name: string; width?: "default" | "narrow" }[]' } },
+      description:
+        'De kolommen van links naar rechts. `width: "narrow"` is voor een kort antwoord, zoals een minuut, en `required: false` voor een kolom die niet verplicht is.',
+      table: { type: { summary: '{ name: string; required?: boolean; width?: "default" | "narrow" }[]' } },
     },
     empty: {
       description: 'Wat er staat als er nog geen rijen zijn, zoals een regel tekst. De knop om toe te voegen blijft.',
@@ -46,6 +47,7 @@ const meta = preview.meta({
           'Een tabel om in te vullen, voor een lijst waarin de redacteur steeds hetzelfde invult, zoals de doelpunten van een wedstrijd.',
           'De koppen van de kolommen zijn de labels die je ziet.',
           'Elk veld heeft ook een label voor een schermlezer, met de rij erin: "Minuut, doelpunt 2".',
+          'Een kolom die niet verplicht is (`required: false`) zegt dat in zijn kop: "niet verplicht".',
           'Elke rij heeft een knop om haar weg te halen en onder de tabel staat een knop om een rij toe te voegen.',
           'Beide zijn verzendknoppen, dus het werkt ook zonder JavaScript: de server antwoordt met het formulier, met de rij erbij of eraf.',
           'Zet de tabel in een `Form`, onder een kop die zegt wat erin staat. Dat formulier is dan even breed als zijn ouder.',

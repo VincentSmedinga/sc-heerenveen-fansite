@@ -11,7 +11,7 @@ import { Select } from '../components/select/Select'
 export const exampleColumns: InputTableColumn[] = [
   { name: 'Team' },
   { name: 'Minuut', width: 'narrow' },
-  { name: 'Blessuretijd', width: 'narrow' },
+  { name: 'Blessuretijd', required: false, width: 'narrow' },
   { name: 'Soort' },
   { name: 'Speler' },
 ]
@@ -44,7 +44,6 @@ const goalRow = (goal: (typeof goals)[number], index: number, errors: boolean): 
       {
         control: <Input inputMode="numeric" name={`blessuretijd-${number}`} />,
         id: `blessuretijd-${number}`,
-        required: false,
       },
       {
         control: (

@@ -122,11 +122,6 @@
       padding-block-end: calc((var(--hf-input-table-control) - 1lh) / 2 + var(--hf-space-s));
     }
 
-    /* The button is lower than a field, so it stands in the middle of the row. */
-    .hf-input-table td.hf-input-table-action {
-      padding-block-end: calc(var(--hf-space-s) + (var(--hf-input-table-control) - var(--hf-size-control-small)) / 2);
-    }
-
     .hf-input-table .hf-input-table-name {
       inline-size: 7.5rem;
     }
@@ -137,6 +132,11 @@
 
     .hf-input-table th.hf-input-table-action {
       inline-size: 7rem;
+    }
+
+    /* "(niet verplicht)" stands under the name, so a narrow column keeps its width. */
+    .hf-input-table .hf-input-table-status {
+      display: block;
     }
 
     /* The labels of the fields are for a screen reader only, as the headers show them. */
