@@ -214,6 +214,25 @@ test.describe('the page of a club', () => {
     ).toHaveAttribute('href', '#stadion')
   })
 
+  test('has the row Laatste wedstrijden for a club with five matches, and none for one with fewer', async ({
+    page,
+  }) => {
+    await page.goto('/statistieken/tegenstanders/testdorp-fc')
+
+    // The matches of this and the last season are 6–0 each, and the older ones are a draw, a
+    // loss and a win (see older-meetings.ts): the oldest first and the newest last.
+    await expect(page.locator('.hf-mark-row .hf-visually-hidden')).toHaveText(
+      'Laatste wedstrijden: winst, verlies, gelijk, winst, winst',
+    )
+
+    for (const club of ['voorbeeld-united', 'fc-maquette']) {
+      await page.goto(`/statistieken/tegenstanders/${club}`)
+
+      await expect(page.getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
+      await expect(page.locator('.hf-mark-row')).toHaveCount(0)
+    }
+  })
+
   test('has no card Stadion for a club whose only league match was at home, and none for the cup', async ({ page }) => {
     for (const club of ['testdorp-fc', 'fc-maquette']) {
       await page.goto(`/statistieken/tegenstanders/${club}`)

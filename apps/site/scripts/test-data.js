@@ -13,12 +13,13 @@ import { addDiscussions } from '../e2e/discussions.ts'
 import { addEarlierSeason } from '../e2e/earlier-season.ts'
 import { addEpisodes } from '../e2e/episodes.ts'
 import { addHeadlines } from '../e2e/headlines.ts'
+import { addOlderMeetings } from '../e2e/older-meetings.ts'
 
 const remove = process.argv.includes('--remove')
 
 // Each function puts its rows in and returns the function that takes them out. The rows of a
 // run that was stopped halfway are taken out first, so running it twice never doubles them.
-for (const add of [addHeadlines, addDiscussions, addEpisodes, addArticles, addEarlierSeason]) {
+for (const add of [addHeadlines, addDiscussions, addEpisodes, addArticles, addEarlierSeason, addOlderMeetings]) {
   const removeAgain = await add()
 
   if (remove) {
