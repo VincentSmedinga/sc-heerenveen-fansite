@@ -120,7 +120,13 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
         <tr>
           {all.map((column, index) => (
             <th className={index === 0 ? undefined : 'hf-numeric'} key={column.name} scope="col">
-              <ColumnText column={column} />
+              {column.hidden === true ? (
+                <span className="hf-visually-hidden">
+                  <ColumnText column={column} />
+                </span>
+              ) : (
+                <ColumnText column={column} />
+              )}
             </th>
           ))}
         </tr>
@@ -129,3 +135,19 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
     </table>
   )
 }
+
+/**
+ * Tables next to each other where there is room, and under each other where there is not, such
+ * as the wins, the draws and the losses of a season. Each table is as wide as its content
+ * needs, and the cells have less space round them than in a table of its own, so three small
+ * tables fit a phone. It only works round DataTable elements, so it is written as
+ * DataTable.Group.
+ */
+const Group = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
+  <div {...props} className={classNames('hf-data-table-group', className)} />
+)
+
+// The name in React's developer tools and in the code examples in Storybook.
+Group.displayName = 'DataTable.Group'
+
+DataTable.Group = Group

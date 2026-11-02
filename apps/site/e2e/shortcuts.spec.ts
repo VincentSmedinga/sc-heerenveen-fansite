@@ -7,11 +7,11 @@ import { hydrated } from './hydrated'
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
-// have the bar, with the links to their own cards: Wedstrijden four (the made-up season has a
+// have the bar, with the links to their own cards: Wedstrijden five (the made-up season has a
 // head coach in the table) and Statistieken nine. The checks of how it behaves while scrolling
 // are on /statistieken below, the page with the long cards.
 const withBar = [
-  { links: 4, path: '/wedstrijden' },
+  { links: 5, path: '/wedstrijden' },
   { links: 9, path: '/statistieken' },
 ] as const
 

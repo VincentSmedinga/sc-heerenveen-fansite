@@ -12,6 +12,12 @@ export type DataTableColumn = {
    * `name` itself, as it does for a column given as a string.
    */
   abbreviation?: string
+  /**
+   * Hides the header from the eye and keeps it for a screen reader, for a column whose cells
+   * say what it is, such as `3×`. It does not work for a `sortable` column, which needs its
+   * button.
+   */
+  hidden?: boolean
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**
@@ -35,6 +41,16 @@ export type DataTableRow = {
    * club in a list of clubs. The link says the same as the header, so it names where it goes.
    */
   href?: string
+  /**
+   * A decoration before the row header, such as the swatch of a slice of a donut chart. It must
+   * be hidden from a screen reader (`aria-hidden`), so `note` says what it means.
+   */
+  marker?: ReactNode
+  /**
+   * Words after the row header that only a screen reader gets, such as `winst` after `4–0`.
+   * Colour or a shape is never the only way to know it.
+   */
+  note?: string
 }
 
 /** A column of a table with text, given as an object when it can fold. */

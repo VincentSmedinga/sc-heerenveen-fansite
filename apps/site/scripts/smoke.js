@@ -688,7 +688,8 @@ await withEmptyDatabase((database) =>
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     // The head coach comes from the seed the site runs at its start, not from anyone by hand:
-    // a card with the strong surface in the sidebar, right after the table, with his name only.
+    // a card with the strong surface in the sidebar, after the table and the scores, with his
+    // name only.
     assert.match(
       matchesHtml,
       /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
@@ -703,7 +704,15 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#programma', '#uitslagen', '#stand', '#hoofdtrainer'],
+      ['#programma', '#uitslagen', '#stand', '#hoe-vaak-welke-uitslag', '#hoofdtrainer'],
+    )
+    // The card with how often each score was played is the card under the table: the
+    // sentence with the sums, the chart without text round the ring (hidden from a screen
+    // reader), and the tables that are its key, one for each outcome, with the outcome in words
+    // for each score.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<p>\d+ keer (?:gewonnen|gelijk|verloren)[^<]*<\/p><div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col">Winst<\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws, with the podcasts and the search.

@@ -83,6 +83,37 @@ describe('DataTable', () => {
     expect(screen.getByRole('table').id).toBe('tabel')
   })
 
+  it('keeps a hidden column header for a screen reader, and shows no text for it', () => {
+    render(
+      <DataTable
+        {...props}
+        columns={['Winst', { hidden: true, name: 'Keer' }]}
+        rows={[{ cells: ['3×'], header: '4–0' }]}
+      />,
+    )
+    const header = screen.getByRole('columnheader', { name: 'Keer' })
+
+    expect(header.querySelector('.hf-visually-hidden')?.textContent).toBe('Keer')
+    expect(screen.getByRole('columnheader', { name: 'Winst' }).querySelector('.hf-visually-hidden')).toBeNull()
+    expect(screen.getByText('3×')).toBeTruthy()
+  })
+
+  it('puts a marker before the row header and words for a screen reader after it', () => {
+    render(
+      <DataTable
+        {...props}
+        rows={[
+          { cells: [2, 1], header: '4–0', marker: <span aria-hidden="true" data-testid="marker" />, note: 'winst' },
+        ]}
+      />,
+    )
+    const header = screen.getByRole('rowheader')
+
+    expect(header.firstElementChild?.getAttribute('data-testid')).toBe('marker')
+    expect(header.textContent).toBe('4–0, winst')
+    expect(header.lastElementChild?.className).toBe('hf-visually-hidden')
+  })
+
   it('makes the row header a link when the row has an href, and leaves the others as text', () => {
     render(
       <DataTable
@@ -228,5 +259,19 @@ describe('DataTable with text', () => {
     expect(screen.getByRole('table').className).toBe('hf-data-table hf-data-table-text extra')
     expect(screen.getByRole('table').id).toBe('tabel')
     expect(screen.getByRole('table').hasAttribute('appearance')).toBe(false)
+  })
+})
+
+describe('DataTable.Group', () => {
+  it('is a div with the class of the group, and passes other props on', () => {
+    const { container } = render(
+      <DataTable.Group className="extra" id="tabellen">
+        <DataTable {...props} />
+      </DataTable.Group>,
+    )
+
+    expect(container.firstElementChild?.className).toBe('hf-data-table-group extra')
+    expect(container.firstElementChild?.id).toBe('tabellen')
+    expect(container.querySelectorAll('table')).toHaveLength(1)
   })
 })

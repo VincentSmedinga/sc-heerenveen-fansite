@@ -6,6 +6,12 @@
 
 export const drawing = { height: 300, width: 320 } as const
 
+/**
+ * The part of the drawing a ring without labels needs: a square round the ring and the outline
+ * of its slices, so the ring fills the chart and not the room for the labels.
+ */
+export const bare = { size: 172, x: 74, y: 64 } as const
+
 const centre = { x: drawing.width / 2, y: drawing.height / 2 }
 
 /** The outer and the inner radius of the ring. */

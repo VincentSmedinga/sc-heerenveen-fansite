@@ -45,6 +45,8 @@ import {
   matchFlowOf,
   overviewOf,
   quarterLabels,
+  type ScoreCount,
+  scoreCountsOf,
   scorersCoverage,
   standingsAround,
   standingsLag,
@@ -53,7 +55,7 @@ import {
   topScorersOf,
   topScorersPlaces,
 } from './matches'
-import { coachesCardOf } from './matchShortcuts'
+import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitStaffName } from './player-name'
 
 /**
@@ -620,12 +622,106 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
   )
 }
 
+const outcomeTones = { draw: 'neutral', loss: 'negative', win: 'positive' } as const
+
+const outcomeWords = { draw: 'gelijk', loss: 'verlies', win: 'winst' } as const
+
+/** The three tables of the card, in the order of the chart: a table for each outcome. */
+const outcomes = [
+  {
+    caption: 'Uitslagen van gewonnen wedstrijden en hoe vaak ze voorkwamen, met onze doelpunten eerst',
+    heading: 'Winst',
+    outcome: 'win',
+  },
+  { caption: 'Uitslagen van gelijke spelen en hoe vaak ze voorkwamen', heading: 'Gelijk', outcome: 'draw' },
+  {
+    caption: 'Uitslagen van verloren wedstrijden en hoe vaak ze voorkwamen, met onze doelpunten eerst',
+    heading: 'Verlies',
+    outcome: 'loss',
+  },
+] as const
+
 /**
  * The caption of the table over the latest five matches, which only a screen reader gets: what
  * it is, and the day of the last result in our data, which can be before the day of the table.
  */
 export function lastFiveCaption(lastResultOn: string) {
   return `Stand over de laatste vijf wedstrijden op ${formatTableDay(lastResultOn)}`
+}
+
+/**
+ * The card of the page Wedstrijden with how often each score was played this season, from the
+ * side of sc Heerenveen: a donut chart with a slice for every score, green for a win, grey for
+ * a draw and red for a loss, best first, and under it the table that is its key and its
+ * numbers. The chart has no text round the ring and is hidden from a screen reader, which gets
+ * the table: each row names the score and the outcome in words. The `matches` are the results
+ * the page lists, and only the played ones with a score count. Without one it is a sentence
+ * and no chart.
+ */
+export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
+  const counts = scoreCountsOf(matches)
+  const played = counts.reduce((sum, count) => sum + count.count, 0)
+  const slices = counts.map(({ count, goalsAgainst, goalsFor, outcome }) => ({
+    label: `${goalsFor}–${goalsAgainst}`,
+    tone: outcomeTones[outcome],
+    value: count,
+  }))
+
+  return (
+    <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season)} surface="warm">
+      <Heading anchor id={scoreCountsCard.id} level={2}>
+        {scoreCountsCard.name}
+      </Heading>
+      {played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <Text>{scoreCountsSentence(counts)}</Text>
+          <DonutChart labels={false} ranked slices={slices} />
+          <DataTable.Group>
+            {outcomes.map(({ caption, heading, outcome }) => {
+              const rows = counts.flatMap((count, index) => (count.outcome === outcome ? [{ count, index }] : []))
+
+              return rows.length === 0 ? null : (
+                <DataTable
+                  caption={caption}
+                  columns={[heading, { hidden: true, name: 'Keer' }]}
+                  key={outcome}
+                  rows={rows.map(({ count, index }) => ({
+                    cells: [`${count.count}×`],
+                    header: slices[index]!.label,
+                    marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
+                    note: outcomeWords[outcome],
+                  }))}
+                />
+              )
+            })}
+          </DataTable.Group>
+          <BasedOn known={played} played={played} />
+        </>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * The sentence above the table of scores: how often sc Heerenveen won, drew and lost, such as
+ * "8 keer gewonnen, 1 keer gelijk, 5 keer verloren". An outcome that did not happen is left
+ * out, and one match gives "1 keer gewonnen".
+ */
+export function scoreCountsSentence(counts: ScoreCount[]) {
+  const total = (outcome: ScoreCount['outcome']) =>
+    counts.filter((count) => count.outcome === outcome).reduce((sum, count) => sum + count.count, 0)
+  const parts = [
+    [total('win'), 'gewonnen'],
+    [total('draw'), 'gelijk'],
+    [total('loss'), 'verloren'],
+  ] as const
+
+  return parts
+    .filter(([count]) => count > 0)
+    .map(([count, word]) => `${count} keer ${word}`)
+    .join(', ')
 }
 
 /**

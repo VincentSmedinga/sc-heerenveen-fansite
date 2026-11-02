@@ -52,7 +52,7 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and three h2 headings in order: the programme, the results and the table', async () => {
+  it('has one h1 and four h2 headings in order: the programme, the results, the table and how often each score was played', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -60,6 +60,7 @@ describe('the page /wedstrijden', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-vaak-welke-uitslag"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#hoe-vaak-welke-uitslag">Hoe vaak welke uitslag</a></h2>',
     ])
   })
 
@@ -122,7 +123,9 @@ describe('the page /wedstrijden', () => {
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(sidebar).toMatch(/^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand">/)
+    expect(sidebar).toMatch(
+      /^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand en hoe vaak welke uitslag">/,
+    )
     expect(main.match(/<h1/g)).toHaveLength(1)
     expect(main).toContain('id="programma"')
     expect(main.indexOf('id="programma"')).toBeLessThan(main.indexOf('id="uitslagen"'))
@@ -172,7 +175,7 @@ describe('the page /wedstrijden', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!--hf-bar-share:[\d.]+"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+")|order:/,
+      / style="(?!--hf-bar-share:[\d.]+"|--hf-donut-cos:|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-bar-chart-(?:slots|at|share|across):[\d.]+")|order:/,
     )
   })
 
@@ -196,14 +199,14 @@ describe('the page /wedstrijden', () => {
     }
   })
 
-  it('lets the visitor make an image of the table, and of no other card', async () => {
+  it('lets the visitor make an image of the table and of the scores, and of no other card', async () => {
     const html = await render()
     const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
       ([, id]) => id,
     )
 
-    expect(shareable).toEqual(['stand'])
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(1)
+    expect(shareable).toEqual(['stand', 'hoe-vaak-welke-uitslag'])
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
     for (const id of ['programma', 'uitslagen']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
@@ -244,7 +247,96 @@ describe('the page /wedstrijden', () => {
     expect(html).toContain('href="#stand">Stand</a>')
     expect(html).not.toContain('Eindstand')
     expect(html).not.toContain('eindstand')
-    expect(html).toContain('aria-label="De stand"')
+    expect(html).toContain('aria-label="De stand en hoe vaak welke uitslag"')
+  })
+
+  describe('the card Hoe vaak welke uitslag', () => {
+    const card = async () => section(await render(), 'hoe-vaak-welke-uitslag')
+
+    it('is a card of the sidebar right after the table, with the heading at level 2 and an anchor', async () => {
+      const html = await render()
+      const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+
+      expect(sidebar).toContain(
+        '<section class="hf-card hf-card-warm hf-card-shareable" aria-labelledby="hoe-vaak-welke-uitslag">',
+      )
+      expect(sidebar.indexOf('id="hoe-vaak-welke-uitslag"')).toBeGreaterThan(sidebar.indexOf('id="stand"'))
+      expect(html).toContain(
+        '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-vaak-welke-uitslag"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#hoe-vaak-welke-uitslag">Hoe vaak welke uitslag</a></h2>',
+      )
+    })
+
+    it('counts the played matches of the list Uitslagen in three tables, best first, with a swatch and the outcome in words', async () => {
+      const html = await card()
+      const tables = [...html.matchAll(/<table.*?<\/table>/g)].map(([table]) => table)
+      const rowsOf = (table: string) =>
+        [...table.matchAll(/<tr><th scope="row">(.*?)<\/th><td class="hf-numeric">([^<]*)<\/td><\/tr>/g)].map(
+          ([, header, count]) => [header?.replaceAll(/<[^>]*>/g, ''), count],
+        )
+
+      expect(tables.map((table) => table.match(/<th scope="col">([^<]*)<\/th>/)?.[1])).toEqual(['Winst', 'Gelijk'])
+      expect(rowsOf(tables[0]!)).toEqual([
+        ['3–1, winst', '1×'],
+        ['2–0, winst', '1×'],
+        ['1–0, winst', '1×'],
+      ])
+      expect(rowsOf(tables[1]!)).toEqual([['2–2, gelijk', '1×']])
+      expect(html.match(/<tr><th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch /g)).toHaveLength(4)
+    })
+
+    it('has a table for each outcome that happened, in green, grey and red order, and none for an outcome that did not', async () => {
+      const played = matchData.matches.filter((match) => match.status === 'played')
+      const loss: PublicMatch = { ...played[0]!, goalsAgainst: 3, goalsFor: 0, round: 'Speelronde 6' }
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, loss] })
+
+      const html = await card()
+
+      expect(html.match(/<th scope="col">([^<]*)<\/th>/g)).toEqual([
+        '<th scope="col">Winst</th>',
+        '<th scope="col">Gelijk</th>',
+        '<th scope="col">Verlies</th>',
+      ])
+      expect(html).toContain('0–3<span class="hf-visually-hidden">, verlies</span>')
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter(
+          (match) => match.status !== 'played' || match.goalsFor !== match.goalsAgainst,
+        ),
+      })
+
+      expect(await card()).not.toContain('Gelijk')
+    })
+
+    it('says how often the club won, drew and lost above the chart, and on how many matches it is based', async () => {
+      const html = await card()
+
+      expect(html).toContain('<p>3 keer gewonnen, 1 keer gelijk</p>')
+      expect(html.indexOf('<p>3 keer')).toBeLessThan(html.indexOf('hf-donut-chart'))
+      expect(html).toContain('Gebaseerd op alle 4 gespeelde wedstrijden')
+      expect(html.indexOf('<table')).toBeLessThan(html.indexOf('Gebaseerd op'))
+    })
+
+    it('hides the chart from a screen reader and has a caption and column headers on the table', async () => {
+      const html = await card()
+
+      expect(html).toContain('<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">')
+      expect(html.match(/<caption class="hf-visually-hidden">Uitslagen van /g)).toHaveLength(2)
+      expect(html).toContain('<th class="hf-numeric" scope="col"><span class="hf-visually-hidden">Keer</span></th>')
+      expect(html).toContain('<div class="hf-data-table-group">')
+    })
+
+    it('says that there are no results yet, without a chart, when no match is played', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+      const html = await card()
+
+      expect(html).toContain('We hebben nog geen uitslagen van dit seizoen.')
+      expect(html).not.toContain('hf-donut-chart')
+      expect(html).not.toContain('<table')
+      expect(html).not.toContain('hf-card-shareable')
+    })
   })
 
   describe('a match that has begun and has no result', () => {
@@ -897,16 +989,18 @@ describe('the head coaches of the season', () => {
     expect(card).not.toContain('wikipedia')
   })
 
-  it('is a card with the strong blue surface in the sidebar right after the table, named by its heading, without a source of its own', async () => {
+  it('is a card with the strong blue surface in the sidebar after the table and the scores, named by its heading, without a source of its own', async () => {
     withCoaches([veldman])
 
     const { card, html } = await coachesCard()
 
     expect(html).toContain('<section class="hf-card hf-card-strong" aria-labelledby="hoofdtrainer">')
-    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="hoe-vaak-welke-uitslag"'))
+    expect(html.indexOf('id="hoe-vaak-welke-uitslag"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html).toContain('aria-label="De stand, hoe vaak welke uitslag en de hoofdtrainer"')
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('hf-wikipedia-credit'))
     expect(card).not.toContain('hf-wikipedia-credit')
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(5)
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(6)
   })
 })
 

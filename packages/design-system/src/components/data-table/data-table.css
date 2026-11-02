@@ -146,3 +146,27 @@
     }
   }
 }
+
+@layer hf.components {
+  /*
+   * Small tables side by side while each has 5.5rem, by the width of their place and not the
+   * screen, and under each other when they have not. The cells keep less space round them, so
+   * a row with a swatch, a score and a count is no wider than 5.5rem. The tables have no space
+   * under them of their own: the group has it.
+   */
+  .hf-data-table-group {
+    align-items: start;
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(5.5rem, 100%), 1fr));
+    margin-block: 0 var(--hf-space-l);
+
+    & > table {
+      margin-block-end: 0;
+    }
+
+    & :is(th, td) {
+      padding-inline: var(--hf-space-xs);
+    }
+  }
+}

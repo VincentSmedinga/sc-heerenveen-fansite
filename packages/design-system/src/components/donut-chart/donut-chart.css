@@ -33,6 +33,22 @@
     --hf-donut-colour: var(--hf-colour-outcome-loss);
   }
 
+  /*
+   * A slice can have a colour of its own, as the results of a match have all three: the green
+   * of a win, the grey of a draw and the red of a loss.
+   */
+  .hf-donut-chart-slice-positive {
+    --hf-donut-colour: var(--hf-colour-outcome-win);
+  }
+
+  .hf-donut-chart-slice-neutral {
+    --hf-donut-colour: var(--hf-colour-outcome-draw);
+  }
+
+  .hf-donut-chart-slice-negative {
+    --hf-donut-colour: var(--hf-colour-outcome-loss);
+  }
+
   .hf-donut-chart-title {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);
@@ -42,6 +58,15 @@
   .hf-donut-chart-plot {
     aspect-ratio: 320 / 300;
     position: relative;
+  }
+
+  /* A ring without labels is a square, as wide as the ring needs and no more. */
+  .hf-donut-chart-bare {
+    max-inline-size: 12rem;
+  }
+
+  .hf-donut-chart-bare .hf-donut-chart-plot {
+    aspect-ratio: 1;
   }
 
   .hf-donut-chart-drawing {
@@ -60,10 +85,32 @@
    * so each slice stands out from the next without a contrast between their colours.
    */
   .hf-donut-chart-slice {
-    fill: color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent);
+    fill: color-mix(
+      in srgb,
+      var(--hf-colour-text-default) var(--hf-donut-deepen, 0%),
+      color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent)
+    );
     stroke: var(--hf-colour-border-chart-slice);
     stroke-linejoin: round;
     stroke-width: 3;
+  }
+
+  /*
+   * The key of a slice in a table: the colour and the strength of the slice, without the
+   * outline, so it is exactly what the slice looks like on the surface of the card.
+   */
+  .hf-donut-chart-swatch {
+    background-color: color-mix(
+      in srgb,
+      var(--hf-colour-text-default) var(--hf-donut-deepen, 0%),
+      color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent)
+    );
+    block-size: 1rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+    inline-size: 1rem;
+    margin-inline-end: var(--hf-space-xs);
+    vertical-align: -0.1875rem;
   }
 
   /* The ring of a chart without values: nothing to show, so only the place of the ring. */
@@ -125,6 +172,10 @@
 
     .hf-donut-chart-track {
       fill: GrayText;
+    }
+
+    .hf-donut-chart-swatch {
+      background-color: CanvasText;
     }
 
     .hf-donut-chart-leader {

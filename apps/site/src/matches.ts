@@ -184,6 +184,17 @@ export type CleanSheets = {
 /** A played match of the Eredivisie with a score, so with both numbers of goals. */
 export type LeagueMatch = PublicMatch & { goalsAgainst: number; goalsFor: number }
 
+/** A score from the side of sc Heerenveen, with the number of matches that ended that way. */
+export type ScoreCount = {
+  count: number
+  goalsAgainst: number
+  goalsFor: number
+  outcome: ScoreOutcome
+}
+
+/** How a played match went for sc Heerenveen: the three colours of a result. */
+export type ScoreOutcome = 'draw' | 'loss' | 'win'
+
 /** One streak: matches in a row that all meet a condition, as it stands now and the longest. */
 export type Streak = {
   /** The matches in a row up to the latest match; 0 when the latest match does not meet it. */
@@ -273,6 +284,38 @@ export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoic
   return matches.filter(
     (match): match is LeagueMatch =>
       countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,
+  )
+}
+
+/**
+ * How often each score was played, from the side of sc Heerenveen (our goals first, at home or
+ * away), best first: by goal difference from large to small, so every win comes before every
+ * draw and every draw before every loss, and a goal difference of 1 before one of 3 in the
+ * losses too; then by the goals in the match from many to few. The goal difference and the
+ * number of goals fix the score, so the order is complete. Only played matches with a score
+ * count, from every competition given, and the score is the one after extra time, so a cup tie
+ * that a shoot-out decided is a draw (see `playedMatchesOf`).
+ */
+export function scoreCountsOf(matches: PublicMatch[]): ScoreCount[] {
+  const counts = new Map<string, ScoreCount>()
+
+  for (const { goalsAgainst, goalsFor } of playedMatchesOf(matches, 'all')) {
+    const key = `${goalsFor}–${goalsAgainst}`
+    const known = counts.get(key)
+
+    if (known === undefined) {
+      const outcome = goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
+
+      counts.set(key, { count: 1, goalsAgainst, goalsFor, outcome })
+    } else {
+      known.count += 1
+    }
+  }
+
+  return [...counts.values()].sort(
+    (a, b) =>
+      b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst) ||
+      b.goalsFor + b.goalsAgainst - (a.goalsFor + a.goalsAgainst),
   )
 }
 

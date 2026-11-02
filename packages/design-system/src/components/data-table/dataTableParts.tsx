@@ -55,7 +55,11 @@ export const TableRows = ({
   <tbody>
     {rows.map((row) => (
       <tr key={row.header}>
-        <th scope="row">{row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}</th>
+        <th scope="row">
+          {row.marker}
+          {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
+          {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
+        </th>
         {row.cells.map((cell, index) => (
           <td className="hf-numeric" key={columns[index + 1]?.name ?? index}>
             {textOf(cell)}
