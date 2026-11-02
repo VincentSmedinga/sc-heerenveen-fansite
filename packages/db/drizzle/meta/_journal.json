@@ -225,6 +225,13 @@
       "when": 1793577288607,
       "tag": "0031_add_match_change_part",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1793605803930,
+      "tag": "0032_add_league_results",
+      "breakpoints": true
     }
   ]
 }

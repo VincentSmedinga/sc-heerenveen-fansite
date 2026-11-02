@@ -6,6 +6,8 @@
   attendances of the matches of other clubs and the goal scorers of the matches of other clubs (emptied). The goal
   scorers, referees and attendances of sc Heerenveen and the two blocks of NAC Breda - sc Heerenveen are as the page
   has them. See the tests.
+  Made up for the tests: the matches of other clubs that are written on one line. They give every club its 34
+  results, on the days of sc Heerenveen's matches; the pairings and the scores are not the page's.
 -->
 == Speelronde 1 ==
 {{Footballbox2
@@ -23,6 +25,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 0|team2=[[FC Twente]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 3|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 1|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[FC Groningen]]|score=0 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=4 – 2|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=9 augustus 2025|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 3|team2=[[NAC Breda]]}}
 ----
 
 == Speelronde 2 ==
@@ -41,6 +51,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=2 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 2|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 3|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=4 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=2 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=16 augustus 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 1|team2=[[Heracles Almelo]]}}
 ----
 
 == Speelronde 3 ==
@@ -59,6 +77,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[FC Volendam]]|score=1 – 0|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 2|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 1|team2=[[Feyenoord]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 0|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[N.E.C.]]|score=2 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=24 augustus 2025|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 2|team2=[[AFC Ajax|Ajax]]}}
 ----
 
 == Speelronde 4 ==
@@ -77,6 +103,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[Heracles Almelo]]|score=1 – 1|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=0 – 1|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=4 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=0 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=30 augustus 2025|time=20:00 uur|team1=[[Feyenoord]]|score=0 – 0|team2=[[FC Groningen]]}}
 ----
 
 == Speelronde 5 ==
@@ -95,6 +129,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[FC Groningen]]|score=0 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=4 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[FC Twente]]|score=1 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[FC Volendam]]|score=1 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[NAC Breda]]|score=3 – 3|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=3 – 1|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=1 – 0|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=13 september 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=4 – 0|team2=[[Go Ahead Eagles]]}}
 ----
 
 == Speelronde 6 ==
@@ -113,6 +155,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[NAC Breda]]|score=2 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=3 – 2|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=0 – 0|team2=[[FC Groningen]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[Feyenoord]]|score=2 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=2 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=0 – 1|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[FC Twente]]|score=1 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=21 september 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=4 – 0|team2=[[FC Volendam]]}}
 ----
 
 == Speelronde 7 ==
@@ -131,6 +181,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=3 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[Heracles Almelo]]|score=3 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 3|team2=[[N.E.C.]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 2|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 0|team2=[[FC Twente]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=3 – 0|team2=[[FC Groningen]]}}
+{{Footballbox2|date=28 september 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=3 – 1|team2=[[Feyenoord]]}}
 ----
 
 == Speelronde 8 ==
@@ -149,6 +207,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 2|team2=[[Feyenoord]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 2|team2=[[NAC Breda]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=1 – 0|team2=[[FC Twente]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=4 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=4 oktober 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=2 – 2|team2=[[Heracles Almelo]]}}
 ----
 
 == Speelronde 9 ==
@@ -167,6 +233,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[Feyenoord]]|score=2 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[FC Twente]]|score=1 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[FC Volendam]]|score=1 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 0|team2=[[N.E.C.]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[Heracles Almelo]]|score=3 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=4 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=19 oktober 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=4 – 2|team2=[[FC Utrecht]]}}
 ----
 
 == Speelronde 10 ==
@@ -185,6 +259,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 1|team2=[[N.E.C.]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 2|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[Feyenoord]]|score=0 – 0|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 3|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=24 oktober 2025|time=20:00 uur|team1=[[FC Volendam]]|score=0 – 2|team2=[[FC Twente]]}}
 ----
 
 == Speelronde 11 ==
@@ -203,6 +285,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[NAC Breda]]|score=3 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[N.E.C.]]|score=2 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 2|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 1|team2=[[FC Groningen]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[Feyenoord]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[FC Volendam]]|score=4 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=1 november 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=0 – 1|team2=[[FC Twente]]}}
 ----
 
 == Speelronde 12 ==
@@ -221,6 +311,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=4 – 3|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=4 – 1|team2=[[FC Volendam]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=0 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 2|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 3|team2=[[Feyenoord]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[N.E.C.]]|score=2 – 0|team2=[[FC Groningen]]}}
+{{Footballbox2|date=8 november 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=0 – 3|team2=[[Excelsior Rotterdam]]}}
 ----
 
 == Speelronde 13 ==
@@ -239,6 +337,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 1|team2=[[NAC Breda]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[N.E.C.]]|score=3 – 3|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=2 – 2|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=4 – 3|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[FC Groningen]]|score=3 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 0|team2=[[FC Twente]]}}
+{{Footballbox2|date=23 november 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=0 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
 ----
 
 == Speelronde 14 ==
@@ -289,6 +395,13 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[FC Volendam]]|score=1 – 1|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[Heracles Almelo]]|score=2 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=1 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[NAC Breda]]|score=0 – 2|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=28 november 2025|time=20:00 uur|team1=[[N.E.C.]]|score=2 – 2|team2=[[Sparta Rotterdam]]}}
 ----
 
 == Speelronde 15 ==
@@ -307,6 +420,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[Feyenoord]]|score=2 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 0|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=2 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[Heracles Almelo]]|score=2 – 2|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[N.E.C.]]|score=3 – 2|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[FC Utrecht]]|score=1 – 2|team2=[[NAC Breda]]}}
+{{Footballbox2|date=6 december 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=3 – 0|team2=[[AFC Ajax|Ajax]]}}
 ----
 
 == Speelronde 16 ==
@@ -325,6 +446,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 3|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[NAC Breda]]|score=2 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=4 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 0|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=4 – 1|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=4 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 1|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=14 december 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 2|team2=[[Fortuna Sittard]]}}
 ----
 
 == Speelronde 17 ==
@@ -343,6 +472,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 2|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 3|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=2 – 1|team2=[[FC Volendam]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[FC Twente]]|score=3 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[NAC Breda]]|score=2 – 3|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=3 – 2|team2=[[Feyenoord]]}}
+{{Footballbox2|date=20 december 2025|time=20:00 uur|team1=[[FC Groningen]]|score=4 – 3|team2=[[Excelsior Rotterdam]]}}
 ----
 
 == Speelronde 18 ==
@@ -361,6 +498,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 0|team2=[[FC Groningen]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=1 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=2 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[N.E.C.]]|score=3 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[NAC Breda]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 3|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=0 – 3|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=11 januari 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 2|team2=[[FC Utrecht]]}}
 ----
 
 == Speelronde 19 ==
@@ -379,6 +524,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 0|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=4 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 3|team2=[[N.E.C.]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[FC Twente]]|score=1 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=2 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=1 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=1 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=18 januari 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=3 – 2|team2=[[Go Ahead Eagles]]}}
 ----
 
 == Speelronde 20 ==
@@ -397,6 +550,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 0|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=2 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=1 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[NAC Breda]]|score=0 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[FC Twente]]|score=0 – 0|team2=[[N.E.C.]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=2 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=1 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=11 februari 2026|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 1|team2=[[Feyenoord]]}}
 ----
 
 == Speelronde 21 ==
@@ -415,6 +576,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=3 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=1 – 1|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[N.E.C.]]|score=4 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 1|team2=[[FC Volendam]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[FC Twente]]|score=4 – 3|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=1 februari 2026|time=20:00 uur|team1=[[Feyenoord]]|score=3 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
 ----
 
 == Speelronde 22 ==
@@ -433,6 +602,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 0|team2=[[FC Volendam]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 1|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=1 – 1|team2=[[FC Groningen]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 0|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=0 – 1|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=3 – 3|team2=[[N.E.C.]]}}
+{{Footballbox2|date=7 februari 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=3 – 2|team2=[[NAC Breda]]}}
 ----
 
 == Speelronde 23 ==
@@ -483,6 +660,13 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 1|team2=[[FC Volendam]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[FC Twente]]|score=2 – 0|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=4 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 1|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=3 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 0|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=15 februari 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=2 – 0|team2=[[NAC Breda]]}}
 ----
 
 == Speelronde 24 ==
@@ -501,6 +685,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[FC Twente]]|score=4 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[FC Groningen]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 2|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=0 – 2|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=2 – 1|team2=[[N.E.C.]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=21 februari 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=1 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
 ----
 
 == Speelronde 25 ==
@@ -519,6 +711,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[FC Groningen]]|score=4 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 2|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=3 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[FC Twente]]|score=2 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=4 – 2|team2=[[FC Volendam]]}}
+{{Footballbox2|date=28 februari 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 3|team2=[[PEC Zwolle]]}}
 ----
 
 == Speelronde 26 ==
@@ -537,6 +737,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[NAC Breda]]|score=0 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=3 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[FC Twente]]|score=4 – 0|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 1|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 0|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=7 maart 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=4 – 0|team2=[[Fortuna Sittard]]}}
 ----
 
 == Speelronde 27 ==
@@ -555,6 +763,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=1 – 3|team2=[[Feyenoord]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 1|team2=[[FC Volendam]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=0 – 2|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[NAC Breda]]|score=3 – 2|team2=[[Heracles Almelo]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 3|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=14 maart 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
 ----
 
 == Speelronde 28 ==
@@ -573,6 +789,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 2|team2=[[NAC Breda]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=2 – 3|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 3|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=1 – 1|team2=[[Feyenoord]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 3|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=1 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=22 maart 2026|time=20:00 uur|team1=[[FC Volendam]]|score=4 – 1|team2=[[PEC Zwolle]]}}
 ----
 
 == Speelronde 29 ==
@@ -591,6 +815,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 2|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[FC Volendam]]|score=2 – 0|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=4 – 0|team2=[[FC Twente]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 0|team2=[[NAC Breda]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=5 april 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=1 – 0|team2=[[FC Groningen]]}}
 ----
 
 == Speelronde 30 ==
@@ -609,6 +841,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=2 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 3|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 3|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[FC Volendam]]|score=4 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[FC Twente]]|score=1 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=12 april 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=4 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
 ----
 
 == Speelronde 31 ==
@@ -627,6 +867,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=0 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[FC Volendam]]|score=3 – 1|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[FC Twente]]|score=3 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=0 – 1|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=2 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 2|team2=[[NAC Breda]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=25 april 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=1 – 1|team2=[[Sparta Rotterdam]]}}
 ----
 
 == Speelronde 32 ==
@@ -645,6 +893,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[FC Twente]]|score=3 – 3|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 2|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=1 – 2|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[Feyenoord]]|score=3 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=1 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=2 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=3 mei 2026|time=20:00 uur|team1=[[NAC Breda]]|score=1 – 3|team2=[[N.E.C.]]}}
 ----
 
 == Speelronde 33 ==
@@ -679,6 +935,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 2|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=2 – 3|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=4 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=2 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=2 – 1|team2=[[Feyenoord]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=2 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=0 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=10 mei 2026|time=20:00 uur|team1=[[FC Twente]]|score=2 – 1|team2=[[FC Volendam]]}}
 ----
 
 == Speelronde 34 ==
@@ -713,4 +977,11 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=4 – 2|team2=[[N.E.C.]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[Heracles Almelo]]|score=4 – 2|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[Feyenoord]]|score=0 – 2|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=1 – 3|team2=[[FC Volendam]]}}
+{{Footballbox2|date=17 mei 2026|time=20:00 uur|team1=[[FC Twente]]|score=0 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
 ----

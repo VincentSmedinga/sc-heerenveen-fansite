@@ -895,6 +895,39 @@ export type NewStandingsRow = typeof standings.$inferInsert
 
 export type StandingsRow = typeof standings.$inferSelect
 
+/**
+ * The results of the Eredivisie, one row per played league match of any club, from the
+ * programme page of the Dutch Wikipedia. The importer replaces the rows of a season at once,
+ * like the table. A match without a result (planned or postponed) has no row until it is
+ * played. The play-offs and the cup are not in it, and neither are the scorers: `matches` has
+ * those for sc Heerenveen.
+ *
+ * `home_club` and `away_club` are written as `standings.club` writes the club, so the two can
+ * be joined on the name. They are not `clubs`: the table holds no entry of the editors
+ * (`match_edits`), and a club of another league has no place in it. `round` is the number of
+ * the round the match is listed under, so a match that was postponed keeps its round, and
+ * `played_on` is the day of the match, or the first day when only a weekend is known.
+ */
+export const leagueResults = mysqlTable(
+  'league_results',
+  {
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    homeClub: varchar('home_club', { length: standingsClubMaxLength }).notNull(),
+    awayClub: varchar('away_club', { length: standingsClubMaxLength }).notNull(),
+    round: int('round', { unsigned: true }).notNull(),
+    playedOn: date('played_on', { mode: 'string' }).notNull(),
+    homeGoals: int('home_goals', { unsigned: true }).notNull(),
+    awayGoals: int('away_goals', { unsigned: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.season, table.homeClub, table.awayClub], name: 'league_results_season_home_away' }),
+  ],
+)
+
+export type LeagueResult = typeof leagueResults.$inferSelect
+
+export type NewLeagueResult = typeof leagueResults.$inferInsert
+
 /** The pages that hold the matches and the table: what `/wedstrijden` credits. */
 export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs'] as const
 

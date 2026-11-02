@@ -71,6 +71,7 @@ beforeEach(async () => {
     'match_changes',
     'matches',
     'players',
+    'league_results',
     'standings',
     'wikipedia_pages',
     'match_imports',
@@ -236,6 +237,7 @@ describe('the command', () => {
     expect(code).toBe(0)
     expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
+      'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
     expect(pageRequests(server)).toHaveLength(4)
 
@@ -283,6 +285,7 @@ describe('the command', () => {
     expect(code).toBe(0)
     expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       'Matches 2025/26: 39 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
+      'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
     expect(pageRequests(server)).toContain('/wiki/Play-offs_Nederlands_voetbal_2026?action=raw')
     expect(
@@ -303,6 +306,7 @@ describe('the command', () => {
     expect(code).toBe(0)
     expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       `Matches 2025/26: ${34 + stored.length} new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17`,
+      'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
     expect(stored).toHaveLength(cupSeason === '2022-23' ? 4 : 3)
     expect(stored.every((match) => match.status === 'played')).toBe(true)
@@ -360,7 +364,9 @@ describe('the command', () => {
 
     expect(second).toEqual({
       code: 0,
-      lines: ['Matches 2025/26: 0 new, 0 updated, 38 unchanged, 0 removed; table of 18 clubs for 2026-05-17'],
+      lines: [
+        'Matches 2025/26: 0 new, 0 updated, 38 unchanged, 0 removed; table of 18 clubs for 2026-05-17\nMatches 2025/26: league results of all clubs: 0 new, 0 updated, 306 unchanged, 0 removed',
+      ],
     })
     expect(pageRequests(server)).toHaveLength(8)
     expect((await rowsOf(past)).matches).toEqual(before.matches)
@@ -505,7 +511,9 @@ describe('the command for all seasons', () => {
     expect(code).toBe(0)
     expect(lines).toEqual([
       expect.stringMatching(/^Matches 2025\/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for /u),
+      'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
       expect.stringMatching(/^Matches 2026\/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for /u),
+      'Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed',
       'Seasons: 2 of 2 read.',
     ])
 
@@ -538,7 +546,9 @@ describe('the command for all seasons', () => {
     expect(second.code).toBe(0)
     expect(second.lines).toEqual([
       expect.stringMatching(/^Matches 2025\/26: 0 new, 0 updated, 38 unchanged, 0 removed; /u),
+      'Matches 2025/26: league results of all clubs: 0 new, 0 updated, 306 unchanged, 0 removed',
       expect.stringMatching(/^Matches 2026\/27: 0 new, 0 updated, 35 unchanged, 0 removed; /u),
+      'Matches 2026/27: league results of all clubs: 0 new, 0 updated, 90 unchanged, 0 removed',
       'Seasons: 2 of 2 read.',
     ])
     expect([await rowsOf(past), await rowsOf(current)]).toEqual(before)
@@ -554,6 +564,7 @@ describe('the command for all seasons', () => {
     expect(lines).toEqual([
       expect.stringMatching(/^Matches 2024\/25: warning, nothing changed and the last good copy stays: /u),
       expect.stringMatching(/^Matches 2025\/26: 38 new, 0 updated, 0 unchanged, 0 removed; /u),
+      'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
       'Seasons: 1 of 2 read, 1 not read:',
       expect.stringMatching(/^ {2}2024\/25: warning, nothing changed and the last good copy stays: /u),
     ])

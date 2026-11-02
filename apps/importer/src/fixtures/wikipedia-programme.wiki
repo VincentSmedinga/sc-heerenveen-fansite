@@ -4,6 +4,9 @@
   Left out: most matches of other clubs, the text around the templates, and the referees and reports
   of every match (emptied) and the goal scorers of the matches of other clubs (emptied). The goal scorers of
   sc Heerenveen are as the page has them. See the tests.
+  Made up for the tests: the matches of other clubs that are written on one line, and the block that finishes the
+  stopped match of FC Utrecht and Go Ahead Eagles. They give every club the ten results the table has, in rounds
+  1 to 10 and on the days of sc Heerenveen's matches; the pairings and the scores are not the page's.
 -->
 * De speeldata en -tijden van speelronde 22 tot en met 32 worden op 22 december 2026 bekendgemaakt door de KNVB.
 
@@ -38,6 +41,13 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[ADO Den Haag]]|score=1 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=0 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[Willem II (voetbalclub)|Willem II]]|score=0 – 0|team2=[[Feyenoord]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=0 – 1|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=1 – 0|team2=[[N.E.C.]]}}
+{{Footballbox2|date=9 augustus 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=3 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
 
 == Speelronde 2 ==
 {{Footballbox2
@@ -55,6 +65,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[ADO Den Haag]]|score=1 – 1|team2=[[N.E.C.]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=1 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=3 – 0|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[FC Twente]]|score=0 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=1 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 2|team2=[[Feyenoord]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[SC Cambuur]]|score=1 – 0|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=16 augustus 2026|time=20:00 uur|team1=[[Willem II (voetbalclub)|Willem II]]|score=1 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
 
 == Speelronde 3 ==
 {{Footballbox2
@@ -72,6 +90,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=0 – 1|team2=[[ADO Den Haag]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=0 – 3|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=2 – 1|team2=[[FC Groningen]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[FC Twente]]|score=3 – 3|team2=[[SC Cambuur]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 2|team2=[[Feyenoord]]}}
+{{Footballbox2|date=22 augustus 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=2 – 1|team2=[[Willem II (voetbalclub)|Willem II]]}}
 
 == Speelronde 4 ==
 {{Footballbox2
@@ -89,6 +115,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[ADO Den Haag]]|score=2 – 1|team2=[[SC Cambuur]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=1 – 2|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[FC Twente]]|score=4 – 2|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[Feyenoord]]|score=4 – 1|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=30 augustus 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 1|team2=[[Telstar (voetbalclub)|Telstar]]}}
 
 == Speelronde 5 ==
 {{Footballbox2
@@ -137,6 +171,13 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=4 – 0|team2=[[ADO Den Haag]]}}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[FC Twente]]|score=2 – 0|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 0|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[Feyenoord]]|score=2 – 0|team2=[[SC Cambuur]]}}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 3|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=6 september 2026|time=20:00 uur|team1=[[Willem II (voetbalclub)|Willem II]]|score=0 – 0|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=9 september 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 3|team2=[[Go Ahead Eagles]]}}
 
 == Speelronde 6 ==
 {{Footballbox2
@@ -154,6 +195,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[ADO Den Haag]]|score=1 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[AZ (voetbalclub)|AZ]]|score=2 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=0 – 1|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[FC Groningen]]|score=1 – 2|team2=[[Feyenoord]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 1|team2=[[FC Twente]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 1|team2=[[Willem II (voetbalclub)|Willem II]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 0|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=13 september 2026|time=20:00 uur|team1=[[SC Cambuur]]|score=3 – 1|team2=[[N.E.C.]]}}
 
 == Speelronde 7 ==
 {{Footballbox2
@@ -171,6 +220,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=0 – 2|team2=[[ADO Den Haag]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=0 – 0|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=0 – 1|team2=[[N.E.C.]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=0 – 2|team2=[[FC Groningen]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=0 – 3|team2=[[PSV (voetbalclub)|PSV]]}}
+{{Footballbox2|date=19 september 2026|time=20:00 uur|team1=[[Willem II (voetbalclub)|Willem II]]|score=0 – 0|team2=[[SC Cambuur]]}}
 
 == Speelronde 8 ==
 {{Footballbox2
@@ -188,6 +245,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=1 – 1|team2=[[ADO Den Haag]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[Fortuna Sittard]]|score=1 – 2|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[Excelsior Rotterdam]]|score=0 – 2|team2=[[FC Twente]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[FC Groningen]]|score=0 – 0|team2=[[Go Ahead Eagles]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[Sparta Rotterdam]]|score=1 – 0|team2=[[FC Utrecht]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=0 – 1|team2=[[Feyenoord]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[N.E.C.]]|score=1 – 3|team2=[[Willem II (voetbalclub)|Willem II]]}}
+{{Footballbox2|date=9 oktober 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 0|team2=[[SC Cambuur]]}}
 
 == Speelronde 9 ==
 {{Footballbox2
@@ -220,6 +285,13 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=4 – 0|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[Willem II (voetbalclub)|Willem II]]|score=2 – 0|team2=[[AFC Ajax|Ajax]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[N.E.C.]]|score=0 – 0|team2=[[FC Groningen]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[FC Twente]]|score=0 – 2|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[Feyenoord]]|score=0 – 1|team2=[[PEC Zwolle]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[Telstar (voetbalclub)|Telstar]]|score=2 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=16 oktober 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=1 – 2|team2=[[SC Cambuur]]}}
 
 == Speelronde 10 ==
 {{Footballbox2
@@ -237,6 +309,14 @@
 |videoreferee =
 |report =
 }}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[PSV (voetbalclub)|PSV]]|score=2 – 3|team2=[[AZ (voetbalclub)|AZ]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[AFC Ajax|Ajax]]|score=1 – 1|team2=[[Excelsior Rotterdam]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[FC Groningen]]|score=2 – 0|team2=[[SC Cambuur]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[FC Twente]]|score=0 – 0|team2=[[Telstar (voetbalclub)|Telstar]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[FC Utrecht]]|score=2 – 0|team2=[[Fortuna Sittard]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[Feyenoord]]|score=1 – 1|team2=[[Sparta Rotterdam]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[Go Ahead Eagles]]|score=2 – 1|team2=[[N.E.C.]]}}
+{{Footballbox2|date=24 oktober 2026|time=20:00 uur|team1=[[PEC Zwolle]]|score=2 – 1|team2=[[Willem II (voetbalclub)|Willem II]]}}
 
 == Speelronde 11 ==
 {{Footballbox2
