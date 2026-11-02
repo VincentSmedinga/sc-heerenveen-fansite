@@ -114,7 +114,7 @@ export async function StatisticsPage({
           </Page.Title>
         }
       >
-        <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
+        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="statistieken" />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />

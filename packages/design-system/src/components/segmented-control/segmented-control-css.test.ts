@@ -154,12 +154,18 @@ describe('the slide between two pages', () => {
     expect(css.match(/@view-transition/g)).toHaveLength(1)
   })
 
-  it('names the thumb and the options, so the labels stay over the thumb, and leaves the rest of the page as it is', () => {
-    expect(transitions).toContain('view-transition-name: hf-segmented-thumb;')
-    expect(transitions.match(/view-transition-name: hf-segmented-option-\d;/g)).toHaveLength(4)
+  it('names the thumb and the options from the place of the switch, so the labels stay over the thumb, and leaves the rest of the page as it is', () => {
+    expect(transitions).toContain('view-transition-name: var(--hf-segmented-thumb-name, none);')
+    expect(transitions).toContain('view-transition-name: var(--hf-segmented-option-name, none);')
+    expect(transitions).not.toMatch(/view-transition-name: hf-/)
     expect(transitions).toMatch(
       /::view-transition-group\(root\),\s*::view-transition-old\(root\),\s*::view-transition-new\(root\) \{\s*animation: none;/,
     )
+  })
+
+  it('shows a name that only one of the two pages has at once, without a fade', () => {
+    expect(transitions).toMatch(/::view-transition-old\(\*\):only-child \{\s*display: none;/)
+    expect(transitions).toMatch(/::view-transition-new\(\*\):only-child \{\s*animation: none;/)
   })
 
   it('moves everything it names with the duration and the curve of the motion tokens', () => {

@@ -1740,6 +1740,9 @@
 - **Later:** zie _Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld_: de ingedrukte knop is niet meer gevuld, maar de gekozen keuze heeft een knop en dikkere letters.
 - **Later:** zie _De baan van de schakelaar is een doorzichtige tint_: de baan is niet meer grijs-200 en blauw-800, maar een doorzichtige tint, en de rand en de letters halen hun verhouding over elk vlak.
   De vorm, de maten, de beweging en de knop blijven zoals ze zijn.
+- **Later:** zie _De overgang van de schakelaar heeft een naam per plek_ (2 november 2026): de namen `hf-segmented-thumb` en `hf-segmented-option-1` tot en met `-4` zijn weg, en de zin "Eén schakelaar per pagina" geldt niet meer.
+  De knop en de keuzes krijgen hun naam van de plek die de pagina aan `SegmentedLinks` geeft, en een pagina mag meer dan één schakelaar hebben als elke een eigen plek heeft.
+  Een schakelaar zonder plek doet niet meer mee aan de overgang, ook niet als hij met knoppen werkt.
 
 ## De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
 
@@ -2261,3 +2264,26 @@
 - **Alternatieven:** de basiselementen een eigen `margin-block: 0` in elke kaart laten zetten (dan moet elk onderdeel het kennen).
   `hf-flow` op `body` of op elk onderdeel zetten (de stroom hoort bij een container die weet wat er in staat).
   Een `dd` zonder marge, met een wrapper om elke term en beschrijving (de HTML wordt omslachtiger voor een lijst die de site niet gebruikt).
+
+## De overgang van de schakelaar heeft een naam per plek
+
+- **Datum:** 2 november 2026
+- **Besluit:** de naam van de overgang tussen pagina's hoort bij de plek van de schakelaar, niet bij het onderdeel (#657).
+  `SegmentedLinks` krijgt een optionele eigenschap `place`, een woord dat de pagina kiest, zoals `stand` op Wedstrijden of `statistieken` op Statistieken.
+  Het component zet daarvan `hf-segmented-thumb-<plek>` voor de knop en `hf-segmented-option-<plek>-<nummer>` voor elke keuze, als custom properties (`--hf-segmented-thumb-name` en `--hf-segmented-option-name`), en `segmented-control.css` leest die in `view-transition-name`.
+  Een schakelaar zonder plek heeft geen naam en doet niet mee.
+  De site geeft elke schakelaar een eigen plek: `stand` (Wedstrijden), `statistieken`, `spelers`, `tegenstanders`, `tegenstander` (de pagina van een club) en `berichten` (`/beheer/berichten`).
+  Dezelfde plek heeft dezelfde naam op elke versie van de pagina, dus een andere keuze, een ander seizoen of een andere competitie laat de knop schuiven.
+  Een naam die maar één van de twee pagina's heeft, is niet gekoppeld: `::view-transition-old(*):only-child` verdwijnt meteen en `::view-transition-new(*):only-child` krijgt geen fade, zodat er geen schim van de oude knop of letters blijft.
+- **Waarom:** de browser koppelt elementen met dezelfde naam op de oude en de nieuwe pagina.
+  Met dezelfde namen op elke schakelaar vloog de knop van "Welke stand" onderaan Wedstrijden naar "Welke wedstrijden" bovenaan Statistieken, met de letters mee.
+  Alleen de pagina weet of twee schakelaars dezelfde zijn.
+  Het blijft CSS en een `style`, dus nog steeds een servercomponent zonder script, en de HTML verschilt alleen in de `style`.
+- **Gevolg:** de HTML van een schakelaar met een plek heeft een custom property meer op de groep en een `style` op elke link.
+  De tests van de pagina's en de rooktest lezen die opmaak.
+  `segmented-control-css.test.ts` eist dat de namen uit die custom properties komen, en `e2e/segmented-places.spec.ts` dat de namen van de vier pagina's verschillen en bij een andere keuze gelijk blijven.
+  Een pagina met twee schakelaars kan nu twee plekken geven; dezelfde plek twee keer op één pagina blijft fout, want een naam kan maar één element hebben.
+  Hoogstens vier keuzes per schakelaar hoeft niet meer: een keuze krijgt een naam uit haar nummer, zonder grens.
+- **Alternatieven:** de overgang laten beginnen op de nieuwe pagina, met de knop op de oude keuze (de nieuwe pagina kent de oude keuze alleen met een script in `pageswap` en `pagereveal`, dat we in #500 uitsloten, en het laat ook bij een wissel tussen verschillende schakelaars iets schuiven).
+  `view-transition-name` alleen op de knop en niet op de letters (de letters liggen dan onder de knop).
+  De overgang met een script uitzetten voor schakelaars op een andere plek (meer code, werkt niet zonder script).
