@@ -70,6 +70,8 @@
 @import url('./base/forms.css');
 @import url('./components/form/form.css');
 @import url('./components/field/field.css');
+@import url('./components/field-group/field-group.css');
+@import url('./components/input-table/input-table.css');
 @import url('./components/input/input.css');
 @import url('./components/textarea/textarea.css');
 @import url('./components/select/select.css');

@@ -190,6 +190,27 @@
   }
 
   /*
+   * A wide page (Page.Main with `wide`) is a page of 84rem: a main of 58rem, 2rem of space and
+   * the usual sidebar of 24rem (--hf-content-max-width-wide and --hf-page-max-width-wide). It
+   * follows the same rules as the page above: one track under 52rem, so a phone sees no
+   * difference, and tracks that shrink up to the full width of the columns plus the margins
+   * (86rem), the main to 24rem at the least and the sidebar to 16rem, so the minimums fit in
+   * the 42.25rem of a phone on its side.
+   * The body is the only part that gets wider: the inset on its sides is worked out from the
+   * wider column, as --hf-page-inset is from the usual one, so the tracks are centred and
+   * don't run out of the body. The header, the menu and the footer stay in the column of 64rem.
+   */
+  .hf-page-body:has(> .hf-page-main-wide) {
+    --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width-wide)) / 2));
+  }
+
+  @media (width >= 52rem) {
+    .hf-page-body:has(> .hf-page-main-wide) {
+      grid-template-columns: minmax(24rem, var(--hf-content-max-width-wide)) minmax(16rem, 24rem);
+    }
+  }
+
+  /*
    * A column is a grid of one track, its own, so its cells stack under each other, each as tall as its content, and not
    * on the rows of the other column. That is why a plain grid is enough here: a subgrid would put the cells of both
    * columns on the same rows. Only a main with an introduction is a subgrid, and then in two rows only (see below).

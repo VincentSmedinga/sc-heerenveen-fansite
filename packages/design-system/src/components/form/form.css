@@ -5,4 +5,12 @@
     box-sizing: border-box;
     max-inline-size: 30rem;
   }
+
+  /*
+   * A form with a table of fields (InputTable) is as wide as its parent, or the table could
+   * never be wider than the longest field. The fields keep their own maximum width.
+   */
+  .hf-form:has(.hf-input-table) {
+    max-inline-size: none;
+  }
 }

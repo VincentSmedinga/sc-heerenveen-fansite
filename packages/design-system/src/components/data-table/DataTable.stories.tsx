@@ -5,7 +5,7 @@ import preview from '#.storybook/preview'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
-import { DataTable, type DataTableProps, type DataTableRow } from './DataTable'
+import { DataTable, type DataTableProps, type DataTableRow, type DataTableTextRow } from './DataTable'
 
 // Made-up clubs, so the table has enough rows to look for the extremes.
 type Figures = [played: number, won: number, drawn: number, lost: number, goalsFor: number, goalsAgainst: number]
@@ -86,6 +86,10 @@ const meta = preview.meta({
           'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
           'Een getallenkolom begint met het grootste getal bovenaan en de eerste kolom van A tot Z; een tweede klik keert de richting om.',
           'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “7–5” dat op het doelpuntensaldo sorteert.',
+          '',
+          'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden.',
+          'De kolommen beginnen aan het begin, de rijkop kan een tweede regel met secundaire tekst hebben (`secondary`), en een cel kan elke inhoud hebben, zoals een link.',
+          'Zo’n tabel kan niet sorteren.',
         ].join('\n'),
       },
     },
@@ -334,5 +338,42 @@ export const SortableLongHeaders = meta.story({
         />
       </Card>
     </div>
+  ),
+})
+
+const matches: DataTableTextRow[] = [
+  {
+    cells: ['2 - 1', 'Gespeeld'],
+    header: 'Testclub - FC Voorbeeld',
+    href: '#wedstrijd-1',
+    secondary: 'zondag 1 november 2026, Eredivisie',
+  },
+  {
+    cells: ['–', <a href="#uitslag">Uitslag ontbreekt</a>],
+    header: 'Proefstad SV - Testclub',
+    href: '#wedstrijd-2',
+    secondary: 'woensdag 28 oktober 2026, KNVB Beker',
+  },
+  {
+    cells: ['0 - 0', 'Gespeeld'],
+    header: 'Testclub - Teststad Boys',
+    secondary: 'zaterdag 3 oktober 2026, Eredivisie',
+  },
+]
+
+export const TextTable = meta.story({
+  name: 'Tabel met tekst',
+  render: () => (
+    <Card aria-labelledby="wedstrijden-kop" style={{ maxInlineSize: '40rem' }}>
+      <Heading id="wedstrijden-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <DataTable
+        appearance="text"
+        caption="Wedstrijden van Testclub met de uitslag en de status"
+        columns={['Wedstrijd', 'Uitslag', 'Status']}
+        rows={matches}
+      />
+    </Card>
   ),
 })

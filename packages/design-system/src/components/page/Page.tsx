@@ -21,6 +21,15 @@ export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
    * the sidebar starts at the top.
    */
   intro?: ReactNode
+  /**
+   * A wide page, for a page whose main column holds a table with fields in it. The page is
+   * wider than other pages, and the main column broader, while the sidebar keeps its width. On
+   * a screen narrower than the columns side by side it makes no difference. It is the
+   * Page.Main that tells the Page.Body, so a page can choose it without owning the Page.Body,
+   * which the layout of the site renders. The header, the menu and the footer keep the width
+   * of the other pages. Don't combine it with `wide` or `narrow` on the Page.Sidebar.
+   */
+  wide?: boolean
 }
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
@@ -148,10 +157,11 @@ const Body = ({ className, ...props }: PageBodyProps) => (
  * children is a cell. With an `intro` the column holds the introduction in a `div` of its own,
  * and the children in a second `div`, which stacks them like the column does without an
  * introduction. The Page.Body needs the two to start the Page.Sidebar under the introduction.
- * The `intro` prop adds them, so a page can't leave one out.
+ * The `intro` prop adds them, so a page can't leave one out. With `wide` the page is wider than
+ * other pages, to make room for a table with fields in it.
  */
-const Main = ({ children, className, intro, ...props }: PageMainProps) => (
-  <main className={classNames('hf-page-main', className)} {...props}>
+const Main = ({ children, className, intro, wide = false, ...props }: PageMainProps) => (
+  <main className={classNames('hf-page-main', wide && 'hf-page-main-wide', className)} {...props}>
     {intro === undefined || intro === null || intro === false ? (
       children
     ) : (
