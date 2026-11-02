@@ -108,6 +108,29 @@ export type ReadProgramme =
     }
   | { kind: 'error'; message: string }
 
+/**
+ * What the import keeps of a played league match of any club: who was at home, the goals of
+ * both, the day and the round. Clubs are named as the page writes them (see `plain`), which is
+ * also how the table is read, so the two can be matched (`matchClubNames`).
+ */
+export type ReadResult = {
+  awayClub: string
+  awayGoals: number
+  homeClub: string
+  homeGoals: number
+  /** The day the match was played, or the first day when the page has only a weekend. */
+  playedOn: string
+  /** The number of the round, 12 for `Speelronde 12`. */
+  round: number
+}
+
+/**
+ * The results of the league, with a line for each played match the page lists but that could
+ * not be read: a score or a date we do not know. They are left out, and the import says so in a
+ * warning, since the table says how many each club has played (see `playedWarning`).
+ */
+export type ReadResults = { results: ReadResult[]; unread: string[] }
+
 export type ReadStandings = { kind: 'error'; message: string } | { kind: 'read'; rows: ReadStandingsRow[] }
 
 /** One club in the table, worked out from the wins, draws, losses and goals Wikipedia gives. */
@@ -305,6 +328,63 @@ export function readLeague(text: string): ReadProgramme {
   return problems.length > 0
     ? { kind: 'error', message: problems.join('; ') }
     : { hasTemplates: true, kind: 'read', lastPlayedOn, matches }
+}
+
+/**
+ * Reads the results of the league for every club, from the same page as `readLeague`: one for
+ * each match under a round of the league that has a score. A match that is planned, postponed
+ * or stopped and not finished has none. A match that was stopped and finished later is one
+ * result with the final score, on the day of the block that finishes it, and who was at home
+ * is as the block that began it has it (see `restOf`). A page with the results of sc
+ * Heerenveen only, as the older pages are, gives no results at all: the form of a club over
+ * its last matches needs all of them.
+ */
+export function readLeagueResults(text: string): ReadResults {
+  const boxes = matchBoxes(text)
+  const results: ReadResult[] = []
+  const unread: string[] = []
+  let others = false
+
+  for (const box of boxes) {
+    const round = box.heading !== null ? /^Speelronde (\d{1,2})$/u.exec(box.heading)?.[1] : undefined
+
+    if (round === undefined || isRestOfStopped(box, boxes)) {
+      continue
+    }
+
+    const result = restOf(box, boxes) ?? box
+    const score = parseScore(result.params.get('score') ?? '')
+
+    if (score.kind !== 'score') {
+      if (score.kind === 'unknown') {
+        unread.push(`${box.heading}: a score we do not know: '${score.text.slice(0, 40)}'`)
+      }
+      continue
+    }
+
+    const day = parseDate(result.params.get('date') ?? '')
+    const [homeClub, awayClub] = [plain(box.params.get('team1') ?? ''), plain(box.params.get('team2') ?? '')]
+    const sameSides =
+      linkTarget(result.params.get('team1') ?? '').toLowerCase() ===
+      linkTarget(box.params.get('team1') ?? '').toLowerCase()
+
+    if (day === undefined || [homeClub, awayClub].some((club) => club === '' || club.length > standingsClubMaxLength)) {
+      unread.push(`${box.heading}: ${homeClub} - ${awayClub} has no date or no club names we can use`)
+      continue
+    }
+
+    others ||= !isOurs(box)
+    results.push({
+      awayClub,
+      awayGoals: sameSides ? score.away : score.home,
+      homeClub,
+      homeGoals: sameSides ? score.home : score.away,
+      playedOn: day.isoDate,
+      round: Number(round),
+    })
+  }
+
+  return others ? { results, unread } : { results: [], unread: [] }
 }
 
 /**
