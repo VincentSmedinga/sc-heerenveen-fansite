@@ -82,6 +82,20 @@ const meetingsOf = (html: string) =>
       .trim(),
   ])
 
+/** The sentence of the row Laatste wedstrijden for a screen reader, if the page has the row. */
+const lastMatchesOf = (html: string) =>
+  /<span class="hf-visually-hidden">(Laatste wedstrijden: [^<]*)<\/span>/.exec(html)?.[1]
+
+/** The letters of the row, as they are shown: the oldest left and the newest right. */
+const lettersOf = (html: string) =>
+  [
+    ...(/<span aria-hidden="true" class="hf-mark-row-marks">(.*?)<\/span>/.exec(html)?.[1] ?? '').matchAll(
+      /<b [^>]*>(.)<\/b>/g,
+    ),
+  ]
+    .map(([, letter]) => letter)
+    .join('')
+
 describe('the page of a club', () => {
   it('has the name of the club as the h1, and "Eerder: …" under it for the other names', async () => {
     const html = await render()
@@ -194,6 +208,45 @@ describe('the page of a club', () => {
 
   it('has the button for an image on the summary, with the credit of Wikipedia under the image', async () => {
     expect(await render()).toContain('hf-card-shareable')
+  })
+
+  it('has the row Laatste wedstrijden directly under the heading of Wedstrijden, above the list', async () => {
+    const html = await render()
+    const card = html.slice(html.indexOf('id="wedstrijden"'))
+
+    expect(card.indexOf('hf-mark-row')).toBeGreaterThan(-1)
+    expect(card.indexOf('hf-mark-row')).toBeLessThan(card.indexOf('<ul'))
+    expect(card.slice(0, card.indexOf('hf-mark-row'))).not.toContain('<li')
+  })
+
+  it('shows the latest five as letters from our side, the oldest left, and says them in words', async () => {
+    const html = await render()
+
+    // The cup loss of 20 September 2026 is the newest, and so the last letter.
+    expect(lettersOf(html)).toBe('WWGWV')
+    expect(lastMatchesOf(html)).toBe('Laatste wedstrijden: winst, winst, gelijk, winst, verlies')
+  })
+
+  it('has no row with the Eredivisie, where there are only four meetings, and not for a single one', async () => {
+    expect(lastMatchesOf(await render('testclub', { competitie: 'eredivisie' }))).toBeUndefined()
+    expect(await render('beker-united')).not.toContain('hf-mark-row')
+  })
+
+  it('has the row for the choice: one with all the matches, and none with the Eredivisie alone', async () => {
+    const withMore = {
+      ...testclub,
+      matches: [
+        ...testclub.matches,
+        { ...testclub.matches[1]!, goalsAgainst: 0, goalsFor: 1, id: 99, matchDate: '2022-10-01' },
+      ],
+    }
+
+    vi.mocked(getClubPage).mockResolvedValue(withMore)
+
+    // Five in the Eredivisie now: 3–0, 1–1, 2–0, 4–2 and the extra 1–0, the newest first. With
+    // all the matches the cup loss is the newest, and the extra match is the sixth: not shown.
+    expect(lettersOf(await render('testclub', { competitie: 'eredivisie' }))).toBe('WWWGW')
+    expect(lettersOf(await render())).toBe('WWGWV')
   })
 
   it('lists every meeting, the newest first, with the season, the competition, the day and the result', async () => {

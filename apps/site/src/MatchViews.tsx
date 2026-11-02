@@ -581,7 +581,8 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
   )
 }
 
-const markOf: Record<FormResult, MarkRowMark> = {
+/** The letter, the word a screen reader says and the tone of a result, for a `MarkRow`. */
+export const markOf: Record<FormResult, MarkRowMark> = {
   G: { label: 'gelijk', mark: 'G', tone: 'neutral' },
   V: { label: 'verlies', mark: 'V', tone: 'negative' },
   W: { label: 'winst', mark: 'W', tone: 'positive' },

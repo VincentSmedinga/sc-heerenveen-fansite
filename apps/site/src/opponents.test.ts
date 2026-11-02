@@ -2,7 +2,7 @@ import type { PublicClubMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { earlierNames, meetingsOf, seasonsOf, stadiumsOf, summaryOf, tallyOf } from './opponents'
+import { earlierNames, lastResultsOf, meetingsOf, seasonsOf, stadiumsOf, summaryOf, tallyOf } from './opponents'
 
 let id = 0
 
@@ -68,6 +68,40 @@ describe('meetingsOf', () => {
 
   it('leaves out a match that is played but has no score', () => {
     expect(meetingsOf([match(null, null)], 'all')).toEqual([])
+  })
+})
+
+describe('lastResultsOf', () => {
+  it('gives the latest five as W, G and V from our side, the oldest first and the newest last', () => {
+    // The newest first: V (cup), G (league), G (cup, level after extra time), W, W.
+    expect(lastResultsOf(meetingsOf(matches, 'all').slice(0, 5))).toEqual(['W', 'W', 'G', 'G', 'V'])
+  })
+
+  it('leaves older meetings out when there are more than five', () => {
+    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'G', 'G', 'V'])
+  })
+
+  it('counts a cup tie that a shoot-out decided after a level score as a draw', () => {
+    const results = lastResultsOf([
+      ...meetingsOf([match(1, 1, { competition: 'KNVB Beker', penaltiesAgainst: 5, penaltiesFor: 3 })], 'all'),
+      ...meetingsOf(matches, 'league').slice(1, 5),
+    ])
+
+    expect(results?.at(-1)).toBe('G')
+  })
+
+  it('has no row for four meetings, and one for five', () => {
+    const meetings = meetingsOf(matches, 'all')
+
+    expect(lastResultsOf(meetings.slice(0, 4))).toBeUndefined()
+    expect(lastResultsOf(meetings.slice(0, 5))).toHaveLength(5)
+    expect(lastResultsOf([])).toBeUndefined()
+  })
+
+  it('only counts the meetings of the choice it is given', () => {
+    // Five in the league: 2-2, 4-1, 1-0, 0-1, 5-1 (newest first).
+    expect(lastResultsOf(meetingsOf(matches, 'league'))).toEqual(['W', 'V', 'W', 'W', 'G'])
+    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'G', 'G', 'V'])
   })
 })
 

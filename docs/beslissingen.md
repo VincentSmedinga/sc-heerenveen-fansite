@@ -5322,6 +5322,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rest van de kaart blijft.
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De kolommen zijn nu G, W, G, V, D en (bij de Eredivisie) P, met de woorden winst en verlies in plaats van gewonnen en verloren, en G gelijk in plaats van GL.
+- **Later:** zie _De kaart Wedstrijden op de pagina van een club heeft een rij met de laatste vijf uitslagen_ (2 november 2026): de kaart Wedstrijden heeft sindsdien direct onder de kop de rij Laatste wedstrijden, bij ten minste vijf gespeelde wedstrijden in de gekozen competitie.
+  De lijst eronder blijft.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -9941,3 +9943,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de tabel laten zoals hij is; alleen Thuis en Uit als rijen (dan ontbreekt het totaal); `DataTable` met andere koppen (dan lijken de twee tabellen niet op elkaar); `StandingsTable` algemener maken (zie _Waarom_); Totaal als eerste rij (de projecteigenaar wilde het onderaan); DV en DT los houden (de projecteigenaar koos één kolom).
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De kolommen zijn nu G, W, G, V, P en S in plaats van G, W, L, V, P en D, met de woorden winst en verlies.
+
+### De kaart Wedstrijden op de pagina van een club heeft een rij met de laatste vijf uitslagen
+
+- **Datum:** 2 november 2026
+- **Besluit:** de kaart Wedstrijden op de pagina van een club heeft direct onder de kop een `MarkRow` met de laatste vijf uitslagen tegen die club, boven de lijst (#629).
+  - **De naam** is "Laatste wedstrijden", zoals bij de kaart Reeksen.
+  - **De wedstrijden** zijn dezelfde als in de lijst eronder: gespeeld, met een score, in de gekozen competitie.
+    De schakelaar Eredivisie/Alle wedstrijden verandert dus de rij mee.
+    De letters zijn W, G en V vanuit sc Heerenveen, naar de score na verlenging (`lastResultsOf` in `src/opponents.ts`, met dezelfde telling als `tallyOf`).
+    De oudste staat links en de nieuwste achteraan, zoals bij elke `MarkRow`; de lijst eronder staat nieuwste eerst, dus de twee lopen tegengesteld.
+  - **Minder dan vijf:** er is geen rij.
+    Bij de keuze Eredivisie kan een rij verdwijnen die bij Alle wedstrijden wel staat.
+  - **De vertaling** van een uitslag naar letter, woord en toon (`markOf`) staat in `MatchViews.tsx` en wordt daar ook gebruikt door de kaart Reeksen.
+- **Waarom:** wie wil weten hoe het de laatste keren tegen een club ging, hoeft de regels dan niet te lezen.
+  Eén naam voor hetzelfde ding, en "Laatste wedstrijden" klopt ook als er minder dan vijf zijn gespeeld.
+  De rij en de lijst vertellen hetzelfde verhaal, en de volgorde van de letters is overal gelijk.
+  Een half gevulde rij leest als een gat, en een club die we zelden troffen toont dan geen rij die niets zegt.
+  De rij vat de lijst eronder samen, en het extra ruimte onder een `MarkRow` bestaat al.
+- **Alternatieven:** "Laatste uitslagen" (wijkt af van Reeksen) of "Laatste vijf" (fout bij minder dan vijf) als naam; de nieuwste links, zoals de lijst (wijkt af van elke andere `MarkRow`); tonen wat er is, een tot vier letters (dat doet Reeksen, maar dan toont een zelden getroffen club een rij die niets zegt); de rij onder de lijst (na tientallen regels, ver weg) of in de kaart "Onze uitslagen tegen …" (de wens noemt de kaart Wedstrijden).

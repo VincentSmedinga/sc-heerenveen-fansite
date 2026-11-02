@@ -4,6 +4,7 @@ import { addDiscussions } from './discussions'
 import { addEarlierSeason } from './earlier-season'
 import { addEpisodes } from './episodes'
 import { addHeadlines } from './headlines'
+import { addOlderMeetings } from './older-meetings'
 import { addStandings } from './standings'
 import { addTestSources } from './test-sources'
 import { addVisits } from './visits'
@@ -14,10 +15,10 @@ import { addVisits } from './visits'
 // moderator with a session that the checks of the admin log in as (see admin.ts), and the
 // made-up counters that the page Bezoek shows (see visits.ts), and a made-up league table for
 // /wedstrijden (see standings.ts), and made-up matches for the season before it (see
-// earlier-season.ts). The homepage keeps its headlines
-// and discussions in memory for five minutes, so nothing may ask for the homepage
-// before this has run: the site is started with robots.txt as its address to wait for (see
-// playwright.config.ts). The function it returns is the teardown.
+// earlier-season.ts), and three older matches against Testdorp FC (see older-meetings.ts).
+// The homepage keeps its headlines and discussions in memory for five minutes, so nothing may
+// ask for the homepage before this has run: the site is started with robots.txt as its address
+// to wait for (see playwright.config.ts). The function it returns is the teardown.
 export default async function globalSetup() {
   // First: the made-up headlines, discussions and episodes below sit on the test sources.
   await addTestSources()
@@ -30,6 +31,7 @@ export default async function globalSetup() {
   const removeVisits = await addVisits()
   const removeStandings = await addStandings()
   const removeEarlierSeason = await addEarlierSeason()
+  const removeOlderMeetings = await addOlderMeetings()
 
   return async () => {
     await removeHeadlines()
@@ -39,6 +41,7 @@ export default async function globalSetup() {
     await removeAdmin()
     await removeVisits()
     await removeStandings()
+    await removeOlderMeetings()
     await removeEarlierSeason()
   }
 }
