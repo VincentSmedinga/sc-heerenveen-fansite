@@ -432,22 +432,22 @@ Een pagina kan daarmee de bron noemen.
 
 `match_changes` bewaart de wijzigingen van een wedstrijd die de importer beoordeelde (zie de README van de importer, _Hoe betrouwbaar een wijziging is_).
 
-| Kolom                               | Betekenis                                                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `season`, `competition`, `round`    | De wedstrijd; blijft staan als de wedstrijd verdwijnt                                                                   |
-| `match_id`                          | De wedstrijd in `matches`; leeg als de wedstrijd weg is                                                                 |
-| `changed`                           | Wat er veranderde: `result`, `goals`, `date`, `opponent`, `stadium` of `removed`                                        |
-| `class`                             | `improvement`: een verbetering van kort geleden die de import overnam; `suspicious`: een wijziging die wacht            |
-| `reason`                            | Waarom de wijziging niet gewoon nieuw is, in het Engels                                                                 |
-| `old_value`, `new_value`            | De wedstrijd en zijn doelpunten als één regel, vóór en na de wijziging; `new_value` is leeg bij een verdwenen wedstrijd |
-| `proposal`                          | De nieuwe wedstrijd en zijn doelpunten als JSON, zodat een mens de wijziging kan accepteren zonder Wikipedia            |
-| `status`                            | `pending` (wacht), `accepted` of `rejected`                                                                             |
-| `resolution`                        | Hoe het besluit viel: `applied`, `stood` (zeven dagen), `person`, `reverted` of `replaced`; leeg zolang het wacht       |
-| `part`                              | Bij een afwijking met de invoer van de redactie: `kickoff`, `result` of `goals`; anders leeg                            |
-| `mailed_at`, `taken_over_mailed_at` | Wanneer de beheerders een mail kregen over de afwijking, en over de overname na zeven dagen; leeg tot een mail uit is   |
-| `first_seen_at`, `last_seen_at`     | De eerste en de laatste run die deze nieuwe waarde zag, in UTC                                                          |
-| `times_seen`                        | Het aantal runs dat deze nieuwe waarde zag                                                                              |
-| `decided_at`                        | Wanneer de wijziging werd overgenomen of afgewezen, in UTC                                                              |
+| Kolom                               | Betekenis                                                                                                                               |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `season`, `competition`, `round`    | De wedstrijd; blijft staan als de wedstrijd verdwijnt                                                                                   |
+| `match_id`                          | De wedstrijd in `matches`; leeg als de wedstrijd weg is                                                                                 |
+| `changed`                           | Wat er veranderde: `result`, `goals`, `date`, `opponent`, `stadium` of `removed`; bij een afwijking `uitslag`, `doelpunten` of `aftrap` |
+| `class`                             | `improvement`: een verbetering van kort geleden die de import overnam; `suspicious`: een wijziging die wacht                            |
+| `reason`                            | Waarom de wijziging niet gewoon nieuw is, in het Engels; bij een afwijking Nederlands: `wijkt af van de invoer van de redactie`         |
+| `old_value`, `new_value`            | De wedstrijd en zijn doelpunten als één regel, vóór en na de wijziging; `new_value` is leeg bij een verdwenen wedstrijd                 |
+| `proposal`                          | De nieuwe wedstrijd en zijn doelpunten als JSON, zodat een mens de wijziging kan accepteren zonder Wikipedia                            |
+| `status`                            | `pending` (wacht), `accepted` of `rejected`                                                                                             |
+| `resolution`                        | Hoe het besluit viel: `applied`, `stood` (zeven dagen), `person`, `reverted` of `replaced`; leeg zolang het wacht                       |
+| `part`                              | Bij een afwijking met de invoer van de redactie: `kickoff`, `result` of `goals`; anders leeg                                            |
+| `mailed_at`, `taken_over_mailed_at` | Wanneer de beheerders een mail kregen over de afwijking, en over de overname na zeven dagen; leeg tot een mail uit is                   |
+| `first_seen_at`, `last_seen_at`     | De eerste en de laatste run die deze nieuwe waarde zag, in UTC                                                                          |
+| `times_seen`                        | Het aantal runs dat deze nieuwe waarde zag                                                                                              |
+| `decided_at`                        | Wanneer de wijziging werd overgenomen of afgewezen, in UTC                                                                              |
 
 Een wijziging die niets bijzonders is (een nieuwe uitslag, een doelpunt erbij, een aanvangstijd) krijgt geen rij.
 De rijen blijven staan: ze laten zien hoe vaak Wikipedia iets verdachts deed.

@@ -31,7 +31,7 @@ type Props = {
 const notices: Record<string, { text: string; title: string }> = {
   'geen-invoer': { text: 'Er was geen invoer van de redactie om weg te halen.', title: 'Niets weggehaald' },
   gehouden: {
-    text: 'Jullie invoer blijft staan. De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.',
+    text: 'Onze invoer blijft staan. De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.',
     title: 'Invoer gehouden',
   },
   'niet-gelukt': {
@@ -117,7 +117,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
             </List.Item>
           </List>
           <Text appearance="meta">
-            Jullie invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
+            Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
             {formatVersionTime(new Date(difference.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia dan nog
             hetzelfde zegt.
           </Text>

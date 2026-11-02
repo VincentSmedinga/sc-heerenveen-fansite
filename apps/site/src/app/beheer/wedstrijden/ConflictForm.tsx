@@ -41,7 +41,7 @@ export function ConflictForm({
       <ErrorSummary
         errors={state.error === undefined ? [] : [{ id: reasonId, message: state.error }]}
         id={summaryId}
-        level={4}
+        level={3}
         tabIndex={-1}
       />
       <Form action={formAction}>
