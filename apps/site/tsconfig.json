@@ -1,5 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // The same prefix as `imports` in package.json, which Node, Vitest and the bundler read.
+    // TypeScript doesn't try extensions on the target of `imports`, so a specifier without
+    // `.ts` only resolves through this.
+    "paths": { "#src/*": ["./src/*"] }
+  },
   "include": ["e2e", "src", "next.config.ts", "playwright.config.ts", "vitest.config.ts"],
   "references": [
     { "path": "../../packages/db" },
