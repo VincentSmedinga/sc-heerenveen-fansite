@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
-import { type TableColumn, tableColumns } from '../table-columns'
+import { signedNumber, type TableColumn, tableColumns } from '../table-columns'
 
 export type RecordTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
@@ -57,9 +57,6 @@ const columns: Column[] = [
   { ...tableColumns.goalDifference, id: 'goalDifference' },
 ]
 
-/** A goal difference with its sign: `+6`, `−2` (a real minus sign) or `0`. */
-const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${-value}` : String(value))
-
 /**
  * The record of sc Heerenveen against one opponent: a real `table` with a row for each part
  * (at home and away) and a column for each figure, and under them the row with the total. It
@@ -82,7 +79,7 @@ export const RecordTable = ({ caption, className, rows, total, ...props }: Recor
   const cells = (row: RecordTableRow) =>
     shown.map((column) => (
       <td className={classNames('hf-numeric', column.figureClass)} key={column.id}>
-        {column.id === 'goalDifference' ? signed(row.goalDifference) : row[column.id]}
+        {column.id === 'goalDifference' ? signedNumber(row.goalDifference) : row[column.id]}
       </td>
     ))
 

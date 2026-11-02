@@ -9,6 +9,7 @@ import {
   RecordTable,
   ShortMatch,
   ShortStaff,
+  signedNumber,
   tableColumns,
   tableLegend,
   Text,
@@ -34,37 +35,37 @@ export function BasedOnSince({ choice, played, since }: { choice: CompetitionCho
   )
 }
 
+/** The figures of the list in the order of its columns, as `tableColumns` sets them. */
+const clubFigures = [
+  tableColumns.played,
+  tableColumns.won,
+  tableColumns.drawn,
+  tableColumns.lost,
+  tableColumns.points,
+  tableColumns.goalDifference,
+] as const
+
 /**
  * The columns of the list: the club, and a number each, with the word a screen reader says.
- * Every column can be sorted, and the points are only there with the choice Eredivisie, because
- * the cup gives none.
+ * Every column can be sorted.
  */
-const clubColumns = (choice: CompetitionChoice) =>
-  [
-    { name: 'Club', sortable: true },
-    ...[
-      tableColumns.played,
-      tableColumns.won,
-      tableColumns.drawn,
-      tableColumns.lost,
-      tableColumns.goals,
-      ...(choice === 'league' ? [tableColumns.points] : []),
-    ].map((column) => ({ ...column, sortable: true })),
-  ] as const
+export const clubColumns = [
+  { name: 'Club', sortable: true },
+  ...clubFigures.map((column) => ({ ...column, sortable: true })),
+] as const
 
-/** The legend under the list: the columns of the table, with what the goals hold. */
-const clubLegend = (choice: CompetitionChoice) =>
-  tableLegend([
-    tableColumns.played,
-    tableColumns.won,
-    tableColumns.drawn,
-    tableColumns.lost,
-    { ...tableColumns.goals, note: 'voor–tegen' },
-    ...(choice === 'league' ? [tableColumns.points] : []),
-  ])
+/** The legend under the list: the columns of the table, with what the points are. */
+const clubLegend = tableLegend(
+  clubFigures.map((column) =>
+    column === tableColumns.points ? { ...column, note: '3 per winst, 1 per gelijkspel' } : column,
+  ),
+)
 
-/** The points against a club in the Eredivisie: 3 for a win and 1 for a draw. */
+/** The points against a club: 3 for a win and 1 for a draw, in the cup too. */
 const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
+
+/** The goals for minus the goals against. */
+const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => record.goalsFor - record.goalsAgainst
 
 /**
  * The card of the page of a club with every match against it that was played, the newest
@@ -103,11 +104,11 @@ export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: 
  * The card of the page Tegenstanders with every club we played, A to Z, each name a link to
  * the page of that club (`address` is the base address of the pages of the clubs; `query` is
  * the part of the address that holds the choice, which every link keeps). The columns are the
- * played, won, drawn and lost matches, the goals for and against, as "7–5", and with the
- * choice Eredivisie the points. They are abbreviations, which fit a phone, and the line under
- * the table explains them. The visitor can sort on every column, with JavaScript; the table
- * of the server is A to Z. The goals sort on the goals for. There is no pagination: the list
- * is one page.
+ * played, won, drawn and lost matches, the points and the goal difference, with its sign, as
+ * "+18". They are abbreviations, which fit a phone, and the line under the table explains them.
+ * The visitor can sort on every column, with JavaScript; the table of the server is A to Z. The
+ * goal difference sorts on the number, so the club we did best against is on top. There is no
+ * pagination: the list is one page.
  */
 export function ClubsCard({
   address,
@@ -135,21 +136,21 @@ export function ClubsCard({
         <>
           <DataTable
             caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'league' ? ' in de Eredivisie' : ''}`}
-            columns={clubColumns(choice)}
+            columns={clubColumns}
             rows={records.map((record) => ({
               cells: [
                 record.played,
                 record.won,
                 record.drawn,
                 record.lost,
-                { sortValue: record.goalsFor, text: `${record.goalsFor}–${record.goalsAgainst}` },
-                ...(choice === 'league' ? [pointsOf(record)] : []),
+                pointsOf(record),
+                { sortValue: goalDifference(record), text: signedNumber(goalDifference(record)) },
               ],
               header: record.name,
               href: `${address}/${record.slug}${query}`,
             }))}
           />
-          <Text appearance="meta">{clubLegend(choice)}</Text>
+          <Text appearance="meta">{clubLegend}</Text>
           <BasedOnSince choice={choice} played={played} since={since} />
         </>
       )}
@@ -182,7 +183,7 @@ export function ClubSummaryCard({
   // Only the Eredivisie gives points, so the choice with the cup has no column for them.
   const row = (name: string, tally: ClubSummary['total']) => ({
     ...tally,
-    goalDifference: tally.goalsFor - tally.goalsAgainst,
+    goalDifference: goalDifference(tally),
     name,
     ...(choice === 'league' ? { points: pointsOf(tally) } : {}),
   })

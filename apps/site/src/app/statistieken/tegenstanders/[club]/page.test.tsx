@@ -116,11 +116,11 @@ describe('the page of a club', () => {
       [...html.matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g)].map(
         ([, header]) => header,
       ),
-    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'S'])
+    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'D'])
     expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
-      /^[^>]*> G gespeeld , W winst , G gelijk , V verlies , S doelsaldo/,
+      /^[^>]*> G gespeeld , W winst , G gelijk , V verlies , D doelsaldo/,
     )
-    // G, W, G, V, S: Thuis and Uit in the body, Totaal in the foot.
+    // G, W, G, V, D: Thuis and Uit in the body, Totaal in the foot.
     expect(summaryOf(html)).toEqual([
       ['Thuis', [2, 2, 0, 0, 5]],
       ['Uit', [3, 1, 1, 1, 1]],

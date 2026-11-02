@@ -25,12 +25,12 @@ describe('RecordTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has the columns G, W, G, V, P and S, with a column header with scope for each', () => {
+  it('has the columns G, W, G, V, P and D, with a column header with scope for each', () => {
     render(<RecordTable {...props} />)
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('[aria-hidden="true"]')?.textContent),
-    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'P', 'S'])
+    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'P', 'D'])
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
   })
 
@@ -122,7 +122,7 @@ describe('RecordTable', () => {
     expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
     expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6'])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W winst, G gelijk, V verlies, S doelsaldo',
+      'G gespeeld, W winst, G gelijk, V verlies, D doelsaldo',
     )
   })
 
@@ -144,7 +144,7 @@ describe('RecordTable', () => {
       'Doelsaldo',
     ])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W winst, G gelijk, V verlies, P punten, S doelsaldo',
+      'G gespeeld, W winst, G gelijk, V verlies, P punten, D doelsaldo',
     )
   })
 

@@ -284,7 +284,7 @@ const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, 
  * and than the sidebar of a small desktop. The line under the two sentences explains them, with
  * the same letters and words as every other table (`tableColumns`).
  */
-const flowColumns = [
+export const flowColumns = [
   tableColumns.played,
   tableColumns.won,
   tableColumns.drawn,

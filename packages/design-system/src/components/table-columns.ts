@@ -10,15 +10,20 @@ export type TableColumn = {
 
 /**
  * The abbreviations of the columns of every table, in one place. Each is one letter and has
- * one word, with one exception: `G` is both `gespeeld` and `gelijk`. The two never stand next
- * to each other, because `G` gespeeld is the first figure of a table and `G` gelijk comes
- * straight after `W` winst; the legend under the table and the whole word in the name of the
- * header tell them apart. The words of `W`, `G` gelijk and `V` are those of `MarkRow` and
- * `FormChart`.
+ * one word, with two exceptions: `G` is both `gespeeld` and `gelijk`, and `D` is both
+ * `doelpunten` and `doelsaldo`. The two `G`s never stand next to each other, because `G`
+ * gespeeld is the first figure of a table and `G` gelijk comes straight after `W` winst. The
+ * two `D`s stand in different tables: the goal difference in a table of the results of the
+ * club, the goals in a table of players. The legend under the table and the whole word in the
+ * name of the header tell them apart. The words of `W`, `G` gelijk and `V` are those of
+ * `MarkRow` and `FormChart`.
+ *
+ * The points come before the goals and the goal difference, as in every league table: `P`
+ * stands before `D`.
  */
 export const tableColumns = {
   drawn: { abbreviation: 'G', name: 'gelijk' },
-  goalDifference: { abbreviation: 'S', name: 'doelsaldo' },
+  goalDifference: { abbreviation: 'D', name: 'doelsaldo' },
   goals: { abbreviation: 'D', name: 'doelpunten' },
   lost: { abbreviation: 'V', name: 'verlies' },
   played: { abbreviation: 'G', name: 'gespeeld' },
@@ -37,9 +42,13 @@ export const reservedTableColumns = {
 
 /**
  * The legend under a table: the letter and the word of each column, in the order of the
- * columns, such as `G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen)`.
+ * columns, such as `G gespeeld, W winst, G gelijk, V verlies, P punten, D doelsaldo`. A column
+ * can have a `note` in brackets, such as `D doelpunten (voor–tegen)`.
  */
 export const tableLegend = (columns: readonly TableColumn[]) =>
   columns
     .map(({ abbreviation, name, note }) => `${abbreviation} ${name}${note === undefined ? '' : ` (${note})`}`)
     .join(', ')
+
+/** A goal difference with its sign: `+6`, `−2` (a real minus sign) or `0`. */
+export const signedNumber = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${-value}` : String(value))

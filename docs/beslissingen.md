@@ -3204,6 +3204,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** sorteren op de server met `?sorteer=` in het adres (werkt zonder JavaScript, maar laadt de pagina opnieuw, past niet bij de schakelaar en maakt de volgorde onderdeel van het adres: het issue sluit dat uit); knoppen in de koppen ook zonder JavaScript (knoppen die niets doen); de pagina laten sorteren met eigen code (dan bouwt elke tabel het opnieuw); het doelpuntensaldo als waarde van Doelpunten (zegt niet hoe vaak we scoorden); sorteren op meer kolommen tegelijk, filteren en paginering (buiten het issue); alle kolommen met een pijl van een neutrale vorm (een extra pictogram en meer breedte op 320 pixels).
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De knop heet nog letter en woord, maar G heeft nu twee woorden: "G gespeeld" en "G gelijk", en "GL gelijk" bestaat niet meer.
+- **Later:** zie _De lijst met tegenstanders sorteert op het doelsaldo en heeft altijd een kolom Punten_.
+  De kolom Doelpunten is vervallen: de laatste kolom is het doelsaldo en sorteert daarop, en Punten staat bij beide keuzes.
 
 ### De schakelaar is een baan met een schuivende knop
 
@@ -3604,6 +3606,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de volgorde van de kolommen en de regel onder de tabel maken het verschil voor wie ziet.
 - **Gevolg:** de kolommen worden smaller, want alle koppen zijn één letter (#630 bouwt daarop).
 - **Alternatieven:** "=" voor gelijk (uniek en eenletterig, maar de uitslagen krijgen dan een ander teken dan de supporter kent); "Wed" voor gespeeld (de gewone kop in Nederlandse tabellen, maar drie letters en een bredere kolom); een bal als pictogram voor gespeeld (een nieuw pictogram dat moeilijker te lezen is); GL of L voor gelijk (twee letters, of een letter die van niets komt); een lege kop (niet toegankelijk); "±" of "+/−" voor het doelsaldo (geen letter, of drie tekens breed); gewonnen en verloren als woorden (dan moeten de uitslagen en het verloop mee).
+- **Later:** zie _In de tabellen met de uitslagen van de club is het doelsaldo D, en staat P vóór D_ (2 november 2026).
+  Het doelsaldo is D en niet S, dus D heeft twee woorden, doelpunten en doelsaldo, net als G; de test legt G en D vast als de enige uitzonderingen.
+  DV, DT en DS komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont, en geen tabel doet dat nu.
+  De rest blijft: één lijst, `tableLegend`, de woorden winst, gelijk en verlies.
 
 ### Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 
@@ -10034,3 +10040,45 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een half gevulde rij leest als een gat, en een club die we zelden troffen toont dan geen rij die niets zegt.
   De rij vat de lijst eronder samen, en het extra ruimte onder een `MarkRow` bestaat al.
 - **Alternatieven:** "Laatste uitslagen" (wijkt af van Reeksen) of "Laatste vijf" (fout bij minder dan vijf) als naam; de nieuwste links, zoals de lijst (wijkt af van elke andere `MarkRow`); tonen wat er is, een tot vier letters (dat doet Reeksen, maar dan toont een zelden getroffen club een rij die niets zegt); de rij onder de lijst (na tientallen regels, ver weg) of in de kaart "Onze uitslagen tegen …" (de wens noemt de kaart Wedstrijden).
+
+### De lijst met tegenstanders sorteert op het doelsaldo en heeft altijd een kolom Punten
+
+- **Datum:** 2 november 2026
+- **Besluit:** de lijst op `/statistieken/tegenstanders` heeft de kolommen Club, G, W, G, V, P en D, bij Alle wedstrijden en bij Eredivisie (#640).
+  - **D is het doelsaldo.**
+    De cel toont het saldo met een teken (`+18`, `−2`, `0`) en de kolom sorteert op het getal.
+    De eerste klik zet het hoogste saldo bovenaan.
+    De kolom met "voor–tegen" en de sortering op de doelpunten voor zijn vervallen; de uitslagen staan nog op de pagina van de club.
+  - **P telt alle wedstrijden die de lijst telt.**
+    Bij Alle wedstrijden telt de beker mee: 3 punten per winst en 1 per gelijkspel, ook als een gelijkspel in de beker daarna werd beslist.
+    `pointsOf` rekent het uit, op één plek.
+  - **De regel onder de tabel** zegt "P punten (3 per winst, 1 per gelijkspel)", omdat dit geen stand is en P hier iets anders kan lijken.
+  - **De rijen Punten** op de pagina van een club (#406) blijven zoals ze zijn.
+- **Waarom:** de projecteigenaar zoekt de club waartegen we het best deden, en daarvoor zijn de punten en het saldo de maat.
+  Sorteren op de doelpunten voor zette Sparta bovenaan, een club waartegen we veel scoorden en veel kregen.
+  Zonder de beker mist de helft van de wedstrijden bij Alle wedstrijden.
+  Een kolom die D heet en op het saldo sorteert, zou liegen, want een schermlezer hoort "doelpunten".
+- **Nadeel:** de lijst toont niet meer hoeveel doelpunten we maakten en kregen tegen een club.
+- **Alternatieven:** P alleen bij Eredivisie (de enige maat voor "best" verdwijnt bij de standaardkeuze); D met "voor–tegen" laten staan en op het saldo sorteren (de kop liegt); een kolom voor de doelpunten én een voor het saldo (acht kolommen passen niet op 320 pixels); sorteren op de doelpunten voor houden.
+- **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de beslissingen "Doelpunten sorteert op de doelpunten voor" en "Bij Alle wedstrijden is er geen kolom Punten" gelden niet meer.
+
+### In de tabellen met de uitslagen van de club is het doelsaldo D, en staat P vóór D
+
+- **Datum:** 2 november 2026
+- **Besluit:** in `tableColumns` is het doelsaldo **D** en niet S, en P staat in elke tabel vóór D (#640).
+  - **D heeft twee woorden:** doelsaldo in de tabellen met de uitslagen van de club, doelpunten in de tabellen van de spelers (`TopScorersTable`).
+    Geen tabel heeft beide.
+    De naam voor een schermlezer blijft het hele woord, "doelsaldo", en een sorteerknop heet "D doelsaldo".
+  - **DV, DT en DS** komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont.
+    Geen tabel doet dat nu, dus ze zijn er niet.
+  - **De volgorde:** P staat vóór D.
+    De punten zijn de eerste maatstaf, het doelsaldo de tweede, zoals in elke stand.
+    De regel staat in de documentatie van `tableColumns`, en een test legt de volgorde vast van de lijst met tegenstanders, `RecordTable`, `StandingsTable` en de tabellen over het verloop.
+  - **`RecordTable`, `DataTable` in de lijst van tegenstanders en de verhalen** nemen D uit `tableColumns`; `signedNumber` schrijft het saldo met een teken.
+- **Waarom:** de projecteigenaar verwacht in een tabel met uitslagen nooit twee soorten D, en D is het doelsaldo of de doelpunten zoals G gespeeld of gelijk is.
+  Eén letter per maat houdt de tabellen gelijk, en een tweede soort D komt niet in dezelfde tabel voor.
+  Het saldo vraagt geen eigen letter als geen tabel het naast de doelpunten toont.
+- **Nadeel:** D heeft twee woorden, naast G.
+  Alleen de tabel en de regel eronder maken het verschil voor wie ziet.
+  Een tabel die ooit doelpunten én saldo toont, heeft nieuwe letters nodig.
+- **Alternatieven:** S voor het doelsaldo houden (de projecteigenaar wilde D); DS voor het saldo nu al (geen tabel toont de doelpunten ernaast); de volgorde per tabel laten kiezen (dan komt de fout terug).
