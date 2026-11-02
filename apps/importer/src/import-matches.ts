@@ -16,10 +16,11 @@ import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import type { Judgement } from './classify-change.ts'
 import type { Fetcher } from './fetcher.ts'
+import type { ResultCounts } from './league-results.ts'
 import type { LinkedGoal, Proposal } from './match-changes.ts'
 import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
-import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
+import { checkGoals, checkMatches, checkResults, checkStandings } from './check-wikipedia.ts'
 import {
   classifyChange,
   classifyRemoval,
@@ -30,6 +31,7 @@ import {
 } from './classify-change.ts'
 import { clubFullNames } from './club-names.ts'
 import { importEditedMatch, mergeEntry, readEdits } from './edited-matches.ts'
+import { matchClubNames, storeResults } from './league-results.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import {
   decide,
@@ -40,7 +42,15 @@ import {
   storeGoals,
   updateMatch,
 } from './match-changes.ts'
-import { pageTitles, pageUrl, readCup, readLeague, readPlayoffs, readStandings } from './read-wikipedia.ts'
+import {
+  pageTitles,
+  pageUrl,
+  readCup,
+  readLeague,
+  readLeagueResults,
+  readPlayoffs,
+  readStandings,
+} from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
 import { describeError, formatTime, printable } from './text.ts'
 
@@ -80,6 +90,8 @@ export type MatchReport =
       clubs: string[]
       kind: 'imported'
       matches: { added: number; held: number; removed: number; unchanged: number; updated: number }
+      /** The results of the league matches of every club (`league_results`). */
+      results: ResultCounts
       season: string
       /** The number of clubs in the table. */
       standings: number
@@ -130,6 +142,7 @@ export function formatMatchReport(report: MatchReport): string {
     case 'imported':
       return [
         `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed${report.matches.held === 0 ? '' : `, ${report.matches.held} held`}; table of ${report.standings} clubs for ${report.validOn}`,
+        `${head}: league results of all clubs: ${report.results.added} new, ${report.results.updated} updated, ${report.results.unchanged} unchanged, ${report.results.removed} removed`,
         ...report.clubs.map((club) => `${head}: ${printable(club)}`),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
@@ -566,7 +579,9 @@ async function readAndStore(
     }
   }
 
-  problems.push(...checkMatches(found), ...checkStandings(table.rows, found))
+  const named = matchClubNames(readLeagueResults(textOf('programme')).results, table.rows)
+
+  problems.push(...checkMatches(found), ...checkStandings(table.rows, found), ...checkResults(named.results))
 
   if (problems.length > 0) {
     return { kind: 'error', message: problems.join('; '), season }
@@ -588,11 +603,13 @@ async function readAndStore(
 
     // A page that changes too much at once is held whole, like a page that fails a check.
     if (result.heldAll) {
-      return result
+      return { ...result, results: { added: 0, removed: 0, unchanged: 0, updated: 0 } }
     }
 
     await transaction.delete(standings).where(eq(standings.season, season))
     await transaction.insert(standings).values(table.rows.map((row) => standingsRow(season, row, validOn)))
+
+    const results = await storeResults(transaction, season, named.results)
 
     for (const page of pages) {
       // A page of the play-offs without a match of ours is no source of the site, unless a
@@ -615,7 +632,7 @@ async function readAndStore(
         .onDuplicateKeyUpdate({ set: values })
     }
 
-    return result
+    return { ...result, results }
   })
 
   if (stored.heldAll) {
@@ -630,6 +647,7 @@ async function readAndStore(
     clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
+    results: stored.results,
     season,
     standings: table.rows.length,
     validOn,

@@ -59,6 +59,7 @@ beforeEach(async () => {
     'wikipedia_pages',
     'match_changes',
     'matches',
+    'league_results',
     'standings',
     'match_imports',
     'sources',
@@ -920,15 +921,16 @@ describe('the import command', () => {
     const lines = reports.flatMap((report) => report.split('\n')).filter((line) => !/: new (club|name) /u.test(line))
 
     expect(code).toBe(0)
-    expect(lines.slice(0, 4)).toEqual([
+    expect(lines.slice(0, 5)).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       expect.stringContaining('Matches 2026/27: 35 new'),
+      expect.stringContaining('Matches 2026/27: league results of all clubs'),
       expect.stringContaining('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad'),
       'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
     ])
     // The goals of the made-up matches differ from the made-up table: a line for each.
-    expect(lines.length).toBeGreaterThan(4)
-    expect(lines.slice(4).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
+    expect(lines.length).toBeGreaterThan(5)
+    expect(lines.slice(5).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
       true,
     )
     expect(pageRequests(server).at(-1)).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw')
