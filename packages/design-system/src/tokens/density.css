@@ -12,8 +12,8 @@
  * 24 by 24 pixels of WCAG 2.5.8.
  *
  * A custom property that another token takes from a step, such as --hf-page-margin from
- * --hf-space-m, keeps the value of the place where it is declared, :root. That is what keeps the
- * width of the page the same at every density.
+ * --hf-space-m, keeps the value of the place where it is declared, :root. That is what keeps
+ * the width of the page the same at every density.
  */
 
 @layer hf.tokens {
