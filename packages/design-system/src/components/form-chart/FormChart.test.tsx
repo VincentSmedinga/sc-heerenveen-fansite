@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 
 import type { FormResult } from './form'
 
+import { tableColumns, tableLegend } from '../table-columns'
+import { formOf } from './form'
 import { FormChart } from './FormChart'
 
 /** The text of the page under the chart, as a screen reader gets it (the chart is hidden). */
@@ -89,6 +91,17 @@ describe('FormChart', () => {
     const { container } = render(<FormChart results={season} />)
 
     expect(textOf(container)).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
+  })
+
+  it('uses the letters and words of the columns under the tables for winst, gelijk and verlies', () => {
+    const { drawn, lost, won } = tableColumns
+    const { container } = render(<FormChart results={season} />)
+
+    expect(formOf(['W', 'G', 'V']).map((mark) => `${mark.mark} ${mark.label}`)).toEqual(
+      tableLegend([won, drawn, lost]).split(', '),
+    )
+    for (const item of tableLegend([won, drawn, lost]).split(', '))
+      expect(container.querySelector('.hf-form-chart-key')?.textContent).toContain(item)
   })
 
   it('takes the number of matches and the size of the window from its props', () => {

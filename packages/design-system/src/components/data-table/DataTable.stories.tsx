@@ -4,6 +4,7 @@ import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
+import { tableColumns, tableLegend } from '../table-columns'
 import { Text } from '../text/Text'
 import { DataTable, type DataTableProps, type DataTableRow, type DataTableTextRow } from './DataTable'
 
@@ -38,14 +39,13 @@ const manyClubs: DataTableRow[] = [
   club('Álbum Rangers', [4, 1, 2, 1, 4, 4]),
 ]
 
+const flowColumns = [tableColumns.played, tableColumns.won, tableColumns.drawn, tableColumns.lost, tableColumns.points]
+const clubColumns = [tableColumns.played, tableColumns.won, tableColumns.drawn, tableColumns.lost, tableColumns.goals]
+const clubLegend = tableLegend([...clubColumns.slice(0, 4), { ...tableColumns.goals, note: 'voor–tegen' }])
+
 const sortableColumns: DataTableProps['columns'] = [
   { name: 'Club', sortable: true },
-  { abbreviation: 'G', name: 'gespeeld', sortable: true },
-  { abbreviation: 'W', name: 'gewonnen', sortable: true },
-  { abbreviation: 'GL', name: 'gelijk', sortable: true },
-  { abbreviation: 'V', name: 'verloren', sortable: true },
-  { abbreviation: 'D', name: 'doelpunten', sortable: true },
-  { abbreviation: 'P', name: 'punten', sortable: true },
+  ...[...clubColumns, tableColumns.points].map((column) => ({ ...column, sortable: true })),
 ]
 
 const meta = preview.meta({
@@ -182,17 +182,10 @@ const renderAbbreviations = () => (
       </Heading>
       <DataTable
         caption="Wat er gebeurt na het eerste doelpunt"
-        columns={[
-          'Eerste doelpunt',
-          { abbreviation: 'G', name: 'gespeeld' },
-          { abbreviation: 'W', name: 'winst' },
-          { abbreviation: 'GL', name: 'gelijk' },
-          { abbreviation: 'V', name: 'verlies' },
-          { abbreviation: 'P', name: 'punten' },
-        ]}
+        columns={['Eerste doelpunt', ...flowColumns]}
         rows={results}
       />
-      <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
+      <Text appearance="meta">{tableLegend(flowColumns)}</Text>
     </Card>
   </div>
 )
@@ -231,17 +224,10 @@ export const Links = meta.story({
         </Heading>
         <DataTable
           caption="De tegenstanders van sc Heerenveen met onze uitslagen tegen elk"
-          columns={[
-            'Club',
-            { abbreviation: 'G', name: 'gespeeld' },
-            { abbreviation: 'W', name: 'gewonnen' },
-            { abbreviation: 'GL', name: 'gelijk' },
-            { abbreviation: 'V', name: 'verloren' },
-            { abbreviation: 'D', name: 'doelpunten' },
-          ]}
+          columns={['Club', ...clubColumns]}
           rows={clubs}
         />
-        <Text appearance="meta">G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)</Text>
+        <Text appearance="meta">{clubLegend}</Text>
       </Card>
     </div>
   ),
@@ -254,7 +240,7 @@ const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
         Alle tegenstanders
       </Heading>
       <DataTable {...args} />
-      <Text appearance="meta">G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen), P punten</Text>
+      <Text appearance="meta">{`${clubLegend}, ${tableLegend([tableColumns.points])}`}</Text>
     </Card>
   </div>
 )

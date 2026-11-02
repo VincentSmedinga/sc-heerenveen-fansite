@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
+import { tableColumns } from '../table-columns'
 
 /** The name of our own club, whose row stands out. */
 const ourClub = 'sc Heerenveen'
@@ -44,8 +45,8 @@ type Column = {
 }
 
 const columns: Column[] = [
-  { abbreviation: 'G', id: 'played', name: 'gespeeld', value: (row) => row.played },
-  { abbreviation: 'P', id: 'points', name: 'punten', value: (row) => row.points },
+  { ...tableColumns.played, id: 'played', value: (row) => row.played },
+  { ...tableColumns.points, id: 'points', value: (row) => row.points },
 ]
 
 /**

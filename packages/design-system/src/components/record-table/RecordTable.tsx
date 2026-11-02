@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { type TableColumn, tableColumns } from '../table-columns'
 
 export type RecordTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
@@ -40,22 +41,20 @@ export type RecordTableRow = {
   won: number
 }
 
-type Column = {
-  abbreviation: string
+type Column = TableColumn & {
   /** The class of the figures: the colour of the result, or the weight of the points. */
   figureClass?: string
   /** What the column is, for the key of its cells. */
   id: 'drawn' | 'goalDifference' | 'lost' | 'played' | 'points' | 'won'
-  name: string
 }
 
 const columns: Column[] = [
-  { abbreviation: 'G', id: 'played', name: 'gespeeld' },
-  { abbreviation: 'W', figureClass: 'hf-match-win', id: 'won', name: 'gewonnen' },
-  { abbreviation: 'L', figureClass: 'hf-match-draw', id: 'drawn', name: 'gelijk' },
-  { abbreviation: 'V', figureClass: 'hf-match-loss', id: 'lost', name: 'verloren' },
-  { abbreviation: 'P', figureClass: 'hf-bar-value', id: 'points', name: 'punten' },
-  { abbreviation: 'D', id: 'goalDifference', name: 'doelsaldo' },
+  { ...tableColumns.played, id: 'played' },
+  { ...tableColumns.won, figureClass: 'hf-match-win', id: 'won' },
+  { ...tableColumns.drawn, figureClass: 'hf-match-draw', id: 'drawn' },
+  { ...tableColumns.lost, figureClass: 'hf-match-loss', id: 'lost' },
+  { ...tableColumns.points, figureClass: 'hf-bar-value', id: 'points' },
+  { ...tableColumns.goalDifference, id: 'goalDifference' },
 ]
 
 /** A goal difference with its sign: `+6`, `−2` (a real minus sign) or `0`. */
@@ -66,7 +65,7 @@ const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${-
  * (at home and away) and a column for each figure, and under them the row with the total. It
  * has the look of the table of `StandingsTable`, with a caption that is not shown, column
  * headers with `scope`, a row header for each row, and under the table the full words of the
- * abbreviations, as "G gespeeld, W gewonnen, …". A screen reader hears the full word, not the
+ * abbreviations, as "G gespeeld, W winst, …". A screen reader hears the full word, not the
  * letter. The wins, draws and losses have the colours of the results (green, grey and red), as
  * in `ShortMatch`; the words in the header say what they are, so the colour is not alone. The
  * points and the total row are bold.

@@ -3181,6 +3181,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tabel met een sorteerbare kolom stuurt een stukje script mee, waar een gewone `DataTable` er geen heeft.
   "7–5" sorteert op één getal en een schermlezer hoort dat niet, want de kop zegt alleen "doelpunten".
 - **Alternatieven:** sorteren op de server met `?sorteer=` in het adres (werkt zonder JavaScript, maar laadt de pagina opnieuw, past niet bij de schakelaar en maakt de volgorde onderdeel van het adres: het issue sluit dat uit); knoppen in de koppen ook zonder JavaScript (knoppen die niets doen); de pagina laten sorteren met eigen code (dan bouwt elke tabel het opnieuw); het doelpuntensaldo als waarde van Doelpunten (zegt niet hoe vaak we scoorden); sorteren op meer kolommen tegelijk, filteren en paginering (buiten het issue); alle kolommen met een pijl van een neutrale vorm (een extra pictogram en meer breedte op 320 pixels).
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De knop heet nog letter en woord, maar G heeft nu twee woorden: "G gespeeld" en "G gelijk", en "GL gelijk" bestaat niet meer.
 
 ### De schakelaar is een baan met een schuivende knop
 
@@ -3548,6 +3550,37 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kolomkoppen houden met twee kopregels; de regels hebben dan niets met elkaar te maken.
   Een veld weghalen uit de pagina als het niet past; dan is wat de redacteur typte weg bij een vergissing.
   Een attribuut `disabled` op elk veld apart; dan moet de aanroeper het bij elk soort veld onthouden.
+
+### Alle tabellen gebruiken één stel afkortingen voor hun kolommen
+
+- **Datum:** 2 november 2026
+- **Besluit:** de kolommen van alle tabellen hebben één stel afkortingen, met één letter per kolom, in één lijst in het designsysteem (`tableColumns`).
+  - **De letters:** G gespeeld, W winst, G gelijk, V verlies, P punten, D doelpunten en S doelsaldo.
+    A (assists) is gereserveerd voor de tabellen van de spelers (#493).
+    GL, L, DV, DT en DS komen niet meer voor.
+  - **De twee G's:** alleen G heeft twee woorden.
+    G gespeeld staat vooraan van de cijferkolommen en G gelijk direct na W, dus de twee staan nooit naast elkaar.
+    Een schermlezer hoort altijd het hele woord, een sorteerknop heet "G gespeeld" of "G gelijk", en de regel onder de tabel zegt wat elke letter is.
+  - **Het doelsaldo is S**, van saldo, want D is al doelpunten en V is verlies.
+    De waarden houden hun teken (+6, −2).
+  - **De woorden zijn winst, gelijk en verlies**, overal.
+    Dat zijn de woorden van `MarkRow` en `FormChart`, die W, G en V houden.
+    De lijst van tegenstanders en `RecordTable` stappen over van gewonnen en verloren.
+  - **De doelpunten** blijven in één kolom, D, met de score "voor–tegen" in de cel.
+  - **De regel onder de tabel** noemt alleen de letters die de tabel heeft, in de volgorde van de kolommen.
+    `tableLegend` schrijft hem uit de lijst.
+  - **Eén plek:** `StandingsTable`, `TopScorersTable`, `RecordTable`, `DataTable` in de lijst van tegenstanders en de tabellen over het verloop van de wedstrijden nemen hun letters en woorden uit `tableColumns`.
+    Een test legt de lijst vast en faalt als een letter twee woorden krijgt, met G als enige uitzondering.
+    Wie een kolom toevoegt, neemt de letter uit de lijst, of kiest een letter die nog vrij is en voegt die toe.
+- **Waarom:** dezelfde letter betekende niet overal hetzelfde.
+  G was "gespeeld" in de stand en "gelijk" in de uitslagen, GL en L waren allebei "gelijk", en D was doelsaldo op de pagina van een club en doelpunten in de lijst van tegenstanders en bij de topscorers.
+  De projecteigenaar wil één letter per kolom en koos ervoor om twee G's te accepteren in plaats van een teken of een tweede letter.
+  W, G en V zijn ook de tekens van de uitslagen, dus een tabel en een rij uitslagen gebruiken dezelfde letters voor winst, gelijk en verlies.
+  Eén lijst houdt de tabellen gelijk, ook de tabellen die er nog komen.
+- **Nadeel:** G heeft twee betekenissen.
+  Alleen de volgorde van de kolommen en de regel onder de tabel maken het verschil voor wie ziet.
+- **Gevolg:** de kolommen worden smaller, want alle koppen zijn één letter (#630 bouwt daarop).
+- **Alternatieven:** "=" voor gelijk (uniek en eenletterig, maar de uitslagen krijgen dan een ander teken dan de supporter kent); "Wed" voor gespeeld (de gewone kop in Nederlandse tabellen, maar drie letters en een bredere kolom); een bal als pictogram voor gespeeld (een nieuw pictogram dat moeilijker te lezen is); GL of L voor gelijk (twee letters, of een letter die van niets komt); een lege kop (niet toegankelijk); "±" of "+/−" voor het doelsaldo (geen letter, of drie tekens breed); gewonnen en verloren als woorden (dan moeten de uitslagen en het verloop mee).
 
 ## Site
 
@@ -4361,6 +4394,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De kolommen DV en DT zijn vervallen en DS heet nu D, en het bijschrift met de dag is niet meer te zien (zie _De stand toont de dag niet_); de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
 - **Later:** zie _De punten staan voor het doelsaldo in de standtabel_.
   De punten staan niet meer achteraan: de kolommen zijn nu positie, club, G, W, G, V, P en D.
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De afkortingen DV, DT en DS bestaan niet meer; het doelsaldo is S, en de letters komen uit één lijst.
 
 ### De bronvermelding van Wikipedia is een component met een link per pagina
 
@@ -5266,6 +5301,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
 - **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, L, V, P en D als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
   De rest van de kaart blijft.
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De kolommen zijn nu G, W, G, V, D en (bij de Eredivisie) P, met de woorden winst en verlies in plaats van gewonnen en verloren, en G gelijk in plaats van GL.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -8462,6 +8499,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De volgorde van de kolommen is nu #, Club, G, W, G, V, P en D.
 - **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
   De kolommen W, G, V en D zijn vervallen: de kolommen zijn nu #, Club, G en P.
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  Het doelsaldo heet nu S in plaats van D.
 
 ### De stand toont de dag niet
 
@@ -9397,6 +9436,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De tabel omdraaien, met de uitkomsten als rijen en de situaties als kolommen (past op 320 pixels ook niet).
 - **Later:** zie _Een inleiding of toelichting bestaat alleen als ze iets toevoegt, en ze staat op een vaste plek_.
   De regel met de afkortingen staat onder de tabellen en onder de twee zinnen, direct boven "Gebaseerd op".
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De kolom gelijk heet nu G gelijk in plaats van GL.
 
 ### Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd
 
@@ -9879,3 +9920,5 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De gedeelde klassen heten `hf-bar-*`, ook al heeft deze tabel geen balk.
   Een wijziging aan de stijl van de ene tabel kan de andere raken.
 - **Alternatieven:** de tabel laten zoals hij is; alleen Thuis en Uit als rijen (dan ontbreekt het totaal); `DataTable` met andere koppen (dan lijken de twee tabellen niet op elkaar); `StandingsTable` algemener maken (zie _Waarom_); Totaal als eerste rij (de projecteigenaar wilde het onderaan); DV en DT los houden (de projecteigenaar koos één kolom).
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De kolommen zijn nu G, W, G, V, P en S in plaats van G, W, L, V, P en D, met de woorden winst en verlies.

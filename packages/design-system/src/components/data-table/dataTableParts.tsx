@@ -30,8 +30,8 @@ const textOf = (cell: DataTableCell) => {
 /**
  * The text of a column header: the abbreviation, with the whole word for a screen reader, or
  * the name itself when the column has no abbreviation. In a button (`named`) the abbreviation
- * is part of the name as well, as in `GL gelijk`, so what the visitor reads is in the name and
- * speech control can say "click GL" (WCAG 2.5.3).
+ * is part of the name as well, as in `G gelijk`, so what the visitor reads is in the name and
+ * speech control can say "click G gelijk" (WCAG 2.5.3).
  */
 export const ColumnText = ({ column, named = false }: { column: DataTableColumn; named?: boolean }) =>
   column.abbreviation === undefined ? (

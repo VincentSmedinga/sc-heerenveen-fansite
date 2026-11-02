@@ -73,8 +73,8 @@ describe('the page /statistieken/tegenstanders', () => {
 
     expect(html).toContain('<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z')
     expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(6)
-    expect(html).toContain('<span class="hf-visually-hidden">gewonnen</span>')
-    expect(html).toContain('G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)')
+    expect(html).toContain('<span class="hf-visually-hidden">winst</span>')
+    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen)')
   })
 
   it('sends the table without buttons, because sorting needs JavaScript, and has no pagination', async () => {
@@ -93,9 +93,9 @@ describe('the page /statistieken/tegenstanders', () => {
     expect([...html.matchAll(/<th [^>]*scope="col">(.*?)<\/th>/g)].map(([, header]) => header)).toEqual([
       'Club',
       '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
-      '<abbr title="Gewonnen"><span aria-hidden="true">W</span><span class="hf-visually-hidden">gewonnen</span></abbr>',
-      '<abbr title="Gelijk"><span aria-hidden="true">GL</span><span class="hf-visually-hidden">gelijk</span></abbr>',
-      '<abbr title="Verloren"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verloren</span></abbr>',
+      '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
+      '<abbr title="Gelijk"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gelijk</span></abbr>',
+      '<abbr title="Verlies"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verlies</span></abbr>',
       '<abbr title="Doelpunten"><span aria-hidden="true">D</span><span class="hf-visually-hidden">doelpunten</span></abbr>',
     ])
   })
@@ -114,7 +114,7 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(html).toContain(
       '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
     )
-    expect(html).toContain('G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen), P punten')
+    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen), P punten')
     expect(rowsOf(html)).toEqual([
       [
         'FC Voorbeeld',

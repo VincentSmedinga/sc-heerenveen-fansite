@@ -1,0 +1,39 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Componenten/Weergave/Afkortingen van kolommen" />
+
+# Afkortingen van kolommen
+
+Elke tabel met cijfers heeft kolomkoppen van één letter, uit één lijst: `tableColumns` in het designsysteem.
+Een component en een pagina nemen hun letters en woorden daar vandaan en schrijven ze niet zelf uit.
+
+| Letter | Woord      |
+| ------ | ---------- |
+| G      | gespeeld   |
+| W      | winst      |
+| G      | gelijk     |
+| V      | verlies    |
+| P      | punten     |
+| D      | doelpunten |
+| S      | doelsaldo  |
+
+**A (assists) is gereserveerd** voor de tabellen van de spelers, die er nog niet zijn.
+
+## De regel van de twee G's
+
+- **Alleen G heeft twee woorden:** gespeeld en gelijk.
+  Elke andere letter heeft één woord, en een woord heeft één letter.
+- **G gespeeld staat vooraan** van de cijferkolommen, vóór de uitkomsten, en **G gelijk staat direct na W**.
+  De twee staan dus nooit naast elkaar.
+- **Een schermlezer hoort het hele woord.**
+  Een sorteerknop heet letter en woord, "G gespeeld" of "G gelijk".
+- **De regel onder de tabel** noemt alleen de letters die de tabel heeft, in de volgorde van de kolommen, zoals "G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen), P punten".
+  `tableLegend` schrijft hem.
+
+## Een kolom toevoegen
+
+Neem de letter uit de lijst.
+Heeft de kolom nog geen letter, kies er dan een die vrij is, voeg hem toe aan `tableColumns` en leg het woord vast in de test.
+Zo kan de lijst niet uit elkaar groeien.
+
+W, G en V zijn ook de tekens van de uitslagen in `MarkRow` en `FormChart`, met dezelfde woorden: winst, gelijk en verlies.

@@ -8,7 +8,7 @@ export type DataTableCell = number | string | { sortValue: number | string; text
 
 export type DataTableColumn = {
   /**
-   * What the header shows, one to three letters such as `GL`. Without it the header shows
+   * What the header shows, one letter such as `G`. Without it the header shows
    * `name` itself, as it does for a column given as a string.
    */
   abbreviation?: string

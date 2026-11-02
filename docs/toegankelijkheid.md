@@ -109,6 +109,8 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
 
 - [ ] Een tabel is een echte `table` met een bijschrift, kolomkoppen en rijkoppen met `scope`.
       Een afgekorte kop heeft het hele woord voor een schermlezer, en een regel onder de tabel legt de afkortingen uit (1.3.1).
+      De letters en woorden komen uit één lijst, `tableColumns` in het designsysteem (G gespeeld, W winst, G gelijk, V verlies, P punten, D doelpunten, S doelsaldo, en A assists als gereserveerde letter).
+      Alleen G heeft twee woorden: een sorteerknop heet daarom letter en woord, "G gespeeld" of "G gelijk", zodat twee koppen met dezelfde letter verschillende namen hebben (2.5.3).
 - [ ] Een tabel die kan sorteren, werkt ook zonder JavaScript: de server stuurt de hele tabel in een vaste volgorde, met koppen van gewone tekst en zonder knoppen die niets doen.
       Met JavaScript wordt de kop van een sorteerbare kolom een knop (4.1.2).
 - [ ] De gesorteerde kop heeft `aria-sort="ascending"` of `"descending"`, en de andere sorteerbare koppen `"none"`.
