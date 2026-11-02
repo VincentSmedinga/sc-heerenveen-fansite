@@ -99,70 +99,172 @@ describe('the pages of the matches', () => {
   })
 })
 
+/** A match of the list that the editors changed. */
+async function editMatch(id: number) {
+  await saveEntry(
+    database.db,
+    userId,
+    id,
+    {
+      goals: [],
+      kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
+      result: {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      },
+    },
+    'Wikipedia is achter',
+  )
+}
+
+const playedAway = {
+  goalsAgainst: 2,
+  goalsFor: 1,
+  home: false,
+  kickoffAt: new Date('2026-08-09T14:45:00Z'),
+  matchDate: '2026-08-09',
+  opponent: 'FC Twente',
+  round: 'Speelronde 1',
+  status: 'played',
+} satisfies Partial<NewMatch>
+
 describe('the list', () => {
-  it('names each match in its link, puts a match without a result first and says so in words', async () => {
-    await addMatch({
-      goalsAgainst: 0,
-      goalsFor: 1,
-      kickoffAt: new Date('2026-08-09T14:45:00Z'),
-      matchDate: '2026-08-09',
-      opponent: 'FC Twente',
-      round: 'Speelronde 1',
-      status: 'played',
-    })
+  it('opens on the matches without a result, with the match as its only link and no heading in a row', async () => {
+    await addMatch(playedAway)
     await addMatch()
 
     const html = await list()
 
-    expect(headings(html)[0]).toBe('h1 Wedstrijden')
+    expect(headings(html)).toEqual(['h1 Wedstrijden', 'h2 Wedstrijden in het seizoen ' + season])
     expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+">(.*?)<\/a>/g)).toEqual([
-      expect.stringContaining('Speelronde 11: sc Heerenveen - N.E.C.'),
-      expect.stringContaining('Speelronde 1: sc Heerenveen - FC Twente'),
+      expect.stringContaining('sc Heerenveen - N.E.C.'),
     ])
     expect(html).toContain('Uitslag ontbreekt')
-    expect(html).toContain('sc Heerenveen 1–0 FC Twente')
+    expect(html).not.toContain('FC Twente - sc Heerenveen')
+    expect(html).toContain('Speelronde 11')
   })
 
-  it('labels a match with an entry "Aangepast door de redactie", in words and not by colour', async () => {
-    const id = await addMatch()
-
-    expect(await list()).not.toContain('Aangepast door de redactie')
-
-    await saveEntry(
-      database.db,
-      userId,
-      id,
-      {
-        goals: [],
-        kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
-        result: {
-          afterNinetyAgainst: null,
-          afterNinetyFor: null,
-          extraTime: false,
-          goalsAgainst: 1,
-          goalsFor: 2,
-          penaltiesAgainst: null,
-          penaltiesFor: null,
-          status: 'played',
-        },
-      },
-      'Wikipedia is achter',
-    )
+  it('shows the filter with the numbers, as links with the choice in the address', async () => {
+    await addMatch(playedAway)
+    await addMatch()
 
     const html = await list()
 
-    expect(html).toContain('Aangepast door de redactie')
-    expect(html).not.toContain('Uitslag ontbreekt')
+    expect(html).toContain('aria-label="Wedstrijden filteren"')
+    expect(html).toMatch(/<a [^>]*href="\/beheer\/wedstrijden\?tonen=alles"[^>]*>Alles \(2\)/u)
+    expect(html).toMatch(/<a [^>]*aria-current="page"[^>]*>Zonder uitslag \(1\)/u)
+    expect(html).toMatch(/href="\/beheer\/wedstrijden\?tonen=aangepast"[^>]*>Aangepast \(0\)/u)
   })
 
-  it('shows only the matches of the current season', async () => {
+  it('shows all matches with the missing ones on top, the score in the order of the match, and the status in words', async () => {
+    await addMatch(playedAway)
+    await addMatch()
+
+    const html = await list({ tonen: 'alles' })
+
+    expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+">(.*?)<\/a>/g)).toEqual([
+      expect.stringContaining('sc Heerenveen - N.E.C.'),
+      expect.stringContaining('FC Twente - sc Heerenveen'),
+    ])
+    expect(html).toContain('2 - 1')
+    expect(html).toContain('Gespeeld')
+    expect(html).toContain('Gepland')
+  })
+
+  it('says in one line that every match has a result, instead of an empty table', async () => {
+    await addMatch(playedAway)
+
+    const html = await list()
+
+    expect(html).toContain('Alle wedstrijden hebben een uitslag.')
+    expect(html).not.toContain('<table')
+  })
+
+  it('tags a match the editors changed in words, and finds it under "Aangepast"', async () => {
+    await editMatch(await addMatch())
+    await addMatch({ round: 'Speelronde 12' })
+
+    const changed = await list({ tonen: 'aangepast' })
+
+    expect(changed.match(/<a href="\/beheer\/wedstrijden\/\d+">/g)).toHaveLength(1)
+    expect(changed).toMatch(/<span class="hf-tag hf-tag-highlight">Aangepast<\/span>/u)
+    expect(changed).toContain('Aangepast (1)')
+    expect(await list()).not.toMatch(/hf-tag-highlight/u)
+  })
+
+  it('says so when the editors changed no match', async () => {
+    await addMatch()
+
+    expect(await list({ tonen: 'aangepast' })).toContain('nog geen wedstrijd aangepast')
+  })
+
+  it('gives a second meeting of two clubs a name of its own, so the rows can be told apart', async () => {
+    await addMatch()
+    await addMatch({ competition: 'KNVB Beker', round: 'Tweede ronde' })
+
+    const html = await list()
+
+    expect(html).toContain('sc Heerenveen - N.E.C. (Speelronde 11)')
+    expect(html).toContain('sc Heerenveen - N.E.C. (Tweede ronde)')
+  })
+
+  it('shows an earlier season when asked, and the current one for a season that is not known', async () => {
+    await addMatch({
+      goalsAgainst: 0,
+      goalsFor: 1,
+      opponent: 'Vitesse',
+      round: 'Speelronde 3',
+      season: '2025/26',
+      status: 'played',
+    })
+    await addMatch()
+
+    const earlier = await list({ seizoen: '2025-26', tonen: 'alles' })
+
+    expect(earlier).toContain('Vitesse')
+    expect(earlier).not.toContain('N.E.C.')
+    // The choices of the filter keep the season.
+    expect(earlier).toContain('href="/beheer/wedstrijden?seizoen=2025-26"')
+    expect(earlier).toContain('href="/beheer/wedstrijden?seizoen=2025-26&amp;tonen=aangepast"')
+    expect(await list({ seizoen: '2099-00' })).toContain('N.E.C.')
+    expect(await list({ seizoen: 'onzin' })).toContain('N.E.C.')
+  })
+
+  it('has a season picker next to the title when there is more than one season', async () => {
     await addMatch({ round: 'Speelronde 3', season: '2025/26' })
+    await addMatch()
 
-    expect(await list()).toContain('Er zijn nog geen wedstrijden')
+    const html = await list()
+
+    expect(html).toContain('aria-label="Seizoen kiezen"')
+    expect(html).toContain('action="/beheer/wedstrijden"')
   })
 
-  it('tells that a match is gone, from the address, in a card with a heading', async () => {
-    expect(headings(await list({ fout: 'weg' }))).toContain('h2 Deze wedstrijd bestaat niet')
+  it('has a breadcrumb and no link back at the bottom', async () => {
+    await addMatch()
+
+    const html = await list()
+
+    expect(html).toContain('aria-label="Kruimelpad"')
+    expect(html).toContain('<a class="hf-navigation-link" href="/beheer">Beheer</a>')
+    expect(html).not.toContain('Terug naar het beheer')
+  })
+
+  it('says that there are no matches in a season without any', async () => {
+    expect(await list()).toContain(`Er zijn nog geen wedstrijden in het seizoen ${season}.`)
+  })
+
+  it('tells that a match is gone, from the address, in a notice without a heading', async () => {
+    const html = await list({ fout: 'weg' })
+
+    expect(html).toMatch(/<p class="hf-notice" role="status">Deze wedstrijd bestaat niet/u)
+    expect(headings(html)).not.toContain('h2 Deze wedstrijd bestaat niet')
   })
 })
 
@@ -370,14 +472,13 @@ describe('the match', () => {
       await withDifference()
       await addMatch({ round: 'Speelronde 12' })
 
-      const html = await list()
+      const html = await list({ tonen: 'alles' })
 
-      expect(html.match(/Wikipedia wijkt af/g)).toHaveLength(1)
-      expect(html).toContain('Aangepast door de redactie · Wikipedia wijkt af')
+      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
     })
 
     it('tells the editor on the list that a difference was decided already', async () => {
-      expect(await list({ fout: 'besloten' })).toContain('Al beslist')
+      expect(await list({ fout: 'besloten' })).toContain('Over deze afwijking is al beslist')
     })
   })
 
