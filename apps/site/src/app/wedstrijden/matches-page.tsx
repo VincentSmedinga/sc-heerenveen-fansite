@@ -60,9 +60,10 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * card with figures that belongs to it on the page Statistieken, of the same season. A season
  * that has no matches in the database is the page "niet gevonden".
  *
- * The card with the table has a switch between the whole season and the latest five matches of
- * each club, `?stand=laatste-5` (see StandingsSwitch). It is there only when the results of
- * every club are complete (see `lastFiveOf`). Any other value is the whole season.
+ * The card with the table of the current season has a switch between the whole season and the
+ * latest five matches of each club, `?stand=laatste-5` (see StandingsSwitch). It is there only
+ * when the results of every club are complete enough (see `lastFiveOf`). An Eindstand has no
+ * switch, and any other value is the whole season.
  */
 export async function MatchesPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
   const { [standingsViewParam]: standingsChoice } = await searchParams
@@ -85,7 +86,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const { programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
   const standingsCard = standingsCardOf(current)
-  const lastFive = await lastFiveOfSeason(data)
+  const lastFive = current ? await lastFiveOfSeason(data) : undefined
   const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
   const coachesCard = coachesCardOf(data.coaches.length)
   // The cards with figures are on the statistics page of the same season.
@@ -162,9 +163,11 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
               )}
               <StandingsTable
                 caption={
-                  lastFiveShown ? lastFiveCaption(data.standings) : standingsCaption(data.standings, standingsCard.name)
+                  lastFiveShown
+                    ? lastFiveCaption(lastFive.lastResultOn)
+                    : standingsCaption(data.standings, standingsCard.name)
                 }
-                rows={lastFiveShown ? lastFive : data.standings}
+                rows={lastFiveShown ? lastFive.rows : data.standings}
               />
               {/* An Eindstand no longer changes, so only the current season can be behind. */}
               {current && <StandingsBehind matches={data.matches} now={now} />}
@@ -187,8 +190,8 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
 
 /**
  * The table over the latest five matches of the season, or undefined when the card has no
- * switch: the results of every club are not complete (see `lastFiveOf`), or they could not be
- * read, which leaves the card as it is without them.
+ * switch: the results of every club are not complete enough (see `lastFiveOf`), or they could
+ * not be read, which leaves the card as it is without them.
  */
 async function lastFiveOfSeason(data: MatchData) {
   if (data.standings.length === 0) {

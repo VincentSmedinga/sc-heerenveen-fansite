@@ -2,7 +2,7 @@ import type { PublicLeagueResult, PublicMatch, PublicStandingsRow } from '@fansi
 
 import { describe, expect, it } from 'vitest'
 
-import { hasAllLeagueResults, lastFiveOf, lastFiveStandings, leagueResultsOfAllClubs } from './last-five'
+import { hasEnoughLeagueResults, lastFiveOf, lastFiveStandings, leagueResultsOfAllClubs } from './last-five'
 
 const result = (
   homeClub: string,
@@ -185,27 +185,33 @@ describe('leagueResultsOfAllClubs', () => {
   })
 })
 
-describe('hasAllLeagueResults', () => {
+describe('hasEnoughLeagueResults', () => {
   const table = [row('Ajax', 2), row('PSV', 1), row('FC Twente', 1)]
   const results = [result('Ajax', 2, 0, 'FC Twente', '2026-09-01', 1), result('PSV', 1, 1, 'Ajax', '2026-09-08', 2)]
 
   it('is true when every club has as many results as the table says it played', () => {
-    expect(hasAllLeagueResults(table, results)).toBe(true)
+    expect(hasEnoughLeagueResults(table, results)).toBe(true)
   })
 
-  it('is false when a club has fewer results, or more', () => {
-    expect(hasAllLeagueResults(table, results.slice(0, 1))).toBe(false)
-    expect(hasAllLeagueResults([row('Ajax', 1), row('PSV', 1), row('FC Twente', 1)], results)).toBe(false)
+  it('is true when a club has one result fewer than the table says, because the pages are edited apart', () => {
+    expect(hasEnoughLeagueResults(table, results.slice(0, 1))).toBe(true)
+    expect(hasEnoughLeagueResults([row('Ajax', 2), row('PSV', 1), row('FC Twente', 2)], results)).toBe(true)
+  })
+
+  it('is false when a club has two results fewer, or more', () => {
+    expect(hasEnoughLeagueResults([row('Ajax', 4), row('PSV', 1), row('FC Twente', 1)], results)).toBe(false)
+    expect(hasEnoughLeagueResults([row('Ajax', 1), row('PSV', 1), row('FC Twente', 1)], results)).toBe(false)
   })
 
   it('is false when there are no results, or no table, or no match played', () => {
-    expect(hasAllLeagueResults(table, [])).toBe(false)
-    expect(hasAllLeagueResults([], results)).toBe(false)
-    expect(hasAllLeagueResults([row('Ajax', 0), row('PSV', 0)], [])).toBe(false)
+    expect(hasEnoughLeagueResults(table, [])).toBe(false)
+    expect(hasEnoughLeagueResults([row('Ajax', 1), row('PSV', 1)], [])).toBe(false)
+    expect(hasEnoughLeagueResults([], results)).toBe(false)
+    expect(hasEnoughLeagueResults([row('Ajax', 0), row('PSV', 0)], [])).toBe(false)
   })
 
   it('is false when a result is of a club the table does not have', () => {
-    expect(hasAllLeagueResults(table, [...results, result('Ajax', 1, 0, 'Vreemd', '2026-09-15', 3)])).toBe(false)
+    expect(hasEnoughLeagueResults(table, [...results, result('Ajax', 1, 0, 'Vreemd', '2026-09-15', 3)])).toBe(false)
   })
 })
 
@@ -215,9 +221,28 @@ describe('lastFiveOf', () => {
     const results = [result('sc Heerenveen', 0, 0, 'Ajax', '2026-09-20', 7)]
 
     expect(lastFiveOf([], [], table)).toBeUndefined()
-    expect(lastFiveOf([ours({ goalsFor: 2 })], results, table)?.map((r) => [r.club, r.points])).toEqual([
+    expect(lastFiveOf([ours({ goalsFor: 2 })], results, table)?.rows.map((r) => [r.club, r.points])).toEqual([
       ['sc Heerenveen', 3],
       ['Ajax', 0],
     ])
+  })
+
+  it('names the day of the last result in our data, not the day of the table', () => {
+    const table = [row('Ajax', 2), row('PSV', 2), row('sc Heerenveen', 1)]
+    const results = [result('Ajax', 1, 0, 'PSV', '2026-09-20', 7), result('PSV', 1, 1, 'Ajax', '2026-10-04', 8)]
+
+    expect(lastFiveOf([], results.slice(0, 1), table)?.lastResultOn).toBe('2026-09-20')
+    expect(lastFiveOf([], results, table)?.lastResultOn).toBe('2026-10-04')
+    expect(lastFiveOf([ours({ matchDate: '2026-10-11' })], results, table)?.lastResultOn).toBe('2026-10-11')
+  })
+
+  it('is undefined when no club has a result at all', () => {
+    expect(
+      lastFiveOf(
+        [],
+        [result('sc Heerenveen', 0, 0, 'Ajax', '2026-09-20', 7)],
+        [row('Ajax', 1), row('sc Heerenveen', 1)],
+      ),
+    ).toBeUndefined()
   })
 })

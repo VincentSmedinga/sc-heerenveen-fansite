@@ -21,16 +21,21 @@ export type LastFiveRow = {
 /** The number at the end of a round as the matches have it, such as 12 for `Speelronde 12`. */
 const roundNumberOf = (round: string) => Number(/(\d+)\s*$/u.exec(round)?.[1] ?? 0)
 
+/** The table over the latest five matches, and the day of the last result it is based on. */
+export type LastFive = { lastResultOn: string; rows: LastFiveRow[] }
+
 type Tally = { goalsAgainst: number; goalsFor: number; points: number }
 
 /**
  * Whether the results are complete enough to count the latest matches of every club: the table
- * has clubs and a played match, every club has as many results as the table says it played, and
- * no result is of a club the table does not have. A season that was not imported again, or
- * whose page lists only our matches, fails this, and so does one that misses a result.
+ * has clubs and a played match, there are results, every club has the results the table says it
+ * played or one fewer, and no result is of a club the table does not have. The pages of
+ * Wikipedia are edited apart from each other, so the results can be a day or a round behind the
+ * table; more than one behind, a result more than the table has and a season that was not
+ * imported again all fail this.
  */
-export function hasAllLeagueResults(standings: PublicStandingsRow[], results: PublicLeagueResult[]) {
-  if (!standings.some((row) => row.played > 0)) {
+export function hasEnoughLeagueResults(standings: PublicStandingsRow[], results: PublicLeagueResult[]) {
+  if (results.length === 0 || !standings.some((row) => row.played > 0)) {
     return false
   }
 
@@ -45,26 +50,44 @@ export function hasAllLeagueResults(standings: PublicStandingsRow[], results: Pu
 
   return (
     [...counts.keys()].every((club) => clubs.has(club)) &&
-    standings.every((row) => (counts.get(row.club) ?? 0) === row.played)
+    standings.every((row) => {
+      const behind = row.played - (counts.get(row.club) ?? 0)
+
+      return behind === 0 || behind === 1
+    })
   )
 }
 
 /**
- * The table over the latest five matches of the season, or undefined when the results of the
- * clubs are not complete (see `hasAllLeagueResults`). The clubs are those of the table of the
- * season, and the matches of sc Heerenveen are the ones the editors may have entered.
+ * The table over the latest five matches of the season with the day of the last result, or
+ * undefined when the results of the clubs are not complete enough (see
+ * `hasEnoughLeagueResults`). The clubs are those of the table of the season, and the matches of
+ * sc Heerenveen are the ones the editors may have entered.
  */
 export function lastFiveOf(
   matches: PublicMatch[],
   results: PublicLeagueResult[],
   standings: PublicStandingsRow[],
-): LastFiveRow[] | undefined {
-  return hasAllLeagueResults(standings, results)
-    ? lastFiveStandings(
-        standings.map((row) => row.club),
-        leagueResultsOfAllClubs(matches, results),
-      )
-    : undefined
+): LastFive | undefined {
+  if (!hasEnoughLeagueResults(standings, results)) {
+    return undefined
+  }
+
+  const all = leagueResultsOfAllClubs(matches, results)
+
+  if (all.length === 0) {
+    return undefined
+  }
+
+  const lastResultOn = all.map((result) => result.playedOn).reduce((a, b) => (b > a ? b : a))
+
+  return {
+    lastResultOn,
+    rows: lastFiveStandings(
+      standings.map((row) => row.club),
+      all,
+    ),
+  }
 }
 
 /**

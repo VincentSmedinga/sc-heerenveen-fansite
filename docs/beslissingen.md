@@ -5475,6 +5475,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een speelronde van sc Heerenveen zonder rij in `league_results` kan de naam van de tegenstander niet corrigeren.
   Dan telt de wedstrijd niet voor die tegenstander als de naam anders is dan in de stand.
 - **Alternatieven:** de uitslagen bij de wedstrijden van het seizoen in `getMatchData` laden (elke pagina betaalt voor een vraag die alleen deze kaart nodig heeft); de schakelaar altijd tonen en bij een onvolledig seizoen een melding geven (een tabel die verkeerd kan zijn, of een kaart met een melding die bezoekers niets zegt); de uitslagen van sc Heerenveen uit `league_results` nemen (de uitslag die de redactie invulde zou dan niet meetellen); de keuze in de seizoenskiezer meenemen (een seizoen zonder schakelaar zou dan een keuze krijgen die het niet kent); een onbekende waarde "niet gevonden" laten geven, zoals `?competitie=` (een gedeelde koppeling naar een seizoen dat later geen schakelaar meer heeft, werkt dan niet meer).
+- **Later:** de schakelaar staat er alleen in het lopende seizoen, en een club mag één uitslag minder hebben dan de stand zegt; het bijschrift noemt de dag van de laatste uitslag, zie _De schakelaar Laatste 5 hoort bij het lopende seizoen en accepteert één uitslag minder_ (2 november 2026).
+
+### De schakelaar Laatste 5 hoort bij het lopende seizoen en accepteert één uitslag minder
+
+- **Datum:** 2 november 2026
+- **Besluit:** op `/wedstrijden` staat de schakelaar "Laatste 5" alleen bij het lopende seizoen, en in het lopende seizoen verschijnt hij ook als de uitslagen één wedstrijd achterlopen (#622).
+  - **Een afgelopen seizoen:** de kaart heet Eindstand en heeft geen schakelaar.
+    `?stand=laatste-5` geeft daar de gewone kaart, en de pagina vraagt de uitslagen van de clubs niet op.
+  - **Het lopende seizoen:** de schakelaar staat er als elke club hoogstens één uitslag minder heeft dan het aantal gespeelde wedstrijden in de stand (`hasEnoughLeagueResults` in `src/last-five.ts`).
+    Meer dan één uitslag minder, een uitslag méér dan de stand, een uitslag van een club die niet in de stand staat en een seizoen zonder uitslagen verbergen hem zoals eerst.
+  - **Het bijschrift:** "Stand over de laatste vijf wedstrijden op 1 november 2026" noemt de dag van de laatste uitslag in onze gegevens (`lastResultOn` van `lastFiveOf`), niet de dag van de stand.
+- **Waarom:** de pagina's van Wikipedia worden los van elkaar bijgewerkt, dus de uitslagen lopen soms een dag of een speelronde achter de stand.
+  De strikte regel van _De kaart Stand heeft een schakelaar voor de stand over de laatste vijf wedstrijden_ verborg de schakelaar daardoor vaak in het lopende seizoen.
+  Een eerlijk bijschrift met de werkelijke dag is beter dan geen schakelaar.
+  De stand over de laatste vijf wedstrijden zegt aan het eind van een seizoen weinig, net als de laatste vijf wedstrijden bij de reeksen (zie _Een eerder seizoen toont bij de reeksen alleen de langste_).
+- **Nadeel:** een club met één uitslag minder mist in "Laatste 5" zijn laatste wedstrijd, tot de bron is bijgewerkt.
+  Het bijschrift noemt de dag van de laatste uitslag, maar alleen een schermlezer krijgt dat bijschrift: wie ziet, merkt het niet.
+- **Alternatieven:** de strikte regel houden (de schakelaar verschijnt zelden); nooit controleren (een ontbrekende wedstrijd kan onopgemerkt een verkeerde stand geven); de schakelaar in elk seizoen laten staan, zoals #602 deed (een eindstand over vijf wedstrijden zegt weinig).
 
 ### In de site noemt een import een bestand in `src` met `#src/`, niet met `../../`
 
