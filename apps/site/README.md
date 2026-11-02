@@ -493,10 +493,12 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken
 ### De tegenstanders
 
 `/statistieken/tegenstanders` is de tweede subpagina van Statistieken.
-Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen.
+Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
 Elke clubnaam is een link naar `/statistieken/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
-De tabel heeft geen knop om te sorteren en geen paginering.
-De vijf cijferkolommen hebben een afkorting (G, W, G, V, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
+De server stuurt de tabel zonder knoppen om te sorteren, en er is geen paginering.
+Met JavaScript is elke kolom sorteerbaar; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
+De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/OpponentViews.tsx`).
 De letters en woorden komen uit `tableColumns` van het designsysteem, zoals in elke tabel.
 De rijkop is een link dankzij `href` op een rij van `DataTable`.
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
@@ -509,7 +511,7 @@ De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie veran
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
 Ze heeft drie delen:
 
-- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en S; W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
   De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
   Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.

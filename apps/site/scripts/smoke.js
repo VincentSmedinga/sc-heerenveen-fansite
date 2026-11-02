@@ -1005,10 +1005,13 @@ await withEmptyDatabase((database) =>
       /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
     )
     // The server sends the whole table in the given order, with plain headers: sorting is for
-    // the browser, so there is no button or aria-sort yet, and no column Punten for the cup.
+    // the browser, so there is no button or aria-sort yet. The columns Punten and Doelsaldo are
+    // there with both choices.
     assert.doesNotMatch(opponentsHtml, /<th[^>]*aria-sort/)
     assert.doesNotMatch(opponentsHtml, /<th[^>]*scope="col"[^>]*><button/)
-    assert.doesNotMatch(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
+    assert.match(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
+    assert.match(opponentsHtml, /<span class="hf-visually-hidden">doelsaldo<\/span>/)
+    assert.match(opponentsHtml, /P punten \(3 per winst, 1 per gelijkspel\), D doelsaldo/)
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and

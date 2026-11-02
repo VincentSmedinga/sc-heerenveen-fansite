@@ -12,7 +12,7 @@ describe('tableColumns', () => {
       ),
     ).toEqual({
       drawn: 'G gelijk',
-      goalDifference: 'S doelsaldo',
+      goalDifference: 'D doelsaldo',
       goals: 'D doelpunten',
       lost: 'V verlies',
       played: 'G gespeeld',
@@ -26,14 +26,17 @@ describe('tableColumns', () => {
     for (const { abbreviation } of all) expect(abbreviation).toMatch(/^[A-Z]$/u)
   })
 
-  it('gives every word one letter and every name once, with G as the only letter for two words', () => {
+  it('gives every word one letter and every name once, with G and D as the only letters for two words', () => {
     const wordsOf = new Map<string, Set<string>>()
     for (const { abbreviation, name } of all) {
       wordsOf.set(abbreviation, (wordsOf.get(abbreviation) ?? new Set()).add(name))
     }
 
     expect(new Set(all.map(({ name }) => name)).size).toBe(all.length)
-    expect([...wordsOf].filter(([, words]) => words.size > 1)).toEqual([['G', new Set(['gelijk', 'gespeeld'])]])
+    expect([...wordsOf].filter(([, words]) => words.size > 1)).toEqual([
+      ['G', new Set(['gelijk', 'gespeeld'])],
+      ['D', new Set(['doelpunten', 'doelsaldo'])],
+    ])
   })
 
   it('writes the legend with the letters and words of the columns in their order, and a note in brackets', () => {

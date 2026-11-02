@@ -4,7 +4,7 @@ import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
-import { tableColumns, tableLegend } from '../table-columns'
+import { signedNumber, tableColumns, tableLegend } from '../table-columns'
 import { Text } from '../text/Text'
 import { DataTable, type DataTableProps, type DataTableRow, type DataTableTextRow } from './DataTable'
 
@@ -17,8 +17,8 @@ const club = (header: string, [played, won, drawn, lost, goalsFor, goalsAgainst]
     won,
     drawn,
     lost,
-    { sortValue: goalsFor - goalsAgainst, text: `${goalsFor}–${goalsAgainst}` },
     won * 3 + drawn,
+    { sortValue: goalsFor - goalsAgainst, text: signedNumber(goalsFor - goalsAgainst) },
   ],
   header,
   href: '#club',
@@ -40,12 +40,19 @@ const manyClubs: DataTableRow[] = [
 ]
 
 const flowColumns = [tableColumns.played, tableColumns.won, tableColumns.drawn, tableColumns.lost, tableColumns.points]
-const clubColumns = [tableColumns.played, tableColumns.won, tableColumns.drawn, tableColumns.lost, tableColumns.goals]
-const clubLegend = tableLegend([...clubColumns.slice(0, 4), { ...tableColumns.goals, note: 'voor–tegen' }])
+const clubColumns = [
+  tableColumns.played,
+  tableColumns.won,
+  tableColumns.drawn,
+  tableColumns.lost,
+  tableColumns.points,
+  tableColumns.goalDifference,
+]
+const clubLegend = tableLegend(clubColumns)
 
 const sortableColumns: DataTableProps['columns'] = [
   { name: 'Club', sortable: true },
-  ...[...clubColumns, tableColumns.points].map((column) => ({ ...column, sortable: true })),
+  ...clubColumns.map((column) => ({ ...column, sortable: true })),
 ]
 
 const meta = preview.meta({
@@ -83,11 +90,11 @@ const meta = preview.meta({
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
           '',
-          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt: de club waartegen we de meeste wedstrijden speelden, of de meeste doelpunten maakten.',
+          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt: de club waartegen we de meeste wedstrijden speelden, of waartegen we het hoogste doelsaldo hebben.',
           'Bij een tabel van een paar rijen is sorteren overbodig.',
           'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
           'Een getallenkolom begint met het grootste getal bovenaan en de eerste kolom van A tot Z; een tweede klik keert de richting om.',
-          'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “7–5” dat op het doelpuntensaldo sorteert.',
+          'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “+18”, dat op het getal sorteert.',
           '',
           'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden.',
           'De kolommen beginnen aan het begin, de rijkop kan een tweede regel met secundaire tekst hebben (`secondary`), en een cel kan elke inhoud hebben, zoals een link.',
@@ -118,9 +125,9 @@ const pages: DataTableRow[] = [
 ]
 
 const clubs: DataTableRow[] = [
-  { cells: [4, 2, 1, 1, '7–5'], header: 'Testclub', href: '#testclub' },
-  { cells: [3, 0, 1, 2, '2–6'], header: 'FC Voorbeeld', href: '#fc-voorbeeld' },
-  { cells: [1, 1, 0, 0, '3–1'], header: 'Proefstad SV', href: '#proefstad-sv' },
+  { cells: [4, 2, 1, 1, 7, '+2'], header: 'Testclub', href: '#testclub' },
+  { cells: [3, 0, 1, 2, 1, '−4'], header: 'FC Voorbeeld', href: '#fc-voorbeeld' },
+  { cells: [1, 1, 0, 0, 3, '+2'], header: 'Proefstad SV', href: '#proefstad-sv' },
 ]
 
 const renderDays = (maxInlineSize: string) => () => (
@@ -242,7 +249,7 @@ const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
         Alle tegenstanders
       </Heading>
       <DataTable {...args} />
-      <Text appearance="meta">{`${clubLegend}, ${tableLegend([tableColumns.points])}`}</Text>
+      <Text appearance="meta">{clubLegend}</Text>
     </Card>
   </div>
 )
@@ -287,9 +294,9 @@ export const SortedPhone = meta.story({
   globals: { theme: 'light' },
   name: 'Gesorteerd op een telefoon, licht',
   play: async ({ canvas }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'D doelpunten' }))
-    await expect(canvas.getByRole('columnheader', { name: 'D doelpunten' })).toHaveAttribute('aria-sort', 'descending')
-    await expect(canvas.getByRole('button', { name: 'D doelpunten' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await expect(canvas.getByRole('columnheader', { name: 'D doelsaldo' })).toHaveAttribute('aria-sort', 'descending')
+    await expect(canvas.getByRole('button', { name: 'D doelsaldo' })).toHaveFocus()
   },
   render: renderSortable('20rem'),
 })

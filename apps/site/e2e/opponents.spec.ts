@@ -41,9 +41,11 @@ for (const choice of ['', '?competitie=eredivisie']) {
 /** The names of the clubs in the list, from the top. */
 const clubNames = (page: Page) => page.locator('tbody th').allInnerTexts()
 
-/** The figures of one column of the list, from the top: 1 is Gespeeld, 5 is Doelpunten. */
+/** One column of the list from the top: 1 is G gespeeld, 5 is P punten, 6 is D doelsaldo. */
 const columnFigures = async (page: Page, column: number) =>
-  (await page.locator(`tbody td:nth-of-type(${column})`).allInnerTexts()).map((text) => Number.parseInt(text, 10))
+  (await page.locator(`tbody td:nth-of-type(${column})`).allInnerTexts()).map((text) =>
+    Number.parseInt(text.replace('\u2212', '-'), 10),
+  )
 
 test.describe('sorting the list', () => {
   test('sorts with the keyboard, keeps the focus on the button and says what happened', async ({ page }) => {
@@ -57,7 +59,7 @@ test.describe('sorting the list', () => {
       'aria-sort',
       'none',
     )
-    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelpunten' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -69,7 +71,7 @@ test.describe('sorting the list', () => {
       'aria-sort',
       'descending',
     )
-    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelpunten' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -109,31 +111,54 @@ test.describe('sorting the list', () => {
     expect(await clubNames(page)).toEqual(names.toReversed())
   })
 
-  test('has the column Punten only with the Eredivisie, and sorts on it', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders')
+  for (const choice of ['', '?competitie=eredivisie']) {
+    test(`has the columns Punten and Doelsaldo${choice === '' ? '' : ' with the Eredivisie'}, and sorts on them`, async ({
+      page,
+    }) => {
+      await page.goto(`/statistieken/tegenstanders${choice}`)
 
-    await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveCount(0)
+      await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute(
+        'aria-sort',
+        'none',
+      )
+      await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+        'aria-sort',
+        'none',
+      )
+      await expect(page.locator('thead th')).toHaveCount(7)
 
-    await page.goto('/statistieken/tegenstanders?competitie=eredivisie')
-    await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute('aria-sort', 'none')
-    await page.getByRole('button', { exact: true, name: 'P punten' }).click()
+      await page.getByRole('button', { exact: true, name: 'P punten' }).click()
 
-    const points = await columnFigures(page, 6)
+      const points = await columnFigures(page, 5)
 
-    expect(points.length).toBeGreaterThan(0)
-    expect(points).toEqual([...points].toSorted((a, b) => b - a))
-    await expect(page.getByRole('status')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
-  })
+      expect(points.length).toBeGreaterThan(0)
+      expect(points).toEqual([...points].toSorted((a, b) => b - a))
+      await expect(page.getByRole('status')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
+
+      await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
+
+      const differences = await columnFigures(page, 6)
+
+      expect(differences.length).toBeGreaterThan(0)
+      expect(differences).toEqual([...differences].toSorted((a, b) => b - a))
+      await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+        'aria-sort',
+        'descending',
+      )
+      await expect(page.getByRole('status')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
+      expect(await page.locator('tbody td:nth-of-type(6)').first().innerText()).toMatch(/^([+−]\d+|0)$/)
+    })
+  }
 
   test('fits a phone of 320 pixels, with the arrow and every column', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 320 })
     await page.goto('/statistieken/tegenstanders?competitie=eredivisie')
-    await page.getByRole('button', { exact: true, name: 'D doelpunten' }).click()
+    await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     ).toBe(true)
-    for (const name of ['Club', 'G gespeeld', 'W winst', 'G gelijk', 'V verlies', 'D doelpunten', 'P punten']) {
+    for (const name of ['Club', 'G gespeeld', 'W winst', 'G gelijk', 'V verlies', 'D doelsaldo', 'P punten']) {
       const box = await page.getByRole('button', { exact: true, name }).boundingBox()
 
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)

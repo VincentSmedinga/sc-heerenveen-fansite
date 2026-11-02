@@ -62,9 +62,9 @@ describe('the page /statistieken/tegenstanders', () => {
 
   it('lists every club A to Z, each name a link to its page, with the figures of the record', async () => {
     expect(rowsOf(await render())).toEqual([
-      ['Beker United', '/statistieken/tegenstanders/beker-united', ['1', '0', '0', '1', '0–2']],
-      ['FC Voorbeeld', '/statistieken/tegenstanders/fc-voorbeeld', ['3', '1', '1', '1', '4–4']],
-      ['Testclub', '/statistieken/tegenstanders/testclub', ['5', '3', '1', '1', '10–4']],
+      ['Beker United', '/statistieken/tegenstanders/beker-united', ['1', '0', '0', '1', '0', '−2']],
+      ['FC Voorbeeld', '/statistieken/tegenstanders/fc-voorbeeld', ['3', '1', '1', '1', '4', '0']],
+      ['Testclub', '/statistieken/tegenstanders/testclub', ['5', '3', '2', '0', '11', '+7']],
     ])
   })
 
@@ -72,9 +72,11 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     expect(html).toContain('<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z')
-    expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(6)
+    expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(html).toContain('<span class="hf-visually-hidden">winst</span>')
-    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen)')
+    expect(html).toContain(
+      'G gespeeld, W winst, G gelijk, V verlies, P punten (3 per winst, 1 per gelijkspel), D doelsaldo',
+    )
   })
 
   it('sends the table without buttons, because sorting needs JavaScript, and has no pagination', async () => {
@@ -96,32 +98,32 @@ describe('the page /statistieken/tegenstanders', () => {
       '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
       '<abbr title="Gelijk"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gelijk</span></abbr>',
       '<abbr title="Verlies"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verlies</span></abbr>',
-      '<abbr title="Doelpunten"><span aria-hidden="true">D</span><span class="hf-visually-hidden">doelpunten</span></abbr>',
+      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
+      '<abbr title="Doelsaldo"><span aria-hidden="true">D</span><span class="hf-visually-hidden">doelsaldo</span></abbr>',
     ])
   })
 
-  it('has no column Punten with all the matches, because a cup tie gives no points', async () => {
-    const html = await render()
+  it('has Punten and Doelsaldo with both choices, and counts the cup in the points of Alle wedstrijden', async () => {
+    const all = await render()
+    const league = await render({ competitie: 'eredivisie' })
+    const legend = 'G gespeeld, W winst, G gelijk, V verlies, P punten (3 per winst, 1 per gelijkspel), D doelsaldo'
 
-    expect(html).not.toContain('>punten<')
-    expect(html).not.toContain(', P punten')
-  })
-
-  it('has the column Punten with the Eredivisie, 3 for a win and 1 for a draw, and explains it', async () => {
-    const html = await render({ competitie: 'eredivisie' })
-
-    expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
-    expect(html).toContain(
-      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
-    )
-    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen), P punten')
-    expect(rowsOf(html)).toEqual([
+    expect(all).toContain(legend)
+    expect(league).toContain(legend)
+    expect(league.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
+    expect(rowsOf(league)).toEqual([
       [
         'FC Voorbeeld',
         '/statistieken/tegenstanders/fc-voorbeeld?competitie=eredivisie',
-        ['3', '1', '1', '1', '4–4', '4'],
+        ['3', '1', '1', '1', '4', '0'],
       ],
-      ['Testclub', '/statistieken/tegenstanders/testclub?competitie=eredivisie', ['4', '3', '1', '0', '10–3', '10']],
+      ['Testclub', '/statistieken/tegenstanders/testclub?competitie=eredivisie', ['4', '3', '1', '0', '10', '+7']],
+    ])
+    // The cup tie of Testclub ended 1–1: a point more with Alle wedstrijden than in the league.
+    expect(rowsOf(all).map(([name, , cells]) => [name, (cells as string[])[4]])).toEqual([
+      ['Beker United', '0'],
+      ['FC Voorbeeld', '4'],
+      ['Testclub', '11'],
     ])
   })
 

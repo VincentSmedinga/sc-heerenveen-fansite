@@ -29,10 +29,12 @@ const record = (
     won,
   }) satisfies PublicClubRecord
 
+// Testclub has the same record in both, but for a cup tie that ended 1–1: a draw gives a point
+// there, so its points differ between the two choices while its goal difference does not.
 export const allRecords: PublicClubRecord[] = [
   record('beker-united', 'Beker United', 1, 0, 0, 1, [0, 2]),
   record('fc-voorbeeld', 'FC Voorbeeld', 3, 1, 1, 1, [4, 4]),
-  record('testclub', 'Testclub', 5, 3, 1, 1, [10, 4]),
+  record('testclub', 'Testclub', 5, 3, 2, 0, [11, 4]),
 ]
 
 export const leagueRecords: PublicClubRecord[] = [
