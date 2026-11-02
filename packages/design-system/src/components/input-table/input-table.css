@@ -88,6 +88,9 @@
     border: 0;
     flex: 1 1 11rem;
     margin: 0;
+
+    /* Never wider than the line: a group of radio buttons with long names wraps instead. */
+    max-inline-size: 100%;
     min-inline-size: 0;
     padding: 0;
 

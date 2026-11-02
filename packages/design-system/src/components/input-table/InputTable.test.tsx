@@ -336,6 +336,10 @@ describe('input-table.css', () => {
     expect(wide).toMatch(/'number first action'\s*'\. second \.'/u)
   })
 
+  it('keeps a field no wider than its line, so long names do not make the page scroll sideways', () => {
+    expect(css).toMatch(/\.hf-input-table-item \{[^}]*max-inline-size: 100%;/u)
+  })
+
   it('shows no label for a screen reader only: every field has its label in view', () => {
     expect(css).not.toContain('clip-path')
     expect(css).not.toContain('thead')
