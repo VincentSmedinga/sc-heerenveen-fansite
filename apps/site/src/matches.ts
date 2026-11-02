@@ -2,11 +2,13 @@ import type { FormResult } from '@fansite/design-system'
 
 import {
   hasEditedMatches,
+  listLeagueResults,
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
   listStaffInSeason,
   listWikipediaPages,
+  type PublicLeagueResult,
   type PublicMatch,
   type PublicStaff,
   type PublicStandingsRow,
@@ -128,6 +130,19 @@ const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
  */
 export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {
   return season === seasonOf(new Date()) ? currentSeasonData(season) : pastSeasonData(season)
+}
+
+const currentLeagueResults = cacheForKey(currentSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
+const pastLeagueResults = cacheForKey(pastSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
+
+/**
+ * The results of the league for every club in one season, for the table over the latest
+ * matches. They are kept like the data of the season, for five minutes in the current season
+ * and for an hour in one that is over, and the page asks for a season of `getMatchSeasons`
+ * only.
+ */
+export function getLeagueResults(season: string): Promise<PublicLeagueResult[]> {
+  return season === seasonOf(new Date()) ? currentLeagueResults(season) : pastLeagueResults(season)
 }
 
 /** Whether the editors entered data that Wikipedia has not taken over yet. */
