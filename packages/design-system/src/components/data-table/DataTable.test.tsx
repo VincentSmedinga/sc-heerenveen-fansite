@@ -105,3 +105,69 @@ describe('DataTable', () => {
     expect(first?.getAttribute('scope')).toBe('row')
   })
 })
+
+describe('DataTable with text', () => {
+  const textProps = {
+    appearance: 'text',
+    caption: 'Wedstrijden',
+    columns: ['Wedstrijd', 'Uitslag', 'Status'],
+    rows: [
+      {
+        cells: ['2 - 1', <a href="#status">Gespeeld</a>],
+        header: 'Testclub - FC Voorbeeld',
+        href: '#wedstrijd-1',
+        secondary: 'zondag 1 november 2026',
+      },
+      { cells: ['–', 'Gepland'], header: 'Proefstad SV - Testclub' },
+    ],
+  } as const
+
+  it('is a table with the same caption, headers with scope and row headers as the one with numbers', () => {
+    render(<DataTable {...textProps} />)
+
+    expect(screen.getByRole('table', { name: 'Wedstrijden' })).toBeTruthy()
+    expect(document.querySelectorAll('thead th[scope="col"]')).toHaveLength(3)
+    expect(document.querySelectorAll('tbody th[scope="row"]')).toHaveLength(2)
+    expect(screen.getByRole('table').className).toBe('hf-data-table hf-data-table-text')
+  })
+
+  it('starts every column at the start: no cell is aligned to the end', () => {
+    render(<DataTable {...textProps} />)
+
+    expect(document.querySelectorAll('.hf-numeric')).toHaveLength(0)
+  })
+
+  it('makes the row header a link and puts the second line of secondary text in the header', () => {
+    render(<DataTable {...textProps} />)
+
+    const [first, second] = screen.getAllByRole('rowheader')
+
+    expect(within(first as HTMLElement).getByRole('link', { name: 'Testclub - FC Voorbeeld' })).toBeTruthy()
+    expect(first?.querySelector('.hf-data-table-secondary')?.textContent).toBe('zondag 1 november 2026')
+    expect(within(second as HTMLElement).queryByRole('link')).toBeNull()
+    expect(second?.querySelector('.hf-data-table-secondary')).toBeNull()
+  })
+
+  it('shows free content in a cell, such as a link, and writes a number the Dutch way', () => {
+    render(<DataTable {...textProps} rows={[{ cells: [<a href="#t">Link</a>, 1234], header: 'Rij' }]} />)
+
+    expect(screen.getByRole('cell', { name: 'Link' }).querySelector('a')?.getAttribute('href')).toBe('#t')
+    expect(screen.getByRole('cell', { name: '1.234' })).toBeTruthy()
+  })
+
+  it('leaves the table of numbers as it was: no text class, and the numbers aligned to the end', () => {
+    render(<DataTable {...props} />)
+
+    expect(screen.getByRole('table').className).toBe('hf-data-table')
+    expect(document.querySelectorAll('.hf-numeric')).toHaveLength(2 + 4)
+    expect(document.querySelector('.hf-data-table-secondary')).toBeNull()
+  })
+
+  it('passes on other attributes and a class, and no `appearance` to the element', () => {
+    render(<DataTable {...textProps} className="extra" id="tabel" />)
+
+    expect(screen.getByRole('table').className).toBe('hf-data-table hf-data-table-text extra')
+    expect(screen.getByRole('table').id).toBe('tabel')
+    expect(screen.getByRole('table').hasAttribute('appearance')).toBe(false)
+  })
+})

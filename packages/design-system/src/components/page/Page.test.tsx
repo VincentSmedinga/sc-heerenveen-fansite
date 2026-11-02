@@ -161,6 +161,17 @@ describe('Page.Main', () => {
     expect(screen.getByRole('main').id).toBe('inhoud')
   })
 
+  it('adds a class for the wide page only with `wide`, and passes no `wide` on to the element', () => {
+    const { rerender } = render(<Page.Main className="extra" wide />)
+
+    expect(screen.getByRole('main').className).toBe('hf-page-main hf-page-main-wide extra')
+    expect(screen.getByRole('main').hasAttribute('wide')).toBe(false)
+
+    rerender(<Page.Main wide={false} />)
+
+    expect(screen.getByRole('main').className).toBe('hf-page-main')
+  })
+
   it('has every child as a cell of its own, in the order of the source', () => {
     render(
       <Page.Main>

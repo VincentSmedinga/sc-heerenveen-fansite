@@ -101,3 +101,21 @@
     white-space: nowrap;
   }
 }
+
+@layer hf.components {
+  /*
+   * A table with text (appearance="text"): the columns start at the start, as the table does
+   * (base/table.css), and the cells begin at the top, so a cell with two lines does not push the
+   * others down. The second line of a row header is secondary text under the header or its link.
+   */
+  .hf-data-table-text :is(th, td) {
+    vertical-align: top;
+  }
+
+  .hf-data-table-text .hf-data-table-secondary {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-body-font-weight);
+  }
+}

@@ -1,4 +1,4 @@
-import type { DataTableCell, DataTableColumn, DataTableRow } from './dataTableTypes'
+import type { DataTableCell, DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
 
 import { Link } from '../link/Link'
 
@@ -50,6 +50,27 @@ export const TableRows = ({
           <td className="hf-numeric" key={columns[index + 1]?.name ?? index}>
             {textOf(cell)}
           </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+)
+
+/**
+ * The rows of a table with text: the cells start at the start and can hold any content, and the
+ * row header can have a second line of secondary text under it.
+ */
+export const TextTableRows = ({ rows }: { rows: readonly DataTableTextRow[] }) => (
+  <tbody>
+    {rows.map((row) => (
+      <tr key={row.header}>
+        <th scope="row">
+          {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
+          {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+        </th>
+        {row.cells.map((cell, index) => (
+          // The cells have no names, so the position is the only key; the rows do not reorder.
+          <td key={index}>{typeof cell === 'number' ? numberFormat.format(cell) : cell}</td>
         ))}
       </tr>
     ))}

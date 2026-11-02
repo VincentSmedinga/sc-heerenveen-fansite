@@ -30,6 +30,8 @@ export type { DonutChartProps, DonutChartSlice, DonutChartTone } from './compone
 export { Emphasis } from './components/emphasis/Emphasis'
 export { ErrorSummary } from './components/error-summary/ErrorSummary'
 export type { ErrorSummaryError, ErrorSummaryProps } from './components/error-summary/ErrorSummary'
+export { FieldGroup } from './components/field-group/FieldGroup'
+export type { FieldGroupProps } from './components/field-group/FieldGroup'
 export { Field } from './components/field/Field'
 export type { FieldProps } from './components/field/Field'
 export { Filter } from './components/filter/Filter'
@@ -47,6 +49,14 @@ export { Heading, headingLevels } from './components/heading/Heading'
 export type { HeadingLevel, HeadingProps } from './components/heading/Heading'
 export { Honeypot } from './components/honeypot/Honeypot'
 export type { HoneypotProps } from './components/honeypot/Honeypot'
+export { InputTable } from './components/input-table/InputTable'
+export type {
+  InputTableButton,
+  InputTableColumn,
+  InputTableField,
+  InputTableProps,
+  InputTableRow,
+} from './components/input-table/InputTable'
 export { Input, inputTypes } from './components/input/Input'
 export type { InputProps, InputType } from './components/input/Input'
 export { Link, linkIcons } from './components/link/Link'

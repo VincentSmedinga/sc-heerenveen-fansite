@@ -369,3 +369,36 @@ describe('the title row in page.css', () => {
     expect(rule).toMatch(/> :not\(:first-child\)\s*\{\s*margin-inline-start: auto;/)
   })
 })
+
+describe('the wide page in page.css', () => {
+  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector}\s*\{(.*?)\n {2,4}\}`, 's'))?.[1] ?? ''
+
+  it('has a main of 58rem and the usual sidebar of 24rem side by side from 52rem, like other pages', () => {
+    const start = css.indexOf('.hf-page-body:has(> .hf-page-main-wide) {\n      grid-template-columns')
+
+    expect(start).not.toBe(-1)
+    expect(css.slice(css.lastIndexOf('@media', start), start)).toContain('@media (width >= 52rem)')
+    expect(css.slice(start, css.indexOf('}', start))).toContain(
+      'grid-template-columns: minmax(24rem, var(--hf-content-max-width-wide)) minmax(16rem, 24rem);',
+    )
+  })
+
+  it('sets the columns of the wide page once, inside the media query, so a phone sees no difference', () => {
+    expect(css.match(/\.hf-page-body:has\(> \.hf-page-main-wide\)/g)).toHaveLength(2)
+    expect(rule(String.raw`\.hf-page-body:has\(> \.hf-page-main-wide\)`)).not.toContain('grid-template-columns')
+  })
+
+  it('works out the inset on the sides from the wider column, so the tracks are centred in the body', () => {
+    expect(rule(String.raw`\.hf-page-body:has\(> \.hf-page-main-wide\)`)).toContain(
+      '--hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width-wide)) / 2));',
+    )
+  })
+
+  it('is the width of its parts: 58rem, 2rem of space and 24rem', () => {
+    const tokens = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8')
+
+    expect(tokens).toContain('--hf-content-max-width-wide: 58rem;')
+    expect(tokens).toContain('--hf-page-max-width-wide: 84rem;')
+    expect(58 + 2 + 24).toBe(84)
+  })
+})

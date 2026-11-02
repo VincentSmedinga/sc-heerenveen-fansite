@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 /**
  * A cell: a number or text, or text with the value the column sorts on, such as `7–5` that
  * sorts as the goal difference `2`.
@@ -33,4 +35,18 @@ export type DataTableRow = {
    * club in a list of clubs. The link says the same as the header, so it names where it goes.
    */
   href?: string
+}
+
+export type DataTableTextRow = {
+  /**
+   * The cells of the row, one for each column after the first. A cell is text, a number or any
+   * other content, such as a link, but not interactive controls that need a label of their own.
+   */
+  cells: readonly ReactNode[]
+  /** What the row is about, as plain text. It is the row header, so it must be unique. */
+  header: string
+  /** Makes the row header a link, as in a row with numbers. The link repeats the header. */
+  href?: string
+  /** A second line under the row header, in secondary text, such as the date of a match. */
+  secondary?: string
 }

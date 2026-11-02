@@ -1,0 +1,152 @@
+/*
+ * A table of rows of fields. Where the table has room, it is a table: the headers of the columns
+ * are the labels, and the label of each field is only for a screen reader. Where it has not,
+ * every row is a block, with all the labels in view. The room is that of the table itself, not
+ * of the window, so the table is right on any page, also in a narrow column. A table has the
+ * room when it is 48rem wide: the row header and the button take 15rem, and eight fields of 6rem
+ * more or less fill the rest. The width is also the one where a wide page (Page.Main with
+ * `wide`), with its main column of 58rem, keeps the table in one piece.
+ *
+ * On a phone the table elements get another `display`. Some screen readers then drop the table
+ * from the page. That costs nothing here, because every field has a full label of its own, with
+ * the name of the row in it, and the header of the row stays in the text.
+ */
+
+@layer hf.components {
+  .hf-input-table {
+    /* The height of a field, which the row header is centred on. */
+    --hf-input-table-control: 2.75rem;
+
+    container-type: inline-size;
+
+    > table {
+      margin-block-end: var(--hf-space-m);
+    }
+  }
+
+  /*
+   * A field in a cell stands without the space under it, which the cell and the row take care
+   * of, and its error stays above it, so the fields of a row stand level at the bottom.
+   */
+  .hf-input-table-field > :is(input, select, textarea) {
+    margin-block-end: 0;
+  }
+
+  /* The block of a row: the default, for a table that is narrower than 48rem. */
+  .hf-input-table table,
+  .hf-input-table tbody {
+    display: block;
+  }
+
+  .hf-input-table thead {
+    display: none;
+  }
+
+  .hf-input-table tbody {
+    display: grid;
+    gap: var(--hf-space-m);
+  }
+
+  .hf-input-table tr {
+    border: 1px solid;
+    border-color: var(--hf-colour-border-default);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+    padding: var(--hf-space-m);
+  }
+
+  .hf-input-table :is(th, td) {
+    display: block;
+    padding: 0;
+  }
+
+  .hf-input-table tbody th {
+    color: var(--hf-colour-text-heading);
+    font-weight: var(--hf-strong-font-weight);
+    grid-column: 1 / -1;
+  }
+
+  .hf-input-table td.hf-input-table-action {
+    grid-column: 1 / -1;
+  }
+
+  @container (inline-size >= 48rem) {
+    .hf-input-table table {
+      display: table;
+      table-layout: fixed;
+    }
+
+    .hf-input-table thead {
+      display: table-header-group;
+    }
+
+    .hf-input-table tbody {
+      display: table-row-group;
+    }
+
+    .hf-input-table tr {
+      border: 0;
+      border-radius: 0;
+      display: table-row;
+      padding: 0;
+    }
+
+    .hf-input-table tbody tr {
+      border-block-start: 1px solid;
+      border-block-start-color: var(--hf-colour-border-default);
+    }
+
+    .hf-input-table :is(th, td) {
+      display: table-cell;
+      padding-block: var(--hf-space-s);
+      padding-inline: var(--hf-space-xs);
+      vertical-align: bottom;
+    }
+
+    .hf-input-table :is(th, td):first-child {
+      padding-inline-start: 0;
+    }
+
+    .hf-input-table :is(th, td):last-child {
+      padding-inline-end: 0;
+    }
+
+    /*
+     * The row header stands level with the text in the fields: the height of a field is
+     * --hf-input-table-control, and the text is in the middle of it.
+     */
+    .hf-input-table tbody th {
+      padding-block-end: calc((var(--hf-input-table-control) - 1lh) / 2 + var(--hf-space-s));
+    }
+
+    /* The button is lower than a field, so it stands in the middle of the row. */
+    .hf-input-table td.hf-input-table-action {
+      padding-block-end: calc(var(--hf-space-s) + (var(--hf-input-table-control) - var(--hf-size-control-small)) / 2);
+    }
+
+    .hf-input-table .hf-input-table-name {
+      inline-size: 7.5rem;
+    }
+
+    .hf-input-table .hf-input-table-narrow {
+      inline-size: 6rem;
+    }
+
+    .hf-input-table th.hf-input-table-action {
+      inline-size: 7rem;
+    }
+
+    /* The labels of the fields are for a screen reader only, as the headers show them. */
+    .hf-input-table-field > .hf-field-label {
+      block-size: 1px;
+      clip-path: inset(50%);
+      inline-size: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+    }
+  }
+}
