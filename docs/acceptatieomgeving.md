@@ -469,7 +469,7 @@ Zo kan niemand nagaan wie een account heeft.
 
 - `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: same-origin`.
   Een bezoeker zonder sessie die `/beheer` opvraagt, krijgt een doorverwijzing (307) naar `/beheer/inloggen`, met dezelfde headers.
-- Het inloggen werkt als je na stap 12 (en na de proefmail) een account maakt voor je eigen adres, naar <https://acc.sc.heerenveen.org/beheer/inloggen> gaat, je adres invult, binnen een paar minuten de mail "Inloggen bij het beheer van de sc Heerenveen Fansite" krijgt en na de link en de knop Inloggen "Je bent ingelogd als <je adres>." ziet.
+- Het inloggen werkt als je na stap 12 (en na de proefmail) een account maakt voor je eigen adres, naar <https://acc.sc.heerenveen.org/beheer/inloggen> gaat, je adres invult, binnen een paar minuten de mail "Inloggen bij het beheer van de sc Heerenveen Fansite" krijgt en na de link en de knop Inloggen "Je bent ingelogd als <je adres> (<je rol>)." ziet, met een tegel voor elk scherm van je rol.
   De link werkt maar één keer: opnieuw openen zegt "Deze link werkt niet".
   Uitloggen brengt je terug bij het formulier, en met de terugknop kom je niet meer in het beheer.
   Het cookie `beheer-sessie` zie je in de ontwikkelaarstools van je browser, onder Application → Cookies; het is `HttpOnly` en `Secure`.

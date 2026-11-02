@@ -19,7 +19,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { MatchEntry } from './match-form'
 
 import { createAccount } from './accounts'
-import { countWaitingDifferences, findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entries'
+import {
+  countMatchesWithoutResult,
+  countWaitingDifferences,
+  findMatch,
+  listAdminMatches,
+  saveEntry,
+  undoEntry,
+} from './match-entries'
 
 let database: TestDatabase
 let userId: number
@@ -445,6 +452,28 @@ describe('undoEntry', () => {
     expect(await undoEntry(database.db, userId, id, 'Waarom', t1)).toBe('none')
     expect(await undoEntry(database.db, userId, 99_999, 'Waarom', t1)).toBe('missing')
     expect(await log()).toEqual([])
+  })
+})
+
+describe('countMatchesWithoutResult', () => {
+  it('counts the matches of the season that have begun and have no result, as the list does', async () => {
+    await addMatch({
+      goalsAgainst: 0,
+      goalsFor: 1,
+      kickoffAt: new Date('2026-08-09T14:45:00Z'),
+      matchDate: '2026-08-09',
+      round: 'Speelronde 1',
+      status: 'played',
+    })
+    await addMatch({ kickoffAt: new Date('2026-10-31T17:45:00Z'), round: 'Speelronde 11' })
+    await addMatch({ kickoffAt: new Date('2026-11-01T09:00:00Z'), matchDate: '2026-11-01', round: 'Speelronde 12' })
+    // Still being played, in the future and in another season: not counted.
+    await addMatch({ kickoffAt: new Date('2026-11-01T11:00:00Z'), matchDate: '2026-11-01', round: 'Speelronde 13' })
+    await addMatch({ kickoffAt: new Date('2026-12-05T17:45:00Z'), matchDate: '2026-12-05', round: 'Speelronde 15' })
+    await addMatch({ season: '2025/26' })
+
+    expect(await countMatchesWithoutResult(database.db, '2026/27', new Date('2026-11-01T12:00:00Z'))).toBe(2)
+    expect(await countMatchesWithoutResult(database.db, '2024/25', t0)).toBe(0)
   })
 })
 

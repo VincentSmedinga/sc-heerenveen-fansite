@@ -46,6 +46,7 @@ const components = [
   'Tag',
   'Text',
   'Textarea',
+  'Tile',
   'TopScorersTable',
   'WikipediaCredit',
 ]
@@ -59,6 +60,11 @@ describe('the JavaScript entry of the package', () => {
   it('gives List.Item on List, because an item only works inside its list', () => {
     expect(typeof designSystem.List.Item).toBe('function')
     expect(designSystem).not.toHaveProperty('ListItem')
+  })
+
+  it('gives Tile.Grid on Tile, because a grid only holds tiles', () => {
+    expect(typeof designSystem.Tile.Grid).toBe('function')
+    expect(designSystem).not.toHaveProperty('TileGrid')
   })
 
   it('gives the trend on BarChart, because it only works inside its chart', () => {

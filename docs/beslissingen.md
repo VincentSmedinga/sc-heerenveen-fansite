@@ -3657,6 +3657,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de uitkomst is geen vaste kleur uit het palet, dus er is geen vaste tabelrij met een verhouding voor de baan: de test meet elke ondergrond.
 - **Alternatieven:** een grijs of een blauw uit een schaal als tint (de baan wordt dan grijs of vlak op een blauwe ondergrond); een vaste kleur per vlak, gezet door `Card` (echte paletkleuren en eenvoudige metingen, maar elke nieuwe ondergrond vraagt een nieuwe regel); de baan laten zoals hij is; in donker een donkere tint (blauw-950, onzichtbaar op de pagina, die dezelfde kleur heeft); zwart in donker (dezelfde reden, en een groef die donkerder is dan de pagina bestaat niet).
 
+### De tegel is een kaart die één link is, in een lijst van tegels
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem heeft `Tile`, een kaart die één link is, en `Tile.Grid`, de lijst waarin tegels staan (#616).
+  - **De tegel** is een `li` met een `Card` erin: een kop (`h2` tot `h4`, het niveau kiest de pagina) met daarin de link, een regel beschrijving en eventueel een pictogram vóór de tekst.
+    De kop is de tekst van de link, dus de naam van de tegel is de naam van de plek, zonder woorden erbij.
+  - **De hele tegel is aan te klikken** met één link: een leeg `::after` op de link bedekt de kaart.
+    De focusrand staat om de hele tegel, op datzelfde `::after`, en de woorden van de kop hebben er geen eigen.
+    Onder de muis krijgt de rand de kleur van een markering, zodat de tegel laat zien dat hij een link is.
+  - **Het raster** zet de tegels naast elkaar zover ze passen, elk minstens 15 rem breed, en onder elkaar op een telefoon, zonder media query.
+    De tegels in een rij zijn even hoog.
+  - **Het pictogram** is een lijnpictogram dat ontbreken kan.
+    Het is voor het oog en verborgen voor hulpsoftware, en het is nooit het enige teken van waar de tegel heen gaat.
+    `Icon` kreeg er vier bij: `speech` (berichten), `document` (artikelen), `ball` (wedstrijden) en `chart` (bezoek), in dezelfde stijl als de andere.
+  - **Het vlak** is het witte van `Card`; er is geen keuze.
+- **Waarom:** een startpagina waar de bezoeker een plek kiest, is een lijst met koppelingen die niet zegt wat er te vinden is.
+  Een tegel met een kop en een regel doet dat, en blijft één link, dus één Tab-stop, één naam voor een schermlezer en één focusrand.
+  `Card` zorgt voor het vlak, de rand en de binnenruimte, zodat een tegel er bij de andere kaarten past en elke verandering daarin vanzelf meegaat.
+  Een `ul` zegt aan een schermlezer hoeveel schermen er zijn.
+- **Nadeel:** de tekst in een tegel is niet te selecteren, want het `::after` van de link ligt erover.
+  Een tegel met een tweede link erin kan niet; dat is de bedoeling, want een tegel is één bestemming.
+- **Alternatieven:** de hele tegel in een `a` (de kop, de beschrijving en het pictogram worden samen de naam van de link, die dan lang is en de beschrijving twee keer voorleest bij een lijst van koppen); een kaart met een knop of link eronder (twee Tab-stops voor één plek); een `Card` met `onClick` (werkt niet zonder JavaScript en niet met het toetsenbord); `:has()` om de rand van de tegel te tekenen als de link focus heeft (werkt, maar het `::after` van de link doet hetzelfde zonder een selector van de ouder); een eigen vlak per tegel, zoals `soft` of `warm` (de kleur zegt hier niets).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -5657,6 +5680,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Doelsaldo en aantal doelpunten leggen de uitslag vast, dus er is geen gelijke stand om op te lossen.
   Een nederlaag met één doelpunt verschil staat vóór een zwaardere.
 - **Alternatieven:** sorteren op doelpunten voor (3–0 vóór 4–1); de nederlagen van slecht naar goed.
+
+### De startpagina van het beheer toont tegels in de hoofdkolom en een kaart Te doen in de zijbalk
+
+- **Datum:** 2 november 2026
+- **Besluit:** de startpagina van het beheer (`/beheer`) heeft in de hoofdkolom een tegel (zie _De tegel is een kaart die één link is, in een lijst van tegels_) voor elk scherm van de rol, en in de zijbalk de kaart "Te doen", die alleen verschijnt als er iets wacht (#616).
+  - **De tegels:** een moderator ziet Berichten, een beheerder ook Artikelen, Wedstrijden en Bezoek.
+    Elke tegel heeft een beschrijving van een regel in gewone woorden.
+  - **De kaart Te doen** heeft een regel per wat wacht, elk een link met het aantal erin: afwijkingen van Wikipedia die op een besluit wachten, naar de lijst "Aangepast" van het seizoen dat ze heeft (zoals bij de lijst van de wedstrijden), en wedstrijden van het lopende seizoen zonder uitslag (`countMatchesWithoutResult`, met dezelfde regel als de lijst: twee uur na de aftrap), naar de lijst die opent op die wedstrijden.
+    Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
+  - **Wacht er niets,** dan is er geen kaart en geen zijbalk.
+    Een moderator heeft nu niets dat wacht, dus die ziet nooit een kaart.
+  - **Op een telefoon** staat de kaart onder de tegels.
+    `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom, en gebruikt bewust geen `order`, zodat de leesvolgorde en de volgorde van het toetsenbord gelijk blijven aan wat je ziet.
+  - **Het kopje** zegt het adres en de rol: "Je bent ingelogd als jelle@voorbeeld.nl (beheerder)."
+    De knop Uitloggen blijft onder de tegels.
+- **Waarom:** wie inlogt, wil zien waar hij nodig is.
+  Een lijst met koppelingen zegt dat niet, en een tegel laat zien wat er te vinden is.
+  Wat wacht, hoort bij elkaar op één plek die je meteen ziet, en niet als een zin achter een koppeling.
+  Een zijbalk die alleen er is als er iets wacht, laat de pagina leeg als er niets te doen is.
+- **Nadeel:** op een telefoon moet je langs de tegels scrollen voor wat wacht; met vier tegels is dat kort.
+  Een tegel Wedstrijden die niet meer naar `?tonen=aangepast` wijst, is een klik meer voor wie alleen de afwijkingen wil zien, maar de kaart heeft die link.
+- **Alternatieven:** een doorverwijzing naar het vaakst gebruikte scherm (werkt niet voor twee rollen met andere schermen); alleen de lijst houden (blijft onduidelijk wat wacht); de kaart boven de tegels op een telefoon met `order` (breekt de leesvolgorde en vraagt een aanpassing aan `Page`); het aantal als label op de tegel (een tegel is één link, en een label zegt niet waar het naartoe gaat); een lege kaart "Niets te doen" (een kaart die niets zegt, naast de lege hoofdkolom).
 
 ## Importer
 

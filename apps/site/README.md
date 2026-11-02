@@ -754,6 +754,10 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
+- `/beheer` is de startpagina: wie is ingelogd (het adres en de rol), een tegel (`Tile` van het designsysteem) voor elk scherm van die rol in de hoofdkolom, en de knop Uitloggen.
+  De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit en wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`), elk een koppeling naar de lijst.
+  Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
+  Op een telefoon staat de kaart onder de tegels, want `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom.
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
@@ -824,8 +828,8 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
 De lijst is één tabel van de wedstrijden van een seizoen, met de wedstrijd als enige koppeling in een rij, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
 Een filter met de aantallen kiest wat de lijst toont: `?tonen=alles`, `?tonen=aangepast` en, zonder zoekopdracht, de wedstrijden zonder uitslag (twee uur na de aftrap, zoals `lacksResult`), met de wedstrijden zonder uitslag eerst bij "Alles".
 Het zijn gewone koppelingen, dus het werkt zonder JavaScript.
-Wachten er afwijkingen van Wikipedia op een besluit, dan wijst de koppeling "Wedstrijden invullen of verbeteren" op de startpagina van het beheer naar `?tonen=aangepast` van het lopende seizoen, of van het nieuwste seizoen dat er heeft (`countWaitingDifferences` in `src/beheer/match-entries.ts`).
-Zonder afwijkingen wijst ze naar de lijst zoals die opent.
+Wachten er afwijkingen van Wikipedia op een besluit, dan zegt de kaart "Te doen" op de startpagina van het beheer het aantal, en de koppeling erbij gaat naar `?tonen=aangepast` van het lopende seizoen, of van het nieuwste seizoen dat er heeft (`countWaitingDifferences` in `src/beheer/match-entries.ts`).
+De tegel Wedstrijden wijst altijd naar de lijst zoals die opent.
 `?seizoen=2025-26` kiest een ouder seizoen, en een seizoen zonder wedstrijden valt terug op het huidige.
 De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) is de brede pagina met een zijbalk: de kaarten van het formulier staan in de hoofdkolom (`MatchFields` in `MatchForm.tsx`) en het blok om op te slaan, de laatste invoer en het uitklapblok "Invoer weghalen" in de zijbalk, die op een brede pagina in beeld blijft.
 De velden van het blok om op te slaan horen bij het formulier met het attribuut `form`, en `MatchFormProvider` deelt de toestand van het formulier met de drie delen.
