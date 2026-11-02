@@ -726,6 +726,26 @@ await withEmptyDatabase((database) =>
     // The cards with figures moved to the statistics page: none of them is left on this one.
     assert.doesNotMatch(matchesHtml, /id="(?:onze-plek-in-de-competitie|reeksen|doelpuntenmakers|uitersten)"/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
+    // The seed has the results of every club, so the card Stand has the switch for the latest
+    // five matches: the whole season is the current one, and the links end on the card.
+    assert.match(
+      matchesHtml,
+      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand">.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand">.*?Laatste 5/s,
+    )
+    const lastFiveHtml = await (await fetch(`${origin}/wedstrijden?stand=laatste-5`)).text()
+    assert.match(
+      lastFiveHtml,
+      /<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op \d+ \w+ \d{4}<\/caption>/,
+    )
+    assert.match(lastFiveHtml, /<a aria-current="page" href="\/wedstrijden\?stand=laatste-5#stand">/)
+    // sc Heerenveen won twice and drew once, so it is first with seven points, and Nepstad
+    // Rangers lost both matches and is last.
+    assert.deepEqual(
+      [...lastFiveHtml.matchAll(/<td class="hf-numeric hf-rank">(\d)<\/td><th scope="row">([^<]+)/g)].map(
+        ([, place, club]) => `${place} ${club}`,
+      ),
+      ['1 sc Heerenveen', '2 Demo Boys', '3 Proefstad SV', '4 Voorbeeld United', '5 Testdorp FC', '6 Nepstad Rangers'],
+    )
     // In the line of the scorers of one match the two are told apart by an initial.
     assert.match(matchesHtml, /J\. Testvoort/)
     assert.match(matchesHtml, /B\. Testvoort/)

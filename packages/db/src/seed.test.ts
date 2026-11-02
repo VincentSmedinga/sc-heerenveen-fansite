@@ -10,6 +10,7 @@ import {
   consentStatuses,
   feeds,
   items,
+  leagueResults,
   matches,
   matchGoals,
   playerPositions,
@@ -21,6 +22,7 @@ import {
 } from './schema.ts'
 import { seasonOf } from './season.ts'
 import {
+  madeUpLeagueResults,
   madeUpMatches,
   madeUpSquad,
   realSources,
@@ -635,6 +637,7 @@ describe('the made-up matches', () => {
   beforeEach(async () => {
     await database.pool.query('DELETE FROM matches')
     await database.pool.query('DELETE FROM standings')
+    await database.pool.query('DELETE FROM league_results')
   })
 
   it('puts matches and a table in the current season, once', async () => {
@@ -646,6 +649,20 @@ describe('the made-up matches', () => {
     expect(rows).toHaveLength(madeUpMatches(now).length)
     expect(rows.every((match) => match.season === '2026/27')).toBe(true)
     expect(await database.db.select().from(standings)).toHaveLength(6)
+    expect(await database.db.select().from(leagueResults)).toHaveLength(madeUpLeagueResults(now).length)
+  })
+
+  it('gives every club of the made-up table as many results as the table says it played', async () => {
+    await seedMatches(database.db, now)
+
+    const table = await database.db.select().from(standings)
+    const results = await database.db.select().from(leagueResults)
+
+    for (const row of table) {
+      expect(results.filter((r) => r.homeClub === row.club || r.awayClub === row.club)).toHaveLength(row.played)
+    }
+    expect(results.every((r) => table.some((row) => row.club === r.homeClub))).toBe(true)
+    expect(results.every((r) => table.some((row) => row.club === r.awayClub))).toBe(true)
   })
 
   it('has every case a page must show', async () => {
@@ -754,6 +771,7 @@ describe('the made-up matches', () => {
       await database.pool.query('DELETE FROM players')
       await database.pool.query('DELETE FROM matches')
       await database.pool.query('DELETE FROM standings')
+      await database.pool.query('DELETE FROM league_results')
       await database.pool.query('DELETE FROM wikipedia_pages')
 
       if (first === 'matches') {

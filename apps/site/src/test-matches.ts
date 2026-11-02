@@ -1,4 +1,4 @@
-import type { PublicMatch } from '@fansite/db/queries'
+import type { PublicLeagueResult, PublicMatch } from '@fansite/db/queries'
 
 import type { MatchData } from './matches'
 
@@ -242,3 +242,14 @@ export const matchData: MatchData = {
     },
   ],
 }
+
+/*
+ * The results of the league that go with the table above: every club has as many as the table
+ * says it played, so the card Stand has its switch. In round 7 the match of sc Heerenveen has
+ * another opponent than the results do, the way `Excelsior` is `Excelsior Rotterdam`.
+ */
+export const leagueResultsData: PublicLeagueResult[] = [
+  { awayClub: 'Demo Boys', awayGoals: 1, homeClub: 'sc Heerenveen', homeGoals: 3, playedOn: '2026-09-20', round: 7 },
+  { awayClub: 'Testdorp FC', awayGoals: 0, homeClub: 'sc Heerenveen', homeGoals: 2, playedOn: '2026-10-04', round: 8 },
+  { awayClub: 'Testdorp FC', awayGoals: 1, homeClub: 'Demo Boys', homeGoals: 1, playedOn: '2026-10-11', round: 9 },
+]

@@ -272,6 +272,12 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De balk verdwijnt op een smalle plek.
   Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"`, in hetzelfde rood als "Gegevens nog niet beschikbaar" (`hf-text-missing`) en boven de link.
   Een Eindstand krijgt de regel niet, een kaart zonder tabel ook niet, en de afbeelding van de kaart laat haar weg (`data-hf-card-share-skip`).
+  Onder de kop staat een schakelaar (`StandingsSwitch` in `src/StandingsSwitch.tsx`, een `SegmentedLinks` in de kleine maat) met "Hele seizoen" en "Laatste 5".
+  "Hele seizoen" is de standaard en heeft geen parameter; "Laatste 5" is `?stand=laatste-5`, en elke andere waarde is "Hele seizoen" (`parseStandingsView` in `src/standings-view.ts`).
+  De links eindigen op het anker van de kaart, en de seizoenskiezer neemt de keuze niet mee.
+  De tabel van "Laatste 5" telt per club de vijf wedstrijden die het laatst zijn gespeeld (`lastFiveStandings` in `src/last-five.ts`).
+  De wedstrijden van sc Heerenveen komen uit `matches` en die van de andere clubs uit `league_results`, en `getLeagueResults` in `src/matches.ts` bewaart die per seizoen zoals `getMatchData`.
+  De schakelaar staat er alleen als voor elke club het aantal uitslagen gelijk is aan het aantal gespeelde wedstrijden in de stand (`hasAllLeagueResults`); anders blijft de kaart zoals hij was.
 - **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
   Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
@@ -295,7 +301,7 @@ Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
 De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de pagina van de selectie); zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
-`pnpm test:a11y` gebruikt de verzonnen wedstrijden en stand van de seed (`madeUpMatches` en `madeUpTable`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden, stand en uitslagen van alle clubs van de seed (`madeUpMatches`, `madeUpTable` en `madeUpLeagueResults`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
 
 ## De statistieken
 

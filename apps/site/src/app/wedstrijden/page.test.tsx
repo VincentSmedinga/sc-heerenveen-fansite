@@ -3,15 +3,16 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '../../matches'
+import { getLeagueResults, getMatchData, getMatchSeasons } from '../../matches'
 import { matchShortcuts } from '../../matchShortcuts'
-import { matchData } from '../../test-matches'
+import { leagueResultsData, matchData } from '../../test-matches'
 import { withoutIcons } from '../../without-icons'
 import MatchesPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
 vi.mock('../../matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -19,8 +20,8 @@ vi.mock('../../matches', async (importOriginal) => ({
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
 
-async function render() {
-  return withoutIcons(renderToStaticMarkup(await MatchesPage()))
+async function render(searchParams: Record<string, string | string[] | undefined> = {}) {
+  return withoutIcons(renderToStaticMarkup(await MatchesPage({ searchParams: Promise.resolve(searchParams) })))
 }
 
 /** The part of the page under the h2 with this id, up to the next h2 or the end. */
@@ -35,8 +36,10 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getLeagueResults).mockReset()
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getLeagueResults).mockResolvedValue([])
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 })
@@ -903,5 +906,124 @@ describe('the head coaches of the season', () => {
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('hf-wikipedia-credit'))
     expect(card).not.toContain('hf-wikipedia-credit')
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(5)
+  })
+})
+
+describe('the switch of the card Stand, between the whole season and the latest five matches', () => {
+  const stand = async (searchParams: Record<string, string | string[] | undefined> = {}) =>
+    section(await render(searchParams), 'stand')
+
+  beforeEach(() => {
+    vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData)
+  })
+
+  it('asks for the results of the season of the page, and of no other', async () => {
+    await render()
+
+    expect(getLeagueResults).toHaveBeenCalledExactlyOnceWith('2026/27')
+  })
+
+  it('puts the switch straight under the heading, as links that end on the card, with the whole season as the current one', async () => {
+    const card = await stand()
+
+    expect(card).toContain('aria-label="Welke stand"')
+    expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand">')
+    expect(card).toContain('<a href="/wedstrijden?stand=laatste-5#stand">')
+    expect(card).toContain('Hele seizoen')
+    expect(card).toContain('Laatste 5')
+    expect(card.indexOf('Welke stand')).toBeLessThan(card.indexOf('<table'))
+    expect(card).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
+  })
+
+  it('shows the table over the latest five matches for ?stand=laatste-5, with its own caption and the current choice', async () => {
+    const card = await stand({ stand: 'laatste-5' })
+
+    expect(card).toContain(
+      '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 18 oktober 2026</caption>',
+    )
+    expect(card).toContain('<a aria-current="page" href="/wedstrijden?stand=laatste-5#stand">')
+    // Heerenveen has 3 + 3 + 1 points in three matches, the other two one point in two matches.
+    const rows = [...card.matchAll(/<tr[^>]*><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row">([^<]+)/g)]
+
+    expect(rows.map(([, place, club]) => [place, club])).toEqual([
+      ['1', 'sc Heerenveen'],
+      ['2', 'Demo Boys'],
+      ['3', 'Testdorp FC'],
+    ])
+    expect(card).toContain('class="hf-highlight hf-standings-table-own"')
+    expect(card).toContain('<a href="/statistieken#onze-plek-in-de-competitie">')
+  })
+
+  it('shows the whole season for a value that is not known, an empty one and one given twice', async () => {
+    for (const value of ['laatste-vijf', 'Laatste-5', '', ['laatste-5', 'laatste-5']]) {
+      const card = await stand({ stand: value })
+
+      expect(card).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
+      expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand">')
+    }
+  })
+
+  it('has no switch when the results of the clubs are not there, and ignores the choice then', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue([])
+
+    for (const searchParams of [{}, { stand: 'laatste-5' }]) {
+      const card = await stand(searchParams)
+
+      expect(card).not.toContain('Welke stand')
+      expect(card).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
+    }
+  })
+
+  it('has no switch when a club has fewer results than the table says it played', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData.slice(0, 2))
+
+    expect(await stand({ stand: 'laatste-5' })).not.toContain('Welke stand')
+  })
+
+  it('has no switch, and no error, when the results can not be read', async () => {
+    vi.mocked(getLeagueResults).mockRejectedValue(new Error('no database'))
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const card = await stand({ stand: 'laatste-5' })
+
+    expect(card).not.toContain('Welke stand')
+    expect(card).toContain('<table')
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('no database'))
+  })
+
+  it('has no table and no switch when the season has no table yet', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings: [] })
+    const card = await stand({ stand: 'laatste-5' })
+
+    expect(card).not.toContain('Welke stand')
+    expect(card).not.toContain('<table')
+  })
+
+  it('keeps the line that the data is behind under the table of the latest five matches', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        ...matchData.matches,
+        {
+          ...matchData.matches[0]!,
+          goalsAgainst: null,
+          goalsFor: null,
+          kickoffAt: new Date('2026-10-22T18:45:00Z'),
+          matchDate: '2026-10-22',
+          round: 'Speelronde 6',
+          status: 'scheduled',
+        },
+      ],
+    })
+    const card = await stand({ stand: 'laatste-5' })
+
+    expect(card).toContain('Gegevens nog niet bijgewerkt')
+  })
+
+  it('does not put the choice in the season picker, which sends visitors to another season', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+    const html = await render({ stand: 'laatste-5' })
+
+    expect(html).toContain('action="/wedstrijden/kies"')
+    expect(html).not.toContain('name="stand"')
   })
 })

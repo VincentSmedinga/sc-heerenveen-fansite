@@ -3,6 +3,7 @@ import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import type { Database } from './client.ts'
 import type {
   FeedFilter,
+  NewLeagueResult,
   NewMatch,
   NewMatchGoal,
   NewPlayer,
@@ -15,7 +16,7 @@ import type {
 import { connect } from './client.ts'
 import { withClubs } from './clubs.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
+import { feeds, leagueResults, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
 import { seedStaff } from './staff-seed.ts'
 
@@ -648,6 +649,38 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
 }
 
 /**
+ * The made-up results of every club in the league, which agree with `madeUpMatches` and
+ * `madeUpTable`: each club has as many results as the table says it played, so the card Stand
+ * has its switch for the latest five matches. The matches of sc Heerenveen are those of the
+ * made-up programme. The match in round 2 is played at Voorbeeld United again, as in the
+ * programme, but a result is kept once for a home club and an away club, so it is written the
+ * other way round here.
+ */
+export function madeUpLeagueResults(now: Date): NewLeagueResult[] {
+  const season = seasonOf(now)
+  const dayOf = (days: number) => new Date(now.getTime() + days * day).toISOString().slice(0, 10)
+  const rows: [round: number, days: number, home: string, homeGoals: number, awayGoals: number, away: string][] = [
+    [0, -21, 'Voorbeeld United', 0, 0, 'sc Heerenveen'],
+    [0, -21, 'Proefstad SV', 1, 0, 'Nepstad Rangers'],
+    [0, -21, 'Demo Boys', 2, 2, 'Testdorp FC'],
+    [1, -14, 'sc Heerenveen', 6, 0, 'Testdorp FC'],
+    [1, -14, 'Demo Boys', 3, 2, 'Nepstad Rangers'],
+    [1, -14, 'Proefstad SV', 1, 1, 'Voorbeeld United'],
+    [2, -7, 'sc Heerenveen', 6, 0, 'Voorbeeld United'],
+  ]
+
+  return rows.map(([round, days, homeClub, homeGoals, awayGoals, awayClub]) => ({
+    awayClub,
+    awayGoals,
+    homeClub,
+    homeGoals,
+    playedOn: dayOf(days),
+    round,
+    season,
+  }))
+}
+
+/**
  * A made-up squad for the current season, for the pages and the accessibility checks: invented
  * names, all four positions, a name with a particle, a name of one word and a player without a
  * shirt number. It passes the checks of the importer (18 to 45 players, two goalkeepers). The
@@ -766,11 +799,11 @@ export function madeUpWikipediaPages(now: Date): NewWikipediaPage[] {
 }
 
 /**
- * Puts made-up matches, a made-up league table and the pages they credit in the database, but
- * only when the current season has none of either. The real import replaces them with
- * Wikipedia's the first time it runs, and a database that already has the real ones is left
- * alone, so a restart on acceptance never puts the made-up ones over the real ones. Returns
- * whether it put them in.
+ * Puts made-up matches, a made-up league table with the results of every club and the pages
+ * they credit in the database, but only when the current season has none of either. The real
+ * import replaces them with Wikipedia's the first time it runs, and a database that already has
+ * the real ones is left alone, so a restart on acceptance never puts the made-up ones over the
+ * real ones. Returns whether it put them in.
  */
 export async function seedMatches(db: Database, now: Date = new Date()): Promise<boolean> {
   const season = seasonOf(now)
@@ -802,6 +835,7 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
     }
     await linkMadeUpGoals(transaction, season)
     await transaction.insert(standings).values(madeUpTable(now))
+    await transaction.insert(leagueResults).values(madeUpLeagueResults(now))
 
     for (const page of madeUpWikipediaPages(now)) {
       await transaction

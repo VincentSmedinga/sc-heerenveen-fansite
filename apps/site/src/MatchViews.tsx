@@ -618,6 +618,18 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
 }
 
 /**
+ * The caption of the table over the latest five matches, which only a screen reader gets: what
+ * it is, and the day the table of the season holds for, which is the day of the last match.
+ */
+export function lastFiveCaption(rows: PublicStandingsRow[]) {
+  const [first] = rows
+
+  return first === undefined
+    ? 'Stand over de laatste vijf wedstrijden'
+    : `Stand over de laatste vijf wedstrijden op ${formatTableDay(first.validOn)}`
+}
+
+/**
  * The full credit for the page of the matches: the pages of Wikipedia the importer read, and
  * the last time it read them, in a card without a border or background to see, so its text
  * lines up with the text in the cards above. It is nothing when the importer has read none,

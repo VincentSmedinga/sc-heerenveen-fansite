@@ -13,6 +13,7 @@ import {
   clubs,
   discussions,
   items,
+  leagueResults,
   matchEdits,
   matches,
   matchGoals,
@@ -47,6 +48,8 @@ export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>
 export type PublicEpisode = Awaited<ReturnType<typeof listPodcastEpisodes>>[number]
 
 export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
+
+export type PublicLeagueResult = Awaited<ReturnType<typeof listLeagueResults>>[number]
 
 export type PublicMatch = Awaited<ReturnType<typeof listSeasonMatches>>[number]
 
@@ -372,6 +375,33 @@ export function listEnabledSources(db: Database) {
     .from(sources)
     .where(eq(sources.enabled, true))
     .orderBy(asc(sources.name))
+}
+
+/**
+ * The results of the league matches that every club has played in a season, such as `2026/27`,
+ * from the earliest day on (a day with more matches by round, then by the clubs): the round,
+ * the day, the two clubs as the table writes them, and their goals. The table of the season
+ * holds the same clubs, so the two can be joined on the name. A season whose page lists only
+ * the matches of sc Heerenveen has the matches of no other club, or none at all.
+ */
+export function listLeagueResults(db: Database, season: string) {
+  return db
+    .select({
+      awayClub: leagueResults.awayClub,
+      awayGoals: leagueResults.awayGoals,
+      homeClub: leagueResults.homeClub,
+      homeGoals: leagueResults.homeGoals,
+      playedOn: leagueResults.playedOn,
+      round: leagueResults.round,
+    })
+    .from(leagueResults)
+    .where(eq(leagueResults.season, season))
+    .orderBy(
+      asc(leagueResults.playedOn),
+      asc(leagueResults.round),
+      asc(leagueResults.homeClub),
+      asc(leagueResults.awayClub),
+    )
 }
 
 /**

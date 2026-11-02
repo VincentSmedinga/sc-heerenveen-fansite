@@ -1,6 +1,6 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { matches, standings, wikipediaPages } from '@fansite/db/schema'
+import { leagueResults, matches, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { madeUpMatches, seedMatches } from '@fansite/db/seed'
 import { eq } from 'drizzle-orm'
@@ -24,12 +24,13 @@ const aYearAgo = () => {
 export const earlierSeasonSlug = () => earlierSeason().replace('/', '-')
 
 /**
- * Puts made-up matches, goals, a league table and the pages they credit in the database for the
- * season before the current one, so the checks of /wedstrijden/<season> have an earlier season
- * to show: the matches page lists the seasons that have matches, and answers "niet gevonden"
- * for the others. A database that already holds matches or a table for that season (a
- * development database that imported one) keeps them, and the checks use those. The checks put
- * the rows in before the first test and take them out after the last one.
+ * Puts made-up matches, goals, a league table with the results of every club and the pages they
+ * credit in the database for the season before the current one, so the checks of
+ * /wedstrijden/<season> have an earlier season to show: the matches page lists the seasons that
+ * have matches, and answers "niet gevonden" for the others. A database that already holds
+ * matches or a table for that season (a development database that imported one) keeps them,
+ * and the checks use those. The checks put the rows in before the first test and take them out
+ * after the last one.
  */
 export async function addEarlierSeason() {
   const { close, db } = connectToDatabase()
@@ -53,6 +54,7 @@ export async function addEarlierSeason() {
         // The goals of the matches go with them.
         await connection.db.delete(matches).where(eq(matches.season, season))
         await connection.db.delete(standings).where(eq(standings.season, season))
+        await connection.db.delete(leagueResults).where(eq(leagueResults.season, season))
         await connection.db.delete(wikipediaPages).where(eq(wikipediaPages.season, season))
       }
     } finally {

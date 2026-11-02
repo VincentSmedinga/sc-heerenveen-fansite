@@ -439,6 +439,7 @@ De sleutel is het seizoen met de thuisclub en de uitclub.
 Een wedstrijd zonder uitslag heeft geen rij, en de beker en de play-offs staan er niet in.
 Een seizoen waarvan de pagina alleen de wedstrijden van sc Heerenveen heeft, heeft geen rijen.
 De rijen van een seizoen worden in één keer vervangen, zoals de stand (zie de [README van de importer](../../apps/importer/README.md)).
+De site leest ze met `listLeagueResults`, voor de stand over de laatste vijf wedstrijden op `/wedstrijden`.
 
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
@@ -518,7 +519,7 @@ De importer vergelijkt de doelpunten met die in `match_goals` en waarschuwt bij 
 Bij elke rij staan de naam, de positie, de pagina op Wikipedia en of de speler in de selectie staat.
 De rijen komen op naam en dan competitie.
 
-De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
+De seed zet verzonnen wedstrijden, een verzonnen stand, de uitslagen van alle clubs en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable`, `madeUpLeagueResults` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
 Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seedSquad`), alleen als het lopende seizoen nog geen spelers heeft: met alle posities, een naam met een voorvoegsel, een naam van één woord en een speler zonder rugnummer.
 De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.

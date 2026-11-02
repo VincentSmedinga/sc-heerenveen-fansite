@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '../../../matches'
+import { getLeagueResults, getMatchData, getMatchSeasons } from '../../../matches'
 import { matchShortcutsOf } from '../../../matchShortcuts'
 import { matchData } from '../../../test-matches'
 import { withoutIcons } from '../../../without-icons'
@@ -12,6 +12,7 @@ import SeasonMatchesPage, { generateMetadata } from './page'
 // Only the queries are replaced: the page of a season is the real one.
 vi.mock('../../../matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -28,10 +29,13 @@ const earlier = {
   standings: matchData.standings.slice(0, 2),
 }
 
-const params = (seizoen: string) => ({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve({}) })
+const params = (seizoen: string, searchParams: Record<string, string | string[]> = {}) => ({
+  params: Promise.resolve({ seizoen }),
+  searchParams: Promise.resolve(searchParams),
+})
 
-const render = async (seizoen = '2025-26') =>
-  withoutIcons(renderToStaticMarkup(await SeasonMatchesPage(params(seizoen))))
+const render = async (seizoen = '2025-26', searchParams: Record<string, string | string[]> = {}) =>
+  withoutIcons(renderToStaticMarkup(await SeasonMatchesPage(params(seizoen, searchParams))))
 
 /** The digest of the error that `notFound()` and `redirect()` throw, which Next.js answers. */
 const digestOf = async (promise: Promise<unknown>) =>
@@ -44,6 +48,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getLeagueResults).mockReset()
+  vi.mocked(getLeagueResults).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
@@ -56,6 +62,44 @@ afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllEnvs()
+})
+
+describe('the switch of the card Eindstand of an earlier season', () => {
+  // The table of the earlier season has two clubs that played each other twice, and the two
+  // results say so.
+  const table = matchData.standings.slice(0, 2).map((row) => ({ ...row, played: 2 }))
+  const results = [
+    { awayClub: 'sc Heerenveen', awayGoals: 0, homeClub: 'Demo Boys', homeGoals: 1, playedOn: '2025-09-20', round: 7 },
+    { awayClub: 'Demo Boys', awayGoals: 0, homeClub: 'sc Heerenveen', homeGoals: 1, playedOn: '2025-10-04', round: 8 },
+  ]
+
+  beforeEach(() => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [], season: '2025/26', standings: table })
+    vi.mocked(getLeagueResults).mockResolvedValue(results)
+  })
+
+  it('has links that end on the card Eindstand and stay on the page of the season', async () => {
+    const html = await render()
+
+    expect(getLeagueResults).toHaveBeenCalledExactlyOnceWith('2025/26')
+    expect(html).toContain('<a aria-current="page" href="/wedstrijden/2025-26#eindstand">')
+    expect(html).toContain('<a href="/wedstrijden/2025-26?stand=laatste-5#eindstand">')
+  })
+
+  it('shows the latest five matches for ?stand=laatste-5, and keeps the name Eindstand for the card', async () => {
+    const html = await render('2025-26', { stand: 'laatste-5' })
+
+    expect(html).toContain(
+      '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 18 oktober 2026</caption>',
+    )
+    expect(html).toContain('id="eindstand"')
+  })
+
+  it('has no switch for a season whose results are missing, so one that was not imported again', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue(results.slice(0, 1))
+
+    expect(await render('2025-26', { stand: 'laatste-5' })).not.toContain('Welke stand')
+  })
 })
 
 describe('the page of an earlier season, /wedstrijden/2025-26', () => {

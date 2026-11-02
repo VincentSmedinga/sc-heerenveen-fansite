@@ -5,13 +5,25 @@ import { Card, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@
 import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '../../env'
-import { overviewOf, resultsOfSeason } from '../../matches'
+import { reasonOf } from '../../errors'
+import { lastFiveOf } from '../../last-five'
+import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason } from '../../matches'
 import { coachesCardOf, standingsCardOf } from '../../matchShortcuts'
-import { CoachesCard, imageCredit, MatchLines, SourceCredit, StandingsBehind, standingsCaption } from '../../MatchViews'
+import {
+  CoachesCard,
+  imageCredit,
+  lastFiveCaption,
+  MatchLines,
+  SourceCredit,
+  StandingsBehind,
+  standingsCaption,
+} from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
-import { loadSeasonPage, matchesPath, pickerPathOf, statisticsPath } from '../../season-page'
+import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
 import { ServerError, serverErrorTitle } from '../../ServerError'
+import { parseStandingsView, standingsViewParam } from '../../standings-view'
+import { StandingsSwitch } from '../../StandingsSwitch'
 import { withBranch } from '../../title'
 
 /** The route that sends the season picker on to its season (app/wedstrijden/kies). */
@@ -47,8 +59,13 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * the last, and calls its table Eindstand. Under the table and the results is a link to the
  * card with figures that belongs to it on the page Statistieken, of the same season. A season
  * that has no matches in the database is the page "niet gevonden".
+ *
+ * The card with the table has a switch between the whole season and the latest five matches of
+ * each club, `?stand=laatste-5` (see StandingsSwitch). It is there only when the results of
+ * every club are complete (see `lastFiveOf`). Any other value is the whole season.
  */
-export async function MatchesPage({ season }: { season: string }) {
+export async function MatchesPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
+  const { [standingsViewParam]: standingsChoice } = await searchParams
   const loaded = await loadSeasonPage(season, matchesPath)
 
   if (loaded.kind === 'unknown') {
@@ -68,6 +85,8 @@ export async function MatchesPage({ season }: { season: string }) {
   const { programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
   const standingsCard = standingsCardOf(current)
+  const lastFive = await lastFiveOfSeason(data)
+  const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
   const coachesCard = coachesCardOf(data.coaches.length)
   // The cards with figures are on the statistics page of the same season.
   const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
@@ -134,7 +153,19 @@ export async function MatchesPage({ season }: { season: string }) {
             <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
           ) : (
             <>
-              <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
+              {lastFive !== undefined && (
+                <StandingsSwitch
+                  address={seasonAddress(matchesPath, season, seasonOf(now))}
+                  anchor={standingsCard.id}
+                  view={lastFiveShown ? 'last-five' : 'season'}
+                />
+              )}
+              <StandingsTable
+                caption={
+                  lastFiveShown ? lastFiveCaption(data.standings) : standingsCaption(data.standings, standingsCard.name)
+                }
+                rows={lastFiveShown ? lastFive : data.standings}
+              />
               {/* An Eindstand no longer changes, so only the current season can be behind. */}
               {current && <StandingsBehind matches={data.matches} now={now} />}
               <Text>
@@ -152,4 +183,23 @@ export async function MatchesPage({ season }: { season: string }) {
       </Page.Sidebar>
     </>
   )
+}
+
+/**
+ * The table over the latest five matches of the season, or undefined when the card has no
+ * switch: the results of every club are not complete (see `lastFiveOf`), or they could not be
+ * read, which leaves the card as it is without them.
+ */
+async function lastFiveOfSeason(data: MatchData) {
+  if (data.standings.length === 0) {
+    return undefined
+  }
+
+  try {
+    return lastFiveOf(data.matches, await getLeagueResults(data.season), data.standings)
+  } catch (error) {
+    console.error(`Could not read the league results for ${matchesPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }

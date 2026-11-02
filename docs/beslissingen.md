@@ -5307,6 +5307,49 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** het hoofdstuk Cookies op `/privacy` en de README van de site zeggen dat de browser van een redacteur dit teken bewaart.
 - **Alternatieven:** een tweede cookie dat bij elk verzoek meegaat (een tweede cookie naast het enige cookie van de site); een verzoek naar `/beheer` bij elke paginaweergave van elke bezoeker (extra verkeer voor iedereen, en het beheer ziet elk bezoek); het cookie van het beheer voor de hele site laten gelden (elke pagina wordt een pagina per bezoeker, en het geheim gaat bij elk verzoek mee).
 
+### De kaart Stand heeft een schakelaar voor de stand over de laatste vijf wedstrijden
+
+- **Datum:** 2 november 2026
+- **Besluit:** op `/wedstrijden` heeft de kaart Stand (en Eindstand) onder de kop een schakelaar met "Hele seizoen" en "Laatste 5" (#602).
+  - **De weergave:** "Hele seizoen" is de standaard en heeft geen opdracht in het adres.
+    "Laatste 5" is `?stand=laatste-5`.
+    Elke andere waarde, een lege en een die twee keer staat, is "Hele seizoen" en geeft nooit "niet gevonden" (`parseStandingsView` in `src/standings-view.ts`).
+    De links zijn koppelingen die op het anker van de kaart eindigen, zodat de pagina niet naar boven springt.
+  - **De berekening:** `lastFiveStandings` in `src/last-five.ts` telt per club de vijf competitiewedstrijden die het laatst zijn gespeeld, op dag en bij dezelfde dag op speelronde.
+    Een club met minder dan vijf telt wat hij heeft, en de kolom G laat zien hoeveel dat is.
+    Een winst geeft drie punten, een gelijkspel één.
+    De volgorde is punten, doelsaldo, gemaakte doelpunten, en dan de naam van de club van A tot Z.
+    De plaatsen lopen van 1 tot en met 18, zonder gedeelde plaatsen.
+  - **Waar de wedstrijden vandaan komen:** de wedstrijden van sc Heerenveen uit `matches`, dus met wat de redactie zelf invulde, en die van de andere clubs uit `league_results` (zie _De import bewaart de uitslagen van alle clubs_).
+    Een wedstrijd van ons staat ook in `league_results`: die rij vervangt de site door die uit `matches`.
+    De naam van de tegenstander volgt de rij van dezelfde speelronde waar sc Heerenveen in staat (`leagueResultsOfAllClubs`), want `matches.opponent` schrijft `Excelsior` waar de stand `Excelsior Rotterdam` heeft.
+    Een speelronde zonder rij houdt de naam van de wedstrijd.
+  - **Wanneer de schakelaar er staat:** alleen als voor elke club het aantal uitslagen in `league_results` gelijk is aan het aantal gespeelde wedstrijden in de stand, er geen uitslag is van een club die de stand niet heeft en er een gespeelde wedstrijd is (`hasAllLeagueResults`).
+    Een seizoen waar dat niet zo is, bijvoorbeeld omdat het nog niet opnieuw is geïmporteerd, toont de kaart zoals tot nu toe.
+    Dat de uitslagen niet te lezen zijn is een regel in het logboek en geen foutpagina.
+  - **De kaart:** dezelfde kolommen en opmaak.
+    Het bijschrift voor een schermlezer is "Stand over de laatste vijf wedstrijden op 18 oktober 2026", met de dag waarvoor de stand van het seizoen geldt.
+    Een eerder seizoen houdt de naam Eindstand voor de kaart.
+    "Gegevens nog niet bijgewerkt" blijft onder de tabel.
+    De afbeelding van de kaart maakt een kopie van de kaart, dus de schakelaar staat erin en laat zien welke weergave het is.
+  - **Het geheugen:** de uitslagen hebben een eigen cache per seizoen (`getLeagueResults` in `src/matches.ts`), vijf minuten voor het lopende seizoen en een uur voor een afgelopen seizoen, zoals `getMatchData`.
+    De andere pagina's vragen ze niet.
+    De keuze zit niet in de sleutel van de cache: de berekening is een rekensom op de lijsten die er al zijn.
+  - **Wat niet verandert:** de canonieke koppeling, de adreslijst en de seizoenskiezer.
+    De kiezer stuurt de keuze niet mee, want een ander seizoen heeft misschien geen schakelaar.
+    De kleine tabel op de homepage en de pagina Statistieken blijven zoals ze zijn.
+- **Waarom:** de projecteigenaar wil zien wie er nu goed staat, ongeacht het hele seizoen.
+  Een eigen berekening uit de uitslagen kan dat, en de stand zelf kan het niet.
+  De schakelaar is een koppeling zoals bij `CompetitionSwitch`, zodat hij zonder JavaScript werkt en de keuze te delen is.
+  Een schakelaar die alleen verschijnt bij een volledig seizoen voorkomt een tabel die er goed uitziet en niet klopt: de eerdere seizoenen misten soms een paar uitslagen (#608).
+  De vergelijking met `played` is dezelfde als die van de import voor zijn waarschuwing.
+- **Nadeel:** staat de redactie een uitslag van sc Heerenveen in die Wikipedia nog niet heeft, dan telt die mee in "Laatste 5" en nog niet in de stand van het hele seizoen.
+  Tot de volgende import verschillen de twee dan een wedstrijd.
+  De schakelaar verdwijnt niet door zo'n uitslag, want de controle telt de uitslagen van de import.
+  Een speelronde van sc Heerenveen zonder rij in `league_results` kan de naam van de tegenstander niet corrigeren.
+  Dan telt de wedstrijd niet voor die tegenstander als de naam anders is dan in de stand.
+- **Alternatieven:** de uitslagen bij de wedstrijden van het seizoen in `getMatchData` laden (elke pagina betaalt voor een vraag die alleen deze kaart nodig heeft); de schakelaar altijd tonen en bij een onvolledig seizoen een melding geven (een tabel die verkeerd kan zijn, of een kaart met een melding die bezoekers niets zegt); de uitslagen van sc Heerenveen uit `league_results` nemen (de uitslag die de redactie invulde zou dan niet meetellen); de keuze in de seizoenskiezer meenemen (een seizoen zonder schakelaar zou dan een keuze krijgen die het niet kent); een onbekende waarde "niet gevonden" laten geven, zoals `?competitie=` (een gedeelde koppeling naar een seizoen dat later geen schakelaar meer heeft, werkt dan niet meer).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
