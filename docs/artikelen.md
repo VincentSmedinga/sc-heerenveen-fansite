@@ -99,7 +99,7 @@ Wie het artikel schrijft, leest het ook na: een tweede lezer is er nog niet (die
 
 Alleen een beheerder schrijft artikelen.
 Een moderator ziet deze pagina's niet: voor een moderator zijn ze "niet gevonden".
-Log in zoals bij elke beheerpagina en kies op `/beheer` de link "Artikelen schrijven en publiceren".
+Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
 
 1. Kies "Nieuw artikel" en vul de velden in.
    De opmaak staat boven het formulier, met een voorbeeld van elk onderdeel.
