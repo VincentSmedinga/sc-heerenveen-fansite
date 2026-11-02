@@ -1023,11 +1023,11 @@ await withEmptyDatabase((database) =>
     assert.match(clubHtml, /<h2[^>]*id="onze-uitslagen">/)
     assert.match(
       clubHtml,
-      /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, in totaal, thuis en uit<\/caption>/,
+      /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, thuis, uit en in totaal<\/caption>/,
     )
     assert.match(
       clubHtml,
-      /<th [^>]*scope="col"[^>]*>Totaal<\/th><th [^>]*scope="col"[^>]*>Thuis<\/th><th [^>]*scope="col"[^>]*>Uit<\/th>/,
+      /<th scope="row">Thuis<\/th>.*<th scope="row">Uit<\/th>.*<tfoot><tr><th scope="row">Totaal<\/th>/,
     )
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
     // The matches are in the main column, the results in the sidebar after it. Testdorp FC was

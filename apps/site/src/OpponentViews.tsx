@@ -1,8 +1,18 @@
 import type { PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
 
-import { Card, DataTable, Heading, List, ShortMatch, ShortStaff, Text, WikipediaCredit } from '@fansite/design-system'
+import {
+  Card,
+  DataTable,
+  Heading,
+  List,
+  RecordTable,
+  ShortMatch,
+  ShortStaff,
+  Text,
+  WikipediaCredit,
+} from '@fansite/design-system'
 
-import type { ClubSummary, Meeting, Stadium, Tally } from './opponents'
+import type { ClubSummary, Meeting, Stadium } from './opponents'
 
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
@@ -39,7 +49,36 @@ const clubColumns = (choice: CompetitionChoice) =>
   ] as const
 
 /** The points against a club in the Eredivisie: 3 for a win and 1 for a draw. */
-const pointsOf = (record: PublicClubRecord) => record.won * 3 + record.drawn
+const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
+
+/**
+ * The card of the page of a club with every match against it that was played, the newest
+ * first, as short lines. Above each line stand the season and the competition, and the line has
+ * the day, the name as Wikipedia wrote the club in that match (so an earlier name shows), where
+ * it was played and the result from our side. It is the main content of the page, so it has
+ * the white surface.
+ */
+export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
+  return (
+    <Card aria-labelledby="wedstrijden">
+      <Heading id="wedstrijden" level={2}>
+        Wedstrijden
+      </Heading>
+      <List role="list">
+        {meetings.map((match) => (
+          <List.Item key={match.id}>
+            <Text appearance="meta">
+              {match.season}
+              {metaSeparator}
+              {match.competition}
+            </Text>
+            <MeetingLine match={match} now={now} />
+          </List.Item>
+        ))}
+      </List>
+    </Card>
+  )
+}
 
 /**
  * The card of the page Tegenstanders with every club we played, A to Z, each name a link to
@@ -101,48 +140,14 @@ export function ClubsCard({
   )
 }
 
-/** A row of the summary: the name of the figure and the figure for the total, home and away. */
-const summaryRow = (header: string, tallies: Tally[], figure: (tally: Tally) => number) => ({
-  cells: tallies.map(figure),
-  header,
-})
-
 /**
- * The card of the page of a club with every match against it that was played, the newest
- * first, as short lines. Above each line stand the season and the competition, and the line has
- * the day, the name as Wikipedia wrote the club in that match (so an earlier name shows), where
- * it was played and the result from our side. It is the main content of the page, so it has
- * the white surface.
- */
-export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
-  return (
-    <Card aria-labelledby="wedstrijden">
-      <Heading id="wedstrijden" level={2}>
-        Wedstrijden
-      </Heading>
-      <List role="list">
-        {meetings.map((match) => (
-          <List.Item key={match.id}>
-            <Text appearance="meta">
-              {match.season}
-              {metaSeparator}
-              {match.competition}
-            </Text>
-            <MeetingLine match={match} now={now} />
-          </List.Item>
-        ))}
-      </List>
-    </Card>
-  )
-}
-
-/**
- * The card of the page of a club with our record against it: a table with a column for the
- * total, at home and away, and a row for the matches played, won, drawn and lost and the goals
- * for and against, and under it the biggest win and the biggest loss against this club. There
- * are no points, because the cup gives none. It has the button for an image, with the name of
- * the club in the heading, so the image says who it is about. It is figures and records that
- * belong to the main content, so it has the soft surface, in the sidebar.
+ * The card of the page of a club with our record against it: a table in the form of the
+ * standings, with a row for the matches at home and away and the total under them, and a column
+ * for the matches played, won, drawn and lost, the points (with the choice Eredivisie only, the
+ * cup gives none) and the goal difference. Under it stand the biggest win and the biggest loss
+ * against this club. It has the button for an image, with the name of the club in the heading,
+ * so the image says who it is about. It is figures and records that belong to the main content,
+ * so it has the soft surface, in the sidebar.
  */
 export function ClubSummaryCard({
   choice,
@@ -157,7 +162,13 @@ export function ClubSummaryCard({
   since: string
   summary: ClubSummary
 }) {
-  const tallies = [summary.total, summary.home, summary.away]
+  // Only the Eredivisie gives points, so the choice with the cup has no column for them.
+  const row = (name: string, tally: ClubSummary['total']) => ({
+    ...tally,
+    goalDifference: tally.goalsFor - tally.goalsAgainst,
+    name,
+    ...(choice === 'league' ? { points: pointsOf(tally) } : {}),
+  })
   const lines = [
     { match: summary.biggestWin, name: 'Grootste overwinning' },
     { match: summary.biggestLoss, name: 'Grootste nederlaag' },
@@ -168,17 +179,10 @@ export function ClubSummaryCard({
       <Heading id="onze-uitslagen" level={2}>
         {`Onze uitslagen tegen ${name}`}
       </Heading>
-      <DataTable
-        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'league' ? ' in de Eredivisie' : ''}, in totaal, thuis en uit`}
-        columns={['Onderdeel', 'Totaal', 'Thuis', 'Uit']}
-        rows={[
-          summaryRow('Gespeeld', tallies, (tally) => tally.played),
-          summaryRow('Gewonnen', tallies, (tally) => tally.won),
-          summaryRow('Gelijk', tallies, (tally) => tally.drawn),
-          summaryRow('Verloren', tallies, (tally) => tally.lost),
-          summaryRow('Doelpunten voor', tallies, (tally) => tally.goalsFor),
-          summaryRow('Doelpunten tegen', tallies, (tally) => tally.goalsAgainst),
-        ]}
+      <RecordTable
+        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'league' ? ' in de Eredivisie' : ''}, thuis, uit en in totaal`}
+        rows={[row('Thuis', summary.home), row('Uit', summary.away)]}
+        total={row('Totaal', summary.total)}
       />
       {lines.length > 0 && (
         <List role="list">
