@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
-import { markedParts } from '@fansite/db/match-edits'
-import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
+import { Breadcrumb, Card, Heading, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { compact } from '../../../../beheer/density'
@@ -11,10 +11,11 @@ import { findMatch } from '../../../../beheer/match-entries'
 import { goalKinds, statusChoices, valuesOf } from '../../../../beheer/match-form'
 import { requireRole } from '../../../../beheer/require-role'
 import { getDatabase } from '../../../../database'
+import { lacksResult } from '../../../../matches'
 import { formatVersionTime } from '../../../../news'
 import { submitConflict, submitMatch, submitRemoveEntry } from '../actions'
 import { ConflictForm } from '../ConflictForm'
-import { MatchForm } from '../MatchForm'
+import { MatchErrorSummary, MatchFields, MatchFormProvider, MatchSavePanel } from '../MatchForm'
 import { matchesPath } from '../paths'
 import { RemoveEntryForm } from '../RemoveEntryForm'
 
@@ -52,8 +53,9 @@ const notices: Record<string, { text: string; title: string }> = {
 }
 
 // The form of one match, with what the editors entered of it so far, the differences with
-// Wikipedia that wait for a decision, and the button that takes the entry away. The page tells
-// what the last action did from the word in the address.
+// Wikipedia that wait for a decision, and the block that takes the entry away. The main column
+// holds the cards of the form, the sidebar the save panel and what belongs to the entry. The
+// page tells what the last action did from the word in the address.
 export default async function MatchPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -69,95 +71,115 @@ export default async function MatchPage({ params, searchParams }: Props) {
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
+  const lacking = lacksResult(match, new Date())
+  const parts =
+    edit === undefined
+      ? ''
+      : markedParts(edit)
+          .map((part) => partLabels[part])
+          .join(', ')
+
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Wedstrijd invullen</Heading>
-          <Text appearance="intro">{title}</Text>
-          <Text>
-            Alles wat je hier opslaat, staat meteen op de site. Zegt Wikipedia later hetzelfde, dan neemt de import het
-            over. Zegt Wikipedia iets anders, dan blijft jouw invoer staan en beslis je hier wat er gebeurt.
-          </Text>
-        </>
-      }
+    <MatchFormProvider
+      action={submitMatch.bind(null, match.id)}
+      choices={{
+        goalKinds,
+        home: match.home,
+        knockout: match.competition !== 'Eredivisie',
+        opponent: match.opponent,
+        squad,
+        statuses: statusChoices,
+      }}
+      initial={valuesOf(match, goals)}
+      key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
     >
-      {notice === undefined ? null : (
-        <Card aria-labelledby="gedaan-kop" surface="soft">
-          <Heading id="gedaan-kop" level={2}>
-            {notice.title}
-          </Heading>
-          <Text>{notice.text}</Text>
-        </Card>
-      )}
-      {edit === undefined ? null : (
-        <Card aria-labelledby="invoer-kop">
-          <Heading id="invoer-kop" level={2}>
-            Aangepast door de redactie
-          </Heading>
-          <Text>
-            Van deze wedstrijd heeft de redactie ingevuld:{' '}
-            {markedParts(edit)
-              .map((part) => partLabels[part])
-              .join(', ')}
-            . De laatste invoer was van {edit.editedByEmail} op {formatVersionTime(edit.editedAt)}. Reden: {edit.reason}
-          </Text>
-        </Card>
-      )}
-      {differences.map((difference) => (
-        <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
-          <Heading id={`afwijking-${difference.id}-kop`} level={2}>
-            Wikipedia wijkt af: {partLabels[difference.part]}
-          </Heading>
-          <List role="list">
-            <List.Item>
-              <Text>Onze invoer: {difference.oldValue}</Text>
-            </List.Item>
-            <List.Item>
-              <Text>Wikipedia: {difference.newValue}</Text>
-            </List.Item>
-          </List>
-          <Text appearance="meta">
-            Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
-            {formatVersionTime(new Date(difference.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia dan nog
-            hetzelfde zegt.
-          </Text>
-          <ConflictForm
-            action={submitConflict.bind(null, difference.id)}
-            id={difference.id}
-            part={`de ${partLabels[difference.part]}`}
-            title={title}
-          />
-        </Card>
-      ))}
-      <MatchForm
-        action={submitMatch.bind(null, match.id)}
-        choices={{
-          goalKinds,
-          knockout: match.competition !== 'Eredivisie',
-          opponent: match.opponent,
-          squad,
-          statuses: statusChoices,
-        }}
-        initial={valuesOf(match, goals)}
-        key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
-      />
-      {edit === undefined ? null : (
-        <Card aria-labelledby="weghalen-kop" surface="soft">
-          <Heading id="weghalen-kop" level={2}>
-            Invoer weghalen
-          </Heading>
-          <Text>
-            Dit zet wat de redactie van deze wedstrijd invulde terug naar wat er stond voor de eerste invoer. Daarna
-            leest de import weer wat Wikipedia zegt, zoals bij elke andere wedstrijd.
-          </Text>
-          <RemoveEntryForm action={submitRemoveEntry.bind(null, match.id)} title={title} />
-        </Card>
-      )}
-      <Text>
-        <Link href={matchesPath}>Terug naar de wedstrijden</Link>
-      </Text>
-    </Page.Main>
+      <Page.Main
+        className={compact}
+        intro={
+          <>
+            <Breadcrumb
+              current={clubs}
+              items={[
+                { href: '/beheer', label: 'Beheer' },
+                { href: matchesPath, label: 'Wedstrijden' },
+              ]}
+              label="Kruimelpad"
+            />
+            <Heading level={1}>{clubs}</Heading>
+            <Text appearance="meta">
+              {match.competition}, {match.round} · {describeEntryKickoff(match)}
+            </Text>
+            {edit === undefined && !lacking ? null : (
+              <Text>
+                {edit === undefined ? null : <Tag tone="highlight">{`Aangepast: ${parts}`}</Tag>}{' '}
+                {lacking ? <Tag tone="attention">Uitslag ontbreekt</Tag> : null}
+              </Text>
+            )}
+          </>
+        }
+        wide
+      >
+        <MatchErrorSummary />
+        {notice === undefined ? null : (
+          <Notice>
+            <Strong>{notice.title}.</Strong> {notice.text}
+          </Notice>
+        )}
+        {differences.map((difference) => (
+          <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
+            <Heading id={`afwijking-${difference.id}-kop`} level={2}>
+              Wikipedia wijkt af: {partLabels[difference.part]}
+            </Heading>
+            <List role="list">
+              <List.Item>
+                <Text>Onze invoer: {difference.oldValue}</Text>
+              </List.Item>
+              <List.Item>
+                <Text>Wikipedia: {difference.newValue}</Text>
+              </List.Item>
+            </List>
+            <Text appearance="meta">
+              Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
+              {formatVersionTime(new Date(difference.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia dan nog
+              hetzelfde zegt.
+            </Text>
+            <ConflictForm
+              action={submitConflict.bind(null, difference.id)}
+              id={difference.id}
+              part={`de ${partLabels[difference.part]}`}
+              title={title}
+            />
+          </Card>
+        ))}
+        <MatchFields />
+      </Page.Main>
+      <Page.Sidebar sticky>
+        <MatchSavePanel cancelHref={matchesPath} />
+        {edit === undefined ? null : (
+          <>
+            <Card aria-labelledby="invoer-kop" surface="soft">
+              <Heading id="invoer-kop" level={2}>
+                Laatste invoer
+              </Heading>
+              <List role="list">
+                <List.Item>
+                  <Text>Onderdelen: {parts}</Text>
+                </List.Item>
+                <List.Item>
+                  <Text>Door: {edit.editedByEmail}</Text>
+                </List.Item>
+                <List.Item>
+                  <Text>Op: {formatVersionTime(edit.editedAt)}</Text>
+                </List.Item>
+                <List.Item>
+                  <Text>Reden: {edit.reason}</Text>
+                </List.Item>
+              </List>
+            </Card>
+            <RemoveEntryForm action={submitRemoveEntry.bind(null, match.id)} title={title} />
+          </>
+        )}
+      </Page.Sidebar>
+    </MatchFormProvider>
   )
 }

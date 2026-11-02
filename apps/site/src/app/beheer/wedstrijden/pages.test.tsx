@@ -278,35 +278,63 @@ describe('the match', () => {
 
     expect(headings(html)).toEqual(
       expect.arrayContaining([
-        'h1 Wedstrijd invullen',
+        'h1 sc Heerenveen - N.E.C.',
         'h2 Aftrap',
-        'h2 Status en uitslag',
+        'h2 Uitslag',
+        'h2 Verlenging en strafschoppen',
         'h2 Doelpunten',
-        'h2 Logboek',
+        'h2 Opslaan',
       ]),
     )
     for (const label of [
       'Datum',
       'Tijd',
+      'Weekend of dag zonder tijd',
       'Status',
-      'Doelpunten sc Heerenveen',
-      'Doelpunten N.E.C.',
-      'Verlenging',
+      'sc Heerenveen',
+      'N.E.C.',
+      'Was er verlenging?',
       'Reden',
     ]) {
       expect(html).toContain(`>${label}`)
     }
-    expect(html).toContain('Doelpunt toevoegen')
-    expect(html).not.toContain('weghalen')
+    expect(html).toMatch(/Doelpunt<\/span> toevoegen<\/button>/u)
+    expect(html).not.toContain('Weghalen')
     // The hidden first button makes Enter save.
-    expect(html.indexOf('value="opslaan"')).toBeLessThan(html.indexOf('Doelpunt toevoegen'))
+    expect(html.indexOf('value="opslaan"')).toBeLessThan(html.indexOf('value="doelpunt-toevoegen"'))
+    // The reason and the button in the sidebar belong to the form of the cards.
+    expect(html).toMatch(/<form [^>]*id="wedstrijd"/u)
+    expect(html).toMatch(/<input [^>]*form="wedstrijd"[^>]*name="reden"/u)
+    expect(html).toMatch(/<button [^>]*form="wedstrijd"[^>]*value="opslaan"/u)
+  })
+
+  it('puts the clubs in the order of the match, so an away match starts with the opponent', async () => {
+    const away = await form(await addMatch({ home: false }))
+    const home = await form(await addMatch({ round: 'Speelronde 12' }))
+
+    expect(away.indexOf('id="uitslag-zij"')).toBeLessThan(away.indexOf('id="uitslag-wij"'))
+    expect(home.indexOf('id="uitslag-wij"')).toBeLessThan(home.indexOf('id="uitslag-zij"'))
+    expect(headings(away)).toContain('h1 N.E.C. - sc Heerenveen')
+  })
+
+  it('has a breadcrumb, tags for what the editors changed and what is missing, and a sticky sidebar', async () => {
+    const id = await addMatch()
+    const html = await form(id)
+
+    expect(html).toContain('aria-label="Kruimelpad"')
+    expect(html).toContain('<span aria-current="page" class="hf-breadcrumb-current">sc Heerenveen - N.E.C.</span>')
+    expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
+    expect(html).not.toContain('Terug naar de wedstrijden')
+    expect(html).toContain('hf-page-sidebar hf-page-sidebar-sticky')
+    expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
+    expect(html).not.toContain('Laatste invoer')
   })
 
   it('has no field for extra time in the league', async () => {
     const id = await addMatch()
     const html = await form(id)
 
-    expect(html).not.toContain('Verlenging')
+    expect(html).not.toContain('id="verlenging"')
     expect(html).not.toContain('strafschoppen-wij')
   })
 
@@ -348,9 +376,11 @@ describe('the match', () => {
 
     const html = await form(id)
 
-    expect(headings(html)).toContain('h3 Doelpunt 1')
-    expect(html).toContain('Minuut, doelpunt 1')
-    expect(html).toContain('Doelpunt 1 weghalen')
+    expect(html).toContain('<th scope="row">Doelpunt 1</th>')
+    // The six fields of the goal each say which goal they are for, and so does the button.
+    expect(html.match(/, doelpunt 1<\/span>/g)).toHaveLength(6)
+    expect(html).toMatch(/Weghalen <span class="hf-visually-hidden">doelpunt 1<\/span>/u)
+    expect(html).toContain('value="doelpunt-weghalen-1" name="knop"')
     expect(html).toContain('Luca Oyen')
     expect(html).toContain('Andere speler')
   })
@@ -383,11 +413,15 @@ describe('the match', () => {
 
     const html = await form(id)
 
-    expect(headings(html)).toContain('h2 Aangepast door de redactie')
-    expect(html).toContain('ingevuld: uitslag')
-    expect(html).toContain('sanne@example.org')
+    expect(headings(html)).toContain('h2 Laatste invoer')
+    expect(html).toContain('<span class="hf-tag hf-tag-highlight">Aangepast: uitslag</span>')
+    expect(html).toContain('Onderdelen: uitslag')
+    expect(html).toContain('Door: sanne@example.org')
     expect(html).toContain('Reden: Wikipedia is achter')
-    expect(html).toContain('Invoer weghalen voor Speelronde 11 (Eredivisie): sc Heerenveen - N.E.C.')
+    // The block with the red button is closed, and the button names the match.
+    expect(html).toMatch(/<details class="hf-disclosure"><summary>Invoer weghalen/u)
+    expect(html).toContain('aria-label="Invoer weghalen voor Speelronde 11 (Eredivisie): sc Heerenveen - N.E.C."')
+    expect(html).toContain('hf-button-danger')
     expect(html).toContain('Reden om de invoer weg te halen')
   })
 
@@ -451,10 +485,12 @@ describe('the match', () => {
         ([, name, text]) => [text, name],
       )
 
-      expect(buttons).toEqual([
-        ['Neem Wikipedia over', expect.stringMatching(/^Neem Wikipedia over: de uitslag van Speelronde 11/)],
-        ['Houd onze invoer', expect.stringMatching(/^Houd onze invoer: de uitslag van Speelronde 11/)],
-      ])
+      expect(buttons).toEqual(
+        expect.arrayContaining([
+          ['Neem Wikipedia over', expect.stringMatching(/^Neem Wikipedia over: de uitslag van Speelronde 11/)],
+          ['Houd onze invoer', expect.stringMatching(/^Houd onze invoer: de uitslag van Speelronde 11/)],
+        ]),
+      )
       expect(html).toContain('Reden voor je besluit over de uitslag')
       expect(html.match(/id="besluit-\d+-reden"/g)).toHaveLength(1)
     })
@@ -490,16 +526,18 @@ describe('the match', () => {
     ['ongewijzigd', 'Niets veranderd'],
     ['weggehaald', 'Invoer weggehaald'],
     ['geen-invoer', 'Niets weggehaald'],
-  ])('tells what the last action did: %s', async (done, title) => {
+  ])('tells what the last action did, in a notice without a heading: %s', async (done, title) => {
     const id = await addMatch()
+    const html = await form(id, { gedaan: done })
 
-    expect(headings(await form(id, { gedaan: done }))).toContain(`h2 ${title}`)
+    expect(html).toMatch(new RegExp(`<p class="hf-notice" role="status"><strong>${title}\\.</strong> `, 'u'))
+    expect(headings(html).join()).not.toContain(title)
   })
 
   it('says nothing for an action it does not know', async () => {
     const id = await addMatch()
 
-    expect(await form(id, { gedaan: 'iets-anders' })).not.toContain('gedaan-kop')
+    expect(await form(id, { gedaan: 'iets-anders' })).not.toContain('hf-notice')
   })
 
   it('is not there for a match that does not exist, or a number that is not one', async () => {
