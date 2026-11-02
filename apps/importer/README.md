@@ -780,7 +780,7 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
 
 - Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.
   Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, de club van de tegenstander (zie _De clubs van de tegenstanders_), thuis of uit, het stadion, de status en de uitslag.
-  Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen leest hij niet.
+  Een ronde van de competitie is een kop `Speelronde <nummer>` of `Inhaalronde <nummer>` (zie _Een wedstrijd onder Inhaalronde_); wedstrijden onder andere koppen leest hij niet.
 - De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
 - Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
@@ -846,10 +846,11 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
 De stand over de laatste wedstrijden (#602) heeft de uitslag van elke club nodig.
 `readLeagueResults` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) leest ze uit de pagina met het programma, die de import al leest, en [`src/league-results.ts`](src/league-results.ts) schrijft ze in `league_results`.
 
-- Er komt een rij voor elk blok `Footballbox2` onder een kop `Speelronde <nummer>` met een score: seizoen, ronde als getal, dag, thuisclub, uitclub en de doelpunten van allebei.
+- Er komt een rij voor elk blok `Footballbox2` onder een kop `Speelronde <nummer>` of `Inhaalronde <nummer>` met een score: seizoen, ronde als getal, dag, thuisclub, uitclub en de doelpunten van allebei.
   De sleutel is het seizoen met de thuisclub en de uitclub.
 - Een wedstrijd zonder score, uitgesteld of afgelast heeft geen rij.
   Wordt hij gespeeld, dan komt de rij bij de volgende import.
+  Het blok zonder score in de oorspronkelijke ronde van een wedstrijd die onder een inhaalronde is gespeeld, heeft ook geen rij: de wedstrijd staat er één keer in, met het nummer van de kop (zie _Een wedstrijd onder Inhaalronde_).
 - Een wedstrijd die gestaakt en later afgemaakt is, telt één keer, met de eindstand en de dag van het blok dat hem afmaakt.
   Wie thuis speelde, volgt het blok waarmee de wedstrijd begon (zie _Een gestaakte wedstrijd_).
   Staat er geen blok dat hem afmaakt, dan heeft de wedstrijd geen uitslag en geen rij.
@@ -1331,6 +1332,24 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
   De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt.
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
 - Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
+
+#### Een wedstrijd onder Inhaalronde
+
+Een wedstrijd die is uitgesteld en later gespeeld, staat op de pagina twee keer.
+Het eerste blok staat in de oorspronkelijke ronde en heeft geen score, of de score "Afgelast" of "Uitgesteld".
+Het tweede staat onder een kop `Inhaalronde <nummer>` en heeft de uitslag.
+In 2022/23 zijn dat RKC Waalwijk – Go Ahead Eagles (`Inhaalronde 17`) en Go Ahead Eagles – RKC Waalwijk (`Inhaalronde 25`).
+De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)):
+
+- Een kop `Inhaalronde <nummer>` is een ronde van de competitie, en het nummer is de ronde van de wedstrijd.
+  Een wedstrijd van sc Heerenveen onder `Inhaalronde 17` heeft dus de ronde `Speelronde 17`, dezelfde sleutel als het blok in de oorspronkelijke ronde.
+- Heeft het blok onder de inhaalronde een score en heeft het blok in de ronde voor dezelfde twee clubs er geen, dan telt alleen het eerste.
+  Voor sc Heerenveen is het één wedstrijd in `matches`, met de speeldatum en de uitslag van de inhaalwedstrijd.
+  In `league_results` is het één rij, met de dag van de inhaalwedstrijd en het nummer van de ronde waaruit hij is uitgesteld.
+- Een blok onder een inhaalronde zonder score, of met "Uitgesteld" of "Afgelast", doet niets: de wedstrijd blijft staan als uitgesteld tot er een uitslag is.
+- Een kop die geen ronde is, zoals de play-offs, blijft buiten de competitie.
+- Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, volgt hier niet: `restOf` zoekt het restant onder dezelfde kop, en de import geeft een fout.
+- De tests gebruiken een uitsnede van de pagina van 2022/23, [`src/fixtures/wikipedia-catch-up-2022-23.wiki`](src/fixtures/wikipedia-catch-up-2022-23.wiki), met de twee wedstrijden van RKC Waalwijk en Go Ahead Eagles en twee verzonnen wedstrijden van sc Heerenveen.
 
 ### Wat de import niet doet
 
