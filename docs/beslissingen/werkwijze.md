@@ -624,3 +624,13 @@
   Een app-instelling voor archiveren (die bestaat alleen voor een gesloten pull request en voor inactiviteit, en een Specifier heeft geen pull request).
 - **Later:** dit herziet het besluit over de ronden in _Zuinig werken is een regel, met harde grenzen_ (één ronde voor de Coordinator, twee voor een Specifier): alleen een Specifier specificeert nog, in hooguit twee rondes.
   Het herziet ook _Een Specifier voor een lang gesprek, en de Action List voor de status_: elk nieuw issue gaat naar een Specifier, niet alleen een lang gesprek.
+
+## De beslissingen staan in een map met een bestand per onderdeel
+
+- **Datum:** 2 november 2026
+- **Besluit:** `docs/beslissingen.md` wordt de map `docs/beslissingen/` met een `index.md` en een bestand per onderdeel (`project.md`, `werkwijze.md`, `hosting-en-data.md`, `werkruimte.md`, `designsysteem.md`, `site.md`, `importer.md` en `redactie.md`).
+  De tekst van de beslissingen blijft gelijk; de koppen worden één niveau hoger.
+- **Waarom:** een agent leest nu een bestand van bijna 10.000 regels (ongeveer 1 MB) om één beslissing te vinden, en elke Builder, Reviewer en Specifier doet dat.
+  De map laat hen één onderdeel openen.
+  De bestanden blijven in `docs/`: onderdelen sluiten niet aan op packages, beslissingen gaan over meer dan één package, en een pull request die alleen `docs/` wijzigt slaat de zware controles van CI over en heeft geen Reviewer nodig.
+- **Alternatieven:** de beslissingen inkorten (verworpen: de regels _Later_ en de alternatieven zijn het punt); een bestand per package in de packages zelf (verworpen: beslissingen gaan over meer dan één package); alle titels in de index zetten (verworpen: ongeveer 25 KB extra voor elke lezer, en een lijst om bij te houden); de bestandsnaam in elke verwijzing tussen bestanden zetten (verworpen: ongeveer 160 regels veranderen, en een beslissing die verhuist breekt de verwijzing); een blijvende test voor titels en verwijzingen (verworpen: onderhoud voor weinig winst, en eerst moet de dubbele titel opgelost worden).
