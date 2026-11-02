@@ -119,4 +119,30 @@
     font-size: var(--hf-meta-font-size);
     font-weight: var(--hf-body-font-weight);
   }
+
+  /*
+   * A column that folds (`fold` in a column of a table with text) is a column where the table
+   * has room, and a line under the row header where it has not. The room is that of the table
+   * itself, as with the table to fill in (see input-table.css), so it is right in a narrow
+   * column on a wide screen too. A column folds under 44rem: the five columns of a list of
+   * matches need about that. The folded cells are gone for a screen reader as well
+   * (`display: none`), so nothing is read twice.
+   */
+  .hf-data-table-fold {
+    container-type: inline-size;
+  }
+
+  .hf-data-table-text .hf-data-table-folded {
+    display: none;
+  }
+
+  @container (inline-size < 44rem) {
+    .hf-data-table-text .hf-data-table-fold-column {
+      display: none;
+    }
+
+    .hf-data-table-text .hf-data-table-folded {
+      display: block;
+    }
+  }
 }
