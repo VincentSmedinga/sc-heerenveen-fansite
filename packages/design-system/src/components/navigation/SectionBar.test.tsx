@@ -29,21 +29,6 @@ describe('SectionBar', () => {
     expect(screen.getByRole('link', { name: 'Berichten' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('aria-current')).toBe(false)
   })
-
-  it('draws the account inside the navigation, so no text of the bar is outside a landmark', () => {
-    render(<SectionBar account={<button type="button">Uitloggen</button>} items={items} label="Beheer" />)
-
-    const nav = screen.getByRole('navigation', { name: 'Beheer' })
-
-    expect(within(nav).getByRole('button', { name: 'Uitloggen' })).toBeTruthy()
-    expect(screen.getAllByRole('navigation')).toHaveLength(1)
-  })
-
-  it('draws no empty account without one', () => {
-    const { container } = render(<SectionBar items={items} label="Beheer" />)
-
-    expect(container.querySelector('.hf-section-bar-account')).toBeNull()
-  })
 })
 
 describe('the look of the bar', () => {
@@ -54,10 +39,5 @@ describe('the look of the bar', () => {
     expect(css).not.toMatch(/--hf-colour-(blue|red|grey|sand|steel)-\d+/)
     expect(css).toContain('var(--hf-colour-background-submenu)')
     expect(css).toContain('var(--hf-colour-text-on-header)')
-  })
-
-  it('puts the account under the links on a narrow screen and beside them from 52rem', () => {
-    expect(css).toMatch(/flex-wrap: wrap;/)
-    expect(css).toMatch(/@media \(width >= 52rem\)/)
   })
 })

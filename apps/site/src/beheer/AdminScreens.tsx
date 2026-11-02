@@ -1,7 +1,6 @@
 'use client'
 
 import type { AdminRole } from '@fansite/db/schema'
-import type { ReactNode } from 'react'
 
 import { SectionBar } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
@@ -14,7 +13,7 @@ import { currentScreen, isLoginPage, screensFor } from './screens'
  * for the main menu, and the HTML of the server already has it. On a login page there is no
  * bar.
  */
-export function AdminScreens({ account, role }: { account: ReactNode; role: AdminRole }) {
+export function AdminScreens({ role }: { role: AdminRole }) {
   const pathname = usePathname()
 
   if (isLoginPage(pathname)) {
@@ -25,7 +24,6 @@ export function AdminScreens({ account, role }: { account: ReactNode; role: Admi
 
   return (
     <SectionBar
-      account={account}
       items={screensFor(role).map(({ href, label }) => ({ current: href === current, href, label }))}
       label="Beheer"
     />

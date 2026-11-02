@@ -1,6 +1,3 @@
-import { Button, Form, Text } from '@fansite/design-system'
-
-import { logOut } from '#src/app/beheer/actions'
 import { sessionToken } from '#src/beheer/require-role'
 import { findSession } from '#src/beheer/sessions'
 import { getDatabase } from '#src/database'
@@ -21,21 +18,5 @@ export async function AdminBar() {
     return null
   }
 
-  return (
-    <AdminScreens
-      account={
-        <>
-          <Text as="span">
-            {session.email}, {session.role}
-          </Text>
-          <Form action={logOut}>
-            <Button appearance="soft" size="small" type="submit">
-              Uitloggen
-            </Button>
-          </Form>
-        </>
-      }
-      role={session.role}
-    />
-  )
+  return <AdminScreens role={session.role} />
 }

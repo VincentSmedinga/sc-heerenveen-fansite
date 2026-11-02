@@ -5664,7 +5664,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 2 november 2026
 - **Besluit:** het beheer houdt de kop en de voet van de site, met onder het hoofdmenu een balk met de schermen op elke pagina onder `/beheer`, behalve de inlogpagina's.
   Een beheerder ziet Beheer, Berichten, Artikelen, Wedstrijden en Bezoek, een moderator Berichten.
-  Rechts staat wie is ingelogd, met de rol, en een knop Uitloggen; op een telefoon staan ze onder de links.
+  Wie is ingelogd en de knop Uitloggen staan niet in de balk maar op de startpagina van het beheer, onder de kop: één plek is genoeg, en in de balk passen ze niet op een telefoon (de projecteigenaar koos dat op 2 november 2026).
   De lijst van schermen per rol staat op één plek (`apps/site/src/beheer/screens.ts`), zodat een nieuw scherm één regel erbij krijgt.
   De balk is `SectionBar` in het designsysteem, en de site tekent hem op de server uit de sessie (`AdminBar`), via het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De balk is geen toegangscontrole: elke pagina roept `requireRole` zelf aan, en zonder geldige sessie is er geen balk.

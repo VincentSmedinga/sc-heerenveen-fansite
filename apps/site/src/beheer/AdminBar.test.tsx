@@ -9,7 +9,6 @@ import { sessionToken } from './require-role'
 let pathname = '/beheer'
 
 vi.mock('next/navigation', () => ({ usePathname: () => pathname }))
-vi.mock('#src/app/beheer/actions', () => ({ logOut: () => undefined }))
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('./require-role', () => ({ sessionToken: vi.fn() }))
 vi.mock('#src/beheer/sessions', () => ({ findSession: vi.fn() }))
@@ -51,13 +50,6 @@ describe('the bar of the admin', () => {
     vi.mocked(findSession).mockResolvedValue({ email: 'jan@example.org', role: 'moderator', userId: 2 })
 
     expect(links(await render('/beheer/berichten'))).toEqual([['/beheer/berichten', 'Berichten']])
-  })
-
-  it('says who is logged in, with the role, and has a button to log out', async () => {
-    const html = await render('/beheer')
-
-    expect(html).toContain('sanne@example.org, beheerder')
-    expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Uitloggen<\/button>/)
   })
 
   it('draws no bar on the login pages, whatever the session', async () => {

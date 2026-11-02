@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { addAdminSession, adminCookie, adminEmail } from './admin'
+import { addAdminSession, adminCookie } from './admin'
 import { checkPage } from './check-page'
 
 // The bar with the screens of the admin, under the main menu: what a moderator and a beheerder
@@ -9,7 +9,7 @@ import { checkPage } from './check-page'
 
 const host = (baseURL: string | undefined) => new URL(baseURL ?? '').hostname
 
-test('gives a moderator Berichten only, with who is logged in and a way out', async ({ baseURL, context, page }) => {
+test('gives a moderator Berichten only', async ({ baseURL, context, page }) => {
   await context.addCookies([adminCookie(host(baseURL), 'moderator')])
   await page.goto('/beheer/berichten')
 
@@ -17,8 +17,6 @@ test('gives a moderator Berichten only, with who is logged in and a way out', as
 
   await expect(bar.getByRole('link')).toHaveText(['Berichten'])
   await expect(bar.getByRole('link', { name: 'Berichten' })).toHaveAttribute('aria-current', 'page')
-  await expect(page.getByText(`${adminEmail}, moderator`)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Uitloggen' })).toBeVisible()
   expect(await checkPage(page)).toEqual([])
 })
 
@@ -39,10 +37,10 @@ test('gives a beheerder every screen and marks the one below which the page is',
 
 // The session is the test's own: logging out ends it, and the shared session of the global
 // setup must stay.
-test('logs out from the bar, and the login page has no bar', async ({ baseURL, context, page }) => {
+test('is gone on the login page after logging out', async ({ baseURL, context, page }) => {
   await context.addCookies([await addAdminSession(host(baseURL), 'beheerder')])
   await page.goto('/beheer')
-  await page.getByRole('button', { name: 'Uitloggen' }).first().click()
+  await page.getByRole('button', { name: 'Uitloggen' }).click()
 
   await expect(page).toHaveURL(/\/beheer\/inloggen/)
   await expect(page.getByRole('navigation', { name: 'Beheer' })).toHaveCount(0)

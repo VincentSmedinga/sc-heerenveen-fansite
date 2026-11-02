@@ -7,48 +7,16 @@
    * (.hf-navigation-sublink), in a row that scrolls like it. The padding on the start side is
    * the inset of the page less the padding of a pill, so the text of the first link is in line
    * with the menu above; the row runs on to the edge of the screen on the end side, as the bar
-   * of sub-pages does. The account stands under the links on a narrow screen and at the end of
-   * the row from 52rem, where the links never scroll.
+   * of sub-pages does.
    */
   .hf-section-bar {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
 
-    align-items: center;
     background-color: var(--hf-colour-background-submenu);
     box-sizing: border-box;
     color: var(--hf-colour-text-on-header);
     display: flex;
-    flex-wrap: wrap;
-    padding-inline-start: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - var(--hf-space-s));
-
-    @media (width >= 52rem) {
-      flex-wrap: nowrap;
-      padding-inline-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
-    }
-  }
-
-  .hf-section-bar-links {
-    flex: 1 1 100%;
-    min-inline-size: 0;
-
-    @media (width >= 52rem) {
-      flex-basis: 0;
-    }
-  }
-
-  .hf-section-bar-account {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    font-size: var(--hf-submenu-font-size);
-    gap: var(--hf-space-xs) var(--hf-space-m);
-    padding-block-end: var(--hf-space-s);
-    padding-inline: var(--hf-space-s) max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
-
-    @media (width >= 52rem) {
-      flex: none;
-      padding-block-end: 0;
-      padding-inline: var(--hf-space-m) 0;
-    }
+    padding-inline: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - var(--hf-space-s))
+      max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
   }
 }
