@@ -4,12 +4,18 @@ import { describe, expect, it } from 'vitest'
 import { RecordTable, type RecordTableRow } from './RecordTable'
 
 const rows: RecordTableRow[] = [
-  { drawn: 1, goalsAgainst: 4, goalsFor: 10, lost: 1, name: 'Totaal', played: 5, won: 3 },
-  { drawn: 0, goalsAgainst: 0, goalsFor: 5, lost: 0, name: 'Thuis', played: 2, won: 2 },
-  { drawn: 1, goalsAgainst: 4, goalsFor: 5, lost: 1, name: 'Uit', played: 3, won: 1 },
+  { drawn: 0, goalDifference: 5, lost: 0, name: 'Thuis', played: 2, points: 6, won: 2 },
+  { drawn: 1, goalDifference: 1, lost: 1, name: 'Uit', played: 3, points: 4, won: 1 },
 ]
+const total: RecordTableRow = { drawn: 1, goalDifference: 6, lost: 1, name: 'Totaal', played: 5, points: 10, won: 3 }
 
-const props = { caption: 'De uitslagen van sc Heerenveen tegen Demo Boys, in totaal, thuis en uit', rows }
+const props = { caption: 'De uitslagen van sc Heerenveen tegen Demo Boys, thuis, uit en in totaal', rows, total }
+
+/** The figures of the row with this name, in the order of the columns. */
+const figures = (name: string) =>
+  within(screen.getByRole('row', { name: new RegExp(`^${name}`, 'u') }))
+    .getAllByRole('cell')
+    .map((cell) => cell.textContent)
 
 describe('RecordTable', () => {
   it('is a real table with the caption that names it, for a screen reader only', () => {
@@ -19,57 +25,111 @@ describe('RecordTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has the columns G, W, GL, V, DV and DT, and no column for points', () => {
+  it('has the columns G, W, GL, V, DS and P, with a column header with scope for each', () => {
     render(<RecordTable {...props} />)
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('[aria-hidden="true"]')?.textContent),
-    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DV', 'DT'])
-    expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
+    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DS', 'P'])
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
   })
 
-  it('names every column by its full word for a screen reader', () => {
+  it('has no column for the goals for and against: only their difference', () => {
     render(<RecordTable {...props} />)
 
-    for (const name of ['gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelpunten voor', 'doelpunten tegen']) {
+    expect(screen.queryByRole('columnheader', { name: 'doelpunten voor' })).toBeNull()
+    expect(screen.queryByRole('columnheader', { name: 'doelpunten tegen' })).toBeNull()
+    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
+  })
+
+  it('names every column header by its full word for a screen reader', () => {
+    render(<RecordTable {...props} />)
+
+    for (const name of ['gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelsaldo', 'punten']) {
       expect(screen.getByRole('columnheader', { name })).toBeTruthy()
     }
   })
 
-  it('has a row header for each row, in the order given', () => {
-    render(<RecordTable {...props} />)
+  it('has a row header for each row, with the total in a foot under the body', () => {
+    const { container } = render(<RecordTable {...props} />)
 
-    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Totaal', 'Thuis', 'Uit'])
-    expect(document.querySelectorAll('tbody th[scope="row"]')).toHaveLength(3)
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Thuis', 'Uit', 'Totaal'])
+    expect([...container.querySelectorAll('tbody th')].map((header) => header.textContent)).toEqual(['Thuis', 'Uit'])
+    expect([...container.querySelectorAll('tfoot th')].map((header) => header.textContent)).toEqual(['Totaal'])
+    expect(container.querySelectorAll('th[scope="row"]')).toHaveLength(3)
   })
 
   it('writes the figures of a row in the columns of the headers', () => {
     render(<RecordTable {...props} />)
 
-    const cells = (name: string) =>
-      within(screen.getByRole('row', { name: new RegExp(`^${name}`, 'u') }))
-        .getAllByRole('cell')
-        .map((cell) => cell.textContent)
+    expect(figures('Thuis')).toEqual(['2', '2', '0', '0', '+5', '6'])
+    expect(figures('Uit')).toEqual(['3', '1', '1', '1', '+1', '4'])
+    expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6', '10'])
+  })
 
-    expect(cells('Totaal')).toEqual(['5', '3', '1', '1', '10', '4'])
-    expect(cells('Thuis')).toEqual(['2', '2', '0', '0', '5', '0'])
-    expect(cells('Uit')).toEqual(['3', '1', '1', '1', '5', '4'])
+  it('writes the goal difference with its sign: plus, a real minus sign, or a bare zero', () => {
+    render(
+      <RecordTable
+        {...props}
+        rows={[
+          { ...rows[0]!, goalDifference: -2 },
+          { ...rows[1]!, goalDifference: 0 },
+        ]}
+      />,
+    )
+
+    expect(figures('Thuis')[4]).toBe('−2')
+    expect(figures('Uit')[4]).toBe('0')
   })
 
   it('shows zeros as figures', () => {
     render(
       <RecordTable
         {...props}
-        rows={[{ ...rows[0]!, drawn: 0, goalsAgainst: 0, goalsFor: 0, lost: 0, played: 0, won: 0 }]}
+        rows={[{ ...rows[0]!, drawn: 0, goalDifference: 0, lost: 0, played: 0, points: 0, won: 0 }]}
       />,
     )
+
+    expect(figures('Thuis')).toEqual(['0', '0', '0', '0', '0', '0'])
+  })
+
+  it('gives the wins, draws and losses the colour of the result, and no other figure', () => {
+    render(<RecordTable {...props} />)
 
     expect(
       within(screen.getByRole('row', { name: /^Totaal/u }))
         .getAllByRole('cell')
-        .map((cell) => cell.textContent),
-    ).toEqual(['0', '0', '0', '0', '0', '0'])
+        .map((cell) => cell.className),
+    ).toEqual([
+      'hf-numeric',
+      'hf-numeric hf-match-win',
+      'hf-numeric hf-match-draw',
+      'hf-numeric hf-match-loss',
+      'hf-numeric',
+      'hf-numeric hf-bar-value',
+    ])
+  })
+
+  it('has no column for points, and no word for them, when the rows have none', () => {
+    const { container } = render(
+      <RecordTable
+        {...props}
+        rows={rows.map((row) => ({ ...row, points: undefined }))}
+        total={{ ...total, points: undefined }}
+      />,
+    )
+
+    expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
+    expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6'])
+    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
+      'G gespeeld, W gewonnen, GL gelijk, V verloren, DS doelsaldo',
+    )
+  })
+
+  it('has no foot without a total', () => {
+    const { container } = render(<RecordTable caption={props.caption} rows={rows} />)
+
+    expect(container.querySelector('tfoot')).toBeNull()
   })
 
   it('gives every abbreviation its full word, in the title and under the table', () => {
@@ -80,11 +140,11 @@ describe('RecordTable', () => {
       'Gewonnen',
       'Gelijk',
       'Verloren',
-      'Doelpunten voor',
-      'Doelpunten tegen',
+      'Doelsaldo',
+      'Punten',
     ])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, GL gelijk, V verloren, DV doelpunten voor, DT doelpunten tegen',
+      'G gespeeld, W gewonnen, GL gelijk, V verloren, DS doelsaldo, P punten',
     )
   })
 
@@ -98,9 +158,9 @@ describe('RecordTable', () => {
   })
 
   it('shows the names of rows as text, not as HTML', () => {
-    const { container } = render(<RecordTable {...props} rows={[{ ...rows[0]!, name: '<b>Totaal</b>' }]} />)
+    const { container } = render(<RecordTable {...props} rows={[{ ...rows[0]!, name: '<b>Thuis</b>' }]} />)
 
-    expect(container.querySelector('tbody th')?.textContent).toBe('<b>Totaal</b>')
+    expect(container.querySelector('tbody th')?.textContent).toBe('<b>Thuis</b>')
     expect(container.querySelector('tbody b')).toBeNull()
   })
 

@@ -56,15 +56,16 @@ const plain = (html: string) =>
     .replaceAll(/\s+/g, ' ')
     .trim()
 
-/** The rows of the summary: the figure (with _ for a space) and its Totaal, Thuis and Uit. */
-/** The summary by row: the figures G, W, GL, V, DV and DT of Totaal, Thuis and Uit. */
-const summaryOf = (html: string) =>
-  Object.fromEntries(
-    [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>\d+<\/td>){6})<\/tr>/g)].map(([, name, cells]) => [
-      name,
-      [...(cells ?? '').matchAll(/>(\d+)</g)].map(([, cell]) => Number(cell)),
-    ]),
-  )
+/**
+ * The rows of the summary, in the order they are on the page, as [name, figures]: the figures
+ * are G, W, GL, V and DS, and P when the table has points. The minus sign of the goal
+ * difference is read as a minus, and the plus as nothing.
+ */
+const summaryOf = (html: string): [string, number[]][] =>
+  [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>[^<]*<\/td>)+)<\/tr>/g)].map(([, name, cells]) => [
+    name ?? '',
+    [...(cells ?? '').matchAll(/>([^<]*)<\/td/g)].map(([, cell]) => Number((cell ?? '').replace('\u2212', '-'))),
+  ])
 
 /** The lines of the card Wedstrijden: season and competition above each line, and the line */
 const meetingsOf = (html: string) =>
@@ -93,7 +94,7 @@ describe('the page of a club', () => {
     expect(await render('beker-united')).not.toContain('Eerder:')
   })
 
-  it('has the summary, with the name of the club in the heading, and a row each for Totaal, Thuis and Uit', async () => {
+  it('has the summary, with the name of the club in the heading, and Thuis and Uit with Totaal under them', async () => {
     const html = await render()
 
     expect(html).toMatch(/<h2[^>]*id="onze-uitslagen"[^>]*>.*Onze uitslagen tegen Testclub/)
@@ -101,33 +102,69 @@ describe('the page of a club', () => {
       [...html.matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g)].map(
         ([, header]) => header,
       ),
-    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DV', 'DT'])
+    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DS'])
     expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
-      /^[^>]*> G gespeeld , W gewonnen , GL gelijk , V verloren , DV doelpunten voor , DT doelpunten tegen/,
+      /^[^>]*> G gespeeld , W gewonnen , GL gelijk , V verloren , DS doelsaldo/,
     )
-    // G, W, GL, V, DV, DT.
-    expect(summaryOf(html)).toEqual({
-      Thuis: [2, 2, 0, 0, 5, 0],
-      Totaal: [5, 3, 1, 1, 10, 4],
-      Uit: [3, 1, 1, 1, 5, 4],
-    })
+    // G, W, GL, V, DS: Thuis and Uit in the body, Totaal in the foot.
+    expect(summaryOf(html)).toEqual([
+      ['Thuis', [2, 2, 0, 0, 5]],
+      ['Uit', [3, 1, 1, 1, 1]],
+      ['Totaal', [5, 3, 1, 1, 6]],
+    ])
+    expect(html).toMatch(/<tfoot><tr><th scope="row">Totaal<\/th>/)
+    expect(html).not.toMatch(/<tbody>(?:(?!<\/tbody>).)*Totaal/)
   })
 
-  it('has no column for points, because the cup gives none', async () => {
+  it('writes the goal difference with its sign', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(0, 1) })
+
+    expect(plain(await render())).toMatch(/Thuis 0 0 0 0 0 Uit 1 0 0 1 \u22121 Totaal 1 0 0 1 \u22121/)
+  })
+
+  it('colours the wins, draws and losses like the results, and not the other figures', async () => {
+    const html = await render()
+    const row = html.slice(html.indexOf('<th scope="row">Totaal</th>'))
+    const classes = [...row.slice(0, row.indexOf('</tr>')).matchAll(/<td class="([^"]*)"/g)].map(([, name]) => name)
+
+    expect(classes).toEqual([
+      'hf-numeric',
+      'hf-numeric hf-match-win',
+      'hf-numeric hf-match-draw',
+      'hf-numeric hf-match-loss',
+      'hf-numeric',
+    ])
+  })
+
+  it('has no column for points with all the matches, because the cup gives none', async () => {
     const html = await render()
 
     expect(html).not.toContain('Punten')
     expect(html).not.toContain('>P</span>')
   })
 
+  it('has a bold column of points with the Eredivisie, 3 for a win and 1 for a draw', async () => {
+    const html = await render('testclub', { competitie: 'eredivisie' })
+
+    expect(html).toContain('>P</span><span class="hf-visually-hidden">punten</span>')
+    expect(summaryOf(html).map(([name, figures]) => [name, figures.at(-1)])).toEqual([
+      ['Thuis', 6],
+      ['Uit', 4],
+      ['Totaal', 10],
+    ])
+    expect(html).toContain('<td class="hf-numeric hf-bar-value">10</td>')
+    expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toContain('P punten')
+  })
+
   it.each([[undefined], ['eredivisie']])(
     'has a Totaal that is Thuis plus Uit, and won, drawn and lost that add up to played, for ?competitie=%s',
     async (competitie) => {
-      const rows = summaryOf(await render('testclub', competitie === undefined ? {} : { competitie }))
-
+      const rows = Object.fromEntries(
+        summaryOf(await render('testclub', competitie === undefined ? {} : { competitie })),
+      )
       const [total, home, away] = ['Totaal', 'Thuis', 'Uit'].map((row): number[] => rows[row] ?? [])
 
-      expect(total).toHaveLength(6)
+      expect(total!.length).toBeGreaterThanOrEqual(5)
       expect(total).toEqual(total!.map((_, column) => (home![column] ?? NaN) + (away![column] ?? NaN)))
 
       for (const figures of [total, home, away]) {
@@ -189,7 +226,7 @@ describe('the page of a club', () => {
       '2026/27 KNVB Beker',
     )
     expect(html).toContain('Gebaseerd op alle 4 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
-    expect(html).toContain('in de Eredivisie, in totaal, thuis en uit')
+    expect(html).toContain('in de Eredivisie, thuis, uit en in totaal')
   })
 
   it('says that we have not played the club in the Eredivisie when the only match was in the cup', async () => {
@@ -201,11 +238,11 @@ describe('the page of a club', () => {
   })
 
   it('shows the summary for that same club with all the matches, a single cup tie', async () => {
-    expect(summaryOf(await render('beker-united'))).toMatchObject({
-      Thuis: [0, 0, 0, 0, 0, 0],
-      Totaal: [1, 0, 0, 1, 0, 2],
-      Uit: [1, 0, 0, 1, 0, 2],
-    })
+    expect(summaryOf(await render('beker-united'))).toEqual([
+      ['Thuis', [0, 0, 0, 0, 0]],
+      ['Uit', [1, 0, 0, 1, -2]],
+      ['Totaal', [1, 0, 0, 1, -2]],
+    ])
   })
 
   it('has no switch for a club that was not met in the cup', async () => {

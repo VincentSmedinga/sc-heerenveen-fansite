@@ -49,7 +49,7 @@ const clubColumns = (choice: CompetitionChoice) =>
   ] as const
 
 /** The points against a club in the Eredivisie: 3 for a win and 1 for a draw. */
-const pointsOf = (record: PublicClubRecord) => record.won * 3 + record.drawn
+const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
 
 /**
  * The card of the page of a club with every match against it that was played, the newest
@@ -142,9 +142,10 @@ export function ClubsCard({
 
 /**
  * The card of the page of a club with our record against it: a table in the form of the
- * standings, with a row for the total, at home and away, and a column for the matches played,
- * won, drawn and lost and the goals for and against, and under it the biggest win and the
- * biggest loss against this club. There are no points, because the cup gives none. It has the
+ * standings, with a row for the matches at home and away and the total under them, and a column
+ * for the matches played, won, drawn and lost, the goal difference and, with the choice
+ * Eredivisie, the points (the cup gives none). Under it stand the biggest win and the biggest
+ * loss against this club. It has the
  * button for an image, with the name of the club in the heading, so the image says who it is
  * about. It is figures and records that belong to the main content, so it has the soft surface,
  * in the sidebar.
@@ -162,11 +163,13 @@ export function ClubSummaryCard({
   since: string
   summary: ClubSummary
 }) {
-  const rows = [
-    { name: 'Totaal', tally: summary.total },
-    { name: 'Thuis', tally: summary.home },
-    { name: 'Uit', tally: summary.away },
-  ].map(({ name: row, tally }) => ({ ...tally, name: row }))
+  // Only the Eredivisie gives points, so the choice with the cup has no column for them.
+  const row = (name: string, tally: ClubSummary['total']) => ({
+    ...tally,
+    goalDifference: tally.goalsFor - tally.goalsAgainst,
+    name,
+    ...(choice === 'league' ? { points: pointsOf(tally) } : {}),
+  })
   const lines = [
     { match: summary.biggestWin, name: 'Grootste overwinning' },
     { match: summary.biggestLoss, name: 'Grootste nederlaag' },
@@ -178,8 +181,9 @@ export function ClubSummaryCard({
         {`Onze uitslagen tegen ${name}`}
       </Heading>
       <RecordTable
-        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'league' ? ' in de Eredivisie' : ''}, in totaal, thuis en uit`}
-        rows={rows}
+        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'league' ? ' in de Eredivisie' : ''}, thuis, uit en in totaal`}
+        rows={[row('Thuis', summary.home), row('Uit', summary.away)]}
+        total={row('Totaal', summary.total)}
       />
       {lines.length > 0 && (
         <List role="list">
