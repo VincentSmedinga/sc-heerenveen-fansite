@@ -2021,6 +2021,7 @@
 - **Alternatieven:** een eigen schil met een andere kop (veel werk, en de moderator verliest het menu); alleen de koppeling "Terug naar het beheer" op elke pagina houden (wijst niet naar de andere schermen); de balk als subitems van het item Beheer in het hoofdmenu (het item hangt af van de markering in de browser, dus een redacteur zonder `localStorage` ziet geen balk, en het menu kent de rol niet); de balk in `Page.Body` met CSS naar buiten trekken (zie _De balk komt via een slot in de layout, een parallelle route_).
 - **Later:** zie _De balk komt via een slot in de layout, een parallelle route_ (27 oktober 2026): ook `/beheer` vult het slot `@shortcuts`, met een route voor de startpagina en een voor alles eronder.
 - **Later:** zie _Uitloggen is de laatste knop van de balk van het beheer_ (2 november 2026): Uitloggen staat niet op de startpagina maar in de balk, op elke pagina; wie is ingelogd (het adres en de rol) blijft onder de kop op de startpagina.
+- **Later:** zie _Eén balk voor de subpagina's van het hoofdmenu en de schermen van een onderdeel_ in `designsysteem.md` (2 november 2026): `SectionBar` bestaat niet meer; het beheer gebruikt `NavigationBar` met een `label`, en die balk eindigt vanaf 66rem aan de rand van de kolom.
 
 ## Een ontwerp voor een telefoon is het ontwerp voor het hele beheer
 
@@ -2065,3 +2066,4 @@
 - **Waarom:** wie uitlogt hoeft dat niet elk moment te kunnen, en de balk blijft één regel hoog zonder extra plek of aparte regel.
   In de balk passen het adres en de rol niet op een telefoon, en wie wil weten met welk account hij is ingelogd, vindt het op de startpagina.
 - **Alternatieven:** Uitloggen vast in beeld aan het rechteruiteinde, buiten de scrollende rij (neemt op een telefoon ruimte van de schermen); een tweede regel onder de koppelingen (de balk wordt twee regels hoog op elke pagina); een koppeling naar een uitlogpagina (een extra stap en een pagina erbij); het adres als `title` of verborgen tekst bij de knop (een tooltip bestaat niet op een telefoon).
+- **Later:** zie _Eén balk voor de subpagina's van het hoofdmenu en de schermen van een onderdeel_ in `designsysteem.md` (2 november 2026): de prop `end` zit op `NavigationBar`, dat een `label` moet hebben, en `SectionBar` bestaat niet meer.

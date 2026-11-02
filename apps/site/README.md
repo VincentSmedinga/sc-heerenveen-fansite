@@ -756,7 +756,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
 - `/beheer` is de startpagina: wie is ingelogd (het adres en de rol), een tegel (`Tile` van het designsysteem) voor elk scherm van die rol in de hoofdkolom.
-  Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `SectionBar` van het designsysteem, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
+  Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `NavigationBar` van het designsysteem, met een `label`, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De knop Uitloggen is het laatste item van die balk (de prop `end`): een knop in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
   De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit en wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`), elk een koppeling naar de lijst.

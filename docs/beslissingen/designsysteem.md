@@ -2316,3 +2316,30 @@
   Een `grid` met `gap` op de fieldset en de legenda erin (de legenda is niet te bereiken met een `gap`).
   Een hulpklasse op elk veld in plaats van een stroom in het formulier (veel klassen, en een Builder vergeet ze).
   Een `Form` die altijd een stroom is (een formulier van kaarten is een raster, en de marges komen dan bij de `gap`).
+
+## Eén balk voor de subpagina's van het hoofdmenu en de schermen van een onderdeel
+
+- **Datum:** 2 november 2026
+- **Besluit:** er is één balkcomponent, `NavigationBar`, met twee standen (#651).
+  - **In het menu:** zonder `label` is hij een `div` met de subpagina's van een onderdeel, alleen binnen `Navigation`, zoals hij was.
+    De HTML is niet veranderd.
+  - **Op zichzelf:** met een `label` is hij een `nav` met die naam, een band van rand tot rand tussen het hoofdmenu en de `Page.Body`.
+    De plek rechts voor één knop die geen scherm is, zoals Uitloggen (`end`, uit #650), is er alleen in deze stand: het type staat `end` zonder `label` niet toe.
+    `SectionBar`, `SectionBarItem`, `SectionBarProps` en `section-bar.css` zijn weg; de site gebruikt `NavigationBar` voor het beheer.
+    De items blijven `subitems`, want die naam gebruikt de site al.
+  - **De CSS** staat in `navigation.css`: de pillen, de rij en de kleur van de band in één regel voor beide, de marges uit `.hf-navigation-header`, de schaduw, `order` en het `grid-area` bij de balk in het menu, en de padding uit `--hf-page-inset` bij de balk op zichzelf.
+    De balk op zichzelf hangt van niets af van `.hf-navigation-header`.
+  - **Het einde van de rij:** de balk op zichzelf eindigt vanaf 66rem aan de rand van de kolom, in lijn met het hoofdmenu, en loopt onder 66rem door tot de rand van het scherm; de band zelf blijft van rand tot rand gekleurd.
+    Op 20em en smaller loopt de rij om, met de eerste link in lijn met het menu.
+- **Waarom:** de stijl van de submenubalk staat dan op één plek, en een wijziging aan de ene balk vergeet de andere niet.
+  De balk op zichzelf heeft geen aanpassing aan het hoofdmenu nodig.
+  Op een groot scherm staat Uitloggen zo in lijn met het menu erboven, en niet ver van alles aan de rand van het scherm.
+- **Gevolg:** de balk van het beheer ziet er anders uit op drie plekken.
+  Vanaf 66rem eindigt hij aan de kolom en niet aan de rand van het scherm.
+  Onder 66rem loopt de rij door tot de rand van het scherm; die stopte 1rem ervoor, terwijl de balk in het menu wel tot de rand liep.
+  Op 20em en smaller staat de eerste link op de plek van het menu; hij stond 8 pixels links daarvan, omdat `SectionBar` de lijst wel terugtrok maar het menu niet.
+  Een balk op zichzelf zonder `end` heeft geen lijst die zo breed is als de balk, wat niemand ziet.
+- **Alternatieven:** twee componenten die één stijlklasse delen (de dubbele opbouw en de dubbele tests blijven).
+  `SectionBar` laten staan en alleen zijn CSS naar die van `NavigationBar` verhuizen (de twee verschillen in HTML en rol blijven op twee plekken staan).
+  `Navigation` zelf een losse balk laten tekenen (het menu kent het onderdeel niet en heeft er geen reden voor).
+  De rij van het beheer tot de rand van het scherm laten lopen (dan blijft er een extra stand voor de breedte in de ene balk, en een deel van de dubbele stijl).
