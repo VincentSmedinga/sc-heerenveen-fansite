@@ -753,8 +753,12 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
 ### Wedstrijden invullen
 
 `/beheer/wedstrijden` (`src/app/beheer/wedstrijden`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
-De lijst toont de wedstrijden van het lopende seizoen, die zonder uitslag eerst (twee uur na de aftrap, zoals `lacksResult`), met "Aangepast door de redactie" bij een wedstrijd met een invoer.
-De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) heeft het formulier (`MatchForm.tsx`) en, bij een invoer, wat de redactie invulde, wat Wikipedia zei toen het afweek, en een eigen formulier om de invoer weg te halen.
+De lijst is één tabel van de wedstrijden van een seizoen, met de wedstrijd als enige koppeling in een rij, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
+Een filter met de aantallen kiest wat de lijst toont: `?tonen=alles`, `?tonen=aangepast` en, zonder zoekopdracht, de wedstrijden zonder uitslag (twee uur na de aftrap, zoals `lacksResult`), met de wedstrijden zonder uitslag eerst bij "Alles".
+Het zijn gewone koppelingen, dus het werkt zonder JavaScript.
+`?seizoen=2025-26` kiest een ouder seizoen, en een seizoen zonder wedstrijden valt terug op het huidige.
+De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) is de brede pagina met een zijbalk: de kaarten van het formulier staan in de hoofdkolom (`MatchFields` in `MatchForm.tsx`) en het blok om op te slaan, de laatste invoer en het uitklapblok "Invoer weghalen" in de zijbalk, die op een brede pagina in beeld blijft.
+De velden van het blok om op te slaan horen bij het formulier met het attribuut `form`, en `MatchFormProvider` deelt de toestand van het formulier met de drie delen.
 Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md); de import is beschreven in de [README van de importer](../importer/README.md).
 
 - Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.

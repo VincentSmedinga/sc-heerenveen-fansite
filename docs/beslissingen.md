@@ -6612,6 +6612,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** het beheer werkt zonder JavaScript, zoals de artikelen, en een formulier met rijen die je toevoegt en weghaalt kan dat met een rondje naar de server.
   Eén speler-veld voorkomt dat een redacteur twee velden moet leren die elkaar uitsluiten.
 - **Alternatieven:** een knop die met JavaScript een rij toevoegt (werkt niet zonder, en de focus is dan ons eigen werk); twee velden naast elkaar voor de speler (de redacteur moet weten welk veld bij welk doelpunt hoort); de Enter-toets laten zoals hij is (hij haalt het eerste doelpunt weg).
+- **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_ en _Het blok om op te slaan staat in de zijbalk en hoort bij het formulier met het attribuut `form`_.
+  De knop voor een doelpunt heet nu "Weghalen doelpunt 2", de doelpunten zijn een tabel en geen kaart per doelpunt, en "Invoer weghalen" is een uitklapblok in de zijbalk.
+  De rest blijft: een formulier dat zonder JavaScript werkt, de verborgen eerste knop, de focus en de ene speler.
 
 ### Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde
 
@@ -6823,6 +6826,65 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** wie een mail kreeg terwijl een andere beheerder hem niet kreeg, merkt dat niet; de afwijking staat wel in het beheer.
   Zonder één beheerder met een actief account gaat er niets uit, en de run zegt dat in het logboek.
 - **Alternatieven:** één mail naar `ALERT_MAIL_TO` (de eigenaar is niet altijd de redacteur die de wedstrijd invulde); één mail met alle beheerders in `To` (de adressen staan bij elkaar, en `sendMail` weigert het); de mail in de transactie van de import (een mail die faalt zou de wedstrijden terugdraaien); een mail bij elke run die de afwijking ziet (honderden mails voor één afwijking).
+
+### De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk
+
+- **Datum:** 2 november 2026
+- **Besluit:** de lijst `/beheer/wedstrijden` en het formulier `/beheer/wedstrijden/<nummer>` krijgen een nieuw ontwerp (#592), als een echt CMS.
+  - **De lijst** is één tabel met de wedstrijd als enige koppeling, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
+    Er staan geen koppen in de rijen.
+    Een filter met aantallen (Alles, Zonder uitslag, Aangepast) kiest wat de lijst toont, met koppelingen die een zoekopdracht in het adres zetten, zodat het zonder JavaScript werkt.
+    De lijst opent op "Zonder uitslag", en "Alles" houdt die wedstrijden bovenaan.
+    Is er niets zonder uitslag, dan staat er één regel in plaats van de tabel.
+    Naast de titel staat de seizoenskeuze, en de lijst toont ook oudere seizoenen.
+  - **Het formulier** is de brede pagina met een zijbalk.
+    De kop is de wedstrijd, met daaronder de competitie, de ronde en de aftrap, en een label als de redactie iets aanpaste of de uitslag ontbreekt.
+    De hoofdkolom heeft de kaarten Aftrap, Uitslag en Doelpunten, en bij de beker en de play-offs een kaart voor de verlenging en de strafschoppen.
+    De zijbalk heeft het blok om op te slaan, de laatste invoer en "Invoer weghalen".
+  - **De stand** staat in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop, zoals in de kop.
+    De labels zijn de namen van de teams.
+  - **De doelpunten** zijn een tabel om in te vullen op een brede pagina en een blok per doelpunt op een telefoon.
+  - **"Invoer weghalen"** is een uitklapblok met een rode knop.
+  - **Een melding** na een actie is een Notice zonder kop, en het kruimelpad vervangt de koppelingen "Terug naar".
+  - **Op een telefoon** is het blok om op te slaan de kaart na het formulier, zonder vaste balk.
+  - De namen van de velden, de acties, de valideringen, de teksten van de foutmeldingen en de logboekregels veranderen niet.
+- **Waarom:** de lijst was een rij koppelingen met een kop in elk item, en het formulier zes velden onder elkaar per doelpunt.
+  De projecteigenaar wil schermen die gebruiksvriendelijker en professioneler zijn.
+  Een tabel laat in één blik zien wat nog ontbreekt.
+  Een zijbalk houdt de knop om op te slaan in beeld bij een lang formulier.
+  Een doelpunt van één rij neemt 60 pixels in plaats van een scherm.
+- **Hoe:** de teksten komen uit het ontwerp (het Artifact "Wedstrijden in het beheer"), korter waar het kon.
+  De onderdelen zijn die van #594, #595 en #599: `Tag`, `Notice`, `Disclosure`, `Breadcrumb`, de gevaarlijke `Button`, `Page.Main` met `wide`, `FieldGroup`, `InputTable`, `DataTable` met `appearance="text"` en de dichtheid `hf-density-compact`.
+- **Nadeel:** de lijst heeft drie kolommen op elke breedte (wedstrijd met de datum en de competitie eronder, uitslag en status), want `DataTable` kan een kolom op een brede pagina niet apart tonen.
+  Het ontwerp liet op een brede pagina vijf kolommen zien.
+- **Alternatieven:** een lijst van koppelingen houden en alleen de opmaak verbeteren; dat laat de koppen in de rijen en het scannen van wat ontbreekt.
+  Sorteren, zoeken en bulkacties: het ontwerp laat ze op bewuste gronden weg, want de volgorde is het punt, een seizoen heeft zo'n 34 wedstrijden en er is niets in bulk te doen.
+  Een vaste balk om op te slaan op een telefoon; het blok bevat de reden en staat daarom als kaart na het formulier.
+
+### Het blok om op te slaan staat in de zijbalk en hoort bij het formulier met het attribuut `form`
+
+- **Datum:** 2 november 2026
+- **Besluit:** het veld "Reden" en de knop "Opslaan" staan in de zijbalk, buiten het `form`-element van de kaarten, en horen er met het attribuut `form="wedstrijd"` bij.
+  - `MatchFormProvider` houdt de toestand van het formulier (`useActionState`) en deelt hem met drie delen: de foutenlijst, de kaarten en het blok om op te slaan.
+    De pagina zelf blijft een servercomponent en zet `Page.Main` en `Page.Sidebar` om de delen heen.
+  - `Page.Sidebar` heeft een nieuwe eigenschap `sticky`: vanaf 52 rem blijft de zijbalk in beeld terwijl de hoofdkolom scrolt.
+    Een gridelement blijft binnen zijn gridgebied, en dat is zo hoog als de hoofdkolom.
+  - Een `Form` met kaarten erin zet de ruimte van de pagina tussen de kaarten.
+  - Een `FieldGroup` met een teken (het streepje in een stand) houdt zijn sporen bij elkaar aan het begin, zodat de twee velden naast elkaar staan.
+  - "Invoer weghalen" is een eigen formulier in een `Disclosure`, in de zijbalk.
+    Het blok staat open als de reden ontbreekt, ook zonder JavaScript, want dan maakt de server de pagina opnieuw.
+  - De knoppen van een doelpunt zijn die van `InputTable`.
+    De knop "Doelpunt toevoegen" heeft geen `id`, dus de pagina zoekt hem op zijn waarde om hem de focus te geven.
+- **Waarom:** het blok om op te slaan moet naast een lange hoofdkolom in beeld blijven.
+  `Page.Main` en `Page.Sidebar` zijn twee kolommen van de `Page.Body` die geen gemeenschappelijk element hebben.
+  Het attribuut `form` is HTML en werkt zonder JavaScript.
+  De Enter-toets in een veld van de kaarten slaat nog op met de verborgen eerste knop, en de knop in de zijbalk verstuurt hetzelfde formulier.
+- **Nadeel:** de pagina is een client-eiland van drie delen die een provider delen.
+  Een zijbalk die hoger is dan het venster, wordt onderaan afgesneden: de zijbalk blijft kort.
+- **Alternatieven:** het hele formulier om `Page.Body` heen; dat verandert de indeling van de site, die de layout tekent.
+  Het blok om op te slaan twee keer maken, een in de hoofdkolom en een in de zijbalk; dan zijn er twee velden "Reden" met dezelfde naam.
+  Een vaste balk onderaan met JavaScript; dat werkt niet zonder JavaScript en het ontwerp wil geen vaste balk op een telefoon.
+  De seizoenen van de lijst uit de cache van de publieke pagina's halen; een wedstrijd die een minuut geleden is toegevoegd, staat er dan niet, en de redactie moet hem zien.
 
 ## Redactie
 
