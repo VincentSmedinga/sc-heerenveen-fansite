@@ -83,6 +83,22 @@ describe('DataTable', () => {
     expect(screen.getByRole('table').id).toBe('tabel')
   })
 
+  it('puts a marker before the row header and words for a screen reader after it', () => {
+    render(
+      <DataTable
+        {...props}
+        rows={[
+          { cells: [2, 1], header: '4–0', marker: <span aria-hidden="true" data-testid="marker" />, note: 'winst' },
+        ]}
+      />,
+    )
+    const header = screen.getByRole('rowheader')
+
+    expect(header.firstElementChild?.getAttribute('data-testid')).toBe('marker')
+    expect(header.textContent).toBe('4–0, winst')
+    expect(header.lastElementChild?.className).toBe('hf-visually-hidden')
+  })
+
   it('makes the row header a link when the row has an href, and leaves the others as text', () => {
     render(
       <DataTable

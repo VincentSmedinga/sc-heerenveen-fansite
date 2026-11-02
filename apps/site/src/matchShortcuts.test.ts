@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
-import { coachesCardOf, matchShortcuts, matchShortcutsOf, standingsCardOf } from './matchShortcuts'
+import { coachesCardOf, matchShortcuts, matchShortcutsOf, scoreCountsCard, standingsCardOf } from './matchShortcuts'
 
 describe('matchShortcutsOf', () => {
-  it('has all three links for the current season', () => {
+  it('has all four links for the current season', () => {
     expect(matchShortcutsOf(true)).toEqual(matchShortcuts)
-    expect(matchShortcutsOf(true)).toHaveLength(3)
+    expect(matchShortcutsOf(true)).toHaveLength(4)
+  })
+
+  it('ends with the card Hoe vaak welke uitslag, the last card on a narrow screen', () => {
+    expect(matchShortcutsOf(true).at(-1)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
+    expect(matchShortcutsOf(false).at(-1)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
+    expect(scoreCountsCard.id).toBe('hoe-vaak-welke-uitslag')
   })
 
   it('has Stand in the current season', () => {
@@ -15,7 +21,7 @@ describe('matchShortcutsOf', () => {
   it('leaves Programma out for a season that is over, and keeps the order of the others', () => {
     const links = matchShortcutsOf(false)
 
-    expect(links).toHaveLength(2)
+    expect(links).toHaveLength(3)
     expect(links.map(({ href }) => href)).not.toContain('#programma')
     expect(links.map(({ href }) => href)).toEqual(
       matchShortcuts
@@ -37,14 +43,19 @@ describe('matchShortcutsOf with head coaches', () => {
   it('has a link to the card Hoofdtrainer straight after the table for one coach', () => {
     const hrefs = matchShortcutsOf(true, 1).map(({ href }) => href)
 
-    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoofdtrainer'])
+    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoofdtrainer', '#hoe-vaak-welke-uitslag'])
     expect(matchShortcutsOf(true, 1)).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainer' })
   })
 
   it('names the card Hoofdtrainers for more, also after the Eindstand of a season that is over', () => {
     const links = matchShortcutsOf(false, 3)
 
-    expect(links.map(({ href }) => href)).toEqual(['#uitslagen', '#eindstand', '#hoofdtrainer'])
+    expect(links.map(({ href }) => href)).toEqual([
+      '#uitslagen',
+      '#eindstand',
+      '#hoofdtrainer',
+      '#hoe-vaak-welke-uitslag',
+    ])
     expect(links).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainers' })
   })
 

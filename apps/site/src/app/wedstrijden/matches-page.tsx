@@ -14,6 +14,7 @@ import {
   imageCredit,
   lastFiveCaption,
   MatchLines,
+  ScoreCountsCard,
   SourceCredit,
   StandingsBehind,
   standingsCaption,
@@ -180,6 +181,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           )}
         </Card>
         <CoachesCard coaches={data.coaches} />
+        <ScoreCountsCard matches={results} season={imageSeason} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
         )}

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { DonutChart, type DonutChartSlice } from './DonutChart'
+import { DonutChart, type DonutChartSlice, strengthsOf } from './DonutChart'
 
 const labels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90']
 
@@ -145,6 +145,127 @@ describe('DonutChart', () => {
 
     expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-positive extra')
     expect(container.firstElementChild?.id).toBe('voor')
+  })
+})
+
+describe('DonutChart with a colour for each slice', () => {
+  const results: DonutChartSlice[] = [
+    { label: '4–0', tone: 'positive', value: 2 },
+    { label: '3–0', tone: 'positive', value: 2 },
+    { label: '2–2', tone: 'neutral', value: 1 },
+    { label: '0–1', tone: 'negative', value: 5 },
+  ]
+  const strengthOf = (container: HTMLElement) =>
+    [...container.querySelectorAll<SVGPathElement>('.hf-donut-chart-slice')].map((slice) => [
+      slice.getAttribute('class'),
+      slice.style.getPropertyValue('--hf-donut-strength'),
+    ])
+
+  it('gives each slice the class of its own tone, and needs no tone of the chart', () => {
+    const { container } = render(<DonutChart labels={false} slices={results} />)
+
+    expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-bare')
+    expect(strengthOf(container).map(([name]) => name)).toEqual([
+      'hf-donut-chart-slice hf-donut-chart-slice-positive',
+      'hf-donut-chart-slice hf-donut-chart-slice-positive',
+      'hf-donut-chart-slice hf-donut-chart-slice-neutral',
+      'hf-donut-chart-slice hf-donut-chart-slice-negative',
+    ])
+  })
+
+  it('runs the strength from the weakest to the full colour within a tone, so slices of one colour differ', () => {
+    const { container } = render(<DonutChart labels={false} slices={results} />)
+
+    expect(strengthOf(container).map(([, strength]) => strength)).toEqual(['70%', '100%', '80%', '70%'])
+  })
+
+  it('lets the tone of a slice win over the tone of the chart', () => {
+    const { container } = render(
+      <DonutChart
+        slices={[
+          { label: 'a', tone: 'negative', value: 1 },
+          { label: 'b', value: 1 },
+        ]}
+        title="Titel"
+        tone="positive"
+      />,
+    )
+
+    expect(strengthOf(container).map(([name]) => name)).toEqual([
+      'hf-donut-chart-slice hf-donut-chart-slice-negative',
+      'hf-donut-chart-slice',
+    ])
+  })
+
+  it('leaves out the texts and the lines round the ring, and draws the ring on its own', () => {
+    const { container } = render(<DonutChart labels={false} slices={results} />)
+
+    expect(container.querySelector('.hf-donut-chart-label')).toBeNull()
+    expect(container.querySelector('.hf-donut-chart-leader')).toBeNull()
+    expect(container.querySelector('.hf-donut-chart-total')?.textContent).toBe('10')
+    expect(container.querySelector('svg')?.getAttribute('viewBox')).toBe('74 64 172 172')
+  })
+
+  it('has no title element without a title', () => {
+    const { container } = render(<DonutChart labels={false} slices={results} />)
+
+    expect(container.querySelector('.hf-donut-chart-title')).toBeNull()
+  })
+
+  it('fills the ring with one slice in its own colour', () => {
+    const { container } = render(<DonutChart labels={false} slices={[{ label: '1–0', tone: 'positive', value: 3 }]} />)
+
+    expect(container.querySelectorAll('.hf-donut-chart-slice')).toHaveLength(1)
+    expect(container.querySelector('.hf-donut-chart-slice')?.getAttribute('d')?.match(/M /gu)).toHaveLength(2)
+  })
+
+  it('shows twelve slices, each with its own place', () => {
+    const many = Array.from({ length: 12 }, (_, index): DonutChartSlice => ({
+      label: `${index}`,
+      tone: index < 6 ? 'positive' : index < 8 ? 'neutral' : 'negative',
+      value: 1 + (index % 3),
+    }))
+    const { container } = render(<DonutChart labels={false} slices={many} />)
+
+    expect(container.querySelectorAll('.hf-donut-chart-slice')).toHaveLength(12)
+  })
+})
+
+describe('strengthsOf', () => {
+  it('goes from 70% to 100% within a tone, and from 80% for the grey of a draw', () => {
+    expect(strengthsOf(['positive', 'positive', 'positive', 'neutral', 'neutral', 'negative'])).toEqual([
+      70, 85, 100, 80, 100, 70,
+    ])
+  })
+})
+
+describe('DonutChart.Swatch', () => {
+  const slices: DonutChartSlice[] = [
+    { label: '4–0', tone: 'positive', value: 2 },
+    { label: '3–0', tone: 'positive', value: 2 },
+    { label: '0–1', tone: 'negative', value: 5 },
+  ]
+
+  it('has the class and the strength of its slice, and is hidden from a screen reader', () => {
+    const { container } = render(
+      <>
+        <DonutChart labels={false} slices={slices} />
+        <DonutChart.Swatch index={1} slices={slices} />
+        <DonutChart.Swatch index={2} slices={slices} />
+      </>,
+    )
+    const drawn = [...container.querySelectorAll<SVGPathElement>('.hf-donut-chart-slice')]
+    const swatches = [...container.querySelectorAll<HTMLElement>('.hf-donut-chart-swatch')]
+
+    expect(swatches.map((swatch) => swatch.getAttribute('aria-hidden'))).toEqual(['true', 'true'])
+    expect(swatches[0]?.className).toContain('hf-donut-chart-slice-positive')
+    expect(swatches[0]?.style.getPropertyValue('--hf-donut-strength')).toBe(
+      drawn[1]?.style.getPropertyValue('--hf-donut-strength'),
+    )
+    expect(swatches[1]?.className).toContain('hf-donut-chart-slice-negative')
+    expect(swatches[1]?.style.getPropertyValue('--hf-donut-strength')).toBe(
+      drawn[2]?.style.getPropertyValue('--hf-donut-strength'),
+    )
   })
 })
 

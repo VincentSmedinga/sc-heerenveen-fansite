@@ -18,8 +18,15 @@ const slicesOf = (values: number[]): DonutChartSlice[] =>
 
 const meta = preview.meta({
   argTypes: {
-    slices: { description: 'De plakken in de volgorde waarin ze rond gaan, met de klok mee vanaf boven.' },
-    title: { description: 'De titel boven de ring.' },
+    labels: {
+      description:
+        'Of de naam en de waarde van elke plak als tekst rond de ring staan. Zonder die tekst is de ring kleiner en op zichzelf, en moet de pagina de getallen in een tabel geven.',
+    },
+    slices: {
+      description:
+        'De plakken in de volgorde waarin ze rond gaan, met de klok mee vanaf boven. Een plak kan een eigen `tone` hebben.',
+    },
+    title: { description: 'De titel boven de ring. Zonder titel staat er niets boven.' },
     tone: {
       control: 'radio',
       description:
@@ -52,9 +59,16 @@ const meta = preview.meta({
           'Zet dezelfde getallen in een `DataTable` ernaast: dat is het tekstalternatief.',
           'Het diagram is dus nooit de enige plek voor de getallen.',
           '',
-          '- `title` is de titel boven de ring.',
-          '- `slices` zijn de plakken met een `label` en een `value`.',
-          '- `tone` kiest tussen groen (`positive`) en rood (`negative`).',
+          '- `title` is de titel boven de ring, en mag ontbreken.',
+          '- `slices` zijn de plakken met een `label`, een `value` en eventueel een eigen `tone`.',
+          '- `tone` kiest tussen groen (`positive`) en rood (`negative`) voor alle plakken die geen eigen `tone` hebben.',
+          '- `labels={false}` laat de tekst rond de ring weg.',
+          '',
+          'Een plak kan een kleur van zichzelf hebben: groen (`positive`), grijs (`neutral`) of rood (`negative`), zoals de uitslagen van een seizoen.',
+          'Plakken van dezelfde kleur lopen onderling van zwak naar sterk, zodat ze te onderscheiden blijven.',
+          'Zonder tekst rond de ring is de ring zelf kleiner en past hij zich aan de plek aan, en staat de naam van elke plak in een tabel ernaast.',
+          'Het vlakje voor een rij van die tabel is een `DonutChart.Swatch`, met precies de kleur van de plak.',
+          'Een rij van een `DataTable` krijgt het vlakje als `marker` en de uitkomst in woorden als `note`.',
           '',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
           'Is er niet genoeg ruimte voor ze naast elkaar, zoals op een telefoon, dan komen ze onder elkaar.',
@@ -211,5 +225,94 @@ export const CrowdedDark = meta.story({
     <div style={{ maxInlineSize: '20rem' }}>
       <DonutChart {...args} />
     </div>
+  ),
+})
+
+const scores = [
+  { label: '4–0', tone: 'positive', value: 2 },
+  { label: '4–1', tone: 'positive', value: 1 },
+  { label: '3–0', tone: 'positive', value: 2 },
+  { label: '2–2', tone: 'neutral', value: 1 },
+  { label: '0–0', tone: 'neutral', value: 1 },
+  { label: '0–1', tone: 'negative', value: 5 },
+] as const satisfies DonutChartSlice[]
+
+const outcomeWords = { negative: 'verlies', neutral: 'gelijk', positive: 'winst' } as const
+
+const ScoresCard = ({ slices }: { slices: readonly DonutChartSlice[] }) => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-kop" surface="warm">
+      <Heading id="uitslagen-kop" level={2}>
+        Hoe vaak welke uitslag
+      </Heading>
+      <DonutChart labels={false} slices={slices} />
+      <DataTable
+        caption="Hoe vaak elke uitslag voorkwam, van de beste naar de slechtste"
+        columns={['Uitslag', 'Keer']}
+        rows={slices.map((slice, index) => ({
+          cells: [slice.value],
+          header: slice.label,
+          marker: <DonutChart.Swatch index={index} slices={slices} />,
+          note: outcomeWords[slice.tone ?? 'neutral'],
+        }))}
+      />
+    </Card>
+  </div>
+)
+
+export const ScoresLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een plak per uitslag in groen, grijs en rood, met een tabel, licht',
+  render: () => <ScoresCard slices={scores} />,
+})
+
+export const ScoresDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Een plak per uitslag in groen, grijs en rood, met een tabel, donker',
+  render: () => <ScoresCard slices={scores} />,
+})
+
+export const ScoresOneSlice = meta.story({
+  globals: { theme: 'light' },
+  name: 'Eén uitslag, de ring is één plak met een tabel van één rij',
+  render: () => <ScoresCard slices={[{ label: '2–1', tone: 'positive', value: 1 }]} />,
+})
+
+export const ScoresNoValues = meta.story({
+  globals: { theme: 'light' },
+  name: 'Zonder waarden, een lege ring met een nul en geen tekst rond de ring',
+  render: () => (
+    <div style={{ maxInlineSize: '24rem' }}>
+      <DonutChart
+        labels={false}
+        slices={[
+          { label: '1–0', tone: 'positive', value: 0 },
+          { label: '0–1', tone: 'negative', value: 0 },
+        ]}
+      />
+    </div>
+  ),
+})
+
+export const ScoresTwelve = meta.story({
+  globals: { theme: 'light' },
+  name: 'Twaalf uitslagen, de plakken van één kleur lopen van zwak naar sterk',
+  render: () => (
+    <ScoresCard
+      slices={[
+        { label: '5–0', tone: 'positive', value: 1 },
+        { label: '4–0', tone: 'positive', value: 2 },
+        { label: '3–0', tone: 'positive', value: 2 },
+        { label: '4–1', tone: 'positive', value: 1 },
+        { label: '3–1', tone: 'positive', value: 3 },
+        { label: '2–0', tone: 'positive', value: 4 },
+        { label: '2–1', tone: 'positive', value: 3 },
+        { label: '1–0', tone: 'positive', value: 2 },
+        { label: '2–2', tone: 'neutral', value: 2 },
+        { label: '1–1', tone: 'neutral', value: 3 },
+        { label: '0–0', tone: 'neutral', value: 1 },
+        { label: '0–1', tone: 'negative', value: 5 },
+      ]}
+    />
   ),
 })

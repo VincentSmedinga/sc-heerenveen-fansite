@@ -73,6 +73,8 @@ const meta = preview.meta({
           '  Een getal schrijft het component op zijn Nederlands, met een punt tussen de duizendtallen.',
           '  De `header` moet uniek zijn.',
           '  Met `href` wordt de rijkop een link naar de pagina over de rij, zoals de pagina van een club in een lijst van clubs.',
+          '  Met `marker` staat er een versiering voor de rijkop, zoals het vlakje van een plak van een donutdiagram, en met `note` hoort een schermlezer woorden achter de rijkop, zoals "winst" achter "4–0".',
+          '  Een `marker` is zelf verborgen voor een schermlezer: de `note` zegt wat hij betekent (zie `DonutChart.Swatch` voor een voorbeeld).',
           '',
           'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet.',
           'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',

@@ -2565,6 +2565,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een taart zonder gat (meer oppervlak, maar geen plek voor het totaal); het getal in de plak zelf (kleine plakken van één doelpunt zijn te smal); een legenda onder het diagram (de koppeling loopt dan alleen via de kleur); zes of twaalf nieuwe kleurtokens voor de plakken (veel om bij te houden, en toch geen 3:1 tussen buren); de teksten als SVG-tekst (die schaalt mee en wordt op een telefoon te klein); een grafiekbibliotheek (het issue sluit die uit).
 - **Later:** zie _De scheiding in een ring is een lichte omlijning, in licht en in donker_.
   De lijn tussen de plakken is niet meer de kleur van het vlak maar een eigen rol, `--hf-colour-border-chart-slice`; de rest blijft.
+- **Later:** zie _Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda_ (2 november 2026).
+  Elke plak kan een eigen kleur hebben, ook het grijs van een gelijkspel, en de tekst rond de ring kan ontbreken; de tekst bij elke plak geldt nu alleen voor een diagram met `labels`, dat de standaard blijft.
 
 ### Een pagina in Storybook is kort, met het voorbeeld en een story per variant
 
@@ -3600,6 +3602,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de volgorde van de kolommen en de regel onder de tabel maken het verschil voor wie ziet.
 - **Gevolg:** de kolommen worden smaller, want alle koppen zijn één letter (#630 bouwt daarop).
 - **Alternatieven:** "=" voor gelijk (uniek en eenletterig, maar de uitslagen krijgen dan een ander teken dan de supporter kent); "Wed" voor gespeeld (de gewone kop in Nederlandse tabellen, maar drie letters en een bredere kolom); een bal als pictogram voor gespeeld (een nieuw pictogram dat moeilijker te lezen is); GL of L voor gelijk (twee letters, of een letter die van niets komt); een lege kop (niet toegankelijk); "±" of "+/−" voor het doelsaldo (geen letter, of drie tekens breed); gewonnen en verloren als woorden (dan moeten de uitslagen en het verloop mee).
+
+### Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
+
+- **Datum:** 2 november 2026
+- **Besluit:** het diagram van de kaart "Hoe vaak welke uitslag" heeft een plak per uitslag in de kleur van de uitkomst (groen, grijs, rood), zonder tekst rond de ring (#638).
+  De tabel eronder heeft een vlakje in de kleur van elke plak en is voor de schermlezer de weergave van de cijfers.
+  - `DonutChart` krijgt daarvoor een `tone` per plak (`positive`, `neutral` of `negative`, de `ChartTone` van de andere grafieken) en `labels={false}`, dat de tekst en de streepjes rond de ring weglaat.
+    De `tone` van het diagram blijft voor de plakken die er geen hebben, en `title` mag ontbreken.
+  - Plakken van één kleur lopen onderling van het zwakste tot de volle kleur, zoals nu, en het grijs van een gelijkspel begint bij 80%, zoals in `chart.css`.
+    Zonder tekst is de ring een eigen, kleinere tekening (`bare` in `geometry.ts`), zodat hij de plek vult.
+  - Het vlakje in de tabel is `DonutChart.Swatch`, dat dezelfde plakken en de plaats van zijn plak krijgt en daaruit dezelfde kleur en sterkte haalt (`strengthsOf`).
+    Een rij van `DataTable` krijgt het als `marker` (voor de rijkop) en de uitkomst in woorden als `note` (alleen voor de schermlezer, "4–0, winst").
+- **Waarom:** een seizoen heeft zo'n acht tot twaalf verschillende uitslagen, en zoveel teksten passen niet rond een ring (ze schuiven tot 40 graden uit elkaar).
+  De cijfers staan toch al in de tabel, en kleur is niet het enige: de tabel noemt de uitslag en de uitkomst in woorden.
+  Eén functie voor de sterkte houdt het vlakje en de plak gelijk, ook als de regel voor de sterkte verandert.
+- **Alternatieven:** drie plakken (winst, gelijk, verlies) met tekst rond de ring; alleen de grote plakken benoemen (een verborgen regel over wat er een naam krijgt); een eigen tabelonderdeel voor de uitslagen in plaats van `marker` en `note` op `DataTable` (een tweede tabel met dezelfde opmaak).
 
 ## Site
 
@@ -5172,6 +5190,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): Tegenstanders is er, naast Spelers, in de balk van Statistieken.
 - **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/` is niet meer Nieuws en heeft geen balk, Nieuws is `/nieuws` en is het archief (dat item vervalt), en de balk van Nieuws heeft Podcasts en Zoeken.
   De rest van dit besluit blijft gelden.
+- **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): `/wedstrijden` houdt toch een kaart met cijfers, "Hoe vaak welke uitslag", als laatste kaart van de zijbalk.
 
 ### De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage
 
@@ -5580,6 +5599,26 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `#src` is voor de volgorde van imports een eigen groep, tussen de pakketten en de `../`-imports, met een lege regel erboven en eronder.
   Een branch die vóór deze wijziging is gemaakt, krijgt een samenvoegconflict in elk bestand waar de importregels zijn omgezet.
 - **Alternatieven:** alleen `paths` in `tsconfig.json` met `@/` of `~/` (Node laadt `scripts` en `vitest.config.ts` rechtstreeks en kent het niet, en Vitest heeft er een plug-in voor nodig); alleen `imports` met `#src/*` (TypeScript vindt een import zonder `.ts` dan niet); overal `.ts` schrijven bij het voorvoegsel (honderden regels meer om te wijzigen, en een andere schrijfwijze dan de rest van de code); een `baseUrl` met kale paden als `season-page` (botst met pakketnamen); de regels laten zoals ze zijn en alleen een lintregel tegen drie mappen omhoog (de helft van het probleem blijft).
+
+### De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen
+
+- **Datum:** 2 november 2026
+- **Besluit:** de kaart "Hoe vaak welke uitslag" staat als laatste kaart in de zijbalk van `/wedstrijden` en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
+  Een bekerwedstrijd telt met de stand na verlenging, zonder strafschoppen.
+  De balk "Op deze pagina:" heeft er een link naar, na Hoofdtrainer.
+- **Waarom:** de projecteigenaar wil de kaart op Wedstrijden, naast de lijst van de uitslagen die hij samenvat.
+  Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
+  De pagina heeft geen schakelaar tussen Eredivisie en alle wedstrijden.
+- **Alternatieven:** de kaart op Statistieken, in de kolom met cijfers, met de schakelaar en de regel dat een kaart alleen de Eredivisie telt (#397, #431), waar hij past bij de andere negen kaarten; alleen de Eredivisie tellen op Wedstrijden (het totaal verschilt dan van de lijst).
+
+### Uitslagen staan van goed naar slecht: winst, gelijk, verlies, dan doelsaldo, dan doelpunten
+
+- **Datum:** 2 november 2026
+- **Besluit:** de uitslagen staan vanuit sc Heerenveen gezien en gesorteerd op uitkomst (winst, gelijk, verlies), dan op doelsaldo (groot naar klein), dan op het aantal doelpunten in de wedstrijd (veel naar weinig) (`scoreCountsOf` in `src/matches.ts`).
+- **Waarom:** het beste resultaat staat bovenaan, zoals de projecteigenaar vroeg.
+  Doelsaldo en aantal doelpunten leggen de uitslag vast, dus er is geen gelijke stand om op te lossen.
+  Een nederlaag met één doelpunt verschil staat vóór een zwaardere.
+- **Alternatieven:** sorteren op doelpunten voor (3–0 vóór 4–1); de nederlagen van slecht naar goed.
 
 ## Importer
 

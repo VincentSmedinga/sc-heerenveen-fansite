@@ -16,6 +16,7 @@ import {
   overviewOf,
   parseCleanSheetCount,
   resultsOfSeason,
+  scoreCountsOf,
   scorersCoverage,
   standingsAround,
   standingsLag,
@@ -841,6 +842,121 @@ describe('leagueResultsOf', () => {
 
     expect(leagueResultsOf([])).toEqual([])
     expect(leagueResultsOf(matches)).toEqual([])
+    expect(matches).toEqual(copy)
+  })
+})
+
+describe('scoreCountsOf', () => {
+  const scoreOn = (matchDate: string, goalsFor: null | number, goalsAgainst: null | number): PublicMatch => ({
+    ...match('Speelronde 1', 'played', matchDate),
+    goalsAgainst,
+    goalsFor,
+  })
+  const scores = (list: [number, number][]): PublicMatch[] =>
+    list.map(([goalsFor, goalsAgainst], index) =>
+      scoreOn(`2026-08-${String(index + 1).padStart(2, '0')}`, goalsFor, goalsAgainst),
+    )
+  const shown = (matches: PublicMatch[]) =>
+    scoreCountsOf(matches).map(
+      ({ count, goalsAgainst, goalsFor, outcome }) => `${goalsFor}-${goalsAgainst} ${count}x ${outcome}`,
+    )
+
+  it('counts every score and puts the best first: wins, then draws, then losses', () => {
+    const matches = scores([
+      [0, 1],
+      [4, 0],
+      [3, 0],
+      [0, 1],
+      [4, 1],
+      [2, 2],
+      [0, 1],
+      [3, 0],
+      [0, 0],
+      [4, 0],
+      [0, 1],
+      [0, 1],
+    ])
+
+    expect(shown(matches)).toEqual([
+      '4-0 2x win',
+      '4-1 1x win',
+      '3-0 2x win',
+      '2-2 1x draw',
+      '0-0 1x draw',
+      '0-1 5x loss',
+    ])
+  })
+
+  it('puts the score with the most goals first when the goal difference is the same', () => {
+    expect(
+      shown(
+        scores([
+          [3, 0],
+          [4, 1],
+          [5, 2],
+          [1, 4],
+          [0, 3],
+          [2, 5],
+        ]),
+      ),
+    ).toEqual(['5-2 1x win', '4-1 1x win', '3-0 1x win', '2-5 1x loss', '1-4 1x loss', '0-3 1x loss'])
+  })
+
+  it('puts a loss by one goal before a loss by three', () => {
+    expect(
+      shown(
+        scores([
+          [0, 3],
+          [0, 1],
+          [2, 3],
+        ]),
+      ),
+    ).toEqual(['2-3 1x loss', '0-1 1x loss', '0-3 1x loss'])
+  })
+
+  it('puts the draws with the most goals first', () => {
+    expect(
+      shown(
+        scores([
+          [0, 0],
+          [2, 2],
+          [1, 1],
+          [3, 3],
+          [2, 2],
+        ]),
+      ),
+    ).toEqual(['3-3 1x draw', '2-2 2x draw', '1-1 1x draw', '0-0 1x draw'])
+  })
+
+  it('counts a cup tie, with the score after extra time and not the shoot-out', () => {
+    const shootOut: PublicMatch = {
+      ...scoreOn('2026-09-23', 1, 1),
+      competition: 'KNVB Beker',
+      extraTime: true,
+      penaltiesAgainst: 3,
+      penaltiesFor: 5,
+    }
+
+    expect(shown([shootOut, ...scores([[1, 0]])])).toEqual(['1-0 1x win', '1-1 1x draw'])
+  })
+
+  it('leaves out a match without a score and a match that is not played', () => {
+    const matches = [
+      scoreOn('2026-08-01', 2, 0),
+      scoreOn('2026-08-08', null, null),
+      match('Speelronde 3', 'postponed', '2026-08-15'),
+      match('Speelronde 4', 'scheduled', '2026-08-22'),
+    ]
+
+    expect(shown(matches)).toEqual(['2-0 1x win'])
+  })
+
+  it('gives one score for one match, nothing for no matches, and does not change the list', () => {
+    const matches = scores([[2, 1]])
+    const copy = [...matches]
+
+    expect(shown(matches)).toEqual(['2-1 1x win'])
+    expect(scoreCountsOf([])).toEqual([])
     expect(matches).toEqual(copy)
   })
 })

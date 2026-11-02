@@ -230,12 +230,13 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).toContain('id="eindstand"')
   })
 
-  it('has the results, the final table and no other card without a coach in the table', async () => {
+  it('has the results, the final table and the scores, and no other card without a coach in the table', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'uitslagen',
       'eindstand',
+      'hoe-vaak-welke-uitslag',
     ])
   })
 
