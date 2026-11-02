@@ -15,31 +15,58 @@ const props: ShortMatchProps = {
 }
 
 describe('ShortMatch', () => {
-  it('writes the day, the opponent with where it was played, and the result', () => {
+  it('writes the day and the two clubs with the result between them, the home club first', () => {
     const { container } = render(<ShortMatch {...props} />)
 
     expect(container.querySelector('time')?.textContent).toBe('za 24 okt')
     expect(container.querySelector('time')?.getAttribute('datetime')).toBe('2026-10-24')
-    expect(container.querySelector('.hf-short-match-opponent')?.textContent).toBe('Testdorp FC · thuis')
+    expect(container.querySelector('.hf-short-match-clubs')?.textContent).toBe('sc Heerenveen 3–03 tegen 0 Testdorp FC')
     expect(container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('3–0')
   })
 
-  it('says "uit" for a match away', () => {
+  it('puts the opponent first and turns the result around for a win away', () => {
     const { container } = render(<ShortMatch {...props} home={false} />)
+    const clubs = [...(container.querySelector('.hf-short-match-clubs')?.children ?? [])]
 
-    expect(container.querySelector('.hf-short-match-where')?.textContent).toBe('uit')
+    expect(clubs.map((part) => part.textContent)).toEqual(['Testdorp FC', '0–30 tegen 3', 'sc Heerenveen'])
+    expect(container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('0–3')
   })
 
-  it('shows the result from the side of sc Heerenveen, whichever side it played on', () => {
-    const { container } = render(<ShortMatch {...props} goalsFor={1} home={false} />)
+  it('shows the goals of the home club first, whichever club is ours', () => {
+    const { container } = render(<ShortMatch {...props} goalsAgainst={0} goalsFor={1} home={false} />)
 
-    expect(container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('1–0')
+    expect(container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('0–1')
   })
 
-  it('lets a screen reader hear the result as "3 tegen 0"', () => {
-    const { container } = render(<ShortMatch {...props} />)
+  it('does not say "thuis" or "uit": the order says where it was played', () => {
+    const home = render(<ShortMatch {...props} />)
+    const away = render(<ShortMatch {...props} home={false} />)
 
-    expect(container.querySelector('.hf-short-match-score .hf-visually-hidden')?.textContent).toBe('3 tegen 0')
+    expect(home.container.textContent).not.toMatch(/thuis|uit/u)
+    expect(away.container.textContent).not.toMatch(/thuis|uit/u)
+  })
+
+  it('lets a screen reader hear the same order as the eyes see, with the names of the clubs', () => {
+    const home = render(<ShortMatch {...props} />)
+    const away = render(<ShortMatch {...props} home={false} />)
+
+    expect(home.container.querySelector('.hf-short-match-clubs')?.textContent).toContain(
+      'sc Heerenveen 3–03 tegen 0 Testdorp FC',
+    )
+    expect(away.container.querySelector('.hf-short-match-score .hf-visually-hidden')?.textContent).toBe('0 tegen 3')
+    expect(away.container.querySelector('.hf-short-match-clubs')?.textContent).toContain(
+      'Testdorp FC 0–30 tegen 3 sc Heerenveen',
+    )
+  })
+
+  it('makes the name of our own club heavier, on whichever side it stands', () => {
+    const home = render(<ShortMatch {...props} />)
+    const away = render(<ShortMatch {...props} home={false} />)
+
+    expect(home.container.querySelector('.hf-short-match-own')?.textContent).toBe('sc Heerenveen')
+    expect(home.container.querySelectorAll('.hf-short-match-own')).toHaveLength(1)
+    expect(away.container.querySelector('.hf-short-match-own')?.textContent).toBe('sc Heerenveen')
+    expect(away.container.querySelectorAll('.hf-short-match-own')).toHaveLength(1)
   })
 
   it.each([
@@ -57,7 +84,7 @@ describe('ShortMatch', () => {
     expect(score?.classList.length).toBe(2)
   })
 
-  it('does not change what a screen reader hears for any outcome', () => {
+  it('hears the goals in the order of the clubs for every outcome', () => {
     const { container, rerender } = render(<ShortMatch {...props} goalsAgainst={2} goalsFor={0} />)
 
     expect(container.querySelector('.hf-short-match-score .hf-visually-hidden')?.textContent).toBe('0 tegen 2')
@@ -104,10 +131,9 @@ describe('ShortMatch', () => {
     }
   })
 
-  it('has no competition, round, stadium, scorers or name of our own club', () => {
+  it('has no competition, round, stadium or scorers', () => {
     const { container } = render(<ShortMatch {...props} />)
 
-    expect(container.textContent).not.toContain('sc Heerenveen')
     expect(container.querySelector('.hf-match-label, .hf-match-goals')).toBeNull()
   })
 

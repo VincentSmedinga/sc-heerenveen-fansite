@@ -139,7 +139,7 @@ describe('the page of a club', () => {
     expect(html).toContain('Grootste overwinning')
     expect(html).toContain('Grootste nederlaag')
     expect(plain(html.slice(html.indexOf('Grootste overwinning')))).toMatch(
-      /^Grootste overwinning vr 24 okt 2025 Testclub · thuis 3–0.*Grootste nederlaag/,
+      /^Grootste overwinning vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub.*Grootste nederlaag/,
     )
   })
 
@@ -156,11 +156,11 @@ describe('the page of a club', () => {
 
   it('lists every meeting, the newest first, with the season, the competition, the day and the result', async () => {
     expect(meetingsOf(await render())).toEqual([
-      ['2026/27', 'KNVB Beker', 'zo 20 sep Testclub · uit 0–1 0 tegen 1'],
-      ['2025/26', 'Eredivisie', 'vr 24 okt 2025 Testclub · thuis 3–0 3 tegen 0'],
-      ['2024/25', 'Eredivisie', 'za 1 mrt 2025 Oude Testclub · uit 1–1 1 tegen 1'],
-      ['2024/25', 'Eredivisie', 'za 9 nov 2024 Testclub · thuis 2–0 2 tegen 0'],
-      ['2022/23', 'Eredivisie', 'zo 2 apr 2023 Testclub · uit 4–2 4 tegen 2'],
+      ['2026/27', 'KNVB Beker', 'zo 20 sep Testclub 1–0 1 tegen 0 sc Heerenveen'],
+      ['2025/26', 'Eredivisie', 'vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub'],
+      ['2024/25', 'Eredivisie', 'za 1 mrt 2025 Oude Testclub 1–1 1 tegen 1 sc Heerenveen'],
+      ['2024/25', 'Eredivisie', 'za 9 nov 2024 sc Heerenveen 2–0 2 tegen 0 Testclub'],
+      ['2022/23', 'Eredivisie', 'zo 2 apr 2023 Testclub 2–4 2 tegen 4 sc Heerenveen'],
     ])
   })
 

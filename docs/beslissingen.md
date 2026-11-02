@@ -9029,6 +9029,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de volledige wedstrijdregels (veel dubbele informatie naast de uitslagen); alleen een getal zonder lijst (zegt niet welke wedstrijden); een markering in de lijst met uitslagen (de nullen verdwijnen dan tussen de rest); een korte uitvoering van `Match` (maakt `Match` groter).
 - **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): `ShortMatch` heeft sindsdien wel de kleur van de uitkomst.
   De rest blijft: een eigen onderdeel met zes props, zonder competitie, ronde, stadion of doelpuntenmakers.
+- **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de regel noemt sindsdien beide clubs, met de thuisclub en zijn doelpunten eerst, en niet meer alleen de tegenstander met "thuis" of "uit" en de uitslag vanuit onze kant.
 
 ### De kaart met topscorers toont alle doelpuntenmakers
 
@@ -9288,6 +9289,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+- **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de korte regels noemen sindsdien beide clubs, met de thuisclub en zijn doelpunten eerst, en niet meer de tegenstander met de uitslag vanuit onze kant.
 - **Later:** een eerder seizoen toont alleen de langste reeksen, zonder de lengte van nu en zonder de laatste vijf wedstrijden, zie _Een eerder seizoen toont bij de reeksen alleen de langste_ (30 oktober 2026).
 - **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de reden dat het zachte vlak de volgende kaart warm laat worden, zodat de kaarten om en om wisselen, vervalt.
   Reeksen blijft zacht, omdat het een lijst is die bij de hoofdinhoud hoort.
@@ -9720,6 +9722,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een gedeelde functie voorkomt dat de twee onderdelen op den duur een andere uitkomst kleuren.
   De kleur is een aanvulling op de cijfers en niet het enige teken: de tekst voor een schermlezer blijft "3 tegen 0".
 - **Alternatieven:** een eigenschap om de kleur uit te zetten (niemand vroeg erom, en elke lijst zou een keuze moeten maken); de regel kopiëren naar `ShortMatch` (twee plaatsen die uit elkaar kunnen lopen); een eigen klasse per uitkomst in `short-match.css` (dezelfde kleuren op twee plaatsen).
+- **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de kleur van de uitkomst blijft vanuit sc Heerenveen, maar de cijfers en de tekst voor een schermlezer staan nu in de volgorde van de wedstrijd, en niet meer "3 tegen 0" vanuit onze kant.
+
+### Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`
+
+- **Datum:** 2 november 2026
+- **Besluit:** `ShortMatch` noemt beide clubs in de volgorde van de wedstrijd, de thuisclub eerst, met de uitslag ertussen en het getal van de thuisclub eerst, zoals `Match` (#624).
+  Een uitwedstrijd die wij met 3–0 winnen staat dus als "Testdorp FC 0–3 sc Heerenveen".
+  - **De regel:** de dag, dan `<club> <uitslag> <club>`.
+    De props blijven `goalsFor` en `goalsAgainst` (vanuit sc Heerenveen) en `home`; het onderdeel zet de getallen zelf in de volgorde van de wedstrijd, zoals `sides` in `Match`.
+    Elke plek waar `ShortMatch` staat (Uitslagen, De nul gehouden, Reeksen, Uitersten en de pagina van een club) is daardoor goed, zonder wijziging in de site.
+  - **"thuis" en "uit"** staan niet meer in de regel: de volgorde zegt het al, en de regel wordt er niet drukker van.
+  - **De naam van sc Heerenveen** staat vet, zoals in `Match`, zodat een lezer onze eigen club ziet, aan welke kant hij ook staat.
+  - **Een schermlezer** hoort dezelfde volgorde met de namen: "Testdorp FC 0 tegen 3 sc Heerenveen".
+    De cijfers blijven voor het oog (`aria-hidden`), en de tekst voor een schermlezer staat ertussen, net als in `Match`.
+  - **De kleur van de uitkomst en het gewicht** blijven vanuit sc Heerenveen (`outcomeOf(goalsFor, goalsAgainst)`): groen bij winst, ook als de uitslag "0–3" is.
+    De klassen (`hf-match-win`, `-loss` en `-draw`) veranderen niet.
+  - **Lange namen** breken in de regel op een spatie, zoals in `Match`; het getal blijft in één stuk (`white-space: nowrap`), dus een smalle kaart scrolt niet zijwaarts.
+  - **Niet veranderd:** totalen van doelpunten die geen uitslag zijn, zoals "D doelpunten (voor–tegen)" in Alle tegenstanders en de kolommen Doelpunten voor en Doelpunten tegen, blijven vanuit sc Heerenveen: ze tellen over meer wedstrijden.
+    Ook de importer houdt zijn Engelse regels voor het logboek en de vergelijking van wijzigingen (`describeState`, `check-wikipedia`) zoals ze zijn: ze zijn voor de beheerder, en `describeState` is een opgeslagen waarde die vergeleken wordt.
+- **Waarom:** zo lezen supporters een uitslag in de krant, bij de bond en bij Wikipedia, en de kaart Uitslagen met `Match` doet het al.
+  Een uitslag die een keer wel en een keer niet omgedraaid is, kost de lezer elke keer een denkstap.
+  De kleur blijft vanuit onze club, want de lijsten gaan over onze club.
+- **Alternatieven:** de uitslag vanuit sc Heerenveen laten staan met "thuis" of "uit" erbij (zoals voorheen); alleen de kleur van de uitkomst laten zeggen wie won; de kleur van de thuisclub (dan is een uitzege rood, wat verkeerd leest).
 
 ### De pagina Spelers toont bijzondere doelpunten
 
