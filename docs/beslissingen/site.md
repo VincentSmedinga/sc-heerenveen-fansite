@@ -768,6 +768,7 @@
 - **Alternatieven:** een wedstrijd uit het programma halen zodra de dag voorbij is (de wedstrijd verdwijnt dan zonder uitslag); een uitgestelde wedstrijd als volgende wedstrijd tonen (staat dan weken bovenaan zonder datum).
 - **Later:** zie _De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur_.
   De uitgestelde wedstrijd zonder nieuwe datum, het blok met twee wedstrijden en de statistieken op de status `played` blijven zoals ze waren.
+- **Later:** zie _Een geannuleerde wedstrijd staat in Uitslagen en niet in Programma_ (3 november 2026): het programma is ook niet elke wedstrijd die niet gespeeld is; een geannuleerde wedstrijd staat er niet in.
 
 ## Een wedstrijd is een regel zonder link en zonder clubwapen
 
@@ -1373,6 +1374,7 @@
     Zonder aanvangstijd is hij begonnen als zijn dag (`matchDate`) in Nederlandse tijd voorbij is, ook rond middernacht en bij het wisselen van de zomertijd.
     Bij een weekend ("12–14 februari") is dat de laatste dag van het bereik (`lastDayOf` in `src/match-format.ts`), want `matchDate` is dan de eerste dag.
   - Een gespeelde wedstrijd is altijd begonnen, een uitgestelde wedstrijd zonder nieuwe datum nooit: die blijft in het programma als "Uitgesteld" en is nooit de vorige of de volgende.
+    **Later:** een geannuleerde wedstrijd is altijd begonnen, maar nooit de vorige wedstrijd (zie _Een geannuleerde wedstrijd staat in Uitslagen en niet in Programma_).
   - `lacksResult` kiest de zin: de wedstrijd heeft geen score en de aanvang is twee uur of langer geleden.
     `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in een gedempt rood maar niet vet, en de tijd blijft staan.
     Dat rood is het token `--hf-colour-text-missing`: stap 800 van de roodschaal in licht, rustiger dan het rood van "Uitgesteld" (`--hf-colour-text-accent`), dat de projecteigenaar daar te fel vond.
@@ -2132,3 +2134,22 @@
   Een eigen anker houdt de ankers op een pagina uniek, ook als de beheerder per ongeluk beide invoert.
 - **Alternatieven:** hetzelfde anker `uitslagen-play-offs` voor allebei (twee kaarten op één pagina zouden dan hetzelfde id hebben).
   Eén kaart "Play-offs" voor beide (de kop zou de naam van de competitie niet meer zijn, zoals #658 het besloot).
+
+## Een geannuleerde wedstrijd staat in Uitslagen en niet in Programma
+
+- **Datum:** 3 november 2026
+- **Besluit:** een wedstrijd met de status `cancelled` zegt "Geannuleerd" waar de tijd of de uitslag zou staan, in dezelfde plaats en vorm als "Uitgesteld" in `Match`.
+  Hij staat niet in Programma, is nooit "de volgende wedstrijd" of "de vorige wedstrijd" op de homepage, en staat wel in de lijst met uitslagen van zijn seizoen, in zijn speelronde.
+  - **Hoe:** `hasBegun` in `src/matches.ts` telt een geannuleerde wedstrijd als begonnen, zodat `programmeOf` hem niet meer geeft en `overviewOf` hem bij de uitslagen zet.
+    `previous` slaat hem over.
+    `lacksResult` zegt niets bij hem, dus de regel "Gegevens nog niet beschikbaar" komt er niet.
+  - **De pagina van een tegenstander:** hij staat niet bij de wedstrijden die nog komen (dat is Programma, zie `upcomingOf`) en telt niet mee in de onderlinge cijfers en de laatste vijf, want die tellen alleen `played`.
+    De pagina toont geen lijst van eerdere wedstrijden zonder uitslag, dus daar staat hij ook niet.
+  - **De cijfers:** de statistieken, de vorm, de topscorers en de stand tellen alleen `played`, dus een geannuleerde wedstrijd telt nergens.
+    De stand komt uit de tabel van de pagina en verandert niet.
+  - **Beheer:** de keuzes voor de status hebben "Geannuleerd" (`statusChoices`), de lijst zegt "Geannuleerd", en een invoer met die status wordt bewaard zonder uitslag en zonder toeschouwers.
+    Er komt geen reden bij; beheer kan zelf een `note` toevoegen.
+  - **Toegankelijkheid:** "Geannuleerd" staat als tekst en heeft hetzelfde gewicht en dezelfde kleur als "Uitgesteld" (`.hf-match-cancelled` naast `.hf-match-postponed`).
+    Een schermlezer hoort "Speelronde 27, Geannuleerd, sc Heerenveen tegen Willem II".
+- **Waarom:** een wedstrijd die nooit meer wordt gespeeld, is geen wedstrijd die nog komt en geen uitslag, maar hij hoort in de lijst van zijn seizoen, zodat speelronde 27 tot en met 34 van 2019/20 geen gat is zonder uitleg.
+- **Alternatieven:** de wedstrijd in Programma laten staan met "Geannuleerd" (hij staat daar dan eeuwig, tussen wedstrijden die nog komen); hem uit alle lijsten halen (een gat zonder uitleg); een eigen kaart "Geannuleerd" naast de uitslagen (meer plekken om te onderhouden voor acht wedstrijden).

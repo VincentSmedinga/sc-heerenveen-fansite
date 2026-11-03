@@ -367,7 +367,7 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | `round`                                    | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie                          |
 | `opponent`, `home`, `stadium`              | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)                                |
 | `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                                                       |
-| `status`                                   | `scheduled`, `played` of `postponed`                                                                                                  |
+| `status`                                   | `scheduled`, `played`, `postponed` of `cancelled`                                                                                     |
 | `goals_for`, `goals_against`               | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                                                    |
 | `extra_time`                               | Of een gespeelde wedstrijd van de beker of de play-offs in verlenging ging; anders `false`                                            |
 | `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld                           |
