@@ -1856,9 +1856,9 @@
 - **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
   Een aftrek in de kolom `PA` is geen fout meer, en 2010/11, 2014/15 en 2015/16 zijn geen gat meer door de aftrek.
 - **Later:** zie _Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd_ (3 november 2026): 2011/12 is geen gat meer.
-- **Later:** zie _Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is_ (3 november 2026): de acht wedstrijden van 2019/20 die niet zijn gespeeld, staan nu als geannuleerd in de database en niet als uitgesteld.
   De zin onder **Waarom** over 2011/12 en de zin onder **Nadeel** hierboven gelden niet meer: de wedstrijd Excelsior – AZ is in de rust gestaakt en later alleen in de tweede helft afgemaakt, niet helemaal opnieuw gespeeld.
   `checkResults` is niet veranderd.
+- **Later:** zie _Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is_ (3 november 2026): de acht wedstrijden van 2019/20 die niet zijn gespeeld, staan nu als geannuleerd in de database en niet als uitgesteld.
 
 ## Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`
 
