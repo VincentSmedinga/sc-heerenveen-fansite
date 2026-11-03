@@ -1239,6 +1239,9 @@
   Een aparte tabel voor de play-offs (alle lijsten en cijfers moeten dan twee bronnen lezen).
   De play-offwedstrijden verwijderen als de pagina er niet is (een hernoemde pagina laat dan stil wedstrijden verdwijnen).
   De pagina pas vragen na 1 mei (een regel en een test erbij voor één verzoek per uur).
+- **Later:** zie _De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League_ (3 november 2026): de pagina van de play-offs wordt ook vóór 2020/21 gelezen, onder de kop van de Europa League en als competitie `Play-offs Europa League`.
+  Seizoenen voor 2021/22 geven dus geen fout meer om de kop.
+  De Conference League blijft zoals hier staat.
 
 ## Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht
 
@@ -1832,6 +1835,8 @@
   De stand overslaan voor de oudere seizoenen (dan vervalt de controle op 18 clubs en op onze eigen rij).
 - **Later:** de Europa League is sinds 3 november 2026 wel een competitie in `competitions`, maar alleen met de wedstrijden van 2012/13 die de Engelse Wikipedia heeft; zie _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_.
   De play-offs voor de Europa League op de Nederlandse pagina blijven staan zoals ze waren, tot #672 ze leest.
+- **Later:** zie _De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League_ (3 november 2026): de import leest ze nu, als competitie `Play-offs Europa League`, voor de seizoenen 2010/11 tot en met 2019/20.
+  Voor de seizoenen voor 2020/21 staat er nu wel een titel voor de play-offs.
 - **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
   Een aftrek in de kolom `PA` is geen fout meer, en 2010/11, 2014/15 en 2015/16 zijn geen gat meer door de aftrek.
 
@@ -1884,3 +1889,29 @@
   De datum van een wedstrijd leeg laten (raakt de volgorde en alle lijsten).
   De wedstrijden met de hand invoeren vanaf voetbalstats.nl (geen bron die de import kan lezen).
 - **Later:** zie _Wedstrijdgegevens komen van de Nederlandse Wikipedia, voor het eerste mannenelftal_ (25 oktober 2026): de taal geldt niet meer voor dit ene seizoen.
+
+## De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League
+
+- **Datum:** 3 november 2026
+- **Besluit:** wedstrijden uit de play-offs voor de Europa League (2010/11 tot en met 2019/20) krijgen de competitie `Play-offs Europa League`, en die van de Conference League houden `Play-offs Conference League` (#672).
+  Beide tellen alleen onder "Alle wedstrijden".
+  - **De pagina:** dezelfde als bij de Conference League, `Play-offs Nederlands voetbal <jaar>` met het jaar waarin het seizoen eindigt.
+    De import leest de wedstrijden van sc Heerenveen onder de kop `Play-offs voor de UEFA Europa League`, voor elk seizoen vanaf 2010/11.
+    De kop zegt de competitie: onder `Play-offs voor de UEFA Conference League` is het `Play-offs Conference League`.
+    Een pagina met geen van beide koppen blijft een fout.
+  - **De competitie:** `Play-offs Europa League` in `matches.competition` en `match_changes.competition`, met een migratie (`0035_add_europa_league_playoffs`).
+    De CHECK-constraint voor verlenging (`matches_extra_time_only_in_played_knockout`) laat de nieuwe waarde toe, en een test in `packages/db` laat dat zien.
+    `player_season_stats` houdt zijn twee competities: de tabel van de selectie heeft geen kolommen voor de play-offs.
+  - **De ronde:** de kop boven de wedstrijd, `Eerste ronde` of `Tweede ronde`, met `, wedstrijd 1/2` bij een paar van twee wedstrijden.
+    Op de pagina's van 2013 tot en met 2018 staat in het sjabloon `Wedstrijd 1` en `Wedstrijd 2`, zonder `/2`, en de lezer neemt dan twee wedstrijden aan.
+    Verlenging staat er ook als `(nv)`; dat leest de lezer zoals `n.v.`.
+    De stand na 90 minuten bewaart hij alleen bij een ronde in één wedstrijd, zoals bij de Conference League.
+  - **De jaren:** sc Heerenveen speelde de play-offs in 2013, 2014, 2015, 2017 en 2018, dus in de seizoenen 2012/13, 2013/14, 2014/15, 2016/17 en 2017/18.
+    Een jaar zonder wedstrijd van ons (2011, 2012, 2016, 2019) is geen fout en geen bron.
+    De pagina van 2020 bestaat niet (404), en een ontbrekende pagina is geen mislukking.
+  - **De seizoenen die niet lezen:** wat een seizoen nog niet laat lezen (#457, #670), houdt ook zijn play-offs buiten, want de pagina's van een seizoen horen bij elkaar.
+- **Waarom:** een bezoeker ziet de naam die bij het seizoen hoort, en de bestaande rijen, adressen en teksten veranderen niet.
+  Een seizoen heeft de ene of de andere, dus de sleutel per seizoen, competitie en ronde blijft uniek.
+  De pagina's hebben dezelfde sjablonen, dus de lezer is bijna dezelfde: alleen de kop, de rondes en `(nv)` zijn nieuw.
+- **Alternatieven:** één algemene naam zoals `Play-offs Europees voetbal` (dat hernoemt bestaande rijen en klopt voor geen van beide).
+  De Europa League-play-offs als bekerwedstrijd bewaren (de ronde, de schakelaar en de bijschriften zeggen dan iets wat niet klopt).

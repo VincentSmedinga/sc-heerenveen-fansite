@@ -34,6 +34,7 @@ const knockoutCompetitions: readonly Match['competition'][] = [
   'KNVB Beker',
   'Play-offs Conference League',
   'Europa League',
+  'Play-offs Europa League',
 ]
 
 /** A goal as entered: a row of `match_goals` without its numbers. */

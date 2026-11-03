@@ -43,14 +43,15 @@ const singleDay = /^(\d{1,2}) (\p{L}+)(?: \d{4})?$/u
 
 /**
  * What the link to a Wikipedia page says: the league table, the programme, the cup or the
- * play-offs of the season, such as "Eredivisie 2026/27". The page with the Europa League
- * matches is on the English Wikipedia, and the name says so.
+ * play-offs of the season, such as "Eredivisie 2026/27". The play-offs are for the Europa
+ * League before 2020/21 and for the Conference League from then on. The page with the Europa
+ * League matches is on the English Wikipedia, and the name says so.
  */
 export function creditName(kind: PublicWikipediaPage['kind'], season: string) {
   return {
     cup: `KNVB Beker ${season}`,
     'europa-league': `Europa League ${season} (Engelse Wikipedia)`,
-    playoffs: `Play-offs Conference League ${season}`,
+    playoffs: `Play-offs ${Number(season.slice(0, 4)) < 2020 ? 'Europa' : 'Conference'} League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
   }[kind]

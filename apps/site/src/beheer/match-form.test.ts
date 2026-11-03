@@ -130,6 +130,9 @@ describe('validate', () => {
     expect(validate(filled({ 'uitslag-zij': '-1' }), league).errors).toHaveProperty('uitslag-zij')
     expect(validate(filled({ verlenging: 'ja' }), league).errors).toHaveProperty('verlenging')
     expect(validate(filled({ verlenging: 'ja' }), cup).errors).toBeUndefined()
+    expect(
+      validate(filled({ verlenging: 'ja' }), { ...cup, competition: 'Play-offs Europa League' }).errors,
+    ).toBeUndefined()
     expect(validate(filled({ 'na90-wij': '1', 'na90-zij': '1' }), league).errors).toHaveProperty('na90-wij')
   })
 

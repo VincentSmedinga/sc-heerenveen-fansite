@@ -2690,6 +2690,7 @@
   De competitie in de regel laten staan (die staat dan tientallen keren onder een kop die haar al noemt, ook voor een schermlezer).
 - **Later:** zie _Het lopende seizoen toont zijn uitslagen ook in een kaart per competitie_ (3 november 2026): het lopende seizoen blijft geen kaart, maar krijgt ook een kaart per competitie, met de nieuwste uitslag bovenaan en een regel die de competitie niet noemt.
   Programma blijft één kaart met alle competities.
+- **Later:** zie _De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League_ (3 november 2026): een seizoen van vóór 2020/21 heeft een kaart Play-offs Europa League (anker `uitslagen-play-offs-europa-league`) waar een ander seizoen Play-offs Conference League heeft.
 
 ## Het lopende seizoen toont zijn uitslagen ook in een kaart per competitie
 

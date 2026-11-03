@@ -141,6 +141,17 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
   })
 
+  it('names the play-offs for the Europa League as the play-offs, since a season has the one or the other', () => {
+    const matches = [
+      league,
+      playoffs('Eerste ronde, wedstrijd 1/2', '2013-05-16', 0, 1, { competition: 'Play-offs Europa League' }),
+    ]
+
+    expect(hasPlayedExtraMatch(matches)).toBe(true)
+    expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
+    expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
+  })
+
   it('counts a match of the Europa League that was played, and names it', () => {
     const europa = played('Derde voorronde, wedstrijd 1/2', '2012-08-02', 4, 0, { competition: 'Europa League' })
 

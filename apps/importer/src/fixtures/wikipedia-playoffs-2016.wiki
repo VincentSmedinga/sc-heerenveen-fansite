@@ -1,0 +1,116 @@
+<!--
+  The play-offs of 2016 (the season 2015/16). sc Heerenveen did not play in them.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2016?action=raw, read on 3 November 2026, cut down to the section of the
+  play-offs for the Europa League without the match schedule table, and the heading of the play-offs for promotion and relegation.
+  The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Play-offs voor de UEFA Europa League ==
+De play-offs, die werden gespeeld door de nummers 5 t/m 8 van de [[Eredivisie 2015/16 (mannenvoetbal)|Eredivisie]], hebben in 2016 dezelfde opzet als in 2015. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[http://www.knvb.nl/downloads/bestand/3799/play-offs-europees-ticket-1516-dd-080516 Speelschema Eredivisie play-offs voor Europees ticket 2015/16 (Na 34 ronden)]</ref>
+
+* Eredivisie #1: groepsfase Champions League
+* Eredivisie #2: voorronde Champions League
+* Eredivisie #3/Bekerwinnaar: groepsfase Europa League
+* Eredivisie #4: derde kwalificatieronde Europa League
+* Eredivisie play-offs (#5 t/m #8): derde kwalificatieronde Europa League
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=12 mei 2016
+| time=20:45
+| team1=[[PEC Zwolle]]
+| score=0 – 0
+| team2=[[FC Utrecht]]
+| goals1=
+| goals2=
+| location=[[Zwolle]]
+| stadium=[[IJsseldeltastadion]]
+| attendance=8.125
+| referee=[[Kevin Blom|Blom]]
+| report=[http://nos.nl/artikel/2104681-pec-zwolle-en-fc-utrecht-scoren-en-vermaken-niet.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=15 mei 2016
+| time=14:30
+| team1=[[FC Utrecht]]
+| score=5 – 2
+| team2=[[PEC Zwolle]]
+| goals1=[[Sébastien Haller|Haller]] {{goal|5||73|pen.}}<br />[[Bart Ramselaar|Ramselaar]] {{goal|23}}<br />[[Christian Kum|Kum]] {{goal|28}}<br />[[Giovanni Troupée|Troupée]] {{goal|62}}
+| goals2={{goal|53}} [[Queensy Menig|Menig]]<br />{{rode kaart|2|25|60}} [[Bart van Hintum|Van Hintum]]<br />{{goal|65}} [[Wout Brama|Brama]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=15.126
+| referee=[[Dennis Higler|Higler]]
+| report=[http://nos.nl/artikel/2105172-fc-utrecht-naar-finale-play-offs-om-europees-voetbal.html Verslag]
+}}
+
+==== Wedstrijd B ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=12 mei 2016
+| time=18:30
+| team1=[[FC Groningen]]
+| score=2 – 1
+| team2=[[Heracles Almelo]]
+| goals1=[[Hans Hateboer|Hateboer]] {{goal|11}}<br />[[Rasmus Lindgren|Lindgren]] {{goal|50}}
+| goals2={{goal|45+1}} [[Wout Weghorst|Weghorst]]
+| location=[[Groningen (stad)|Groningen]]
+| stadium=[[Euroborg]]
+| attendance=20.477
+| referee=[[Ed Janssen|Janssen]]
+| report=[http://nos.nl/artikel/2104655-fc-groningen-begint-play-offs-met-kleine-zege.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=15 mei 2016
+| time=12:30
+| team1=[[Heracles Almelo]]
+| score=5 – 1 ([[Verlenging|nv]])
+| team2=[[FC Groningen]]
+| goals1=[[Ramon Zomer|Zomer]] {{goal|83}}<br />[[Paul Gladon|Gladon]] {{goal|90+2}}<br />[[Wout Weghorst|Weghorst]] {{goal|111}}<br />[[Brahim Darri|Darri]] {{goal|115}}<br />[[Joey Pelupessy|Pelupessy]] {{goal|119}}
+| goals2={{goal|63}} [[Albert Rusnák (1994)|Rusnák]]<br />{{rode kaart|0|118}} [[Kasper Larsen|Larsen]]
+| location=[[Almelo]]
+| stadium=[[Polman Stadion]]
+| attendance=10.744
+| referee=[[Pol van Boekel|Van Boekel]]
+| report=[http://nos.nl/artikel/2105154-heracles-na-spectaculaire-verlenging-naar-finale-play-offs.html Verslag]
+}}
+
+=== Tweede ronde ===
+==== Wedstrijd C ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=19 mei 2016
+| time=20:45
+| team1=[[Heracles Almelo]]
+| score=1 – 1
+| team2=[[FC Utrecht]]
+| goals1=[[Thomas Bruns|Bruns]] {{goal|40}}
+| goals2={{goal|51}} [[Rico Strieder|Strieder]]
+| location=[[Almelo]]
+| stadium=[[Polman Stadion]]
+| attendance=11.521
+| referee=[[Pieter Vink|Vink]]
+| report=[http://nos.nl/artikel/2106041-utrecht-zet-voorzichtige-stap-richting-europa.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=22 mei 2016
+| time=14:30
+| team1=[[FC Utrecht]]
+| score=0 – 2
+| team2=[[Heracles Almelo]]
+| goals1=
+| goals2={{goal|68}} [[Thomas Bruns|Bruns]]<br />{{goal|85}} [[Paul Gladon|Gladon]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=18.980
+| referee=[[Björn Kuipers|Kuipers]]
+| report=[http://nos.nl/artikel/2106580-heracles-schrijft-geschiedenis-met-europees-ticket.html Verslag]
+}}
+* [[Heracles Almelo]] plaatst zich voor de 3e voorronde van de [[UEFA Europa League 2016/17|Europa League]].
+
+== Play-offs om promotie/degradatie ==

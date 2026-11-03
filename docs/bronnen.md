@@ -826,7 +826,7 @@ De import leest per seizoen vier pagina's van de Nederlandse Wikipedia, en de br
 - `Eredivisie <seizoen> (mannenvoetbal)`: de stand;
 - `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`: het programma en de uitslagen van de competitie, van sc Heerenveen en van de andere clubs;
 - `KNVB Beker <seizoen> (mannen)`: de bekerwedstrijden;
-- `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League, met het jaar waarin het seizoen eindigt.
+- `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League (vanaf 2020/21) of de Europa League (daarvoor), met het jaar waarin het seizoen eindigt.
   Die pagina komt pas in mei, en de bronvermelding noemt hem alleen als sc Heerenveen meespeelde.
 - `2012–13 UEFA Europa League qualifying (third and play-off round matches)` op de Engelse Wikipedia: de vier Europa League-wedstrijden van 2012/13, die de Nederlandse pagina's alleen met de score hebben.
   Alleen dat seizoen heeft zo'n pagina, en de bronvermelding noemt hem "Engelse Wikipedia".

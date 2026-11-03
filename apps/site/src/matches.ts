@@ -28,8 +28,8 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 const ourClub = 'sc Heerenveen'
 
 /**
- * Whether a match counts for the choice: the league alone, or the league, the cup, the
- * play-offs for the Conference League and the Europa League.
+ * Whether a match counts for the choice: the league alone, or every competition: the league,
+ * the cup, the play-offs (Conference League or Europa League) and the Europa League.
  */
 const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
@@ -66,7 +66,7 @@ export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoi
   const names = [
     'de Eredivisie',
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
-    ...(played('Play-offs Conference League') ? ['de play-offs'] : []),
+    ...(played('Play-offs Conference League') || played('Play-offs Europa League') ? ['de play-offs'] : []),
     ...(played('Europa League') ? ['de Europa League'] : []),
   ]
 

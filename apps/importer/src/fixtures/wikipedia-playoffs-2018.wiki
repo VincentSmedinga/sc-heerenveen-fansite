@@ -1,0 +1,125 @@
+<!--
+  The play-offs of 2018 (the season 2017/18). sc Heerenveen played the first round over two matches; the second round has a line of text under its heading.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2018?action=raw, read on 3 November 2026, cut down to the section of the
+  play-offs for the Europa League without the match schedule table, and the heading of the play-offs for promotion and relegation.
+  The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Play-offs voor de UEFA Europa League ==
+Deze play-offs, die werden gespeeld door de nummers 5 tot en met 8 van de [[Eredivisie 2017/18 (mannenvoetbal)|Eredivisie]], kenden in 2018 een andere opzet dan in 2017. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[https://www.knvb.nl/nieuws/betaald-voetbal/eredivisie/47619/zo-zien-de-virtuele-schemas-voor-de-play-offs-eruit Speelschema Eredivisie play-offs voor Europees ticket 2017/18, Toelichting KNVB]</ref>
+
+* Eredivisie #1: play-off ronde Champions League
+* Eredivisie #2: tweede voorronde Champions League
+* Eredivisie #3: tweede voorronde Europa League
+* Eredivisie play-offs (#5, #6, #7 of #8): tweede voorronde Europa League <sup>1</sup>
+* Bekerwinnaar: derde voorronde Europa League <sup>1</sup>
+
+<sup>1</sup> De clubs op de plekken vier tot en met zeven spelen normaliter in de play-offs om één ticket dat recht geeft tot toegang in de tweede kwalificatieronde van de Europa League. Dat zijn respectievelijk Feyenoord, FC Utrecht, Vitesse en ADO Den Haag. Feyenoord plaatst zich direct voor de derde voorronde van de Europa League, omdat Feyenoord de [[KNVB beker|TOTO KNVB beker]] heeft gewonnen. Daarom krijgt ook de nummer acht (sc Heerenveen) een ticket voor de play-offs.
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=9 mei 2018
+| time=18:30 uur
+| team1=[[ADO Den Haag]]
+| score=2 – 5
+| team2=[[SBV Vitesse|Vitesse]]
+| goals1=[[Abdenasser El Khayati|El Khayati]] {{goal|52|pen.|82}}
+| goals2={{goal|14}} [[Tim Matavž|Matavž]]<br />{{goal|34||37||72}} [[Mason Mount|Mount]]<br />{{goal|44}} [[Bryan Linssen|Linssen]]
+| location=[[Den Haag]]
+| stadium=[[Cars Jeans Stadion]]
+| attendance=11.930
+| referee=[[Danny Makkelie|Makkelie]]
+| report=[https://nos.nl/artikel/2231140-vitesse-op-rozen-na-ruime-uitzege-op-ado.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=12 mei 2018
+| time=18:30 uur
+| team1=[[SBV Vitesse|Vitesse]]
+| score=2 – 1
+| team2=[[ADO Den Haag]]
+| goals1=[[Tim Matavž|Matavž]] {{goal|32}}<br />[[Mason Mount|Mount]] {{goal|53}}
+| goals2={{goal|55}} [[Abdenasser El Khayati|El Khayati]]
+| location=[[Arnhem]]
+| stadium=[[GelreDome]]
+| attendance=13.715
+| referee=[[Kevin Blom|Blom]]
+| report=[https://nos.nl/artikel/2231556-vitesse-naar-finale-play-offs-na-tweede-zege-op-ado.html Verslag]
+}}
+----
+
+==== Wedstrijd B ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=9 mei 2018
+| time=20:45 uur
+| team1=[[sc Heerenveen]]
+| score=4 – 3
+| team2=[[FC Utrecht]]
+| goals1=[[Yuki Kobayashi|Kobayashi]] {{goal|9}}<br />[[Reza Ghoochannejhad|Ghoochannejhad]] {{goal|23}}<br />[[Daniel Høegh|Høegh]] {{goal|48}}<br />[[Denzel Dumfries|Dumfries]] {{goal|86}}
+| goals2={{goal|50||63}} [[Zakaria Labyad|Labyad]]<br />{{rode kaart|2|51|51}} [[Yassin Ayoub|Ayoub]]<br />{{goal|65|e.d.}} [[Dave Bulthuis|Bulthuis]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=17.225
+| referee=[[Ed Janssen|Janssen]]
+| report=[https://nos.nl/artikel/2231158-heerenveen-winnaar-van-spektakelstuk-tegen-utrecht.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=12 mei 2018
+| time=20:45 uur
+| team1=[[FC Utrecht]]
+| score=2 – 1
+| team2=[[sc Heerenveen]]
+| goals1=[[Rico Strieder|Strieder]] {{goal|39}}<br />[[Mark van der Maarel|Van der Maarel]] {{goal|58}}
+| goals2={{goal|78}} [[Marco Rojas|Rojas]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=14.632
+| referee=[[Serdar Gözübüyük|Gözübüyük]]
+| report=[https://nos.nl/artikel/2231572-fc-utrecht-wankelt-tegen-heerenveen-maar-bereikt-finale-play-offs.html Verslag]
+}}
+----
+
+=== Tweede ronde ===
+Bij alle wedstrijden in deze ronde werd er gebruikgemaakt van een video-assistent.
+
+==== Wedstrijd C ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=15 mei 2018
+| time=20:45 uur
+| team1=[[SBV Vitesse|Vitesse]]
+| score=3 – 2
+| team2=[[FC Utrecht]]
+| goals1=[[Mason Mount|Mount]] {{goal|42}}<br />[[Bryan Linssen|Linssen]] {{goal|78}}<br />[[Goeram Kasjia|Kasjia]] {{goal|90+1}}
+| goals2={{goal|62}} [[Ramon Leeuwin|Leeuwin]]<br />{{goal|86}} [[Zakaria Labyad|Labyad]]
+| location=[[Arnhem]]
+| stadium=[[GelreDome]]
+| attendance=14.236
+| referee=[[Jochem Kamphuis|Kamphuis]]
+| videoreferee=[[Kevin Blom|Blom]]
+| report=[https://nos.nl/artikel/2232011-gelukkig-vitesse-in-blessuretijd-langs-fc-utrecht.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=19 mei 2018
+| time=20:45 uur
+| team1=[[FC Utrecht]]
+| score=1 – 2
+| team2=[[SBV Vitesse|Vitesse]]
+| goals1=[[Mark van der Maarel|Van der Maarel]] {{goal|46}}
+| goals2={{goal|18|e.d.}} [[Ramon Leeuwin|Leeuwin]]<br />{{goal|38}} [[Matt Miazga|Miazga]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=21.353
+| referee=[[Bas Nijhuis|Nijhuis]]
+| videoreferee=[[Danny Makkelie|Makkelie]]
+| report=[https://nos.nl/artikel/2232681-vitesse-wint-play-offs-en-gaat-europa-in.html Verslag]
+}}
+* [[SBV Vitesse|Vitesse]] plaatst zich voor de 2e voorronde van de [[UEFA Europa League 2018/19|Europa League]].
+----
+
+== Play-offs om promotie/degradatie ==

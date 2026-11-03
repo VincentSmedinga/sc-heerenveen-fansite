@@ -2117,3 +2117,18 @@
 - **Waarom:** in Programma bepaalt de datum de volgorde, dus die staat bovenaan; onder de kop van een competitie leest de ronde als het begin van de regel.
   De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.
 - **Alternatieven:** overal dezelfde volgorde (de competitie staat dan tientallen keren onder een kop die haar al noemt, zoals bij #658 is besloten).
+
+## De site toont de play-offs voor de Europa League zoals die voor de Conference League
+
+- **Datum:** 3 november 2026
+- **Besluit:** `Play-offs Europa League` staat overal waar `Play-offs Conference League` staat (#672).
+  - **De kaart:** een afgelopen seizoen van vóór 2020/21 met zulke wedstrijden krijgt een kaart met de kop `Play-offs Europa League` en het anker `uitslagen-play-offs-europa-league`.
+    De kaart staat na die van de beker, zoals die van de Conference League, en de balk "Op deze pagina:" heeft er een link naar.
+  - **De cijfers:** de wedstrijden tellen alleen onder "Alle wedstrijden", niet bij "Eredivisie".
+    De schakelaar staat er ook als de enige extra wedstrijd een play-offwedstrijd is, en de bijschriften zeggen "de play-offs" voor allebei.
+  - **De bronvermelding:** de pagina met de soort `playoffs` heet `Play-offs Europa League <seizoen>` voor een seizoen van vóór 2020/21 en `Play-offs Conference League <seizoen>` daarna.
+  - **Het beheer:** de competitie staat in het formulier van een wedstrijd, en verlenging is er toegestaan, zoals bij de beker.
+- **Waarom:** een bezoeker ziet de naam die bij het seizoen hoort, en een seizoen heeft de ene of de andere, dus er komt geen tweede kaart met dezelfde betekenis.
+  Een eigen anker houdt de ankers op een pagina uniek, ook als de beheerder per ongeluk beide invoert.
+- **Alternatieven:** hetzelfde anker `uitslagen-play-offs` voor allebei (twee kaarten op één pagina zouden dan hetzelfde id hebben).
+  Eén kaart "Play-offs" voor beide (de kop zou de naam van de competitie niet meer zijn, zoals #658 het besloot).

@@ -51,6 +51,12 @@ const playoffPages = Object.fromEntries(
     readFileSync(new URL(`./fixtures/wikipedia-playoffs-${year}.wiki`, import.meta.url), 'utf8'),
   ]),
 ) as Record<number, string>
+const europaPlayoffPages = Object.fromEntries(
+  [2013, 2015, 2016, 2018].map((year) => [
+    year,
+    readFileSync(new URL(`./fixtures/wikipedia-playoffs-${year}.wiki`, import.meta.url), 'utf8'),
+  ]),
+) as Record<number, string>
 const cupPages = Object.fromEntries(
   ['2021-22', '2022-23', '2023-24', '2024-25'].map((season) => [
     season,
@@ -1801,7 +1807,8 @@ describe('the play-offs for the Conference League', () => {
 
     expect(readPlayoffs(page ?? '')).toEqual({
       kind: 'error',
-      message: "the play-offs page has no section 'Play-offs voor de UEFA Conference League'",
+      message:
+        "the play-offs page has no section 'Play-offs voor de UEFA Conference League' or 'Play-offs voor de UEFA Europa League'",
     })
   })
 
@@ -1823,6 +1830,101 @@ describe('the play-offs for the Conference League', () => {
     )
 
     expect(JSON.stringify(readPlayoffs(page ?? ''))).toContain('has a date we do not know')
+  })
+})
+
+describe('the play-offs for the Europa League', () => {
+  const matchesOf = (year: number) => {
+    const read = readPlayoffs(europaPlayoffPages[year] ?? '')
+
+    if (read.kind === 'error') {
+      throw new Error(read.message)
+    }
+
+    return read.matches
+  }
+  const summary = (year: number) =>
+    matchesOf(year).map((match) => [
+      match.competition,
+      match.round,
+      match.matchDate,
+      match.home,
+      match.opponent,
+      match.goalsFor,
+      match.goalsAgainst,
+      match.extraTime,
+    ])
+
+  it('reads the first round of 2013 as a pair of matches, with the goals, the stadium and the crowd', () => {
+    expect(summary(2013)).toEqual([
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 1/2', '2013-05-16', true, 'FC Utrecht', 0, 1, false],
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 2/2', '2013-05-19', false, 'FC Utrecht', 1, 2, false],
+    ])
+    expect(matchesOf(2013)[0]).toMatchObject({
+      attendance: 13500,
+      referee: 'Kevin Blom',
+      stadium: 'Abe Lenstra Stadion',
+    })
+    expect(matchesOf(2013)[0]?.goals).toHaveLength(1)
+  })
+
+  it('reads both rounds of 2015, with extra time written as `(nv)`, and leaves the tie of the others out', () => {
+    expect(summary(2015)).toEqual([
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 1/2', '2015-05-21', true, 'Feyenoord', 1, 0, false],
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 2/2', '2015-05-24', false, 'Feyenoord', 2, 2, true],
+      ['Play-offs Europa League', 'Tweede ronde, wedstrijd 1/2', '2015-05-28', true, 'Vitesse', 2, 2, false],
+      ['Play-offs Europa League', 'Tweede ronde, wedstrijd 2/2', '2015-05-31', false, 'Vitesse', 2, 5, false],
+    ])
+  })
+
+  it('does not know the score after 90 minutes of the second match of a pair, as for the Conference League', () => {
+    expect(matchesOf(2015)[1]).toMatchObject({ afterNinetyAgainst: null, afterNinetyFor: null })
+  })
+
+  it('reads 2018, where a line of text stands under the heading of the second round', () => {
+    expect(summary(2018)).toEqual([
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 1/2', '2018-05-09', true, 'FC Utrecht', 4, 3, false],
+      ['Play-offs Europa League', 'Eerste ronde, wedstrijd 2/2', '2018-05-12', false, 'FC Utrecht', 1, 2, false],
+    ])
+  })
+
+  it('reads a year without a match of sc Heerenveen as a page without a fault', () => {
+    expect(readPlayoffs(europaPlayoffPages[2016] ?? '')).toEqual({
+      hasTemplates: true,
+      kind: 'read',
+      lastPlayedOn: null,
+      matches: [],
+    })
+  })
+
+  it('reads a round of one match as the round alone', () => {
+    const page = europaPlayoffPages[2013]?.replace(/^\| round=Wedstrijd [12]\n/gmu, '')
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({
+      matches: [{ round: 'Eerste ronde' }, { round: 'Eerste ronde' }],
+    })
+  })
+
+  it('reads extra time and a shoot-out in the second match of a pair, without a score after 90 minutes', () => {
+    const page = europaPlayoffPages[2013]
+      ?.replace(
+        '| score=2 – 1\n| team2=[[sc Heerenveen]]',
+        '| score=1 – 1 (nv)\n| penaltyscore=3 – 4\n| team2=[[sc Heerenveen]]',
+      )
+      .replace(/^\| goals[12]=.*$/gmu, '| goals1=')
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({
+      matches: [
+        { extraTime: false },
+        { extraTime: true, goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: 3, penaltiesFor: 4 },
+      ],
+    })
+  })
+
+  it('is an error when the round above the match is not one we know', () => {
+    const page = europaPlayoffPages[2013]?.replace('=== Eerste ronde ===', '=== Voorronde ===')
+
+    expect(JSON.stringify(readPlayoffs(page ?? ''))).toContain('has no usable round heading')
   })
 })
 
@@ -1885,14 +1987,16 @@ describe('the pages of the older seasons', () => {
   it('tries the title with the addition first and the one without it second', () => {
     expect(pageCandidates('2013/14')).toEqual({
       cup: ['KNVB Beker 2013/14 (mannen)'],
-      playoffs: [],
+      playoffs: ['Play-offs Nederlands voetbal 2014'],
       programme: ['Eredivisie 2013/14 (mannenvoetbal)/Wedstrijden', 'Eredivisie 2013/14/Wedstrijden'],
       standings: ['Eredivisie 2013/14 (mannenvoetbal)', 'Eredivisie 2013/14'],
     })
   })
 
-  it('reads the page of the play-offs from 2020/21 on, the first season with play-offs for the Conference League', () => {
-    expect(pageCandidates('2019/20').playoffs).toEqual([])
+  it('reads the page of the play-offs from 2010/11 on, with the Europa League up to 2019/20', () => {
+    expect(pageCandidates('2009/10').playoffs).toEqual([])
+    expect(pageCandidates('2010/11').playoffs).toEqual(['Play-offs Nederlands voetbal 2011'])
+    expect(pageCandidates('2019/20').playoffs).toEqual(['Play-offs Nederlands voetbal 2020'])
     expect(pageCandidates('2020/21').playoffs).toEqual(['Play-offs Nederlands voetbal 2021'])
   })
 

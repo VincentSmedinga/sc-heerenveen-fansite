@@ -2770,6 +2770,20 @@ describe('the play-offs for the Conference League', () => {
     expect(await health()).toMatchObject({ failuresInARow: 0 })
   })
 
+  it('keeps the play-off match for the Europa League it has when the page is gone, like the Conference League', async () => {
+    const { pages, server } = await serve({ playoffs: fixture('wikipedia-playoffs-2013.wiki') })
+
+    await importAt(server, first)
+    Object.assign(pages, { playoffs: null })
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+    const kept = await database.db.select().from(matches).where(eq(matches.competition, 'Play-offs Europa League'))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 0 } })
+    expect(kept.map((match) => match.round)).toEqual(['Eerste ronde, wedstrijd 1/2', 'Eerste ronde, wedstrijd 2/2'])
+    expect(await playoffPages()).toHaveLength(1)
+  })
+
   it('removes the play-off match and the credit when the page has not had sc Heerenveen for seven days', async () => {
     const { pages, server } = await serve({ playoffs })
 
