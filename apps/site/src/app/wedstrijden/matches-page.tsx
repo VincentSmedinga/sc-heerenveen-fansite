@@ -57,11 +57,10 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * The page of a season: `/wedstrijden` for the current season and `/wedstrijden/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. A season that is over has no Programma, shows its results from the first match to
- * the last in a card for each competition (Uitslagen Eredivisie, Uitslagen KNVB Beker and so
- * on, the link to the course of the season in the first), and calls its table Eindstand. Under
- * the table and the results is a link to the card with figures that belongs to it on the page
- * Statistieken, of the same season. A season that has no matches in the database is the page
- * "niet gevonden".
+ * the last in a card for each competition (Eredivisie, KNVB Beker and so on, the link to the
+ * course of the season in the first), and calls its table Eindstand. Under the table and the
+ * results is a link to the card with figures that belongs to it on the page Statistieken, of
+ * the same season. A season that has no matches in the database is the page "niet gevonden".
  *
  * The card with the table of the current season has a switch between the whole season and the
  * latest five matches of each club, `?stand=laatste-5` (see StandingsSwitch). It is there only

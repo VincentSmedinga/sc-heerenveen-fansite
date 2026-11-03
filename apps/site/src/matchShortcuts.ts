@@ -26,9 +26,9 @@ export const standingsCardOf = (current: boolean) =>
 type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {
-  Eredivisie: { id: 'uitslagen', name: 'Uitslagen Eredivisie' },
-  'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'Uitslagen KNVB Beker' },
-  'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Uitslagen play-offs Conference League' },
+  Eredivisie: { id: 'uitslagen', name: 'Eredivisie' },
+  'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'KNVB Beker' },
+  'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Play-offs Conference League' },
 }
 
 /**

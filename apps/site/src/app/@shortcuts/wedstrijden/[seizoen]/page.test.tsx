@@ -41,8 +41,8 @@ describe('the bar of the page of an earlier season', () => {
     expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#eindstand', '#hoe-vaak-welke-uitslag'])
     expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
-    expect(html).toContain('>Uitslagen Eredivisie</a>')
-    expect(html).toContain('>Uitslagen KNVB Beker</a>')
+    expect(html).toContain('>Eredivisie</a>')
+    expect(html).toContain('>KNVB Beker</a>')
   })
 
   it('has the one link Uitslagen for a season without matches', async () => {

@@ -56,7 +56,7 @@ const meta = preview.meta({
           'Staat "Gegevens nog niet beschikbaar" er ook, dan komt de regel daaronder.',
           'Zonder `note` verandert er niets.',
           '',
-          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "Uitslagen KNVB Beker", laat dan `competition` weg: bovenaan staat alleen de ronde.',
+          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "KNVB Beker", laat dan `competition` weg: bovenaan staat alleen de ronde.',
           '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
@@ -708,7 +708,7 @@ const renderWithoutCompetition = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="uitslagen-beker-kop">
       <Heading id="uitslagen-beker-kop" level={2}>
-        Uitslagen KNVB Beker
+        KNVB Beker
       </Heading>
       <List role="list">
         <List.Item>

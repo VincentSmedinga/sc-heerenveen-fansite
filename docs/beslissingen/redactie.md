@@ -2669,11 +2669,13 @@
 ## Een afgelopen seizoen toont zijn uitslagen in een kaart per competitie
 
 - **Datum:** 2 november 2026
-- **Besluit:** op de pagina van een afgelopen seizoen is de kaart Uitslagen verdeeld in een kaart per competitie met wedstrijden: Uitslagen Eredivisie, Uitslagen KNVB Beker en Uitslagen play-offs Conference League, in die volgorde (#658).
+- **Besluit:** op de pagina van een afgelopen seizoen is de kaart Uitslagen verdeeld in een kaart per competitie met wedstrijden: Eredivisie, KNVB Beker en Play-offs Conference League, in die volgorde (#658).
+  De kop is de naam van de competitie, zonder het woord Uitslagen.
+  De projecteigenaar koos dit op 3 november 2026; de specificatie had "Uitslagen Eredivisie".
   Binnen een kaart blijft de volgorde van oud naar nieuw, de regel noemt de competitie niet meer en elke kaart heeft zijn eigen legenda.
   De balk "Op deze pagina:" heeft een link per kaart.
   Het lopende seizoen blijft één kaart, nieuwste eerst, met de competitie in de regel.
-  - **De koppen en de ankers:** `uitslagen` voor de Eredivisie, zodat een oude link blijft werken, `uitslagen-knvb-beker` en `uitslagen-play-offs`.
+  - **De koppen en de ankers:** de ankers houden het woord uitslagen, ook al staat het niet in de kop: `uitslagen` voor de Eredivisie, zodat een oude link blijft werken, `uitslagen-knvb-beker` en `uitslagen-play-offs`.
     Een competitie zonder wedstrijden heeft geen kaart; een afgelopen seizoen zonder wedstrijden houdt één kaart "Uitslagen" (anker `uitslagen`) met zijn zin.
   - **De link "Het verloop van het seizoen"** staat in de kaart Eredivisie, want de kaart met cijfers telt die competitie.
   - **In de code:** `resultsPerCompetition` in `src/matches.ts` verdeelt de uitslagen, `resultsCardOf` en `resultsCardsOf` in `src/matchShortcuts.ts` geven de naam en het anker, en de pagina en de balk lezen ze allebei daar.

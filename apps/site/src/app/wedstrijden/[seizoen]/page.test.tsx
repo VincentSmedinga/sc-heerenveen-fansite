@@ -161,9 +161,9 @@ describe('the cards with results of an earlier season, one for each competition'
       'hoe-vaak-welke-uitslag',
     ])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)?.map((heading) => heading.replace(/<[^>]+>/g, ''))).toEqual([
-      'Uitslagen Eredivisie',
-      'Uitslagen KNVB Beker',
-      'Uitslagen play-offs Conference League',
+      'Eredivisie',
+      'KNVB Beker',
+      'Play-offs Conference League',
       'Eindstand',
       'Hoe vaak welke uitslag',
     ])

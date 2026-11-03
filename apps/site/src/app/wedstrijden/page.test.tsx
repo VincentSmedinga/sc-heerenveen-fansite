@@ -246,7 +246,7 @@ describe('the page /wedstrijden', () => {
     const results = section(html, 'uitslagen')
 
     expect(html).not.toContain('uitslagen-knvb-beker')
-    expect(html).not.toContain('Uitslagen Eredivisie')
+    expect(html).not.toContain('>Eredivisie</a>')
     expect(results).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde')
     expect(results).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 9')
     expect(results).toContain('Het verloop van het seizoen')

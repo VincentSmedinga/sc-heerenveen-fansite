@@ -92,14 +92,14 @@ describe('standingsCardOf', () => {
 
 describe('resultsCardOf', () => {
   it('keeps the anchor uitslagen for the league, so an old link still lands on its card', () => {
-    expect(resultsCardOf('Eredivisie')).toEqual({ id: 'uitslagen', name: 'Uitslagen Eredivisie' })
+    expect(resultsCardOf('Eredivisie')).toEqual({ id: 'uitslagen', name: 'Eredivisie' })
   })
 
   it('names the cup and the play-offs, each with an anchor of its own', () => {
-    expect(resultsCardOf('KNVB Beker')).toEqual({ id: 'uitslagen-knvb-beker', name: 'Uitslagen KNVB Beker' })
+    expect(resultsCardOf('KNVB Beker')).toEqual({ id: 'uitslagen-knvb-beker', name: 'KNVB Beker' })
     expect(resultsCardOf('Play-offs Conference League')).toEqual({
       id: 'uitslagen-play-offs',
-      name: 'Uitslagen play-offs Conference League',
+      name: 'Play-offs Conference League',
     })
   })
 })
@@ -126,9 +126,9 @@ describe('matchShortcutsOf with the cards with results of a season that is over'
 
   it('has a link for each card with results, with the name of its heading, in the place of Uitslagen', () => {
     expect(matchShortcutsOf(false, 0, all)).toEqual([
-      { href: '#uitslagen', label: 'Uitslagen Eredivisie' },
-      { href: '#uitslagen-knvb-beker', label: 'Uitslagen KNVB Beker' },
-      { href: '#uitslagen-play-offs', label: 'Uitslagen play-offs Conference League' },
+      { href: '#uitslagen', label: 'Eredivisie' },
+      { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
+      { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
       { href: '#eindstand', label: 'Eindstand' },
       { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
     ])
