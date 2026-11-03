@@ -298,6 +298,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Zonder gespeelde wedstrijd staat er "We hebben nog geen uitslagen van dit seizoen." en geen diagram.
   De kaart heeft de knop voor een afbeelding en de bronvermelding van de pagina; een eerder seizoen zet zijn seizoen op de afbeelding.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
+  Heeft een club een puntenaftrek, dan staat onder de tabel een regel als "FC Twente: 6 punten aftrek."; de punten in de tabel zijn die na de aftrek, en "Laatste 5" heeft de regel niet.
   Een eerder seizoen noemt de kaart en het bijschrift "Eindstand", met het anker `eindstand`.
   De balk verdwijnt op een smalle plek.
   Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"`, in hetzelfde rood als "Gegevens nog niet beschikbaar" (`hf-text-missing`) en boven de link.
