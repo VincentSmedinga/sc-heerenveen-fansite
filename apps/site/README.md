@@ -536,7 +536,7 @@ Ze heeft drie delen:
 Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
 
 De pagina's tellen de wedstrijden van alle seizoenen, dus ze hebben geen seizoenskiezer.
-Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze tussen alle wedstrijden en de Eredivisie_), die er alleen staat als er een gespeelde bekerwedstrijd of play-offwedstrijd is.
+Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze tussen alle wedstrijden en de Eredivisie_), die er alleen staat als er een gespeelde of komende bekerwedstrijd of een gespeelde play-offwedstrijd is.
 Een club die we alleen in de beker of de play-offs troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
 De keuze zit in elke link van de lijst.
 
