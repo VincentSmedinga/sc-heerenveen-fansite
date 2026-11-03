@@ -1238,10 +1238,10 @@
   Een 404 als mislukking tellen (de mail van #533 komt dan bij elk lopend seizoen).
   Een aparte tabel voor de play-offs (alle lijsten en cijfers moeten dan twee bronnen lezen).
   De play-offwedstrijden verwijderen als de pagina er niet is (een hernoemde pagina laat dan stil wedstrijden verdwijnen).
+  De pagina pas vragen na 1 mei (een regel en een test erbij voor één verzoek per uur).
 - **Later:** zie _De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League_ (3 november 2026): de pagina van de play-offs wordt ook vóór 2020/21 gelezen, onder de kop van de Europa League en als competitie `Play-offs Europa League`.
   Seizoenen voor 2021/22 geven dus geen fout meer om de kop.
   De Conference League blijft zoals hier staat.
-  De pagina pas vragen na 1 mei (een regel en een test erbij voor één verzoek per uur).
 
 ## Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht
 
