@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
 import { getClubPage, getSourcePages } from '#src/opponents'
-import { beker, matchSeasons, sourcePages, testclub } from '#src/test-opponents'
+import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
 import ClubOpponentPage, { generateMetadata } from './page'
@@ -35,7 +35,7 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getClubPage).mockReset()
   vi.mocked(getClubPage).mockImplementation((slug) =>
-    Promise.resolve(slug === 'testclub' ? testclub : slug === 'beker-united' ? beker : undefined),
+    Promise.resolve({ 'beker-united': beker, 'komend-fc': komend, 'nieuw-promovendus': promovendus, testclub }[slug]),
   )
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
@@ -431,5 +431,123 @@ describe('the page of a club', () => {
     expect(await generateMetadata({ params: Promise.resolve({ club: 'testclub' }) })).toMatchObject({
       robots: { index: false },
     })
+  })
+})
+
+describe('the matches that are still to come on the page of a club', () => {
+  /** The card under the heading Komende wedstrijden, up to the next heading. */
+  const upcomingPart = (html: string) => /<h3[^>]*>Komende wedstrijden<\/h3>(.*?)<h3/s.exec(html)?.[1] ?? ''
+
+  /** The lines of the list, as a screen reader hears them. */
+  const linesOf = (part: string) => [...part.matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => plain(line ?? ''))
+
+  it('lists them under Komende wedstrijden, the next one first, as Match with the competition in the line', async () => {
+    const html = await render('komend-fc')
+    const lines = linesOf(upcomingPart(html))
+
+    expect(lines).toHaveLength(3)
+    // Called off: the day is not known, so the line says so instead of a time.
+    expect(lines[0]).toContain('Uitgesteld')
+    expect(lines[0]).toContain('Eredivisie · Speelronde 11')
+    expect(lines[1]).toMatch(/wo 18 nov 20:45 · Abe Lenstra Stadion.*Komend FC.*KNVB Beker · Achtste finale/)
+    expect(lines[2]).toMatch(/za 5 dec 20:30 · Komend Stadion.*Komend FC.*Eredivisie · Speelronde 15/)
+    expect(html).toContain('<time dateTime="2026-12-05T19:30:00.000Z"')
+  })
+
+  it('has the lines of Match without Thuis, Uit, a season or a score', async () => {
+    const part = upcomingPart(await render('komend-fc'))
+
+    expect(plain(part)).not.toMatch(/Thuis|Uit /)
+    expect(plain(part)).not.toContain('2026/27')
+    expect(part).not.toContain('hf-match-goals')
+  })
+
+  it('has the subheadings Komende wedstrijden and Gespeelde wedstrijden as h3 under the h2, the row after the second', async () => {
+    const html = await render('komend-fc')
+    const headings = [...html.matchAll(/<h([23])[^>]*>(?:<[^>]*>)*([^<]*)/g)].map(([, level, text]) => [level, text])
+
+    expect(headings).toEqual([
+      ['2', 'Wedstrijden'],
+      ['3', 'Komende wedstrijden'],
+      ['3', 'Gespeelde wedstrijden'],
+      ['2', 'Onze uitslagen tegen Komend FC'],
+    ])
+    expect(html.indexOf('Gespeelde wedstrijden')).toBeLessThan(html.indexOf('hf-short-match'))
+  })
+
+  it('has one list for each, a real list', async () => {
+    const html = await render('komend-fc')
+
+    expect(upcomingPart(html)).toMatch(/^\s*<ul[^>]*role="list"/)
+    expect(upcomingPart(html)).toMatch(/<\/ul>\s*$/)
+  })
+
+  it('shows one match that is to come, for a club with a single one', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...komend,
+      matches: komend.matches.slice(0, 1).concat(komend.matches[3]!),
+    })
+
+    expect(linesOf(upcomingPart(await render('komend-fc')))).toHaveLength(1)
+  })
+
+  it('leaves out a cup tie with ?competitie=eredivisie, like the played matches', async () => {
+    const lines = linesOf(upcomingPart(await render('komend-fc', { competitie: 'eredivisie' })))
+
+    expect(lines).toHaveLength(2)
+    expect(lines.join(' ')).not.toContain('KNVB Beker')
+  })
+
+  it('has no subheadings and no sentence for a club with nothing to come', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('Komende wedstrijden')
+    expect(html).not.toContain('Gespeelde wedstrijden')
+    expect(html).not.toMatch(/<h3/)
+  })
+
+  it('does not count a match that has begun without a result as to come, but keeps one that is called off', async () => {
+    vi.setSystemTime(new Date('2026-12-05T19:35:00Z'))
+
+    const lines = linesOf(upcomingPart(await render('komend-fc')))
+
+    // The cup tie and the match of 5 December have begun; only the postponed one is left.
+    expect(lines).toHaveLength(1)
+    expect(lines[0]).toContain('Uitgesteld')
+  })
+
+  it('shows the switch for the competition when only the matches to come are in the cup', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({ ...komend, matches: komend.matches.slice(1, 2) })
+
+    expect(await render('komend-fc')).toContain('Alle wedstrijden')
+  })
+
+  it('has the card, the sentence under Gespeelde wedstrijden and only the credit for a club we have not played', async () => {
+    const html = await render('nieuw-promovendus')
+
+    expect(html).toContain('Komende wedstrijden')
+    expect(html).toMatch(
+      /<h3[^>]*>Gespeelde wedstrijden<\/h3>\s*<p[^>]*>We hebben nog niet tegen deze club gespeeld\.<\/p>/,
+    )
+    expect(html).not.toContain('id="onze-uitslagen"')
+    expect(html).not.toContain('id="stadion"')
+    expect(html).toContain('aria-label="De bron"')
+    expect(html).toContain('Eredivisie 2026/27')
+  })
+
+  it('says that we have not played the club in the Eredivisie under Gespeelde wedstrijden with that choice', async () => {
+    const html = await render('nieuw-promovendus', { competitie: 'eredivisie' })
+
+    expect(html).toContain('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')
+  })
+
+  it('credits the seasons of the matches to come as well', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({ ...komend, matches: komend.matches.slice(0, 1) })
+
+    expect(await render('komend-fc')).toContain('Eredivisie 2026/27')
+  })
+
+  it('is unchanged for a club without matches to come: no Komende wedstrijden for a club we only met in the cup', async () => {
+    expect(await render('beker-united')).not.toContain('Komende wedstrijden')
   })
 })

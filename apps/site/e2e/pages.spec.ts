@@ -76,6 +76,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken/tegenstanders/voorbeeld-united', status: 200 },
   { path: '/statistieken/tegenstanders/fc-maquette', status: 200 },
   { path: '/statistieken/tegenstanders/fc-maquette?competitie=eredivisie', status: 200 },
+  // Clubs with matches still to come and none played: Nepstad Rangers (a weekend, no time yet),
+  // Demo Boys (called off) and SV Proefdorp (a cup tie, so also with the choice Eredivisie).
+  { path: '/statistieken/tegenstanders/nepstad-rangers', status: 200 },
+  { path: '/statistieken/tegenstanders/demo-boys', status: 200 },
+  { path: '/statistieken/tegenstanders/sv-proefdorp', status: 200 },
+  { path: '/statistieken/tegenstanders/sv-proefdorp?competitie=eredivisie', status: 200 },
   { path: '/statistieken/tegenstanders/testdorp-fc?competitie=onzin', status: 404 },
   { path: '/statistieken/tegenstanders/bestaat-niet', status: 404 },
   { path: '/statistieken/tegenstanders/testdorp-fc/extra', status: 404 },

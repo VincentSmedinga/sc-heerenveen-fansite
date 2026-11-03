@@ -1,8 +1,18 @@
-import type { PublicClubMatch } from '@fansite/db/queries'
+import type { PublicClubMatch, PublicMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { earlierNames, lastResultsOf, meetingsOf, seasonsOf, stadiumsOf, summaryOf, tallyOf } from './opponents'
+import { overviewOf } from './matches'
+import {
+  earlierNames,
+  lastResultsOf,
+  meetingsOf,
+  seasonsOf,
+  stadiumsOf,
+  summaryOf,
+  tallyOf,
+  upcomingOf,
+} from './opponents'
 
 let id = 0
 
@@ -290,5 +300,85 @@ describe('stadiumsOf', () => {
   it('gives an empty list for a club we never visited in the league', () => {
     expect(stadiumsOf([])).toEqual([])
     expect(stadiumsOf(matches.filter((item) => item.competition === 'KNVB Beker'))).toEqual([])
+  })
+})
+
+describe('upcomingOf', () => {
+  // Between the played match of 24 October and the two that are still to come.
+  const now = new Date('2026-10-30T13:40:00Z')
+  const scheduled = (round: string, more: Partial<PublicClubMatch> = {}) =>
+    match(null, null, {
+      kickoffAt: new Date('2026-11-07T19:30:00Z'),
+      matchDate: '2026-11-07',
+      round,
+      status: 'scheduled',
+      ...more,
+    })
+  const rounds = (matches: readonly { round: string }[]) => matches.map((item) => item.round)
+
+  it('gives the matches that have not begun, the next one first, whatever order the query gave', () => {
+    const matches = [
+      scheduled('Later', { kickoffAt: new Date('2027-02-14T15:30:00Z'), matchDate: '2027-02-14' }),
+      scheduled('Eerst', { kickoffAt: new Date('2026-11-07T19:30:00Z') }),
+      match(2, 0, { matchDate: '2026-10-24', round: 'Gespeeld' }),
+    ]
+
+    expect(rounds(upcomingOf(matches, 'all', now))).toEqual(['Eerst', 'Later'])
+  })
+
+  it('keeps a postponed match, and leaves out one that has begun without a result', () => {
+    const matches = [
+      scheduled('Uitgesteld', { matchDate: '2026-11-07', status: 'postponed' }),
+      scheduled('Begonnen', { kickoffAt: new Date('2026-10-30T12:30:00Z'), matchDate: '2026-10-30' }),
+      scheduled('Gepland', { kickoffAt: new Date('2026-12-05T19:30:00Z'), matchDate: '2026-12-05' }),
+    ]
+
+    expect(rounds(upcomingOf(matches.toReversed(), 'all', now)).toSorted()).toEqual(['Gepland', 'Uitgesteld'])
+  })
+
+  it('leaves out the cup with the choice league, and keeps it with all', () => {
+    const matches = [scheduled('Beker', { competition: 'KNVB Beker' }), scheduled('Competitie')]
+
+    expect(rounds(upcomingOf(matches, 'league', now))).toEqual(['Competitie'])
+    expect(rounds(upcomingOf(matches, 'all', now)).toSorted()).toEqual(['Beker', 'Competitie'])
+  })
+
+  it('gives nothing for a club with only played matches, and does not change the list it is given', () => {
+    const matches = [match(1, 0), match(0, 0)]
+    const copy = [...matches]
+
+    expect(upcomingOf(matches, 'all', now)).toEqual([])
+    expect(matches).toEqual(copy)
+  })
+
+  it('agrees with Programma on what is to come and in which order, for the same matches', () => {
+    // The query gives a season oldest first and a club newest first; the matches are the same.
+    const season = [
+      match(1, 0, { matchDate: '2026-10-24', round: 'Gespeeld', status: 'played' }),
+      scheduled('Begonnen', { kickoffAt: new Date('2026-10-30T12:30:00Z'), matchDate: '2026-10-30' }),
+      scheduled('Weekend', { dateText: 'weekend 12–14 februari', kickoffAt: null, matchDate: '2027-02-12' }),
+      scheduled('Uitgesteld', { matchDate: '2026-11-21', status: 'postponed' }),
+      scheduled('Avond', { kickoffAt: new Date('2026-11-07T19:30:00Z') }),
+      scheduled('Middag', { kickoffAt: new Date('2026-11-07T14:30:00Z') }),
+    ].toSorted(
+      (a, b) =>
+        a.matchDate.localeCompare(b.matchDate) ||
+        (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0) ||
+        a.id - b.id,
+    )
+    const seasonMatches = season.map((item) => ({
+      afterNinetyAgainst: null,
+      afterNinetyFor: null,
+      attendance: null,
+      goals: [],
+      note: null,
+      referee: null,
+      ...item,
+    })) satisfies PublicMatch[]
+
+    expect(rounds(upcomingOf(season.toReversed(), 'all', now))).toEqual(
+      rounds(overviewOf(seasonMatches, now).programme),
+    )
+    expect(rounds(upcomingOf(season.toReversed(), 'all', now))).toEqual(['Middag', 'Avond', 'Uitgesteld', 'Weekend'])
   })
 })

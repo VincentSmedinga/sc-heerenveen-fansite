@@ -2,7 +2,8 @@ import { expect, type Page, test } from '@playwright/test'
 
 // The page Tegenstanders and the page of a club, on the made-up matches of the checks: Testdorp
 // FC is met in the league, FC Maquette in the cup only, and Voorbeeld United is visited twice
-// in the league in a stadium with two names.
+// in the league in a stadium with two names. Nepstad Rangers, Demo Boys and SV Proefdorp have
+// a match still to come and none played.
 
 /** The first four figures of the row of a club in the list: played, won, drawn and lost. */
 async function listRow(page: Page, club: string) {
@@ -282,5 +283,45 @@ test.describe('the bar of Statistieken', () => {
     await page.getByRole('link', { name: 'Testdorp FC' }).click()
 
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
+  })
+})
+
+test.describe('the matches to come on the page of a club', () => {
+  test('has them under Komende wedstrijden, and the sentence under Gespeelde wedstrijden for a club not played yet', async ({
+    page,
+  }) => {
+    await page.goto('/statistieken/tegenstanders/nepstad-rangers')
+
+    const card = page.getByRole('region', { name: 'Wedstrijden' })
+
+    await expect(card.getByRole('heading', { level: 3 })).toHaveText(['Komende wedstrijden', 'Gespeelde wedstrijden'])
+    await expect(card.getByRole('list').first().getByRole('listitem')).toHaveCount(1)
+    await expect(card.getByRole('listitem').first()).toContainText('Nepstad Rangers')
+    await expect(card.getByRole('listitem').first()).toContainText('Eredivisie · Speelronde 4')
+    await expect(card.getByText('We hebben nog niet tegen deze club gespeeld.')).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
+    // Without a played match there is no summary, but the credit is still there.
+    await expect(page.getByRole('complementary', { name: 'De bron' }).getByText(/^Bron: /)).toBeVisible()
+  })
+
+  test('shows a match that is called off with "Uitgesteld"', async ({ page }) => {
+    await page.goto('/statistieken/tegenstanders/demo-boys')
+
+    await expect(page.getByRole('region', { name: 'Wedstrijden' }).getByText('Uitgesteld')).toBeVisible()
+  })
+
+  test('leaves out a cup tie with the choice Eredivisie, and brings it back with Alle wedstrijden', async ({
+    page,
+  }) => {
+    await page.goto('/statistieken/tegenstanders/sv-proefdorp?competitie=eredivisie')
+
+    const card = page.getByRole('region', { name: 'Wedstrijden' })
+
+    await expect(page.getByText('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')).toBeVisible()
+    await expect(card.getByText('KNVB Beker')).toHaveCount(0)
+    await page.getByRole('link', { name: 'Alle wedstrijden' }).click()
+
+    await expect(page).toHaveURL(/\/statistieken\/tegenstanders\/sv-proefdorp$/)
+    await expect(card.getByText('KNVB Beker · Tweede ronde')).toBeVisible()
   })
 })

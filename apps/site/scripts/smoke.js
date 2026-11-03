@@ -1074,6 +1074,16 @@ await withEmptyDatabase((database) =>
     )
     const cupClub = await (await fetch(`${origin}/statistieken/tegenstanders/fc-maquette?competitie=eredivisie`)).text()
     assert.match(cupClub, /In de Eredivisie hebben we nog niet tegen deze club gespeeld\./)
+    // A club with a match to come and none played: the card Wedstrijden has both subheadings,
+    // the match as Match (the competition and round in its line, without Thuis or Uit), the
+    // sentence under Gespeelde wedstrijden, and only the credit in the sidebar.
+    const comingClub = await (await fetch(`${origin}/statistieken/tegenstanders/nepstad-rangers`)).text()
+    assert.match(
+      comingClub,
+      /<h2[^>]*id="wedstrijden">.*<h3[^>]*>Komende wedstrijden<\/h3><ul role="list"><li><div class="hf-match">.*Nepstad Rangers.*hf-match-label">Eredivisie <span aria-hidden="true">·<\/span> Speelronde 4<\/p><\/div><\/li><\/ul><h3[^>]*>Gespeelde wedstrijden<\/h3><p[^>]*>We hebben nog niet tegen deze club gespeeld\./s,
+    )
+    assert.doesNotMatch(comingClub, /id="onze-uitslagen"|Thuis|>Uit</)
+    assert.match(comingClub, /<aside[^>]*aria-label="De bron"/)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)
 

@@ -116,6 +116,50 @@ export const beker: ClubPage = {
   ],
 }
 
+/** A match that has not been played, scheduled unless `more` says it is postponed. */
+function upcoming(more: Partial<PublicClubMatch> = {}): PublicClubMatch {
+  return match(0, 0, {
+    goalsAgainst: null,
+    goalsFor: null,
+    kickoffAt: new Date('2026-12-05T19:30:00Z'),
+    matchDate: '2026-12-05',
+    opponent: 'Komend FC',
+    season: '2026/27',
+    status: 'scheduled',
+    ...more,
+  })
+}
+
+/**
+ * Komend FC: one match played and three still to come on the afternoon of 30 October 2026, the
+ * newest first as the query gives them. The next one is called off, the cup tie is on a
+ * Wednesday evening and the match in the Eredivisie is at their ground.
+ */
+export const komend: ClubPage = {
+  club: { id: 5, name: 'Komend FC', otherNames: [], slug: 'komend-fc', wikipediaPage: null },
+  matches: [
+    upcoming({ home: false, round: 'Speelronde 15', stadium: 'Komend Stadion' }),
+    upcoming({
+      competition: 'KNVB Beker',
+      home: true,
+      kickoffAt: new Date('2026-11-18T19:45:00Z'),
+      matchDate: '2026-11-18',
+      round: 'Achtste finale',
+      stadium: 'Abe Lenstra Stadion',
+    }),
+    upcoming({ kickoffAt: null, matchDate: '2026-11-07', round: 'Speelronde 11', status: 'postponed' }),
+    match(2, 0, { matchDate: '2026-10-24', opponent: 'Komend FC', season: '2026/27', stadium: 'Abe Lenstra Stadion' }),
+  ],
+}
+
+/** A club we have not played yet, such as a promoted one, with a match to come. */
+export const promovendus: ClubPage = {
+  club: { id: 6, name: 'Nieuw Promovendus', otherNames: [], slug: 'nieuw-promovendus', wikipediaPage: null },
+  matches: [
+    upcoming({ home: false, opponent: 'Nieuw Promovendus', round: 'Speelronde 20', stadium: 'Promovendus Park' }),
+  ],
+}
+
 const readAt = new Date('2026-10-25T12:00:00Z')
 
 export const sourcePages: PublicSeasonWikipediaPage[] = [

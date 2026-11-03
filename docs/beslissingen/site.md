@@ -1728,6 +1728,28 @@
   De kolommen zijn nu G, W, G, V, D en (bij de Eredivisie) P, met de woorden winst en verlies in plaats van gewonnen en verloren, en G gelijk in plaats van GL.
 - **Later:** zie _De kaart Wedstrijden op de pagina van een club heeft een rij met de laatste vijf uitslagen_ (2 november 2026): de kaart Wedstrijden heeft sindsdien direct onder de kop de rij Laatste wedstrijden, bij ten minste vijf gespeelde wedstrijden in de gekozen competitie.
   De lijst eronder blijft.
+- **Later:** zie _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ (3 november 2026): een wedstrijd die nog niet is gespeeld staat er sindsdien wel in, als `Match` onder "Komende wedstrijden", en de gespeelde staan dan onder "Gespeelde wedstrijden".
+  De lijst en de samenvatting tellen nog steeds alleen gespeelde wedstrijden.
+
+## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
+
+- **Datum:** 3 november 2026
+- **Besluit:** de kaart Wedstrijden op de pagina van een club toont ook elke wedstrijd tegen die club die nog komt (#669).
+  - **Wat telt als komend** is wat Programma onder het programma zet: `programmeOf` in `src/matches.ts` is de ene regel voor allebei (`overviewOf` en `upcomingOf` in `src/opponents.ts` gebruiken hem).
+    Een geplande wedstrijd, een uitgestelde en een wedstrijd zonder aanvangstijd van een dag die nog niet voorbij is, staan erbij; een wedstrijd die begonnen is zonder uitslag staat er niet bij.
+  - **Alle competities, en de keuze telt mee:** zonder maximum, en bij `?competitie=eredivisie` valt een bekerwedstrijd weg, zoals bij de gespeelde wedstrijden.
+    De schakelaar staat er ook als de club alleen een komende bekerwedstrijd heeft.
+  - **Dezelfde kaart, twee onderkoppen:** met komende wedstrijden heeft de kaart onder de `h2` "Wedstrijden" twee `h3`'s: "Komende wedstrijden" en "Gespeelde wedstrijden".
+    De rij Laatste wedstrijden en de lijst die er al was, staan onder de tweede.
+    Zonder komende wedstrijden is de kaart zoals hij was, zonder onderkoppen en zonder zin.
+  - **De regel is `Match`**, met de competitie in de regel zoals in Programma: de dag en tijd met het stadion, de clubs, en de competitie met de ronde, zonder seizoen en zonder toeschouwers of scheidsrechter.
+    De wedstrijden staan op datum, de eerstvolgende bovenaan; een uitgestelde staat waar zijn datum hem zet, zoals in Programma.
+  - **Een club die we nog niet speelden** (een promovendus) met een komende wedstrijd heeft de kaart met alleen "Komende wedstrijden", en onder "Gespeelde wedstrijden" de zin "We hebben nog niet tegen deze club gespeeld.".
+    De zijkolom met Onze uitslagen en Stadion(s) blijft weg, want die hebben gespeelde wedstrijden nodig.
+    De bronvermelding komt wel, in een zijkolom met alleen de bron, want de komende wedstrijden komen van dezelfde pagina's van Wikipedia; ze telt de seizoenen van de komende wedstrijden mee.
+- **Waarom:** wie een club zoekt, wil ook weten wanneer en waar we hem weer treffen, op één plek voor alle wedstrijden tegen die club.
+  Eén regel voor wat komt, in Programma en hier, voorkomt dat de twee pagina's het oneens zijn over een uitgestelde of een begonnen wedstrijd.
+- **Alternatieven:** een eigen kaart voor de komende wedstrijden, erboven of in de zijkolom; de keuze voor de competitie negeren, zoals de kaart Stadion doet; alleen de eerstvolgende wedstrijd tonen; een zin "we spelen niet meer tegen deze club" als er niets komt (fout als het programma nog niet gepubliceerd is); `ShortMatch` als regel, zoals de gespeelde wedstrijden.
 
 ## De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 

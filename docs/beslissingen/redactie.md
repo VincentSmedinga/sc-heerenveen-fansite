@@ -2624,6 +2624,7 @@
   Een half gevulde rij leest als een gat, en een club die we zelden troffen toont dan geen rij die niets zegt.
   De rij vat de lijst eronder samen, en het extra ruimte onder een `MarkRow` bestaat al.
 - **Alternatieven:** "Laatste uitslagen" (wijkt af van Reeksen) of "Laatste vijf" (fout bij minder dan vijf) als naam; de nieuwste links, zoals de lijst (wijkt af van elke andere `MarkRow`); tonen wat er is, een tot vier letters (dat doet Reeksen, maar dan toont een zelden getroffen club een rij die niets zegt); de rij onder de lijst (na tientallen regels, ver weg) of in de kaart "Onze uitslagen tegen …" (de wens noemt de kaart Wedstrijden).
+- **Later:** zie _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ in `site.md` (3 november 2026): heeft de club een wedstrijd die nog komt, dan staat de rij onder de kop "Gespeelde wedstrijden", niet direct onder de kop Wedstrijden.
 
 ## De lijst met tegenstanders sorteert op het doelsaldo en heeft altijd een kolom Punten
 
