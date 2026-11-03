@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { checkGoals } from './check-wikipedia.ts'
+import { checkGoals, checkResults } from './check-wikipedia.ts'
 import {
   clubName,
   europaLeaguePage,
@@ -39,6 +39,7 @@ const olderStandings = {
 }
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const catchUpProgramme = readFileSync(new URL('./fixtures/wikipedia-catch-up-2022-23.wiki', import.meta.url), 'utf8')
+const stoppedProgramme = readFileSync(new URL('./fixtures/wikipedia-stopped-2011-12.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
 const europaLeaguePage2012 = readFileSync(
@@ -2371,5 +2372,148 @@ describe('the Europa League matches of 2012/13 on the English Wikipedia', () => 
 
   it('is an error when the page has no section of a round we know', () => {
     expect(messageOf('Nothing here')).toBe('the Europa League page of 2012/13 has 0 matches of sc Heerenveen, not 4')
+  })
+})
+
+describe('a match that was stopped and finished under an Inhaalronde', () => {
+  // The first block has a plain score and says in its report that the match was stopped.
+  const stopped = (fields: Record<string, string> = {}) =>
+    box({
+      date: '10 mei 2026',
+      report: "Verslag<br />''In de rust gestaakt''",
+      score: '0 – 0',
+      stadium: '[[Rat Verlegh Stadion]]',
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+      time: '16:45 uur',
+      ...fields,
+    })
+  const finished = (fields: Record<string, string> = {}) =>
+    box({
+      date: '13 mei 2026',
+      score: '1 – 0',
+      stadium: '[[Abe Lenstra Stadion]]',
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+      time: '14:30 uur',
+      ...fields,
+    })
+  const page = (first: string, ...later: string[]) =>
+    `== Speelronde 12 ==\n${first}\n== Inhaalronde 12 ==\n${later.join('\n')}\n`
+  const errorOf = (text: string) => {
+    const read = readLeague(text)
+
+    return read.kind === 'error' ? read.message : ''
+  }
+
+  it('reads the real page of 2011/12 as one result: Excelsior - AZ 0 – 0 on 7 December 2011 in round 13', () => {
+    expect(stoppedProgramme).toContain('==Inhaalronde 13==')
+    expect(readLeagueResults(stoppedProgramme)).toEqual({
+      results: [
+        {
+          awayClub: 'AZ',
+          awayGoals: 0,
+          homeClub: 'Excelsior',
+          homeGoals: 0,
+          playedOn: '2011-12-07',
+          round: 13,
+        },
+      ],
+      unread: [],
+    })
+    expect(readLeague(stoppedProgramme)).toMatchObject({ kind: 'read', lastPlayedOn: '2011-12-07', matches: [] })
+  })
+
+  it('is one match of sc Heerenveen under the round of the first block, with the minute or the break in the note', () => {
+    const read = readLeague(page(stopped(), finished()))
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      lastPlayedOn: '2026-05-13',
+      matches: [
+        {
+          goalsAgainst: 1,
+          goalsFor: 0,
+          home: false,
+          matchDate: '2026-05-10',
+          note: 'Gestaakt in de rust. Het restant is op 13 mei gespeeld in het Abe Lenstra Stadion.',
+          round: 'Speelronde 12',
+          stadium: 'Rat Verlegh Stadion',
+          status: 'played',
+        },
+      ],
+    })
+    expect(read.kind === 'read' ? read.matches : []).toHaveLength(1)
+  })
+
+  it('names the minute when the score has it, and the break otherwise', () => {
+    expect(matchOf(page(stopped({ score: "Gestaakt 46' (0 – 0)" }), finished()), 'Speelronde 12')?.note).toBe(
+      'Gestaakt in minuut 46. Het restant is op 13 mei gespeeld in het Abe Lenstra Stadion.',
+    )
+    expect(matchOf(page(stopped({ score: 'Gestaakt (0 – 0)' }), finished()), 'Speelronde 12')?.note).toBe(
+      'Gestaakt in de rust. Het restant is op 13 mei gespeeld in het Abe Lenstra Stadion.',
+    )
+  })
+
+  it('stops when the page says nothing about the minute or the break', () => {
+    expect(errorOf(page(stopped({ report: 'Verslag, gestaakt' }), finished()))).toContain('a minute we do not know')
+  })
+
+  it('stops when a stopped block has no block that finishes it, or only one under another round', () => {
+    expect(errorOf(`== Speelronde 12 ==\n${stopped()}\n`)).toContain('Speelronde 12 (Eredivisie) was stopped')
+    expect(errorOf(`== Speelronde 12 ==\n${stopped()}\n== Inhaalronde 13 ==\n${finished()}\n`)).toContain('was stopped')
+    expect(errorOf(`== Speelronde 12 ==\n${stopped()}\n== Speelronde 13 ==\n${finished()}\n`)).toContain('was stopped')
+  })
+
+  it('stops when the block that finishes it is stopped, postponed or has a score we do not know', () => {
+    expect(errorOf(page(stopped(), finished({ score: "Gestaakt 60' (1 – 0)" })))).toContain('was stopped')
+    expect(errorOf(page(stopped(), finished({ report: 'Gestaakt' })))).toContain('stopped too')
+    expect(errorOf(page(stopped(), finished({ score: 'Uitgesteld' })))).toContain('no score we can use')
+    expect(errorOf(page(stopped(), finished({ score: 'onbekend' })))).toContain('a score we do not know')
+  })
+
+  it('reads the words of the report and not the address of its link, which can say "gestaakt" for a match that was played', () => {
+    const slug =
+      '[https://nos.nl/artikel/2311740-zege-pec-op-fortuna-in-rood-gekleurd-en-vanwege-vuurwerk-gestaakt-duel.html Verslag]'
+
+    expect(readLeague(page(finished({ report: slug }))).kind).toBe('read')
+    expect(
+      readLeagueResults(page(stopped({ report: slug, team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }))).results,
+    ).toMatchObject([{ homeClub: 'Ajax', playedOn: '2026-05-10' }])
+  })
+
+  it('keeps the same result twice without the word a fault, for a replay is no stopped match', () => {
+    const replay = (report: string) => {
+      const other = { team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }
+
+      return page(stopped({ report, ...other }), finished({ score: '0 – 0', ...other }))
+    }
+
+    expect(checkResults(readLeagueResults(replay('Verslag')).results)).toEqual([
+      'Ajax is at home against Feyenoord twice in the results',
+    ])
+    expect(checkResults(readLeagueResults(replay("Verslag<br />''In de rust gestaakt''")).results)).toEqual([])
+  })
+
+  it('gives no result for another club when the block under the Inhaalronde is stopped itself', () => {
+    const other = { team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }
+    const read = readLeagueResults(page(stopped(other), finished({ report: 'Verslag, opnieuw gestaakt', ...other })))
+
+    expect(read.results).toEqual([])
+    expect(read.unread).toHaveLength(1)
+  })
+
+  it('gives a result for another club only when the block that finishes it is there', () => {
+    const other = (fields: Record<string, string>) =>
+      stopped({ team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]', ...fields })
+
+    expect(readLeagueResults(page(other({}))).unread).toHaveLength(1)
+    expect(readLeagueResults(page(other({}))).results).toEqual([])
+    expect(
+      readLeagueResults(page(other({}), finished({ team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }))),
+    ).toMatchObject({
+      results: [{ homeClub: 'Ajax', playedOn: '2026-05-13', round: 12 }],
+      unread: [],
+    })
   })
 })
