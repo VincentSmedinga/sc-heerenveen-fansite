@@ -386,12 +386,14 @@ function describeResult(
 }
 
 /**
- * Fetches the pages one after the other, or says why one could not be read. A page may have
- * more than one title (see `pageCandidates`): the first that exists is the page, and a 404 on
- * every title is a fault that names them all. The page of the play-offs may not be there: it
- * comes in May, and a season that is going has none. Wikipedia answering 404 for it is no
- * fault, and the pages are then the other three. Any other answer is a fault, as for the other
- * pages.
+ * Fetches the pages one after the other, or says why one could not be read. The pages are on
+ * the Dutch Wikipedia, except the page of the Europa League matches of 2012/13, which is on the
+ * English one (`europaLeaguePage`) and is asked for only for a season that has one. A page
+ * may have more than one title (see `pageCandidates`): the first that exists is the page, and
+ * a 404 on every title is a fault that names them all. The page of the play-offs may not be
+ * there: it comes in May, and a season that is going has none. Wikipedia answering 404 for it
+ * is no fault, and the pages are then the other three. Any other answer is a fault, as for the
+ * other pages.
  */
 async function fetchPages(fetcher: Fetcher, season: string, origins: Origins): Promise<PageRead[] | Problem> {
   const candidates = pageCandidates(season)

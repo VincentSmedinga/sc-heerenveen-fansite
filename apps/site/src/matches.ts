@@ -28,8 +28,8 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 const ourClub = 'sc Heerenveen'
 
 /**
- * Whether a match counts for the choice: the league alone, or the league, the cup and the
- * play-offs for the Conference League.
+ * Whether a match counts for the choice: the league alone, or the league, the cup, the
+ * play-offs for the Conference League and the Europa League.
  */
 const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
@@ -45,9 +45,9 @@ const isPlayedExtraMatch = (match: PublicMatch) =>
   match.goalsAgainst !== null
 
 /**
- * Whether the season has a cup tie or a match of the play-offs that was played, so whether
- * there is anything to choose: without one, the two choices count the same matches and the page
- * has no switch.
+ * Whether the season has a cup tie, a match of the play-offs or a match of the Europa League
+ * that was played, so whether there is anything to choose: without one, the two choices count
+ * the same matches and the page has no switch.
  */
 export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPlayedExtraMatch)
 
