@@ -273,8 +273,7 @@
    * not scroll sideways (WCAG 1.4.10), so the label and the links wrap and nothing scrolls. The
    * row takes the whole width under the label, without a mask, and the list is pulled back by
    * the padding of a link, so the text of the first link is in line with the label. The links
-   * stay 36px high at least, and a name that is wider than the row, such as "Uitslagen play-offs
-   * Conference League", wraps inside its link.
+   * stay 36px high.
    */
   @media (width <= 20em) {
     .hf-page-shortcuts {
@@ -298,14 +297,6 @@
       inline-size: auto;
       margin-inline-start: calc(-1 * var(--hf-space-s));
       padding-inline: 0;
-    }
-
-    .hf-page-shortcuts-link {
-      block-size: auto;
-      line-height: 1.25;
-      min-block-size: 2.25rem;
-      padding-block: 0.25rem;
-      white-space: normal;
     }
   }
 }

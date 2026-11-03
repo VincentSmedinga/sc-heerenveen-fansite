@@ -61,12 +61,6 @@ const renderWith =
 
 const render = renderWith(cards)
 
-// A name wider than the row wraps inside its link on a very narrow screen.
-const renderWrapped = renderWith([
-  ...cards.slice(0, 3),
-  { href: '#uitslagen-play-offs', label: 'Uitslagen play-offs Conference League' },
-])
-
 // Only on the canvas, with Storybook's viewport setting: the bar is gone from the width where
 // the body has two columns, and the docs page is wider than that.
 const phone = { tags: ['!autodocs'] }
@@ -103,18 +97,18 @@ export const Wrapped = meta.story({
     docs: {
       description: {
         story:
-          'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om. Zo valt er niets buiten beeld en scrolt de pagina niet zijwaarts. De balk volgt de lettergrootte van de bezoeker: met grotere tekst loopt de rij eerder om. Een naam die breder is dan de rij loopt binnen zijn link om.',
+          'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om. Zo valt er niets buiten beeld en scrolt de pagina niet zijwaarts. De balk volgt de lettergrootte van de bezoeker: met grotere tekst loopt de rij eerder om.',
       },
     },
   },
-  render: renderWrapped,
+  render,
 })
 
 export const WrappedDark = meta.story({
   ...phone,
   globals: { theme: 'dark', viewport: { value: 'mobile1' } },
   name: 'Smal scherm: de rij loopt om, donker',
-  render: renderWrapped,
+  render,
 })
 
 const sections = [
