@@ -52,9 +52,9 @@ const isPlayedExtraMatch = (match: PublicMatch) =>
 export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPlayedExtraMatch)
 
 /**
- * The competitions a card counts, as the captions of the cards name them: the cup and the
- * play-offs are in only when the choice is `all` and a match of theirs was played, because then
- * it is in the numbers.
+ * The competitions a card counts, as the captions of the cards name them: the cup, the
+ * play-offs and the Europa League are in only when the choice is `all` and a match of theirs
+ * was played, because then it is in the numbers.
  */
 export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) => {
   if (choice === 'league') {
@@ -67,6 +67,7 @@ export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoi
     'de Eredivisie',
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
     ...(played('Play-offs Conference League') ? ['de play-offs'] : []),
+    ...(played('Europa League') ? ['de Europa League'] : []),
   ]
 
   return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`

@@ -752,7 +752,7 @@ export function SourceCredit({
   season: string
 }) {
   const credited = pages.map((page) => ({
-    href: wikipediaUrl(page.title),
+    href: wikipediaUrl(page.title, page.kind),
     name: creditName(page.kind, season),
     readAt: page.readAt,
   }))

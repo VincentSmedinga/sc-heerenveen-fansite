@@ -92,6 +92,11 @@ export type ImportOptions = {
   /** Gives the time. A test gives its own, to run the import at a moment it chooses. */
   clock?: () => Date
   /**
+   * The address of the English Wikipedia, for the Europa League matches of 2012/13 (only the
+   * command that reads a season that is over asks it). A test gives its own web server.
+   */
+  englishOrigin?: string
+  /**
    * Makes the fetcher of the run, with the store for robots.txt. A test gives one that may
    * reach its own web servers.
    */

@@ -737,13 +737,13 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 De gegevens vallen onder CC BY-SA 4.0.
-Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen.
+Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, en om de Europa League van 2012/13 (zie _De Europa League van 2012/13_).
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
 ### Welke pagina's
 
-Per seizoen leest de import vier pagina's, met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
+Per seizoen leest de import vier pagina's van de Nederlandse Wikipedia (2012/13 heeft er een van de Engelse bij, zie _De Europa League van 2012/13_), met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
 
 | Pagina                                           | Wat erop staat                                                                         |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
@@ -1284,6 +1284,28 @@ De beslissing is _De lezer kent de oudere vormen van de stand, de beker en de ti
 - Een naam met sterren achter zich (`FC Twente *`) is de naam zonder de sterren.
 - De fixtures `wikipedia-standings-2012-13.wiki`, `wikipedia-standings-2015-16.wiki`, `wikipedia-standings-2018-19.wiki`, `wikipedia-cup-older-seasons.wiki` en `wikipedia-programme-2018-19.wiki` in `src/fixtures/` zijn korte stukken van de echte pagina's.
 
+### De Europa League van 2012/13
+
+De Nederlandse Wikipedia heeft van de vier Europa League-wedstrijden van 2012/13 alleen de scores, zonder datum of stadion.
+Voor dit ene seizoen leest de import ze van de Engelse Wikipedia, met dezelfde fetcher en regels: dezelfde user agent, `robots.txt` en alleen `/wiki/<pagina>?action=raw`.
+De beslissing is _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
+- **De pagina:** `2012–13 UEFA Europa League qualifying (third and play-off round matches)` op `en.wikipedia.org`.
+  `europaLeaguePage` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) zegt voor welk seizoen er zo'n pagina is.
+  Voor elk ander seizoen vraagt de import niets aan de Engelse Wikipedia.
+  `wikipedia_pages` bewaart de pagina met de soort `europa-league`, en de bronvermelding noemt hem "Engelse Wikipedia".
+- **De wedstrijden:** de competitie is `Europa League`, en de ronde is `Derde voorronde, wedstrijd 1/2` en `Play-offronde, wedstrijd 1/2`.
+  `readEuropaLeague` leest de blokken `{{#invoke:Football box|main` van sc Heerenveen: de datum, de tijd, thuis of uit, het stadion (zonder de plaats erachter), de score, de toeschouwers en de scheidsrechter (zonder land).
+  De doelpuntenmakers laat hij weg, want de Engelse links zijn geen Nederlandse artikelen van spelers.
+- **De controles:** de pagina moet vier wedstrijden van sc Heerenveen hebben, twee per ronde, en de scores van een ronde samen zijn de totaalstand in de samenvatting.
+  Anders is het een fout met het seizoen erin, en de import schrijft niets.
+- **De tijd:** de pagina zegt dat de tijden Midden-Europese zomertijd zijn (CEST).
+  Staat die zin er niet meer, dan bewaart de import alleen de dag (`date_text`).
+- **De clubs:** `europaLeagueClubs` vertaalt de Engelse titel van een tegenstander naar de naam en het artikel van de Nederlandse Wikipedia (`Rapid Boekarest`, `Molde FK`).
+  Een tegenstander die er niet in staat, is een fout.
+- Een seizoen zonder pagina laat de Europa League-wedstrijden die er zijn, staan.
+- De fixture `wikipedia-europa-league-2012.wiki` in `src/fixtures/` is een kort stuk van de echte pagina.
+
 ### Een afgelopen seizoen
 
 Een afgelopen seizoen verandert niet meer, dus de uurlijkse import leest het niet opnieuw.
@@ -1297,7 +1319,7 @@ pnpm run import:season 2025/26
   De opdracht weigert met een zin een andere vorm, twee jaren die niet op elkaar volgen, het lopende seizoen en een seizoen dat nog niet begonnen is.
   Zonder seizoen laat ze zien hoe het moet.
   De weigering komt voordat de opdracht Wikipedia iets vraagt of iets schrijft.
-- Ze leest de vier pagina's van dat seizoen (vier verzoeken), met dezelfde fetcher, controles en opslag als de uurlijkse import, en schrijft alles in één transactie.
+- Ze leest de vier pagina's van dat seizoen (vier verzoeken, en vijf voor 2012/13), met dezelfde fetcher, controles en opslag als de uurlijkse import, en schrijft alles in één transactie.
   Ze raakt alleen de rijen van dat seizoen: de rijen van het lopende seizoen blijven zoals ze zijn.
   Draait ze nog eens, dan staat er `0 new, 0 updated, 38 unchanged`.
 - Ze neemt de lock van de import.

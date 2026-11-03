@@ -544,9 +544,10 @@ export type ArticleVersion = typeof articleVersions.$inferSelect
 
 /**
  * The competitions of a match. `Play-offs Conference League` is the match or two that decide
- * the ticket for the second qualifying round after the league season.
+ * the ticket for the second qualifying round after the league season. `Europa League` holds the
+ * matches of the Europa League that sc Heerenveen played in 2012/13.
  */
-export const competitions = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League'] as const
+export const competitions = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League', 'Europa League'] as const
 
 export type Competition = (typeof competitions)[number]
 
@@ -729,7 +730,7 @@ export const matches = mysqlTable(
     check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
     check(
       'matches_extra_time_only_in_played_knockout',
-      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League'))`,
+      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League', 'Europa League'))`,
     ),
     check(
       'matches_penalties_in_a_pair',
@@ -928,8 +929,11 @@ export type LeagueResult = typeof leagueResults.$inferSelect
 
 export type NewLeagueResult = typeof leagueResults.$inferInsert
 
-/** The pages that hold the matches and the table: what `/wedstrijden` credits. */
-export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs'] as const
+/**
+ * The pages that hold the matches and the table: what `/wedstrijden` credits. `europa-league`
+ * is a page of the English Wikipedia, the only one of these that is not on the Dutch one.
+ */
+export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs', 'europa-league'] as const
 
 export type MatchPageKind = (typeof matchPageKinds)[number]
 

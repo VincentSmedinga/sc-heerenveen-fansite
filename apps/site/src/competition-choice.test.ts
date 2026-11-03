@@ -141,6 +141,14 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
   })
 
+  it('counts a match of the Europa League that was played, and names it', () => {
+    const europa = played('Derde voorronde, wedstrijd 1/2', '2012-08-02', 4, 0, { competition: 'Europa League' })
+
+    expect(hasPlayedExtraMatch([league, europa])).toBe(true)
+    expect(competitionNames([league, europa], 'all')).toBe('de Eredivisie en de Europa League')
+    expect(competitionNames([league, europa], 'league')).toBe('de Eredivisie')
+  })
+
   it('names the cup only when it is counted and was played', () => {
     const matches = [league, cup('Tweede ronde', '2026-09-23', 1, 0)]
 

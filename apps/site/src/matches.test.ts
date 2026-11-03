@@ -131,6 +131,14 @@ describe('resultsPerCompetition', () => {
     ])
   })
 
+  it('puts the Europa League after the play-offs', () => {
+    expect(
+      resultsPerCompetition([of('Europa League', 'Derde voorronde, wedstrijd 1/2'), ...mixed]).map(
+        ({ competition }) => competition,
+      ),
+    ).toEqual(['Eredivisie', 'KNVB Beker', 'Play-offs Conference League', 'Europa League'])
+  })
+
   it('keeps the order it was given inside each list', () => {
     expect(resultsPerCompetition(mixed).map(({ matches }) => matches.map((match) => match.round))).toEqual([
       ['Speelronde 1', 'Speelronde 2'],

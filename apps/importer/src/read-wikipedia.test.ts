@@ -4,11 +4,13 @@ import { describe, expect, it } from 'vitest'
 import { checkGoals } from './check-wikipedia.ts'
 import {
   clubName,
+  europaLeaguePage,
   linkedPage,
   pageCandidates,
   pageTitles,
   pageUrl,
   readCup,
+  readEuropaLeague,
   readLeague,
   readLeagueResults,
   readPlayoffs,
@@ -37,6 +39,10 @@ const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-progra
 const catchUpProgramme = readFileSync(new URL('./fixtures/wikipedia-catch-up-2022-23.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
+const europaLeaguePage2012 = readFileSync(
+  new URL('./fixtures/wikipedia-europa-league-2012.wiki', import.meta.url),
+  'utf8',
+)
 const playoffPages = Object.fromEntries(
   [2022, 2024, 2025, 2026].map((year) => [
     year,
@@ -2055,5 +2061,174 @@ describe('the programme of 2018/19', () => {
         { goalsAgainst: 3, goalsFor: 1, opponent: 'FC Utrecht', round: 'Speelronde 34' },
       ],
     })
+  })
+})
+
+describe('the Europa League matches of 2012/13 on the English Wikipedia', () => {
+  const read = (text = europaLeaguePage2012) => readEuropaLeague(text, '2012/13')
+  const matchesOf = (text?: string) => {
+    const result = read(text)
+
+    if (result.kind === 'error') {
+      throw new Error(result.message)
+    }
+
+    return result.matches
+  }
+  const messageOf = (text: string) => {
+    const result = read(text)
+
+    return result.kind === 'error' ? result.message : ''
+  }
+
+  it('has a page for 2012/13 and for no other season', () => {
+    expect(europaLeaguePage('2012/13')).toBe('2012–13 UEFA Europa League qualifying (third and play-off round matches)')
+    expect(europaLeaguePage('2011/12')).toBeUndefined()
+    expect(europaLeaguePage('2013/14')).toBeUndefined()
+    expect(europaLeaguePage('constructor')).toBeUndefined()
+  })
+
+  it('reads the tie with Rapid Boekarest: a day, a time, the stadium, the audience and the referee', () => {
+    const [home, away] = matchesOf()
+
+    expect(home).toEqual({
+      afterNinetyAgainst: null,
+      afterNinetyFor: null,
+      attendance: 18000,
+      competition: 'Europa League',
+      dateText: null,
+      extraTime: false,
+      factsProblem: null,
+      goals: null,
+      goalsAgainst: 0,
+      goalsFor: 4,
+      goalsProblem: null,
+      home: true,
+      kickoffAt: new Date('2012-08-02T17:30:00Z'),
+      matchDate: '2012-08-02',
+      note: null,
+      opponent: 'Rapid Boekarest',
+      opponentPage: 'Rapid Boekarest',
+      penaltiesAgainst: null,
+      penaltiesFor: null,
+      referee: 'Jorge Sousa',
+      round: 'Derde voorronde, wedstrijd 1/2',
+      stadium: 'Abe Lenstra Stadion',
+      status: 'played',
+    })
+    expect(away).toMatchObject({
+      attendance: 1928,
+      goalsAgainst: 1,
+      goalsFor: 0,
+      home: false,
+      kickoffAt: new Date('2012-08-09T18:30:00Z'),
+      opponent: 'Rapid Boekarest',
+      referee: 'Felix Zwayer',
+      round: 'Derde voorronde, wedstrijd 2/2',
+      stadium: 'Arena Națională',
+    })
+  })
+
+  it('reads the tie with Molde: away first, and the club under the name and the article of the Dutch Wikipedia', () => {
+    expect(
+      matchesOf()
+        .slice(2)
+        .map((match) => ({
+          attendance: match.attendance,
+          goalsAgainst: match.goalsAgainst,
+          goalsFor: match.goalsFor,
+          home: match.home,
+          kickoffAt: match.kickoffAt?.toISOString(),
+          opponent: match.opponent,
+          opponentPage: match.opponentPage,
+          referee: match.referee,
+          round: match.round,
+          stadium: match.stadium,
+        })),
+    ).toEqual([
+      {
+        attendance: 4656,
+        goalsAgainst: 2,
+        goalsFor: 0,
+        home: false,
+        kickoffAt: '2012-08-23T17:00:00.000Z',
+        opponent: 'Molde FK',
+        opponentPage: 'Molde FK',
+        referee: 'Cristian Balaj',
+        round: 'Play-offronde, wedstrijd 1/2',
+        stadium: 'Aker Stadion',
+      },
+      {
+        attendance: 10000,
+        goalsAgainst: 2,
+        goalsFor: 1,
+        home: true,
+        kickoffAt: '2012-08-30T17:00:00.000Z',
+        opponent: 'Molde FK',
+        opponentPage: 'Molde FK',
+        referee: 'Stanislav Todorov',
+        round: 'Play-offronde, wedstrijd 2/2',
+        stadium: 'Abe Lenstra Stadion',
+      },
+    ])
+  })
+
+  it('reads the four matches and no match of another club, and leaves the scorers out', () => {
+    const matches = matchesOf()
+
+    expect(matches).toHaveLength(4)
+    expect(matches.every((match) => match.goals === null && match.goalsProblem === null)).toBe(true)
+  })
+
+  it('keeps only the day when the page does not say which time zone it uses', () => {
+    const unsure = europaLeaguePage2012.replace('Times are [[Central European Summer Time|CEST]]', 'Times are local')
+    const [first] = matchesOf(unsure)
+
+    expect(first).toMatchObject({ dateText: '2 augustus 2012', kickoffAt: null, matchDate: '2012-08-02' })
+  })
+
+  it('reads a time with the local time in brackets as the time before the brackets', () => {
+    const [first] = matchesOf(europaLeaguePage2012.replace('|time       = 19:30', '|time       = 19:30 (20:30 EEST)'))
+
+    expect(first?.kickoffAt).toEqual(new Date('2012-08-02T17:30:00Z'))
+  })
+
+  it('is an error, with the season in it, when the scores do not add up to the aggregate of the summary', () => {
+    expect(messageOf(europaLeaguePage2012.replace('|score      = 4–0', '|score      = 3–0'))).toBe(
+      'the Europa League page of 2012/13: Rapid Boekarest: the matches add up to 3-1, the summary says 4-1',
+    )
+  })
+
+  it('is an error when a tie has not two matches of ours', () => {
+    const lonely = europaLeaguePage2012.replace(
+      '|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]',
+      '|team2      = {{fbaicon|NED}} [[AZ Alkmaar|AZ]]',
+    )
+
+    expect(messageOf(lonely)).toBe(
+      "the Europa League page of 2012/13 has 1 matches of sc Heerenveen under 'Third qualifying round', not 2",
+    )
+  })
+
+  it('is an error when the summary has no row for sc Heerenveen', () => {
+    expect(messageOf(europaLeaguePage2012.replace(/^\|\[\[SC Heerenveen\|Heerenveen\]\]\|NED\|.*$/mu, ''))).toBe(
+      'the Europa League page of 2012/13: the summary has no row for sc Heerenveen',
+    )
+  })
+
+  it('is an error when an opponent has no name on the Dutch Wikipedia in the list', () => {
+    expect(messageOf(europaLeaguePage2012.replaceAll('[[Molde FK|Molde]]', '[[Molde Fotballklubb|Molde]]'))).toContain(
+      "'Molde Fotballklubb' has no name on the Dutch Wikipedia",
+    )
+  })
+
+  it('is an error when a match has a date we do not know', () => {
+    expect(messageOf(europaLeaguePage2012.replaceAll('{{Start date|2012|8|2|df=y}}', 'August 2012'))).toContain(
+      'has a date we do not know',
+    )
+  })
+
+  it('is an error when the page has no section of a round we know', () => {
+    expect(messageOf('Nothing here')).toBe('the Europa League page of 2012/13 has 0 matches of sc Heerenveen, not 4')
   })
 })

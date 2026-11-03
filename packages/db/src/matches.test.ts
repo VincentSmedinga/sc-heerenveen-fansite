@@ -89,6 +89,21 @@ describe('the extra time and the shoot-out of a match', () => {
     })
   })
 
+  it('keeps a match of the Europa League, with extra time allowed like in the cup', async () => {
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        competition: 'Europa League',
+        extraTime: true,
+        round: 'Play-offronde, wedstrijd 2/2',
+      }),
+    )
+
+    const [row] = await database.db.select().from(matches)
+
+    expect(row).toMatchObject({ competition: 'Europa League', extraTime: true })
+  })
+
   it('keeps the score after 90 minutes of a match with extra time, from our side', async () => {
     await database.db.insert(matches).values(
       await clubbed({
