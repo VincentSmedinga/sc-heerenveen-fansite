@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { coachesCardOf, matchShortcuts, matchShortcutsOf, scoreCountsCard, standingsCardOf } from './matchShortcuts'
+import {
+  coachesCardOf,
+  matchShortcuts,
+  matchShortcutsOf,
+  resultsCardOf,
+  resultsCardsOf,
+  scoreCountsCard,
+  standingsCardOf,
+} from './matchShortcuts'
 
 describe('matchShortcutsOf', () => {
   it('has all four links for the current season', () => {
@@ -79,5 +87,65 @@ describe('standingsCardOf', () => {
 
   it('is Eindstand with the anchor eindstand in a season that is over', () => {
     expect(standingsCardOf(false)).toEqual({ id: 'eindstand', name: 'Eindstand' })
+  })
+})
+
+describe('resultsCardOf', () => {
+  it('keeps the anchor uitslagen for the league, so an old link still lands on its card', () => {
+    expect(resultsCardOf('Eredivisie')).toEqual({ id: 'uitslagen', name: 'Eredivisie' })
+  })
+
+  it('names the cup and the play-offs, each with an anchor of its own', () => {
+    expect(resultsCardOf('KNVB Beker')).toEqual({ id: 'uitslagen-knvb-beker', name: 'KNVB Beker' })
+    expect(resultsCardOf('Play-offs Conference League')).toEqual({
+      id: 'uitslagen-play-offs',
+      name: 'Play-offs Conference League',
+    })
+  })
+})
+
+describe('resultsCardsOf', () => {
+  it('is the one card Uitslagen for the current season, whatever competitions it has', () => {
+    expect(resultsCardsOf(true, ['Eredivisie', 'KNVB Beker'])).toEqual([{ id: 'uitslagen', name: 'Uitslagen' }])
+  })
+
+  it('is the one card Uitslagen for a season that is over without results', () => {
+    expect(resultsCardsOf(false, [])).toEqual([{ id: 'uitslagen', name: 'Uitslagen' }])
+  })
+
+  it('is a card for each competition with results for a season that is over, in the order given', () => {
+    expect(resultsCardsOf(false, ['Eredivisie', 'Play-offs Conference League']).map(({ id }) => id)).toEqual([
+      'uitslagen',
+      'uitslagen-play-offs',
+    ])
+  })
+})
+
+describe('matchShortcutsOf with the cards with results of a season that is over', () => {
+  const all = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League'] as const
+
+  it('has a link for each card with results, with the name of its heading, in the place of Uitslagen', () => {
+    expect(matchShortcutsOf(false, 0, all)).toEqual([
+      { href: '#uitslagen', label: 'Eredivisie' },
+      { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
+      { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
+      { href: '#eindstand', label: 'Eindstand' },
+      { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
+    ])
+  })
+
+  it('has one link for each competition that has results, and keeps the rest of the bar', () => {
+    expect(matchShortcutsOf(false, 1, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href)).toEqual([
+      '#uitslagen',
+      '#uitslagen-knvb-beker',
+      '#eindstand',
+      '#hoe-vaak-welke-uitslag',
+      '#hoofdtrainer',
+    ])
+  })
+
+  it('keeps the link Uitslagen without results, and for the current season', () => {
+    expect(matchShortcutsOf(false, 0, [])).toContainEqual({ href: '#uitslagen', label: 'Uitslagen' })
+    expect(matchShortcutsOf(true, 0, all)).toEqual(matchShortcuts)
   })
 })

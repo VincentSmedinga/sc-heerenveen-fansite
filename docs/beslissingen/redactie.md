@@ -2248,6 +2248,7 @@
 - **Alternatieven:** de volgorde laten zoals ze is (de lijst begint dan bij het einde van het seizoen).
   Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
   Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).
+- **Later:** zie _Een afgelopen seizoen toont zijn uitslagen in een kaart per competitie_ (2 november 2026): de kaart Uitslagen van een afgelopen seizoen is verdeeld in een kaart per competitie; de volgorde van oud naar nieuw geldt binnen elke kaart.
 
 ## Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina
 
@@ -2664,3 +2665,25 @@
   Alleen de tabel en de regel eronder maken het verschil voor wie ziet.
   Een tabel die ooit doelpunten én saldo toont, heeft nieuwe letters nodig.
 - **Alternatieven:** S voor het doelsaldo houden (de projecteigenaar wilde D); DS voor het saldo nu al (geen tabel toont de doelpunten ernaast); de volgorde per tabel laten kiezen (dan komt de fout terug).
+
+## Een afgelopen seizoen toont zijn uitslagen in een kaart per competitie
+
+- **Datum:** 2 november 2026
+- **Besluit:** op de pagina van een afgelopen seizoen is de kaart Uitslagen verdeeld in een kaart per competitie met wedstrijden: Eredivisie, KNVB Beker en Play-offs Conference League, in die volgorde (#658).
+  De kop is de naam van de competitie, zonder het woord Uitslagen.
+  De projecteigenaar koos dit op 3 november 2026; de specificatie had "Uitslagen Eredivisie".
+  Binnen een kaart blijft de volgorde van oud naar nieuw, de regel noemt de competitie niet meer en elke kaart heeft zijn eigen legenda.
+  De balk "Op deze pagina:" heeft een link per kaart.
+  Het lopende seizoen blijft één kaart, nieuwste eerst, met de competitie in de regel.
+  - **De koppen en de ankers:** de ankers houden het woord uitslagen, ook al staat het niet in de kop: `uitslagen` voor de Eredivisie, zodat een oude link blijft werken, `uitslagen-knvb-beker` en `uitslagen-play-offs`.
+    Een competitie zonder wedstrijden heeft geen kaart; een afgelopen seizoen zonder wedstrijden houdt één kaart "Uitslagen" (anker `uitslagen`) met zijn zin.
+  - **De link "Het verloop van het seizoen"** staat in de kaart Eredivisie, want de kaart met cijfers telt die competitie.
+  - **In de code:** `resultsPerCompetition` in `src/matches.ts` verdeelt de uitslagen, `resultsCardOf` en `resultsCardsOf` in `src/matchShortcuts.ts` geven de naam en het anker, en de pagina en de balk lezen ze allebei daar.
+    `Match` laat de competitie weg als `competition` ontbreekt, en `MatchLines` heeft daarvoor `withCompetition`.
+- **Waarom:** wie een afgelopen seizoen bekijkt, zoekt de competitie of de beker apart; de volgorde in de tijd doet er daar minder toe.
+  Een kaart per competitie is op de pagina mooier dan koppen binnen één lange kaart, en de balk volgt de kaarten zoals hij dat voor Stand, Eindstand en Hoofdtrainer al doet.
+  Het lopende seizoen volgt het nieuws, dus daar blijft de volgorde in de tijd.
+- **Alternatieven:** één kaart met een kop van niveau 3 per competitie (de balk blijft dan gelijk, maar de pagina is minder mooi).
+  Subpagina's per competitie (een menu dat van de pagina afhangt).
+  Een schakelaar tussen "Per competitie" en "In de tijd" (meer bediening voor een kleine behoefte).
+  De competitie in de regel laten staan (die staat dan tientallen keren onder een kop die haar al noemt, ook voor een schermlezer).

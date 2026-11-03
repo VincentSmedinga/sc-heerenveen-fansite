@@ -30,6 +30,14 @@ const earlier = {
   standings: matchData.standings.slice(0, 2),
 }
 
+/** The matches of the current season as if they were played a year earlier, in 2025/26. */
+const inSeason2025 = (matches: PublicMatch[]): PublicMatch[] =>
+  matches.map((match) => ({
+    ...match,
+    kickoffAt: match.kickoffAt === null ? null : new Date(match.kickoffAt.getTime() - 365 * 24 * 60 * 60 * 1000),
+    matchDate: `2025${match.matchDate.slice(4)}`,
+  }))
+
 const params = (seizoen: string, searchParams: Record<string, string | string[]> = {}) => ({
   params: Promise.resolve({ seizoen }),
   searchParams: Promise.resolve(searchParams),
@@ -96,6 +104,164 @@ describe('the card Eindstand of an earlier season', () => {
   })
 })
 
+/** The part of the page under the h2 with this id, up to the next h2 or the end. */
+function section(html: string, id: string) {
+  const start = html.indexOf(`<h2 class="hf-heading-2 hf-heading-anchored" id="${id}">`)
+  const end = html.indexOf('<h2', start + 1)
+
+  return html.slice(start, end === -1 ? undefined : end)
+}
+
+describe('the cards with results of an earlier season, one for each competition', () => {
+  const played: PublicMatch = { ...earlierMatch, goals: [], goalsAgainst: 0, goalsFor: 1, status: 'played' }
+  const goal = (minute: number, kind: 'ownGoal' | 'penalty'): PublicMatch['goals'][number] => ({
+    minute,
+    ours: true,
+    ownGoal: kind === 'ownGoal',
+    penalty: kind === 'penalty',
+    player: 'Proefman',
+    playerId: null,
+    playerName: null,
+    playerPage: null,
+    playerSearchTerm: null,
+    stoppageMinutes: null,
+  })
+  const match = (
+    competition: PublicMatch['competition'],
+    round: string,
+    matchDate: string,
+    extra = {},
+  ): PublicMatch => ({
+    ...played,
+    competition,
+    matchDate,
+    opponent: `Club ${round}`,
+    round,
+    ...extra,
+  })
+  // The cup tie is played before the first match of the league, the play-offs after the last.
+  const all = [
+    match('Eredivisie', 'Speelronde 1', '2025-08-10'),
+    match('Eredivisie', 'Speelronde 2', '2025-08-17', { goals: [goal(12, 'ownGoal')] }),
+    match('KNVB Beker', 'Tweede ronde', '2025-08-05', { extraTime: true }),
+    match('Play-offs Conference League', 'Halve finale', '2026-05-20', { goals: [goal(30, 'penalty')] }),
+  ]
+  const withMatches = (matches: PublicMatch[]) => vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches })
+  const ids = (html: string) => [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => id)
+
+  it('has a card for the league, one for the cup and one for the play-offs, in that order, with the ids of the old link and the new ones', async () => {
+    withMatches(all)
+    const html = await render()
+
+    expect(ids(html)).toEqual([
+      'uitslagen',
+      'uitslagen-knvb-beker',
+      'uitslagen-play-offs',
+      'eindstand',
+      'hoe-vaak-welke-uitslag',
+    ])
+    expect(html.match(/<h2[^>]*>.*?<\/h2>/g)?.map((heading) => heading.replace(/<[^>]+>/g, ''))).toEqual([
+      'Eredivisie',
+      'KNVB Beker',
+      'Play-offs Conference League',
+      'Eindstand',
+      'Hoe vaak welke uitslag',
+    ])
+  })
+
+  it('names each card by its heading, so a screen reader hears the competition and then its lines', async () => {
+    withMatches(all)
+    const html = await render()
+
+    for (const id of ['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs']) {
+      expect(html).toContain(`aria-labelledby="${id}"`)
+    }
+  })
+
+  it('has the headings in the source in the order of the screen: the main before the sidebar, the cards in order', async () => {
+    withMatches(all)
+    const html = await render()
+    const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
+
+    expect(ids(main)).toEqual(['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'])
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('id="eindstand"'))
+  })
+
+  it('has each match in the card of its competition, the oldest first', async () => {
+    withMatches(all)
+    const html = await render()
+    const league = section(html, 'uitslagen')
+
+    expect(league.indexOf('Speelronde 1')).toBeGreaterThan(-1)
+    expect(league.indexOf('Speelronde 1')).toBeLessThan(league.indexOf('Speelronde 2'))
+    expect(league).not.toContain('Tweede ronde')
+    expect(league).not.toContain('Halve finale')
+    expect(section(html, 'uitslagen-knvb-beker')).toContain('Tweede ronde')
+    expect(section(html, 'uitslagen-play-offs')).toContain('Halve finale')
+  })
+
+  it('leaves the competition out of the line, because the heading names it, and keeps the round', async () => {
+    withMatches(all)
+    const html = await render()
+    const cards = ['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'].map((id) => section(html, id)).join('')
+
+    expect(cards).toContain('>Tweede ronde<')
+    expect(cards).not.toMatch(/hf-match-label">(Eredivisie|KNVB Beker|Play-offs Conference League)/)
+    expect(cards).not.toContain('Play-offs Conference League ·')
+  })
+
+  it('has the legend of its own matches in each card and not that of the whole season', async () => {
+    withMatches(all)
+    const html = await render()
+
+    expect(section(html, 'uitslagen')).toContain('e.d. eigen doelpunt')
+    expect(section(html, 'uitslagen')).not.toContain('n.v.')
+    expect(section(html, 'uitslagen')).not.toContain('pen. penalty')
+    expect(section(html, 'uitslagen-knvb-beker')).toContain('n.v. na verlenging')
+    expect(section(html, 'uitslagen-knvb-beker')).not.toContain('e.d.')
+    expect(section(html, 'uitslagen-play-offs')).toContain('pen. penalty')
+    expect(section(html, 'uitslagen-play-offs')).not.toContain('n.v. na verlenging')
+  })
+
+  it('has the link to the course of the season in the card of the league only', async () => {
+    withMatches(all)
+    const html = await render()
+    const link = 'href="/statistieken/2025-26#verloop-van-het-seizoen"'
+
+    expect(section(html, 'uitslagen')).toContain(link)
+    expect(section(html, 'uitslagen-knvb-beker')).not.toContain('verloop-van-het-seizoen')
+    expect(section(html, 'uitslagen-play-offs')).not.toContain('verloop-van-het-seizoen')
+    expect(html.match(/Het verloop van het seizoen/g)).toHaveLength(1)
+  })
+
+  it('has no card for a competition without matches', async () => {
+    withMatches([all[0]!, all[3]!])
+    const html = await render()
+
+    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-play-offs', 'eindstand', 'hoe-vaak-welke-uitslag'])
+    expect(html).not.toContain('uitslagen-knvb-beker')
+  })
+
+  it('has one card Uitslagen with its sentence and no link to the course of the season for a season without matches', async () => {
+    withMatches([])
+    const html = await render()
+
+    expect(ids(html)).toEqual(['uitslagen', 'eindstand', 'hoe-vaak-welke-uitslag'])
+    expect(section(html, 'uitslagen')).toContain('We hebben nog geen uitslagen van dit seizoen.')
+    expect(html).toContain('>Uitslagen</a>')
+    expect(html).not.toContain('Het verloop van het seizoen')
+  })
+
+  it('has a heading for every link of the bar, in the same order', async () => {
+    withMatches(all)
+    const html = await render()
+
+    expect(
+      matchShortcutsOf(false, 0, ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League']).map(({ href }) => href),
+    ).toEqual(ids(html).map((id) => `#${id}`))
+  })
+})
+
 describe('the page of an earlier season, /wedstrijden/2025-26', () => {
   it('asks for the data of that season and of no other, after finding it among the seasons with matches', async () => {
     await render()
@@ -111,19 +277,15 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).not.toContain('Voorbeeld United')
   })
 
-  it('shows the results from the first match of the season to the last, the oldest first', async () => {
+  it('shows the results of the league from the first match of the season to the last, the oldest first', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
-      matches: matchData.matches.map((match) => ({
-        ...match,
-        kickoffAt: match.kickoffAt === null ? null : new Date(match.kickoffAt.getTime() - 365 * 24 * 60 * 60 * 1000),
-        matchDate: `2025${match.matchDate.slice(4)}`,
-      })),
+      matches: inSeason2025(matchData.matches),
       season: '2025/26',
     })
     const results = (await render()).match(/<h2[^>]*id="uitslagen">.*?(?=<h2)/s)?.[0] ?? ''
-    // The made-up matches in the order of their days, from the first of the season.
-    const rounds = ['Speelronde 7', 'Speelronde 8', 'Speelronde 9', 'Tweede ronde', 'Speelronde 10']
+    // The made-up matches of the league in the order of their days, from the first one.
+    const rounds = ['Speelronde 7', 'Speelronde 8', 'Speelronde 9', 'Speelronde 10']
     const positions = rounds.map((round) => results.indexOf(round))
 
     expect(positions.every((position) => position >= 0)).toBe(true)

@@ -257,7 +257,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 De negen andere kaarten met cijfers staan op `/statistieken` (zie _De statistieken_).
 Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder hoe vaak welke uitslag en de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Statistieken waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
-Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Programma, Uitslagen, Stand, Hoe vaak welke uitslag en Hoofdtrainer) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
+Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Programma, Uitslagen, Stand, Hoe vaak welke uitslag en Hoofdtrainer; een eerder seizoen heeft een link per kaart met uitslagen) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand heeft een zacht vlak (`surface="soft"`), de hoofdtrainers een sterk vlak, en het programma en de uitslagen zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
@@ -267,7 +267,7 @@ Elk seizoen heeft één adres: `/wedstrijden` is het lopende seizoen en `/wedstr
 Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, en een seizoen dat niet in de database staat, een seizoen in de toekomst en een adres dat geen seizoen is, geven "niet gevonden".
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
-Een eerder seizoen heeft geen kaart Programma, toont zijn uitslagen van de eerste naar de laatste wedstrijd (`resultsOfSeason`), noemt zijn tabel Eindstand (`standingsCardOf`, met het anker `eindstand`), zet het seizoen op de afbeelding van een kaart en staat niet in de sitemap.
+Een eerder seizoen heeft geen kaart Programma, toont zijn uitslagen in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker en Play-offs Conference League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`), elk van de eerste naar de laatste wedstrijd (`resultsOfSeason`), noemt zijn tabel Eindstand (`standingsCardOf`, met het anker `eindstand`), zet het seizoen op de afbeelding van een kaart en staat niet in de sitemap.
 Een pagina met een ander basisadres (zoals `/statistieken`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Title` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
 Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
@@ -309,7 +309,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Hij staat er als elke club hoogstens één uitslag minder heeft dan het aantal gespeelde wedstrijden in de stand, omdat de pagina's van Wikipedia los van elkaar worden bijgewerkt (`hasEnoughLeagueResults`); anders blijft de kaart zoals hij was.
   Het bijschrift van "Laatste 5" noemt de dag van de laatste uitslag in onze gegevens, niet de dag van de stand.
 - **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
-  Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
+  Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`) en heeft een kaart per competitie met wedstrijden, in de volgorde Eredivisie, KNVB Beker, play-offs (`resultsPerCompetition`).
+  De regel noemt dan de competitie niet (`withCompetition` van `MatchLines`), elke kaart heeft de legenda van zijn eigen wedstrijden, en de link naar het verloop van het seizoen staat in de kaart Eredivisie.
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
   Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.

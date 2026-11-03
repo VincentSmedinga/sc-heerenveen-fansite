@@ -33,13 +33,50 @@ const render = async (seizoen: string) =>
 const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].map(([, href]) => href)
 
 describe('the bar of the page of an earlier season', () => {
-  it('has the anchors of the cards the page has: those of the current season without Programma', async () => {
+  it('has the anchors of the cards the page has: a card with results for each competition, without Programma', async () => {
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(matchShortcutsOf(false).map(({ href }) => href))
-    expect(hrefs(html)).toHaveLength(3)
+    // The made-up matches have the league and the cup.
+    expect(hrefs(html)).toEqual(matchShortcutsOf(false, 0, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href))
+    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#eindstand', '#hoe-vaak-welke-uitslag'])
     expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
+    expect(html).toContain('>Eredivisie</a>')
+    expect(html).toContain('>KNVB Beker</a>')
+  })
+
+  it('has a link for the play-offs too, after the one for the cup', async () => {
+    const [first] = matchData.matches
+    const playOffs = {
+      ...first!,
+      competition: 'Play-offs Conference League',
+      matchDate: '2026-05-20',
+      round: 'Halve finale',
+    } as const
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [...matchData.matches, playOffs],
+      season: '2025/26',
+    })
+    const html = await render('2025-26')
+
+    expect(hrefs(html)).toEqual([
+      '#uitslagen',
+      '#uitslagen-knvb-beker',
+      '#uitslagen-play-offs',
+      '#eindstand',
+      '#hoe-vaak-welke-uitslag',
+    ])
+    expect(html).toContain('>Play-offs Conference League</a>')
+  })
+
+  it('has the one link Uitslagen for a season without matches', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], season: '2025/26' })
+    const html = await render('2025-26')
+
+    expect(hrefs(html)).toEqual(['#uitslagen', '#eindstand', '#hoe-vaak-welke-uitslag'])
+    expect(html).toContain('>Uitslagen</a>')
   })
 
   it('has Eindstand for Stand, with the anchor of the card', async () => {

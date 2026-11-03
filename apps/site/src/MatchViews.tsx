@@ -518,8 +518,20 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
   )
 }
 
-/** A list of matches, each as a line with its own day or time. */
-export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+/**
+ * A list of matches, each as a line with its own day or time. A line names its competition,
+ * unless `withCompetition` is false, for a list under a heading that names it already. The
+ * legend under the list holds only the abbreviations of these matches.
+ */
+export function MatchLines({
+  matches,
+  now,
+  withCompetition = true,
+}: {
+  matches: PublicMatch[]
+  now: Date
+  withCompetition?: boolean
+}) {
   const shootOut = matches.some(hasShootOut)
   // A shoot-out is written without "n.v.", unless the score after 90 minutes follows it.
   const extraTime = matches.some((match) => match.extraTime && (!hasShootOut(match) || hasAfterNinety(match)))
@@ -536,7 +548,7 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
       <List role="list">
         {matches.map((match) => (
           <List.Item key={`${match.competition}-${match.round}`}>
-            <MatchLine match={match} now={now} />
+            <MatchLine match={match} now={now} withCompetition={withCompetition} />
           </List.Item>
         ))}
       </List>
@@ -1024,9 +1036,9 @@ function hasShootOut(match: PublicMatch): boolean {
 }
 
 /** A match as the design system shows it, with the time in Dutch time. */
-function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
+function MatchLine({ match, now, withCompetition }: { match: PublicMatch; now: Date; withCompetition: boolean }) {
   const common = {
-    competition: match.competition,
+    competition: withCompetition ? match.competition : undefined,
     home: match.home,
     note: match.note,
     opponent: match.opponent,

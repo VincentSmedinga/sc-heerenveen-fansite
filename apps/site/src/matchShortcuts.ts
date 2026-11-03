@@ -1,3 +1,5 @@
+import type { Competition } from '@fansite/db/schema'
+
 /** The name and the anchor of the card with how often each score was played, under Stand. */
 export const scoreCountsCard = { id: 'hoe-vaak-welke-uitslag', name: 'Hoe vaak welke uitslag' } as const
 
@@ -23,6 +25,27 @@ export const standingsCardOf = (current: boolean) =>
 
 type Shortcut = { href: string; label: string }
 
+const resultsCards: Record<Competition, { id: string; name: string }> = {
+  Eredivisie: { id: 'uitslagen', name: 'Eredivisie' },
+  'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'KNVB Beker' },
+  'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Play-offs Conference League' },
+}
+
+/**
+ * The name and the anchor of the card with the results of one competition, on the page of a
+ * season that is over. The card of the Eredivisie keeps the anchor `uitslagen` of the one card
+ * the page had, so an old link still lands on it.
+ */
+export const resultsCardOf = (competition: Competition) => resultsCards[competition]
+
+/**
+ * The cards with results a page has, in the order they are on it: a card for each competition
+ * with a result in a season that is over, and the one card Uitslagen for the current season and
+ * for a season that is over and has no result, which holds the sentence that says so.
+ */
+export const resultsCardsOf = (current: boolean, withResults: readonly Competition[]) =>
+  current || withResults.length === 0 ? [{ id: 'uitslagen', name: 'Uitslagen' }] : withResults.map(resultsCardOf)
+
 /**
  * The name and the anchor of the card with the head coaches of a season: Hoofdtrainer for one,
  * Hoofdtrainers for more. The anchor is the same for both, so a link to it keeps working when
@@ -34,16 +57,27 @@ export const coachesCardOf = (coachCount: number) =>
 /**
  * The links of the bar for the page of a season, in the order of the cards: all of them for the
  * current season, and for a season that is over the same without Programma, which has no card
- * there, and with Eindstand for Stand. The card with the head coaches, after the one with the
- * scores, has a link when the season has a coach in the table (`coachCount` above 0).
+ * there, with Eindstand for Stand, and with a link for each card with results (`withResults`
+ * are the competitions that have one, see `resultsCardsOf`). The card with the head coaches,
+ * after the one with the scores, has a link when the season has a coach in the table
+ * (`coachCount` above 0).
  */
-export const matchShortcutsOf = (current: boolean, coachCount = 0): Shortcut[] => {
+export const matchShortcutsOf = (
+  current: boolean,
+  coachCount = 0,
+  withResults: readonly Competition[] = [],
+): Shortcut[] => {
   const standings = standingsCardOf(current)
   const coaches = coachesCardOf(coachCount)
   const links: Shortcut[] = []
 
   for (const shortcut of matchShortcuts as readonly Shortcut[]) {
     if (shortcut.href === '#programma' && !current) {
+      continue
+    }
+
+    if (shortcut.href === '#uitslagen') {
+      links.push(...resultsCardsOf(current, withResults).map(({ id, name }) => ({ href: `#${id}`, label: name })))
       continue
     }
 
