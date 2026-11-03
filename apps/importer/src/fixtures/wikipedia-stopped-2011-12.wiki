@@ -1,0 +1,39 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2011/12_(mannenvoetbal)/Wedstrijden?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all matches except the two of Excelsior and AZ, the text around the templates, and the referee and the attendance (emptied).
+  The match was stopped at half time on 20 November 2011 because of fog, and the second half was played on 7 December 2011.
+  The page writes the first block as a plain score in italics, says "In de rust gestaakt" in the report, and has the second block under
+  Inhaalronde 13 instead of under the same heading.
+-->
+== Speelronde 13 ==
+{{footballbox2
+| date=20 november 2011
+| time=16:30
+| team1=[[SBV Excelsior|Excelsior]]
+| score=''0 – 0''
+| team2=[[AZ (voetbalclub)|AZ]]
+| goals1=
+| goals2=
+| location=[[Rotterdam]]
+| stadium=[[Stadion Woudestein]]
+| attendance=
+| referee=
+| report=[https://nos.nl/artikel/315143-excelsioraz-gestaakt-om-mist.html Verslag]<br />''In de rust gestaakt''<br />''wegens mist.''}}
+----
+
+==Inhaalronde 13==
+{{footballbox2
+| date=7 december 2011
+| time=19:30
+| team1=[[SBV Excelsior|Excelsior]]
+| score=0 – 0
+| team2=[[AZ (voetbalclub)|AZ]]
+| goals1=
+| goals2=
+| location=[[Rotterdam]]
+| stadium=[[Stadion Woudestein]]
+| attendance=
+| referee=
+| report=[https://nos.nl/artikel/320253-excelsioraz-deel-twee-onbeslist.html Verslag]<br />''Tweede helft''}}
+----

@@ -1395,8 +1395,16 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
   Dat geldt ook als het latere blok zelf gestaakt is, een dag of minuut heeft die we niet kennen, of een uitgestelde wedstrijd is.
   Een score die we niet kennen, geeft altijd een fout.
+- Het restant staat ook onder `Inhaalronde <nummer>` met hetzelfde nummer als de ronde van het gestaakte blok, en nergens anders.
+  Zo staat Excelsior – AZ in 2011/12: onder `Speelronde 13` een blok met de gewone score `0 – 0` op 20 november 2011, waarvan `report` zegt "In de rust gestaakt", en onder `Inhaalronde 13` het blok met `0 – 0` van 7 december 2011 ("Tweede helft").
+  Het is één wedstrijd, met de eindstand en de dag van het tweede blok.
+- Ook een blok met een gewone score is gestaakt als de tekst van `report` (zonder opmaak en zonder de adressen van links) "gestaakt" bevat en het blok onder een `Speelronde` staat.
+  Staat de minuut niet in de score maar zegt `report` "in de rust", dan begint de regel met "Gestaakt in de rust."
+  Zegt de pagina niets over de minuut of de rust, dan is het een fout.
+  Het blok onder de inhaalronde mag zelf niet gestaakt zijn (ook niet met "gestaakt" in `report`).
 - Een gestaakte wedstrijd van een andere club komt niet in `matches`, want daar staan alleen de wedstrijden van sc Heerenveen.
-  De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt.
+  De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt, met de eindstand en de dag van dat blok en het nummer van de ronde.
+  Een gestaakt blok met een gewone score dat geen bruikbaar restant heeft, krijgt geen uitslag maar een melding in de waarschuwing "league results left out".
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
 - Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
 
@@ -1415,7 +1423,7 @@ De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waar
   In `league_results` is het één rij, met de dag van de inhaalwedstrijd en het nummer van de ronde waaruit hij is uitgesteld.
 - Een blok onder een inhaalronde zonder score, of met "Uitgesteld" of "Afgelast", doet niets: de wedstrijd blijft staan als uitgesteld tot er een uitslag is.
 - Een kop die geen ronde is, zoals de play-offs, blijft buiten de competitie.
-- Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, volgt hier niet: `restOf` zoekt het restant onder dezelfde kop, en de import geeft een fout.
+- Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd (zie _Een gestaakte wedstrijd_ hierboven).
 - De tests gebruiken een uitsnede van de pagina van 2022/23, [`src/fixtures/wikipedia-catch-up-2022-23.wiki`](src/fixtures/wikipedia-catch-up-2022-23.wiki), met de twee wedstrijden van RKC Waalwijk en Go Ahead Eagles en twee verzonnen wedstrijden van sc Heerenveen.
 
 ### Wat de import niet doet
@@ -1607,6 +1615,7 @@ Er staan alle wedstrijden van sc Heerenveen in en een paar van andere clubs.
 De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de verslagen en de scheidsrechters en toeschouwers van andere clubs zijn leeggemaakt.
 De overige uitslagen van andere clubs zijn verzonnen, op één regel per wedstrijd, zodat elke club evenveel uitslagen heeft als de stand zegt: tien in `wikipedia-programme.wiki` (ronde 1 tot en met 10) en 34 in `wikipedia-season-programme.wiki`.
 Alleen de clubs, de dagen en de rondes volgen de pagina; de paren en de scores niet.
+[`wikipedia-stopped-2011-12.wiki`](src/fixtures/wikipedia-stopped-2011-12.wiki) is een uitsnede van de pagina van 2011/12 (op 3 november 2026 gelezen) met de twee blokken van Excelsior – AZ en hun koppen.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
 `wikipedia-playoffs-2013.wiki`, `wikipedia-playoffs-2015.wiki`, `wikipedia-playoffs-2016.wiki` en `wikipedia-playoffs-2018.wiki` zijn de Europa League-play-offs, gelezen op 3 november 2026 en ingekort tot de kop van de Europa League: 2013 met een paar van sc Heerenveen, 2015 met twee rondes en verlenging als `(nv)`, 2016 zonder sc Heerenveen en 2018 met een regel tekst onder de kop van de tweede ronde.

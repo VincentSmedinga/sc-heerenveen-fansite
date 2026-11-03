@@ -1677,6 +1677,7 @@
   `restOf` zoekt het restant onder dezelfde kop, dus het blok onder de inhaalronde blijft dan een wedstrijd naast het gestaakte blok en de import geeft een fout.
   We hebben dat niet op een pagina gezien; komt het voor, dan volgt een eigen issue.
 - **Alternatieven:** een eigen ronde `Inhaalronde 17` voor de wedstrijd van sc Heerenveen (de wedstrijd staat dan twee keer in `matches`, een keer uitgesteld en een keer gespeeld, en het programma van de site toont er twee); de wedstrijd laten staan zoals hij was en alleen de uitslagen aanvullen (een uitgestelde wedstrijd van ons blijft dan uitgesteld terwijl hij is gespeeld); een inhaalblok zonder score ook laten vervangen (de nieuwe datum is dan zichtbaar, maar een wedstrijd die nog niet is gespeeld zou de oorspronkelijke vervangen en we zagen zo'n blok niet).
+- **Later:** zie _Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd_ (3 november 2026): de gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt is nu gedekt, ook als het eerste blok een gewone score heeft.
 
 ## De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk
 
@@ -1843,6 +1844,9 @@
   Voor de seizoenen voor 2020/21 staat er nu wel een titel voor de play-offs.
 - **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
   Een aftrek in de kolom `PA` is geen fout meer, en 2010/11, 2014/15 en 2015/16 zijn geen gat meer door de aftrek.
+- **Later:** zie _Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd_ (3 november 2026): 2011/12 is geen gat meer.
+  De zin onder **Waarom** over 2011/12 en de zin onder **Nadeel** hierboven gelden niet meer: de wedstrijd Excelsior – AZ is in de rust gestaakt en later alleen in de tweede helft afgemaakt, niet helemaal opnieuw gespeeld.
+  `checkResults` is niet veranderd.
 
 ## Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`
 
@@ -1961,3 +1965,31 @@
 - **Alternatieven:** alleen bureauonderzoek.
   Dat is goedkoper, maar de aantallen zijn dan een schatting.
 - **Gevolg:** de proef staat in `docs/onderzoek-spelers-sinds-1990.md`, met de stappen om hem te herhalen.
+
+## Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd
+
+- **Datum:** 3 november 2026
+- **Besluit:** een blok onder `Speelronde <n>` waarvan het veld `report` "gestaakt" zegt, is een gestaakte wedstrijd, ook als de score een gewone uitslag is, en het blok voor dezelfde twee clubs onder `Inhaalronde <n>` maakt hem af, zoals het latere blok onder dezelfde kop dat al deed (#548, #678).
+  Het is één wedstrijd met de eindstand en de dag van het tweede blok.
+  Een wedstrijd die helemaal opnieuw is gespeeld, krijgt geen regel en blijft een fout.
+  - **Het woord:** de lezer leest de tekst van `report` zoals de pagina hem toont, zonder opmaak en zonder de adressen van links.
+    Het adres van een verslag bevat vaak het woord (`...-vuurwerk-gestaakt-duel.html` in 2019/20, een wedstrijd die wel is gespeeld) en is geen mededeling.
+  - **Het restant:** onder dezelfde kop, of onder `Inhaalronde <n>` met hetzelfde nummer voor een blok onder `Speelronde <n>`, en nergens anders.
+    Dat geldt voor elk gestaakt blok, ook voor een score als `Gestaakt 82' (2 – 0)`.
+    Staat er geen blok, of is het zelf gestaakt (de score, of "gestaakt" in `report` van het blok onder de inhaalronde), uitgesteld of een score die we niet kennen, dan is het een fout die de wedstrijd noemt.
+  - **Voor sc Heerenveen:** één wedstrijd in `matches`, onder de ronde van het eerste blok, met de regel in `matches.note`.
+    Staat de minuut niet in de score maar zegt `report` "in de rust", dan begint de regel met "Gestaakt in de rust."
+    Zegt de pagina niets over de minuut of de rust, dan is het een fout.
+  - **Voor de uitslagen van alle clubs:** één uitslag, de eindstand van het blok dat hem afmaakt, met de dag van dat blok en de ronde uit het kopnummer.
+    `lastPlayedOn` telt dat blok mee.
+    Een gestaakt blok met een gewone score en zonder bruikbaar restant staat in `unread` en niet in de uitslagen, want de gewone score zou een stand geven die niet de eindstand is.
+  - **Wat niet losser wordt:** `checkResults` is niet veranderd.
+    Dezelfde uitslag twee keer zonder het woord blijft een fout.
+- **Waarom:** Excelsior – AZ (2011/12) is op 20 november 2011 in de rust gestaakt wegens mist (0 – 0) en op 7 december 2011 afgemaakt in de tweede helft (0 – 0).
+  De pagina schrijft het eerste blok als gewone uitslag onder `Speelronde 13` en het tweede onder `Inhaalronde 13`, dus Excelsior stond twee keer thuis tegen AZ in de uitslagen en het seizoen las niet.
+  De wedstrijd telt voor de stand maar één keer, met de eindstand na beide delen, en die klopt met de stand van Wikipedia.
+  Het woord in `report` is de enige plek waar de pagina het zegt, en een tweede blok dat er alleen op lijkt is zonder dat woord geen reden om te raden.
+- **Alternatieven:** twee wedstrijden met een status (een kolom en een status die elke lijst op de site moet kennen, voor één wedstrijd van een andere club en een geval dat we verder niet zagen).
+  Elk blok onder een inhaalronde laten winnen van het blok onder de ronde (eenvoudiger, maar dezelfde uitslag twee keer zou dan stil goed gaan).
+  Een vaste uitzondering voor deze wedstrijd in de code (nul risico nu, maar de volgende gestaakte wedstrijd vraagt weer een wijziging).
+  Alleen wedstrijden van andere clubs (laat de eigen wedstrijd onder een inhaalronde een fout, terwijl de code hetzelfde is).

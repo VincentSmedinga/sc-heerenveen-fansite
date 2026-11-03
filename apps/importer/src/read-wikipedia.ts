@@ -449,8 +449,9 @@ export function readLeague(text: string): ReadProgramme {
       continue
     }
 
-    const played = parseScore(box.params.get('score') ?? '')
-    const day = parseDate(box.params.get('date') ?? '')
+    const result = stoppedOf(box) === undefined ? box : restOf(box, boxes)
+    const played = parseScore(result?.params.get('score') ?? '')
+    const day = parseDate(result?.params.get('date') ?? '')
 
     if (played.kind === 'score' && day !== undefined && (lastPlayedOn === null || day.isoDate > lastPlayedOn)) {
       lastPlayedOn = day.isoDate
@@ -493,12 +494,19 @@ export function readLeagueResults(text: string): ReadResults {
       continue
     }
 
-    const result = restOf(box, boxes) ?? box
+    const rest = restOf(box, boxes)
+    const result = rest ?? box
     const score = parseScore(result.params.get('score') ?? '')
     const [homeClub, awayClub] = [clubName(box.params.get('team1') ?? ''), clubName(box.params.get('team2') ?? '')]
 
     // A match of another club on the page makes it a page with every club, played or not yet.
     others ||= !isOurs(box)
+    if (isStoppedByReport(box) && (rest === undefined || ['postponed', 'stopped', 'unknown'].includes(score.kind))) {
+      unread.push(
+        `${box.heading}: ${homeClub} - ${awayClub} was stopped, and the page has no usable block that finishes it`,
+      )
+      continue
+    }
     if (score.kind !== 'score') {
       if (score.kind === 'unknown') {
         unread.push(
@@ -882,17 +890,24 @@ function isOurs(box: Template): boolean {
 }
 
 /**
- * Whether a block finishes a match that was stopped: an earlier block under the same heading
- * is for the same two clubs and has a score like `Gestaakt 82' (2 – 0)`. That earlier block is
- * the match (see `restOf`), so this one is not a match of its own.
+ * Whether a block finishes a match that was stopped: an earlier block is for the same two
+ * clubs and is a stopped match that this block can finish (see `restOf`). That earlier block is
+ * the match, so this one is not a match of its own.
  */
 function isRestOfStopped(box: Template, boxes: Template[]): boolean {
-  return boxes.some(
-    (other) =>
-      other.index < box.index &&
-      other.heading === box.heading &&
-      clubsOf(other) === clubsOf(box) &&
-      parseScore(other.params.get('score') ?? '').kind === 'stopped',
+  return boxes.some((other) => other.index < box.index && restsOf(other, boxes).includes(box))
+}
+
+/**
+ * Whether a block under a round of the league has a plain score and says in its `report` that
+ * the match was stopped, as the page of 2011/12 does for Excelsior - AZ: `0 – 0` and "In de
+ * rust gestaakt". The block under an `Inhaalronde` with the same number finishes it.
+ */
+function isStoppedByReport(box: Template): boolean {
+  return (
+    /^Speelronde \d{1,2}(?: \(was \d{1,2}\))?$/u.test(box.heading ?? '') &&
+    parseScore(box.params.get('score') ?? '').kind === 'score' &&
+    /gestaakt/iu.test(reportText(box))
   )
 }
 
@@ -1494,7 +1509,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const stadium = plain(box.params.get('stadium') ?? '') || null
   const day = parseDate(box.params.get('date') ?? '')
   const time = parseTime(box.params.get('time') ?? '')
-  const began = parseScore(box.params.get('score') ?? '')
+  const began = stoppedOf(box)
   // The block with the result, and who is at home in it: the rest may name the clubs the other
   // way round.
   const result = rest ?? box
@@ -1523,7 +1538,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
   if (time === undefined) {
     return `${name} has a time we do not know: '${plain(box.params.get('time') ?? '').slice(0, 40)}'`
   }
-  if (score.kind === 'stopped') {
+  if (score.kind === 'stopped' || (began !== undefined && rest === undefined)) {
     return `${name} was stopped, and the page has no later block for the same two clubs in this round`
   }
   if (score.kind === 'unknown') {
@@ -1532,12 +1547,15 @@ function readMatch(box: Template, competition: Competition, round: null | string
 
   let note: null | string = null
 
-  if (began.kind === 'stopped' && rest !== undefined) {
+  if (began !== undefined && rest !== undefined) {
     if (score.kind !== 'score' && score.kind !== 'none') {
       return `${name} was stopped, and the block that finishes it has no score we can use`
     }
+    if (rest.heading !== box.heading && /gestaakt/iu.test(reportText(rest))) {
+      return `${name} was stopped, and the block that finishes it was stopped too`
+    }
 
-    const problem = stoppedNote(began.minute, rest, score.kind === 'score')
+    const problem = stoppedNote(began, rest, score.kind === 'score')
 
     if (typeof problem === 'string') {
       return `${name} ${problem}`
@@ -1674,17 +1692,41 @@ function readScoreParts(text: string): Omit<Extract<ParsedScore, { kind: 'score'
 }
 
 /**
- * The block that finishes a match that was stopped: the last block under the same heading for
- * the same two clubs after it, or undefined when the box is not stopped or nothing follows.
- * The block is the one with the result, as the stopped block has only the score up to the
- * minute it stopped.
+ * What the `report` field of a block says, as the page shows it: without the addresses of the
+ * links, since an address such as `nos.nl/artikel/2311740-...-gestaakt-duel` is no statement
+ * of ours to read, only a link text is.
+ */
+function reportText(box: Template): string {
+  return plain((box.params.get('report') ?? '').replace(/\[(?:https?:)?\/\/\S+\s*([^\]]*)\]/gu, '$1'))
+}
+
+/**
+ * The block that finishes a match that was stopped: the last block for the same two clubs
+ * after it, or undefined when the box is not stopped or nothing follows. The block is the one
+ * with the result, as the stopped block has only the score up to the minute it stopped.
  */
 function restOf(box: Template, boxes: Template[]): Template | undefined {
-  return parseScore(box.params.get('score') ?? '').kind === 'stopped'
-    ? boxes.findLast(
-        (other) => other.index > box.index && other.heading === box.heading && clubsOf(other) === clubsOf(box),
-      )
-    : undefined
+  return restsOf(box, boxes).at(-1)
+}
+
+/**
+ * The blocks that can finish a match that was stopped, in the order of the page: those after
+ * it for the same two clubs under the same heading and, for a block under `Speelronde 13`,
+ * those under `Inhaalronde 13` (the number before any bracket), and nowhere else.
+ */
+function restsOf(box: Template, boxes: Template[]): Template[] {
+  if (stoppedOf(box) === undefined) {
+    return []
+  }
+
+  const round = /^Speelronde (\d{1,2})\b/u.exec(box.heading ?? '')?.[1]
+
+  return boxes.filter(
+    (other) =>
+      other.index > box.index &&
+      clubsOf(other) === clubsOf(box) &&
+      (other.heading === box.heading || (round !== undefined && other.heading === `Inhaalronde ${round}`)),
+  )
 }
 
 /**
@@ -1748,18 +1790,41 @@ function splitParameters(inner: string): string[] {
  * its article can't be told from the name. The answer is a text when the page does not give
  * what the line needs.
  */
-function stoppedNote(minute: null | number, rest: Template, played: boolean): string | { note: string } {
+function stoppedNote(
+  began: { inBreak: boolean; minute: null | number },
+  rest: Template,
+  played: boolean,
+): string | { note: string } {
   const day = parseDate(rest.params.get('date') ?? '')
   const stadium = plain(rest.params.get('stadium') ?? '')
 
-  if (minute === null) {
+  if (began.minute === null && !began.inBreak) {
     return 'was stopped at a minute we do not know'
   }
   if (day === undefined || !day.single) {
     return `was finished on a day we do not know: '${plain(rest.params.get('date') ?? '').slice(0, 40)}'`
   }
 
-  const note = `Gestaakt in minuut ${minute}. Het restant ${played ? 'is' : 'wordt'} op ${day.day} ${months[day.month - 1]} gespeeld${stadium === '' ? '' : ` in ${/stadion$/iu.test(stadium) ? 'het ' : ''}${stadium}`}.`
+  const note = `Gestaakt ${began.minute === null ? 'in de rust' : `in minuut ${began.minute}`}. Het restant ${played ? 'is' : 'wordt'} op ${day.day} ${months[day.month - 1]} gespeeld${stadium === '' ? '' : ` in ${/stadion$/iu.test(stadium) ? 'het ' : ''}${stadium}`}.`
 
   return note.length > matchLimits.note ? 'has a note that is too long' : { note }
+}
+
+/**
+ * What a block says about being stopped: undefined when it is not. A score like `Gestaakt 82'
+ * (2 – 0)` is a stopped match, with the minute. A plain score with the word in `report` is one
+ * too (see `isStoppedByReport`), and has no minute. Either may say in `report` that it was
+ * "in de rust".
+ */
+function stoppedOf(box: Template): undefined | { inBreak: boolean; minute: null | number } {
+  const score = parseScore(box.params.get('score') ?? '')
+
+  if (score.kind !== 'stopped' && !isStoppedByReport(box)) {
+    return undefined
+  }
+
+  return {
+    inBreak: /\bin de rust\b/iu.test(reportText(box)),
+    minute: score.kind === 'stopped' ? score.minute : null,
+  }
 }
