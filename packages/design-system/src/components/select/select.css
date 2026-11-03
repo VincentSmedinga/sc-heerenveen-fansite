@@ -25,6 +25,32 @@
    */
   /* stylelint-disable plugin/use-baseline -- base-select is not widely available yet */
   @supports (appearance: base-select) {
+    @position-try --hf-select-picker-end {
+      margin-inline: var(--hf-space-xs) 0;
+      position-area: block-end span-inline-start;
+    }
+
+    @position-try --hf-select-picker-across {
+      margin-inline: var(--hf-space-xs);
+      max-inline-size: stretch;
+      position-area: block-end span-all;
+    }
+
+    @position-try --hf-select-picker-up-start {
+      position-area: block-start span-inline-end;
+    }
+
+    @position-try --hf-select-picker-up-end {
+      margin-inline: var(--hf-space-xs) 0;
+      position-area: block-start span-inline-start;
+    }
+
+    @position-try --hf-select-picker-up-across {
+      margin-inline: var(--hf-space-xs);
+      max-inline-size: stretch;
+      position-area: block-start span-all;
+    }
+
     .hf-select-styled,
     .hf-select-styled::picker(select) {
       appearance: base-select;
@@ -47,7 +73,15 @@
         rotate: 180deg;
       }
 
-      /* The open list: a surface with a border, below the closed list and as wide as it. */
+      /*
+       * The open list: a surface with a border, next to the closed list and never outside the
+       * screen. It is as wide as its longest option and at least as wide as the closed list,
+       * but no wider than the screen; a longer option wraps. It opens below the closed list
+       * and grows to the right. Where that does not fit it grows to the left, from the right
+       * edge of the closed list, and where that does not fit either it takes the width of the
+       * screen. When there is more room above than below it opens upward. The height is the
+       * room that is left, so the list scrolls inside itself, and not the page.
+       */
       &::picker(select) {
         background-color: var(--hf-colour-background-surface);
         border: 1px solid;
@@ -55,9 +89,18 @@
         border-radius: 0.25rem;
         box-sizing: border-box;
         color: var(--hf-colour-text-default);
-        /* stylelint-disable-next-line declaration-property-value-allowed-list -- The margin moves the open list away from the closed one; the list is a popover, outside the flow, and a gap does not reach it. */
-        margin-block: var(--hf-space-xs);
+        inline-size: max-content;
+        /* stylelint-disable-next-line declaration-property-value-allowed-list -- The margin keeps the open list a little way from the closed one and from the edge of the screen; the list is a popover, outside the flow, and a gap does not reach it. */
+        margin: var(--hf-space-xs);
+        margin-inline-start: 0;
+        overflow-inline: hidden;
+        overflow-wrap: anywhere;
+        overscroll-behavior: contain;
         padding: var(--hf-space-xs);
+        position-try-fallbacks:
+          --hf-select-picker-end, --hf-select-picker-across, --hf-select-picker-up-start, --hf-select-picker-up-end,
+          --hf-select-picker-up-across;
+        position-try-order: most-block-size;
       }
 
       option {
@@ -70,6 +113,9 @@
         min-block-size: var(--hf-size-control);
         padding-block: var(--hf-space-s);
         padding-inline: var(--hf-space-s);
+
+        /* A long option wraps inside the list, as the browser's own list does not. */
+        white-space: normal;
 
         /*
          * Under the mouse: a tint and a thin line, which stays in forced colours. Where the

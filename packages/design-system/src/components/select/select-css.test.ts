@@ -35,6 +35,30 @@ describe('the styled list in select.css', () => {
   })
 })
 
+describe('the open list in select.css', () => {
+  it('is as wide as its longest option, never wider than the screen, and wraps a long option', () => {
+    expect(css).toContain('inline-size: max-content')
+    expect(css).toMatch(/@position-try --hf-select-picker-across \{[^}]*max-inline-size: stretch/)
+    expect(css).not.toMatch(/\dvw/)
+    expect(css).toMatch(/white-space: normal/)
+    expect(css).toMatch(/overflow-inline: hidden/)
+  })
+
+  it('moves to the other side of the field, and then across the screen, instead of leaving the screen', () => {
+    expect(css).toMatch(/position-try-fallbacks:[^;]*--hf-select-picker-end[^;]*--hf-select-picker-across/)
+    expect(css).toMatch(/@position-try --hf-select-picker-end \{[^}]*position-area: block-end span-inline-start/)
+    expect(css).toMatch(/@position-try --hf-select-picker-across \{[^}]*position-area: block-end span-all/)
+    expect(css).toMatch(/@position-try --hf-select-picker-up-across \{[^}]*position-area: block-start span-all/)
+  })
+
+  it('opens where there is most room, with no fixed height, and scrolls itself and not the page', () => {
+    expect(css).toContain('position-try-order: most-block-size')
+    expect(css).toContain('overscroll-behavior: contain')
+    expect(css).not.toMatch(/(?:max-)?block-size: \d/)
+    expect(css).not.toMatch(/max-height/)
+  })
+})
+
 describe('the season picker', () => {
   it('asks for the styled list', () => {
     expect(read('../season-picker/SeasonPicker.tsx')).toContain('className="hf-select-styled"')

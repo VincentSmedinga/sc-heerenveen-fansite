@@ -1539,6 +1539,8 @@
 - **Alternatieven:** een eigen pijltje als achtergrond van de `select` (door de projecteigenaar afgewezen, en het verdwijnt in gedwongen kleuren).
   Een eigen keuzelijst van `div`'s (staat buiten dit issue, en het toetsenbord en de schermlezer moeten dan allemaal opnieuw).
   Alle keuzelijsten in één keer opmaken (raakt het contactformulier en `Field`, en de seizoenskiezer is de enige met een e2e-test voor het toetsenbord).
+- **Later:** zie _Het menu van een keuzelijst met de opmaak van de site blijft binnen het scherm_, want 400% zoom was alleen met vier seizoenen bekeken.
+  De rest blijft gelden.
 
 ## Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze
 
@@ -2343,3 +2345,30 @@
   `SectionBar` laten staan en alleen zijn CSS naar die van `NavigationBar` verhuizen (de twee verschillen in HTML en rol blijven op twee plekken staan).
   `Navigation` zelf een losse balk laten tekenen (het menu kent het onderdeel niet en heeft er geen reden voor).
   De rij van het beheer tot de rand van het scherm laten lopen (dan blijft er een extra stand voor de breedte in de ene balk, en een deel van de dubbele stijl).
+
+## Het menu van een keuzelijst met de opmaak van de site blijft binnen het scherm
+
+- **Datum:** 3 november 2026
+- **Besluit:** het open menu van een `Select` met `hf-select-styled` blijft binnen het scherm, aan alle kanten en op elke breedte (#668).
+  De regels staan in `select.css`, binnen `@supports (appearance: base-select)`; een gewone `Select` houdt de lijst van de browser.
+  - **Breedte:** het menu is minstens zo breed als het veld en groeit mee met de langste optie, tot het scherm min een marge van `--hf-space-xs`.
+    Een lange optie breekt af op meer regels (`white-space: normal`, `overflow-wrap: anywhere`), en het menu krijgt geen horizontale schuifbalk.
+  - **Kant:** het menu groeit naar rechts vanaf de linkerkant van het veld.
+    Past dat niet, dan lijnt het uit met de rechterkant van het veld en groeit het naar links.
+    Past ook dat niet, dan neemt het de breedte van het scherm.
+    Dat is `position-try-fallbacks` met drie eigen `@position-try`-regels; `min-inline-size` laat het menu niet krimpen tot de ruimte naast het veld, zodat de browser doorgaat naar de volgende.
+  - **Hoogte en richting:** het menu opent onder het veld, of boven het veld als daar meer ruimte is (`position-try-order: most-block-size`, zoals de browser al deed).
+    Zijn hoogte is de ruimte aan die kant min een marge (`max-block-size: stretch` van de browser), zonder vaste maximumhoogte.
+    Alleen het menu scrolt (`overscroll-behavior: contain`).
+  - **Toetsenbord:** bij het openen staat de gekozen optie in beeld, en de optie met focus scrolt mee bij de pijltjes, Home, End, Page up, Page down en een letter.
+    Dat doet Chromium zelf; de test controleert het.
+- **Waarom:** het menu was bij een veld aan de rechterkant van de pagina breder dan het scherm: het groeide vanaf de linkerkant van het veld naar rechts en `inline-size` was zo breed als de langste optie (642 pixels in het verhaal met de lange optie), zonder grens.
+  Een vaste maat past niet bij elk scherm, elke zoom en elke tekstgrootte; de ruimte op het scherm doet dat wel.
+  Een menu dat nooit smaller is dan het veld, wordt niet verward met een ander veld, en een lange optie blijft leesbaar.
+- **Nadeel:** een veld in de onderste helft van het scherm opent omhoog, ook als het menu eronder zou passen, omdat `most-block-size` de grootste ruimte kiest en niet de eerste die past.
+  Een kort menu zit dan boven het veld in plaats van eronder.
+  Firefox en Safari zijn niet bekeken; zonder `base-select` houden ze de lijst die ze hebben.
+- **Alternatieven:** precies zo breed als het veld (een lange optie wordt afgekapt of breekt in smalle regels, en het vinkje vraagt zelf ruimte).
+  Een vaste maximumhoogte van ongeveer acht opties (een maat die we moeten onderhouden, en op een laag scherm nog te hoog).
+  Alleen scrollen binnen het menu, zonder eis aan zoom (laat de zwaarste situatie ongetest).
+  Alle keuzelijsten de opmaak van de site geven (een eigen issue).
