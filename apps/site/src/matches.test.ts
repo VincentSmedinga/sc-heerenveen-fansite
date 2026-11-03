@@ -16,6 +16,7 @@ import {
   overviewOf,
   parseCleanSheetCount,
   resultsOfSeason,
+  resultsPerCompetition,
   scoreCountsOf,
   scorersCoverage,
   standingsAround,
@@ -105,6 +106,44 @@ describe('resultsOfSeason', () => {
     resultsOfSeason(newestFirst, '2025/26', between)
 
     expect(rounds(newestFirst)).toEqual(['Speelronde 4', 'Speelronde 3', 'Speelronde 2', 'Speelronde 1'])
+  })
+})
+
+describe('resultsPerCompetition', () => {
+  const of = (competition: PublicMatch['competition'], round: string): PublicMatch => ({
+    ...season[0]!,
+    competition,
+    round,
+  })
+  const mixed = [
+    of('Play-offs Conference League', 'Halve finale'),
+    of('KNVB Beker', 'Tweede ronde'),
+    of('Eredivisie', 'Speelronde 1'),
+    of('Eredivisie', 'Speelronde 2'),
+    of('KNVB Beker', 'Derde ronde'),
+  ]
+
+  it('gives a list for each competition, the league first, then the cup, then the play-offs', () => {
+    expect(resultsPerCompetition(mixed).map(({ competition }) => competition)).toEqual([
+      'Eredivisie',
+      'KNVB Beker',
+      'Play-offs Conference League',
+    ])
+  })
+
+  it('keeps the order it was given inside each list', () => {
+    expect(resultsPerCompetition(mixed).map(({ matches }) => matches.map((match) => match.round))).toEqual([
+      ['Speelronde 1', 'Speelronde 2'],
+      ['Tweede ronde', 'Derde ronde'],
+      ['Halve finale'],
+    ])
+  })
+
+  it('leaves out a competition without a result, and has nothing for no results', () => {
+    expect(resultsPerCompetition([mixed[0]!]).map(({ competition }) => competition)).toEqual([
+      'Play-offs Conference League',
+    ])
+    expect(resultsPerCompetition([])).toEqual([])
   })
 })
 

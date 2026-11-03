@@ -98,8 +98,11 @@ type MatchAfterNinety =
 type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
-  /** The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. */
-  competition: string
+  /**
+   * The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. Leave it out
+   * where the heading above the list already names it: the label then has the round alone.
+   */
+  competition?: string | undefined
   /** Whether sc Heerenveen plays at home. The home club is named first. */
   home: boolean
   /**
@@ -157,10 +160,11 @@ const separator = (
 )
 
 /**
- * A match of sc Heerenveen 1 as a line in a list: the competition and the round, the two clubs
- * with the result between them, and under that when and where. It is plain text: a match has no
- * page of its own, so there is no link, and no club badge, only the names. match.css gives it
- * its look, and draws the lines between the lines of a List.
+ * A match of sc Heerenveen 1 as a line in a list: the competition and the round (the round
+ * alone under a heading that names the competition), the two clubs with the result between
+ * them, and under that when and where. It is plain text: a match has no page of its own, so
+ * there is no link, and no club badge, only the names. match.css gives it its look, and draws
+ * the lines between the lines of a List.
  *
  * The two clubs are in the order they are announced, the home club first, and the line also
  * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
@@ -244,8 +248,12 @@ export const Match = ({
   return (
     <div {...props} className={classNames('hf-match', className)}>
       <Text appearance="meta" className="hf-match-label">
-        {competition}
-        {separator}
+        {competition ? (
+          <>
+            {competition}
+            {separator}
+          </>
+        ) : null}
         {round}
       </Text>
       <p className="hf-match-clubs">

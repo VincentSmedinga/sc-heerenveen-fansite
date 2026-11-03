@@ -38,6 +38,12 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-when')?.textContent).toBe('zo 1 nov 14:30 · Uit · Voorbeeldpark')
   })
 
+  it('writes the round alone when the competition is left out', () => {
+    const { container } = render(<Match {...scheduled} competition={undefined} />)
+
+    expect(container.querySelector('.hf-match-label')?.textContent).toBe('Speelronde 12')
+  })
+
   it('names the home club first, and says "Thuis" or "Uit"', () => {
     const { container, rerender } = render(<Match {...scheduled} home />)
 

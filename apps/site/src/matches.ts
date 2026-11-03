@@ -14,6 +14,7 @@ import {
   type PublicStandingsRow,
   type PublicWikipediaPage,
 } from '@fansite/db/queries'
+import { type Competition, competitions } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
@@ -832,6 +833,28 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
  */
 export function resultsOfSeason(results: PublicMatch[], season: string, now: Date) {
   return season === seasonOf(now) ? results : [...results].reverse()
+}
+
+/** The competitions in the order a season that is over shows them: league, cup, the rest. */
+const resultsCardOrder: readonly Competition[] = [
+  'Eredivisie',
+  'KNVB Beker',
+  ...competitions.filter((competition) => competition !== 'Eredivisie' && competition !== 'KNVB Beker'),
+]
+
+/**
+ * The results of a season that is over split into one list per competition, for the cards of
+ * its page. The lists come in the order of `resultsCardOrder` and keep the order of `results`
+ * inside each, and a competition without a result has none. The current season has one card
+ * for all of them (see `resultsOfSeason`), so it doesn't use this.
+ */
+export function resultsPerCompetition(results: PublicMatch[]) {
+  return resultsCardOrder
+    .map((competition) => ({
+      competition,
+      matches: results.filter((match) => match.competition === competition),
+    }))
+    .filter(({ matches }) => matches.length > 0)
 }
 
 /** How long after the kick-off a result may take: later than this we say it isn't there yet. */

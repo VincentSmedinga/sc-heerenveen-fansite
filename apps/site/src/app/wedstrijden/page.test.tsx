@@ -241,6 +241,17 @@ describe('the page /wedstrijden', () => {
     expect(results).toContain('2–0')
   })
 
+  it('keeps all the results in one card Uitslagen, with the competition in each line', async () => {
+    const html = await render()
+    const results = section(html, 'uitslagen')
+
+    expect(html).not.toContain('uitslagen-knvb-beker')
+    expect(html).not.toContain('Uitslagen Eredivisie')
+    expect(results).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde')
+    expect(results).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 9')
+    expect(results).toContain('Het verloop van het seizoen')
+  })
+
   it('calls the card with the table Stand, and not Eindstand, which is for a season that is over', async () => {
     const html = await render()
 

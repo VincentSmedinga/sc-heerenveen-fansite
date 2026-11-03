@@ -7,8 +7,8 @@ import { notFound } from 'next/navigation'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { lastFiveOf } from '#src/last-five'
-import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason } from '#src/matches'
-import { coachesCardOf, scoreCountsCard, standingsCardOf } from '#src/matchShortcuts'
+import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason, resultsPerCompetition } from '#src/matches'
+import { coachesCardOf, resultsCardOf, scoreCountsCard, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
   imageCredit,
@@ -57,9 +57,11 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * The page of a season: `/wedstrijden` for the current season and `/wedstrijden/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. A season that is over has no Programma, shows its results from the first match to
- * the last, and calls its table Eindstand. Under the table and the results is a link to the
- * card with figures that belongs to it on the page Statistieken, of the same season. A season
- * that has no matches in the database is the page "niet gevonden".
+ * the last in a card for each competition (Uitslagen Eredivisie, Uitslagen KNVB Beker and so
+ * on, the link to the course of the season in the first), and calls its table Eindstand. Under
+ * the table and the results is a link to the card with figures that belongs to it on the page
+ * Statistieken, of the same season. A season that has no matches in the database is the page
+ * "niet gevonden".
  *
  * The card with the table of the current season has a switch between the whole season and the
  * latest five matches of each club, `?stand=laatste-5` (see StandingsSwitch). It is there only
@@ -86,6 +88,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const imageSeason = current ? undefined : season
   const { programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
+  // A season that is over has a card for each competition with a result. The current season
+  // and a season without a result have the one card Uitslagen.
+  const resultCards = current ? [] : resultsPerCompetition(results)
   const standingsCard = standingsCardOf(current)
   const lastFive = current ? await lastFiveOfSeason(data) : undefined
   const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
@@ -119,23 +124,33 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             )}
           </Card>
         )}
-        <Card aria-labelledby="uitslagen">
-          <Heading anchor id="uitslagen" level={2}>
-            Uitslagen
-          </Heading>
-          {results.length === 0 ? (
-            <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
-          ) : (
-            <MatchLines matches={results} now={now} />
-          )}
-          {results.length > 0 && (
-            <Text>
-              <Link href={statistics('verloop-van-het-seizoen')} icon="arrow-right">
-                Het verloop van het seizoen
-              </Link>
-            </Text>
-          )}
-        </Card>
+        {resultCards.length === 0 ? (
+          <Card aria-labelledby="uitslagen">
+            <Heading anchor id="uitslagen" level={2}>
+              Uitslagen
+            </Heading>
+            {results.length === 0 ? (
+              <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+            ) : (
+              <MatchLines matches={results} now={now} />
+            )}
+            {results.length > 0 && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
+          </Card>
+        ) : (
+          resultCards.map(({ competition, matches }) => {
+            const { id, name } = resultsCardOf(competition)
+
+            return (
+              <Card aria-labelledby={id} key={competition}>
+                <Heading anchor id={id} level={2}>
+                  {name}
+                </Heading>
+                <MatchLines matches={matches} now={now} withCompetition={false} />
+                {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
+              </Card>
+            )
+          })
+        )}
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
           the results: the table, how often each score was played, and the head coaches. */}
@@ -207,4 +222,15 @@ async function lastFiveOfSeason(data: MatchData) {
 
     return undefined
   }
+}
+
+/** The link under the results to the card with the course of the season, on Statistieken. */
+function SeasonCourseLink({ href }: { href: string }) {
+  return (
+    <Text>
+      <Link href={href} icon="arrow-right">
+        Het verloop van het seizoen
+      </Link>
+    </Text>
+  )
 }

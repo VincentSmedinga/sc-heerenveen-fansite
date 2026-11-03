@@ -56,6 +56,8 @@ const meta = preview.meta({
           'Staat "Gegevens nog niet beschikbaar" er ook, dan komt de regel daaronder.',
           'Zonder `note` verandert er niets.',
           '',
+          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "Uitslagen KNVB Beker", laat dan `competition` weg: bovenaan staat alleen de ronde.',
+          '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
           '- `status` is `scheduled`, `played` of `postponed`.',
@@ -698,4 +700,49 @@ export const SidebarMissingDark = meta.story({
 export const WithNote = meta.story({
   name: 'Met een regel eronder: gestaakt en later uitgespeeld, zonder regel, en naast "Gegevens nog niet beschikbaar"',
   render: renderNote,
+})
+
+// Under a heading that names the competition, the line has the round alone. The clubs and the
+// stadiums are made up.
+const renderWithoutCompetition = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-beker-kop">
+      <Heading id="uitslagen-beker-kop" level={2}>
+        Uitslagen KNVB Beker
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="2026-10-28"
+            goalsAgainst={0}
+            goalsFor={2}
+            home
+            opponent="Proefstad SV"
+            round="Tweede ronde"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="wo 28 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            dateTime="2026-12-02"
+            goalsAgainst={1}
+            goalsFor={1}
+            home={false}
+            opponent="Voorbeeld United"
+            round="Achtste finale"
+            stadium="Voorbeeldpark"
+            status="played"
+            time="wo 2 dec"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const WithoutCompetition = meta.story({
+  name: 'Zonder competitie: alleen de ronde, onder een kop die de competitie noemt',
+  render: renderWithoutCompetition,
 })
