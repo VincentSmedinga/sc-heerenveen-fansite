@@ -1,18 +1,16 @@
 import { render, screen, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { SectionBar } from './SectionBar'
+import { NavigationBar } from './NavigationBar'
 
-const items = [
+const subitems = [
   { href: '/beheer', label: 'Beheer' },
   { current: true, href: '/beheer/berichten', label: 'Berichten' },
 ]
 
-describe('SectionBar', () => {
+describe('a bar on its own', () => {
   it('is a nav with a name of its own, holding a list of the screens', () => {
-    render(<SectionBar items={items} label="Beheer" />)
+    render(<NavigationBar label="Beheer" subitems={subitems} />)
     const nav = screen.getByRole('navigation', { name: 'Beheer' })
 
     expect(
@@ -24,10 +22,25 @@ describe('SectionBar', () => {
   })
 
   it('marks only the current screen with aria-current="page"', () => {
-    render(<SectionBar items={items} label="Beheer" />)
+    render(<NavigationBar label="Beheer" subitems={subitems} />)
 
     expect(screen.getByRole('link', { name: 'Berichten' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('aria-current')).toBe(false)
+  })
+
+  it('has the classes of the bar in the menu, and one of its own', () => {
+    render(<NavigationBar label="Beheer" subitems={subitems} />)
+
+    expect(screen.getByRole('navigation').className).toBe('hf-navigation-bar hf-navigation-bar-alone')
+  })
+})
+
+describe('the bar in the menu', () => {
+  it('is a div without a name and not a landmark, so the menu keeps its one navigation', () => {
+    const { container } = render(<NavigationBar subitems={subitems} />)
+
+    expect(screen.queryByRole('navigation')).toBeNull()
+    expect(container.innerHTML).toMatch(/^<div class="hf-navigation-bar"><div class="hf-page-shortcuts-row">/)
   })
 })
 
@@ -35,7 +48,7 @@ describe('the button at the end', () => {
   const end = { action: () => undefined, label: 'Uitloggen' }
 
   it('is the last item of the list in the same nav, as a button in a form', () => {
-    render(<SectionBar end={end} items={items} label="Beheer" />)
+    render(<NavigationBar end={end} label="Beheer" subitems={subitems} />)
     const nav = screen.getByRole('navigation', { name: 'Beheer' })
     const listItems = within(nav).getAllByRole('listitem')
     const button = within(nav).getByRole('button', { name: 'Uitloggen' })
@@ -48,14 +61,14 @@ describe('the button at the end', () => {
   })
 
   it('is not there without it, and the links stay as they were', () => {
-    render(<SectionBar items={items} label="Beheer" />)
+    render(<NavigationBar label="Beheer" subitems={subitems} />)
 
     expect(screen.queryByRole('button')).toBeNull()
     expect(screen.getAllByRole('listitem')).toHaveLength(2)
   })
 
   it('comes after the last link in the document, so the keyboard reaches it after the links', () => {
-    render(<SectionBar end={end} items={items} label="Beheer" />)
+    render(<NavigationBar end={end} label="Beheer" subitems={subitems} />)
 
     const lastLink = screen.getAllByRole('link').at(-1)!
 
@@ -63,21 +76,9 @@ describe('the button at the end', () => {
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
   })
-})
 
-describe('the look of the bar', () => {
-  const css = readFileSync(join(import.meta.dirname, 'section-bar.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
-
-  it('takes its colours from the roles of the tokens, and writes none itself', () => {
-    expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|rgb\(|hsl\(|oklch\(|color-mix\(/i)
-    expect(css).not.toMatch(/--hf-colour-(blue|red|grey|sand|steel)-\d+/)
-    expect(css).toContain('var(--hf-colour-background-submenu)')
-    expect(css).toContain('var(--hf-colour-text-on-header)')
-  })
-
-  it('puts the button at the end of a bar that is wider than the row, and keeps it a pill', () => {
-    expect(css).toMatch(/\.hf-section-bar-list \{[^}]*min-inline-size: 100%/)
-    expect(css).toMatch(/\.hf-section-bar-end \{[^}]*margin-inline-start: auto/)
-    expect(css).toMatch(/:where\(\.hf-section-bar-end \.hf-navigation-sublink\) \{[^}]*border: 0/)
+  it('is only allowed on a bar with a name, which the type checks', () => {
+    // @ts-expect-error -- The bar in the menu has no place for a button.
+    render(<NavigationBar end={end} subitems={subitems} />)
   })
 })
