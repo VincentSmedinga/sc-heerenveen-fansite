@@ -501,7 +501,10 @@ export function readLeagueResults(text: string): ReadResults {
 
     // A match of another club on the page makes it a page with every club, played or not yet.
     others ||= !isOurs(box)
-    if (isStoppedByReport(box) && (rest === undefined || ['postponed', 'stopped', 'unknown'].includes(score.kind))) {
+    if (
+      (isStoppedByReport(box) && (rest === undefined || ['postponed', 'stopped', 'unknown'].includes(score.kind))) ||
+      (rest !== undefined && stoppedAgain(box, rest))
+    ) {
       unread.push(
         `${box.heading}: ${homeClub} - ${awayClub} was stopped, and the page has no usable block that finishes it`,
       )
@@ -1551,7 +1554,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
     if (score.kind !== 'score' && score.kind !== 'none') {
       return `${name} was stopped, and the block that finishes it has no score we can use`
     }
-    if (rest.heading !== box.heading && /gestaakt/iu.test(reportText(rest))) {
+    if (stoppedAgain(box, rest)) {
       return `${name} was stopped, and the block that finishes it was stopped too`
     }
 
@@ -1780,6 +1783,14 @@ function splitParameters(inner: string): string[] {
   parts.push(current)
 
   return parts
+}
+
+/**
+ * Whether the block that finishes a stopped match, under an `Inhaalronde`, is stopped itself:
+ * its `report` says so. A block under the same heading is read as it always was.
+ */
+function stoppedAgain(box: Template, rest: Template): boolean {
+  return rest.heading !== box.heading && /gestaakt/iu.test(reportText(rest))
 }
 
 /**

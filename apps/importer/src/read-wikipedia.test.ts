@@ -2495,6 +2495,14 @@ describe('a match that was stopped and finished under an Inhaalronde', () => {
     expect(checkResults(readLeagueResults(replay("Verslag<br />''In de rust gestaakt''")).results)).toEqual([])
   })
 
+  it('gives no result for another club when the block under the Inhaalronde is stopped itself', () => {
+    const other = { team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }
+    const read = readLeagueResults(page(stopped(other), finished({ report: 'Verslag, opnieuw gestaakt', ...other })))
+
+    expect(read.results).toEqual([])
+    expect(read.unread).toHaveLength(1)
+  })
+
   it('gives a result for another club only when the block that finishes it is there', () => {
     const other = (fields: Record<string, string>) =>
       stopped({ team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]', ...fields })
