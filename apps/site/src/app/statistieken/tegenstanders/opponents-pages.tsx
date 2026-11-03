@@ -22,6 +22,7 @@ import {
   seasonsOf,
   stadiumsOf,
   summaryOf,
+  upcomingOf,
 } from '#src/opponents'
 import { ClubMeetingsCard, ClubsCard, ClubSummaryCard, OpponentsCredit, StadiumsCard } from '#src/OpponentViews'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -159,12 +160,14 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
 /**
  * The page of one club: its name as the heading, with "Eerder: …" under it when Wikipedia has
  * written the club under other names, the record against it (the total, at home and away,
- * and the biggest win and loss) and every match, the newest first. The matches are the main
- * column, on the white surface; the record, the card with the names of the stadium of the club
- * and the credit are the sidebar. It follows the choice between all the matches and the
- * Eredivisie (the names of the stadium come from the Eredivisie whatever the choice). A club
- * we only met in the cup says with the choice Eredivisie that we have not played it there. A
- * slug no club has, and a choice that is not known, are the page "niet gevonden".
+ * and the biggest win and loss) and every match: first those still to come, the next one
+ * first, then those played, the newest first. The matches are the main column, on the white
+ * surface; the record, the card with the names of the stadium of the club and the credit are
+ * the sidebar. A club with matches to come and none played has the credit alone. It follows the
+ * choice between all the matches and the Eredivisie (the names of the stadium come from the
+ * Eredivisie whatever the choice). A club we only met in the cup says with the choice
+ * Eredivisie that we have not played it there. A slug no club has, and a choice that is not
+ * known, are the page "niet gevonden".
  */
 export async function ClubPage({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
   const { competitie } = await searchParams
@@ -182,7 +185,14 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const { club, matches } = loaded.page
   const now = new Date()
   const meetings = meetingsOf(matches, competition)
-  const hasCup = meetingsOf(matches, 'all').length > meetingsOf(matches, 'league').length
+  const upcoming = upcomingOf(matches, competition, now)
+  const hasCup =
+    meetingsOf(matches, 'all').length > meetingsOf(matches, 'league').length ||
+    upcomingOf(matches, 'all', now).length > upcomingOf(matches, 'league', now).length
+  const noneYet =
+    competition === 'league'
+      ? 'In de Eredivisie hebben we nog niet tegen deze club gespeeld.'
+      : 'We hebben nog niet tegen deze club gespeeld.'
   const earlier = earlierNames(club.otherNames)
   const stadiums = stadiumsOf(matches)
 
@@ -199,19 +209,15 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
         {hasCup && (
           <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} place="tegenstander" />
         )}
-        {meetings.length === 0 ? (
-          <Text>
-            {competition === 'league'
-              ? 'In de Eredivisie hebben we nog niet tegen deze club gespeeld.'
-              : 'We hebben nog niet tegen deze club gespeeld.'}
-          </Text>
+        {meetings.length === 0 && upcoming.length === 0 ? (
+          <Text>{noneYet}</Text>
         ) : (
-          <ClubMeetingsCard meetings={meetings} now={now} />
+          <ClubMeetingsCard meetings={meetings} now={now} upcoming={upcoming} />
         )}
       </Page.Main>
       {/* The sidebar is as wide as the main column, as on Statistieken. On a phone it follows the
           matches: our record against the club, the names of its stadium and the credit. */}
-      {meetings.length > 0 && (
+      {meetings.length > 0 ? (
         <Page.Sidebar aria-label={`Onze uitslagen${stadiums.length > 0 ? ', het stadion' : ''} en de bron`} wide>
           <ClubSummaryCard
             choice={competition}
@@ -221,8 +227,18 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             summary={summaryOf(meetings)}
           />
           <StadiumsCard stadiums={stadiums} />
-          <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(meetings)} />
+          <OpponentsCredit
+            edited={loaded.edited}
+            pages={loaded.pages}
+            seasons={seasonsOf([...meetings, ...upcoming])}
+          />
         </Page.Sidebar>
+      ) : (
+        upcoming.length > 0 && (
+          <Page.Sidebar aria-label="De bron" wide>
+            <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
+          </Page.Sidebar>
+        )
       )}
     </>
   )

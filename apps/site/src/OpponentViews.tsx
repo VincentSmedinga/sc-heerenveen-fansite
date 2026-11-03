@@ -1,4 +1,4 @@
-import type { PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
+import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
 
 import {
   Card,
@@ -6,6 +6,7 @@ import {
   Heading,
   List,
   MarkRow,
+  Match,
   RecordTable,
   ShortMatch,
   ShortStaff,
@@ -68,14 +69,25 @@ const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + re
 const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => record.goalsFor - record.goalsAgainst
 
 /**
- * The card of the page of a club with every match against it that was played, the newest
- * first, as short lines, with the row Laatste wedstrijden above them when there are five or
- * more (see `lastResultsOf`). Above each line stand the season and the competition, and the
- * line has the day, the name as Wikipedia wrote the club in that match (so an earlier name
- * shows), where it was played and the result from our side. It is the main content of the page,
+ * The card of the page of a club with every match against it, in one list. The matches that
+ * are still to come stand first, next one first, as `Match` has them in Programma, with the
+ * competition and the round in the line. The matches that were played follow, the newest
+ * first, as short lines, with the row Laatste wedstrijden above the list when there are five
+ * or more (see `lastResultsOf`). Above each played line stand the season and the competition,
+ * and the line has the day, the name as Wikipedia wrote the club in that match (so an earlier
+ * name shows), where it was played and the result from our side. A match to come has no result,
+ * which is what sets it apart, so there are no subheadings. It is the main content of the page,
  * so it has the white surface.
  */
-export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
+export function ClubMeetingsCard({
+  meetings,
+  now,
+  upcoming,
+}: {
+  meetings: Meeting[]
+  now: Date
+  upcoming: PublicClubMatch[]
+}) {
   const last = lastResultsOf(meetings)
 
   return (
@@ -85,6 +97,11 @@ export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: 
       </Heading>
       {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
       <List role="list">
+        {upcoming.map((match) => (
+          <List.Item key={match.id}>
+            <UpcomingLine match={match} now={now} />
+          </List.Item>
+        ))}
         {meetings.map((match) => (
           <List.Item key={match.id}>
             <Text appearance="meta">
@@ -304,5 +321,26 @@ function MeetingLine({ match, now }: { match: Meeting; now: Date }) {
       home={match.home}
       opponent={match.opponent}
     />
+  )
+}
+
+/**
+ * A match that is still to come, as `Match` shows it in Programma: the day and the stadium, the
+ * clubs, and the competition with the round. A match that is called off says so instead of a
+ * time. It has begun for none of them, so no line says the result is missing.
+ */
+function UpcomingLine({ match, now }: { match: PublicClubMatch; now: Date }) {
+  const common = {
+    competition: match.competition,
+    home: match.home,
+    opponent: match.opponent,
+    round: match.round,
+    stadium: match.stadium,
+  }
+
+  return match.status === 'postponed' ? (
+    <Match {...common} status="postponed" />
+  ) : (
+    <Match {...common} {...matchMoment(match, now)} status="scheduled" />
   )
 }

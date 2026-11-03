@@ -813,7 +813,7 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
  * programme. `now` is the moment of the visit.
  */
 export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
-  const programme = matches.filter((match) => !hasBegun(match, now))
+  const programme = programmeOf(matches, now)
   const results = matches.filter((match) => hasBegun(match, now)).reverse()
 
   return {
@@ -822,6 +822,18 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
     programme,
     results,
   }
+}
+
+/**
+ * The matches that have not begun at `now`, in the order they are given: the programme. This is
+ * the one rule for what is still to come, shared by Programma and the page of a club. A match
+ * that is called off with no new date has no place in time and stays in it.
+ */
+export function programmeOf<T extends Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>>(
+  matches: readonly T[],
+  now: Date,
+): T[] {
+  return matches.filter((match) => !hasBegun(match, now))
 }
 
 /**

@@ -13,6 +13,7 @@ import {
 import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
+import { programmeOf } from './matches'
 
 /**
  * The opponents of sc Heerenveen under Statistieken: the list of the clubs and the page of each
@@ -90,6 +91,20 @@ export function tallyOf(meetings: readonly Meeting[]): Tally {
   }
 
   return tally
+}
+
+/**
+ * The matches against a club that are still to come, for the choice: those of the Eredivisie
+ * alone for `league`, all of them for `all`. What is to come is what Programma has (see
+ * `programmeOf`), the postponed matches included, and the order is the one of Programma too:
+ * by the day and the kick-off, the next one first. The matches are given newest first, as the
+ * query has them, so they are turned round.
+ */
+export function upcomingOf(matches: readonly PublicClubMatch[], choice: CompetitionChoice, now: Date) {
+  return programmeOf(
+    matches.filter((match) => choice === 'all' || match.competition === 'Eredivisie').toReversed(),
+    now,
+  )
 }
 
 /** How many of the latest meetings the row Laatste wedstrijden shows, and needs. */
