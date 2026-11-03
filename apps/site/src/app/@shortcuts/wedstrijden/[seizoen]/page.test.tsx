@@ -45,6 +45,32 @@ describe('the bar of the page of an earlier season', () => {
     expect(html).toContain('>KNVB Beker</a>')
   })
 
+  it('has a link for the play-offs too, after the one for the cup', async () => {
+    const [first] = matchData.matches
+    const playOffs = {
+      ...first!,
+      competition: 'Play-offs Conference League',
+      matchDate: '2026-05-20',
+      round: 'Halve finale',
+    } as const
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [...matchData.matches, playOffs],
+      season: '2025/26',
+    })
+    const html = await render('2025-26')
+
+    expect(hrefs(html)).toEqual([
+      '#uitslagen',
+      '#uitslagen-knvb-beker',
+      '#uitslagen-play-offs',
+      '#eindstand',
+      '#hoe-vaak-welke-uitslag',
+    ])
+    expect(html).toContain('>Play-offs Conference League</a>')
+  })
+
   it('has the one link Uitslagen for a season without matches', async () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], season: '2025/26' })
     const html = await render('2025-26')
