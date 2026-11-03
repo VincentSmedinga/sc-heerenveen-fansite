@@ -2249,6 +2249,7 @@
   Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
   Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).
 - **Later:** zie _Een afgelopen seizoen toont zijn uitslagen in een kaart per competitie_ (2 november 2026): de kaart Uitslagen van een afgelopen seizoen is verdeeld in een kaart per competitie; de volgorde van oud naar nieuw geldt binnen elke kaart.
+  Zie ook _Het lopende seizoen toont zijn uitslagen ook in een kaart per competitie_ (3 november 2026): het lopende seizoen heeft dezelfde kaarten, met de nieuwste uitslag bovenaan.
 
 ## Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina
 
@@ -2687,3 +2688,20 @@
   Subpagina's per competitie (een menu dat van de pagina afhangt).
   Een schakelaar tussen "Per competitie" en "In de tijd" (meer bediening voor een kleine behoefte).
   De competitie in de regel laten staan (die staat dan tientallen keren onder een kop die haar al noemt, ook voor een schermlezer).
+- **Later:** zie _Het lopende seizoen toont zijn uitslagen ook in een kaart per competitie_ (3 november 2026): het lopende seizoen blijft geen kaart, maar krijgt ook een kaart per competitie, met de nieuwste uitslag bovenaan en een regel die de competitie niet noemt.
+  Programma blijft één kaart met alle competities.
+
+## Het lopende seizoen toont zijn uitslagen ook in een kaart per competitie
+
+- **Datum:** 3 november 2026
+- **Besluit:** op `/wedstrijden` is de kaart Uitslagen van het lopende seizoen verdeeld in een kaart per competitie met een uitslag, zoals die van een afgelopen seizoen: Eredivisie, KNVB Beker en Play-offs Conference League, met dezelfde koppen en ankers en een eigen legenda per kaart (#665).
+  Binnen een kaart staat de nieuwste uitslag bovenaan, want het lopende seizoen volgt het nieuws; een afgelopen seizoen blijft van oud naar nieuw.
+  Een competitie krijgt een kaart bij haar eerste uitslag.
+  Zonder uitslagen is er één kaart "Uitslagen" met zijn zin.
+  - **Programma** blijft één kaart met alle competities op datum, met de competitie in elke regel.
+  - **De balk "Op deze pagina:"** heeft een link per kaart (Programma, de kaarten met uitslagen, Stand, Hoe vaak welke uitslag, Hoofdtrainer).
+    Het anker `uitslagen` zit op de kaart Eredivisie, en daar staat ook de link "Het verloop van het seizoen".
+  - **In de code:** `resultsPerCompetition` en `resultsCardsOf` kennen het lopende seizoen niet meer apart; `resultsOfSeason` bepaalt alleen de volgorde.
+    De ankers `uitslagen-knvb-beker` en `uitslagen-play-offs` staan nu ook voor `/wedstrijden` in `src/anchors.ts`.
+- **Waarom:** wie de beker of de competitie zoekt, vindt ze apart, en het lopende seizoen werkt nu net als een afgelopen seizoen.
+- **Alternatieven:** één kaart houden voor het lopende seizoen (twee soorten pagina's); vijf uitslagen per kaart nu al (dat is #516, dat later komt en dan opnieuw bekeken wordt voor kaarten per competitie).

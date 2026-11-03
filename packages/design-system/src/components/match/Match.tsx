@@ -99,8 +99,10 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
   /**
-   * The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. Leave it out
-   * where the heading above the list already names it: the label then has the round alone.
+   * The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. It gives the
+   * match the form with the competition: the day first and the competition with the round as
+   * the last line. Leave it out where the heading above the list already names it: the first
+   * line then starts with the round.
    */
   competition?: string | undefined
   /** Whether sc Heerenveen plays at home. The home club is named first. */
@@ -116,7 +118,7 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   opponent: string
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
   round: string
-  /** The stadium, as plain text. Without it the line only says whether the match is at home. */
+  /** The stadium, as plain text. Without it the line has the day or the time alone. */
   stadium?: null | string | undefined
 }
 
@@ -160,14 +162,22 @@ const separator = (
 )
 
 /**
- * A match of sc Heerenveen 1 as a line in a list: the competition and the round (the round
- * alone under a heading that names the competition), the two clubs with the result between
- * them, and under that when and where. It is plain text: a match has no page of its own, so
- * there is no link, and no club badge, only the names. match.css gives it its look, and draws
- * the lines between the lines of a List.
+ * A match of sc Heerenveen 1 as a line in a list: when and where, the two clubs with the result
+ * between them, the scorers, and the competition and the round. It is plain text: a match has
+ * no page of its own, so there is no link, and no club badge, only the names. match.css gives
+ * it its look, and draws the lines between the lines of a List.
  *
- * The two clubs are in the order they are announced, the home club first, and the line also
- * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
+ * The order of the lines depends on `competition`. With it, as in Programma and on the
+ * homepage, where matches of more than one competition stand together and the day decides the
+ * order, the first line is the day or the time and the stadium ("zo 8 nov 12:15 · Abe Lenstra
+ * Stadion"), then the clubs and the scorers, and the last line is the competition and the round
+ * ("Eredivisie · Speelronde 12"). Without it, under a heading that names the competition, the
+ * first line starts with the round ("Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA"),
+ * followed by the clubs and the scorers. The order in the source is the order on the screen and
+ * the order a screen reader reads.
+ *
+ * The two clubs are in the order they are announced, the home club first, and the stadium says
+ * where it is played; the line does not say "Thuis" or "Uit". A played match has the
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
  * "2 tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
  * score, as "(4–2 n.s.)" in the order of the clubs; a screen reader hears the full words after
@@ -181,12 +191,12 @@ const separator = (
  * "tegen".
  * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
  * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
- * line, under the time and the place, in a muted red, and not bold. The words are the sign;
+ * line, under the other lines, in a muted red, and not bold. The words are the sign;
  * the colour only adds to them. A `note` is one more line of plain text at the very end, in the
- * small text of the line with the time, for the match that needs a word more, such as "Gestaakt
+ * small text of the other lines, for the match that needs a word more, such as "Gestaakt
  * in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
  *
- * The scorers of a played match are one line between the clubs and the time, in the order of
+ * The scorers of a played match are one line under the clubs, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
  * club is not named. The minute is green for a goal of sc Heerenveen and red for one of the
  * opponent, the colours of the result, and bold for sc Heerenveen like its name on the line of
@@ -245,17 +255,34 @@ export const Match = ({
         }
       : { hidden: 'tegen', shown: '–' }
 
+  const when =
+    status === 'postponed' ? (
+      <span className="hf-match-postponed">Uitgesteld</span>
+    ) : (
+      <Time dateTime={dateTime}>{time}</Time>
+    )
+  const where = stadium ? (
+    <>
+      {separator}
+      <span>{stadium}</span>
+    </>
+  ) : null
+
   return (
     <div {...props} className={classNames('hf-match', className)}>
-      <Text appearance="meta" className="hf-match-label">
-        {competition ? (
-          <>
-            {competition}
-            {separator}
-          </>
-        ) : null}
-        {round}
-      </Text>
+      {competition ? (
+        <Text appearance="meta" className="hf-match-when">
+          {when}
+          {where}
+        </Text>
+      ) : (
+        <Text appearance="meta" className="hf-match-when">
+          {round}
+          {separator}
+          {when}
+          {where}
+        </Text>
+      )}
       <p className="hf-match-clubs">
         <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
         <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
@@ -307,21 +334,13 @@ export const Match = ({
           ))}
         </p>
       ) : null}
-      <Text appearance="meta" className="hf-match-when">
-        {status === 'postponed' ? (
-          <span className="hf-match-postponed">Uitgesteld</span>
-        ) : (
-          <Time dateTime={dateTime}>{time}</Time>
-        )}
-        {separator}
-        <span>{home ? 'Thuis' : 'Uit'}</span>
-        {stadium ? (
-          <>
-            {separator}
-            <span>{stadium}</span>
-          </>
-        ) : null}
-      </Text>
+      {competition ? (
+        <Text appearance="meta" className="hf-match-label">
+          {competition}
+          {separator}
+          {round}
+        </Text>
+      ) : null}
       {resultMissing ? (
         <Text appearance="meta" className="hf-match-missing">
           Gegevens nog niet beschikbaar

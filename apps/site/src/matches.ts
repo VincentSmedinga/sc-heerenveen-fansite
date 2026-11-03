@@ -843,10 +843,9 @@ const resultsCardOrder: readonly Competition[] = [
 ]
 
 /**
- * The results of a season that is over split into one list per competition, for the cards of
- * its page. The lists come in the order of `resultsCardOrder` and keep the order of `results`
- * inside each, and a competition without a result has none. The current season has one card
- * for all of them (see `resultsOfSeason`), so it doesn't use this.
+ * The results of a season split into one list per competition, for the cards of its page. The
+ * lists come in the order of `resultsCardOrder` and keep the order of `results` inside each
+ * (see `resultsOfSeason`), and a competition without a result has none.
  */
 export function resultsPerCompetition(results: PublicMatch[]) {
   return resultsCardOrder

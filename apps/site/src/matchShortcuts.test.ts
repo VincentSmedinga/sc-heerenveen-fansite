@@ -105,23 +105,19 @@ describe('resultsCardOf', () => {
 })
 
 describe('resultsCardsOf', () => {
-  it('is the one card Uitslagen for the current season, whatever competitions it has', () => {
-    expect(resultsCardsOf(true, ['Eredivisie', 'KNVB Beker'])).toEqual([{ id: 'uitslagen', name: 'Uitslagen' }])
+  it('is the one card Uitslagen for a season without results', () => {
+    expect(resultsCardsOf([])).toEqual([{ id: 'uitslagen', name: 'Uitslagen' }])
   })
 
-  it('is the one card Uitslagen for a season that is over without results', () => {
-    expect(resultsCardsOf(false, [])).toEqual([{ id: 'uitslagen', name: 'Uitslagen' }])
-  })
-
-  it('is a card for each competition with results for a season that is over, in the order given', () => {
-    expect(resultsCardsOf(false, ['Eredivisie', 'Play-offs Conference League']).map(({ id }) => id)).toEqual([
+  it('is a card for each competition with results, in the order given', () => {
+    expect(resultsCardsOf(['Eredivisie', 'Play-offs Conference League']).map(({ id }) => id)).toEqual([
       'uitslagen',
       'uitslagen-play-offs',
     ])
   })
 })
 
-describe('matchShortcutsOf with the cards with results of a season that is over', () => {
+describe('matchShortcutsOf with the cards with results', () => {
   const all = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League'] as const
 
   it('has a link for each card with results, with the name of its heading, in the place of Uitslagen', () => {
@@ -144,8 +140,26 @@ describe('matchShortcutsOf with the cards with results of a season that is over'
     ])
   })
 
-  it('keeps the link Uitslagen without results, and for the current season', () => {
+  it('keeps the link Uitslagen without results', () => {
     expect(matchShortcutsOf(false, 0, [])).toContainEqual({ href: '#uitslagen', label: 'Uitslagen' })
-    expect(matchShortcutsOf(true, 0, all)).toEqual(matchShortcuts)
+    expect(matchShortcutsOf(true, 0, [])).toEqual(matchShortcuts)
+  })
+
+  it('has the same links for the current season, with Programma first and Stand for Eindstand', () => {
+    expect(matchShortcutsOf(true, 0, all)).toEqual([
+      { href: '#programma', label: 'Programma' },
+      { href: '#uitslagen', label: 'Eredivisie' },
+      { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
+      { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
+      { href: '#stand', label: 'Stand' },
+      { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
+    ])
+    expect(matchShortcutsOf(true, 1, ['Eredivisie']).map(({ href }) => href)).toEqual([
+      '#programma',
+      '#uitslagen',
+      '#stand',
+      '#hoe-vaak-welke-uitslag',
+      '#hoofdtrainer',
+    ])
   })
 })

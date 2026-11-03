@@ -205,8 +205,9 @@ describe('the cards with results of an earlier season, one for each competition'
     const html = await render()
     const cards = ['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'].map((id) => section(html, id)).join('')
 
-    expect(cards).toContain('>Tweede ronde<')
-    expect(cards).not.toMatch(/hf-match-label">(Eredivisie|KNVB Beker|Play-offs Conference League)/)
+    expect(cards).toContain('Tweede ronde <span aria-hidden="true">·</span> <time')
+    expect(cards).not.toContain('hf-match-label')
+    expect(cards).not.toMatch(/(Eredivisie|KNVB Beker|Play-offs Conference League) <span aria-hidden/)
     expect(cards).not.toContain('Play-offs Conference League ·')
   })
 

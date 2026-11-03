@@ -37,14 +37,15 @@ describe('the bar of /wedstrijden', () => {
     expect(html).toContain(`<span class="hf-page-shortcuts-label" id="${labelId}">Op deze pagina:</span>`)
   })
 
-  it('has the four anchors of its cards, in the order of a narrow screen, and none of the cards with figures', async () => {
+  it('has an anchor for each of its cards, in the order of a narrow screen, and none of the cards with figures', async () => {
     const html = await render()
 
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
       ['#programma', 'Programma'],
-      ['#uitslagen', 'Uitslagen'],
+      ['#uitslagen', 'Eredivisie'],
+      ['#uitslagen-knvb-beker', 'KNVB Beker'],
       ['#stand', 'Stand'],
       ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
     ])
@@ -73,7 +74,8 @@ describe('the bar of /wedstrijden', () => {
       ]),
     ).toEqual([
       ['#programma', 'Programma'],
-      ['#uitslagen', 'Uitslagen'],
+      ['#uitslagen', 'Eredivisie'],
+      ['#uitslagen-knvb-beker', 'KNVB Beker'],
       ['#stand', 'Stand'],
       ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
       ['#hoofdtrainer', 'Hoofdtrainer'],

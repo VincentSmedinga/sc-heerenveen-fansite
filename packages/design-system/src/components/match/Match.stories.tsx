@@ -13,10 +13,15 @@ const meta = preview.meta({
       description: {
         component: [
           'Een wedstrijd van sc Heerenveen 1, als regel in een lijst.',
-          'Bovenaan staan de competitie en de ronde, daaronder de twee clubs met de uitslag ertussen, en onderaan wanneer en waar.',
+          'Er zijn twee vormen, en `competition` kiest welke.',
+          'Met `competition`, zoals op de homepage en in een lijst met alle competities op datum, staat de dag bovenaan, met het stadion: "zo 8 nov 12:15 · Abe Lenstra Stadion".',
+          'Daaronder staan de twee clubs met de uitslag ertussen, en eventueel de doelpuntenmakers, en onderaan de competitie met de ronde: "Eredivisie · Speelronde 12".',
+          'Zonder `competition`, onder een kop die de competitie al noemt, begint de regel met de ronde, de dag en het stadion: "Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA".',
+          'Daaronder staan de clubs en de doelpuntenmakers.',
+          'De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.',
           '',
           'De clubs staan in de volgorde van de aankondiging: de thuisclub eerst.',
-          'De regel zegt ook "Thuis" of "Uit", dus een bezoeker hoeft het niet af te leiden uit de volgorde.',
+          'De regel zegt niet "Thuis" of "Uit": de volgorde van de clubs en het stadion zeggen het al.',
           'Een gespeelde wedstrijd heeft de uitslag tussen de namen, gezien vanaf de thuisclub: "2–0".',
           'Een schermlezer hoort "2 tegen 0".',
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker zolang er geen strafschoppen zijn.',
@@ -27,7 +32,7 @@ const meta = preview.meta({
           'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
           'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',
           '',
-          'Een gespeelde wedstrijd kan de doelpuntenmakers tonen, in `goals`: één regel tussen de clubs en de tijd, op volgorde van de minuut met de doelpunten van beide clubs, zoals "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen".',
+          'Een gespeelde wedstrijd kan de doelpuntenmakers tonen, in `goals`: één regel onder de clubs, op volgorde van de minuut met de doelpunten van beide clubs, zoals "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen".',
           'De naam van de club staat er niet.',
           'De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander, met dezelfde betekenis als de uitslag, en bij sc Heerenveen ook vet.',
           'Kleur is niet het enige teken: het vet blijft over in forced colours, en een schermlezer hoort per doelpunt de club: "minuut 45 plus 1, Vente, sc Heerenveen".',
@@ -44,10 +49,10 @@ const meta = preview.meta({
           'Je geeft de tekst zoals een bezoeker hem leest, in Nederlandse tijd, en in `dateTime` de waarde voor machines.',
           'Dat is de aftrap, bijvoorbeeld "zo 1 nov 14:30", of de dag, bijvoorbeeld "zo 25 okt", bij een uitslag.',
           'Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", en `dateTime` is de eerste dag.',
-          'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd.',
+          'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd: "Uitgesteld · Abe Lenstra Stadion".',
           '',
           'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
-          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de tijd en de plaats, in een gedempt rood, en niet vet.',
+          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de andere regels, in een gedempt rood, en niet vet.',
           'De tijd blijft staan.',
           'Het is een eerlijke melding van wat we niet weten, zonder gok naar de uitslag.',
           '',
@@ -56,14 +61,14 @@ const meta = preview.meta({
           'Staat "Gegevens nog niet beschikbaar" er ook, dan komt de regel daaronder.',
           'Zonder `note` verandert er niets.',
           '',
-          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "KNVB Beker", laat dan `competition` weg: bovenaan staat alleen de ronde.',
+          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "KNVB Beker", laat dan `competition` weg: de competitie staat dan niet tientallen keren onder een kop die haar al noemt.',
           '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
           '- `status` is `scheduled`, `played` of `postponed`.',
           '  Een gespeelde wedstrijd heeft `goalsFor` en `goalsAgainst`, een andere heeft ze niet.',
           '- `stadium` is het stadion.',
-          '  Zonder stadion zegt de regel alleen of de wedstrijd thuis is.',
+          '  Zonder stadion staat er alleen de dag of de tijd.',
           '',
           'Een wedstrijd heeft geen eigen pagina, dus er is geen link, en geen clubwapen: alleen de namen.',
           'Het component is een `div`.',
@@ -702,8 +707,8 @@ export const WithNote = meta.story({
   render: renderNote,
 })
 
-// Under a heading that names the competition, the line has the round alone. The clubs and the
-// stadiums are made up.
+// Under a heading that names the competition, the first line starts with the round and the
+// competition is left out. The clubs and the stadiums are made up.
 const renderWithoutCompetition = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="uitslagen-beker-kop">
@@ -743,6 +748,6 @@ const renderWithoutCompetition = () => (
 )
 
 export const WithoutCompetition = meta.story({
-  name: 'Zonder competitie: alleen de ronde, onder een kop die de competitie noemt',
+  name: 'Zonder competitie: de ronde eerst, onder een kop die de competitie noemt',
   render: renderWithoutCompetition,
 })

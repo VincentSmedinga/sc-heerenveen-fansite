@@ -704,7 +704,15 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#programma', '#uitslagen', '#stand', '#hoe-vaak-welke-uitslag', '#hoofdtrainer'],
+      [
+        '#programma',
+        '#uitslagen',
+        '#uitslagen-knvb-beker',
+        '#uitslagen-play-offs',
+        '#stand',
+        '#hoe-vaak-welke-uitslag',
+        '#hoofdtrainer',
+      ],
     )
     // The card with how often each score was played is the card under the table: the
     // sentence with the sums, the chart without text round the ring (hidden from a screen
@@ -758,6 +766,10 @@ await withEmptyDatabase((database) =>
     // In the line of the scorers of one match the two are told apart by an initial.
     assert.match(matchesHtml, /J\. Testvoort/)
     assert.match(matchesHtml, /B\. Testvoort/)
+    // A match line says neither "Thuis" nor "Uit", and the results are one card for each
+    // competition with a result.
+    assert.doesNotMatch(matchesHtml, /<span>(?:Thuis|Uit)<\/span>/)
+    assert.match(matchesHtml, /<h2[^>]*id="uitslagen-knvb-beker">/)
     assert.match(matchesHtml, closedWikipediaCredit)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)

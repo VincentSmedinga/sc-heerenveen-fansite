@@ -779,6 +779,9 @@
   De wedstrijd heeft geen link, want een pagina per wedstrijd is #108, en er zijn alleen namen, geen clubwapens.
 - **Waarom:** de namen dragen de regel voor iedereen, ook met een schermlezer, en een wapen is een afbeelding van een ander, met rechten die we niet hebben.
 - **Alternatieven:** alleen de volgorde van de clubs voor thuis en uit (niet te zien voor wie het niet weet); een kolommentabel voor de wedstrijden (breed, en op een telefoon moet hij zijwaarts scrollen).
+- **Later:** zie _De regel van een wedstrijd zegt niet "Thuis" of "Uit"_ en _De volgorde van de regels van een wedstrijd hangt af van de competitie_ (3 november 2026).
+  De regel noemt "Thuis" en "Uit" niet meer, en de competitie en de ronde staan niet altijd bovenaan.
+  De thuisclub staat nog eerst, de uitslag is nog "2–0" vanaf de thuiskant, en de aftrap is nog een `Time`.
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -2067,3 +2070,27 @@
   In de balk passen het adres en de rol niet op een telefoon, en wie wil weten met welk account hij is ingelogd, vindt het op de startpagina.
 - **Alternatieven:** Uitloggen vast in beeld aan het rechteruiteinde, buiten de scrollende rij (neemt op een telefoon ruimte van de schermen); een tweede regel onder de koppelingen (de balk wordt twee regels hoog op elke pagina); een koppeling naar een uitlogpagina (een extra stap en een pagina erbij); het adres als `title` of verborgen tekst bij de knop (een tooltip bestaat niet op een telefoon).
 - **Later:** zie _Eén balk voor de subpagina's van het hoofdmenu en de schermen van een onderdeel_ in `designsysteem.md` (2 november 2026): de prop `end` zit op `NavigationBar`, dat een `label` moet hebben, en `SectionBar` bestaat niet meer.
+
+## De regel van een wedstrijd zegt niet "Thuis" of "Uit"
+
+- **Datum:** 3 november 2026
+- **Besluit:** `Match` noemt "Thuis" en "Uit" niet meer, ook niet voor een schermlezer (#665).
+  De volgorde van de clubs (de thuisclub eerst) en het stadion zeggen het al, en een schermlezer hoort dezelfde volgorde: "sc Heerenveen 2 tegen 0 Testdorp FC".
+  Een test laat dat zien.
+- **Waarom:** een bezoeker die ziet, krijgt hetzelfde, en `ShortMatch` doet het al zo (beslissing van 2 november 2026).
+- **Alternatieven:** een verborgen woord "Thuiswedstrijd" of "Uitwedstrijd" voor een schermlezer (een extra woord in elke regel).
+
+## De volgorde van de regels van een wedstrijd hangt af van de competitie
+
+- **Datum:** 3 november 2026
+- **Besluit:** `Match` heeft twee vormen, die `competition` kiest (#665).
+  - **Met `competition`** (Programma en de kaart Wedstrijden op de homepage): de eerste regel is `zo 8 nov 12:15 · Abe Lenstra Stadion`, daaronder staan de clubs en eventueel de doelpunten, en de laatste regel is `Eredivisie · Speelronde 12`.
+  - **Zonder `competition`** (onder een kop die de competitie noemt): de eerste regel is `Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA`, gevolgd door de clubs en de doelpunten.
+  - **In beide vormen:** "Gegevens nog niet beschikbaar" en een `note` blijven de laatste regels.
+    Een uitslag toont de dag en geen tijd, en het jaar alleen als het niet dit jaar is.
+    Een uitgestelde wedstrijd zegt "Uitgesteld" waar de dag zou staan, dus `Uitgesteld · <stadion>` als eerste regel (zonder `competition` komt de ronde ervoor).
+    Een wedstrijd zonder stadion toont alleen de dag of de tijd.
+  - De kaart Wedstrijden op de homepage gebruikt de vorm met de competitie, want ze mengt een uitslag en een programma zonder kop die de competitie noemt.
+- **Waarom:** in Programma bepaalt de datum de volgorde, dus die staat bovenaan; onder de kop van een competitie leest de ronde als het begin van de regel.
+  De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.
+- **Alternatieven:** overal dezelfde volgorde (de competitie staat dan tientallen keren onder een kop die haar al noemt, zoals bij #658 is besloten).

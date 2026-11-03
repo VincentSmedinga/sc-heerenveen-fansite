@@ -7,11 +7,11 @@ import { hydrated } from './hydrated'
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
-// have the bar, with the links to their own cards: Wedstrijden five (the made-up season has a
-// head coach in the table) and Statistieken nine. The checks of how it behaves while scrolling
-// are on /statistieken below, the page with the long cards.
+// have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
+// result in three competitions and a head coach in the table) and Statistieken nine. The checks
+// of how it behaves while scrolling are on /statistieken below, the page with the long cards.
 const withBar = [
-  { links: 5, path: '/wedstrijden' },
+  { links: 7, path: '/wedstrijden' },
   { links: 9, path: '/statistieken' },
 ] as const
 
@@ -93,12 +93,12 @@ test.describe('the bar under the header of /statistieken', () => {
     // The other page with a bar has its own links, not those of the page before.
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
     await expect(page).toHaveURL(/\/wedstrijden$/)
-    await expect(bar.getByRole('link', { name: 'Uitslagen' })).toBeVisible()
+    await expect(bar.getByRole('link', { name: 'Eredivisie' })).toBeVisible()
     await expect(bar.getByRole('link', { name: 'Reeksen' })).toHaveCount(0)
 
     await menu.getByRole('link', { name: 'Statistieken' }).click()
     await expect(bar.getByRole('link', { name: 'Reeksen' })).toBeVisible()
-    await expect(bar.getByRole('link', { name: 'Uitslagen' })).toHaveCount(0)
+    await expect(bar.getByRole('link', { name: 'Eredivisie' })).toHaveCount(0)
   })
 
   test('sticks to the top of the window, and a link brings its heading under the bar, not behind it', async ({

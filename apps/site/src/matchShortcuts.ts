@@ -32,19 +32,19 @@ const resultsCards: Record<Competition, { id: string; name: string }> = {
 }
 
 /**
- * The name and the anchor of the card with the results of one competition, on the page of a
- * season that is over. The card of the Eredivisie keeps the anchor `uitslagen` of the one card
- * the page had, so an old link still lands on it.
+ * The name and the anchor of the card with the results of one competition. The card of the
+ * Eredivisie keeps the anchor `uitslagen` of the one card the page had, so an old link still
+ * lands on it.
  */
 export const resultsCardOf = (competition: Competition) => resultsCards[competition]
 
 /**
  * The cards with results a page has, in the order they are on it: a card for each competition
- * with a result in a season that is over, and the one card Uitslagen for the current season and
- * for a season that is over and has no result, which holds the sentence that says so.
+ * with a result, and the one card Uitslagen for a season without a result, which holds the
+ * sentence that says so. The current season and a season that is over work the same.
  */
-export const resultsCardsOf = (current: boolean, withResults: readonly Competition[]) =>
-  current || withResults.length === 0 ? [{ id: 'uitslagen', name: 'Uitslagen' }] : withResults.map(resultsCardOf)
+export const resultsCardsOf = (withResults: readonly Competition[]) =>
+  withResults.length === 0 ? [{ id: 'uitslagen', name: 'Uitslagen' }] : withResults.map(resultsCardOf)
 
 /**
  * The name and the anchor of the card with the head coaches of a season: Hoofdtrainer for one,
@@ -55,12 +55,11 @@ export const coachesCardOf = (coachCount: number) =>
   ({ id: 'hoofdtrainer', name: coachCount === 1 ? 'Hoofdtrainer' : 'Hoofdtrainers' }) as const
 
 /**
- * The links of the bar for the page of a season, in the order of the cards: all of them for the
- * current season, and for a season that is over the same without Programma, which has no card
- * there, with Eindstand for Stand, and with a link for each card with results (`withResults`
- * are the competitions that have one, see `resultsCardsOf`). The card with the head coaches,
- * after the one with the scores, has a link when the season has a coach in the table
- * (`coachCount` above 0).
+ * The links of the bar for the page of a season, in the order of the cards: Programma (only the
+ * current season has it), a link for each card with results (`withResults` are the competitions
+ * that have one, see `resultsCardsOf`), Stand (Eindstand for a season that is over) and the
+ * card with how often each score was played. The card with the head coaches, after the one with
+ * the scores, has a link when the season has a coach in the table (`coachCount` above 0).
  */
 export const matchShortcutsOf = (
   current: boolean,
@@ -77,7 +76,7 @@ export const matchShortcutsOf = (
     }
 
     if (shortcut.href === '#uitslagen') {
-      links.push(...resultsCardsOf(current, withResults).map(({ id, name }) => ({ href: `#${id}`, label: name })))
+      links.push(...resultsCardsOf(withResults).map(({ id, name }) => ({ href: `#${id}`, label: name })))
       continue
     }
 

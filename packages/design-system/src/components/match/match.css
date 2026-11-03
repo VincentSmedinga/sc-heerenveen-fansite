@@ -1,7 +1,9 @@
 /*
- * A match: the competition and the round in small type, under that the two clubs with the
- * result between them, and under that when and where. A club is not a link, so the line has no
- * underline and no hover. A List of matches has a thin line between the lines.
+ * A match: the two clubs with the result between them, with small type around them. With a
+ * competition the day and the stadium are above the clubs and the competition and the round
+ * under them; without one, the round, the day and the stadium are above them. A club is not a
+ * link, so the line has no underline and no hover. A List of matches has a thin line between
+ * the matches.
  */
 
 @layer hf.components {
@@ -89,7 +91,7 @@
   }
 
   /*
-   * The scorers: one line between the clubs and the time, in the order of the clock. The minute
+   * The scorers: one line under the clubs, in the order of the clock. The minute
    * has the colour of the result for the club that scored, and a goal of sc Heerenveen is also
    * bold, so the colour is never the only sign; a forced colour replaces it and the weight
    * stays. A screen reader hears the club in hidden text. The names are in the colour of the
@@ -123,7 +125,7 @@
   }
 
   /*
-   * "Gegevens nog niet beschikbaar" is the last line of the match, under the time and the place.
+   * "Gegevens nog niet beschikbaar" is the last line of the match, under the other lines.
    * It is a muted red, the token for missing data: red-800 in light, a step darker than the
    * accent of "Uitgesteld", which was too bright there, and the same red-300 in dark. It has the
    * weight of the small lines around it. The colour only adds to the words; whoever can't see it
