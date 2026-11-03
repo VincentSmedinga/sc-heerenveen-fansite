@@ -1,7 +1,7 @@
 <!--
   A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2015/16_(mannenvoetbal)?action=raw, read on 3 November 2026.
   Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
-  Left out: all rows but the first three of the first table and the first three of the second, the tables for home, away and each half, and the references. See the tests.
+  Left out: all rows but the first three of the first table and all below FC Twente in the second, the tables for home, away and each half, and the references. See the tests.
 -->
 == Standen ==
 === Officiële eindstand ===
@@ -36,4 +36,24 @@
  | 2. || align=left| [[AFC Ajax|Ajax]] || 34 || 25 || 7 || 2 || || '''82''' || 81 || 21 || +60
 |- style="background:#EEE8AA;"
  | 3. || align=left| [[Feyenoord]] || 34 || 19 || 6 || 9 || || '''63''' || 62 || 40 || +22
+|- style="background:#81BEF7;"
+  | 4. || align=left| [[AZ (voetbalclub)|AZ]] || 34 || 18 || 5 || 11 || || '''59''' || 70 || 53 || +17
+|- style="background:#B0E0E6;"
+ | 5. ||  align=left| [[FC Utrecht]] || 34 || 15 || 8 || 11 || || '''53''' || 57 || 48 || +9
+|- style="background:#B0E0E6;"
+ | 6. || align=left| [[Heracles Almelo]] || 34 || 14 || 9 || 11 || || '''51''' || 47 || 49 || −2
+|- style="background:#B0E0E6;" 
+ | 7. || align=left| [[FC Groningen]] || 34 || 14 || 8 || 12 || || '''50''' || 41 || 48 || −7
+|- style="background:#B0E0E6;" 
+ | 8. || align=left| [[PEC Zwolle]] || 34 || 14 || 6 || 14 || || '''48''' || 56 || 54 || +2
+|-
+| 9. || align=left| [[SBV Vitesse|Vitesse]] || 34 || 12 || 10 || 12 || || '''46''' || 55 || 38 || +17
+|-
+| 10. || align=left| [[N.E.C.]] || 34 || 13 || 7 || 14 || || '''46''' || 37 || 42 || −5
+|- 
+| 11. || align=left| [[ADO Den Haag]] || 34 || 10 || 13 || 11 || || '''43''' || 48 || 49 || −1
+|-
+| 12. ||align=left| [[sc Heerenveen]] || 34 || 11 || 9 || 14 || || '''42''' || 46 || 61 || −15
+|-
+| 13. || align=left| [[FC Twente]] ** || 34 || 12 || 7 || 15 || 3<ref>[http://www.knvb.nl/nieuws/betaald-voetbal/licenties/17618/opnieuw-drie-punten-mindering-voor-fc-twente Opnieuw drie punten aftrek voor FC Twente], knvb.nl, 4 april 2016</ref> || '''40''' || 49 || 64 || −15
 |}

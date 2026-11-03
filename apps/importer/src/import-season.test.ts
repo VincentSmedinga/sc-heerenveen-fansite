@@ -24,7 +24,7 @@ import {
   runSeasonsImport,
   seasonUsage,
 } from './import-season.ts'
-import { europaLeaguePage, pageTitles, pageUrl } from './read-wikipedia.ts'
+import { europaLeaguePage, pageTitles, pageUrl, readStandings } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
@@ -84,6 +84,37 @@ beforeEach(async () => {
 afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
+
+/**
+ * The same table in the form of the older seasons (a wikitable with the column PA), in which
+ * the clubs of `deductions` lose that many points: their points are the ones after it.
+ */
+function olderTable(page: string, deductions: Record<string, number>) {
+  const header = ['pos', 'club', 'gs', 'w', 'g', 'v', 'pnt', 'PA', 'dv', 'dt', 'ds']
+    .map((name) => `!{{afkorting|${name}|${name}}}`)
+    .join('\n')
+  const body = read(page)
+    .map((row) => {
+      const deducted = deductions[row.club] ?? 0
+      const difference = `${row.goalDifference < 0 ? '−' : '+'}${Math.abs(row.goalDifference)}`
+
+      return `|-\n| ${row.position}. || [[${row.club}]] || ${row.played} || ${row.won} || ${row.drawn} || ${row.lost} || '''${row.points - deducted}''' || ${deducted === 0 ? '' : `−${deducted}`} || ${row.goalsFor} || ${row.goalsAgainst} || ${difference}`
+    })
+    .join('\n')
+
+  return `== Standen ==\n=== Eindstand ===\n{| class="wikitable"\n${header}\n${body}\n|}\n`
+}
+
+/** The rows of a table of Wikipedia, with the points as the page gives them. */
+function read(page: string) {
+  const table = readStandings(page)
+
+  if (table.kind === 'error') {
+    throw new Error(table.message)
+  }
+
+  return table.rows
+}
 
 /** Runs the command at the moment `now` against this server, and collects what it prints. */
 async function runCommand(server: TestServer, argument: string | undefined) {
@@ -275,6 +306,27 @@ describe('the command', () => {
     expect(await database.db.select().from(matchImports)).toMatchObject([
       { failuresInARow: 0, lastOutcome: 'imported', season: past },
     ])
+  })
+
+  it('writes the points a club lost to a deduction, reads them back, and keeps the points of the page', async () => {
+    const standingsPage = olderTable(lastSeason.standings, { Feyenoord: 6, 'NAC Breda': 1 })
+    const server = await serve({ last: { ...lastSeason, standings: standingsPage } })
+
+    const { code, lines } = await runCommand(server, past)
+
+    expect(code).toBe(0)
+    expect(lines.join('\n')).toContain('table of 18 clubs for 2026-05-17')
+    expect(lines.join('\n')).not.toMatch(/warning|error|deduction/iu)
+
+    const table = await listSeasonStandings(database.db, past)
+    const kept = read(lastSeason.standings)
+
+    expect(table.filter((row) => row.pointsDeducted > 0)).toMatchObject([
+      { club: 'Feyenoord', points: kept.find((row) => row.club === 'Feyenoord')!.points - 6, pointsDeducted: 6 },
+      { club: 'NAC Breda', points: kept.find((row) => row.club === 'NAC Breda')!.points - 1, pointsDeducted: 1 },
+    ])
+    expect(table.filter((row) => row.pointsDeducted === 0)).toHaveLength(16)
+    expect(table.find((row) => row.club === 'sc Heerenveen')).toMatchObject({ played: 34, points: 51 })
   })
 
   it('reads the play-offs for the Conference League of a season that is over: the page of the year it ended in', async () => {

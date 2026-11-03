@@ -424,7 +424,8 @@ De sleutel is het seizoen met de plaats.
 | `position`, `club`                              | De plaats en de naam van de club                                                 |
 | `played`, `won`, `drawn`, `lost`                | Gespeeld, gewonnen, gelijk en verloren                                           |
 | `goals_for`, `goals_against`, `goal_difference` | Doelpunten voor en tegen, en het doelsaldo (kan negatief zijn)                   |
-| `points`                                        | De punten                                                                        |
+| `points`                                        | De punten, na een aftrek als de club er een heeft                                |
+| `points_deducted`                               | De punten die de club door een aftrek kwijt is (standaard 0)                     |
 | `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
 
 `league_results` heeft een rij voor elke gespeelde competitiewedstrijd van elke club van de Eredivisie, uit de pagina met het programma.

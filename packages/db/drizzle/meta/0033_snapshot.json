@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "fcbd0455-25ac-472d-a269-3a6d1a6d9340",
+  "id": "fb61bc7d-2c36-4870-af02-1e54ab9b71e8",
   "prevId": "6ceb1121-963a-470a-bc24-85800589b1e4",
   "tables": {
     "admin_login_attempts": {
@@ -1494,7 +1494,7 @@
         },
         "competition": {
           "name": "competition",
-          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League')",
+          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -2037,7 +2037,7 @@
         },
         "competition": {
           "name": "competition",
-          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League')",
+          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -2238,7 +2238,7 @@
         },
         "matches_extra_time_only_in_played_knockout": {
           "name": "matches_extra_time_only_in_played_knockout",
-          "value": "`matches`.`extra_time` = 0 or (`matches`.`status` = 'played' and `matches`.`competition` in ('KNVB Beker', 'Play-offs Conference League', 'Europa League'))"
+          "value": "`matches`.`extra_time` = 0 or (`matches`.`status` = 'played' and `matches`.`competition` in ('KNVB Beker', 'Play-offs Conference League'))"
         },
         "matches_penalties_in_a_pair": {
           "name": "matches_penalties_in_a_pair",
@@ -3021,6 +3021,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "points_deducted": {
+          "name": "points_deducted",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
         "valid_on": {
           "name": "valid_on",
           "type": "date",
@@ -3133,7 +3141,7 @@
         },
         "kind": {
           "name": "kind",
-          "type": "enum('standings','programme','cup','playoffs','europa-league','squad')",
+          "type": "enum('standings','programme','cup','playoffs','squad')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

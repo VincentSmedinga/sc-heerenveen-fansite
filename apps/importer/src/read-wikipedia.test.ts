@@ -31,7 +31,9 @@ const playoffAfterNinetyPage = readFileSync(
 const olderCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-older-seasons.wiki', import.meta.url), 'utf8')
 const olderProgramme = readFileSync(new URL('./fixtures/wikipedia-programme-2018-19.wiki', import.meta.url), 'utf8')
 const olderStandings = {
+  2010: readFileSync(new URL('./fixtures/wikipedia-standings-2010-11.wiki', import.meta.url), 'utf8'),
   2012: readFileSync(new URL('./fixtures/wikipedia-standings-2012-13.wiki', import.meta.url), 'utf8'),
+  2014: readFileSync(new URL('./fixtures/wikipedia-standings-2014-15.wiki', import.meta.url), 'utf8'),
   2015: readFileSync(new URL('./fixtures/wikipedia-standings-2015-16.wiki', import.meta.url), 'utf8'),
   2018: readFileSync(new URL('./fixtures/wikipedia-standings-2018-19.wiki', import.meta.url), 'utf8'),
 }
@@ -1341,6 +1343,7 @@ describe('the league table', () => {
         lost: 3,
         played: 10,
         points: 15,
+        pointsDeducted: 0,
         position: 7,
         won: 4,
       })
@@ -1913,14 +1916,13 @@ describe('the table of the older seasons', () => {
   })
 
   it('reads the table under Stand na 34 wedstrijden, past the column of deductions and the official order', () => {
-    expect(readStandings(olderStandings[2015])).toMatchObject({
-      kind: 'read',
-      rows: [
-        { club: 'PSV', goalsAgainst: 32, goalsFor: 88, points: 84, position: 1 },
-        { club: 'Ajax', goalDifference: 60, points: 82, position: 2 },
-        { club: 'Feyenoord', goalDifference: 22, points: 63, position: 3 },
-      ],
-    })
+    const read = readStandings(olderStandings[2015])
+
+    expect(read.kind === 'read' ? read.rows.slice(0, 3) : read).toMatchObject([
+      { club: 'PSV', goalsAgainst: 32, goalsFor: 88, points: 84, pointsDeducted: 0, position: 1 },
+      { club: 'Ajax', goalDifference: 60, points: 82, pointsDeducted: 0, position: 2 },
+      { club: 'Feyenoord', goalDifference: 22, points: 63, pointsDeducted: 0, position: 3 },
+    ])
   })
 
   it('reads the table under Eindstand na 34 wedstrijden, with the attributes in the cells', () => {
@@ -1942,13 +1944,48 @@ describe('the table of the older seasons', () => {
     expect(read.kind === 'read' ? read.rows[0] : read).toMatchObject({ club: 'Ajax', goalDifference: -52 })
   })
 
-  it('gives an error for a deduction of points, because the table keeps no deductions', () => {
-    const text = olderStandings[2015].replace("| 6 || 2 || || '''84", "| 6 || 2 || −3 || '''84")
+  describe('a deduction of points in the column PA', () => {
+    const club = (text: string, name: string) => {
+      const read = readStandings(text)
 
-    expect(text).not.toBe(olderStandings[2015])
-    expect(readStandings(text)).toEqual({
-      kind: 'error',
-      message: 'PSV has a deduction of points (-3), which the table cannot hold',
+      return read.kind === 'read' ? read.rows.find((row) => row.club === name) : read
+    }
+
+    it.each([
+      ['2010/11, written in italics with a hyphen', olderStandings[2010], 'NAC Breda', 40, 1],
+      ['2014/15, with two footnotes', olderStandings[2014], 'FC Twente', 43, 6],
+      ['2015/16, with a footnote and a mark behind the club', olderStandings[2015], 'FC Twente', 40, 3],
+    ])('reads the deduction of %s, and keeps the points of the page', (_name, text, name, points, deducted) => {
+      expect(club(text, name)).toMatchObject({ club: name, points, pointsDeducted: deducted })
+    })
+
+    it('reads no deduction for the other clubs, with an empty cell or without the column', () => {
+      expect(club(olderStandings[2010], 'Ajax')).toMatchObject({ pointsDeducted: 0 })
+      expect(club(olderStandings[2014], 'PSV')).toMatchObject({ pointsDeducted: 0 })
+      expect(club(olderStandings[2012], 'Ajax')).toMatchObject({ pointsDeducted: 0 })
+    })
+
+    it.each([
+      ['a minus sign of Wikipedia', '−3', 3],
+      ['a hyphen', '-3', 3],
+      ['no sign', '3', 3],
+      ['a zero', '0', 0],
+      ['a minus zero', '−0', 0],
+    ])('reads %s as %i points', (_name, cell, deducted) => {
+      const text = olderStandings[2015].replace("| 6 || 2 || || '''84", `| 6 || 2 || ${cell} || '''84`)
+
+      expect(text).not.toBe(olderStandings[2015])
+      expect(club(text, 'PSV')).toMatchObject({ points: 84, pointsDeducted: deducted })
+    })
+
+    it.each(['drie', '1,5', '−', '1000', '3 punten'])('gives an error with the club for the text "%s"', (cell) => {
+      const text = olderStandings[2015].replace("| 6 || 2 || || '''84", `| 6 || 2 || ${cell} || '''84`)
+
+      expect(text).not.toBe(olderStandings[2015])
+      expect(readStandings(text)).toEqual({
+        kind: 'error',
+        message: `PSV has no whole number for the deduction of points (${cell.replaceAll('−', '-')})`,
+      })
     })
   })
 

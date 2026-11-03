@@ -663,7 +663,8 @@ export function listSeasonPlayerStats(db: Database, season: string) {
 /**
  * The league table of a season, such as `2026/27`, from the first place down, with what the
  * pages show: the position, the club, the matches played, won, drawn and lost, the goals for
- * and against, the goal difference, the points, and the day the table holds for.
+ * and against, the goal difference, the points, the points the club lost to a deduction (the
+ * points are the ones after it), and the day the table holds for.
  */
 export function listSeasonStandings(db: Database, season: string) {
   return db
@@ -676,6 +677,7 @@ export function listSeasonStandings(db: Database, season: string) {
       lost: standings.lost,
       played: standings.played,
       points: standings.points,
+      pointsDeducted: standings.pointsDeducted,
       position: standings.position,
       validOn: standings.validOn,
       won: standings.won,

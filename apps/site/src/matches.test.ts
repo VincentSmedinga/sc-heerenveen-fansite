@@ -428,6 +428,7 @@ const row = (position: number, club: string): PublicStandingsRow => ({
   lost: 0,
   played: 0,
   points: 0,
+  pointsDeducted: 0,
   position,
   validOn: '2026-10-18',
   won: 0,
