@@ -144,6 +144,18 @@ export const englishWikipediaOrigin = 'https://en.wikipedia.org'
 
 export type { LinkedGoal } from './match-changes.ts'
 
+/**
+ * A match that is still `postponed` once the season is over (the score says "Uitgesteld" or
+ * "Afgelast", and no block under an `Inhaalronde` with a score has replaced it) will not be
+ * played any more, so it is `cancelled`. Only the page of a season that is over says so: in the
+ * current season the same block still waits for a new date.
+ */
+export function cancelledOf(found: ReadMatch[], pastSeason: boolean): ReadMatch[] {
+  return pastSeason
+    ? found.map((match) => (match.status === 'postponed' ? { ...match, status: 'cancelled' } : match))
+    : found
+}
+
 /** Writes a report as lines of text: one for the import, and one for each warning. */
 export function formatMatchReport(report: MatchReport): string {
   const head = `Matches ${report.season}`
@@ -658,7 +670,12 @@ async function readAndStore(
     return { kind: 'error', message: problems.join('; '), season }
   }
 
-  const found = [...league.matches, ...cup.matches, ...(playoffs?.matches ?? []), ...(europaLeague?.matches ?? [])]
+  const now = clock()
+  const pastSeason = isPastSeason(season, now)
+  const found = cancelledOf(
+    [...league.matches, ...cup.matches, ...(playoffs?.matches ?? []), ...(europaLeague?.matches ?? [])],
+    pastSeason,
+  )
 
   if (!cup.hasTemplates) {
     const problem = await checkEmptyCupPage(db, season, pages.find((page) => page.kind === 'cup')?.title ?? '')
@@ -692,7 +709,6 @@ async function readAndStore(
     return { ...lookup, season }
   }
 
-  const now = clock()
   const validOn = league.lastPlayedOn ?? seasonStart(season)
   const stored = await db.transaction(async (transaction) => {
     const [read] = await transaction
@@ -708,7 +724,7 @@ async function readAndStore(
       { europaLeague: europaLeague !== undefined, playoffs: playoffs !== undefined },
       {
         firstRead: read === undefined,
-        pastSeason: isPastSeason(season, now),
+        pastSeason,
         previousReadAt,
         redirects: lookup.redirects,
       },

@@ -72,6 +72,7 @@ export const statusChoices = [
   { label: 'Gepland', value: 'scheduled' },
   { label: 'Gespeeld', value: 'played' },
   { label: 'Uitgesteld', value: 'postponed' },
+  { label: 'Geannuleerd', value: 'cancelled' },
 ] as const
 
 /** The kinds of goal as the form words them. */

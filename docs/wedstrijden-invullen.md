@@ -17,7 +17,7 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
 3. Vul in wat je weet.
    Je hoeft niet alles in te vullen:
    - de **aftrap**: de datum en de tijd, of de datum en een tekst als de tijd nog niet bekend is (zoals "12-14 februari 2027");
-   - de **status**: gepland, gespeeld of uitgesteld;
+   - de **status**: gepland, gespeeld, uitgesteld of geannuleerd (een wedstrijd die niet meer wordt gespeeld);
    - de **uitslag**, bij een gespeelde wedstrijd.
      De clubs staan in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop.
      Bij de beker en de play-offs staat er een kaart met de verlenging, de stand na 90 minuten en de strafschoppen;

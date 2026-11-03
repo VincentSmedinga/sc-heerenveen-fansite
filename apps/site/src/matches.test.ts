@@ -15,6 +15,7 @@ import {
   matchFlowOf,
   overviewOf,
   parseCleanSheetCount,
+  programmeOf,
   resultsOfSeason,
   resultsPerCompetition,
   scoreCountsOf,
@@ -185,6 +186,45 @@ describe('overviewOf', () => {
   it('has no next match when only a postponed one is left, and nothing at all for no matches', () => {
     expect(overviewOf([match('Speelronde 5', 'postponed', '2026-08-29')], between).next).toBeUndefined()
     expect(overviewOf([], between)).toEqual({ next: undefined, previous: undefined, programme: [], results: [] })
+  })
+
+  describe('with a cancelled match', () => {
+    // Round 5 will not be played: it stays in the results, and is never the previous match.
+    const withCancelled = season.map((item) =>
+      item.round === 'Speelronde 5' ? match('Speelronde 5', 'cancelled', '2026-08-29') : item,
+    )
+    const afterwards = new Date('2026-09-20T12:00:00Z')
+
+    it('leaves it out of the programme, whatever the date', () => {
+      expect(overviewOf(withCancelled, between).programme.map((item) => item.round)).toEqual([
+        'Speelronde 6',
+        'Speelronde 7',
+      ])
+      expect(programmeOf(withCancelled, afterwards)).toEqual([])
+    })
+
+    it('puts it in the results of its season, in its place', () => {
+      expect(overviewOf(withCancelled, afterwards).results.map((item) => item.round)).toEqual([
+        'Speelronde 7',
+        'Speelronde 6',
+        'Speelronde 5',
+        'Speelronde 4',
+        'Speelronde 3',
+        'Speelronde 2',
+        'Speelronde 1',
+      ])
+      expect(overviewOf(withCancelled, between).results.map((item) => item.round)).toContain('Speelronde 5')
+    })
+
+    it('is never the previous or the next match', () => {
+      const early = new Date('2026-08-24T12:00:00Z')
+      const overview = overviewOf(withCancelled, new Date('2026-09-01T12:00:00Z'))
+
+      expect(overview.previous?.round).toBe('Speelronde 4')
+      expect(overview.next?.round).toBe('Speelronde 6')
+      expect(overviewOf([match('Speelronde 5', 'cancelled', '2026-08-29')], afterwards).previous).toBeUndefined()
+      expect(overviewOf(withCancelled, early).next?.round).toBe('Speelronde 6')
+    })
   })
 
   it('does not change the list it is given', () => {
@@ -413,8 +453,9 @@ describe('lacksResult', () => {
     expect(lacksResult(weekend, new Date('2026-10-27T12:00:00Z'))).toBe(true)
   })
 
-  it('is false for a postponed match, and for a match that is still to come', () => {
+  it('is false for a postponed match, a cancelled match, and for a match that is still to come', () => {
     expect(lacksResult(cup({ status: 'postponed' }), new Date('2026-11-05T12:00:00Z'))).toBe(false)
+    expect(lacksResult(cup({ status: 'cancelled' }), new Date('2026-11-05T12:00:00Z'))).toBe(false)
     expect(lacksResult(cup(), new Date('2026-10-01T12:00:00Z'))).toBe(false)
   })
 })

@@ -253,6 +253,9 @@ describe('the lines the log and the page use', () => {
     expect(describeEntryResult({ ...match, ...score, goalsAgainst: null, goalsFor: null, status: 'postponed' })).toBe(
       'uitgesteld',
     )
+    expect(describeEntryResult({ ...match, ...score, goalsAgainst: null, goalsFor: null, status: 'cancelled' })).toBe(
+      'geannuleerd',
+    )
     expect(describeEntryResult({ ...match, ...score, goalsAgainst: null, goalsFor: null, status: 'scheduled' })).toBe(
       'gepland',
     )

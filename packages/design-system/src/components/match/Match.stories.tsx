@@ -50,6 +50,8 @@ const meta = preview.meta({
           'Dat is de aftrap, bijvoorbeeld "zo 1 nov 14:30", of de dag, bijvoorbeeld "zo 25 okt", bij een uitslag.',
           'Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", en `dateTime` is de eerste dag.',
           'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd: "Uitgesteld · Abe Lenstra Stadion".',
+          'Een wedstrijd die nooit meer wordt gespeeld, zoals in een seizoen dat is stilgelegd, is `cancelled` en zegt op dezelfde plaats en op dezelfde manier "Geannuleerd".',
+          'Hij heeft geen uitslag en geen regel over gegevens die ontbreken.',
           '',
           'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
           'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de andere regels, in een gedempt rood, en niet vet.',
@@ -65,7 +67,7 @@ const meta = preview.meta({
           '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
-          '- `status` is `scheduled`, `played` of `postponed`.',
+          '- `status` is `scheduled`, `played`, `postponed` of `cancelled`.',
           '  Een gespeelde wedstrijd heeft `goalsFor` en `goalsAgainst`, een andere heeft ze niet.',
           '- `stadium` is het stadion.',
           '  Zonder stadion staat er alleen de dag of de tijd.',
@@ -221,6 +223,16 @@ const renderStates = () => (
             round="Speelronde 5"
             stadium="Stadion Proeflaan"
             status="postponed"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            home={false}
+            opponent="Voorbeeld United"
+            round="Speelronde 27"
+            stadium="Voorbeeldpark"
+            status="cancelled"
           />
         </List.Item>
         <List.Item>
@@ -632,13 +644,13 @@ export const NarrowDark = meta.story({
 
 export const StatesLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, thuis en uit, gespeeld, licht',
+  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, geannuleerd, thuis en uit, gespeeld, licht',
   render: renderStates,
 })
 
 export const StatesDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, thuis en uit, gespeeld, donker',
+  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, geannuleerd, thuis en uit, gespeeld, donker',
   render: renderStates,
 })
 
@@ -750,4 +762,57 @@ const renderWithoutCompetition = () => (
 export const WithoutCompetition = meta.story({
   name: 'Zonder competitie: de ronde eerst, onder een kop die de competitie noemt',
   render: renderWithoutCompetition,
+})
+
+// A season that was stopped: the results list keeps the matches that were never played, in
+// their round, and says "Geannuleerd" where a played match has its day. The clubs are made up.
+const renderCancelled = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-geannuleerd-kop">
+      <Heading id="uitslagen-geannuleerd-kop" level={2}>
+        Uitslagen
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            home={false}
+            opponent="Voorbeeld United"
+            round="Speelronde 28"
+            stadium="Voorbeeldpark"
+            status="cancelled"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            home
+            opponent="Testdorp FC"
+            round="Speelronde 27"
+            stadium="Stadion Proeflaan"
+            status="cancelled"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-03-08"
+            goalsAgainst={0}
+            goalsFor={2}
+            home
+            opponent="Proefstad SV"
+            round="Speelronde 26"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 8 mrt"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const Cancelled = meta.story({
+  name: 'Geannuleerd: twee wedstrijden die nooit zijn gespeeld, onder een gespeelde',
+  render: renderCancelled,
 })

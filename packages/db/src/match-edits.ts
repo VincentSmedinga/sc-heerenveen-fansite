@@ -131,6 +131,9 @@ export function describeEntryResult(match: ResultFields): string {
   if (match.status === 'postponed') {
     return 'uitgesteld'
   }
+  if (match.status === 'cancelled') {
+    return 'geannuleerd'
+  }
 
   const ours = match.goalsFor ?? 0
   const theirs = match.goalsAgainst ?? 0

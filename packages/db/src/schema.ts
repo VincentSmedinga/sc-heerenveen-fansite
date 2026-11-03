@@ -568,9 +568,10 @@ export type StatsCompetition = (typeof statsCompetitions)[number]
 
 /**
  * Where a match stands: `scheduled` is still to be played (with or without a time), `played`
- * has a result, `postponed` was called off and has no new date yet.
+ * has a result, `postponed` was called off and has no new date yet, `cancelled` was called
+ * off and will not be played any more (the importer decides that once the season is over).
  */
-export const matchStatuses = ['scheduled', 'played', 'postponed'] as const
+export const matchStatuses = ['scheduled', 'played', 'postponed', 'cancelled'] as const
 
 export type MatchStatus = (typeof matchStatuses)[number]
 

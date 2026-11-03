@@ -8,8 +8,11 @@ import { Time } from '../time/Time'
 /** The name of our own club, which a match always has on one side. */
 const ourClub = 'sc Heerenveen'
 
-/** Where a match stands: still to be played, played, or called off without a new date. */
-export const matchStatuses = ['scheduled', 'played', 'postponed'] as const
+/**
+ * Where a match stands: still to be played, played, called off without a new date, or called
+ * off for good.
+ */
+export const matchStatuses = ['scheduled', 'played', 'postponed', 'cancelled'] as const
 
 /** One goal of a played match. */
 export type MatchGoal = {
@@ -48,20 +51,8 @@ export type MatchProps =
         resultMissing?: never
         status: 'played'
       })
-  | (MatchBaseProps & {
-      afterNinetyAgainst?: never
-      afterNinetyFor?: never
-      dateTime?: never
-      extraTime?: never
-      goals?: never
-      goalsAgainst?: never
-      goalsFor?: never
-      penaltiesAgainst?: never
-      penaltiesFor?: never
-      resultMissing?: never
-      status: 'postponed'
-      time?: never
-    })
+  | MatchCalledOffProps<'cancelled'>
+  | MatchCalledOffProps<'postponed'>
   | (MatchWithTimeProps & {
       afterNinetyAgainst?: never
       afterNinetyFor?: never
@@ -120,6 +111,22 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   round: string
   /** The stadium, as plain text. Without it the line has the day or the time alone. */
   stadium?: null | string | undefined
+}
+
+/** A match that is called off has no time and no result, only the word for its status. */
+type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBaseProps & {
+  afterNinetyAgainst?: never
+  afterNinetyFor?: never
+  dateTime?: never
+  extraTime?: never
+  goals?: never
+  goalsAgainst?: never
+  goalsFor?: never
+  penaltiesAgainst?: never
+  penaltiesFor?: never
+  resultMissing?: never
+  status: Status
+  time?: never
 }
 
 /** The shoot-out of a cup match that was level after extra time: both scores, or none. */
@@ -189,7 +196,9 @@ const separator = (
  * the colour follows the shoot-out. The goals say the same, so a screen reader hears nothing
  * extra. A match that is still to be played has a dash between the names, which is read as
  * "tegen".
- * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
+ * A postponed match says "Uitgesteld" where the time would be, and a cancelled one, which will
+ * not be played any more, says "Geannuleerd" in the same place and the same way, with no
+ * result and no line about missing data. A match that has begun long ago
  * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
  * line, under the other lines, in a muted red, and not bold. The words are the sign;
  * the colour only adds to them. A `note` is one more line of plain text at the very end, in the
@@ -258,6 +267,8 @@ export const Match = ({
   const when =
     status === 'postponed' ? (
       <span className="hf-match-postponed">Uitgesteld</span>
+    ) : status === 'cancelled' ? (
+      <span className="hf-match-cancelled">Geannuleerd</span>
     ) : (
       <Time dateTime={dateTime}>{time}</Time>
     )

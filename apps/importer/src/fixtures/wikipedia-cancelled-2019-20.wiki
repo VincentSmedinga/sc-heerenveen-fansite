@@ -1,0 +1,152 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2019/20_(mannenvoetbal)/Wedstrijden?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all matches except the eight of sc Heerenveen in Speelronde 27 to 34, which were never played because
+  the season was stopped, and the first block of Inhaalronde 22, a match of two other clubs that has no score either.
+  The text around the templates is left out too. The blocks are as the page has them, and the note that the
+  first of them carries is the one the page has with its first block.
+-->
+== Speelronde 27 ==
+{{Footballbox2
+|date = 14 maart 2020
+|time = 18:30 uur
+|team1 = [[Willem II (voetbalclub)|Willem II]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 april 2020)">[https://nos.nl/artikel/2326872-alle-voetbalwedstrijden-in-nederland-tot-1-april-geschrapt.html Alle voetbalwedstrijden in Nederland tot 1 april geschrapt], NOS.nl, 12 maart 2020. [https://web.archive.org/web/20230621123912/https://nos.nl/artikel/2326872-alle-voetbalwedstrijden-in-nederland-tot-1-april-geschrapt.html Gearchiveerd] op 21 juni 2023.</ref>
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Tilburg]]
+|stadium = [[Koning Willem II Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 28 ==
+{{Footballbox2
+|date = 21 maart 2020
+|time = 20:45 uur
+|team1 = [[sc Heerenveen]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 april 2020)" />
+|team2 = [[RKC Waalwijk]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 29 ==
+{{Footballbox2
+|date = 4 april 2020
+|time = 18:30 uur
+|team1 = [[Sparta Rotterdam]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 7 april 2020)">[https://www.knvb.nl/nieuws/amateurvoetbal/competitiezaken/59633/geen-voetbalwedstrijden-tot-en-met-6-april Geen voetbalwedstrijden tot en met 6 april], KNVB.nl, 15 maart 2020. [https://web.archive.org/web/20230417221951/https://www.knvb.nl/nieuws/amateurvoetbal/competitiezaken/59633/geen-voetbalwedstrijden-tot-en-met-6-april Gearchiveerd] op 17 april 2023.</ref>
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel|Het Kasteel]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Inhaalronde 22 ==
+{{Footballbox2
+|date = 8 april 2020
+|time = 18:45 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)">[https://www.knvb.nl/nieuws/betaald-voetbal/competitiezaken/59777/voorlopig-geen-wedstrijden-betaald-voetbal Voorlopig geen wedstrijden betaald voetbal], KNVB.nl, 31 maart 2020. [https://web.archive.org/web/20220119000603/https://www.knvb.nl/nieuws/betaald-voetbal/competitiezaken/59777/voorlopig-geen-wedstrijden-betaald-voetbal Gearchiveerd] op 19 januari 2022.</ref>
+|team2 = [[Feyenoord]]
+|goals1 =
+|goals2 =
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 30 ==
+{{Footballbox2
+|date = 10 april 2020
+|time = 20:00 uur
+|team1 = [[FC Groningen]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)" />
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Groningen (stad)|Groningen]]
+|stadium = [[Euroborg|Hitachi Capital Mobility Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 31 ==
+{{Footballbox2
+|date = 22 april 2020
+|time = 20:45 uur
+|team1 = [[sc Heerenveen]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)" />
+|team2 = [[FC Emmen]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 32 ==
+{{Footballbox2
+|date = 25 april 2020
+|time = 20:45 uur
+|team1 = [[PEC Zwolle]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)" />
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Zwolle]]
+|stadium = [[MAC³PARK stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 33 ==
+{{Footballbox2
+|date = 3 mei 2020
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)" />
+|team2 = [[PSV (voetbalclub)|PSV]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}
+== Speelronde 34 ==
+{{Footballbox2
+|date = 10 mei 2020
+|time = 14:30 uur
+|team1 = [[FC Utrecht]]
+|score = Afgelast<ref name="Coronavirus (maatregel tot 1 juni 2020)" />
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 
+|referee = 
+|videoreferee = 
+|report = 
+}}

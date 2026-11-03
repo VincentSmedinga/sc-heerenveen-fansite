@@ -274,6 +274,7 @@ Een pagina met een ander basisadres (zoals `/statistieken`) gebruikt dezelfde on
 Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn begonnen, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
+  Een geannuleerde wedstrijd staat er niet in: hij wordt niet meer gespeeld en staat in Uitslagen, in zijn speelronde, met "Geannuleerd".
   Een wedstrijd is begonnen als zijn aanvangstijd voorbij is, of, zonder aanvangstijd, als zijn dag in Nederlandse tijd voorbij is (`overviewOf` in `src/matches.ts`, met het moment van het verzoek).
   Een weekend telt tot het einde van zijn laatste dag.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
@@ -321,7 +322,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
   Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.
   `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`; de pagina's met `ShortMatch`, zoals die van een tegenstander, hebben er geen plek voor.
-- **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
+- **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag, maar niet een geannuleerde) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
 
@@ -386,6 +387,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
 - **Verloop van het seizoen:** een kaart in de linker kolom, direct onder de kaart met onze plek in de competitie, met `FormChart` uit het designsysteem: de vorm, een staafje per gespeelde wedstrijd van de Eredivisie en de lijn erdoorheen.
   `leagueResultsOf` in `src/matches.ts` maakt de lijst `W`, `G` en `V` uit de gespeelde wedstrijden van de Eredivisie met een uitslag, op volgorde van speeldatum; een bekerwedstrijd telt niet mee.
   Een uitgestelde wedstrijd heeft pas een staafje als hij gespeeld is, en staat dan op de plek waar hij gespeeld is.
+  Een geannuleerde wedstrijd heeft nooit een staafje.
   Onder de grafiek staat dezelfde informatie als tabel (`DataTable`: winst, gelijk, verlies en totaal, met de wedstrijden en de punten), die de schermlezer krijgt, want de grafiek is voor hulpsoftware verborgen.
   Zonder een uitslag staat er een zin in plaats van de grafiek.
 - **Reeksen:** een kaart in de linker kolom, direct na Verloop van het seizoen, in het zachte vlak.

@@ -69,6 +69,16 @@ describe('meetingsOf', () => {
     )
   })
 
+  it('does not count a cancelled match, in the record or in the latest five', () => {
+    const cancelled = match(0, 0, { goalsAgainst: null, goalsFor: null, status: 'cancelled' })
+    const played = [match(1, 0), match(2, 0), match(3, 0), match(0, 1), match(0, 0)]
+    const meetings = meetingsOf([cancelled, ...played], 'all')
+
+    expect(meetings).toEqual(played)
+    expect(tallyOf(meetings)).toMatchObject({ played: 5 })
+    expect(lastResultsOf(meetingsOf([cancelled, ...played.slice(0, 4)], 'all'))).toBeUndefined()
+  })
+
   it('keeps only the Eredivisie for the league', () => {
     const league = meetingsOf(matches, 'league')
 
@@ -334,6 +344,16 @@ describe('upcomingOf', () => {
     ]
 
     expect(rounds(upcomingOf(matches.toReversed(), 'all', now)).toSorted()).toEqual(['Gepland', 'Uitgesteld'])
+  })
+
+  it('leaves out a cancelled match, whatever its day, as it is not played any more', () => {
+    const matches = [
+      scheduled('Geannuleerd', { matchDate: '2026-12-12', status: 'cancelled' }),
+      scheduled('Oud', { kickoffAt: new Date('2020-03-14T17:30:00Z'), matchDate: '2020-03-14', status: 'cancelled' }),
+      scheduled('Gepland', { kickoffAt: new Date('2026-12-05T19:30:00Z'), matchDate: '2026-12-05' }),
+    ]
+
+    expect(rounds(upcomingOf(matches, 'all', now))).toEqual(['Gepland'])
   })
 
   it('leaves out the cup with the choice league, and keeps it with all', () => {

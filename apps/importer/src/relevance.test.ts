@@ -613,6 +613,12 @@ describe('the opponent of a match', () => {
       )
     })
 
+    it('does not count a cancelled match, which has no new date either', () => {
+      expect(judgeAt('ADO in vorm', '2026-10-24T12:00:00Z', [match('ADO Den Haag', '2026-10-24', 'cancelled')])).toBe(
+        'irrelevant',
+      )
+    })
+
     it('gives every match of a club its own window', () => {
       const twice = [match('ADO Den Haag', '2026-10-24', 'played'), match('ADO Den Haag', '2027-02-14')]
 

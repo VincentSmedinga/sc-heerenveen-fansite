@@ -311,7 +311,7 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
   Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
 - **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
   De tabel heeft ook eerdere seizoenen (`pnpm import:season`), maar die tellen niet.
-  Een wedstrijd zonder aftrap telt met de datum die we hebben, en een uitgestelde wedstrijd zonder nieuwe datum telt niet.
+  Een wedstrijd zonder aftrap telt met de datum die we hebben, en een uitgestelde of geannuleerde wedstrijd zonder nieuwe datum telt niet.
   Speelt een club twee keer tegen ons, dan heeft elke wedstrijd zijn eigen venster.
   Alleen de tegenstander van die wedstrijd telt: een club die we pas over een maand treffen, doet nu niets.
 - **Hoe het werkt:** `judgeRelevance` leest zelf niets uit de database.
@@ -800,6 +800,12 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, de club van de tegenstander (zie _De clubs van de tegenstanders_), thuis of uit, het stadion, de status en de uitslag.
   Een ronde van de competitie is een kop `Speelronde <nummer>` of `Inhaalronde <nummer>` (zie _Een wedstrijd onder Inhaalronde_); wedstrijden onder andere koppen leest hij niet.
 - De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
+- Van een seizoen dat voorbij is (`pnpm import:season`), wordt een wedstrijd die na het lezen nog `postponed` is, `cancelled`: de score zegt "uitgesteld" of "afgelast", en geen blok onder `Inhaalronde <nummer>` met een score heeft hem vervangen.
+  Hij wordt dan niet meer gespeeld, zoals de acht wedstrijden van sc Heerenveen in 2019/20 die door de coronacrisis nooit zijn gespeeld.
+  De uurlijkse import van het lopende seizoen verandert niets: daar blijft zo'n wedstrijd `postponed`.
+  De regel kijkt naar het seizoen en niet naar een lijst, en hij geldt voor elke competitie.
+  Er komt geen reden bij.
+  Een wedstrijd die al als `postponed` is bewaard, wordt `cancelled` bij de volgende lezing van het seizoen.
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
 - Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
   Wikipedia schrijft de uitslag in `score` als "N – N", ook na verlenging.
@@ -1464,6 +1470,7 @@ De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waar
   Voor sc Heerenveen is het één wedstrijd in `matches`, met de speeldatum en de uitslag van de inhaalwedstrijd.
   In `league_results` is het één rij, met de dag van de inhaalwedstrijd en het nummer van de ronde waaruit hij is uitgesteld.
 - Een blok onder een inhaalronde zonder score, of met "Uitgesteld" of "Afgelast", doet niets: de wedstrijd blijft staan als uitgesteld tot er een uitslag is.
+  Is het seizoen voorbij en blijft hij zo, dan wordt hij geannuleerd (zie _Wat de import bewaart_).
 - Een kop die geen ronde is, zoals de play-offs, blijft buiten de competitie.
 - Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd (zie _Een gestaakte wedstrijd_ hierboven).
 - De tests gebruiken een uitsnede van de pagina van 2022/23, [`src/fixtures/wikipedia-catch-up-2022-23.wiki`](src/fixtures/wikipedia-catch-up-2022-23.wiki), met de twee wedstrijden van RKC Waalwijk en Go Ahead Eagles en twee verzonnen wedstrijden van sc Heerenveen.

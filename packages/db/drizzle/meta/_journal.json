@@ -260,6 +260,13 @@
       "when": 1793742805059,
       "tag": "0036_add_club_pages",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1793746360401,
+      "tag": "0037_add_cancelled_match_status",
+      "breakpoints": true
     }
   ]
 }

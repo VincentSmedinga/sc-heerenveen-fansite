@@ -782,6 +782,8 @@
 - **Alternatieven:** de wedstrijd verbergen tot er een nieuwe datum is.
 - **Later:** zie _Een wedstrijd onder Inhaalronde telt voor de ronde waaruit hij is uitgesteld, en vervangt het blok zonder uitslag_: de pagina heeft een uitgestelde wedstrijd twee keer, en het blok onder `Inhaalronde <nummer>` met een uitslag vervangt dat zonder uitslag.
   Een uitgestelde wedstrijd zonder uitslag blijft staan zoals hier.
+- **Later:** zie _Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is_ (3 november 2026): in een seizoen dat voorbij is, wordt een wedstrijd die nog uitgesteld is `cancelled` en zegt de site "Geannuleerd".
+  In het lopende seizoen blijft het zoals hier.
 
 ## Het weer valt buiten dit werk
 
@@ -1856,6 +1858,7 @@
 - **Later:** zie _Een gestaakte wedstrijd die onder een inhaalronde wordt afgemaakt, is één wedstrijd_ (3 november 2026): 2011/12 is geen gat meer.
   De zin onder **Waarom** over 2011/12 en de zin onder **Nadeel** hierboven gelden niet meer: de wedstrijd Excelsior – AZ is in de rust gestaakt en later alleen in de tweede helft afgemaakt, niet helemaal opnieuw gespeeld.
   `checkResults` is niet veranderd.
+- **Later:** zie _Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is_ (3 november 2026): de acht wedstrijden van 2019/20 die niet zijn gespeeld, staan nu als geannuleerd in de database en niet als uitgesteld.
 
 ## Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`
 
@@ -2046,3 +2049,23 @@
 - **Waarom:** een migratie kan Wikipedia niet vragen, en de run schrijft elke samenvoeging in het logboek.
   Zo gebeurt het herstel op acceptatie en productie zonder dat iemand "Import seasons" start.
 - **Alternatieven:** een eenmalig commando (het moet toch per omgeving gedraaid worden en laat geen regel in het logboek van de runs); met de hand samenvoegen met SQL (twee clubs nu, maar het is de oude weg die we juist willen vermijden).
+
+## Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is
+
+- **Datum:** 3 november 2026
+- **Besluit:** `matches.status` krijgt de waarde `cancelled`, op de site "Geannuleerd".
+  De importer zet een wedstrijd van sc Heerenveen op `cancelled` als `pnpm import:season` hem na het lezen van een seizoen dat voorbij is nog als `postponed` ziet: de score zegt `Uitgesteld` of `Afgelast` en geen blok onder `Inhaalronde` met een score heeft hem vervangen.
+  In het lopende seizoen blijft zo'n wedstrijd `postponed`.
+  Een geannuleerde wedstrijd blijft in de lijst van zijn seizoen en staat in Uitslagen, niet in Programma; hij telt nergens als gespeeld en krijgt geen reden.
+  - **Waar de regel zit:** in `import-matches.ts` (`cancelledOf`), na het lezen van de pagina's en vóór het opslaan, en alleen voor een seizoen dat voorbij is (`isPastSeason`).
+    De uurlijkse import leest alleen het lopende seizoen, dus die verandert niet.
+  - **Een tweede lezing:** een wedstrijd die al als `postponed` is bewaard, wordt bij de volgende lezing van het seizoen `cancelled`.
+    De wijziging gaat door het oordeel van `classify-change.ts` als een wijziging van de datum van een wedstrijd zonder uitslag: nieuw, dus overgenomen.
+  - **Wat het raakt:** de regel kijkt naar het seizoen en niet naar de competitie, dus ook een bekerwedstrijd of een wedstrijd van een andere competitie die nooit is gespeeld, wordt `cancelled`.
+    De CHECK-regels van `matches` laten een geannuleerde wedstrijd zonder doelpunten, verlenging, strafschoppen en toeschouwers toe en eisen dat ook; ze zijn daarvoor niet veranderd, want ze vragen alleen om `played`.
+  - **Relevantie:** `relevance.ts` telt een geannuleerde wedstrijd niet mee, zoals een uitgestelde.
+- **Waarom:** de pagina van 2019/20 schrijft `Afgelast` bij 76 wedstrijden, ook bij die door het weer zijn uitgesteld en later zijn gespeeld, dus het woord zegt niet of de wedstrijd nog komt.
+  Dat weten we pas als het seizoen voorbij is.
+  Een eigen status laat Programma, de pagina van een tegenstander en de cijfers het verschil maken zonder dat elke plek een seizoen hoeft te kennen.
+  "Uitgesteld" voor wedstrijden die nooit meer komen, is voor een supporter misleidend.
+- **Alternatieven:** alleen een ander woord op de site voor dezelfde status `postponed` (geen migratie, maar de wedstrijden blijven in het programma staan en tellen als nog komend); een lijst met seizoenen in de importer (`2019/20` is geannuleerd; uitgeschreven, maar elk nieuw geval vraagt een codewijziging); de wedstrijden verbergen (een gat in speelronde 27 tot en met 34 zonder uitleg); een vaste reden als tekst bij de wedstrijd (een claim die wij zelf doen, naast de pagina).
