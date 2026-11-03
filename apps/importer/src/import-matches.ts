@@ -30,6 +30,7 @@ import {
   isMassChange,
 } from './classify-change.ts'
 import { clubFullNames } from './club-names.ts'
+import { lookUpClubPages, repairClubPagesFromWikipedia } from './club-pages.ts'
 import { importEditedMatch, mergeEntry, readEdits } from './edited-matches.ts'
 import { matchClubNames, playedWarning, storeResults } from './league-results.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
@@ -304,39 +305,64 @@ export function isUnhealthy(health: Pick<MatchImport, 'failuresInARow'>): boolea
 }
 
 /**
- * Makes the clubs of `club-names.ts` right in the database: a club that is there twice, or
- * under another name, is merged and gets its full name and its slug (`repairClubs` in the
- * database package). It runs at the start of every import run, before any season is read, in a
- * transaction of its own, and so does not wait for a season that can be read and stored. A run
- * that has nothing to repair writes nothing. Returns the lines for the log, one for each thing
- * it did, in English.
+ * Makes the clubs right in the database at the start of every import run, before any season is
+ * read, in two steps. A step that fails does not stop the other.
+ *
+ * 1. A club under the title of a redirect on Wikipedia is one club with the club of the article
+ *    the redirect ends in (`repairClubPagesFromWikipedia`). The title of every club that is
+ *    not in `club_pages` is asked about once, so a run with nothing to check asks nothing.
+ *    Without an `origin` (no Wikipedia to read from) it is skipped.
+ * 2. A club of `club-names.ts` that is there twice, or under another name, is merged and gets
+ *    its full name and its slug (`repairClubs` in the database package). The first step goes
+ *    first, so two clubs with an article each that were one article do not stay apart.
+ *
+ * Each step has a transaction of its own and does not wait for a season that can be read and
+ * stored. A run that has nothing to repair writes nothing. Returns the lines for the log, one
+ * for each thing it did, in English.
  *
  * A failure is no reason to stop the import: it gives a line that says so, and the warning goes
  * on the health of the current season (`match_imports`), where `pnpm run import:status` shows
  * it. The next run tries again. It never throws: when the warning can't be written either, the
  * line says that too.
  */
-export async function repairKnownClubs(db: Database, clock: () => Date = () => new Date()): Promise<string[]> {
-  try {
-    const events = await db.transaction((transaction) => repairClubs(transaction, clubFullNames))
+export async function repairKnownClubs(
+  db: Database,
+  fetcher: Fetcher,
+  origin: null | string,
+  clock: () => Date = () => new Date(),
+): Promise<string[]> {
+  const lines: string[] = []
+  const steps = [
+    async () => (origin === null ? [] : repairClubPagesFromWikipedia(db, fetcher, origin)),
+    async () => db.transaction((transaction) => repairClubs(transaction, clubFullNames)),
+  ]
 
-    return events.map((event) => `Clubs: ${printable(event)}`)
-  } catch (error) {
-    const now = clock()
-    const warning = printable(`clubs not repaired: ${describeError(error)}`)
-    const values = { lastWarning: warning, lastWarningAt: now }
-
+  for (const step of steps) {
     try {
-      await db
-        .insert(matchImports)
-        .values({ lastOutcome: 'error', season: seasonOf(now), ...values })
-        .onDuplicateKeyUpdate({ set: values })
+      lines.push(...(await step()).map((event) => `Clubs: ${printable(event)}`))
+    } catch (error) {
+      const now = clock()
+      const warning = printable(
+        error instanceof Error && error.message.startsWith('club pages not checked')
+          ? error.message
+          : `clubs not repaired: ${describeError(error)}`,
+      )
+      const values = { lastWarning: warning, lastWarningAt: now }
 
-      return [`Clubs: warning, ${warning}`]
-    } catch (writeError) {
-      return [`Clubs: warning, ${warning}; the warning was not saved: ${describeError(writeError)}`]
+      try {
+        await db
+          .insert(matchImports)
+          .values({ lastOutcome: 'error', season: seasonOf(now), ...values })
+          .onDuplicateKeyUpdate({ set: values })
+
+        lines.push(`Clubs: warning, ${warning}`)
+      } catch (writeError) {
+        lines.push(`Clubs: warning, ${warning}; the warning was not saved: ${describeError(writeError)}`)
+      }
     }
   }
+
+  return lines
 }
 
 /**
@@ -478,6 +504,8 @@ type StoreContext = {
   pastSeason: boolean
   /** The last run that read the pages with success, before this one. */
   previousReadAt: Date | null
+  /** Where the titles of the clubs that were new to the database end (`lookUpClubPages`). */
+  redirects: ReadonlyMap<string, string>
 }
 
 /**
@@ -649,6 +677,21 @@ async function readAndStore(
     return { kind: 'error', message: problems.join('; '), season }
   }
 
+  // Wikipedia is asked before the transaction: no request is made while rows are locked.
+  const lookup = await lookUpClubPages(
+    db,
+    fetcher,
+    origins.nl,
+    found.flatMap((match) => (match.opponentPage === null ? [] : [match.opponentPage])),
+  )
+
+  if (lookup.kind === 'error') {
+    return { kind: 'error', message: `the article of a club, ${lookup.message}`, season }
+  }
+  if (lookup.kind !== 'found') {
+    return { ...lookup, season }
+  }
+
   const now = clock()
   const validOn = league.lastPlayedOn ?? seasonStart(season)
   const stored = await db.transaction(async (transaction) => {
@@ -667,6 +710,7 @@ async function readAndStore(
         firstRead: read === undefined,
         pastSeason: isPastSeason(season, now),
         previousReadAt,
+        redirects: lookup.redirects,
       },
     )
 
@@ -807,7 +851,7 @@ async function storeMatches(
   found: ReadMatch[],
   now: Date,
   read: { europaLeague: boolean; playoffs: boolean },
-  { firstRead, pastSeason, previousReadAt }: StoreContext,
+  { firstRead, pastSeason, previousReadAt, redirects }: StoreContext,
 ) {
   const clubLines: string[] = []
   const known = new Map(
@@ -828,7 +872,7 @@ async function storeMatches(
   }
 
   const edits = await readEdits(db, season)
-  const book = await createClubBook(db, { fullNames: clubFullNames })
+  const book = await createClubBook(db, { fullNames: clubFullNames, redirects })
   const changes = await readSeasonChanges(db, season, now)
   const counts = { added: 0, held: 0, removed: 0, unchanged: 0, updated: 0 }
   const warnings: string[] = []

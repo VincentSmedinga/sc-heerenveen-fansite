@@ -920,6 +920,7 @@ De import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw al
 
 Elke wedstrijd hangt aan een club (`matches.club_id`, zie _De tabellen `clubs` en `club_names`_ in de [README van `@fansite/db`](../../packages/db/README.md)).
 Een club is één artikel op de Nederlandse Wikipedia, met een vaste slug voor zijn adres.
+Een titel die een doorverwijzing is, telt als het artikel waar hij naar verwijst (zie _Een doorverwijzing is hetzelfde artikel_).
 De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/db/src/clubs.ts) van het package, en de import van de wedstrijden past ze toe op elke wedstrijd die hij schrijft:
 
 1. De reader leest de pagina van de link bij de tegenstander (`[[Telstar (voetbalclub)|Telstar]]` geeft `Telstar (voetbalclub)`), zoals bij de spelers.
@@ -950,7 +951,7 @@ Aan het begin van elke run, vóór een seizoen wordt gelezen, zoekt de import de
 Hij voegt ze samen en zet de volledige naam en de slug goed, in een eigen transactie.
 Het herstel wacht dus niet op een seizoen dat te lezen is: ook als de import van het seizoen stilstaat, bijvoorbeeld op een datum die de reader niet kent, staan de clubs goed.
 Het commando voor een afgelopen seizoen (`pnpm import:season`) herstelt de clubs ook, vóór hij het seizoen leest.
-Hebben twee van die clubs elk een eigen artikel, dan laat hij ze staan en zegt dat in het logboek: één artikel is één club.
+Hebben twee van die clubs elk een eigen artikel dat geen doorverwijzing is, dan laat hij ze staan en zegt dat in het logboek: één artikel is één club.
 Elke samenvoeging, naamswijziging en nieuwe naam staat in de uitvoer van de run, met `Clubs:` vooraan:
 
 ```text
@@ -972,6 +973,47 @@ Een club aan de lijst toevoegen:
    De wedstrijden van elk seizoen gaan mee naar de club die blijft, ook die van seizoenen die de import niet meer leest.
 
 `otherClubGroups` in `relevance-terms.ts` is een andere lijst met een ander doel, het filter van de koppen, en blijft zoals hij is.
+
+### Een doorverwijzing is hetzelfde artikel
+
+Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, en `SBV Excelsior` een naar `Excelsior Rotterdam`.
+Een wedstrijd die zo'n titel linkt, hoort bij de club van het artikel waar de titel naartoe gaat, niet bij een tweede club.
+De import vraagt dat aan Wikipedia, per titel één keer, en onthoudt het antwoord in de tabel `club_pages` (zie de [README van `@fansite/db`](../../packages/db/README.md), _De tabel `club_pages`_):
+
+- Een titel die in `club_pages` staat of de titel van het artikel van een club is, kost geen verzoek, ook niet in een volgende run of bij het uurlijkse seizoen.
+- Een andere titel vraagt de import één keer op met de fetcher: dezelfde User-Agent, `robots.txt` en alleen `/wiki/<titel>?action=raw`, bij de Nederlandse Wikipedia.
+  De titels van de Europa League-wedstrijden van 2012/13 zijn ook titels van de Nederlandse Wikipedia, want de reader zet de Engelse namen om (`europaLeagueClubs`).
+  Dat gebeurt vóór de transactie van het seizoen, dus er is geen verzoek terwijl rijen op slot zitten.
+- Begint de tekst met `#REDIRECT` of `#DOORVERWIJZING` (hoofdletters tellen niet mee), dan is het doel de titel tussen `[[` en `]]`, zonder `|…` of `#…`.
+  Een doel dat zelf een doorverwijzing is, volgt de import ook, hoogstens drie keer.
+  Een doel dat al in `club_pages` staat, kost geen verzoek: de import neemt het artikel van die club.
+- De import bewaart niets uit de tekst van een artikel, alleen of de titel een doorverwijzing is en naar wat.
+  Elke titel op de weg staat daarna in `club_pages` bij de club, het artikel zelf ook.
+- Faalt een verzoek (netwerk, status, `robots.txt`), of is de tekst een doorverwijzing zonder doel, een kring of een keten van meer dan drie, dan maakt de import geen club op een gok.
+  De run van het seizoen valt, zoals bij elke pagina die niet te lezen is, met `the article of a club, <titel>: <reden>`, en de volgende run probeert het opnieuw.
+  Dat geldt ook voor een titel die niet bestaat (404): wie een rode link naar een club in een seizoen ziet, krijgt een fout in plaats van een club zonder artikel.
+
+Staat een club al onder de titel van een doorverwijzing in de database, dan herstelt de import dat aan het begin van elke run (`repairKnownClubs`, naast het herstel van de lijst hierboven):
+
+1. De import vraagt de titel van elke club die nog niet in `club_pages` staat één keer op.
+   Een run waarin alle titels erin staan, vraagt niets en schrijft niets.
+2. Clubs die op hetzelfde artikel uitkomen, zijn één club (`repairClubPages` in `@fansite/db/clubs`, in een transactie per artikel).
+   De club met het artikel blijft; zijn er meer, dan die met de meeste wedstrijden, dan de oudste.
+   Heeft geen club het artikel, dan krijgt de club dat als `wikipedia_page` en blijft staan: `BV De Graafschap` wordt het artikel `De Graafschap (voetbalclub)` en blijft de club `de-graafschap`.
+3. De wedstrijden en de andere namen van de club die weggaat, gaan naar de club die blijft, en zijn naam wordt een andere naam.
+   De club die blijft houdt zijn slug en zijn naam; de slug van de club die weggaat vervalt zonder omleiding.
+4. Elke samenvoeging en elke titel die erbij komt, staat in de uitvoer met `Clubs:` vooraan:
+
+```text
+Clubs: merged club 'AZ' into club 'AZ'
+Clubs: title 'AZ Alkmaar' is a redirect to 'AZ (voetbalclub)', the article of club 'AZ'
+```
+
+Dit herstel gaat vóór dat van de lijst met volledige namen, zodat twee clubs die één artikel zijn, geen waarschuwing meer geven.
+Faalt een verzoek, dan komt `Clubs: warning, club pages not checked: <reden>` in de uitvoer en in `match_imports` (`last_warning`), het herstel van de lijst gaat gewoon door en de volgende run probeert het opnieuw.
+Heeft de omgeving geen Wikipedia om uit te lezen, dan slaat de import het over.
+
+Twee clubs die elk een eigen artikel hebben dat geen doorverwijzing is, blijven twee clubs: `Excelsior Maassluis` is een andere club dan `Excelsior Rotterdam`.
 
 Een wedstrijd kan van club veranderen als Wikipedia een ander artikel linkt; dan telt hij als bijgewerkt.
 De import verwijdert nooit een club, ook niet als er geen wedstrijd meer aan hangt (zoals de verzonnen clubs van de seed): de queries tonen alleen clubs met een wedstrijd.

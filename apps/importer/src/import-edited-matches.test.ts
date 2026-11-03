@@ -15,6 +15,7 @@ import { runChangesCommand } from './import-changes.ts'
 import { runImport } from './import-feeds.ts'
 import { importMatches, importPastSeason } from './import-matches.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
+import { articleRoutes } from './test-articles.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 // What the import does with a match the editors filled in (issue 272). The pages of Wikipedia
@@ -93,7 +94,7 @@ async function serve() {
     }
   }
 
-  const server = await startServer(routes)
+  const server = await startServer({ ...articleRoutes(Object.values(original)), ...routes })
 
   servers.push(server)
 

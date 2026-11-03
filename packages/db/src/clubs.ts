@@ -1,9 +1,9 @@
-import { asc, eq, max, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
 
-import { clubNames, clubs, matches } from './schema.ts'
+import { clubNames, clubPages, clubs, matches } from './schema.ts'
 
 /**
  * Slugs the pages of the site use themselves, under the address of the clubs. A club never
@@ -50,6 +50,9 @@ type KnownClub = {
   wikipediaPage: null | string
 }
 
+/** What `repairClubPages` writes through: it moves rows and deletes the club that goes away. */
+type PagesDatabase = Pick<Database, 'transaction'> & RepairDatabase
+
 /** What `repairClubs` writes through: it also deletes the club that goes away. */
 type RepairDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
@@ -78,9 +81,9 @@ export function clubSlug(name: string): string {
  * through `db` (use the transaction of the import). One club is one article on the Dutch
  * Wikipedia, so:
  *
- * - a name with an article goes to the club with that article. When no club has it, the club
- *   with that name takes the article if it has none yet (a club the migration made from a name
- *   alone); otherwise a new club is made.
+ * - a name with an article goes to the club with that article, after any redirects (see
+ *   below). When no club has it, the club with that name takes the article if it has none yet
+ *   (a club the migration made from a name alone); otherwise a new club is made.
  * - a name without an article goes to the club with that name, or with that name among its
  *   other names, whatever the capitals and punctuation; otherwise a new club is made.
  * - a new club gets the slug of its name, with `-2`, `-3` and so on when another club has it.
@@ -100,10 +103,23 @@ export function clubSlug(name: string): string {
  * article. A club the book makes under a listed full name gets the other spellings as its other
  * names. A name that is not listed, such as `Excelsior Maassluis`, works as before. Run
  * `repairClubs` first when the database may hold such a club twice.
+ *
+ * A title that is a redirect on Wikipedia is the article it redirects to, so it is the same
+ * club (`AZ Alkmaar` is `AZ (voetbalclub)`). The book does not ask Wikipedia: the importer
+ * does, once for each title the database does not know (`knownClubPages`), and gives the
+ * answers as `redirects`, from each title it asked about, redirects on the way included, to
+ * the title of the article it ends in (the title itself when it is no redirect). The book then
+ * looks for the club of that article, and remembers both titles in `club_pages`, so the next
+ * run needs no answer. A title that is in neither the database nor `redirects` is taken as its
+ * own article, as before, and is not remembered: nobody checked it. Run `repairClubPages` first
+ * when the database may hold a club under a title that is a redirect.
  */
 export async function createClubBook(
   db: ClubDatabase,
-  { fullNames = [] }: { fullNames?: readonly ClubFullName[] } = {},
+  {
+    fullNames = [],
+    redirects = new Map(),
+  }: { fullNames?: readonly ClubFullName[]; redirects?: ReadonlyMap<string, string> } = {},
 ) {
   const listed = listedNames(fullNames)
   const rows = await db.select().from(clubs).orderBy(asc(clubs.id))
@@ -127,6 +143,8 @@ export async function createClubBook(
   )
   const byPage = new Map<string, KnownClub>()
   const byName = new Map<string, KnownClub>()
+  /** The titles that are in `club_pages`. */
+  const remembered = new Set<string>()
   const slugs = new Set(rows.map((row) => row.slug))
 
   for (const club of known.values()) {
@@ -135,6 +153,14 @@ export async function createClubBook(
     }
     if (!byName.has(normaliseClubName(club.name))) {
       byName.set(normaliseClubName(club.name), club)
+    }
+  }
+  for (const row of await db.select().from(clubPages)) {
+    const club = known.get(row.clubId)
+
+    if (club !== undefined) {
+      byPage.set(row.page, club)
+      remembered.add(row.page)
     }
   }
   for (const other of names) {
@@ -161,6 +187,19 @@ export async function createClubBook(
         return candidate
       }
     }
+  }
+
+  /** Puts a title that was checked in `club_pages`, unless it is there or is another club's. */
+  async function remember(title: string, club: KnownClub): Promise<boolean> {
+    if (remembered.has(title) || (byPage.get(title) ?? club) !== club) {
+      return false
+    }
+
+    await db.insert(clubPages).values({ clubId: club.id, page: title })
+    remembered.add(title)
+    byPage.set(title, club)
+
+    return true
   }
 
   async function create(
@@ -215,21 +254,23 @@ export async function createClubBook(
       const events: string[] = []
       const name = listed.get(normaliseClubName(given))?.name ?? given
       const key = normaliseClubName(name)
-      let club = page === null ? byName.get(key) : byPage.get(page)
+      // The article the title ends in: a title the book knows is its own article.
+      const article = page === null || byPage.has(page) ? page : (redirects.get(page) ?? page)
+      let club = article === null ? byName.get(key) : byPage.get(article)
 
-      if (club === undefined && page !== null) {
+      if (club === undefined && article !== null) {
         const named = byName.get(key)
 
         if (named !== undefined && named.wikipediaPage === null) {
           club = named
-          club.wikipediaPage = page
-          byPage.set(page, club)
-          await db.update(clubs).set({ wikipediaPage: page }).where(eq(clubs.id, club.id))
-          events.push(`article '${page}' for club '${club.name}'`)
+          club.wikipediaPage = article
+          byPage.set(article, club)
+          await db.update(clubs).set({ wikipediaPage: article }).where(eq(clubs.id, club.id))
+          events.push(`article '${article}' for club '${club.name}'`)
         }
       }
       if (club === undefined) {
-        club = await create(name, page, season ?? null, events)
+        club = await create(name, article, season ?? null, events)
       } else if (key !== normaliseClubName(club.name) && !club.otherNames.has(key)) {
         const owner = byName.get(key)
 
@@ -251,6 +292,15 @@ export async function createClubBook(
           events.push(`new name '${name}' for club '${club.name}'`)
         }
       }
+      if (page !== null && article !== null && redirects.has(page)) {
+        const isNew = !remembered.has(page)
+
+        await remember(page, club)
+        await remember(article, club)
+        if (isNew && article !== page) {
+          events.push(`title '${page}' is a redirect to '${article}', the article of club '${club.name}'`)
+        }
+      }
       if (season !== undefined && (club.newestSeason === null || season > club.newestSeason)) {
         club.newestSeason = season
       }
@@ -258,6 +308,18 @@ export async function createClubBook(
       return { events, id: club.id }
     },
   }
+}
+
+/**
+ * Every title the database knows as the article of a club: the `wikipedia_page` of the clubs
+ * and the rows of `club_pages`. The importer asks Wikipedia about a title that is not here, and
+ * about no other.
+ */
+export async function knownClubPages(db: Pick<Database, 'select'>): Promise<Set<string>> {
+  const own = await db.select({ page: clubs.wikipediaPage }).from(clubs).where(isNotNull(clubs.wikipediaPage))
+  const remembered = await db.select({ page: clubPages.page }).from(clubPages)
+
+  return new Set([...own, ...remembered].flatMap((row) => (row.page === null ? [] : [row.page])))
 }
 
 /**
@@ -271,6 +333,66 @@ export function normaliseClubName(name: string): string {
     .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]/gu, '')
+}
+
+/**
+ * The titles in `club_pages` with the article of their club (`AZ Alkmaar` with
+ * `AZ (voetbalclub)`), which is where a redirect to a remembered title ends.
+ */
+export async function rememberedClubArticles(db: Pick<Database, 'select'>): Promise<Map<string, string>> {
+  const rows = await db
+    .select({ article: clubs.wikipediaPage, page: clubPages.page })
+    .from(clubPages)
+    .innerJoin(clubs, eq(clubs.id, clubPages.clubId))
+    .where(isNotNull(clubs.wikipediaPage))
+
+  return new Map(rows.flatMap((row) => (row.article === null ? [] : [[row.page, row.article] as const])))
+}
+
+/**
+ * Makes the clubs right that are in the database under a title that is a redirect on
+ * Wikipedia, with the answers the importer got for `unrememberedClubPages`: `redirects` maps
+ * each title it asked about, redirects on the way included, to the title of the article the
+ * redirects end in (the title itself when it is none). One club is one article, so the clubs
+ * that end in the same article are one club.
+ *
+ * For each article, in a transaction of its own:
+ *
+ * - the club that stays is the one that has the article, else the one with the most matches,
+ *   else the oldest, as `repairClubs` does. A club that has the article but is not in a
+ *   redirect still stays: it is the article.
+ * - the matches and the other names of the other clubs go to the club that stays, their names
+ *   become other names of it unless that name is its own or belongs to another club, and their
+ *   rows go. The club that stays keeps its slug and its name.
+ * - the club that stays gets the article as its `wikipedia_page` when it had a redirect, and
+ *   every title that ends in the article goes in `club_pages`, the article itself too.
+ *
+ * Two clubs that have an article each, and that is not a redirect, are not in one group and so
+ * stay two clubs. A title not in `redirects` is left alone, and a club that is right already
+ * changes nothing, so running it again writes nothing and gives no events. The events are lines
+ * for the log of the run, in English, with no personal data.
+ */
+export async function repairClubPages(db: PagesDatabase, redirects: ReadonlyMap<string, string>): Promise<string[]> {
+  const events: string[] = []
+  const articles = new Set<string>()
+
+  for (const title of await unrememberedClubPages(db)) {
+    const article = redirects.get(title)
+
+    if (article !== undefined) {
+      articles.add(article)
+    }
+  }
+
+  for (const article of articles) {
+    const titles = [
+      ...new Set([article, ...[...redirects].filter(([, end]) => end === article).map(([title]) => title)]),
+    ]
+
+    events.push(...(await db.transaction((transaction) => repairArticle(transaction, article, titles))))
+  }
+
+  return events
 }
 
 /**
@@ -403,6 +525,22 @@ export async function repairClubs(db: RepairDatabase, fullNames: readonly ClubFu
 }
 
 /**
+ * The titles of clubs that nobody checked yet: the article of a club that is not in
+ * `club_pages`, oldest club first. Once `repairClubPages` has run, it is empty until the
+ * importer makes a club, which it remembers itself.
+ */
+export async function unrememberedClubPages(db: Pick<Database, 'select'>): Promise<string[]> {
+  const rows = await db
+    .select({ page: clubs.wikipediaPage })
+    .from(clubs)
+    .leftJoin(clubPages, eq(clubPages.page, clubs.wikipediaPage))
+    .where(and(isNotNull(clubs.wikipediaPage), isNull(clubPages.page)))
+    .orderBy(asc(clubs.id))
+
+  return rows.flatMap((row) => (row.page === null ? [] : [row.page]))
+}
+
+/**
  * Gives each row the club of its `opponent`, found or made by name. For tests and the seed,
  * where there is no article to go by.
  */
@@ -433,4 +571,88 @@ function listedNames(fullNames: readonly ClubFullName[]): Map<string, ClubFullNa
   }
 
   return listed
+}
+
+/** One article of `repairClubPages`: the clubs under `titles` become one, in a transaction. */
+async function repairArticle(db: RepairDatabase, article: string, titles: readonly string[]): Promise<string[]> {
+  const events: string[] = []
+  const remembered = await db
+    .select()
+    .from(clubPages)
+    .where(inArray(clubPages.page, [...titles]))
+  const own = await db
+    .select()
+    .from(clubs)
+    .where(inArray(clubs.wikipediaPage, [...titles]))
+  const owner =
+    own.find((club) => club.wikipediaPage === article)?.id ?? remembered.find((row) => row.page === article)?.clubId
+  const ids = new Set([...own.map((club) => club.id), ...remembered.map((row) => row.clubId)])
+
+  if (ids.size === 0) {
+    return events
+  }
+
+  const everyone = await db.select().from(clubs)
+  const found = everyone.filter((club) => ids.has(club.id)).sort((a, b) => a.id - b.id)
+  const counts = await db
+    .select({ clubId: matches.clubId, matches: sql<number>`count(*)`.mapWith(Number) })
+    .from(matches)
+    .where(inArray(matches.clubId, [...ids]))
+    .groupBy(matches.clubId)
+  const matchesOf = (id: number) => counts.find((count) => count.clubId === id)?.matches ?? 0
+  const [stays] = [...found].sort(
+    (a, b) => Number(b.id === owner) - Number(a.id === owner) || matchesOf(b.id) - matchesOf(a.id) || a.id - b.id,
+  )
+
+  if (stays === undefined) {
+    return events
+  }
+
+  const others = found.filter((club) => club.id !== stays.id)
+  const names = await db.select().from(clubNames)
+  const goneIds = new Set(others.map((club) => club.id))
+  // The names the club has once the others are merged in, and those of clubs that stay apart.
+  const had = new Set([
+    normaliseClubName(stays.name),
+    ...names
+      .filter((other) => other.clubId === stays.id || goneIds.has(other.clubId))
+      .map((other) => normaliseClubName(other.name)),
+  ])
+  const apart = new Set([
+    ...everyone.filter((club) => !ids.has(club.id)).map((club) => normaliseClubName(club.name)),
+    ...names.filter((other) => !ids.has(other.clubId)).map((other) => normaliseClubName(other.name)),
+  ])
+
+  for (const other of others) {
+    await db.update(matches).set({ clubId: stays.id }).where(eq(matches.clubId, other.id))
+    await db.update(clubNames).set({ clubId: stays.id }).where(eq(clubNames.clubId, other.id))
+    await db.update(clubPages).set({ clubId: stays.id }).where(eq(clubPages.clubId, other.id))
+    await db.delete(clubs).where(eq(clubs.id, other.id))
+    events.push(`merged club '${other.name}' into club '${stays.name}'`)
+
+    const key = normaliseClubName(other.name)
+
+    if (!had.has(key) && !apart.has(key)) {
+      await db.insert(clubNames).values({ clubId: stays.id, name: other.name })
+      had.add(key)
+    }
+  }
+
+  if (stays.wikipediaPage !== article) {
+    await db.update(clubs).set({ wikipediaPage: article }).where(eq(clubs.id, stays.id))
+    events.push(`article '${article}' for club '${stays.name}'`)
+  }
+
+  const inThere = new Set([...remembered.map((row) => row.page)])
+
+  for (const title of titles) {
+    if (!inThere.has(title)) {
+      await db.insert(clubPages).values({ clubId: stays.id, page: title })
+      if (title !== article) {
+        events.push(`title '${title}' is a redirect to '${article}', the article of club '${stays.name}'`)
+      }
+    }
+  }
+
+  return events
 }

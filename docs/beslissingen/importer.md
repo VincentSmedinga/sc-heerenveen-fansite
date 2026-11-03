@@ -1045,6 +1045,9 @@
 - **Later:** zie _Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn_ (31 oktober 2026): het nadeel hierboven is voor de clubs in die lijst opgelost, en de importer voegt zo'n club zelf samen.
   De rest van deze beslissing blijft: één artikel is één club, de slug verandert niet door een andere naam, en een club die niet in de lijst staat, voegt de projecteigenaar nog met de hand samen.
   Alleen bij het samenvoegen van een club uit de lijst verandert de slug van de club die blijft.
+- **Later:** zie _Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club_ (3 november 2026): één artikel is één club, na de doorverwijzingen.
+  De titel van een artikel dat een doorverwijzing is, telt als het artikel waar hij naar verwijst, en `wikipedia_page` is de titel van het echte artikel.
+  Een club die onder de titel van een doorverwijzing staat, voegt de importer zelf samen, dus alleen een club zonder doorverwijzing voegt de projecteigenaar nog met de hand samen.
 
 ## Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn
 
@@ -1079,6 +1082,10 @@
 - **Alternatieven:** de volledige naam raden uit het begin van een naam (`Excelsior` en `Excelsior Maassluis` zouden samenvallen); een migratie die de twee clubs samenvoegt (geen regel in het logboek, en de lijst moet in de importer toch bestaan); een samenvoegcommando (een commando voor één club, en de lijst doet het vanzelf); de oude slug laten omleiden (er zijn nog geen openbare links, zie #33).
 - **Later:** zie _Het herstel van de clubs draait aan het begin van elke run, en een datum van meer dagen is een datum in elke schrijfwijze_ (1 november 2026): het herstel draait aan het begin van de run, vóór een seizoen wordt gelezen, en in een eigen transactie in plaats van in de transactie van de import.
   De rest blijft: de lijst, de volledige naam en de slug, wie blijft en wat er in het logboek komt.
+- **Later:** zie _Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club_ (3 november 2026): "Hebben twee clubs elk een eigen artikel, dan voegt de importer ze niet samen" geldt alleen voor artikelen die geen doorverwijzing zijn.
+  `SBV Excelsior` is een doorverwijzing naar `Excelsior Rotterdam`, dus voor Excelsior Rotterdam komt de waarschuwing niet meer voor; ze blijft voor een lijstclub met twee echte artikelen.
+  "Meer clubs komen alleen op de lijst als de projecteigenaar het per club beslist" blijft voor namen, maar een titel die een doorverwijzing is, hoeft er niet op: de importer vraagt dat aan Wikipedia.
+  `clubFullNames` blijft zoals hij is.
 
 ## Het herstel van de clubs draait aan het begin van elke run, en een datum van meer dagen is een datum in elke schrijfwijze
 
@@ -1104,6 +1111,8 @@
   Een wedstrijd met een datum die we niet kennen overslaan en de rest bewaren (dat is de regel van _Een gestaakte wedstrijd telt niet, de latere uitslag geldt_ omgekeerd, en een overgeslagen wedstrijd zou uit de lijst verdwijnen).
   Het jaar van een datum zonder jaar afleiden uit het seizoen (een gok; Wikipedia schrijft het jaar bij elke datum in de sjablonen die we lazen).
   Het herstel in de transactie van de import laten, maar dan ook als het seizoen niet leest (de transactie bestaat dan niet).
+- **Later:** zie _Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst_ (3 november 2026): `repairKnownClubs` doet nu twee stappen, eerst het herstel van de doorverwijzingen en dan dat van de lijst.
+  De rest blijft: aan het begin van elke run, in een eigen transactie, en een fout is een waarschuwing.
 
 ## Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 
@@ -1993,3 +2002,47 @@
   Elk blok onder een inhaalronde laten winnen van het blok onder de ronde (eenvoudiger, maar dezelfde uitslag twee keer zou dan stil goed gaan).
   Een vaste uitzondering voor deze wedstrijd in de code (nul risico nu, maar de volgende gestaakte wedstrijd vraagt weer een wijziging).
   Alleen wedstrijden van andere clubs (laat de eigen wedstrijd onder een inhaalronde een fout, terwijl de code hetzelfde is).
+
+## Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club
+
+- **Datum:** 3 november 2026
+- **Besluit:** de import behandelt de titel van een artikel dat een doorverwijzing is als het artikel waar hij naar verwijst (#680).
+  Hij vraagt dat per titel één keer aan Wikipedia en onthoudt het antwoord in de tabel `club_pages`.
+  - `club_pages` heeft een rij per titel (`page`, uniek) met de club (`club_id`).
+    `clubs.wikipedia_page` is de titel van het echte artikel, na de doorverwijzingen, en staat ook in de tabel.
+  - Een titel die niet in `club_pages` staat en van geen club het artikel is, vraagt de import één keer op met de bestaande fetcher: dezelfde User-Agent, `robots.txt` en alleen `/wiki/<titel>?action=raw`.
+    Dat gebeurt vóór de transactie van het seizoen.
+  - Begint de tekst met `#REDIRECT` of `#DOORVERWIJZING` (hoofdletters tellen niet mee), dan is het doel de titel tussen `[[` en `]]`, zonder `|…` of `#…`.
+    Een doel dat zelf een doorverwijzing is, volgt de import ook, hoogstens drie keer.
+    Een doel dat al in `club_pages` staat, kost geen verzoek.
+  - De import bewaart niets uit de tekst van een artikel, alleen of de titel een doorverwijzing is en naar wat.
+  - Faalt een verzoek (netwerk, status, `robots.txt`), dan maakt de import geen club op een gok: de run van het seizoen valt, en een volgende run probeert het opnieuw.
+  - De titels van de Europa League-wedstrijden van 2012/13 zijn titels van de Nederlandse Wikipedia, want de reader zet de Engelse namen om (`europaLeagueClubs`).
+    Alle verzoeken gaan dus naar de Nederlandse Wikipedia.
+  - Twee clubs die elk een eigen artikel hebben dat geen doorverwijzing is, blijven twee clubs: `Excelsior Maassluis` is een andere club dan `Excelsior Rotterdam`.
+- **Waarom:** "één artikel is één club" klopt alleen als doorverwijzingen meetellen.
+  Zonder dat werden `AZ Alkmaar` en `SBV Excelsior` extra clubs (3 november 2026, na #667): de pagina Tegenstanders toonde twee rijen met dezelfde naam, en de pagina van een tegenstander telde maar een deel van de wedstrijden.
+  De oudere seizoenen van #414 hebben veel meer oude namen en titels, en een lijst die we met de hand bijhouden, loopt daar altijd achter.
+- **Nadeel:** een titel die niet bestaat (404), zoals een rode link naar een club, laat de run van het seizoen vallen in plaats van een club zonder artikel te maken.
+  Eenmalig komen er ongeveer 55 verzoeken bij voor de titels die er al zijn.
+  De slugs `az-2` en `excelsior-rotterdam-2` vervallen zonder omleiding, want er zijn nog geen openbare links (zie #33).
+- **Alternatieven:** de lijst `clubFullNames` uitbreiden met titels van artikelen (geen verzoeken en geen tabel, maar elk nieuw paar blijft een dubbele club tot iemand het ziet); doorverwijzingen alleen controleren bij het zoeken naar dubbele clubs (de club bestaat dan al en de pagina's tonen hem dubbel); een titel zonder artikel als 404 laten doorgaan (dat is een gok, en een fout valt op).
+
+## Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst
+
+- **Datum:** 3 november 2026
+- **Besluit:** de import voegt clubs waarvan de titel een doorverwijzing is, zelf samen aan het begin van een run, vóór een seizoen wordt gelezen, naast `repairClubs` voor de lijst met volledige namen (`repairKnownClubs`, dat `repairClubPages` draait).
+  Er komt geen migratie die data verandert.
+  - De import controleert elke club waarvan de titel nog niet in `club_pages` staat, één keer: een verzoek per titel.
+  - Clubs die op hetzelfde artikel uitkomen, zijn één club, in een transactie per artikel.
+    De club die blijft is die met het artikel, anders die met de meeste wedstrijden, anders de oudste, zoals bij `repairClubs`.
+    Heeft geen club het artikel, dan krijgt de club dat als `wikipedia_page` en blijft staan: `BV De Graafschap` wordt het artikel `De Graafschap (voetbalclub)` en blijft de club `de-graafschap`.
+  - De wedstrijden en de andere namen van de club die weggaat, gaan naar de club die blijft, en zijn titel en naam worden een titel in `club_pages` en een andere naam.
+    De club die blijft houdt zijn slug en zijn naam.
+  - Elke samenvoeging staat in het logboek met `Clubs:` vooraan, zoals `Clubs: merged club 'AZ' into club 'AZ'`.
+    Een tweede run schrijft niets en vraagt niets.
+  - Het herstel van de doorverwijzingen gaat vóór dat van de lijst, zodat twee clubs die één artikel zijn, geen waarschuwing "have an article each" meer geven.
+    Faalt het, dan is dat een waarschuwing en gaat het herstel van de lijst door.
+- **Waarom:** een migratie kan Wikipedia niet vragen, en de run schrijft elke samenvoeging in het logboek.
+  Zo gebeurt het herstel op acceptatie en productie zonder dat iemand "Import seasons" start.
+- **Alternatieven:** een eenmalig commando (het moet toch per omgeving gedraaid worden en laat geen regel in het logboek van de runs); met de hand samenvoegen met SQL (twee clubs nu, maar het is de oude weg die we juist willen vermijden).

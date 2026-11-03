@@ -610,12 +610,13 @@ const articleTitle = customType<{ data: string }>({
 
 /**
  * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
- * `wikipedia_page` is its title (unique where there is one), and a club that is named in more
- * than one way is still one row. `slug` is the fixed name in an address, with lowercase
- * letters, digits and single hyphens (the check ignores the collation, which would let capitals
- * through); it is unique and never changes when the name does. `name` is the name of the
- * newest season we have of the club; the other names it was written with are in `club_names`.
- * Times are UTC.
+ * `wikipedia_page` is the title of that article, after any redirects (unique where there is
+ * one), and a club that is named in more than one way is still one row. The titles that lead
+ * to the article, such as `AZ Alkmaar` for `AZ (voetbalclub)`, are in `club_pages`. `slug` is
+ * the fixed name in an address, with lowercase letters, digits and single hyphens (the check
+ * ignores the collation, which would let capitals through); it is unique and never changes
+ * when the name does. `name` is the name of the newest season we have of the club; the other
+ * names it was written with are in `club_names`. Times are UTC.
  */
 export const clubs = mysqlTable(
   'clubs',
@@ -651,6 +652,24 @@ export const clubNames = mysqlTable('club_names', {
 export type ClubName = typeof clubNames.$inferSelect
 
 export type NewClubName = typeof clubNames.$inferInsert
+
+/**
+ * The titles of Wikipedia articles that belong to a club: its own article, and the titles that
+ * redirect to it (`AZ Alkmaar` is a redirect to `AZ (voetbalclub)`). The importer asks
+ * Wikipedia once whether a title is a redirect, and this table is how it remembers the answer:
+ * a title that is here costs no request. A title belongs to one club, so it is the primary key,
+ * and the rows go with their club.
+ */
+export const clubPages = mysqlTable('club_pages', {
+  page: articleTitle('page').primaryKey(),
+  clubId: int('club_id', { unsigned: true })
+    .notNull()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+})
+
+export type ClubPage = typeof clubPages.$inferSelect
+
+export type NewClubPage = typeof clubPages.$inferInsert
 
 /**
  * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie, the KNVB

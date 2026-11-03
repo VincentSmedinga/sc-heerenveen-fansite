@@ -24,8 +24,9 @@ import {
   runSeasonsImport,
   seasonUsage,
 } from './import-season.ts'
-import { europaLeaguePage, pageTitles, pageUrl, readStandings } from './read-wikipedia.ts'
+import { europaLeaguePage, pageTitles, pageUrl, readEuropaLeague, readStandings } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
+import { articleRoutes } from './test-articles.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
@@ -153,14 +154,27 @@ async function serve({
     routes[pageUrl('', pageTitles(past).playoffs)] = reply(200, playoffs, wiki)
   }
 
-  const server = await startServer(routes)
+  const server = await startServer({
+    ...articleRoutes([...Object.values(last), ...Object.values(thisOne), playoffs ?? '']),
+    ...routes,
+  })
 
   servers.push(server)
 
   return server
 }
 
-const pageRequests = (server: TestServer) => server.paths().filter((path) => path !== '/robots.txt')
+/** The requests for the pages of a season, not those for robots.txt and for club articles. */
+const pageRequests = (server: TestServer) => {
+  const seasonPages = new Set(
+    ['2012/13', past, current].flatMap((season) => [
+      ...Object.values(pageTitles(season)).map((title) => pageUrl('', title)),
+      ...(europaLeaguePage(season) === undefined ? [] : [pageUrl('', europaLeaguePage(season) ?? '')]),
+    ]),
+  )
+
+  return server.paths().filter((path) => path !== undefined && seasonPages.has(path))
+}
 
 /** Every row the import writes for a season, to see that a run changed none of them. */
 async function rowsOf(season: string) {
@@ -572,7 +586,14 @@ describe('the Europa League matches of 2012/13', () => {
     }
     routes[pageUrl('', europaLeaguePage(europa) ?? '')] = reply(200, english, wiki)
 
-    const server = await startServer(routes)
+    const read = readEuropaLeague(english, europa)
+    const server = await startServer({
+      // The page is English, and its matches have the titles of the Dutch Wikipedia.
+      ...articleRoutes(Object.values(lastSeason), {
+        titles: read.kind === 'read' ? read.matches.flatMap((match) => match.opponentPage ?? []) : [],
+      }),
+      ...routes,
+    })
 
     servers.push(server)
 
