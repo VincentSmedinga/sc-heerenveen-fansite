@@ -51,20 +51,8 @@ export type MatchProps =
         resultMissing?: never
         status: 'played'
       })
-  | (MatchBaseProps & {
-      afterNinetyAgainst?: never
-      afterNinetyFor?: never
-      dateTime?: never
-      extraTime?: never
-      goals?: never
-      goalsAgainst?: never
-      goalsFor?: never
-      penaltiesAgainst?: never
-      penaltiesFor?: never
-      resultMissing?: never
-      status: 'cancelled' | 'postponed'
-      time?: never
-    })
+  | MatchCalledOffProps<'cancelled'>
+  | MatchCalledOffProps<'postponed'>
   | (MatchWithTimeProps & {
       afterNinetyAgainst?: never
       afterNinetyFor?: never
@@ -123,6 +111,22 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   round: string
   /** The stadium, as plain text. Without it the line has the day or the time alone. */
   stadium?: null | string | undefined
+}
+
+/** A match that is called off has no time and no result, only the word for its status. */
+type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBaseProps & {
+  afterNinetyAgainst?: never
+  afterNinetyFor?: never
+  dateTime?: never
+  extraTime?: never
+  goals?: never
+  goalsAgainst?: never
+  goalsFor?: never
+  penaltiesAgainst?: never
+  penaltiesFor?: never
+  resultMissing?: never
+  status: Status
+  time?: never
 }
 
 /** The shoot-out of a cup match that was level after extra time: both scores, or none. */
