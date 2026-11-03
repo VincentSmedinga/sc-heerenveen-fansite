@@ -342,8 +342,8 @@ function UpcomingLine({ match, now }: { match: PublicClubMatch; now: Date }) {
     stadium: match.stadium,
   }
 
-  return match.status === 'postponed' ? (
-    <Match {...common} status="postponed" />
+  return match.status === 'postponed' || match.status === 'cancelled' ? (
+    <Match {...common} status={match.status} />
   ) : (
     <Match {...common} {...matchMoment(match, now)} status="scheduled" />
   )

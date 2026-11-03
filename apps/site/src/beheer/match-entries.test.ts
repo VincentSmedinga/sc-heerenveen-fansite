@@ -401,6 +401,21 @@ describe('saveEntry', () => {
     expect(await stored(id)).toMatchObject({ attendance: null, goalsFor: null, resultSetAt: null, status: 'postponed' })
   })
 
+  it('keeps a cancelled match without a result, and clears the spectators', async () => {
+    const id = await addMatch({ attendance: 20_000, goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ result: { ...entry().result, goalsAgainst: null, goalsFor: null, status: 'cancelled' } }),
+      'Geannuleerd',
+      t0,
+    )
+
+    expect(await stored(id)).toMatchObject({ attendance: null, goalsFor: null, resultSetAt: null, status: 'cancelled' })
+  })
+
   it('says a match is missing, and writes nothing', async () => {
     expect(await saveEntry(database.db, userId, 99_999, entry(), 'Wie weet', t0)).toEqual({ status: 'missing' })
     expect(await log()).toEqual([])

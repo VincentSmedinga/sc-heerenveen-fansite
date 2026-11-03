@@ -188,7 +188,12 @@ function ResultCell({ match }: { match: AdminMatchRow }) {
 
 /** The status in words, with a Tag for what needs a look: a missing result and an entry. */
 function StatusCell({ match }: { match: AdminMatchRow }) {
-  const status = match.status === 'played' ? 'Gespeeld' : match.status === 'postponed' ? 'Uitgesteld' : 'Gepland'
+  const status = {
+    cancelled: 'Geannuleerd',
+    played: 'Gespeeld',
+    postponed: 'Uitgesteld',
+    scheduled: 'Gepland',
+  }[match.status]
 
   return (
     <>

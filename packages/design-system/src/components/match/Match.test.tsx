@@ -506,6 +506,32 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-when')?.textContent).toBe('Uitgesteld')
   })
 
+  it('says "Geannuleerd" for a cancelled match where "Uitgesteld" would be, with no result and no missing data', () => {
+    const { container } = render(
+      <Match
+        competition="Eredivisie"
+        home={false}
+        opponent="Willem II"
+        round="Speelronde 27"
+        stadium="Koning Willem II Stadion"
+        status="cancelled"
+      />,
+    )
+
+    expect(container.querySelector('.hf-match-cancelled')?.textContent).toBe('Geannuleerd')
+    expect(container.querySelector('.hf-match-postponed')).toBeNull()
+    expect(container.querySelector('time')).toBeNull()
+    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Geannuleerd · Koning Willem II Stadion')
+    expect(container.querySelector('.hf-match-missing')).toBeNull()
+    expect(container.querySelector('.hf-match-goals')).toBeNull()
+  })
+
+  it('names a cancelled match for a screen reader as the clubs, the round and "Geannuleerd"', () => {
+    const { container } = render(<Match home opponent="Willem II" round="Speelronde 27" status="cancelled" />)
+
+    expect(container.textContent).toBe('Speelronde 27 · Geannuleerdsc Heerenveen –tegen Willem II')
+  })
+
   describe('a match without a result', () => {
     it('says "Gegevens nog niet beschikbaar" as the last line and keeps the time and the dash', () => {
       const { container } = render(<Match {...scheduled} resultMissing />)

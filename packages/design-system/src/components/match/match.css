@@ -116,10 +116,11 @@
   }
 
   /*
-   * "Uitgesteld" is the one fact a supporter looks for in the line, so it has the weight and
-   * the accent colour of a time.
+   * "Uitgesteld" and "Geannuleerd" are the one fact a supporter looks for in the line, so they
+   * have the weight and the accent colour of a time.
    */
-  .hf-match-postponed {
+  .hf-match-postponed,
+  .hf-match-cancelled {
     color: var(--hf-colour-text-accent);
     font-weight: var(--hf-strong-font-weight);
   }

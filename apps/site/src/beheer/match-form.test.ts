@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { MatchValues } from './match-fields'
 
 import { emptyFields, emptyGoal } from './match-fields'
-import { readButton, readValues, validate, valuesOf } from './match-form'
+import { readButton, readValues, statusChoices, validate, valuesOf } from './match-form'
 
 const squad = [
   { id: 11, name: 'Luca Oyen', wikipediaPage: 'Luca Oyen' },
@@ -96,15 +96,22 @@ describe('validate', () => {
     ])
   })
 
-  it('accepts a result without goals, and a scheduled or postponed match without a result', () => {
+  it('accepts a result without goals, and a scheduled, postponed or cancelled match without a result', () => {
     expect(validate(filled({ 'uitslag-wij': '0', 'uitslag-zij': '0' }), league).errors).toBeUndefined()
 
-    for (const status of ['scheduled', 'postponed']) {
+    for (const status of ['scheduled', 'postponed', 'cancelled']) {
       const checked = validate(filled({ status, 'uitslag-wij': '', 'uitslag-zij': '' }), league)
 
       expect(checked.errors).toBeUndefined()
       expect(checked.entry?.result).toMatchObject({ goalsAgainst: null, goalsFor: null, status })
     }
+  })
+
+  it('offers Geannuleerd as a status, and asks for no goals with it', () => {
+    expect(statusChoices).toContainEqual({ label: 'Geannuleerd', value: 'cancelled' })
+    expect(
+      validate(filled({ status: 'cancelled', 'uitslag-wij': '1', 'uitslag-zij': '0' }), league).errors,
+    ).toHaveProperty('uitslag-wij')
   })
 
   it('asks for the day, a time or a text, and not both', () => {

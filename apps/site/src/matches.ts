@@ -269,9 +269,10 @@ export async function getMatchSeasons(): Promise<string[]> {
  * The results of the played matches of the Eredivisie, for the chart of the season: `W` for a
  * win, `G` for a draw and `V` for a loss, in the order the matches were played (the query gives
  * the matches by date, then by kick-off). A cup tie, a match that isn't played and a match with
- * no score count for nothing. A match that was postponed has no result until it is played, and
- * then it stands where it was played, so the place in the list is the order of the matches and
- * not always the round. The Eredivisie has no extra time or shoot-out, so the score decides.
+ * no score count for nothing. A match that was postponed has no result until it is played (a
+ * cancelled one never has), and then it stands where it was played, so the place in the list is
+ * the order of the matches and not always the round. The Eredivisie has no extra time or
+ * shoot-out, so the score decides.
  */
 export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
   return playedMatchesOf(matches, 'league').map(resultOf)
@@ -811,7 +812,9 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
  * results, and the previous and the next match the homepage shows (see `MatchOverview`). A
  * match has begun when its kick-off is past, or, without a kick-off, when its day in Dutch time
  * is over. A match that is called off with no new date has no place in time and stays in the
- * programme. `now` is the moment of the visit.
+ * programme. A match that is cancelled will not be played, so it is in the results of its
+ * season and never in the programme or the previous or the next match. `now` is the moment of
+ * the visit.
  */
 export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
   const programme = programmeOf(matches, now)
@@ -819,7 +822,8 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
 
   return {
     next: programme.find((match) => match.status !== 'postponed'),
-    previous: results[0],
+    // A match that is cancelled is in the results of its season, but it was never played.
+    previous: results.find((match) => match.status !== 'cancelled'),
     programme,
     results,
   }
@@ -828,7 +832,8 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
 /**
  * The matches that have not begun at `now`, in the order they are given: the programme. This is
  * the one rule for what is still to come, shared by Programma and the page of a club. A match
- * that is called off with no new date has no place in time and stays in it.
+ * that is called off with no new date has no place in time and stays in it, and one that is
+ * cancelled is not in it.
  */
 export function programmeOf<T extends Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>>(
   matches: readonly T[],
@@ -891,7 +896,7 @@ export function lacksResult(
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     return false
   }
-  if (match.status === 'postponed' || !hasBegun(match, now)) {
+  if (match.status === 'postponed' || match.status === 'cancelled' || !hasBegun(match, now)) {
     return false
   }
 
@@ -1185,9 +1190,10 @@ function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
  * Dutch time is over (it counts as not begun until the end of that day, and a weekend until the
  * end of its last day). A match that is played
  * has begun whatever the clock says, and one that is called off with no new date never has.
+ * A match that is cancelled is over: it is in the results and never in the programme.
  */
 function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
-  if (match.status === 'played') {
+  if (match.status === 'played' || match.status === 'cancelled') {
     return true
   }
   if (match.status === 'postponed') {

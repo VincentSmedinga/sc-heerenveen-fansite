@@ -192,6 +192,16 @@ describe('the list', () => {
     expect(html).toContain('Gepland')
   })
 
+  it('says Geannuleerd for a cancelled match, which is not one without a result', async () => {
+    await addMatch({ status: 'cancelled' })
+
+    const html = await list({ tonen: 'alles' })
+
+    expect(html).toContain('Geannuleerd')
+    expect(html).not.toContain('Uitslag ontbreekt')
+    expect(await list()).toContain('Alle wedstrijden hebben een uitslag.')
+  })
+
   it('says in one line that every match has a result, instead of an empty table', async () => {
     await addMatch(playedAway)
 
@@ -501,6 +511,7 @@ describe('the match', () => {
     expect(html).toMatch(/type="radio" name="doelpunt-1-kant" value="wij"/u)
     expect(html).toContain('<select class="hf-width-natural" name="doelpunt-1-soort"')
     expect(html).toMatch(/<select [^>]*name="status"/u)
+    expect(html).toMatch(/<option value="cancelled">Geannuleerd<\/option>/u)
   })
 
   it('says how soon a save shows, from the time the data is kept, and longer for an earlier season', async () => {

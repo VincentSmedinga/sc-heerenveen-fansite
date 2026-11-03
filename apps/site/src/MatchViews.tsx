@@ -1046,8 +1046,8 @@ function MatchLine({ match, now, withCompetition }: { match: PublicMatch; now: D
     stadium: match.stadium,
   }
 
-  if (match.status === 'postponed') {
-    return <Match {...common} status="postponed" />
+  if (match.status === 'postponed' || match.status === 'cancelled') {
+    return <Match {...common} status={match.status} />
   }
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     const result = {
