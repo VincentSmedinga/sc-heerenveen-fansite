@@ -531,23 +531,24 @@ De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `made
 ## De tabellen `clubs` en `club_names`
 
 De clubs waartegen sc Heerenveen speelde, zodat elke tegenstander een vaste naam en een vast adres heeft.
-Een club is één artikel op de Nederlandse Wikipedia, ook als Wikipedia hem in de wedstrijden op twee manieren schrijft.
+Een club is één artikel op de Nederlandse Wikipedia, ook als Wikipedia hem in de wedstrijden op twee manieren schrijft en ook als een titel een doorverwijzing naar dat artikel is.
 De gegevens komen van Wikipedia en vallen onder CC BY-SA 4.0, zoals de wedstrijden.
 
 `clubs` heeft een rij per club.
 
-| Kolom            | Betekenis                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `slug`           | De vaste naam in een adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek, en een nieuwe naam verandert hem niet |
-| `name`           | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                             |
-| `wikipedia_page` | De titel van het artikel, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club waarvan we alleen een naam kennen      |
-| `created_at`     | Wanneer de club is toegevoegd, in UTC                                                                                                      |
+| Kolom            | Betekenis                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`           | De vaste naam in een adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek, en een nieuwe naam verandert hem niet      |
+| `name`           | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                                  |
+| `wikipedia_page` | De titel van het artikel, na de doorverwijzingen, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club met alleen een naam |
+| `created_at`     | Wanneer de club is toegevoegd, in UTC                                                                                                           |
 
 De CHECK-constraint `clubs_slug_format` weigert een slug met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
 `wikipedia_page` vergelijkt letter voor letter (de collatie is `utf8mb4_bin`), want `Go Ahead Eagles` en `Go ahead eagles` zijn twee pagina's.
 `club_names` heeft de andere namen van een club, zoals Wikipedia ze in wedstrijden schrijft (`N.E.C.` bij `NEC`).
 Het zijn `club_id` en `name`; een naam is uniek, want hij hoort bij één club, en de rij gaat weg met haar club.
 De huidige naam staat er niet nog eens in.
+`club_pages` heeft de titels die bij het artikel horen, de doorverwijzingen erbij (zie _De tabel `club_pages`_ hieronder).
 
 `matches.club_id` verwijst naar de club van de tegenstander.
 Een club met wedstrijden is niet te verwijderen (de verwijzing heeft geen cascade), en een wedstrijd zonder club bestaat niet.
@@ -577,6 +578,30 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 - `listAllWikipediaPages(db)` geeft de pagina's van Wikipedia die de import voor de wedstrijden las, van alle seizoenen, het nieuwste seizoen eerst: het seizoen, de titel, het soort en het moment van lezen.
   Een pagina die over alle seizoenen telt, zoals de onderlinge resultaten, noemt ze allemaal als bron.
 
+### De tabel `club_pages`
+
+De titels van de artikelen op Wikipedia die bij een club horen: zijn eigen artikel, en elke titel die daar een doorverwijzing naartoe is.
+Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, dus beide titels staan bij dezelfde club.
+Zonder deze tabel leest de import `AZ Alkmaar` als een tweede artikel, en dus als een tweede club.
+
+| Kolom     | Betekenis                                                                               |
+| --------- | --------------------------------------------------------------------------------------- |
+| `page`    | De titel, letter voor letter vergeleken (`utf8mb4_bin`) en de sleutel van de rij: uniek |
+| `club_id` | De club van het artikel; de rij gaat weg met haar club                                  |
+
+`clubs.wikipedia_page` is de titel van het echte artikel, na de doorverwijzingen, en staat ook in `club_pages`.
+De importer vraagt Wikipedia per titel één keer of hij een doorverwijzing is, en onthoudt het antwoord hier: een titel in deze tabel kost geen verzoek meer.
+De regels staan in de [README van de importer](../../apps/importer/README.md), _Een doorverwijzing is hetzelfde artikel_.
+Vier functies in `@fansite/db/clubs` horen erbij:
+
+- `knownClubPages(db)` geeft elke titel die een club als artikel heeft of die in de tabel staat;
+- `rememberedClubArticles(db)` geeft elke titel in de tabel met het artikel van zijn club;
+- `unrememberedClubPages(db)` geeft de titels van de artikelen van clubs die nog niet in de tabel staan;
+- `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen (zie hieronder).
+
+De migratie `0036_add_club_pages` maakt de tabel leeg.
+De importer vult hem aan het begin van de eerstvolgende run, voor elke club met een artikel, met één verzoek per titel.
+
 ### Een club met twee namen samenvoegen
 
 Staat een club twee keer in `clubs` omdat Wikipedia hem op twee manieren schrijft, zoals `Excelsior` en `Excelsior Rotterdam`, dan zijn er twee wegen.
@@ -587,7 +612,18 @@ De club met een artikel blijft, anders die met de meeste wedstrijden, anders de 
 Hebben beide clubs een eigen artikel, dan voegt hij niets samen en zegt dat in het logboek.
 Een club aan de lijst toevoegen staat in de [README van de importer](../../apps/importer/README.md), onder _De clubs van de tegenstanders_.
 
-Staat de club niet in die lijst, dan voegt de projecteigenaar of een Builder ze met de hand samen.
+Een club die onder de titel van een doorverwijzing staat, zoals `AZ Alkmaar` naast `AZ (voetbalclub)`, voegt de importer ook zelf samen aan het begin van elke run, met `repairClubPages(db, doorverwijzingen)` (zie _De tabel `club_pages`_).
+`doorverwijzingen` zijn de antwoorden van Wikipedia: elke titel waar de importer naar vroeg, met de titel van het artikel waar hij op uitkomt.
+Clubs die op hetzelfde artikel uitkomen, zijn één club, in een transactie per artikel:
+
+- de club die blijft is die met het artikel, anders die met de meeste wedstrijden, anders de oudste;
+- de wedstrijden en de andere namen van de clubs die weggaan, gaan naar de club die blijft, en hun naam wordt een andere naam, tenzij hij van de club zelf of van een andere club is;
+- de club die blijft houdt zijn slug en zijn naam, en krijgt het artikel als `wikipedia_page` als hij een doorverwijzing had; elke titel die op het artikel uitkomt, komt in `club_pages`;
+- de slug van een club die weggaat, vervalt zonder omleiding.
+
+Hebben twee clubs elk een eigen artikel dat geen doorverwijzing is, dan komen ze op een ander artikel uit en blijven ze twee clubs.
+
+Staat de club niet in die lijst en is zijn titel geen doorverwijzing, dan voegt de projecteigenaar of een Builder ze met de hand samen.
 Er is geen opdracht voor, want het komt zelden voor.
 Doe het in één transactie, met `<blijft>` en `<gaat weg>` als het `id` van de twee clubs:
 
@@ -600,7 +636,8 @@ DELETE FROM clubs WHERE id = <gaat weg>;
 
 De naam van de club die weggaat, staat daarna bij de andere namen van de club die blijft.
 Schrijft Wikipedia die naam later weer, zonder link, dan vindt de importer de club die blijft.
-Had de club die weggaat een eigen artikel, dan is het geen samenvoegen maar een vergissing: één artikel is één club, en de importer maakt de club bij de volgende lezing opnieuw.
+Had de club die weggaat een eigen artikel dat geen doorverwijzing is, dan is het geen samenvoegen maar een vergissing: één artikel is één club, en de importer maakt de club bij de volgende lezing opnieuw.
+Heeft hij titels in `club_pages`, zet die dan ook over: `UPDATE club_pages SET club_id = <blijft> WHERE club_id = <gaat weg>;` vóór de `DELETE`, want de rijen gaan met hun club mee weg.
 De slug van de club die weggaat, werkt dan niet meer; de slug van de club die blijft verandert niet.
 
 ## De tabel `staff`
@@ -664,9 +701,9 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
-- `@fansite/db/clubs`: `createClubBook(db, { fullNames })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
+- `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
