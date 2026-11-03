@@ -879,6 +879,8 @@
   De site van de club (geen toestemming, zie #16).
 - **Later:** we bewaren sinds 27 oktober 2026 ook de pagina van de speler op Wikipedia en of hij nog in de selectie staat; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
 - **Later:** we bewaren sinds 31 oktober 2026 ook de optredens, doelpunten en assists per speler, uit dezelfde tabel; zie _De cijfers van een speler staan in een eigen tabel, per seizoen en competitie_.
+- **Later:** de selectie van eerdere seizoenen wordt onderzocht in `docs/onderzoek-spelers-sinds-1990.md` (#676).
+  Er is nog niets gekozen, dus de bron en de licentie hier blijven gelden.
 
 ## De zoekterm is de achternaam, als eigen kolom
 
@@ -965,6 +967,8 @@
 - **Alternatieven:** de uurlijkse import ook het vorige seizoen laten lezen (verzoeken zonder reden, en een seizoen dat ongezond kan worden).
   Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
+- **Later:** de selectie van eerdere seizoenen wordt onderzocht in `docs/onderzoek-spelers-sinds-1990.md` (#676).
+  Er is nog niets gekozen, dus dit besluit blijft gelden tot de projecteigenaar kiest.
 - **Later:** zie _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_.
   Een seizoen dat al in de database staat, verandert niet zomaar meer: een verschil dat iets overschrijft wacht bij een tweede lezing tot een mens besluit (`pnpm run import:changes`) of tot de opdracht het na zeven dagen weer leest.
   Een eerste lezing en een lezing zonder verschil werken zoals hier staat.
@@ -1915,3 +1919,45 @@
   De pagina's hebben dezelfde sjablonen, dus de lezer is bijna dezelfde: alleen de kop, de rondes en `(nv)` zijn nieuw.
 - **Alternatieven:** één algemene naam zoals `Play-offs Europees voetbal` (dat hernoemt bestaande rijen en klopt voor geen van beide).
   De Europa League-play-offs als bekerwedstrijd bewaren (de ronde, de schakelaar en de bijschriften zeggen dan iets wat niet klopt).
+
+## Het onderzoek naar de spelers telt de hele selectie, niet alleen wie speelde
+
+- **Datum:** 3 november 2026
+- **Besluit:** met "spelers die voor het eerste elftal speelden" bedoelen we iedereen die in de selectie van een seizoen zat, ook zonder wedstrijd.
+- **Waarom:** de projecteigenaar wil de volledige lijst, en een naam zonder wedstrijd hoort er voor een supporter ook bij.
+- **Alternatieven:** alleen wie minstens één wedstrijd speelde, ook als invaller.
+  Dat past beter bij wat de tabellen en wedstrijdpagina's laten zien, maar het mist spelers die nooit in actie kwamen.
+- **Gevolg:** oude pagina's noemen een speler zonder wedstrijd zelden.
+  Het onderzoek zegt per tijdperk hoe compleet de lijst kan worden, en noemt wat alleen met wedstrijden te vinden is (zie `docs/onderzoek-spelers-sinds-1990.md`).
+
+## De bronnen voor de spelers zijn de Nederlandse Wikipedia, Wikidata en de Engelse Wikipedia
+
+- **Datum:** 3 november 2026
+- **Besluit:** het onderzoek (#676) beoordeelt de pagina's van de Nederlandse Wikipedia, Wikidata (CC0) en de Engelse Wikipedia (CC BY-SA 4.0).
+  Transfermarkt en andere databanken blijven buiten beeld, zoals bij #414.
+- **Waarom:** het zijn open bronnen die bij het bronbeleid passen, en Wikidata heeft het lidmaatschap van een team met data.
+- **Alternatieven:** alleen de Nederlandse Wikipedia.
+  Dat is geen nieuwe bron, maar het laat misschien gaten in oudere seizoenen.
+- **Gevolg:** het onderzoek beoordeelt de bronnen.
+  Het besluit om er een te gebruiken in de importer komt na het antwoord van de projecteigenaar.
+- **Later:** het onderzoek vond dat de `robots.txt` van Wikidata ons weert, dus Wikidata kan niet met de fetcher.
+  De keuze wat we ermee doen, staat als open vraag in `docs/onderzoek-spelers-sinds-1990.md`.
+
+## De oude fansite-database staat alleen in een alinea van het onderzoek
+
+- **Datum:** 3 november 2026
+- **Besluit:** het antwoord noemt in één alinea wat de oude database van 1989 tot 2007 zou kunnen dekken.
+  Het onderzoek leest haar niet voor het voorstel.
+- **Waarom:** de rechten zijn onduidelijk (zie #414), en dat probleem hoort niet in dit onderzoek.
+- **Alternatieven:** de namen vergelijken om de volledigheid te meten.
+  Dat is nuttig, maar het raakt de rechtenvraag toch.
+
+## Het onderzoek naar de spelers heeft een alleen-lezen proef
+
+- **Datum:** 3 november 2026
+- **Besluit:** de Builder haalt de pagina's van alle seizoenen vanaf 1990/91 op met een wegwerpscript en slaat niets op.
+  De aantallen komen in het antwoord.
+- **Waarom:** zo zijn de aantallen per seizoen gemeten en niet geschat, zoals bij #414.
+- **Alternatieven:** alleen bureauonderzoek.
+  Dat is goedkoper, maar de aantallen zijn dan een schatting.
+- **Gevolg:** de proef staat in `docs/onderzoek-spelers-sinds-1990.md`, met de stappen om hem te herhalen.
