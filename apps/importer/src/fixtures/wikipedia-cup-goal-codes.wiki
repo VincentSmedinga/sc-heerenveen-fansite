@@ -1,0 +1,43 @@
+<!--
+  A trimmed piece of two pages of the Dutch Wikipedia, read on 4 November 2026, one match of sc Heerenveen from each:
+  https://nl.wikipedia.org/wiki/KNVB_Beker_2015/16_(mannen)?action=raw (Achtste finales) and
+  https://nl.wikipedia.org/wiki/KNVB_Beker_2020/21_(mannen)?action=raw (Halve finales).
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: every other match, and the text around the templates.
+  Roda JC - sc Heerenveen has an own goal written as {{goal|66|o.g.}}, and sc Heerenveen - Ajax a penalty written as {{goal|63|p}}.
+-->
+==== Achtste finales ====
+<!-- KNVB Beker 2015/16 (mannen), Achtste finales -->
+{{footballbox2
+| date= 15 december 2015
+| time=20:45
+| team1= [[Roda JC Kerkrade]] *
+| score= 3 – 1 (2 – 0)
+| team2= [[sc Heerenveen]]
+| goals1= [[Tomi Jurić|Jurić]] {{goal|18||26|pen.}}<br />[[Maecky Ngombo|Ngombo]] {{goal|89|}}
+| goals2= {{rode kaart|0|25}} [[Joey van den Berg|Van den Berg]]<br />{{goal|66|o.g.}} [[Ard van Peppen|van Peppen]]
+| location= [[Kerkrade (plaats)|Kerkrade]]
+| stadium=  [[Parkstad Limburg Stadion]]
+| attendance= 7.258
+| referee= [[Kevin Blom]]
+| report=
+}}
+
+==== Halve finales ====
+<!-- KNVB Beker 2020/21 (mannen), Halve finales -->
+{{Footballbox2
+| date= 3 maart 2021
+| time= 21:00 uur
+| team1= [[sc Heerenveen]]
+| score= 0 – 3 (0 – 1)
+| team2=[[AFC Ajax|Ajax]]
+| goals1=
+| goals2={{goal|19}} [[Davy Klaassen|Klaassen]]<br />{{goal|63|p}} [[Dušan Tadić|Tadić]]<br />{{goal|77}} [[David Neres|Neres]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=0
+| referee=[[Bas Nijhuis|Nijhuis]]
+| videoreferee=[[Dennis Higler|Higler]]
+| AVAR=R. de Nas
+| report =[https://nos.nl/artikel/2371114-ajax-heeft-geen-moeite-met-heerenveen-en-plaatst-zich-met-ruime-zege-voor-bekerfinale.html verslag]
+}}

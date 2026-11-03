@@ -646,7 +646,7 @@ async function readAndStore(
   }
 
   const textOf = (kind: WikipediaPageKind) => pages.find((page) => page.kind === kind)?.text ?? ''
-  const league = readLeague(textOf('programme'))
+  const league = readLeague(textOf('programme'), season)
   const cup = readCup(textOf('cup'))
   const table = readStandings(textOf('standings'))
   const playoffs = pages.some((page) => page.kind === 'playoffs') ? readPlayoffs(textOf('playoffs')) : undefined
@@ -685,7 +685,7 @@ async function readAndStore(
     }
   }
 
-  const everyClub = readLeagueResults(textOf('programme'))
+  const everyClub = readLeagueResults(textOf('programme'), season)
   const named = matchClubNames(everyClub.results, table.rows)
 
   problems.push(...checkMatches(found), ...checkStandings(table.rows, found), ...checkResults(named.results))

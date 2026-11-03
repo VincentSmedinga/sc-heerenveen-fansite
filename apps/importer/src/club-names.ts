@@ -16,4 +16,5 @@ import type { ClubFullName } from '@fansite/db/clubs'
  */
 export const clubFullNames: readonly ClubFullName[] = [
   { aliases: ['Excelsior', 'SBV Excelsior'], name: 'Excelsior Rotterdam' },
+  { aliases: ['Roda JC'], name: 'Roda JC Kerkrade' },
 ]

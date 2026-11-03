@@ -1474,6 +1474,8 @@
 - **Waarom:** de pagina's van de beker en de competitie van afgelopen seizoen hebben drie soorten sjablonen in deze velden (`goal`, `rode kaart` en `penmis`), en alleen `goal` is een doelpunt.
   Een ander sjabloon, zoals een gele kaart, hebben we niet gezien en we kennen zijn naam niet, en dan is de waarschuwing beter dan een gok.
 - **Alternatieven:** elk onbekend sjabloon negeren (een doelpunt dat in een ander sjabloon staat, valt dan stil weg, en de controle met de uitslag vangt dat alleen als het aantal verschilt).
+- **Later:** zie _De lezer neemt `o.g.` als eigen doelpunt en `p` als strafschop, en geen andere deelcode_ in `importer.md` (4 november 2026): `o.g.` telt als `e.d.` en `p` als `pen.`.
+  Elke andere deelcode blijft een regel die we niet kunnen lezen.
 
 ## De cijfers zijn alleen voor beheerders, en de tellers per dag blijven bewaard
 

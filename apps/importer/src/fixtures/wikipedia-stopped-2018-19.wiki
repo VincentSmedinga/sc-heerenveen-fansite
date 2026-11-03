@@ -1,0 +1,73 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2018/19_(mannenvoetbal)/Wedstrijden?action=raw, read on 4 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all matches except the four below, and the text around the templates.
+  Feyenoord - VVV-Venlo was stopped after 1 minute on 4 November 2018 and played again from the start on 6 December, under Inhaalronde 11.
+  PEC Zwolle - FC Groningen was stopped after 57 minutes on 24 April 2019 and finished on 29 April, under the same heading.
+  The page writes a stopped score as "(0 – 0)<br />Gestaakt 1'": the score first, then the word.
+-->
+== Speelronde 11 ==
+{{Footballbox2
+|date = 4 november 2018
+|time = 16:45 uur
+|team1 = [[Feyenoord]]
+|score = (0 – 0)<br />Gestaakt 1'
+|team2 = [[VVV-Venlo]]
+|goals1 = 
+|goals2 = 
+|location = [[Rotterdam (hoofdbetekenis)|Rotterdam]]
+|stadium = [[Stadion Feijenoord]]
+|attendance = 
+|referee = [[Bas Nijhuis|Nijhuis]]
+|videoreferee = [[Erwin Blank|Blank]]
+|report = [https://nos.nl/artikel/2257897-licht-valt-uit-in-de-kuip-nachtmerrie-van-iedere-stadiondirecteur.html Bron]
+}}
+
+== Inhaalronde 11 ==
+{{Footballbox2
+|date = 6 december 2018
+|time = 20:00 uur
+|team1 = [[Feyenoord]]
+|score = 4 – 1
+|team2 = [[VVV-Venlo]]
+|goals1 = [[Tonny Vilhena|Vilhena]] {{goal|28}}<br />[[Robin van Persie|Van Persie]] {{goal|33}}<br />[[Sam Larsson|Larsson]] {{goal|55||75}}
+|goals2 = {{goal|58}} [[Tino-Sven Sušić|Sušić]]
+|location = [[Rotterdam (hoofdbetekenis)|Rotterdam]]
+|stadium = [[Stadion Feijenoord]]
+|attendance = 40.000
+|referee = [[Dennis Higler|Higler]]
+|videoreferee = [[Kevin Blom|Blom]]
+|report = [https://nos.nl/artikel/2262343-dominant-feyenoord-licht-vvv-venlo-pootje.html Verslag]
+}}
+
+== Speelronde 32 ==
+{{Footballbox2
+|date = 24 april 2019
+|time = 19:45 uur
+|team1 = [[PEC Zwolle]]
+|score = (1 – 2)<br />Gestaakt 57'
+|team2 = [[FC Groningen]]
+|goals1 = [[Lennart Thy|Thy]] {{goal|47}}
+|goals2 = {{goal|20}} [[Kaj Sierhuis|Sierhuis]]<br />{{goal|55}} [[Paul Gladon|Gladon]]
+|location = [[Zwolle (hoofdbetekenis)|Zwolle]]
+|stadium = [[MAC³PARK stadion]]
+|attendance = 13.942
+|referee = [[Martin van den Kerkhof|Van den Kerkhof]]
+|videoreferee = [[Erwin Blank|Blank]]
+|report = [https://nos.nl/artikel/2281918-pec-groningen-gestaakt-wegens-onweer-maandag-verder.html Verslag]
+}}
+{{Footballbox2
+|date = 29 april 2019
+|time = 20:00 uur<br />(restant 34 minuten)
+|team1 = [[PEC Zwolle]]
+|score = 3 – 2
+|team2 = [[FC Groningen]]
+|goals1 = [[Lennart Thy|Thy]] {{goal|47||81}}<br />[[Bram van Polen|Van Polen]] {{goal|75}}
+|goals2 = {{goal|20}} [[Kaj Sierhuis|Sierhuis]]<br />{{goal|55}} [[Paul Gladon|Gladon]]
+|location = [[Zwolle (hoofdbetekenis)|Zwolle]]
+|stadium = [[MAC³PARK stadion]]
+|attendance = 13.942
+|referee = [[Martin van den Kerkhof|Van den Kerkhof]]
+|videoreferee = [[Erwin Blank|Blank]]
+|report = [https://nos.nl/artikel/2282616-pec-zet-duel-met-groningen-in-half-uur-op-zijn-kop.html Verslag]
+}}
