@@ -133,7 +133,10 @@ export type ReadResults = { results: ReadResult[]; unread: string[] }
 
 export type ReadStandings = { kind: 'error'; message: string } | { kind: 'read'; rows: ReadStandingsRow[] }
 
-/** One club in the table, worked out from the wins, draws, losses and goals Wikipedia gives. */
+/**
+ * One club in the table. `points` is the number on the page, so after a deduction;
+ * `pointsDeducted` is the deduction itself, 0 for most clubs.
+ */
 export type ReadStandingsRow = {
   club: string
   drawn: number
@@ -143,6 +146,7 @@ export type ReadStandingsRow = {
   lost: number
   played: number
   points: number
+  pointsDeducted: number
   position: number
   won: number
 }
@@ -523,6 +527,7 @@ export function readStandings(text: string): ReadStandings {
       lost,
       played: won + drawn + lost,
       points: 3 * won + drawn,
+      pointsDeducted: 0,
       position: index + 1,
       won,
     })
@@ -926,10 +931,11 @@ function playoffSection(text: string): string | undefined {
 /**
  * Reads the table of the older seasons: a wikitable (`{|`) under a heading such as `Eindstand`,
  * with the columns told by the header, as `{{afkorting|gs|...}}` or as plain text. The columns
- * differ from season to season (a column for a deduction of points, the club under `club` or
- * `Team`), so each is found by its header, and a missing one is an error. The numbers are the
- * ones on the page, points and goal difference included: `checkStandings` tests them, and
- * nothing is worked out here. A position that is not the next one is an error too.
+ * differ from season to season (a column `PA` for a deduction of points, the club under `club`
+ * or `Team`), so each is found by its header, and a missing one is an error, except `PA`: a
+ * table without it has no deductions. The numbers are the ones on the page, points and goal
+ * difference included: `checkStandings` tests them with the deduction, and nothing is worked
+ * out here. A position that is not the next one is an error too.
  */
 function readTableStandings(text: string): ReadStandings {
   const noTable: ReadStandings = {
@@ -993,10 +999,11 @@ function readTableStandings(text: string): ReadStandings {
 
     const deducted = deduction === -1 ? '' : plain(cells[deduction] ?? '').replaceAll('−', '-')
 
-    if (deducted !== '' && !/^-?0+$/u.test(deducted)) {
+    // Wikipedia writes the deduction as a loss (`−6`) or as a number (`6`).
+    if (deducted !== '' && !/^-?\d{1,3}$/u.test(deducted)) {
       return {
         kind: 'error',
-        message: `${club} has a deduction of points (${deducted.slice(0, 10)}), which the table cannot hold`,
+        message: `${club} has no whole number for the deduction of points (${deducted.slice(0, 10)})`,
       }
     }
 
@@ -1025,6 +1032,7 @@ function readTableStandings(text: string): ReadStandings {
       lost,
       played,
       points,
+      pointsDeducted: Math.abs(Number(deducted)),
       position: rows.length + 1,
       won,
     })

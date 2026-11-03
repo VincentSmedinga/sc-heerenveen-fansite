@@ -773,6 +773,20 @@ describe('the page /wedstrijden', () => {
     expect(stand.match(/<tr[ >]/g)).toHaveLength(4)
   })
 
+  it('says under the table which club lost points to a deduction, and has no such line without one', async () => {
+    expect(section(await render(), 'stand')).not.toContain('aftrek')
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      standings: matchData.standings.map((row) => (row.club === 'Testdorp FC' ? { ...row, pointsDeducted: 6 } : row)),
+    })
+
+    const stand = section(await render(), 'stand')
+
+    expect(stand).toContain('Testdorp FC: 6 punten aftrek.')
+    expect(stand.indexOf('Testdorp FC: 6 punten aftrek.')).toBeGreaterThan(stand.indexOf('</table>'))
+  })
+
   it('has the columns position, played and points in the full table, in the headers and in the row of sc Heerenveen', async () => {
     const stand = section(await render(), 'stand')
     const head = stand.slice(stand.indexOf('<thead>'), stand.indexOf('</thead>'))

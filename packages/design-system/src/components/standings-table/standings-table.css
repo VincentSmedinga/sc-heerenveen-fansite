@@ -6,6 +6,12 @@
  */
 
 @layer hf.components {
+  /* The words of the abbreviations and the lines about deductions, close under the table. */
+  .hf-standings-notes {
+    display: grid;
+    gap: var(--hf-space-xs);
+  }
+
   /*
    * The row of sc Heerenveen is marked by more than its colour: it is bold (base/table.css),
    * and its first cell has a bar on the start side, which also shows in forced colours.

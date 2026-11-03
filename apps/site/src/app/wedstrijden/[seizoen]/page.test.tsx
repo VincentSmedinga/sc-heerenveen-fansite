@@ -87,6 +87,14 @@ describe('the card Eindstand of an earlier season', () => {
     vi.mocked(getLeagueResults).mockResolvedValue(results)
   })
 
+  it('says under the table which club lost points to a deduction', async () => {
+    const deducted = table.map((row) => (row.club === 'Demo Boys' ? { ...row, pointsDeducted: 1 } : row))
+
+    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [], season: '2025/26', standings: deducted })
+
+    expect(await render()).toContain('Demo Boys: 1 punt aftrek.')
+  })
+
   it('has no switch, and does not ask for the results of the clubs', async () => {
     const html = await render()
 

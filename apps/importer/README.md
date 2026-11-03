@@ -1271,7 +1271,9 @@ De beslissing is _De lezer kent de oudere vormen van de stand, de beker en de ti
   Vóór 2020/21 leest de import de pagina van de play-offs niet.
 - **De stand** zonder sjabloon `Sports table` staat in een tabel onder `Eindstand`, `Stand na 34 wedstrijden` of `Eindstand na 34 wedstrijden`.
   De lezer zoekt elke kolom op de kop (`gs`, `w`, `g`, `v`, `pnt`, `dv`, `dt`, `ds`, en `club` of `Team`) en neemt de cijfers van de pagina over.
-  Een puntenaftrek in de kolom `PA` is een fout, want de tabel `standings` kent die niet.
+  Een puntenaftrek staat in de kolom `PA` (`−1`, `-1` en `1` zijn één punt; leeg of `0` is geen aftrek) en komt in `standings.points_deducted`.
+  De punten blijven die van de pagina, dus na de aftrek, en `checkStandings` eist dat ze 3 × gewonnen + gelijk − aftrek zijn.
+  Iets anders dan een geheel getal in die kolom is een fout met de naam van de club.
 - **De score van een bekerwedstrijd** mag `n.v.` en `(6 – 7 pen.)` bevatten, en een of twee paren tussen haakjes:
 
 | Wikipedia schrijft                                 | De lezer leest                                                         |
@@ -1388,8 +1390,7 @@ De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waar
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
 - De schutters bij de strafschoppen en de stand bij de rust bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging, de stand na 90 minuten als de pagina die geeft en de score van de strafschoppen.
-- Een puntenaftrek rekent hij niet mee.
-  De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
+- De reden van een puntenaftrek bewaart hij niet: Wikipedia geeft die alleen in een voetnoot.
 - Opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
 - Andere seizoenen leest hij niet in de uurlijkse import (alleen `pnpm run import:season` leest een afgelopen seizoen), en wedstrijden van andere teams van de club ook niet.
 

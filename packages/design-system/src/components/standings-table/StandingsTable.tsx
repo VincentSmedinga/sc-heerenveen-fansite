@@ -17,8 +17,9 @@ export type StandingsTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
   children?: never
   /**
    * `all` (default) is the full table: a bar next to the points, which goes
-   * when the place is too narrow, and the full words of the abbreviations under the table.
-   * `compact` has neither, and fits a narrow column such as the sidebar of the homepage.
+   * when the place is too narrow, and the full words of the abbreviations under the table,
+   * with a line for each club that has a deduction of points.
+   * `compact` has none of these, and fits a narrow column such as the sidebar of the homepage.
    */
   columns?: 'all' | 'compact'
   /** The rows of the table, from the first place down. */
@@ -30,8 +31,13 @@ export type StandingsTableRow = {
   club: string
   /** The matches played. */
   played: number
-  /** The points. */
+  /** The points, after a deduction if the club has one. */
   points: number
+  /**
+   * The points the club lost to a deduction. The full table says so in a line under it; none or
+   * 0 is no line. `points` already has it taken off, so the table does not change its order.
+   */
+  pointsDeducted?: number
   /** The place in the table, from 1. */
   position: number
 }
@@ -69,11 +75,13 @@ export function pointsShares(rows: StandingsTableRow[]): null | number[] {
  * The full table has a bar at the end of each row, next to the points and in their
  * cell, as long as the points are compared to those of the leader. The bar is decoration: it
  * is hidden from a screen reader, which reads the numbers only. It goes when the place of the
- * table is too narrow, chosen with a container query. bar.css gives the bar, and
- * standings-table.css the rest of the look.
+ * table is too narrow, chosen with a container query. A club with a deduction of points gets
+ * a line of plain text under the table, after the words of the abbreviations. bar.css gives
+ * the bar, and standings-table.css the rest of the look.
  */
 export const StandingsTable = ({ caption, className, columns: set = 'all', rows, ...props }: StandingsTableProps) => {
   const shares = set === 'all' ? pointsShares(rows) : null
+  const deductions = rows.filter((row) => (row.pointsDeducted ?? 0) > 0)
 
   return (
     <div {...props} className={classNames('hf-standings hf-bar-place', className)}>
@@ -121,14 +129,21 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
         </tbody>
       </table>
       {set === 'all' && (
-        <p className="hf-meta hf-bar-legend">
-          {columns.map((column, index) => (
-            <span key={column.id}>
-              {index > 0 ? ', ' : ''}
-              <b>{column.abbreviation}</b> {column.name}
-            </span>
+        <div className="hf-standings-notes">
+          <p className="hf-meta hf-bar-legend">
+            {columns.map((column, index) => (
+              <span key={column.id}>
+                {index > 0 ? ', ' : ''}
+                <b>{column.abbreviation}</b> {column.name}
+              </span>
+            ))}
+          </p>
+          {deductions.map((row) => (
+            <p className="hf-meta hf-bar-legend" key={row.position}>
+              {row.club}: {row.pointsDeducted} {row.pointsDeducted === 1 ? 'punt' : 'punten'} aftrek.
+            </p>
           ))}
-        </p>
+        </div>
       )}
     </div>
   )

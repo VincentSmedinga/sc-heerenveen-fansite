@@ -16,6 +16,8 @@ const meta = preview.meta({
           'De koppen zijn afkortingen.',
           'Onder de volledige tabel staan de volle woorden: "G gespeeld, P punten, …".',
           'De korte vorm heeft die regel niet, want een smalle kolom heeft er geen plaats voor.',
+          'Heeft een club een puntenaftrek, dan staat onder de uitleg van de afkortingen een regel in gewone tekst, zoals "Testdorp FC: 6 punten aftrek.".',
+          'De punten in de tabel zijn dan de punten na de aftrek, en de volgorde blijft zoals ze is.',
           'De afkorting zelf heeft ook een `title` met het volle woord, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
           '',
           'De rij van sc Heerenveen valt op met meer dan kleur: ze is vet, ze heeft een balk aan het begin van de rij en een schermlezer hoort "(onze club)" achter de naam.',
@@ -33,6 +35,7 @@ const meta = preview.meta({
           '',
           '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
           '- `rows` zijn de clubs van boven naar beneden.',
+          '  Een rij kan `pointsDeducted` hebben, de punten die de club door een aftrek kwijt is; de volledige tabel zegt het onder de tabel.',
           '- `columns` is `all` (standaard) of `compact`.',
           '  `all` is de volledige stand, met balken en de uitleg van de afkortingen.',
           '  `compact` heeft geen balken en geen uitleg en past in een smalle kolom, zoals de zijbalk van de homepage.',
@@ -65,6 +68,11 @@ const equalRows: StandingsTableRow[] = rows.map((row) => ({ ...row, played: 1, p
 
 // The start of a season: nobody has points, so there are no bars.
 const noPointsRows: StandingsTableRow[] = rows.map((row) => ({ ...row, played: 0, points: 0 }))
+
+// The same table, in which a club lost six points to a deduction (its points are after it).
+const deductedRows: StandingsTableRow[] = rows.map((row) =>
+  row.club === 'Testdorp FC' ? { ...row, points: 9, pointsDeducted: 6 } : row,
+)
 
 const caption = 'Stand op 18 oktober 2026'
 
@@ -124,6 +132,18 @@ export const NoPointsDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Niemand heeft punten, geen balken, donker',
   render: renderFull('32rem', noPointsRows),
+})
+
+export const DeductionLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een club met puntenaftrek, een regel onder de tabel, licht',
+  render: renderFull('32rem', deductedRows),
+})
+
+export const DeductionDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Een club met puntenaftrek, een regel onder de tabel, donker',
+  render: renderFull('32rem', deductedRows),
 })
 
 export const NarrowLight = meta.story({

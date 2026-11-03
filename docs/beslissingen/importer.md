@@ -738,6 +738,9 @@
 - **Let op:** Wikipedia geeft in de pagina gewonnen, gelijk, verloren en doelpunten, niet gespeeld en punten.
   De importer rekent die twee uit, dus voor die twee is de controle per club een zekerheid van de code en geen controle van de bron.
   Een puntenaftrek zou de stand dan niet meer laten kloppen met de uitslagen.
+- **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
+  De punten zijn nu 3 × gewonnen + gelijk − aftrek, en een aftrek groter dan 3 × gewonnen + gelijk is een fout.
+  De regel van sc Heerenveen wordt met dezelfde formule vergeleken met onze uitslagen.
 
 ## De aftrap staat in UTC en mag ontbreken
 
@@ -1826,3 +1829,25 @@
   Dat bewaart andere punten dan Wikipedia noemt, dus een gok.
   Een eigen lezer per tijdperk (meer code voor kleine verschillen).
   De stand overslaan voor de oudere seizoenen (dan vervalt de controle op 18 clubs en op onze eigen rij).
+- **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
+  Een aftrek in de kolom `PA` is geen fout meer, en 2010/11, 2014/15 en 2015/16 zijn geen gat meer door de aftrek.
+
+## Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`
+
+- **Datum:** 3 november 2026
+- **Besluit:** `standings` krijgt een kolom `points_deducted` (niet negatief, standaard 0), met een migratie waarin bestaande rijen 0 krijgen (#670).
+  `points` blijft het getal van Wikipedia, dus na de aftrek.
+  De lezer van de oudere tabel leest de aftrek uit de kolom `PA`: `−1`, `-1` en `1` zijn één punt, een leeg vakje of `0` is geen aftrek, en alles wat geen geheel getal is, is een fout met de naam van de club.
+  `checkStandings` eist per club dat punten = 3 × gewonnen + gelijk − aftrek, met een fout voor een aftrek groter dan 3 × gewonnen + gelijk, en vergelijkt de regel van sc Heerenveen met onze uitslagen met dezelfde formule.
+  De volledige tabel op de site zet er een regel onder ("FC Twente: 6 punten aftrek."); de compacte tabel niet.
+  Punten en volgorde blijven die van Wikipedia.
+- **Waarom:** een club heeft hoogstens één aftrek per seizoen in deze data, dus een tabel met een reden is te veel.
+  Wikipedia geeft de reden alleen als tekst in een voetnoot, en raden bewaart een gok.
+  De punten van de pagina bewaren we zoals ze zijn, zodat de stand klopt met wat supporters kennen.
+  De controle blijft even streng, want ze rekent met de aftrek in plaats van hem te negeren.
+- **Alternatieven:** een aparte tabel met een reden (meer code en een join in elke vraag, voor een reden die we niet kunnen lezen).
+  Een vaste lijst van de drie seizoenen in de code (elke nieuwe aftrek vraagt een codewijziging).
+  De aftrek bij de punten tellen en de controle laten slagen (bewaart andere punten dan Wikipedia noemt, zie #457).
+  Een marker bij de punten (meer om goed te krijgen voor hulpsoftware, terwijl de regel onder de tabel genoeg is).
+- **Let op:** de nieuwere vorm met het sjabloon `Sports table` (vanaf 2020/21) rekent de punten uit en kent geen aftrek, en blijft zoals hij is.
+  De import schrijft de aftrek daar als 0.

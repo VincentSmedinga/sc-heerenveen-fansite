@@ -866,8 +866,10 @@ export const standingsClubMaxLength = 100
  * season has the same day, because the importer replaces the whole table at once. A table of
  * an earlier season stays as it was.
  *
- * `played`, `points` and `goal_difference` are worked out from the rest when the importer reads
- * the table (Wikipedia gives wins, draws, losses and goals); `goal_difference` can be negative.
+ * `played` and `goal_difference` are worked out from the rest when the importer reads the table
+ * (Wikipedia gives wins, draws, losses and goals); `goal_difference` can be negative. `points`
+ * is the number on the page, so after a deduction: `points_deducted` holds the points the club
+ * lost (0 for most), and `points` is 3 × won + drawn − `points_deducted`.
  */
 export const standings = mysqlTable(
   'standings',
@@ -883,6 +885,7 @@ export const standings = mysqlTable(
     goalsAgainst: int('goals_against', { unsigned: true }).notNull(),
     goalDifference: int('goal_difference').notNull(),
     points: int('points', { unsigned: true }).notNull(),
+    pointsDeducted: int('points_deducted', { unsigned: true }).notNull().default(0),
     validOn: date('valid_on', { mode: 'string' }).notNull(),
   },
   (table) => [

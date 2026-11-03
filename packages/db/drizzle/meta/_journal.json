@@ -232,6 +232,13 @@
       "when": 1793605803930,
       "tag": "0032_add_league_results",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1793728449095,
+      "tag": "0033_add_points_deducted",
+      "breakpoints": true
     }
   ]
 }
