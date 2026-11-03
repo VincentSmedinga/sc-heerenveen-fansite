@@ -147,6 +147,9 @@ export type ReadStandingsRow = {
   won: number
 }
 
+/** The titles to try for each page of a season, the one the import prefers first. */
+export type SeasonPageCandidates = Record<keyof SeasonPages, string[]>
+
 export type SeasonPages = { cup: string; playoffs: string; programme: string; standings: string }
 
 type Heading = { index: number; title: string }
@@ -178,7 +181,13 @@ const months = [
 type Pair = { away: number; home: number }
 
 type ParsedScore =
-  | (Pair & { afterNinety: null | Pair; halfTime: null | Pair; kind: 'score' })
+  | (Pair & {
+      afterNinety: null | Pair
+      extraTime: boolean
+      halfTime: null | Pair
+      kind: 'score'
+      penalties: null | Pair
+    })
   | { kind: 'none' }
   | { kind: 'postponed' }
   | { kind: 'stopped'; minute: null | number }
@@ -197,6 +206,14 @@ export function clean(text: string): string {
 }
 
 /**
+ * The name of a club in a table or a programme: what the link shows, without the asterisks
+ * after it that point to a footnote (`FC Twente *`).
+ */
+export function clubName(value: string): string {
+  return plain(value).replace(/\s*\*+$/u, '')
+}
+
+/**
  * The page the first link in a wikitext value points to, written the way Wikipedia names a
  * page: `Luca Oyen` for `[[Luca Oyen|Oyen]]` and `Pim Verbeek (voetballer)` for `[[pim_Verbeek
  * (voetballer)]]`, with spaces for underscores and a capital first letter, and without a
@@ -212,6 +229,25 @@ export function linkedPage(value: string): null | string {
   }
 
   return title.charAt(0).toUpperCase() + title.slice(1)
+}
+
+/**
+ * The titles a page of a season may have, in the order to try them. The pages of 2012/13 to
+ * 2014/15 are called `Eredivisie 2013/14` and `Eredivisie 2013/14/Wedstrijden`, without the
+ * addition the other seasons have. That title comes second: for several seasons it is a page
+ * that lists the competitions of that name, not a season. Before 2020/21 the play-offs have no
+ * title: their page then holds no play-offs for the Conference League, which began that year,
+ * and the ones for the Europa League are a competition the site does not keep.
+ */
+export function pageCandidates(season: string): SeasonPageCandidates {
+  const titles = pageTitles(season)
+
+  return {
+    cup: [titles.cup],
+    playoffs: Number(season.slice(0, 4)) >= firstPlayoffsSeason ? [titles.playoffs] : [],
+    programme: [titles.programme, `Eredivisie ${season}/Wedstrijden`],
+    standings: [titles.standings, `Eredivisie ${season}`],
+  }
 }
 
 /**
@@ -356,7 +392,7 @@ export function readLeagueResults(text: string): ReadResults {
 
     const result = restOf(box, boxes) ?? box
     const score = parseScore(result.params.get('score') ?? '')
-    const [homeClub, awayClub] = [plain(box.params.get('team1') ?? ''), plain(box.params.get('team2') ?? '')]
+    const [homeClub, awayClub] = [clubName(box.params.get('team1') ?? ''), clubName(box.params.get('team2') ?? '')]
 
     // A match of another club on the page makes it a page with every club, played or not yet.
     others ||= !isOurs(box)
@@ -436,13 +472,14 @@ export function readPlayoffs(text: string): ReadProgramme {
 
 /**
  * Reads the table: the order of the clubs and, for each, the wins, draws, losses and goals. The
- * page gives no matches played and no points; both follow from the rest.
+ * page gives no matches played and no points; both follow from the rest. The older seasons have
+ * no Sports table template but a table of their own under a heading (see `readTableStandings`).
  */
 export function readStandings(text: string): ReadStandings {
   const [table] = findTemplates(clean(text), /\{\{\s*#invoke:\s*Sports table\s*\|/giu)
 
   if (table === undefined) {
-    return { kind: 'error', message: 'the league table has no Sports table template' }
+    return readTableStandings(clean(text))
   }
 
   const order = (table.params.get('team_order') ?? '')
@@ -469,7 +506,7 @@ export function readStandings(text: string): ReadStandings {
       found[field] = Number(value)
     }
 
-    const club = plain(table.params.get(`name_${code}`) ?? '')
+    const club = clubName(table.params.get(`name_${code}`) ?? '')
 
     if (club === '' || club.length > standingsClubMaxLength) {
       return { kind: 'error', message: `the league table has no usable name_${code}` }
@@ -493,6 +530,31 @@ export function readStandings(text: string): ReadStandings {
 
   return { kind: 'read', rows }
 }
+
+/**
+ * The headings above the table with the numbers of the regular season: `Eindstand`, `Stand na
+ * 34 wedstrijden` and `Eindstand na 34 wedstrijden`. `Officiële eindstand`, the order after the
+ * play-offs, has only the reasons and is not matched.
+ */
+const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?[ \t]*=+[ \t]*$/imu
+
+/** The first season with play-offs for the Conference League, which that page holds. */
+const firstPlayoffsSeason = 2020
+
+/** The attributes a cell may start with: `align=left|` or `style="width: 10px;" |`. */
+const cellAttributes = /^\s*(?:[a-z-]+\s*=\s*(?:"[^"]*"|[^\s|"]+)\s*)+\|(?!\|)/iu
+
+/** The columns of a table and the abbreviation Wikipedia gives each in its header. */
+const standingsColumns = {
+  drawn: 'g',
+  goalDifference: 'ds',
+  goalsAgainst: 'dt',
+  goalsFor: 'dv',
+  lost: 'v',
+  played: 'gs',
+  points: 'pnt',
+  won: 'w',
+} as const
 
 /** How far the clock in the Netherlands is ahead of UTC at a moment: one or two hours. */
 function amsterdamOffsetMs(moment: number): number {
@@ -598,6 +660,13 @@ function hasResult(box: Template): boolean {
   return !['none', 'postponed'].includes(parseScore(box.params.get('score') ?? '').kind)
 }
 
+/** What a header cell stands for: the abbreviation of `{{afkorting|gs|...}}`, or its text. */
+function headerKey(cell: string): string {
+  const abbreviation = /^\{\{\s*afkorting\s*\|([^|}]*)/iu.exec(cell)?.[1]
+
+  return (abbreviation ?? plain(cell)).trim().toLowerCase()
+}
+
 function isOurs(box: Template): boolean {
   return [box.params.get('team1'), box.params.get('team2')].some(
     (team) => team !== undefined && linkTarget(team).toLowerCase() === ourClub.toLowerCase(),
@@ -625,10 +694,12 @@ function isRestOfStopped(box: Template, boxes: Template[]): boolean {
  * without a score under its own round, and the block with the score under `Inhaalronde 17`,
  * where the number is the round it was postponed from. The second one is in round 17 as well,
  * and replaces the first. A block under an `Inhaalronde` without a score is nothing yet, and
- * the block of the round stays as it is.
+ * the block of the round stays as it is. A round that moved says so in its heading, as
+ * `Speelronde 33 (was 34)` in 2018/19: it is the round with the number before the bracket, the
+ * one it was played as.
  */
 function leagueRoundOf(box: Template, boxes: Template[]): null | { name: string; number: number } {
-  const found = /^(Speelronde|Inhaalronde) (\d{1,2})$/u.exec(box.heading ?? '')
+  const found = /^(Speelronde|Inhaalronde) (\d{1,2})(?: \(was \d{1,2}\))?$/u.exec(box.heading ?? '')
 
   if (found === null) {
     return null
@@ -853,6 +924,116 @@ function playoffSection(text: string): string | undefined {
 }
 
 /**
+ * Reads the table of the older seasons: a wikitable (`{|`) under a heading such as `Eindstand`,
+ * with the columns told by the header, as `{{afkorting|gs|...}}` or as plain text. The columns
+ * differ from season to season (a column for a deduction of points, the club under `club` or
+ * `Team`), so each is found by its header, and a missing one is an error. The numbers are the
+ * ones on the page, points and goal difference included: `checkStandings` tests them, and
+ * nothing is worked out here. A position that is not the next one is an error too.
+ */
+function readTableStandings(text: string): ReadStandings {
+  const noTable: ReadStandings = {
+    kind: 'error',
+    message: 'the league table has no Sports table template and no table under Eindstand or Stand na 34 wedstrijden',
+  }
+  const heading = standingsHeading.exec(text)
+
+  if (heading === null) {
+    return noTable
+  }
+
+  const rest = text.slice(heading.index + heading[0].length)
+  const start = rest.indexOf('{|')
+  const end = rest.indexOf('\n|}', start)
+
+  // A table further down, under another heading, is not the table of this heading.
+  if (start === -1 || end === -1 || /^=+[^=\n]+=+[ \t]*$/mu.test(rest.slice(0, start))) {
+    return noTable
+  }
+
+  const [header = '', ...body] = rest.slice(start + 2, end).split(/^\|-.*$/mu)
+  const names = tableCells(header, '!', '!!').map(headerKey)
+  const index: Partial<Record<'club' | keyof typeof standingsColumns, number>> = {}
+
+  for (const [field, key] of Object.entries(standingsColumns)) {
+    const found = names.indexOf(key)
+
+    if (found !== -1) {
+      index[field as keyof typeof standingsColumns] = found
+    }
+  }
+  index.club = names.findIndex((name) => name === 'club' || name === 'team')
+
+  const deduction = names.indexOf('pa')
+
+  for (const [field, found] of Object.entries(index)) {
+    if (found === undefined || found < 0) {
+      return { kind: 'error', message: `the league table has no column for ${field}` }
+    }
+  }
+
+  const rows: ReadStandingsRow[] = []
+
+  for (const line of body.filter((part) => part.trim() !== '')) {
+    const cells = tableCells(line, '|', '||')
+
+    if (cells.length !== names.length) {
+      return { kind: 'error', message: `the league table has a row with ${cells.length} cells, not ${names.length}` }
+    }
+
+    const position = /^(\d{1,2})\.?$/u.exec(plain(cells[0] ?? ''))?.[1]
+    const club = clubName(cells[index.club ?? 0] ?? '')
+
+    if (position === undefined || Number(position) !== rows.length + 1) {
+      return { kind: 'error', message: `the league table has no position ${rows.length + 1} in row ${rows.length + 1}` }
+    }
+    if (club === '' || club.length > standingsClubMaxLength) {
+      return { kind: 'error', message: `the league table has no usable club in row ${rows.length + 1}` }
+    }
+
+    const deducted = deduction === -1 ? '' : plain(cells[deduction] ?? '').replaceAll('−', '-')
+
+    if (deducted !== '' && !/^-?0+$/u.test(deducted)) {
+      return {
+        kind: 'error',
+        message: `${club} has a deduction of points (${deducted.slice(0, 10)}), which the table cannot hold`,
+      }
+    }
+
+    const numbers: Partial<Record<keyof typeof standingsColumns, number>> = {}
+
+    for (const field of Object.keys(standingsColumns) as (keyof typeof standingsColumns)[]) {
+      const value = plain(cells[index[field] ?? 0] ?? '')
+        .replaceAll('−', '-')
+        .replace(/^\+/u, '')
+
+      if (!/^-?\d{1,3}$/u.test(value)) {
+        return { kind: 'error', message: `the league table has no number for ${field} of ${club}` }
+      }
+      numbers[field] = Number(value)
+    }
+
+    const { drawn = 0, goalDifference = 0, goalsAgainst = 0, goalsFor = 0, lost = 0, played = 0 } = numbers
+    const { points = 0, won = 0 } = numbers
+
+    rows.push({
+      club,
+      drawn,
+      goalDifference,
+      goalsAgainst,
+      goalsFor,
+      lost,
+      played,
+      points,
+      position: rows.length + 1,
+      won,
+    })
+  }
+
+  return { kind: 'read', rows }
+}
+
+/**
  * What is wrong with the brackets of a score, or null: a part of the match cannot be higher
  * than what follows it, and a score after 90 minutes needs extra time.
  */
@@ -864,6 +1045,19 @@ function scoreProblem(score: Extract<ParsedScore, { kind: 'score' }>, extraTimeS
   const afterNinety = score.afterNinety ?? score
 
   return within(score.afterNinety, score) && within(score.halfTime, afterNinety) ? null : 'that does not add up'
+}
+
+/**
+ * The cells of a row or the header of a wikitable, without the attributes in front of each
+ * (`align=left|`). `lead` starts a line with cells and `separator` separates cells on one line.
+ */
+function tableCells(part: string, lead: '!' | '|', separator: '!!' | '||'): string[] {
+  return part
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith(lead) && !line.startsWith('|}'))
+    .flatMap((line) => line.slice(1).split(separator))
+    .map((cell) => cell.replace(cellAttributes, '').trim())
 }
 
 /** Whether no number of a part of the match is higher than the same number of the whole. */
@@ -950,24 +1144,20 @@ function parseScore(value: string): ParsedScore {
     return { kind: 'stopped', minute: minute === undefined ? null : Number(minute) }
   }
 
-  const score = new RegExp(`^${pairPattern}(?: ?\\(${pairPattern}(?:, ?${pairPattern})?\\))?$`, 'u').exec(text)
+  const score = readScoreParts(text)
 
-  if (score !== null) {
-    const pair = (at: number): null | Pair =>
-      score[at] === undefined ? null : { away: Number(score[at + 1]), home: Number(score[at]) }
-    const [inBrackets, last] = [pair(3), pair(5)]
-
-    return {
-      afterNinety: last === null ? null : inBrackets,
-      away: Number(score[2]),
-      halfTime: last ?? inBrackets,
-      home: Number(score[1]),
-      kind: 'score',
-    }
+  if (score !== undefined) {
+    return { ...score, kind: 'score' }
   }
 
   return /^(uitgesteld|afgelast)\b/iu.test(text) ? { kind: 'postponed' } : { kind: 'unknown', text }
 }
+
+/** What follows the final score on the older pages: `n.v.`, brackets, or `(6 – 7 pen.)`. */
+const scorePart = new RegExp(
+  `\\s*(?:(n\\.v\\.)|\\(${pairPattern}(?:, ?${pairPattern})?\\)|\\(${pairPattern} pen\\.\\))`,
+  'uy',
+)
 
 /**
  * The time of a box in hours and minutes, null when it is empty, undefined when it is not
@@ -980,7 +1170,7 @@ function parseTime(value: string): null | undefined | { hours: number; minutes: 
     return null
   }
 
-  const time = /^(\d{1,2}):(\d{2})(?: uur)?$/u.exec(text)
+  const time = /^(\d{1,2})[:.](\d{2})(?: uur)?$/u.exec(text)
   const hours = Number(time?.[1])
   const minutes = Number(time?.[2])
 
@@ -1066,8 +1256,13 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const result = rest ?? box
   const resultHome = linkTarget(result.params.get('team1') ?? '').toLowerCase() === ourClub.toLowerCase()
   const score = parseScore(result.params.get('score') ?? '')
-  const penalties = parsePenalties(result.params.get('penaltyscore') ?? '')
-  const extraTimeSaid = plain(result.params.get('aet') ?? '') !== ''
+  const shootOut = parsePenalties(result.params.get('penaltyscore') ?? '')
+  const extraTimeSaid = plain(result.params.get('aet') ?? '') !== '' || (score.kind === 'score' && score.extraTime)
+  // The older pages write the shoot-out in the score (`(6 – 7 pen.)`), the newer in a field.
+  const penalties =
+    shootOut.kind === 'none' && score.kind === 'score' && score.penalties !== null
+      ? ({ ...score.penalties, kind: 'score' } as const)
+      : shootOut
 
   if (round === null || round.length > matchLimits.round) {
     return `${name} has no usable round heading`
@@ -1162,6 +1357,75 @@ function readMatch(box: Template, competition: Competition, round: null | string
     round,
     stadium,
     status,
+  }
+}
+
+/**
+ * The parts of a score as the older pages write them: the final score first, then any of:
+ * `n.v.` for extra time; one pair in brackets for half time (`2 – 1 (1 – 0)`); two pairs in one
+ * pair of brackets for the score after 90 minutes and then half time (`2 – 4 (2 – 2, 1 – 1)`);
+ * the same as two pairs in brackets of their own (`2 – 2 n.v. (2 – 2) (0 – 1)`); and the
+ * shoot-out as `(6 – 7 pen.)`. Undefined for anything else, such as a part twice.
+ */
+function readScoreParts(text: string): Omit<Extract<ParsedScore, { kind: 'score' }>, 'kind'> | undefined {
+  const head = new RegExp(`^${pairPattern}`, 'u').exec(text)
+
+  if (head === null) {
+    return undefined
+  }
+
+  const pair = (home: string | undefined, away: string | undefined): null | Pair =>
+    home === undefined || away === undefined ? null : { away: Number(away), home: Number(home) }
+  const brackets: { first: Pair; second: null | Pair }[] = []
+  let extraTime = false
+  let penalties: null | Pair = null
+
+  let end = head[0].length
+
+  scorePart.lastIndex = end
+
+  for (let found = scorePart.exec(text); found !== null; found = scorePart.exec(text)) {
+    end = scorePart.lastIndex
+    const [, extra, firstHome, firstAway, secondHome, secondAway, penHome, penAway] = found
+    const [first, second, shootOut] = [pair(firstHome, firstAway), pair(secondHome, secondAway), pair(penHome, penAway)]
+
+    if (extra !== undefined) {
+      if (extraTime) {
+        return undefined
+      }
+      extraTime = true
+    } else if (shootOut !== null) {
+      if (penalties !== null) {
+        return undefined
+      }
+      penalties = shootOut
+    } else if (first !== null) {
+      brackets.push({ first, second })
+    }
+  }
+
+  const [one, two] = brackets
+
+  if (end !== text.length || brackets.length > 2 || (two !== undefined && (one?.second || two.second))) {
+    return undefined
+  }
+
+  const [afterNinety, halfTime] =
+    one === undefined
+      ? [null, null]
+      : one.second !== null
+        ? [one.first, one.second]
+        : two === undefined
+          ? [null, one.first]
+          : [one.first, two.first]
+
+  return {
+    afterNinety,
+    away: Number(head[2]),
+    extraTime,
+    halfTime,
+    home: Number(head[1]),
+    penalties,
   }
 }
 

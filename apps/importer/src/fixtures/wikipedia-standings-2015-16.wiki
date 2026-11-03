@@ -1,0 +1,39 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2015/16_(mannenvoetbal)?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all rows but the first three of the first table and the first three of the second, the tables for home, away and each half, and the references. See the tests.
+-->
+== Standen ==
+=== Officiële eindstand ===
+{| cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: right; border:1px solid #aaa;"
+! align=left|Nr.
+! align=left width=150|Club
+! align=left|Reden
+|-
+|1. || align=left| [[PSV (voetbalclub)|PSV]] || align=left|Stand na 34 wedstrijden, [[UEFA Champions League 2016/17|Champions League, groepsfase]]
+|-
+|2. || align=left| [[AFC Ajax|Ajax]] || align=left|Stand na 34 wedstrijden, [[UEFA Champions League 2016/17|Champions League, 3e voorronde voor niet-kampioenen]]
+|-
+|3. || align=left| [[Feyenoord]] || align=left|Behoudt als bekerwinnaar de stand na 34 wedstrijden, [[UEFA Europa League 2016/17|Europa League, groepsfase]]
+|}
+
+=== Stand na 34 wedstrijden ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="font-size: 90%; text-align: center;"
+!width=10|
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=30|{{afkorting|PA|Punten aftrek}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+ | 1. || align=left| [[PSV (voetbalclub)|PSV]] || 34 || 26 || 6 || 2 || || '''84''' || 88 || 32 || +56
+|-  style="background:#C0F0D0;"
+ | 2. || align=left| [[AFC Ajax|Ajax]] || 34 || 25 || 7 || 2 || || '''82''' || 81 || 21 || +60
+|- style="background:#EEE8AA;"
+ | 3. || align=left| [[Feyenoord]] || 34 || 19 || 6 || 9 || || '''63''' || 62 || 40 || +22
+|}

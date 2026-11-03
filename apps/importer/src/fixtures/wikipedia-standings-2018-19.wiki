@@ -1,0 +1,38 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2018/19_(mannenvoetbal)?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all rows but the first three, and the other tables. See the tests.
+-->
+== Standen ==
+=== Officiële eindstand ===
+{| cellspacing="0" cellpadding="3" style="background: #F9F9F9; font-size: 90%; text-align: right; border: 1px solid #AAA;"
+! style="text-align: left;" | Nr.
+! style="text-align: left; width: 150px;" | Club
+! style="text-align: left;" | Reden
+|-
+| 1. || style="text-align: left;" | [[AFC Ajax|Ajax]] || style="text-align: left;" | Stand na 34 wedstrijden, [[UEFA Champions League 2019/20|Champions League, 3e voorronde voor kampioenen]]
+|-
+| 2. || style="text-align: left;" | [[PSV (voetbalclub)|PSV]] || style="text-align: left;" | Stand na 34 wedstrijden, [[UEFA Champions League 2019/20|Champions League, 2e voorronde voor niet-kampioenen]]
+|-
+| 3. || style="text-align: left;" | [[Feyenoord]] || style="text-align: left;" | Stand na 34 wedstrijden, [[UEFA Europa League 2019/20|Europa League, 3e voorronde]]
+|}
+
+=== Eindstand na 34 wedstrijden ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background: #F9F9F9; font-size: 90%; text-align: center; border: 1px solid #AAA;"
+! style="width: 10px;" | {{afkorting|#|Positie}}
+! style="width: 120px; text-align: left;" | Team
+! style="width: 31px;" | {{afkorting|gs|Aantal gespeelde wedstrijden}}
+! style="width: 26px;" | {{afkorting|w|Aantal gewonnen wedstrijden}}
+! style="width: 26px;" | {{afkorting|g|Aantal gelijk gespeelde wedstrijden}}
+! style="width: 26px;" | {{afkorting|v|Aantal verloren wedstrijden}}
+! style="width: 34px;" | {{afkorting|pnt|Totaal punten}}
+! style="width: 31px;" | {{afkorting|dv|Aantal gemaakte doelpunten}}
+! style="width: 31px;" | {{afkorting|dt|Aantal doelpunten tegen}}
+! style="width: 31px;" | {{afkorting|ds|Doelsaldo}}
+|- style="background: #ACE1AF;"
+| 1. || style="text-align: left;" | [[AFC Ajax|Ajax]] || 34 || 28 || 2 || 4 || '''86''' || 119 || 32 || +87
+|- style="background: #C0F0D0;"
+| 2. || style="text-align: left;" | [[PSV (voetbalclub)|PSV]] || 34 || 26 || 5 || 3 || '''83''' || 98 || 26 || +72
+|- style="background: #EEE8AA;"
+| 3. || style="text-align: left;" | [[Feyenoord]] || 34 || 20 || 5 || 9 || '''65''' || 75 || 41 || +34
+|}

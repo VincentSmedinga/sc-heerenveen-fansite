@@ -1,0 +1,35 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2012/13?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all rows but the first four, and the tables for home, away and each half. See the tests.
+-->
+== Ranglijst ==
+
+=== Eindstand ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 100%; text-align: center; border:1px solid #aaa;"
+!width=36|{{afkorting|pos|positie}}
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. ||align=left| [[AFC Ajax|Ajax]] || 34 || 22 || 10 || 2 || '''76''' || 83 || 31 || 52
+|- style="background:#C0F0D0;"
+| 2. ||align=left| [[PSV (voetbalclub)|PSV]] || 34 || 22 || 3 || 9 || '''69''' || 103 || 43 || 60
+|- style="background:#81BEF7;"
+| 3. ||align=left| [[Feyenoord]] || 34 || 21 || 6 || 7 || '''69''' || 64 || 38 || 26
+|- style="background:#66DEFF;"
+| 4. ||align=left| [[SBV Vitesse|Vitesse]] || 34 || 19 || 7 || 8 || '''64''' || 68 || 42 || 26
+|}
+
+=== Stand thuiswedstrijden ===
+{| class="wikitable"
+! pos !! club !! gs
+|-
+| 1. || [[PSV (voetbalclub)|PSV]] || 17
+|}

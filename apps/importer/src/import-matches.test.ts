@@ -28,7 +28,7 @@ import type { Handler, TestServer } from './test-server.ts'
 import { runImport } from './import-feeds.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, unlinkedWarning } from './import-matches.ts'
 import { acceptChanges, rejectChanges } from './match-changes.ts'
-import { pageTitles, pageUrl } from './read-wikipedia.ts'
+import { pageCandidates, pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
@@ -2131,6 +2131,45 @@ describe('a read that fails a check or a page that has changed', () => {
     const report = await importAt(gone, new Date(first.getTime() + hours(1)))
 
     expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining('Wedstrijden: HTTP 404') })
+    expect(await snapshot()).toEqual(before)
+  })
+
+  it('reads the programme and the table under the title without the addition when the first title is not a page', async () => {
+    const [, programmeTitle = ''] = pageCandidates('2026/27').programme
+    const [, standingsTitle = ''] = pageCandidates('2026/27').standings
+    const server = await startServer({
+      '/robots.txt': reply(200, ''),
+      ...route('2026/27', 'cup', reply(200, original.cup, wiki)),
+      [pageUrl('', programmeTitle)]: reply(200, original.programme, wiki),
+      [pageUrl('', standingsTitle)]: reply(200, original.standings, wiki),
+    })
+
+    servers.push(server)
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported' })
+    expect(pageRequests(server)).toContain(pageUrl('', pageTitles('2026/27').standings))
+    expect((await database.db.select().from(wikipediaPages)).map((page) => page.title).sort()).toEqual(
+      [pageTitles('2026/27').cup, programmeTitle, standingsTitle].sort(),
+    )
+  })
+
+  it('names every title it tried when none of them is a page, and keeps what it had', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await snapshot()
+    const [preferred, other] = pageCandidates('2026/27').programme
+    const gone = await startServer({ '/robots.txt': reply(200, '') })
+
+    servers.push(gone)
+
+    const report = await importAt(gone, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({
+      kind: 'error',
+      message: expect.stringContaining(`none of the pages ${preferred} or ${other} exists`),
+    })
     expect(await snapshot()).toEqual(before)
   })
 

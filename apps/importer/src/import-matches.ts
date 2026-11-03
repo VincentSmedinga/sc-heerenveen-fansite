@@ -43,7 +43,7 @@ import {
   updateMatch,
 } from './match-changes.ts'
 import {
-  pageTitles,
+  pageCandidates,
   pageUrl,
   readCup,
   readLeague,
@@ -365,40 +365,58 @@ function describeResult(
 }
 
 /**
- * Fetches the pages one after the other, or says why one could not be read. The page of the
- * play-offs may not be there: it comes in May, and a season that is going has none. Wikipedia
- * answering 404 for it is no fault, and the pages are then the other three. Any other answer
- * is a fault, as for the other pages.
+ * Fetches the pages one after the other, or says why one could not be read. A page may have
+ * more than one title (see `pageCandidates`): the first that exists is the page, and a 404 on
+ * every title is a fault that names them all. The page of the play-offs may not be there: it
+ * comes in May, and a season that is going has none. Wikipedia answering 404 for it is no
+ * fault, and the pages are then the other three. Any other answer is a fault, as for the other
+ * pages.
  */
 async function fetchPages(fetcher: Fetcher, season: string, origin: string): Promise<PageRead[] | Problem> {
-  const titles = pageTitles(season)
+  const candidates = pageCandidates(season)
   const pages: PageRead[] = []
 
   for (const kind of ['programme', 'standings', 'cup', 'playoffs'] as const) {
-    const title = titles[kind]
-    const outcome = await fetcher.fetch(pageUrl(origin, title))
+    const titles = candidates[kind]
+    let missing = ''
 
-    switch (outcome.kind) {
-      case 'blocked-by-robots':
-        return { kind: 'blocked-by-robots', season, url: outcome.url }
-      case 'error':
-        if (kind === 'playoffs' && outcome.reason === 'http-status' && outcome.status === 404) {
+    for (const title of titles) {
+      const outcome = await fetcher.fetch(pageUrl(origin, title))
+
+      if (outcome.kind === 'error' && outcome.reason === 'http-status' && outcome.status === 404) {
+        missing = `${title}: ${outcome.message}`
+        continue
+      }
+
+      switch (outcome.kind) {
+        case 'blocked-by-robots':
+          return { kind: 'blocked-by-robots', season, url: outcome.url }
+        case 'error':
+          return { kind: 'error', message: `${title}: ${outcome.message}`, season }
+        case 'fetched':
+          pages.push({
+            kind,
+            text: new TextDecoder('utf-8').decode(outcome.body),
+            title,
+            version: outcome.lastModified,
+          })
           break
-        }
+        case 'not-modified':
+          return { kind: 'error', message: `${title}: the page answered 304 to a request without conditions`, season }
+        case 'wait':
+          return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, season, url: outcome.url }
+      }
 
-        return { kind: 'error', message: `${title}: ${outcome.message}`, season }
-      case 'fetched':
-        pages.push({
-          kind,
-          text: new TextDecoder('utf-8').decode(outcome.body),
-          title,
-          version: outcome.lastModified,
-        })
-        break
-      case 'not-modified':
-        return { kind: 'error', message: `${title}: the page answered 304 to a request without conditions`, season }
-      case 'wait':
-        return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, season, url: outcome.url }
+      missing = ''
+      break
+    }
+
+    if (missing !== '' && kind !== 'playoffs') {
+      return {
+        kind: 'error',
+        message: titles.length === 1 ? missing : `none of the pages ${titles.join(' or ')} exists: ${missing}`,
+        season,
+      }
     }
   }
 
@@ -572,7 +590,7 @@ async function readAndStore(
   const found = [...league.matches, ...cup.matches, ...(playoffs?.matches ?? [])]
 
   if (!cup.hasTemplates) {
-    const problem = await checkEmptyCupPage(db, season, pageTitles(season).cup)
+    const problem = await checkEmptyCupPage(db, season, pages.find((page) => page.kind === 'cup')?.title ?? '')
 
     if (problem !== undefined) {
       problems.push(problem)

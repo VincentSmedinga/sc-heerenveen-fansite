@@ -1791,3 +1791,38 @@
   Alleen hexadecimale tekens met een `a` voorop (strenger dan nodig, en de verzonnen feeds gebruiken `ag…`).
   Acht tot en met tien (een gok boven wat we zagen).
   Een sleutel uit de kop (de kop verandert juist).
+
+## De lezer kent de oudere vormen van de stand, de beker en de titels (2010/11 tot en met 2019/20)
+
+- **Datum:** 3 november 2026
+- **Besluit:** de import leest de seizoenen 2010/11 tot en met 2019/20 zoals Wikipedia ze schrijft, en raadt niets (#457).
+  - **De titels:** per soort pagina staat een lijst titels, en de import neemt de eerste die bestaat (`pageCandidates`).
+    Voor de stand en het programma is dat eerst de titel met `(mannenvoetbal)` en dan die zonder, want de pagina's van 2012/13 tot en met 2014/15 heten `Eredivisie 2013/14`.
+    Bestaat geen enkele titel, dan is dat een fout die ze allemaal noemt.
+  - **De stand:** heeft de pagina geen sjabloon `Sports table`, dan leest de import de tabel (`{|`) onder de kop `Eindstand`, `Stand na 34 wedstrijden` of `Eindstand na 34 wedstrijden`.
+    `Officiële eindstand` heeft geen cijfers, alleen de reden, en wordt overgeslagen.
+    De kolommen volgen uit de kop (`{{afkorting|gs|…}}` of de tekst), omdat hun volgorde per seizoen verschilt.
+    Punten en doelsaldo zijn de cijfers van de pagina; `checkStandings` blijft ze toetsen, en geen regel is losser geworden.
+    Een kolom die ontbreekt, een positie die niet de volgende is en een getal dat geen getal is, zijn een fout.
+  - **Puntenaftrek:** staat in de kolom `PA` een aftrek, dan is dat een fout met de naam van de club.
+    De tabel `standings` kent geen aftrek, en de punten van de pagina zouden niet meer 3 × gewonnen + gelijk zijn.
+    Dat geldt voor 2010/11 (NAC Breda), 2014/15 en 2015/16 (FC Twente): die drie seizoenen blijven een gat tot er een besluit is over de aftrek.
+  - **De beker:** de score kent `n.v.`, een of twee paren tussen haakjes in elke volgorde, en `(6 – 7 pen.)`; de oudere pagina's schrijven geen `aet` en geen `penaltyscore`.
+    Een `n.v.` in de score is verlenging.
+    Een tijd mag een punt hebben (`20.45`).
+    Een deel dat twee keer staat, een paar te veel of een stand die niet optelt, is een fout.
+  - **Een ronde die verschoof:** `Speelronde 33 (was 34)` is ronde 33, het nummer waarmee ze is gespeeld (2018/19).
+  - **De play-offs:** voor 2020/21 staat er geen titel voor de play-offs.
+    De pagina heeft dan geen play-offs voor de Conference League, en die voor de Europa League zijn een competitie die de site niet bewaart (`competitions`).
+  - **De namen van clubs:** sterren achter een naam (`FC Twente *`) verwijzen naar een voetnoot en horen er niet bij.
+- **Waarom:** de competitie en de doelpunten van die tien seizoenen lazen al, maar de import stopte op de stand, de beker of de titel.
+  De projecteigenaar wil zo ver terug als de pagina's toelaten, zonder dat een controle losser wordt.
+  Op 3 november 2026 lazen 2012/13, 2013/14 en 2016/17 tot en met 2019/20 zo, en 2010/11, 2011/12, 2014/15 en 2015/16 blijven een gat met een reden (zie het pull request).
+- **Nadeel:** een seizoen met puntenaftrek ontbreekt tot daar een besluit over is.
+  Het seizoen 2011/12 blijft een gat: de wedstrijd Excelsior – AZ is in de rust gestaakt, en de pagina heeft die stand van 0 – 0 als uitslag naast de wedstrijd die daarna helemaal is gespeeld.
+  `checkResults` meldt dan dat Excelsior twee keer thuis tegen AZ speelt, en die controle blijft zoals ze is.
+  Het seizoen 2019/20 is afgebroken: de acht wedstrijden die niet zijn gespeeld, staan op de pagina als uitgesteld en zo staan ze ook in de database.
+- **Alternatieven:** de aftrek bij de punten tellen (`3 × gewonnen + gelijk`) en de controle laten slagen.
+  Dat bewaart andere punten dan Wikipedia noemt, dus een gok.
+  Een eigen lezer per tijdperk (meer code voor kleine verschillen).
+  De stand overslaan voor de oudere seizoenen (dan vervalt de controle op 18 clubs en op onze eigen rij).
