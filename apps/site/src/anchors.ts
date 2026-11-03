@@ -44,7 +44,17 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/statistieken/tegenstanders/voorbeeld-united': ['stadion'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
-  '/wedstrijden': ['programma', 'stand', 'uitslagen', 'hoofdtrainer', 'hoe-vaak-welke-uitslag'],
+  // The results are a card for each competition with a result. The Eredivisie keeps the anchor
+  // `uitslagen`; the made-up season has a result in each of the three competitions (#665).
+  '/wedstrijden': [
+    'programma',
+    'stand',
+    'uitslagen',
+    'uitslagen-knvb-beker',
+    'uitslagen-play-offs',
+    'hoofdtrainer',
+    'hoe-vaak-welke-uitslag',
+  ],
 }
 
 // Every id on the page, with the elements that carry it.

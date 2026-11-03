@@ -794,6 +794,11 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.match(/class="hf-match"/g)).toHaveLength(2)
     expect(html.indexOf('Tweede ronde')).toBeLessThan(html.indexOf('Speelronde 10'))
     expect(html).not.toContain('Speelronde 9')
+    // The form with the competition: the day and the stadium first, the competition and the
+    // round last, and no "Thuis" or "Uit".
+    expect(html).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde</p>')
+    expect(html).toMatch(/hf-match-when"><time[^>]*>di 20 okt<\/time>.*?hf-match-label">KNVB Beker/s)
+    expect(html).not.toMatch(/<span>(?:Thuis|Uit)<\/span>/)
     expect(html).not.toContain('Uitgesteld')
     expect(html).toContain('di 20 okt')
     expect(html).toContain('wo 28 okt 19:45')

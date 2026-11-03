@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
-import { matchShortcuts } from '#src/matchShortcuts'
+import { matchShortcutsOf } from '#src/matchShortcuts'
 import { leagueResultsData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -23,6 +23,13 @@ const now = new Date('2026-10-23T13:40:00Z')
 
 async function render(searchParams: Record<string, string | string[] | undefined> = {}) {
   return withoutIcons(renderToStaticMarkup(await MatchesPage({ searchParams: Promise.resolve(searchParams) })))
+}
+
+/** All the cards with results, from the first one to the end of the main. */
+function resultCards(html: string) {
+  const start = html.indexOf('<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen">')
+
+  return html.slice(start, html.indexOf('</main>'))
 }
 
 /** The part of the page under the h2 with this id, up to the next h2 or the end. */
@@ -52,13 +59,14 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and four h2 headings in order: the programme, the results, the table and how often each score was played', async () => {
+  it('has one h1 and five h2 headings in order: the programme, a card for each competition with results, the table and how often each score was played', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Eredivisie</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen-knvb-beker"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen-knvb-beker">KNVB Beker</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-vaak-welke-uitslag"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#hoe-vaak-welke-uitslag">Hoe vaak welke uitslag</a></h2>',
     ])
@@ -112,7 +120,7 @@ describe('the page /wedstrijden', () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
-    expect(matchShortcuts.map((item) => item.href)).toEqual(ids)
+    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker']).map((item) => item.href)).toEqual(ids)
   })
 
   it('has the programme and the results in the main with the h1, and the table in a named, wide sidebar after it', async () => {
@@ -193,6 +201,7 @@ describe('the page /wedstrijden', () => {
     for (const [id, surface] of [
       ['programma', 'hf-card'],
       ['uitslagen', 'hf-card'],
+      ['uitslagen-knvb-beker', 'hf-card'],
       ['stand', 'hf-card hf-card-soft hf-card-shareable'],
     ] as const) {
       expect(html).toContain(`<section class="${surface}" aria-labelledby="${id}">`)
@@ -230,26 +239,58 @@ describe('the page /wedstrijden', () => {
     expect(programme).not.toContain('Speelronde 9')
   })
 
-  it('shows the results with the newest first, with the day', async () => {
+  it('shows the results of a competition with the newest first, with the day', async () => {
     const results = section(await render(), 'uitslagen')
 
-    expect(results.match(/class="hf-match"/g)).toHaveLength(4)
-    expect(results.indexOf('Tweede ronde')).toBeLessThan(results.indexOf('Speelronde 9'))
+    expect(results.match(/class="hf-match"/g)).toHaveLength(3)
     expect(results.indexOf('Speelronde 9')).toBeLessThan(results.indexOf('Speelronde 8'))
     expect(results.indexOf('Speelronde 8')).toBeLessThan(results.indexOf('Speelronde 7'))
     expect(results).toContain('zo 11 okt')
     expect(results).toContain('2–0')
   })
 
-  it('keeps all the results in one card Uitslagen, with the competition in each line', async () => {
+  it('has a card for each competition with results, named after it and without the competition in each line', async () => {
     const html = await render()
-    const results = section(html, 'uitslagen')
+    const league = section(html, 'uitslagen')
+    const cup = section(html, 'uitslagen-knvb-beker')
+
+    expect(league).toContain('>Eredivisie</a>')
+    expect(cup).toContain('>KNVB Beker</a>')
+    expect(league.indexOf('Speelronde 9')).toBeGreaterThan(-1)
+    expect(cup).toContain('Tweede ronde')
+    expect(cup).not.toContain('Speelronde')
+    expect(resultCards(html)).not.toContain('<p class="hf-meta hf-match-label">')
+    expect(league).toContain('Het verloop van het seizoen')
+    expect(cup).not.toContain('Het verloop van het seizoen')
+  })
+
+  it('starts a line of a result with the round, then the day and the stadium', async () => {
+    const results = section(await render(), 'uitslagen')
+
+    expect(results).toContain(
+      '<p class="hf-meta hf-match-when">Speelronde 9 <span aria-hidden="true">·</span> <time dateTime="2026-10-11">zo 11 okt</time> <span aria-hidden="true">·</span> <span>Voorbeeldpark</span></p>',
+    )
+    expect(results).not.toMatch(/Thuis|Uit</)
+  })
+
+  it('puts the competition and the round last in the lines of the programme, after the day and the stadium', async () => {
+    const programme = section(await render(), 'programma')
+
+    expect(programme).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 10</p></div>')
+    expect(programme.indexOf('wo 28 okt 19:45')).toBeLessThan(programme.indexOf('Proefstad SV'))
+    expect(programme.indexOf('Proefstad SV')).toBeLessThan(programme.indexOf('Speelronde 10'))
+  })
+
+  it('has a card Uitslagen for each competition only when it has a result, in the order of the bar', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.filter((match) => match.competition !== 'KNVB Beker'),
+    })
+
+    const html = await render()
 
     expect(html).not.toContain('uitslagen-knvb-beker')
-    expect(html).not.toContain('>Eredivisie</a>')
-    expect(results).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde')
-    expect(results).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 9')
-    expect(results).toContain('Het verloop van het seizoen')
+    expect(section(html, 'uitslagen')).toContain('>Eredivisie</a>')
   })
 
   it('calls the card with the table Stand, and not Eindstand, which is for a season that is over', async () => {
@@ -371,7 +412,7 @@ describe('the page /wedstrijden', () => {
     it('puts it at the top of the results and not in the programme, with the sentence after two hours', async () => {
       withMatch(cup('2026-10-22T18:45:00Z', 'Derde ronde'))
       const html = await render()
-      const results = section(html, 'uitslagen')
+      const results = resultCards(html)
 
       expect(section(html, 'programma')).not.toContain('Derde ronde')
       expect(results.indexOf('Derde ronde')).toBeLessThan(results.indexOf('Tweede ronde'))
@@ -383,7 +424,7 @@ describe('the page /wedstrijden', () => {
       withMatch(cup('2026-10-23T12:00:00Z', 'Derde ronde'))
       const html = await render()
 
-      expect(section(html, 'uitslagen')).toContain('Derde ronde')
+      expect(section(html, 'uitslagen-knvb-beker')).toContain('Derde ronde')
       expect(section(html, 'programma')).not.toContain('Derde ronde')
       expect(html).not.toContain('Gegevens nog niet beschikbaar')
     })
@@ -392,7 +433,7 @@ describe('the page /wedstrijden', () => {
       withMatch(cup('2026-10-22T18:45:00Z', 'Derde ronde', { goalsAgainst: 1, goalsFor: 3, status: 'played' }))
       const html = await render()
 
-      expect(section(html, 'uitslagen')).toContain('3–1')
+      expect(section(html, 'uitslagen-knvb-beker')).toContain('1–3')
       expect(html).not.toContain('Gegevens nog niet beschikbaar')
     })
 
@@ -433,9 +474,9 @@ describe('the page /wedstrijden', () => {
     it('names the competition and the round as text in the results, with the result', async () => {
       withMatch(playoffs())
 
-      const results = section(await render(), 'uitslagen')
+      const results = section(await render(), 'uitslagen-play-offs')
 
-      expect(results).toContain('Play-offs Conference League')
+      expect(results).toContain('>Play-offs Conference League</a>')
       expect(results).toContain('Halve finale')
       expect(results).toContain('FC Voorbeeld')
       expect(results).toContain('3–2')
@@ -457,13 +498,13 @@ describe('the page /wedstrijden', () => {
 
       expect(section(html, 'programma')).toContain('Play-offs Conference League')
       expect(section(html, 'programma')).toContain('Halve finale')
-      expect(section(html, 'uitslagen')).not.toContain('Halve finale')
+      expect(resultCards(html)).not.toContain('Halve finale')
     })
 
     it('says "Gegevens nog niet beschikbaar" after two hours without a result, like any other match', async () => {
       withMatch(playoffs({ goalsAgainst: null, goalsFor: null, status: 'scheduled' }))
 
-      const results = section(await render(), 'uitslagen')
+      const results = section(await render(), 'uitslagen-play-offs')
 
       expect(results).toContain('Halve finale')
       expect(results.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(1)
@@ -534,7 +575,7 @@ describe('the page /wedstrijden', () => {
     it('shows the shoot-out and says in words what the abbreviations are, under the results', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, tie] })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('(3–4 <abbr title="Na strafschoppen">n.s.</abbr>)')
       expect(results).toContain('1 tegen 1, na strafschoppen 3 tegen 4')
@@ -548,7 +589,7 @@ describe('the page /wedstrijden', () => {
         matches: [...matchData.matches, { ...tie, penaltiesAgainst: null, penaltiesFor: null, round: 'Derde ronde' }],
       })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('<abbr title="Na verlenging">n.v.</abbr>')
       expect(results).toContain('n.v. na verlenging')
@@ -563,10 +604,10 @@ describe('the page /wedstrijden', () => {
         matches: matchData.matches.map((match) => (match.round === 'Speelronde 9' ? { ...match, note } : match)),
       })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results.split(note)).toHaveLength(2)
-      expect(results).toContain(`Voorbeeldpark</span></p><p class="hf-meta hf-match-note">${note}</p></div>`)
+      expect(results).toContain(`<p class="hf-meta hf-match-note">${note}</p></div>`)
       expect(results.match(/hf-match-note/gu)).toHaveLength(1)
     })
 
@@ -579,7 +620,7 @@ describe('the page /wedstrijden', () => {
         ],
       })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('<abbr title="Na verlenging">n.v.</abbr>')
       expect(results).toContain('</abbr>\u00a0(1–0)')
@@ -593,7 +634,7 @@ describe('the page /wedstrijden', () => {
         matches: [...matchData.matches, { ...tie, afterNinetyAgainst: 1, afterNinetyFor: 1 }],
       })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('1 tegen 1, na verlenging; na 90 minuten 1 tegen 1; na strafschoppen 3 tegen 4')
       expect(results).toContain('n.v. na verlenging')
@@ -601,7 +642,7 @@ describe('the page /wedstrijden', () => {
     })
 
     it('has no abbreviations and no explanation when no line needs them', async () => {
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).not.toContain('<abbr')
       expect(results).not.toContain('na verlenging')
@@ -644,7 +685,7 @@ describe('the page /wedstrijden', () => {
     }
 
     it('shows the scorers of a played match on one line, with the club for a screen reader', async () => {
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results.match(/class="hf-match-goals"/g)).toHaveLength(2)
       expect(results).toContain('12’')
@@ -664,7 +705,7 @@ describe('the page /wedstrijden', () => {
     it('names the abbreviations of an own goal and a penalty under the results, and only those', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, flagged] })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('<abbr title="Eigen doelpunt">e.d.</abbr>')
       expect(results).toContain('<abbr title="Penalty">pen.</abbr>')
@@ -675,14 +716,14 @@ describe('the page /wedstrijden', () => {
         matches: [...matchData.matches, { ...flagged, goals: flagged.goals.slice(0, 1) }],
       })
 
-      const own = section(await render(), 'uitslagen')
+      const own = resultCards(await render())
 
       expect(own).toContain('e.d. eigen doelpunt')
       expect(own).not.toContain('pen. penalty')
     })
 
     it('has no explanation of abbreviations when no line uses them', async () => {
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).not.toContain('eigen doelpunt')
       expect(results).not.toContain('penalty')
@@ -713,7 +754,7 @@ describe('the page /wedstrijden', () => {
         ],
       })
 
-      const results = section(await render(), 'uitslagen')
+      const results = resultCards(await render())
 
       expect(results).toContain('&lt;img src=x onerror=alert(1)&gt;')
       expect(results).not.toContain('<img')
@@ -905,7 +946,7 @@ describe('the season picker on /wedstrijden', () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
-    expect(matchShortcuts.map(({ href }) => href)).toEqual(ids)
+    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href)).toEqual(ids)
   })
 })
 
@@ -1011,7 +1052,7 @@ describe('the head coaches of the season', () => {
     expect(html).toContain('aria-label="De stand, hoe vaak welke uitslag en de hoofdtrainer"')
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('hf-wikipedia-credit'))
     expect(card).not.toContain('hf-wikipedia-credit')
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(6)
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(7)
   })
 })
 
