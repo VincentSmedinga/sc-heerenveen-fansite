@@ -43,6 +43,13 @@ describe('the names of the clubs in the results and in the table', () => {
     )
   })
 
+  it('writes Roda JC as Roda JC Kerkrade, which is how the table has the club', () => {
+    expect(matchClubNames([result('PSV', 'Roda JC')], [{ club: 'PSV' }, { club: 'Roda JC Kerkrade' }])).toEqual({
+      results: [result('PSV', 'Roda JC Kerkrade')],
+      strangers: [],
+    })
+  })
+
   it('writes a name the table lacks as the page has it, and says which', () => {
     expect(matchClubNames([result('FC Volendam', 'FC Twente'), result('FC Twente', 'Heracles')], table)).toEqual({
       results: [result('FC Volendam', 'FC Twente'), result('FC Twente', 'Heracles')],

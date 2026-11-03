@@ -187,6 +187,9 @@ const months = [
   'december',
 ]
 
+/** The index in `months` of the first month of a season: August. */
+const seasonStartMonth = months.indexOf('augustus')
+
 /** The two numbers of a score or a part of it, team 1 first. */
 type Pair = { away: number; home: number }
 
@@ -429,9 +432,10 @@ export function readEuropaLeague(text: string, season: string): ReadProgramme {
  * league and is left out. A match that was postponed and played later is under `Inhaalronde`
  * with its score, and counts for the round it was postponed from (see `leagueRoundOf`). A block
  * for a match that was stopped is the match, and the later block for the same two clubs only
- * finishes it (see `restOf`).
+ * finishes it (see `restOf`). The `season` (`2010/11`) gives the year of a date that has none
+ * (see `parseDate`); without it such a date is not one we know.
  */
-export function readLeague(text: string): ReadProgramme {
+export function readLeague(text: string, season?: string): ReadProgramme {
   const boxes = matchBoxes(text)
 
   if (boxes.length === 0) {
@@ -451,13 +455,13 @@ export function readLeague(text: string): ReadProgramme {
 
     const result = stoppedOf(box) === undefined ? box : restOf(box, boxes)
     const played = parseScore(result?.params.get('score') ?? '')
-    const day = parseDate(result?.params.get('date') ?? '')
+    const day = parseDate(result?.params.get('date') ?? '', season)
 
     if (played.kind === 'score' && day !== undefined && (lastPlayedOn === null || day.isoDate > lastPlayedOn)) {
       lastPlayedOn = day.isoDate
     }
     if (isOurs(box) && !isRestOfStopped(box, boxes)) {
-      const match = readMatch(box, 'Eredivisie', round.name, restOf(box, boxes))
+      const match = readMatch(box, 'Eredivisie', round.name, restOf(box, boxes), season)
 
       if (typeof match === 'string') {
         problems.push(match)
@@ -479,9 +483,9 @@ export function readLeague(text: string): ReadProgramme {
  * finished later is one result with the final score, on the day of the block that finishes it,
  * and who was at home is as the block that began it has it (see `restOf`). A page with the
  * results of sc Heerenveen only, as the older pages are, gives no results at all: the form of
- * a club over its last matches needs all of them.
+ * a club over its last matches needs all of them. The `season` is as for `readLeague`.
  */
-export function readLeagueResults(text: string): ReadResults {
+export function readLeagueResults(text: string, season?: string): ReadResults {
   const boxes = matchBoxes(text)
   const results: ReadResult[] = []
   const unread: string[] = []
@@ -502,7 +506,8 @@ export function readLeagueResults(text: string): ReadResults {
     // A match of another club on the page makes it a page with every club, played or not yet.
     others ||= !isOurs(box)
     if (
-      (isStoppedByReport(box) && (rest === undefined || ['postponed', 'stopped', 'unknown'].includes(score.kind))) ||
+      (stoppedOf(box) !== undefined &&
+        (rest === undefined || ['postponed', 'stopped', 'unknown'].includes(score.kind))) ||
       (rest !== undefined && stoppedAgain(box, rest))
     ) {
       unread.push(
@@ -519,7 +524,7 @@ export function readLeagueResults(text: string): ReadResults {
       continue
     }
 
-    const day = parseDate(result.params.get('date') ?? '')
+    const day = parseDate(result.params.get('date') ?? '', season)
     const sameSides =
       linkTarget(result.params.get('team1') ?? '').toLowerCase() ===
       linkTarget(box.params.get('team1') ?? '').toLowerCase()
@@ -962,16 +967,21 @@ function matchBoxes(text: string): Template[] {
  * `12-14 februari 2027`, `1–3 december 2026`, `29 april-3 mei 2027`, `30 november–2 december
  * 2026`. The year is on the last day, and may be on the first as well (`31 december 2026 – 2
  * januari 2027`); a date without a year is not one we know, because the year would be a guess.
- * The date is the first day, and `text` is what Wikipedia wrote.
+ * The one exception is a single day with no year (`15 december`) on a page for which the caller
+ * says the season: a season runs from August to July, so the month gives the year, August to
+ * December the first and January to July the second. The date is the first day, and `text` is
+ * what Wikipedia wrote.
  */
 function parseDate(
   value: string,
+  season?: string,
 ): undefined | { day: number; isoDate: string; month: number; single: boolean; text: string; year: number } {
   const text = plain(value).replace(/\*+$/u, '').trim()
   const month = '(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)'
   const dash = '\\s*[-–]\\s*'
   const normalised = text.replaceAll('&ndash;', '–').replaceAll('&#8211;', '–')
   const single = new RegExp(`^(\\d{1,2}) ${month} (\\d{4})$`, 'u').exec(normalised)
+  const yearless = season === undefined ? null : new RegExp(`^(\\d{1,2}) ${month}$`, 'u').exec(normalised)
   const several = new RegExp(`^(\\d{1,2})(?: ${month}(?: (\\d{4}))?)?${dash}(\\d{1,2}) ${month} (\\d{4})$`, 'u').exec(
     normalised,
   )
@@ -979,6 +989,15 @@ function parseDate(
 
   if (single !== null) {
     first = { day: Number(single[1]), monthName: single[2] ?? '', year: Number(single[3]) }
+  } else if (yearless !== null) {
+    const monthName = yearless[2] ?? ''
+    const firstYear = Number(season?.slice(0, 4))
+
+    first = {
+      day: Number(yearless[1]),
+      monthName,
+      year: months.indexOf(monthName) >= seasonStartMonth ? firstYear : firstYear + 1,
+    }
   } else if (several !== null) {
     const monthName = several[2] ?? several[5] ?? ''
 
@@ -1026,7 +1045,7 @@ function parseDate(
     day: first.day,
     isoDate: `${first.year}-${String(monthNumber).padStart(2, '0')}-${String(first.day).padStart(2, '0')}`,
     month: monthNumber,
-    single: single !== null,
+    single: single !== null || yearless !== null,
     text,
     year: first.year,
   }
@@ -1036,10 +1055,11 @@ function parseDate(
  * A name and the minutes of its goals: `[[Luca Oyen|Oyen]] {{goal|52}}` for the home club, and
  * `{{goal|45}} [[Jacob Trenskow|Trenskow]]` for the away club, one player to a line and
  * lines cut by `<br />`. The template takes every goal of the player: `{{goal|78||80}}` is
- * two, and `e.d.` (own goal) or `pen.` (penalty) after a minute belongs to that goal. Red cards
- * and missed penalties in the same field are not goals and are left out. Anything else, a goal
- * without a name or a template we do not know, is a text we cannot read: the answer is then a
- * reason and no goals at all, since half a list says something false.
+ * two, and `e.d.` or `o.g.` (own goal) or `pen.` or `p` (penalty) after a minute belongs to
+ * that goal. Red cards and missed penalties in the same field are not goals and are left out.
+ * Anything else, a goal without a name, a part we do not know or a template we do not know, is
+ * a text we cannot read: the answer is then a reason and no goals at all, since half a list
+ * says something false.
  */
 function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | { problem: string } {
   const goals: ReadGoal[] = []
@@ -1086,8 +1106,8 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
             return { problem: `a goal of ${name} has a minute we do not know: '${token}'` }
           }
           goals.push(last)
-        } else if ((token === 'e.d.' || token === 'pen.') && last !== undefined) {
-          last[token === 'e.d.' ? 'ownGoal' : 'penalty'] = true
+        } else if (['e.d.', 'o.g.', 'p', 'pen.'].includes(token) && last !== undefined) {
+          last[token === 'e.d.' || token === 'o.g.' ? 'ownGoal' : 'penalty'] = true
           if (last.ownGoal && last.penalty) {
             return { problem: `a goal of ${name} is both an own goal and a penalty` }
           }
@@ -1387,8 +1407,8 @@ function parseReferee(value: string): { kind: 'name'; name: string } | { kind: '
 }
 
 /**
- * The score of a box: none yet, a score, called off, or something we do not know. A score is
- * the final score. The older cup pages add the score at half time in brackets
+ * The score of a box: none yet, a score, stopped, called off, or something we do not know. A
+ * score is the final score. The older cup pages add the score at half time in brackets
  * (`2 – 1 (1 – 0)`), or after extra time the score after 90 minutes and then the score at half
  * time (`2 – 4 (2 – 2, 1 – 1)`). The final score is the score of the match; the brackets are
  * read and checked, and `readMatch` keeps the score after 90 minutes (see `scoreAfterNinety`),
@@ -1399,6 +1419,13 @@ function parseScore(value: string): ParsedScore {
 
   if (text === '' || /^[–-]$/u.test(text)) {
     return { kind: 'none' }
+  }
+  // The older pages write `Gest. 57' (0 – 0)`, the 2018/19 page `(0 – 0)<br />Gestaakt 1'`.
+  // `Gest.` is only a stopped score with the minute, since the word alone says too little.
+  const stopped = stoppedScore.exec(text)
+
+  if (stopped !== null) {
+    return { kind: 'stopped', minute: Number(stopped[1] ?? stopped[6]) }
   }
   if (/^gestaakt\b/iu.test(text)) {
     const minute = /^gestaakt\s+(\d{1,3})\s*['’′]/iu.exec(text)?.[1]
@@ -1414,6 +1441,17 @@ function parseScore(value: string): ParsedScore {
 
   return /^(uitgesteld|afgelast)\b/iu.test(text) ? { kind: 'postponed' } : { kind: 'unknown', text }
 }
+
+/**
+ * A stopped score with its minute, in the two orders of the pages: the word and the minute and
+ * then the score at that moment in brackets (`Gest. 57' (0 – 0)`), or the score in brackets
+ * and then the word and the minute (`(0 – 0) Gestaakt 1'`). The brackets hold two numbers
+ * each, so the minute is group 1 for the first order and group 6 for the other.
+ */
+const stoppedScore = new RegExp(
+  `^(?:(?:gestaakt|gest\\.) ?(\\d{1,3}) ?['’′](?: ?\\(${pairPattern}\\))?|\\(${pairPattern}\\) ?(?:gestaakt|gest\\.) ?(\\d{1,3}) ?['’′])$`,
+  'iu',
+)
 
 /** What follows the final score on older pages: `n.v.`, `(nv)`, brackets or `(6 – 7 pen.)`. */
 const scorePart = new RegExp(
@@ -1504,13 +1542,19 @@ function readGoals(box: Template, home: boolean): { goals: null | ReadGoal[]; pr
  * the day and the stadium for the note (see `stoppedNote`). The spectators and the referee
  * are the ones of the stopped block (see `readFacts`).
  */
-function readMatch(box: Template, competition: Competition, round: null | string, rest?: Template): ReadMatch | string {
+function readMatch(
+  box: Template,
+  competition: Competition,
+  round: null | string,
+  rest?: Template,
+  season?: string,
+): ReadMatch | string {
   const name = `${round ?? 'a match'} (${competition})`
   const [team1, team2] = [box.params.get('team1') ?? '', box.params.get('team2') ?? '']
   const home = linkTarget(team1).toLowerCase() === ourClub.toLowerCase()
   const opponent = plain(home ? team2 : team1)
   const stadium = plain(box.params.get('stadium') ?? '') || null
-  const day = parseDate(box.params.get('date') ?? '')
+  const day = parseDate(box.params.get('date') ?? '', season)
   const time = parseTime(box.params.get('time') ?? '')
   const began = stoppedOf(box)
   // The block with the result, and who is at home in it: the rest may name the clubs the other
@@ -1558,7 +1602,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
       return `${name} was stopped, and the block that finishes it was stopped too`
     }
 
-    const problem = stoppedNote(began, rest, score.kind === 'score')
+    const problem = stoppedNote(began, rest, score.kind === 'score', season)
 
     if (typeof problem === 'string') {
       return `${name} ${problem}`
@@ -1805,8 +1849,9 @@ function stoppedNote(
   began: { inBreak: boolean; minute: null | number },
   rest: Template,
   played: boolean,
+  season?: string,
 ): string | { note: string } {
-  const day = parseDate(rest.params.get('date') ?? '')
+  const day = parseDate(rest.params.get('date') ?? '', season)
   const stadium = plain(rest.params.get('stadium') ?? '')
 
   if (began.minute === null && !began.inBreak) {

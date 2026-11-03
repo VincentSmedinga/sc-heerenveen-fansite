@@ -844,8 +844,11 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
   De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
   Een speler van ons krijgt daarbij zijn rij in `players` (`player_id`): zie _De doelpunten koppelen aan de spelers_.
-  Het sjabloon `goal` heeft de minuten achter elkaar: `{{goal|45+2}}` is minuut 45 met 2 minuten erbij, `{{goal|78||80}}` zijn twee doelpunten van dezelfde speler, en `e.d.` of `pen.` na een minuut hoort bij dat doelpunt, zoals in `{{goal|5|pen.|23|pen.}}`.
-  Een eigen doelpunt staat op de pagina bij de club die ervan profiteert (`{{goal|7|e.d.}}`), en zo bewaart de import het ook.
+  Het sjabloon `goal` heeft de minuten achter elkaar: `{{goal|45+2}}` is minuut 45 met 2 minuten erbij, `{{goal|78||80}}` zijn twee doelpunten van dezelfde speler, en een deelcode na een minuut hoort bij dat doelpunt, zoals in `{{goal|5|pen.|23|pen.}}`.
+  De import kent `e.d.` en `o.g.` voor een eigen doelpunt en `pen.` en `p` voor een strafschop, en geen andere schrijfwijze.
+  Een andere deelcode geeft de waarschuwing "no scorers" voor die wedstrijd.
+  Een doelpunt dat beide is (`{{goal|5|e.d.|pen.}}`) is een fout.
+  Een eigen doelpunt staat op de pagina bij de club die ervan profiteert (`{{goal|7|e.d.}}` of `{{goal|7|o.g.}}`), en zo bewaart de import het ook.
   Een rode kaart (`{{rode kaart}}`) en een gemiste penalty (`{{penmis}}`) in deze velden zijn geen doelpunt en vallen weg.
   De doelpunten staan op volgorde van de klok, beide clubs door elkaar, en bij dezelfde minuut eerst die van het eerste team.
   Bij een wedstrijd die niet is gespeeld leest de import de velden niet.
@@ -858,7 +861,10 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   Het jaar staat achter de laatste dag, en mag ook achter de eerste staan: `31 december 2026 – 2 januari 2027`.
   Staat het jaar alleen achter de laatste dag en loopt de datum door het nieuwe jaar (`31 december–2 januari 2027`), dan hoort de eerste dag bij het jaar ervoor.
   Een datum van meer dagen heeft nooit een aftrap, ook niet als de pagina een tijd geeft: `kickoff_at` is leeg, en `date_text` heeft de tekst van Wikipedia.
-  Een datum zonder jaar, een laatste dag voor de eerste of een dag die niet bestaat kent de import niet: dat is een fout, en de import verandert niets (zie _Slaagt of mislukt_).
+  Een datum van één dag zonder jaar (`15 december`) krijgt op de wedstrijdpagina van de competitie het jaar van het seizoen: augustus tot en met december het eerste jaar, januari tot en met juli het tweede.
+  Het seizoen komt van de aanroep, niet uit de pagina.
+  Op de pagina's van de beker en de play-offs, en bij een datum van meer dagen, kent de import een datum zonder jaar niet.
+  Een datum zonder jaar daar, een laatste dag voor de eerste of een dag die niet bestaat kent de import niet: dat is een fout, en de import verandert niets (zie _Slaagt of mislukt_).
 - De stand heeft alleen gewonnen, gelijk, verloren en de doelpunten; gespeeld en punten rekent de import uit.
   `valid_on` is de dag van de laatste competitiewedstrijd die iemand speelde.
 - Van elke club in de competitie bewaart hij de uitslag van de gespeelde competitiewedstrijden in `league_results`, uit dezelfde pagina met het programma (zie _De uitslagen van alle clubs_).
@@ -1433,6 +1439,9 @@ Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026 in Breda, het 
 De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)):
 
 - Een blok waarvan de score met "Gestaakt" begint, is de wedstrijd.
+  Dat kan ook in de twee andere schrijfwijzen van de pagina's van 2010/11 en 2018/19: de afkorting met de minuut en daarachter de stand, `Gest. 57' (0 – 0)`, en de stand eerst en dan het woord, `(0 – 0)<br />Gestaakt 1'`.
+  Het woord is `Gestaakt` of `Gest.`, de minuut heeft een apostrof, en de stand staat tussen haakjes ervoor of erna.
+  `Gest.` zonder minuut is geen gestaakte score maar een score die we niet kennen.
   Het geeft het stadion, thuis of uit, de datum en de aftrap, zodat de cijfers per stadion de wedstrijd tellen voor de plek waar hij begon.
 - Het laatste blok daarna onder dezelfde kop voor dezelfde twee clubs maakt de wedstrijd af en is zelf geen wedstrijd.
   Het geeft de uitslag en de doelpunten, en de dag en het stadion voor de regel in `matches.note`: "Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
@@ -1446,13 +1455,16 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - Het restant staat ook onder `Inhaalronde <nummer>` met hetzelfde nummer als de ronde van het gestaakte blok, en nergens anders.
   Zo staat Excelsior – AZ in 2011/12: onder `Speelronde 13` een blok met de gewone score `0 – 0` op 20 november 2011, waarvan `report` zegt "In de rust gestaakt", en onder `Inhaalronde 13` het blok met `0 – 0` van 7 december 2011 ("Tweede helft").
   Het is één wedstrijd, met de eindstand en de dag van het tweede blok.
+- Dat blok is de eindstand ook als de pagina de wedstrijd helemaal opnieuw laat spelen, zoals bij Feyenoord – VVV-Venlo in 2018/19: gestaakt na 1 minuut op 4 november 2018 en op 6 december onder `Inhaalronde 11` met 4 – 1 opnieuw gespeeld.
+  De pagina geeft geen manier om een restant van een herspeelde wedstrijd te onderscheiden, dus de import probeert dat niet.
+  De regel in `matches.note` zegt daarom altijd "Het restant …".
 - Ook een blok met een gewone score is gestaakt als de tekst van `report` (zonder opmaak en zonder de adressen van links) "gestaakt" bevat en het blok onder een `Speelronde` staat.
   Staat de minuut niet in de score maar zegt `report` "in de rust", dan begint de regel met "Gestaakt in de rust."
   Zegt de pagina niets over de minuut of de rust, dan is het een fout.
   Het blok onder de inhaalronde mag zelf niet gestaakt zijn (ook niet met "gestaakt" in `report`).
 - Een gestaakte wedstrijd van een andere club komt niet in `matches`, want daar staan alleen de wedstrijden van sc Heerenveen.
   De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt, met de eindstand en de dag van dat blok en het nummer van de ronde.
-  Een gestaakt blok met een gewone score dat geen bruikbaar restant heeft, krijgt geen uitslag maar een melding in de waarschuwing "league results left out".
+  Een gestaakt blok, in elke schrijfwijze van de score, dat geen bruikbaar restant heeft, krijgt geen uitslag maar een melding in de waarschuwing "league results left out".
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
 - Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
 

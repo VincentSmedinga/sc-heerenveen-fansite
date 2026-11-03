@@ -1113,6 +1113,8 @@
   Een wedstrijd met een datum die we niet kennen overslaan en de rest bewaren (dat is de regel van _Een gestaakte wedstrijd telt niet, de latere uitslag geldt_ omgekeerd, en een overgeslagen wedstrijd zou uit de lijst verdwijnen).
   Het jaar van een datum zonder jaar afleiden uit het seizoen (een gok; Wikipedia schrijft het jaar bij elke datum in de sjablonen die we lazen).
   Het herstel in de transactie van de import laten, maar dan ook als het seizoen niet leest (de transactie bestaat dan niet).
+- **Later:** zie _Een datum zonder jaar krijgt het jaar van het seizoen_ (4 november 2026): op de wedstrijdpagina van de competitie leest de reader een datum met dag en maand en zonder jaar, met het jaar van het seizoen.
+  Op andere pagina's, en voor een datum van meer dagen, blijft een datum zonder jaar een fout.
 - **Later:** zie _Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst_ (3 november 2026): `repairKnownClubs` doet nu twee stappen, eerst het herstel van de doorverwijzingen en dan dat van de lijst.
   De rest blijft: aan het begin van elke run, in een eigen transactie, en een fout is een waarschuwing.
 
@@ -1983,7 +1985,7 @@
 - **Datum:** 3 november 2026
 - **Besluit:** een blok onder `Speelronde <n>` waarvan het veld `report` "gestaakt" zegt, is een gestaakte wedstrijd, ook als de score een gewone uitslag is, en het blok voor dezelfde twee clubs onder `Inhaalronde <n>` maakt hem af, zoals het latere blok onder dezelfde kop dat al deed (#548, #678).
   Het is één wedstrijd met de eindstand en de dag van het tweede blok.
-  Een wedstrijd die helemaal opnieuw is gespeeld, krijgt geen regel en blijft een fout.
+  Een wedstrijd die helemaal opnieuw is gespeeld, kreeg toen nog geen regel (zie **Later:** onderaan).
   - **Het woord:** de lezer leest de tekst van `report` zoals de pagina hem toont, zonder opmaak en zonder de adressen van links.
     Het adres van een verslag bevat vaak het woord (`...-vuurwerk-gestaakt-duel.html` in 2019/20, een wedstrijd die wel is gespeeld) en is geen mededeling.
   - **Het restant:** onder dezelfde kop, of onder `Inhaalronde <n>` met hetzelfde nummer voor een blok onder `Speelronde <n>`, en nergens anders.
@@ -2005,6 +2007,9 @@
   Elk blok onder een inhaalronde laten winnen van het blok onder de ronde (eenvoudiger, maar dezelfde uitslag twee keer zou dan stil goed gaan).
   Een vaste uitzondering voor deze wedstrijd in de code (nul risico nu, maar de volgende gestaakte wedstrijd vraagt weer een wijziging).
   Alleen wedstrijden van andere clubs (laat de eigen wedstrijd onder een inhaalronde een fout, terwijl de code hetzelfde is).
+- **Later:** zie _De lezer kent twee nieuwe schrijfwijzen van een gestaakte score, en een helemaal herspeelde wedstrijd is één wedstrijd_ (4 november 2026): ook een wedstrijd die helemaal opnieuw is gespeeld is één wedstrijd, met de eindstand van het blok dat hem afmaakt.
+  De zin hierboven over een wedstrijd die helemaal opnieuw is gespeeld, geldt niet meer.
+  De rest blijft: zonder bruikbaar restant is het een fout, en `checkResults` is niet veranderd.
 
 ## Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club
 
@@ -2069,3 +2074,53 @@
   Een eigen status laat Programma, de pagina van een tegenstander en de cijfers het verschil maken zonder dat elke plek een seizoen hoeft te kennen.
   "Uitgesteld" voor wedstrijden die nooit meer komen, is voor een supporter misleidend.
 - **Alternatieven:** alleen een ander woord op de site voor dezelfde status `postponed` (geen migratie, maar de wedstrijden blijven in het programma staan en tellen als nog komend); een lijst met seizoenen in de importer (`2019/20` is geannuleerd; uitgeschreven, maar elk nieuw geval vraagt een codewijziging); de wedstrijden verbergen (een gat in speelronde 27 tot en met 34 zonder uitleg); een vaste reden als tekst bij de wedstrijd (een claim die wij zelf doen, naast de pagina).
+
+## De lezer kent twee nieuwe schrijfwijzen van een gestaakte score, en een helemaal herspeelde wedstrijd is één wedstrijd
+
+- **Datum:** 4 november 2026
+- **Besluit:** een score met `Gestaakt` of `Gest.` en een minuut, met de stand ervoor of erna, is een gestaakte wedstrijd, net als `Gestaakt 82' (2 – 0)` (#684).
+  Het blok dat hem afmaakt (hetzelfde als bij #548 en #678) geeft de eindstand en de dag, ook als de pagina de wedstrijd helemaal opnieuw laat spelen.
+  De regel in `matches.note` verandert niet.
+  - **De schrijfwijzen:** `Gest. 57' (0 – 0)` (2010/11) en `(0 – 0)<br />Gestaakt 1'` (2018/19).
+    `Gest.` zonder minuut is een score die we niet kennen, en dus een waarschuwing of fout.
+  - **Zonder restant:** een gestaakt blok zonder bruikbaar vervolg staat in `unread` bij de uitslagen van alle clubs, in elke schrijfwijze van de score.
+    Voorheen deed dat alleen een blok met een gewone score en "gestaakt" in `report`.
+- **Waarom:** Willem II – De Graafschap, Excelsior – NAC Breda, Feyenoord – VVV-Venlo en PEC Zwolle – FC Groningen zijn dezelfde soort wedstrijd als NAC Breda – sc Heerenveen (2025/26) en Excelsior – AZ (2011/12).
+  Alleen de woorden van de score verschillen.
+  Een herspeelde wedstrijd leest even goed als de eindstand van het tweede blok, want de stand telt de wedstrijd één keer.
+  De pagina heeft geen veld dat een restant van een herspeelde wedstrijd onderscheidt, dus raden we niet.
+- **Alternatieven:** de herspeelde wedstrijd een fout of waarschuwing laten (de waarschuwing blijft dan elke import terugkomen, terwijl de uitslag klopt).
+  Twee wedstrijden met een status (een kolom die elke lijst op de site moet kennen, voor wedstrijden van andere clubs).
+  Een eigen regel in `matches.note` voor een herspeelde wedstrijd (de pagina laat het verschil niet zien).
+
+## De lezer neemt `o.g.` als eigen doelpunt en `p` als strafschop, en geen andere deelcode
+
+- **Datum:** 4 november 2026
+- **Besluit:** `o.g.` achter een minuut is een eigen doelpunt zoals `e.d.`, `p` is een strafschop zoals `pen.`.
+  Een andere deelcode blijft een waarschuwing "no scorers" voor die wedstrijd.
+- **Waarom:** `o.g.` komt 29 keer voor op de vier pagina's, altijd waar `e.d.` kan staan.
+  `p` komt één keer voor, bij een doelpunt van Tadić (Ajax) na 63 minuten, waar `pen.` kan staan.
+  Zonder deze twee codes hebben vier wedstrijden geen doelpuntenmakers.
+- **Alternatieven:** ook andere schrijfwijzen toestaan (`og`, `pen`, `P`): niet gezien op een pagina, dus een gok.
+  De waarschuwing laten staan en de wedstrijden zonder doelpuntenmakers laten (de doelpunten staan wel op de pagina).
+- **Later:** een doelpunt dat beide is (`e.d.` of `o.g.` samen met `pen.` of `p`) blijft een fout.
+
+## Een datum zonder jaar krijgt het jaar van het seizoen
+
+- **Datum:** 4 november 2026
+- **Besluit:** een datum met dag en maand en zonder jaar op de wedstrijdpagina van de competitie krijgt het jaar van het seizoen: augustus tot en met december het eerste jaar, januari tot en met juli het tweede.
+  Het seizoen komt van de aanroep (`readLeague` en `readLeagueResults`), niet uit de pagina.
+- **Waarom:** Excelsior – NAC Breda (2010/11) heeft "15 december" zonder jaar.
+  Zonder die datum valt de uitslag weg en kloppen de uitslagen niet met de stand van Excelsior en NAC Breda.
+  Een seizoen loopt van augustus tot en met juli, dus de maand bepaalt het jaar zonder twijfel.
+- **Alternatieven:** het blok laten vallen en de waarschuwing houden (de stand blijft dan afwijken).
+  Het jaar van het blok ervoor of erna nemen (dat hangt af van de volgorde op de pagina, en een blok kan onder een andere kop staan dan het blok ervoor).
+
+## `Roda JC` is een andere schrijfwijze van `Roda JC Kerkrade`
+
+- **Datum:** 4 november 2026
+- **Besluit:** `Roda JC` staat als andere schrijfwijze in `clubFullNames` bij `Roda JC Kerkrade`, zoals `Excelsior` bij `Excelsior Rotterdam`.
+- **Waarom:** PSV – Roda JC (19 december 2010) schrijft de uitwedstrijdclub als `[[Roda JC Kerkrade|Roda JC]]`.
+  De lezer neemt de zichtbare tekst en de stand kent alleen `Roda JC Kerkrade`, dus de uitslag telde voor een club die de stand niet heeft.
+  Wikipedia heeft maar één artikel, `Roda JC Kerkrade`, dus het is dezelfde club.
+- **Alternatieven:** de naam in de uitslagen aan de stand aanpassen met een eigen regel in de lezer (de lijst `clubFullNames` doet dat al voor Excelsior, voor de uitslagen en voor de clubs).

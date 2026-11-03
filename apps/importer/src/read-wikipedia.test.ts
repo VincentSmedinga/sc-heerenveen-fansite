@@ -40,6 +40,9 @@ const olderStandings = {
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const catchUpProgramme = readFileSync(new URL('./fixtures/wikipedia-catch-up-2022-23.wiki', import.meta.url), 'utf8')
 const stoppedProgramme = readFileSync(new URL('./fixtures/wikipedia-stopped-2011-12.wiki', import.meta.url), 'utf8')
+const stopped2010 = readFileSync(new URL('./fixtures/wikipedia-stopped-2010-11.wiki', import.meta.url), 'utf8')
+const stopped2018 = readFileSync(new URL('./fixtures/wikipedia-stopped-2018-19.wiki', import.meta.url), 'utf8')
+const goalCodesCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goal-codes.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
 const europaLeaguePage2012 = readFileSync(
@@ -1465,6 +1468,38 @@ describe('the goal scorers', () => {
     ])
   })
 
+  it('reads o.g. as an own goal and p as a penalty, like e.d. and pen.', () => {
+    expect(
+      goalsOf('[[A]] {{goal|2|o.g.}}<br />[[B]] {{goal|63|p||70|p}}', '{{goal|9|o.g.}} [[C]]', '4 – 2').goals,
+    ).toMatchObject([
+      { minute: 2, ownGoal: true, penalty: false, player: 'A' },
+      { minute: 9, ownGoal: true, penalty: false, player: 'C' },
+      { minute: 63, ownGoal: false, penalty: true, player: 'B' },
+      { minute: 70, ownGoal: false, penalty: true, player: 'B' },
+    ])
+  })
+
+  it('reads the real goals of the cup with o.g. and p: Van Peppen for sc Heerenveen and Tadić for Ajax', () => {
+    const read = readCup(goalCodesCupPage)
+    const goals = (round: string) =>
+      read.kind === 'read' ? read.matches.find((match) => match.round === round)?.goals : undefined
+
+    expect(goalCodesCupPage).toContain('{{goal|66|o.g.}}')
+    expect(goalCodesCupPage).toContain('{{goal|63|p}}')
+    expect(goals('Achtste finales')?.find((goal) => goal.minute === 66)).toMatchObject({
+      ours: true,
+      ownGoal: true,
+      penalty: false,
+      player: 'van Peppen',
+    })
+    expect(goals('Halve finales')?.find((goal) => goal.minute === 63)).toMatchObject({
+      ours: false,
+      ownGoal: false,
+      penalty: true,
+      player: 'Tadić',
+    })
+  })
+
   it('leaves a red card and a missed penalty out: they are no goals', () => {
     const match = goalsOf(
       '[[Floranus]] {{rode kaart|0|57}}<br />[[Bajraktarević]] {{goal|23||32}}, {{penmis||68}}',
@@ -1507,6 +1542,11 @@ describe('the goal scorers', () => {
     ['a minute of 0', '[[A]] {{goal|0}}', 'a minute we do not know'],
     ['an own goal without a minute', '[[A]] {{goal|e.d.|5}}', 'a part we do not know'],
     ['a goal that is both an own goal and a penalty', '[[A]] {{goal|5|e.d.|pen.}}', 'both an own goal and a penalty'],
+    ['an own goal and a penalty in the other codes', '[[A]] {{goal|5|o.g.|p}}', 'both an own goal and a penalty'],
+    ['an own goal and a penalty in both codes', '[[A]] {{goal|5|e.d.|p}}', 'both an own goal and a penalty'],
+    ['a code that is written another way', '[[A]] {{goal|5|og}}', 'a part we do not know'],
+    ['a capital letter in a code', '[[A]] {{goal|5|P}}', 'a part we do not know'],
+    ['a code of a minute that is no goal', '[[A]] {{goal|o.g.|5}}', 'a part we do not know'],
     ['a name that is a link left open', '[[A {{goal|5}}', 'a goal has no usable name'],
   ])('reads %s as no scorers, with the reason', (_name, goals1, reason) => {
     const match = goalsOf(goals1, '', '1 – 0')
@@ -2515,5 +2555,227 @@ describe('a match that was stopped and finished under an Inhaalronde', () => {
       results: [{ homeClub: 'Ajax', playedOn: '2026-05-13', round: 12 }],
       unread: [],
     })
+  })
+})
+
+describe('a stopped match in the other spellings of the score', () => {
+  const stopped = (score: string, fields: Record<string, string> = {}) =>
+    box({
+      date: '10 november 2026',
+      score,
+      stadium: '[[Rat Verlegh Stadion]]',
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+      time: '16:45 uur',
+      ...fields,
+    })
+  const finished = (fields: Record<string, string> = {}) =>
+    box({
+      date: '24 november 2026',
+      score: '1 – 0',
+      stadium: '[[Abe Lenstra Stadion]]',
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+      time: '20:00 uur',
+      ...fields,
+    })
+  const page = (first: string, ...later: string[]) =>
+    `== Speelronde 12 ==\n${first}\n== Inhaalronde 12 ==\n${later.join('\n')}\n`
+  const other = { team1: '[[AFC Ajax|Ajax]]', team2: '[[Feyenoord]]' }
+  const errorOf = (text: string) => {
+    const read = readLeague(text)
+
+    return read.kind === 'error' ? read.message : ''
+  }
+
+  it('reads the real page of 2010/11: Willem II - De Graafschap and Excelsior - NAC Breda are one result each', () => {
+    expect(stopped2010).toContain("Gest. 57' (0 – 0)")
+    expect(readLeagueResults(stopped2010, '2010/11')).toEqual({
+      results: [
+        {
+          awayClub: 'De Graafschap',
+          awayGoals: 1,
+          homeClub: 'Willem II',
+          homeGoals: 0,
+          playedOn: '2010-11-24',
+          round: 14,
+        },
+        {
+          awayClub: 'NAC Breda',
+          awayGoals: 3,
+          homeClub: 'Excelsior',
+          homeGoals: 1,
+          playedOn: '2010-12-15',
+          round: 17,
+        },
+        { awayClub: 'Roda JC', awayGoals: 1, homeClub: 'PSV', homeGoals: 3, playedOn: '2010-12-19', round: 19 },
+      ],
+      unread: [],
+    })
+  })
+
+  it('does not know the day of Excelsior - NAC Breda without the season, which the page leaves out of the date', () => {
+    const read = readLeagueResults(stopped2010)
+
+    expect(read.results.map((found) => found.homeClub)).toEqual(['Willem II', 'PSV'])
+    expect(read.unread).toEqual(['Inhaalronde 17: Excelsior - NAC Breda has no date or no club names we can use'])
+  })
+
+  it('reads the real page of 2018/19: the score first and then the word, and a match played again from the start', () => {
+    expect(stopped2018).toContain("(0 – 0)<br />Gestaakt 1'")
+    expect(readLeagueResults(stopped2018, '2018/19')).toEqual({
+      results: [
+        {
+          awayClub: 'VVV-Venlo',
+          awayGoals: 1,
+          homeClub: 'Feyenoord',
+          homeGoals: 4,
+          playedOn: '2018-12-06',
+          round: 11,
+        },
+        {
+          awayClub: 'FC Groningen',
+          awayGoals: 2,
+          homeClub: 'PEC Zwolle',
+          homeGoals: 3,
+          playedOn: '2019-04-29',
+          round: 32,
+        },
+      ],
+      unread: [],
+    })
+  })
+
+  it.each([
+    ["Gest. 57' (0 – 0)"],
+    ['Gest. 57’ (0 – 0)'],
+    ["(1 – 2)<br />Gestaakt 57'"],
+    ["(1 – 2)<br />Gest. 57'"],
+    ["Gestaakt 57' (0 – 0)"],
+    ["Gest. 57'"],
+  ])('is one match of sc Heerenveen with the same note for %s', (score) => {
+    const read = readLeague(page(stopped(score), finished()))
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      lastPlayedOn: '2026-11-24',
+      matches: [
+        {
+          goalsAgainst: 1,
+          goalsFor: 0,
+          matchDate: '2026-11-10',
+          note: 'Gestaakt in minuut 57. Het restant is op 24 november gespeeld in het Abe Lenstra Stadion.',
+          round: 'Speelronde 12',
+          stadium: 'Rat Verlegh Stadion',
+          status: 'played',
+        },
+      ],
+    })
+    expect(read.kind === 'read' ? read.matches : []).toHaveLength(1)
+  })
+
+  it('takes the block under the Inhaalronde as the final score also when the match is played again from the start', () => {
+    const again = finished({ goals2: '{{goal|10}} [[Sarr]]', score: '1 – 3' })
+
+    expect(matchOf(page(stopped("(0 – 0)<br />Gestaakt 1'"), again), 'Speelronde 12')).toMatchObject({
+      goalsAgainst: 1,
+      goalsFor: 3,
+      note: 'Gestaakt in minuut 1. Het restant is op 24 november gespeeld in het Abe Lenstra Stadion.',
+    })
+    expect(
+      readLeagueResults(page(stopped("(0 – 0)<br />Gestaakt 1'", other), finished({ score: '4 – 1', ...other }))),
+    ).toMatchObject({ results: [{ homeClub: 'Ajax', homeGoals: 4, playedOn: '2026-11-24', round: 12 }], unread: [] })
+  })
+
+  it('does not know Gest. without a minute, and neither a minute without an apostrophe or brackets around the score', () => {
+    for (const score of ['Gest. (0 – 0)', 'Gest.', "Gest 57' (0 – 0)", '(0 – 0) Gest. 57']) {
+      expect(errorOf(page(stopped(score), finished()))).toContain('a score we do not know')
+    }
+  })
+
+  it('keeps Gestaakt without a minute as it was: a stopped match at a minute we do not know', () => {
+    expect(errorOf(page(stopped('Gestaakt (0 – 0)'), finished()))).toContain('a minute we do not know')
+  })
+
+  it.each([["Gest. 57' (0 – 0)"], ["(1 – 2)<br />Gestaakt 57'"]])(
+    'stays an error for sc Heerenveen without a block that finishes it, as %s',
+    (score) => {
+      expect(errorOf(`== Speelronde 12 ==\n${stopped(score)}\n`)).toContain('was stopped')
+      expect(errorOf(`== Speelronde 12 ==\n${stopped(score)}\n== Inhaalronde 13 ==\n${finished()}\n`)).toContain(
+        'was stopped',
+      )
+      expect(errorOf(page(stopped(score), finished({ score: "Gest. 60' (1 – 0)" })))).toContain('was stopped')
+      expect(errorOf(page(stopped(score), finished({ score: 'Uitgesteld' })))).toContain('no score we can use')
+      expect(errorOf(page(stopped(score), finished({ score: 'onbekend' })))).toContain('a score we do not know')
+    },
+  )
+
+  it.each([["Gest. 57' (0 – 0)"], ["(1 – 2)<br />Gestaakt 57'"]])(
+    'leaves a result of another club out of the results, and says so, without a usable block, as %s',
+    (score) => {
+      for (const text of [
+        `== Speelronde 12 ==\n${stopped(score, other)}\n`,
+        page(stopped(score, other), finished({ score: "(2 – 1)<br />Gestaakt 60'", ...other })),
+        page(stopped(score, other), finished({ score: 'Uitgesteld', ...other })),
+        page(stopped(score, other), finished({ score: 'onbekend', ...other })),
+      ]) {
+        const read = readLeagueResults(text)
+
+        expect(read.results).toEqual([])
+        expect(read.unread).toHaveLength(1)
+      }
+
+      // A block under another round finishes nothing, and counts for its own round.
+      const elsewhere = readLeagueResults(
+        `== Speelronde 12 ==\n${stopped(score, other)}\n== Inhaalronde 13 ==\n${finished(other)}\n`,
+      )
+
+      expect(elsewhere.unread).toHaveLength(1)
+      expect(elsewhere.results).toMatchObject([{ round: 13 }])
+    },
+  )
+
+  it('keeps the same result twice without a stopped score a fault', () => {
+    const twice = page(stopped('0 – 0', other), finished({ score: '0 – 0', ...other }))
+
+    expect(checkResults(readLeagueResults(twice).results)).toEqual([
+      'Ajax is at home against Feyenoord twice in the results',
+    ])
+    // `Gest.` with no minute is no stopped score, so the first block says nothing we know.
+    expect(
+      readLeagueResults(page(stopped('Gest. (0 – 0)', other), finished({ score: '0 – 0', ...other }))).unread,
+    ).toEqual(["Speelronde 12: Ajax - Feyenoord has a score we do not know: 'Gest. (0 – 0)'"])
+  })
+})
+
+describe('a date without a year', () => {
+  const league = (date: string) => box({ date, score: '1 – 0' })
+  const matchDate = (date: string, season?: string) => {
+    const read = readLeague(`== Speelronde 1 ==\n${league(date)}\n`, season)
+
+    return read.kind === 'read' ? read.matches[0]?.matchDate : read.message
+  }
+
+  it('gets the first year of the season from August to December and the second from January to July', () => {
+    expect(matchDate('1 augustus', '2010/11')).toBe('2010-08-01')
+    expect(matchDate('15 december', '2010/11')).toBe('2010-12-15')
+    expect(matchDate('1 januari', '2010/11')).toBe('2011-01-01')
+    expect(matchDate('31 juli', '2010/11')).toBe('2011-07-31')
+    expect(matchDate('29 februari', '2019/20')).toBe('2020-02-29')
+  })
+
+  it('keeps a date with a year as it is, whatever the season', () => {
+    expect(matchDate('14 november 2026', '2010/11')).toBe('2026-11-14')
+  })
+
+  it('is a date we do not know without a season, or with a day the month does not have', () => {
+    expect(matchDate('15 december')).toContain('a date we do not know')
+    expect(matchDate('31 november', '2010/11')).toContain('a date we do not know')
+    expect(matchDate('29 februari', '2018/19')).toContain('a date we do not know')
+    expect(matchDate('15 december', 'dit seizoen')).toContain('a date we do not know')
+  })
+
+  it('is not a date for a weekend or for two days', () => {
+    expect(matchDate('12-14 februari', '2010/11')).toContain('a date we do not know')
   })
 })
