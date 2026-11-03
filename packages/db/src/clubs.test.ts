@@ -4,8 +4,18 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { ClubFullName } from './clubs.ts'
 import type { TestDatabase } from './test-database.ts'
 
-import { clubSlug, createClubBook, normaliseClubName, repairClubs, reservedClubSlugs, withClubs } from './clubs.ts'
-import { clubNames, clubs, matches } from './schema.ts'
+import {
+  clubSlug,
+  createClubBook,
+  knownClubPages,
+  normaliseClubName,
+  repairClubPages,
+  repairClubs,
+  reservedClubSlugs,
+  unrememberedClubPages,
+  withClubs,
+} from './clubs.ts'
+import { clubNames, clubPages, clubs, matches } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 describe('normaliseClubName', () => {
@@ -62,6 +72,7 @@ describe('the book of clubs', () => {
 
   beforeEach(async () => {
     await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM club_pages')
     await database.pool.query('DELETE FROM club_names')
     await database.pool.query('DELETE FROM clubs')
   })
@@ -287,6 +298,7 @@ describe('the full names of clubs', () => {
 
   beforeEach(async () => {
     await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM club_pages')
     await database.pool.query('DELETE FROM club_names')
     await database.pool.query('DELETE FROM clubs')
   })
@@ -562,6 +574,286 @@ describe('the full names of clubs', () => {
           ],
         }),
       ).rejects.toThrow(/in the list of full names twice/u)
+    })
+  })
+})
+
+describe('the redirects of Wikipedia', () => {
+  let database: TestDatabase
+  let rounds = 0
+
+  beforeAll(async () => {
+    database = await createTestDatabase()
+  })
+
+  afterAll(async () => {
+    await database?.drop()
+  })
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM club_pages')
+    await database.pool.query('DELETE FROM club_names')
+    await database.pool.query('DELETE FROM clubs')
+  })
+
+  /** A club with its matches, one per entry of `seasons`, each in a round of its own. */
+  async function club(
+    name: string,
+    slug: string,
+    { page = null, seasons = [] }: { page?: null | string; seasons?: string[] } = {},
+  ) {
+    const [{ id }] = (await database.db.insert(clubs).values({ name, slug, wikipediaPage: page }).$returningId()) as [
+      { id: number },
+    ]
+
+    for (const [index, season] of seasons.entries()) {
+      await database.db.insert(matches).values({
+        clubId: id,
+        competition: 'Eredivisie',
+        dateText: 'x',
+        home: true,
+        matchDate: `${season.slice(0, 4)}-09-0${index + 1}`,
+        opponent: name,
+        round: `Speelronde ${(rounds += 1)}`,
+        season,
+        status: 'scheduled',
+      })
+    }
+
+    return id
+  }
+
+  const pagesOf = async () =>
+    (await database.db.select().from(clubPages).orderBy(clubPages.page)).map((row) => [row.page, row.clubId])
+
+  const repair = (redirects: Record<string, string>) => repairClubPages(database.db, new Map(Object.entries(redirects)))
+
+  /** Everything the repair may change, for a comparison. */
+  async function state() {
+    return {
+      clubs: await database.db.select().from(clubs).orderBy(clubs.slug),
+      matches: (await database.db.select().from(matches).orderBy(matches.id)).map((match) => [match.id, match.clubId]),
+      names: (await database.db.select().from(clubNames).orderBy(clubNames.name)).map((name) => [
+        name.clubId,
+        name.name,
+      ]),
+      pages: await pagesOf(),
+    }
+  }
+
+  describe('the book of clubs', () => {
+    it('takes a title that redirects to the article of a club as that club, and remembers both titles', async () => {
+      const az = await club('AZ', 'az', { page: 'AZ (voetbalclub)' })
+      const book = await createClubBook(database.db, {
+        redirects: new Map([['AZ Alkmaar', 'AZ (voetbalclub)']]),
+      })
+      const result = await book.resolve({ name: 'AZ', page: 'AZ Alkmaar', season: '2012/13' })
+
+      expect(result.id).toBe(az)
+      expect(result.events).toEqual([
+        "title 'AZ Alkmaar' is a redirect to 'AZ (voetbalclub)', the article of club 'AZ'",
+      ])
+      expect(await database.db.select({ slug: clubs.slug }).from(clubs)).toEqual([{ slug: 'az' }])
+      expect(await pagesOf()).toEqual([
+        ['AZ (voetbalclub)', az],
+        ['AZ Alkmaar', az],
+      ])
+    })
+
+    it('makes a club for the article a redirect ends in, and not for the redirect', async () => {
+      const book = await createClubBook(database.db, {
+        redirects: new Map([['AZ Alkmaar', 'AZ (voetbalclub)']]),
+      })
+      const result = await book.resolve({ name: 'AZ', page: 'AZ Alkmaar', season: '2012/13' })
+      const [made] = await database.db.select().from(clubs)
+
+      expect(result.events).toEqual([
+        "new club 'AZ' (article 'AZ (voetbalclub)')",
+        "title 'AZ Alkmaar' is a redirect to 'AZ (voetbalclub)', the article of club 'AZ'",
+      ])
+      expect(made).toMatchObject({ slug: 'az', wikipediaPage: 'AZ (voetbalclub)' })
+      expect(await pagesOf()).toEqual([
+        ['AZ (voetbalclub)', made!.id],
+        ['AZ Alkmaar', made!.id],
+      ])
+    })
+
+    it('finds the club of a title it remembered, without an answer from Wikipedia', async () => {
+      const az = await club('AZ', 'az', { page: 'AZ (voetbalclub)' })
+
+      await database.db.insert(clubPages).values([
+        { clubId: az, page: 'AZ (voetbalclub)' },
+        { clubId: az, page: 'AZ Alkmaar' },
+      ])
+
+      const result = await (await createClubBook(database.db)).resolve({ name: 'AZ', page: 'AZ Alkmaar' })
+
+      expect(result).toEqual({ events: [], id: az })
+      expect(await pagesOf()).toHaveLength(2)
+    })
+
+    it('remembers the title of an article that is no redirect, and finds Excelsior Rotterdam under SBV Excelsior', async () => {
+      const full = await club('Excelsior Rotterdam', 'excelsior-rotterdam', { page: 'Excelsior Rotterdam' })
+      const fullNames = [{ aliases: ['Excelsior', 'SBV Excelsior'], name: 'Excelsior Rotterdam' }]
+      const book = await createClubBook(database.db, {
+        fullNames,
+        redirects: new Map([
+          ['Excelsior Rotterdam', 'Excelsior Rotterdam'],
+          ['SBV Excelsior', 'Excelsior Rotterdam'],
+        ]),
+      })
+
+      expect((await book.resolve({ name: 'SBV Excelsior', page: 'SBV Excelsior', season: '2010/11' })).id).toBe(full)
+      expect(await database.db.select({ slug: clubs.slug }).from(clubs)).toEqual([{ slug: 'excelsior-rotterdam' }])
+      expect(await pagesOf()).toEqual([
+        ['Excelsior Rotterdam', full],
+        ['SBV Excelsior', full],
+      ])
+    })
+
+    it('takes a title nobody checked as its own article, and does not remember it', async () => {
+      const result = await (await createClubBook(database.db)).resolve({ name: 'FC Twente', page: 'FC Twente' })
+
+      expect(result.events).toEqual(["new club 'FC Twente' (article 'FC Twente')"])
+      expect(await pagesOf()).toEqual([])
+    })
+
+    it('keeps two clubs with an article each apart, whatever the redirects', async () => {
+      await club('Excelsior Rotterdam', 'excelsior-rotterdam', { page: 'Excelsior Rotterdam' })
+
+      const book = await createClubBook(database.db, {
+        redirects: new Map([['Excelsior Maassluis', 'Excelsior Maassluis']]),
+      })
+      const maassluis = await book.resolve({ name: 'Excelsior Maassluis', page: 'Excelsior Maassluis' })
+
+      expect(await database.db.select().from(clubs)).toHaveLength(2)
+      expect(maassluis.events).toEqual(["new club 'Excelsior Maassluis' (article 'Excelsior Maassluis')"])
+    })
+  })
+
+  describe('knownClubPages and unrememberedClubPages', () => {
+    it('knows the article of every club and the rows of club_pages, and lists the clubs nobody checked', async () => {
+      const az = await club('AZ', 'az', { page: 'AZ (voetbalclub)' })
+
+      await club('FC Twente', 'fc-twente', { page: 'FC Twente' })
+      await club('SV Proefdorp', 'sv-proefdorp')
+      await database.db.insert(clubPages).values({ clubId: az, page: 'AZ Alkmaar' })
+
+      expect([...(await knownClubPages(database.db))].sort()).toEqual(['AZ (voetbalclub)', 'AZ Alkmaar', 'FC Twente'])
+      expect(await unrememberedClubPages(database.db)).toEqual(['AZ (voetbalclub)', 'FC Twente'])
+    })
+  })
+
+  describe('repairClubPages', () => {
+    it('merges the club of a redirect into the club of its article, with the matches, the names and the slug of the one that stays', async () => {
+      const stays = await club('AZ', 'az', { page: 'AZ (voetbalclub)', seasons: ['2025/26', '2024/25'] })
+      const goes = await club('AZ Alkmaar', 'az-2', { page: 'AZ Alkmaar', seasons: ['2012/13'] })
+
+      await database.db.insert(clubNames).values({ clubId: goes, name: 'AZ 67' })
+
+      const events = await repair({ 'AZ (voetbalclub)': 'AZ (voetbalclub)', 'AZ Alkmaar': 'AZ (voetbalclub)' })
+
+      expect(events).toEqual([
+        "merged club 'AZ Alkmaar' into club 'AZ'",
+        "title 'AZ Alkmaar' is a redirect to 'AZ (voetbalclub)', the article of club 'AZ'",
+      ])
+      expect(await database.db.select().from(clubs)).toMatchObject([
+        { id: stays, name: 'AZ', slug: 'az', wikipediaPage: 'AZ (voetbalclub)' },
+      ])
+      expect(await database.db.select().from(matches).where(eq(matches.clubId, stays))).toHaveLength(3)
+      expect((await database.db.select().from(clubNames)).map((name) => [name.clubId, name.name]).sort()).toEqual([
+        [stays, 'AZ 67'],
+        [stays, 'AZ Alkmaar'],
+      ])
+      expect(await pagesOf()).toEqual([
+        ['AZ (voetbalclub)', stays],
+        ['AZ Alkmaar', stays],
+      ])
+    })
+
+    it('merges Excelsior Maassluis never, and SBV Excelsior into Excelsior Rotterdam', async () => {
+      const full = await club('Excelsior Rotterdam', 'excelsior-rotterdam', {
+        page: 'Excelsior Rotterdam',
+        seasons: ['2025/26'],
+      })
+
+      await club('SBV Excelsior', 'excelsior-rotterdam-2', { page: 'SBV Excelsior', seasons: ['2010/11', '2011/12'] })
+      await club('Excelsior Maassluis', 'excelsior-maassluis', { page: 'Excelsior Maassluis' })
+
+      const events = await repair({
+        'Excelsior Maassluis': 'Excelsior Maassluis',
+        'Excelsior Rotterdam': 'Excelsior Rotterdam',
+        'SBV Excelsior': 'Excelsior Rotterdam',
+      })
+
+      expect(events).toContain("merged club 'SBV Excelsior' into club 'Excelsior Rotterdam'")
+      expect((await database.db.select().from(clubs).orderBy(clubs.slug)).map((one) => one.slug)).toEqual([
+        'excelsior-maassluis',
+        'excelsior-rotterdam',
+      ])
+      expect(await database.db.select().from(matches).where(eq(matches.clubId, full))).toHaveLength(3)
+    })
+
+    it('gives a club the article its redirect ends in when no club has it, and makes no second club', async () => {
+      const graafschap = await club('BV De Graafschap', 'de-graafschap', {
+        page: 'BV De Graafschap',
+        seasons: ['2012/13'],
+      })
+      const events = await repair({
+        'BV De Graafschap': 'De Graafschap (voetbalclub)',
+        'De Graafschap (voetbalclub)': 'De Graafschap (voetbalclub)',
+      })
+
+      expect(events).toEqual([
+        "article 'De Graafschap (voetbalclub)' for club 'BV De Graafschap'",
+        "title 'BV De Graafschap' is a redirect to 'De Graafschap (voetbalclub)', the article of club 'BV De Graafschap'",
+      ])
+      expect(await database.db.select().from(clubs)).toMatchObject([
+        { id: graafschap, slug: 'de-graafschap', wikipediaPage: 'De Graafschap (voetbalclub)' },
+      ])
+      expect(await pagesOf()).toEqual([
+        ['BV De Graafschap', graafschap],
+        ['De Graafschap (voetbalclub)', graafschap],
+      ])
+    })
+
+    it('keeps the club with the most matches, then the oldest, of two redirects to a new article', async () => {
+      const few = await club('Club A', 'club-a', { page: 'Club A (oud)', seasons: ['2010/11'] })
+      const many = await club('Club B', 'club-b', { page: 'Club B (oud)', seasons: ['2011/12', '2012/13'] })
+      const events = await repair({ 'Club A (oud)': 'Club (nieuw)', 'Club B (oud)': 'Club (nieuw)' })
+
+      expect(events).toContain("merged club 'Club A' into club 'Club B'")
+      expect(await database.db.select().from(clubs)).toMatchObject([
+        { id: many, slug: 'club-b', wikipediaPage: 'Club (nieuw)' },
+      ])
+      expect(await pagesOf()).toEqual([
+        ['Club (nieuw)', many],
+        ['Club A (oud)', many],
+        ['Club B (oud)', many],
+      ])
+      expect(few).not.toBe(many)
+    })
+
+    it('remembers the article of a club that is no redirect, and merges nothing', async () => {
+      const twente = await club('FC Twente', 'fc-twente', { page: 'FC Twente' })
+      const events = await repair({ 'FC Twente': 'FC Twente' })
+
+      expect(events).toEqual([])
+      expect(await pagesOf()).toEqual([['FC Twente', twente]])
+    })
+
+    it('writes nothing the second time, and leaves a title with no answer alone', async () => {
+      await club('AZ', 'az', { page: 'AZ (voetbalclub)', seasons: ['2025/26'] })
+      await club('AZ Alkmaar', 'az-2', { page: 'AZ Alkmaar', seasons: ['2012/13'] })
+      await club('FC Twente', 'fc-twente', { page: 'FC Twente' })
+      await repair({ 'AZ (voetbalclub)': 'AZ (voetbalclub)', 'AZ Alkmaar': 'AZ (voetbalclub)' })
+
+      const before = await state()
+
+      expect(await unrememberedClubPages(database.db)).toEqual(['FC Twente'])
+      expect(await repair({ 'AZ (voetbalclub)': 'AZ (voetbalclub)', 'AZ Alkmaar': 'AZ (voetbalclub)' })).toEqual([])
+      expect(await state()).toEqual(before)
     })
   })
 })

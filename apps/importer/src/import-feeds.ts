@@ -343,8 +343,8 @@ export async function runImport(
 
       // Before any season is read: the clubs are right whether or not a season can be read. A
       // failure is a warning and no reason to stop.
-      const clubLines = await repairKnownClubs(db, clock)
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
+      const clubLines = await repairKnownClubs(db, fetcher, origin, clock)
       const [reports, wikipedia] = await Promise.allSettled([
         importFeeds(db, fetcher, { alerts, clock, runId, write }),
         origin === null ? [] : importWikipedia(db, fetcher, clock, origin, { ...alerts, clock, write }),

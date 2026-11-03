@@ -24,6 +24,7 @@ import { formatSquadReport, importSquad } from './import-squad.ts'
 import { squadPageTitle } from './read-squad.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
+import { articleRoutes } from './test-articles.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
@@ -105,7 +106,14 @@ async function serve(squad: null | string = original, { matchPages = false, robo
     routes[pageUrl('', pages.standings)] = reply(200, fixture('wikipedia-standings.wiki'), wiki)
   }
 
-  const server = await startServer(routes)
+  const server = await startServer({
+    ...articleRoutes(
+      matchPages
+        ? [fixture('wikipedia-cup.wiki'), fixture('wikipedia-programme.wiki'), fixture('wikipedia-standings.wiki')]
+        : [],
+    ),
+    ...routes,
+  })
 
   servers.push(server)
 

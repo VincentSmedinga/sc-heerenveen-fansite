@@ -30,6 +30,7 @@ import { formatMatchReport, importMatches, repairKnownClubs, unlinkedWarning } f
 import { acceptChanges, rejectChanges } from './match-changes.ts'
 import { pageCandidates, pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
+import { articleRoutes } from './test-articles.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
@@ -95,9 +96,16 @@ function importAt(server: TestServer, at: Date) {
   return importMatches(database.db, fetcherFor([server]), { clock: () => at, origin: server.origin })
 }
 
-/** The requests for the three pages so far; the robots.txt is not counted. */
+/**
+ * The requests for the pages of the season so far; the robots.txt and the articles of the clubs
+ * are not counted.
+ */
 function pageRequests(server: TestServer) {
-  return server.paths().filter((path) => path !== '/robots.txt')
+  const seasonPages = new Set(
+    ['2026/27', '2027/28'].flatMap((season) => Object.values(pageTitles(season)).map((title) => pageUrl('', title))),
+  )
+
+  return server.paths().filter((path) => path !== undefined && seasonPages.has(path))
 }
 
 /** A page of the season, served the way Wikipedia serves the raw text. */
@@ -130,7 +138,10 @@ async function serve(pages: { [Kind in keyof ServedPages]?: null | ServedPages[K
     }
   }
 
-  const server = await startServer(routes)
+  const texts = [current.cup, current.programme, current.standings, current.playoffs].filter(
+    (text): text is string => typeof text === 'string',
+  )
+  const server = await startServer({ ...articleRoutes(texts), ...routes })
 
   servers.push(server)
 
@@ -1358,7 +1369,7 @@ describe('the clubs of the opponents', () => {
         { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
       ])
 
-      const lines = await repairKnownClubs(database.db)
+      const lines = await repairKnownClubs(database.db, fetcherFor([]), null)
       const found = await excelsior()
 
       expect(lines).toEqual(mergeLines)
@@ -1411,7 +1422,7 @@ describe('the clubs of the opponents', () => {
       }) as typeof database.db
       const warning = 'clubs not repaired: Deadlock found when trying to get lock'
 
-      expect(await repairKnownClubs(failing, () => first)).toEqual([`Clubs: warning, ${warning}`])
+      expect(await repairKnownClubs(failing, fetcherFor([]), null, () => first)).toEqual([`Clubs: warning, ${warning}`])
       expect(await database.db.select().from(matchImports)).toEqual([
         expect.objectContaining({ lastWarning: warning, lastWarningAt: first, season: '2026/27' }),
       ])
@@ -1425,7 +1436,7 @@ describe('the clubs of the opponents', () => {
 
       const later = new Date(first.getTime() + hours(2))
 
-      expect(await repairKnownClubs(failing, () => later)).toEqual([`Clubs: warning, ${warning}`])
+      expect(await repairKnownClubs(failing, fetcherFor([]), null, () => later)).toEqual([`Clubs: warning, ${warning}`])
 
       const [health] = await database.db.select().from(matchImports)
 
@@ -2138,6 +2149,7 @@ describe('a read that fails a check or a page that has changed', () => {
     const [, programmeTitle = ''] = pageCandidates('2026/27').programme
     const [, standingsTitle = ''] = pageCandidates('2026/27').standings
     const server = await startServer({
+      ...articleRoutes([original.cup, original.programme, original.standings]),
       '/robots.txt': reply(200, ''),
       ...route('2026/27', 'cup', reply(200, original.cup, wiki)),
       [pageUrl('', programmeTitle)]: reply(200, original.programme, wiki),

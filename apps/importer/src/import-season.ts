@@ -140,13 +140,15 @@ export async function runSeasonImport(
 
   try {
     const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
+      const fetcher = makeFetcher(robotsStoreFor(db, clock))
+
       // As in the hourly import: the clubs are right before the season is read.
-      for (const line of await repairKnownClubs(db, clock)) {
+      for (const line of await repairKnownClubs(db, fetcher, origin, clock)) {
         write(line)
       }
 
       try {
-        return await importPastSeason(db, makeFetcher(robotsStoreFor(db, clock)), parsed.season, {
+        return await importPastSeason(db, fetcher, parsed.season, {
           clock,
           englishOrigin,
           origin,
@@ -213,7 +215,7 @@ export async function runSeasonsImport(
 
     for (const season of parsed.seasons) {
       const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
-        const lines = await repairKnownClubs(db, clock)
+        const lines = await repairKnownClubs(db, fetcher, origin, clock)
 
         try {
           return { lines, report: await importPastSeason(db, fetcher, season, { clock, englishOrigin, origin }) }

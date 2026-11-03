@@ -253,6 +253,13 @@
       "when": 1793739715026,
       "tag": "0035_add_europa_league_playoffs",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1793742805059,
+      "tag": "0036_add_club_pages",
+      "breakpoints": true
     }
   ]
 }
