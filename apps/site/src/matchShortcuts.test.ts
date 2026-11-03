@@ -102,6 +102,10 @@ describe('resultsCardOf', () => {
       name: 'Play-offs Conference League',
     })
   })
+
+  it('names the Europa League, with an anchor of its own', () => {
+    expect(resultsCardOf('Europa League')).toEqual({ id: 'uitslagen-europa-league', name: 'Europa League' })
+  })
 })
 
 describe('resultsCardsOf', () => {

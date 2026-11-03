@@ -30,7 +30,11 @@ export const mostStoppageMinutes = 30
 const mostGoals = 99
 
 /** The competitions in which a match can go to extra time. */
-const knockoutCompetitions: readonly Match['competition'][] = ['KNVB Beker', 'Play-offs Conference League']
+const knockoutCompetitions: readonly Match['competition'][] = [
+  'KNVB Beker',
+  'Play-offs Conference League',
+  'Europa League',
+]
 
 /** A goal as entered: a row of `match_goals` without its numbers. */
 export type EntryGoal = Omit<MatchGoal, 'id' | 'matchId'>

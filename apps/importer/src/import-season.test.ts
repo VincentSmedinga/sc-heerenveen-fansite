@@ -24,7 +24,7 @@ import {
   runSeasonsImport,
   seasonUsage,
 } from './import-season.ts'
-import { pageTitles, pageUrl, readStandings } from './read-wikipedia.ts'
+import { europaLeaguePage, pageTitles, pageUrl, readStandings } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
@@ -524,6 +524,114 @@ describe('the command', () => {
     expect(held.ran && held.result.code).toBe(1)
     expect(held.ran && held.result.lines.join('\n')).toContain('An import is still running')
     expect(server.paths()).toEqual([])
+    expect(await database.db.select().from(matches)).toEqual([])
+  })
+})
+
+describe('the Europa League matches of 2012/13', () => {
+  const europa = '2012/13'
+  const englishPage = fixture('wikipedia-europa-league-2012.wiki')
+
+  /**
+   * Serves the pages of the season 2012/13 (the ones of the made-up season, as the checks only
+   * need their shape) on the Dutch Wikipedia, and the page of the Europa League on the English
+   * one, which is the same server here.
+   */
+  async function serveEurope(english = englishPage) {
+    const routes: Record<string, Handler> = { '/robots.txt': reply(200, '', { 'Content-Type': 'text/plain' }) }
+
+    for (const kind of ['cup', 'programme', 'standings'] as const) {
+      routes[pageUrl('', pageTitles(europa)[kind])] = reply(200, lastSeason[kind], wiki)
+    }
+    routes[pageUrl('', europaLeaguePage(europa) ?? '')] = reply(200, english, wiki)
+
+    const server = await startServer(routes)
+
+    servers.push(server)
+
+    return server
+  }
+
+  async function runEurope(server: TestServer) {
+    const lines: string[] = []
+    const code = await runSeasonImport(database.url, europa, {
+      clock: () => now,
+      englishOrigin: server.origin,
+      makeFetcher: (robots) => fetcherFor([server], { robots }),
+      wikipediaOrigin: server.origin,
+      write: (line) => lines.push(line),
+    })
+
+    return {
+      code,
+      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line)),
+    }
+  }
+
+  it('reads the four matches next to the league and the cup, from the English page', async () => {
+    const server = await serveEurope()
+
+    const { code, lines } = await runEurope(server)
+
+    expect(code).toBe(0)
+    expect(lines[0]).toBe(
+      'Matches 2012/13: 42 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
+    )
+    expect(pageRequests(server)).toContain(
+      '/wiki/2012%E2%80%9313_UEFA_Europa_League_qualifying_(third_and_play-off_round_matches)?action=raw',
+    )
+    expect(
+      (
+        await database.db
+          .select()
+          .from(matches)
+          .where(eq(matches.competition, 'Europa League'))
+          .orderBy(asc(matches.matchDate))
+      ).map((match) => [match.round, match.opponent, match.home, match.goalsFor, match.goalsAgainst, match.matchDate]),
+    ).toEqual([
+      ['Derde voorronde, wedstrijd 1/2', 'Rapid Boekarest', true, 4, 0, '2012-08-02'],
+      ['Derde voorronde, wedstrijd 2/2', 'Rapid Boekarest', false, 0, 1, '2012-08-09'],
+      ['Play-offronde, wedstrijd 1/2', 'Molde FK', false, 0, 2, '2012-08-23'],
+      ['Play-offronde, wedstrijd 2/2', 'Molde FK', true, 1, 2, '2012-08-30'],
+    ])
+    expect(
+      await database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'europa-league')),
+    ).toMatchObject([
+      { season: europa, title: '2012–13 UEFA Europa League qualifying (third and play-off round matches)' },
+    ])
+  })
+
+  it('changes nothing the second time', async () => {
+    const server = await serveEurope()
+
+    await runEurope(server)
+
+    const before = await rowsOf(europa)
+    const second = await runEurope(server)
+
+    expect(second.lines[0]).toBe(
+      'Matches 2012/13: 0 new, 0 updated, 42 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
+    )
+    expect((await rowsOf(europa)).matches).toEqual(before.matches)
+  })
+
+  it('asks the English Wikipedia for no other season', async () => {
+    const server = await serve()
+
+    await runCommand(server, past)
+
+    expect(pageRequests(server).every((path) => !path?.includes('Europa_League'))).toBe(true)
+  })
+
+  it('writes nothing when the scores do not add up to the aggregate of the page', async () => {
+    const server = await serveEurope(englishPage.replace('|score      = 4–0', '|score      = 3–0'))
+
+    const { code, lines } = await runEurope(server)
+
+    expect(code).toBe(1)
+    expect(lines.join('\n')).toContain(
+      'the Europa League page of 2012/13: Rapid Boekarest: the matches add up to 3-1, the summary says 4-1',
+    )
     expect(await database.db.select().from(matches)).toEqual([])
   })
 })

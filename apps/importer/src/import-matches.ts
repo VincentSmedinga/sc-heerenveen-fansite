@@ -43,9 +43,11 @@ import {
   updateMatch,
 } from './match-changes.ts'
 import {
+  europaLeaguePage,
   pageCandidates,
   pageUrl,
   readCup,
+  readEuropaLeague,
   readLeague,
   readLeagueResults,
   readPlayoffs,
@@ -67,6 +69,11 @@ export type HealthReport =
 
 export type MatchImportOptions = {
   clock?: () => Date
+  /**
+   * The address of the English Wikipedia, which has the Europa League matches of 2012/13. A
+   * test gives the address of its own web server.
+   */
+  englishOrigin?: string
   /** The address of Wikipedia. A test gives the address of its own web server. */
   origin?: string
 }
@@ -121,12 +128,18 @@ export type MatchReport =
       url: string
     }
 
+/** The addresses of the two Wikipedias the import reads. */
+type Origins = { english: string; nl: string }
+
 type PageRead = { kind: WikipediaPageKind; text: string; title: string; version: null | string }
 
 type Problem = Exclude<MatchReport, { kind: 'imported' | 'postponed' }>
 
 /** The address of the Dutch Wikipedia. */
 export const wikipediaOrigin = 'https://nl.wikipedia.org'
+
+/** The address of the English Wikipedia: the Europa League matches come from there. */
+export const englishWikipediaOrigin = 'https://en.wikipedia.org'
 
 export type { LinkedGoal } from './match-changes.ts'
 
@@ -225,7 +238,11 @@ export function healthAfter(
 export async function importMatches(
   db: Database,
   fetcher: Fetcher,
-  { clock = () => new Date(), origin = wikipediaOrigin }: MatchImportOptions = {},
+  {
+    clock = () => new Date(),
+    englishOrigin = englishWikipediaOrigin,
+    origin = wikipediaOrigin,
+  }: MatchImportOptions = {},
 ): Promise<MatchReport> {
   const season = seasonOf(clock())
   const [before] = await db.select().from(matchImports).where(eq(matchImports.season, season))
@@ -234,7 +251,7 @@ export async function importMatches(
     return { kind: 'postponed', retryAt: before.retryAt, season }
   }
 
-  return readSeason(db, fetcher, season, before, origin, clock)
+  return readSeason(db, fetcher, season, before, { english: englishOrigin, nl: origin }, clock)
 }
 
 /**
@@ -250,7 +267,11 @@ export async function importPastSeason(
   db: Database,
   fetcher: Fetcher,
   season: string,
-  { clock = () => new Date(), origin = wikipediaOrigin }: MatchImportOptions = {},
+  {
+    clock = () => new Date(),
+    englishOrigin = englishWikipediaOrigin,
+    origin = wikipediaOrigin,
+  }: MatchImportOptions = {},
 ): Promise<MatchReport> {
   if (!isPastSeason(season, clock())) {
     return {
@@ -262,7 +283,7 @@ export async function importPastSeason(
 
   const [before] = await db.select().from(matchImports).where(eq(matchImports.season, season))
 
-  return readSeason(db, fetcher, season, before, origin, clock)
+  return readSeason(db, fetcher, season, before, { english: englishOrigin, nl: origin }, clock)
 }
 
 /** Whether a season, such as `2025/26`, ended before the moment. */
@@ -365,19 +386,29 @@ function describeResult(
 }
 
 /**
- * Fetches the pages one after the other, or says why one could not be read. A page may have
- * more than one title (see `pageCandidates`): the first that exists is the page, and a 404 on
- * every title is a fault that names them all. The page of the play-offs may not be there: it
- * comes in May, and a season that is going has none. Wikipedia answering 404 for it is no
- * fault, and the pages are then the other three. Any other answer is a fault, as for the other
- * pages.
+ * Fetches the pages one after the other, or says why one could not be read. The pages are on
+ * the Dutch Wikipedia, except the page of the Europa League matches of 2012/13, which is on the
+ * English one (`europaLeaguePage`) and is asked for only for a season that has one. A page
+ * may have more than one title (see `pageCandidates`): the first that exists is the page, and
+ * a 404 on every title is a fault that names them all. The page of the play-offs may not be
+ * there: it comes in May, and a season that is going has none. Wikipedia answering 404 for it
+ * is no fault, and the pages are then the other three. Any other answer is a fault, as for the
+ * other pages.
  */
-async function fetchPages(fetcher: Fetcher, season: string, origin: string): Promise<PageRead[] | Problem> {
+async function fetchPages(fetcher: Fetcher, season: string, origins: Origins): Promise<PageRead[] | Problem> {
   const candidates = pageCandidates(season)
+  const europaLeague = europaLeaguePage(season)
   const pages: PageRead[] = []
+  const wanted = [
+    { kind: 'programme', origin: origins.nl, titles: candidates.programme },
+    { kind: 'standings', origin: origins.nl, titles: candidates.standings },
+    { kind: 'cup', origin: origins.nl, titles: candidates.cup },
+    { kind: 'playoffs', origin: origins.nl, titles: candidates.playoffs },
+    // The only page of the English Wikipedia: a season either has it or is not asked for it.
+    { kind: 'europa-league', origin: origins.english, titles: europaLeague === undefined ? [] : [europaLeague] },
+  ] as const
 
-  for (const kind of ['programme', 'standings', 'cup', 'playoffs'] as const) {
-    const titles = candidates[kind]
+  for (const { kind, origin, titles } of wanted) {
     let missing = ''
 
     for (const title of titles) {
@@ -561,11 +592,11 @@ async function readAndStore(
   db: Database,
   fetcher: Fetcher,
   season: string,
-  origin: string,
+  origins: Origins,
   clock: () => Date,
   previousReadAt: Date | null,
 ): Promise<MatchReport> {
-  const pages = await fetchPages(fetcher, season, origin)
+  const pages = await fetchPages(fetcher, season, origins)
 
   if (!Array.isArray(pages)) {
     return pages
@@ -576,18 +607,27 @@ async function readAndStore(
   const cup = readCup(textOf('cup'))
   const table = readStandings(textOf('standings'))
   const playoffs = pages.some((page) => page.kind === 'playoffs') ? readPlayoffs(textOf('playoffs')) : undefined
+  const europaLeague = pages.some((page) => page.kind === 'europa-league')
+    ? readEuropaLeague(textOf('europa-league'), season)
+    : undefined
   const problems: string[] = []
 
-  for (const read of [league, cup, table, playoffs]) {
+  for (const read of [league, cup, table, playoffs, europaLeague]) {
     if (read?.kind === 'error') {
       problems.push(read.message)
     }
   }
-  if (league.kind === 'error' || cup.kind === 'error' || table.kind === 'error' || playoffs?.kind === 'error') {
+  if (
+    league.kind === 'error' ||
+    cup.kind === 'error' ||
+    table.kind === 'error' ||
+    playoffs?.kind === 'error' ||
+    europaLeague?.kind === 'error'
+  ) {
     return { kind: 'error', message: problems.join('; '), season }
   }
 
-  const found = [...league.matches, ...cup.matches, ...(playoffs?.matches ?? [])]
+  const found = [...league.matches, ...cup.matches, ...(playoffs?.matches ?? []), ...(europaLeague?.matches ?? [])]
 
   if (!cup.hasTemplates) {
     const problem = await checkEmptyCupPage(db, season, pages.find((page) => page.kind === 'cup')?.title ?? '')
@@ -614,11 +654,18 @@ async function readAndStore(
       .from(wikipediaPages)
       .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
       .limit(1)
-    const result = await storeMatches(transaction, season, found, now, playoffs !== undefined, {
-      firstRead: read === undefined,
-      pastSeason: isPastSeason(season, now),
-      previousReadAt,
-    })
+    const result = await storeMatches(
+      transaction,
+      season,
+      found,
+      now,
+      { europaLeague: europaLeague !== undefined, playoffs: playoffs !== undefined },
+      {
+        firstRead: read === undefined,
+        pastSeason: isPastSeason(season, now),
+        previousReadAt,
+      },
+    )
 
     // A page that changes too much at once is held whole, like a page that fails a check.
     if (result.heldAll) {
@@ -686,13 +733,13 @@ async function readSeason(
   fetcher: Fetcher,
   season: string,
   before: MatchImport | undefined,
-  origin: string,
+  origins: Origins,
   clock: () => Date,
 ): Promise<MatchReport> {
   let report: MatchReport
 
   try {
-    report = await readAndStore(db, fetcher, season, origin, clock, before?.lastSuccessAt ?? null)
+    report = await readAndStore(db, fetcher, season, origins, clock, before?.lastSuccessAt ?? null)
   } catch (error) {
     report = { kind: 'error', message: describeError(error), season }
   }
@@ -742,19 +789,21 @@ function standingsRow(season: string, row: ReadStandingsRow, validOn: string) {
  * gets its player as soon as the squad has him, and a goal that is linked keeps its link until
  * the table says otherwise. A goal of ours that has no player is a warning too (once the squad
  * has been read), and no reason to keep the match out. The play-offs have a page that may be
- * missing (`fetchPages`), and then `playoffsRead` is false: the play-off matches we have stay,
- * since a page that is not there tells us nothing about them. Every match gets its club
- * (`clubs.ts` in the database package): the club with the article the match links, or else with
- * the name, or a new one, by the full names and spellings of `club-names.ts`. A club of that
- * list that is in the database twice is merged before the import reads a season
- * (`repairKnownClubs`). What the import made or changed comes back as lines for the log.
+ * missing (`fetchPages`), and then `read.playoffs` is false: the play-off matches we have stay,
+ * since a page that is not there tells us nothing about them. The same goes for the Europa
+ * League matches, which only some seasons have a page for (`read.europaLeague`). Every match
+ * gets its club (`clubs.ts` in the database package): the club with the article the match
+ * links, or else with the name, or a new one, by the full names and spellings of
+ * `club-names.ts`. A club of that list that is in the database twice is merged before the
+ * import reads a season (`repairKnownClubs`). What the import made or changed comes back as
+ * lines for the log.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   season: string,
   found: ReadMatch[],
   now: Date,
-  playoffsRead: boolean,
+  read: { europaLeague: boolean; playoffs: boolean },
   { firstRead, pastSeason, previousReadAt }: StoreContext,
 ) {
   const clubLines: string[] = []
@@ -894,7 +943,10 @@ async function storeMatches(
   }
 
   for (const row of known.values()) {
-    if (!playoffsRead && row.competition === 'Play-offs Conference League') {
+    if (
+      (!read.playoffs && row.competition === 'Play-offs Conference League') ||
+      (!read.europaLeague && row.competition === 'Europa League')
+    ) {
       continue
     }
 

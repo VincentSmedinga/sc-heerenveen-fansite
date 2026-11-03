@@ -218,6 +218,16 @@ export function clubName(value: string): string {
 }
 
 /**
+ * The page of the English Wikipedia with the Europa League matches of a season, or undefined
+ * when the season has none. The seasons are listed by hand: the Dutch Wikipedia has the scores
+ * of these matches only, without a date or a stadium, and the English page is the one place
+ * that has them, so a season is added here after someone has read its page.
+ */
+export function europaLeaguePage(season: string): string | undefined {
+  return Object.hasOwn(europaLeaguePages, season) ? europaLeaguePages[season] : undefined
+}
+
+/**
  * The page the first link in a wikitext value points to, written the way Wikipedia names a
  * page: `Luca Oyen` for `[[Luca Oyen|Oyen]]` and `Pim Verbeek (voetballer)` for `[[pim_Verbeek
  * (voetballer)]]`, with spaces for underscores and a capital first letter, and without a
@@ -241,7 +251,7 @@ export function linkedPage(value: string): null | string {
  * addition the other seasons have. That title comes second: for several seasons it is a page
  * that lists the competitions of that name, not a season. Before 2020/21 the play-offs have no
  * title: their page then holds no play-offs for the Conference League, which began that year,
- * and the ones for the Europa League are a competition the site does not keep.
+ * and the ones for the Europa League are not read yet.
  */
 export function pageCandidates(season: string): SeasonPageCandidates {
   const titles = pageTitles(season)
@@ -316,6 +326,88 @@ export function readCup(text: string): ReadProgramme {
     } else {
       matches.push(match)
     }
+  }
+
+  return problems.length > 0
+    ? { kind: 'error', message: problems.join('; ') }
+    : { hasTemplates: true, kind: 'read', lastPlayedOn: null, matches }
+}
+
+/**
+ * Reads the page of the English Wikipedia with the matches of the third qualifying round and
+ * the play-off round of the Europa League, for the matches of sc Heerenveen: two ties of two
+ * matches each. The page is read into the shape of the Dutch pages and goes through `readMatch`
+ * like them, so a match is checked the same way. Only what the Dutch pages give is kept: the
+ * scorers are left out, because the English links to players are no articles we know. The
+ * opponent gets the name and the article of the Dutch Wikipedia (`europaLeagueClubs`). The
+ * times are those of the page's own time zone; when the page does not name Central European
+ * Summer Time, the matches get a day and no time. Anything that does not fit is an error, with
+ * the season in it: the number of matches, and the sum of the scores against the aggregate of
+ * the summary above them.
+ */
+export function readEuropaLeague(text: string, season: string): ReadProgramme {
+  const cleaned = withoutRefn(clean(text))
+  const name = `the Europa League page of ${season}`
+  const headings = [...cleaned.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
+  const timesKnown = /Times are \[\[Central European Summer Time/iu.test(cleaned.slice(0, headings[0]?.index))
+  const matches: ReadMatch[] = []
+  const problems: string[] = []
+
+  for (const [index, heading] of headings.entries()) {
+    const title = plain(heading[1] ?? '')
+
+    if (!Object.hasOwn(europaLeagueRounds, title)) {
+      continue
+    }
+
+    const round = europaLeagueRounds[title]
+
+    const section = cleaned.slice(heading.index, headings[index + 1]?.index)
+    const boxes = findTemplates(section, /\{\{\s*#invoke:\s*Football box\s*\|\s*main\s*(?=\||\n)/giu).filter(isOurs)
+    const tie: ReadMatch[] = []
+
+    if (boxes.length !== 2) {
+      problems.push(`${name} has ${boxes.length} matches of ${ourClub} under '${title}', not 2`)
+      continue
+    }
+
+    for (const [leg, box] of boxes.entries()) {
+      const stranger = [box.params.get('team1'), box.params.get('team2')]
+        .map((team) => linkTarget(team ?? ''))
+        .find((target) => target.toLowerCase() !== ourClub.toLowerCase() && !Object.hasOwn(europaLeagueClubs, target))
+
+      if (stranger !== undefined) {
+        problems.push(
+          `${name}: '${stranger.slice(0, 60)}' has no name on the Dutch Wikipedia in the list of the importer`,
+        )
+        continue
+      }
+
+      const read = readMatch(
+        { ...box, heading: null, params: dutchBox(box, timesKnown) },
+        'Europa League',
+        `${round}, wedstrijd ${leg + 1}/2`,
+      )
+
+      if (typeof read === 'string') {
+        problems.push(`${name}: ${read}`)
+      } else if (read.status !== 'played') {
+        problems.push(`${name}: ${read.round} has no result`)
+      } else {
+        tie.push(read)
+      }
+    }
+
+    const problem = tie.length === 2 ? aggregateProblem(section, tie) : undefined
+
+    if (problem !== undefined) {
+      problems.push(`${name}: ${problem}`)
+    }
+    matches.push(...tie)
+  }
+
+  if (problems.length === 0 && matches.length !== 4) {
+    problems.push(`${name} has ${matches.length} matches of ${ourClub}, not 4`)
   }
 
   return problems.length > 0
@@ -546,6 +638,37 @@ const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?[ \t]*=
 /** The first season with play-offs for the Conference League, which that page holds. */
 const firstPlayoffsSeason = 2020
 
+/** The start of a footnote that is a template of its own. */
+const refn = /\{\{\s*refn\s*\|/iu
+
+/** The pages of the English Wikipedia with Europa League matches, per season. */
+const europaLeaguePages: Readonly<Record<string, string>> = {
+  '2012/13': '2012–13 UEFA Europa League qualifying (third and play-off round matches)',
+}
+
+/** The sections of that page we read, and what the round is called in Dutch. */
+const europaLeagueRounds: Readonly<Record<string, string>> = {
+  'Play-off round': 'Play-offronde',
+  'Third qualifying round': 'Derde voorronde',
+}
+
+/**
+ * The opponents on the English pages, by the title of their English article, with the name and
+ * the article of the Dutch Wikipedia. An English title is no key of a club, so an opponent not
+ * listed here is an error until someone adds it.
+ */
+const europaLeagueClubs: Readonly<Record<string, string>> = {
+  'FC Rapid București': 'Rapid Boekarest',
+  'Molde FK': 'Molde FK',
+}
+
+/**
+ * The first line of the summary that has sc Heerenveen: the two clubs, each followed by its
+ * country, with the aggregate between them (`4–1`, or `1–1 (a)`), as the summary writes it.
+ */
+const summaryRow =
+  /^\|(\[\[[^\]]*\]\]|[^|\n]*)\|[A-Z]{3}\|(\d{1,2})[–-](\d{1,2})[^|\n]*\|(\[\[[^\]]*\]\]|[^|\n]*)\|[A-Z]{3}\|/gmu
+
 /** The attributes a cell may start with: `align=left|` or `style="width: 10px;" |`. */
 const cellAttributes = /^\s*(?:[a-z-]+\s*=\s*(?:"[^"]*"|[^\s|"]+)\s*)+\|(?!\|)/iu
 
@@ -560,6 +683,31 @@ const standingsColumns = {
   points: 'pnt',
   won: 'w',
 } as const
+
+/**
+ * What is wrong with the two matches of a tie against the aggregate that the summary of the
+ * section gives, or undefined: the goals of both legs added up must be that aggregate.
+ */
+function aggregateProblem(section: string, tie: ReadMatch[]): string | undefined {
+  const row = [...section.matchAll(summaryRow)].find((found) =>
+    [found[1], found[4]].some((team) => linkTarget(team ?? '').toLowerCase() === ourClub.toLowerCase()),
+  )
+
+  if (row === undefined) {
+    return `the summary has no row for ${ourClub}`
+  }
+
+  const first = linkTarget(row[1] ?? '').toLowerCase() === ourClub.toLowerCase()
+  const [ours, theirs] = first ? [Number(row[2]), Number(row[3])] : [Number(row[3]), Number(row[2])]
+  const [goalsFor, goalsAgainst] = [
+    tie.reduce((total, match) => total + (match.goalsFor ?? 0), 0),
+    tie.reduce((total, match) => total + (match.goalsAgainst ?? 0), 0),
+  ]
+
+  return ours === goalsFor && theirs === goalsAgainst
+    ? undefined
+    : `${tie[0]?.opponent}: the matches add up to ${goalsFor}-${goalsAgainst}, the summary says ${ours}-${theirs}`
+}
 
 /** How far the clock in the Netherlands is ahead of UTC at a moment: one or two hours. */
 function amsterdamOffsetMs(moment: number): number {
@@ -620,6 +768,44 @@ function clubsOf(box: Template): string {
     .map((team) => linkTarget(team).toLowerCase())
     .sort()
     .join('|')
+}
+
+/**
+ * The parameters of a block of the English page in the shape `readMatch` reads: the clubs by
+ * their Dutch names, the date as `2 augustus 2012`, the attendance without the commas of the
+ * thousands, and the stadium without its footnote and the town after it (`Abe Lenstra Stadion,
+ * Heerenveen`), as the Dutch pages name a stadium. The scorers stay out. A time with the local
+ * time in brackets after it is the time before the brackets, and no time at all when the page
+ * does not say which zone it is in (`timesKnown`), so the match then has a day only.
+ */
+function dutchBox(box: Template, timesKnown: boolean): Map<string, string> {
+  const params = new Map(box.params)
+  const start = /\{\{\s*Start date\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2})\b/iu.exec(
+    box.params.get('date') ?? '',
+  )
+  const month = months[Number(start?.[2]) - 1]
+
+  for (const team of ['team1', 'team2']) {
+    const target = linkTarget(box.params.get(team) ?? '')
+
+    params.set(
+      team,
+      target.toLowerCase() === ourClub.toLowerCase() ? `[[${ourClub}]]` : `[[${europaLeagueClubs[target] ?? target}]]`,
+    )
+  }
+  params.set('date', start === null || month === undefined ? '' : `${Number(start[3])} ${month} ${start[1]}`)
+  params.set('time', timesKnown ? plain(box.params.get('time') ?? '').replace(/\s*\(.*\)$/u, '') : '')
+  params.set('attendance', plain(box.params.get('attendance') ?? '').replace(/(?<=\d),(?=\d{3}\b)/gu, ''))
+  params.set(
+    'stadium',
+    plain(withoutRefn(box.params.get('stadium') ?? ''))
+      .split(',')[0]
+      ?.trim() ?? '',
+  )
+  params.delete('goals1')
+  params.delete('goals2')
+
+  return params
 }
 
 /**
@@ -1071,6 +1257,22 @@ function tableCells(part: string, lead: '!' | '|', separator: '!!' | '||'): stri
 /** Whether no number of a part of the match is higher than the same number of the whole. */
 function within(part: null | Pair, whole: Pair): boolean {
   return part === null || (part.home <= whole.home && part.away <= whole.away)
+}
+
+/** The text without the footnotes of `{{refn|...}}`, which can hold links and templates. */
+function withoutRefn(text: string): string {
+  let result = text
+
+  for (let found = refn.exec(result); found !== null; found = refn.exec(result)) {
+    const end = closingBraces(result, found.index)
+
+    if (end === undefined) {
+      break
+    }
+    result = result.slice(0, found.index) + result.slice(end + 2)
+  }
+
+  return result
 }
 
 /** A pair of numbers such as `2 – 1`, after the spaces and the dashes of Wikipedia. */

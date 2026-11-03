@@ -28,8 +28,8 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 const ourClub = 'sc Heerenveen'
 
 /**
- * Whether a match counts for the choice: the league alone, or the league, the cup and the
- * play-offs for the Conference League.
+ * Whether a match counts for the choice: the league alone, or the league, the cup, the
+ * play-offs for the Conference League and the Europa League.
  */
 const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
@@ -45,16 +45,16 @@ const isPlayedExtraMatch = (match: PublicMatch) =>
   match.goalsAgainst !== null
 
 /**
- * Whether the season has a cup tie or a match of the play-offs that was played, so whether
- * there is anything to choose: without one, the two choices count the same matches and the page
- * has no switch.
+ * Whether the season has a cup tie, a match of the play-offs or a match of the Europa League
+ * that was played, so whether there is anything to choose: without one, the two choices count
+ * the same matches and the page has no switch.
  */
 export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPlayedExtraMatch)
 
 /**
- * The competitions a card counts, as the captions of the cards name them: the cup and the
- * play-offs are in only when the choice is `all` and a match of theirs was played, because then
- * it is in the numbers.
+ * The competitions a card counts, as the captions of the cards name them: the cup, the
+ * play-offs and the Europa League are in only when the choice is `all` and a match of theirs
+ * was played, because then it is in the numbers.
  */
 export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) => {
   if (choice === 'league') {
@@ -67,6 +67,7 @@ export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoi
     'de Eredivisie',
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
     ...(played('Play-offs Conference League') ? ['de play-offs'] : []),
+    ...(played('Europa League') ? ['de Europa League'] : []),
   ]
 
   return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`

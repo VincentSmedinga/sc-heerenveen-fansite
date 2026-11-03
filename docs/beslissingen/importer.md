@@ -698,6 +698,7 @@
   Sportmonks (ongeveer €290 per jaar).
   OpenFootball (verouderd).
   Eredivisie.nl en andere sites (verbieden scrapen).
+- **Later:** zie _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_ (3 november 2026): de taal geldt niet meer voor dit ene seizoen.
 
 ## Onze wedstrijdgegevens zijn CC BY-SA 4.0
 
@@ -1829,6 +1830,8 @@
   Dat bewaart andere punten dan Wikipedia noemt, dus een gok.
   Een eigen lezer per tijdperk (meer code voor kleine verschillen).
   De stand overslaan voor de oudere seizoenen (dan vervalt de controle op 18 clubs en op onze eigen rij).
+- **Later:** de Europa League is sinds 3 november 2026 wel een competitie in `competitions`, maar alleen met de wedstrijden van 2012/13 die de Engelse Wikipedia heeft; zie _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_.
+  De play-offs voor de Europa League op de Nederlandse pagina blijven staan zoals ze waren, tot #672 ze leest.
 - **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
   Een aftrek in de kolom `PA` is geen fout meer, en 2010/11, 2014/15 en 2015/16 zijn geen gat meer door de aftrek.
 
@@ -1851,3 +1854,33 @@
   Een marker bij de punten (meer om goed te krijgen voor hulpsoftware, terwijl de regel onder de tabel genoeg is).
 - **Let op:** de nieuwere vorm met het sjabloon `Sports table` (vanaf 2020/21) rekent de punten uit en kent geen aftrek, en blijft zoals hij is.
   De import schrijft de aftrek daar als 0.
+
+## De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia
+
+- **Datum:** 3 november 2026
+- **Besluit:** de wedstrijden van sc Heerenveen in de Europa League van 2012/13 komen van de Engelse Wikipedia, voor dit ene seizoen.
+  De rest van de wedstrijdgegevens blijft van de Nederlandse Wikipedia (#673).
+  - **De pagina:** `2012–13 UEFA Europa League qualifying (third and play-off round matches)`, die de import ophaalt met de bestaande fetcher: dezelfde User-Agent, `robots.txt` en alleen `/wiki/<pagina>?action=raw`, nooit `/w/` of `api.php`.
+    Een vaste lijst in de lezer (`europaLeaguePage`) zegt voor welk seizoen er zo'n pagina is, en voor de andere seizoenen komt er geen verzoek.
+    De soort pagina heet `europa-league`, en de bronvermelding noemt hem "Engelse Wikipedia", met dezelfde licentie (CC BY-SA 4.0).
+  - **De lezer:** de blokken `Football box` van sc Heerenveen gaan door `readMatch`, in de vorm van de Nederlandse pagina's, zodat dezelfde controles gelden.
+    De ronde is `Derde voorronde, wedstrijd 1/2` en `Play-offronde, wedstrijd 1/2`.
+    Een fout noemt het seizoen: het aantal wedstrijden (vier) en de som van de scores, die de totaalstand van de samenvatting moet zijn.
+    De doelpuntenmakers laat de lezer weg, want de Engelse links zijn geen Nederlandse artikelen van spelers.
+    Het stadion is de naam zonder de plaats erachter (`Abe Lenstra Stadion`, niet `Abe Lenstra Stadion, Heerenveen`), zoals de Nederlandse pagina's het schrijven, zodat de statistieken per stadion één stadion blijven zien.
+  - **De tijd:** de pagina zegt boven de samenvatting dat de tijden Midden-Europese zomertijd zijn (CEST, UTC+2), de tijd van UEFA, en bij een andere lokale tijd staat die tussen haakjes.
+    De lezer neemt de tijd voor de haakjes, als hij CEST ziet staan.
+    Staat dat er niet, dan bewaart hij alleen de dag (`date_text`) en geen aanvangstijd.
+  - **De clubs:** de tegenstanders heten zoals de Nederlandse Wikipedia ze schrijft, met hun Nederlandse artikel: `Rapid Boekarest` en `Molde FK`.
+    Een kleine vaste lijst in de lezer (`europaLeagueClubs`) vertaalt de Engelse titel, want een Engelse titel is geen sleutel van een club.
+    Een tegenstander die niet in de lijst staat, is een fout.
+  - **De competitie:** `matches.competition` en `match_changes.competition` krijgen de waarde `Europa League`.
+    De CHECK voor verlenging laat de waarde toe, `statsCompetitions` blijft zoals het is, en de wedstrijden tellen alleen onder "Alle wedstrijden".
+    Een seizoen zonder pagina laat de Europa League-wedstrijden die we hebben staan, zoals de play-offs.
+- **Waarom:** de Nederlandse Wikipedia heeft van deze wedstrijden alleen de scores, zonder datum of stadion, en een wedstrijd heeft bij ons een datum nodig.
+  De Engelse Wikipedia heeft ze volledig, onder dezelfde licentie (CC BY-SA 4.0) en met dezelfde fetcher en regels.
+  voetbalstats.nl liet zich niet lezen: de site zet een controle tegen bots voor elke pagina.
+- **Alternatieven:** de vier wedstrijden niet tonen (een gat in de geschiedenis van de club).
+  De datum van een wedstrijd leeg laten (raakt de volgorde en alle lijsten).
+  De wedstrijden met de hand invoeren vanaf voetbalstats.nl (geen bron die de import kan lezen).
+- **Later:** zie _Wedstrijdgegevens komen van de Nederlandse Wikipedia, voor het eerste mannenelftal_ (25 oktober 2026): de taal geldt niet meer voor dit ene seizoen.

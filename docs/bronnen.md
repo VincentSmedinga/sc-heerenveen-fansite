@@ -821,13 +821,15 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 ## Wikipedia, voor de wedstrijden
 
 De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse Wikipedia, onder CC BY-SA 4.0 (zie [`beslissingen/importer.md`](beslissingen/importer.md)).
-De import leest per seizoen vier pagina's, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
+De import leest per seizoen vier pagina's van de Nederlandse Wikipedia, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
 
 - `Eredivisie <seizoen> (mannenvoetbal)`: de stand;
 - `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`: het programma en de uitslagen van de competitie, van sc Heerenveen en van de andere clubs;
 - `KNVB Beker <seizoen> (mannen)`: de bekerwedstrijden;
 - `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League, met het jaar waarin het seizoen eindigt.
   Die pagina komt pas in mei, en de bronvermelding noemt hem alleen als sc Heerenveen meespeelde.
+- `2012–13 UEFA Europa League qualifying (third and play-off round matches)` op de Engelse Wikipedia: de vier Europa League-wedstrijden van 2012/13, die de Nederlandse pagina's alleen met de score hebben.
+  Alleen dat seizoen heeft zo'n pagina, en de bronvermelding noemt hem "Engelse Wikipedia".
 
 De uitslagen van de andere clubs bewaren we ook, in de tabel `league_results`: de ronde, de dag, de twee clubs en de doelpunten van allebei, voor de stand over de laatste wedstrijden.
 Een andere pagina is er niet voor nodig.

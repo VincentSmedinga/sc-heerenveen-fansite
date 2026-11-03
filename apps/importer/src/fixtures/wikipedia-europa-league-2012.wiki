@@ -1,0 +1,138 @@
+<!--
+  The Europa League matches of the season 2012/13: the third qualifying round and the play-off round.
+  https://en.wikipedia.org/wiki/2012–13_UEFA_Europa_League_qualifying_(third_and_play-off_round_matches)?action=raw, read on 3 November 2026,
+  cut down to the matches of sc Heerenveen, one match of another club in each round, and the rows of the summary around them.
+  Text of the English Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). See the tests.
+-->
+{{Short description|European football competition}}
+{{main|2012–13 UEFA Europa League|2012–13 UEFA Europa League qualifying}}
+{{see also|2012–13 UEFA Europa League qualifying (first and second round matches)}}
+{{Use dmy dates|date=July 2025}}
+This page summarises the matches of the '''third qualifying and play-off rounds''' of '''2012–13 UEFA Europa League qualifying'''.
+
+Times are [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]]), as listed by UEFA (local times, if different, are in parentheses).
+
+
+==Third qualifying round==
+
+===Summary===
+<section begin=Q3 />
+
+{{#invoke:Sports series|main|generate_links=y
+|[[Fehérvár FC|Videoton]]|HUN|4–0|[[KAA Gent|Gent]]|BEL|1–0|3–0
+|[[SC Heerenveen|Heerenveen]]|NED|4–1|[[FC Rapid București|Rapid București]]|ROU|4–0|0–1
+}}
+<section end=Q3 />
+
+===Matches===
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|2|df=y}}
+|time       = 20:30
+|team1      = [[Fehérvár FC|Videoton]] {{fbaicon|HUN}}
+|score      = 1–0
+|team2      = {{fbaicon|BEL}} [[KAA Gent|Gent]]
+|goals1     =
+*[[Nemanja Nikolić (footballer, born 1987)|Nikolić]] {{goal|78}}
+|goals2     =
+|stadium    = [[Sóstói Stadion]], [[Székesfehérvár]]
+|attendance = 5,900<ref>{{Cite web|url=https://int.soccerway.com/matches/2012/08/02/europe/uefa-cup/fc-fehervar/koninklijke-atletiek-associatie-gent/1343254/|title = Fehervar vs. Gent – 2 August 2012 – Soccerway}}</ref>
+|referee    = [[Paolo Silvio Mazzoleni]] ([[Italian Football Federation|Italy]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009771/
+}}
+----
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|2|df=y}}
+|time       = 19:30
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 4–0
+|team2      = {{fbaicon|ROU}} [[FC Rapid București|Rapid București]]
+|goals1     =
+*[[Filip Đuričić|Đuričić]] {{goal|9||64}}
+*[[Marten de Roon|de Roon]] {{goal|69}}
+*[[Samir Fazli|Fazli]] {{goal|89}}
+|goals2     =
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance = 18,000<ref>{{Cite web|url=https://int.soccerway.com/matches/2012/08/02/europe/uefa-cup/sportclub-heerenveen/sc-fc-rapid-sa-bucuresti/1343258/|title = Heerenveen vs. Rapid – 2 August 2012 – Soccerway}}</ref>
+|referee    = [[Jorge Sousa]] ([[Portuguese Football Federation|Portugal]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009789/
+}}
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|9|df=y}}
+|time       = 20:30
+|team1      = [[FC Rapid București|Rapid București]] {{fbaicon|ROU}}
+|score      = 1–0
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Ovidiu Herea|Herea]] {{goal|20|pen.}}
+|goals2     =
+|stadium    = [[Arena Națională]], [[Bucharest]]{{refn|group=note|[[FC Rapid București|Rapid București]] played their home match at [[Arena Națională]], [[Bucharest]] instead of their regular stadium, [[Stadionul Giulești-Valentin Stănescu (1939)|Stadionul Giulești-Valentin Stănescu]], [[Bucharest]].}}
+|attendance = 1,928<ref>{{Cite web|url=https://int.soccerway.com/matches/2012/08/09/europe/uefa-cup/sc-fc-rapid-sa-bucuresti/sportclub-heerenveen/1343257/|title = Rapid vs. Heerenveen – 9 August 2012 – Soccerway}}</ref>
+|referee    = [[Felix Zwayer]] ([[German Football Association|Germany]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009818/
+}}
+''Heerenveen won 4–1 on aggregate.''
+----
+
+==Play-off round==
+
+===Summary===
+<section begin=PO />
+
+{{#invoke:Sports series|main|generate_links=y
+|[[Athletic Bilbao]]|ESP|9–3|[[Helsingin Jalkapalloklubi|HJK]]|FIN|6–0|3–3
+|[[Molde FK|Molde]]|NOR|4–1|[[SC Heerenveen|Heerenveen]]|NED|2–0|2–1
+}}
+<section end=PO />
+
+===Matches===
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|23|df=y}}
+|time       = 18:00
+|team1      = [[FC Anzhi Makhachkala|Anzhi Makhachkala]] {{fbaicon|RUS}}
+|score      = 1–0
+|team2      = {{fbaicon|NED}} [[AZ Alkmaar|AZ]]
+|goals1     =
+*[[Lacina Traoré|Traoré]] {{goal|51}}
+|goals2     =
+|stadium    = [[Lokomotiv Stadium (Moscow)|Lokomotiv Stadium]], [[Moscow]]{{refn|group=note|[[FC Anzhi Makhachkala|Anzhi Makhachkala]] played their home match at [[Lokomotiv Stadium (Moscow)|Lokomotiv Stadium]], Moscow instead of their regular stadium, [[Dynamo Stadium (Makhachkala)|Dynamo Stadium]], [[Makhachkala]], due to security issues involving the city of Makhachkala and the autonomous republic of [[Dagestan]].<ref name="anzhi">{{cite web|url=http://fc-anji.ru/news/en/fc_anji_news/decision_by_uefa_executive_committee/|title=Decision by UEFA Executive committee|publisher=fc-anji.ru|date=2 July 2012|access-date=25 February 2020|archive-date=18 September 2018|archive-url=https://web.archive.org/web/20180918054239/http://fc-anji.ru/news/en/fc_anji_news/decision_by_uefa_executive_committee/|url-status=dead}}</ref>}}
+|attendance = 6,030<ref>{{cite web |url=https://int.soccerway.com/matches/2012/08/23/europe/uefa-cup/anzhi-makhachkala/stichting-az/1370859/ |title=Anzhi Makhachkala–AZ |work=Soccerway |date=23 August 2012 |access-date=28 August 2012}}</ref>
+|referee    = [[Michael Koukoulakis]] ([[Hellenic Football Federation|Greece]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009829/
+}}
+----
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|23|df=y}}
+|time       = 19:00
+|team1      = [[Molde FK|Molde]] {{fbaicon|NOR}}
+|score      = 2–0
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Magnus Wolff Eikrem|Eikrem]] {{goal|31}}
+*[[Mattias Moström|Moström]] {{goal|90}}
+|goals2     =
+|stadium    = [[Aker Stadion]], [[Molde]]
+|attendance = 4,656<ref>{{cite web |url=https://int.soccerway.com/matches/2012/08/23/europe/uefa-cup/molde-fotballklubb/sportclub-heerenveen/1370881/ |title=Molde–Heerenveen |work=Soccerway |date=23 August 2012 |access-date=28 August 2012}}</ref>
+|referee    = [[Cristian Balaj]] ([[Romanian Football Federation|Romania]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009837/
+}}
+{{#invoke:Football box|main
+|date       = {{Start date|2012|8|30|df=y}}
+|time       = 19:00
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 1–2
+|team2      = {{fbaicon|NOR}} [[Molde FK|Molde]]
+|goals1     =
+*[[Arsenio Valpoort|Valpoort]] {{goal|90+2}}
+|goals2     =
+*[[Jo Inge Berget|Berget]] {{goal|54}}
+*[[Pape Paté Diouf|Diouf]] {{goal|73}}
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance = 10,000<ref>{{cite web |url=https://int.soccerway.com/matches/2012/08/30/europe/uefa-cup/sportclub-heerenveen/molde-fotballklubb/1370882/ |title=Heerenveen–Molde |work=Soccerway |date=30 August 2012 |access-date=9 September 2012}}</ref>
+|referee    = [[Stanislav Todorov]] ([[Bulgarian Football Union|Bulgaria]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/2009868/
+}}
+''Molde won 4–1 on aggregate.''
+----
+
+==Notes==
+{{reflist|group=note}}

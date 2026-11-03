@@ -14,6 +14,7 @@ import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher } from './fetcher.ts'
 import {
+  englishWikipediaOrigin,
   formatMatchReport,
   importPastSeason,
   isPastSeason,
@@ -116,6 +117,7 @@ export async function runSeasonImport(
   argument: string | undefined,
   {
     clock = () => new Date(),
+    englishOrigin = englishWikipediaOrigin,
     makeFetcher = (robots) => createFetcher({ robots }),
     wikipediaOrigin: origin = wikipediaOrigin,
     write = console.log,
@@ -144,7 +146,11 @@ export async function runSeasonImport(
       }
 
       try {
-        return await importPastSeason(db, makeFetcher(robotsStoreFor(db, clock)), parsed.season, { clock, origin })
+        return await importPastSeason(db, makeFetcher(robotsStoreFor(db, clock)), parsed.season, {
+          clock,
+          englishOrigin,
+          origin,
+        })
       } catch (error) {
         return { kind: 'error', message: describeError(error), season: parsed.season } as const
       }
@@ -180,6 +186,7 @@ export async function runSeasonsImport(
   argument: string | undefined,
   {
     clock = () => new Date(),
+    englishOrigin = englishWikipediaOrigin,
     makeFetcher = (robots) => createFetcher({ robots }),
     wikipediaOrigin: origin = wikipediaOrigin,
     write = console.log,
@@ -209,7 +216,7 @@ export async function runSeasonsImport(
         const lines = await repairKnownClubs(db, clock)
 
         try {
-          return { lines, report: await importPastSeason(db, fetcher, season, { clock, origin }) }
+          return { lines, report: await importPastSeason(db, fetcher, season, { clock, englishOrigin, origin }) }
         } catch (error) {
           return { lines, report: { kind: 'error', message: describeError(error), season } as const }
         }

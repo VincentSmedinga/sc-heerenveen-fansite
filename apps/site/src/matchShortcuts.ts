@@ -27,6 +27,7 @@ type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {
   Eredivisie: { id: 'uitslagen', name: 'Eredivisie' },
+  'Europa League': { id: 'uitslagen-europa-league', name: 'Europa League' },
   'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'KNVB Beker' },
   'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Play-offs Conference League' },
 }

@@ -363,7 +363,7 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 
 | Kolom                                      | Betekenis                                                                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `season`, `competition`                    | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker` of `Play-offs Conference League`                    |
+| `season`, `competition`                    | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker`, `Play-offs Conference League` of `Europa League`   |
 | `round`                                    | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
 | `opponent`, `home`, `stadium`              | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)       |
 | `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
@@ -443,7 +443,7 @@ Een seizoen waarvan de pagina alleen de wedstrijden van sc Heerenveen heeft, hee
 De rijen van een seizoen worden in één keer vervangen, zoals de stand (zie de [README van de importer](../../apps/importer/README.md)).
 De site leest ze met `listLeagueResults`, voor de stand over de laatste vijf wedstrijden op `/wedstrijden`.
 
-`wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
+`wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, en `europa-league` voor de pagina van de Engelse Wikipedia met de Europa League-wedstrijden van 2012/13; `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
 

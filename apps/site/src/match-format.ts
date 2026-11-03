@@ -43,11 +43,13 @@ const singleDay = /^(\d{1,2}) (\p{L}+)(?: \d{4})?$/u
 
 /**
  * What the link to a Wikipedia page says: the league table, the programme, the cup or the
- * play-offs of the season, such as "Eredivisie 2026/27".
+ * play-offs of the season, such as "Eredivisie 2026/27". The page with the Europa League
+ * matches is on the English Wikipedia, and the name says so.
  */
 export function creditName(kind: PublicWikipediaPage['kind'], season: string) {
   return {
     cup: `KNVB Beker ${season}`,
+    'europa-league': `Europa League ${season} (Engelse Wikipedia)`,
     playoffs: `Play-offs Conference League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
@@ -194,9 +196,12 @@ export function weekendText(dateText: string) {
   return day === null ? dateText : `${day[1]} ${day[2]}`
 }
 
-/** The address of a page on the Dutch Wikipedia. */
-export function wikipediaUrl(title: string) {
-  return `https://nl.wikipedia.org/wiki/${encodeURI(title.replaceAll(' ', '_'))}`
+/**
+ * The address of a page on the Dutch Wikipedia, or on the English one for the kind of page that
+ * is: the page with the Europa League matches.
+ */
+export function wikipediaUrl(title: string, kind?: PublicWikipediaPage['kind']) {
+  return `https://${kind === 'europa-league' ? 'en' : 'nl'}.wikipedia.org/wiki/${encodeURI(title.replaceAll(' ', '_'))}`
 }
 
 /** A calendar day such as `2026-10-25` as a moment in the middle of that day in UTC. */
