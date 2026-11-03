@@ -1904,6 +1904,16 @@ describe('the matches and the table of a season', () => {
       expect(await listSeasonStandings(database.db, '2027/28')).toEqual([])
     })
 
+    it('gives the points a club lost to a deduction, 0 for the others', async () => {
+      const [first, ...others] = madeUpTable(now)
+
+      await database.db.insert(standings).values([{ ...first!, pointsDeducted: 6 }, ...others])
+
+      const rows = await listSeasonStandings(database.db, '2026/27')
+
+      expect(rows.map((row) => row.pointsDeducted)).toEqual([6, 0, 0, 0, 0, 0])
+    })
+
     it('keeps a negative goal difference', async () => {
       await database.db.insert(standings).values(madeUpTable(now))
 

@@ -24,7 +24,7 @@ const rows = read(readStandings(fixture('wikipedia-standings.wiki'))).rows
 
 /**
  * The table with one club changed. The numbers that follow from the rest are worked out
- * again.
+ * again, the points after the deduction.
  */
 function withClub(club: string, change: Partial<ReadStandingsRow>, from: ReadStandingsRow[] = rows) {
   return from.map((row) => {
@@ -38,7 +38,7 @@ function withClub(club: string, change: Partial<ReadStandingsRow>, from: ReadSta
       ...next,
       goalDifference: next.goalsFor - next.goalsAgainst,
       played: next.won + next.drawn + next.lost,
-      points: 3 * next.won + next.drawn,
+      points: 3 * next.won + next.drawn - next.pointsDeducted,
     }
   })
 }
@@ -146,6 +146,58 @@ describe('the checks of the league table', () => {
         league,
       ),
     ).toContain('Ajax: goal difference is not goals for - goals against')
+  })
+
+  describe('a deduction of points', () => {
+    it('passes when the points are 3 x won + drawn - the deduction', () => {
+      const deducted = withClub('Ajax', { pointsDeducted: 6 })
+      const ajax = deducted.find((row) => row.club === 'Ajax')
+
+      expect(ajax?.points).toBe(rows.find((row) => row.club === 'Ajax')!.points - 6)
+      expect(checkStandings(deducted, league)).toEqual([])
+    })
+
+    it('fails when the points are not those after the deduction, and says what the deduction is', () => {
+      const kept = rows.map((row) => (row.club === 'Ajax' ? { ...row, pointsDeducted: 6 } : row))
+
+      expect(checkStandings(kept, league)).toEqual(['Ajax: points are not 3 x won + drawn - the deduction of 6'])
+    })
+
+    it('fails when the points are one off, with or without a deduction', () => {
+      const off = withClub('Ajax', { pointsDeducted: 3 }).map((row) =>
+        row.club === 'Ajax' ? { ...row, points: row.points + 1 } : row,
+      )
+
+      expect(checkStandings(off, league)).toEqual(['Ajax: points are not 3 x won + drawn - the deduction of 3'])
+    })
+
+    it('fails when the deduction is more than 3 x won + drawn', () => {
+      const ajax = rows.find((row) => row.club === 'Ajax')!
+      const earned = 3 * ajax.won + ajax.drawn
+      const more = rows.map((row) => (row.club === 'Ajax' ? { ...row, points: 0, pointsDeducted: earned + 1 } : row))
+
+      expect(checkStandings(more, league)).toEqual([
+        `Ajax: the deduction of ${earned + 1} points is more than 3 x won + drawn (${earned})`,
+      ])
+    })
+
+    it('compares the row of sc Heerenveen with our own results with the same formula', () => {
+      expect(checkStandings(withClub('sc Heerenveen', { pointsDeducted: 2 }), league)).toEqual([])
+      expect(
+        checkStandings(
+          rows.map((row) => (row.club === 'sc Heerenveen' ? { ...row, points: row.points, pointsDeducted: 2 } : row)),
+          league,
+        ),
+      ).toContain('sc Heerenveen: points are not 3 x won + drawn - the deduction of 2')
+    })
+
+    it('says in the message about our own row that there is a deduction', () => {
+      const ahead = withClub('sc Heerenveen', { pointsDeducted: 2, won: 5 }, withClub('Ajax', { lost: 2 }))
+
+      expect(checkStandings(ahead, league)).toEqual([
+        'the row of sc Heerenveen (11 played, 18-13, 16 points after a deduction of 2) is not what the matches say (10 played, 18-13, 13 points after a deduction of 2)',
+      ])
+    })
   })
 
   it('fail when the row of sc Heerenveen does not match our own results', () => {

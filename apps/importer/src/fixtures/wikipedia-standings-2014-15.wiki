@@ -1,0 +1,39 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2014/15?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all rows below FC Twente, the tables for home, away and each half, and the references outside the table. See the tests.
+-->
+=== Stand na 34 wedstrijden ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+!width=10|
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=30|{{afkorting|PA|Punten aftrek}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. || align=left| [[PSV (voetbalclub)|PSV]] || 34 || 29 || 1 || 4 || || '''88''' || 92 || 31 || +61
+|- style="background:#C0F0D0;"
+| 2. || align=left| [[AFC Ajax|Ajax]] || 34 || 21|| 8|| 5|| || '''71''' || 69|| 29|| +40
+|- style="background:#81BEF7;"
+| 3. || align=left| [[AZ (voetbalclub)|AZ]] || 34 || 19 || 5 || 10 || || '''62''' || 63 || 56 || +7
+|- style="background:#B0E0E6;"
+| 4. || align=left| [[Feyenoord]] || 34 || 17 || 8 || 9 || || '''59''' || 56 || 39 || +17
+|- style="background:#B0E0E6;"
+| 5. || align=left| [[SBV Vitesse|Vitesse]] || 34 || 16 || 10 || 8 || || '''58''' || 66 || 43 || +23
+|- style="background:#B0E0E6;"
+| 6. || align=left| [[PEC Zwolle]] || 34 || 16 || 5 || 13 || || '''53''' || 59 || 43 || +16
+|- style="background:#B0E0E6;"
+| 7. || align=left| [[sc Heerenveen]] || 34 || 13 || 11 || 10 || || '''50''' || 53 || 46 || +7
+|- style="background:#EEE8AA;"
+| 8. ||  align=left| [[FC Groningen]] || 34 || 11 || 13 || 10 || || '''46''' || 49 || 53 || −4
+|-
+| 9. || align=left| [[Willem II (voetbalclub)|Willem II]] || 34 || 13 || 7 || 14 || || '''46''' || 46 || 50|| −4
+|-
+| 10. || align=left| [[FC Twente]] || 34 || 13 || 10 || 11 || 6<ref>[https://nos.nl/artikel/2022619-knvb-straft-fc-twente-met-puntenaftrek.html Puntenaftrek FC Twente]. [https://web.archive.org/web/20230224173541/https://nos.nl/artikel/2022619-knvb-straft-fc-twente-met-puntenaftrek.html Gearchiveerd] op 24 februari 2023.</ref><ref>[https://nos.nl/artikel/2029486-opnieuw-drie-punten-aftrek-voor-fc-twente.html Opnieuw drie punten aftrek voor FC Twente | NOS]. [https://web.archive.org/web/20220703152333/https://nos.nl/artikel/2029486-opnieuw-drie-punten-aftrek-voor-fc-twente.html Gearchiveerd] op 3 juli 2022.</ref> || '''43''' || 56 || 51 || +5
+|}

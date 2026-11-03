@@ -152,9 +152,10 @@ export function checkSquad(players: ReadPlayer[]): string[] {
 
 /**
  * Checks the league table: 18 clubs, and for each that played = won + drawn + lost, points = 3
- * x won + drawn and goal difference = goals for - goals against. Over the whole table the
- * goals for equal the goals against and the wins equal the losses. The row of sc Heerenveen
- * must agree with the league matches we have of our own: matches played, goals and points.
+ * x won + drawn - the deduction and goal difference = goals for - goals against. A deduction
+ * cannot be more than 3 x won + drawn. Over the whole table the goals for equal the goals
+ * against and the wins equal the losses. The row of sc Heerenveen must agree with the league
+ * matches we have of our own: matches played, goals and points (after its deduction, if any).
  */
 export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): string[] {
   const problems: string[] = []
@@ -167,8 +168,18 @@ export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): 
     if (row.played !== row.won + row.drawn + row.lost) {
       problems.push(`${row.club}: played is not won + drawn + lost`)
     }
-    if (row.points !== 3 * row.won + row.drawn) {
-      problems.push(`${row.club}: points are not 3 x won + drawn`)
+    const earned = 3 * row.won + row.drawn
+
+    if (row.pointsDeducted > earned) {
+      problems.push(
+        `${row.club}: the deduction of ${row.pointsDeducted} points is more than 3 x won + drawn (${earned})`,
+      )
+    } else if (row.points !== earned - row.pointsDeducted) {
+      problems.push(
+        row.pointsDeducted === 0
+          ? `${row.club}: points are not 3 x won + drawn`
+          : `${row.club}: points are not 3 x won + drawn - the deduction of ${row.pointsDeducted}`,
+      )
     }
     if (row.goalDifference !== row.goalsFor - row.goalsAgainst) {
       problems.push(`${row.club}: goal difference is not goals for - goals against`)
@@ -194,7 +205,7 @@ export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): 
   const played = matches.filter((match) => match.competition === 'Eredivisie' && match.status === 'played')
   const goalsFor = sum(played, (match) => match.goalsFor ?? 0)
   const goalsAgainst = sum(played, (match) => match.goalsAgainst ?? 0)
-  const points = sum(played, (match) => pointsOf(match))
+  const points = sum(played, (match) => pointsOf(match)) - row.pointsDeducted
 
   if (
     row.played !== played.length ||
@@ -202,9 +213,11 @@ export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): 
     row.goalsAgainst !== goalsAgainst ||
     row.points !== points
   ) {
+    const deduction = row.pointsDeducted === 0 ? '' : ` after a deduction of ${row.pointsDeducted}`
+
     problems.push(
-      `the row of ${ourClub} (${row.played} played, ${row.goalsFor}-${row.goalsAgainst}, ${row.points} points) ` +
-        `is not what the matches say (${played.length} played, ${goalsFor}-${goalsAgainst}, ${points} points)`,
+      `the row of ${ourClub} (${row.played} played, ${row.goalsFor}-${row.goalsAgainst}, ${row.points} points${deduction}) ` +
+        `is not what the matches say (${played.length} played, ${goalsFor}-${goalsAgainst}, ${points} points${deduction})`,
     )
   }
 

@@ -277,6 +277,48 @@ describe('StandingsTable', () => {
     expect(container.querySelector('.hf-bar-legend')).toBeNull()
   })
 
+  describe('a deduction of points', () => {
+    const deducted = rows.map((row) => (row.club === 'Testdorp FC' ? { ...row, pointsDeducted: 6 } : row))
+    const lines = (container: HTMLElement) =>
+      [...container.querySelectorAll('.hf-bar-legend')].map((line) => line.textContent)
+
+    it('gets a line under the table, after the words of the abbreviations, that names the club', () => {
+      const { container } = render(<StandingsTable {...props} rows={deducted} />)
+
+      expect(lines(container)).toEqual(['G gespeeld, P punten', 'Testdorp FC: 6 punten aftrek.'])
+      expect(container.querySelector('table')?.nextElementSibling?.lastElementChild?.textContent).toBe(
+        'Testdorp FC: 6 punten aftrek.',
+      )
+    })
+
+    it('says "punt" for one point, and has a line for each club', () => {
+      const two = deducted.map((row) => (row.club === 'Demo Boys' ? { ...row, pointsDeducted: 1 } : row))
+      const { container } = render(<StandingsTable {...props} rows={two} />)
+
+      expect(lines(container).slice(1)).toEqual(['Demo Boys: 1 punt aftrek.', 'Testdorp FC: 6 punten aftrek.'])
+    })
+
+    it('leaves the points, the order and the bars as they are', () => {
+      const { container } = render(<StandingsTable {...props} rows={deducted} />)
+      const { container: plain } = render(<StandingsTable {...props} />)
+
+      expect(container.querySelector('table')?.outerHTML).toBe(plain.querySelector('table')?.outerHTML)
+    })
+
+    it('has no line for no deduction or 0', () => {
+      const none = rows.map((row) => ({ ...row, pointsDeducted: 0 }))
+      const { container } = render(<StandingsTable {...props} rows={none} />)
+
+      expect(lines(container)).toEqual(['G gespeeld, P punten'])
+    })
+
+    it('has no line in the short form', () => {
+      const { container } = render(<StandingsTable {...props} columns="compact" rows={deducted} />)
+
+      expect(container.textContent).not.toMatch(/aftrek/u)
+    })
+  })
+
   it('shows the names of clubs as text, not as HTML', () => {
     const { container } = render(<StandingsTable {...props} rows={[{ ...rows[0]!, club: '<b>Demo</b>' }]} />)
 
