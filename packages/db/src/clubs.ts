@@ -106,14 +106,13 @@ export function clubSlug(name: string): string {
  *
  * A title that is a redirect on Wikipedia is the article it redirects to, so it is the same
  * club (`AZ Alkmaar` is `AZ (voetbalclub)`). The book does not ask Wikipedia: the importer
- * does,
- * once for each title the database does not know (`knownClubPages`), and gives the answers as
- * `redirects`, from each title it asked about, redirects on the way included, to the title of
- * the article it ends in (the title itself when it is no redirect). The book then looks for the
- * club of that article, and remembers both titles in `club_pages`, so the next run needs no
- * answer. A title that is in neither the database nor `redirects` is taken as its own article,
- * as before, and is not remembered: nobody checked it. Run `repairClubPages` first when the
- * database may hold a club under a title that is a redirect.
+ * does, once for each title the database does not know (`knownClubPages`), and gives the
+ * answers as `redirects`, from each title it asked about, redirects on the way included, to
+ * the title of the article it ends in (the title itself when it is no redirect). The book then
+ * looks for the club of that article, and remembers both titles in `club_pages`, so the next
+ * run needs no answer. A title that is in neither the database nor `redirects` is taken as its
+ * own article, as before, and is not remembered: nobody checked it. Run `repairClubPages` first
+ * when the database may hold a club under a title that is a redirect.
  */
 export async function createClubBook(
   db: ClubDatabase,

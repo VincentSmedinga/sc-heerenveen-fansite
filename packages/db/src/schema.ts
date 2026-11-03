@@ -615,9 +615,8 @@ const articleTitle = customType<{ data: string }>({
  * to the article, such as `AZ Alkmaar` for `AZ (voetbalclub)`, are in `club_pages`. `slug` is
  * the fixed name in an address, with lowercase letters, digits and single hyphens (the check
  * ignores the collation, which would let capitals through); it is unique and never changes
- * when the name does. `name` is the name of the
- * newest season we have of the club; the other names it was written with are in `club_names`.
- * Times are UTC.
+ * when the name does. `name` is the name of the newest season we have of the club; the other
+ * names it was written with are in `club_names`. Times are UTC.
  */
 export const clubs = mysqlTable(
   'clubs',
