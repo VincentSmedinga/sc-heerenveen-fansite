@@ -163,8 +163,14 @@ type Template = { heading: null | string; index: number; params: Map<string, str
 /** The name Wikipedia knows us by in the links of a match. */
 const ourClub = 'sc Heerenveen'
 
-/** The heading of the play-offs for the Conference League on the page of the play-offs. */
-const playoffHeading = /^Play-offs voor de UEFA (?:Europa )?Conference League$/iu
+/**
+ * The headings of the play-offs of ours on the page of the play-offs, and the competition of
+ * each: the Conference League from 2020/21, the Europa League before.
+ */
+const playoffHeadings: readonly { competition: Competition; heading: RegExp }[] = [
+  { competition: 'Play-offs Conference League', heading: /^Play-offs voor de UEFA (?:Europa )?Conference League$/iu },
+  { competition: 'Play-offs Europa League', heading: /^Play-offs voor de UEFA Europa League$/iu },
+]
 
 const months = [
   'januari',
@@ -250,8 +256,9 @@ export function linkedPage(value: string): null | string {
  * 2014/15 are called `Eredivisie 2013/14` and `Eredivisie 2013/14/Wedstrijden`, without the
  * addition the other seasons have. That title comes second: for several seasons it is a page
  * that lists the competitions of that name, not a season. Before 2020/21 the play-offs have no
- * title: their page then holds no play-offs for the Conference League, which began that year,
- * and the ones for the Europa League are not read yet.
+ * title: their page then holds no play-offs for the Conference League, which began that year.
+ * The pages of 2011 to 2020 hold the play-offs for the Europa League, and are the pages of the
+ * seasons 2010/11 to 2019/20.
  */
 export function pageCandidates(season: string): SeasonPageCandidates {
   const titles = pageTitles(season)
@@ -526,33 +533,39 @@ export function readLeagueResults(text: string): ReadResults {
 
 /**
  * Reads the page of the play-offs of a year for the matches of sc Heerenveen under the heading
- * of the Conference League, and nowhere else: the other play-offs on the page are for promotion
- * and relegation, and are no business of ours. The round is the heading of the level above the
- * match, `Halve finales` as `Halve finale` and `Finale`. In the years the semi-finals were
- * played over two matches, each box says which one it is (`Wedstrijd 1/2`), and the round says
- * so too. A year in which sc Heerenveen did not play has the section and no match, and that is
- * a page without a fault. A page without the section is an error: it has changed shape.
+ * of the Conference League or the Europa League, and nowhere else: the other play-offs on the
+ * page are for promotion and relegation, and are no business of ours. The competition is the
+ * one the heading names. The round is the heading of the level above the match, `Halve finales`
+ * as `Halve finale`, `Finale`, `Eerste ronde` and `Tweede ronde`. In the years a round was
+ * played over two matches, each box says which one it is (`Wedstrijd 1/2`, or `Wedstrijd 1` and
+ * `Wedstrijd 2` on the pages of 2013 to 2018), and the round says so too. A year in which sc
+ * Heerenveen did not play has the section and no match, and that is a page without a fault. A
+ * page without the section is an error: it has changed shape.
  */
 export function readPlayoffs(text: string): ReadProgramme {
   const cleaned = clean(text)
   const section = playoffSection(cleaned)
 
   if (section === undefined) {
-    return { kind: 'error', message: `the play-offs page has no section 'Play-offs voor de UEFA Conference League'` }
+    return {
+      kind: 'error',
+      message: `the play-offs page has no section 'Play-offs voor de UEFA Conference League' or 'Play-offs voor de UEFA Europa League'`,
+    }
   }
 
-  const rounds: Heading[] = [...section.matchAll(/^===[ \t]*([^=\n].*?)[ \t]*===[ \t]*$/gmu)].map((heading) => ({
+  const { competition } = section
+  const rounds: Heading[] = [...section.text.matchAll(/^===[ \t]*([^=\n].*?)[ \t]*===[ \t]*$/gmu)].map((heading) => ({
     index: heading.index,
     title: plain(heading[1] ?? ''),
   }))
-  const boxes = findTemplates(section, /\{\{\s*Footballbox2\s*(?=\||\n)/giu)
+  const boxes = findTemplates(section.text, /\{\{\s*Footballbox2\s*(?=\||\n)/giu)
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
   for (const box of boxes.filter((found) => isOurs(found) && !isRestOfStopped(found, boxes))) {
     const heading = rounds.findLast((candidate) => candidate.index < box.index)?.title
     const round = heading === undefined ? null : playoffRound(heading, plain(box.params.get('round') ?? ''))
-    const match = readMatch(box, 'Play-offs Conference League', round, restOf(box, boxes))
+    const match = readMatch(box, competition, round, restOf(box, boxes))
 
     if (typeof match === 'string') {
       problems.push(match)
@@ -635,8 +648,12 @@ export function readStandings(text: string): ReadStandings {
  */
 const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?[ \t]*=+[ \t]*$/imu
 
-/** The first season with play-offs for the Conference League, which that page holds. */
-const firstPlayoffsSeason = 2020
+/**
+ * The first season whose page of the play-offs we read: 2010/11, the page of 2011. The page
+ * holds the play-offs for the Europa League up to 2019/20, and for the Conference League from
+ * 2020/21.
+ */
+const firstPlayoffsSeason = 2010
 
 /** The start of a footnote that is a template of its own. */
 const refn = /\{\{\s*refn\s*\|/iu
@@ -1084,34 +1101,48 @@ function parsePenalties(
   return score === null ? { kind: 'unknown', text } : { away: Number(score[2]), home: Number(score[1]), kind: 'score' }
 }
 
+/** The headings of a round of the play-offs, and the name of the round. */
+const playoffRoundNames: readonly (readonly [RegExp, string])[] = [
+  [/^halve finales?$/iu, 'Halve finale'],
+  [/^finale$/iu, 'Finale'],
+  [/^eerste ronde$/iu, 'Eerste ronde'],
+  [/^tweede ronde$/iu, 'Tweede ronde'],
+]
+
 /**
  * The round of a play-off match from the heading above it, with the leg when the box says
  * which: `Halve finale, wedstrijd 1/2`. Null when the heading is not a round we know.
  */
 function playoffRound(heading: string, leg: string): null | string {
-  const name = /^halve finales?$/iu.test(heading) ? 'Halve finale' : /^finale$/iu.test(heading) ? 'Finale' : null
-  const part = /^wedstrijd (\d)\/(\d)$/iu.exec(leg)
+  const name = playoffRoundNames.find(([pattern]) => pattern.test(heading))?.[1] ?? null
+  const part = /^wedstrijd (\d)(?:\/(\d))?$/iu.exec(leg)
 
-  return name === null ? null : part === null ? name : `${name}, wedstrijd ${part[1]}/${part[2]}`
+  // The pages of 2013 to 2018 write `Wedstrijd 1` and `Wedstrijd 2`, always in a pair.
+  return name === null ? null : part === null ? name : `${name}, wedstrijd ${part[1]}/${part[2] ?? '2'}`
 }
 
 /**
- * The text under the heading of the play-offs for the Conference League, up to the next heading
- * of the same level, or undefined when the page has none. The heading was `UEFA Europa
- * Conference League` for the first years.
+ * The text under the heading of the play-offs for the Conference League or the Europa League,
+ * up to the next heading of the same level, with the competition the heading names, or
+ * undefined when the page has none. The heading was `UEFA Europa Conference League` for the
+ * first years of the Conference League.
  */
-function playoffSection(text: string): string | undefined {
+function playoffSection(text: string): undefined | { competition: Competition; text: string } {
   const headings = [...text.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
-  const start = headings.findIndex((heading) => playoffHeading.test(plain(heading[1] ?? '')))
-  const found = headings[start]
 
-  if (found === undefined) {
-    return undefined
+  for (const [start, found] of headings.entries()) {
+    const title = plain(found[1] ?? '')
+    const known = playoffHeadings.find(({ heading }) => heading.test(title))
+
+    if (known !== undefined) {
+      return {
+        competition: known.competition,
+        text: text.slice(found.index + found[0].length, headings[start + 1]?.index),
+      }
+    }
   }
 
-  const next = headings[start + 1]
-
-  return text.slice(found.index + found[0].length, next?.index)
+  return undefined
 }
 
 /**
@@ -1280,13 +1311,16 @@ const pairPattern = '(\\d{1,2}) ?[–-] ?(\\d{1,2})'
 
 /**
  * Whether a match of this competition and round keeps the score after 90 minutes when it goes
- * to extra time: the cup and the play-offs for the Conference League, and in the play-offs only
- * a round played over one match. In the years the semi-final was played over two matches, extra
- * time came after the second one, and the round says which leg it is (see `playoffRound`).
+ * to extra time: the cup and the play-offs for the Conference League and the Europa League, and
+ * in the play-offs only a round played over one match. In the years a round was played over two
+ * matches, extra time came after the second one, and the round says which leg it is (see
+ * `playoffRound`).
  */
 function keepsScoreAfterNinety(competition: Competition, round: string): boolean {
   return (
-    competition === 'KNVB Beker' || (competition === 'Play-offs Conference League' && !round.includes(', wedstrijd'))
+    competition === 'KNVB Beker' ||
+    ((competition === 'Play-offs Conference League' || competition === 'Play-offs Europa League') &&
+      !round.includes(', wedstrijd'))
   )
 }
 
@@ -1363,9 +1397,9 @@ function parseScore(value: string): ParsedScore {
   return /^(uitgesteld|afgelast)\b/iu.test(text) ? { kind: 'postponed' } : { kind: 'unknown', text }
 }
 
-/** What follows the final score on the older pages: `n.v.`, brackets, or `(6 – 7 pen.)`. */
+/** What follows the final score on older pages: `n.v.`, `(nv)`, brackets or `(6 – 7 pen.)`. */
 const scorePart = new RegExp(
-  `\\s*(?:(n\\.v\\.)|\\(${pairPattern}(?:, ?${pairPattern})?\\)|\\(${pairPattern} pen\\.\\))`,
+  `\\s*(?:(n\\.?v\\.?|\\(n\\.?v\\.?\\))|\\(${pairPattern}(?:, ?${pairPattern})?\\)|\\(${pairPattern} pen\\.\\))`,
   'uy',
 )
 

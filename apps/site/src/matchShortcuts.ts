@@ -30,6 +30,7 @@ const resultsCards: Record<Competition, { id: string; name: string }> = {
   'Europa League': { id: 'uitslagen-europa-league', name: 'Europa League' },
   'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'KNVB Beker' },
   'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Play-offs Conference League' },
+  'Play-offs Europa League': { id: 'uitslagen-play-offs-europa-league', name: 'Play-offs Europa League' },
 }
 
 /**

@@ -544,10 +544,17 @@ export type ArticleVersion = typeof articleVersions.$inferSelect
 
 /**
  * The competitions of a match. `Play-offs Conference League` is the match or two that decide
- * the ticket for the second qualifying round after the league season. `Europa League` holds the
+ * the ticket for the second qualifying round after the league season, from 2020/21. `Play-offs
+ * Europa League` is the same for the Europa League, before 2020/21. `Europa League` holds the
  * matches of the Europa League that sc Heerenveen played in 2012/13.
  */
-export const competitions = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League', 'Europa League'] as const
+export const competitions = [
+  'Eredivisie',
+  'KNVB Beker',
+  'Play-offs Conference League',
+  'Europa League',
+  'Play-offs Europa League',
+] as const
 
 export type Competition = (typeof competitions)[number]
 
@@ -647,9 +654,9 @@ export type NewClubName = typeof clubNames.$inferInsert
 
 /**
  * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie, the KNVB
- * Beker and the play-offs for the Conference League. A season starts on 1 July and is written
- * `2026/27`. The importer reads the current season only and never changes or removes the rows
- * of an earlier one.
+ * Beker and the play-offs for the Conference League or the Europa League. A season starts on
+ * 1 July and is written `2026/27`. The importer reads the current season only and never changes
+ * or removes the rows of an earlier one.
  *
  * `round` is the label as Wikipedia has it, such as `Speelronde 12` or `Eerste ronde`; it is
  * unique per season and competition, because sc Heerenveen plays one match in each. `home` is
@@ -730,7 +737,7 @@ export const matches = mysqlTable(
     check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
     check(
       'matches_extra_time_only_in_played_knockout',
-      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League', 'Europa League'))`,
+      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League', 'Europa League', 'Play-offs Europa League'))`,
     ),
     check(
       'matches_penalties_in_a_pair',

@@ -1,0 +1,116 @@
+<!--
+  The play-offs of 2015 (the season 2014/15). sc Heerenveen played both rounds over two matches; the second match of the first round went to extra time, written `(nv)`.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2015?action=raw, read on 3 November 2026, cut down to the section of the
+  play-offs for the Europa League without the match schedule table, and the heading of the play-offs for promotion and relegation.
+  The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Play-offs voor de UEFA Europa League ==
+De play-offs, die werden gespeeld door de nummers 4 t/m 7 van de [[Eredivisie 2014/15|Eredivisie]], hebben in 2015 een licht gewijzigde opzet ten opzichte van 2014. Toen speelden de nummers 5 tot en met 8 de play-offs. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[https://web.archive.org/web/20150518103916/http://home.knvb.nl/media/4366/europa33str.png Speelschema Eredivisie play-offs voor Europees ticket 2014/15 (Na 33 ronden)]</ref><ref>[https://web.archive.org/web/20150703082412/http://home.knvb.nl/nieuws/verdeling-europese-tickets-20142015/ Speelschema Eredivisie play-offs voor Europees ticket 2014/15, Toelichting KNVB]</ref>
+
+* Eredivisie #1: groepsfase Champions League
+* Eredivisie #2: voorronde Champions League
+* Eredivisie #3: derde kwalificatieronde Europa League
+* Eredivisie play-offs (#4 t/m #7): derde kwalificatieronde Europa League
+* Bekerwinnaar: groepsfase Europa League
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=21 mei 2015
+| time=18:30
+| team1=[[sc Heerenveen]]
+| score=1 – 0
+| team2=[[Feyenoord]]
+| goals1=[[Simon Thern|Thern]] {{goal|83}}
+| goals2=
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=15.123
+| referee=[[Danny Makkelie|Makkelie]]
+| report=[http://nos.nl/artikel/2036999-ook-van-bronckhorst-krijgt-feyenoord-niet-op-de-rit.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=24 mei 2015
+| time=15:30
+| team1=[[Feyenoord]]
+| score=2 – 2 ([[Verlenging|nv]])
+| team2=[[sc Heerenveen]]
+| goals1=[[Anass Achahbar|Achahbar]] {{goal|41}}<br />[[Colin Kâzım-Richards|Kazim-Richards]] {{goal|110}}
+| goals2={{goal|100||105}} [[Mark Uth|Uth]]
+| location=[[Rotterdam]]
+| stadium=[[Stadion Feijenoord]]
+| attendance=35.000
+| referee=[[Kevin Blom|Blom]]
+| report=[http://nos.nl/artikel/2037485-heerenveen-dompelt-feyenoord-in-rouw.html Verslag]
+}}
+
+==== Wedstrijd B ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=21 mei 2015
+| time=20.45
+| team1=[[PEC Zwolle]]
+| score=1 – 2
+| team2=[[SBV Vitesse|Vitesse]]
+| goals1=[[Maikel van der Werff|Van der Werff]] {{goal|31}}
+| goals2={{goal|68}} [[Marko Vejinović|Vejinović]]<br />{{goal|74}} [[Valeri Kazaisjvili|Qazaishvili]]
+| location=[[Zwolle]]
+| stadium=[[IJsseldeltastadion]]
+| attendance=7.200
+| referee=[[Pol van Boekel|Van Boekel]]
+| report=[http://nos.nl/artikel/2037029-vitesse-zet-eerste-stap-in-zwolle.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=24 mei 2015
+| time=12:30
+| team1=[[SBV Vitesse|Vitesse]]
+| score=1 – 1
+| team2=[[PEC Zwolle]]
+| goals1=[[Bertrand Traoré|Traoré]] {{goal|18}}
+| goals2={{goal|56}} [[Tomáš Necid|Necid]]<br />{{rode kaart|2|49|80}} [[Maikel van der Werff|Van der Werff]]
+| location=[[Arnhem]]
+| stadium=[[GelreDome]]
+| attendance=16.116
+| referee=[[Eric Braamhaar|Braamhaar]]
+| report=[http://nos.nl/artikel/2037447-vitesse-na-gelijkspel-door-naar-finale-play-offs.html Verslag]
+}}
+
+=== Tweede ronde ===
+==== Wedstrijd C ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=28 mei 2015
+| time=20:45
+| team1=[[sc Heerenveen]]
+| score=2 – 2
+| team2=[[SBV Vitesse|Vitesse]]
+| goals1=[[Luciano Slagveer|Slagveer]] {{goal|32}}<br />[[Mark Uth|Uth]] {{goal|75}}
+| goals2={{goal|21}} [[Valeri Kazaisjvili|Qazaishvili]]<br />{{goal|66}} [[Davy Pröpper|Pröpper]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=16.620
+| referee=[[Björn Kuipers|Kuipers]]
+| report=[http://nos.nl/artikel/2038268-heerenveen-en-vitesse-in-balans.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=31 mei 2015
+| time=16:45
+| team1=[[SBV Vitesse|Vitesse]]
+| score=5 – 2
+| team2=[[sc Heerenveen]]
+| goals1=[[Goeram Kasjia|Kashia]] {{goal|11}}<br />[[Marko Vejinović|Vejinovic]] {{goal|56|pen.}}<br />[[Davy Pröpper|Pröpper]] {{goal|77}}<br />[[Zakaria Labyad|Labyad]] {{goal|82}}<br />[[Jan-Arie van der Heijden|Van der Heijden]] {{goal|86}}
+| goals2={{goal|4||24}} [[Mark Uth|Uth]]
+| location=[[Arnhem]]
+| stadium=[[GelreDome]]
+| attendance=17.529
+| referee=[[Bas Nijhuis|Nijhuis]]
+| report=[http://nos.nl/artikel/2038758-vitesse-dankzij-ruime-zege-europa-in.html Verslag]
+}}
+* [[SBV Vitesse|Vitesse]] plaatst zich voor de 3e voorronde van de [[UEFA Europa League 2015/16|Europa League]].
+
+== Play-offs om promotie/degradatie ==

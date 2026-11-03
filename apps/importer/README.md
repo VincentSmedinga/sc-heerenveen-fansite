@@ -737,7 +737,7 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 De gegevens vallen onder CC BY-SA 4.0.
-Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, en om de Europa League van 2012/13 (zie _De Europa League van 2012/13_).
+Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_) en om de Europa League van 2012/13 (zie _De Europa League van 2012/13_).
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
@@ -745,12 +745,12 @@ Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen se
 
 Per seizoen leest de import vier pagina's van de Nederlandse Wikipedia (2012/13 heeft er een van de Engelse bij, zie _De Europa League van 2012/13_), met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
 
-| Pagina                                           | Wat erop staat                                                                         |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table` (oudere seizoenen: zie _De oudere seizoenen_) |
-| `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde     |
-| `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                      |
-| `Play-offs Nederlands voetbal 2027`              | De play-offs voor de Conference League, ook in `Footballbox2` (zie _De play-offs_)     |
+| Pagina                                           | Wat erop staat                                                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table` (oudere seizoenen: zie _De oudere seizoenen_)                 |
+| `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde                     |
+| `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                                      |
+| `Play-offs Nederlands voetbal 2027`              | De play-offs voor de Conference League of de Europa League, ook in `Footballbox2` (zie _De play-offs_) |
 
 De titels volgen uit het seizoen, dus een nieuw seizoen kost geen code.
 Alles gaat door de fetcher en alleen naar `/wiki/<pagina>?action=raw`: `robots.txt` van Wikipedia sluit `/w/` en dus `api.php`.
@@ -759,16 +759,26 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
 
 ### De play-offs
 
-Na de competitie spelen de clubs op de plekken vijf tot en met negen om één ticket voor de tweede voorronde van de Conference League.
+Na de competitie spelen de clubs op de plekken vijf tot en met negen om één ticket voor de tweede voorronde van de Conference League, vanaf 2020/21.
+Daarvoor was het ticket voor de Europa League.
 Wikipedia heeft per jaar een pagina, `Play-offs Nederlands voetbal <jaar>`, met het jaar waarin het seizoen eindigt: voor 2026/27 is dat 2027.
-De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Conference League`, en `wikipedia_pages` bewaart de pagina met de soort `playoffs`.
+De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Conference League`, of als `Play-offs Europa League` vóór 2020/21, en `wikipedia_pages` bewaart de pagina met de soort `playoffs`.
+Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, ronde) blijft uniek.
 
-- Hij leest alleen de wedstrijden onder de kop `Play-offs voor de UEFA Conference League` (in de eerste jaren `UEFA Europa Conference League`), tot de volgende kop van dat niveau.
+- Hij leest alleen de wedstrijden onder de kop `Play-offs voor de UEFA Conference League` (in de eerste jaren `UEFA Europa Conference League`) of `Play-offs voor de UEFA Europa League`, tot de volgende kop van dat niveau.
+  De kop zegt de competitie.
   De play-offs om promotie en degradatie op dezelfde pagina laat hij weg.
-- De ronde is de kop van het niveau erboven, `Halve finales` als `Halve finale` en `Finale`, en niet de kop `Wedstrijd A`.
+- De ronde is de kop van het niveau erboven, `Halve finales` als `Halve finale`, en verder `Finale`, `Eerste ronde` en `Tweede ronde`, en niet de kop `Wedstrijd A`.
   Een wedstrijd onder een andere kop is een fout.
 - In 2022 en 2023 speelden de clubs de halve finale over twee wedstrijden, elk met `round = Wedstrijd 1/2` in het sjabloon.
   De ronde is dan `Halve finale, wedstrijd 1/2`, zodat de sleutel (seizoen, competitie, ronde) per wedstrijd verschilt.
+- De pagina's van 2011 tot en met 2020 hebben twee rondes (`Eerste ronde` en `Tweede ronde`), elk over twee wedstrijden met `round = Wedstrijd 1` en `Wedstrijd 2`.
+  De ronde is dan `Eerste ronde, wedstrijd 1/2`.
+  Verlenging staat op die pagina's als `(nv)` of `n.v.` achter de score, en de lezer kent beide.
+  Na de tweede wedstrijd van een paar volgt de verlenging, dus de stand na 90 minuten bewaart hij daar niet, zoals bij de Conference League.
+- Sc Heerenveen speelde Europa League-play-offs in 2013, 2014, 2015, 2017 en 2018.
+  Bij de andere jaren (2011, 2012, 2016, 2019) heeft de pagina de kop en geen wedstrijd van ons.
+  De pagina van 2020 bestaat niet (Wikipedia geeft 404, gelezen op 3 november 2026), want dat seizoen is afgebroken, en een ontbrekende pagina is geen mislukking.
 - Verlenging en strafschoppen leest hij zoals bij de beker.
 - De pagina komt pas in mei, en een lopend seizoen heeft hem niet: Wikipedia geeft dan 404.
   Dat is geen mislukking: de import gaat door met de andere pagina's, schrijft geen fout en telt niet mee voor `failures_in_a_row` (en dus niet voor de mail van #533).
@@ -782,7 +792,7 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
 - Gecontroleerd tegen de volledige pagina's van 2022, 2023, 2024, 2025 en 2026: ze hebben dezelfde opbouw.
   De pagina van 2023 is met de hand gelezen en heeft geen fixture; de andere vier staan in `src/fixtures/`.
   Dat de import ze leest zonder verdere wijziging, laat de test voor 2025/26 zien (zie _Een afgelopen seizoen_).
-  Voor oudere seizoenen, waarin de kop anders heette, leest de import niets: de kop ontbreekt dan, en dat is een fout.
+  De pagina's van 2013, 2014, 2015, 2017 en 2018 zijn de Europa League-play-offs; zie `src/fixtures/wikipedia-playoffs-2013.wiki` en de andere.
 
 ### Wat de import bewaart
 
@@ -1268,7 +1278,7 @@ De beslissing is _De lezer kent de oudere vormen van de stand, de beker en de ti
 - **De titels:** `pageCandidates` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) geeft per pagina de titels in volgorde, en de import neemt de eerste die bestaat.
   De pagina's van 2012/13 tot en met 2014/15 hebben geen `(mannenvoetbal)`.
   Een pagina waar geen enkele titel bij past, is een fout die ze allemaal noemt.
-  Vóór 2020/21 leest de import de pagina van de play-offs niet.
+  De pagina van de play-offs leest hij vanaf 2010/11: onder de kop van de Europa League tot en met 2019/20 (zie _De play-offs_).
 - **De stand** zonder sjabloon `Sports table` staat in een tabel onder `Eindstand`, `Stand na 34 wedstrijden` of `Eindstand na 34 wedstrijden`.
   De lezer zoekt elke kolom op de kop (`gs`, `w`, `g`, `v`, `pnt`, `dv`, `dt`, `ds`, en `club` of `Team`) en neemt de cijfers van de pagina over.
   Een puntenaftrek staat in de kolom `PA` (`−1`, `-1` en `1` zijn één punt; leeg of `0` is geen aftrek) en komt in `standings.points_deducted`.
@@ -1599,6 +1609,7 @@ De overige uitslagen van andere clubs zijn verzonnen, op één regel per wedstri
 Alleen de clubs, de dagen en de rondes volgen de pagina; de paren en de scores niet.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
+`wikipedia-playoffs-2013.wiki`, `wikipedia-playoffs-2015.wiki`, `wikipedia-playoffs-2016.wiki` en `wikipedia-playoffs-2018.wiki` zijn de Europa League-play-offs, gelezen op 3 november 2026 en ingekort tot de kop van de Europa League: 2013 met een ronde, 2015 met twee rondes en verlenging als `(nv)`, 2016 zonder sc Heerenveen en 2018 met een regel tekst onder de kop van de tweede ronde.
 [`wikipedia-playoffs-after-ninety.wiki`](src/fixtures/wikipedia-playoffs-after-ninety.wiki) heeft twee verzonnen wedstrijden met verlenging in de lay-out van de echte pagina, met `half time score` zoals de bekerpagina het schrijft, omdat de echte play-offpagina's dat veld nog niet hebben.
 [`wikipedia-cup-goals.wiki`](src/fixtures/wikipedia-cup-goals.wiki) heeft de vier bekerwedstrijden van sc Heerenveen uit het seizoen 2025/26, gelezen op 26 oktober 2026, met een eigen doelpunt, twee doelpunten van één speler in één sjabloon, blessuretijd en een gemiste penalty.
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.

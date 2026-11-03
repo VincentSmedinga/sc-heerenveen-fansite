@@ -348,6 +348,33 @@ describe('the command', () => {
     ])
   })
 
+  it('reads the play-offs for the Europa League from the same page, as a competition of their own', async () => {
+    const server = await serve({ playoffs: fixture('wikipedia-playoffs-2015.wiki') })
+
+    const { code } = await runCommand(server, past)
+    const stored = await database.db
+      .select()
+      .from(matches)
+      .where(eq(matches.competition, 'Play-offs Europa League'))
+      .orderBy(asc(matches.matchDate))
+
+    expect(code).toBe(0)
+    expect(
+      stored.map((match) => [match.round, match.opponent, match.goalsFor, match.goalsAgainst, match.extraTime]),
+    ).toEqual([
+      ['Eerste ronde, wedstrijd 1/2', 'Feyenoord', 1, 0, false],
+      ['Eerste ronde, wedstrijd 2/2', 'Feyenoord', 2, 2, true],
+      ['Tweede ronde, wedstrijd 1/2', 'Vitesse', 2, 2, false],
+      ['Tweede ronde, wedstrijd 2/2', 'Vitesse', 2, 5, false],
+    ])
+    expect(
+      await database.db.select().from(matches).where(eq(matches.competition, 'Play-offs Conference League')),
+    ).toEqual([])
+    expect(await database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'playoffs'))).toMatchObject([
+      { season: past, title: 'Play-offs Nederlands voetbal 2026' },
+    ])
+  })
+
   it.each(['2022-23', '2024-25'])('reads a season whose cup page has the older layout (%s)', async (cupSeason) => {
     const cup = fixture(`wikipedia-cup-${cupSeason}.wiki`)
     const server = await serve({ last: { ...lastSeason, cup } })

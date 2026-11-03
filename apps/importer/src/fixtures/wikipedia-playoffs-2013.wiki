@@ -1,0 +1,116 @@
+<!--
+  The play-offs of 2013 (the season 2012/13). sc Heerenveen played the first round over two matches and lost it.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2013?action=raw, read on 3 November 2026, cut down to the section of the
+  play-offs for the Europa League without the match schedule table, and the heading of the play-offs for promotion and relegation.
+  The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Play-offs voor de UEFA Europa League ==
+De play-offs, gespeeld door de nummers 5 t/m 8 van de [[Eredivisie 2012/13|Eredivisie]], hadden in 2013 een iets andere opzet dan de jaren daarvoor. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:
+* Eredivisie #1: groepsfase Champions League
+* Eredivisie #2: voorronde Champions League
+* Eredivisie #3: play-off fase Europa League
+* Eredivisie #4: derde kwalificatieronde Europa League
+* Eredivisie play-offs: tweede kwalificatieronde Europa League
+* Bekerwinnaar: play-off fase Europa League
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=16 mei 2013
+| time=20:45
+| team1=[[sc Heerenveen]]
+| score=0 – 1
+| team2=[[FC Utrecht]]
+| goals1=
+| goals2={{goal|69}} [[Cedric van der Gun|Van der Gun]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=13.500
+| referee=[[Kevin Blom|Blom]]
+| report=[http://nos.nl/artikel/507692-fc-utrecht-wint-bij-heerenveen.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=19 mei 2013
+| time=16:30
+| team1=[[FC Utrecht]]
+| score=2 – 1
+| team2=[[sc Heerenveen]]
+| goals1=[[Jens Toornstra|Toornstra]] {{goal|9||82}}
+| goals2={{goal|89}} [[Mark Uth|Uth]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=19.222
+| referee=[[Pol van Boekel|Van Boekel]]
+| report=[http://nos.nl/artikel/508606-utrecht-klopt-heerenveen-opnieuw.html Verslag]
+}}
+
+==== Wedstrijd B ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=16 mei 2013
+| time=18:45
+| team1=[[FC Groningen]]
+| score=0 – 1
+| team2=[[FC Twente]]
+| goals1=
+| goals2={{goal|22}} [[Felipe Gutiérrez|Gutiérrez]]
+| location=[[Groningen (stad)|Groningen]]
+| stadium=[[Euroborg]]
+| attendance=11.178
+| referee=[[Pieter Vink|Vink]]
+| report=[http://nos.nl/artikel/507656-fc-twente-zegeviert-in-groningen.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=19 mei 2013
+| time=12:30
+| team1=[[FC Twente]]
+| score=3 – 2
+| team2=[[FC Groningen]]
+| goals1=[[Edson Braafheid|Braafheid]] {{goal|12}}<br />[[Felipe Gutiérrez|Gutiérrez]] {{goal|83}}<br />[[Nacer Chadli|Chadli]] {{goal|90+1}}
+| goals2={{goal|23|e.d.}} [[Edson Braafheid|Braafheid]]<br />{{goal|26}} [[Andraž Kirm|Kirm]]
+| location=[[Enschede]]
+| stadium=[[De Grolsch Veste]]
+| attendance=22.500
+| referee=[[Richard Liesveld|Liesveld]]
+| report=[http://nos.nl/artikel/508512-fc-twente-naar-finale-playoffs.html Verslag]
+}}
+
+=== Tweede ronde ===
+==== Wedstrijd C ====
+{{footballbox2
+| round=Wedstrijd 1
+| date=23 mei 2013
+| time=20:45
+| team1=[[FC Twente]]
+| score=0 – 2
+| team2=[[FC Utrecht]]
+| goals1=
+| goals2={{goal|9}} [[Cedric van der Gun|Van der Gun]]<br />{{goal|59}} [[Edouard Duplan|Duplan]]<br />{{rode kaart|2|41|90+3}} [[Nana Asare|Asare]]
+| location=[[Enschede]]
+| stadium=[[De Grolsch Veste]]
+| attendance= 20.500
+| referee=[[Reinold Wiedemeijer|Wiedemeijer]]
+| report=[http://nos.nl/artikel/510131-elticket-lonkt-voor-fc-utrecht.html Verslag]
+}}
+{{footballbox2
+| round=Wedstrijd 2
+| date=26 mei 2013
+| time=12:30
+| team1=[[FC Utrecht]]
+| score=1 – 2
+| team2=[[FC Twente]]
+| goals1=[[Edouard Duplan|Duplan]] {{goal|46}}
+| goals2={{goal|34}} [[Dušan Tadić|Tadić]]<br />{{goal|36}} [[Nacer Chadli|Chaldi]]
+| location=[[Utrecht (stad)|Utrecht]]
+| stadium=[[Stadion Galgenwaard]]
+| attendance=23.397
+| referee=[[Danny Makkelie|Makkelie]]
+| report=[http://nos.nl/artikel/511020-utrecht-ondanks-verlies-europa-in.html Verslag]
+}}
+* [[FC Utrecht]] plaatst zich voor de 2e voorronde van de [[UEFA Europa League 2013/14|Europa League]].
+
+== Play-offs om promotie/degradatie ==

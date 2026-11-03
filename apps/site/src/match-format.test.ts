@@ -134,6 +134,8 @@ describe('the links to Wikipedia', () => {
     expect(creditName('programme', '2026/27')).toBe('Programma Eredivisie 2026/27')
     expect(creditName('cup', '2026/27')).toBe('KNVB Beker 2026/27')
     expect(creditName('europa-league', '2012/13')).toBe('Europa League 2012/13 (Engelse Wikipedia)')
+    expect(creditName('playoffs', '2025/26')).toBe('Play-offs Conference League 2025/26')
+    expect(creditName('playoffs', '2012/13')).toBe('Play-offs Europa League 2012/13')
   })
 
   it('links to the English Wikipedia for the page with the Europa League matches, and only for that', () => {

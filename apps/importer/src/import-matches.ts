@@ -1,5 +1,5 @@
 import type { Database } from '@fansite/db/client'
-import type { Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
+import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
 import {
@@ -526,12 +526,15 @@ function goalsOf(match: ReadMatch, link: (goal: ReadGoal) => null | number): { g
     : { goals: [], warning: `no scorers: ${problem}` }
 }
 
+/** The competitions on the play-offs page: Conference League from 2020/21, else Europa. */
+const playoffCompetitions: Competition[] = ['Play-offs Conference League', 'Play-offs Europa League']
+
 /** Whether the season has a match of the play-offs in the database. */
 async function hasPlayoffMatch(db: Pick<Database, 'select'>, season: string): Promise<boolean> {
   const [row] = await db
     .select({ id: matches.id })
     .from(matches)
-    .where(and(eq(matches.season, season), eq(matches.competition, 'Play-offs Conference League')))
+    .where(and(eq(matches.season, season), inArray(matches.competition, playoffCompetitions)))
     .limit(1)
 
   return row !== undefined
@@ -944,7 +947,7 @@ async function storeMatches(
 
   for (const row of known.values()) {
     if (
-      (!read.playoffs && row.competition === 'Play-offs Conference League') ||
+      (!read.playoffs && playoffCompetitions.includes(row.competition)) ||
       (!read.europaLeague && row.competition === 'Europa League')
     ) {
       continue

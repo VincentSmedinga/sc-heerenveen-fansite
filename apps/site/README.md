@@ -267,7 +267,7 @@ Elk seizoen heeft één adres: `/wedstrijden` is het lopende seizoen en `/wedstr
 Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, en een seizoen dat niet in de database staat, een seizoen in de toekomst en een adres dat geen seizoen is, geven "niet gevonden".
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
-Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Play-offs Conference League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
+Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
 Het lopende seizoen heeft de nieuwste uitslag bovenaan en een kaart Programma met alle competities op datum.
 Een eerder seizoen heeft geen kaart Programma, toont elke kaart van de eerste naar de laatste wedstrijd (`resultsOfSeason`), noemt zijn tabel Eindstand (`standingsCardOf`, met het anker `eindstand`), zet het seizoen op de afbeelding van een kaart en staat niet in de sitemap.
 Een pagina met een ander basisadres (zoals `/statistieken`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Title` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
@@ -354,7 +354,7 @@ Rechts staan de doelpuntenmakers (de top 5, zie _De spelers_), de nul gehouden, 
 De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
-De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
+De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League of de Europa League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
 Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders.
 De links van die balk houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/statistieken/spelers/2025-26?competitie=eredivisie`, en Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
 De items van het menu zelf houden niets vast: Statistieken is altijd `/statistieken`.
@@ -554,7 +554,7 @@ Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?compet
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
 De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd of play-offwedstrijd (`hasPlayedExtraMatch`): zonder die zijn de twee keuzes gelijk.
-De play-offs voor de Conference League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
+De play-offs voor de Conference League en de Europa League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
 De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
