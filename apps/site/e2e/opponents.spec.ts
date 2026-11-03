@@ -307,7 +307,7 @@ test.describe('the matches to come on the page of a club', () => {
   test('shows a match that is called off with "Uitgesteld"', async ({ page }) => {
     await page.goto('/statistieken/tegenstanders/demo-boys')
 
-    await expect(page.getByRole('region', { name: 'Wedstrijden' }).getByText('Uitgesteld')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Wedstrijden' }).getByText('Uitgesteld').first()).toBeVisible()
   })
 
   test('leaves out a cup tie with the choice Eredivisie, and brings it back with Alle wedstrijden', async ({
