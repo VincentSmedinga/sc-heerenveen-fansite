@@ -513,11 +513,10 @@ Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nulle
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
 De pagina heeft twee kolommen.
 De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
-Staat er een wedstrijd in het programma, dan komt die eerst, onder de kop "Komende wedstrijden", als `Match` met de competitie in de regel en de eerstvolgende bovenaan.
+Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, als `Match` met de competitie in de regel en de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
 Wat komt, bepaalt `programmeOf` in `src/matches.ts`, dezelfde regel als Programma (`upcomingOf` in `src/opponents.ts`), en de keuze voor de competitie telt mee.
-De gespeelde wedstrijden staan dan onder de kop "Gespeelde wedstrijden"; zonder komende wedstrijden zijn er geen onderkoppen.
-Een club die we nog niet speelden, zegt dat onder die kop, heeft geen zijkolom met uitslagen, en heeft alleen de bronvermelding in de zijkolom.
-Direct onder de kop (bij komende wedstrijden onder "Gespeelde wedstrijden") staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
+Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft alleen die wedstrijden in de kaart, geen zijkolom met uitslagen, en alleen de bronvermelding in de zijkolom.
+Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
 Ze heeft drie delen:

@@ -435,15 +435,21 @@ describe('the page of a club', () => {
 })
 
 describe('the matches that are still to come on the page of a club', () => {
-  /** The card under the heading Komende wedstrijden, up to the next heading. */
-  const upcomingPart = (html: string) => /<h3[^>]*>Komende wedstrijden<\/h3>(.*?)<h3/s.exec(html)?.[1] ?? ''
+  /** The list of the card Wedstrijden. */
+  const listOf = (html: string) => /id="wedstrijden".*?(<ul[^>]*role="list".*?<\/ul>)/s.exec(html)?.[1] ?? ''
 
-  /** The lines of the list, as a screen reader hears them. */
-  const linesOf = (part: string) => [...part.matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => plain(line ?? ''))
+  /** The items of that list, in order, as HTML. */
+  const itemsOf = (html: string) => [...listOf(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, item]) => item ?? '')
 
-  it('lists them under Komende wedstrijden, the next one first, as Match with the competition in the line', async () => {
+  /** The lines of the matches to come (`Match`, not `ShortMatch`), as heard by a reader. */
+  const linesOf = (html: string) =>
+    itemsOf(html)
+      .filter((item) => item.includes('class="hf-match"'))
+      .map(plain)
+
+  it('lists them first in the list of the card, the next one first, as Match with the competition in the line', async () => {
     const html = await render('komend-fc')
-    const lines = linesOf(upcomingPart(html))
+    const lines = linesOf(html)
 
     expect(lines).toHaveLength(3)
     // Called off: the day is not known, so the line says so instead of a time.
@@ -455,31 +461,26 @@ describe('the matches that are still to come on the page of a club', () => {
   })
 
   it('has the lines of Match without Thuis, Uit, a season or a score', async () => {
-    const part = upcomingPart(await render('komend-fc'))
+    const lines = linesOf(await render('komend-fc')).join(' ')
 
-    expect(plain(part)).not.toMatch(/Thuis|Uit /)
-    expect(plain(part)).not.toContain('2026/27')
-    expect(part).not.toContain('hf-match-goals')
+    expect(lines).not.toMatch(/Thuis|Uit /)
+    expect(lines).not.toContain('2026/27')
+    expect(lines).not.toContain('hf-match-goals')
   })
 
-  it('has the subheadings Komende wedstrijden and Gespeelde wedstrijden as h3 under the h2, the row after the second', async () => {
+  it('has no subheadings: the matches to come and the played ones are one list, the ones to come first', async () => {
     const html = await render('komend-fc')
     const headings = [...html.matchAll(/<h([23])[^>]*>(?:<[^>]*>)*([^<]*)/g)].map(([, level, text]) => [level, text])
 
     expect(headings).toEqual([
       ['2', 'Wedstrijden'],
-      ['3', 'Komende wedstrijden'],
-      ['3', 'Gespeelde wedstrijden'],
       ['2', 'Onze uitslagen tegen Komend FC'],
     ])
-    expect(html.indexOf('Gespeelde wedstrijden')).toBeLessThan(html.indexOf('hf-short-match'))
-  })
-
-  it('has one list for each, a real list', async () => {
-    const html = await render('komend-fc')
-
-    expect(upcomingPart(html)).toMatch(/^\s*<ul[^>]*role="list"/)
-    expect(upcomingPart(html)).toMatch(/<\/ul>\s*$/)
+    expect(html).not.toContain('Komende wedstrijden')
+    expect(html).not.toContain('Gespeelde wedstrijden')
+    expect(listOf(html).match(/<ul/g)).toHaveLength(1)
+    expect(itemsOf(html)).toHaveLength(4)
+    expect(html.indexOf('class="hf-match"')).toBeLessThan(html.indexOf('hf-short-match'))
   })
 
   it('shows one match that is to come, for a club with a single one', async () => {
@@ -488,28 +489,27 @@ describe('the matches that are still to come on the page of a club', () => {
       matches: komend.matches.slice(0, 1).concat(komend.matches[3]!),
     })
 
-    expect(linesOf(upcomingPart(await render('komend-fc')))).toHaveLength(1)
+    expect(linesOf(await render('komend-fc'))).toHaveLength(1)
   })
 
   it('leaves out a cup tie with ?competitie=eredivisie, like the played matches', async () => {
-    const lines = linesOf(upcomingPart(await render('komend-fc', { competitie: 'eredivisie' })))
+    const lines = linesOf(await render('komend-fc', { competitie: 'eredivisie' }))
 
     expect(lines).toHaveLength(2)
     expect(lines.join(' ')).not.toContain('KNVB Beker')
   })
 
-  it('has no subheadings and no sentence for a club with nothing to come', async () => {
+  it('is unchanged for a club with nothing to come: no match line of Match in the list', async () => {
     const html = await render()
 
-    expect(html).not.toContain('Komende wedstrijden')
-    expect(html).not.toContain('Gespeelde wedstrijden')
+    expect(linesOf(html)).toEqual([])
     expect(html).not.toMatch(/<h3/)
   })
 
   it('does not count a match that has begun without a result as to come, but keeps one that is called off', async () => {
     vi.setSystemTime(new Date('2026-12-05T19:35:00Z'))
 
-    const lines = linesOf(upcomingPart(await render('komend-fc')))
+    const lines = linesOf(await render('komend-fc'))
 
     // The cup tie and the match of 5 December have begun; only the postponed one is left.
     expect(lines).toHaveLength(1)
@@ -522,23 +522,23 @@ describe('the matches that are still to come on the page of a club', () => {
     expect(await render('komend-fc')).toContain('Alle wedstrijden')
   })
 
-  it('has the card, the sentence under Gespeelde wedstrijden and only the credit for a club we have not played', async () => {
+  it('has the card with only the matches to come, no sentence, and only the credit for a club we have not played', async () => {
     const html = await render('nieuw-promovendus')
 
-    expect(html).toContain('Komende wedstrijden')
-    expect(html).toMatch(
-      /<h3[^>]*>Gespeelde wedstrijden<\/h3>\s*<p[^>]*>We hebben nog niet tegen deze club gespeeld\.<\/p>/,
-    )
+    expect(linesOf(html)).toHaveLength(1)
+    expect(itemsOf(html)).toHaveLength(1)
+    expect(html).not.toContain('We hebben nog niet tegen deze club gespeeld')
     expect(html).not.toContain('id="onze-uitslagen"')
     expect(html).not.toContain('id="stadion"')
     expect(html).toContain('aria-label="De bron"')
     expect(html).toContain('Eredivisie 2026/27')
   })
 
-  it('says that we have not played the club in the Eredivisie under Gespeelde wedstrijden with that choice', async () => {
+  it('has no sentence for a club we have not played in the Eredivisie when a match to come is there', async () => {
     const html = await render('nieuw-promovendus', { competitie: 'eredivisie' })
 
-    expect(html).toContain('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')
+    expect(linesOf(html)).toHaveLength(1)
+    expect(html).not.toContain('nog niet tegen deze club gespeeld')
   })
 
   it('credits the seasons of the matches to come as well', async () => {
@@ -547,7 +547,7 @@ describe('the matches that are still to come on the page of a club', () => {
     expect(await render('komend-fc')).toContain('Eredivisie 2026/27')
   })
 
-  it('is unchanged for a club without matches to come: no Komende wedstrijden for a club we only met in the cup', async () => {
-    expect(await render('beker-united')).not.toContain('Komende wedstrijden')
+  it('has no match to come for a club we only met in the cup', async () => {
+    expect(linesOf(await render('beker-united'))).toEqual([])
   })
 })

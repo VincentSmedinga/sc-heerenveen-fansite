@@ -287,18 +287,18 @@ test.describe('the bar of Statistieken', () => {
 })
 
 test.describe('the matches to come on the page of a club', () => {
-  test('has them under Komende wedstrijden, and the sentence under Gespeelde wedstrijden for a club not played yet', async ({
+  test('has them in the list of the card, with no subheadings and no sentence, for a club not played yet', async ({
     page,
   }) => {
     await page.goto('/statistieken/tegenstanders/nepstad-rangers')
 
     const card = page.getByRole('region', { name: 'Wedstrijden' })
 
-    await expect(card.getByRole('heading', { level: 3 })).toHaveText(['Komende wedstrijden', 'Gespeelde wedstrijden'])
+    await expect(card.getByRole('heading', { level: 3 })).toHaveCount(0)
     await expect(card.getByRole('list').first().getByRole('listitem')).toHaveCount(1)
     await expect(card.getByRole('listitem').first()).toContainText('Nepstad Rangers')
     await expect(card.getByRole('listitem').first()).toContainText('Eredivisie · Speelronde 4')
-    await expect(card.getByText('We hebben nog niet tegen deze club gespeeld.')).toBeVisible()
+    await expect(page.getByText('We hebben nog niet tegen deze club gespeeld.')).toHaveCount(0)
     await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
     // Without a played match there is no summary, but the credit is still there.
     await expect(page.getByRole('complementary', { name: 'De bron' }).getByText(/^Bron: /)).toBeVisible()

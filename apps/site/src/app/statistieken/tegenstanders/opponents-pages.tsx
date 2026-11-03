@@ -212,7 +212,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
         {meetings.length === 0 && upcoming.length === 0 ? (
           <Text>{noneYet}</Text>
         ) : (
-          <ClubMeetingsCard meetings={meetings} noneYet={noneYet} now={now} upcoming={upcoming} />
+          <ClubMeetingsCard meetings={meetings} now={now} upcoming={upcoming} />
         )}
       </Page.Main>
       {/* The sidebar is as wide as the main column, as on Statistieken. On a phone it follows the

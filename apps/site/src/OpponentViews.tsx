@@ -69,74 +69,50 @@ const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + re
 const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => record.goalsFor - record.goalsAgainst
 
 /**
- * The card of the page of a club with every match against it. The matches that are still to
- * come stand first, next one first, as `Match` has them in Programma, with the competition and
- * the round in the line. The matches that were played follow, the newest first, as short lines,
- * with the row Laatste wedstrijden above them when there are five or more (see
- * `lastResultsOf`). Above each of those lines stand the season and the competition, and the
- * line has the day, the name as Wikipedia wrote the club in that match (so an earlier name
- * shows), where it was played and the result from our side. It is the main content of the page,
+ * The card of the page of a club with every match against it, in one list. The matches that
+ * are still to come stand first, next one first, as `Match` has them in Programma, with the
+ * competition and the round in the line. The matches that were played follow, the newest
+ * first, as short lines, with the row Laatste wedstrijden above the list when there are five
+ * or more (see `lastResultsOf`). Above each played line stand the season and the competition,
+ * and the line has the day, the name as Wikipedia wrote the club in that match (so an earlier
+ * name shows), where it was played and the result from our side. A match to come has no result,
+ * which is what sets it apart, so there are no subheadings. It is the main content of the page,
  * so it has the white surface.
- *
- * With matches to come the two lists have a heading of their own, and a club we have not played
- * says so under the second. Without any, the card is the played matches alone, with no
- * subheadings.
  */
 export function ClubMeetingsCard({
   meetings,
-  noneYet,
   now,
   upcoming,
 }: {
   meetings: Meeting[]
-  noneYet: string
   now: Date
   upcoming: PublicClubMatch[]
 }) {
   const last = lastResultsOf(meetings)
-  const played = (
-    <>
-      {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
-      {meetings.length === 0 ? (
-        <Text>{noneYet}</Text>
-      ) : (
-        <List role="list">
-          {meetings.map((match) => (
-            <List.Item key={match.id}>
-              <Text appearance="meta">
-                {match.season}
-                {metaSeparator}
-                {match.competition}
-              </Text>
-              <MeetingLine match={match} now={now} />
-            </List.Item>
-          ))}
-        </List>
-      )}
-    </>
-  )
 
   return (
     <Card aria-labelledby="wedstrijden">
       <Heading id="wedstrijden" level={2}>
         Wedstrijden
       </Heading>
-      {upcoming.length === 0 ? (
-        played
-      ) : (
-        <>
-          <Heading level={3}>Komende wedstrijden</Heading>
-          <List role="list">
-            {upcoming.map((match) => (
-              <List.Item key={match.id}>
-                <UpcomingLine match={match} now={now} />
-              </List.Item>
-            ))}
-          </List>
-          <Heading level={3}>Gespeelde wedstrijden</Heading>
-          {played}
-        </>
-      )}
+      {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
+      <List role="list">
+        {upcoming.map((match) => (
+          <List.Item key={match.id}>
+            <UpcomingLine match={match} now={now} />
+          </List.Item>
+        ))}
+        {meetings.map((match) => (
+          <List.Item key={match.id}>
+            <Text appearance="meta">
+              {match.season}
+              {metaSeparator}
+              {match.competition}
+            </Text>
+            <MeetingLine match={match} now={now} />
+          </List.Item>
+        ))}
+      </List>
     </Card>
   )
 }
