@@ -745,12 +745,12 @@ Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen se
 
 Per seizoen leest de import vier pagina's, met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
 
-| Pagina                                           | Wat erop staat                                                                     |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table`                                           |
-| `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde |
-| `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                  |
-| `Play-offs Nederlands voetbal 2027`              | De play-offs voor de Conference League, ook in `Footballbox2` (zie _De play-offs_) |
+| Pagina                                           | Wat erop staat                                                                         |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table` (oudere seizoenen: zie _De oudere seizoenen_) |
+| `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde     |
+| `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                      |
+| `Play-offs Nederlands voetbal 2027`              | De play-offs voor de Conference League, ook in `Footballbox2` (zie _De play-offs_)     |
 
 De titels volgen uit het seizoen, dus een nieuw seizoen kost geen code.
 Alles gaat door de fetcher en alleen naar `/wiki/<pagina>?action=raw`: `robots.txt` van Wikipedia sluit `/w/` en dus `api.php`.
@@ -1250,6 +1250,7 @@ De lezer kent deze vormen:
 | `5 – 1 (3 – 0)`                      | de eindstand 5 – 1, met 3 – 0 bij de rust                                      |
 | `2 – 4 (2 – 2, 1 – 1)` met `aet = J` | de eindstand 2 – 4 na verlenging, met 2 – 2 na 90 minuten en 1 – 1 bij de rust |
 | `20:00 uur` en `20:00`               | dezelfde tijd                                                                  |
+| `20.45`                              | dezelfde tijd (2011/12)                                                        |
 
 - De eindstand is de score van de wedstrijd, met de score van de strafschoppen er los van in `penaltyscore`.
 - De import leest de waarden in de haakjes en controleert ze.
@@ -1258,6 +1259,30 @@ De lezer kent deze vormen:
   De stand na 90 minuten bewaart hij (zie _Wat de import bewaart_ hierboven), de stand bij de rust niet.
 - Een score of een tijd in een andere vorm blijft een fout met de naam van de wedstrijd, en de database blijft zoals ze was.
 - De fixtures `wikipedia-cup-2021-22.wiki` tot en met `wikipedia-cup-2024-25.wiki` in `src/fixtures/` zijn de wedstrijden van sc Heerenveen uit die vier pagina's.
+
+### De oudere seizoenen (2010/11 tot en met 2019/20)
+
+Voor deze seizoenen kent de lezer meer titels en meer vormen.
+De beslissing is _De lezer kent de oudere vormen van de stand, de beker en de titels_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
+- **De titels:** `pageCandidates` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) geeft per pagina de titels in volgorde, en de import neemt de eerste die bestaat.
+  De pagina's van 2012/13 tot en met 2014/15 hebben geen `(mannenvoetbal)`.
+  Een pagina waar geen enkele titel bij past, is een fout die ze allemaal noemt.
+  Vóór 2020/21 leest de import de pagina van de play-offs niet.
+- **De stand** zonder sjabloon `Sports table` staat in een tabel onder `Eindstand`, `Stand na 34 wedstrijden` of `Eindstand na 34 wedstrijden`.
+  De lezer zoekt elke kolom op de kop (`gs`, `w`, `g`, `v`, `pnt`, `dv`, `dt`, `ds`, en `club` of `Team`) en neemt de cijfers van de pagina over.
+  Een puntenaftrek in de kolom `PA` is een fout, want de tabel `standings` kent die niet.
+- **De score van een bekerwedstrijd** mag `n.v.` en `(6 – 7 pen.)` bevatten, en een of twee paren tussen haakjes:
+
+| Wikipedia schrijft                                 | De lezer leest                                                         |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `0 – 1 n.v.`                                       | 0 – 1 na verlenging                                                    |
+| `5 – 1 (1 – 1, 0 – 0) n.v.`                        | 5 – 1 na verlenging, 1 – 1 na 90 minuten, 0 – 0 bij de rust            |
+| `2 – 2 n.v. (2 – 2) (0 – 1) (6 – 7 pen.)`          | 2 – 2 na verlenging, 2 – 2 na 90 minuten, 0 – 1 bij de rust, 6 – 7 pen |
+| `Speelronde 33 (was 34)` boven een wedstrijd (kop) | ronde 33                                                               |
+
+- Een naam met sterren achter zich (`FC Twente *`) is de naam zonder de sterren.
+- De fixtures `wikipedia-standings-2012-13.wiki`, `wikipedia-standings-2015-16.wiki`, `wikipedia-standings-2018-19.wiki`, `wikipedia-cup-older-seasons.wiki` en `wikipedia-programme-2018-19.wiki` in `src/fixtures/` zijn korte stukken van de echte pagina's.
 
 ### Een afgelopen seizoen
 

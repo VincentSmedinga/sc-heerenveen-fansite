@@ -1,0 +1,110 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2011/12_(mannen)?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: every match but six of sc Heerenveen, taken from six pages (named above each match) of the seasons 2011/12 to 2019/20, and the text around them. See the tests.
+-->
+
+=== Kwartfinales ===
+<!-- KNVB Beker 2011/12 (mannen), Kwartfinales -->
+{{footballbox2
+| date=31 januari 2012
+| time=20.45
+| team1=[[SBV Vitesse|Vitesse]]
+| score=1 – 2 (1 – 0)
+| team2=[[sc Heerenveen]]
+| goals1= [[Stanley Aborah]] {{goal|41}}
+| goals2= {{goal|67}} [[Viktor Elm]] <br />{{goal|71}} [[Bas Dost]]
+| location=[[Arnhem (hoofdbetekenis)|Arnhem]]
+| stadium=[[GelreDome]]
+| attendance=10.418
+| referee=[[Richard Liesveld]]
+| report=[https://nos.nl/artikel/336140-heerenveen-klopt-vitesse-in-beker.html Verslag]
+}}
+
+=== Achtste finales ===
+<!-- KNVB Beker 2012/13 (mannen), Achtste finales -->
+{{footballbox2
+| date=19 december 2012
+| time=20:45
+| team1=[[sc Heerenveen]]
+| score= 2 – 2 n.v. (2 – 2) (0 – 1) <br /> <small>(6 – 7 pen.)</small>
+| team2=[[Feyenoord]]
+| goals1=[[Jeffrey Gouweleeuw]] {{goal|55}} <br /> [[Filip Đuričić]] {{goal|90}}
+| goals2={{goal|28}} [[Graziano Pellè]] <br /> {{goal|66}} [[Lex Immers]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=18.800
+| referee=[[Bas Nijhuis]]
+| report=
+}}
+
+=== Achtste finales ===
+<!-- KNVB Beker 2013/14 (mannen), Achtste finales -->
+{{footballbox2
+| date= 18 december 2013
+| time= 18:45
+| team1= [[AZ (voetbalclub)|AZ]]
+| score= 2 – 2 n.v. (1 – 1) (1 – 1)<br /><small>(7 – 6 pen.)</small>
+| team2= [[sc Heerenveen]]
+| goals1= [[Aron Jóhannsson]] {{goal|19}}<br />[[Aron Jóhannsson]] {{goal|105}}
+| goals2= {{goal|9}} [[Hakim Ziyech]]<br />{{goal|120}} ([[Strafschop|pen]]) [[Hakim Ziyech]]
+| location= [[Alkmaar (hoofdbetekenis)|Alkmaar]]
+| stadium= [[AFAS Stadion]]
+| attendance= 11.121
+| referee= [[Danny Makkelie]]
+| report=
+}}
+
+=== Eerste ronde ===
+<!-- KNVB Beker 2016/17 (mannen), Eerste ronde -->
+{{footballbox2
+| date= 20 september 2016
+| time= 20:45
+| team1= [[sc Heerenveen]] *
+| score= 5 – 1 (1 – 1, 0 – 0) n.v.
+| team2= [[BV De Graafschap|De Graafschap]]
+| goals1= [[Henk Veerman|Veerman]] {{goal|86||93}}<br />[[Arber Zeneli|Zeneli]] {{goal|95}}<br />[[Younes Namli|Namli]] {{goal|102}}<br />[[Stijn Schaars|Schaars]] {{goal|105}}
+| goals2= {{goal|67}} [[Elvio van Overbeek|Van Overbeek]]
+| location= Heerenveen
+| stadium= [[Abe Lenstra Stadion]]
+| attendance= 11.150
+| referee= [[Christiaan Bax|Bax]]
+| report=
+}}
+
+=== Eerste ronde ===
+<!-- KNVB Beker 2018/19 (mannen), Eerste ronde -->
+{{Footballbox2
+| date= 26 september 2018
+| time= 19:45 uur
+| team1= [[VV Katwijk]]
+| score= 0 – 1 n.v.
+| team2= [[sc Heerenveen]] *
+| goals1= 
+| goals2= {{goal|116}} [[Sam Lammers|Lammers]]
+| location= [[Katwijk (Zuid-Holland)|Katwijk]]
+| stadium= [[Sportpark de Krom]]
+| attendance= 1.750
+| referee= [[Clay Ruperti|Ruperti]]
+| report= [https://www.vi.nl/wedstrijden/2018/09/26/nederland/toto-knvb-beker/katwijk-vs-sc-heerenveen Verslag]
+}}
+
+=== Achtste finales ===
+<!-- KNVB Beker 2019/20 (mannen), Achtste finales -->
+{{Footballbox2
+| date= 22 januari 2020
+| time= 20:45 uur
+| team1= '''[[sc Heerenveen]]'''
+| score= 2 – 2 (2 – 2, 0 – 1) n.v.
+| team2= [[Willem II (voetbalclub)|Willem II]]
+| goals1= [[Hicham Faik|Faik]] {{goal|48|pen.}}<br />[[Dries Saddiki|Saddiki]] {{goal|76|e.d.}}
+| goals2= {{goal|20}} [[Vangelis Pavlidis|Pavlidis]]<br />{{goal|81}} [[Damil Dankerlui|Dankerlui]]
+| penaltyscore= 4 – 3
+| penalties1= [[Hicham Faik|Faik]] {{pengoal}}<br />[[Ibrahim Drešević|Drešević]] {{pengoal}}<br />[[Runar Espejord|Espejord]] {{penmis|Redding keeper}}<br />[[Alen Halilović|Halilović]] {{pengoal}}<br />[[Chidera Ejuke|Ejuke]] {{pengoal}}
+| penalties2= {{penmis|Naast}} [[Freek Heerkens|Heerkens]]<br />{{pengoal}} [[Mike Trésor Ndayishimiye|Ndayishimiye]]<br />{{pengoal}} [[Miquel Nelom|Nelom]]<br />{{penmis|Redding keeper}} [[Marios Vrousai|Vrousai]]<br />{{pengoal}} [[Sebastian Holmén|Holmén]]
+| location= [[Heerenveen (plaats)|Heerenveen]]
+| stadium= [[Abe Lenstra Stadion]]
+| attendance= 7.102
+| referee= [[Pol van Boekel|Van Boekel]]
+| report= 
+}}

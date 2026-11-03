@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 
 import { checkGoals } from './check-wikipedia.ts'
 import {
+  clubName,
   linkedPage,
+  pageCandidates,
   pageTitles,
   pageUrl,
   readCup,
@@ -24,6 +26,13 @@ const playoffAfterNinetyPage = readFileSync(
   new URL('./fixtures/wikipedia-playoffs-after-ninety.wiki', import.meta.url),
   'utf8',
 )
+const olderCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-older-seasons.wiki', import.meta.url), 'utf8')
+const olderProgramme = readFileSync(new URL('./fixtures/wikipedia-programme-2018-19.wiki', import.meta.url), 'utf8')
+const olderStandings = {
+  2012: readFileSync(new URL('./fixtures/wikipedia-standings-2012-13.wiki', import.meta.url), 'utf8'),
+  2015: readFileSync(new URL('./fixtures/wikipedia-standings-2015-16.wiki', import.meta.url), 'utf8'),
+  2018: readFileSync(new URL('./fixtures/wikipedia-standings-2018-19.wiki', import.meta.url), 'utf8'),
+}
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const catchUpProgramme = readFileSync(new URL('./fixtures/wikipedia-catch-up-2022-23.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
@@ -902,7 +911,7 @@ describe('the cup pages of 2021/22 to 2024/25', () => {
     ])
   })
 
-  it.each(['20:00', '20:00 uur', '8:05', '20:00*'])('reads the time %j as a time', (time) => {
+  it.each(['20:00', '20:00 uur', '8:05', '20:00*', '20.45', '20.00'])('reads the time %j as a time', (time) => {
     expect(read(tie({ time }))).toMatchObject([{ kickoffAt: expect.any(Date) }])
   })
 
@@ -914,7 +923,7 @@ describe('the cup pages of 2021/22 to 2024/25', () => {
     expect(without?.kickoffAt).toEqual(new Date('2022-10-18T18:00:00Z'))
   })
 
-  it.each(['25:00', '20:75', '20.00', '20:00 u', 'avond', '20:00:00'])('still refuses the time %j', (time) => {
+  it.each(['25:00', '20:75', '20,00', '20:00 u', 'avond', '20:00:00'])('still refuses the time %j', (time) => {
     expect(readCup(tie({ time }))).toEqual({
       kind: 'error',
       message: `Eerste ronde (KNVB Beker) has a time we do not know: '${time}'`,
@@ -1860,5 +1869,191 @@ describe('the score after 90 minutes of a play-off tie', () => {
       ['Halve finale, wedstrijd 1/2', null, null],
       ['Halve finale, wedstrijd 2/2', null, null],
     ])
+  })
+})
+
+describe('the pages of the older seasons', () => {
+  it('tries the title with the addition first and the one without it second', () => {
+    expect(pageCandidates('2013/14')).toEqual({
+      cup: ['KNVB Beker 2013/14 (mannen)'],
+      playoffs: [],
+      programme: ['Eredivisie 2013/14 (mannenvoetbal)/Wedstrijden', 'Eredivisie 2013/14/Wedstrijden'],
+      standings: ['Eredivisie 2013/14 (mannenvoetbal)', 'Eredivisie 2013/14'],
+    })
+  })
+
+  it('reads the page of the play-offs from 2020/21 on, the first season with play-offs for the Conference League', () => {
+    expect(pageCandidates('2019/20').playoffs).toEqual([])
+    expect(pageCandidates('2020/21').playoffs).toEqual(['Play-offs Nederlands voetbal 2021'])
+  })
+
+  it('takes the asterisks of a footnote off the name of a club', () => {
+    expect(clubName('[[FC Twente]] **')).toBe('FC Twente')
+    expect(clubName('[[sc Heerenveen]]')).toBe('sc Heerenveen')
+  })
+})
+
+describe('the table of the older seasons', () => {
+  it('reads the table under Eindstand, with the points and the goal difference as the page has them', () => {
+    expect(readStandings(olderStandings[2012])).toMatchObject({
+      kind: 'read',
+      rows: [
+        { club: 'Ajax', drawn: 10, goalDifference: 52, lost: 2, played: 34, points: 76, position: 1, won: 22 },
+        { club: 'PSV', goalDifference: 60, points: 69, position: 2 },
+        { club: 'Feyenoord', points: 69, position: 3 },
+        { club: 'Vitesse', points: 64, position: 4 },
+      ],
+    })
+  })
+
+  it('reads the table under Stand na 34 wedstrijden, past the column of deductions and the official order', () => {
+    expect(readStandings(olderStandings[2015])).toMatchObject({
+      kind: 'read',
+      rows: [
+        { club: 'PSV', goalsAgainst: 32, goalsFor: 88, points: 84, position: 1 },
+        { club: 'Ajax', goalDifference: 60, points: 82, position: 2 },
+        { club: 'Feyenoord', goalDifference: 22, points: 63, position: 3 },
+      ],
+    })
+  })
+
+  it('reads the table under Eindstand na 34 wedstrijden, with the attributes in the cells', () => {
+    expect(readStandings(olderStandings[2018])).toMatchObject({
+      kind: 'read',
+      rows: [
+        { club: 'Ajax', goalDifference: 87, goalsFor: 119, points: 86 },
+        { club: 'PSV', goalDifference: 72, points: 83 },
+        { club: 'Feyenoord', points: 65 },
+      ],
+    })
+  })
+
+  it('reads a negative goal difference written with the minus sign of Wikipedia', () => {
+    const text = olderStandings[2012].replace('|| 31 || 52', '|| 31 || −52')
+    const read = readStandings(text)
+
+    expect(text).not.toBe(olderStandings[2012])
+    expect(read.kind === 'read' ? read.rows[0] : read).toMatchObject({ club: 'Ajax', goalDifference: -52 })
+  })
+
+  it('gives an error for a deduction of points, because the table keeps no deductions', () => {
+    const text = olderStandings[2015].replace("| 6 || 2 || || '''84", "| 6 || 2 || −3 || '''84")
+
+    expect(text).not.toBe(olderStandings[2015])
+    expect(readStandings(text)).toEqual({
+      kind: 'error',
+      message: 'PSV has a deduction of points (-3), which the table cannot hold',
+    })
+  })
+
+  it.each([
+    ['the heading is gone', olderStandings[2012].replace('=== Eindstand ===', '=== Tussenstand ===')],
+    ['the table is gone', olderStandings[2012].replace('{|', '').replace(/\n\|\}/u, '')],
+    ['a column is gone', olderStandings[2012].replace(/!width=31\|\{\{afkorting\|dt\|[^\n]*\n/u, '')],
+    ['a position is out of order', olderStandings[2012].replace('| 2. ||', '| 3. ||')],
+    ['a number is no number', olderStandings[2012].replace('|| 34 || 22 || 10', '|| 34 || tweeëntwintig || 10')],
+    ['a row has a cell too many', olderStandings[2012].replace('|| 34 || 22 || 10', '|| 34 || 22 || 10 || 0')],
+  ])('gives an error when %s', (_name, text) => {
+    expect(text).not.toBe(olderStandings[2012])
+    expect(readStandings(text).kind).toBe('error')
+  })
+})
+
+describe('the cup pages of the older seasons', () => {
+  const read = readCup(olderCupPage)
+
+  /** The match of sc Heerenveen against this opponent. */
+  function against(opponent: string) {
+    return read.kind === 'read' ? read.matches.find((match) => match.opponent === opponent) : undefined
+  }
+
+  it('reads a time written with a dot', () => {
+    expect(against('Vitesse')).toMatchObject({
+      goalsAgainst: 1,
+      goalsFor: 2,
+      kickoffAt: new Date('2012-01-31T19:45:00Z'),
+      round: 'Kwartfinales',
+    })
+  })
+
+  it('reads extra time and the shoot-out from the score, with the score after 90 minutes in brackets', () => {
+    expect(against('Feyenoord')).toMatchObject({
+      afterNinetyAgainst: 2,
+      afterNinetyFor: 2,
+      extraTime: true,
+      goalsAgainst: 2,
+      goalsFor: 2,
+      home: true,
+      penaltiesAgainst: 7,
+      penaltiesFor: 6,
+    })
+  })
+
+  it('gives the shoot-out to the club that took it when sc Heerenveen is away', () => {
+    expect(against('AZ')).toMatchObject({
+      afterNinetyFor: 1,
+      extraTime: true,
+      goalsFor: 2,
+      home: false,
+      penaltiesAgainst: 7,
+      penaltiesFor: 6,
+    })
+  })
+
+  it('reads extra time written after the brackets', () => {
+    expect(against('De Graafschap')).toMatchObject({
+      afterNinetyAgainst: 1,
+      afterNinetyFor: 1,
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 5,
+      penaltiesFor: null,
+    })
+  })
+
+  it('reads extra time without any brackets', () => {
+    expect(against('VV Katwijk')).toMatchObject({
+      afterNinetyFor: null,
+      extraTime: true,
+      goalsAgainst: 0,
+      goalsFor: 1,
+      home: false,
+    })
+  })
+
+  it('reads the shoot-out of a page that gives it in a parameter of its own', () => {
+    expect(against('Willem II')).toMatchObject({
+      extraTime: true,
+      goalsAgainst: 2,
+      goalsFor: 2,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    })
+  })
+
+  it.each([
+    ['extra time twice', '2 – 2 n.v. n.v.'],
+    ['a shoot-out twice', '2 – 2 n.v. (6 – 7 pen.) (6 – 7 pen.)'],
+    ['three pairs in brackets', '2 – 2 n.v. (2 – 2) (0 – 1) (0 – 0)'],
+    ['two pairs twice', '2 – 2 n.v. (2 – 2, 0 – 1) (0 – 1)'],
+    ['text after the parts', '2 – 2 n.v. (2 – 2) na strafschoppen'],
+    ['a part that does not add up', '2 – 2 n.v. (3 – 2) (0 – 1)'],
+  ])('gives an error for %s in a score', (_name, score) => {
+    const page = olderCupPage.replace('2 – 2 n.v. (2 – 2) (0 – 1) <br /> <small>(6 – 7 pen.)</small>', score)
+
+    expect(page).not.toBe(olderCupPage)
+    expect(readCup(page).kind).toBe('error')
+  })
+})
+
+describe('the programme of 2018/19', () => {
+  it('reads the rounds that moved, `Speelronde 33 (was 34)` as round 33', () => {
+    expect(readLeague(olderProgramme)).toMatchObject({
+      kind: 'read',
+      matches: [
+        { goalsAgainst: 1, goalsFor: 2, opponent: 'NAC Breda', round: 'Speelronde 33' },
+        { goalsAgainst: 3, goalsFor: 1, opponent: 'FC Utrecht', round: 'Speelronde 34' },
+      ],
+    })
   })
 })

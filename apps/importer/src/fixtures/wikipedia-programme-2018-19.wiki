@@ -1,0 +1,39 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2018/19_(mannenvoetbal)/Wedstrijden?action=raw, read on 3 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: every match but the ones of sc Heerenveen in the last two rounds, and the goal scorers, referees and reports. See the tests.
+-->
+== Speelronde 33 (was 34) ==
+{{Footballbox2
+|date = 12 mei 2019
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 1
+|team2 = [[NAC Breda]]
+|goals1 = [[Sam Lammers|Lammers]] {{goal|69}}<br />[[Mitchell van Bergen|Van Bergen]] {{goal|90}}
+|goals2 = {{goal|81}} [[Menno Koch|Koch]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 18.500
+|referee = [[Dennis Higler|Higler]]
+|videoreferee = [[Laurens Gerrets|Gerrets]]
+|report = [https://nos.nl/artikel/2284266-nac-definitief-gedegradeerd-na-nederlaag-in-heerenveen.html Verslag]
+}}
+
+== Speelronde 34 (was 33) ==
+{{Footballbox2
+|date = 15 mei 2019
+|time = 19:30 uur
+|team1 = [[FC Utrecht]]
+|score = 3 – 1
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Willem Janssen (voetballer)|Janssen]] {{goal|41}}<br />[[Sander van de Streek|Van de Streek]] {{goal|48}}<br />[[Cyriel Dessers|Dessers]] {{goal|81}}
+|goals2 = {{goal|30}} [[Ben Rienstra|Rienstra]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 18.646
+|referee = [[Christiaan Bax|Bax]]
+|videoreferee = [[Sander van der Eijk|Van der Eijk]]
+|report = [https://nos.nl/artikel/2284820-fc-utrecht-in-eigen-huis-te-sterk-voor-sc-heerenveen.html Verslag]
+}}
+
