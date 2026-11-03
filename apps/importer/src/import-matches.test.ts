@@ -26,9 +26,16 @@ import type { LinkedGoal } from './import-matches.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
-import { formatMatchReport, importMatches, repairKnownClubs, unlinkedWarning } from './import-matches.ts'
+import {
+  cancelledOf,
+  formatMatchReport,
+  importMatches,
+  importPastSeason,
+  repairKnownClubs,
+  unlinkedWarning,
+} from './import-matches.ts'
 import { acceptChanges, rejectChanges } from './match-changes.ts'
-import { pageCandidates, pageTitles, pageUrl } from './read-wikipedia.ts'
+import { pageCandidates, pageTitles, pageUrl, readLeague } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { articleRoutes } from './test-articles.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
@@ -2869,5 +2876,98 @@ describe('the play-offs for the Conference League', () => {
         expect(await health()).toMatchObject({ failuresInARow: 1, lastOutcome: 'error' })
       },
     )
+  })
+})
+
+describe('a match that is still postponed when the season is over', () => {
+  const over = new Date('2027-08-01T12:00:00Z')
+  const zwolle = /(\|team1 = \[\[sc Heerenveen\]\]\n)\|score = 0 – 2(\n\|team2 = \[\[PEC Zwolle\]\])/u
+  const feyenoord = /(\|date = 8 november 2026\n\|time = )12:15 uur(\n\|team1 = \[\[sc Heerenveen\]\]\n\|score = ) – /u
+  /** Zwolle is called off and played under an Inhaalronde; Feyenoord is called off for good. */
+  const programme = original.programme
+    .replace(zwolle, '$1|score = Afgelast$2')
+    .replace(feyenoord, '$1$2Uitgesteld')
+    .concat(
+      '\n== Inhaalronde 3 ==\n{{Footballbox2\n|date = 21 oktober 2026\n|time = 20:00 uur\n|team1 = [[sc Heerenveen]]\n|score = 0 – 2\n|team2 = [[PEC Zwolle]]\n|location = [[Heerenveen (plaats)|Heerenveen]]\n|stadium = [[Abe Lenstra Stadion]]\n|attendance = 20.100\n}}\n',
+    )
+  const statusOf = async (round: string) =>
+    (await database.db.select().from(matches).where(eq(matches.round, round)))[0]?.status
+  const importOver = (server: TestServer) =>
+    importPastSeason(database.db, fetcherFor([server]), season, { clock: () => over, origin: server.origin })
+
+  it('is cancelled, and a match that was played under an Inhaalronde is played', async () => {
+    expect(programme).not.toBe(original.programme)
+
+    const { server } = await serve({ programme })
+
+    expect(await importOver(server)).toMatchObject({ kind: 'imported' })
+    expect(await statusOf('Speelronde 12')).toBe('cancelled')
+    expect(await statusOf('Speelronde 3')).toBe('played')
+    expect(await database.db.select().from(matches).where(eq(matches.status, 'postponed'))).toEqual([])
+    expect(await database.db.select().from(matches).where(eq(matches.status, 'cancelled'))).toMatchObject([
+      { goalsAgainst: null, goalsFor: null, opponent: 'Feyenoord' },
+    ])
+  })
+
+  it('stays postponed in the season that is going, with the same blocks', async () => {
+    const { server } = await serve({ programme })
+
+    await importAt(server, first)
+
+    expect(await statusOf('Speelronde 12')).toBe('postponed')
+    expect(await statusOf('Speelronde 3')).toBe('played')
+  })
+
+  it('becomes cancelled when the season is read again after it is over', async () => {
+    const { server } = await serve({ programme })
+
+    await importAt(server, first)
+    expect(await statusOf('Speelronde 12')).toBe('postponed')
+    expect(await importOver(server)).toMatchObject({ kind: 'imported' })
+    expect(await statusOf('Speelronde 12')).toBe('cancelled')
+    expect(await database.db.select().from(matchChanges)).toEqual([])
+  })
+
+  it('finds nothing changed in a second reading', async () => {
+    const { server } = await serve({ programme })
+
+    await importOver(server)
+
+    const before = await database.db.select().from(matches).orderBy(asc(matches.id))
+    const report = await importPastSeason(database.db, fetcherFor([server]), season, {
+      clock: () => new Date(over.getTime() + hours(1)),
+      origin: server.origin,
+    })
+
+    expect(report).toMatchObject({ matches: { added: 0, removed: 0, unchanged: 35, updated: 0 } })
+    expect(await database.db.select().from(matches).orderBy(asc(matches.id))).toEqual(before)
+  })
+})
+
+describe('the eight matches of 2019/20 that were never played', () => {
+  const page = fixture('wikipedia-cancelled-2019-20.wiki')
+  const read = () => {
+    const league = readLeague(page)
+
+    if (league.kind === 'error') {
+      throw new Error(league.message)
+    }
+
+    return league.matches
+  }
+  const rounds = ['27', '28', '29', '30', '31', '32', '33', '34'].map((round) => `Speelronde ${round}`)
+
+  it('are postponed on the page, and cancelled once the season is over', () => {
+    expect(read().map((match) => [match.round, match.status])).toEqual(rounds.map((round) => [round, 'postponed']))
+    expect(cancelledOf(read(), true).map((match) => [match.round, match.status])).toEqual(
+      rounds.map((round) => [round, 'cancelled']),
+    )
+    expect(cancelledOf(read(), true).every((match) => match.goalsFor === null && match.goalsAgainst === null)).toBe(
+      true,
+    )
+  })
+
+  it('stay postponed in the season that is going', () => {
+    expect(cancelledOf(read(), false)).toEqual(read())
   })
 })
