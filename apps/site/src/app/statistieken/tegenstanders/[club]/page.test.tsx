@@ -563,34 +563,12 @@ describe('the page of a club', () => {
       expect(scoreCardOf(all)).not.toContain('Gemaakt')
     })
 
-    it('draws the goals against first, so the goals for are at the left, as in the text of the hole', async () => {
-      const card = scoreCardOf(await render())
-      const small = card.slice(card.indexOf('hf-donut-chart-small'), card.indexOf('Doelpunten:'))
-
-      expect(small.indexOf('hf-donut-chart-slice-negative')).toBeGreaterThan(-1)
-      expect(small.indexOf('hf-donut-chart-slice-negative')).toBeLessThan(
-        small.indexOf('hf-donut-chart-slice-positive'),
-      )
-    })
-
     it('says the goals as text for a screen reader, right after the charts and before the tables', async () => {
       const card = scoreCardOf(await render())
       const sentence = card.indexOf('<p class="hf-visually-hidden">Doelpunten: 10 gemaakt, 4 tegen.</p>')
 
       expect(sentence).toBeGreaterThan(card.lastIndexOf('hf-donut-chart-small'))
       expect(sentence).toBeLessThan(card.indexOf('<table'))
-    })
-
-    it('draws no slice for a side without goals', async () => {
-      vi.mocked(getClubPage).mockResolvedValue({
-        ...testclub,
-        matches: [{ ...testclub.matches.at(3)!, goalsAgainst: 0, goalsFor: 2 }],
-      })
-
-      const card = scoreCardOf(await render())
-
-      expect(card).toContain('Doelpunten: 2 gemaakt, 0 tegen.')
-      expect(card.match(/<path class="hf-donut-chart-slice hf-donut-chart-slice-negative"/g)).toBeNull()
     })
   })
 

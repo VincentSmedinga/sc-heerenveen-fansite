@@ -101,6 +101,30 @@ describe('ClubScoreCountsCard', () => {
     ).toEqual(['CompetitieWedstrijden', 'Eredivisie4', 'KNVB Beker1'])
   })
 
+  it('draws the goals against first, so the goals for are green at the left, as in the hole', () => {
+    const { container } = render(<ClubScoreCountsCard meetings={meetings} />)
+    const small = container.querySelector('.hf-donut-chart-small')!
+
+    expect(small.querySelector('.hf-donut-chart-total')?.textContent).toBe('10–4')
+    expect(small.querySelector('.hf-donut-chart-title')?.textContent).toBe('Doelsaldo')
+    expect([...small.querySelectorAll('.hf-donut-chart-slice')].map((slice) => slice.getAttribute('class'))).toEqual([
+      'hf-donut-chart-slice hf-donut-chart-slice-negative',
+      'hf-donut-chart-slice hf-donut-chart-slice-positive',
+    ])
+    expect(small.querySelector('.hf-donut-chart-label')).toBeNull()
+  })
+
+  it('draws no slice for a side without goals', () => {
+    const shut = { ...meetings[1]!, goalsAgainst: 0, goalsFor: 2 }
+    const { container } = render(<ClubScoreCountsCard meetings={[shut]} />)
+    const small = container.querySelector('.hf-donut-chart-small')!
+
+    expect([...small.querySelectorAll('.hf-donut-chart-slice')].map((slice) => slice.getAttribute('class'))).toEqual([
+      'hf-donut-chart-slice hf-donut-chart-slice-positive',
+    ])
+    expect(small.querySelector('.hf-donut-chart-total')?.textContent).toBe('2–0')
+  })
+
   it('is nothing without a match', () => {
     const { container } = render(<ClubScoreCountsCard meetings={[]} />)
 
