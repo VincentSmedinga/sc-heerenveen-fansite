@@ -1117,7 +1117,7 @@ await withEmptyDatabase((database) =>
     // the line for the one match without scorers. Voorbeeld United has fewer, so it has none.
     assert.match(
       clubHtml,
-      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="doelpuntenmakers">Doelpuntenmakers tegen Testdorp FC<\/h2>.*<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie<\/caption>.*Gebaseerd op de doelpuntenmakers van 4 van de 5 gespeelde wedstrijden/s,
+      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="doelpuntenmakers">Doelpuntenmakers tegen Testdorp FC<\/h2>.*<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie<\/caption>.*Gebaseerd op de doelpuntenmakers van (?:<!-- -->)?4(?:<!-- -->)? van de (?:<!-- -->)?5(?:<!-- -->)? gespeelde wedstrijden/s,
     )
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
