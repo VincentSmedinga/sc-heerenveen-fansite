@@ -27,7 +27,14 @@ test('gives a beheerder every screen and marks the one below which the page is',
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
 
-  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Berichten', 'Artikelen', 'Wedstrijden', 'Bezoek'])
+  await expect(bar.getByRole('link')).toHaveText([
+    'Beheer',
+    'Berichten',
+    'Artikelen',
+    'Wedstrijden',
+    'Stadions',
+    'Bezoek',
+  ])
   await expect(bar.locator('[aria-current="page"]')).toHaveText('Artikelen')
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
 
