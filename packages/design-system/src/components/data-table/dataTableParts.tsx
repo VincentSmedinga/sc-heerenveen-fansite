@@ -68,7 +68,10 @@ export const TableRows = ({
           {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
         </th>
         {row.cells.map((cell, index) => (
-          <td className="hf-numeric" key={columns[index + 1]?.name ?? index}>
+          <td
+            className={columns[index + 1]?.semibold === true ? 'hf-numeric hf-data-table-semibold' : 'hf-numeric'}
+            key={columns[index + 1]?.name ?? index}
+          >
             {textOf(cell)}
           </td>
         ))}

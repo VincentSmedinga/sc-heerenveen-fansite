@@ -1785,7 +1785,7 @@
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 - **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
-- **Later:** zie _Tegenstanders heeft een zijkolom met de top 10, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: op de pagina Tegenstanders is de lijst met alle tegenstanders de hoofdinhoud en dus wit (regel 1); de top 10 in de zijkolom is zacht (regel 4).
+- **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Punten per wedstrijd, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: op de pagina Tegenstanders is de lijst met alle tegenstanders de hoofdinhoud en dus wit (regel 1); de top 10 in de zijkolom is zacht (regel 4).
 
 ## De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
 
@@ -2386,6 +2386,8 @@
   - **Niet voor een tabel die sorteert:** de eigenschap werkt alleen in een gewone tabel.
     Een tabel met een sorteerbare kolom (`SortableDataTable`) toont de plaats niet, want na het sorteren klopt de volgorde niet meer met de plaatsen.
   - **Geef een plaats aan elke rij of aan geen:** de component controleert het niet.
+  - **`semibold` op een kolom** zet de cellen van die kolom in het gewicht van een naam (600), voor het getal waarop de lijst is geordend.
+    De kop van de kolom blijft zoals hij is.
 - **Waarom:** de top 10 op Tegenstanders heeft links, een gemiddelde en een aantal per club, en de plaats hoort in een eigen kolom met een kop.
   `TopScorersTable` heeft een speler en doelpunten, en `StandingsTable` heeft geen links en geen gemiddelde.
   Een `marker` bij de rijkop is een versiering voor een schermlezer en geen kolom, en 1 en 10 staan er niet recht onder elkaar.

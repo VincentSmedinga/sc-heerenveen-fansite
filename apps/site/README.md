@@ -516,10 +516,10 @@ De letters en woorden komen uit `tableColumns` van het designsysteem, zoals in e
 De rijkop is een link dankzij `href` op een rij van `DataTable`.
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 De lijst staat in de hoofdkolom, op het witte vlak.
-De zijkolom heeft de zachte kaart "Top 10 gemiddeld aantal punten per wedstrijd" (`TopPointsCard`) en de bronvermelding.
+De zijkolom heeft de zachte kaart "Punten per wedstrijd" (`TopPointsCard`), met de top 10, en de bronvermelding.
 De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
-Hij is geen `DataTable` die sorteert: de plaats komt uit `position` van een rij.
+Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is `semibold`.
 
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
 De pagina heeft twee kolommen.

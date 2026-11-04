@@ -319,6 +319,20 @@ describe('DataTable.Group', () => {
       expect(document.querySelector('tbody td.hf-rank')?.className).toBe('hf-numeric hf-rank')
     })
 
+    it('sets the cells of a semibold column in that weight and leaves the others', () => {
+      render(
+        <DataTable
+          {...ranked}
+          columns={['Club', { abbreviation: 'Gem.', name: 'gemiddeld aantal punten', semibold: true }, 'G']}
+        />,
+      )
+
+      expect([...document.querySelectorAll('tbody td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual(
+        ['2,50', '2,00'],
+      )
+      expect(document.querySelectorAll('tbody td:not(.hf-rank):not(.hf-data-table-semibold)')).toHaveLength(2)
+    })
+
     it('has no such column when no row has a position', () => {
       render(<DataTable {...props} />)
 

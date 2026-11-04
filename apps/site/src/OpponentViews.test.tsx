@@ -120,6 +120,16 @@ describe('TopPointsCard', () => {
     ])
   })
 
+  it('sets the average in the semibold weight', () => {
+    render(card())
+
+    expect([...document.querySelectorAll('td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual([
+      '3,00',
+      '1,40',
+      '0,57',
+    ])
+  })
+
   it('cannot be sorted: no buttons and no sort order', () => {
     render(card())
 
@@ -130,9 +140,12 @@ describe('TopPointsCard', () => {
   it('names the minimum, the legend and what the card is based on', () => {
     render(card())
 
-    expect(screen.getByText('Alleen clubs met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(screen.getByText('Gem. gemiddeld aantal punten, G gespeeld')).toBeTruthy()
-    expect(screen.getByText('Gebaseerd op alle 22 gespeelde wedstrijden sinds 2022/23')).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Gebaseerd op alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
+      ),
+    ).toBeTruthy()
   })
 
   it('says one sentence, and shows no table, when no club has five played matches', () => {
@@ -146,7 +159,7 @@ describe('TopPointsCard', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: 'Top 10 gemiddeld aantal punten per wedstrijd' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Punten per wedstrijd' })).toBeTruthy()
     expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(screen.queryByRole('table')).toBeNull()
     expect(screen.queryByText(/Gebaseerd op/)).toBeNull()

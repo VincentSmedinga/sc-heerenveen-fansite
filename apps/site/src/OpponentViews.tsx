@@ -37,11 +37,23 @@ import {
  * form is the one of the cards on Statistieken ("Gebaseerd op …"), with the season from which
  * we have data, so a visitor knows how far back the record goes.
  */
-export function BasedOnSince({ choice, played, since }: { choice: CompetitionChoice; played: number; since: string }) {
+export function BasedOnSince({
+  choice,
+  condition,
+  played,
+  since,
+}: {
+  choice: CompetitionChoice
+  /** What the matches have in common beyond the choice, such as "tegen clubs met …". */
+  condition?: string
+  played: number
+  since: string
+}) {
   const matches = played === 1 ? '1 gespeelde wedstrijd' : `alle ${played} gespeelde wedstrijden`
+  const where = condition === undefined ? '' : `, ${condition}`
 
   return (
-    <Text appearance="meta">{`Gebaseerd op ${matches}${choice === 'league' ? ' in de Eredivisie' : ''} sinds ${since}`}</Text>
+    <Text appearance="meta">{`Gebaseerd op ${matches}${choice === 'league' ? ' in de Eredivisie' : ''} sinds ${since}${where}`}</Text>
   )
 }
 
@@ -183,7 +195,7 @@ export function ClubsCard({
 /** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
 const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
-/** The legend of the top 10: the two abbreviations of its columns. */
+/** The legend of the card: the two abbreviations of its columns. */
 const topPointsLegend = tableLegend([{ abbreviation: 'Gem.', name: 'gemiddeld aantal punten' }, tableColumns.played])
 
 /**
@@ -377,7 +389,7 @@ export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
  * most points per match (see `topPointsOf`), in the sidebar on the soft surface: a ranking that
  * belongs to the list of all the opponents. It counts the same matches as that list, so it
  * follows the switch of the page, and its links keep the choice (`address` and `query`, as in
- * `ClubsCard`). The line under the heading says which clubs count. The table has the place, the
+ * `ClubsCard`). The line under the table says which clubs count. The table has the place, the
  * club as a link, the average with two decimals and the number of matches. It cannot be sorted:
  * its order is the point. With no club that counts there is a sentence and no table, and the
  * card stays.
@@ -398,18 +410,21 @@ export function TopPointsCard({
   const { places, played } = topPointsOf(records)
 
   return (
-    <Card aria-labelledby="top-10-gemiddeld-aantal-punten" surface="soft">
-      <Heading id="top-10-gemiddeld-aantal-punten" level={2}>
-        Top 10 gemiddeld aantal punten per wedstrijd
+    <Card aria-labelledby="punten-per-wedstrijd" surface="soft">
+      <Heading id="punten-per-wedstrijd" level={2}>
+        Punten per wedstrijd
       </Heading>
       {places.length === 0 ? (
         <Text>{`Nog geen club met minstens ${topPointsMinimum} gespeelde wedstrijden.`}</Text>
       ) : (
         <>
-          <Text>{`Alleen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden.`}</Text>
           <DataTable
             caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'league' ? ', in de Eredivisie' : ''}`}
-            columns={['Club', { abbreviation: 'Gem.', name: 'gemiddeld aantal punten' }, tableColumns.played]}
+            columns={[
+              'Club',
+              { abbreviation: 'Gem.', name: 'gemiddeld aantal punten', semibold: true },
+              tableColumns.played,
+            ]}
             rows={places.map((place) => ({
               cells: [averageFormat.format(place.points / place.played), place.played],
               header: place.name,
@@ -418,7 +433,12 @@ export function TopPointsCard({
             }))}
           />
           <Text appearance="meta">{topPointsLegend}</Text>
-          <BasedOnSince choice={choice} played={played} since={since} />
+          <BasedOnSince
+            choice={choice}
+            condition={`tegen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden`}
+            played={played}
+            since={since}
+          />
         </>
       )}
     </Card>

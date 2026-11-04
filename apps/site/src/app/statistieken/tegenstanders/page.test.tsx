@@ -65,7 +65,7 @@ const sidebarOf = (html: string) => html.slice(html.indexOf('<aside'), html.inde
 const placesOf = (html: string) =>
   [
     ...sidebarOf(html).matchAll(
-      /<tr><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th><td class="hf-numeric">([^<]*)<\/td><td class="hf-numeric">(\d+)<\/td><\/tr>/g,
+      /<tr><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th><td class="hf-numeric hf-data-table-semibold">([^<]*)<\/td><td class="hf-numeric">(\d+)<\/td><\/tr>/g,
     ),
   ].map(([, place, href, name, average, played]) => [place, name, href, average, played])
 
@@ -86,7 +86,7 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => heading.replaceAll(/<[^>]*>/g, ''))).toEqual([
       'Tegenstanders',
       'Alle tegenstanders',
-      'Top 10 gemiddeld aantal punten per wedstrijd',
+      'Punten per wedstrijd',
     ])
   })
 
@@ -216,15 +216,15 @@ describe('the page /statistieken/tegenstanders', () => {
     )
     expect(mainOf(html)).not.toContain('hf-card-soft')
     expect(sidebarOf(html)).toMatch(
-      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="top-10-gemiddeld-aantal-punten"|aria-labelledby="top-10-gemiddeld-aantal-punten"[^>]*class="hf-card hf-card-soft/,
+      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="punten-per-wedstrijd"|aria-labelledby="punten-per-wedstrijd"[^>]*class="hf-card hf-card-soft/,
     )
   })
 
   it('has a sidebar with a name, the top 10 first and the credit after it', async () => {
     const sidebar = sidebarOf(await render())
 
-    expect(sidebar).toContain('aria-label="De top 10 van de gemiddelde punten en de bron"')
-    expect(sidebar.indexOf('id="top-10-gemiddeld-aantal-punten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+    expect(sidebar).toContain('aria-label="De punten per wedstrijd en de bron"')
+    expect(sidebar.indexOf('id="punten-per-wedstrijd"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
     expect(mainOf(await render())).not.toContain('Bron: Wikipedia')
   })
 
@@ -233,8 +233,9 @@ describe('the page /statistieken/tegenstanders', () => {
 
     // Beker United (1 match) and FC Voorbeeld (3) are under the minimum; Testclub has 11 in 5.
     expect(placesOf(html)).toEqual([['1', 'Testclub', '/statistieken/tegenstanders/testclub', '2,20', '5']])
-    expect(sidebarOf(html)).toContain('Alleen clubs met minstens 5 gespeelde wedstrijden.')
-    expect(sidebarOf(html)).toContain('Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23')
+    expect(sidebarOf(html)).toContain(
+      'Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
+    )
     expect(sidebarOf(html)).toContain(
       '<caption class="hf-visually-hidden">De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
     )
@@ -246,7 +247,7 @@ describe('the page /statistieken/tegenstanders', () => {
 
     expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
     expect(sidebarOf(html)).not.toContain('<table')
-    expect(html).toContain('id="top-10-gemiddeld-aantal-punten"')
+    expect(html).toContain('id="punten-per-wedstrijd"')
   })
 
   it('keeps the choice in the links of the top 10', async () => {

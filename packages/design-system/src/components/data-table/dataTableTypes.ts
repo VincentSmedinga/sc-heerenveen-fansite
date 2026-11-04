@@ -21,6 +21,11 @@ export type DataTableColumn = {
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**
+   * Sets the cells of this column in the semibold weight, for the figure the table is about,
+   * such as the average in a ranking. The header stays as it is.
+   */
+  semibold?: boolean
+  /**
    * What the header shows when that is not the words a screen reader says, such as `Winst 12×`
    * for the name `Winst, 12 keer`. Unlike an `abbreviation` it is no abbreviation, so it gets
    * no `abbr`. It does not work for a `sortable` column, whose button is named by `name`.

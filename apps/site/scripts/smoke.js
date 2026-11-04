@@ -1027,13 +1027,10 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
     // The sidebar has the top 10 of the average points: a table for the clubs with five played
     // matches, or the sentence when there is none, and the credit.
+    assert.match(opponentsHtml, /<h2[^>]*id="punten-per-wedstrijd">Punten per wedstrijd<\/h2>/)
     assert.match(
       opponentsHtml,
-      /<h2[^>]*id="top-10-gemiddeld-aantal-punten">Top 10 gemiddeld aantal punten per wedstrijd<\/h2>/,
-    )
-    assert.match(
-      opponentsHtml,
-      /Alleen clubs met minstens 5 gespeelde wedstrijden\.|Nog geen club met minstens 5 gespeelde wedstrijden\./,
+      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,
     )
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
