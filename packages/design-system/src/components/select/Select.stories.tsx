@@ -86,7 +86,7 @@ export const Natural = meta.story({
   ),
 })
 
-// Dertig seizoenen, van 2026/27 terug, met één lange tekst om te zien dat die afbreekt.
+// Thirty seasons, from 2026/27 back, one with a long text to show that it wraps.
 const seasons = Array.from({ length: 30 }, (_, index) => {
   const start = 2026 - index
 

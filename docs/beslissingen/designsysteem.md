@@ -2356,7 +2356,10 @@
   - **Kant:** het menu groeit naar rechts vanaf de linkerkant van het veld.
     Past dat niet, dan lijnt het uit met de rechterkant van het veld en groeit het naar links.
     Past ook dat niet, dan neemt het de breedte van het scherm.
-    Dat is `position-try-fallbacks` met drie eigen `@position-try`-regels; `min-inline-size` laat het menu niet krimpen tot de ruimte naast het veld, zodat de browser doorgaat naar de volgende.
+    Dat is `position-try-fallbacks` met vijf eigen `@position-try`-regels, naast de standaardplaats onder het veld naar rechts: onder het veld naar links en over de breedte van het scherm, en boven het veld naar rechts, naar links en over de breedte van het scherm.
+    De breedte is `max-content` en krimpt niet tot de ruimte naast het veld, dus de browser ziet dat het menu daar niet past en gaat door naar de volgende regel.
+    Alleen bij de breedte van het scherm geldt `max-inline-size: stretch`.
+    De minimumbreedte, zo breed als het veld, komt uit de standaardstijl van de browser.
   - **Hoogte en richting:** het menu opent onder het veld, of boven het veld als daar meer ruimte is (`position-try-order: most-block-size`, zoals de browser al deed).
     Zijn hoogte is de ruimte aan die kant min een marge (`max-block-size: stretch` van de browser), zonder vaste maximumhoogte.
     Alleen het menu scrolt (`overscroll-behavior: contain`).
