@@ -120,10 +120,10 @@ describe('TopPointsCard', () => {
     ])
   })
 
-  it('sets the average in the semibold weight', () => {
+  it('sets the average as the key figure', () => {
     render(card())
 
-    expect([...document.querySelectorAll('td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual([
+    expect([...document.querySelectorAll('td.hf-key')].map((cell) => cell.textContent)).toEqual([
       '3,00',
       '1,40',
       '0,57',

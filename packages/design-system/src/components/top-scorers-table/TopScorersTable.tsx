@@ -72,7 +72,7 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
               <th scope="row">
                 <PlayerName givenName={row.givenName} surname={row.surname} />
               </th>
-              <td className="hf-numeric hf-bar-value">
+              <td className="hf-numeric hf-key">
                 {row.goals}
                 {shares !== null ? <Bar share={shares[index]!} /> : null}
               </td>

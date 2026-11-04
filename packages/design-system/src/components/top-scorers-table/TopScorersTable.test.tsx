@@ -93,8 +93,8 @@ describe('TopScorersTable', () => {
     const { container } = render(<TopScorersTable {...props} />)
     const cells = [...container.querySelectorAll('tbody tr:first-child td')]
 
-    expect(cells.at(-1)?.className).toBe('hf-numeric hf-bar-value')
-    expect(container.querySelectorAll('td.hf-bar-value')).toHaveLength(4)
+    expect(cells.at(-1)?.className).toBe('hf-numeric hf-key')
+    expect(container.querySelectorAll('td.hf-key')).toHaveLength(4)
   })
 
   describe('the bars', () => {
@@ -102,9 +102,9 @@ describe('TopScorersTable', () => {
       const { container } = render(<TopScorersTable {...props} />)
 
       expect(barLengths(container)).toEqual(['100', '50', '50', '12.5'])
-      expect(
-        [...container.querySelectorAll('.hf-bar')].every((bar) => bar.parentElement?.matches('td.hf-bar-value')),
-      ).toBe(true)
+      expect([...container.querySelectorAll('.hf-bar')].every((bar) => bar.parentElement?.matches('td.hf-key'))).toBe(
+        true,
+      )
     })
 
     it('hides the bars from a screen reader and adds no cell or header for them', () => {

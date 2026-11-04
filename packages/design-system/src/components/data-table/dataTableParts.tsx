@@ -18,6 +18,22 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
 export const columnOf = (column: DataTableColumn | string): DataTableColumn =>
   typeof column === 'string' ? { name: column } : column
 
+/**
+ * The index of the column with `key`, or -1 when there is none. A table has at most one key
+ * figure, so two is a mistake in the code of the page, and it throws.
+ */
+export const keyColumnOf = (columns: readonly DataTableColumn[]) => {
+  const keys = columns.flatMap((column, index) => (column.key === true ? [index] : []))
+
+  if (keys.length > 1) {
+    throw new Error(
+      `A table has at most one key column, and these have key: ${keys.map((index) => columns[index]?.name).join(', ')}`,
+    )
+  }
+
+  return keys[0] ?? -1
+}
+
 /** What a cell shows: a number the Dutch way, text as it is. */
 const textOf = (cell: DataTableCell) => {
   if (typeof cell === 'number') {
@@ -53,10 +69,13 @@ export const ColumnText = ({ column, named = false }: { column: DataTableColumn;
 /** The rows of the table: a row header, a link when the row has an `href`, and its cells. */
 export const TableRows = ({
   columns,
+  keyColumn,
   rows,
   withPosition = true,
 }: {
   columns: readonly DataTableColumn[]
+  /** The index of the column that is the key figure, in the heaviest weight. -1 is none. */
+  keyColumn: number
   rows: readonly DataTableRow[]
   /** Whether a row shows its `position`: not in a table that sorts, which has no `#` header. */
   withPosition?: boolean
@@ -72,7 +91,7 @@ export const TableRows = ({
         </th>
         {row.cells.map((cell, index) => (
           <td
-            className={columns[index + 1]?.semibold === true ? 'hf-numeric hf-data-table-semibold' : 'hf-numeric'}
+            className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
             key={columns[index + 1]?.name ?? index}
           >
             {textOf(cell)}

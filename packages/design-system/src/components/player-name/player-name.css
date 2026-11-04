@@ -1,6 +1,6 @@
 /*
- * The name of a player: the given name in the normal weight and the surname in the stronger
- * weight. Both weights are set here, on the parts, so the name looks the same whatever weight
+ * The name of a player: the given name in the normal weight and the surname in the weight of a
+ * row header. Both weights are set here, on the parts, so the name looks the same whatever weight
  * the place around it has, such as a bold row header or a link.
  */
 
@@ -14,6 +14,6 @@
   }
 
   .hf-player-name-surname {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 }

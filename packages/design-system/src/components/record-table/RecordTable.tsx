@@ -42,7 +42,7 @@ export type RecordTableRow = {
 }
 
 type Column = TableColumn & {
-  /** The class of the figures: the colour of the result, or the weight of the points. */
+  /** The class of the figures: the colour of the result, or the key figure (the points). */
   figureClass?: string
   /** What the column is, for the key of its cells. */
   id: 'drawn' | 'goalDifference' | 'lost' | 'played' | 'points' | 'won'
@@ -53,7 +53,7 @@ const columns: Column[] = [
   { ...tableColumns.won, figureClass: 'hf-match-win', id: 'won' },
   { ...tableColumns.drawn, figureClass: 'hf-match-draw', id: 'drawn' },
   { ...tableColumns.lost, figureClass: 'hf-match-loss', id: 'lost' },
-  { ...tableColumns.points, figureClass: 'hf-bar-value', id: 'points' },
+  { ...tableColumns.points, figureClass: 'hf-key', id: 'points' },
   { ...tableColumns.goalDifference, id: 'goalDifference' },
 ]
 
@@ -65,7 +65,7 @@ const columns: Column[] = [
  * abbreviations, as "G gespeeld, W winst, …". A screen reader hears the full word, not the
  * letter. The wins, draws and losses have the colours of the results (green, grey and red), as
  * in `ShortMatch`; the words in the header say what they are, so the colour is not alone. The
- * points and the total row are bold.
+ * points are the key figure, in the heaviest weight, and so is the total row.
  *
  * It is a form of its own next to `StandingsTable` and not a general version of it: a standings
  * table has a place, a club and points, with a bar, and this one has none of them. The two

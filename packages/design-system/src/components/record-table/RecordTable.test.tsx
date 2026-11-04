@@ -105,7 +105,7 @@ describe('RecordTable', () => {
       'hf-numeric hf-match-win',
       'hf-numeric hf-match-draw',
       'hf-numeric hf-match-loss',
-      'hf-numeric hf-bar-value',
+      'hf-numeric hf-key',
       'hf-numeric',
     ])
   })

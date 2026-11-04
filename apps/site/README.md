@@ -417,7 +417,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   De kaart met alle spelers staat op `/statistieken/spelers` (zie _De spelers_); de rest van deze alinea gaat over die lijst.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
-  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam vet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
+  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam halfvet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
   Een doelpunt zonder speler maar met een Wikipedia-pagina (`playerPage`) telt voor die pagina en toont de titel zonder de toevoeging tussen haakjes als volledige naam, gesplitst met de korte naam van de wedstrijdpagina; heeft een gekoppeld doelpunt dezelfde pagina, dan tellen ze samen.
   Een doelpunt zonder speler en zonder pagina telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam.
@@ -519,7 +519,7 @@ De lijst staat in de hoofdkolom, op het witte vlak.
 De zijkolom heeft de zachte kaart "Gemiddeld resultaat" (`TopPointsCard`), met de top 10, en de bronvermelding.
 De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
-Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is `semibold`.
+Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
 
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
 De pagina heeft twee kolommen.
@@ -536,7 +536,7 @@ De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie veran
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
 Ze heeft vier delen:
 
-- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, direct onder de eerste: dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
   `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel.
   Anders dan op Wedstrijden heeft de kaart naast het eerste diagram een tweede, kleiner donutdiagram (`DonutChart` met `size="small"`) met de doelpunten die we maakten (groen, links) en de tegendoelpunten (rood, rechts) van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31" (`centre`) in een kleinere letter dan het totaal van het eerste diagram.
@@ -687,7 +687,7 @@ De teller van het bezoek telt `/nieuws/zoeken` zonder de vraag (`src/visits.ts`)
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 
 De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op een smal scherm onder de resultaten en zonder vraag direct onder het formulier.
-Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam vet) is een link naar `/nieuws/zoeken?q=<achternaam>`.
+Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam halfvet) is een link naar `/nieuws/zoeken?q=<achternaam>`.
 Zijn er geen spelers, dan laat de pagina de lijst weg.
 Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
 `listSquad` is de ene plek die bepaalt wie in de lijst staat, en geeft alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in `players` voor zijn doelpunten.

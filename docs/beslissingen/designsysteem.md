@@ -1256,6 +1256,8 @@
 - **Alternatieven:** de hele naam vet laten, zoals nu in de kaart; dan valt het deel dat je zoekt niet op.
   Of `strong` om de achternaam; dat zegt een schermlezer iets wat niet nodig is.
   Of de volledige naam overal tonen; dat past niet in de wedstrijdregel op een smal scherm.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  De achternaam heeft het gewicht van een rijkop (600) in plaats van het zwaardere (700); de voornaam blijft gewoon.
 
 ## Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen
 
@@ -1459,6 +1461,8 @@
   De huidige plek in de balk "Op deze pagina" laten zoals hij is (de regel zou dan een uitzondering hebben).
   Het gewicht van de huidige link verbergen met een onzichtbare dikke kopie, zodat de rij niet verspringt (extra opmaak bij elke link, en de site laadt bij elke klik toch een nieuwe pagina).
 - **Later:** vervangt delen van vier eerdere besluiten; zie de **Later:**-regels bij _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_, _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_, _De balk met links naar de kaarten volgt de pagina_ en _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  Nadruk (700) blijft de regel, maar in een tabel is hij alleen nog voor het kerngetal en de rij met het totaal; koppen en rijkoppen zijn 600.
 
 ## De acht voorlopige kleuren blijven en heten niet meer voorlopig
 
@@ -2397,6 +2401,8 @@
   De site mag geen eigen `table` schrijven: de lint verbiedt HTML-elementen in de site.
 - **Nadeel:** de eigenschap werkt niet met `sortable`, en de component zegt dat alleen in de beschrijving.
 - **Alternatieven:** een eigen onderdeel voor ranglijsten (veel werk voor één kaart, en `DataTable` heeft alles al); de plaats in de eerste cel van de rij tonen als tekst (de rijkop is dan geen club meer); een `marker` met het getal (geen kolomkop, scheve uitlijning).
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  De optie `semibold` is vervangen door `key`: de cellen van die kolom hebben het zwaarste gewicht (700, niet 600), het kerngetal van de tabel.
 
 ## Twee donutdiagrammen in een groep staan midden in hun eigen kolom
 
@@ -2411,3 +2417,37 @@
   Een diagram met tekst rond de ring (hoogstens 20rem breed) naast een klein diagram krijgt een kolom die bij het diagram zonder tekst past.
 - **Alternatieven:** de tweede kolom breder maken met een vaste maat (dan klopt de verhouding alleen bij één breedte van de kaart); het kleine diagram rechts of links uitlijnen (dan staat het nog steeds niet midden in zijn kolom).
 - **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (#697) in `site.md`: de kolom van 7rem voor het kleine diagram is hier vervangen door een kolom die bij zijn breedte past.
+
+## In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam
+
+- **Datum:** 4 november 2026
+- **Besluit:** in een tabel is het zwaarste gewicht (het gewicht van nadruk) voor één ding: het kerngetal van de tabel (#704).
+  Dat is de kolom waarop de tabel is geordend, of het antwoord dat de tabel geeft.
+  De rij met het totaal heeft hetzelfde gewicht, met een dikkere lijn erboven.
+  Koppen en rijkoppen zijn halfvet.
+  De rij van onze club en de achternaam van een speler zijn dat niet meer vet.
+  - **Naam:** de klasse is `hf-key` (eerder `hf-bar-value`, naar de balk) en werkt in elke tabel, ook zonder balken.
+    De kolomoptie van `DataTable` en `SortableDataTable` is `key` (eerder `semibold`).
+    Per tabel is hoogstens één kolom `key`; twee geven een fout.
+  - **Gesorteerd:** in een tabel die de bezoeker kan sorteren, volgt het kerngetal de sortering.
+    Voor de eerste klik, en zonder JavaScript, is de kolom met `key` het kerngetal.
+    Sorteert de bezoeker op de eerste kolom, met de rijkoppen, dan heeft de tabel geen kerngetal: de rijkoppen zijn al halfvet.
+    De sortering is ook zonder vet te zien en te horen, via de sorteerknop en `aria-sort`.
+  - **Onze club:** de rij van sc Heerenveen is herkenbaar aan de achtergrond, de kleur, de balk aan het begin en "(onze club)" voor een schermlezer.
+    De punten in die rij zijn nog steeds het kerngetal.
+  - **Waar:** `StandingsTable`, `RecordTable` (de punten en het totaal) en `TopScorersTable` (de doelpunten) gebruiken `hf-key`.
+    `PlayerName` zet de achternaam op het gewicht van een rijkop, en de rijkoppen van `InputTable` zijn halfvet.
+    Het onderschrift van een tabel en de letters in de legenda blijven op het gewicht van nadruk.
+  - **De test:** `weight-css.test.ts` leest de CSS van de tabellen en faalt als een andere selector dan `hf-key`, de rij met het totaal (`tfoot`), het onderschrift en de legenda het zwaarste gewicht zet, of als iets anders dan een kop een gewicht zet dat niet `inherit` of normaal is.
+- **Waarom:** vet betekende vijf dingen en dat leest niet als een regel.
+  Met twee vette gewichten naast elkaar valt het verschil nauwelijks op, en een volledig vette rij nam het kerngetal zijn plek af.
+  Nu valt het getal op waar een supporter naar kijkt: de punten in de stand, de doelpunten bij de topscorers, de kolom waarop hij zelf sorteerde.
+  Onze rij blijft opvallen zonder gewicht, want de achtergrond, de kleur en de balk dragen dat al.
+- **Nadeel:** onze rij valt iets minder op in een tabel zonder balk, en een achternaam in een kaart is minder zwaar dan hij was.
+- **Alternatieven:** de rij van onze club vet laten (dan valt de kolom met het kerngetal daar niet op).
+  De naam `hf-ordered` en de optie `ordered` (past niet bij een kolom die een antwoord geeft in plaats van een volgorde).
+  Een vaste vette kolom in een tabel die je kunt sorteren (dan staat vet soms op een kolom waarop de tabel niet is geordend).
+  De achternaam op het zwaarste gewicht laten (twee vette gewichten naast elkaar in een rij).
+  Eerst alleen de regel opschrijven en de code later (de code is klein en de regel zonder test loopt weer uit elkaar).
+- **Later:** vervangt delen van drie besluiten.
+  Zie de **Later:**-regels bij _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026), _Een spelersnaam is één component, met de voornaam gewoon en de achternaam vet_ (27 oktober 2026) en _De punten staan voor het doelsaldo in de standtabel_ (26 oktober 2026, in `redactie.md`).

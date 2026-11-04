@@ -18,13 +18,15 @@ export type DataTableColumn = {
    * button.
    */
   hidden?: boolean
+  /**
+   * Makes this column the key figure of the table: its cells get the heaviest weight, for the
+   * figure the table is ordered by or the answer it gives, such as the average in a ranking.
+   * The header stays as it is. At most one column can be the key figure, so a table with two
+   * throws an error. In a table that sorts, the column the visitor sorts on takes over.
+   */
+  key?: boolean
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
-  /**
-   * Sets the cells of this column in the semibold weight, for the figure the table is about,
-   * such as the average in a ranking. The header stays as it is.
-   */
-  semibold?: boolean
   /**
    * What the header shows when that is not the words a screen reader says, such as `Winst 12×`
    * for the name `Winst, 12 keer`. Unlike an `abbreviation` it is no abbreviation, so it gets

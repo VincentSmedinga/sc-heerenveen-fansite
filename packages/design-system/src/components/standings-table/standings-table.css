@@ -13,8 +13,9 @@
   }
 
   /*
-   * The row of sc Heerenveen is marked by more than its colour: it is bold (base/table.css),
-   * and its first cell has a bar on the start side, which also shows in forced colours.
+   * The row of sc Heerenveen is marked by more than its colour: its first cell has a bar on the
+   * start side, which also shows in forced colours, and the bars of its points are the whole
+   * green. It is not marked by weight: bold is for the key figure (base/table.css).
    */
   .hf-standings-table-own > :first-child {
     border-inline-start: 0.25rem solid var(--hf-colour-text-highlight);

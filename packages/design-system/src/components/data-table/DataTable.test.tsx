@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { tableColumns } from '../table-columns'
@@ -320,13 +321,25 @@ describe('DataTable.Group', () => {
       expect(document.querySelector('tbody td.hf-rank')?.className).toBe('hf-numeric hf-rank')
     })
 
-    it('sets the cells of a semibold column in that weight and leaves the others', () => {
-      render(<DataTable {...ranked} columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, 'G']} />)
+    it('gives the cells of the column with key the class of the key figure and leaves the others', () => {
+      render(<DataTable {...ranked} columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, 'G']} />)
 
-      expect([...document.querySelectorAll('tbody td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual(
-        ['2,50', '2,00'],
+      expect([...document.querySelectorAll('tbody td.hf-key')].map((cell) => cell.textContent)).toEqual([
+        '2,50',
+        '2,00',
+      ])
+      expect(document.querySelectorAll('tbody td:not(.hf-rank):not(.hf-key)')).toHaveLength(2)
+    })
+
+    it('throws when two columns have key, because a table has at most one key figure', () => {
+      const twice = [
+        { key: true, name: 'P' },
+        { key: true, name: 'G' },
+      ]
+
+      expect(() => renderToStaticMarkup(<DataTable {...ranked} columns={['Club', ...twice]} />)).toThrow(
+        /at most one key column.*P, G/u,
       )
-      expect(document.querySelectorAll('tbody td:not(.hf-rank):not(.hf-data-table-semibold)')).toHaveLength(2)
     })
 
     it('has no such column when no row has a position', () => {

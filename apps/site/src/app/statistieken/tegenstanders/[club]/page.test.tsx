@@ -195,7 +195,7 @@ describe('the page of a club', () => {
       ['Uit', 4],
       ['Totaal', 10],
     ])
-    expect(html).toContain('<td class="hf-numeric hf-bar-value">10</td>')
+    expect(html).toContain('<td class="hf-numeric hf-key">10</td>')
     expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toContain('P punten')
   })
 

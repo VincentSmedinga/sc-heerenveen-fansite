@@ -52,7 +52,7 @@ const clubLegend = tableLegend(clubColumns)
 
 const sortableColumns: DataTableProps['columns'] = [
   { name: 'Club', sortable: true },
-  ...clubColumns.map((column) => ({ ...column, sortable: true })),
+  ...clubColumns.map((column) => ({ ...column, key: column.abbreviation === 'P', sortable: true })),
 ]
 
 const meta = preview.meta({
@@ -96,6 +96,11 @@ const meta = preview.meta({
           'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
           'Een getallenkolom begint met het grootste getal bovenaan en de eerste kolom van A tot Z; een tweede klik keert de richting om.',
           'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “+18”, dat op het getal sorteert.',
+          '',
+          'In een tabel is vet voor één ding: het kerngetal, het getal waarop de tabel is geordend of dat het antwoord van de tabel is.',
+          'Geef die kolom `key`; er kan er hoogstens één zijn, anders geeft de tabel een fout.',
+          'In een tabel die sorteert, volgt het kerngetal de sortering: de kolom waarop de bezoeker sorteerde is vet, en voor de eerste klik is dat de kolom met `key`.',
+          'Vet is nooit het enige teken: de sorteerknop en `aria-sort` zeggen het ook.',
           '',
           'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden.',
           'De kolommen beginnen aan het begin, de rijkop kan een tweede regel met secundaire tekst hebben (`secondary`), en een cel kan elke inhoud hebben, zoals een link.',
@@ -253,7 +258,7 @@ export const Ranked = meta.story({
         </Heading>
         <DataTable
           caption="De drie clubs waartegen we gemiddeld de meeste punten per wedstrijd halen, van hoog naar laag"
-          columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, tableColumns.played]}
+          columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
           rows={[
             { cells: ['2,43', 14], header: 'Testclub', href: '#club', position: 1 },
             { cells: ['2,10', 10], header: 'Nepclub ’s-Gravenvoorbeeld', href: '#club', position: 2 },
@@ -334,6 +339,28 @@ export const SortedPhoneDark = meta.story({
     await expect(canvas.getByRole('columnheader', { name: 'Club' })).toHaveAttribute('aria-sort', 'descending')
   },
   render: renderSortable('20rem'),
+})
+
+export const SortedKey = meta.story({
+  globals: { theme: 'light' },
+  name: 'Het kerngetal volgt de sortering, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De punten zijn het kerngetal en dus vet. Na een klik op een andere kolom is die kolom vet en de punten niet meer: het kerngetal is de kolom waarop de tabel is geordend.',
+      },
+    },
+  },
+  play: async ({ canvas, canvasElement }) => {
+    const keys = () =>
+      [...canvasElement.querySelectorAll('tbody tr:first-child td')].map((cell) => cell.classList.contains('hf-key'))
+
+    await expect(keys()).toEqual([false, false, false, false, true, false])
+    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await expect(keys()).toEqual([false, false, false, false, false, true])
+  },
+  render: renderSortable('40rem'),
 })
 
 export const SortableLongHeaders = meta.story({

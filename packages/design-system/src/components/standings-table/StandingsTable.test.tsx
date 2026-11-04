@@ -167,9 +167,9 @@ describe('StandingsTable', () => {
     const cells = [...container.querySelectorAll('tbody tr:nth-child(2) td')]
 
     expect(cells.at(-1)?.textContent).toBe('6')
-    expect(cells.at(-1)?.className).toBe('hf-numeric hf-bar-value')
+    expect(cells.at(-1)?.className).toBe('hf-numeric hf-key')
     expect(cells.at(-2)?.className).toBe('hf-numeric')
-    expect(container.querySelectorAll('.hf-bar-value')).toHaveLength(4)
+    expect(container.querySelectorAll('.hf-key')).toHaveLength(4)
   })
 
   it('gives the header of the points the space of the bar, so it stays above the numbers, only with bars', () => {
@@ -211,9 +211,9 @@ describe('StandingsTable', () => {
       const { container } = render(<StandingsTable {...props} />)
 
       expect(barLengths(container)).toEqual(['66.67', '100', '16.67', '0'])
-      expect(
-        [...container.querySelectorAll('.hf-bar')].every((bar) => bar.parentElement?.matches('td.hf-bar-value')),
-      ).toBe(true)
+      expect([...container.querySelectorAll('.hf-bar')].every((bar) => bar.parentElement?.matches('td.hf-key'))).toBe(
+        true,
+      )
     })
 
     it('hides the bars from a screen reader and gives them no role, name or text', () => {
@@ -250,7 +250,7 @@ describe('StandingsTable', () => {
       const { container } = render(<StandingsTable {...props} rows={rows.map((row) => ({ ...row, points: 0 }))} />)
 
       expect(container.querySelector('.hf-bar')).toBeNull()
-      expect(screen.getAllByRole('cell').filter((cell) => cell.classList.contains('hf-bar-value'))).toHaveLength(4)
+      expect(screen.getAllByRole('cell').filter((cell) => cell.classList.contains('hf-key'))).toHaveLength(4)
     })
 
     it('has no bars in the short form', () => {

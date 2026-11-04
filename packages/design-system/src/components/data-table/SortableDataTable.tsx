@@ -6,7 +6,7 @@ import type { DataTableColumn, DataTableRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
-import { ColumnText, TableRows } from './dataTableParts'
+import { ColumnText, keyColumnOf, TableRows } from './dataTableParts'
 import { describeSorting, firstDirection, isNumericColumn, type Sorting, sortRows } from './sortRows'
 
 export type SortableDataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & {
@@ -27,6 +27,9 @@ const subscribeToNothing = () => () => undefined
  * the other sortable headers have `aria-sort="none"`, and a line that is not shown, in a polite
  * live region, says what happened. The focus stays on the button, because the header is not
  * rebuilt.
+ * The column that is sorted on is the key figure, in the heaviest weight, and so is the column
+ * with `key` before the visitor has sorted. Bold is never the only sign: the button and
+ * `aria-sort` say it too.
  */
 export const SortableDataTable = ({ caption, className, columns, rows, ...props }: SortableDataTableProps) => {
   // Whether script runs: only then the headers are buttons. The server and the first render of
@@ -38,6 +41,11 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
   )
   const [sorting, setSorting] = useState<Sorting>()
   const [announcement, setAnnouncement] = useState('')
+  // The key figure is the column the visitor sorted on. Before that, and without script, it is
+  // the column with `key`. A table sorted on its first column, which holds the row headers, has
+  // none: the row headers are already the semibold of a header.
+  const declaredKey = keyColumnOf(columns)
+  const keyColumn = sorting === undefined ? declaredKey : sorting.column
   const sorted = useMemo(() => (sorting === undefined ? rows : sortRows(rows, sorting)), [rows, sorting])
 
   const sortOn = (column: number) => {
@@ -90,7 +98,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
             })}
           </tr>
         </thead>
-        <TableRows columns={columns} rows={sorted} withPosition={false} />
+        <TableRows columns={columns} keyColumn={keyColumn} rows={sorted} withPosition={false} />
       </table>
       {scripted && (
         <div className="hf-visually-hidden" role="status">

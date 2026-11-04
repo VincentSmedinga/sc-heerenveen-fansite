@@ -51,11 +51,6 @@
     inline-size: 100%;
   }
 
-  /* The number with the bar is what the table is ordered by, so it is bold. */
-  .hf-bar-table td.hf-bar-value {
-    font-weight: var(--hf-figure-font-weight);
-  }
-
   /*
    * The bar sits to the end of the number, in the same cell, so the numbers stay in line. It is
    * as long as the share of the largest number, which the component gives as a number from 0

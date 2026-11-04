@@ -84,7 +84,8 @@ export const InTableHeader = meta.story({
   parameters: {
     docs: {
       description: {
-        story: 'De rijkop van een tabel is vet, en toch blijft de voornaam gewoon: het gewicht staat op de naam zelf.',
+        story:
+          'De rijkop van een tabel is halfvet, en toch blijft de voornaam gewoon: het gewicht staat op de naam zelf.',
       },
     },
   },

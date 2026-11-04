@@ -816,6 +816,8 @@
   De punten staan niet meer achteraan: de kolommen zijn nu positie, club, G, W, G, V, P en D.
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De afkortingen DV, DT en DS bestaan niet meer; het doelsaldo is S, en de letters komen uit één lijst.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  De punten blijven vet, maar de rij van sc Heerenveen is het niet meer: de achtergrond, de kleur, de balk en "(onze club)" markeren haar.
 
 ## De bronvermelding van Wikipedia is een component met een link per pagina
 
@@ -2261,3 +2263,5 @@
 - **Alternatieven:** de kaart in de hoofdkolom (de lijst met alle tegenstanders komt dan later in beeld); "Alle tegenstanders" zacht laten (twee kaarten zouden dan dezelfde betekenis krijgen); `DataTable` met de plaats als markering voor de rijkop (de plaats is dan geen kolom met een kop en staat niet recht onder elkaar); een gewone `table` in de site (de lint verbiedt HTML-elementen in de site); de bronvermelding in de hoofdkolom laten.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de pagina heeft sindsdien een zijkolom, en de lijst staat op het witte vlak.
 - **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026) in `designsysteem.md`: "Alle tegenstanders" volgt regel 1, de top 10 regel 4.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_ in `designsysteem.md`.
+  De punten per wedstrijd zijn de `key`-kolom en staan in het zwaarste gewicht, niet in het halfvette.

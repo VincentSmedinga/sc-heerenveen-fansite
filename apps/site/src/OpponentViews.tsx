@@ -420,7 +420,7 @@ export function TopPointsCard({
         <>
           <DataTable
             caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'league' ? ', in de Eredivisie' : ''}`}
-            columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, tableColumns.played]}
+            columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
             rows={places.map((place) => ({
               cells: [averageFormat.format(place.points / place.played), place.played],
               header: place.name,
