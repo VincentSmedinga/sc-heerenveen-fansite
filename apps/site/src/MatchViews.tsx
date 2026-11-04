@@ -677,6 +677,7 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
 
   return (
     <ScoreCountsView
+      anchored
       counts={counts}
       empty="We hebben nog geen uitslagen van dit seizoen."
       footer={<BasedOn known={played} played={played} />}
@@ -712,14 +713,18 @@ export function scoreCountsSentence(counts: ScoreCount[]) {
  * The card "Hoe vaak welke uitslag" for the `counts` it is given, which the page of the
  * matches and the page of a club share: the sentence, the chart and the tables. The `footer`
  * is the line under it that says what the figures are based on, which differs per page, and
- * `empty` the sentence for no played match.
+ * `empty` the sentence for no played match. The heading is an anchor (`anchored`) where the
+ * page links to it, as Wedstrijden does; the anchors of a page are a promise, see
+ * `src/anchors.ts`.
  */
 export function ScoreCountsView({
+  anchored = false,
   counts,
   empty,
   footer,
   season,
 }: {
+  anchored?: boolean
   counts: ScoreCount[]
   empty: string
   footer: ReactNode
@@ -734,9 +739,15 @@ export function ScoreCountsView({
 
   return (
     <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season)} surface="warm">
-      <Heading anchor id={scoreCountsCard.id} level={2}>
-        {scoreCountsCard.name}
-      </Heading>
+      {anchored ? (
+        <Heading anchor id={scoreCountsCard.id} level={2}>
+          {scoreCountsCard.name}
+        </Heading>
+      ) : (
+        <Heading id={scoreCountsCard.id} level={2}>
+          {scoreCountsCard.name}
+        </Heading>
+      )}
       {played === 0 ? (
         <Text>{empty}</Text>
       ) : (

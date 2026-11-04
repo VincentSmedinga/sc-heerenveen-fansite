@@ -1059,8 +1059,8 @@ await withEmptyDatabase((database) =>
     assert.match(clubHtml, /<main[^>]*>.*id="wedstrijden".*<\/main>.*<aside[^>]*>.*id="onze-uitslagen"/s)
     assert.doesNotMatch(clubHtml, /id="stadion"/)
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
-    assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag"[^>]*>.*Hoe vaak welke uitslag/s)
-    assert.match(clubHtml, /id="hoe-vaak-welke-uitslag".*\d+ keer (?:gewonnen|gelijk|verloren).*<svg/s)
+    assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
+    assert.match(clubHtml, /id="hoe-vaak-welke-uitslag".*\d+ keer (?:gewonnen|gelijk|verloren).*hf-donut-chart/s)
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
     // the card Stadions: the older name with "tot", the newer with "vanaf", after the results.
     const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()
