@@ -1300,6 +1300,8 @@
 - **Alternatieven:** rechte stukken (de eerste versie; schokkerig).
   Een gemiddelde sinds wedstrijd 1.
   Een lopend totaal aan punten (niet op de schaal van de staafjes).
+- **Later:** zie _`BarChart` is standaard 4 rem hoog, en de lijn begint bij de eerste wedstrijd_ (4 november 2026).
+  De lijn begint bij de eerste wedstrijd en middelt over hoogstens 5, in plaats van van wedstrijd 5 af.
 
 ## De lijn is licht met een rand in de kleur van de kaart in donker, en donker met een witte rand in licht
 
@@ -2477,8 +2479,8 @@
 - **Datum:** 4 november 2026
 - **Besluit:** er komt een onderdeel `FormTimeline` (map `form-timeline/`, naast `form-chart/`), geen variant van `FormChart` (#718).
   Het zet `BarChart`, `BarChart.Trend` en de sleutel samen, en weet niets van wedstrijden of seizoenen: het krijgt per plek een uitslag of niets (`results`), het jaar van de eerste plek (`firstYear`), hoeveel plekken bij één jaar horen (`placesPerYear`, standaard 2), het hoogste aantal uitslagen waarover de lijn middelt (`window`, standaard 4; elke uitslag heeft een punt, via `runningAverage` naast `movingAverage`) en de teksten (`title` en `scope`).
-  - **`BarChart`** kan kleiner met `size="small"` (4 rem hoog, ook als er ruimte is voor de hoge grafiek, zoals `DonutChart`) en zet labels onder de plekken die de pagina kiest met `axis.labels`, een lijst van een plek en een tekst, in plaats van de vaste telling van `axisLabels`.
-    Zonder die twee props verandert niets aan de bestaande grafieken.
+  - **`BarChart`** zet labels onder de plekken die de pagina kiest met `axis.labels`, een lijst van een plek en een tekst, in plaats van de vaste telling van `axisLabels`.
+    Zonder die prop verandert niets aan de bestaande grafieken (zie _`BarChart` is standaard 4 rem hoog, en de lijn begint bij de eerste wedstrijd_ voor de hoogte).
   - **De labels:** `FormTimeline` zet een label onder het eerste jaar en daarna onder elk `labelEvery`-de jaar (standaard 5), in het midden onder de plekken van dat jaar, als de laatste twee cijfers ("90", "95", "00"; met 5 vanaf 2010: "10", "15", "20").
   - **De sleutel** (W winst (3 punten), G gelijk (1), V verlies (0)) staat in `FormKey`, een deel dat `FormChart` en `FormTimeline` delen en dat de woorden uit `tableColumns` haalt.
     Het wordt niet los geëxporteerd en neemt een tekst mee in dezelfde alinea (`children`).
@@ -2503,3 +2505,17 @@
   Een lettertype dat niet variabel is, springt tussen de twee gewichten.
 - **Alternatieven:** de duur laten staan (de knop schuift te snel om te zien); een eigen duur tussen 0,2 en 0,4 seconde (een token erbij voor één onderdeel); alleen de knop langzamer en de letters meteen (de letters springen terwijl de knop nog onderweg is).
 - **Later:** vult _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_ aan: de knop van de schakelaar is de tweede die de langste duur krijgt, en het lettergewicht van de gekozen keuze is een tweede uitzondering op "alleen kleur, doorzichtigheid en transformatie bewegen".
+
+## `BarChart` is standaard 4 rem hoog, en de lijn begint bij de eerste wedstrijd
+
+- **Datum:** 4 november 2026
+- **Besluit:** `BarChart` is overal 4 rem hoog, ook als de grafiek ruimte heeft; dat was 4,5 rem, en 6 rem met ruimte (#718).
+  De cijfers aan de zijkant en de bredere ruimte om de staafjes blijven bij een brede grafiek.
+  De lijn van `FormChart` begint bij de eerste wedstrijd en middelt over de wedstrijden die er zijn, hoogstens 5, met `runningAverage`, zoals `FormTimeline`.
+  De zin onder de grafiek noemt hoeveel wedstrijden het gemiddelde telt ("in de laatste 3 wedstrijden"), en "De lijn begint bij de eerste wedstrijd." staat er alleen zolang er niets is gespeeld.
+- **Waarom:** de projecteigenaar wil dat de grafieken van het seizoen en van de club even hoog zijn en dat elke gespeelde wedstrijd een punt op de lijn heeft.
+  Een prop voor de hoogte (`size="small"`, die in dit werk even bestond) is er dan niet meer nodig.
+- **Voorlopig:** de projecteigenaar noemde dit "voor nu"; een andere hoogte voor een brede grafiek komt terug als er een reden is.
+- **Nadeel:** de eerste punten van de lijn middelen over weinig wedstrijden en springen meer.
+- **Alternatieven:** de hoogte als prop (`size`) naast een standaard van 6 rem; de lijn laten wachten op vijf wedstrijden (de vorm die er was, met "De lijn begint na 5 wedstrijden.").
+- **Later:** vervangt "van wedstrijd 5 af" in _De lijn is het gemiddelde over de laatste 5 wedstrijden, als vloeiende kromme_ (27 oktober 2026).

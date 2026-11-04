@@ -24,10 +24,9 @@ describe('FormTimeline', () => {
     expect(container.querySelectorAll('.hf-bar-chart-stub')).toHaveLength(1)
   })
 
-  it('is the small chart, with the title under the labels', () => {
+  it('has the title under the labels', () => {
     const { container } = render(<FormTimeline {...props} results={places({})} />)
 
-    expect(container.querySelector('.hf-bar-chart-small')).not.toBeNull()
     expect(container.querySelector('.hf-bar-chart-title')?.textContent).toBe('Seizoen')
   })
 

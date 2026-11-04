@@ -62,11 +62,6 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   /** The value of a full bar. It is the scale of the chart, and of a trend on it. */
   max: number
   /**
-   * `small` is a lower chart, for a card that holds a small chart: it keeps its height on a
-   * chart with room. The default is the height that follows the width of the chart.
-   */
-  size?: 'small'
-  /**
    * Lines across the chart at these values, and on a chart with room the numbers at the side. A
    * line at 0 is the ground, which is always there.
    */
@@ -156,7 +151,6 @@ export const BarChart = ({
   children,
   className,
   max,
-  size,
   style,
   ticks = [],
   zero = 'stub',
@@ -177,7 +171,7 @@ export const BarChart = ({
     <div
       {...props}
       aria-hidden="true"
-      className={classNames('hf-bar-chart', size === undefined ? undefined : `hf-bar-chart-${size}`, className)}
+      className={classNames('hf-bar-chart', className)}
       style={{ ...style, '--hf-bar-chart-slots': slots } as CSSProperties}
     >
       <div className="hf-bar-chart-frame">

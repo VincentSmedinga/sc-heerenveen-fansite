@@ -7,7 +7,7 @@
 
 @layer hf.components {
   .hf-bar-chart {
-    --hf-bar-chart-height: 4.5rem;
+    --hf-bar-chart-height: 4rem;
     --hf-bar-chart-line: 2px;
     --hf-bar-chart-edge: 5px;
 
@@ -162,8 +162,8 @@
   }
 
   /*
-   * A chart with room has taller bars, the numbers of 0, 1 and 3 at the side, more numbers
-   * under the places and a wider gap round each bar. The width is that of the chart, which
+   * A chart with room has the numbers of 0, 1 and 3 at the side, more numbers under the
+   * places and a wider gap round each bar. The width is that of the chart, which
    * is a card of about 28rem or wider; a card of a narrow column stays with the small
    * chart.
    */
@@ -171,10 +171,6 @@
     .hf-bar-chart-frame {
       grid-template-columns: 1.25rem minmax(0, 1fr);
       padding-block-start: var(--hf-space-s);
-    }
-
-    .hf-bar-chart-plot {
-      --hf-bar-chart-height: 6rem;
     }
 
     .hf-bar-chart-slot {
@@ -206,15 +202,6 @@
     .hf-bar-chart-number-wide {
       display: block;
     }
-  }
-
-  /* A small chart keeps its height, also where there is room for the tall one. */
-  .hf-bar-chart-small {
-    --hf-bar-chart-height: 4rem;
-  }
-
-  .hf-bar-chart-small .hf-bar-chart-plot {
-    --hf-bar-chart-height: 4rem;
   }
 
   /* In forced colours a background colour is replaced, unless it is a system colour. */

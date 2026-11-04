@@ -13,7 +13,7 @@ const meta = preview.meta({
     results: {
       description: 'De gespeelde wedstrijden, de oudste eerst: `W` (winst), `G` (gelijk) of `V` (verlies).',
     },
-    window: { description: 'Het aantal wedstrijden waarover de lijn het gemiddelde neemt.' },
+    window: { description: 'Het hoogste aantal wedstrijden waarover de lijn het gemiddelde neemt.' },
   },
   component: FormChart,
   parameters: {
@@ -23,7 +23,7 @@ const meta = preview.meta({
           'De vormgrafiek laat een seizoen zien als staafjes: één per wedstrijd, drie hoog voor een winst, één voor een gelijkspel en een klein blokje voor een verlies, met een vloeiende lijn erdoorheen die laat zien hoe het gaat.',
           'Boven de grafiek staat de vorm als letters, het oudste links.',
           'Wedstrijden die nog gespeeld moeten worden, hebben een lege plek.',
-          'De lijn is het gemiddelde aantal punten per wedstrijd over de laatste wedstrijden, en begint pas als er genoeg wedstrijden zijn.',
+          'De lijn is het gemiddelde aantal punten per wedstrijd over de laatste wedstrijden, hoogstens vijf, en begint bij de eerste wedstrijd.',
           '',
           'De grafiek zelf is verborgen voor een schermlezer.',
           'De vorm in woorden, de uitleg van de letters en de zin over de lijn zijn tekst, en de pagina zet dezelfde cijfers in een `DataTable` ernaast.',
@@ -101,7 +101,7 @@ export const InProgress = meta.story({
 
 export const AfterThree = meta.story({
   args: { results: seasonResults.slice(0, 3) },
-  name: 'Na drie wedstrijden, nog geen lijn',
+  name: 'Na drie wedstrijden, de lijn begint bij de eerste wedstrijd',
   render: (args) => <SeasonCard results={args.results} />,
 })
 
@@ -133,7 +133,7 @@ export const SurfacesDark = meta.story({
 
 export const Narrow = meta.story({
   args: { results: seasonResults },
-  name: 'Een smalle kaart, de kleine grafiek',
+  name: 'Een smalle kaart',
   render: (args) => (
     <div style={{ maxInlineSize: '20rem' }}>
       <SeasonCard results={args.results} />

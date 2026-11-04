@@ -163,14 +163,6 @@ describe('BarChart', () => {
     expect(container.querySelector('.hf-bar-chart-title')?.textContent).toBe('Seizoen')
   })
 
-  it('has the small class only when asked for the small chart', () => {
-    const { container, rerender } = render(<BarChart bars={[null]} max={3} />)
-
-    expect(container.querySelector('.hf-bar-chart-small')).toBeNull()
-    rerender(<BarChart bars={[null]} max={3} size="small" />)
-    expect(container.querySelector('.hf-bar-chart-small')).not.toBeNull()
-  })
-
   it('has no numbers or caption when the axis is false', () => {
     const { container } = render(<BarChart axis={false} bars={bars} max={3} />)
 

@@ -65,17 +65,12 @@ describe('bar-chart.css', () => {
     expect(css).not.toMatch(/@media \((?:min|max)-width/u)
   })
 
-  it('is 4.5rem high, and 6rem with room, with the numbers at the side only then', () => {
-    expect(declarationsOf('.hf-bar-chart')).toMatch(/--hf-bar-chart-height: 4\.5rem/u)
+  it('is 4rem high, with the numbers at the side only when there is room', () => {
+    expect(declarationsOf('.hf-bar-chart')).toMatch(/--hf-bar-chart-height: 4rem/u)
     expect(declarationsOf('.hf-bar-chart-scale')).toMatch(/display: none/u)
-    expect(css).toMatch(/@container[^{]*\{[\s\S]*--hf-bar-chart-height: 6rem/u)
+    expect(css).not.toMatch(/--hf-bar-chart-height: 6rem|4\.5rem/u)
     expect(css).toMatch(/@container[^{]*\{[\s\S]*\.hf-bar-chart-scale \{[^}]*display: block/u)
     expect(css).toMatch(/@container[^{]*\{[\s\S]*\.hf-bar-chart-number-wide \{[^}]*display: block/u)
-  })
-
-  it('keeps the small chart 4rem high, also where there is room for the tall one', () => {
-    expect(declarationsOf('.hf-bar-chart-small')).toMatch(/--hf-bar-chart-height: 4rem/u)
-    expect(declarationsOf('.hf-bar-chart-small .hf-bar-chart-plot')).toMatch(/--hf-bar-chart-height: 4rem/u)
   })
 
   it('shows the bars and the line in a system colour in forced colours, and the edge in the colour of the page', () => {

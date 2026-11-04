@@ -69,7 +69,6 @@ export const FormTimeline = ({
         axis={{ labels: yearLabels(results.length, firstYear, placesPerYear, labelEvery), title }}
         bars={barsOf(results)}
         max={3}
-        size="small"
         ticks={[0, 1, 3]}
       >
         <BarChart.Trend values={values} />

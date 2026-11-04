@@ -198,7 +198,7 @@ describe('the page /statistieken', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!--hf-bar-share:[\d.]+"|--hf-segmented-thumb-name:hf-segmented-thumb-[a-z-]+;--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-segmented-option-name:hf-segmented-option-[a-z-]+-\d"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+")|order:/,
+      / style="(?!--hf-bar-share:[\d.]+"|--hf-segmented-thumb-name:hf-segmented-thumb-[a-z-]+;--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-segmented-option-name:hf-segmented-option-[a-z-]+-\d"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
     )
   })
 
@@ -454,11 +454,13 @@ describe('the page /statistieken', () => {
         ['Totaal', '6', '8'],
       ])
       expect(card).toContain('in de laatste 5 wedstrijden')
-      expect(card).not.toContain('De lijn begint na 5 wedstrijden.')
     })
 
-    it('says the line starts after five matches while there are fewer', async () => {
-      expect(section(await render(), 'verloop-van-het-seizoen')).toContain('De lijn begint na 5 wedstrijden.')
+    it('draws the line from the first match, over the matches there are while there are fewer than five', async () => {
+      const card = section(await render(), 'verloop-van-het-seizoen')
+
+      expect(card).toContain('in de laatste 3 wedstrijden: nu 2,3.')
+      expect(card).not.toContain('De lijn begint na')
     })
 
     it('hides the chart from a screen reader and leaves the numbers to the table', async () => {
