@@ -980,8 +980,8 @@ export function StreaksCard({
  * The page of a club has the short form too, for the matches against that club (see
  * `ClubTopScorersCard`, with `topOnly` and no link), but its texts are about a club and not
  * about a season: `scope` ends the caption ("van sc Heerenveen tegen FC Twente, in de
- * Eredivisie") and `empty` is the sentence for no goal. Without them the texts are those of a
- * season, from `season`.
+ * Eredivisie") and `empty` is the sentence for no goal. A season gets `season` and no `scope`,
+ * a club the other way round, so the caption never says "undefined".
  */
 export function TopScorers({
   competition,
@@ -996,11 +996,9 @@ export function TopScorers({
   empty?: string
   matches: ScoredMatch[]
   playersHref?: string | undefined
-  scope?: string
-  season?: string
   /** Only the first five places; on by default when there is a link to the full list. */
   topOnly?: boolean
-}) {
+} & ({ scope: string; season?: undefined } | { scope?: undefined; season: string })) {
   const scorers = topScorersOf(matches, competition)
   const shown = topOnly ? topFiveOf(scorers) : scorers
   const cut = shown.length < scorers.length
