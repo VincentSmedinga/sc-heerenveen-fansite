@@ -1733,6 +1733,7 @@
   De lijst eronder blijft.
 - **Later:** zie _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ (3 november 2026): een wedstrijd die nog niet is gespeeld staat er sindsdien wel in, als `Match` bovenaan in dezelfde lijst, vóór de gespeelde wedstrijden.
   De lijst en de samenvatting tellen nog steeds alleen gespeelde wedstrijden.
+- **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): de kaart Wedstrijden toont sindsdien elke wedstrijd als `Match`, met de competitie en de ronde in de regel en het jaar bij de dag, en niet meer als korte regel (`ShortMatch`) met het seizoen en de competitie erboven.
 
 ## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
 
@@ -1754,6 +1755,8 @@
 - **Waarom:** wie een club zoekt, wil ook weten wanneer en waar we hem weer treffen, op één plek voor alle wedstrijden tegen die club.
   Eén regel voor wat komt, in Programma en hier, voorkomt dat de twee pagina's het oneens zijn over een uitgestelde of een begonnen wedstrijd.
 - **Alternatieven:** een eigen kaart voor de komende wedstrijden, erboven of in de zijkolom; de keuze voor de competitie negeren, zoals de kaart Stadion doet; alleen de eerstvolgende wedstrijd tonen; een zin "we spelen niet meer tegen deze club" als er niets komt (fout als het programma nog niet gepubliceerd is); `ShortMatch` als regel, zoals de gespeelde wedstrijden; twee onderkoppen, "Komende wedstrijden" en "Gespeelde wedstrijden", en een zin onder de tweede voor een club die we nog niet speelden (de projecteigenaar wilde geen koppen; het ontbreken van een uitslag zegt genoeg).
+- **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): `ShortMatch` voor de gespeelde wedstrijden is vervallen.
+  De kaart Wedstrijden heeft sindsdien één soort regel, `Match`, voor de komende en de gespeelde wedstrijden; een komende wedstrijd valt nog altijd op omdat hij geen uitslag heeft.
 
 ## De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -2179,3 +2182,23 @@
 - **Waarom:** twee kaarten naast elkaar met verschillende aantallen zouden verwarren.
   De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
 - **Alternatieven:** altijd alleen de Eredivisie (de donut zou de rest van de pagina tegenspreken zodra de beker meetelt).
+
+## `Match` is voor een volledige lijst, `ShortMatch` voor een selectie
+
+- **Datum:** 4 november 2026
+- **Besluit:** de site kiest `Match` voor een volledige lijst (een seizoen, een competitie, alle wedstrijden tegen één club) en `ShortMatch` voor een selectie: een lijst of kaart die op een eigenschap uit de wedstrijden kiest, of een stuk van een lijst (#693).
+  `ShortMatch` staat nooit voor een volledige lijst, en een lijst mengt de twee niet.
+  - **`Match`** is de standaard voor Programma, Uitslagen, de wedstrijden tegen een tegenstander en de wedstrijden op de homepage.
+  - **`ShortMatch`** is voor de wedstrijden waarin we de nul hielden, de laatste vijf wedstrijden bij Reeksen, de benoemde wedstrijden bij Uitersten en Onze uitslagen, en de grootste overwinning en nederlaag op de pagina van een club.
+  - **De pagina van een club** toont daarom ook de gespeelde wedstrijden als `Match`, in dezelfde lijst als de komende, nieuwste eerst.
+    De regel "seizoen · competitie" boven een gespeelde wedstrijd is weg: de competitie en de ronde staan in de regel, en de dag heeft het jaar (`withYear` van `matchMoment`), zodat een wedstrijd uit een eerder seizoen te herkennen is.
+    Een gespeelde wedstrijd toont wat hij bij Uitslagen toont: de doelpuntenmakers waar we ze kennen, verlenging en strafschoppen, en onder de lijst staat de legenda van de afkortingen.
+  - **Dezelfde code:** de kaart gebruikt `MatchLine` en `MatchLegend` van `src/MatchViews.tsx`, zoals Uitslagen, en geen tweede kopie.
+    `listClubMatches` geeft daarvoor ook de aantekening, de stand na 90 minuten en de doelpuntenmakers, met dezelfde hulpfunctie als `listSeasonMatches`.
+    Het jaar staat bij de dag van elke gespeelde wedstrijd op deze pagina, ook in het lopende jaar, want de pagina loopt over seizoenen; een komende wedstrijd houdt de dag zoals Programma.
+- **Waarom:** een lijst met twee soorten regels leest onrustig, en wie alle wedstrijden tegen één club bekijkt, wil dezelfde gegevens (competitie, ronde, doelpuntenmakers) bij elke wedstrijd.
+  De korte regel past bij een selectie, waar de uitslag genoeg is en de kaart klein moet blijven.
+  Een keuze op doel, niet op welke gegevens nodig zijn, want dat bepaalt niemand per lijst.
+- **Alternatieven:** `ShortMatch` voor alles op de pagina van een club (het onderdeel kent geen wedstrijd die nog komt, en competitie, stadion en tijd zouden verdwijnen); de gemengde lijst laten zoals ze is (de projecteigenaar wil dat niet); alle `ShortMatch`-plekken ook `Match` maken (de kaarten van Statistieken worden lang voor een uitslag die ze al geven).
+- **Nadeel:** de pagina van een club met veel wedstrijden wordt langer, omdat een `Match` meer ruimte neemt dan een `ShortMatch`.
+  Een grens aan de lengte of "Laad meer" is een eigen issue als dat nodig blijkt.

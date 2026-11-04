@@ -5,7 +5,7 @@ import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
 import { findClubBySlug, listClubMatches, listClubRecords } from './queries.ts'
-import { clubNames, clubs, matches } from './schema.ts'
+import { clubNames, clubs, matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -251,6 +251,47 @@ describe('listClubMatches', () => {
     expect(await listClubMatches(database.db, await idOf('vitesse'))).toMatchObject([
       { dateText: 'februari 2027', goalsAgainst: null, goalsFor: null, status: 'scheduled' },
     ])
+  })
+
+  it('gives each match its note, its score after 90 minutes and its scorers in the order of the clock', async () => {
+    await store(
+      played('FC Twente', 2, 2, {
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        competition: 'KNVB Beker',
+        extraTime: true,
+        note: 'Aangepast',
+      }),
+      played('Ajax', 1, 0),
+    )
+
+    const twente = await idOf('fc-twente')
+    const [{ id: twenteMatch = 0 } = {}, { id: ajaxMatch = 0 } = {}] = await database.db
+      .select({ id: matches.id })
+      .from(matches)
+      .orderBy(matches.id)
+
+    await database.db.insert(matchGoals).values([
+      { matchId: twenteMatch, minute: 70, ours: false, player: 'Late' },
+      { matchId: twenteMatch, minute: 12, ours: true, penalty: true, player: 'Vroeg' },
+      { matchId: ajaxMatch, minute: 5, ours: true, player: 'Elders' },
+    ])
+
+    const [list] = await listClubMatches(database.db, twente)
+
+    expect(list).toMatchObject({ afterNinetyAgainst: 1, afterNinetyFor: 1, extraTime: true, note: 'Aangepast' })
+    // The goals are those of this club's match alone, not of the other club's.
+    expect(list?.goals.map((goal) => [goal.minute, goal.player, goal.penalty])).toEqual([
+      [12, 'Vroeg', true],
+      [70, 'Late', false],
+    ])
+    expect(list?.id).toBe(twenteMatch)
+  })
+
+  it('gives a match without a goal an empty list of scorers', async () => {
+    await store(played('FC Twente', 0, 0))
+
+    expect(await listClubMatches(database.db, await idOf('fc-twente'))).toMatchObject([{ goals: [] }])
   })
 
   it('gives nothing for a club that has no matches', async () => {

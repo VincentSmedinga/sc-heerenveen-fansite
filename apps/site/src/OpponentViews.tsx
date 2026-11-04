@@ -6,7 +6,6 @@ import {
   Heading,
   List,
   MarkRow,
-  Match,
   RecordTable,
   ShortMatch,
   ShortStaff,
@@ -20,7 +19,7 @@ import {
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
 import { countScores } from './matches'
-import { imageCredit, markOf, metaSeparator, ScoreCountsView } from './MatchViews'
+import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView } from './MatchViews'
 import { type ClubSummary, lastResultsOf, type Meeting, type Stadium } from './opponents'
 
 /**
@@ -70,15 +69,20 @@ const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + re
 const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => record.goalsFor - record.goalsAgainst
 
 /**
- * The card of the page of a club with every match against it, in one list. The matches that
- * are still to come stand first, next one first, as `Match` has them in Programma, with the
- * competition and the round in the line. The matches that were played follow, the newest
- * first, as short lines, with the row Laatste wedstrijden above the list when there are five
- * or more (see `lastResultsOf`). Above each played line stand the season and the competition,
- * and the line has the day, the name as Wikipedia wrote the club in that match (so an earlier
- * name shows), where it was played and the result from our side. A match to come has no result,
- * which is what sets it apart, so there are no subheadings. It is the main content of the page,
- * so it has the white surface.
+ * The card of the page of a club with every match against it, in one list of `Match` lines,
+ * the same line as Programma and Uitslagen use (`MatchLine`). The matches that are still to
+ * come stand first, next one first, as Programma has them. The matches that were played
+ * follow, the newest first, with the row Laatste wedstrijden above the list when there are
+ * five or more (see `lastResultsOf`).
+ *
+ * A line has the day with its year, so a match of an earlier season can be told from one of
+ * this season, the competition and the round, the name as Wikipedia wrote the club in that
+ * match (so an earlier name shows), where it was played and, for a match that was played, the
+ * result from our side with the scorers, extra time and the shoot-out. A match to come has
+ * no result, which is what sets it apart, so there are no subheadings. The legend of the
+ * abbreviations is under the list. The list has all the matches, not a selection, so it has
+ * one kind of line (see the decision of 4 November 2026 in `docs/beslissingen/site.md`). It is
+ * the main content of the page, so it has the white surface.
  */
 export function ClubMeetingsCard({
   meetings,
@@ -90,6 +94,7 @@ export function ClubMeetingsCard({
   upcoming: PublicClubMatch[]
 }) {
   const last = lastResultsOf(meetings)
+  const shown = [...upcoming, ...meetings]
 
   return (
     <Card aria-labelledby="wedstrijden">
@@ -98,22 +103,14 @@ export function ClubMeetingsCard({
       </Heading>
       {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
       <List role="list">
-        {upcoming.map((match) => (
+        {shown.map((match) => (
+          // A competition and a round come back every season, so the match itself is the key.
           <List.Item key={match.id}>
-            <UpcomingLine match={match} now={now} />
-          </List.Item>
-        ))}
-        {meetings.map((match) => (
-          <List.Item key={match.id}>
-            <Text appearance="meta">
-              {match.season}
-              {metaSeparator}
-              {match.competition}
-            </Text>
-            <MeetingLine match={match} now={now} />
+            <MatchLine match={match} now={now} withYear />
           </List.Item>
         ))}
       </List>
+      <MatchLegend matches={shown} />
     </Card>
   )
 }
@@ -345,7 +342,7 @@ export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
   )
 }
 
-/** One played match against the club as a short line. */
+/** One played match against the club as a short line, for the cards that pick matches out. */
 function MeetingLine({ match, now }: { match: Meeting; now: Date }) {
   return (
     <ShortMatch
@@ -355,26 +352,5 @@ function MeetingLine({ match, now }: { match: Meeting; now: Date }) {
       home={match.home}
       opponent={match.opponent}
     />
-  )
-}
-
-/**
- * A match that is still to come, as `Match` shows it in Programma: the day and the stadium, the
- * clubs, and the competition with the round. A match that is called off says so instead of a
- * time. It has begun for none of them, so no line says the result is missing.
- */
-function UpcomingLine({ match, now }: { match: PublicClubMatch; now: Date }) {
-  const common = {
-    competition: match.competition,
-    home: match.home,
-    opponent: match.opponent,
-    round: match.round,
-    stadium: match.stadium,
-  }
-
-  return match.status === 'postponed' || match.status === 'cancelled' ? (
-    <Match {...common} status={match.status} />
-  ) : (
-    <Match {...common} {...matchMoment(match, now)} status="scheduled" />
   )
 }

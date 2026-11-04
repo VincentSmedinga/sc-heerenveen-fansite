@@ -21,15 +21,19 @@ function match(ours: null | number, theirs: null | number, more: Partial<PublicC
   id += 1
 
   return {
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
     competition: 'Eredivisie',
     dateText: null,
     extraTime: false,
+    goals: [],
     goalsAgainst: theirs,
     goalsFor: ours,
     home: true,
     id,
     kickoffAt: null,
     matchDate: '2026-10-24',
+    note: null,
     opponent: 'Testclub',
     penaltiesAgainst: null,
     penaltiesFor: null,
@@ -387,11 +391,7 @@ describe('upcomingOf', () => {
         a.id - b.id,
     )
     const seasonMatches = season.map((item) => ({
-      afterNinetyAgainst: null,
-      afterNinetyFor: null,
       attendance: null,
-      goals: [],
-      note: null,
       referee: null,
       ...item,
     })) satisfies PublicMatch[]

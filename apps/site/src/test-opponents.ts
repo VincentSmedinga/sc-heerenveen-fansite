@@ -44,19 +44,38 @@ export const leagueRecords: PublicClubRecord[] = [
 
 let id = 0
 
+/** A goal of one of our players, at `minute`, as the query gives it. */
+const goal = (minute: number, player: string, more: Partial<PublicClubMatch['goals'][number]> = {}) => ({
+  minute,
+  ours: true,
+  ownGoal: false,
+  penalty: false,
+  player,
+  playerId: null,
+  playerName: null,
+  playerPage: null,
+  playerSearchTerm: null,
+  stoppageMinutes: null,
+  ...more,
+})
+
 function match(ours: number, theirs: number, more: Partial<PublicClubMatch> = {}): PublicClubMatch {
   id += 1
 
   return {
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
     competition: 'Eredivisie',
     dateText: null,
     extraTime: false,
+    goals: [],
     goalsAgainst: theirs,
     goalsFor: ours,
     home: true,
     id,
     kickoffAt: null,
     matchDate: '2025-10-24',
+    note: null,
     opponent: 'Testclub',
     penaltiesAgainst: null,
     penaltiesFor: null,
@@ -83,13 +102,21 @@ export const testclub: ClubPage = {
   },
   matches: [
     match(0, 1, {
+      afterNinetyAgainst: 0,
+      afterNinetyFor: 0,
       competition: 'KNVB Beker',
+      extraTime: true,
+      goals: [goal(112, 'Voorbeeld', { ours: false })],
       home: false,
       matchDate: '2026-09-20',
       season: '2026/27',
       stadium: 'Neutraal Stadion',
     }),
-    match(3, 0, { matchDate: '2025-10-24', stadium: 'Abe Lenstra Stadion' }),
+    match(3, 0, {
+      goals: [goal(12, 'Vroeg', { penalty: true }), goal(40, 'Midden'), goal(77, 'Laat')],
+      matchDate: '2025-10-24',
+      stadium: 'Abe Lenstra Stadion',
+    }),
     match(1, 1, {
       home: false,
       matchDate: '2025-03-01',

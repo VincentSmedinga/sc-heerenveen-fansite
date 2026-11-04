@@ -18,7 +18,7 @@ const meta = preview.meta({
           'Een uitwedstrijd die wij met 3–0 winnen staat dus als "Testdorp FC 0–3 sc Heerenveen".',
           'Er staat geen "thuis" of "uit" bij: de volgorde zegt het al.',
           'Een schermlezer hoort dezelfde volgorde met de namen van de clubs, als "Testdorp FC 0 tegen 3 sc Heerenveen".',
-          'Het is voor een lijst die over onze club gaat, zoals de wedstrijden waarin we de nul hielden of de wedstrijden tegen één club.',
+          'Kies hem voor een selectie, een lijst of kaart die op een eigenschap uit de wedstrijden kiest, zoals de wedstrijden waarin we de nul hielden; voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club, kies je `Match`, en een lijst heeft één soort regel.',
           'Onze eigen naam staat vet, zoals in een `Match`.',
           '',
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, niet van de thuisclub: groen bij winst, rood bij verlies en neutraal bij gelijkspel, thuis en uit.',
