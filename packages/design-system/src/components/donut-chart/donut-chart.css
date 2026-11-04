@@ -15,6 +15,15 @@
     grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
   }
 
+  /*
+   * A group with a small chart gives the small one the room its text needs and the other chart
+   * the rest, as long as that is a ring wider than a few words; below that they stack.
+   */
+  .hf-donut-chart-group:has(.hf-donut-chart-small) {
+    grid-template-columns: minmax(0, 1fr) 10rem;
+    align-items: center;
+  }
+
   .hf-donut-chart {
     display: grid;
     gap: var(--hf-space-xs);
@@ -59,6 +68,11 @@
   .hf-donut-chart-plot {
     aspect-ratio: 320 / 300;
     position: relative;
+  }
+
+  /* The text round the ring needs this much room, so the ring itself is smaller. */
+  .hf-donut-chart-small {
+    max-inline-size: 10rem;
   }
 
   /* A ring without labels is a square, as wide as the ring needs and no more. */

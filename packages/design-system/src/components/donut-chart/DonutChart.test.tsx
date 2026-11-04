@@ -340,6 +340,17 @@ describe('DonutChart.Swatch', () => {
   })
 })
 
+describe('DonutChart size', () => {
+  it('has the class of a small chart only when it is asked for, and keeps the text round the ring', () => {
+    const small = render(<DonutChart {...props} size="small" />).container.firstElementChild
+    const normal = render(<DonutChart {...props} />).container.firstElementChild
+
+    expect(small?.className).toContain('hf-donut-chart-small')
+    expect(small?.querySelectorAll('.hf-donut-chart-label')).toHaveLength(6)
+    expect(normal?.className).not.toContain('hf-donut-chart-small')
+  })
+})
+
 describe('DonutChart.Group', () => {
   it('is a div with the class of the group, and passes other props on', () => {
     const { container } = render(

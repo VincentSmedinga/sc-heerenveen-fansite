@@ -1,5 +1,6 @@
 import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
 
+import { competitions } from '@fansite/db/schema'
 import {
   Card,
   DataTable,
@@ -176,19 +177,13 @@ export function ClubsCard({
 /**
  * The card "Hoe vaak welke uitslag" of the page of a club: the card of the page Wedstrijden
  * (`ScoreCountsView`) for the meetings the rest of the page counts, so the figures are those of
- * the row Totaal of `ClubSummaryCard` for either choice. It is under that card, in the sidebar,
- * and nothing without a played match, so a club we only meet in the future has none. The line
- * under it is the one of the other cards of the page, with the season we have data from.
+ * the row Totaal of `ClubSummaryCard` for either choice. Unlike Wedstrijden it has a second
+ * chart with the goals we scored and conceded in those meetings, and under the tables a table
+ * of the competitions they were played in, which follows the switch. It is under the summary,
+ * in the sidebar, and nothing without a played match, so a club we only meet in the future has
+ * none.
  */
-export function ClubScoreCountsCard({
-  choice,
-  meetings,
-  since,
-}: {
-  choice: CompetitionChoice
-  meetings: readonly Meeting[]
-  since: string
-}) {
+export function ClubScoreCountsCard({ meetings }: { meetings: readonly Meeting[] }) {
   if (meetings.length === 0) {
     return null
   }
@@ -197,8 +192,17 @@ export function ClubScoreCountsCard({
     <ScoreCountsView
       counts={countScores(meetings)}
       empty=""
-      footer={<BasedOnSince choice={choice} played={meetings.length} since={since} />}
-    />
+      goals={{
+        against: meetings.reduce((sum, meeting) => sum + meeting.goalsAgainst, 0),
+        for: meetings.reduce((sum, meeting) => sum + meeting.goalsFor, 0),
+      }}
+    >
+      <DataTable
+        caption="De competities van deze wedstrijden en hoeveel wedstrijden er in elke werden gespeeld"
+        columns={['Competitie', 'Wedstrijden']}
+        rows={competitionCounts(meetings).map(({ competition, count }) => ({ cells: [count], header: competition }))}
+      />
+    </ScoreCountsView>
   )
 }
 
@@ -259,6 +263,20 @@ export function ClubSummaryCard({
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
     </Card>
   )
+}
+
+/**
+ * The competitions of `meetings` and how many matches each has, the most matches first and, for
+ * the same number, in the order of `competitions` (the order of the site).
+ */
+export function competitionCounts(meetings: readonly Meeting[]) {
+  return competitions
+    .map((competition) => ({
+      competition,
+      count: meetings.filter((meeting) => meeting.competition === competition).length,
+    }))
+    .filter(({ count }) => count > 0)
+    .toSorted((a, b) => b.count - a.count)
 }
 
 /**

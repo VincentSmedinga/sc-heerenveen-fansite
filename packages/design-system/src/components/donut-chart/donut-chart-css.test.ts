@@ -40,6 +40,13 @@ describe('donut-chart.css', () => {
     )
   })
 
+  it('makes a small chart narrower than the other and gives a group with one the room for its text', () => {
+    expect(declarationsOf('.hf-donut-chart-small')).toMatch(/max-inline-size: 10rem/u)
+    expect(declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')).toMatch(
+      /grid-template-columns: minmax\(0, 1fr\) 10rem/u,
+    )
+  })
+
   it('has no animation or transition, so nothing moves', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/u)
   })

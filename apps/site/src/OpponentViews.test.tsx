@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 import type { PublicClubRecord } from '@fansite/db/queries'
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { ClubsCard } from './OpponentViews'
+import type { Meeting } from './opponents'
+
+import { ClubsCard, ClubScoreCountsCard } from './OpponentViews'
+import { testclub } from './test-opponents'
 
 const record = (
   name: string,
@@ -65,5 +68,42 @@ describe('ClubsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'D doelsaldo' }))
 
     expect(names()).toEqual(['Venlo', 'Sparta', 'Zwolle'])
+  })
+})
+
+describe('ClubScoreCountsCard', () => {
+  const meetings = testclub.matches.filter(
+    (match): match is Meeting => match.goalsFor !== null && match.goalsAgainst !== null,
+  )
+
+  it('names the header of each table with the count, as a screen reader says it', () => {
+    render(<ClubScoreCountsCard meetings={meetings} />)
+
+    expect(screen.getByRole('columnheader', { name: 'Winst, 3 keer' }).textContent).toBe('Winst 3×Winst, 3 keer')
+    expect(screen.getByRole('columnheader', { name: 'Gelijk, 1 keer' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'Verlies, 1 keer' })).toBeTruthy()
+  })
+
+  it('names the table of competitions and gives it the matches of each competition', () => {
+    render(<ClubScoreCountsCard meetings={meetings} />)
+
+    const table = screen.getByRole('table', { name: /^De competities van deze wedstrijden/ })
+
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent),
+    ).toEqual(['Competitie', 'Wedstrijden'])
+    expect(
+      within(table)
+        .getAllByRole('row')
+        .map((row) => row.textContent),
+    ).toEqual(['CompetitieWedstrijden', 'Eredivisie4', 'KNVB Beker1'])
+  })
+
+  it('is nothing without a match', () => {
+    const { container } = render(<ClubScoreCountsCard meetings={[]} />)
+
+    expect(container.innerHTML).toBe('')
   })
 })

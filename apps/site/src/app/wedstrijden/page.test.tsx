@@ -326,7 +326,9 @@ describe('the page /wedstrijden', () => {
           ([, header, count]) => [header?.replaceAll(/<[^>]*>/g, ''), count],
         )
 
-      expect(tables.map((table) => table.match(/<th scope="col">([^<]*)<\/th>/)?.[1])).toEqual(['Winst', 'Gelijk'])
+      expect(
+        tables.map((table) => table.match(/<th scope="col">.*?<span class="hf-visually-hidden">([^<]*)</)?.[1]),
+      ).toEqual(['Winst, 3 keer', 'Gelijk, 1 keer'])
       expect(rowsOf(tables[0]!)).toEqual([
         ['3–1, winst', '1×'],
         ['2–0, winst', '1×'],
@@ -344,11 +346,9 @@ describe('the page /wedstrijden', () => {
 
       const html = await card()
 
-      expect(html.match(/<th scope="col">([^<]*)<\/th>/g)).toEqual([
-        '<th scope="col">Winst</th>',
-        '<th scope="col">Gelijk</th>',
-        '<th scope="col">Verlies</th>',
-      ])
+      expect(
+        [...html.matchAll(/<th scope="col"><span aria-hidden="true">([^<]*)<\/span>/g)].map(([, header]) => header),
+      ).toEqual(['Winst 3×', 'Gelijk 1×', 'Verlies 1×'])
       expect(html).toContain('0–3<span class="hf-visually-hidden">, verlies</span>')
 
       vi.mocked(getMatchData).mockResolvedValue({
@@ -361,13 +361,28 @@ describe('the page /wedstrijden', () => {
       expect(await card()).not.toContain('Gelijk')
     })
 
-    it('says how often the club won, drew and lost above the chart, and on how many matches it is based', async () => {
+    it('has no sentence above the chart, the counts in the headers and under the tables how many matches it counts', async () => {
       const html = await card()
 
-      expect(html).toContain('<p>3 keer gewonnen, 1 keer gelijk</p>')
-      expect(html.indexOf('<p>3 keer')).toBeLessThan(html.indexOf('hf-donut-chart'))
-      expect(html).toContain('Gebaseerd op alle 4 gespeelde wedstrijden')
-      expect(html.indexOf('<table')).toBeLessThan(html.indexOf('Gebaseerd op'))
+      expect(html).not.toContain('keer gewonnen')
+      expect(html).toContain(
+        '<span aria-hidden="true">Winst 3×</span><span class="hf-visually-hidden">Winst, 3 keer</span>',
+      )
+      expect(html).toContain(
+        '<span aria-hidden="true">Gelijk 1×</span><span class="hf-visually-hidden">Gelijk, 1 keer</span>',
+      )
+      expect(html).toContain('<p class="hf-meta">Alle 4 gespeelde wedstrijden</p>')
+      expect(html).not.toContain('Gebaseerd op')
+      expect(html.lastIndexOf('</table>')).toBeLessThan(html.indexOf('Alle 4 gespeelde wedstrijden'))
+    })
+
+    it('has one chart, no table of competitions and no sentence about the goals', async () => {
+      const html = await card()
+
+      expect(html.match(/hf-donut-chart /g)).toHaveLength(1)
+      expect(html).not.toContain('Competitie')
+      expect(html).not.toContain('hf-donut-chart-small')
+      expect(html).not.toContain('Doelpunten:')
     })
 
     it('hides the chart from a screen reader and has a caption and column headers on the table', async () => {

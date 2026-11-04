@@ -25,6 +25,11 @@ export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
    * out. `DonutChart.Swatch` takes it too.
    */
   ranked?: boolean
+  /**
+   * `small` is a smaller ring with its text round it, to stand beside a larger chart in a
+   * `DonutChart.Group`, such as the goals beside the scores. It is as wide as its text needs.
+   */
+  size?: 'small'
   /** The slices in the order they go round, clockwise from the top. */
   slices: readonly DonutChartSlice[]
   /** The title above the ring, such as `Aanmeldingen`. Without it the ring has no title. */
@@ -116,6 +121,7 @@ export const DonutChart = ({
   className,
   labels = true,
   ranked = false,
+  size,
   slices,
   title,
   tone,
@@ -138,6 +144,7 @@ export const DonutChart = ({
         'hf-donut-chart',
         tone === undefined ? undefined : `hf-donut-chart-${tone}`,
         labels ? undefined : 'hf-donut-chart-bare',
+        size === undefined ? undefined : `hf-donut-chart-${size}`,
         className,
       )}
     >

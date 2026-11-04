@@ -22,6 +22,11 @@ const meta = preview.meta({
       description:
         'Of de naam en de waarde van elke plak als tekst rond de ring staan. Zonder die tekst is de ring kleiner en op zichzelf, en moet de pagina de getallen in een tabel geven.',
     },
+    size: {
+      description:
+        'Met `small` is de ring kleiner, met de tekst eromheen, om naast een groter diagram te staan in een `DonutChart.Group`, zoals de doelpunten naast de uitslagen.',
+      ...union(['small']),
+    },
     slices: {
       description:
         'De plakken in de volgorde waarin ze rond gaan, met de klok mee vanaf boven. Een plak kan een eigen `tone` hebben.',
@@ -344,4 +349,45 @@ export const ScoresNarrow = meta.story({
   globals: { theme: 'light' },
   name: 'Een smalle plek, de drie tabellen onder elkaar waar ze niet naast elkaar passen',
   render: () => <ScoresCard maxInlineSize="15rem" slices={scores} />,
+})
+
+// Made-up numbers: how often we won, drew and lost, and the goals scored and conceded.
+const pairScores: DonutChartSlice[] = [
+  { label: '4–0', tone: 'positive', value: 1 },
+  { label: '2–0', tone: 'positive', value: 3 },
+  { label: '1–1', tone: 'neutral', value: 2 },
+  { label: '0–2', tone: 'negative', value: 1 },
+]
+
+const pairGoals: DonutChartSlice[] = [
+  { label: 'Gemaakt', tone: 'positive', value: 45 },
+  { label: 'Tegen', tone: 'negative', value: 31 },
+]
+
+const pair = (maxInlineSize: string) => () => (
+  <Card style={{ maxInlineSize }} surface="warm">
+    <Heading level={2}>Hoe vaak welke uitslag</Heading>
+    <DonutChart.Group>
+      <DonutChart labels={false} ranked slices={pairScores} />
+      <DonutChart size="small" slices={pairGoals} />
+    </DonutChart.Group>
+  </Card>
+)
+
+export const PairLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een klein diagram met tekst naast een groter zonder tekst, licht',
+  render: pair('24rem'),
+})
+
+export const PairDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Een klein diagram met tekst naast een groter zonder tekst, donker',
+  render: pair('24rem'),
+})
+
+export const PairPhone = meta.story({
+  globals: { theme: 'light' },
+  name: 'Op de breedte van een telefoon staan ze naast elkaar',
+  render: pair('20.5rem'),
 })

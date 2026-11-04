@@ -295,7 +295,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De grootste winst en het grootste verlies hebben de sterkste kleur, en de kleur van de sterkste plakken gaat voorbij de volle kleur naar de kleur van de tekst, zodat het verschil met de zwakste goed te zien is.
   Eronder staan drie kleine tabellen naast elkaar (`DataTable.Group`), Winst, Gelijk en Verlies, en een tabel zonder uitslagen ontbreekt; op een smalle plek staan ze onder elkaar.
   Samen zijn ze de legenda en de bron van de cijfers: elke rij heeft een vlakje in precies de kleur van de plak (`DonutChart.Swatch`), de uitslag en het aantal ("4×", onder een kop die alleen een schermlezer hoort), met de uitkomst in woorden voor een schermlezer ("4–0, winst").
-  Boven het diagram staat een zin met de optelling ("8 keer gewonnen, 1 keer gelijk, 5 keer verloren"), onder de tabellen "Gebaseerd op alle 14 gespeelde wedstrijden".
+  Het totaal van een uitslag staat in de kop van zijn tabel: de kop is "Winst 8×" voor het oog en "Winst, 8 keer" voor een schermlezer, uit één plek in de code (`shown` en `name` van de kolom, `outcomeColumn` in `src/MatchViews.tsx`).
+  Er is geen zin boven het diagram, en onder de tabellen staat alleen het aantal wedstrijden, "Alle 14 gespeelde wedstrijden" (`playedLine`).
   Zonder gespeelde wedstrijd staat er "We hebben nog geen uitslagen van dit seizoen." en geen diagram.
   De kaart heeft de knop voor een afbeelding en de bronvermelding van de pagina; een eerder seizoen zet zijn seizoen op de afbeelding.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
@@ -531,9 +532,13 @@ De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statist
 Ze heeft vier delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
-- De kaart "Hoe vaak welke uitslag" op het warme vlak, direct onder de eerste: dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek, de tabellen van de uitslagen en de zin "8 keer gewonnen, 1 keer gelijk, 5 keer verloren".
+- De kaart "Hoe vaak welke uitslag" op het warme vlak, direct onder de eerste: dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
   `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel.
-  Onder de kaart staat dezelfde zin "Gebaseerd op …" als onder de samenvatting.
+  Anders dan op Wedstrijden heeft de kaart naast het eerste diagram een tweede, kleiner donutdiagram (`DonutChart` met `size="small"`) met de doelpunten die we maakten (groen, "Gemaakt") en de tegendoelpunten (rood, "Tegen") van dezelfde wedstrijden, met de naam en de waarde als tekst om de ring.
+  De twee staan naast elkaar in een `DonutChart.Group`, ook op een telefoon.
+  Het diagram is verborgen voor een schermlezer, die direct na de diagrammen de zin hoort "Doelpunten: 45 gemaakt, 31 tegen.".
+  Onder de tabellen van de uitslagen staat een tabel met de competities van de getelde wedstrijden en hun aantal (`competitionCounts`), met de meeste wedstrijden bovenaan en bij gelijk aantal in de volgorde van de site; de schakelaar bepaalt de rijen.
+  Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "Gebaseerd op", zonder "sinds" en zonder "in de Eredivisie".
   Een club zonder gespeelde wedstrijd krijgt de kaart niet.
 - De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
   De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
