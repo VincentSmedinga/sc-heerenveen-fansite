@@ -85,6 +85,8 @@ const meta = preview.meta({
           '',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
           'Is er niet genoeg ruimte voor ze naast elkaar, zoals op een telefoon, dan komen ze onder elkaar.',
+          'Een groep met een klein diagram naast een groter diagram zonder tekst houdt ze naast elkaar, ook op een telefoon.',
+          'Elk diagram staat dan midden in een eigen kolom, en de kolommen verhouden zich als de breedtes van de diagrammen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -381,18 +383,18 @@ const pair = (maxInlineSize: string) => () => (
 
 export const PairLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Een klein diagram met tekst naast een groter zonder tekst, licht',
+  name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom, licht',
   render: pair('24rem'),
 })
 
 export const PairDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Een klein diagram met tekst naast een groter zonder tekst, donker',
+  name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom, donker',
   render: pair('24rem'),
 })
 
 export const PairPhone = meta.story({
   globals: { theme: 'light' },
-  name: 'Op de breedte van een telefoon staan ze naast elkaar',
+  name: 'Op de breedte van een telefoon staan ze naast elkaar, elk midden in zijn kolom',
   render: pair('20.5rem'),
 })
