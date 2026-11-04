@@ -19,8 +19,24 @@ export type BarChartAxis = {
    * number counted from 1.
    */
   labelOf?: (slot: number) => string
+  /**
+   * The numbers at the places the page picks, in place of the ones the chart picks itself
+   * (the first place and every fifth). All of them show, also on a narrow chart, so give only
+   * as many as fit. `labelOf` is not used then.
+   */
+  labels?: readonly BarChartAxisLabel[]
   /** The caption under the numbers, such as `Speelronde`. */
   title?: string
+}
+
+/** A number under the ground at a place the page picks, with the text it shows. */
+export type BarChartAxisLabel = {
+  /**
+   * Where the middle of the text sits, counted in places from the start side: 0.5 is the middle
+   * of the first place, and 1 is the line between the first and the second.
+   */
+  at: number
+  text: string
 }
 
 /** One bar: how high it is, on the scale of the chart, and the tone that gives its colour. */
@@ -72,6 +88,8 @@ export type BarChartTrendProps = {
   /** One value per place, on the scale of the chart. `null` is a gap, where the line stops. */
   values: readonly (null | number)[]
 }
+
+const acrossOf = (at: number, slots: number) => Math.round((at / slots) * 10000) / 100
 
 const percentOf = (value: number, max: number) => Math.round(Math.min(1, Math.max(0, value / max)) * 10000) / 100
 
@@ -140,6 +158,11 @@ export const BarChart = ({
 }: BarChartProps) => {
   const slots = bars.length
   const labelOf = (axis ? axis.labelOf : undefined) ?? ((slot: number) => String(slot + 1))
+  // The numbers under the ground: the ones the page picks, or every fifth place by default.
+  const numbers = axis
+    ? (axis.labels?.map(({ at, text }) => ({ at, text, wide: false })) ??
+      axisLabels(slots).map(({ narrow, slot }) => ({ at: slot + 0.5, text: labelOf(slot), wide: !narrow })))
+    : []
   const layers = Children.map(children, (child) =>
     isValidElement<BarChartTrendProps>(child) && child.type === Trend ? cloneElement(child, { max }) : child,
   )
@@ -195,15 +218,13 @@ export const BarChart = ({
         {axis && (
           <div className="hf-bar-chart-axis">
             <div className="hf-bar-chart-numbers">
-              {axisLabels(slots).map((label) => (
+              {numbers.map((number) => (
                 <span
-                  className={classNames('hf-bar-chart-number', !label.narrow && 'hf-bar-chart-number-wide')}
-                  key={label.slot}
-                  style={
-                    { '--hf-bar-chart-across': Math.round(((label.slot + 0.5) / slots) * 10000) / 100 } as CSSProperties
-                  }
+                  className={classNames('hf-bar-chart-number', number.wide && 'hf-bar-chart-number-wide')}
+                  key={number.at}
+                  style={{ '--hf-bar-chart-across': acrossOf(number.at, slots) } as CSSProperties}
                 >
-                  {labelOf(label.slot)}
+                  {number.text}
                 </span>
               ))}
             </div>

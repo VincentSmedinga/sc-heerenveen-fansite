@@ -6,7 +6,7 @@
 
 @layer hf.components {
   /* The letters of the key are heavier than the words, so they are easy to find. */
-  .hf-form-chart-key b {
+  .hf-form-key b {
     font-weight: var(--hf-strong-font-weight);
   }
 }

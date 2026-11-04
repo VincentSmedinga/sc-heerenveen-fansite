@@ -18,6 +18,31 @@ export function movingAverage(values: readonly (null | number)[], span: number):
   })
 }
 
+/**
+ * The average of each value and the ones before it in the same run, at most `span` of them. A
+ * run is the values between two gaps (`null`), so every value has an average, the first ones
+ * of a run over fewer than `span` values, and a gap stays a gap. Where `movingAverage` waits
+ * for a full window, this starts at once.
+ */
+export function runningAverage(values: readonly (null | number)[], span: number): (null | number)[] {
+  const size = Math.max(1, Math.floor(span))
+
+  return values.map((value, index) => {
+    if (value === null) return null
+
+    const part: number[] = []
+
+    for (let at = index; at >= 0 && part.length < size; at -= 1) {
+      const item = values[at]
+
+      if (item === null || item === undefined) break
+      part.push(item)
+    }
+
+    return part.reduce((sum, item) => sum + item, 0) / part.length
+  })
+}
+
 /** The height of a value in the drawing: 0 at the top of the chart and 100 on the ground. */
 const heightOf = (value: number, max: number) => 100 - (Math.min(max, Math.max(0, value)) / max) * 100
 

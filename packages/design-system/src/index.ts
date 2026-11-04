@@ -8,7 +8,13 @@ export type { ArticleCardProps } from './components/article-card/ArticleCard'
 export { Article } from './components/article/Article'
 export type { ArticleProps } from './components/article/Article'
 export { BarChart } from './components/bar-chart/BarChart'
-export type { BarChartAxis, BarChartBar, BarChartProps, BarChartTrendProps } from './components/bar-chart/BarChart'
+export type {
+  BarChartAxis,
+  BarChartAxisLabel,
+  BarChartBar,
+  BarChartProps,
+  BarChartTrendProps,
+} from './components/bar-chart/BarChart'
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
 export { Breadcrumb } from './components/breadcrumb/Breadcrumb'
@@ -19,7 +25,7 @@ export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
 export { chartTones } from './components/chart/tones'
 export type { ChartTone } from './components/chart/tones'
-export { monotonePath, movingAverage } from './components/chart/trend'
+export { monotonePath, movingAverage, runningAverage } from './components/chart/trend'
 export type { TrendCurve } from './components/chart/trend'
 export { CheckboxGroup } from './components/checkbox-group/CheckboxGroup'
 export type { CheckboxGroupOption, CheckboxGroupProps } from './components/checkbox-group/CheckboxGroup'
@@ -51,6 +57,8 @@ export { formResults } from './components/form-chart/form'
 export type { FormResult } from './components/form-chart/form'
 export { FormChart } from './components/form-chart/FormChart'
 export type { FormChartProps } from './components/form-chart/FormChart'
+export { FormTimeline } from './components/form-timeline/FormTimeline'
+export type { FormTimelineProps } from './components/form-timeline/FormTimeline'
 export { Form } from './components/form/Form'
 export type { FormProps } from './components/form/Form'
 export { Head } from './components/head/Head'

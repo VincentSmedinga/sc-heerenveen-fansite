@@ -5,6 +5,7 @@ import {
   Card,
   DataTable,
   Disclosure,
+  FormTimeline,
   Heading,
   List,
   MarkRow,
@@ -25,11 +26,15 @@ import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorer
 import {
   type ClubNameView,
   type ClubSummary,
+  hasTimeline,
   lastResultsOf,
   type Meeting,
   meetingsOf,
   pointsOf,
   type StadiumView,
+  startYearOf,
+  timelineOf,
+  timelineWindow,
   topPointsMinimum,
   topPointsOf,
 } from './opponents'
@@ -313,6 +318,51 @@ export function ClubSummaryCard({
         </List>
       )}
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
+    </Card>
+  )
+}
+
+/**
+ * The card "Resultaten sinds <jaar>" of the page of a club: how we did against it, season after
+ * season, as bars for a win, a draw and a loss with a line through the average of the points
+ * over at most eight matches (see `FormTimeline`). It has two places for each season from the
+ * first season we have matches of, for any club, up to now, so the axis is the same for every
+ * club.
+ * A season we didn't meet this club in the Eredivisie, a match still to come and a season we
+ * have no matches of are an empty place. It counts the Eredivisie whatever the visitor chose,
+ * and says so, and nothing else: the key and that line are all the text, because the page lists
+ * every match under Wedstrijden. It is the same kind of figure as the card with the record, on
+ * a surface of its own between the soft one above it and the warm one below it, and it has no
+ * button for an image. A club we played fewer than `timelineMinimum` times in the Eredivisie
+ * has no card, and no sentence that says why.
+ */
+export function ClubTimelineCard({
+  matches,
+  now,
+  since,
+}: {
+  matches: readonly PublicClubMatch[]
+  now: Date
+  since: string
+}) {
+  const firstYear = startYearOf(since)
+
+  if (!hasTimeline(matches) || !Number.isFinite(firstYear)) {
+    return null
+  }
+
+  return (
+    <Card aria-labelledby="resultaten-sinds">
+      <Heading anchor id="resultaten-sinds" level={2}>
+        {`Resultaten sinds ${firstYear}`}
+      </Heading>
+      <FormTimeline
+        firstYear={firstYear}
+        results={timelineOf(matches, now, firstYear)}
+        scope="Alleen de Eredivisie."
+        title="Seizoen"
+        window={timelineWindow}
+      />
     </Card>
   )
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { monotonePath, movingAverage } from './trend'
+import { monotonePath, movingAverage, runningAverage } from './trend'
 
 /** Every `x y` pair of a path, whatever the command in front of it. */
 const pairsOf = (path: string) =>
@@ -12,6 +12,21 @@ const pointsOf = (path: string) =>
     .split(/(?=[MLC])/u)
     .filter(Boolean)
     .map((part) => pairsOf(part).at(-1)!)
+
+describe('runningAverage', () => {
+  it('averages each value with the ones before it, at most `span` of them, from the first value', () => {
+    expect(runningAverage([3, 3, 1, 0, 3, 1], 3)).toEqual([3, 3, 7 / 3, 4 / 3, 4 / 3, 4 / 3])
+  })
+
+  it('starts again after a gap, which stays a gap', () => {
+    expect(runningAverage([3, 1, null, 0, 3, null, null, 1], 4)).toEqual([3, 2, null, 0, 1.5, null, null, 1])
+  })
+
+  it('takes fewer values than the span without waiting for a full window', () => {
+    expect(runningAverage([3, 1, 0], 5)).toEqual([3, 2, 4 / 3])
+    expect(runningAverage([], 5)).toEqual([])
+  })
+})
 
 describe('movingAverage', () => {
   it('averages each value with the ones before it, from the place where the window is full', () => {

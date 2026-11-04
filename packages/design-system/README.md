@@ -95,6 +95,13 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
 
 De keuzes en hun redenen staan in [`docs/beslissingen/designsysteem.md`](../../docs/beslissingen/designsysteem.md).
 
+## De grafieken
+
+`BarChart`, `BarChart.Trend`, `DonutChart` en `MarkRow` weten niets van voetbal.
+`FormChart` zet ze samen voor een seizoen, een staafje per speelronde, en `FormTimeline` voor uitslagen over de jaren, met een vaste as van jaren en gaten waar niets is gespeeld.
+`FormTimeline` krijgt per plek een uitslag of niets en de teksten; de woorden van de sleutel komen uit `tableColumns`, zoals bij `FormChart`.
+`BarChart` heeft daarvoor labels onder de plekken die de pagina kiest (`axis.labels`).
+
 ## Een pagina in Storybook
 
 De pagina van een component is kort: een titel, een alinea, het voorbeeld met controls en de stories die nodig zijn.

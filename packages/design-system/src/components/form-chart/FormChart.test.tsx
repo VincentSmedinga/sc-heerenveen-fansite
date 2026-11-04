@@ -47,14 +47,15 @@ describe('FormChart', () => {
     expect(container.querySelectorAll('.hf-bar-chart-stub')).toHaveLength(1)
   })
 
-  it('draws the line from the fifth match, as the average of the points of the last five', () => {
+  it('draws the line from the first match, over the last five once there are five', () => {
     const { container } = render(<FormChart results={['W', 'W', 'G', 'V', 'W', 'G']} />)
 
-    // The averages are 10/5 and 8/5 and sit in the places of the fifth and sixth match.
+    // The averages are 3, 3, 7/3, 7/4, 8/5 and 8/5, in the places of the first six matches.
     const line = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
 
-    expect(line.startsWith('M4.5 33.333')).toBe(true)
+    expect(line.startsWith('M0.5 0')).toBe(true)
     expect(line).toContain('5.5 46.667')
+    expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
   })
 
   it('says what the line shows, with the latest average and a decimal comma', () => {
@@ -71,12 +72,25 @@ describe('FormChart', () => {
     expect(textOf(container).join(' ')).toContain('nu 1,4.')
   })
 
-  it('has no line, and says when it starts, with fewer than five matches', () => {
+  it('has a line from the first match, and says it covers the matches there are', () => {
     const { container } = render(<FormChart results={['W', 'G', 'V']} />)
 
-    expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).toBe('')
+    expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).not.toBe('')
+    expect(container.querySelector('.hf-bar-chart-trend-dot')).not.toBeNull()
+    expect(textOf(container).join(' ')).toContain('in de laatste 3 wedstrijden: nu 1,3.')
+  })
+
+  it('says "de laatste wedstrijd" after one match', () => {
+    const { container } = render(<FormChart results={['W']} />)
+
+    expect(textOf(container).join(' ')).toContain('in de laatste wedstrijd: nu 3,0.')
+  })
+
+  it('has no line, and says where it starts, before the first match', () => {
+    const { container } = render(<FormChart results={[]} />)
+
     expect(container.querySelector('.hf-bar-chart-trend-dot')).toBeNull()
-    expect(textOf(container)).toContain('De lijn begint na 5 wedstrijden.')
+    expect(textOf(container)).toContain('De lijn begint bij de eerste wedstrijd.')
   })
 
   it('shows empty places and a text for the form when nothing is played yet', () => {

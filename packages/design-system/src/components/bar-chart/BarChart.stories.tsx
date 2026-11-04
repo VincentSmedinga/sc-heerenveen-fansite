@@ -34,7 +34,7 @@ const meta = preview.meta({
           'Een `BarChart.Trend` tekent er een vloeiende lijn overheen, op dezelfde schaal.',
           '',
           'De staafjes hebben de kleuren van de uitslag, in dezelfde sterkte als de balk in een tabel en de plakken van het donutdiagram.',
-          'De grootte volgt de breedte van de plek waar de grafiek staat: een smalle kaart krijgt de kleine grafiek en een brede meer ruimte, met cijfers aan de zijkant.',
+          'De hoogte is vast; een brede kaart krijgt cijfers aan de zijkant en meer ruimte om de staafjes.',
           '',
           'De grafiek is een plaatje van getallen en daarom verborgen voor een schermlezer.',
           'Zet dezelfde getallen als tekst of in een `DataTable` ernaast.',

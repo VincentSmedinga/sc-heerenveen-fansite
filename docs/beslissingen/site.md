@@ -1844,6 +1844,8 @@
 - **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
 - **Later:** zie _Het beheer bewaart een eigen lijst per club, die de lijst van Wikipedia vervangt_ (4 november 2026): een club met een eigen lijst toont alleen die, met een toelichting onder de naam, en ook als hij geen uitwedstrijd in de Eredivisie had.
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026): de perioden zijn seizoenen en geen dagen van wedstrijden, en de regel onder de lijst is weg.
+- **Later:** zie _Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen_ (4 november 2026).
+  De zijkolom heeft tussen Onze uitslagen en Hoe vaak welke uitslag de kaart Resultaten sinds, op het witte vlak.
 
 ## Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
 
@@ -2194,6 +2196,8 @@
 - **Waarom:** twee kaarten naast elkaar met verschillende aantallen zouden verwarren.
   De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
 - **Alternatieven:** altijd alleen de Eredivisie (de donut zou de rest van de pagina tegenspreken zodra de beker meetelt).
+- **Later:** zie _Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen_ (4 november 2026).
+  De kaart Resultaten sinds volgt de schakelaar niet en telt de Eredivisie, ook bij Alle wedstrijden; de zin onder de grafiek zegt dat.
 
 ## `Match` is voor een volledige lijst, `ShortMatch` voor een selectie
 
@@ -2418,6 +2422,45 @@
 - **Waarom:** zonder het scherm blijft de tabel leeg, en #694 bewijst dat de combinatie in één pull request past.
   Eén patroon voor de twee schermen houdt het beheer te leren en te onderhouden.
 - **Alternatieven:** twee issues, eerst de tabel met een lijst in de code en dan het scherm (de lijst in de code moet daarna weer weg); `Overnemen` ook hier (maakt van elke schrijfwijze een naamswijziging, wat de lijst juist niet wil zijn).
+
+## Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen
+
+- **Datum:** 4 november 2026
+- **Besluit:** de kaart "Resultaten sinds <jaar>" op de pagina van een club telt alleen de Eredivisie en geeft elk seizoen twee plekken: de eerste en de tweede gespeelde wedstrijd tegen de club, op datum (`timelineOf` in `src/opponents.ts`, #718).
+  De as loopt van het eerste seizoen waarvan we wedstrijden hebben tot het seizoen van nu, met een label (de laatste twee cijfers van het beginjaar) onder het eerste jaar en daarna elke vijf jaar.
+  De kaart volgt de schakelaar niet.
+  Hij staat in de zijkolom direct onder "Onze uitslagen tegen …", op het witte vlak: het zachte vlak erboven en het warme eronder zijn dan niet gelijk aan het zijne.
+- **Waarom:** twee wedstrijden per seizoen zijn de vaste maat van de competitie, dus "twee staafjes per jaar" klopt altijd.
+  Plaatsen op de kalenderdatum werkt niet: in 14 combinaties van club en seizoen vallen beide wedstrijden in hetzelfde halfjaar (AZ in 2013/14: augustus en december), en dan botsen de staafjes.
+  Een beker- of play-offwedstrijd heeft geen vaste plek in een jaar en past niet in twee plekken.
+  Een label elke vijf jaar vanaf het eerste jaar houdt de as leesbaar op een telefoon.
+- **Alternatieven:** per halfjaar op de datum van de wedstrijd (botst); de schakelaar volgen met een regel voor een derde en vierde wedstrijd in een seizoen (de grafiek kan ze niet tonen); een label op de veelvouden van vijf in plaats van vanaf het eerste jaar (dat eerste jaar heeft dan soms geen label).
+
+## Het gemiddelde loopt over hoogstens acht gespeelde plekken, zodat elk staafje een punt heeft
+
+- **Datum:** 4 november 2026
+- **Besluit:** elk punt van de lijn van "Resultaten sinds" is het gemiddelde aantal punten per wedstrijd over die wedstrijd en de wedstrijden ervoor in dezelfde reeks, hoogstens acht, vier seizoenen (`timelineWindow` in `src/opponents.ts`, `runningAverage` in het designsysteem, #718).
+  De eerste punten van een reeks middelen dus over minder dan acht wedstrijden, en elke gespeelde wedstrijd heeft een punt.
+  Een gat (een seizoen zonder wedstrijd) stopt de lijn, en na het gat begint een nieuwe reeks.
+  De kaart is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline`), zonder zin die zegt waarom.
+- **Waarom:** de projecteigenaar bekeek vensters van 4, 6, 8 en 10 wedstrijden met de echte uitslagen tegen AZ en FC Groningen en koos 8, en daarna een grens van hoogstens 8 voor AZ en Excelsior Rotterdam, zodat de lijn bij elk staafje begint.
+  Een gemiddelde over een volle reeks van acht liet de eerste jaren en elke reeks na een gat zonder lijn.
+  Het gemiddelde over een gat heen trekken laat zien wat er niet is, dus een gat blijft een gat.
+  `runningAverage` staat naast `movingAverage` (dat op een vol venster wacht, zoals de vormgrafiek van het seizoen).
+- **Nadeel:** een punt aan het begin van een reeks middelt over weinig wedstrijden en springt meer; een reeks van één wedstrijd heeft alleen een stip.
+- **Alternatieven:** een vol venster van 8 (een lijn die pas na vier seizoenen achter elkaar begint); een venster van 4, 6 of 10; het gemiddelde over een gat heen trekken.
+
+## De as begint bij het eerste seizoen met gegevens, en de kaart zegt alleen dat het de Eredivisie is
+
+- **Datum:** 4 november 2026
+- **Besluit:** de as van "Resultaten sinds <jaar>" begint met het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen en niet voor deze club (nu 2010/11, dus de kop "Resultaten sinds 2010").
+  Onder de grafiek staat één alinea met alleen de sleutel (W, G, V) en "Alleen de Eredivisie."
+  Er is geen zin over de lijn, geen telling van de wedstrijden en geen link naar de lijst Wedstrijden (#718).
+  - **Het schuift mee:** komen er eerdere seizoenen bij (#414), dan begint de as eerder en de kop noemt dat jaar.
+- **Waarom:** de projecteigenaar wil dat elke club dezelfde as heeft en dat er geen lege jaren zijn waarin niemand wedstrijden heeft.
+  Een kaart met alleen de grafiek, de sleutel en de competitie is rustig; de lijst Wedstrijden op dezelfde pagina heeft elke wedstrijd met zijn uitslag.
+- **Nadeel:** een schermlezer hoort de grafiek niet (die is verborgen) en krijgt alleen de sleutel en de competitie; de uitslagen staan in de lijst Wedstrijden.
+- **Alternatieven:** de as laten beginnen in 1990 (twintig jaar leeg tot #414, en de zin moest uitleggen waarom); de as laten beginnen bij de eerste wedstrijd van deze club (elke club heeft een andere as); zinnen over de lijn en de aantallen onder de grafiek (de projecteigenaar wil ze niet).
 
 ## De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval
 

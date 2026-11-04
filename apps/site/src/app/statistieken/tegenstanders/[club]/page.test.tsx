@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
-import { getClubPage, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubPage, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -1053,5 +1053,130 @@ describe('the card Doelpuntenmakers on the page of a club', () => {
     expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="stadion"'))
     expect(card).toMatch(/^<section class="hf-card hf-card-soft hf-card-shareable"/)
     expect(plain(html)).toContain('Doelpuntenmakers van sc Heerenveen tegen Testclub')
+  })
+})
+
+describe('the card Resultaten sinds', () => {
+  const cardOf = (html: string) => {
+    const start = html.indexOf('aria-labelledby="resultaten-sinds"')
+    const end = html.indexOf('</section>', start)
+
+    return start === -1 ? '' : html.slice(start, end)
+  }
+
+  // Eight places in a row from 2022/23 to 2025/26 and one in 2026/27: the line has two points.
+  const clone = (id: number, goals: [number, number], matchDate: string, season: string) => ({
+    ...testclub.matches[3]!,
+    goalsAgainst: goals[1],
+    goalsFor: goals[0],
+    id,
+    matchDate,
+    season,
+  })
+  const long: ClubPage = {
+    club: { id: 9, name: 'Reeks FC', otherNames: [], slug: 'reeks-fc', wikipediaPage: null },
+    matches: [
+      ...testclub.matches,
+      clone(900, [0, 1], '2023-03-05', '2022/23'),
+      clone(901, [1, 1], '2023-09-02', '2023/24'),
+      clone(902, [2, 1], '2024-03-02', '2023/24'),
+      clone(903, [1, 0], '2026-02-01', '2025/26'),
+      clone(904, [3, 1], '2026-08-15', '2026/27'),
+    ],
+    names: [],
+    stadiums: [],
+  }
+
+  beforeEach(() => {
+    vi.mocked(getClubPage).mockImplementation((slug) =>
+      Promise.resolve(
+        { 'beker-united': beker, 'komend-fc': komend, 'nieuw-promovendus': promovendus, 'reeks-fc': long, testclub }[
+          slug
+        ],
+      ),
+    )
+  })
+
+  it('has the first season we have matches of in the heading, as an anchor, in the sidebar between the summary and the card Hoe vaak welke uitslag', async () => {
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+
+    // The oldest season of the seasons we have is 2022/23.
+    expect(html).toMatch(/<h2[^>]*id="resultaten-sinds"[^>]*>[\s\S]*Resultaten sinds 2022/)
+    expect(html).toContain('href="#resultaten-sinds"')
+    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="resultaten-sinds"'))
+    expect(sidebar.indexOf('id="resultaten-sinds"')).toBeLessThan(sidebar.indexOf('id="hoe-vaak-welke-uitslag"'))
+  })
+
+  it('starts with the first season of all the matches we have, not that of the club', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2018/19'])
+    const card = cardOf(await render())
+
+    expect(card).toContain('Resultaten sinds 2018')
+    expect(card).toContain('--hf-bar-chart-slots:18')
+    expect([...card.matchAll(/class="hf-bar-chart-number[^"]*"[^>]*>(\d+)</g)].map(([, year]) => year)).toEqual([
+      '18',
+      '23',
+    ])
+  })
+
+  it('is on the white surface, which the soft card above it and the warm card below it are not', async () => {
+    expect(cardOf(await render())).not.toMatch(/hf-card-(soft|warm|strong|transparent)/)
+  })
+
+  it('has no button for an image', async () => {
+    expect(cardOf(await render())).not.toContain('hf-card-shareable')
+  })
+
+  it('has two places for each season up to the season of now, hidden from a screen reader', async () => {
+    const card = cardOf(await render())
+
+    // 2022/23 up to and including 2026/27 is five seasons.
+    expect(card).toContain('hf-form-timeline')
+    expect(card).toContain('--hf-bar-chart-slots:10')
+    expect(card).toMatch(/<div[^>]*aria-hidden="true"[^>]*class="hf-bar-chart/)
+    expect(card).toContain('Seizoen')
+  })
+
+  it('has the key and "Alleen de Eredivisie." in one paragraph and no other text', async () => {
+    const html = await render()
+    const card = cardOf(html)
+
+    expect(card.match(/<p /g)).toHaveLength(1)
+    expect(plain(card)).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Alleen de Eredivisie.')
+    expect(card).not.toContain('href="#wedstrijden"')
+    expect(plain(card)).not.toMatch(/De lijn|gespeelde wedstrijden|De hele lijst/)
+  })
+
+  it('gives the last played match the point of the line, whatever the number of matches', async () => {
+    // The page helper takes the drawing of the line out, so the dot at its last point shows it.
+    // Testclub has its last match in the seventh place, Reeks FC in the ninth.
+    expect(cardOf(await render())).toMatch(/hf-bar-chart-trend-dot[^>]*--hf-bar-chart-across:65/)
+    expect(cardOf(await render('reeks-fc'))).toMatch(/hf-bar-chart-trend-dot[^>]*--hf-bar-chart-across:85/)
+  })
+
+  it('does not follow the switch: it has the same bars with all the matches and with the Eredivisie alone', async () => {
+    const all = cardOf(await render('reeks-fc'))
+    const league = cardOf(await render('reeks-fc', { competitie: 'eredivisie' }))
+
+    expect(all.match(/<span class="hf-bar-chart-bar/g)).toHaveLength(9)
+    expect(league.match(/<span class="hf-bar-chart-bar/g)).toHaveLength(9)
+  })
+
+  it('does not count the cup tie of Testclub as a bar', async () => {
+    expect(cardOf(await render()).match(/<span class="hf-bar-chart-bar/g)).toHaveLength(4)
+  })
+
+  it('is not there for a club with fewer than four matches in the Eredivisie, and says nothing about it', async () => {
+    for (const slug of ['beker-united', 'komend-fc']) {
+      const html = await render(slug)
+
+      expect(html).not.toContain('resultaten-sinds')
+      expect(html).not.toContain('Resultaten sinds')
+    }
+  })
+
+  it('is not there for a club with matches to come and none played', async () => {
+    expect(await render('nieuw-promovendus')).not.toContain('resultaten-sinds')
   })
 })
