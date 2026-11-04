@@ -1836,6 +1836,7 @@
   Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
 - **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
 - **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
+- **Later:** zie _Het beheer bewaart een eigen lijst per club, die de lijst van Wikipedia vervangt_ (4 november 2026): een club met een eigen lijst toont alleen die, met een toelichting onder de naam, en ook als hij geen uitwedstrijd in de Eredivisie had.
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026): de perioden zijn seizoenen en geen dagen van wedstrijden, en de regel onder de lijst is weg.
 
 ## Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
@@ -2282,6 +2283,7 @@
   Een dag van een wedstrijd leest als de dag van de wijziging en is dat niet.
 - **Alternatieven:** de dagen laten staan met het seizoen erachter (meer ruis, en de zin over de dagen blijft nodig).
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de perioden zijn seizoenen, en de dagen en de regel onder de lijst zijn weg.
+- **Later:** zie _Een naam begint met een seizoen of met een dag, en de volgende bepaalt waar hij eindigt_ (4 november 2026): de exacte dag komt uit het beheer (#694), met `ownStadiumPeriods` in `src/match-format.ts`, en de kaart krijgt de tekst per regel, zoals hier bedoeld.
 
 ## De zin over Wikipedia onder de kaart Stadion gaat weg
 
@@ -2292,3 +2294,56 @@
   Regel 4 van het hoofdstuk Redactie vraagt de bron te noemen, en dat doet de bronvermelding.
   De zin over de dagen is niet meer nodig, want er staan geen dagen meer.
 - **Alternatieven:** de zin laten staan (dubbel met de bronvermelding, en niet meer waar zodra het beheer namen toevoegt, #694).
+- **Later:** zie _Een toelichting is korte tekst bij een naam_ (4 november 2026): bij een eigen lijst komen de namen van de redactie en niet van Wikipedia.
+  De bronvermelding onderaan blijft staan voor de wedstrijden, en een toelichting die niet van Wikipedia komt, noemt haar bron zelf in de zin.
+
+## Het beheer bewaart een eigen lijst per club, die de lijst van Wikipedia vervangt
+
+- **Datum:** 4 november 2026
+- **Besluit:** het beheer bewaart per club een eigen lijst van namen van het stadion, met een start en een toelichting (#694).
+  Heeft een club een lijst, dan toont de kaart op zijn pagina alleen die; heeft hij er geen, dan blijft de kaart wat de wedstrijden zeggen (zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_).
+  - **De kaart:** `stadiumViewsOf` in `src/opponents.ts` kiest tussen de lijst van de redactie en die van de wedstrijden.
+    Een club met een eigen lijst heeft de kaart ook als de wedstrijden geen stadion noemen en ook met de keuze Eredivisie als we hem alleen in de beker troffen; de zijkolom is er dan ook zonder gespeelde wedstrijden.
+  - **Het scherm:** `/beheer/stadions` toont de clubs waarvan we wedstrijden hebben, met het label "Eigen lijst", het filter Alles of Eigen lijst en zoeken op de naam.
+    `/beheer/stadions/<club>` is de brede pagina met een zijbalk, zoals een wedstrijd: het formulier met de regels in de hoofdkolom, en in de zijbalk "Opslaan", wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
+    "Overnemen" vult het formulier en slaat niets op; "Terug naar Wikipedia" haalt de hele lijst weg, ook de toelichtingen, na een bevestiging.
+    Voor dezelfde rollen als de wedstrijden: alleen een beheerder.
+  - **Geen reden:** een opslag of een "Terug naar Wikipedia" vraagt geen reden, anders dan een wedstrijd.
+    Het logboek heeft het nummer van de club en de aantallen (`stadium.save` en `stadium.reset`), en de lijst is te lezen op de pagina zelf.
+  - **De tabel:** zie _De eigen lijst van stadions van een club staat in `club_stadiums`_ in `hosting-en-data.md`.
+- **Waarom:** één regel is genoeg om uit te leggen en te testen, en de redactie ziet precies wat bezoekers zien.
+  Een aanvulling op de namen uit de wedstrijden zou aan de spelling van Wikipedia hangen, die bij A-B-A of een andere schrijfwijze breekbaar is.
+  Het formulier vraagt geen reden omdat de lijst de eigen tekst van de redactie is en niet een verbetering van gegevens die Wikipedia anders heeft.
+- **Nadeel:** een nieuwe naam op Wikipedia verschijnt bij een club met een eigen lijst niet vanzelf.
+  De lijst van de wedstrijden staat naast het formulier, dus de redactie ziet het verschil.
+- **Alternatieven:** een toelichting of een dag aan een naam uit de wedstrijden hangen (blijft kloppen bij een nieuwe naam op Wikipedia, maar koppelt aan een spelling die we niet beheren); een reden bij elke opslag, zoals bij een wedstrijd (een lijst heeft geen eerdere waarde om te verantwoorden, en de aantallen in het logboek volstaan).
+
+## Een naam begint met een seizoen of met een dag, en de volgende bepaalt waar hij eindigt
+
+- **Datum:** 4 november 2026
+- **Besluit:** de start van een naam is een seizoen (`2019/20`, telt als 1 juli van dat jaar) of een exacte dag, nooit allebei, en alleen de eerste naam van een lijst mag zonder start; de starts lopen strikt op.
+  De naam ervoor eindigt "t/m" het seizoen ervoor of "tot" die dag, en een naam heeft geen eigen einde.
+  - **De tekst:** `ownStadiumPeriods` in `src/match-format.ts` maakt de tekst per regel.
+    De eerste naam heeft alleen zijn einde ("t/m 2018/19", "tot 14 februari 2021") en de laatste "vanaf" met zijn start ("vanaf 2020/21", "vanaf 14 februari 2021").
+    Een naam in het midden heeft zijn begin en zijn einde: "2019/20" als hij één seizoen duurde, "2019/20 t/m 2021/22", "2019/20 tot 14 februari 2021", "10 augustus 2019 t/m 2019/20" of "10 augustus 2019 tot 14 februari 2021".
+    Bij één naam staat geen periode.
+  - **De controle:** `validateStadiumRows` in `src/beheer/stadium-form.ts` controleert op de server de vorm van een seizoen (vier cijfers, een schuine streep en de laatste twee cijfers van het jaar erna), een dag die bestaat, en de volgorde.
+    De tabel controleert wat zij kan (zie `hosting-en-data.md`).
+- **Waarom:** een stadion krijgt meestal met een nieuw seizoen een andere naam, en alleen soms midden in een seizoen (zoals AZ in 2019, na de instorting van een deel van het dak).
+  Een einde dat uit de volgende start volgt, kan niet tegenspreken en laat geen gat.
+- **Nadeel:** een naam in het midden met twee dagen is lang ("10 augustus 2019 tot 14 februari 2021") en breekt op een telefoon naar een eigen regel; we kiezen de volle maand zoals in de rest van de zin, en niet een korte vorm die er anders uitziet dan de eerste en de laatste regel.
+- **Alternatieven:** een start én een einde per regel (kan gaten en overlap hebben en vraagt meer controles).
+- **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026) voor de kaart zonder eigen lijst: daar blijven de perioden seizoenen.
+
+## Een toelichting is korte tekst bij een naam
+
+- **Datum:** 4 november 2026
+- **Besluit:** een regel van de eigen lijst kan een toelichting hebben van hoogstens 200 tekens, als gewone tekst onder de naam op de kaart (#694), zoals "AZ speelde tijdelijk in Den Haag".
+  - **De weergave:** `ShortStaff` heeft een prop `note` (met een verhaal en een test), die de tekst op een regel van zichzelf onder de naam zet, in de stijl van een metatekst.
+    Zonder die prop stond de toelichting als losse tekst onder de regel zonder ruimte erboven, op de rand van de volgende regel.
+  - **De controle:** de toelichting en de naam zijn gewone tekst: een regeleinde wordt een spatie, een stuurteken of onzichtbaar opmaakteken wordt geweigerd, en opmaak of een link blijft de tekst die het is.
+    De pagina geeft hem weer als tekst, nooit als markup.
+  - **De hulptekst:** "Schrijf in eigen woorden. Komt het niet van Wikipedia, noem dan de bron in de zin." staat als tekst boven de tabel met de regels, niet bij elk veld, want `InputTable` heeft geen hulptekst per veld en dezelfde zin bij elke regel is veel herhaling.
+- **Waarom:** de projecteigenaar wil dat een lezer begrijpt waarom AZ tijdelijk in Den Haag speelde, zonder dat het een fout lijkt.
+  De toelichting is een feit in eigen woorden, geen tekst van een journalist, en past dus in het bronbeleid (hoofdstuk Redactie).
+- **Alternatieven:** een vaste lijst toelichtingen in de code (nieuw bij elke club een wijziging van de code); opmaak of links in de toelichting (de bron staat dan in de tekst); een hulptekst bij elk veld (een nieuwe prop van `InputTable` voor een herhaalde zin).

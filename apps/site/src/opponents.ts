@@ -1,5 +1,6 @@
 import type { FormResult } from '@fansite/design-system'
 
+import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
 import {
   findClubBySlug,
   listAllWikipediaPages,
@@ -13,6 +14,7 @@ import {
 import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
+import { ownStadiumPeriods, stadiumPeriods } from './match-format'
 import { programmeOf } from './matches'
 
 /**
@@ -184,6 +186,30 @@ export const earlierNames = (otherNames: readonly string[]) =>
 export type Stadium = { firstSeason: string; lastSeason: string; name: string }
 
 /**
+ * A line of the card with the stadium of a club: the name, a note that the editors wrote with
+ * it, and what it says about the time (see `stadiumPeriods` and `ownStadiumPeriods`).
+ */
+export type StadiumView = { name: string; note?: string | undefined; period?: string | undefined }
+
+/**
+ * The lines of the card with the stadium of a club. A club whose editors made a list of its own
+ * shows that list, with their notes, and nothing of the matches; a club without a list shows
+ * the names of the matches (`stadiumsOf`).
+ */
+export function stadiumViewsOf(own: readonly StadiumLine[], matches: readonly PublicClubMatch[]): StadiumView[] {
+  if (own.length > 0) {
+    const periods = ownStadiumPeriods(own)
+
+    return own.map((line, index) => ({ name: line.name, note: line.note ?? undefined, period: periods[index] }))
+  }
+
+  const stadiums = stadiumsOf(matches)
+  const periods = stadiumPeriods(stadiums)
+
+  return stadiums.map((stadium, index) => ({ name: stadium.name, period: periods[index] }))
+}
+
+/**
  * The key by which two spellings of a stadium count as one name: capitals, the amount of
  * spaces and a hyphen or dash instead of a space make no difference. Nothing else does, so
  * "Stadion Galgenwaard" and "Galgenwaard" stay two names.
@@ -282,6 +308,8 @@ const clubRecords = cacheForKey(period, (choice) =>
 export type ClubPage = {
   club: NonNullable<Awaited<ReturnType<typeof findClubBySlug>>>
   matches: PublicClubMatch[]
+  /** The own list of stadium names of the club, which is empty for a club that has none. */
+  stadiums: StadiumLine[]
 }
 
 /**
@@ -297,7 +325,9 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
   const { db } = getDatabase()
   const club = await findClubBySlug(db, slug)
 
-  return club === undefined ? undefined : { club, matches: await listClubMatches(db, club.id) }
+  return club === undefined
+    ? undefined
+    : { club, matches: await listClubMatches(db, club.id), stadiums: await listClubStadiums(db, club.id) }
 })
 
 /**

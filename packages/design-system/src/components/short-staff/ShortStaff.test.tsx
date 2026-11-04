@@ -38,6 +38,21 @@ describe('ShortStaff', () => {
     expect(container.querySelector('.hf-short-match-where')).toBeNull()
   })
 
+  it('puts a note on a line of its own under the name, as plain text', () => {
+    const { container, rerender } = render(
+      <ShortStaff note="Tijdelijk <b>elders</b>." period="tot 2019" surname="Een" />,
+    )
+
+    expect(container.querySelector('.hf-short-staff-note')?.textContent).toBe('Tijdelijk <b>elders</b>.')
+    expect(container.querySelector('.hf-short-staff-note b')).toBeNull()
+    expect(container.querySelector('.hf-short-staff-note')?.classList.contains('hf-meta')).toBe(true)
+    expect(container.querySelector('.hf-short-match-opponent')?.textContent).toBe('Een')
+
+    rerender(<ShortStaff period="tot 2019" surname="Een" />)
+
+    expect(container.querySelector('.hf-short-staff-note')).toBeNull()
+  })
+
   it('has no result and so no colour of an outcome, although it borrows the look of a short match', () => {
     const { container } = render(<ShortStaff givenName="Testtrainer" interim period="tot 14 mrt 2026" surname="Een" />)
 

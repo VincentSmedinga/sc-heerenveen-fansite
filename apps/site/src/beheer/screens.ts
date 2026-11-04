@@ -13,6 +13,7 @@ export const screens: readonly Screen[] = [
   { href: '/beheer/berichten', label: 'Berichten', roles: ['beheerder', 'moderator'] },
   { href: '/beheer/artikelen', label: 'Artikelen', roles: ['beheerder'] },
   { href: '/beheer/wedstrijden', label: 'Wedstrijden', roles: ['beheerder'] },
+  { href: '/beheer/stadions', label: 'Stadions', roles: ['beheerder'] },
   { href: '/beheer/bezoek', label: 'Bezoek', roles: ['beheerder'] },
 ]
 

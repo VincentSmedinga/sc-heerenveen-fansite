@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
+import { Text } from '../text/Text'
 
 export type ShortStaffProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** A short staff line has no children: everything it shows comes from the props below. */
@@ -10,6 +11,11 @@ export type ShortStaffProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
   givenName?: string | undefined
   /** Whether the person stood in. The line then says "(interim)" behind the name. */
   interim?: boolean
+  /**
+   * A short text under the line, in the quiet style of a meta text, such as why a club played
+   * elsewhere for a while. It is plain text, written by us.
+   */
+  note?: string | undefined
   /**
    * Which part of the time the line is about, as a visitor reads it, such as `tot 14 mrt 2026`
    * or `vanaf 1 sep 2025`. The component writes it as given. Leave it out when the name says
@@ -26,9 +32,18 @@ export type ShortStaffProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
  * short line of ShortMatch for a person, and it has the look of it: short-match.css draws the
  * lines, the wrapping and the colours, and short-staff.css only makes room for the longer text
  * before the name. The name is a PlayerName, so the given name is in the normal weight, and
- * "(interim)" is in the normal weight and the second colour, like "thuis" in a short match.
+ * "(interim)" is in the normal weight and the second colour, like "thuis" in a short match. A
+ * line can have a note under it, on a line of its own.
  */
-export const ShortStaff = ({ className, givenName, interim = false, period, surname, ...props }: ShortStaffProps) => (
+export const ShortStaff = ({
+  className,
+  givenName,
+  interim = false,
+  note,
+  period,
+  surname,
+  ...props
+}: ShortStaffProps) => (
   <div {...props} className={classNames('hf-short-match', 'hf-short-staff', className)}>
     {period === undefined ? null : <span className="hf-short-match-when">{period}</span>}
     <span className="hf-short-match-opponent">
@@ -40,5 +55,10 @@ export const ShortStaff = ({ className, givenName, interim = false, period, surn
         </>
       ) : null}
     </span>
+    {note === undefined ? null : (
+      <Text appearance="meta" as="span" className="hf-short-staff-note">
+        {note}
+      </Text>
+    )}
   </div>
 )

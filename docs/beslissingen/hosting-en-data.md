@@ -456,3 +456,18 @@
   De database van een mislukt seizoen blijft zoals ze was.
 - **Waarom:** een seizoen dat de lezer nog niet kan lezen (de seizoenen vóór 2020/21) mag de rest niet tegenhouden, en de projecteigenaar wil in één logboek zien wat ontbreekt.
 - **Alternatieven:** stoppen bij de eerste fout (de rest blijft dan ongelezen).
+
+## De eigen lijst van stadions van een club staat in `club_stadiums`
+
+- **Datum:** 4 november 2026
+- **Besluit:** een nieuwe tabel `club_stadiums` bewaart de eigen lijst van namen van het stadion van een club (#694, zie _Het beheer bewaart een eigen lijst per club, die de lijst van Wikipedia vervangt_ in `site.md`).
+  Een rij heeft de club (`club_id`, met `ON DELETE CASCADE`), de plaats in de lijst (`position`, vanaf 0), de naam, de start als seizoen (`start_season`) of als dag (`start_day`), en een toelichting (`note`).
+  - **De controles in de tabel:** de naam is 1 tot 100 tekens en de toelichting hoogstens 200; een start is een seizoen of een dag, nooit allebei; een seizoen heeft de vorm `2019/20`; alleen de rij op plaats 0 mag zonder start; `(club_id, position)` is uniek.
+    Dat de starts oplopen en dat een dag bestaat, controleert het beheer op de server (`stadium-form.ts`), want een controle daarvoor zou de rij met zijn buren moeten vergelijken.
+  - **Het logboek:** de acties `stadium.save` en `stadium.reset` met het nummer van de club als `item_id` en in `detail` alleen de aantallen, nooit de tekst van een toelichting.
+    Opslaan en logboek zijn één transactie (`replaceClubStadiums` en `removeClubStadiums` in `@fansite/db/club-stadiums`), en de rij van de club is vergrendeld, zodat twee redacteuren die tegelijk opslaan hun regels niet mengen.
+  - **De back-up:** de tabel gaat mee met haar rijen en staat niet in `structureOnlyTables`, want het is werk van de redactie dat we niet opnieuw kunnen lezen.
+  - **De migratie:** `0038_add_club_stadiums` maakt de tabel leeg en zet geen echte gegevens: de redactie vult AZ in via het beheer.
+- **Waarom:** de namen uit de wedstrijden kunnen niet zeggen waarom een club tijdelijk elders speelde, en een lijst per club is de kleinste vorm die dat kan.
+  Een `position` houdt de volgorde vast die de redactie ziet, ook voor een naam die terugkomt (A, B, A), waar sorteren op de start niet genoeg is voor de eerste regel zonder start.
+- **Alternatieven:** een tabel met stadions los van clubs, met een stadion dat van naam verandert of door meer clubs wordt gebruikt (#549 vroeg erom en is gesloten omdat de namen uit de wedstrijden volstonden; een lijst per club heeft zo'n tabel niet nodig); een lijst als tekst of JSON in `clubs` (geen controles in de database, en de back-up en het logboek hebben er dan geen aandacht voor).

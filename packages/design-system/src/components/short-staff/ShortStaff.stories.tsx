@@ -10,6 +10,10 @@ const meta = preview.meta({
   argTypes: {
     givenName: { description: 'De voornaam, in het normale gewicht. Laat hem weg bij iemand met één naam.' },
     interim: { description: 'Of de persoon tijdelijk invalde. De regel zegt dan "(interim)" achter de naam.' },
+    note: {
+      description:
+        'Een korte tekst onder de regel, zoals waarom een club een tijd elders speelde. Gewone tekst, door ons geschreven.',
+    },
     period: {
       description:
         'Welk deel van de tijd de regel gaat, zoals de bezoeker het leest: "tot 14 mrt 2026" of "vanaf 1 sep 2025". Laat hem weg als de naam genoeg zegt, zoals bij de enige trainer van een seizoen.',
@@ -67,6 +71,30 @@ export const OnlyName = meta.story({
       </List.Item>,
       'Hoofdtrainer',
       'staf-naam',
+    ),
+})
+
+export const WithNote = meta.story({
+  name: 'Een regel met een toelichting eronder',
+  render: () =>
+    inCard(
+      <>
+        <List.Item>
+          <ShortStaff period="tot 10 augustus 2019" surname="Eerste Stadion" />
+        </List.Item>
+        <List.Item>
+          <ShortStaff
+            note="De club speelde tijdelijk in een andere stad, na de instorting van een deel van het dak."
+            period="10 augustus 2019 t/m 2019/20"
+            surname="Tijdelijk Stadion"
+          />
+        </List.Item>
+        <List.Item>
+          <ShortStaff period="vanaf 2020/21" surname="Eerste Stadion" />
+        </List.Item>
+      </>,
+      'Stadions',
+      'staf-toelichting',
     ),
 })
 
