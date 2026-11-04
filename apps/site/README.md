@@ -548,7 +548,8 @@ Ze heeft zes delen:
   Een seizoen zonder wedstrijd tegen de club in de Eredivisie, een wedstrijd die nog moet komen en een derde wedstrijd in een seizoen zijn een lege plek of vallen weg; de beker en de play-offs staan er niet in.
   Onder de as staat elke vijf jaar een label (90, 95, 00, …) met de titel "Seizoen", en de lijn is het gemiddelde aantal punten over vier plekken achter elkaar die alle gespeeld zijn: bij een gat stopt de lijn.
   De as begint altijd in 1990, ook nu de database pas vanaf 2010/11 wedstrijden heeft; de zin "Alleen de Eredivisie: alle 12 gespeelde wedstrijden sinds 2010/11." zegt sinds wanneer we ze hebben, en schuift mee als er seizoenen bijkomen (#414).
-  De grafiek is verborgen voor een schermlezer, die de sleutel (W, G, V uit `tableColumns`), de zin over de lijn ("… in de laatste 4 wedstrijden: 1,8, bij de wedstrijd van 2025/26", of "De lijn begint na 4 wedstrijden achter elkaar.") en de zin "12 wedstrijden: 5 winst, 3 gelijk, 4 verlies. De hele lijst staat bij Wedstrijden." met een link naar `#wedstrijden` hoort.
+  De grafiek is verborgen voor een schermlezer.
+  Die hoort de sleutel (W, G, V uit `tableColumns`), de zin over de lijn ("… in de laatste 4 wedstrijden: 1,8, bij de wedstrijd van 2025/26", of "De lijn begint na 4 wedstrijden achter elkaar") en de aantallen ("12 wedstrijden: 5 winst, 3 gelijk, 4 verlies", met "De hele lijst staat bij Wedstrijden" en een link naar `#wedstrijden`).
   De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.
   Hij is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline` en `timelineMinimum`), zonder zin die zegt waarom.
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Verloop sinds 1990": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
