@@ -1785,6 +1785,7 @@
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 - **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
+- **Later:** zie _Tegenstanders heeft een zijkolom met de top 10, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: op de pagina Tegenstanders is de lijst met alle tegenstanders de hoofdinhoud en dus wit (regel 1); de top 10 in de zijkolom is zacht (regel 4).
 
 ## De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
 
@@ -2375,3 +2376,19 @@
   Een vaste maximumhoogte van ongeveer acht opties (een maat die we moeten onderhouden, en op een laag scherm nog te hoog).
   Alleen scrollen binnen het menu, zonder eis aan zoom (laat de zwaarste situatie ongetest).
   Alle keuzelijsten de opmaak van de site geven (een eigen issue).
+
+## `DataTable` kan de plaats van een rij in een ranglijst tonen
+
+- **Datum:** 4 november 2026
+- **Besluit:** een rij van `DataTable` heeft de optionele eigenschap `position`, de plaats in een ranglijst vanaf 1 (#699).
+  Heeft een rij een plaats, dan krijgt de tabel een kolom vóór de rijkoppen, met de kop `#` (`plaats` voor een schermlezer, in een `abbr` met de titel "Plaats").
+  De cel heeft de klassen `hf-numeric hf-rank`, dus de plaats staat rechts uitgelijnd in de kleur van de markeringen, zoals in `TopScorersTable` en `StandingsTable`.
+  - **Niet voor een tabel die sorteert:** de eigenschap werkt alleen in een gewone tabel.
+    Een tabel met een sorteerbare kolom (`SortableDataTable`) toont de plaats niet, want na het sorteren klopt de volgorde niet meer met de plaatsen.
+  - **Geef een plaats aan elke rij of aan geen:** de component controleert het niet.
+- **Waarom:** de top 10 op Tegenstanders heeft links, een gemiddelde en een aantal per club, en de plaats hoort in een eigen kolom met een kop.
+  `TopScorersTable` heeft een speler en doelpunten, en `StandingsTable` heeft geen links en geen gemiddelde.
+  Een `marker` bij de rijkop is een versiering voor een schermlezer en geen kolom, en 1 en 10 staan er niet recht onder elkaar.
+  De site mag geen eigen `table` schrijven: de lint verbiedt HTML-elementen in de site.
+- **Nadeel:** de eigenschap werkt niet met `sortable`, en de component zegt dat alleen in de beschrijving.
+- **Alternatieven:** een eigen onderdeel voor ranglijsten (veel werk voor één kaart, en `DataTable` heeft alles al); de plaats in de eerste cel van de rij tonen als tekst (de rijkop is dan geen club meer); een `marker` met het getal (geen kolomkop, scheve uitlijning).

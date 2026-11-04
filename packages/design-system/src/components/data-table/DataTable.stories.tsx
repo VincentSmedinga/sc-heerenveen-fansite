@@ -243,6 +243,29 @@ export const Links = meta.story({
   ),
 })
 
+export const Ranked = meta.story({
+  name: 'Met de plaats in de ranglijst op een telefoon',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="ranglijst-kop" surface="soft">
+        <Heading id="ranglijst-kop" level={2}>
+          Top 3 gemiddeld aantal punten per wedstrijd
+        </Heading>
+        <DataTable
+          caption="De drie clubs waartegen we gemiddeld de meeste punten per wedstrijd halen, van hoog naar laag"
+          columns={['Club', { abbreviation: 'Gem.', name: 'gemiddeld aantal punten' }, tableColumns.played]}
+          rows={[
+            { cells: ['2,43', 14], header: 'Testclub', href: '#club', position: 1 },
+            { cells: ['2,10', 10], header: 'Nepclub ’s-Gravenvoorbeeld', href: '#club', position: 2 },
+            { cells: ['1,88', 8], header: 'FC Voorbeeld', href: '#club', position: 3 },
+          ]}
+        />
+        <Text appearance="meta">Gem. gemiddeld aantal punten, G gespeeld</Text>
+      </Card>
+    </div>
+  ),
+})
+
 const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
   <div style={{ maxInlineSize }}>
     <Card aria-labelledby="sorteerbaar-kop">

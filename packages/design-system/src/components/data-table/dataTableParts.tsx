@@ -61,6 +61,7 @@ export const TableRows = ({
   <tbody>
     {rows.map((row) => (
       <tr key={row.header}>
+        {row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
         <th scope="row">
           {row.marker}
           {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}

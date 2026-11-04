@@ -31,6 +31,7 @@ import {
   ClubSummaryCard,
   OpponentsCredit,
   StadiumsCard,
+  TopPointsCard,
 } from '#src/OpponentViews'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
@@ -103,7 +104,10 @@ export async function clubListMetadata(): Promise<Metadata> {
  * the KNVB Beker, or the Eredivisie alone with `?competitie=eredivisie`, as Statistieken does,
  * and the switch is the one of Statistieken. A club we only met in the cup is not in the list
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
- * the choice that is not known is the page "niet gevonden".
+ * the choice that is not known is the page "niet gevonden". The list is the main column, on the
+ * white surface. The sidebar has the top 10 of the average points per match (`TopPointsCard`),
+ * which counts the same matches as the list, and the credit under it. On a phone it follows the
+ * list.
  */
 export async function ClubListPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie } = await searchParams
@@ -123,24 +127,38 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
   // Without a cup tie the two choices count the same matches and there is nothing to choose.
   const hasCup = played(loaded.all) > played(loaded.league)
 
+  const records = competition === 'league' ? loaded.league : loaded.all
+  const since = sinceOf(loaded.seasons)
+
   return (
-    <Page.Main
-      intro={
-        <Page.Title>
-          <Heading level={1}>Tegenstanders</Heading>
-        </Page.Title>
-      }
-    >
-      {hasCup && <CompetitionLinks address={opponentsPath} competition={competition} place="tegenstanders" />}
-      <ClubsCard
-        address={opponentsPath}
-        choice={competition}
-        query={competitionQuery(competition)}
-        records={competition === 'league' ? loaded.league : loaded.all}
-        since={sinceOf(loaded.seasons)}
-      />
-      <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} />
-    </Page.Main>
+    <>
+      <Page.Main
+        intro={
+          <Page.Title>
+            <Heading level={1}>Tegenstanders</Heading>
+          </Page.Title>
+        }
+      >
+        {hasCup && <CompetitionLinks address={opponentsPath} competition={competition} place="tegenstanders" />}
+        <ClubsCard
+          address={opponentsPath}
+          choice={competition}
+          query={competitionQuery(competition)}
+          records={records}
+          since={since}
+        />
+      </Page.Main>
+      <Page.Sidebar aria-label="De top 10 van de gemiddelde punten en de bron">
+        <TopPointsCard
+          address={opponentsPath}
+          choice={competition}
+          query={competitionQuery(competition)}
+          records={records}
+          since={since}
+        />
+        <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} />
+      </Page.Sidebar>
+    </>
   )
 }
 

@@ -21,7 +21,15 @@ import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
 import { countScores } from './matches'
 import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView } from './MatchViews'
-import { type ClubSummary, lastResultsOf, type Meeting, type Stadium } from './opponents'
+import {
+  type ClubSummary,
+  lastResultsOf,
+  type Meeting,
+  pointsOf,
+  type Stadium,
+  topPointsMinimum,
+  topPointsOf,
+} from './opponents'
 
 /**
  * What the cards of the opponents say about the matches they count: all the played matches
@@ -62,9 +70,6 @@ const clubLegend = tableLegend(
     column === tableColumns.points ? { ...column, note: '3 per winst, 1 per gelijkspel' } : column,
   ),
 )
-
-/** The points against a club: 3 for a win and 1 for a draw, in the cup too. */
-const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
 
 /** The goals for minus the goals against. */
 const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => record.goalsFor - record.goalsAgainst
@@ -124,7 +129,8 @@ export function ClubMeetingsCard({
  * "+18". They are abbreviations, which fit a phone, and the line under the table explains them.
  * The visitor can sort on every column, with JavaScript; the table of the server is A to Z. The
  * goal difference sorts on the number, so the club we did best against is on top. There is no
- * pagination: the list is one page.
+ * pagination: the list is one page. It is the main content of the page, so it has the white
+ * surface.
  */
 export function ClubsCard({
   address,
@@ -142,7 +148,7 @@ export function ClubsCard({
   const played = records.reduce((sum, record) => sum + record.played, 0)
 
   return (
-    <Card aria-labelledby="alle-tegenstanders" surface="soft">
+    <Card aria-labelledby="alle-tegenstanders">
       <Heading id="alle-tegenstanders" level={2}>
         Alle tegenstanders
       </Heading>
@@ -173,6 +179,12 @@ export function ClubsCard({
     </Card>
   )
 }
+
+/** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
+const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+
+/** The legend of the top 10: the two abbreviations of its columns. */
+const topPointsLegend = tableLegend([{ abbreviation: 'Gem.', name: 'gemiddeld aantal punten' }, tableColumns.played])
 
 /**
  * The card "Hoe vaak welke uitslag" of the page of a club: the card of the page Wedstrijden
@@ -356,6 +368,59 @@ export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
           ? 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie.'
           : 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie. De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.'}
       </Text>
+    </Card>
+  )
+}
+
+/**
+ * The card of the page Tegenstanders with the ten clubs against which sc Heerenveen took the
+ * most points per match (see `topPointsOf`), in the sidebar on the soft surface: a ranking that
+ * belongs to the list of all the opponents. It counts the same matches as that list, so it
+ * follows the switch of the page, and its links keep the choice (`address` and `query`, as in
+ * `ClubsCard`). The line under the heading says which clubs count. The table has the place, the
+ * club as a link, the average with two decimals and the number of matches. It cannot be sorted:
+ * its order is the point. With no club that counts there is a sentence and no table, and the
+ * card stays.
+ */
+export function TopPointsCard({
+  address,
+  choice,
+  query,
+  records,
+  since,
+}: {
+  address: string
+  choice: CompetitionChoice
+  query: string
+  records: PublicClubRecord[]
+  since: string
+}) {
+  const { places, played } = topPointsOf(records)
+
+  return (
+    <Card aria-labelledby="top-10-gemiddeld-aantal-punten" surface="soft">
+      <Heading id="top-10-gemiddeld-aantal-punten" level={2}>
+        Top 10 gemiddeld aantal punten per wedstrijd
+      </Heading>
+      {places.length === 0 ? (
+        <Text>{`Nog geen club met minstens ${topPointsMinimum} gespeelde wedstrijden.`}</Text>
+      ) : (
+        <>
+          <Text>{`Alleen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden.`}</Text>
+          <DataTable
+            caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'league' ? ', in de Eredivisie' : ''}`}
+            columns={['Club', { abbreviation: 'Gem.', name: 'gemiddeld aantal punten' }, tableColumns.played]}
+            rows={places.map((place) => ({
+              cells: [averageFormat.format(place.points / place.played), place.played],
+              header: place.name,
+              href: `${address}/${place.slug}${query}`,
+              position: place.place,
+            }))}
+          />
+          <Text appearance="meta">{topPointsLegend}</Text>
+          <BasedOnSince choice={choice} played={played} since={since} />
+        </>
+      )}
     </Card>
   )
 }

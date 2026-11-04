@@ -57,6 +57,14 @@ export type DataTableRow = {
    * Colour or a shape is never the only way to know it.
    */
   note?: string
+  /**
+   * The place of the row in a ranking, from 1. A table in which a row has one gets a column
+   * before the row headers, with the header `#` (`plaats` for a screen reader), and the rows
+   * are in the order of the ranking, so give a place to every row or to none. It is for a
+   * table that is not sortable: a sorted table keeps the places it was given, which would no
+   * longer be the order.
+   */
+  position?: number
 }
 
 /** A column of a table with text, given as an object when it can fold. */

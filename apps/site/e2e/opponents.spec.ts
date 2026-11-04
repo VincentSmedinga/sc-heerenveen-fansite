@@ -5,9 +5,14 @@ import { expect, type Page, test } from '@playwright/test'
 // in the league in a stadium with two names. Nepstad Rangers, Demo Boys and SV Proefdorp have
 // a match still to come and none played.
 
+/** The card Alle tegenstanders; the sidebar has a table of its own, which these tests skip. */
+const list = (page: Page) => page.getByRole('region', { name: 'Alle tegenstanders' })
+
 /** The first four figures of the row of a club in the list: played, won, drawn and lost. */
 async function listRow(page: Page, club: string) {
-  const row = page.getByRole('row').filter({ has: page.getByRole('rowheader', { name: club }) })
+  const row = list(page)
+    .getByRole('row')
+    .filter({ has: page.getByRole('rowheader', { name: club }) })
   const cells = await row.getByRole('cell').allInnerTexts()
 
   return cells.slice(0, 4).map(Number)
@@ -29,7 +34,7 @@ for (const choice of ['', '?competitie=eredivisie']) {
 
     const inList = await listRow(page, 'Testdorp FC')
 
-    await page.getByRole('link', { name: 'Testdorp FC' }).click()
+    await list(page).getByRole('link', { name: 'Testdorp FC' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/statistieken/tegenstanders/testdorp-fc${choice.replace('?', '\\?')}$`))
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Testdorp FC')
@@ -40,11 +45,11 @@ for (const choice of ['', '?competitie=eredivisie']) {
 }
 
 /** The names of the clubs in the list, from the top. */
-const clubNames = (page: Page) => page.locator('tbody th').allInnerTexts()
+const clubNames = (page: Page) => list(page).locator('tbody th').allInnerTexts()
 
 /** One column of the list from the top: 1 is G gespeeld, 5 is P punten, 6 is D doelsaldo. */
 const columnFigures = async (page: Page, column: number) =>
-  (await page.locator(`tbody td:nth-of-type(${column})`).allInnerTexts()).map((text) =>
+  (await list(page).locator(`tbody td:nth-of-type(${column})`).allInnerTexts()).map((text) =>
     Number.parseInt(text.replace('\u2212', '-'), 10),
   )
 
@@ -126,7 +131,7 @@ test.describe('sorting the list', () => {
         'aria-sort',
         'none',
       )
-      await expect(page.locator('thead th')).toHaveCount(7)
+      await expect(list(page).locator('thead th')).toHaveCount(7)
 
       await page.getByRole('button', { exact: true, name: 'P punten' }).click()
 
@@ -147,7 +152,7 @@ test.describe('sorting the list', () => {
         'descending',
       )
       await expect(page.getByRole('status')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
-      expect(await page.locator('tbody td:nth-of-type(6)').first().innerText()).toMatch(/^([+−]\d+|0)$/)
+      expect(await list(page).locator('tbody td:nth-of-type(6)').first().innerText()).toMatch(/^([+−]\d+|0)$/)
     })
   }
 
@@ -175,7 +180,7 @@ test.describe('without JavaScript', () => {
     await page.goto('/statistieken/tegenstanders')
 
     await expect(page.getByRole('button')).toHaveCount(0)
-    await expect(page.getByRole('columnheader', { exact: true, name: 'gespeeld' })).toBeVisible()
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'gespeeld' })).toBeVisible()
 
     const names = await clubNames(page)
 
@@ -188,12 +193,12 @@ test.describe('without JavaScript', () => {
 
     const choices = page.getByRole('group', { name: 'Welke wedstrijden' })
 
-    await expect(page.getByRole('rowheader', { name: 'FC Maquette' })).toBeVisible()
+    await expect(list(page).getByRole('rowheader', { name: 'FC Maquette' })).toBeVisible()
     await choices.getByRole('link', { name: 'Eredivisie' }).click()
 
     await expect(page).toHaveURL(/\/statistieken\/tegenstanders\?competitie=eredivisie$/)
     await expect(page.getByRole('rowheader', { name: 'FC Maquette' })).toHaveCount(0)
-    await expect(page.getByRole('rowheader', { name: 'Testdorp FC' })).toBeVisible()
+    await expect(list(page).getByRole('rowheader', { name: 'Testdorp FC' })).toBeVisible()
   })
 
   test('the page of a club we only met in the cup says so with the choice Eredivisie', async ({ page }) => {
@@ -283,7 +288,7 @@ test.describe('the bar of Statistieken', () => {
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
     await expect(bar.getByRole('link', { name: 'Spelers' })).not.toHaveAttribute('aria-current', 'page')
 
-    await page.getByRole('link', { name: 'Testdorp FC' }).click()
+    await list(page).getByRole('link', { name: 'Testdorp FC' }).click()
 
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
   })

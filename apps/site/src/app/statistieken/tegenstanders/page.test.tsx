@@ -8,6 +8,21 @@ import { withoutIcons } from '#src/without-icons'
 
 import OpponentsPage, { generateMetadata } from './page'
 
+/** A club with five played matches, five wins, for the tests that need a club in the top 10. */
+const fiveMatchRecords = [
+  {
+    drawn: 0,
+    goalsAgainst: 1,
+    goalsFor: 10,
+    id: 99,
+    lost: 0,
+    name: 'Vijf Winst',
+    played: 5,
+    slug: 'vijf-winst',
+    won: 5,
+  },
+]
+
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getEditedMatches: vi.fn(),
@@ -40,6 +55,20 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
+/** The main column: the card Alle tegenstanders. */
+const mainOf = (html: string) => html.slice(0, html.indexOf('<aside'))
+
+/** The sidebar: the card with the top 10 and the credit. */
+const sidebarOf = (html: string) => html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+
+/** The rows of the top 10: the place, the club and its address, the average and the matches. */
+const placesOf = (html: string) =>
+  [
+    ...sidebarOf(html).matchAll(
+      /<tr><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th><td class="hf-numeric">([^<]*)<\/td><td class="hf-numeric">(\d+)<\/td><\/tr>/g,
+    ),
+  ].map(([, place, href, name, average, played]) => [place, name, href, average, played])
+
 /** The rows of the table: the name of the club, its address and the figures. */
 const rowsOf = (html: string) =>
   [...html.matchAll(/<tr><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th>(.*?)<\/tr>/g)].map(
@@ -51,12 +80,13 @@ const rowsOf = (html: string) =>
   )
 
 describe('the page /statistieken/tegenstanders', () => {
-  it('has one h1, Tegenstanders, and one h2, the card Alle tegenstanders', async () => {
+  it('has one h1, Tegenstanders, and two h2s: the card Alle tegenstanders and the top 10', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => heading.replaceAll(/<[^>]*>/g, ''))).toEqual([
       'Tegenstanders',
       'Alle tegenstanders',
+      'Top 10 gemiddeld aantal punten per wedstrijd',
     ])
   })
 
@@ -72,7 +102,7 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     expect(html).toContain('<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z')
-    expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
+    expect(mainOf(html).match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(html).toContain('<span class="hf-visually-hidden">winst</span>')
     expect(html).toContain(
       'G gespeeld, W winst, G gelijk, V verlies, P punten (3 per winst, 1 per gelijkspel), D doelsaldo',
@@ -92,7 +122,7 @@ describe('the page /statistieken/tegenstanders', () => {
   it('sends the names of the columns in the order of the table for every column that can be sorted', async () => {
     const html = await render()
 
-    expect([...html.matchAll(/<th [^>]*scope="col">(.*?)<\/th>/g)].map(([, header]) => header)).toEqual([
+    expect([...mainOf(html).matchAll(/<th [^>]*scope="col">(.*?)<\/th>/g)].map(([, header]) => header)).toEqual([
       'Club',
       '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
       '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
@@ -110,7 +140,7 @@ describe('the page /statistieken/tegenstanders', () => {
 
     expect(all).toContain(legend)
     expect(league).toContain(legend)
-    expect(league.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
+    expect(mainOf(league).match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(rowsOf(league)).toEqual([
       [
         'FC Voorbeeld',
@@ -176,6 +206,65 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(html).not.toMatch(/<details class="hf-meta hf-wikipedia-credit"[^>]* open/)
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2022/23_(mannenvoetbal)"')
     expect(html).toContain('CC BY-SA 4.0')
+  })
+
+  it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the sidebar', async () => {
+    const html = await render()
+
+    expect(mainOf(html)).toMatch(
+      /<section class="hf-card" aria-labelledby="alle-tegenstanders">|<section aria-labelledby="alle-tegenstanders" class="hf-card">/,
+    )
+    expect(mainOf(html)).not.toContain('hf-card-soft')
+    expect(sidebarOf(html)).toMatch(
+      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="top-10-gemiddeld-aantal-punten"|aria-labelledby="top-10-gemiddeld-aantal-punten"[^>]*class="hf-card hf-card-soft/,
+    )
+  })
+
+  it('has a sidebar with a name, the top 10 first and the credit after it', async () => {
+    const sidebar = sidebarOf(await render())
+
+    expect(sidebar).toContain('aria-label="De top 10 van de gemiddelde punten en de bron"')
+    expect(sidebar.indexOf('id="top-10-gemiddeld-aantal-punten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+    expect(mainOf(await render())).not.toContain('Bron: Wikipedia')
+  })
+
+  it('ranks the clubs with five played matches on the average points, with the minimum and the matches it counts', async () => {
+    const html = await render()
+
+    // Beker United (1 match) and FC Voorbeeld (3) are under the minimum; Testclub has 11 in 5.
+    expect(placesOf(html)).toEqual([['1', 'Testclub', '/statistieken/tegenstanders/testclub', '2,20', '5']])
+    expect(sidebarOf(html)).toContain('Alleen clubs met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).toContain('Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23')
+    expect(sidebarOf(html)).toContain(
+      '<caption class="hf-visually-hidden">De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
+    )
+    expect(sidebarOf(html)).not.toContain('<button')
+  })
+
+  it('follows the choice: with ?competitie=eredivisie no club has five matches, so there is a sentence and no table', async () => {
+    const html = await render({ competitie: 'eredivisie' })
+
+    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).not.toContain('<table')
+    expect(html).toContain('id="top-10-gemiddeld-aantal-punten"')
+  })
+
+  it('keeps the choice in the links of the top 10', async () => {
+    vi.mocked(getClubRecords).mockResolvedValue([...leagueRecords, ...fiveMatchRecords])
+
+    const html = await render({ competitie: 'eredivisie' })
+
+    expect(placesOf(html).map(([, name, href]) => [name, href])).toEqual([
+      ['Vijf Winst', '/statistieken/tegenstanders/vijf-winst?competitie=eredivisie'],
+    ])
+  })
+
+  it('keeps the top 10 when there is no club at all', async () => {
+    vi.mocked(getClubRecords).mockResolvedValue([])
+
+    const html = await render()
+
+    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
   })
 
   it('says so, and has no table, while there is no club', async () => {

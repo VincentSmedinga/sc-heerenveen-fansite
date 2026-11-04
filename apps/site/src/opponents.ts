@@ -220,6 +220,40 @@ export function stadiumsOf(matches: readonly PublicClubMatch[]): Stadium[] {
   return stadiums.map(({ firstDay, lastDay, name }) => ({ firstDay, lastDay, name }))
 }
 
+/** The points against a club: 3 for a win and 1 for a draw, in the cup too. */
+export const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
+
+/** How many matches a club needs for the top 10 of the average points, and its places. */
+export const topPointsMinimum = 5
+export const topPointsPlaces = 10
+
+/** A place in the top 10 of the average points per match: the club, its figures, its place. */
+export type PointsPlace = { name: string; place: number; played: number; points: number; slug: string }
+
+/**
+ * The top 10 of the clubs against which sc Heerenveen took the most points per match, from the
+ * records the page already has, so for the choice of the page. The points are the ones of the
+ * column Punten (`pointsOf`) and the average is those points per played match. Only a club with
+ * at least `topPointsMinimum` played matches counts, because a club met once or twice would
+ * otherwise be on top. Level averages go by the number of matches, then by name; the order
+ * compares the real ratio and not the rounded number, and every club has a place of its own.
+ * `played` is the number of matches of all the clubs that count, not only of the ten shown.
+ * With no club that counts, `places` is empty.
+ */
+export function topPointsOf(records: readonly PublicClubRecord[]) {
+  const counting = records.filter((record) => record.played >= topPointsMinimum)
+  const places = counting
+    .map((record) => ({ name: record.name, played: record.played, points: pointsOf(record), slug: record.slug }))
+    // Compare points/played without dividing, so 7 out of 3 is not the same as 2,33 rounded.
+    .toSorted(
+      (a, b) => b.points * a.played - a.points * b.played || b.played - a.played || a.name.localeCompare(b.name, 'nl'),
+    )
+    .slice(0, topPointsPlaces)
+    .map((place, index) => ({ ...place, place: index + 1 }))
+
+  return { places, played: counting.reduce((sum, record) => sum + record.played, 0) }
+}
+
 /** The seasons of the meetings, the newest first, each once. */
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()

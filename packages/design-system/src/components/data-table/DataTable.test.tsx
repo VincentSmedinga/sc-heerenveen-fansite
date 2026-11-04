@@ -294,4 +294,36 @@ describe('DataTable.Group', () => {
     expect(container.firstElementChild?.id).toBe('tabellen')
     expect(container.querySelectorAll('table')).toHaveLength(1)
   })
+
+  describe('with a position', () => {
+    const ranked = {
+      caption: 'De clubs met de meeste punten, van hoog naar laag',
+      columns: ['Club', 'Gem.', 'G'],
+      rows: [
+        { cells: ['2,50', 6], header: 'Testclub', position: 1 },
+        { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
+      ],
+    }
+
+    it('has a column before the row headers, named plaats for a screen reader, and a place in every row', () => {
+      render(<DataTable {...ranked} />)
+
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+        '#plaats',
+        'Club',
+        'Gem.',
+        'G',
+      ])
+      expect(document.querySelector('thead abbr')?.getAttribute('title')).toBe('Plaats')
+      expect([...document.querySelectorAll('tbody td.hf-rank')].map((cell) => cell.textContent)).toEqual(['1', '2'])
+      expect(document.querySelector('tbody td.hf-rank')?.className).toBe('hf-numeric hf-rank')
+    })
+
+    it('has no such column when no row has a position', () => {
+      render(<DataTable {...props} />)
+
+      expect(document.querySelector('.hf-rank')).toBeNull()
+      expect(screen.queryByText('plaats')).toBeNull()
+    })
+  })
 })
