@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import type { PublicClubRecord } from '@fansite/db/queries'
+import type { PublicClubMatch, PublicClubRecord } from '@fansite/db/queries'
 
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
 
-import { ClubsCard, ClubScoreCountsCard, TopPointsCard } from './OpponentViews'
+import { ClubsCard, ClubScoreCountsCard, ClubTopScorersCard, TopPointsCard } from './OpponentViews'
 import { testclub } from './test-opponents'
 
 const record = (
@@ -224,5 +224,100 @@ describe('ClubScoreCountsCard', () => {
     const { container } = render(<ClubScoreCountsCard meetings={[]} />)
 
     expect(container.innerHTML).toBe('')
+  })
+})
+
+describe('ClubTopScorersCard', () => {
+  // The five matches of Testclub: a cup tie without a goal of ours, and in the Eredivisie one
+  // 3–0 with the scorers Vroeg (a penalty), Midden and Laat, and three whose scorers we lack.
+  const { matches } = testclub
+  const card = (choice: 'all' | 'league', list = matches) => (
+    <ClubTopScorersCard choice={choice} matches={list} name="Testclub" />
+  )
+
+  it('has the heading with the name of the club, a table with a caption for a screen reader, and the line', () => {
+    render(card('league'))
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Doelpuntenmakers tegen Testclub' })).toBeTruthy()
+    expect(screen.getByText('3 spelers hebben gescoord')).toBeTruthy()
+    expect(
+      screen.getByRole('table', {
+        name: 'Doelpuntenmakers van sc Heerenveen tegen Testclub, in de Eredivisie',
+      }),
+    ).toBeTruthy()
+    expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat', 'Midden', 'Vroeg'])
+  })
+
+  it('says "Gebaseerd op" only because three of the four matches of the Eredivisie lack their scorers', () => {
+    render(card('league'))
+
+    expect(screen.getByText('Gebaseerd op de doelpuntenmakers van 1 van de 4 gespeelde wedstrijden')).toBeTruthy()
+  })
+
+  it('follows the choice: with all the matches the cup tie counts, and the caption names the cup', () => {
+    render(card('all'))
+
+    expect(
+      screen.getByRole('table', {
+        name: 'Doelpuntenmakers van sc Heerenveen tegen Testclub, in de Eredivisie en de KNVB Beker',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByText('Gebaseerd op de doelpuntenmakers van 2 van de 5 gespeelde wedstrijden')).toBeTruthy()
+    // The goal of the opponent in the cup tie is nobody's goal of ours.
+    expect(screen.getAllByRole('rowheader')).toHaveLength(3)
+  })
+
+  it('says nothing about the scorers when every match has them', () => {
+    const complete = matches.filter((match) => match.goals.length > 0 || match.goalsFor === 0)
+
+    render(card('all', complete))
+
+    expect(screen.queryByText(/Gebaseerd op/)).toBeNull()
+  })
+
+  it('counts a penalty, and counts neither an own goal of an opponent nor a goal of the opponent', () => {
+    const own = { ...matches[1]!.goals[0]!, ours: true, ownGoal: true, penalty: false, player: 'Eigen' }
+    const theirs = { ...matches[1]!.goals[0]!, ours: false, penalty: false, player: 'Tegen' }
+    const mixed: PublicClubMatch[] = [
+      { ...matches[1]!, goals: [...matches[1]!.goals, own, theirs] },
+      ...matches.slice(2),
+    ]
+
+    render(card('league', mixed))
+
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat', 'Midden', 'Vroeg'])
+  })
+
+  it('cuts the list to the top five, and the line says so', () => {
+    // Six players with six, five, four, three, two and one goals: the sixth is left out.
+    const goals = ['A', 'B', 'C', 'D', 'E', 'F'].flatMap((player, index) =>
+      Array.from({ length: 6 - index }, (_, minute) => ({
+        ...matches[1]!.goals[0]!,
+        minute: minute + 1,
+        penalty: false,
+        player,
+      })),
+    )
+    const many: PublicClubMatch[] = [{ ...matches[1]!, goals }, ...matches.slice(2)]
+
+    render(card('league', many))
+
+    expect(screen.getByText('De top 5 van 6 spelers die scoorden')).toBeTruthy()
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['A', 'B', 'C', 'D', 'E'])
+    expect(
+      screen.getByRole('table', {
+        name: 'De top 5 van de doelpuntenmakers van sc Heerenveen tegen Testclub, in de Eredivisie',
+      }),
+    ).toBeTruthy()
+  })
+
+  it('has the sentence in place of the table when the chosen matches have no scorers', () => {
+    const silent = matches.map((match) => ({ ...match, goals: [] }))
+
+    render(card('league', silent))
+
+    expect(screen.getByText('We hebben geen doelpuntenmakers van deze wedstrijden.')).toBeTruthy()
+    expect(screen.queryByRole('table')).toBeNull()
   })
 })

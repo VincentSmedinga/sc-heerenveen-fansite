@@ -267,6 +267,39 @@ test.describe('the page of a club', () => {
     }
   })
 
+  test('has the card Doelpuntenmakers for a club with five matches, in both choices, and none for fewer', async ({
+    page,
+  }) => {
+    // Testdorp FC has five played matches in the league (see older-meetings.ts), so the card is
+    // there with both choices, after Hoe vaak welke uitslag. Voorbeeld United has four.
+    for (const choice of ['', '?competitie=eredivisie']) {
+      await page.goto(`/statistieken/tegenstanders/testdorp-fc${choice}`)
+
+      const card = page.getByRole('region', { name: 'Doelpuntenmakers tegen Testdorp FC' })
+
+      await expect(card.getByRole('heading', { level: 2 })).toBeVisible()
+      await expect(
+        card.getByRole('table', { name: /^Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie/ }),
+      ).toBeVisible()
+      await expect(
+        card.getByText(/^\d+ spelers hebben gescoord$|^De top 5 van \d+ spelers die scoorden$/),
+      ).toBeVisible()
+      await expect(
+        card.getByText(/^Gebaseerd op de doelpuntenmakers van \d+ van de \d+ gespeelde wedstrijden$/),
+      ).toBeVisible()
+    }
+
+    await page.goto('/statistieken/tegenstanders/testdorp-fc')
+    await expect(page.getByRole('complementary').getByRole('heading', { level: 2 })).toContainText([
+      'Onze uitslagen tegen Testdorp FC',
+      'Hoe vaak welke uitslag',
+      'Doelpuntenmakers tegen Testdorp FC',
+    ])
+
+    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+    await expect(page.getByRole('heading', { level: 2, name: /^Doelpuntenmakers tegen/ })).toHaveCount(0)
+  })
+
   test('has no card Stadion for a club whose only league match was at home, and none for the cup', async ({ page }) => {
     for (const club of ['testdorp-fc', 'fc-maquette']) {
       await page.goto(`/statistieken/tegenstanders/${club}`)

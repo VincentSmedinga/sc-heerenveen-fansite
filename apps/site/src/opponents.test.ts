@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest'
 
 import { overviewOf } from './matches'
 import {
+  clubScorersMinimum,
   earlierNames,
+  hasClubScorers,
   lastResultsOf,
   meetingsOf,
   pointsOf,
@@ -94,6 +96,36 @@ describe('meetingsOf', () => {
 
   it('leaves out a match that is played but has no score', () => {
     expect(meetingsOf([match(null, null)], 'all')).toEqual([])
+  })
+})
+
+describe('hasClubScorers', () => {
+  const played = (count: number) => Array.from({ length: count }, () => match(1, 0))
+
+  it('has the card from five played matches with a result, and not with four or fewer', () => {
+    expect(clubScorersMinimum).toBe(5)
+    expect(hasClubScorers(played(4))).toBe(false)
+    expect(hasClubScorers(played(5))).toBe(true)
+    expect(hasClubScorers(played(6))).toBe(true)
+  })
+
+  it('does not count a match still to be played, a cancelled one or one without a result', () => {
+    const notCounted = [
+      match(null, null, { status: 'scheduled' }),
+      match(null, null, { status: 'postponed' }),
+      match(0, 0, { goalsAgainst: null, goalsFor: null, status: 'cancelled' }),
+      match(null, null),
+    ]
+
+    expect(hasClubScorers([...played(4), ...notCounted])).toBe(false)
+    expect(hasClubScorers([...played(5), ...notCounted])).toBe(true)
+  })
+
+  it('counts every competition, so it does not depend on the choice of the visitor', () => {
+    const mixed = [...played(3), match(0, 1, { competition: 'KNVB Beker' }), match(2, 2, { competition: 'KNVB Beker' })]
+
+    expect(meetingsOf(mixed, 'league')).toHaveLength(3)
+    expect(hasClubScorers(mixed)).toBe(true)
   })
 })
 

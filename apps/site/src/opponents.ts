@@ -72,6 +72,21 @@ export function meetingsOf(matches: readonly PublicClubMatch[], choice: Competit
   )
 }
 
+/**
+ * How many played matches with a result we need against a club before its page has the card
+ * Doelpuntenmakers: with fewer the list says little, and a card with one name is mostly empty.
+ */
+export const clubScorersMinimum = 5
+
+/**
+ * Whether the page of a club has the card Doelpuntenmakers: we played it at least
+ * `clubScorersMinimum` times, in all competitions together. It doesn't depend on the choice,
+ * so the card doesn't vanish when the visitor switches to the Eredivisie; the list in it does
+ * follow the choice.
+ */
+export const hasClubScorers = (matches: readonly PublicClubMatch[]) =>
+  meetingsOf(matches, 'all').length >= clubScorersMinimum
+
 /** What a list of meetings comes to: how many were won, drawn and lost, and the goals. */
 export function tallyOf(meetings: readonly Meeting[]): Tally {
   const tally = emptyTally()

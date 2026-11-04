@@ -534,7 +534,7 @@ Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft a
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
-Ze heeft vier delen:
+Ze heeft vijf delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, direct onder de eerste: dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
@@ -545,6 +545,12 @@ Ze heeft vier delen:
   Onder de tabellen van de uitslagen staat een tabel met de competities van de getelde wedstrijden en hun aantal (`competitionCounts`), met de meeste wedstrijden bovenaan en bij gelijk aantal in de volgorde van de site; de schakelaar bepaalt de rijen.
   Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "Gebaseerd op", zonder "sinds" en zonder "in de Eredivisie".
   Een club zonder gespeelde wedstrijd krijgt de kaart niet.
+- De kaart "Doelpuntenmakers tegen …" op het zachte vlak, met de afbeeldingsknop, onder "Hoe vaak welke uitslag" en boven het stadion (`ClubTopScorersCard` in `src/OpponentViews.tsx`).
+  Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` en, bij onvolledige gegevens, "Gebaseerd op de doelpuntenmakers van X van de Y gespeelde wedstrijden".
+  Het is dezelfde telling en dezelfde weergave als de kaart op Wedstrijden en Statistieken: `TopScorers` in `src/MatchViews.tsx` krijgt de teksten die verschillen (het bijschrift met `scope` en de zin zonder doelpuntenmakers met `empty`) en de hulpfuncties in `src/matches.ts` nemen elk type wedstrijd dat een `ScoredMatch` past, dus ook die van een club.
+  De kaart is er alleen als we minstens 5 gespeelde wedstrijden met een uitslag tegen de club hebben, in alle competities samen (`hasClubScorers` en `clubScorersMinimum` in `src/opponents.ts`), ongeacht de schakelaar.
+  Bij minder dan 5 is hij er niet, zonder zin die zegt waarom.
+  De lijst zelf telt de wedstrijden van de schakelaar, dus bij Eredivisie kan hij korter zijn of leeg, en dan staat er "We hebben geen doelpuntenmakers van deze wedstrijden." in plaats van de tabel.
 - De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
   De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
   Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.

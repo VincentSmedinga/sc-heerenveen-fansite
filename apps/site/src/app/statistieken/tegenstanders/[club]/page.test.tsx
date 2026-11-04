@@ -796,3 +796,86 @@ describe('the matches that are still to come on the page of a club', () => {
     expect(linesOf(await render('beker-united'))).toEqual([])
   })
 })
+
+describe('the card Doelpuntenmakers on the page of a club', () => {
+  // The matches of testclub: the cup tie (a goal of the opponent), the league match 3–0 with
+  // the scorers Vroeg (a penalty), Midden and Laat, and three league matches without scorers.
+  const [cup, scored, ...others] = testclub.matches
+
+  const withMatches = (matches: typeof testclub.matches) =>
+    vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches })
+
+  const cardOf = (html: string) => {
+    const start = html.indexOf('id="doelpuntenmakers"')
+
+    return start === -1 ? '' : html.slice(start, html.indexOf('</section>', start))
+  }
+
+  it('is there from five played matches with a result, with the heading of the club, and not with four', async () => {
+    withMatches([cup!, scored!, ...others])
+    expect(await render()).toContain('>Doelpuntenmakers tegen Testclub</h2>')
+
+    withMatches([scored!, ...others])
+    expect(await render()).not.toContain('id="doelpuntenmakers"')
+
+    withMatches([cup!, scored!, ...others, { ...others[0]!, id: 900 }])
+    expect(await render()).toContain('>Doelpuntenmakers tegen Testclub</h2>')
+  })
+
+  it('does not count a match that is still to come or has no result', async () => {
+    const coming = {
+      ...others[0]!,
+      goals: [],
+      goalsAgainst: null,
+      goalsFor: null,
+      id: 901,
+      status: 'scheduled' as const,
+    }
+    const noResult = { ...coming, id: 902, status: 'played' as const }
+
+    withMatches([coming, noResult, scored!, ...others])
+    expect(await render()).not.toContain('id="doelpuntenmakers"')
+
+    withMatches([coming, noResult, cup!, scored!, ...others])
+    expect(await render()).toContain('id="doelpuntenmakers"')
+  })
+
+  it('stays with both choices of the switch, and the list counts the matches of the choice', async () => {
+    // Five matches, of which three were in the Eredivisie: the 3–0 and two without scorers.
+    const asCup = (match: (typeof others)[number]) => ({ ...match, competition: 'KNVB Beker' as const })
+    const goalOfCup = { ...scored!.goals[0]!, penalty: false, player: 'Beker' }
+
+    withMatches([asCup(others[0]!), { ...asCup(others[1]!), goals: [goalOfCup] }, scored!, others[2]!, cup!])
+
+    const all = cardOf(await render())
+    const league = cardOf(await render('testclub', { competitie: 'eredivisie' }))
+
+    expect(plain(all)).toContain('4 spelers hebben gescoord')
+    expect(plain(all)).toContain('Gebaseerd op de doelpuntenmakers van 3 van de 5 gespeelde wedstrijden')
+    expect(plain(all)).toContain('Beker')
+    expect(plain(league)).toContain('3 spelers hebben gescoord')
+    expect(plain(league)).toContain('Gebaseerd op de doelpuntenmakers van 1 van de 2 gespeelde wedstrijden')
+    expect(plain(league)).not.toContain('Beker')
+  })
+
+  it('has the sentence and no table when the chosen matches have no scorers', async () => {
+    withMatches([cup!, ...others, { ...others[0]!, id: 903 }].map((match) => ({ ...match, goals: [] })))
+
+    const html = cardOf(await render('testclub', { competitie: 'eredivisie' }))
+
+    expect(plain(html)).toContain('We hebben geen doelpuntenmakers van deze wedstrijden.')
+    expect(html).not.toContain('<table')
+  })
+
+  it('is in the sidebar after Hoe vaak welke uitslag and before the stadium, soft, with the button for an image', async () => {
+    withMatches([cup!, scored!, ...others])
+
+    const html = await render()
+    const card = html.slice(html.lastIndexOf('<section', html.indexOf('id="doelpuntenmakers"')))
+
+    expect(html.indexOf('id="hoe-vaak-welke-uitslag"')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+    expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="stadion"'))
+    expect(card).toMatch(/^<section class="hf-card hf-card-soft hf-card-shareable"/)
+    expect(plain(html)).toContain('Doelpuntenmakers van sc Heerenveen tegen Testclub')
+  })
+})

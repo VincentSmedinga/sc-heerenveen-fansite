@@ -17,6 +17,7 @@ import {
   getClubPage,
   getClubRecords,
   getSourcePages,
+  hasClubScorers,
   meetingsOf,
   opponentsPath,
   seasonsOf,
@@ -29,6 +30,7 @@ import {
   ClubsCard,
   ClubScoreCountsCard,
   ClubSummaryCard,
+  ClubTopScorersCard,
   OpponentsCredit,
   StadiumsCard,
   TopPointsCard,
@@ -252,6 +254,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             summary={summaryOf(meetings)}
           />
           <ClubScoreCountsCard meetings={meetings} />
+          {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
           <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit
             edited={loaded.edited}
