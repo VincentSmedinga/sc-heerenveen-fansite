@@ -2246,11 +2246,11 @@
   - **De zijkolom** heet "De punten per wedstrijd en de bron".
     De bronvermelding (`OpponentsCredit`) staat daarin onder de kaart, zoals op Spelers en op de pagina van een club, en niet meer onder de lijst.
     Op een telefoon volgt de zijkolom de hoofdkolom, dus de top 10 staat onder de lijst met alle tegenstanders.
-  - **De tabel** is een `DataTable` met de kolommen plaats (#), club (een link), gemiddelde (Gem.) en gespeeld (G).
+  - **De tabel** is een `DataTable` met de kolommen plaats (#), club (een link), gemiddeld (de hele kop "Gemiddeld", dus zonder afkorting) en gespeeld (G).
     De plaats komt uit de nieuwe eigenschap `position` van een rij (zie _`DataTable` kan de plaats van een rij in een ranglijst tonen_ in `designsysteem.md`).
     Het gemiddelde staat in het halfvette gewicht (`semibold` van de kolom), omdat de lijst daarop is geordend.
     De tabel is niet te sorteren: de volgorde is het punt van de kaart.
-    Het bijschrift is onzichtbaar en noemt de volgorde, en een regel eronder legt Gem. en G uit.
+    Het bijschrift is onzichtbaar en noemt de volgorde, en een regel eronder legt # en G uit.
     De kaart is een onderdeel van de site (`TopPointsCard`), geen onderdeel van het designsysteem.
   - **De berekening** staat in `topPointsOf` in `src/opponents.ts`, zonder database, en de regels staan in _De kaart Punten per wedstrijd toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ in `redactie.md`.
 - **Waarom:** de lijst met alle tegenstanders is de hoofdinhoud van de pagina en dus wit (regel 1 van _De vier vlakken van een kaart hebben een betekenis_); een ranglijst die erbij hoort is zacht (regel 4).

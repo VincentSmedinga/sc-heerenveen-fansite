@@ -255,7 +255,7 @@ export const Ranked = meta.story({
           caption="De drie clubs waartegen we gemiddeld de meeste punten per wedstrijd halen, van hoog naar laag"
           columns={[
             'Club',
-            { abbreviation: 'Gem.', name: 'gemiddeld aantal punten', semibold: true },
+            { name: 'gemiddeld aantal punten per wedstrijd', semibold: true, shown: 'Gemiddeld' },
             tableColumns.played,
           ]}
           rows={[
@@ -264,7 +264,7 @@ export const Ranked = meta.story({
             { cells: ['1,88', 8], header: 'FC Voorbeeld', href: '#club', position: 3 },
           ]}
         />
-        <Text appearance="meta">Gem. gemiddeld aantal punten, G gespeeld</Text>
+        <Text appearance="meta">{tableLegend([{ abbreviation: '#', name: 'plaats' }, tableColumns.played])}</Text>
       </Card>
     </div>
   ),

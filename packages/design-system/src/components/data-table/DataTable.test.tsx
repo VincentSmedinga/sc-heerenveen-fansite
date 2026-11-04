@@ -298,7 +298,7 @@ describe('DataTable.Group', () => {
   describe('with a position', () => {
     const ranked = {
       caption: 'De clubs met de meeste punten, van hoog naar laag',
-      columns: ['Club', 'Gem.', 'G'],
+      columns: ['Club', 'Gemiddeld', 'G'],
       rows: [
         { cells: ['2,50', 6], header: 'Testclub', position: 1 },
         { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
@@ -311,7 +311,7 @@ describe('DataTable.Group', () => {
       expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
         '#plaats',
         'Club',
-        'Gem.',
+        'Gemiddeld',
         'G',
       ])
       expect(document.querySelector('thead abbr')?.getAttribute('title')).toBe('Plaats')
@@ -323,7 +323,7 @@ describe('DataTable.Group', () => {
       render(
         <DataTable
           {...ranked}
-          columns={['Club', { abbreviation: 'Gem.', name: 'gemiddeld aantal punten', semibold: true }, 'G']}
+          columns={['Club', { name: 'gemiddeld aantal punten per wedstrijd', semibold: true, shown: 'Gemiddeld' }, 'G']}
         />,
       )
 
