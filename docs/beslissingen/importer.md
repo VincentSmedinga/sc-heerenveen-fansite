@@ -2105,6 +2105,7 @@
 - **Alternatieven:** ook andere schrijfwijzen toestaan (`og`, `pen`, `P`): niet gezien op een pagina, dus een gok.
   De waarschuwing laten staan en de wedstrijden zonder doelpuntenmakers laten (de doelpunten staan wel op de pagina).
 - **Later:** een doelpunt dat beide is (`e.d.` of `o.g.` samen met `pen.` of `p`) blijft een fout.
+- **Later:** een markering tussen haakjes bij de naam, zoals `([[Strafschop|pen]])`, is ook een deel van het doelpunt, en `pen` staat dan ook bij de bekende delen (zie _Een markering tussen haakjes is een deel van het doelpunt, geen deel van de naam_).
 
 ## Een datum zonder jaar krijgt het jaar van het seizoen
 
@@ -2138,3 +2139,16 @@
 - **Waarom:** zo ontstaat bij een naamswijziging geen tweede club, zoals bij AZ en Excelsior (#680), en de import hoeft geen tweede bron van waarheid voor de naam in de kop te kennen.
 - **Nadeel:** staat de laatste naam van de lijst niet gelijk aan de kop, dan zegt het beheerscherm dat in tekst; de redactie of een volgende import lost het op.
 - **Alternatieven:** de nieuwste naam van de lijst wordt de naam in de kop (de import moet dan voor die clubs ophouden de naam te veranderen: meer regels en meer risico).
+
+## Een markering tussen haakjes is een deel van het doelpunt, geen deel van de naam
+
+- **Datum:** 4 november 2026
+- **Besluit:** de lezer haalt een markering tussen haakjes uit de regel met een doelpunt voordat hij de naam en de pagina bepaalt.
+  `pen`, `pen.` en `p` werken als de delen in het sjabloon voor een strafschop, `e.d.` en `o.g.` voor een eigen doelpunt.
+  Een andere markering, of een markering bij meer dan één doelpunt op een regel, is een tekst die we niet kunnen lezen.
+  Haakjes in de titel van een link, zoals `[[Daniel Wass (voetballer)|Wass]]`, zijn geen markering.
+- **Waarom:** de pagina schrijft de strafschop van Ziyech in 2013/14 als `([[Strafschop|pen]]) [[Hakim Ziyech]]`.
+  Zonder dit besluit werd de naam "(pen) Hakim Ziyech", de pagina "Strafschop" en het doelpunt geen strafschop.
+  De lezer raadt bij een deel dat hij niet kent niet, en dat doet hij hier ook niet.
+- **Alternatieven:** de link naar "Strafschop" bij het tonen overslaan (de naam en de strafschop blijven fout in de database).
+  Elke markering tussen haakjes negeren (een markering die iets anders betekent, valt dan stil weg).
