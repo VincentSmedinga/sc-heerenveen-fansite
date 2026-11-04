@@ -41,9 +41,8 @@ describe('donut-chart.css', () => {
   })
 
   it('makes a small chart narrower than the other, with a smaller text in the hole', () => {
-    expect(declarationsOf('.hf-donut-chart-small')).toMatch(/max-inline-size: 7rem/u)
-    expect(declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')).toMatch(
-      /grid-template-columns: minmax\(0, 1fr\) 7rem/u,
+    expect(declarationsOf('.hf-donut-chart-small')).toMatch(
+      /max-inline-size: calc\(var\(--hf-donut-small-size, 7\) \* 1rem\)/u,
     )
     expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-title')).toMatch(
       /color: var\(--hf-colour-text-secondary\);\s*font-size: var\(--hf-meta-font-size\);\s*font-weight: var\(--hf-meta-font-weight\)/u,
@@ -51,6 +50,34 @@ describe('donut-chart.css', () => {
     expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
       /font-size: var\(--hf-body-font-size\);\s*font-weight: var\(--hf-name-font-weight\)/u,
     )
+  })
+
+  it('puts each chart of a pair in the middle of a column as wide as the chart, so the columns relate as the charts', () => {
+    // The widths are written once, as properties of the group, for the rings and the columns.
+    const group = declarationsOf('.hf-donut-chart-group')
+    const widths = {
+      bare: /--hf-donut-bare-size: (\d+);/u.exec(group)?.[1],
+      small: /--hf-donut-small-size: (\d+);/u.exec(group)?.[1],
+    }
+
+    expect(widths).toEqual({ bare: '12', small: '7' })
+    expect(declarationsOf('.hf-donut-chart-bare')).toMatch(
+      /max-inline-size: calc\(var\(--hf-donut-bare-size, 12\) \* 1rem\)/u,
+    )
+
+    // A small chart is also bare, so its width has to come later in the file to win.
+    expect(css.indexOf('.hf-donut-chart-small {')).toBeGreaterThan(css.indexOf('.hf-donut-chart-bare {'))
+
+    const pair = declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')
+
+    // The first column is its share of the width without the gap, the second takes the rest.
+    expect(pair).toMatch(
+      /grid-template-columns:\s*minmax\(\s*0,\s*calc\(\s*\(100% - var\(--hf-space-m\)\) \* var\(--hf-donut-bare-size\) \/\s*\(var\(--hf-donut-bare-size\) \+ var\(--hf-donut-small-size\)\)\s*\)\s*\)\s*minmax\(0, 1fr\)/u,
+    )
+    // Not a fixed size for one column: that leaves the small chart no room beside it.
+    expect(pair).not.toMatch(/\d+rem/u)
+    // Each chart takes the margins on both sides, so it is in the middle of its column.
+    expect(declarationsOf('.hf-donut-chart')).toMatch(/margin-inline: auto/u)
   })
 
   it('has no animation or transition, so nothing moves', () => {
