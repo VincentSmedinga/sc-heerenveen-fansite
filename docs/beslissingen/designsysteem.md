@@ -2375,3 +2375,17 @@
   Een vaste maximumhoogte van ongeveer acht opties (een maat die we moeten onderhouden, en op een laag scherm nog te hoog).
   Alleen scrollen binnen het menu, zonder eis aan zoom (laat de zwaarste situatie ongetest).
   Alle keuzelijsten de opmaak van de site geven (een eigen issue).
+
+## Twee donutdiagrammen in een groep staan midden in hun eigen kolom
+
+- **Datum:** 4 november 2026
+- **Besluit:** in een `DonutChart.Group` met een klein diagram krijgt elke kolom het deel van de breedte dat de maximale breedte van zijn diagram inneemt, en staat elk diagram met automatische marges midden in zijn kolom (#700).
+  - **Eén keer geschreven:** de breedtes van het diagram zonder tekst en van het kleine diagram zijn getallen in rem, `--hf-donut-bare-size` en `--hf-donut-small-size`, op de groep.
+    De diagrammen lezen ze voor hun `max-inline-size`, en de eerste kolom leest ze voor zijn deel van de breedte (zonder de ruimte tussen de kolommen); de tweede kolom neemt de rest.
+  - **Hetzelfde:** een groep zonder klein diagram (Voor en Tegen op Wedstrijden), de rest van de kaart en de maten van de diagrammen zelf.
+- **Waarom:** de tweede kolom had precies de breedte van het kleine diagram, dus het had geen marge en zat tegen de rand van de kaart.
+  Kolommen die de breedtes van hun diagram volgen, houden het diagram in het midden van zijn kolom, en een nieuwe maat past zich vanzelf aan.
+- **Nadeel:** de verhouding gaat uit van het diagram zonder tekst naast het kleine diagram, zoals op de kaart "Hoe vaak welke uitslag".
+  Een diagram met tekst rond de ring (hoogstens 20rem breed) naast een klein diagram krijgt een kolom die bij het diagram zonder tekst past.
+- **Alternatieven:** de tweede kolom breder maken met een vaste maat (dan klopt de verhouding alleen bij één breedte van de kaart); het kleine diagram rechts of links uitlijnen (dan staat het nog steeds niet midden in zijn kolom).
+- **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (#697) in `site.md`: de kolom van 7rem voor het kleine diagram is hier vervangen door een kolom die bij zijn breedte past.

@@ -10,18 +10,31 @@
    * it has not, as on a phone. They are as wide as the place they are in, not the screen.
    */
   .hf-donut-chart-group {
+    /* The widths of the rings in rem, as numbers: the columns and the rings both read them. */
+    --hf-donut-bare-size: 12;
+    --hf-donut-small-size: 7;
+
     display: grid;
     gap: var(--hf-space-l) var(--hf-space-m);
     grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
   }
 
   /*
-   * A group with a small chart gives the small one a narrow column, so it is a smaller ring, and
-   * the other chart the rest. They stay side by side, also on a phone.
+   * A group with a small chart is a ring without labels next to the small one. Each gets the
+   * part of the width that its ring is wide at most, so the columns relate as the rings, and
+   * each ring sits in the middle of its column. They stay side by side, also on a phone.
    */
   .hf-donut-chart-group:has(.hf-donut-chart-small) {
     align-items: center;
-    grid-template-columns: minmax(0, 1fr) 7rem;
+    grid-template-columns:
+      minmax(
+        0,
+        calc(
+          (100% - var(--hf-space-m)) * var(--hf-donut-bare-size) /
+            (var(--hf-donut-bare-size) + var(--hf-donut-small-size))
+        )
+      )
+      minmax(0, 1fr);
   }
 
   .hf-donut-chart {
@@ -77,18 +90,21 @@
     position: relative;
   }
 
-  /* A small chart is a ring of this width at most, with a smaller text in its hole. */
-  .hf-donut-chart-small {
-    max-inline-size: 7rem;
-  }
-
   /* A ring without labels is a square, as wide as the ring needs and no more. */
   .hf-donut-chart-bare {
-    max-inline-size: 12rem;
+    max-inline-size: calc(var(--hf-donut-bare-size, 12) * 1rem);
   }
 
   .hf-donut-chart-bare .hf-donut-chart-plot {
     aspect-ratio: 1;
+  }
+
+  /*
+   * A small chart is a ring of this width at most, with a smaller text in its hole. It is also
+   * a ring without labels, so this comes after that rule to keep its own width.
+   */
+  .hf-donut-chart-small {
+    max-inline-size: calc(var(--hf-donut-small-size, 7) * 1rem);
   }
 
   .hf-donut-chart-drawing {
