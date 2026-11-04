@@ -1,6 +1,8 @@
 import type { FormResult } from '@fansite/design-system'
 
+import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
 import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
+import { normaliseClubName } from '@fansite/db/clubs'
 import {
   findClubBySlug,
   listAllWikipediaPages,
@@ -14,7 +16,7 @@ import {
 import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
-import { ownStadiumPeriods, stadiumPeriods } from './match-format'
+import { ownListPeriods, stadiumPeriods } from './match-format'
 import { programmeOf } from './matches'
 
 /**
@@ -149,6 +151,43 @@ export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | unde
 const difference = (meeting: Meeting) => meeting.goalsFor - meeting.goalsAgainst
 
 /**
+ * A name of the own list of names of a club, with when it held and the note the editors wrote
+ * with it (see `ownListPeriods`).
+ */
+export type ClubNameView = { name: string; note?: string | undefined; period?: string | undefined }
+
+/**
+ * The names of the own list of a club with their periods and notes, in the order of the list.
+ * A club without a list, or with one name, has none: one name says nothing about a change.
+ */
+export function clubNameViewsOf(own: readonly NamePeriodLine[]): ClubNameView[] {
+  if (own.length < 2) {
+    return []
+  }
+
+  const periods = ownListPeriods(own)
+
+  return own.map((line, index) => ({ name: line.name, note: line.note ?? undefined, period: periods[index] }))
+}
+
+/**
+ * The text for "Eerder: …" under the name of a club: the names of its own list before the name
+ * it has now, each with its period, such as "FC Zwolle t/m 2011/12". The last name of the list
+ * is the name of now when it is the name in the heading (`heading`, whatever the capitals,
+ * accents and punctuation); when it is another name, the heading comes from the import and
+ * every name of the list is earlier. A club without a list, or with one name, has no line.
+ */
+export function earlierNames(own: readonly NamePeriodLine[], heading: string): string | undefined {
+  const views = clubNameViewsOf(own)
+  const last = views.at(-1)
+  const earlier = last !== undefined && sameName(last.name, heading) ? views.slice(0, -1) : views
+
+  return earlier.length === 0
+    ? undefined
+    : earlier.map((view) => (view.period === undefined ? view.name : `${view.name} ${view.period}`)).join(', ')
+}
+
+/**
  * The record of the meetings, newest first: the total, at home and away, and the biggest win
  * and the biggest loss, by the difference in goals. When two are level, the later one wins, as
  * on the card Uitersten. A win needs a difference in our favour and a loss one against us.
@@ -171,12 +210,8 @@ export function summaryOf(meetings: readonly Meeting[]): ClubSummary {
   }
 }
 
-/**
- * The other names Wikipedia gives a club, for "Eerder: …" under its name, or undefined when it
- * has none. The query gives them A to Z.
- */
-export const earlierNames = (otherNames: readonly string[]) =>
-  otherNames.length === 0 ? undefined : otherNames.join(', ')
+/** Whether two spellings are one name for the importer: capitals and dots do not count. */
+const sameName = (a: string, b: string) => normaliseClubName(a) === normaliseClubName(b)
 
 /**
  * A name of the stadium of a club, as Wikipedia wrote it, with the first and the last season
@@ -187,7 +222,7 @@ export type Stadium = { firstSeason: string; lastSeason: string; name: string }
 
 /**
  * A line of the card with the stadium of a club: the name, a note that the editors wrote with
- * it, and what it says about the time (see `stadiumPeriods` and `ownStadiumPeriods`).
+ * it, and what it says about the time (see `stadiumPeriods` and `ownListPeriods`).
  */
 export type StadiumView = { name: string; note?: string | undefined; period?: string | undefined }
 
@@ -198,7 +233,7 @@ export type StadiumView = { name: string; note?: string | undefined; period?: st
  */
 export function stadiumViewsOf(own: readonly StadiumLine[], matches: readonly PublicClubMatch[]): StadiumView[] {
   if (own.length > 0) {
-    const periods = ownStadiumPeriods(own)
+    const periods = ownListPeriods(own)
 
     return own.map((line, index) => ({ name: line.name, note: line.note ?? undefined, period: periods[index] }))
   }
@@ -308,6 +343,8 @@ const clubRecords = cacheForKey(period, (choice) =>
 export type ClubPage = {
   club: NonNullable<Awaited<ReturnType<typeof findClubBySlug>>>
   matches: PublicClubMatch[]
+  /** The own list of names of the club, which is empty for a club that has none. */
+  names: NamePeriodLine[]
   /** The own list of stadium names of the club, which is empty for a club that has none. */
   stadiums: StadiumLine[]
 }
@@ -327,7 +364,12 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
 
   return club === undefined
     ? undefined
-    : { club, matches: await listClubMatches(db, club.id), stadiums: await listClubStadiums(db, club.id) }
+    : {
+        club,
+        matches: await listClubMatches(db, club.id),
+        names: await listClubNamePeriods(db, club.id),
+        stadiums: await listClubStadiums(db, club.id),
+      }
 })
 
 /**

@@ -219,14 +219,14 @@ De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUP
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                                                                                                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                               |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                  |
-| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save` of `stadium.reset` |
-| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                   |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`                                                                                                                                                         |
-| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                          |
+| Kolom        | Betekenis                                                                                                                                                                                                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                    |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                       |
+| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save` of `club-name.reset` |
+| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                       |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`                                                                                                                                                                                              |
+| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                              |
 
 Alleen `recordAction` in `packages/db/src/audit-log.ts` schrijft erin, en alleen met `INSERT`.
 De site en de importer gebruiken dezelfde functie.
@@ -573,7 +573,7 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
   Een wedstrijd telt als gespeeld, gewonnen, gelijk of verloren op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gelijk.
   Zonder `competition` tellen alle wedstrijden, met `competition: 'Eredivisie'` alleen die van de competitie, en een club die we alleen in de beker troffen staat er dan niet in.
   Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
-- `findClubBySlug(db, slug)` geeft één club met zijn `id`, `slug`, `name`, `wikipediaPage` en de andere namen (`otherNames`, van A tot Z), of niets voor een slug die niemand heeft.
+- `findClubBySlug(db, slug)` geeft één club met zijn `id`, `slug`, `name`, `wikipediaPage` en de andere schrijfwijzen die Wikipedia gebruikt (`otherNames`, van A tot Z; het zijn geen naamswijzigingen), of niets voor een slug die niemand heeft.
 - `listClubMatches(db, clubId, { competition })` geeft de wedstrijden tegen de club, de nieuwste eerst over alle seizoenen, ook de wedstrijden die nog niet gespeeld zijn.
   Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag, eventuele verlenging en strafschoppen, de stand na 90 minuten, de aantekening en de doelpuntenmakers (`goals`, op volgorde van de klok, zoals bij `listSeasonMatches`).
   Met `competition` alleen die van de competitie.
@@ -630,6 +630,28 @@ Drie functies in `@fansite/db/club-stadiums` horen erbij:
 Het logboek krijgt het nummer van de club en de aantallen, en nooit de tekst van een toelichting.
 De dump van `pnpm db:backup` neemt de tabel mee met haar rijen, en `pnpm db:restore` zet haar terug (`structureOnlyTables` in `src/backup.ts` noemt haar niet).
 
+### De tabel `club_name_periods`
+
+De namen die een club droeg, met een start en een toelichting, die de redactie bijhoudt in het beheer (zie _De namen van een club_ in de [README van de site](../../apps/site/README.md)).
+De lijst is alleen voor de weergave: de pagina van de club zegt "Eerder" uit deze lijst, en de lijsten met wedstrijden tonen de naam van het seizoen.
+De importer bepaalt de naam in de kop en de slug, en vindt een hernoemde club via `club_names`, waar elke naam van de lijst bij het opslaan ook in komt.
+De migratie `0039_add_club_name_periods` maakt de tabel leeg: de redactie vult de clubs in die het nodig hebben.
+
+De kolommen en de controles in de tabel zijn die van `club_stadiums` (`club_id`, `position`, `name` van 1 tot 100 tekens, `start_season`, `start_day`, `note` van hoogstens 200 tekens).
+Zes functies in `@fansite/db/club-name-periods` horen erbij:
+
+- `listClubNamePeriods(db, clubId)` geeft de lijst van een club in volgorde, en `listClubsWithNamePeriods(db)` de nummers van de clubs die er een hebben;
+- `replaceClubNamePeriods(db, userId, clubId, lines)` vervangt de lijst van een club, zet de namen die `club_names` nog niet kent daar bij en schrijft `club-name.save` in het logboek, in één transactie;
+  hoort een naam bij een andere club (zijn naam in de kop of een andere naam, zonder verschil in hoofdletters, accenten en leestekens), dan geeft hij de namen die botsen terug en slaat niets op;
+- `removeClubNamePeriods(db, userId, clubId)` haalt de lijst weg en schrijft `club-name.reset`; een club zonder lijst verandert niets en laat geen regel achter, en `club_names` blijft zoals het was;
+- `nameOnDay(lines, day)` geeft de naam die op een dag gold (een seizoen telt als 1 juli, een dag als die dag), of niets voor een dag vóór de eerste start;
+- `withSeasonNames(db, rows)` geeft wedstrijden de naam van hun dag in `opponent`, en laat een club zonder lijst, of zonder naam voor die dag, met de schrijfwijze van Wikipedia.
+  `listSeasonMatches` en `listClubMatches` gebruiken dat, zodat elke pagina de naam van het seizoen krijgt.
+  De schermen voor wedstrijden in het beheer lezen `matches.opponent` zelf en tonen de schrijfwijze van Wikipedia.
+
+Het logboek krijgt het nummer van de club en de aantallen, en nooit de tekst van een toelichting.
+De dump van `pnpm db:backup` neemt de tabel mee met haar rijen.
+
 ### Een club met twee namen samenvoegen
 
 Staat een club twee keer in `clubs` omdat Wikipedia hem op twee manieren schrijft, zoals `Excelsior` en `Excelsior Rotterdam`, dan zijn er twee wegen.
@@ -668,6 +690,7 @@ Had de club die weggaat een eigen artikel dat geen doorverwijzing is, dan is het
 Heeft hij titels in `club_pages`, zet die dan ook over: `UPDATE club_pages SET club_id = <blijft> WHERE club_id = <gaat weg>;` vóór de `DELETE`, want de rijen gaan met hun club mee weg.
 Heeft hij een eigen lijst in `club_stadiums` en de club die blijft niet, zet die dan ook over met `UPDATE club_stadiums SET club_id = <blijft> WHERE club_id = <gaat weg>;`.
 Hebben allebei een lijst, kies er dan een en haal de andere weg: de lijsten van twee clubs laten zich niet samenvoegen.
+Hetzelfde geldt voor een lijst in `club_name_periods`: zet hem over met `UPDATE club_name_periods SET club_id = <blijft> WHERE club_id = <gaat weg>;` als de club die blijft er geen heeft, anders kies je een lijst.
 De slug van de club die weggaat, werkt dan niet meer; de slug van de club die blijft verandert niet.
 
 ## De tabel `staff`
@@ -731,8 +754,9 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `club_stadiums`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
+- `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;

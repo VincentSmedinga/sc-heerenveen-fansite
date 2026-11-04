@@ -40,6 +40,7 @@ describe('the bar of the admin', () => {
       ['/beheer/artikelen', 'Artikelen'],
       ['/beheer/wedstrijden', 'Wedstrijden'],
       ['/beheer/stadions', 'Stadions'],
+      ['/beheer/clubnamen', 'Clubnamen'],
       ['/beheer/bezoek', 'Bezoek'],
     ])
     expect(html.match(/aria-current="page"/g)).toHaveLength(1)

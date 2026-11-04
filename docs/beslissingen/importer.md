@@ -1050,6 +1050,7 @@
 - **Later:** zie _Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club_ (3 november 2026): één artikel is één club, na de doorverwijzingen.
   De titel van een artikel dat een doorverwijzing is, telt als het artikel waar hij naar verwijst, en `wikipedia_page` is de titel van het echte artikel.
   Een club die onder de titel van een doorverwijzing staat, voegt de importer zelf samen, dus alleen een club zonder doorverwijzing voegt de projecteigenaar nog met de hand samen.
+- **Later:** zie _De lijst van namen is alleen voor de weergave, en de import houdt de naam in de kop_ (4 november 2026): de naam en de slug blijven van de import, maar de redactie kan namen toevoegen aan `club_names` via een lijst in het beheer.
 
 ## Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn
 
@@ -2124,3 +2125,16 @@
   De lezer neemt de zichtbare tekst en de stand kent alleen `Roda JC Kerkrade`, dus de uitslag telde voor een club die de stand niet heeft.
   Wikipedia heeft maar één artikel, `Roda JC Kerkrade`, dus het is dezelfde club.
 - **Alternatieven:** de naam in de uitslagen aan de stand aanpassen met een eigen regel in de lezer (de lijst `clubFullNames` doet dat al voor Excelsior, voor de uitslagen en voor de clubs).
+
+## De lijst van namen is alleen voor de weergave, en de import houdt de naam in de kop
+
+- **Datum:** 4 november 2026
+- **Besluit:** de namen van de lijst van de redactie (`club_name_periods`, #705) komen bij het opslaan ook in `club_names`, behalve de naam in de kop, zodat de import een hernoemde club vindt.
+  De import bepaalt de naam in de kop en de slug, ook voor een club met een lijst.
+  Een naam die bij een andere club hoort, wordt geweigerd.
+  - **Wat "bij een andere club" is:** de naam in de kop of een andere naam van een andere club, op naam zonder verschil in hoofdletters, accenten en leestekens (`normaliseClubName`), zoals de import zoekt.
+  - **Wat weghalen doet:** een naam uit de lijst halen of de hele lijst weghalen laat `club_names` zoals het is, want de import kan de naam intussen hebben gebruikt voor een wedstrijd.
+  - **De test:** na het opslaan van een lijst met FC en PEC vindt `createClubBook` (de import) een wedstrijd tegen "FC …" bij dezelfde club en maakt hij geen tweede club.
+- **Waarom:** zo ontstaat bij een naamswijziging geen tweede club, zoals bij AZ en Excelsior (#680), en de import hoeft geen tweede bron van waarheid voor de naam in de kop te kennen.
+- **Nadeel:** staat de laatste naam van de lijst niet gelijk aan de kop, dan zegt het beheerscherm dat in tekst; de redactie of een volgende import lost het op.
+- **Alternatieven:** de nieuwste naam van de lijst wordt de naam in de kop (de import moet dan voor die clubs ophouden de naam te veranderen: meer regels en meer risico).

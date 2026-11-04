@@ -192,6 +192,18 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/stadions/bestaat-niet', status: 404 },
   { admin: 'moderator', path: '/beheer/stadions', status: 404 },
   { admin: 'moderator', path: '/beheer/stadions/sv-proefdorp', status: 404 },
+  // The names of the clubs: the same pages as the stadiums, with a club that has a list of
+  // names of its own and a note (made up, see club-names.ts).
+  { admin: 'beheerder', path: '/beheer/clubnamen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen?tonen=eigen-lijst', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen?q=proef', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen?fout=weg', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen/sv-proefdorp', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen/sv-proefdorp?gedaan=opgeslagen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen/voorbeeld-united', status: 200 },
+  { admin: 'beheerder', path: '/beheer/clubnamen/bestaat-niet', status: 404 },
+  { admin: 'moderator', path: '/beheer/clubnamen', status: 404 },
+  { admin: 'moderator', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{match}', status: 404 },
   { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
   { admin: 'moderator', path: '/beheer/bezoek', status: 404 },

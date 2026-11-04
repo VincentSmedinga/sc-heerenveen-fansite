@@ -523,7 +523,11 @@ De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstri
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
 Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
 
-De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
+De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als de redactie een lijst van namen heeft ingevuld (zie _De namen van een club_ onder _Het beheer_).
+De regel noemt de namen vóór de naam van nu met hun periode, zoals "Eerder: FC Zwolle t/m 2011/12" (`earlierNames` in `src/opponents.ts`).
+Een club zonder lijst, of met één naam, heeft geen regel: de andere schrijfwijzen van Wikipedia (`club_names`, zoals `N.E.C.` bij `NEC`) staan er niet onder.
+Heeft een naam een toelichting, dan staat onder de regel het uitklapblok "Over de namen" (`ClubNamesNotes`), met elke naam, zijn periode en de toelichting als gewone tekst.
+De wedstrijden van de lijsten tonen de naam die in het seizoen van de wedstrijd gold; de database bepaalt die (zie _De namen van een club_ in de README van `@fansite/db`).
 De pagina heeft twee kolommen.
 De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke wedstrijd tegen de club, de nieuwste eerst, als `Match` (`MatchLine` in `src/MatchViews.tsx`, dezelfde code als Uitslagen).
 Een gespeelde wedstrijd toont wat hij bij Uitslagen toont: de doelpuntenmakers waar we ze kennen, verlenging en strafschoppen, met de competitie en de ronde in de regel en de dag met het jaar (`withYear` van `matchMoment` in `src/match-format.ts`), zodat een wedstrijd uit een eerder seizoen te herkennen is.
@@ -810,6 +814,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/stadions` is voor beheerders alleen: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
+- `/beheer/clubnamen` is voor beheerders alleen: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - Het beheer is compact: kleinere letters en kortere afstanden dan de publieke pagina's.
   Elke pagina onder `/beheer` zet de klasse `compact` uit `src/beheer/density.ts` op zijn `Page.Main`, en `src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die haar vergeet (zie _Dichtheid_ in Storybook).
@@ -921,6 +926,25 @@ Hier geeft de redactie een club een eigen lijst van namen, met een start en een 
   `replaceClubStadiums` en `removeClubStadiums` uit `@fansite/db/club-stadiums` schrijven de lijst en `stadium.save` of `stadium.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
 - Een opslag staat binnen vijf minuten op de pagina van de club: dat is de tijd die `getClubPage` zijn gegevens bewaart.
 - `e2e/stadiums.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
+
+### De namen van een club
+
+`/beheer/clubnamen` (`src/app/beheer/clubnamen`) is alleen voor beheerders, zoals de stadions.
+De data van Wikipedia kent alleen schrijfwijzen, geen jaren: hier houdt de redactie bij welke namen een club droeg, vanaf wanneer, en waarom.
+De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het adres van de pagina (de slug), ook voor een club met een lijst.
+
+- De lijst van clubs en het zoeken zijn die van de stadions (`searchClubs` komt uit `src/beheer/stadiums.ts`), met het label "Eigen lijst" en het filter Alles of Eigen lijst.
+- `/beheer/clubnamen/<club>` heeft het formulier (`ClubNameForm.tsx`) met een regel per naam: de naam (1 tot 100 tekens), het seizoen of de dag waarmee hij begint, en een toelichting van hoogstens 200 tekens.
+  De regels voor een start zijn die van de stadions, en de periodes komen uit dezelfde functie (`ownListPeriods` in `src/match-format.ts`).
+  Boven het formulier staat de naam die de site nu in de kop toont.
+  Is de laatste naam van de lijst een andere (`headingNotice`), dan zegt een melding dat in gewone tekst; opslaan kan wel.
+- De zijbalk heeft "Opslaan", de schrijfwijzen die we van Wikipedia kennen (alleen lezen, uit `club_names`) en het uitklapblok "Lijst weghalen", dat eerst een bevestiging vraagt.
+- Elke naam van de lijst komt bij het opslaan ook in `club_names`, zodat de import de oude naam als dezelfde club vindt en er geen tweede club ontstaat.
+  Hoort een naam bij een andere club (op naam, zonder verschil in hoofdletters, accenten en leestekens), dan staat er een fout bij het veld en wordt niets opgeslagen.
+  Een naam uit de lijst halen of de lijst weghalen laat `club_names` zoals het is.
+- `replaceClubNamePeriods` en `removeClubNamePeriods` uit `@fansite/db/club-name-periods` schrijven de lijst en `club-name.save` of `club-name.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
+- Een opslag staat binnen vijf minuten op de pagina van de club (de tijd die `getClubPage` zijn gegevens bewaart); de lijsten met wedstrijden volgen als de pagina's van het seizoen verversen.
+- `e2e/club-names.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
 
 ### Het bezoek bekijken
 

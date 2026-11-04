@@ -13,6 +13,7 @@ import { reasonOf } from '#src/errors'
 import { getEditedMatches, getMatchSeasons } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
+  clubNameViewsOf,
   earlierNames,
   getClubPage,
   getClubRecords,
@@ -27,6 +28,7 @@ import {
 } from '#src/opponents'
 import {
   ClubMeetingsCard,
+  ClubNamesNotes,
   ClubsCard,
   ClubScoreCountsCard,
   ClubSummaryCard,
@@ -185,9 +187,9 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
 }
 
 /**
- * The page of one club: its name as the heading, with "Eerder: …" under it when Wikipedia has
- * written the club under other names, the record against it (the total, at home and away,
- * and the biggest win and loss) and every match: first those still to come, the next one
+ * The page of one club: its name as the heading, with "Eerder: …" under it when the editors
+ * keep a list of its names (see `earlierNames`), the record against it (the total, at home and
+ * away, and the biggest win and loss) and every match: first those still to come, the next one
  * first, then those played, the newest first. The matches are the main column, on the white
  * surface; the record, the chart of the scores, the card with the names of the stadium of the
  * club and the credit are the sidebar. A club with matches to come and none played has the
@@ -220,7 +222,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
     competition === 'league'
       ? 'In de Eredivisie hebben we nog niet tegen deze club gespeeld.'
       : 'We hebben nog niet tegen deze club gespeeld.'
-  const earlier = earlierNames(club.otherNames)
+  const earlier = earlierNames(loaded.page.names, club.name)
   const stadiums = stadiumViewsOf(loaded.page.stadiums, matches)
 
   return (
@@ -230,6 +232,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           <Page.Cell>
             <Heading level={1}>{club.name}</Heading>
             {earlier !== undefined && <Text appearance="meta">{`Eerder: ${earlier}`}</Text>}
+            <ClubNamesNotes names={clubNameViewsOf(loaded.page.names)} />
           </Page.Cell>
         }
       >

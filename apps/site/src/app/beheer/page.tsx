@@ -78,6 +78,9 @@ export default async function AdminPage() {
               <Tile href="/beheer/stadions" icon="ball" level={2} title="Stadions">
                 Geef een club een eigen lijst van stadions, met een toelichting.
               </Tile>
+              <Tile href="/beheer/clubnamen" icon="ball" level={2} title="Clubnamen">
+                Houd bij welke namen een club droeg, en sinds wanneer.
+              </Tile>
               <Tile href="/beheer/bezoek" icon="chart" level={2} title="Bezoek">
                 Bekijk hoeveel mensen de site bezoeken.
               </Tile>

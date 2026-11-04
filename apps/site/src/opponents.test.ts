@@ -1,3 +1,4 @@
+import type { NamePeriodLine } from '@fansite/db/club-name-periods'
 import type { StadiumLine } from '@fansite/db/club-stadiums'
 import type { PublicClubMatch, PublicClubRecord, PublicMatch } from '@fansite/db/queries'
 
@@ -5,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { overviewOf } from './matches'
 import {
+  clubNameViewsOf,
   clubScorersMinimum,
   earlierNames,
   hasClubScorers,
@@ -246,9 +248,60 @@ describe('summaryOf', () => {
 })
 
 describe('earlierNames', () => {
-  it('joins the other names and says nothing for a club that has none', () => {
-    expect(earlierNames(['Be Quick', 'Be Quick 1887'])).toBe('Be Quick, Be Quick 1887')
-    expect(earlierNames([])).toBeUndefined()
+  const line = (name: string, extra: Partial<NamePeriodLine> = {}): NamePeriodLine => ({
+    name,
+    note: null,
+    startDay: null,
+    startSeason: null,
+    ...extra,
+  })
+
+  it('names the names before the one of now, each with its period', () => {
+    expect(earlierNames([line('FC Zwolle'), line('PEC Zwolle', { startSeason: '2012/13' })], 'PEC Zwolle')).toBe(
+      'FC Zwolle t/m 2011/12',
+    )
+  })
+
+  it('has the period of a name in the middle, of one season and of more seasons, and of a day', () => {
+    const names = [
+      line('Een'),
+      line('Twee', { startSeason: '2005/06' }),
+      line('Drie', { startSeason: '2006/07' }),
+      line('Vier', { startDay: '2010-03-01' }),
+      line('Vijf', { startSeason: '2012/13' }),
+    ]
+
+    expect(earlierNames(names, 'Vijf')).toBe(
+      'Een t/m 2004/05, Twee 2005/06, Drie 2006/07 tot 1 mrt 2010, Vier 1 mrt 2010 t/m 2011/12',
+    )
+  })
+
+  it('says nothing for a club without a list or with one name, and keeps a changed heading apart', () => {
+    expect(earlierNames([], 'Be Quick')).toBeUndefined()
+    expect(earlierNames([line('Be Quick')], 'Be Quick')).toBeUndefined()
+    expect(earlierNames([line('Oud'), line('Nieuw', { startSeason: '2020/21' })], 'Heel Nieuw')).toBe(
+      'Oud t/m 2019/20, Nieuw vanaf 2020/21',
+    )
+  })
+
+  it('takes the last name of the list for the heading whatever the capitals, accents and punctuation', () => {
+    expect(earlierNames([line('Oud'), line('N.E.C.', { startSeason: '2020/21' })], 'NEC')).toBe('Oud t/m 2019/20')
+  })
+})
+
+describe('clubNameViewsOf', () => {
+  it('has the name, the period and the note of each line, and nothing for fewer than two names', () => {
+    const lines: NamePeriodLine[] = [
+      { name: 'Oud', note: null, startDay: null, startSeason: null },
+      { name: 'Nieuw', note: 'Een toelichting.', startDay: null, startSeason: '2020/21' },
+    ]
+
+    expect(clubNameViewsOf(lines)).toEqual([
+      { name: 'Oud', note: undefined, period: 't/m 2019/20' },
+      { name: 'Nieuw', note: 'Een toelichting.', period: 'vanaf 2020/21' },
+    ])
+    expect(clubNameViewsOf([lines[1]!])).toEqual([])
+    expect(clubNameViewsOf([])).toEqual([])
   })
 })
 

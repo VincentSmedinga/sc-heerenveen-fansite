@@ -10,6 +10,7 @@
     "./alerts": "./src/alerts.ts",
     "./audit-log": "./src/audit-log.ts",
     "./client": "./src/client.ts",
+    "./club-name-periods": "./src/club-name-periods.ts",
     "./club-stadiums": "./src/club-stadiums.ts",
     "./clubs": "./src/clubs.ts",
     "./env": "./src/env.ts",
