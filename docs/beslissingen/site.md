@@ -1836,6 +1836,7 @@
   Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
 - **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
 - **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
+- **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026): de perioden zijn seizoenen en geen dagen van wedstrijden, en de regel onder de lijst is weg.
 
 ## Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
 
@@ -2265,3 +2266,27 @@
 - **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026) in `designsysteem.md`: "Alle tegenstanders" volgt regel 1, de top 10 regel 4.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_ in `designsysteem.md`.
   De punten per wedstrijd zijn de `key`-kolom en staan in het zwaarste gewicht, niet in het halfvette.
+
+## Een stadion toont seizoenen, en een dag alleen als het beheer die kent
+
+- **Datum:** 4 november 2026
+- **Besluit:** de periodes op de kaart Stadion zijn seizoenen (#695): "t/m 2018/19" voor de eerste naam, "2019/20" of "2019/20 t/m 2021/22" voor een naam in het midden, en "vanaf 2020/21" voor de laatste.
+  Bij één naam staat geen periode.
+  Een naam die na een andere terugkomt (A, B, A) blijft drie regels.
+  Een exacte dag midden in een seizoen komt alleen uit het beheer (#694), want onze wedstrijden zeggen niets over de dag dat de naam veranderde.
+  - **De vorm:** `stadiumsOf` geeft per naam `firstSeason` en `lastSeason` (het seizoen van de wedstrijd), niet meer de dagen, en `stadiumPeriods` in `src/match-format.ts` maakt daar de tekst van.
+    De kaart krijgt de tekst per regel, dus een exacte dag kan er later in zonder dat de kaart opnieuw wordt gebouwd.
+- **Waarom:** een stadion krijgt meestal een nieuwe naam met een nieuw seizoen, en we bezoeken een club maar één keer per seizoen.
+  Een dag van een wedstrijd leest als de dag van de wijziging en is dat niet.
+- **Alternatieven:** de dagen laten staan met het seizoen erachter (meer ruis, en de zin over de dagen blijft nodig).
+- **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de perioden zijn seizoenen, en de dagen en de regel onder de lijst zijn weg.
+
+## De zin over Wikipedia onder de kaart Stadion gaat weg
+
+- **Datum:** 4 november 2026
+- **Besluit:** de kaart heeft geen zin meer over waar de namen vandaan komen (#695).
+  De bronvermelding onderaan de pagina geldt voor de kaart (besluit van 1 november 2026).
+- **Waarom:** de projecteigenaar vindt de zin overbodig naast de bronvermelding.
+  Regel 4 van het hoofdstuk Redactie vraagt de bron te noemen, en dat doet de bronvermelding.
+  De zin over de dagen is niet meer nodig, want er staan geen dagen meer.
+- **Alternatieven:** de zin laten staan (dubbel met de bronvermelding, en niet meer waar zodra het beheer namen toevoegt, #694).

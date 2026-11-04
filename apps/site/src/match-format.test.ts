@@ -199,17 +199,31 @@ describe('coachPeriods', () => {
 })
 
 describe('stadiumPeriods', () => {
-  const first = { firstDay: '2020-08-02', lastDay: '2022-05-15' }
-  const second = { firstDay: '2022-08-07', lastDay: '2024-04-28' }
-  const third = { firstDay: '2024-08-04', lastDay: '2026-03-14' }
+  const season = (firstSeason: string, lastSeason = firstSeason) => ({ firstSeason, lastSeason })
 
   it('says nothing for one name: the name is enough', () => {
-    expect(stadiumPeriods([first])).toEqual([undefined])
+    expect(stadiumPeriods([season('2020/21', '2025/26')])).toEqual([undefined])
   })
 
-  it('says "tot" and the day of the last match for each name but the last, and "vanaf" and the day of the first for the last', () => {
-    expect(stadiumPeriods([first, second, third])).toEqual(['tot 15 mei 2022', 'tot 28 apr 2024', 'vanaf 4 aug 2024'])
-    expect(stadiumPeriods([first, second])).toEqual(['tot 15 mei 2022', 'vanaf 7 aug 2022'])
+  it('says "t/m" for the first name and "vanaf" for the last, with two names', () => {
+    expect(stadiumPeriods([season('2020/21', '2021/22'), season('2022/23', '2025/26')])).toEqual([
+      't/m 2021/22',
+      'vanaf 2022/23',
+    ])
+  })
+
+  it('says the season of a name in the middle that lasted one season, and "t/m" when it lasted longer', () => {
+    expect(
+      stadiumPeriods([season('2018/19'), season('2019/20'), season('2020/21', '2022/23'), season('2023/24')]),
+    ).toEqual(['t/m 2018/19', '2019/20', '2020/21 t/m 2022/23', 'vanaf 2023/24'])
+  })
+
+  it('writes a name that returns after another as a line of its own', () => {
+    expect(stadiumPeriods([season('2018/19'), season('2019/20'), season('2020/21')])).toEqual([
+      't/m 2018/19',
+      '2019/20',
+      'vanaf 2020/21',
+    ])
   })
 
   it('says nothing for a club without a name', () => {

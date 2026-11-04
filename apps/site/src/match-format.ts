@@ -167,21 +167,30 @@ export function matchMoment(
 }
 
 /**
- * What the list of stadium names of a club says in front of each name, in the order we saw
- * them: one name says nothing, because the name is enough, and a "vanaf" there would say the
- * stadium began when our data begins. With more, each name but the last has "tot 14 mrt 2026",
- * the day of the last match with that name, and the last has "vanaf 1 sep 2025", the day of the
- * first match with it. They are days of our matches, not of the change of the name.
+ * What the list of stadium names of a club says with each name, in the order we saw them: one
+ * name says nothing, because the name is enough, and a "vanaf" there would say the stadium
+ * began when our data begins. With more, the first name has "t/m 2018/19", the last season we
+ * saw it, a name in the middle has its season ("2019/20") or, when it lasted longer, "2019/20
+ * t/m 2021/22", and the last has "vanaf 2020/21", the first season we saw it. They are seasons
+ * of our matches: the change of a name is seldom on a day we know.
  */
-export function stadiumPeriods(stadiums: readonly { firstDay: string; lastDay: string }[]): (string | undefined)[] {
-  return stadiums.map(({ firstDay, lastDay }, index) => {
+export function stadiumPeriods(
+  stadiums: readonly { firstSeason: string; lastSeason: string }[],
+): (string | undefined)[] {
+  return stadiums.map(({ firstSeason, lastSeason }, index) => {
     if (stadiums.length === 1) {
       return undefined
     }
 
-    return index === stadiums.length - 1
-      ? `vanaf ${formatStaffDate({ date: firstDay, precision: 'day' })}`
-      : `tot ${formatStaffDate({ date: lastDay, precision: 'day' })}`
+    if (index === 0) {
+      return `t/m ${lastSeason}`
+    }
+
+    if (index === stadiums.length - 1) {
+      return `vanaf ${firstSeason}`
+    }
+
+    return firstSeason === lastSeason ? firstSeason : `${firstSeason} t/m ${lastSeason}`
   })
 }
 

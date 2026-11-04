@@ -262,22 +262,25 @@ describe('stadiumsOf', () => {
     match(1, 0, { home: false, matchDate, stadium, ...more })
 
   it('gives the one name of a club that never changed, from the first to the last visit', () => {
-    const visits = [visit('2025-03-01', 'Stadion Test'), visit('2022-10-02', 'Stadion Test')]
+    const visits = [
+      visit('2025-03-01', 'Stadion Test', { season: '2024/25' }),
+      visit('2022-10-02', 'Stadion Test', { season: '2022/23' }),
+    ]
 
-    expect(stadiumsOf(visits)).toEqual([{ firstDay: '2022-10-02', lastDay: '2025-03-01', name: 'Stadion Test' }])
+    expect(stadiumsOf(visits)).toEqual([{ firstSeason: '2022/23', lastSeason: '2024/25', name: 'Stadion Test' }])
   })
 
   it('gives the names in the order of the matches, whatever the order they come in', () => {
     const visits = [
-      visit('2026-02-01', 'Nieuwe Arena'),
-      visit('2024-11-10', 'Nieuwe Arena'),
-      visit('2023-04-02', 'Oud Stadion'),
-      visit('2021-09-12', 'Oud Stadion'),
+      visit('2026-02-01', 'Nieuwe Arena', { season: '2025/26' }),
+      visit('2024-11-10', 'Nieuwe Arena', { season: '2024/25' }),
+      visit('2023-04-02', 'Oud Stadion', { season: '2022/23' }),
+      visit('2021-09-12', 'Oud Stadion', { season: '2021/22' }),
     ]
 
     expect(stadiumsOf(visits)).toEqual([
-      { firstDay: '2021-09-12', lastDay: '2023-04-02', name: 'Oud Stadion' },
-      { firstDay: '2024-11-10', lastDay: '2026-02-01', name: 'Nieuwe Arena' },
+      { firstSeason: '2021/22', lastSeason: '2022/23', name: 'Oud Stadion' },
+      { firstSeason: '2024/25', lastSeason: '2025/26', name: 'Nieuwe Arena' },
     ])
   })
 
@@ -291,9 +294,17 @@ describe('stadiumsOf', () => {
   })
 
   it('gives a name that returns as a line of its own', () => {
-    const visits = [visit('2024-01-01', 'A'), visit('2023-01-01', 'B'), visit('2022-01-01', 'A')]
+    const visits = [
+      visit('2024-01-01', 'A', { season: '2023/24' }),
+      visit('2023-01-01', 'B', { season: '2022/23' }),
+      visit('2022-01-01', 'A', { season: '2021/22' }),
+    ]
 
-    expect(stadiumsOf(visits).map((stadium) => stadium.name)).toEqual(['A', 'B', 'A'])
+    expect(stadiumsOf(visits)).toEqual([
+      { firstSeason: '2021/22', lastSeason: '2021/22', name: 'A' },
+      { firstSeason: '2022/23', lastSeason: '2022/23', name: 'B' },
+      { firstSeason: '2023/24', lastSeason: '2023/24', name: 'A' },
+    ])
   })
 
   it('leaves out a cup tie and a play-off, which can be at a neutral ground', () => {
@@ -324,19 +335,19 @@ describe('stadiumsOf', () => {
   it('counts a stopped match for where it began: it is a played match with the stadium of the club', () => {
     // The match was stopped in minute 82 and finished in another stadium; the match keeps the
     // stadium where it began (see `matches.note`).
-    const stopped = visit('2025-10-19', 'Stadion Test', { goalsAgainst: 0, goalsFor: 6 })
+    const stopped = visit('2025-10-19', 'Stadion Test', { goalsAgainst: 0, goalsFor: 6, season: '2025/26' })
 
-    expect(stadiumsOf([stopped])).toEqual([{ firstDay: '2025-10-19', lastDay: '2025-10-19', name: 'Stadion Test' }])
+    expect(stadiumsOf([stopped])).toEqual([{ firstSeason: '2025/26', lastSeason: '2025/26', name: 'Stadion Test' }])
   })
 
   it('takes spellings that differ in capitals, spaces or hyphens for one name, as the first match wrote it', () => {
     const visits = [
-      visit('2026-02-01', 'stadion  de-kuip'),
-      visit('2025-02-01', 'Stadion de kuip'),
-      visit('2024-02-01', 'Stadion De Kuip'),
+      visit('2026-02-01', 'stadion  de-kuip', { season: '2025/26' }),
+      visit('2025-02-01', 'Stadion de kuip', { season: '2024/25' }),
+      visit('2024-02-01', 'Stadion De Kuip', { season: '2023/24' }),
     ]
 
-    expect(stadiumsOf(visits)).toEqual([{ firstDay: '2024-02-01', lastDay: '2026-02-01', name: 'Stadion De Kuip' }])
+    expect(stadiumsOf(visits)).toEqual([{ firstSeason: '2023/24', lastSeason: '2025/26', name: 'Stadion De Kuip' }])
   })
 
   it('keeps two names that may be one, such as one with "Stadion" in front', () => {

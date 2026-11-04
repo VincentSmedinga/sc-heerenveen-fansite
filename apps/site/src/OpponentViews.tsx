@@ -389,11 +389,9 @@ export function OpponentsCredit({
 /**
  * The card of the page of a club with the names of its stadium in the order we saw them, on the
  * strong surface, like the head coaches. With one name there is the name alone; with more, each
- * name has "tot" and the day of the last match with it, and the last has "vanaf" and the day of
- * the first (see `stadiumPeriods`). The line under the list says where the names come
- * from and, with more than one, that the days are those of our matches and not of the change of
- * the name. The anchor is the same for "Stadion" and
- * "Stadions". A club without a name has no card.
+ * name has its seasons (see `stadiumPeriods`). The credit at the foot of the page says where
+ * the names come from, so the card has no line of its own. The anchor is the same for "Stadion"
+ * and "Stadions". A club without a name has no card.
  */
 export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
   if (stadiums.length === 0) {
@@ -411,16 +409,11 @@ export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
         {stadiums.map((stadium, index) => (
           // The name can come back after another, so the place in the list is part of the key.
           <List.Item key={`${index}-${stadium.name}`}>
-            {/* A ShortStaff is a line with the days in front of a name, as this is. */}
+            {/* A ShortStaff is a line with the period next to a name, as this is. */}
             <ShortStaff period={periods[index]} surname={stadium.name} />
           </List.Item>
         ))}
       </List>
-      <Text appearance="meta">
-        {stadiums.length === 1
-          ? 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie.'
-          : 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie. De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.'}
-      </Text>
     </Card>
   )
 }
