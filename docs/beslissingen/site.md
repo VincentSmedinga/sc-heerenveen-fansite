@@ -2276,6 +2276,8 @@
   Een exacte dag midden in een seizoen komt alleen uit het beheer (#694), want onze wedstrijden zeggen niets over de dag dat de naam veranderde.
   - **De vorm:** `stadiumsOf` geeft per naam `firstSeason` en `lastSeason` (het seizoen van de wedstrijd), niet meer de dagen, en `stadiumPeriods` in `src/match-format.ts` maakt daar de tekst van.
     De kaart krijgt de tekst per regel, dus een exacte dag kan er later in zonder dat de kaart opnieuw wordt gebouwd.
+  - **De breedte:** de kolom met de periode van `ShortStaff` is breder (9,5 in plaats van 8,5 rem), zodat "2019/20 t/m 2021/22" erin past en de namen van alle regels op dezelfde plaats beginnen.
+    Hoofdtrainers krijgt dezelfde bredere kolom.
 - **Waarom:** een stadion krijgt meestal een nieuwe naam met een nieuw seizoen, en we bezoeken een club maar één keer per seizoen.
   Een dag van een wedstrijd leest als de dag van de wijziging en is dat niet.
 - **Alternatieven:** de dagen laten staan met het seizoen erachter (meer ruis, en de zin over de dagen blijft nodig).
