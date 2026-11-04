@@ -1,8 +1,8 @@
 import { connect } from '@fansite/db/client'
+import { readDatabaseEnv } from '@fansite/db/env'
 import { clubs, clubStadiums } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
-
-import { databaseEnv, loopback } from './articles'
+import path from 'node:path'
 
 /**
  * A made-up list of stadiums of its own for SV Proefdorp, with a name that starts on a day and
@@ -11,8 +11,8 @@ import { databaseEnv, loopback } from './articles'
  * pages.spec.ts). SV Proefdorp has a cup tie to come and no match played, so its page has the
  * card Stadion only because of this list, also with the choice Eredivisie. The rows go straight
  * into the table, because they are not an action of the admin and no row of the log should
- * outlast the accounts of the checks. Like `matchId`, it only writes to a database on this
- * computer.
+ * outlast the accounts of the checks. It only writes to a database on this computer. The file
+ * imports nothing from this folder, because `pnpm --filter site test-data` runs it with Node.
  */
 const slug = 'sv-proefdorp'
 
@@ -61,4 +61,20 @@ export async function addStadiums() {
       await connection.close()
     }
   }
+}
+
+const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
+
+/**
+ * The DATABASE_URL of the environment or the .env in the root, like the server of the check
+ * uses.
+ */
+function databaseEnv() {
+  try {
+    process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'))
+  } catch {
+    // No .env: CI sets DATABASE_URL itself.
+  }
+
+  return readDatabaseEnv()
 }
