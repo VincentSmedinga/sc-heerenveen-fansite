@@ -1056,10 +1056,13 @@ function parseDate(
  * `{{goal|45}} [[Jacob Trenskow|Trenskow]]` for the away club, one player to a line and
  * lines cut by `<br />`. The template takes every goal of the player: `{{goal|78||80}}` is
  * two, and `e.d.` or `o.g.` (own goal) or `pen.` or `p` (penalty) after a minute belongs to
- * that goal. Red cards and missed penalties in the same field are not goals and are left out.
- * Anything else, a goal without a name, a part we do not know or a template we do not know, is
- * a text we cannot read: the answer is then a reason and no goals at all, since half a list
- * says something false.
+ * that goal. A mark in brackets before or after the name is a part of the goal as well, not of
+ * the name: `([[Strafschop|pen]]) [[Hakim Ziyech]]` is a penalty of Hakim Ziyech. `pen`, `pen.`
+ * and `p` mean a penalty and `e.d.` and `o.g.` an own goal. A mark belongs to one goal, so it
+ * is no use on a line with more than one. Red cards and missed penalties in the same field are
+ * not goals and are left out. Anything else, a goal without a name, a part we do not know, a
+ * mark we do not know or a template we do not know, is a text we cannot read: the answer is
+ * then a reason and no goals at all, since half a list says something false.
  */
 function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | { problem: string } {
   const goals: ReadGoal[] = []
@@ -1068,8 +1071,20 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
     .replace(/\{\{\s*(?:rode kaart(?: VAR)?|penmis)\s*\|[^{}]*\}\}/giu, '')
     .split(/<br\s*\/?>/iu)) {
     const templates = [...line.matchAll(/\{\{\s*goal\s*\|([^{}]*)\}\}/giu)]
+    // A mark in brackets is not a part of the name, and its link is not the page of the player.
+    // A link is skipped whole, for its title may have brackets: `[[Wass (voetballer)|Wass]]`.
+    const marks: string[] = []
+    const withoutGoals = line
+      .replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' ')
+      .replace(/\[\[[^\]]*\]\]|\(([^()]*)\)/gu, (found, mark: string | undefined) => {
+        if (mark === undefined) {
+          return found
+        }
+        marks.push(plain(mark))
+        return ' '
+      })
     // What is left of a line besides its goals is the name; a comma between templates is not.
-    const name = plain(line.replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' ')).replace(/^[\s,;]+|[\s,;]+$/gu, '')
+    const name = plain(withoutGoals).replace(/^[\s,;]+|[\s,;]+$/gu, '')
 
     if (templates.length === 0) {
       if (/\{\{|\}\}/u.test(line)) {
@@ -1081,7 +1096,8 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
       return { problem: `a goal has no usable name: '${plain(line).slice(0, 40)}'` }
     }
 
-    const playerPage = linkedPage(line.replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' '))
+    const playerPage = linkedPage(withoutGoals)
+    const lineStart = goals.length
 
     for (const [, inner = ''] of templates) {
       let last: ReadGoal | undefined
@@ -1113,6 +1129,27 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
           }
         } else {
           return { problem: `a goal of ${name} has a part we do not know: '${token.slice(0, 40)}'` }
+        }
+      }
+    }
+
+    for (const mark of marks) {
+      const own = ['e.d.', 'o.g.'].includes(mark)
+      const lineGoals = goals.slice(lineStart)
+
+      if (!own && !['p', 'pen', 'pen.'].includes(mark)) {
+        return { problem: `a goal of ${name} has a mark we do not know: '(${mark.slice(0, 40)})'` }
+      }
+      if (lineGoals.length !== 1) {
+        return { problem: `a mark '(${mark})' is on a line of ${name} with ${lineGoals.length} goals` }
+      }
+
+      const goal = lineGoals[0]
+
+      if (goal !== undefined) {
+        goal[own ? 'ownGoal' : 'penalty'] = true
+        if (goal.ownGoal && goal.penalty) {
+          return { problem: `a goal of ${name} is both an own goal and a penalty` }
         }
       }
     }

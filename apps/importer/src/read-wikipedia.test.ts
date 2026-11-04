@@ -1500,6 +1500,45 @@ describe('the goal scorers', () => {
     })
   })
 
+  it('reads a mark in brackets before or after the name as a part of the goal, not of the name', () => {
+    expect(
+      goalsOf(
+        '([[Strafschop|pen]]) [[Hakim Ziyech]] {{goal|120}}<br />[[B]] {{goal|7}} (pen.)<br />(p) [[C]] {{goal|9}}',
+        '{{goal|11}} ([[Eigen doelpunt|e.d.]]) [[D]]<br />{{goal|12}} [[E]] (o.g.)',
+        '3 – 2',
+      ).goals,
+    ).toMatchObject([
+      { minute: 7, ownGoal: false, penalty: true, player: 'B', playerPage: 'B' },
+      { minute: 9, ownGoal: false, penalty: true, player: 'C', playerPage: 'C' },
+      { minute: 11, ownGoal: true, penalty: false, player: 'D', playerPage: 'D' },
+      { minute: 12, ownGoal: true, penalty: false, player: 'E', playerPage: 'E' },
+      { minute: 120, ownGoal: false, penalty: true, player: 'Hakim Ziyech', playerPage: 'Hakim Ziyech' },
+    ])
+  })
+
+  it('keeps the brackets in the title of a link: they are not a mark', () => {
+    expect(goalsOf('[[Daniel Wass (voetballer)|Wass]] {{goal|5}}', '', '1 – 0').goals).toMatchObject([
+      { penalty: false, player: 'Wass', playerPage: 'Daniel Wass (voetballer)' },
+    ])
+  })
+
+  it('reads the penalty of Ziyech in minute 120 of the cup tie against AZ, not as the page Strafschop', () => {
+    const read = readCup(olderCupPage)
+    const ziyech =
+      read.kind === 'read'
+        ? read.matches.find((match) => match.opponent === 'AZ')?.goals?.find((goal) => goal.minute === 120)
+        : undefined
+
+    expect(olderCupPage).toContain('{{goal|120}} ([[Strafschop|pen]]) [[Hakim Ziyech]]')
+    expect(ziyech).toMatchObject({
+      ours: true,
+      ownGoal: false,
+      penalty: true,
+      player: 'Hakim Ziyech',
+      playerPage: 'Hakim Ziyech',
+    })
+  })
+
   it('leaves a red card and a missed penalty out: they are no goals', () => {
     const match = goalsOf(
       '[[Floranus]] {{rode kaart|0|57}}<br />[[Bajraktarević]] {{goal|23||32}}, {{penmis||68}}',
@@ -1548,6 +1587,9 @@ describe('the goal scorers', () => {
     ['a capital letter in a code', '[[A]] {{goal|5|P}}', 'a part we do not know'],
     ['a code of a minute that is no goal', '[[A]] {{goal|o.g.|5}}', 'a part we do not know'],
     ['a name that is a link left open', '[[A {{goal|5}}', 'a goal has no usable name'],
+    ['a mark we do not know', '[[A]] {{goal|5}} ([[Strafschop|vermoedelijk]])', 'a mark we do not know'],
+    ['a mark on a line with two goals', '([[Strafschop|pen]]) [[A]] {{goal|5||50}}', 'is on a line of A with 2 goals'],
+    ['a mark that is both an own goal and a penalty', '(e.d.) [[A]] {{goal|5|pen.}}', 'both an own goal and a penalty'],
   ])('reads %s as no scorers, with the reason', (_name, goals1, reason) => {
     const match = goalsOf(goals1, '', '1 – 0')
 

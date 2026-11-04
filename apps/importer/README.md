@@ -846,7 +846,9 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   Een speler van ons krijgt daarbij zijn rij in `players` (`player_id`): zie _De doelpunten koppelen aan de spelers_.
   Het sjabloon `goal` heeft de minuten achter elkaar: `{{goal|45+2}}` is minuut 45 met 2 minuten erbij, `{{goal|78||80}}` zijn twee doelpunten van dezelfde speler, en een deelcode na een minuut hoort bij dat doelpunt, zoals in `{{goal|5|pen.|23|pen.}}`.
   De import kent `e.d.` en `o.g.` voor een eigen doelpunt en `pen.` en `p` voor een strafschop, en geen andere schrijfwijze.
-  Een andere deelcode geeft de waarschuwing "no scorers" voor die wedstrijd.
+  Dezelfde codes (en `pen`) kunnen als markering tussen haakjes voor of na de naam staan, zoals `([[Strafschop|pen]]) [[Hakim Ziyech]]`: de markering hoort bij het doelpunt, niet bij de naam of de pagina van de speler.
+  Een markering hoort bij één doelpunt, dus op een regel met meer dan één doelpunt is ze een tekst die we niet kunnen lezen.
+  Een andere deelcode of markering geeft de waarschuwing "no scorers" voor die wedstrijd.
   Een doelpunt dat beide is (`{{goal|5|e.d.|pen.}}`) is een fout.
   Een eigen doelpunt staat op de pagina bij de club die ervan profiteert (`{{goal|7|e.d.}}` of `{{goal|7|o.g.}}`), en zo bewaart de import het ook.
   Een rode kaart (`{{rode kaart}}`) en een gemiste penalty (`{{penmis}}`) in deze velden zijn geen doelpunt en vallen weg.
