@@ -9,8 +9,10 @@
  * The thumb is the pseudo-element ::before of the group. It finds its place from two custom
  * properties that the component sets, the number of options and the index of the chosen one, so
  * it works for links without JavaScript, and for buttons whose value the page changes. It
- * slides with a transition on `translate`, which the motion tokens make 0s with reduced motion,
- * so it jumps there. The chosen option is shown by more than colour: the thumb has a border
+ * slides with a transition on `translate` in the medium duration, and the letters of the
+ * chosen option go from regular to bold in the same time (the font is variable, and the copy
+ * in bold below keeps the width). The motion tokens make both 0s with reduced motion, so it
+ * jumps there. The chosen option is shown by more than colour: the thumb has a border
  * that reaches 3:1 against the track, and the letters are heavier. A label is laid over a copy
  * of itself in bold (see SegmentedLabel), so the track does not change width with the choice.
  *
@@ -47,7 +49,7 @@
       inset-block: var(--hf-segmented-edge);
       inset-inline-start: var(--hf-segmented-edge);
       position: absolute;
-      transition: translate var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);
       translate: calc(var(--hf-segmented-index) * (100% + 2 * var(--hf-segmented-edge))) 0;
       z-index: -1;
 
@@ -80,7 +82,9 @@
       padding-inline: var(--hf-space-m);
       text-align: center;
       text-decoration: none;
-      transition: color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      transition:
+        color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+        font-weight var(--hf-motion-duration-medium) var(--hf-motion-ease-change);
 
       &:hover {
         background-color: transparent;
@@ -150,7 +154,9 @@
  * old place to the new one, and the labels stay above it (they have names of their own, because
  * a named element is painted over the page). Everything else on the page, the root, changes at
  * once, as it did before. With reduced motion the pages are not joined, so the thumb jumps. A
- * browser without support loads the next page as ever.
+ * browser without support loads the next page as ever. This is for a link that loads a page,
+ * so without script; a page that changes the choice in the browser moves the thumb with the
+ * transition on `translate` above.
  *
  * The browser joins elements with the same name on the old and the new page. So the names
  * belong to the place of the switch on the page, which the page gives to SegmentedLinks as
@@ -200,7 +206,7 @@
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
-    animation-duration: var(--hf-motion-duration-short);
+    animation-duration: var(--hf-motion-duration-medium);
     animation-timing-function: var(--hf-motion-ease-change);
   }
 

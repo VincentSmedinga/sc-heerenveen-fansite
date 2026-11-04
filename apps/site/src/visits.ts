@@ -99,8 +99,10 @@ for (const [network, prefix] of [
  * What to count for a request, or undefined when it isn't a visit: a request that is not a
  * GET for a page of the site that asks for HTML, a prefetch, a bot, a check of the hosting, or
  * a visitor who asked not to be counted (`DNT: 1` or `Sec-GPC: 1`). Every link of the site
- * loads a whole page, so a page view is a request for HTML. Next.js hides the headers of its
- * own navigation without a page load from the proxy, and those requests accept any type.
+ * loads a whole page, so a page view is a request for HTML. The switches that change the page
+ * in the browser (`SwitchLinks`) use the router of Next.js: Next.js hides the headers of its
+ * own navigation without a page load from the proxy, and those requests accept any type, so a
+ * click on a switch is no visit.
  */
 export function visitOf(request: NextRequest): PageVisit | undefined {
   const { headers } = request
@@ -146,8 +148,8 @@ function addressOf(headers: Headers) {
 /**
  * Whether the browser loads the page ahead of time, for a visitor who may not open it
  * (`Sec-Purpose` and `Purpose` are what Chrome, Safari and Firefox send, `X-Moz` is older).
- * Next.js hides its own headers for this from the proxy; the site has no `next/link`, so no
- * such request comes (see the test).
+ * Next.js hides its own headers for this from the proxy; the site has no `next/link`, so the
+ * router asks for no page ahead of time (see the test).
  */
 function isPrefetch(headers: Headers) {
   return (

@@ -233,7 +233,17 @@ describe('visitOf', () => {
     expect(visitOf(request('/statistieken/tegenstanders/ado-den-haag/extra'))).toBeUndefined()
   })
 
-  it('has no link of Next.js, so every page view is a whole page load that the proxy sees', () => {
+  it('counts the address of a switch as a page, and not the request the router makes for it', () => {
+    // A click on a switch (`SwitchLinks`) is a router navigation: it asks for the data of the
+    // page, and any type is fine. The same address asked for as a page asks for HTML.
+    const address = '/statistieken?competitie=eredivisie'
+
+    expect(visitOf(request(address, { accept: '*/*', rsc: '1' }))).toBeUndefined()
+    expect(visitOf(request(address, { accept: 'text/x-component' }))).toBeUndefined()
+    expect(visitOf(request(address))).toMatchObject({ path: '/statistieken' })
+  })
+
+  it('has no link of Next.js, so a link loads a whole page that the proxy sees (the switches use the router)', () => {
     const root = `${import.meta.dirname}/../../..`
     const uses = ['apps/site/src', 'packages/design-system/src']
       .flatMap((folder) => readdirSync(`${root}/${folder}`, { recursive: true, withFileTypes: true }))

@@ -37,7 +37,9 @@ export type SegmentedLinksProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
  * JavaScript: each option is a link, and the one the page shows has `aria-current="page"`. It
  * is a group with a name, a track with a thumb under the current option and heavier letters on
  * it, so it shows without colour. It holds no state: the page gives the value and the
- * addresses, and a press loads the page of that option. With a `place`, the thumb and the
+ * addresses, and without script a press loads the page of that option; a page that wants to
+ * change the choice in the browser takes the click on the group (`onClick`) and gives the new
+ * value. With a `place`, the thumb and the
  * options get names for the slide between two pages (see segmented-control.css): the names
  * belong to the place, so only a switch in the same place on the next page is the same element.
  */

@@ -19,6 +19,7 @@ vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
     throw new Error(`redirect to ${url}`)
   },
+  useRouter: () => ({ push: () => undefined }),
 }))
 
 let database: TestDatabase

@@ -102,6 +102,11 @@ Zo test je het: tab door de pagina met een schermlezer aan, of bekijk de naam va
 - [ ] Een keuze die de pagina direct ververst, zoals de seizoenskiezer, wisselt de context.
       Een tekst bij de keuzelijst zegt het vooraf, en een schermlezer leest hem voor met `aria-describedby` (3.2.2).
       Met het toetsenbord kies je met de pijltjes zonder dat de pagina bij elke toets verspringt: een keuze met een toets wacht op Enter.
+- [ ] Een schakelaar die met JavaScript in de pagina wisselt, zoals Welke stand, laat de focus op de link waarop je klikte.
+      Een regel met `role="status"` die er al voor de klik is, zegt na de wissel wat er gekozen is, zoals "Laatste 5 gekozen" (4.1.3, 2.4.3).
+      Terwijl de inhoud laadt, staat `aria-busy="true"` op de groep.
+      De keuze wisselt alleen na een klik of Enter, dus niets verspringt zonder dat je het vraagt (3.2.2).
+      Zonder JavaScript en bij een klik met Ctrl, Cmd, Shift of Alt blijft het een gewone link.
 
 Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het toetsenbord.
 

@@ -58,7 +58,8 @@ test.describe('sorting the list', () => {
     await page.goto('/statistieken/tegenstanders')
 
     const played = page.getByRole('button', { exact: true, name: 'G gespeeld' })
-    const status = page.getByRole('status')
+    // The line of the table is a div. The switch Welke wedstrijden has a line of its own, a p.
+    const status = page.locator('div[role="status"]')
     const given = await clubNames(page)
 
     await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
@@ -110,7 +111,7 @@ test.describe('sorting the list', () => {
     const names = await clubNames(page)
 
     expect(names).toEqual([...names].toSorted(collator.compare))
-    await expect(page.getByRole('status')).toHaveText('Gesorteerd op Club, van A tot Z')
+    await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Club, van A tot Z')
 
     await page.getByRole('button', { exact: true, name: 'Club' }).click()
 
@@ -139,7 +140,7 @@ test.describe('sorting the list', () => {
 
       expect(points.length).toBeGreaterThan(0)
       expect(points).toEqual([...points].toSorted((a, b) => b - a))
-      await expect(page.getByRole('status')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
+      await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
 
       await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
 
@@ -151,7 +152,7 @@ test.describe('sorting the list', () => {
         'aria-sort',
         'descending',
       )
-      await expect(page.getByRole('status')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
+      await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
       expect(await list(page).locator('tbody td:nth-of-type(6)').first().innerText()).toMatch(/^([+−]\d+|0)$/)
     })
   }
