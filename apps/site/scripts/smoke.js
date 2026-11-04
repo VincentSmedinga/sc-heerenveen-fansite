@@ -966,12 +966,13 @@ await withEmptyDatabase((database) =>
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
     // The card shows the top 5, with the link to the page with everybody who scored; the whole
-    // list is on that page (below).
+    // list is on that page (below). Demo and Nepper both
+    // scored twice, so they share a row.
     assert.match(statisticsHtml, /<caption class="hf-visually-hidden">(?:De top 5 van de d|D)oelpuntenmakers van sc /)
     assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-top-scorers-name"><span class="hf-player-name"><span class="hf-player-name-given">Rick<\/span> <span class="hf-player-name-surname">Demo<\/span><\/span>,<\/span> <span class="hf-top-scorers-name"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
     // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
     assert.match(
