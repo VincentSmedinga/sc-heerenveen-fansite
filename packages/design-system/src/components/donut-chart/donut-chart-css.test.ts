@@ -49,7 +49,7 @@ describe('donut-chart.css', () => {
       /color: var\(--hf-colour-text-secondary\);\s*font-size: var\(--hf-meta-font-size\);\s*font-weight: var\(--hf-meta-font-weight\)/u,
     )
     expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
-      /font-size: var\(--hf-figure-font-size\)/u,
+      /font-size: var\(--hf-body-font-size\);\s*font-weight: var\(--hf-name-font-weight\)/u,
     )
   })
 
