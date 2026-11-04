@@ -208,7 +208,9 @@ test.describe('without JavaScript', () => {
 })
 
 test.describe('the page of a club', () => {
-  test('has the matches in the main column and the results and the stadiums in the sidebar', async ({ page }) => {
+  test('has the matches in the main column and the results, the scores and the stadiums in the sidebar', async ({
+    page,
+  }) => {
     await page.goto('/statistieken/tegenstanders/voorbeeld-united')
 
     await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
@@ -218,6 +220,7 @@ test.describe('the page of a club', () => {
 
     await expect(sidebar.getByRole('heading', { level: 2 })).toHaveText([
       'Onze uitslagen tegen Voorbeeld United',
+      'Hoe vaak welke uitslag',
       'Stadions',
     ])
     await expect(sidebar.getByText(/^Bron: /)).toBeVisible()

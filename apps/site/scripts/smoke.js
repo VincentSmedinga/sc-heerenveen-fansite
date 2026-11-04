@@ -1058,6 +1058,9 @@ await withEmptyDatabase((database) =>
     // only met in the league at home, so the stadium is ours and there is no card Stadion.
     assert.match(clubHtml, /<main[^>]*>.*id="wedstrijden".*<\/main>.*<aside[^>]*>.*id="onze-uitslagen"/s)
     assert.doesNotMatch(clubHtml, /id="stadion"/)
+    // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
+    assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
+    assert.match(clubHtml, /id="hoe-vaak-welke-uitslag".*\d+ keer (?:gewonnen|gelijk|verloren).*hf-donut-chart/s)
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
     // the card Stadions: the older name with "tot", the newer with "vanaf", after the results.
     const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()
@@ -1083,7 +1086,7 @@ await withEmptyDatabase((database) =>
       /<h2[^>]*id="wedstrijden">.*<ul role="list"><li><div class="hf-match">.*Nepstad Rangers.*hf-match-label">Eredivisie.*?Speelronde 4<\/p><\/div><\/li><\/ul>/s,
     )
     assert.doesNotMatch(comingClub, /<h3|nog niet tegen deze club gespeeld/)
-    assert.doesNotMatch(comingClub, /id="onze-uitslagen"|Thuis|>Uit</)
+    assert.doesNotMatch(comingClub, /id="onze-uitslagen"|id="hoe-vaak-welke-uitslag"|Thuis|>Uit</)
     assert.match(comingClub, /<aside[^>]*aria-label="De bron"/)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)

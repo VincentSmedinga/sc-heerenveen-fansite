@@ -24,7 +24,14 @@ import {
   summaryOf,
   upcomingOf,
 } from '#src/opponents'
-import { ClubMeetingsCard, ClubsCard, ClubSummaryCard, OpponentsCredit, StadiumsCard } from '#src/OpponentViews'
+import {
+  ClubMeetingsCard,
+  ClubsCard,
+  ClubScoreCountsCard,
+  ClubSummaryCard,
+  OpponentsCredit,
+  StadiumsCard,
+} from '#src/OpponentViews'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
@@ -162,12 +169,12 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
  * written the club under other names, the record against it (the total, at home and away,
  * and the biggest win and loss) and every match: first those still to come, the next one
  * first, then those played, the newest first. The matches are the main column, on the white
- * surface; the record, the card with the names of the stadium of the club and the credit are
- * the sidebar. A club with matches to come and none played has the credit alone. It follows the
- * choice between all the matches and the Eredivisie (the names of the stadium come from the
- * Eredivisie whatever the choice). A club we only met in the cup says with the choice
- * Eredivisie that we have not played it there. A slug no club has, and a choice that is not
- * known, are the page "niet gevonden".
+ * surface; the record, the chart of the scores, the card with the names of the stadium of the
+ * club and the credit are the sidebar. A club with matches to come and none played has the
+ * credit alone. It follows the choice between all the matches and the Eredivisie (the names
+ * of the stadium come from the Eredivisie whatever the choice). A club we only met in the cup
+ * says with the choice Eredivisie that we have not played it there. A slug no club has, and a
+ * choice that is not known, are the page "niet gevonden".
  */
 export async function ClubPage({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
   const { competitie } = await searchParams
@@ -226,6 +233,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             since={sinceOf(loaded.seasons)}
             summary={summaryOf(meetings)}
           />
+          <ClubScoreCountsCard choice={competition} meetings={meetings} since={sinceOf(loaded.seasons)} />
           <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit
             edited={loaded.edited}

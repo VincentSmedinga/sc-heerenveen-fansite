@@ -67,6 +67,22 @@ const summaryOf = (html: string): [string, number[]][] =>
     [...(cells ?? '').matchAll(/>([^<]*)<\/td/g)].map(([, cell]) => Number((cell ?? '').replace('\u2212', '-'))),
   ])
 
+/** The card Hoe vaak welke uitslag, from its heading to the end of the card. */
+const scoreCardOf = (html: string) => {
+  const start = html.indexOf('id="hoe-vaak-welke-uitslag"')
+  const end = html.indexOf('</section>', start)
+
+  return start === -1 ? '' : html.slice(start, end)
+}
+
+/** How often we won, drew and lost, from the sentence of the card Hoe vaak welke uitslag. */
+const sentenceOf = (html: string) => {
+  const text = plain(scoreCardOf(html))
+  const count = (word: string) => Number(new RegExp(`(\\d+) keer ${word}`).exec(text)?.[1] ?? 0)
+
+  return { drawn: count('gelijk'), lost: count('verloren'), won: count('gewonnen') }
+}
+
 /** The lines of the card Wedstrijden: season and competition above each line, and the line */
 const meetingsOf = (html: string) =>
   [
@@ -113,9 +129,11 @@ describe('the page of a club', () => {
 
     expect(html).toMatch(/<h2[^>]*id="onze-uitslagen"[^>]*>.*Onze uitslagen tegen Testclub/)
     expect(
-      [...html.matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g)].map(
-        ([, header]) => header,
-      ),
+      [
+        ...html
+          .slice(0, html.indexOf('id="hoe-vaak-welke-uitslag"'))
+          .matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g),
+      ].map(([, header]) => header),
     ).toEqual([undefined, 'G', 'W', 'G', 'V', 'D'])
     expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
       /^[^>]*> G gespeeld , W winst , G gelijk , V verlies , D doelsaldo/,
@@ -324,9 +342,75 @@ describe('the page of a club', () => {
     expect(sidebar).toMatch(
       /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="onze-uitslagen"|aria-labelledby="onze-uitslagen"[^>]*class="hf-card hf-card-soft/,
     )
-    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="stadion"'))
+    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="hoe-vaak-welke-uitslag"'))
+    expect(sidebar.indexOf('id="hoe-vaak-welke-uitslag"')).toBeLessThan(sidebar.indexOf('id="stadion"'))
     expect(sidebar.indexOf('id="stadion"')).toBeLessThan(sidebar.indexOf('Bron:'))
-    expect(html).not.toContain('hf-card-warm')
+    expect(main).not.toContain('hf-card-warm')
+  })
+
+  it('has the card Hoe vaak welke uitslag on the warm surface in the sidebar, as on Wedstrijden', async () => {
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+
+    expect(html).toMatch(/<h2[^>]*id="hoe-vaak-welke-uitslag"[^>]*>.*Hoe vaak welke uitslag/)
+    expect(sidebar).toMatch(
+      /class="hf-card hf-card-warm[^"]*"[^>]*aria-labelledby="hoe-vaak-welke-uitslag"|aria-labelledby="hoe-vaak-welke-uitslag"[^>]*class="hf-card hf-card-warm/,
+    )
+    // The page has no link to the heading, so the heading is no anchor (they are a promise).
+    expect(html).not.toContain('href="#hoe-vaak-welke-uitslag"')
+    // The chart is hidden from a screen reader, which gets the tables: a row for each score.
+    expect(plain(scoreCardOf(html))).toMatch(/4–2 , winst 1×/)
+  })
+
+  it('counts the scores like the row Totaal of the summary, for both choices of the switch', async () => {
+    for (const searchParams of [{}, { competitie: 'eredivisie' }]) {
+      const html = await render('testclub', searchParams)
+      // The figures of Totaal are G, W, G, V and D (and P with the Eredivisie, after V).
+      const [, won, drawn, lost] = summaryOf(html).find(([name]) => name === 'Totaal')![1]
+
+      expect(sentenceOf(html)).toEqual({ drawn, lost, won })
+    }
+  })
+
+  it('counts a cup tie that a shoot-out decided as a draw, and only the cup with all the matches', async () => {
+    const cup = testclub.matches[0]!
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      matches: [
+        { ...cup, goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: 5, penaltiesFor: 4 },
+        ...testclub.matches.slice(1),
+      ],
+    })
+
+    expect(sentenceOf(await render())).toEqual({ drawn: 2, lost: 0, won: 3 })
+    expect(sentenceOf(await render('testclub', { competitie: 'eredivisie' }))).toEqual({ drawn: 1, lost: 0, won: 3 })
+  })
+
+  it('changes the figures of the card with the switch', async () => {
+    const all = scoreCardOf(await render())
+    const league = scoreCardOf(await render('testclub', { competitie: 'eredivisie' }))
+
+    expect(plain(all)).toContain('3 keer gewonnen, 1 keer gelijk, 1 keer verloren')
+    expect(plain(all)).toContain('Gebaseerd op alle 5 gespeelde wedstrijden sinds')
+    expect(plain(league)).toContain('3 keer gewonnen, 1 keer gelijk')
+    expect(plain(league)).not.toContain('verloren')
+    expect(plain(league)).toContain('Gebaseerd op alle 4 gespeelde wedstrijden in de Eredivisie sinds')
+  })
+
+  it('has the card from one played match on, with the line in the form of the other card', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(1, 2) })
+
+    const card = plain(scoreCardOf(await render()))
+
+    expect(card).toContain('1 keer gewonnen')
+    expect(card).toContain('Gebaseerd op 1 gespeelde wedstrijd sinds')
+  })
+
+  it('has the card for a club with played matches and matches to come, and none for a club we have not played', async () => {
+    expect(await render('nieuw-promovendus')).not.toContain('hoe-vaak-welke-uitslag')
+    expect(await render('komend-fc')).toContain('hoe-vaak-welke-uitslag')
+    expect(await render('beker-united', { competitie: 'eredivisie' })).not.toContain('hoe-vaak-welke-uitslag')
   })
 
   it('has the card Stadions on the strong surface, with each name and when we saw it, for a club that changed', async () => {
@@ -475,6 +559,7 @@ describe('the matches that are still to come on the page of a club', () => {
     expect(headings).toEqual([
       ['2', 'Wedstrijden'],
       ['2', 'Onze uitslagen tegen Komend FC'],
+      ['2', 'Hoe vaak welke uitslag'],
     ])
     expect(html).not.toContain('Komende wedstrijden')
     expect(html).not.toContain('Gespeelde wedstrijden')
