@@ -356,6 +356,8 @@ describe('the page of a club', () => {
     expect(sidebar).toMatch(
       /class="hf-card hf-card-warm[^"]*"[^>]*aria-labelledby="hoe-vaak-welke-uitslag"|aria-labelledby="hoe-vaak-welke-uitslag"[^>]*class="hf-card hf-card-warm/,
     )
+    // The page has no link to the heading, so the heading is no anchor (they are a promise).
+    expect(html).not.toContain('href="#hoe-vaak-welke-uitslag"')
     // The chart is hidden from a screen reader, which gets the tables: a row for each score.
     expect(plain(scoreCardOf(html))).toMatch(/4–2 , winst 1×/)
   })
