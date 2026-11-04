@@ -1051,6 +1051,14 @@ export type MultiGoalScorer = NameParts & {
   times: number
 }
 
+/** The players who share a place in the list of scorers, with the goals each of them has. */
+export type ScorerPlace = {
+  goals: number
+  /** The players of the place, in the order of the list: the surname, then the given name. */
+  players: [TopScorer, ...TopScorer[]]
+  position: number
+}
+
 /** The goals that stand out, for the card Bijzondere doelpunten. */
 export type SpecialGoals = {
   /** The players with two goals in a match, and not three, the most often first. */
@@ -1069,6 +1077,28 @@ export type SpecialGoals = {
   penalties: number
   /** The played matches of the choice, counted or not. */
   played: number
+}
+
+/**
+ * The scorers per place, for the short forms of the table, so players with the same goals share
+ * a row. It keeps the order of the list it gets (`topScorersOf` or `topFiveOf`: the place, then
+ * the surname, then the given name), so the places are in order and the players in a place too.
+ * Each place has at least one player, so a list of four places gives four rows.
+ */
+export function scorersByPlace(scorers: TopScorer[]): ScorerPlace[] {
+  const places: ScorerPlace[] = []
+
+  for (const scorer of scorers) {
+    const last = places.at(-1)
+
+    if (last?.position === scorer.position) {
+      last.players.push(scorer)
+    } else {
+      places.push({ goals: scorer.goals, players: [scorer], position: scorer.position })
+    }
+  }
+
+  return places
 }
 
 /**

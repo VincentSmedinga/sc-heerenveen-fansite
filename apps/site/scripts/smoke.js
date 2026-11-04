@@ -1153,6 +1153,12 @@ await withEmptyDatabase((database) =>
       clubHtml,
       /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="doelpuntenmakers">Doelpuntenmakers tegen Testdorp FC<\/h2>.*<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie<\/caption>.*Gebaseerd op de doelpuntenmakers van (?:<!-- -->)?4(?:<!-- -->)? van de (?:<!-- -->)?5(?:<!-- -->)? gespeelde wedstrijden/s,
     )
+    // Players with the same goals share a row, with a comma between the names: Dummy, Monster,
+    // Nepper, Probeer and Proefman each scored once against Testdorp FC, so one row holds them.
+    assert.match(
+      clubHtml,
+      /id="doelpuntenmakers".*<th scope="row"><span class="hf-top-scorers-name">(?:(?!<\/th>).)*?Dummy<\/span><\/span>,<\/span> <span class="hf-top-scorers-name">(?:(?!<\/th>).)*?Monster<\/span><\/span>,<\/span> .*?Proefman/s,
+    )
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
     // The card has two charts (the scores and the goals, the second small), the sentence of the

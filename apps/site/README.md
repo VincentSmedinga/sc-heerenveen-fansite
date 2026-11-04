@@ -412,6 +412,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Zonder een uitslag staat er een zin in plaats van de tabel.
 - **Doelpuntenmakers:** de eerste kaart van de rechter kolom, met de top 5 van de spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten (`topFiveOf` in `src/matches.ts`).
   Delen spelers de vijfde plek, dan staan ze er allemaal in, dus de kaart kan meer dan vijf namen tonen; een plek vóór de vijfde houdt ook al zijn spelers.
+  Spelers met evenveel doelpunten delen één rij, met de namen achter elkaar gescheiden door komma's (`scorersByPlace` in `src/matches.ts`), dus de kaart heeft hoogstens vijf rijen, en de plaatsen in de kolom herhalen zich niet.
   Onder de kop staat "De top 5 van 17 spelers die scoorden", zodat de afbeelding van de kaart "top 5" zegt; scoorden er vijf of minder, dan is er niets weggelaten en staat er "4 spelers hebben gescoord".
   Onder de tabel staat de link "Alle doelpuntenmakers" naar de pagina Spelers van hetzelfde seizoen.
   De kaart met alle spelers staat op `/statistieken/spelers` (zie _De spelers_); de rest van deze alinea gaat over die lijst.
@@ -481,7 +482,8 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 
 `/statistieken/spelers` is de eerste subpagina van Statistieken.
 Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
-De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
+De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste plaatsen van de lijst (`topFiveOf` in `src/matches.ts`), met spelers met evenveel doelpunten op één rij.
+Spelers heeft zelf een rij per speler.
 Op Spelers heeft de kaart het witte vlak, want de lijst is waar de pagina voor bestaat (de eigenschap `surface`); op Statistieken staat hij in de zijkolom op het zachte vlak.
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
@@ -546,7 +548,7 @@ Ze heeft vijf delen:
   Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "Gebaseerd op", zonder "sinds" en zonder "in de Eredivisie".
   Een club zonder gespeelde wedstrijd krijgt de kaart niet.
 - De kaart "Doelpuntenmakers tegen …" op het zachte vlak, met de afbeeldingsknop, onder "Hoe vaak welke uitslag" en boven het stadion (`ClubTopScorersCard` in `src/OpponentViews.tsx`).
-  Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` en, bij onvolledige gegevens, "Gebaseerd op de doelpuntenmakers van X van de Y gespeelde wedstrijden".
+  Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` (spelers met evenveel doelpunten delen een rij) en, bij onvolledige gegevens, "Gebaseerd op de doelpuntenmakers van X van de Y gespeelde wedstrijden".
   Het is dezelfde telling en dezelfde weergave als de kaart op Wedstrijden en Statistieken: `TopScorers` in `src/MatchViews.tsx` krijgt de teksten die verschillen (het bijschrift met `scope`, in plaats van `season`, de zin zonder doelpuntenmakers met `empty`, en met `topOnly` alleen de eerste vijf plaatsen, ook zonder link naar Spelers) en de hulpfuncties in `src/matches.ts` nemen elk type wedstrijd dat een `ScoredMatch` past, dus ook die van een club.
   De kaart is er alleen als we minstens 5 gespeelde wedstrijden met een uitslag tegen de club hebben, in alle competities samen (`hasClubScorers` en `clubScorersMinimum` in `src/opponents.ts`), ongeacht de schakelaar.
   Bij minder dan 5 is hij er niet, zonder zin die zegt waarom.

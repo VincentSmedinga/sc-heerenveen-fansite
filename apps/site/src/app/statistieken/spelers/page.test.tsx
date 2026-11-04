@@ -477,18 +477,23 @@ describe('the list of Spelers and the card of Statistieken', () => {
     )
   })
 
-  it('give the players who share fifth place on both pages, as the first rows of the list', async () => {
+  it('give the players who share fifth place on both pages, one row per player on Spelers and one shared row on Statistieken', async () => {
     const { all, top } = await bothFor([9, 8, 7, 6, 2, 2, 2, 1])
 
-    expect(top).toHaveLength(7)
-    expect(top).toEqual(all.slice(0, 7))
     expect(all).toHaveLength(8)
+    expect(all.slice(4, 7).map(([position, player]) => [position, player])).toEqual([
+      ['5', 'Speler E'],
+      ['5', 'Speler F'],
+      ['5', 'Speler G'],
+    ])
+    expect(top).toEqual([...all.slice(0, 4), ['5', 'Speler E, Speler F, Speler G', '2']])
   })
 
-  it('give everybody on both pages when five players or fewer scored', async () => {
+  it('give everybody on both pages when five players or fewer scored, with the tie on one row on Statistieken', async () => {
     const { all, top } = await bothFor([3, 2, 1, 1])
 
-    expect(top).toEqual(all)
+    expect(all).toHaveLength(4)
+    expect(top).toEqual([...all.slice(0, 2), ['3', 'Speler C, Speler D', '1']])
   })
 })
 

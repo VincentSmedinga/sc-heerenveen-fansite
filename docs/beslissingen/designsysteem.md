@@ -2451,3 +2451,20 @@
   Eerst alleen de regel opschrijven en de code later (de code is klein en de regel zonder test loopt weer uit elkaar).
 - **Later:** vervangt delen van drie besluiten.
   Zie de **Later:**-regels bij _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026), _Een spelersnaam is één component, met de voornaam gewoon en de achternaam vet_ (27 oktober 2026) en _De punten staan voor het doelsaldo in de standtabel_ (26 oktober 2026, in `redactie.md`).
+
+## Een rij van de tabel met doelpuntenmakers heeft een of meer spelers
+
+- **Datum:** 4 november 2026
+- **Besluit:** een rij van `TopScorersTable` heeft de plaats, de doelpunten en een of meer spelers (`players`), niet meer één speler (#710).
+  Bij meer dan één speler staan alle namen in één rijkop (`th scope="row"`), elk als `PlayerName`, gescheiden door een komma en een spatie.
+  - **Het afbreken:** elke naam met zijn komma is één blok (`hf-top-scorers-name`, `display: inline-block`), dus de cel breekt tussen namen en niet in een naam: "Van der Meer" blijft heel.
+    Is één naam breder dan de cel, dan breekt hij toch in zichzelf, zodat een smalle tabel niet breder wordt.
+    Het blok staat bovenaan, zodat de plaats, de doelpunten en de balk op de hoogte van de eerste regel blijven.
+  - **Een speler:** een rij met één speler geeft dezelfde HTML als voorheen, zonder blok om de naam.
+  - **De doelpunten en de balk:** er is één cel en één balk per rij, en ze gelden per speler.
+    Het component zegt dat niet in de cel: de plaats en de komma's maken duidelijk dat de spelers gelijk staan.
+  - **De pagina:** de pagina kiest de rijen (zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md`), en het verhaal heeft een voorbeeld met gedeelde rijen naast dat met één speler per rij.
+- **Waarom:** de kaart op de pagina van een club werd te lang door spelers met één of twee doelpunten.
+  Dat het component rijen met meer spelers neemt, houdt de samenvoeging op één plek: de pagina Spelers geeft rijen met één speler en heeft geen tweede tabel nodig.
+- **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
+- **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
