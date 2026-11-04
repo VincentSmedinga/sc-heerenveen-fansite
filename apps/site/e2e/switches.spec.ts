@@ -177,6 +177,9 @@ for (const { admin, after, anchor, bar, from, group, path, to } of switches) {
 
       const choices = page.getByRole('group', { name: group })
       const content = await contentOf(page)
+      // The text of a page can change between two requests (the clock, an item that another
+      // test hides), so Back is checked with the headings, which stay.
+      const headings = await page.getByRole('heading').allTextContents()
 
       await choices.getByRole('link', { exact: true, name: to }).click()
       await expect(page).toHaveURL(after)
@@ -186,7 +189,7 @@ for (const { admin, after, anchor, bar, from, group, path, to } of switches) {
       await page.goBack()
       await expect(choices.getByRole('link', { exact: true, name: from })).toHaveAttribute('aria-current', 'page')
       await expect(choices.getByRole('link', { exact: true, name: to })).not.toHaveAttribute('aria-current')
-      await expect.poll(() => contentOf(page)).toBe(content)
+      await expect.poll(() => page.getByRole('heading').allTextContents()).toEqual(headings)
 
       await page.goForward()
       await expect(page).toHaveURL(after)
