@@ -1,9 +1,18 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
 import { tableColumns } from '../table-columns'
+
+export type TopScorersTablePlayer = {
+  /** The given name of the player, in the normal weight. Leave it out when it is not known. */
+  givenName?: string | undefined
+  /** What tells the player from the others, such as his id: the first is the key of the row. */
+  id: number | string
+  /** The surname of the player, in the stronger weight (see `PlayerName`). */
+  surname: string
+}
 
 export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
@@ -14,32 +23,34 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
   caption: string
   /** A top scorers table has no children: everything it shows comes from the props below. */
   children?: never
-  /** The players, from the most goals down. */
+  /** The places, from the most goals down. */
   rows: TopScorersTableRow[]
 }
 
 export type TopScorersTableRow = {
-  /** The given name of the player, in the normal weight. Leave it out when it is not known. */
-  givenName?: string | undefined
-  /** The goals of the player. */
+  /** The goals of each player in the row: players who share a row have the same number. */
   goals: number
-  /** What tells the player from the other rows, such as his id: it is the key of the row. */
-  id: number | string
+  /**
+   * The players of the row, in the order they are shown. A row has one player, or more when
+   * players with the same goals share it, such as in a short list.
+   */
+  players: [TopScorersTablePlayer, ...TopScorersTablePlayer[]]
   /** The place in the list, from 1. Players with the same goals have the same place. */
   position: number
-  /** The surname of the player, in the stronger weight (see `PlayerName`). */
-  surname: string
 }
 
 /**
  * The top scorers: a real `table` with a caption that is not shown, column headers with `scope`
- * and a row header for each player, whose name is a `PlayerName`: the given name in the normal
- * weight and the surname in the stronger one. The goals are bold, because the list is ordered
- * by them, and have a bar next to them that is as long as the share of the top scorer's goals.
+ * and a row header for each row, whose names are `PlayerName`s: the given name in the normal
+ * weight and the surname in the stronger one. A row with more than one player has all the names
+ * in its one row header, with a comma and a space between them; a name stays whole when the
+ * header wraps, unless it is wider than the cell. The goals are bold, because the list is
+ * ordered by them, belong to each player of the row, and have a bar next to them that is as
+ * long as the share of the top scorer's goals.
  * The bar is the one of the standings: decoration that a screen reader skips, which goes when
  * the place of the table is too narrow. The header of the goals is the abbreviation D, so the
  * full word stands under the table as well, because a title on an abbreviation only shows under
- * a mouse. bar.css gives the look.
+ * a mouse. bar.css gives the look, and top-scorers-table.css the names of a shared row.
  */
 export const TopScorersTable = ({ caption, className, rows, ...props }: TopScorersTableProps) => {
   const shares = sharesOf(rows.map((row) => row.goals))
@@ -67,10 +78,22 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <tr key={row.id}>
+            <tr key={row.players[0].id}>
               <td className="hf-numeric hf-rank">{row.position}</td>
               <th scope="row">
-                <PlayerName givenName={row.givenName} surname={row.surname} />
+                {row.players.length === 1 ? (
+                  <PlayerName givenName={row.players[0].givenName} surname={row.players[0].surname} />
+                ) : (
+                  row.players.map((player, place) => (
+                    <Fragment key={player.id}>
+                      {place === 0 ? null : ' '}
+                      <span className="hf-top-scorers-name">
+                        <PlayerName givenName={player.givenName} surname={player.surname} />
+                        {place === row.players.length - 1 ? null : ','}
+                      </span>
+                    </Fragment>
+                  ))
+                )}
               </th>
               <td className="hf-numeric hf-key">
                 {row.goals}

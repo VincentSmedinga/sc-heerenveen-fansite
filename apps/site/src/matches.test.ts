@@ -19,6 +19,7 @@ import {
   resultsOfSeason,
   resultsPerCompetition,
   scoreCountsOf,
+  scorersByPlace,
   scorersCoverage,
   standingsAround,
   standingsLag,
@@ -738,6 +739,69 @@ describe('topScorersOf', () => {
     expect(topScorersOf([])).toEqual([])
     expect(topScorersOf([played([])])).toEqual([])
     expect(topScorersOf([played([goal('Teststraat', { ours: false })])])).toEqual([])
+  })
+})
+
+describe('scorersByPlace', () => {
+  /** The places for players who scored the given number of goals each. */
+  const places = (counts: Record<string, number>, short = false) => {
+    const all = topScorersOf([
+      played(Object.entries(counts).flatMap(([name, count]) => Array.from({ length: count }, () => goal(name)))),
+    ])
+
+    return scorersByPlace(short ? topFiveOf(all) : all).map((place) => [
+      place.position,
+      place.goals,
+      place.players.map((player) => player.player),
+    ])
+  }
+
+  it('has a place for each player when nobody has the same goals', () => {
+    expect(places({ Alfa: 3, Beta: 2, Gamma: 1 })).toEqual([
+      [1, 3, ['Alfa']],
+      [2, 2, ['Beta']],
+      [3, 1, ['Gamma']],
+    ])
+  })
+
+  it('puts players with the same goals on one place before the last place, from A to Z on the surname', () => {
+    expect(places({ Alfa: 4, Beta: 2, Delta: 2, Epsilon: 1, Gamma: 3 })).toEqual([
+      [1, 4, ['Alfa']],
+      [2, 3, ['Gamma']],
+      [3, 2, ['Beta', 'Delta']],
+      [5, 1, ['Epsilon']],
+    ])
+  })
+
+  it('puts the players on the last place together, three or more of them too', () => {
+    expect(places({ Alfa: 3, Beta: 1, Delta: 1, Epsilon: 1, Gamma: 1 })).toEqual([
+      [1, 3, ['Alfa']],
+      [2, 1, ['Beta', 'Delta', 'Epsilon', 'Gamma']],
+    ])
+  })
+
+  it('has one place with one player for a single scorer, and none for nobody', () => {
+    expect(places({ Alfa: 2 })).toEqual([[1, 2, ['Alfa']]])
+    expect(scorersByPlace([])).toEqual([])
+  })
+
+  it('gives at most five places for the short list, however many players share the last one', () => {
+    const counts = { Alfa: 5, Beta: 4, Delta: 2, Epsilon: 1, Eta: 1, Gamma: 3, Theta: 1, Zeta: 1 }
+
+    expect(places(counts, true)).toEqual([
+      [1, 5, ['Alfa']],
+      [2, 4, ['Beta']],
+      [3, 3, ['Gamma']],
+      [4, 2, ['Delta']],
+      [5, 1, ['Epsilon', 'Eta', 'Theta', 'Zeta']],
+    ])
+  })
+
+  it('keeps the whole scorer in each place, with the id and the name parts', () => {
+    const [place] = scorersByPlace(topScorersOf([played([goal('Alfa'), goal('Beta')])]))
+
+    expect(place?.players.map((player) => player.id)).toEqual(['Alfa', 'Beta'])
+    expect(place?.players.every((player) => player.goals === 1 && player.position === 1)).toBe(true)
   })
 })
 

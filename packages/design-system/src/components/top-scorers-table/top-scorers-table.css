@@ -1,0 +1,19 @@
+/*
+ * The top scorers table. The table itself takes its look from base/table.css, and the place,
+ * the columns and the legend from bar/bar.css. This file adds the names of a row that players
+ * share.
+ */
+
+@layer hf.components {
+  /*
+   * Each name of a shared row, with its comma, is one unit: the row header wraps between names
+   * and never in the middle of one, so "Van der Meer" stays whole. A name that is wider than
+   * the cell still wraps inside itself, so a narrow table does not get wider. The unit is
+   * aligned to the top, so the number and the bar stay level with the first line of the row
+   * header.
+   */
+  .hf-top-scorers-name {
+    display: inline-block;
+    vertical-align: top;
+  }
+}

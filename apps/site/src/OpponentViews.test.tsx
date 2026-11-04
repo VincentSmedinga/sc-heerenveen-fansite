@@ -246,7 +246,7 @@ describe('ClubTopScorersCard', () => {
       }),
     ).toBeTruthy()
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
-    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat', 'Midden', 'Vroeg'])
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat, Midden, Vroeg'])
   })
 
   it('says "Gebaseerd op" only because three of the four matches of the Eredivisie lack their scorers', () => {
@@ -264,8 +264,8 @@ describe('ClubTopScorersCard', () => {
       }),
     ).toBeTruthy()
     expect(screen.getByText('Gebaseerd op de doelpuntenmakers van 2 van de 5 gespeelde wedstrijden')).toBeTruthy()
-    // The goal of the opponent in the cup tie is nobody's goal of ours.
-    expect(screen.getAllByRole('rowheader')).toHaveLength(3)
+    // The goal of the opponent in the cup tie is nobody's goal of ours: three share one row.
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat, Midden, Vroeg'])
   })
 
   it('says nothing about the scorers when every match has them', () => {
@@ -286,7 +286,7 @@ describe('ClubTopScorersCard', () => {
 
     render(card('league', mixed))
 
-    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat', 'Midden', 'Vroeg'])
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat, Midden, Vroeg'])
   })
 
   it('cuts the list to the top five, and the line says so', () => {

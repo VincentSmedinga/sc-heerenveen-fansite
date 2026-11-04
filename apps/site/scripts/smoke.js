@@ -966,12 +966,13 @@ await withEmptyDatabase((database) =>
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
     // The card shows the top 5, with the link to the page with everybody who scored; the whole
-    // list is on that page (below).
+    // list is on that page (below). Demo and Nepper both
+    // scored twice, so they share a row.
     assert.match(statisticsHtml, /<caption class="hf-visually-hidden">(?:De top 5 van de d|D)oelpuntenmakers van sc /)
     assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-top-scorers-name"><span class="hf-player-name"><span class="hf-player-name-given">Rick<\/span> <span class="hf-player-name-surname">Demo<\/span><\/span>,<\/span> <span class="hf-top-scorers-name"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
     // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
     assert.match(
@@ -1152,6 +1153,12 @@ await withEmptyDatabase((database) =>
     assert.match(
       clubHtml,
       /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="doelpuntenmakers">Doelpuntenmakers tegen Testdorp FC<\/h2>.*<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie<\/caption>.*Gebaseerd op de doelpuntenmakers van (?:<!-- -->)?4(?:<!-- -->)? van de (?:<!-- -->)?5(?:<!-- -->)? gespeelde wedstrijden/s,
+    )
+    // Players with the same goals share a row, with a comma between the names: Dummy, Monster,
+    // Nepper, Probeer and Proefman each scored once against Testdorp FC, so one row holds them.
+    assert.match(
+      clubHtml,
+      /id="doelpuntenmakers".*<th scope="row"><span class="hf-top-scorers-name">(?:(?!<\/th>).)*?Dummy<\/span><\/span>,<\/span> <span class="hf-top-scorers-name">(?:(?!<\/th>).)*?Monster<\/span><\/span>,<\/span> .*?Proefman/s,
     )
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)

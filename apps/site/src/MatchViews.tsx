@@ -49,11 +49,14 @@ import {
   type ScoreCount,
   scoreCountsOf,
   type ScoredMatch,
+  type ScorerPlace,
+  scorersByPlace,
   scorersCoverage,
   standingsAround,
   standingsLag,
   streaksOf,
   topFiveOf,
+  type TopScorer,
   topScorersOf,
   topScorersPlaces,
 } from './matches'
@@ -1019,7 +1022,7 @@ export function TopScorers({
       </Text>
       <TopScorersTable
         caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} ${scope ?? `van sc Heerenveen in het seizoen ${season}, in ${competitionNames(matches, competition)}`}`}
-        rows={shown}
+        rows={topOnly ? scorersByPlace(shown) : shown.map(onePlayerPlace)}
       />
       {known < played && (
         <Text appearance="meta">
@@ -1036,6 +1039,13 @@ export function TopScorers({
     </>
   )
 }
+
+/** A row of the table for one player, as on the page Spelers, which has a row per player. */
+const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
+  goals: scorer.goals,
+  players: [scorer],
+  position: scorer.position,
+})
 
 /**
  * The card Doelpuntenmakers, on the page Statistieken as the short form (the top 5, with the

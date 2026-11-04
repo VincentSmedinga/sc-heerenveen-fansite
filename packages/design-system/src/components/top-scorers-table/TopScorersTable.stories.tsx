@@ -18,6 +18,8 @@ const meta = preview.meta({
           'De afkorting zelf heeft ook een `title`, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
           '',
           'Spelers met evenveel doelpunten hebben dezelfde plaats.',
+          "Een korte lijst, zoals de top 5, voegt ze samen: spelers met evenveel doelpunten delen één rij, met de namen achter elkaar gescheiden door komma's, en een lange lijst met alle spelers houdt een rij per speler.",
+          'De doelpunten in een gedeelde rij gelden voor elke speler, en een naam breekt nooit midden in de naam.',
           'Het aantal doelpunten is het kerngetal en dus vet, want daarop is de lijst gesorteerd.',
           'De getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',
@@ -31,7 +33,7 @@ const meta = preview.meta({
           'Zonder doelpunten geeft de pagina geen tabel, maar een zin voor de lezer in de kaart.',
           '',
           '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
-          '- `rows` zijn de spelers van boven naar beneden, met hun plaats, naam (voornaam en achternaam, zie `PlayerName`) en doelpunten.',
+          '- `rows` zijn de plaatsen van boven naar beneden, met de plaats, de doelpunten en een of meer spelers (voornaam en achternaam, zie `PlayerName`).',
           '  De pagina telt de doelpunten en kiest de rijen: het component rekent alleen de balken uit.',
           '',
           "Er zijn geen links en geen foto's: alleen de namen.",
@@ -46,40 +48,67 @@ const meta = preview.meta({
 // A made-up list: a top scorer with eight goals (so one goal is 12.5% of the bar), two players
 // with four goals who share the second place, and two more.
 const rows: TopScorersTableRow[] = [
-  { givenName: 'Wouter', goals: 8, id: 1, position: 1, surname: 'Proefman' },
-  { givenName: 'Gerrit', goals: 4, id: 2, position: 2, surname: 'Nepper' },
-  { givenName: 'Joris', goals: 4, id: 3, position: 2, surname: 'Testvoort' },
-  { givenName: 'Rick', goals: 2, id: 4, position: 4, surname: 'Demo' },
-  { givenName: 'Pieter', goals: 1, id: 5, position: 5, surname: 'Voorbeeld' },
+  { goals: 8, players: [{ givenName: 'Wouter', id: 1, surname: 'Proefman' }], position: 1 },
+  { goals: 4, players: [{ givenName: 'Gerrit', id: 2, surname: 'Nepper' }], position: 2 },
+  { goals: 4, players: [{ givenName: 'Joris', id: 3, surname: 'Testvoort' }], position: 2 },
+  { goals: 2, players: [{ givenName: 'Rick', id: 4, surname: 'Demo' }], position: 4 },
+  { goals: 1, players: [{ givenName: 'Pieter', id: 5, surname: 'Voorbeeld' }], position: 5 },
 ]
 
 // A long list, like a season with many scorers: one player with seven goals, then levels down
 // to the players with one goal, who share the last place.
 const longRows: TopScorersTableRow[] = [
-  { givenName: 'Wouter', goals: 7, id: 6, position: 1, surname: 'Proefman' },
-  { givenName: 'Gerrit', goals: 5, id: 7, position: 2, surname: 'Nepper' },
-  { givenName: 'Rick', goals: 4, id: 8, position: 3, surname: 'Demo' },
-  { givenName: 'Joris', goals: 4, id: 9, position: 3, surname: 'Testvoort' },
-  { givenName: 'Pieter', goals: 3, id: 10, position: 5, surname: 'Voorbeeld' },
-  { givenName: 'Jan', goals: 3, id: 11, position: 5, surname: 'Van der Voorbeeldstraat-Proefmans' },
-  { givenName: 'Teun', goals: 2, id: 12, position: 7, surname: 'Dummy' },
-  { givenName: 'Sander', goals: 2, id: 13, position: 7, surname: 'Monster' },
-  { givenName: 'Lennart', goals: 2, id: 14, position: 7, surname: 'Probeer' },
-  { goals: 1, id: 15, position: 10, surname: 'Kopie' },
-  { goals: 1, id: 16, position: 10, surname: 'Modelman' },
-  { goals: 1, id: 17, position: 10, surname: 'Oefenaar' },
-  { givenName: 'Marijn', goals: 1, id: 18, position: 10, surname: 'Sjabloon' },
-  { givenName: 'Niels', goals: 1, id: 19, position: 10, surname: 'Steekproef' },
-  { goals: 1, id: 20, position: 10, surname: 'Teststraat' },
-  { goals: 1, id: 21, position: 10, surname: 'Voorproef' },
-  { goals: 1, id: 22, position: 10, surname: 'Voorstudie' },
-  { goals: 1, id: 23, position: 10, surname: 'Werkstuk' },
-  { goals: 1, id: 24, position: 10, surname: 'Zetproef' },
-  { goals: 1, id: 25, position: 10, surname: 'Zonnetje' },
+  { goals: 7, players: [{ givenName: 'Wouter', id: 6, surname: 'Proefman' }], position: 1 },
+  { goals: 5, players: [{ givenName: 'Gerrit', id: 7, surname: 'Nepper' }], position: 2 },
+  { goals: 4, players: [{ givenName: 'Rick', id: 8, surname: 'Demo' }], position: 3 },
+  { goals: 4, players: [{ givenName: 'Joris', id: 9, surname: 'Testvoort' }], position: 3 },
+  { goals: 3, players: [{ givenName: 'Pieter', id: 10, surname: 'Voorbeeld' }], position: 5 },
+  { goals: 3, players: [{ givenName: 'Jan', id: 11, surname: 'Van der Voorbeeldstraat-Proefmans' }], position: 5 },
+  { goals: 2, players: [{ givenName: 'Teun', id: 12, surname: 'Dummy' }], position: 7 },
+  { goals: 2, players: [{ givenName: 'Sander', id: 13, surname: 'Monster' }], position: 7 },
+  { goals: 2, players: [{ givenName: 'Lennart', id: 14, surname: 'Probeer' }], position: 7 },
+  { goals: 1, players: [{ id: 15, surname: 'Kopie' }], position: 10 },
+  { goals: 1, players: [{ id: 16, surname: 'Modelman' }], position: 10 },
+  { goals: 1, players: [{ id: 17, surname: 'Oefenaar' }], position: 10 },
+  { goals: 1, players: [{ givenName: 'Marijn', id: 18, surname: 'Sjabloon' }], position: 10 },
+  { goals: 1, players: [{ givenName: 'Niels', id: 19, surname: 'Steekproef' }], position: 10 },
+  { goals: 1, players: [{ id: 20, surname: 'Teststraat' }], position: 10 },
+  { goals: 1, players: [{ id: 21, surname: 'Voorproef' }], position: 10 },
+  { goals: 1, players: [{ id: 22, surname: 'Voorstudie' }], position: 10 },
+  { goals: 1, players: [{ id: 23, surname: 'Werkstuk' }], position: 10 },
+  { goals: 1, players: [{ id: 24, surname: 'Zetproef' }], position: 10 },
+  { goals: 1, players: [{ id: 25, surname: 'Zonnetje' }], position: 10 },
 ]
 
 // Everybody scored once: the same goals, so the same bars and the same place.
 const equalRows: TopScorersTableRow[] = rows.map((row) => ({ ...row, goals: 1, position: 1 }))
+
+// The short form of a list: players with the same goals share a row, so there is one row for
+// each place. The goals are those of each player in the row.
+const sharedRows: TopScorersTableRow[] = [
+  { goals: 8, players: [{ givenName: 'Wouter', id: 1, surname: 'Proefman' }], position: 1 },
+  {
+    goals: 4,
+    players: [
+      { givenName: 'Gerrit', id: 2, surname: 'Nepper' },
+      { givenName: 'Joris', id: 3, surname: 'Testvoort' },
+    ],
+    position: 2,
+  },
+  { goals: 2, players: [{ givenName: 'Rick', id: 4, surname: 'Demo' }], position: 4 },
+  {
+    goals: 1,
+    players: [
+      { givenName: 'Pieter', id: 5, surname: 'Voorbeeld' },
+      { givenName: 'Jan', id: 6, surname: 'Van der Meer' },
+      { id: 7, surname: 'Kopie' },
+      { givenName: 'Marijn', id: 8, surname: 'Sjabloon' },
+      { id: 9, surname: 'Teststraat' },
+      { givenName: 'Niels', id: 10, surname: 'Steekproef' },
+    ],
+    position: 5,
+  },
+]
 
 const caption = 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
@@ -139,6 +168,24 @@ export const EqualDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Gelijke spelers, even lange balken, donker',
   render: render('32rem', equalRows),
+})
+
+export const SharedLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Gelijke spelers delen een rij, licht',
+  render: render('32rem', sharedRows),
+})
+
+export const SharedDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Gelijke spelers delen een rij, donker',
+  render: render('32rem', sharedRows),
+})
+
+export const SharedNarrowLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Gelijke spelers delen een rij op een smalle plek, licht',
+  render: render('20rem', sharedRows),
 })
 
 export const NarrowLight = meta.story({

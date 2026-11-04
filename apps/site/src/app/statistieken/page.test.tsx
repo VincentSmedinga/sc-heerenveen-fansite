@@ -1328,8 +1328,7 @@ describe('the page /statistieken', () => {
       // Proefman scored in two matches. The Nepper of the opponent does not count for ours.
       expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
         ['1', 'Proefman', '2'],
-        ['2', 'Kopie', '1'],
-        ['2', 'Nepper', '1'],
+        ['2', 'Kopie, Nepper', '1'],
       ])
     })
 
@@ -1411,8 +1410,7 @@ describe('the page /statistieken', () => {
 
       expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
         ['1', 'Boy Kemper', '2'],
-        ['2', 'Proefman', '1'],
-        ['2', 'Mitchell van Bergen', '1'],
+        ['2', 'Proefman, Mitchell van Bergen', '1'],
       ])
       expect(card).toContain(
         '<span class="hf-player-name"><span class="hf-player-name-given">Boy</span> <span class="hf-player-name-surname">Kemper</span></span>',
@@ -1422,10 +1420,10 @@ describe('the page /statistieken', () => {
     it('shows a bar next to the goals of every player, hidden from a screen reader, the top scorer filling it', async () => {
       const card = await topScorers()
 
-      expect(card.match(/class="hf-bar" style="--hf-bar-share:[\d.]+"/g)).toHaveLength(3)
+      expect(card.match(/class="hf-bar" style="--hf-bar-share:[\d.]+"/g)).toHaveLength(2)
       expect(card).toContain('style="--hf-bar-share:100"')
       expect(card).toContain('style="--hf-bar-share:50"')
-      expect(card.match(/aria-hidden="true" class="hf-bar"/g)).toHaveLength(3)
+      expect(card.match(/aria-hidden="true" class="hf-bar"/g)).toHaveLength(2)
     })
 
     it('says in a line directly under the heading, above the table, how many players scored, as the clean sheets do', async () => {
@@ -1507,6 +1505,20 @@ describe('the page /statistieken', () => {
       expect(card).not.toContain('14 spelers hebben gescoord')
     })
 
+    it('shares a row between players with the same goals before the last place too, one row per place', async () => {
+      withScorers([9, 5, 5, 3, 2, 2, 2, 2, 1])
+
+      const card = await topScorers()
+
+      expect(rowsOf(card)).toEqual([
+        ['1', 'Speler A', '9'],
+        ['2', 'Speler B, Speler C', '5'],
+        ['4', 'Speler D', '3'],
+        ['5', 'Speler E, Speler F, Speler G, Speler H', '2'],
+      ])
+      expect(card).toContain('<p>De top 5 van 9 spelers die scoorden</p>')
+    })
+
     it('shows all the players who share fifth place, so it has more than five names', async () => {
       withScorers([9, 8, 7, 6, 2, 2, 2, 1])
 
@@ -1517,9 +1529,7 @@ describe('the page /statistieken', () => {
         ['2', 'Speler B', '8'],
         ['3', 'Speler C', '7'],
         ['4', 'Speler D', '6'],
-        ['5', 'Speler E', '2'],
-        ['5', 'Speler F', '2'],
-        ['5', 'Speler G', '2'],
+        ['5', 'Speler E, Speler F, Speler G', '2'],
       ])
       expect(card).toContain('<p>De top 5 van 8 spelers die scoorden</p>')
     })
@@ -1529,7 +1539,11 @@ describe('the page /statistieken', () => {
 
       const card = await topScorers()
 
-      expect(rowsOf(card)).toHaveLength(5)
+      expect(rowsOf(card)).toEqual([
+        ['1', 'Speler A', '3'],
+        ['2', 'Speler B', '2'],
+        ['3', 'Speler C, Speler D, Speler E', '1'],
+      ])
       expect(card).toContain('<p>5 spelers hebben gescoord</p>')
       expect(card).not.toContain('De top 5')
     })
@@ -1539,8 +1553,9 @@ describe('the page /statistieken', () => {
 
       const card = await topScorers()
 
-      expect(rowsOf(card)).toHaveLength(14)
-      expect(rowsOf(card).every(([position]) => position === '1')).toBe(true)
+      expect(rowsOf(card)).toHaveLength(1)
+      expect(rowsOf(card)[0]!.slice(0, 1)).toEqual(['1'])
+      expect(plain(card.match(/<th scope="row">(.+?)<\/th>/)?.[1]).split(', ')).toHaveLength(14)
       expect(card).toContain('14 spelers hebben gescoord')
     })
 

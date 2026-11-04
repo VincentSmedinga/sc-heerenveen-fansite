@@ -1674,6 +1674,7 @@
   De balk "Op deze pagina:" van Spelers heeft één link, naar de enige kaart; hij krijgt er meer als de extra's van #403 en #407 erbij komen.
 - **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
 - **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
+- **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ (4 november 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
 - **Later:** zie _De pagina Spelers toont bijzondere doelpunten_ (31 oktober 2026): Spelers heeft sinds die dag een tweede kaart, en de balk "Op deze pagina:" van Spelers heeft twee links.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de balk met subpagina's van Statistieken heeft sindsdien ook Tegenstanders, en op de pagina's daarvan is Tegenstanders de huidige subpagina.
 
@@ -2348,3 +2349,22 @@
 - **Waarom:** de projecteigenaar wil dat een lezer begrijpt waarom AZ tijdelijk in Den Haag speelde, zonder dat het een fout lijkt.
   De toelichting is een feit in eigen woorden, geen tekst van een journalist, en past dus in het bronbeleid (hoofdstuk Redactie).
 - **Alternatieven:** een vaste lijst toelichtingen in de code (nieuw bij elke club een wijziging van de code); opmaak of links in de toelichting (de bron staat dan in de tekst); een hulptekst bij elk veld (een nieuwe prop van `InputTable` voor een herhaalde zin).
+
+## Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers
+
+- **Datum:** 4 november 2026
+- **Besluit:** in de korte vormen van de tabel met doelpuntenmakers (de kaart op de pagina van een club en de top 5 op Statistieken) delen spelers met evenveel doelpunten één rij, bij elke gelijke stand, met de namen in één cel gescheiden door komma's (#710).
+  De pagina Spelers houdt een rij per speler.
+  - **Waar:** `scorersByPlace` in `src/matches.ts` groepeert de spelers van `topScorersOf` of `topFiveOf` per plaats, in de volgorde van de lijst.
+    `TopScorers` in `src/MatchViews.tsx` geeft de tabel die plaatsen bij `topOnly` en een plaats met één speler per speler zonder `topOnly`, dus er is één tabel en één telling.
+  - **De zin boven de tabel:** hij telt spelers en blijft zoals hij was ("De top 5 van 17 spelers die scoorden"): "top 5" gaat over plaatsen en er valt niemand weg.
+- **Waarom:** de kaart op de pagina van een club werd lang: 241 rijen over 25 kaarten, en bij sommige clubs 21 tot 23 namen.
+  Met één rij per plaats zijn het er 67, en een kaart heeft nooit meer dan vijf rijen.
+  Elke gelijke stand samenvoegen is één regel zonder drempel, en laat de plaatsen in de kolom niet herhalen.
+  Het besluit dat gelijke plekken er allemaal bij horen, blijft waar: er valt niemand weg.
+  De pagina Spelers is de volledige lijst, waarin een bezoeker zijn speler zoekt, en daar zou één cel met twintig namen hem verstoppen.
+- **Nadeel:** een rij met meer dan één naam is hoger dan een rij met één, en de doelpunten in de rij gelden per speler, wat de cel niet zegt.
+  Een bezoeker kan "3" bij drie namen lezen als het totaal van de groep.
+  Een schermlezer leest de namen als één rijkop.
+- **Alternatieven:** alleen de laatste plaats samenvoegen (86 rijen, en een gelijke stand eerder in de tabel blijft vijf rijen met dezelfde plaats); groepen van drie of meer (77 rijen, met een drempel die niemand ziet); alleen de kaart op de pagina van een club (Statistieken houdt zijn lange gelijke stand op plaats 5); alle drie de tabellen, Spelers ook; "elk" in de cel of een regel onder de tabel die zegt dat de doelpunten per speler zijn (afgewezen: de plaats en de komma's zeggen genoeg); één naam per regel in de cel (even hoog als nu); namen die midden in een naam mogen breken.
+- **Later:** bij _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
