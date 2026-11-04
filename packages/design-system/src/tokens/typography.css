@@ -106,10 +106,10 @@
     /* The total in the hole of a donut */
     --hf-figure-large-font-size: 1.5rem;
 
-    /* Emphasis: strong, b, buttons, our club, chart titles, caption, a status not to miss */
+    /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
-    /* The figures people look up: a score, a bar value, a mark in a row, a donut, our goals */
+    /* The figures people look up: a score, the key figure of a table, a mark in a row, a donut */
     --hf-figure-font-weight: 700;
 
     /* The name of something: the label and the legend of a form, th and dt */
