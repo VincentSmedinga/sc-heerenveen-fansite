@@ -2007,6 +2007,7 @@
   Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
 - **Later:** zie _De kaart Gemiddeld resultaat toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ (4 november 2026): die kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen.
 - **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (4 november 2026) in `site.md`: die kaart zegt het aantal wedstrijden zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.
+- **Later:** zie _De pagina van een club heeft een kaart met doelpuntenmakers, vanaf 5 wedstrijden_ (4 november 2026): de regel "een kaart blijft zichtbaar bij weinig wedstrijden" geldt niet voor die kaart; die is er pas bij minstens 5 wedstrijden tegen de club.
 
 ## Reeksen staan in een eigen kaart na Verloop van het seizoen
 
@@ -2790,3 +2791,20 @@
   Het gemiddelde zegt niets over wanneer de wedstrijden waren.
 - **Alternatieven:** het gemiddelde van de tegenstander (leest als "de lastigste tegenstanders" en kan met deze kaart verward worden); geen minimum (de lijst bestaat dan uit clubs die we één keer troffen); een minimum van 3 (de aantallen blijven klein); altijd de Eredivisie (de kaart zou bij de keuze "alles" afwijken van de tabel ernaast); sorteren op het afgeronde gemiddelde (twee clubs met "2,38" staan dan op toeval).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397): deze kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen, en volgt de schakelaar in plaats van altijd de Eredivisie te tellen.
+
+## De pagina van een club heeft een kaart met doelpuntenmakers, vanaf 5 wedstrijden
+
+- **Datum:** 4 november 2026
+- **Besluit:** de pagina van een club krijgt een kaart "Doelpuntenmakers tegen <club>" met de top 5 doelpuntenmakers van sc Heerenveen tegen die club (met gelijkstaanden), uit dezelfde telling als de kaart op Wedstrijden (#703).
+  De kaart staat er alleen als we minstens 5 gespeelde wedstrijden met een uitslag tegen de club hebben, in alle competities samen.
+  De lijst zelf volgt de schakelaar Eredivisie/Alle wedstrijden.
+  De regel onder de kaart is dezelfde als op Wedstrijden: "Gebaseerd op …" alleen bij onvolledige gegevens.
+- **Waarom:** een supporter wil weten wie er tegen deze club scoort, en de gegevens en de weergave bestaan al.
+  Bij een of twee wedstrijden zegt zo'n lijst weinig, en een kaart met één naam is vooral leeg; vanaf 5 wedstrijden is er een lijst om naar te kijken.
+  De drempel telt alle wedstrijden en niet die van de schakelaar, zodat een kaart niet verdwijnt omdat de lezer naar de Eredivisie schakelt; de lijst zelf volgt de schakelaar, net als de rest van de pagina.
+  Een top 5 met gelijkstaanden is wat Statistieken al toont, en past in een smalle zijkolom.
+  De regel over onvolledige gegevens blijft, want een lijst waarin spelers ontbreken, mag niemand voor volledig houden.
+- **Nadeel:** de kaart is er bij sommige clubs niet, zonder zin die zegt waarom.
+  En met de schakelaar op "Eredivisie" kan de kaart er zijn terwijl de lijst uit minder dan 5 wedstrijden komt, of leeg is.
+- **Alternatieven:** de drempel volgens de schakelaar (de kaart verdwijnt bij het schakelen); een zin bij minder dan 5 wedstrijden in plaats van niets (past bij #397, maar zet een zin op elke pagina van een club met weinig wedstrijden); een top 10 of alle spelers die scoorden (een lange kaart in de zijkolom); altijd het aantal zonder "Gebaseerd op" (de lezer ziet dan niet dat de lijst onvolledig kan zijn).
+- **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397): de regel "een kaart blijft zichtbaar bij weinig wedstrijden" geldt niet voor deze kaart; die is er pas bij minstens 5 wedstrijden tegen de club.

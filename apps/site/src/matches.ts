@@ -28,17 +28,23 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 const ourClub = 'sc Heerenveen'
 
 /**
+ * What the counts of the goal scorers need of a match, so that the matches of a season
+ * (`PublicMatch`) and those against a club (`PublicClubMatch`) go through the same code.
+ */
+export type ScoredMatch = Pick<PublicMatch, 'competition' | 'goals' | 'goalsAgainst' | 'goalsFor' | 'status'>
+
+/**
  * Whether a match counts for the choice: the league alone, or every competition: the league,
  * the cup, the play-offs (Conference League or Europa League) and the Europa League.
  */
-const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
+const countsFor = (match: Pick<ScoredMatch, 'competition'>, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
 
 /**
  * Whether a match of another competition than the league was played and has a score, so one the
  * choice can add.
  */
-const isPlayedExtraMatch = (match: PublicMatch) =>
+const isPlayedExtraMatch = (match: Omit<ScoredMatch, 'goals'>) =>
   match.competition !== 'Eredivisie' &&
   match.status === 'played' &&
   match.goalsFor !== null &&
@@ -56,7 +62,7 @@ export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPl
  * play-offs and the Europa League are in only when the choice is `all` and a match of theirs
  * was played, because then it is in the numbers.
  */
-export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) => {
+export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: CompetitionChoice) => {
   if (choice === 'league') {
     return 'de Eredivisie'
   }
@@ -935,7 +941,7 @@ export function parseCleanSheetCount(value: string | string[] | undefined) {
  * miss, so it is complete.
  */
 export function scorersCoverage(
-  matches: PublicMatch[],
+  matches: ScoredMatch[],
   choice: CompetitionChoice = 'all',
 ): { known: number; played: number } {
   const played = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
@@ -984,7 +990,7 @@ export function standingsLag(matches: PublicMatch[], now: Date) {
  * goal with the same page. Without a page it counts for its name as the match page shows it,
  * as a row of its own, so no goal is lost.
  */
-export function topScorersOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): TopScorer[] {
+export function topScorersOf(matches: ScoredMatch[], choice: CompetitionChoice = 'all'): TopScorer[] {
   const scorers = new Map<string, Omit<TopScorer, 'position'>>()
   const goals = matches
     .filter((match) => countsFor(match, choice))

@@ -8,6 +8,7 @@
 //
 //   node scripts/smoke.js <folder with apps/site/server.js>
 import { connect } from '@fansite/db/client'
+import { seasonOf } from '@fansite/db/season'
 import { scratchDatabaseName } from '@fansite/db/test-database'
 import { visitDay } from '@fansite/db/visits'
 import assert from 'node:assert/strict'
@@ -67,6 +68,51 @@ const closedWikipediaCredit =
 const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-system/src/layers.css')
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
+
+/**
+ * Gives Testdorp FC four more played home matches in the Eredivisie, one to four years ago, so
+ * with the one of the seed it has the five that the card Doelpuntenmakers needs. Three of them
+ * have scorers and the fourth has a score without scorers, so the line "Gebaseerd op" shows.
+ */
+async function addTestdorpMeetings(database) {
+  const { close, pool } = connect(database)
+  const meetings = [
+    {
+      against: 0,
+      for: 2,
+      goals: [
+        [12, 'Wouter Proefman'],
+        [60, 'Rick Demo'],
+      ],
+      yearsAgo: 1,
+    },
+    { against: 1, for: 0, goals: [], yearsAgo: 2 },
+    { against: 1, for: 1, goals: [[30, 'Rick Demo']], yearsAgo: 3 },
+    { against: 0, for: 3, goals: [], yearsAgo: 4 },
+  ]
+
+  try {
+    const [[{ club }]] = await pool.query("SELECT club_id AS club FROM matches WHERE opponent = 'Testdorp FC' LIMIT 1")
+
+    for (const { against, for: scored, goals, yearsAgo } of meetings) {
+      const now = new Date()
+      const day = new Date(Date.UTC(now.getUTCFullYear() - yearsAgo, now.getUTCMonth(), now.getUTCDate(), 18, 45))
+      const [{ insertId }] = await pool.query(
+        "INSERT INTO matches (season, competition, round, opponent, club_id, home, status, goals_for, goals_against, match_date, kickoff_at) VALUES (?, 'Eredivisie', 'Speelronde 1', 'Testdorp FC', ?, 1, 'played', ?, ?, ?, ?)",
+        [seasonOf(day), club, scored, against, day.toISOString().slice(0, 10), day],
+      )
+
+      for (const [minute, page] of goals) {
+        await pool.query(
+          'INSERT INTO match_goals (match_id, ours, minute, player, wikipedia_page) VALUES (?, 1, ?, ?, ?)',
+          [insertId, minute, page.split(' ').at(-1), page],
+        )
+      }
+    }
+  } finally {
+    await close()
+  }
+}
 
 /**
  * Checks what the admin sends on this environment, whichever it is: a visitor without a session
@@ -1047,6 +1093,7 @@ await withEmptyDatabase((database) =>
     // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
     // slug that no club has is "niet gevonden".
+    await addTestdorpMeetings(database)
     const clubPage = await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc`)
     const clubHtml = await clubPage.text()
     assert.equal(clubPage.status, 200)
@@ -1065,6 +1112,13 @@ await withEmptyDatabase((database) =>
     // only met in the league at home, so the stadium is ours and there is no card Stadion.
     assert.match(clubHtml, /<main[^>]*>.*id="wedstrijden".*<\/main>.*<aside[^>]*>.*id="onze-uitslagen"/s)
     assert.doesNotMatch(clubHtml, /id="stadion"/)
+    // Testdorp FC has five played matches, so the sidebar has the card Doelpuntenmakers tegen
+    // the club after Hoe vaak welke uitslag: the table with a caption for a screen reader, and
+    // the line for the one match without scorers. Voorbeeld United has fewer, so it has none.
+    assert.match(
+      clubHtml,
+      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="doelpuntenmakers">Doelpuntenmakers tegen Testdorp FC<\/h2>.*<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen tegen Testdorp FC, in de Eredivisie<\/caption>.*Gebaseerd op de doelpuntenmakers van (?:<!-- -->)?4(?:<!-- -->)? van de (?:<!-- -->)?5(?:<!-- -->)? gespeelde wedstrijden/s,
+    )
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
     // The card has two charts (the scores and the goals, the second small), the sentence of the
@@ -1083,6 +1137,7 @@ await withEmptyDatabase((database) =>
       /id="onze-uitslagen".*<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot [^<]*<.*Oud Voorbeeldpark.*vanaf [^<]*<.*Voorbeeldpark/s,
     )
     assert.match(stadiumClub, /De dagen zijn die van onze wedstrijden/)
+    assert.doesNotMatch(stadiumClub, /id="doelpuntenmakers"/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, closedWikipediaCredit)
     assert.match(

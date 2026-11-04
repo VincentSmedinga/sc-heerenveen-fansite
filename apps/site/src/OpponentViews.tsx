@@ -19,12 +19,13 @@ import {
 
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
-import { countScores } from './matches'
-import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView } from './MatchViews'
+import { competitionNames, countScores, topScorersOf } from './matches'
+import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import {
   type ClubSummary,
   lastResultsOf,
   type Meeting,
+  meetingsOf,
   pointsOf,
   type Stadium,
   topPointsMinimum,
@@ -285,6 +286,46 @@ export function ClubSummaryCard({
         </List>
       )}
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
+    </Card>
+  )
+}
+
+/**
+ * The card "Doelpuntenmakers tegen <club>" of the page of a club: the top 5 of the players of
+ * sc Heerenveen who scored against it, from the same count and the same table as the card of
+ * the page Wedstrijden (`TopScorers`), with texts about the club and not about a season. The
+ * page only has it from `clubScorersMinimum` matches (`hasClubScorers`), counted over all
+ * competitions; the list is of the matches the choice counts, so with the Eredivisie alone it
+ * can be shorter, or empty, and then a sentence says so. It is under "Hoe vaak welke uitslag",
+ * soft, with the button for an image, which has the name of the club in the heading.
+ */
+export function ClubTopScorersCard({
+  choice,
+  matches,
+  name,
+}: {
+  choice: CompetitionChoice
+  matches: readonly PublicClubMatch[]
+  name: string
+}) {
+  const counted = meetingsOf(matches, choice)
+
+  return (
+    <Card
+      aria-labelledby="doelpuntenmakers"
+      shareable={imageCredit(topScorersOf(counted, 'all').length > 0)}
+      surface="soft"
+    >
+      <Heading id="doelpuntenmakers" level={2}>
+        {`Doelpuntenmakers tegen ${name}`}
+      </Heading>
+      <TopScorers
+        competition={choice}
+        empty="We hebben geen doelpuntenmakers van deze wedstrijden."
+        matches={counted}
+        scope={`van sc Heerenveen tegen ${name}, in ${competitionNames(counted, choice)}`}
+        topOnly
+      />
     </Card>
   )
 }

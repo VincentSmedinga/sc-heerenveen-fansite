@@ -48,6 +48,7 @@ import {
   quarterLabels,
   type ScoreCount,
   scoreCountsOf,
+  type ScoredMatch,
   scorersCoverage,
   standingsAround,
   standingsLag,
@@ -975,25 +976,36 @@ export function StreaksCard({
  * top 5 van 17 spelers die scoorden", and the link "Alle doelpuntenmakers" under the list goes
  * to `playersHref`, the page with the whole list. The line only says "top 5" when the list was
  * cut: if nobody is left out, it counts the players, as the full list does.
+ *
+ * The page of a club has the short form too, for the matches against that club (see
+ * `ClubTopScorersCard`, with `topOnly` and no link), but its texts are about a club and not
+ * about a season: `scope` ends the caption ("van sc Heerenveen tegen FC Twente, in de
+ * Eredivisie") and `empty` is the sentence for no goal. A season gets `season` and no `scope`,
+ * a club the other way round, so the caption never says "undefined".
  */
 export function TopScorers({
   competition,
+  empty = 'We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.',
   matches,
   playersHref,
+  scope,
   season,
+  topOnly = playersHref !== undefined,
 }: {
   competition: CompetitionChoice
-  matches: PublicMatch[]
+  empty?: string
+  matches: ScoredMatch[]
   playersHref?: string | undefined
-  season: string
-}) {
+  /** Only the first five places; on by default when there is a link to the full list. */
+  topOnly?: boolean
+} & ({ scope: string; season?: undefined } | { scope?: undefined; season: string })) {
   const scorers = topScorersOf(matches, competition)
-  const shown = playersHref === undefined ? scorers : topFiveOf(scorers)
+  const shown = topOnly ? topFiveOf(scorers) : scorers
   const cut = shown.length < scorers.length
   const { known, played } = scorersCoverage(matches, competition)
 
   if (scorers.length === 0) {
-    return <Text>We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.</Text>
+    return <Text>{empty}</Text>
   }
 
   return (
@@ -1006,7 +1018,7 @@ export function TopScorers({
             : `${scorers.length} spelers hebben gescoord`}
       </Text>
       <TopScorersTable
-        caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} van sc Heerenveen in het seizoen ${season}, in ${competitionNames(matches, competition)}`}
+        caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} ${scope ?? `van sc Heerenveen in het seizoen ${season}, in ${competitionNames(matches, competition)}`}`}
         rows={shown}
       />
       {known < played && (
