@@ -1,9 +1,8 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { SegmentedLinks } from '@fansite/design-system'
-
 import { type CompetitionChoice, competitionParam, competitionQuery, leagueValue } from './competition'
 import { hasPlayedExtraMatch } from './matches'
+import { SwitchLinks } from './SwitchLinks'
 
 /**
  * The two links of the switch, for a page that knows itself whether there is anything to
@@ -21,7 +20,7 @@ export function CompetitionLinks({
   place: string
 }) {
   return (
-    <SegmentedLinks
+    <SwitchLinks
       label="Welke wedstrijden"
       options={[
         { href: address, label: 'Alle wedstrijden', value: 'all' },

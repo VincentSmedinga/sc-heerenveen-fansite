@@ -123,8 +123,13 @@ describe('the thumb of the segmented control', () => {
   })
 
   it('slides with a transition on translate that takes its time and curve from the motion tokens', () => {
-    expect(thumb).toContain('transition: translate var(--hf-motion-duration-short) var(--hf-motion-ease-change);')
+    expect(thumb).toContain('transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);')
     expect(thumb).toContain('translate: calc(var(--hf-segmented-index) *')
+  })
+
+  it('lets the letters of an option go from regular to bold in the duration of the thumb', () => {
+    expect(css).toContain('color var(--hf-motion-duration-short) var(--hf-motion-ease-change),')
+    expect(css).toContain('font-weight var(--hf-motion-duration-medium) var(--hf-motion-ease-change);')
   })
 
   it('keeps a visible border in forced colours', () => {
@@ -169,7 +174,7 @@ describe('the slide between two pages', () => {
   })
 
   it('moves everything it names with the duration and the curve of the motion tokens', () => {
-    expect(transitions).toContain('animation-duration: var(--hf-motion-duration-short);')
+    expect(transitions).toContain('animation-duration: var(--hf-motion-duration-medium);')
     expect(transitions).toContain('animation-timing-function: var(--hf-motion-ease-change);')
   })
 })

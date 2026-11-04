@@ -1,6 +1,5 @@
-import { SegmentedLinks } from '@fansite/design-system'
-
 import { type StandingsView, standingsViewQuery } from './standings-view'
+import { SwitchLinks } from './SwitchLinks'
 
 /**
  * The switch of the card Stand between the table of the whole season (the default) and the
@@ -12,7 +11,7 @@ import { type StandingsView, standingsViewQuery } from './standings-view'
  */
 export function StandingsSwitch({ address, anchor, view }: { address: string; anchor: string; view: StandingsView }) {
   return (
-    <SegmentedLinks
+    <SwitchLinks
       label="Welke stand"
       options={[
         { href: `${address}${standingsViewQuery('season')}#${anchor}`, label: 'Hele seizoen', value: 'season' },

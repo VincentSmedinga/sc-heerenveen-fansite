@@ -1173,6 +1173,7 @@
   Of een bibliotheek voor animaties; dat is een dependency voor iets wat CSS kan.
   Of helemaal geen overgangen behalve de themaknop; dat laat de site hard aanvoelen, en het besluit is dat beweging een bewuste keuze is, geen toeval.
 - **Later:** vult het besluit _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026) aan: de duren staan nu in de tokens van `motion.css`.
+- **Later:** zie _De knop van de schakelaar schuift in de langste duur, en de letters gaan mee_ (4 november 2026): de knop van de schakelaar neemt de langste duur, en de letters van de gekozen keuze gaan over van gewone naar dikke letters.
 - **Later:** zie _De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht_.
   "Alleen kleur, doorzichtigheid en transformatie bewegen" kent één uitzondering: de hoogte van die uitklap.
   Hij staat in de groep Verschijnen en verdwijnen en neemt de curve van het pijltje.
@@ -2468,3 +2469,19 @@
   Dat het component rijen met meer spelers neemt, houdt de samenvoeging op één plek: de pagina Spelers geeft rijen met één speler en heeft geen tweede tabel nodig.
 - **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
+
+## De knop van de schakelaar schuift in de langste duur, en de letters gaan mee
+
+- **Datum:** 4 november 2026
+- **Besluit:** de knop van `SegmentedControl` en `SegmentedLinks` schuift in `--hf-motion-duration-medium` (0,4 seconde) in plaats van `-short` (0,2 seconde), en de letters van de gekozen keuze gaan in dezelfde duur over van gewone naar dikke letters (`font-weight`).
+  De kleur van de tekst houdt de korte duur, zodat het aanwijzen met de muis niet achterloopt.
+  Dezelfde duur geldt voor de overgang tussen pagina's zonder JavaScript.
+  Bij minder beweging zijn de duren 0 s, dus de knop en de letters springen.
+- **Waarom:** met JavaScript wisselt de schakelaar nu meteen (zie _De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval_ in `site.md`), en bij 0,2 seconde was het schuiven nauwelijks te zien.
+  De projecteigenaar koos 0,4 seconde na het uitproberen.
+  De letters die meegaan, maken de wissel rustiger: het dikker worden springt niet meer.
+- **Let op:** een overgang van het lettergewicht is een uitzondering op "wat nooit beweegt".
+  Het kan hier omdat het lettertype variabel is (Atkinson Hyperlegible Next, 200 tot 800) en omdat een onzichtbaar exemplaar in dik de baan even breed houdt: de baan en de keuzes verschuiven niet, alleen de letters binnen hun keuze.
+  Een lettertype dat niet variabel is, springt tussen de twee gewichten.
+- **Alternatieven:** de duur laten staan (de knop schuift te snel om te zien); een eigen duur tussen 0,2 en 0,4 seconde (een token erbij voor één onderdeel); alleen de knop langzamer en de letters meteen (de letters springen terwijl de knop nog onderweg is).
+- **Later:** vult _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_ aan: de knop van de schakelaar is de tweede die de langste duur krijgt, en het lettergewicht van de gekozen keuze is een tweede uitzondering op "alleen kleur, doorzichtigheid en transformatie bewegen".
