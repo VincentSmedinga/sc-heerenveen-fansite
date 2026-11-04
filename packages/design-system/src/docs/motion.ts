@@ -35,8 +35,13 @@ export const motionGroups: MotionGroup[] = [
     id: 'selecteren',
     label: 'Ingedrukt en geselecteerd',
     moves:
-      'Vulling, rand en kleur, en de draaiing van het pijltje van een open lijst. Ingedrukt volgt de vinger meteen; geselecteerd en open nemen de tijd van aanwijzen.',
-    tokens: ['--hf-motion-duration-quick', '--hf-motion-duration-short', '--hf-motion-ease-change'],
+      'Vulling, rand en kleur, en de draaiing van het pijltje van een open lijst. Ingedrukt volgt de vinger meteen; geselecteerd en open nemen de tijd van aanwijzen, behalve de knop van de schakelaar, die de langste duur neemt.',
+    tokens: [
+      '--hf-motion-duration-quick',
+      '--hf-motion-duration-short',
+      '--hf-motion-duration-medium',
+      '--hf-motion-ease-change',
+    ],
     why: "Wie drukt, wil dat het ding direct antwoordt. Wat blijft staan, mag rustig overgaan. Een pijltje dat draait als een lijst opent, is zo'n staat die blijft, en het wisselt niet van vorm: het draait een halve slag. Daarom volstaat de tijd van aanwijzen, en is het geen beweging van de hele pagina.",
   },
   {
@@ -67,7 +72,7 @@ export const motionGroups: MotionGroup[] = [
       '--hf-motion-duration-short',
       '--hf-motion-ease-change',
     ],
-    why: 'Dit zijn de grootste veranderingen, dus de enige die de langste duur krijgen. De bezoeker kiest ze zelf, en ze zijn dan het enige dat op het scherm gebeurt.',
+    why: 'Dit zijn de grootste veranderingen, dus ze krijgen de langste duur; de knop van de schakelaar is de ene andere die hem krijgt. De bezoeker kiest ze zelf, en ze zijn dan het enige dat op het scherm gebeurt.',
   },
   {
     contains:
@@ -159,8 +164,8 @@ export const motionChanges: MotionChange[] = [
   {
     component: 'SegmentedControl, knop',
     group: 'selecteren',
-    now: 'Schuift in 0,2 seconde naar de gekozen keuze, de kleur van de tekst gaat over (#500). Tussen twee pagina’s schuift hij met een overgang tussen pagina’s, waar de browser die kent.',
-    what: 'Plaats van de knop en kleur van de tekst',
+    now: 'Schuift in 0,4 seconde naar de gekozen keuze, de dikte van de letters gaat in 0,4 seconde mee en de kleur van de tekst in 0,2 seconde (#500). Tussen twee pagina’s schuift hij met een overgang tussen pagina’s, waar de browser die kent.',
+    what: 'Plaats van de knop, dikte van de letters en kleur van de tekst',
     why: 'Geselecteerd (`aria-pressed`, `aria-current`)',
   },
   {
@@ -302,7 +307,10 @@ export const motionChanges: MotionChange[] = [
 export const motionTokens = [
   { name: '--hf-motion-duration-quick', use: 'Ingedrukt: het antwoord op een vinger of een toets.' },
   { name: '--hf-motion-duration-short', use: 'Kleur, vulling en rand, en iets dat in of uit beeld gaat.' },
-  { name: '--hf-motion-duration-medium', use: 'Een vorm die in een andere overgaat. De langste duur die er is.' },
+  {
+    name: '--hf-motion-duration-medium',
+    use: 'Een vorm die in een andere overgaat, en de knop van de schakelaar. De langste duur die er is.',
+  },
   { name: '--hf-motion-ease-change', use: 'Een toestand gaat over in een andere: kleur en vulling.' },
   { name: '--hf-motion-ease-morph', use: 'Een vorm gaat over in een andere: beide uiteinden zijn langzaam.' },
   { name: '--hf-motion-ease-enter', use: 'Iets komt binnen: eerst snel, dan rustig.' },
