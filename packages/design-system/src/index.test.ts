@@ -24,6 +24,7 @@ const components = [
   'Filter',
   'Form',
   'FormChart',
+  'FormTimeline',
   'Heading',
   'Honeypot',
   'Input',

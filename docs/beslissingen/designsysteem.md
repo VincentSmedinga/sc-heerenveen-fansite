@@ -1273,6 +1273,8 @@
   Een context kan niet, omdat de onderdelen servercomponenten blijven.
 - **Alternatieven:** één `FormChart` met alles erin (sneller, maar de volgende grafiek begint opnieuw).
   Of de onderdelen eerst en `FormChart` later, wat de onderdelen alleen met losse verhalen test.
+- **Later:** zie _`FormTimeline` zet uitslagen op een as van jaren, met `BarChart` in de kleine maat en eigen labels_ (4 november 2026).
+  `form-timeline/` staat naast `form-chart/`, en `BarChart` kent nu `size="small"` en `axis.labels`.
 
 ## Een verlies is een streepje van 0,25 rem, geen lege plek
 
@@ -2468,3 +2470,18 @@
   Dat het component rijen met meer spelers neemt, houdt de samenvoeging op één plek: de pagina Spelers geeft rijen met één speler en heeft geen tweede tabel nodig.
 - **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
+
+## `FormTimeline` zet uitslagen op een as van jaren, met `BarChart` in de kleine maat en eigen labels
+
+- **Datum:** 4 november 2026
+- **Besluit:** er komt een onderdeel `FormTimeline` (map `form-timeline/`, naast `form-chart/`), geen variant van `FormChart` (#718).
+  Het zet `BarChart`, `BarChart.Trend` en de sleutel samen, en weet niets van wedstrijden of seizoenen: het krijgt per plek een uitslag of niets (`results`), het jaar van de eerste plek (`firstYear`), hoeveel plekken bij één jaar horen (`placesPerYear`, standaard 2), het aantal uitslagen van het venster (`window`, standaard 4) en de teksten (`title`, `line` en `scope`).
+  - **`BarChart`** kan kleiner met `size="small"` (4 rem hoog, ook als er ruimte is voor de hoge grafiek, zoals `DonutChart`) en zet labels onder de plekken die de pagina kiest met `axis.labels`, een lijst van een plek en een tekst, in plaats van de vaste telling van `axisLabels`.
+    Zonder die twee props verandert niets aan de bestaande grafieken.
+  - **De labels:** `FormTimeline` zet een label onder elk jaar dat een veelvoud is van `labelEvery` (standaard 5), in het midden onder de plekken van dat jaar, als de laatste twee cijfers ("90", "95", "00").
+  - **De sleutel** (W winst (3 punten), G gelijk (1), V verlies (0)) staat in `FormKey`, een deel dat `FormChart` en `FormTimeline` delen en dat de woorden uit `tableColumns` haalt.
+    Het wordt niet los geëxporteerd.
+  - **De zin over de lijn** is een functie van het laatste punt (het gemiddelde met een decimale komma en het jaar van de plek); de pagina schrijft hem in volledige zinnen, want het onderdeel kent geen seizoen als "2025/26".
+- **Waarom:** de rij "Vorm", het aantal wedstrijden van het seizoen en het venster van 5 van `FormChart` passen niet bij een as van jaren; een variant met drie uitzonderingen zou een tweede onderdeel in één zijn.
+  De delen die wel gelijk zijn (de staafjes, de lijn, de sleutel en de woorden) worden hergebruikt, niet gekopieerd.
+- **Alternatieven:** een prop op `FormChart` voor de tijdas (de helft van de props geldt dan alleen voor één van de twee); een eigen grafiek zonder `BarChart` (dubbele code voor de staafjes en de lijn).

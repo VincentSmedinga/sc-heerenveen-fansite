@@ -10,6 +10,7 @@ import {
   clubScorersMinimum,
   earlierNames,
   hasClubScorers,
+  hasTimeline,
   lastResultsOf,
   meetingsOf,
   pointsOf,
@@ -18,6 +19,7 @@ import {
   stadiumViewsOf,
   summaryOf,
   tallyOf,
+  timelineOf,
   topPointsOf,
   upcomingOf,
 } from './opponents'
@@ -637,5 +639,121 @@ describe('topPointsOf', () => {
   it('has no places, and no matches, when no club has five played matches', () => {
     expect(topPointsOf([record('Vier', 4, 0, 0)])).toEqual({ places: [], played: 0 })
     expect(topPointsOf([])).toEqual({ places: [], played: 0 })
+  })
+})
+
+describe('timelineOf', () => {
+  // The afternoon of 30 October 2026: the season 2026/27, the 37th since 1990/91.
+  const now = new Date('2026-10-30T13:40:00Z')
+  const played = (season: string, matchDate: string, ours: number, theirs: number, more = {}) =>
+    match(ours, theirs, { matchDate, season, ...more })
+
+  it('has two places for each season from 1990/91 up to and including the season of now', () => {
+    expect(timelineOf([], now)).toHaveLength(74)
+    expect(timelineOf([], new Date('2000-10-30T12:00:00Z'))).toHaveLength(22)
+    expect(timelineOf([], new Date('1990-07-01T00:00:00Z'))).toHaveLength(2)
+  })
+
+  it('has only empty places without matches', () => {
+    expect(timelineOf([], now).every((place) => place === null)).toBe(true)
+  })
+
+  it('puts the first match of a season on the left and the second on the right, by the day', () => {
+    // The matches are given newest first, as the query has them.
+    const places = timelineOf([played('2025/26', '2026-02-01', 0, 1), played('2025/26', '2025-09-13', 3, 0)], now)
+
+    expect(places.slice(70, 74)).toEqual(['W', 'V', null, null])
+  })
+
+  it('fills only the first place of a season with one match', () => {
+    expect(timelineOf([played('2024/25', '2025-03-01', 1, 1)], now).slice(68, 72)).toEqual(['G', null, null, null])
+  })
+
+  it('leaves a season without a match empty, so a club that played lower leaves a gap', () => {
+    const places = timelineOf([played('2012/13', '2013-03-02', 2, 0), played('2010/11', '2011-02-12', 0, 2)], now)
+
+    expect(places.slice(40, 46)).toEqual(['V', null, null, null, 'W', null])
+  })
+
+  it('leaves out a cup match, a play-off match and a match that was not played', () => {
+    const places = timelineOf(
+      [
+        played('2025/26', '2026-03-01', 2, 0, { competition: 'KNVB Beker' }),
+        played('2025/26', '2026-05-24', 2, 0, { competition: 'Play-offs' }),
+        played('2025/26', '2026-04-01', 2, 0, { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
+        played('2025/26', '2025-10-04', 0, 0),
+      ],
+      now,
+    )
+
+    expect(places.slice(70, 72)).toEqual(['G', null])
+  })
+
+  it('shows the first match of the current season when only the match at home has been played', () => {
+    const places = timelineOf(
+      [
+        played('2026/27', '2026-10-24', 2, 0),
+        played('2026/27', '2027-03-01', 0, 0, { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
+      ],
+      now,
+    )
+
+    expect(places.slice(72)).toEqual(['W', null])
+  })
+
+  it('leaves out a third match of a season, because the chart has two places for it', () => {
+    const places = timelineOf(
+      [
+        played('2025/26', '2026-05-01', 0, 5),
+        played('2025/26', '2026-02-01', 1, 0),
+        played('2025/26', '2025-09-13', 1, 1),
+      ],
+      now,
+    )
+
+    expect(places.slice(70, 72)).toEqual(['G', 'W'])
+  })
+
+  it('leaves out a match from before 1990/91 and a match past the season of now', () => {
+    const places = timelineOf(
+      [
+        played('2027/28', '2027-09-01', 1, 0),
+        played('1990/91', '1991-02-02', 1, 0),
+        played('1989/90', '1990-02-02', 1, 0),
+      ],
+      now,
+    )
+
+    expect(places.filter((place) => place !== null)).toEqual(['W'])
+    expect(places[1]).toBeNull()
+    expect(places[0]).toBe('W')
+  })
+
+  it('starts a new season on 1 July', () => {
+    const matches = [played('2025/26', '2026-02-01', 1, 0), played('2026/27', '2026-08-15', 0, 1)]
+
+    // Until the end of 30 June 2026 the last season is 2025/26 and the axis ends there.
+    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z'))).toHaveLength(72)
+    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z')).slice(70)).toEqual(['W', null])
+    // From 1 July the axis has the season 2026/27, with its two empty places.
+    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z'))).toHaveLength(74)
+    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z')).slice(70)).toEqual(['W', null, 'V', null])
+  })
+
+  it('does not depend on the order the matches are given in', () => {
+    const matches = [played('2025/26', '2025-09-13', 3, 0), played('2025/26', '2026-02-01', 0, 1)]
+
+    expect(timelineOf(matches, now)).toEqual(timelineOf([...matches].reverse(), now))
+  })
+})
+
+describe('hasTimeline', () => {
+  it('needs four matches played in the Eredivisie, and the cup does not count', () => {
+    const league = (count: number) => Array.from({ length: count }, () => match(1, 0))
+
+    expect(hasTimeline(league(3))).toBe(false)
+    expect(hasTimeline(league(4))).toBe(true)
+    expect(hasTimeline([...league(3), match(1, 0, { competition: 'KNVB Beker' })])).toBe(false)
+    expect(hasTimeline([...league(3), match(null, null, { status: 'scheduled' })])).toBe(false)
   })
 })

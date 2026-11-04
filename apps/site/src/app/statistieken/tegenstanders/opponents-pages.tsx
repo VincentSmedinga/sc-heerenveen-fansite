@@ -32,6 +32,7 @@ import {
   ClubsCard,
   ClubScoreCountsCard,
   ClubSummaryCard,
+  ClubTimelineCard,
   ClubTopScorersCard,
   OpponentsCredit,
   StadiumsCard,
@@ -256,6 +257,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             since={sinceOf(loaded.seasons)}
             summary={summaryOf(meetings)}
           />
+          <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
           <ClubScoreCountsCard meetings={meetings} />
           {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
           <StadiumsCard stadiums={stadiums} />

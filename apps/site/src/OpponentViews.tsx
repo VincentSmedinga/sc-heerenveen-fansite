@@ -5,7 +5,10 @@ import {
   Card,
   DataTable,
   Disclosure,
+  FormTimeline,
+  type FormTimelineLatest,
   Heading,
+  Link,
   List,
   MarkRow,
   RecordTable,
@@ -25,11 +28,16 @@ import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorer
 import {
   type ClubNameView,
   type ClubSummary,
+  hasTimeline,
   lastResultsOf,
   type Meeting,
   meetingsOf,
   pointsOf,
+  seasonOfYear,
   type StadiumView,
+  timelineFirstYear,
+  timelineMinimum,
+  timelineOf,
   topPointsMinimum,
   topPointsOf,
 } from './opponents'
@@ -313,6 +321,63 @@ export function ClubSummaryCard({
         </List>
       )}
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
+    </Card>
+  )
+}
+
+/** The sentence about the line of the card Verloop sinds 1990, from its last point. */
+const timelineLine = (latest: FormTimelineLatest | null) =>
+  latest === null
+    ? `De lijn begint na ${timelineMinimum} wedstrijden achter elkaar.`
+    : `De lijn laat zien hoeveel punten sc Heerenveen per wedstrijd haalde in de laatste ${timelineMinimum} wedstrijden: ${latest.average}, bij de wedstrijd van ${seasonOfYear(latest.year)}.`
+
+/**
+ * The card "Verloop sinds 1990" of the page of a club: how we did against it, season after
+ * season, as bars for a win, a draw and a loss with a line through the average of the points
+ * (see `FormTimeline`). It has two places for each season from 1990/91 up to now, so the axis
+ * is always the same stretch of time, and a season we didn't meet the club in the Eredivisie, a
+ * match still to come and a season we have no matches of yet are an empty place. It counts the
+ * Eredivisie whatever the visitor chose, and says so, with since when we have matches, so an
+ * empty place before that doesn't read as "never played". The chart is hidden from a screen
+ * reader, so under it are a sentence with the numbers and a link to the list of Wedstrijden.
+ * It is the same kind of figure as the card with the record, on a surface of its own between
+ * the soft one above it and the warm one below it, and it has no button for an image. A club we
+ * played fewer than `timelineMinimum` times in the Eredivisie has no card, and no sentence that
+ * says why.
+ */
+export function ClubTimelineCard({
+  matches,
+  now,
+  since,
+}: {
+  matches: readonly PublicClubMatch[]
+  now: Date
+  since: string
+}) {
+  if (!hasTimeline(matches)) {
+    return null
+  }
+
+  const results = timelineOf(matches, now)
+  const count = (result: 'G' | 'V' | 'W') => results.filter((item) => item === result).length
+  const played = results.filter((item) => item !== null).length
+
+  return (
+    <Card aria-labelledby="verloop-sinds-1990">
+      <Heading anchor id="verloop-sinds-1990" level={2}>
+        Verloop sinds 1990
+      </Heading>
+      <FormTimeline
+        firstYear={timelineFirstYear}
+        line={timelineLine}
+        results={results}
+        scope={`Alleen de Eredivisie: alle ${played} gespeelde wedstrijden sinds ${since}.`}
+        title="Seizoen"
+      />
+      <Text appearance="meta">
+        {`${played} wedstrijden: ${count('W')} winst, ${count('G')} gelijk, ${count('V')} verlies. De hele lijst staat bij `}
+        <Link href="#wedstrijden">Wedstrijden</Link>.
+      </Text>
     </Card>
   )
 }

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
-import { getClubPage, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubPage, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -1053,5 +1053,130 @@ describe('the card Doelpuntenmakers on the page of a club', () => {
     expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="stadion"'))
     expect(card).toMatch(/^<section class="hf-card hf-card-soft hf-card-shareable"/)
     expect(plain(html)).toContain('Doelpuntenmakers van sc Heerenveen tegen Testclub')
+  })
+})
+
+describe('the card Verloop sinds 1990', () => {
+  const cardOf = (html: string) => {
+    const start = html.indexOf('aria-labelledby="verloop-sinds-1990"')
+    const end = html.indexOf('</section>', start)
+
+    return start === -1 ? '' : html.slice(start, end)
+  }
+
+  // Seven places in a row from 2022/23 to 2025/26, so the line has four points.
+  const long: ClubPage = {
+    club: { id: 9, name: 'Reeks FC', otherNames: [], slug: 'reeks-fc', wikipediaPage: null },
+    matches: [
+      ...testclub.matches,
+      ...[
+        { goals: [0, 1], matchDate: '2023-03-05', season: '2022/23' },
+        { goals: [1, 1], matchDate: '2023-09-02', season: '2023/24' },
+        { goals: [2, 1], matchDate: '2024-03-02', season: '2023/24' },
+      ].map(({ goals, matchDate, season }, index) => ({
+        ...testclub.matches[3]!,
+        goalsAgainst: goals[1]!,
+        goalsFor: goals[0]!,
+        id: 900 + index,
+        matchDate,
+        season,
+      })),
+    ],
+    names: [],
+    stadiums: [],
+  }
+
+  beforeEach(() => {
+    vi.mocked(getClubPage).mockImplementation((slug) =>
+      Promise.resolve(
+        { 'beker-united': beker, 'komend-fc': komend, 'nieuw-promovendus': promovendus, 'reeks-fc': long, testclub }[
+          slug
+        ],
+      ),
+    )
+  })
+
+  it('has the heading as an anchor, in the sidebar between the summary and the card Hoe vaak welke uitslag', async () => {
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+
+    expect(html).toMatch(/<h2[^>]*id="verloop-sinds-1990"[^>]*>[\s\S]*Verloop sinds 1990/)
+    expect(html).toContain('href="#verloop-sinds-1990"')
+    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="verloop-sinds-1990"'))
+    expect(sidebar.indexOf('id="verloop-sinds-1990"')).toBeLessThan(sidebar.indexOf('id="hoe-vaak-welke-uitslag"'))
+  })
+
+  it('is on the white surface, which the soft card above it and the warm card below it are not', async () => {
+    const card = cardOf(await render())
+
+    expect(card).not.toMatch(/hf-card-(soft|warm|strong|transparent)/)
+  })
+
+  it('has no button for an image', async () => {
+    expect(cardOf(await render())).not.toContain('hf-card-shareable')
+  })
+
+  it('has the chart with 74 places in November 2026, hidden from a screen reader', async () => {
+    const card = cardOf(await render())
+
+    expect(card).toContain('hf-form-timeline')
+    expect(card).toContain('--hf-bar-chart-slots:74')
+    expect(card).toMatch(/<div[^>]*aria-hidden="true"[^>]*class="hf-bar-chart/)
+    expect(card).toContain('Seizoen')
+  })
+
+  it('has the key, the sentence about the line and the sentence about what counts, as text', async () => {
+    const text = plain(cardOf(await render()))
+
+    expect(text).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
+    expect(text).toContain('Alleen de Eredivisie: alle 4 gespeelde wedstrijden sinds 2022/23.')
+  })
+
+  it('says the line begins after four matches in a row when there is no point', async () => {
+    expect(plain(cardOf(await render()))).toContain('De lijn begint na 4 wedstrijden achter elkaar.')
+  })
+
+  it('says the last point of the line with the season of that match', async () => {
+    const text = plain(cardOf(await render('reeks-fc')))
+
+    expect(text).toContain(
+      'De lijn laat zien hoeveel punten sc Heerenveen per wedstrijd haalde in de laatste 4 wedstrijden: 2,5, bij de wedstrijd van 2025/26.',
+    )
+  })
+
+  it('counts the wins, draws and losses and links to the list of Wedstrijden', async () => {
+    const html = await render()
+
+    expect(plain(cardOf(html))).toContain(
+      '4 wedstrijden: 3 winst, 1 gelijk, 0 verlies. De hele lijst staat bij Wedstrijden .',
+    )
+    expect(cardOf(html)).toContain('<a href="#wedstrijden"')
+    expect(html).toMatch(/<h2[^>]*id="wedstrijden"/)
+  })
+
+  it('does not follow the switch: it counts the Eredivisie with all the matches and with the Eredivisie alone', async () => {
+    const all = cardOf(await render('reeks-fc'))
+    const league = cardOf(await render('reeks-fc', { competitie: 'eredivisie' }))
+
+    expect(plain(all)).toContain('Alleen de Eredivisie: alle 7 gespeelde wedstrijden sinds 2022/23.')
+    expect(plain(league)).toContain('Alleen de Eredivisie: alle 7 gespeelde wedstrijden sinds 2022/23.')
+    expect(all.match(/hf-bar-chart-bar/g)).toHaveLength(league.match(/hf-bar-chart-bar/g)?.length ?? -1)
+  })
+
+  it('does not count the cup tie of Testclub as a bar', async () => {
+    expect(cardOf(await render()).match(/<span class="hf-bar-chart-bar/g)).toHaveLength(4)
+  })
+
+  it('is not there for a club with fewer than four matches in the Eredivisie, and says nothing about it', async () => {
+    for (const slug of ['beker-united', 'komend-fc']) {
+      const html = await render(slug)
+
+      expect(html).not.toContain('verloop-sinds-1990')
+      expect(html).not.toContain('Verloop sinds')
+    }
+  })
+
+  it('is not there for a club with matches to come and none played', async () => {
+    expect(await render('nieuw-promovendus')).not.toContain('verloop-sinds-1990')
   })
 })

@@ -141,6 +141,36 @@ describe('BarChart', () => {
     expect(container.querySelector('.hf-bar-chart-number')?.textContent).toBe('R1')
   })
 
+  it('puts the numbers the page picks under the places it picks, all of them also on a narrow chart', () => {
+    const { container } = render(
+      <BarChart
+        axis={{
+          labels: [
+            { at: 1, text: '90' },
+            { at: 5.5, text: '95' },
+          ],
+          title: 'Seizoen',
+        }}
+        bars={Array.from({ length: 10 }, () => null)}
+        max={3}
+      />,
+    )
+    const numbers = [...container.querySelectorAll<HTMLElement>('.hf-bar-chart-number')]
+
+    expect(numbers.map((number) => number.textContent)).toEqual(['90', '95'])
+    expect(numbers.map((number) => number.style.getPropertyValue('--hf-bar-chart-across'))).toEqual(['10', '55'])
+    expect(container.querySelector('.hf-bar-chart-number-wide')).toBeNull()
+    expect(container.querySelector('.hf-bar-chart-title')?.textContent).toBe('Seizoen')
+  })
+
+  it('has the small class only when asked for the small chart', () => {
+    const { container, rerender } = render(<BarChart bars={[null]} max={3} />)
+
+    expect(container.querySelector('.hf-bar-chart-small')).toBeNull()
+    rerender(<BarChart bars={[null]} max={3} size="small" />)
+    expect(container.querySelector('.hf-bar-chart-small')).not.toBeNull()
+  })
+
   it('has no numbers or caption when the axis is false', () => {
     const { container } = render(<BarChart axis={false} bars={bars} max={3} />)
 

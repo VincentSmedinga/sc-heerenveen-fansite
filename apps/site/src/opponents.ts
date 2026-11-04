@@ -12,6 +12,7 @@ import {
   type PublicClubRecord,
   type PublicSeasonWikipediaPage,
 } from '@fansite/db/queries'
+import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
@@ -126,6 +127,10 @@ export function upcomingOf(matches: readonly PublicClubMatch[], choice: Competit
   )
 }
 
+/** The result of a meeting from the side of sc Heerenveen: `W`, `G` or `V` by the score. */
+const resultOf = ({ goalsAgainst, goalsFor }: Meeting): FormResult =>
+  goalsFor > goalsAgainst ? 'W' : goalsFor === goalsAgainst ? 'G' : 'V'
+
 /** How many of the latest meetings the row Laatste wedstrijden shows, and needs. */
 const lastCount = 5
 
@@ -140,13 +145,71 @@ export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | unde
     return undefined
   }
 
-  return meetings
-    .slice(0, lastCount)
-    .map(({ goalsAgainst, goalsFor }): FormResult =>
-      goalsFor > goalsAgainst ? 'W' : goalsFor === goalsAgainst ? 'G' : 'V',
-    )
-    .reverse()
+  return meetings.slice(0, lastCount).map(resultOf).reverse()
 }
+
+/** The year the axis of the card Verloop sinds 1990 starts at: the season 1990/91. */
+export const timelineFirstYear = 1990
+
+/** The places of a season on that axis: the first and the second match against the club. */
+export const timelinePerYear = 2
+
+/**
+ * How many played matches in the Eredivisie we need against a club before its page has the card
+ * Verloop sinds 1990. It is the number of results the line averages over, so a card with fewer
+ * would have bars and no line.
+ */
+export const timelineMinimum = 4
+
+/** The year a season starts in, `2025/26` being 2025. */
+const startYearOf = (season: string) => Number(season.slice(0, 4))
+
+/** A season written out from the year it starts in, `2025` being `2025/26`. */
+export const seasonOfYear = (year: number) => `${year}/${String((year + 1) % 100).padStart(2, '0')}`
+
+/**
+ * The place of every played match of the Eredivisie against a club on the axis of the card
+ * Verloop sinds 1990, for the choice `league` whatever the visitor chose. There are two places
+ * for each season from 1990/91 up to and including the season of `now` (a season starts on
+ * 1 July): the first match of the season on the day, then the second. A place is a result from
+ * the side of sc Heerenveen, or `null` when the match was not played, there was none (the club,
+ * or we, played in another division) or it is a third match, which the chart cannot show. A
+ * match from before 1990/91 has no place. The matches may be in any order.
+ */
+export function timelineOf(matches: readonly PublicClubMatch[], now: Date): (FormResult | null)[] {
+  const lastYear = startYearOf(seasonOf(now))
+  const places: (FormResult | null)[] = Array.from(
+    { length: Math.max(0, lastYear - timelineFirstYear + 1) * timelinePerYear },
+    () => null,
+  )
+  const bySeason = new Map<number, Meeting[]>()
+
+  for (const meeting of meetingsOf(matches, 'league')) {
+    const year = startYearOf(meeting.season)
+
+    if (year >= timelineFirstYear && year <= lastYear) {
+      bySeason.set(year, [...(bySeason.get(year) ?? []), meeting])
+    }
+  }
+
+  for (const [year, meetings] of bySeason) {
+    meetings
+      .toSorted((a, b) => a.matchDate.localeCompare(b.matchDate) || a.id - b.id)
+      .slice(0, timelinePerYear)
+      .forEach((meeting, index) => {
+        places[(year - timelineFirstYear) * timelinePerYear + index] = resultOf(meeting)
+      })
+  }
+
+  return places
+}
+
+/**
+ * Whether the page of a club has the card Verloop sinds 1990: we played it at least
+ * `timelineMinimum` times in the Eredivisie. It doesn't depend on the choice of the page.
+ */
+export const hasTimeline = (matches: readonly PublicClubMatch[]) =>
+  meetingsOf(matches, 'league').length >= timelineMinimum
 
 const difference = (meeting: Meeting) => meeting.goalsFor - meeting.goalsAgainst
 

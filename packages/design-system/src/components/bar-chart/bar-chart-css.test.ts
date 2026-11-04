@@ -73,6 +73,11 @@ describe('bar-chart.css', () => {
     expect(css).toMatch(/@container[^{]*\{[\s\S]*\.hf-bar-chart-number-wide \{[^}]*display: block/u)
   })
 
+  it('keeps the small chart 4rem high, also where there is room for the tall one', () => {
+    expect(declarationsOf('.hf-bar-chart-small')).toMatch(/--hf-bar-chart-height: 4rem/u)
+    expect(declarationsOf('.hf-bar-chart-small .hf-bar-chart-plot')).toMatch(/--hf-bar-chart-height: 4rem/u)
+  })
+
   it('shows the bars and the line in a system colour in forced colours, and the edge in the colour of the page', () => {
     expect(css).toMatch(/@media \(forced-colors: active\) \{\s*\.hf-bar-chart-bar \{\s*background-color: CanvasText/u)
     expect(css).toMatch(/\.hf-bar-chart-trend-line \{\s*stroke: CanvasText/u)

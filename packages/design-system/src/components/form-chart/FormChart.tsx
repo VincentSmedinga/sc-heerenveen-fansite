@@ -4,9 +4,9 @@ import { BarChart } from '../bar-chart/BarChart'
 import { movingAverage } from '../chart/trend'
 import { classNames } from '../classNames'
 import { MarkRow } from '../mark-row/MarkRow'
-import { tableColumns } from '../table-columns'
 import { Text } from '../text/Text'
 import { formOf, type FormResult, pointsOf, slots } from './form'
+import { FormKey } from './FormKey'
 
 export type FormChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'results'> & {
   /** A form chart has no children: everything it shows comes from the props below. */
@@ -54,11 +54,7 @@ export const FormChart = ({ className, matches = 34, results, window: span = 5, 
       <BarChart axis={{ title: 'Speelronde' }} bars={slots(played, matches)} max={3} ticks={[0, 1, 3]}>
         <BarChart.Trend values={Array.from({ length: matches }, (_, index) => line[index] ?? null)} />
       </BarChart>
-      <Text appearance="meta" className="hf-form-chart-key hf-space-end-xs">
-        <b>{tableColumns.won.abbreviation}</b> {tableColumns.won.name} (3 punten),{' '}
-        <b>{tableColumns.drawn.abbreviation}</b> {tableColumns.drawn.name} (1), <b>{tableColumns.lost.abbreviation}</b>{' '}
-        {tableColumns.lost.name} (0).
-      </Text>
+      <FormKey className="hf-form-chart-key hf-space-end-xs" />
       <Text appearance="meta" className="hf-form-chart-line">
         {latest === null
           ? `De lijn begint na ${span} wedstrijden.`

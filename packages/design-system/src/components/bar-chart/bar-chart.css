@@ -208,6 +208,15 @@
     }
   }
 
+  /* A small chart keeps its height, also where there is room for the tall one. */
+  .hf-bar-chart-small {
+    --hf-bar-chart-height: 4rem;
+  }
+
+  .hf-bar-chart-small .hf-bar-chart-plot {
+    --hf-bar-chart-height: 4rem;
+  }
+
   /* In forced colours a background colour is replaced, unless it is a system colour. */
   @media (forced-colors: active) {
     .hf-bar-chart-bar {
