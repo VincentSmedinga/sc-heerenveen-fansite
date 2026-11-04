@@ -4,12 +4,9 @@ import { describe, expect, it } from 'vitest'
 import type { FormResult } from '../form-chart/form'
 
 import { tableColumns, tableLegend } from '../table-columns'
-import { FormTimeline, type FormTimelineLatest } from './FormTimeline'
+import { FormTimeline } from './FormTimeline'
 
-const line = (latest: FormTimelineLatest | null) =>
-  latest === null ? 'Nog geen punt.' : `Laatste punt: ${latest.average}, in ${latest.year}.`
-
-const props = { firstYear: 1990, line, scope: 'Alleen de Eredivisie.', title: 'Seizoen' }
+const props = { firstYear: 1990, scope: 'Alleen de Eredivisie.', title: 'Seizoen' }
 
 /** 74 places: 1990 up to and including 2026, two for each year. */
 const places = (played: Record<number, FormResult>): (FormResult | null)[] =>
@@ -61,34 +58,10 @@ describe('FormTimeline', () => {
     expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
   })
 
-  it('says what the last point of the line is, with a decimal comma and its year', () => {
-    const { container } = render(<FormTimeline {...props} results={places({ 70: 'W', 71: 'W', 72: 'G', 73: 'V' })} />)
-
-    expect(textOf(container)).toContain('Laatste punt: 1,8, in 2026.')
-  })
-
-  it('takes the year of the place of the last point, also when the series ends before the last place', () => {
-    const { container } = render(<FormTimeline {...props} results={places({ 2: 'W', 3: 'W', 4: 'W', 5: 'W' })} />)
-
-    expect(textOf(container)).toContain('Laatste punt: 3,0, in 1992.')
-  })
-
-  it('says there is no point when fewer than four results are in a row', () => {
-    const { container } = render(<FormTimeline {...props} results={places({ 0: 'W', 1: 'W', 2: 'W', 4: 'W' })} />)
-
-    expect(textOf(container)).toContain('Nog geen punt.')
-    expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).toBe('')
-    expect(container.querySelector('.hf-bar-chart-trend-dot')).toBeNull()
-  })
-
-  it('puts the key, the sentence about the line and the sentence about what counts under the chart', () => {
+  it('puts the key and the text about what counts under the chart, and no text about the line', () => {
     const { container } = render(<FormTimeline {...props} results={places({})} />)
 
-    expect(textOf(container)).toEqual([
-      'W winst (3 punten), G gelijk (1), V verlies (0).',
-      'Nog geen punt.',
-      'Alleen de Eredivisie.',
-    ])
+    expect(textOf(container)).toEqual(['W winst (3 punten), G gelijk (1), V verlies (0).', 'Alleen de Eredivisie.'])
   })
 
   it('uses the letters and words of the columns under the tables', () => {
@@ -115,7 +88,11 @@ describe('FormTimeline', () => {
       '90',
       '00',
     ])
-    expect(textOf(container)).toContain('Laatste punt: 1,0, in 2001.')
+    // A window of 2 gives a point from the second result: two runs, with the gap between them.
+    const path = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
+
+    expect(path.startsWith('M1.5 0 L')).toBe(false)
+    expect(path.match(/M/gu)).toHaveLength(2)
   })
 
   it('hides the chart from a screen reader and keeps everything else as text', () => {

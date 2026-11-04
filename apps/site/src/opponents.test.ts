@@ -649,28 +649,43 @@ describe('timelineOf', () => {
     match(ours, theirs, { matchDate, season, ...more })
 
   it('has two places for each season from 1990/91 up to and including the season of now', () => {
-    expect(timelineOf([], now)).toHaveLength(74)
-    expect(timelineOf([], new Date('2000-10-30T12:00:00Z'))).toHaveLength(22)
-    expect(timelineOf([], new Date('1990-07-01T00:00:00Z'))).toHaveLength(2)
+    expect(timelineOf([], now, 1990)).toHaveLength(74)
+    expect(timelineOf([], new Date('2000-10-30T12:00:00Z'), 1990)).toHaveLength(22)
+    expect(timelineOf([], new Date('1990-07-01T00:00:00Z'), 1990)).toHaveLength(2)
+  })
+
+  it('starts with the season of the first year it is given, the first season we have matches of', () => {
+    const matches = [played('2025/26', '2026-02-01', 1, 0), played('2009/10', '2010-03-07', 1, 0)]
+    const places = timelineOf(matches, now, 2010)
+
+    expect(places).toHaveLength(34)
+    expect(places.slice(30, 34)).toEqual(['W', null, null, null])
+    expect(places.filter((place) => place !== null)).toEqual(['W'])
+    expect(timelineOf([played('2010/11', '2011-02-12', 0, 2)], now, 2010).slice(0, 2)).toEqual(['V', null])
   })
 
   it('has only empty places without matches', () => {
-    expect(timelineOf([], now).every((place) => place === null)).toBe(true)
+    expect(timelineOf([], now, 1990).every((place) => place === null)).toBe(true)
   })
 
   it('puts the first match of a season on the left and the second on the right, by the day', () => {
     // The matches are given newest first, as the query has them.
-    const places = timelineOf([played('2025/26', '2026-02-01', 0, 1), played('2025/26', '2025-09-13', 3, 0)], now)
+    const places = timelineOf([played('2025/26', '2026-02-01', 0, 1), played('2025/26', '2025-09-13', 3, 0)], now, 1990)
 
     expect(places.slice(70, 74)).toEqual(['W', 'V', null, null])
   })
 
   it('fills only the first place of a season with one match', () => {
-    expect(timelineOf([played('2024/25', '2025-03-01', 1, 1)], now).slice(68, 72)).toEqual(['G', null, null, null])
+    expect(timelineOf([played('2024/25', '2025-03-01', 1, 1)], now, 1990).slice(68, 72)).toEqual([
+      'G',
+      null,
+      null,
+      null,
+    ])
   })
 
   it('leaves a season without a match empty, so a club that played lower leaves a gap', () => {
-    const places = timelineOf([played('2012/13', '2013-03-02', 2, 0), played('2010/11', '2011-02-12', 0, 2)], now)
+    const places = timelineOf([played('2012/13', '2013-03-02', 2, 0), played('2010/11', '2011-02-12', 0, 2)], now, 1990)
 
     expect(places.slice(40, 46)).toEqual(['V', null, null, null, 'W', null])
   })
@@ -684,6 +699,7 @@ describe('timelineOf', () => {
         played('2025/26', '2025-10-04', 0, 0),
       ],
       now,
+      1990,
     )
 
     expect(places.slice(70, 72)).toEqual(['G', null])
@@ -696,6 +712,7 @@ describe('timelineOf', () => {
         played('2026/27', '2027-03-01', 0, 0, { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
       ],
       now,
+      1990,
     )
 
     expect(places.slice(72)).toEqual(['W', null])
@@ -709,6 +726,7 @@ describe('timelineOf', () => {
         played('2025/26', '2025-09-13', 1, 1),
       ],
       now,
+      1990,
     )
 
     expect(places.slice(70, 72)).toEqual(['G', 'W'])
@@ -722,6 +740,7 @@ describe('timelineOf', () => {
         played('1989/90', '1990-02-02', 1, 0),
       ],
       now,
+      1990,
     )
 
     expect(places.filter((place) => place !== null)).toEqual(['W'])
@@ -733,17 +752,17 @@ describe('timelineOf', () => {
     const matches = [played('2025/26', '2026-02-01', 1, 0), played('2026/27', '2026-08-15', 0, 1)]
 
     // Until the end of 30 June 2026 the last season is 2025/26 and the axis ends there.
-    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z'))).toHaveLength(72)
-    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z')).slice(70)).toEqual(['W', null])
+    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z'), 1990)).toHaveLength(72)
+    expect(timelineOf(matches, new Date('2026-06-30T21:59:59Z'), 1990).slice(70)).toEqual(['W', null])
     // From 1 July the axis has the season 2026/27, with its two empty places.
-    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z'))).toHaveLength(74)
-    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z')).slice(70)).toEqual(['W', null, 'V', null])
+    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z'), 1990)).toHaveLength(74)
+    expect(timelineOf(matches, new Date('2026-07-01T00:00:00Z'), 1990).slice(70)).toEqual(['W', null, 'V', null])
   })
 
   it('does not depend on the order the matches are given in', () => {
     const matches = [played('2025/26', '2025-09-13', 3, 0), played('2025/26', '2026-02-01', 0, 1)]
 
-    expect(timelineOf(matches, now)).toEqual(timelineOf([...matches].reverse(), now))
+    expect(timelineOf(matches, now, 1990)).toEqual(timelineOf([...matches].reverse(), now, 1990))
   })
 })
 

@@ -148,38 +148,38 @@ export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | unde
   return meetings.slice(0, lastCount).map(resultOf).reverse()
 }
 
-/** The year the axis of the card Verloop sinds 1990 starts at: the season 1990/91. */
-export const timelineFirstYear = 1990
-
-/** The places of a season on that axis: the first and the second match against the club. */
+/** The places of a season on the axis of the card Resultaten sinds: two matches. */
 export const timelinePerYear = 2
+
+/** The number of matches the line of that card averages over: four seasons of two matches. */
+export const timelineWindow = 8
 
 /**
  * How many played matches in the Eredivisie we need against a club before its page has the card
- * Verloop sinds 1990. It is the number of results the line averages over, so a card with fewer
- * would have bars and no line.
+ * Resultaten sinds. It is fewer than the window of the line: a card with fewer matches has bars
+ * and no line.
  */
 export const timelineMinimum = 4
 
 /** The year a season starts in, `2025/26` being 2025. */
-const startYearOf = (season: string) => Number(season.slice(0, 4))
-
-/** A season written out from the year it starts in, `2025` being `2025/26`. */
-export const seasonOfYear = (year: number) => `${year}/${String((year + 1) % 100).padStart(2, '0')}`
+export const startYearOf = (season: string) => Number(season.slice(0, 4))
 
 /**
  * The place of every played match of the Eredivisie against a club on the axis of the card
- * Verloop sinds 1990, for the choice `league` whatever the visitor chose. There are two places
- * for each season from 1990/91 up to and including the season of `now` (a season starts on
- * 1 July): the first match of the season on the day, then the second. A place is a result from
- * the side of sc Heerenveen, or `null` when the match was not played, there was none (the club,
- * or we, played in another division) or it is a third match, which the chart cannot show. A
- * match from before 1990/91 has no place. The matches may be in any order.
+ * Resultaten sinds, for the choice `league` whatever the visitor chose. The axis starts with
+ * the season that starts in `firstYear`: the first season we have matches of, for any club.
+ * There are two places for each season up to and including the season of `now` (a season
+ * starts on 1 July): the first match of the season on the day, then the second.
+ * A place is a result from the side of sc Heerenveen, or `null` when the match was not played,
+ * there was none (the club, or we, played in another division) or it is a third match, which
+ * the chart cannot show.
+ * A match from before that season has no place.
+ * The matches may be in any order.
  */
-export function timelineOf(matches: readonly PublicClubMatch[], now: Date): (FormResult | null)[] {
+export function timelineOf(matches: readonly PublicClubMatch[], now: Date, firstYear: number): (FormResult | null)[] {
   const lastYear = startYearOf(seasonOf(now))
   const places: (FormResult | null)[] = Array.from(
-    { length: Math.max(0, lastYear - timelineFirstYear + 1) * timelinePerYear },
+    { length: Math.max(0, lastYear - firstYear + 1) * timelinePerYear },
     () => null,
   )
   const bySeason = new Map<number, Meeting[]>()
@@ -187,7 +187,7 @@ export function timelineOf(matches: readonly PublicClubMatch[], now: Date): (For
   for (const meeting of meetingsOf(matches, 'league')) {
     const year = startYearOf(meeting.season)
 
-    if (year >= timelineFirstYear && year <= lastYear) {
+    if (year >= firstYear && year <= lastYear) {
       bySeason.set(year, [...(bySeason.get(year) ?? []), meeting])
     }
   }
@@ -197,7 +197,7 @@ export function timelineOf(matches: readonly PublicClubMatch[], now: Date): (For
       .toSorted((a, b) => a.matchDate.localeCompare(b.matchDate) || a.id - b.id)
       .slice(0, timelinePerYear)
       .forEach((meeting, index) => {
-        places[(year - timelineFirstYear) * timelinePerYear + index] = resultOf(meeting)
+        places[(year - firstYear) * timelinePerYear + index] = resultOf(meeting)
       })
   }
 
@@ -205,7 +205,7 @@ export function timelineOf(matches: readonly PublicClubMatch[], now: Date): (For
 }
 
 /**
- * Whether the page of a club has the card Verloop sinds 1990: we played it at least
+ * Whether the page of a club has the card Resultaten sinds: we played it at least
  * `timelineMinimum` times in the Eredivisie. It doesn't depend on the choice of the page.
  */
 export const hasTimeline = (matches: readonly PublicClubMatch[]) =>

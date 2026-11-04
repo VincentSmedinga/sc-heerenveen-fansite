@@ -543,16 +543,17 @@ De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statist
 Ze heeft zes delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
-- De kaart "Verloop sinds 1990" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
-  Het is dezelfde grafiek als "Verloop van het seizoen" (staafjes van 3 hoog voor winst, 1 voor gelijk en een streepje voor verlies, en een lijn door het gemiddelde), maar de horizontale as volgt de tijd: elk seizoen heeft twee plekken, de eerste en de tweede gespeelde wedstrijd van de Eredivisie tegen de club op datum (`timelineOf` in `src/opponents.ts`), van 1990/91 tot en met het seizoen van nu (een seizoen begint op 1 juli).
+- De kaart "Resultaten sinds 2010" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
+  Het jaar in de kop is het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen (nu 2010/11), en schuift mee als er eerdere seizoenen bijkomen (#414).
+  Het is dezelfde grafiek als "Verloop van het seizoen" (staafjes van 3 hoog voor winst, 1 voor gelijk en een streepje voor verlies, en een lijn door het gemiddelde), maar de horizontale as volgt de tijd: elk seizoen heeft twee plekken, de eerste en de tweede gespeelde wedstrijd van de Eredivisie tegen de club op datum (`timelineOf` in `src/opponents.ts`), tot en met het seizoen van nu (een seizoen begint op 1 juli).
   Een seizoen zonder wedstrijd tegen de club in de Eredivisie, een wedstrijd die nog moet komen en een derde wedstrijd in een seizoen zijn een lege plek of vallen weg; de beker en de play-offs staan er niet in.
-  Onder de as staat elke vijf jaar een label (90, 95, 00, …) met de titel "Seizoen", en de lijn is het gemiddelde aantal punten over vier plekken achter elkaar die alle gespeeld zijn: bij een gat stopt de lijn.
-  De as begint altijd in 1990, ook nu de database pas vanaf 2010/11 wedstrijden heeft; de zin "Alleen de Eredivisie: alle 12 gespeelde wedstrijden sinds 2010/11." zegt sinds wanneer we ze hebben, en schuift mee als er seizoenen bijkomen (#414).
+  Onder de as staat een label onder het eerste jaar en daarna elke vier jaar (10, 14, 18, …) met de titel "Seizoen".
+  De lijn is het gemiddelde aantal punten over acht plekken achter elkaar die alle gespeeld zijn, vier seizoenen (`timelineWindow`): bij een gat stopt de lijn, en een club met minder dan acht wedstrijden heeft staafjes en geen lijn.
   De grafiek is verborgen voor een schermlezer.
-  Die hoort de sleutel (W, G, V uit `tableColumns`), de zin over de lijn ("… in de laatste 4 wedstrijden: 1,8, bij de wedstrijd van 2025/26", of "De lijn begint na 4 wedstrijden achter elkaar") en de aantallen ("12 wedstrijden: 5 winst, 3 gelijk, 4 verlies", met "De hele lijst staat bij Wedstrijden" en een link naar `#wedstrijden`).
+  Onder de grafiek staan alleen de sleutel (W, G, V uit `tableColumns`) en "Alleen de Eredivisie."
   De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.
   Hij is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline` en `timelineMinimum`), zonder zin die zegt waarom.
-- De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Verloop sinds 1990": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
+- De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Resultaten sinds": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
   `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel.
   Anders dan op Wedstrijden heeft de kaart naast het eerste diagram een tweede, kleiner donutdiagram (`DonutChart` met `size="small"`) met de doelpunten die we maakten (groen, links) en de tegendoelpunten (rood, rechts) van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31" (`centre`) in een kleinere letter dan het totaal van het eerste diagram.
   De twee staan naast elkaar in een `DonutChart.Group`, ook op een telefoon.
@@ -592,7 +593,7 @@ De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecac
 De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
 De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
 De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
-`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion, en met de kaart Verloop sinds 1990), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion, en met de kaart Resultaten sinds), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
@@ -606,7 +607,7 @@ Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt A
 
 De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
-Op de pagina van een club volgt de kaart Verloop sinds 1990 de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
+Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
 Doelpunten in de verlenging blijven buiten Doelpunten per kwartier, met de zin die dat zegt.

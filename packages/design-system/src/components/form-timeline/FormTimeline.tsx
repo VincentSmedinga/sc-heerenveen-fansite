@@ -6,27 +6,15 @@ import { classNames } from '../classNames'
 import { type FormResult, pointsOf } from '../form-chart/form'
 import { FormKey } from '../form-chart/FormKey'
 import { Text } from '../text/Text'
-import { barsOf, yearLabels, yearOfPlace } from './timeline'
-
-/** The last point of the line: the average, with a decimal comma, and the year it sits in. */
-export type FormTimelineLatest = {
-  average: string
-  year: number
-}
+import { barsOf, yearLabels } from './timeline'
 
 export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'results'> & {
   /** A form timeline has no children: everything it shows comes from the props below. */
   children?: never
-  /** The year of the first place. A label sits under each year that `labelEvery` divides. */
+  /** The year of the first place. */
   firstYear: number
-  /** How many years there are between two labels. The default is 5. */
+  /** How many years there are between two labels, from the first year. The default is 5. */
   labelEvery?: number
-  /**
-   * The sentence about the line, from its last point: how far back it goes and the year of that
-   * point, or `null` when the line has no point. Write it in full: it is the text for what the
-   * line shows.
-   */
-  line: (latest: FormTimelineLatest | null) => string
   /** How many places make one year. The default is 2. */
   placesPerYear?: number
   /**
@@ -35,8 +23,8 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
    */
   results: readonly (FormResult | null)[]
   /**
-   * What counts and what does not, such as the competition and since when we have matches. A
-   * place with no result is a gap, and without this sentence a gap reads as "never played".
+   * The text under the key: what counts, such as the competition. A place with no result is a
+   * gap, and this text says what a gap means.
    */
   scope: string
   /** The caption under the labels, such as `Seizoen`. */
@@ -45,16 +33,14 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
   window?: number
 }
 
-const average = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
-
 /**
  * Results over the years as bars: a place on the axis for each result, with gaps where there
  * is none, and a smooth line through the average of the points over the last results. The
  * axis follows the time, so it has the same places whatever has been played, and a label sits
  * under every fifth year. A gap in the results is a gap in the line. Under the chart are the
- * key to the letters, a sentence about the line and one about what counts, so everything the
- * picture says is text too. The chart itself is hidden from a screen reader, so give the same
- * numbers in a list or a table on the same page.
+ * key to the letters and the text about what counts, so the picture is explained in text too.
+ * The chart itself is hidden from a screen reader, so give the same numbers in a list or a
+ * table on the same page.
  *
  * It puts together `BarChart`, `BarChart.Trend` and the key of `FormChart`. It knows nothing
  * about matches or seasons: the page gives a result or nothing for each place, the year of the
@@ -64,7 +50,6 @@ export const FormTimeline = ({
   className,
   firstYear,
   labelEvery = 5,
-  line,
   placesPerYear = 2,
   results,
   scope,
@@ -76,9 +61,6 @@ export const FormTimeline = ({
     results.map((result) => (result === null ? null : pointsOf(result))),
     span,
   )
-  const last = values.findLastIndex((value) => value !== null)
-  const latest = values[last] ?? null
-
   return (
     <div {...props} className={classNames('hf-form-timeline hf-flow', className)}>
       <BarChart
@@ -91,13 +73,6 @@ export const FormTimeline = ({
         <BarChart.Trend values={values} />
       </BarChart>
       <FormKey className="hf-space-end-xs" />
-      <Text appearance="meta" className="hf-form-timeline-line hf-space-end-xs">
-        {line(
-          latest === null
-            ? null
-            : { average: average.format(latest), year: yearOfPlace(last, firstYear, placesPerYear) },
-        )}
-      </Text>
       <Text appearance="meta" className="hf-form-timeline-scope">
         {scope}
       </Text>

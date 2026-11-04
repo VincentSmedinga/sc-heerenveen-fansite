@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { barsOf, shortYear, yearLabels, yearOfPlace } from './timeline'
+import { barsOf, shortYear, yearLabels } from './timeline'
 
 describe('barsOf', () => {
   it('gives a bar for each result, as high as its points, and nothing for a gap', () => {
@@ -10,12 +10,6 @@ describe('barsOf', () => {
       { tone: 'neutral', value: 1 },
       { tone: 'negative', value: 0 },
     ])
-  })
-})
-
-describe('yearOfPlace', () => {
-  it('puts the places of a year together, from the year of the first', () => {
-    expect([0, 1, 2, 3, 73].map((place) => yearOfPlace(place, 1990, 2))).toEqual([1990, 1990, 1991, 1991, 2026])
   })
 })
 
@@ -33,8 +27,15 @@ describe('yearLabels', () => {
     expect(labels.map(({ at }) => at)).toEqual([1, 11, 21, 31, 41, 51, 61, 71])
   })
 
-  it('starts at the first year that is a multiple, when the axis starts in between', () => {
-    expect(yearLabels(8, 1993, 2, 5)).toEqual([{ at: 5, text: '95' }])
+  it('starts with a label under the first year, whatever year it is, and counts from there', () => {
+    expect(yearLabels(8, 1993, 2, 5)).toEqual([{ at: 1, text: '93' }])
+    expect(yearLabels(34, 2010, 2, 4)).toEqual(
+      [2010, 2014, 2018, 2022, 2026].map((year, index) => ({ at: 1 + index * 8, text: String(year).slice(2) })),
+    )
+  })
+
+  it('counts over the turn of the century', () => {
+    expect(yearLabels(20, 1996, 2, 4).map(({ text }) => text)).toEqual(['96', '00', '04'])
   })
 
   it('has no label for a year after the last place', () => {

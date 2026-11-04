@@ -1842,7 +1842,7 @@
 - **Later:** zie _Het beheer bewaart een eigen lijst per club, die de lijst van Wikipedia vervangt_ (4 november 2026): een club met een eigen lijst toont alleen die, met een toelichting onder de naam, en ook als hij geen uitwedstrijd in de Eredivisie had.
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026): de perioden zijn seizoenen en geen dagen van wedstrijden, en de regel onder de lijst is weg.
 - **Later:** zie _Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen_ (4 november 2026).
-  De zijkolom heeft tussen Onze uitslagen en Hoe vaak welke uitslag de kaart Verloop sinds 1990, op het witte vlak.
+  De zijkolom heeft tussen Onze uitslagen en Hoe vaak welke uitslag de kaart Resultaten sinds, op het witte vlak.
 
 ## Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
 
@@ -2194,7 +2194,7 @@
   De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
 - **Alternatieven:** altijd alleen de Eredivisie (de donut zou de rest van de pagina tegenspreken zodra de beker meetelt).
 - **Later:** zie _Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen_ (4 november 2026).
-  De kaart Verloop sinds 1990 volgt de schakelaar niet en telt de Eredivisie, ook bij Alle wedstrijden; de zin onder de grafiek zegt dat.
+  De kaart Resultaten sinds volgt de schakelaar niet en telt de Eredivisie, ook bij Alle wedstrijden; de zin onder de grafiek zegt dat.
 
 ## `Match` is voor een volledige lijst, `ShortMatch` voor een selectie
 
@@ -2423,32 +2423,35 @@
 ## Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen
 
 - **Datum:** 4 november 2026
-- **Besluit:** de kaart "Verloop sinds 1990" op de pagina van een club telt alleen de Eredivisie en geeft elk seizoen twee plekken: de eerste en de tweede gespeelde wedstrijd tegen de club, op datum (`timelineOf` in `src/opponents.ts`, #718).
-  De as loopt van het seizoen 1990/91 tot het seizoen van nu, met een label (de laatste twee cijfers van het beginjaar) elke vijf jaar.
+- **Besluit:** de kaart "Resultaten sinds <jaar>" op de pagina van een club telt alleen de Eredivisie en geeft elk seizoen twee plekken: de eerste en de tweede gespeelde wedstrijd tegen de club, op datum (`timelineOf` in `src/opponents.ts`, #718).
+  De as loopt van het eerste seizoen waarvan we wedstrijden hebben tot het seizoen van nu, met een label (de laatste twee cijfers van het beginjaar) onder het eerste jaar en daarna elke vier jaar.
   De kaart volgt de schakelaar niet.
   Hij staat in de zijkolom direct onder "Onze uitslagen tegen …", op het witte vlak: het zachte vlak erboven en het warme eronder zijn dan niet gelijk aan het zijne.
 - **Waarom:** twee wedstrijden per seizoen zijn de vaste maat van de competitie, dus "twee staafjes per jaar" klopt altijd.
   Plaatsen op de kalenderdatum werkt niet: in 14 combinaties van club en seizoen vallen beide wedstrijden in hetzelfde halfjaar (AZ in 2013/14: augustus en december), en dan botsen de staafjes.
   Een beker- of play-offwedstrijd heeft geen vaste plek in een jaar en past niet in twee plekken.
-- **Alternatieven:** per halfjaar op de datum van de wedstrijd (botst, en januari tot juni van 1990 blijft altijd leeg); de schakelaar volgen met een regel voor een derde en vierde wedstrijd in een seizoen (de grafiek kan ze niet tonen).
+  Een label elke vier jaar vanaf het eerste jaar houdt de as leesbaar op een telefoon en laat het laatste jaar een label hebben.
+- **Alternatieven:** per halfjaar op de datum van de wedstrijd (botst); de schakelaar volgen met een regel voor een derde en vierde wedstrijd in een seizoen (de grafiek kan ze niet tonen); een label elke vijf jaar op de veelvouden van vijf (het laatste jaar valt er dan tussenin).
 
-## Het gemiddelde loopt over vier opeenvolgende gespeelde plekken en stopt bij een gat
+## Het gemiddelde loopt over acht opeenvolgende gespeelde plekken en stopt bij een gat
 
 - **Datum:** 4 november 2026
-- **Besluit:** de lijn van "Verloop sinds 1990" is het gemiddelde aantal punten per wedstrijd over vier opeenvolgende plekken die alle gespeeld zijn, en stopt bij een gat (#718).
-  De zin onder de grafiek noemt het laatste punt met het seizoen.
+- **Besluit:** de lijn van "Resultaten sinds" is het gemiddelde aantal punten per wedstrijd over acht opeenvolgende plekken die alle gespeeld zijn, vier seizoenen, en stopt bij een gat (`timelineWindow` in `src/opponents.ts`, #718).
   De kaart is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline`), zonder zin die zegt waarom.
-- **Waarom:** twee seizoenen zijn genoeg om een gemiddelde te geven dat niet bij elke wedstrijd springt, en een club die tussendoor lager speelde, geeft geen gemiddelde over een gat heen.
+  Heeft een club minder dan 8 wedstrijden, dan heeft de kaart staafjes en geen lijn.
+- **Waarom:** de projecteigenaar bekeek vensters van 4, 6, 8 en 10 wedstrijden met de echte uitslagen tegen AZ en FC Groningen en koos 8.
+  Vier seizoenen geven een rustige lijn die laat zien hoe het over een periode ging, en een club die tussendoor lager speelde, geeft geen gemiddelde over een gat heen.
   Het is dezelfde `movingAverage` als bij het seizoen, zonder nieuwe regel.
-  De zin noemt het seizoen van het laatste punt en niet "nu", want bij een club die al jaren niet in de Eredivisie speelt is het laatste punt oud.
-- **Alternatieven:** een venster van 5, zoals de rij "Vorm" (met twee wedstrijden per seizoen een vreemd getal); het gemiddelde over een gat heen trekken (laat zien wat er niet is).
+- **Alternatieven:** een venster van 4 (springt bij elke wedstrijd), van 6, van 10 of van 5 zoals de rij "Vorm" (een lijn die pas na vijf seizoenen achter elkaar begint, of een vreemd getal bij twee wedstrijden per seizoen); het gemiddelde over een gat heen trekken (laat zien wat er niet is).
 
-## De eerste 20 jaar blijven leeg tot #414, en de zin zegt sinds wanneer
+## De as begint bij het eerste seizoen met gegevens, en de kaart zegt alleen dat het de Eredivisie is
 
 - **Datum:** 4 november 2026
-- **Besluit:** de as van "Verloop sinds 1990" begint altijd in 1990, ook als de database nu pas vanaf 2010/11 wedstrijden heeft (#718).
-  De zin onder de grafiek noemt het eerste seizoen dat we hebben ("Alleen de Eredivisie: alle 12 gespeelde wedstrijden sinds 2010/11.").
-- **Waarom:** de projecteigenaar wil één vaste as, die niet verspringt als er seizoenen bijkomen.
-  Een lege plek vóór 2010/11 zou anders lezen als "niet gespeeld".
-  De kaart hoeft niet op #414 te wachten.
-- **Alternatieven:** wachten op #414 (vertraagt de kaart voor een onbekende tijd); de as laten beginnen bij het eerste seizoen met gegevens (verspringt bij elke import).
+- **Besluit:** de as van "Resultaten sinds <jaar>" begint met het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen en niet voor deze club (nu 2010/11, dus de kop "Resultaten sinds 2010").
+  Onder de grafiek staan alleen de sleutel (W, G, V) en "Alleen de Eredivisie."
+  Er is geen zin over de lijn, geen telling van de wedstrijden en geen link naar de lijst Wedstrijden (#718).
+  - **Het schuift mee:** komen er eerdere seizoenen bij (#414), dan begint de as eerder en de kop noemt dat jaar.
+- **Waarom:** de projecteigenaar wil dat elke club dezelfde as heeft en dat er geen lege jaren zijn waarin niemand wedstrijden heeft.
+  Een kaart met alleen de grafiek, de sleutel en de competitie is rustig; de lijst Wedstrijden op dezelfde pagina heeft elke wedstrijd met zijn uitslag.
+- **Nadeel:** een schermlezer hoort de grafiek niet (die is verborgen) en krijgt alleen de sleutel en de competitie; de uitslagen staan in de lijst Wedstrijden.
+- **Alternatieven:** de as laten beginnen in 1990 (twintig jaar leeg tot #414, en de zin moest uitleggen waarom); de as laten beginnen bij de eerste wedstrijd van deze club (elke club heeft een andere as); zinnen over de lijn en de aantallen onder de grafiek (de projecteigenaar wil ze niet).
