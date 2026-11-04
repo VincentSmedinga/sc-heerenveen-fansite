@@ -225,6 +225,7 @@ test.describe('the page of a club', () => {
 
     await expect(sidebar.getByRole('heading', { level: 2 })).toHaveText([
       'Onze uitslagen tegen Voorbeeld United',
+      'Verloop sinds 1990',
       'Hoe vaak welke uitslag',
       'Stadions',
     ])
