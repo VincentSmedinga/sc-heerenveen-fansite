@@ -252,6 +252,34 @@ export function cleanSheetsOf(matches: PublicMatch[], choice: CompetitionChoice 
 }
 
 /**
+ * The counting and the order of `scoreCountsOf`, for any list of played matches with a score:
+ * the page of a club counts its meetings (see `meetingsOf` in `opponents.ts`) with it, so both
+ * pages show one chart.
+ */
+export function countScores(results: readonly { goalsAgainst: number; goalsFor: number }[]): ScoreCount[] {
+  const counts = new Map<string, ScoreCount>()
+
+  for (const { goalsAgainst, goalsFor } of results) {
+    const key = `${goalsFor}–${goalsAgainst}`
+    const known = counts.get(key)
+
+    if (known === undefined) {
+      const outcome = goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
+
+      counts.set(key, { count: 1, goalsAgainst, goalsFor, outcome })
+    } else {
+      known.count += 1
+    }
+  }
+
+  return [...counts.values()].sort(
+    (a, b) =>
+      b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst) ||
+      b.goalsFor + b.goalsAgainst - (a.goalsFor + a.goalsAgainst),
+  )
+}
+
+/**
  * The seasons the matches and statistics pages can show, the newest first: the seasons that
  * have matches, up to and including the current one. The current season is always in it, also
  * before its first match is in the database, because the page of that season is the base
@@ -300,26 +328,7 @@ export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoic
  * that a shoot-out decided is a draw (see `playedMatchesOf`).
  */
 export function scoreCountsOf(matches: PublicMatch[]): ScoreCount[] {
-  const counts = new Map<string, ScoreCount>()
-
-  for (const { goalsAgainst, goalsFor } of playedMatchesOf(matches, 'all')) {
-    const key = `${goalsFor}–${goalsAgainst}`
-    const known = counts.get(key)
-
-    if (known === undefined) {
-      const outcome = goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
-
-      counts.set(key, { count: 1, goalsAgainst, goalsFor, outcome })
-    } else {
-      known.count += 1
-    }
-  }
-
-  return [...counts.values()].sort(
-    (a, b) =>
-      b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst) ||
-      b.goalsFor + b.goalsAgainst - (a.goalsFor + a.goalsAgainst),
-  )
+  return countScores(playedMatchesOf(matches, 'all'))
 }
 
 /** The result of a match from the side of sc Heerenveen: `W` won, `G` drawn and `V` lost. */

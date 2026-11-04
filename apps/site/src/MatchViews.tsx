@@ -1,5 +1,6 @@
 import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
 import type { FormResult, MarkRowMark } from '@fansite/design-system'
+import type { ReactNode } from 'react'
 
 import {
   Button,
@@ -668,11 +669,63 @@ export function lastFiveCaption(lastResultOn: string) {
  * numbers. The chart has no text round the ring and is hidden from a screen reader, which gets
  * the table: each row names the score and the outcome in words. The `matches` are the results
  * the page lists, and only the played ones with a score count. Without one it is a sentence
- * and no chart.
+ * and no chart. The page of a club shows the same card (see `ScoreCountsView`).
  */
 export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const counts = scoreCountsOf(matches)
-  const played = counts.reduce((sum, count) => sum + count.count, 0)
+  const played = playedOfCounts(counts)
+
+  return (
+    <ScoreCountsView
+      counts={counts}
+      empty="We hebben nog geen uitslagen van dit seizoen."
+      footer={<BasedOn known={played} played={played} />}
+      season={season}
+    />
+  )
+}
+
+/** How many matches the scores in `counts` come to. */
+export const playedOfCounts = (counts: ScoreCount[]) => counts.reduce((sum, count) => sum + count.count, 0)
+
+/**
+ * The sentence above the table of scores: how often sc Heerenveen won, drew and lost, such as
+ * "8 keer gewonnen, 1 keer gelijk, 5 keer verloren". An outcome that did not happen is left
+ * out, and one match gives "1 keer gewonnen".
+ */
+export function scoreCountsSentence(counts: ScoreCount[]) {
+  const total = (outcome: ScoreCount['outcome']) =>
+    counts.filter((count) => count.outcome === outcome).reduce((sum, count) => sum + count.count, 0)
+  const parts = [
+    [total('win'), 'gewonnen'],
+    [total('draw'), 'gelijk'],
+    [total('loss'), 'verloren'],
+  ] as const
+
+  return parts
+    .filter(([count]) => count > 0)
+    .map(([count, word]) => `${count} keer ${word}`)
+    .join(', ')
+}
+
+/**
+ * The card "Hoe vaak welke uitslag" for the `counts` it is given, which the page of the
+ * matches and the page of a club share: the sentence, the chart and the tables. The `footer`
+ * is the line under it that says what the figures are based on, which differs per page, and
+ * `empty` the sentence for no played match.
+ */
+export function ScoreCountsView({
+  counts,
+  empty,
+  footer,
+  season,
+}: {
+  counts: ScoreCount[]
+  empty: string
+  footer: ReactNode
+  season?: string | undefined
+}) {
+  const played = playedOfCounts(counts)
   const slices = counts.map(({ count, goalsAgainst, goalsFor, outcome }) => ({
     label: `${goalsFor}–${goalsAgainst}`,
     tone: outcomeTones[outcome],
@@ -685,7 +738,7 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
         {scoreCountsCard.name}
       </Heading>
       {played === 0 ? (
-        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+        <Text>{empty}</Text>
       ) : (
         <>
           <Text>{scoreCountsSentence(counts)}</Text>
@@ -709,31 +762,11 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
               )
             })}
           </DataTable.Group>
-          <BasedOn known={played} played={played} />
+          {footer}
         </>
       )}
     </Card>
   )
-}
-
-/**
- * The sentence above the table of scores: how often sc Heerenveen won, drew and lost, such as
- * "8 keer gewonnen, 1 keer gelijk, 5 keer verloren". An outcome that did not happen is left
- * out, and one match gives "1 keer gewonnen".
- */
-export function scoreCountsSentence(counts: ScoreCount[]) {
-  const total = (outcome: ScoreCount['outcome']) =>
-    counts.filter((count) => count.outcome === outcome).reduce((sum, count) => sum + count.count, 0)
-  const parts = [
-    [total('win'), 'gewonnen'],
-    [total('draw'), 'gelijk'],
-    [total('loss'), 'verloren'],
-  ] as const
-
-  return parts
-    .filter(([count]) => count > 0)
-    .map(([count, word]) => `${count} keer ${word}`)
-    .join(', ')
 }
 
 /**

@@ -1722,6 +1722,7 @@
 - **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de lijst sorteert sindsdien met JavaScript op elke kolom en heeft bij de keuze Eredivisie de kolom Punten.
   De tabel van de server blijft van A tot Z, zonder knoppen.
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
+- **Later:** zie _De pagina van een tegenstander toont de uitslagen als donutgrafiek per score_ (4 november 2026): de zijkolom van de pagina van een club heeft sindsdien ook de kaart "Hoe vaak welke uitslag", direct onder "Onze uitslagen tegen …".
   Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
   De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
 - **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, L, V, P en D als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
@@ -2153,3 +2154,28 @@
     Een schermlezer hoort "Speelronde 27, Geannuleerd, sc Heerenveen tegen Willem II".
 - **Waarom:** een wedstrijd die nooit meer wordt gespeeld, is geen wedstrijd die nog komt en geen uitslag, maar hij hoort in de lijst van zijn seizoen, zodat speelronde 27 tot en met 34 van 2019/20 geen gat is zonder uitleg.
 - **Alternatieven:** de wedstrijd in Programma laten staan met "Geannuleerd" (hij staat daar dan eeuwig, tussen wedstrijden die nog komen); hem uit alle lijsten halen (een gat zonder uitleg); een eigen kaart "Geannuleerd" naast de uitslagen (meer plekken om te onderhouden voor acht wedstrijden).
+
+## De pagina van een tegenstander toont de uitslagen als donutgrafiek per score
+
+- **Datum:** 4 november 2026
+- **Besluit:** de zijkolom van de pagina van een tegenstander krijgt, direct onder "Onze uitslagen tegen …", de kaart "Hoe vaak welke uitslag": dezelfde kaart als op de pagina Wedstrijden, met een plakje voor elke uitslag, voor alle gespeelde wedstrijden tegen die club (#690).
+  De kaart is er vanaf één gespeelde wedstrijd, met "Gebaseerd op …", en niet voor een club waartegen we niet speelden.
+  - **Dezelfde code:** `ScoreCountsView` in `src/MatchViews.tsx` is de kaart, met de zin, de grafiek en de tabellen; `ScoreCountsCard` (Wedstrijden) en `ClubScoreCountsCard` (de club) geven hem alleen de aantallen en de regel eronder.
+    `countScores` in `src/matches.ts` telt en sorteert de uitslagen voor allebei.
+    Er komt geen nieuw onderdeel in het designsysteem.
+  - **De regel eronder** is die van de andere kaarten van de pagina, `BasedOnSince`, ook bij één gespeelde wedstrijd.
+    Het id van de kop, `hoe-vaak-welke-uitslag`, botst niet met dat van een andere kaart van de pagina.
+- **Waarom:** de projecteigenaar wil dezelfde grafiek als op Seizoen.
+  De twee kaarten over onze uitslagen horen bij elkaar, en het warme vlak laat de kaarten in de zijkolom afwisselen met het zachte vlak.
+  Een kaart blijft zichtbaar bij weinig wedstrijden en zegt waarop hij rust (zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_).
+- **Alternatieven:** alleen drie plakjes voor winst, gelijk en verlies (herhaalt de tabel van "Onze uitslagen" en lijkt niet op Seizoen); de kaart in de hoofdkolom boven de lijst (duwt de wedstrijden naar beneden); de kaart pas tonen vanaf drie wedstrijden (een nieuwe regel die nergens anders op de site geldt).
+
+## De kaart met de uitslagen op de pagina van een tegenstander volgt de schakelaar
+
+- **Datum:** 4 november 2026
+- **Besluit:** de donut telt dezelfde wedstrijden als de lijst en "Onze uitslagen tegen …", dus volgens de keuze van de schakelaar op de pagina van de tegenstander, standaard met de beker (#690).
+  Een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel, zoals op Wedstrijden.
+  Een test controleert dat de aantallen kloppen met de rij Totaal, voor beide keuzes.
+- **Waarom:** twee kaarten naast elkaar met verschillende aantallen zouden verwarren.
+  De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
+- **Alternatieven:** altijd alleen de Eredivisie (de donut zou de rest van de pagina tegenspreken zodra de beker meetelt).

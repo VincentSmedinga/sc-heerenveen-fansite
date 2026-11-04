@@ -19,7 +19,8 @@ import {
 
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
-import { imageCredit, markOf, metaSeparator } from './MatchViews'
+import { countScores } from './matches'
+import { imageCredit, markOf, metaSeparator, ScoreCountsView } from './MatchViews'
 import { type ClubSummary, lastResultsOf, type Meeting, type Stadium } from './opponents'
 
 /**
@@ -172,6 +173,35 @@ export function ClubsCard({
         </>
       )}
     </Card>
+  )
+}
+
+/**
+ * The card "Hoe vaak welke uitslag" of the page of a club: the card of the page Wedstrijden
+ * (`ScoreCountsView`) for the meetings the rest of the page counts, so the figures are those of
+ * the row Totaal of `ClubSummaryCard` for either choice. It is under that card, in the sidebar,
+ * and nothing without a played match, so a club we only meet in the future has none. The line
+ * under it is the one of the other cards of the page, with the season we have data from.
+ */
+export function ClubScoreCountsCard({
+  choice,
+  meetings,
+  since,
+}: {
+  choice: CompetitionChoice
+  meetings: readonly Meeting[]
+  since: string
+}) {
+  if (meetings.length === 0) {
+    return null
+  }
+
+  return (
+    <ScoreCountsView
+      counts={countScores(meetings)}
+      empty=""
+      footer={<BasedOnSince choice={choice} played={meetings.length} since={since} />}
+    />
   )
 }
 
