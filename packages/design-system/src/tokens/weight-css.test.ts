@@ -77,3 +77,97 @@ describe('the font weights in the CSS of the components', () => {
     expect(new Set(values)).toEqual(new Set(['400', '500', '600', '700', '800', '900']))
   })
 })
+
+// The CSS of tables. Bold means one thing there: the key figure (`hf-key`), the row with the
+// total, the caption and the legend. Headers and row headers are semibold and never heavier.
+const tableFiles = [
+  'base/table.css',
+  'components/bar/bar.css',
+  'components/data-table/data-table.css',
+  'components/input-table/input-table.css',
+  'components/record-table/record-table.css',
+  'components/standings-table/standings-table.css',
+]
+
+type WeightRule = { selector: string; value: string }
+
+// The declarations of font-weight with the selector they are in, nested rules joined and
+// at-rules (@layer, @container) left out.
+const weightRules = (css: string): WeightRule[] => {
+  const rules: WeightRule[] = []
+  const path: string[] = []
+
+  for (const [, text = '', delimiter] of css.matchAll(/([^{};]*)([{};])/g)) {
+    const declaration = /^font-weight\s*:\s*(.+)$/s.exec(text.trim())
+
+    if (delimiter === '{') {
+      path.push(text.trim())
+    } else {
+      if (declaration) {
+        rules.push({
+          selector: path.filter((part) => !part.startsWith('@')).join(' '),
+          value: (declaration[1] ?? '').trim(),
+        })
+      }
+
+      if (delimiter === '}') {
+        path.pop()
+      }
+    }
+  }
+
+  return rules
+}
+
+const token = (name: string) => `var(--hf-${name}-font-weight)`
+const header = /(^|[\s,>])th\b/
+const heaviest = /hf-key|tfoot|^caption|hf-bar-legend/
+
+describe('the font weights in the CSS of tables', () => {
+  const rules = tableFiles.flatMap((file) => weightRules(read(file)).map((rule) => ({ ...rule, file })))
+
+  it('finds the rules to check', () => {
+    expect(rules.length).toBeGreaterThan(5)
+    expect(rules).toContainEqual(expect.objectContaining({ selector: '.hf-key', value: token('figure') }))
+  })
+
+  it('sets the heaviest weight only on the key figure, the total, the caption and the legend', () => {
+    for (const { file, selector, value } of rules) {
+      if (value === token('strong') || value === token('figure')) {
+        expect(selector, `${file}: ${selector} { font-weight: ${value} }`).toMatch(heaviest)
+      }
+    }
+  })
+
+  it('sets the semibold weight only on headers and row headers, and nothing heavier on them', () => {
+    for (const { file, selector, value } of rules) {
+      if (value === token('name')) {
+        expect(selector, `${file}: ${selector} { font-weight: ${value} }`).toMatch(header)
+      }
+
+      if (header.test(selector) && !heaviest.test(selector)) {
+        expect(value, `${file}: ${selector}`).not.toMatch(/strong|figure/)
+      }
+    }
+  })
+
+  it('lets nothing else set a weight but to take the weight of the parent or the normal weight', () => {
+    for (const { file, selector, value } of rules) {
+      if (!header.test(selector) && !heaviest.test(selector)) {
+        expect(['inherit', token('body')], `${file}: ${selector} { font-weight: ${value} }`).toContain(value)
+      }
+    }
+  })
+
+  it('does not mark the row of our own club or a highlighted row by weight', () => {
+    expect(rules.filter(({ selector }) => /hf-highlight|hf-standings-table-own/.test(selector))).toEqual([])
+  })
+
+  it('sets the surname of a player in the weight of a row header', () => {
+    const surname = weightRules(read('components/player-name/player-name.css')).find(({ selector }) =>
+      selector.includes('hf-player-name-surname'),
+    )
+
+    expect(surname?.value).toBe(token('name'))
+  })
+})

@@ -1,7 +1,8 @@
 /*
  * The record table. The table itself takes its look from base/table.css, and the place, the
  * columns and the legend from bar/bar.css, so it looks like the standings. This file adds the
- * row with the total: bold figures, and a line above it that is twice as thick as the others.
+ * row with the total: the weight of the key figure, and a line above it that is twice as thick
+ * as the others.
  */
 
 @layer hf.components {

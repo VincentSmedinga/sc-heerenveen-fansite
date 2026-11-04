@@ -252,6 +252,92 @@ describe('DataTable with sortable columns', () => {
   })
 })
 
+describe('the key figure of a table that sorts', () => {
+  const withKey: DataTableProps = {
+    ...props,
+    columns: [
+      { name: 'Club', sortable: true },
+      { abbreviation: 'G', name: 'gespeeld', sortable: true },
+      { abbreviation: 'W', key: true, name: 'winst', sortable: true },
+      { abbreviation: 'D', name: 'doelpunten' },
+    ],
+  }
+
+  // The header names of the columns whose cells have the weight of the key figure.
+  const keyColumns = () => {
+    const headers = screen.getAllByRole('columnheader').map((header) => header.textContent?.replaceAll(' ', ''))
+
+    return [...document.querySelectorAll('tbody tr:first-child td')].flatMap((cell, index) =>
+      cell.classList.contains('hf-key') ? [headers[index + 1]] : [],
+    )
+  }
+
+  it('is the column with key before anything is sorted, and also without JavaScript', () => {
+    const html = renderToStaticMarkup(<DataTable {...withKey} />)
+    const table = new DOMParser().parseFromString(html, 'text/html')
+
+    expect([...table.querySelectorAll('td.hf-key')].map((cell) => cell.textContent)).toEqual(['2', '6', '1', '2'])
+
+    render(<DataTable {...withKey} />)
+
+    expect(keyColumns()).toEqual(['Wwinst'])
+  })
+
+  it('follows the sorting: the column that is sorted on is the key figure and no other column is', () => {
+    render(<DataTable {...withKey} />)
+    fireEvent.click(button('G gespeeld'))
+
+    expect(keyColumns()).toEqual(['Ggespeeld'])
+    expect(document.querySelectorAll('td.hf-key')).toHaveLength(4)
+
+    fireEvent.click(button('G gespeeld'))
+
+    expect(keyColumns()).toEqual(['Ggespeeld'])
+
+    fireEvent.click(button('W winst'))
+
+    expect(keyColumns()).toEqual(['Wwinst'])
+  })
+
+  it('has no key figure when the table is sorted on its first column, whose row headers are semibold already', () => {
+    render(<DataTable {...withKey} />)
+    fireEvent.click(button('Club'))
+
+    expect(document.querySelectorAll('td.hf-key')).toHaveLength(0)
+  })
+
+  it('has a key figure only once the visitor has sorted, in a table with no key column', () => {
+    render(<DataTable {...props} />)
+
+    expect(document.querySelectorAll('td.hf-key')).toHaveLength(0)
+
+    fireEvent.click(button('G gespeeld'))
+
+    expect(keyColumns()).toEqual(['Ggespeeld'])
+  })
+
+  it('still says what it is sorted on without the weight, with aria-sort and the arrow', () => {
+    render(<DataTable {...withKey} />)
+    fireEvent.click(button('G gespeeld'))
+
+    expect(screen.getByRole('columnheader', { name: /gespeeld/u }).getAttribute('aria-sort')).toBe('descending')
+    expect(screen.getByRole('status').textContent).toContain('Gespeeld')
+  })
+
+  it('throws when two columns have key', () => {
+    const twice: DataTableProps = {
+      ...props,
+      columns: [
+        { name: 'Club', sortable: true },
+        { key: true, name: 'gespeeld', sortable: true },
+        { key: true, name: 'winst', sortable: true },
+      ],
+    }
+
+    expect(() => renderToStaticMarkup(<DataTable {...twice} />)).toThrow(/at most one key column.*gespeeld, winst/u)
+  })
+})
+
 describe('data-table.css for a sortable column', () => {
   const css = readFileSync(join(import.meta.dirname, 'data-table.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
 

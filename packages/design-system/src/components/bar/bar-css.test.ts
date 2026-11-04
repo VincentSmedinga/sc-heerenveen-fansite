@@ -26,10 +26,6 @@ describe('bar.css', () => {
     expect(declarationsOf('tbody th')).toMatch(/overflow-wrap: anywhere/u)
   })
 
-  it('makes the number with the bar bold', () => {
-    expect(declarationsOf('.hf-bar-table td.hf-bar-value')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
-  })
-
   it('draws the bar as long as the share the component gives, from the start side', () => {
     expect(declarationsOf('&::before')).toMatch(/inline-size: calc\(var\(--hf-bar-share\) \* 1%\)/u)
   })

@@ -119,7 +119,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
                 {row.club === ourClub ? <span className="hf-visually-hidden"> (onze club)</span> : null}
               </th>
               {columns.map((column) => (
-                <td className={classNames('hf-numeric', column.id === 'points' && 'hf-bar-value')} key={column.id}>
+                <td className={classNames('hf-numeric', column.id === 'points' && 'hf-key')} key={column.id}>
                   {column.value(row)}
                   {column.id === 'points' && shares !== null ? <Bar share={shares[index]!} /> : null}
                 </td>

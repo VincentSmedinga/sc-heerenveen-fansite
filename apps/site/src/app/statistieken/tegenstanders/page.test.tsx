@@ -65,7 +65,7 @@ const sidebarOf = (html: string) => html.slice(html.indexOf('<aside'), html.inde
 const placesOf = (html: string) =>
   [
     ...sidebarOf(html).matchAll(
-      /<tr><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th><td class="hf-numeric hf-data-table-semibold">([^<]*)<\/td><td class="hf-numeric">(\d+)<\/td><\/tr>/g,
+      /<tr><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th><td class="hf-numeric hf-key">([^<]*)<\/td><td class="hf-numeric">(\d+)<\/td><\/tr>/g,
     ),
   ].map(([, place, href, name, average, played]) => [place, name, href, average, played])
 

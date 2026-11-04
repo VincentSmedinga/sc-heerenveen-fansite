@@ -1522,6 +1522,8 @@
 - **Alternatieven:** de punten achteraan laten, zoals veel sites (de projecteigenaar wilde ze eerder); de punten direct na de club zetten (verbreekt de rij gespeeld, gewonnen, gelijk, verloren).
 - **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
   De kolommen W, G, V en D zijn vervallen: de kolommen zijn nu # Club G P.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  De punten blijven vet, want ze zijn het kerngetal; de rij van sc Heerenveen is niet meer vet.
 
 ## De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten
 
@@ -2623,6 +2625,8 @@
 - **Alternatieven:** de tabel laten zoals hij is; alleen Thuis en Uit als rijen (dan ontbreekt het totaal); `DataTable` met andere koppen (dan lijken de twee tabellen niet op elkaar); `StandingsTable` algemener maken (zie _Waarom_); Totaal als eerste rij (de projecteigenaar wilde het onderaan); DV en DT los houden (de projecteigenaar koos één kolom).
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De kolommen zijn nu G, W, G, V, P en S in plaats van G, W, L, V, P en D, met de woorden winst en verlies.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
+  De punten en het totaal hebben het gewicht van het kerngetal; de rij met het totaal houdt zijn dikkere lijn.
 
 ## De kaart Wedstrijden op de pagina van een club heeft een rij met de laatste vijf uitslagen
 

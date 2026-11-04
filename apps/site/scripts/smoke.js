@@ -938,7 +938,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
     // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
     assert.match(
@@ -998,7 +998,7 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       playersHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
     // Two players called Testvoort are two rows, each with his full name.
     assert.match(playersHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)

@@ -1,7 +1,13 @@
 /*
  * Tables: tabular figures, a thin line between rows. Hooks for tables: .hf-numeric aligns a
- * cell to the end, .hf-highlight marks a row, such as sc Heerenveen in the standings, and
- * .hf-rank is a position in a ranking. The StandingsTable component uses all three.
+ * cell to the end, .hf-highlight marks a row, such as sc Heerenveen in the standings, .hf-rank
+ * is a position in a ranking and .hf-key is the key figure. The StandingsTable component uses
+ * all four.
+ *
+ * Bold means one thing in a table: the key figure. Headers and row headers are semibold and
+ * never heavier. At most one column is the key figure, in the heaviest weight: the figure the
+ * table is ordered by, or the answer the table gives. The row with the total has the same
+ * weight (see record-table.css). A row is never marked by weight, only by colour.
  */
 
 @layer hf.base {
@@ -52,6 +58,11 @@
     text-align: end;
   }
 
+  /* The key figure of the table: the column the table is ordered by, or the answer it gives. */
+  .hf-key {
+    font-weight: var(--hf-figure-font-weight);
+  }
+
   .hf-rank {
     color: var(--hf-colour-marker-text);
   }
@@ -59,11 +70,6 @@
   .hf-highlight {
     background-color: var(--hf-colour-background-highlight);
     color: var(--hf-colour-text-highlight);
-    font-weight: var(--hf-strong-font-weight);
-
-    th {
-      font-weight: inherit;
-    }
 
     /* In a highlighted row the position takes the row's colour, so the row reads as one. */
     .hf-rank {

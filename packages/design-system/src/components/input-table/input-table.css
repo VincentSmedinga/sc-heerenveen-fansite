@@ -55,7 +55,7 @@
     align-items: center;
     color: var(--hf-colour-text-heading);
     display: flex;
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
     grid-area: number;
     min-block-size: var(--hf-input-table-control);
   }

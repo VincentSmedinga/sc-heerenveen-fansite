@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import type { DataTableColumn, DataTableRow, DataTableTextColumn, DataTableTextRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
-import { columnOf, ColumnText, TableRows, TextTableRows } from './dataTableParts'
+import { columnOf, ColumnText, keyColumnOf, TableRows, TextTableRows } from './dataTableParts'
 import { SortableDataTable } from './SortableDataTable'
 
 export type {
@@ -70,6 +70,9 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
  * A row can have a `position`, its place in a ranking: the table then has a column `#` before
  * the row headers. That is for a table in the order of the ranking, so not a sortable one.
  *
+ * A column can be the `key` figure, in the heaviest weight: the figure the table is ordered by
+ * or the answer it gives. Bold means nothing else in a table, and there is at most one.
+ *
  * A column can be `sortable`. The table then lets the visitor sort on it, which needs
  * JavaScript: the server sends the whole table in the order of `rows`, with plain headers, and
  * in the browser the headers of the sortable columns become buttons (see SortableDataTable). A
@@ -112,6 +115,8 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
   const all = (columns as readonly (DataTableColumn | string)[]).map(columnOf)
   const numberRows = rows as readonly DataTableRow[]
 
+  const keyColumn = keyColumnOf(all)
+
   if (all.some((column) => column.sortable === true)) {
     return <SortableDataTable {...props} caption={caption} className={className} columns={all} rows={numberRows} />
   }
@@ -142,7 +147,7 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
           ))}
         </tr>
       </thead>
-      <TableRows columns={all} rows={numberRows} />
+      <TableRows columns={all} keyColumn={keyColumn} rows={numberRows} />
     </table>
   )
 }
