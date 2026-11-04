@@ -1722,9 +1722,9 @@
 - **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de lijst sorteert sindsdien met JavaScript op elke kolom en heeft bij de keuze Eredivisie de kolom Punten.
   De tabel van de server blijft van A tot Z, zonder knoppen.
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
-- **Later:** zie _De pagina van een tegenstander toont de uitslagen als donutgrafiek per score_ (4 november 2026): de zijkolom van de pagina van een club heeft sindsdien ook de kaart "Hoe vaak welke uitslag", direct onder "Onze uitslagen tegen …".
   Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
   De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
+- **Later:** zie _De pagina van een tegenstander toont de uitslagen als donutgrafiek per score_ (4 november 2026): de zijkolom van de pagina van een club heeft sindsdien ook de kaart "Hoe vaak welke uitslag", direct onder "Onze uitslagen tegen …".
 - **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, L, V, P en D als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
   De rest van de kaart blijft.
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.

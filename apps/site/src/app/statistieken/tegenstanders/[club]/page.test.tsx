@@ -407,7 +407,7 @@ describe('the page of a club', () => {
     expect(card).toContain('Gebaseerd op 1 gespeelde wedstrijd sinds')
   })
 
-  it('has no card for a club we have not played, with matches to come or without', async () => {
+  it('has the card for a club with played matches and matches to come, and none for a club we have not played', async () => {
     expect(await render('nieuw-promovendus')).not.toContain('hoe-vaak-welke-uitslag')
     expect(await render('komend-fc')).toContain('hoe-vaak-welke-uitslag')
     expect(await render('beker-united', { competitie: 'eredivisie' })).not.toContain('hoe-vaak-welke-uitslag')
