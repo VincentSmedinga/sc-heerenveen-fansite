@@ -18,13 +18,17 @@ const slicesOf = (values: number[]): DonutChartSlice[] =>
 
 const meta = preview.meta({
   argTypes: {
+    centre: {
+      description:
+        'De tekst in het gat van de ring in plaats van het totaal, zoals `45–31` voor de doelpunten die we maakten en kregen.',
+    },
     labels: {
       description:
         'Of de naam en de waarde van elke plak als tekst rond de ring staan. Zonder die tekst is de ring kleiner en op zichzelf, en moet de pagina de getallen in een tabel geven.',
     },
     size: {
       description:
-        'Met `small` is de ring kleiner, met de tekst eromheen, om naast een groter diagram te staan in een `DonutChart.Group`, zoals de doelpunten naast de uitslagen.',
+        'Met `small` is de ring kleiner, met een kleinere tekst in het gat, om naast een groter diagram te staan in een `DonutChart.Group`, zoals de doelpunten naast de uitslagen.',
       table: union(['small']),
     },
     slices: {
@@ -360,8 +364,9 @@ const pairScores: DonutChartSlice[] = [
 ]
 
 const pairGoals: DonutChartSlice[] = [
-  { label: 'Gemaakt', tone: 'positive', value: 45 },
+  // Clockwise from the top: red goals against first, so the green goals for sit at the left.
   { label: 'Tegen', tone: 'negative', value: 31 },
+  { label: 'Gemaakt', tone: 'positive', value: 45 },
 ]
 
 const pair = (maxInlineSize: string) => () => (
@@ -369,7 +374,7 @@ const pair = (maxInlineSize: string) => () => (
     <Heading level={2}>Hoe vaak welke uitslag</Heading>
     <DonutChart.Group>
       <DonutChart labels={false} ranked slices={pairScores} />
-      <DonutChart size="small" slices={pairGoals} />
+      <DonutChart centre="45–31" labels={false} size="small" slices={pairGoals} title="Doelsaldo" />
     </DonutChart.Group>
   </Card>
 )

@@ -2222,15 +2222,18 @@
   Met de aantallen in de kop leest de tabel zelf, ook voor een schermlezer ("Winst, 12 keer"), en hoeft de lezer de zin niet apart te lezen.
   Welke competities meetellen was nergens te zien; de tabel zegt het bij de schakelaar.
   "Sinds …" staat op de kaart erboven, en het aantal blijft in de regel, dus de kaart zegt nog steeds waarop hij rust.
-- **Ook:** de pagina van een club krijgt naast het diagram van de uitslagen een tweede, kleiner donutdiagram met de gemaakte en de tegendoelpunten (twee plakken, groen en rood, met de tekst om de ring), van dezelfde wedstrijden.
+- **Ook:** de pagina van een club krijgt naast het diagram van de uitslagen een tweede, kleiner donutdiagram met de gemaakte en de tegendoelpunten (twee plakken, groen en rood), van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31".
+  Het groen staat links en het rood rechts, zoals de uitslag leest; de ring loopt met de klok mee vanaf boven, dus de tegendoelpunten komen eerst in de lijst met plakken.
   Een schermlezer hoort de getallen in een zin die alleen hij hoort ("Doelpunten: 45 gemaakt, 31 tegen."), direct na de diagrammen.
+  Het eerste voorstel had de tekst "Gemaakt" en "Tegen" om de ring; de projecteigenaar wilde liever het bijschrift en de twee getallen in het gat (4 november 2026).
   Op Wedstrijden komt het niet.
-  - **De maat:** `DonutChart` kreeg `size="small"`: een ring met de tekst eromheen, in een kolom van 10rem naast het grotere diagram in een `DonutChart.Group`.
-    Op een telefoon van 390 pixels staan de twee naast elkaar, het eerste groter; de tekst "Gemaakt" steekt daar een paar pixels buiten het diagram, in de ruimte van de kaart.
+  - **De maat:** `DonutChart` kreeg `size="small"`, een smallere ring met een kleinere tekst in het gat, in een kolom van 7rem naast het grotere diagram in een `DonutChart.Group`, en `centre` voor de tekst in het gat in plaats van het totaal.
+    Op een telefoon van 390 pixels staan de twee naast elkaar, het eerste groter.
 - **Waarom het tweede diagram:** het eerste diagram zegt hoe vaak we wonnen en verloren, maar niet hoeveel doelpunten erbij vielen; dat is wat een supporter van een club wil weten.
   Twee plakken zijn een eenvoudig plaatje met de tekst eraan, zoals bij Doelpunten per kwartier, en herhalen de uitslagen niet.
   Alleen de pagina van een club, omdat de projecteigenaar het daar wil zien; Wedstrijden heeft al de kaart Doelpunten per kwartier met diagrammen van de doelpunten.
 - **Nadeel:** de kaart op de pagina van een club heeft een andere regel dan de andere kaarten van die pagina, tot #494 ze gelijktrekt.
-  Het tweede diagram heeft de getallen als verborgen tekst en niet in een tabel, dus een lezer met alleen een gezichtsprobleem moet de tekst om de ring lezen; de getallen staan dus op twee plekken.
+  Het tweede diagram heeft de getallen als verborgen tekst en niet in een tabel, dus een lezer met alleen een gezichtsprobleem moet de tekst in het gat lezen; de getallen staan dus op twee plekken.
+  Het gat zegt niet welk getal gemaakt en welk tegen is: dat volgt uit de volgorde en de kleuren, en het bijschrift "Doelsaldo" noemt het verschil tussen de twee.
 - **Alternatieven:** de zin alleen op de pagina van een club weglaten (de twee kaarten verschillen dan, en de gedeelde code krijgt een schakelaar); de regel helemaal weglaten (dan staat het aantal wedstrijden nergens, tenzij een Totaal-rij het zegt); de koppen laten zoals ze zijn en het aantal in de rijen zetten (het aantal per uitslag is dan alleen uit te rekenen); winst, gelijk en verlies per competitie in de tabel (breder op een smalle zijkolom, en de koppen hebben ze al).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397) in `redactie.md`: deze kaart zegt het aantal zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.

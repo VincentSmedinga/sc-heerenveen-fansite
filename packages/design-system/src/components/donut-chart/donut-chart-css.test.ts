@@ -40,10 +40,13 @@ describe('donut-chart.css', () => {
     )
   })
 
-  it('makes a small chart narrower than the other and gives a group with one the room for its text', () => {
-    expect(declarationsOf('.hf-donut-chart-small')).toMatch(/max-inline-size: 10rem/u)
+  it('makes a small chart narrower than the other, with a smaller text in the hole', () => {
+    expect(declarationsOf('.hf-donut-chart-small')).toMatch(/max-inline-size: 7rem/u)
     expect(declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')).toMatch(
-      /grid-template-columns: minmax\(0, 1fr\) 10rem/u,
+      /grid-template-columns: minmax\(0, 1fr\) 7rem/u,
+    )
+    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
+      /font-size: var\(--hf-figure-font-size\)/u,
     )
   })
 

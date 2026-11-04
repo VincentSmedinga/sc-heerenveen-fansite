@@ -557,8 +557,20 @@ describe('the page of a club', () => {
       expect(goalsOf(league)).toEqual({ against: 3, for: 10 })
       expect(scoreCardOf(all).match(/<div aria-hidden="true" class="hf-donut-chart /g)).toHaveLength(2)
       expect(scoreCardOf(all)).toContain('hf-donut-chart-small')
-      expect(plain(scoreCardOf(all))).toMatch(/Gemaakt\s*10\s*Tegen\s*4/)
-      expect(plain(scoreCardOf(league))).toMatch(/Gemaakt\s*10\s*Tegen\s*3/)
+      // The small chart has the caption Doelsaldo above it and the goals in the hole.
+      expect(plain(scoreCardOf(all))).toMatch(/Doelsaldo\s*10–4/)
+      expect(plain(scoreCardOf(league))).toMatch(/Doelsaldo\s*10–3/)
+      expect(scoreCardOf(all)).not.toContain('Gemaakt')
+    })
+
+    it('draws the goals against first, so the goals for are at the left, as in the text of the hole', async () => {
+      const card = scoreCardOf(await render())
+      const small = card.slice(card.indexOf('hf-donut-chart-small'), card.indexOf('Doelpunten:'))
+
+      expect(small.indexOf('hf-donut-chart-slice-negative')).toBeGreaterThan(-1)
+      expect(small.indexOf('hf-donut-chart-slice-negative')).toBeLessThan(
+        small.indexOf('hf-donut-chart-slice-positive'),
+      )
     })
 
     it('says the goals as text for a screen reader, right after the charts and before the tables', async () => {

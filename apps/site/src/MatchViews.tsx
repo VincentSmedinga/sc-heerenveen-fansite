@@ -756,11 +756,16 @@ export function ScoreCountsView({
               <DonutChart.Group>
                 <DonutChart labels={false} ranked slices={slices} />
                 <DonutChart
+                  centre={`${goals.for}–${goals.against}`}
+                  labels={false}
                   size="small"
                   slices={[
-                    { label: 'Gemaakt', tone: 'positive', value: goals.for },
+                    // The ring goes clockwise from the top: the goals against first, so the
+                    // goals for come after them and sit at the left, as in "45–31".
                     { label: 'Tegen', tone: 'negative', value: goals.against },
+                    { label: 'Gemaakt', tone: 'positive', value: goals.for },
                   ]}
+                  title="Doelsaldo"
                 />
               </DonutChart.Group>
               <Text className="hf-visually-hidden">{`Doelpunten: ${goals.for} gemaakt, ${goals.against} tegen.`}</Text>

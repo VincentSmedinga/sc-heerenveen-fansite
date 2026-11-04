@@ -16,12 +16,12 @@
   }
 
   /*
-   * A group with a small chart gives the small one the room its text needs and the other chart
-   * the rest, as long as that is a ring wider than a few words; below that they stack.
+   * A group with a small chart gives the small one a narrow column, so it is a smaller ring, and
+   * the other chart the rest. They stay side by side, also on a phone.
    */
   .hf-donut-chart-group:has(.hf-donut-chart-small) {
-    grid-template-columns: minmax(0, 1fr) 10rem;
     align-items: center;
+    grid-template-columns: minmax(0, 1fr) 7rem;
   }
 
   .hf-donut-chart {
@@ -70,9 +70,9 @@
     position: relative;
   }
 
-  /* The text round the ring needs this much room, so the ring itself is smaller. */
+  /* A small chart is a ring of this width at most, with a smaller text in its hole. */
   .hf-donut-chart-small {
-    max-inline-size: 10rem;
+    max-inline-size: 7rem;
   }
 
   /* A ring without labels is a square, as wide as the ring needs and no more. */
@@ -149,6 +149,10 @@
     line-height: 1;
     position: absolute;
     transform: translate(-50%, -50%);
+  }
+
+  .hf-donut-chart-small .hf-donut-chart-total {
+    font-size: var(--hf-figure-font-size);
   }
 
   /*
