@@ -1130,13 +1130,15 @@ await withEmptyDatabase((database) =>
     )
     assert.doesNotMatch(clubHtml, /\d+ keer (?:gewonnen|gelijk|verloren)/)
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
-    // the card Stadions: the older name with "tot", the newer with "vanaf", after the results.
+    // the card Stadions: the older name with "t/m" and a season, the newer with "vanaf" and a
+    // season, after the results.
     const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()
     assert.match(
       stadiumClub,
-      /id="onze-uitslagen".*<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot [^<]*<.*Oud Voorbeeldpark.*vanaf [^<]*<.*Voorbeeldpark/s,
+      /id="onze-uitslagen".*<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*t\/m \d{4}\/\d{2}<.*Oud Voorbeeldpark.*vanaf \d{4}\/\d{2}<.*Voorbeeldpark/s,
     )
-    assert.match(stadiumClub, /De dagen zijn die van onze wedstrijden/)
+    assert.doesNotMatch(stadiumClub, /Zo noemt Wikipedia|De dagen zijn die van onze wedstrijden/)
+    assert.match(stadiumClub, closedWikipediaCredit)
     assert.doesNotMatch(stadiumClub, /id="doelpuntenmakers"/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, closedWikipediaCredit)

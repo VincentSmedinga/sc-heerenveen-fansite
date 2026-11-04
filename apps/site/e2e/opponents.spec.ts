@@ -239,10 +239,11 @@ test.describe('the page of a club', () => {
     const items = page.getByRole('region', { name: 'Stadions' }).locator('li')
 
     await expect(items).toHaveCount(4)
-    await expect(items.nth(0)).toContainText(/^tot .*Oud Voorbeeldpark$/)
-    await expect(items.nth(1)).toContainText(/^tot .*Voorbeeldpark$/)
-    await expect(items.nth(2)).toContainText(/^tot .*Oud Voorbeeldpark$/)
-    await expect(items.nth(3)).toContainText(/^vanaf .*Voorbeeldpark$/)
+    // The first has "t/m" and a season, the ones in the middle their season, the last "vanaf".
+    await expect(items.nth(0)).toContainText(/^t\/m \d{4}\/\d{2}.*Oud Voorbeeldpark$/)
+    await expect(items.nth(1)).toContainText(/^\d{4}\/\d{2}.*Voorbeeldpark$/)
+    await expect(items.nth(2)).toContainText(/^\d{4}\/\d{2}.*Oud Voorbeeldpark$/)
+    await expect(items.nth(3)).toContainText(/^vanaf \d{4}\/\d{2}.*Voorbeeldpark$/)
     await expect(
       page.getByRole('region', { name: 'Stadions' }).getByRole('link', { name: 'Stadions' }),
     ).toHaveAttribute('href', '#stadion')

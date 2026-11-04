@@ -177,10 +177,11 @@ export const earlierNames = (otherNames: readonly string[]) =>
   otherNames.length === 0 ? undefined : otherNames.join(', ')
 
 /**
- * A name of the stadium of a club, as Wikipedia wrote it, with the first and the last day of
- * the league matches in which we saw that name.
+ * A name of the stadium of a club, as Wikipedia wrote it, with the first and the last season
+ * (such as "2019/20") of the league matches in which we saw that name. A season is all we know:
+ * we visit a club once a season, so the matches say nothing about the day the name changed.
  */
-export type Stadium = { firstDay: string; lastDay: string; name: string }
+export type Stadium = { firstSeason: string; lastSeason: string; name: string }
 
 /**
  * The key by which two spellings of a stadium count as one name: capitals, the amount of
@@ -200,11 +201,11 @@ const byPlayedOrder = (a: PublicClubMatch, b: PublicClubMatch) =>
 
 /**
  * The names of the stadium of a club in the order we saw them, each with the first and the last
- * day of the matches that had it. The names come from the Eredivisie matches that were played
- * away, where sc Heerenveen visited the club: the stadium of a match is then the one of the
- * club. A cup tie or a play-off can be at a neutral ground, so those do not count. A match that
- * was stopped counts for where it began, as the match does, so it gives the club's stadium.
- * A match without a stadium is left out.
+ * season of the matches that had it. The names come from the Eredivisie matches that were
+ * played away, where sc Heerenveen visited the club: the stadium of a match is then the one of
+ * the club. A cup tie or a play-off can be at a neutral ground, so those do not count. A match
+ * that was stopped counts for where it began, as the match does, so it gives the club's
+ * stadium. A match without a stadium is left out.
  *
  * Spellings that only differ in capitals, spaces or hyphens are one name, written as the first
  * match of it wrote it. A name that returns after another is a line of its own, because the
@@ -213,7 +214,7 @@ const byPlayedOrder = (a: PublicClubMatch, b: PublicClubMatch) =>
 export function stadiumsOf(matches: readonly PublicClubMatch[]): Stadium[] {
   const stadiums: (Stadium & { key: string })[] = []
 
-  for (const { matchDate, stadium } of meetingsOf(matches, 'league')
+  for (const { season, stadium } of meetingsOf(matches, 'league')
     .filter((meeting) => !meeting.home)
     .toSorted(byPlayedOrder)) {
     const name = stadium?.trim() ?? ''
@@ -226,13 +227,13 @@ export function stadiumsOf(matches: readonly PublicClubMatch[]): Stadium[] {
     const last = stadiums.at(-1)
 
     if (last?.key === key) {
-      last.lastDay = matchDate
+      last.lastSeason = season
     } else {
-      stadiums.push({ firstDay: matchDate, key, lastDay: matchDate, name })
+      stadiums.push({ firstSeason: season, key, lastSeason: season, name })
     }
   }
 
-  return stadiums.map(({ firstDay, lastDay, name }) => ({ firstDay, lastDay, name }))
+  return stadiums.map(({ firstSeason, lastSeason, name }) => ({ firstSeason, lastSeason, name }))
 }
 
 /** The points against a club: 3 for a win and 1 for a draw, in the cup too. */

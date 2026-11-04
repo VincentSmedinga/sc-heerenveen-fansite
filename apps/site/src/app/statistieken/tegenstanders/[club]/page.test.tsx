@@ -580,13 +580,20 @@ describe('the page of a club', () => {
 
   it('has the card Stadions on the strong surface, with each name and when we saw it, for a club that changed', async () => {
     const html = await render()
-    const card = html.slice(html.indexOf('aria-labelledby="stadion"') - 40, html.indexOf('Zo noemt Wikipedia'))
+    const card = html.slice(
+      html.indexOf('aria-labelledby="stadion"') - 40,
+      html.indexOf('</ul>', html.indexOf('aria-labelledby="stadion"')),
+    )
 
     expect(card).toContain('hf-card-strong')
     expect(card).toMatch(/<h2[^>]*id="stadion"[^>]*>.*Stadions/)
     expect(card).toContain('<a class="hf-heading-link" href="#stadion"')
-    expect(plain(card.slice(card.indexOf('<ul')))).toBe('tot 2 apr 2023 Oud Testpark vanaf 1 mrt 2025 Nieuw Testpark')
-    expect(html).toContain('De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.')
+    expect(plain(card.slice(card.indexOf('<ul')))).toBe('t/m 2022/23 Oud Testpark vanaf 2024/25 Nieuw Testpark')
+    // The card is the heading and the list: no line about Wikipedia or about days. The credit
+    // at the foot of the page says where the names come from.
+    expect(html).not.toContain('Zo noemt Wikipedia')
+    expect(html).not.toContain('De dagen zijn die van onze wedstrijden')
+    expect(html.indexOf('Bron:')).toBeGreaterThan(html.indexOf('aria-labelledby="stadion"'))
     // The card holds the names we saw, not these: they are in the lines of the matches only.
     expect(card).not.toContain('Neutraal Stadion')
     expect(card).not.toContain('Abe Lenstra Stadion')
@@ -596,11 +603,14 @@ describe('the page of a club', () => {
     vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(0, 4) })
 
     const html = await render()
-    const card = html.slice(html.indexOf('aria-labelledby="stadion"'), html.indexOf('Zo noemt Wikipedia'))
+    const card = html.slice(
+      html.indexOf('aria-labelledby="stadion"'),
+      html.indexOf('</ul>', html.indexOf('aria-labelledby="stadion"')),
+    )
 
     expect(card).toMatch(/<h2[^>]*id="stadion"[^>]*>.*Stadion</)
     expect(plain(card.slice(card.indexOf('<ul')))).toBe('Nieuw Testpark')
-    expect(html).not.toContain('niet van de dag dat de naam veranderde')
+    expect(html).not.toContain('Zo noemt Wikipedia')
   })
 
   it('has the same stadiums with the choice Eredivisie', async () => {

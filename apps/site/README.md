@@ -556,8 +556,9 @@ Ze heeft vijf delen:
   Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.
   Spellingen die alleen verschillen in hoofdletters, spaties of een koppelteken zijn één naam; een twijfelgeval, zoals "Galgenwaard" naast "Stadion Galgenwaard", blijft twee regels.
   Een naam die terugkomt na een andere, staat opnieuw.
-  Bij één naam staat alleen de naam; bij meer heeft elke naam behalve de laatste "tot" en de dag van de laatste wedstrijd met die naam, en de laatste "vanaf" en de dag van de eerste (`stadiumPeriods` in `src/match-format.ts`).
-  Het zijn de dagen van onze wedstrijden, niet van de dag dat de naam veranderde, en een regel onder de lijst zegt dat.
+  Bij één naam staat alleen de naam; bij meer heeft de eerste "t/m" en het laatste seizoen met die naam ("t/m 2018/19"), een naam in het midden zijn seizoen ("2019/20") of "2019/20 t/m 2021/22" als hij langer duurde, en de laatste "vanaf" en het eerste seizoen met die naam (`stadiumPeriods` in `src/match-format.ts`).
+  Het zijn seizoenen van onze wedstrijden, want we bezoeken een club één keer per seizoen en de wedstrijden zeggen niets over de dag dat de naam veranderde.
+  Onder de lijst staat geen zin: de bronvermelding onderaan de pagina zegt waar de namen vandaan komen.
   De kop heeft het anker `#stadion` bij beide titels.
   Een club zonder uitwedstrijd in de Eredivisie, of zonder stadion in die wedstrijden, heeft de kaart niet.
 - De bronvermelding, die ook voor deze kaart geldt.
