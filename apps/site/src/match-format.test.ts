@@ -218,7 +218,7 @@ describe('stadiumPeriods', () => {
     ).toEqual(['t/m 2018/19', '2019/20', '2020/21 t/m 2022/23', 'vanaf 2023/24'])
   })
 
-  it('writes a name that returns after another as a line of its own', () => {
+  it('says the season of the one name in the middle of three', () => {
     expect(stadiumPeriods([season('2018/19'), season('2019/20'), season('2020/21')])).toEqual([
       't/m 2018/19',
       '2019/20',

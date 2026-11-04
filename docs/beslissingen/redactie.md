@@ -2374,6 +2374,7 @@
   Een "van … tot …" bij elke trainer (de regel wordt lang, en de dag van het begin van een trainer is de dag van het einde van de vorige).
   Een eigen lijstregel met eigen CSS (dubbel werk, en de twee lijsten gaan dan uit elkaar lopen).
 - **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): de kaart "Hoe vaak welke uitslag" staat tussen de stand en de hoofdtrainer, dus Hoofdtrainer is de laatste kaart van de zijbalk en de link staat na die van Hoe vaak welke uitslag.
+- **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026) in `site.md`: de kolom met de periode van `ShortStaff` is 9,5 in plaats van 8,5 rem, zodat een periode van twee seizoenen erin past.
 
 ## De hoofdtrainers staan in de seed met de laatste dag, en een afgeleide laatste dag is de dag voor de opvolger
 
