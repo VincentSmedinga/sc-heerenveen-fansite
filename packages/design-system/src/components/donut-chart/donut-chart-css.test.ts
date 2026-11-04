@@ -40,6 +40,19 @@ describe('donut-chart.css', () => {
     )
   })
 
+  it('makes a small chart narrower than the other, with a smaller text in the hole', () => {
+    expect(declarationsOf('.hf-donut-chart-small')).toMatch(/max-inline-size: 7rem/u)
+    expect(declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')).toMatch(
+      /grid-template-columns: minmax\(0, 1fr\) 7rem/u,
+    )
+    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-title')).toMatch(
+      /color: var\(--hf-colour-text-secondary\);\s*font-size: var\(--hf-meta-font-size\);\s*font-weight: var\(--hf-meta-font-weight\)/u,
+    )
+    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
+      /font-size: var\(--hf-body-font-size\);\s*font-weight: var\(--hf-name-font-weight\)/u,
+    )
+  })
+
   it('has no animation or transition, so nothing moves', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/u)
   })

@@ -15,6 +15,15 @@
     grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
   }
 
+  /*
+   * A group with a small chart gives the small one a narrow column, so it is a smaller ring, and
+   * the other chart the rest. They stay side by side, also on a phone.
+   */
+  .hf-donut-chart-group:has(.hf-donut-chart-small) {
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) 7rem;
+  }
+
   .hf-donut-chart {
     display: grid;
     gap: var(--hf-space-xs);
@@ -56,9 +65,21 @@
     font-weight: var(--hf-strong-font-weight);
   }
 
+  /* The title of a small chart is a label, like the names round a ring: not bold, a subtler colour. */
+  .hf-donut-chart-small .hf-donut-chart-title {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-meta-font-weight);
+  }
+
   .hf-donut-chart-plot {
     aspect-ratio: 320 / 300;
     position: relative;
+  }
+
+  /* A small chart is a ring of this width at most, with a smaller text in its hole. */
+  .hf-donut-chart-small {
+    max-inline-size: 7rem;
   }
 
   /* A ring without labels is a square, as wide as the ring needs and no more. */
@@ -135,6 +156,11 @@
     line-height: 1;
     position: absolute;
     transform: translate(-50%, -50%);
+  }
+
+  .hf-donut-chart-small .hf-donut-chart-total {
+    font-size: var(--hf-body-font-size);
+    font-weight: var(--hf-name-font-weight);
   }
 
   /*

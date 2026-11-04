@@ -76,6 +76,26 @@ describe('DataTable', () => {
     expect(header.className).toBe('hf-numeric')
   })
 
+  it('shows the text of a column and gives a screen reader its name, with no abbreviation', () => {
+    render(
+      <DataTable
+        caption="Uitslagen"
+        columns={[
+          { name: 'Winst, 12 keer', shown: 'Winst 12×' },
+          { hidden: true, name: 'Keer' },
+        ]}
+        rows={[{ cells: ['1×'], header: '2–0' }]}
+      />,
+    )
+
+    const header = screen.getAllByRole('columnheader')[0] as HTMLElement
+
+    expect(header.querySelector('abbr')).toBeNull()
+    expect(header.querySelector('[aria-hidden="true"]')?.textContent).toBe('Winst 12×')
+    expect(header.querySelector('.hf-visually-hidden')?.textContent).toBe('Winst, 12 keer')
+    expect(screen.getByRole('columnheader', { name: 'Winst, 12 keer' })).toBeTruthy()
+  })
+
   it('has the hf-data-table class and passes on other attributes and a class', () => {
     render(<DataTable {...props} className="extra" id="tabel" />)
 

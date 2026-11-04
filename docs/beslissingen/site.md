@@ -2172,6 +2172,7 @@
   De twee kaarten over onze uitslagen horen bij elkaar, en het warme vlak laat de kaarten in de zijkolom afwisselen met het zachte vlak.
   Een kaart blijft zichtbaar bij weinig wedstrijden en zegt waarop hij rust (zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_).
 - **Alternatieven:** alleen drie plakjes voor winst, gelijk en verlies (herhaalt de tabel van "Onze uitslagen" en lijkt niet op Seizoen); de kaart in de hoofdkolom boven de lijst (duwt de wedstrijden naar beneden); de kaart pas tonen vanaf drie wedstrijden (een nieuwe regel die nergens anders op de site geldt).
+- **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (4 november 2026): de regel onder de kaart is niet meer `BasedOnSince` maar de korte vorm van het aantal wedstrijden, en de zin boven de grafiek is weg.
 
 ## De kaart met de uitslagen op de pagina van een tegenstander volgt de schakelaar
 
@@ -2202,3 +2203,37 @@
 - **Alternatieven:** `ShortMatch` voor alles op de pagina van een club (het onderdeel kent geen wedstrijd die nog komt, en competitie, stadion en tijd zouden verdwijnen); de gemengde lijst laten zoals ze is (de projecteigenaar wil dat niet); alle `ShortMatch`-plekken ook `Match` maken (de kaarten van Statistieken worden lang voor een uitslag die ze al geven).
 - **Nadeel:** de pagina van een club met veel wedstrijden wordt langer, omdat een `Match` meer ruimte neemt dan een `ShortMatch`.
   Een grens aan de lengte of "Laad meer" is een eigen issue als dat nodig blijkt.
+
+## De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram
+
+- **Datum:** 4 november 2026
+- **Besluit:** de kaart "Hoe vaak welke uitslag" laat de zin met de optelling weg, zet de aantallen in de kop van elke tabel ("Winst 12×") en heeft op de pagina van een club onderaan een tabel met de competities van de getelde wedstrijden.
+  De regel onder de kaart is de korte vorm van het aantal wedstrijden ("Alle 40 gespeelde wedstrijden", "1 gespeelde wedstrijd"), zonder "Gebaseerd op", zonder "sinds" en zonder "in de Eredivisie" (#697).
+  - **De kop:** de kop is "Winst 12×" voor het oog en "Winst, 12 keer" voor een schermlezer, uit één plek in de code (`outcomeColumn` in `src/MatchViews.tsx`).
+    `DataTable` kreeg daarvoor de eigenschap `shown` voor een kolom: de kop toont `shown` en een schermlezer hoort `name`.
+    De `abbreviation` van een kolom zou het ook doen, maar zet de tekst in een `abbr`, en "Winst 12×" is geen afkorting.
+  - **De tabel met competities** heeft de kolommen Competitie en Wedstrijden, de meeste wedstrijden bovenaan en bij gelijk aantal de volgorde van `competitions` in `@fansite/db/schema`.
+    Hij telt dezelfde wedstrijden als de rest van de kaart, dus de schakelaar beslist, en hij staat ook met één competitie.
+    Er is geen rij Totaal: het totaal staat in de regel eronder.
+    De volgorde van de kaart is kop, diagrammen, tabellen van de uitslagen, competities, regel.
+  - **Dezelfde code:** de kaart op Wedstrijden heeft de korte regel en de kopaantallen ook, want `ScoreCountsView` is gedeeld.
+    De tabel met competities en het tweede diagram staan alleen op de pagina van een club.
+- **Waarom:** de zin, de kopaantallen en de regel onderaan zeiden hetzelfde.
+  Met de aantallen in de kop leest de tabel zelf, ook voor een schermlezer ("Winst, 12 keer"), en hoeft de lezer de zin niet apart te lezen.
+  Welke competities meetellen was nergens te zien; de tabel zegt het bij de schakelaar.
+  "Sinds …" staat op de kaart erboven, en het aantal blijft in de regel, dus de kaart zegt nog steeds waarop hij rust.
+- **Ook:** de pagina van een club krijgt naast het diagram van de uitslagen een tweede, kleiner donutdiagram met de gemaakte en de tegendoelpunten (twee plakken, groen en rood), van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31".
+  Het groen staat links en het rood rechts, zoals de uitslag leest; de ring loopt met de klok mee vanaf boven, dus de tegendoelpunten komen eerst in de lijst met plakken.
+  Een schermlezer hoort de getallen in een zin die alleen hij hoort ("Doelpunten: 45 gemaakt, 31 tegen."), direct na de diagrammen.
+  Het eerste voorstel had de tekst "Gemaakt" en "Tegen" om de ring; de projecteigenaar wilde liever het bijschrift en de twee getallen in het gat (4 november 2026).
+  Op Wedstrijden komt het niet.
+  - **De maat:** `DonutChart` kreeg `size="small"`, een smallere ring met een kleinere tekst in het gat, in een kolom van 7rem naast het grotere diagram in een `DonutChart.Group`, en `centre` voor de tekst in het gat in plaats van het totaal.
+    Op een telefoon van 390 pixels staan de twee naast elkaar, het eerste groter.
+- **Waarom het tweede diagram:** het eerste diagram zegt hoe vaak we wonnen en verloren, maar niet hoeveel doelpunten erbij vielen; dat is wat een supporter van een club wil weten.
+  Twee plakken zijn een eenvoudig plaatje met de tekst eraan, zoals bij Doelpunten per kwartier, en herhalen de uitslagen niet.
+  Alleen de pagina van een club, omdat de projecteigenaar het daar wil zien; Wedstrijden heeft al de kaart Doelpunten per kwartier met diagrammen van de doelpunten.
+- **Nadeel:** de kaart op de pagina van een club heeft een andere regel dan de andere kaarten van die pagina, tot #494 ze gelijktrekt.
+  Het tweede diagram heeft de getallen als verborgen tekst en niet in een tabel, dus een lezer met alleen een gezichtsprobleem moet de tekst in het gat lezen; de getallen staan dus op twee plekken.
+  Het gat zegt niet welk getal gemaakt en welk tegen is: dat volgt uit de volgorde en de kleuren, en het bijschrift "Doelsaldo" noemt het verschil tussen de twee.
+- **Alternatieven:** de zin alleen op de pagina van een club weglaten (de twee kaarten verschillen dan, en de gedeelde code krijgt een schakelaar); de regel helemaal weglaten (dan staat het aantal wedstrijden nergens, tenzij een Totaal-rij het zegt); de koppen laten zoals ze zijn en het aantal in de rijen zetten (het aantal per uitslag is dan alleen uit te rekenen); winst, gelijk en verlies per competitie in de tabel (breder op een smalle zijkolom, en de koppen hebben ze al).
+- **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397) in `redactie.md`: deze kaart zegt het aantal zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.

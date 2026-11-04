@@ -233,7 +233,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             since={sinceOf(loaded.seasons)}
             summary={summaryOf(meetings)}
           />
-          <ClubScoreCountsCard choice={competition} meetings={meetings} since={sinceOf(loaded.seasons)} />
+          <ClubScoreCountsCard meetings={meetings} />
           <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit
             edited={loaded.edited}

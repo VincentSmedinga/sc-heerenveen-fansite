@@ -9,6 +9,11 @@ import { bare, drawing, labelDistance, labelGap, pointAt, ring, slicePath, slice
 export const donutChartTones = ['positive', 'negative'] as const
 
 export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+  /**
+   * The text in the hole instead of the total, such as `45–31` for the goals we scored and
+   * conceded. It is hidden from a screen reader with the rest of the chart.
+   */
+  centre?: string
   /** A donut chart has no children: everything it shows comes from the props below. */
   children?: never
   /**
@@ -25,6 +30,12 @@ export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
    * out. `DonutChart.Swatch` takes it too.
    */
   ranked?: boolean
+  /**
+   * `small` is a smaller ring, with a smaller text in the hole, to stand beside a larger chart
+   * in a `DonutChart.Group`, such as the goals beside the scores. Its title is a label, in the
+   * smaller size and the subtler colour of the text round a ring.
+   */
+  size?: 'small'
   /** The slices in the order they go round, clockwise from the top. */
   slices: readonly DonutChartSlice[]
   /** The title above the ring, such as `Aanmeldingen`. Without it the ring has no title. */
@@ -113,9 +124,11 @@ const tonesOf = (slices: readonly DonutChartSlice[], tone: DonutChartTone | unde
  * donut-chart.css gives the look. Several charts go in a `DonutChart.Group`.
  */
 export const DonutChart = ({
+  centre,
   className,
   labels = true,
   ranked = false,
+  size,
   slices,
   title,
   tone,
@@ -138,6 +151,7 @@ export const DonutChart = ({
         'hf-donut-chart',
         tone === undefined ? undefined : `hf-donut-chart-${tone}`,
         labels ? undefined : 'hf-donut-chart-bare',
+        size === undefined ? undefined : `hf-donut-chart-${size}`,
         className,
       )}
     >
@@ -173,7 +187,7 @@ export const DonutChart = ({
               )
             })}
         </svg>
-        <span className="hf-donut-chart-total">{total}</span>
+        <span className="hf-donut-chart-total">{centre ?? total}</span>
         {labels &&
           drawn.map((slice, position) => {
             const angle = angles[position]!

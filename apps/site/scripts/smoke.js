@@ -714,13 +714,13 @@ await withEmptyDatabase((database) =>
         '#hoofdtrainer',
       ],
     )
-    // The card with how often each score was played is the card under the table: the
-    // sentence with the sums, the chart without text round the ring (hidden from a screen
-    // reader), and the tables that are its key, one for each outcome, with the outcome in words
-    // for each score.
+    // The card with how often each score was played is the card under the table: the chart
+    // without text round the ring (hidden from a screen reader), and the tables that are its
+    // key, one for each outcome with its count in the header, and the outcome in words for each
+    // score. It has no sentence with the sums, and under the tables only the number of matches.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<p>\d+ keer (?:gewonnen|gelijk|verloren)[^<]*<\/p><div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col">Winst<\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
+      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws, with the podcasts and the search.
@@ -1060,7 +1060,14 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(clubHtml, /id="stadion"/)
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
-    assert.match(clubHtml, /id="hoe-vaak-welke-uitslag".*\d+ keer (?:gewonnen|gelijk|verloren).*hf-donut-chart/s)
+    // The card has two charts (the scores and the goals, the second small), the sentence of the
+    // goals for a screen reader, the counts in the headers, then the table of the competitions
+    // and last the number of matches, in the short form.
+    assert.match(
+      clubHtml,
+      /id="hoe-vaak-welke-uitslag".*?hf-donut-chart-group.*?hf-donut-chart-small.*?Doelpunten: \d+ gemaakt, \d+ tegen\..*?<th scope="col"><span aria-hidden="true">\w+ \d+×.*?<th scope="col">Competitie<\/th>.*?<p class="hf-meta">(?:1 gespeelde wedstrijd|Alle \d+ gespeelde wedstrijden)<\/p>/s,
+    )
+    assert.doesNotMatch(clubHtml, /\d+ keer (?:gewonnen|gelijk|verloren)/)
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
     // the card Stadions: the older name with "tot", the newer with "vanaf", after the results.
     const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()

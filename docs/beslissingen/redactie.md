@@ -2005,6 +2005,7 @@
 - **Later:** zie _De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie_ (31 oktober 2026): de regel "een kaart telt alleen de Eredivisie, tenzij hij over de beker gaat" is vervallen.
   De kaarten tellen standaard de Eredivisie en de KNVB Beker, en de schakelaar kiest alleen de Eredivisie; drie kaarten blijven de Eredivisie.
   Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
+- **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (4 november 2026) in `site.md`: die kaart zegt het aantal wedstrijden zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.
 
 ## Reeksen staan in een eigen kaart na Verloop van het seizoen
 

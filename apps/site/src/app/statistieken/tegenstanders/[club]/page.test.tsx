@@ -61,11 +61,19 @@ const plain = (html: string) =>
  * are G, W, G, V, P when the table has points, and S. The minus sign of the goal
  * difference is read as a minus, and the plus as nothing.
  */
-const summaryOf = (html: string): [string, number[]][] =>
-  [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>[^<]*<\/td>)+)<\/tr>/g)].map(([, name, cells]) => [
-    name ?? '',
-    [...(cells ?? '').matchAll(/>([^<]*)<\/td/g)].map(([, cell]) => Number((cell ?? '').replace('\u2212', '-'))),
-  ])
+const summaryOf = (page: string): [string, number[]][] => {
+  // The rows of the table of competitions of the card Hoe vaak welke uitslag look the same.
+  const html = page.includes('id="hoe-vaak-welke-uitslag"')
+    ? page.slice(0, page.indexOf('id="hoe-vaak-welke-uitslag"'))
+    : page
+
+  return [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>[^<]*<\/td>)+)<\/tr>/g)].map(
+    ([, name, cells]) => [
+      name ?? '',
+      [...(cells ?? '').matchAll(/>([^<]*)<\/td/g)].map(([, cell]) => Number((cell ?? '').replace('\u2212', '-'))),
+    ],
+  )
+}
 
 /** The card Hoe vaak welke uitslag, from its heading to the end of the card. */
 const scoreCardOf = (html: string) => {
@@ -75,12 +83,21 @@ const scoreCardOf = (html: string) => {
   return start === -1 ? '' : html.slice(start, end)
 }
 
-/** How often we won, drew and lost, from the sentence of the card Hoe vaak welke uitslag. */
+/** How often we won, drew and lost, from the headers of the tables of the score card. */
 const sentenceOf = (html: string) => {
   const text = plain(scoreCardOf(html))
-  const count = (word: string) => Number(new RegExp(`(\\d+) keer ${word}`).exec(text)?.[1] ?? 0)
+  const count = (word: string) => Number(new RegExp(`${word}, (\\d+) keer`).exec(text)?.[1] ?? 0)
 
-  return { drawn: count('gelijk'), lost: count('verloren'), won: count('gewonnen') }
+  return { drawn: count('Gelijk'), lost: count('Verlies'), won: count('Winst') }
+}
+
+/** The competitions of the card, from its table of competitions, as [competition, matches]. */
+const competitionsOf = (html: string): [string, number][] => {
+  const table = /<table(?:(?!<\/table>).)*Competitie.*?<\/table>/s.exec(scoreCardOf(html))?.[0] ?? ''
+
+  return [...table.matchAll(/<tr><th scope="row">([^<]*)<\/th><td class="hf-numeric">(\d+)<\/td><\/tr>/g)].map(
+    ([, name, count]) => [name ?? '', Number(count)],
+  )
 }
 
 /** The list of the card Wedstrijden, from its first item to its end. */
@@ -419,24 +436,140 @@ describe('the page of a club', () => {
     expect(sentenceOf(await render('testclub', { competitie: 'eredivisie' }))).toEqual({ drawn: 1, lost: 0, won: 3 })
   })
 
-  it('changes the figures of the card with the switch', async () => {
+  it('changes the figures of the card with the switch, and gives the line under it the number of matches only', async () => {
     const all = scoreCardOf(await render())
     const league = scoreCardOf(await render('testclub', { competitie: 'eredivisie' }))
 
-    expect(plain(all)).toContain('3 keer gewonnen, 1 keer gelijk, 1 keer verloren')
-    expect(plain(all)).toContain('Gebaseerd op alle 5 gespeelde wedstrijden sinds')
-    expect(plain(league)).toContain('3 keer gewonnen, 1 keer gelijk')
-    expect(plain(league)).not.toContain('verloren')
-    expect(plain(league)).toContain('Gebaseerd op alle 4 gespeelde wedstrijden in de Eredivisie sinds')
+    expect(sentenceOf(all)).toEqual({ drawn: 1, lost: 1, won: 3 })
+    expect(plain(all)).toContain('Winst 3× Winst, 3 keer')
+    expect(plain(all)).toContain('Alle 5 gespeelde wedstrijden')
+    expect(sentenceOf(league)).toEqual({ drawn: 1, lost: 0, won: 3 })
+    expect(plain(league)).not.toContain('Verlies')
+    expect(plain(league)).toContain('Alle 4 gespeelde wedstrijden')
+
+    for (const card of [all, league]) {
+      expect(card).not.toContain('keer gewonnen')
+      expect(card).not.toContain('Gebaseerd op')
+      expect(card).not.toContain('sinds')
+      expect(card).not.toContain('in de Eredivisie')
+      expect(card.lastIndexOf('<p class="hf-meta">')).toBeGreaterThan(card.lastIndexOf('</table>'))
+    }
   })
 
-  it('has the card from one played match on, with the line in the form of the other card', async () => {
+  it('gives the header of a table the count for the eye and for a screen reader from one place', async () => {
+    const card = scoreCardOf(await render())
+    const headers = [...card.matchAll(/<th scope="col">(.*?)<\/th>/g)].map(([, header]) => header ?? '')
+
+    expect(headers.slice(0, 3)).toEqual([
+      '<span aria-hidden="true">Winst 3×</span><span class="hf-visually-hidden">Winst, 3 keer</span>',
+      '<span aria-hidden="true">Gelijk 1×</span><span class="hf-visually-hidden">Gelijk, 1 keer</span>',
+      '<span aria-hidden="true">Verlies 1×</span><span class="hf-visually-hidden">Verlies, 1 keer</span>',
+    ])
+  })
+
+  it('has the card from one played match on, with the line in the short form', async () => {
     vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(1, 2) })
 
     const card = plain(scoreCardOf(await render()))
 
-    expect(card).toContain('1 keer gewonnen')
-    expect(card).toContain('Gebaseerd op 1 gespeelde wedstrijd sinds')
+    expect(card).toContain('Winst, 1 keer')
+    expect(card).toContain('1 gespeelde wedstrijd')
+    expect(card).not.toContain('Alle 1')
+  })
+
+  describe('the competitions and the goals', () => {
+    const goalsOf = (html: string) => {
+      const text = plain(scoreCardOf(html))
+      const found = /Doelpunten: (\d+) gemaakt, (\d+) tegen\./.exec(text)
+
+      return found === null ? undefined : { against: Number(found[2]), for: Number(found[1]) }
+    }
+
+    it('has a table with a row for each competition, the most matches on top, that follows the switch', async () => {
+      expect(competitionsOf(await render())).toEqual([
+        ['Eredivisie', 4],
+        ['KNVB Beker', 1],
+      ])
+      expect(competitionsOf(await render('testclub', { competitie: 'eredivisie' }))).toEqual([['Eredivisie', 4]])
+    })
+
+    it('has the table after the tables of the outcomes and before the line, with a caption and column headers', async () => {
+      const card = scoreCardOf(await render())
+      const table = card.slice(card.lastIndexOf('<table'))
+
+      expect(table).toContain('<caption class="hf-visually-hidden">De competities van deze wedstrijden')
+      expect(table).toContain('<th scope="col">Competitie</th>')
+      expect(table).toContain('Wedstrijden</th>')
+      expect(card.indexOf('Winst')).toBeLessThan(card.lastIndexOf('<table'))
+      expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('Alle 5 gespeelde wedstrijden'))
+    })
+
+    it('adds the competitions up to the matches of the card, for both choices', async () => {
+      for (const [searchParams, played] of [
+        [{}, 5],
+        [{ competitie: 'eredivisie' }, 4],
+      ] as const) {
+        const html = await render('testclub', searchParams)
+        const { drawn, lost, won } = sentenceOf(html)
+
+        expect(competitionsOf(html).reduce((sum, [, count]) => sum + count, 0)).toBe(played)
+        expect(drawn + lost + won).toBe(played)
+      }
+    })
+
+    it('puts the competitions with the same number in the order of the site', async () => {
+      const [cup] = testclub.matches
+      const league = testclub.matches.at(1)!
+
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        matches: [
+          { ...league, competition: 'Play-offs Europa League' },
+          { ...cup!, competition: 'Europa League' },
+          { ...league, competition: 'Play-offs Conference League', matchDate: '2025-05-01' },
+          { ...league, competition: 'KNVB Beker', matchDate: '2025-04-01' },
+          { ...league, competition: 'Eredivisie', matchDate: '2025-03-01' },
+          { ...league, competition: 'Eredivisie', matchDate: '2025-02-01' },
+        ],
+      })
+
+      expect(competitionsOf(await render())).toEqual([
+        ['Eredivisie', 2],
+        ['KNVB Beker', 1],
+        ['Play-offs Conference League', 1],
+        ['Europa League', 1],
+        ['Play-offs Europa League', 1],
+      ])
+    })
+
+    it('has one row for one competition', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(1) })
+
+      expect(competitionsOf(await render())).toEqual([['Eredivisie', 4]])
+    })
+
+    it('has a second chart with the goals scored and conceded of the same matches, for both choices', async () => {
+      const all = await render()
+      const league = await render('testclub', { competitie: 'eredivisie' })
+
+      // The matches of Testclub: 3–0, 1–1, 2–0 and 4–2 in the Eredivisie, and 0–1 in the cup.
+      expect(goalsOf(all)).toEqual({ against: 4, for: 10 })
+      expect(goalsOf(league)).toEqual({ against: 3, for: 10 })
+      expect(scoreCardOf(all).match(/<div aria-hidden="true" class="hf-donut-chart /g)).toHaveLength(2)
+      expect(scoreCardOf(all)).toContain('hf-donut-chart-small')
+      // The small chart has the caption Doelsaldo above it and the goals in the hole.
+      expect(plain(scoreCardOf(all))).toMatch(/Doelsaldo\s*10–4/)
+      expect(plain(scoreCardOf(league))).toMatch(/Doelsaldo\s*10–3/)
+      expect(scoreCardOf(all)).not.toContain('Gemaakt')
+    })
+
+    it('says the goals as text for a screen reader, right after the charts and before the tables', async () => {
+      const card = scoreCardOf(await render())
+      const sentence = card.indexOf('<p class="hf-visually-hidden">Doelpunten: 10 gemaakt, 4 tegen.</p>')
+
+      expect(sentence).toBeGreaterThan(card.lastIndexOf('hf-donut-chart-small'))
+      expect(sentence).toBeLessThan(card.indexOf('<table'))
+    })
   })
 
   it('has the card for a club with played matches and matches to come, and none for a club we have not played', async () => {

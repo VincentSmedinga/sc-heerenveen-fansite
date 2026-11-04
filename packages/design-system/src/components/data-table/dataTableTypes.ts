@@ -21,6 +21,12 @@ export type DataTableColumn = {
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**
+   * What the header shows when that is not the words a screen reader says, such as `Winst 12×`
+   * for the name `Winst, 12 keer`. Unlike an `abbreviation` it is no abbreviation, so it gets
+   * no `abbr`. It does not work for a `sortable` column, whose button is named by `name`.
+   */
+  shown?: string
+  /**
    * Lets the visitor sort the table on this column. It only works with JavaScript: without it
    * the header is plain text and the table keeps the order of `rows`.
    */

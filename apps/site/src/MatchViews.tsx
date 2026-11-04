@@ -680,16 +680,9 @@ export function lastFiveCaption(lastResultOn: string) {
  */
 export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const counts = scoreCountsOf(matches)
-  const played = playedOfCounts(counts)
 
   return (
-    <ScoreCountsView
-      anchored
-      counts={counts}
-      empty="We hebben nog geen uitslagen van dit seizoen."
-      footer={<BasedOn known={played} played={played} />}
-      season={season}
-    />
+    <ScoreCountsView anchored counts={counts} empty="We hebben nog geen uitslagen van dit seizoen." season={season} />
   )
 }
 
@@ -697,44 +690,41 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
 export const playedOfCounts = (counts: ScoreCount[]) => counts.reduce((sum, count) => sum + count.count, 0)
 
 /**
- * The sentence above the table of scores: how often sc Heerenveen won, drew and lost, such as
- * "8 keer gewonnen, 1 keer gelijk, 5 keer verloren". An outcome that did not happen is left
- * out, and one match gives "1 keer gewonnen".
+ * The words in the header of the table of an outcome: what the eye reads, such as `Winst 12×`,
+ * and what a screen reader says, `Winst, 12 keer`, both made from the same count here.
  */
-export function scoreCountsSentence(counts: ScoreCount[]) {
-  const total = (outcome: ScoreCount['outcome']) =>
-    counts.filter((count) => count.outcome === outcome).reduce((sum, count) => sum + count.count, 0)
-  const parts = [
-    [total('win'), 'gewonnen'],
-    [total('draw'), 'gelijk'],
-    [total('loss'), 'verloren'],
-  ] as const
+const outcomeColumn = (heading: string, count: number) => ({
+  name: `${heading}, ${count} keer`,
+  shown: `${heading} ${count}×`,
+})
 
-  return parts
-    .filter(([count]) => count > 0)
-    .map(([count, word]) => `${count} keer ${word}`)
-    .join(', ')
-}
+/** The line that closes the card: how many matches its figures count. */
+export const playedLine = (played: number) =>
+  played === 1 ? '1 gespeelde wedstrijd' : `Alle ${played} gespeelde wedstrijden`
 
 /**
  * The card "Hoe vaak welke uitslag" for the `counts` it is given, which the page of the
- * matches and the page of a club share: the sentence, the chart and the tables. The `footer`
- * is the line under it that says what the figures are based on, which differs per page, and
- * `empty` the sentence for no played match. The heading is an anchor (`anchored`) where the
+ * matches and the page of a club share: the chart and a table for each outcome, with the
+ * count of the outcome in its header, and under them the line with the number of matches.
+ * `empty` is the sentence for no played match. The page of a club gives the `goals` of the
+ * same matches, which get a second, smaller chart beside the first, and `children`, which
+ * stand under the tables and above the line. The heading is an anchor (`anchored`) where the
  * page links to it, as Wedstrijden does; the anchors of a page are a promise, see
  * `src/anchors.ts`.
  */
 export function ScoreCountsView({
   anchored = false,
+  children,
   counts,
   empty,
-  footer,
+  goals,
   season,
 }: {
   anchored?: boolean
+  children?: ReactNode
   counts: ScoreCount[]
   empty: string
-  footer: ReactNode
+  goals?: undefined | { against: number; for: number }
   season?: string | undefined
 }) {
   const played = playedOfCounts(counts)
@@ -759,16 +749,37 @@ export function ScoreCountsView({
         <Text>{empty}</Text>
       ) : (
         <>
-          <Text>{scoreCountsSentence(counts)}</Text>
-          <DonutChart labels={false} ranked slices={slices} />
+          {goals === undefined ? (
+            <DonutChart labels={false} ranked slices={slices} />
+          ) : (
+            <>
+              <DonutChart.Group>
+                <DonutChart labels={false} ranked slices={slices} />
+                <DonutChart
+                  centre={`${goals.for}–${goals.against}`}
+                  labels={false}
+                  size="small"
+                  slices={[
+                    // The ring goes clockwise from the top: the goals against first, so the
+                    // goals for come after them and sit at the left, as in "45–31".
+                    { label: 'Tegen', tone: 'negative', value: goals.against },
+                    { label: 'Gemaakt', tone: 'positive', value: goals.for },
+                  ]}
+                  title="Doelsaldo"
+                />
+              </DonutChart.Group>
+              <Text className="hf-visually-hidden">{`Doelpunten: ${goals.for} gemaakt, ${goals.against} tegen.`}</Text>
+            </>
+          )}
           <DataTable.Group>
             {outcomes.map(({ caption, heading, outcome }) => {
               const rows = counts.flatMap((count, index) => (count.outcome === outcome ? [{ count, index }] : []))
+              const total = rows.reduce((sum, { count }) => sum + count.count, 0)
 
               return rows.length === 0 ? null : (
                 <DataTable
                   caption={caption}
-                  columns={[heading, { hidden: true, name: 'Keer' }]}
+                  columns={[outcomeColumn(heading, total), { hidden: true, name: 'Keer' }]}
                   key={outcome}
                   rows={rows.map(({ count, index }) => ({
                     cells: [`${count.count}×`],
@@ -780,7 +791,8 @@ export function ScoreCountsView({
               )
             })}
           </DataTable.Group>
-          {footer}
+          {children}
+          <Text appearance="meta">{playedLine(played)}</Text>
         </>
       )}
     </Card>

@@ -87,6 +87,7 @@ const meta = preview.meta({
           'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',
           'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`.',
           'De kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt, zoals de stand van de competitie doet.',
+          'Is de tekst van een kop geen afkorting maar een andere schrijfwijze van de naam, zoals "Winst 12×" voor "Winst, 12 keer", geef de kolom dan als `{ name, shown }`.',
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
           '',
