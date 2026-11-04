@@ -12,6 +12,7 @@ import {
   removeClubNamePeriods,
   replaceClubNamePeriods,
 } from '@fansite/db/club-name-periods'
+import { normaliseClubName } from '@fansite/db/clubs'
 import { findClubBySlug, listClubRecords } from '@fansite/db/queries'
 
 export { searchClubs } from './stadiums'
@@ -56,7 +57,7 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
 export function headingNotice(heading: string, own: readonly NamePeriodLine[]): string | undefined {
   const last = own.at(-1)
 
-  if (last === undefined || key(last.name) === key(heading)) {
+  if (last === undefined || normaliseClubName(last.name) === normaliseClubName(heading)) {
     return undefined
   }
 
@@ -69,10 +70,3 @@ export async function listAdminClubs(db: Database): Promise<AdminClubRow[]> {
 
   return records.map(({ id, name, slug }) => ({ id, name, own: own.has(id), slug }))
 }
-
-const key = (name: string) =>
-  name
-    .normalize('NFKD')
-    .replaceAll(/\p{M}/gu, '')
-    .toLowerCase()
-    .replaceAll(/[^\p{L}\p{N}]/gu, '')

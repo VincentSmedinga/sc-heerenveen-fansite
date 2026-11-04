@@ -2,6 +2,7 @@ import type { FormResult } from '@fansite/design-system'
 
 import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
 import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
+import { normaliseClubName } from '@fansite/db/clubs'
 import {
   findClubBySlug,
   listAllWikipediaPages,
@@ -210,14 +211,7 @@ export function summaryOf(meetings: readonly Meeting[]): ClubSummary {
 }
 
 /** Whether two spellings are one name for the importer: capitals and dots do not count. */
-const sameName = (a: string, b: string) => nameKey(a) === nameKey(b)
-
-const nameKey = (name: string) =>
-  name
-    .normalize('NFKD')
-    .replaceAll(/\p{M}/gu, '')
-    .toLowerCase()
-    .replaceAll(/[^\p{L}\p{N}]/gu, '')
+const sameName = (a: string, b: string) => normaliseClubName(a) === normaliseClubName(b)
 
 /**
  * A name of the stadium of a club, as Wikipedia wrote it, with the first and the last season

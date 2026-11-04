@@ -1028,7 +1028,6 @@
   `kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`.
 - **Waarom:** de pagina's per tegenstander (#415) hebben een adres nodig dat blijft werken.
   Een naam is dat niet: clubs veranderen van naam, fuseren, en Wikipedia schrijft dezelfde club in de competitie en in de beker soms anders (`N.E.C.` en `NEC`).
-- **Later:** zie _De lijst van namen is alleen voor de weergave, en de import houdt de naam in de kop_ (4 november 2026): de naam en de slug blijven van de import, maar de redactie kan namen toevoegen aan `club_names` via een lijst in het beheer.
   Het artikel is wat Wikipedia zelf als identiteit gebruikt, zoals bij de spelers.
 - **Hoe:** de importer zoekt bij elke wedstrijd de club met het artikel dat de wedstrijd linkt, en anders de club met die naam of een van zijn andere namen, zonder verschil in hoofdletters, accenten en leestekens.
   Vindt hij er geen, dan maakt hij een club.
@@ -1051,6 +1050,7 @@
 - **Later:** zie _Een doorverwijzing op Wikipedia is hetzelfde artikel, dus dezelfde club_ (3 november 2026): één artikel is één club, na de doorverwijzingen.
   De titel van een artikel dat een doorverwijzing is, telt als het artikel waar hij naar verwijst, en `wikipedia_page` is de titel van het echte artikel.
   Een club die onder de titel van een doorverwijzing staat, voegt de importer zelf samen, dus alleen een club zonder doorverwijzing voegt de projecteigenaar nog met de hand samen.
+- **Later:** zie _De lijst van namen is alleen voor de weergave, en de import houdt de naam in de kop_ (4 november 2026): de naam en de slug blijven van de import, maar de redactie kan namen toevoegen aan `club_names` via een lijst in het beheer.
 
 ## Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn
 

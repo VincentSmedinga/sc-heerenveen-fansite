@@ -255,7 +255,7 @@ describe('submitNames', () => {
     )
 
     expect(result).toMatchObject({
-      errors: { 'regel-2-naam': expect.stringContaining('hoort bij Oefenstad NAC') },
+      errors: { 'regel-2-naam': expect.stringContaining('hoort al bij Oefenstad NAC') },
       values: [{ naam: 'Oefen AZ' }, { naam: 'oefenstad n.a.c.' }],
     })
     expect(await stored()).toEqual([])

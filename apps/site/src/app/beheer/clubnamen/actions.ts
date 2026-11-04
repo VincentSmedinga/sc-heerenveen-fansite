@@ -67,7 +67,7 @@ export async function submitNames(slug: string, _previous: NameFormState, formDa
       errors: Object.fromEntries(
         outcome.conflicts.map(({ club, index, name }) => [
           nameFieldId(index + 1, 'naam'),
-          `${name} hoort bij ${club}. Kies een andere naam, of haal de naam daar eerst weg.`,
+          `${name} hoort al bij ${club}. Kies een andere naam, of laat de naam daar met de hand weghalen.`,
         ]),
       ),
       values: given,
