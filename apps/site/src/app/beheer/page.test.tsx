@@ -87,10 +87,12 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/artikelen">Artikelen</a>',
       '<a class="hf-tile-link" href="/beheer/wedstrijden">Wedstrijden</a>',
       '<a class="hf-tile-link" href="/beheer/stadions">Stadions</a>',
+      '<a class="hf-tile-link" href="/beheer/clubnamen">Clubnamen</a>',
       '<a class="hf-tile-link" href="/beheer/bezoek">Bezoek</a>',
     ])
     expect(html).toContain('Vul wedstrijden in of verbeter ze.')
     expect(html).toContain('Geef een club een eigen lijst van stadions, met een toelichting.')
+    expect(html).toContain('Houd bij welke namen een club droeg, en sinds wanneer.')
   })
 
   it('has no card and no sidebar when nothing waits', async () => {

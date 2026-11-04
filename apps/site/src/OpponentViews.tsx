@@ -4,6 +4,7 @@ import { competitions } from '@fansite/db/schema'
 import {
   Card,
   DataTable,
+  Disclosure,
   Heading,
   List,
   MarkRow,
@@ -22,6 +23,7 @@ import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-for
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import {
+  type ClubNameView,
   type ClubSummary,
   lastResultsOf,
   type Meeting,
@@ -198,6 +200,31 @@ const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2,
 
 /** The legend of the card: the letters of its two columns. The place has no line. */
 const topPointsLegend = tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
+
+/**
+ * The names the editors list for a club, in a fold under its heading, for the notes they wrote
+ * with a name (when the KNVB approved it, say). It lists every name with its period, as the
+ * line "Eerder" says in short, and shows the note under each name. A list without a note has no
+ * fold: the line "Eerder" is all there is to say. The notes are plain text, written by us.
+ */
+export function ClubNamesNotes({ names }: { names: ClubNameView[] }) {
+  if (!names.some((name) => name.note !== undefined)) {
+    return null
+  }
+
+  return (
+    <Disclosure summary="Over de namen">
+      <List role="list">
+        {names.map((name, index) => (
+          // A name can come back after another, so the place in the list is part of the key.
+          <List.Item key={`${index}-${name.name}`}>
+            <ShortStaff note={name.note} period={name.period} surname={name.name} />
+          </List.Item>
+        ))}
+      </List>
+    </Disclosure>
+  )
+}
 
 /**
  * The card "Hoe vaak welke uitslag" of the page of a club: the card of the page Wedstrijden
@@ -389,7 +416,7 @@ export function OpponentsCredit({
 /**
  * The card of the page of a club with the names of its stadium, on the strong surface, like the
  * head coaches. With one name there is the name alone; with more, each name has its period (see
- * `stadiumPeriods` and `ownStadiumPeriods`). A name can have a note under it, which the editors
+ * `stadiumPeriods` and `ownListPeriods`). A name can have a note under it, which the editors
  * wrote: it says why, for instance, a club played elsewhere for a while. The names of the
  * matches come from Wikipedia, and the credit at the foot of the page says so, so the card has
  * no line of its own. The anchor is the same for "Stadion" and "Stadions". A club without a

@@ -1738,6 +1738,8 @@
   De lijst en de samenvatting tellen nog steeds alleen gespeelde wedstrijden.
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): de kaart Wedstrijden toont sindsdien elke wedstrijd als `Match`, met de competitie en de ronde in de regel en het jaar bij de dag, en niet meer als korte regel (`ShortMatch`) met het seizoen en de competitie erboven.
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026): de lijst heeft een zijkolom met de top 10 en de bronvermelding, en is wit.
+- **Later:** zie _"Eerder" toont alleen echte naamswijzigingen_ en _De wedstrijdlijsten tonen de naam van het seizoen, de kop de naam van nu_ (4 november 2026): de regel "Eerder: …" onder de kop komt sindsdien uit de lijst van de redactie in plaats van uit de schrijfwijzen van Wikipedia, en de wedstrijden noemen de club met de naam van het seizoen als de club een lijst heeft.
+  Een club zonder lijst heeft geen regel, en toont de schrijfwijze van Wikipedia in zijn wedstrijden zoals voorheen.
 
 ## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
 
@@ -2368,3 +2370,48 @@
   Een schermlezer leest de namen als één rijkop.
 - **Alternatieven:** alleen de laatste plaats samenvoegen (86 rijen, en een gelijke stand eerder in de tabel blijft vijf rijen met dezelfde plaats); groepen van drie of meer (77 rijen, met een drempel die niemand ziet); alleen de kaart op de pagina van een club (Statistieken houdt zijn lange gelijke stand op plaats 5); alle drie de tabellen, Spelers ook; "elk" in de cel of een regel onder de tabel die zegt dat de doelpunten per speler zijn (afgewezen: de plaats en de komma's zeggen genoeg); één naam per regel in de cel (even hoog als nu); namen die midden in een naam mogen breken.
 - **Later:** bij _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
+
+## De wedstrijdlijsten tonen de naam van het seizoen, de kop de naam van nu
+
+- **Datum:** 4 november 2026
+- **Besluit:** heeft een club een lijst van namen (#705), dan tonen de wedstrijdlijsten en teksten de naam die gold in het seizoen van de wedstrijd, en bij een start met een dag op de dag van de wedstrijd.
+  De kop van de pagina van de club toont de naam van nu.
+  Zonder lijst, of voor een wedstrijd van vóór de eerste start, blijft het de schrijfwijze van Wikipedia (`matches.opponent`).
+  - **Waar de naam wordt bepaald:** in de queries `listSeasonMatches` en `listClubMatches` van `@fansite/db`, met `nameOnDay` en `withSeasonNames` in `club-name-periods.ts`.
+    Elke pagina die een wedstrijd toont, krijgt zo de naam van het seizoen zonder een regel eigen code: de wedstrijdlijsten, `noteworthy`, de laatste vijf en de pagina van een club.
+    `listSeasonMatches` leest het nummer van de club erbij en geeft het niet door.
+  - **Wat de datum is:** een seizoen telt als 1 juli van zijn eerste jaar, een dag als die dag, en de wedstrijd telt met zijn datum (`matchDate`).
+  - **Het beheer niet:** de schermen voor wedstrijden lezen `matches.opponent` zelf (`match-entries.ts`) en tonen dus altijd de schrijfwijze van Wikipedia, want daar vergelijkt de redactie met de bron.
+- **Waarom:** een lezer ziet FC Zwolle in 2011/12, wat de club toen heette, en de kop zegt wie de club nu is.
+  De regel "Eerder" legt het uit.
+- **Nadeel:** dezelfde club heeft op één pagina twee namen: de kop en de rijen eronder.
+- **Alternatieven:** overal de naam van nu (de uitslag van 2011/12 noemt dan een club die nog niet zo heette); de naam bepalen in elke pagina (een regel code per pagina die er een vergeet).
+
+## "Eerder" toont alleen echte naamswijzigingen
+
+- **Datum:** 4 november 2026
+- **Besluit:** de regel "Eerder: …" onder de kop van een club komt uit de lijst van de redactie, met de periode van elke naam: "Eerder: FC Zwolle t/m 2011/12" (#705).
+  De schrijfwijzen van Wikipedia staan er niet meer, ook die van IJsselmeervogels en NEC.
+  - **Welke namen:** de namen van de lijst vóór de naam van nu.
+    Is de laatste naam van de lijst de naam in de kop (zonder verschil in hoofdletters, accenten en leestekens), dan valt die weg; is het een andere naam, dan komt de kop van de import en zijn alle namen van de lijst eerder.
+    Een club zonder lijst, of met één naam, heeft geen regel (`earlierNames` in `src/opponents.ts`).
+  - **De toelichting:** onder de regel staat het uitklapblok "Over de namen", alleen als een naam een toelichting heeft, met elke naam, zijn periode en de toelichting als gewone tekst (`ClubNamesNotes`, met `ShortStaff` zoals de kaart Stadion).
+    Er is geen nieuw component voor nodig.
+- **Waarom:** "Eerder: V.V. IJsselmeervogels" is geen naamswijziging, en een regel "Eerder: N.E.C." zegt de lezer niets.
+  Wat de redactie invult, is gecontroleerd.
+- **Nadeel:** tot de redactie iets invult, hebben alle clubs geen regel.
+- **Alternatieven:** de schrijfwijzen laten staan voor clubs zonder lijst (de regel zegt dan twee verschillende dingen); de toelichting altijd zichtbaar onder de regel (een lange tekst onder de kop, voor wie hem niet zoekt).
+
+## De namen van een club hebben een eigen scherm, `/beheer/clubnamen`, naast Stadions
+
+- **Datum:** 4 november 2026
+- **Besluit:** de tabel, de weergave en het scherm zijn één issue, na #694 dat het patroon van het scherm legde (#705).
+  `/beheer/clubnamen` volgt `/beheer/stadions`: dezelfde rollen (alleen een beheerder), dezelfde lijst met filter en zoeken zonder JavaScript, hetzelfde formulier met herhaalde velden, dezelfde regels voor een start, dezelfde functie voor de periodes (`ownListPeriods`, eerder `ownStadiumPeriods`) en dezelfde verversing.
+  - **Anders dan Stadions:** er is geen "Overnemen", want de schrijfwijzen van Wikipedia zijn geen naamswijzigingen; ze staan in de zijbalk, alleen lezen.
+    Het uitklapblok heet "Lijst weghalen" en laat de schrijfwijzen in `club_names` staan.
+    Boven het formulier staat de naam die de site nu in de kop toont, en een melding in gewone tekst als de laatste naam van de lijst een andere is.
+  - **Een naam van een andere club:** het formulier weigert hem met een fout bij het veld, en dan wordt niets opgeslagen.
+    De controle staat in de transactie van `replaceClubNamePeriods`, op de naam in de kop en de andere namen van de andere clubs, zoals de import zoekt.
+- **Waarom:** zonder het scherm blijft de tabel leeg, en #694 bewijst dat de combinatie in één pull request past.
+  Eén patroon voor de twee schermen houdt het beheer te leren en te onderhouden.
+- **Alternatieven:** twee issues, eerst de tabel met een lijst in de code en dan het scherm (de lijst in de code moet daarna weer weg); `Overnemen` ook hier (maakt van elke schrijfwijze een naamswijziging, wat de lijst juist niet wil zijn).

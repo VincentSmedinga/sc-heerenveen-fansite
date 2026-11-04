@@ -951,6 +951,8 @@ De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/d
    Is de wedstrijd van het nieuwste seizoen dat we van de club hebben, dan wordt het de naam van de club, en de oude naam komt bij de andere namen.
    Een naam die de club al had, verandert niets, zodat twee schrijfwijzen in één seizoen niet om de beurt de naam zijn.
    Een naam van een andere club blijft bij die club.
+   De redactie kan er namen bij zetten met een lijst van namen in het beheer (`/beheer/clubnamen`): elke naam daarvan komt ook in `club_names`, zodat de import een hernoemde club als dezelfde club vindt.
+   De import bepaalt de naam in de kop en de slug, ook voor een club met zo'n lijst.
 
 Een lijst met volledige namen gaat vóór deze regels (`clubFullNames` in [`src/club-names.ts`](src/club-names.ts)).
 Ze zegt van een club hoe hij heet en welke andere schrijfwijzen dezelfde club zijn: nu `Excelsior Rotterdam` met `Excelsior` en `SBV Excelsior`.

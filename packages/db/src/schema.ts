@@ -411,6 +411,8 @@ export const auditActions = [
   'match.keep',
   'stadium.save',
   'stadium.reset',
+  'club-name.save',
+  'club-name.reset',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -427,11 +429,11 @@ export const auditDetailMaxLength = 1000
  * keeps it so. It keeps who (the id of the account, not the address), when (UTC), what, which
  * item, article, match or club and the reason. `item_id` is the number of an item for an
  * `item.` action, of an article for an `article.` action, of a match for a `match.` action and
- * of a club for a `stadium.` action: the action says which. It has no foreign key, so the row
- * stays when an item is deleted. `reason` is empty for an action that has none, such as showing
- * an item again. `detail` says what changed, for the actions that change values: the part of a
- * match and the values before and after, or for a `stadium.` action the numbers of lines. It
- * holds nothing else of the request.
+ * of a club for a `stadium.` or `club-name.` action: the action says which. It has no foreign
+ * key, so the row stays when an item is deleted. `reason` is empty for an action that has
+ * none, such as showing an item again. `detail` says what changed, for the actions that change
+ * values: the part of a match and the values before and after, or for a `stadium.` or
+ * `club-name.` action the numbers of lines. It holds nothing else of the request.
  *
  * `user_id` is empty for a line the importer writes: it has no account. The `match.caught-up`
  * and `match.differs` actions are only ever written by the importer, and have no account, which
@@ -723,6 +725,51 @@ export const clubStadiums = mysqlTable(
 export type ClubStadium = typeof clubStadiums.$inferSelect
 
 export type NewClubStadium = typeof clubStadiums.$inferInsert
+
+/** The most characters a column of `club_name_periods` holds. The admin checks them first. */
+export const clubNamePeriodLimits = { name: clubLimits.name, note: 200 }
+
+/**
+ * The names a club has had, as the editors keep them in the admin: for display only. The
+ * importer decides the name in the heading and the slug, and finds a renamed club through
+ * `club_names`, which gets every name saved here. A club with rows here has its own list: its
+ * page says "Eerder" from it, and the lists of matches show the name of the season. The rows
+ * are in order: `position` counts from 0. A name starts with a season (`start_season`, such as
+ * `2012/13`, counting as 1 July of that year) or with a day (`start_day`), never both, and the
+ * next name decides where it ends. Only the first name may have no start. `note` is a short
+ * text of our own, such as when the KNVB approved the name. The rows go with their club, and a
+ * test of the database package keeps the rules of a row.
+ */
+export const clubNamePeriods = mysqlTable(
+  'club_name_periods',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    clubId: int('club_id', { unsigned: true })
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    name: varchar('name', { length: clubNamePeriodLimits.name }).notNull(),
+    startSeason: varchar('start_season', { length: matchLimits.season }),
+    startDay: date('start_day', { mode: 'string' }),
+    note: varchar('note', { length: clubNamePeriodLimits.note }),
+  },
+  (table) => [
+    unique('club_name_periods_club_id_position_unique').on(table.clubId, table.position),
+    check('club_name_periods_one_start', sql`${table.startSeason} is null or ${table.startDay} is null`),
+    check(
+      'club_name_periods_start_season_format',
+      sql`${table.startSeason} is null or ${table.startSeason} regexp '^[0-9]{4}/[0-9]{2}$'`,
+    ),
+    check(
+      'club_name_periods_start_after_first',
+      sql`${table.position} = 0 or ${table.startSeason} is not null or ${table.startDay} is not null`,
+    ),
+  ],
+)
+
+export type ClubNamePeriod = typeof clubNamePeriods.$inferSelect
+
+export type NewClubNamePeriod = typeof clubNamePeriods.$inferInsert
 
 /**
  * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie, the KNVB

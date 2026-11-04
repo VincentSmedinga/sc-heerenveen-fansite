@@ -70,6 +70,32 @@ const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
 /**
+ * Gives SV Proefdorp a list of names of its own: an older name, and the name of now from the
+ * season 2012/13, with a note. Its page then says "Eerder" from the list.
+ */
+async function addProefdorpNames(database) {
+  const { close, pool } = connect(database)
+
+  try {
+    const [[{ club }]] = await pool.query("SELECT club_id AS club FROM matches WHERE opponent = 'SV Proefdorp' LIMIT 1")
+
+    await pool.query(
+      'INSERT INTO club_name_periods (club_id, position, name, start_season, start_day, note) VALUES (?, 0, ?, NULL, NULL, NULL), (?, 1, ?, ?, NULL, ?)',
+      [
+        club,
+        'Proefdorp Boys',
+        club,
+        'SV Proefdorp',
+        '2012/13',
+        'De club koos een nieuwe naam, en de bond keurde hem goed op 5 juni 2012.',
+      ],
+    )
+  } finally {
+    await close()
+  }
+}
+
+/**
  * Gives SV Proefdorp, a club with a cup tie to come and no match played, a list of stadiums of
  * its own: a name, a name that starts on a day, with a note, and the first name again from a
  * season. Its page then has the card Stadions although the matches name no stadium.
@@ -181,6 +207,9 @@ async function checkAdmin() {
     '/beheer/stadions',
     '/beheer/stadions?tonen=eigen-lijst&q=proef',
     '/beheer/stadions/voorbeeld-united',
+    '/beheer/clubnamen',
+    '/beheer/clubnamen?tonen=eigen-lijst&q=proef',
+    '/beheer/clubnamen/voorbeeld-united',
   ]) {
     const response = await fetch(origin + path, { redirect: 'manual' })
     assert.equal(response.status, 307, path)
@@ -1129,6 +1158,7 @@ await withEmptyDatabase((database) =>
     // slug that no club has is "niet gevonden".
     await addTestdorpMeetings(database)
     await addProefdorpStadiums(database)
+    await addProefdorpNames(database)
     const clubPage = await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc`)
     const clubHtml = await clubPage.text()
     assert.equal(clubPage.status, 200)
@@ -1209,6 +1239,13 @@ await withEmptyDatabase((database) =>
       ownListClub,
       /<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot 10 aug 2019<.*Sportpark Proefdorp.*10 aug 2019 t\/m 2019\/20<.*Stadion Tijdelijk.*Proefdorp speelde tijdelijk elders\..*vanaf 2020\/21<.*Sportpark Proefdorp.*Bron: /s,
     )
+    // The same club has a list of names: "Eerder" comes from the list, with the period, and the
+    // note is in the fold under it. The spellings of Wikipedia are not under the heading.
+    assert.match(
+      ownListClub,
+      /<h1[^>]*>SV Proefdorp<\/h1><p class="hf-meta">Eerder: Proefdorp Boys t\/m 2011\/12<\/p><details.*Over de namen.*t\/m 2011\/12<.*Proefdorp Boys.*vanaf 2012\/13<.*SV Proefdorp.*de bond keurde hem goed op 5 juni 2012\./s,
+    )
+    assert.doesNotMatch(clubHtml, /Eerder:/)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)
 

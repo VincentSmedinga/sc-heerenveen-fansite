@@ -33,6 +33,7 @@ test('gives a beheerder every screen and marks the one below which the page is',
     'Artikelen',
     'Wedstrijden',
     'Stadions',
+    'Clubnamen',
     'Bezoek',
   ])
   await expect(bar.locator('[aria-current="page"]')).toHaveText('Artikelen')

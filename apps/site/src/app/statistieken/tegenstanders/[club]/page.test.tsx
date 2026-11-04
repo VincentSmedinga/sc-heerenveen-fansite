@@ -124,14 +124,103 @@ const lettersOf = (html: string) =>
     .join('')
 
 describe('the page of a club', () => {
-  it('has the name of the club as the h1, and "Eerder: …" under it for the other names', async () => {
+  describe('with a list of names of its own', () => {
+    const names = [
+      { name: 'Oude Testclub', note: null, startDay: null, startSeason: null },
+      {
+        name: 'Testclub',
+        note: 'De KNVB keurde de naam Testclub goed op 5 juni 2012.',
+        startDay: null,
+        startSeason: '2012/13',
+      },
+    ]
+
+    it('has the name of the club as the h1, and "Eerder: …" under it from the list, with the period', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, names })
+
+      const html = await render()
+
+      expect(html).toMatch(/<h1[^>]*>Testclub<\/h1>/)
+      expect(html).toContain('Eerder: Oude Testclub t/m 2011/12')
+    })
+
+    it('does not put the spellings of Wikipedia under the heading any more, with a list or without', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, names })
+
+      expect(await render()).not.toContain('Testclub 1900')
+      vi.mocked(getClubPage).mockResolvedValue(testclub)
+      expect(await render()).not.toContain('Eerder:')
+      expect(await render()).not.toContain('Testclub 1900')
+    })
+
+    it('shows the note with its name in a fold, as text', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, names })
+
+      const html = await render()
+      const fold = html.slice(html.indexOf('<details'), html.indexOf('</details>'))
+
+      expect(fold).toContain('Over de namen')
+      expect(plain(fold.slice(fold.indexOf('<ul')))).toBe(
+        't/m 2011/12 Oude Testclub vanaf 2012/13 Testclub De KNVB keurde de naam Testclub goed op 5 juni 2012.',
+      )
+    })
+
+    it('has no fold when no name has a note, and none with one name', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        names: names.map((name) => ({ ...name, note: null })),
+      })
+      expect(await render()).not.toContain('Over de namen')
+
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, names: [{ ...names[1]! }] })
+
+      const html = await render()
+
+      expect(html).not.toContain('Over de namen')
+      expect(html).not.toContain('Eerder:')
+    })
+
+    it('shows a note as text, never as markup', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        names: [{ ...names[0]! }, { ...names[1]!, note: '<b>vet</b>"><script>alert(1)</script>' }],
+      })
+
+      const html = await render()
+
+      expect(html).not.toContain('<b>vet</b>')
+      expect(html).not.toContain('<script>alert(1)')
+      expect(html).toContain('&lt;b&gt;vet&lt;/b&gt;')
+    })
+
+    it('stays editorial: no intro, no photo, no request to a third party, and the credit of Wikipedia stays', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, names })
+
+      const html = await render()
+
+      expect(html).not.toContain('<img')
+      expect(html).not.toMatch(/(?:src|srcset)="https?:/)
+      expect(html).toContain('Bron:')
+      expect(html).toContain('wikipedia.org')
+    })
+
+    it('names every earlier name of the list when the last one is not the name in the heading', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        names: [...names, { name: 'Nieuwste Testclub', note: null, startDay: '2025-06-01', startSeason: null }],
+      })
+
+      expect(await render()).toContain(
+        'Eerder: Oude Testclub t/m 2011/12, Testclub 2012/13 tot 1 jun 2025, Nieuwste Testclub vanaf 1 jun 2025',
+      )
+    })
+  })
+
+  it('has the name of the club as the h1, and no "Eerder" line for a club without a list', async () => {
     const html = await render()
 
     expect(html).toMatch(/<h1[^>]*>Testclub<\/h1>/)
-    expect(html).toContain('Eerder: Oude Testclub, Testclub 1900')
-  })
-
-  it('has no "Eerder" line for a club with one name', async () => {
+    expect(html).not.toContain('Eerder:')
     expect(await render('beker-united')).not.toContain('Eerder:')
   })
 

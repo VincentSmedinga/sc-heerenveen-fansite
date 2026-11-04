@@ -129,6 +129,8 @@ describe('recordAction', () => {
       'match.keep',
       'stadium.save',
       'stadium.reset',
+      'club-name.save',
+      'club-name.reset',
     ])
   })
 

@@ -7,6 +7,7 @@ import { alias } from 'drizzle-orm/mysql-core'
 import type { Database } from './client.ts'
 import type { Competition, MatchPageKind, StaffRole } from './schema.ts'
 
+import { listClubNamePeriods, nameOnDay, withSeasonNames } from './club-name-periods.ts'
 import {
   articles,
   clubNames,
@@ -104,10 +105,10 @@ export async function countPodcastEpisodes(
 }
 
 /**
- * One club by its `slug`, the fixed name in its address, with the other names Wikipedia writes
- * for it (`otherNames`, A to Z, without the name it has now) and the title of its article,
- * which is null for a club the importer has not met with an article. It gives nothing for a
- * slug that no club has.
+ * One club by its `slug`, the fixed name in its address, with the other spellings Wikipedia
+ * writes for it (`otherNames`, A to Z, without the name it has now; they are not name
+ * changes) and the title of its article, which is null for a club the importer has not met with
+ * an article. It gives nothing for a slug that no club has.
  */
 export async function findClubBySlug(db: Database, slug: string) {
   const [club] = await db
@@ -302,7 +303,8 @@ export function listArchiveSources(db: Database, until: Date) {
  * number of spectators and the referee, which no page shows. `club` is the `id` of the club
  * (from `findClubBySlug`). With `competition` only the matches of that competition are given;
  * without it all of them. A club with no match, or none in that competition, gives an empty
- * list.
+ * list. `opponent` is the name the club had on the day of the match when the club has a list of
+ * names of its own (`club_name_periods`), and otherwise the spelling of Wikipedia.
  */
 export async function listClubMatches(db: Database, club: number, { competition }: { competition?: Competition } = {}) {
   const where = and(
@@ -334,8 +336,10 @@ export async function listClubMatches(db: Database, club: number, { competition 
     .from(matches)
     .where(where)
     .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+  const lines = await listClubNamePeriods(db, club)
+  const named = rows.map((row) => ({ ...row, opponent: nameOnDay(lines, row.matchDate) ?? row.opponent }))
 
-  return withGoals(db, rows, where)
+  return withGoals(db, named, where)
 }
 
 /**
@@ -575,7 +579,9 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * title of the player's Wikipedia page as the table of the match links it, whether or not the
  * goal is linked to a player, and null when the table does not link the name. The moment the
  * importer saw a result stays internal. Only the season that is asked for is read: the pages
- * show the current season alone.
+ * show the current season alone. `opponent` is the name the club had on the day of the match
+ * when the club has a list of names of its own (`club_name_periods`), and otherwise the
+ * spelling of Wikipedia.
  */
 export async function listSeasonMatches(db: Database, season: string) {
   const rows = await db
@@ -583,6 +589,7 @@ export async function listSeasonMatches(db: Database, season: string) {
       afterNinetyAgainst: matches.afterNinetyAgainst,
       afterNinetyFor: matches.afterNinetyFor,
       attendance: matches.attendance,
+      clubId: matches.clubId,
       competition: matches.competition,
       dateText: matches.dateText,
       extraTime: matches.extraTime,
@@ -605,8 +612,15 @@ export async function listSeasonMatches(db: Database, season: string) {
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
 
-  // The pages of a season don't need the `id`, so it stays out of what they get.
-  return (await withGoals(db, rows, eq(matches.season, season))).map((match) => omitId(match))
+  // The pages of a season need neither the `id` nor the club, so they stay out of what they
+  // get.
+  const named = await withSeasonNames(db, rows)
+
+  return (await withGoals(db, named, eq(matches.season, season))).map(({ clubId, ...match }) => {
+    void clubId
+
+    return omitId(match)
+  })
 }
 
 /**

@@ -274,6 +274,13 @@
       "when": 1793806302143,
       "tag": "0038_add_club_stadiums",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1793812541008,
+      "tag": "0039_add_club_name_periods",
+      "breakpoints": true
     }
   ]
 }

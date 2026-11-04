@@ -79,8 +79,8 @@ const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month:
 
 const shortMonthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'short', timeZone, year: 'numeric' })
 
-/** When a name in an own list of stadiums starts: a season, a day or neither. */
-export type StadiumStart = { startDay: null | string; startSeason: null | string }
+/** When a line in an own list (of stadiums, of names) starts: a season, a day or neither. */
+export type ListStart = { startDay: null | string; startSeason: null | string }
 
 /**
  * What the list of head coaches says in front of each name, in the order the coaches began: a
@@ -170,7 +170,8 @@ export function matchMoment(
 }
 
 /**
- * What the own list of stadium names of a club says with each name, in the order of the list.
+ * What an own list of a club (its stadium names, its names) says with each name, in the order
+ * of the list.
  * The start of a name is a season or a day, and the next start decides where the name before it
  * ends: "t/m 2018/19", the season before, when the next start is a season, and "tot 14 feb
  * 2021" when it is a day. The first name has only its end, and the last has "vanaf" with its
@@ -180,7 +181,7 @@ export function matchMoment(
  * list of head coaches (`coachPeriods`). One name
  * says nothing, because the name is enough.
  */
-export function ownStadiumPeriods(starts: readonly StadiumStart[]): (string | undefined)[] {
+export function ownListPeriods(starts: readonly ListStart[]): (string | undefined)[] {
   const days = starts.map((start) =>
     start.startDay === null ? undefined : formatStaffDate({ date: start.startDay, precision: 'day' }),
   )

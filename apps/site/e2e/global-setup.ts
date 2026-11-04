@@ -1,5 +1,6 @@
 import { addAdmin } from './admin'
 import { addArticles } from './articles'
+import { addClubNames } from './club-names'
 import { addDiscussions } from './discussions'
 import { addEarlierSeason } from './earlier-season'
 import { addEpisodes } from './episodes'
@@ -17,7 +18,8 @@ import { addVisits } from './visits'
 // made-up counters that the page Bezoek shows (see visits.ts), and a made-up league table for
 // /wedstrijden (see standings.ts), and made-up matches for the season before it (see
 // earlier-season.ts), and three older matches against Testdorp FC (see older-meetings.ts), and
-// a list of stadiums of its own for SV Proefdorp (see stadiums.ts).
+// a list of stadiums and a list of names of its own for SV Proefdorp (see stadiums.ts and
+// club-names.ts).
 // The homepage keeps its headlines and discussions in memory for five minutes, so nothing may
 // ask for the homepage before this has run: the site is started with robots.txt as its address
 // to wait for (see playwright.config.ts). The function it returns is the teardown.
@@ -35,6 +37,7 @@ export default async function globalSetup() {
   const removeEarlierSeason = await addEarlierSeason()
   const removeOlderMeetings = await addOlderMeetings()
   const removeStadiums = await addStadiums()
+  const removeClubNames = await addClubNames()
 
   return async () => {
     await removeHeadlines()
@@ -44,6 +47,7 @@ export default async function globalSetup() {
     await removeAdmin()
     await removeVisits()
     await removeStandings()
+    await removeClubNames()
     await removeStadiums()
     await removeOlderMeetings()
     await removeEarlierSeason()

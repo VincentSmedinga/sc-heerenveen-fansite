@@ -471,3 +471,19 @@
 - **Waarom:** de namen uit de wedstrijden kunnen niet zeggen waarom een club tijdelijk elders speelde, en een lijst per club is de kleinste vorm die dat kan.
   Een `position` houdt de volgorde vast die de redactie ziet, ook voor een naam die terugkomt (A, B, A), waar sorteren op de start niet genoeg is voor de eerste regel zonder start.
 - **Alternatieven:** een tabel met stadions los van clubs, met een stadion dat van naam verandert of door meer clubs wordt gebruikt (#549 vroeg erom en is gesloten omdat de namen uit de wedstrijden volstonden; een lijst per club heeft zo'n tabel niet nodig); een lijst als tekst of JSON in `clubs` (geen controles in de database, en de back-up en het logboek hebben er dan geen aandacht voor).
+
+## De namen van een club staan in `club_name_periods`, naast de schrijfwijzen in `club_names`
+
+- **Datum:** 4 november 2026
+- **Besluit:** een nieuwe tabel `club_name_periods` bewaart per club de namen die hij droeg, met een start (een seizoen of een dag) en een toelichting (#705).
+  `club_names` blijft wat het is: de schrijfwijzen die de import gebruikt om een club te vinden.
+  De redactie beheert de lijst in `/beheer/clubnamen`, en alleen daar (zie _De namen van een club hebben een eigen scherm_ in `site.md`).
+  - **De rij en de controles:** zoals `club_stadiums` (zie _De eigen lijst van stadions van een club staat in `club_stadiums`_): `club_id` met `ON DELETE CASCADE`, `position`, de naam (1 tot 100 tekens), `start_season` of `start_day` en de toelichting (hoogstens 200 tekens), met dezelfde CHECK-constraints en `(club_id, position)` uniek.
+  - **Het logboek:** de acties `club-name.save` en `club-name.reset` met het nummer van de club als `item_id` en in `detail` de aantallen (de regels, hoeveel een toelichting hebben, hoeveel namen erbij kwamen in `club_names`), nooit de tekst van een toelichting.
+    Opslaan en logboek zijn één transactie (`replaceClubNamePeriods` en `removeClubNamePeriods` in `@fansite/db/club-name-periods`).
+  - **De back-up:** de tabel gaat mee met haar rijen, want het is werk van de redactie dat we niet opnieuw kunnen lezen.
+  - **De migratie:** `0039_add_club_name_periods` maakt de tabel leeg en zet geen echte gegevens: de redactie vult PEC Zwolle (FC Zwolle t/m 2011/12, PEC Zwolle vanaf 2012/13) en andere clubs in via het beheer.
+- **Waarom:** de gegevens van Wikipedia kennen alleen schrijfwijzen, geen jaren, en kunnen een naamswijziging niet van een andere schrijfwijze onderscheiden (`N.E.C.` en `NEC`, `V.V. IJsselmeervogels` en `IJsselmeervogels`).
+  Een naamswijziging met een jaar is een feit dat iemand moet opzoeken.
+- **Nadeel:** een club zonder lijst heeft geen regel "Eerder" meer, en de redactie moet de lijst invullen.
+- **Alternatieven:** jaren in `club_names` zetten (dat zijn schrijfwijzen voor de import, en de meeste rijen zijn geen naamswijziging); de jaren uit de wedstrijden afleiden (we zien alleen de spelling van Wikipedia, niet wanneer de naam veranderde, en voor FC Zwolle toonde Wikipedia al PEC Zwolle); een vaste lijst in de code zoals `clubFullNames` (elke naamswijziging is dan een wijziging van de code).
