@@ -53,7 +53,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
         intro={article.intro}
         title={article.title}
       >
-        <ArticleText text={article.body} />
+        <ArticleText body={article.body} />
       </Article>
     </Page.Main>
   )

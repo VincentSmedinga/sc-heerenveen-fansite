@@ -8,7 +8,6 @@ import { requireRole } from '#src/beheer/require-role'
 
 import { submitNewArticle } from '../actions'
 import { ArticleForm } from '../ArticleForm'
-import { FormatHelp } from '../FormatHelp'
 import { formLimits } from '../limits'
 import { articlesPath } from '../paths'
 
@@ -34,7 +33,6 @@ export default async function NewArticlePage() {
         </>
       }
     >
-      <FormatHelp />
       <ArticleForm
         action={submitNewArticle}
         initial={{ ...emptyValues, auteur: 'de redactie' }}

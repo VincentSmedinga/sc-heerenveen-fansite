@@ -1,7 +1,8 @@
 'use client'
 
 import { Button, ErrorSummary, Field, Form, Input, Textarea } from '@fansite/design-system'
-import { useActionState, useEffect, useRef } from 'react'
+import { RichTextEditor, type RichTextValue } from '@fansite/design-system/rich-text-editor'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
 import {
   type ArticleFormState,
@@ -20,11 +21,11 @@ export type ArticleFormLimits = { author: number; body: string; intro: number; t
 export type ArticleStatus = 'draft' | 'new' | 'published'
 
 /**
- * The form to write an article or to change one. It is a client component only to show what the
- * server says: the form is a plain POST that works without JavaScript, and with JavaScript the
- * page doesn't reload. With JavaScript the address follows the title until the editor writes in
- * the address field themself; without it, an empty address becomes the same proposal on the
- * server.
+ * The form to write an article or to change one. It is a client component to show what the
+ * server says and to run the editor, which needs JavaScript: writing does, reading does not.
+ * With JavaScript the page doesn't reload when the form is sent. The address follows the title
+ * until the editor writes in the address field themself; an empty address becomes the same
+ * proposal on the server.
  *
  * "Opslaan" is the first button, so the Enter key in a field saves and does not publish.
  * "Publiceren" saves what is on the screen and then publishes it. The address of a published
@@ -41,6 +42,8 @@ export function ArticleForm({
   limits: ArticleFormLimits
   status: ArticleStatus
 }) {
+  // The editor starts with the text that was loaded, and keeps its own text after that.
+  const [startText] = useState(() => editorValue(initial.tekst))
   const [state, formAction, pending] = useActionState(action, { errors: {}, values: initial })
   const { errors, values } = state
   const summary = fieldNames.flatMap((name) => {
@@ -110,14 +113,14 @@ export function ArticleForm({
         >
           <Textarea autoComplete="off" defaultValue={values.intro} name="intro" rows={3} />
         </Field>
-        <Field
+        <RichTextEditor
+          {...(startText === undefined ? {} : { defaultValue: startText })}
           error={errors.tekst}
-          hint={`Hoogstens ${limits.body} tekens. De opmaak staat bij “Zo schrijf je de tekst” hierboven.`}
+          hint={`Hoogstens ${limits.body} tekens. Met de knoppen maak je een kop, een lijst, vet, cursief en een link. Noem wat je van anderen overneemt altijd met de bron en een link.`}
           id="tekst"
           label="Tekst"
-        >
-          <Textarea autoComplete="off" defaultValue={values.tekst} name="tekst" rows={24} />
-        </Field>
+          name="tekst"
+        />
         <Field
           error={errors.auteur}
           hint={`De naam die bij het artikel staat, bijvoorbeeld “de redactie”. Hoogstens ${limits.author} tekens.`}
@@ -138,4 +141,17 @@ export function ArticleForm({
       </Form>
     </>
   )
+}
+
+/** The text of the article for the editor, or nothing, so the editor starts empty. */
+function editorValue(text: string): RichTextValue | undefined {
+  try {
+    const value: unknown = JSON.parse(text)
+
+    return typeof value === 'object' && value !== null && 'type' in value && value.type === 'doc'
+      ? (value as RichTextValue)
+      : undefined
+  } catch {
+    return undefined
+  }
 }

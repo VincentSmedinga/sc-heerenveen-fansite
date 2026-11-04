@@ -1,11 +1,15 @@
 import { articleLimits } from '@fansite/db/schema'
+import { type ArticleDocumentProblem, readArticleDocument } from '@fansite/shared/article-document'
 
 import { type ArticleErrors, type ArticleValues, suggestSlug } from './article-fields'
 
 // What an editor types in the form of an article: read as text, cleaned, and checked. The
 // server does this again for every request, whatever the browser did.
 
-/** The most characters of the text of an article. The column holds far more. */
+/**
+ * The most characters of the visible text of an article, not counting the JSON around it. The
+ * column holds far more, and `readArticleDocument` has a limit for the JSON itself.
+ */
 export const bodyMaxLength = 20_000
 
 /**
@@ -44,21 +48,23 @@ const numberOf = new Intl.NumberFormat('nl-NL')
 const line = (value: string) => value.replaceAll(/[\p{Cc}\s]+/gu, ' ').trim()
 
 /**
- * The text of an article as the form sends it: line breaks are `\n` (a browser sends `\r\n`),
- * every control character other than a line break or a tab is gone, and the ends are trimmed.
- * What is left is what the editor typed, so saving and opening the article again changes
- * nothing.
+ * What is wrong with the text, for each way `readArticleDocument` can refuse it. The first two
+ * can only happen when something other than the editor sent the text, so they say what to do
+ * and nothing more.
  */
-export function cleanBody(value: string) {
-  return value
-    .replaceAll(/\r\n|[\r\u2028\u2029]/gu, '\n')
-    .replaceAll(/[^\P{Cc}\n\t]/gu, '')
-    .trim()
+const bodyProblems: Record<ArticleDocumentProblem, string> = {
+  component:
+    'De tekst bevat iets wat in een artikel niet kan. Gebruik alleen alinea’s, koppen, lijsten, vet, cursief en links.',
+  link: 'Een link wijst naar een adres dat niet kan. Een link begint met https:// of met een schuine streep, zoals /bronnen.',
+  'too-large': 'De tekst is te groot om te bewaren. Maak hem korter.',
+  unreadable: 'De tekst is niet goed aangekomen. Laad de pagina opnieuw en probeer het nog een keer.',
 }
 
 /**
  * The values of a form, as the form sends them: text, or nothing if a field is missing or is
- * not text. An empty address becomes the proposal from the title.
+ * not text. An empty address becomes the proposal from the title. The text of the article is
+ * the JSON of the editor; when it is valid it is the form that gets stored, with the keys in
+ * their fixed order, and when it isn't it stays as it was sent, so the form can give it back.
  */
 export function readValues(formData: FormData): ArticleValues {
   const text = (name: string) => {
@@ -68,12 +74,13 @@ export function readValues(formData: FormData): ArticleValues {
   }
 
   const titel = line(text('titel'))
+  const body = readArticleDocument(text('tekst'))
 
   return {
     adres: text('adres').trim() || suggestSlug(titel, articleLimits.slug),
     auteur: line(text('auteur')),
     intro: line(text('intro')),
-    tekst: cleanBody(text('tekst')),
+    tekst: body.ok ? body.json : text('tekst'),
     titel,
   }
 }
@@ -110,10 +117,14 @@ export function validate({ adres, auteur, intro, tekst, titel }: ArticleValues):
     errors.intro = `De intro is te lang. Gebruik hoogstens ${articleLimits.intro} tekens, nu zijn het er ${lengthOf(intro)}.`
   }
 
-  if (tekst === '') {
+  const body = readArticleDocument(tekst)
+
+  if (tekst.trim() === '' || (body.ok && !body.hasText)) {
     errors.tekst = 'Schrijf de tekst van het artikel.'
-  } else if (lengthOf(tekst) > bodyMaxLength) {
-    errors.tekst = `De tekst is te lang. Gebruik hoogstens ${numberOf.format(bodyMaxLength)} tekens, nu zijn het er ${numberOf.format(lengthOf(tekst))}.`
+  } else if (!body.ok) {
+    errors.tekst = bodyProblems[body.problem]
+  } else if (body.textLength > bodyMaxLength) {
+    errors.tekst = `De tekst is te lang. Gebruik hoogstens ${numberOf.format(bodyMaxLength)} tekens, nu zijn het er ${numberOf.format(body.textLength)}.`
   }
 
   if (auteur === '') {

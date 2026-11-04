@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { adminUsers, articles, articleVersions, auditLog } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { type ArticleDocument, serialiseArticleDocument } from '@fansite/shared/article-document'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -63,6 +64,13 @@ beforeEach(async () => {
   jar.set(sessionCookieName, await startSession(database.db, userId))
 })
 
+/** The JSON of the editor for a text of one paragraph. */
+const json = (text: string) =>
+  serialiseArticleDocument({
+    content: [{ content: [{ text, type: 'text' }], type: 'paragraph' }],
+    type: 'doc',
+  } as unknown as ArticleDocument)
+
 const fields = (overrides: Record<string, string> = {}) => {
   const formData = new FormData()
 
@@ -70,7 +78,7 @@ const fields = (overrides: Record<string, string> = {}) => {
     adres: 'welkom',
     auteur: 'de redactie',
     intro: 'We stellen ons voor.',
-    tekst: 'Een alinea.',
+    tekst: json('Een alinea.'),
     titel: 'Welkom',
     ...overrides,
   })) {
@@ -133,11 +141,11 @@ describe('submitNewArticle', () => {
   })
 
   it('returns the form with the errors and the values, and stores nothing, for fields that are wrong', async () => {
-    const result = await create({ adres: 'Fout Adres', tekst: 'Wel ingevulde tekst', titel: '' })
+    const result = await create({ adres: 'Fout Adres', tekst: json('Wel ingevulde tekst'), titel: '' })
 
     expect(result).toMatchObject({
       errors: { adres: expect.stringContaining('kleine letters'), titel: 'Schrijf een titel.' },
-      values: { adres: 'Fout Adres', tekst: 'Wel ingevulde tekst', titel: '' },
+      values: { adres: 'Fout Adres', tekst: json('Wel ingevulde tekst'), titel: '' },
     })
     expect(await stored()).toEqual([])
     expect(await log()).toEqual([])
@@ -161,7 +169,7 @@ describe('submitNewArticle', () => {
   })
 
   it('keeps a text that is too long in the values it returns, so nothing the editor wrote is lost', async () => {
-    const tekst = 'x'.repeat(20_001)
+    const tekst = json('x'.repeat(20_001))
     const result = await create({ tekst })
 
     expect(result).toMatchObject({ errors: { tekst: expect.stringContaining('20.000') }, values: { tekst } })
@@ -169,16 +177,71 @@ describe('submitNewArticle', () => {
   })
 })
 
+describe('the text of an article', () => {
+  const link = (href: string) =>
+    JSON.stringify({
+      content: [
+        { content: [{ marks: [{ attrs: { href }, type: 'link' }], text: 'x', type: 'text' }], type: 'paragraph' },
+      ],
+      type: 'doc',
+    })
+
+  it.each([
+    ['a script as text in a node of its own', '{"type":"doc","content":[{"type":"script","content":[]}]}'],
+    ['an image', '{"type":"doc","content":[{"type":"image","attrs":{"src":"https://www.lc.nl/foto.jpg"}}]}'],
+    ['a link to javascript:', link('javascript:alert(1)')],
+    ['a link to //evil.example', link('//evil.example')],
+    ['a link to http://', link('http://www.lc.nl')],
+    ['a very deep nesting', `{"type":"doc","content":${'[{"type":"bulletList","content":'.repeat(5000)}[]`],
+    ['a million characters', json('a'.repeat(1_000_000))],
+    ['something that is no JSON', '<script>alert(1)</script>'],
+  ])('is refused, with %s, at the field with the value kept, and nothing is stored', async (_name, tekst) => {
+    const result = await create({ tekst })
+
+    expect(result).toMatchObject({ errors: { tekst: expect.any(String) }, values: { tekst } })
+    expect(await stored()).toEqual([])
+    expect(await log()).toEqual([])
+  })
+
+  it('is refused when a save of an existing article has it, and the article stays as it was', async () => {
+    const id = await draft()
+    const result = await save(id, { tekst: link('javascript:alert(1)') })
+
+    expect(result).toMatchObject({ errors: { tekst: expect.stringContaining('Een link wijst naar een adres') } })
+    expect(await stored()).toMatchObject([{ body: json('Een alinea.') }])
+    expect(await versions()).toHaveLength(1)
+  })
+
+  it('is stored as the JSON that was checked, with a mark of the editor in the fixed order', async () => {
+    const id = await draft({
+      tekst:
+        '{"content":[{"content":[{"marks":[{"type":"bold"}],"text":"Vet","type":"text"}],"type":"paragraph"}],"type":"doc"}',
+    })
+
+    expect((await stored()).find((row) => row.id === id)?.body).toBe(
+      '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","marks":[{"type":"bold"}],"text":"Vet"}]}]}',
+    )
+  })
+
+  it('never ends up in the log', async () => {
+    await create({ tekst: json('GEHEIME-TEKST') })
+
+    expect(JSON.stringify(await log())).not.toContain('GEHEIME-TEKST')
+  })
+})
+
 describe('submitArticle', () => {
   it('saves the fields, stays a draft and leads to the page with a notice', async () => {
     const id = await draft()
 
-    expect(await save(id, { tekst: 'Nieuwe tekst' })).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=opgeslagen` })
-    expect((await stored())[0]).toMatchObject({ body: 'Nieuwe tekst', publishedAt: null })
+    expect(await save(id, { tekst: json('Nieuwe tekst') })).toEqual({
+      redirect: `/beheer/artikelen/${id}?gedaan=opgeslagen`,
+    })
+    expect((await stored())[0]).toMatchObject({ body: json('Nieuwe tekst'), publishedAt: null })
     expect((await log()).map((row) => row.action)).toEqual(['article.create', 'article.update'])
     expect(await versions()).toMatchObject([
-      { body: 'Een alinea.', version: 1 },
-      { body: 'Nieuwe tekst', savedBy: userId, version: 2 },
+      { body: json('Een alinea.'), version: 1 },
+      { body: json('Nieuwe tekst'), savedBy: userId, version: 2 },
     ])
   })
 
@@ -192,14 +255,14 @@ describe('submitArticle', () => {
 
   it('publishes what is on the screen when the button Publiceren was pressed', async () => {
     const id = await draft()
-    const formData = fields({ tekst: 'Laatste versie' })
+    const formData = fields({ tekst: json('Laatste versie') })
 
     formData.set('knop', 'publiceren')
 
     expect(await resultOf(() => submitArticle(id, initial, formData))).toEqual({
       redirect: `/beheer/artikelen/${id}?gedaan=gepubliceerd`,
     })
-    expect((await stored())[0]).toMatchObject({ body: 'Laatste versie', publishedAt: expect.any(Date) })
+    expect((await stored())[0]).toMatchObject({ body: json('Laatste versie'), publishedAt: expect.any(Date) })
     expect((await log()).map((row) => row.action)).toEqual(['article.create', 'article.update', 'article.publish'])
   })
 
@@ -225,11 +288,11 @@ describe('submitArticle', () => {
     formData.set('knop', 'publiceren')
     await resultOf(() => submitArticle(id, initial, formData))
 
-    expect(await save(id, { adres: 'ander-adres', tekst: 'Nog een wijziging' })).toMatchObject({
+    expect(await save(id, { adres: 'ander-adres', tekst: json('Nog een wijziging') })).toMatchObject({
       errors: { adres: expect.stringContaining('kan niet meer veranderen') },
-      values: { adres: 'ander-adres', tekst: 'Nog een wijziging' },
+      values: { adres: 'ander-adres', tekst: json('Nog een wijziging') },
     })
-    expect((await stored())[0]).toMatchObject({ body: 'Een alinea.', slug: 'welkom' })
+    expect((await stored())[0]).toMatchObject({ body: json('Een alinea.'), slug: 'welkom' })
   })
 
   it('returns the errors for fields that are wrong and stores nothing', async () => {
@@ -288,9 +351,9 @@ describe('who may call the actions', () => {
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
     await expect(create({ adres: 'ander' })).rejects.toThrow('not found')
-    await expect(save(id, { tekst: 'Gekraakt' })).rejects.toThrow('not found')
+    await expect(save(id, { tekst: json('Gekraakt') })).rejects.toThrow('not found')
     await expect(withdraw(id)).rejects.toThrow('not found')
-    expect(await stored()).toMatchObject([{ body: 'Een alinea.' }])
+    expect(await stored()).toMatchObject([{ body: json('Een alinea.') }])
     expect(await log()).toHaveLength(1)
     expect(await versions()).toHaveLength(1)
   })

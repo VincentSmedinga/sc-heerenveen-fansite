@@ -60,6 +60,8 @@ Draai ze vanuit de root van de repository.
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
+Na de migraties van het schema zet `migrateArticleBodies` (`src/article-body-migration.ts`) de tekst van artikelen en versies die nog de oude opmaak hebben om in Tiptap's JSON; `prepareDatabase` doet dat ook.
+De stap is te herhalen: een tekst die al JSON is, blijft zoals hij is.
 
 De seed heeft twee lijsten in `src/seed.ts`:
 
@@ -257,7 +259,7 @@ Een artikel staat op `/redactie/<slug>` en het nieuwste als kaart op de homepage
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `slug`                     | Het adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek                                    |
 | `title`, `intro`, `author` | De titel (120 tekens), de intro (300) en de naam bij het artikel (100)                                                |
-| `body`                     | De tekst, in de opmaak van `apps/site/src/article-text.ts`; een `mediumtext`                                          |
+| `body`                     | De tekst als Tiptap's JSON (zie `packages/shared/src/article-document.ts`); een `mediumtext`                          |
 | `published_at`             | Leeg is een concept; een tijd in de toekomst telt als concept tot die tijd, in UTC                                    |
 | `created_at`, `updated_at` | Wanneer het artikel is gemaakt en veranderd, in UTC; wie een artikel verandert, zet `updated_at` en `updated_by` zelf |
 | `created_by`               | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade                          |

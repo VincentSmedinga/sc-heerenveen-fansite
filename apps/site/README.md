@@ -827,12 +827,16 @@ Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-da
 
 `/beheer/artikelen` (`src/app/beheer/artikelen`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
 De lijst toont alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
-Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState`: een gewone post die zonder JavaScript werkt, en die een fout met de ingevulde waarden terugstuurt.
+Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState` die een fout met de ingevulde waarden terugstuurt.
+De tekst schrijf je met `RichTextEditor` uit het designsysteem (`@fansite/design-system/rich-text-editor`), die JavaScript vraagt; alleen de pagina's met het formulier laden Tiptap.
+De editor zet de tekst als Tiptap's JSON in een verborgen veld.
 Dat kan niet via het adres zoals bij de berichten, want een tekst van 20.000 tekens past er niet in.
 De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt het blok de focus.
 "Opslaan" is de eerste knop, dus Enter bewaart; "Publiceren" slaat op wat op het scherm staat en publiceert het in dezelfde transactie.
 
 - `src/beheer/article-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server.
+  De tekst gaat door `readArticleDocument` uit `@fansite/shared/article-document`, die alleen alinea's, koppen van niveau 2, lijsten, vet, cursief en links toelaat, en het adres van een link beperkt tot `https://` of `/`.
+  `ArticleText` maakt van die JSON componenten; er is geen HTML en geen `dangerouslySetInnerHTML`.
   `src/beheer/articles.ts` maakt, bewaart, publiceert en trekt in, elk in één transactie met de regel in het logboek (`article.create`, `article.update`, `article.publish`, `article.unpublish`).
   Een wijziging zonder verschil en een tweede klik schrijven niets.
 - Het voorbeeld (`/beheer/artikelen/<nummer>/voorbeeld`) gebruikt `Article` en `ArticleText`, net als de pagina voor bezoekers.
@@ -892,7 +896,7 @@ De tokens zijn voor elke run nieuw, staan alleen in het geheugen van de controle
 De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
 De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.
 `admin.spec.ts` verbergt en toont een verzonnen bericht van de uitgezette testbron, met en zonder JavaScript, en toetst de staten met axe.
-`writing.spec.ts` schrijft, bekijkt, publiceert, wijzigt en trekt een verzonnen artikel in, met en zonder JavaScript.
+`writing.spec.ts` schrijft met de editor, bekijkt, publiceert, wijzigt en trekt een verzonnen artikel in, en leest het gepubliceerde artikel ook zonder JavaScript.
 Omdat het een artikel publiceert dat de kaart op de homepage kan worden, draait het als eigen project (`chromium-writing`) nadat alle andere controles klaar zijn.
 
 ## De foutpagina

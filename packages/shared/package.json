@@ -6,6 +6,7 @@
   "license": "EUPL-1.2",
   "type": "module",
   "exports": {
+    "./article-document": "./src/article-document.ts",
     "./contact-email": "./src/contact-email.ts",
     "./env": "./src/env.ts",
     "./mail": "./src/mail.ts",
