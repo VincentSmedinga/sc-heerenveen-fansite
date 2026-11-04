@@ -80,12 +80,12 @@ export const WithNote = meta.story({
     inCard(
       <>
         <List.Item>
-          <ShortStaff period="tot 10 augustus 2019" surname="Eerste Stadion" />
+          <ShortStaff period="tot 10 aug 2019" surname="Eerste Stadion" />
         </List.Item>
         <List.Item>
           <ShortStaff
             note="De club speelde tijdelijk in een andere stad, na de instorting van een deel van het dak."
-            period="10 augustus 2019 t/m 2019/20"
+            period="10 aug 2019 t/m 2019/20"
             surname="Tijdelijk Stadion"
           />
         </List.Item>

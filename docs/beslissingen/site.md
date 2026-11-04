@@ -2324,14 +2324,15 @@
 - **Besluit:** de start van een naam is een seizoen (`2019/20`, telt als 1 juli van dat jaar) of een exacte dag, nooit allebei, en alleen de eerste naam van een lijst mag zonder start; de starts lopen strikt op.
   De naam ervoor eindigt "t/m" het seizoen ervoor of "tot" die dag, en een naam heeft geen eigen einde.
   - **De tekst:** `ownStadiumPeriods` in `src/match-format.ts` maakt de tekst per regel.
-    De eerste naam heeft alleen zijn einde ("t/m 2018/19", "tot 14 februari 2021") en de laatste "vanaf" met zijn start ("vanaf 2020/21", "vanaf 14 februari 2021").
-    Een naam in het midden heeft zijn begin en zijn einde: "2019/20" als hij één seizoen duurde, "2019/20 t/m 2021/22", "2019/20 tot 14 februari 2021", "10 augustus 2019 t/m 2019/20" of "10 augustus 2019 tot 14 februari 2021".
+    De eerste naam heeft alleen zijn einde ("t/m 2018/19", "tot 14 feb 2021") en de laatste "vanaf" met zijn start ("vanaf 2020/21", "vanaf 14 feb 2021").
+    Een naam in het midden heeft zijn begin en zijn einde: "2019/20" als hij één seizoen duurde, "2019/20 t/m 2021/22", "2019/20 tot 14 feb 2021", "10 aug 2019 t/m 2019/20" of "10 aug 2019 tot 14 feb 2021".
     Bij één naam staat geen periode.
   - **De controle:** `validateStadiumRows` in `src/beheer/stadium-form.ts` controleert op de server de vorm van een seizoen (vier cijfers, een schuine streep en de laatste twee cijfers van het jaar erna), een dag die bestaat, en de volgorde.
     De tabel controleert wat zij kan (zie `hosting-en-data.md`).
 - **Waarom:** een stadion krijgt meestal met een nieuw seizoen een andere naam, en alleen soms midden in een seizoen (zoals AZ in 2019, na de instorting van een deel van het dak).
   Een einde dat uit de volgende start volgt, kan niet tegenspreken en laat geen gat.
-- **Nadeel:** een naam in het midden met twee dagen is lang ("10 augustus 2019 tot 14 februari 2021") en breekt op een telefoon naar een eigen regel; we kiezen de volle maand zoals in de rest van de zin, en niet een korte vorm die er anders uitziet dan de eerste en de laatste regel.
+- **De maand is een afkorting:** een dag in de lijst heeft een korte maand ("14 feb 2021"), zoals het hoofdstuk Redactie voor een maand in een lijst vraagt en zoals de lijst van hoofdtrainers het schrijft (`formatStaffDate`).
+  Het issue schreef "tot 14 februari 2021" als voorbeeld; de korte vorm houdt de periode ook op een telefoon kort.
 - **Alternatieven:** een start én een einde per regel (kan gaten en overlap hebben en vraagt meer controles).
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026) voor de kaart zonder eigen lijst: daar blijven de perioden seizoenen.
 

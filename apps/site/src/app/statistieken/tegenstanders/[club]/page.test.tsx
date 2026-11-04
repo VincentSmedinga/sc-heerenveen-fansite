@@ -637,7 +637,7 @@ describe('the page of a club', () => {
       const card = cardOf(html)
 
       expect(plain(card.slice(card.indexOf('<ul')))).toBe(
-        'tot 10 augustus 2019 AFAS Stadion 10 augustus 2019 t/m 2019/20 Cars Jeans Stadion Tijdelijk in Den Haag, na de instorting van het dak. vanaf 2020/21 AFAS Stadion',
+        'tot 10 aug 2019 AFAS Stadion 10 aug 2019 t/m 2019/20 Cars Jeans Stadion Tijdelijk in Den Haag, na de instorting van het dak. vanaf 2020/21 AFAS Stadion',
       )
       expect(card).not.toContain('Oud Testpark')
       expect(card).not.toContain('Nieuw Testpark')

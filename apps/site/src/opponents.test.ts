@@ -400,8 +400,8 @@ describe('stadiumViewsOf', () => {
         visits,
       ),
     ).toEqual([
-      { name: 'AFAS Stadion', note: undefined, period: 'tot 10 augustus 2019' },
-      { name: 'Cars Jeans Stadion', note: 'Tijdelijk in Den Haag.', period: '10 augustus 2019 t/m 2019/20' },
+      { name: 'AFAS Stadion', note: undefined, period: 'tot 10 aug 2019' },
+      { name: 'Cars Jeans Stadion', note: 'Tijdelijk in Den Haag.', period: '10 aug 2019 t/m 2019/20' },
       { name: 'AFAS Stadion', note: undefined, period: 'vanaf 2020/21' },
     ])
   })

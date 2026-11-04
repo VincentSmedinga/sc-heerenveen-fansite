@@ -247,7 +247,7 @@ describe('ownStadiumPeriods', () => {
   })
 
   it('says "tot" with the day when the next name starts with a day, and "vanaf" with that day', () => {
-    expect(ownStadiumPeriods([first, day('2021-02-14')])).toEqual(['tot 14 februari 2021', 'vanaf 14 februari 2021'])
+    expect(ownStadiumPeriods([first, day('2021-02-14')])).toEqual(['tot 14 feb 2021', 'vanaf 14 feb 2021'])
   })
 
   it('counts the season before across the turn of the century and the years that start with a zero', () => {
@@ -264,14 +264,14 @@ describe('ownStadiumPeriods', () => {
     ])
     expect(ownStadiumPeriods([first, season('2019/20'), day('2021-02-14'), season('2022/23')])).toEqual([
       't/m 2018/19',
-      '2019/20 tot 14 februari 2021',
-      '14 februari 2021 t/m 2021/22',
+      '2019/20 tot 14 feb 2021',
+      '14 feb 2021 t/m 2021/22',
       'vanaf 2022/23',
     ])
     expect(ownStadiumPeriods([first, day('2019-08-10'), day('2020-02-01'), season('2020/21')])).toEqual([
-      'tot 10 augustus 2019',
-      '10 augustus 2019 tot 1 februari 2020',
-      '1 februari 2020 t/m 2019/20',
+      'tot 10 aug 2019',
+      '10 aug 2019 tot 1 feb 2020',
+      '1 feb 2020 t/m 2019/20',
       'vanaf 2020/21',
     ])
   })

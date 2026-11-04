@@ -172,16 +172,17 @@ export function matchMoment(
 /**
  * What the own list of stadium names of a club says with each name, in the order of the list.
  * The start of a name is a season or a day, and the next start decides where the name before it
- * ends: "t/m 2018/19", the season before, when the next start is a season, and "tot 14 februari
+ * ends: "t/m 2018/19", the season before, when the next start is a season, and "tot 14 feb
  * 2021" when it is a day. The first name has only its end, and the last has "vanaf" with its
- * start ("vanaf 2020/21", "vanaf 14 februari 2021"). A name in the middle has its start and its
- * end: "2019/20" when it lasted one season, "2019/20 t/m 2021/22", "2019/20 tot 14 februari
- * 2021", "10 augustus 2019 t/m 2020/21" or "10 augustus 2019 tot 14 februari 2021". One name
+ * start ("vanaf 2020/21", "vanaf 14 feb 2021"). A name in the middle has its start and its
+ * end: "2019/20" when it lasted one season, "2019/20 t/m 2021/22", "2019/20 tot 14 feb 2021",
+ * "10 aug 2019 t/m 2020/21" or "10 aug 2019 tot 14 feb 2021". A day has a short month, as in a
+ * list of head coaches (`coachPeriods`). One name
  * says nothing, because the name is enough.
  */
 export function ownStadiumPeriods(starts: readonly StadiumStart[]): (string | undefined)[] {
   const days = starts.map((start) =>
-    start.startDay === null ? undefined : longDayFormat.format(noonOf(start.startDay)),
+    start.startDay === null ? undefined : formatStaffDate({ date: start.startDay, precision: 'day' }),
   )
 
   return starts.map((start, index) => {

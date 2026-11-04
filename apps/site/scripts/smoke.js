@@ -1200,7 +1200,7 @@ await withEmptyDatabase((database) =>
     assert.match(ownListClub, /<aside[^>]*aria-label="Het stadion en de bron"/)
     assert.match(
       ownListClub,
-      /<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot 10 augustus 2019<.*Sportpark Proefdorp.*10 augustus 2019 t\/m 2019\/20<.*Stadion Tijdelijk.*Proefdorp speelde tijdelijk elders\..*vanaf 2020\/21<.*Sportpark Proefdorp.*Bron: /s,
+      /<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot 10 aug 2019<.*Sportpark Proefdorp.*10 aug 2019 t\/m 2019\/20<.*Stadion Tijdelijk.*Proefdorp speelde tijdelijk elders\..*vanaf 2020\/21<.*Sportpark Proefdorp.*Bron: /s,
     )
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)

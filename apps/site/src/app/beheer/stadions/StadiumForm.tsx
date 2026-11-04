@@ -145,7 +145,7 @@ export function StadiumForm({
             zin.
           </Text>
           {errors['regels'] === undefined ? null : (
-            <Text className="hf-field-error">
+            <Text className="hf-field-error" id="regels" tabIndex={-1}>
               <Text as="span" className="hf-visually-hidden">
                 Fout:
               </Text>{' '}
