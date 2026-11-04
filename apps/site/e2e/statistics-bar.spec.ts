@@ -89,8 +89,9 @@ test.describe('the bar of Statistieken with JavaScript', () => {
 
     expect(await names()).toEqual(order)
 
-    // Every link of the site loads a whole page (there is no next/link), so the bar is new with
-    // the page and the focus starts at the top, as it does after any link on the site.
+    // A link of the bar loads a whole page (there is no next/link), so the bar is new with the
+    // page and the focus starts at the top, as it does after any link on the site. Only the
+    // switches change the page in the browser (see switches.spec.ts).
     await bar(page, 'Spelers').focus()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/statistieken\/spelers\?competitie=eredivisie$/)

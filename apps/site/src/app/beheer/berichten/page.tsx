@@ -16,7 +16,6 @@ import {
   List,
   NewsItem,
   Page,
-  SegmentedLinks,
   Text,
 } from '@fansite/design-system'
 
@@ -36,6 +35,7 @@ import {
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { dateTimeOf, formatNewsTime } from '#src/news'
+import { SwitchLinks } from '#src/SwitchLinks'
 
 import { submitHide, submitShow } from './actions'
 import { itemsPath, type ListView } from './paths'
@@ -141,7 +141,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             Schrijf bij de reden kort wat er mis is, in hoogstens {hiddenReasonMaxLength} tekens. Bijvoorbeeld “Fout in
             het bericht”, “Past niet bij de site” of “Op verzoek van de bron”.
           </Text>
-          <SegmentedLinks
+          <SwitchLinks
             label="Welke berichten"
             options={[
               {

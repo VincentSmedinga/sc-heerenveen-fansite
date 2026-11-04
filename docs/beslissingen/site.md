@@ -1803,6 +1803,9 @@
   De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
   De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
 - **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): op de pagina van een afgelopen seizoen is Statistieken in het menu het adres van dat seizoen (`/statistieken/2025-26`) en niet meer altijd `/statistieken`, en Wedstrijden is dat ook; de keuze tussen alle wedstrijden en de Eredivisie houdt het menu nog steeds niet vast.
+- **Later:** zie _De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval_ (4 november 2026): een klik op Welke wedstrijden wisselt met de router, zonder een nieuwe pagina.
+  De balk blijft staan, `@subnav` ververst zijn links met de nieuwe keuze, en de focus blijft op de link waarop is geklikt.
+  Voor elke andere link geldt wat hier staat.
 
 ## De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
 
@@ -2415,3 +2418,30 @@
 - **Waarom:** zonder het scherm blijft de tabel leeg, en #694 bewijst dat de combinatie in één pull request past.
   Eén patroon voor de twee schermen houdt het beheer te leren en te onderhouden.
 - **Alternatieven:** twee issues, eerst de tabel met een lijst in de code en dan het scherm (de lijst in de code moet daarna weer weg); `Overnemen` ook hier (maakt van elke schrijfwijze een naamswijziging, wat de lijst juist niet wil zijn).
+
+## De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval
+
+- **Datum:** 4 november 2026
+- **Besluit:** Welke stand, Welke wedstrijden en Welke berichten voelen sneller: met JavaScript wordt een gewone klik een wissel binnen de pagina, zonder JavaScript blijven het echte links.
+  `SwitchLinks` in `apps/site/src/SwitchLinks.tsx` is een clientonderdeel dat `SegmentedLinks` omhult en de klik op de groep opvangt.
+  `SegmentedLinks` zelf blijft een onderdeel zonder script en zonder afhankelijkheid van Next.js: het heeft al een `onClick` op de groep, zoals het verhaal "De knop schuift naar een andere keuze" laat zien.
+  - **Een gewone klik:** met de linkermuisknop of Enter, zonder Ctrl, Cmd, Shift of Alt en op een link zonder `target` of `download`.
+    De waarde van de schakelaar (de knop en `aria-current`) staat meteen op de keuze en de pagina volgt met `router.push(href, { scroll: false })`, dus een regel in de geschiedenis en de pagina springt niet.
+    Een andere klik laat het onderdeel aan de link.
+  - **De knop schuift met de bestaande CSS-overgang** op `translate` van `segmented-control.css` (0 seconden bij verminderde beweging), niet met een overgang tussen documenten.
+    Dat werkt in elke browser, ook in Firefox.
+    `@view-transition` blijft voor de terugval zonder JavaScript.
+  - **Tijdens het laden** schuift alleen de knop en staat `aria-busy="true"` op de groep.
+    De oude inhoud blijft staan tot de nieuwe er is, zonder schemering en zonder draaiend teken.
+    Valt de wissel weg of mislukt hij, dan staat de schakelaar weer op de waarde van de pagina (`useOptimistic` in een overgang).
+  - **Een beleefde regel:** een `Text` met `role="status"`, naast de groep en niet te zien, die er al voor de klik is en na de wissel "<keuze> gekozen" zegt, zoals "Laatste 5 gekozen", zoals bij de sorteerbare tabel.
+    De focus blijft op de link waarop is geklikt.
+    `link.focus()` staat in de klik omdat Safari een link bij een klik niet focust.
+- **Waarom:** op een trage server lijkt een klik eerst niets te doen: elke klik laadt de hele pagina (0,16 tot 0,24 seconde op acceptatie, zonder cache), en de knop schuift pas als de nieuwe pagina er is.
+  De pagina laadt al 11 scripts (193 kB met gzip) waar React en de browserkant van Next.js in zitten, dus een klein onderdeel met `useRouter` voegt weinig toe.
+  De inhoud staat buiten de schakelaar en een pagina zou zelf moeten meedoen voor een schemering, en de regel met `role="status"` en de focus houden de wissel hoorbaar zonder dat de focus verhuist (4.1.3, 2.4.3 in `docs/toegankelijkheid.md`).
+  Een gewone klik in de geschiedenis houdt Terug en Vooruit zoals bij de links.
+- **Let op:** `useRouter` uit `next/navigation` en niet `next/link`: de site heeft geen `next/link`, omdat de teller alleen een aanvraag voor een hele pagina telt (zie _Een klik op een schakelaar telt niet als paginaweergave_ in `redactie.md`).
+  De pagina's die de keuze lezen zijn server-onderdelen en komen mee met de router: de links van de balk "Op deze pagina:" (`@subnav`), `aria-current` in het menu, de titel en de canonical link.
+  De tests van de pagina's draaien zonder router, dus `src/test-setup.ts` zet een `useRouter` die niets doet.
+- **Alternatieven:** `next/link` op de hele site (veel groter, en dan telt geen enkele klik meer); het hele onderdeel in het designsysteem met een eigen script (het designsysteem krijgt dan een afhankelijkheid van Next.js); `document.startViewTransition` om de wissel (meer code, niet in elke browser, en het voegt niets toe aan een knop die al schuift); `router.replace` (Terug slaat de keuzes over, dat wijkt af van de links); de inhoud lichter tonen tijdens het laden (een pagina moet zelf meedoen en het geeft een nieuwe contrastcontrole in licht en donker); de focus naar de inhoud verplaatsen (haalt de bezoeker weg bij de schakelaar).

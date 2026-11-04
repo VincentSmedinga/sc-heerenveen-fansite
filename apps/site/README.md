@@ -209,6 +209,21 @@ Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`)
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen/site.md`).
 De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
 
+## Schakelaars die in de pagina wisselen
+
+Welke stand, Welke wedstrijden en Welke berichten zijn gewone links (`SegmentedLinks` uit het designsysteem, dat niets van Next.js kent).
+`SwitchLinks` in `src/SwitchLinks.tsx` is het clientonderdeel dat er met JavaScript een wissel binnen de pagina van maakt: `StandingsSwitch`, `CompetitionLinks` en de lijst in `/beheer/berichten` gebruiken het.
+Een gewone klik met de linkermuisknop (of Enter) zet de waarde van de schakelaar meteen op de keuze en roept `router.push(href, { scroll: false })` aan; de oude inhoud blijft staan tot de nieuwe er is.
+Terwijl de pagina laadt, staat `aria-busy="true"` op de groep, en daarna zegt de regel met `role="status"` naast de groep wat er gekozen is: "Laatste 5 gekozen".
+Valt de wissel weg, dan staat de schakelaar weer op de waarde van de pagina.
+Een klik met Ctrl, Cmd, Shift of Alt, met een andere muisknop of op een link met `target` of `download` laat `SwitchLinks` aan de link.
+Zonder JavaScript zijn het echte links met `aria-current="page"`, en de overgang tussen pagina's blijft zoals hij was.
+
+Het onderdeel gebruikt `useRouter` en niet `next/link`: de site heeft geen `next/link` (een test in `src/visits.test.ts` controleert dat).
+De router vraagt de gegevens van de pagina zonder `Accept: text/html`, en alleen een aanvraag die om HTML vraagt telt als paginaweergave (`visitOf` in `src/visits.ts`).
+Een klik op een schakelaar telt dus niet mee, en het openen van hetzelfde adres in een nieuw tabblad wel.
+`e2e/switches.spec.ts` toetst alle drie met JavaScript, op de pagina's `/wedstrijden`, `/statistieken`, `/statistieken/spelers` en `/beheer/berichten`.
+
 ## De homepage
 
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
@@ -305,7 +320,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De balk verdwijnt op een smalle plek.
   Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"`, in hetzelfde rood als "Gegevens nog niet beschikbaar" (`hf-text-missing`) en boven de link.
   Een Eindstand krijgt de regel niet, een kaart zonder tabel ook niet, en de afbeelding van de kaart laat haar weg (`data-hf-card-share-skip`).
-  Onder de kop staat een schakelaar (`StandingsSwitch` in `src/StandingsSwitch.tsx`, een `SegmentedLinks` in de kleine maat) met "Hele seizoen" en "Laatste 5".
+  Onder de kop staat een schakelaar (`StandingsSwitch` in `src/StandingsSwitch.tsx`, een `SwitchLinks` in de kleine maat) met "Hele seizoen" en "Laatste 5".
   "Hele seizoen" is de standaard en heeft geen parameter; "Laatste 5" is `?stand=laatste-5`, en elke andere waarde is "Hele seizoen" (`parseStandingsView` in `src/standings-view.ts`).
   De links eindigen op het anker van de kaart, en de seizoenskiezer neemt de keuze niet mee.
   De tabel van "Laatste 5" telt per club de vijf wedstrijden die het laatst zijn gespeeld (`lastFiveStandings` in `src/last-five.ts`).
@@ -587,7 +602,7 @@ De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clu
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
-Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem in de kleine maat, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SwitchLinks` in de kleine maat, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
@@ -832,8 +847,9 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
 ### Berichten verbergen
 
 `/beheer/berichten` (`src/app/beheer/berichten`) is voor beheerders en moderators.
-Boven de lijst staat een schakelaar met twee keuzes: "Op de site" en "Niet op de site" (`SegmentedLinks`, zoals `CompetitionSwitch`).
+Boven de lijst staat een schakelaar met twee keuzes: "Op de site" en "Niet op de site" (`SwitchLinks`, zoals `CompetitionSwitch`).
 Het zijn gewone links, dus hij werkt zonder JavaScript, en de huidige keuze heeft `aria-current="page"`.
+Met JavaScript wisselt een gewone klik de pagina zonder haar opnieuw te laden (zie _Schakelaars die in de pagina wisselen_).
 "Op de site" is de standaard en heeft niets in het adres, "Niet op de site" is `?toon=niet-op-de-site`, en een andere waarde valt terug op de standaard.
 Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden en al gepubliceerd.
 `isShown` in `@fansite/db/queries` is strenger voor de bezoeker (een bron die uitstaat, en een verhaal dat de site samenvouwt), dus een bericht dat hier "op de site" staat, kan voor een bezoeker ontbreken.

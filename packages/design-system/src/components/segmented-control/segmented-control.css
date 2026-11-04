@@ -150,7 +150,9 @@
  * old place to the new one, and the labels stay above it (they have names of their own, because
  * a named element is painted over the page). Everything else on the page, the root, changes at
  * once, as it did before. With reduced motion the pages are not joined, so the thumb jumps. A
- * browser without support loads the next page as ever.
+ * browser without support loads the next page as ever. This is for a link that loads a page,
+ * so without script; a page that changes the choice in the browser moves the thumb with the
+ * transition on `translate` above.
  *
  * The browser joins elements with the same name on the old and the new page. So the names
  * belong to the place of the switch on the page, which the page gives to SegmentedLinks as

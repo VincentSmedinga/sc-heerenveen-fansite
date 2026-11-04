@@ -1411,6 +1411,8 @@
     Een test controleert dat er geen `next/link` in de code staat; komt hij er toch, dan telt een klik niet meer en moet dit besluit opnieuw.
   - Een bezoeker die de pagina uit de cache van zijn browser haalt (terug in de geschiedenis), doet geen verzoek en telt niet.
 - **Alternatieven:** tellen in `layout.tsx` (telt niet bij een pagina uit een cache; de pagina's zijn nu `force-dynamic`, maar dat verandert misschien); een eigen route met een afbeelding of script (vraagt een script of een extra verzoek); de logbestanden van de hosting lezen (zie hierboven).
+- **Later:** zie _Een klik op een schakelaar telt niet als paginaweergave_ (4 november 2026): de site heeft nog steeds geen `next/link`, maar de drie schakelaars wisselen met JavaScript in de pagina met `useRouter`, en die klik telt niet.
+  "Elke klik is een hele pagina" geldt dus voor een link, en niet voor een schakelaar.
 
 ## Het adres van de bezoeker is het laatste adres van `X-Forwarded-For`
 
@@ -2813,3 +2815,15 @@
   En met de schakelaar op "Eredivisie" kan de kaart er zijn terwijl de lijst uit minder dan 5 wedstrijden komt, of leeg is.
 - **Alternatieven:** de drempel volgens de schakelaar (de kaart verdwijnt bij het schakelen); een zin bij minder dan 5 wedstrijden in plaats van niets (past bij #397, maar zet een zin op elke pagina van een club met weinig wedstrijden); een top 10 of alle spelers die scoorden (een lange kaart in de zijkolom); altijd het aantal zonder "Gebaseerd op" (de lezer ziet dan niet dat de lijst onvolledig kan zijn).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397): de regel "een kaart blijft zichtbaar bij weinig wedstrijden" geldt niet voor deze kaart; die is er pas bij minstens 5 wedstrijden tegen de club.
+
+## Een klik op een schakelaar telt niet als paginaweergave
+
+- **Datum:** 4 november 2026
+- **Besluit:** de teller telt alleen een aanvraag van een hele pagina, en een klik op een schakelaar met JavaScript (`SwitchLinks`, zie _De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval_ in `site.md`) is dat niet.
+  De router van Next.js vraagt de gegevens van de pagina op de achtergrond, zonder `Accept: text/html`, dus `visitOf` telt het niet.
+  Het openen van hetzelfde adres in een nieuw tabblad, of een klik zonder JavaScript, is een aanvraag voor HTML en telt wel.
+  De site krijgt nog steeds geen `next/link`: de test in `src/visits.test.ts` die `from 'next/link'` verbiedt, blijft.
+- **Waarom:** een schakelaar verandert de weergave van een pagina die al open is, en er komt geen nieuwe pagina bij.
+  Tot nu toe telde elke klik als weergave, en dat maakt de tellingen iets te hoog.
+- **Gemeten:** `src/visits.test.ts` toont dat dezelfde plaats met `Accept: */*` en `Accept: text/x-component` niet telt en met `Accept: text/html` wel, en `e2e/switches.spec.ts` ziet bij elke schakelaar dat de klik geen aanvraag van een document en geen aanvraag met `text/html` doet.
+- **Alternatieven:** elke klik toch laten tellen met een extra aanvraag vanuit de browser (een eigen route en een script voor de teller, wat het besluit _De proxy telt, na het antwoord, alleen een aanvraag van een pagina_ juist uitsloot).
