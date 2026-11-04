@@ -1274,8 +1274,8 @@
   Een context kan niet, omdat de onderdelen servercomponenten blijven.
 - **Alternatieven:** één `FormChart` met alles erin (sneller, maar de volgende grafiek begint opnieuw).
   Of de onderdelen eerst en `FormChart` later, wat de onderdelen alleen met losse verhalen test.
-- **Later:** zie _`FormTimeline` zet uitslagen op een as van jaren, met `BarChart` in de kleine maat en eigen labels_ (4 november 2026).
-  `form-timeline/` staat naast `form-chart/`, en `BarChart` kent nu `size="small"` en `axis.labels`.
+- **Later:** zie _`FormTimeline` zet uitslagen op een as van jaren, met `BarChart` en eigen labels_ (4 november 2026).
+  `form-timeline/` staat naast `form-chart/`, en `BarChart` kent nu `axis.labels`.
 
 ## Een verlies is een streepje van 0,25 rem, geen lege plek
 
@@ -2474,7 +2474,7 @@
 - **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
 
-## `FormTimeline` zet uitslagen op een as van jaren, met `BarChart` in de kleine maat en eigen labels
+## `FormTimeline` zet uitslagen op een as van jaren, met `BarChart` en eigen labels
 
 - **Datum:** 4 november 2026
 - **Besluit:** er komt een onderdeel `FormTimeline` (map `form-timeline/`, naast `form-chart/`), geen variant van `FormChart` (#718).

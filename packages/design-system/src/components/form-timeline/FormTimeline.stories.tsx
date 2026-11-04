@@ -16,8 +16,7 @@ const meta = preview.meta({
         'Per plek de uitslag, de oudste eerst: `W` (winst), `G` (gelijk), `V` (verlies) of `null` voor een lege plek.',
     },
     scope: {
-      description:
-        'De tekst onder de sleutel: wat meetelt en sinds wanneer, zodat een lege plek niet leest als "nooit gespeeld".',
+      description: 'De tekst na de sleutel, in dezelfde alinea: wat meetelt, zoals de competitie.',
     },
     title: { description: 'Het bijschrift onder de labels.' },
     window: { description: 'Het hoogste aantal uitslagen waarover de lijn het gemiddelde neemt.' },
