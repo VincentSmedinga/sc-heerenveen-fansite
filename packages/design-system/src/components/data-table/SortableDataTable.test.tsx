@@ -277,4 +277,11 @@ describe('data-table.css for a sortable column', () => {
     expect(start).not.toBe(-1)
     expect(css.slice(start, css.indexOf('}', start))).toMatch(/white-space: nowrap/u)
   })
+
+  it('leaves out the position of a row, because a sorted table has no # column', () => {
+    render(<DataTable {...props} rows={props.rows.map((row, index) => ({ ...row, position: index + 1 }))} />)
+
+    expect(document.querySelector('.hf-rank')).toBeNull()
+    expect(screen.getAllByRole('columnheader')).toHaveLength(4)
+  })
 })

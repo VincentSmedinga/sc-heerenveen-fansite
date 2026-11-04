@@ -90,7 +90,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
             })}
           </tr>
         </thead>
-        <TableRows columns={columns} rows={sorted} />
+        <TableRows columns={columns} rows={sorted} withPosition={false} />
       </table>
       {scripted && (
         <div className="hf-visually-hidden" role="status">

@@ -2384,10 +2384,13 @@
   Heeft een rij een plaats, dan krijgt de tabel een kolom vóór de rijkoppen, met de kop `#` (`plaats` voor een schermlezer, in een `abbr` met de titel "Plaats").
   De cel heeft de klassen `hf-numeric hf-rank`, dus de plaats staat rechts uitgelijnd in de kleur van de markeringen, zoals in `TopScorersTable` en `StandingsTable`.
   - **Niet voor een tabel die sorteert:** de eigenschap werkt alleen in een gewone tabel.
-    Een tabel met een sorteerbare kolom (`SortableDataTable`) toont de plaats niet, want na het sorteren klopt de volgorde niet meer met de plaatsen.
+    Een tabel met een sorteerbare kolom (`SortableDataTable`) toont de plaats niet, want na het sorteren klopt de volgorde niet meer met de plaatsen: `TableRows` slaat de cel dan over (`withPosition`).
   - **Geef een plaats aan elke rij of aan geen:** de component controleert het niet.
   - **`semibold` op een kolom** zet de cellen van die kolom in het gewicht van een naam (600), voor het getal waarop de lijst is geordend.
     De kop van de kolom blijft zoals hij is.
+  - **P punten per wedstrijd** staat nu in `tableColumns` (`pointsPerMatch`): P heeft daarmee twee woorden, naast G en D.
+    Ze staan nooit in dezelfde tabel, want de ene staat in de lijst met alle tegenstanders en de andere in de kaart Punten per wedstrijd.
+    De `#` van de plaats is geen kolom van `tableColumns` en staat niet in een legenda: de plaats is bekend uit de volgorde en de kop zegt "plaats" voor een schermlezer.
 - **Waarom:** de top 10 op Tegenstanders heeft links, een gemiddelde en een aantal per club, en de plaats hoort in een eigen kolom met een kop.
   `TopScorersTable` heeft een speler en doelpunten, en `StandingsTable` heeft geen links en geen gemiddelde.
   Een `marker` bij de rijkop is een versiering voor een schermlezer en geen kolom, en 1 en 10 staan er niet recht onder elkaar.

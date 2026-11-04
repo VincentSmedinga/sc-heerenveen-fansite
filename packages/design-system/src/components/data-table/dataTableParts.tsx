@@ -54,14 +54,17 @@ export const ColumnText = ({ column, named = false }: { column: DataTableColumn;
 export const TableRows = ({
   columns,
   rows,
+  withPosition = true,
 }: {
   columns: readonly DataTableColumn[]
   rows: readonly DataTableRow[]
+  /** Whether a row shows its `position`: not in a table that sorts, which has no `#` header. */
+  withPosition?: boolean
 }) => (
   <tbody>
     {rows.map((row) => (
       <tr key={row.header}>
-        {row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
+        {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
         <th scope="row">
           {row.marker}
           {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}

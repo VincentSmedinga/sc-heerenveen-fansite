@@ -103,7 +103,7 @@ describe('TopPointsCard', () => {
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       '#plaats',
       'Club',
-      'Gemiddeldgemiddeld aantal punten per wedstrijd',
+      'Ppunten per wedstrijd',
       'Ggespeeld',
     ])
     expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/statistieken/tegenstanders/zwolle')
@@ -140,7 +140,7 @@ describe('TopPointsCard', () => {
   it('names the minimum, the legend and what the card is based on', () => {
     render(card())
 
-    expect(screen.getByText('# plaats, G gespeeld')).toBeTruthy()
+    expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
     expect(
       screen.getByText(
         'Gebaseerd op alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',

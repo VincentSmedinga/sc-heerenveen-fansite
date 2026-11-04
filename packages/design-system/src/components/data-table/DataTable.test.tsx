@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { tableColumns } from '../table-columns'
 import { DataTable } from './DataTable'
 
 const props = {
@@ -298,7 +299,7 @@ describe('DataTable.Group', () => {
   describe('with a position', () => {
     const ranked = {
       caption: 'De clubs met de meeste punten, van hoog naar laag',
-      columns: ['Club', 'Gemiddeld', 'G'],
+      columns: ['Club', 'P', 'G'],
       rows: [
         { cells: ['2,50', 6], header: 'Testclub', position: 1 },
         { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
@@ -311,7 +312,7 @@ describe('DataTable.Group', () => {
       expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
         '#plaats',
         'Club',
-        'Gemiddeld',
+        'P',
         'G',
       ])
       expect(document.querySelector('thead abbr')?.getAttribute('title')).toBe('Plaats')
@@ -320,12 +321,7 @@ describe('DataTable.Group', () => {
     })
 
     it('sets the cells of a semibold column in that weight and leaves the others', () => {
-      render(
-        <DataTable
-          {...ranked}
-          columns={['Club', { name: 'gemiddeld aantal punten per wedstrijd', semibold: true, shown: 'Gemiddeld' }, 'G']}
-        />,
-      )
+      render(<DataTable {...ranked} columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, 'G']} />)
 
       expect([...document.querySelectorAll('tbody td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual(
         ['2,50', '2,00'],

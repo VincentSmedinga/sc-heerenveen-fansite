@@ -253,18 +253,14 @@ export const Ranked = meta.story({
         </Heading>
         <DataTable
           caption="De drie clubs waartegen we gemiddeld de meeste punten per wedstrijd halen, van hoog naar laag"
-          columns={[
-            'Club',
-            { name: 'gemiddeld aantal punten per wedstrijd', semibold: true, shown: 'Gemiddeld' },
-            tableColumns.played,
-          ]}
+          columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, tableColumns.played]}
           rows={[
             { cells: ['2,43', 14], header: 'Testclub', href: '#club', position: 1 },
             { cells: ['2,10', 10], header: 'Nepclub ’s-Gravenvoorbeeld', href: '#club', position: 2 },
             { cells: ['1,88', 8], header: 'FC Voorbeeld', href: '#club', position: 3 },
           ]}
         />
-        <Text appearance="meta">{tableLegend([{ abbreviation: '#', name: 'plaats' }, tableColumns.played])}</Text>
+        <Text appearance="meta">{tableLegend([tableColumns.pointsPerMatch, tableColumns.played])}</Text>
       </Card>
     </div>
   ),

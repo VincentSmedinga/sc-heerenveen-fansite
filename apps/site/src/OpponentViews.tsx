@@ -195,11 +195,8 @@ export function ClubsCard({
 /** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
 const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
-/**
- * The legend of the card: the two abbreviations of its columns. The average has its whole word
- * as the header, so it needs no line.
- */
-const topPointsLegend = tableLegend([{ abbreviation: '#', name: 'plaats' }, tableColumns.played])
+/** The legend of the card: the letters of its two columns. The place has no line. */
+const topPointsLegend = tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
 
 /**
  * The card "Hoe vaak welke uitslag" of the page of a club: the card of the page Wedstrijden
@@ -423,11 +420,7 @@ export function TopPointsCard({
         <>
           <DataTable
             caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'league' ? ', in de Eredivisie' : ''}`}
-            columns={[
-              'Club',
-              { name: 'gemiddeld aantal punten per wedstrijd', semibold: true, shown: 'Gemiddeld' },
-              tableColumns.played,
-            ]}
+            columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, tableColumns.played]}
             rows={places.map((place) => ({
               cells: [averageFormat.format(place.points / place.played), place.played],
               header: place.name,
