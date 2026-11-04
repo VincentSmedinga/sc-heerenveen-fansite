@@ -2742,7 +2742,7 @@
     Onderdelen die hetzelfde teken delen gaan in één element, zoals de editor ze schrijft: `<strong>a <em>b</em> c</strong>` en niet drie `strong`.
   - Het adres van een link is strenger dan dat van de editor (`safeAddress`): ook een adres met een inlog, een backslash of een aanhalingsteken wordt geweigerd, zoals de oude functie al deed.
 - **Migratie:** `migrateArticleBodies` in `packages/db/src/article-body-migration.ts` zet de tekst van elk artikel en elke versie van de oude opmaak om in JSON, met `legacy-article-text.ts`, een kopie van de oude `parseArticleText`, als bron.
-  Ze draait na de migraties van het schema, bij het starten van de site en bij `pnpm db:migrate`, en is te herhalen: een tekst die met `{"type":"doc"` begint is al JSON en blijft zoals hij is.
+  Ze draait na de migraties van het schema, bij het starten van de site en bij `pnpm db:migrate`, en is te herhalen: een tekst die JSON van een document is, in welke vorm ook (ingesprongen, of met de sleutels in een andere volgorde), wordt in de vorm van de site gezet als de site hem accepteert, en blijft anders zoals hij is, dus hij wordt nooit een alinea met ruwe JSON.
   Alle rijen veranderen in één transactie en alleen als de rij nog de tekst heeft die gelezen is, dus een run die stopt laat niets half achter, en een opslag tussendoor wordt niet overschreven.
   Alleen `body` verandert: `updated_at`, de versies en de logregels blijven.
   Een test zet een artikel met elk onderdeel om en vergelijkt de pagina die een bezoeker ziet met wat de oude functie ervan maakte.

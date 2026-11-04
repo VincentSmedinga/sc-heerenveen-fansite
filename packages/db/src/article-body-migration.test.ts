@@ -100,6 +100,29 @@ describe('articleBodyToJson', () => {
     expect(articleBodyToJson(json)).toBe(json)
   })
 
+  it('writes JSON in another form, such as indented or with the keys in another order, in the form of the site', () => {
+    const expected = '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hoi"}]}]}'
+    const indented = JSON.stringify(JSON.parse(expected), null, 2)
+    const shuffled = '{"content":[{"content":[{"text":"Hoi","type":"text"}],"type":"paragraph"}],"type":"doc"}'
+
+    expect(articleBodyToJson(indented)).toBe(expected)
+    expect(articleBodyToJson(`\n${shuffled}`)).toBe(expected)
+    expect(articleBodyToJson(shuffled)).toBe(expected)
+  })
+
+  it('keeps a JSON document that the site does not accept as it is, and does not make it a paragraph', () => {
+    const refused = '{"type":"doc","content":[{"type":"image","attrs":{"src":"x"}}]}'
+    const other = '{\n  "type": "doc",\n  "content": [{ "type": "image" }]\n}'
+
+    expect(articleBodyToJson(refused)).toBe(refused)
+    expect(articleBodyToJson(other)).toBe(other)
+  })
+
+  it('still reads an old text that starts with a brace as the old format', () => {
+    expect(JSON.parse(articleBodyToJson('{niet json} en **vet**'))).toMatchObject({ type: 'doc' })
+    expect(articleBodyToJson('{niet json} en **vet**')).toContain('{niet json} en ')
+  })
+
   it('converts a text of a million characters in a moment', () => {
     const start = performance.now()
 
@@ -155,6 +178,23 @@ describe('migrateArticleBodies', () => {
 
     expect(await migrateArticleBodies(database.db)).toBe(0)
     expect(await rows('SELECT body FROM articles UNION ALL SELECT body FROM article_versions')).toEqual(before)
+  })
+
+  it('writes a document in another form in the form of the site, and keeps one it does not accept', async () => {
+    const shuffled = '{"content":[{"content":[{"text":"Nieuw","type":"text"}],"type":"paragraph"}],"type":"doc"}'
+    const refused = '{"type":"doc","content":[{"type":"image"}]}'
+
+    await database.pool.query('UPDATE articles SET body = ?', [shuffled])
+    await database.pool.query('UPDATE article_versions SET body = ? WHERE version = 1', [refused])
+    await database.pool.query('UPDATE article_versions SET body = ? WHERE version = 2', [shuffled])
+
+    expect(await migrateArticleBodies(database.db)).toBe(2)
+    expect(await rows('SELECT body FROM articles')).toMatchObject([{ body: articleBodyToJson(shuffled) }])
+    expect(await rows('SELECT body FROM article_versions ORDER BY version')).toMatchObject([
+      { body: refused },
+      { body: articleBodyToJson(shuffled) },
+    ])
+    expect(await migrateArticleBodies(database.db)).toBe(0)
   })
 
   it('leaves the text of an article saved in the new format alone', async () => {

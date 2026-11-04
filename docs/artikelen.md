@@ -45,7 +45,8 @@ De regels om op te letten:
 - Een punt van een lijst is één alinea: er zit geen lijst in een lijst.
 - Een link gaat naar een adres dat met `https://` begint, of naar een pagina van ons die met een enkele `/` begint, zoals `/bronnen`.
   Geen `http://`, geen `www.lc.nl` zonder `https://` en geen `//`.
-  De editor en de server weigeren zo'n adres, en ook een adres met een inlog erin (`https://www.lc.nl@evil.example`).
+  De editor en de server weigeren zo'n adres.
+  De server weigert ook een adres met een inlog erin (`https://www.lc.nl@evil.example`), want dat verbergt de echte site.
   Een link naar een andere site krijgt vanzelf het pictogram voor een externe link.
 - Er is geen HTML en er zijn geen afbeeldingen.
   `<b>vet</b>` staat letterlijk in de tekst, met de tekens erbij.
