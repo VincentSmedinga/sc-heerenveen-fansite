@@ -26,6 +26,7 @@ const meta = preview.meta({
           '',
           'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, gesloten en open: ruimte tussen het pijltje en de rand, en een lijst met keuzes in onze kleuren, waarin de gekozen keuze een vinkje heeft.',
           'Dat werkt in een browser die dat kan; een andere browser houdt zijn eigen lijst.',
+          'De open lijst blijft binnen het scherm: hij opent naar de kant met de meeste ruimte, en een lange lijst scrolt in zichzelf.',
           'De seizoenskiezer gebruikt het al.',
         ].join('\n'),
       },
@@ -82,5 +83,31 @@ export const Natural = meta.story({
         <Select.Option value="eigen">Eigen doelpunt</Select.Option>
       </Select>
     </Field>
+  ),
+})
+
+// Dertig seizoenen, van 2026/27 terug, met één lange tekst om te zien dat die afbreekt.
+const seasons = Array.from({ length: 30 }, (_, index) => {
+  const start = 2026 - index
+
+  return { label: `${start}/${String(start + 1).slice(2)}`, value: `${start}-${String(start + 1).slice(2)}` }
+})
+
+export const LongList = meta.story({
+  name: 'Lange lijst',
+  render: () => (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', maxInlineSize: '24rem' }}>
+      <Field id="seizoen" label="Seizoen">
+        <Select className="hf-select-styled" defaultValue="2024-25" name="seizoen" width="natural">
+          {seasons.map(({ label, value }, index) => (
+            <Select.Option key={value} value={value}>
+              {index === 3
+                ? `${label}, het seizoen met de allerlangste tekst die een keuze in een lijst kan hebben`
+                : label}
+            </Select.Option>
+          ))}
+        </Select>
+      </Field>
+    </div>
   ),
 })

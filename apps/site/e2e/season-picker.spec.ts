@@ -182,3 +182,137 @@ test.describe('the title row with the season picker', () => {
     }
   }
 })
+
+// The open list of the season picker has the look of the site (`appearance: base-select`), and
+// the rules in select.css keep it inside the screen: it is measured here, on a phone, at 400%
+// zoom and on a low phone. The page has few seasons, so thirty more are added to the list.
+test.describe('the open list of the season picker', () => {
+  const longText = 'Een seizoen met een allerlangste tekst die in de lijst over meer regels moet gaan'
+
+  test('stays inside the screen, scrolls when it is longer, shows the chosen season and opens upward when there is more room above', async ({
+    page,
+  }) => {
+    for (const { height, width } of [
+      { height: 844, width: 390 },
+      { height: 256, width: 320 },
+      { height: 400, width: 390 },
+    ]) {
+      await page.setViewportSize({ height, width })
+      await page.goto('/wedstrijden')
+      await hydrated(page)
+
+      const list = listOf(page)
+
+      await list.evaluate(
+        (select: HTMLSelectElement, { lowerBy, text }) => {
+          for (let year = 2000; year < 2030; year++) {
+            const season = `${year}-${String(year + 1).slice(2)}`
+
+            select.add(new Option(year === 2010 ? `${season}, ${text}` : season, season))
+          }
+
+          select.value = '2005-06'
+          // On the low phone the field sits lower on the page, as it does with a larger title
+          // or another row above it, so there is more room above than below.
+          select.closest('form')!.style.marginBlockStart = `${lowerBy}px`
+        },
+        { lowerBy: height < 500 ? 180 : 0, text: longText },
+      )
+
+      await list.click()
+      await expect.poll(() => list.evaluate((select) => select.matches(':open'))).toBe(true)
+
+      // Playwright scrolls the field into view to click it; from here on the page stays where
+      // it is.
+      const scrolled = await page.evaluate(() => window.scrollY)
+
+      const field = (await list.boundingBox())!
+      const menu = await list.evaluate((select: HTMLSelectElement) => {
+        const options = [...select.options].map((option) => option.getBoundingClientRect())
+        const first = options[0]!
+        const chosen = select.selectedOptions[0]!.getBoundingClientRect()
+        const field = select.getBoundingClientRect()
+        // The list is a popover that the browser draws for the select, so it has no box to
+        // measure. A point on its border or padding hits the select, outside the field itself:
+        // that finds the top and bottom (on a line through the padding at the left of the
+        // options), then the left and right (on a line through the middle of the list).
+        const isList = (x: number, y: number) =>
+          document.elementFromPoint(x, y) === select &&
+          !(x >= field.left && x <= field.right && y >= field.top && y <= field.bottom)
+        const rows: number[] = []
+        const columns: number[] = []
+
+        for (let y = 0; y < window.innerHeight; y++) {
+          if (isList(first.left - 1, y)) {
+            rows.push(y)
+          }
+        }
+
+        const middle = Math.round((rows[0]! + rows.at(-1)!) / 2)
+
+        for (let x = 0; x < window.innerWidth; x++) {
+          if (isList(x, middle)) {
+            columns.push(x)
+          }
+        }
+
+        return {
+          bottom: rows.at(-1)! + 1,
+          chosen: { bottom: chosen.bottom, top: chosen.top },
+          left: columns[0]!,
+          longest: Math.max(...options.map((option) => option.height)),
+          optionsHeight: options.reduce((sum, option) => sum + option.height, 0),
+          right: columns.at(-1)! + 1,
+          shortest: Math.min(...options.map((option) => option.height)),
+          top: rows[0]!,
+        }
+      })
+
+      // Inside the screen on every side, and at least as wide as the field.
+      expect(menu.left).toBeGreaterThanOrEqual(0)
+      expect(menu.right).toBeLessThanOrEqual(width)
+      expect(menu.top).toBeGreaterThanOrEqual(0)
+      expect(menu.bottom).toBeLessThanOrEqual(height)
+      expect(menu.right - menu.left).toBeGreaterThanOrEqual(field.width)
+      // Options keep a target of 44 pixels, and a long text wraps instead of widening the list.
+      expect(menu.shortest).toBeGreaterThanOrEqual(44)
+      expect(menu.longest).toBeGreaterThan(44)
+      // The list is longer than the room, so it scrolls itself, and the page behind it does
+      // not.
+      expect(menu.optionsHeight).toBeGreaterThan(menu.bottom - menu.top)
+      // The chosen season is in view.
+      expect(menu.chosen.top).toBeGreaterThanOrEqual(menu.top)
+      expect(menu.chosen.bottom).toBeLessThanOrEqual(menu.bottom)
+      // The list opens where there is more room: above the field on the low phone, where the
+      // field sits lower on the page.
+      const roomAbove = field.y
+      const roomBelow = height - field.y - field.height
+
+      if (height === 400) {
+        expect(roomAbove).toBeGreaterThan(roomBelow)
+      }
+
+      if (roomAbove > roomBelow) {
+        expect(menu.bottom).toBeLessThanOrEqual(field.y)
+      } else {
+        expect(menu.top).toBeGreaterThanOrEqual(field.y + field.height)
+      }
+
+      // The keyboard goes to the last season: the option with focus scrolls into view in the
+      // list.
+      await page.keyboard.press('End')
+
+      const focused = await list.evaluate((select: HTMLSelectElement) => {
+        const { bottom, top } = select.querySelector('option:focus-visible')!.getBoundingClientRect()
+
+        return { bottom, top }
+      })
+
+      expect(focused.top).toBeGreaterThanOrEqual(menu.top)
+      expect(focused.bottom).toBeLessThanOrEqual(menu.bottom)
+      expect(await page.evaluate(() => window.scrollY)).toBe(scrolled)
+
+      await page.keyboard.press('Escape')
+    }
+  })
+})
