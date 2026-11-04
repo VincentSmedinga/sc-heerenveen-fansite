@@ -32,7 +32,8 @@ export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
   ranked?: boolean
   /**
    * `small` is a smaller ring, with a smaller text in the hole, to stand beside a larger chart
-   * in a `DonutChart.Group`, such as the goals beside the scores.
+   * in a `DonutChart.Group`, such as the goals beside the scores. Its title is a label, in the
+   * smaller size and the subtler colour of the text round a ring.
    */
   size?: 'small'
   /** The slices in the order they go round, clockwise from the top. */

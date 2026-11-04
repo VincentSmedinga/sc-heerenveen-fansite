@@ -65,6 +65,13 @@
     font-weight: var(--hf-strong-font-weight);
   }
 
+  /* The title of a small chart is a label, like the names round a ring: not bold, a subtler colour. */
+  .hf-donut-chart-small .hf-donut-chart-title {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-meta-font-weight);
+  }
+
   .hf-donut-chart-plot {
     aspect-ratio: 320 / 300;
     position: relative;

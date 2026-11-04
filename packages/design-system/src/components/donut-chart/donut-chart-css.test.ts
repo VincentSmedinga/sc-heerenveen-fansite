@@ -45,6 +45,9 @@ describe('donut-chart.css', () => {
     expect(declarationsOf('.hf-donut-chart-group:has(.hf-donut-chart-small)')).toMatch(
       /grid-template-columns: minmax\(0, 1fr\) 7rem/u,
     )
+    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-title')).toMatch(
+      /color: var\(--hf-colour-text-secondary\);\s*font-size: var\(--hf-meta-font-size\);\s*font-weight: var\(--hf-meta-font-weight\)/u,
+    )
     expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
       /font-size: var\(--hf-figure-font-size\)/u,
     )
