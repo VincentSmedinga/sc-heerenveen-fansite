@@ -159,7 +159,7 @@ describe('TopPointsCard', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: 'Punten per wedstrijd' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Gemiddeld resultaat' })).toBeTruthy()
     expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(screen.queryByRole('table')).toBeNull()
     expect(screen.queryByText(/Gebaseerd op/)).toBeNull()

@@ -410,9 +410,9 @@ export function TopPointsCard({
   const { places, played } = topPointsOf(records)
 
   return (
-    <Card aria-labelledby="punten-per-wedstrijd" surface="soft">
-      <Heading id="punten-per-wedstrijd" level={2}>
-        Punten per wedstrijd
+    <Card aria-labelledby="gemiddeld-resultaat" surface="soft">
+      <Heading id="gemiddeld-resultaat" level={2}>
+        Gemiddeld resultaat
       </Heading>
       {places.length === 0 ? (
         <Text>{`Nog geen club met minstens ${topPointsMinimum} gespeelde wedstrijden.`}</Text>

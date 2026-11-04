@@ -2005,7 +2005,7 @@
 - **Later:** zie _De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie_ (31 oktober 2026): de regel "een kaart telt alleen de Eredivisie, tenzij hij over de beker gaat" is vervallen.
   De kaarten tellen standaard de Eredivisie en de KNVB Beker, en de schakelaar kiest alleen de Eredivisie; drie kaarten blijven de Eredivisie.
   Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
-- **Later:** zie _De kaart Punten per wedstrijd toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ (4 november 2026): die kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen.
+- **Later:** zie _De kaart Gemiddeld resultaat toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ (4 november 2026): die kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen.
 - **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (4 november 2026) in `site.md`: die kaart zegt het aantal wedstrijden zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.
 
 ## Reeksen staan in een eigen kaart na Verloop van het seizoen
@@ -2765,10 +2765,10 @@
 - **Later:** vervangt de eis dat het formulier van de artikelen ook zonder JavaScript werkt (#264).
   Alleen de editor vraagt JavaScript: de pagina's `/redactie/<adres>`, het voorbeeld en de pagina van een versie lezen zonder.
 
-## De kaart Punten per wedstrijd toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar
+## De kaart Gemiddeld resultaat toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar
 
 - **Datum:** 4 november 2026
-- **Besluit:** de kaart "Punten per wedstrijd" op Tegenstanders toont de tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt (#699).
+- **Besluit:** de kaart "Gemiddeld resultaat" op Tegenstanders toont de tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt (#699).
   - **Het gemiddelde** zijn de punten die wij tegen een club haalden (3 per winst, 1 per gelijkspel, 0 per verlies, de beker meegeteld), gedeeld door de gespeelde wedstrijden tegen die club.
     Het is dezelfde regel als de kolom Punten in "Alle tegenstanders" (`pointsOf`), op één plek in de code.
   - **Het minimum** is 5 gespeelde wedstrijden, en de kaart zegt het in de regel onder de tabel, samen met waarop hij rust: "Gebaseerd op alle 30 gespeelde wedstrijden sinds 2020/21, tegen clubs met minstens 5 gespeelde wedstrijden".
@@ -2780,7 +2780,7 @@
     De kaart blijft altijd zichtbaar.
   - **De schakelaar** van de pagina beslist: standaard alle gespeelde wedstrijden, met `?competitie=eredivisie` alleen de Eredivisie, en de clublinks houden de keuze.
   - **"Gebaseerd op"** telt de gespeelde wedstrijden van de clubs die meedoen, niet die van alle clubs, in de vorm van `BasedOnSince` met het minimum erachter (`condition`).
-    De kop is "Punten per wedstrijd" (de projecteigenaar, 4 november 2026): de kop is korter, en de tabel en het bijschrift zeggen dat het de top 10 is.
+    De kop is "Gemiddeld resultaat" (de projecteigenaar, 4 november 2026): de kop zegt niet hoeveel clubs erin staan, en de tabel en het bijschrift zeggen dat het de top 10 is.
 - **Waarom:** de kaart staat naast "Alle tegenstanders" en moet met die tabel kloppen, dus dezelfde punten en dezelfde wedstrijden.
   Een club die we één of twee keer troffen (twee winsten is 3,00) zou zonder minimum bovenaan staan.
   Vergelijken op de echte verhouding voorkomt dat twee clubs met 2,38 in de verkeerde volgorde staan.

@@ -1027,7 +1027,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
     // The sidebar has the top 10 of the average points: a table for the clubs with five played
     // matches, or the sentence when there is none, and the credit.
-    assert.match(opponentsHtml, /<h2[^>]*id="punten-per-wedstrijd">Punten per wedstrijd<\/h2>/)
+    assert.match(opponentsHtml, /<h2[^>]*id="gemiddeld-resultaat">Gemiddeld resultaat<\/h2>/)
     assert.match(
       opponentsHtml,
       /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,

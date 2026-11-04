@@ -86,7 +86,7 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => heading.replaceAll(/<[^>]*>/g, ''))).toEqual([
       'Tegenstanders',
       'Alle tegenstanders',
-      'Punten per wedstrijd',
+      'Gemiddeld resultaat',
     ])
   })
 
@@ -216,15 +216,15 @@ describe('the page /statistieken/tegenstanders', () => {
     )
     expect(mainOf(html)).not.toContain('hf-card-soft')
     expect(sidebarOf(html)).toMatch(
-      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="punten-per-wedstrijd"|aria-labelledby="punten-per-wedstrijd"[^>]*class="hf-card hf-card-soft/,
+      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="gemiddeld-resultaat"|aria-labelledby="gemiddeld-resultaat"[^>]*class="hf-card hf-card-soft/,
     )
   })
 
   it('has a sidebar with a name, the top 10 first and the credit after it', async () => {
     const sidebar = sidebarOf(await render())
 
-    expect(sidebar).toContain('aria-label="De punten per wedstrijd en de bron"')
-    expect(sidebar.indexOf('id="punten-per-wedstrijd"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+    expect(sidebar).toContain('aria-label="Het gemiddelde resultaat en de bron"')
+    expect(sidebar.indexOf('id="gemiddeld-resultaat"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
     expect(mainOf(await render())).not.toContain('Bron: Wikipedia')
   })
 
@@ -247,7 +247,7 @@ describe('the page /statistieken/tegenstanders', () => {
 
     expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
     expect(sidebarOf(html)).not.toContain('<table')
-    expect(html).toContain('id="punten-per-wedstrijd"')
+    expect(html).toContain('id="gemiddeld-resultaat"')
   })
 
   it('keeps the choice in the links of the top 10', async () => {

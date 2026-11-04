@@ -148,7 +148,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
           since={since}
         />
       </Page.Main>
-      <Page.Sidebar aria-label="De punten per wedstrijd en de bron">
+      <Page.Sidebar aria-label="Het gemiddelde resultaat en de bron">
         <TopPointsCard
           address={opponentsPath}
           choice={competition}
