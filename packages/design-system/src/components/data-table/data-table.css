@@ -14,6 +14,13 @@
 }
 
 @layer hf.components {
+  /* The cells of a column with `semibold` are in the weight of a name, a little under bold. */
+  .hf-data-table td.hf-data-table-semibold {
+    font-weight: var(--hf-name-font-weight);
+  }
+}
+
+@layer hf.components {
   /*
    * The header of a sortable column is a button that looks like its text: no fill and no
    * border, the colour and weight of the header, underlined so it reads as something to press.

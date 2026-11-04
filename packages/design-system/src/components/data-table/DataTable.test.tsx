@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { tableColumns } from '../table-columns'
 import { DataTable } from './DataTable'
 
 const props = {
@@ -293,5 +294,46 @@ describe('DataTable.Group', () => {
     expect(container.firstElementChild?.className).toBe('hf-data-table-group extra')
     expect(container.firstElementChild?.id).toBe('tabellen')
     expect(container.querySelectorAll('table')).toHaveLength(1)
+  })
+
+  describe('with a position', () => {
+    const ranked = {
+      caption: 'De clubs met de meeste punten, van hoog naar laag',
+      columns: ['Club', 'P', 'G'],
+      rows: [
+        { cells: ['2,50', 6], header: 'Testclub', position: 1 },
+        { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
+      ],
+    }
+
+    it('has a column before the row headers, named plaats for a screen reader, and a place in every row', () => {
+      render(<DataTable {...ranked} />)
+
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+        '#plaats',
+        'Club',
+        'P',
+        'G',
+      ])
+      expect(document.querySelector('thead abbr')?.getAttribute('title')).toBe('Plaats')
+      expect([...document.querySelectorAll('tbody td.hf-rank')].map((cell) => cell.textContent)).toEqual(['1', '2'])
+      expect(document.querySelector('tbody td.hf-rank')?.className).toBe('hf-numeric hf-rank')
+    })
+
+    it('sets the cells of a semibold column in that weight and leaves the others', () => {
+      render(<DataTable {...ranked} columns={['Club', { ...tableColumns.pointsPerMatch, semibold: true }, 'G']} />)
+
+      expect([...document.querySelectorAll('tbody td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual(
+        ['2,50', '2,00'],
+      )
+      expect(document.querySelectorAll('tbody td:not(.hf-rank):not(.hf-data-table-semibold)')).toHaveLength(2)
+    })
+
+    it('has no such column when no row has a position', () => {
+      render(<DataTable {...props} />)
+
+      expect(document.querySelector('.hf-rank')).toBeNull()
+      expect(screen.queryByText('plaats')).toBeNull()
+    })
   })
 })

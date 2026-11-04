@@ -1025,6 +1025,13 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<span class="hf-visually-hidden">doelsaldo<\/span>/)
     assert.match(opponentsHtml, /P punten \(3 per winst, 1 per gelijkspel\), D doelsaldo/)
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
+    // The sidebar has the top 10 of the average points: a table for the clubs with five played
+    // matches, or the sentence when there is none, and the credit.
+    assert.match(opponentsHtml, /<h2[^>]*id="gemiddeld-resultaat">Gemiddeld resultaat<\/h2>/)
+    assert.match(
+      opponentsHtml,
+      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,
+    )
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.

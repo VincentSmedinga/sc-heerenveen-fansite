@@ -7,31 +7,34 @@ import { Meta } from '@storybook/addon-docs/blocks'
 Elke tabel met cijfers heeft kolomkoppen van één letter, uit één lijst: `tableColumns` in het designsysteem.
 Een component en een pagina nemen hun letters en woorden daar vandaan en schrijven ze niet zelf uit.
 
-| Letter | Woord      |
-| ------ | ---------- |
-| G      | gespeeld   |
-| W      | winst      |
-| G      | gelijk     |
-| V      | verlies    |
-| P      | punten     |
-| D      | doelpunten |
-| D      | doelsaldo  |
+| Letter | Woord                |
+| ------ | -------------------- |
+| G      | gespeeld             |
+| W      | winst                |
+| G      | gelijk               |
+| V      | verlies              |
+| P      | punten               |
+| P      | punten per wedstrijd |
+| D      | doelpunten           |
+| D      | doelsaldo            |
 
 **A (assists) is gereserveerd** voor de tabellen van de spelers, die er nog niet zijn.
 
-## De regel van de twee G's en de twee D's
+## De regel van de twee G's, de twee D's en de twee P's
 
-- **Alleen G en D hebben twee woorden:** G is gespeeld en gelijk, D is doelpunten en doelsaldo.
+- **Alleen G, D en P hebben twee woorden:** G is gespeeld en gelijk, D is doelpunten en doelsaldo, P is punten en punten per wedstrijd.
   Elke andere letter heeft één woord, en een woord heeft één letter.
 - **G gespeeld staat vooraan** van de cijferkolommen, vóór de uitkomsten, en **G gelijk staat direct na W**.
   De twee staan dus nooit naast elkaar.
 - **D doelsaldo staat in de tabellen met de uitslagen van de club**, D doelpunten in de tabellen van de spelers.
   Geen tabel heeft beide.
   Zou een tabel ze ooit samen tonen, dan komen er eigen letters voor de doelpunten voor, de doelpunten tegen en het saldo (DV, DT en DS); die zijn er nu niet.
+- **P punten per wedstrijd staat in een lijst die op dat gemiddelde is geordend** (de top 10 op Tegenstanders), en die heeft geen P punten.
+  De regel onder die tabel zegt dus welke P het is.
 - **P staat vóór D**: de punten zijn de eerste maatstaf, het doelsaldo de tweede, zoals in elke stand.
 - **Een schermlezer hoort het hele woord.**
   Een sorteerknop heet letter en woord, "G gespeeld" of "G gelijk".
-- **De regel onder de tabel** noemt alleen de letters die de tabel heeft, in de volgorde van de kolommen, zoals "G gespeeld, W winst, G gelijk, V verlies, P punten, D doelsaldo".
+- **De regel onder de tabel** noemt alleen de letters die de tabel heeft, in de volgorde van de kolommen, en nooit de `#` van de plaats, zoals "G gespeeld, W winst, G gelijk, V verlies, P punten, D doelsaldo".
   `tableLegend` schrijft hem.
 
 ## Een kolom toevoegen

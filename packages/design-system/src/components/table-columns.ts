@@ -10,13 +10,14 @@ export type TableColumn = {
 
 /**
  * The abbreviations of the columns of every table, in one place. Each is one letter and has
- * one word, with two exceptions: `G` is both `gespeeld` and `gelijk`, and `D` is both
- * `doelpunten` and `doelsaldo`. The two `G`s never stand next to each other, because `G`
- * gespeeld is the first figure of a table and `G` gelijk comes straight after `W` winst. The
- * two `D`s stand in different tables: the goal difference in a table of the results of the
- * club, the goals in a table of players. The legend under the table and the whole word in the
- * name of the header tell them apart. The words of `W`, `G` gelijk and `V` are those of
- * `MarkRow` and `FormChart`.
+ * one word, with three exceptions: `G` is both `gespeeld` and `gelijk`, `D` is both
+ * `doelpunten` and `doelsaldo`, and `P` is both `punten` and `punten per wedstrijd`. The two
+ * `G`s never stand next to each other, because `G` gespeeld is the first figure of a table and
+ * `G` gelijk comes straight after `W` winst. The two `D`s stand in different tables: the goal
+ * difference in a table of the results of the club, the goals in a table of players, and the
+ * two `P`s too: the average points in the ranking of the opponents, the points in their list.
+ * The legend under the table and the whole word in the name of the header tell them apart.
+ * The words of `W`, `G` gelijk and `V` are those of `MarkRow` and `FormChart`.
  *
  * The points come before the goals and the goal difference, as in every league table: `P`
  * stands before `D`.
@@ -28,6 +29,7 @@ export const tableColumns = {
   lost: { abbreviation: 'V', name: 'verlies' },
   played: { abbreviation: 'G', name: 'gespeeld' },
   points: { abbreviation: 'P', name: 'punten' },
+  pointsPerMatch: { abbreviation: 'P', name: 'punten per wedstrijd' },
   won: { abbreviation: 'W', name: 'winst' },
 } as const satisfies Record<string, TableColumn>
 

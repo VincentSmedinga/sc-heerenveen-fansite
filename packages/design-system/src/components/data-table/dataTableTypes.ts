@@ -21,6 +21,11 @@ export type DataTableColumn = {
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**
+   * Sets the cells of this column in the semibold weight, for the figure the table is about,
+   * such as the average in a ranking. The header stays as it is.
+   */
+  semibold?: boolean
+  /**
    * What the header shows when that is not the words a screen reader says, such as `Winst 12×`
    * for the name `Winst, 12 keer`. Unlike an `abbreviation` it is no abbreviation, so it gets
    * no `abbr`. It does not work for a `sortable` column, whose button is named by `name`.
@@ -57,6 +62,14 @@ export type DataTableRow = {
    * Colour or a shape is never the only way to know it.
    */
   note?: string
+  /**
+   * The place of the row in a ranking, from 1. A table in which a row has one gets a column
+   * before the row headers, with the header `#` (`plaats` for a screen reader), and the rows
+   * are in the order of the ranking, so give a place to every row or to none. It is for a
+   * table that is not sortable: a sorted table keeps the places it was given, which would no
+   * longer be the order.
+   */
+  position?: number
 }
 
 /** A column of a table with text, given as an object when it can fold. */

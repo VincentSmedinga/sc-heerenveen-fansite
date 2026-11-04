@@ -67,6 +67,9 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
  * header, such as a path, wraps instead of making the table wider than the space.
  * base/table.css gives it its look.
  *
+ * A row can have a `position`, its place in a ranking: the table then has a column `#` before
+ * the row headers. That is for a table in the order of the ranking, so not a sortable one.
+ *
  * A column can be `sortable`. The table then lets the visitor sort on it, which needs
  * JavaScript: the server sends the whole table in the order of `rows`, with plain headers, and
  * in the browser the headers of the sortable columns become buttons (see SortableDataTable). A
@@ -118,6 +121,14 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
       <caption className="hf-visually-hidden">{caption}</caption>
       <thead>
         <tr>
+          {numberRows.some((row) => row.position !== undefined) && (
+            <th className="hf-numeric" scope="col">
+              <abbr title="Plaats">
+                <span aria-hidden="true">#</span>
+                <span className="hf-visually-hidden">plaats</span>
+              </abbr>
+            </th>
+          )}
           {all.map((column, index) => (
             <th className={index === 0 ? undefined : 'hf-numeric'} key={column.name} scope="col">
               {column.hidden === true ? (

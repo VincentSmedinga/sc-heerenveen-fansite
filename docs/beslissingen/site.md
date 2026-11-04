@@ -1734,6 +1734,7 @@
 - **Later:** zie _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ (3 november 2026): een wedstrijd die nog niet is gespeeld staat er sindsdien wel in, als `Match` bovenaan in dezelfde lijst, vóór de gespeelde wedstrijden.
   De lijst en de samenvatting tellen nog steeds alleen gespeelde wedstrijden.
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): de kaart Wedstrijden toont sindsdien elke wedstrijd als `Match`, met de competitie en de ronde in de regel en het jaar bij de dag, en niet meer als korte regel (`ShortMatch`) met het seizoen en de competitie erboven.
+- **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026): de lijst heeft een zijkolom met de top 10 en de bronvermelding, en is wit.
 
 ## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
 
@@ -2238,3 +2239,25 @@
 - **Alternatieven:** de zin alleen op de pagina van een club weglaten (de twee kaarten verschillen dan, en de gedeelde code krijgt een schakelaar); de regel helemaal weglaten (dan staat het aantal wedstrijden nergens, tenzij een Totaal-rij het zegt); de koppen laten zoals ze zijn en het aantal in de rijen zetten (het aantal per uitslag is dan alleen uit te rekenen); winst, gelijk en verlies per competitie in de tabel (breder op een smalle zijkolom, en de koppen hebben ze al).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397) in `redactie.md`: deze kaart zegt het aantal zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.
   Zie ook _Twee donutdiagrammen in een groep staan midden in hun eigen kolom_ (#700) in `designsysteem.md`: het kleine diagram staat niet in een vaste kolom van 7rem, maar in een kolom die naar verhouding bij zijn breedte past, en staat daarin midden.
+
+## Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit
+
+- **Datum:** 4 november 2026
+- **Besluit:** de pagina `/statistieken/tegenstanders` heeft een zijkolom (`Page.Sidebar`) met de zachte kaart "Gemiddeld resultaat" met de top 10 (#699), en de kaart "Alle tegenstanders" in de hoofdkolom wordt wit (`default`).
+  - **De zijkolom** heet "De punten per wedstrijd en de bron".
+    De bronvermelding (`OpponentsCredit`) staat daarin onder de kaart, zoals op Spelers en op de pagina van een club, en niet meer onder de lijst.
+    Op een telefoon volgt de zijkolom de hoofdkolom, dus de top 10 staat onder de lijst met alle tegenstanders.
+  - **De tabel** is een `DataTable` met de kolommen plaats (#), club (een link), de punten per wedstrijd (P, in het halfvette gewicht) en gespeeld (G).
+    De plaats komt uit de nieuwe eigenschap `position` van een rij (zie _`DataTable` kan de plaats van een rij in een ranglijst tonen_ in `designsysteem.md`).
+    De tabel is niet te sorteren: de volgorde is het punt van de kaart.
+    Het bijschrift is onzichtbaar en noemt de volgorde, en een regel eronder legt P en G uit: "P punten per wedstrijd, G gespeeld".
+    De # van de plaats staat nooit in de legenda: de eigenaar wil dat niet (4 november 2026), en de plaats is geen afkorting die uitleg nodig heeft.
+    De kaart is een onderdeel van de site (`TopPointsCard`), geen onderdeel van het designsysteem.
+  - **De berekening** staat in `topPointsOf` in `src/opponents.ts`, zonder database, en de regels staan in _De kaart Gemiddeld resultaat toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ in `redactie.md`.
+- **Waarom:** de lijst met alle tegenstanders is de hoofdinhoud van de pagina en dus wit (regel 1 van _De vier vlakken van een kaart hebben een betekenis_); een ranglijst die erbij hoort is zacht (regel 4).
+  Een zijkolom is de plek voor wat de hoofdinhoud aanvult, zoals op Spelers.
+  De bronvermelding hoort bij beide kaarten, dus ze staat bij de zijkolom en niet tussen de lijst en de top 10 op een telefoon.
+- **Nadeel:** de top 10 is op een telefoon pas na een lange lijst te zien.
+- **Alternatieven:** de kaart in de hoofdkolom (de lijst met alle tegenstanders komt dan later in beeld); "Alle tegenstanders" zacht laten (twee kaarten zouden dan dezelfde betekenis krijgen); `DataTable` met de plaats als markering voor de rijkop (de plaats is dan geen kolom met een kop en staat niet recht onder elkaar); een gewone `table` in de site (de lint verbiedt HTML-elementen in de site); de bronvermelding in de hoofdkolom laten.
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de pagina heeft sindsdien een zijkolom, en de lijst staat op het witte vlak.
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026) in `designsysteem.md`: "Alle tegenstanders" volgt regel 1, de top 10 regel 4.

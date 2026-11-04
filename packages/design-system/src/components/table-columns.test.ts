@@ -17,6 +17,7 @@ describe('tableColumns', () => {
       lost: 'V verlies',
       played: 'G gespeeld',
       points: 'P punten',
+      pointsPerMatch: 'P punten per wedstrijd',
       won: 'W winst',
     })
     expect(reservedTableColumns.assists).toEqual({ abbreviation: 'A', name: 'assists' })
@@ -26,7 +27,7 @@ describe('tableColumns', () => {
     for (const { abbreviation } of all) expect(abbreviation).toMatch(/^[A-Z]$/u)
   })
 
-  it('gives every word one letter and every name once, with G and D as the only letters for two words', () => {
+  it('gives every word one letter and every name once, with G, D and P as the only letters for two words', () => {
     const wordsOf = new Map<string, Set<string>>()
     for (const { abbreviation, name } of all) {
       wordsOf.set(abbreviation, (wordsOf.get(abbreviation) ?? new Set()).add(name))
@@ -36,6 +37,7 @@ describe('tableColumns', () => {
     expect([...wordsOf].filter(([, words]) => words.size > 1)).toEqual([
       ['G', new Set(['gelijk', 'gespeeld'])],
       ['D', new Set(['doelpunten', 'doelsaldo'])],
+      ['P', new Set(['punten', 'punten per wedstrijd'])],
     ])
   })
 

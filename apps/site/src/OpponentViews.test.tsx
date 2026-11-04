@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
 
-import { ClubsCard, ClubScoreCountsCard } from './OpponentViews'
+import { ClubsCard, ClubScoreCountsCard, TopPointsCard } from './OpponentViews'
 import { testclub } from './test-opponents'
 
 const record = (
@@ -68,6 +68,101 @@ describe('ClubsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'D doelsaldo' }))
 
     expect(names()).toEqual(['Venlo', 'Sparta', 'Zwolle'])
+  })
+})
+
+describe('TopPointsCard', () => {
+  // Sparta has 10 played matches and 14 points, Zwolle 5 and 15, Venlo 7 and 4.
+  const card = (choice: 'all' | 'league' = 'all', query = '') => (
+    <TopPointsCard
+      address="/statistieken/tegenstanders"
+      choice={choice}
+      query={query}
+      records={records}
+      since="2022/23"
+    />
+  )
+
+  it('ranks the clubs on the average points per match with two decimals and a comma', () => {
+    render(card())
+
+    expect(names()).toEqual(['Zwolle', 'Sparta', 'Venlo'])
+    expect(figures(1)).toEqual(['1', '2', '3'])
+    expect(figures(2)).toEqual(['3,00', '1,40', '0,57'])
+    expect(figures(3)).toEqual(['5', '10', '7'])
+  })
+
+  it('has a hidden caption that names the order, real column headers and a link named by the club', () => {
+    render(card())
+
+    expect(
+      screen.getByRole('table', {
+        name: /^De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag$/,
+      }),
+    ).toBeTruthy()
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      '#plaats',
+      'Club',
+      'Ppunten per wedstrijd',
+      'Ggespeeld',
+    ])
+    expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/statistieken/tegenstanders/zwolle')
+  })
+
+  it('says it is the Eredivisie in the caption and keeps the choice in every link', () => {
+    render(card('league', '?competitie=eredivisie'))
+
+    expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, in de Eredivisie$/)
+    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/statistieken/tegenstanders/zwolle?competitie=eredivisie',
+      '/statistieken/tegenstanders/sparta?competitie=eredivisie',
+      '/statistieken/tegenstanders/venlo?competitie=eredivisie',
+    ])
+  })
+
+  it('sets the average in the semibold weight', () => {
+    render(card())
+
+    expect([...document.querySelectorAll('td.hf-data-table-semibold')].map((cell) => cell.textContent)).toEqual([
+      '3,00',
+      '1,40',
+      '0,57',
+    ])
+  })
+
+  it('cannot be sorted: no buttons and no sort order', () => {
+    render(card())
+
+    expect(screen.queryAllByRole('button')).toEqual([])
+    expect(document.querySelector('[aria-sort]')).toBeNull()
+  })
+
+  it('names the minimum, the legend and what the card is based on', () => {
+    render(card())
+
+    expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Gebaseerd op alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
+      ),
+    ).toBeTruthy()
+  })
+
+  it('says one sentence, and shows no table, when no club has five played matches', () => {
+    render(
+      <TopPointsCard
+        address="/statistieken/tegenstanders"
+        choice="all"
+        query=""
+        records={[record('Venlo', 1, 1, 2, 3, 4)]}
+        since="2022/23"
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Gemiddeld resultaat' })).toBeTruthy()
+    expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
+    expect(screen.queryByRole('table')).toBeNull()
+    expect(screen.queryByText(/Gebaseerd op/)).toBeNull()
   })
 })
 
