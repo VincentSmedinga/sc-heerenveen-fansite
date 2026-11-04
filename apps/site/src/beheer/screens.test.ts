@@ -13,6 +13,7 @@ describe('the screens of the admin', () => {
       'Berichten',
       'Artikelen',
       'Wedstrijden',
+      'Stadions',
       'Bezoek',
     ])
   })

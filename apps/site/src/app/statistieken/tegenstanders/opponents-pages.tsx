@@ -21,7 +21,7 @@ import {
   meetingsOf,
   opponentsPath,
   seasonsOf,
-  stadiumsOf,
+  stadiumViewsOf,
   summaryOf,
   upcomingOf,
 } from '#src/opponents'
@@ -221,7 +221,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       ? 'In de Eredivisie hebben we nog niet tegen deze club gespeeld.'
       : 'We hebben nog niet tegen deze club gespeeld.'
   const earlier = earlierNames(club.otherNames)
-  const stadiums = stadiumsOf(matches)
+  const stadiums = stadiumViewsOf(loaded.page.stadiums, matches)
 
   return (
     <>
@@ -263,9 +263,17 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           />
         </Page.Sidebar>
       ) : (
-        upcoming.length > 0 && (
-          <Page.Sidebar aria-label="De bron" wide>
-            <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
+        (upcoming.length > 0 || stadiums.length > 0) && (
+          <Page.Sidebar
+            aria-label={
+              stadiums.length === 0 ? 'De bron' : upcoming.length === 0 ? 'Het stadion' : 'Het stadion en de bron'
+            }
+            wide
+          >
+            <StadiumsCard stadiums={stadiums} />
+            {upcoming.length > 0 && (
+              <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
+            )}
           </Page.Sidebar>
         )
       )}

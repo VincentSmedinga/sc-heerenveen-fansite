@@ -561,6 +561,9 @@ Ze heeft vijf delen:
   Onder de lijst staat geen zin: de bronvermelding onderaan de pagina zegt waar de namen vandaan komen.
   De kop heeft het anker `#stadion` bij beide titels.
   Een club zonder uitwedstrijd in de Eredivisie, of zonder stadion in die wedstrijden, heeft de kaart niet.
+  Heeft de redactie een club een eigen lijst gegeven (zie _De stadions van een club_ onder _Het beheer_), dan toont de kaart alleen die lijst, met de periodes uit de starts (`ownStadiumPeriods` in `src/match-format.ts`) en de toelichting onder de naam van haar regel (de prop `note` van `ShortStaff`), en `stadiumViewsOf` in `src/opponents.ts` kiest tussen de twee.
+  Een club met een eigen lijst heeft de kaart ook als de wedstrijden geen stadion noemen, en ook met de keuze Eredivisie als we hem alleen in de beker troffen.
+  De pagina van een club leest de lijst met de wedstrijden in `getClubPage`, dus een opslag staat er binnen vijf minuten.
 - De bronvermelding, die ook voor deze kaart geldt.
 
 Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
@@ -804,6 +807,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
+- `/beheer/stadions` is voor beheerders alleen: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - Het beheer is compact: kleinere letters en kortere afstanden dan de publieke pagina's.
   Elke pagina onder `/beheer` zet de klasse `compact` uit `src/beheer/density.ts` op zijn `Page.Main`, en `src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die haar vergeet (zie _Dichtheid_ in Storybook).
@@ -892,6 +896,29 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 - Een wijziging van Wikipedia die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
 - Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) onder die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
   De vlag komt uit `hasEditedMatches` en is zo vers als de gegevens van het seizoen.
+
+### De stadions van een club
+
+`/beheer/stadions` (`src/app/beheer/stadions`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion (zie _De tegenstanders_).
+Hier geeft de redactie een club een eigen lijst van namen, met een start en een toelichting, voor een stadion dat de wedstrijden niet goed vertellen, zoals AZ dat in 2019 een half jaar in Den Haag speelde.
+
+- De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Eigen lijst" bij clubs die er een hebben, het filter Alles of Eigen lijst en zoeken op een deel van de naam.
+  Het zoeken is een formulier met `GET`, dus het werkt zonder JavaScript (`searchClubs` in `src/beheer/stadiums.ts`).
+- `/beheer/stadions/<club>` is de brede pagina met een zijbalk, zoals een wedstrijd.
+  De hoofdkolom heeft het formulier (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
+  Een naam begint met een seizoen (`2019/20`, telt als 1 juli van dat jaar) of met een dag, niet met allebei, en alleen de eerste naam mag zonder start; de starts lopen op, en de naam ervoor eindigt waar de volgende begint.
+  De toelichting is gewone tekst van hoogstens 200 tekens, in eigen woorden, en noemt de bron als die niet Wikipedia is.
+- De zijbalk heeft "Opslaan", wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
+  "Overnemen" vult het formulier met die namen en seizoenen, en slaat niets op.
+  "Terug naar Wikipedia" haalt de hele lijst van de club weg, ook de toelichtingen, en vraagt eerst een bevestiging zoals "Invoer weghalen" bij een wedstrijd.
+- Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.
+  Een regel toevoegen of weghalen en "Overnemen" zijn knoppen van hetzelfde formulier, die de server beantwoordt met de waarden bewaard en de focus op het goede veld; de eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
+  De knoppen in de zijbalk horen bij het formulier met het attribuut `form`.
+- `src/beheer/stadium-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met een zin bij elk veld (lengte, vorm van een seizoen, een dag die bestaat, oplopende starts).
+  `replaceClubStadiums` en `removeClubStadiums` uit `@fansite/db/club-stadiums` schrijven de lijst en `stadium.save` of `stadium.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
+- Een opslag staat binnen vijf minuten op de pagina van de club: dat is de tijd die `getClubPage` zijn gegevens bewaart.
+- `e2e/stadiums.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
 
 ### Het bezoek bekijken
 

@@ -613,6 +613,83 @@ describe('the page of a club', () => {
     expect(html).not.toContain('Zo noemt Wikipedia')
   })
 
+  describe('with a list of stadiums of its own', () => {
+    const own = [
+      { name: 'AFAS Stadion', note: null, startDay: null, startSeason: null },
+      {
+        name: 'Cars Jeans Stadion',
+        note: 'Tijdelijk in Den Haag, na de instorting van het dak.',
+        startDay: '2019-08-10',
+        startSeason: null,
+      },
+      { name: 'AFAS Stadion', note: null, startDay: null, startSeason: '2020/21' },
+    ]
+    const cardOf = (html: string) =>
+      html.slice(
+        html.indexOf('aria-labelledby="stadion"'),
+        html.indexOf('</ul>', html.indexOf('aria-labelledby="stadion"')),
+      )
+
+    it('shows only that list, with the period of each name and the note under its name', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...testclub, stadiums: own })
+
+      const html = await render()
+      const card = cardOf(html)
+
+      expect(plain(card.slice(card.indexOf('<ul')))).toBe(
+        'tot 10 aug 2019 AFAS Stadion 10 aug 2019 t/m 2019/20 Cars Jeans Stadion Tijdelijk in Den Haag, na de instorting van het dak. vanaf 2020/21 AFAS Stadion',
+      )
+      expect(card).not.toContain('Oud Testpark')
+      expect(card).not.toContain('Nieuw Testpark')
+    })
+
+    it('shows the note as plain text, without markup from the note', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        stadiums: [
+          own[0] ?? own[0],
+          { ...own[1], note: '<b>Vet</b> & <a href="https://example.test">link</a>' },
+        ] as typeof own,
+      })
+
+      const card = cardOf(await render())
+
+      expect(card).toContain('&lt;b&gt;Vet&lt;/b&gt; &amp; &lt;a href=')
+      expect(card).not.toContain('<b>Vet')
+      expect(card).not.toContain('href="https://example.test"')
+    })
+
+    it('has the card for a club we only visited in the cup, with the choice Eredivisie too', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...beker, stadiums: [own[0] as (typeof own)[0]] })
+
+      const all = await render('beker-united')
+      const league = await render('beker-united', { competitie: 'eredivisie' })
+
+      expect(plain(cardOf(all).slice(cardOf(all).indexOf('<ul')))).toBe('AFAS Stadion')
+      expect(plain(cardOf(league).slice(cardOf(league).indexOf('<ul')))).toBe('AFAS Stadion')
+      expect(league).toContain('aria-label="Het stadion"')
+    })
+
+    it('has the card for a club with a list and no match away', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...testclub,
+        matches: testclub.matches.filter((item) => item.home),
+        stadiums: [own[0] as (typeof own)[0]],
+      })
+
+      expect(plain(cardOf(await render()).slice(cardOf(await render()).indexOf('<ul')))).toBe('AFAS Stadion')
+    })
+
+    it('names the sidebar of a club with matches to come after the stadium and the source', async () => {
+      vi.mocked(getClubPage).mockResolvedValue({ ...promovendus, stadiums: [own[0] as (typeof own)[0]] })
+
+      const html = await render('nieuw-promovendus')
+
+      expect(html).toContain('aria-label="Het stadion en de bron"')
+      expect(html.indexOf('id="stadion"')).toBeLessThan(html.indexOf('Bron:'))
+    })
+  })
+
   it('has the same stadiums with the choice Eredivisie', async () => {
     const html = await render('testclub', { competitie: 'eredivisie' })
 

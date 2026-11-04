@@ -75,6 +75,9 @@ export default async function AdminPage() {
               <Tile href={matchesPath} icon="ball" level={2} title="Wedstrijden">
                 Vul wedstrijden in of verbeter ze.
               </Tile>
+              <Tile href="/beheer/stadions" icon="ball" level={2} title="Stadions">
+                Geef een club een eigen lijst van stadions, met een toelichting.
+              </Tile>
               <Tile href="/beheer/bezoek" icon="chart" level={2} title="Bezoek">
                 Bekijk hoeveel mensen de site bezoeken.
               </Tile>

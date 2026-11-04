@@ -1,3 +1,4 @@
+import type { StadiumLine } from '@fansite/db/club-stadiums'
 import type { PublicClubMatch, PublicClubRecord, PublicMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
@@ -12,6 +13,7 @@ import {
   pointsOf,
   seasonsOf,
   stadiumsOf,
+  stadiumViewsOf,
   summaryOf,
   tallyOf,
   topPointsOf,
@@ -359,6 +361,56 @@ describe('stadiumsOf', () => {
   it('gives an empty list for a club we never visited in the league', () => {
     expect(stadiumsOf([])).toEqual([])
     expect(stadiumsOf(matches.filter((item) => item.competition === 'KNVB Beker'))).toEqual([])
+  })
+})
+
+describe('stadiumViewsOf', () => {
+  const visit = (matchDate: string, stadium: string, season: string) =>
+    match(1, 0, { home: false, matchDate, season, stadium })
+  const visits = [visit('2022-10-02', 'Oud Stadion', '2022/23'), visit('2024-11-10', 'Nieuwe Arena', '2024/25')]
+  const own = (name: string, more: Partial<StadiumLine> = {}): StadiumLine => ({
+    name,
+    note: null,
+    startDay: null,
+    startSeason: null,
+    ...more,
+  })
+
+  it('gives what the matches say, with their periods, for a club without a list of its own', () => {
+    expect(stadiumViewsOf([], visits)).toEqual([
+      { name: 'Oud Stadion', period: 't/m 2022/23' },
+      { name: 'Nieuwe Arena', period: 'vanaf 2024/25' },
+    ])
+  })
+
+  it('gives a list of one line as the name alone, whatever the matches say', () => {
+    expect(stadiumViewsOf([own('Eigen Stadion')], visits)).toEqual([
+      { name: 'Eigen Stadion', note: undefined, period: undefined },
+    ])
+  })
+
+  it('gives the periods of a list with a season and a day as a start, with its notes', () => {
+    expect(
+      stadiumViewsOf(
+        [
+          own('AFAS Stadion'),
+          own('Cars Jeans Stadion', { note: 'Tijdelijk in Den Haag.', startDay: '2019-08-10' }),
+          own('AFAS Stadion', { startSeason: '2020/21' }),
+        ],
+        visits,
+      ),
+    ).toEqual([
+      { name: 'AFAS Stadion', note: undefined, period: 'tot 10 aug 2019' },
+      { name: 'Cars Jeans Stadion', note: 'Tijdelijk in Den Haag.', period: '10 aug 2019 t/m 2019/20' },
+      { name: 'AFAS Stadion', note: undefined, period: 'vanaf 2020/21' },
+    ])
+  })
+
+  it('gives the list of its own for a club we never visited, and nothing for a club without either', () => {
+    expect(stadiumViewsOf([own('Eigen Stadion')], [])).toEqual([
+      { name: 'Eigen Stadion', note: undefined, period: undefined },
+    ])
+    expect(stadiumViewsOf([], [])).toEqual([])
   })
 })
 

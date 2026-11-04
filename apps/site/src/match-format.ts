@@ -79,6 +79,9 @@ const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month:
 
 const shortMonthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'short', timeZone, year: 'numeric' })
 
+/** When a name in an own list of stadiums starts: a season, a day or neither. */
+export type StadiumStart = { startDay: null | string; startSeason: null | string }
+
 /**
  * What the list of head coaches says in front of each name, in the order the coaches began: a
  * season with one coach says nothing, because the name is enough. With more, each coach but the
@@ -167,6 +170,45 @@ export function matchMoment(
 }
 
 /**
+ * What the own list of stadium names of a club says with each name, in the order of the list.
+ * The start of a name is a season or a day, and the next start decides where the name before it
+ * ends: "t/m 2018/19", the season before, when the next start is a season, and "tot 14 feb
+ * 2021" when it is a day. The first name has only its end, and the last has "vanaf" with its
+ * start ("vanaf 2020/21", "vanaf 14 feb 2021"). A name in the middle has its start and its
+ * end: "2019/20" when it lasted one season, "2019/20 t/m 2021/22", "2019/20 tot 14 feb 2021",
+ * "10 aug 2019 t/m 2020/21" or "10 aug 2019 tot 14 feb 2021". A day has a short month, as in a
+ * list of head coaches (`coachPeriods`). One name
+ * says nothing, because the name is enough.
+ */
+export function ownStadiumPeriods(starts: readonly StadiumStart[]): (string | undefined)[] {
+  const days = starts.map((start) =>
+    start.startDay === null ? undefined : formatStaffDate({ date: start.startDay, precision: 'day' }),
+  )
+
+  return starts.map((start, index) => {
+    const next = starts[index + 1]
+    const begin = start.startSeason ?? days[index]
+
+    if (starts.length === 1) {
+      return undefined
+    }
+
+    if (next === undefined) {
+      return begin === undefined ? undefined : `vanaf ${begin}`
+    }
+
+    const lastSeason = next.startSeason === null ? undefined : seasonBefore(next.startSeason)
+    const end = lastSeason === undefined ? `tot ${days[index + 1] ?? ''}` : `t/m ${lastSeason}`
+
+    if (begin === undefined) {
+      return end
+    }
+
+    return begin === lastSeason ? begin : `${begin} ${end}`
+  })
+}
+
+/**
  * What the list of stadium names of a club says with each name, in the order we saw them: one
  * name says nothing, because the name is enough, and a "vanaf" there would say the stadium
  * began when our data begins. With more, the first name has "t/m 2018/19", the last season we
@@ -224,6 +266,13 @@ export function wikipediaUrl(title: string, kind?: PublicWikipediaPage['kind']) 
 /** A calendar day such as `2026-10-25` as a moment in the middle of that day in UTC. */
 function noonOf(day: string) {
   return new Date(`${day}T12:00:00Z`)
+}
+
+/** The season before one: `2019/20` is preceded by `2018/19`. */
+function seasonBefore(season: string) {
+  const year = Number(season.slice(0, 4)) - 1
+
+  return `${year}/${String((year + 1) % 100).padStart(2, '0')}`
 }
 
 function yearOf(moment: Date) {

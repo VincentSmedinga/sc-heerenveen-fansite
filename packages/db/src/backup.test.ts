@@ -233,6 +233,18 @@ describe('backUp', () => {
     expect(readdirSync(process.env['FAKE_RECORD'] ?? '').filter((name) => name.startsWith('args-'))).toHaveLength(2)
   })
 
+  it('takes the table with the stadiums of the clubs along with its rows, as it holds the work of the editors', async () => {
+    await backUp(env(), now)
+
+    const record = process.env['FAKE_RECORD'] ?? ''
+    const rows = readFileSync(path.join(record, 'args-0'), 'utf8').trim().split('\n')
+    const structure = readFileSync(path.join(record, 'args-1'), 'utf8').trim().split('\n')
+
+    expect(structureOnlyTables).not.toContain('club_stadiums')
+    expect(rows).not.toContain('--ignore-table=fansite_acc.club_stadiums')
+    expect(structure).not.toContain('club_stadiums')
+  })
+
   it('fails, and leaves no file, when the second pass fails', async () => {
     const second = program(
       'mysqldump',

@@ -127,6 +127,7 @@ export const testclub: ClubPage = {
     match(2, 0, { matchDate: '2024-11-09', season: '2024/25', stadium: 'Abe Lenstra Stadion' }),
     match(4, 2, { home: false, matchDate: '2023-04-02', season: '2022/23', stadium: 'Oud Testpark' }),
   ],
+  stadiums: [],
 }
 
 /** A club with a single match, in the cup, at its stadium: not a name for the card Stadion. */
@@ -141,6 +142,7 @@ export const beker: ClubPage = {
       stadium: 'Bekerveld',
     }),
   ],
+  stadiums: [],
 }
 
 /** A match that has not been played, scheduled unless `more` says it is postponed. */
@@ -177,6 +179,7 @@ export const komend: ClubPage = {
     upcoming({ kickoffAt: null, matchDate: '2026-11-07', round: 'Speelronde 11', status: 'postponed' }),
     match(2, 0, { matchDate: '2026-10-24', opponent: 'Komend FC', season: '2026/27', stadium: 'Abe Lenstra Stadion' }),
   ],
+  stadiums: [],
 }
 
 /** A club we have not played yet, such as a promoted one, with a match to come. */
@@ -185,6 +188,7 @@ export const promovendus: ClubPage = {
   matches: [
     upcoming({ home: false, opponent: 'Nieuw Promovendus', round: 'Speelronde 20', stadium: 'Promovendus Park' }),
   ],
+  stadiums: [],
 }
 
 const readAt = new Date('2026-10-25T12:00:00Z')

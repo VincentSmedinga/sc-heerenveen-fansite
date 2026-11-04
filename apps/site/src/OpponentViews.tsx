@@ -18,7 +18,7 @@ import {
 } from '@fansite/design-system'
 
 import { type CompetitionChoice } from './competition'
-import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
+import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import {
@@ -27,7 +27,7 @@ import {
   type Meeting,
   meetingsOf,
   pointsOf,
-  type Stadium,
+  type StadiumView,
   topPointsMinimum,
   topPointsOf,
 } from './opponents'
@@ -387,18 +387,18 @@ export function OpponentsCredit({
 }
 
 /**
- * The card of the page of a club with the names of its stadium in the order we saw them, on the
- * strong surface, like the head coaches. With one name there is the name alone; with more, each
- * name has its seasons (see `stadiumPeriods`). The credit at the foot of the page says where
- * the names come from, so the card has no line of its own. The anchor is the same for "Stadion"
- * and "Stadions". A club without a name has no card.
+ * The card of the page of a club with the names of its stadium, on the strong surface, like the
+ * head coaches. With one name there is the name alone; with more, each name has its period (see
+ * `stadiumPeriods` and `ownStadiumPeriods`). A name can have a note under it, which the editors
+ * wrote: it says why, for instance, a club played elsewhere for a while. The names of the
+ * matches come from Wikipedia, and the credit at the foot of the page says so, so the card has
+ * no line of its own. The anchor is the same for "Stadion" and "Stadions". A club without a
+ * name has no card.
  */
-export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
+export function StadiumsCard({ stadiums }: { stadiums: StadiumView[] }) {
   if (stadiums.length === 0) {
     return null
   }
-
-  const periods = stadiumPeriods(stadiums)
 
   return (
     <Card aria-labelledby="stadion" surface="strong">
@@ -410,7 +410,7 @@ export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
           // The name can come back after another, so the place in the list is part of the key.
           <List.Item key={`${index}-${stadium.name}`}>
             {/* A ShortStaff is a line with the period next to a name, as this is. */}
-            <ShortStaff period={periods[index]} surname={stadium.name} />
+            <ShortStaff note={stadium.note} period={stadium.period} surname={stadium.name} />
           </List.Item>
         ))}
       </List>

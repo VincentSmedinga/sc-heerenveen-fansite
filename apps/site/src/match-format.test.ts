@@ -8,6 +8,7 @@ import {
   formatTableDay,
   lastDayOf,
   matchMoment,
+  ownStadiumPeriods,
   stadiumPeriods,
   weekendText,
   wikipediaUrl,
@@ -228,5 +229,58 @@ describe('stadiumPeriods', () => {
 
   it('says nothing for a club without a name', () => {
     expect(stadiumPeriods([])).toEqual([])
+  })
+})
+
+describe('ownStadiumPeriods', () => {
+  const season = (startSeason: string) => ({ startDay: null, startSeason })
+  const day = (startDay: string) => ({ startDay, startSeason: null })
+  const first = { startDay: null, startSeason: null }
+
+  it('says nothing for one name, and for a club without a list', () => {
+    expect(ownStadiumPeriods([first])).toEqual([undefined])
+    expect(ownStadiumPeriods([])).toEqual([])
+  })
+
+  it('says "t/m" with the season before when the next name starts with a season, and "vanaf" with its season', () => {
+    expect(ownStadiumPeriods([first, season('2019/20')])).toEqual(['t/m 2018/19', 'vanaf 2019/20'])
+  })
+
+  it('says "tot" with the day when the next name starts with a day, and "vanaf" with that day', () => {
+    expect(ownStadiumPeriods([first, day('2021-02-14')])).toEqual(['tot 14 feb 2021', 'vanaf 14 feb 2021'])
+  })
+
+  it('counts the season before across the turn of the century and the years that start with a zero', () => {
+    expect(ownStadiumPeriods([first, season('2000/01')])).toEqual(['t/m 1999/00', 'vanaf 2000/01'])
+    expect(ownStadiumPeriods([first, season('2010/11')])).toEqual(['t/m 2009/10', 'vanaf 2010/11'])
+  })
+
+  it('says the start and the end of a name in the middle, in the form of the two starts around it', () => {
+    expect(ownStadiumPeriods([first, season('2018/19'), season('2021/22'), season('2023/24')])).toEqual([
+      't/m 2017/18',
+      '2018/19 t/m 2020/21',
+      '2021/22 t/m 2022/23',
+      'vanaf 2023/24',
+    ])
+    expect(ownStadiumPeriods([first, season('2019/20'), day('2021-02-14'), season('2022/23')])).toEqual([
+      't/m 2018/19',
+      '2019/20 tot 14 feb 2021',
+      '14 feb 2021 t/m 2021/22',
+      'vanaf 2022/23',
+    ])
+    expect(ownStadiumPeriods([first, day('2019-08-10'), day('2020-02-01'), season('2020/21')])).toEqual([
+      'tot 10 aug 2019',
+      '10 aug 2019 tot 1 feb 2020',
+      '1 feb 2020 t/m 2019/20',
+      'vanaf 2020/21',
+    ])
+  })
+
+  it('says only the season of a name in the middle that lasted one season', () => {
+    expect(ownStadiumPeriods([first, season('2019/20'), season('2020/21')])).toEqual([
+      't/m 2018/19',
+      '2019/20',
+      'vanaf 2020/21',
+    ])
   })
 })

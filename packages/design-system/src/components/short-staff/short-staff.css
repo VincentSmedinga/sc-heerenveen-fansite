@@ -1,11 +1,18 @@
 /*
  * A short staff line takes everything from the short match (short-match.css). Only the column
  * before the name is wider here, because "tot 14 mrt 2026" and "2019/20 t/m 2021/22" are longer
- * than "za 24 okt", and the names of the lines still start at the same place.
+ * than "za 24 okt", and the names of the lines still start at the same place. A note is a line
+ * of its own under the name.
  */
 
 @layer hf.components {
   .hf-short-staff > .hf-short-match-when {
     min-inline-size: 9.5rem;
+  }
+
+  /* The note is a line of its own under the name, as wide as the line. */
+  .hf-short-staff > .hf-short-staff-note {
+    display: block;
+    flex: 1 0 100%;
   }
 }
