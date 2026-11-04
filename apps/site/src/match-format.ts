@@ -144,15 +144,22 @@ export function lastDayOf(dateText: null | string, matchDate: string) {
  *   and the first day;
  * - a match that is played: the day alone, "zo 18 okt", because the hour no longer matters.
  *
- * The year follows only when it is not the year of `now`: a season runs over two years.
+ * The year follows only when it is not the year of `now`: a season runs over two years. A list
+ * that runs over seasons asks for `withYear`, and the day of a match that is played then has
+ * its year always, so a match of the season before can't be taken for one of this season.
  */
-export function matchMoment(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
+export function matchMoment(
+  match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>,
+  now: Date,
+  { withYear = false }: { withYear?: boolean } = {},
+) {
   if (match.status !== 'played' && match.kickoffAt === null) {
     return { dateTime: match.matchDate, time: weekendText(match.dateText ?? match.matchDate) }
   }
 
   const moment = match.status === 'played' || match.kickoffAt === null ? noonOf(match.matchDate) : match.kickoffAt
-  const day = (yearOf(moment) === yearOf(now) ? dayFormat : dayWithYearFormat).format(moment)
+  const sameYear = yearOf(moment) === yearOf(now) && !(withYear && match.status === 'played')
+  const day = (sameYear ? dayFormat : dayWithYearFormat).format(moment)
 
   return match.status === 'played'
     ? { dateTime: match.matchDate, time: day }

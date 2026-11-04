@@ -83,20 +83,14 @@ const sentenceOf = (html: string) => {
   return { drawn: count('gelijk'), lost: count('verloren'), won: count('gewonnen') }
 }
 
-/** The lines of the card Wedstrijden: season and competition above each line, and the line */
-const meetingsOf = (html: string) =>
-  [
-    ...html.matchAll(
-      /<li><p class="hf-meta">([^<]*) <span aria-hidden="true">·<\/span> ([^<]*)<\/p><div class="hf-short-match">(.*?)<\/div><\/li>/g,
-    ),
-  ].map(([, season, competition, line]) => [
-    season,
-    competition,
-    (line ?? '')
-      .replaceAll(/<[^>]*>/g, ' ')
-      .replaceAll(/\s+/g, ' ')
-      .trim(),
-  ])
+/** The list of the card Wedstrijden, from its first item to its end. */
+const listOf = (html: string) => /id="wedstrijden".*?(<ul[^>]*role="list".*?<\/ul>)/s.exec(html)?.[1] ?? ''
+
+/** The items of that list, in order, as HTML. */
+const itemsOf = (html: string) => [...listOf(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, item]) => item ?? '')
+
+/** The lines of the card Wedstrijden as a reader hears them, the newest first. */
+const meetingsOf = (html: string) => itemsOf(html).map(plain)
 
 /** The sentence of the row Laatste wedstrijden for a screen reader, if the page has the row. */
 const lastMatchesOf = (html: string) =>
@@ -267,14 +261,53 @@ describe('the page of a club', () => {
     expect(lettersOf(await render())).toBe('WWGWV')
   })
 
-  it('lists every meeting, the newest first, with the season, the competition, the day and the result', async () => {
+  it('lists every meeting as a Match, the newest first, with the day and its year, the competition and the result', async () => {
     expect(meetingsOf(await render())).toEqual([
-      ['2026/27', 'KNVB Beker', 'zo 20 sep Testclub 1–0 1 tegen 0 sc Heerenveen'],
-      ['2025/26', 'Eredivisie', 'vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub'],
-      ['2024/25', 'Eredivisie', 'za 1 mrt 2025 Oude Testclub 1–1 1 tegen 1 sc Heerenveen'],
-      ['2024/25', 'Eredivisie', 'za 9 nov 2024 sc Heerenveen 2–0 2 tegen 0 Testclub'],
-      ['2022/23', 'Eredivisie', 'zo 2 apr 2023 Testclub 2–4 2 tegen 4 sc Heerenveen'],
+      'zo 20 sep 2026 · Neutraal Stadion Testclub 1–0 n.v. (0–0) 1 tegen 0, na verlenging; na 90 minuten 0 tegen 0 sc Heerenveen 112’ minuut 112, Voorbeeld , Testclub KNVB Beker · Speelronde 1',
+      'vr 24 okt 2025 · Abe Lenstra Stadion sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg pen. , penalty , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen Eredivisie · Speelronde 2',
+      'za 1 mrt 2025 · Nieuw Testpark Oude Testclub 1–1 1 tegen 1 sc Heerenveen Eredivisie · Speelronde 3',
+      'za 9 nov 2024 · Abe Lenstra Stadion sc Heerenveen 2–0 2 tegen 0 Testclub Eredivisie · Speelronde 4',
+      'zo 2 apr 2023 · Oud Testpark Testclub 2–4 2 tegen 4 sc Heerenveen Eredivisie · Speelronde 5',
     ])
+  })
+
+  it('has only Match in the list of the card Wedstrijden, a ShortMatch only in Onze uitslagen', async () => {
+    const html = await render()
+    const list = listOf(html)
+
+    expect(itemsOf(html)).toHaveLength(5)
+    expect(itemsOf(html).every((item) => item.startsWith('<div class="hf-match"'))).toBe(true)
+    expect(list).not.toContain('hf-short-match')
+    // The two selections of the summary keep the short line.
+    expect(html.match(/hf-short-match"/g)).toHaveLength(2)
+  })
+
+  it('has no line with the season above a match: the day shows the year and the line the competition', async () => {
+    const html = await render()
+    const list = listOf(html)
+
+    expect(list).not.toContain('2025/26')
+    expect(list).not.toContain('2024/25')
+    expect(list).not.toMatch(/<li><p class="hf-meta">/)
+    expect(meetingsOf(html)).toSatisfy((lines: string[]) => lines.every((line) => / 20\d\d /.test(line)))
+  })
+
+  it('shows what Uitslagen shows of a played match: the scorers, extra time and the words of the abbreviations', async () => {
+    const html = await render()
+    const list = listOf(html)
+
+    expect(list).toContain('hf-match-goals')
+    expect(list).toContain('<abbr title="Na verlenging">n.v.</abbr>')
+    expect(list).toContain('<abbr title="Penalty">pen.</abbr>')
+    // The result is heard as "3 tegen 0", and the legend under the list gives the full words.
+    expect(list).toContain('3 tegen 0')
+    expect(plain(html.slice(html.indexOf('</ul>', html.indexOf('id="wedstrijden"')), html.indexOf('</section>')))).toBe(
+      'n.v. na verlenging, pen. penalty',
+    )
+  })
+
+  it('keeps the list a list for a screen reader', async () => {
+    expect(listOf(await render())).toMatch(/^<ul role="list">/)
   })
 
   it('says how many matches it is based on and since which season we have them', async () => {
@@ -293,9 +326,8 @@ describe('the page of a club', () => {
   it('counts the Eredivisie alone with ?competitie=eredivisie, and says so', async () => {
     const html = await render('testclub', { competitie: 'eredivisie' })
 
-    expect(meetingsOf(html).map(([season, competition]) => `${season} ${competition}`)).not.toContain(
-      '2026/27 KNVB Beker',
-    )
+    expect(meetingsOf(html)).toHaveLength(4)
+    expect(meetingsOf(html).join(' ')).not.toContain('KNVB Beker')
     expect(html).toContain('Gebaseerd op alle 4 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
     expect(html).toContain('in de Eredivisie, thuis, uit en in totaal')
   })
@@ -422,8 +454,9 @@ describe('the page of a club', () => {
     expect(card).toContain('<a class="hf-heading-link" href="#stadion"')
     expect(plain(card.slice(card.indexOf('<ul')))).toBe('tot 2 apr 2023 Oud Testpark vanaf 1 mrt 2025 Nieuw Testpark')
     expect(html).toContain('De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.')
-    expect(html).not.toContain('Neutraal Stadion')
-    expect(html).not.toContain('Abe Lenstra Stadion')
+    // The card holds the names we saw, not these: they are in the lines of the matches only.
+    expect(card).not.toContain('Neutraal Stadion')
+    expect(card).not.toContain('Abe Lenstra Stadion')
   })
 
   it('has the card Stadion with the name alone for a club with one name, and no periods', async () => {
@@ -519,16 +552,10 @@ describe('the page of a club', () => {
 })
 
 describe('the matches that are still to come on the page of a club', () => {
-  /** The list of the card Wedstrijden. */
-  const listOf = (html: string) => /id="wedstrijden".*?(<ul[^>]*role="list".*?<\/ul>)/s.exec(html)?.[1] ?? ''
-
-  /** The items of that list, in order, as HTML. */
-  const itemsOf = (html: string) => [...listOf(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, item]) => item ?? '')
-
-  /** The lines of the matches to come (`Match`, not `ShortMatch`), as heard by a reader. */
+  /** The lines of the matches to come: a `Match` that has no result, or is called off. */
   const linesOf = (html: string) =>
     itemsOf(html)
-      .filter((item) => item.includes('class="hf-match"'))
+      .filter((item) => /hf-match-(versus|postponed|cancelled)/.test(item))
       .map(plain)
 
   it('lists them first in the list of the card, the next one first, as Match with the competition in the line', async () => {

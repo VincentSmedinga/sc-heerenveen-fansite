@@ -296,14 +296,23 @@ export function listArchiveSources(db: Database, until: Date) {
 /**
  * The matches against one club, the newest first, whether they are played or not, with what a
  * list of results shows: the season, the competition and round, the day, the kick-off, the
- * result from the side of sc Heerenveen, and whether it was at home. `club` is the `id` of the
- * club (from `findClubBySlug`). With `competition` only the matches of that competition are
- * given; without it all of them. A club with no match, or none in that competition, gives an
- * empty list.
+ * result from the side of sc Heerenveen, whether it was at home, the note, the score after 90
+ * minutes and the scorers. These are the fields of `listSeasonMatches` (see there for the
+ * scorers, which are the same), so one line can show a match from either, but without the
+ * number of spectators and the referee, which no page shows. `club` is the `id` of the club
+ * (from `findClubBySlug`). With `competition` only the matches of that competition are given;
+ * without it all of them. A club with no match, or none in that competition, gives an empty
+ * list.
  */
-export function listClubMatches(db: Database, club: number, { competition }: { competition?: Competition } = {}) {
-  return db
+export async function listClubMatches(db: Database, club: number, { competition }: { competition?: Competition } = {}) {
+  const where = and(
+    eq(matches.clubId, club),
+    competition === undefined ? undefined : eq(matches.competition, competition),
+  )
+  const rows = await db
     .select({
+      afterNinetyAgainst: matches.afterNinetyAgainst,
+      afterNinetyFor: matches.afterNinetyFor,
       competition: matches.competition,
       dateText: matches.dateText,
       extraTime: matches.extraTime,
@@ -313,6 +322,7 @@ export function listClubMatches(db: Database, club: number, { competition }: { c
       id: matches.id,
       kickoffAt: matches.kickoffAt,
       matchDate: matches.matchDate,
+      note: matches.note,
       opponent: matches.opponent,
       penaltiesAgainst: matches.penaltiesAgainst,
       penaltiesFor: matches.penaltiesFor,
@@ -322,8 +332,10 @@ export function listClubMatches(db: Database, club: number, { competition }: { c
       status: matches.status,
     })
     .from(matches)
-    .where(and(eq(matches.clubId, club), competition === undefined ? undefined : eq(matches.competition, competition)))
+    .where(where)
     .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+
+  return withGoals(db, rows, where)
 }
 
 /**
@@ -592,43 +604,9 @@ export async function listSeasonMatches(db: Database, season: string) {
     .from(matches)
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
-  const scored = await db
-    .select({
-      matchId: matchGoals.matchId,
-      minute: matchGoals.minute,
-      ours: matchGoals.ours,
-      ownGoal: matchGoals.ownGoal,
-      penalty: matchGoals.penalty,
-      player: matchGoals.player,
-      playerId: matchGoals.playerId,
-      playerName: players.name,
-      playerPage: matchGoals.wikipediaPage,
-      playerSearchTerm: players.searchTerm,
-      stoppageMinutes: matchGoals.stoppageMinutes,
-    })
-    .from(matchGoals)
-    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
-    .leftJoin(players, eq(matchGoals.playerId, players.id))
-    .where(eq(matches.season, season))
-    .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
 
-  return rows.map(({ id, ...match }) => ({
-    ...match,
-    goals: scored
-      .filter((goal) => goal.matchId === id)
-      .map((goal) => ({
-        minute: goal.minute,
-        ours: goal.ours,
-        ownGoal: goal.ownGoal,
-        penalty: goal.penalty,
-        player: goal.player,
-        playerId: goal.playerId,
-        playerName: goal.playerName,
-        playerPage: goal.playerPage,
-        playerSearchTerm: goal.playerSearchTerm,
-        stoppageMinutes: goal.stoppageMinutes,
-      })),
-  }))
+  // The pages of a season don't need the `id`, so it stays out of what they get.
+  return (await withGoals(db, rows, eq(matches.season, season))).map((match) => omitId(match))
 }
 
 /**
@@ -816,6 +794,58 @@ export async function searchPublic(
     .slice(0, limit)
 
   return { hits, total: Number(found[0]?.total ?? 0) + Number(written[0]?.total ?? 0) }
+}
+
+/** The match without its `id`. */
+function omitId<T extends { id: number }>({ id, ...match }: T): Omit<T, 'id'> {
+  void id
+
+  return match
+}
+
+/**
+ * Gives each of `rows` its `goals`, found by its `id`: the scorers of the match in the order
+ * of the clock, both clubs together. `where` picks the matches the rows are of, so one query
+ * reads the goals of all of them, and a match without a goal gets an empty list.
+ */
+async function withGoals<T extends { id: number }>(db: Database, rows: T[], where: SQL | undefined) {
+  const scored = await db
+    .select({
+      matchId: matchGoals.matchId,
+      minute: matchGoals.minute,
+      ours: matchGoals.ours,
+      ownGoal: matchGoals.ownGoal,
+      penalty: matchGoals.penalty,
+      player: matchGoals.player,
+      playerId: matchGoals.playerId,
+      playerName: players.name,
+      playerPage: matchGoals.wikipediaPage,
+      playerSearchTerm: players.searchTerm,
+      stoppageMinutes: matchGoals.stoppageMinutes,
+    })
+    .from(matchGoals)
+    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .leftJoin(players, eq(matchGoals.playerId, players.id))
+    .where(where)
+    .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
+
+  return rows.map((match) => ({
+    ...match,
+    goals: scored
+      .filter((goal) => goal.matchId === match.id)
+      .map((goal) => ({
+        minute: goal.minute,
+        ours: goal.ours,
+        ownGoal: goal.ownGoal,
+        penalty: goal.penalty,
+        player: goal.player,
+        playerId: goal.playerId,
+        playerName: goal.playerName,
+        playerPage: goal.playerPage,
+        playerSearchTerm: goal.playerSearchTerm,
+        stoppageMinutes: goal.stoppageMinutes,
+      })),
+  }))
 }
 
 /**

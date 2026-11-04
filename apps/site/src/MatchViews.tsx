@@ -520,6 +520,25 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
 }
 
 /**
+ * The legend under a list of `MatchLine`s: the full words of the abbreviations in use, and
+ * nothing when there are none. A title only shows under a mouse, so the words are text.
+ */
+export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] }) {
+  const shootOut = matches.some(hasShootOut)
+  // A shoot-out is written without "n.v.", unless the score after 90 minutes follows it.
+  const extraTime = matches.some((match) => match.extraTime && (!hasShootOut(match) || hasAfterNinety(match)))
+  const goals = matches.flatMap((match) => match.goals)
+  const legend = [
+    extraTime && 'n.v. na verlenging',
+    shootOut && 'n.s. na strafschoppen',
+    goals.some((goal) => goal.ownGoal) && 'e.d. eigen doelpunt',
+    goals.some((goal) => goal.penalty) && 'pen. penalty',
+  ].filter((part) => part !== false)
+
+  return legend.length > 0 ? <Text appearance="meta">{legend.join(', ')}</Text> : null
+}
+
+/**
  * A list of matches, each as a line with its own day or time. A line names its competition,
  * unless `withCompetition` is false, for a list under a heading that names it already. The
  * legend under the list holds only the abbreviations of these matches.
@@ -533,17 +552,6 @@ export function MatchLines({
   now: Date
   withCompetition?: boolean
 }) {
-  const shootOut = matches.some(hasShootOut)
-  // A shoot-out is written without "n.v.", unless the score after 90 minutes follows it.
-  const extraTime = matches.some((match) => match.extraTime && (!hasShootOut(match) || hasAfterNinety(match)))
-  const goals = matches.flatMap((match) => match.goals)
-  const legend = [
-    extraTime && 'n.v. na verlenging',
-    shootOut && 'n.s. na strafschoppen',
-    goals.some((goal) => goal.ownGoal) && 'e.d. eigen doelpunt',
-    goals.some((goal) => goal.penalty) && 'pen. penalty',
-  ].filter((part) => part !== false)
-
   return (
     <>
       <List role="list">
@@ -553,8 +561,7 @@ export function MatchLines({
           </List.Item>
         ))}
       </List>
-      {/* The full words of the abbreviations in use: a title only shows under a mouse. */}
-      {legend.length > 0 && <Text appearance="meta">{legend.join(', ')}</Text>}
+      <MatchLegend matches={matches} />
     </>
   )
 }
@@ -1055,32 +1062,29 @@ export const metaSeparator = (
   </>
 )
 
-/** A goal for the name above a short match: the minute with stoppage time, and the player. */
-function goalLine({ goal }: ExtremeGoal) {
-  const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
+/**
+ * What a line of a match needs, which a match of a season has and so has a match against a
+ * club: the number of spectators and the referee are the only fields that a line leaves out.
+ */
+export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
 
-  return (
-    <>
-      {metaSeparator}
-      {`minuut ${minute}`}
-      {metaSeparator}
-      {`${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`}
-    </>
-  )
-}
-
-/** Whether the score after 90 minutes of a match is known, which has both scores. */
-function hasAfterNinety(match: PublicMatch): boolean {
-  return match.afterNinetyFor !== null && match.afterNinetyAgainst !== null
-}
-
-/** Whether a played match was decided in a shoot-out, which has both scores. */
-function hasShootOut(match: PublicMatch): boolean {
-  return match.penaltiesFor !== null && match.penaltiesAgainst !== null
-}
-
-/** A match as the design system shows it, with the time in Dutch time. */
-function MatchLine({ match, now, withCompetition }: { match: PublicMatch; now: Date; withCompetition: boolean }) {
+/**
+ * A match as the design system shows it (`Match`), with the time in Dutch time. This is the one
+ * line for a list of matches: Programma, Uitslagen and the matches against a club all use it,
+ * so a match looks the same wherever it stands. A list that runs over seasons asks for
+ * `withYear`, which gives the day of a played match its year (see `matchMoment`).
+ */
+export function MatchLine({
+  match,
+  now,
+  withCompetition = true,
+  withYear = false,
+}: {
+  match: MatchLineMatch
+  now: Date
+  withCompetition?: boolean
+  withYear?: boolean
+}) {
   const common = {
     competition: withCompetition ? match.competition : undefined,
     home: match.home,
@@ -1096,7 +1100,7 @@ function MatchLine({ match, now, withCompetition }: { match: PublicMatch; now: D
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     const result = {
       ...common,
-      ...matchMoment(match, now),
+      ...matchMoment(match, now, { withYear }),
       extraTime: match.extraTime,
       goals: goalsWithInitials(match.goals),
       goalsAgainst: match.goalsAgainst,
@@ -1119,6 +1123,30 @@ function MatchLine({ match, now, withCompetition }: { match: PublicMatch; now: D
   // A match that has begun and has no result keeps its time, and says after two hours that the
   // result isn't known yet.
   return <Match {...common} {...matchMoment(match, now)} resultMissing={lacksResult(match, now)} status="scheduled" />
+}
+
+/** A goal for the name above a short match: the minute with stoppage time, and the player. */
+function goalLine({ goal }: ExtremeGoal) {
+  const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
+
+  return (
+    <>
+      {metaSeparator}
+      {`minuut ${minute}`}
+      {metaSeparator}
+      {`${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`}
+    </>
+  )
+}
+
+/** Whether the score after 90 minutes of a match is known, which has both scores. */
+function hasAfterNinety(match: MatchLineMatch): boolean {
+  return match.afterNinetyFor !== null && match.afterNinetyAgainst !== null
+}
+
+/** Whether a played match was decided in a shoot-out, which has both scores. */
+function hasShootOut(match: MatchLineMatch): boolean {
+  return match.penaltiesFor !== null && match.penaltiesAgainst !== null
 }
 
 /**

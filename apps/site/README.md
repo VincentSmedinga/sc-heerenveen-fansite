@@ -321,7 +321,9 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
   Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.
-  `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`; de pagina's met `ShortMatch`, zoals die van een tegenstander, hebben er geen plek voor.
+  `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`.
+  Programma, Uitslagen en de kaart Wedstrijden op de pagina van een club gebruiken dezelfde `MatchLine`.
+  De lijsten met `ShortMatch` (zie de beslissing van 4 november 2026 in `docs/beslissingen/site.md`) kiezen wedstrijden uit en hebben er geen plek voor.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag, maar niet een geannuleerde) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
@@ -515,8 +517,12 @@ Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nulle
 
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
 De pagina heeft twee kolommen.
-De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
-Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, als `Match` met de competitie in de regel en de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
+De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke wedstrijd tegen de club, de nieuwste eerst, als `Match` (`MatchLine` in `src/MatchViews.tsx`, dezelfde code als Uitslagen).
+Een gespeelde wedstrijd toont wat hij bij Uitslagen toont: de doelpuntenmakers waar we ze kennen, verlenging en strafschoppen, met de competitie en de ronde in de regel en de dag met het jaar (`withYear` van `matchMoment` in `src/match-format.ts`), zodat een wedstrijd uit een eerder seizoen te herkennen is.
+Een regel met het seizoen boven de wedstrijd is er niet meer.
+De regel noemt de club zoals Wikipedia hem in die wedstrijd schreef, en onder de lijst staat de legenda van de afkortingen die erin voorkomen (`MatchLegend`).
+De scorers komen uit dezelfde bron als bij Uitslagen: `listClubMatches` leest ze met dezelfde hulpfunctie als `listSeasonMatches`.
+Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
 Wat komt, bepaalt `programmeOf` in `src/matches.ts`, dezelfde regel als Programma (`upcomingOf` in `src/opponents.ts`), en de keuze voor de competitie telt mee.
 Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft alleen die wedstrijden in de kaart, geen zijkolom met uitslagen, en alleen de bronvermelding in de zijkolom.
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
@@ -524,7 +530,7 @@ De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie veran
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
 Ze heeft vier delen:
 
-- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, in vet, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, direct onder de eerste: dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek, de tabellen van de uitslagen en de zin "8 keer gewonnen, 1 keer gelijk, 5 keer verloren".
   `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel.
   Onder de kaart staat dezelfde zin "Gebaseerd op …" als onder de samenvatting.

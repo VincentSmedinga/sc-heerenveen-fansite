@@ -1760,6 +1760,8 @@
 - **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): `ShortMatch` heeft sindsdien wel de kleur van de uitkomst.
   De rest blijft: een eigen onderdeel met zes props, zonder competitie, ronde, stadion of doelpuntenmakers.
 - **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de regel noemt sindsdien beide clubs, met de thuisclub en zijn doelpunten eerst, en niet meer alleen de tegenstander met "thuis" of "uit" en de uitslag vanuit onze kant.
+- **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): `ShortMatch` is sindsdien voor een selectie, zoals deze kaart, en niet voor een volledige lijst.
+  De keuze voor de korte regel hier blijft; de reden is nu de regel voor selecties en niet alleen dat de uitslag genoeg is.
 
 ## De kaart met topscorers toont alle doelpuntenmakers
 
@@ -2483,6 +2485,7 @@
   Een uitslag die een keer wel en een keer niet omgedraaid is, kost de lezer elke keer een denkstap.
   De kleur blijft vanuit onze club, want de lijsten gaan over onze club.
 - **Alternatieven:** de uitslag vanuit sc Heerenveen laten staan met "thuis" of "uit" erbij (zoals voorheen); alleen de kleur van de uitkomst laten zeggen wie won; de kleur van de thuisclub (dan is een uitzege rood, wat verkeerd leest).
+- **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): de lijst van de kaart Wedstrijden op de pagina van een club heeft sindsdien geen `ShortMatch` meer; de grootste overwinning en nederlaag onder Onze uitslagen blijven er een.
 
 ## De pagina Spelers toont bijzondere doelpunten
 

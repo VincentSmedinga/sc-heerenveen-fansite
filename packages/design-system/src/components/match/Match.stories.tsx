@@ -13,6 +13,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een wedstrijd van sc Heerenveen 1, als regel in een lijst.',
+          'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; voor een selectie die op een eigenschap uit de wedstrijden kiest, kies je `ShortMatch`, en een lijst heeft één soort regel.',
           'Er zijn twee vormen, en `competition` kiest welke.',
           'Met `competition`, zoals op de homepage en in een lijst met alle competities op datum, staat de dag bovenaan, met het stadion: "zo 8 nov 12:15 · Abe Lenstra Stadion".',
           'Daaronder staan de twee clubs met de uitslag ertussen, en eventueel de doelpuntenmakers, en onderaan de competitie met de ronde: "Eredivisie · Speelronde 12".',
