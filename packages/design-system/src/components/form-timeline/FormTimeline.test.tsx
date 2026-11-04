@@ -58,7 +58,7 @@ describe('FormTimeline', () => {
     expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
   })
 
-  it('puts the key and the text about what counts under the chart, and no text about the line', () => {
+  it('puts the key and the text about what counts in one paragraph under the chart', () => {
     const { container } = render(<FormTimeline {...props} results={places({})} />)
 
     expect(textOf(container)).toEqual(['W winst (3 punten), G gelijk (1), V verlies (0).', 'Alleen de Eredivisie.'])

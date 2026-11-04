@@ -565,7 +565,7 @@ Ze heeft zes delen:
   Onder de as staat een label onder het eerste jaar en daarna elke vier jaar (10, 14, 18, …) met de titel "Seizoen".
   De lijn is het gemiddelde aantal punten over acht plekken achter elkaar die alle gespeeld zijn, vier seizoenen (`timelineWindow`): bij een gat stopt de lijn, en een club met minder dan acht wedstrijden heeft staafjes en geen lijn.
   De grafiek is verborgen voor een schermlezer.
-  Onder de grafiek staan alleen de sleutel (W, G, V uit `tableColumns`) en "Alleen de Eredivisie."
+  Onder de grafiek staat één alinea met alleen de sleutel (W, G, V uit `tableColumns`) en "Alleen de Eredivisie."
   De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.
   Hij is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline` en `timelineMinimum`), zonder zin die zegt waarom.
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Resultaten sinds": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").

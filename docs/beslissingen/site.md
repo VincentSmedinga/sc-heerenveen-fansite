@@ -2451,7 +2451,7 @@
 
 - **Datum:** 4 november 2026
 - **Besluit:** de as van "Resultaten sinds <jaar>" begint met het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen en niet voor deze club (nu 2010/11, dus de kop "Resultaten sinds 2010").
-  Onder de grafiek staan alleen de sleutel (W, G, V) en "Alleen de Eredivisie."
+  Onder de grafiek staat één alinea met alleen de sleutel (W, G, V) en "Alleen de Eredivisie."
   Er is geen zin over de lijn, geen telling van de wedstrijden en geen link naar de lijst Wedstrijden (#718).
   - **Het schuift mee:** komen er eerdere seizoenen bij (#414), dan begint de as eerder en de kop noemt dat jaar.
 - **Waarom:** de projecteigenaar wil dat elke club dezelfde as heeft en dat er geen lege jaren zijn waarin niemand wedstrijden heeft.

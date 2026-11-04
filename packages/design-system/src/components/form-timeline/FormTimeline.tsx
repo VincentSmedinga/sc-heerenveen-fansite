@@ -5,7 +5,6 @@ import { movingAverage } from '../chart/trend'
 import { classNames } from '../classNames'
 import { type FormResult, pointsOf } from '../form-chart/form'
 import { FormKey } from '../form-chart/FormKey'
-import { Text } from '../text/Text'
 import { barsOf, yearLabels } from './timeline'
 
 export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'results'> & {
@@ -23,8 +22,7 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
    */
   results: readonly (FormResult | null)[]
   /**
-   * The text under the key: what counts, such as the competition. A place with no result is a
-   * gap, and this text says what a gap means.
+   * The text after the key, in the same paragraph: what counts, such as the competition.
    */
   scope: string
   /** The caption under the labels, such as `Seizoen`. */
@@ -72,10 +70,7 @@ export const FormTimeline = ({
       >
         <BarChart.Trend values={values} />
       </BarChart>
-      <FormKey className="hf-space-end-xs" />
-      <Text appearance="meta" className="hf-form-timeline-scope">
-        {scope}
-      </Text>
+      <FormKey className="hf-form-timeline-key">{scope}</FormKey>
     </div>
   )
 }

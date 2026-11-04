@@ -2481,8 +2481,8 @@
     Zonder die twee props verandert niets aan de bestaande grafieken.
   - **De labels:** `FormTimeline` zet een label onder het eerste jaar en daarna onder elk `labelEvery`-de jaar (standaard 5), in het midden onder de plekken van dat jaar, als de laatste twee cijfers ("90", "95", "00"; met 4 vanaf 2010: "10", "14", "18").
   - **De sleutel** (W winst (3 punten), G gelijk (1), V verlies (0)) staat in `FormKey`, een deel dat `FormChart` en `FormTimeline` delen en dat de woorden uit `tableColumns` haalt.
-    Het wordt niet los geëxporteerd.
-  - **Geen zin over de lijn:** de lijn is een hulp voor het oog, en de tekst onder de sleutel (`scope`) zegt wat meetelt, zoals de competitie; het onderdeel noemt het laatste punt niet.
+    Het wordt niet los geëxporteerd en neemt een tekst mee in dezelfde alinea (`children`).
+  - **Geen zin over de lijn:** de lijn is een hulp voor het oog, en de tekst na de sleutel (`scope`, in dezelfde alinea) zegt wat meetelt, zoals de competitie; het onderdeel noemt het laatste punt niet.
     De zin over de lijn van `FormChart` blijft, want daar is de lijn het kerngetal van de kaart.
 - **Waarom:** de rij "Vorm", het aantal wedstrijden van het seizoen en het venster van 5 van `FormChart` passen niet bij een as van jaren; een variant met drie uitzonderingen zou een tweede onderdeel in één zijn.
   De delen die wel gelijk zijn (de staafjes, de lijn, de sleutel en de woorden) worden hergebruikt, niet gekopieerd.

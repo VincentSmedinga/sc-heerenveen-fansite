@@ -1139,11 +1139,11 @@ describe('the card Resultaten sinds', () => {
     expect(card).toContain('Seizoen')
   })
 
-  it('has the key and "Alleen de Eredivisie." and no other text', async () => {
+  it('has the key and "Alleen de Eredivisie." in one paragraph and no other text', async () => {
     const html = await render()
     const card = cardOf(html)
 
-    expect(card.match(/<p /g)).toHaveLength(2)
+    expect(card.match(/<p /g)).toHaveLength(1)
     expect(plain(card)).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Alleen de Eredivisie.')
     expect(card).not.toContain('href="#wedstrijden"')
     expect(plain(card)).not.toMatch(/De lijn|gespeelde wedstrijden|De hele lijst/)
