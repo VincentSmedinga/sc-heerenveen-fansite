@@ -6,6 +6,7 @@
   "license": "EUPL-1.2",
   "type": "module",
   "exports": {
+    "./article-body-migration": "./src/article-body-migration.ts",
     "./alerts": "./src/alerts.ts",
     "./audit-log": "./src/audit-log.ts",
     "./client": "./src/client.ts",

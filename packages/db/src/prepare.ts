@@ -1,5 +1,6 @@
 import { migrate } from 'drizzle-orm/mysql2/migrator'
 
+import { migrateArticleBodies } from './article-body-migration.ts'
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
 import { removeTestSources, seedMatches, seedRealSources, seedSquad } from './seed.ts'
@@ -22,10 +23,11 @@ export type PrepareOptions = {
 }
 
 /**
- * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts
- * the real sources in the register and the head coaches in `staff` (see `PrepareOptions`). The
- * test sources are for local development and the tests only; acceptance removes the ones it
- * had. The site calls this when it starts. A lock in the database (`GET_LOCK`) makes two
+ * Brings the database up to date: runs the migrations it hasn't had yet, puts the text of the
+ * articles that still have the old format into JSON and, when asked, puts the real sources in
+ * the register and the head coaches in `staff` (see `PrepareOptions`). The test sources are
+ * for local development and the tests only; acceptance removes the ones it had. The site calls
+ * this when it starts. A lock in the database (`GET_LOCK`) makes two
  * processes that start at the same moment take turns, so the second one finds nothing left to
  * do.
  *
@@ -44,6 +46,7 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
   try {
     const { ran } = await withLock(pool, lockName, lockSeconds, async () => {
       await migrate(db, { migrationsFolder })
+      await migrateArticleBodies(db)
 
       if (seed === 'acceptance' || seed === 'production') {
         await seedRealSources(db)

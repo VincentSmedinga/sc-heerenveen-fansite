@@ -65,7 +65,7 @@ export default async function ArticleVersionPage({ params }: { params: Promise<{
         intro={version.intro}
         title={version.title}
       >
-        <ArticleText text={version.body} />
+        <ArticleText body={version.body} />
       </Article>
     </Page.Main>
   )

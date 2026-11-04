@@ -12,40 +12,89 @@ const authorEmail = 'e2e-redactie@example.test'
 /** Every made-up article has a slug that starts with this, so a leftover is easy to find. */
 const slugPrefix = 'e2e-'
 
+type Mark = { attrs?: { href: string }; type: 'bold' | 'italic' | 'link' }
+
+/** A piece of text, with the marks it has. */
+const text = (value: string, ...marks: Mark[]) => ({
+  text: value,
+  type: 'text',
+  ...(marks.length > 0 ? { marks } : {}),
+})
+
+/** A paragraph of pieces of text. */
+const paragraph = (...content: ReturnType<typeof text>[]) => ({ content, type: 'paragraph' })
+
+/** The text of an article in the JSON that the editor makes. */
+const document = (...content: object[]) => JSON.stringify({ content, type: 'doc' })
+
+const heading = (value: string) => ({ attrs: { level: 2 }, content: [text(value)], type: 'heading' })
+
+const bullets = (...items: ReturnType<typeof paragraph>[]) => ({
+  content: items.map((item) => ({ content: [item], type: 'listItem' })),
+  type: 'bulletList',
+})
+
 /**
- * The made-up articles for the checks of the pages, in the text format of the editors. One is
- * published and has every part of the format. The draft and the article for later must be on no
- * page: the checks look for them everywhere.
+ * The made-up articles for the checks of the pages, in the JSON of the editor. One is
+ * published and has every part an article may hold. The draft and the article for later must be
+ * on no page: the checks look for them everywhere.
  */
 export const testArticles = {
   draft: { slug: `${slugPrefix}concept`, title: 'Verzonnen concept dat nergens staat' },
   later: { slug: `${slugPrefix}later`, title: 'Verzonnen artikel voor over een jaar' },
   published: {
     author: 'de testredactie',
-    body: [
-      'Dit is een **verzonnen** artikel om de pagina mee te testen. Het heeft *cursieve* tekst en een link naar [onze bronnen](/bronnen).',
-      '## Een kop in het artikel',
-      'Een alinea met een link naar [de Testkrant](https://testkrant.test/verhaal), een andere site.',
-      '- Het eerste punt van de lijst',
-      '- Het tweede punt, met **vet**',
-      '## Een tweede kop',
-      'Het slot, met <b>HTML</b> dat gewone tekst blijft, en een lang adres dat de pagina niet breder maakt: https://www.voorbeeldkrant.test/een/heel/lang/adres/zonder/spaties/naar/het/verhaal/van/vandaag.',
-    ].join('\n\n'),
+    body: document(
+      paragraph(
+        text('Dit is een '),
+        text('verzonnen', { type: 'bold' }),
+        text(' artikel om de pagina mee te testen. Het heeft '),
+        text('cursieve', { type: 'italic' }),
+        text(' tekst en een link naar '),
+        text('onze bronnen', { attrs: { href: '/bronnen' }, type: 'link' }),
+        text('.'),
+      ),
+      heading('Een kop in het artikel'),
+      paragraph(
+        text('Een alinea met een link naar '),
+        text('de Testkrant', { attrs: { href: 'https://testkrant.test/verhaal' }, type: 'link' }),
+        text(', een andere site.'),
+      ),
+      bullets(
+        paragraph(text('Het eerste punt van de lijst')),
+        paragraph(text('Het tweede punt, met '), text('vet', { type: 'bold' })),
+      ),
+      heading('Een tweede kop'),
+      paragraph(
+        text(
+          'Het slot, met <b>HTML</b> dat gewone tekst blijft, en een lang adres dat de pagina niet breder maakt: https://www.voorbeeldkrant.test/een/heel/lang/adres/zonder/spaties/naar/het/verhaal/van/vandaag.',
+        ),
+      ),
+    ),
     intro: 'Een verzonnen inleiding van twee zinnen. Ze laat zien hoe de kaart op de homepage eruit ziet.',
     slug: `${slugPrefix}artikel`,
     title: 'Verzonnen artikel van de testredactie',
   },
 } as const
 
+/** The text of an article of one paragraph, in the JSON of the editor. */
+export const plainText = (value: string) => document(paragraph(text(value)))
+
 /** The first two versions of the published article: the text as it was before the edits. */
 export const earlierVersions = [
   {
-    body: 'Dit is de eerste tekst van het verzonnen artikel.',
+    body: plainText('Dit is de eerste tekst van het verzonnen artikel.'),
     intro: 'Een eerste verzonnen inleiding.',
     title: 'Verzonnen artikel (eerste tekst)',
   },
   {
-    body: 'Dit is de tweede tekst van het verzonnen artikel, met **vet** erin.',
+    body: document(
+      paragraph(
+        text('Dit is de tweede tekst van het verzonnen artikel, met '),
+        text('vet', { type: 'bold' }),
+        text(' erin.'),
+      ),
+    ),
     intro: 'Een tweede verzonnen inleiding.',
     title: 'Verzonnen artikel (tweede tekst)',
   },
@@ -87,7 +136,7 @@ export async function addArticles() {
         { ...published, createdBy, publishedAt: new Date(now - day), updatedBy },
         {
           author: 'de testredactie',
-          body: 'Dit concept staat nergens.',
+          body: plainText('Dit concept staat nergens.'),
           createdBy,
           intro: 'Een verzonnen concept.',
           publishedAt: null,
@@ -96,7 +145,7 @@ export async function addArticles() {
         },
         {
           author: 'de testredactie',
-          body: 'Dit artikel staat nog nergens.',
+          body: plainText('Dit artikel staat nog nergens.'),
           createdBy,
           intro: 'Een verzonnen artikel voor later.',
           publishedAt: new Date(now + 365 * day),

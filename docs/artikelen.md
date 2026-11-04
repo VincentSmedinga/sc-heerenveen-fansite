@@ -26,52 +26,31 @@ De datum staat er niet bij: de pagina zet de dag van publicatie onder de titel.
 
 ## De opmaak van de tekst
 
-De opmaak is klein, en wat ze niet kent, blijft gewone tekst.
+Je schrijft de tekst in de editor van het formulier, met de knoppen boven het tekstvak.
+Wat de knoppen niet kennen, kan niet: een foto, een tabel of andere opmaak die je plakt, wordt gewone tekst.
 
-| Je wilt                          | Je schrijft                                         |
-| -------------------------------- | --------------------------------------------------- |
-| Een nieuwe alinea                | Een lege regel tussen twee alinea's                 |
-| Een kop                          | Een regel die met `## ` begint, met een spatie erna |
-| Een lijst                        | Elke regel van de lijst begint met `- `             |
-| **Vet**                          | `**vet**`                                           |
-| _Cursief_                        | `*cursief*`                                         |
-| Een link                         | `[de tekst van de link](https://www.lc.nl/sport)`   |
-| Een link naar een pagina van ons | `[Onze bronnen](/bronnen)`                          |
-
-Een voorbeeld:
-
-```text
-Wij zijn de redactie van de Fansite.
-We **schrijven** niet over wat anderen al schreven, maar we wijzen je de weg.
-
-## Wat je van ons mag verwachten
-
-- Altijd de bron erbij
-- Een link naar het hele verhaal
-
-Lees ook [Onze bronnen](/bronnen).
-```
+| Je wilt                          | Je doet                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Een nieuwe alinea                | Je drukt op Enter                                                              |
+| Een kop                          | Je kiest "Kop" (een kop van niveau 2)                                          |
+| Een lijst                        | Je kiest "Lijst" en drukt na elk punt op Enter; twee keer Enter sluit de lijst |
+| **Vet**                          | Je selecteert de woorden en kiest "Vet", of drukt op Ctrl of Cmd en B          |
+| _Cursief_                        | Je selecteert de woorden en kiest "Cursief", of drukt op Ctrl of Cmd en I      |
+| Een link                         | Je kiest "Link", vult het adres en de tekst in en kiest "Link opslaan"         |
+| Een link naar een pagina van ons | Hetzelfde, met een adres als `/bronnen`                                        |
 
 De regels om op te letten:
 
-- Een kop is een regel op zich, met een lege regel erboven en eronder.
-  Het is een kop van niveau 2, want de titel van het artikel is al de kop van niveau 1.
-- Regels onder elkaar zonder lege regel ertussen horen bij één alinea; ze lopen op de pagina in elkaar over.
-- Een lijst bestaat alleen uit regels met `- `.
-  Staat er tussen de regels van een lijst een gewone regel, dan is het geen lijst.
-- Vet staat in een alinea of een lijstpunt, tussen `**` en `**`.
-  Cursief mag erin staan: `**vet en *cursief* erin**`.
-  Vet in cursief werkt niet.
-  Een kop blijft gewone tekst, ook met `*` of `**` erin.
-- Een spatie binnen de tekens maakt er gewone tekst van: `2 * 3 * 4` blijft zoals het staat.
+- De titel van het artikel is al de kop van niveau 1, dus een kop in de tekst is altijd van niveau 2.
+- Een punt van een lijst is één alinea: er zit geen lijst in een lijst.
 - Een link gaat naar een adres dat met `https://` begint, of naar een pagina van ons die met een enkele `/` begint, zoals `/bronnen`.
   Geen `http://`, geen `www.lc.nl` zonder `https://` en geen `//`.
-  Zo'n link blijft gewone tekst.
-  De tekst van een link is gewone tekst: vet of cursief erin werkt niet, en `[` en `]` kunnen er niet in.
-  Een adres met haakjes werkt niet; schrijf `%28` voor `(` en `%29` voor `)`.
+  De editor en de server weigeren zo'n adres, en ook een adres met een inlog erin (`https://www.lc.nl@evil.example`).
   Een link naar een andere site krijgt vanzelf het pictogram voor een externe link.
 - Er is geen HTML en er zijn geen afbeeldingen.
   `<b>vet</b>` staat letterlijk in de tekst, met de tekens erbij.
+- De editor werkt alleen met JavaScript.
+  Dat geldt voor het schrijven; een bezoeker leest de pagina's ook zonder JavaScript.
 
 ## Bronnen noemen
 
@@ -102,8 +81,8 @@ Een moderator ziet deze pagina's niet: voor een moderator zijn ze "niet gevonden
 Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
 
 1. Kies "Nieuw artikel" en vul de velden in.
-   De opmaak staat boven het formulier, met een voorbeeld van elk onderdeel.
-   Het adres vul je niet in: met JavaScript volgt het de titel, zonder JavaScript maakt de site er een voorstel van als je het leeg laat.
+   Schrijf de tekst met de knoppen van de editor (zie _De opmaak van de tekst_).
+   Het adres vul je niet in: het volgt de titel, en laat je het leeg, dan maakt de site er een voorstel van.
    De auteur staat vooraf op "de redactie".
 2. Kies "Opslaan als concept".
    Het artikel staat nergens op de site.
@@ -135,10 +114,12 @@ Wat verder goed is om te weten:
 - Onder het formulier staat "Eerdere versies" (zie _Wat het beheer bewaart_).
 - Een artikel met een datum in de toekomst, dat alleen met SQL kan, staat in de lijst als "Gepland voor …".
   Wil je het nu publiceren, trek het dan eerst in.
-- De velden hebben deze grenzen: een titel van 120 tekens, een intro van 300, een auteur van 100, een adres van 80 en een tekst van 20.000.
+- De velden hebben deze grenzen: een titel van 120 tekens, een intro van 300, een auteur van 100, een adres van 80 en een tekst van 20.000 tekens.
+  Bij de tekst telt de zichtbare tekst, niet de opmaak eromheen.
   Een adres heeft alleen kleine letters, cijfers en enkele streepjes, is niet van een ander artikel, en is niet de eerste naam van een pagina van de site, zoals `bronnen` of `beheer`.
 - Een regeleinde in de titel, de intro of de auteur wordt een spatie.
-  In de tekst blijven de regels zoals je ze typte; alleen besturingstekens gaan eruit, en lege regels aan het begin en het eind.
+  De server controleert de tekst bij elke keer opslaan, ook als de browser iets anders stuurt.
+  Staat er iets in wat niet in een artikel kan, dan staat de fout bij het veld Tekst, en blijft wat je schreef staan.
 
 ## Wat het beheer bewaart
 
@@ -167,6 +148,7 @@ Lees de versies in phpMyAdmin met `SELECT version, saved_at, saved_by, title FRO
 ## Een artikel in de database zetten
 
 Dit is een terugval voor als het beheer niet werkt.
+De tekst is dan de JSON van de editor (zie _De tekst als JSON_ hieronder).
 Open phpMyAdmin op de host, kies de database van de site en ga naar het tabblad SQL.
 Lokaal werkt `docker compose exec mariadb mariadb fansite`, en dan eerst `SET NAMES utf8mb4;`, zodat de accenten goed aankomen.
 
@@ -188,7 +170,7 @@ Er komt geen e-mailadres in het artikel.
 Zonder `published_at` is het artikel een concept: het staat op geen enkele pagina.
 Zet de teksten tussen enkele aanhalingstekens.
 Een enkel aanhalingsteken in de tekst schrijf je dubbel (`l''ordre`), en een backslash laat je weg, want die heeft in MariaDB een eigen betekenis.
-Een nieuwe regel mag gewoon in de tekst staan.
+De tekst (`<tekst>`) is de JSON van de editor, zoals hieronder staat.
 
 ```sql
 INSERT INTO articles (slug, title, intro, body, author, created_by, updated_by)
@@ -266,12 +248,35 @@ Open daarna `/redactie/<adres>` en de homepage.
 Een verkeerd adres of een concept geeft de pagina "Pagina niet gevonden".
 De pagina verraadt niet of het adres een concept is.
 
+### De tekst als JSON
+
+De tekst van een artikel is Tiptap's JSON.
+Een document heeft `type` `doc` en een lijst `content` met alinea's (`paragraph`), koppen (`heading`, met `attrs` `{"level":2}`) en lijsten (`bulletList`, met `listItem` die elk één `paragraph` hebben).
+Stukjes tekst zijn `text` met `text` en eventueel `marks`: `bold`, `italic` of `link` met `attrs` `{"href":"…"}`.
+Een voorbeeld, met een alinea en een kop:
+
+```json
+{
+  "type": "doc",
+  "content": [
+    { "type": "paragraph", "content": [{ "type": "text", "text": "Wij zijn de redactie." }] },
+    { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Wat je mag verwachten" }] }
+  ]
+}
+```
+
+Een tekst die niet klopt, of iets bevat wat niet op de lijst staat, toont de pagina niet: ze blijft leeg.
+Schrijf je het artikel liever in het beheer en haal je de JSON uit de kolom `body`, dan weet je zeker dat hij klopt.
+De oude opmaak met `##` en `**` werkt niet meer.
+Artikelen en versies die er nog mee zijn opgeslagen, zijn bij het starten van de site omgezet.
+
 ## Voor wie de code leest
 
 - De tabellen heten `articles` en `article_versions` (zie `packages/db/src/schema.ts`), en de vragen naar de eerste staan in `packages/db/src/queries.ts`: `findPublishedArticle`, `findNewestArticle` en `listPublishedArticles`.
   Een artikel is gepubliceerd als `published_at` gevuld is en niet na het moment van nu ligt.
-- De opmaak leest `apps/site/src/article-text.ts`, en `apps/site/src/ArticleText.tsx` maakt er elementen van.
-  Er is geen `dangerouslySetInnerHTML`, en de tests (`article-text.test.tsx`) proberen HTML, `javascript:`-adressen, `//evil.example` en teksten van een miljoen tekens.
+- `readArticleDocument` in `packages/shared/src/article-document.ts` controleert de JSON van de tekst tegen de lijst met wat mag, en `apps/site/src/ArticleText.tsx` maakt er elementen van.
+  Er is geen `dangerouslySetInnerHTML`, en de tests (`article-document.test.ts` en `ArticleText.test.tsx`) proberen HTML, `javascript:`-adressen, `//evil.example`, een diepe nesting en teksten van een miljoen tekens.
+- `migrateArticleBodies` in `packages/db/src/article-body-migration.ts` heeft de artikelen en versies in de oude opmaak omgezet naar JSON (zie _Artikelen schrijven vraagt JavaScript, lezen niet_ en de beslissing erboven in `beslissingen/redactie.md`).
 - Het beheer staat in `apps/site/src/app/beheer/artikelen` (de lijst, het formulier, de serveracties en het voorbeeld).
   De queries en de wijzigingen staan in `apps/site/src/beheer/articles.ts`, de controle van het formulier in `article-form.ts`.
   Elke serveractie begint met `requireRole('beheerder')`, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
@@ -279,5 +284,5 @@ De pagina verraadt niet of het adres een concept is.
   Alleen `article-versions.ts` raakt `article_versions`, alleen met `INSERT`, en `article-versions.test.ts` houdt dat zo.
 - De pagina is `apps/site/src/app/redactie/[slug]/page.tsx`, de kaart staat in `apps/site/src/app/page.tsx`, en beide gebruiken de componenten `Article` en `ArticleCard` van het designsysteem.
 - De testgegevens staan in `apps/site/e2e/articles.ts`: een artikel met drie versies, een concept en een artikel voor later.
-  `apps/site/e2e/writing.spec.ts` schrijft, bekijkt, publiceert en trekt een verzonnen artikel in, met en zonder JavaScript.
+  `apps/site/e2e/writing.spec.ts` schrijft met de editor, bekijkt, publiceert en trekt een verzonnen artikel in, en leest het ook zonder JavaScript.
   Op acceptatie zet de seed geen artikel: de eigenaar zet het eerste artikel zelf, met de opdrachten hierboven.

@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
+import { articleBodyToJson } from './article-body-migration.ts'
 import { prepareDatabase } from './prepare.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -42,7 +43,11 @@ afterEach(async () => {
   await database?.drop()
 })
 
-/** What the migration must leave behind for the two articles of `oldDatabaseWithArticles`. */
+/**
+ * What the migration must leave behind for the two articles of `oldDatabaseWithArticles`. The
+ * bodies are JSON because the site converts them at the same start (see
+ * `article-body-migration.ts`).
+ */
 async function expectMigrated() {
   expect(await rows('SELECT slug, created_by = updated_by AS same FROM articles ORDER BY id')).toMatchObject([
     { same: 1, slug: 'eerste' },
@@ -59,7 +64,7 @@ async function expectMigrated() {
       article: 'eerste',
       at_updated: 1,
       author: 'de redactie',
-      body: 'Tekst een',
+      body: articleBodyToJson('Tekst een'),
       by_updated: 1,
       intro: 'Intro een',
       slug: 'eerste',
@@ -70,7 +75,7 @@ async function expectMigrated() {
       article: 'tweede',
       at_updated: 1,
       author: 'Jelle',
-      body: 'Tekst twee',
+      body: articleBodyToJson('Tekst twee'),
       by_updated: 1,
       intro: 'Intro twee',
       slug: 'tweede',

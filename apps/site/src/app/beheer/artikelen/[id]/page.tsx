@@ -13,7 +13,6 @@ import { formatArticleDate, formatVersionTime } from '#src/news'
 
 import { submitArticle, submitWithdraw } from '../actions'
 import { ArticleForm } from '../ArticleForm'
-import { FormatHelp } from '../FormatHelp'
 import { formLimits } from '../limits'
 import { articlesPath, previewPath, versionPath } from '../paths'
 
@@ -75,7 +74,6 @@ export default async function ArticlePage({ params, searchParams }: Props) {
           <Text>{notice.text}</Text>
         </Card>
       )}
-      <FormatHelp />
       <ArticleForm
         action={submitArticle.bind(null, article.id)}
         initial={{

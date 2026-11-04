@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { adminUsers } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { type ArticleDocument, serialiseArticleDocument } from '@fansite/shared/article-document'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -49,11 +50,29 @@ beforeEach(async () => {
   requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
 })
 
+const text = (value: string, marks?: unknown[]) => ({ text: value, type: 'text', ...(marks ? { marks } : {}) })
+const paragraph = (...content: unknown[]) => ({ content, type: 'paragraph' })
+// The text as the server stores it: the keys in the order of Tiptap.
+const doc = (...content: unknown[]) => serialiseArticleDocument({ content, type: 'doc' } as unknown as ArticleDocument)
+
+/** The JSON of the editor for a text of one paragraph. */
+const json = (value: string) => doc(paragraph(text(value)))
+
 const values = (overrides: Record<string, string> = {}) => ({
   adres: 'welkom',
   auteur: 'de redactie',
   intro: 'We stellen ons voor.',
-  tekst: 'Een alinea met **vet**.\n\n## Een kop\n\n- punt een\n- punt twee',
+  tekst: doc(
+    paragraph(text('Een alinea met '), text('vet', [{ type: 'bold' }]), text('.')),
+    { attrs: { level: 2 }, content: [text('Een kop')], type: 'heading' },
+    {
+      content: [
+        { content: [paragraph(text('punt een'))], type: 'listItem' },
+        { content: [paragraph(text('punt twee'))], type: 'listItem' },
+      ],
+      type: 'bulletList',
+    },
+  ),
   titel: 'Welkom',
   ...overrides,
 })
@@ -184,11 +203,11 @@ describe('the list', () => {
 })
 
 describe('the new article', () => {
-  it('has one h1, the help with the format, the five fields with labels, and one button that saves a draft', async () => {
+  it('has one h1, the five fields with labels, and one button that saves a draft', async () => {
     const html = renderToStaticMarkup(await NewArticlePage())
 
     expect(requireRole).toHaveBeenCalledWith('beheerder')
-    expect(headings(html)).toEqual(['h1 Nieuw artikel', 'h2 Zo schrijf je de tekst'])
+    expect(headings(html)).toEqual(['h1 Nieuw artikel'])
 
     for (const [name, label] of [
       ['titel', 'Titel'],
@@ -197,6 +216,7 @@ describe('the new article', () => {
       ['tekst', 'Tekst'],
       ['auteur', 'Auteur'],
     ]) {
+      // The editor is a div that carries its id, and a hidden field carries the text.
       expect(html, name).toMatch(new RegExp(`<label[^>]*for="${name}"[^>]*>${label}`, 'u'))
       expect(html, name).toMatch(new RegExp(`<(?:input|textarea)[^>]*name="${name}"`, 'u'))
     }
@@ -209,18 +229,13 @@ describe('the new article', () => {
     expect(html).not.toContain('Er is iets mis')
   })
 
-  it('names every part of the format with an example', async () => {
+  it('has the editor for the text, and no help about a format', async () => {
     const html = renderToStaticMarkup(await NewArticlePage())
 
-    for (const part of [
-      '“## Wie zijn wij”',
-      '“- Nieuws”',
-      '“**dit is vet**”',
-      '“*dit is cursief*”',
-      '[de Leeuwarder Courant](https://www.lc.nl)',
-    ]) {
-      expect(html).toContain(part)
-    }
+    expect(html).not.toContain('Zo schrijf je de tekst')
+    expect(html).not.toContain('<textarea name="tekst"')
+    expect(html).toContain('hf-rich-text-editor')
+    expect(html).toContain('Met de knoppen maak je een kop, een lijst, vet, cursief en een link.')
   })
 })
 
@@ -231,14 +246,13 @@ describe('the article', () => {
 
     expect(headings(html)).toEqual([
       'h1 Artikel bewerken',
-      'h2 Zo schrijf je de tekst',
       'h2 Eerdere versies',
       `h3 <a href="/beheer/artikelen/${id}/versies/1">Versie 1</a>`,
     ])
     expect(html).toContain('Dit artikel is een concept. Het staat nergens op de site.')
     expect(html).toContain(`<a href="/beheer/artikelen/${id}/voorbeeld">Voorbeeld</a>`)
     expect(html).toMatch(/<input[^>]*name="titel"[^>]*value="Welkom"|<input[^>]*value="Welkom"[^>]*name="titel"/u)
-    expect(html).toMatch(/<textarea[^>]*name="tekst"[^>]*>Een alinea met \*\*vet\*\*\./u)
+    expect(html).toMatch(/<input[^>]*name="tekst"[^>]*value="\{&quot;type&quot;:&quot;doc&quot;/u)
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
       '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
@@ -252,7 +266,6 @@ describe('the article', () => {
 
     expect(headings(html)).toEqual([
       'h1 Artikel bewerken',
-      'h2 Zo schrijf je de tekst',
       'h2 Van de site halen',
       'h2 Eerdere versies',
       `h3 <a href="/beheer/artikelen/${id}/versies/1">Versie 1</a>`,
@@ -265,14 +278,13 @@ describe('the article', () => {
     ])
   })
 
-  it('has the text with its blank lines and special characters in the field as they were stored', async () => {
-    const tekst = 'Eén “alinea” & <b>niet vet</b>\n\n\n- [de LC](https://www.lc.nl/a?b=1&c=2)'
+  it('has the text in the hidden field of the editor as it was stored, with its special characters', async () => {
+    const tekst = json('Eén “alinea” & <b>niet vet</b>')
     const id = await addArticle({ tekst })
     const html = await edit(id)
 
-    expect(html).toContain(
-      'Eén “alinea” &amp; &lt;b&gt;niet vet&lt;/b&gt;\n\n\n- [de LC](https://www.lc.nl/a?b=1&amp;c=2)',
-    )
+    expect(html).toContain('&quot;text&quot;:&quot;Eén “alinea” &amp; &lt;b&gt;niet vet&lt;/b&gt;&quot;')
+    expect(html).not.toContain('<b>niet vet</b>')
   })
 
   it('says "niet gevonden" for a number that is no article, and for one that is not a number', async () => {
@@ -355,20 +367,34 @@ describe('the preview', () => {
     expect(html).toContain('Zo ziet een bezoeker dit artikel op /redactie/welkom.')
   })
 
-  it('turns the text into elements and shows HTML, a script address and a link without https as text', async () => {
+  it('turns the text into elements and shows HTML as text, with the links that are allowed', async () => {
     const id = await addArticle({
-      tekst:
-        '<script>alert(1)</script> en <b>vet</b>\n\n[boos](javascript:alert(2)) [zonder](www.lc.nl) [goed](https://www.lc.nl/sport) [ons](/bronnen)',
+      tekst: doc(
+        paragraph(text('<script>alert(1)</script> en <b>vet</b>')),
+        paragraph(
+          text('goed', [{ attrs: { href: 'https://www.lc.nl/sport' }, type: 'link' }]),
+          text(' '),
+          text('ons', [{ attrs: { href: '/bronnen' }, type: 'link' }]),
+        ),
+      ),
     })
     const html = await preview(id)
 
     expect(html).not.toContain('<script>')
     expect(html).not.toContain('<b>vet</b>')
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
-    expect(html).not.toContain('href="javascript:')
-    expect(html).not.toContain('href="www.lc.nl"')
     expect(html).toContain('href="https://www.lc.nl/sport"')
     expect(html).toContain('href="/bronnen"')
+  })
+
+  it('shows nothing of a text with a link to a script address, which only SQL can put in the database', async () => {
+    const id = await addArticle({
+      tekst: doc(paragraph(text('boos', [{ attrs: { href: 'javascript:alert(2)' }, type: 'link' }]))),
+    })
+    const html = await preview(id)
+
+    expect(html).not.toContain('javascript:')
+    expect(html).not.toContain('boos')
   })
 
   it('says "niet gevonden" for a number that is no article', async () => {
@@ -389,7 +415,7 @@ describe('the earlier versions on the page of the article', () => {
       database.db,
       other?.id ?? 0,
       id,
-      values({ tekst: 'Tweede tekst' }),
+      values({ tekst: json('Tweede tekst') }),
       false,
       new Date('2026-10-24T08:05:00Z'),
     )
@@ -397,7 +423,7 @@ describe('the earlier versions on the page of the article', () => {
       database.db,
       userId,
       id,
-      values({ tekst: 'Derde tekst' }),
+      values({ tekst: json('Derde tekst') }),
       false,
       new Date('2026-10-25T10:30:00Z'),
     )
@@ -457,13 +483,16 @@ describe('the earlier versions on the page of the article', () => {
 
 describe('the page of a version', () => {
   async function editedArticle() {
-    const id = await addArticle({ tekst: 'Eerste tekst met **vet**.', titel: 'Eerste titel' })
+    const id = await addArticle({
+      tekst: doc(paragraph(text('Eerste tekst met '), text('vet', [{ type: 'bold' }]), text('.'))),
+      titel: 'Eerste titel',
+    })
 
     await saveArticle(
       database.db,
       userId,
       id,
-      values({ tekst: 'Tweede tekst.', titel: 'Tweede titel' }),
+      values({ tekst: json('Tweede tekst.'), titel: 'Tweede titel' }),
       false,
       new Date('2026-10-25T10:30:00Z'),
     )
@@ -508,15 +537,17 @@ describe('the page of a version', () => {
     expect(await version(liveId, 1)).toContain('<time dateTime="2026-10-21">21 oktober 2026</time>')
   })
 
-  it('turns the text into elements and shows HTML and a script address as text', async () => {
+  it('turns the text into elements and shows HTML as text', async () => {
     const id = await addArticle({
-      tekst: '<script>alert(1)</script>\n\n[boos](javascript:alert(2)) [goed](https://www.lc.nl/sport)',
+      tekst: doc(
+        paragraph(text('<script>alert(1)</script>')),
+        paragraph(text('goed', [{ attrs: { href: 'https://www.lc.nl/sport' }, type: 'link' }])),
+      ),
     })
     const html = await version(id, 1)
 
     expect(html).not.toContain('<script>')
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
-    expect(html).not.toContain('href="javascript:')
     expect(html).toContain('href="https://www.lc.nl/sport"')
   })
 

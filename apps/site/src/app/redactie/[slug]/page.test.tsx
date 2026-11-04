@@ -10,7 +10,29 @@ vi.mock('#src/articles', () => ({ getArticle: vi.fn() }))
 
 const article = {
   author: 'de redactie',
-  body: 'Een alinea met **vet** en [de LC](https://www.lc.nl/sport).\n\n## Een kop\n\n- een\n- twee',
+  body: JSON.stringify({
+    content: [
+      {
+        content: [
+          { text: 'Een alinea met ', type: 'text' },
+          { marks: [{ type: 'bold' }], text: 'vet', type: 'text' },
+          { text: ' en ', type: 'text' },
+          { marks: [{ attrs: { href: 'https://www.lc.nl/sport' }, type: 'link' }], text: 'de LC', type: 'text' },
+          { text: '.', type: 'text' },
+        ],
+        type: 'paragraph',
+      },
+      { attrs: { level: 2 }, content: [{ text: 'Een kop', type: 'text' }], type: 'heading' },
+      {
+        content: [
+          { content: [{ content: [{ text: 'een', type: 'text' }], type: 'paragraph' }], type: 'listItem' },
+          { content: [{ content: [{ text: 'twee', type: 'text' }], type: 'paragraph' }], type: 'listItem' },
+        ],
+        type: 'bulletList',
+      },
+    ],
+    type: 'doc',
+  }),
   intro: 'Een verzonnen inleiding.',
   publishedAt: new Date('2026-10-25T08:00:00Z'),
   slug: 'dit-zijn-wij',
@@ -71,7 +93,7 @@ describe('the page of an article', () => {
     )
   })
 
-  it('shows the intro and then the text, with its format turned into elements', async () => {
+  it('shows the intro and then the text, with the JSON turned into elements', async () => {
     const html = await render()
 
     expect(html).toContain('<p class="hf-intro"><b>Een verzonnen inleiding.</b></p>')
@@ -85,7 +107,7 @@ describe('the page of an article', () => {
     vi.mocked(getArticle).mockResolvedValue({
       ...article,
       author: '<b>x</b>',
-      body: '<script>alert(1)</script>\n\n[x](javascript:alert(1))',
+      body: '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"<script>alert(1)</script>"}]}]}',
       title: '<img src=x onerror=alert(1)>',
     })
 

@@ -461,8 +461,10 @@ export const articleLimits = { author: 100, intro: 300, slug: 80, title: 120 }
  * `published_at` is a draft: it is on no page, and withdrawing an article empties it again.
  * Nothing is deleted.
  *
- * `body` is the text in the format of `apps/site/src/article-text.ts`: paragraphs, `## `
- * headings, `- ` lists, bold, italic and links. A `mediumtext` holds 16 MB, far more than an
+ * `body` is the text as Tiptap's JSON, checked against the list of what an article may hold in
+ * `packages/shared/src/article-document.ts`: paragraphs, headings of level 2, lists with
+ * bullets, bold, italic and links. Until 4 November 2026 it was a small text format; the
+ * conversion is `article-body-migration.ts`. A `mediumtext` holds 16 MB, far more than an
  * article needs; the admin sets the real limit. `author` is the name next to the article, such
  * as "de redactie". `created_by` is the account that put the article in, as a number, never an
  * address. `updated_by` is the account that changed the article last, whatever the change was
@@ -516,7 +518,9 @@ export type NewArticle = typeof articles.$inferInsert
  *
  * `saved_at` is UTC and `saved_by` is the account, as a number. The one function
  * `recordVersion` in the site writes it, in the same transaction as the change, and nothing
- * updates or deletes a row: a test keeps it so. An article that is only changed with SQL keeps
+ * updates or deletes a row: a test keeps it so. The one exception is the conversion of `body`
+ * to JSON (`article-body-migration.ts`), which changes only that column. An article that is
+ * only changed with SQL keeps
  * no versions.
  */
 export const articleVersions = mysqlTable(

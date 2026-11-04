@@ -1,7 +1,12 @@
 /*
- * The format of the text of an article, and the function that reads it. The format is small on
- * purpose, so that whoever writes an article needs no HTML, and whoever takes over an account
- * can't put a script in a page:
+ * The format that the text of an article had before it was stored as Tiptap's JSON, and the
+ * function that reads it. It is here for one purpose: `article-body-migration.ts` turns every
+ * article and version that still has the old format into JSON, and this is its source. It
+ * is a copy of the parser that the site used until then, so what a visitor read before is what
+ * they read after. Nothing else may use it, and it can go once acceptance and the live site
+ * have run the migration.
+ *
+ * The format was small on purpose:
  *
  * - paragraphs, separated by a blank line; the lines of one paragraph run together;
  * - a heading of level 2: one line that starts with `## `;
@@ -9,11 +14,11 @@
  * - `**bold**` and `*italic*`; italic can stand inside bold, not the other way round;
  * - a link, `[text](address)`, to an address that starts with `https://`, or with a single `/`.
  *
- * Everything else is plain text, including HTML, images and addresses of any other kind. The
- * function gives a tree of plain data, and `ArticleText` turns that into elements, which React
- * escapes. No regular expression here runs over the whole text, and no scan goes back, so a
- * long or hostile text takes time in proportion to its length.
+ * Everything else is plain text. No regular expression here runs over the whole text, and no
+ * scan goes back, so a long or hostile text takes time in proportion to its length.
  */
+
+import { safeAddress } from '@fansite/shared/article-document'
 
 export type Block =
   { children: Inline[]; type: 'paragraph' } | { items: Inline[][]; type: 'list' } | { text: string; type: 'heading' }
@@ -23,11 +28,8 @@ export type Inline =
   | { external: boolean; href: string; text: string; type: 'link' }
   | { text: string; type: 'text' }
 
-/** The longest address of a link. A link that is longer is shown as text. */
-const maxAddressLength = 2000
-
-/** Reads the text of an article into blocks. */
-export function parseArticleText(text: string): Block[] {
+/** Reads the text of an article in the old format into blocks. */
+export function readLegacyArticleText(text: string): Block[] {
   const blocks: Block[] = []
   let lines: string[] = []
 
@@ -50,39 +52,6 @@ export function parseArticleText(text: string): Block[] {
   finish()
 
   return blocks
-}
-
-/**
- * Whether an address may be the target of a link: `'external'` for a full address that starts
- * with `https://`, `'internal'` for a page of ours (`/bronnen`), and undefined for the rest.
- * That is `http:`, `javascript:`, `data:`, an address without a scheme, a relative one, and one
- * that starts with `//` or `/\`, which a browser takes for another site. An address with white
- * space, a control character, a backslash, a quote, an angle bracket or a bracket is refused,
- * and so is one with a login in it (`https://www.lc.nl@evil.example`), which hides the real
- * host.
- */
-export function safeAddress(address: string): 'external' | 'internal' | undefined {
-  if (address.length > maxAddressLength || !/^[^\s\\()[\]"'<>]+$/u.test(address) || /\p{Cc}/u.test(address)) {
-    return undefined
-  }
-  if (address.startsWith('/')) {
-    return address[1] === '/' ? undefined : 'internal'
-  }
-  if (!address.startsWith('https://')) {
-    return undefined
-  }
-
-  const authority = address.slice('https://'.length).split(/[/?#]/u, 1)[0] ?? ''
-
-  if (authority === '' || authority.includes('@')) {
-    return undefined
-  }
-
-  try {
-    return new URL(address).hostname === '' ? undefined : 'external'
-  } catch {
-    return undefined
-  }
 }
 
 /** The block that the lines of one part stand for. The lines are trimmed and none is empty. */

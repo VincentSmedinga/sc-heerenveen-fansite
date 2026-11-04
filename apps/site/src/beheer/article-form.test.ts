@@ -1,10 +1,11 @@
 import { articleLimits } from '@fansite/db/schema'
+import { type ArticleDocument, serialiseArticleDocument } from '@fansite/shared/article-document'
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { slugMaxLength } from './article-fields'
-import { bodyMaxLength, cleanBody, readValues, reservedSlugs, validate } from './article-form'
+import { bodyMaxLength, readValues, reservedSlugs, validate } from './article-form'
 
 const form = (fields: Record<string, string>) => {
   const formData = new FormData()
@@ -16,11 +17,15 @@ const form = (fields: Record<string, string>) => {
   return formData
 }
 
+const paragraph = (text: string) => ({ content: [{ text, type: 'text' }], type: 'paragraph' })
+// The text as the server stores it: the keys in the order of Tiptap.
+const doc = (...content: unknown[]) => serialiseArticleDocument({ content, type: 'doc' } as unknown as ArticleDocument)
+
 const good = {
   adres: 'welkom-bij-de-fansite',
   auteur: 'de redactie',
   intro: 'We stellen ons voor.',
-  tekst: 'Een alinea.',
+  tekst: doc(paragraph('Een alinea.')),
   titel: 'Welkom bij de Fansite',
 }
 
@@ -66,26 +71,20 @@ describe('readValues', () => {
   })
 })
 
-describe('cleanBody', () => {
-  it('turns every kind of line break into \\n and keeps blank lines, tabs and spaces inside', () => {
-    expect(cleanBody('Een\r\n\r\nTwee\rDrie Vier\t  vijf')).toBe('Een\n\nTwee\nDrie\nVier\t  vijf')
+describe('the text', () => {
+  it('is stored as the checked JSON, with the keys in their fixed order', () => {
+    const shuffled = '{"content":[{"content":[{"text":"Een","type":"text"}],"type":"paragraph"}],"type":"doc"}'
+
+    expect(readValues(form({ ...good, tekst: shuffled })).tekst).toBe(
+      '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Een"}]}]}',
+    )
   })
 
-  it('drops control characters other than a line break and a tab, and trims the ends', () => {
-    expect(cleanBody('\n\n  Tekst\u0000 met\u0007 \u001b[31mbesturing\u007f  \n\n')).toBe('Tekst met [31mbesturing')
-  })
+  it('stays as it was sent when it is refused, so the form can give it back', () => {
+    const refused = doc({ attrs: { src: 'https://www.lc.nl/foto.jpg' }, type: 'image' })
 
-  it('keeps accents, quotes, emoji, other scripts and the characters of the format as they are', () => {
-    const text =
-      '## Één “kop” – ‘nu’ 🙂 ø\n\n- **vet** en *cursief*\n- [de LC](https://www.lc.nl/sport?a=1&b=2#x)\n\n<b>geen html</b> Це текст'
-
-    expect(cleanBody(text)).toBe(text)
-  })
-
-  it('changes nothing in a text it has cleaned already', () => {
-    const once = cleanBody('Eerste\r\n\r\n\r\nTweede  \r\n')
-
-    expect(cleanBody(once)).toBe(once)
+    expect(readValues(form({ ...good, tekst: refused })).tekst).toBe(refused)
+    expect(readValues(form({ ...good, tekst: 'niet json' })).tekst).toBe('niet json')
   })
 })
 
@@ -113,12 +112,61 @@ describe('validate', () => {
     expect(validate({ ...good, adres: 'x'.repeat(articleLimits.slug + 1) }).adres).toContain('hoogstens 80 tekens')
   })
 
-  it('limits the text to 20.000 characters and says how many there are', () => {
+  it('limits the visible text to 20.000 characters, not the JSON, and says how many there are', () => {
     expect(bodyMaxLength).toBe(20_000)
-    expect(validate({ ...good, tekst: 'x'.repeat(bodyMaxLength) })).toEqual({})
-    expect(validate({ ...good, tekst: 'x'.repeat(bodyMaxLength + 5) }).tekst).toBe(
+    expect(validate({ ...good, tekst: doc(paragraph('x'.repeat(bodyMaxLength))) })).toEqual({})
+    expect(validate({ ...good, tekst: doc(paragraph('x'.repeat(bodyMaxLength + 5))) }).tekst).toBe(
       'De tekst is te lang. Gebruik hoogstens 20.000 tekens, nu zijn het er 20.005.',
     )
+  })
+
+  it('counts the text of marks and lists, and not the JSON around them', () => {
+    const bold = { marks: [{ type: 'bold' }], text: 'x'.repeat(bodyMaxLength), type: 'text' }
+
+    expect(validate({ ...good, tekst: doc({ content: [bold], type: 'paragraph' }) })).toEqual({})
+    expect(
+      validate({ ...good, tekst: doc({ content: [bold, { text: 'y', type: 'text' }], type: 'paragraph' }) }).tekst,
+    ).toContain('nu zijn het er 20.001')
+  })
+
+  it.each([
+    ['an empty text', ''],
+    ['a document without text', '{"type":"doc","content":[{"type":"paragraph"}]}'],
+    ['a document of spaces', doc(paragraph('   '))],
+  ])('asks for the text when it is %s', (_name, tekst) => {
+    expect(validate({ ...good, tekst }).tekst).toBe('Schrijf de tekst van het artikel.')
+  })
+
+  it.each([
+    ['a node that is not on the list', doc({ attrs: { src: 'x' }, type: 'image' }), 'iets wat in een artikel niet kan'],
+    ['a script as a node', doc({ content: [], type: 'script' }), 'iets wat in een artikel niet kan'],
+    [
+      'a link to javascript:',
+      doc({
+        content: [{ marks: [{ attrs: { href: 'javascript:alert(1)' }, type: 'link' }], text: 'x', type: 'text' }],
+        type: 'paragraph',
+      }),
+      'Een link wijst naar een adres dat niet kan',
+    ],
+    [
+      'a link to //evil.example',
+      doc({
+        content: [{ marks: [{ attrs: { href: '//evil.example' }, type: 'link' }], text: 'x', type: 'text' }],
+        type: 'paragraph',
+      }),
+      'Een link wijst naar een adres dat niet kan',
+    ],
+    ['JSON that is far too big', doc(paragraph('a'.repeat(1_000_000))), 'De tekst is te groot'],
+    ['something that is no JSON', '<script>alert(1)</script>', 'De tekst is niet goed aangekomen'],
+  ])('refuses %s, at the field', (_name, tekst, message) => {
+    expect(validate({ ...good, tekst }).tekst).toContain(message)
+  })
+
+  it('refuses a text with a million characters, and one nested very deep', () => {
+    expect(validate({ ...good, tekst: doc(paragraph('a'.repeat(1_000_000))) }).tekst).toBeDefined()
+    expect(
+      validate({ ...good, tekst: `{"type":"doc","content":${'[{"content":'.repeat(50_000)}[]` }).tekst,
+    ).toBeDefined()
   })
 
   it.each([

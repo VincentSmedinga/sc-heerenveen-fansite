@@ -9,7 +9,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { ArticleValues } from './article-fields'
 
 import { createAccount } from './accounts'
-import { cleanBody } from './article-form'
 import { listVersions } from './article-versions'
 import { createArticle, findArticle, listArticles, saveArticle, withdrawArticle } from './articles'
 
@@ -126,14 +125,27 @@ describe('createArticle', () => {
     expect(await log()).toHaveLength(1)
   })
 
-  it('keeps a long text with accents, quotes, emoji and a link to another site exactly as it was typed', async () => {
-    const tekst = cleanBody(
-      [
-        '## Één “kop” – ‘nu’ 🙂',
-        `${'Een lange alinea met ëxtra accenten, “aanhalingstekens” en een link naar [de Leeuwarder Courant](https://www.lc.nl/sport?a=1&b=2#x). '.repeat(120)}`,
-        '- **Vet** punt\n- *Cursief* punt\n\n<b>geen html</b> & %20 \\ Це текст',
-      ].join('\r\n\r\n'),
-    )
+  it('keeps a long text with accents, quotes, emoji and a link to another site exactly as it was stored', async () => {
+    const sentence =
+      'Een lange alinea met ëxtra accenten, “aanhalingstekens”, 🙂 en een link naar de Leeuwarder Courant. '
+    const tekst = JSON.stringify({
+      content: [
+        { attrs: { level: 2 }, content: [{ text: 'Één “kop” – ‘nu’ 🙂', type: 'text' }], type: 'heading' },
+        {
+          content: [
+            { text: sentence.repeat(140), type: 'text' },
+            {
+              marks: [{ attrs: { href: 'https://www.lc.nl/sport?a=1&b=2#x' }, type: 'link' }],
+              text: 'de LC',
+              type: 'text',
+            },
+            { text: '<b>geen html</b> & %20 \\ Це текст', type: 'text' },
+          ],
+          type: 'paragraph',
+        },
+      ],
+      type: 'doc',
+    })
     const id = await draft({ tekst })
 
     expect((await findArticle(database.db, id))?.body).toBe(tekst)

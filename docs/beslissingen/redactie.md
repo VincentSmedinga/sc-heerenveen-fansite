@@ -859,6 +859,9 @@
   - Een link naar een andere site krijgt het pictogram voor een externe link en `rel="noopener"`.
     Er komt geen `nofollow` en geen `noreferrer` bij: de tekst schrijven wij, en een bron mag zien dat bezoekers van ons komen.
     De link opent in hetzelfde tabblad, zoals elke link van de site.
+- **Later:** zie _De tekst van een artikel wordt bewaard als Tiptap's JSON, met een lijst van wat mag_ (27 oktober 2026): de tekst is geen eigen opmaak meer maar Tiptap's JSON, en `parseArticleText` en `article-text.ts` zijn weg.
+  Wat er over blijft van deze beslissing: er is geen HTML en geen `dangerouslySetInnerHTML`, `ArticleText` maakt elementen die React escapet, en een link gaat alleen naar `https://` of naar een pagina van ons.
+  `safeAddress` staat nu in `packages/shared/src/article-document.ts`, en de oude parser leeft voort als bron van de migratie in `packages/db/src/legacy-article-text.ts`.
 
 ## Een artikel is gepubliceerd als `published_at` gevuld is en niet na nu ligt
 
@@ -977,6 +980,8 @@
 - **Hoe:** "Opslaan" is de eerste knop van het formulier, dus Enter bewaart en publiceert niet.
   Een knop met `pending` is uitgeschakeld, zodat een dubbele klik geen tweede verzoek geeft.
   Met JavaScript volgt het adres de titel tot de schrijver er zelf in typt; zonder JavaScript maakt de server hetzelfde voorstel (`suggestSlug`) van een leeg adres.
+- **Later:** zie _Artikelen schrijven vraagt JavaScript, lezen niet_ (27 oktober 2026): het formulier werkt niet meer zonder JavaScript, want de editor draait in de browser.
+  De rest blijft: de fouten en de waarden komen terug in de toestand, en met de ingevulde tekst als JSON in het verborgen veld van de editor.
 
 ## De velden van een artikel worden altijd op de server gecontroleerd en schoongemaakt
 
@@ -990,6 +995,8 @@
   De tekst is geen HTML en `ArticleText` maakt er elementen van, dus er is niets te escapen bij het opslaan.
   Een artikel staat op `/redactie/<adres>`, dus een adres als `bronnen` botst nu niet; de lijst voorkomt verwarring en houdt de weg open om artikelen later bovenaan de site te zetten.
 - **Alternatieven:** de browser laten controleren met `maxLength` (die kapt een geplakte tekst stil af, en de schrijver ziet het niet); geen grens aan de tekst (de kolom houdt 16 MB, maar een tekst van die lengte is niet te lezen en niet te controleren).
+- **Later:** zie _De tekst van een artikel wordt bewaard als Tiptap's JSON, met een lijst van wat mag_ (27 oktober 2026): de tekst is niet meer de opmaak met regels en lege regels maar JSON, `cleanBody` is weg, en de grens van 20.000 tekens telt de zichtbare tekst.
+  De andere velden blijven zoals ze waren.
 
 ## Het voorbeeld van een artikel is een pagina van het beheer, met dezelfde componenten
 
@@ -1010,6 +1017,8 @@
   De teardown verwijdert ook de artikelen van die accounts, voor de logregels en de accounts.
 - **Waarom:** een gepubliceerd artikel is het nieuwste en wordt de kaart op de homepage, en dan zou de test van de kaart in `articles.spec.ts` falen, afhankelijk van wie eerst kwam.
 - **Alternatieven:** de test het artikel meteen laten intrekken (een korte tijd blijft het zichtbaar, en parallelle tests zien het dan soms); de test van de kaart minder streng maken (hij toetst dan minder).
+- **Later:** zie _Artikelen schrijven vraagt JavaScript, lezen niet_ (27 oktober 2026): `writing.spec.ts` schrijft het artikel nu met de editor, en alleen met JavaScript.
+  Het lezen van het gepubliceerde artikel zonder JavaScript staat nog in dezelfde test.
 
 ## Het relevantiefilter kent de Friese schrijfwijze van de club en Friese voetbalwoorden
 
@@ -1906,6 +1915,7 @@
 - **Waarom:** wie een artikel schrijft, hoeft geen opmaaktekens te kennen.
   Tiptap is open (MIT), onderhouden en heeft een kleine kern; de opmaak blijft klein omdat we alleen laden wat we gebruiken.
 - **Alternatieven:** de textarea met eigen opmaak houden (de schrijver moet de tekens leren kennen); een andere editor zoals Lexical of Slate (meer werk om toegankelijk te maken); `contenteditable` zelf bouwen (veel werk en veel fouten).
+- **Later:** zie _De tekst van een artikel wordt bewaard als Tiptap's JSON, met een lijst van wat mag_ (27 oktober 2026): de editor staat in het formulier van `/beheer/artikelen` (#359).
 
 ## De afbeelding van een kaart wordt in de browser gemaakt, met een bibliotheek die pas bij een klik laadt
 
@@ -2708,3 +2718,44 @@
     De ankers `uitslagen-knvb-beker` en `uitslagen-play-offs` staan nu ook voor `/wedstrijden` in `src/anchors.ts`.
 - **Waarom:** wie de beker of de competitie zoekt, vindt ze apart, en het lopende seizoen werkt nu net als een afgelopen seizoen.
 - **Alternatieven:** één kaart houden voor het lopende seizoen (twee soorten pagina's); vijf uitslagen per kaart nu al (dat is #516, dat later komt en dan opnieuw bekeken wordt voor kaarten per competitie).
+
+## De tekst van een artikel wordt bewaard als Tiptap's JSON, met een lijst van wat mag
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de tekst van een artikel wordt bewaard als Tiptap's JSON, gecontroleerd tegen een lijst met toegestane onderdelen, en door een eigen functie omgezet naar componenten.
+  Er komt geen HTML in de database en niet in de sjablonen.
+- **Waarom:** de editor werkt in JSON, dus er is geen vertaalslag die kan misgaan, en er is ruimte voor foto's en tabellen later.
+  De lijst met toegestane onderdelen houdt de veiligheid van de oude opmaak.
+- **Alternatieven:** de oude opmaak houden en Tiptap erin en eruit omzetten (geen migratie, maar een vertaling die een artikel kan veranderen en twee formaten om te onderhouden); HTML bewaren (vraagt een schoonmaker en `dangerouslySetInnerHTML`, en keert _Sjablonen bevatten geen HTML_ om).
+- **Hoe (4 november 2026):**
+  - `readArticleDocument` in `packages/shared/src/article-document.ts` controleert de JSON bij elke opslag, en bouwt het document opnieuw op uit wat op de lijst staat.
+    De lijst: alinea, kop van niveau 2, lijst met bolletjes (elk punt één alinea), en de tekens vet, cursief en link.
+    Een ander onderdeel, een ander teken, een kenmerk dat niet op de lijst staat, een tweede lijst in een lijst en een link naar iets anders dan `https://` of `/` weigert de functie.
+    Omdat de vorm vastligt, wordt een document nooit dieper dan een punt in een lijst, en een diepe nesting wordt bij het eerste onderdeel geweigerd.
+  - Wat de functie teruggeeft is de tekst om te bewaren, met de sleutels in de volgorde van Tiptap, zodat dezelfde tekst altijd dezelfde string is en opslaan zonder wijziging geen nieuwe versie maakt.
+    Een besturingsteken wordt een spatie, en een stukje tekst zonder tekens valt weg.
+  - De grens van 20.000 tekens telt de zichtbare tekst (`textLength`).
+    De JSON zelf mag hoogstens 1.000.000 tekens zijn (`articleJsonMaxLength`): een tekst van 20.000 tekens met overal een teken van opmaak is zo'n 420.000 tekens JSON, dus dat past ruim.
+  - Een weigering komt terug bij het veld `tekst`, in woorden die zeggen wat te doen, met de ingevulde tekst terug in het formulier.
+    Alleen iets anders dan de editor kan een onderdeel of een JSON sturen die niet klopt, dus die fouten zeggen niet meer dan wat er mis is.
+  - `ArticleText` leest de JSON met dezelfde functie en toont niets bij een tekst die niet klopt, zoals een tekst die met SQL in de database kwam.
+    Onderdelen die hetzelfde teken delen gaan in één element, zoals de editor ze schrijft: `<strong>a <em>b</em> c</strong>` en niet drie `strong`.
+  - Het adres van een link is strenger dan dat van de editor (`safeAddress`): ook een adres met een inlog, een backslash of een aanhalingsteken wordt geweigerd, zoals de oude functie al deed.
+- **Migratie:** `migrateArticleBodies` in `packages/db/src/article-body-migration.ts` zet de tekst van elk artikel en elke versie van de oude opmaak om in JSON, met `legacy-article-text.ts`, een kopie van de oude `parseArticleText`, als bron.
+  Ze draait na de migraties van het schema, bij het starten van de site en bij `pnpm db:migrate`, en is te herhalen: een tekst die met `{"type":"doc"` begint is al JSON en blijft zoals hij is.
+  Alle rijen veranderen in één transactie en alleen als de rij nog de tekst heeft die gelezen is, dus een run die stopt laat niets half achter, en een opslag tussendoor wordt niet overschreven.
+  Alleen `body` verandert: `updated_at`, de versies en de logregels blijven.
+  Een test zet een artikel met elk onderdeel om en vergelijkt de pagina die een bezoeker ziet met wat de oude functie ervan maakte.
+  `legacy-article-text.ts` kan weg zodra acceptatie en de echte site de migratie hebben gedraaid.
+- **Nadeel:** een artikel dat met SQL in de database komt, moet nu JSON zijn (zie `docs/artikelen.md`).
+  Van de oude opmaak kunnen versies van vóór de migratie niet meer terug naar die opmaak: de JSON is de enige vorm.
+
+## Artikelen schrijven vraagt JavaScript, lezen niet
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** artikelen schrijven vraagt JavaScript; lezen niet.
+- **Waarom:** alleen een beheerder schrijft, achter de inlog, en een tekstvak naast de editor betekent twee formaten voor altijd.
+  Een bezoeker leest nog steeds zonder JavaScript.
+- **Alternatieven:** een tekstvak als terugval dat de server omzet naar JSON (houdt de oude opmaak en haar tekens in leven).
+- **Later:** vervangt de eis dat het formulier van de artikelen ook zonder JavaScript werkt (#264).
+  Alleen de editor vraagt JavaScript: de pagina's `/redactie/<adres>`, het voorbeeld en de pagina van een versie lezen zonder.
