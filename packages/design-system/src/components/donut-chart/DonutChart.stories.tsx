@@ -25,7 +25,7 @@ const meta = preview.meta({
     size: {
       description:
         'Met `small` is de ring kleiner, met de tekst eromheen, om naast een groter diagram te staan in een `DonutChart.Group`, zoals de doelpunten naast de uitslagen.',
-      ...union(['small']),
+      table: union(['small']),
     },
     slices: {
       description:
