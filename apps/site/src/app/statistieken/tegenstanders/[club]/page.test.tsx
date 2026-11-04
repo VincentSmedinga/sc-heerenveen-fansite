@@ -1116,8 +1116,7 @@ describe('the card Resultaten sinds', () => {
     expect(card).toContain('--hf-bar-chart-slots:18')
     expect([...card.matchAll(/class="hf-bar-chart-number[^"]*"[^>]*>(\d+)</g)].map(([, year]) => year)).toEqual([
       '18',
-      '22',
-      '26',
+      '23',
     ])
   })
 
@@ -1149,9 +1148,10 @@ describe('the card Resultaten sinds', () => {
     expect(plain(card)).not.toMatch(/De lijn|gespeelde wedstrijden|De hele lijst/)
   })
 
-  it('averages over eight matches in a row: no point for four matches, the last at the ninth place for nine', async () => {
+  it('gives the last played match the point of the line, whatever the number of matches', async () => {
     // The page helper takes the drawing of the line out, so the dot at its last point shows it.
-    expect(cardOf(await render())).not.toContain('hf-bar-chart-trend-dot')
+    // Testclub has its last match in the seventh place, Reeks FC in the ninth.
+    expect(cardOf(await render())).toMatch(/hf-bar-chart-trend-dot[^>]*--hf-bar-chart-across:65/)
     expect(cardOf(await render('reeks-fc'))).toMatch(/hf-bar-chart-trend-dot[^>]*--hf-bar-chart-across:85/)
   })
 

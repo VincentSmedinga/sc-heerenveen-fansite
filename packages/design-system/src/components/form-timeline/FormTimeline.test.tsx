@@ -42,26 +42,38 @@ describe('FormTimeline', () => {
     expect(container.querySelector('.hf-bar-chart-number-wide')).toBeNull()
   })
 
-  it('draws the line from four results in a row, and stops it at a gap', () => {
+  it('gives every result a point, from the first, and stops the line at a gap', () => {
     const { container } = render(
       <FormTimeline
         {...props}
         results={places({ 10: 'W', 11: 'W', 12: 'G', 13: 'V', 14: 'W', 20: 'G', 21: 'G', 22: 'G', 23: 'G' })}
       />,
     )
-    const paths = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
+    const path = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
 
-    // The first run has points at the places 13 and 14 (averages 1.75 and 1.5), the second at
-    // 23.
-    expect(paths.startsWith('M13.5 41.667')).toBe(true)
-    expect(paths.match(/M/gu)).toHaveLength(1)
+    // Two runs, the first from the first result of 3 points (the top of the chart).
+    expect(path.startsWith('M10.5 0')).toBe(true)
+    expect(path.match(/M/gu)).toHaveLength(2)
     expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
+    expect(
+      container.querySelector<HTMLElement>('.hf-bar-chart-trend-dot')?.style.getPropertyValue('--hf-bar-chart-across'),
+    ).toBe('31.76')
+  })
+
+  it('averages over at most the window: the first points over fewer results', () => {
+    const { container } = render(<FormTimeline {...props} firstYear={2000} results={['W', 'V', 'G']} window={2} />)
+    const path = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
+
+    // 3, then (3 + 0) / 2 = 1.5, then (0 + 1) / 2 = 0.5, at heights 0, 50 and 83.333.
+    expect(path.startsWith('M0.5 0')).toBe(true)
+    expect(path).toContain('83.333')
+    expect(path).not.toContain('M1.5')
   })
 
   it('puts the key and the text about what counts in one paragraph under the chart', () => {
     const { container } = render(<FormTimeline {...props} results={places({})} />)
 
-    expect(textOf(container)).toEqual(['W winst (3 punten), G gelijk (1), V verlies (0).', 'Alleen de Eredivisie.'])
+    expect(textOf(container)).toEqual(['W winst (3 punten), G gelijk (1), V verlies (0). Alleen de Eredivisie.'])
   })
 
   it('uses the letters and words of the columns under the tables', () => {
@@ -88,10 +100,9 @@ describe('FormTimeline', () => {
       '90',
       '00',
     ])
-    // A window of 2 gives a point from the second result: two runs, with the gap between them.
+    // Two runs, with the gap between them.
     const path = container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d') ?? ''
 
-    expect(path.startsWith('M1.5 0 L')).toBe(false)
     expect(path.match(/M/gu)).toHaveLength(2)
   })
 

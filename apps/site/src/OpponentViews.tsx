@@ -325,8 +325,9 @@ export function ClubSummaryCard({
 /**
  * The card "Resultaten sinds <jaar>" of the page of a club: how we did against it, season after
  * season, as bars for a win, a draw and a loss with a line through the average of the points
- * over eight matches (see `FormTimeline`). It has two places for each season from the first
- * season we have matches of, for any club, up to now, so the axis is the same for every club.
+ * over at most eight matches (see `FormTimeline`). It has two places for each season from the
+ * first season we have matches of, for any club, up to now, so the axis is the same for every
+ * club.
  * A season we didn't meet this club in the Eredivisie, a match still to come and a season we
  * have no matches of are an empty place. It counts the Eredivisie whatever the visitor chose,
  * and says so, and nothing else: the key and that line are all the text, because the page lists
@@ -357,7 +358,6 @@ export function ClubTimelineCard({
       </Heading>
       <FormTimeline
         firstYear={firstYear}
-        labelEvery={4}
         results={timelineOf(matches, now, firstYear)}
         scope="Alleen de Eredivisie."
         title="Seizoen"

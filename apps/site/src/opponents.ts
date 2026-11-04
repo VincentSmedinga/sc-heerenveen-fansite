@@ -151,7 +151,7 @@ export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | unde
 /** The places of a season on the axis of the card Resultaten sinds: two matches. */
 export const timelinePerYear = 2
 
-/** The number of matches the line of that card averages over: four seasons of two matches. */
+/** The most matches the line of that card averages over: four seasons of two matches. */
 export const timelineWindow = 8
 
 /**

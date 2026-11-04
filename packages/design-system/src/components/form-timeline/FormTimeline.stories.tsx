@@ -20,7 +20,7 @@ const meta = preview.meta({
         'De tekst onder de sleutel: wat meetelt en sinds wanneer, zodat een lege plek niet leest als "nooit gespeeld".',
     },
     title: { description: 'Het bijschrift onder de labels.' },
-    window: { description: 'Het aantal uitslagen waarover de lijn het gemiddelde neemt.' },
+    window: { description: 'Het hoogste aantal uitslagen waarover de lijn het gemiddelde neemt.' },
   },
   component: FormTimeline,
   parameters: {
@@ -57,7 +57,7 @@ const TimelineCard = ({ results, scope }: { results: readonly (FormResult | null
     <Heading id="resultaten-kop" level={2}>
       Resultaten sinds 2010
     </Heading>
-    <FormTimeline firstYear={firstYear} labelEvery={4} results={results} scope={scope} title="Seizoen" />
+    <FormTimeline firstYear={firstYear} results={results} scope={scope} title="Seizoen" />
   </Card>
 )
 
@@ -69,19 +69,19 @@ const withGaps = places(2010, 'WWGVWGGWVWWGWVGWWGVWGWVWWGGWWVWGW').map((result, 
 )
 
 export const WithGaps = meta.story({
-  args: { firstYear, labelEvery: 4, results: withGaps, scope, title: 'Seizoen' },
+  args: { firstYear, results: withGaps, scope, title: 'Seizoen' },
   name: 'Een club die tussendoor lager speelde, de lijn stopt bij een gat',
   render: (args) => <TimelineCard results={args.results} scope={args.scope} />,
 })
 
 export const OnePiece = meta.story({
-  args: { firstYear, labelEvery: 4, results: places(2018, 'WGVWWGVWGWGV'), scope, title: 'Seizoen' },
+  args: { firstYear, results: places(2018, 'WGVWWGVWGWGV'), scope, title: 'Seizoen' },
   name: 'Een club die pas laat in de Eredivisie kwam, de eerste jaren zijn leeg',
   render: (args) => <TimelineCard results={args.results} scope={args.scope} />,
 })
 
 export const OnPhone = meta.story({
-  args: { firstYear, labelEvery: 4, results: withGaps, scope, title: 'Seizoen' },
+  args: { firstYear, results: withGaps, scope, title: 'Seizoen' },
   name: 'Op een telefoon: 34 plekken in een smalle kaart',
   render: (args) => (
     <div style={{ inlineSize: '20rem', maxInlineSize: '100%' }}>

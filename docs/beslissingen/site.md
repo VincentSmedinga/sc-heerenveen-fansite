@@ -2427,25 +2427,28 @@
 
 - **Datum:** 4 november 2026
 - **Besluit:** de kaart "Resultaten sinds <jaar>" op de pagina van een club telt alleen de Eredivisie en geeft elk seizoen twee plekken: de eerste en de tweede gespeelde wedstrijd tegen de club, op datum (`timelineOf` in `src/opponents.ts`, #718).
-  De as loopt van het eerste seizoen waarvan we wedstrijden hebben tot het seizoen van nu, met een label (de laatste twee cijfers van het beginjaar) onder het eerste jaar en daarna elke vier jaar.
+  De as loopt van het eerste seizoen waarvan we wedstrijden hebben tot het seizoen van nu, met een label (de laatste twee cijfers van het beginjaar) onder het eerste jaar en daarna elke vijf jaar.
   De kaart volgt de schakelaar niet.
   Hij staat in de zijkolom direct onder "Onze uitslagen tegen …", op het witte vlak: het zachte vlak erboven en het warme eronder zijn dan niet gelijk aan het zijne.
 - **Waarom:** twee wedstrijden per seizoen zijn de vaste maat van de competitie, dus "twee staafjes per jaar" klopt altijd.
   Plaatsen op de kalenderdatum werkt niet: in 14 combinaties van club en seizoen vallen beide wedstrijden in hetzelfde halfjaar (AZ in 2013/14: augustus en december), en dan botsen de staafjes.
   Een beker- of play-offwedstrijd heeft geen vaste plek in een jaar en past niet in twee plekken.
-  Een label elke vier jaar vanaf het eerste jaar houdt de as leesbaar op een telefoon en laat het laatste jaar een label hebben.
-- **Alternatieven:** per halfjaar op de datum van de wedstrijd (botst); de schakelaar volgen met een regel voor een derde en vierde wedstrijd in een seizoen (de grafiek kan ze niet tonen); een label elke vijf jaar op de veelvouden van vijf (het laatste jaar valt er dan tussenin).
+  Een label elke vijf jaar vanaf het eerste jaar houdt de as leesbaar op een telefoon.
+- **Alternatieven:** per halfjaar op de datum van de wedstrijd (botst); de schakelaar volgen met een regel voor een derde en vierde wedstrijd in een seizoen (de grafiek kan ze niet tonen); een label op de veelvouden van vijf in plaats van vanaf het eerste jaar (dat eerste jaar heeft dan soms geen label).
 
-## Het gemiddelde loopt over acht opeenvolgende gespeelde plekken en stopt bij een gat
+## Het gemiddelde loopt over hoogstens acht gespeelde plekken, zodat elk staafje een punt heeft
 
 - **Datum:** 4 november 2026
-- **Besluit:** de lijn van "Resultaten sinds" is het gemiddelde aantal punten per wedstrijd over acht opeenvolgende plekken die alle gespeeld zijn, vier seizoenen, en stopt bij een gat (`timelineWindow` in `src/opponents.ts`, #718).
+- **Besluit:** elk punt van de lijn van "Resultaten sinds" is het gemiddelde aantal punten per wedstrijd over die wedstrijd en de wedstrijden ervoor in dezelfde reeks, hoogstens acht, vier seizoenen (`timelineWindow` in `src/opponents.ts`, `runningAverage` in het designsysteem, #718).
+  De eerste punten van een reeks middelen dus over minder dan acht wedstrijden, en elke gespeelde wedstrijd heeft een punt.
+  Een gat (een seizoen zonder wedstrijd) stopt de lijn, en na het gat begint een nieuwe reeks.
   De kaart is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline`), zonder zin die zegt waarom.
-  Heeft een club minder dan 8 wedstrijden, dan heeft de kaart staafjes en geen lijn.
-- **Waarom:** de projecteigenaar bekeek vensters van 4, 6, 8 en 10 wedstrijden met de echte uitslagen tegen AZ en FC Groningen en koos 8.
-  Vier seizoenen geven een rustige lijn die laat zien hoe het over een periode ging, en een club die tussendoor lager speelde, geeft geen gemiddelde over een gat heen.
-  Het is dezelfde `movingAverage` als bij het seizoen, zonder nieuwe regel.
-- **Alternatieven:** een venster van 4 (springt bij elke wedstrijd), van 6, van 10 of van 5 zoals de rij "Vorm" (een lijn die pas na vijf seizoenen achter elkaar begint, of een vreemd getal bij twee wedstrijden per seizoen); het gemiddelde over een gat heen trekken (laat zien wat er niet is).
+- **Waarom:** de projecteigenaar bekeek vensters van 4, 6, 8 en 10 wedstrijden met de echte uitslagen tegen AZ en FC Groningen en koos 8, en daarna een grens van hoogstens 8 voor AZ en Excelsior Rotterdam, zodat de lijn bij elk staafje begint.
+  Een gemiddelde over een volle reeks van acht liet de eerste jaren en elke reeks na een gat zonder lijn.
+  Het gemiddelde over een gat heen trekken laat zien wat er niet is, dus een gat blijft een gat.
+  `runningAverage` staat naast `movingAverage` (dat op een vol venster wacht, zoals de vormgrafiek van het seizoen).
+- **Nadeel:** een punt aan het begin van een reeks middelt over weinig wedstrijden en springt meer; een reeks van één wedstrijd heeft alleen een stip.
+- **Alternatieven:** een vol venster van 8 (een lijn die pas na vier seizoenen achter elkaar begint); een venster van 4, 6 of 10; het gemiddelde over een gat heen trekken.
 
 ## De as begint bij het eerste seizoen met gegevens, en de kaart zegt alleen dat het de Eredivisie is
 

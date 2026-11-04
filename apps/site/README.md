@@ -562,8 +562,9 @@ Ze heeft zes delen:
   Het jaar in de kop is het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen (nu 2010/11), en schuift mee als er eerdere seizoenen bijkomen (#414).
   Het is dezelfde grafiek als "Verloop van het seizoen" (staafjes van 3 hoog voor winst, 1 voor gelijk en een streepje voor verlies, en een lijn door het gemiddelde), maar de horizontale as volgt de tijd: elk seizoen heeft twee plekken, de eerste en de tweede gespeelde wedstrijd van de Eredivisie tegen de club op datum (`timelineOf` in `src/opponents.ts`), tot en met het seizoen van nu (een seizoen begint op 1 juli).
   Een seizoen zonder wedstrijd tegen de club in de Eredivisie, een wedstrijd die nog moet komen en een derde wedstrijd in een seizoen zijn een lege plek of vallen weg; de beker en de play-offs staan er niet in.
-  Onder de as staat een label onder het eerste jaar en daarna elke vier jaar (10, 14, 18, …) met de titel "Seizoen".
-  De lijn is het gemiddelde aantal punten over acht plekken achter elkaar die alle gespeeld zijn, vier seizoenen (`timelineWindow`): bij een gat stopt de lijn, en een club met minder dan acht wedstrijden heeft staafjes en geen lijn.
+  Onder de as staat een label onder het eerste jaar en daarna elke vijf jaar (10, 15, 20, 25) met de titel "Seizoen".
+  Elke gespeelde wedstrijd heeft een punt op de lijn: het gemiddelde aantal punten over die wedstrijd en de wedstrijden ervoor, hoogstens acht, vier seizoenen (`timelineWindow`, `runningAverage` uit het designsysteem).
+  De eerste punten van een reeks middelen dus over minder dan acht wedstrijden, en bij een gat stopt de lijn en begint een nieuwe.
   De grafiek is verborgen voor een schermlezer.
   Onder de grafiek staat één alinea met alleen de sleutel (W, G, V uit `tableColumns`) en "Alleen de Eredivisie."
   De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.

@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { BarChart } from '../bar-chart/BarChart'
-import { movingAverage } from '../chart/trend'
+import { runningAverage } from '../chart/trend'
 import { classNames } from '../classNames'
 import { type FormResult, pointsOf } from '../form-chart/form'
 import { FormKey } from '../form-chart/FormKey'
@@ -27,16 +27,20 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
   scope: string
   /** The caption under the labels, such as `Seizoen`. */
   title: string
-  /** The number of results the line averages over. The default is 4. */
+  /**
+   * The most results the line averages over: each point is the average of its result and the
+   * ones before it in the same run, up to this many. The default is 4.
+   */
   window?: number
 }
 
 /**
  * Results over the years as bars: a place on the axis for each result, with gaps where there
- * is none, and a smooth line through the average of the points over the last results. The
- * axis follows the time, so it has the same places whatever has been played, and a label sits
- * under every fifth year. A gap in the results is a gap in the line. Under the chart are the
- * key to the letters and the text about what counts, so the picture is explained in text too.
+ * is none, and a smooth line through the average of the points over the last results, at most
+ * `window` of them, so every result has a point. The axis follows the time, so it has the same
+ * places whatever has been played, and a label sits under the first year and every fifth
+ * after. A gap in the results is a gap in the line. Under the chart are the key to the letters
+ * and the text about what counts, so the picture is explained in text too.
  * The chart itself is hidden from a screen reader, so give the same numbers in a list or a
  * table on the same page.
  *
@@ -55,7 +59,7 @@ export const FormTimeline = ({
   window: span = 4,
   ...props
 }: FormTimelineProps) => {
-  const values = movingAverage(
+  const values = runningAverage(
     results.map((result) => (result === null ? null : pointsOf(result))),
     span,
   )
