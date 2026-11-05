@@ -12,6 +12,7 @@ import {
   type NewMatch,
   persons,
   players,
+  wikipediaPages,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -21,8 +22,11 @@ import type { MatchEntry } from './match-form'
 
 import { createAccount } from './accounts'
 import {
+  countHeldChanges,
   countMatchesWithoutResult,
   countWaitingDifferences,
+  decideHeldChange,
+  findHeldChange,
   findMatch,
   listAdminMatches,
   saveEntry,
@@ -628,5 +632,104 @@ describe('countWaitingDifferences', () => {
     await addDifference(null)
 
     expect(await countWaitingDifferences(database.db)).toEqual({ seasons: [], total: 0 })
+  })
+})
+
+describe('the changes of Wikipedia that are held back', () => {
+  /** A change of Wikipedia that waits for a decision, unless the values say otherwise. */
+  async function addHeld(matchId: null | number, overrides: Partial<typeof matchChanges.$inferInsert> = {}) {
+    const [inserted] = await database.db
+      .insert(matchChanges)
+      .values({
+        changed: 'goals',
+        class: 'suspicious',
+        competition: 'Eredivisie',
+        firstSeenAt: t0,
+        lastSeenAt: t1,
+        matchId,
+        newValue: 'b',
+        oldValue: 'a',
+        reason: 'the season is over, and its matches do not change',
+        round: 'Speelronde 11',
+        season: '2026/27',
+        status: 'pending',
+        timesSeen: 3,
+        ...overrides,
+      })
+      .$returningId()
+
+    return inserted?.id ?? 0
+  }
+
+  it('counts nothing, and names no season, when no change is held back', async () => {
+    expect(await countHeldChanges(database.db)).toEqual({ seasons: [], total: 0 })
+  })
+
+  it('counts the held changes in all seasons and names the seasons, the newest first', async () => {
+    const now = await addMatch()
+    const before = await addMatch({ round: 'Achtste finales', season: '2013/14' })
+
+    await addHeld(before, { round: 'Achtste finales', season: '2013/14' })
+    await addHeld(now)
+    await addHeld(now, { newValue: null })
+
+    expect(await countHeldChanges(database.db)).toEqual({ seasons: ['2026/27', '2013/14'], total: 3 })
+  })
+
+  it('leaves out what is not a held change: a decided one, a difference with an entry and a deleted match', async () => {
+    const id = await addMatch()
+
+    await addHeld(id, { status: 'accepted' })
+    await addHeld(id, { part: 'result' })
+    await addHeld(null)
+
+    expect(await countHeldChanges(database.db)).toEqual({ seasons: [], total: 0 })
+    // The other kind still counts its own.
+    expect(await countWaitingDifferences(database.db)).toEqual({ seasons: ['2026/27'], total: 1 })
+  })
+
+  it('tells the list which matches have a held change, and the form of the match its changes and pages', async () => {
+    const held = await addMatch()
+    const quiet = await addMatch({ opponent: 'Ajax', round: 'Speelronde 12' })
+    const id = await addHeld(held)
+
+    await addHeld(held, { status: 'rejected' })
+    await database.db.insert(wikipediaPages).values([
+      { kind: 'programme', readAt: t1, season: '2026/27', title: 'Eredivisie 2026/27' },
+      { kind: 'cup', readAt: t1, season: '2026/27', title: 'KNVB Beker 2026/27' },
+    ])
+
+    const { rows } = await listAdminMatches(database.db, '2026/27', t1)
+    const found = await findMatch(database.db, held)
+
+    expect(rows.find((row) => row.id === held)).toMatchObject({ differs: 0, held: 1 })
+    expect(rows.find((row) => row.id === quiet)).toMatchObject({ held: 0 })
+    expect(found?.held).toMatchObject([{ id, matchId: held, part: null, timesSeen: 3 }])
+    expect(found?.pages.map((page) => page.title)).toEqual(['Eredivisie 2026/27', 'KNVB Beker 2026/27'])
+    expect((await findMatch(database.db, quiet))?.held).toEqual([])
+  })
+
+  it('finds a held change that waits, and nothing else', async () => {
+    const matchId = await addMatch()
+    const id = await addHeld(matchId)
+    const decided = await addHeld(matchId, { status: 'rejected' })
+    const difference = await addHeld(matchId, { part: 'result' })
+
+    expect(await findHeldChange(database.db, id)).toMatchObject({ id, matchId, part: null })
+    expect(await findHeldChange(database.db, decided)).toBeUndefined()
+    expect(await findHeldChange(database.db, difference)).toBeUndefined()
+    expect(await findHeldChange(database.db, 99_999)).toBeUndefined()
+  })
+
+  it('decides a held change in one transaction with its line in the log', async () => {
+    const matchId = await addMatch()
+    const id = await addHeld(matchId, { newValue: null })
+
+    expect(await decideHeldChange(database.db, userId, id, 'keep', 'Het blijft staan', t1)).toBe('done')
+    expect(await decideHeldChange(database.db, userId, id, 'take-over', 'Te laat', t1)).toBe('not-waiting')
+    expect(await database.db.select().from(matches)).toHaveLength(1)
+    expect(await database.db.select().from(auditLog)).toMatchObject([
+      { action: 'match.keep', itemId: matchId, reason: 'Het blijft staan', userId },
+    ])
   })
 })

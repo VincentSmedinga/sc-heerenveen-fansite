@@ -4,6 +4,7 @@ import { adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
+import { heldMatchId } from './held-changes'
 import { matchId } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -13,7 +14,8 @@ import { matchId } from './matches'
 // admin.ts).
 // `{draft}` and `{published}` in a path stand for the number of the made-up draft and the
 // made-up published article, and `{match}` for the first made-up match of this season that
-// is still to be played, which the database gives.
+// is still to be played, which the database gives, and `{held}` for the match of the season
+// before it that has a made-up change of Wikipedia that is held back (see held-changes.ts).
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -176,6 +178,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=aangepast', status: 200 },
   { admin: 'beheerder', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`, status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden?fout=weg', status: 200 },
+  // A change of Wikipedia that is held back: its choice in the list, in an earlier season, and
+  // the card on the match, with the form that decides it.
+  { admin: 'beheerder', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=wikipedia-wacht`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden?gedaan=verwijderd', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{held}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{held}?gedaan=wijziging-afgewezen', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/999999', status: 404 },
@@ -205,6 +213,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/clubnamen', status: 404 },
   { admin: 'moderator', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{match}', status: 404 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{held}', status: 404 },
   { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
   { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
   // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
@@ -224,6 +233,7 @@ async function withNumbers(path: string) {
         .replace('{draft}', String(await articleIdOf(testArticles.draft.slug)))
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
         .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
+        .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '{held}')
     : path
 }
 

@@ -3,7 +3,15 @@
 import { redirect } from 'next/navigation'
 
 import { parseItemId, parseReason } from '#src/beheer/items'
-import { decideDifference, findDifference, findMatch, saveEntry, undoEntry } from '#src/beheer/match-entries'
+import {
+  decideDifference,
+  decideHeldChange,
+  findDifference,
+  findHeldChange,
+  findMatch,
+  saveEntry,
+  undoEntry,
+} from '#src/beheer/match-entries'
 import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '#src/beheer/match-fields'
 import { newGoal, readButton, readValues, validate } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
@@ -20,6 +28,9 @@ import { matchesPath, matchPath } from './paths'
 
 /** Where the form that decides a difference comes back to, with its error. */
 export type ConflictFormState = { error?: string }
+
+/** Where the form that decides a held change of Wikipedia comes back to, with its error. */
+export type HeldChangeFormState = { error?: string }
 
 /** Where the form for removing the entry of a match comes back to, with its error. */
 export type RemoveFormState = { error?: string }
@@ -72,6 +83,61 @@ export async function submitConflict(
       : outcome === 'no-proposal'
         ? matchPath(difference.matchId, 'niet-gelukt')
         : `${matchesPath}?fout=besloten`,
+  )
+}
+
+/**
+ * Decides a change that Wikipedia holds back: "overnemen" makes the match what Wikipedia says
+ * now (or removes it, when the page does not name it any more), "afwijzen" leaves the match as
+ * it is. It asks for a reason, as every change does. The number of the change is bound to the
+ * action and checked again, and one that is decided already (by someone else, by the command or
+ * by the import after seven days) or whose match is gone ends on the list with a notice.
+ */
+export async function submitHeldChange(
+  changeId: number,
+  _previous: HeldChangeFormState,
+  formData: FormData,
+): Promise<HeldChangeFormState> {
+  const { userId } = await requireRole('beheerder')
+  const id = parseItemId(changeId)
+  const change = id === undefined ? undefined : await findHeldChange(getDatabase().db, id)
+
+  if (id === undefined || change === undefined) {
+    redirect(`${matchesPath}?fout=besloten`)
+  }
+
+  const decision = formData.get('besluit')
+
+  if (decision !== 'overnemen' && decision !== 'afwijzen') {
+    return { error: 'Kies of je Wikipedia overneemt of de wijziging afwijst.' }
+  }
+
+  const reason = parseReason(formData.get('reden'))
+
+  if ('error' in reason) {
+    return {
+      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+    }
+  }
+
+  const outcome = await decideHeldChange(
+    getDatabase().db,
+    userId,
+    id,
+    decision === 'overnemen' ? 'take-over' : 'keep',
+    reason.reason,
+  )
+
+  redirect(
+    outcome === 'done'
+      ? decision === 'overnemen' && change.newValue === null
+        ? `${matchesPath}?gedaan=verwijderd`
+        : matchPath(change.matchId, decision === 'overnemen' ? 'wikipedia-overgenomen' : 'wijziging-afgewezen')
+      : outcome === 'no-proposal'
+        ? matchPath(change.matchId, 'wijziging-niet-gelukt')
+        : outcome === 'gone'
+          ? `${matchesPath}?fout=weg`
+          : `${matchesPath}?fout=besloten`,
   )
 }
 

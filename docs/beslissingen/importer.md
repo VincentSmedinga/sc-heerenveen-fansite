@@ -1326,6 +1326,8 @@
   Een uitslag in het gat tussen 24 uur en drie dagen wel overnemen (een vandaal wacht dan twee dagen en komt erdoor).
 - **Later:** zie _Een uitslag die verandert, nemen we over, en na drie dagen met een waarschuwing_.
 - **Later:** een wedstrijd met een markering van de redactie volgt andere regels; zie _De invoer van de redactie staat in de gewone tabellen, met een markering_ en _Bij een verschil blijft de invoer staan en schrijft de import het op_.
+- **Later:** een mens accepteert of wijst een wijziging ook af in het beheer, niet alleen met `pnpm run import:changes`; zie _Een vastgehouden wijziging van Wikipedia beslist een beheerder in het beheer, in de schermen van de wedstrijden_ in `site.md`.
+  Het scherm en het commando gebruiken dezelfde code (`decideChange`), en een wijziging in een afgelopen seizoen neemt alleen een mens over.
 
 ## De invoer van de redactie staat in de gewone tabellen, met een markering
 

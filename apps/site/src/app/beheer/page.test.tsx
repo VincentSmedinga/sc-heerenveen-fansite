@@ -7,18 +7,30 @@ import LoginPage, { metadata as loginMetadata } from './inloggen/page'
 import SentPage, { metadata as sentMetadata } from './inloggen/verstuurd/page'
 import AdminPage, { metadata as adminMetadata } from './page'
 
-const { countMatchesWithoutResult, countWaitingDifferences, findSession, loginLinkWorks, requireRole, sessionToken } =
-  vi.hoisted(() => ({
-    countMatchesWithoutResult: vi.fn(),
-    countWaitingDifferences: vi.fn(),
-    findSession: vi.fn(),
-    loginLinkWorks: vi.fn(),
-    requireRole: vi.fn(),
-    sessionToken: vi.fn(),
-  }))
+const {
+  countHeldChanges,
+  countMatchesWithoutResult,
+  countWaitingDifferences,
+  findSession,
+  loginLinkWorks,
+  requireRole,
+  sessionToken,
+} = vi.hoisted(() => ({
+  countHeldChanges: vi.fn(),
+  countMatchesWithoutResult: vi.fn(),
+  countWaitingDifferences: vi.fn(),
+  findSession: vi.fn(),
+  loginLinkWorks: vi.fn(),
+  requireRole: vi.fn(),
+  sessionToken: vi.fn(),
+}))
 
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('#src/beheer/match-entries', () => ({ countMatchesWithoutResult, countWaitingDifferences }))
+vi.mock('#src/beheer/match-entries', () => ({
+  countHeldChanges,
+  countMatchesWithoutResult,
+  countWaitingDifferences,
+}))
 vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
@@ -28,6 +40,8 @@ vi.mock('next/navigation', () => ({
 }))
 
 beforeEach(() => {
+  countHeldChanges.mockReset()
+  countHeldChanges.mockResolvedValue({ seasons: [], total: 0 })
   countMatchesWithoutResult.mockReset()
   countMatchesWithoutResult.mockResolvedValue(0)
   countWaitingDifferences.mockReset()
@@ -137,6 +151,46 @@ describe('the admin', () => {
     expect(countWaitingDifferences).toHaveBeenCalledTimes(3)
   })
 
+  it('tells a beheerder how many changes of Wikipedia are held back, and nobody else', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).toContain('1 wijziging van Wikipedia wacht op een besluit')
+
+    countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 3 })
+    expect(renderToStaticMarkup(await AdminPage())).toContain('3 wijzigingen van Wikipedia wachten op een besluit')
+
+    // Each line counts its own kind: held changes do not make a line about differences.
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
+
+    countHeldChanges.mockResolvedValue({ seasons: [], total: 0 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('wijziging')
+
+    countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 3 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    countHeldChanges.mockClear()
+    const html = renderToStaticMarkup(await AdminPage())
+
+    expect(html).not.toContain('wijziging')
+    expect(html).not.toContain('<aside')
+    expect(countHeldChanges).not.toHaveBeenCalled()
+  })
+
+  it('links the line about held changes to the choice Wikipedia wacht of the season that holds them', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    const link = async () =>
+      (renderToStaticMarkup(await AdminPage()).match(
+        /<a href="([^"]*)">\d+ wijzigingen? van Wikipedia wachte?n? op een besluit<\/a>/,
+      ) ?? [])[1]
+    const slug = currentSeason.replace('/', '-')
+
+    countHeldChanges.mockResolvedValue({ seasons: [currentSeason, '2013/14'], total: 2 })
+    expect(await link()).toBe(`/beheer/wedstrijden?seizoen=${slug}&amp;tonen=wikipedia-wacht`)
+
+    // A season that is over: the newest one that holds a change.
+    countHeldChanges.mockResolvedValue({ seasons: ['2024/25', '2013/14'], total: 2 })
+    expect(await link()).toBe('/beheer/wedstrijden?seizoen=2024-25&amp;tonen=wikipedia-wacht')
+  })
+
   it('tells a beheerder how many matches of the season have no result, and nobody else', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
     countMatchesWithoutResult.mockResolvedValue(1)
@@ -158,6 +212,7 @@ describe('the admin', () => {
   it('lists the lines of the card one under the other, the differences first', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
     countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 2 })
+    countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 1 })
     countMatchesWithoutResult.mockResolvedValue(3)
 
     const html = renderToStaticMarkup(await AdminPage())
@@ -165,6 +220,7 @@ describe('the admin', () => {
 
     expect([...aside.matchAll(/<li>(.*?)<\/li>/g)].map(([, line]) => line?.replace(/<[^>]*>/g, ''))).toEqual([
       '2 afwijkingen van Wikipedia wachten op een besluit',
+      '1 wijziging van Wikipedia wacht op een besluit',
       '3 wedstrijden zonder uitslag',
     ])
   })

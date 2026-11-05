@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { adminCookie } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { earlierSeasonSlug } from './earlier-season'
+import { heldMatchId } from './held-changes'
 import { matchId } from './matches'
 
 // Every screen of the admin on a phone (#618): 390 pixels wide, with touch. The pages are
@@ -22,7 +23,9 @@ const screens = [
   '/beheer/artikelen/{published}/versies/1',
   '/beheer/wedstrijden',
   `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`,
+  `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=wikipedia-wacht`,
   '/beheer/wedstrijden/{match}',
+  '/beheer/wedstrijden/{held}',
   '/beheer/stadions',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
@@ -35,6 +38,7 @@ async function withNumbers(path: string) {
     .replace('{draft}', path.includes('{draft}') ? String(await articleIdOf(testArticles.draft.slug)) : '')
     .replace('{published}', path.includes('{published}') ? String(await articleIdOf(testArticles.published.slug)) : '')
     .replace('{match}', path.includes('{match}') ? String(await matchId()) : '')
+    .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '')
 }
 
 test.use({ hasTouch: true, isMobile: true, viewport: { height: 780, width: 390 } })

@@ -35,16 +35,24 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-/** What the list shows: the matches without a result, those the editors changed, or all. */
-type Show = 'aangepast' | 'alles' | 'zonder-uitslag'
+/**
+ * What the list shows: the matches without a result, those the editors changed, those with a
+ * change that Wikipedia holds back, or all.
+ */
+type Show = 'aangepast' | 'alles' | 'wikipedia-wacht' | 'zonder-uitslag'
 
-const shows: readonly Show[] = ['zonder-uitslag', 'alles', 'aangepast']
+const shows: readonly Show[] = ['zonder-uitslag', 'alles', 'aangepast', 'wikipedia-wacht']
 
 /** The list opens on what is left to do. */
 const defaultShow: Show = 'zonder-uitslag'
 
+const done: Record<string, string> = {
+  verwijderd: 'De wedstrijd is weggehaald, omdat hij niet meer op de pagina van Wikipedia staat.',
+}
+
 const notices: Record<string, string> = {
-  besloten: 'Over deze afwijking is al beslist, door iemand anders of door de import. Er is niets veranderd.',
+  besloten:
+    'Over deze afwijking of wijziging is al beslist, door iemand anders, door het commando of door de import. Er is niets veranderd.',
   weg: 'Deze wedstrijd bestaat niet. Er is niets veranderd. Kies hieronder een wedstrijd.',
 }
 
@@ -54,7 +62,7 @@ const notices: Record<string, string> = {
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole('beheerder')
 
-  const { fout, seizoen, tonen } = await searchParams
+  const { fout, gedaan, seizoen, tonen } = await searchParams
   const now = new Date()
   const current = seasonOf(now)
   const { db } = getDatabase()
@@ -67,10 +75,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const { rows } = await listAdminMatches(db, season, now)
   const lacking = rows.filter((match) => match.lacksResult)
   const edited = rows.filter((match) => match.edited.length > 0)
-  const shown = { aangepast: edited, alles: rows, 'zonder-uitslag': lacking }[show]
+  const holding = rows.filter((match) => match.held > 0)
+  const shown = { aangepast: edited, alles: rows, 'wikipedia-wacht': holding, 'zonder-uitslag': lacking }[show]
   const address = (choice: Show) =>
     listPath(season === current ? undefined : season, choice === defaultShow ? undefined : choice)
-  const notice = typeof fout === 'string' ? notices[fout] : undefined
+  const notice = typeof fout === 'string' ? notices[fout] : typeof gedaan === 'string' ? done[gedaan] : undefined
 
   return (
     <Page.Main
@@ -112,6 +121,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                 label: `Zonder uitslag (${lacking.length})`,
               },
               { current: show === 'aangepast', href: address('aangepast'), label: `Aangepast (${edited.length})` },
+              {
+                current: show === 'wikipedia-wacht',
+                href: address('wikipedia-wacht'),
+                label: `Wikipedia wacht (${holding.length})`,
+              },
             ]}
             label="Wedstrijden filteren"
           />
@@ -140,6 +154,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 const emptyTexts: Record<Show, string> = {
   aangepast: 'De redactie heeft in dit seizoen nog geen wedstrijd aangepast.',
   alles: '',
+  'wikipedia-wacht': 'Er wacht geen wijziging van Wikipedia op een besluit in dit seizoen.',
   'zonder-uitslag': 'Alle wedstrijden hebben een uitslag.',
 }
 
@@ -208,6 +223,12 @@ function StatusCell({ match }: { match: AdminMatchRow }) {
         <>
           {' '}
           <Tag tone="highlight">Aangepast</Tag>
+        </>
+      )}
+      {match.held === 0 ? null : (
+        <>
+          {' '}
+          <Tag tone="attention">Wikipedia wacht</Tag>
         </>
       )}
       {match.differs === 0 ? null : (

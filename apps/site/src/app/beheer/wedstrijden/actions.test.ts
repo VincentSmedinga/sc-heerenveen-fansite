@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
+import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
 import { encodePartProposal } from '@fansite/db/match-conflicts'
 import {
   adminUsers,
@@ -22,7 +23,7 @@ import { emptyFields, emptyGoal } from '#src/beheer/match-fields'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitConflict, submitMatch, submitRemoveEntry } from './actions'
+import { submitConflict, submitHeldChange, submitMatch, submitRemoveEntry } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -495,5 +496,184 @@ describe('submitConflict', () => {
     jar.clear()
     expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({ redirect: '/beheer/inloggen' })
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+  })
+})
+
+describe('submitHeldChange', () => {
+  const wikipedia: ReadMatch = {
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
+    attendance: null,
+    competition: 'Eredivisie',
+    dateText: null,
+    extraTime: false,
+    factsProblem: null,
+    goals: null,
+    goalsAgainst: 1,
+    goalsFor: 3,
+    goalsProblem: null,
+    home: true,
+    kickoffAt: scheduled.kickoffAt ?? null,
+    matchDate: '2026-10-31',
+    note: null,
+    opponent: 'N.E.C.',
+    opponentPage: null,
+    penaltiesAgainst: null,
+    penaltiesFor: null,
+    referee: null,
+    round: 'Speelronde 11',
+    stadium: null,
+    status: 'played',
+  }
+
+  /** A played match, 2-1, and a change that Wikipedia holds back: it says 3-1, or nothing. */
+  async function held(newValue: null | string = 'sc Heerenveen 3–1 N.E.C.') {
+    const [match] = await database.db.select().from(matches)
+
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: 1, goalsFor: 2, resultSetAt: new Date('2026-10-31T21:00:00Z'), status: 'played' })
+      .where(eq(matches.id, matchId))
+    await database.db.insert(matchChanges).values({
+      changed: newValue === null ? 'removed' : 'result',
+      class: 'suspicious',
+      competition: 'Eredivisie',
+      firstSeenAt: new Date('2026-11-02T10:00:00Z'),
+      lastSeenAt: new Date('2026-11-03T10:00:00Z'),
+      matchId,
+      newValue,
+      oldValue: 'sc Heerenveen 2–1 N.E.C.',
+      proposal: newValue === null ? null : encodeProposal({ clubId: match!.clubId, goals: [], match: wikipedia }),
+      reason: 'the result changed after 3 days',
+      round: 'Speelronde 11',
+      season: '2026/27',
+      status: 'pending',
+    })
+
+    return (await database.db.select().from(matchChanges))[0]?.id ?? 0
+  }
+
+  const decide = (changeId: number | string, fields: Record<string, string>) => {
+    const formData = new FormData()
+
+    for (const [name, value] of Object.entries(fields)) {
+      formData.set(name, value)
+    }
+
+    return resultOf(() => submitHeldChange(changeId as number, {}, formData))
+  }
+
+  it('takes Wikipedia over: the match changes, the change is accepted, and the reason is in the log', async () => {
+    const id = await held()
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Ik zag het in het verslag' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=wikipedia-overgenomen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 3, status: 'played' })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'person', status: 'accepted' }])
+    expect(await log()).toMatchObject([
+      { action: 'match.take-over', itemId: matchId, reason: 'Ik zag het in het verslag', userId },
+    ])
+  })
+
+  it('rejects the change: the match stays as it is, and the reason is in the log', async () => {
+    const id = await held()
+
+    expect(await decide(id, { besluit: 'afwijzen', reden: 'Dat klopt niet' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=wijziging-afgewezen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    expect(await log()).toMatchObject([{ action: 'match.keep', reason: 'Dat klopt niet', userId }])
+  })
+
+  it('removes the match when Wikipedia does not name it any more, and leads to the list', async () => {
+    const id = await held(null)
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Het is weg' })).toEqual({
+      redirect: '/beheer/wedstrijden?gedaan=verwijderd',
+    })
+    expect(await database.db.select().from(matches)).toEqual([])
+    expect(await log()).toMatchObject([{ action: 'match.take-over', itemId: matchId }])
+  })
+
+  it('asks for a reason and for a choice, and decides nothing without them', async () => {
+    const id = await held()
+
+    expect(await decide(id, { besluit: 'overnemen', reden: '  ' })).toEqual({ error: 'Schrijf waarom je dit beslist.' })
+    expect(await decide(id, { besluit: 'afwijzen', reden: 'x'.repeat(301) })).toEqual({
+      error: 'Schrijf hoogstens 300 tekens.',
+    })
+    expect(await decide(id, { besluit: 'houden', reden: 'Waarom' })).toEqual({
+      error: 'Kies of je Wikipedia overneemt of de wijziging afwijst.',
+    })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+    expect(await log()).toEqual([])
+  })
+
+  it('changes nothing for a change that is decided already, and leads to the list with a notice', async () => {
+    const id = await held()
+
+    await decide(id, { besluit: 'afwijzen', reden: 'Eerste' })
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect(await decide(99_999, { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect(await decide('abc', { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
+    expect(await log()).toHaveLength(1)
+  })
+
+  it('does not take a difference with an entry of the editors for a held change', async () => {
+    const id = await held()
+
+    await database.db.update(matchChanges).set({ part: 'result' }).where(eq(matchChanges.id, id))
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+  })
+
+  it('leads to the list with a notice when the match is gone, and changes nothing', async () => {
+    const id = await held()
+
+    // The match is not on the round of the change any more.
+    await database.db.update(matches).set({ round: 'Speelronde 12' }).where(eq(matches.id, matchId))
+
+    expect(await decide(id, { besluit: 'afwijzen', reden: 'Waarom' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=weg',
+    })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+    expect(await log()).toEqual([])
+  })
+
+  it('says so when the change has no proposal to apply, and changes nothing', async () => {
+    const id = await held()
+
+    await database.db.update(matchChanges).set({ proposal: 'niets' }).where(eq(matchChanges.id, id))
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=wijziging-niet-gelukt`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
+    expect(await log()).toEqual([])
+  })
+
+  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+    const id = await held()
+
+    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    await expect(decide(id, { besluit: 'overnemen', reden: 'Waarom' })).rejects.toThrow('not found')
+
+    jar.clear()
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({ redirect: '/beheer/inloggen' })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
   })
 })

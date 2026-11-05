@@ -451,6 +451,9 @@ De site leest ze met `listLeagueResults`, voor de stand over de laatste vijf wed
 Een pagina kan daarmee de bron noemen.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
 
+Een wijziging die de importer vasthoudt (een rij zonder `part`) beslist `decideChange` in `src/match-changes.ts`, zoals `decideConflict` een afwijking met de invoer van de redactie beslist: het beheer en het commando `import:changes` roepen allebei die functie aan, in één transactie met de regel in `audit_log`.
+De module bewaart ook de typen en de code van een voorstel (`Proposal`, `updateMatch`, `storeGoals`).
+
 `match_changes` bewaart de wijzigingen van een wedstrijd die de importer beoordeelde (zie de README van de importer, _Hoe betrouwbaar een wijziging is_).
 
 | Kolom                               | Betekenis                                                                                                                               |
