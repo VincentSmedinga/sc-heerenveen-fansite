@@ -16,7 +16,17 @@ import type {
 import { connect } from './client.ts'
 import { withClubs } from './clubs.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, leagueResults, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
+import {
+  feeds,
+  leagueResults,
+  matches,
+  matchGoals,
+  persons,
+  players,
+  sources,
+  standings,
+  wikipediaPages,
+} from './schema.ts'
 import { seasonOf } from './season.ts'
 import { seedStaff } from './staff-seed.ts'
 
@@ -882,17 +892,19 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
 }
 
 /**
- * Points the made-up goals of the season to the made-up players they name by page, for the
- * goals that have none yet. The seed of the matches and the seed of the squad each call it when
- * they are done, so the links are there whichever of the two runs last. A goal whose page no
- * player has stays without a link.
+ * Points the made-up goals of the season to the made-up players they name by page, and to the
+ * person of that player, for the goals that have none yet. The seed of the matches and the seed
+ * of the squad each call it when they are done, so the links are there whichever of the two
+ * runs last. A goal whose page no player has stays without a link.
  */
-async function linkMadeUpGoals(db: Pick<Database, 'select' | 'update'>, season: string) {
+async function linkMadeUpGoals(db: Pick<Database, 'insert' | 'select' | 'update'>, season: string) {
+  await personsForMadeUpPlayers(db, season)
+
   const squad = await db
-    .select({ id: players.id, page: players.wikipediaPage })
+    .select({ id: players.id, page: players.wikipediaPage, personId: players.personId })
     .from(players)
     .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
-  const idOf = new Map(squad.map((player) => [player.page, player.id]))
+  const playerOf = new Map(squad.map((player) => [player.page, player]))
   const unlinked = await db
     .select({ id: matchGoals.id, page: matchGoals.wikipediaPage })
     .from(matchGoals)
@@ -900,11 +912,67 @@ async function linkMadeUpGoals(db: Pick<Database, 'select' | 'update'>, season: 
     .where(and(eq(matches.season, season), isNotNull(matchGoals.wikipediaPage), isNull(matchGoals.playerId)))
 
   for (const goal of unlinked) {
-    const playerId = idOf.get(goal.page)
+    const player = playerOf.get(goal.page)
 
-    if (playerId !== undefined) {
-      await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
+    if (player !== undefined) {
+      await db
+        .update(matchGoals)
+        .set({ personId: player.personId, playerId: player.id })
+        .where(eq(matchGoals.id, goal.id))
     }
+  }
+}
+
+/**
+ * The name of a made-up person in the parts the importer keeps: the search term is the prefix
+ * and the family name, so `van der Kooi` is the prefix `van der` and the family name `Kooi`
+ * (the words in lower case at the start are the prefix), and what comes before the search term
+ * is the given name. A name of one word has no given name.
+ */
+function madeUpPersonName(name: string, searchTerm: string) {
+  const words = searchTerm.split(' ')
+  const prefixLength = words.findIndex((word) => word !== word.toLowerCase())
+  const split = prefixLength < 0 ? words.length - 1 : prefixLength
+  const givenName = name.endsWith(searchTerm) ? name.slice(0, name.length - searchTerm.length).trim() : name
+
+  return {
+    familyName: words.slice(split).join(' '),
+    familyNamePrefix: split === 0 ? null : words.slice(0, split).join(' '),
+    givenName: givenName === '' ? null : givenName,
+  }
+}
+
+/**
+ * Gives each made-up player of the season a person, as the import does (one for each page, with
+ * the name kept in parts), for the players that have none yet.
+ */
+async function personsForMadeUpPlayers(db: Pick<Database, 'insert' | 'select' | 'update'>, season: string) {
+  const squad = await db
+    .select({ id: players.id, name: players.name, page: players.wikipediaPage, searchTerm: players.searchTerm })
+    .from(players)
+    .where(and(eq(players.season, season), isNotNull(players.wikipediaPage), isNull(players.personId)))
+
+  for (const player of squad) {
+    if (player.page === null) {
+      continue
+    }
+
+    await db
+      .insert(persons)
+      .values({
+        ...madeUpPersonName(player.name, player.searchTerm),
+        name: player.name,
+        nameSource: 'manual',
+        wikipediaPage: player.page,
+      })
+      .onDuplicateKeyUpdate({ set: { wikipediaPage: player.page } })
+
+    const [person] = await db.select({ id: persons.id }).from(persons).where(eq(persons.wikipediaPage, player.page))
+
+    await db
+      .update(players)
+      .set({ personId: person?.id ?? null })
+      .where(eq(players.id, player.id))
   }
 }
 

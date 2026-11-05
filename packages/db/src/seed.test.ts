@@ -13,6 +13,7 @@ import {
   leagueResults,
   matches,
   matchGoals,
+  persons,
   playerPositions,
   players,
   sourceKinds,
@@ -827,6 +828,39 @@ describe('the made-up matches', () => {
 
       expect(testvoort.map((goal) => goal.name)).toEqual(['Joris Testvoort', 'Bas Testvoort'])
     })
+
+    it.each(['matches', 'squad'] as const)(
+      'gives the goals and the players a person with the name in parts, whichever seed runs first (%s)',
+      async (first) => {
+        await database.pool.query('DELETE FROM persons')
+        await bothSeeds(first)
+
+        const rows = await database.db
+          .select({
+            family: persons.familyName,
+            given: persons.givenName,
+            page: matchGoals.wikipediaPage,
+            person: matchGoals.personId,
+            playerPerson: players.personId,
+            prefix: persons.familyNamePrefix,
+          })
+          .from(matchGoals)
+          .innerJoin(players, eq(matchGoals.playerId, players.id))
+          .innerJoin(persons, eq(matchGoals.personId, persons.id))
+
+        expect(rows.every((row) => row.person === row.playerPerson)).toBe(true)
+        expect(rows.find((row) => row.page === 'Joris Testvoort')).toMatchObject({
+          family: 'Testvoort',
+          given: 'Joris',
+          prefix: null,
+        })
+        expect(rows.find((row) => row.page === 'Jan van der Voorbeeldstraat-Proefmans')).toMatchObject({
+          family: 'Voorbeeldstraat-Proefmans',
+          given: 'Jan',
+          prefix: 'van der',
+        })
+      },
+    )
 
     it('keeps every player of the squad with a page of his own, and the surname twice in it', () => {
       const squad = madeUpSquad(now)
