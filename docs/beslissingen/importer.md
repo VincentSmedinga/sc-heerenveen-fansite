@@ -926,6 +926,8 @@
   De kaart met doelpuntenmakers telt een gekoppeld doelpunt per `id` en toont de volledige naam, een doelpunt zonder speler per naam als een eigen rij.
 - **Alternatieven:** doorgaan met namen in tekst en per naam tellen (twee spelers met dezelfde achternaam tellen samen); de verwijzing maken met de zoekterm of de achternaam (breekt bij dezelfde achternaam); de selectie bij elke lezing vervangen en de doelpunten opnieuw koppelen (de `id`'s veranderen, dus een link of een pagina per speler breekt later).
 - **Later:** een doelpunt zonder speler maar met een Wikipedia-pagina telt sinds 30 oktober 2026 voor die pagina en toont de titel als volledige naam; zie _Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina_.
+- **Later:** elke doelpuntenmaker en elke speler van de selectie met een pagina heeft sinds 4 november 2026 ook een persoon met een eigen `id` (`person_id`), die alle titels van zijn artikel bij elkaar houdt; zie _Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij_ in `hosting-en-data.md`.
+  De rijen van `players` blijven één per speler en seizoen.
 
 ## De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -941,6 +943,10 @@
   `pnpm run import:status` toont hetzelfde aantal.
   Zo'n doelpunt krijgt zijn speler bij een latere lezing, want de import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw als een koppeling verandert.
 - **Alternatieven:** alleen op de achternaam koppelen (fout bij dezelfde achternaam); een koppeling met de hand in het beheer (er is geen redactieproces voor, en na elke transfer verouderd).
+- **Later:** de importer koppelt sinds 4 november 2026 eerst op de persoon van de pagina (`person_id`), dan op de pagina, de volledige naam en de achternaam, zoals hierboven.
+  Een doelpunt onder een doorverwijzing van de pagina van de speler krijgt zo zijn `player_id`.
+  Hebben twee spelers van een seizoen dezelfde persoon, dan slaat de regel van de persoon over en beslist de pagina.
+  Zie _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_.
 
 ## De eerste goede lezing van de selectie vervangt de verzonnen selectie
 
@@ -2035,6 +2041,8 @@
 - **Nadeel:** een titel die niet bestaat (404), zoals een rode link naar een club, laat de run van het seizoen vallen in plaats van een club zonder artikel te maken.
   Eenmalig komen er ongeveer 55 verzoeken bij voor de titels die er al zijn.
   De slugs `az-2` en `excelsior-rotterdam-2` vervallen zonder omleiding, want er zijn nog geen openbare links (zie #33).
+- **Later:** voor een persoon bewaart de import ook niets uit de tekst van een artikel, tot #715 de voor- en achternaam uit de tekst haalt.
+  Een titel zonder artikel (404) en een mislukt verzoek vallen daar anders uit dan hier: zie _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_.
 - **Alternatieven:** de lijst `clubFullNames` uitbreiden met titels van artikelen (geen verzoeken en geen tabel, maar elk nieuw paar blijft een dubbele club tot iemand het ziet); doorverwijzingen alleen controleren bij het zoeken naar dubbele clubs (de club bestaat dan al en de pagina's tonen hem dubbel); een titel zonder artikel als 404 laten doorgaan (dat is een gok, en een fout valt op).
 
 ## Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst
@@ -2152,3 +2160,46 @@
   De lezer raadt bij een deel dat hij niet kent niet, en dat doet hij hier ook niet.
 - **Alternatieven:** de link naar "Strafschop" bij het tonen overslaan (de naam en de strafschop blijven fout in de database).
   Elke markering tussen haakjes negeren (een markering die iets anders betekent, valt dan stil weg).
+
+## Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing
+
+- **Datum:** 4 november 2026
+- **Besluit:** de import vraagt een titel van een doelpuntenmaker met een pagina, van ons en van de tegenstander, en een titel in de selectie die niet in `person_pages` staat, één keer op en onthoudt het antwoord in `person_pages` (#714).
+  Hij volgt de doorverwijzingen zoals bij `club_pages`.
+  - **Hoe:** `lookUpPersonPages` in `person-pages.ts` gebruikt voor elke titel `lookUpTitles` uit `club-pages.ts` (geen kopie), dus dezelfde fetcher, `robots.txt`, alleen `?action=raw` en hoogstens drie stappen.
+    Het gebeurt voor de transactie van het seizoen, in de import van de wedstrijden en in die van de selectie.
+    De transactie maakt de personen en de rijen van `person_pages` met `createPersonBook` (`@fansite/db/persons`) en zet `person_id` bij de doelpunten en de spelers.
+  - **Een titel zonder artikel** (404, een rode link) wordt een persoon met de titel zoals hij staat.
+  - **Een mislukt verzoek** geeft een waarschuwing met `Persons:` vooraan en laat `person_id` leeg tot de volgende run.
+    Een `robots.txt` die weigert of een verzoek om te wachten stopt het vragen voor die run.
+    Na drie mislukte titels achter elkaar stopt de import ook, zodat een storing niet honderden verzoeken met een time-out kost.
+    De run van het seizoen valt er nooit door.
+  - **Een titel die al bekend is,** kost geen verzoek: ook niet een doorverwijzing naar een bekend artikel.
+    Een tweede run schrijft niets en vraagt niets, en het logboek noemt het aantal titels dat is opgevraagd.
+  - **`personTitleAliases`** in `person-names.ts`, in de vorm van `clubFullNames`, zegt welke titels één persoon zijn als geen doorverwijzing het zegt.
+    Het gaat voor het verzoek: een andere titel kost geen verzoek en is de persoon van de titel die blijft.
+    De lijst begint leeg.
+  - **Een doelpunt in een seizoen dat voorbij is** krijgt zijn `person_id` zonder een wijziging die wacht: een verschil alleen in de koppelingen (speler, pagina, persoon) is een aanvulling (`links` in `classify-change.ts`).
+  - **Een doelpunt dat de redactie in het beheer bewaart** houdt het `person_id` dat de import bewaarde, als het doelpunt niet veranderde.
+    Een doelpunt dat de redactie zelf toevoegt, krijgt geen `person_id` en telt dan op zijn speler of zijn titel, zoals nu.
+- **Waarom:** een club op een gok is erger dan wachten, maar een seizoen mag niet vallen op één speler van een tegenstander.
+  De doelpunten tellen zonder persoon gewoon op de titel mee, zoals nu.
+  Een rode link is nog steeds de speler zoals de wedstrijdpagina hem noemt.
+- **Nadeel:** een pagina die hernoemd wordt, blijft onder de oude titel in de database staan.
+  De waarschuwing voor personen die op elkaar lijken vangt het eerste geval dat dit geeft.
+  De eerste import vraagt ongeveer 680 titels op, eenmalig.
+- **Alternatieven:** de run laten vallen bij een mislukt verzoek (zoals bij clubs; één storing in Wikipedia stopt dan de import van een seizoen).
+  Elke titel elke run opnieuw vragen (kost 680 verzoeken per run).
+
+## Twee personen die op elkaar lijken waarschuwen, en voegen we niet zelf samen
+
+- **Datum:** 4 november 2026
+- **Besluit:** zijn twee titels zonder accenten, hoofdletters, streepjes, spaties en apostrofs gelijk, dan waarschuwt de import (`Persons:`) en voegt hij niets samen (#714).
+  De toevoeging tussen haakjes telt mee: `Johnny Jansen (1952)` en `Johnny Jansen (1975)` lijken niet op elkaar.
+  `pnpm run import:status` toont het aantal groepen, met de titels.
+  Een lijst `personTitleAliases` in de importer zegt welke titels één persoon zijn als geen doorverwijzing het zegt.
+  Er komt geen scherm in het beheer.
+- **Waarom:** samenvoegen op een gelijke naam is een gok bij twee spelers met dezelfde naam.
+  Een scherm voor een handvol gevallen kost meer dan het geeft, en de lijst in de code kan de Builder bijwerken zodra de waarschuwing iets laat zien.
+- **Alternatieven:** automatisch samenvoegen op een gelijke naam (fout bij twee spelers met dezelfde naam).
+  Een lijst in het beheer (een scherm en een werkwijze voor enkele gevallen).

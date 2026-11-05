@@ -49,6 +49,8 @@ export type ChangeInput = {
 /** A goal as the importer compares it, with the player and the page it is linked to. */
 export type GoalState = Pick<ReadGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty' | 'player' | 'stoppageMinutes'> & {
   page: null | string
+  /** Left out or null when the goal has no person. */
+  personId?: null | number
   playerId: null | number
 }
 
@@ -134,7 +136,7 @@ export function goalStateOf(goal: MatchGoal): GoalState {
 }
 
 /** The goal of a read match as the importer compares it. */
-export function goalStateOfRead(goal: ReadGoal & { playerId: null | number }): GoalState {
+export function goalStateOfRead(goal: ReadGoal & { personId: null | number; playerId: null | number }): GoalState {
   return { ...goal, page: goal.playerPage }
 }
 
@@ -153,7 +155,12 @@ function compareGoals(before: GoalState[], now: GoalState[]): GoalDifference {
   const right = now.map(describeGoal)
 
   if (left.length === right.length && left.every((goal, index) => goal === right[index])) {
-    return before.every((goal, index) => goal.playerId === now[index]?.playerId && goal.page === now[index]?.page)
+    return before.every(
+      (goal, index) =>
+        (goal.personId ?? null) === (now[index]?.personId ?? null) &&
+        goal.playerId === now[index]?.playerId &&
+        goal.page === now[index]?.page,
+    )
       ? 'same'
       : 'links'
   }

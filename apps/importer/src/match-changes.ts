@@ -17,7 +17,7 @@ import { reliability } from './classify-change.ts'
 export type Decision = { change: MatchChange; message: string; ok: boolean }
 
 /** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
-export type LinkedGoal = ReadGoal & { playerId: null | number }
+export type LinkedGoal = ReadGoal & { personId: null | number; playerId: null | number }
 
 /** The new state of a match: what the page says, its club and its goals. */
 export type Proposal = { clubId: number; goals: LinkedGoal[]; match: ReadMatch }

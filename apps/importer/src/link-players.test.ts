@@ -35,6 +35,40 @@ describe('the goals of our players', () => {
 describe('linking a goal to a player', () => {
   const link = playerLinker(squad)
 
+  describe('0. by the person of the link', () => {
+    const withPersons = playerLinker([
+      { id: 1, name: 'Alfreð Finnbogason', personId: 10, wikipediaPage: 'Alfreð Finnbogason' },
+      { id: 2, name: 'Filip Đuričić', personId: 20, wikipediaPage: 'Filip Đuričić' },
+      { id: 3, name: 'Bram Jansen', personId: 30, wikipediaPage: 'Bram Jansen' },
+      { id: 4, name: 'Bram Jansen Junior', personId: 30, wikipediaPage: 'Bram Jansen (2)' },
+    ])
+
+    it('finds the player whose person the goal has, when the title is a redirect to his page', () => {
+      expect(withPersons(goal('Finnbogason', 'Alfred Finnbogason', { personId: 10 }))).toBe(1)
+      expect(withPersons(goal('Djuricic', 'Filip Djuričić', { personId: 20 }))).toBe(2)
+    })
+
+    it('goes before the page and the name: the person of the goal wins over a name that fits another', () => {
+      expect(withPersons(goal('Finnbogason', 'Filip Đuričić', { personId: 10 }))).toBe(1)
+    })
+
+    it('falls back on the page and the name when the goal has no person, or a person nobody has', () => {
+      expect(withPersons(goal('Finnbogason', 'Alfreð Finnbogason', { personId: null }))).toBe(1)
+      expect(withPersons(goal('Finnbogason', 'Alfreð Finnbogason'))).toBe(1)
+      expect(withPersons(goal('Onbekend', 'Onbekende titel', { personId: 99 }))).toBeNull()
+      expect(withPersons(goal('Filip Đuričić', null, { personId: 99 }))).toBe(2)
+    })
+
+    it('does not tell two players of one person apart, so it leaves the choice to the page and the name', () => {
+      expect(withPersons(goal('Jansen', 'Bram Jansen (2)', { personId: 30 }))).toBe(4)
+      expect(withPersons(goal('Onbekend', 'Titel die niemand heeft', { personId: 30 }))).toBeNull()
+    })
+
+    it('links no goal that is not of a player of ours', () => {
+      expect(withPersons(goal('Finnbogason', null, { ours: false, personId: 10 }))).toBeNull()
+    })
+  })
+
   describe('1. by the page of the link', () => {
     it('finds the player whose page the goal links to', () => {
       expect(link(goal('Oyen', 'Luca Oyen'))).toBe(1)

@@ -71,6 +71,7 @@ beforeEach(async () => {
   for (const table of [
     'match_changes',
     'matches',
+    'persons',
     'players',
     'league_results',
     'standings',
@@ -280,7 +281,9 @@ describe('the command', () => {
     const { code, lines } = await runCommand(server, past)
 
     expect(code).toBe(0)
-    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
+    expect(
+      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+    ).toEqual([
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
@@ -349,7 +352,9 @@ describe('the command', () => {
     const { code, lines } = await runCommand(server, past)
 
     expect(code).toBe(0)
-    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
+    expect(
+      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+    ).toEqual([
       'Matches 2025/26: 39 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
@@ -397,7 +402,9 @@ describe('the command', () => {
     const stored = await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))
 
     expect(code).toBe(0)
-    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
+    expect(
+      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+    ).toEqual([
       `Matches 2025/26: ${34 + stored.length} new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17`,
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
     ])
@@ -612,7 +619,7 @@ describe('the Europa League matches of 2012/13', () => {
 
     return {
       code,
-      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line)),
+      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
     }
   }
 
@@ -706,7 +713,7 @@ describe('the command for all seasons', () => {
 
     return {
       code,
-      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line)),
+      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
     }
   }
 
