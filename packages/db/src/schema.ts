@@ -682,6 +682,14 @@ export type ClubPage = typeof clubPages.$inferSelect
 
 export type NewClubPage = typeof clubPages.$inferInsert
 
+/** Where the name of a person comes from: the sort key of the article, a guess or the list. */
+export const personNameSources = ['sort_key', 'guess', 'manual'] as const
+
+export type PersonNameSource = (typeof personNameSources)[number]
+
+/** The most characters the columns with the name of a person hold. */
+export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
+
 /**
  * A person who scored a goal or stood in the squad of a match, ours or an opponent's: one row
  * for each article about a player on the Dutch Wikipedia, with an `id` that never changes. The
@@ -692,14 +700,6 @@ export type NewClubPage = typeof clubPages.$inferInsert
  * `person_id` of `match_goals` and `players` points here. A person who is deleted leaves them
  * without a person; the importer finds the person again by the title.
  */
-/** Where the name of a person comes from: the sort key of the article, a guess or the list. */
-export const personNameSources = ['sort_key', 'guess', 'manual'] as const
-
-export type PersonNameSource = (typeof personNameSources)[number]
-
-/** The most characters the columns with the name of a person hold. */
-export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
-
 export const persons = mysqlTable('persons', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
   wikipediaPage: articleTitle('wikipedia_page').notNull().unique(),
