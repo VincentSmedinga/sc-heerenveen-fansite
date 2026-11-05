@@ -806,7 +806,7 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   De regel kijkt naar het seizoen en niet naar een lijst, en hij geldt voor elke competitie.
   Er komt geen reden bij.
   Een wedstrijd die al als `postponed` is bewaard, wordt `cancelled` bij de volgende lezing van het seizoen.
-  Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
+  Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout (voor een wedstrijd van een andere club een waarschuwing, behalve de uitzondering onder _Een gestaakte wedstrijd_).
 - Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
   Wikipedia schrijft de uitslag in `score` als "N – N", ook na verlenging.
   De bekerpagina's van 2021/22 tot en met 2024/25 zetten er haakjes achter (zie _Oudere bekerpagina's_).
@@ -1509,7 +1509,7 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
   Over de reden van het staken of het publiek zegt de regel niets.
 - Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
   Dat geldt ook als het latere blok zelf gestaakt is, een dag of minuut heeft die we niet kennen, of een uitgestelde wedstrijd is.
-  Een score die we niet kennen, geeft altijd een fout.
+  Een score die we niet kennen, geeft een fout bij een wedstrijd van sc Heerenveen en een waarschuwing bij een wedstrijd van een andere club, behalve in de uitzondering hieronder.
 - Het restant staat ook onder `Inhaalronde <nummer>` met hetzelfde nummer als de ronde van het gestaakte blok, en nergens anders.
   Zo staat Excelsior – AZ in 2011/12: onder `Speelronde 13` een blok met de gewone score `0 – 0` op 20 november 2011, waarvan `report` zegt "In de rust gestaakt", en onder `Inhaalronde 13` het blok met `0 – 0` van 7 december 2011 ("Tweede helft").
   Het is één wedstrijd, met de eindstand en de dag van het tweede blok.
@@ -1523,6 +1523,11 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - Een gestaakte wedstrijd van een andere club komt niet in `matches`, want daar staan alleen de wedstrijden van sc Heerenveen.
   De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt, met de eindstand en de dag van dat blok en het nummer van de ronde.
   Een gestaakt blok, in elke schrijfwijze van de score, dat geen bruikbaar restant heeft, krijgt geen uitslag maar een melding in de waarschuwing "league results left out".
+- Eén wedstrijd is een uitzondering: SC Cambuur – Go Ahead Eagles in speelronde 11 van 2026/27 staat op de pagina als `4 – 0 (Gestaakt 82')`, en de stand is daar de officiële einduitslag geworden.
+  De reader telt hem met 4 – 0, op de dag van het blok, bij de uitslagen van de competitie, zolang de score precies zo staat en er geen later blok voor dezelfde twee clubs is.
+  De wedstrijd staat als gegevens in `officialStoppedResults` in `src/read-wikipedia.ts`, met een opmerking `ONE-OFF (#736)`.
+  Meestal wordt het restant van een gestaakte wedstrijd alsnog gespeeld, en leest de import dat al.
+  Wordt nog een gestaakte wedstrijd de officiële uitslag, overweeg dan een algemene regel en haal de uitzondering weg (zie _Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
 - Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
 
