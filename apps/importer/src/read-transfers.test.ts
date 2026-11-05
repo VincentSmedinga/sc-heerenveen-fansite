@@ -448,6 +448,36 @@ describe('readSeasonScorers', () => {
     })
   })
 
+  it('is an error for a table of scorers that is not closed', () => {
+    const text = [
+      '==Doelpuntenmakers==',
+      '{| class="wikitable"',
+      '! Naam',
+      '! Doelpunten',
+      '|-',
+      '| [[Een Speler]] || 3',
+    ].join('\n')
+
+    expect(readSeasonScorers(text)).toEqual({
+      kind: 'error',
+      message: 'a table in the section Doelpuntenmakers is not closed',
+    })
+  })
+
+  it('is an error for tables of scorers that have no players', () => {
+    const text = [
+      '==Doelpuntenmakers==',
+      '{| class="wikitable"',
+      '! Naam',
+      '! Doelpunten',
+      '|-',
+      "| '''Totaal''' || '''0'''",
+      '|}',
+    ].join('\n')
+
+    expect(readSeasonScorers(text)).toEqual({ kind: 'error', message: 'the tables of scorers have no players' })
+  })
+
   it('is an error for a number of goals that is not a number', () => {
     const text = [
       '==Doelpuntenmakers==',
