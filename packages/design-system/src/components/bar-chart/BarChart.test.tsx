@@ -92,6 +92,17 @@ describe('BarChart', () => {
     ])
   })
 
+  it('writes the numbers at the side with the text the page gives', () => {
+    const { container } = render(
+      <BarChart bars={bars} max={3000} ticks={[1000, 3000]} tickText={(value) => `${value / 1000} duizend`} />,
+    )
+
+    expect([...container.querySelectorAll('.hf-bar-chart-scale-number')].map((number) => number.textContent)).toEqual([
+      '1 duizend',
+      '3 duizend',
+    ])
+  })
+
   it('has no guides or numbers at the side without ticks', () => {
     const { container } = render(<BarChart bars={bars} max={3} />)
 

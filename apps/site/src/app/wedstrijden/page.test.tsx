@@ -152,6 +152,7 @@ describe('the page /wedstrijden', () => {
       'verloop-van-het-seizoen',
       'reeksen',
       'thuis-en-uit',
+      'toeschouwers',
       'doelpuntenmakers',
       'topscorers',
       'de-nul-gehouden',

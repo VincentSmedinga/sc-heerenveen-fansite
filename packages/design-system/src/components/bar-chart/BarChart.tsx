@@ -68,6 +68,11 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
    */
   ticks?: readonly number[]
   /**
+   * The text of a number at the side, from its value. The default is the plain number; a page
+   * passes a formatter for its own notation, such as the Dutch `5.000`.
+   */
+  tickText?: (value: number) => string
+  /**
    * What a bar of value 0 looks like: `stub` (the default) is a small bar on the ground, so it
    * can be told from a place with no bar; `none` shows nothing.
    */
@@ -172,6 +177,7 @@ export const BarChart = ({
   max,
   style,
   ticks = [],
+  tickText = String,
   zero = 'stub',
   ...props
 }: BarChartProps) => {
@@ -201,7 +207,7 @@ export const BarChart = ({
               key={tick}
               style={{ '--hf-bar-chart-at': percentOf(tick, max) } as CSSProperties}
             >
-              {tick}
+              {tickText(tick)}
             </span>
           ))}
         </div>

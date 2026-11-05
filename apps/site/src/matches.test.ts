@@ -3,6 +3,7 @@ import type { PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
 import { describe, expect, it } from 'vitest'
 
 import {
+  attendanceOf,
   cleanSheetsOf,
   describeShowDelay,
   extremesOf,
@@ -2215,5 +2216,58 @@ describe('homeAwayOf', () => {
   it('counts a match whose goals per player are not known', () => {
     // `game` has no goals in the list, only a score: it still counts.
     expect(homeAwayOf([game(true, 2, 1)]).home).toMatchObject({ goalsAgainst: 1, goalsFor: 2, played: 1, won: 1 })
+  })
+})
+
+describe('attendanceOf', () => {
+  const home = (attendance: null | number, extra: Partial<PublicMatch> = {}) =>
+    ({
+      ...match('Speelronde 1', 'played', '2026-08-01'),
+      attendance,
+      competition: 'Eredivisie',
+      home: true,
+      ...extra,
+    }) as PublicMatch
+
+  it('keeps the order given, and only the home matches that are not cancelled', () => {
+    const slots = attendanceOf([
+      home(1, { opponent: 'A' }),
+      home(2, { home: false, opponent: 'B' }),
+      home(3, { opponent: 'C', status: 'cancelled' }),
+      home(null, { opponent: 'D', status: 'scheduled' }),
+    ]).slots
+
+    expect(slots.map((slot) => slot.match.opponent)).toEqual(['A', 'D'])
+    expect(slots.map((slot) => slot.attendance)).toEqual([1, null])
+  })
+
+  it('counts the cup and the play-offs only for the choice all', () => {
+    const matches = [home(10), home(20, { competition: 'KNVB Beker' })]
+
+    expect(attendanceOf(matches, 'league').slots).toHaveLength(1)
+    expect(attendanceOf(matches, 'all').slots).toHaveLength(2)
+  })
+
+  it('averages and takes the largest over the numbers above 0, the first match winning a tie', () => {
+    const result = attendanceOf([home(0), home(null), home(20000, { opponent: 'A' }), home(20000, { opponent: 'B' })])
+
+    expect(result.average).toBe(20000)
+    expect(result.known).toBe(2)
+    expect(result.highest?.match.opponent).toBe('A')
+  })
+
+  it('rounds the scale up to a multiple of 5.000, with a line at each', () => {
+    expect(attendanceOf([home(20001)])).toMatchObject({ max: 25000, ticks: [5000, 10000, 15000, 20000, 25000] })
+    expect(attendanceOf([home(20000)]).max).toBe(20000)
+  })
+
+  it('has no average, largest or scale without a number above 0', () => {
+    expect(attendanceOf([home(0), home(null)])).toMatchObject({
+      average: undefined,
+      highest: undefined,
+      known: 0,
+      max: 0,
+      ticks: [],
+    })
   })
 })

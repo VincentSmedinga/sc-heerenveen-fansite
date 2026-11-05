@@ -390,8 +390,8 @@ De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden v
 De pagina deelt met Wedstrijden alles rond het seizoen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, en de onderdelen van `src/seasons.ts`.
 Elk seizoen heeft één adres: `/statistieken` is het lopende seizoen en `/statistieken/2025-26` een eerder seizoen (`app/statistieken/[seizoen]`), en de kiezer gaat via `app/statistieken/kies`, die doorverwijst (303).
 De regels zijn die van Wedstrijden (zie _De wedstrijden_): het lopende seizoen op zijn eigen adres verwijst door, een onbekend seizoen geeft "niet gevonden", en lukt het lezen niet, dan staat er de foutpagina.
-Een eerder seizoen toont dezelfde negen kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
-De ankers van de negen kaarten stonden op `/wedstrijden` en zijn verhuisd, met hun twee oude namen (`topscorers` en `nul-gehouden`).
+Een eerder seizoen toont dezelfde tien kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
+De ankers van de tien kaarten stonden op `/wedstrijden` en zijn verhuisd, met hun twee oude namen (`topscorers` en `nul-gehouden`).
 Op `/wedstrijden` zijn ze weg, met opzet en zonder omleiding (zie `src/anchors.ts`).
 Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze plek in de competitie" en naar "Het verloop van het seizoen", met het seizoen in het adres.
 
@@ -485,7 +485,11 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Elke regel is een naam boven een `ShortMatch`, en bij een doelpunt staan de minuut en de speler in de naam, gescheiden door een middenpunt.
   Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: gebaseerd op 6 van de 7 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
-- **Opmerkelijk:** de laatste kaart van de linker kolom, na Thuis en uit, met het warme vlak en één opmerkelijk feit: een feit over één wedstrijd, speler of trainer, in één zin (`NoteworthyCard` in `src/NoteworthyCard.tsx`).
+- **Toeschouwers:** een kaart in de linker kolom, direct na Thuis en uit, met een staaf (`BarChart`) per thuiswedstrijd van het gekozen seizoen.
+  `attendanceOf` in `src/matches.ts` kiest de plekken: alleen thuiswedstrijden, zonder geannuleerde, met de beker en de play-offs alleen bij Alle wedstrijden.
+  Een wedstrijd zonder getal is een lege plek, `0` een streepje, en de schaal loopt tot het hoogste aantal naar boven afgerond op 5.000.
+  Onder de grafiek staan het gemiddelde, het hoogste aantal en een tabel met elke wedstrijd; zonder getal boven 0 staat er een zin in plaats van de grafiek.
+- **Opmerkelijk:** de laatste kaart van de linker kolom, na Toeschouwers, met het warme vlak en één opmerkelijk feit: een feit over één wedstrijd, speler of trainer, in één zin (`NoteworthyCard` in `src/NoteworthyCard.tsx`).
   Elke soort feit is een kleine functie in `src/noteworthy.ts`, met een test in `src/noteworthy.test.ts`: doelpunten in opeenvolgende minuten, in de blessuretijd, een hattrick, zeven doelpunten of meer, een zege na een achterstand van twee, vijf zeges op rij thuis of uit, en de eerste wedstrijd onder een nieuwe trainer.
   Een nieuwe soort is één functie in `kinds`, zonder nieuwe query: ze lezen de wedstrijden en de trainers van het seizoen, die de pagina al heeft.
   De volgorde is per dag vast en door elkaar gehusseld (`orderNoteworthyFacts`, op de dag in Nederlandse tijd), en `?opmerkelijk=n` kiest het n-de feit, met rond na het laatste.
@@ -627,7 +631,7 @@ De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd o
 De play-offs voor de Conference League en de Europa League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.

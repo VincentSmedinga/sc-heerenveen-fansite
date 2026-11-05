@@ -883,7 +883,7 @@ await withEmptyDatabase((database) =>
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
 
-    // The statistics page shows the nine cards with figures of the made-up matches and table of
+    // The statistics page shows the ten cards with figures of the made-up matches and table of
     // the seed, in two equal columns (the sidebar is as wide as the main), with the credit for
     // Wikipedia under them.
     const statisticsPage = await fetch(`${origin}/statistieken`)
@@ -911,6 +911,7 @@ await withEmptyDatabase((database) =>
         '#verloop-van-het-seizoen',
         '#reeksen',
         '#thuis-en-uit',
+        '#toeschouwers',
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',

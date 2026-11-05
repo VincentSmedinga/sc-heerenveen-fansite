@@ -1040,6 +1040,27 @@ export const topScorersPlaces = 5
 export const topFiveOf = (scorers: TopScorer[]): TopScorer[] =>
   scorers.filter((scorer) => scorer.position <= topScorersPlaces)
 
+export type Attendance = {
+  /** The mean of the known numbers above 0, rounded to a whole number. */
+  average: number | undefined
+  /** The first match with the largest number. */
+  highest: AttendanceSlot | undefined
+  /** How many places have a number above 0. */
+  known: number
+  /** The top of the scale: the largest number, rounded up to a multiple of `attendanceStep`. */
+  max: number
+  slots: AttendanceSlot[]
+  /** The values for the lines and numbers at the side, from one step to `max`. */
+  ticks: number[]
+}
+
+/** One place of the chart of the visitors: a home match, and how many came to it. */
+export type AttendanceSlot = {
+  /** `null` when the number is not known, `0` for a match without an audience. */
+  attendance: null | number
+  match: PublicMatch
+}
+
 /** A player who scored three or more goals in a match, or two, and how often it happened. */
 export type MultiGoalScorer = NameParts & {
   /** What tells the player from the others, as in `TopScorer`. */
@@ -1274,4 +1295,35 @@ function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate
  */
 function scorerSortName(goal: ScorerGoal): string {
   return personNameParts(goal) === undefined ? goal.player : personSortName(goal)
+}
+
+export const attendanceStep = 5000
+
+/**
+ * The home matches of a season, in the order given, with their number of visitors: the league
+ * only for the choice `league`, the cup and the play-offs as well for `all`. An away match
+ * never counts, because that audience is the other club's, and neither does a cancelled match.
+ * A match still to be played keeps its place without a number. The average and the largest
+ * only count numbers above 0: a match without an audience is not a number, and nor is an
+ * unknown one.
+ */
+export function attendanceOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): Attendance {
+  const slots = matches
+    .filter((match) => match.home && match.status !== 'cancelled' && countsFor(match, choice))
+    .map((match) => ({ attendance: match.status === 'played' ? match.attendance : null, match }))
+  const counted = slots.filter((slot) => (slot.attendance ?? 0) > 0)
+  const largest = Math.max(0, ...counted.map((slot) => slot.attendance ?? 0))
+  const max = Math.ceil(largest / attendanceStep) * attendanceStep
+
+  return {
+    average:
+      counted.length === 0
+        ? undefined
+        : Math.round(counted.reduce((sum, slot) => sum + (slot.attendance ?? 0), 0) / counted.length),
+    highest: counted.find((slot) => slot.attendance === largest),
+    known: counted.length,
+    max,
+    slots,
+    ticks: Array.from({ length: max / attendanceStep }, (_, index) => (index + 1) * attendanceStep),
+  }
 }

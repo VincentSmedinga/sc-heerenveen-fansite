@@ -8,11 +8,11 @@ import { hydrated } from './hydrated'
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
 // have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
-// result in three competitions and a head coach in the table) and Statistieken nine. The checks
+// result in three competitions and a head coach in the table) and Statistieken ten. The checks
 // of how it behaves while scrolling are on /statistieken below, the page with the long cards.
 const withBar = [
   { links: 7, path: '/wedstrijden' },
-  { links: 9, path: '/statistieken' },
+  { links: 10, path: '/statistieken' },
 ] as const
 
 for (const { links, path } of withBar) {
@@ -81,14 +81,14 @@ test.describe('the bar under the header of /statistieken', () => {
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await expect(bar.getByRole('link')).toHaveCount(9)
+    await expect(bar.getByRole('link')).toHaveCount(10)
     await menu.getByRole('link', { name: 'Nieuws' }).click()
     await expect(page).toHaveURL(/\/nieuws$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
 
     await menu.getByRole('link', { name: 'Statistieken' }).click()
     await expect(page).toHaveURL(/\/statistieken$/)
-    await expect(bar.getByRole('link')).toHaveCount(9)
+    await expect(bar.getByRole('link')).toHaveCount(10)
 
     // The other page with a bar has its own links, not those of the page before.
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
@@ -178,6 +178,7 @@ test.describe('the bar under the header of /statistieken', () => {
         'Verloop van het seizoen',
         'Reeksen',
         'Thuis en uit',
+        'Toeschouwers',
         'Doelpuntenmakers',
         'De nul gehouden',
         'Doelpunten per kwartier',
@@ -189,6 +190,7 @@ test.describe('the bar under the header of /statistieken', () => {
         'Doelpunten per kwartier',
         'De nul gehouden',
         'Doelpuntenmakers',
+        'Toeschouwers',
         'Thuis en uit',
         'Reeksen',
         'Verloop van het seizoen',

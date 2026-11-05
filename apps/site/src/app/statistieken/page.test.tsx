@@ -52,7 +52,7 @@ afterEach(() => {
 })
 
 describe('the page /statistieken', () => {
-  it('has one h1 and nine h2 headings in order: our place in the league, the season, the streaks, home and away, the goal scorers, the clean sheets, the goals per quarter, how the matches go and the extremes', async () => {
+  it('has one h1 and ten h2 headings in order: our place in the league, the season, the streaks, home and away, the visitors, the goal scorers, the clean sheets, the goals per quarter, how the matches go and the extremes', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -61,6 +61,7 @@ describe('the page /statistieken', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="verloop-van-het-seizoen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#verloop-van-het-seizoen">Verloop van het seizoen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="reeksen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#reeksen">Reeksen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="thuis-en-uit"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#thuis-en-uit">Thuis en uit</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="toeschouwers"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#toeschouwers">Toeschouwers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
@@ -162,11 +163,11 @@ describe('the page /statistieken', () => {
     expect(statisticsShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the first four cards in the main with the h1 and the other five in a named, wide sidebar after it, so the two columns are equal', async () => {
+  it('has the first five cards in the main with the h1 and the other five in a named, wide sidebar after it, so the two columns are equal', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
-    const left = ['onze-plek-in-de-competitie', 'verloop-van-het-seizoen', 'reeksen', 'thuis-en-uit']
+    const left = ['onze-plek-in-de-competitie', 'verloop-van-het-seizoen', 'reeksen', 'thuis-en-uit', 'toeschouwers']
     const right = [
       'doelpuntenmakers',
       'de-nul-gehouden',
@@ -219,6 +220,7 @@ describe('the page /statistieken', () => {
       ['verloop-van-het-seizoen', 'hf-card hf-card-warm hf-card-shareable'],
       ['reeksen', 'hf-card hf-card-soft hf-card-shareable'],
       ['thuis-en-uit', 'hf-card hf-card-shareable'],
+      ['toeschouwers', 'hf-card hf-card-shareable'],
       ['doelpunten-per-kwartier', 'hf-card hf-card-warm hf-card-shareable'],
       ['hoe-de-wedstrijden-verlopen', 'hf-card hf-card-soft hf-card-shareable'],
       ['uitersten', 'hf-card hf-card-soft hf-card-shareable'],
@@ -227,14 +229,14 @@ describe('the page /statistieken', () => {
     }
   })
 
-  it('lets the visitor make an image of each of the nine cards', async () => {
+  it('lets the visitor make an image of each of the ten cards', async () => {
     const html = await render()
     const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
       ([, id]) => id,
     )
 
     expect(shareable).toEqual(statisticsShortcuts.map(({ href }) => href.slice(1)))
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(9)
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(10)
   })
 
   it('has no button for an image on a card that has no facts yet', async () => {
@@ -1911,8 +1913,9 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     const all = await render()
     const league = await render(eredivisie)
 
-    // Only the links carry the choice, which is the same page.
-    for (const id of statisticsShortcuts.map(({ href }) => href.slice(1))) {
+    // Only the links carry the choice, which is the same page. The visitors table has a column
+    // for the competition under Alle wedstrijden, so it is the one card that differs.
+    for (const id of statisticsShortcuts.map(({ href }) => href.slice(1)).filter((id) => id !== 'toeschouwers')) {
       expect(section(all, id), id).toBe(section(league, id).replaceAll('?competitie=eredivisie', ''))
     }
   })
@@ -2160,7 +2163,7 @@ describe('the card Opmerkelijk on /statistieken', () => {
     expect(orders.size).toBeGreaterThan(1)
   })
 
-  it('is in the bar of nobody: the bar has the nine cards with figures', async () => {
+  it('is in the bar of nobody: the bar has the ten cards with figures', async () => {
     withFacts(...three)
 
     const ids = [...(await render()).matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
@@ -2174,5 +2177,104 @@ describe('the card Opmerkelijk on /statistieken', () => {
     const html = card(await render()) ?? ''
 
     expect(html).not.toMatch(/<script|<button|<form|https?:/)
+  })
+})
+
+describe('the card Toeschouwers', () => {
+  const home = (round: number, attendance: null | number, extra: Partial<PublicMatch> = {}): PublicMatch => ({
+    ...matchData.matches[0]!,
+    attendance,
+    competition: 'Eredivisie',
+    goals: [],
+    home: true,
+    matchDate: `2026-08-${String(round).padStart(2, '0')}`,
+    opponent: `Proefclub ${round}`,
+    round: `Speelronde ${round}`,
+    status: 'played',
+    ...extra,
+  })
+  const withMatches = (...list: PublicMatch[]) =>
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: list })
+  const toeschouwers = async (searchParams = {}) => section(await render(searchParams), 'toeschouwers')
+
+  it('has a bar for each home match, the average and the largest number in two sentences, and a table', async () => {
+    withMatches(home(1, 20000), home(2, 26022), home(3, 0), home(4, null), home(5, 26022))
+
+    const html = await toeschouwers()
+
+    expect(html.match(/class="hf-bar-chart-slot"/g)).toHaveLength(5)
+    expect(html).toContain('Gemiddeld 24.015 toeschouwers per thuiswedstrijd')
+    expect(html).toContain('Het meest: 26.022, tegen Proefclub 2 op 2 augustus 2026')
+    expect(html).toContain('Gebaseerd op 3 van de 5 gespeelde wedstrijden')
+    expect(html).toContain('>Zonder publiek<')
+    expect(html).toContain('>Niet bekend<')
+    expect(html).toContain('>26.022<')
+    expect(html).toContain('aria-hidden="true" class="hf-bar-chart"')
+  })
+
+  it('writes the numbers at the side in Dutch, up to the largest number rounded up to 5.000', async () => {
+    withMatches(home(1, 20001))
+
+    const html = await toeschouwers()
+
+    for (const tick of ['5.000', '10.000', '15.000', '20.000', '25.000']) {
+      expect(html).toContain(`>${tick}</span>`)
+    }
+    expect(html).not.toContain('>30.000<')
+  })
+
+  it('leaves out an away match and a cancelled one, and keeps a home match still to be played as an empty place', async () => {
+    withMatches(
+      home(1, 20000),
+      home(2, 30000, { home: false }),
+      home(3, null, { status: 'cancelled' }),
+      home(4, null, { status: 'scheduled' }),
+    )
+
+    const html = await toeschouwers()
+
+    expect(html.match(/class="hf-bar-chart-slot"/g)).toHaveLength(2)
+    expect(html).toContain('>Nog niet gespeeld<')
+    expect(html).not.toContain('Proefclub 2')
+    expect(html).not.toContain('Proefclub 3')
+  })
+
+  it('counts the cup only on Alle wedstrijden, which is also the only one with the column Competitie', async () => {
+    withMatches(home(1, 20000), home(2, 25000, { competition: 'KNVB Beker' }))
+
+    const all = await toeschouwers()
+    const league = await toeschouwers(eredivisie)
+
+    expect(all.match(/class="hf-bar-chart-slot"/g)).toHaveLength(2)
+    expect(all).toContain('>Competitie<')
+    expect(league.match(/class="hf-bar-chart-slot"/g)).toHaveLength(1)
+    expect(league).not.toContain('>Competitie<')
+  })
+
+  it('says so in a sentence, and has no chart, without a number, with only zeroes, or without a home match', async () => {
+    withMatches(home(1, null))
+    expect(await toeschouwers()).toContain('We hebben van dit seizoen nog geen toeschouwersaantallen.')
+
+    withMatches(home(1, 0), home(2, null))
+    expect(await toeschouwers()).toContain('Alle thuiswedstrijden waarvan we het aantal kennen, waren zonder publiek.')
+
+    withMatches(home(1, 5000, { home: false }))
+
+    const none = await toeschouwers()
+
+    expect(none).toContain('We hebben nog geen thuiswedstrijden van dit seizoen.')
+    for (const html of [none]) {
+      expect(html).not.toMatch(/hf-bar-chart|<table/)
+    }
+  })
+
+  it('credits Wikipedia and has no request to another site or script', async () => {
+    withMatches(home(1, 20000))
+
+    const html = await toeschouwers()
+
+    expect(html).toContain('volgens Wikipedia')
+    expect(html).toContain('data-hf-card-share')
+    expect(html).not.toMatch(/<script|<img/)
   })
 })

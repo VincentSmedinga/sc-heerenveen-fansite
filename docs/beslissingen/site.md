@@ -2490,6 +2490,26 @@
   De tests van de pagina's draaien zonder router, dus `src/test-setup.ts` zet een `useRouter` die niets doet.
 - **Alternatieven:** `next/link` op de hele site (veel groter, en dan telt geen enkele klik meer); het hele onderdeel in het designsysteem met een eigen script (het designsysteem krijgt dan een afhankelijkheid van Next.js); `document.startViewTransition` om de wissel (meer code, niet in elke browser, en het voegt niets toe aan een knop die al schuift); `router.replace` (Terug slaat de keuzes over, dat wijkt af van de links); de inhoud lichter tonen tijdens het laden (een pagina moet zelf meedoen en het geeft een nieuwe contrastcontrole in licht en donker); de focus naar de inhoud verplaatsen (haalt de bezoeker weg bij de schakelaar).
 
+## De pagina Statistieken heeft een kaart met het aantal toeschouwers per thuiswedstrijd
+
+- **Datum:** 5 november 2026
+- **Besluit:** de kaart Toeschouwers staat in de hoofdkolom direct onder Thuis en uit, met een staaf per thuiswedstrijd van het gekozen seizoen (#729).
+  Onder de grafiek staan twee zinnen (het gemiddelde en het hoogste aantal) en een tabel met elke thuiswedstrijd.
+  Dit vervangt het besluit in #416 om de grafiek samen met de pagina van een wedstrijd te bouwen, na #108.
+- **Welke wedstrijden:** alleen thuiswedstrijden, want het publiek bij een uitwedstrijd is dat van de tegenstander.
+  De schakelaar telt mee: bij Eredivisie alleen die competitie, bij Alle wedstrijden ook de beker en de play-offs.
+  Een geannuleerde wedstrijd telt niet, en een thuiswedstrijd die nog gespeeld moet worden is een lege plek, zodat de grafiek het hele seizoen laat zien (`attendanceOf` in `src/matches.ts`).
+- **Onbekend en nul:** een thuiswedstrijd zonder getal houdt zijn plek zonder staaf, en `0` is een streepje.
+  In de tabel staat "Niet bekend", "Zonder publiek" en "Nog niet gespeeld".
+  Het gemiddelde en het hoogste tellen alleen getallen boven 0, afgerond op een heel getal, en bij gelijke aantallen telt de eerste wedstrijd.
+- **De schaal:** van 0 tot het hoogste aantal van het seizoen, naar boven afgerond op een veelvoud van 5.000, met een lijn en een cijfer bij elke 5.000 in Nederlandse notatie.
+  Daarvoor krijgt `BarChart` de eigenschap `tickText`, de tekst van een cijfer aan de zijkant; de bestaande grafieken houden het kale getal.
+  Er is geen lijn door de staven en geen tooltip: die komen met #726.
+- **Zonder grafiek:** drie zinnen voor bezoekers, voor een seizoen zonder thuiswedstrijd, zonder getal en met alleen `0`.
+- **Waarom:** het aantal staat sinds #558 bij elke wedstrijd, en de kaart heeft de pagina van een wedstrijd (#108) niet nodig.
+  Een bezoeker leest een aantal van de schaal en de tabel; het is een schatting van Wikipedia, en dat staat erbij.
+- **Alternatieven:** de kaart in #416 laten, dan wacht de grafiek op #108; altijd alleen de Eredivisie, dan komt het publiek bij een bekerwedstrijd nooit in beeld; wedstrijden zonder getal weglaten, dan klopt de plek van de staven niet meer; een lijn met het gemiddelde.
+
 ## De site telt per persoon en toont de bewaarde naam, en raadt niets
 
 - **Datum:** 4 november 2026
