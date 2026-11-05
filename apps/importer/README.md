@@ -1608,6 +1608,26 @@ Wat een pagina niet noemt, is leeg (`null`), en geen nul.
 `readSeasonSquad` in `src/read-squad.ts` geeft de uitkomst van `readSquad` in die vorm.
 De import van het huidige seizoen blijft `readSquad` lezen.
 
+### De tabellen Statistieken van 1990/91 tot en met 2005/06
+
+De pagina's `Sc Heerenveen in het seizoen JJJJ/JJ` (zonder "(mannen)", zie `statisticsPageTitle`) van 1990/91 tot en met 1999/00 en van 2005/06 hebben geen selectie.
+Ze noemen wel de spelers die speelden, in een tabel met statistieken.
+`readSeasonStatistics` in [`src/read-statistics.ts`](src/read-statistics.ts) leest die tabel in de vorm `SeasonSquad`, met de bron `statistieken`.
+Het is een tekstlezer: hij doet zelf geen verzoek en schrijft niets.
+De import van #744 roept hem aan.
+
+Er zijn twee vormen:
+
+- 1990/91 tot en met 1999/00: onder de kop "Aantal wedstrijden/doelpunten" staat een tabel per competitie, met een rang, een naam, de wedstrijden (`AW`) en de doelpunten.
+  Een speler in meer dan één tabel is één speler, met de cijfers opgeteld.
+  De rijen onder "Eigen doelpunt" zijn spelers van andere clubs en blijven weg, net als de rij "Totaal".
+- 2005/06: onder de kop "Statistieken" staat één tabel met een groepskop per positie (`Doelverdediger`, `Verdediger`, `Middenvelder`, `Aanvaller`, zie `squadGroups`), het rugnummer, de naam, de geboortedatum en de wedstrijden en doelpunten van elke competitie, opgeteld.
+
+Een pagina zonder zo'n tabel geeft `none`.
+Een tabel in een andere vorm geeft een fout: een kop, een kolom of een naam die de lezer niet kent, een rij met te weinig cellen, of een tabel die niet is afgesloten.
+Een cijfer dat geen getal is, blijft leeg met een waarschuwing, en dan is ook de optelsom van de pagina leeg.
+Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt.
+
 ### Wat de import bewaart
 
 Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken), de zoekterm en de pagina op Wikipedia (`wikipedia_page`, mag ontbreken).
