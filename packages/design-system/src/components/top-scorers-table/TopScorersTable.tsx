@@ -83,9 +83,8 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
               <th scope="row">
                 {row.players.map((player, place) => (
                   <Fragment key={player.id}>
-                    {place === 0 ? null : ' '}
                     <PlayerName givenName={player.givenName} surname={player.surname} />
-                    {place === row.players.length - 1 ? null : ','}
+                    {place === row.players.length - 1 ? null : ', '}
                   </Fragment>
                 ))}
               </th>
