@@ -621,8 +621,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
               }))}
             />
             <Text appearance="meta">
-              Ronde is de speelronde. Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden,
-              zoals de lijn.
+              Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden, zoals de lijn.
             </Text>
           </Disclosure>
         </>
