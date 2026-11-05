@@ -2336,6 +2336,9 @@
   - Een pagina zonder sectie Selectie geeft `none`, met de reden: 2010/11, 2011/12 en 2012/13 hebben geen tabel.
     Een sectie in een andere vorm is een fout en schrijft niets.
   - De tabellen met statistieken van 2008/09, 2016/17 en 2017/18 leest deze lezer niet: ze noemen alleen achternamen of zijn leeg.
+  - De lezer geeft voor 2008/09 36 spelers en voor 2009/10 27, tegen 19 en 26 in het onderzoek.
+    De pagina's geven die aantallen: de tabellen zijn met de hand geteld.
+    De projecteigenaar koos op 6 november 2026 voor het getal van de pagina.
 - **Waarom:** de selecties van deze elf seizoenen staan in drie vormen die geen van beide bestaande lezers kent, en #744 heeft de spelers nodig.
   Een speler die ongemerkt wegvalt, maakt de selectie onvolledig zonder dat iemand het ziet.
   Daarom is een cel die we niet kennen een fout, en niet een rij die we overslaan.
