@@ -87,7 +87,6 @@ const tableFiles = [
   'components/input-table/input-table.css',
   'components/record-table/record-table.css',
   'components/standings-table/standings-table.css',
-  'components/top-scorers-table/top-scorers-table.css',
 ]
 
 type WeightRule = { selector: string; value: string }

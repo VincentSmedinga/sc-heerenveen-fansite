@@ -2473,6 +2473,7 @@
   Dat het component rijen met meer spelers neemt, houdt de samenvoeging op één plek: de pagina Spelers geeft rijen met één speler en heeft geen tweede tabel nodig.
 - **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
+- **Later:** zie _Een spelersnaam mag afbreken op een spatie, ook in een tabel_ (5 november 2026): het blok om elke naam (`hf-top-scorers-name`) en de regel "Van der Meer" blijft heel zijn weg.
 
 ## `FormTimeline` zet uitslagen op een as van jaren, met `BarChart` en eigen labels
 
@@ -2556,3 +2557,17 @@
   Op een telefoon is er geen hover, en een tooltip die bij het loslaten weggaat, is verdwenen op het moment dat je de vinger wegneemt om te lezen.
 - **Alternatieven:** een grafiek met bediening met het toetsenbord (veel meer werk, meer kans op fouten); alleen de tooltip zonder tekst (de waarde per speelronde is dan nergens als tekst te lezen); de tooltip alleen tonen zolang de vinger op het scherm ligt; geen ondersteuning voor aanraking (dan krijgt een telefoon alleen de tabel).
 - **Nog niet:** een tooltip bij een knop of pictogram die op hover en focus verschijnt, en een tooltip bij de staafjes; daar komt een eigen issue voor als het nodig is.
+
+## Een spelersnaam mag afbreken op een spatie, ook in een tabel
+
+- **Datum:** 5 november 2026
+- **Besluit:** een spelersnaam breekt af op een spatie op elke plek waar de site hem toont, ook in de rijkop van `TopScorersTable` met meer dan één speler (#728).
+  Een woord dat langer is dan de regel breekt overal (`overflow-wrap: anywhere` van `PlayerName`).
+  - **Wat weg is:** het blok om elke naam met zijn komma (`hf-top-scorers-name`, `display: inline-block`) en het bestand `top-scorers-table.css`.
+    De komma staat direct achter de naam, dus ze blijft bij de laatste regel van die naam.
+  - **Wat blijft:** de uitslagen en getallen op één regel (`white-space: nowrap` op `td.hf-numeric` in een tabel die sorteert), en de spatie die niet afbreekt tussen de minuut en de naam in de regel met doelpuntenmakers van `Match`: een minuut hoort niet alleen aan het eind van een regel te staan.
+- **Waarom:** de projecteigenaar vindt het te streng en het werkt op een telefoon niet goed: een lange naam laat de rij hoger worden of de kolom breder.
+  Een naam die mag afbreken, laat de kolom met namen krimpen in plaats van de tabel te verbreden.
+- **Nadeel:** een naam kan over twee regels staan, zodat "Van der" en "Meer" uit elkaar staan.
+- **Alternatieven:** het blok laten staan (de rij blijft rustig, maar de naam bepaalt de breedte van de kolom); een spatie die niet afbreekt in de naam zelf (dezelfde streng als het blok, maar dan in elke tabel en lijst).
+- **Later:** vervangt de regel "Het afbreken" in _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026).
