@@ -180,6 +180,7 @@ describe('the first import, into an empty database', () => {
       wikipediaPage: 'Bernt Klaverboer',
     })
     expect(stored.every((player) => player.inSquad && player.leftSquadAt === null)).toBe(true)
+    expect(stored.every((player) => player.source === 'selectie')).toBe(true)
     expect(stored.find((player) => player.name === 'Sten Kremers')).toMatchObject({
       position: 'doelman',
       searchTerm: 'Kremers',

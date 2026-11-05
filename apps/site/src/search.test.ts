@@ -121,7 +121,7 @@ describe('searchHref', () => {
 })
 
 describe('squadGroups', () => {
-  const player = (name: string, position: 'aanvaller' | 'doelman' | 'middenvelder' | 'verdediger') => ({
+  const player = (name: string, position: 'aanvaller' | 'doelman' | 'middenvelder' | 'verdediger' | null) => ({
     name,
     personFamilyName: null,
     personFamilyNamePrefix: null,
@@ -150,5 +150,13 @@ describe('squadGroups', () => {
   it('leaves out a position without players, and gives nothing for no players', () => {
     expect(squadGroups([player('Keeper Een', 'doelman')]).map((group) => group.label)).toEqual(['Doelmannen'])
     expect(squadGroups([])).toEqual([])
+  })
+
+  it('leaves out a player without a position', () => {
+    const groups = squadGroups([player('Keeper Een', 'doelman'), player('Zonder Positie', null)])
+
+    expect(groups.map((group) => [group.label, group.players.map((item) => item.name)])).toEqual([
+      ['Doelmannen', ['Keeper Een']],
+    ])
   })
 })

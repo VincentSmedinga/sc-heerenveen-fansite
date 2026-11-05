@@ -19,6 +19,7 @@ Er is niets opgeslagen in de database en er is geen code van de importer verande
   De pagina's van 1990/91 tot en met 1999/00 noemen wie speelde.
   De andere seizoenen hebben een deel van de selectie, uit transfers en doelpunten.
 - **Het datamodel:** houd voor de eerste versie `players` als een rij per speler en seizoen (keuze a).
+  De projecteigenaar koos dit op 5 november 2026; het besluit _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ in `docs/beslissingen/hosting-en-data.md` legt het vast (#738).
   Een tabel per persoon (keuze b) is later toe te voegen zonder die rijen te veranderen.
   Het besluit _Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij_ (4 november 2026, #714, in `docs/beslissingen/hosting-en-data.md`) haalt keuze b naar voren, naast `players`.
 - **De opdeling:** 7 pull requests, drie kleine, drie middelgrote en één grote.
@@ -300,7 +301,7 @@ Dit onderzoek heeft haar niet gelezen en gebruikt haar niet voor het voorstel, w
 
 ### Wat er nu is
 
-`players` heeft een rij per speler en seizoen, met `name`, `position` (verplicht), `shirt_number`, `search_term` (verplicht), `wikipedia_page`, `in_squad` en `left_squad_at`.
+`players` heeft een rij per speler en seizoen, met `name`, `position` (verplicht; sinds #738 mag hij leeg zijn en is er een `source`), `shirt_number`, `search_term` (verplicht), `wikipedia_page`, `in_squad` en `left_squad_at`.
 Een rij is uniek op seizoen en naam, en op seizoen en pagina.
 `match_goals.player_id` verwijst naar `players.id` (`ON DELETE SET NULL`) en `player_season_stats.player_id` ook (`ON DELETE CASCADE`).
 `listSquad(db, season)` toont alleen de spelers van het gevraagde seizoen die `in_squad` zijn.

@@ -724,12 +724,13 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     ['aanvaller', 22, 'Dinho', 'Dinho'],
   ]
 
-  const squad = rows.map(([position, shirtNumber, name, searchTerm]) => ({
+  const squad = rows.map(([position, shirtNumber, name, searchTerm]): NewPlayer => ({
     name,
     position,
     searchTerm,
     season,
     shirtNumber,
+    source: 'selectie',
     wikipediaPage: name,
   }))
   const scorers = madeUpScorers.map(([name, shirtNumber, inSquad]): NewPlayer => ({
@@ -740,6 +741,7 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     searchTerm: name.split(' ').slice(1).join(' '),
     season,
     shirtNumber,
+    source: 'selectie',
     wikipediaPage: name,
   }))
 

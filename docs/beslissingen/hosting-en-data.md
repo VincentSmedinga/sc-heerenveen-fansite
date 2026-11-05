@@ -538,3 +538,22 @@
   Wikidata (voornaam en achternaam als gegevens; de `robots.txt` weert ons).
   Een vaste lijst voor alle spelers (loopt achter bij elke transfer).
   Het voorvoegsel bij de achternaam bewaren (dan kan een lijst er niet op sorteren).
+
+## Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie
+
+- **Datum:** 5 november 2026
+- **Besluit:** `players` blijft één rij per speler en seizoen.
+  Rijen van dezelfde speler horen bij elkaar door `person_id` (#714).
+  Een rij heeft een `source` die zegt hoe volledig de bron was, en een positie die leeg mag zijn.
+  - **De bronnen:** de lijst `playerSources` in `packages/db` loopt van volledig naar minder volledig: `selectie` (tabel met de hele selectie), `statistieken` (tabel van wie speelde), `engels` (selectie of transfers op de Engelse Wikipedia), `transfers`, `doelpunten` en `wikidata`.
+  - **De migratie:** `0042_add_player_source` maakt `position` leeg-toegestaan en voegt `source` toe, verplicht, met `selectie` als standaard.
+    Bestaande rijen krijgen `selectie`: dat zijn ze.
+    Ze voegt alleen toe of verruimt, en kan opnieuw draaien.
+    Terugdraaien op de host: de kolom `source` weghalen, en `position` weer verplicht maken kan alleen zolang geen rij leeg is.
+  - **De pagina's:** een speler zonder positie staat niet in de lijst per positie.
+    Wat de site met `source` doet, is aan latere issues (#739 en volgende).
+- **Waarom:** de projecteigenaar koos dit op 5 november 2026 uit het onderzoek (#676, keuze a).
+  Doelpunten en cijfers wijzen al naar `players`, en `person_id` legt de seizoenen aan elkaar.
+  Een bron per rij is nodig om te zeggen hoe volledig een seizoen is.
+- **Alternatieven:** een rij per persoon met een tabel voor seizoenen (een grotere migratie die `match_goals` en `player_season_stats` raakt).
+  De positie verplicht houden en bij een transfer gokken (een gok is erger dan leeg).

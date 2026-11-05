@@ -39,7 +39,7 @@ export type Squad = {
 /** The squad as the page shows it: the players under the position they play. */
 export type SquadGroup = { label: string; players: PublicPlayer[] }
 
-const positionLabels: Record<PublicPlayer['position'], string> = {
+const positionLabels: Record<NonNullable<PublicPlayer['position']>, string> = {
   aanvaller: 'Aanvallers',
   doelman: 'Doelmannen',
   middenvelder: 'Middenvelders',
@@ -129,7 +129,7 @@ export function searchSite(words: string[], count: number): Promise<{ hits: Publ
 
 /**
  * The players under their position, from the goal to the front, in the order the query gives
- * them. A position without players is left out.
+ * them. A position without players is left out, and so is a player without a position.
  */
 export function squadGroups(players: PublicPlayer[]): SquadGroup[] {
   return positionOrder.flatMap((position) => {
