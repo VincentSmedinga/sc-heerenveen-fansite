@@ -1,11 +1,11 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
-import { matchChanges, matches } from '@fansite/db/schema'
+import { matchChanges, matches, matchGoals } from '@fansite/db/schema'
 import { and, asc, eq } from 'drizzle-orm'
 import path from 'node:path'
 
-import { earlierSeason } from './earlier-season'
+import { earlierSeason } from './earlier-season.ts'
 
 /**
  * The made-up change of Wikipedia that the checks hold back: Wikipedia says one goal more for
@@ -42,6 +42,11 @@ export async function addHeldChange() {
         opponentPage: null,
       }
 
+      // The goals stay as they are, so only the result differs.
+      const goals = (
+        await db.select().from(matchGoals).where(eq(matchGoals.matchId, match.id)).orderBy(asc(matchGoals.id))
+      ).map(({ wikipediaPage, ...goal }) => ({ ...goal, playerPage: wikipediaPage }))
+
       await db.insert(matchChanges).values({
         changed: 'result',
         class: 'suspicious',
@@ -51,7 +56,7 @@ export async function addHeldChange() {
         matchId: match.id,
         newValue: 'verzonnen',
         oldValue: marker,
-        proposal: encodeProposal({ clubId: match.clubId, goals: [], match: read }),
+        proposal: encodeProposal({ clubId: match.clubId, goals, match: read }),
         reason: 'the season is over, and its matches do not change',
         round: match.round,
         season: match.season,
