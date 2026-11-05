@@ -1,0 +1,101 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Transfers==
+''Voor recente transfers bekijk: [[Lijst van Eredivisie transfers zomer 2010/11]]''
+
+===Aangetrokken===
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Bas Dost]] || {{NL-VLAG}} [[Heracles Almelo]] || [[2015]] ||
+|-
+| {{NL-VLAG}} [[Arnold Kruiswijk]] || {{NL-VLAG}} [[Roda JC Kerkrade|Roda JC]] || [[2014]]||
+|-
+| {{NL-VLAG}} [[Calvin Jong-a-Pin]] || {{NL-VLAG}} [[SBV Vitesse|Vitesse]]|| ||Keert terug van verhuur
+|-
+| {{IS-VLAG}} [[Björn Johsson|Björn Jónsson]] || {{NL-VLAG}} [[FC Emmen]] || || Keert terug van verhuur
+|-
+| {{NO-VLAG}} [[Tarik Elyounoussi]] || {{NO-VLAG}} [[Lillestrøm SK]] || || Keert terug van verhuur
+|-
+| {{CZ-VLAG}}[[Milan Kopic]]|| {{CZ-VLAG}} [[Sparta Praag]]|| || Keert terug van verhuur
+|}
+
+=== Vertrokken ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NL-VLAG}} [[Michael Dingsdag]] || {{CH-VLAG}} [[FC Sion]] || contract niet verlengd
+|-
+| {{NL-VLAG}} [[Gerald Sibon]] || {{AU-VLAG}} [[Melbourne Heart]] || contract niet verlengd
+|-
+| {{AR-VLAG}} [[Hernan Losada]] || {{BE-VLAG}} [[Anderlecht]] || was gehuurd
+|-
+| {{NL-VLAG}} [[Michel Poldervaart]] || {{NL-VLAG}} [[FC Emmen]] || was al verhuurd aan emmen
+|-
+| {{NL-VLAG}} [[Cecilio Lopes]] || {{NL-VLAG}} [[FC Dordrecht]] || was verhuurd
+|-
+| {{NL-VLAG}} [[Sofian Akouili]] || ?|| was verhuurd
+|-
+| {{NL-VLAG}} [[Agil Etemadi]] || {{NL-VLAG}} [[BV Veendam]]|| was verhuurd
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NO-VLAG}} [[Tarik Elyounoussi]] || {{NO-VLAG}} [[Fredrikstad FK]] ||
+|-
+| {{IS-VLAG}} [[Björn Johsson|Björn Jónsson]] || ? || contract ontbonden
+|-
+| {{CZ-VLAG}} [[Michal Papadopulos]] || {{RU-VLAG}} [[FK Zjemtsjoezjina Sotsji]] ||
+|}
+|}
+
+=== Verhuur ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Nieuwe club
+|-
+| {{NL-VLAG}} [[Johnny de Vries]] || {{NL-VLAG}} [[FC Emmen]]
+|-
+| {{NL-VLAG}} [[Richard Stolte]] || {{NL-VLAG}} [[FC Emmen]]
+|-
+| {{NL-VLAG}} [[Bart de Groot]] || {{NL-VLAG}} [[FC Emmen]]
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NL-VLAG}} [[Diederik Bangma]] || {{NL-VLAG}} [[FC Emmen]] ||
+|-
+| {{AT-VLAG}} [[Radovan Mitrovic]] || {{NL-VLAG}} [[FC Emmen]] || Contract verloopt na dit seizoen
+|-
+| {{NL-VLAG}} [[Youssef El Akchaoui]] || {{NL-VLAG}} [[VVV-Venlo]] ||
+|}
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]

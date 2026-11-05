@@ -1,0 +1,108 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Transfers==
+===Aangetrokken===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Warner Hahn]] || {{NL-VLAG}} [[Feyenoord]] || 2020 || 
+|-
+| {{DK-VLAG}} [[Daniel Høegh]] || {{CH-VLAG}} [[FC Basel]]|| 2019 || 
+|-
+| {{NZ-VLAG}} [[Marco Rojas]] || {{AU-VLAG}} [[Melbourne Victory FC|Melbourne Victory]] || 2019  || optie tot 2020
+|-
+| {{NL-VLAG}}[[Sam Lammers]] || {{NL-VLAG}}  [[PSV (voetbalclub)|PSV]] || 2019 || gehuurd voor één seizoen
+|-
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| 
+|-
+|}
+|}
+
+=== Vertrokken ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Erwin Mulder]] || {{WL-VLAG}} [[Swansea City]] || contract niet verlengd
+|-
+| {{NL-VLAG}} [[Lucas Bijker]] || n.n.b. || contract niet verlengd
+|-
+| {{NL-VLAG}} [[Branco van den Boomen]] || {{NL-VLAG}} [[FC Eindhoven]] || was al verhuurd
+|-
+| {{HU-VLAG}} {{NG-VLAG}} [[Kenneth Otigba]] || {{HU-VLAG}} [[Ferencvárosi TC|Ferencváros]] || werd al verhuurd
+|-
+| {{BE-VLAG}} [[Wout Faes]] || {{BE-VLAG}} [[RSC Anderlecht]] || werd gehuurd
+|-
+| {{EN-VLAG}} [[Shay Facey]] || {{EN-VLAG}} [[Manchester City FC]] || werd gehuurd
+|-
+| {{NL-VLAG}} [[Wieger Sietsma]] || {{EN-VLAG}} [[MK Dons]] || was al verhuurd
+|-
+
+|}
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+| 
+|-
+|}
+|}
+
+=== Verhuur ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Maarten de Fockert]] || {{NL-VLAG}} [[Go Ahead Eagles]] || 
+|-
+| {{NL-VLAG}} [[Robert van Koesveld]] || {{NL-VLAG}} [[Helmond Sport]] || 
+|-
+| {{NL-VLAG}} {{TR-VLAG}} [[Caner Cavlan]] || {{TR-VLAG}} [[Boluspor]] || optie tot koop
+|-
+|}
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+|}
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]

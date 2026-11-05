@@ -1,0 +1,109 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Mutaties==
+===Aangetrokken===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Vorige club
+!style="border-bottom:1px solid #AAAAAA" |Contract tot
+!style="border-bottom:1px solid #AAAAAA" |Bijzonderheden
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}}  {{HT-VLAG}} [[Lesly Fellinga]] || {{NL-VLAG}} [[BV Veendam]]  || [[2009]]||
+|-
+| {{BR-VLAG}} [[Pedro Beda]] || {{BR-VLAG}} [[Clube de Regatas do Flamengo|Flamengo]]  || [[2011]]||
+|-bgcolor="#F8F8FF"
+| {{MK-VLAG}} [[Goran Popov]]    || {{GR-VLAG}} [[Levadiakos]]  || [[2011]]|| was gehuurd van [[Egaleo FC]]
+|- bgcolor="#F8F8FF"
+| {{PL-VLAG}} [[Radosław Matusiak]] || {{PL-VLAG}} [[GKS Belchatów]]  ||[[2010]] || terugkomend van huur
+|- 
+|  || '''Winterstop'''  ||   || 
+|- 
+|}
+
+===Aangetrokken voor volgend seizoen===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Vorige club
+!style="border-bottom:1px solid #AAAAAA" |Contract ingaande per
+!style="border-bottom:1px solid #AAAAAA" |Contract tot
+!style="border-bottom:1px solid #AAAAAA" |Bijzonderheden
+|-bgcolor="#F8F8FF"
+| {{RS-VLAG}}   [[Filip Đuričić]] || {{RS-VLAG}} [[Radnicki Obrenovac]]  || Januari [[2010]]|| [[2013]] || wordt gezien als "de [[Johan Cruijff]] van de [[Balkan (schiereiland)|Balkan]]"
+|-
+| {{MK-VLAG}} [[Samir Fazli]] || {{MK-VLAG}} [[FK Makedonija Ğorče Petrov Skopje]]  || Juli [[2009]]|| 2014||
+|- 
+|}
+
+=== Vertrokken ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |bijzonderheden
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Harmen Kuperus]] || {{NL-VLAG}} [[FC Zwolle]] || was gehuurd
+|-
+| {{NL-VLAG}} [[Mark Bloemendaal]] || {{NL-VLAG}} [[bV De Graafschap|de Graafschap]]
+|-bgcolor="#F8F8FF"
+| {{UY-VLAG}} [[Gonzalo Garcia-Garcia]] || {{NL-VLAG}} [[FC Groningen]] || 
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Sebastiaan Steur]] || {{NL-VLAG}} [[Heracles Almelo]] || was verhuurd aan [[SBV Excelsior|Excelsior]]
+|-
+|}
+
+=== Verhuurd ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |bijzonderheden
+|-
+| {{DK-VLAG}} [[Timmi Johansen]] || {{DK-VLAG}} [[Odense BK]] || verhuurd met optie tot koop
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Jeroen Drost]] || {{NL-VLAG}} [[SBV Vitesse|Vitesse]]|| was verhuurd aan [[N.E.C.]] nu weer verhuurd
+|-
+| {{NL-VLAG}} [[Oguzhan Türk]] || {{NL-VLAG}} [[Go Ahead Eagles]]  || weer gehuurd door Go Ahead Eagles 
+|-bgcolor="#F8F8FF"
+| {{FI-VLAG}} [[Niklas Tarvajärvi]] || {{NL-VLAG}} [[SBV Vitesse|Vitesse]]  || was verhuurd  aan [[Vbv De Graafschap|De Graafschap]] 
+|-
+| {{NL-VLAG}}/{{CV-VLAG}} [[Cecilio Lopes]] || {{NL-VLAG}} [[FC Dordrecht]]  || eerder in het seizoen verhuurd aan [[FC Volendam]]
+|-  bgcolor="#F8F8FF"
+|  || '''Winterstop'''  ||   || 
+|}
+
+===aangetrokken Technische staf===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |wie
+!style="border-bottom:1px solid #AAAAAA" |Vorige club
+
+!style="border-bottom:1px solid #AAAAAA" |Functie
+|-bgcolor="#F8F8FF"
+| {{NO-VLAG}}  [[Trond Sollied]] || {{BE-VLAG}} [[AA Gent]]  ||  Hoofdcoach
+|-
+| {{BE-VLAG}} [[Chris van Puyvelde]] || {{BE-VLAG}} [[AA Gent]]  || assistentcoach
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Jan de Jonge]] || {{NL-VLAG}} [[BV De Graafschap|De Graafschap]]  || Hoofd jeugdopleiding
+|-
+|}
+
+=== Vertrokken Technische staf ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |Functie
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Gertjan Verbeek]] || {{NL-VLAG}} [[Feyenoord]] ||  Hoofdcoach
+|-
+| {{NL-VLAG}} [[Björn Rekelhof]] || {{NL-VLAG}} [[Feyenoord]]||conditie-trainer
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Alex Pastoor]] || {{NL-VLAG}} [[Feyenoord]] ||  assistentcoach
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]

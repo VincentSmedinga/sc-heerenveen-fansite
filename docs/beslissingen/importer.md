@@ -2315,3 +2315,27 @@
   Alle spelers van elke tabel in de uitkomst, ook de spelers onder "Eigen doelpunt" (verworpen: ze spelen voor een andere club).
   De cijfers van de competities apart bewaren (verworpen: `player_season_stats` heeft geen competitie voor deze seizoenen, zie #740).
   Een som van de bekende cijfers als één cijfer ontbreekt (verworpen: de som zou te laag zijn zonder dat iemand het ziet).
+
+## De transfers van 2006/07 tot en met 2017/18 hebben een eigen lezer, en een vertrokken speler telt alleen mee als hij het seizoen meemaakte
+
+- **Datum:** 6 november 2026
+- **Besluit:** `read-transfers.ts` (#742) leest de lijsten onder "Transfers" of "Mutaties" van de pagina `Sc Heerenveen in het seizoen JJJJ/JJ` in de vorm `SeasonSquad`, met de bron `transfers`.
+  `readSeasonScorers` leest in hetzelfde bestand de lijst onder "Doelpuntenmakers" van 2006/07, met de bron `doelpunten`.
+  Het zijn twee lezers met elk één bron, omdat `SeasonSquad` één bron per uitkomst heeft; #744 voegt ze samen.
+  - Wie meetelt: een speler die in de zomer of de winter is aangetrokken, een speler die is verhuurd of terugkeert van verhuur, en een speler die in de winter is vertrokken.
+    Een speler die in de zomer vóór het seizoen vertrok, telt niet mee, behalve als zijn regel met "Verhuurd" begint.
+    Scheidt de pagina de zomer en de winter niet bij de vertrokken spelers (2007/08, 2008/09 en 2009/10), dan telt geen vertrokken speler mee.
+  - Het venster komt uit een kop Zomer of Winter, uit een vetgedrukt Zomer of Winter boven een tabel, of uit een rij "Winterstop" in de tabel.
+    Een kop van een lijst zet het venster terug als hij niet onder de kop van het venster hangt.
+  - De lijst van aangetrokken spelers voor volgend seizoen (2008/09) en de technische staf blijven weg: ze horen niet bij het seizoen en niet bij de spelers.
+  - Een speler in meer dan één lijst is één speler, op zijn pagina en anders op zijn naam zonder accenten.
+  - Een kop, onderschrift of kolomkop die de lezer niet kent is een fout en schrijft niets.
+    Een pagina zonder de kop, of zonder tabel onder de kop, geeft `none`.
+  - Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt, zoals bij de tabellen Statistieken (#740).
+- **Waarom:** voor 2006/07 en 2010/11 tot en met 2012/13 is de lijst met transfers de enige bron met namen, en in de andere seizoenen vult ze de selectie aan (#738).
+  Een speler die ontbreekt is een gat dat de volledigheid laag houdt; een speler die er ten onrechte bij staat is een fout die we niet terugzien.
+  Daarom telt een speler die in de zomer vertrok niet mee, en een vertrokken speler zonder bekend venster ook niet.
+  Het onderzoek telde alle namen uit de lijsten (28, 33, 46, 29, 42, 28, 35, 31, 37, 25, 21 en 33, met de technische staf en de spelers van volgend seizoen): dat geeft te veel spelers.
+- **Alternatieven:** alle namen uit de lijst tellen (verworpen, zie hierboven).
+  Eén lezer die de transfers en de doelpuntenmakers van 2006/07 samen teruggeeft (verworpen: `SeasonSquad` heeft één bron, en de beste bron per speler kiest #744).
+  Een vertrokken speler zonder bekend venster toch tellen (verworpen: dan staat een speler die in de zomer vertrok in het seizoen).

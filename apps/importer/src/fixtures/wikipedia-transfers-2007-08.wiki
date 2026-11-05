@@ -1,0 +1,75 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Transfers==
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+|+'''Aangetrokken spelers'''
+|-
+| {{NL-VLAG}} [[Niek Loohuis]] || {{NL-VLAG}} [[BV Veendam]] || [[2010]]
+|-
+| {{DK-VLAG}} [[Kristian Bak Nielsen]] || {{DK-VLAG}} [[FC Midtjylland]] || [[2011]]
+|-
+| {{NL-VLAG}} [[Roy Beerens]] || {{NL-VLAG}} [[PSV (voetbalclub)|PSV]] || [[2010]]
+|-
+| {{NL-VLAG}} [[Mark Bloemendaal]] || {{NL-VLAG}} [[Vbv De Graafschap|De Graafschap]] || gehuurd tot medio 2008
+|-
+| {{NL-VLAG}} [[Harmen Kuperus]] || {{NL-VLAG}} [[FC Zwolle]] || gehuurd tot medio 2008
+|}
+
+{| class="wikitable"
+! Speler
+! Vorige club
+|+'''Terugkerende spelers'''
+|-
+| {{NL-VLAG}} [[Cecilio Lopes]] || {{NL-VLAG}} [[Sparta Rotterdam|Sparta]]
+|-
+| {{NL-VLAG}} [[Henrico Drost]] || {{NL-VLAG}} [[SBV Excelsior|Excelsior]]
+|-
+| {{NL-VLAG}} [[Sebastiaan Steur]] || {{NL-VLAG}} [[SBV Excelsior|Excelsior]]
+|}
+
+{| class="wikitable"
+! Speler
+! Nieuwe club
+|+'''Vertrokken spelers'''
+|-
+| {{CA-VLAG}} [[Rob Friend]] || {{DE-VLAG}}[[Borussia Mönchengladbach]]
+|-
+| {{NL-VLAG}} [[Boy Waterman]] || {{NL-VLAG}} [[AZ (voetbalclub)|AZ]]
+|-
+| {{SE-VLAG}} [[Petter Hansson]] || {{FR-VLAG}} [[Stade Rennais|Stade Rennes]]
+|}
+
+{| class="wikitable"
+! Speler
+! Verhuurd aan
+! Verhuurd tot
+|+'''Verhuurde spelers'''
+|-
+| {{CA-VLAG}} [[Will Johnson (voetballer)|Will Johnson]] || {{NL-VLAG}} [[Vbv De Graafschap|De Graafschap]] || [[2008]]
+|-
+| {{NL-VLAG}} [[Robbert Maruanaya]] || {{NL-VLAG}} [[Go Ahead Eagles]] || [[2008]]
+|-
+| {{NL-VLAG}} [[Oguzhan Türk]] || {{NL-VLAG}} [[Go Ahead Eagles]] || [[2008]]
+|}
+
+{| class="wikitable"
+! Speler
+|+'''Gestopte spelers'''
+|-
+| {{NL-VLAG}} [[Paul Bosvelt]]
+|}
+
+{| class="wikitable"
+! Speler
+|+'''Gestopte technische staf en directie'''
+|-
+| {{NL-VLAG}} [[Koos Formsma]]
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]
