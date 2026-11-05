@@ -43,14 +43,14 @@ export type TopScorersTableRow = {
  * The top scorers: a real `table` with a caption that is not shown, column headers with `scope`
  * and a row header for each row, whose names are `PlayerName`s: the given name in the normal
  * weight and the surname in the stronger one. A row with more than one player has all the names
- * in its one row header, with a comma and a space between them; a name stays whole when the
- * header wraps, unless it is wider than the cell. The goals are bold, because the list is
+ * in its one row header, with a comma and a space between them; the header wraps at a space,
+ * also inside a name. The goals are bold, because the list is
  * ordered by them, belong to each player of the row, and have a bar next to them that is as
  * long as the share of the top scorer's goals.
  * The bar is the one of the standings: decoration that a screen reader skips, which goes when
  * the place of the table is too narrow. The header of the goals is the abbreviation D, so the
  * full word stands under the table as well, because a title on an abbreviation only shows under
- * a mouse. bar.css gives the look, and top-scorers-table.css the names of a shared row.
+ * a mouse. bar.css gives the look.
  */
 export const TopScorersTable = ({ caption, className, rows, ...props }: TopScorersTableProps) => {
   const shares = sharesOf(rows.map((row) => row.goals))
@@ -81,19 +81,13 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
             <tr key={row.players[0].id}>
               <td className="hf-numeric hf-rank">{row.position}</td>
               <th scope="row">
-                {row.players.length === 1 ? (
-                  <PlayerName givenName={row.players[0].givenName} surname={row.players[0].surname} />
-                ) : (
-                  row.players.map((player, place) => (
-                    <Fragment key={player.id}>
-                      {place === 0 ? null : ' '}
-                      <span className="hf-top-scorers-name">
-                        <PlayerName givenName={player.givenName} surname={player.surname} />
-                        {place === row.players.length - 1 ? null : ','}
-                      </span>
-                    </Fragment>
-                  ))
-                )}
+                {row.players.map((player, place) => (
+                  <Fragment key={player.id}>
+                    {place === 0 ? null : ' '}
+                    <PlayerName givenName={player.givenName} surname={player.surname} />
+                    {place === row.players.length - 1 ? null : ','}
+                  </Fragment>
+                ))}
               </th>
               <td className="hf-numeric hf-key">
                 {row.goals}

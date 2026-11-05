@@ -117,20 +117,22 @@ describe('TopScorersTable', () => {
       const third = container.querySelectorAll('tbody tr')[2]!
 
       expect(third.querySelectorAll('th .hf-player-name-surname')).toHaveLength(3)
-      expect([...third.querySelectorAll('th .hf-top-scorers-name')].map((name) => name.textContent)).toEqual([
-        'Rick Demo,',
-        'Jan Van der Meer,',
-        'Zonnetje',
-      ])
+      expect(third.querySelector('th')?.innerHTML).toBe(
+        [
+          '<span class="hf-player-name"><span class="hf-player-name-given">Rick</span> <span class="hf-player-name-surname">Demo</span></span>, ',
+          '<span class="hf-player-name"><span class="hf-player-name-given">Jan</span> <span class="hf-player-name-surname">Van der Meer</span></span>, ',
+          '<span class="hf-player-name"><span class="hf-player-name-surname">Zonnetje</span></span>',
+        ].join(''),
+      )
     })
 
-    it('gives a row with one player the same markup as before, with no unit around the name', () => {
+    it('puts no unit around a name, so a name may wrap at a space like the text around it', () => {
       const { container } = render(<TopScorersTable {...props} rows={shared} />)
 
+      expect(container.querySelector('.hf-top-scorers-name')).toBeNull()
       expect(container.querySelector('tbody tr:first-child th')?.innerHTML).toBe(
         '<span class="hf-player-name"><span class="hf-player-name-given">Wouter</span> <span class="hf-player-name-surname">Proefman</span></span>',
       )
-      expect(container.querySelector('tbody tr:first-child .hf-top-scorers-name')).toBeNull()
     })
 
     it('gives the place and the goals once per row, and one bar per row for the goals of each player', () => {
