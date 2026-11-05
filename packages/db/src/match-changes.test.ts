@@ -142,8 +142,7 @@ describe('decideChange', () => {
       {
         action: 'match.take-over',
         createdAt: now,
-        detail:
-          'Wijziging van Wikipedia (result): op de site: sc Heerenveen 2–0 Ajax; Wikipedia: sc Heerenveen 3–0 Ajax',
+        detail: 'Wijziging van Wikipedia: uitslag',
         itemId: matchId,
         reason: 'Ik heb de pagina gelezen',
         userId: adminId,
@@ -161,7 +160,7 @@ describe('decideChange', () => {
       status: 'accepted',
     })
     expect(await log()).toMatchObject([
-      { action: 'match.take-over', detail: expect.stringContaining('Wikipedia: niets') },
+      { action: 'match.take-over', detail: expect.stringContaining('de wedstrijd staat niet meer op de pagina') },
     ])
   })
 
@@ -243,9 +242,13 @@ describe('proposals', () => {
     expect(decodeProposal('nope')).toBeUndefined()
   })
 
-  it('describes a change for the log', () => {
-    expect(describeChange({ changed: 'goals', newValue: null, oldValue: 'x' })).toBe(
-      'Wijziging van Wikipedia (goals): op de site: x; Wikipedia: niets',
+  it('describes a change for the log in Dutch, without the English values', () => {
+    expect(describeChange({ changed: 'result, goals', newValue: 'x' })).toBe(
+      'Wijziging van Wikipedia: uitslag, doelpunten',
     )
+    expect(describeChange({ changed: 'removed', newValue: null })).toBe(
+      'Wijziging van Wikipedia: wedstrijd weg (de wedstrijd staat niet meer op de pagina)',
+    )
+    expect(describeChange({ changed: 'iets nieuws', newValue: 'x' })).toBe('Wijziging van Wikipedia: iets nieuws')
   })
 })

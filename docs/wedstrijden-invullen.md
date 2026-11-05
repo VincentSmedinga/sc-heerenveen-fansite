@@ -82,14 +82,17 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 ## Een vastgehouden wijziging beslissen
 
-De import houdt soms een wijziging van Wikipedia vast, omdat hij verdacht lijkt: een uitslag die verandert nadat hij een dag stond, een doelpunt in een wedstrijd van een week geleden, of een wedstrijd die van de pagina verdwijnt.
+De import houdt soms een wijziging van Wikipedia vast, omdat hij verdacht lijkt.
+Een voorbeeld is een uitslag die verandert nadat hij een dag stond, een doelpunt in een wedstrijd van een week geleden, of een wedstrijd die van de pagina verdwijnt.
 Tot iemand beslist, blijven de wedstrijd en de doelpunten zoals ze zijn.
-Een vastgehouden wijziging staat op de kaart "Te doen" van de startpagina, en op `/beheer/wedstrijden` onder "Wikipedia wacht" met het label "Wikipedia wacht" bij de wedstrijd.
+Een vastgehouden wijziging staat op de kaart "Te doen" van de startpagina.
+Op `/beheer/wedstrijden` staat ze onder "Wikipedia wacht", met hetzelfde label bij de wedstrijd.
 Dat werkt ook voor een seizoen dat voorbij is.
 
 Open de wedstrijd.
-De kaart "Wikipedia wacht" zegt wat er nu op de site staat en wat Wikipedia nu zegt, waarom de wijziging wacht, sinds wanneer Wikipedia het zegt, en wat er zonder besluit gebeurt.
-Daar staat ook een koppeling naar de pagina van het seizoen op Wikipedia, om het zelf na te kijken.
+De kaart "Wikipedia wacht" zegt wat er nu op de site staat en wat Wikipedia nu zegt.
+Ze zegt ook waarom de wijziging wacht, sinds wanneer Wikipedia het zegt, en wat er zonder besluit gebeurt.
+Een koppeling naar de pagina van het seizoen op Wikipedia laat je het zelf nakijken.
 Schrijf bij "Reden" waarom je beslist, en kies:
 
 - **Neem Wikipedia over:** de wedstrijd en de doelpunten worden wat Wikipedia nu zegt.
@@ -99,7 +102,8 @@ Schrijf bij "Reden" waarom je beslist, en kies:
 
 Het besluit komt in het logboek, met wie en waarom.
 In het lopende seizoen neemt de import de wijziging over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
-In een seizoen dat voorbij is leest de import de pagina niet meer, dus daar blijft de huidige waarde staan tot iemand beslist.
+In een seizoen dat voorbij is leest de import de pagina niet meer.
+Daar blijft de huidige waarde staan tot iemand beslist.
 Alleen een beheerder ziet deze schermen en kan beslissen.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` laat de wedstrijd staan.

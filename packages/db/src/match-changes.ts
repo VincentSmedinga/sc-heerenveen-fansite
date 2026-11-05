@@ -202,9 +202,29 @@ export function decodeProposal(text: null | string): Proposal | undefined {
   }
 }
 
-/** The line for the log: what changed, what the site has and what Wikipedia says now. */
-export function describeChange(change: Pick<MatchChange, 'changed' | 'newValue' | 'oldValue'>): string {
-  return `Wijziging van Wikipedia (${change.changed}): op de site: ${change.oldValue}; Wikipedia: ${change.newValue ?? 'niets'}`
+/** What `match_changes.changed` says, in the words of the admin and the log. */
+const changedLabels: Record<string, string> = {
+  attendance: 'toeschouwers',
+  date: 'datum',
+  everything: 'alles',
+  goals: 'doelpunten',
+  note: 'opmerking',
+  opponent: 'tegenstander',
+  referee: 'scheidsrechter',
+  removed: 'wedstrijd weg',
+  result: 'uitslag',
+  stadium: 'stadion',
+  unknown: 'onbekend',
+}
+
+/**
+ * The line for the log: what changed, in Dutch, and whether Wikipedia drops the match. The
+ * values themselves are one line of English for the machine, so they stay in `match_changes`.
+ */
+export function describeChange(change: Pick<MatchChange, 'changed' | 'newValue'>): string {
+  const parts = change.changed.split(', ').map((part) => changedLabels[part] ?? part)
+
+  return `Wijziging van Wikipedia: ${parts.join(', ')}${change.newValue === null ? ' (de wedstrijd staat niet meer op de pagina)' : ''}`
 }
 
 /** The proposal as JSON text, for `match_changes.proposal`. */
