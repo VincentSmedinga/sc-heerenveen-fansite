@@ -44,4 +44,14 @@ export const releaseNotes: ReleaseNotes = {
     'Over ons: waar onze gegevens vandaan komen en wat er mis kan gaan.',
     'Licht of donker: de knop staat nu bovenin.',
   ],
+  '0.5.0': [
+    'Nieuw: Statistieken, met cijfers over het seizoen in kaarten. Kies alle wedstrijden of alleen de Eredivisie, en een seizoen.',
+    'Op Spelers: de topscorers, de bijzondere doelpunten en wie evenveel doelpunten maakte, op één regel.',
+    'Tegenstanders: kies een club en zie onze uitslagen tegen hen, thuis en uit, met de topscorers tegen die club en de wedstrijden die nog komen.',
+    'Op de pagina van een club: het stadion, ook als het verhuisde, en de eerdere namen van de club.',
+    'Verloop van het seizoen: wijs een punt op de lijn aan en zie het gemiddelde.',
+    'Toeschouwers per thuiswedstrijd, als staafgrafiek.',
+    'Op wedstrijden: ook de play-offs en de Europa League van eerdere seizoenen.',
+    'Nieuws: blader door het archief en kies de bronnen die je wilt zien. Nieuwe bronnen: Rijnmond en De Gelderlander.',
+  ],
 }
