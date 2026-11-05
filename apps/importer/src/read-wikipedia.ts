@@ -500,7 +500,7 @@ export function readLeagueResults(text: string, season?: string): ReadResults {
 
     const rest = restOf(box, boxes)
     const result = rest ?? box
-    const score = parseScore(result.params.get('score') ?? '')
+    const score = officialResultOf(box, boxes, season) ?? parseScore(result.params.get('score') ?? '')
     const [homeClub, awayClub] = [clubName(box.params.get('team1') ?? ''), clubName(box.params.get('team2') ?? '')]
 
     // A match of another club on the page makes it a page with every club, played or not yet.
@@ -1864,6 +1864,68 @@ function splitParameters(inner: string): string[] {
   parts.push(current)
 
   return parts
+}
+
+/**
+ * ONE-OFF (#736): matches of other clubs that were stopped and whose score at that moment
+ * became the official result. A stopped match is usually played to the end later, and `restOf`
+ * reads that already. This list is for the exception: the page has no later block, and writes
+ * the score as `4 – 0 (Gestaakt 82')`. We have one example, so there is no general rule for
+ * that way of writing it, which would count every such score as finished. When another
+ * stopped match gets an official result, consider a general rule and remove this list. See the
+ * README of the importer, _Een gestaakte wedstrijd_. A match is only the one listed when the
+ * season, the heading, the two clubs and the score are exactly as written here; `result` is
+ * what it counts as.
+ */
+const officialStoppedResults: readonly {
+  awayClub: string
+  heading: string
+  homeClub: string
+  result: string
+  score: string
+  season: string
+}[] = [
+  {
+    awayClub: 'Go Ahead Eagles',
+    heading: 'Speelronde 11',
+    homeClub: 'SC Cambuur',
+    result: '4 – 0',
+    score: "4 – 0 (Gestaakt 82')",
+    season: '2026/27',
+  },
+]
+
+/**
+ * The score a block of another club counts as when it is in `officialStoppedResults`, or
+ * undefined when it is not. It stops being one as soon as the page changes: another score, or a
+ * later block for the same two clubs under the same heading or the `Inhaalronde` of the same
+ * number, which finishes the match (see `restsOf`) and is read as usual.
+ */
+function officialResultOf(box: Template, boxes: Template[], season: string | undefined): ParsedScore | undefined {
+  const [homeClub, awayClub] = [clubName(box.params.get('team1') ?? ''), clubName(box.params.get('team2') ?? '')]
+  const score = plain(box.params.get('score') ?? '')
+  const known = officialStoppedResults.find(
+    (official) =>
+      official.season === season &&
+      official.heading === box.heading &&
+      official.homeClub === homeClub &&
+      official.awayClub === awayClub &&
+      official.score === score,
+  )
+
+  if (known === undefined || isOurs(box)) {
+    return undefined
+  }
+
+  const round = /^Speelronde (\d{1,2})$/u.exec(known.heading)?.[1]
+  const finished = boxes.some(
+    (other) =>
+      other.index > box.index &&
+      clubsOf(other) === clubsOf(box) &&
+      (other.heading === box.heading || other.heading === `Inhaalronde ${round}`),
+  )
+
+  return finished ? undefined : parseScore(known.result)
 }
 
 /**
