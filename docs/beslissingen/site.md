@@ -2377,6 +2377,7 @@
   Een schermlezer leest de namen als één rijkop.
 - **Alternatieven:** alleen de laatste plaats samenvoegen (86 rijen, en een gelijke stand eerder in de tabel blijft vijf rijen met dezelfde plaats); groepen van drie of meer (77 rijen, met een drempel die niemand ziet); alleen de kaart op de pagina van een club (Statistieken houdt zijn lange gelijke stand op plaats 5); alle drie de tabellen, Spelers ook; "elk" in de cel of een regel onder de tabel die zegt dat de doelpunten per speler zijn (afgewezen: de plaats en de komma's zeggen genoeg); één naam per regel in de cel (even hoog als nu); namen die midden in een naam mogen breken.
 - **Later:** bij _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
+- **Later:** zie _Een spelersnaam mag afbreken op een spatie, ook in een tabel_ in `designsysteem.md` (5 november 2026): een naam mag toch afbreken op een spatie.
 
 ## De wedstrijdlijsten tonen de naam van het seizoen, de kop de naam van nu
 

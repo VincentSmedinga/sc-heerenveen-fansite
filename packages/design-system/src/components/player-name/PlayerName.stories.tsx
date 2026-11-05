@@ -143,3 +143,43 @@ export const Long = meta.story({
     </div>
   ),
 })
+
+export const LongInHeaderAndList = meta.story({
+  name: 'Een lange naam in een rijkop en in een lijst, op een smalle plek',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Op een smalle plek breekt de naam af op een spatie, ook in de rijkop van een tabel en in een lijst. Een woord dat langer is dan de plek breekt overal. De tabel wordt niet breder dan de plek.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '18rem' }}>
+      <table>
+        <caption className="hf-visually-hidden">Doelpuntenmakers</caption>
+        <thead>
+          <tr>
+            <th scope="col">Speler</th>
+            <th className="hf-numeric" scope="col">
+              Doelpunten
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">
+              <PlayerName givenName="Jan Willem" surname="Van der Voorbeeldstraat-Proefmans" />
+            </th>
+            <td className="hf-numeric">7</td>
+          </tr>
+        </tbody>
+      </table>
+      <List role="list">
+        <List.Item>
+          <PlayerName givenName="Johannes Christiaan" surname="De Wit van Testvoort" />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})

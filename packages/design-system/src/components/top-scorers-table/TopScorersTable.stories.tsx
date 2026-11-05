@@ -80,6 +80,24 @@ const longRows: TopScorersTableRow[] = [
   { goals: 1, players: [{ id: 25, surname: 'Zonnetje' }], position: 10 },
 ]
 
+// Long names: the surname with a prefix, and a row that players share. They wrap at a space in
+// a narrow place, and a word that is wider than the place breaks anywhere.
+const longNameRows: TopScorersTableRow[] = [
+  {
+    goals: 4,
+    players: [{ givenName: 'Jan Willem', id: 1, surname: 'Van der Voorbeeldstraat-Proefmans' }],
+    position: 1,
+  },
+  {
+    goals: 2,
+    players: [
+      { givenName: 'Johannes Christiaan', id: 2, surname: 'De Wit van Testvoort' },
+      { givenName: 'Gerrit', id: 3, surname: 'Nepper' },
+    ],
+    position: 2,
+  },
+]
+
 // Everybody scored once: the same goals, so the same bars and the same place.
 const equalRows: TopScorersTableRow[] = rows.map((row) => ({ ...row, goals: 1, position: 1 }))
 
@@ -180,6 +198,12 @@ export const SharedDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Gelijke spelers delen een rij, donker',
   render: render('32rem', sharedRows),
+})
+
+export const LongNamesNarrowLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Lange namen breken af op een spatie, smalle plek, licht',
+  render: render('20rem', longNameRows),
 })
 
 export const SharedNarrowLight = meta.story({
