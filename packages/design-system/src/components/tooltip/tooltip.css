@@ -1,0 +1,41 @@
+/*
+ * The tooltip: a small box with a short text, placed by the component in the parent it sits
+ * in. The parent has to be positioned. The colours are those of the text turned round: a box
+ * in the colour of the text with the text in the colour of the page, which keeps the text at
+ * 4.5:1 and the box at 3:1 on every surface in both themes (see tooltip-css.test.ts). It
+ * ignores the pointer, so the pointer passes over it, and slides to its new place.
+ */
+
+@layer hf.components {
+  .hf-tooltip {
+    background-color: var(--hf-colour-text-default);
+    border-radius: 0.25rem;
+    color: var(--hf-colour-background-surface);
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-tooltip-font-weight);
+    inset-block-start: var(--hf-tooltip-y);
+    inset-inline-start: var(--hf-tooltip-x);
+    line-height: 1.25rem;
+    padding-block: 1px;
+    padding-inline: var(--hf-space-s);
+    pointer-events: none;
+    position: absolute;
+    transition:
+      inset-block-start var(--hf-motion-duration-short) var(--hf-motion-ease-enter),
+      inset-inline-start var(--hf-motion-duration-short) var(--hf-motion-ease-enter);
+    white-space: nowrap;
+  }
+
+  /* Until the component has measured it, the tooltip is not at its place yet. */
+  .hf-tooltip:not([data-side]) {
+    visibility: hidden;
+  }
+
+  @media (forced-colors: active) {
+    .hf-tooltip {
+      background-color: CanvasText;
+      color: Canvas;
+    }
+  }
+}

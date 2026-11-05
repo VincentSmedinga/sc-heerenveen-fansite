@@ -5,6 +5,7 @@ import {
   feeds,
   matches,
   matchGoals,
+  persons,
   players,
   playerSeasonStats,
   sources,
@@ -60,6 +61,7 @@ beforeEach(async () => {
     'wikipedia_pages',
     'match_changes',
     'matches',
+    'persons',
     'league_results',
     'standings',
     'match_imports',
@@ -144,6 +146,7 @@ describe('the first import, into an empty database', () => {
 
     expect(report).toEqual({
       kind: 'imported',
+      persons: ['persons: 25 titles asked, 25 new persons, 25 titles remembered'],
       players: { added: 25, left: 0, unchanged: 0, updated: 0 },
       season,
       stats: { added: 50, unchanged: 0, updated: 0 },
@@ -153,6 +156,7 @@ describe('the first import, into an empty database', () => {
       [
         'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
         'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
+        'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered',
       ].join('\n'),
     )
 
@@ -187,12 +191,17 @@ describe('the first import, into an empty database', () => {
     ])
   })
 
-  it('fetches only /wiki/<page>?action=raw, once, with the user agent of the importer', async () => {
+  it('fetches only /wiki/<page>?action=raw, once for the squad and once for each player, with the user agent of the importer', async () => {
     const { server } = await serve()
 
     await importAt(server, first)
 
-    expect(pageRequests(server)).toEqual(['/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw'])
+    const titles = (await database.db.select().from(players).orderBy(asc(players.id))).map(
+      (player) => `/wiki/${encodeURI(player.wikipediaPage?.replaceAll(' ', '_') ?? '')}?action=raw`,
+    )
+
+    expect(titles).toHaveLength(25)
+    expect(pageRequests(server)).toEqual(['/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw', ...titles])
     expect(String(server.requests[0]?.headers['user-agent'])).toMatch(
       /^scHeerenveenFansite\/.+ \(\+https:\/\/github\.com\//u,
     )
@@ -238,12 +247,14 @@ describe('reading again', () => {
     const early = await importAt(server, new Date(first.getTime() + 30 * 60 * 1000))
 
     expect(early).toMatchObject({ kind: 'postponed', retryAt: new Date(first.getTime() + 59 * 60 * 1000) })
-    expect(pageRequests(server)).toHaveLength(1)
+    // The squad page and the 25 players. A postponed read asks nothing.
+    expect(pageRequests(server)).toHaveLength(26)
 
     const later = await importAt(server, new Date(first.getTime() + hours(1)))
 
     expect(later).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
-    expect(pageRequests(server)).toHaveLength(2)
+    // Only the squad page: every player is known, so he costs no request.
+    expect(pageRequests(server)).toHaveLength(27)
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
 
@@ -276,6 +287,7 @@ describe('reading again', () => {
       [
         'Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad',
         'Squad 2026/27: numbers of the players: 2 new, 0 updated, 48 unchanged',
+        'Squad 2026/27: persons: 1 title asked, 1 new person, 1 title remembered',
       ].join('\n'),
     )
 
@@ -867,6 +879,26 @@ describe('seasons', () => {
     expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(25)
   })
 
+  it('gives every player with a page his person, and the same person in the next season', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await database.db.select().from(players).orderBy(asc(players.id))
+
+    expect(before.filter((player) => player.wikipediaPage !== null && player.personId === null)).toEqual([])
+    expect(new Set(before.map((player) => player.personId)).size).toBe(25)
+    expect(await database.db.select().from(persons)).toHaveLength(25)
+
+    await importAt(server, new Date('2027-07-01T10:00:00Z'))
+
+    const next = await database.db.select().from(players).where(eq(players.season, '2027/28'))
+
+    expect(next).toHaveLength(25)
+    expect(next.map((player) => player.personId).sort()).toEqual(before.map((player) => player.personId).sort())
+    expect(await database.db.select().from(persons)).toHaveLength(25)
+  })
+
   it('reads the page of the new season on 1 July, and keeps the squad of the old one', async () => {
     const { server } = await serve()
 
@@ -876,7 +908,11 @@ describe('seasons', () => {
     const report = await importAt(server, july)
 
     expect(report).toMatchObject({ kind: 'imported', players: { added: 25 }, season: '2027/28' })
-    expect(pageRequests(server).at(-1)).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2027/28_(mannen)?action=raw')
+    expect(
+      pageRequests(server)
+        .filter((path) => path?.includes('Sc_Heerenveen_in_het_seizoen'))
+        .at(-1),
+    ).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2027/28_(mannen)?action=raw')
     expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(25)
     expect(await database.db.select().from(players).where(eq(players.season, '2027/28'))).toHaveLength(25)
     expect((await database.db.select().from(squadImports)).map((row) => row.season).sort()).toEqual([
@@ -926,7 +962,9 @@ describe('the import command', () => {
     const { server } = await serve(original, { matchPages: true })
 
     const { code, lines: reports } = await run(server, feed)
-    const lines = reports.flatMap((report) => report.split('\n')).filter((line) => !/: new (club|name) /u.test(line))
+    const lines = reports
+      .flatMap((report) => report.split('\n'))
+      .filter((line) => !/: (new (club|name) |persons: )/u.test(line))
 
     expect(code).toBe(0)
     expect(lines.slice(0, 5)).toEqual([
@@ -941,7 +979,11 @@ describe('the import command', () => {
     expect(lines.slice(5).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
       true,
     )
-    expect(pageRequests(server).at(-1)).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw')
+    expect(
+      pageRequests(server)
+        .filter((path) => path?.includes('Sc_Heerenveen_in_het_seizoen'))
+        .at(-1),
+    ).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw')
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
 
@@ -956,8 +998,9 @@ describe('the import command', () => {
     expect(lines[1]).toContain('Matches 2026/27: warning, nothing changed and the last good copy stays')
     expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
     expect(lines[3]).toBe('Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged')
+    expect(lines[4]).toBe('Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered')
     // No match was played in the database, so there is nothing to compare the goals with.
-    expect(lines).toHaveLength(4)
+    expect(lines).toHaveLength(5)
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

@@ -2,6 +2,7 @@ import type { BarChartBar } from '../bar-chart/BarChart'
 import type { ChartTone } from '../chart/tones'
 import type { MarkRowMark } from '../mark-row/MarkRow'
 
+import { runningAverage } from '../chart/trend'
 import { tableColumns } from '../table-columns'
 
 /** The results of a match: `W` won (winst), `G` drawn (gelijk) and `V` lost (verlies). */
@@ -38,3 +39,19 @@ export const slots = (results: readonly FormResult[], matches: number): (BarChar
 
     return result ? { tone: toneOf(result), value: pointsOf(result) } : null
   })
+
+/**
+ * The average of the points per match over the last `span` matches, for each match played, the
+ * oldest first. It starts at the first match, over fewer than `span`. It is the line of
+ * `FormChart` and its tooltip, so a table next to the chart gives the same numbers by using it.
+ */
+export const averagesOf = (results: readonly FormResult[], span = 5): number[] =>
+  runningAverage(
+    results.map((result) => pointsOf(result)),
+    span,
+  ).flatMap((average) => (average === null ? [] : [average]))
+
+const average = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+
+/** An average as the page writes it, with a decimal comma and one decimal: "1,8". */
+export const formatAverage = (value: number): string => average.format(value)

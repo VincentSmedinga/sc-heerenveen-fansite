@@ -19,6 +19,7 @@
     "./match-conflicts": "./src/match-conflicts.ts",
     "./match-edits": "./src/match-edits.ts",
     "./prepare": "./src/prepare.ts",
+    "./persons": "./src/persons.ts",
     "./queries": "./src/queries.ts",
     "./schema": "./src/schema.ts",
     "./season": "./src/season.ts",

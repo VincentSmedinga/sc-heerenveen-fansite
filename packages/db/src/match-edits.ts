@@ -171,6 +171,7 @@ export function encodeGoals(goals: MatchGoal[]): string {
       ours: goal.ours,
       ownGoal: goal.ownGoal,
       penalty: goal.penalty,
+      personId: goal.personId,
       player: goal.player,
       playerId: goal.playerId,
       stoppageMinutes: goal.stoppageMinutes,

@@ -2,6 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
+import { createPersonBook } from '@fansite/db/persons'
 import {
   matches,
   matchGoals,
@@ -12,7 +13,7 @@ import {
   wikipediaPages,
 } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
 
 import type { Judgement } from './classify-change.ts'
 import type { Fetcher } from './fetcher.ts'
@@ -43,6 +44,8 @@ import {
   storeGoals,
   updateMatch,
 } from './match-changes.ts'
+import { aliasMap, personTitleAliases } from './person-names.ts'
+import { describePersons, lookUpPersonPages, similarPersons, similarPersonsWarning } from './person-pages.ts'
 import {
   europaLeaguePage,
   pageCandidates,
@@ -98,6 +101,11 @@ export type MatchReport =
       clubs: string[]
       kind: 'imported'
       matches: { added: number; held: number; removed: number; unchanged: number; updated: number }
+      /**
+       * What the import did for the persons of the scorers and the squad: the titles it asked
+       * Wikipedia about and the persons it made. Empty when it asked and made nothing.
+       */
+      persons: string[]
       /** The results of the league matches of every club (`league_results`). */
       results: ResultCounts
       season: string
@@ -170,6 +178,7 @@ export function formatMatchReport(report: MatchReport): string {
         `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed${report.matches.held === 0 ? '' : `, ${report.matches.held} held`}; table of ${report.standings} clubs for ${report.validOn}`,
         `${head}: league results of all clubs: ${report.results.added} new, ${report.results.updated} updated, ${report.results.unchanged} unchanged, ${report.results.removed} removed`,
         ...report.clubs.map((club) => `${head}: ${printable(club)}`),
+        ...report.persons.map((line) => `${head}: ${printable(line)}`),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -514,6 +523,8 @@ type StoreContext = {
   /** The import has never read this season, so nothing stored comes from Wikipedia. */
   firstRead: boolean
   pastSeason: boolean
+  /** Where the titles of persons that were new to the database end (`lookUpPersonPages`). */
+  personRedirects: ReadonlyMap<string, string>
   /** The last run that read the pages with success, before this one. */
   previousReadAt: Date | null
   /** Where the titles of the clubs that were new to the database end (`lookUpClubPages`). */
@@ -556,13 +567,24 @@ function changeLine(
 /**
  * The goals to keep for a match, and the warning when the page's scorers are not used. The
  * scorers are an extra: a list that cannot be read or does not fit the result is left out, the
- * match itself stays. Every goal gets its player from `link` (see `link-players.ts`).
+ * match itself stays. Every goal gets its person from `personOf`, by the page it links to, and
+ * its player from `link` (see `link-players.ts`).
  */
-function goalsOf(match: ReadMatch, link: (goal: ReadGoal) => null | number): { goals: LinkedGoal[]; warning?: string } {
+function goalsOf(
+  match: ReadMatch,
+  link: (goal: ReadGoal & { personId: null | number }) => null | number,
+  personOf: ReadonlyMap<string, null | number>,
+): { goals: LinkedGoal[]; warning?: string } {
   const problem = checkGoals(match)
 
   return problem === undefined
-    ? { goals: (match.goals ?? []).map((goal) => ({ ...goal, playerId: link(goal) })) }
+    ? {
+        goals: (match.goals ?? []).map((goal) => {
+          const personId = goal.playerPage === null ? null : (personOf.get(goal.playerPage) ?? null)
+
+          return { ...goal, personId, playerId: link({ ...goal, personId }) }
+        }),
+      }
     : { goals: [], warning: `no scorers: ${problem}` }
 }
 
@@ -614,6 +636,7 @@ function isSameGoals(before: MatchGoal[], now: LinkedGoal[]): boolean {
         goal.minute === now[index].minute &&
         goal.stoppageMinutes === now[index].stoppageMinutes &&
         goal.player === now[index].player &&
+        goal.personId === now[index].personId &&
         goal.playerId === now[index].playerId &&
         goal.wikipediaPage === now[index].playerPage &&
         goal.ownGoal === now[index].ownGoal &&
@@ -709,6 +732,25 @@ async function readAndStore(
     return { ...lookup, season }
   }
 
+  // The same for the persons: the scorers, ours and the opponents', and the squad. A request
+  // that fails is a warning, never a failed season (see `lookUpPersonPages`).
+  const squadPages = await db
+    .select({ page: players.wikipediaPage })
+    .from(players)
+    .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
+  const personLookup = await lookUpPersonPages(
+    db,
+    fetcher,
+    origins.nl,
+    [
+      ...found.flatMap((match) =>
+        (match.goals ?? []).flatMap((goal) => (goal.playerPage === null ? [] : [goal.playerPage])),
+      ),
+      ...squadPages.flatMap((row) => (row.page === null ? [] : [row.page])),
+    ],
+    aliasMap(personTitleAliases),
+  )
+
   const validOn = league.lastPlayedOn ?? seasonStart(season)
   const stored = await db.transaction(async (transaction) => {
     const [read] = await transaction
@@ -725,6 +767,7 @@ async function readAndStore(
       {
         firstRead: read === undefined,
         pastSeason,
+        personRedirects: personLookup.redirects,
         previousReadAt,
         redirects: lookup.redirects,
       },
@@ -772,16 +815,22 @@ async function readAndStore(
     }
   }
 
+  const alikeWarning = similarPersonsWarning(await similarPersons(db))
+  const alike = alikeWarning === undefined ? [] : [alikeWarning]
+
   return {
     clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
+    persons: describePersons(personLookup.asked, stored.persons),
     results: stored.results,
     season,
     standings: table.rows.length,
     validOn,
     warnings: [
       ...stored.warnings,
+      ...personLookup.warnings,
+      ...alike,
       ...resultWarnings(everyClub.unread, playedWarning(named.results, table.rows, named.strangers)),
     ],
   }
@@ -867,7 +916,7 @@ async function storeMatches(
   found: ReadMatch[],
   now: Date,
   read: { europaLeague: boolean; playoffs: boolean },
-  { firstRead, pastSeason, previousReadAt, redirects }: StoreContext,
+  { firstRead, pastSeason, personRedirects, previousReadAt, redirects }: StoreContext,
 ) {
   const clubLines: string[] = []
   const known = new Map(
@@ -875,6 +924,31 @@ async function storeMatches(
   )
   const existing = new Map(known)
   const squad = await db.select().from(players).where(eq(players.season, season))
+  const personBook = await createPersonBook(db, { aliases: aliasMap(personTitleAliases), redirects: personRedirects })
+
+  // A player of the squad that has no person yet gets it from the page of his name. Then the
+  // goals under a redirect of that page find him by his person (see `playerLinker`).
+  for (const player of squad) {
+    if (player.personId === null && player.wikipediaPage !== null) {
+      const personId = await personBook.resolve(player.wikipediaPage)
+
+      if (personId !== null) {
+        player.personId = personId
+        await db.update(players).set({ personId }).where(eq(players.id, player.id))
+      }
+    }
+  }
+
+  const personOf = new Map<string, null | number>()
+
+  for (const match of found) {
+    for (const goal of match.goals ?? []) {
+      if (goal.playerPage !== null && !personOf.has(goal.playerPage)) {
+        personOf.set(goal.playerPage, await personBook.resolve(goal.playerPage))
+      }
+    }
+  }
+
   const link = playerLinker(squad)
   const storedGoals = new Map<number, MatchGoal[]>()
 
@@ -900,7 +974,7 @@ async function storeMatches(
 
   for (const match of found) {
     const before = known.get(key(match))
-    const scorers = goalsOf(match, link)
+    const scorers = goalsOf(match, link, personOf)
     const club = await book.resolve({ name: match.opponent, page: match.opponentPage, season })
 
     clubLines.push(...club.events)
@@ -1162,5 +1236,5 @@ async function storeMatches(
     warnings.push(unlinked)
   }
 
-  return { clubs: clubLines, counts, heldAll, overwrites: mass, warnings }
+  return { clubs: clubLines, counts, heldAll, overwrites: mass, persons: personBook.counts, warnings }
 }

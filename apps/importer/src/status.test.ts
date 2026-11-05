@@ -108,6 +108,8 @@ describe('the overview', () => {
         'Matches 2026/27 (Wikipedia): not read yet',
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
+        '',
+        'Persons that look alike: 0',
       ],
     })
   })
@@ -137,6 +139,8 @@ describe('the overview', () => {
         'Matches 2026/27 (Wikipedia): not read yet',
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
+        '',
+        'Persons that look alike: 0',
       ],
     })
   })

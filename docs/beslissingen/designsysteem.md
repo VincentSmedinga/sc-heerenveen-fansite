@@ -2521,6 +2521,50 @@
 - **Alternatieven:** de hoogte als prop (`size`) naast een standaard van 6 rem; de lijn laten wachten op vijf wedstrijden (de vorm die er was, met "De lijn begint na 5 wedstrijden.").
 - **Later:** vervangt "van wedstrijd 5 af" in _De lijn is het gemiddelde over de laatste 5 wedstrijden, als vloeiende kromme_ (27 oktober 2026).
 
+## `Tooltip` is een eigen onderdeel dat de ouder aanstuurt, en `BarChart.Trend` geeft het `labels`
+
+- **Datum:** 5 november 2026
+- **Besluit:** er komt een onderdeel `Tooltip` (map `tooltip/`) dat een korte tekst toont op een plek in zijn ouder (#726).
+  De plek is een afstand van links en van onderen, als deel van de ouder (0 tot 100), en de ouder bepaalt de grootte en wanneer de tooltip er is.
+  Hij staat boven de plek, of eronder als er boven geen ruimte is, en blijft binnen de randen van de ouder; hij heeft geen pijl.
+  De ouder kan zeggen dat er boven hem ruimte is (`overhang`, in pixels), en de tooltip mag daar overheen steken.
+  Bij een andere plek schuift hij naar de nieuwe plek, met de korte duur van de bewegingstokens (dus meteen bij verminderde beweging).
+  Hij reageert zelf niet op de aanwijzer (`pointer-events: none`), is `aria-hidden`, krijgt geen focus en meldt Escape via `onClose`.
+  `placeTooltip` in `tooltip/placement.ts` rekent de plek uit en `Tooltip` meet de ouder en de tooltip in een `useLayoutEffect`.
+  - **`BarChart.Trend` krijgt `labels`:** per plek de tekst van de tooltip, of `null` voor een plek zonder punt, even lang als `values`.
+    Zonder `labels` is er geen tooltip en verandert er niets aan de lijn.
+    De tekst komt klaar van de pagina: `FormChart` maakt de labels met `formatAverage` ("1,8"), want `BarChart` weet niets van voetbal en een functie als eigenschap kan niet tussen servercomponenten.
+    De tooltip toont alleen de waarde, zonder eenheid en speelronde; die staan onder de grafiek en in de tabel.
+  - **De aanwijzer zit in een eigen deel:** `TrendPointer` (`bar-chart/TrendPointer.tsx`) is de enige client-component van de grafiek en komt alleen in de pagina als er `labels` zijn.
+    `nearestPoint` (`bar-chart/pointer.ts`) zoekt de plek met een punt die het dichtst bij de aanwijzer ligt, en slaat plekken zonder punt over.
+    Op dat punt staat een stip, die dezelfde klasse heeft als de stip aan het eind van de lijn.
+  - **De kleuren zijn die van de tekst, omgekeerd:** een vlak in `--hf-colour-text-default` met de tekst in `--hf-colour-background-surface`, zonder rand, in gewicht 500 (`--hf-tooltip-font-weight`).
+    Een test (`tooltip-css.test.ts`) toetst de tekst op 4,5:1 en het vlak op 3:1 op elk vlak van de pagina, in licht en donker.
+  - **De tooltip mag in de witruimte boven de grafiek:** `TrendPointer` geeft `overhang` 16 pixels mee.
+    Zoveel witruimte zit er minstens boven de grafiek (de ruimte tussen de onderdelen van de kaart), en niets knipt de tooltip af, want de grafiek heeft geen `overflow`-regel.
+    Er komt dus geen extra opvulling bij, en een punt vlak onder de bovenrand krijgt toch een tooltip erboven.
+    Staat er boven de grafiek een eigen onderdeel dat dichter bij zit, dan hoort `overhang` kleiner.
+- **Waarom:** de lijn toont een gemiddelde, maar de bezoeker kon de waarde op een punt nergens aflezen.
+  Een eigen onderdeel is ook bruikbaar voor `DonutChart` of een andere grafiek, en houdt `BarChart.Trend` eenvoudig.
+- **Later (5 november 2026, op verzoek van de projecteigenaar):** de tooltip had een licht vlak met een rand en sprong naar de nieuwe plek; nu is hij omgekeerd, vet (500) en schuift hij, en mag hij boven de grafiek in de witruimte.
+- **Alternatieven:** de tooltip in `BarChart.Trend` zelf bouwen (niet te hergebruiken); een tooltip die om elk element heen past en bij hover en focus verschijnt (veel meer werk: focus, `aria-describedby` en een positie die live wordt berekend, en de grafiek heeft dat niet nodig); een functie die de tekst maakt (kan niet tussen servercomponenten); de speelronde of de uitslag ook in de tooltip (dubbel met wat eronder staat).
+- **Later:** vult _Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen_ (27 oktober 2026) aan: `BarChart.Trend` heeft nu een deel dat JavaScript nodig heeft, maar alleen met `labels`.
+
+## De tooltip is voor de aanwijzer en aanraking, de grafiek blijft verborgen voor een schermlezer
+
+- **Datum:** 5 november 2026
+- **Besluit:** de grafiek blijft `aria-hidden` en krijgt geen bediening met het toetsenbord en geen plek in de volgorde van Tab (#726).
+  De tooltip is een extra voor wie een muis, een pen of een scherm met aanraking heeft; zonder JavaScript is er geen tooltip.
+  De pagina geeft dezelfde getallen als tekst (bij `FormChart`: een tabel in een `Disclosure`, met `averagesOf` en `formatAverage` uit het designsysteem, zodat de tabel en de tooltip met dezelfde getallen rekenen).
+  - **Muis en pen:** de tooltip springt naar het dichtstbijzijnde punt zolang de aanwijzer boven de grafiek is, en gaat weg als de aanwijzer de grafiek verlaat en bij Escape.
+  - **Aanraking:** een tik toont de tooltip, zijwaarts slepen verplaatst hem en een veeg omhoog of omlaag scrolt de pagina nog (`touch-action: pan-y` op de laag van de aanwijzer).
+    Neerleggen van de vinger toont nog niets, want het kan het begin van een scroll zijn; de tooltip komt bij het loslaten of bij slepen.
+    Hij blijft staan als de vinger loslaat, en gaat weg bij een tik buiten de grafiek of bij Escape.
+- **Waarom:** een eigen bediening met pijltjes, een live-regio en een grafiek die niet meer verborgen is, is veel om te bouwen en te testen, en een tabel helpt iedereen, ook wie niet kan wijzen.
+  Op een telefoon is er geen hover, en een tooltip die bij het loslaten weggaat, is verdwenen op het moment dat je de vinger wegneemt om te lezen.
+- **Alternatieven:** een grafiek met bediening met het toetsenbord (veel meer werk, meer kans op fouten); alleen de tooltip zonder tekst (de waarde per speelronde is dan nergens als tekst te lezen); de tooltip alleen tonen zolang de vinger op het scherm ligt; geen ondersteuning voor aanraking (dan krijgt een telefoon alleen de tabel).
+- **Nog niet:** een tooltip bij een knop of pictogram die op hover en focus verschijnt, en een tooltip bij de staafjes; daar komt een eigen issue voor als het nodig is.
+
 ## Een spelersnaam mag afbreken op een spatie, ook in een tabel
 
 - **Datum:** 5 november 2026
@@ -2544,3 +2588,16 @@
   Het label eromheen is ook aan te raken, maar het vinkje zelf hoort het minimum te halen.
 - **Nadeel:** het vinkje is iets groter dan de tekst ernaast.
 - **Alternatieven:** alleen het beheer groter maken (twee maten om gelijk te houden); het label als doel laten gelden (het vinkje blijft te klein voor wie het zelf raakt).
+
+## De uitleg van de lijn staat in de regel van de sleutel, en `FormTimeline` krijgt ook een tooltip
+
+- **Datum:** 5 november 2026
+- **Besluit:** de zin onder de grafiek van `FormChart` is korter en staat direct achter de sleutel, in dezelfde alinea: "**Lijn** gemiddeld aantal punten over 5 wedstrijden: nu 2,4." (#726).
+  Zolang er niets gespeeld is, staat er "**Lijn** begint bij de eerste wedstrijd."
+  Het getal is het aantal wedstrijden dat het gemiddelde telt: "over 1 wedstrijd", "over 3 wedstrijden", "over 5 wedstrijden".
+  `FormTimeline` geeft zijn lijn ook `labels`, met `formatAverage` op het gemiddelde van elke plek, dus dezelfde tooltip als `FormChart`.
+- **Waarom:** de projecteigenaar wil dat de sleutel en de uitleg van de lijn bij elkaar staan, en korter.
+  Een tooltip hoort bij elke lijn die een gemiddelde toont, en de kaart "Resultaten sinds" heeft ook zo'n lijn.
+- **Nadeel:** de kaart "Resultaten sinds" heeft geen tabel met de gemiddelden; de tooltip is daar alleen voor wie een muis, pen of aanraking gebruikt.
+  De wedstrijden zelf staan wel in de lijst onder Wedstrijden.
+- **Later:** vervangt "De zin onder de grafiek noemt hoeveel wedstrijden het gemiddelde telt" in _BarChart is overal 4 rem hoog_ (4 november 2026) en "alleen de kaart Verloop van het seizoen gebruikt hem" in de beslissing over de tooltip van #726 (5 november 2026): `FormTimeline` gebruikt hem nu ook.

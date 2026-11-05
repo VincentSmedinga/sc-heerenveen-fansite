@@ -458,7 +458,7 @@ function isSameGoal(
 
 /**
  * The goals of the entry, where a goal that did not change keeps what the import stored of it:
- * the link to the page of its scorer and his name as Wikipedia writes it.
+ * the link to the page of its scorer, his person and his name as Wikipedia writes it.
  */
 function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
   const left = [...stored]
@@ -467,7 +467,9 @@ function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
     const at = left.findIndex((candidate) => isSameGoal(candidate, goal))
     const [found] = at === -1 ? [] : left.splice(at, 1)
 
-    return found === undefined ? goal : { ...goal, player: found.player, wikipediaPage: found.wikipediaPage }
+    return found === undefined
+      ? goal
+      : { ...goal, personId: found.personId, player: found.player, wikipediaPage: found.wikipediaPage }
   })
 }
 
