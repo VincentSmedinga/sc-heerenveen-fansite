@@ -2,6 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { MatchImport, WikipediaPage } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
+import { countPersonNames } from '@fansite/db/persons'
 import {
   feeds,
   importRuns,
@@ -184,8 +185,12 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
  */
 async function showSimilarPersons(db: Database, write: (line: string) => void): Promise<void> {
   const groups = await similarPersons(db)
+  const names = await countPersonNames(db)
 
   write('')
+  write(
+    `Person names: ${names.sort_key} from a sort key, ${names.guess} guessed, ${names.manual} from the list, ${names.none} without a name`,
+  )
   write(
     `Persons that look alike: ${groups.length}${groups.length === 0 ? '' : ` (${printable(groups.map((titles) => titles.join(' and ')).join(', '))})`}`,
   )

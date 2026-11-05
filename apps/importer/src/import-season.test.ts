@@ -1097,8 +1097,17 @@ describe('the health and the status', () => {
     await runCommand(server, past)
 
     // The status of the current season is the same, and says nothing of the goals without a
-    // player or the pages of the season that is over.
-    expect(await status()).toEqual(before)
+    // player or the pages of the season that is over. The line with the names of the persons
+    // counts all seasons, so it is the one line that grows.
+    const withoutNames = (shown: { code: number; lines: string }) => ({
+      ...shown,
+      lines: shown.lines
+        .split('\n')
+        .filter((line) => !line.startsWith('Person names:'))
+        .join('\n'),
+    })
+
+    expect(withoutNames(await status())).toEqual(withoutNames(before))
     expect(before.code).toBe(0)
     expect(before.lines).toContain('goals of ours without a player')
   })

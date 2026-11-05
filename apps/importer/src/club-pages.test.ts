@@ -92,6 +92,7 @@ describe('lookUpTitles', () => {
         ['AZ (voetbalclub)', 'AZ (voetbalclub)'],
         ['AZ Alkmaar', 'AZ (voetbalclub)'],
       ]),
+      sortKeys: new Map(),
     })
     expect(asked(server)).toEqual(['/wiki/AZ_Alkmaar?action=raw', '/wiki/AZ_(voetbalclub)?action=raw'])
   })
@@ -120,7 +121,11 @@ describe('lookUpTitles', () => {
       new Map([['AZ (voetbalclub)', 'AZ (voetbalclub)']]),
     )
 
-    expect(found).toEqual({ kind: 'found', redirects: new Map([['AZ Alkmaar', 'AZ (voetbalclub)']]) })
+    expect(found).toEqual({
+      kind: 'found',
+      redirects: new Map([['AZ Alkmaar', 'AZ (voetbalclub)']]),
+      sortKeys: new Map(),
+    })
     expect(asked(server)).toEqual(['/wiki/AZ_Alkmaar?action=raw'])
   })
 
@@ -133,14 +138,18 @@ describe('lookUpTitles', () => {
       new Map([['Excelsior Rotterdam', 'Excelsior Rotterdam']]),
     )
 
-    expect(found).toEqual({ kind: 'found', redirects: new Map([['SBV Excelsior', 'Excelsior Rotterdam']]) })
+    expect(found).toEqual({
+      kind: 'found',
+      redirects: new Map([['SBV Excelsior', 'Excelsior Rotterdam']]),
+      sortKeys: new Map(),
+    })
   })
 
   it('takes a title that is no redirect as its own article, after one request', async () => {
     const server = await serve({ 'FC Twente': articleText })
     const found = await lookUpTitles(fetcherFor([server]), server.origin, ['FC Twente', 'FC Twente'], new Map())
 
-    expect(found).toEqual({ kind: 'found', redirects: new Map([['FC Twente', 'FC Twente']]) })
+    expect(found).toEqual({ kind: 'found', redirects: new Map([['FC Twente', 'FC Twente']]), sortKeys: new Map() })
     expect(asked(server)).toHaveLength(1)
   })
 

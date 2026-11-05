@@ -1,12 +1,13 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { createPersonBook } from '@fansite/db/persons'
+import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { persons } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
 
+import { personNameOf } from './person-name.ts'
 import { aliasMap } from './person-names.ts'
 import {
   describePersons,
@@ -76,7 +77,7 @@ describe('lookUpPersonPages', () => {
       'Filip Đuričić',
     ])
 
-    expect(found).toEqual({
+    expect(found).toMatchObject({
       asked: 2,
       redirects: new Map([
         ['Alfred Finnbogason', 'Alfreð Finnbogason'],
@@ -102,12 +103,19 @@ describe('lookUpPersonPages', () => {
     })
 
     await book.resolve('Alfreð Finnbogason')
+    // The person has his name already, or the import would ask about his article once more.
+    await storePersonNames(database.db, new Map([['Alfreð Finnbogason', personNameOf('Alfreð Finnbogason', null)]]))
 
     const server = await serve({ 'Alfred Finnbogason': '#REDIRECT [[Alfreð Finnbogason]]' })
 
-    expect(await lookUp(server, ['Alfreð Finnbogason'])).toEqual({ asked: 0, redirects: new Map(), warnings: [] })
+    expect(await lookUp(server, ['Alfreð Finnbogason'])).toEqual({
+      asked: 0,
+      names: new Map(),
+      redirects: new Map(),
+      warnings: [],
+    })
     expect(asked(server)).toEqual([])
-    expect(await lookUp(server, ['Alfred Finnbogason'])).toEqual({
+    expect(await lookUp(server, ['Alfred Finnbogason'])).toMatchObject({
       asked: 1,
       redirects: new Map([['Alfred Finnbogason', 'Alfreð Finnbogason']]),
       warnings: [],
@@ -119,7 +127,7 @@ describe('lookUpPersonPages', () => {
     const server = await serve({ 'Luca Oyen': articleText, 'Rode Link': 404 })
     const found = await lookUp(server, ['Rode Link', 'Luca Oyen'])
 
-    expect(found).toEqual({
+    expect(found).toMatchObject({
       asked: 2,
       redirects: new Map([
         ['Luca Oyen', 'Luca Oyen'],
@@ -227,5 +235,49 @@ describe('similarPersons', () => {
     expect(similarPersonsWarning(Array.from({ length: 7 }, (_, index) => [`A${index}`, `a-${index}`]))).toMatch(
       /^Persons: 7 groups of persons look alike and are not merged: 'A0' and 'a-0', .*, …$/u,
     )
+  })
+})
+
+describe('the names that lookUpPersonPages finds', () => {
+  const key = (text: string) => `${articleText}\n{{DEFAULTSORT:${text}}}`
+
+  it('reads the name from the sort key of the article it asks for, and guesses without one', async () => {
+    const server = await serve({
+      'Joost van Aken': key('Aken, Joost van'),
+      'Ramon Zomer': articleText,
+      'Rode Link': 404,
+    })
+    const found = await lookUp(server, ['Joost van Aken', 'Ramon Zomer', 'Rode Link'])
+
+    expect(found.names.get('Joost van Aken')).toMatchObject({
+      familyName: 'Aken',
+      familyNamePrefix: 'van',
+      givenName: 'Joost',
+      source: 'sort_key',
+    })
+    expect(found.names.get('Ramon Zomer')).toMatchObject({ familyName: 'Zomer', givenName: 'Ramon', source: 'guess' })
+    expect(found.names.get('Rode Link')).toMatchObject({ familyName: 'Link', source: 'guess' })
+  })
+
+  it('asks about a person without a name once more, and about nobody when every person has a name', async () => {
+    const book = await createPersonBook(database.db, {
+      redirects: new Map([['Joost van Aken', 'Joost van Aken']]),
+    })
+
+    await book.resolve('Joost van Aken')
+
+    const server = await serve({ 'Joost van Aken': key('Aken, Joost van') })
+    const first = await lookUp(server, ['Joost van Aken'])
+
+    expect(first.asked).toBe(1)
+    expect(asked(server)).toEqual(['/wiki/Joost_van_Aken?action=raw'])
+
+    await storePersonNames(database.db, first.names)
+
+    const second = await lookUp(server, ['Joost van Aken'])
+
+    expect(second).toEqual({ asked: 0, names: new Map(), redirects: new Map(), warnings: [] })
+    expect(asked(server)).toHaveLength(1)
+    expect((await storePersonNames(database.db, second.names)).counts).toEqual({ guess: 0, manual: 0, sort_key: 0 })
   })
 })
