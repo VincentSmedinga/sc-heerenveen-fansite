@@ -510,9 +510,12 @@ describe('the page /statistieken', () => {
         const card = section(await render(), 'verloop-van-het-seizoen')
 
         expect(card).toContain('Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde')
-        for (const column of ['Speelronde', 'Uitslag', 'Punten', 'Gemiddelde']) {
-          expect(card).toContain(column)
+        for (const column of ['Ronde', 'Uitslag', 'Punten']) {
+          expect(card).toContain(`>${column}</`)
         }
+        // The average is shortened to fit a phone, with the whole word for a screen reader.
+        expect(card).toContain('<span aria-hidden="true">Gem.</span><span class="hf-visually-hidden">Gemiddelde</span>')
+        expect(card).toContain('Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden')
       })
 
       it('has no fold, and no table, when no match is played', async () => {
@@ -533,7 +536,9 @@ describe('the page /statistieken', () => {
       const card = section(await render(), 'verloop-van-het-seizoen')
 
       expect(card).toContain('aria-hidden="true"')
-      expect(card.match(/<table[^>]*>.*<\/table>/s)?.[0]).not.toContain('aria-hidden')
+      // The tables and the fold are for a screen reader: only the chart is hidden.
+      expect(card).not.toMatch(/<(?:table|details|summary)[^>]*aria-hidden/)
+      expect(card.match(/<table[^>]*>.*?<\/table>/s)?.[0]).not.toContain('aria-hidden')
     })
 
     it('says so in a sentence, with no chart or table, when no match of the Eredivisie is played', async () => {

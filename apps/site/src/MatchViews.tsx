@@ -614,12 +614,16 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
           <Disclosure summary="Uitslag en gemiddelde per speelronde">
             <DataTable
               caption="Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden"
-              columns={['Speelronde', 'Uitslag', 'Punten', 'Gemiddelde']}
+              columns={['Ronde', 'Uitslag', 'Punten', { abbreviation: 'Gem.', name: 'Gemiddelde' }]}
               rows={results.map((result, index) => ({
                 cells: [outcomeWord[result], pointsOf(result), formatAverage(averages[index] ?? 0)],
                 header: String(index + 1),
               }))}
             />
+            <Text appearance="meta">
+              Ronde is de speelronde. Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden,
+              zoals de lijn.
+            </Text>
           </Disclosure>
         </>
       )}
