@@ -2540,10 +2540,13 @@
     Op dat punt staat een stip, die dezelfde klasse heeft als de stip aan het eind van de lijn.
   - **De kleuren zijn die van de tekst, omgekeerd:** een vlak in `--hf-colour-text-default` met de tekst in `--hf-colour-background-surface`, zonder rand, in gewicht 500 (`--hf-tooltip-font-weight`).
     Een test (`tooltip-css.test.ts`) toetst de tekst op 4,5:1 en het vlak op 3:1 op elk vlak van de pagina, in licht en donker.
-  - **De grafiek houdt ruimte vrij boven de lijn:** een `BarChart` met `labels` krijgt 24 pixels ruimte boven de plot (`bar-chart.css`, hetzelfde getal als `overhang` in `TrendPointer`), zodat de tooltip vaker boven een punt past.
+  - **De tooltip mag in de witruimte boven de grafiek:** `TrendPointer` geeft `overhang` 16 pixels mee.
+    Zoveel witruimte zit er minstens boven de grafiek (de ruimte tussen de onderdelen van de kaart), en niets knipt de tooltip af, want de grafiek heeft geen `overflow`-regel.
+    Er komt dus geen extra opvulling bij, en een punt vlak onder de bovenrand krijgt toch een tooltip erboven.
+    Staat er boven de grafiek een eigen onderdeel dat dichter bij zit, dan hoort `overhang` kleiner.
 - **Waarom:** de lijn toont een gemiddelde, maar de bezoeker kon de waarde op een punt nergens aflezen.
   Een eigen onderdeel is ook bruikbaar voor `DonutChart` of een andere grafiek, en houdt `BarChart.Trend` eenvoudig.
-- **Later (5 november 2026, op verzoek van de projecteigenaar):** de tooltip had een licht vlak met een rand en sprong naar de nieuwe plek; nu is hij omgekeerd, vet (500) en schuift hij.
+- **Later (5 november 2026, op verzoek van de projecteigenaar):** de tooltip had een licht vlak met een rand en sprong naar de nieuwe plek; nu is hij omgekeerd, vet (500) en schuift hij, en mag hij boven de grafiek in de witruimte.
 - **Alternatieven:** de tooltip in `BarChart.Trend` zelf bouwen (niet te hergebruiken); een tooltip die om elk element heen past en bij hover en focus verschijnt (veel meer werk: focus, `aria-describedby` en een positie die live wordt berekend, en de grafiek heeft dat niet nodig); een functie die de tekst maakt (kan niet tussen servercomponenten); de speelronde of de uitslag ook in de tooltip (dubbel met wat eronder staat).
 - **Later:** vult _Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen_ (27 oktober 2026) aan: `BarChart.Trend` heeft nu een deel dat JavaScript nodig heeft, maar alleen met `labels`.
 

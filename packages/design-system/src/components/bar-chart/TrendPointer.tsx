@@ -5,8 +5,11 @@ import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } fr
 import { Tooltip } from '../tooltip/Tooltip'
 import { nearestPoint, type TrendPoint } from './pointer'
 
-/** The room above the plot the tooltip may use, in pixels: the padding in bar-chart.css. */
-const overhang = 24
+/**
+ * The room above the plot the tooltip may use, in pixels. A chart has at least this much
+ * whitespace above it (the flow of the card, 16 pixels in `FormChart`), and nothing clips it.
+ */
+const overhang = 16
 
 export type TrendPointerProps = {
   /** One entry per place: where its point is and its text, or `null` for no point. */

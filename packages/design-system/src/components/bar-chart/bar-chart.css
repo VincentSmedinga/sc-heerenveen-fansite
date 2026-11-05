@@ -29,18 +29,6 @@
   }
 
   /*
-   * A chart with a tooltip at its line has room above the plot for it, so it fits above a
-   * point near the top. It is the same number as the overhang in TrendPointer.tsx.
-   */
-  .hf-bar-chart-frame:has(.hf-bar-chart-pointer) {
-    padding-block-start: 24px;
-  }
-
-  .hf-bar-chart-scale {
-    display: none;
-  }
-
-  /*
    * The plot is the chart without the numbers. Everything in it is placed in percentages of
    * it, and the ground is a line under it. It has no overflow rule, so the end dot and the
    * edge of the line can stick out over the border.
