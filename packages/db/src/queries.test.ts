@@ -30,6 +30,7 @@ import {
   leagueResults,
   matches,
   matchGoals,
+  persons,
   players,
   sources,
   standings,
@@ -1734,11 +1735,13 @@ describe('the matches and the table of a season', () => {
           ours: true,
           ownGoal: false,
           penalty: true,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: 'Vroeg',
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: null,
         },
         {
@@ -1746,11 +1749,13 @@ describe('the matches and the table of a season', () => {
           ours: true,
           ownGoal: false,
           penalty: false,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: 'Voor rust',
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: null,
         },
         {
@@ -1758,11 +1763,13 @@ describe('the matches and the table of a season', () => {
           ours: false,
           ownGoal: false,
           penalty: false,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: 'Blessuretijd',
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: 2,
         },
         {
@@ -1770,11 +1777,13 @@ describe('the matches and the table of a season', () => {
           ours: true,
           ownGoal: false,
           penalty: false,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: 'Na rust',
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: null,
         },
         {
@@ -1782,18 +1791,20 @@ describe('the matches and the table of a season', () => {
           ours: false,
           ownGoal: false,
           penalty: false,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: 'Late',
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: null,
         },
       ])
       expect(rows.filter((match) => match !== cup).every((match) => match.goals.length === 0)).toBe(true)
     })
 
-    it('gives a goal of one of our players the player and his full name, also when he has left the squad', async () => {
+    it("gives a goal the player and the name kept for the person, ours or an opponent's", async () => {
       await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const [cupMatch] = await database.db
@@ -1817,29 +1828,55 @@ describe('the matches and the table of a season', () => {
         season: '2026/27',
         wikipediaPage: 'Marko Farji',
       })
+      const [{ insertId: lucaPerson }] = await database.db
+        .insert(persons)
+        .values({ familyName: 'Oyen', givenName: 'Luca', name: 'Luca Oyen', wikipediaPage: 'Luca Oyen' })
+      const [{ insertId: opponentPerson }] = await database.db.insert(persons).values({
+        familyName: 'Aken',
+        familyNamePrefix: 'van',
+        givenName: 'Joost',
+        name: 'Joost van Aken',
+        wikipediaPage: 'Joost van Aken',
+      })
 
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: oyen, wikipediaPage: 'Luca Oyen' },
+        {
+          matchId: id,
+          minute: 10,
+          ours: true,
+          personId: lucaPerson,
+          player: 'Oyen',
+          playerId: oyen,
+          wikipediaPage: 'Luca Oyen',
+        },
         { matchId: id, minute: 20, ours: true, player: 'Farji', playerId: farji },
         { matchId: id, minute: 25, ours: true, player: 'Kemper', wikipediaPage: 'Boy Kemper' },
-        { matchId: id, minute: 30, ours: false, player: 'Teststraat' },
+        {
+          matchId: id,
+          minute: 30,
+          ours: false,
+          personId: opponentPerson,
+          player: 'Van Aken',
+          wikipediaPage: 'Joost van Aken',
+        },
       ])
 
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 
       expect(
-        cup?.goals.map(({ player, playerId, playerName, playerPage, playerSearchTerm }) => [
-          player,
-          playerId,
-          playerName,
-          playerPage,
-          playerSearchTerm,
+        cup?.goals.map((goal) => [
+          goal.player,
+          goal.playerId,
+          goal.personId,
+          goal.personGivenName,
+          goal.personFamilyNamePrefix,
+          goal.personFamilyName,
         ]),
       ).toEqual([
-        ['Oyen', oyen, 'Luca Oyen', 'Luca Oyen', 'Oyen'],
-        ['Farji', farji, 'Marko Farji', null, 'Farji'],
-        ['Kemper', null, null, 'Boy Kemper', null],
-        ['Teststraat', null, null, null, null],
+        ['Oyen', oyen, lucaPerson, 'Luca', null, 'Oyen'],
+        ['Farji', farji, null, null, null, null],
+        ['Kemper', null, null, null, null, null],
+        ['Van Aken', null, opponentPerson, 'Joost', 'van', 'Aken'],
       ])
     })
 

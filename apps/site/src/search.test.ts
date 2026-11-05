@@ -123,6 +123,9 @@ describe('searchHref', () => {
 describe('squadGroups', () => {
   const player = (name: string, position: 'aanvaller' | 'doelman' | 'middenvelder' | 'verdediger') => ({
     name,
+    personFamilyName: null,
+    personFamilyNamePrefix: null,
+    personGivenName: null,
     position,
     searchTerm: name,
   })

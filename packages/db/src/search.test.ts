@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { TestDatabase } from './test-database.ts'
 
 import { findSquadPage, listSquad, searchPublic } from './queries.ts'
-import { adminUsers, articles, feeds, items, players, sources, wikipediaPages } from './schema.ts'
+import { adminUsers, articles, feeds, items, persons, players, sources, wikipediaPages } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -328,6 +328,8 @@ describe('searchPublic', () => {
 })
 
 describe('listSquad', () => {
+  const noPerson = { personFamilyName: null, personFamilyNamePrefix: null, personGivenName: null }
+
   it('gives the players of the season by shirt number, those without a number last, and nobody who left the squad', async () => {
     await database.db.insert(players).values([
       { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
@@ -346,9 +348,38 @@ describe('listSquad', () => {
     ])
 
     expect(await listSquad(database.db, '2026/27')).toEqual([
-      { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper' },
-      { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler' },
-      { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer' },
+      { name: 'Een Keeper', ...noPerson, position: 'doelman', searchTerm: 'Keeper' },
+      { name: 'Tien Speler', ...noPerson, position: 'aanvaller', searchTerm: 'Speler' },
+      { name: 'Zonder Nummer', ...noPerson, position: 'doelman', searchTerm: 'Nummer' },
+    ])
+  })
+
+  it('gives the name kept for the person of a player', async () => {
+    const [{ insertId: person }] = await database.db.insert(persons).values({
+      familyName: 'Aken',
+      familyNamePrefix: 'van',
+      givenName: 'Joost',
+      wikipediaPage: 'Joost van Aken',
+    })
+
+    await database.db.insert(players).values({
+      name: 'Joost van Aken',
+      personId: person,
+      position: 'verdediger',
+      searchTerm: 'van Aken',
+      season: '2026/27',
+      shirtNumber: 4,
+    })
+
+    expect(await listSquad(database.db, '2026/27')).toEqual([
+      {
+        name: 'Joost van Aken',
+        personFamilyName: 'Aken',
+        personFamilyNamePrefix: 'van',
+        personGivenName: 'Joost',
+        position: 'verdediger',
+        searchTerm: 'van Aken',
+      },
     ])
   })
 })

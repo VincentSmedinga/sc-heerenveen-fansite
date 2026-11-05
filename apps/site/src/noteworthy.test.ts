@@ -18,11 +18,13 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   ours: true,
   ownGoal: false,
   penalty: false,
+  personFamilyName: null,
+  personFamilyNamePrefix: null,
+  personGivenName: null,
+  personId: null,
   player,
   playerId: null,
-  playerName: null,
   playerPage: null,
-  playerSearchTerm: null,
   stoppageMinutes: null,
   ...options,
 })
@@ -138,7 +140,9 @@ describe('noteworthyFactsOf: goals in stoppage time', () => {
 
 describe('noteworthyFactsOf: hattricks', () => {
   it('finds a hattrick of one of our players, by name', () => {
-    const goals = [10, 30, 70].map((minute) => goal('Proefman', { minute, playerName: 'Piet Proefman' }))
+    const goals = [10, 30, 70].map((minute) =>
+      goal('Proefman', { minute, personFamilyName: 'Proefman', personGivenName: 'Piet', personId: 1 }),
+    )
 
     expect(texts([played(goals)])).toEqual([
       'Thuis tegen Testdorp FC (3–0, 1 augustus 2026) maakte Piet Proefman een hattrick.',

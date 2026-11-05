@@ -11,11 +11,13 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   ours: true,
   ownGoal: false,
   penalty: false,
+  personFamilyName: null,
+  personFamilyNamePrefix: null,
+  personGivenName: null,
+  personId: null,
   player,
   playerId: null,
-  playerName: null,
   playerPage: null,
-  playerSearchTerm: null,
   stoppageMinutes: null,
   ...options,
 })
@@ -186,31 +188,38 @@ describe('specialGoalsOf', () => {
     ])
   })
 
-  it('counts the goals of a player linked in the table together with those that only have his page', () => {
-    const linked = goal('Oyen', {
-      playerId: 7,
-      playerName: 'Luca Oyen',
-      playerPage: 'Luca Oyen',
-      playerSearchTerm: 'Oyen',
-    })
-    const onlyPage = goal('L. Oyen', { playerPage: 'Luca Oyen' })
+  it('counts the goals of one person under two titles together', () => {
+    const person = { personFamilyName: 'Finnbogason', personGivenName: 'Alfreð', personId: 7 }
     const matches = [
-      played([linked, onlyPage, goal('Oyen', { playerId: 7, playerName: 'Luca Oyen', playerSearchTerm: 'Oyen' })]),
+      played([
+        goal('Finnbogason', { ...person, playerPage: 'Alfreð Finnbogason' }),
+        goal('Finnbogason', { ...person, playerPage: 'Alfred Finnbogason' }),
+        goal('Finnbogason', { ...person, playerId: 3 }),
+      ]),
     ]
 
     expect(specialGoalsOf(matches).hattricks).toEqual([
-      { givenName: 'Luca', id: 7, player: 'Luca Oyen', surname: 'Oyen', times: 1 },
+      { givenName: 'Alfreð', id: 'person:7', player: 'Alfreð Finnbogason', surname: 'Finnbogason', times: 1 },
     ])
   })
 
-  it('makes two players with the same surname two rows', () => {
-    const jansen = (id: number, name: string) =>
-      goal('Jansen', { playerId: id, playerName: name, playerSearchTerm: 'Jansen' })
-    const matches = [
-      played([jansen(1, 'Bram Jansen'), jansen(1, 'Bram Jansen'), jansen(2, 'Kees Jansen'), jansen(2, 'Kees Jansen')]),
-    ]
+  it('makes two people with the same surname two rows', () => {
+    const jansen = (id: number, given: string) =>
+      goal('Jansen', { personFamilyName: 'Jansen', personGivenName: given, personId: id })
+    const matches = [played([jansen(1, 'Bram'), jansen(1, 'Bram'), jansen(2, 'Kees'), jansen(2, 'Kees')])]
 
     expect(specialGoalsOf(matches).doubles.map((item) => item.player)).toEqual(['Bram Jansen', 'Kees Jansen'])
+  })
+
+  it('puts people in order on the family name without the prefix', () => {
+    const named = (id: number, given: string, prefix: null | string, family: string) =>
+      goal(family, { personFamilyName: family, personFamilyNamePrefix: prefix, personGivenName: given, personId: id })
+    const matches = [
+      played([named(1, 'Zoë', null, 'Zwart'), named(1, 'Zoë', null, 'Zwart')]),
+      played([named(2, 'Joost', 'van', 'Aken'), named(2, 'Joost', 'van', 'Aken')]),
+    ]
+
+    expect(specialGoalsOf(matches).doubles.map((item) => item.player)).toEqual(['Joost van Aken', 'Zoë Zwart'])
   })
 
   it('leaves out a match that is not played, and one with a score and no goals', () => {

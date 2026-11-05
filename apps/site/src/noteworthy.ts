@@ -2,7 +2,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { type CompetitionChoice } from './competition'
 import { formatTableDay } from './match-format'
-import { type LeagueMatch, playedMatchesOf } from './matches'
+import { keyOf, type LeagueMatch, playedMatchesOf, scorerLine } from './matches'
 
 /**
  * The words the card shows and the address uses, in one place: the heading, the link to the
@@ -147,18 +147,18 @@ function consecutiveMinutes({ played }: FactInput): NoteworthyFact[] {
 
 /**
  * Three or more goals of one player in one match, of ours or of the opponent. A penalty is a
- * goal of the player, an own goal is a goal of nobody. A player is known by the id, then the
- * Wikipedia page and then the name, as in the list of goal scorers.
+ * goal of the player, an own goal is a goal of nobody. A player is known as in the list of goal
+ * scorers (see `keyOf`), and shown with the name kept for the person.
  */
 function hattricks({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
     const scored = new Map<string, { count: number; name: string; ours: boolean }>()
 
     for (const goal of match.goals.filter((item) => !item.ownGoal)) {
-      const key = `${goal.ours}:${goal.playerId ?? goal.playerPage ?? goal.player}`
+      const key = `${goal.ours}:${keyOf(goal)}`
       const known = scored.get(key)
 
-      scored.set(key, { count: (known?.count ?? 0) + 1, name: goal.playerName ?? goal.player, ours: goal.ours })
+      scored.set(key, { count: (known?.count ?? 0) + 1, name: scorerLine(goal).player, ours: goal.ours })
     }
 
     return [...scored.entries()]
