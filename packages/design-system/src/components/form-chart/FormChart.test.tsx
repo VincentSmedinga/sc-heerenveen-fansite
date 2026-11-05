@@ -1,10 +1,10 @@
-import { render } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { FormResult } from './form'
 
 import { tableColumns, tableLegend } from '../table-columns'
-import { formOf } from './form'
+import { averagesOf, formatAverage, formOf } from './form'
 import { FormChart } from './FormChart'
 
 /** The text of the page under the chart, as a screen reader gets it (the chart is hidden). */
@@ -61,9 +61,7 @@ describe('FormChart', () => {
   it('says what the line shows, with the latest average and a decimal comma', () => {
     const { container } = render(<FormChart results={['W', 'W', 'G', 'V', 'G']} />)
 
-    expect(textOf(container)).toContain(
-      'De lijn laat zien hoeveel punten sc Heerenveen per wedstrijd haalde in de laatste 5 wedstrijden: nu 1,6.',
-    )
+    expect(textOf(container).join(' ')).toContain('Lijn gemiddeld aantal punten over 5 wedstrijden: nu 1,6.')
   })
 
   it('rounds the average to one decimal', () => {
@@ -77,20 +75,20 @@ describe('FormChart', () => {
 
     expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).not.toBe('')
     expect(container.querySelector('.hf-bar-chart-trend-dot')).not.toBeNull()
-    expect(textOf(container).join(' ')).toContain('in de laatste 3 wedstrijden: nu 1,3.')
+    expect(textOf(container).join(' ')).toContain('over 3 wedstrijden: nu 1,3.')
   })
 
-  it('says "de laatste wedstrijd" after one match', () => {
+  it('says "1 wedstrijd" after one match', () => {
     const { container } = render(<FormChart results={['W']} />)
 
-    expect(textOf(container).join(' ')).toContain('in de laatste wedstrijd: nu 3,0.')
+    expect(textOf(container).join(' ')).toContain('over 1 wedstrijd: nu 3,0.')
   })
 
   it('has no line, and says where it starts, before the first match', () => {
     const { container } = render(<FormChart results={[]} />)
 
     expect(container.querySelector('.hf-bar-chart-trend-dot')).toBeNull()
-    expect(textOf(container)).toContain('De lijn begint bij de eerste wedstrijd.')
+    expect(textOf(container).join(' ')).toContain('Lijn begint bij de eerste wedstrijd.')
   })
 
   it('shows empty places and a text for the form when nothing is played yet', () => {
@@ -104,7 +102,7 @@ describe('FormChart', () => {
   it('writes the key to the letters, and puts the points in it', () => {
     const { container } = render(<FormChart results={season} />)
 
-    expect(textOf(container)).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
+    expect(textOf(container).join(' ')).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Lijn gemiddeld')
   })
 
   it('uses the letters and words of the columns under the tables for winst, gelijk and verlies', () => {
@@ -122,7 +120,7 @@ describe('FormChart', () => {
     const { container } = render(<FormChart matches={10} results={['W', 'W', 'W']} window={3} />)
 
     expect(container.querySelectorAll('.hf-bar-chart-slot')).toHaveLength(10)
-    expect(textOf(container).join(' ')).toContain('in de laatste 3 wedstrijden: nu 3,0.')
+    expect(textOf(container).join(' ')).toContain('over 3 wedstrijden: nu 3,0.')
   })
 
   it('hides the chart from a screen reader and keeps everything else as text', () => {
@@ -130,5 +128,40 @@ describe('FormChart', () => {
 
     expect(container.querySelector('.hf-bar-chart')?.getAttribute('aria-hidden')).toBe('true')
     expect(container.querySelector('.hf-form-chart > p[aria-hidden]')).toBeNull()
+  })
+
+  it('gives the line a tooltip with the average of the match the pointer is nearest to', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      bottom: 64,
+      height: 64,
+      left: 0,
+      right: 340,
+      toJSON: () => ({}),
+      top: 0,
+      width: 340,
+      x: 0,
+      y: 0,
+    })
+
+    const { container } = render(<FormChart results={season} />)
+    const layer = container.querySelector<HTMLElement>('.hf-bar-chart-pointer')!
+    const tooltip = () => container.querySelector('.hf-tooltip')?.textContent
+
+    // 34 places of 10 wide. The first match averaged 3; matches 8 to 12 scored 3, 0, 3, 3, 1.
+    fireEvent.pointerMove(layer, { clientX: 2, pointerType: 'mouse' })
+    expect(tooltip()).toBe('3,0')
+    fireEvent.pointerMove(layer, { clientX: 335, pointerType: 'mouse' })
+    expect(tooltip()).toBe('2,0')
+    expect(textOf(container).at(-1)).toContain('nu 2,0.')
+    expect(tooltip()).toBe(formatAverage(averagesOf(season).at(-1)!))
+
+    vi.restoreAllMocks()
+  })
+
+  it('has no tooltip before a match is played', () => {
+    const { container } = render(<FormChart results={[]} />)
+
+    fireEvent.pointerMove(container.querySelector('.hf-bar-chart-pointer')!, { clientX: 20, pointerType: 'mouse' })
+    expect(container.querySelector('.hf-tooltip')).toBeNull()
   })
 })

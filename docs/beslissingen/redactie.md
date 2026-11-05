@@ -2827,3 +2827,19 @@
   Tot nu toe telde elke klik als weergave, en dat maakt de tellingen iets te hoog.
 - **Gemeten:** `src/visits.test.ts` toont dat dezelfde plaats met `Accept: */*` en `Accept: text/x-component` niet telt en met `Accept: text/html` wel, en `e2e/switches.spec.ts` ziet bij elke schakelaar dat de klik geen aanvraag van een document en geen aanvraag met `text/html` doet.
 - **Alternatieven:** elke klik toch laten tellen met een extra aanvraag vanuit de browser (een eigen route en een script voor de teller, wat het besluit _De proxy telt, na het antwoord, alleen een aanvraag van een pagina_ juist uitsloot).
+
+## Verloop van het seizoen heeft een tooltip bij de lijn en een tabel per speelronde in een uitklapper
+
+- **Datum:** 5 november 2026
+- **Besluit:** alleen de kaart "Verloop van het seizoen" (`FormChart`) geeft de lijn een tooltip met het gemiddelde op dat punt, bijvoorbeeld "1,8" (#726).
+  Onder de tabel met de totalen staat een uitklapper (`Disclosure`, dicht) "Uitslag en gemiddelde per speelronde", met een tabel per gespeelde speelronde: de speelronde, de uitslag (winst, gelijk of verlies), de punten en het gemiddelde over de laatste 5 wedstrijden.
+  De tabel gebruikt `averagesOf` en `formatAverage` van het designsysteem, dezelfde getallen als de lijn en de tooltip.
+  De kolommen heten Ronde, Uitslag, Punten en Gem. (voor een schermlezer: Gemiddelde), met een regel eronder die ze uitlegt: met "Speelronde" en "Gemiddelde" werd de pagina op 320 pixels breder dan het scherm.
+  De tabel met de totalen en de zin onder de grafiek blijven (die zin staat nu in de regel van de sleutel, zie _De uitleg van de lijn staat in de regel van de sleutel_ in `designsysteem.md`).
+  De speelronde is de plek in de rij gespeelde wedstrijden van de Eredivisie, zoals de as van de grafiek (een uitgestelde wedstrijd staat waar hij gespeeld is).
+- **Waarom:** de grafiek is voor een schermlezer verborgen en heeft geen toetsenbord, dus de waarde per speelronde moet ook als tekst te lezen zijn.
+  Er is nu één grafiek met een lijn; de volgende (#411, #413) kiest zelf zijn labels.
+- **Let op:** de lijn begint sinds #718 bij de eerste wedstrijd (zie _`BarChart` is standaard 4 rem hoog, en de lijn begint bij de eerste wedstrijd_ in `designsysteem.md`), dus elke gespeelde speelronde heeft een punt, een gemiddelde en een regel in de tabel.
+  Alleen een plek die nog niet gespeeld is, heeft geen punt en geen tooltip.
+  Het "nog niet" voor de eerste vier speelrondes uit het issue komt daarom nergens voor.
+- **Alternatieven:** de andere grafieken nu al noemen (ze bestaan nog niet); de tabel boven de uitklapper laten staan zonder uitklapper (een kaart met een tabel van 34 rijen).

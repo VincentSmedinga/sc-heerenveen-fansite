@@ -122,7 +122,6 @@ describe('the page /statistieken', () => {
         '</h2>',
         'hf-form-chart',
         'hf-form-chart-key',
-        'hf-form-chart-line',
         '<table',
       ])
     })
@@ -414,7 +413,7 @@ describe('the page /statistieken', () => {
 
       expect(card).toContain('hf-form-chart')
       expect(card).toContain('<b>W</b> winst (3 punten), <b>G</b> gelijk (1), <b>V</b> verlies (0).')
-      expect(card.match(/<table/g)).toHaveLength(1)
+      expect(card.match(/<table/g)).toHaveLength(2)
       expect(card.indexOf('hf-form-chart')).toBeLessThan(card.indexOf('<table'))
       expect(card).toContain('Uitslagen van sc Heerenveen dit seizoen, met de punten')
       expect(rows(card)).toEqual([
@@ -453,13 +452,82 @@ describe('the page /statistieken', () => {
         ['Verlies', '2', '0'],
         ['Totaal', '6', '8'],
       ])
-      expect(card).toContain('in de laatste 5 wedstrijden')
+      expect(card).toContain('over 5 wedstrijden')
+    })
+
+    describe('the table per round', () => {
+      const six = () =>
+        vi.mocked(getMatchData).mockResolvedValue({
+          ...matchData,
+          matches: [
+            league('Speelronde 1', '2026-08-01', 0, 2),
+            league('Speelronde 2', '2026-08-08', 1, 1),
+            league('Speelronde 3', '2026-08-15', 1, 0),
+            league('Speelronde 4', '2026-08-22', 3, 0),
+            league('Speelronde 5', '2026-08-29', 0, 0),
+            league('Speelronde 6', '2026-09-05', 2, 4),
+          ],
+        })
+
+      /** The rows of the fold: round, result, points and average. */
+      const roundRows = (card: string) =>
+        [
+          ...(card.match(/<details.*<\/details>/s)?.[0] ?? '').matchAll(
+            /<tr><th scope="row">([^<]*)<\/th><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/g,
+          ),
+        ].map(([, ...cells]) => cells)
+
+      it('is a closed fold under the totals, with a row for every round played', async () => {
+        six()
+
+        const card = section(await render(), 'verloop-van-het-seizoen')
+
+        expect(card).toMatch(/<details class="hf-disclosure"><summary>Uitslag en gemiddelde per speelronde/)
+        expect(card).not.toMatch(/<details[^>]* open/)
+        expect(card.indexOf('Totaal')).toBeLessThan(card.indexOf('<details'))
+        expect(roundRows(card)).toHaveLength(6)
+      })
+
+      it('gives the result, the points and the average over the last five, which is what the tooltip says', async () => {
+        six()
+
+        const card = section(await render(), 'verloop-van-het-seizoen')
+
+        expect(roundRows(card)).toEqual([
+          ['1', 'Verlies', '0', '0,0'],
+          ['2', 'Gelijk', '1', '0,5'],
+          ['3', 'Winst', '3', '1,3'],
+          ['4', 'Winst', '3', '1,8'],
+          ['5', 'Gelijk', '1', '1,6'],
+          ['6', 'Verlies', '0', '1,6'],
+        ])
+      })
+
+      it('names its columns and says what the average is', async () => {
+        six()
+
+        const card = section(await render(), 'verloop-van-het-seizoen')
+
+        expect(card).toContain('Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde')
+        for (const column of ['Ronde', 'Uitslag', 'Punten']) {
+          expect(card).toContain(`>${column}</`)
+        }
+        // The average is shortened to fit a phone, with the whole word for a screen reader.
+        expect(card).toContain('<span aria-hidden="true">Gem.</span><span class="hf-visually-hidden">Gemiddelde</span>')
+        expect(card).toContain('Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden')
+      })
+
+      it('has no fold, and no table, when no match is played', async () => {
+        vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+        expect(section(await render(), 'verloop-van-het-seizoen')).not.toContain('<details')
+      })
     })
 
     it('draws the line from the first match, over the matches there are while there are fewer than five', async () => {
       const card = section(await render(), 'verloop-van-het-seizoen')
 
-      expect(card).toContain('in de laatste 3 wedstrijden: nu 2,3.')
+      expect(card).toContain('over 3 wedstrijden: nu 2,3.')
       expect(card).not.toContain('De lijn begint na')
     })
 
@@ -467,7 +535,9 @@ describe('the page /statistieken', () => {
       const card = section(await render(), 'verloop-van-het-seizoen')
 
       expect(card).toContain('aria-hidden="true"')
-      expect(card.match(/<table[^>]*>.*<\/table>/s)?.[0]).not.toContain('aria-hidden')
+      // The tables and the fold are for a screen reader: only the chart is hidden.
+      expect(card).not.toMatch(/<(?:table|details|summary)[^>]*aria-hidden/)
+      expect(card.match(/<table[^>]*>.*?<\/table>/s)?.[0]).not.toContain('aria-hidden')
     })
 
     it('says so in a sentence, with no chart or table, when no match of the Eredivisie is played', async () => {
