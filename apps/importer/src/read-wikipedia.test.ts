@@ -475,6 +475,118 @@ describe('the results of every club in the league', () => {
   })
 })
 
+describe('a stopped match of another club whose score became the official result (#736)', () => {
+  const abandoned = (fields: Record<string, string> = {}) =>
+    box({
+      date: '7 november 2026',
+      score: "4 – 0 (Gestaakt 82')",
+      team1: '[[SC Cambuur]]',
+      team2: '[[Go Ahead Eagles]]',
+      ...fields,
+    })
+  const page = (heading: string, ...boxes: string[]) => `== ${heading} ==\n${boxes.join('\n')}\n`
+  const warning = "Speelronde 11: SC Cambuur - Go Ahead Eagles has a score we do not know: '4 – 0 (Gestaakt 82')'"
+
+  it('reads 4 – 0 on the day of the block, in round 11', () => {
+    expect(
+      readLeagueResults(
+        page('Speelronde 11', abandoned(), abandoned({ score: '1 – 0', team1: '[[Ajax]]' })),
+        '2026/27',
+      ),
+    ).toEqual({
+      results: [
+        {
+          awayClub: 'Go Ahead Eagles',
+          awayGoals: 0,
+          homeClub: 'SC Cambuur',
+          homeGoals: 4,
+          playedOn: '2026-11-07',
+          round: 11,
+        },
+        {
+          awayClub: 'Go Ahead Eagles',
+          awayGoals: 0,
+          homeClub: 'Ajax',
+          homeGoals: 1,
+          playedOn: '2026-11-07',
+          round: 11,
+        },
+      ],
+      unread: [],
+    })
+  })
+
+  it.each([
+    ['another season', page('Speelronde 11', abandoned()), '2025/26'],
+    ['no season', page('Speelronde 11', abandoned()), undefined],
+    ['another round', page('Speelronde 12', abandoned()), '2026/27'],
+    ['another home club', page('Speelronde 11', abandoned({ team1: '[[Ajax]]' })), '2026/27'],
+    ['another away club', page('Speelronde 11', abandoned({ team2: '[[Feyenoord]]' })), '2026/27'],
+    ['another minute', page('Speelronde 11', abandoned({ score: "4 – 0 (Gestaakt 80')" })), '2026/27'],
+    ['another stand', page('Speelronde 11', abandoned({ score: "3 – 0 (Gestaakt 82')" })), '2026/27'],
+  ])('still leaves out the match for %s', (_name, text, season) => {
+    const { results, unread } = readLeagueResults(text, season)
+
+    expect(results).toEqual([])
+    expect(unread).toEqual([expect.stringContaining('has a score we do not know')])
+  })
+
+  it('still leaves out the match when the score is written another way', () => {
+    const text = page('Speelronde 11', abandoned({ score: "4 – 0 (Gest. 82')" }))
+
+    expect(readLeagueResults(text, '2026/27').unread).toEqual([expect.stringContaining('has a score we do not know')])
+  })
+
+  it.each([
+    ['the same round', 'Speelronde 11'],
+    ['the Inhaalronde of the same number', 'Inhaalronde 11'],
+  ])('reads the page as usual when a later block in %s finishes the match', (_name, heading) => {
+    const text = `${page('Speelronde 11', abandoned())}${page(heading, abandoned({ date: '12 november 2026', score: '4 – 1' }))}`
+    const read = readLeagueResults(text, '2026/27')
+
+    expect(read.results).toEqual([
+      {
+        awayClub: 'Go Ahead Eagles',
+        awayGoals: 1,
+        homeClub: 'SC Cambuur',
+        homeGoals: 4,
+        playedOn: '2026-11-12',
+        round: 11,
+      },
+    ])
+    expect(read.unread).toEqual([
+      `Speelronde 11: SC Cambuur - Go Ahead Eagles has a score we do not know: '4 – 0 (Gestaakt 82')'`,
+    ])
+  })
+
+  it('keeps the exception for a later block of other clubs or another round', () => {
+    const text = `${page('Speelronde 11', abandoned())}${page('Speelronde 12', abandoned({ score: '2 – 0' }))}`
+
+    expect(readLeagueResults(text, '2026/27').results.map((result) => [result.round, result.homeGoals])).toEqual([
+      [11, 4],
+      [12, 2],
+    ])
+  })
+
+  it('does not change the warning of an unknown score of another match', () => {
+    expect(readLeagueResults(page('Speelronde 11', abandoned({ team1: '[[Ajax]]' })), '2026/27').unread).toEqual([
+      warning.replace('SC Cambuur', 'Ajax'),
+    ])
+  })
+
+  it('does not change a stopped match of sc Heerenveen: it is still a fault that names the match', () => {
+    const ours = box({ score: "4 – 0 (Gestaakt 82')", team1: '[[SC Cambuur]]', team2: '[[sc Heerenveen]]' })
+    const text = page('Speelronde 11', ours, abandoned({ score: '1 – 0', team1: '[[Ajax]]' }))
+    const read = readLeague(text, '2026/27')
+
+    expect(read).toEqual({
+      kind: 'error',
+      message: expect.stringContaining('Speelronde 11 (Eredivisie) has a score we do not know'),
+    })
+    expect(readLeagueResults(text, '2026/27').unread).toEqual([expect.stringContaining('has a score we do not know')])
+  })
+})
+
 describe('a match that was postponed and played under an Inhaalronde', () => {
   const read = (text: string) => {
     const found = readLeague(text)

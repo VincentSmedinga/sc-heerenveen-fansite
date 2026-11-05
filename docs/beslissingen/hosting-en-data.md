@@ -510,3 +510,31 @@
   Het Q-nummer van Wikidata (het stabielste, maar de `robots.txt` van Wikidata weert ons).
   `players` omvormen tot een rij per persoon (een grotere migratie, en `player_season_stats` en het koppelen per seizoen moeten mee).
 - **Later:** zie ook _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_ in `importer.md`.
+- **Later:** de rij heeft sinds #715 ook een naam in delen; zie _De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij_ hieronder.
+
+## De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij
+
+- **Datum:** 5 november 2026
+- **Besluit:** de import bewaart per persoon `name`, `given_name`, `family_name_prefix`, `family_name` en `name_source` (#715).
+  De bron is de sorteersleutel van het artikel (`{{DEFAULTSORT:…}}`), toegepast op de titel.
+  Zonder sleutel, of als de sleutel niet op de titel past, raadt de import één keer volgens vaste regels en schrijft dat in het logboek.
+  Een lijst `personNames` in de importer gaat voor.
+  De site raadt niets meer (#716).
+  - **De kolommen:** `name` is de titel zonder de toevoeging tussen haakjes ("Joost van Aken").
+    `given_name` is leeg voor een persoon met één naam ("Dinho"), `family_name_prefix` is leeg zonder "van", "van der" en dergelijke, en `family_name` is de achternaam zonder voorvoegsel ("Aken").
+    De drie delen met een spatie ertussen geven `name`.
+    `name_source` is `sort_key`, `guess` of `manual`.
+    Alle vijf zijn leeg tot de import ze vult.
+  - **Het voorvoegsel is een eigen veld**, zodat een lijst op de rest van de achternaam kan sorteren: Joost van Aken hoort onder de A.
+    Bij het tonen blijft het voorvoegsel bij de achternaam, zoals nu.
+  - **De migratie:** `0041_add_person_names` voegt alleen vijf kolommen toe en kan opnieuw draaien.
+    Terugdraaien op de host kan door de vijf kolommen weg te halen.
+- **Waarom:** de pagina Spelers toont nu "Ramon Zomer" helemaal vet, omdat de site bij het tonen raadt en de gok faalt als de korte naam de titel is.
+  De sleutel is een vaste uitspraak van de schrijvers van het artikel en staat in het artikel dat we toch al opvragen.
+  Wat de import raadt, wordt één keer geraden, is zichtbaar en kan met de lijst worden verbeterd, en dat is beter dan een gok bij elk bezoek.
+- **Nadeel:** een sleutel kan fout zijn, en dan is de naam fout tot iemand het in de lijst zet.
+- **Alternatieven:** blijven raden bij het tonen (de huidige fout).
+  Een naam zonder sleutel ongesplitst laten.
+  Wikidata (voornaam en achternaam als gegevens; de `robots.txt` weert ons).
+  Een vaste lijst voor alle spelers (loopt achter bij elke transfer).
+  Het voorvoegsel bij de achternaam bewaren (dan kan een lijst er niet op sorteren).

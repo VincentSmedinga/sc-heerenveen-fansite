@@ -288,6 +288,13 @@
       "when": 1793840903497,
       "tag": "0040_add_persons",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1793898143258,
+      "tag": "0041_add_person_names",
+      "breakpoints": true
     }
   ]
 }

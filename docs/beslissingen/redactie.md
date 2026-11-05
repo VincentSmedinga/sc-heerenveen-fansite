@@ -2288,6 +2288,7 @@
   De uitslagen houden de naam van de wedstrijdpagina.
 - **Alternatieven:** de korte naam houden (geen voornaam, zoals voorheen).
   De selectie van elk seizoen importeren (kan niet als de pagina op Wikipedia ontbreekt).
+- **Later:** sinds 5 november 2026 toont de site de naam die de import van de persoon bewaarde en raadt hij niets meer: `pageTitleName` en `splitPageName` zijn weg, en een doelpunt zonder persoon toont de naam van de wedstrijdpagina als achternaam; zie _De site telt per persoon en toont de bewaarde naam, en raadt niets_ in `site.md`.
 
 ## Een eerder seizoen toont bij de reeksen alleen de langste
 

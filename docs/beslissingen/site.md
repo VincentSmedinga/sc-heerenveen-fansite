@@ -2509,3 +2509,22 @@
 - **Waarom:** het aantal staat sinds #558 bij elke wedstrijd, en de kaart heeft de pagina van een wedstrijd (#108) niet nodig.
   Een bezoeker leest een aantal van de schaal en de tabel; het is een schatting van Wikipedia, en dat staat erbij.
 - **Alternatieven:** de kaart in #416 laten, dan wacht de grafiek op #108; altijd alleen de Eredivisie, dan komt het publiek bij een bekerwedstrijd nooit in beeld; wedstrijden zonder getal weglaten, dan klopt de plek van de staven niet meer; een lijn met het gemiddelde.
+
+## De site telt per persoon en toont de bewaarde naam, en raadt niets
+
+- **Datum:** 4 november 2026
+- **Besluit:** de site telt doelpunten per persoon (`person_id`), anders per speler, anders per titel, anders per naam.
+  De naam komt uit `persons`: `given_name` gewoon, en het voorvoegsel met `family_name` vet.
+  Zonder persoon toont de site de naam van de wedstrijdpagina als achternaam.
+  De functies die uit een titel of een zoekterm een voor- en achternaam raden, zijn weg (`splitPageName`, `splitPlayerName` en `pageTitleName`).
+  Een lijst die op achternaam staat, sorteert op `family_name` zonder voorvoegsel, dus Joost van Aken staat onder de A.
+  `goalsWithInitials` vergelijkt de namen zoals de wedstrijdpagina ze schrijft, met het voorvoegsel.
+- **Waarom:** de gok bij het tonen faalt zodra de korte naam gelijk is aan de titel ("Ramon Zomer"), en de titel als sleutel telt twee titels van één speler dubbel.
+  De import weet het beter dan de pagina: hij heeft de doorverwijzing en de sorteersleutel gelezen (#714 en #715).
+- **Hoe:** `listSeasonMatches` en `listClubMatches` geven bij elk doelpunt `personId`, `personGivenName`, `personFamilyNamePrefix` en `personFamilyName` (ook bij een tegenstander), en `listSquad` geeft de naam van de persoon van de speler.
+  `playerName` en `playerSearchTerm` zijn uit de doelpunten gehaald.
+  De zoekterm `players.search_term` blijft voor het zoeken.
+  De `id` van een rij in de lijst met doelpuntenmakers is een tekst (`person:7`, `id:9`, `page:Boy Kemper`, `name:Kemper`), zodat het nummer van een persoon niet gelijk kan zijn aan dat van een speler.
+  Een doelpunt zonder speler maar met een pagina telt niet meer voor een gekoppeld doelpunt met dezelfde pagina: de persoon doet dat nu.
+- **Alternatieven:** de titel blijven gebruiken en alleen de doorverwijzingen bij het tonen oplossen (een verzoek per bezoek of een lijst in de site).
+  De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).

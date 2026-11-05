@@ -1,12 +1,20 @@
 import type { Database } from '@fansite/db/client'
 
-import { knownPersonPages, rememberedPersonArticles } from '@fansite/db/persons'
+import {
+  knownPersonPages,
+  type PersonName,
+  type PersonNameCounts,
+  personNamesBySource,
+  rememberedPersonArticles,
+} from '@fansite/db/persons'
 import { persons } from '@fansite/db/schema'
 import { asc } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 
 import { lookUpTitles } from './club-pages.ts'
+import { fitsColumns, manualNames, personNameOf } from './person-name.ts'
+import { personNames } from './person-names.ts'
 import { printable } from './text.ts'
 
 /** The most requests in a row that may fail before the import stops asking for this run. */
@@ -20,6 +28,12 @@ export type PersonLookup = {
    */
   asked: number
   /**
+   * The name of each article it learnt about, by the title of the article: from the sort key,
+   * guessed, or from the list `personNames`. It has the persons without a name too, and the
+   * persons whose name the list gives; `storePersonNames` keeps the rest of the rules.
+   */
+  names: Map<string, PersonName>
+  /**
    * Each title it asked about, redirects on the way included, with the title of the article the
    * redirects end in: the title itself when it is no redirect, and when it has no article.
    */
@@ -30,17 +44,33 @@ export type PersonLookup = {
 
 /**
  * The line for the log about the persons of a run: the titles asked of Wikipedia, the persons
- * made and the titles remembered. No lines when it asked and made nothing, so a run that has
- * nothing new says nothing.
+ * made, the titles remembered and the names stored, by source. No lines when it asked and made
+ * nothing, so a run that has nothing new says nothing.
  */
-export function describePersons(asked: number, counts: { people: number; titles: number }): string[] {
+export function describePersons(
+  asked: number,
+  counts: { people: number; titles: number },
+  names: PersonNameCounts = { guess: 0, manual: 0, sort_key: 0 },
+): string[] {
   const plural = (count: number, word: string) => `${count} ${count === 1 ? word : `${word}s`}`
+  const named = names.sort_key + names.guess + names.manual
 
-  return asked === 0 && counts.people === 0
+  return asked === 0 && counts.people === 0 && named === 0
     ? []
     : [
-        `persons: ${plural(asked, 'title')} asked, ${plural(counts.people, 'new person')}, ${plural(counts.titles, 'title')} remembered`,
+        `persons: ${plural(asked, 'title')} asked, ${plural(counts.people, 'new person')}, ${plural(counts.titles, 'title')} remembered` +
+          (named === 0
+            ? ''
+            : `, ${plural(named, 'name')} stored (${names.sort_key} from a sort key, ${names.guess} guessed, ${names.manual} from the list)`),
       ]
+}
+
+/** The warnings of a run for the names it guessed: the title and what came of it. */
+export function guessedNameWarnings(guessed: readonly { name: PersonName; title: string }[]): string[] {
+  return guessed.map(
+    ({ name, title }) =>
+      `Persons: guessed the name of '${printable(title)}': given name '${printable(name.givenName ?? '')}', prefix '${printable(name.familyNamePrefix ?? '')}', family name '${printable(name.familyName)}'`,
+  )
 }
 
 /**
@@ -68,11 +98,34 @@ export async function lookUpPersonPages(
 ): Promise<PersonLookup> {
   const known = await knownPersonPages(db)
   const articles = await rememberedPersonArticles(db)
+  const sources = await personNamesBySource(db)
+  const manual = manualNames(personNames)
   const redirects = new Map<string, string>()
+  const names = new Map<string, PersonName>()
   const warnings: string[] = []
+  // A person who has no name yet is asked about once more, to read the sort key of his article.
+  const nameless = [...sources].flatMap(([title, source]) => (source === null ? [title] : []))
   const wanted = [
     ...new Set(titles.filter((title) => !known.has(title)).map((title) => aliases.get(title) ?? title)),
-  ].filter((title) => !known.has(title))
+    ...nameless,
+  ].filter((title, index, all) => all.indexOf(title) === index && (!known.has(title) || nameless.includes(title)))
+
+  // A name from the list goes before every other, also on a person who has one already.
+  for (const [title, name] of manual) {
+    if (sources.has(title) && sources.get(title) !== 'manual') {
+      names.set(title, name)
+    }
+  }
+
+  const nameArticle = (article: string, sortKey: null | string) => {
+    const name = personNameOf(article, sortKey, manual)
+
+    if (fitsColumns(name)) {
+      names.set(article, name)
+    } else {
+      warnings.push(`Persons: the name of '${printable(article)}' is too long to store`)
+    }
+  }
   const failed: string[] = []
   let asked = 0
   let failuresInARow = 0
@@ -104,6 +157,7 @@ export async function lookUpPersonPages(
           failuresInARow = 0
           redirects.set(title, title)
           articles.set(title, title)
+          nameArticle(title, null)
         }
 
         break
@@ -113,6 +167,9 @@ export async function lookUpPersonPages(
         for (const [one, end] of lookup.redirects) {
           redirects.set(one, end)
           articles.set(one, end)
+        }
+        for (const article of new Set(lookup.redirects.values())) {
+          nameArticle(article, lookup.sortKeys.get(article) ?? null)
         }
 
         break
@@ -135,7 +192,7 @@ export async function lookUpPersonPages(
     )
   }
 
-  return { asked, redirects, warnings }
+  return { asked, names, redirects, warnings }
 }
 
 /**

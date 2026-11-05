@@ -4,6 +4,7 @@ import { knownClubPages, rememberedClubArticles, repairClubPages, unrememberedCl
 
 import type { Fetcher } from './fetcher.ts'
 
+import { readSortKey } from './person-name.ts'
 import { linkedPage, pageUrl } from './read-wikipedia.ts'
 import { printable } from './text.ts'
 
@@ -19,7 +20,15 @@ export type PageLookup =
       /** The title that answered 404, when that is why there is no answer: no article. */
       missing?: string
     }
-  | { kind: 'found'; redirects: Map<string, string> }
+  | {
+      kind: 'found'
+      redirects: Map<string, string>
+      /**
+       * The sort key (`{{DEFAULTSORT:…}}`) of each article that has one, by the title of the
+       * article. Only the articles of the pages that were asked: no extra request.
+       */
+      sortKeys: Map<string, string>
+    }
   | { kind: 'wait'; retryAfterSeconds: null | number; url: string }
 
 /** A redirect page starts with `#REDIRECT` or `#DOORVERWIJZING`, whatever the capitals. */
@@ -40,7 +49,7 @@ export async function lookUpClubPages(
   const wanted = [...new Set(titles)].filter((title) => !known.has(title))
 
   return wanted.length === 0
-    ? { kind: 'found', redirects: new Map() }
+    ? { kind: 'found', redirects: new Map(), sortKeys: new Map() }
     : lookUpTitles(fetcher, origin, wanted, await rememberedClubArticles(db))
 }
 
@@ -63,6 +72,7 @@ export async function lookUpTitles(
   articles: ReadonlyMap<string, string>,
 ): Promise<PageLookup> {
   const redirects = new Map<string, string>()
+  const sortKeys = new Map<string, string>()
 
   for (const first of new Set(titles)) {
     if (redirects.has(first)) {
@@ -104,6 +114,13 @@ export async function lookUpTitles(
 
       if (marker === null) {
         end = title
+
+        const sortKey = readSortKey(text)
+
+        if (sortKey !== null) {
+          sortKeys.set(title, sortKey)
+        }
+
         break
       }
 
@@ -134,7 +151,7 @@ export async function lookUpTitles(
     }
   }
 
-  return { kind: 'found', redirects }
+  return { kind: 'found', redirects, sortKeys }
 }
 
 /**

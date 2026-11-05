@@ -123,3 +123,34 @@ describe('the warning when the results do not agree with the table', () => {
     )
   })
 })
+
+describe('the abandoned match of Cambuur and Go Ahead Eagles (#736)', () => {
+  const block = (heading: string, date: string, home: string, score: string, away: string) =>
+    `== ${heading} ==\n{{Footballbox2\n|date = ${date}\n|team1 = [[${home}]]\n|score = ${score}\n|team2 = [[${away}]]\n}}\n`
+  const table = [
+    { club: 'Excelsior Rotterdam', played: 1 },
+    { club: 'Go Ahead Eagles', played: 1 },
+    { club: 'SC Cambuur', played: 2 },
+  ]
+  const page = (score: string) =>
+    block('Speelronde 10', '1 november 2026', 'Excelsior Rotterdam', '0 – 1', 'SC Cambuur') +
+    block('Speelronde 11', '7 november 2026', 'SC Cambuur', score, 'Go Ahead Eagles')
+
+  it('counts the match, so the log has no left-out result and the table agrees', () => {
+    const { results, unread } = readLeagueResults(page("4 – 0 (Gestaakt 82')"), '2026/27')
+
+    expect(unread).toEqual([])
+    expect(playedWarning(matchClubNames(results, table).results, table, [])).toBeUndefined()
+  })
+
+  it('warns as before when the score is another text', () => {
+    const { results, unread } = readLeagueResults(page("4 – 0 (Gestaakt 80')"), '2026/27')
+
+    expect(unread).toEqual([
+      "Speelronde 11: SC Cambuur - Go Ahead Eagles has a score we do not know: '4 – 0 (Gestaakt 80')'",
+    ])
+    expect(playedWarning(matchClubNames(results, table).results, table, [])).toBe(
+      'league results: the results do not agree with the table: Go Ahead Eagles 0 results against 1 played, SC Cambuur 1 results against 2 played',
+    )
+  })
+})

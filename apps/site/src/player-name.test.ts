@@ -1,84 +1,50 @@
 import { describe, expect, it } from 'vitest'
 
-import { pageTitleName, splitPageName, splitPlayerName, splitStaffName, surnameOnly } from './player-name'
+import { personNameParts, personSortName, splitStaffName, surnameOnly } from './player-name'
 
-describe('splitPlayerName', () => {
+const person = (given: null | string, prefix: null | string, family: null | string) => ({
+  personFamilyName: family,
+  personFamilyNamePrefix: prefix,
+  personGivenName: given,
+})
+
+describe('personNameParts', () => {
   it.each([
-    ['Joost van Aken', 'van Aken', { givenName: 'Joost', surname: 'van Aken' }],
-    ['Jakob Trenskow', 'Trenskow', { givenName: 'Jakob', surname: 'Trenskow' }],
-    ['Bernt Klaverboer', 'Klaverboer', { givenName: 'Bernt', surname: 'Klaverboer' }],
-    ['Jan-Willem Oyen', 'Oyen', { givenName: 'Jan-Willem', surname: 'Oyen' }],
-  ])('splits %s at the search term %s', (name, searchTerm, parts) => {
-    expect(splitPlayerName(name, searchTerm)).toEqual(parts)
+    [person('Alfreð', null, 'Finnbogason'), { givenName: 'Alfreð', surname: 'Finnbogason' }],
+    [person('Ramon', null, 'Zomer'), { givenName: 'Ramon', surname: 'Zomer' }],
+    [person('Filip', null, 'Đuričić'), { givenName: 'Filip', surname: 'Đuričić' }],
+    [person('Jan-Willem', null, 'Oyen'), { givenName: 'Jan-Willem', surname: 'Oyen' }],
+  ])('puts the given name in the normal weight and the family name in the heavier one', (name, parts) => {
+    expect(personNameParts(name)).toEqual(parts)
   })
 
-  it('gives only a surname for a name that is the search term', () => {
-    expect(splitPlayerName('Dinho', 'Dinho')).toEqual({ surname: 'Dinho' })
+  it('puts the prefix before the family name, in the heavier weight', () => {
+    expect(personNameParts(person('Joost', 'van', 'Aken'))).toEqual({ givenName: 'Joost', surname: 'van Aken' })
+    expect(personNameParts(person('Ruud', 'van der', 'Sar'))).toEqual({ givenName: 'Ruud', surname: 'van der Sar' })
   })
 
-  it('takes the surname as the name writes it, whatever the capitals of the search term', () => {
-    expect(splitPlayerName('Joost Van Aken', 'van aken')).toEqual({ givenName: 'Joost', surname: 'Van Aken' })
+  it('gives only a surname for a person with one name', () => {
+    expect(personNameParts(person(null, null, 'Dinho'))).toEqual({ surname: 'Dinho' })
+    expect(personNameParts(person('', null, 'Dinho'))).toEqual({ surname: 'Dinho' })
   })
 
-  it('leaves the other given names with the given name', () => {
-    expect(splitPlayerName('Jan Paul van Hecke', 'van Hecke')).toEqual({ givenName: 'Jan Paul', surname: 'van Hecke' })
+  it('gives the whole name in the normal weight for a person without a family name', () => {
+    expect(personNameParts(person('Pelé', null, null))).toEqual({ givenName: 'Pelé', surname: '' })
   })
 
-  it('does not split when the search term is no end of the name, so the whole name stays in the normal weight', () => {
-    expect(splitPlayerName('Dylan Vente', 'Vente (Dylan)')).toEqual({ givenName: 'Dylan Vente', surname: '' })
-    expect(splitPlayerName('Luca Oyen', 'Luca')).toEqual({ givenName: 'Luca Oyen', surname: '' })
-  })
-
-  it('does not split in the middle of a word', () => {
-    expect(splitPlayerName('Luca Boyen', 'oyen')).toEqual({ givenName: 'Luca Boyen', surname: '' })
-  })
-
-  it('does not split without a search term', () => {
-    expect(splitPlayerName('Luca Oyen', '')).toEqual({ givenName: 'Luca Oyen', surname: '' })
+  it('gives nothing for a person whose name the importer has not kept, and guesses nothing', () => {
+    expect(personNameParts(person(null, null, null))).toBeUndefined()
+    expect(personNameParts(person('', '', ''))).toBeUndefined()
   })
 })
 
-describe('surnameOnly', () => {
-  it('shows a name as the page writes it as a surname', () => {
-    expect(surnameOnly('Van Bergen')).toEqual({ surname: 'Van Bergen' })
-  })
-})
-
-describe('pageTitleName', () => {
-  it.each([
-    ['Boy Kemper', 'Boy Kemper'],
-    ['Pim Verbeek (voetballer, 1999)', 'Pim Verbeek'],
-    ['Pim Verbeek (voetballer)', 'Pim Verbeek'],
-    ['Joris van Overeem', 'Joris van Overeem'],
-  ])('takes the name from the title %s', (title, name) => {
-    expect(pageTitleName(title)).toBe(name)
+describe('personSortName', () => {
+  it('leaves the prefix out, so Joost van Aken is under the A', () => {
+    expect(personSortName(person('Joost', 'van', 'Aken'))).toBe('Aken')
   })
 
-  it('only takes off the addition at the end', () => {
-    expect(pageTitleName('Jan (Johan) de Vries')).toBe('Jan (Johan) de Vries')
-  })
-})
-
-describe('splitPageName', () => {
-  it('splits the title at the short name of the match page', () => {
-    expect(splitPageName('Kemper', 'Boy Kemper')).toEqual({ givenName: 'Boy', surname: 'Kemper' })
-  })
-
-  it('splits a name with a prefix, whatever the capital of the short name', () => {
-    expect(splitPageName('Van Overeem', 'Joris van Overeem')).toEqual({ givenName: 'Joris', surname: 'van Overeem' })
-    expect(splitPageName('Van Bergen', 'Mitchell van Bergen')).toEqual({ givenName: 'Mitchell', surname: 'van Bergen' })
-  })
-
-  it('leaves the addition in brackets out', () => {
-    expect(splitPageName('Verbeek', 'Pim Verbeek (voetballer, 1999)')).toEqual({ givenName: 'Pim', surname: 'Verbeek' })
-  })
-
-  it('takes the initials off the short name before it splits', () => {
-    expect(splitPageName('D. Rots', 'Daniël Rots')).toEqual({ givenName: 'Daniël', surname: 'Rots' })
-  })
-
-  it('does not split when the short name is no end of the title', () => {
-    expect(splitPageName('Dinho', 'Dinho Santos')).toEqual({ givenName: 'Dinho Santos', surname: '' })
+  it('takes the given name for a person without a family name', () => {
+    expect(personSortName(person('Pelé', null, null))).toBe('Pelé')
   })
 })
 
@@ -91,5 +57,11 @@ describe('splitStaffName', () => {
 
   it('makes a name of one word a surname', () => {
     expect(splitStaffName('Dinho')).toEqual({ surname: 'Dinho' })
+  })
+})
+
+describe('surnameOnly', () => {
+  it('shows a name as a surname', () => {
+    expect(surnameOnly('Ramon Zomer')).toEqual({ surname: 'Ramon Zomer' })
   })
 })

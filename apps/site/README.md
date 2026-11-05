@@ -293,7 +293,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd is begonnen als zijn aanvangstijd voorbij is, of, zonder aanvangstijd, als zijn dag in Nederlandse tijd voorbij is (`overviewOf` in `src/matches.ts`, met het moment van het verzoek).
   Een weekend telt tot het einde van zijn laatste dag.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
-  Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
+  Hebben twee verschillende personen in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
+  De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
 - **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand en onder Hoe vaak welke uitslag, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
   Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitStaffName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
@@ -436,10 +437,11 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   De kaart met alle spelers staat op `/statistieken/spelers` (zie _De spelers_); de rest van deze alinea gaat over die lijst.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
-  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam halfvet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
-  Een doelpunt zonder speler maar met een Wikipedia-pagina (`playerPage`) telt voor die pagina en toont de titel zonder de toevoeging tussen haakjes als volledige naam, gesplitst met de korte naam van de wedstrijdpagina; heeft een gekoppeld doelpunt dezelfde pagina, dan tellen ze samen.
-  Een doelpunt zonder speler en zonder pagina telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
-  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam.
+  Een doelpunt telt voor de persoon erachter (`person_id`, zie _Een speler is een persoon met een eigen `id`_ in `docs/beslissingen/hosting-en-data.md`), dus twee titels van één artikel zijn één rij ("Alfreð Finnbogason" en "Alfred Finnbogason"), en twee personen met dezelfde achternaam zijn twee rijen.
+  Heeft het doelpunt geen persoon, dan telt het voor de speler (`player_id`), anders voor de titel van de pagina (`playerPage`), anders voor de naam zoals de wedstrijdpagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat, ook niet als het opvragen van een titel mislukte.
+  De naam komt uit `persons`: de voornaam gewoon en het voorvoegsel met de achternaam halfvet, met `PlayerName` (`personNameParts` in `src/player-name.ts`).
+  Heeft de persoon geen achternaam, dan staat de hele naam gewoon; heeft het doelpunt geen persoon, dan staat de naam van de wedstrijdpagina als achternaam (`surnameOnly`), zonder te raden.
+  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam zonder voorvoegsel: Joost van Aken staat onder de A.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
   Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
@@ -738,7 +740,7 @@ De teller van het bezoek telt `/nieuws/zoeken` zonder de vraag (`src/visits.ts`)
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 
 De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op een smal scherm onder de resultaten en zonder vraag direct onder het formulier.
-Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam halfvet) is een link naar `/nieuws/zoeken?q=<achternaam>`.
+Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de voor- en achternaam van de persoon van de speler en de achternaam halfvet) is een link naar `/nieuws/zoeken?q=<achternaam>`.
 Zijn er geen spelers, dan laat de pagina de lijst weg.
 Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
 `listSquad` is de ene plek die bepaalt wie in de lijst staat, en geeft alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in `players` voor zijn doelpunten.

@@ -909,6 +909,7 @@
 - **Alternatieven:** de gezondheid van de selectie in `match_imports` zetten (een kolom of rij erbij voor iets wat een eigen uur en een eigen uitkomst heeft).
   De zoekterm bij elke lezing opnieuw afleiden (de eigen kolom heeft dan geen nut).
 - **Later:** een goede lezing vervangt de selectie sinds 26 oktober 2026 niet meer: een speler die niet meer in de tabel staat, verdwijnt niet maar blijft staan als "niet meer in de selectie", met zijn `id` en zijn doelpunten; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
+- **Later:** de naam van een persoon komt sinds #715 uit de sorteersleutel van zijn artikel; de zoekterm van een speler (`players.search_term`) blijft voor de zoekpagina. Zie _De import leest de naam van een persoon uit de sorteersleutel van zijn artikel_ hieronder.
 
 ## Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar
 
@@ -928,6 +929,7 @@
 - **Later:** een doelpunt zonder speler maar met een Wikipedia-pagina telt sinds 30 oktober 2026 voor die pagina en toont de titel als volledige naam; zie _Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina_.
 - **Later:** elke doelpuntenmaker en elke speler van de selectie met een pagina heeft sinds 4 november 2026 ook een persoon met een eigen `id` (`person_id`), die alle titels van zijn artikel bij elkaar houdt; zie _Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij_ in `hosting-en-data.md`.
   De rijen van `players` blijven één per speler en seizoen.
+- **Later:** de kaart met doelpuntenmakers telt sinds 5 november 2026 per persoon en niet meer per `id` van de speler; zie _De site telt per persoon en toont de bewaarde naam, en raadt niets_ in `site.md`.
 
 ## De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -1461,6 +1463,9 @@
   Krijgt een gespeelde wedstrijd van drie dagen of langer geleden een ander stadion, een andere datum of een andere regel, dan wacht die wijziging zeven dagen of tot een mens besluit.
   Het nadeel hierboven is opgelost: zie _De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze_.
   Voor een gestaakte wedstrijd komen ze uit het gestaakte blok.
+- **Later:** zie _Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd_.
+  Een score die we niet kennen, geeft bij een wedstrijd van een andere club een waarschuwing, behalve voor die ene wedstrijd.
+  Bij een wedstrijd van sc Heerenveen blijft het een fout.
 
 ## De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze
 
@@ -2046,6 +2051,7 @@
 - **Later:** voor een persoon bewaart de import ook niets uit de tekst van een artikel, tot #715 de voor- en achternaam uit de tekst haalt.
   Een titel zonder artikel (404) en een mislukt verzoek vallen daar anders uit dan hier: zie _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_.
 - **Alternatieven:** de lijst `clubFullNames` uitbreiden met titels van artikelen (geen verzoeken en geen tabel, maar elk nieuw paar blijft een dubbele club tot iemand het ziet); doorverwijzingen alleen controleren bij het zoeken naar dubbele clubs (de club bestaat dan al en de pagina's tonen hem dubbel); een titel zonder artikel als 404 laten doorgaan (dat is een gok, en een fout valt op).
+- **Later:** de import bewaart voor een persoon sinds #715 ook de naam in delen, uit de sorteersleutel van zijn artikel en niet uit de tekst van een link; zie _De import leest de naam van een persoon uit de sorteersleutel van zijn artikel_ hieronder.
 
 ## Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst
 
@@ -2205,3 +2211,48 @@
   Een scherm voor een handvol gevallen kost meer dan het geeft, en de lijst in de code kan de Builder bijwerken zodra de waarschuwing iets laat zien.
 - **Alternatieven:** automatisch samenvoegen op een gelijke naam (fout bij twee spelers met dezelfde naam).
   Een lijst in het beheer (een scherm en een werkwijze voor enkele gevallen).
+
+## De import leest de naam van een persoon uit de sorteersleutel van zijn artikel
+
+- **Datum:** 5 november 2026
+- **Besluit:** de import leest de naam van een persoon uit hetzelfde verzoek waarmee hij de titel opvraagt (#715).
+  Een nieuwe titel kost dus één verzoek, ook voor de naam.
+  `lookUpTitles` bewaart de sorteersleutel van elk artikel dat het opvraagt, en `personNameOf` in `apps/importer/src/person-name.ts` maakt er de naam van.
+  - **De sleutel past** als de achternaam in `{{DEFAULTSORT:Achternaam, Voornamen voorvoegsel}}` het eind van de titel is, zonder te letten op accenten, hoofdletters, punten en streepjes (`Anholt, Pele van` past op `Pelé van Anholt`, `St Juste, Jerry` op `Jerry St. Juste`, en `Basacikoglu` op `Başacıkoğlu`).
+    De naam komt uit de titel, met accent, niet uit de sleutel.
+    De kleine woorden vlak voor de achternaam, en die waarmee hij begint (`Van der Vaart`), zijn het voorvoegsel.
+  - **De gok** geldt zonder sleutel of als de sleutel niet past: het laatste woord is de achternaam, de kleine woorden ervoor zijn het voorvoegsel, en een naam van één woord is een achternaam zonder voornaam.
+    De kleine woorden zijn `al`, `bin`, `da`, `das`, `de`, `del`, `den`, `der`, `di`, `do`, `dos`, `du`, `el`, `ibn`, `la`, `le`, `te`, `ten`, `ter`, `van` en `von`.
+  - **De lijst `personNames`** in `apps/importer/src/person-names.ts` zegt per titel de voornaam, het voorvoegsel en de achternaam.
+    Die gaat voor alles, geeft `manual` en wordt nooit vervangen.
+    Ze start leeg.
+  - **Een persoon zonder naam**, uit de import van #714, krijgt zijn naam bij de eerstvolgende import van een seizoen met zijn titel: de import vraagt zijn artikel nog één keer op.
+    Een tweede run schrijft niets en vraagt niets.
+    Een persoon met een naam houdt hem, behalve dat een naam uit de lijst voorgaat.
+  - **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en schrijft een waarschuwing met `Persons:` vooraan voor elke gok, met de titel en de uitkomst.
+    `pnpm run import:status` toont de aantallen per bron.
+- **Waarom:** een naam uit een bron is beter dan een gok bij elk bezoek, en een gok die in het logboek staat kan met de lijst worden verbeterd.
+  De sleutel staat in het artikel dat we toch al opvragen, dus de naam kost geen verzoek erbij voor een nieuwe titel.
+- **Nadeel:** het eenmalig opvragen van het artikel van elke bestaande persoon kost ongeveer 680 verzoeken.
+  Een artikel zonder pagina (een rode link) heeft nooit een sleutel, dus zijn naam is altijd een gok.
+- **Alternatieven:** de naam bij het tonen raden (de huidige fout); Wikidata (de `robots.txt` weert ons); de sleutel laten gelden zonder te controleren of hij op de titel past (een foute sleutel geeft dan een foute naam zonder dat iemand het ziet).
+
+## Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd
+
+- **Datum:** 5 november 2026
+- **Besluit:** de wedstrijd SC Cambuur – Go Ahead Eagles uit speelronde 11 van 2026/27, op de pagina met de score `4 – 0 (Gestaakt 82')`, telt met 4 – 0 bij de uitslagen van de competitie (#736).
+  Dat geldt alleen zolang de pagina die tekst heeft en geen later blok voor dezelfde twee clubs onder dezelfde kop of onder `Inhaalronde 11`.
+  Verandert de pagina, dan leest de reader hem zoals altijd, met de waarschuwing "has a score we do not know".
+  De wedstrijd staat als gegevens in `officialStoppedResults` in `read-wikipedia.ts`, met een opmerking `ONE-OFF (#736)` die zegt dat latere sessies de uitzondering opnieuw moeten bekijken.
+  De uitzondering raakt alleen `readLeagueResults`: een wedstrijd van sc Heerenveen met zo'n score blijft een fout die de wedstrijd noemt, en `classify-change.ts` krijgt geen regel.
+- **Waarom:** de stand is hier officieel de einduitslag geworden, maar meestal wordt het restant alsnog gespeeld en leest de import dat al.
+  Een algemene regel voor deze schrijfwijze zou ook die wedstrijden als afgerond tellen, terwijl we maar één voorbeeld hebben.
+  Zonder de uitzondering bleef de uitslag weg en week de controle met de stand af voor SC Cambuur en Go Ahead Eagles.
+  `classify-change.ts` oordeelt over wedstrijden van sc Heerenveen, en deze wedstrijd komt niet in `matches`.
+- **Alternatieven:** een algemene regel voor `(Gestaakt <minuut>')` achter een stand (verworpen: één voorbeeld, en het restant komt meestal nog).
+  De waarschuwing laten staan (verworpen: de controle met de stand blijft dan afwijken).
+  Een regel onder de wedstrijd voor bezoekers (verworpen: de site toont wedstrijden van andere clubs niet een voor een).
+  Een gestaakte wedstrijd altijd laten wachten op een redacteur (verworpen: er is hier niets om op te wachten).
+- **Alleen deze schrijfwijze:** afgelast, uitgesteld, reglementair en forfait krijgen geen nieuwe regels.
+  Een score die we niet kennen blijft zo een waarschuwing of een fout, en een gok is erger dan een melding.
+  We hebben van die woorden ook geen voorbeeld van de pagina.

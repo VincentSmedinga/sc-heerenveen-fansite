@@ -532,6 +532,7 @@ Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seed
 De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.
 Een database met echte wedstrijden raakt de seed niet aan.
 De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
+Elke verzonnen speler heeft ook een persoon met de naam in delen (`personsForMadeUpPlayers` in `seed.ts`), en zijn doelpunten verwijzen ernaar, zoals de import het doet.
 
 ## De tabellen `clubs` en `club_names`
 
@@ -613,10 +614,15 @@ Elke speler die een doelpunt maakte of in de selectie stond, van ons en van de t
 Twee titels die op Wikipedia naar hetzelfde artikel verwijzen, zoals `Alfred Finnbogason` en `Alfreð Finnbogason`, zijn dezelfde persoon.
 Een speler zonder artikel (een rode link) is ook een persoon, met de titel zoals hij staat.
 
-| Kolom (`persons`) | Betekenis                                                                                                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`              | Het eigen nummer van de persoon                                                                                                                                                |
-| `wikipedia_page`  | De titel van het artikel na de doorverwijzingen, met de toevoeging tussen haakjes als die er is (`Johnny Jansen (1975)`); uniek, letter voor letter vergeleken (`utf8mb4_bin`) |
+| Kolom (`persons`)    | Betekenis                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                 | Het eigen nummer van de persoon                                                                                                                                                |
+| `wikipedia_page`     | De titel van het artikel na de doorverwijzingen, met de toevoeging tussen haakjes als die er is (`Johnny Jansen (1975)`); uniek, letter voor letter vergeleken (`utf8mb4_bin`) |
+| `name`               | De naam zoals de titel hem schrijft, zonder de toevoeging tussen haakjes (`Joost van Aken`); leeg tot de importer de naam leest                                                |
+| `given_name`         | De voornamen (`Joost`); leeg voor een persoon met één naam (`Dinho`) en voor een persoon zonder naam                                                                           |
+| `family_name_prefix` | Het voorvoegsel van de achternaam (`van`, `van der`); leeg zonder voorvoegsel                                                                                                  |
+| `family_name`        | De achternaam zonder voorvoegsel (`Aken`)                                                                                                                                      |
+| `name_source`        | Waar de naam vandaan komt: `sort_key` (de sorteersleutel van het artikel), `guess` (de import raadde) of `manual` (de lijst `personNames`); leeg zolang er geen naam is        |
 
 | Kolom (`person_pages`) | Betekenis                                                                                            |
 | ---------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -635,7 +641,12 @@ Drie functies in `@fansite/db/persons` horen erbij:
 - `knownPersonPages(db)` geeft elke titel in `person_pages`;
 - `rememberedPersonArticles(db)` geeft elke titel in `person_pages` met het artikel van zijn persoon.
 
+De voornaam, het voorvoegsel en de achternaam geven samen `name`, met een spatie ertussen waar iets staat (#715).
+De regels voor het lezen van de naam staan in de [README van de importer](../../apps/importer/README.md), _De namen van de personen_.
+`personNamesBySource`, `storePersonNames` en `countPersonNames` in `@fansite/db/persons` horen erbij.
+
 De migratie `0040_add_persons` voegt alleen toe en maakt de tabellen en de kolommen leeg; de importer vult ze bij zijn volgende run.
+De migratie `0041_add_person_names` voegt de vijf kolommen van de naam toe, ook leeg; terugdraaien kan door ze weg te halen.
 Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `match_goals_person_id_persons_id_fk` en `players_person_id_persons_id_fk` weg, dan de kolommen `person_id` van `match_goals` en `players`, en dan `person_pages` en `persons`.
 
 ### De tabel `club_stadiums`

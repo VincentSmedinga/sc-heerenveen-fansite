@@ -682,6 +682,14 @@ export type ClubPage = typeof clubPages.$inferSelect
 
 export type NewClubPage = typeof clubPages.$inferInsert
 
+/** Where the name of a person comes from: the sort key of the article, a guess or the list. */
+export const personNameSources = ['sort_key', 'guess', 'manual'] as const
+
+export type PersonNameSource = (typeof personNameSources)[number]
+
+/** The most characters the columns with the name of a person hold. */
+export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
+
 /**
  * A person who scored a goal or stood in the squad of a match, ours or an opponent's: one row
  * for each article about a player on the Dutch Wikipedia, with an `id` that never changes. The
@@ -695,6 +703,15 @@ export type NewClubPage = typeof clubPages.$inferInsert
 export const persons = mysqlTable('persons', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
   wikipediaPage: articleTitle('wikipedia_page').notNull().unique(),
+  // The name, kept when the importer reads the article (#715). All five are empty until then.
+  // `name` is the title without the addition between brackets ("Joost van Aken"). `given_name`
+  // is empty for a person with one name ("Dinho"), `family_name_prefix` for a name without
+  // "van", "van der" and the like, and the three parts with a space between them give `name`.
+  name: varchar('name', { length: personNameLimits.name }),
+  givenName: varchar('given_name', { length: personNameLimits.givenName }),
+  familyNamePrefix: varchar('family_name_prefix', { length: personNameLimits.familyNamePrefix }),
+  familyName: varchar('family_name', { length: personNameLimits.familyName }),
+  nameSource: mysqlEnum('name_source', personNameSources),
 })
 
 export type NewPerson = typeof persons.$inferInsert

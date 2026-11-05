@@ -522,11 +522,13 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   ours: true,
   ownGoal: false,
   penalty: false,
+  personFamilyName: null,
+  personFamilyNamePrefix: null,
+  personGivenName: null,
+  personId: null,
   player,
   playerId: null,
-  playerName: null,
   playerPage: null,
-  playerSearchTerm: null,
   stoppageMinutes: null,
   ...options,
 })
@@ -544,20 +546,20 @@ describe('topScorersOf', () => {
     const matches = [played([goal('Proefman'), goal('Nepper')]), played([goal('Proefman')])]
 
     expect(topScorersOf(matches)).toEqual([
-      { goals: 2, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
-      { goals: 1, id: 'Nepper', player: 'Nepper', position: 2, surname: 'Nepper' },
+      { goals: 2, id: 'name:Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
+      { goals: 1, id: 'name:Nepper', player: 'Nepper', position: 2, surname: 'Nepper' },
     ])
   })
 
   it('counts a penalty as a goal of the player', () => {
     expect(topScorersOf([played([goal('Proefman', { penalty: true }), goal('Proefman')])])).toEqual([
-      { goals: 2, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
+      { goals: 2, id: 'name:Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
     ])
   })
 
   it('does not count the own goal of an opponent for a player of ours, who has no goal from it', () => {
     expect(topScorersOf([played([goal('Teststraat', { ownGoal: true }), goal('Proefman')])])).toEqual([
-      { goals: 1, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
+      { goals: 1, id: 'name:Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
     ])
   })
 
@@ -566,7 +568,7 @@ describe('topScorersOf', () => {
     const against = goal('Proefman', { minute: 30, ours: false })
 
     expect(topScorersOf([played([own, against, goal('Nepper')])])).toEqual([
-      { goals: 1, id: 'Nepper', player: 'Nepper', position: 1, surname: 'Nepper' },
+      { goals: 1, id: 'name:Nepper', player: 'Nepper', position: 1, surname: 'Nepper' },
     ])
   })
 
@@ -590,149 +592,166 @@ describe('topScorersOf', () => {
     const scorers = topScorersOf([played(goals)])
 
     expect(scorers).toHaveLength(20)
-    expect(scorers[0]).toEqual({ goals: 2, id: 'Speler 01', player: 'Speler 01', position: 1, surname: 'Speler 01' })
+    expect(scorers[0]).toEqual({
+      goals: 2,
+      id: 'name:Speler 01',
+      player: 'Speler 01',
+      position: 1,
+      surname: 'Speler 01',
+    })
     expect(scorers.slice(1).every((item) => item.goals === 1 && item.position === 2)).toBe(true)
     expect(scorers.slice(1).map((item) => item.player)).toEqual(names.slice(1))
   })
 
-  describe('with the goals linked to the players of the squad', () => {
-    /** A goal of a player of ours: the name in the match line, and the player behind it. */
-    const linked = (id: number, name: string, searchTerm: string, shown: string, options: Partial<Goal> = {}) =>
-      goal(shown, { playerId: id, playerName: name, playerSearchTerm: searchTerm, ...options })
+  describe('with the persons the importer found', () => {
+    /** A goal of a person: the name the importer kept, and the name of the match line. */
+    const of = (id: number, given: null | string, family: null | string, shown: string, options: Partial<Goal> = {}) =>
+      goal(shown, { personFamilyName: family, personGivenName: given, personId: id, ...options })
 
-    it('counts per player and shows his full name, with his id and the end of his name', () => {
+    it('counts per person and shows the name kept for him, with the person as the id', () => {
       const matches = [
-        played([linked(7, 'Luca Oyen', 'Oyen', 'Oyen'), linked(8, 'Jacob Trenskow', 'Trenskow', 'Trenskow')]),
-        played([linked(7, 'Luca Oyen', 'Oyen', 'L. Oyen')]),
+        played([of(7, 'Luca', 'Oyen', 'Oyen'), of(8, 'Jacob', 'Trenskow', 'Trenskow')]),
+        played([of(7, 'Luca', 'Oyen', 'L. Oyen')]),
       ]
 
       expect(topScorersOf(matches)).toEqual([
-        { givenName: 'Luca', goals: 2, id: 7, player: 'Luca Oyen', position: 1, surname: 'Oyen' },
-        { givenName: 'Jacob', goals: 1, id: 8, player: 'Jacob Trenskow', position: 2, surname: 'Trenskow' },
+        { givenName: 'Luca', goals: 2, id: 'person:7', player: 'Luca Oyen', position: 1, surname: 'Oyen' },
+        { givenName: 'Jacob', goals: 1, id: 'person:8', player: 'Jacob Trenskow', position: 2, surname: 'Trenskow' },
       ])
     })
 
-    it('makes two rows of two players with the same surname, who were not counted as one', () => {
+    it('counts two titles of one person as one row, with the goals of both', () => {
       const matches = [
         played([
-          linked(1, 'Bram Jansen', 'Jansen', 'Jansen'),
-          linked(2, 'Kees Jansen', 'Jansen', 'Jansen'),
-          linked(2, 'Kees Jansen', 'Jansen', 'Jansen'),
+          of(1, 'Alfreð', 'Finnbogason', 'Finnbogason', { playerId: 5, playerPage: 'Alfreð Finnbogason' }),
+          of(1, 'Alfreð', 'Finnbogason', 'Finnbogason', { playerPage: 'Alfred Finnbogason' }),
+          of(1, 'Alfreð', 'Finnbogason', 'Finnbogason', { playerPage: 'Alfred Finnbogason' }),
+        ]),
+      ]
+
+      expect(topScorersOf(matches)).toEqual([
+        {
+          givenName: 'Alfreð',
+          goals: 3,
+          id: 'person:1',
+          player: 'Alfreð Finnbogason',
+          position: 1,
+          surname: 'Finnbogason',
+        },
+      ])
+    })
+
+    it('makes two rows of two people with the same surname', () => {
+      const matches = [
+        played([
+          of(1, 'Bram', 'Jansen', 'Jansen'),
+          of(2, 'Kees', 'Jansen', 'Jansen'),
+          of(2, 'Kees', 'Jansen', 'Jansen'),
         ]),
       ]
 
       expect(topScorersOf(matches).map((item) => [item.position, item.player, item.id, item.goals])).toEqual([
-        [1, 'Kees Jansen', 2, 2],
-        [2, 'Bram Jansen', 1, 1],
+        [1, 'Kees Jansen', 'person:2', 2],
+        [2, 'Bram Jansen', 'person:1', 1],
       ])
     })
 
-    it('keeps the goals of a player who has left the squad', () => {
-      expect(topScorersOf([played([linked(9, 'Marko Farji', 'Farji', 'Farji')])])).toEqual([
-        { givenName: 'Marko', goals: 1, id: 9, player: 'Marko Farji', position: 1, surname: 'Farji' },
+    it('shows the prefix and the family name together in the heavier weight', () => {
+      expect(
+        topScorersOf([
+          played(
+            [of(3, 'Mitchell', 'Bergen', 'Van Bergen')].map((item) => ({ ...item, personFamilyNamePrefix: 'van' })),
+          ),
+        ]),
+      ).toEqual([
+        {
+          givenName: 'Mitchell',
+          goals: 1,
+          id: 'person:3',
+          player: 'Mitchell van Bergen',
+          position: 1,
+          surname: 'van Bergen',
+        },
       ])
     })
 
-    it('counts a goal without a player under its name, as a row of its own, so no goal is lost', () => {
+    it('puts people with the same goals from A to Z on the family name without the prefix', () => {
+      const withPrefix = (id: number, given: string, prefix: string, family: string) =>
+        of(id, given, family, family, { personFamilyNamePrefix: prefix })
       const matches = [
-        played([goal('Onbekend'), goal('Onbekend'), linked(7, 'Luca Oyen', 'Oyen', 'Oyen'), goal('Oyen')]),
+        played([
+          of(1, 'Zoë', 'Zwart', 'Zwart'),
+          withPrefix(2, 'Joost', 'van', 'Aken'),
+          of(3, 'Cees', 'Boer', 'Boer'),
+          withPrefix(4, 'Jan', 'de', 'Vries'),
+        ]),
+      ]
+
+      expect(topScorersOf(matches).map((item) => item.player)).toEqual([
+        'Joost van Aken',
+        'Cees Boer',
+        'Jan de Vries',
+        'Zoë Zwart',
+      ])
+    })
+
+    it('shows the whole name in the normal weight for a person without a family name', () => {
+      expect(topScorersOf([played([of(4, 'Pelé', null, 'Pelé')])])).toEqual([
+        { givenName: 'Pelé', goals: 1, id: 'person:4', player: 'Pelé', position: 1, surname: '' },
+      ])
+    })
+
+    it('shows a person with one name as a surname', () => {
+      expect(topScorersOf([played([of(5, null, 'Dinho', 'Dinho')])])).toEqual([
+        { goals: 1, id: 'person:5', player: 'Dinho', position: 1, surname: 'Dinho' },
+      ])
+    })
+
+    it('shows the name of the match page as a surname for a goal without a person, and guesses nothing', () => {
+      const matches = [
+        played([
+          goal('Ramon Zomer', { playerPage: 'Ramon Zomer' }),
+          goal('Ramon Zomer', { playerPage: 'Ramon Zomer' }),
+          goal('Onbekend'),
+        ]),
       ]
 
       expect(topScorersOf(matches)).toEqual([
-        { goals: 2, id: 'Onbekend', player: 'Onbekend', position: 1, surname: 'Onbekend' },
-        { goals: 1, id: 'Oyen', player: 'Oyen', position: 2, surname: 'Oyen' },
-        { givenName: 'Luca', goals: 1, id: 7, player: 'Luca Oyen', position: 2, surname: 'Oyen' },
+        { goals: 2, id: 'page:Ramon Zomer', player: 'Ramon Zomer', position: 1, surname: 'Ramon Zomer' },
+        { goals: 1, id: 'name:Onbekend', player: 'Onbekend', position: 2, surname: 'Onbekend' },
       ])
     })
 
-    describe('with only the Wikipedia page of the player', () => {
-      const paged = (shown: string, page: string, options: Partial<Goal> = {}) =>
-        goal(shown, { playerPage: page, ...options })
+    it('counts a goal without a person for its player, then its page, then its name, so no goal is lost', () => {
+      const matches = [
+        played([
+          goal('Farji', { playerId: 9 }),
+          goal('Farji', { playerId: 9, playerPage: 'Marko Farji' }),
+          goal('Kemper', { playerPage: 'Boy Kemper' }),
+          goal('Boy Kemper', { playerPage: 'Boy Kemper' }),
+          goal('Kemper'),
+        ]),
+      ]
 
-      it('shows the full name from the title of the page, split at the short name', () => {
-        const matches = [
-          played([paged('Kemper', 'Boy Kemper'), paged('Van Bergen', 'Mitchell van Bergen')]),
-          played([paged('Kemper', 'Boy Kemper')]),
-        ]
-
-        expect(topScorersOf(matches)).toEqual([
-          { givenName: 'Boy', goals: 2, id: 'Boy Kemper', player: 'Boy Kemper', position: 1, surname: 'Kemper' },
-          {
-            givenName: 'Mitchell',
-            goals: 1,
-            id: 'Mitchell van Bergen',
-            player: 'Mitchell van Bergen',
-            position: 2,
-            surname: 'van Bergen',
-          },
-        ])
-      })
-
-      it('leaves the addition of the title out of the name', () => {
-        expect(topScorersOf([played([paged('Verbeek', 'Pim Verbeek (voetballer, 1999)')])])).toEqual([
-          {
-            givenName: 'Pim',
-            goals: 1,
-            id: 'Pim Verbeek (voetballer, 1999)',
-            player: 'Pim Verbeek',
-            position: 1,
-            surname: 'Verbeek',
-          },
-        ])
-      })
-
-      it('keeps two players with the same surname apart, each with his given name', () => {
-        const matches = [
-          played([paged('Jansen', 'Bram Jansen'), paged('Jansen', 'Kees Jansen'), paged('Jansen', 'Kees Jansen')]),
-        ]
-
-        expect(topScorersOf(matches).map((item) => [item.position, item.player, item.goals])).toEqual([
-          [1, 'Kees Jansen', 2],
-          [2, 'Bram Jansen', 1],
-        ])
-      })
-
-      it('counts a goal with a page for the linked player with the same page, in either order', () => {
-        const link = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { playerPage: 'Luca Oyen' })
-        const expected = [{ givenName: 'Luca', goals: 3, id: 7, player: 'Luca Oyen', position: 1, surname: 'Oyen' }]
-
-        expect(topScorersOf([played([paged('Oyen', 'Luca Oyen'), link, paged('L. Oyen', 'Luca Oyen')])])).toEqual(
-          expected,
-        )
-        expect(topScorersOf([played([link, paged('Oyen', 'Luca Oyen'), paged('Oyen', 'Luca Oyen')])])).toEqual(expected)
-      })
-
-      it('does not count a goal with another page for the linked player', () => {
-        const link = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { playerPage: 'Luca Oyen' })
-
-        expect(
-          topScorersOf([played([link, paged('Oyen', 'Jan Oyen')])]).map((item) => [item.player, item.goals]),
-        ).toEqual([
-          ['Jan Oyen', 1],
-          ['Luca Oyen', 1],
-        ])
-      })
-
-      it('keeps the short name for a goal without a page', () => {
-        expect(topScorersOf([played([goal('Kemper')])])).toEqual([
-          { goals: 1, id: 'Kemper', player: 'Kemper', position: 1, surname: 'Kemper' },
-        ])
-      })
-
-      it('does not count an own goal or a goal of the opponent', () => {
-        expect(
-          topScorersOf([
-            played([paged('Kemper', 'Boy Kemper', { ownGoal: true }), paged('Kemper', 'Boy Kemper', { ours: false })]),
-          ]),
-        ).toEqual([])
-      })
+      expect(topScorersOf(matches).map((item) => [item.id, item.goals])).toEqual([
+        ['id:9', 2],
+        ['page:Boy Kemper', 2],
+        ['name:Kemper', 1],
+      ])
     })
 
-    it('does not count an own goal or a goal of the opponent for a linked player', () => {
-      const own = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { ours: false, ownGoal: true })
-      const opponent = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { ours: false })
+    it('counts the goals of the opponent for nobody, also for a person who scored for us as well', () => {
+      const matches = [played([of(7, 'Luca', 'Oyen', 'Oyen'), of(7, 'Luca', 'Oyen', 'Oyen', { ours: false })])]
 
-      expect(topScorersOf([played([own, opponent])])).toEqual([])
+      expect(topScorersOf(matches).map((item) => [item.player, item.goals])).toEqual([['Luca Oyen', 1]])
+      expect(topScorersOf([played([of(7, 'Luca', 'Oyen', 'Oyen', { ours: false })])])).toEqual([])
+    })
+
+    it('does not count an own goal for a person', () => {
+      const own = of(7, 'Luca', 'Oyen', 'Oyen', { ownGoal: true })
+      const against = of(7, 'Luca', 'Oyen', 'Oyen', { ours: false, ownGoal: true })
+
+      expect(topScorersOf([played([own, against])])).toEqual([])
     })
   })
 
@@ -801,7 +820,7 @@ describe('scorersByPlace', () => {
   it('keeps the whole scorer in each place, with the id and the name parts', () => {
     const [place] = scorersByPlace(topScorersOf([played([goal('Alfa'), goal('Beta')])]))
 
-    expect(place?.players.map((player) => player.id)).toEqual(['Alfa', 'Beta'])
+    expect(place?.players.map((player) => player.id)).toEqual(['name:Alfa', 'name:Beta'])
     expect(place?.players.every((player) => player.goals === 1 && player.position === 1)).toBe(true)
   })
 })
@@ -1660,9 +1679,9 @@ describe('goalsWithInitials', () => {
   const trenskow = (id: number, given: string, minute: number) =>
     goal('Trenskow', {
       minute,
-      playerId: id,
-      playerName: `${given} Trenskow`,
-      playerSearchTerm: 'Trenskow',
+      personFamilyName: 'Trenskow',
+      personGivenName: given,
+      personId: id,
     })
 
   it('gives the whole given name when two players with the same name have the same initial', () => {
@@ -1700,7 +1719,7 @@ describe('goalsWithInitials', () => {
   it('leaves players with different names alone, and goals without a player', () => {
     const goals = [
       trenskow(1, 'Jakob', 10),
-      goal('Oyen', { minute: 20, playerId: 3, playerName: 'Luca Oyen', playerSearchTerm: 'Oyen' }),
+      goal('Oyen', { minute: 20, personFamilyName: 'Oyen', personGivenName: 'Luca', personId: 3 }),
       goal('Trenskow', { minute: 30, ours: false }),
     ]
 
@@ -1713,13 +1732,44 @@ describe('goalsWithInitials', () => {
       { ...trenskow(2, 'Bram', 20), ownGoal: true },
     ])
 
-    expect(changed).toMatchObject({ minute: 10, penalty: true, player: 'J. Trenskow', playerId: 1 })
+    expect(changed).toMatchObject({ minute: 10, penalty: true, personId: 1, player: 'J. Trenskow' })
   })
 
   it('does not shorten a name that has no given name to tell it from', () => {
     const goals = [
-      goal('Dinho', { minute: 10, playerId: 1, playerName: 'Dinho', playerSearchTerm: 'Dinho' }),
-      goal('Dinho', { minute: 20, playerId: 2, playerName: 'Dinho', playerSearchTerm: 'Dinho' }),
+      goal('Dinho', { minute: 10, personFamilyName: 'Dinho', personId: 1 }),
+      goal('Dinho', { minute: 20, personFamilyName: 'Dinho', personId: 2 }),
+    ]
+
+    expect(goalsWithInitials(goals)).toEqual(goals)
+  })
+
+  it('compares the names as the match line writes them, with the prefix', () => {
+    const aken = (id: number, given: string) =>
+      goal('van Aken', {
+        personFamilyName: 'Aken',
+        personFamilyNamePrefix: 'van',
+        personGivenName: given,
+        personId: id,
+      })
+    const goals = [
+      aken(1, 'Joost'),
+      aken(2, 'Bram'),
+      goal('Aken', { personFamilyName: 'Aken', personGivenName: 'Cees', personId: 3 }),
+    ]
+
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. van Aken', 'B. van Aken', 'Aken'])
+  })
+
+  it('leaves a goal alone whose person has the same name twice only as one person, under two titles', () => {
+    const goals = [
+      goal('Finnbogason', { personFamilyName: 'Finnbogason', personGivenName: 'Alfreð', personId: 1 }),
+      goal('Finnbogason', {
+        personFamilyName: 'Finnbogason',
+        personGivenName: 'Alfreð',
+        personId: 1,
+        playerPage: 'Alfred Finnbogason',
+      }),
     ]
 
     expect(goalsWithInitials(goals)).toEqual(goals)

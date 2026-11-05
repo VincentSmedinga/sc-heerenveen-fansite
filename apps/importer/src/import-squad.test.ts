@@ -111,9 +111,15 @@ async function serve(squad: null | string = original, { matchPages = false, robo
   const server = await startServer({
     ...articleRoutes(
       matchPages
-        ? [fixture('wikipedia-cup.wiki'), fixture('wikipedia-programme.wiki'), fixture('wikipedia-standings.wiki')]
-        : [],
+        ? [
+            original,
+            fixture('wikipedia-cup.wiki'),
+            fixture('wikipedia-programme.wiki'),
+            fixture('wikipedia-standings.wiki'),
+          ]
+        : [original],
     ),
+    ...articleRoutes([], { titles: ['Pim Verbeek', 'Anderen Pagina'] }),
     ...routes,
   })
 
@@ -146,7 +152,9 @@ describe('the first import, into an empty database', () => {
 
     expect(report).toEqual({
       kind: 'imported',
-      persons: ['persons: 25 titles asked, 25 new persons, 25 titles remembered'],
+      persons: [
+        'persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
+      ],
       players: { added: 25, left: 0, unchanged: 0, updated: 0 },
       season,
       stats: { added: 50, unchanged: 0, updated: 0 },
@@ -156,7 +164,7 @@ describe('the first import, into an empty database', () => {
       [
         'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
         'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
-        'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered',
+        'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
       ].join('\n'),
     )
 
@@ -287,7 +295,7 @@ describe('reading again', () => {
       [
         'Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad',
         'Squad 2026/27: numbers of the players: 2 new, 0 updated, 48 unchanged',
-        'Squad 2026/27: persons: 1 title asked, 1 new person, 1 title remembered',
+        'Squad 2026/27: persons: 1 title asked, 1 new person, 1 title remembered, 1 name stored (1 from a sort key, 0 guessed, 0 from the list)',
       ].join('\n'),
     )
 
@@ -998,7 +1006,9 @@ describe('the import command', () => {
     expect(lines[1]).toContain('Matches 2026/27: warning, nothing changed and the last good copy stays')
     expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
     expect(lines[3]).toBe('Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged')
-    expect(lines[4]).toBe('Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered')
+    expect(lines[4]).toBe(
+      'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
+    )
     // No match was played in the database, so there is nothing to compare the goals with.
     expect(lines).toHaveLength(5)
     expect(await database.db.select().from(matches)).toEqual([])

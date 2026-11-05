@@ -48,11 +48,19 @@ const hits: PublicSearchHit[] = [
   },
 ] as unknown as PublicSearchHit[]
 
-const player = (name: string, position: PublicPlayer['position'], searchTerm: string): PublicPlayer => ({
-  name,
-  position,
-  searchTerm,
-})
+/** A player with his person's kept name: the search term is the prefix and family name. */
+const player = (name: string, position: PublicPlayer['position'], searchTerm: string): PublicPlayer => {
+  const words = searchTerm.split(' ')
+
+  return {
+    name,
+    personFamilyName: words.at(-1) ?? null,
+    personFamilyNamePrefix: words.length > 1 ? words.slice(0, -1).join(' ') : null,
+    personGivenName: name === searchTerm ? null : name.slice(0, name.length - searchTerm.length).trim(),
+    position,
+    searchTerm,
+  }
+}
 
 const squad: Squad = {
   page: { readAt: new Date('2026-10-25T12:05:00Z'), title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' },

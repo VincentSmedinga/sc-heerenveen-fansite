@@ -1257,6 +1257,7 @@
 - **Alternatieven:** de hele naam vet laten, zoals nu in de kaart; dan valt het deel dat je zoekt niet op.
   Of `strong` om de achternaam; dat zegt een schermlezer iets wat niet nodig is.
   Of de volledige naam overal tonen; dat past niet in de wedstrijdregel op een smal scherm.
+- **Later:** sinds 5 november 2026 splitst de site de naam niet meer zelf: `splitPlayerName` is weg, en de voornaam en de achternaam komen uit `persons`; zie _De site telt per persoon en toont de bewaarde naam, en raadt niets_ in `site.md`.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
   De achternaam heeft het gewicht van een rijkop (600) in plaats van het zwaardere (700); de voornaam blijft gewoon.
 
