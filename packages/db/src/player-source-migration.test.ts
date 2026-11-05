@@ -86,9 +86,9 @@ describe(`the migration ${migration}`, () => {
   it('has the sources in the database in the order of the list, from the most complete', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    const [column] = await rows("SHOW COLUMNS FROM players LIKE 'source'")
-
-    expect(column.Type).toBe(`enum(${playerSources.map((source) => `'${source}'`).join(',')})`)
+    expect(await rows("SHOW COLUMNS FROM players LIKE 'source'")).toMatchObject([
+      { Type: `enum(${playerSources.map((source) => `'${source}'`).join(',')})` },
+    ])
   })
 
   it('gives the players of the seed the source selectie', async () => {

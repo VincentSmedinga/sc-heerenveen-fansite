@@ -714,7 +714,7 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     ['aanvaller', 22, 'Dinho', 'Dinho'],
   ]
 
-  const squad = rows.map(([position, shirtNumber, name, searchTerm]) => ({
+  const squad = rows.map(([position, shirtNumber, name, searchTerm]): NewPlayer => ({
     name,
     position,
     searchTerm,
