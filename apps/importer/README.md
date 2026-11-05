@@ -794,6 +794,31 @@ Een seizoen heeft de ene of de andere, dus de sleutel (seizoen, competitie, rond
   Dat de import ze leest zonder verdere wijziging, laat de test voor 2025/26 zien (zie _Een afgelopen seizoen_).
   De pagina's van 2013, 2014, 2015, 2017 en 2018 zijn de Europa League-play-offs; zie `src/fixtures/wikipedia-playoffs-2013.wiki` en de andere.
 
+### De selecties van 2007/08 tot en met 2017/18
+
+De pagina's `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)` (zie `squadPageTitle`) van 2007/08 tot en met 2017/18 hebben een sectie "Selectie" of "Voorlopige selectie", in drie vormen.
+`readSeasonSelection` in [`src/read-selection.ts`](src/read-selection.ts) leest ze in de vorm `SeasonSquad`, met de bron `selectie`.
+Het is een tekstlezer: hij doet zelf geen verzoek en schrijft niets.
+De import van #744 roept hem aan.
+Alleen de lijst of de tabel in die sectie telt; een link in de tekst eromheen of in een latere sectie is geen speler.
+
+- 2007/08: een lijst met een vlag, een naam en het einde van het contract, onder een kop per contract.
+  De lijst heeft geen positie en geen rugnummer.
+- 2008/09 en 2009/10: een brede tabel met twee spelers op een regel (vlag, naam, vorige club, contract), onder een kop per positie.
+  2009/10 zet het rugnummer voor de naam; 2008/09 heeft geen rugnummers.
+  De cel na een vlag is de naam, de rest van de regel is het contract en de vorige club.
+- 2013/14 tot en met 2017/18: een tabel met het rugnummer, de naam, de nationaliteit, de geboortedatum en de vorige club in een rij, onder een kop per positie.
+  Het teken van de aanvoerder achter een naam (een link naar een bestand, of `{{aanvoerder}}`) valt weg.
+
+De wedstrijden en de doelpunten zijn leeg, want de pagina's geven ze niet.
+De koppen zijn die van `squadGroups`; een kop die er niet in staat, is een fout.
+Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt.
+Een andere naam zonder link blijft weg, met een waarschuwing.
+
+Een pagina zonder zo'n sectie geeft `none`: 2010/11, 2011/12 en 2012/13 hebben geen selectie.
+Een sectie in een andere vorm geeft een fout: een kop, een kolom, een rugnummer of een cel die de lezer niet kent, een rij met te weinig cellen, een regel in de lijst die geen speler is, of een sectie zonder spelers.
+De tabellen met statistieken van 2008/09, 2016/17 en 2017/18 leest deze lezer niet.
+
 ### Wat de import bewaart
 
 - Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.

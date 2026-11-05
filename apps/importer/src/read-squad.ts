@@ -97,9 +97,46 @@ const dash = /^[-–—]$/u
  */
 const cellAttributes = /^(?:\s*[a-z-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'|]+))+\s*\|(?!\|)/iu
 
+/** The cells of a row on the lines that start with `|`, in both writings, without attributes */
+export function dataCells(row: string): string[] {
+  const cells: string[] = []
+
+  for (const line of row.split('\n')) {
+    if (line.startsWith('|') && !line.startsWith('|}') && !line.startsWith('{|')) {
+      cells.push(...line.slice(1).split('||').map(stripAttributes))
+    }
+  }
+
+  return cells
+}
+
+/** The cells of a row that starts with `!`: the headings of the columns, or of a group. */
+export function headerCells(row: string): string[] {
+  const cells: string[] = []
+
+  for (const line of row.split('\n')) {
+    if (line.startsWith('!')) {
+      cells.push(...line.slice(1).split('!!').map(stripAttributes))
+    }
+  }
+
+  return cells
+}
+
 /** A key that treats names as the database does: without accents and capitals. */
 export function nameKey(name: string): string {
   return name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+}
+
+/**
+ * The name of a cell: what the link shows, `Roberts Uldrikis` for `[[Roberts Uldriķis|Roberts
+ * Uldrikis]]`, or the title of the page without a disambiguation like `(voetballer)`.
+ */
+export function nameOf(cell: string): string {
+  const name = plain(cell)
+  const piped = /\[\[[^\]|]*\|/u.test(cell)
+
+  return piped ? name : name.replace(/\s*\([^()]*\)$/u, '')
 }
 
 /**
@@ -216,19 +253,6 @@ function competitionsInOrder(rows: string[]): boolean {
   return names[0] === 'eredivisie' && names[1] === 'knvb beker'
 }
 
-/** The cells of a row on the lines that start with `|`, in both writings, without attributes */
-function dataCells(row: string): string[] {
-  const cells: string[] = []
-
-  for (const line of row.split('\n')) {
-    if (line.startsWith('|') && !line.startsWith('|}') && !line.startsWith('{|')) {
-      cells.push(...line.slice(1).split('||').map(stripAttributes))
-    }
-  }
-
-  return cells
-}
-
 /** The text between `== Spelers ==` (any level) and the end of the first table under it. */
 function findTable(text: string): string | undefined {
   const heading = /^(={2,6})[ \t]*Spelers[ \t]*\1[ \t]*$/mu.exec(text)
@@ -248,30 +272,6 @@ function findTable(text: string): string | undefined {
   const end = rest.indexOf('\n|}', start)
 
   return end < 0 ? undefined : rest.slice(start, end)
-}
-
-/** The cells of a row that starts with `!`: the headings of the columns, or of a group. */
-function headerCells(row: string): string[] {
-  const cells: string[] = []
-
-  for (const line of row.split('\n')) {
-    if (line.startsWith('!')) {
-      cells.push(...line.slice(1).split('!!').map(stripAttributes))
-    }
-  }
-
-  return cells
-}
-
-/**
- * The name of a cell: what the link shows, `Roberts Uldrikis` for `[[Roberts Uldriķis|Roberts
- * Uldrikis]]`, or the title of the page without a disambiguation like `(voetballer)`.
- */
-function nameOf(cell: string): string {
-  const name = plain(cell)
-  const piped = /\[\[[^\]|]*\|/u.test(cell)
-
-  return piped ? name : name.replace(/\s*\([^()]*\)$/u, '')
 }
 
 /**
