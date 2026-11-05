@@ -1,0 +1,47 @@
+Het seizoen 2009/10 van [[sc Heerenveen]]. Trainer was [[Ron Jans]].
+
+==Selectie==
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |land
+!style="border-bottom:1px solid #AAAAAA" |speler
+!style="border-bottom:1px solid #AAAAAA" |vorige club
+!style="border-bottom:1px solid #AAAAAA" |contract tot
+!style="border-bottom:1px solid #AAAAAA" |
+!style="border-bottom:1px solid #AAAAAA" |land
+!style="border-bottom:1px solid #AAAAAA" |speler
+!style="border-bottom:1px solid #AAAAAA" |vorige club
+!style="border-bottom:1px solid #AAAAAA" |contract tot
+|- bgcolor="#F8F8FF"
+|-bgcolor="#EBEBFF"
+! !!colspan="12" align="left" style="padding-top:12px;" |Keepers
+|-
+|{{BE-VLAG}}|| 25 [[Brian Vandenbussche]] || {{NL-VLAG}} [[Sparta Rotterdam]] ||[[2011]]||
+|| {{BE-VLAG}}|| 1 [[Kenny Steppe]] || {{BE-VLAG}} [[Germinal Beerschot]] || 2013 ||
+|-
+|-bgcolor="#EBEBFF"
+! !!colspan="12" align="left" style="padding-top:12px;" |Verdedigers
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}}|| 19 [[Daryl Janmaat]] ||{{NL-VLAG}} [[ADO Den Haag]]|| [[2012]]||
+||{{MK-VLAG}}|| 20 [[Goran Popov]] ||{{GR-VLAG}} [[Levadiakos]]<br /><small>(gehuurd van [[Egaleo FC]])</small> ||[[2011]]
+|-
+| {{NL-VLAG}}|| 37 [[Gerry Koning]] || {{NL-VLAG}} [[FC Volendam]] ||[[2011]]||
+|| || || ||
+|-bgcolor="#EBEBFF"
+! !!colspan="12" align="left" style="padding-top:12px;" |Middenvelders
+|-
+| {{SE-VLAG}}|| 7 [[Viktor Elm]] || {{SE-VLAG}} [[Kalmar FF]] || [[2012]]||
+|| || || ||
+|-bgcolor="#EBEBFF"
+
+! !!colspan="12" align="left" style="padding-top:12px;" |Aanvallers
+|-
+| |{{NL-VLAG}}|| 8 [[Roy Beerens]] ||{{NL-VLAG}} [[PSV (voetbalclub)|PSV]]|| [[2013]]||
+| |{{NL-VLAG}}|| 35 [[Gerald Sibon]] ||{{DE-VLAG}} [[1.FC Nürnberg]]|| [[2009]]||
+|-
+|| {{MK-VLAG}} ||[[Samir Fazli]] || {{MK-VLAG}} [[FK Makedonija Ğorče Petrov Skopje|Makedonija Skopje]] || [[2014]]||
+|- bgcolor="#F8F8FF"
+|}
+
+==Mutaties==
+* {{NL-VLAG}} [[Spelerslink in de tekst eromheen]]

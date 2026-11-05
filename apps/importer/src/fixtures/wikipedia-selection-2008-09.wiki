@@ -1,0 +1,51 @@
+Het seizoen 2008/09 van [[sc Heerenveen]]. Trainer was [[Trond Sollied]].
+
+== Selectie in het seizoen 2008-2009 ==
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |land
+!style="border-bottom:1px solid #AAAAAA" |speler
+!style="border-bottom:1px solid #AAAAAA" |vorige club
+!style="border-bottom:1px solid #AAAAAA" |contract tot
+!style="border-bottom:1px solid #AAAAAA" |
+!style="border-bottom:1px solid #AAAAAA" |land
+!style="border-bottom:1px solid #AAAAAA" |speler
+!style="border-bottom:1px solid #AAAAAA" |vorige club
+!style="border-bottom:1px solid #AAAAAA" |contract tot
+|- bgcolor="#F8F8FF"
+|-bgcolor="#EBEBFF"
+!  !!colspan="12" align="left" style="padding-top:12px;" |Keepers
+|-
+|{{BE-VLAG}}|| [[Brian Vandenbussche]] || {{NL-VLAG}} [[Sparta Rotterdam]] ||[[2011]]||
+||{{NL-VLAG}}|| [[Agil Etemadi]] ||{{NL-VLAG}} eigen jeugd || [[2010]] 
+|-bgcolor="#F8F8FF"
+| {{ZA-VLAG}}|| [[Hans Vonk (doelman)|Hans Vonk]] || {{NL-VLAG}} [[AFC Ajax]]  || [[2010]]||
+||||||||
+|-bgcolor="#EBEBFF"
+!  !!colspan="12" align="left" style="padding-top:12px;" |Verdedigers
+|-
+| {{NL-VLAG}}|| [[Michel Breuer]] ||{{NL-VLAG}} [[SBV Excelsior|Excelsior]]|| [[2009]]||
+|| {{BR-VLAG}} ||[[Lázaro Vinícius|Lázaro]] || {{BR-VLAG}} [[Atlético Mineiro]]  ||
+|-
+|| {{NL-VLAG}}<br />{{HT-VLAG}}|| [[Lesly Fellinga]]||{{NL-VLAG}} [[BV Veendam]]|| [[2009]]
+|-bgcolor="#EBEBFF"
+!  !!colspan="12" align="left" style="padding-top:12px;" |Middenvelders
+|-
+|  {{NL-VLAG}}|| [[Geert Arend Roorda]] ||{{NL-VLAG}} eigen jeugd|| [[2013]]||
+||  {{NL-VLAG}}|| [[Roy Beerens]] ||{{NL-VLAG}} [[N.E.C.]]<br /><small>(gehuurd van [[PSV (voetbalclub)|PSV]])</small> ||  [[2010]]
+|-bgcolor="#EBEBFF"
+
+!  !!colspan="12" align="left" style="padding-top:12px;" |Aanvallers
+|-
+| {{SE-VLAG}}|| [[Patrik Ingelsten]] || {{SE-VLAG}} [[Kalmar FF]]  || [[2012]]
+|| ||{{CI-VLAG}}|| [[Bonaventure Kalou]]|| {{AE-VLAG}} [[Al-Jazira Club]]|| [[2010]]
+|- bgcolor="#F8F8FF"
+| {{NO-VLAG}}<br />{{MA-VLAG}}||  [[Tarik Elyounoussi]]||{{NO-VLAG}} [[Fredrikstad FK]]|| [[2013]]||||{{SE-VLAG}}|| [[Samuel Armenteros]]|| {{NL-VLAG}} Eigen Jeugd|| 
+|-
+| {{PL-VLAG}} ||[[Paweł Wojciechowski (voetballer 1990)|Paweł Wojciechowski]] ||{{NL-VLAG}} eigen jeugd|| ||
+|| 
+|-
+|}
+
+==Mutaties==
+* {{NL-VLAG}} [[Spelerslink in de tekst eromheen]]

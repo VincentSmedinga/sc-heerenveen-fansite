@@ -1,0 +1,35 @@
+'''sc Heerenveen''' in het seizoen 2014/2015.
+
+== Selectie ==
+{| class="wikitable" style="font-size:85%;"
+!No.
+!Naam
+!Nationaliteit
+!Geboortedatum
+!Vorige club
+|-
+| style="background:blue;" colspan="5" | <span style="color:white;">'''Keepers'''</span>
+|-
+| 1 || [[Kristoffer Nordfeldt]] || {{SE}} || 23-06-1989 || [[Brommapojkarna]]
+|-
+| 30 || [[Robin Kist]] || {{NL}} || 10-03-1995 || ''eigen jeugd''
+|-
+| style="background:blue;" colspan="5" | <span style="color:white;">'''Verdedigers'''</span>
+|-
+| 2 || [[Kenny Otigba|Kenneth Otigba]] || {{HU}} || 29-08-1992 || ''eigen jeugd''
+|-
+| 5 || [[Pelé van Anholt]] || {{NL}} || 23-04-1991 || [[FC Emmen]] (verhuur) / ''eigen jeugd''
+|-
+| style="background:blue;" colspan="5" | <span style="color:white;">'''Middenvelders'''</span>
+|-
+| 15 || [[Marten de Roon]] {{aanvoerder}} || {{NL}} || 29-03-1991 || [[Sparta Rotterdam]]
+|-
+| style="background:blue;" colspan="5" | <span style="color:white;">'''Aanvallers'''</span>
+|-
+| 11 || [[Sam Larsson]] || {{SE}} || 10-04-1993 || [[IFK Göteborg]]
+|-
+|}
+
+== Transfers ==
+=== Aangetrokken ===
+* [[Spelerslink in de tekst eromheen]]

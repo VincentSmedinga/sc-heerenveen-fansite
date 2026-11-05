@@ -1,0 +1,33 @@
+'''sc Heerenveen''' in het seizoen 2016/2017.
+
+== Selectie ==
+{| class="wikitable" style="font-size:85%;"
+!No.
+!Naam
+!Nationaliteit
+!Geboortedatum
+!Vorige club
+|-
+| colspan="5" | '''Keepers'''</font></div>
+|-
+| 1 || [[Erwin Mulder]] || {{NL}} || 03-03-1989 || [[Feyenoord]]
+|-
+| 31 || [[Jan Bekkema]] || {{NL}} || 09-04-1996 || ''eigen jeugd''
+|-
+| colspan="5" | '''Verdedigers'''</font></div>
+|-
+| 2 || [[Stefano Marzo]] || {{BE}} || 22-03-1991 || [[Beerschot VAC|Beerschot AC]]
+|-
+| colspan="5" | '''Middenvelders'''</font></div>
+|-
+| 6 || [[Stijn Schaars]] {{aanvoerder}} || {{NL}} || 11-01-1984 || [[PSV (voetbalclub)|PSV]]
+|-
+| colspan="5" | '''Aanvallers'''</font></div>
+|-
+| 7 || [[Luciano Slagveer]] || {{NL}} || 10-04-1993 || ''eigen jeugd''
+|-
+|}
+
+== Transfers ==
+=== Aangetrokken ===
+* [[Spelerslink in de tekst eromheen]]
