@@ -1,8 +1,16 @@
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { createPersonBook, knownPersonPages, rememberedPersonArticles } from './persons.ts'
+import {
+  countPersonNames,
+  createPersonBook,
+  knownPersonPages,
+  type PersonName,
+  rememberedPersonArticles,
+  storePersonNames,
+} from './persons.ts'
 import { personPages, persons } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -36,7 +44,7 @@ describe('createPersonBook', () => {
 
     expect(a).not.toBeNull()
     expect(b).toBe(a)
-    expect(await database.db.select().from(persons)).toEqual([{ id: a, wikipediaPage: 'Alfreð Finnbogason' }])
+    expect(await database.db.select().from(persons)).toMatchObject([{ id: a, wikipediaPage: 'Alfreð Finnbogason' }])
     expect(await pages()).toEqual([
       ['Alfred Finnbogason', a],
       ['Alfreð Finnbogason', a],
@@ -128,5 +136,64 @@ describe('knownPersonPages and rememberedPersonArticles', () => {
         ['Luca Oyen', 'Luca Oyen'],
       ]),
     )
+  })
+})
+
+describe('the names of persons', () => {
+  const name = (source: PersonName['source'], givenName = 'Joost'): PersonName => ({
+    familyName: 'Aken',
+    familyNamePrefix: 'van',
+    givenName,
+    name: `${givenName} van Aken`,
+    source,
+  })
+  const rowOf = async (page: string) =>
+    (await database.db.select().from(persons).where(eq(persons.wikipediaPage, page)))[0]
+
+  it('starts empty, and stores the parts and where they came from', async () => {
+    await database.db.insert(persons).values({ wikipediaPage: 'Joost van Aken' })
+
+    expect(await rowOf('Joost van Aken')).toMatchObject({ familyName: null, name: null, nameSource: null })
+
+    const stored = await storePersonNames(database.db, new Map([['Joost van Aken', name('sort_key')]]))
+
+    expect(stored.counts).toEqual({ guess: 0, manual: 0, sort_key: 1 })
+    expect(await rowOf('Joost van Aken')).toMatchObject({
+      familyName: 'Aken',
+      familyNamePrefix: 'van',
+      givenName: 'Joost',
+      name: 'Joost van Aken',
+      nameSource: 'sort_key',
+    })
+  })
+
+  it('keeps a name it has, takes a name from the list over it, and never replaces that', async () => {
+    await database.db.insert(persons).values({ wikipediaPage: 'Joost van Aken' })
+    await storePersonNames(database.db, new Map([['Joost van Aken', name('sort_key')]]))
+
+    const again = await storePersonNames(database.db, new Map([['Joost van Aken', name('guess', 'Jo')]]))
+
+    expect(again.counts).toEqual({ guess: 0, manual: 0, sort_key: 0 })
+    expect(await rowOf('Joost van Aken')).toMatchObject({ givenName: 'Joost', nameSource: 'sort_key' })
+
+    await storePersonNames(database.db, new Map([['Joost van Aken', name('manual', 'Joost J.')]]))
+    await storePersonNames(database.db, new Map([['Joost van Aken', name('sort_key')]]))
+
+    expect(await rowOf('Joost van Aken')).toMatchObject({ givenName: 'Joost J.', nameSource: 'manual' })
+  })
+
+  it('reports the guesses, skips a title that is no person, and counts the names by source', async () => {
+    await database.db.insert(persons).values([{ wikipediaPage: 'Ramon Zomer' }, { wikipediaPage: 'Luca Oyen' }])
+
+    const stored = await storePersonNames(
+      database.db,
+      new Map([
+        ['Niemand', name('sort_key')],
+        ['Ramon Zomer', { ...name('guess'), givenName: 'Ramon' }],
+      ]),
+    )
+
+    expect(stored.guessed.map((one) => one.title)).toEqual(['Ramon Zomer'])
+    expect(await countPersonNames(database.db)).toEqual({ guess: 1, manual: 0, none: 1, sort_key: 0 })
   })
 })

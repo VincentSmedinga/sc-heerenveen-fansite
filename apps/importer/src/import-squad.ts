@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
-import { createPersonBook } from '@fansite/db/persons'
+import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { matches, matchGoals, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { and, count, eq, isNotNull } from 'drizzle-orm'
@@ -13,7 +13,7 @@ import type { ReadPlayer } from './read-squad.ts'
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
-import { describePersons, lookUpPersonPages } from './person-pages.ts'
+import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
 import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -270,11 +270,14 @@ async function readAndStore(
     return { ids: result.ids, persons: personBook.counts, players: result.counts, stats: stats.counts }
   })
 
+  const personNames = await storePersonNames(db, personLookup.names)
+
+  warnings.push(...guessedNameWarnings(personNames.guessed))
   warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
 
   return {
     kind: 'imported',
-    persons: describePersons(personLookup.asked, counts.persons),
+    persons: describePersons(personLookup.asked, counts.persons, personNames.counts),
     players: counts.players,
     season,
     stats: counts.stats,

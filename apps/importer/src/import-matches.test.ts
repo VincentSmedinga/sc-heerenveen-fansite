@@ -154,7 +154,7 @@ async function serve(
   const texts = [current.cup, current.programme, current.standings, current.playoffs].filter(
     (text): text is string => typeof text === 'string',
   )
-  const server = await startServer({ ...articleRoutes(texts), ...routes, ...extra })
+  const server = await startServer({ ...articleRoutes(texts, { titles: ['Test Speler'] }), ...routes, ...extra })
 
   servers.push(server)
 
@@ -3085,7 +3085,13 @@ describe('the persons of the scorers', () => {
   it('makes a person of a title without an article, under the title as it stands', async () => {
     const { server } = await serve({}, { routes: { [pageUrl('', 'Abdellah Ouazane')]: reply(404, 'Niet gevonden') } })
 
-    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    // A person without an article has no sort key, so his name is a guess, and the run says so.
+    expect(await importAt(server, first)).toMatchObject({
+      kind: 'imported',
+      warnings: [
+        "Persons: guessed the name of 'Abdellah Ouazane': given name 'Abdellah', prefix '', family name 'Ouazane'",
+      ],
+    })
     expect(await personsOf('Speelronde 2')).toContainEqual(['Ouazane', 'Abdellah Ouazane', 'Abdellah Ouazane'])
     expect(await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Abdellah Ouazane'))).toHaveLength(
       1,
@@ -3100,7 +3106,7 @@ describe('the persons of the scorers', () => {
         routes: {
           [pageUrl('', 'Abdellah Ouazane')]: (_request, response) => {
             response.writeHead(status, wiki)
-            response.end(status === 200 ? 'Een artikel.' : 'Fout')
+            response.end(status === 200 ? 'Een artikel.\n{{DEFAULTSORT:Ouazane, Abdellah}}' : 'Fout')
           },
         },
       },
@@ -3187,7 +3193,9 @@ describe('the persons of the scorers', () => {
     const { server } = await serve()
     const report = await importAt(server, first)
     const warnings =
-      report.kind === 'imported' ? report.warnings.filter((warning) => warning.startsWith('Persons:')) : []
+      report.kind === 'imported'
+        ? report.warnings.filter((warning) => warning.startsWith('Persons:') && !warning.includes('guessed'))
+        : []
 
     expect(warnings).toEqual([
       "Persons: 1 group of persons look alike and are not merged: 'Daniël Jansen' and 'Daniel Jansen'",

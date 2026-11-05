@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
-import { createPersonBook } from '@fansite/db/persons'
+import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import {
   matches,
   matchGoals,
@@ -45,7 +45,13 @@ import {
   updateMatch,
 } from './match-changes.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
-import { describePersons, lookUpPersonPages, similarPersons, similarPersonsWarning } from './person-pages.ts'
+import {
+  describePersons,
+  guessedNameWarnings,
+  lookUpPersonPages,
+  similarPersons,
+  similarPersonsWarning,
+} from './person-pages.ts'
 import {
   europaLeaguePage,
   pageCandidates,
@@ -815,6 +821,8 @@ async function readAndStore(
     }
   }
 
+  // The names of the persons that were new or had none, after their rows are in the database.
+  const personNames = await storePersonNames(db, personLookup.names)
   const alikeWarning = similarPersonsWarning(await similarPersons(db))
   const alike = alikeWarning === undefined ? [] : [alikeWarning]
 
@@ -822,7 +830,7 @@ async function readAndStore(
     clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
-    persons: describePersons(personLookup.asked, stored.persons),
+    persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
     results: stored.results,
     season,
     standings: table.rows.length,
@@ -830,6 +838,7 @@ async function readAndStore(
     warnings: [
       ...stored.warnings,
       ...personLookup.warnings,
+      ...guessedNameWarnings(personNames.guessed),
       ...alike,
       ...resultWarnings(everyClub.unread, playedWarning(named.results, table.rows, named.strangers)),
     ],

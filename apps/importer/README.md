@@ -952,7 +952,7 @@ Daarvoor vraagt de import elke titel die nog niet in `person_pages` staat één 
 Het logboek noemt het aantal titels dat is opgevraagd, alleen als dat meer dan nul is:
 
 ```text
-Matches 2026/27: persons: 20 titles asked, 20 new persons, 20 titles remembered
+Matches 2026/27: persons: 20 titles asked, 20 new persons, 20 titles remembered, 20 names stored (18 from a sort key, 2 guessed, 0 from the list)
 ```
 
 De import voegt geen personen samen op een gelijke naam.
@@ -962,9 +962,27 @@ Zijn twee titels zonder accenten, hoofdletters, streepjes, spaties en apostrofs 
 Matches 2026/27: warning, Persons: 1 group of persons look alike and are not merged: 'Daniël Jansen' and 'Daniel Jansen'
 ```
 
-`pnpm run import:status` toont het aantal groepen onder `Persons that look alike`.
+`pnpm run import:status` toont het aantal groepen onder `Persons that look alike` en de aantallen namen per bron onder `Person names`.
 Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases` en draai de import van de seizoenen opnieuw.
 Een pagina die later een andere titel krijgt, ziet de import niet: de oude titel blijft in `person_pages` staan.
+
+### De namen van de personen
+
+Elke persoon heeft een naam in delen: `name`, `given_name`, `family_name_prefix`, `family_name` en `name_source` (zie de [README van `@fansite/db`](../../packages/db/README.md), _De tabellen `persons` en `person_pages`_).
+De import leest ze uit hetzelfde verzoek waarmee hij de titel opvraagt, dus een nieuwe titel kost één verzoek, ook voor de naam.
+
+- **De sorteersleutel** van het artikel, `{{DEFAULTSORT:Aken, Joost van}}`, geeft de achternaam.
+  Hij past als de achternaam het eind van de titel is, zonder te letten op accenten, hoofdletters, punten en streepjes.
+  De naam komt uit de titel, met accent: `Anholt, Pele van` geeft `Pelé van Anholt`.
+  De kleine woorden vlak voor de achternaam zijn het voorvoegsel (`van`, `van der`), en `name_source` is `sort_key`.
+- **Zonder sleutel**, of als hij niet past, raadt de import één keer: het laatste woord is de achternaam, de kleine woorden ervoor zijn het voorvoegsel, en een naam van één woord is een achternaam zonder voornaam.
+  Dat is `guess`, en het logboek schrijft er een waarschuwing met `Persons:` vooraan bij, met de titel en de uitkomst.
+- **De lijst `personNames`** in [`src/person-names.ts`](src/person-names.ts) zegt per titel de voornaam, het voorvoegsel en de achternaam.
+  Hij gaat voor alles, geeft `manual` en wordt nooit vervangen.
+  Zet er een naam in nadat je de gok in het logboek hebt nagekeken.
+- **Een persoon zonder naam** krijgt hem bij de eerstvolgende import van een seizoen met zijn titel: de import vraagt zijn artikel nog één keer op.
+  Een tweede run schrijft en vraagt niets.
+- **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en `pnpm run import:status` toont de aantallen per bron voor alle personen.
 
 ### De clubs van de tegenstanders
 

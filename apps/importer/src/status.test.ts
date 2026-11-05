@@ -109,6 +109,7 @@ describe('the overview', () => {
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
         '',
+        'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
       ],
     })
@@ -140,6 +141,7 @@ describe('the overview', () => {
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
         '',
+        'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
       ],
     })

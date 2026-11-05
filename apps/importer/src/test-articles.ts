@@ -24,16 +24,28 @@ export function articleRoutes(
       const title = linkedPage(link[0])
 
       if (title !== null) {
-        routes[pageUrl('', title)] = reply(200, articleText, { 'Content-Type': 'text/x-wiki; charset=UTF-8' })
+        routes[pageUrl('', title)] = reply(200, articleTextOf(title), { 'Content-Type': 'text/x-wiki; charset=UTF-8' })
       }
     }
   }
   for (const title of titles) {
-    routes[pageUrl('', title)] = reply(200, articleText, { 'Content-Type': 'text/x-wiki; charset=UTF-8' })
+    routes[pageUrl('', title)] = reply(200, articleTextOf(title), { 'Content-Type': 'text/x-wiki; charset=UTF-8' })
   }
   for (const [title, target] of Object.entries(redirects)) {
     routes[pageUrl('', title)] = reply(200, `#REDIRECT [[${target}]]`, { 'Content-Type': 'text/x-wiki; charset=UTF-8' })
   }
 
   return routes
+}
+
+/**
+ * The text of an article with a sort key made from its title, the family name first, as the
+ * article of a person has one on Wikipedia (`Joost van Aken` has `Aken, Joost van`). A club
+ * ignores it. The importer then reads a name from the key and has nothing to guess.
+ */
+export function articleTextOf(title: string) {
+  const words = title.replace(/\s*\([^()]*\)\s*$/u, '').split(/\s+/u)
+  const key = words.length === 1 ? words[0] : `${words.at(-1)}, ${words.slice(0, -1).join(' ')}`
+
+  return `${articleText}\n{{DEFAULTSORT:${key}}}`
 }

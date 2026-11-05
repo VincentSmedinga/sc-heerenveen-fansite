@@ -909,6 +909,7 @@
 - **Alternatieven:** de gezondheid van de selectie in `match_imports` zetten (een kolom of rij erbij voor iets wat een eigen uur en een eigen uitkomst heeft).
   De zoekterm bij elke lezing opnieuw afleiden (de eigen kolom heeft dan geen nut).
 - **Later:** een goede lezing vervangt de selectie sinds 26 oktober 2026 niet meer: een speler die niet meer in de tabel staat, verdwijnt niet maar blijft staan als "niet meer in de selectie", met zijn `id` en zijn doelpunten; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
+- **Later:** de naam van een persoon komt sinds #715 uit de sorteersleutel van zijn artikel; de zoekterm van een speler (`players.search_term`) blijft voor de zoekpagina. Zie _De import leest de naam van een persoon uit de sorteersleutel van zijn artikel_ hieronder.
 
 ## Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar
 
@@ -2047,6 +2048,7 @@
 - **Later:** voor een persoon bewaart de import ook niets uit de tekst van een artikel, tot #715 de voor- en achternaam uit de tekst haalt.
   Een titel zonder artikel (404) en een mislukt verzoek vallen daar anders uit dan hier: zie _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_.
 - **Alternatieven:** de lijst `clubFullNames` uitbreiden met titels van artikelen (geen verzoeken en geen tabel, maar elk nieuw paar blijft een dubbele club tot iemand het ziet); doorverwijzingen alleen controleren bij het zoeken naar dubbele clubs (de club bestaat dan al en de pagina's tonen hem dubbel); een titel zonder artikel als 404 laten doorgaan (dat is een gok, en een fout valt op).
+- **Later:** de import bewaart voor een persoon sinds #715 ook de naam in delen, uit de sorteersleutel van zijn artikel en niet uit de tekst van een link; zie _De import leest de naam van een persoon uit de sorteersleutel van zijn artikel_ hieronder.
 
 ## Het herstel van clubs onder een doorverwijzing hoort bij de import, zoals dat van de lijst
 
@@ -2206,6 +2208,31 @@
   Een scherm voor een handvol gevallen kost meer dan het geeft, en de lijst in de code kan de Builder bijwerken zodra de waarschuwing iets laat zien.
 - **Alternatieven:** automatisch samenvoegen op een gelijke naam (fout bij twee spelers met dezelfde naam).
   Een lijst in het beheer (een scherm en een werkwijze voor enkele gevallen).
+
+## De import leest de naam van een persoon uit de sorteersleutel van zijn artikel
+
+- **Datum:** 5 november 2026
+- **Besluit:** de import leest de naam van een persoon uit hetzelfde verzoek waarmee hij de titel opvraagt (#715).
+  Een nieuwe titel kost dus één verzoek, ook voor de naam.
+  `lookUpTitles` bewaart de sorteersleutel van elk artikel dat het opvraagt, en `personNameOf` in `apps/importer/src/person-name.ts` maakt er de naam van.
+  - **De sleutel past** als de achternaam in `{{DEFAULTSORT:Achternaam, Voornamen voorvoegsel}}` het eind van de titel is, zonder te letten op accenten, hoofdletters, punten en streepjes (`Anholt, Pele van` past op `Pelé van Anholt`, `St Juste, Jerry` op `Jerry St. Juste`, en `Basacikoglu` op `Başacıkoğlu`).
+    De naam komt uit de titel, met accent, niet uit de sleutel.
+    De kleine woorden vlak voor de achternaam, en die waarmee hij begint (`Van der Vaart`), zijn het voorvoegsel.
+  - **De gok** geldt zonder sleutel of als de sleutel niet past: het laatste woord is de achternaam, de kleine woorden ervoor zijn het voorvoegsel, en een naam van één woord is een achternaam zonder voornaam.
+    De kleine woorden zijn `al`, `bin`, `da`, `das`, `de`, `del`, `den`, `der`, `di`, `do`, `dos`, `du`, `el`, `ibn`, `la`, `le`, `te`, `ten`, `ter`, `van` en `von`.
+  - **De lijst `personNames`** in `apps/importer/src/person-names.ts` zegt per titel de voornaam, het voorvoegsel en de achternaam.
+    Die gaat voor alles, geeft `manual` en wordt nooit vervangen.
+    Ze start leeg.
+  - **Een persoon zonder naam**, uit de import van #714, krijgt zijn naam bij de eerstvolgende import van een seizoen met zijn titel: de import vraagt zijn artikel nog één keer op.
+    Een tweede run schrijft niets en vraagt niets.
+    Een persoon met een naam houdt hem, behalve dat een naam uit de lijst voorgaat.
+  - **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en schrijft een waarschuwing met `Persons:` vooraan voor elke gok, met de titel en de uitkomst.
+    `pnpm run import:status` toont de aantallen per bron.
+- **Waarom:** een naam uit een bron is beter dan een gok bij elk bezoek, en een gok die in het logboek staat kan met de lijst worden verbeterd.
+  De sleutel staat in het artikel dat we toch al opvragen, dus de naam kost geen verzoek erbij voor een nieuwe titel.
+- **Nadeel:** het eenmalig opvragen van het artikel van elke bestaande persoon kost ongeveer 680 verzoeken.
+  Een artikel zonder pagina (een rode link) heeft nooit een sleutel, dus zijn naam is altijd een gok.
+- **Alternatieven:** de naam bij het tonen raden (de huidige fout); Wikidata (de `robots.txt` weert ons); de sleutel laten gelden zonder te controleren of hij op de titel past (een foute sleutel geeft dan een foute naam zonder dat iemand het ziet).
 
 ## Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd
 
