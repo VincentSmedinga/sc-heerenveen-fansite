@@ -1,0 +1,36 @@
+'''sc Heerenveen''' in het seizoen 2013/2014.
+
+== Selectie ==
+{| class="wikitable"
+! Nr.
+! Naam
+! Nat.
+! Geb. dat.
+! Vorige club
+! seizoen
+|-
+!style="background:white" colspan="12"|Keepers
+|-
+| 1 || [[Kristoffer Nordfeldt|Bo Kristoffer Nordfeldt]] || {{SE}} || 23 juni 1989 || {{SE-VLAG}} [[Brommapojkarna]]|| 3e
+|-
+| 25 || [[Brian Vandenbussche]] || {{BE}} || 24 september 1981 || {{NL-VLAG}} [[Sparta Rotterdam]] ||10e
+|-
+!style="background:white" colspan="11"|Verdedigers
+|-
+| 2 || [[Kenny Otigba]] || {{HU}} || 29 augustus 1992 || ''eigen jeugd'' || 2e
+|-
+!style="background:white" colspan="11"|Middenvelders
+|-
+| 15 || [[Marten de Roon]]  [[Bestand:Captain sports.svg|10px|Aanvoerder]] || {{NL}} || 29 maart 1991 || {{NL-VLAG}} [[Sparta Rotterdam]] || 2e
+|-
+| 22 || [[Hakim Ziyech]] || {{NL}} || 19 maart 1993 || ''eigen jeugd'' || 2e
+|-
+!style="background:white" colspan="11"|Aanvallers
+|-
+| 11 || [[Alfreð Finnbogason]] || {{IS}} || 1 februari 1989 || {{BE-VLAG}} [[Sporting Lokeren]] || 2e
+|-
+|}
+
+== Transfers ==
+=== Aangetrokken ===
+* [[Spelerslink in de tekst eromheen]]

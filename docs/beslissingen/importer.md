@@ -2315,3 +2315,30 @@
   Alle spelers van elke tabel in de uitkomst, ook de spelers onder "Eigen doelpunt" (verworpen: ze spelen voor een andere club).
   De cijfers van de competities apart bewaren (verworpen: `player_season_stats` heeft geen competitie voor deze seizoenen, zie #740).
   Een som van de bekende cijfers als één cijfer ontbreekt (verworpen: de som zou te laag zijn zonder dat iemand het ziet).
+
+## De selecties van 2007/08 tot en met 2017/18 hebben een eigen lezer, en alleen de sectie Selectie telt
+
+- **Datum:** 5 november 2026
+- **Besluit:** `read-selection.ts` (#741) leest de sectie "Selectie" of "Voorlopige selectie" van de pagina `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)` in de vorm `SeasonSquad`, met de bron `selectie`.
+  Wedstrijden en doelpunten zijn leeg, want de pagina's geven ze niet.
+  - Er zijn drie vormen: een lijst met een vlag, een naam en een contract (2007/08), een brede tabel met twee spelers op een regel (2008/09 en 2009/10) en een tabel met het rugnummer, de naam en de geboortedatum (2013/14 tot en met 2017/18).
+  - Alleen de lijst of de tabel in de sectie telt, tot de volgende kop.
+    Een link in de tekst eromheen, bij de transfers of in een latere sectie is geen speler.
+  - De positie komt uit de koppen van de tabellen, uit `squadGroups`.
+    Die lijst had de koppen van deze pagina's al (`Keepers`, `Verdedigers`, `Middenvelders`, `Aanvallers`); een andere kop is een fout.
+    De lijst van 2007/08 heeft alleen koppen voor het contract, dus daar is de positie leeg.
+  - In de brede tabel is de cel na een vlag de naam, met het rugnummer ervoor waar de pagina het geeft.
+    De vorige club en het contract (een link naar een jaartal) zijn nooit een naam, want een vlag staat er niet voor.
+    Een cel na een vlag die geen link of volle naam is, is een fout, zodat een speler niet ongemerkt wegvalt.
+  - Het teken van de aanvoerder achter een naam (een link naar een bestand of `{{aanvoerder}}`) is geen deel van de naam.
+  - Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt (zoals bij #740).
+    Een andere naam zonder link blijft weg, met een waarschuwing.
+  - Een pagina zonder sectie Selectie geeft `none`, met de reden: 2010/11, 2011/12 en 2012/13 hebben geen tabel.
+    Een sectie in een andere vorm is een fout en schrijft niets.
+  - De tabellen met statistieken van 2008/09, 2016/17 en 2017/18 leest deze lezer niet: ze noemen alleen achternamen of zijn leeg.
+- **Waarom:** de selecties van deze elf seizoenen staan in drie vormen die geen van beide bestaande lezers kent, en #744 heeft de spelers nodig.
+  Een speler die ongemerkt wegvalt, maakt de selectie onvolledig zonder dat iemand het ziet.
+  Daarom is een cel die we niet kennen een fout, en niet een rij die we overslaan.
+- **Alternatieven:** de brede tabel lezen als losse cellen op volgorde (verworpen: de regels hebben een wisselend aantal cellen, soms met lege cellen ertussen, dus de plaats zegt niets).
+  Elke link in de sectie als speler nemen (verworpen: de vorige club en het contract zijn ook links).
+  Een eigen lijst met koppen voor deze pagina's (verworpen: `squadGroups` heeft ze al).
