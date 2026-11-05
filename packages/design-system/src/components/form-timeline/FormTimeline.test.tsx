@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { FormResult } from '../form-chart/form'
 
@@ -57,6 +57,37 @@ describe('FormTimeline', () => {
     expect(
       container.querySelector<HTMLElement>('.hf-bar-chart-trend-dot')?.style.getPropertyValue('--hf-bar-chart-across'),
     ).toBe('31.76')
+  })
+
+  it('gives the line a tooltip with the average at the place the pointer is nearest to', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      bottom: 64,
+      height: 64,
+      left: 0,
+      right: 740,
+      toJSON: () => ({}),
+      top: 0,
+      width: 740,
+      x: 0,
+      y: 0,
+    })
+
+    const { container } = render(<FormTimeline {...props} results={places({ 10: 'W', 11: 'V', 12: 'G', 30: 'W' })} />)
+    const layer = container.querySelector<HTMLElement>('.hf-bar-chart-pointer')!
+    const tooltip = () => container.querySelector('.hf-tooltip')?.textContent
+
+    // 74 places of 10 wide. The average at place 10 is 3, at 11 is 1,5 and at 12 is 1,3.
+    fireEvent.pointerMove(layer, { clientX: 105, pointerType: 'mouse' })
+    expect(tooltip()).toBe('3,0')
+    fireEvent.pointerMove(layer, { clientX: 115, pointerType: 'mouse' })
+    expect(tooltip()).toBe('1,5')
+    fireEvent.pointerMove(layer, { clientX: 125, pointerType: 'mouse' })
+    expect(tooltip()).toBe('1,3')
+    // A place with no result in the run is skipped: the pointer lands on the nearest point.
+    fireEvent.pointerMove(layer, { clientX: 5, pointerType: 'mouse' })
+    expect(tooltip()).toBe('3,0')
+
+    vi.restoreAllMocks()
   })
 
   it('averages over at most the window: the first points over fewer results', () => {

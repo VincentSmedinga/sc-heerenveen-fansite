@@ -12,6 +12,7 @@ import type { ChartTone } from '../chart/tones'
 import { monotonePath, type TrendCurve } from '../chart/trend'
 import { classNames } from '../classNames'
 import { axisLabels } from './axis'
+import { TrendPointer } from './TrendPointer'
 
 export type BarChartAxis = {
   /**
@@ -86,6 +87,13 @@ export type BarChartTrendProps = {
   /** Whether the last point has a dot. The default is yes. */
   endDot?: boolean
   /**
+   * The text of the tooltip at each place, as long as `values`: `null` is a place without a
+   * point. Without `labels` there is no tooltip. The page gives the text ready, such as "1,8",
+   * because the chart knows nothing about what it shows. A tooltip is for a mouse, a pen and a
+   * finger; the chart stays hidden from a screen reader, so give the same numbers as text.
+   */
+  labels?: readonly (null | string)[]
+  /**
    * The scale of the values. The `BarChart` it sits in gives it. Only set it for a trend
    * outside a chart, where it is the largest value if you don't.
    */
@@ -101,13 +109,23 @@ const percentOf = (value: number, max: number) => Math.round(Math.min(1, Math.ma
 /**
  * A line over a `BarChart`, through one value per place. The drawing has the places as its
  * width and the scale of the chart as its height, and stretches over the chart, with a stroke
- * that keeps its width in pixels. There is no line before its first point.
+ * that keeps its width in pixels. There is no line before its first point. With `labels`, a
+ * tooltip follows the pointer along the line (see `TrendPointer`).
  */
-const Trend = ({ curve = 'smooth', edge = true, endDot = true, max, values }: BarChartTrendProps) => {
+const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
   const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0))
   const path = monotonePath(values, scale, curve)
   const last = values.findLastIndex((value) => value !== null)
   const lastValue = values[last] ?? null
+  const points = labels
+    ? values.map((value, index) => {
+        const label = labels[index]
+
+        return value === null || label === null || label === undefined
+          ? null
+          : { across: acrossOf(index + 0.5, values.length), at: percentOf(value, scale), label }
+      })
+    : null
 
   return (
     <>
@@ -132,6 +150,7 @@ const Trend = ({ curve = 'smooth', edge = true, endDot = true, max, values }: Ba
           }
         />
       )}
+      {points && <TrendPointer points={points} />}
     </>
   )
 }

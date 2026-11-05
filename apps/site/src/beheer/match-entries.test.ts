@@ -10,6 +10,7 @@ import {
   matches,
   matchGoals,
   type NewMatch,
+  persons,
   players,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
@@ -44,6 +45,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM match_changes')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
+  await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
   await createAccount(database.db, 'sanne@example.org', 'beheerder')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
@@ -193,8 +195,14 @@ describe('saveEntry', () => {
         .$returningId()
         .then((rows) => rows as [{ id: number }])
 
+      const [{ id: personId }] = await database.db
+        .insert(persons)
+        .values({ wikipediaPage: 'Luca Oyen' })
+        .$returningId()
+        .then((rows) => rows as [{ id: number }])
+
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: 12, ours: true, player: 'Oyen', playerId, wikipediaPage: 'Luca Oyen' },
+        { matchId: id, minute: 12, ours: true, personId, player: 'Oyen', playerId, wikipediaPage: 'Luca Oyen' },
         { matchId: id, minute: 40, ours: false, player: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
       ])
 
@@ -205,7 +213,7 @@ describe('saveEntry', () => {
         goal({ minute: 40, ours: false, player: 'Sibbing' }),
       ]
 
-      return { asEntered, id, playerId }
+      return { asEntered, id, personId, playerId }
     }
 
     const sameResult = { ...entry().result, goalsAgainst: 1, goalsFor: 1 }
@@ -255,6 +263,25 @@ describe('saveEntry', () => {
       expect(
         (await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))).map((row) => row.wikipediaPage),
       ).toEqual(['Luca Oyen', null])
+    })
+
+    it('keeps the person of a goal that did not change, and puts it back with an undo', async () => {
+      const { asEntered, id, personId } = await importedMatch()
+
+      await saveEntry(
+        database.db,
+        userId,
+        id,
+        entry({ goals: [asEntered[0]!, goal({ minute: 41, ours: false, player: 'Sibbing' })], result: sameResult }),
+        'Een minuut later',
+        t0,
+      )
+
+      expect((await goalsOf(id)).map((row) => row.personId)).toEqual([personId, null])
+
+      await undoEntry(database.db, userId, id, 'Terug', t1)
+
+      expect((await goalsOf(id)).map((row) => row.personId)).toEqual([personId, null])
     })
   })
 

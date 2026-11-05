@@ -13,7 +13,12 @@ export const maxRedirects = 3
 /** What came of asking Wikipedia about titles: the answers, or why there are none. */
 export type PageLookup =
   | { kind: 'blocked-by-robots'; url: string }
-  | { kind: 'error'; message: string }
+  | {
+      kind: 'error'
+      message: string
+      /** The title that answered 404, when that is why there is no answer: no article. */
+      missing?: string
+    }
   | { kind: 'found'; redirects: Map<string, string> }
   | { kind: 'wait'; retryAfterSeconds: null | number; url: string }
 
@@ -77,7 +82,11 @@ export async function lookUpTitles(
         case 'blocked-by-robots':
           return { kind: 'blocked-by-robots', url: outcome.url }
         case 'error':
-          return { kind: 'error', message: `${printable(title)}: ${printable(outcome.message)}` }
+          return {
+            kind: 'error',
+            ...(outcome.reason === 'http-status' && outcome.status === 404 ? { missing: title } : {}),
+            message: `${printable(title)}: ${printable(outcome.message)}`,
+          }
         case 'fetched':
           break
         case 'not-modified':

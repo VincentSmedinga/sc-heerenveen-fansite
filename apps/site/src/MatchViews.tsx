@@ -3,12 +3,15 @@ import type { FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
 import {
+  averagesOf,
   BarChart,
   Button,
   Card,
   DataTable,
+  Disclosure,
   DonutChart,
   Form,
+  formatAverage,
   FormChart,
   Heading,
   Input,
@@ -16,6 +19,7 @@ import {
   List,
   MarkRow,
   Match,
+  pointsOf,
   ShortMatch,
   ShortStaff,
   StandingsTable,
@@ -659,14 +663,20 @@ export function MatchLines({
   )
 }
 
+/** The words of the totals table, which the table per round uses too. */
+const outcomeWord: Record<FormResult, string> = { G: 'Gelijk', V: 'Verlies', W: 'Winst' }
+
 /**
  * The card of the statistics page with the season of the Eredivisie as a chart of bars, one for
- * each match played, and under it the same numbers in a table, which is what a screen reader
- * gets, because the chart is hidden from it. The cup ties don't count. Without a result it is
- * a sentence for visitors and no chart.
+ * each match played, and under it the same numbers in tables, which is what a screen reader
+ * gets, because the chart is hidden from it: the totals, and in a fold the points and the
+ * average of each round, which are the numbers the tooltip of the line gives. The cup ties
+ * don't count. Without a result it is a sentence for visitors and no chart.
  */
 export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const results = leagueResultsOf(matches)
+  // The same function as the line of the chart, so the table and the tooltip agree.
+  const averages = averagesOf(results)
   const count = (result: FormResult) => results.filter((item) => item === result).length
   const [won, drawn, lost] = [count('W'), count('G'), count('V')]
 
@@ -690,6 +700,19 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
               { cells: [results.length, won * 3 + drawn], header: 'Totaal' },
             ]}
           />
+          <Disclosure summary="Uitslag en gemiddelde per speelronde">
+            <DataTable
+              caption="Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden"
+              columns={['Ronde', 'Uitslag', 'Punten', { abbreviation: 'Gem.', name: 'Gemiddelde' }]}
+              rows={results.map((result, index) => ({
+                cells: [outcomeWord[result], pointsOf(result), formatAverage(averages[index] ?? 0)],
+                header: String(index + 1),
+              }))}
+            />
+            <Text appearance="meta">
+              Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden, zoals de lijn.
+            </Text>
+          </Disclosure>
         </>
       )}
     </Card>

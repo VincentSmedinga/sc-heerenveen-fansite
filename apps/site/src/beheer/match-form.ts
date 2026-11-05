@@ -38,7 +38,10 @@ const knockoutCompetitions: readonly Match['competition'][] = [
 ]
 
 /** A goal as entered: a row of `match_goals` without its numbers. */
-export type EntryGoal = Omit<MatchGoal, 'id' | 'matchId'>
+export type EntryGoal = Omit<MatchGoal, 'id' | 'matchId' | 'personId'> & {
+  /** What the import stored of the goal; the form can not give it. */
+  personId?: null | number
+}
 
 /** What the checks need to know about the match and the season. */
 export type MatchContext = {

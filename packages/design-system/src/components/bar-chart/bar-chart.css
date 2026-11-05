@@ -102,6 +102,7 @@
     inset-block-start: 0;
     inset-inline-start: 0;
     overflow: visible;
+    pointer-events: none;
     position: absolute;
   }
 
@@ -132,8 +133,21 @@
     inline-size: 0.625rem;
     inset-block-end: calc(var(--hf-bar-chart-at) * 1%);
     inset-inline-start: calc(var(--hf-bar-chart-across) * 1%);
+    pointer-events: none;
     position: absolute;
     transform: translate(-50%, 50%);
+  }
+
+  /*
+   * The layer over the plot that takes the pointer, when the trend has labels. Moving the
+   * pointer sideways picks a place, and so does dragging a finger sideways; a swipe up or down
+   * stays with the page, which scrolls. Everything else in the plot ignores the pointer, so
+   * the pointer never leaves the layer on its way to the dot or the tooltip.
+   */
+  .hf-bar-chart-pointer {
+    inset: 0;
+    position: absolute;
+    touch-action: pan-y;
   }
 
   .hf-bar-chart-axis {

@@ -682,6 +682,43 @@ export type ClubPage = typeof clubPages.$inferSelect
 
 export type NewClubPage = typeof clubPages.$inferInsert
 
+/**
+ * A person who scored a goal or stood in the squad of a match, ours or an opponent's: one row
+ * for each article about a player on the Dutch Wikipedia, with an `id` that never changes. The
+ * `wikipedia_page` is the title of the article after the redirects, with the addition between
+ * brackets when it has one (`Johnny Jansen (1975)`), so two titles that redirect to the same
+ * article are one person. A title without an article (a red link) is a person too, under the
+ * title as it stands. `person_pages` keeps every title that leads to the person, and the
+ * `person_id` of `match_goals` and `players` points here. A person who is deleted leaves them
+ * without a person; the importer finds the person again by the title.
+ */
+export const persons = mysqlTable('persons', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  wikipediaPage: articleTitle('wikipedia_page').notNull().unique(),
+})
+
+export type NewPerson = typeof persons.$inferInsert
+
+export type Person = typeof persons.$inferSelect
+
+/**
+ * The titles of Wikipedia articles that belong to a person: the title of the article itself,
+ * and the titles that redirect to it (`Alfred Finnbogason` leads to `Alfreð Finnbogason`). The
+ * importer asks Wikipedia once about a title and this table is how it remembers the answer, as
+ * `club_pages` does for the clubs: a title that is here costs no request. A title belongs to
+ * one person, so it is the primary key, and the rows go with their person.
+ */
+export const personPages = mysqlTable('person_pages', {
+  page: articleTitle('page').primaryKey(),
+  personId: int('person_id', { unsigned: true })
+    .notNull()
+    .references(() => persons.id, { onDelete: 'cascade' }),
+})
+
+export type NewPersonPage = typeof personPages.$inferInsert
+
+export type PersonPage = typeof personPages.$inferSelect
+
 /** The most characters a column of `club_stadiums` holds. The admin checks them first. */
 export const clubStadiumLimits = { name: 100, note: 200 }
 
@@ -905,6 +942,10 @@ export const matchGoalPlayerMaxLength = 100
  * we could not link. The importer lays the links (see `link-players.ts`); a player that is
  * deleted leaves his goals behind without a link.
  *
+ * `person_id` is the person (`persons`) of the page the goal links to, for a goal of ours and
+ * of an opponent alike. It is empty for a goal without a page, and until the importer has asked
+ * Wikipedia about the title. `wikipedia_page` stays the title as the match page writes it.
+ *
  * The importer stores the rows in the order they are shown, so the order of `id` breaks a tie
  * between two goals in the same minute. A match has none of them when the page did not name
  * the scorers yet, or when they did not fit the result.
@@ -921,6 +962,7 @@ export const matchGoals = mysqlTable(
     stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
     player: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
     playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
     ownGoal: boolean('own_goal').notNull().default(false),
     penalty: boolean('penalty').notNull().default(false),
@@ -1296,7 +1338,8 @@ export type PlayerPosition = (typeof playerPositions)[number]
  * own column so one player can be corrected: the importer fills it for a new player and leaves
  * it alone for a known one. `wikipedia_page` is the page the table links to, such as `Luca
  * Oyen` or `Pim Verbeek (voetballer, 1999)`, empty when the table does not link the name. It
- * is the key that ties a goal to a player, and it is unique within a season.
+ * is the key that ties a goal to a player, and it is unique within a season. `person_id` is the
+ * person (`persons`) of that page, which is the same for the same player in every season.
  */
 export const players = mysqlTable(
   'players',
@@ -1308,6 +1351,7 @@ export const players = mysqlTable(
     shirtNumber: int('shirt_number', { unsigned: true }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
+    personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     inSquad: boolean('in_squad').notNull().default(true),
     leftSquadAt: datetime('left_squad_at'),
   },

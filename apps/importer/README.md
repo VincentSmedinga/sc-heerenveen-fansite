@@ -910,10 +910,12 @@ Dan verandert er niets, zoals bij elke controle.
 Een doelpunt van een speler van ons wijst met `player_id` naar zijn rij in `players`, zodat de topscorers per speler tellen en niet per tekst.
 De regels staan op één plek, `playerLinker` in [`src/link-players.ts`](src/link-players.ts), en de import van de wedstrijden past ze bij elke lezing toe op de spelers van het seizoen, ook op wie de selectie verliet:
 
-1. de pagina van de link van het doelpunt is gelijk aan de `wikipedia_page` van een speler;
-2. anders is de naam in de wedstrijdregel gelijk aan zijn volledige naam;
-3. anders eindigt zijn naam op de getoonde naam (meestal de achternaam, `Oyen` voor `Luca Oyen`), en maar één speler heeft zo'n naam;
-4. anders blijft `player_id` leeg.
+1. de persoon van de pagina van de link van het doelpunt (`person_id`, zie _De personen van de doelpuntenmakers_) is de persoon van een speler: zo vindt de import een doelpunt onder een doorverwijzing van de pagina van de speler.
+   Hebben twee spelers van het seizoen dezelfde persoon, dan slaat deze regel over;
+2. anders is de pagina van de link van het doelpunt gelijk aan de `wikipedia_page` van een speler;
+3. anders is de naam in de wedstrijdregel gelijk aan zijn volledige naam;
+4. anders eindigt zijn naam op de getoonde naam (meestal de achternaam, `Oyen` voor `Luca Oyen`), en maar één speler heeft zo'n naam;
+5. anders blijft `player_id` leeg.
 
 Hoofdletters en accenten tellen niet mee.
 Twee spelers met dezelfde achternaam koppelt de import dus alleen als de link van het doelpunt hun pagina noemt, of de volledige naam er staat: zonder link blijft het doelpunt leeg, in plaats van dat hij gokt.
@@ -929,6 +931,40 @@ Matches 2026/27: warning, 3 goals of ours have no player in the squad table: Oye
 
 `pnpm run import:status` toont hetzelfde aantal onder de wedstrijden: `goals of ours without a player: 3 of 41 (Oyen, Vente)`.
 De import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw als de koppeling verandert, dus een doelpunt krijgt zijn speler bij de eerstvolgende lezing nadat de selectie hem heeft.
+
+### De personen van de doelpuntenmakers
+
+Elke speler die een doelpunt maakte of in de selectie staat, van ons en van de tegenstander, is een persoon in `persons` met een eigen `id` (zie de [README van `@fansite/db`](../../packages/db/README.md), _De tabellen `persons` en `person_pages`_).
+Twee titels die naar hetzelfde artikel verwijzen, zoals `Alfred Finnbogason` en `Alfreð Finnbogason`, geven dezelfde persoon.
+Een doelpunt met een pagina en een speler van de selectie krijgen zijn `person_id`.
+Daarvoor vraagt de import elke titel die nog niet in `person_pages` staat één keer aan Wikipedia (`lookUpPersonPages` in [`src/person-pages.ts`](src/person-pages.ts)), vóór de transactie van het seizoen, in de import van de wedstrijden en in die van de selectie:
+
+- Het zijn dezelfde fetcher en `lookUpTitles` als bij de clubs: alleen `?action=raw`, `robots.txt` en hoogstens drie doorverwijzingen.
+  Een titel die al in `person_pages` staat, kost geen verzoek, ook niet als een doorverwijzing ernaartoe wijst.
+- Een titel zonder artikel (404, een rode link) wordt een persoon met de titel zoals hij staat.
+- Een verzoek dat mislukt geeft een waarschuwing met `Persons:` vooraan, en laat `person_id` leeg.
+  De volgende run probeert het opnieuw, en de run van het seizoen valt er niet door.
+  Een `robots.txt` die weigert of een verzoek om te wachten stopt het vragen voor die run, en drie mislukte titels achter elkaar ook.
+- Een lijst `personTitleAliases` in [`src/person-names.ts`](src/person-names.ts), in de vorm van `clubFullNames`, zegt welke titels één persoon zijn als geen doorverwijzing het zegt.
+  Hij gaat voor het verzoek en begint leeg.
+- Een doelpunt in een seizoen dat voorbij is, krijgt zijn `person_id` zonder dat een wijziging wacht: een verschil alleen in de koppelingen telt als een aanvulling.
+
+Het logboek noemt het aantal titels dat is opgevraagd, alleen als dat meer dan nul is:
+
+```text
+Matches 2026/27: persons: 20 titles asked, 20 new persons, 20 titles remembered
+```
+
+De import voegt geen personen samen op een gelijke naam.
+Zijn twee titels zonder accenten, hoofdletters, streepjes, spaties en apostrofs gelijk, de toevoeging tussen haakjes meegeteld (`Johnny Jansen (1952)` en `(1975)` dus niet), dan waarschuwt hij:
+
+```text
+Matches 2026/27: warning, Persons: 1 group of persons look alike and are not merged: 'Daniël Jansen' and 'Daniel Jansen'
+```
+
+`pnpm run import:status` toont het aantal groepen onder `Persons that look alike`.
+Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases` en draai de import van de seizoenen opnieuw.
+Een pagina die later een andere titel krijgt, ziet de import niet: de oude titel blijft in `person_pages` staan.
 
 ### De clubs van de tegenstanders
 
@@ -1697,4 +1733,5 @@ De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spe
 `src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord, en de cijfers: een streepje, een lege cel, een waarde die we niet kennen en kopjes in een andere volgorde.
 `src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat, dat een speler zijn `id` houdt, dat een vertrokken speler blijft staan en dat een terugkerende speler weer in de selectie komt.
 Dezelfde test laat zien dat de cijfers van een nieuwe speler, een speler zonder cijfers, een vertrokken speler, een streepje en twee runs achter elkaar goed gaan, en dat de controle van de doelpunten wel waarschuwt bij een verschil en niet bij gelijke aantallen.
-`src/link-players.test.ts` toetst de regels van de koppeling zonder database, ook voor twee spelers met dezelfde achternaam, en `src/import-matches.test.ts` laat zien dat de doelpunten van een wedstrijd hun speler krijgen.
+`src/link-players.test.ts` toetst de regels van de koppeling zonder database, ook voor twee spelers met dezelfde achternaam en voor de persoon, en `src/import-matches.test.ts` laat zien dat de doelpunten van een wedstrijd hun speler en hun persoon krijgen.
+`src/person-pages.test.ts` toetst het opvragen van de titels (een doorverwijzing, een titel zonder artikel, een mislukt verzoek, `robots.txt` en de lijst met titels die één persoon zijn) en de waarschuwing voor personen die op elkaar lijken.

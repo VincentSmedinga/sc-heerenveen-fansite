@@ -1,3 +1,5 @@
+import { userEvent } from 'storybook/test'
+
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
@@ -33,6 +35,7 @@ const meta = preview.meta({
           'Een plek zonder staafje toont alleen de grond, zodat de grafiek laat zien hoe lang de reeks wordt.',
           'Het onderdeel weet niets over wat de staafjes meten: de tonen, de schaal en de nummers zijn van de pagina.',
           'Een `BarChart.Trend` tekent er een vloeiende lijn overheen, op dezelfde schaal.',
+          'Met `labels` op de lijn volgt een tooltip de aanwijzer en toont de tekst van het dichtstbijzijnde punt; een tik of sleep met de vinger doet hetzelfde.',
           '',
           'De staafjes hebben de kleuren van de uitslag, in dezelfde sterkte als de balk in een tabel en de plakken van het donutdiagram.',
           'De hoogte is vast; een brede kaart krijgt cijfers aan de zijkant en meer ruimte om de staafjes.',
@@ -70,9 +73,12 @@ const bars: (BarChartBar | null)[] = [
   ...Array.from({ length: 22 }, () => null),
 ]
 
-const latest = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(
-  movingAverage(goals, 5).at(-1) ?? 0,
-)
+const average = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
+const latest = average.format(movingAverage(goals, 5).at(-1) ?? 0)
+
+/** The average per match over five matches, from the fifth match on, as the tooltip says it. */
+const averages = movingAverage([...goals, ...Array.from({ length: 22 }, () => null)], 5)
+const averageLabels = averages.map((value) => (value === null ? null : average.format(value)))
 
 const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
   <div style={{ maxInlineSize: '36rem' }}>
@@ -81,7 +87,7 @@ const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
         Doelpunten per wedstrijd
       </Heading>
       <BarChart axis={{ title: 'Speelronde' }} bars={bars} max={4} ticks={[0, 2, 4]}>
-        {trend && <BarChart.Trend values={movingAverage([...goals, ...Array.from({ length: 22 }, () => null)], 5)} />}
+        {trend && <BarChart.Trend labels={averageLabels} values={averages} />}
       </BarChart>
       <Text appearance="meta">
         {`De lijn laat zien hoeveel doelpunten sc Heerenveen per wedstrijd maakte in de laatste 5 wedstrijden: nu ${latest}.`}
@@ -131,4 +137,22 @@ export const OtherChartDark = meta.story({
 export const NoLine = meta.story({
   name: 'Zonder lijn',
   render: () => <GoalsCard trend={false} />,
+})
+
+export const Tooltip = meta.story({
+  name: 'Met tooltip bij de lijn, open',
+  play: async ({ canvasElement }) => {
+    const layer = canvasElement.querySelector<HTMLElement>('.hf-bar-chart-pointer')
+
+    if (layer) {
+      const box = layer.getBoundingClientRect()
+
+      // Between the places of the tenth and the eleventh match, where the line has a point.
+      await userEvent.pointer({
+        coords: { clientX: box.left + box.width * 0.3, clientY: box.top + box.height / 2 },
+        target: layer,
+      })
+    }
+  },
+  render: () => <GoalsCard />,
 })

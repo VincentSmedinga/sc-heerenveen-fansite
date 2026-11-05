@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
+import { createPersonBook } from '@fansite/db/persons'
 import { matches, matchGoals, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { and, count, eq, isNotNull } from 'drizzle-orm'
@@ -11,6 +12,8 @@ import type { ReadPlayer } from './read-squad.ts'
 
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
+import { aliasMap, personTitleAliases } from './person-names.ts'
+import { describePersons, lookUpPersonPages } from './person-pages.ts'
 import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -36,6 +39,7 @@ export type SquadReport =
     }
   | {
       kind: 'imported'
+      persons: string[]
       players: { added: number; left: number; unchanged: number; updated: number }
       season: string
       /** What came of the numbers of the players (see `storeStats`). */
@@ -62,6 +66,7 @@ export function formatSquadReport(report: SquadReport): string {
       return [
         `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.left} left the squad`,
         `${head}: numbers of the players: ${report.stats.added} new, ${report.stats.updated} updated, ${report.stats.unchanged} unchanged`,
+        ...report.persons.map((line) => `${head}: ${printable(line)}`),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -229,16 +234,28 @@ async function readAndStore(
     return { kind: 'error', message: `${title}: ${problems.join('; ')}`, season }
   }
 
+  // Wikipedia is asked before the transaction: no request is made while rows are locked.
+  const personLookup = await lookUpPersonPages(
+    db,
+    fetcher,
+    origin,
+    read.players.flatMap((player) => (player.wikipediaPage === null ? [] : [player.wikipediaPage])),
+    aliasMap(personTitleAliases),
+  )
   const now = clock()
-  const warnings = [...read.warnings]
+  const warnings = [...read.warnings, ...personLookup.warnings]
   const counts = await db.transaction(async (transaction) => {
+    const personBook = await createPersonBook(transaction, {
+      aliases: aliasMap(personTitleAliases),
+      redirects: personLookup.redirects,
+    })
     // The first good read of a season replaces what the seed made up, and nothing else: a
     // player from an earlier read stays. A goal of a made-up player loses its link.
     if (firstRead) {
       await transaction.delete(players).where(eq(players.season, season))
     }
 
-    const result = await storePlayers(transaction, season, read.players, now)
+    const result = await storePlayers(transaction, season, read.players, now, personBook)
     const stats = await storeStats(transaction, season, read.players, result.ids, now)
 
     warnings.push(...stats.warnings)
@@ -250,12 +267,19 @@ async function readAndStore(
       .values({ title, ...values })
       .onDuplicateKeyUpdate({ set: values })
 
-    return { ids: result.ids, players: result.counts, stats: stats.counts }
+    return { ids: result.ids, persons: personBook.counts, players: result.counts, stats: stats.counts }
   })
 
   warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
 
-  return { kind: 'imported', players: counts.players, season, stats: counts.stats, warnings }
+  return {
+    kind: 'imported',
+    persons: describePersons(personLookup.asked, counts.persons),
+    players: counts.players,
+    season,
+    stats: counts.stats,
+    warnings,
+  }
 }
 
 /**
@@ -263,10 +287,11 @@ async function readAndStore(
  * replaces it, so a player keeps his `id` and the goals that point to it. A player is known by
  * the page his name links to, or else by his name, the way the database keeps names apart
  * (`nameKey`: a name that differs only in an accent is the same player). A player who is not
- * known is added. A known player is changed when his name, page, position or number differ, and
- * is put back in the squad if he had left. A player who is not in the table any more is marked
- * as no longer in the squad, with the moment, and stays. A player who is known keeps his search
- * term, so a correction by hand survives the import. Rows of another season are not touched.
+ * known is added. A known player is changed when his name, page, position, number or person
+ * differ, and is put back in the squad if he had left. A player who is not in the table any
+ * more is marked as no longer in the squad, with the moment, and stays. A player who is known
+ * keeps his search term, so a correction by hand survives the import. Rows of another season
+ * are not touched.
  *
  * `left` counts the players who left the squad in this read, not those who were gone already.
  * `ids` gives the row of each player found, or null for one that could not be placed: a row can
@@ -278,6 +303,7 @@ async function storePlayers(
   season: string,
   found: ReadPlayer[],
   now: Date,
+  personBook: { resolve: (title: string) => Promise<null | number> },
 ) {
   const rows = await db.select().from(players).where(eq(players.season, season))
   const byPage = new Map<string, Player>()
@@ -300,10 +326,12 @@ async function storePlayers(
       (player.wikipediaPage === null ? undefined : byPage.get(nameKey(player.wikipediaPage))) ??
       byName.get(nameKey(player.name))
 
+    const personId = player.wikipediaPage === null ? null : await personBook.resolve(player.wikipediaPage)
+
     if (before === undefined) {
       counts.added++
 
-      const [{ insertId }] = await db.insert(players).values({ ...player, season })
+      const [{ insertId }] = await db.insert(players).values({ ...player, personId, season })
 
       ids.set(player, insertId)
 
@@ -323,7 +351,8 @@ async function storePlayers(
       before.name === player.name &&
       before.position === player.position &&
       before.shirtNumber === player.shirtNumber &&
-      before.wikipediaPage === player.wikipediaPage
+      before.wikipediaPage === player.wikipediaPage &&
+      (personId === null || before.personId === personId)
     ) {
       counts.unchanged++
     } else {
@@ -334,6 +363,7 @@ async function storePlayers(
           inSquad: true,
           leftSquadAt: null,
           name: player.name,
+          personId: personId ?? before.personId,
           position: player.position,
           shirtNumber: player.shirtNumber,
           wikipediaPage: player.wikipediaPage,

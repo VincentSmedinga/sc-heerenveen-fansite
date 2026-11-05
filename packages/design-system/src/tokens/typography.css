@@ -126,6 +126,9 @@
     /* The bar "Op deze pagina" and its current link, 200 heavier */
     --hf-anchor-font-weight: 500;
     --hf-anchor-current-font-weight: 700;
+
+    /* The tooltip of a chart: a short figure on a dark box, a little heavier than the text */
+    --hf-tooltip-font-weight: 500;
   }
 
   @media (width < 40em) {

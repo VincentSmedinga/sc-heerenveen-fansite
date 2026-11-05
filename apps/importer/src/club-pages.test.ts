@@ -46,6 +46,7 @@ beforeEach(async () => {
   for (const table of [
     'match_changes',
     'matches',
+    'persons',
     'club_pages',
     'club_names',
     'clubs',
