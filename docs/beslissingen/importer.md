@@ -1500,6 +1500,8 @@
   De achternaam uit de tekst van de link bewaren (niet uniek, en de volledige naam staat in het doel).
   De link of de pagina van de scheidsrechter bewaren (nieuwe gegevens over een persoon die niemand vroeg).
   Elke wijziging van de toeschouwers laten wachten (ze worden juist na afloop bijgesteld).
+- **Later:** de pagina Statistieken toont het aantal toeschouwers sinds #729, in een kaart met een staaf per thuiswedstrijd; zie _De pagina Statistieken heeft een kaart met het aantal toeschouwers per thuiswedstrijd_ in `site.md`.
+  De scheidsrechter wordt nog nergens getoond.
 
 ## Van een bericht met meerdere versies toont de site alleen de laatste kop
 

@@ -16,6 +16,7 @@ const meta = preview.meta({
     children: { description: 'Lagen op dezelfde grafiek, zoals een `BarChart.Trend`.' },
     max: { description: 'De waarde van een vol staafje. Ook de schaal van de lijn.' },
     ticks: { description: 'Hulplijnen op deze waarden, en op een brede grafiek de cijfers aan de zijkant.' },
+    tickText: { description: 'De tekst van een cijfer aan de zijkant, bijvoorbeeld met een punt bij duizendtallen.' },
     zero: {
       control: 'radio',
       description: 'Een waarde 0: `stub` is een streepje op de grond, `none` toont niets.',

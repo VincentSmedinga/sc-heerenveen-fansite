@@ -9,6 +9,7 @@ import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { parseCleanSheetCount } from '#src/matches'
 import {
+  AttendanceCard,
   CleanSheetsCard,
   ExtremesCard,
   GoalsPerQuarterCard,
@@ -57,8 +58,8 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 /**
  * The page of a season: `/statistieken` for the current season and `/statistieken/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
- * heading. The nine cards with figures sit in two equal columns on a wide screen, the first
- * four on the left and the other five on the right, and under each other on a narrow one, in
+ * heading. The ten cards with figures sit in two equal columns on a wide screen, the first
+ * five on the left and the other five on the right, and under each other on a narrow one, in
  * the order of the bar "Op deze pagina:". The switch between the matches (see below) is the
  * first cell of the main column, a plain cell without a card, directly under the title row.
  * The card Opmerkelijk is the last of the main column and is not in the bar: it is one fact
@@ -119,6 +120,7 @@ export async function StatisticsPage({
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
+        <AttendanceCard competition={competition} matches={data.matches} season={imageSeason} />
         <NoteworthyCard
           coaches={data.coaches}
           competition={competition}

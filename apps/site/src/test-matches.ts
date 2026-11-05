@@ -32,6 +32,7 @@ export const matchData: MatchData = {
   matches: [
     {
       ...base,
+      attendance: 24500,
       competition: 'Eredivisie',
       goalsAgainst: 1,
       goalsFor: 3,

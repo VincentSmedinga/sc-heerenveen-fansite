@@ -88,7 +88,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
     }
   })
 
-  it('has the same nine cards as the current season, in the order of the bar', async () => {
+  it('has the same ten cards as the current season, in the order of the bar', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
@@ -96,6 +96,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
       'verloop-van-het-seizoen',
       'reeksen',
       'thuis-en-uit',
+      'toeschouwers',
       'doelpuntenmakers',
       'de-nul-gehouden',
       'doelpunten-per-kwartier',

@@ -3,6 +3,7 @@ import type { FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
 import {
+  BarChart,
   Button,
   Card,
   DataTable,
@@ -31,6 +32,7 @@ import { type CompetitionChoice, competitionParam, leagueValue } from './competi
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
+  attendanceOf,
   cleanSheetsOf,
   competitionNames,
   type ExtremeGoal,
@@ -431,6 +433,93 @@ export function HomeAwayCard({
         </>
       )}
     </Card>
+  )
+}
+
+const numberFormat = new Intl.NumberFormat('nl-NL')
+
+/**
+ * The card of the statistics page with the visitors at the home matches of the season: a bar
+ * for each home match, in the order of the days, and under it two sentences with the average
+ * and the largest number, and a table with every match. The chart is hidden from a screen
+ * reader, which gets the sentences and the table. A match still to be played is an empty
+ * place, so the chart shows the whole season. A match with an unknown number is an empty place
+ * too, and one without an audience a stub. The numbers are Wikipedia's estimates.
+ */
+export function AttendanceCard({
+  competition,
+  matches,
+  season,
+}: {
+  competition: CompetitionChoice
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
+  const { average, highest, known, max, slots, ticks } = attendanceOf(matches, competition)
+  const withNumbers = slots.some((slot) => slot.attendance !== null)
+  const played = slots.filter((slot) => slot.match.status === 'played').length
+  const heading = (
+    <Heading anchor id="toeschouwers" level={2}>
+      Toeschouwers
+    </Heading>
+  )
+  const card = (children: ReactNode, shareable = false) => (
+    <Card aria-labelledby="toeschouwers" shareable={imageCredit(shareable, season)}>
+      {heading}
+      {children}
+    </Card>
+  )
+
+  if (slots.length === 0) {
+    return card(<Text>We hebben nog geen thuiswedstrijden van dit seizoen.</Text>)
+  }
+
+  if (known === 0) {
+    return card(
+      <Text>
+        {withNumbers
+          ? 'Alle thuiswedstrijden waarvan we het aantal kennen, waren zonder publiek.'
+          : 'We hebben van dit seizoen nog geen toeschouwersaantallen.'}
+      </Text>,
+    )
+  }
+
+  const cell = ({ attendance, match }: (typeof slots)[number]) =>
+    match.status !== 'played'
+      ? 'Nog niet gespeeld'
+      : attendance === null
+        ? 'Niet bekend'
+        : attendance === 0
+          ? 'Zonder publiek'
+          : numberFormat.format(attendance)
+
+  return card(
+    <>
+      <BarChart
+        axis={{ title: 'Thuiswedstrijd' }}
+        bars={slots.map(({ attendance }) => (attendance === null ? null : { tone: 'neutral', value: attendance }))}
+        max={max}
+        ticks={ticks}
+        tickText={numberFormat.format}
+      />
+      <Text>{`Gemiddeld ${numberFormat.format(average ?? 0)} toeschouwers per thuiswedstrijd`}</Text>
+      {highest && (
+        <Text>
+          {`Het meest: ${numberFormat.format(highest.attendance ?? 0)}, tegen ${highest.match.opponent} op ${formatTableDay(highest.match.matchDate)}`}
+        </Text>
+      )}
+      <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
+      <DataTable
+        caption="Het aantal toeschouwers bij elke thuiswedstrijd van sc Heerenveen dit seizoen"
+        columns={['Wedstrijd', ...(competition === 'all' ? ['Competitie'] : []), 'Toeschouwers']}
+        rows={slots.map((slot) => ({
+          cells: [...(competition === 'all' ? [slot.match.competition] : []), cell(slot)],
+          header: `${formatTableDay(slot.match.matchDate)}, ${slot.match.opponent}`,
+        }))}
+      />
+      <BasedOn known={known} played={played} />
+    </>,
+    true,
   )
 }
 
