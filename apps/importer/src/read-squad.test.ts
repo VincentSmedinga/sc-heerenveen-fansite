@@ -2,10 +2,12 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import type { ReadPlayer } from './read-squad.ts'
+import type { SeasonSquad } from './season-squad.ts'
 
-import { readSquad, searchTerm, squadPageTitle } from './read-squad.ts'
+import { readSeasonSquad, readSquad, searchTerm, squadGroups, squadPageTitle } from './read-squad.ts'
 
 const page = readFileSync(new URL('./fixtures/wikipedia-squad.wiki', import.meta.url), 'utf8')
+const page202223 = readFileSync(new URL('./fixtures/wikipedia-squad-2022-23.wiki', import.meta.url), 'utf8')
 
 /** A small page with a table under "Spelers", from the lines between the group headings. */
 function pageWith(...lines: string[]) {
@@ -355,5 +357,206 @@ describe('a page that has changed', () => {
 
   it('reads an empty table as no players', () => {
     expect(playersOf(pageWith())).toEqual([])
+  })
+})
+
+describe('the group headings', () => {
+  it('are one list, with Keepers next to Doelmannen', () => {
+    expect(squadGroups).toEqual({
+      aanvallers: 'aanvaller',
+      doelmannen: 'doelman',
+      keepers: 'doelman',
+      middenvelders: 'middenvelder',
+      verdedigers: 'verdediger',
+    })
+  })
+
+  it('reads the heading Keepers as goalkeepers', () => {
+    const text = pageWith('|-\n! colspan="13" align="left" |Keepers\n|-\n|1||{{NL-VLAG}}||[[Pim Verbeek]]')
+
+    expect(playersOf(text)).toMatchObject([{ name: 'Pim Verbeek', position: 'doelman' }])
+  })
+
+  it('does not take a word of the prototype of an object for a heading', () => {
+    expect(problemOf(pageWith('|-\n! colspan="13" |Constructor\n|-\n|1||{{NL-VLAG}}||[[Pim Verbeek]]'))).toBe(
+      "the squad table has a heading we do not know: 'Constructor'",
+    )
+  })
+
+  it('still gives an error for a heading it does not know', () => {
+    expect(problemOf(pageWith('|-\n! colspan="13" |Reserves\n|-\n|1||{{NL-VLAG}}||[[Pim Verbeek]]'))).toBe(
+      "the squad table has a heading we do not know: 'Reserves'",
+    )
+  })
+})
+
+describe('a cell with an attribute without quotes', () => {
+  const row = (cell: string) => `${keeper}\n|-\n|1||{{NL-VLAG}}||${cell}||2029`
+
+  it.each([
+    ['align=left|[[Pim Verbeek]]'],
+    ['align=left |[[Pim Verbeek]]'],
+    ['align = left | [[Pim Verbeek]]'],
+    ["align='left' |[[Pim Verbeek]]"],
+    ['align=left style=color:red|[[Pim Verbeek]]'],
+    ['align=left style="color:red"|[[Pim Verbeek]]'],
+  ])('reads %s as the cell without the attribute', (cell) => {
+    expect(playersOf(pageWith(row(cell)))).toMatchObject([{ name: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek' }])
+  })
+
+  it('reads a cell on a line of its own too', () => {
+    expect(playersOf(pageWith(`${keeper}\n|-\n|1\n|{{NL-VLAG}}\n|align=left|[[Pim Verbeek]]`))).toMatchObject([
+      { name: 'Pim Verbeek', shirtNumber: 1 },
+    ])
+  })
+
+  it('does not take the text of a name for an attribute', () => {
+    expect(problemOf(pageWith(row('a=b|c|[[Pim Verbeek]]')))).toContain('has no usable name')
+  })
+})
+
+describe('the page of 2022/23', () => {
+  const read = readSeasonSquad(page202223)
+
+  it('reads without an error, with the players of the table under their group', () => {
+    expect(read).toMatchObject({ kind: 'read', source: 'selectie' })
+    expect(playersOf(page202223).map((player) => [player.name, player.position, player.shirtNumber])).toEqual([
+      ['Xavier Mous', 'doelman', 1],
+      ['Andries Noppert', 'doelman', 44],
+      ['Joost van Aken', 'verdediger', 3],
+      ['Sven van Beek', 'verdediger', 4],
+      ['Anas Tahiri', 'middenvelder', 26],
+      ['Thom Haye', 'middenvelder', 33],
+      ['Timo Zaal', 'middenvelder', 34],
+      ['Mats Köhlert', 'aanvaller', 7],
+      ['Sidney van Hooijdonk', 'aanvaller', 17],
+    ])
+  })
+
+  it('keeps the page a name links to, when the name differs from it', () => {
+    expect(playersOf(page202223).find((player) => player.shirtNumber === 17)?.wikipediaPage).toBe(
+      'Sydney van Hooijdonk',
+    )
+  })
+
+  it('reads no numbers, because the competitions have other names, and says so', () => {
+    expect(playersOf(page202223).every((player) => player.stats.length === 0)).toBe(true)
+    expect(warningsOf(page202223)).toEqual([
+      'the squad table does not have the columns Eredivisie and KNVB Beker in that order, so no numbers are read',
+    ])
+  })
+})
+
+describe('what a reader of a season gives back', () => {
+  it('has the players, the source, the totals and the warnings when it read the page', () => {
+    const read = readSeasonSquad(page)
+
+    expect(read).toMatchObject({ kind: 'read', source: 'selectie', warnings: [] })
+    expect(Object.keys(read).sort()).toEqual([
+      'appearancesTotal',
+      'goalsTotal',
+      'kind',
+      'players',
+      'source',
+      'warnings',
+    ])
+
+    if (read.kind !== 'read') {
+      throw new Error('The squad was not read')
+    }
+
+    expect(read.players).toHaveLength(25)
+    expect(read.players.find((player) => player.name === 'Bernt Klaverboer')).toEqual({
+      appearances: 9,
+      goals: 0,
+      name: 'Bernt Klaverboer',
+      page: 'Bernt Klaverboer',
+      position: 'doelman',
+      shirtNumber: 22,
+    })
+    expect(read.players.find((player) => player.name === 'Oliver Braude')).toMatchObject({
+      appearances: 8,
+      goals: 2,
+    })
+    expect(read.players.find((player) => player.name === 'Sten Kremers')).toMatchObject({ shirtNumber: null })
+    expect(read.appearancesTotal).toBe(read.players.reduce((total, player) => total + (player.appearances ?? 0), 0))
+    expect(read.goalsTotal).toBe(read.players.reduce((total, player) => total + (player.goals ?? 0), 0))
+    expect(read.goalsTotal).toBeGreaterThan(0)
+
+    for (const player of read.players) {
+      expect(Object.keys(player).sort()).toEqual(['appearances', 'goals', 'name', 'page', 'position', 'shirtNumber'])
+    }
+  })
+
+  it('leaves the numbers and the totals empty when the page does not give them', () => {
+    const read = readSeasonSquad(page202223)
+
+    if (read.kind !== 'read') {
+      throw new Error('The squad was not read')
+    }
+
+    expect(read.appearancesTotal).toBeNull()
+    expect(read.goalsTotal).toBeNull()
+    expect(read.players.every((player) => player.appearances === null && player.goals === null)).toBe(true)
+    expect(read.players.find((player) => player.name === 'Xavier Mous')).toEqual({
+      appearances: null,
+      goals: null,
+      name: 'Xavier Mous',
+      page: 'Xavier Mous',
+      position: 'doelman',
+      shirtNumber: 1,
+    })
+  })
+
+  it('leaves the page empty for a name without a link', () => {
+    const text = pageWith(`${keeper}\n|-\n| -||{{NL-VLAG}}||Pim Verbeek||2029`)
+    const read = readSeasonSquad(text)
+
+    expect(read).toMatchObject({ kind: 'read', players: [{ name: 'Pim Verbeek', page: null, shirtNumber: null }] })
+  })
+
+  it('has a message when the page has changed shape', () => {
+    expect(readSeasonSquad(page.replace('=== Spelers ===', '=== Selectie ==='))).toEqual({
+      kind: 'error',
+      message: 'the squad page has no table under the heading Spelers',
+    })
+  })
+
+  it('has a reason when there is no page or table for the season', () => {
+    // The Dutch reader never gives `none`; the readers of the older seasons do (#740 on).
+    const none = {
+      kind: 'none',
+      reason: 'the English Wikipedia has no page for this season',
+    } satisfies SeasonSquad
+
+    expect(Object.keys(none).sort()).toEqual(['kind', 'reason'])
+  })
+
+  it('is one of three kinds, and the Dutch reader gives the first and the last', () => {
+    const kinds = (squad: SeasonSquad): string => {
+      switch (squad.kind) {
+        case 'error':
+          return squad.message
+        case 'none':
+          return squad.reason
+        case 'read':
+          return `${squad.players.length} players`
+      }
+    }
+
+    expect(kinds(readSeasonSquad(page202223))).toBe('9 players')
+    expect(kinds(readSeasonSquad(''))).toBe('the squad page has no table under the heading Spelers')
+  })
+
+  it('gives the same players as readSquad, so the import of the season does not change', () => {
+    const squad = readSquad(page)
+    const season = readSeasonSquad(page)
+
+    if (squad.kind !== 'read' || season.kind !== 'read') {
+      throw new Error('The squad was not read')
+    }
+
+    expect(season.players.map((player) => player.name)).toEqual(squad.players.map((player) => player.name))
+    expect(season.warnings).toEqual(squad.warnings)
   })
 })

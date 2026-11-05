@@ -189,6 +189,7 @@ Zodra een vrijwilliger de pagina schrijft, leest de importer hem (besluit van 29
 De pagina heeft de kop "Keepers" en cellen met een attribuut zonder aanhalingstekens, zoals `align=left|Xavier Mous`.
 `readSquad` kent alleen "Doelmannen" en attributen met aanhalingstekens.
 Dat zijn kleine aanpassingen in de lezer, en ze horen bij elk plan voor de selectie van een eerder seizoen.
+Sinds #739 kent `readSquad` beide, en de pagina van 2022/23 leest.
 
 ### De aantallen per seizoen
 
