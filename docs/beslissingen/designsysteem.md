@@ -2579,6 +2579,16 @@
 - **Alternatieven:** het blok laten staan (de rij blijft rustig, maar de naam bepaalt de breedte van de kolom); een spatie die niet afbreekt in de naam zelf (dezelfde streng als het blok, maar dan in elke tabel en lijst).
 - **Later:** vervangt de regel "Het afbreken" in _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026).
 
+## Een vinkje en een keuzerondje zijn 24 pixels groot
+
+- **Datum:** 5 november 2026
+- **Besluit:** het vinkje (`checkbox`) en het keuzerondje (`radio`) zijn 1,5 rem groot, 24 pixels, in plaats van 1,25 rem (#618).
+  Een controle in de browser (`apps/site/e2e/admin-phone.spec.ts`) loopt de schermen van het beheer op 390 pixels af en meldt elk doel dat kleiner is dan 24 bij 24 pixels.
+- **Waarom:** het vinkje van het filter op de pagina Berichten was 20 bij 20 pixels en haalde 2.5.8 niet.
+  Het label eromheen is ook aan te raken, maar het vinkje zelf hoort het minimum te halen.
+- **Nadeel:** het vinkje is iets groter dan de tekst ernaast.
+- **Alternatieven:** alleen het beheer groter maken (twee maten om gelijk te houden); het label als doel laten gelden (het vinkje blijft te klein voor wie het zelf raakt).
+
 ## De uitleg van de lijn staat in de regel van de sleutel, en `FormTimeline` krijgt ook een tooltip
 
 - **Datum:** 5 november 2026
