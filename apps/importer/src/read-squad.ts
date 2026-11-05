@@ -4,10 +4,13 @@
 // as the same table. A page that has changed shape gives an error, never a guess, so the import
 // keeps the squad it has. The numbers of a player (appearances, goals and assists in the
 // Eredivisie and the KNVB Beker) are read from the same row; a number we cannot be sure of is
-// left out with a warning, since the squad does not depend on it.
+// left out with a warning, since the squad does not depend on it. `readSeasonSquad` gives the
+// same result in the shape every reader of an earlier season returns (see `SeasonSquad`).
 import type { PlayerPosition, StatsCompetition } from '@fansite/db/schema'
 
 import { playerNameMaxLength } from '@fansite/db/schema'
+
+import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
 
@@ -62,10 +65,15 @@ const statsColumns: { competition: StatsCompetition; first: number }[] = [
 /** The cells of a row with all numbers: four before, six for the competitions, three after */
 const cellsWithStats = 13
 
-/** The group headings of the table, with the position of the players under each. */
-const groups: Record<string, PlayerPosition> = {
+/**
+ * The group headings of the tables of a squad, in lower case, with the position of the players
+ * under each. The readers of the squad tables share this list. A heading that is not in it is
+ * an error, not a guess.
+ */
+export const squadGroups: Record<string, PlayerPosition> = {
   aanvallers: 'aanvaller',
   doelmannen: 'doelman',
+  keepers: 'doelman',
   middenvelders: 'middenvelder',
   verdedigers: 'verdediger',
 }
@@ -79,12 +87,24 @@ const particles = new Set(["'t", 'da', 'de', 'den', 'der', 'di', 'el', 'het', 't
 /** A cell with a dash instead of a number: a hyphen, an en dash or an em dash. */
 const dash = /^[-–—]$/u
 
-/** What an attribute in front of a cell looks like: `align="left" |`. */
-const cellAttributes = /^(?:\s*[a-z-]+\s*=\s*"[^"]*")+\s*\|(?!\|)/iu
+/**
+ * What an attribute in front of a cell looks like: `align="left" |`, `align='left' |` or
+ * `align=left|`, with or without quotes.
+ */
+const cellAttributes = /^(?:\s*[a-z-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'|]+))+\s*\|(?!\|)/iu
 
 /** A key that treats names as the database does: without accents and capitals. */
 export function nameKey(name: string): string {
   return name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+}
+
+/**
+ * Reads the squad in the shape every reader of a season returns. The squad table of the Dutch
+ * page lists the whole selection, so the source is `selectie`. The page of a season that has no
+ * table is an error here, because the caller only asks for a season whose page it has fetched.
+ */
+export function readSeasonSquad(text: string): SeasonSquad {
+  return seasonSquadOf(readSquad(text))
 }
 
 /**
@@ -119,7 +139,8 @@ export function readSquad(text: string): ReadSquad {
     const cells = dataCells(row)
 
     if (header.length === 1) {
-      const group = groups[plain(header[0] ?? '').toLowerCase()]
+      const heading = plain(header[0] ?? '').toLowerCase()
+      const group = Object.hasOwn(squadGroups, heading) ? squadGroups[heading] : undefined
 
       if (group === undefined) {
         return {
@@ -156,6 +177,24 @@ export function searchTerm(name: string): string {
   const [first = ''] = words
 
   return words.length < 2 || particles.has(first.toLowerCase()) ? words.join(' ') : words.slice(1).join(' ')
+}
+
+/** `readSquad` in the shape of `SeasonSquad`: the same players, numbers and warnings. */
+export function seasonSquadOf(read: ReadSquad): SeasonSquad {
+  if (read.kind === 'error') {
+    return read
+  }
+
+  const players = read.players.map(seasonPlayerOf)
+
+  return {
+    appearancesTotal: totalOf(players.map((player) => player.appearances)),
+    goalsTotal: totalOf(players.map((player) => player.goals)),
+    kind: 'read',
+    players,
+    source: 'selectie',
+    warnings: read.warnings,
+  }
 }
 
 /** The title of the page of a season: `Sc Heerenveen in het seizoen 2026/27 (mannen)`. */
@@ -302,7 +341,32 @@ function readStats(cells: string[], name: string, warnings: string[]): ReadStats
   return stats
 }
 
+/** A player in the shape of `SeasonPlayer`: the numbers of the competitions added up. */
+function seasonPlayerOf(player: ReadPlayer): SeasonPlayer {
+  const given = player.stats.length > 0
+
+  return {
+    appearances: given ? sum(player.stats.map((stats) => stats.appearances)) : null,
+    goals: given ? sum(player.stats.map((stats) => stats.goals)) : null,
+    name: player.name,
+    page: player.wikipediaPage,
+    position: player.position,
+    shirtNumber: player.shirtNumber,
+  }
+}
+
 /** Takes the attributes off the front of a cell: `align="left" |[[Naam]]` is `[[Naam]]`. */
 function stripAttributes(cell: string): string {
   return cell.replace(cellAttributes, '').trim()
+}
+
+function sum(numbers: number[]): number {
+  return numbers.reduce((total, number) => total + number, 0)
+}
+
+/** The sum of the numbers a page gives, or null when it gives none. */
+function totalOf(numbers: (null | number)[]): null | number {
+  const given = numbers.filter((number) => number !== null)
+
+  return given.length === 0 ? null : sum(given)
 }

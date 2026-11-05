@@ -1,0 +1,71 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Sc_Heerenveen_in_het_seizoen_2022/23_(mannen)?action=raw, read on 5 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the infobox, the text around the squad, the staff and the matches, and most of the players.
+  What the page does that the page of 2026/27 does not: the group heading is "Keepers", most cells have an
+  attribute without quotes (`align=left|`), the competitions have other names and 6 columns each, and there
+  is no column for the contract.
+-->
+== Selectie ==
+=== Spelers ===
+{| class="wikitable" style="font-size: 85%; text-align: center;"
+|-
+! rowspan="2" style="vertical-align: bottom;" |{{afkorting|Nr.|Nummer}}
+! rowspan="2" style="vertical-align: bottom;" | {{afkorting|Nat.|Nationaliteit}}
+! rowspan="2" style="vertical-align: bottom;" | Naam
+! colspan="6" | {{small|[[Eredivisie 2022/23 (mannenvoetbal)|Competitie]]}}
+! colspan="6" | {{small|[[KNVB beker 2022/23 (mannen)|Beker]]}}
+! colspan="6" | {{small|[[Play-offs Nederlands voetbal 2023#Play-offs voor de UEFA Europa Conference League|Play-offs]]}}
+! colspan="6" | {{small|Totaal}}
+|- style="background: #D7E5EF;"
+! {{afkorting|W|Wedstrijden}}
+! {{goal}}
+! {{Assist}}
+!{{Gele kaart}}
+![[Bestand:Yellow-red card.svg|15px]]
+!{{Rode kaart}}
+! {{afkorting|W|Wedstrijden}}
+! {{goal}}
+! {{Assist}}
+!{{Gele kaart}}
+![[Bestand:Yellow-red card.svg|15px]]
+!{{Rode kaart}}
+! {{afkorting|W|Wedstrijden}}
+! {{goal}}
+! {{Assist}}
+!{{Gele kaart}}
+![[Bestand:Yellow-red card.svg|15px]]
+!{{Rode kaart}}
+! {{afkorting|W|Wedstrijden}}
+! {{goal}}
+! {{Assist}}
+!{{Gele kaart}}
+![[Bestand:Yellow-red card.svg|15px]]
+!{{Rode kaart}}
+|-
+! colspan="27" style="text-align: left;" | Keepers
+|-
+|1||{{NL-VLAG}}||align=left|[[Xavier Mous]]||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+|44||{{NL-VLAG}}|| align="left" |[[Andries Noppert]]||4||0||0||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+! colspan="27" style="text-align: left;" | Verdedigers
+|-
+|3||{{NL-VLAG}}||align=left|[[Joost van Aken]]||4||0||0||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+|4||{{NL-VLAG}}||align=left|[[Sven van Beek]]||4||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+! colspan="27" style="text-align: left;" | Middenvelders
+|-
+|26||{{BE-VLAG}}||align=left|[[Anas Tahiri]]||4||0||1||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+|33||{{NL-VLAG}}||align=left|[[Thom Haye]]||4||0||0||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+|34||{{NL-VLAG}}||align=left|[[Timo Zaal]]||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+! colspan="27" style="text-align: left;" | Aanvallers
+|-
+|7||{{DE-VLAG}}||align=left|[[Mats Köhlert]]||4||0||0||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|-
+|17||{{NL-VLAG}}||align=left|[[Sydney van Hooijdonk|Sidney van Hooijdonk]]||4||4||0||1||0||0||0||0||0||0||0||0||0||0||0||0||0||0||'''0'''||'''0'''|| '''0'''||'''0'''||'''0'''||'''0'''
+|}

@@ -2260,3 +2260,28 @@
 - **Alleen deze schrijfwijze:** afgelast, uitgesteld, reglementair en forfait krijgen geen nieuwe regels.
   Een score die we niet kennen blijft zo een waarschuwing of een fout, en een gok is erger dan een melding.
   We hebben van die woorden ook geen voorbeeld van de pagina.
+
+## Elke lezer van een eerder seizoen geeft een `SeasonSquad`, en de koppen staan in één lijst
+
+- **Datum:** 5 november 2026
+- **Besluit:** elke lezer van de selectie van een eerder seizoen geeft een `SeasonSquad` (`season-squad.ts`, #739), in een van drie vormen.
+  `read` heeft de spelers, de bron uit `playerSources`, de optelsom van de wedstrijden en van de doelpunten die de pagina geeft, en waarschuwingen.
+  `none` zegt met een reden dat de pagina of de tabel er voor dit seizoen niet is.
+  `error` zegt dat de pagina van vorm is veranderd.
+  Een speler heeft de naam, de pagina, de positie, het rugnummer, de wedstrijden en de doelpunten.
+  Wat een pagina niet noemt, is leeg (`null`): een optelsom van een pagina zonder cijfers is leeg en geen nul, omdat nul een uitkomst is.
+  Een speler zonder link heeft geen pagina, en een speler zonder rugnummer of cijfers houdt ze leeg.
+  `readSeasonSquad` geeft de uitkomst van `readSquad` in deze vorm, met de bron `selectie` en de cijfers van de competities opgeteld.
+  `readSquad` zelf verandert niet, zodat de import van het huidige seizoen dezelfde velden blijft lezen.
+- **Koppen:** de groepskoppen met hun positie staan in één lijst, `squadGroups` in `read-squad.ts`.
+  "Keepers" staat naast "Doelmannen", en de lezers van #740 en #741 voegen hun koppen daar toe.
+  Een kop die er niet in staat blijft een fout, en een woord als `constructor` telt niet als kop.
+- **Cel:** een attribuut zonder aanhalingstekens voor een cel (`align=left|[[Xavier Mous]]`) wordt zoals een attribuut met aanhalingstekens van de cel gehaald.
+  Op de pagina van 2022/23 heet de competitie "Competitie" en niet "Eredivisie" en heeft elke competitie zes kolommen, dus de cijfers blijven daar weg met de waarschuwing die `readSquad` al gaf.
+  De spelers worden wel gelezen.
+- **Waarom:** de pagina's van 1990/91 tot en met 2025/26 komen uit zes soorten bron, en de opslag (#744) en de controle op volledigheid (#745) moeten niet per soort iets anders hoeven te doen.
+  Eén vorm met drie uitkomsten dwingt elke lezer om te zeggen wat hij niet weet, in plaats van een nul of een gok te geven.
+  Een pagina die we niet kennen is een fout en geen lege selectie, zodat de import bewaart wat hij heeft.
+- **Alternatieven:** per bron een eigen vorm (verworpen: de opslag zou zes takken krijgen).
+  Een nul voor een cijfer dat de pagina niet geeft (verworpen: de controle op volledigheid kan dan geen verschil maken tussen "niet gespeeld" en "niet genoemd").
+  `readSquad` zelf de nieuwe vorm laten teruggeven (verworpen: de import van het huidige seizoen leest ook de zoekterm en de cijfers per competitie, en die horen niet bij elke bron).

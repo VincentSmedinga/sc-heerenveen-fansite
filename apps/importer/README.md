@@ -1580,13 +1580,14 @@ De tabel staat op dezelfde pagina op twee manieren geschreven, en de lezer neemt
 - elke cel op een eigen regel, na een regel `|-`.
 
 Een rij met groepskop (`! colspan="13" align="left" |Doelmannen`) zet de positie voor de spelers eronder: doelman, verdediger, middenvelder of aanvaller.
+De koppen staan in één lijst, `squadGroups` in `src/read-squad.ts`: ook "Keepers" is doelman, zoals op de pagina van 2022/23.
 Een andere groepskop is een fout.
 Bij de eerste cel staat het rugnummer, vet gedrukt of niet.
 Een streepje (`| -`) of een lege cel is een speler zonder rugnummer.
 Een nummer buiten 1 tot en met 99 is een fout.
 De tweede cel is de nationaliteit en blijft weg, net als de vierde, het contract.
 De cijfers komen uit de cellen daarna (zie _De cijfers van een speler_).
-De naam komt uit de derde cel, zonder attribuut als `align="left"`:
+De naam komt uit de derde cel, zonder attribuut als `align="left"` of `align=left` (zonder aanhalingstekens):
 
 - `[[Naam]]` geeft `Naam`, en `[[Pagina|Naam]]` de tekst achter de `|`;
 - komt de naam uit een paginatitel met een toevoeging, zoals `[[Dylan Vente (voetballer)]]`, dan laat de import die toevoeging weg;
@@ -1594,6 +1595,18 @@ De naam komt uit de derde cel, zonder attribuut als `align="left"`:
 
 De pagina waar de link naar wijst, bewaart de import ook, met de toevoeging nog erbij (`Dylan Vente (voetballer)`): spaties voor streepjes, een hoofdletter vooraan en zonder `#kopje`.
 Een naam zonder link heeft geen pagina.
+
+### De selectie van een eerder seizoen
+
+Een lezer van de selectie van een eerder seizoen geeft een `SeasonSquad` terug (zie [`src/season-squad.ts`](src/season-squad.ts)), in een van drie vormen:
+
+- `read`: de spelers, de bron, de optelsom van de wedstrijden en van de doelpunten, en de waarschuwingen;
+- `none`: een reden, als de pagina of de tabel er niet is;
+- `error`: de pagina is van vorm veranderd.
+
+Wat een pagina niet noemt, is leeg (`null`), en geen nul.
+`readSeasonSquad` in `src/read-squad.ts` geeft de uitkomst van `readSquad` in die vorm.
+De import van het huidige seizoen blijft `readSquad` lezen.
 
 ### Wat de import bewaart
 
@@ -1754,6 +1767,7 @@ De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) ze
 De tests van de selectie lezen [`src/fixtures/wikipedia-squad.wiki`](src/fixtures/wikipedia-squad.wiki): de tabel "Spelers" van de pagina van het seizoen 2026/27, gelezen op 26 oktober 2026, met bovenaan de herkomst en de licentie (CC BY-SA 4.0).
 De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spelers, onder wie een speler met een streepje in plaats van een rugnummer, en met de cijfers van de Eredivisie, de KNVB Beker en het totaal.
 `src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord, en de cijfers: een streepje, een lege cel, een waarde die we niet kennen en kopjes in een andere volgorde.
+[`src/fixtures/wikipedia-squad-2022-23.wiki`](src/fixtures/wikipedia-squad-2022-23.wiki) is een verkleinde kopie van de pagina van 2022/23, gelezen op 5 november 2026, met negen spelers: de kop "Keepers", cellen met een attribuut zonder aanhalingstekens, en andere namen en kolommen voor de competities.
 `src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat, dat een speler zijn `id` houdt, dat een vertrokken speler blijft staan en dat een terugkerende speler weer in de selectie komt.
 Dezelfde test laat zien dat de cijfers van een nieuwe speler, een speler zonder cijfers, een vertrokken speler, een streepje en twee runs achter elkaar goed gaan, en dat de controle van de doelpunten wel waarschuwt bij een verschil en niet bij gelijke aantallen.
 `src/link-players.test.ts` toetst de regels van de koppeling zonder database, ook voor twee spelers met dezelfde achternaam en voor de persoon, en `src/import-matches.test.ts` laat zien dat de doelpunten van een wedstrijd hun speler en hun persoon krijgen.
