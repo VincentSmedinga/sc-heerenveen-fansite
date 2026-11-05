@@ -2489,3 +2489,22 @@
   De pagina's die de keuze lezen zijn server-onderdelen en komen mee met de router: de links van de balk "Op deze pagina:" (`@subnav`), `aria-current` in het menu, de titel en de canonical link.
   De tests van de pagina's draaien zonder router, dus `src/test-setup.ts` zet een `useRouter` die niets doet.
 - **Alternatieven:** `next/link` op de hele site (veel groter, en dan telt geen enkele klik meer); het hele onderdeel in het designsysteem met een eigen script (het designsysteem krijgt dan een afhankelijkheid van Next.js); `document.startViewTransition` om de wissel (meer code, niet in elke browser, en het voegt niets toe aan een knop die al schuift); `router.replace` (Terug slaat de keuzes over, dat wijkt af van de links); de inhoud lichter tonen tijdens het laden (een pagina moet zelf meedoen en het geeft een nieuwe contrastcontrole in licht en donker); de focus naar de inhoud verplaatsen (haalt de bezoeker weg bij de schakelaar).
+
+## De site telt per persoon en toont de bewaarde naam, en raadt niets
+
+- **Datum:** 4 november 2026
+- **Besluit:** de site telt doelpunten per persoon (`person_id`), anders per speler, anders per titel, anders per naam.
+  De naam komt uit `persons`: `given_name` gewoon, en het voorvoegsel met `family_name` vet.
+  Zonder persoon toont de site de naam van de wedstrijdpagina als achternaam.
+  De functies die uit een titel of een zoekterm een voor- en achternaam raden, zijn weg (`splitPageName`, `splitPlayerName` en `pageTitleName`).
+  Een lijst die op achternaam staat, sorteert op `family_name` zonder voorvoegsel, dus Joost van Aken staat onder de A.
+  `goalsWithInitials` vergelijkt de namen zoals de wedstrijdpagina ze schrijft, met het voorvoegsel.
+- **Waarom:** de gok bij het tonen faalt zodra de korte naam gelijk is aan de titel ("Ramon Zomer"), en de titel als sleutel telt twee titels van één speler dubbel.
+  De import weet het beter dan de pagina: hij heeft de doorverwijzing en de sorteersleutel gelezen (#714 en #715).
+- **Hoe:** `listSeasonMatches` en `listClubMatches` geven bij elk doelpunt `personId`, `personGivenName`, `personFamilyNamePrefix` en `personFamilyName` (ook bij een tegenstander), en `listSquad` geeft de naam van de persoon van de speler.
+  `playerName` en `playerSearchTerm` zijn uit de doelpunten gehaald.
+  De zoekterm `players.search_term` blijft voor het zoeken.
+  De `id` van een rij in de lijst met doelpuntenmakers is een tekst (`person:7`, `id:9`, `page:Boy Kemper`, `name:Kemper`), zodat het nummer van een persoon niet gelijk kan zijn aan dat van een speler.
+  Een doelpunt zonder speler maar met een pagina telt niet meer voor een gekoppeld doelpunt met dezelfde pagina: de persoon doet dat nu.
+- **Alternatieven:** de titel blijven gebruiken en alleen de doorverwijzingen bij het tonen oplossen (een verzoek per bezoek of een lijst in de site).
+  De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).

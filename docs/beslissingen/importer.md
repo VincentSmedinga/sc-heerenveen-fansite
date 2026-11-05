@@ -929,6 +929,7 @@
 - **Later:** een doelpunt zonder speler maar met een Wikipedia-pagina telt sinds 30 oktober 2026 voor die pagina en toont de titel als volledige naam; zie _Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina_.
 - **Later:** elke doelpuntenmaker en elke speler van de selectie met een pagina heeft sinds 4 november 2026 ook een persoon met een eigen `id` (`person_id`), die alle titels van zijn artikel bij elkaar houdt; zie _Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij_ in `hosting-en-data.md`.
   De rijen van `players` blijven één per speler en seizoen.
+- **Later:** de kaart met doelpuntenmakers telt sinds 5 november 2026 per persoon en niet meer per `id` van de speler; zie _De site telt per persoon en toont de bewaarde naam, en raadt niets_ in `site.md`.
 
 ## De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
