@@ -328,9 +328,10 @@ describe('searchPublic', () => {
 })
 
 describe('listSquad', () => {
-  it('gives the players of the season by shirt number, those without a number last, and nobody who left the squad', async () => {
+  it('gives the players of the season by shirt number, those without a number last, a player without a position, and nobody who left the squad', async () => {
     await database.db.insert(players).values([
       { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
+      { name: 'Zonder Positie', position: null, searchTerm: 'Positie', season: '2026/27', shirtNumber: null },
       { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler', season: '2026/27', shirtNumber: 10 },
       { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper', season: '2026/27', shirtNumber: 1 },
       { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
@@ -349,6 +350,7 @@ describe('listSquad', () => {
       { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper' },
       { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler' },
       { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer' },
+      { name: 'Zonder Positie', position: null, searchTerm: 'Positie' },
     ])
   })
 })

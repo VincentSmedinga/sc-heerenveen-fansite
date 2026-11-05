@@ -720,6 +720,7 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     searchTerm,
     season,
     shirtNumber,
+    source: 'selectie',
     wikipediaPage: name,
   }))
   const scorers = madeUpScorers.map(([name, shirtNumber, inSquad]): NewPlayer => ({
@@ -730,6 +731,7 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     searchTerm: name.split(' ').slice(1).join(' '),
     season,
     shirtNumber,
+    source: 'selectie',
     wikipediaPage: name,
   }))
 

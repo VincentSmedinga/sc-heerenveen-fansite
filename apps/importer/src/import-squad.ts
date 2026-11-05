@@ -334,7 +334,7 @@ async function storePlayers(
     if (before === undefined) {
       counts.added++
 
-      const [{ insertId }] = await db.insert(players).values({ ...player, personId, season })
+      const [{ insertId }] = await db.insert(players).values({ ...player, personId, season, source: 'selectie' })
 
       ids.set(player, insertId)
 

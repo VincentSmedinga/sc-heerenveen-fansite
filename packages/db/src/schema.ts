@@ -1340,6 +1340,16 @@ export const playerPositions = ['doelman', 'verdediger', 'middenvelder', 'aanval
 export type PlayerPosition = (typeof playerPositions)[number]
 
 /**
+ * Where a row in `players` comes from, from the most complete source to the least: `selectie`
+ * (a table with the whole squad), `statistieken` (a table of who played), `engels` (a squad or
+ * transfers on the English Wikipedia), `transfers`, `doelpunten` and `wikidata`. It says how
+ * complete a season is, so a page can tell when a list may be missing players.
+ */
+export const playerSources = ['selectie', 'statistieken', 'engels', 'transfers', 'doelpunten', 'wikidata'] as const
+
+export type PlayerSource = (typeof playerSources)[number]
+
+/**
  * The squad of sc Heerenveen 1 (men), from the Dutch Wikipedia, one row per player and season.
  * The importer reads the current season only: a good read updates the squad of the season and
  * never replaces it, so a player keeps his `id`, which the goals in `match_goals` point to. A
@@ -1350,7 +1360,9 @@ export type PlayerPosition = (typeof playerPositions)[number]
  * are in `player_season_stats`, not here.
  *
  * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
- * it is under. `shirt_number` is empty for a player without one. `search_term` is the name
+ * it is under. `position` is empty for a player from a list that gives none, such as a transfer
+ * or a goal, and `source` says which kind of list the row comes from (see `playerSources`).
+ * `shirt_number` is empty for a player without one. `search_term` is the name
  * without the first given name, the surname the search page looks for (`van Aken`). It is its
  * own column so one player can be corrected: the importer fills it for a new player and leaves
  * it alone for a known one. `wikipedia_page` is the page the table links to, such as `Luca
@@ -1364,7 +1376,8 @@ export const players = mysqlTable(
     id: int('id', { unsigned: true }).autoincrement().primaryKey(),
     season: varchar('season', { length: matchLimits.season }).notNull(),
     name: varchar('name', { length: playerNameMaxLength }).notNull(),
-    position: mysqlEnum('position', playerPositions).notNull(),
+    position: mysqlEnum('position', playerPositions),
+    source: mysqlEnum('source', playerSources).notNull().default('selectie'),
     shirtNumber: int('shirt_number', { unsigned: true }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
