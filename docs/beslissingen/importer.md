@@ -1461,6 +1461,9 @@
   Krijgt een gespeelde wedstrijd van drie dagen of langer geleden een ander stadion, een andere datum of een andere regel, dan wacht die wijziging zeven dagen of tot een mens besluit.
   Het nadeel hierboven is opgelost: zie _De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze_.
   Voor een gestaakte wedstrijd komen ze uit het gestaakte blok.
+- **Later:** zie _Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd_.
+  Een score die we niet kennen, geeft bij een wedstrijd van een andere club een waarschuwing, behalve voor die ene wedstrijd.
+  Bij een wedstrijd van sc Heerenveen blijft het een fout.
 
 ## De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze
 
@@ -2203,3 +2206,23 @@
   Een scherm voor een handvol gevallen kost meer dan het geeft, en de lijst in de code kan de Builder bijwerken zodra de waarschuwing iets laat zien.
 - **Alternatieven:** automatisch samenvoegen op een gelijke naam (fout bij twee spelers met dezelfde naam).
   Een lijst in het beheer (een scherm en een werkwijze voor enkele gevallen).
+
+## Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd
+
+- **Datum:** 5 november 2026
+- **Besluit:** de wedstrijd SC Cambuur – Go Ahead Eagles uit speelronde 11 van 2026/27, op de pagina met de score `4 – 0 (Gestaakt 82')`, telt met 4 – 0 bij de uitslagen van de competitie (#736).
+  Dat geldt alleen zolang de pagina die tekst heeft en geen later blok voor dezelfde twee clubs onder dezelfde kop of onder `Inhaalronde 11`.
+  Verandert de pagina, dan leest de reader hem zoals altijd, met de waarschuwing "has a score we do not know".
+  De wedstrijd staat als gegevens in `officialStoppedResults` in `read-wikipedia.ts`, met een opmerking `ONE-OFF (#736)` die zegt dat latere sessies de uitzondering opnieuw moeten bekijken.
+  De uitzondering raakt alleen `readLeagueResults`: een wedstrijd van sc Heerenveen met zo'n score blijft een fout die de wedstrijd noemt, en `classify-change.ts` krijgt geen regel.
+- **Waarom:** de stand is hier officieel de einduitslag geworden, maar meestal wordt het restant alsnog gespeeld en leest de import dat al.
+  Een algemene regel voor deze schrijfwijze zou ook die wedstrijden als afgerond tellen, terwijl we maar één voorbeeld hebben.
+  Zonder de uitzondering bleef de uitslag weg en week de controle met de stand af voor SC Cambuur en Go Ahead Eagles.
+  `classify-change.ts` oordeelt over wedstrijden van sc Heerenveen, en deze wedstrijd komt niet in `matches`.
+- **Alternatieven:** een algemene regel voor `(Gestaakt <minuut>')` achter een stand (verworpen: één voorbeeld, en het restant komt meestal nog).
+  De waarschuwing laten staan (verworpen: de controle met de stand blijft dan afwijken).
+  Een regel onder de wedstrijd voor bezoekers (verworpen: de site toont wedstrijden van andere clubs niet een voor een).
+  Een gestaakte wedstrijd altijd laten wachten op een redacteur (verworpen: er is hier niets om op te wachten).
+- **Alleen deze schrijfwijze:** afgelast, uitgesteld, reglementair en forfait krijgen geen nieuwe regels.
+  Een score die we niet kennen blijft zo een waarschuwing of een fout, en een gok is erger dan een melding.
+  We hebben van die woorden ook geen voorbeeld van de pagina.
