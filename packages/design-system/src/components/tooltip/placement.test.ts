@@ -18,6 +18,15 @@ describe('placeTooltip', () => {
     expect(placeTooltip({ ...base, anchor: { x: 100, y: 20 } })).toEqual({ side: 'below', x: 80, y: 30 })
   })
 
+  it('lets the tooltip stick out above the parent by the overhang', () => {
+    expect(placeTooltip({ ...base, anchor: { x: 100, y: 20 }, overhang: 20 })).toEqual({ side: 'above', x: 80, y: -14 })
+    expect(placeTooltip({ ...base, anchor: { x: 100, y: 14 }, overhang: 20 })).toEqual({ side: 'above', x: 80, y: -20 })
+  })
+
+  it('puts the tooltip below the place when even the overhang is not enough', () => {
+    expect(placeTooltip({ ...base, anchor: { x: 100, y: 10 }, overhang: 20 })).toEqual({ side: 'below', x: 80, y: 20 })
+  })
+
   it('shifts the tooltip along when the place is at the left edge', () => {
     expect(placeTooltip({ ...base, anchor: { x: 4, y: 50 } })).toEqual({ side: 'above', x: 0, y: 16 })
   })

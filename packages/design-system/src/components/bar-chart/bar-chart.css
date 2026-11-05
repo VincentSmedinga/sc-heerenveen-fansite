@@ -28,6 +28,14 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /*
+   * A chart with a tooltip at its line has room above the plot for it, so it fits above a
+   * point near the top. It is the same number as the overhang in TrendPointer.tsx.
+   */
+  .hf-bar-chart-frame:has(.hf-bar-chart-pointer) {
+    padding-block-start: 24px;
+  }
+
   .hf-bar-chart-scale {
     display: none;
   }

@@ -5,6 +5,9 @@ import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } fr
 import { Tooltip } from '../tooltip/Tooltip'
 import { nearestPoint, type TrendPoint } from './pointer'
 
+/** The room above the plot the tooltip may use, in pixels: the padding in bar-chart.css. */
+const overhang = 24
+
 export type TrendPointerProps = {
   /** One entry per place: where its point is and its text, or `null` for no point. */
   points: readonly (null | TrendPoint)[]
@@ -66,7 +69,7 @@ export function TrendPointer({ points }: TrendPointerProps) {
             className="hf-bar-chart-trend-dot"
             style={{ '--hf-bar-chart-across': point.across, '--hf-bar-chart-at': point.at } as CSSProperties}
           />
-          <Tooltip bottom={point.at} left={point.across} onClose={() => setActive(null)}>
+          <Tooltip bottom={point.at} left={point.across} onClose={() => setActive(null)} overhang={overhang}>
             {point.label}
           </Tooltip>
         </>

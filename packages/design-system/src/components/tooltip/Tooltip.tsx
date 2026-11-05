@@ -14,6 +14,11 @@ export type TooltipProps = Omit<ComponentPropsWithoutRef<'div'>, 'aria-hidden' |
   left: number
   /** Called at Escape. The parent should stop showing the tooltip then. */
   onClose?: () => void
+  /**
+   * How far the tooltip may go above the top of the parent, in pixels: the room the parent has
+   * above it, such as padding. The parent has to keep that room free. Default 0.
+   */
+  overhang?: number
 }
 
 /** The room between the place and the tooltip, in pixels. */
@@ -24,15 +29,15 @@ const gap = 12
  * is the element it sits in, which should be positioned (`position: relative`) and sets how
  * large the area is; the place is given as a share of it, from the left and from the bottom.
  * The tooltip sits above the place, or below it when there is no room above, and never goes
- * past an edge of the parent. It has no arrow and does not move: it is at the new place at
- * once.
+ * past an edge of the parent, except above it by `overhang`. It has no arrow, and slides to its
+ * new place when the place changes.
  *
  * It is a help for the pointer and for touch, not a control. It does not react to the pointer
  * itself, so the pointer can pass over it, it is hidden from a screen reader (`aria-hidden`)
  * and cannot get focus. The parent shows and hides it, and a screen reader needs the same text
  * elsewhere. Escape is reported through `onClose`. tooltip.css gives the look.
  */
-export const Tooltip = ({ bottom, children, className, left, onClose, ...props }: TooltipProps) => {
+export const Tooltip = ({ bottom, children, className, left, onClose, overhang = 0, ...props }: TooltipProps) => {
   const element = useRef<HTMLDivElement>(null)
   const [placement, setPlacement] = useState<null | TooltipPlacement>(null)
 
@@ -48,6 +53,7 @@ export const Tooltip = ({ bottom, children, className, left, onClose, ...props }
         placeTooltip({
           anchor: { x: (left / 100) * parent.clientWidth, y: (1 - bottom / 100) * parent.clientHeight },
           gap,
+          overhang,
           parent: { height: parent.clientHeight, width: parent.clientWidth },
           tooltip: { height: own.offsetHeight, width: own.offsetWidth },
         }),
@@ -62,7 +68,7 @@ export const Tooltip = ({ bottom, children, className, left, onClose, ...props }
     observer.observe(parent)
 
     return () => observer.disconnect()
-  }, [bottom, children, left])
+  }, [bottom, children, left, overhang])
 
   useEffect(() => {
     if (!onClose) return

@@ -12,9 +12,8 @@ const surfaces = ['page', 'surface', 'surface-strong', 'surface-soft', 'surface-
 
 describe('tooltip.css', () => {
   it('takes its colours from colour roles, never from a scale', () => {
-    expect(css).toContain('background-color: var(--hf-colour-background-surface);')
-    expect(css).toContain('border: 1px solid var(--hf-colour-border-input);')
-    expect(css).toContain('color: var(--hf-colour-text-default);')
+    expect(css).toContain('background-color: var(--hf-colour-text-default);')
+    expect(css).toContain('color: var(--hf-colour-background-surface);')
     expect(css).not.toMatch(/var\(--hf-colour-(?:blue|grey|red|steel|sand)-/)
   })
 
@@ -22,23 +21,25 @@ describe('tooltip.css', () => {
     expect(css).toContain('pointer-events: none;')
   })
 
-  it('has no transition or animation: it is at the new place at once', () => {
-    expect(css).not.toMatch(/transition|animation/)
+  it('is medium bold, so the figures stay readable at a small size', () => {
+    expect(css).toContain('font-weight: var(--hf-tooltip-font-weight);')
+  })
+
+  it('slides to its new place, with the duration of a motion token and nothing else moving', () => {
+    expect(css).toContain('inset-block-start var(--hf-motion-duration-short) var(--hf-motion-ease-enter)')
+    expect(css).toContain('inset-inline-start var(--hf-motion-duration-short) var(--hf-motion-ease-enter)')
+    expect(css).not.toMatch(/animation/)
   })
 
   it.each(['light', 'dark'] as const)('has text that reaches 4.5:1 on its own fill in %s', (theme) => {
-    expect(contrast(role('text-default')[theme], role('background-surface')[theme])).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(role('background-surface')[theme], role('text-default')[theme])).toBeGreaterThanOrEqual(4.5)
   })
 
-  it.each(['light', 'dark'] as const)(
-    'has a border that reaches 3:1 on its fill and on every surface in %s',
-    (theme) => {
-      for (const ground of surfaces) {
-        expect(
-          contrast(role('border-input')[theme], role(`background-${ground}`)[theme]),
-          ground,
-        ).toBeGreaterThanOrEqual(3)
-      }
-    },
-  )
+  it.each(['light', 'dark'] as const)('has a fill that reaches 3:1 on every surface in %s', (theme) => {
+    for (const ground of surfaces) {
+      expect(contrast(role('text-default')[theme], role(`background-${ground}`)[theme]), ground).toBeGreaterThanOrEqual(
+        3,
+      )
+    }
+  })
 })

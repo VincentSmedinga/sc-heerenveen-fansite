@@ -2526,7 +2526,9 @@
 - **Datum:** 5 november 2026
 - **Besluit:** er komt een onderdeel `Tooltip` (map `tooltip/`) dat een korte tekst toont op een plek in zijn ouder (#726).
   De plek is een afstand van links en van onderen, als deel van de ouder (0 tot 100), en de ouder bepaalt de grootte en wanneer de tooltip er is.
-  Hij staat boven de plek, of eronder als er boven geen ruimte is, en blijft binnen de randen van de ouder; hij heeft geen pijl en geen beweging, en staat meteen op de nieuwe plek.
+  Hij staat boven de plek, of eronder als er boven geen ruimte is, en blijft binnen de randen van de ouder; hij heeft geen pijl.
+  De ouder kan zeggen dat er boven hem ruimte is (`overhang`, in pixels), en de tooltip mag daar overheen steken.
+  Bij een andere plek schuift hij naar de nieuwe plek, met de korte duur van de bewegingstokens (dus meteen bij verminderde beweging).
   Hij reageert zelf niet op de aanwijzer (`pointer-events: none`), is `aria-hidden`, krijgt geen focus en meldt Escape via `onClose`.
   `placeTooltip` in `tooltip/placement.ts` rekent de plek uit en `Tooltip` meet de ouder en de tooltip in een `useLayoutEffect`.
   - **`BarChart.Trend` krijgt `labels`:** per plek de tekst van de tooltip, of `null` voor een plek zonder punt, even lang als `values`.
@@ -2536,10 +2538,12 @@
   - **De aanwijzer zit in een eigen deel:** `TrendPointer` (`bar-chart/TrendPointer.tsx`) is de enige client-component van de grafiek en komt alleen in de pagina als er `labels` zijn.
     `nearestPoint` (`bar-chart/pointer.ts`) zoekt de plek met een punt die het dichtst bij de aanwijzer ligt, en slaat plekken zonder punt over.
     Op dat punt staat een stip, die dezelfde klasse heeft als de stip aan het eind van de lijn.
-  - **De kleuren zijn die van een vlak met de rand van een invoerveld** (`--hf-colour-background-surface`, `--hf-colour-text-default` en `--hf-colour-border-input`).
-    Een test (`tooltip-css.test.ts`) toetst de tekst op 4,5:1 en de rand op 3:1, in licht en donker.
+  - **De kleuren zijn die van de tekst, omgekeerd:** een vlak in `--hf-colour-text-default` met de tekst in `--hf-colour-background-surface`, zonder rand, in gewicht 500 (`--hf-tooltip-font-weight`).
+    Een test (`tooltip-css.test.ts`) toetst de tekst op 4,5:1 en het vlak op 3:1 op elk vlak van de pagina, in licht en donker.
+  - **De grafiek houdt ruimte vrij boven de lijn:** een `BarChart` met `labels` krijgt 24 pixels ruimte boven de plot (`bar-chart.css`, hetzelfde getal als `overhang` in `TrendPointer`), zodat de tooltip vaker boven een punt past.
 - **Waarom:** de lijn toont een gemiddelde, maar de bezoeker kon de waarde op een punt nergens aflezen.
   Een eigen onderdeel is ook bruikbaar voor `DonutChart` of een andere grafiek, en houdt `BarChart.Trend` eenvoudig.
+- **Later (5 november 2026, op verzoek van de projecteigenaar):** de tooltip had een licht vlak met een rand en sprong naar de nieuwe plek; nu is hij omgekeerd, vet (500) en schuift hij.
 - **Alternatieven:** de tooltip in `BarChart.Trend` zelf bouwen (niet te hergebruiken); een tooltip die om elk element heen past en bij hover en focus verschijnt (veel meer werk: focus, `aria-describedby` en een positie die live wordt berekend, en de grafiek heeft dat niet nodig); een functie die de tekst maakt (kan niet tussen servercomponenten); de speelronde of de uitslag ook in de tooltip (dubbel met wat eronder staat).
 - **Later:** vult _Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen_ (27 oktober 2026) aan: `BarChart.Trend` heeft nu een deel dat JavaScript nodig heeft, maar alleen met `labels`.
 
