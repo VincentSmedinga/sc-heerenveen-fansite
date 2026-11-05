@@ -1,10 +1,10 @@
-import { render } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { FormResult } from './form'
 
 import { tableColumns, tableLegend } from '../table-columns'
-import { formOf } from './form'
+import { averagesOf, formatAverage, formOf } from './form'
 import { FormChart } from './FormChart'
 
 /** The text of the page under the chart, as a screen reader gets it (the chart is hidden). */
@@ -130,5 +130,40 @@ describe('FormChart', () => {
 
     expect(container.querySelector('.hf-bar-chart')?.getAttribute('aria-hidden')).toBe('true')
     expect(container.querySelector('.hf-form-chart > p[aria-hidden]')).toBeNull()
+  })
+
+  it('gives the line a tooltip with the average of the match the pointer is nearest to', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      bottom: 64,
+      height: 64,
+      left: 0,
+      right: 340,
+      toJSON: () => ({}),
+      top: 0,
+      width: 340,
+      x: 0,
+      y: 0,
+    })
+
+    const { container } = render(<FormChart results={season} />)
+    const layer = container.querySelector<HTMLElement>('.hf-bar-chart-pointer')!
+    const tooltip = () => container.querySelector('.hf-tooltip')?.textContent
+
+    // 34 places of 10 wide. The first match averaged 3; matches 8 to 12 scored 3, 0, 3, 3, 1.
+    fireEvent.pointerMove(layer, { clientX: 2, pointerType: 'mouse' })
+    expect(tooltip()).toBe('3,0')
+    fireEvent.pointerMove(layer, { clientX: 335, pointerType: 'mouse' })
+    expect(tooltip()).toBe('2,0')
+    expect(textOf(container).at(-1)).toContain('nu 2,0.')
+    expect(tooltip()).toBe(formatAverage(averagesOf(season).at(-1)!))
+
+    vi.restoreAllMocks()
+  })
+
+  it('has no tooltip before a match is played', () => {
+    const { container } = render(<FormChart results={[]} />)
+
+    fireEvent.pointerMove(container.querySelector('.hf-bar-chart-pointer')!, { clientX: 20, pointerType: 'mouse' })
+    expect(container.querySelector('.hf-tooltip')).toBeNull()
   })
 })

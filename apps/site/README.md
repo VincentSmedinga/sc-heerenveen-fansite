@@ -406,7 +406,10 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   `leagueResultsOf` in `src/matches.ts` maakt de lijst `W`, `G` en `V` uit de gespeelde wedstrijden van de Eredivisie met een uitslag, op volgorde van speeldatum; een bekerwedstrijd telt niet mee.
   Een uitgestelde wedstrijd heeft pas een staafje als hij gespeeld is, en staat dan op de plek waar hij gespeeld is.
   Een geannuleerde wedstrijd heeft nooit een staafje.
+  Een tooltip volgt de muis, een pen of een vinger langs de lijn en toont het gemiddelde op het dichtstbijzijnde punt, bijvoorbeeld "1,8".
   Onder de grafiek staat dezelfde informatie als tabel (`DataTable`: winst, gelijk, verlies en totaal, met de wedstrijden en de punten), die de schermlezer krijgt, want de grafiek is voor hulpsoftware verborgen.
+  Daaronder staat een uitklapper, dicht, met een tabel per gespeelde speelronde: de speelronde, de uitslag, de punten en het gemiddelde over de laatste vijf wedstrijden.
+  De tabel rekent met `averagesOf` en `formatAverage` uit het designsysteem, dus met dezelfde getallen als de tooltip.
   Zonder een uitslag staat er een zin in plaats van de grafiek.
 - **Reeksen:** een kaart in de linker kolom, direct na Verloop van het seizoen, in het zachte vlak.
   `streaksOf` in `src/matches.ts` geeft zes reeksen uit de score van de gespeelde wedstrijden: ongeslagen, gewonnen, zonder winst, verloren, gescoord en zonder tegendoelpunt.

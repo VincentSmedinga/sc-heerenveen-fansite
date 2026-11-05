@@ -48,6 +48,7 @@ const components = [
   'Text',
   'Textarea',
   'Tile',
+  'Tooltip',
   'TopScorersTable',
   'WikipediaCredit',
 ]

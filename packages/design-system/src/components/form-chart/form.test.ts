@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formOf, pointsOf, slots, toneOf } from './form'
+import { averagesOf, formatAverage, formOf, pointsOf, slots, toneOf } from './form'
 
 describe('pointsOf', () => {
   it('gives 3 points for a win, 1 for a draw and none for a loss', () => {
@@ -55,5 +55,31 @@ describe('slots', () => {
 
   it('leaves out results past the number of matches', () => {
     expect(slots(['W', 'W', 'W'], 2)).toHaveLength(2)
+  })
+})
+
+describe('averagesOf', () => {
+  it('gives an average for every match played, starting at the first, over at most five', () => {
+    // The points are 3, 3, 1, 0, 3, 1: the windows hold 1, 2, 3, 4, 5 and then 5 matches.
+    expect(averagesOf(['W', 'W', 'G', 'V', 'W', 'G'])).toEqual([3, 3, 7 / 3, 7 / 4, 2, 8 / 5])
+  })
+
+  it('takes the window from the second argument', () => {
+    expect(averagesOf(['W', 'G', 'V'], 2)).toEqual([3, 2, 0.5])
+  })
+
+  it('gives nothing for a season that has not begun', () => {
+    expect(averagesOf([])).toEqual([])
+  })
+})
+
+describe('formatAverage', () => {
+  it('writes one decimal with a comma', () => {
+    expect([formatAverage(1.8), formatAverage(3), formatAverage(7 / 4), formatAverage(0)]).toEqual([
+      '1,8',
+      '3,0',
+      '1,8',
+      '0,0',
+    ])
   })
 })
