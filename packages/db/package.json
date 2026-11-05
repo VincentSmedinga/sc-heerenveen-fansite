@@ -15,6 +15,7 @@
     "./clubs": "./src/clubs.ts",
     "./env": "./src/env.ts",
     "./lock": "./src/lock.ts",
+    "./match-changes": "./src/match-changes.ts",
     "./match-conflict-mail": "./src/match-conflict-mail.ts",
     "./match-conflicts": "./src/match-conflicts.ts",
     "./match-edits": "./src/match-edits.ts",

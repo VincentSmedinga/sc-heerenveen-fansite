@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchChange, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
+import { decideChange } from '@fansite/db/match-changes'
 import { type ConflictOutcome, decideConflict } from '@fansite/db/match-conflicts'
 import {
   describeEntryGoals,
@@ -13,6 +14,7 @@ import {
   refreshSnapshot,
   removeEntry,
 } from '@fansite/db/match-edits'
+import { listWikipediaPages } from '@fansite/db/queries'
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
 import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
@@ -37,11 +39,39 @@ export type AdminMatchRow = Awaited<ReturnType<typeof listAdminMatches>>['rows']
 /** A difference between Wikipedia and an entry of the editors that waits for a decision. */
 export type Difference = MatchChange & { part: MatchPart }
 
+/**
+ * A change of Wikipedia that the importer holds back, because it looks suspicious: it has no
+ * `part`, and the match, the goals and the log stay as they are until a person decides.
+ */
+export type HeldChange = MatchChange & { matchId: number; part: null }
+
 /** What removing an entry did: it is gone, there was none, or there is no such match. */
 export type RemoveOutcome = 'done' | 'missing' | 'none'
 
 /** What an entry did. */
 export type SaveOutcome = { parts: MatchPart[]; status: 'saved' } | { status: 'missing' } | { status: 'unchanged' }
+
+/**
+ * The changes of Wikipedia that the importer holds back, in all seasons: how many, and the
+ * seasons they are in, the newest first. The start page tells the number and links to a season
+ * in the list. A difference with an entry of the editors is not one of them
+ * (`countWaitingDifferences`).
+ */
+export async function countHeldChanges(db: Pick<Database, 'select'>): Promise<{ seasons: string[]; total: number }> {
+  const found = await db
+    .select({ season: matchChanges.season, total: count() })
+    .from(matchChanges)
+    .where(and(eq(matchChanges.status, 'pending'), isNull(matchChanges.part), isNotNull(matchChanges.matchId)))
+    .groupBy(matchChanges.season)
+
+  return {
+    seasons: found
+      .map((row) => row.season)
+      .sort()
+      .reverse(),
+    total: found.reduce((sum, row) => sum + row.total, 0),
+  }
+}
 
 /**
  * How many matches of a season have no result two hours after their kick-off (`lacksResult`,
@@ -108,6 +138,23 @@ export async function decideDifference(
   )
 }
 
+/**
+ * A beheerder decides a change that Wikipedia holds back: Wikipedia is taken over (the match
+ * and its goals change, or the match goes), or the match stays as it is. This is the code the
+ * command `import:changes` uses too (`decideChange`), in one transaction with its line in the
+ * log.
+ */
+export async function decideHeldChange(
+  db: Database,
+  userId: number,
+  id: number,
+  kind: 'keep' | 'take-over',
+  reason: string,
+  now = new Date(),
+): Promise<ConflictOutcome> {
+  return db.transaction((transaction) => decideChange(transaction, id, { kind, reason, userId }, now))
+}
+
 /** The difference with this number if it waits, or undefined. */
 export async function findDifference(db: Pick<Database, 'select'>, id: number): Promise<Difference | undefined> {
   const [change] = await db
@@ -116,6 +163,18 @@ export async function findDifference(db: Pick<Database, 'select'>, id: number): 
     .where(and(eq(matchChanges.id, id), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
 
   return change === undefined || change.part === null ? undefined : { ...change, part: change.part }
+}
+
+/** The held change with this number if it waits, or undefined. */
+export async function findHeldChange(db: Pick<Database, 'select'>, id: number): Promise<HeldChange | undefined> {
+  const [change] = await db
+    .select()
+    .from(matchChanges)
+    .where(and(eq(matchChanges.id, id), eq(matchChanges.status, 'pending'), isNull(matchChanges.part)))
+
+  return change === undefined || change.part !== null || change.matchId === null
+    ? undefined
+    : { ...change, matchId: change.matchId, part: null }
 }
 
 /** The match with this number, for the form, or `undefined` for none. */
@@ -142,7 +201,9 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     differences: await waitingDifferences(db, id),
     edit: edit === undefined ? undefined : { ...edit.row, editedByEmail: edit.editedByEmail },
     goals,
+    held: await waitingHeldChanges(db, id),
     match,
+    pages: await listWikipediaPages(db, match.season),
     squad,
   }
 }
@@ -150,8 +211,9 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
 /**
  * The matches of a season for the list: the matches without a result two hours after their
  * kick-off first (`lacksResult`, as the pages of visitors have it), then the rest in the order
- * of the season. `edited` says which parts the editors hold, and `differs` how many of them
- * Wikipedia says something else about, which waits for a decision.
+ * of the season. `edited` says which parts the editors hold, `differs` how many of them
+ * Wikipedia says something else about, which waits for a decision, and `held` how many changes
+ * of Wikipedia the importer holds back for the match.
  */
 export async function listAdminMatches(db: Database, season: string, now: Date) {
   const found = await db
@@ -181,10 +243,15 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
     .select({ matchId: matchChanges.matchId, part: matchChanges.part })
     .from(matchChanges)
     .where(and(eq(matchChanges.season, season), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
+  const holding = await db
+    .select({ matchId: matchChanges.matchId })
+    .from(matchChanges)
+    .where(and(eq(matchChanges.season, season), eq(matchChanges.status, 'pending'), isNull(matchChanges.part)))
   const rows = found.map((match) => ({
     ...match,
     differs: differing.filter((change) => change.matchId === match.id).length,
     edited: edits.has(match.id) ? markedParts(edits.get(match.id) as MatchEdit) : [],
+    held: holding.filter((change) => change.matchId === match.id).length,
     lacksResult: lacksResult(match, now),
   }))
 
@@ -377,6 +444,17 @@ export async function waitingDifferences(db: Pick<Database, 'select'>, matchId: 
     .orderBy(asc(matchChanges.id))
 
   return found.filter((change): change is Difference => change.part !== null)
+}
+
+/** The changes of Wikipedia that are held back for one match, oldest first. */
+export async function waitingHeldChanges(db: Pick<Database, 'select'>, matchId: number): Promise<HeldChange[]> {
+  const found = await db
+    .select()
+    .from(matchChanges)
+    .where(and(eq(matchChanges.matchId, matchId), eq(matchChanges.status, 'pending'), isNull(matchChanges.part)))
+    .orderBy(asc(matchChanges.id))
+
+  return found.map((change) => ({ ...change, matchId, part: null }))
 }
 
 /** A kick-off to the minute: the form has no seconds, so a stored second is no difference. */

@@ -2,25 +2,23 @@
 // change that is judged suspicious, and deciding one, by the importer after seven days or by a
 // person. `classify-change.ts` judges; this file holds what the database needs for it.
 import type { Database } from '@fansite/db/client'
-import type { Match, MatchChange, NewMatchChange, NewMatchGoal } from '@fansite/db/schema'
+import type { Proposal } from '@fansite/db/match-changes'
+import type { Match, MatchChange, NewMatchChange } from '@fansite/db/schema'
 
+import { decideChange, encodeProposal } from '@fansite/db/match-changes'
 import { decideConflict } from '@fansite/db/match-conflicts'
-import { matchChanges, matches, matchGoals } from '@fansite/db/schema'
+import { matchChanges } from '@fansite/db/schema'
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm'
 
 import type { Judgement, MatchHistory } from './classify-change.ts'
-import type { ReadGoal, ReadMatch } from './read-wikipedia.ts'
 
 import { reliability } from './classify-change.ts'
 
 /** What a person's decision came to. */
 export type Decision = { change: MatchChange; message: string; ok: boolean }
 
-/** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
-export type LinkedGoal = ReadGoal & { personId: null | number; playerId: null | number }
-
-/** The new state of a match: what the page says, its club and its goals. */
-export type Proposal = { clubId: number; goals: LinkedGoal[]; match: ReadMatch }
+export type { LinkedGoal, Proposal } from '@fansite/db/match-changes'
+export { decodeProposal, encodeProposal, storeGoals, updateMatch } from '@fansite/db/match-changes'
 
 /**
  * What the changes of the season say that the judgement needs: for each match the values it had
@@ -67,30 +65,6 @@ export async function decide(
   now: Date,
 ) {
   await db.update(matchChanges).set({ decidedAt: now, resolution, status }).where(eq(matchChanges.id, change.id))
-}
-
-/** The proposal in JSON text, or undefined when the text is not one we wrote. */
-export function decodeProposal(text: null | string): Proposal | undefined {
-  if (text === null) {
-    return undefined
-  }
-
-  try {
-    const parsed = JSON.parse(text, (name, value: unknown) =>
-      name === 'kickoffAt' && typeof value === 'string' ? new Date(value) : value,
-    ) as Proposal
-
-    return Array.isArray(parsed.goals) && typeof parsed.clubId === 'number' && typeof parsed.match.round === 'string'
-      ? parsed
-      : undefined
-  } catch {
-    return undefined
-  }
-}
-
-/** The proposal as JSON text, for `match_changes.proposal`. */
-export function encodeProposal(proposal: Proposal): string {
-  return JSON.stringify(proposal)
 }
 
 /** Whether a waiting change has stood long enough to be taken over. */
@@ -190,61 +164,10 @@ export async function rejectChanges(db: Database, ids: 'all' | number[], now: Da
   const decisions: Decision[] = []
 
   for (const change of await changesToDecide(db, ids)) {
-    if (change.part !== null) {
-      // A difference with an entry of the editors: keep the entry, as the admin does.
-      decisions.push(await db.transaction((transaction) => decideDifference(transaction, change, 'keep', now)))
-      continue
-    }
-
-    await decide(db, change, 'rejected', 'person', now)
-    decisions.push({ change, message: 'rejected', ok: true })
+    decisions.push(await db.transaction((transaction) => decideWaiting(transaction, change, 'keep', now)))
   }
 
   return decisions
-}
-
-/** Writes the goals of a match in the order they are shown, so `id` keeps that order. */
-export async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: LinkedGoal[]) {
-  if (goals.length > 0) {
-    await db.insert(matchGoals).values(
-      goals.map(({ playerPage, ...goal }): NewMatchGoal => ({
-        ...goal,
-        matchId,
-        wikipediaPage: playerPage,
-      })),
-    )
-  }
-}
-
-/**
- * Makes a stored match what the page says. `result_set_at` moves only when the result does: it
- * is the moment the import first saw the result as it stands. The goals are written again when
- * `goalsChanged` says they differ.
- */
-export async function updateMatch(
-  db: Pick<Database, 'delete' | 'insert' | 'update'>,
-  before: Pick<Match, 'goalsAgainst' | 'goalsFor' | 'id' | 'resultSetAt' | 'status'>,
-  proposal: Proposal,
-  goalsChanged: boolean,
-  now: Date,
-) {
-  const { clubId, goals, match } = proposal
-  const sameResult =
-    before.status === match.status && before.goalsFor === match.goalsFor && before.goalsAgainst === match.goalsAgainst
-
-  await db
-    .update(matches)
-    .set({
-      ...match,
-      clubId,
-      resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null,
-    })
-    .where(eq(matches.id, before.id))
-
-  if (goalsChanged) {
-    await db.delete(matchGoals).where(eq(matchGoals.matchId, before.id))
-    await storeGoals(db, before.id, goals)
-  }
 }
 
 /** The changes that wait, oldest first, for any season. */
@@ -253,42 +176,8 @@ export async function waitingChanges(db: Pick<Database, 'select'>): Promise<Matc
 }
 
 /** Takes one waiting change over. */
-async function acceptChange(db: Writer, change: MatchChange, now: Date): Promise<Decision> {
-  if (change.part !== null) {
-    // A difference with an entry of the editors: take that part over, as the admin does.
-    return decideDifference(db, change, 'take-over', now)
-  }
-
-  const [row] = await db
-    .select()
-    .from(matches)
-    .where(
-      and(
-        eq(matches.season, change.season),
-        eq(matches.competition, change.competition),
-        eq(matches.round, change.round),
-      ),
-    )
-
-  if (row === undefined) {
-    return { change, message: 'the match is not in the database any more', ok: false }
-  }
-
-  if (change.newValue === null) {
-    await db.delete(matches).where(eq(matches.id, row.id))
-  } else {
-    const proposal = decodeProposal(change.proposal)
-
-    if (proposal === undefined) {
-      return { change, message: 'the change has no proposal to apply', ok: false }
-    }
-
-    await updateMatch(db, row, proposal, true, now)
-  }
-
-  await decide(db, change, 'accepted', 'person', now)
-
-  return { change, message: 'accepted', ok: true }
+function acceptChange(db: Writer, change: MatchChange, now: Date): Promise<Decision> {
+  return decideWaiting(db, change, 'take-over', now)
 }
 
 /** The changes with these numbers that wait. A number that waits no more is left out. */
@@ -308,24 +197,27 @@ async function changesToDecide(db: Pick<Database, 'select'>, ids: 'all' | number
     .orderBy(asc(matchChanges.id))
 }
 
-/** Decides a difference with an entry of the editors, with the code the admin uses. */
-async function decideDifference(
+/**
+ * Decides a waiting change with the code the admin uses: a difference with an entry of the
+ * editors (`decideConflict`) or a change that Wikipedia holds back (`decideChange`). The
+ * command has no reason of its own, so it gives the same one for both.
+ */
+async function decideWaiting(
   db: Writer,
   change: MatchChange,
   kind: 'keep' | 'take-over',
   now: Date,
 ): Promise<Decision> {
-  const outcome = await decideConflict(
-    db,
-    change.id,
-    {
-      kind,
-      reason: 'Besloten met het commando import:changes',
-      resolution: 'person',
-      userId: null,
-    },
-    now,
-  )
+  const decision = {
+    kind,
+    reason: 'Besloten met het commando import:changes',
+    resolution: 'person' as const,
+    userId: null,
+  }
+  const outcome =
+    change.part === null
+      ? await decideChange(db, change.id, decision, now)
+      : await decideConflict(db, change.id, decision, now)
 
   switch (outcome) {
     case 'done':

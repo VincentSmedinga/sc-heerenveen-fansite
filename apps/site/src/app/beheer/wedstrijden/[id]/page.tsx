@@ -2,20 +2,23 @@ import type { Metadata } from 'next'
 
 import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
-import { Breadcrumb, Card, Heading, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { compact } from '#src/beheer/density'
+import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
 import { goalKinds, statusChoices, valuesOf } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
+import { wikipediaUrl } from '#src/match-format'
 import { describeShowDelay, lacksResult } from '#src/matches'
 import { formatVersionTime } from '#src/news'
 
-import { submitConflict, submitMatch, submitRemoveEntry } from '../actions'
+import { submitConflict, submitHeldChange, submitMatch, submitRemoveEntry } from '../actions'
 import { ConflictForm } from '../ConflictForm'
+import { HeldChangeForm } from '../HeldChangeForm'
 import { MatchErrorSummary, MatchFields, MatchFormProvider, MatchSavePanel } from '../MatchForm'
 import { matchesPath } from '../paths'
 import { RemoveEntryForm } from '../RemoveEntryForm'
@@ -50,6 +53,18 @@ const notices: Record<string, { text: string; title: string }> = {
     text: 'De wedstrijd is teruggezet naar wat er stond voor de eerste invoer. De import leest bij de volgende keer weer wat Wikipedia zegt.',
     title: 'Invoer weggehaald',
   },
+  'wijziging-afgewezen': {
+    text: 'De wedstrijd blijft zoals hij is. De import meldt deze wijziging niet nog eens, zolang Wikipedia dezelfde waarde toont.',
+    title: 'Wijziging afgewezen',
+  },
+  'wijziging-niet-gelukt': {
+    text: 'Er is niets veranderd: van deze wijziging is niet te lezen wat Wikipedia zegt. Wijs haar af.',
+    title: 'Niet overgenomen',
+  },
+  'wikipedia-overgenomen': {
+    text: 'De wedstrijd en de doelpunten zijn nu wat Wikipedia zegt.',
+    title: 'Wikipedia overgenomen',
+  },
 }
 
 // The form of one match, with what the editors entered of it so far, the differences with
@@ -66,7 +81,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { differences, edit, goals, match, squad } = found
+  const { differences, edit, goals, held, match, pages, squad } = found
   const { gedaan } = await searchParams
   const showDelay = describeShowDelay(match.season)
   const notice =
@@ -77,7 +92,8 @@ export default async function MatchPage({ params, searchParams }: Props) {
         : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
-  const lacking = lacksResult(match, new Date())
+  const now = new Date()
+  const lacking = lacksResult(match, now)
   const parts =
     edit === undefined
       ? ''
@@ -158,6 +174,69 @@ export default async function MatchPage({ params, searchParams }: Props) {
             />
           </Card>
         ))}
+        {held.map((change) => {
+          const summary = describeHeldChange(change, match, goals)
+          const outcome = describeWithoutDecision(change, now)
+          const page = pages.find((candidate) => candidate.kind === pageKindOf(match.competition))
+          const what = summary.removal
+            ? 'het weghalen van de wedstrijd'
+            : summary.differences.length === 0
+              ? 'de wijziging'
+              : listWords(summary.differences.map((difference) => difference.label.toLowerCase()))
+
+          return (
+            <Card aria-labelledby={`wijziging-${change.id}-kop`} key={change.id}>
+              <Heading id={`wijziging-${change.id}-kop`} level={2}>
+                Wikipedia wacht: {what}
+              </Heading>
+              <Text>{explainHold(change.reason)}</Text>
+              {summary.removal ? (
+                <List role="list">
+                  <List.Item>
+                    <Text>Op de site: de wedstrijd staat er.</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>Wikipedia: de wedstrijd staat niet meer op de pagina.</Text>
+                  </List.Item>
+                </List>
+              ) : summary.differences.length === 0 ? (
+                <Text>Alleen een verwijzing is anders, zoals de pagina van een speler of van de tegenstander.</Text>
+              ) : (
+                <List role="list">
+                  {summary.differences.map((difference) => (
+                    <List.Item key={difference.label}>
+                      <Text>
+                        <Strong>{difference.label}.</Strong> Op de site: {difference.site}. Wikipedia:{' '}
+                        {difference.wikipedia}.
+                      </Text>
+                    </List.Item>
+                  ))}
+                </List>
+              )}
+              <Text appearance="meta">
+                Wikipedia zegt dit sinds {formatVersionTime(change.firstSeenAt)}. De import zag het{' '}
+                {change.timesSeen === 1 ? 'één keer' : `${change.timesSeen} keer`}, voor het laatst op{' '}
+                {formatVersionTime(change.lastSeenAt)}.{' '}
+                {outcome.kind === 'taken-over'
+                  ? `Zonder besluit neemt de import dit over op ${formatVersionTime(outcome.at)}, als Wikipedia dan nog hetzelfde zegt.`
+                  : 'De import leest dit seizoen niet meer. Zonder besluit blijft de huidige waarde staan.'}
+              </Text>
+              {page === undefined ? null : (
+                <Text>
+                  <Link href={wikipediaUrl(page.title, page.kind)} icon="external-link">
+                    Bekijk {page.title} op Wikipedia
+                  </Link>
+                </Text>
+              )}
+              <HeldChangeForm
+                action={submitHeldChange.bind(null, change.id)}
+                id={change.id}
+                title={title}
+                what={what}
+              />
+            </Card>
+          )
+        })}
         <MatchFields />
       </Page.Main>
       <Page.Sidebar aria-label="Opslaan en invoer" sticky>
@@ -189,4 +268,22 @@ export default async function MatchPage({ params, searchParams }: Props) {
       </Page.Sidebar>
     </MatchFormProvider>
   )
+}
+
+/** Words in a row: "a", "a en b", "a, b en c". */
+function listWords(words: string[]) {
+  const last = words.at(-1)
+
+  return words.length < 2 ? (last ?? '') : `${words.slice(0, -1).join(', ')} en ${last}`
+}
+
+/** The page of Wikipedia that holds the matches of a competition. */
+function pageKindOf(competition: string) {
+  return competition === 'Eredivisie'
+    ? 'programme'
+    : competition === 'KNVB Beker'
+      ? 'cup'
+      : competition === 'Europa League'
+        ? 'europa-league'
+        : 'playoffs'
 }

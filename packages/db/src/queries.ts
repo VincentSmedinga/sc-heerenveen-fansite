@@ -725,7 +725,7 @@ export async function listStaffInSeason(db: Database, role: StaffRole, season: s
  * order is the standings, the programme and the cup. The page of the squad is not one of them.
  * The `Last-Modified` of a page stays internal.
  */
-export async function listWikipediaPages(db: Database, season: string) {
+export async function listWikipediaPages(db: Pick<Database, 'select'>, season: string) {
   const rows = await db
     .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, title: wikipediaPages.title })
     .from(wikipediaPages)

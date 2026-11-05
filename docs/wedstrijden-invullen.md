@@ -80,6 +80,30 @@ Zet Wikipedia zelf de waarde van de redactie terug, dan vervalt de afwijking.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` houdt de invoer.
 
+## Een vastgehouden wijziging beslissen
+
+De import houdt soms een wijziging van Wikipedia vast, omdat hij verdacht lijkt: een uitslag die verandert nadat hij een dag stond, een doelpunt in een wedstrijd van een week geleden, of een wedstrijd die van de pagina verdwijnt.
+Tot iemand beslist, blijven de wedstrijd en de doelpunten zoals ze zijn.
+Een vastgehouden wijziging staat op de kaart "Te doen" van de startpagina, en op `/beheer/wedstrijden` onder "Wikipedia wacht" met het label "Wikipedia wacht" bij de wedstrijd.
+Dat werkt ook voor een seizoen dat voorbij is.
+
+Open de wedstrijd.
+De kaart "Wikipedia wacht" zegt wat er nu op de site staat en wat Wikipedia nu zegt, waarom de wijziging wacht, sinds wanneer Wikipedia het zegt, en wat er zonder besluit gebeurt.
+Daar staat ook een koppeling naar de pagina van het seizoen op Wikipedia, om het zelf na te kijken.
+Schrijf bij "Reden" waarom je beslist, en kies:
+
+- **Neem Wikipedia over:** de wedstrijd en de doelpunten worden wat Wikipedia nu zegt.
+  Staat de wedstrijd niet meer op de pagina, dan gaat hij van de site.
+- **Wijs af:** de wedstrijd blijft zoals hij is.
+  De import meldt de wijziging niet nog eens, zolang Wikipedia dezelfde waarde toont.
+
+Het besluit komt in het logboek, met wie en waarom.
+In het lopende seizoen neemt de import de wijziging over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
+In een seizoen dat voorbij is leest de import de pagina niet meer, dus daar blijft de huidige waarde staan tot iemand beslist.
+Alleen een beheerder ziet deze schermen en kan beslissen.
+
+Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` laat de wedstrijd staan.
+
 ## Invoer weghalen
 
 Op de pagina van een wedstrijd met een invoer staat naast het formulier, onder "Laatste invoer", een blok "Invoer weghalen".

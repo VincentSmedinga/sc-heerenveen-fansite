@@ -2528,3 +2528,40 @@
   Een doelpunt zonder speler maar met een pagina telt niet meer voor een gekoppeld doelpunt met dezelfde pagina: de persoon doet dat nu.
 - **Alternatieven:** de titel blijven gebruiken en alleen de doorverwijzingen bij het tonen oplossen (een verzoek per bezoek of een lijst in de site).
   De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).
+
+## Een vastgehouden wijziging van Wikipedia beslist een beheerder in het beheer, in de schermen van de wedstrijden
+
+- **Datum:** 5 november 2026
+- **Besluit:** alleen een beheerder neemt een vastgehouden wijziging over of wijst haar af, met een reden die in het logboek komt (#752).
+  De wijzigingen staan in de lijst per seizoen onder "Wikipedia wacht (n)", als kaart op de pagina van de wedstrijd en als regel op de kaart "Te doen".
+  Het logboek gebruikt `match.take-over` en `match.keep`, de soorten van een afwijking met de invoer van de redactie: de enum van `audit_log.action` verandert niet, en het `detail` zegt dat het een wijziging van Wikipedia is.
+- **Waarom:** de schermen van de wedstrijden en het besluit over een afwijking met de invoer van de redactie zijn al voor de beheerder, en een vastgehouden wijziging is verdacht, dus beslist wie al over de gegevens van Wikipedia beslist.
+  Eén plek per soort voorkomt dat de eigenaar op de host moet zijn voor wat een scherm kan.
+- **Alternatieven:** ook redacteuren laten beslissen (verworpen: zij komen niet op de schermen van de wedstrijden en het zou de groep vergroten die wedstrijdgegevens raakt).
+  Eén nieuwe pagina met alle wijzigingen van alle seizoenen (verworpen: een nieuw scherm naast drie die het al kunnen, en de wedstrijd zelf staat er niet bij).
+  Nieuwe soorten in het logboek (verworpen: het vraagt een migratie van de enum, en de twee soorten zeggen al wat er gebeurt).
+
+## Een vastgehouden wijziging in een afgelopen seizoen neemt alleen een mens over
+
+- **Datum:** 5 november 2026
+- **Besluit:** er komt geen geplande import die een afgelopen seizoen opnieuw leest, zodat de zeven dagen daar werken.
+  Het scherm zegt bij zo'n wijziging dat er zonder besluit niets verandert, en de kaart "Te doen" zorgt dat een beheerder haar ziet.
+  Een seizoen is afgelopen als het vóór het seizoen van vandaag ligt (`describeWithoutDecision`).
+- **Waarom:** een afgelopen seizoen verandert niet meer, en wat Wikipedia daar nog wijzigt is verdacht.
+  Een extra opdracht op de host kost werk en opent het seizoen voor bewerkingen zonder dat iemand kijkt; het scherm maakt het besluit goedkoop.
+- **Alternatieven:** een geplande opdracht die afgelopen seizoenen met een vastgehouden wijziging opnieuw leest (verworpen: een cron-opdracht en een extra import erbij, en een vandaal kan wachten).
+  Wachten tot iemand `pnpm run import:season` draait, de gang van zaken tot nu toe (verworpen: niemand ziet de wijziging).
+
+## Het scherm en het commando gebruiken dezelfde code voor het besluit, en het scherm toont wat de import bewaarde
+
+- **Datum:** 5 november 2026
+- **Besluit:** de code die een voorstel toepast verhuist van de importer naar `packages/db/src/match-changes.ts`, zoals `decideConflict` in `match-conflicts.ts`: `decideChange`, met `updateMatch`, `storeGoals`, het voorstel en de typen `ReadMatch` en `ReadGoal`.
+  De importer haalt ze uit dat pakket.
+  Het scherm laat zien wat de site heeft en wat Wikipedia nu zegt, in woorden en per onderdeel dat verschilt, uit het voorstel dat de import bewaarde.
+  Het toont ook sinds wanneer en hoe vaak de import het zag, waarom de wijziging wacht (de Engelse reden van de import in het Nederlands), wat er zonder besluit gebeurt en een link naar de pagina van het seizoen op Wikipedia.
+  Een besluit over een wedstrijd die er niet meer is, verandert niets en zegt dat.
+- **Waarom:** twee wegen naar hetzelfde besluit moeten hetzelfde doen, en een beheerder die niet ziet sinds wanneer en waarom iets wacht, kan niet beslissen.
+  De regel van de import in één regel tekst (`old_value` en `new_value`) is Engels en voor een machine; het voorstel heeft de velden.
+- **Alternatieven:** de code in de importer laten en in de site kopiëren (verworpen: ze lopen uit elkaar).
+  Alleen de oude en de nieuwe waarde tonen (verworpen: de beheerder moet raden hoe oud het is en waar hij het controleert).
+  De regel `old_value` en `new_value` tonen (verworpen: Engels, en een lange regel op een telefoon).

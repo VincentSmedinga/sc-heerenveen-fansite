@@ -1251,6 +1251,9 @@ pnpm run import:changes reject 12 13
 pnpm run import:changes accept all
 ```
 
+- De beheerders kunnen een vastgehouden wijziging ook beslissen in het beheer, op de pagina van de wedstrijd (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
+  Het scherm en de opdracht gebruiken dezelfde code, `decideChange` in `packages/db/src/match-changes.ts`, die ook het voorstel naar de wedstrijd schrijft (`updateMatch`).
+  Het scherm schrijft `match.take-over` of `match.keep` met de reden en het account in het logboek van het beheer; de opdracht doet dat zonder account, met de reden `Besloten met het commando import:changes`.
 - Zonder argument toont de opdracht de wijzigingen die wachten, met nummer, de oude en de nieuwe waarde en het moment waarop de import ze overneemt.
 - `accept` en `reject` nemen nummers of `all`.
   Ze vragen niets aan Wikipedia: een geaccepteerde wijziging wordt wat de import zag op het moment van de wijziging.

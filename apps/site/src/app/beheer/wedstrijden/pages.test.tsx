@@ -1,9 +1,20 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matchChanges, matchEdits, matches, type NewMatch, players } from '@fansite/db/schema'
+import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
+import {
+  adminUsers,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  type NewMatch,
+  players,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -42,6 +53,8 @@ const season = seasonOf(new Date())
 beforeEach(async () => {
   requireRole.mockReset()
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM match_changes')
+  await database.pool.query('DELETE FROM wikipedia_pages')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
@@ -703,7 +716,7 @@ describe('the match', () => {
     })
 
     it('tells the editor on the list that a difference was decided already', async () => {
-      expect(await list({ fout: 'besloten' })).toContain('Over deze afwijking is al beslist')
+      expect(await list({ fout: 'besloten' })).toContain('Over deze afwijking of wijziging is al beslist')
     })
   })
 
@@ -715,12 +728,230 @@ describe('the match', () => {
     ['ongewijzigd', 'Niets veranderd'],
     ['weggehaald', 'Invoer weggehaald'],
     ['geen-invoer', 'Niets weggehaald'],
+    ['wikipedia-overgenomen', 'Wikipedia overgenomen'],
+    ['wijziging-afgewezen', 'Wijziging afgewezen'],
+    ['wijziging-niet-gelukt', 'Niet overgenomen'],
   ])('tells what the last action did, in a notice without a heading: %s', async (done, title) => {
     const id = await addMatch()
     const html = await form(id, { gedaan: done })
 
     expect(html).toMatch(new RegExp(`<p class="hf-notice" role="status"><strong>${title}\\.</strong> `, 'u'))
     expect(headings(html).join()).not.toContain(title)
+  })
+
+  describe('a change of Wikipedia that is held back', () => {
+    const wikipedia: ReadMatch = {
+      afterNinetyAgainst: null,
+      afterNinetyFor: null,
+      attendance: null,
+      competition: 'KNVB Beker',
+      dateText: null,
+      extraTime: false,
+      factsProblem: null,
+      goals: null,
+      goalsAgainst: 0,
+      goalsFor: 1,
+      goalsProblem: null,
+      home: true,
+      kickoffAt: new Date('2014-02-05T19:45:00Z'),
+      matchDate: '2014-02-05',
+      note: null,
+      opponent: 'Ajax',
+      opponentPage: null,
+      penaltiesAgainst: null,
+      penaltiesFor: null,
+      referee: null,
+      round: 'Achtste finales',
+      stadium: null,
+      status: 'played',
+    }
+
+    /** The cup match of 2013/14 where Wikipedia now calls the goal of Ziyech a penalty. */
+    async function withHeldChange(overrides: Partial<typeof matchChanges.$inferInsert> = {}, season = '2013/14') {
+      const id = await addMatch({
+        competition: 'KNVB Beker',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        kickoffAt: new Date('2014-02-05T19:45:00Z'),
+        matchDate: '2014-02-05',
+        opponent: 'Ajax',
+        resultSetAt: new Date('2014-02-05T22:00:00Z'),
+        round: 'Achtste finales',
+        season,
+        status: 'played',
+      })
+
+      await database.db
+        .insert(matchGoals)
+        .values({ matchId: id, minute: 12, ours: true, ownGoal: false, penalty: false, player: 'Hakim Ziyech' })
+
+      const [inserted] = await database.db
+        .insert(matchChanges)
+        .values({
+          changed: 'goals',
+          class: 'suspicious',
+          competition: 'KNVB Beker',
+          firstSeenAt: new Date('2026-11-01T10:00:00Z'),
+          lastSeenAt: new Date('2026-11-03T10:00:00Z'),
+          matchId: id,
+          newValue: 'x',
+          oldValue: 'y',
+          proposal: encodeProposal({
+            clubId: 1,
+            goals: [
+              {
+                minute: 12,
+                ours: true,
+                ownGoal: false,
+                penalty: true,
+                personId: null,
+                player: 'Hakim Ziyech',
+                playerId: null,
+                playerPage: null,
+                stoppageMinutes: null,
+              },
+            ],
+            match: wikipedia,
+          }),
+          reason: 'the goals changed in a match played 4 days ago',
+          round: 'Achtste finales',
+          season,
+          status: 'pending',
+          timesSeen: 2,
+          ...overrides,
+        })
+        .$returningId()
+
+      await database.db.insert(wikipediaPages).values({
+        kind: 'cup',
+        readAt: new Date('2026-11-03T10:00:00Z'),
+        season,
+        title: `KNVB Beker ${season} (mannen)`,
+      })
+
+      return { changeId: inserted?.id ?? 0, id }
+    }
+
+    it('shows what the site has and what Wikipedia says, why it waits, and since when', async () => {
+      const { id } = await withHeldChange()
+      const html = await form(id)
+
+      expect(headings(html)).toEqual(
+        expect.arrayContaining(['h1 sc Heerenveen - Ajax', 'h2 Wikipedia wacht: doelpunten']),
+      )
+      expect(html).toContain('Op de site: 12&#x27; Hakim Ziyech. Wikipedia: 12&#x27; Hakim Ziyech (strafschop).')
+      expect(html).toContain('De doelpunten van een wedstrijd die 4 dagen geleden werd gespeeld, zijn veranderd.')
+      expect(html).toContain('Wikipedia zegt dit sinds 1 november 2026')
+      expect(html).toContain('De import zag het 2 keer, voor het laatst op 3 november 2026')
+    })
+
+    it('tells what happens without a decision: in a season that is over, nothing', async () => {
+      const { id } = await withHeldChange()
+      const html = await form(id)
+
+      expect(html).toContain('De import leest dit seizoen niet meer. Zonder besluit blijft de huidige waarde staan.')
+      expect(html).not.toContain('Zonder besluit neemt de import dit over')
+    })
+
+    it('tells what happens without a decision: in the season that is on, the import takes it over after seven days', async () => {
+      const { id } = await withHeldChange({}, season)
+      const html = await form(id)
+
+      expect(html).toContain('Zonder besluit neemt de import dit over op 8 november 2026')
+      expect(html).not.toContain('De import leest dit seizoen niet meer')
+    })
+
+    it('links to the page of the season on Wikipedia, as a plain link', async () => {
+      const { id } = await withHeldChange()
+      const html = await form(id)
+
+      expect(html).toContain(
+        '<a href="https://nl.wikipedia.org/wiki/KNVB_Beker_2013/14_(mannen)">Bekijk KNVB Beker 2013/14 (mannen) op ',
+      )
+    })
+
+    it('says that the match is no longer on the page, and what taking over does', async () => {
+      const { id } = await withHeldChange({
+        changed: 'removed',
+        newValue: null,
+        proposal: null,
+        reason: 'the match is no longer on the page',
+      })
+      const html = await form(id)
+
+      expect(headings(html)).toContain('h2 Wikipedia wacht: het weghalen van de wedstrijd')
+      expect(html).toContain('Wikipedia: de wedstrijd staat niet meer op de pagina.')
+      expect(html).toContain('De wedstrijd staat niet meer op de pagina.')
+    })
+
+    it('has two buttons that name the match and what changes, and one reason with a hint', async () => {
+      const { changeId, id } = await withHeldChange()
+      const html = await form(id)
+      const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map(
+        ([, name, text]) => [text, name],
+      )
+
+      expect(buttons).toEqual(
+        expect.arrayContaining([
+          [
+            'Neem Wikipedia over',
+            expect.stringMatching(/^Neem Wikipedia over: doelpunten van Achtste finales \(KNVB Beker\)/),
+          ],
+          ['Wijs af', expect.stringMatching(/^Wijs af: doelpunten van Achtste finales \(KNVB Beker\)/)],
+        ]),
+      )
+      expect(html).toContain('Reden voor je besluit over doelpunten')
+      expect(html).toContain('Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens.')
+      expect(html).toContain(`id="wijziging-${changeId}-reden"`)
+    })
+
+    it('shows nothing when the change was decided, or belongs to a difference with an entry', async () => {
+      const { changeId, id } = await withHeldChange()
+
+      await database.db.update(matchChanges).set({ part: 'result' }).where(eq(matchChanges.id, changeId))
+      expect(await form(id)).not.toContain('Wikipedia wacht')
+
+      await database.db
+        .update(matchChanges)
+        .set({ part: null, status: 'accepted' })
+        .where(eq(matchChanges.id, changeId))
+      expect(await form(id)).not.toContain('Wikipedia wacht')
+    })
+
+    it('finds the match under "Wikipedia wacht (n)" for any season, with a label in words', async () => {
+      await withHeldChange()
+      await addMatch({ competition: 'Eredivisie', round: 'Speelronde 12', season: '2013/14' })
+
+      const html = await list({ seizoen: '2013-14', tonen: 'wikipedia-wacht' })
+
+      expect(html).toContain('Wikipedia wacht (1)')
+      expect(html).toContain('Alles (2)')
+      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wacht<\/span>/g)).toHaveLength(1)
+      expect(html).toContain('Achtste finales')
+      expect(html).not.toContain('Speelronde 12')
+      expect(html).not.toContain('hf-tag-attention">Wikipedia wijkt af')
+    })
+
+    it('says so when no change waits in the season of the choice', async () => {
+      await addMatch()
+
+      expect(await list({ tonen: 'wikipedia-wacht' })).toContain(
+        'Er wacht geen wijziging van Wikipedia op een besluit in dit seizoen.',
+      )
+    })
+
+    it('tells the list that the match is removed, from the address', async () => {
+      expect(await list({ gedaan: 'verwijderd' })).toContain('De wedstrijd is weggehaald')
+    })
+
+    it('is for the beheerder: a moderator does not get the page', async () => {
+      const { id } = await withHeldChange()
+
+      requireRole.mockRejectedValue(new Error('not found'))
+
+      await expect(form(id)).rejects.toThrow('not found')
+      await expect(list({ tonen: 'wikipedia-wacht' })).rejects.toThrow('not found')
+    })
   })
 
   it('says nothing for an action it does not know', async () => {

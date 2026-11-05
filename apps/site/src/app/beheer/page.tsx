@@ -5,7 +5,7 @@ import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
-import { countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
+import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -34,6 +34,8 @@ export default async function AdminPage() {
   const { db } = getDatabase()
   const { seasons, total: waiting } = beheerder ? await countWaitingDifferences(db) : { seasons: [], total: 0 }
   const season = seasons.includes(current) ? current : seasons[0]
+  const { seasons: heldSeasons, total: held } = beheerder ? await countHeldChanges(db) : { seasons: [], total: 0 }
+  const heldSeason = heldSeasons.includes(current) ? current : heldSeasons[0]
   const withoutResult = beheerder ? await countMatchesWithoutResult(db, current, now) : 0
   const todo: TodoItem[] = []
 
@@ -41,6 +43,12 @@ export default async function AdminPage() {
     todo.push({
       href: season === undefined ? matchesPath : listPath(season, 'aangepast'),
       text: `${plural(waiting, 'afwijking van Wikipedia wacht', 'afwijkingen van Wikipedia wachten')} op een besluit`,
+    })
+  }
+  if (held > 0) {
+    todo.push({
+      href: heldSeason === undefined ? matchesPath : listPath(heldSeason, 'wikipedia-wacht'),
+      text: `${plural(held, 'wijziging van Wikipedia wacht', 'wijzigingen van Wikipedia wachten')} op een besluit`,
     })
   }
   if (withoutResult > 0) {

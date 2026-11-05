@@ -844,7 +844,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `NavigationBar` van het designsysteem, met een `label`, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De knop Uitloggen is het laatste item van die balk (de prop `end`): een knop in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
-  De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit en wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`), elk een koppeling naar de lijst.
+  De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit, vastgehouden wijzigingen van Wikipedia op een besluit (`countHeldChanges`) en wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`), elk een koppeling naar de lijst.
   Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
   Op een telefoon staat de kaart onder de tegels, want `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom.
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
@@ -925,6 +925,10 @@ De lijst is één tabel van de wedstrijden van een seizoen, met de wedstrijd als
 Een filter met de aantallen kiest wat de lijst toont: `?tonen=alles`, `?tonen=aangepast` en, zonder zoekopdracht, de wedstrijden zonder uitslag (twee uur na de aftrap, zoals `lacksResult`), met de wedstrijden zonder uitslag eerst bij "Alles".
 Het zijn gewone koppelingen, dus het werkt zonder JavaScript.
 Wachten er afwijkingen van Wikipedia op een besluit, dan zegt de kaart "Te doen" op de startpagina van het beheer het aantal, en de koppeling erbij gaat naar `?tonen=aangepast` van het lopende seizoen, of van het nieuwste seizoen dat er heeft (`countWaitingDifferences` in `src/beheer/match-entries.ts`).
+Een wijziging van Wikipedia die de importer vasthoudt, omdat ze verdacht lijkt (een rij in `match_changes` met de status `pending` en zonder `part`), heeft een eigen keuze `?tonen=wikipedia-wacht` ("Wikipedia wacht (n)") en een eigen regel op de kaart "Te doen", met een koppeling naar het lopende seizoen of het nieuwste seizoen dat er een heeft (`countHeldChanges`).
+De pagina van de wedstrijd heeft per vastgehouden wijziging een kaart, met wat de site heeft en wat Wikipedia zegt (`describeHeldChange` in `src/beheer/held-changes.ts`, uit het voorstel van de import), waarom ze wacht (`explainHold`, de Nederlandse tekst bij de Engelse reden van de import), wat er zonder besluit gebeurt (`describeWithoutDecision`), een koppeling naar de pagina van het seizoen op Wikipedia en het formulier `HeldChangeForm`: "Neem Wikipedia over" en "Wijs af", met een verplichte reden.
+De actie `submitHeldChange` roept `decideChange` van `@fansite/db/match-changes` aan, dezelfde code als de opdracht `pnpm run import:changes` van de importer.
+De controles zetten er een verzonnen wijziging voor in `e2e/held-changes.ts`.
 De tegel Wedstrijden wijst altijd naar de lijst zoals die opent.
 `?seizoen=2025-26` kiest een ouder seizoen, en een seizoen zonder wedstrijden valt terug op het huidige.
 De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) is de brede pagina met een zijbalk: de kaarten van het formulier staan in de hoofdkolom (`MatchFields` in `MatchForm.tsx`) en het blok om op te slaan, de laatste invoer en het uitklapblok "Invoer weghalen" in de zijbalk, die op een brede pagina in beeld blijft.

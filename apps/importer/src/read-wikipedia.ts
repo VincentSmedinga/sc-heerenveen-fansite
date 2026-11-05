@@ -3,6 +3,7 @@
 // pages are not HTML, so this file reads their templates: `Footballbox2` for a match and
 // `#invoke:Sports table` for the table. A page that has changed shape gives an error, never a
 // guess, so the import keeps what it has.
+import type { ReadGoal, ReadMatch } from '@fansite/db/match-changes'
 import type { Competition, MatchStatus } from '@fansite/db/schema'
 
 import {
@@ -14,88 +15,7 @@ import {
 
 import { printable } from './text.ts'
 
-/** One goal of a played match, as the page names it. */
-export type ReadGoal = {
-  /** The minute on the clock: 45 for "45+1". */
-  minute: number
-  /** True for a goal of sc Heerenveen, false for a goal of the opponent. */
-  ours: boolean
-  /** An own goal, which is listed under the club that benefits from it. */
-  ownGoal: boolean
-  penalty: boolean
-  /** The name as the page shows it, such as `Van Bergen`. */
-  player: string
-  /** The page of the link: `Luca Oyen` for `[[Luca Oyen|Oyen]]`, or null (`linkedPage`). */
-  playerPage: null | string
-  /** The minutes of added time: 1 for "45+1". Null in regular time. */
-  stoppageMinutes: null | number
-}
-
-/** What the import keeps of one match of sc Heerenveen. */
-export type ReadMatch = {
-  /**
-   * The score after 90 minutes of a match with extra time, from our side, when the page
-   * gives it. Both or neither. It may equal the result, and is never above it.
-   */
-  afterNinetyAgainst: null | number
-  afterNinetyFor: null | number
-  /**
-   * The number of spectators of a played match: 0 for a match without an audience, null when
-   * the page has no number or none we can read (see `factsProblem`).
-   */
-  attendance: null | number
-  competition: Competition
-  /** The date as Wikipedia writes it, only when the time is unknown. */
-  dateText: null | string
-  /** Whether a played match went to extra time. Only the cup and the play-offs have it. */
-  extraTime: boolean
-  /**
-   * Why the attendance or the referee could not be read, or null. Then the field in question
-   * is null and the match is imported all the same: it is a side issue.
-   */
-  factsProblem: null | string
-  /**
-   * The goals in the order of the clock, both clubs together. Null when the page names no
-   * scorers (yet), and for a match that is not played. They are not checked against the score
-   * yet: see `checkGoals`.
-   */
-  goals: null | ReadGoal[]
-  /** Empty unless the match is played. */
-  goalsAgainst: null | number
-  goalsFor: null | number
-  /** Why the scorers of a played match could not be read, or null. Then `goals` is null. */
-  goalsProblem: null | string
-  home: boolean
-  /** Empty while the time is unknown. UTC. */
-  kickoffAt: Date | null
-  /** The local day, or the first day when only a weekend is known: `2026-10-24`. */
-  matchDate: string
-  /**
-   * A line about the match as the page tells it, now only for a match that was stopped and
-   * finished later: the minute it stopped and the day and the stadium of the rest. Null for
-   * every other match.
-   */
-  note: null | string
-  opponent: string
-  /**
-   * The article of the opponent as the match links it: `Telstar (voetbalclub)` for
-   * `[[Telstar (voetbalclub)|Telstar]]`, or null when the name has no link (`linkedPage`).
-   */
-  opponentPage: null | string
-  /** The shoot-out of a match level after extra time, from our side. Both or neither. */
-  penaltiesAgainst: null | number
-  penaltiesFor: null | number
-  /**
-   * The full name of the referee, from the link target when the name is linked, else the text
-   * (`Sander van der Eijk` for `[[Sander van der Eijk|Van der Eijk]]`). Null when the page has
-   * none or none we can read: see `factsProblem`.
-   */
-  referee: null | string
-  /** As Wikipedia has it: `Speelronde 12`, `Eerste ronde`. */
-  round: string
-  stadium: null | string
-  status: MatchStatus
-}
+export type { ReadGoal, ReadMatch }
 
 export type ReadProgramme =
   | {
