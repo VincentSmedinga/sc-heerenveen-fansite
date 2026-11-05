@@ -487,3 +487,26 @@
   Een naamswijziging met een jaar is een feit dat iemand moet opzoeken.
 - **Nadeel:** een club zonder lijst heeft geen regel "Eerder" meer, en de redactie moet de lijst invullen.
 - **Alternatieven:** jaren in `club_names` zetten (dat zijn schrijfwijzen voor de import, en de meeste rijen zijn geen naamswijziging); de jaren uit de wedstrijden afleiden (we zien alleen de spelling van Wikipedia, niet wanneer de naam veranderde, en voor FC Zwolle toonde Wikipedia al PEC Zwolle); een vaste lijst in de code zoals `clubFullNames` (elke naamswijziging is dan een wijziging van de code).
+
+## Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij
+
+- **Datum:** 4 november 2026
+- **Besluit:** de tabel `persons` heeft een rij per speler die een doelpunt maakte of in de selectie stond, van ons en van de tegenstander, met een eigen `id` dat nooit verandert (#714).
+  De titel van het artikel na de doorverwijzingen is uniek op de persoon (`wikipedia_page`), met de toevoeging tussen haakjes als die er is: `Johnny Jansen (1975)`.
+  `person_pages` houdt elke titel die naar het artikel verwijst bij de persoon, de titel van het artikel zelf ook, zoals `club_pages` dat voor clubs doet.
+  `match_goals.person_id` en `players.person_id` wijzen naar `persons` (leeg toegestaan, `ON DELETE SET NULL`).
+  De rijen van `players` blijven één per speler en seizoen.
+  - **De tabellen:** `persons` heeft `id` en `wikipedia_page`; `person_pages` heeft `page` (de sleutel) en `person_id` (`ON DELETE CASCADE`).
+    Beide titels staan in `utf8mb4_bin`, zodat `Alfred` en `Alfreð` twee titels zijn.
+  - **`match_goals.wikipedia_page`** blijft de titel zoals de wedstrijdpagina hem schrijft.
+  - **De migratie:** `0040_add_persons` voegt alleen toe (twee tabellen en twee kolommen) en kan opnieuw draaien.
+    De tabellen en de kolommen zijn leeg tot de import ze vult.
+    Op de host terugdraaien kan door de drie foreign keys, de twee kolommen en de twee tabellen weg te halen: dat verliest geen gegevens, want de import vult ze opnieuw.
+  - **De back-up:** de tabellen gaan mee met hun rijen, want de nachtelijke dump neemt alles; ze zijn ook opnieuw te maken uit Wikipedia.
+- **Waarom:** twee titels die naar hetzelfde artikel verwijzen waren twee spelers in de lijst met doelpuntenmakers, en 954 van de 976 doelpunten van ons hebben geen `player_id`, dus de titel was de enige sleutel.
+  Een eigen `id` blijft gelijk als een pagina een andere titel krijgt, en een titel die doorverwijst is dezelfde persoon.
+  Het onderzoek van #676 koos voor een rij per speler en seizoen en liet de tabel per persoon (keuze b) voor later; dit besluit haalt keuze b naar voren, naast `players`, zonder die rijen te veranderen.
+- **Alternatieven:** de titel van het artikel als sleutel (geen nieuw nummer, maar een andere titel breekt elke verwijzing).
+  Het Q-nummer van Wikidata (het stabielste, maar de `robots.txt` van Wikidata weert ons).
+  `players` omvormen tot een rij per persoon (een grotere migratie, en `player_season_stats` en het koppelen per seizoen moeten mee).
+- **Later:** zie ook _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_ in `importer.md`.

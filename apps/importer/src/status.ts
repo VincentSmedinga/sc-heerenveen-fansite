@@ -22,6 +22,7 @@ import { describeWaitingChange } from './import-changes.ts'
 import { isUnhealthy } from './import-matches.ts'
 import { isGoalOfOurPlayer } from './link-players.ts'
 import { waitingChanges } from './match-changes.ts'
+import { similarPersons } from './person-pages.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime, printable } from './text.ts'
 
@@ -106,6 +107,7 @@ export async function showStatus(
     const matchesUnhealthy = await showMatchStatus(db, now, write)
     const squadUnhealthy = await showSquadStatus(db, now, write)
 
+    await showSimilarPersons(db, write)
     await showWaitingChanges(db, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
@@ -173,6 +175,20 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
   }
 
   return unhealthy
+}
+
+/**
+ * Shows how many groups of persons look alike (`similarPersons`), with their titles. It is
+ * information and no fault: the import merges nothing, and a person joins a title with
+ * `personTitleAliases`.
+ */
+async function showSimilarPersons(db: Database, write: (line: string) => void): Promise<void> {
+  const groups = await similarPersons(db)
+
+  write('')
+  write(
+    `Persons that look alike: ${groups.length}${groups.length === 0 ? '' : ` (${printable(groups.map((titles) => titles.join(' and ')).join(', '))})`}`,
+  )
 }
 
 /**

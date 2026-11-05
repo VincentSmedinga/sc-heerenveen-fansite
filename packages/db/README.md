@@ -398,17 +398,18 @@ Negen CHECK-constraints houden de rijen heel:
 `match_goals` heeft een rij per doelpunt van een gespeelde wedstrijd.
 De rijen horen bij hun wedstrijd (`match_id`) en verdwijnen met haar.
 
-| Kolom              | Betekenis                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| `match_id`         | De wedstrijd                                                                                      |
-| `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                  |
-| `minute`           | De minuut op de klok: 45 bij "45+1"                                                               |
-| `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                          |
-| `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                             |
-| `player_id`        | De speler van ons in `players` die het doelpunt maakte; leeg als er geen is (zie hieronder)       |
-| `wikipedia_page`   | De pagina waar de naam naar linkt, zoals `Luca Oyen` voor `[[Luca Oyen\|Oyen]]`; leeg zonder link |
-| `own_goal`         | Of het een eigen doelpunt is; het telt voor de club die ervan profiteert, dus `ours` is die club  |
-| `penalty`          | Of het een penalty was                                                                            |
+| Kolom              | Betekenis                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `match_id`         | De wedstrijd                                                                                                 |
+| `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                             |
+| `minute`           | De minuut op de klok: 45 bij "45+1"                                                                          |
+| `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                                     |
+| `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                                        |
+| `player_id`        | De speler van ons in `players` die het doelpunt maakte; leeg als er geen is (zie hieronder)                  |
+| `person_id`        | De persoon in `persons` van de pagina van het doelpunt; leeg zonder pagina of als hij nog niet is opgevraagd |
+| `wikipedia_page`   | De pagina waar de naam naar linkt, zoals `Luca Oyen` voor `[[Luca Oyen\|Oyen]]`; leeg zonder link            |
+| `own_goal`         | Of het een eigen doelpunt is; het telt voor de club die ervan profiteert, dus `ours` is die club             |
+| `penalty`          | Of het een penalty was                                                                                       |
 
 De goals van een club zijn even veel als haar `goals_for` of `goals_against`, maar de database dwingt dat niet af: de import controleert het en bewaart bij een verschil geen doelpuntenmakers (zie [de README van de importer](../../apps/importer/README.md)).
 Een CHECK-constraint (`match_goals_not_own_goal_and_penalty`) houdt een doelpunt dat beide is buiten de deur.
@@ -416,6 +417,7 @@ Een CHECK-constraint (`match_goals_not_own_goal_and_penalty`) houdt een doelpunt
 Alleen een doelpunt van een speler van ons heeft een `player_id`: een doelpunt van sc Heerenveen dat geen eigen doelpunt is, en een eigen doelpunt dat bij de tegenstander staat.
 Een doelpunt van een speler van de tegenstander, en een eigen doelpunt van een tegenstander, hebben er geen, en een doelpunt dat de importer niet kan koppelen ook niet.
 De importer legt de koppeling (zie [de README van de importer](../../apps/importer/README.md)).
+`person_id` verwijst naar `persons.id` (`ON DELETE SET NULL`) en hoort bij elk doelpunt met een pagina, ook dat van de tegenstander (zie _De tabellen `persons` en `person_pages`_).
 De volgorde van `id` is de volgorde van de klok, want de import schrijft de rijen zo; `listSeasonMatches` sorteert op minuut, blessuretijd en `id`.
 
 `standings` heeft een rij per club van de Eredivisie.
@@ -479,16 +481,17 @@ De importer werkt de selectie van het lopende seizoen bij elke goede lezing bij 
 Hij vervangt haar niet, want de doelpunten in `match_goals` verwijzen naar de `id` van een speler: die blijft gelijk, ook als de speler de selectie verlaat.
 Een naam komt in een seizoen één keer voor, en een pagina ook.
 
-| Kolom            | Betekenis                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| `season`         | Het seizoen, zoals `2026/27`                                                                                |
-| `name`           | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                    |
-| `position`       | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                      |
-| `shirt_number`   | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                           |
-| `search_term`    | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                             |
-| `wikipedia_page` | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link |
-| `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`             |
-| `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                 |
+| Kolom            | Betekenis                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `season`         | Het seizoen, zoals `2026/27`                                                                                                                       |
+| `name`           | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                                                           |
+| `position`       | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                                                             |
+| `shirt_number`   | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                                                                  |
+| `search_term`    | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                                                                    |
+| `wikipedia_page` | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link                                        |
+| `person_id`      | De persoon in `persons` van die pagina; leeg zonder pagina of als de pagina nog niet is opgevraagd (zie _De tabellen `persons` en `person_pages`_) |
+| `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`                                                    |
+| `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                                                        |
 
 Er staat niets anders in: geen nationaliteit, leeftijd, contract of foto.
 De cijfers van een speler staan in `player_season_stats` (zie hieronder).
@@ -603,6 +606,37 @@ Vier functies in `@fansite/db/clubs` horen erbij:
 
 De migratie `0036_add_club_pages` maakt de tabel leeg.
 De importer vult hem aan het begin van de eerstvolgende run, voor elke club met een artikel, met één verzoek per titel.
+
+### De tabellen `persons` en `person_pages`
+
+Elke speler die een doelpunt maakte of in de selectie stond, van ons en van de tegenstander, is een persoon met een eigen `id` dat nooit verandert (#714).
+Twee titels die op Wikipedia naar hetzelfde artikel verwijzen, zoals `Alfred Finnbogason` en `Alfreð Finnbogason`, zijn dezelfde persoon.
+Een speler zonder artikel (een rode link) is ook een persoon, met de titel zoals hij staat.
+
+| Kolom (`persons`) | Betekenis                                                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`              | Het eigen nummer van de persoon                                                                                                                                                |
+| `wikipedia_page`  | De titel van het artikel na de doorverwijzingen, met de toevoeging tussen haakjes als die er is (`Johnny Jansen (1975)`); uniek, letter voor letter vergeleken (`utf8mb4_bin`) |
+
+| Kolom (`person_pages`) | Betekenis                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `page`                 | Een titel die bij het artikel hoort, de titel van het artikel zelf ook; de sleutel van de rij: uniek |
+| `person_id`            | De persoon van het artikel; de rij gaat weg met haar persoon                                         |
+
+`match_goals.person_id` en `players.person_id` verwijzen naar `persons` (`ON DELETE SET NULL`, leeg toegestaan).
+`match_goals.wikipedia_page` blijft de titel zoals de wedstrijdpagina hem schrijft, en de rijen van `players` blijven één per speler en seizoen.
+Een andere speler en seizoen kunnen dus dezelfde persoon hebben: dat is wat de pagina's Spelers en Statistieken straks over seizoenen heen laat tellen (#716).
+
+De importer vraagt Wikipedia per titel één keer of hij een doorverwijzing is, en onthoudt het antwoord in `person_pages`: een titel in die tabel kost geen verzoek meer.
+De regels staan in de [README van de importer](../../apps/importer/README.md), _De personen van de doelpuntenmakers_.
+Drie functies in `@fansite/db/persons` horen erbij:
+
+- `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat het `id` van de persoon van een titel geeft, de persoon en de titels erbij maakt als ze er niet zijn, en null geeft voor een titel waarover de importer geen antwoord had;
+- `knownPersonPages(db)` geeft elke titel in `person_pages`;
+- `rememberedPersonArticles(db)` geeft elke titel in `person_pages` met het artikel van zijn persoon.
+
+De migratie `0040_add_persons` voegt alleen toe en maakt de tabellen en de kolommen leeg; de importer vult ze bij zijn volgende run.
+Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `match_goals_person_id_persons_id_fk` en `players_person_id_persons_id_fk` weg, dan de kolommen `person_id` van `match_goals` en `players`, en dan `person_pages` en `persons`.
 
 ### De tabel `club_stadiums`
 
@@ -754,10 +788,11 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
+- `@fansite/db/persons`: `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat de persoon van een titel vindt of maakt en zijn titels in `person_pages` zet, met `knownPersonPages` en `rememberedPersonArticles` voor de titels in `person_pages`;
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;

@@ -20,6 +20,7 @@ Er is niets opgeslagen in de database en er is geen code van de importer verande
   De andere seizoenen hebben een deel van de selectie, uit transfers en doelpunten.
 - **Het datamodel:** houd voor de eerste versie `players` als een rij per speler en seizoen (keuze a).
   Een tabel per persoon (keuze b) is later toe te voegen zonder die rijen te veranderen.
+  Het besluit _Een speler is een persoon met een eigen `id`, en elke titel van zijn artikel hoort erbij_ (4 november 2026, #714, in `docs/beslissingen/hosting-en-data.md`) haalt keuze b naar voren, naast `players`.
 - **De opdeling:** 7 pull requests, drie kleine, drie middelgrote en één grote.
   De import van alle namen kost ongeveer 35 verzoeken aan Wikipedia, eenmalig.
 - **Wat de projecteigenaar moet kiezen:** de Engelse Wikipedia ook voor selecties, wat we met Wikidata doen (de `robots.txt` van Wikidata weert ons) en het datamodel.

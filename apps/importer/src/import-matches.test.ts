@@ -11,6 +11,8 @@ import {
   matches,
   matchGoals,
   matchImports,
+  personPages,
+  persons,
   players,
   sources,
   squadImports,
@@ -80,6 +82,7 @@ beforeEach(async () => {
   for (const table of [
     'match_changes',
     'matches',
+    'persons',
     'club_names',
     'clubs',
     'players',
@@ -126,7 +129,10 @@ function route(season: string, kind: keyof ServedPages, handler: Handler) {
  * Starts a web server on this computer that serves the three pages of the seasons as Wikipedia
  * does, from `pages`, which a test can change between runs. The tests ask no real site.
  */
-async function serve(pages: { [Kind in keyof ServedPages]?: null | ServedPages[Kind] } = {}, { robots = '' } = {}) {
+async function serve(
+  pages: { [Kind in keyof ServedPages]?: null | ServedPages[Kind] } = {},
+  { robots = '', routes: extra = {} }: { robots?: string; routes?: Record<string, Handler> } = {},
+) {
   const current = { ...original, playoffs: null, ...pages } as ServedPages
   const routes: Record<string, Handler> = { '/robots.txt': reply(200, robots, { 'Content-Type': 'text/plain' }) }
 
@@ -148,7 +154,7 @@ async function serve(pages: { [Kind in keyof ServedPages]?: null | ServedPages[K
   const texts = [current.cup, current.programme, current.standings, current.playoffs].filter(
     (text): text is string => typeof text === 'string',
   )
-  const server = await startServer({ ...articleRoutes(texts), ...routes })
+  const server = await startServer({ ...articleRoutes(texts), ...routes, ...extra })
 
   servers.push(server)
 
@@ -195,6 +201,7 @@ describe('the first import, into an empty database', () => {
       clubs: expect.any(Array),
       kind: 'imported',
       matches: { added: 35, held: 0, removed: 0, unchanged: 0, updated: 0 },
+      persons: expect.any(Array),
       results: expect.objectContaining({ removed: 0 }),
       season,
       standings: 18,
@@ -1500,6 +1507,7 @@ describe('the lines of a report', () => {
       clubs: [],
       kind: 'imported',
       matches: counts,
+      persons: [],
       results: { added: 3, removed: 0, unchanged: 0, updated: 1 },
       season,
       standings: 18,
@@ -2364,7 +2372,9 @@ describe('the import command', () => {
     const { code, lines } = await run(server, feed)
 
     expect(code).toBe(0)
-    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
+    expect(
+      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+    ).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
       'Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed',
@@ -2651,6 +2661,7 @@ describe('the warning about goals without a player', () => {
     ours: true,
     ownGoal: false,
     penalty: false,
+    personId: null,
     player,
     playerId: null,
     playerPage: null,
@@ -2969,5 +2980,228 @@ describe('the eight matches of 2019/20 that were never played', () => {
 
   it('stay postponed in the season that is going', () => {
     expect(cancelledOf(read(), false)).toEqual(read())
+  })
+})
+
+describe('the persons of the scorers', () => {
+  /** The requests for articles of persons: not the robots.txt, not the pages of the season. */
+  function personRequests(server: TestServer) {
+    const seasonPages = new Set(
+      ['2026/27', '2027/28'].flatMap((name) => Object.values(pageTitles(name)).map((title) => pageUrl('', title))),
+    )
+
+    return server.paths().filter((path) => path !== undefined && path !== '/robots.txt' && !seasonPages.has(path))
+  }
+
+  const redirect = (target: string): Handler => reply(200, `#REDIRECT [[${target}]]`, wiki)
+  const article = reply(200, 'Een artikel over een speler. (Verzonnen tekst voor een test.)', wiki)
+
+  /** The goals of a round as `[name in the goal, page, article of the person]`. */
+  const personsOf = async (round: string) =>
+    (
+      await database.db
+        .select({ goal: matchGoals, page: persons.wikipediaPage })
+        .from(matchGoals)
+        .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+        .leftJoin(persons, eq(matchGoals.personId, persons.id))
+        .where(eq(matches.round, round))
+        .orderBy(asc(matchGoals.id))
+    ).map(({ goal, page }) => [goal.player, goal.wikipediaPage, page])
+
+  it('gives every goal with a page a person, and two titles of one article the same person', async () => {
+    const { server } = await serve(
+      {},
+      {
+        routes: {
+          [pageUrl('', 'Maxence Rivera')]: redirect('Maxence Rivera (voetballer)'),
+          [pageUrl('', 'Maxence Rivera (voetballer)')]: article,
+        },
+      },
+    )
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 } })
+
+    const goals = await database.db.select().from(matchGoals)
+    const withPage = goals.filter((goal) => goal.wikipediaPage !== null)
+
+    expect(withPage.length).toBeGreaterThan(10)
+    expect(withPage.every((goal) => goal.personId !== null)).toBe(true)
+    // Ours and the opponent's: Ouazane scored for the opponent.
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Ouazane', 'Abdellah Ouazane', 'Abdellah Ouazane'])
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Rivera', 'Maxence Rivera', 'Maxence Rivera (voetballer)'])
+    expect(goals.filter((goal) => goal.wikipediaPage === null && goal.personId !== null)).toEqual([])
+
+    // The page of the goal stays as the match page writes it, and both titles are remembered.
+    const pageRows = await database.db.select().from(personPages)
+
+    expect(
+      pageRows
+        .filter((row) => row.page.startsWith('Maxence Rivera'))
+        .map((row) => row.page)
+        .sort(),
+    ).toEqual(['Maxence Rivera', 'Maxence Rivera (voetballer)'])
+    expect(
+      new Set(pageRows.filter((row) => row.page.startsWith('Maxence Rivera')).map((row) => row.personId)).size,
+    ).toBe(1)
+    expect(await database.db.select().from(persons)).toHaveLength(new Set(pageRows.map((row) => row.personId)).size)
+    expect(formatMatchReport(report)).toMatch(
+      /Matches 2026\/27: persons: \d+ titles asked, \d+ new persons, \d+ titles remembered/u,
+    )
+  })
+
+  it('links a goal under a redirect to the player of the squad, by the person', async () => {
+    await database.db.insert(players).values({
+      name: 'Maxence Rivera Gomez',
+      position: 'aanvaller',
+      searchTerm: 'Rivera Gomez',
+      season,
+      wikipediaPage: 'Maxence Rivera (voetballer)',
+    })
+
+    const { server } = await serve(
+      {},
+      {
+        routes: {
+          [pageUrl('', 'Maxence Rivera')]: redirect('Maxence Rivera (voetballer)'),
+          [pageUrl('', 'Maxence Rivera (voetballer)')]: article,
+        },
+      },
+    )
+
+    await importAt(server, first)
+
+    const [player] = await database.db.select().from(players)
+    const [rivera] = await database.db
+      .select()
+      .from(matchGoals)
+      .where(eq(matchGoals.wikipediaPage, 'Maxence Rivera'))
+      .limit(1)
+
+    expect(player?.personId).not.toBeNull()
+    expect(rivera).toMatchObject({ personId: player?.personId, playerId: player?.id })
+  })
+
+  it('makes a person of a title without an article, under the title as it stands', async () => {
+    const { server } = await serve({}, { routes: { [pageUrl('', 'Abdellah Ouazane')]: reply(404, 'Niet gevonden') } })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Ouazane', 'Abdellah Ouazane', 'Abdellah Ouazane'])
+    expect(await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Abdellah Ouazane'))).toHaveLength(
+      1,
+    )
+  })
+
+  it('warns and leaves person_id empty when a request fails, keeps the season, and tries again next run', async () => {
+    let status = 500
+    const { server } = await serve(
+      {},
+      {
+        routes: {
+          [pageUrl('', 'Abdellah Ouazane')]: (_request, response) => {
+            response.writeHead(status, wiki)
+            response.end(status === 200 ? 'Een artikel.' : 'Fout')
+          },
+        },
+      },
+    )
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 } })
+    expect(report.kind === 'imported' && report.warnings).toContainEqual(
+      expect.stringMatching(
+        /^Persons: 1 title could not be asked, so their goals and players have no person until the next run: .*Abdellah Ouazane/u,
+      ),
+    )
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Ouazane', 'Abdellah Ouazane', null])
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Trenskow', 'Jacob Trenskow', 'Jacob Trenskow'])
+    expect(await database.db.select().from(personPages).where(eq(personPages.page, 'Abdellah Ouazane'))).toEqual([])
+    expect(formatMatchReport(report)).toContain('Matches 2026/27: warning, Persons: 1 title could not be asked')
+
+    status = 200
+
+    const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(again).toMatchObject({ kind: 'imported', matches: { updated: expect.any(Number) }, warnings: [] })
+    expect(await personsOf('Speelronde 2')).toContainEqual(['Ouazane', 'Abdellah Ouazane', 'Abdellah Ouazane'])
+  })
+
+  it('writes nothing and asks nothing about a person in a second run', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = {
+      goals: await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id)),
+      pages: await database.db.select().from(personPages).orderBy(asc(personPages.page)),
+      persons: await database.db.select().from(persons).orderBy(asc(persons.id)),
+    }
+    const asked = personRequests(server).length
+
+    expect(asked).toBeGreaterThan(10)
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, unchanged: 35, updated: 0 }, persons: [] })
+    expect(personRequests(server)).toHaveLength(asked)
+    expect({
+      goals: await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id)),
+      pages: await database.db.select().from(personPages).orderBy(asc(personPages.page)),
+      persons: await database.db.select().from(persons).orderBy(asc(persons.id)),
+    }).toEqual(before)
+  })
+
+  it('gives the goals of a season that is over their person without holding a change', async () => {
+    const { server } = await serve()
+    const over = new Date('2027-08-01T12:00:00Z')
+
+    await importAt(server, first)
+    // As the database was before this import: goals, no persons.
+    await database.db.update(matchGoals).set({ personId: null })
+    await database.db.delete(persons)
+
+    const report = await importPastSeason(database.db, fetcherFor([server]), season, {
+      clock: () => over,
+      origin: server.origin,
+    })
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { held: 0, removed: 0 } })
+    expect(await database.db.select().from(matchChanges).where(eq(matchChanges.status, 'pending'))).toEqual([])
+    expect(
+      (await database.db.select().from(matchGoals)).filter(
+        (goal) => goal.wikipediaPage !== null && goal.personId === null,
+      ),
+    ).toEqual([])
+  })
+
+  it('warns when two persons look alike, with the addition between brackets counted, and merges nothing', async () => {
+    await database.db
+      .insert(persons)
+      .values([
+        { wikipediaPage: 'Daniël Jansen' },
+        { wikipediaPage: 'Daniel Jansen' },
+        { wikipediaPage: 'Johnny Jansen (1952)' },
+        { wikipediaPage: 'Johnny Jansen (1975)' },
+      ])
+
+    const { server } = await serve()
+    const report = await importAt(server, first)
+    const warnings =
+      report.kind === 'imported' ? report.warnings.filter((warning) => warning.startsWith('Persons:')) : []
+
+    expect(warnings).toEqual([
+      "Persons: 1 group of persons look alike and are not merged: 'Daniël Jansen' and 'Daniel Jansen'",
+    ])
+    expect(await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Daniel Jansen'))).toHaveLength(1)
+  })
+
+  it('shows the number of persons that look alike in the status', async () => {
+    await database.db.insert(persons).values([{ wikipediaPage: 'Daniël Jansen' }, { wikipediaPage: 'Daniel Jansen' }])
+
+    const lines: string[] = []
+
+    await showStatus(database.url, { clock: () => first, write: (line) => lines.push(line) })
+
+    expect(lines).toContain('Persons that look alike: 1 (Daniël Jansen and Daniel Jansen)')
   })
 })
