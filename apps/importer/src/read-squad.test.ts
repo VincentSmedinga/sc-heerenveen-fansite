@@ -523,7 +523,8 @@ describe('what a reader of a season gives back', () => {
   })
 
   it('has a reason when there is no page or table for the season', () => {
-    // The Dutch reader never gives `none`; the readers of the older seasons do (#740 on).
+    // The Dutch reader never gives `none`; the readers of the older seasons do (#740 on), and
+    // their tests check the real thing. This only holds the shape of the contract at typecheck.
     const none = {
       kind: 'none',
       reason: 'the English Wikipedia has no page for this season',

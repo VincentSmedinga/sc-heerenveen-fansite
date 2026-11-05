@@ -1598,7 +1598,12 @@ Een naam zonder link heeft geen pagina.
 
 ### De selectie van een eerder seizoen
 
-Een lezer van de selectie van een eerder seizoen geeft een `SeasonSquad` terug (zie [`src/season-squad.ts`](src/season-squad.ts)): `read` met de spelers, de bron, de optelsom van de wedstrijden en van de doelpunten en de waarschuwingen, `none` met een reden als de pagina of de tabel er niet is, of `error` als de pagina van vorm is veranderd.
+Een lezer van de selectie van een eerder seizoen geeft een `SeasonSquad` terug (zie [`src/season-squad.ts`](src/season-squad.ts)), in een van drie vormen:
+
+- `read`: de spelers, de bron, de optelsom van de wedstrijden en van de doelpunten, en de waarschuwingen;
+- `none`: een reden, als de pagina of de tabel er niet is;
+- `error`: de pagina is van vorm veranderd.
+
 Wat een pagina niet noemt, is leeg (`null`), en geen nul.
 `readSeasonSquad` in `src/read-squad.ts` geeft de uitkomst van `readSquad` in die vorm.
 De import van het huidige seizoen blijft `readSquad` lezen.
