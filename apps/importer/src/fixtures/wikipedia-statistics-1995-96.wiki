@@ -1,0 +1,116 @@
+==Statistieken sc Heerenveen 1995/1996==
+===Eindstand sc Heerenveen in de Nederlandse Eredivisie 1995 / 1996===
+{| class="wikitable" style="width:100%; font-size:85%; text-align:center"
+! Stand
+! Gespeeld
+! Gewonnen
+! Gelijk
+! Verloren
+! Punten
+! Doelpunten voor {{goal}}
+! Doelpunten tegen {{goal}}
+|-
+| 7e
+| 34
+| 14
+| 11
+| 9
+| 53
+| 66
+| 68
+|}
+
+===Aantal wedstrijden/doelpunten===
+{| width=75%
+| width=25% align=left valign=top |
+'''Competitie'''
+{| class="wikitable" style="width:90%; font-size:85%;"
+|- valign=top
+! width=15% align=center | #
+! width=65% align=center | Naam
+!AW
+! align="center" width="20%" | {{goal}}
+|- valign="top"
+| align="center" |1.
+|[[Marco Roelofsen]]
+|34
+| align="center" |0
+|- valign="top"
+| align="center" |2.
+|[[Erik Regtop]]
+|33
+| align="center" |7
+|- valign="top"
+| rowspan="3" align="center" |4.
+|[[Johan Hansma]]
+|31
+| align="center" |3
+|- valign="top"
+|[[Jan de Visser (voetballer)|Jan de Visser]]
+|31
+| align="center" |2
+|- valign="top"
+|[[Tom Sier]]
+|31
+| align="center" |0
+|- valign="top"
+| rowspan="2" align="center" | 7.
+| {{DK-VLAG|15}} [[Jon Dahl Tomasson]]
+|30
+| rowspan="1" align="center" | 14
+|- valign="top"
+! colspan="4" | Eigen doelpunt
+|- valign="top"
+| rowspan="1" align="center" | –
+| colspan="2" | [[Ab Persijn]] ([[FC Volendam]])
+| rowspan="1" align="center" | 1 
+|- valign="top"
+| colspan="3" | '''Totaal'''
+| align="center" | '''66'''
+|}
+| width=25% align=left valign=top |
+'''Beker'''
+{| class="wikitable" style="width:90%; font-size:85%;"
+|- valign=top
+! width=15% align=center | #
+! width=65% align=center | Naam
+!AW
+! align="center" width="20%" | {{goal}}
+|- valign="top"
+| rowspan="6" align="center" |1.
+|[[Marco Roelofsen]]
+|4
+| align="center" |1
+|- valign="top"
+|[[Carlo l'Ami]]
+|`3
+| align="center" |0
+|- valign="top"
+| colspan="3" | '''Totaal'''
+| align="center" | '''3'''
+|}
+| width=25% align=left valign=top |
+'''Intertoto Cup'''
+{| class="wikitable" style="width:90%; font-size:85%;"
+|- valign=top
+! width=15% align=center | #
+! width=65% align=center | Naam
+!AW
+! align="center" width="20%" | {{goal}}
+|- valign=top
+| rowspan="3" align="center" | 1.
+| [[Erik Regtop]]
+|6
+| align="center" | 5
+|- valign="top"
+|[[Marco Roelofsen]]
+|6
+| align="center" |0
+|- valign="top"
+| colspan="3" | '''Totaal'''
+| align="center" | '''17'''
+|}
+|}
+
+==Zie ook==
+* [[sc Heerenveen]]

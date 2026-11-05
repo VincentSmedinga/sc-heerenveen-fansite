@@ -71,10 +71,14 @@ const cellsWithStats = 13
  * an error, not a guess.
  */
 export const squadGroups: Record<string, PlayerPosition> = {
+  aanvaller: 'aanvaller',
   aanvallers: 'aanvaller',
   doelmannen: 'doelman',
+  doelverdediger: 'doelman',
   keepers: 'doelman',
+  middenvelder: 'middenvelder',
   middenvelders: 'middenvelder',
+  verdediger: 'verdediger',
   verdedigers: 'verdediger',
 }
 

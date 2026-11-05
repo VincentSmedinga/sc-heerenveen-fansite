@@ -1,0 +1,41 @@
+==Statistieken==
+{{Sticky header}}
+{| class="wikitable sticky-header" style="text-align:center; font-size:95%; width:100%"
+|-
+!rowspan="2" width=5%|№ 
+!rowspan="2" width=24%|Naam
+!rowspan="2" width=12%|Geboren
+!colspan="2" width=15%|Competitie
+!colspan="2" width=15%|Play-offs
+!colspan="2" width=15%|UEFA Cup
+!colspan="2" width=15%|Beker
+|-
+!{{Afkorting|Duels|Aantal duels}}!! Goals
+! style="width:10%"|Duels
+! style="width:10%"|Goals
+! style="width:10%"|Duels
+! style="width:10%"|Goals
+! style="width:10%"|Duels
+! style="width:10%"|Goals
+|-
+! colspan="12" style="background:#FFDEAD; text-align:left" | [[Doelverdediger (voetbal)|Doel]]
+|- style="background:#FFECCE"
+| 24 || style="text-align:left" | {{NL-VLAG}} [[Boy Waterman]] ||24-01-1984|| 11|| 0|| 0|| 0|| 4|| 0|| 0||0
+|- style="background:#FFECCE"
+| 25 || style="text-align:left" | {{nowrap|{{BE-VLAG}} [[Brian Vandenbussche]]}} ||24-09-1981|| 24|| 0|| 4|| 0|| 4|| 0|| 2||0
+|-
+! colspan="12" style="background:#BBF0C9; text-align:left" | [[Verdediger (voetbal)|Verdediging]]
+|- style="background:#E7FAEC"
+| 2 || style="text-align:left" | {{DK-VLAG}} [[Jakob Poulsen]] ||07-07-1983|| 7|| 0|| 3|| 1|| 0|| 0|| 0||0
+|-
+! colspan="12" style="background:#B0D3FB; text-align:left" | [[Middenvelder|Middenveld]]
+|- style="background:#DFEDFD"
+| 6 || style="text-align:left" | {{NL-VLAG}} [[Paul Bosvelt]] ||26-03-1970|| 30|| 4|| 4|| 1|| 6|| 0|| 1||0
+|-
+! colspan="12" style="background:#FFACB3; text-align:left" | [[Aanvaller (voetbal)|Aanval]]
+|- style="background:#FFD2D6"
+| 9 || style="text-align:left" | {{NL-VLAG}} [[Klaas-Jan Huntelaar]] ||12-08-1983|| 15|| 17|| 0|| 0|| 6|| 2|| 1||1
+|}
+
+== Zie ook ==
+* [[Lijst van spelers van sc Heerenveen (mannen)|Lijst van spelers van sc Heerenveen]]

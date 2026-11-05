@@ -2285,3 +2285,31 @@
 - **Alternatieven:** per bron een eigen vorm (verworpen: de opslag zou zes takken krijgen).
   Een nul voor een cijfer dat de pagina niet geeft (verworpen: de controle op volledigheid kan dan geen verschil maken tussen "niet gespeeld" en "niet genoemd").
   `readSquad` zelf de nieuwe vorm laten teruggeven (verworpen: de import van het huidige seizoen leest ook de zoekterm en de cijfers per competitie, en die horen niet bij elke bron).
+
+## De tabellen Statistieken van 1990/91 tot en met 2005/06 hebben een eigen lezer, en een cijfer dat niet klopt blijft leeg
+
+- **Datum:** 5 november 2026
+- **Besluit:** `read-statistics.ts` (#740) leest de spelers die speelden van de pagina `Sc Heerenveen in het seizoen JJJJ/JJ` (zonder "(mannen)") in de vorm `SeasonSquad`, met de bron `statistieken`.
+  De lezer kent twee vormen en neemt elke tabel in zijn geheel: een pagina in een andere vorm is een fout en schrijft niets.
+  - 1990/91 tot en met 1999/00: onder de kop "Aantal wedstrijden/doelpunten" staat een tabel per competitie met een rang, een naam, de wedstrijden en de doelpunten.
+    Een speler in meer dan één tabel is één speler, met de cijfers opgeteld.
+    De rijen onder "Eigen doelpunt" tot de rij "Totaal" zijn spelers van andere clubs en blijven weg.
+  - 2005/06: onder de kop "Statistieken" staat één tabel met een groepskop per positie, het rugnummer, de naam, de geboortedatum en de wedstrijden en doelpunten van elke competitie.
+    De cijfers van de competities worden opgeteld.
+  - De positie komt alleen uit de koppen van de tweede vorm.
+    De koppen zijn de pagina's waar ze naar linken (`Doelverdediger`, `Verdediger`, `Middenvelder`, `Aanvaller`), en staan in `squadGroups` naast de koppen van #739.
+    Een kop die er niet in staat blijft een fout.
+  - Een speler zonder link blijft bewaard als de cel een volledige naam geeft: minstens twee woorden, zonder afkorting met een punt.
+    Een achternaam met afkorting (`v. Amersfoort`) is een fout, omdat we de speler er niet aan kunnen herkennen.
+  - Twee spellingen van dezelfde naam op één pagina (`Mitriță` en `Mitriţă` in 1998/99) zijn één speler: de namen zijn gelijk zonder accenten, zoals `nameKey` ze vergelijkt.
+  - Een cijfer dat geen getal is (op de pagina van 1995/96 staat `` `3 ``, en een streepje telt niet als nul) blijft leeg met een waarschuwing die de speler noemt.
+    De optelsom van wat die pagina geeft is dan ook leeg, want een som zonder één speler zegt iets onwaars.
+  - Een pagina zonder de kop "Aantal wedstrijden/doelpunten" en zonder kop "Statistieken" met een tabel erin geeft `none`.
+- **Waarom:** de pagina's tot en met 2005/06 hebben geen selectie, maar noemen wel wie speelde (22 tot 33 namen per seizoen), en #744 heeft die namen nodig.
+  Een speler die er is en wiens cijfer niet klopt, is nog steeds een speler.
+  Daarom blijft het cijfer leeg met een waarschuwing en blijft de speler, in plaats van de hele pagina af te wijzen om een tik van een vrijwilliger.
+  Een afkorting of een tabel die we niet kennen is wel een fout, want dan weten we niet wie er bedoeld is.
+- **Alternatieven:** een cijfer dat geen getal is overslaan met de rest van de rij (verworpen: dan ontbreekt een speler die speelde).
+  Alle spelers van elke tabel in de uitkomst, ook de spelers onder "Eigen doelpunt" (verworpen: ze spelen voor een andere club).
+  De cijfers van de competities apart bewaren (verworpen: `player_season_stats` heeft geen competitie voor deze seizoenen, zie #740).
+  Een som van de bekende cijfers als één cijfer ontbreekt (verworpen: de som zou te laag zijn zonder dat iemand het ziet).

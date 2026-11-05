@@ -361,12 +361,16 @@ describe('a page that has changed', () => {
 })
 
 describe('the group headings', () => {
-  it('are one list, with Keepers next to Doelmannen', () => {
+  it('are one list, with Keepers next to Doelmannen and the singular headings of the older pages', () => {
     expect(squadGroups).toEqual({
+      aanvaller: 'aanvaller',
       aanvallers: 'aanvaller',
       doelmannen: 'doelman',
+      doelverdediger: 'doelman',
       keepers: 'doelman',
+      middenvelder: 'middenvelder',
       middenvelders: 'middenvelder',
+      verdediger: 'verdediger',
       verdedigers: 'verdediger',
     })
   })
