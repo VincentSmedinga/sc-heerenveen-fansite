@@ -98,14 +98,16 @@ describe(`the migration ${migration}`, () => {
     expect(await rows("SHOW COLUMNS FROM players LIKE 'person_id'")).toMatchObject([{ Null: 'YES' }])
   })
 
-  it('takes the made-up squad and matches of the seed without a person', async () => {
+  it('gives the made-up squad and the goals of the seed a person, as the import does', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
     expect(await seedMatches(database.db)).toBe(true)
     expect(await seedSquad(database.db)).toBe(true)
-    expect(await rows('SELECT COUNT(*) AS n FROM players WHERE person_id IS NOT NULL')).toMatchObject([{ n: 0 }])
-    expect(await rows('SELECT COUNT(*) AS n FROM match_goals WHERE person_id IS NOT NULL')).toMatchObject([{ n: 0 }])
+    expect(await rows('SELECT COUNT(*) AS n FROM players WHERE person_id IS NULL')).toMatchObject([{ n: 0 }])
     expect(await rows('SELECT COUNT(*) AS n FROM players')).not.toMatchObject([{ n: 0 }])
+    expect(
+      await rows('SELECT COUNT(*) AS n FROM match_goals WHERE player_id IS NOT NULL AND person_id IS NULL'),
+    ).toMatchObject([{ n: 0 }])
   })
 
   it('lets a goal and a player lose their person when it is deleted, and the titles go with it', async () => {

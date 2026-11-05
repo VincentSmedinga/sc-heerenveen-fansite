@@ -19,6 +19,7 @@ import {
   matches,
   matchGoals,
   matchPageKinds,
+  persons,
   players,
   playerSeasonStats,
   sources,
@@ -572,16 +573,18 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * known), the number of spectators and the name of the referee (both null when the page does
  * not give them; no page shows them yet). `goals` are the scorers of a played match in the
  * order of the clock, both clubs together, and empty when the page names none. `player` is the
- * name as the page shows it. A goal of one of our players also has `playerId`, and the full
- * name and the search term of that player in `playerName` and `playerSearchTerm` (all three
- * null for a goal that has no player in the table `players`: a goal of the opponent, or one
- * that could not be linked). The player may have left the squad since. `playerPage` is the
- * title of the player's Wikipedia page as the table of the match links it, whether or not the
- * goal is linked to a player, and null when the table does not link the name. The moment the
- * importer saw a result stays internal. Only the season that is asked for is read: the pages
- * show the current season alone. `opponent` is the name the club had on the day of the match
- * when the club has a list of names of its own (`club_name_periods`), and otherwise the
- * spelling of Wikipedia.
+ * name as the page shows it. A goal of one of our players also has `playerId` (null for a goal
+ * that has no player in the table `players`: a goal of the opponent, or one that could not be
+ * linked). The player may have left the squad since. `playerPage` is the title of the player's
+ * Wikipedia page as the table of the match links it, whether or not the goal is linked to a
+ * player, and null when the table does not link the name. `personId` is the person behind the
+ * goal, ours or an opponent's, with the name the importer kept of him in `personGivenName`,
+ * `personFamilyNamePrefix` and `personFamilyName` (each null while the importer has not read
+ * the article, and all null for a goal without a person, such as a title that was not looked
+ * up). The moment the importer saw a result stays internal. Only the season that is asked for
+ * is read: the pages show the current season alone. `opponent` is the name the club had on the
+ * day of the match when the club has a list of names of its own (`club_name_periods`), and
+ * otherwise the spelling of Wikipedia.
  */
 export async function listSeasonMatches(db: Database, season: string) {
   const rows = await db
@@ -681,15 +684,25 @@ export function listSeasonStandings(db: Database, season: string) {
 
 /**
  * The players of the squad of a season, such as `2026/27`, for the list on the search page: the
- * name, the position and the surname the search page looks for. The order is the shirt number,
- * and players without one last, by name. Every other column stays internal. This is the one
- * place that decides who is in the list: only the players who are in the squad now. A player
+ * name, the name kept for the person of the player (`personGivenName`, `personFamilyNamePrefix`
+ * and `personFamilyName`, null while the importer has not read the article), the position and
+ * the surname the search page looks for. The order is the shirt number, and players without one
+ * last, by name. Every other column stays internal. This is the one place that decides who is
+ * in the list: only the players who are in the squad now. A player
  * who left stays in the table for his goals, and is not listed.
  */
 export function listSquad(db: Database, season: string) {
   return db
-    .select({ name: players.name, position: players.position, searchTerm: players.searchTerm })
+    .select({
+      name: players.name,
+      personFamilyName: persons.familyName,
+      personFamilyNamePrefix: persons.familyNamePrefix,
+      personGivenName: persons.givenName,
+      position: players.position,
+      searchTerm: players.searchTerm,
+    })
     .from(players)
+    .leftJoin(persons, eq(players.personId, persons.id))
     .where(and(eq(players.season, season), eq(players.inSquad, true)))
     .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(players.name))
 }
@@ -830,16 +843,19 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
       ours: matchGoals.ours,
       ownGoal: matchGoals.ownGoal,
       penalty: matchGoals.penalty,
+      personFamilyName: persons.familyName,
+      personFamilyNamePrefix: persons.familyNamePrefix,
+      personGivenName: persons.givenName,
+      personId: matchGoals.personId,
       player: matchGoals.player,
       playerId: matchGoals.playerId,
-      playerName: players.name,
       playerPage: matchGoals.wikipediaPage,
-      playerSearchTerm: players.searchTerm,
       stoppageMinutes: matchGoals.stoppageMinutes,
     })
     .from(matchGoals)
     .innerJoin(matches, eq(matchGoals.matchId, matches.id))
     .leftJoin(players, eq(matchGoals.playerId, players.id))
+    .leftJoin(persons, eq(matchGoals.personId, persons.id))
     .where(where)
     .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
 
@@ -852,11 +868,13 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
         ours: goal.ours,
         ownGoal: goal.ownGoal,
         penalty: goal.penalty,
+        personFamilyName: goal.personFamilyName,
+        personFamilyNamePrefix: goal.personFamilyNamePrefix,
+        personGivenName: goal.personGivenName,
+        personId: goal.personId,
         player: goal.player,
         playerId: goal.playerId,
-        playerName: goal.playerName,
         playerPage: goal.playerPage,
-        playerSearchTerm: goal.playerSearchTerm,
         stoppageMinutes: goal.stoppageMinutes,
       })),
   }))

@@ -127,11 +127,13 @@ describe('the cards with results of an earlier season, one for each competition'
     ours: true,
     ownGoal: kind === 'ownGoal',
     penalty: kind === 'penalty',
+    personFamilyName: null,
+    personFamilyNamePrefix: null,
+    personGivenName: null,
+    personId: null,
     player: 'Proefman',
     playerId: null,
-    playerName: null,
     playerPage: null,
-    playerSearchTerm: null,
     stoppageMinutes: null,
   })
   const match = (

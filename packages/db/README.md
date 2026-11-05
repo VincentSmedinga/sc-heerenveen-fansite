@@ -532,6 +532,7 @@ Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seed
 De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.
 Een database met echte wedstrijden raakt de seed niet aan.
 De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
+Elke verzonnen speler heeft ook een persoon met de naam in delen (`personsForMadeUpPlayers` in `seed.ts`), en zijn doelpunten verwijzen ernaar, zoals de import het doet.
 
 ## De tabellen `clubs` en `club_names`
 

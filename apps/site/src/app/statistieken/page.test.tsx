@@ -1014,11 +1014,13 @@ describe('the page /statistieken', () => {
         ours,
         ownGoal: false,
         penalty: false,
+        personFamilyName: null,
+        personFamilyNamePrefix: null,
+        personGivenName: null,
+        personId: null,
         player: 'Proefman',
         playerId: null,
-        playerName: null,
         playerPage: null,
-        playerSearchTerm: null,
         stoppageMinutes: null,
       })
       const base = matchData.matches.find((match) => match.goals.length > 0) as PublicMatch
@@ -1170,11 +1172,13 @@ describe('the page /statistieken', () => {
                     ours: true,
                     ownGoal: true,
                     penalty: false,
+                    personFamilyName: null,
+                    personFamilyNamePrefix: null,
+                    personGivenName: null,
+                    personId: null,
                     player: 'Teststraat',
                     playerId: null,
-                    playerName: null,
                     playerPage: null,
-                    playerSearchTerm: null,
                     stoppageMinutes: 4,
                   },
                 ],
@@ -1404,18 +1408,20 @@ describe('the page /statistieken', () => {
       ])
     })
 
-    it('shows the full name of a player the goals are linked to, and two players with the same surname as two rows', async () => {
+    it('shows the name kept for a person, and two people with the same surname as two rows', async () => {
       const played = matchData.matches.find((item) => item.status === 'played')!
-      const goal = (id: number, name: string, minute: number) => ({
+      const goal = (id: number, given: string, minute: number) => ({
         minute,
         ours: true,
         ownGoal: false,
         penalty: false,
+        personFamilyName: 'Jansen',
+        personFamilyNamePrefix: null,
+        personGivenName: given,
+        personId: id,
         player: 'Jansen',
         playerId: id,
-        playerName: name,
         playerPage: null,
-        playerSearchTerm: 'Jansen',
         stoppageMinutes: null,
       })
 
@@ -1424,7 +1430,7 @@ describe('the page /statistieken', () => {
         matches: [
           {
             ...played,
-            goals: [goal(1, 'Bram Jansen', 10), goal(2, 'Kees Jansen', 20), goal(2, 'Kees Jansen', 30)],
+            goals: [goal(1, 'Bram', 10), goal(2, 'Kees', 20), goal(2, 'Kees', 30)],
             goalsAgainst: 0,
             goalsFor: 3,
           },
@@ -1445,20 +1451,24 @@ describe('the page /statistieken', () => {
       )
     })
 
-    it('shows the full name from the Wikipedia page for goals without a linked player, and counts them together', async () => {
+    it('counts two titles of one person together, and shows a goal without a person as a surname', async () => {
       const played = matchData.matches.find((item) => item.status === 'played')!
-      const goal = (shown: string, page: null | string, minute: number) => ({
+      const goal = (shown: string, person: [number, string, null | string, string] | null, minute: number) => ({
         minute,
         ours: true,
         ownGoal: false,
         penalty: false,
+        personFamilyName: person?.[3] ?? null,
+        personFamilyNamePrefix: person?.[2] ?? null,
+        personGivenName: person?.[1] ?? null,
+        personId: person?.[0] ?? null,
         player: shown,
         playerId: null,
-        playerName: null,
-        playerPage: page,
-        playerSearchTerm: null,
+        playerPage: null,
         stoppageMinutes: null,
       })
+      const kemper: [number, string, null, string] = [1, 'Boy', null, 'Kemper']
+      const bergen: [number, string, string, string] = [2, 'Mitchell', 'van', 'Bergen']
 
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,
@@ -1466,9 +1476,9 @@ describe('the page /statistieken', () => {
           {
             ...played,
             goals: [
-              goal('Kemper', 'Boy Kemper', 10),
-              goal('Kemper', 'Boy Kemper', 20),
-              goal('Van Bergen', 'Mitchell van Bergen (voetballer, 1999)', 30),
+              goal('Kemper', kemper, 10),
+              goal('Boy Kemper', kemper, 20),
+              goal('Van Bergen', bergen, 30),
               goal('Proefman', null, 40),
             ],
             goalsAgainst: 0,
@@ -1482,11 +1492,12 @@ describe('the page /statistieken', () => {
 
       expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
         ['1', 'Boy Kemper', '2'],
-        ['2', 'Proefman, Mitchell van Bergen', '1'],
+        ['2', 'Mitchell van Bergen, Proefman', '1'],
       ])
       expect(card).toContain(
         '<span class="hf-player-name"><span class="hf-player-name-given">Boy</span> <span class="hf-player-name-surname">Kemper</span></span>',
       )
+      expect(card).toContain('<span class="hf-player-name-surname">van Bergen</span>')
     })
 
     it('shows a bar next to the goals of every player, hidden from a screen reader, the top scorer filling it', async () => {
@@ -1538,11 +1549,13 @@ describe('the page /statistieken', () => {
           ours: true,
           ownGoal: false,
           penalty: false,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
+          personId: null,
           player: `Speler ${String.fromCharCode(65 + index)}`,
           playerId: null,
-          playerName: null,
           playerPage: null,
-          playerSearchTerm: null,
           stoppageMinutes: null,
         })),
       )
