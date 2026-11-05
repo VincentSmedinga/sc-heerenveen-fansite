@@ -511,7 +511,7 @@ export function AttendanceCard({
       <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
       <DataTable
         caption="Het aantal toeschouwers bij elke thuiswedstrijd van sc Heerenveen dit seizoen"
-        columns={['Wedstrijd', ...(competition === 'all' ? ['Competitie'] : []), 'Toeschouwers']}
+        columns={['Wedstrijd', ...(competition === 'all' ? ['Competitie'] : []), 'Aantal']}
         rows={slots.map((slot) => ({
           cells: [...(competition === 'all' ? [slot.match.competition] : []), cell(slot)],
           header: `${formatTableDay(slot.match.matchDate)}, ${slot.match.opponent}`,
