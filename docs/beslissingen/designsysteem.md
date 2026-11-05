@@ -2578,3 +2578,16 @@
 - **Nadeel:** een naam kan over twee regels staan, zodat "Van der" en "Meer" uit elkaar staan.
 - **Alternatieven:** het blok laten staan (de rij blijft rustig, maar de naam bepaalt de breedte van de kolom); een spatie die niet afbreekt in de naam zelf (dezelfde streng als het blok, maar dan in elke tabel en lijst).
 - **Later:** vervangt de regel "Het afbreken" in _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026).
+
+## De uitleg van de lijn staat in de regel van de sleutel, en `FormTimeline` krijgt ook een tooltip
+
+- **Datum:** 5 november 2026
+- **Besluit:** de zin onder de grafiek van `FormChart` is korter en staat direct achter de sleutel, in dezelfde alinea: "**Lijn** gemiddeld aantal punten over 5 wedstrijden: nu 2,4." (#726).
+  Zolang er niets gespeeld is, staat er "**Lijn** begint bij de eerste wedstrijd."
+  Het getal is het aantal wedstrijden dat het gemiddelde telt: "over 1 wedstrijd", "over 3 wedstrijden", "over 5 wedstrijden".
+  `FormTimeline` geeft zijn lijn ook `labels`, met `formatAverage` op het gemiddelde van elke plek, dus dezelfde tooltip als `FormChart`.
+- **Waarom:** de projecteigenaar wil dat de sleutel en de uitleg van de lijn bij elkaar staan, en korter.
+  Een tooltip hoort bij elke lijn die een gemiddelde toont, en de kaart "Resultaten sinds" heeft ook zo'n lijn.
+- **Nadeel:** de kaart "Resultaten sinds" heeft geen tabel met de gemiddelden; de tooltip is daar alleen voor wie een muis, pen of aanraking gebruikt.
+  De wedstrijden zelf staan wel in de lijst onder Wedstrijden.
+- **Later:** vervangt "De zin onder de grafiek noemt hoeveel wedstrijden het gemiddelde telt" in _BarChart is overal 4 rem hoog_ (4 november 2026) en "alleen de kaart Verloop van het seizoen gebruikt hem" in de beslissing over de tooltip van #726 (5 november 2026): `FormTimeline` gebruikt hem nu ook.

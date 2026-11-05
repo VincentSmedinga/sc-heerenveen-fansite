@@ -61,9 +61,7 @@ describe('FormChart', () => {
   it('says what the line shows, with the latest average and a decimal comma', () => {
     const { container } = render(<FormChart results={['W', 'W', 'G', 'V', 'G']} />)
 
-    expect(textOf(container)).toContain(
-      'De lijn laat zien hoeveel punten sc Heerenveen per wedstrijd haalde in de laatste 5 wedstrijden: nu 1,6.',
-    )
+    expect(textOf(container).join(' ')).toContain('Lijn gemiddeld aantal punten over 5 wedstrijden: nu 1,6.')
   })
 
   it('rounds the average to one decimal', () => {
@@ -77,20 +75,20 @@ describe('FormChart', () => {
 
     expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).not.toBe('')
     expect(container.querySelector('.hf-bar-chart-trend-dot')).not.toBeNull()
-    expect(textOf(container).join(' ')).toContain('in de laatste 3 wedstrijden: nu 1,3.')
+    expect(textOf(container).join(' ')).toContain('over 3 wedstrijden: nu 1,3.')
   })
 
-  it('says "de laatste wedstrijd" after one match', () => {
+  it('says "1 wedstrijd" after one match', () => {
     const { container } = render(<FormChart results={['W']} />)
 
-    expect(textOf(container).join(' ')).toContain('in de laatste wedstrijd: nu 3,0.')
+    expect(textOf(container).join(' ')).toContain('over 1 wedstrijd: nu 3,0.')
   })
 
   it('has no line, and says where it starts, before the first match', () => {
     const { container } = render(<FormChart results={[]} />)
 
     expect(container.querySelector('.hf-bar-chart-trend-dot')).toBeNull()
-    expect(textOf(container)).toContain('De lijn begint bij de eerste wedstrijd.')
+    expect(textOf(container).join(' ')).toContain('Lijn begint bij de eerste wedstrijd.')
   })
 
   it('shows empty places and a text for the form when nothing is played yet', () => {
@@ -104,7 +102,7 @@ describe('FormChart', () => {
   it('writes the key to the letters, and puts the points in it', () => {
     const { container } = render(<FormChart results={season} />)
 
-    expect(textOf(container)).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
+    expect(textOf(container).join(' ')).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Lijn gemiddeld')
   })
 
   it('uses the letters and words of the columns under the tables for winst, gelijk and verlies', () => {
@@ -122,7 +120,7 @@ describe('FormChart', () => {
     const { container } = render(<FormChart matches={10} results={['W', 'W', 'W']} window={3} />)
 
     expect(container.querySelectorAll('.hf-bar-chart-slot')).toHaveLength(10)
-    expect(textOf(container).join(' ')).toContain('in de laatste 3 wedstrijden: nu 3,0.')
+    expect(textOf(container).join(' ')).toContain('over 3 wedstrijden: nu 3,0.')
   })
 
   it('hides the chart from a screen reader and keeps everything else as text', () => {

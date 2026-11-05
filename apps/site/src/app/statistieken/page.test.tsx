@@ -122,7 +122,6 @@ describe('the page /statistieken', () => {
         '</h2>',
         'hf-form-chart',
         'hf-form-chart-key',
-        'hf-form-chart-line',
         '<table',
       ])
     })
@@ -453,7 +452,7 @@ describe('the page /statistieken', () => {
         ['Verlies', '2', '0'],
         ['Totaal', '6', '8'],
       ])
-      expect(card).toContain('in de laatste 5 wedstrijden')
+      expect(card).toContain('over 5 wedstrijden')
     })
 
     describe('the table per round', () => {
@@ -528,7 +527,7 @@ describe('the page /statistieken', () => {
     it('draws the line from the first match, over the matches there are while there are fewer than five', async () => {
       const card = section(await render(), 'verloop-van-het-seizoen')
 
-      expect(card).toContain('in de laatste 3 wedstrijden: nu 2,3.')
+      expect(card).toContain('over 3 wedstrijden: nu 2,3.')
       expect(card).not.toContain('De lijn begint na')
     })
 

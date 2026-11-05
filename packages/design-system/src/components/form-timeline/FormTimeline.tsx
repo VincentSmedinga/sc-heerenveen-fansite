@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { BarChart } from '../bar-chart/BarChart'
 import { runningAverage } from '../chart/trend'
 import { classNames } from '../classNames'
-import { type FormResult, pointsOf } from '../form-chart/form'
+import { formatAverage, type FormResult, pointsOf } from '../form-chart/form'
 import { FormKey } from '../form-chart/FormKey'
 import { barsOf, yearLabels } from './timeline'
 
@@ -40,7 +40,8 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
  * `window` of them, so every result has a point. The axis follows the time, so it has the same
  * places whatever has been played, and a label sits under the first year and every fifth
  * after. A gap in the results is a gap in the line. Under the chart are the key to the letters
- * and the text about what counts, so the picture is explained in text too.
+ * and the text about what counts, so the picture is explained in text too. A tooltip follows
+ * the pointer along the line and gives the average at that place.
  * The chart itself is hidden from a screen reader, so give the same numbers in a list or a
  * table on the same page.
  *
@@ -71,7 +72,10 @@ export const FormTimeline = ({
         max={3}
         ticks={[0, 1, 3]}
       >
-        <BarChart.Trend values={values} />
+        <BarChart.Trend
+          labels={values.map((value) => (value === null ? null : formatAverage(value)))}
+          values={values}
+        />
       </BarChart>
       <FormKey className="hf-form-timeline-key">{scope}</FormKey>
     </div>

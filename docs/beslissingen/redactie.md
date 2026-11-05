@@ -2835,7 +2835,7 @@
   Onder de tabel met de totalen staat een uitklapper (`Disclosure`, dicht) "Uitslag en gemiddelde per speelronde", met een tabel per gespeelde speelronde: de speelronde, de uitslag (winst, gelijk of verlies), de punten en het gemiddelde over de laatste 5 wedstrijden.
   De tabel gebruikt `averagesOf` en `formatAverage` van het designsysteem, dezelfde getallen als de lijn en de tooltip.
   De kolommen heten Ronde, Uitslag, Punten en Gem. (voor een schermlezer: Gemiddelde), met een regel eronder die ze uitlegt: met "Speelronde" en "Gemiddelde" werd de pagina op 320 pixels breder dan het scherm.
-  De tabel met de totalen en de zin onder de grafiek blijven.
+  De tabel met de totalen en de zin onder de grafiek blijven (die zin staat nu in de regel van de sleutel, zie _De uitleg van de lijn staat in de regel van de sleutel_ in `designsysteem.md`).
   De speelronde is de plek in de rij gespeelde wedstrijden van de Eredivisie, zoals de as van de grafiek (een uitgestelde wedstrijd staat waar hij gespeeld is).
 - **Waarom:** de grafiek is voor een schermlezer verborgen en heeft geen toetsenbord, dus de waarde per speelronde moet ook als tekst te lezen zijn.
   Er is nu één grafiek met een lijn; de volgende (#411, #413) kiest zelf zijn labels.
