@@ -523,9 +523,9 @@ type StoreContext = {
   /** The import has never read this season, so nothing stored comes from Wikipedia. */
   firstRead: boolean
   pastSeason: boolean
-  /** The last run that read the pages with success, before this one. */
   /** Where the titles of persons that were new to the database end (`lookUpPersonPages`). */
   personRedirects: ReadonlyMap<string, string>
+  /** The last run that read the pages with success, before this one. */
   previousReadAt: Date | null
   /** Where the titles of the clubs that were new to the database end (`lookUpClubPages`). */
   redirects: ReadonlyMap<string, string>
