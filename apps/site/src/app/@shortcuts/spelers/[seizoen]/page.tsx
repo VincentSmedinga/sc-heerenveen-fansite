@@ -1,6 +1,6 @@
 import type { SearchParams } from '#src/season-page'
 
-import { SeasonShortcuts } from '#src/app/@shortcuts/statistieken/season-shortcuts'
+import { SeasonShortcuts } from '#src/app/@shortcuts/cijfers/season-shortcuts'
 import { seasonFromSlug } from '#src/seasons'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 

@@ -1,6 +1,5 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -11,7 +10,7 @@ import { matchData } from '#src/test-matches'
 import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
-import StatisticsPage from '../statistieken/page'
+import StatisticsPage from '../cijfers/page'
 import PlayersPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
@@ -122,7 +121,7 @@ describe('the page /spelers', () => {
     expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
   })
 
-  it('keeps the card on Statistieken soft, where it is in the sidebar', async () => {
+  it('keeps the card on Cijfers soft, where it is in the sidebar', async () => {
     const html = await renderStatistics()
 
     expect(html).toContain(
@@ -153,7 +152,7 @@ describe('the page /spelers', () => {
     )
   })
 
-  it('has the card, the credit and nothing else: no other cards of Statistieken or Wedstrijden', async () => {
+  it('has the card, the credit and nothing else: no other cards of Cijfers or Wedstrijden', async () => {
     const html = await render()
 
     for (const id of ['reeksen', 'uitersten', 'de-nul-gehouden', 'stand', 'programma', 'hoofdtrainer']) {
@@ -173,7 +172,7 @@ describe('the page /spelers', () => {
     expect(card).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
   })
 
-  it('counts the goals of our players over the matches, as the card on Statistieken did', async () => {
+  it('counts the goals of our players over the matches, as the card on Cijfers did', async () => {
     // Proefman scored in two matches. The Nepper of the opponent does not count for ours.
     expect(rowsOf(await render())).toEqual([
       ['1', 'Proefman', '2'],
@@ -483,7 +482,7 @@ describe('the season picker on /spelers', () => {
   })
 })
 
-describe('the list of Spelers and the card of Statistieken', () => {
+describe('the list of Spelers and the card of Cijfers', () => {
   /** The rows of the card Doelpuntenmakers on each page, for the same matches. */
   async function bothFor(counts: number[]) {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: scorers(counts) })
@@ -505,7 +504,7 @@ describe('the list of Spelers and the card of Statistieken', () => {
     )
   })
 
-  it('give the players who share fifth place on both pages, one row per player on Spelers and one shared row on Statistieken', async () => {
+  it('give the players who share fifth place on both pages, one row per player on Spelers and one shared row on Cijfers', async () => {
     const { all, top } = await bothFor([9, 8, 7, 6, 2, 2, 2, 1])
 
     expect(all).toHaveLength(8)
@@ -517,7 +516,7 @@ describe('the list of Spelers and the card of Statistieken', () => {
     expect(top).toEqual([...all.slice(0, 4), ['5', 'Speler E, Speler F, Speler G', '2']])
   })
 
-  it('give everybody on both pages when five players or fewer scored, with the tie on one row on Statistieken', async () => {
+  it('give everybody on both pages when five players or fewer scored, with the tie on one row on Cijfers', async () => {
     const { all, top } = await bothFor([3, 2, 1, 1])
 
     expect(all).toHaveLength(4)
@@ -750,14 +749,5 @@ describe('the card Selectie on /spelers', () => {
     vi.mocked(getSeasonSquad).mockRejectedValue(new Error('no database'))
 
     expect(await render()).toContain('Er ging iets mis')
-  })
-})
-
-describe('the old addresses of the page Spelers under /statistieken', () => {
-  // /statistieken/spelers is the page of a season of Statistieken with a season that is not
-  // one, so it is "niet gevonden" (see app/statistieken/[seizoen]/page.test.tsx). The other two
-  // have no route any more, and there is no redirect: the site is not public yet (#768).
-  it.each(['spelers/[seizoen]', 'spelers/kies', 'spelers/page.tsx'])('has no route %s under /statistieken', (route) => {
-    expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
   })
 })

@@ -9,7 +9,7 @@ vi.mock('#src/matches', () => ({ getMatchSeasons: vi.fn() }))
 // The afternoon of Friday 23 October 2026, in the season 2026/27.
 const now = new Date('2026-10-23T13:40:00Z')
 
-const ask = (search: string) => GET(new Request(`https://sc.heerenveen.org/statistieken/kies${search}`))
+const ask = (search: string) => GET(new Request(`https://sc.heerenveen.org/cijfers/kies${search}`))
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
@@ -22,19 +22,19 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('/statistieken/kies', () => {
+describe('/cijfers/kies', () => {
   it('sends the visitor on, with a 303, to the address of the season that was picked', async () => {
     const response = await ask('?seizoen=2025-26')
 
     expect(response.status).toBe(303)
-    expect(response.headers.get('location')).toBe('/statistieken/2025-26')
+    expect(response.headers.get('location')).toBe('/cijfers/2025-26')
   })
 
-  it('sends the current season to /statistieken, which is its address', async () => {
+  it('sends the current season to /cijfers, which is its address', async () => {
     const response = await ask('?seizoen=2026-27')
 
     expect(response.status).toBe(303)
-    expect(response.headers.get('location')).toBe('/statistieken')
+    expect(response.headers.get('location')).toBe('/cijfers')
   })
 
   it.each([
@@ -50,18 +50,18 @@ describe('/statistieken/kies', () => {
     '?anders=2025-26',
     '?seizoen=%2F%2Fevil.example',
     '?seizoen=https://evil.example',
-  ])('sends %j back to /statistieken', async (search) => {
+  ])('sends %j back to /cijfers', async (search) => {
     const response = await ask(search)
 
     expect(response.status).toBe(303)
-    expect(response.headers.get('location')).toBe('/statistieken')
+    expect(response.headers.get('location')).toBe('/cijfers')
   })
 
   it('keeps the address relative, so the visitor stays on the host they came to', async () => {
-    expect((await ask('?seizoen=2024-25')).headers.get('location')).toMatch(/^\/statistieken/)
+    expect((await ask('?seizoen=2024-25')).headers.get('location')).toMatch(/^\/cijfers/)
   })
 
-  it('sends the visitor to /statistieken, where the page says what is wrong, when the database is down', async () => {
+  it('sends the visitor to /cijfers, where the page says what is wrong, when the database is down', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
     vi.mocked(getMatchSeasons).mockRejectedValue(new Error('connect ECONNREFUSED'))
@@ -69,24 +69,24 @@ describe('/statistieken/kies', () => {
     const response = await ask('?seizoen=2025-26')
 
     expect(response.status).toBe(303)
-    expect(response.headers.get('location')).toBe('/statistieken')
+    expect(response.headers.get('location')).toBe('/cijfers')
     expect(error).toHaveBeenCalledOnce()
   })
 })
 
-describe('/statistieken/kies with the choice of the matches', () => {
+describe('/cijfers/kies with the choice of the matches', () => {
   it('sends the choice on to the address of the season, as the season picker asks', async () => {
     expect((await ask('?seizoen=2025-26&competitie=eredivisie')).headers.get('location')).toBe(
-      '/statistieken/2025-26?competitie=eredivisie',
+      '/cijfers/2025-26?competitie=eredivisie',
     )
     expect((await ask('?seizoen=2026-27&competitie=eredivisie')).headers.get('location')).toBe(
-      '/statistieken?competitie=eredivisie',
+      '/cijfers?competitie=eredivisie',
     )
   })
 
   it('keeps the choice when the season is not one, as the page then shows the current season', async () => {
     expect((await ask('?seizoen=onzin&competitie=eredivisie')).headers.get('location')).toBe(
-      '/statistieken?competitie=eredivisie',
+      '/cijfers?competitie=eredivisie',
     )
   })
 
@@ -97,6 +97,6 @@ describe('/statistieken/kies with the choice of the matches', () => {
     '?seizoen=2025-26&competitie=eredivisie&competitie=eredivisie',
     '?seizoen=2025-26&competitie[]=eredivisie',
   ])('leaves out %j, so the picker never sends a visitor to the page "niet gevonden"', async (search) => {
-    expect((await ask(search)).headers.get('location')).toBe('/statistieken/2025-26')
+    expect((await ask(search)).headers.get('location')).toBe('/cijfers/2025-26')
   })
 })

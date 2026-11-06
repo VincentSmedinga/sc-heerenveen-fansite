@@ -27,7 +27,7 @@ describe('playersShortcuts', () => {
     ])
   })
 
-  it('goes to the same anchor as the card on Statistieken, which keeps its link', () => {
+  it('goes to the same anchor as the card on Cijfers, which keeps its link', () => {
     expect(statisticsShortcuts.map(({ href }) => href)).toContain('#doelpuntenmakers')
   })
 })

@@ -61,7 +61,7 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * current season, which also has the card Programma with every competition on one list, and
  * from the first match to the last in a season that is over, which has no Programma and calls
  * its table Eindstand. Under the table and the results is a link to the card with figures that
- * belongs to it on the page Statistieken, of the same season. A season that has no matches in
+ * belongs to it on the page Cijfers, of the same season. A season that has no matches in
  * the database is the page "niet gevonden".
  *
  * The card with the table of the current season has a switch between the whole season and the
@@ -220,7 +220,7 @@ async function lastFiveOfSeason(data: MatchData) {
   }
 }
 
-/** The link under the results to the card with the course of the season, on Statistieken. */
+/** The link under the results to the card with the course of the season, on Cijfers. */
 function SeasonCourseLink({ href }: { href: string }) {
   return (
     <Text>

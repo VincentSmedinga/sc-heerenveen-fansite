@@ -189,9 +189,9 @@ describe('visitOf', () => {
     expect(visitOf(request('/wedstrijden/2025-26'))).toMatchObject({ path: '/wedstrijden' })
   })
 
-  it('counts the page of a season of Statistieken as a visit to /statistieken', () => {
-    expect(visitOf(request('/statistieken'))).toMatchObject({ path: '/statistieken' })
-    expect(visitOf(request('/statistieken/2025-26'))).toMatchObject({ path: '/statistieken' })
+  it('counts the page of a season of Cijfers as a visit to /cijfers', () => {
+    expect(visitOf(request('/cijfers'))).toMatchObject({ path: '/cijfers' })
+    expect(visitOf(request('/cijfers/2025-26'))).toMatchObject({ path: '/cijfers' })
   })
 
   it('counts the page Spelers, and the page of a season of it, as a visit to /spelers', () => {
@@ -204,10 +204,10 @@ describe('visitOf', () => {
     '/wedstrijden/kies',
     '/wedstrijden/2025-26/extra',
     '/wedstrijden/x',
-    '/statistieken/2025-27',
-    '/statistieken/kies',
-    '/statistieken/2025-26/extra',
-    '/statistieken/x',
+    '/cijfers/2025-27',
+    '/cijfers/kies',
+    '/cijfers/2025-26/extra',
+    '/cijfers/x',
     '/spelers/2025-27',
     '/spelers/kies',
     '/spelers/2025-26/extra',
@@ -235,11 +235,11 @@ describe('visitOf', () => {
   it('counts the address of a switch as a page, and not the request the router makes for it', () => {
     // A click on a switch (`SwitchLinks`) is a router navigation: it asks for the data of the
     // page, and any type is fine. The same address asked for as a page asks for HTML.
-    const address = '/statistieken?competitie=eredivisie'
+    const address = '/cijfers?competitie=eredivisie'
 
     expect(visitOf(request(address, { accept: '*/*', rsc: '1' }))).toBeUndefined()
     expect(visitOf(request(address, { accept: 'text/x-component' }))).toBeUndefined()
-    expect(visitOf(request(address))).toMatchObject({ path: '/statistieken' })
+    expect(visitOf(request(address))).toMatchObject({ path: '/cijfers' })
   })
 
   it('has no link of Next.js, so a link loads a whole page that the proxy sees (the switches use the router)', () => {
@@ -257,13 +257,13 @@ describe('visitOf', () => {
   it('has a rule for every page of the site', () => {
     // The pages that are on no list on purpose: the admin, the article and the page of a club,
     // which the database confirms, and the page of a season, which counts as /wedstrijden,
-    // /statistieken or /spelers. A slot of the layout (@shortcuts) is not a page
+    // /cijfers or /spelers. A slot of the layout (@shortcuts) is not a page
     // of its own.
     const withoutCount = [
       '/beheer',
       '/beheer/[...]',
       '/redactie/[slug]',
-      '/statistieken/[seizoen]',
+      '/cijfers/[seizoen]',
       '/spelers/[seizoen]',
       '/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',

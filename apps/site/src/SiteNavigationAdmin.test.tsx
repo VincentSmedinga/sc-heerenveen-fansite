@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { saveAdminMarker } from './admin-marker'
 import { SiteNavigation } from './SiteNavigation'
 
-vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/statistieken') }))
+vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/spelers') }))
 
 // The item Beheer of the main menu depends on the mark in localStorage, which only the browser
 // has. The tests of the menu itself render on the server (SiteNavigation.test.tsx); these need
@@ -38,14 +38,14 @@ describe('the item Beheer in the main menu', () => {
   it('is not there without the mark', () => {
     render(<SiteNavigation />)
 
-    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Spelers', 'Forum'])
+    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Spelers', 'Forum'])
   })
 
   it('comes before Forum, which stays last, as a plain link to /beheer, when the browser has the mark', () => {
     saveAdminMarker(true)
     render(<SiteNavigation />)
 
-    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Spelers', 'Beheer', 'Forum'])
+    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Spelers', 'Beheer', 'Forum'])
     expect(screen.getByRole('link', { name: 'Beheer' })).toHaveProperty('pathname', '/beheer')
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('target')).toBe(false)
     expect(screen.getByRole('link', { name: 'Beheer' }).querySelector('svg')).toBeNull()

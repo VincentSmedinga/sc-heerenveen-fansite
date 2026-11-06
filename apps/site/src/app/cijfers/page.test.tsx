@@ -1,5 +1,6 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
+import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -51,12 +52,12 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the page /statistieken', () => {
+describe('the page /cijfers', () => {
   it('has one h1 and ten h2 headings in order: our place in the league, the season, the streaks, home and away, the visitors, the goal scorers, the clean sheets, the goals per quarter, how the matches go and the extremes', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
-      '<h1 class="hf-heading-1">Statistieken</h1>',
+      '<h1 class="hf-heading-1">Cijfers</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="onze-plek-in-de-competitie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#onze-plek-in-de-competitie">Onze plek in de competitie</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="verloop-van-het-seizoen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#verloop-van-het-seizoen">Verloop van het seizoen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="reeksen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#reeksen">Reeksen</a></h2>',
@@ -74,9 +75,7 @@ describe('the page /statistieken', () => {
     const html = await render()
 
     expect(html).not.toContain('hf-intro')
-    expect(html).toMatch(
-      /<div class="hf-page-intro"><div class="hf-page-title"><h1 class="hf-heading-1">Statistieken<\/h1>/,
-    )
+    expect(html).toMatch(/<div class="hf-page-intro"><div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1>/)
   })
 
   describe('the order of the parts of a card', () => {
@@ -323,7 +322,7 @@ describe('the page /statistieken', () => {
       expect(sheets).toContain('11 keer de nul gehouden in 11 wedstrijden')
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
       expect(sheets).toContain('Laad 5 meer')
-      expect(sheets).toContain('action="/statistieken#nul-11"')
+      expect(sheets).toContain('action="/cijfers#nul-11"')
       expect(sheets).toContain('name="nul"')
       expect(sheets).toContain('value="15"')
       expect(sheets).toContain('id="nul-10"')
@@ -344,7 +343,7 @@ describe('the page /statistieken', () => {
       const sheets = section(await render({ nul: '15' }), 'de-nul-gehouden')
 
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(15)
-      expect(sheets).toContain('action="/statistieken#nul-16"')
+      expect(sheets).toContain('action="/cijfers#nul-16"')
       expect(sheets).toContain('value="20"')
     })
 
@@ -1760,9 +1759,9 @@ describe('the page /statistieken', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
-    expect(html).toContain('<a href="/statistieken">Probeer het opnieuw</a>')
+    expect(html).toContain('<a href="/cijfers">Probeer het opnieuw</a>')
     expect(error).toHaveBeenCalledWith(
-      'Could not read the matches and the table for /statistieken: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the matches and the table for /cijfers: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
     expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
   })
@@ -1770,13 +1769,13 @@ describe('the page /statistieken', () => {
   it('has a title of its own, a description and the canonical link', async () => {
     const metadata = await generateMetadata()
 
-    expect(metadata.title).toBe('Statistieken')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/statistieken')
+    expect(metadata.title).toBe('Cijfers')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/cijfers')
     expect(metadata.description).toContain('cijfers')
   })
 })
 
-describe('the season picker on /statistieken', () => {
+describe('the season picker on /cijfers', () => {
   beforeEach(() => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
   })
@@ -1791,12 +1790,12 @@ describe('the season picker on /statistieken', () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Statistieken<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+      /<div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
     )
-    expect(html).toContain('action="/statistieken/kies"')
+    expect(html).toContain('action="/cijfers/kies"')
   })
 
   it('keeps the images as they were, without a season on them', async () => {
@@ -1810,7 +1809,7 @@ describe('the season picker on /statistieken', () => {
 
     expect(html).not.toContain('<select')
     expect(html).not.toContain('Seizoen kiezen')
-    expect(html).toContain('<h1 class="hf-heading-1">Statistieken</h1>')
+    expect(html).toContain('<h1 class="hf-heading-1">Cijfers</h1>')
   })
 
   it('has the bar of the page and the picker agree: a link for every card the page has', async () => {
@@ -1821,7 +1820,7 @@ describe('the season picker on /statistieken', () => {
   })
 })
 
-describe('the choice between all the matches and the Eredivisie on /statistieken', () => {
+describe('the choice between all the matches and the Eredivisie on /cijfers', () => {
   // The test data has a played cup tie, 1-0 away at SV Proefdorp, beside three played matches
   // of the Eredivisie.
   const switchOf = (html: string) => /<div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div>/.exec(html)?.[0]
@@ -1842,10 +1841,10 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     const league = await render(eredivisie)
 
     expect(switchOf(all)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-statistieken;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/statistieken" style="--hf-segmented-option-name:hf-segmented-option-statistieken-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/statistieken?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-statistieken-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-cijfers;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/cijfers" style="--hf-segmented-option-name:hf-segmented-option-cijfers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/cijfers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-cijfers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(switchOf(league)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-statistieken;--hf-segmented-count:2;--hf-segmented-index:1"><a href="/statistieken" style="--hf-segmented-option-name:hf-segmented-option-statistieken-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/statistieken?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-statistieken-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-cijfers;--hf-segmented-count:2;--hf-segmented-index:1"><a href="/cijfers" style="--hf-segmented-option-name:hf-segmented-option-cijfers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/cijfers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-cijfers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(all.match(/aria-current/g)).toHaveLength(1)
   })
@@ -2019,7 +2018,7 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
   })
 })
 
-describe('the card Opmerkelijk on /statistieken', () => {
+describe('the card Opmerkelijk on /cijfers', () => {
   const base = matchData.matches[1]!
   /** A match with a score of seven goals and no goals listed, so a fact. */
   const manyGoals = (round: number, opponent: string, competition: PublicMatch['competition'] = 'Eredivisie') => ({
@@ -2066,7 +2065,7 @@ describe('the card Opmerkelijk on /statistieken', () => {
     expect(sentence(html)).toMatch(
       /^Thuis tegen Proefclub [ABC] \(3–4, \d+ september 2026\) vielen zeven doelpunten\.$/,
     )
-    expect(card(html)).toMatch(/<a href="\/statistieken\?opmerkelijk=\d#opmerkelijk">Nog iets opmerkelijks<\/a>/)
+    expect(card(html)).toMatch(/<a href="\/cijfers\?opmerkelijk=\d#opmerkelijk">Nog iets opmerkelijks<\/a>/)
   })
 
   it('is the last card of the main column, after home and away', async () => {
@@ -2098,10 +2097,10 @@ describe('the card Opmerkelijk on /statistieken', () => {
         card(await render(fact === undefined ? {} : { opmerkelijk: fact })) ?? '',
       )?.[1]
 
-    expect(await link()).toBe('/statistieken?opmerkelijk=2#opmerkelijk')
-    expect(await link('2')).toBe('/statistieken?opmerkelijk=3#opmerkelijk')
-    expect(await link('3')).toBe('/statistieken?opmerkelijk=1#opmerkelijk')
-    expect(await link('4')).toBe('/statistieken?opmerkelijk=2#opmerkelijk')
+    expect(await link()).toBe('/cijfers?opmerkelijk=2#opmerkelijk')
+    expect(await link('2')).toBe('/cijfers?opmerkelijk=3#opmerkelijk')
+    expect(await link('3')).toBe('/cijfers?opmerkelijk=1#opmerkelijk')
+    expect(await link('4')).toBe('/cijfers?opmerkelijk=2#opmerkelijk')
   })
 
   it('shows the first fact for a number that is not valid', async () => {
@@ -2131,8 +2130,8 @@ describe('the card Opmerkelijk on /statistieken', () => {
     const all = await render()
     const league = await render(eredivisie)
 
-    expect(card(all)).toContain('href="/statistieken?opmerkelijk=2#opmerkelijk"')
-    expect(card(league)).toContain('href="/statistieken?competitie=eredivisie&amp;opmerkelijk=2#opmerkelijk"')
+    expect(card(all)).toContain('href="/cijfers?opmerkelijk=2#opmerkelijk"')
+    expect(card(league)).toContain('href="/cijfers?competitie=eredivisie&amp;opmerkelijk=2#opmerkelijk"')
     expect(card(league)).not.toContain('Bekerclub')
 
     const everyone = await Promise.all(
@@ -2276,5 +2275,13 @@ describe('the card Toeschouwers', () => {
     expect(html).toContain('volgens Wikipedia')
     expect(html).toContain('data-hf-card-share')
     expect(html).not.toMatch(/<script|<img/)
+  })
+})
+
+describe('the old addresses of Cijfers', () => {
+  // /statistieken, /statistieken/<seizoen> and /statistieken/kies have no route any more, so
+  // they are "niet gevonden", and there is no redirect: the site is not public yet (#768).
+  it.each(['page.tsx', '[seizoen]', 'kies'])('has no route %s under /statistieken', (route) => {
+    expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
   })
 })

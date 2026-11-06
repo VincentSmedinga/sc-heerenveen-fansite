@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { SegmentedLinks } from './SegmentedLinks'
 
 const options = [
-  { href: '/statistieken', label: 'Alle wedstrijden', value: 'all' },
-  { href: '/statistieken?competitie=eredivisie', label: 'Eredivisie', value: 'league' },
+  { href: '/cijfers', label: 'Alle wedstrijden', value: 'all' },
+  { href: '/cijfers?competitie=eredivisie', label: 'Eredivisie', value: 'league' },
 ] as const
 
 describe('SegmentedLinks', () => {
@@ -14,8 +14,8 @@ describe('SegmentedLinks', () => {
 
     expect(screen.getByRole('group', { name: 'Welke wedstrijden' }).className).toBe('hf-segmented-control')
     expect(screen.getAllByRole('link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
-      ['Alle wedstrijden', '/statistieken'],
-      ['Eredivisie', '/statistieken?competitie=eredivisie'],
+      ['Alle wedstrijden', '/cijfers'],
+      ['Eredivisie', '/cijfers?competitie=eredivisie'],
     ])
   })
 
@@ -90,7 +90,7 @@ describe('SegmentedLinks', () => {
       }
 
       expect(names('stand', 'all')).toEqual(names('stand', 'league'))
-      expect(names('stand', 'all')).not.toEqual(names('statistieken', 'all'))
+      expect(names('stand', 'all')).not.toEqual(names('cijfers', 'all'))
     })
 
     it('leaves the style of the caller in place', () => {

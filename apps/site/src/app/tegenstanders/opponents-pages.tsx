@@ -106,8 +106,8 @@ export async function clubListMetadata(): Promise<Metadata> {
 /**
  * The page Tegenstanders: every club sc Heerenveen played, A to Z, with our record against
  * each, for the matches of every season we have. It counts all the matches, the Eredivisie and
- * the KNVB Beker, or the Eredivisie alone with `?competitie=eredivisie`, as Statistieken does,
- * and the switch is the one of Statistieken. A club we only met in the cup is not in the list
+ * the KNVB Beker, or the Eredivisie alone with `?competitie=eredivisie`, as Cijfers does,
+ * and the switch is the one of Cijfers. A club we only met in the cup is not in the list
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
  * white surface. The sidebar has the top 10 of the average points per match (`TopPointsCard`),
@@ -246,7 +246,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           <ClubMeetingsCard meetings={meetings} now={now} upcoming={upcoming} />
         )}
       </Page.Main>
-      {/* The sidebar is as wide as the main column, as on Statistieken. On a phone it follows the
+      {/* The sidebar is as wide as the main column, as on Cijfers. On a phone it follows the
           matches: our record against the club, the names of its stadium and the credit. */}
       {meetings.length > 0 ? (
         <Page.Sidebar aria-label={`Onze uitslagen${stadiums.length > 0 ? ', het stadion' : ''} en de bron`} wide>

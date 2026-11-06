@@ -47,7 +47,7 @@ describe('seasonAddress', () => {
 
   it('is the base address with the season for another season, for any base address', () => {
     expect(seasonAddress('/wedstrijden', '2025/26', '2026/27')).toBe('/wedstrijden/2025-26')
-    expect(seasonAddress('/statistieken', '2025/26', '2026/27')).toBe('/statistieken/2025-26')
+    expect(seasonAddress('/cijfers', '2025/26', '2026/27')).toBe('/cijfers/2025-26')
   })
 })
 
@@ -83,6 +83,6 @@ describe('pickedAddress', () => {
   })
 
   it('works for a base address that is not /wedstrijden', () => {
-    expect(pickedAddress('/statistieken', '2024-25', known)).toBe('/statistieken/2024-25')
+    expect(pickedAddress('/cijfers', '2024-25', known)).toBe('/cijfers/2024-25')
   })
 })

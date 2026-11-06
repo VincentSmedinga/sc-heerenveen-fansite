@@ -47,16 +47,16 @@ export async function playersMetadata(season: string): Promise<Metadata> {
 /**
  * The page Spelers of a season: `/spelers` for the current season and
  * `/spelers/2025-26` for another, which is what the two routes render. It has the
- * title row and the season picker of Statistieken, and the card Selectie with every player of
+ * title row and the season picker of Cijfers, and the card Selectie with every player of
  * the season in parts by position and, under the heading, how complete that list is. That card
  * is white: the squad is what the page is for. The sidebar follows the main column on a phone,
  * so the squad comes first there. It starts with the switch between all matches and the
  * Eredivisie, because the switch changes only the cards with goals, and then has the card
  * Doelpuntenmakers (every player who scored) and the card Bijzondere doelpunten (hattricks,
- * penalties and own goals), both soft, and ends with the credit, as on Statistieken. A season
+ * penalties and own goals), both soft, and ends with the credit, as on Cijfers. A season
  * that is over has the cards with goals put the season on their image. A season that has no
  * matches in the database is the page "niet gevonden". The cards with goals count all the
- * matches or, with `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so
+ * matches or, with `?competitie=eredivisie`, the Eredivisie alone, as on Cijfers, and so
  * does the switch.
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {

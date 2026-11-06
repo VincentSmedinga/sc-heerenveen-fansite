@@ -332,7 +332,7 @@ test.describe('the bar of Wedstrijden', () => {
     await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
     await expect(bar.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
-    await expect(bar.getByRole('link', { name: 'Statistieken' })).not.toHaveAttribute('aria-current', /.*/)
+    await expect(bar.getByRole('link', { name: 'Cijfers' })).not.toHaveAttribute('aria-current', /.*/)
 
     await list(page).getByRole('link', { name: 'Testdorp FC' }).click()
 
@@ -340,8 +340,8 @@ test.describe('the bar of Wedstrijden', () => {
     await expect(bar.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
   })
 
-  test('is gone on Statistieken', async ({ page }) => {
-    await page.goto('/statistieken')
+  test('is gone on Spelers', async ({ page }) => {
+    await page.goto('/spelers')
 
     await expect(page.getByRole('navigation', { name: 'Hoofdmenu' }).locator('.hf-navigation-bar')).toHaveCount(0)
   })

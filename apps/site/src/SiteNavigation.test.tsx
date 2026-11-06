@@ -34,8 +34,8 @@ function render(pathname: string, matchesBar?: ReactNode) {
 }
 
 describe('SiteNavigation', () => {
-  it('links to the news, the matches, the statistics, the players and the forum, in a navigation named Hoofdmenu', () => {
-    const html = render('/statistieken')
+  it('links to the news, the matches, the players and the forum, in a navigation named Hoofdmenu', () => {
+    const html = render('/spelers')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
     expect(
@@ -46,29 +46,33 @@ describe('SiteNavigation', () => {
     ).toEqual([
       ['/nieuws', 'Nieuws'],
       ['/wedstrijden', 'Wedstrijden'],
-      ['/statistieken', 'Statistieken'],
       ['/spelers', 'Spelers'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
   })
 
   it('draws the icon for a link to another site at the forum only, hidden from screen readers', () => {
-    const html = render('/statistieken')
+    const html = render('/spelers')
     const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
 
-    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, false, true])
-    expect(links[4]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
+    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, true])
+    expect(links[3]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
   it('has no link to the podcasts or the search in the menu itself', () => {
-    expect(render('/statistieken')).not.toMatch(/href="\/nieuws\//)
+    expect(render('/spelers')).not.toMatch(/href="\/nieuws\//)
   })
 
-  it('has no link to Tegenstanders in the menu itself, only in the bar of Wedstrijden', () => {
-    for (const path of ['/statistieken', '/nieuws']) {
+  it('has no link to Cijfers or Tegenstanders in the menu itself, only in the bar of Wedstrijden', () => {
+    for (const path of ['/spelers', '/nieuws']) {
       expect(render(path)).not.toContain('/tegenstanders')
+      expect(render(path)).not.toContain('/cijfers')
     }
+  })
+
+  it('has four items in the menu: Nieuws, Wedstrijden, Spelers and Forum', () => {
+    expect(menuAddresses('/')).toEqual(['/nieuws', '/wedstrijden', '/spelers', 'https://forum.heerenveen.org'])
   })
 
   it('marks Nieuws as the current page on /nieuws, with the bar of the podcasts and the search and no sub-page current', () => {
@@ -117,24 +121,30 @@ describe('SiteNavigation', () => {
       const html = render(path)
 
       expect(currentLinks(html)).toEqual(['Wedstrijden'])
-      expect(barLinks(html)).toEqual([['/tegenstanders', 'Tegenstanders']])
+      expect(barLinks(html)).toEqual([
+        ['/cijfers', 'Cijfers'],
+        ['/tegenstanders', 'Tegenstanders'],
+      ])
       expect(linksWith(html, 'true')).toEqual([])
     },
   )
 
-  it.each(['/statistieken', '/statistieken/2025-26'])(
-    'marks Statistieken as the current page on %s, with no bar',
+  it.each(['/cijfers', '/cijfers/2025-26'])(
+    'marks Cijfers as the current sub-page on %s, and Wedstrijden as the item that holds it',
     (path) => {
       const html = render(path)
 
-      expect(currentLinks(html)).toEqual(['Statistieken'])
-      expect(html).not.toContain('hf-navigation-bar')
-      expect(linksWith(html, 'true')).toEqual([])
+      expect(currentLinks(html)).toEqual(['Cijfers'])
+      expect(linksWith(html, 'true')).toEqual(['Wedstrijden'])
+      expect(barLinks(html)).toEqual([
+        ['/cijfers', 'Cijfers'],
+        ['/tegenstanders', 'Tegenstanders'],
+      ])
     },
   )
 
   it.each(['/spelers', '/spelers/2025-26'])(
-    'marks Spelers as the current page on %s, and not Statistieken, with no bar',
+    'marks Spelers as the current page on %s, and not Wedstrijden, with no bar',
     (path) => {
       const html = render(path)
 
@@ -145,7 +155,7 @@ describe('SiteNavigation', () => {
   )
 
   it('has exactly one item with aria-current on every page of the menu', () => {
-    for (const path of ['/nieuws', '/wedstrijden', '/statistieken', '/spelers', '/spelers/2025-26']) {
+    for (const path of ['/nieuws', '/wedstrijden', '/cijfers', '/tegenstanders', '/spelers', '/spelers/2025-26']) {
       expect(render(path).match(/aria-current="page"/g)).toHaveLength(1)
     }
   })
@@ -157,7 +167,10 @@ describe('SiteNavigation', () => {
 
       expect(currentLinks(html)).toEqual(['Tegenstanders'])
       expect(linksWith(html, 'true')).toEqual(['Wedstrijden'])
-      expect(barLinks(html)).toEqual([['/tegenstanders', 'Tegenstanders']])
+      expect(barLinks(html)).toEqual([
+        ['/cijfers', 'Cijfers'],
+        ['/tegenstanders', 'Tegenstanders'],
+      ])
     },
   )
 
@@ -165,23 +178,27 @@ describe('SiteNavigation', () => {
     // What the slot @subnav draws for ?competitie=eredivisie on the page of a season.
     const bar = (
       <div className="hf-navigation-bar">
+        <a href="/cijfers?competitie=eredivisie">Cijfers</a>
         <a href="/tegenstanders?competitie=eredivisie">Tegenstanders</a>
       </div>
     )
 
-    it.each(['/wedstrijden', '/wedstrijden/2025-26', '/tegenstanders', '/tegenstanders/ado-den-haag'])(
-      'draws that bar instead of the fixed one on %s, in the item of Wedstrijden',
-      (path) => {
-        const html = render(path, bar)
+    it.each([
+      '/wedstrijden',
+      '/wedstrijden/2025-26',
+      '/cijfers',
+      '/cijfers/2025-26',
+      '/tegenstanders',
+      '/tegenstanders/ado-den-haag',
+    ])('draws that bar instead of the fixed one on %s, in the item of Wedstrijden', (path) => {
+      const html = render(path, bar)
 
-        expect(barLinks(html)).toEqual([['/tegenstanders?competitie=eredivisie', 'Tegenstanders']])
-        expect(html.match(/hf-navigation-bar/g)).toHaveLength(1)
-        expect(html).toMatch(/<a [^>]*href="\/wedstrijden[^"]*"[^>]*>Wedstrijden<\/a><div class="hf-navigation-bar">/)
-      },
-    )
-
-    it('draws no bar on Statistieken, which has no sub-pages', () => {
-      expect(render('/statistieken/2025-26', bar)).toBe(render('/statistieken/2025-26'))
+      expect(barLinks(html)).toEqual([
+        ['/cijfers?competitie=eredivisie', 'Cijfers'],
+        ['/tegenstanders?competitie=eredivisie', 'Tegenstanders'],
+      ])
+      expect(html.match(/hf-navigation-bar/g)).toHaveLength(1)
+      expect(html).toMatch(/<a [^>]*href="\/wedstrijden[^"]*"[^>]*>Wedstrijden<\/a><div class="hf-navigation-bar">/)
     })
 
     it('draws no bar on Spelers, which has no sub-pages', () => {
@@ -190,19 +207,18 @@ describe('SiteNavigation', () => {
     })
 
     it('takes the season of the page along in the main menu, and no choice', () => {
-      const html = render('/statistieken/2025-26', bar)
+      const html = render('/cijfers/2025-26', bar)
       const menu = html.replace(/<div class="hf-navigation-bar">.*?<\/div>/, '')
 
       expect([...menu.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
         '/nieuws',
         '/wedstrijden/2025-26',
-        '/statistieken/2025-26',
         '/spelers/2025-26',
         'https://forum.heerenveen.org',
       ])
     })
 
-    it.each(['/', '/nieuws', '/nieuws/podcasts', '/statistieken', '/bronnen'])(
+    it.each(['/', '/nieuws', '/nieuws/podcasts', '/spelers', '/bronnen'])(
       'leaves the other pages as they are, with their own bar or none, on %s',
       (path) => {
         expect(render(path, bar)).toBe(render(path))
@@ -234,16 +250,10 @@ function menuAddresses(pathname: string) {
 }
 
 describe('the addresses of the main menu', () => {
-  const fixed = ['/nieuws', '/wedstrijden', '/statistieken', '/spelers', 'https://forum.heerenveen.org']
-  const inSeason = [
-    '/nieuws',
-    '/wedstrijden/2023-24',
-    '/statistieken/2023-24',
-    '/spelers/2023-24',
-    'https://forum.heerenveen.org',
-  ]
+  const fixed = ['/nieuws', '/wedstrijden', '/spelers', 'https://forum.heerenveen.org']
+  const inSeason = ['/nieuws', '/wedstrijden/2023-24', '/spelers/2023-24', 'https://forum.heerenveen.org']
 
-  it.each(['/wedstrijden/2023-24', '/statistieken/2023-24', '/spelers/2023-24'])(
+  it.each(['/wedstrijden/2023-24', '/cijfers/2023-24', '/spelers/2023-24'])(
     'take the season of the page along on %s, in the HTML of the server',
     (path) => {
       expect(menuAddresses(path)).toEqual(inSeason)
@@ -253,7 +263,7 @@ describe('the addresses of the main menu', () => {
   it.each([
     '/',
     '/wedstrijden',
-    '/statistieken',
+    '/cijfers',
     '/spelers',
     '/tegenstanders',
     '/tegenstanders/ado-den-haag',
@@ -266,7 +276,7 @@ describe('the addresses of the main menu', () => {
     '/wedstrijden/2023-25',
     '/wedstrijden/2023-24/',
     '/wedstrijden/2023-24/onzin',
-    '/statistieken/kies',
+    '/cijfers/kies',
     '/spelers/kies',
     '/spelers/onzin',
     '/spelers/2023-24/onzin',
@@ -277,7 +287,8 @@ describe('the addresses of the main menu', () => {
 
   it('keeps the current item and the sub-page as the path says, whatever the address', () => {
     expect(currentLinks(render('/wedstrijden/2023-24'))).toEqual(['Wedstrijden'])
-    expect(currentLinks(render('/statistieken/2023-24'))).toEqual(['Statistieken'])
+    expect(currentLinks(render('/cijfers/2023-24'))).toEqual(['Cijfers'])
+    expect(linksWith(render('/cijfers/2023-24'), 'true')).toEqual(['Wedstrijden'])
     expect(currentLinks(render('/spelers/2023-24'))).toEqual(['Spelers'])
     expect(linksWith(render('/spelers/2023-24'), 'true')).toEqual([])
   })
@@ -286,7 +297,7 @@ describe('the addresses of the main menu', () => {
 describe('seasonOfPath', () => {
   it.each([
     ['/wedstrijden/2023-24', '2023/24'],
-    ['/statistieken/2023-24', '2023/24'],
+    ['/cijfers/2023-24', '2023/24'],
     ['/spelers/2023-24', '2023/24'],
     ['/wedstrijden', undefined],
     ['/spelers', undefined],
@@ -300,11 +311,13 @@ describe('seasonOfPath', () => {
 })
 
 describe('hrefOf', () => {
-  it('takes the season of Wedstrijden and Statistieken along to Spelers, and the other way', () => {
+  it('takes the season of Wedstrijden and Cijfers along to Spelers, and the other way', () => {
     expect(hrefOf('/spelers', '/wedstrijden/2023-24')).toBe('/spelers/2023-24')
-    expect(hrefOf('/spelers', '/statistieken/2023-24')).toBe('/spelers/2023-24')
+    expect(hrefOf('/spelers', '/cijfers/2023-24')).toBe('/spelers/2023-24')
     expect(hrefOf('/wedstrijden', '/spelers/2023-24')).toBe('/wedstrijden/2023-24')
-    expect(hrefOf('/statistieken', '/spelers/2023-24')).toBe('/statistieken/2023-24')
+    expect(hrefOf('/wedstrijden', '/cijfers/2023-24')).toBe('/wedstrijden/2023-24')
+    expect(hrefOf('/cijfers', '/spelers/2023-24')).toBe('/cijfers/2023-24')
+    expect(hrefOf('/cijfers', '/wedstrijden/2023-24')).toBe('/cijfers/2023-24')
   })
 
   it('gives Spelers its own address on a page without a season', () => {
@@ -328,14 +341,16 @@ describe('currentOf', () => {
     ['/redactie/een-artikel', { item: '/nieuws', subitem: '/redactie' }],
     ['/wedstrijden', { item: '/wedstrijden' }],
     ['/wedstrijden/2025-26', { item: '/wedstrijden' }],
-    ['/statistieken', { item: '/statistieken' }],
-    ['/statistieken/2025-26', { item: '/statistieken' }],
+    ['/cijfers', { item: '/wedstrijden', subitem: '/cijfers' }],
+    ['/cijfers/2025-26', { item: '/wedstrijden', subitem: '/cijfers' }],
     ['/spelers', { item: '/spelers' }],
     ['/spelers/2025-26', { item: '/spelers' }],
-    ['/statistieken/spelers', { item: '/statistieken' }],
+    ['/cijfers/spelers', { item: '/wedstrijden', subitem: '/cijfers' }],
     ['/tegenstanders', { item: '/wedstrijden', subitem: '/tegenstanders' }],
     ['/tegenstanders/ado-den-haag', { item: '/wedstrijden', subitem: '/tegenstanders' }],
-    ['/statistieken/tegenstanders', { item: '/statistieken' }],
+    ['/cijfers/tegenstanders', { item: '/wedstrijden', subitem: '/cijfers' }],
+    ['/statistieken', {}],
+    ['/statistieken/2025-26', {}],
     ['/bronnen', {}],
     ['/nieuws/bestaat-niet', {}],
     ['/podcasts', {}],

@@ -42,7 +42,7 @@ import {
 /**
  * What the cards of the opponents say about the matches they count: all the played matches
  * since the first season we have, in the Eredivisie alone when the choice is `league`. The
- * form is the one of the cards on Statistieken ("Gebaseerd op …"), with the season from which
+ * form is the one of the cards on Cijfers ("Gebaseerd op …"), with the season from which
  * we have data, so a visitor knows how far back the record goes.
  */
 export function BasedOnSince({

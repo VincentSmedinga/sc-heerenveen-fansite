@@ -29,12 +29,12 @@ import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
-/** The route that sends the season picker on to its season (app/statistieken/kies). */
+/** The route that sends the season picker on to its season (app/cijfers/kies). */
 export const pickerPath = pickerPathOf(statisticsPath)
 
 /**
  * The title, description and canonical address of the page of a season. The current season is
- * the page `/statistieken`; another season has an address of its own, which is its canonical
+ * the page `/cijfers`; another season has an address of its own, which is its canonical
  * address, and a title that names the season.
  */
 export async function statisticsMetadata(season: string): Promise<Metadata> {
@@ -48,15 +48,15 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
   const current = seasonOf(new Date())
 
   return season === current
-    ? pageMetadata(statisticsPath, 'Statistieken')
+    ? pageMetadata(statisticsPath, 'Cijfers')
     : seasonPageMetadata(statisticsPath, seasonAddress(statisticsPath, season, current), {
         description: `De cijfers van sc Heerenveen 1 in het seizoen ${season}, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: de Nederlandse Wikipedia.`,
-        title: `Statistieken ${season}`,
+        title: `Cijfers ${season}`,
       })
 }
 
 /**
- * The page of a season: `/statistieken` for the current season and `/statistieken/2025-26` for
+ * The page of a season: `/cijfers` for the current season and `/cijfers/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. The ten cards with figures sit in two equal columns on a wide screen, the first
  * five on the left and the other five on the right, and under each other on a narrow one, in
@@ -105,7 +105,7 @@ export async function StatisticsPage({
       <Page.Main
         intro={
           <Page.Title>
-            <Heading level={1}>Statistieken</Heading>
+            <Heading level={1}>Cijfers</Heading>
             <SeasonPicker
               action={pickerPath}
               fields={competitionFields(competition)}
@@ -115,7 +115,7 @@ export async function StatisticsPage({
           </Page.Title>
         }
       >
-        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="statistieken" />
+        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="cijfers" />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />

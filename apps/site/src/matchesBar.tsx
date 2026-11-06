@@ -4,10 +4,11 @@ import { NavigationBar } from '@fansite/design-system'
 
 import { type CompetitionChoice, competitionQuery, parseCompetition } from './competition'
 import { opponentsPath } from './opponents'
-import { type SearchParams } from './season-page'
+import { type SearchParams, statisticsPath } from './season-page'
+import { seasonFromSlug, seasonSlug } from './seasons'
 
 /** The sub-page of Wedstrijden that the visitor is on, or none (the page of a season). */
-export type MatchesSubpage = 'opponents' | undefined
+export type MatchesSubpage = 'figures' | 'opponents' | undefined
 
 /**
  * The bar of Wedstrijden for the page the visitor is on, built on the server from the address:
@@ -18,31 +19,41 @@ export type MatchesSubpage = 'opponents' | undefined
 export async function MatchesBar({
   current,
   searchParams,
+  seasonSlug: slug,
 }: {
   current: MatchesSubpage
   searchParams: Promise<SearchParams>
+  /** The season in the address of the page, when it has one (`/wedstrijden/2025-26`). */
+  seasonSlug?: string
 }) {
   const { competitie } = await searchParams
   const competition = parseCompetition(competitie) ?? 'all'
+  const season = slug === undefined ? undefined : seasonFromSlug(slug)
 
-  return <NavigationBar subitems={matchesBarItems({ competition, current })} />
+  return <NavigationBar subitems={matchesBarItems({ competition, current, season })} />
 }
 
 /**
- * The links in the bar under the main menu while the visitor is on Wedstrijden: Tegenstanders.
- * Tegenstanders counts every season, so it only keeps the choice between all matches and the
- * Eredivisie, which is in the address of the page (`?competitie=eredivisie`). The main menu
- * keeps the season of the page for Wedstrijden, Statistieken and Spelers, but not the choice
- * (see SiteNavigation).
+ * The links in the bar under the main menu while the visitor is on Wedstrijden: Cijfers and
+ * Tegenstanders. Both keep the choice between all matches and the Eredivisie, which is in the
+ * address of the page (`?competitie=eredivisie`). Cijfers also keeps the season of the page, as
+ * the main menu does for Wedstrijden, Cijfers and Spelers (see SiteNavigation); Tegenstanders
+ * counts every season, so it has none.
  */
 export function matchesBarItems({
   competition,
   current,
+  season,
 }: {
   competition: CompetitionChoice
   current: MatchesSubpage
+  season?: string | undefined
 }): NavigationSubitem[] {
   const query = competitionQuery(competition)
+  const figures = season === undefined ? statisticsPath : `${statisticsPath}/${seasonSlug(season)}`
 
-  return [{ current: current === 'opponents', href: `${opponentsPath}${query}`, label: 'Tegenstanders' }]
+  return [
+    { current: current === 'figures', href: `${figures}${query}`, label: 'Cijfers' },
+    { current: current === 'opponents', href: `${opponentsPath}${query}`, label: 'Tegenstanders' },
+  ]
 }

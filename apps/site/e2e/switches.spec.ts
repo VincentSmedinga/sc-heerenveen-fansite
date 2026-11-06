@@ -3,7 +3,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { adminCookie } from './admin'
 
 // The switches that change the page with JavaScript: Welke stand, Welke wedstrijden (on
-// Statistieken and Spelers) and Welke berichten. A plain click moves the thumb at once and the
+// Cijfers and Spelers) and Welke berichten. A plain click moves the thumb at once and the
 // content follows without a new page; the links work without JavaScript, which the specs of
 // each switch check (standings-switch, competition-switch). The router asks for the page
 // without `Accept: text/html`, so a click is no visit for the counter (see src/visits.ts); a
@@ -49,10 +49,10 @@ const switches: SwitchCase[] = [
     to: 'Laatste 5',
   },
   {
-    after: /\/statistieken\?competitie=eredivisie$/,
+    after: /\/cijfers\?competitie=eredivisie$/,
     from: 'Alle wedstrijden',
     group: 'Welke wedstrijden',
-    path: '/statistieken',
+    path: '/cijfers',
     to: 'Eredivisie',
   },
   {

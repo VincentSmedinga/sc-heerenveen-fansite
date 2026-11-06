@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -311,14 +310,5 @@ describe('the page /tegenstanders', () => {
     vi.mocked(getClubRecords).mockRejectedValue(new Error('no database'))
 
     expect(await generateMetadata()).toMatchObject({ robots: { index: false } })
-  })
-})
-
-describe('the old addresses of Tegenstanders under /statistieken', () => {
-  // /statistieken/tegenstanders is the page of a season of Statistieken with a season that is
-  // not one, so it is "niet gevonden" (see app/statistieken/[seizoen]/page.test.tsx). The page
-  // of a club has no route any more, and there is no redirect: the site is not public yet.
-  it.each(['tegenstanders/[club]', 'tegenstanders/page.tsx'])('has no route %s under /statistieken', (route) => {
-    expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
   })
 })
