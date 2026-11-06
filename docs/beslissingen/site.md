@@ -2759,7 +2759,7 @@
   Een kaart die er niet is, heeft geen link.
   De balk is er op een telefoon, zoals bij Wedstrijden.
   De ankers zijn de bestaande `id`'s van de koppen.
-  Een kop die een link naar zichzelf is (Resultaten sinds en Stadion) staat al in `src/anchors.ts`; de andere zijn geen belofte en staan er niet in.
+  De kop Stadion staat al in `src/anchors.ts` (voor een club met twee namen van het stadion); de andere ankers zijn geen belofte en staan er niet in.
 - **Waarom:** het werkt zonder JavaScript, past bij Nieuws en Redactie en vraagt geen extra pagina per club.
   Een lijst van dertig wedstrijden op een telefoon is een lange scroll, en de acht kaarten erna waren niet te bereiken.
 - **Alternatieven:** vijf regels en een aparte pagina met de hele lijst (zoals #516, maar een extra pagina per club).
