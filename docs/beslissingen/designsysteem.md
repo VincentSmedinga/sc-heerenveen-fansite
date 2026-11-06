@@ -1264,6 +1264,7 @@
 - **Later:** sinds 5 november 2026 splitst de site de naam niet meer zelf: `splitPlayerName` is weg, en de voornaam en de achternaam komen uit `persons`; zie _De site telt per persoon en toont de bewaarde naam, en raadt niets_ in `site.md`.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
   De achternaam heeft het gewicht van een rijkop (600) in plaats van het zwaardere (700); de voornaam blijft gewoon.
+- **Later:** zie _Het rugnummer en een regel achter de naam zijn opties van PlayerName, en ShortPlayer vervalt_ (7 november 2026): `PlayerName` heeft nu ook een rugnummer en een regel achter de naam, en het onderdeel `ShortPlayer`, dat de naam met een rugnummer toonde, is weg.
 
 ## Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen
 
