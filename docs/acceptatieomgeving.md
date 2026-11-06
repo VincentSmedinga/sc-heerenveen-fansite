@@ -164,6 +164,30 @@ De workflow [`import-seasons.yml`](../.github/workflows/import-seasons.yml) doet
 - **Let op:** de run houdt de `concurrency`-groep `acceptance` vast tot hij klaar is, dus een deploy wacht zolang de import loopt.
   Voor één seizoen duurt dat seconden, voor alle seizoenen een paar minuten.
 
+### De selectie van afgelopen seizoenen importeren
+
+De workflow [`import-squads.yml`](../.github/workflows/import-squads.yml) leest de selectie van afgelopen seizoenen vanaf een beginseizoen, het oudste eerst.
+Hij leest de selectie en niet de wedstrijden: die leest _Import seasons_.
+Start hem na een wijziging in de lezers van de selectie, en eenmalig vanaf 1990/91 voor de spelers van alle seizoenen:
+
+1. Open in GitHub _Actions → Import squads_ en kies _Run workflow_, met de branch `main`.
+2. Vul het eerste seizoen in, zoals `1990/91`.
+   De workflow weigert een andere vorm dan `2025/26`, voordat hij verbinding maakt.
+   De opdracht zelf weigert een seizoen dat nog niet begonnen is en het lopende seizoen, want vanaf dat seizoen is er niets te lezen.
+3. Lees het logboek van de stap _Import the squads on the host_.
+   Daar staat per seizoen een regel, zoals `Squad 2013/14: 16 new, 0 improved, 0 unchanged, from 1 page`, of `Squad 2002/03: no squad page on Wikipedia, so no squad` voor een seizoen zonder pagina.
+   Aan het eind staat een samenvatting: `Squads: 36 of 36 read, 6 of them without a page.`
+   Een tweede run meldt overal `0 new, 0 improved`.
+
+- Een seizoen zonder pagina is een gat en geen fout: de run blijft groen.
+  Een pagina die een fout geeft maakt de run rood, maar de opdracht gaat door met het volgende seizoen, en het seizoen dat mislukte blijft zoals het was.
+- Vanaf 1990/91 zijn dat ongeveer 35 pagina's en, eenmalig, ongeveer 400 titels voor personen, elk één verzoek.
+  Een tweede run vraagt alleen de pagina's.
+- Houdt een run van cron de lock vast als een seizoen aan de beurt is, dan slaat de opdracht dat seizoen over en telt het als mislukt.
+  Start de workflow dan opnieuw met het beginseizoen van het seizoen dat ontbreekt.
+- Na de selectie draai je _Import seasons_ vanaf 2010/11, zodat de doelpunten hun `player_id` en `person_id` krijgen.
+- Net als _Import seasons_ houdt de run de `concurrency`-groep `acceptance` vast tot hij klaar is, en breekt de workflow na 30 minuten af.
+
 ### Een mail als een import blijft falen
 
 Faalt dezelfde import drie runs achter elkaar, dan mailt de importer de projecteigenaar.

@@ -24,6 +24,8 @@
     "import:changes": "pnpm --filter @fansite/importer run import:changes",
     "import:season": "pnpm --filter @fansite/importer run import:season",
     "import:seasons": "pnpm --filter @fansite/importer run import:seasons",
+    "import:squad": "pnpm --filter @fansite/importer run import:squad",
+    "import:squads": "pnpm --filter @fansite/importer run import:squads",
     "import:status": "pnpm --filter @fansite/importer run import:status",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run lint:format",
     "lint:css": "stylelint --allow-empty-input '**/*.css'",
