@@ -39,8 +39,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
   // list, the only place it is (#774). The old anchor topscorers comes along. The card
-  // Bijzondere doelpunten (#403) is under it.
-  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
+  // Alle tijden (#780) follows it, and the card Bijzondere doelpunten (#403) is under that.
+  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'alle-tijden', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium.
   '/tegenstanders/voorbeeld-united': ['stadion'],

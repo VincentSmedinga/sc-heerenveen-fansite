@@ -30,7 +30,7 @@ afterEach(() => {
 const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
 
 describe('the bar of /spelers', () => {
-  it('is a navigation named Op deze pagina:, with three links: to the cards Selectie, Doelpuntenmakers and Bijzondere doelpunten', async () => {
+  it('is a navigation named Op deze pagina:, with four links: to the cards Selectie, Doelpuntenmakers, Alle tijden and Bijzondere doelpunten', async () => {
     const html = await render()
 
     expect(html).toContain('Op deze pagina:')
@@ -39,9 +39,10 @@ describe('the bar of /spelers', () => {
     ).toEqual([
       ['#selectie', 'Selectie'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
+      ['#alle-tijden', 'Alle tijden'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
-    expect(playersShortcuts).toHaveLength(3)
+    expect(playersShortcuts).toHaveLength(4)
   })
 
   it('has none of the other eight cards of Cijfers', async () => {

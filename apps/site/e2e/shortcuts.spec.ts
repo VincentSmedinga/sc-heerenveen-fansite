@@ -362,18 +362,20 @@ test.describe('the bar under the header of /cijfers', () => {
 // the other bars, because the cards then sit in the main column and the sidebar side by side.
 test.describe('the bar under the header of /spelers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has three links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
+    test(`has four links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/spelers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(3)
+      await expect(bar.getByRole('link')).toHaveCount(4)
       await bar.getByRole('link', { name: 'Selectie' }).click()
       await expect(page).toHaveURL(/#selectie$/)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
+      await bar.getByRole('link', { name: 'Alle tijden' }).click()
+      await expect(page).toHaveURL(/#alle-tijden$/)
       await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
       await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
       expect(await checkPage(page)).toEqual([])

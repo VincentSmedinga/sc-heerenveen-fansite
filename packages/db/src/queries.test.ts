@@ -8,6 +8,7 @@ import {
   countArchiveItems,
   countPodcastEpisodes,
   findPodcast,
+  listAllMatchGoals,
   listAllWikipediaPages,
   listArchivePage,
   listArchiveSources,
@@ -1696,6 +1697,26 @@ describe('the matches and the table of a season', () => {
       expect(extra).toMatchObject({ extraTime: true, penaltiesAgainst: null, penaltiesFor: null })
       expect(shootOut).toMatchObject({ extraTime: true, penaltiesAgainst: 5, penaltiesFor: 4 })
       expect(league).toMatchObject({ extraTime: false, penaltiesAgainst: null, penaltiesFor: null })
+    })
+
+    it('gives every match of every season with its goals and nothing else, for the all-time list', async () => {
+      const [first, second] = madeUpMatches(now)
+      const earlier = { ...second!, season: '2010/11' }
+
+      await database.db.insert(matches).values(await withClubs(database.db, [first!, earlier]))
+
+      const [row] = await database.db.select({ id: matches.id }).from(matches).where(eq(matches.season, '2010/11'))
+
+      await database.db.insert(matchGoals).values({ matchId: row?.id ?? 0, minute: 3, ours: true, player: 'Oud' })
+
+      const rows = await listAllMatchGoals(database.db)
+
+      expect(rows.map((match) => match.season)).toEqual(['2010/11', first!.season])
+      expect(Object.keys(rows[0]!).sort()).toEqual(
+        ['competition', 'goals', 'goalsAgainst', 'goalsFor', 'season', 'status'].sort(),
+      )
+      expect(rows[0]?.goals.map((goal) => goal.player)).toEqual(['Oud'])
+      expect(rows[1]?.goals).toEqual([])
     })
 
     it('gives a cup match with extra time the score after 90 minutes when the seed has it', async () => {
