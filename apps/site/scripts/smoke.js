@@ -729,6 +729,9 @@ await withEmptyDatabase((database) =>
     // Before the first page is asked for: the site keeps our places for five minutes, and the
     // check of the anchors asks for the matches page long before the checks of its content.
     await addEarlierStandings(database)
+    // Also before the first page: the card Resultaten per hoofdtrainer on /cijfers counts these
+    // matches of earlier seasons, and the site keeps that for five minutes too.
+    await addTestdorpMeetings(database)
 
     const home = await fetch(origin)
     const html = await home.text()
@@ -985,7 +988,7 @@ await withEmptyDatabase((database) =>
     const coachCard = statisticsHtml.slice(statisticsHtml.indexOf('id="resultaten-per-hoofdtrainer"'))
     assert.match(
       coachCard,
-      /^id="resultaten-per-hoofdtrainer">.*?href="#resultaten-per-hoofdtrainer">Resultaten per hoofdtrainer<\/a><\/h2><table/s,
+      /^id="resultaten-per-hoofdtrainer">.*?href="#resultaten-per-hoofdtrainer">Resultaten per .*?<\/h2><table/s,
     )
     assert.ok(
       (coachCard.slice(0, coachCard.indexOf('</table>')).match(/<th scope="row">/g) ?? []).length >= 2,
@@ -1279,7 +1282,6 @@ await withEmptyDatabase((database) =>
     // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
     // slug that no club has is "niet gevonden".
-    await addTestdorpMeetings(database)
     await addProefdorpStadiums(database)
     await addProefdorpNames(database)
     const clubPage = await fetch(`${origin}/tegenstanders/testdorp-fc`)
