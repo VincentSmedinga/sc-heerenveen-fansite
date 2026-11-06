@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
+import { englishWikipediaOrigin } from './import-matches.ts'
 import { englishSquadPage, englishSquadSeasons, readEnglishSquad } from './read-english-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 
@@ -221,7 +222,7 @@ describe('englishSquadPage', () => {
   it('makes a request with only ?action=raw to the address of the English Wikipedia', () => {
     const title = englishSquadPage('2019/20') ?? ''
 
-    expect(pageUrl('https://en.wikipedia.org', title)).toBe(
+    expect(pageUrl(englishWikipediaOrigin, title)).toBe(
       'https://en.wikipedia.org/wiki/2019%E2%80%9320_SC_Heerenveen_season?action=raw',
     )
   })

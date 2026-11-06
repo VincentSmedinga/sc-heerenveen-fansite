@@ -2386,7 +2386,8 @@
   - Een sjabloon, positie of rugnummer dat de lezer niet kent, en een tabel zonder kolom Player, is een fout.
     Een pagina zonder selectie en zonder transfers geeft `none`.
   - De lezer geeft 32, 13, 31, 30 en 30 spelers voor 2018/19, 2019/20, 2020/21, 2021/22 en 2024/25, tegen 31, 21, 28, 29 en 34 in het onderzoek.
-    De selecties zijn met de hand geteld (32, 31, 31 en 30 sjablonen; de speler die twee keer voorkomt telt één keer). 2019/20 heeft alleen transfers, en de onderzoekscijfers tellen ook wie in de zomer vertrok.
+    De selecties zijn met de hand geteld (32, 31, 31 en 30 sjablonen; de speler die twee keer voorkomt telt één keer).
+    2019/20 heeft alleen transfers, en de onderzoekscijfers tellen ook wie in de zomer vertrok.
 - **Waarom:** de projecteigenaar gaf op 5 november 2026 toestemming, voor selecties alleen waar de Nederlandse pagina ontbreekt.
   De licentie is dezelfde (CC BY-SA 4.0).
   Een speler heeft binnen een seizoen één bron, dus geen dubbele namen met twee titels.
