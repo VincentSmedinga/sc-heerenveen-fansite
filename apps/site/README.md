@@ -541,7 +541,7 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
 `/tegenstanders` is de enige subpagina van Wedstrijden, met de pagina van elke club eronder op `/tegenstanders/<club>`; de oude adressen onder `/statistieken` bestaan niet meer (zie _Tegenstanders hoort bij Wedstrijden_).
 Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
 Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
-De server stuurt de tabel zonder knoppen om te sorteren, en er is geen paginering.
+De server stuurt de tabel zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
 Met JavaScript is elke kolom sorteerbaar; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
 De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
 De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/opponents.ts`).
@@ -568,6 +568,9 @@ De scorers komen uit dezelfde bron als bij Uitslagen: `listClubMatches` leest ze
 Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
 Wat komt, bepaalt `programmeOf` in `src/matches.ts`, dezelfde regel als Programma (`upcomingOf` in `src/opponents.ts`), en de keuze voor de competitie telt mee.
 Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft alleen die wedstrijden in de kaart, geen zijkolom met uitslagen, en alleen de bronvermelding in de zijkolom.
+De gespeelde wedstrijden staan tien per pagina, met `Pagination` en `?pagina=` (`meetingsPerPage` in `src/opponents.ts`); de keuze Eredivisie gaat voor `pagina` in het adres.
+De komende wedstrijden en de rij "Laatste wedstrijden" staan alleen op de eerste pagina, en een pagina na de laatste is "niet gevonden".
+Op een telefoon staat onder de kop de balk "Op deze pagina:" met een link naar elke kaart die er is (`clubShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders/[club]`).
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.

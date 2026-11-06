@@ -9,6 +9,7 @@ import {
   Heading,
   List,
   MarkRow,
+  Pagination,
   RecordTable,
   ShortMatch,
   ShortStaff,
@@ -29,7 +30,9 @@ import {
   hasTimeline,
   lastResultsOf,
   type Meeting,
+  meetingPageCount,
   meetingsOf,
+  meetingsOnPage,
   pointsOf,
   type StadiumView,
   startYearOf,
@@ -99,28 +102,36 @@ const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => r
  * the same line as Programma and Uitslagen use (`MatchLine`). The matches that are still to
  * come stand first, next one first, as Programma has them. The matches that were played
  * follow, the newest first, with the row Laatste wedstrijden above the list when there are
- * five or more (see `lastResultsOf`).
+ * five or more (see `lastResultsOf`). The played matches come ten to a page with `Pagination`
+ * (see `meetingsPerPage`); the matches to come and the row Laatste wedstrijden are on the
+ * first page only. `pageHref` gives the address of a page.
  *
  * A line has the day with its year, so a match of an earlier season can be told from one of
  * this season, the competition and the round, the name as Wikipedia wrote the club in that
  * match (so an earlier name shows), where it was played and, for a match that was played, the
  * result from our side with the scorers, extra time and the shoot-out. A match to come has
  * no result, which is what sets it apart, so there are no subheadings. The legend of the
- * abbreviations is under the list. The list has all the matches, not a selection, so it has
- * one kind of line (see the decision of 4 November 2026 in `docs/beslissingen/site.md`). It is
- * the main content of the page, so it has the white surface.
+ * abbreviations is under the list. The list has all the matches, not a selection, only
+ * spread over pages, so it has one kind of line (see the decision of 4 November 2026 in
+ * `docs/beslissingen/site.md`). It is the main content of the page, so it has the white
+ * surface.
  */
 export function ClubMeetingsCard({
   meetings,
   now,
+  page = 1,
+  pageHref = () => '',
   upcoming,
 }: {
   meetings: Meeting[]
   now: Date
+  page?: number
+  pageHref?: (page: number) => string
   upcoming: PublicClubMatch[]
 }) {
-  const last = lastResultsOf(meetings)
-  const shown = [...upcoming, ...meetings]
+  const pageCount = meetingPageCount(meetings)
+  const last = page === 1 ? lastResultsOf(meetings) : undefined
+  const shown = [...(page === 1 ? upcoming : []), ...meetingsOnPage(meetings, page)]
 
   return (
     <Card aria-labelledby="wedstrijden">
@@ -137,6 +148,15 @@ export function ClubMeetingsCard({
         ))}
       </List>
       <MatchLegend matches={shown} />
+      {pageCount > 1 && (
+        <Pagination
+          current={page}
+          label="Paginering van de wedstrijden"
+          nextHref={page < pageCount ? pageHref(page + 1) : undefined}
+          previousHref={page > 1 ? pageHref(page - 1) : undefined}
+          total={pageCount}
+        />
+      )}
     </Card>
   )
 }

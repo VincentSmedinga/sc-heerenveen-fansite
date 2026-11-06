@@ -1,4 +1,4 @@
-import type { FormResult } from '@fansite/design-system'
+import type { FormResult, PageShortcutsItem } from '@fansite/design-system'
 
 import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
 import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
@@ -75,6 +75,56 @@ export function meetingsOf(matches: readonly PublicClubMatch[], choice: Competit
       match.goalsFor !== null &&
       match.goalsAgainst !== null,
   )
+}
+
+/** How many played matches the card Wedstrijden of a club shows on a page. */
+export const meetingsPerPage = 10
+
+/** How many pages the played matches take: at least one, so a club with none has a page. */
+export const meetingPageCount = (meetings: readonly unknown[]) =>
+  Math.max(1, Math.ceil(meetings.length / meetingsPerPage))
+
+/** The played matches of one page (counting from 1), in the order given: the newest first. */
+export const meetingsOnPage = <T>(meetings: readonly T[], page: number) =>
+  meetings.slice((page - 1) * meetingsPerPage, page * meetingsPerPage)
+
+/**
+ * The links in the bar "Op deze pagina:" of the page of a club: one to each card the page has,
+ * in the order of a narrow screen, which is the screen the bar is for. The ids are those of
+ * the headings in `OpponentViews.tsx` (a test checks it). The card Wedstrijden is there with a
+ * match to show; the cards of the sidebar follow the page (see `ClubPage`): the figures need a
+ * played match, the timeline needs `hasTimeline`, Doelpuntenmakers needs `hasClubScorers`, and
+ * Stadion needs a stadium. `since` is the first season we have, as on the card.
+ */
+export function clubShortcutsOf({
+  hasStadium,
+  matches,
+  played,
+  since,
+  upcoming,
+}: {
+  hasStadium: boolean
+  matches: readonly PublicClubMatch[]
+  played: number
+  since: string
+  upcoming: number
+}): PageShortcutsItem[] {
+  const firstYear = startYearOf(since)
+
+  return [
+    ...(played + upcoming > 0 ? [{ href: '#wedstrijden', label: 'Wedstrijden' }] : []),
+    ...(played > 0
+      ? [
+          { href: '#onze-uitslagen', label: 'Onze uitslagen' },
+          ...(hasTimeline(matches) && Number.isFinite(firstYear)
+            ? [{ href: '#resultaten-sinds', label: `Resultaten sinds ${firstYear}` }]
+            : []),
+          { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
+          ...(hasClubScorers(matches) ? [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] : []),
+        ]
+      : []),
+    ...(hasStadium ? [{ href: '#stadion', label: 'Stadion' }] : []),
+  ]
 }
 
 /**
