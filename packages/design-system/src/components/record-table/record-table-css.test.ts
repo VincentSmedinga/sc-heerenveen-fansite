@@ -10,6 +10,6 @@ describe('record-table.css', () => {
   })
 
   it('puts a line above the total, thicker than the line between the other rows', () => {
-    expect(css).toMatch(/border-block-start: 2px solid var\(--hf-colour-border-default\)/u)
+    expect(css).toMatch(/border-block-start: 2px solid var\(--hf-card-line, var\(--hf-colour-border-default\)\)/u)
   })
 })

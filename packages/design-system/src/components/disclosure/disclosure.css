@@ -7,7 +7,7 @@
 
 @layer hf.components {
   .hf-disclosure {
-    border: 1px solid var(--hf-colour-border-surface-soft);
+    border: 1px solid var(--hf-card-line-strong, var(--hf-colour-border-surface-soft));
     border-radius: 0.5rem;
     box-sizing: border-box;
 

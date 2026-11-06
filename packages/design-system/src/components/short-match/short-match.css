@@ -70,7 +70,7 @@
   }
 
   li > .hf-short-match {
-    border-block-start: 1px solid var(--hf-colour-border-default);
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
   }
 
   li:first-child > .hf-short-match {
@@ -89,7 +89,7 @@
    * This comes after the rules above, which have the same weight.
    */
   li > :not(.hf-short-match):has(+ .hf-short-match) {
-    border-block-start: 1px solid var(--hf-colour-border-default);
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     padding-block-start: var(--hf-space-s);
   }
 

@@ -53,7 +53,7 @@
   .hf-rich-text-editor-link {
     background-color: var(--hf-colour-background-surface-soft);
     border: 1px solid;
-    border-color: var(--hf-colour-border-surface-soft);
+    border-color: var(--hf-card-line-strong, var(--hf-colour-border-surface-soft));
     border-radius: 0.25rem;
     box-sizing: border-box;
     display: grid;

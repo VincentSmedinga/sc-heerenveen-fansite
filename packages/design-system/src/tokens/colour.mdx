@@ -87,6 +87,14 @@ In licht is de lijn donker met een witte rand, in donker is hij licht met een ra
 De lijn haalt 3:1 op de vlakken.
 Tegen een staafje van een gelijkspel haalt hij in donker maar 1,92:1; de rand ertussen haalt 4,02:1 of meer tegen de staafjes en draagt de scheiding.
 
+De lijnen in een kaart volgen de kaart.
+Elk vlak heeft naast zijn rand twee lijnen: `--hf-colour-line-darker-*`, een stap donkerder, voor de omlijsting van een uitklapblok of een mededeling, en `--hf-colour-line-graphic-*`, voor assen en pijlen.
+Die laatste haalt 3:1 tegen het vlak waarop hij staat, op de vier vlakken in licht en in donker (1.4.11): 4,19 en 6,21 op wit, 3,46 en 4,89 op sterk, 3,85 en 6,21 op zacht en 3,47 en 4,89 op warm.
+Op een warm vlak is dat in licht een zandkleur (zand 500), zodat er geen blauwe lijn in een zandkleurige kaart staat.
+De donkerder lijn en de rand zijn versiering en hebben geen eis.
+De kaart zet ze als `--hf-card-line`, `--hf-card-line-strong` en `--hf-card-line-graphic` (zie de pagina van Kaart), en een onderdeel gebruikt ze met zijn eigen kleur als terugval.
+De rand van een invoerveld, de focusrand, de knoppen, een label met nadruk en de gegevens van een grafiek houden hun vaste kleur.
+
 Oudere browsers zonder `light-dark()` (van vóór 2024) krijgen alleen het lichte thema.
 
 <Story of={ColourStories.SemanticTokens} />

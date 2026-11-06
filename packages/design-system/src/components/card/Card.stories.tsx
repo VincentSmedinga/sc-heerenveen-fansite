@@ -1,13 +1,17 @@
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { BarChart } from '../bar-chart/BarChart'
 import { Button } from '../button/Button'
+import { DataTable } from '../data-table/DataTable'
+import { Disclosure } from '../disclosure/Disclosure'
 import { DonutChart } from '../donut-chart/DonutChart'
 import { Form } from '../form/Form'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { List } from '../list/List'
 import { NewsItem } from '../news-item/NewsItem'
+import { Notice } from '../notice/Notice'
 import { Page } from '../page/Page'
 import { StandingsTable } from '../standings-table/StandingsTable'
 import { Text } from '../text/Text'
@@ -51,6 +55,11 @@ const meta = preview.meta({
           'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
           'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',
           'Gebruik hem alleen voor een kaart met cijfers en feiten die we mogen laten rondgaan, nooit voor het werk van journalisten.',
+          '',
+          'De lijnen in een kaart volgen de kaart: de scheidingen tussen rijen, de omlijsting van een uitklapblok of een mededeling en de assen van een grafiek hebben de kleur van het vlak waarop ze staan, en niet meer één kleur voor elk vlak.',
+          'Het vlak zet daarvoor drie eigenschappen, `--hf-card-line` (de rand van het vlak), `--hf-card-line-strong` (een stap donkerder) en `--hf-card-line-graphic` (haalt 3:1, voor assen en pijlen).',
+          'Een onderdeel gebruikt ze met een terugval op zijn eigen kleur, dus buiten een kaart verandert er niets.',
+          'Velden, de focusrand, knoppen en de gegevens van een grafiek houden hun vaste kleur.',
           '',
           'De vier vlakken en het doorzichtige vlak hebben elk een betekenis.',
           'Loop de regels op volgorde door: de eerste die past, wint.',
@@ -161,6 +170,71 @@ const renderSurfaces = () => (
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Vier vlakken, licht', render: renderSurfaces })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken, donker', render: renderSurfaces })
+
+// The lines in a card follow the card: the rows of the table, the outline of the disclosure and
+// the notice, and the axes of the chart take the colour of the surface they are on.
+const renderLines = (only?: CardSurface) => (
+  <Page.Body>
+    <Page.Main>
+      {surfaces
+        .filter(({ surface }) => only === undefined || surface === only)
+        .map(({ label, surface }) => (
+          <Card aria-labelledby={`lines-${surface}`} key={surface} surface={surface}>
+            <Heading appearance={3} id={`lines-${surface}`} level={2}>
+              {label}
+            </Heading>
+            <DataTable
+              caption={`Een tabel op het ${label.toLowerCase()}`}
+              columns={['Seizoen', 'Plek', 'Punten']}
+              rows={[
+                { cells: [4, 58], header: '2025/26' },
+                { cells: [2, 64], header: '2024/25' },
+                { cells: [9, 44], header: '2023/24' },
+              ]}
+            />
+            <BarChart
+              axis={{ title: 'Speelronde' }}
+              bars={[3, 1, 3, 0, 3, 1, 3, 3].map((value) => ({
+                tone: value === 3 ? 'positive' : value === 1 ? 'neutral' : 'negative',
+                value,
+              }))}
+              max={3}
+              ticks={[0, 1, 3]}
+            />
+            <Notice>Een mededeling in een kaart.</Notice>
+            <Disclosure summary="Uitslag per speelronde">
+              <Text>Wat achter de samenvatting staat.</Text>
+            </Disclosure>
+          </Card>
+        ))}
+    </Page.Main>
+  </Page.Body>
+)
+
+export const LinesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Lijnen in een kaart, licht',
+  render: () => renderLines(),
+})
+
+export const LinesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Lijnen in een kaart, donker',
+  render: () => renderLines(),
+})
+
+// The warm surface alone, where the lines used to be blue or hardly there.
+export const LinesWarmLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Lijnen in een warme kaart, licht',
+  render: () => renderLines('warm'),
+})
+
+export const LinesWarmDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Lijnen in een warme kaart, donker',
+  render: () => renderLines('warm'),
+})
 
 const renderWithButton = () => (
   <Page.Body>

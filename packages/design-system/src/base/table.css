@@ -51,7 +51,7 @@
 
   tbody tr {
     border-block-start: 1px solid;
-    border-block-start-color: var(--hf-colour-border-default);
+    border-block-start-color: var(--hf-card-line, var(--hf-colour-border-default));
   }
 
   .hf-numeric {

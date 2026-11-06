@@ -38,7 +38,7 @@
 
   .hf-input-table tr {
     border: 1px solid;
-    border-color: var(--hf-colour-border-default);
+    border-color: var(--hf-card-line, var(--hf-colour-border-default));
     border-radius: 0.25rem;
     box-sizing: border-box;
     display: grid;
@@ -122,7 +122,7 @@
     .hf-input-table tr {
       border: 0;
       border-block-start: 1px solid;
-      border-block-start-color: var(--hf-colour-border-default);
+      border-block-start-color: var(--hf-card-line, var(--hf-colour-border-default));
       border-radius: 0;
       grid-template-areas:
         'number first action'

@@ -151,6 +151,8 @@
   De rand maakt tonale vlakken even duidelijk afgebakend als kaarten.
 - **Later:** zie _Een kaart is een eigen component, en de koppen staan op een wit vlak_.
   Het tonale vlak heet nu het sterke vlak, met de tokens `background-surface-strong` en `border-surface-strong`.
+- **Later:** de lijnen in een kaart volgen de rand van die kaart en niet meer één kleur: zie _Lijnen in een kaart volgen de kaart via lokale eigenschappen_ (6 november 2026).
+  Een vlak heeft nu naast zijn rand twee lijnen, een stap donkerder en een van 3:1 voor assen en pijlen.
 
 ## Kleuren, reeksen en rollen
 
@@ -183,6 +185,8 @@
 - **Alternatieven:** kaart en tonaal vlak als twee aparte rollen, zoals eerst.
 - **Later:** zie _Een kaart is een eigen component, en de koppen staan op een wit vlak_.
   Het tonale vlak heet nu het sterke vlak, met de tokens `-strong` in plaats van `-tonal`.
+- **Later:** `border-default` is de lijn tussen rijen buiten een kaart.
+  In een kaart volgt ze de rand van die kaart (_Lijnen in een kaart volgen de kaart via lokale eigenschappen_, 6 november 2026).
 
 ## Eigen focusrand op de donkere blauwe vlakken
 
@@ -2602,3 +2606,27 @@
 - **Nadeel:** de kaart "Resultaten sinds" heeft geen tabel met de gemiddelden; de tooltip is daar alleen voor wie een muis, pen of aanraking gebruikt.
   De wedstrijden zelf staan wel in de lijst onder Wedstrijden.
 - **Later:** vervangt "De zin onder de grafiek noemt hoeveel wedstrijden het gemiddelde telt" in _BarChart is overal 4 rem hoog_ (4 november 2026) en "alleen de kaart Verloop van het seizoen gebruikt hem" in de beslissing over de tooltip van #726 (5 november 2026): `FormTimeline` gebruikt hem nu ook.
+
+## Lijnen in een kaart volgen de kaart via lokale eigenschappen
+
+- **Datum:** 6 november 2026
+- **Besluit:** elk vlak van `Card` zet `--hf-card-line` (de randkleur van het vlak), `--hf-card-line-strong` (een stap donkerder) en `--hf-card-line-graphic` (3:1 voor assen en pijlen), elk uit een kleurtoken met een waarde voor licht en donker.
+  Onderdelen gebruiken ze als `var(--hf-card-line, <de huidige kleur>)`, dus buiten een kaart verandert er niets.
+  Het transparante vlak zet ze niet.
+  - **Volgen `--hf-card-line`:** de scheiding tussen rijen en de `hr` (`base/table.css`, `base/elements.css`), `record-table`, `input-table`, `news-item`, `discussion-item`, `match`, `short-match`, de hulplijnen en de ring zonder waarden van `bar-chart` en `donut-chart`.
+  - **Volgen `--hf-card-line-strong`:** `Disclosure`, `Notice`, het formulier voor een link in de editor en `fieldset`.
+  - **Volgen `--hf-card-line-graphic`:** de grond van `bar-chart`, de geleider van `donut-chart`, de pijlen van `breadcrumb` en de balk van een `blockquote`.
+  - **Blijven vast:** de randen van invoervelden, selects en tekstvakken (`--hf-colour-border-input`), de focusrand, de randen van de zachte knop en van een Tag met nadruk, de foutmeldingen, de balk van de huidige rij in `standings-table`, `pre` en `code`, de gegevens van grafieken (balken, lijn, schijven en hun omlijning), onderstrepingen en opsommingstekens.
+  - **Kleur:** de reeks zand krijgt de stappen 400 en 500 (even licht als grijs 400 en 500).
+    Rollen: `line-darker-surface[-strong|-soft|-warm]` en `line-graphic-surface[-strong|-soft|-warm]`.
+    De grafische lijn haalt 3:1 tegen zijn vlak: wit 4,19 (licht) en 6,21 (donker), sterk 3,46 en 4,89, zacht 3,85 en 6,21, warm 3,47 en 4,89.
+- **Waarom:** de lijnen in een warme kaart waren blauw of bijna onzichtbaar (rijscheidingen 1,09:1).
+  Een eigenschap op het vlak houdt het binnen de kaart: een onderdeel buiten een kaart verandert niet, en een nieuw vlak hoeft alleen drie eigenschappen te zetten.
+- **Alternatieven:** `--hf-colour-border-default` per vlak herdefiniëren (niet ingekapseld, en raakt ook onderdelen buiten kaarten); één waarde voor alle lijnen (rijscheidingen en omlijstingen willen niet dezelfde kracht); de lijnen van velden ook laten volgen (die moeten 3:1 halen en zijn geen versiering).
+
+## Grafiekassen volgen een eigen waarde van 3:1
+
+- **Datum:** 6 november 2026
+- **Besluit:** assen, de grond en pijlen volgen `--hf-card-line-graphic`; de gegevens van de grafiek blijven vast.
+- **Waarom:** een as betekent iets en moet 3:1 halen (1.4.11), en de grafieken van het seizoen staan op warme kaarten.
+- **Alternatief:** de assen blauw laten (blauw in zand, wat de projecteigenaar niet mooi vindt).
