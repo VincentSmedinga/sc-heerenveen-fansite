@@ -883,6 +883,8 @@
 - **Later:** we bewaren sinds 31 oktober 2026 ook de optredens, doelpunten en assists per speler, uit dezelfde tabel; zie _De cijfers van een speler staan in een eigen tabel, per seizoen en competitie_.
 - **Later:** de selectie van eerdere seizoenen wordt onderzocht in `docs/onderzoek-spelers-sinds-1990.md` (#676).
   Er is nog niets gekozen, dus de bron en de licentie hier blijven gelden.
+- **Later:** zie _De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg_.
+  Sinds 6 november 2026 lezen `import:squad` en `import:squads` de selectie van eerdere seizoenen, uit dezelfde Nederlandse Wikipedia en met dezelfde fetcher, controle op `robots.txt` en licentie.
 
 ## De zoekterm is de achternaam, als eigen kolom
 
@@ -983,6 +985,9 @@
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
 - **Later:** de selectie van eerdere seizoenen wordt onderzocht in `docs/onderzoek-spelers-sinds-1990.md` (#676).
   Er is nog niets gekozen, dus dit besluit blijft gelden tot de projecteigenaar kiest.
+- **Later:** zie _De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg_.
+  Een eerder seizoen kan sinds 6 november 2026 wel een selectie hebben, met `pnpm run import:squad <seizoen>`.
+  Het uitgangspunt "de selectie van een eerder seizoen komt er niet bij" geldt dus niet meer, en de doelpunten van een eerder seizoen krijgen hun `player_id` bij de volgende `import:season`.
 - **Later:** zie _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_.
   Een seizoen dat al in de database staat, verandert niet zomaar meer: een verschil dat iets overschrijft wacht bij een tweede lezing tot een mens besluit (`pnpm run import:changes`) of tot de opdracht het na zeven dagen weer leest.
   Een eerste lezing en een lezing zonder verschil werken zoals hier staat.
@@ -2396,3 +2401,39 @@
   Een speler heeft binnen een seizoen één bron, dus geen dubbele namen met twee titels.
 - **Alternatieven:** alleen de Nederlandse Wikipedia (vijf seizoenen zonder spelers).
   De Engelse pagina ook waar de Nederlandse bestaat (twee titels per speler, en alleen Wikidata voegt ze samen).
+
+## De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg
+
+- **Datum:** 5 november 2026
+- **Besluit:** `import:squad` en `import:squads` lezen de selectie van afgelopen seizoenen eenmalig, uit wat de Nederlandse Wikipedia heeft (#744).
+  Een seizoen zonder pagina krijgt geen rijen en een regel in het logboek.
+  Een seizoen met een deel van de selectie wordt bewaard met de bron van elke rij.
+  Een tweede lezing voegt toe en haalt niemand weg.
+- **Waarom:** de projecteigenaar liet gaten toe op 5 november 2026.
+  Een gat is beter dan een gok, en een afgelopen seizoen verandert niet meer.
+  De volledigheid per seizoen (#745) zegt hoeveel we weten.
+  Een speler weghalen die in een eerdere lezing stond, breekt de verwijzingen van de doelpunten.
+- **Gevolg:** zo werken de opdrachten (6 november 2026):
+  - `squadSources` in `squad-sources.ts` zegt per seizoen welke pagina's en lezers erbij horen.
+    1990/91 tot en met 1999/00 en 2005/06 hebben de tabel Statistieken, 2006/07 de transfers en de doelpuntenmakers, 2007/08 tot en met 2017/18 de selectie en de transfers, 2022/23 en 2023/24 de tabel `readSquad`, en 2018/19 tot en met 2021/22 en 2024/25 de Engelse pagina.
+    2000/01 tot en met 2004/05 en 2025/26 hebben geen lezers.
+  - Een seizoen zonder lezers, een pagina die niet bestaat (404) en een pagina zonder tabel (`none`) zijn een gat: één regel `Squad 2002/03: no squad page on Wikipedia, so no squad`, niets geschreven en exitcode 0.
+  - Een pagina die een fout geeft, een lezer die een fout meldt of een verzoek dat mislukt laat het hele seizoen ongemoeid.
+    Dan staat er een fout in `squad_imports` en eindigt de opdracht met 1, maar `import:squads` gaat door met het volgende seizoen.
+    Een seizoen half opslaan door een lezer die faalt, zou een gat als een gevulde selectie laten lijken.
+  - De spelers van de lezers van een seizoen worden samengevoegd per persoon: dezelfde pagina, en anders dezelfde naam zonder accenten en hoofdletters.
+    Twee spelers met verschillende pagina's zijn twee personen.
+    De rij krijgt de beste bron uit `playerSources` van de lijsten die de speler hebben, en de positie en het rugnummer van de beste lijst die ze geeft.
+    De wedstrijden en doelpunten uit de tabellen gaan niet naar `player_season_stats`: de lezers tellen alle competities op, en die tabel heeft een rij per competitie.
+  - Elke pagina van een speler gaat langs `lookUpPersonPages` (#714): een nieuwe titel kost één verzoek, een bekende niets, en een mislukt verzoek is een waarschuwing en laat `person_id` leeg tot de volgende lezing.
+  - Een tweede lezing voegt nieuwe spelers toe en verbetert een rij: een betere bron (met de positie en het rugnummer van die bron), een ontbrekende positie of rugnummer, een ontbrekende pagina of persoon.
+    Ze verlaagt nooit een bron, positie of rugnummer en schrijft niets in `players` als er niets nieuw is.
+    `wikipedia_pages` (`kind` `squad`) en `squad_imports` noteren wel dat de pagina is gelezen.
+  - `squad_imports` heeft een rij per gelezen seizoen, zoals `match_imports` bij een eerder seizoen: de status en de waarschuwingen tellen alleen het lopende seizoen.
+    Een gat krijgt geen rij.
+  - Op de host zijn het de opties `--squad` en `--from-squad` van `import.mjs`.
+    De workflow `import-squads.yml` start `--from-squad` op acceptatie, met dezelfde concurrency-groep als de andere imports.
+- **Alternatieven:** alleen seizoenen met een volledige tabel importeren (minder dan een derde van de seizoenen).
+  De selectie bij elke lezing vervangen, zoals de verzonnen selectie (de `id`'s veranderen en de doelpunten raken hun speler kwijt).
+  Een seizoen met een falende lezer toch half opslaan (verworpen: zie hierboven).
+- **Later:** dit vervangt het uitgangspunt van _Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie_ dat een eerder seizoen geen selectie heeft.

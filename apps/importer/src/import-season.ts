@@ -47,9 +47,10 @@ type Checked = { kind: 'refused'; message: string } | { kind: 'season'; season: 
 export function parseFromSeason(
   argument: string | undefined,
   now: Date,
+  usage = fromSeasonUsage,
 ): { kind: 'refused'; message: string } | { kind: 'seasons'; seasons: string[] } {
   const checked = checkSeason(argument)
-  const refuse = (message: string) => ({ kind: 'refused', message: `${message}\n${fromSeasonUsage}` }) as const
+  const refuse = (message: string) => ({ kind: 'refused', message: `${message}\n${usage}` }) as const
 
   if (checked.kind === 'refused') {
     return refuse(checked.message)
@@ -77,16 +78,17 @@ export function parseFromSeason(
 
 /**
  * Reads the argument of the command: a season written `2025/26` that is over. Anything else is
- * refused with a sentence that says why.
+ * refused with a sentence that says why, followed by `usage`.
  */
 export function parseSeason(
   argument: string | undefined,
   now: Date,
+  usage = seasonUsage,
 ): { kind: 'refused'; message: string } | { kind: 'season'; season: string } {
   const checked = checkSeason(argument)
 
   if (checked.kind === 'refused') {
-    return { kind: 'refused', message: `${checked.message}\n${seasonUsage}` }
+    return { kind: 'refused', message: `${checked.message}\n${usage}` }
   }
   if (!isPastSeason(checked.season, now)) {
     const current = seasonOf(now)
@@ -97,7 +99,7 @@ export function parseSeason(
         checked.season === current
           ? `${checked.season} is the current season, which the hourly import reads. This command is for a season that is over.`
           : `${checked.season} has not started yet. This command is for a season that is over.`
-      }\n${seasonUsage}`,
+      }\n${usage}`,
     }
   }
 

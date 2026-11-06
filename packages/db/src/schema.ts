@@ -1351,9 +1351,11 @@ export type PlayerSource = (typeof playerSources)[number]
 
 /**
  * The squad of sc Heerenveen 1 (men), from the Dutch Wikipedia, one row per player and season.
- * The importer reads the current season only: a good read updates the squad of the season and
- * never replaces it, so a player keeps his `id`, which the goals in `match_goals` point to. A
- * player who is no longer in the table stays, with `in_squad` false and the moment he left in
+ * The hourly importer reads the current season only: a good read updates the squad of the
+ * season and never replaces it, so a player keeps his `id`, which the goals in `match_goals`
+ * point to. The commands `import:squad` and `import:squads` read a season that is over once,
+ * and add and improve rows but never remove one (`import-past-squad.ts`). A player who is no
+ * longer in the table stays, with `in_squad` false and the moment he left in
  * `left_squad_at` (UTC), and comes back into the squad when the table has him again. The rows
  * of an earlier season are kept and never shown. Only what the pages need is kept: no
  * nationality, age, contract or photo. The numbers of a player (appearances, goals and assists)

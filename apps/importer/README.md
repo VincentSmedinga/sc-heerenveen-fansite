@@ -25,6 +25,7 @@ De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), éé
 Een feed die nog moet wachten, slaat hij over.
 Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
 Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig, en `pnpm run import:seasons <seizoen>` voor alle afgelopen seizoenen vanaf een seizoen (zie _Een afgelopen seizoen_).
+De selectie van afgelopen seizoenen lezen `pnpm run import:squad <seizoen>` en `pnpm run import:squads <seizoen>` (zie _De selectie van afgelopen seizoenen_).
 Wat verdacht lijkt, houdt hij vast; de opdracht `pnpm run import:changes` toont en beslist die wijzigingen (zie _Hoe betrouwbaar een wijziging is_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
@@ -1547,6 +1548,55 @@ pnpm run import:seasons 2020/21
 - Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--from-season` en het beginseizoen erachter.
   Op acceptatie start je dat in GitHub met de workflow _Import seasons_ (zie _Alle afgelopen seizoenen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
+#### De selectie van afgelopen seizoenen
+
+De uurlijkse import leest de selectie van het lopende seizoen.
+Die van afgelopen seizoenen leest een opdracht, eenmalig (zie _De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)):
+
+```sh
+pnpm run import:squad 2007/08
+pnpm run import:squads 1990/91
+```
+
+`import:squad` leest één seizoen, en `import:squads` dat seizoen en alle afgelopen seizoenen daarna, het oudste eerst.
+Ze controleren het seizoen zoals `import:season`: het lopende seizoen en een seizoen in de toekomst worden geweigerd, voordat er iets gevraagd of geschreven wordt.
+Ze nemen de lock van de import, en `import:squads` deelt één fetcher over de hele run en gaat door na een seizoen dat mislukt.
+Op de host zijn het de opties `--squad` en `--from-squad` van `import.mjs`, zoals `--season` en `--from-season`.
+Op acceptatie start je `--from-squad` met de workflow _Import squads_ (zie _De selectie van afgelopen seizoenen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
+- `squadSources` in [`src/squad-sources.ts`](src/squad-sources.ts) zegt per seizoen welke pagina's en welke lezers erbij horen:
+
+  | Seizoenen                           | Pagina                                             | Lezers                                       |
+  | ----------------------------------- | -------------------------------------------------- | -------------------------------------------- |
+  | 1990/91 tot en met 1999/00          | `Sc Heerenveen in het seizoen JJJJ/JJ`             | `readSeasonStatistics`                       |
+  | 2005/06                             | `Sc Heerenveen in het seizoen 2005/06`             | `readSeasonStatistics`                       |
+  | 2006/07                             | `Sc Heerenveen in het seizoen 2006/07`             | `readSeasonTransfers`, `readSeasonScorers`   |
+  | 2007/08 tot en met 2017/18          | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSelection`, `readSeasonTransfers` |
+  | 2022/23 en 2023/24                  | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSquad`                            |
+  | 2018/19 tot en met 2021/22, 2024/25 | `JJJJ–JJ SC Heerenveen season` (Engelse Wikipedia) | `readEnglishSquad`                           |
+  | 2000/01 tot en met 2004/05, 2025/26 | geen                                               | geen                                         |
+
+- Een seizoen zonder lezers, een pagina die niet bestaat (404) en een pagina zonder tabel (`none`) zijn een gat.
+  Het logboek krijgt één regel en niets wordt geschreven: `Squad 2002/03: no squad page on Wikipedia, so no squad`.
+  Een gat is geen fout: de exitcode blijft 0.
+- Een pagina die een fout geeft, een lezer die een fout meldt en een verzoek dat mislukt laten het hele seizoen ongemoeid.
+  De regel zegt waarom (`Squad 2013/14: warning, nothing changed: ...`), `squad_imports` telt de mislukking, en de exitcode is 1.
+  `import:squads` gaat dan door met het volgende seizoen en eindigt met een samenvatting, zoals `Squads: 35 of 36 read, 6 of them without a page, 1 not read:`.
+- De spelers van de lezers van een seizoen worden samengevoegd per persoon: dezelfde pagina is dezelfde speler, en anders dezelfde naam zonder accenten en hoofdletters (`mergePlayers` in [`src/import-past-squad.ts`](src/import-past-squad.ts)).
+  De rij krijgt de beste bron uit `playerSources` van de lijsten die de speler hebben, en de positie en het rugnummer van de beste lijst die ze geeft.
+  De wedstrijden en doelpunten uit de tabellen gaan niet naar `player_season_stats`.
+- Elke pagina van een speler gaat langs `lookUpPersonPages`: een nieuwe titel kost één verzoek, een bekende titel niets.
+  Een mislukt verzoek is een waarschuwing en laat `person_id` leeg tot de volgende lezing.
+  Het logboek noemt het aantal opgevraagde titels: `Squad 2013/14: persons: 16 titles asked, 16 new persons, ...`.
+  De rij krijgt `in_squad` waar en `left_squad_at` leeg.
+- Een tweede lezing van een seizoen voegt nieuwe spelers toe en verbetert een bron, een positie, een rugnummer, een pagina of een persoon.
+  Ze haalt nooit een speler weg en schrijft niets in `players` als er niets nieuw is: `Squad 2013/14: 0 new, 0 improved, 16 unchanged, from 1 page`.
+- De pagina's die zijn gelezen komen in `wikipedia_pages` met `kind` `squad`, voor de bronvermelding.
+  Er komt een rij in `squad_imports` per gelezen seizoen, zoals bij `match_imports` van een afgelopen seizoen.
+  De status en de waarschuwingen (`pnpm run import:status`) tellen alleen het lopende seizoen.
+
+De tests staan in [`src/import-squads.test.ts`](src/import-squads.test.ts): ze draaien op een echte MariaDB met een eigen webserver voor de pagina's, en vragen Wikipedia niets.
+
 #### Een gestaakte wedstrijd
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
@@ -1832,6 +1882,7 @@ De zoekpagina (#107) kan daarmee de bronvermelding tonen, zoals `/wedstrijden` d
   De uitvoer komt achteraan in `~/fansite-import.log`.
 - Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
 - Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig, en met `--from-season <seizoen>` alle afgelopen seizoenen vanaf dat seizoen (zie _Een afgelopen seizoen_).
+- Met `--squad <seizoen>` leest het de selectie van een afgelopen seizoen, en met `--from-squad <seizoen>` die van alle afgelopen seizoenen vanaf dat seizoen (zie _De selectie van afgelopen seizoenen_).
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 

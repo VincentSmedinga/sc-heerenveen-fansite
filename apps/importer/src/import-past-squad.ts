@@ -1,0 +1,450 @@
+// Reads the squad of a season that is over from the pages of Wikipedia that have it
+// (`squadSources`), puts what the readers find together per player, and stores it in `players`.
+// The commands `import:squad` and `import:squads` are in `import-squads.ts`.
+//
+// A past season is read once, by hand, and gets what Wikipedia has. A season without a page is
+// a gap in the log and no row. A season with a part of the squad keeps that part, with the
+// source of each row. A second read adds and improves but never removes a player, because the
+// goals point to his row (decision of 5 November 2026).
+import type { Database } from '@fansite/db/client'
+import type { Player, PlayerPosition, PlayerSource } from '@fansite/db/schema'
+
+import { createPersonBook, storePersonNames } from '@fansite/db/persons'
+import {
+  playerNameMaxLength,
+  players,
+  playerSources,
+  squadImports,
+  wikipediaPageMaxLength,
+  wikipediaPages,
+} from '@fansite/db/schema'
+import { eq } from 'drizzle-orm'
+
+import type { Fetcher } from './fetcher.ts'
+import type { MatchImportOptions } from './import-matches.ts'
+import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
+
+import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
+import { aliasMap, personTitleAliases } from './person-names.ts'
+import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
+import { nameKey, searchTerm } from './read-squad.ts'
+import { pageUrl } from './read-wikipedia.ts'
+import { squadSources } from './squad-sources.ts'
+import { describeError, printable } from './text.ts'
+
+/** A player as the readers of a season give him, put together (see `mergePlayers`). */
+export type MergedPlayer = {
+  name: string
+  page: null | string
+  position: null | PlayerPosition
+  shirtNumber: null | number
+  /** The best source of the lists that have him. */
+  source: PlayerSource
+}
+
+/** What came of reading the squad of a season that is over. Like a match report, a value. */
+export type PastSquadReport =
+  | {
+      /** The page has changed shape or could not be read: nothing changed. */
+      kind: 'error'
+      message: string
+      season: string
+    }
+  | {
+      /** The season has no page, or no page with a table: a gap, and no fault. */
+      kind: 'none'
+      season: string
+    }
+  | {
+      kind: 'blocked-by-robots'
+      season: string
+      url: string
+    }
+  | {
+      kind: 'imported'
+      /** The pages that gave players. */
+      pages: number
+      persons: string[]
+      players: { added: number; improved: number; unchanged: number }
+      season: string
+      warnings: string[]
+    }
+  | {
+      kind: 'wait'
+      retryAfterSeconds: null | number
+      season: string
+      url: string
+    }
+
+/** What one reader of a page found: the players, and where they come from. */
+type ReadOfPage = { players: SeasonPlayer[]; source: PlayerSource }
+
+/** Writes a report as a line of text. */
+export function formatPastSquadReport(report: PastSquadReport): string {
+  const head = `Squad ${report.season}`
+
+  switch (report.kind) {
+    case 'blocked-by-robots':
+      return `${head}: not read, robots.txt does not allow ${report.url}`
+    case 'error':
+      return `${head}: warning, nothing changed: ${printable(report.message)}`
+    case 'imported':
+      return [
+        `${head}: ${report.players.added} new, ${report.players.improved} improved, ${report.players.unchanged} unchanged, from ${report.pages} ${report.pages === 1 ? 'page' : 'pages'}`,
+        ...report.persons.map((line) => `${head}: ${printable(line)}`),
+        ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
+      ].join('\n')
+    case 'none':
+      return `${head}: no squad page on Wikipedia, so no squad`
+    case 'wait':
+      return `${head}: not read, Wikipedia asks us to wait${report.retryAfterSeconds === null ? '' : ` ${report.retryAfterSeconds} seconds`}`
+  }
+}
+
+/**
+ * Reads the squad of a season that is over, once, and stores it. It asks each page of
+ * `squadSources` one time (a page with more than one reader is fetched once), runs the readers,
+ * puts their players together and stores them in one transaction. It asks as often as it is
+ * run: the hourly pause of the current season does not apply to a season that is over.
+ *
+ * A page that does not exist or has no table gives no players. When no page gives any, the
+ * season is a gap and nothing is written. A page that fails, or a reader that reports an error,
+ * leaves the whole season as it was, with a report that says why, so a season is never stored
+ * half read by mistake. A season that is not over is an error, and nothing is asked or written.
+ * It throws when the database can't be written; the pages themselves fail into an error report.
+ */
+export async function importPastSquad(
+  db: Database,
+  fetcher: Fetcher,
+  season: string,
+  {
+    clock = () => new Date(),
+    englishOrigin = englishWikipediaOrigin,
+    origin = wikipediaOrigin,
+  }: MatchImportOptions = {},
+): Promise<PastSquadReport> {
+  if (!isPastSeason(season, clock())) {
+    return {
+      kind: 'error',
+      message: `${season} is not a season that is over; the hourly import reads the current season`,
+      season,
+    }
+  }
+
+  const sources = squadSources(season)
+
+  if (sources.length === 0) {
+    return { kind: 'none', season }
+  }
+
+  const reads: ReadOfPage[] = []
+  const pagesRead: { title: string; version: null | string }[] = []
+  const warnings: string[] = []
+
+  for (const source of sources) {
+    const outcome = await fetcher.fetch(pageUrl(source.origin === 'english' ? englishOrigin : origin, source.title))
+
+    if (outcome.kind === 'error' && outcome.reason === 'http-status' && outcome.status === 404) {
+      warnings.push(`${source.title}: the page does not exist`)
+
+      continue
+    }
+
+    switch (outcome.kind) {
+      case 'blocked-by-robots':
+        return await recorded(db, { kind: 'blocked-by-robots', season, url: outcome.url }, clock)
+      case 'error':
+        return await recorded(db, { kind: 'error', message: `${source.title}: ${outcome.message}`, season }, clock)
+      case 'fetched':
+        break
+      case 'not-modified':
+        return await recorded(
+          db,
+          { kind: 'error', message: `${source.title}: the page answered 304 to a request without conditions`, season },
+          clock,
+        )
+      case 'wait':
+        return await recorded(
+          db,
+          { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, season, url: outcome.url },
+          clock,
+        )
+    }
+
+    const text = new TextDecoder('utf-8').decode(outcome.body)
+    let gave = false
+
+    for (const reader of source.readers) {
+      let read: SeasonSquad
+
+      try {
+        read = reader.read(text)
+      } catch (error) {
+        read = { kind: 'error', message: describeError(error) }
+      }
+
+      if (read.kind === 'error') {
+        return await recorded(
+          db,
+          { kind: 'error', message: `${source.title} (${reader.name}): ${read.message}`, season },
+          clock,
+        )
+      }
+      if (read.kind === 'none') {
+        warnings.push(`${source.title} (${reader.name}): ${read.reason}`)
+
+        continue
+      }
+
+      gave = true
+      reads.push({ players: read.players, source: read.source })
+      warnings.push(...read.warnings.map((warning) => `${source.title} (${reader.name}): ${warning}`))
+    }
+
+    if (gave) {
+      pagesRead.push({ title: source.title, version: outcome.lastModified })
+    }
+  }
+
+  if (reads.length === 0) {
+    return { kind: 'none', season }
+  }
+
+  const merged = mergePlayers(reads)
+
+  warnings.push(...merged.warnings)
+
+  // Wikipedia is asked before the transaction: no request is made while rows are locked.
+  const personLookup = await lookUpPersonPages(
+    db,
+    fetcher,
+    origin,
+    merged.players.flatMap((player) => (player.page === null ? [] : [player.page])),
+    aliasMap(personTitleAliases),
+  )
+  const now = clock()
+  const stored = await db.transaction(async (transaction) => {
+    const personBook = await createPersonBook(transaction, {
+      aliases: aliasMap(personTitleAliases),
+      redirects: personLookup.redirects,
+    })
+    const counts = await storePlayers(transaction, season, merged.players, personBook)
+
+    for (const { title, version } of pagesRead) {
+      const values = { kind: 'squad' as const, readAt: now, season, version }
+
+      await transaction
+        .insert(wikipediaPages)
+        .values({ title, ...values })
+        .onDuplicateKeyUpdate({ set: values })
+    }
+
+    return { persons: personBook.counts, players: counts }
+  })
+  const personNames = await storePersonNames(db, personLookup.names)
+  const report: PastSquadReport = {
+    kind: 'imported',
+    pages: pagesRead.length,
+    persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
+    players: stored.players,
+    season,
+    warnings: [...warnings, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
+  }
+
+  return await recorded(db, report, clock)
+}
+
+/**
+ * Puts the players of the readers of a season together, one entry per person. Two players are
+ * the same person when they link the same page or, when either has no page, when their names
+ * are the same without accents and capitals (`nameKey`); two players with different pages are
+ * two persons. The entry keeps the best source of the lists that have the player
+ * (`playerSources`, from the most complete down), and takes the name, position and shirt number
+ * from the best list that gives them. The matches and goals of the tables are not kept. A
+ * player whose name or page the database cannot hold, and a second player with a name that is
+ * already taken, are left out with a warning.
+ */
+export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPlayer[]; warnings: string[] } {
+  const rank = (source: PlayerSource) => playerSources.indexOf(source)
+  const merged: MergedPlayer[] = []
+  const byPage = new Map<string, MergedPlayer>()
+  const byName = new Map<string, MergedPlayer>()
+  const warnings: string[] = []
+
+  for (const { players: found, source } of [...reads].sort((a, b) => rank(a.source) - rank(b.source))) {
+    for (const player of found) {
+      if (player.name.length > playerNameMaxLength || (player.page?.length ?? 0) > wikipediaPageMaxLength) {
+        warnings.push(`${printable(player.name)}: the name or the page is too long to store, so the player is left out`)
+
+        continue
+      }
+
+      const shirtNumber =
+        player.shirtNumber !== null && player.shirtNumber >= 1 && player.shirtNumber <= 99 ? player.shirtNumber : null
+      const samePage = player.page === null ? undefined : byPage.get(nameKey(player.page))
+      const sameName = byName.get(nameKey(player.name))
+      // A player with another page than the one with his name is another person.
+      const same =
+        samePage ??
+        (sameName !== undefined && (sameName.page === null || player.page === null || sameName.page === player.page)
+          ? sameName
+          : undefined)
+
+      if (same === undefined) {
+        if (sameName !== undefined) {
+          warnings.push(`${printable(player.name)}: a second player with this name, so he is left out`)
+
+          continue
+        }
+
+        const entry: MergedPlayer = {
+          name: player.name,
+          page: player.page,
+          position: player.position,
+          shirtNumber,
+          source,
+        }
+
+        merged.push(entry)
+        byName.set(nameKey(player.name), entry)
+        if (player.page !== null) {
+          byPage.set(nameKey(player.page), entry)
+        }
+
+        continue
+      }
+
+      // The list that came first is the better one, so it only gets what it lacks.
+      same.position ??= player.position
+      same.shirtNumber ??= shirtNumber
+      if (same.page === null && player.page !== null && !byPage.has(nameKey(player.page))) {
+        same.page = player.page
+        byPage.set(nameKey(player.page), same)
+      }
+    }
+  }
+
+  return { players: merged, warnings }
+}
+
+/**
+ * Writes the health of the season to `squad_imports`, as the squad import of the current season
+ * does, and gives the report back. The health of a season that is over is never shown: the
+ * status and the warnings count only the current season.
+ */
+async function recorded(db: Database, report: PastSquadReport, clock: () => Date): Promise<PastSquadReport> {
+  if (report.kind === 'none') {
+    return report
+  }
+
+  const [before] = await db.select().from(squadImports).where(eq(squadImports.season, report.season))
+  const health = healthAfter(before, report, clock())
+
+  if (health !== undefined) {
+    await db
+      .insert(squadImports)
+      .values({ season: report.season, ...health })
+      .onDuplicateKeyUpdate({ set: health })
+  }
+
+  return report
+}
+
+/**
+ * Brings the players of the season in the database up to date with what the readers found,
+ * and never removes one, so a player keeps his `id` and the goals that point to it. A player
+ * is known by his page, or else by his name (`nameKey`). A player who is not known is added,
+ * in the squad and with the best source, position and number the lists give. A known player
+ * is improved when a better list has him than the one he has (the source, and the position and
+ * number of that list), when he lacked a position or a number that a list gives, and when he
+ * lacked a page or a person. Nothing else of a known row changes, and a known player who is
+ * unchanged costs no write.
+ */
+async function storePlayers(
+  db: Pick<Database, 'insert' | 'select' | 'update'>,
+  season: string,
+  found: MergedPlayer[],
+  personBook: { resolve: (title: string) => Promise<null | number> },
+) {
+  const rows = await db.select().from(players).where(eq(players.season, season))
+  const byPage = new Map<string, Player>()
+  const byName = new Map<string, Player>()
+  const counts = { added: 0, improved: 0, unchanged: 0 }
+  const rank = (source: PlayerSource) => playerSources.indexOf(source)
+
+  for (const row of rows) {
+    byName.set(nameKey(row.name), row)
+    if (row.wikipediaPage !== null) {
+      byPage.set(nameKey(row.wikipediaPage), row)
+    }
+  }
+
+  for (const player of found) {
+    const personId = player.page === null ? null : await personBook.resolve(player.page)
+    const before =
+      (player.page === null ? undefined : byPage.get(nameKey(player.page))) ?? byName.get(nameKey(player.name))
+
+    if (before === undefined) {
+      const row = {
+        name: player.name,
+        personId,
+        position: player.position,
+        searchTerm: searchTerm(player.name),
+        season,
+        shirtNumber: player.shirtNumber,
+        source: player.source,
+        wikipediaPage: player.page,
+      }
+      const [{ insertId }] = await db.insert(players).values(row)
+
+      counts.added++
+      byName.set(nameKey(player.name), { ...row, id: insertId, inSquad: true, leftSquadAt: null })
+      if (player.page !== null) {
+        byPage.set(nameKey(player.page), { ...row, id: insertId, inSquad: true, leftSquadAt: null })
+      }
+
+      continue
+    }
+
+    const better = rank(player.source) < rank(before.source)
+    const changes: Partial<Pick<Player, 'personId' | 'position' | 'shirtNumber' | 'source' | 'wikipediaPage'>> = {}
+
+    if (better) {
+      changes.source = player.source
+    }
+    if (player.position !== null && player.position !== before.position && (better || before.position === null)) {
+      changes.position = player.position
+    }
+    if (
+      player.shirtNumber !== null &&
+      player.shirtNumber !== before.shirtNumber &&
+      (better || before.shirtNumber === null)
+    ) {
+      changes.shirtNumber = player.shirtNumber
+    }
+    if (before.wikipediaPage === null && player.page !== null && !byPage.has(nameKey(player.page))) {
+      changes.wikipediaPage = player.page
+    }
+    if (before.personId === null && personId !== null) {
+      changes.personId = personId
+    }
+
+    if (Object.keys(changes).length === 0) {
+      counts.unchanged++
+
+      continue
+    }
+
+    counts.improved++
+    await db.update(players).set(changes).where(eq(players.id, before.id))
+
+    const after = { ...before, ...changes }
+
+    byName.set(nameKey(after.name), after)
+    if (after.wikipediaPage !== null) {
+      byPage.set(nameKey(after.wikipediaPage), after)
+    }
+  }
+
+  return counts
+}

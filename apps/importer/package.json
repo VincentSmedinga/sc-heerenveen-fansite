@@ -10,6 +10,8 @@
     "import:changes": "node --env-file-if-exists=../../.env src/import.ts --changes",
     "import:season": "node --env-file-if-exists=../../.env src/import.ts --season",
     "import:seasons": "node --env-file-if-exists=../../.env src/import.ts --from-season",
+    "import:squad": "node --env-file-if-exists=../../.env src/import.ts --squad",
+    "import:squads": "node --env-file-if-exists=../../.env src/import.ts --from-squad",
     "import:status": "node --env-file-if-exists=../../.env src/import.ts --status",
     "test": "node ../../scripts/worktree-env.js run -- vitest run",
     "typecheck": "tsc -b"

@@ -11,6 +11,10 @@
 // doesn't know, a season without `--season` and a combination of the options stop it before it
 // does anything.
 //
+// With `--squad <season>` it reads the squad of one season that is over from Wikipedia
+// (`pnpm run import:squad 2007/08`), and with `--from-squad <season>` the squads of every
+// season that is over from that season on (`pnpm run import:squads 1990/91`).
+//
 // With `--changes` it lists the changes of a match that wait for a decision, and with
 // `--changes accept 12` or `--changes reject all` it decides them (`pnpm run import:changes`).
 import { readDatabaseEnv } from '@fansite/db/env'
@@ -19,6 +23,7 @@ import { parseArgs } from 'node:util'
 import { runChangesCommand } from './import-changes.ts'
 import { runImport } from './import-feeds.ts'
 import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from './import-season.ts'
+import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
 import { showStatus } from './status.ts'
 
 const { positionals, values } = parseArgs({
@@ -26,21 +31,24 @@ const { positionals, values } = parseArgs({
   options: {
     changes: { type: 'boolean' },
     'from-season': { type: 'boolean' },
+    'from-squad': { type: 'boolean' },
     season: { type: 'boolean' },
+    squad: { type: 'boolean' },
     status: { type: 'boolean' },
   },
 })
 const fromSeason = values['from-season']
-const modes = [values.changes, fromSeason, values.season, values.status].filter(Boolean).length
+const fromSquad = values['from-squad']
+const modes = [values.changes, fromSeason, fromSquad, values.season, values.squad, values.status].filter(Boolean).length
 const wrongArguments =
   modes > 1 ||
-  (values.season === true || fromSeason === true
+  (values.season === true || fromSeason === true || values.squad === true || fromSquad === true
     ? positionals.length > 1
     : values.changes !== true && positionals.length > 0)
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\nOr use --status alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\nOr use --status alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -51,8 +59,12 @@ process.exitCode = fromSeason
   ? await runSeasonsImport(DATABASE_URL, positionals[0])
   : values.season
     ? await runSeasonImport(DATABASE_URL, positionals[0])
-    : values.changes
-      ? await runChangesCommand(DATABASE_URL, positionals)
-      : values.status
-        ? await showStatus(DATABASE_URL)
-        : await runImport(DATABASE_URL)
+    : fromSquad
+      ? await runSquadsImport(DATABASE_URL, positionals[0])
+      : values.squad
+        ? await runSquadImport(DATABASE_URL, positionals[0])
+        : values.changes
+          ? await runChangesCommand(DATABASE_URL, positionals)
+          : values.status
+            ? await showStatus(DATABASE_URL)
+            : await runImport(DATABASE_URL)
