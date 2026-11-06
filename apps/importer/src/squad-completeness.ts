@@ -164,8 +164,9 @@ function scorersCheck({ players, scorers }: SquadCompletenessInput): Checked {
 
   const persons = new Set(players.flatMap((player) => (player.personId === null ? [] : [player.personId])))
   const names = new Set(players.map((player) => nameKey(player.name)))
-  const found = scorers.filter((scorer) =>
-    scorer.personId === null ? names.has(nameKey(scorer.name)) : persons.has(scorer.personId),
+  // A scorer is in the list by his person or by his name: English squads have no persons.
+  const found = scorers.filter(
+    (scorer) => (scorer.personId !== null && persons.has(scorer.personId)) || names.has(nameKey(scorer.name)),
   ).length
   const detail = `${found} of the ${scorers.length} scorers of ours are in the list`
 
