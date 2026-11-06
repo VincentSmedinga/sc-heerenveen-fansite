@@ -16,6 +16,7 @@ const meta = preview.meta({
           'De hoofdkolom van de pagina: een `main`.',
           'Elke pagina heeft er één en zet haar inhoud erin.',
           '',
+          '- De hoofdkolom heeft de lijst of tabel waar de pagina voor bestaat, op een wit vlak. Staat er een schakelaar die cijfers kiest, dan is dat de eerste cel. Cijfers is de uitzondering: daar hebben twee even brede kolommen allebei cijfers.',
           '- Elk kind van de kolom is een cel, zoals een kop, een tekst of een kaart. De cellen staan onder elkaar.',
           '- Zet wat bij elkaar hoort, zoals een kop met een inleiding, in een `Page.Cell`.',
           '- De ruimte tussen de cellen komt van de `Page.Body`.',

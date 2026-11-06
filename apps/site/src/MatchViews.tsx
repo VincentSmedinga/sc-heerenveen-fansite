@@ -314,6 +314,15 @@ const measureNames: Record<LeagueMeasure, string> = {
 
 const pointsPerMatchFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
+/**
+ * The last line of a card that ignores the switch between all the matches and the Eredivisie:
+ * it rests on the table, the 34 rounds or the score after 90 minutes, so it counts the
+ * Eredivisie alone. The cards that do it stand together above the switch (see StatisticsPage).
+ */
+export function EredivisieOnly() {
+  return <Text appearance="meta">Alleen de Eredivisie</Text>
+}
+
 /** The value of a measure as the table writes it: the goal difference with its sign. */
 function measureValue(measure: LeagueMeasure, value: number): number | string {
   if (measure === 'pointsPerMatch') {
@@ -372,6 +381,7 @@ export function LeaguePlaceCard({
           </Text>
         </>
       )}
+      <EredivisieOnly />
     </Card>
   )
 }
@@ -613,6 +623,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
           )}
         </>
       )}
+      <EredivisieOnly />
     </Card>
   )
 }
@@ -716,6 +727,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
           </Disclosure>
         </>
       )}
+      <EredivisieOnly />
     </Card>
   )
 }
@@ -795,8 +807,16 @@ export function lastFiveCaption(lastResultOn: string) {
  * the page lists, and only the played ones with a score count. Without one it is a sentence
  * and no chart. The page of a club shows the same card (see `ScoreCountsView`).
  */
-export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
-  const counts = scoreCountsOf(matches)
+export function ScoreCountsCard({
+  competition = 'all',
+  matches,
+  season,
+}: {
+  competition?: CompetitionChoice
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
+  const counts = scoreCountsOf(matches, competition)
 
   return (
     <ScoreCountsView anchored counts={counts} empty="We hebben nog geen uitslagen van dit seizoen." season={season} />
@@ -1108,14 +1128,13 @@ export function StreaksCard({
  * only), and a line when not every played match has its scorers, so nobody takes an incomplete
  * list for a complete one. Without a goal it is a sentence for visitors and no table.
  *
- * Without `playersHref` it is everybody who scored, as on the page Spelers. With it, it is the
- * short form of the page Cijfers: the first five places (see topFiveOf), the line says "De
- * top 5 van 17 spelers die scoorden", and the link "Alle doelpuntenmakers" under the list goes
- * to `playersHref`, the page with the whole list. The line only says "top 5" when the list was
- * cut: if nobody is left out, it counts the players, as the full list does.
+ * It is everybody who scored, as on the page Spelers. With `topOnly` it is the short form: the
+ * first five places (see topFiveOf), and the line says "De top 5 van 17 spelers die scoorden".
+ * The line only says "top 5" when the list was cut: if nobody is left out, it counts the
+ * players, as the full list does.
  *
- * The page of a club has the short form too, for the matches against that club (see
- * `ClubTopScorersCard`, with `topOnly` and no link), but its texts are about a club and not
+ * The page of a club has the short form, for the matches against that club (see
+ * `ClubTopScorersCard`), but its texts are about a club and not
  * about a season: `scope` ends the caption ("van sc Heerenveen tegen FC Twente, in de
  * Eredivisie") and `empty` is the sentence for no goal. A season gets `season` and no `scope`,
  * a club the other way round, so the caption never says "undefined".
@@ -1124,16 +1143,14 @@ export function TopScorers({
   competition,
   empty = 'We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.',
   matches,
-  playersHref,
   scope,
   season,
-  topOnly = playersHref !== undefined,
+  topOnly = false,
 }: {
   competition: CompetitionChoice
   empty?: string
   matches: ScoredMatch[]
-  playersHref?: string | undefined
-  /** Only the first five places; on by default when there is a link to the full list. */
+  /** Only the first five places. */
   topOnly?: boolean
 } & ({ scope: string; season?: undefined } | { scope?: undefined; season: string })) {
   const scorers = topScorersOf(matches, competition)
@@ -1163,13 +1180,6 @@ export function TopScorers({
           Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
         </Text>
       )}
-      {playersHref !== undefined && (
-        <Text>
-          <Link href={playersHref} icon="arrow-right">
-            Alle doelpuntenmakers
-          </Link>
-        </Text>
-      )}
     </>
   )
 }
@@ -1182,22 +1192,17 @@ const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
 })
 
 /**
- * The card Doelpuntenmakers, on the page Cijfers as the short form (the top 5, with the
- * link to the page Spelers) and on the page Spelers as the whole list. Both have the same
- * heading, anchor and button for an image, so a link to `#doelpuntenmakers` works on both.
- * `playersHref` is the page Spelers of the season the card is about; the page Spelers leaves it
- * out. The card is soft and in the sidebar on both pages.
+ * The card Doelpuntenmakers of the page Spelers, with the whole list. The card is soft and in
+ * the sidebar.
  */
 export function TopScorersCard({
   competition,
   matches,
-  playersHref,
   season,
   seasonOnImage,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
-  playersHref?: string | undefined
   season: string
   seasonOnImage?: string | undefined
 }) {
@@ -1210,7 +1215,7 @@ export function TopScorersCard({
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers
       </Heading>
-      <TopScorers competition={competition} matches={matches} playersHref={playersHref} season={season} />
+      <TopScorers competition={competition} matches={matches} season={season} />
     </Card>
   )
 }

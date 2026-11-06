@@ -2412,6 +2412,7 @@
     Hij staat in een gewone cel zonder kaart, als eerste cel van de hoofdkolom, direct onder de titelrij en links; de seizoenskiezer blijft rechts naast de kop.
     Eerst stond hij in de titelrij, maar daar was hij te opvallend; de projecteigenaar koos de plek onder de kop op 31 oktober 2026.
     Hij staat er alleen bij een seizoen met een gespeelde bekerwedstrijd, want anders valt er niets te kiezen.
+    **Later:** zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026) in `site.md`: op Cijfers staat hij na de drie kaarten die hij negeert, niet meer als eerste cel.
   - **Welke kaarten de keuze volgen:** Reeksen en de laatste vijf wedstrijden, Thuis en uit, Doelpuntenmakers (ook de top 5 en de lijst op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
     Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes of de stand na 90 minuten rusten.
   - **De telling van de beker:** een bekerwedstrijd telt met de score na de verlenging, en een strafschoppenserie telt niet mee.
@@ -2727,6 +2728,7 @@
   Zonder uitslagen is er één kaart "Uitslagen" met zijn zin.
   - **Programma** blijft één kaart met alle competities op datum, met de competitie in elke regel.
   - **De balk "Op deze pagina:"** heeft een link per kaart (Programma, de kaarten met uitslagen, Stand, Hoe vaak welke uitslag, Hoofdtrainer).
+    **Later:** de link naar Hoe vaak welke uitslag staat sinds 6 november 2026 in de balk van Cijfers (zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ in `site.md`).
     Het anker `uitslagen` zit op de kaart Eredivisie, en daar staat ook de link "Het verloop van het seizoen".
   - **In de code:** `resultsPerCompetition` en `resultsCardsOf` kennen het lopende seizoen niet meer apart; `resultsOfSeason` bepaalt alleen de volgorde.
     De ankers `uitslagen-knvb-beker` en `uitslagen-play-offs` staan nu ook voor `/wedstrijden` in `src/anchors.ts`.

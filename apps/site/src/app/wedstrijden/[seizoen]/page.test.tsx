@@ -163,19 +163,12 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches(all)
     const html = await render()
 
-    expect(ids(html)).toEqual([
-      'uitslagen',
-      'uitslagen-knvb-beker',
-      'uitslagen-play-offs',
-      'eindstand',
-      'hoe-vaak-welke-uitslag',
-    ])
+    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs', 'eindstand'])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)?.map((heading) => heading.replace(/<[^>]+>/g, ''))).toEqual([
       'Eredivisie',
       'KNVB Beker',
       'Play-offs Conference League',
       'Eindstand',
-      'Hoe vaak welke uitslag',
     ])
   })
 
@@ -249,7 +242,7 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches([all[0]!, all[3]!])
     const html = await render()
 
-    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-play-offs', 'eindstand', 'hoe-vaak-welke-uitslag'])
+    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-play-offs', 'eindstand'])
     expect(html).not.toContain('uitslagen-knvb-beker')
   })
 
@@ -257,7 +250,7 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches([])
     const html = await render()
 
-    expect(ids(html)).toEqual(['uitslagen', 'eindstand', 'hoe-vaak-welke-uitslag'])
+    expect(ids(html)).toEqual(['uitslagen', 'eindstand'])
     expect(section(html, 'uitslagen')).toContain('We hebben nog geen uitslagen van dit seizoen.')
     expect(html).toContain('>Uitslagen</a>')
     expect(html).not.toContain('Het verloop van het seizoen')
@@ -310,7 +303,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="eindstand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#eindstand">Eindstand</a></h2>',
     )
     expect(html).toContain('<caption class="hf-visually-hidden">Eindstand op ')
-    expect(html).toContain('aria-label="De eindstand en hoe vaak welke uitslag"')
+    expect(html).toContain('aria-label="De eindstand"')
     expect(html).toContain('aria-labelledby="eindstand"')
     expect(html).not.toContain('id="stand"')
     expect(html).not.toContain('>Stand</')
@@ -403,13 +396,12 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).toContain('id="eindstand"')
   })
 
-  it('has the results, the final table and the scores, and no other card without a coach in the table', async () => {
+  it('has the results and the final table, and no other card without a coach in the table', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'uitslagen',
       'eindstand',
-      'hoe-vaak-welke-uitslag',
     ])
   })
 

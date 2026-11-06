@@ -46,13 +46,13 @@ describe('the bar of /cijfers', () => {
     ).toEqual([
       ['#onze-plek-in-de-competitie', 'Plek in de competitie'],
       ['#verloop-van-het-seizoen', 'Verloop van het seizoen'],
+      ['#hoe-de-wedstrijden-verlopen', 'Hoe wedstrijden verlopen'],
       ['#reeksen', 'Reeksen'],
       ['#thuis-en-uit', 'Thuis en uit'],
       ['#toeschouwers', 'Toeschouwers'],
-      ['#doelpuntenmakers', 'Doelpuntenmakers'],
+      ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
       ['#de-nul-gehouden', 'De nul gehouden'],
       ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
-      ['#hoe-de-wedstrijden-verlopen', 'Hoe wedstrijden verlopen'],
       ['#uitersten', 'Uitersten'],
     ])
     expect(statisticsShortcuts).toHaveLength(10)

@@ -18,12 +18,12 @@
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
-  // The nine cards with figures moved to /cijfers (#483). Their anchors on /wedstrijden
-  // are gone on purpose, without a redirect: a link to one of them breaks.
+  // The nine cards with figures moved to /cijfers (#483), and Hoe vaak welke uitslag followed
+  // (#774). Their anchors on /wedstrijden are gone on purpose, without a redirect: a link to
+  // one of them breaks. The card Doelpuntenmakers left /cijfers for /spelers alone (#774), so
+  // its anchors #doelpuntenmakers and #topscorers are gone here too.
   '/cijfers': [
     'doelpunten-per-kwartier',
-    'doelpuntenmakers',
-    'topscorers',
     'de-nul-gehouden',
     'nul-gehouden',
     'verloop-van-het-seizoen',
@@ -32,13 +32,14 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'toeschouwers',
     'onze-plek-in-de-competitie',
     'hoe-de-wedstrijden-verlopen',
+    'hoe-vaak-welke-uitslag',
     'uitersten',
   ],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
-  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /cijfers as
-  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
-  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
+  // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
+  // list, the only place it is (#774). The old anchor topscorers comes along. The card
+  // Bijzondere doelpunten (#403) is under it.
   '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium.
@@ -47,15 +48,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
   // The results are a card for each competition with a result. The Eredivisie keeps the anchor
   // `uitslagen`; the made-up season has a result in each of the three competitions (#665).
-  '/wedstrijden': [
-    'programma',
-    'stand',
-    'uitslagen',
-    'uitslagen-knvb-beker',
-    'uitslagen-play-offs',
-    'hoofdtrainer',
-    'hoe-vaak-welke-uitslag',
-  ],
+  '/wedstrijden': ['programma', 'stand', 'uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs', 'hoofdtrainer'],
 }
 
 // Every id on the page, with the elements that carry it.

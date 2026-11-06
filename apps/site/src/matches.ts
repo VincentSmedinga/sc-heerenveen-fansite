@@ -329,11 +329,11 @@ export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoic
  * draw and every draw before every loss, and a goal difference of 1 before one of 3 in the
  * losses too; then by the goals in the match from many to few. The goal difference and the
  * number of goals fix the score, so the order is complete. Only played matches with a score
- * count, from every competition given, and the score is the one after extra time, so a cup tie
- * that a shoot-out decided is a draw (see `playedMatchesOf`).
+ * count, from every competition the choice counts (see `playedMatchesOf`), and the score is the
+ * one after extra time, so a cup tie that a shoot-out decided is a draw.
  */
-export function scoreCountsOf(matches: PublicMatch[]): ScoreCount[] {
-  return countScores(playedMatchesOf(matches, 'all'))
+export function scoreCountsOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): ScoreCount[] {
+  return countScores(playedMatchesOf(matches, choice))
 }
 
 /** The result of a match from the side of sc Heerenveen: `W` won, `G` drawn and `V` lost. */

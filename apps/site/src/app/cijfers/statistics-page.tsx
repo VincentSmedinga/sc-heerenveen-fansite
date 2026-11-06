@@ -4,7 +4,7 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { competitionQuery, parseCompetition } from '#src/competition'
+import { parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { parseCleanSheetCount } from '#src/matches'
@@ -16,15 +16,15 @@ import {
   HomeAwayCard,
   LeaguePlaceCard,
   MatchFlowCard,
+  ScoreCountsCard,
   SeasonCard,
   SourceCredit,
   StreaksCard,
-  TopScorersCard,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { noteworthy, parseNoteworthyNumber } from '#src/noteworthy'
 import { NoteworthyCard } from '#src/NoteworthyCard'
-import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '#src/season-page'
+import { loadSeasonPage, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
@@ -58,19 +58,21 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 /**
  * The page of a season: `/cijfers` for the current season and `/cijfers/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
- * heading. The ten cards with figures sit in two equal columns on a wide screen, the first
- * five on the left and the other five on the right, and under each other on a narrow one, in
- * the order of the bar "Op deze pagina:". The switch between the matches (see below) is the
- * first cell of the main column, a plain cell without a card, directly under the title row.
- * The card Opmerkelijk is the last of the main column and is not in the bar: it is one fact
- * that changes with the day (see NoteworthyCard).
+ * heading. The ten cards with figures sit in two equal columns on a wide screen, and under
+ * each other on a narrow one, in the order of the bar "Op deze pagina:". The page is the
+ * exception to the rule of the columns (see Page.Main): both hold cards with figures. The three
+ * cards that stay the Eredivisie come first in the main column, together, and under them is the
+ * switch between the matches (see below), a plain cell without a card, directly above the first
+ * card that follows it. The card Opmerkelijk is the last of the main column and is not in the
+ * bar: it is one fact that changes with the day (see NoteworthyCard).
  * A season that is over has its cards put the season on the image. A season that has no matches
  * in the database is the page "niet gevonden".
  *
  * The cards count all the matches, the Eredivisie and the KNVB Beker, or the Eredivisie alone
  * with `?competitie=eredivisie` (see CompetitionSwitch). Three cards do not follow the choice:
  * our place in the league, the season and how the matches go rest on the table, the 34 rounds
- * or the score after 90 minutes, so they stay the Eredivisie. A value other than that one is
+ * or the score after 90 minutes, so they stay the Eredivisie, and say so on their last line.
+ * The card Hoe vaak welke uitslag follows the choice. A value other than that one is
  * the page "niet gevonden", and so is one given twice.
  */
 export async function StatisticsPage({
@@ -115,12 +117,12 @@ export async function StatisticsPage({
           </Page.Title>
         }
       >
-        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="cijfers" />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
+        <MatchFlowCard matches={data.matches} season={imageSeason} />
+        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="cijfers" />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
-        <AttendanceCard competition={competition} matches={data.matches} season={imageSeason} />
         <NoteworthyCard
           coaches={data.coaches}
           competition={competition}
@@ -131,17 +133,12 @@ export async function StatisticsPage({
         />
       </Page.Main>
       {/* The second column is a sidebar as wide as the main column, so the two are equal. On a
-          phone it follows the main: our place in the league, the season, the streaks, home and
-          away, the goal scorers, the clean sheets, the goals per quarter, how the matches go
-          and the extremes. */}
+          phone it follows the main: our place in the league, the season, how the matches go,
+          the streaks, home and away, the attendance, how often each score was played, the clean
+          sheets, the goals per quarter and the extremes. */}
       <Page.Sidebar aria-label="Meer cijfers over het seizoen" wide>
-        <TopScorersCard
-          competition={competition}
-          matches={data.matches}
-          playersHref={`${seasonAddress(playersPath, season, seasonOf(now))}${competitionQuery(competition)}`}
-          season={data.season}
-          seasonOnImage={imageSeason}
-        />
+        <AttendanceCard competition={competition} matches={data.matches} season={imageSeason} />
+        <ScoreCountsCard competition={competition} matches={data.matches} season={imageSeason} />
         <CleanSheetsCard
           competition={competition}
           count={parseCleanSheetCount(nul)}
@@ -151,7 +148,6 @@ export async function StatisticsPage({
           season={imageSeason}
         />
         <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
-        <MatchFlowCard matches={data.matches} season={imageSeason} />
         <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />

@@ -94,26 +94,15 @@ describe('the page of an earlier season, /cijfers/2025-26', () => {
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'onze-plek-in-de-competitie',
       'verloop-van-het-seizoen',
+      'hoe-de-wedstrijden-verlopen',
       'reeksen',
       'thuis-en-uit',
       'toeschouwers',
-      'doelpuntenmakers',
+      'hoe-vaak-welke-uitslag',
       'de-nul-gehouden',
       'doelpunten-per-kwartier',
-      'hoe-de-wedstrijden-verlopen',
       'uitersten',
     ])
-  })
-
-  it('links the card Doelpuntenmakers to the page Spelers of the same season', async () => {
-    const goal = matchData.matches.flatMap((match) => match.goals).find((item) => item.ours)!
-
-    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [{ ...earlierMatch, goals: [goal] }] })
-
-    const html = await render()
-
-    expect(html).toContain('<p><a href="/spelers/2025-26">Alle doelpuntenmakers</a></p>')
-    expect(html).not.toContain('href="/spelers"')
   })
 
   describe('the streaks', () => {

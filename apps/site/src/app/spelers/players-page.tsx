@@ -50,8 +50,9 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * title row and the season picker of Cijfers, and the card Selectie with every player of
  * the season in parts by position and, under the heading, how complete that list is. That card
  * is white: the squad is what the page is for. The sidebar follows the main column on a phone,
- * so the squad comes first there. It starts with the switch between all matches and the
- * Eredivisie, because the switch changes only the cards with goals, and then has the card
+ * so the squad comes first there. The switch between all matches and the Eredivisie is the
+ * first cell of the main column, as on every page that has it, and changes only the cards with
+ * goals. The sidebar has the card
  * Doelpuntenmakers (every player who scored) and the card Bijzondere doelpunten (hattricks,
  * penalties and own goals), both soft, and ends with the credit, as on Cijfers. A season
  * that is over has the cards with goals put the season on their image. A season that has no
@@ -97,15 +98,15 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           </Page.Title>
         }
       >
-        <SeasonSquadCard squad={squad} />
-      </Page.Main>
-      <Page.Sidebar aria-label="Meer cijfers over de spelers">
         <CompetitionSwitch
           address={seasonAddress(playersPath, season, seasonOf(new Date()))}
           competition={competition}
           matches={data.matches}
           place="spelers"
         />
+        <SeasonSquadCard squad={squad} />
+      </Page.Main>
+      <Page.Sidebar aria-label="Meer cijfers over de spelers">
         <TopScorersCard
           competition={competition}
           matches={data.matches}

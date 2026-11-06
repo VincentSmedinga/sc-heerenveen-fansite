@@ -3,14 +3,13 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons, topScorersOf } from '#src/matches'
+import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
-import StatisticsPage from '../cijfers/page'
 import PlayersPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
@@ -30,9 +29,6 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
 const now = new Date('2026-10-23T13:40:00Z')
 
 const render = async () => withoutIcons(renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve({}) })))
-
-const renderStatistics = async () =>
-  withoutIcons(renderToStaticMarkup(await StatisticsPage({ searchParams: Promise.resolve({}) })))
 
 /** The text of some HTML, as a screen reader and a copy have it. */
 const plain = (html: string | undefined) => (html ?? '').replaceAll(/<[^>]*>/g, '')
@@ -119,14 +115,6 @@ describe('the page /spelers', () => {
     )
     expect(html).toContain('<section class="hf-card" aria-labelledby="selectie">')
     expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
-  })
-
-  it('keeps the card on Cijfers soft, where it is in the sidebar', async () => {
-    const html = await renderStatistics()
-
-    expect(html).toContain(
-      '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
-    )
   })
 
   it('has the main column with the white card Selectie and a named sidebar with the soft cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
@@ -482,48 +470,6 @@ describe('the season picker on /spelers', () => {
   })
 })
 
-describe('the list of Spelers and the card of Cijfers', () => {
-  /** The rows of the card Doelpuntenmakers on each page, for the same matches. */
-  async function bothFor(counts: number[]) {
-    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: scorers(counts) })
-
-    return { all: rowsOf(await render()), top: rowsOf(await renderStatistics()) }
-  }
-
-  it('give the same figures in the same order, and the top 5 are the first rows of the list', async () => {
-    const { all, top } = await bothFor([9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1])
-
-    expect(all).toHaveLength(11)
-    expect(top).toEqual(all.slice(0, 5))
-    expect(all).toEqual(
-      topScorersOf(scorers([9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1])).map((row) => [
-        String(row.position),
-        row.player,
-        String(row.goals),
-      ]),
-    )
-  })
-
-  it('give the players who share fifth place on both pages, one row per player on Spelers and one shared row on Cijfers', async () => {
-    const { all, top } = await bothFor([9, 8, 7, 6, 2, 2, 2, 1])
-
-    expect(all).toHaveLength(8)
-    expect(all.slice(4, 7).map(([position, player]) => [position, player])).toEqual([
-      ['5', 'Speler E'],
-      ['5', 'Speler F'],
-      ['5', 'Speler G'],
-    ])
-    expect(top).toEqual([...all.slice(0, 4), ['5', 'Speler E, Speler F, Speler G', '2']])
-  })
-
-  it('give everybody on both pages when five players or fewer scored, with the tie on one row on Cijfers', async () => {
-    const { all, top } = await bothFor([3, 2, 1, 1])
-
-    expect(all).toHaveLength(4)
-    expect(top).toEqual([...all.slice(0, 2), ['3', 'Speler C, Speler D', '1']])
-  })
-})
-
 describe('the choice between all the matches and the Eredivisie on /spelers', () => {
   // The cup tie of the test data, in which a player of the cup scored once.
   const cupScorer = {
@@ -560,15 +506,16 @@ describe('the choice between all the matches and the Eredivisie on /spelers', ()
     )
   })
 
-  it('puts the switch first in the sidebar, before the cards it controls, and not in a card or in the main column', async () => {
+  it('puts the switch first in the main column, before the card Selectie, and not in a card or in the sidebar', async () => {
     const html = await render()
-    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
+    const cells = /<div class="hf-page-cells">(.*)/s.exec(main)?.[1] ?? ''
 
-    expect(sidebar).toMatch(
-      /^<aside class="hf-page-sidebar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small"/,
-    )
-    expect(html.indexOf('Welke wedstrijden')).toBeGreaterThan(html.indexOf('id="selectie"'))
-    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+    expect(
+      cells.startsWith('<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"'),
+    ).toBe(true)
+    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="selectie"'))
+    expect(html.match(/<aside.*<\/aside>/s)?.[0]).not.toContain('Welke wedstrijden')
     expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
   })
 

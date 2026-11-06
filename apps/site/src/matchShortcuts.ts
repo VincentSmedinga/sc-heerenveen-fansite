@@ -1,6 +1,6 @@
 import type { Competition } from '@fansite/db/schema'
 
-/** The name and the anchor of the card with how often each score was played, under Stand. */
+/** The name and the anchor of the card with how often each score was played, on Cijfers. */
 export const scoreCountsCard = { id: 'hoe-vaak-welke-uitslag', name: 'Hoe vaak welke uitslag' } as const
 
 /**
@@ -13,7 +13,6 @@ export const matchShortcuts = [
   { href: '#programma', label: 'Programma' },
   { href: '#uitslagen', label: 'Uitslagen' },
   { href: '#stand', label: 'Stand' },
-  { href: `#${scoreCountsCard.id}`, label: scoreCountsCard.name },
 ] as const
 
 /**
@@ -59,9 +58,9 @@ export const coachesCardOf = (coachCount: number) =>
 /**
  * The links of the bar for the page of a season, in the order of the cards: Programma (only the
  * current season has it), a link for each card with results (`withResults` are the competitions
- * that have one, see `resultsCardsOf`), Stand (Eindstand for a season that is over) and the
- * card with how often each score was played. The card with the head coaches, after the one with
- * the scores, has a link when the season has a coach in the table (`coachCount` above 0).
+ * that have one, see `resultsCardsOf`) and Stand (Eindstand for a season that is over). The
+ * card with the head coaches, after the table, has a link when the season has a coach in the
+ * table (`coachCount` above 0).
  */
 export const matchShortcutsOf = (
   current: boolean,
@@ -88,11 +87,11 @@ export const matchShortcutsOf = (
     }
 
     links.push(shortcut)
+  }
 
-    // The card with the head coaches comes after the one with the scores, under the table.
-    if (shortcut.href === `#${scoreCountsCard.id}` && coachCount > 0) {
-      links.push({ href: `#${coaches.id}`, label: coaches.name })
-    }
+  // The card with the head coaches comes last, under the table.
+  if (coachCount > 0) {
+    links.push({ href: `#${coaches.id}`, label: coaches.name })
   }
 
   return links
