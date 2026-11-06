@@ -4,9 +4,13 @@ import type { PublicClubMatch, PublicClubRecord, PublicMatch } from '@fansite/db
 
 import { describe, expect, it } from 'vitest'
 
+import type { FinalPlace } from './matches'
+
 import { overviewOf } from './matches'
 import {
+  clubKeysOf,
   clubNameViewsOf,
+  clubPlacesOf,
   clubScorersMinimum,
   earlierNames,
   hasClubScorers,
@@ -774,5 +778,92 @@ describe('hasTimeline', () => {
     expect(hasTimeline(league(4))).toBe(true)
     expect(hasTimeline([...league(3), match(1, 0, { competition: 'KNVB Beker' })])).toBe(false)
     expect(hasTimeline([...league(3), match(null, null, { status: 'scheduled' })])).toBe(false)
+  })
+})
+
+describe('clubPlacesOf', () => {
+  const ours = (season: string, position: number | undefined, now = false): FinalPlace => ({
+    now,
+    row: position === undefined ? undefined : { goalDifference: 0, points: 0, pointsDeducted: 0, position },
+    season,
+  })
+  const places = [
+    ours('2022/23', 4),
+    ours('2023/24', 6),
+    ours('2024/25', undefined),
+    ours('2025/26', 8),
+    ours('2026/27', 2, true),
+  ]
+  const table = (season: string, club: string, position: number) => ({ club, position, season })
+
+  const club = (names: readonly NamePeriodLine[], otherNames: string[], opponents: string[]) => ({
+    club: { id: 1, name: 'FC Zwolle', otherNames, slug: 'fc-zwolle', wikipediaPage: null },
+    matches: opponents.map((opponent) => ({ ...matches[0]!, opponent })),
+    names: [...names],
+  })
+
+  it('gives both places of every season in which both are in the table, the newest first', () => {
+    const rows = [
+      table('2022/23', 'FC Zwolle', 11),
+      table('2023/24', 'FC Zwolle', 9),
+      table('2025/26', 'FC Zwolle', 16),
+    ]
+
+    expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([
+      { ours: 8, season: '2025/26', theirs: 16 },
+      { ours: 6, season: '2023/24', theirs: 9 },
+      { ours: 4, season: '2022/23', theirs: 11 },
+    ])
+  })
+
+  it('leaves out a season in which the club is not in the table', () => {
+    const rows = [table('2022/23', 'FC Zwolle', 11), table('2023/24', 'Ajax', 1), table('2025/26', 'FC Zwolle', 16)]
+
+    expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], []))).map((place) => place.season)).toEqual([
+      '2025/26',
+      '2022/23',
+    ])
+  })
+
+  it('leaves out a season in which we are not in the table, and the season that is going on', () => {
+    const rows = [table('2024/25', 'FC Zwolle', 3), table('2026/27', 'FC Zwolle', 1)]
+
+    expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([])
+  })
+
+  it('finds a club that changed its name under every name it had', () => {
+    // PEC Zwolle was FC Zwolle until 2012/13 and wrote N.E.C.-style dots in some seasons.
+    const rows = [
+      table('2022/23', 'FC Zwolle', 11),
+      table('2023/24', 'P.E.C. Zwolle', 9),
+      table('2025/26', 'PEC Zwolle', 16),
+    ]
+    const renamed = club(
+      [
+        { name: 'FC Zwolle', note: null, startDay: null, startSeason: null },
+        { name: 'PEC Zwolle', note: null, startDay: null, startSeason: '2023/24' },
+      ],
+      [],
+      [],
+    )
+
+    expect(clubPlacesOf(places, rows, clubKeysOf(renamed)).map((place) => [place.season, place.theirs])).toEqual([
+      ['2025/26', 16],
+      ['2023/24', 9],
+      ['2022/23', 11],
+    ])
+  })
+
+  it('also knows a club by its other names and by the name of its matches', () => {
+    const rows = [table('2022/23', 'Zwolle', 11), table('2025/26', 'Zwolse Boys', 16)]
+    const keys = clubKeysOf(club([], ['Zwolle'], ['Zwolse Boys']))
+
+    expect(clubPlacesOf(places, rows, keys).map((place) => place.theirs)).toEqual([16, 11])
+  })
+
+  it('does not take another club for this one', () => {
+    const rows = [table('2022/23', 'FC Zwolle II', 11), table('2025/26', 'Sparta', 5)]
+
+    expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([])
   })
 })

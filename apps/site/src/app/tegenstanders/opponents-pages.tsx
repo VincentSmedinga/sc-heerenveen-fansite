@@ -17,6 +17,7 @@ import {
   clubNameViewsOf,
   earlierNames,
   getClubPage,
+  getClubPlaces,
   getClubRecords,
   getSourcePages,
   hasClubScorers,
@@ -31,6 +32,7 @@ import {
 import {
   ClubMeetingsCard,
   ClubNamesNotes,
+  ClubPlacesCard,
   ClubsCard,
   ClubScoreCountsCard,
   ClubSummaryCard,
@@ -80,6 +82,7 @@ const loadClub = cache(async (slug: string) => {
       kind: 'found',
       page,
       pages: await getSourcePages(),
+      places: await getClubPlaces(page),
       seasons: await getMatchSeasons(),
     } as const
   } catch (error) {
@@ -275,6 +278,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           />
           <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
           <ClubScoreCountsCard meetings={meetings} />
+          <ClubPlacesCard name={club.name} places={loaded.places} />
           {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
           <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit

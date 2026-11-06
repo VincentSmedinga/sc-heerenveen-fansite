@@ -44,6 +44,36 @@ for (const choice of ['', '?competitie=eredivisie']) {
   })
 }
 
+/** The card "De plek van <club> en de onze" of Testdorp FC, with its places per season. */
+const placesCard = (page: Page, club = 'Testdorp FC') =>
+  page.getByRole('region', { name: `De plek van ${club} en de onze` })
+
+for (const choice of ['', '?competitie=eredivisie']) {
+  test(`the page of a club has the places of the club and ours per season${choice === '' ? '' : ', the same for the Eredivisie'}`, async ({
+    page,
+  }) => {
+    await page.goto(`/tegenstanders/testdorp-fc${choice}`)
+
+    const card = placesCard(page)
+    const table = card.getByRole('table', {
+      name: 'De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen',
+    })
+
+    await expect(card.getByRole('heading', { level: 2 })).toHaveText('De plek van Testdorp FC en de onze')
+    await expect(table.getByRole('columnheader')).toHaveText(['Seizoen', 'Onze plek', 'Hun plek'])
+    expect(await table.getByRole('rowheader').count()).toBeGreaterThanOrEqual(2)
+    await expect(card.getByText('Alleen de Eredivisie')).toBeVisible()
+  })
+}
+
+test('a club that was never in the table with us has no card with the places', async ({ page }) => {
+  // FC Maquette was only met in the cup, so it is in no table.
+  await page.goto('/tegenstanders/fc-maquette')
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('FC Maquette')
+  await expect(page.getByRole('heading', { level: 2, name: /^De plek van/ })).toHaveCount(0)
+})
+
 /** The names of the clubs in the list, from the top. */
 const clubNames = (page: Page) => list(page).locator('tbody th').allInnerTexts()
 
@@ -228,6 +258,7 @@ test.describe('the page of a club', () => {
       'Onze uitslagen tegen Voorbeeld United',
       /^Resultaten sinds \d{4}$/,
       'Hoe vaak welke uitslag',
+      'De plek van Voorbeeld United en de onze',
       'Stadions',
     ])
     await expect(sidebar.getByText(/^Bron: /)).toBeVisible()

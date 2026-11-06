@@ -23,6 +23,7 @@ import {
   listRecentItems,
   listSeasonMatches,
   listSeasonStandings,
+  listStandingsPlaces,
   listStandingsSeasons,
   listWikipediaPages,
   searchPublic,
@@ -2019,6 +2020,21 @@ describe('the matches and the table of a season', () => {
       ])
       expect(rows[0]).toMatchObject({ pointsDeducted: 2 })
       expect(await listClubStandings(database.db, 'Onbekend')).toEqual([])
+    })
+
+    it('gives the place of every club in every season, the oldest season first and from the top', async () => {
+      await database.db.insert(standings).values(season('2026-10-25T12:00:00Z', 2))
+      await database.db.insert(standings).values(season('2024-10-25T12:00:00Z', 1))
+
+      const rows = await listStandingsPlaces(database.db)
+
+      expect(rows).toHaveLength(12)
+      expect(rows.slice(0, 2)).toEqual([
+        { club: 'sc Heerenveen', position: 1, season: '2024/25' },
+        { club: 'Club 2', position: 2, season: '2024/25' },
+      ])
+      expect(rows.at(-1)).toMatchObject({ position: 6, season: '2026/27' })
+      expect(await listStandingsPlaces(database.db)).toEqual(rows)
     })
 
     it('gives every season that has a table once, the oldest first, also one without our club', async () => {

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ClubPage as ClubPageView } from '#src/app/tegenstanders/opponents-pages'
 import { getMatchSeasons } from '#src/matches'
-import { type ClubPage, getClubPage, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 
 import ClubShortcuts from './page'
@@ -16,6 +16,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubPage: vi.fn(),
+  getClubPlaces: vi.fn(),
   getSourcePages: vi.fn(),
 }))
 
@@ -31,6 +32,8 @@ beforeEach(() => {
   vi.setSystemTime(new Date('2026-10-30T13:40:00Z'))
   vi.mocked(getClubPage).mockReset()
   vi.mocked(getClubPage).mockImplementation((slug) => Promise.resolve(pages[slug]))
+  vi.mocked(getClubPlaces).mockReset()
+  vi.mocked(getClubPlaces).mockResolvedValue([])
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
   vi.mocked(getSourcePages).mockReset()
@@ -85,6 +88,22 @@ describe('the bar of the page of a club', () => {
     for (const href of hrefs(html)) {
       expect(ids, `${href} on ${slug}`).toContain(href?.slice(1))
     }
+  })
+
+  it('has a link to the card with the places only when the club has a season in common with us', async () => {
+    expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).not.toContain('#plek-in-de-competitie')
+
+    vi.mocked(getClubPlaces).mockResolvedValue([{ ours: 3, season: '2025/26', theirs: 9 }])
+
+    expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).toEqual([
+      '#wedstrijden',
+      '#onze-uitslagen',
+      '#resultaten-sinds',
+      '#hoe-vaak-welke-uitslag',
+      '#plek-in-de-competitie',
+      '#doelpuntenmakers',
+      '#stadion',
+    ])
   })
 
   it('has the card Doelpuntenmakers only with five matches: the bar has no link for a club with fewer', async () => {

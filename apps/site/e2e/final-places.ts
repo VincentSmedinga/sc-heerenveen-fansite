@@ -7,15 +7,16 @@ import path from 'node:path'
 
 /**
  * Our row in the league table of two and three years ago, the older one with two points taken
- * off. With the made-up table of this season (see standings.ts) and of the season before it
- * (see earlier-season.ts) the card "Onze plek door de jaren" of /wedstrijden has four seasons,
- * so the checks of axe and the page look at a real line. A season that already has a table (a
- * development database that imported one) keeps it. The checks put the rows in before the
- * first test and take them out after the last one.
+ * off, and the row of Testdorp FC below it, so the card "De plek van <club> en de onze" on
+ * the page of that club has three seasons. With the made-up table of this season (see
+ * standings.ts) and of the season before it (see earlier-season.ts) the card "Onze plek door
+ * de jaren" of /wedstrijden has four seasons, so the checks of axe and the page look at a real
+ * line. A season that already has a table (a development database that imported one) keeps
+ * it. The checks put the rows in before the first test and take them out after the last one.
  */
 const seasonsAgo = [
-  { pointsDeducted: 0, position: 3, yearsAgo: 2 },
-  { pointsDeducted: 2, position: 5, yearsAgo: 3 },
+  { pointsDeducted: 0, position: 3, theirs: 12, yearsAgo: 2 },
+  { pointsDeducted: 2, position: 5, theirs: 9, yearsAgo: 3 },
 ] as const
 
 const dayOf = (yearsAgo: number) => {
@@ -30,7 +31,7 @@ export async function addFinalPlaces() {
   const added: string[] = []
 
   try {
-    for (const { pointsDeducted, position, yearsAgo } of seasonsAgo) {
+    for (const { pointsDeducted, position, theirs, yearsAgo } of seasonsAgo) {
       const day = dayOf(yearsAgo)
       const season = seasonOf(day)
       const [existing] = await db
@@ -43,21 +44,22 @@ export async function addFinalPlaces() {
         continue
       }
 
-      await db.insert(standings).values({
-        club: 'sc Heerenveen',
+      const row = {
         drawn: 6,
         goalDifference: 20,
         goalsAgainst: 40,
         goalsFor: 60,
         lost: 10,
         played: 34,
-        points: 60 - pointsDeducted,
-        pointsDeducted,
-        position,
         season,
         validOn: day.toISOString().slice(0, 10),
         won: 18,
-      })
+      }
+
+      await db.insert(standings).values([
+        { ...row, club: 'sc Heerenveen', points: 60 - pointsDeducted, pointsDeducted, position },
+        { ...row, club: 'Testdorp FC', points: 60, pointsDeducted: 0, position: theirs },
+      ])
       added.push(season)
     }
   } finally {

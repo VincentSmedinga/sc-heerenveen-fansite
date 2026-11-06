@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
-import { type ClubPage, getClubPage, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -16,6 +16,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubPage: vi.fn(),
+  getClubPlaces: vi.fn(),
   getSourcePages: vi.fn(),
 }))
 
@@ -37,6 +38,8 @@ beforeEach(() => {
   vi.mocked(getClubPage).mockImplementation((slug) =>
     Promise.resolve({ 'beker-united': beker, 'komend-fc': komend, 'nieuw-promovendus': promovendus, testclub }[slug]),
   )
+  vi.mocked(getClubPlaces).mockReset()
+  vi.mocked(getClubPlaces).mockResolvedValue([])
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
   vi.mocked(getSourcePages).mockReset()
@@ -213,6 +216,41 @@ describe('the page of a club', () => {
       expect(await render()).toContain(
         'Eerder: Oude Testclub t/m 2011/12, Testclub 2012/13 tot 1 jun 2025, Nieuwste Testclub vanaf 1 jun 2025',
       )
+    })
+  })
+
+  describe('the card with the places of the club and ours', () => {
+    const places = [
+      { ours: 8, season: '2025/26', theirs: 16 },
+      { ours: 4, season: '2022/23', theirs: 11 },
+    ]
+    const card = (html: string) => {
+      const start = html.indexOf('id="plek-in-de-competitie"')
+
+      return start === -1 ? '' : plain(html.slice(start, html.indexOf('</section>', start)))
+    }
+
+    it('is under Hoe vaak welke uitslag, with the club in the heading and the Eredivisie alone as its last line', async () => {
+      vi.mocked(getClubPlaces).mockResolvedValue(places)
+
+      const html = await render()
+
+      expect(html.indexOf('id="plek-in-de-competitie"')).toBeGreaterThan(html.indexOf('id="hoe-vaak-welke-uitslag"'))
+      expect(html.indexOf('id="plek-in-de-competitie"')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+      expect(card(html)).toContain('De plek van Testclub en de onze')
+      expect(card(html)).toContain('2025/26 8 16 2022/23 4 11')
+      expect(card(html).endsWith('Alleen de Eredivisie')).toBe(true)
+    })
+
+    it('is the same with the switch on all the matches and on the Eredivisie', async () => {
+      vi.mocked(getClubPlaces).mockResolvedValue(places)
+
+      expect(card(await render('testclub', { competitie: 'eredivisie' }))).toBe(card(await render()))
+      expect(card(await render())).not.toBe('')
+    })
+
+    it('is not there without a season in which both were in the table', async () => {
+      expect(await render()).not.toContain('plek-in-de-competitie')
     })
   })
 
