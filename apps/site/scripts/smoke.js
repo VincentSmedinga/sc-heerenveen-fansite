@@ -1517,7 +1517,7 @@ await withEmptyDatabase((database) =>
     const feed = await checkFeed('https://acc.sc.heerenveen.org')
 
     // Every kind of response carries the headers: a page, a page from the database, robots.txt,
-    // a static file, a feed, the manifest, the icons and a 404.
+    // a static file, a feed, the manifest, the icons, a 404 and a page of the admin.
     for (const response of [
       home,
       sources,
@@ -1528,9 +1528,13 @@ await withEmptyDatabase((database) =>
       feed,
       await fetch(origin + asset),
       await fetch(`${origin}/bestaat-niet`),
+      await fetch(`${origin}/beheer/inloggen`),
     ]) {
       assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
       assert.match(response.headers.get('content-security-policy') ?? '', /^default-src 'self';/, response.url)
+      assert.match(response.headers.get('content-security-policy') ?? '', /; frame-ancestors 'none'(;|$)/, response.url)
+      assert.equal(response.headers.get('x-frame-options'), 'DENY', response.url)
+      assert.equal(response.headers.get('cross-origin-opener-policy'), 'same-origin', response.url)
     }
 
     // A page loads nothing from another domain: no script, stylesheet, font or image (editorial

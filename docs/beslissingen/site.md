@@ -43,6 +43,8 @@
   Voor de plek: `headers()` in `next.config.ts`; maar de headers staan nu al in de proxy, en zo blijven ze op één plek.
 - **Later:** zie _De CSP laat afbeeldingen van het type `data:` toe_ (28 oktober 2026): `img-src` is nu `'self' data:`.
   De rest van de lijst blijft zoals hij was.
+- **Later:** zie _Geen frames en geen vensters met een opener: `frame-ancestors 'none'`, `X-Frame-Options: DENY` en COOP `same-origin`_ (6 november 2026): de CSP heeft ook `frame-ancestors 'none'`, en de proxy zet `X-Frame-Options: DENY` en `Cross-Origin-Opener-Policy: same-origin` op elk antwoord, tegen clickjacking op het beheer.
+  De rest van de CSP en `'unsafe-inline'` blijven zoals ze waren.
 
 ## De lijst met bronnen staat een uur in het geheugen van de server
 
@@ -3020,3 +3022,19 @@
   Alle tijden alleen over de seizoenen met cijfers ("sinds 2023/24", met twee beginjaren op één kaart).
   Een regel achter de naam, zoals bij de hoofdtrainers in #812, die de gedeelde rijen laat staan.
 - **Later:** dit vervangt voor kaarten met D/W het besluit van 4 november 2026 dat spelers met evenveel doelpunten één rij delen (_Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_).
+
+## Geen frames en geen vensters met een opener: `frame-ancestors 'none'`, `X-Frame-Options: DENY` en COOP `same-origin`
+
+- **Datum:** 6 november 2026
+- **Besluit:** de proxy zet drie headers op elk antwoord, op productie en acceptatie: `frame-ancestors 'none'` in de CSP, `X-Frame-Options: DENY` en `Cross-Origin-Opener-Policy: same-origin` (#801).
+  Dat geldt voor pagina's, bestanden onder `/_next`, de 404, de feeds en het beheer.
+  `frame-src 'self'`, de rest van de CSP en `'unsafe-inline'` blijven zoals ze zijn.
+- **Waarom:** het beheer heeft een inlog, en een pagina die in een frame van een andere site kan staan, kan voor clickjacking dienen.
+  `same-origin` voor COOP scheidt onze pagina's van vensters van andere sites.
+  De site toont zelf geen frames en opent geen vensters, dus niets breekt (gecontroleerd met `git grep`).
+  Het Lighthouse-rapport van 6 november 2026 meldde beide ontbrekende headers.
+- **Gemeten:** `src/proxy.test.ts` en de rooktest controleren de drie op een pagina, een bestand onder `/_next`, de 404 en een pagina van het beheer.
+- **Alternatieven:** alleen voor `/beheer` (verworpen: eenvoudiger en veiliger voor alles, niets frameet ons).
+  `X-Frame-Options: SAMEORIGIN` (verworpen: we framen onszelf niet).
+  Headers via `.htaccess` of `next.config.ts` (verworpen: de headers staan al in de proxy en blijven op één plek).
+- **Let op:** niet in dit besluit: `Strict-Transport-Security`, want HTTPS en zijn headers zijn van de host.

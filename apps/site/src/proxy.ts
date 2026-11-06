@@ -10,6 +10,8 @@ import { countVisit } from './visits'
  * `next dev` also needs eval, for reloading code while you work. Images may also be `data:`
  * addresses: the image of a card is drawn from one in the browser (see CardShare in the design
  * system), and a `data:` image is in the page itself and asks nothing of another domain.
+ * No other site may put a page of ours in a frame (`frame-ancestors 'none'`), because the admin
+ * has a login and a framed page can be used for clickjacking. We frame nothing ourselves.
  */
 export const contentSecurityPolicy = [
   "default-src 'self'",
@@ -19,6 +21,7 @@ export const contentSecurityPolicy = [
   "font-src 'self'",
   "connect-src 'self'",
   "frame-src 'self'",
+  "frame-ancestors 'none'",
   "form-action 'self'",
   "base-uri 'self'",
 ].join('; ')
@@ -29,7 +32,10 @@ export function isAdminPath(pathname: string) {
 }
 
 // Runs for every request, including the files in /_next/static, so every response carries the
-// headers. The admin gets two more on every environment, production too: no search engine may
+// headers. Every response also keeps itself out of frames for the browsers that don't know
+// `frame-ancestors` (`X-Frame-Options`), and out of the group of windows of other sites
+// (`Cross-Origin-Opener-Policy: same-origin`): the site shows no frame and opens no window with
+// an opener. The admin gets two more on every environment, production too: no search engine may
 // index it, and nothing of it is kept in a cache of the browser or of anything on the way. It
 // sends a referrer only to our own pages (`same-origin`), so the login link in the address bar
 // goes to no other site. `no-referrer` would do that too, but Chromium then sends `Origin:
@@ -45,6 +51,8 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
   countVisit(request, (counted) => event?.waitUntil(counted))
 
   response.headers.set('Content-Security-Policy', contentSecurityPolicy)
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
 
   if (isAdminPath(request.nextUrl.pathname)) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')

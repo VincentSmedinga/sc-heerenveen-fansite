@@ -45,12 +45,36 @@ describe('proxy', () => {
       'default-src': "'self'",
       'font-src': "'self'",
       'form-action': "'self'",
+      'frame-ancestors': "'none'",
       'frame-src': "'self'",
       'img-src': "'self' data:",
       'script-src': "'self' 'unsafe-inline'",
       'style-src': "'self' 'unsafe-inline'",
     })
   })
+
+  it.each(['local', 'acceptance', 'production'])(
+    'keeps every page out of frames and out of the windows of other sites on %s',
+    (siteEnv) => {
+      vi.stubEnv('SITE_ENV', siteEnv)
+
+      for (const path of [
+        '/',
+        '/bronnen',
+        '/_next/static/chunks/app.js',
+        '/bestaat-niet',
+        '/feed.xml',
+        '/beheer',
+        '/beheer/inloggen',
+      ]) {
+        const { headers } = proxy(path)
+
+        expect(headers.get('X-Frame-Options'), path).toBe('DENY')
+        expect(headers.get('Cross-Origin-Opener-Policy'), path).toBe('same-origin')
+        expect(headers.get('Content-Security-Policy'), path).toContain("frame-ancestors 'none'")
+      }
+    },
+  )
 
   it.each(['local', 'acceptance', 'production'])(
     'keeps the admin out of search engines and caches on %s',
