@@ -18,6 +18,9 @@
 // With `--completeness` it works out again how likely it is that the squad of each season is
 // whole, from the database and without a request (`pnpm run import:completeness`).
 //
+// With `--item-clubs` it works out again which professional clubs each headline names, from the
+// database and without a request (`pnpm run import:item-clubs`).
+//
 // With `--changes` it lists the changes of a match that wait for a decision, and with
 // `--changes accept 12` or `--changes reject all` it decides them (`pnpm run import:changes`).
 import { readDatabaseEnv } from '@fansite/db/env'
@@ -29,6 +32,7 @@ import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from 
 import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
 import { showStatus } from './status.ts'
 import { runCompletenessCommand } from './store-completeness.ts'
+import { runItemClubsCommand } from './store-item-clubs.ts'
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -37,6 +41,7 @@ const { positionals, values } = parseArgs({
     completeness: { type: 'boolean' },
     'from-season': { type: 'boolean' },
     'from-squad': { type: 'boolean' },
+    'item-clubs': { type: 'boolean' },
     season: { type: 'boolean' },
     squad: { type: 'boolean' },
     status: { type: 'boolean' },
@@ -49,6 +54,7 @@ const modes = [
   values.completeness,
   fromSeason,
   fromSquad,
+  values['item-clubs'],
   values.season,
   values.squad,
   values.status,
@@ -61,7 +67,7 @@ const wrongArguments =
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\nOr use --status alone, --completeness alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\nOr use --status alone, --completeness alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -82,4 +88,6 @@ process.exitCode = fromSeason
             ? await showStatus(DATABASE_URL)
             : values.completeness
               ? await runCompletenessCommand(DATABASE_URL)
-              : await runImport(DATABASE_URL)
+              : values['item-clubs']
+                ? await runItemClubsCommand(DATABASE_URL)
+                : await runImport(DATABASE_URL)

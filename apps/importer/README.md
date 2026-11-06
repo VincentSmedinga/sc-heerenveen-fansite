@@ -297,6 +297,30 @@ De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
 Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
 Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van een uitkomst (#76), komen later.
 
+### Welke clubs een kop noemt
+
+Naast `relevance` bewaart de importer bij elke kop welke andere profclubs hij noemt, voor de kaart "Nieuws over <club>" op de pagina van een club (#777, besluit #794).
+De functie is `clubsNamed` in [`src/relevance.ts`](src/relevance.ts).
+Ze volgt de regels van `judgeRelevance`: hele woorden, hoofdletters, accenten en "s.c." tellen niet, en een lange naam gaat voor een korte ("Jong Ajax" is niet ook "Ajax").
+Een naam in een andere naam telt niet: `lookalikeClubs` in `relevance-terms.ts` heeft "Excelsior Maassluis", en `namesakeClubs` heeft "Sparta Praag".
+sc Heerenveen zelf staat er niet in, en een kop zonder club heeft geen rij.
+
+- **De tabel:** `item_clubs` heeft een rij per kop en club, met de club zoals `matches.opponent` hem heeft (`otherClubFullNames` in `relevance-terms.ts`: "N.E.C.", "Excelsior Rotterdam").
+  De pagina's van de site vinden de club daarmee via `clubs.name` en `club_names`.
+  De rijen gaan weg met hun kop.
+- **Bij elke kop:** `storeItems` zet de rijen na het bewaren van elke kop die de importer ziet, ook bij een feed met het filter `none` en ook buiten de dagen rond een wedstrijd.
+  Verandert de titel, dan volgen de rijen de nieuwe titel.
+  Een verborgen kop houdt zijn titel, dus ook zijn rijen.
+- **Bestaande koppen:** de uurlijkse import raakt alleen wat nog in een feed staat.
+  `pnpm run import:item-clubs` loopt over alle koppen in de database en zet hun rijen, zonder verzoek aan een bron.
+  Op de host is het `import.mjs --item-clubs`.
+  Het neemt de lock van de import en schrijft één regel: `Item clubs: 1250 items checked, 310 rows added, 0 rows removed`.
+  Een tweede keer schrijft niets.
+  Draai het ook na een wijziging aan de lijst met profclubs in `relevance-terms.ts`.
+- **Terugdraaien:** de tabel weghalen verliest geen gegevens (`DROP TABLE item_clubs`): `import:item-clubs` maakt de rijen weer uit de titels.
+
+De tests staan in [`src/store-item-clubs.test.ts`](src/store-item-clubs.test.ts) en bij `clubsNamed` in [`src/relevance.test.ts`](src/relevance.test.ts).
+
 ### Koppen over de tegenstander
 
 Een bericht over de tegenstander rond een wedstrijd tegen ons is ook nieuws over sc Heerenveen, ook als de kop de club niet noemt: "ADO beleeft frustrerende avond".

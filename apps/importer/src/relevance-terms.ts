@@ -218,6 +218,60 @@ export const otherClubGroups = [
   ['vvv venlo'],
 ] as const
 
+/**
+ * The name of each club of `otherClubGroups`, as `matches.opponent` has it (the full name of
+ * `club-names.ts` where the club has one), under the first name of its group. This is the name
+ * `item_clubs` stores for a headline that names the club, and the pages of the site find the
+ * club from it through `clubs.name` and `club_names`. A test checks that every group has one.
+ */
+export const otherClubFullNames: Readonly<Record<string, string>> = {
+  'ado den haag': 'ADO Den Haag',
+  ajax: 'Ajax',
+  'almere city': 'Almere City FC',
+  'az alkmaar': 'AZ',
+  cambuur: 'SC Cambuur',
+  'de graafschap': 'De Graafschap',
+  excelsior: 'Excelsior Rotterdam',
+  'fc den bosch': 'FC Den Bosch',
+  'fc dordrecht': 'FC Dordrecht',
+  'fc eindhoven': 'FC Eindhoven',
+  'fc emmen': 'FC Emmen',
+  'fc groningen': 'FC Groningen',
+  'fc twente': 'FC Twente',
+  'fc utrecht': 'FC Utrecht',
+  'fc volendam': 'FC Volendam',
+  feyenoord: 'Feyenoord',
+  'fortuna sittard': 'Fortuna Sittard',
+  'go ahead eagles': 'Go Ahead Eagles',
+  'helmond sport': 'Helmond Sport',
+  'heracles almelo': 'Heracles Almelo',
+  'jong ajax': 'Jong Ajax',
+  'jong az': 'Jong AZ',
+  'jong fc utrecht': 'Jong FC Utrecht',
+  'jong psv': 'Jong PSV',
+  'mvv maastricht': 'MVV Maastricht',
+  'nac breda': 'NAC Breda',
+  'nec nijmegen': 'N.E.C.',
+  'pec zwolle': 'PEC Zwolle',
+  psv: 'PSV',
+  'rkc waalwijk': 'RKC Waalwijk',
+  'roda jc kerkrade': 'Roda JC Kerkrade',
+  'sparta rotterdam': 'Sparta Rotterdam',
+  telstar: 'Telstar',
+  'top oss': 'TOP Oss',
+  vitesse: 'Vitesse',
+  'vvv venlo': 'VVV-Venlo',
+  'willem ii': 'Willem II',
+}
+
+/**
+ * Clubs that are not on the list but have the name of one in theirs, as headlines write them.
+ * `clubsNamed` leaves these phrases out first, so "Excelsior Maassluis" (an amateur club) is
+ * not "Excelsior" of Rotterdam as well. Unlike `namesakeClubs`, the rule of the opponent does
+ * not use them, since a match against such a club has to find it.
+ */
+export const lookalikeClubs = ['excelsior maassluis'] as const
+
 /** The names of `otherClubGroups` in one list, for the rule of "Heerenveen" next to a club. */
 export const otherClubs: readonly string[] = otherClubGroups.flat()
 

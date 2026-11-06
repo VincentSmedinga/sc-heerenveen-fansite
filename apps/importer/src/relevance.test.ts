@@ -11,11 +11,13 @@ import {
   clubSurnames,
   footballWords,
   frisianFootballWords,
+  lookalikeClubs,
   ordinaryClubWords,
+  otherClubFullNames,
   otherClubGroups,
   otherClubs,
 } from './relevance-terms.ts'
-import { judgeRelevance, normaliseTitle, opponentsAround } from './relevance.ts'
+import { clubsNamed, judgeRelevance, normaliseTitle, opponentsAround } from './relevance.ts'
 
 type Case = [title: string, expected: ItemRelevance]
 
@@ -814,3 +816,72 @@ describe('the lists of names and words', () => {
     expect(otherClubs).not.toContain('jong sc heerenveen')
   })
 })
+
+describe('clubsNamed', () => {
+  it('gives the club a headline names, as matches.opponent has it', () => {
+    expect(clubsNamed('Feyenoord wint de topper')).toEqual(['Feyenoord'])
+    expect(clubsNamed('Trainer van N.E.C. kijkt vooruit')).toEqual(['N.E.C.'])
+    expect(clubsNamed('Telstar-fans zingen door')).toEqual(['Telstar'])
+  })
+
+  it('gives every club a headline names, in the order of the list', () => {
+    expect(clubsNamed('PSV en Ajax delen de punten')).toEqual(['Ajax', 'PSV'])
+    expect(clubsNamed('Heerenveen verslaat Ajax, Vitesse en PSV niet')).toEqual(['Ajax', 'PSV', 'Vitesse'])
+  })
+
+  it('gives a club once, however often or under which of its names the headline says it', () => {
+    expect(clubsNamed('Ajax, AFC Ajax en nog eens Ajax')).toEqual(['Ajax'])
+    expect(clubsNamed('Sparta verslaat Sparta Rotterdam niet')).toEqual(['Sparta Rotterdam'])
+  })
+
+  it('gives nothing for sc Heerenveen alone', () => {
+    expect(clubsNamed('sc Heerenveen wint na een zinderende middag')).toEqual([])
+    expect(clubsNamed('S.C. Heerenveen-fan wint prijs')).toEqual([])
+  })
+
+  it('gives sc Heerenveen no row when another club is named as well', () => {
+    expect(clubsNamed('sc Heerenveen ontvangt Willem II')).toEqual(['Willem II'])
+  })
+
+  it('gives nothing for a headline without a club', () => {
+    expect(clubsNamed('Het weer in Friesland is wisselvallig')).toEqual([])
+    expect(clubsNamed('')).toEqual([])
+  })
+
+  it('ignores capitals, accents and full stops', () => {
+    expect(clubsNamed('FEYENOORD wint')).toEqual(['Feyenoord'])
+    expect(clubsNamed('s.c. Cambuur en Excélsior')).toEqual(['SC Cambuur', 'Excelsior Rotterdam'])
+    expect(clubsNamed('n.e.c. wint van ado')).toEqual(['ADO Den Haag', 'N.E.C.'])
+  })
+
+  it('looks at whole words only', () => {
+    expect(clubsNamed('Azerbeidzjan en Psvchologie')).toEqual([])
+    expect(clubsNamed('Nacht van de Vitesses')).toEqual([])
+  })
+
+  it('lets a long name go before a short one', () => {
+    expect(clubsNamed('Jong Ajax wint')).toEqual(['Jong Ajax'])
+    expect(clubsNamed('Jong FC Utrecht tegen FC Utrecht')).toEqual(['FC Utrecht', 'Jong FC Utrecht'])
+    expect(clubsNamed('SC Cambuur wint')).toEqual(['SC Cambuur'])
+  })
+
+  it('does not take a name that sits in another name for the club', () => {
+    expect(clubsNamed('Excelsior Maassluis verrast in de beker')).toEqual([])
+    expect(clubsNamed('Excelsior Maassluis en Excelsior spelen')).toEqual(['Excelsior Rotterdam'])
+    expect(clubsNamed('Sparta Praag wint in Praag')).toEqual([])
+  })
+
+  it('does not depend on the opponents or the feed: a headline well away from a match gets its club', () => {
+    expect(clubsNamed('Transfernieuws bij Feyenoord')).toEqual(['Feyenoord'])
+  })
+
+  it('has a name for every group, and a name for nobody else', () => {
+    expect(Object.keys(otherClubFullNames).sort()).toEqual(otherClubGroups.map((group) => group[0]).sort())
+    expect(Object.values(otherClubFullNames).every((name) => name.length > 0 && name.length <= 100)).toBe(true)
+    expect(lookalikeClubs.map(normalised)).toEqual([...lookalikeClubs])
+  })
+})
+
+function normalised(term: string) {
+  return normaliseTitle(term).join(' ')
+}
