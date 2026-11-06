@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS `squad_completeness` (
 	`calculated_at` datetime NOT NULL,
 	CONSTRAINT `squad_completeness_season` PRIMARY KEY(`season`),
 	CONSTRAINT `squad_completeness_probability_range` CHECK(`squad_completeness`.`probability` between 0 and 100)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
