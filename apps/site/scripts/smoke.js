@@ -907,7 +907,7 @@ await withEmptyDatabase((database) =>
     // sub-page.
     assert.match(
       statisticsHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar"><a aria-current="page" class="hf-navigation-sublink" href="\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
     assert.match(
       statisticsHtml,
@@ -952,9 +952,13 @@ await withEmptyDatabase((database) =>
       /<a href="\/cijfers" style="--hf-segmented-option-name:hf-segmented-option-cijfers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/cijfers\?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-cijfers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
     )
     assert.equal((await fetch(`${origin}/cijfers?competitie=onzin`)).status, 404)
-    // Cijfers has no bar under the menu, and the items of the menu itself keep no choice.
-    assert.doesNotMatch(leagueHtml, /hf-navigation-bar/)
-    assert.match(leagueHtml, /<a aria-current="page" class="hf-navigation-link" href="\/cijfers">Cijfers<\/a>/)
+    // The bar under the menu keeps the choice in both links and marks Cijfers, and the items of
+    // the menu itself keep no choice.
+    assert.match(
+      leagueHtml,
+      /<a aria-current="page" class="hf-navigation-sublink" href="\/cijfers\?competitie=eredivisie">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
+    )
+    assert.match(leagueHtml, /<a class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
     // The cup gives no points: all the matches have no rows with points and the Eredivisie has
     // them, and the Eredivisie names itself alone in the streaks.
     assert.doesNotMatch(statisticsHtml, /<th scope="row">Punten<\/th>/)
