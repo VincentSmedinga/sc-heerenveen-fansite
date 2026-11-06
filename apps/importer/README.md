@@ -1657,6 +1657,41 @@ Een tabel in een andere vorm geeft een fout: een kop, een kolom of een naam die 
 Een cijfer dat geen getal is, blijft leeg met een waarschuwing, en dan is ook de optelsom van de pagina leeg.
 Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt.
 
+### De transfers van 2006/07 tot en met 2017/18
+
+De pagina's van deze seizoenen (zie `transfersPageTitle`: 2006/07 zonder "(mannen)", de andere met) hebben een lijst met transfers onder de kop "Transfers" of "Mutaties".
+`readSeasonTransfers` in [`src/read-transfers.ts`](src/read-transfers.ts) leest die lijsten in de vorm `SeasonSquad`, met de bron `transfers`.
+Voor 2006/07 leest `readSeasonScorers` in hetzelfde bestand ook de lijst onder "Doelpuntenmakers", met de bron `doelpunten`: die wedstrijden staan niet in de database.
+Het zijn tekstlezers: ze doen zelf geen verzoek en schrijven niets.
+De import van #744 roept ze aan.
+
+Wie meetelt voor het seizoen:
+
+- een speler die in de zomer of in de winter is aangetrokken;
+- een speler die is verhuurd, of die terugkeert van verhuur;
+- een speler die in de winter is vertrokken;
+- een speler die in de zomer vertrok, alleen als de regel zegt dat hij is verhuurd.
+
+Wie in de zomer vóór het seizoen vertrok, telt niet mee: hij heeft het seizoen niet meegemaakt.
+Scheidt de pagina de zomer en de winter niet, dan telt een vertrokken speler niet mee.
+Een speler in meer dan één lijst is één speler.
+Per regel is de eerste link de speler; de links naar clubs zijn dat niet.
+Positie en rugnummer zijn leeg.
+
+De lijsten hebben vijf vormen:
+
+- 2006/07: een kop Zomer en een kop Winter, elk met een tabel Nieuw en een tabel Weg.
+- 2007/08: een tabel per soort (Aangetrokken, Terugkerende, Vertrokken, Verhuurde en Gestopte spelers) met de soort in het onderschrift, zonder zomer en winter.
+- 2008/09 en 2009/10: een tabel per soort onder een kop Aangetrokken, Vertrokken of Verhuurd.
+  2008/09 zet een rij "Winterstop" tussen de zomer en de winter in de tabellen van aangetrokken en verhuurde spelers; zijn tabel met vertrokken spelers heeft haar niet.
+  De spelers van volgend seizoen en de technische staf tellen niet mee.
+- 2010/11: een platte tabel met aangetrokken spelers, en voor vertrokken en verhuurde spelers een kolom Zomer en een kolom Winter.
+- 2011/12 tot en met 2017/18: die kolommen voor alle drie de lijsten.
+
+Een pagina zonder de kop, of met de kop maar zonder tabel, geeft `none`.
+Een kop, een onderschrift of een kolomkop die de lezer niet kent, een regel zonder naam of een tabel die niet is afgesloten, geeft een fout.
+Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen afkorting met een punt; anders geeft hij een waarschuwing.
+
 ### Wat de import bewaart
 
 Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken), de zoekterm en de pagina op Wikipedia (`wikipedia_page`, mag ontbreken).

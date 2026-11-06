@@ -1,0 +1,70 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Mutaties==
+===Aangetrokken===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Vorige club
+!style="border-bottom:1px solid #AAAAAA" |Contract tot
+!style="border-bottom:1px solid #AAAAAA" |Bijzonderheden
+|-bgcolor="#F8F8FF"
+| {{RS-VLAG}} [[Filip Đuričić]] || {{RS-VLAG}} [[Radnicki Obrenovac]] || [[2013]] || komt over in januari [[2010]]
+|-
+| {{MK-VLAG}} [[Samir Fazli]] || {{MK-VLAG}} [[FK Makedonija Ğorče Petrov Skopje]] || [[2014]]||
+|-
+| {{CZ-VLAG}} [[Martin Lejsal]] || {{CZ-VLAG}} [[FC Zbrojovka Brno|1. FC Brno]]||[[2010]]||gehuurd met optie tot koop
+|-
+| {{AR-VLAG}} [[Hernán Losada]] || {{BE-VLAG}} [[Anderlecht]] ||[[2010]]||gehuurd met optie tot koop
+|}
+
+=== Vertrokken ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |bijzonderheden
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} {{HT-VLAG}} [[Lesly Fellinga]] || {{CA-VLAG}} [[Toronto FC]] || contract niet verlengd
+|-
+| {{NL-VLAG}} [[Robin Huisman de Jong]] || {{DE-VLAG}} [[BV Cloppenburg]] || was verhuurd aan [[FC Emmen]]
+|-bgcolor="#F8F8FF"
+| {{NO-VLAG}} [[André Hanssen]] || {{NO-VLAG}} [[FK Bodø/Glimt]] || contract niet verlengd
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Oguzhan Türk]] || {{NL-VLAG}} [[SC Cambuur Leeuwarden|SC Cambuur]] || was verhuurd aan [[Go Ahead Eagles]]
+|}
+
+=== Verhuurd ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Speler
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |bijzonderheden
+|-
+| {{NL-VLAG}} [[Xander Houtkoop]] || {{NL-VLAG}} [[FC Emmen]] ||
+|- bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Michel Poldervaart]] || {{NL-VLAG}} [[FC Emmen]] ||
+|-
+| {{NL-VLAG}} [[Hassan Bai Kamara]] || {{NL-VLAG}} [[FC Emmen]] ||
+|-bgcolor="#F8F8FF"
+| {{NL-VLAG}} [[Henrico Drost]] ||{{NL-VLAG}} [[VVV-Venlo]] || verhuurd met optie tot koop
+|}
+
+=== Technische Staf ===
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA" |Persoon
+!style="border-bottom:1px solid #AAAAAA" |Nieuwe club
+!style="border-bottom:1px solid #AAAAAA" |bijzonderheden
+|-
+| {{DK-VLAG}} [[Trond Sollied]] || {{QA-VLAG}} [[Al-Ahli SC]] || Trainer, opgestapt
+|-
+| {{BE-VLAG}} [[Chris Van Puyvelde]] || {{BE-VLAG}} [[KSC Lokeren]] ||assistent-trainer, opgestapt
+|-
+| {{NL-VLAG}} [[Jan de Jonge]] || sc Heerenveen <br /><small>(hoofd opleidingen)</small>|| Trainer, opgestapt
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]

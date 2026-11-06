@@ -1,0 +1,110 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Transfers==
+===Aangetrokken===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{DE-VLAG}} [[Mark Uth]] || {{NL-VLAG}} [[Heracles Almelo]] || 2015 || was verhuurd 
+|-
+| {{NL-VLAG}} [[Doke Schmidt]] ||{{NL-VLAG}} [[Go Ahead Eagles]] || 2015 || was verhuurd
+|-
+| {{NL-VLAG}} [[Jens Jurn Streutker]] ||{{NL-VLAG}} [[Heracles Almelo]]|| 2015+1 || was verhuurd
+|-
+| {{NL-VLAG}} [[Yanic Wildschut]]|| {{NL-VLAG}} [[ADO Den Haag]] || 2016 || was verhuurd
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{SE-VLAG}} [[Simon Thern]] || {{SE-VLAG}} [[Malmö FF]] || 2018+1 || transfervrij
+|-
+| {{DK-VLAG}} [[Younes Namli]] || {{DK-VLAG}} [[Akademisk BK|AB]] || 2017 ||
+|-
+| {{NL-VLAG}} [[Lerin Duarte]] || {{NL-VLAG}} [[AFC Ajax]] || 2015 || gehuurd met optie tot koop
+|-
+|-
+|}
+|}
+
+=== Vertrokken ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{MK-VLAG}} [[Samir Fazli]] || {{CH-VLAG}} [[FC Wil 1900]] || contract niet verlengd
+|-
+| {{BE-VLAG}} [[Brian Vandenbussche]] || {{BE-VLAG}} [[AA Gent]]|| transfervrij
+|-
+| {{NL-VLAG}} [[Anthony Lurling]] || {{NL-VLAG}} [[FC Den Bosch]] ||contract niet verlengd
+|-
+| {{NG-VLAG}} [[Uche Nwofor]] || {{NL-VLAG}} [[VVV-Venlo]] || werd gehuurd
+|-
+| {{NL-VLAG}} [[Joeri de Kamps]] || {{NL-VLAG}} [[NAC Breda]] || werd gehuurd van [[AFC Ajax]]
+|-
+| {{NL-VLAG}} [[Mitchell Dijks]] || {{NL-VLAG}} [[Willem II (voetbalclub)|Willem II]]|| werd gehuurd van [[AFC Ajax]]
+|-
+| {{NL-VLAG}} [[Fahd Aktaou]] || {{NL-VLAG}} [[Heracles Almelo]] || werd verhuurd aan [[Almere City FC]]
+|}
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NL-VLAG}} [[Daley Sinkgraven]] || {{NL-VLAG}} [[AFC Ajax]] ||€7.000.000
+|-
+| {{FI-VLAG}} [[Jukka Raitala]] || {{DK-VLAG}} [[FC Vestsjaelland]] || contract ontbonden
+|}
+|}
+
+=== Verhuur ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+|}
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NL-VLAG}} [[Pascal Huser]] || {{NL-VLAG}} [[MVV Maastricht]] ||
+|-
+| {{NL-VLAG}} [[Jens Jurn Streutker]] || {{NL-VLAG}} [[MVV Maastricht]] ||
+|-
+| {{DK-VLAG}} [[Thomas Dalgaard]] || {{DK-VLAG}} [[Odense BK]] || Optie tot koop
+|}
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]

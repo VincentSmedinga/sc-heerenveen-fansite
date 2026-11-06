@@ -1,0 +1,164 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Doelpuntenmakers==
+===[[Eredivisie 2006/07|Eredivisie]]===
+{| class="wikitable"
+! Naam
+! Doelpunten
+|-
+| [[Afonso Alves]] || 34
+|-
+| [[Lasse Nilsson]] || 9
+|-
+| [[Rob Friend]] || 5
+|-
+| [[Petter Hansson]] || 4
+|-
+| [[Danijel Pranjić]] || 2
+|-
+| [[Paul Bosvelt]] || 1
+|-
+| [[Gonzalo García]] || 1
+|-
+| [[Will Johnson (voetballer)|Will Johnson]] || 1
+|-
+| [[Niklas Tarvajärvi]] || 1
+|-
+| [[Uğur Yıldırım]] || 1
+|-
+| [[Gianni Zuiverloon]] || 1
+|-
+| '''Totaal''' || '''60'''
+|}
+
+===[[KNVB Beker 2006/07 (mannen)|KNVB beker]]===
+Geen doelpunten gemaakt door spelers van sc Heerenveen
+
+===[[UEFA Cup 2006/07|UEFA Cup]]===
+{| class="wikitable"
+! Naam
+! Doelpunten
+|-
+| [[Afonso Alves]] || 3
+|-
+| [[Lasse Nilsson]] || 1
+|-
+| [[Danijel Pranjić]] || 1
+|-
+| '''Totaal''' || '''5'''
+|}
+
+===[[Play-offs Nederlands voetbal 2007|Play-offs]]===
+{| class="wikitable"
+! Naam
+! Doelpunten
+|-
+| [[Lasse Nilsson]] || 1
+|-
+| '''Totaal''' || '''1'''
+|}
+
+
+==Transfers==
+===Zomer===
+====Nieuw====
+{| class="wikitable"
+! Naam
+! Van
+! Bijzonderheden
+|-
+| {{BR-VLAG}} [[Afonso Alves]] || {{SE-VLAG}} [[Malmö FF]] ||
+|-
+| {{NL-VLAG}} [[Age Hains Boersma]] || {{NL-VLAG}} [[VV Sneek]] ||
+|-
+| {{NL-VLAG}} [[Michael Dingsdag]] || {{NL-VLAG}} [[SBV Vitesse|Vitesse]] || Gehuurd
+|-
+| {{CA-VLAG}} [[Rob Friend]] || {{NO-VLAG}} [[Molde FK]] ||
+|-
+| {{UY-VLAG}} & {{ES-VLAG}} [[Gonzalo García]] || {{NL-VLAG}} [[AGOVV Apeldoorn]] ||
+|-
+| {{CA-VLAG}} [[Will Johnson (voetballer)|Will Johnson]] || {{US-VLAG}} [[Chicago Fire Soccer Club|Chicago Fire]] ||
+|-
+| {{US-VLAG}} [[Robbie Rogers]] || {{US-VLAG}} [[University of Maryland]] ||
+|-
+| {{NL-VLAG}} [[Danny Wintjens]] || {{NL-VLAG}} [[FC Twente]] ||
+|-
+| {{NL-VLAG}} [[Gianni Zuiverloon]] || {{NL-VLAG}} [[Feyenoord]] ||
+|-
+|}
+
+====Weg====
+{| class="wikitable"
+! Naam
+! Naar
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Vincent van den Berg]] || {{EN-VLAG}} [[Arsenal FC|Arsenal]] ||
+|-
+| {{NL-VLAG}} [[Arnold Bruggink]] || {{DE-VLAG}} [[Hannover 96]]
+|-
+| {{NL-VLAG}} [[Fernando Derveld]] || {{DK-VLAG}} [[Esbjerg fB]] ||
+|-
+| {{NL-VLAG}} [[Henrico Drost]] || {{NL-VLAG}} [[Excelsior (Rotterdam)|Excelsior]] || Verhuurd
+|-
+| {{NL-VLAG}} [[Kevin Moeliker]] || {{NL-VLAG}} [[Go Ahead Eagles]] ||
+|-
+| {{DK-VLAG}} [[Hjalte Bo Nørregaard]] || {{DK-VLAG}} [[FC København|FC Kopenhagen]] ||
+|-
+| {{DK-VLAG}} [[Lasse Schöne]] || {{NL-VLAG}} [[vbv De Graafschap|De Graafschap]] ||
+|-
+| {{NL-VLAG}} [[Marcel Seip]] || {{EN-VLAG}} [[Plymouth Argyle]] || Geen nieuw contract
+|-
+| {{NL-VLAG}} [[Sebastiaan Steur]] || {{NL-VLAG}} [[Excelsior (Rotterdam)|Excelsior]] || Verhuurd
+|-
+| {{NL-VLAG}} [[Mark de Vries (1975, voetballer)|Mark de Vries]] || {{EN-VLAG}} [[Leicester City FC|Leicester City]] || Was gehuurd<br />(meteen verhuurd<br />aan [[ADO Den Haag|ADO]])
+|-
+|}
+
+===Winter===
+====Nieuw====
+{| class="wikitable"
+! Naam
+! Van
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Rob van Dijk (voetballer)|Rob van Dijk]] || {{NL-VLAG}} [[RKC Waalwijk]] ||
+|-
+| {{NL-VLAG}} [[Calvin Jong-A-Pin]] || Eigen jeugd ||
+|-
+| {{NL-VLAG}} [[Robin Huisman de Jong]] || Eigen jeugd ||
+|-
+| {{NL-VLAG}} [[Cecilio Lopes]] || {{NL-VLAG}} [[FC Dordrecht]] || Meteen verhuurd<br />aan [[Sparta Rotterdam|Sparta]]
+|-
+| {{RS-VLAG}} [[Miralem Sulejmani]] || {{RS-VLAG}} [[Partizan Belgrado]] ||
+|-
+|}
+
+====Weg====
+{| class="wikitable"
+! Naam
+! Naar
+! Bijzonderheden
+|-
+| {{CA-VLAG}} [[Rob Friend]] || {{NL-VLAG}} [[Heracles Almelo]] || Verhuurd
+|-
+| {{NL-VLAG}} [[Reza Ghoochannejhad]] || {{NL-VLAG}} [[Go Ahead Eagles]] || Verhuurd
+|-
+| {{MA-VLAG}} [[Abdelkarim Kissi]] || {{BG-VLAG}} [[Beroe Stara Zagora]] || Contract niet verlengd
+|-
+| {{DK-VLAG}} [[Ken Ilsø Larsen]] || {{DK-VLAG}} [[Sonderjysk]] ||
+|-
+| {{NL-VLAG}} [[Boy Waterman]] || {{NL-VLAG}} [[AZ (voetbalclub)|AZ]] || Verhuurd
+|-
+|}
+
+{{Navigatie sc Heerenveen (mannen)}}
+{{Navigatie Eredivisie 2006/07}}
+{{Kleine letter}}
+
+[[Categorie:Sc Heerenveen naar seizoen|2006/07]]
+[[Categorie:Nederlandse voetbalclub 2006/07|Heerenveen]]
+
+== Zie ook ==
+* [[Eredivisie]]

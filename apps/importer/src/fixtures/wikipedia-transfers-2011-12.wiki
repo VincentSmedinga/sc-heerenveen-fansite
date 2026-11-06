@@ -1,0 +1,117 @@
+{{Infobox}}
+De selectie van het seizoen.
+
+==Transfers==
+===Aangetrokken===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{BE-VLAG}} [[Sven Kums]] || {{BE-VLAG}} [[KV Kortrijk]] || [[2015]] || € 500.000
+|-
+| {{NL-VLAG}} [[Pelé van Anholt]] || {{NL-VLAG}} [[FC Emmen]]|| ||keert terug van verhuur
+|-
+| {{NL-VLAG}} [[Jurjan Wouda]] || {{NL-VLAG}} [[FC Emmen]]|| ||keert terug van verhuur
+|-
+| {{NL-VLAG}} [[Enzo Huntink]] || {{NL-VLAG}} [[FC Emmen]]|| ||keert terug van verhuur
+|-
+| {{NL-VLAG}} [[Youssef El Akchaoui]] || {{NL-VLAG}} [[VVV-Venlo]]|| 2013 ||keert terug van verhuur
+|-
+| {{NL-VLAG}} [[Geert Arend Roorda]] || {{NL-VLAG}} [[SBV Excelsior|Excelsior]]|| 2012 ||keert terug van verhuur
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Vorige club
+! Contract tot
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Johnny de Vries]] || {{NL-VLAG}} [[FC Emmen]] || ? || werd teruggestuurd door FC Emmen in november
+|-
+| {{NL-VLAG}} [[Oussama Tannane]] || {{NL-VLAG}} [[PSV (voetbalclub)|PSV]] || 2013 || Transfervrij + optie van 1 jaar, weggestuurd bij PSV
+|-
+| {{SE-VLAG}} [[Kristoffer Nordfeldt]] || {{SE-VLAG}} [[IF Brommapojkarna|Brommapojkarna]] || 2015 || Transfervrij
+|-
+
+|}
+|}
+
+=== Vertrokken ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{DK-VLAG}} [[Kevin Stuhr-Ellegaad]] || {{SE-VLAG}} [[IF Elfsborg]] ||contract niet verlengd
+|-
+| {{NL-VLAG}} [[Gerry Koning]] || {{NL-VLAG}} [[FC Volendam]] || contract niet verlengd
+|-
+| {{NL-VLAG}} [[Calvin Jong-a-Pin]] || {{JP-VLAG}} [[Shimizu S-Pulse]]|| contract niet verlengd
+|-
+| {{NL-VLAG}} [[Diederik Bangma]] || {{NL-VLAG}} [[WKE]] || was verhuurd aan [[FC Emmen]]
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{SE-VLAG}} [[Robin Eriksson]] || ? || contract ontbonden
+|}
+|}
+
+=== Verhuur ===
+{| width=100%
+| width=33% align=left valign=top |
+'''Zomer'''
+
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! Bijzonderheden
+|-
+| {{NL-VLAG}} [[Richard Stolte]] || {{NL-VLAG}} [[Fortuna Sittard]] ||
+|-
+| {{NL-VLAG}} [[Johnny de Vries]] || {{NL-VLAG}} [[FC Emmen]] || 2e jaar verhuur
+|-
+| {{NL-VLAG}} [[Bart de Groot]] || {{NL-VLAG}} [[FC Emmen]] || 2e jaar verhuur
+|-
+
+|}
+
+| width=33% align=left valign=top |
+
+'''Winter'''
+{| class="wikitable"
+! Speler
+! Nieuwe club
+! bijzonderheden
+|-
+| {{NL-VLAG}} [[Enzo Huntink]] || {{NL-VLAG}} [[FC Emmen]] || was al eerder verhuurd aan FC Emmen
+|-
+| {{NL-VLAG}} [[Youssef El Akchaoui]] || {{NL-VLAG}} [[NAC Breda|NAC]]
+||
+|-
+| {{NL-VLAG}} [[René Oosterhof]] || {{NL-VLAG}} [[AGOVV Apeldoorn|AGOVV]] ||
+
+|}
+|}
+
+
+== Zie ook ==
+* [[Eredivisie]]
