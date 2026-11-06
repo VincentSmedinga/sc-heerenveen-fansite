@@ -21,7 +21,7 @@ import { ownListPeriods, stadiumPeriods } from './match-format'
 import { programmeOf } from './matches'
 
 /**
- * The opponents of sc Heerenveen under Statistieken: the list of the clubs and the page of each
+ * The opponents of sc Heerenveen under Wedstrijden: the list of the clubs and the page of each
  * club with the record against it, for the matches of every season we have. The data is the
  * clubs of `packages/db` (one club is one article of the Dutch Wikipedia, with a fixed slug in
  * the address). This module has the tallies, which need no database, and the cached readings.
@@ -54,7 +54,7 @@ export type Tally = {
 }
 
 /** The address of the page Tegenstanders; the page of a club is this and `/<slug>`. */
-export const opponentsPath = '/statistieken/tegenstanders'
+export const opponentsPath = '/tegenstanders'
 
 /** How long the readings are kept: a new result shows within five minutes of the import. */
 const period = 5 * 60 * 1000

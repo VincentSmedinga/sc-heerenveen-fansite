@@ -30,13 +30,13 @@ for (const choice of ['', '?competitie=eredivisie']) {
   test(`the figures of a club in the list are the Totaal of its page${choice === '' ? '' : ', for the Eredivisie'}`, async ({
     page,
   }) => {
-    await page.goto(`/statistieken/tegenstanders${choice}`)
+    await page.goto(`/tegenstanders${choice}`)
 
     const inList = await listRow(page, 'Testdorp FC')
 
     await list(page).getByRole('link', { name: 'Testdorp FC' }).click()
 
-    await expect(page).toHaveURL(new RegExp(`/statistieken/tegenstanders/testdorp-fc${choice.replace('?', '\\?')}$`))
+    await expect(page).toHaveURL(new RegExp(`/tegenstanders/testdorp-fc${choice.replace('?', '\\?')}$`))
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Testdorp FC')
     expect(await totals(page)).toEqual(inList)
     expect(inList[0]).toBeGreaterThan(0)
@@ -55,7 +55,7 @@ const columnFigures = async (page: Page, column: number) =>
 
 test.describe('sorting the list', () => {
   test('sorts with the keyboard, keeps the focus on the button and says what happened', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders')
+    await page.goto('/tegenstanders')
 
     const played = page.getByRole('button', { exact: true, name: 'G gespeeld' })
     // The line of the table is a div. The switch Welke wedstrijden has a line of its own, a p.
@@ -103,7 +103,7 @@ test.describe('sorting the list', () => {
   })
 
   test('sorts the clubs from A to Z on the first click on Club, then from Z to A', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders')
+    await page.goto('/tegenstanders')
     await page.getByRole('button', { exact: true, name: 'G gespeeld' }).click()
     await page.getByRole('button', { exact: true, name: 'Club' }).click()
 
@@ -122,7 +122,7 @@ test.describe('sorting the list', () => {
     test(`has the columns Punten and Doelsaldo${choice === '' ? '' : ' with the Eredivisie'}, and sorts on them`, async ({
       page,
     }) => {
-      await page.goto(`/statistieken/tegenstanders${choice}`)
+      await page.goto(`/tegenstanders${choice}`)
 
       await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute(
         'aria-sort',
@@ -159,7 +159,7 @@ test.describe('sorting the list', () => {
 
   test('fits a phone of 320 pixels, with the arrow and every column', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 320 })
-    await page.goto('/statistieken/tegenstanders?competitie=eredivisie')
+    await page.goto('/tegenstanders?competitie=eredivisie')
     await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
 
     expect(
@@ -178,7 +178,7 @@ test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
   test('the headers are plain text and the list stays A to Z', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders')
+    await page.goto('/tegenstanders')
 
     await expect(page.getByRole('button')).toHaveCount(0)
     await expect(list(page).getByRole('columnheader', { exact: true, name: 'gespeeld' })).toBeVisible()
@@ -190,25 +190,25 @@ test.describe('without JavaScript', () => {
   })
 
   test('the switch of the list is two links, and a club we only met in the cup leaves the list', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders')
+    await page.goto('/tegenstanders')
 
     const choices = page.getByRole('group', { name: 'Welke wedstrijden' })
 
     await expect(list(page).getByRole('rowheader', { name: 'FC Maquette' })).toBeVisible()
     await choices.getByRole('link', { name: 'Eredivisie' }).click()
 
-    await expect(page).toHaveURL(/\/statistieken\/tegenstanders\?competitie=eredivisie$/)
+    await expect(page).toHaveURL(/\/tegenstanders\?competitie=eredivisie$/)
     await expect(page.getByRole('rowheader', { name: 'FC Maquette' })).toHaveCount(0)
     await expect(list(page).getByRole('rowheader', { name: 'Testdorp FC' })).toBeVisible()
   })
 
   test('the page of a club we only met in the cup says so with the choice Eredivisie', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders/fc-maquette?competitie=eredivisie')
+    await page.goto('/tegenstanders/fc-maquette?competitie=eredivisie')
 
     await expect(page.getByText('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')).toBeVisible()
     await page.getByRole('link', { name: 'Alle wedstrijden' }).click()
 
-    await expect(page).toHaveURL(/\/statistieken\/tegenstanders\/fc-maquette$/)
+    await expect(page).toHaveURL(/\/tegenstanders\/fc-maquette$/)
     await expect(page.getByRole('heading', { level: 2, name: 'Onze uitslagen tegen FC Maquette' })).toBeVisible()
   })
 })
@@ -217,7 +217,7 @@ test.describe('the page of a club', () => {
   test('has the matches in the main column and the results, the scores and the stadiums in the sidebar', async ({
     page,
   }) => {
-    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+    await page.goto('/tegenstanders/voorbeeld-united')
 
     await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
     await expect(page.getByRole('main').getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
@@ -234,7 +234,7 @@ test.describe('the page of a club', () => {
   })
 
   test('names the stadium of a club that changed it, in the order we saw them', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+    await page.goto('/tegenstanders/voorbeeld-united')
 
     // The checks also seed the season of a year ago, so the made-up names come twice: the old
     // name, the new one, and then both again. A name that returns is a line of its own.
@@ -254,7 +254,7 @@ test.describe('the page of a club', () => {
   test('has the row Laatste wedstrijden for a club with five matches, and none for one with fewer', async ({
     page,
   }) => {
-    await page.goto('/statistieken/tegenstanders/testdorp-fc')
+    await page.goto('/tegenstanders/testdorp-fc')
 
     // The matches of this and the last season are 6–0 each, and the older ones are a draw, a
     // loss and a win (see older-meetings.ts): the oldest first and the newest last.
@@ -263,7 +263,7 @@ test.describe('the page of a club', () => {
     )
 
     for (const club of ['voorbeeld-united', 'fc-maquette']) {
-      await page.goto(`/statistieken/tegenstanders/${club}`)
+      await page.goto(`/tegenstanders/${club}`)
 
       await expect(page.getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
       await expect(page.locator('.hf-mark-row')).toHaveCount(0)
@@ -276,7 +276,7 @@ test.describe('the page of a club', () => {
     // Testdorp FC has five played matches in the league (see older-meetings.ts), so the card is
     // there with both choices, after Hoe vaak welke uitslag. Voorbeeld United has four.
     for (const choice of ['', '?competitie=eredivisie']) {
-      await page.goto(`/statistieken/tegenstanders/testdorp-fc${choice}`)
+      await page.goto(`/tegenstanders/testdorp-fc${choice}`)
 
       const card = page.getByRole('region', { name: 'Doelpuntenmakers tegen Testdorp FC' })
 
@@ -299,20 +299,20 @@ test.describe('the page of a club', () => {
       ).toBeVisible()
     }
 
-    await page.goto('/statistieken/tegenstanders/testdorp-fc')
+    await page.goto('/tegenstanders/testdorp-fc')
     await expect(page.getByRole('complementary').getByRole('heading', { level: 2 })).toContainText([
       'Onze uitslagen tegen Testdorp FC',
       'Hoe vaak welke uitslag',
       'Doelpuntenmakers tegen Testdorp FC',
     ])
 
-    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+    await page.goto('/tegenstanders/voorbeeld-united')
     await expect(page.getByRole('heading', { level: 2, name: /^Doelpuntenmakers tegen/ })).toHaveCount(0)
   })
 
   test('has no card Stadion for a club whose only league match was at home, and none for the cup', async ({ page }) => {
     for (const club of ['testdorp-fc', 'fc-maquette']) {
-      await page.goto(`/statistieken/tegenstanders/${club}`)
+      await page.goto(`/tegenstanders/${club}`)
 
       await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: /^Stadions?$/ })).toHaveCount(0)
@@ -320,22 +320,30 @@ test.describe('the page of a club', () => {
   })
 })
 
-test.describe('the bar of Statistieken', () => {
-  test('marks Tegenstanders on the list and on the page of a club, and leads from Statistieken to it', async ({
+test.describe('the bar of Wedstrijden', () => {
+  test('marks Tegenstanders on the list and on the page of a club, and leads from Wedstrijden to it', async ({
     page,
   }) => {
     const bar = page.getByRole('navigation', { name: 'Hoofdmenu' })
 
-    await page.goto('/statistieken')
+    await page.goto('/wedstrijden')
     await bar.getByRole('link', { name: 'Tegenstanders' }).click()
 
-    await expect(page).toHaveURL(/\/statistieken\/tegenstanders$/)
+    await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
-    await expect(bar.getByRole('link', { name: 'Spelers' })).not.toHaveAttribute('aria-current', 'page')
+    await expect(bar.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
+    await expect(bar.getByRole('link', { name: 'Statistieken' })).not.toHaveAttribute('aria-current', /.*/)
 
     await list(page).getByRole('link', { name: 'Testdorp FC' }).click()
 
     await expect(bar.getByRole('link', { name: 'Tegenstanders' })).toHaveAttribute('aria-current', 'page')
+    await expect(bar.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
+  })
+
+  test('is gone on Statistieken', async ({ page }) => {
+    await page.goto('/statistieken')
+
+    await expect(page.getByRole('navigation', { name: 'Hoofdmenu' }).locator('.hf-navigation-bar')).toHaveCount(0)
   })
 })
 
@@ -343,7 +351,7 @@ test.describe('the matches to come on the page of a club', () => {
   test('has them in the list of the card, with no subheadings and no sentence, for a club not played yet', async ({
     page,
   }) => {
-    await page.goto('/statistieken/tegenstanders/nepstad-rangers')
+    await page.goto('/tegenstanders/nepstad-rangers')
 
     const card = page.getByRole('region', { name: 'Wedstrijden' })
 
@@ -358,7 +366,7 @@ test.describe('the matches to come on the page of a club', () => {
   })
 
   test('shows a match that is called off with "Uitgesteld"', async ({ page }) => {
-    await page.goto('/statistieken/tegenstanders/demo-boys')
+    await page.goto('/tegenstanders/demo-boys')
 
     await expect(page.getByRole('region', { name: 'Wedstrijden' }).getByText('Uitgesteld').first()).toBeVisible()
   })
@@ -366,7 +374,7 @@ test.describe('the matches to come on the page of a club', () => {
   test('leaves out a cup tie with the choice Eredivisie, and brings it back with Alle wedstrijden', async ({
     page,
   }) => {
-    await page.goto('/statistieken/tegenstanders/sv-proefdorp?competitie=eredivisie')
+    await page.goto('/tegenstanders/sv-proefdorp?competitie=eredivisie')
 
     const card = page.getByRole('region', { name: 'Wedstrijden' })
 
@@ -374,7 +382,7 @@ test.describe('the matches to come on the page of a club', () => {
     await expect(card.getByText('KNVB Beker')).toHaveCount(0)
     await page.getByRole('link', { name: 'Alle wedstrijden' }).click()
 
-    await expect(page).toHaveURL(/\/statistieken\/tegenstanders\/sv-proefdorp$/)
+    await expect(page).toHaveURL(/\/tegenstanders\/sv-proefdorp$/)
     await expect(card.getByText('KNVB Beker · Tweede ronde')).toBeVisible()
   })
 })

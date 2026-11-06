@@ -545,12 +545,12 @@ async function checkSitemap(siteOrigin, { clubs: hasClubs }) {
   // Then the page of each club the made-up matches have, and nothing else.
   const clubs = locations.slice(listed.length)
   assert.equal(
-    clubs.includes(`${siteOrigin}/statistieken/tegenstanders/testdorp-fc`),
+    clubs.includes(`${siteOrigin}/tegenstanders/testdorp-fc`),
     hasClubs,
     'the page of a club is listed when there are matches',
   )
   assert.equal(clubs.length > 0, hasClubs)
-  assert.ok(clubs.every((location) => location.startsWith(`${siteOrigin}/statistieken/tegenstanders/`)))
+  assert.ok(clubs.every((location) => location.startsWith(`${siteOrigin}/tegenstanders/`)))
   assert.doesNotMatch(xml, /lastmod|changefreq|priority|feed\.xml/)
 
   return sitemap
@@ -795,6 +795,12 @@ await withEmptyDatabase((database) =>
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
+    // Wedstrijden has the bar of its sub-pages under the menu, with Tegenstanders and none of
+    // them current.
+    assert.match(
+      matchesHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+    )
     // The head coach comes from the seed the site runs at its start, not from anyone by hand:
     // a card with the strong surface in the sidebar, after the table and the scores, with his
     // name only.
@@ -939,11 +945,8 @@ await withEmptyDatabase((database) =>
       /<a href="\/statistieken" style="--hf-segmented-option-name:hf-segmented-option-statistieken-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/statistieken\?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-statistieken-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
     )
     assert.equal((await fetch(`${origin}/statistieken?competitie=onzin`)).status, 404)
-    // The bar under the menu keeps the choice, and the items of the menu itself do not.
-    assert.match(
-      leagueHtml,
-      /<div class="hf-navigation-bar">.*?href="\/statistieken\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
-    )
+    // Statistieken has no bar under the menu, and the items of the menu itself keep no choice.
+    assert.doesNotMatch(leagueHtml, /hf-navigation-bar/)
     assert.match(
       leagueHtml,
       /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a>/,
@@ -1004,12 +1007,12 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Rick<\/span> <span class="hf-player-name-surname">Demo<\/span><\/span>, <span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
-    // The menu has the bar of Statistieken, with Tegenstanders and no sub-page as the current
-    // page, and Spelers as an item of its own after it.
+    // Statistieken has no bar, and Spelers is an item of the menu of its own after it.
     assert.match(
       statisticsHtml,
-      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>.*?<a class="hf-navigation-link" href="\/spelers">Spelers<\/a>/s,
+      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><\/li><li role="listitem"><a class="hf-navigation-link" href="\/spelers">Spelers<\/a>/,
     )
+    assert.doesNotMatch(statisticsHtml, /hf-navigation-bar/)
     assert.match(
       statisticsHtml,
       /<h2[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
@@ -1137,18 +1140,18 @@ await withEmptyDatabase((database) =>
     // The page Tegenstanders lists every club of the made-up matches A to Z, each name a link
     // to its page, in a table with a caption and column headers with scope. The menu has it as
     // a sub-page of Statistieken, and it is the current one.
-    const opponentsPage = await fetch(`${origin}/statistieken/tegenstanders`)
+    const opponentsPage = await fetch(`${origin}/tegenstanders`)
     const opponentsHtml = await opponentsPage.text()
     assert.equal(opponentsPage.status, 200)
     assert.match(opponentsHtml, /<h1[^>]*>Tegenstanders<\/h1>/)
     assert.match(
       opponentsHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/s,
+      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
     assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
     assert.match(
       opponentsHtml,
-      /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
+      /<th scope="row"><a href="\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
     )
     // The server sends the whole table in the given order, with plain headers: sorting is for
     // the browser, so there is no button or aria-sort yet. The columns Punten and Doelsaldo are
@@ -1169,14 +1172,19 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.
-    assert.match(opponentsHtml, /href="\/statistieken\/tegenstanders\/fc-maquette"/)
+    assert.match(opponentsHtml, /href="\/tegenstanders\/fc-maquette"/)
 
-    const leagueOpponents = await (await fetch(`${origin}/statistieken/tegenstanders?competitie=eredivisie`)).text()
+    const leagueOpponents = await (await fetch(`${origin}/tegenstanders?competitie=eredivisie`)).text()
     assert.doesNotMatch(leagueOpponents, /fc-maquette/)
     assert.match(leagueOpponents, /<span class="hf-visually-hidden">punten<\/span>/)
     assert.match(leagueOpponents, /P punten/)
-    assert.match(leagueOpponents, /href="\/statistieken\/tegenstanders\/testdorp-fc\?competitie=eredivisie"/)
-    assert.equal((await fetch(`${origin}/statistieken/tegenstanders?competitie=onzin`)).status, 404)
+    assert.match(leagueOpponents, /href="\/tegenstanders\/testdorp-fc\?competitie=eredivisie"/)
+    // The bar under the menu keeps the choice, and the items of the menu itself do not.
+    assert.match(
+      leagueOpponents,
+      /<div class="hf-navigation-bar">.*?href="\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
+    )
+    assert.equal((await fetch(`${origin}/tegenstanders?competitie=onzin`)).status, 404)
 
     // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
@@ -1184,7 +1192,7 @@ await withEmptyDatabase((database) =>
     await addTestdorpMeetings(database)
     await addProefdorpStadiums(database)
     await addProefdorpNames(database)
-    const clubPage = await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc`)
+    const clubPage = await fetch(`${origin}/tegenstanders/testdorp-fc`)
     const clubHtml = await clubPage.text()
     assert.equal(clubPage.status, 200)
     assert.match(clubHtml, /<h1[^>]*>Testdorp FC<\/h1>/)
@@ -1228,7 +1236,7 @@ await withEmptyDatabase((database) =>
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
     // the card Stadions: the older name with "t/m" and a season, the newer with "vanaf" and a
     // season, after the results.
-    const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()
+    const stadiumClub = await (await fetch(`${origin}/tegenstanders/voorbeeld-united`)).text()
     assert.match(
       stadiumClub,
       /id="onze-uitslagen".*<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*t\/m \d{4}\/\d{2}<.*Oud Voorbeeldpark.*vanaf \d{4}\/\d{2}<.*Voorbeeldpark/s,
@@ -1240,14 +1248,14 @@ await withEmptyDatabase((database) =>
     assert.match(clubHtml, closedWikipediaCredit)
     assert.match(
       clubHtml,
-      /<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/,
+      /<a aria-current="page" class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/,
     )
-    const cupClub = await (await fetch(`${origin}/statistieken/tegenstanders/fc-maquette?competitie=eredivisie`)).text()
+    const cupClub = await (await fetch(`${origin}/tegenstanders/fc-maquette?competitie=eredivisie`)).text()
     assert.match(cupClub, /In de Eredivisie hebben we nog niet tegen deze club gespeeld\./)
     // A club with a match to come and none played: the card Wedstrijden has the match as Match
     // (the competition and round in its line, without Thuis or Uit) with no subheadings and no
     // sentence, and only the credit in the sidebar.
-    const comingClub = await (await fetch(`${origin}/statistieken/tegenstanders/nepstad-rangers`)).text()
+    const comingClub = await (await fetch(`${origin}/tegenstanders/nepstad-rangers`)).text()
     assert.match(
       comingClub,
       /<h2[^>]*id="wedstrijden">.*<ul role="list"><li><div class="hf-match">.*Nepstad Rangers.*hf-match-label">Eredivisie.*?Speelronde 4<\/p><\/div><\/li><\/ul>/s,
@@ -1258,7 +1266,7 @@ await withEmptyDatabase((database) =>
     // A club with a list of its own has the card Stadions with it, whatever the matches say:
     // the periods follow from the starts, the note is under the name of its line, and the
     // credit follows the card. This club has a cup tie to come and none played.
-    const ownListClub = await (await fetch(`${origin}/statistieken/tegenstanders/sv-proefdorp`)).text()
+    const ownListClub = await (await fetch(`${origin}/tegenstanders/sv-proefdorp`)).text()
     assert.match(ownListClub, /<aside[^>]*aria-label="Het stadion en de bron"/)
     assert.match(
       ownListClub,
@@ -1271,8 +1279,16 @@ await withEmptyDatabase((database) =>
       /<h1[^>]*>SV Proefdorp<\/h1><p class="hf-meta">Eerder: Proefdorp Boys t\/m 2011\/12<\/p><details.*Over de namen.*t\/m 2011\/12<.*Proefdorp Boys.*vanaf 2012\/13<.*SV Proefdorp.*de bond keurde hem goed op 5 juni 2012\./s,
     )
     assert.doesNotMatch(clubHtml, /Eerder:/)
-    assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
-    assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)
+    assert.equal((await fetch(`${origin}/tegenstanders/bestaat-niet`)).status, 404)
+    // The old addresses under Statistieken are gone, with no redirect (the site is not public).
+    for (const old of ['/statistieken/tegenstanders', '/statistieken/tegenstanders/testdorp-fc']) {
+      assert.equal(
+        (await fetch(`${origin}${old}`, { redirect: 'manual' })).status,
+        404,
+        `${old} must be "niet gevonden"`,
+      )
+    }
+    assert.equal((await fetch(`${origin}/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)
 
     // Updates shows the versions of the build, newest first, and points feed readers to its
     // feed.

@@ -10,7 +10,7 @@ const { getClubRecords, getPublishedArticles } = vi.hoisted(() => ({
 }))
 
 vi.mock('../articles', () => ({ getPublishedArticles }))
-vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/statistieken/tegenstanders' }))
+vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/tegenstanders' }))
 
 // The pages that are not in the sitemap on purpose, as paths such as '/beheer'. A new page.tsx
 // that isn't in the list of pages in pages.ts must be named here, so a new page doesn't forget
@@ -39,7 +39,7 @@ const notInSitemap: string[] = [
   // One page for every published article: the sitemap lists them from the database.
   '/redactie/[slug]',
   // One page for every club we played: the sitemap lists them from the database.
-  '/statistieken/tegenstanders/[club]',
+  '/tegenstanders/[club]',
   // The statistics of a season that is over: only the current season, /statistieken, is listed.
   '/statistieken/[seizoen]',
   // The same for the players of a season that is over: only /spelers is listed.
@@ -106,8 +106,8 @@ describe('sitemap', () => {
 
     expect(await sitemap()).toEqual([
       ...pages.map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
-      { url: 'https://sc.heerenveen.org/statistieken/tegenstanders/ado-den-haag' },
-      { url: 'https://sc.heerenveen.org/statistieken/tegenstanders/fc-groningen' },
+      { url: 'https://sc.heerenveen.org/tegenstanders/ado-den-haag' },
+      { url: 'https://sc.heerenveen.org/tegenstanders/fc-groningen' },
     ])
     expect(getClubRecords).toHaveBeenCalledWith('all')
   })

@@ -226,7 +226,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
   })
 
   describe('an address that is no page', () => {
-    it.each(['2025-27', '2025-2026', '2025/26', 'seizoen', '25-26', '2025-26x', 'kies2', 'spelers'])(
+    it.each(['2025-27', '2025-2026', '2025/26', 'seizoen', '25-26', '2025-26x', 'kies2', 'spelers', 'tegenstanders'])(
       'is "niet gevonden" for %s, without asking for data',
       async (seizoen) => {
         expect(await digestOf(render(seizoen))).toContain('404')

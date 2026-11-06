@@ -20,8 +20,8 @@ const switches = [
   { group: 'Welke wedstrijden', other: '/spelers?competitie=eredivisie', path: '/spelers' },
   {
     group: 'Welke wedstrijden',
-    other: '/statistieken/tegenstanders?competitie=eredivisie',
-    path: '/statistieken/tegenstanders',
+    other: '/tegenstanders?competitie=eredivisie',
+    path: '/tegenstanders',
   },
 ] as const
 

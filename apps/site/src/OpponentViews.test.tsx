@@ -39,7 +39,7 @@ const figures = (column: number) =>
 
 describe('ClubsCard', () => {
   const card = (choice: 'all' | 'league' = 'all') => (
-    <ClubsCard address="/statistieken/tegenstanders" choice={choice} query="" records={records} since="2022/23" />
+    <ClubsCard address="/tegenstanders" choice={choice} query="" records={records} since="2022/23" />
   )
 
   it('shows the goal difference with its sign in the last column, and the points before it', () => {
@@ -74,13 +74,7 @@ describe('ClubsCard', () => {
 describe('TopPointsCard', () => {
   // Sparta has 10 played matches and 14 points, Zwolle 5 and 15, Venlo 7 and 4.
   const card = (choice: 'all' | 'league' = 'all', query = '') => (
-    <TopPointsCard
-      address="/statistieken/tegenstanders"
-      choice={choice}
-      query={query}
-      records={records}
-      since="2022/23"
-    />
+    <TopPointsCard address="/tegenstanders" choice={choice} query={query} records={records} since="2022/23" />
   )
 
   it('ranks the clubs on the average points per match with two decimals and a comma', () => {
@@ -106,7 +100,7 @@ describe('TopPointsCard', () => {
       'Ppunten per wedstrijd',
       'Ggespeeld',
     ])
-    expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/statistieken/tegenstanders/zwolle')
+    expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/tegenstanders/zwolle')
   })
 
   it('says it is the Eredivisie in the caption and keeps the choice in every link', () => {
@@ -114,9 +108,9 @@ describe('TopPointsCard', () => {
 
     expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, in de Eredivisie$/)
     expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
-      '/statistieken/tegenstanders/zwolle?competitie=eredivisie',
-      '/statistieken/tegenstanders/sparta?competitie=eredivisie',
-      '/statistieken/tegenstanders/venlo?competitie=eredivisie',
+      '/tegenstanders/zwolle?competitie=eredivisie',
+      '/tegenstanders/sparta?competitie=eredivisie',
+      '/tegenstanders/venlo?competitie=eredivisie',
     ])
   })
 
@@ -151,7 +145,7 @@ describe('TopPointsCard', () => {
   it('says one sentence, and shows no table, when no club has five played matches', () => {
     render(
       <TopPointsCard
-        address="/statistieken/tegenstanders"
+        address="/tegenstanders"
         choice="all"
         query=""
         records={[record('Venlo', 1, 1, 2, 3, 4)]}

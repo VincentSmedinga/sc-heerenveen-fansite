@@ -24,7 +24,7 @@ export const matchesPath = '/wedstrijden'
 export const statisticsPath = '/statistieken'
 
 /**
- * The base address of the page Spelers under Statistieken, which is the address of its current
+ * The base address of the page Spelers, which is the address of its current
  * season. It has the picker and the addresses of a season that the other pages have.
  */
 export const playersPath = '/spelers'

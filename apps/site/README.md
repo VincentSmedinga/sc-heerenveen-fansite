@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/statistieken/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
@@ -191,7 +191,7 @@ git diff --name-only -- src e2e | xargs pnpm exec eslint --fix
 
 ## Het hoofdmenu en de balk van Nieuws
 
-Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vier onderdelen: Nieuws (`/nieuws`), Wedstrijden, Statistieken en Forum (extern).
+Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vijf onderdelen: Nieuws (`/nieuws`), Wedstrijden, Statistieken, Spelers (`/spelers`) en Forum (extern).
 De homepage (`/`) staat niet in het menu: het logo wijst ernaartoe.
 Nieuws heeft een balk met subpagina's onder het menu: Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
 Nieuws is zelf het overzicht van alle koppen, dus er is geen apart item Archief.
@@ -375,14 +375,14 @@ De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
 De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League of de Europa League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
-Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu alleen Tegenstanders (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_).
-De link van die balk houdt de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
+Onder het hoofdmenu staat op de pagina's van Wedstrijden een balk met de subpagina's van Wedstrijden, nu alleen Tegenstanders (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_, en Statistieken heeft geen balk).
+De link van die balk houdt de keuze tussen alle wedstrijden en de Eredivisie vast: met `?competitie=eredivisie` in het adres blijft de link naar Tegenstanders `/tegenstanders?competitie=eredivisie` (die telt alle seizoenen, dus het seizoen reist niet mee).
 De items van het menu zelf houden de keuze niet vast, en het seizoen alleen op de pagina van een seizoen: op `/statistieken/2025-26` gaan Wedstrijden en Spelers naar `/wedstrijden/2025-26` en `/spelers/2025-26` (`hrefOf` in `src/SiteNavigation.tsx`).
 De keuze staat in de query string, en die kan een clientcomponent in de layout alleen lezen met `useSearchParams` en een Suspense-grens, en dat raakt elke pagina.
-Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/statistieken`, `src/statisticsBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`statisticsBar`), dat hem aan het item Statistieken geeft (`bar` van `Navigation`).
-`statisticsSubitems` in `src/SiteNavigation.tsx` zegt alleen welke subpagina de huidige is.
-Alleen de pagina's van Statistieken hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Spelers, krijgt een leeg slot.
-Op `/statistieken` is geen subpagina de huidige; op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
+Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/wedstrijden` en `app/@subnav/tegenstanders`, `src/matchesBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`matchesBar`), dat hem aan het item Wedstrijden geeft (`bar` van `Navigation`).
+`matchesSubitems` in `src/SiteNavigation.tsx` zegt alleen welke subpagina de huidige is.
+Alleen de pagina's van Wedstrijden en Tegenstanders hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Statistieken en Spelers, krijgt een leeg slot.
+Op `/wedstrijden` en zijn seizoenen is geen subpagina de huidige; op `/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Wedstrijden is dan het huidige onderdeel van het menu (`aria-current="true"`), niet Statistieken.
 Op `/spelers` en zijn seizoenen is Spelers het huidige onderdeel van het menu (`aria-current="page"`), zonder balk en zonder dat Statistieken meetelt.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
@@ -537,9 +537,9 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
 
 ### De tegenstanders
 
-`/statistieken/tegenstanders` is de enige subpagina van Statistieken.
+`/tegenstanders` is de enige subpagina van Wedstrijden, met de pagina van elke club eronder op `/tegenstanders/<club>`; de oude adressen onder `/statistieken` bestaan niet meer (zie _Tegenstanders hoort bij Wedstrijden_).
 Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
-Elke clubnaam is een link naar `/statistieken/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
+Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
 De server stuurt de tabel zonder knoppen om te sorteren, en er is geen paginering.
 Met JavaScript is elke kolom sorteerbaar; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
 De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
@@ -621,7 +621,7 @@ Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLi
 Een club die we alleen in de beker of de play-offs troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
 De keuze zit in elke link van de lijst.
 
-De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecachete lezingen, op de queries van `packages/db`), `src/OpponentViews.tsx` (de kaarten) en `app/statistieken/tegenstanders` (de twee pagina's).
+De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecachete lezingen, op de queries van `packages/db`), `src/OpponentViews.tsx` (de kaarten) en `app/tegenstanders` (de twee pagina's).
 De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
 De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
 De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
@@ -629,7 +629,7 @@ De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clu
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
-Bovenaan `/statistieken`, `/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SwitchLinks` in de kleine maat, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Bovenaan `/statistieken`, `/spelers`, `/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SwitchLinks` in de kleine maat, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.

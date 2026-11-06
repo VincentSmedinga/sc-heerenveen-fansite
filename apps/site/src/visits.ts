@@ -37,7 +37,7 @@ const countedPaths: ReadonlySet<string> = new Set([
 
 const articlePath = /^\/redactie\/([^/]+)$/u
 
-const clubPath = /^\/statistieken\/tegenstanders\/([^/]+)$/u
+const clubPath = /^\/tegenstanders\/([^/]+)$/u
 
 const seasonPath = /^(\/wedstrijden|\/spelers|\/statistieken)\/([^/]+)$/u
 

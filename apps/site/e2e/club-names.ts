@@ -7,7 +7,7 @@ import path from 'node:path'
 /**
  * A made-up list of names of its own for SV Proefdorp, with an older name and a note, so the
  * page of the club and the screen of the admin are checked with one (see
- * `/statistieken/tegenstanders/sv-proefdorp` and `/beheer/clubnamen/sv-proefdorp` in
+ * `/tegenstanders/sv-proefdorp` and `/beheer/clubnamen/sv-proefdorp` in
  * pages.spec.ts). The rows go straight into the table, because they are not an action of the
  * admin and no row of the log should outlast the accounts of the checks, and they leave
  * `club_names` alone. It only writes to a database on this computer. The file imports nothing

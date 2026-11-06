@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -79,7 +80,7 @@ const rowsOf = (html: string) =>
     ],
   )
 
-describe('the page /statistieken/tegenstanders', () => {
+describe('the page /tegenstanders', () => {
   it('has one h1, Tegenstanders, and two h2s: the card Alle tegenstanders and the top 10', async () => {
     const html = await render()
 
@@ -92,9 +93,9 @@ describe('the page /statistieken/tegenstanders', () => {
 
   it('lists every club A to Z, each name a link to its page, with the figures of the record', async () => {
     expect(rowsOf(await render())).toEqual([
-      ['Beker United', '/statistieken/tegenstanders/beker-united', ['1', '0', '0', '1', '0', '−2']],
-      ['FC Voorbeeld', '/statistieken/tegenstanders/fc-voorbeeld', ['3', '1', '1', '1', '4', '0']],
-      ['Testclub', '/statistieken/tegenstanders/testclub', ['5', '3', '2', '0', '11', '+7']],
+      ['Beker United', '/tegenstanders/beker-united', ['1', '0', '0', '1', '0', '−2']],
+      ['FC Voorbeeld', '/tegenstanders/fc-voorbeeld', ['3', '1', '1', '1', '4', '0']],
+      ['Testclub', '/tegenstanders/testclub', ['5', '3', '2', '0', '11', '+7']],
     ])
   })
 
@@ -144,12 +145,8 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(league).toContain(legend)
     expect(mainOf(league).match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(rowsOf(league)).toEqual([
-      [
-        'FC Voorbeeld',
-        '/statistieken/tegenstanders/fc-voorbeeld?competitie=eredivisie',
-        ['3', '1', '1', '1', '4', '0'],
-      ],
-      ['Testclub', '/statistieken/tegenstanders/testclub?competitie=eredivisie', ['4', '3', '1', '0', '10', '+7']],
+      ['FC Voorbeeld', '/tegenstanders/fc-voorbeeld?competitie=eredivisie', ['3', '1', '1', '1', '4', '0']],
+      ['Testclub', '/tegenstanders/testclub?competitie=eredivisie', ['4', '3', '1', '0', '10', '+7']],
     ])
     // The cup tie of Testclub ended 1–1: a point more with Alle wedstrijden than in the league.
     expect(rowsOf(all).map(([name, , cells]) => [name, (cells as string[])[4]])).toEqual([
@@ -167,10 +164,8 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     expect(html).toContain('aria-label="Welke wedstrijden"')
-    expect(html).toMatch(
-      /<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders"[^>]*><span[^>]*>Alle wedstrijden/,
-    )
-    expect(html).toContain('href="/statistieken/tegenstanders?competitie=eredivisie"')
+    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toContain('href="/tegenstanders?competitie=eredivisie"')
   })
 
   it('has no switch when no cup tie was played, because there is nothing to choose', async () => {
@@ -184,8 +179,8 @@ describe('the page /statistieken/tegenstanders', () => {
 
     expect(rowsOf(html).map(([name]) => name)).toEqual(['FC Voorbeeld', 'Testclub'])
     expect(rowsOf(html).map(([, href]) => href)).toEqual([
-      '/statistieken/tegenstanders/fc-voorbeeld?competitie=eredivisie',
-      '/statistieken/tegenstanders/testclub?competitie=eredivisie',
+      '/tegenstanders/fc-voorbeeld?competitie=eredivisie',
+      '/tegenstanders/testclub?competitie=eredivisie',
     ])
     expect(html).toContain('Gebaseerd op alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
     expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Eredivisie</)
@@ -234,7 +229,7 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     // Beker United (1 match) and FC Voorbeeld (3) are under the minimum; Testclub has 11 in 5.
-    expect(placesOf(html)).toEqual([['1', 'Testclub', '/statistieken/tegenstanders/testclub', '2,20', '5']])
+    expect(placesOf(html)).toEqual([['1', 'Testclub', '/tegenstanders/testclub', '2,20', '5']])
     expect(sidebarOf(html)).toContain(
       'Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
     )
@@ -258,7 +253,7 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render({ competitie: 'eredivisie' })
 
     expect(placesOf(html).map(([, name, href]) => [name, href])).toEqual([
-      ['Vijf Winst', '/statistieken/tegenstanders/vijf-winst?competitie=eredivisie'],
+      ['Vijf Winst', '/tegenstanders/vijf-winst?competitie=eredivisie'],
     ])
   })
 
@@ -298,15 +293,15 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     expect(html).toContain('Er ging iets mis')
-    expect(html).toContain('href="/statistieken/tegenstanders"')
+    expect(html).toContain('href="/tegenstanders"')
     expect(error).toHaveBeenCalledWith(
-      'Could not read the opponents for /statistieken/tegenstanders: connect ECONNREFUSED 127.0.0.1:3306',
+      'Could not read the opponents for /tegenstanders: connect ECONNREFUSED 127.0.0.1:3306',
     )
   })
 
   it('has the title Tegenstanders and the canonical address of the list', async () => {
     expect(await generateMetadata()).toMatchObject({
-      alternates: { canonical: 'https://sc.heerenveen.org/statistieken/tegenstanders' },
+      alternates: { canonical: 'https://sc.heerenveen.org/tegenstanders' },
       title: 'Tegenstanders',
     })
   })
@@ -316,5 +311,14 @@ describe('the page /statistieken/tegenstanders', () => {
     vi.mocked(getClubRecords).mockRejectedValue(new Error('no database'))
 
     expect(await generateMetadata()).toMatchObject({ robots: { index: false } })
+  })
+})
+
+describe('the old addresses of Tegenstanders under /statistieken', () => {
+  // /statistieken/tegenstanders is the page of a season of Statistieken with a season that is
+  // not one, so it is "niet gevonden" (see app/statistieken/[seizoen]/page.test.tsx). The page
+  // of a club has no route any more, and there is no redirect: the site is not public yet.
+  it.each(['tegenstanders/[club]', 'tegenstanders/page.tsx'])('has no route %s under /statistieken', (route) => {
+    expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
   })
 })
