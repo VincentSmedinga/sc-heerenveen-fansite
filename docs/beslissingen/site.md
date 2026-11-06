@@ -2877,11 +2877,11 @@
     Een trainer zonder wedstrijd staat er niet in, dus de trainers van vóór 2010/11 ook niet.
   - **Overlap:** twee periodes kunnen door een vage datum elkaar raken (Marco van Basten tot juli 2014 en Dwight Lodeweges vanaf 2014).
     Een dag die in twee periodes valt, telt voor de trainer die als eerste begon, want zijn begin is het zekerst.
-  - **Interim:** een eigen rij, met "(interim)" achter de naam.
-    Heeft één persoon twee rijen, dan staat de periode achter de naam, omdat een rijkop uniek is.
-  - **Tabel:** de nieuwste trainer eerst, met de kolommen periode, gespeeld, winst, gelijk, verlies en punten per wedstrijd (de sleutelwaarde).
+  - **Interim:** een eigen rij, met "interim" in de rijkop: "Henk Brugge (interim, feb 2025 – mrt 2025)".
+  - **Tabel:** de nieuwste trainer eerst, met de kolommen gespeeld, winst, gelijk, verlies en punten per wedstrijd (de sleutelwaarde).
+    De rijkop is de naam met de periode erachter, "Dwight Lodeweges (jan 2014 – okt 2015)", en geen kolom van tekst: die maakt de tabel breder dan een telefoon (bij 320 pixels loopt de pagina dan 65 pixels over).
+    Een periode staat op de maand, of op het jaar als alleen het jaar bekend is; een trainer die nog bezig is, eindigt op "nu".
     De letters komen uit `tableColumns`, met de uitleg eronder.
-    Een periode staat op de maand ("jan 2019 – nu"), of op het jaar als alleen het jaar bekend is.
     De punten per wedstrijd zijn 3 per winst en 1 per gelijkspel, gedeeld door de wedstrijden, met twee decimalen en een komma.
   - **Fout:** kunnen de trainers of de wedstrijden niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
 - **Waarom:** de gegevens (`staff` en de wedstrijden) zijn er, en de pagina Seizoenen bestaat pas als #414 is gebouwd.

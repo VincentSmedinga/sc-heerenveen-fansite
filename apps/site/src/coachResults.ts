@@ -19,8 +19,6 @@ export type CoachResult = {
   played: number
   /** The points per match as the Dutch write it, with two decimals and a comma: `1,85`. */
   pointsPerMatch: string
-  /** The date the period began, to tell two periods of one person apart. */
-  startDate: string
   won: number
 }
 
@@ -112,7 +110,6 @@ export function coachResultsOf(
               period: periodOf(coach),
               played,
               pointsPerMatch: pointsFormat.format((3 * won + drawn) / played),
-              startDate: coach.startDate,
               won,
             },
           ]

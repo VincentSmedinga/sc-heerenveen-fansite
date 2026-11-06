@@ -17,15 +17,19 @@ const figureColumns = [
 
 const legend = tableLegend(figureColumns)
 
-/** The name in the row header: the name, with "(interim)" where the coach stood in. */
-const nameOf = ({ interim, name }: CoachResult) => (interim ? `${name} (interim)` : name)
+/**
+ * The row header: the name, and in brackets the period, with "interim" first where the coach
+ * stood in. The period is in the header and not a column of its own, because a column of text
+ * makes the table wider than a phone; the header wraps. A person with two periods has two
+ * different headers, which a row header must have.
+ */
+const headerOf = ({ interim, name, period }: CoachResult) => `${name} (${interim ? 'interim, ' : ''}${period})`
 
 /**
  * The card "Resultaten per hoofdtrainer" of Cijfers: a table with a row for each head coach who
- * has a played match in our data, the newest first, with his period and the matches he played,
- * won, drew and lost, and the points per match. The row header is the name, with "(interim)"
- * where that is so; two periods of one person get the period after the name, because a row
- * header is unique. The card follows the switch between all the matches and the Eredivisie
+ * has a played match in our data, the newest first, with the matches he played, won, drew and
+ * lost, and the points per match. The row header is the name with his period (see `headerOf`).
+ * The card follows the switch between all the matches and the Eredivisie
  * (see `coachResultsOf`) and, as a long table, has no button for an image. `since` is the
  * season from which we have matches. Without a coach with a match there is no card.
  */
@@ -51,16 +55,11 @@ export function CoachResultsCard({
       </Heading>
       <DataTable
         caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'league' ? ', in de Eredivisie' : ''}`}
-        columns={['Hoofdtrainer', 'Periode', ...figureColumns]}
-        rows={results.map((result) => {
-          const name = nameOf(result)
-          const twice = results.filter((other) => nameOf(other) === name).length > 1
-
-          return {
-            cells: [result.period, result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
-            header: twice ? `${name}, ${result.period}` : name,
-          }
-        })}
+        columns={['Hoofdtrainer', ...figureColumns]}
+        rows={results.map((result) => ({
+          cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
+          header: headerOf(result),
+        }))}
       />
       <Text appearance="meta">{legend}</Text>
       <BasedOnSince choice={choice} played={played} since={since} />

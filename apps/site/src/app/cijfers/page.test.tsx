@@ -2017,13 +2017,13 @@ describe('the card Resultaten per hoofdtrainer', () => {
       [...(cells ?? '').matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map(([, cell]) => cell),
     ])
 
-  it('is a soft card with the table, the newest coach first, with his period and the points per match', async () => {
+  it('is a soft card with the table, the newest coach first, with his period in the header and the points per match', async () => {
     const html = await render()
 
     expect(html).toContain('<section class="hf-card hf-card-soft" aria-labelledby="resultaten-per-hoofdtrainer">')
     expect(rows(html)).toEqual([
-      ['Piet Proef (interim)', ['jan 2026 \u2013 nu', '1', '0', '0', '1', '0,00']],
-      ['Anna Voorbeeld', ['jul 2024 \u2013 jan 2026', '2', '1', '1', '0', '2,00']],
+      ['Piet Proef (interim, jan 2026 \u2013 nu)', ['1', '0', '0', '1', '0,00']],
+      ['Anna Voorbeeld (jul 2024 \u2013 jan 2026)', ['2', '1', '1', '0', '2,00']],
     ])
   })
 
@@ -2041,8 +2041,8 @@ describe('the card Resultaten per hoofdtrainer', () => {
     const all = await render()
     const league = await render(eredivisie)
 
-    expect(rows(all)[1]?.[1]?.[1]).toBe('2')
-    expect(rows(league)[1]).toEqual(['Anna Voorbeeld', ['jul 2024 \u2013 jan 2026', '1', '1', '0', '0', '3,00']])
+    expect(rows(all)[1]?.[1]?.[0]).toBe('2')
+    expect(rows(league)[1]).toEqual(['Anna Voorbeeld (jul 2024 \u2013 jan 2026)', ['1', '1', '0', '0', '3,00']])
     expect(card(all)).toContain('Gebaseerd op alle 3 gespeelde wedstrijden sinds 2025/26')
     expect(card(league)).toContain('Gebaseerd op alle 2 gespeelde wedstrijden in de Eredivisie sinds 2025/26')
   })
