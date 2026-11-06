@@ -50,14 +50,6 @@ const switches: SwitchCase[] = [
   },
   {
     after: /\/statistieken\?competitie=eredivisie$/,
-    bar: { from: '/statistieken/spelers', name: 'Spelers', to: '/statistieken/spelers?competitie=eredivisie' },
-    from: 'Alle wedstrijden',
-    group: 'Welke wedstrijden',
-    path: '/statistieken',
-    to: 'Eredivisie',
-  },
-  {
-    after: /\/statistieken\/spelers\?competitie=eredivisie$/,
     bar: {
       from: '/statistieken/tegenstanders',
       name: 'Tegenstanders',
@@ -65,7 +57,14 @@ const switches: SwitchCase[] = [
     },
     from: 'Alle wedstrijden',
     group: 'Welke wedstrijden',
-    path: '/statistieken/spelers',
+    path: '/statistieken',
+    to: 'Eredivisie',
+  },
+  {
+    after: /\/spelers\?competitie=eredivisie$/,
+    from: 'Alle wedstrijden',
+    group: 'Welke wedstrijden',
+    path: '/spelers',
     to: 'Eredivisie',
   },
   {

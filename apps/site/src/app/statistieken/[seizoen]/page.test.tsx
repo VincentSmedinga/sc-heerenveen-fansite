@@ -112,8 +112,8 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
 
     const html = await render()
 
-    expect(html).toContain('<p><a href="/statistieken/spelers/2025-26">Alle doelpuntenmakers</a></p>')
-    expect(html).not.toContain('href="/statistieken/spelers"')
+    expect(html).toContain('<p><a href="/spelers/2025-26">Alle doelpuntenmakers</a></p>')
+    expect(html).not.toContain('href="/spelers"')
   })
 
   describe('the streaks', () => {
@@ -226,7 +226,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
   })
 
   describe('an address that is no page', () => {
-    it.each(['2025-27', '2025-2026', '2025/26', 'seizoen', '25-26', '2025-26x', 'kies2'])(
+    it.each(['2025-27', '2025-2026', '2025/26', 'seizoen', '25-26', '2025-26x', 'kies2', 'spelers'])(
       'is "niet gevonden" for %s, without asking for data',
       async (seizoen) => {
         expect(await digestOf(render(seizoen))).toContain('404')

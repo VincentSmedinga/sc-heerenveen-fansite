@@ -30,7 +30,7 @@ export const pages = [
   {
     description:
       'De selectie van sc Heerenveen 1 dit seizoen en alle spelers die scoorden, met hun doelpunten en de bron erbij: Wikipedia.',
-    path: '/statistieken/spelers',
+    path: '/spelers',
   },
   {
     description:

@@ -57,14 +57,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken/kies', status: 200 },
   { path: '/statistieken/2099-00', status: 404 },
   { path: '/statistieken/onzin', status: 404 },
-  // The page Spelers of Statistieken, with the same set of addresses.
-  { path: '/statistieken/spelers', status: 200 },
-  { path: `/statistieken/spelers/${earlierSeasonSlug()}`, status: 200 },
-  { path: `/statistieken/spelers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
-  { path: '/statistieken/spelers/kies?seizoen=onzin', status: 200 },
-  { path: '/statistieken/spelers/kies', status: 200 },
-  { path: '/statistieken/spelers/2099-00', status: 404 },
-  { path: '/statistieken/spelers/onzin', status: 404 },
+  // The page Spelers, an item of the main menu, with the same set of addresses.
+  { path: '/spelers', status: 200 },
+  { path: `/spelers/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/spelers/kies?seizoen=onzin', status: 200 },
+  { path: '/spelers/kies', status: 200 },
+  { path: '/spelers/2099-00', status: 404 },
+  { path: '/spelers/onzin', status: 404 },
+  // The old addresses under Statistieken are gone, with no redirect (#769).
+  { path: '/statistieken/spelers', status: 404 },
+  { path: '/statistieken/spelers/kies', status: 404 },
   // The page Tegenstanders: the list, a club met in the league (Testdorp FC), one with two
   // names of its stadium (Voorbeeld United) and one met in the cup only (FC Maquette, who is
   // not in the list with the choice Eredivisie and has a sentence on its page), the choice, and
@@ -95,9 +98,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken?competitie=onzin', status: 404 },
   { path: '/statistieken?competitie=eredivisie&competitie=eredivisie', status: 404 },
   { path: `/statistieken/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
-  { path: '/statistieken/spelers?competitie=eredivisie', status: 200 },
-  { path: '/statistieken/spelers?competitie=onzin', status: 404 },
-  { path: `/statistieken/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  { path: '/spelers?competitie=eredivisie', status: 200 },
+  { path: '/spelers?competitie=onzin', status: 404 },
+  { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   // The podcasts: all, one (with the card about it), both (which is all), the second page, and
   // the addresses that say "niet gevonden": an unknown podcast, a podcast given twice and a
   // page that is wrong.

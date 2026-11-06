@@ -39,12 +39,12 @@ const articlePath = /^\/redactie\/([^/]+)$/u
 
 const clubPath = /^\/statistieken\/tegenstanders\/([^/]+)$/u
 
-const seasonPath = /^(\/wedstrijden|\/statistieken\/spelers|\/statistieken)\/([^/]+)$/u
+const seasonPath = /^(\/wedstrijden|\/spelers|\/statistieken)\/([^/]+)$/u
 
 /**
  * The path a visit is counted under. The page of a season, such as `/wedstrijden/2025-26`,
- * `/statistieken/2025-26` or `/statistieken/spelers/2025-26`, counts as a visit to
- * `/wedstrijden`, `/statistieken` or `/statistieken/spelers`: it is the same page for another
+ * `/statistieken/2025-26` or `/spelers/2025-26`, counts as a visit to
+ * `/wedstrijden`, `/statistieken` or `/spelers`: it is the same page for another
  * season, and a count per season would be a row for every address that has the shape of one.
  */
 const countedPathOf = (path: string) => {

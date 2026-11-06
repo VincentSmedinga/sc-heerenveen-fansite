@@ -1,5 +1,6 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
+import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -10,7 +11,7 @@ import { matchData } from '#src/test-matches'
 import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
-import StatisticsPage from '../page'
+import StatisticsPage from '../statistieken/page'
 import PlayersPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
@@ -86,7 +87,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the page /statistieken/spelers', () => {
+describe('the page /spelers', () => {
   it('has one h1, Spelers, with the season picker beside it, the h2 Selectie with an h3 for each position, and the h2 of the two cards with goals', async () => {
     const html = await render()
 
@@ -252,9 +253,9 @@ describe('the page /statistieken/spelers', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
-    expect(html).toContain('<a href="/statistieken/spelers">Probeer het opnieuw</a>')
+    expect(html).toContain('<a href="/spelers">Probeer het opnieuw</a>')
     expect(error).toHaveBeenCalledWith(
-      'Could not read the matches and the table for /statistieken/spelers: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the matches and the table for /spelers: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
     expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
   })
@@ -263,12 +264,12 @@ describe('the page /statistieken/spelers', () => {
     const metadata = await generateMetadata()
 
     expect(metadata.title).toBe('Spelers')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/statistieken/spelers')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/spelers')
     expect(metadata.description).toContain('scoorden')
   })
 })
 
-describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
+describe('the card Bijzondere doelpunten on /spelers', () => {
   const cardOf = (html: string) =>
     /<section [^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
   /** The parts of the card: the name and the value under it, as a screen reader reads them. */
@@ -444,7 +445,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
   })
 })
 
-describe('the season picker on /statistieken/spelers', () => {
+describe('the season picker on /spelers', () => {
   beforeEach(() => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
   })
@@ -464,7 +465,7 @@ describe('the season picker on /statistieken/spelers', () => {
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
     )
-    expect(html).toContain('action="/statistieken/spelers/kies"')
+    expect(html).toContain('action="/spelers/kies"')
     expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Toon<\/button>/)
   })
 
@@ -524,7 +525,7 @@ describe('the list of Spelers and the card of Statistieken', () => {
   })
 })
 
-describe('the choice between all the matches and the Eredivisie on /statistieken/spelers', () => {
+describe('the choice between all the matches and the Eredivisie on /spelers', () => {
   // The cup tie of the test data, in which a player of the cup scored once.
   const cupScorer = {
     minute: 70,
@@ -553,10 +554,10 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
 
   it('has the switch, with links to this page, and marks the choice of the address', async () => {
     expect(switchOf(await render())).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-spelers;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/statistieken/spelers" style="--hf-segmented-option-name:hf-segmented-option-spelers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/statistieken/spelers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-spelers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-spelers;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/spelers" style="--hf-segmented-option-name:hf-segmented-option-spelers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/spelers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-spelers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(switchOf(await renderWith({ competitie: 'eredivisie' }))).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-spelers;--hf-segmented-count:2;--hf-segmented-index:1"><a href="/statistieken/spelers" style="--hf-segmented-option-name:hf-segmented-option-spelers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/statistieken/spelers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-spelers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-spelers;--hf-segmented-count:2;--hf-segmented-index:1"><a href="/spelers" style="--hf-segmented-option-name:hf-segmented-option-spelers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/spelers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-spelers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
   })
 
@@ -607,7 +608,7 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
   })
 })
 
-describe('the card Selectie on /statistieken/spelers', () => {
+describe('the card Selectie on /spelers', () => {
   const card = (html: string) =>
     html.match(/<section class="hf-card" aria-labelledby="selectie">.*?<\/section>/s)?.[0] ?? ''
 
@@ -749,5 +750,14 @@ describe('the card Selectie on /statistieken/spelers', () => {
     vi.mocked(getSeasonSquad).mockRejectedValue(new Error('no database'))
 
     expect(await render()).toContain('Er ging iets mis')
+  })
+})
+
+describe('the old addresses of the page Spelers under /statistieken', () => {
+  // /statistieken/spelers is the page of a season of Statistieken with a season that is not
+  // one, so it is "niet gevonden" (see app/statistieken/[seizoen]/page.test.tsx). The other two
+  // have no route any more, and there is no redirect: the site is not public yet (#768).
+  it.each(['spelers/[seizoen]', 'spelers/kies', 'spelers/page.tsx'])('has no route %s under /statistieken', (route) => {
+    expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
   })
 })

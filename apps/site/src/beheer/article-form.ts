@@ -33,6 +33,7 @@ export const reservedSlugs: readonly string[] = [
   'redactie',
   'robots',
   'sitemap',
+  'spelers',
   'statistieken',
   'toegankelijkheid',
   'updates',
