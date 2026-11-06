@@ -1,10 +1,11 @@
-import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, PlayerName, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
 import type { CompetitionChoice } from './competition'
 
 import { type CoachResult } from './coachResults'
 import { coachResultsCard } from './matchShortcuts'
 import { BasedOnSince } from './OpponentViews'
+import { splitStaffName } from './player-name'
 
 /** The columns of the figures, in order, with the points per match as the key figure. */
 const figureColumns = [
@@ -18,20 +19,22 @@ const figureColumns = [
 const legend = tableLegend(figureColumns)
 
 /**
- * The row header: the name, and in brackets the period, with "interim" first where the coach
- * stood in. The period is in the header and not a column of its own, because a column of text
- * makes the table wider than a phone; the header wraps. A person with two periods has two
- * different headers, which a row header must have.
+ * The plain text of the row: the name and the period. It is the key of the row, so two periods
+ * of one person have different ones.
  */
-const headerOf = ({ interim, name, period }: CoachResult) => `${name} (${interim ? 'interim, ' : ''}${period})`
+const headerOf = ({ name, period }: CoachResult) => `${name}, ${period}`
+
+/** The line under the name: the period, with "interim" in front where the coach stood in. */
+const periodLineOf = ({ interim, period }: CoachResult) => (interim ? `interim \u00b7 ${period}` : period)
 
 /**
  * The card "Resultaten per hoofdtrainer" of Cijfers: a table with a row for each head coach who
  * has a played match in our data, the newest first, with the matches he played, won, drew and
- * lost, and the points per match. The row header is the name with his period (see `headerOf`).
- * The card follows the switch between all the matches and the Eredivisie
- * (see `coachResultsOf`) and, as a long table, has no button for an image. `since` is the
- * season from which we have matches. Without a coach with a match there is no card.
+ * lost, and the points per match. The row header is the name (`PlayerName`, the surname in the
+ * stronger weight) with his period on a line of its own under it (see `periodLineOf`). The card
+ * follows the switch between all the matches and the Eredivisie (see `coachResultsOf`) and, as
+ * a long table, has no button for an image. `since` is the season from which we have matches.
+ * Without a coach with a match there is no card.
  */
 export function CoachResultsCard({
   choice,
@@ -58,7 +61,9 @@ export function CoachResultsCard({
         columns={['Hoofdtrainer', ...figureColumns]}
         rows={results.map((result) => ({
           cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
+          display: <PlayerName {...splitStaffName(result.name)} />,
           header: headerOf(result),
+          secondary: periodLineOf(result),
         }))}
       />
       <Text appearance="meta">{legend}</Text>

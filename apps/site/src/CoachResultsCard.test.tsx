@@ -22,25 +22,34 @@ describe('CoachResultsCard', () => {
     expect(renderToStaticMarkup(<CoachResultsCard choice="all" results={[]} since="2010/11" />)).toBe('')
   })
 
-  it('tells two rows of one person apart by the period in the header, which is unique', () => {
+  it('shows the name with the surname in the stronger weight, and the period on a line under it', () => {
+    const html = renderToStaticMarkup(
+      <CoachResultsCard choice="all" results={[result({ name: 'Kees van Wonderen' })]} since="2010/11" />,
+    )
+
+    expect(html).toContain(
+      '<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Kees</span> <span class="hf-player-name-surname">van Wonderen</span></span><span class="hf-data-table-secondary">2015 \u2013 2016</span></th>',
+    )
+  })
+
+  it('tells two periods of one person apart, because the plain header is the key of the row', () => {
     const html = renderToStaticMarkup(
       <CoachResultsCard
         choice="all"
-        results={[result({ period: '2015 – 2016' }), result({ period: '2020 – 2021' })]}
+        results={[result({ period: '2015 \u2013 2016' }), result({ period: '2020 \u2013 2021' })]}
         since="2010/11"
       />,
     )
 
-    expect(html).toContain('<th scope="row">Foppe de Haan (2015 – 2016)</th>')
-    expect(html).toContain('<th scope="row">Foppe de Haan (2020 – 2021)</th>')
+    expect(html.match(/hf-data-table-secondary">(\d{4} \u2013 \d{4})</g)).toHaveLength(2)
   })
 
-  it('writes "interim" in the header of a person who stood in', () => {
+  it('puts "interim" in front of the period of a person who stood in', () => {
     const html = renderToStaticMarkup(
       <CoachResultsCard choice="league" results={[result({ interim: true })]} since="2010/11" />,
     )
 
-    expect(html).toContain('<th scope="row">Foppe de Haan (interim, 2015 \u2013 2016)</th>')
+    expect(html).toContain('<span class="hf-data-table-secondary">interim \u00b7 2015 \u2013 2016</span>')
     expect(html).toContain('in de Eredivisie')
   })
 })
