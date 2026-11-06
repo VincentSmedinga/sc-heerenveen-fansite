@@ -2922,3 +2922,4 @@
   Bezoekers met een schermlezer houden de tabel, want de samenvatting van een Disclosure is bereikbaar met het toetsenbord.
   Het is dezelfde keuze als bij Verloop van het seizoen.
 - **Alternatieven:** de tabel laten staan; de tabel schrappen (verliest de cijfers per wedstrijd).
+- **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de tabel voor een schermlezer staat nu in een Disclosure, dicht bij het laden.
