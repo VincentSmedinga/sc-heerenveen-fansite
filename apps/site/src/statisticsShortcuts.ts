@@ -25,13 +25,14 @@ export const statisticsShortcuts = [
 
 /**
  * The links in the bar under the header of /spelers: the card with the squad of
- * the season, the card with the goal scorers and the card with the goals that stand out, in the
- * order of the page. The ids are
+ * the season, the card with the goal scorers, the card with the scorers of all time and the
+ * card with the goals that stand out, in the order of the page. The ids are
  * those of their headings in app/spelers/players-page.tsx (a test checks it). They
  * are the same cards for a season that is over, so the bar is too.
  */
 export const playersShortcuts = [
   { href: '#selectie', label: 'Selectie' },
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+  { href: '#alle-tijden', label: 'Alle tijden' },
   { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
 ] as const

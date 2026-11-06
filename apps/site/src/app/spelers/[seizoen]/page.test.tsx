@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
@@ -13,6 +13,7 @@ import SeasonPlayersPage, { generateMetadata } from './page'
 // Only the queries are replaced: the page of a season is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getAllTimeMatches: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -47,6 +48,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getAllTimeMatches).mockReset()
+  vi.mocked(getAllTimeMatches).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getSeasonSquad).mockReset()

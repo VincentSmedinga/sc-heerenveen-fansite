@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
@@ -15,6 +15,7 @@ import PlayersPage, { generateMetadata } from './page'
 // Only the query is replaced: the split into the programme and the results is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getAllTimeMatches: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -68,6 +69,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getAllTimeMatches).mockReset()
+  vi.mocked(getAllTimeMatches).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getSeasonSquad).mockReset()
@@ -83,7 +86,7 @@ afterEach(() => {
 })
 
 describe('the page /spelers', () => {
-  it('has one h1, Spelers, with the season picker beside it, the h2 Selectie with an h3 for each position, and the h2 of the two cards with goals', async () => {
+  it('has one h1, Spelers, with the season picker beside it, the h2 Selectie with an h3 for each position, and the h2 of the three cards with goals', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -94,6 +97,7 @@ describe('the page /spelers', () => {
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="alle-tijden"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#alle-tijden">Alle tijden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
     expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
@@ -696,5 +700,94 @@ describe('the card Selectie on /spelers', () => {
     vi.mocked(getSeasonSquad).mockRejectedValue(new Error('no database'))
 
     expect(await render()).toContain('Er ging iets mis')
+  })
+})
+
+describe('the card Alle tijden on /spelers', () => {
+  const allTimeCard = (html: string) =>
+    /<section [^>]*aria-labelledby="alle-tijden">.*?<\/section>/s.exec(html)?.[0] ?? ''
+
+  /** Matches of an earlier season in which each player scored the given number of goals. */
+  const history = (counts: number[], competition: PublicMatch['competition'] = 'Eredivisie') => [
+    { ...scorers(counts)[0]!, competition, season: '2010/11' },
+  ]
+
+  it('is soft in the sidebar under Doelpuntenmakers, with a button for an image', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue(history([3, 2]))
+
+    const html = await render()
+    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+
+    expect(sidebar).toContain('<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="alle-tijden">')
+    expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="alle-tijden"'))
+    expect(sidebar.indexOf('id="alle-tijden"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(3)
+  })
+
+  it('says from which season it counts, and that all players scored when ten places show them all', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue(history([3, 2]))
+
+    const card = allTimeCard(await render())
+
+    expect(plain(card)).toContain('Sinds 2010/11.')
+    expect(plain(card)).toContain('2 spelers hebben gescoord')
+    expect(rowsOf(card)).toEqual([
+      ['1', 'Speler A', '3'],
+      ['2', 'Speler B', '2'],
+    ])
+  })
+
+  it('shows the first ten places, with everyone who shares the tenth, and says how many players scored', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue(history([12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1]))
+
+    const card = allTimeCard(await render())
+
+    expect(plain(card)).toContain('De top 10 van 12 spelers die scoorden')
+    // The two players level in tenth place share one row.
+    expect(rowsOf(card)).toHaveLength(10)
+    expect(rowsOf(card).at(-1)?.[0]).toBe('10')
+    expect(rowsOf(card).at(-1)?.[1]).toMatch(/Speler J.*Speler K/)
+    expect(plain(card)).not.toContain('Speler L')
+  })
+
+  it('does not change with the season of the picker or with the matches of the page', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue(history([4]))
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: scorers([9, 8]) })
+
+    expect(rowsOf(allTimeCard(await render()))).toEqual([['1', 'Speler A', '4']])
+  })
+
+  it('follows the switch: the Eredivisie alone leaves out the goals of the cup', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue([...history([1]), ...history([5], 'KNVB Beker')])
+
+    const withSwitch = async (competitie?: string) =>
+      allTimeCard(
+        withoutIcons(
+          renderToStaticMarkup(
+            await PlayersPage({ searchParams: Promise.resolve(competitie === undefined ? {} : { competitie }) }),
+          ),
+        ),
+      )
+
+    expect(rowsOf(await withSwitch())).toEqual([['1', 'Speler A', '6']])
+    expect(rowsOf(await withSwitch('eredivisie'))).toEqual([['1', 'Speler A', '1']])
+  })
+
+  it('is a sentence without a table when there is no goal in earlier seasons', async () => {
+    const card = allTimeCard(await render())
+
+    expect(plain(card)).toContain('We hebben nog geen doelpuntenmakers van eerdere seizoenen.')
+    expect(card).not.toContain('<table')
+    expect(card).not.toContain('hf-card-shareable')
+  })
+
+  it('is left out, and the rest of the page stays, when the goals of all seasons cannot be read', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getAllTimeMatches).mockRejectedValue(new Error('no database'))
+
+    const html = await render()
+
+    expect(html).not.toContain('id="alle-tijden"')
+    expect(html).toContain('id="doelpuntenmakers"')
   })
 })

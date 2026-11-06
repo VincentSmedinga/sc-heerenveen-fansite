@@ -1060,7 +1060,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(playersHtml, /hf-navigation-bar/)
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#selectie', '#doelpuntenmakers', '#bijzondere-doelpunten'],
+      ['#selectie', '#doelpuntenmakers', '#alle-tijden', '#bijzondere-doelpunten'],
     )
     // The made-up squad is whole: the sentence says so, the four positions are parts of the
     // card in the order of the goal to the front, and the shirt number comes before the name.
@@ -1093,6 +1093,17 @@ await withEmptyDatabase((database) =>
     assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
     assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
     assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
+    // The card Alle tijden is under Doelpuntenmakers, soft, with a button for an image. It says
+    // from which season it counts, and it counts the made-up season with the cup.
+    const allTimeCard = /<section[^>]*aria-labelledby="alle-tijden">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="alle-tijden"'))
+    assert.ok(playersHtml.indexOf('id="alle-tijden"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
+    assert.match(allTimeCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
+    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ''), /Sinds \d{4}\/\d{2}\./)
+    assert.match(
+      allTimeCard,
+      /<caption class="hf-visually-hidden">De top 10 van de doelpuntenmakers van sc Heerenveen sinds /,
+    )
     // The card Bijzondere doelpunten comes after the list of scorers, in the sidebar. The
     // made-up data has no hattrick, two doubles (Demo, and Proefman in the cup), one penalty
     // and an own goal of the opponent. The card is a list of four parts, each with its name as

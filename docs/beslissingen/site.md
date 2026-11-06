@@ -2813,3 +2813,20 @@
 - **Later:** vervangt _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026).
   Het vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: de code toont op Cijfers nu ook geen anker `#doelpuntenmakers` meer.
   Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
+
+## Spelers toont ook de doelpuntenmakers aller tijden, als top 10
+
+- **Datum:** 6 november 2026
+- **Besluit:** een kaart "Alle tijden" met de eerste tien plaatsen, over alle seizoenen, per persoon, die de schakelaar volgt (#780).
+  - **Plek:** zacht vlak in de zijkolom van Spelers, direct onder Doelpuntenmakers, met een item "Alle tijden" in de balk "Op deze pagina:" en het anker `#alle-tijden`.
+  - **Telling:** `topScorersOf` over de wedstrijden van alle seizoenen, in één query (`listAllMatchGoals`), een uur bewaard.
+    Het seizoen van de kiezer verandert de kaart niet.
+  - **Plaatsen:** de kaart toont de eerste tien plaatsen, met alle spelers die de tiende delen, in rijen met gelijkstaanden zoals `TopScorersTable` ze toont.
+    Valt er iemand weg, dan staat er "De top 10 van N spelers die scoorden".
+  - **Vanaf wanneer:** de kaart zegt "Sinds 2010/11", het eerste seizoen met wedstrijden, en wordt vanzelf voller als er meer seizoenen komen.
+  - **Fout:** kan de kaart niet worden gelezen, dan blijft ze weg en houdt de rest van de pagina zijn inhoud.
+- **Waarom:** de pagina toont één seizoen, en wie wil weten wie de meeste doelpunten maakte sinds 2010/11, vindt dat nergens.
+  De persoonskoppeling is er nu.
+- **Alternatieven:** de hele lijst (#727, groter).
+  Een vaste tien rijen met afkappen van gelijke plekken (willekeurig).
+- **Later:** dit vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: Spelers heeft nu de lijst van het seizoen en de top 10 aller tijden.

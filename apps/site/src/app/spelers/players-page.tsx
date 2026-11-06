@@ -8,7 +8,8 @@ import { parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { SourceCredit, TopScorersCard } from '#src/MatchViews'
+import { getAllTimeMatches } from '#src/matches'
+import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
 import { getSeasonSquad } from '#src/season-squad'
@@ -53,12 +54,13 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * so the squad comes first there. The switch between all matches and the Eredivisie is the
  * first cell of the main column, as on every page that has it, and changes only the cards with
  * goals. The sidebar has the card
- * Doelpuntenmakers (every player who scored) and the card Bijzondere doelpunten (hattricks,
- * penalties and own goals), both soft, and ends with the credit, as on Cijfers. A season
- * that is over has the cards with goals put the season on their image. A season that has no
- * matches in the database is the page "niet gevonden". The cards with goals count all the
- * matches or, with `?competitie=eredivisie`, the Eredivisie alone, as on Cijfers, and so
- * does the switch.
+ * Doelpuntenmakers (every player who scored), the card Alle tijden (the first ten places of the
+ * scorers of every season, which does not change with the season of the picker) and the card
+ * Bijzondere doelpunten (hattricks, penalties and own goals), all soft, and ends with the
+ * credit, as on Cijfers. A season that is over has the cards with goals put the season on their
+ * image. A season that has no matches in the database is the page "niet gevonden". The cards
+ * with goals count all the matches or, with `?competitie=eredivisie`, the Eredivisie alone, as
+ * on Cijfers, and so does the switch.
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
   const { competitie } = await searchParams
@@ -79,6 +81,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
     return <ServerError retryHref={seasonAddress(playersPath, season, seasonOf(new Date()))} />
   }
 
+  const allTime = await loadAllTime()
   const { data, seasons } = loaded
   const current = season === seasonOf(new Date())
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
@@ -113,6 +116,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           season={data.season}
           seasonOnImage={current ? undefined : season}
         />
+        {allTime !== undefined && <AllTimeScorersCard competition={competition} matches={allTime} />}
         <SpecialGoalsCard
           competition={competition}
           matches={data.matches}
@@ -124,6 +128,21 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
       </Page.Sidebar>
     </>
   )
+}
+
+/**
+ * Every match of every season with its goals, for the card Alle tijden, or undefined when it
+ * could not be read (the error is logged). The card is left out then: the rest of the page
+ * doesn't need it.
+ */
+async function loadAllTime() {
+  try {
+    return await getAllTimeMatches()
+  } catch (error) {
+    console.error(`Could not read the goals of all seasons for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }
 
 /** The squad of the season, or undefined when it could not be read (the error is logged). */
