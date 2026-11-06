@@ -4,6 +4,7 @@ import { addClubNames } from './club-names'
 import { addDiscussions } from './discussions'
 import { addEarlierSeason } from './earlier-season'
 import { addEpisodes } from './episodes'
+import { addFinalPlaces } from './final-places'
 import { addHeadlines } from './headlines'
 import { addHeldChange } from './held-changes'
 import { addOlderMeetings } from './older-meetings'
@@ -18,7 +19,8 @@ import { addVisits } from './visits'
 // moderator with a session that the checks of the admin log in as (see admin.ts), and the
 // made-up counters that the page Bezoek shows (see visits.ts), and a made-up league table for
 // /wedstrijden (see standings.ts), and made-up matches for the season before it (see
-// earlier-season.ts), and a change of Wikipedia that is held back on one of them (see
+// earlier-season.ts), and our row in the table of the two seasons before that (see
+// final-places.ts), and a change of Wikipedia that is held back on one of them (see
 // held-changes.ts), and three older matches against Testdorp FC (see older-meetings.ts), and
 // a list of stadiums and a list of names of its own for SV Proefdorp (see stadiums.ts and
 // club-names.ts).
@@ -37,6 +39,7 @@ export default async function globalSetup() {
   const removeVisits = await addVisits()
   const removeStandings = await addStandings()
   const removeEarlierSeason = await addEarlierSeason()
+  const removeFinalPlaces = await addFinalPlaces()
   const removeHeldChange = await addHeldChange()
   const removeOlderMeetings = await addOlderMeetings()
   const removeStadiums = await addStadiums()
@@ -54,6 +57,7 @@ export default async function globalSetup() {
     await removeStadiums()
     await removeOlderMeetings()
     await removeHeldChange()
+    await removeFinalPlaces()
     await removeEarlierSeason()
   }
 }

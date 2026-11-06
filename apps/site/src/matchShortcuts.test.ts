@@ -21,6 +21,21 @@ describe('matchShortcutsOf', () => {
     expect(scoreCountsCard.id).toBe('hoe-vaak-welke-uitslag')
   })
 
+  it('has the card with our place in every season right after the table, only when the page has it', () => {
+    const hrefs = (current: boolean, withFinalPlaces: boolean) =>
+      matchShortcutsOf(current, 1, [], withFinalPlaces).map(({ href }) => href)
+
+    expect(hrefs(true, true)).toEqual([
+      '#programma',
+      '#uitslagen',
+      '#stand',
+      '#onze-plek-door-de-jaren',
+      '#hoofdtrainer',
+    ])
+    expect(hrefs(false, true)).toEqual(['#uitslagen', '#eindstand', '#onze-plek-door-de-jaren', '#hoofdtrainer'])
+    expect(hrefs(true, false)).not.toContain('#onze-plek-door-de-jaren')
+  })
+
   it('has Stand in the current season', () => {
     expect(matchShortcutsOf(true)).toContainEqual({ href: '#stand', label: 'Stand' })
   })

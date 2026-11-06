@@ -12,6 +12,7 @@ import {
   listAllWikipediaPages,
   listArchivePage,
   listArchiveSources,
+  listClubStandings,
   listEnabledSources,
   listLeagueResults,
   listMatchSeasons,
@@ -21,6 +22,7 @@ import {
   listRecentItems,
   listSeasonMatches,
   listSeasonStandings,
+  listStandingsSeasons,
   listWikipediaPages,
   searchPublic,
 } from './queries.ts'
@@ -1978,6 +1980,37 @@ describe('the matches and the table of a season', () => {
       const rows = await listSeasonStandings(database.db, '2026/27')
 
       expect(rows.at(-1)?.goalDifference).toBe(-2)
+    })
+  })
+
+  describe('listClubStandings and listStandingsSeasons', () => {
+    const season = (date: string, positionOfUs: number, pointsDeducted = 0) =>
+      madeUpTable(new Date(date)).map((row, index) => ({
+        ...row,
+        club: positionOfUs === index + 1 ? 'sc Heerenveen' : `Club ${index + 1}`,
+        pointsDeducted: positionOfUs === index + 1 ? pointsDeducted : 0,
+        position: index + 1,
+      }))
+
+    it('gives the row of one club in every season, the oldest first, and no other club', async () => {
+      await database.db.insert(standings).values(season('2026-10-25T12:00:00Z', 1))
+      await database.db.insert(standings).values(season('2024-10-25T12:00:00Z', 5, 2))
+
+      const rows = await listClubStandings(database.db, 'sc Heerenveen')
+
+      expect(rows.map((row) => [row.season, row.position])).toEqual([
+        ['2024/25', 5],
+        ['2026/27', 1],
+      ])
+      expect(rows[0]).toMatchObject({ pointsDeducted: 2 })
+      expect(await listClubStandings(database.db, 'Onbekend')).toEqual([])
+    })
+
+    it('gives every season that has a table once, the oldest first, also one without our club', async () => {
+      await database.db.insert(standings).values(season('2026-10-25T12:00:00Z', 1))
+      await database.db.insert(standings).values(season('2023-10-25T12:00:00Z', 0))
+
+      expect(await listStandingsSeasons(database.db)).toEqual(['2023/24', '2026/27'])
     })
   })
 

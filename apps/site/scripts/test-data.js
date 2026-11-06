@@ -1,11 +1,12 @@
 // Puts the made-up headlines, discussions, episodes and articles of the accessibility checks
 // (e2e/*.ts) in the database of the .env in the root, so a build on your own computer shows a
-// full homepage, /nieuws, /nieuws/podcasts and the matches of the season before this one for
+// full homepage, /nieuws, /nieuws/podcasts, the matches of the season before this one and our
+// place in the two seasons before that (the card Onze plek door de jaren) for
 // `pnpm screenshots`. Run it after `pnpm db:migrate` and `pnpm db:seed`, and before you start
 // the site: the homepage keeps its headlines for five minutes. `--remove` takes them out again,
-// the season before this one only while all its matches are made up, and a list of stadiums and
-// a list of names of its own for SV Proefdorp. The database holds
-// nothing else of them: it is the one you develop with.
+// the season before this one only while all its matches are made up, and a list of stadiums
+// and a list of names of its own for SV Proefdorp. The database holds nothing else of them: it
+// is the one you develop with.
 //
 //   pnpm --filter site test-data
 //   pnpm --filter site test-data --remove
@@ -14,6 +15,7 @@ import { addClubNames } from '../e2e/club-names.ts'
 import { addDiscussions } from '../e2e/discussions.ts'
 import { addEarlierSeason } from '../e2e/earlier-season.ts'
 import { addEpisodes } from '../e2e/episodes.ts'
+import { addFinalPlaces } from '../e2e/final-places.ts'
 import { addHeadlines } from '../e2e/headlines.ts'
 import { addHeldChange } from '../e2e/held-changes.ts'
 import { addOlderMeetings } from '../e2e/older-meetings.ts'
@@ -29,6 +31,7 @@ for (const add of [
   addEpisodes,
   addArticles,
   addEarlierSeason,
+  addFinalPlaces,
   addHeldChange,
   addOlderMeetings,
   addStadiums,

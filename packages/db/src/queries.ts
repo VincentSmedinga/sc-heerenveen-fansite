@@ -447,6 +447,27 @@ export function listClubRecords(db: Database, { competition }: { competition?: C
 }
 
 /**
+ * The row of one club in the league table of every season, the oldest season first: the place,
+ * the points (after a deduction), the goal difference and the points lost to a deduction. A
+ * season in which the club is not in the table (or has no table) gives no row. The club is
+ * written as the table writes it (`sc Heerenveen`). The table of the current season is not
+ * final, so the caller decides how to show it.
+ */
+export function listClubStandings(db: Database, club: string) {
+  return db
+    .select({
+      goalDifference: standings.goalDifference,
+      points: standings.points,
+      pointsDeducted: standings.pointsDeducted,
+      position: standings.position,
+      season: standings.season,
+    })
+    .from(standings)
+    .where(eq(standings.club, club))
+    .orderBy(asc(standings.season))
+}
+
+/**
  * The sources that are switched on, by name, with what the page 'Onze bronnen' shows of them:
  * the name, the domain, the kind and the description. The policy and the permission stay
  * internal, so they can't reach a page.
@@ -833,6 +854,13 @@ export function listSquadPages(db: Database, season: string) {
  */
 export async function listStaffInSeason(db: Database, role: StaffRole, season: string) {
   return (await staffOfRole(db, role)).filter((member) => servedInSeason(member, season))
+}
+
+/** The seasons that have a league table, such as `2026/27`, the oldest first. */
+export async function listStandingsSeasons(db: Database) {
+  const rows = await db.selectDistinct({ season: standings.season }).from(standings).orderBy(asc(standings.season))
+
+  return rows.map((row) => row.season)
 }
 
 /**

@@ -18,7 +18,11 @@ test.describe('the links between the pages of a season', () => {
     test(`keep the season on every link from ${path} to another page of a season`, async ({ page }) => {
       await page.goto(path)
 
-      const hrefs = await page.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+      // The card Onze plek door de jaren links to every season on purpose, whichever season the
+      // page shows (#776), so its links are no links that drop the season.
+      const hrefs = await page
+        .locator('a[href]:not(section[aria-labelledby="onze-plek-door-de-jaren"] a)')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
       const toSeasonPages = hrefs
         .filter((href): href is string => href !== null && href.startsWith('/'))
         .map((href) => new URL(href, 'http://example.test').pathname)

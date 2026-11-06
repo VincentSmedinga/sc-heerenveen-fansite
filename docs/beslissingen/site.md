@@ -2814,6 +2814,31 @@
   Het vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: de code toont op Cijfers nu ook geen anker `#doelpuntenmakers` meer.
   Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
 
+## Onze eindplek per seizoen staat als lijn op Wedstrijden
+
+- **Datum:** 6 november 2026
+- **Besluit:** de kaart "Onze plek door de jaren" toont als lijn onze eindplek per seizoen, met plek 1 bovenaan, en een tabel voor een schermlezer.
+  Hij staat in de zijkolom van Wedstrijden, direct onder Stand of Eindstand, op het zachte vlak, en negeert de seizoenskiezer en de schakelaar (#776).
+  - **De gegevens:** `listClubStandings` geeft onze rij uit `standings` in elk seizoen, en `listStandingsSeasons` de seizoenen met een stand.
+    `finalPlacesOf` maakt er een plek per seizoen van, van het eerste seizoen met een stand tot het lopende.
+    Een seizoen zonder onze rij is een lege plek: een onderbreking in de lijn en een rij "geen stand".
+    Het lopende seizoen staat erbij als "nu", want zijn stand is nog niet af.
+    De vraag geeft de club als argument, zodat de pagina van een club (#779) dezelfde vraag kan stellen.
+  - **De lijn:** `BarChart` met alleen de grond en `BarChart.Trend`.
+    De omgekeerde schaal is geen nieuw onderdeel: de pagina zet plek 1 om in de hoogste waarde (`max + 1 - plek`, met 18 clubs als vaste schaal) en geeft de plekken 1, 5, 10, 15 en 18 aan de zijkant.
+    De lijn is voor een schermlezer verborgen.
+  - **De tabel:** seizoen (nieuwste bovenaan, het lopende met "(nu)"), plek, punten en doelsaldo, altijd zichtbaar.
+    Een seizoen zonder stand heeft streepjes, en een schermlezer hoort "geen stand".
+    Afgetrokken punten staan als regel onder de tabel ("2025/26: 2 punten afgetrokken"), zoals onder de tabel Stand.
+    Een tabel met tekst past niet op 300 pixels breed.
+    Een seizoen is een link naar `/wedstrijden/<seizoen>` als het wedstrijden heeft; zonder wedstrijden is er geen pagina om naar te linken.
+  - **De regels onder de kaart:** "Sinds 2010/11" (het eerste seizoen met een stand) en, als laatste, "Alleen de Eredivisie" (zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_).
+  - **De balk:** "Onze plek door de jaren" staat in "Op deze pagina" na Stand of Eindstand, zodra een seizoen een stand heeft.
+- **Waarom:** de stand van één seizoen laat niet zien hoe het de jaren daarvoor ging, en de gegevens zijn er.
+  Een lijn laat de lezer in een oogopslag zien of het beter of slechter gaat.
+- **Alternatieven:** staafjes (zeggen minder over beter of slechter); op Cijfers (de kaart hoort bij de stand); alleen een tabel; een nieuw onderdeel in het designsysteem voor de omgekeerde schaal (niet nodig, zolang er één plek is die hem gebruikt).
+- **Later:** vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de zijkolom van Wedstrijden heeft nu Stand, Onze plek door de jaren en de bronvermelding, met Hoofdtrainer tussen de laatste twee.
+
 ## Spelers toont ook de doelpuntenmakers aller tijden, als top 10
 
 - **Datum:** 6 november 2026

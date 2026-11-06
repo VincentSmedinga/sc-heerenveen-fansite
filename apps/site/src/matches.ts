@@ -3,11 +3,13 @@ import type { FormResult } from '@fansite/design-system'
 import {
   hasEditedMatches,
   listAllMatchGoals,
+  listClubStandings,
   listLeagueResults,
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
   listStaffInSeason,
+  listStandingsSeasons,
   listWikipediaPages,
   type PublicLeagueResult,
   type PublicMatch,
@@ -167,6 +169,58 @@ export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> 
 const currentLeagueResults = cacheForKey(currentSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
 const pastLeagueResults = cacheForKey(pastSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
 
+/** One season of the card "Onze plek door de jaren": our place, or none without a table. */
+export type FinalPlace = {
+  /** Whether this is the season that is going on, whose table is not final. */
+  now: boolean
+  /** Our row of the table, or undefined for a season in which we are not in a table. */
+  row: Pick<PublicStandingsRow, 'goalDifference' | 'points' | 'pointsDeducted' | 'position'> | undefined
+  season: string
+}
+
+/**
+ * Our place in the table of every season from the first season that has a table up to the
+ * current one, the oldest first. A season in between without our row is a place with no row (an
+ * empty place on the chart), and so is the current season until its table is in. No table at
+ * all gives no places. `rows` are our rows (`listClubStandings`), `seasons` the seasons with a
+ * table (`listStandingsSeasons`), both oldest first. A season after the current one is left
+ * out. The question is for the club of the page, so the page of a club can ask it too.
+ */
+export function finalPlacesOf(
+  rows: readonly (NonNullable<FinalPlace['row']> & { season: string })[],
+  seasons: readonly string[],
+  current: string,
+): FinalPlace[] {
+  const first = seasons.filter((season) => season <= current).at(0)
+
+  if (first === undefined) {
+    return []
+  }
+
+  const places: FinalPlace[] = []
+
+  for (let year = Number(first.slice(0, 4)); year <= Number(current.slice(0, 4)); year++) {
+    const season = `${year}/${String(year + 1).slice(2)}`
+    const row = rows.find((candidate) => candidate.season === season)
+
+    places.push({
+      now: season === current,
+      row:
+        row === undefined
+          ? undefined
+          : {
+              goalDifference: row.goalDifference,
+              points: row.points,
+              pointsDeducted: row.pointsDeducted,
+              position: row.position,
+            },
+      season,
+    })
+  }
+
+  return places
+}
+
 /**
  * The results of the league for every club in one season, for the table over the latest
  * matches. They are kept like the data of the season, for five minutes in the current season
@@ -176,6 +230,20 @@ const pastLeagueResults = cacheForKey(pastSeasonPeriod, (season) => listLeagueRe
 export function getLeagueResults(season: string): Promise<PublicLeagueResult[]> {
   return season === seasonOf(new Date()) ? currentLeagueResults(season) : pastLeagueResults(season)
 }
+
+async function loadFinalPlaces(): Promise<FinalPlace[]> {
+  const { db } = getDatabase()
+  const [rows, seasons] = await Promise.all([listClubStandings(db, ourClub), listStandingsSeasons(db)])
+
+  return finalPlacesOf(rows, seasons, seasonOf(new Date()))
+}
+
+/**
+ * Our place in the table of every season we have one, for the card "Onze plek door de jaren" of
+ * Wedstrijden (see `finalPlacesOf`). It does not depend on the season of the page. It is kept
+ * for five minutes, like the data of the current season, which is in it.
+ */
+export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
 
 /**
  * The score and the goals of every match of every season, for the list of the goal scorers of

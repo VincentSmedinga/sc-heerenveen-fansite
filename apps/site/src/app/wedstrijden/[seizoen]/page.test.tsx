@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
+import { getFinalPlaces, getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 import { matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
@@ -13,6 +13,7 @@ import SeasonMatchesPage, { generateMetadata } from './page'
 // Only the queries are replaced: the page of a season is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getFinalPlaces: vi.fn(),
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
@@ -57,6 +58,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getFinalPlaces).mockReset()
+  vi.mocked(getFinalPlaces).mockResolvedValue([])
   vi.mocked(getLeagueResults).mockReset()
   vi.mocked(getLeagueResults).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
@@ -532,5 +535,23 @@ describe('the title, description and canonical address of a season', () => {
     vi.mocked(getMatchSeasons).mockRejectedValue(new Error('down'))
 
     expect(await metadataOf('2025-26')).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
+  })
+})
+
+describe('the card Onze plek door de jaren on the page of an earlier season', () => {
+  it('is the card of the current season too, with every season in it', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+    vi.mocked(getMatchData).mockImplementation(async (season) => (season === '2025/26' ? earlier : matchData))
+    vi.mocked(getFinalPlaces).mockResolvedValue([
+      { now: false, row: { goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 }, season: '2025/26' },
+      { now: true, row: { goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 }, season: '2026/27' },
+    ])
+    const html = await render('2025-26')
+
+    expect(html).toContain('id="onze-plek-door-de-jaren"')
+    // Both seasons are in the table, and the link of the current season is the base address.
+    expect(html).toContain('href="/wedstrijden/2025-26"')
+    expect(html).toContain('href="/wedstrijden"')
+    expect(html).toContain('Sinds 2025/26')
   })
 })
