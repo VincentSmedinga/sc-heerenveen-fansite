@@ -1,4 +1,4 @@
-import { BarChart, Card, DataTable, Heading, signedNumber, Text } from '@fansite/design-system'
+import { BarChart, Card, DataTable, Disclosure, Heading, signedNumber, Text } from '@fansite/design-system'
 
 import type { FinalPlace } from './matches'
 
@@ -36,13 +36,13 @@ const shortSeason = (season: string) => season.slice(2)
 
 /**
  * The card "Onze plek door de jaren": our place in the Eredivisie in every season we have a
- * table of, as a line with place 1 at the top, and under it the same numbers in a table, which
- * is what a screen reader gets because the line is hidden from it. It does not depend on the
- * season of the page or on the switch: `places` is the same on every page. The season that is
- * going on is marked "nu", a season with points taken off says how many in the table, and a
- * season without a table is a gap in the line and a row that says so. A season links to its
- * page when it has one (`linkable` are the seasons that have matches). Without a table of any
- * season there is no card.
+ * table of, as a line with place 1 at the top, and under it the same numbers in a table,
+ * which is what a screen reader gets because the line is hidden from it. The table is in a
+ * closed Disclosure (#808). It does not depend on the season of the page or on the switch:
+ * `places` is the same on every page. The season that is going on is marked "nu", a season
+ * with points taken off says how many in the table, and a season without a table is a gap in
+ * the line and a row that says so. A season links to its page when it has one (`linkable`
+ * are the seasons that have matches). Without a table of any season there is no card.
  */
 export function FinalPlacesCard({
   current,
@@ -81,19 +81,21 @@ export function FinalPlacesCard({
       >
         <BarChart.Trend labels={labels} values={values} />
       </BarChart>
-      <DataTable
-        caption="De plek van sc Heerenveen in de Eredivisie per seizoen, met punten en doelsaldo"
-        columns={['Seizoen', 'Plek', 'Punten', { abbreviation: 'Saldo', name: 'Doelsaldo' }]}
-        rows={[...places].reverse().map(({ now: going, row, season }) => ({
-          cells:
-            row === undefined
-              ? ['–', '–', '–']
-              : [String(row.position), String(row.points), signedNumber(row.goalDifference)],
-          header: going ? `${season} (nu)` : season,
-          ...(row === undefined ? { note: 'geen stand' } : {}),
-          ...(linkable.includes(season) ? { href: seasonAddress(matchesPath, season, current) } : {}),
-        }))}
-      />
+      <Disclosure summary="Plek per seizoen">
+        <DataTable
+          caption="De plek van sc Heerenveen in de Eredivisie per seizoen, met punten en doelsaldo"
+          columns={['Seizoen', 'Plek', 'Punten', { abbreviation: 'Saldo', name: 'Doelsaldo' }]}
+          rows={[...places].reverse().map(({ now: going, row, season }) => ({
+            cells:
+              row === undefined
+                ? ['–', '–', '–']
+                : [String(row.position), String(row.points), signedNumber(row.goalDifference)],
+            header: going ? `${season} (nu)` : season,
+            ...(row === undefined ? { note: 'geen stand' } : {}),
+            ...(linkable.includes(season) ? { href: seasonAddress(matchesPath, season, current) } : {}),
+          }))}
+        />
+      </Disclosure>
       {deductions.map(({ points, season }) => (
         <Text
           appearance="meta"

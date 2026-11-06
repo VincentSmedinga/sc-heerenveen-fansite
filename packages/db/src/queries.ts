@@ -13,6 +13,7 @@ import {
   clubNames,
   clubs,
   discussions,
+  itemClubs,
   items,
   leagueResults,
   matchEdits,
@@ -438,6 +439,41 @@ export async function listClubMatches(db: Database, club: number, { competition 
   const named = rows.map((row) => ({ ...row, opponent: nameOnDay(lines, row.matchDate) ?? row.opponent }))
 
   return withGoals(db, named, where)
+}
+
+/**
+ * The newest `limit` headlines that name a club, for the page of that club: what
+ * `listRecentItems` gives (same fields, same rules: sources that are switched on, no podcast,
+ * nothing hidden or not relevant, nothing after `until`), for the items that have a row in
+ * `item_clubs` under one of `names`. A club is written in more than one way (its name now, the
+ * names it had, the spellings of Wikipedia), so the caller gives all of them; an item that
+ * names the club under two of them is given once. No names give no items. Newest first.
+ */
+export async function listClubNews(
+  db: Database,
+  { limit, names, until }: { limit: number; names: readonly string[]; until: Date },
+) {
+  if (names.length === 0) {
+    return []
+  }
+
+  return db
+    .select(newsColumns)
+    .from(items)
+    .innerJoin(sources, eq(items.sourceId, sources.id))
+    .where(
+      and(
+        newsFilter(until),
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(itemClubs)
+            .where(and(eq(itemClubs.itemId, items.id), inArray(itemClubs.club, [...names]))),
+        ),
+      ),
+    )
+    .orderBy(desc(items.publishedAt), desc(items.id))
+    .limit(limit)
 }
 
 /**

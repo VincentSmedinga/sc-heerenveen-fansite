@@ -2846,3 +2846,21 @@
   Alleen een plek die nog niet gespeeld is, heeft geen punt en geen tooltip.
   Het "nog niet" voor de eerste vier speelrondes uit het issue komt daarom nergens voor.
 - **Alternatieven:** de andere grafieken nu al noemen (ze bestaan nog niet); de tabel boven de uitklapper laten staan zonder uitklapper (een kaart met een tabel van 34 rijen).
+
+## De pagina van een club toont de nieuwste vijf koppen die de club noemen
+
+- **Datum:** 6 november 2026
+- **Besluit:** de kaart "Nieuws over <club>" (#777) toont hoogstens vijf koppen, zonder inleiding of foto, uit `item_clubs`, zonder leeftijdsgrens en zonder knop voor een afbeelding.
+  Het zijn dezelfde koppen als op de homepage, via `NewsItem`: de kop als link, de bron en de tijd.
+  De kaart staat in de zijkolom na de kaarten met cijfers en vóór het stadion, op het zachte vlak, met het anker `#nieuws` in de balk "Op deze pagina".
+  Een club zonder koppen heeft de kaart niet, en er staat geen zin voor.
+  Een kop die meer clubs noemt, staat bij elke club die hij noemt.
+  De koppen worden gezocht onder alle namen van de club (`clubNamesOf`), dus ook onder een oude naam.
+- **Waarom:** de bezoeker die een club bekijkt, wil weten wat er over die club geschreven wordt, en de kop, de bron en de link zijn wat we van anderen mogen tonen.
+  Een leeftijdsgrens zou de kaart bij kleine clubs leeg laten.
+- **Nadeel:** tot de koppen van vóór #794 hun rijen hebben (`pnpm run import:item-clubs`), toont een club alleen de koppen van daarna.
+  En een kop die een club alleen bij een bijnaam noemt die niet in onze lijst met namen staat, telt niet.
+- **Alternatieven:** alleen koppen in de week van een wedstrijd (te weinig).
+  Zoeken op titel (zie #794).
+  Een link naar alle nieuws over de club (Zoeken kan er niet op filteren).
+- **Later:** dit past bij _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (`site.md`) met een uitzondering: de zijkolom van een club heeft hier een lijst met links in plaats van cijfers.

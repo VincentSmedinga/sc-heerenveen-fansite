@@ -2692,6 +2692,7 @@
 - **Waarom:** nu betekent hoofdkolom of zijkolom per pagina iets anders.
   Spelers (#765) heeft de duidelijkste vorm: witte lijst, blauwe cijfers.
 - **Alternatieven:** elke pagina zelf laten kiezen (zoals nu).
+- **Later:** de zijkolom van een club heeft ook de kaart "Nieuws over <club>" (#777, zie _De pagina van een club toont de nieuwste vijf koppen die de club noemen_ in `redactie.md`): een lijst met links van anderen, op het zachte vlak, naast de cijfers.
 
 ## Doelpuntenmakers staan op één plek: Spelers
 
@@ -2911,6 +2912,19 @@
   De namen van de wedstrijden erbij nemen vangt een naam die in de stand anders is geschreven dan in `club_names`: de importer legt de namen in de stand niet vast aan een club.
 - **Alternatieven:** een grafiek met twee lijnen (meer ontwerp, weinig extra); een rij onder Verloop sinds 1990; het lopende seizoen met "nu" erbij (zijn stand is nog niet af).
 - **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de vraag die `finalPlacesOf` voor de club van de pagina kon stellen, wordt hier alleen voor onze eigen plek gebruikt; de plek van de club komt uit `listStandingsPlaces`.
+
+## Een tabel die een grafiek herhaalt, staat in een Disclosure
+
+- **Datum:** 6 november 2026
+- **Besluit:** staat bij een grafiek een tabel met dezelfde gegevens, per wedstrijd of per seizoen, dan staat die tabel in een `Disclosure`.
+  De grafiek en de samenvatting blijven zichtbaar.
+  Dit geldt voor Toeschouwers (#808) en Onze plek door de jaren (Plek per seizoen, op verzoek van de projecteigenaar in dezelfde pull request); andere kaarten volgen in eigen issues.
+  De opmerkingen over afgetrokken punten blijven buiten de Disclosure, en de links naar de seizoenen staan ook dicht in de pagina.
+- **Waarom:** de tabel is lang en de kaart wordt rustiger zonder.
+  Bezoekers met een schermlezer houden de tabel, want de samenvatting van een Disclosure is bereikbaar met het toetsenbord.
+  Het is dezelfde keuze als bij Verloop van het seizoen.
+- **Alternatieven:** de tabel laten staan; de tabel schrappen (verliest de cijfers per wedstrijd).
+- **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de tabel voor een schermlezer staat nu in een Disclosure, dicht bij het laden.
 
 ## De kaart met podcasts toont de afleveringen van de laatste 8 dagen
 

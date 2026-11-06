@@ -16,6 +16,7 @@ import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
   clubNameViewsOf,
   earlierNames,
+  getClubNews,
   getClubPage,
   getClubPlaces,
   getClubRecords,
@@ -32,6 +33,7 @@ import {
 import {
   ClubMeetingsCard,
   ClubNamesNotes,
+  ClubNewsCard,
   ClubPlacesCard,
   ClubsCard,
   ClubScoreCountsCard,
@@ -80,6 +82,7 @@ const loadClub = cache(async (slug: string) => {
     return {
       edited: await getEditedMatches(),
       kind: 'found',
+      news: await getClubNews(page),
       page,
       pages: await getSourcePages(),
       places: await getClubPlaces(page),
@@ -244,6 +247,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       : 'We hebben nog niet tegen deze club gespeeld.'
   const earlier = earlierNames(loaded.page.names, club.name)
   const stadiums = stadiumViewsOf(loaded.page.stadiums, matches)
+  const hasNews = loaded.news.length > 0
 
   return (
     <>
@@ -268,7 +272,15 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       {/* The sidebar is as wide as the main column, as on Cijfers. On a phone it follows the
           matches: our record against the club, the names of its stadium and the credit. */}
       {meetings.length > 0 ? (
-        <Page.Sidebar aria-label={`Onze uitslagen${stadiums.length > 0 ? ', het stadion' : ''} en de bron`} wide>
+        <Page.Sidebar
+          aria-label={sidebarLabel([
+            'onze uitslagen',
+            hasNews && 'het nieuws',
+            stadiums.length > 0 && 'het stadion',
+            'de bron',
+          ])}
+          wide
+        >
           <ClubSummaryCard
             choice={competition}
             name={club.name}
@@ -280,6 +292,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           <ClubScoreCountsCard meetings={meetings} />
           <ClubPlacesCard name={club.name} places={loaded.places} />
           {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
+          <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
           <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit
             edited={loaded.edited}
@@ -288,13 +301,16 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           />
         </Page.Sidebar>
       ) : (
-        (upcoming.length > 0 || stadiums.length > 0) && (
+        (upcoming.length > 0 || stadiums.length > 0 || hasNews) && (
           <Page.Sidebar
-            aria-label={
-              stadiums.length === 0 ? 'De bron' : upcoming.length === 0 ? 'Het stadion' : 'Het stadion en de bron'
-            }
+            aria-label={sidebarLabel([
+              hasNews && 'het nieuws',
+              stadiums.length > 0 && 'het stadion',
+              upcoming.length > 0 && 'de bron',
+            ])}
             wide
           >
+            <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
             <StadiumsCard stadiums={stadiums} />
             {upcoming.length > 0 && (
               <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
@@ -304,4 +320,12 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       )}
     </>
   )
+}
+
+/** The label of a sidebar from the names of its cards: "Het nieuws, het stadion en de bron". */
+function sidebarLabel(parts: readonly (false | string)[]) {
+  const names = parts.filter((part) => part !== false)
+  const text = names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
+
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}`
 }

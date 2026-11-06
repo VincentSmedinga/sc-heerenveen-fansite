@@ -9,6 +9,7 @@ import {
   Heading,
   List,
   MarkRow,
+  NewsItem,
   Pagination,
   RecordTable,
   ShortMatch,
@@ -24,7 +25,9 @@ import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { EredivisieOnly, imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
+import { dateTimeOf, formatNewsTime } from './news'
 import {
+  type ClubHeadline,
   type ClubNameView,
   type ClubPlace,
   clubPlacesId,
@@ -509,6 +512,53 @@ export function OpponentsCredit({
         readAt={formatReadAt(readAt)}
         readAtDateTime={readAt.toISOString()}
       />
+    </Card>
+  )
+}
+
+/** The id of the card "Nieuws over <club>", for the bar "Op deze pagina". */
+export const clubNewsId = 'nieuws'
+
+/**
+ * The card "Nieuws over <club>" of the page of a club: the newest headlines that name it, as
+ * `NewsItem` shows them everywhere: the headline as the link, the source and the time, with no
+ * intro and no photo, and a paywall shown. It is a list of links from others, so it has the
+ * soft surface and no button for an image, and no link to more: Zoeken cannot filter on a
+ * club. It is in the sidebar, after the cards with figures. Without a headline there is no
+ * card and no sentence.
+ */
+export function ClubNewsCard({
+  headlines,
+  name,
+  now,
+}: {
+  headlines: readonly ClubHeadline[]
+  name: string
+  now: Date
+}) {
+  if (headlines.length === 0) {
+    return null
+  }
+
+  return (
+    <Card aria-labelledby={clubNewsId} surface="soft">
+      <Heading anchor id={clubNewsId} level={2}>
+        {`Nieuws over ${name}`}
+      </Heading>
+      <List role="list">
+        {headlines.map((item, index) => (
+          <List.Item key={index}>
+            <NewsItem
+              dateTime={dateTimeOf(item.publishedAt)}
+              headline={item.title}
+              href={item.url}
+              paywalled={item.paywalled}
+              source={item.sourceName}
+              time={formatNewsTime(item.publishedAt, now)}
+            />
+          </List.Item>
+        ))}
+      </List>
     </Card>
   )
 }

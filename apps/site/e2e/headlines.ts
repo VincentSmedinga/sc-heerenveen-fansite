@@ -1,12 +1,14 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { feeds, type ItemRelevance, items, sources } from '@fansite/db/schema'
+import { feeds, itemClubs, type ItemRelevance, items, sources } from '@fansite/db/schema'
 import path from 'node:path'
 
 /**
  * A made-up item: on which test source, how long before the check started, and what it says.
  */
 type Row = {
+  /** The clubs the headline names, as `item_clubs` has them (the importer works them out). */
+  clubs?: string[]
   domain: string
   hoursAgo: number
   paywalled?: boolean
@@ -29,9 +31,17 @@ type Row = {
  * Behind them come 45 older headlines of two sources, so that the news page (/nieuws) has 56 in
  * all and a second page of 50 per page, and a page of one source (`/nieuws?bron=testkrant`).
  */
+/**
+ * The club that the headlines below say "Testclub" about, for the card "Nieuws over <club>" on
+ * its page: the made-up club of the older meetings (see older-meetings.ts). Six headlines name
+ * it, and the card shows the newest five.
+ */
+const testdorp = 'Testdorp FC'
+
 export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
   madeUp: [
     {
+      clubs: [testdorp],
       domain: 'testkrant.test',
       hoursAgo: 1,
       source: 'Testkrant',
@@ -71,12 +81,14 @@ export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
         'Een lange kop over een wedstrijd vol wendingen, blessures en een doelpunt in de laatste minuut, met reacties van beide trainers, de spelers en de supporters op de tribune',
     },
     {
+      clubs: [testdorp],
       domain: 'voorbeeldkrant.test',
       hoursAgo: 120,
       source: 'Voorbeeldkrant, met dank aan de redactie',
       title: 'Wedstrijdbespreking: ‘OnvoorstelbaarbijzonderevoetbalprestatiesvandejongeverdedigingsliniebijTestclub’',
     },
     {
+      clubs: [testdorp],
       domain: 'proefnieuws.test',
       hoursAgo: 192,
       source: 'Proefnieuws',
@@ -97,6 +109,7 @@ export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
         'Terugblik op een bewogen week bij Heerenveen, met een nieuwe aanvaller, een geblesseerde captain en een stadion dat uitverkocht raakt',
     },
     {
+      clubs: [testdorp],
       domain: 'proefnieuws.test',
       hoursAgo: 340,
       source: 'Proefnieuws',
@@ -131,6 +144,8 @@ const archiveRows: Row[] = Array.from({ length: 45 }, (_, index) => {
   const testkrant = index % 2 === 0
 
   return {
+    // The first two name the club too, so that it has more headlines than its card shows.
+    ...(index < 2 ? { clubs: [testdorp] } : {}),
     domain: testkrant ? 'testkrant.test' : 'proefnieuws.test',
     hoursAgo: 400 + index * 12,
     source: testkrant ? 'Testkrant' : 'Proefnieuws',
@@ -175,10 +190,11 @@ export async function addHeadlines() {
         .values({ sourceId, url: `https://${domain}${feedPath}` })
         .$returningId()
 
-      await db.insert(items).values(
-        rows
-          .filter((row) => row.domain === domain)
-          .map((row, index) => ({
+      const ofSource = rows.filter((row) => row.domain === domain)
+      const ids = await db
+        .insert(items)
+        .values(
+          ofSource.map((row, index) => ({
             feedId: feed?.id ?? 0,
             key: `e2e-${index}`,
             paywalled: row.paywalled ?? false,
@@ -188,7 +204,15 @@ export async function addHeadlines() {
             title: row.title,
             url: `https://${domain}/e2e-${index}`,
           })),
+        )
+        .$returningId()
+      const named = ofSource.flatMap((row, index) =>
+        (row.clubs ?? []).map((club) => ({ club, itemId: ids[index]?.id ?? 0 })),
       )
+
+      if (named.length > 0) {
+        await db.insert(itemClubs).values(named)
+      }
     }
   } finally {
     await close()

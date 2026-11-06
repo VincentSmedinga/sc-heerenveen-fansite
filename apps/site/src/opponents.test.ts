@@ -9,6 +9,7 @@ import type { FinalPlace } from './matches'
 import { overviewOf } from './matches'
 import {
   clubKeysOf,
+  clubNamesOf,
   clubNameViewsOf,
   clubPlacesOf,
   clubScorersMinimum,
@@ -865,5 +866,17 @@ describe('clubPlacesOf', () => {
     const rows = [table('2022/23', 'FC Zwolle II', 11), table('2025/26', 'Sparta', 5)]
 
     expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([])
+  })
+})
+
+describe('clubNamesOf', () => {
+  it('has the name now, the other spellings, the names of its own list and of its matches, each once as written', () => {
+    const page = {
+      club: { id: 1, name: 'AZ Alkmaar', otherNames: ['AZ', 'Alkmaar'], slug: 'az-alkmaar', wikipediaPage: null },
+      matches: [{ opponent: 'AZ' }, { opponent: 'Alkmaar' }, { opponent: 'AZ Alkmaar' }] as PublicClubMatch[],
+      names: [{ name: 'AZ 67' }] as NamePeriodLine[],
+    }
+
+    expect(clubNamesOf(page)).toEqual(['AZ Alkmaar', 'AZ', 'Alkmaar', 'AZ 67'])
   })
 })
