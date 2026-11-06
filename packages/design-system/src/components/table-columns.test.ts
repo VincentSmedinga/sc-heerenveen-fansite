@@ -14,6 +14,7 @@ describe('tableColumns', () => {
       drawn: 'G gelijk',
       goalDifference: 'D doelsaldo',
       goals: 'D doelpunten',
+      goalsPerMatch: 'D/W doelpunten per wedstrijd',
       lost: 'V verlies',
       played: 'G gespeeld',
       points: 'P punten',
@@ -23,8 +24,8 @@ describe('tableColumns', () => {
     expect(reservedTableColumns.assists).toEqual({ abbreviation: 'A', name: 'assists' })
   })
 
-  it('gives every abbreviation one letter', () => {
-    for (const { abbreviation } of all) expect(abbreviation).toMatch(/^[A-Z]$/u)
+  it('gives every abbreviation one letter, except D/W', () => {
+    for (const { abbreviation } of all) expect(abbreviation).toMatch(/^([A-Z]|D\/W)$/u)
   })
 
   it('gives every word one letter and every name once, with G, D and P as the only letters for two words', () => {

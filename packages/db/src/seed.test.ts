@@ -16,6 +16,7 @@ import {
   persons,
   playerPositions,
   players,
+  playerSeasonStats,
   sourceKinds,
   sources,
   standings,
@@ -23,8 +24,10 @@ import {
 } from './schema.ts'
 import { seasonOf } from './season.ts'
 import {
+  madeUpGoals,
   madeUpLeagueResults,
   madeUpMatches,
+  madeUpPlayerStats,
   madeUpSquad,
   realSources,
   removeTestSources,
@@ -996,5 +999,43 @@ describe('the made-up squad', () => {
     expect(squad.some((player) => player.shirtNumber === null)).toBe(true)
     expect(squad.some((player) => !player.name.includes(' '))).toBe(true)
     expect(new Set(squad.map((player) => player.name)).size).toBe(squad.length)
+  })
+
+  it('has appearances for the made-up scorers, in the Eredivisie and the cup, that agree with the made-up goals', () => {
+    // The goals of a player of ours in the matches of a competition, without own goals.
+    const goalsOf = (page: string, competition: string) =>
+      Object.entries(madeUpGoals)
+        .filter(([key]) => key.startsWith(`${competition}|`))
+        .flatMap(([, goals]) => goals)
+        .filter((goal) => goal.ours && goal.ownGoal !== true && goal.wikipediaPage === page).length
+
+    for (const [page, rows] of Object.entries(madeUpPlayerStats)) {
+      for (const [competition, appearances, goals] of rows) {
+        expect(appearances, page).toBeGreaterThanOrEqual(1)
+        expect(goals, `${page} ${competition}`).toBe(goalsOf(page, competition))
+      }
+    }
+    // Everybody who scored has a row for the competition they scored in.
+    for (const competition of ['Eredivisie', 'KNVB Beker'] as const) {
+      for (const goal of Object.entries(madeUpGoals)
+        .filter(([key]) => key.startsWith(`${competition}|`))
+        .flatMap(([, goals]) => goals)
+        .filter((item) => item.ours && item.ownGoal !== true)) {
+        expect(
+          madeUpPlayerStats[goal.wikipediaPage ?? '']?.some(([name]) => name === competition),
+          goal.player,
+        ).toBe(true)
+      }
+    }
+  })
+
+  it('puts the appearances in the database for the made-up players, in the made-up season', async () => {
+    await database.pool.query('DELETE FROM player_season_stats')
+    await seedSquad(database.db, now)
+
+    const rows = await database.db.select().from(playerSeasonStats)
+
+    expect(rows).toHaveLength(Object.values(madeUpPlayerStats).flat().length)
+    expect(rows.every((row) => row.season === '2026/27')).toBe(true)
   })
 })

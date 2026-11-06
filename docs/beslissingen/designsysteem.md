@@ -2119,6 +2119,7 @@
   Het doelsaldo is D en niet S, dus D heeft twee woorden, doelpunten en doelsaldo, net als G; de test legt G en D vast als de enige uitzonderingen.
   DV, DT en DS komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont, en geen tabel doet dat nu.
   De rest blijft: één lijst, `tableLegend`, de woorden winst, gelijk en verlies.
+- **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): `D/W` is de uitzondering op één letter per kolom, en de test legt G, D en P vast als de letters met twee woorden.
 
 ## Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 
@@ -2480,6 +2481,7 @@
 - **Alternatieven:** een tweede component voor de korte vorm (twee tabellen met dezelfde kolommen en dezelfde balk); de speler als lijst in de cel (een lijst in een rijkop leest een schermlezer als losse items, en dit is één regel tekst); de namen laten breken waar ze willen (een naam valt uit elkaar).
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ in `site.md` (4 november 2026): de korte vormen geven het component rijen met meer dan één speler.
 - **Later:** zie _Een spelersnaam mag afbreken op een spatie, ook in een tabel_ (5 november 2026): het blok om elke naam (`hf-top-scorers-name`) en de regel "Van der Meer" blijft heel zijn weg.
+- **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): met `showGoalsPerMatch` heeft elke speler een eigen rij, ook als een rij er meer had.
 
 ## `FormTimeline` zet uitslagen op een as van jaren, met `BarChart` en eigen labels
 
@@ -2653,3 +2655,22 @@
 - **Alternatieven:** `ShortPlayer` laten staan als omhulsel om `PlayerName` (twee onderdelen die bijna hetzelfde doen).
   Een eigenschap `meta` voor de regel (zie boven).
 - **Later:** dit vervangt het onderdeel `ShortPlayer`, dat in _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (`site.md`) de regel van de kaart Selectie was.
+
+## `TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters
+
+- **Datum:** 7 november 2026
+- **Besluit:** `TopScorersTable` krijgt de optie `showGoalsPerMatch` en een tekst `goalsPerMatch` bij elke speler (#819), en `tableColumns` krijgt `goalsPerMatch`, met de afkorting D/W en het woord "doelpunten per wedstrijd".
+  - **De kolom:** na de doelpunten, met D/W voor het oog en "doelpunten per wedstrijd" voor een schermlezer, en de waarde als tekst in de cel.
+    De staaf blijft een aandeel van de topscorer.
+  - **Een rij per speler:** met de optie splitst het component een rij waar spelers delen, en de spelers houden hun plaats en hun doelpunten.
+    Zonder de optie blijft de tabel precies zoals hij was, met gedeelde rijen en de kolommen #, Speler en D.
+  - **De regel onder de tabel:** met de optie staat er "D doelpunten, D/W doelpunten per wedstrijd" (`tableLegend`) en een zin die zegt wat D/W is: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.
+    Zonder de optie is er geen zin.
+  - **De pagina kiest:** het component rekent D/W niet uit en weet niet wanneer het mag (zie _De doelpuntenmakers op Spelers tonen D/W waar de wedstrijden van elke speler bekend zijn_ in `site.md`).
+  - **Uitzondering op één letter:** D/W is twee letters en een schuine streep.
+    De test van `tableColumns` laat D/W toe en laat de regel voor G, D en P staan.
+- **Waarom:** de projecteigenaar noemt de kolom D/W, en "D" zou niet zeggen wat het is, want D is al doelpunten.
+  Twee spelers kunnen niet één D/W delen, dus de kolom vraagt een rij per speler.
+- **Alternatieven:** een andere letter voor de kolom (de projecteigenaar koos D/W).
+  Een regel achter de naam, zoals bij de hoofdtrainers (#812), die de gedeelde rijen laat staan.
+- **Later:** dit vult _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ (2 november 2026) aan met één afkorting van twee letters, en vervangt voor tabellen met de kolom het deel van _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026) dat rijen met meer dan één speler toestaat.

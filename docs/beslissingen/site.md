@@ -2400,6 +2400,8 @@
 - **Alternatieven:** alleen de laatste plaats samenvoegen (86 rijen, en een gelijke stand eerder in de tabel blijft vijf rijen met dezelfde plaats); groepen van drie of meer (77 rijen, met een drempel die niemand ziet); alleen de kaart op de pagina van een club (Statistieken houdt zijn lange gelijke stand op plaats 5); alle drie de tabellen, Spelers ook; "elk" in de cel of een regel onder de tabel die zegt dat de doelpunten per speler zijn (afgewezen: de plaats en de komma's zeggen genoeg); één naam per regel in de cel (even hoog als nu); namen die midden in een naam mogen breken.
 - **Later:** bij _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
 - **Later:** zie _Een spelersnaam mag afbreken op een spatie, ook in een tabel_ in `designsysteem.md` (5 november 2026): een naam mag toch afbreken op een spatie.
+- **Later:** zie _De doelpuntenmakers op Spelers tonen D/W waar de wedstrijden van elke speler bekend zijn_ (7 november 2026): een kaart met de kolom D/W heeft een rij per speler, dus daar vervalt het samenvoegen van spelers met evenveel doelpunten.
+  De korte vormen zonder die kolom delen nog altijd één rij.
 
 ## De wedstrijdlijsten tonen de naam van het seizoen, de kop de naam van nu
 
@@ -2983,3 +2985,38 @@
   De kolommen G en P van de tabel blijven; de regel is er voor wie de naam leest zonder de tabel te volgen.
 - **Waarom:** de projecteigenaar wilde de aantallen bij de naam, en het is de eerste plek die de regel van `PlayerName` gebruikt.
 - **Alternatieven:** de regel in de plaats van de periode (dan mist de periode); de kolommen weghalen (de tabel wordt minder te vergelijken).
+
+## De doelpuntenmakers op Spelers tonen D/W waar de wedstrijden van elke speler bekend zijn
+
+- **Datum:** 7 november 2026
+- **Besluit:** de kaart Doelpuntenmakers op Spelers krijgt een kolom D/W, de doelpunten per wedstrijd van elke speler, alleen als voor elke speler in de lijst vaststaat hoeveel wedstrijden hij speelde en de cijfers kloppen (#819).
+  Anders heeft de kaart geen D/W, ook geen streepje en geen uitleg.
+  - **Alles of niets per kaart:** `goalsPerMatchOf` in `src/goals-per-match.ts` is een functie zonder database en zonder verzoek.
+    Ze geeft de waarden of niets, en de kaart toont de kolom alleen als ze waarden geeft.
+  - **De regel:** de kolom is er als aan drie dingen is voldaan.
+    1: elke gespeelde wedstrijd die de kaart telt, is een wedstrijd van de Eredivisie of de KNVB Beker, want de selectietabel heeft alleen daar cijfers voor.
+    Bij de keuze Eredivisie is dat altijd zo; bij Alle wedstrijden niet in een seizoen met een gespeelde wedstrijd van de play-offs of van Europa.
+    2: elke speler in de lijst heeft minstens één optreden in de competities die de kaart telt.
+    3: voor elke speler zijn de doelpunten in `player_season_stats`, in die competities, gelijk aan de doelpunten van de kaart.
+    Een speler met een doelpunt dat niet aan een speler van de selectie hangt (`playerId`), heeft geen cijfers, dus dan is er ook geen kolom.
+    Heeft een persoon meer spelers (titels), dan tellen hun cijfers samen, zoals de kaart een persoon één keer telt.
+  - **De waarde:** de doelpunten van de kaart gedeeld door de optredens, ook als invaller, in de competities die de kaart telt, met een decimale komma en twee decimalen ("0,50"), afgerond zoals `perMatch` in `MatchViews.tsx`.
+  - **Alleen de lijsten van een seizoen:** de kaart Doelpuntenmakers op Spelers, voor het gekozen seizoen en de gekozen competitie.
+    De top 5 op Cijfers is er niet meer (#774).
+    Niet Alle tijden: daar zijn de wedstrijden van bijna elk seizoen sinds 2010/11 onbekend, dus het getal zou onwaar of onvolledig zijn.
+    Niet de kaart op de pagina van een club: dat zijn doelpunten tegen één club, en de wedstrijden tegen die club kennen we niet.
+  - **Een rij per speler:** een kaart met D/W heeft voor elke speler een eigen rij met de plaats, de naam, de doelpunten (met de staaf) en D/W.
+    Spelers met evenveel doelpunten houden dezelfde plaats, en het plaatsnummer staat bij elke rij.
+    De pagina Spelers had al een rij per speler, dus daar verandert alleen de kolom; het component splitst een gedeelde rij als de kolom aanstaat (`showGoalsPerMatch`).
+  - **De cijfers:** het aantal wedstrijden komt alleen uit de selectietabel van de Nederlandse Wikipedia (`player_season_stats`, via `listSeasonPlayerStats` en `getSeasonPlayerStats` in `src/season-player-stats.ts`, vijf minuten bewaard).
+    Ze zijn er voor 2005/06 en 2023/24 en niet voor de seizoenen ertussen, dus de kolom staat er nu voor die seizoenen.
+    Lukt het lezen niet, dan staat de kaart zonder de kolom en schrijft de site de reden in het logboek.
+  - **De verzonnen gegevens:** het verzonnen seizoen van de seed heeft optredens voor de spelers die scoorden (`madeUpPlayerStats`), en een gespeelde wedstrijd van de play-offs.
+    Zo heeft `/spelers?competitie=eredivisie` de kolom en `/spelers` (alle wedstrijden) niet, en de pagina van het seizoen daarvoor, uit de controle, heeft geen cijfers.
+- **Waarom:** de projecteigenaar wilde de doelpunten per wedstrijd van een speler, samen met de punten per wedstrijd van een hoofdtrainer (#812).
+  Een lijst met gaten nodigt uit tot vergelijken op ongelijke gegevens, en een onwaar getal is erger dan geen getal.
+  Twee spelers kunnen niet één D/W delen, dus een kolom vraagt een rij per speler.
+- **Alternatieven:** per speler een streepje waar het onbekend is.
+  Alle tijden alleen over de seizoenen met cijfers ("sinds 2023/24", met twee beginjaren op één kaart).
+  Een regel achter de naam, zoals bij de hoofdtrainers in #812, die de gedeelde rijen laat staan.
+- **Later:** dit vervangt voor kaarten met D/W het besluit van 4 november 2026 dat spelers met evenveel doelpunten één rij delen (_Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_).

@@ -23,6 +23,7 @@ import {
   matchGoals,
   persons,
   players,
+  playerSeasonStats,
   sources,
   squadCompleteness,
   standings,
@@ -749,6 +750,35 @@ export function madeUpSquad(now: Date): NewPlayer[] {
   return [...squad, ...scorers]
 }
 
+/**
+ * The made-up appearances of the made-up scorers, as the squad table of the Dutch Wikipedia
+ * gives them: by page of the player, the competition, the appearances and the goals. The goals
+ * are those of `madeUpGoals` for the Eredivisie and for the cup, so the column D/W of the card
+ * Doelpuntenmakers on Spelers is there for the choice Eredivisie. The made-up season also has a
+ * played match of the play-offs, which the table has no figures for, so the choice all matches
+ * has no column: the page is checked with and without it. Opponents and own goals have no row.
+ */
+export const madeUpPlayerStats: Record<
+  string,
+  [competition: 'Eredivisie' | 'KNVB Beker', appearances: number, goals: number][]
+> = {
+  'Bas Testvoort': [['Eredivisie', 2, 1]],
+  'Gerrit Nepper': [['Eredivisie', 4, 2]],
+  'Jan van der Voorbeeldstraat-Proefmans': [['KNVB Beker', 1, 1]],
+  'Joris Testvoort': [['Eredivisie', 2, 1]],
+  'Lennart Probeer': [['Eredivisie', 2, 1]],
+  'Marijn Sjabloon': [['Eredivisie', 1, 1]],
+  'Niels Steekproef': [['Eredivisie', 3, 1]],
+  'Pieter Voorbeeld': [['KNVB Beker', 2, 1]],
+  'Rick Demo': [['Eredivisie', 4, 2]],
+  'Sander Monster': [['Eredivisie', 1, 1]],
+  'Teun Dummy': [['Eredivisie', 3, 1]],
+  'Wouter Proefman': [
+    ['Eredivisie', 2, 1],
+    ['KNVB Beker', 1, 2],
+  ],
+}
+
 /** The page that the made-up squad pretends to come from, with the title the importer reads. */
 export function madeUpSquadPage(now: Date): NewWikipediaPage {
   const season = seasonOf(now)
@@ -885,6 +915,24 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
 
     await transaction.insert(players).values(squad)
     await linkMadeUpGoals(transaction, season)
+
+    const seasonPlayers = await transaction
+      .select({ id: players.id, page: players.wikipediaPage })
+      .from(players)
+      .where(eq(players.season, season))
+
+    await transaction.insert(playerSeasonStats).values(
+      seasonPlayers.flatMap((player) =>
+        (madeUpPlayerStats[player.page ?? ''] ?? []).map(([competition, appearances, goals]) => ({
+          appearances,
+          assists: 0,
+          competition,
+          goals,
+          playerId: player.id,
+          season,
+        })),
+      ),
+    )
 
     // The made-up squad is a whole table of the squad, so the page Spelers says it is complete.
     // The import works the chance out again the first time it reads the real squad.

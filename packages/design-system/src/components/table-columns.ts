@@ -1,6 +1,6 @@
 /** A column of a table: the letter in the header and the whole word a screen reader says. */
 export type TableColumn = {
-  /** One letter, shown in the header. */
+  /** One letter, shown in the header, except for `D/W`. */
   abbreviation: string
   /** The whole word, such as `gespeeld`: what a screen reader says and the legend gives. */
   name: string
@@ -10,7 +10,9 @@ export type TableColumn = {
 
 /**
  * The abbreviations of the columns of every table, in one place. Each is one letter and has
- * one word, with three exceptions: `G` is both `gespeeld` and `gelijk`, `D` is both
+ * one word, with one exception for the letters, `D/W` (`doelpunten per wedstrijd`): `D` is
+ * already the goals, and the owner calls this column D/W. Three letters have two words: `G` is
+ * both `gespeeld` and `gelijk`, `D` is both
  * `doelpunten` and `doelsaldo`, and `P` is both `punten` and `punten per wedstrijd`. The two
  * `G`s never stand next to each other, because `G` gespeeld is the first figure of a table and
  * `G` gelijk comes straight after `W` winst. The two `D`s stand in different tables: the goal
@@ -26,6 +28,7 @@ export const tableColumns = {
   drawn: { abbreviation: 'G', name: 'gelijk' },
   goalDifference: { abbreviation: 'D', name: 'doelsaldo' },
   goals: { abbreviation: 'D', name: 'doelpunten' },
+  goalsPerMatch: { abbreviation: 'D/W', name: 'doelpunten per wedstrijd' },
   lost: { abbreviation: 'V', name: 'verlies' },
   played: { abbreviation: 'G', name: 'gespeeld' },
   points: { abbreviation: 'P', name: 'punten' },

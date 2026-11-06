@@ -12,6 +12,7 @@ import { getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
+import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
@@ -82,6 +83,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
   }
 
   const allTime = await loadAllTime()
+  const stats = await loadStats(season)
   const { data, seasons } = loaded
   const current = season === seasonOf(new Date())
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
@@ -115,6 +117,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           matches={data.matches}
           season={data.season}
           seasonOnImage={current ? undefined : season}
+          stats={stats}
         />
         {allTime !== undefined && <AllTimeScorersCard competition={competition} matches={allTime} />}
         <SpecialGoalsCard
@@ -151,6 +154,20 @@ async function loadSquad(season: string) {
     return await getSeasonSquad(season)
   } catch (error) {
     console.error(`Could not read the squad for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The figures of the players of the season for the column D/W, or undefined when they could not
+ * be read (the error is logged). The column is an extra: the card shows the goals without it.
+ */
+async function loadStats(season: string) {
+  try {
+    return await getSeasonPlayerStats(season)
+  } catch (error) {
+    console.error(`Could not read the appearances of the players for ${playersPath}: ${reasonOf(error)}`)
 
     return undefined
   }

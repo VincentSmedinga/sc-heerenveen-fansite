@@ -1214,7 +1214,7 @@ export type MultiGoalScorer = NameParts & {
 export type ScorerPlace = {
   goals: number
   /** The players of the place, in the order of the list: the surname, then the given name. */
-  players: [TopScorer, ...TopScorer[]]
+  players: [TopScorer & { goalsPerMatch?: string }, ...(TopScorer & { goalsPerMatch?: string })[]]
   position: number
 }
 
