@@ -427,3 +427,35 @@ test.describe('Spelers in the main menu', () => {
     await expect(menu.getByRole('link', { name: 'Spelers' })).not.toHaveAttribute('aria-current', /.*/)
   })
 })
+
+test.describe('the bar under the header of the page of a club', () => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`passes axe on a phone in ${colorScheme}, and each link goes to a card of the page`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme })
+      await page.setViewportSize({ height: 800, width: 390 })
+      await page.goto('/tegenstanders/voorbeeld-united')
+
+      const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+
+      await expect(bar).toBeVisible()
+
+      const hrefs = await bar.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+
+      expect(hrefs.length).toBeGreaterThan(1)
+      expect(hrefs[0]).toBe('#wedstrijden')
+      expect(hrefs).toContain('#stadion')
+
+      for (const href of hrefs) {
+        await expect(page.locator(href ?? '#none')).toHaveCount(1)
+      }
+      expect(await checkPage(page)).toEqual([])
+    })
+  }
+
+  test('is gone where the cards sit side by side', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 832 })
+    await page.goto('/tegenstanders/voorbeeld-united')
+
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(0)
+  })
+})

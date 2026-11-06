@@ -6,10 +6,11 @@ import { cache } from 'react'
 
 import type { SearchParams } from '#src/season-page'
 
-import { competitionQuery, parseCompetition } from '#src/competition'
+import { competitionParam, competitionQuery, leagueValue, parseCompetition } from '#src/competition'
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
 import { getEditedMatches, getMatchSeasons } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
@@ -19,6 +20,7 @@ import {
   getClubRecords,
   getSourcePages,
   hasClubScorers,
+  meetingPageCount,
   meetingsOf,
   opponentsPath,
   seasonsOf,
@@ -191,20 +193,23 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
  * The page of one club: its name as the heading, with "Eerder: …" under it when the editors
  * keep a list of its names (see `earlierNames`), the record against it (the total, at home and
  * away, and the biggest win and loss) and every match: first those still to come, the next one
- * first, then those played, the newest first. The matches are the main column, on the white
- * surface; the record, the chart of the scores, the card with the names of the stadium of the
- * club and the credit are the sidebar. A club with matches to come and none played has the
- * credit alone. It follows the choice between all the matches and the Eredivisie (the names
- * of the stadium come from the Eredivisie whatever the choice). A club we only met in the cup
- * says with the choice Eredivisie that we have not played it there. A slug no club has, and a
+ * first, then those played, the newest first, ten to a page (`?pagina=2`, after the choice in
+ * the address; a page after the last one is "niet gevonden"). The matches are the main column,
+ * on the white surface; the record, the chart of the scores, the card with the names of the
+ * stadium of the club and the credit are the sidebar. A club with matches to come and none
+ * played has the credit alone. It follows the choice between all the matches and the
+ * Eredivisie (the names of the stadium come from the Eredivisie whatever the choice). A club
+ * we only met in the cup says with the choice Eredivisie that we have not played it there. A
+ * slug no club has, and a
  * choice that is not known, are the page "niet gevonden".
  */
 export async function ClubPage({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
-  const { competitie } = await searchParams
-  const competition = parseCompetition(competitie)
+  const params = await searchParams
+  const competition = parseCompetition(params[competitionParam])
+  const query = parseFilterQuery(params, competitionParam)
   const loaded = await loadClub(slug)
 
-  if (competition === undefined || loaded.kind === 'unknown') {
+  if (competition === undefined || query === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -216,6 +221,17 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const now = new Date()
   const meetings = meetingsOf(matches, competition)
   const upcoming = upcomingOf(matches, competition, now)
+
+  // A page after the last one is "niet gevonden"; a club with no match played has one page.
+  if (query.page > meetingPageCount(meetings)) {
+    notFound()
+  }
+
+  const pageHref = (page: number) =>
+    filterHref(
+      `${opponentsPath}/${slug}`,
+      filterQuery(competitionParam, competition === 'league' ? [leagueValue] : [], page),
+    )
   const hasCup =
     meetingsOf(matches, 'all').length > meetingsOf(matches, 'league').length ||
     upcomingOf(matches, 'all', now).length > upcomingOf(matches, 'league', now).length
@@ -243,7 +259,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
         {meetings.length === 0 && upcoming.length === 0 ? (
           <Text>{noneYet}</Text>
         ) : (
-          <ClubMeetingsCard meetings={meetings} now={now} upcoming={upcoming} />
+          <ClubMeetingsCard meetings={meetings} now={now} page={query.page} pageHref={pageHref} upcoming={upcoming} />
         )}
       </Page.Main>
       {/* The sidebar is as wide as the main column, as on Cijfers. On a phone it follows the

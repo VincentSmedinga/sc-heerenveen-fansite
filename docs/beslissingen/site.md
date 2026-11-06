@@ -2237,6 +2237,7 @@
 - **Alternatieven:** `ShortMatch` voor alles op de pagina van een club (het onderdeel kent geen wedstrijd die nog komt, en competitie, stadion en tijd zouden verdwijnen); de gemengde lijst laten zoals ze is (de projecteigenaar wil dat niet); alle `ShortMatch`-plekken ook `Match` maken (de kaarten van Statistieken worden lang voor een uitslag die ze al geven).
 - **Nadeel:** de pagina van een club met veel wedstrijden wordt langer, omdat een `Match` meer ruimte neemt dan een `ShortMatch`.
   Een grens aan de lengte of "Laad meer" is een eigen issue als dat nodig blijkt.
+- **Later:** zie _De wedstrijden van een club staan bladerend, tien per pagina_ (6 november 2026): de lijst is nog steeds volledig, maar verdeeld over pagina's, en de pagina heeft een balk "Op deze pagina:".
 
 ## De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram
 
@@ -2745,6 +2746,28 @@
 - **Later:** vult _Het hoofdmenu kiest het onderdeel en de subpagina uit het pad_ (31 oktober 2026) aan: op een artikel van de redactie is Nieuws niet meer `aria-current="page"`, maar `aria-current="true"`, en Redactie is de huidige subpagina.
   Dat verkleint ook het nadeel dat daar stond.
   Het vult _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) aan: de balk van Nieuws heeft ook Redactie.
+
+## De wedstrijden van een club staan bladerend, tien per pagina
+
+- **Datum:** 6 november 2026
+- **Besluit:** de kaart Wedstrijden op de pagina van een club toont de gespeelde wedstrijden tien per pagina, de nieuwste eerst, met `Pagination` en `?pagina=` zoals het nieuwsarchief, op één pagina per club (#775).
+  - **De adressen:** `/tegenstanders/<club>?pagina=2`, en met de keuze `/tegenstanders/<club>?competitie=eredivisie&pagina=2`.
+    Pagina 1 heeft geen `pagina`.
+    De schakelaar tussen alle wedstrijden en de Eredivisie gaat naar pagina 1, want het aantal pagina's verschilt per keuze.
+    Een pagina na de laatste (`meetingPageCount` in `src/opponents.ts`), of een `pagina` die geen positief getal is (`parseFilterQuery`), is "niet gevonden".
+    Zonder `pagina` en met tien gespeelde wedstrijden of minder is er geen `Pagination`.
+  - **Wat op pagina 1 staat:** de wedstrijden die nog komen en de rij Laatste wedstrijden staan alleen op de eerste pagina, bovenop de tien gespeelde.
+    De legenda onder de lijst telt de wedstrijden van de pagina.
+  - **De volgorde blijft:** de lijst staat vóór de cijferkaarten, ook op een telefoon.
+- **Balk "Op deze pagina:":** de pagina van een club heeft de balk met een link naar elke kaart die er is, in de volgorde van de pagina (`clubShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders/[club]`): Wedstrijden, Onze uitslagen, Resultaten sinds …, Hoe vaak welke uitslag, Doelpuntenmakers en Stadion.
+  Een kaart die er niet is, heeft geen link.
+  De balk is er op een telefoon, zoals bij Wedstrijden.
+  De ankers zijn de bestaande `id`'s van de koppen.
+  De kop Stadion staat al in `src/anchors.ts` (voor een club met twee namen van het stadion); de andere ankers zijn geen belofte en staan er niet in.
+- **Waarom:** het werkt zonder JavaScript, past bij Nieuws en Redactie en vraagt geen extra pagina per club.
+  Een lijst van dertig wedstrijden op een telefoon is een lange scroll, en de acht kaarten erna waren niet te bereiken.
+- **Alternatieven:** vijf regels en een aparte pagina met de hele lijst (zoals #516, maar een extra pagina per club).
+  Een samenvatting vóór de lijst op een telefoon (breekt de regel van #768 dat de hoofdkolom vooraan staat).
 
 ## Cijfers staat in de balk van Wedstrijden, en Statistieken is geen onderdeel meer
 
