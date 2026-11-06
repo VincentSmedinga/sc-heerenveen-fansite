@@ -589,7 +589,7 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
   Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 - `findClubBySlug(db, slug)` geeft één club met zijn `id`, `slug`, `name`, `wikipediaPage` en de andere schrijfwijzen die Wikipedia gebruikt (`otherNames`, van A tot Z; het zijn geen naamswijzigingen), of niets voor een slug die niemand heeft.
 - `listClubMatches(db, clubId, { competition })` geeft de wedstrijden tegen de club, de nieuwste eerst over alle seizoenen, ook de wedstrijden die nog niet gespeeld zijn.
-  Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag, eventuele verlenging en strafschoppen, de stand na 90 minuten, de aantekening en de doelpuntenmakers (`goals`, op volgorde van de klok, zoals bij `listSeasonMatches`).
+  Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag, eventuele verlenging en strafschoppen, de stand na 90 minuten, de aantekening, het aantal toeschouwers (`attendance`, `null` als we het niet kennen, voor de kaart Toeschouwers tegen een club) en de doelpuntenmakers (`goals`, op volgorde van de klok, zoals bij `listSeasonMatches`).
   Met `competition` alleen die van de competitie.
 - `listAllWikipediaPages(db)` geeft de pagina's van Wikipedia die de import voor de wedstrijden las, van alle seizoenen, het nieuwste seizoen eerst: het seizoen, de titel, het soort en het moment van lezen.
   Een pagina die over alle seizoenen telt, zoals de onderlinge resultaten, noemt ze allemaal als bron.

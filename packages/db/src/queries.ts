@@ -399,7 +399,9 @@ export async function listArticleLines(db: Database, until: Date, limit: number,
  * result from the side of sc Heerenveen, whether it was at home, the note, the score after 90
  * minutes and the scorers. These are the fields of `listSeasonMatches` (see there for the
  * scorers, which are the same), so one line can show a match from either, but without the
- * number of spectators and the referee, which no page shows. `club` is the `id` of the club
+ * referee, which no page shows. `attendance` is the number of spectators as Wikipedia has it
+ * (null when it is not known), for the card of the visitors at the home matches against the
+ * club. `club` is the `id` of the club
  * (from `findClubBySlug`). With `competition` only the matches of that competition are given;
  * without it all of them. A club with no match, or none in that competition, gives an empty
  * list. `opponent` is the name the club had on the day of the match when the club has a list of
@@ -414,6 +416,7 @@ export async function listClubMatches(db: Database, club: number, { competition 
     .select({
       afterNinetyAgainst: matches.afterNinetyAgainst,
       afterNinetyFor: matches.afterNinetyFor,
+      attendance: matches.attendance,
       competition: matches.competition,
       dateText: matches.dateText,
       extraTime: matches.extraTime,

@@ -2,12 +2,14 @@ import type { NamePeriodLine } from '@fansite/db/club-name-periods'
 import type { StadiumLine } from '@fansite/db/club-stadiums'
 import type { PublicClubMatch, PublicClubRecord, PublicMatch } from '@fansite/db/queries'
 
+import { seasonOf } from '@fansite/db/season'
 import { describe, expect, it } from 'vitest'
 
 import type { FinalPlace } from './matches'
 
 import { overviewOf } from './matches'
 import {
+  clubAttendanceOf,
   clubKeysOf,
   clubNamesOf,
   clubNameViewsOf,
@@ -38,6 +40,7 @@ function match(ours: null | number, theirs: null | number, more: Partial<PublicC
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    attendance: null,
     competition: 'Eredivisie',
     dateText: null,
     extraTime: false,
@@ -548,7 +551,6 @@ describe('upcomingOf', () => {
         a.id - b.id,
     )
     const seasonMatches = season.map((item) => ({
-      attendance: null,
       referee: null,
       ...item,
     })) satisfies PublicMatch[]
@@ -878,5 +880,82 @@ describe('clubNamesOf', () => {
     }
 
     expect(clubNamesOf(page)).toEqual(['AZ Alkmaar', 'AZ', 'Alkmaar', 'AZ 67'])
+  })
+})
+
+describe('clubAttendanceOf', () => {
+  const at = (attendance: null | number, day: string, more: Partial<PublicClubMatch> = {}) =>
+    match(1, 0, { attendance, matchDate: day, season: seasonOf(new Date(`${day}T12:00:00Z`)), ...more })
+
+  it('counts only the played matches at home, the oldest first', () => {
+    const { average, known, slots } = clubAttendanceOf(
+      [
+        at(20000, '2026-10-24'),
+        at(18000, '2025-10-24', { home: false }),
+        at(16000, '2024-10-24'),
+        at(30000, '2027-02-01', { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
+      ],
+      'all',
+    )
+
+    expect(slots.map((slot) => slot.attendance)).toEqual([16000, 20000])
+    expect(known).toBe(2)
+    expect(average).toBe(18000)
+  })
+
+  it('has an empty place for an unknown number and a stub for none, and counts neither in the average', () => {
+    const { average, highest, known, slots } = clubAttendanceOf(
+      [at(null, '2026-10-24'), at(0, '2025-10-24'), at(22000, '2024-10-24')],
+      'all',
+    )
+
+    expect(slots.map((slot) => slot.attendance)).toEqual([22000, 0, null])
+    expect(known).toBe(1)
+    expect(average).toBe(22000)
+    expect(highest?.attendance).toBe(22000)
+  })
+
+  it('has the largest number with the season it was in, the first one when two are equal', () => {
+    const { highest } = clubAttendanceOf(
+      [at(25000, '2026-10-24'), at(25000, '2024-10-24'), at(20000, '2025-10-24')],
+      'all',
+    )
+
+    expect(highest?.match.season).toBe('2024/25')
+  })
+
+  it('has one place and one number for a club with a single home match', () => {
+    const { average, highest, known, slots } = clubAttendanceOf([at(19000, '2026-10-24')], 'all')
+
+    expect(slots).toHaveLength(1)
+    expect([average, highest?.attendance, known]).toEqual([19000, 19000, 1])
+  })
+
+  it('follows the choice: the cup is not in the Eredivisie', () => {
+    const matches = [at(20000, '2026-10-24'), at(12000, '2025-10-24', { competition: 'KNVB Beker' })]
+
+    expect(clubAttendanceOf(matches, 'all').known).toBe(2)
+    expect(clubAttendanceOf(matches, 'league').slots.map((slot) => slot.attendance)).toEqual([20000])
+  })
+
+  it('has no known number for a club without a number at a home match', () => {
+    expect(clubAttendanceOf([at(null, '2026-10-24'), at(15000, '2025-10-24', { home: false })], 'all').known).toBe(0)
+    expect(clubAttendanceOf([], 'all').known).toBe(0)
+  })
+
+  it('names the first season and then every fifth, at the middle of its matches', () => {
+    const matches = Array.from({ length: 7 }, (_, index) => {
+      const year = 2020 + index
+
+      return [at(20000, `${year}-09-10`), at(21000, `${year}-12-10`)]
+    })
+      .flat()
+      .toReversed()
+    const { labels } = clubAttendanceOf(matches, 'all')
+
+    expect(labels).toEqual([
+      { at: 1, text: '2020' },
+      { at: 11, text: '2025' },
+    ])
   })
 })

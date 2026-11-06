@@ -20,7 +20,7 @@ import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { ownListPeriods, stadiumPeriods } from './match-format'
-import { type FinalPlace, getFinalPlaces, programmeOf } from './matches'
+import { type Attendance, attendanceOf, type FinalPlace, getFinalPlaces, programmeOf } from './matches'
 
 /**
  * The opponents of sc Heerenveen under Wedstrijden: the list of the clubs and the page of each
@@ -99,10 +99,12 @@ export const clubPlacesId = 'plek-in-de-competitie'
  * the headings in `OpponentViews.tsx` (a test checks it). The card Wedstrijden is there with a
  * match to show; the cards of the sidebar follow the page (see `ClubPage`): the figures need a
  * played match, the timeline needs `hasTimeline`, Doelpuntenmakers needs `hasClubScorers`, and
- * Stadion needs a stadium, and Nieuws needs a headline that names the club (between the
- * figures and Stadion). `since` is the first season we have, as on the card.
+ * Stadion needs a stadium, Toeschouwers needs a known number at a home match (`hasAttendance`,
+ * between the places and Doelpuntenmakers), and Nieuws needs a headline that names the club
+ * (between the figures and Stadion). `since` is the first season we have, as on the card.
  */
 export function clubShortcutsOf({
+  hasAttendance = false,
   hasNews = false,
   hasPlaces = false,
   hasStadium,
@@ -111,6 +113,7 @@ export function clubShortcutsOf({
   since,
   upcoming,
 }: {
+  hasAttendance?: boolean
   hasNews?: boolean
   hasPlaces?: boolean
   hasStadium: boolean
@@ -131,12 +134,55 @@ export function clubShortcutsOf({
             : []),
           { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
           ...(hasPlaces ? [{ href: `#${clubPlacesId}`, label: 'Plek in de competitie' }] : []),
+          ...(hasAttendance ? [{ href: `#${clubAttendanceId}`, label: 'Toeschouwers' }] : []),
           ...(hasClubScorers(matches) ? [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] : []),
         ]
       : []),
     ...(hasNews ? [{ href: '#nieuws', label: 'Nieuws' }] : []),
     ...(hasStadium ? [{ href: '#stadion', label: 'Stadion' }] : []),
   ]
+}
+
+/** The id of the card "Toeschouwers tegen <club>", for the bar "Op deze pagina". */
+export const clubAttendanceId = 'toeschouwers'
+
+/** The visitors at the home matches against a club, oldest first, and the axis labels. */
+export type ClubAttendance = Attendance<PublicClubMatch> & {
+  /** A season number under the chart, at the middle of the matches of that season. */
+  labels: { at: number; text: string }[]
+}
+
+/** Every how many seasons the chart of the visitors names a season under its bars. */
+const attendanceLabelEvery = 5
+
+/**
+ * The visitors at our home matches against a club, for the card "Toeschouwers tegen <club>":
+ * the played matches at home that the choice counts, the oldest first, so the chart reads from
+ * the first season to the last, counted by `attendanceOf` as the card of Cijfers counts them.
+ * A match that is still to come has no place: only a played match has an audience. `labels`
+ * name the first season and then every fifth by the year it began, at the middle of its
+ * matches, so a chart of many seasons has labels that fit.
+ */
+export function clubAttendanceOf(matches: readonly PublicClubMatch[], choice: CompetitionChoice): ClubAttendance {
+  const attendance = attendanceOf(matches.filter((match) => match.status === 'played').toReversed(), choice)
+  const labels: ClubAttendance['labels'] = []
+  let seasons = 0
+
+  attendance.slots.forEach((slot, index, slots) => {
+    if (index > 0 && slots[index - 1]?.match.season === slot.match.season) {
+      return
+    }
+
+    const end = slots.findIndex((other, at) => at >= index && other.match.season !== slot.match.season)
+
+    if (seasons % attendanceLabelEvery === 0) {
+      labels.push({ at: (index + (end === -1 ? slots.length : end)) / 2, text: String(startYearOf(slot.match.season)) })
+    }
+
+    seasons += 1
+  })
+
+  return { ...attendance, labels }
 }
 
 /**

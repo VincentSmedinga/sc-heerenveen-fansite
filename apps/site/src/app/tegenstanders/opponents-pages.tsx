@@ -14,6 +14,7 @@ import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
 import { getEditedMatches, getMatchSeasons } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
+  clubAttendanceOf,
   clubNameViewsOf,
   earlierNames,
   getClubNews,
@@ -31,6 +32,7 @@ import {
   upcomingOf,
 } from '#src/opponents'
 import {
+  ClubAttendanceCard,
   ClubMeetingsCard,
   ClubNamesNotes,
   ClubNewsCard,
@@ -291,6 +293,11 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
           <ClubScoreCountsCard meetings={meetings} />
           <ClubPlacesCard name={club.name} places={loaded.places} />
+          <ClubAttendanceCard
+            attendance={clubAttendanceOf(matches, competition)}
+            choice={competition}
+            name={club.name}
+          />
           {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
           <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
           <StadiumsCard stadiums={stadiums} />

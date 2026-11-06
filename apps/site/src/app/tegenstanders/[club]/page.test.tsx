@@ -1420,3 +1420,95 @@ describe('the card Nieuws over <club> on the page of a club', () => {
     expect(await render()).toContain('>Doelpuntenmakers tegen Testclub</h2>')
   })
 })
+
+describe('the card Toeschouwers tegen <club> on the page of a club', () => {
+  // Every played match of testclub made a home match, with the numbers given in the order of
+  // the matches; the others have no number.
+  const withCrowds = (crowds: (null | number)[], page: ClubPage = testclub) => {
+    const played = page.matches.filter((match) => match.status === 'played')
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...page,
+      matches: page.matches.map((match) => {
+        const index = played.indexOf(match)
+
+        return index === -1 ? match : { ...match, attendance: crowds[index] ?? null, home: true }
+      }),
+    })
+
+    return played.length
+  }
+
+  const cardOf = (html: string) => {
+    const start = html.indexOf('id="toeschouwers"')
+
+    return start === -1 ? '' : html.slice(html.lastIndexOf('<section', start), html.indexOf('</section>', start))
+  }
+
+  it('is not there, with no sentence, when no home match has a known number', async () => {
+    withCrowds([])
+
+    const html = await render()
+
+    expect(html).not.toContain('id="toeschouwers"')
+    expect(html).not.toContain('Toeschouwers tegen')
+  })
+
+  it('has the heading of the club, the average, the largest number with its season, the estimate and the button for an image', async () => {
+    const homes = withCrowds([24000, 20000, null, 18000])
+    const card = cardOf(await render())
+    const text = plain(card)
+
+    expect(homes).toBeGreaterThanOrEqual(4)
+    expect(text).toContain('Toeschouwers tegen Testclub')
+    expect(text).toContain('Gemiddeld 20.667 toeschouwers per thuiswedstrijd')
+    expect(text).toMatch(/Het meest: 24\.000, in het seizoen \d{4}\/\d{2}/)
+    expect(text).toContain('Het aantal toeschouwers is een schatting, volgens Wikipedia.')
+    expect(text).toContain('Gebaseerd op 3 van de')
+    expect(card).toContain('hf-card-shareable')
+  })
+
+  it('keeps the table in an uitklapper, with Niet bekend for an unknown number', async () => {
+    withCrowds([24000, null])
+
+    const card = cardOf(await render())
+
+    expect(card).toContain('<details')
+    expect(card).toContain('Aantal per thuiswedstrijd')
+    expect(card).toContain('<table')
+    expect(plain(card)).toContain('Niet bekend')
+    expect(plain(card)).toContain('24.000')
+  })
+
+  it('hides the chart from a screen reader', async () => {
+    withCrowds([24000])
+
+    expect(cardOf(await render())).toMatch(
+      /aria-hidden="true"[^>]*class="hf-bar-chart|class="hf-bar-chart[^>]*aria-hidden="true"/,
+    )
+  })
+
+  it('follows the choice: with the Eredivisie the table has no column for the competition', async () => {
+    withCrowds([24000, 20000, 18000, 16000])
+
+    expect(plain(cardOf(await render('testclub')))).toContain('Competitie')
+    expect(plain(cardOf(await render('testclub', { competitie: 'eredivisie' })))).not.toContain('Competitie')
+  })
+
+  it('is after the places and before Doelpuntenmakers, and has no card on a club we only play away', async () => {
+    withCrowds([24000, 20000, 18000, 16000])
+    vi.mocked(getClubPlaces).mockResolvedValue([{ ours: 3, season: '2025/26', theirs: 9 }])
+
+    const html = await render()
+
+    expect(html.indexOf('id="plek-in-de-competitie"')).toBeLessThan(html.indexOf('id="toeschouwers"'))
+    expect(html.indexOf('id="toeschouwers"')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      matches: testclub.matches.map((match) => ({ ...match, attendance: 20000, home: false })),
+    })
+
+    expect(await render()).not.toContain('id="toeschouwers"')
+  })
+})

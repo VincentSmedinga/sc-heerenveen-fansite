@@ -1177,25 +1177,28 @@ export const topFiveOf = (scorers: TopScorer[]): TopScorer[] => firstPlacesOf(sc
 export const firstPlacesOf = (scorers: TopScorer[], places: number): TopScorer[] =>
   scorers.filter((scorer) => scorer.position <= places)
 
-export type Attendance = {
+export type Attendance<T extends AttendanceMatch = PublicMatch> = {
   /** The mean of the known numbers above 0, rounded to a whole number. */
   average: number | undefined
   /** The first match with the largest number. */
-  highest: AttendanceSlot | undefined
+  highest: AttendanceSlot<T> | undefined
   /** How many places have a number above 0. */
   known: number
   /** The top of the scale: the largest number, rounded up to a multiple of `attendanceStep`. */
   max: number
-  slots: AttendanceSlot[]
+  slots: AttendanceSlot<T>[]
   /** The values for the lines and numbers at the side, from one step to `max`. */
   ticks: number[]
 }
 
+/** What the count of the visitors reads of a match; both public match types have it. */
+export type AttendanceMatch = Pick<PublicMatch, 'attendance' | 'competition' | 'home' | 'status'>
+
 /** One place of the chart of the visitors: a home match, and how many came to it. */
-export type AttendanceSlot = {
+export type AttendanceSlot<T extends AttendanceMatch = PublicMatch> = {
   /** `null` when the number is not known, `0` for a match without an audience. */
   attendance: null | number
-  match: PublicMatch
+  match: T
 }
 
 /** A player who scored three or more goals in a match, or two, and how often it happened. */
@@ -1457,7 +1460,10 @@ export const attendanceStep = 5000
  * only count numbers above 0: a match without an audience is not a number, and nor is an
  * unknown one.
  */
-export function attendanceOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): Attendance {
+export function attendanceOf<T extends AttendanceMatch = PublicMatch>(
+  matches: readonly T[],
+  choice: CompetitionChoice = 'all',
+): Attendance<T> {
   const slots = matches
     .filter((match) => match.home && match.status !== 'cancelled' && countsFor(match, choice))
     .map((match) => ({ attendance: match.status === 'played' ? match.attendance : null, match }))

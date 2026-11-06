@@ -5,6 +5,7 @@ import type { SearchParams } from '#src/season-page'
 import { competitionParam, parseCompetition } from '#src/competition'
 import { getMatchSeasons } from '#src/matches'
 import {
+  clubAttendanceOf,
   clubShortcutsOf,
   getClubNews,
   getClubPage,
@@ -49,6 +50,7 @@ export default async function ClubShortcuts({
     const { matches } = page
 
     items = clubShortcutsOf({
+      hasAttendance: clubAttendanceOf(matches, competition).known > 0,
       hasNews: (await getClubNews(page)).length > 0,
       hasPlaces: (await getClubPlaces(page)).length > 0,
       hasStadium: stadiumViewsOf(page.stadiums, matches).length > 0,
