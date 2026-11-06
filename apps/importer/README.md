@@ -1595,7 +1595,34 @@ Op acceptatie start je `--from-squad` met de workflow _Import squads_ (zie _De s
   Er komt een rij in `squad_imports` per gelezen seizoen, zoals bij `match_imports` van een afgelopen seizoen.
   De status en de waarschuwingen (`pnpm run import:status`) tellen alleen het lopende seizoen.
 
+- Aan het eind van een lezing komt de kans dat de lijst de hele selectie is in `squad_completeness` (zie _De volledigheid van de selectie_).
+  Het logboek krijgt er een regel bij: `Completeness 2013/14: 55% bijna, 16 players, new`.
+
 De tests staan in [`src/import-squads.test.ts`](src/import-squads.test.ts): ze draaien op een echte MariaDB met een eigen webserver voor de pagina's, en vragen Wikipedia niets.
+
+#### De volledigheid van de selectie
+
+De kans dat de spelers van een seizoen de hele selectie zijn (`squadCompleteness`, zie [`docs/volledigheid-selectie.md`](../../docs/volledigheid-selectie.md)) staat per seizoen in de tabel `squad_completeness`.
+De site leest haar alleen; de importer rekent haar uit (`storeCompleteness` in [`src/store-completeness.ts`](src/store-completeness.ts)).
+Een seizoen zonder spelers heeft geen rij, en de site leest dat als `onbekend`.
+
+- **Wanneer:** aan het eind van een lezing van de selectie.
+  Dat is de uurlijkse import van het lopende seizoen (na de wedstrijden, in dezelfde run), en `import:squad` en `import:squads` voor een afgelopen seizoen.
+  De regel krijgt uit de database wat hij nodig heeft: de bronnen en personen van de spelers en de doelpuntenmakers van het seizoen.
+- **De som van de tabel:** het aantal wedstrijden en doelpunten dat de tabel gaf, opgeteld, staat in `matches_total` en `goals_total`.
+  Het is alleen bekend terwijl de pagina wordt gelezen, dus de uitkomst en dat bewijs worden samen bewaard.
+  Bij een afgelopen seizoen met meer lijsten telt de beste lijst die een som geeft, omdat de lijsten verschillend tellen.
+  Een pagina zonder som laat de kolom leeg.
+- **Opnieuw uitrekenen:** `pnpm run import:completeness` rekent elk seizoen opnieuw uit met wat in de database staat en de bewaarde som, zonder verzoek aan Wikipedia.
+  Draai het nadat #414 doelpunten van een eerder seizoen heeft gezet.
+  Op de host is het `import.mjs --completeness`.
+  Het neemt de lock van de import en schrijft een regel per seizoen: `Completeness 2013/14: 50% bijna, 26 players, was 95% compleet with 26 players`.
+- **Geen overbodige schrijfactie:** een tweede berekening zonder nieuwe gegevens schrijft niets, dus `calculated_at` verandert dan niet.
+- **Status:** `pnpm run import:status` toont de kans en het niveau van het lopende seizoen, en een waarschuwing als de bron `selectie` is en de kans onder `bijna` valt: die tabel heeft iedereen, dus de lezer mist iets.
+  Eerdere seizoenen staan er niet in.
+- **Terugdraaien:** de tabel `squad_completeness` weghalen verliest geen gegevens (`DROP TABLE squad_completeness`): `import:completeness` maakt haar rijen weer uit `players` en `match_goals`.
+
+De tests staan in [`src/store-completeness.test.ts`](src/store-completeness.test.ts).
 
 #### Een gestaakte wedstrijd
 

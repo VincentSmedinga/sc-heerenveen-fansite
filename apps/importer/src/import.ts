@@ -15,6 +15,9 @@
 // (`pnpm run import:squad 2007/08`), and with `--from-squad <season>` the squads of every
 // season that is over from that season on (`pnpm run import:squads 1990/91`).
 //
+// With `--completeness` it works out again how likely it is that the squad of each season is
+// whole, from the database and without a request (`pnpm run import:completeness`).
+//
 // With `--changes` it lists the changes of a match that wait for a decision, and with
 // `--changes accept 12` or `--changes reject all` it decides them (`pnpm run import:changes`).
 import { readDatabaseEnv } from '@fansite/db/env'
@@ -25,11 +28,13 @@ import { runImport } from './import-feeds.ts'
 import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from './import-season.ts'
 import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
 import { showStatus } from './status.ts'
+import { runCompletenessCommand } from './store-completeness.ts'
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: {
     changes: { type: 'boolean' },
+    completeness: { type: 'boolean' },
     'from-season': { type: 'boolean' },
     'from-squad': { type: 'boolean' },
     season: { type: 'boolean' },
@@ -39,7 +44,15 @@ const { positionals, values } = parseArgs({
 })
 const fromSeason = values['from-season']
 const fromSquad = values['from-squad']
-const modes = [values.changes, fromSeason, fromSquad, values.season, values.squad, values.status].filter(Boolean).length
+const modes = [
+  values.changes,
+  values.completeness,
+  fromSeason,
+  fromSquad,
+  values.season,
+  values.squad,
+  values.status,
+].filter(Boolean).length
 const wrongArguments =
   modes > 1 ||
   (values.season === true || fromSeason === true || values.squad === true || fromSquad === true
@@ -48,7 +61,7 @@ const wrongArguments =
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\nOr use --status alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\nOr use --status alone, --completeness alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -67,4 +80,6 @@ process.exitCode = fromSeason
           ? await runChangesCommand(DATABASE_URL, positionals)
           : values.status
             ? await showStatus(DATABASE_URL)
-            : await runImport(DATABASE_URL)
+            : values.completeness
+              ? await runCompletenessCommand(DATABASE_URL)
+              : await runImport(DATABASE_URL)

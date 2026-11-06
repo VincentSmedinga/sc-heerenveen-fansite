@@ -1,7 +1,14 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
-import { persons, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
+import {
+  persons,
+  players,
+  playerSeasonStats,
+  squadCompleteness,
+  squadImports,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -59,7 +66,15 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['player_season_stats', 'players', 'squad_imports', 'wikipedia_pages', 'persons', 'sources']) {
+  for (const table of [
+    'player_season_stats',
+    'players',
+    'squad_completeness',
+    'squad_imports',
+    'wikipedia_pages',
+    'persons',
+    'sources',
+  ]) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 })
@@ -286,6 +301,17 @@ describe('importPastSquad', () => {
     expect(await database.db.select().from(squadImports)).toMatchObject([
       { failuresInARow: 0, lastOutcome: 'imported', season },
     ])
+    // The chance is stored with the read: two sources, and the best of them.
+    const [completeness] = await database.db.select().from(squadCompleteness)
+
+    expect(completeness).toMatchObject({
+      bestSource: 'selectie',
+      calculatedAt: now,
+      playerCount: rows.length,
+      season,
+    })
+    expect(completeness?.probability).toBeGreaterThan(0)
+    expect(formatPastSquadReport(report)).toContain(`Completeness ${season}: ${completeness?.probability}%`)
   })
 
   it('asks one request for each new title of a player, says how many, and none the second time', async () => {

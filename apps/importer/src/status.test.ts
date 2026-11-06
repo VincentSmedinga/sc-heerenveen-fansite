@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, sources } from '@fansite/db/schema'
+import { feeds, sources, squadCompleteness } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -109,10 +109,50 @@ describe('the overview', () => {
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
         '',
+        'Completeness of the squad 2026/27: not calculated yet',
+        '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
       ],
     })
+  })
+
+  it('shows the chance that the squad of the current season is whole, and warns when the table of the selection says less than almost', async () => {
+    const row = {
+      bestSource: 'selectie' as const,
+      calculatedAt: start,
+      checks: [
+        {
+          detail: 'the list has 12 players, a squad has 20 or more',
+          name: 'size' as const,
+          outcome: 'failed' as const,
+        },
+      ],
+      level: 'weinig' as const,
+      playerCount: 12,
+      probability: 20,
+      season: '2026/27',
+    }
+
+    await database.db
+      .insert(squadCompleteness)
+      .values([row, { ...row, level: 'compleet', probability: 95, season: '2025/26' }])
+
+    const { code, lines } = await statusAt(start)
+
+    expect(code).toBe(0)
+    expect(lines).toContain(
+      'Completeness of the squad 2026/27: 20% weinig, 12 players, best source selectie, calculated 2026-10-22 10:07:00 UTC',
+    )
+    expect(lines).toContain(
+      '  warning: the table of the selection should hold the whole squad, but the chance is weinig: the list has 12 players, a squad has 20 or more',
+    )
+    expect(lines.filter((line) => line.startsWith('Completeness'))).toHaveLength(1)
+
+    await database.db.update(squadCompleteness).set({ level: 'bijna', probability: 60 })
+
+    expect((await statusAt(start)).lines.some((line) => line.includes('warning: the table'))).toBe(false)
+    await database.db.delete(squadCompleteness)
   })
 
   it('exits with 0 when every feed is healthy, also after a failure or two', async () => {
@@ -140,6 +180,8 @@ describe('the overview', () => {
         'Matches 2026/27 (Wikipedia): not read yet',
         '',
         'Squad 2026/27 (Wikipedia): not read yet',
+        '',
+        'Completeness of the squad 2026/27: not calculated yet',
         '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',

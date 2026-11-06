@@ -11,6 +11,7 @@ import {
   matchImports,
   matchPageKinds,
   sources,
+  squadCompleteness,
   squadImports,
   wikipediaPages,
 } from '@fansite/db/schema'
@@ -108,12 +109,43 @@ export async function showStatus(
     const matchesUnhealthy = await showMatchStatus(db, now, write)
     const squadUnhealthy = await showSquadStatus(db, now, write)
 
+    await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
     await showWaitingChanges(db, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
   } finally {
     await close()
+  }
+}
+
+/**
+ * Shows the chance that the list of players of the current season is the whole squad, with its
+ * level. A season whose source is the table of the selection and whose chance is below `bijna`
+ * is a warning: that table holds everyone, so the reader is missing something. It is
+ * information and no fault, so it does not change the exit code. Earlier seasons are not shown.
+ */
+async function showCompleteness(db: Database, now: Date, write: (line: string) => void): Promise<void> {
+  const season = seasonOf(now)
+  const [row] = await db.select().from(squadCompleteness).where(eq(squadCompleteness.season, season))
+
+  write('')
+
+  if (row === undefined) {
+    write(`Completeness of the squad ${season}: not calculated yet`)
+
+    return
+  }
+
+  write(
+    `Completeness of the squad ${season}: ${row.probability}% ${row.level}, ${row.playerCount} players, best source ${row.bestSource}, calculated ${formatTime(row.calculatedAt)}`,
+  )
+  if (row.bestSource === 'selectie' && (row.level === 'onbekend' || row.level === 'weinig' || row.level === 'deels')) {
+    const failed = row.checks.filter((check) => check.outcome === 'failed').map((check) => check.detail)
+
+    write(
+      `  warning: the table of the selection should hold the whole squad, but the chance is ${row.level}${failed.length === 0 ? '' : `: ${printable(failed.join('; '))}`}`,
+    )
   }
 }
 

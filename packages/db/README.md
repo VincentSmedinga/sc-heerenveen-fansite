@@ -506,6 +506,8 @@ De zoekpagina met de lijst van spelers (#107) moet dus `listSquad` gebruiken en 
 De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
 
 `squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
+`squad_completeness` heeft per seizoen met spelers de kans dat de lijst de hele selectie is, het niveau, het aantal spelers, de beste bron, de som van de wedstrijden en de doelpunten van de tabel, de controles (JSON) en het moment van berekenen (#746).
+De importer schrijft haar, de site leest haar; een seizoen zonder rij is `onbekend`.
 
 `player_season_stats` heeft per speler, seizoen en competitie de optredens, doelpunten en assists uit de tabel van de selectie op de Nederlandse Wikipedia (bron en licentie als bij de selectie: CC BY-SA 4.0).
 De importer schrijft de rijen in dezelfde run als de selectie (zie de [README van de importer](../../apps/importer/README.md), _De cijfers van een speler_).
@@ -802,7 +804,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);

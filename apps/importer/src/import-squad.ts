@@ -9,6 +9,7 @@ import { and, count, eq, isNotNull } from 'drizzle-orm'
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
 import type { ReadPlayer } from './read-squad.ts'
+import type { CompletenessTotals } from './store-completeness.ts'
 
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
@@ -16,6 +17,7 @@ import { aliasMap, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
 import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
+import { describeChange, storeCompleteness } from './store-completeness.ts'
 import { describeError, formatTime, printable } from './text.ts'
 
 /** What came of the import of the squad. Like a match report, every result is a value. */
@@ -27,6 +29,17 @@ export type SquadReport =
       season: string
     }
   | {
+      /** The chance that the list is the whole squad, as a line; absent if not stored. */
+      completeness?: string | undefined
+      kind: 'imported'
+      persons: string[]
+      players: { added: number; left: number; unchanged: number; updated: number }
+      season: string
+      /** What came of the numbers of the players (see `storeStats`). */
+      stats: { added: number; unchanged: number; updated: number }
+      warnings: string[]
+    }
+  | {
       /** The import did not ask: it reads Wikipedia once an hour, and the hour is not over. */
       kind: 'postponed'
       retryAt: Date
@@ -36,15 +49,6 @@ export type SquadReport =
       kind: 'blocked-by-robots'
       season: string
       url: string
-    }
-  | {
-      kind: 'imported'
-      persons: string[]
-      players: { added: number; left: number; unchanged: number; updated: number }
-      season: string
-      /** What came of the numbers of the players (see `storeStats`). */
-      stats: { added: number; unchanged: number; updated: number }
-      warnings: string[]
     }
   | {
       kind: 'wait'
@@ -67,6 +71,7 @@ export function formatSquadReport(report: SquadReport): string {
         `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.left} left the squad`,
         `${head}: numbers of the players: ${report.stats.added} new, ${report.stats.updated} updated, ${report.stats.unchanged} unchanged`,
         ...report.persons.map((line) => `${head}: ${printable(line)}`),
+        ...(report.completeness === undefined ? [] : [report.completeness]),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -275,7 +280,18 @@ async function readAndStore(
   warnings.push(...guessedNameWarnings(personNames.guessed))
   warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
 
+  // The chance that the list is whole is a result of its own: a failure to store it is a
+  // warning and never undoes a squad that is stored.
+  let completeness: string | undefined
+
+  try {
+    completeness = describeChange(season, await storeCompleteness(db, season, totalsOf(read.players), now))
+  } catch (error) {
+    warnings.push(`the completeness is not stored: ${describeError(error)}`)
+  }
+
   return {
+    completeness,
     kind: 'imported',
     persons: describePersons(personLookup.asked, counts.persons, personNames.counts),
     players: counts.players,
@@ -435,4 +451,17 @@ async function storeStats(
   }
 
   return { counts, warnings }
+}
+
+/**
+ * The sums of the table: the matches and the goals of all players in all competitions, or null
+ * when no player has a number.
+ */
+function totalsOf(found: ReadPlayer[]): CompletenessTotals {
+  const stats = found.flatMap((player) => player.stats)
+
+  return {
+    goalsTotal: stats.length === 0 ? null : stats.reduce((total, row) => total + row.goals, 0),
+    matchesTotal: stats.length === 0 ? null : stats.reduce((total, row) => total + row.appearances, 0),
+  }
 }

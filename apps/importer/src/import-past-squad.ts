@@ -23,6 +23,7 @@ import { eq } from 'drizzle-orm'
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
+import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
@@ -30,6 +31,7 @@ import { describePersons, guessedNameWarnings, lookUpPersonPages } from './perso
 import { nameKey, searchTerm } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { squadSources } from './squad-sources.ts'
+import { describeChange, storeCompleteness } from './store-completeness.ts'
 import { describeError, printable } from './text.ts'
 
 /** A player as the readers of a season give him, put together (see `mergePlayers`). */
@@ -44,6 +46,17 @@ export type MergedPlayer = {
 
 /** What came of reading the squad of a season that is over. Like a match report, a value. */
 export type PastSquadReport =
+  | {
+      /** The chance that the list is the whole squad, as a line (see `storeCompleteness`). */
+      completeness: string
+      kind: 'imported'
+      /** The pages that gave players. */
+      pages: number
+      persons: string[]
+      players: { added: number; improved: number; unchanged: number }
+      season: string
+      warnings: string[]
+    }
   | {
       /** The page has changed shape or could not be read: nothing changed. */
       kind: 'error'
@@ -61,15 +74,6 @@ export type PastSquadReport =
       url: string
     }
   | {
-      kind: 'imported'
-      /** The pages that gave players. */
-      pages: number
-      persons: string[]
-      players: { added: number; improved: number; unchanged: number }
-      season: string
-      warnings: string[]
-    }
-  | {
       kind: 'wait'
       retryAfterSeconds: null | number
       season: string
@@ -78,6 +82,9 @@ export type PastSquadReport =
 
 /** What one reader of a page found: the players, and where they come from. */
 type ReadOfPage = { players: SeasonPlayer[]; source: PlayerSource }
+
+/** A read of a page with the sums its table gave (see `totalsOf`). */
+type ReadWithTotals = CompletenessTotals & ReadOfPage
 
 /** Writes a report as a line of text. */
 export function formatPastSquadReport(report: PastSquadReport): string {
@@ -92,6 +99,7 @@ export function formatPastSquadReport(report: PastSquadReport): string {
       return [
         `${head}: ${report.players.added} new, ${report.players.improved} improved, ${report.players.unchanged} unchanged, from ${report.pages} ${report.pages === 1 ? 'page' : 'pages'}`,
         ...report.persons.map((line) => `${head}: ${printable(line)}`),
+        report.completeness,
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'none':
@@ -137,7 +145,7 @@ export async function importPastSquad(
     return { kind: 'none', season }
   }
 
-  const reads: ReadOfPage[] = []
+  const reads: ReadWithTotals[] = []
   const pagesRead: { title: string; version: null | string }[] = []
   const warnings: string[] = []
 
@@ -197,7 +205,12 @@ export async function importPastSquad(
       }
 
       gave = true
-      reads.push({ players: read.players, source: read.source })
+      reads.push({
+        goalsTotal: read.goalsTotal,
+        matchesTotal: read.appearancesTotal,
+        players: read.players,
+        source: read.source,
+      })
       warnings.push(...read.warnings.map((warning) => `${source.title} (${reader.name}): ${warning}`))
     }
 
@@ -242,7 +255,9 @@ export async function importPastSquad(
     return { persons: personBook.counts, players: counts }
   })
   const personNames = await storePersonNames(db, personLookup.names)
+  const completeness = await storeCompleteness(db, season, totalsOf(reads), now)
   const report: PastSquadReport = {
+    completeness: describeChange(season, completeness),
     kind: 'imported',
     pages: pagesRead.length,
     persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
@@ -447,4 +462,18 @@ async function storePlayers(
   }
 
   return counts
+}
+
+/**
+ * The sums of the tables that were read: for each sum, what the best list that gives it says
+ * (`playerSources`, from the most complete down), because the lists count differently and a
+ * sum of the lists would count a player twice.
+ */
+function totalsOf(reads: readonly ReadWithTotals[]): CompletenessTotals {
+  const best = [...reads].sort((a, b) => playerSources.indexOf(a.source) - playerSources.indexOf(b.source))
+
+  return {
+    goalsTotal: best.find((read) => read.goalsTotal !== null)?.goalsTotal ?? null,
+    matchesTotal: best.find((read) => read.matchesTotal !== null)?.matchesTotal ?? null,
+  }
 }
