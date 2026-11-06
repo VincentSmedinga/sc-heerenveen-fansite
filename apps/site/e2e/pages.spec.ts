@@ -223,6 +223,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/wedstrijden/{held}', status: 404 },
   { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
   { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
+  // The overview of the articles of the editors: the first page, and the addresses that say
+  // "niet gevonden": a page after the last one (the made-up articles fit on one page) and a
+  // page that is not a number.
+  { path: '/redactie', status: 200 },
+  { path: '/redactie?pagina=2', status: 404 },
+  { path: '/redactie?pagina=0', status: 404 },
   // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
   // article for later, an address that isn't an article and one in capitals.
   { path: `/redactie/${testArticles.published.slug}`, status: 200 },

@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
@@ -193,14 +193,15 @@ git diff --name-only -- src e2e | xargs pnpm exec eslint --fix
 
 Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vijf onderdelen: Nieuws (`/nieuws`), Wedstrijden, Statistieken, Spelers (`/spelers`) en Forum (extern).
 De homepage (`/`) staat niet in het menu: het logo wijst ernaartoe.
-Nieuws heeft een balk met subpagina's onder het menu: Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
+Nieuws heeft een balk met subpagina's onder het menu: Podcasts (`/nieuws/podcasts`), Redactie (`/redactie`) en Zoeken (`/nieuws/zoeken`), in die volgorde en altijd alle drie.
 Nieuws is zelf het overzicht van alle koppen, dus er is geen apart item Archief.
 De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu en de balk zijn één navigatie, "Hoofdmenu".
 `currentOf` in hetzelfde bestand kiest uit het pad het huidige onderdeel en de huidige subpagina:
 
-- Nieuws is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden, Statistieken en Spelers op hun pagina en elke pagina eronder, zoals een seizoen.
+- Nieuws is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/redactie`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden, Statistieken en Spelers op hun pagina en elke pagina eronder, zoals een seizoen.
 - Staat de bezoeker op een subpagina, dan is die `aria-current="page"` en heeft het item Nieuws `aria-current="true"`.
-  Op `/nieuws` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
+  Op `/redactie` en op een artikel van de redactie is Redactie de huidige subpagina.
+  Op `/nieuws` is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
 - Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
 Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/spelers/<seizoen>` nemen de items Wedstrijden, Statistieken en Spelers het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.

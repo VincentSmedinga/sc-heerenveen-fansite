@@ -1,13 +1,17 @@
 import {
+  countPublishedArticles,
   findNewestArticle,
   findPublishedArticle,
+  listArticleLines,
   listPublishedArticles,
   type PublicArticle,
   type PublicArticleCard,
+  type PublicArticleLine,
   type PublicArticleLink,
 } from '@fansite/db/queries'
 
 import { getDatabase } from './database'
+import { articlesPerPage } from './items-per-card'
 
 /**
  * The slugs an article can have: lowercase letters, digits and single hyphens, at most 80
@@ -28,6 +32,26 @@ export async function getArticle(slug: string): Promise<PublicArticle | undefine
   }
 
   return findPublishedArticle(getDatabase().db, slug, new Date())
+}
+
+/**
+ * A page of the overview of the articles: the published articles of that page, newest first,
+ * and the number of pages (at least one, also without an article). It is undefined for a page
+ * after the last one, so the address says "niet gevonden". Not cached, for the same reason as
+ * the newest article: a withdrawn article is gone at once.
+ */
+export async function getArticlesPage(
+  page: number,
+): Promise<undefined | { articles: PublicArticleLine[]; pageCount: number }> {
+  const { db } = getDatabase()
+  const now = new Date()
+  const pageCount = Math.max(1, Math.ceil((await countPublishedArticles(db, now)) / articlesPerPage))
+
+  if (page > pageCount) {
+    return undefined
+  }
+
+  return { articles: await listArticleLines(db, now, articlesPerPage, (page - 1) * articlesPerPage), pageCount }
 }
 
 /**

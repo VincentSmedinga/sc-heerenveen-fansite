@@ -38,6 +38,8 @@ export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedA
 
 export type PublicArticleCard = NonNullable<Awaited<ReturnType<typeof findNewestArticle>>>
 
+export type PublicArticleLine = Awaited<ReturnType<typeof listArticleLines>>[number]
+
 export type PublicArticleLink = Awaited<ReturnType<typeof listPublishedArticles>>[number]
 
 export type PublicClub = NonNullable<Awaited<ReturnType<typeof findClubBySlug>>>
@@ -104,6 +106,13 @@ export async function countPodcastEpisodes(
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
     .where(episodeFilter(until, slugs))
+
+  return row?.total ?? 0
+}
+
+/** The number of published articles, with a time of publication up to `until` included. */
+export async function countPublishedArticles(db: Database, until: Date) {
+  const [row] = await db.select({ total: count() }).from(articles).where(lte(articles.publishedAt, until))
 
   return row?.total ?? 0
 }
@@ -315,6 +324,23 @@ export function listArchiveSources(db: Database, until: Date) {
       ),
     )
     .orderBy(asc(sources.name))
+}
+
+/**
+ * One page of the published articles for the overview, newest first: the slug, the title, the
+ * intro and the time of publication. A draft and an article for later (`published_at` after
+ * `until`) are not in it. `offset` articles are skipped and at most `limit` given.
+ */
+export async function listArticleLines(db: Database, until: Date, limit: number, offset: number) {
+  const rows = await db
+    .select({ intro: articles.intro, publishedAt: articles.publishedAt, slug: articles.slug, title: articles.title })
+    .from(articles)
+    .where(lte(articles.publishedAt, until))
+    .orderBy(desc(articles.publishedAt), desc(articles.id))
+    .limit(limit)
+    .offset(offset)
+
+  return rows.flatMap((row) => (row.publishedAt === null ? [] : [{ ...row, publishedAt: row.publishedAt }]))
 }
 
 /**

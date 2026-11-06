@@ -26,6 +26,7 @@ test.describe('the bar of Nieuws', () => {
 
     for (const [name, path] of [
       ['Podcasts', '/nieuws/podcasts'],
+      ['Redactie', '/redactie'],
       ['Zoeken', '/nieuws/zoeken'],
     ] as const) {
       await menu(page).getByRole('link', { exact: true, name }).click()
@@ -39,10 +40,14 @@ test.describe('the bar of Nieuws', () => {
     }
   })
 
-  test('is on an article of the editors, with Nieuws as the current page', async ({ page }) => {
+  test('is on an article of the editors, with Redactie as the current sub-page', async ({ page }) => {
     await page.goto(`/redactie/${testArticles.published.slug}`)
 
-    await expect(menu(page).getByRole('link', { exact: true, name: 'Nieuws' })).toHaveAttribute('aria-current', 'page')
+    await expect(menu(page).getByRole('link', { exact: true, name: 'Redactie' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    await expect(menu(page).getByRole('link', { exact: true, name: 'Nieuws' })).toHaveAttribute('aria-current', 'true')
     await expect(menu(page).getByRole('link', { exact: true, name: 'Zoeken' })).toBeVisible()
   })
 
@@ -54,12 +59,14 @@ test.describe('the bar of Nieuws', () => {
   })
 
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`shows both links on a phone of 320 pixels in ${colorScheme}, without a sideways scroll`, async ({ page }) => {
+    test(`shows all three links on a phone of 320 pixels in ${colorScheme}, without a sideways scroll`, async ({
+      page,
+    }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 320 })
       await page.goto('/nieuws/zoeken')
 
-      for (const name of ['Podcasts', 'Zoeken']) {
+      for (const name of ['Podcasts', 'Redactie', 'Zoeken']) {
         await expect(menu(page).getByRole('link', { exact: true, name })).toBeInViewport({ ratio: 1 })
       }
 

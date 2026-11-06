@@ -77,6 +77,11 @@ export function EditorsCard({
           />
         </List.Item>
       </List>
+      <Text>
+        <Link href="/redactie" icon="arrow-right">
+          Alle artikelen
+        </Link>
+      </Text>
     </Card>
   )
 }

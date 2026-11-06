@@ -767,6 +767,12 @@ await withEmptyDatabase((database) =>
     // The old addresses of the podcasts and the search are gone, without a redirect.
     assert.equal((await fetch(`${origin}/podcasts`, { redirect: 'manual' })).status, 404)
     assert.equal((await fetch(`${origin}/zoeken`, { redirect: 'manual' })).status, 404)
+    // The overview of the articles: one page without an article, and no page after it.
+    const editorsPage = await fetch(`${origin}/redactie`)
+
+    assert.equal(editorsPage.status, 200)
+    assert.match(await editorsPage.text(), /<h1 class="hf-heading-1">Redactie<\/h1>/)
+    assert.equal((await fetch(`${origin}/redactie?pagina=2`)).status, 404)
 
     // The news page reads the headlines, and the seed has none, so there is no filter. It has
     // the card with the podcasts, and no card with matches. A source, several sources or a page
@@ -837,12 +843,12 @@ await withEmptyDatabase((database) =>
       /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
-    // current. The news page has the bar of Nieuws, with the podcasts and the search.
+    // current. The news page has the bar of Nieuws: the podcasts, the editors and the search.
     assert.doesNotMatch(html, /class="hf-page-shortcuts"|class="hf-navigation-bar"| aria-current="/)
     assert.match(html, /<nav aria-label="Hoofdmenu".*?<a class="hf-navigation-link" href="\/nieuws">Nieuws<\/a>/s)
     assert.match(
       archiveHtml,
-      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/nieuws">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/nieuws">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/redactie">Redactie<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
     )
     assert.doesNotMatch(archiveHtml, /Archief/)
     assert.match(matchesHtml, /Testdorp FC/)
