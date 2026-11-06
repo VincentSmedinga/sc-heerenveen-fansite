@@ -198,12 +198,12 @@ Nieuws is zelf het overzicht van alle koppen, dus er is geen apart item Archief.
 De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu en de balk zijn één navigatie, "Hoofdmenu".
 `currentOf` in hetzelfde bestand kiest uit het pad het huidige onderdeel en de huidige subpagina:
 
-- Nieuws is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden en Statistieken op hun pagina en elke pagina eronder, zoals een seizoen.
+- Nieuws is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden, Statistieken en Spelers op hun pagina en elke pagina eronder, zoals een seizoen.
 - Staat de bezoeker op een subpagina, dan is die `aria-current="page"` en heeft het item Nieuws `aria-current="true"`.
   Op `/nieuws` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
 - Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
-Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/spelers/<seizoen>` nemen de items Wedstrijden en Statistieken het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
+Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/spelers/<seizoen>` nemen de items Wedstrijden, Statistieken en Spelers het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
 Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
 
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen/site.md`).
@@ -375,14 +375,15 @@ De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
 De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League of de Europa League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
-Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders.
-De links van die balk houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/spelers/2025-26?competitie=eredivisie`, en Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
-De items van het menu zelf houden niets vast: Statistieken is altijd `/statistieken`.
+Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu alleen Tegenstanders (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_).
+De link van die balk houdt de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
+De items van het menu zelf houden de keuze niet vast, en het seizoen alleen op de pagina van een seizoen: op `/statistieken/2025-26` gaan Wedstrijden en Spelers naar `/wedstrijden/2025-26` en `/spelers/2025-26` (`hrefOf` in `src/SiteNavigation.tsx`).
 De keuze staat in de query string, en die kan een clientcomponent in de layout alleen lezen met `useSearchParams` en een Suspense-grens, en dat raakt elke pagina.
 Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/statistieken`, `src/statisticsBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`statisticsBar`), dat hem aan het item Statistieken geeft (`bar` van `Navigation`).
 `statisticsSubitems` in `src/SiteNavigation.tsx` zegt alleen welke subpagina de huidige is.
-Alleen de pagina's van Statistieken hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina krijgt een leeg slot.
-Op `/statistieken` is geen subpagina de huidige; op `/spelers` en zijn seizoenen is Spelers het wel, op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
+Alleen de pagina's van Statistieken hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Spelers, krijgt een leeg slot.
+Op `/statistieken` is geen subpagina de huidige; op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
+Op `/spelers` en zijn seizoenen is Spelers het huidige onderdeel van het menu (`aria-current="page"`), zonder balk en zonder dat Statistieken meetelt.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
 De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie en thuis en uit zijn wit.
@@ -504,7 +505,7 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 
 ### De spelers
 
-`/spelers` is de eerste subpagina van Statistieken.
+`/spelers` is een onderdeel van het hoofdmenu, na Statistieken en voor het forum, op `/spelers` en `/spelers/<seizoen>`; de oude adressen onder `/statistieken` bestaan niet meer (zie _Spelers staat in het menu na Wedstrijden_).
 Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer en naam, zonder link, in een deel per positie.
 Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
@@ -531,12 +532,12 @@ De cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze
 Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
 De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
 Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
-De balk "Op deze pagina:" heeft twee links, naar de twee kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`).
+De balk "Op deze pagina:" heeft drie links, naar de drie kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`).
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
 
 ### De tegenstanders
 
-`/statistieken/tegenstanders` is de tweede subpagina van Statistieken.
+`/statistieken/tegenstanders` is de enige subpagina van Statistieken.
 Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
 Elke clubnaam is een link naar `/statistieken/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
 De server stuurt de tabel zonder knoppen om te sorteren, en er is geen paginering.
@@ -648,7 +649,7 @@ De keuze blijft bij elke link tussen de twee pagina's: de link "Alle doelpuntenm
 `pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
 De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
 De balk onder het hoofdmenu houdt het seizoen en de keuze vast (zie _Het hoofdmenu en de balk van Nieuws_).
-De items Wedstrijden en Statistieken van het menu zelf nemen het seizoen van de pagina mee, maar niet de keuze: die kan het menu niet lezen zonder `useSearchParams`.
+De items Wedstrijden, Statistieken en Spelers van het menu zelf nemen het seizoen van de pagina mee, maar niet de keuze: die kan het menu niet lezen zonder `useSearchParams`.
 
 De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
 Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.

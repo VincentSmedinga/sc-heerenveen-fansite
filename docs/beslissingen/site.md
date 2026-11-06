@@ -1580,6 +1580,7 @@
 - **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/` is niet meer Nieuws en heeft geen balk, Nieuws is `/nieuws` en is het archief (dat item vervalt), en de balk van Nieuws heeft Podcasts en Zoeken.
   De rest van dit besluit blijft gelden.
 - **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): `/wedstrijden` houdt toch een kaart met cijfers, "Hoe vaak welke uitslag", onder de stand en boven de hoofdtrainer in de zijbalk.
+- **Later:** zie _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ (6 november 2026): Statistieken is geen onderdeel meer, en Spelers wordt er een (#769). Tot #771 heeft het menu vijf onderdelen: Nieuws, Wedstrijden, Statistieken, Spelers en Forum.
 
 ## De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage
 
@@ -1677,6 +1678,7 @@
 - **Later:** zie _Spelers met evenveel doelpunten delen één rij in de korte tabel met doelpuntenmakers_ (4 november 2026): de kaart op Statistieken heeft sinds dit besluit hoogstens vijf rijen, ook als meer dan vijf spelers erin staan.
 - **Later:** zie _De pagina Spelers toont bijzondere doelpunten_ (31 oktober 2026): Spelers heeft sinds die dag een tweede kaart, en de balk "Op deze pagina:" van Spelers heeft twee links.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de balk met subpagina's van Statistieken heeft sindsdien ook Tegenstanders, en op de pagina's daarvan is Tegenstanders de huidige subpagina.
+- **Later:** zie _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026): Cijfers toont geen top 5 meer (#774). Sinds #769 staat Spelers op `/spelers`, met `/spelers/<seizoen>` en `/spelers/kies`, en is Spelers een onderdeel van het hoofdmenu.
 
 ## Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken
 
@@ -1740,6 +1742,7 @@
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026): de lijst heeft een zijkolom met de top 10 en de bronvermelding, en is wit.
 - **Later:** zie _"Eerder" toont alleen echte naamswijzigingen_ en _De wedstrijdlijsten tonen de naam van het seizoen, de kop de naam van nu_ (4 november 2026): de regel "Eerder: …" onder de kop komt sindsdien uit de lijst van de redactie in plaats van uit de schrijfwijzen van Wikipedia, en de wedstrijden noemen de club met de naam van het seizoen als de club een lijst heeft.
   Een club zonder lijst heeft geen regel, en toont de schrijfwijze van Wikipedia in zijn wedstrijden zoals voorheen.
+- **Later:** zie _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ (6 november 2026): Tegenstanders en de cijfers van het seizoen komen onder Wedstrijden (#770 en #771). Tot dan staat Tegenstanders nog in de balk van Statistieken, die geen Spelers meer heeft.
 
 ## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
 
@@ -1806,6 +1809,7 @@
 - **Later:** zie _De schakelaars wisselen met JavaScript in de pagina, en de links blijven de terugval_ (4 november 2026): een klik op Welke wedstrijden wisselt met de router, zonder een nieuwe pagina.
   De balk blijft staan, `@subnav` ververst zijn links met de nieuwe keuze, en de focus blijft op de link waarop is geklikt.
   Voor elke andere link geldt wat hier staat.
+- **Later:** sinds #769 (6 november 2026) heeft de balk van Statistieken alleen nog Tegenstanders, want Spelers is een onderdeel van het hoofdmenu (`/spelers`, zonder balk). Het seizoen reist mee via het hoofdmenu (`hrefOf`), en de keuze Alle wedstrijden / Eredivisie via de balk van Statistieken. De slot `@subnav` heeft geen route meer voor Spelers.
 
 ## De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
 
@@ -1883,6 +1887,7 @@
   Een seizoen dat bij de ene pagina bestaat, bestaat ook bij de andere, dus een meegenomen seizoen leidt nooit naar "niet gevonden".
 - **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
 - **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
+- **Later:** sinds #769 (6 november 2026) nemen Wedstrijden, Statistieken en Spelers het seizoen van elkaars pagina mee: `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/spelers/<seizoen>`. Het adres `/statistieken/spelers/<seizoen>` bestaat niet meer.
 
 ## De lijst in het beheer heeft een schakelaar voor wel en niet op de site
 
@@ -2598,3 +2603,93 @@
   De naam als link naar Wikipedia (kan later).
   De zin onderaan de kaart (de bezoeker leest de lijst eerst zonder de kanttekening).
 - **Later:** vult _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026) aan: de ranglijst is niet meer de inhoud van de pagina.
+
+## Spelers staat in het menu na Wedstrijden
+
+- **Datum:** 6 november 2026
+- **Besluit:** de volgorde is Nieuws, Wedstrijden, (Statistieken), Spelers, Forum.
+  Spelers is een onderdeel van het hoofdmenu op `/spelers`, huidig (`aria-current="page"`) op elk adres eronder, zonder balk eronder.
+  `/statistieken/spelers`, `/statistieken/spelers/<seizoen>` en `/statistieken/spelers/kies` bestaan niet meer, zonder omleiding.
+  - **De code:** de map `app/spelers` (de pagina's en de route van de kiezer) en het slot `@shortcuts/spelers` zijn met `git mv` verhuisd.
+    Het slot `@subnav` heeft geen route voor Spelers meer, en `statisticsBar.tsx` kent alleen Tegenstanders.
+    `playersPath` is `/spelers`; de balk "Op deze pagina" van Spelers blijft Selectie, Doelpuntenmakers en Bijzondere doelpunten.
+  - **Het adres is gereserveerd:** `spelers` staat in `reservedSlugs`, zodat een artikel dat adres niet kan nemen.
+- **Waarom:** het eindbeeld is Nieuws, Wedstrijden, Spelers, Forum, en Spelers hoort bij de wedstrijden eerder dan bij het nieuws.
+  De site is nog niet openbaar, dus er zijn geen links om te bewaren.
+- **Alternatieven:** Spelers vóór Wedstrijden.
+  Omleidingen met 308 van de oude adressen (nu niet nodig).
+
+## Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum
+
+- **Datum:** 6 november 2026
+- **Besluit:** Statistieken is geen onderdeel meer.
+  Spelers wordt een eigen onderdeel.
+  Tegenstanders en de cijfers van het seizoen staan onder Wedstrijden.
+  Forum blijft een externe link.
+- **Waarom:** Statistieken was een verzameling: cijfers, een selectie en een lijst met clubs.
+  Wie de selectie zoekt, kijkt niet onder Statistieken.
+  Nieuwe cijfers horen bij de spelers, de wedstrijden of de clubs waar ze over gaan.
+- **Alternatieven:** alles laten zoals het is, met een regel voor kaarten (Statistieken blijft dan de plek waar elke nieuwe kaart terechtkomt).
+  Eén onderdeel Seizoen met tabbladen voor Wedstrijden, Stand, Spelers en Cijfers (verbergt Wedstrijden en Spelers achter een nieuw woord, en de meeste bezoeken gaan over nu).
+  Een vijfde onderdeel Tegenstanders.
+  Een vijfde onderdeel Geschiedenis.
+- **Later:** dit vervangt _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_.
+
+## Geschiedenis wordt geen eigen onderdeel van het menu
+
+- **Datum:** 6 november 2026
+- **Besluit:** de seizoenen, de hoofdtrainers en de records komen onder Wedstrijden, op een pagina `/seizoenen` in de balk, zodra #414 de seizoenen voor 2010/11 heeft.
+- **Waarom:** de projecteigenaar wil het menu strak houden.
+  De wedstrijden gaan nu terug tot 2010/11, dus een onderdeel Geschiedenis zou dun zijn.
+- **Alternatieven:** een vijfde onderdeel Geschiedenis met Seizoenen, Tegenstanders, Trainers en Records.
+
+## Zoeken blijft onder Nieuws
+
+- **Datum:** 6 november 2026
+- **Besluit:** de balk van Nieuws wordt Podcasts, Redactie, Zoeken.
+  Zoeken komt niet in de kop, en het adres blijft `/nieuws/zoeken`.
+  De link in de footer blijft.
+- **Waarom:** een zoekveld of knop in de kop past niet op een telefoon.
+  Zoeken vindt nu alleen nieuws, podcasts en artikelen.
+  Het toont wel de lijst met spelers van dit seizoen.
+- **Alternatieven:** een zoeklink rechts in de kop op elke pagina.
+  Zoeken alleen in de footer.
+
+## Adressen noemen de zaak en niet het menu, en er komen geen omleidingen
+
+- **Datum:** 6 november 2026
+- **Besluit:** de pagina's heten `/wedstrijden`, `/cijfers`, `/spelers`, `/tegenstanders`, `/redactie` en later `/seizoenen`.
+  De oude adressen onder `/statistieken` verdwijnen zonder omleiding.
+- **Waarom:** de site is nog niet openbaar, dus er zijn geen links om te bewaren.
+  Staat een adres los van het menu, dan kan het menu later weer veranderen zonder omleidingen.
+- **Alternatieven:** adressen onder hun menu-onderdeel, zoals `/wedstrijden/cijfers` (zou bij een volgende wijziging van het menu opnieuw verhuizen).
+  Omleidingen met 308 (nu niet nodig).
+
+## Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen
+
+- **Datum:** 6 november 2026
+- **Besluit:** de hoofdkolom (wit) heeft de lijst of tabel waar de pagina voor bestaat.
+  De zijkolom heeft cijfers erover, elk op een zacht, warm of sterk vlak, met de bronvermelding als laatste.
+  Cijfers is de uitzondering, met twee even brede kolommen, omdat daar elke kaart een cijferkaart is.
+- **Waarom:** nu betekent hoofdkolom of zijkolom per pagina iets anders.
+  Spelers (#765) heeft de duidelijkste vorm: witte lijst, blauwe cijfers.
+- **Alternatieven:** elke pagina zelf laten kiezen (zoals nu).
+
+## Doelpuntenmakers staan op één plek: Spelers
+
+- **Datum:** 6 november 2026
+- **Besluit:** Cijfers toont geen top 5 doelpuntenmakers meer.
+  De pagina van een club houdt haar eigen top 5 tegen die club.
+- **Waarom:** de top 5 op Statistieken en de volledige lijst op Spelers is dezelfde kaart op twee plaatsen.
+  Met Spelers in het menu is de top 5 overbodig.
+- **Alternatieven:** de top 5 laten staan als voorproefje.
+- **Later:** dit vervangt _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_.
+
+## Het seizoen blijft een instelling van de pagina en wordt geen globale keuze
+
+- **Datum:** 6 november 2026
+- **Besluit:** de seizoenskiezer blijft in de titel van Wedstrijden, Cijfers en Spelers, en het gekozen seizoen reist mee door de menulinks tussen die drie.
+  Een algemeen overzicht van seizoenen komt als `/seizoenen`.
+- **Waarom:** Nieuws, Tegenstanders en de homepage hebben geen seizoen.
+  Een globale keuze in de kop zou daar niets doen.
+- **Alternatieven:** een seizoenskiezer in de kop van elke pagina.

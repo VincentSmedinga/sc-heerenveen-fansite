@@ -397,8 +397,8 @@ test.describe('the bar under the header of /spelers', () => {
   })
 })
 
-test.describe('the bar of Statistieken in the main menu', () => {
-  test('has Spelers, and marks it as the current page on /spelers, not on /statistieken', async ({ page }) => {
+test.describe('Spelers in the main menu', () => {
+  test('is an item after Statistieken, and the current page on /spelers, not on /statistieken', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/statistieken')
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
@@ -410,16 +410,17 @@ test.describe('the bar of Statistieken in the main menu', () => {
 
     await expect(page).toHaveURL(/\/spelers$/)
     await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveAttribute('aria-current', 'page')
-    await expect(menu.getByRole('link', { name: 'Statistieken' })).toHaveAttribute('aria-current', 'true')
+    await expect(menu.getByRole('link', { name: 'Statistieken' })).not.toHaveAttribute('aria-current', /.*/)
   })
 
-  test('is left when the visitor goes on to Wedstrijden, which has no bar', async ({ page }) => {
+  test('is left when the visitor goes on to Wedstrijden, which is then the current item', async ({ page }) => {
     await page.goto('/spelers')
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
 
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
 
     await expect(page).toHaveURL(/\/wedstrijden$/)
-    await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveCount(0)
+    await expect(menu.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'page')
+    await expect(menu.getByRole('link', { name: 'Spelers' })).not.toHaveAttribute('aria-current', /.*/)
   })
 })
