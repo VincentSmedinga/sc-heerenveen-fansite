@@ -2750,7 +2750,7 @@
   - **De adressen:** `/tegenstanders/<club>?pagina=2`, en met de keuze `/tegenstanders/<club>?competitie=eredivisie&pagina=2`.
     Pagina 1 heeft geen `pagina`.
     De schakelaar tussen alle wedstrijden en de Eredivisie gaat naar pagina 1, want het aantal pagina's verschilt per keuze.
-    Een pagina na de laatste, of een `pagina` die geen positief getal is, is "niet gevonden" (`meetingPageCount` in `src/opponents.ts`).
+    Een pagina na de laatste (`meetingPageCount` in `src/opponents.ts`), of een `pagina` die geen positief getal is (`parseFilterQuery`), is "niet gevonden".
     Zonder `pagina` en met tien gespeelde wedstrijden of minder is er geen `Pagination`.
   - **Wat op pagina 1 staat:** de wedstrijden die nog komen en de rij Laatste wedstrijden staan alleen op de eerste pagina, bovenop de tien gespeelde.
     De legenda onder de lijst telt de wedstrijden van de pagina.
@@ -2758,7 +2758,8 @@
 - **Balk "Op deze pagina:":** de pagina van een club heeft de balk met een link naar elke kaart die er is, in de volgorde van de pagina (`clubShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders/[club]`): Wedstrijden, Onze uitslagen, Resultaten sinds …, Hoe vaak welke uitslag, Doelpuntenmakers en Stadion.
   Een kaart die er niet is, heeft geen link.
   De balk is er op een telefoon, zoals bij Wedstrijden.
-  De ankers zijn de bestaande `id`'s van de koppen, die geen link naar zichzelf zijn en dus niet in `src/anchors.ts` staan.
+  De ankers zijn de bestaande `id`'s van de koppen.
+  Een kop die een link naar zichzelf is (Resultaten sinds en Stadion) staat al in `src/anchors.ts`; de andere zijn geen belofte en staan er niet in.
 - **Waarom:** het werkt zonder JavaScript, past bij Nieuws en Redactie en vraagt geen extra pagina per club.
   Een lijst van dertig wedstrijden op een telefoon is een lange scroll, en de acht kaarten erna waren niet te bereiken.
 - **Alternatieven:** vijf regels en een aparte pagina met de hele lijst (zoals #516, maar een extra pagina per club).
