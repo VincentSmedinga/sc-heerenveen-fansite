@@ -2437,3 +2437,19 @@
   De selectie bij elke lezing vervangen, zoals de verzonnen selectie (de `id`'s veranderen en de doelpunten raken hun speler kwijt).
   Een seizoen met een falende lezer toch half opslaan (verworpen: zie hierboven).
 - **Later:** dit vervangt het uitgangspunt van _Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie_ dat een eerder seizoen geen selectie heeft.
+
+## De volledigheid van een selectie is een kans die rust op de bron, met een plafond per bron
+
+- **Datum:** 5 november 2026
+- **Besluit:** de kans dat een lijst de hele selectie van een seizoen bevat, begint bij de beste bron van het seizoen en wordt begrensd door wat die bron kan weten (een tabel van wie speelde kent de bank niet).
+  Controles met de doelpuntenmakers, het aantal spelers en de optelsom van de wedstrijden verlagen de kans als ze uitvallen.
+  Een controle die niet kan draaien, verandert niets.
+  De getallen komen uit een meting op de seizoenen met een volledige tabel (`docs/volledigheid-selectie.md`, #745).
+  - `squadCompleteness` in `squad-completeness.ts` is een functie zonder database en zonder verzoek.
+    Het plafond per bron is 95 voor `selectie`, 70 voor `engels`, 60 voor `statistieken`, 50 voor `wikidata`, 40 voor `transfers` en 30 voor `doelpunten`.
+  - De grenzen van de grootte komen uit de meting: de tien seizoenen hebben 22 tot 36 spelers, dus minder dan 20 is verdacht (hoogstens 45) en minder dan 15 bijna zeker onvolledig (hoogstens 20).
+  - `doelpunten` kreeg 30 en niet het getal van `transfers`, omdat de tabellen laten zien dat wie scoorde 42% tot 52% van de selectie is.
+- **Waarom:** de projecteigenaar wilde per seizoen een kans, op 5 november 2026.
+  De bron zegt het meest over wat ontbreekt, en een plafond voorkomt dat meer controles ooit meer beloven dan de bron weet.
+- **Alternatieven:** een percentage van het aantal spelers tegenover een vast getal (zegt niets over wie ontbreekt).
+  De kans uitrekenen met twee bronnen tegelijk, vangst en terugvangst (zwaar voor de eerste versie en onbetrouwbaar met twee bronnen die niet los van elkaar zijn).
