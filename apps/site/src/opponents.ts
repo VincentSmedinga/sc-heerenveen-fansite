@@ -8,6 +8,7 @@ import {
   listAllWikipediaPages,
   listClubMatches,
   listClubRecords,
+  listStandingsPlaces,
   type PublicClubMatch,
   type PublicClubRecord,
   type PublicSeasonWikipediaPage,
@@ -18,7 +19,7 @@ import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { ownListPeriods, stadiumPeriods } from './match-format'
-import { programmeOf } from './matches'
+import { type FinalPlace, getFinalPlaces, programmeOf } from './matches'
 
 /**
  * The opponents of sc Heerenveen under Wedstrijden: the list of the clubs and the page of each
@@ -88,6 +89,9 @@ export const meetingPageCount = (meetings: readonly unknown[]) =>
 export const meetingsOnPage = <T>(meetings: readonly T[], page: number) =>
   meetings.slice((page - 1) * meetingsPerPage, page * meetingsPerPage)
 
+/** The id of the heading of the card "De plek van <club> en de onze". */
+export const clubPlacesId = 'plek-in-de-competitie'
+
 /**
  * The links in the bar "Op deze pagina:" of the page of a club: one to each card the page has,
  * in the order of a narrow screen, which is the screen the bar is for. The ids are those of
@@ -97,12 +101,14 @@ export const meetingsOnPage = <T>(meetings: readonly T[], page: number) =>
  * Stadion needs a stadium. `since` is the first season we have, as on the card.
  */
 export function clubShortcutsOf({
+  hasPlaces = false,
   hasStadium,
   matches,
   played,
   since,
   upcoming,
 }: {
+  hasPlaces?: boolean
   hasStadium: boolean
   matches: readonly PublicClubMatch[]
   played: number
@@ -120,6 +126,7 @@ export function clubShortcutsOf({
             ? [{ href: '#resultaten-sinds', label: `Resultaten sinds ${firstYear}` }]
             : []),
           { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
+          ...(hasPlaces ? [{ href: `#${clubPlacesId}`, label: 'Plek in de competitie' }] : []),
           ...(hasClubScorers(matches) ? [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] : []),
         ]
       : []),
@@ -485,6 +492,54 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
       }
 })
 
+/** One season of the card "De plek van <club> en de onze": both places in the Eredivisie. */
+export type ClubPlace = { ours: number; season: string; theirs: number }
+
+/**
+ * The names a club goes by, normalised (see `normaliseClubName`): its name, the other spellings
+ * in `club_names`, the names of its own list with their periods, and the name of every match
+ * against it. The table of a season writes the club as Wikipedia did that season, so a club
+ * that changed its name is found under each of them.
+ */
+export function clubKeysOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): Set<string> {
+  return new Set(
+    [
+      page.club.name,
+      ...page.club.otherNames,
+      ...page.names.map((line) => line.name),
+      ...page.matches.map((match) => match.opponent),
+    ].map(normaliseClubName),
+  )
+}
+
+/**
+ * The seasons in which both sc Heerenveen and the club are in the table of the Eredivisie, the
+ * newest first, with the two places. `ours` are the places of every season (`getFinalPlaces`),
+ * `table` the rows of every club (`listStandingsPlaces`) and `keys` the names of the club
+ * (`clubKeysOf`). The season that is going on is left out: its table is not final, and these
+ * are the places a season ended in. A season in which the club is not in the table, or we are
+ * not, is not in the list.
+ */
+export function clubPlacesOf(
+  ours: readonly FinalPlace[],
+  table: readonly { club: string; position: number; season: string }[],
+  keys: ReadonlySet<string>,
+): ClubPlace[] {
+  const places: ClubPlace[] = []
+
+  for (const { now, row, season } of ours) {
+    const theirs = table.find((candidate) => candidate.season === season && keys.has(normaliseClubName(candidate.club)))
+
+    if (!now && row !== undefined && theirs !== undefined) {
+      places.push({ ours: row.position, season, theirs: theirs.position })
+    }
+  }
+
+  return places.reverse()
+}
+
+const standingsPlaces = cacheFor(period, () => listStandingsPlaces(getDatabase().db))
+
 /**
  * The club with that address part and its matches, or undefined for a slug that no club has.
  * The slug is checked against the clubs that have a match before it is used as a key, because
@@ -494,6 +549,16 @@ export async function getClubPage(slug: string): Promise<ClubPage | undefined> {
   const known = await getClubRecords('all')
 
   return known.some((record) => record.slug === slug) ? clubPages(slug) : undefined
+}
+
+/**
+ * The places of a club and ours per season (see `clubPlacesOf`). Our places are the ones of the
+ * card "Onze plek door de jaren" (`getFinalPlaces`), so there is no second question for them.
+ */
+export async function getClubPlaces(page: ClubPage): Promise<ClubPlace[]> {
+  const [ours, table] = await Promise.all([getFinalPlaces(), standingsPlaces()])
+
+  return clubPlacesOf(ours, table, clubKeysOf(page))
 }
 
 /** Whether a club has that slug, for the sitemap and the visit counter. */

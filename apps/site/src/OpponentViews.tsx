@@ -23,9 +23,11 @@ import {
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
 import { competitionNames, countScores, topScorersOf } from './matches'
-import { imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
+import { EredivisieOnly, imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import {
   type ClubNameView,
+  type ClubPlace,
+  clubPlacesId,
   type ClubSummary,
   hasTimeline,
   lastResultsOf,
@@ -248,6 +250,34 @@ export function ClubNamesNotes({ names }: { names: ClubNameView[] }) {
         ))}
       </List>
     </Disclosure>
+  )
+}
+
+/**
+ * The card "De plek van <club> en de onze" of the page of a club: a table with, for every
+ * season in which both clubs were in the table of the Eredivisie, the place each of us ended
+ * in, the newest season first (see `clubPlacesOf`). It is a competition table, so it doesn't
+ * follow the switch between all the matches and the Eredivisie, and it says it counts the
+ * Eredivisie alone. It is figures, so it has the soft surface, in the sidebar under "Hoe vaak
+ * welke uitslag". Without a season in which both were in the table there is no card.
+ */
+export function ClubPlacesCard({ name, places }: { name: string; places: readonly ClubPlace[] }) {
+  if (places.length === 0) {
+    return null
+  }
+
+  return (
+    <Card aria-labelledby={clubPlacesId} surface="soft">
+      <Heading anchor id={clubPlacesId} level={2}>
+        {`De plek van ${name} en de onze`}
+      </Heading>
+      <DataTable
+        caption={`De plek in de Eredivisie waarin ${name} en sc Heerenveen eindigden, per seizoen`}
+        columns={['Seizoen', 'Onze plek', 'Hun plek']}
+        rows={places.map(({ ours, season, theirs }) => ({ cells: [String(ours), String(theirs)], header: season }))}
+      />
+      <EredivisieOnly />
+    </Card>
   )
 }
 

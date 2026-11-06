@@ -81,22 +81,27 @@ const seasonsAgo = (years) => seasonOf(dayYearsAgo(years))
 
 /**
  * Gives the card "Onze plek door de jaren" three seasons: the one of the seed and our row in
- * the table of the two seasons before it, the older one with two points taken off. These
- * seasons have a table and no matches, so their rows are not links.
+ * the table of the two seasons before it, the older one with two points taken off, and the row
+ * of Testdorp FC in them, for its card "De plek van <club> en de onze". These seasons have a
+ * table and no matches, so their rows are not links.
  */
 async function addEarlierStandings(database) {
   const { close, pool } = connect(database)
 
   try {
-    for (const [yearsAgo, position, pointsDeducted] of [
-      [2, 3, 0],
-      [3, 5, 2],
+    for (const [yearsAgo, position, pointsDeducted, theirs] of [
+      [2, 3, 0, 12],
+      [3, 5, 2, 9],
     ]) {
       const day = dayYearsAgo(yearsAgo)
 
       await pool.query(
         "INSERT INTO standings (season, position, club, played, won, drawn, lost, goals_for, goals_against, goal_difference, points, points_deducted, valid_on) VALUES (?, ?, 'sc Heerenveen', 34, 18, 6, 10, 60, 40, 20, ?, ?, ?)",
         [seasonOf(day), position, 60 - pointsDeducted, pointsDeducted, day.toISOString().slice(0, 10)],
+      )
+      await pool.query(
+        "INSERT INTO standings (season, position, club, played, won, drawn, lost, goals_for, goals_against, goal_difference, points, points_deducted, valid_on) VALUES (?, ?, 'Testdorp FC', 34, 18, 6, 10, 60, 40, 20, 60, 0, ?)",
+        [seasonOf(day), theirs, day.toISOString().slice(0, 10)],
       )
     }
   } finally {
@@ -1302,6 +1307,24 @@ await withEmptyDatabase((database) =>
     )
     // The sidebar has the card Hoe vaak welke uitslag directly under the summary.
     assert.match(clubHtml, /id="onze-uitslagen".*<h2[^>]*id="hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/h2>/s)
+    // The card with the places follows it: Testdorp FC is in the table of the seasons two and
+    // three years ago, as we are, so those are its rows, the newest first, and it says it
+    // counts the Eredivisie alone. The season that is going on is not in it.
+    assert.match(
+      clubHtml,
+      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="plek-in-de-competitie">.*?De plek van Testdorp FC en de onz.*?<\/h2>.*?<caption class="hf-visually-hidden">De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen<\/caption>/s,
+    )
+    const clubPlaces = clubHtml.slice(clubHtml.indexOf('id="plek-in-de-competitie"'))
+    const placeRow = (years, ours, theirs) =>
+      new RegExp(
+        `<th scope="row">${seasonsAgo(years).replace('/', '\\/')}</th><td[^>]*>${ours}</td><td[^>]*>${theirs}</td>`,
+      )
+
+    assert.match(clubPlaces, placeRow(2, 3, 12))
+    assert.match(clubPlaces, placeRow(3, 5, 9))
+    assert.ok(clubPlaces.indexOf(seasonsAgo(2)) < clubPlaces.indexOf(seasonsAgo(3)))
+    assert.doesNotMatch(clubPlaces.slice(0, clubPlaces.indexOf('</section>')), new RegExp(`>${seasonOf(new Date())}<`))
+    assert.match(clubPlaces, /Alleen de Eredivisie/)
     // The card has two charts (the scores and the goals, the second small), the sentence of the
     // goals for a screen reader, the counts in the headers, then the table of the competitions
     // and last the number of matches, in the short form.
@@ -1321,6 +1344,9 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(stadiumClub, /Zo noemt Wikipedia|De dagen zijn die van onze wedstrijden/)
     assert.match(stadiumClub, closedWikipediaCredit)
     assert.doesNotMatch(stadiumClub, /id="doelpuntenmakers"/)
+    // Voorbeeld United is only in the table of the season that is going on, so it has no season
+    // in common with us that is over and no card with the places.
+    assert.doesNotMatch(stadiumClub, /id="plek-in-de-competitie"/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, closedWikipediaCredit)
     assert.match(
