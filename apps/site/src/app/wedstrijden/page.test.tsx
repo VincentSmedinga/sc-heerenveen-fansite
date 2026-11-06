@@ -144,7 +144,7 @@ describe('the page /wedstrijden', () => {
     expect(sidebar).not.toContain('id="programma"')
   })
 
-  it('has none of the cards with figures: they are on the page Statistieken', async () => {
+  it('has none of the cards with figures: they are on the page Cijfers', async () => {
     const html = await render()
 
     for (const id of [
@@ -165,21 +165,21 @@ describe('the page /wedstrijden', () => {
     }
   })
 
-  it('has under the table a link to our place in the league and under the results one to the course of the season, on the page Statistieken', async () => {
+  it('has under the table a link to our place in the league and under the results one to the course of the season, on the page Cijfers', async () => {
     const html = await render()
 
     expect(section(html, 'stand')).toContain(
-      '<a href="/statistieken#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
+      '<a href="/cijfers#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
     )
     expect(section(html, 'uitslagen')).toContain(
-      '<a href="/statistieken#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
+      '<a href="/cijfers#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
     )
   })
 
   it('has no link to the cards with figures under a table or results that are not there yet', async () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], standings: [] })
 
-    expect(await render()).not.toContain('/statistieken')
+    expect(await render()).not.toContain('/cijfers')
   })
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
@@ -1135,7 +1135,7 @@ describe('the switch of the card Stand, between the whole season and the latest 
       ['3', 'Testdorp FC'],
     ])
     expect(card).toContain('class="hf-highlight hf-standings-table-own"')
-    expect(card).toContain('<a href="/statistieken#onze-plek-in-de-competitie">')
+    expect(card).toContain('<a href="/cijfers#onze-plek-in-de-competitie">')
   })
 
   it('shows the whole season for a value that is not known, an empty one and one given twice', async () => {

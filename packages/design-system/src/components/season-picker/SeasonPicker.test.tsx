@@ -75,12 +75,7 @@ describe('SeasonPicker', () => {
 
   it('sends the fields it is given along with the season, as hidden fields', () => {
     render(
-      <SeasonPicker
-        action="/statistieken/kies"
-        fields={{ competitie: 'eredivisie' }}
-        options={options}
-        value="2026-27"
-      />,
+      <SeasonPicker action="/cijfers/kies" fields={{ competitie: 'eredivisie' }} options={options} value="2026-27" />,
     )
 
     const field = document.querySelector<HTMLInputElement>('form input[type="hidden"]')

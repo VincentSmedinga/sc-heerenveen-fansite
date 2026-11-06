@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import NoSubnav from '../[...rest]/page'
+import SeasonFiguresSubnav from '../cijfers/[seizoen]/page'
+import FiguresSubnav from '../cijfers/page'
 import Home from '../page'
 import ClubSubnav from '../tegenstanders/[club]/page'
 import OpponentsSubnav from '../tegenstanders/page'
@@ -24,31 +26,47 @@ const links = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].ma
 
 const current = (html: string) => /aria-current="page"[^>]*>([^<]*)</.exec(html)?.[1]
 
-const search = (query: Query = {}) => ({ searchParams: Promise.resolve(query) })
+const search = (query: Query = {}, seizoen = '2025-26') => ({
+  params: Promise.resolve({ seizoen }),
+  searchParams: Promise.resolve(query),
+})
 
 describe('the slot @subnav, for the bar of Wedstrijden in the main menu', () => {
-  it('keeps the choice on the page of a season, and marks no sub-page', async () => {
+  it('keeps the choice and the season on the page of a season, and marks no sub-page', async () => {
     const html = renderToStaticMarkup(await SeasonMatchesSubnav(search({ competitie: 'eredivisie' })))
 
-    expect(links(html)).toEqual(['/tegenstanders?competitie=eredivisie'])
+    expect(links(html)).toEqual(['/cijfers/2025-26?competitie=eredivisie', '/tegenstanders?competitie=eredivisie'])
     expect(current(html)).toBeUndefined()
   })
 
-  it('has the link to Tegenstanders on /wedstrijden, with and without the choice', async () => {
-    expect(links(renderToStaticMarkup(await MatchesSubnav(search())))).toEqual(['/tegenstanders'])
+  it('has the links to Cijfers and Tegenstanders on /wedstrijden, with and without the choice', async () => {
+    expect(links(renderToStaticMarkup(await MatchesSubnav(search())))).toEqual(['/cijfers', '/tegenstanders'])
     expect(links(renderToStaticMarkup(await MatchesSubnav(search({ competitie: 'eredivisie' }))))).toEqual([
+      '/cijfers?competitie=eredivisie',
       '/tegenstanders?competitie=eredivisie',
     ])
   })
 
   it('does not repeat a choice that the page does not know', async () => {
     expect(links(renderToStaticMarkup(await SeasonMatchesSubnav(search({ competitie: 'alle' }))))).toEqual([
+      '/cijfers/2025-26',
       '/tegenstanders',
     ])
   })
 
-  it('has no bar for Statistieken or Spelers, which have no sub-pages', () => {
-    expect(existsSync(new URL('../statistieken', import.meta.url))).toBe(false)
+  it('marks Cijfers on /cijfers and on the page of a season, and keeps the choice and the season', async () => {
+    const figures = renderToStaticMarkup(await FiguresSubnav(search({ competitie: 'eredivisie' })))
+    const season = renderToStaticMarkup(await SeasonFiguresSubnav(search({ competitie: 'eredivisie' }, '2023-24')))
+
+    expect(links(figures)).toEqual(['/cijfers?competitie=eredivisie', '/tegenstanders?competitie=eredivisie'])
+    expect(links(season)).toEqual(['/cijfers/2023-24?competitie=eredivisie', '/tegenstanders?competitie=eredivisie'])
+
+    for (const html of [figures, season]) {
+      expect(current(html)).toBe('Cijfers')
+    }
+  })
+
+  it('has no bar for Spelers, which has no sub-pages', () => {
     expect(existsSync(new URL('../spelers', import.meta.url))).toBe(false)
   })
 
@@ -57,7 +75,7 @@ describe('the slot @subnav, for the bar of Wedstrijden in the main menu', () => 
     const club = renderToStaticMarkup(await ClubSubnav(search({ competitie: 'eredivisie' })))
 
     for (const html of [list, club]) {
-      expect(links(html)).toEqual(['/tegenstanders?competitie=eredivisie'])
+      expect(links(html)).toEqual(['/cijfers?competitie=eredivisie', '/tegenstanders?competitie=eredivisie'])
       expect(current(html)).toBe('Tegenstanders')
     }
   })

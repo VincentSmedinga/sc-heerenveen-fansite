@@ -44,7 +44,7 @@ describe('the bar of /spelers', () => {
     expect(playersShortcuts).toHaveLength(3)
   })
 
-  it('has none of the other eight cards of Statistieken', async () => {
+  it('has none of the other eight cards of Cijfers', async () => {
     const html = await render()
 
     for (const id of ['reeksen', 'uitersten', 'de-nul-gehouden']) {

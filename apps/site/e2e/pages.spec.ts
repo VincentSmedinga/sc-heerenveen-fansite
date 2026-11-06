@@ -48,15 +48,15 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/kies', status: 200 },
   { path: '/wedstrijden/2099-00', status: 404 },
   { path: '/wedstrijden/onzin', status: 404 },
-  // The statistics of the current season, of an earlier season, the route behind the season
+  // The figures of the current season, of an earlier season, the route behind the season
   // picker and the addresses that say "niet gevonden", as for Wedstrijden above.
-  { path: '/statistieken', status: 200 },
-  { path: `/statistieken/${earlierSeasonSlug()}`, status: 200 },
-  { path: `/statistieken/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
-  { path: '/statistieken/kies?seizoen=onzin', status: 200 },
-  { path: '/statistieken/kies', status: 200 },
-  { path: '/statistieken/2099-00', status: 404 },
-  { path: '/statistieken/onzin', status: 404 },
+  { path: '/cijfers', status: 200 },
+  { path: `/cijfers/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/cijfers/kies?seizoen=onzin', status: 200 },
+  { path: '/cijfers/kies', status: 200 },
+  { path: '/cijfers/2099-00', status: 404 },
+  { path: '/cijfers/onzin', status: 404 },
   // The page Spelers, an item of the main menu, with the same set of addresses.
   { path: '/spelers', status: 200 },
   { path: `/spelers/${earlierSeasonSlug()}`, status: 200 },
@@ -65,9 +65,6 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/spelers/kies', status: 200 },
   { path: '/spelers/2099-00', status: 404 },
   { path: '/spelers/onzin', status: 404 },
-  // The old addresses under Statistieken are gone, with no redirect (#769).
-  { path: '/statistieken/spelers', status: 404 },
-  { path: '/statistieken/spelers/kies', status: 404 },
   // The page Tegenstanders, a sub-page of Wedstrijden: the list, a club met in the league
   // (Testdorp FC), one with two names of its stadium (Voorbeeld United) and one met in the cup
   // only (FC Maquette, who is not in the list with the choice Eredivisie and has a sentence on
@@ -91,17 +88,23 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/tegenstanders/testdorp-fc?competitie=onzin', status: 404 },
   { path: '/tegenstanders/bestaat-niet', status: 404 },
   { path: '/tegenstanders/testdorp-fc/extra', status: 404 },
-  // The old addresses under Statistieken are gone, with no redirect (#770).
+  // The old addresses of Cijfers, when the page was still called Statistieken, are gone, with
+  // no redirect (#771), and so are the ones under them that Spelers and Tegenstanders had
+  // before (#769, #770).
+  { path: '/statistieken', status: 404 },
+  { path: `/statistieken/${earlierSeasonSlug()}`, status: 404 },
+  { path: '/statistieken/kies', status: 404 },
+  { path: '/statistieken/spelers', status: 404 },
   { path: '/statistieken/tegenstanders', status: 404 },
   { path: '/statistieken/tegenstanders/testdorp-fc', status: 404 },
   // The choice between all the matches and the Eredivisie, on both pages: `eredivisie` is the
   // only value, and anything else or the same twice says "niet gevonden". The route behind the
   // season picker keeps the choice, and drops a value it does not know.
-  { path: '/statistieken?competitie=eredivisie', status: 200 },
-  { path: `/statistieken/${earlierSeasonSlug()}?competitie=eredivisie`, status: 200 },
-  { path: '/statistieken?competitie=onzin', status: 404 },
-  { path: '/statistieken?competitie=eredivisie&competitie=eredivisie', status: 404 },
-  { path: `/statistieken/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  { path: '/cijfers?competitie=eredivisie', status: 200 },
+  { path: `/cijfers/${earlierSeasonSlug()}?competitie=eredivisie`, status: 200 },
+  { path: '/cijfers?competitie=onzin', status: 404 },
+  { path: '/cijfers?competitie=eredivisie&competitie=eredivisie', status: 404 },
+  { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   { path: '/spelers?competitie=eredivisie', status: 200 },
   { path: '/spelers?competitie=onzin', status: 404 },
   { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },

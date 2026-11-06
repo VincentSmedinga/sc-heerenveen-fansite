@@ -2,7 +2,7 @@ import { seasonOf } from '@fansite/db/season'
 
 import type { SearchParams } from '#src/season-page'
 
-import { SeasonShortcuts } from '#src/app/@shortcuts/statistieken/season-shortcuts'
+import { SeasonShortcuts } from '#src/app/@shortcuts/cijfers/season-shortcuts'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 
 // Render on each request, like the page it belongs to, so the build never reads the database.

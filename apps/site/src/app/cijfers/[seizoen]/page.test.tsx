@@ -59,7 +59,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the page of an earlier season, /statistieken/2025-26', () => {
+describe('the page of an earlier season, /cijfers/2025-26', () => {
   it('asks for the data of that season and of no other, after finding it among the seasons with matches', async () => {
     await render()
 
@@ -73,11 +73,11 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
     expect(statisticsShortcuts.map(({ href }) => href)).toEqual(ids)
   })
 
-  it('has the heading Statistieken, without the season, which the list beside it names', async () => {
+  it('has the heading Cijfers, without the season, which the list beside it names', async () => {
     const html = await render()
 
-    expect(html).toContain('<h1 class="hf-heading-1">Statistieken</h1>')
-    expect(html).not.toContain('Statistieken 2025/26</h1>')
+    expect(html).toContain('<h1 class="hf-heading-1">Cijfers</h1>')
+    expect(html).not.toContain('Cijfers 2025/26</h1>')
   })
 
   it('has none of the cards of Wedstrijden', async () => {
@@ -180,7 +180,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
     expect(html).not.toMatch(/\ssrc="/)
   })
 
-  it('keeps the button for more clean sheets on the page of the season, not on /statistieken', async () => {
+  it('keeps the button for more clean sheets on the page of the season, not on /cijfers', async () => {
     const sheets = Array.from({ length: 11 }, (_, index): PublicMatch => ({
       ...earlierMatch,
       goals: [],
@@ -192,17 +192,17 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
 
     vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: sheets })
 
-    expect(await render()).toContain('action="/statistieken/2025-26#nul-11"')
+    expect(await render()).toContain('action="/cijfers/2025-26#nul-11"')
   })
 
   describe('the season picker', () => {
-    it('is a form named Seizoen kiezen in the title row, next to the heading, that gets /statistieken/kies', async () => {
+    it('is a form named Seizoen kiezen in the title row, next to the heading, that gets /cijfers/kies', async () => {
       const html = await render()
 
       expect(html).toMatch(
-        /<div class="hf-page-title"><h1 class="hf-heading-1">Statistieken<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+        /<div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
       )
-      expect(html).toContain('action="/statistieken/kies"')
+      expect(html).toContain('action="/cijfers/kies"')
       expect(html).toContain('method="get"')
     })
 
@@ -244,11 +244,11 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
       expect(getMatchData).not.toHaveBeenCalled()
     })
 
-    it('sends the current season to /statistieken, for a season to have one address', async () => {
+    it('sends the current season to /cijfers, for a season to have one address', async () => {
       const digest = await digestOf(render('2026-27'))
 
       expect(digest).toContain('NEXT_REDIRECT')
-      expect(digest).toContain('/statistieken;')
+      expect(digest).toContain('/cijfers;')
       expect(digest).not.toContain('308')
       expect(getMatchData).not.toHaveBeenCalled()
     })
@@ -262,7 +262,7 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
     const html = await render()
 
     expect(html).toContain('Er ging iets mis')
-    expect(html).toContain('href="/statistieken/2025-26"')
+    expect(html).toContain('href="/cijfers/2025-26"')
     expect(error).toHaveBeenCalledOnce()
   })
 })
@@ -273,15 +273,15 @@ describe('the title, description and canonical address of a season', () => {
   it('names the season in the title, which the heading does not, and has the address of the season as the canonical address', async () => {
     const metadata = await metadataOf('2025-26')
 
-    expect(metadata.title).toBe('Statistieken 2025/26')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/statistieken/2025-26')
-    expect(metadata.openGraph?.url).toBe('https://sc.heerenveen.org/statistieken/2025-26')
+    expect(metadata.title).toBe('Cijfers 2025/26')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/cijfers/2025-26')
+    expect(metadata.openGraph?.url).toBe('https://sc.heerenveen.org/cijfers/2025-26')
     expect(metadata.description).toContain('2025/26')
     expect(metadata.description).toContain('De cijfers')
     expect(metadata.description).not.toContain('dit seizoen')
   })
 
-  it('is noindex on the error page, as /statistieken is', async () => {
+  it('is noindex on the error page, as /cijfers is', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.mocked(getMatchSeasons).mockRejectedValue(new Error('down'))
 

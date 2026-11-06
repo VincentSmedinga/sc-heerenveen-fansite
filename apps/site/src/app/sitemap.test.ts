@@ -40,8 +40,8 @@ const notInSitemap: string[] = [
   '/redactie/[slug]',
   // One page for every club we played: the sitemap lists them from the database.
   '/tegenstanders/[club]',
-  // The statistics of a season that is over: only the current season, /statistieken, is listed.
-  '/statistieken/[seizoen]',
+  // The statistics of a season that is over: only the current season, /cijfers, is listed.
+  '/cijfers/[seizoen]',
   // The same for the players of a season that is over: only /spelers is listed.
   '/spelers/[seizoen]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.

@@ -1,8 +1,8 @@
 /**
- * The links in the bar under the header of /statistieken: each goes to the heading of one of
+ * The links in the bar under the header of /cijfers: each goes to the heading of one of
  * the ten cards with figures, in the order the cards have in the source, which is the order on
  * a narrow screen and the order of the two columns on a wide one, the left one first. The ids
- * are those of the headings in app/statistieken/statistics-page.tsx (a test checks it). The
+ * are those of the headings in app/cijfers/statistics-page.tsx (a test checks it). The
  * cards are the same for a season that is over, so the bar is too. The card Opmerkelijk (id
  * `opmerkelijk`) is not in it: it is one fact that changes with the day, and it may not be
  * there.

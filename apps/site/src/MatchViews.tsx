@@ -106,7 +106,7 @@ export function CleanSheetsCard({
   count,
   matches,
   now,
-  path = '/statistieken',
+  path = '/cijfers',
   season,
 }: {
   competition: CompetitionChoice
@@ -1109,7 +1109,7 @@ export function StreaksCard({
  * list for a complete one. Without a goal it is a sentence for visitors and no table.
  *
  * Without `playersHref` it is everybody who scored, as on the page Spelers. With it, it is the
- * short form of the page Statistieken: the first five places (see topFiveOf), the line says "De
+ * short form of the page Cijfers: the first five places (see topFiveOf), the line says "De
  * top 5 van 17 spelers die scoorden", and the link "Alle doelpuntenmakers" under the list goes
  * to `playersHref`, the page with the whole list. The line only says "top 5" when the list was
  * cut: if nobody is left out, it counts the players, as the full list does.
@@ -1182,7 +1182,7 @@ const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
 })
 
 /**
- * The card Doelpuntenmakers, on the page Statistieken as the short form (the top 5, with the
+ * The card Doelpuntenmakers, on the page Cijfers as the short form (the top 5, with the
  * link to the page Spelers) and on the page Spelers as the whole list. Both have the same
  * heading, anchor and button for an image, so a link to `#doelpuntenmakers` works on both.
  * `playersHref` is the page Spelers of the season the card is about; the page Spelers leaves it

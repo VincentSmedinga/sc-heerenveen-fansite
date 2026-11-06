@@ -7,7 +7,7 @@ export const scoreCountsCard = { id: 'hoe-vaak-welke-uitslag', name: 'Hoe vaak w
  * The links in the bar under the header of /wedstrijden: each goes to the heading of a card, in
  * the order the cards have on a narrow screen. The ids are those of the headings in
  * app/wedstrijden/matches-page.tsx (a test checks it). The cards with figures have their own
- * bar, on /statistieken (see statisticsShortcuts.ts).
+ * bar, on /cijfers (see statisticsShortcuts.ts).
  */
 export const matchShortcuts = [
   { href: '#programma', label: 'Programma' },

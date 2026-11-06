@@ -7,8 +7,8 @@ import { SeasonShortcuts } from '../season-shortcuts'
 export const dynamic = 'force-dynamic'
 
 /**
- * The bar of the page of another season, such as /statistieken/2025-26. An address that isn't a
- * season has no bar: the page is "niet gevonden". The current season is sent to /statistieken
+ * The bar of the page of another season, such as /cijfers/2025-26. An address that isn't a
+ * season has no bar: the page is "niet gevonden". The current season is sent to /cijfers
  * by the page, so it gets the bar there.
  */
 export default async function SeasonStatisticsShortcuts({
