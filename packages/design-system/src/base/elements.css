@@ -14,7 +14,7 @@
 
   blockquote {
     border-inline-start: 0.25rem solid;
-    border-inline-start-color: var(--hf-colour-marker-graphic);
+    border-inline-start-color: var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
     box-sizing: border-box;
     display: grid;
     gap: var(--hf-space-m);
@@ -65,7 +65,7 @@
   hr {
     border: none;
     border-block-start: 1px solid;
-    border-block-start-color: var(--hf-colour-border-default);
+    border-block-start-color: var(--hf-card-line, var(--hf-colour-border-default));
     box-sizing: border-box;
     margin-block: 0;
   }

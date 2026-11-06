@@ -5,8 +5,8 @@
  * Scales: a colour in one strength, made in OKLCH and numbered from light to dark. Only scales have numbers.
  * - Vivid: blue, red and green, 11 steps each.
  * - Muted: steel, a muted blue (chroma 0.030 to 0.075, steps 200 to 600), and sand (chroma 0.030 and 0.042,
- *   steps 100, 300 and 700). Steel, sand-300 and sand-700 are as light as the grey step with the same number;
- *   sand-100 is as light as blue-100.
+ *   steps 100, 300, 400, 500 and 700). Steel and sand steps are as light as the grey step with
+ * the same number, except   sand-100, which is as light as blue-100;
  * - Neutral: grey, a neutral sand (chroma 0.006 to 0.017), 11 steps: warm and never fully neutral.
  * Roles: the semantic tokens. They have names, never numbers.
  *
@@ -75,6 +75,8 @@
     --hf-colour-steel-600: #416088;
     --hf-colour-sand-100: #f3e8d3;
     --hf-colour-sand-300: #d6c7ab;
+    --hf-colour-sand-400: #afa185;
+    --hf-colour-sand-500: #877a5f;
     --hf-colour-sand-700: #52462d;
 
     /*
@@ -276,6 +278,26 @@
     --hf-colour-border-surface-warm: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
 
     /*
+     * The lines inside a card follow the card. Each surface has, next to its border (the line
+     * above), two more: `line-darker`, a step darker than the border, for the outlines of parts
+     * such as a disclosure or a notice, and `line-graphic`, for axes and arrows, which must
+     * reach 3:1 against the surface (WCAG 1.4.11). The border and the darker line are
+     * decoration and have no ratio to reach. Card sets them as --hf-card-line, --hf-card-line-
+     * strong and --hf-card-line-graphic (see card.css). Contrast of the graphic line against
+     * its surface, light / dark: surface 4.19 / 6.21, strong 3.46 / 4.89, soft 3.85 / 6.21,
+     * warm 3.47 / 4.89. Contrast of the darker line, which is not required: surface 1.67 /
+     * 2.28, strong 2.10 / 2.66, soft 1.52 / 2.28, warm 2.09 / 2.66.
+     */
+    --hf-colour-line-darker-surface: light-dark(var(--hf-colour-grey-300), var(--hf-colour-blue-600));
+    --hf-colour-line-darker-surface-strong: light-dark(var(--hf-colour-steel-400), var(--hf-colour-blue-500));
+    --hf-colour-line-darker-surface-soft: light-dark(var(--hf-colour-steel-300), var(--hf-colour-blue-600));
+    --hf-colour-line-darker-surface-warm: light-dark(var(--hf-colour-sand-400), var(--hf-colour-blue-500));
+    --hf-colour-line-graphic-surface: light-dark(var(--hf-colour-steel-500), var(--hf-colour-steel-400));
+    --hf-colour-line-graphic-surface-strong: light-dark(var(--hf-colour-steel-500), var(--hf-colour-steel-400));
+    --hf-colour-line-graphic-surface-soft: light-dark(var(--hf-colour-steel-500), var(--hf-colour-steel-400));
+    --hf-colour-line-graphic-surface-warm: light-dark(var(--hf-colour-sand-500), var(--hf-colour-steel-400));
+
+    /*
      * The line round the slices of a chart: a light outline on every surface, in light and in
      * dark, and not the colour of the surface. A see-through line would draw nothing, so it
      * would not part the slices. In dark it is blue-50, the colour of the headings and the
@@ -294,7 +316,11 @@
     --hf-colour-chart-line: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
     --hf-colour-chart-line-edge: light-dark(var(--hf-colour-white), var(--hf-colour-blue-800));
 
-    /* Lines between rows and the horizontal rule. The same values as the surface border, for now. */
+    /*
+     * Lines between rows and the horizontal rule outside a card, the same values as the surface
+     * border. Inside a card they take the border of that card (--hf-card-line), so this is what
+     * they are where no card is.
+     */
     --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
 
@@ -389,6 +415,14 @@
       --hf-colour-border-surface-strong: var(--hf-colour-steel-300);
       --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
       --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
+      --hf-colour-line-darker-surface: var(--hf-colour-grey-300);
+      --hf-colour-line-darker-surface-strong: var(--hf-colour-steel-400);
+      --hf-colour-line-darker-surface-soft: var(--hf-colour-steel-300);
+      --hf-colour-line-darker-surface-warm: var(--hf-colour-sand-400);
+      --hf-colour-line-graphic-surface: var(--hf-colour-steel-500);
+      --hf-colour-line-graphic-surface-strong: var(--hf-colour-steel-500);
+      --hf-colour-line-graphic-surface-soft: var(--hf-colour-steel-500);
+      --hf-colour-line-graphic-surface-warm: var(--hf-colour-sand-500);
       --hf-colour-border-chart-slice: var(--hf-colour-white);
       --hf-colour-chart-line: var(--hf-colour-blue-900);
       --hf-colour-chart-line-edge: var(--hf-colour-white);

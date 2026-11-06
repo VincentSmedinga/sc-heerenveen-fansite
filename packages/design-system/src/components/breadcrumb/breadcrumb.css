@@ -26,8 +26,8 @@
        */
       &:not(:last-child)::after {
         block-size: 0.4em;
-        border-block-start: 2px solid var(--hf-colour-marker-graphic);
-        border-inline-end: 2px solid var(--hf-colour-marker-graphic);
+        border-block-start: 2px solid var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
+        border-inline-end: 2px solid var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
         box-sizing: border-box;
         content: '';
         flex: none;

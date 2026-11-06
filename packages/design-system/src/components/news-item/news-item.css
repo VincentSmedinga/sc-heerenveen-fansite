@@ -114,7 +114,7 @@
   }
 
   li > .hf-news-item {
-    border-block-start: 1px solid var(--hf-colour-border-default);
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
   }
 
   li:first-child > .hf-news-item {

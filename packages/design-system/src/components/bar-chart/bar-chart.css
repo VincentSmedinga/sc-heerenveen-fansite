@@ -39,14 +39,14 @@
    */
   .hf-bar-chart-plot {
     block-size: var(--hf-bar-chart-height);
-    border-block-end: 0.125rem solid var(--hf-colour-marker-graphic);
+    border-block-end: 0.125rem solid var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
     grid-column: -2 / -1;
     position: relative;
   }
 
   /* A line across the chart at a value, in the same line as between the rows of a table. */
   .hf-bar-chart-guide {
-    border-block-start: 1px solid var(--hf-colour-border-default);
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     inline-size: 100%;
     inset-block-end: calc(var(--hf-bar-chart-at) * 1%);
     inset-inline-start: 0;

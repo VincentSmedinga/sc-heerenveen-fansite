@@ -30,6 +30,24 @@
     }
   }
 
+  /*
+   * The lines inside a card follow its border. Each surface sets three properties and the parts
+   * in the card draw their lines with them, `var(--hf-card-line, <their own colour>)`, so a
+   * part outside a card is what it always was and a new surface only has to set these three:
+   * - --hf-card-line: the border of the surface, for the lines between rows and the rule;
+   * - --hf-card-line-strong: a step darker, for the outline of a disclosure, a notice or a
+   *   fieldset;
+   * - --hf-card-line-graphic: reaches 3:1 against the surface, for the axes of a chart and
+   *   arrows.
+   * The transparent card sets none of them, so what is in it keeps its own colour. The base is a
+   * :where() so a surface below wins without a specificity fight.
+   */
+  :where(.hf-card:not(.hf-card-transparent)) {
+    --hf-card-line: var(--hf-colour-border-surface);
+    --hf-card-line-strong: var(--hf-colour-line-darker-surface);
+    --hf-card-line-graphic: var(--hf-colour-line-graphic-surface);
+  }
+
   /* The heading of a card with a button for an image leaves room for it, so it never runs under it. */
   .hf-card-shareable > :first-child:is(h1, h2, h3, h4, h5, h6) {
     padding-inline-end: calc(var(--hf-space-xl) + var(--hf-space-s));
@@ -38,16 +56,28 @@
   .hf-card-strong {
     background-color: var(--hf-colour-background-surface-strong);
     border-color: var(--hf-colour-border-surface-strong);
+
+    --hf-card-line: var(--hf-colour-border-surface-strong);
+    --hf-card-line-strong: var(--hf-colour-line-darker-surface-strong);
+    --hf-card-line-graphic: var(--hf-colour-line-graphic-surface-strong);
   }
 
   .hf-card-soft {
     background-color: var(--hf-colour-background-surface-soft);
     border-color: var(--hf-colour-border-surface-soft);
+
+    --hf-card-line: var(--hf-colour-border-surface-soft);
+    --hf-card-line-strong: var(--hf-colour-line-darker-surface-soft);
+    --hf-card-line-graphic: var(--hf-colour-line-graphic-surface-soft);
   }
 
   .hf-card-warm {
     background-color: var(--hf-colour-background-surface-warm);
     border-color: var(--hf-colour-border-surface-warm);
+
+    --hf-card-line: var(--hf-colour-border-surface-warm);
+    --hf-card-line-strong: var(--hf-colour-line-darker-surface-warm);
+    --hf-card-line-graphic: var(--hf-colour-line-graphic-surface-warm);
   }
 
   /*

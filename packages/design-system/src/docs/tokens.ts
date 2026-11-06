@@ -30,10 +30,10 @@ export const scales: { description: string; label: string; name: ScaleName; step
   },
   {
     description:
-      'Gedempt zand, tint 85° met 0,030 en 0,042 chroma. Voor het warme vlak en zijn rand in licht, en voor de links in de footer.',
+      'Gedempt zand, tint 85° met 0,030 en 0,042 chroma. Voor het warme vlak en zijn rand en lijnen in licht, en voor de links in de footer.',
     label: 'Zand',
     name: 'sand',
-    steps: [100, 300, 700],
+    steps: [100, 300, 400, 500, 700],
   },
   {
     description: 'Neutraal zand, tint 85° met hooguit 0,017 chroma: warm en nooit helemaal neutraal.',
@@ -158,8 +158,43 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-border-surface-strong', use: 'Sterke rand, ook van codeblokken' },
       { name: '--hf-colour-border-surface-soft', use: 'Zachte rand' },
       { name: '--hf-colour-border-surface-warm', use: 'Warme rand' },
+      {
+        name: '--hf-colour-line-darker-surface',
+        use: 'Een stap donkerder dan de rand van het vlak: omlijsting van een uitklapblok of mededeling in die kaart',
+      },
+      {
+        name: '--hf-colour-line-darker-surface-strong',
+        use: 'Een stap donkerder dan de rand van het sterk vlak: omlijsting van een uitklapblok of mededeling in die kaart',
+      },
+      {
+        name: '--hf-colour-line-darker-surface-soft',
+        use: 'Een stap donkerder dan de rand van het zacht vlak: omlijsting van een uitklapblok of mededeling in die kaart',
+      },
+      {
+        name: '--hf-colour-line-darker-surface-warm',
+        use: 'Een stap donkerder dan de rand van het warm vlak: omlijsting van een uitklapblok of mededeling in die kaart',
+      },
+      {
+        name: '--hf-colour-line-graphic-surface',
+        use: 'As of pijl in een kaart met het vlak: haalt 3:1 tegen dat vlak',
+      },
+      {
+        name: '--hf-colour-line-graphic-surface-strong',
+        use: 'As of pijl in een kaart met het sterk vlak: haalt 3:1 tegen dat vlak',
+      },
+      {
+        name: '--hf-colour-line-graphic-surface-soft',
+        use: 'As of pijl in een kaart met het zacht vlak: haalt 3:1 tegen dat vlak',
+      },
+      {
+        name: '--hf-colour-line-graphic-surface-warm',
+        use: 'As of pijl in een kaart met het warm vlak: haalt 3:1 tegen dat vlak',
+      },
       { name: '--hf-colour-border-shortcuts', use: 'Lijn onder de balk Op deze pagina' },
-      { name: '--hf-colour-border-default', use: 'Lijn: tussen rijen en als scheidingslijn' },
+      {
+        name: '--hf-colour-border-default',
+        use: 'Lijn tussen rijen en scheidingslijn buiten een kaart; in een kaart volgt ze de rand van die kaart',
+      },
       { name: '--hf-colour-border-chart-slice', use: 'Lijn om de plakken van een donutdiagram, op elk vlak' },
       { name: '--hf-colour-chart-line', use: 'Lijn door een staafdiagram: donker in licht, licht in donker' },
       {
@@ -441,6 +476,10 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('marker-graphic', 'surface-strong', 'Opsommingsteken of lijn op een sterk vlak', 'grafisch'),
       pair('marker-graphic', 'surface-soft', 'Opsommingsteken of lijn op een zacht vlak', 'grafisch'),
       pair('marker-graphic', 'surface-warm', 'Opsommingsteken of lijn op een warm vlak', 'grafisch'),
+      pair('line-graphic-surface', 'surface', 'As of pijl in een kaart met het vlak', 'grafisch'),
+      pair('line-graphic-surface-strong', 'surface-strong', 'As of pijl in een kaart met het sterk vlak', 'grafisch'),
+      pair('line-graphic-surface-soft', 'surface-soft', 'As of pijl in een kaart met het zacht vlak', 'grafisch'),
+      pair('line-graphic-surface-warm', 'surface-warm', 'As of pijl in een kaart met het warm vlak', 'grafisch'),
       pair('chart-line', 'surface', 'Lijn door een staafdiagram op een vlak', 'grafisch'),
       pair('chart-line', 'surface-soft', 'Lijn door een staafdiagram op een zacht vlak', 'grafisch'),
       pair('chart-line', 'surface-warm', 'Lijn door een staafdiagram op een warm vlak', 'grafisch'),
@@ -456,6 +495,10 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('border-surface-strong', 'surface-strong', 'Sterke rand op een sterk vlak', 'decoratief'),
       pair('border-surface-soft', 'surface-soft', 'Zachte rand op een zacht vlak', 'decoratief'),
       pair('border-surface-warm', 'surface-warm', 'Warme rand op een warm vlak', 'decoratief'),
+      pair('line-darker-surface', 'surface', 'Donkerder lijn op het vlak', 'decoratief'),
+      pair('line-darker-surface-strong', 'surface-strong', 'Donkerder lijn op het sterk vlak', 'decoratief'),
+      pair('line-darker-surface-soft', 'surface-soft', 'Donkerder lijn op het zacht vlak', 'decoratief'),
+      pair('line-darker-surface-warm', 'surface-warm', 'Donkerder lijn op het warm vlak', 'decoratief'),
       pair('border-shortcuts', 'shortcuts', 'Lijn onder de balk Op deze pagina', 'decoratief'),
       pair('border-default', 'surface', 'Lijn op een vlak', 'decoratief'),
       pair('border-default', 'page', 'Lijn op de pagina', 'decoratief'),

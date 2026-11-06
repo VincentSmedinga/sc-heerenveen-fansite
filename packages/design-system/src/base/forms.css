@@ -96,7 +96,7 @@
 
   fieldset {
     border: 1px solid;
-    border-color: var(--hf-colour-border-surface);
+    border-color: var(--hf-card-line-strong, var(--hf-colour-border-surface));
     border-radius: 0.25rem;
     box-sizing: border-box;
     margin-block: 0;

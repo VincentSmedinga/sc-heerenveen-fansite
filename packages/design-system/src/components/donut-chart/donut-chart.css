@@ -153,11 +153,11 @@
 
   /* The ring of a chart without values: nothing to show, so only the place of the ring. */
   .hf-donut-chart-track {
-    fill: var(--hf-colour-border-default);
+    fill: var(--hf-card-line, var(--hf-colour-border-default));
   }
 
   .hf-donut-chart-leader {
-    stroke: var(--hf-colour-marker-graphic);
+    stroke: var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
     stroke-width: 1;
   }
 

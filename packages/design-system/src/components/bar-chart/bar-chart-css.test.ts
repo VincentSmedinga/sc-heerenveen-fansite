@@ -36,11 +36,11 @@ describe('bar-chart.css', () => {
     expect(declarationsOf('.hf-bar-chart-slot')).toMatch(/padding-inline: 1px/u)
   })
 
-  it('draws the ground in the marker colour and the guides in the colour of the lines between rows', () => {
+  it('draws the ground in the graphic line of the card and the guides in its line, as outside a card', () => {
     expect(declarationsOf('.hf-bar-chart-plot')).toMatch(
-      /border-block-end: [\d.]+rem solid var\(--hf-colour-marker-graphic\)/u,
+      /border-block-end: [\d.]+rem solid var\(--hf-card-line-graphic, var\(--hf-colour-marker-graphic\)\)/u,
     )
-    expect(declarationsOf('.hf-bar-chart-guide')).toMatch(/var\(--hf-colour-border-default\)/u)
+    expect(declarationsOf('.hf-bar-chart-guide')).toMatch(/var\(--hf-card-line, var\(--hf-colour-border-default\)\)/u)
   })
 
   it('keeps the stroke of the line at 2 pixels and its edge at 5, whatever the stretch of the drawing', () => {

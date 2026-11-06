@@ -14,7 +14,7 @@
     }
 
     tr {
-      border-block-start: 2px solid var(--hf-colour-border-default);
+      border-block-start: 2px solid var(--hf-card-line, var(--hf-colour-border-default));
     }
   }
 }
