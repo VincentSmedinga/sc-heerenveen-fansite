@@ -2888,7 +2888,8 @@
 - **Datum:** 6 november 2026
 - **Besluit:** staat bij een grafiek een tabel met dezelfde gegevens, per wedstrijd of per seizoen, dan staat die tabel in een `Disclosure`.
   De grafiek en de samenvatting blijven zichtbaar.
-  Dit geldt eerst voor Toeschouwers (#808); andere kaarten volgen in eigen issues.
+  Dit geldt voor Toeschouwers (#808) en Onze plek door de jaren (Plek per seizoen, op verzoek van de projecteigenaar in dezelfde pull request); andere kaarten volgen in eigen issues.
+  De opmerkingen over afgetrokken punten blijven buiten de Disclosure, en de links naar de seizoenen staan ook dicht in de pagina.
 - **Waarom:** de tabel is lang en de kaart wordt rustiger zonder.
   Bezoekers met een schermlezer houden de tabel, want de samenvatting van een Disclosure is bereikbaar met het toetsenbord.
   Het is dezelfde keuze als bij Verloop van het seizoen.
