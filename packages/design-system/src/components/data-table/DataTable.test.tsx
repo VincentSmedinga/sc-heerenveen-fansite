@@ -201,6 +201,26 @@ describe('DataTable with text', () => {
     expect(second?.querySelector('.hf-data-table-secondary')).toBeNull()
   })
 
+  it('shows `display` and a second line in the row header of a table of numbers, and keeps the header as the key', () => {
+    render(
+      <DataTable
+        caption="Trainers"
+        columns={['Trainer', 'Wedstrijden']}
+        rows={[
+          { cells: [3], display: <b>Robin</b>, header: 'Robin Veldman, 2025 – nu', secondary: '2025 – nu' },
+          { cells: [5], header: 'Anders' },
+        ]}
+      />,
+    )
+
+    const [first, second] = screen.getAllByRole('rowheader')
+
+    expect(first?.querySelector('b')?.textContent).toBe('Robin')
+    expect(first?.textContent).toBe('Robin2025 – nu')
+    expect(first?.querySelector('.hf-data-table-secondary')?.textContent).toBe('2025 – nu')
+    expect(second?.textContent).toBe('Anders')
+  })
+
   describe('with a column that folds', () => {
     const foldProps = {
       appearance: 'text',

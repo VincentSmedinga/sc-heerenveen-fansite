@@ -2,7 +2,9 @@ import type { FormResult } from '@fansite/design-system'
 
 import {
   hasEditedMatches,
+  listAllMatchDays,
   listAllMatchGoals,
+  listAllStaff,
   listClubStandings,
   listLeagueResults,
   listMatchSeasons,
@@ -250,6 +252,18 @@ export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
  * all time. One query for all seasons, kept for an hour like a season that is over.
  */
 export const getAllTimeMatches = cacheFor(pastSeasonPeriod, () => listAllMatchGoals(getDatabase().db))
+
+/**
+ * Every head coach and the day and score of every match of every season, for the card
+ * "Resultaten per hoofdtrainer" (see `coachResultsOf`). It does not depend on the season of the
+ * page. It is kept for five minutes, like the data of the current season, which is in it.
+ */
+export const getCoachResultData = cacheFor(currentSeasonPeriod, async () => {
+  const { db } = getDatabase()
+  const [coaches, matchDays] = await Promise.all([listAllStaff(db, 'coach'), listAllMatchDays(db)])
+
+  return { coaches, matchDays }
+})
 
 /** Whether the editors entered data that Wikipedia has not taken over yet. */
 export const getEditedMatches = cacheFor(currentSeasonPeriod, async () => hasEditedMatches(getDatabase().db))

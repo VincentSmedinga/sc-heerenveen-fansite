@@ -3,9 +3,9 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getCoachResultData, getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
-import { matchData } from '#src/test-matches'
+import { coachResultData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
 import SeasonStatisticsPage, { generateMetadata } from './page'
@@ -13,6 +13,7 @@ import SeasonStatisticsPage, { generateMetadata } from './page'
 // Only the queries are replaced: the page of a season is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getCoachResultData: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -46,6 +47,8 @@ beforeEach(() => {
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
+  vi.mocked(getCoachResultData).mockReset()
+  vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>
@@ -88,7 +91,7 @@ describe('the page of an earlier season, /cijfers/2025-26', () => {
     }
   })
 
-  it('has the same ten cards as the current season, in the order of the bar', async () => {
+  it('has the same eleven cards as the current season, in the order of the bar', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
@@ -102,6 +105,7 @@ describe('the page of an earlier season, /cijfers/2025-26', () => {
       'de-nul-gehouden',
       'doelpunten-per-kwartier',
       'uitersten',
+      'resultaten-per-hoofdtrainer',
     ])
   })
 

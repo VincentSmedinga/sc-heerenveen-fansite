@@ -86,8 +86,13 @@ export const TableRows = ({
         {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
         <th scope="row">
           {row.marker}
-          {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
+          {row.href === undefined ? (
+            (row.display ?? row.header)
+          ) : (
+            <Link href={row.href}>{row.display ?? row.header}</Link>
+          )}
           {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
+          {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
         </th>
         {row.cells.map((cell, index) => (
           <td

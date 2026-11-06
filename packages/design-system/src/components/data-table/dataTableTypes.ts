@@ -47,6 +47,11 @@ export type DataTableRow = {
    * text }` shows `text` and sorts on `sortValue`.
    */
   cells: readonly DataTableCell[]
+  /**
+   * What the row header shows in place of `header`, such as a `PlayerName`, where the weight of
+   * the words matters. `header` stays the plain text of the row and its key.
+   */
+  display?: ReactNode
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
   header: string
   /**
@@ -72,6 +77,11 @@ export type DataTableRow = {
    * longer be the order.
    */
   position?: number
+  /**
+   * A second line under the row header in secondary text, such as the period of a coach. A
+   * screen reader reads it as part of the row header.
+   */
+  secondary?: string
 }
 
 /** A column of a table with text, given as an object when it can fold. */

@@ -769,6 +769,11 @@ await withEmptyDatabase((database) =>
     // Before the first page is asked for: the site keeps our places for five minutes, and the
     // check of the anchors asks for the matches page long before the checks of its content.
     await addEarlierStandings(database)
+    // Also before the first page: the card Resultaten per hoofdtrainer on /cijfers counts these
+    // matches of earlier seasons, and the site keeps that for five minutes too.
+    await addTestdorpMeetings(database)
+    // And the headlines of the card Nieuws over Testdorp FC, kept for five minutes as well.
+    await addTestdorpNews(database)
 
     const home = await fetch(origin)
     const html = await home.text()
@@ -982,9 +987,9 @@ await withEmptyDatabase((database) =>
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
 
-    // The statistics page shows the ten cards with figures of the made-up matches and table of
-    // the seed, in two equal columns (the sidebar is as wide as the main), with the credit for
-    // Wikipedia under them.
+    // The statistics page shows the eleven cards with figures of the made-up matches and table
+    // of the seed, in two equal columns (the sidebar is as wide as the main), with the credit
+    // for Wikipedia under them.
     const statisticsPage = await fetch(`${origin}/cijfers`)
     const statisticsHtml = await statisticsPage.text()
     assert.equal(statisticsPage.status, 200)
@@ -1017,8 +1022,21 @@ await withEmptyDatabase((database) =>
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
         '#uitersten',
+        '#resultaten-per-hoofdtrainer',
       ],
     )
+    // The card with the results per head coach counts the matches of every season: with the
+    // older made-up matches (see older-meetings.ts) two or more coaches of the seed have one.
+    const coachCard = statisticsHtml.slice(statisticsHtml.indexOf('id="resultaten-per-hoofdtrainer"'))
+    assert.match(
+      coachCard,
+      /^id="resultaten-per-hoofdtrainer">.*?href="#resultaten-per-hoofdtrainer">Resultaten per .*?<\/h2><table/s,
+    )
+    assert.ok(
+      (coachCard.slice(0, coachCard.indexOf('</table>')).match(/<th scope="row">/g) ?? []).length >= 2,
+      'the card Resultaten per hoofdtrainer has a row for at least two head coaches',
+    )
+    assert.match(coachCard, /G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd<\/p>/)
     // The seed has one fact, two goals in minutes that follow each other, so the card
     // Opmerkelijk has it and no link to a next one.
     assert.match(
@@ -1306,8 +1324,6 @@ await withEmptyDatabase((database) =>
     // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
     // slug that no club has is "niet gevonden".
-    await addTestdorpMeetings(database)
-    await addTestdorpNews(database)
     await addProefdorpStadiums(database)
     await addProefdorpNames(database)
     const clubPage = await fetch(`${origin}/tegenstanders/testdorp-fc`)
