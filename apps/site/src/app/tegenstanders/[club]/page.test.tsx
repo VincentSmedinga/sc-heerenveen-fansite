@@ -1178,3 +1178,120 @@ describe('the card Resultaten sinds', () => {
     expect(await render('nieuw-promovendus')).not.toContain('resultaten-sinds')
   })
 })
+
+describe('the card Wedstrijden of a club that is paged', () => {
+  const template = testclub.matches[1] as ClubPage['matches'][number]
+
+  /** A club with `count` matches in the Eredivisie, the newest first (Ronde `count` first). */
+  const clubWith = (count: number, extra: ClubPage['matches'] = []): ClubPage => ({
+    ...testclub,
+    matches: [
+      ...extra,
+      ...Array.from({ length: count }, (_, index) => ({
+        ...template,
+        id: 1000 + index,
+        matchDate: new Date(Date.UTC(2020, 0, 1) + (count - index) * 86_400_000).toISOString().slice(0, 10),
+        round: `Ronde ${count - index}`,
+      })),
+    ],
+  })
+
+  const show = (count: number, extra: ClubPage['matches'] = []) =>
+    vi
+      .mocked(getClubPage)
+      .mockImplementation((slug) => Promise.resolve(slug === 'testclub' ? clubWith(count, extra) : undefined))
+
+  /** The rounds in the list, in order. */
+  const roundsOf = (html: string) => meetingsOf(html).map((line) => /Ronde (\d+)/.exec(line)?.[1])
+
+  const paging = (html: string) => /<nav[^>]*aria-label="Paginering van de wedstrijden".*?<\/nav>/s.exec(html)?.[0]
+
+  it.each([
+    [10, 1, 10],
+    [11, 2, 10],
+    [21, 3, 10],
+  ])('takes %i matches over %i pages of ten at most, and has no paging for ten', async (count, pages) => {
+    show(count)
+
+    const html = await render()
+
+    expect(roundsOf(html)).toHaveLength(10)
+    expect(roundsOf(html)[0]).toBe(String(count))
+    expect(paging(html) === undefined).toBe(pages === 1)
+
+    if (pages > 1) {
+      expect(plain(paging(html) ?? '')).toContain(`Pagina 1 van ${pages}`)
+    }
+  })
+
+  it('shows the next ten, still the newest first, on page 2, and the rest on the last page', async () => {
+    show(21)
+
+    expect(roundsOf(await render('testclub', { pagina: '2' }))).toEqual(
+      ['11', '10', '9', '8', '7', '6', '5', '4', '3', '2'].map(String),
+    )
+
+    const last = await render('testclub', { pagina: '3' })
+
+    expect(roundsOf(last)).toEqual(['1'])
+    expect(plain(paging(last) ?? '')).toContain('Pagina 3 van 3')
+    expect(paging(last)).not.toContain('Volgende')
+  })
+
+  it('has the row Laatste wedstrijden and the matches to come on the first page only', async () => {
+    show(30, [{ ...(komend.matches[0] as ClubPage['matches'][number]), opponent: 'Testclub' }])
+
+    const first = await render()
+    const second = await render('testclub', { pagina: '2' })
+
+    expect(lastMatchesOf(first)).toBeDefined()
+    expect(itemsOf(first)).toHaveLength(11)
+    expect(first).toContain('hf-match-versus')
+    expect(lastMatchesOf(second)).toBeUndefined()
+    expect(itemsOf(second)).toHaveLength(10)
+    expect(second).not.toContain('hf-match-versus')
+  })
+
+  it('is the page "niet gevonden" after the last page, and for a page that is not a number', async () => {
+    show(11)
+
+    for (const pagina of ['3', '0', 'abc', ['1', '2']]) {
+      await expect(render('testclub', { pagina })).rejects.toHaveProperty('digest', expect.stringContaining('404'))
+    }
+    await expect(render('testclub', { pagina: '2' })).resolves.toContain('Ronde 1')
+  })
+
+  it('has no page 2 when the club has ten matches or fewer', async () => {
+    show(10)
+
+    await expect(render('testclub', { pagina: '2' })).rejects.toHaveProperty('digest', expect.stringContaining('404'))
+  })
+
+  it('keeps the choice in the links of the paging, and counts the pages by it', async () => {
+    show(12, [{ ...(testclub.matches[0] as ClubPage['matches'][number]), id: 999 }])
+
+    const all = await render('testclub', { pagina: '2' })
+
+    // 12 league matches and one in the cup: 13 played, two pages in either choice.
+    expect(paging(all)).toContain('href="/tegenstanders/testclub"')
+
+    const league = await render('testclub', { competitie: 'eredivisie' })
+
+    expect(paging(league)).toContain('href="/tegenstanders/testclub?competitie=eredivisie&amp;pagina=2"')
+
+    const leagueTwo = await render('testclub', { competitie: 'eredivisie', pagina: '2' })
+
+    expect(paging(leagueTwo)).toContain('href="/tegenstanders/testclub?competitie=eredivisie"')
+  })
+
+  it('counts the pages by the choice: ten league matches and a cup tie are two pages, but one with the Eredivisie', async () => {
+    show(10, [testclub.matches[0] as ClubPage['matches'][number]])
+
+    expect(paging(await render())).toBeDefined()
+    expect(paging(await render('testclub', { competitie: 'eredivisie' }))).toBeUndefined()
+    await expect(render('testclub', { competitie: 'eredivisie', pagina: '2' })).rejects.toHaveProperty(
+      'digest',
+      expect.stringContaining('404'),
+    )
+  })
+})
