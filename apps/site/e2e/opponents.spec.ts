@@ -243,6 +243,29 @@ test.describe('without JavaScript', () => {
   })
 })
 
+test.describe('the card Nieuws over <club>', () => {
+  test('has the newest five headlines that name the club, as links with the source, and no intro or image', async ({
+    page,
+  }) => {
+    await page.goto('/tegenstanders/testdorp-fc')
+
+    const card = page.getByRole('region', { name: 'Nieuws over Testdorp FC' })
+    const links = card.getByRole('listitem').getByRole('link')
+
+    await expect(card.getByRole('heading', { level: 2 })).toHaveText('Nieuws over Testdorp FC')
+    await expect(links).toHaveCount(5)
+    await expect(card.getByRole('listitem').first()).toContainText('Testkrant')
+    await expect(card.locator('img, button')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Alle nieuws over Testdorp FC' })).toHaveCount(0)
+  })
+
+  test('is not on the page of a club that no headline names', async ({ page }) => {
+    await page.goto('/tegenstanders/voorbeeld-united')
+
+    await expect(page.getByRole('region', { name: /^Nieuws over/ })).toHaveCount(0)
+  })
+})
+
 test.describe('the page of a club', () => {
   test('has the matches in the main column and the results, the scores and the stadiums in the sidebar', async ({
     page,
