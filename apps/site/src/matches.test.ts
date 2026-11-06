@@ -12,6 +12,7 @@ import {
   goalsWithInitials,
   homeAwayOf,
   lacksResult,
+  lateGoalsOf,
   leaguePlaceOf,
   leagueResultsOf,
   matchFlowOf,
@@ -1408,6 +1409,84 @@ describe('parseCleanSheetCount', () => {
       expect(parseCleanSheetCount(value)).toBe(10)
     },
   )
+})
+
+describe('lateGoalsOf', () => {
+  const minutes = (...list: [number, (null | number)?][]) =>
+    played(list.map(([minute, stoppageMinutes = null]) => goal('Proefman', { minute, stoppageMinutes })))
+
+  it('counts from minute 81: 80 is not late and 81 is', () => {
+    expect(lateGoalsOf([minutes([80])]).late).toEqual({ conceded: 0, scored: 0 })
+    expect(lateGoalsOf([minutes([81])]).late).toEqual({ conceded: 0, scored: 1 })
+  })
+
+  it('counts a goal in the stoppage time of the first half as stoppage time, and not as late', () => {
+    expect(lateGoalsOf([minutes([45, 1])])).toEqual({
+      late: { conceded: 0, scored: 0 },
+      stoppage: { conceded: 0, scored: 1 },
+    })
+  })
+
+  it('counts 90+3 as late and as stoppage time, both', () => {
+    expect(lateGoalsOf([minutes([90, 3])])).toEqual({
+      late: { conceded: 0, scored: 1 },
+      stoppage: { conceded: 0, scored: 1 },
+    })
+  })
+
+  it('counts a goal without added time for its minute alone, also at 90', () => {
+    expect(lateGoalsOf([minutes([90])])).toEqual({
+      late: { conceded: 0, scored: 1 },
+      stoppage: { conceded: 0, scored: 0 },
+    })
+  })
+
+  it('counts a goal in extra time as late, and one in the added time of extra time as stoppage time', () => {
+    expect(lateGoalsOf([minutes([105], [120, 2])])).toEqual({
+      late: { conceded: 0, scored: 2 },
+      stoppage: { conceded: 0, scored: 1 },
+    })
+  })
+
+  it('counts the goals of the opponent as against, and an own goal for the club that profits', () => {
+    const matches = [
+      played([
+        goal('Teststraat', { minute: 85, ours: false }),
+        goal('Proefman', { minute: 88, ours: false, ownGoal: true, stoppageMinutes: null }),
+        goal('Teststraat', { minute: 90, ours: true, ownGoal: true, stoppageMinutes: 1 }),
+      ]),
+    ]
+
+    expect(lateGoalsOf(matches)).toEqual({
+      late: { conceded: 2, scored: 1 },
+      stoppage: { conceded: 0, scored: 1 },
+    })
+  })
+
+  it('leaves out a minute that can not be played (0)', () => {
+    expect(lateGoalsOf([minutes([0, 2])])).toEqual({
+      late: { conceded: 0, scored: 0 },
+      stoppage: { conceded: 0, scored: 0 },
+    })
+  })
+
+  it('counts the cup for all the matches and leaves it out for the league', () => {
+    const cup = { ...minutes([85]), competition: 'KNVB Beker' as const }
+
+    expect(lateGoalsOf([minutes([85]), cup], 'all').late.scored).toBe(2)
+    expect(lateGoalsOf([minutes([85]), cup], 'league').late.scored).toBe(1)
+  })
+
+  it('counts the matches the card per quarter counts: known goals of a played match', () => {
+    const scheduled = { ...minutes([85]), status: 'scheduled' as const }
+    const noGoals = { ...match('Speelronde 2', 'played', '2026-08-08'), goalsAgainst: 1, goalsFor: 2 }
+
+    expect(lateGoalsOf([scheduled, noGoals, minutes([85])]).late.scored).toBe(1)
+  })
+
+  it('says 0 and 0 without a match', () => {
+    expect(lateGoalsOf([])).toEqual({ late: { conceded: 0, scored: 0 }, stoppage: { conceded: 0, scored: 0 } })
+  })
 })
 
 describe('goalsPerQuarter', () => {

@@ -454,8 +454,12 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een eigen doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt.
   Een gespeelde wedstrijd telt mee als hij minstens één doelpunt heeft of eindigde in 0–0; een wedstrijd met een uitslag maar zonder doelpunten in `match_goals` heeft geen minuten en blijft erbuiten.
   Onder het diagram staat dezelfde informatie als tabel (`DataTable`), die de schermlezer krijgt, want de diagrammen zijn voor hulpsoftware verborgen.
+  Onder de tabel staan twee regels met tekst: "Na de 80e minuut: 5 voor, 3 tegen" en "In blessuretijd: 2 voor, 1 tegen" (`lateGoalsOf` in `src/matches.ts`).
+  Ze tellen in dezelfde wedstrijden en volgen de schakelaar, en zeggen 0 als er geen doelpunt is.
+  Na de 80e minuut is vanaf minuut 81, dus 90+3 en een doelpunt in de verlenging staan erbij; in blessuretijd is een doelpunt met toegevoegde tijd (45+1, 90+3, 105+1).
+  Een doelpunt zonder toegevoegde tijd telt alleen voor zijn minuut, want Wikipedia noemt de toegevoegde tijd niet altijd.
   Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
-  Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
+  Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee in de tabel, wel in de twee regels erboven."; anders staat die zin er niet.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Hoe de wedstrijden verlopen:** de derde kaart van de linker kolom, direct na het verloop van het seizoen en boven de schakelaar, in het zachte vlak, met de laatste regel "Alleen de Eredivisie".
   De link in de balk onder de kop heet "Hoe wedstrijden verlopen": de hele kop past op een telefoon niet tussen de vervaagde randen van de rij.
@@ -662,7 +666,7 @@ Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste reg
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
-Doelpunten in de verlenging blijven buiten Doelpunten per kwartier, met de zin die dat zegt.
+Doelpunten in de verlenging blijven buiten de tabel van Doelpunten per kwartier, met de zin die dat zegt; de twee regels eronder tellen ze wel.
 De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`CompetitionChoice`); wie het weglaat, krijgt wat de kaart tot nu toe deed.
 
 De keuze blijft bij elke link: de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.

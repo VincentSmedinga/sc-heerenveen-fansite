@@ -1807,6 +1807,7 @@
   - De diagrammen zijn verborgen voor hulpsoftware en de tabel is het tekstalternatief, met een bijschrift dat alleen een schermlezer krijgt.
     De diagrammen zelf zijn `DonutChart` (zie _Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur_).
   - De kop heeft het anker `doelpunten-per-kwartier`, dat in `src/anchors.ts` staat.
+- **Later:** zie _Late doelpunten en doelpunten in blessuretijd staan onder Doelpunten per kwartier_ in `site.md` (6 november 2026): twee regels onder de tabel tellen de blessuretijd en de verlenging wel, en de zin over de verlenging zegt dat.
 - **Aangevuld op 26 oktober 2026, op verzoek van de projecteigenaar:** de zin "Doelpunten in de verlenging tellen niet mee." staat er alleen als ze iets zegt.
   `goalsPerQuarter` geeft daarvoor `extraTime`: waar als minstens één wedstrijd in de telling `extra_time` heeft.
   Een wedstrijd buiten de telling, zonder doelpunten of niet gespeeld, telt daarvoor niet mee.
