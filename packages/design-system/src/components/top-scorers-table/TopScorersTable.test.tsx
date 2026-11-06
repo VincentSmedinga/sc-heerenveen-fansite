@@ -215,4 +215,85 @@ describe('TopScorersTable', () => {
     expect(container.firstElementChild?.className).toBe('hf-top-scorers hf-bar-place extra')
     expect(container.firstElementChild?.id).toBe('topscorers')
   })
+
+  describe('with showGoalsPerMatch', () => {
+    const perMatchRows: TopScorersTableRow[] = [
+      { goals: 8, players: [{ givenName: 'Wouter', goalsPerMatch: '0,32', id: 1, surname: 'Proefman' }], position: 1 },
+      {
+        goals: 4,
+        players: [
+          { givenName: 'Gerrit', goalsPerMatch: '0,17', id: 2, surname: 'Nepper' },
+          { givenName: 'Joris', goalsPerMatch: '0,50', id: 3, surname: 'Testvoort' },
+        ],
+        position: 2,
+      },
+    ]
+
+    it('adds the column D/W after the goals, named "doelpunten per wedstrijd" for a screen reader', () => {
+      render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
+
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+        '#plaats',
+        'Speler',
+        'Ddoelpunten',
+        'D/Wdoelpunten per wedstrijd',
+      ])
+      expect(screen.getByRole('columnheader', { name: 'doelpunten per wedstrijd' }).getAttribute('scope')).toBe('col')
+    })
+
+    it('gives every player a row of their own, with the place they share, and the figure as text', () => {
+      render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
+      const row = (name: RegExp) =>
+        within(screen.getByRole('row', { name }))
+          .getAllByRole('cell')
+          .map((cell) => cell.textContent)
+
+      expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
+        'Wouter Proefman',
+        'Gerrit Nepper',
+        'Joris Testvoort',
+      ])
+      expect(row(/Gerrit Nepper/)).toEqual(['2', '4', '0,17'])
+      expect(row(/Joris Testvoort/)).toEqual(['2', '4', '0,50'])
+    })
+
+    it('keeps the bars a share of the top scorer', () => {
+      const { container } = render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
+
+      expect(barLengths(container)).toEqual(['100', '50', '50'])
+    })
+
+    it('says in the legend what D/W is, with the letters of both columns', () => {
+      const { container } = render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
+
+      expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
+        'D doelpunten, D/W doelpunten per wedstrijd. D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
+      )
+    })
+  })
+
+  describe('without showGoalsPerMatch', () => {
+    it('is as it was: no D/W column, shared rows stay shared and the legend is the letter D alone', () => {
+      const shared: TopScorersTableRow[] = [
+        {
+          goals: 4,
+          players: [
+            { givenName: 'Gerrit', goalsPerMatch: '0,17', id: 2, surname: 'Nepper' },
+            { givenName: 'Joris', goalsPerMatch: '0,50', id: 3, surname: 'Testvoort' },
+          ],
+          position: 1,
+        },
+      ]
+      const { container } = render(<TopScorersTable {...props} rows={shared} />)
+
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+        '#plaats',
+        'Speler',
+        'Ddoelpunten',
+      ])
+      expect(screen.getAllByRole('rowheader')).toHaveLength(1)
+      expect(container.textContent).not.toContain('0,17')
+      expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('D doelpunten')
+    })
+  })
 })

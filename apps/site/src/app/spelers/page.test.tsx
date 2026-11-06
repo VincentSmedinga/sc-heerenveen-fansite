@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
+import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
@@ -26,6 +27,9 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
   getSeasonSquad: vi.fn(),
 }))
 
+// The appearances are made up too: the page reads them from the database.
+vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
+
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
 
@@ -43,8 +47,11 @@ const rowsOf = (html: string) =>
 /** The first match that was played, in which the goals of the made-up players are scored. */
 const played = matchData.matches.find((item) => item.status === 'played')!
 
-/** One match in which player A scored the first number of goals, player B the second, etc. */
-function scorers(counts: number[]): PublicMatch[] {
+/**
+ * One match in which player A scored the first number of goals, player B the second, etc.
+ * Player A has `playerId` 1, B 2, etc. when `linked`, as the import links goals to the squad.
+ */
+function scorers(counts: number[], linked = false): PublicMatch[] {
   const goals = counts.flatMap((count, index) =>
     Array.from({ length: count }, (_, goalIndex) => ({
       minute: goalIndex + 1,
@@ -56,7 +63,7 @@ function scorers(counts: number[]): PublicMatch[] {
       personGivenName: null,
       personId: null,
       player: `Speler ${String.fromCharCode(65 + index)}`,
-      playerId: null,
+      playerId: linked ? index + 1 : null,
       playerPage: null,
       stoppageMinutes: null,
     })),
@@ -73,6 +80,8 @@ beforeEach(() => {
   vi.mocked(getAllTimeMatches).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getSeasonPlayerStats).mockReset()
+  vi.mocked(getSeasonPlayerStats).mockResolvedValue([])
   vi.mocked(getSeasonSquad).mockReset()
   vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
   vi.mocked(getMatchData).mockResolvedValue(matchData)
@@ -797,5 +806,61 @@ describe('the card Alle tijden on /spelers', () => {
 
     expect(html).not.toContain('id="alle-tijden"')
     expect(html).toContain('id="doelpuntenmakers"')
+  })
+})
+
+describe('the column D/W on the card Doelpuntenmakers', () => {
+  const stat = (playerId: number, appearances: number, goals: number) => ({
+    appearances,
+    assists: 0,
+    competition: 'Eredivisie' as const,
+    goals,
+    inSquad: true,
+    name: `Speler ${playerId}`,
+    playerId,
+    position: 'aanvaller' as const,
+    wikipediaPage: null,
+  })
+
+  beforeEach(() => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: scorers([3, 1], true) })
+  })
+
+  it('is there when every scorer has appearances and the goals agree: a row per player, the figure with a comma', async () => {
+    vi.mocked(getSeasonPlayerStats).mockResolvedValue([stat(1, 6, 3), stat(2, 4, 1)])
+
+    const html = await render()
+
+    expect(html).toContain('<abbr title="doelpunten per wedstrijd"><span aria-hidden="true">D/W</span>')
+    expect(html).toContain('<td class="hf-numeric">0,50</td>')
+    expect(html).toContain('<td class="hf-numeric">0,25</td>')
+    expect(html).toContain(
+      'D doelpunten, D/W doelpunten per wedstrijd. D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
+    )
+  })
+
+  it('is not there, and nothing says so, for a season without figures', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('D/W')
+    expect(html).not.toContain('doelpunten per wedstrijd')
+    expect(html).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
+  })
+
+  it('is not there when the goals in the table differ from the goals of the card for one player', async () => {
+    vi.mocked(getSeasonPlayerStats).mockResolvedValue([stat(1, 6, 3), stat(2, 4, 2)])
+
+    expect(await render()).not.toContain('D/W')
+  })
+
+  it('is not there when the figures could not be read, and the card still shows the goals', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getSeasonPlayerStats).mockRejectedValue(new Error('no database'))
+
+    const html = await render()
+
+    expect(html).not.toContain('D/W')
+    expect(html).toContain('id="doelpuntenmakers"')
+    expect(console.error).toHaveBeenCalledOnce()
   })
 })

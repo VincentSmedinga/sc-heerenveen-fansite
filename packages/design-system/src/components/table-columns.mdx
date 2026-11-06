@@ -7,21 +7,24 @@ import { Meta } from '@storybook/addon-docs/blocks'
 Elke tabel met cijfers heeft kolomkoppen van één letter, uit één lijst: `tableColumns` in het designsysteem.
 Een component en een pagina nemen hun letters en woorden daar vandaan en schrijven ze niet zelf uit.
 
-| Letter | Woord                |
-| ------ | -------------------- |
-| G      | gespeeld             |
-| W      | winst                |
-| G      | gelijk               |
-| V      | verlies              |
-| P      | punten               |
-| P      | punten per wedstrijd |
-| D      | doelpunten           |
-| D      | doelsaldo            |
+| Letter | Woord                    |
+| ------ | ------------------------ |
+| G      | gespeeld                 |
+| W      | winst                    |
+| G      | gelijk                   |
+| V      | verlies                  |
+| P      | punten                   |
+| P      | punten per wedstrijd     |
+| D      | doelpunten               |
+| D      | doelsaldo                |
+| D/W    | doelpunten per wedstrijd |
 
 **A (assists) is gereserveerd** voor de tabellen van de spelers, die er nog niet zijn.
 
 ## De regel van de twee G's, de twee D's en de twee P's
 
+- **D/W is de uitzondering op één letter:** de doelpunten per wedstrijd van een speler, in de kaarten met doelpuntenmakers waar de wedstrijden van elke speler bekend zijn.
+  D is al de doelpunten, en de projecteigenaar noemt de kolom D/W.
 - **Alleen G, D en P hebben twee woorden:** G is gespeeld en gelijk, D is doelpunten en doelsaldo, P is punten en punten per wedstrijd.
   Elke andere letter heeft één woord, en een woord heeft één letter.
 - **G gespeeld staat vooraan** van de cijferkolommen, vóór de uitkomsten, en **G gelijk staat direct na W**.

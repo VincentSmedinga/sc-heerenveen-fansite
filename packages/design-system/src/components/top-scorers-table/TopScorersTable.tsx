@@ -3,11 +3,16 @@ import { type ComponentPropsWithoutRef, Fragment } from 'react'
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
-import { tableColumns } from '../table-columns'
+import { tableColumns, tableLegend } from '../table-columns'
 
 export type TopScorersTablePlayer = {
   /** The given name of the player, in the normal weight. Leave it out when it is not known. */
   givenName?: string | undefined
+  /**
+   * The goals per match of the player as text, such as `0,50`: the page works it out and
+   * writes it, because it knows the matches. Only shown with `showGoalsPerMatch`.
+   */
+  goalsPerMatch?: string | undefined
   /** What tells the player from the others, such as his id: the first is the key of the row. */
   id: number | string
   /** The surname of the player, in the stronger weight (see `PlayerName`). */
@@ -25,6 +30,14 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
   children?: never
   /** The places, from the most goals down. */
   rows: TopScorersTableRow[]
+  /**
+   * Adds the column D/W, the goals per match, after the goals, with the `goalsPerMatch` of each
+   * player. A table with the column has a row for each player, also where players share a
+   * place and a row has more than one: the row is split, and the players keep their place and
+   * their goals. A table without it is as it was. The page only sets it when it knows the
+   * matches of every player in the list (all or nothing).
+   */
+  showGoalsPerMatch?: boolean | undefined
 }
 
 export type TopScorersTableRow = {
@@ -39,6 +52,14 @@ export type TopScorersTableRow = {
   position: number
 }
 
+/** What D/W is, under the table of a card that has the column. */
+const goalsPerMatchSentence =
+  'D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.'
+
+/** The rows with one player each: a shared row is split, and each player keeps the place. */
+const onePlayerPerRow = (rows: TopScorersTableRow[]): TopScorersTableRow[] =>
+  rows.flatMap((row) => row.players.map((player) => ({ ...row, players: [player] as [TopScorersTablePlayer] })))
+
 /**
  * The top scorers: a real `table` with a caption that is not shown, column headers with `scope`
  * and a row header for each row, whose names are `PlayerName`s: the given name in the normal
@@ -51,8 +72,19 @@ export type TopScorersTableRow = {
  * the place of the table is too narrow. The header of the goals is the abbreviation D, so the
  * full word stands under the table as well, because a title on an abbreviation only shows under
  * a mouse. bar.css gives the look.
+ *
+ * With `showGoalsPerMatch` there is a column D/W after the goals, for a screen reader
+ * "doelpunten per wedstrijd", and the legend under the table has it too, with a sentence that
+ * says what it is. Every player then has a row of their own.
  */
-export const TopScorersTable = ({ caption, className, rows, ...props }: TopScorersTableProps) => {
+export const TopScorersTable = ({
+  caption,
+  className,
+  rows: placedRows,
+  showGoalsPerMatch = false,
+  ...props
+}: TopScorersTableProps) => {
+  const rows = showGoalsPerMatch ? onePlayerPerRow(placedRows) : placedRows
   const shares = sharesOf(rows.map((row) => row.goals))
 
   return (
@@ -74,6 +106,14 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
                 <span className="hf-visually-hidden">{tableColumns.goals.name}</span>
               </abbr>
             </th>
+            {showGoalsPerMatch ? (
+              <th className="hf-numeric" scope="col">
+                <abbr title={tableColumns.goalsPerMatch.name}>
+                  <span aria-hidden="true">{tableColumns.goalsPerMatch.abbreviation}</span>
+                  <span className="hf-visually-hidden">{tableColumns.goalsPerMatch.name}</span>
+                </abbr>
+              </th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -92,12 +132,19 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
                 {row.goals}
                 {shares !== null ? <Bar share={shares[index]!} /> : null}
               </td>
+              {showGoalsPerMatch ? <td className="hf-numeric">{row.players[0].goalsPerMatch}</td> : null}
             </tr>
           ))}
         </tbody>
       </table>
       <p className="hf-meta hf-bar-legend">
-        <b>{tableColumns.goals.abbreviation}</b> {tableColumns.goals.name}
+        {showGoalsPerMatch ? (
+          `${tableLegend([tableColumns.goals, tableColumns.goalsPerMatch])}. ${goalsPerMatchSentence}`
+        ) : (
+          <>
+            <b>{tableColumns.goals.abbreviation}</b> {tableColumns.goals.name}
+          </>
+        )}
       </p>
     </div>
   )

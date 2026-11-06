@@ -30,6 +30,10 @@ const meta = preview.meta({
           'Is de plek van de tabel te smal, zoals op een telefoon, dan verdwijnt de balk en blijft de rest van de tabel staan.',
           'Dat hangt af van de breedte van de plek waar de tabel in staat en niet van het scherm.',
           '',
+          'De kolom D/W, de doelpunten per wedstrijd, komt er alleen bij als de pagina van elke speler weet hoeveel wedstrijden hij speelde (`showGoalsPerMatch`).',
+          'Elke speler heeft dan een eigen rij, en spelers met evenveel doelpunten houden dezelfde plaats.',
+          'Onder de tabel staat dan ook wat D/W is.',
+          '',
           'Zonder doelpunten geeft de pagina geen tabel, maar een zin voor de lezer in de kaart.',
           '',
           '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
@@ -128,18 +132,29 @@ const sharedRows: TopScorersTableRow[] = [
   },
 ]
 
+// The same players with their goals per match, one row each: the places stay shared.
+const perMatchRows: TopScorersTableRow[] = [
+  { goals: 8, players: [{ givenName: 'Wouter', goalsPerMatch: '0,32', id: 1, surname: 'Proefman' }], position: 1 },
+  { goals: 4, players: [{ givenName: 'Gerrit', goalsPerMatch: '0,17', id: 2, surname: 'Nepper' }], position: 2 },
+  { goals: 4, players: [{ givenName: 'Joris', goalsPerMatch: '0,50', id: 3, surname: 'Testvoort' }], position: 2 },
+  { goals: 2, players: [{ givenName: 'Rick', goalsPerMatch: '0,09', id: 4, surname: 'Demo' }], position: 4 },
+  { goals: 1, players: [{ givenName: 'Pieter', goalsPerMatch: '1,00', id: 5, surname: 'Voorbeeld' }], position: 5 },
+]
+
 const caption = 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
-const render = (maxInlineSize: string, tableRows: TopScorersTableRow[]) => () => (
-  <div style={{ maxInlineSize }}>
-    <Card aria-labelledby="doelpuntenmakers-kop">
-      <Heading id="doelpuntenmakers-kop" level={2}>
-        Doelpuntenmakers
-      </Heading>
-      <TopScorersTable caption={caption} rows={tableRows} />
-    </Card>
-  </div>
-)
+const render =
+  (maxInlineSize: string, tableRows: TopScorersTableRow[], showGoalsPerMatch = false) =>
+  () => (
+    <div style={{ maxInlineSize }}>
+      <Card aria-labelledby="doelpuntenmakers-kop">
+        <Heading id="doelpuntenmakers-kop" level={2}>
+          Doelpuntenmakers
+        </Heading>
+        <TopScorersTable caption={caption} rows={tableRows} showGoalsPerMatch={showGoalsPerMatch} />
+      </Card>
+    </div>
+  )
 
 const renderEmpty = () => (
   <div style={{ maxInlineSize: '32rem' }}>
@@ -198,6 +213,24 @@ export const SharedDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Gelijke spelers delen een rij, donker',
   render: render('32rem', sharedRows),
+})
+
+export const PerMatchLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met de kolom D/W, een rij per speler, licht',
+  render: render('32rem', perMatchRows, true),
+})
+
+export const PerMatchDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met de kolom D/W, een rij per speler, donker',
+  render: render('32rem', perMatchRows, true),
+})
+
+export const PerMatchNarrowLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met de kolom D/W op een smalle plek, licht',
+  render: render('20rem', perMatchRows, true),
 })
 
 export const LongNamesNarrowLight = meta.story({

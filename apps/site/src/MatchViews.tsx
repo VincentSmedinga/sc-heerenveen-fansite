@@ -1,4 +1,10 @@
-import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type {
+  PublicMatch,
+  PublicPlayerStats,
+  PublicStaff,
+  PublicStandingsRow,
+  PublicWikipediaPage,
+} from '@fansite/db/queries'
 import type { FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
@@ -33,6 +39,7 @@ import {
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
 import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
+import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
@@ -1161,11 +1168,18 @@ export function TopScorers({
   matches,
   scope,
   season,
+  stats,
   topOnly = false,
 }: {
   competition: CompetitionChoice
   empty?: string
   matches: ScoredMatch[]
+  /**
+   * The appearances of the players of the season (`player_season_stats`), for the column D/W.
+   * The column is there when `goalsPerMatchOf` says every scorer's figures are known and agree
+   * with the goals; without this, or without agreement, the table has no column.
+   */
+  stats?: PublicPlayerStats[] | undefined
   /** Only the first five places. */
   topOnly?: boolean
 } & ({ scope: string; season?: undefined } | { scope?: undefined; season: string })) {
@@ -1173,6 +1187,7 @@ export function TopScorers({
   const shown = topOnly ? topFiveOf(scorers) : scorers
   const cut = shown.length < scorers.length
   const { known, played } = scorersCoverage(matches, competition)
+  const goalsPerMatch = stats === undefined || topOnly ? undefined : goalsPerMatchOf(matches, competition, stats)
 
   if (scorers.length === 0) {
     return <Text>{empty}</Text>
@@ -1189,7 +1204,12 @@ export function TopScorers({
       </Text>
       <TopScorersTable
         caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} ${scope ?? `van sc Heerenveen in het seizoen ${season}, in ${competitionNames(matches, competition)}`}`}
-        rows={topOnly ? scorersByPlace(shown) : shown.map(onePlayerPlace)}
+        rows={
+          topOnly
+            ? scorersByPlace(shown)
+            : shown.map((scorer) => onePlayerPlace(scorer, goalsPerMatch && perMatch(goalsPerMatch.get(scorer.id))))
+        }
+        showGoalsPerMatch={goalsPerMatch !== undefined}
       />
       {known < played && (
         <Text appearance="meta">
@@ -1201,9 +1221,9 @@ export function TopScorers({
 }
 
 /** A row of the table for one player, as on the page Spelers, which has a row per player. */
-const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
+const onePlayerPlace = (scorer: TopScorer, goalsPerMatch?: string): ScorerPlace => ({
   goals: scorer.goals,
-  players: [scorer],
+  players: [goalsPerMatch === undefined ? scorer : { ...scorer, goalsPerMatch }],
   position: scorer.position,
 })
 
@@ -1265,11 +1285,14 @@ export function TopScorersCard({
   matches,
   season,
   seasonOnImage,
+  stats,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
   season: string
   seasonOnImage?: string | undefined
+  /** The appearances of the season, for the column D/W (see `TopScorers`). */
+  stats?: PublicPlayerStats[] | undefined
 }) {
   return (
     <Card
@@ -1280,7 +1303,7 @@ export function TopScorersCard({
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers
       </Heading>
-      <TopScorers competition={competition} matches={matches} season={season} />
+      <TopScorers competition={competition} matches={matches} season={season} stats={stats} />
     </Card>
   )
 }
