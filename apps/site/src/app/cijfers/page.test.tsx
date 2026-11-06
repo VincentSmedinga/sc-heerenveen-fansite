@@ -2025,6 +2025,21 @@ describe('the card Toeschouwers', () => {
     expect(html).toContain('aria-hidden="true" class="hf-bar-chart"')
   })
 
+  it('has the table in a closed fold under the chart, and the average, the largest number and the credit outside it', async () => {
+    withMatches(home(1, 20000), home(2, 26022))
+
+    const html = await toeschouwers()
+    const fold = html.indexOf('<details class="hf-disclosure"><summary>Aantal per thuiswedstrijd')
+
+    expect(fold).toBeGreaterThan(html.indexOf('hf-bar-chart'))
+    expect(html).not.toMatch(/<details[^>]* open/)
+    expect(html.indexOf('<table')).toBeGreaterThan(fold)
+    expect(html.indexOf('<table')).toBeLessThan(html.indexOf('</details>'))
+    expect(html.indexOf('Gemiddeld')).toBeLessThan(fold)
+    expect(html.indexOf('Het meest')).toBeLessThan(fold)
+    expect(html.indexOf('Gebaseerd op')).toBeGreaterThan(html.indexOf('</details>'))
+  })
+
   it('writes the numbers at the side in Dutch, up to the largest number rounded up to 5.000', async () => {
     withMatches(home(1, 20001))
 
