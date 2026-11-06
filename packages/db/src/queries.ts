@@ -250,6 +250,28 @@ export async function findStaffOn(db: Database, role: StaffRole, day: string): P
 }
 
 /**
+ * Every match of every season with what the list of all-time goal scorers counts: the season,
+ * the competition, the status, the score and the goals, in the form of `listSeasonMatches` (see
+ * there for the goals). Nothing else leaves the database, and the order is by season, day and
+ * `id`.
+ */
+export async function listAllMatchGoals(db: Database) {
+  const rows = await db
+    .select({
+      competition: matches.competition,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      id: matches.id,
+      season: matches.season,
+      status: matches.status,
+    })
+    .from(matches)
+    .orderBy(asc(matches.season), asc(matches.matchDate), asc(matches.id))
+
+  return (await withGoals(db, rows, undefined)).map(omitId)
+}
+
+/**
  * The Wikipedia pages the match import read for every season, newest season first, in the order
  * of `listWikipediaPages` within a season: the season, the title of the page, which kind it is
  * and the moment it was last read. A page that counts across seasons, such as the head-to-head

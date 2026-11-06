@@ -2,6 +2,7 @@ import type { FormResult } from '@fansite/design-system'
 
 import {
   hasEditedMatches,
+  listAllMatchGoals,
   listClubStandings,
   listLeagueResults,
   listMatchSeasons,
@@ -243,6 +244,12 @@ async function loadFinalPlaces(): Promise<FinalPlace[]> {
  * for five minutes, like the data of the current season, which is in it.
  */
 export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
+
+/**
+ * The score and the goals of every match of every season, for the list of the goal scorers of
+ * all time. One query for all seasons, kept for an hour like a season that is over.
+ */
+export const getAllTimeMatches = cacheFor(pastSeasonPeriod, () => listAllMatchGoals(getDatabase().db))
 
 /** Whether the editors entered data that Wikipedia has not taken over yet. */
 export const getEditedMatches = cacheFor(currentSeasonPeriod, async () => hasEditedMatches(getDatabase().db))
@@ -1099,14 +1106,20 @@ export function topScorersOf(matches: ScoredMatch[], choice: CompetitionChoice =
 /** How many places the short list of the goal scorers has. */
 export const topScorersPlaces = 5
 
+/** How many places the list of the goal scorers of all time has. */
+export const allTimePlaces = 10
+
 /**
  * The first places of the list of scorers: everyone who stands in the first five places.
  * Players who share a place all show, so a tie for fifth place gives more than five names, and
  * a tie that starts before it (three players in fourth place) keeps all of them. The list is
  * in the order of `topScorersOf`, so these are its first rows.
  */
-export const topFiveOf = (scorers: TopScorer[]): TopScorer[] =>
-  scorers.filter((scorer) => scorer.position <= topScorersPlaces)
+export const topFiveOf = (scorers: TopScorer[]): TopScorer[] => firstPlacesOf(scorers, topScorersPlaces)
+
+/** Everyone who stands in the first `places` places, with all who share the last of them. */
+export const firstPlacesOf = (scorers: TopScorer[], places: number): TopScorer[] =>
+  scorers.filter((scorer) => scorer.position <= places)
 
 export type Attendance = {
   /** The mean of the known numbers above 0, rounded to a whole number. */
@@ -1164,6 +1177,19 @@ export type SpecialGoals = {
   penalties: number
   /** The played matches of the choice, counted or not. */
   played: number
+}
+
+/**
+ * The goal scorers of all time: the first ten places of `topScorersOf` over every season, how
+ * many players scored in all, and the first season that has a match, from which the list
+ * counts (`undefined` without a match). `matches` have the season they were played in. The
+ * count is the one of the card of a season, so a person who scored in two seasons is one row.
+ */
+export function allTimeScorersOf(matches: (ScoredMatch & { season: string })[], choice: CompetitionChoice = 'all') {
+  const scorers = topScorersOf(matches, choice)
+  const since = matches.map((match) => match.season).sort()[0]
+
+  return { scorers: firstPlacesOf(scorers, allTimePlaces), since, total: scorers.length }
 }
 
 /**

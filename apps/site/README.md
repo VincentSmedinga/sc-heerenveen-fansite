@@ -521,6 +521,12 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Zonder doelpunten staat er een zin in plaats van een tabel.
 
 De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
+De kaart Alle tijden (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#alle-tijden`, staat onder Doelpuntenmakers op het zachte vlak.
+Ze toont de eerste tien plaatsen van de doelpuntenmakers over alle seizoenen, per persoon, met `TopScorersTable`: spelers met gelijk aantal doelpunten delen een rij, en de plaats van de tiende hoort bij alle rijen ervan.
+De telling is `allTimeScorersOf` in `src/matches.ts`, dus `topScorersOf` over de wedstrijden van alle seizoenen (`getAllTimeMatches`, één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard).
+De kaart zegt "Sinds 2010/11", het eerste seizoen met wedstrijden, en hoeveel spelers er scoorden als de lijst is afgekapt.
+Ze volgt de schakelaar, maar niet het seizoen van de kiezer.
+Kan de database niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
 Op een telefoon volgt de zijkolom op de hoofdkolom, dus de selectie komt eerst, en de bronvermelding sluit de zijkolom af.
 Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
@@ -646,7 +652,7 @@ De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd o
 De play-offs voor de Conference League en de Europa League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Alle tijden (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
 Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`), zodat de schakelaar direct boven de eerste kaart staat die hem volgt.
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.

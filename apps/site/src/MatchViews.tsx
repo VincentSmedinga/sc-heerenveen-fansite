@@ -36,6 +36,8 @@ import { type CompetitionChoice, competitionParam, leagueValue } from './competi
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
+  allTimePlaces,
+  allTimeScorersOf,
   attendanceOf,
   cleanSheetsOf,
   competitionNames,
@@ -1190,6 +1192,55 @@ const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
   players: [scorer],
   position: scorer.position,
 })
+
+/**
+ * The card Alle tijden of the page Spelers, under Doelpuntenmakers: the first ten places of the
+ * goal scorers over every season we have, per person, as the card of a season counts them. It
+ * says from which season it counts ("sinds 2010/11"), so "alle tijden" never promises more than
+ * we have, and the line under the heading says how many players scored when the list is cut.
+ * The card is soft and in the sidebar, and has the button for an image like the other cards.
+ */
+export function AllTimeScorersCard({
+  competition,
+  matches,
+}: {
+  competition: CompetitionChoice
+  matches: (ScoredMatch & { season: string })[]
+}) {
+  const { scorers, since, total } = allTimeScorersOf(matches, competition)
+  const { known, played } = scorersCoverage(matches, competition)
+
+  return (
+    <Card aria-labelledby="alle-tijden" shareable={imageCredit(scorers.length > 0)} surface="soft">
+      <Heading anchor id="alle-tijden" level={2}>
+        Alle tijden
+      </Heading>
+      {scorers.length === 0 || since === undefined ? (
+        <Text>We hebben nog geen doelpuntenmakers van eerdere seizoenen. Kijk straks nog eens.</Text>
+      ) : (
+        <>
+          <Text>
+            Sinds {since}.{' '}
+            {scorers.length < total
+              ? `De top ${allTimePlaces} van ${total} spelers die scoorden`
+              : total === 1
+                ? '1 speler heeft gescoord'
+                : `${total} spelers hebben gescoord`}
+          </Text>
+          <TopScorersTable
+            caption={`De top ${allTimePlaces} van de doelpuntenmakers van sc Heerenveen sinds ${since}, in ${competitionNames(matches, competition)}`}
+            rows={scorersByPlace(scorers)}
+          />
+          {known < played && (
+            <Text appearance="meta">
+              Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
+            </Text>
+          )}
+        </>
+      )}
+    </Card>
+  )
+}
 
 /**
  * The card Doelpuntenmakers of the page Spelers, with the whole list. The card is soft and in
