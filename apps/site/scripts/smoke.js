@@ -772,8 +772,6 @@ await withEmptyDatabase((database) =>
     // Also before the first page: the card Resultaten per hoofdtrainer on /cijfers counts these
     // matches of earlier seasons, and the site keeps that for five minutes too.
     await addTestdorpMeetings(database)
-    // And the headlines of the card Nieuws over Testdorp FC, kept for five minutes as well.
-    await addTestdorpNews(database)
 
     const home = await fetch(origin)
     const html = await home.text()
@@ -1324,6 +1322,7 @@ await withEmptyDatabase((database) =>
     // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
     // slug that no club has is "niet gevonden".
+    await addTestdorpNews(database)
     await addProefdorpStadiums(database)
     await addProefdorpNames(database)
     const clubPage = await fetch(`${origin}/tegenstanders/testdorp-fc`)
