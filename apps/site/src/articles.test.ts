@@ -1,15 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { db, findNewestArticle, findPublishedArticle } = vi.hoisted(() => ({
+const { countPublishedArticles, db, findNewestArticle, findPublishedArticle, listArticleLines } = vi.hoisted(() => ({
+  countPublishedArticles: vi.fn(),
   db: { name: 'db' },
   findNewestArticle: vi.fn(),
   findPublishedArticle: vi.fn(),
+  listArticleLines: vi.fn(),
 }))
 
-vi.mock('@fansite/db/queries', () => ({ findNewestArticle, findPublishedArticle }))
+vi.mock('@fansite/db/queries', () => ({
+  countPublishedArticles,
+  findNewestArticle,
+  findPublishedArticle,
+  listArticleLines,
+}))
 vi.mock('./database', () => ({ getDatabase: () => ({ db }) }))
 
-import { getArticle, getNewestArticle } from './articles'
+import { getArticle, getArticlesPage, getNewestArticle } from './articles'
 
 const now = new Date('2026-10-26T12:00:00Z')
 
@@ -18,6 +25,8 @@ beforeEach(() => {
   vi.setSystemTime(now)
   findNewestArticle.mockReset()
   findPublishedArticle.mockReset()
+  countPublishedArticles.mockReset()
+  listArticleLines.mockReset()
 })
 
 afterEach(() => {
@@ -71,5 +80,34 @@ describe('getArticle', () => {
     findPublishedArticle.mockRejectedValue(new Error('connection lost'))
 
     await expect(getArticle('wie-zijn-wij')).rejects.toThrow('connection lost')
+  })
+})
+
+describe('getArticlesPage', () => {
+  it.each([
+    [0, 1],
+    [10, 1],
+    [11, 2],
+    [21, 3],
+  ])('has the pages that %i articles need, at least one', async (total, pages) => {
+    countPublishedArticles.mockResolvedValue(total)
+    listArticleLines.mockResolvedValue([])
+
+    expect((await getArticlesPage(1))?.pageCount).toBe(pages)
+  })
+
+  it('asks for ten articles from the start of the page', async () => {
+    countPublishedArticles.mockResolvedValue(21)
+    listArticleLines.mockResolvedValue([{ slug: 'a' }])
+
+    expect(await getArticlesPage(3)).toEqual({ articles: [{ slug: 'a' }], pageCount: 3 })
+    expect(listArticleLines).toHaveBeenCalledWith(db, now, 10, 20)
+  })
+
+  it('gives nothing for a page after the last one, and asks for no articles', async () => {
+    countPublishedArticles.mockResolvedValue(11)
+
+    expect(await getArticlesPage(3)).toBeUndefined()
+    expect(listArticleLines).not.toHaveBeenCalled()
   })
 })

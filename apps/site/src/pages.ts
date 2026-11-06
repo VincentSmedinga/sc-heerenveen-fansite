@@ -43,6 +43,11 @@ export const pages = [
     path: '/nieuws/podcasts',
   },
   {
+    description:
+      'De artikelen van de redactie van de sc Heerenveen Fansite, de nieuwste eerst, met de eerste alinea erbij.',
+    path: '/redactie',
+  },
+  {
     description: 'De media waar we het nieuws over sc Heerenveen vandaan halen, met een korte beschrijving van elk.',
     path: '/bronnen',
   },

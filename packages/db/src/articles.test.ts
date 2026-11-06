@@ -4,7 +4,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { findNewestArticle, findPublishedArticle, listPublishedArticles } from './queries.ts'
+import {
+  countPublishedArticles,
+  findNewestArticle,
+  findPublishedArticle,
+  listArticleLines,
+  listPublishedArticles,
+} from './queries.ts'
 import { adminUsers, articleLimits, articles, type NewArticle } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -258,5 +264,32 @@ describe('listPublishedArticles', () => {
     await database.db.insert(articles).values([article('a'), article('b'), article('c')])
 
     expect(await listPublishedArticles(database.db, now, 2)).toHaveLength(2)
+  })
+})
+
+describe('listArticleLines and countPublishedArticles', () => {
+  it('gives a page of the published articles, newest first, with the intro, and counts only them', async () => {
+    await database.db
+      .insert(articles)
+      .values([
+        article('oud', { publishedAt: new Date('2026-10-01T08:00:00Z') }),
+        article('midden', { publishedAt: new Date('2026-10-10T08:00:00Z') }),
+        article('nieuw', { intro: 'Een eigen intro.', publishedAt: new Date('2026-10-25T08:00:00Z') }),
+        article('concept', { publishedAt: null }),
+        article('later', { publishedAt: new Date('2026-11-01T08:00:00Z') }),
+      ])
+
+    expect(await countPublishedArticles(database.db, now)).toBe(3)
+
+    const first = await listArticleLines(database.db, now, 2, 0)
+
+    expect(first.map((row) => row.slug)).toEqual(['nieuw', 'midden'])
+    expect(first[0]).toMatchObject({ intro: 'Een eigen intro.', title: 'Titel van nieuw' })
+    expect((await listArticleLines(database.db, now, 2, 2)).map((row) => row.slug)).toEqual(['oud'])
+  })
+
+  it('counts none without an article', async () => {
+    expect(await countPublishedArticles(database.db, now)).toBe(0)
+    expect(await listArticleLines(database.db, now, 10, 0)).toEqual([])
   })
 })

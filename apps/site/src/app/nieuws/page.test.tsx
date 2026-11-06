@@ -455,14 +455,22 @@ describe('the sidebar of the news page', () => {
     expect(card).toContain('<span>Van de redactie</span>')
     expect(card).not.toContain('Wij zijn de redactie van de Fansite')
     expect(card).not.toContain('Lees verder')
-    expect(card.match(/<a /g)).toHaveLength(1)
+    expect(card.match(/<a /g)).toHaveLength(2)
   })
 
-  it('draws no icon for another site behind the article: it is a page of our own', async () => {
+  it('links to the overview of the articles under the line', async () => {
+    const html = withoutIcons(await render())
+    const card = html.match(/<section class="hf-card" aria-labelledby="editors-heading">.*?<\/section>/)?.[0] ?? ''
+
+    expect(card).toMatch(/<a [^>]*href="\/redactie"[^>]*>Alle artikelen<\/a>/)
+  })
+
+  it('draws no icon for another site behind the article: it is a page of our own, and only the link to all articles has an arrow', async () => {
     const html = await render()
     const card = html.match(/<section class="hf-card" aria-labelledby="editors-heading">.*?<\/section>/)?.[0] ?? ''
 
-    expect(card).not.toContain('<svg')
+    expect(card.match(/<svg/g)).toHaveLength(1)
+    expect(card.indexOf('<svg')).toBeGreaterThan(card.indexOf('Alle artikelen'))
   })
 
   it('leaves the card of the editors out when there is no article', async () => {

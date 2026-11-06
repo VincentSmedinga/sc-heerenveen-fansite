@@ -90,6 +90,7 @@
 - **Alternatieven:** elk pad dat met `/nieuws/` begint onder Nieuws laten vallen (korter, maar een adres dat niet bestaat staat dan onder Nieuws).
   Op een artikel geen balk en Nieuws niet huidig (dan weet de bezoeker niet waar hij is).
   Een eigenschap op `Navigation` voor "in dit onderdeel" met `aria-current="true"` (juister, maar een wijziging in het designsysteem voor één pagina).
+- **Later:** zie _De balk van Nieuws heeft Podcasts, Redactie en Zoeken, in die volgorde, altijd alle drie_ (6 november 2026): een artikel van de redactie hoort bij de subpagina Redactie, dus Nieuws is daar `aria-current="true"` en het nadeel hierboven vervalt.
 
 ## Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep
 
@@ -2699,3 +2700,21 @@
 - **Waarom:** Nieuws, Tegenstanders en de homepage hebben geen seizoen.
   Een globale keuze in de kop zou daar niets doen.
 - **Alternatieven:** een seizoenskiezer in de kop van elke pagina.
+
+## De balk van Nieuws heeft Podcasts, Redactie en Zoeken, in die volgorde, altijd alle drie
+
+- **Datum:** 6 november 2026
+- **Besluit:** de balk onder Nieuws heeft Podcasts, Redactie en Zoeken, in die volgorde.
+  Redactie staat er ook als er nog geen artikel is.
+  Redactie is de huidige subpagina op `/redactie` en op elk artikel (`/redactie/<naam>`), en Nieuws is daar `aria-current="true"`, zoals op Podcasts.
+  `/redactie` toont de gepubliceerde artikelen, de nieuwste eerst, met de titel, de dag en de inleiding, tien per pagina, met `Pagination` en `?pagina=` zoals het nieuwsarchief.
+  Zonder artikel staat er "We hebben nog geen artikelen.", en een pagina na de laatste is "niet gevonden".
+  De kaart "Van de redactie" op `/nieuws` heeft de link "Alle artikelen", en een artikel heeft de link "Alle artikelen van de redactie".
+- **Waarom:** Podcasts is het grootste deel, en Zoeken doorzoekt alles en staat dus als laatste.
+  Een balk die per aantal artikelen verandert, is meer om te testen dan de lege zin waard is.
+  De inleiding mag op de lijst staan, want het is onze eigen tekst.
+- **Alternatieven:** Zoeken eerst.
+  Redactie pas tonen vanaf twee artikelen.
+- **Later:** vult _Het hoofdmenu kiest het onderdeel en de subpagina uit het pad_ (31 oktober 2026) aan: op een artikel van de redactie is Nieuws niet meer `aria-current="page"`, maar `aria-current="true"`, en Redactie is de huidige subpagina.
+  Dat verkleint ook het nadeel dat daar stond.
+  Het vult _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) aan: de balk van Nieuws heeft ook Redactie.

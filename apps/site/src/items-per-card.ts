@@ -20,6 +20,9 @@ export const firstHeadlines = listSizes[1]
 /** How many headlines a page of /nieuws shows. */
 export const headlinesPerPage = listSizes[3]
 
+/** How many articles a page of /redactie shows. */
+export const articlesPerPage = listSizes[1]
+
 /** How many clean sheets the card on the statistics page starts with. */
 export const firstCleanSheets = listSizes[1]
 

@@ -118,7 +118,6 @@ describe('visitOf', () => {
     '/bestaat-niet',
     '/privacy/extra',
     '/Privacy',
-    '/redactie',
     '/redactie/a/b',
   ])('does not count %s', (path) => {
     expect(visitOf(request(path))).toBeUndefined()

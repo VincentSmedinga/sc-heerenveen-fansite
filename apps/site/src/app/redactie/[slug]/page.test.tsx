@@ -73,7 +73,15 @@ describe('the page of an article', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html.match(/<article/g)).toHaveLength(1)
-    expect(html).toMatch(/^<main class="hf-page-main"><article class="hf-article">.*<\/article><\/main>$/)
+    expect(html).toMatch(/^<main class="hf-page-main"><article class="hf-article">.*<\/article>.*<\/main>$/)
+  })
+
+  it('links back to the overview of the articles, under the article', async () => {
+    const html = await render()
+
+    expect(html).toMatch(
+      /<\/article><p[^>]*><a [^>]*href="\/redactie"[^>]*>Alle artikelen van de redactie<\/a><\/p><\/main>$/,
+    )
   })
 
   it('has the title as the one h1 and the headings of the text as h2', async () => {

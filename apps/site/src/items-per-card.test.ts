@@ -20,5 +20,6 @@ describe('the counts of the lists', () => {
     expect(counts.itemsPerCard).toBe(5)
     expect(counts.firstHeadlines).toBe(10)
     expect(counts.headlinesPerPage).toBe(50)
+    expect(counts.articlesPerPage).toBe(10)
   })
 })

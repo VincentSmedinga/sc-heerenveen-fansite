@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Article, Page } from '@fansite/design-system'
+import { Article, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
@@ -55,6 +55,9 @@ export default async function ArticlePage({ params }: { params: Params }) {
       >
         <ArticleText body={article.body} />
       </Article>
+      <Text>
+        <Link href="/redactie">Alle artikelen van de redactie</Link>
+      </Text>
     </Page.Main>
   )
 }
