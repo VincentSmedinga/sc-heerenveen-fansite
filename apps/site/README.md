@@ -1082,6 +1082,10 @@ De beslissing en de alternatieven staan in `docs/beslissingen/site.md`.
 Elk antwoord krijgt de header `Content-Security-Policy` (zie `src/proxy.ts`).
 Een pagina laadt alleen iets van onze eigen server: geen scripts, stijlen, lettertypes, afbeeldingen of frames van een ander domein.
 Inline scripts en stijlen mogen wel, omdat Next.js ze nodig heeft.
+Een andere site mag geen pagina van ons in een frame zetten (`frame-ancestors 'none'`), omdat het beheer een inlog heeft en een pagina in een frame kan dienen voor clickjacking.
+Elk antwoord heeft daarom ook `X-Frame-Options: DENY`, voor browsers die `frame-ancestors` niet kennen, en `Cross-Origin-Opener-Policy: same-origin`, dat onze pagina's scheidt van vensters van andere sites.
+De site toont zelf geen frames en opent geen vensters met een opener, dus niets breekt.
+`src/proxy.test.ts` en de rooktest controleren de drie op een pagina, een bestand onder `/_next`, de 404 en een pagina van het beheer.
 
 ## Zoekmachines
 
