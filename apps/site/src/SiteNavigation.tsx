@@ -9,10 +9,11 @@ import { useSyncExternalStore } from 'react'
 import { readAdminMarker, subscribeToAdminMarker } from './admin-marker'
 import { seasonFromSlug, seasonSlug } from './seasons'
 
-// The sub-pages of Nieuws, in the bar under the menu: the podcasts and the search. Nieuws
-// itself is the news overview, so there is no separate archive.
+// The sub-pages of Nieuws, in the bar under the menu: the podcasts, the editors and the
+// search. Nieuws itself is the news overview, so there is no separate archive.
 const newsSubitems = [
   { href: '/nieuws/podcasts', label: 'Podcasts' },
+  { href: '/redactie', label: 'Redactie' },
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 
@@ -55,11 +56,12 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
 /**
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
  * Nieuws has the news overview, its sub-pages and the articles of the editors
- * (`/redactie/<name>`); the home page has no item, because it is the front page of the whole
- * site and the logo links to it. Wedstrijden has the page and every page below it, such as the
- * season. Statistieken has the same, and two sub-pages of its own: Spelers, with the page of
- * each season below it (`/statistieken/spelers/2025-26`), and Tegenstanders, with the page of
- * each club below it (`/statistieken/tegenstanders/ado-den-haag`). A path that belongs to no
+ * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item,
+ * because it is the front page of the whole site and the logo links to it. Wedstrijden has
+ * the page and every page below it, such as the season. Statistieken has the same, and two
+ * sub-pages of its own: Spelers, with the page of each season below it
+ * (`/statistieken/spelers/2025-26`), and Tegenstanders, with the page of each club below it
+ * (`/statistieken/tegenstanders/ado-den-haag`). A path that belongs to no
  * item, such as /bronnen, the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
@@ -69,7 +71,11 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: newsPath, subitem: subitem.href }
   }
 
-  if (pathname === newsPath || pathname.startsWith('/redactie/')) {
+  if (pathname.startsWith('/redactie/')) {
+    return { item: newsPath, subitem: '/redactie' }
+  }
+
+  if (pathname === newsPath) {
     return { item: newsPath }
   }
 

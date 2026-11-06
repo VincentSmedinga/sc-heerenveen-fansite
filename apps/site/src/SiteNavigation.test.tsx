@@ -76,6 +76,7 @@ describe('SiteNavigation', () => {
 
     expect(barLinks(html)).toEqual([
       ['/nieuws/podcasts', 'Podcasts'],
+      ['/redactie', 'Redactie'],
       ['/nieuws/zoeken', 'Zoeken'],
     ])
     expect(currentLinks(html)).toEqual(['Nieuws'])
@@ -92,20 +93,22 @@ describe('SiteNavigation', () => {
 
   it.each([
     ['/nieuws/podcasts', 'Podcasts'],
+    ['/redactie', 'Redactie'],
     ['/nieuws/zoeken', 'Zoeken'],
   ])('marks %s as the current sub-page in the bar, and Nieuws as the item that holds it', (path, label) => {
     const html = render(path)
 
-    expect(barLinks(html).map(([, text]) => text)).toEqual(['Podcasts', 'Zoeken'])
+    expect(barLinks(html).map(([, text]) => text)).toEqual(['Podcasts', 'Redactie', 'Zoeken'])
     expect(currentLinks(html)).toEqual([label])
     expect(linksWith(html, 'true')).toEqual(['Nieuws'])
   })
 
-  it('shows the bar on an article of the editors, with Nieuws as the current item and no sub-page', () => {
+  it('shows the bar on an article of the editors, with Redactie as the current sub-page and Nieuws as the item that holds it', () => {
     const html = render('/redactie/een-artikel')
 
-    expect(barLinks(html)).toHaveLength(2)
-    expect(currentLinks(html)).toEqual(['Nieuws'])
+    expect(barLinks(html).map(([, text]) => text)).toEqual(['Podcasts', 'Redactie', 'Zoeken'])
+    expect(currentLinks(html)).toEqual(['Redactie'])
+    expect(linksWith(html, 'true')).toEqual(['Nieuws'])
   })
 
   it.each(['/wedstrijden', '/wedstrijden/2025-26'])(
@@ -206,7 +209,7 @@ describe('SiteNavigation', () => {
     )
   })
 
-  it.each(['/bronnen', '/nieuws/bestaat-niet', '/podcasts', '/zoeken', '/redactie', '/bestaat-niet'])(
+  it.each(['/bronnen', '/nieuws/bestaat-niet', '/podcasts', '/zoeken', '/redactiepagina', '/bestaat-niet'])(
     'marks nothing on %s, which is not in the menu, and shows no bar',
     (path) => {
       const html = render(path)
@@ -302,7 +305,8 @@ describe('currentOf', () => {
     ['/nieuws', { item: '/nieuws' }],
     ['/nieuws/podcasts', { item: '/nieuws', subitem: '/nieuws/podcasts' }],
     ['/nieuws/zoeken', { item: '/nieuws', subitem: '/nieuws/zoeken' }],
-    ['/redactie/een-artikel', { item: '/nieuws' }],
+    ['/redactie', { item: '/nieuws', subitem: '/redactie' }],
+    ['/redactie/een-artikel', { item: '/nieuws', subitem: '/redactie' }],
     ['/wedstrijden', { item: '/wedstrijden' }],
     ['/wedstrijden/2025-26', { item: '/wedstrijden' }],
     ['/statistieken', { item: '/statistieken' }],
