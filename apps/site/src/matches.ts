@@ -553,6 +553,14 @@ export type HomeAwayTally = {
   won: number
 }
 
+/** The goals of sc Heerenveen and against it in some of the matches, for the two lines. */
+export type LateGoals = {
+  /** The goals against. */
+  conceded: number
+  /** The goals of sc Heerenveen. */
+  scored: number
+}
+
 /** The five things the card of our place in the league ranks sc Heerenveen on. */
 export type LeagueMeasure = 'goalDifference' | 'goalsAgainst' | 'goalsFor' | 'pointsPerMatch' | 'won'
 
@@ -682,6 +690,40 @@ export function goalsPerQuarter(matches: PublicMatch[], choice: CompetitionChoic
     played: played.length,
     scored,
   }
+}
+
+/**
+ * The late goals of the matches `goalsPerQuarter` counts: the goals after the 80th minute
+ * (`late`) and the goals in stoppage time (`stoppage`), of sc Heerenveen and against it, in the
+ * same matches (the league and, for the choice `all`, the cup, with the goals known). A goal
+ * after the 80th minute is one from minute 81, so 90+3 and a goal in extra time are in it, and
+ * 80 is not. A goal in stoppage time is one with added time (45+1, 90+3 and 105+1), and a goal
+ * without added time counts for its minute alone: Wikipedia gives the added time only for some
+ * goals, so a goal at 90 with no added time is late and not in stoppage time. A goal counts
+ * for the club that profits (`ours`), so an own goal is a goal of the other club, and a minute
+ * that can't be played (0) is left out. A goal can be in both.
+ */
+export function lateGoalsOf(
+  matches: PublicMatch[],
+  choice: CompetitionChoice = 'all',
+): { late: LateGoals; stoppage: LateGoals } {
+  const late: LateGoals = { conceded: 0, scored: 0 }
+  const stoppage: LateGoals = { conceded: 0, scored: 0 }
+  const known = matches.filter((match) => countsFor(match, choice) && match.status === 'played').filter(hasKnownGoals)
+
+  for (const goal of known.flatMap((match) => match.goals)) {
+    const side = goal.ours ? 'scored' : 'conceded'
+
+    if (goal.minute >= 81) {
+      late[side]++
+    }
+
+    if (goal.minute >= 1 && goal.stoppageMinutes !== null && goal.stoppageMinutes > 0) {
+      stoppage[side]++
+    }
+  }
+
+  return { late, stoppage }
 }
 
 /**

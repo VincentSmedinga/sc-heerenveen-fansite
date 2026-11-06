@@ -59,7 +59,7 @@ const episodes: PublicEpisode[] = [
   {
     durationSeconds: 2944,
     episodeNumber: 16,
-    publishedAt: new Date('2026-10-22T10:00:00Z'),
+    publishedAt: new Date('2026-10-25T10:00:00Z'),
     seasonNumber: 9,
     sourceName: 'Testpodcast',
     title: 'Aflevering 12 & <b>de winterstop</b>',
@@ -489,6 +489,19 @@ describe('the sidebar of the news page', () => {
     expect(card).toContain('<h2 class="hf-heading-2" id="episodes-heading">Podcasts</h2>')
     expect(card).toContain('href="https://testpodcast.test/e/12"')
     expect(card).toContain('Aflevering 12 &amp; &lt;b&gt;de winterstop&lt;/b&gt;')
+    expect(card).toContain('<a href="/nieuws/podcasts">Alle podcasts</a>')
+  })
+
+  it('shows a sentence instead of the list when the newest episode is older than 8 days, with the link under it', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue([
+      { ...episodes[0]!, publishedAt: new Date(now.getTime() - 9 * 24 * 60 * 60 * 1000) },
+    ])
+
+    const html = withoutIcons(await render())
+    const card = html.match(/<section class="hf-card" aria-labelledby="episodes-heading">.*?<\/section>/)?.[0] ?? ''
+
+    expect(card).toContain('<p>We hebben de laatste 8 dagen geen podcastafleveringen gevonden.</p>')
+    expect(card).not.toContain('<li>')
     expect(card).toContain('<a href="/nieuws/podcasts">Alle podcasts</a>')
   })
 

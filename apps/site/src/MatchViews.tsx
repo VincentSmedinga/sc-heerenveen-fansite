@@ -47,6 +47,7 @@ import {
   goalsWithInitials,
   homeAwayOf,
   lacksResult,
+  lateGoalsOf,
   type LeagueMeasure,
   type LeaguePlace,
   leaguePlaceOf,
@@ -241,6 +242,10 @@ export function ExtremesCard({
  * no minutes, and, when one of those matches went to extra time, a line that extra time is left
  * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
  * charts.
+ *
+ * Under the table are two lines with the goals after the 80th minute and in stoppage time, for
+ * and against (see `lateGoalsOf`), which count in the same matches and follow the switch. They
+ * are plain text, in the order a screen reader reads them, and say 0 when there is none.
  */
 export function GoalsPerQuarterCard({
   competition,
@@ -252,6 +257,7 @@ export function GoalsPerQuarterCard({
   season?: string | undefined
 }) {
   const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches, competition)
+  const { late, stoppage } = lateGoalsOf(matches, competition)
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
@@ -282,8 +288,14 @@ export function GoalsPerQuarterCard({
               header: label,
             }))}
           />
+          <Text>{`Na de 80e minuut: ${late.scored} voor, ${late.conceded} tegen`}</Text>
+          <Text>{`In blessuretijd: ${stoppage.scored} voor, ${stoppage.conceded} tegen`}</Text>
           <BasedOn known={known} played={played} />
-          {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
+          {extraTime && (
+            <Text appearance="meta">
+              Doelpunten in de verlenging tellen niet mee in de tabel, wel in de twee regels erboven.
+            </Text>
+          )}
         </>
       )}
     </Card>

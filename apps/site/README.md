@@ -258,9 +258,12 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Onderaan de zijbalk staat het blok "Nieuwste podcasts": de nieuwste afleveringen van alle podcasts van de laatste 8 dagen, tot vijf, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
+De kaart (`EpisodesCard` in `src/NewsCards.tsx`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu; een aflevering van precies 8 dagen oud staat er nog in.
+Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
+Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Boven de discussies staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
@@ -454,8 +457,12 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een eigen doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt.
   Een gespeelde wedstrijd telt mee als hij minstens één doelpunt heeft of eindigde in 0–0; een wedstrijd met een uitslag maar zonder doelpunten in `match_goals` heeft geen minuten en blijft erbuiten.
   Onder het diagram staat dezelfde informatie als tabel (`DataTable`), die de schermlezer krijgt, want de diagrammen zijn voor hulpsoftware verborgen.
+  Onder de tabel staan twee regels met tekst: "Na de 80e minuut: 5 voor, 3 tegen" en "In blessuretijd: 2 voor, 1 tegen" (`lateGoalsOf` in `src/matches.ts`).
+  Ze tellen in dezelfde wedstrijden en volgen de schakelaar, en zeggen 0 als er geen doelpunt is.
+  Na de 80e minuut is vanaf minuut 81, dus 90+3 en een doelpunt in de verlenging staan erbij; in blessuretijd is een doelpunt met toegevoegde tijd (45+1, 90+3, 105+1).
+  Een doelpunt zonder toegevoegde tijd telt alleen voor zijn minuut, want Wikipedia noemt de toegevoegde tijd niet altijd.
   Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
-  Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
+  Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee in de tabel, wel in de twee regels erboven."; anders staat die zin er niet.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Hoe de wedstrijden verlopen:** de derde kaart van de linker kolom, direct na het verloop van het seizoen en boven de schakelaar, in het zachte vlak, met de laatste regel "Alleen de Eredivisie".
   De link in de balk onder de kop heet "Hoe wedstrijden verlopen": de hele kop past op een telefoon niet tussen de vervaagde randen van de rij.
@@ -674,7 +681,7 @@ Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste reg
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
-Doelpunten in de verlenging blijven buiten Doelpunten per kwartier, met de zin die dat zegt.
+Doelpunten in de verlenging blijven buiten de tabel van Doelpunten per kwartier, met de zin die dat zegt; de twee regels eronder tellen ze wel.
 De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`CompetitionChoice`); wie het weglaat, krijgt wat de kaart tot nu toe deed.
 
 De keuze blijft bij elke link: de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
@@ -699,7 +706,7 @@ De zijbalk heeft drie kaarten, in deze volgorde, ook op een telefoon:
 - het filter per bron;
 - "Van de redactie": het nieuwste artikel als één nieuwsregel (`NewsItem`, `EditorsCard` in `src/NewsCards.tsx`): de titel als link naar `/redactie/<naam>`, de dag, en "Van de redactie" als bron, zonder pictogram voor een andere site en zonder inleiding.
   Is er geen artikel, dan staat er geen kaart;
-- "Podcasts": de nieuwste afleveringen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
+- "Podcasts": de nieuwste afleveringen van de laatste 8 dagen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
   Het artikel en de podcasts zijn extra's: lukt het lezen ervan niet, dan staat de kaart er niet en schrijft de site de reden in het logboek.
 
 Het filter staat in een lichtblauwe kaart (`surface="soft"`) in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".

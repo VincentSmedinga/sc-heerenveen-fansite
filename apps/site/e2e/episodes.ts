@@ -63,9 +63,10 @@ export async function addEpisodes() {
           episodeNumber: index % 3 === 0 ? count - index : null,
           feedId: feed?.id ?? 0,
           key: `e2e-${index}`,
-          // The first is an hour old, and each next one is a few days older: this week, this
-          // year and years ago.
-          publishedAt: new Date(now - (index === 0 ? 1 / 24 : index * 11) * day),
+          // The first is an hour old, the next three are 2, 4 and 6 days old, so the card on
+          // the homepage (the last 8 days) has four episodes whenever the check runs, and each
+          // next one is a few days older: this year and years ago.
+          publishedAt: new Date(now - (index === 0 ? 1 / 24 : index < 4 ? index * 2 : index * 11) * day),
           seasonNumber: index % 6 === 0 ? 2 : null,
           sourceId,
           title: index === 1 ? episodeTitles.long : index === 2 ? episodeTitles.html : `Aflevering ${count - index}`,

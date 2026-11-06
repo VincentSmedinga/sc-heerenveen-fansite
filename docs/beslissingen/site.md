@@ -1622,6 +1622,7 @@
   Twee items per kaart in de zijbalk van de homepage, om de kolommen even lang te maken (de projecteigenaar koos op 1 november 2026 voor vijf per kaart; de eerste versie van dit besluit had twee).
   Een bezoeker laten kiezen tussen 5, 10, 20 en 50 (meer knoppen en een adres per keuze, terwijl de code de maten vastlegt).
   Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
+- **Later:** zie _De kaart met podcasts toont de afleveringen van de laatste 8 dagen_ (7 november 2026): de kaart met podcasts op de homepage en op `/nieuws` toont alleen afleveringen van de laatste 8 dagen, tot vijf.
 - **Later:** zie _Op de homepage staat Wedstrijden boven het forum_ (6 november 2026): de zijbalk van de homepage begint met Wedstrijden en Stand, dan het forum, dan de podcasts.
 
 ## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
@@ -2912,6 +2913,27 @@
 - **Alternatieven:** een grafiek met twee lijnen (meer ontwerp, weinig extra); een rij onder Verloop sinds 1990; het lopende seizoen met "nu" erbij (zijn stand is nog niet af).
 - **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de vraag die `finalPlacesOf` voor de club van de pagina kon stellen, wordt hier alleen voor onze eigen plek gebruikt; de plek van de club komt uit `listStandingsPlaces`.
 
+## Late doelpunten en doelpunten in blessuretijd staan onder Doelpunten per kwartier
+
+- **Datum:** 6 november 2026
+- **Besluit:** twee regels onder de tabel van de kaart Doelpunten per kwartier: "Na de 80e minuut" en "In blessuretijd", voor ons en tegen ons, volgens de schakelaar (#783).
+  - **Telling:** `lateGoalsOf` in `src/matches.ts` telt in dezelfde wedstrijden als de kaart zelf (gespeeld, met bekende doelpunten, de competitie en bij Alle wedstrijden de beker).
+    Na de 80e minuut is vanaf minuut 81: 80 telt niet, 81 wel, en 90+3 en een doelpunt in de verlenging ook.
+    In blessuretijd is een doelpunt met toegevoegde tijd: 45+1, 90+3 en 105+1.
+    Een doelpunt zonder toegevoegde tijd telt alleen voor zijn minuut, want Wikipedia noemt die niet altijd, en de kaart zegt niet dat de blessuretijd volledig is.
+    90+3 telt in beide regels.
+    Een doelpunt telt voor de club die ervan profiteert (`ours`), en minuut 0 telt niet.
+  - **Verlenging:** de tabel laat de verlenging weg en de twee regels niet.
+    De zin onder de kaart zegt dat nu: "Doelpunten in de verlenging tellen niet mee in de tabel, wel in de twee regels erboven."
+  - **Weergave:** twee regels gewone tekst, in die volgorde, met 0 als er geen doelpunt is ("Na de 80e minuut: 0 voor, 0 tegen").
+    De tabel en de diagrammen veranderen niet.
+- **Waarom:** de gegevens staan er al, en een extra kaart voor twee getallen zou de pagina drukker maken.
+  80 is de grens die supporters "laat" noemen.
+- **Alternatieven:** een eigen kaart.
+  Een lijst van de late winnende doelpunten (groter, een ander issue).
+  De grens bij de 85e minuut.
+- **Later:** dit vult _De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten_ (`redactie.md`) aan: de blessuretijd (`stoppage_minutes`) doet voor de kwartieren nog niet mee, maar telt wel in de regel "In blessuretijd", en de verlenging blijft buiten de tabel maar telt in de twee regels.
+
 ## Een tabel die een grafiek herhaalt, staat in een Disclosure
 
 - **Datum:** 6 november 2026
@@ -2939,3 +2961,16 @@
 - **Alternatieven:** ook uitwedstrijden (zegt iets anders).
   Een regel in Verloop sinds 1990.
 - **Later:** dit past bij _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ met een uitzondering: de kaart telt de wedstrijden tegen één club en hoort daarom bij die club.
+
+## De kaart met podcasts toont de afleveringen van de laatste 8 dagen
+
+- **Datum:** 7 november 2026
+- **Besluit:** de kaart met podcasts (`EpisodesCard`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu, tot het aantal van `itemsPerCard`.
+  Een aflevering van precies 8 dagen oud staat er nog in.
+  Zonder afleveringen staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
+- **Waarom:** de projecteigenaar wil op de homepage en bij het nieuws alleen verse afleveringen zien.
+  Een aflevering van weken oud is geen nieuws meer.
+  8 dagen dekt een wekelijkse podcast.
+- **Alternatieven:** altijd de vijf nieuwste tonen (zoals eerder).
+  Een venster van 7 dagen (mist een wekelijkse aflevering die iets later komt).
+- **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) en van _Het blok op de homepage staat in de zijbalk onder het forum_ in `docs/beslissingen/importer.md` (24 oktober 2026) dat zegt dat de kaart de nieuwste afleveringen toont zonder grens in de tijd.

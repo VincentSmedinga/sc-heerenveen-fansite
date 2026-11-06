@@ -386,7 +386,7 @@ const episodes: PublicEpisode[] = [
   {
     durationSeconds: 4320,
     episodeNumber: null,
-    publishedAt: new Date('2026-10-12T10:00:00Z'),
+    publishedAt: new Date('2026-10-16T10:00:00Z'),
     seasonNumber: null,
     sourceName: 'Proefpodcast',
     title: 'Aflevering 11',
@@ -395,7 +395,7 @@ const episodes: PublicEpisode[] = [
   {
     durationSeconds: null,
     episodeNumber: null,
-    publishedAt: new Date('2025-12-30T10:00:00Z'),
+    publishedAt: new Date('2026-10-15T13:40:00Z'),
     seasonNumber: null,
     sourceName: 'Testpodcast',
     title: 'Aflevering 1',
@@ -449,14 +449,14 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     expect(html).toContain('Proefpodcast')
   })
 
-  it('shows a weekday and the time for this week, and the weekday and the date, with the year when it is not this year, before that', async () => {
+  it('shows a weekday and the time for this week, and the weekday and the date before that', async () => {
     vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
 
     const html = await renderEpisodes()
 
     expect(html).toContain('do 12:00')
-    expect(html).toContain('ma 12 okt')
-    expect(html).toContain('di 30 dec 2025')
+    expect(html).toContain('vr 16 okt')
+    expect(html).toContain('do 15 okt')
   })
 
   it('shows the season, the number and the duration of an episode after the name, for what the feed gave', async () => {
@@ -488,12 +488,50 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     expect(html).not.toMatch(/<img|<audio|<iframe|\.mp3/)
   })
 
-  it('says there are no episodes yet, with the link to all podcasts under it', async () => {
+  it('says there are no episodes in the last 8 days, with the link to all podcasts under it', async () => {
     const html = await renderEpisodes()
 
     expect(withoutIcons(html)).toContain(
-      '<p>We hebben nog geen podcastafleveringen gevonden.</p><p><a href="/nieuws/podcasts">Alle podcasts</a></p>',
+      '<p>We hebben de laatste 8 dagen geen podcastafleveringen gevonden.</p><p><a href="/nieuws/podcasts">Alle podcasts</a></p>',
     )
+  })
+
+  it('shows only the episodes of the last 8 days: 7 days and exactly 8 days are in, 8 days and a minute and 9 days are out', async () => {
+    const at = (title: string, ago: number) => ({
+      durationSeconds: null,
+      episodeNumber: null,
+      publishedAt: new Date(now.getTime() - ago),
+      seasonNumber: null,
+      sourceName: 'Testpodcast',
+      title,
+      url: `https://testpodcast.test/e/${title}`,
+    })
+    const day = 24 * 60 * 60 * 1000
+
+    vi.mocked(getLatestEpisodes).mockResolvedValue([
+      at('zeven', 7 * day),
+      at('acht', 8 * day),
+      at('acht-en-een-minuut', 8 * day + 60 * 1000),
+      at('negen', 9 * day),
+    ])
+
+    const html = await renderEpisodes()
+
+    expect(html.match(/<li>/g)).toHaveLength(2)
+    expect(html).toContain('e/zeven')
+    expect(html).toContain('e/acht"')
+    expect(html).not.toContain('acht-en-een-minuut')
+    expect(html).not.toContain('e/negen')
+  })
+
+  it('says there are none in the last 8 days when every episode is older, with the link under it', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue([{ ...episodes[0]!, publishedAt: new Date('2026-10-10T10:00:00Z') }])
+
+    const html = await renderEpisodes()
+
+    expect(html).not.toContain('<li>')
+    expect(withoutIcons(html)).toContain('<p>We hebben de laatste 8 dagen geen podcastafleveringen gevonden.</p>')
+    expect(html).toContain('href="/nieuws/podcasts"')
   })
 
   it('shows the error page when only the episodes can not be read', async () => {

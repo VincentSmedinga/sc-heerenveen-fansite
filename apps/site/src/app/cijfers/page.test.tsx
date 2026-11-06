@@ -895,7 +895,44 @@ describe('the page /cijfers', () => {
       })
 
       expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
-        '<p class="hf-meta">Doelpunten in de verlenging tellen niet mee.</p>',
+        '<p class="hf-meta">Doelpunten in de verlenging tellen niet mee in de tabel, wel in de twee regels erboven.</p>',
+      )
+    })
+
+    it('has two lines under the table with the late goals and the goals in stoppage time, for and against', async () => {
+      const card = section(await render(), 'doelpunten-per-kwartier')
+
+      expect(card).toContain('<p>Na de 80e minuut: 0 voor, 1 tegen</p><p>In blessuretijd: 1 voor, 1 tegen</p>')
+      expect(card.indexOf('</table>')).toBeLessThan(card.indexOf('Na de 80e minuut'))
+      expect(card.indexOf('In blessuretijd')).toBeLessThan(card.indexOf('Gebaseerd op'))
+    })
+
+    it('follows the switch: the cup goals count for all the matches and not for the Eredivisie', async () => {
+      const cup = {
+        ...goalMatches[0]!,
+        competition: 'KNVB Beker' as const,
+        goals: [{ ...goalMatches[0]!.goals[0]!, minute: 88, ours: true, stoppageMinutes: 2 }],
+        round: 'Eerste ronde',
+      }
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...goalMatches, cup] })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        'Na de 80e minuut: 1 voor, 1 tegen</p><p>In blessuretijd: 2 voor, 1 tegen',
+      )
+      expect(section(await render(eredivisie), 'doelpunten-per-kwartier')).toContain(
+        'Na de 80e minuut: 0 voor, 1 tegen</p><p>In blessuretijd: 1 voor, 1 tegen',
+      )
+    })
+
+    it('says 0, and not a blank, when there is no goal late or in stoppage time', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [{ ...goalMatches[0]!, goals: [{ ...goalMatches[0]!.goals[0]!, minute: 10, stoppageMinutes: null }] }],
+      })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        'Na de 80e minuut: 0 voor, 0 tegen</p><p>In blessuretijd: 0 voor, 0 tegen',
       )
     })
 
