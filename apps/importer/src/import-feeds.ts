@@ -34,6 +34,7 @@ import { readForum } from './read-forum.ts'
 import { judgeRelevance, opponentsAround } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
+import { syncItemClubs } from './store-item-clubs.ts'
 import { describeError } from './text.ts'
 
 /**
@@ -610,6 +611,9 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * different value counts as a change. The items are all stored, whatever the value. The counts
  * of the values hold the decision for every item of the feed, also for a hidden item, whose own
  * value stays as it is.
+ *
+ * Every item also gets the clubs its headline names in `item_clubs` (`clubsNamed`), whatever
+ * the filter of the feed, and a changed title gives changed rows.
  */
 async function storeItems(
   db: Executor,
@@ -706,6 +710,23 @@ async function storeItems(
           url: unlessHidden(items.url),
         },
       })
+
+    // The clubs follow the title as stored now, also for a hidden item, whose title stays.
+    await syncItemClubs(
+      db,
+      await db
+        .select({ id: items.id, title: items.title })
+        .from(items)
+        .where(
+          and(
+            eq(items.sourceId, feed.sourceId),
+            inArray(
+              items.key,
+              batch.map((item) => item.key),
+            ),
+          ),
+        ),
+    )
   }
 
   return { ...counts, relevance }

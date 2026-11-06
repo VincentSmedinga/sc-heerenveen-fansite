@@ -571,3 +571,18 @@
 - **Waarom:** de site moet de kans alleen lezen, en de som van de tabel bestaat nergens anders dan tijdens het lezen (zie _De importer berekent de volledigheid en bewaart hem, de site rekent niet_ in `importer.md`).
 - **Alternatieven:** kolommen in `squad_imports` (die tabel is de gezondheid van de import, en een seizoen zonder lezing heeft er geen rij).
   De kans bij elk verzoek uit `players` rekenen (de som is dan weg).
+
+## Welke clubs een kop noemt staat in een tabel `item_clubs`
+
+- **Datum:** 6 november 2026
+- **Besluit:** migratie `0044_add_item_clubs` voegt een tabel toe met een rij per kop en club: `item_id` (verwijst naar `items`, de rijen gaan weg met de kop) en `club` (de naam zoals `matches.opponent` hem heeft), samen de sleutel, met een index op `club` (#794).
+  sc Heerenveen zelf staat er niet in.
+  - **De migratie:** ze voegt alleen een tabel toe, begint leeg en kan opnieuw draaien.
+    De deploy volgt `docs/back-ups.md`: een dump vooraf, zoals bij elke migratie.
+  - **Op acceptatie:** na de deploy draait `import.mjs --item-clubs` één keer, zodat ook de koppen die al in de database staan hun rijen krijgen.
+    De volgende uurlijkse import houdt ze bij.
+  - **Terugdraaien:** de tabel weghalen (`DROP TABLE item_clubs`) verliest geen gegevens.
+    `import:item-clubs` maakt de rijen weer uit de titels.
+- **Waarom:** de kaart "Nieuws over <club>" (#777) moet de koppen van een club kunnen opvragen zonder de titels bij elke lading te doorzoeken, en een kop kan meer clubs noemen (zie _Een kop onthoudt welke clubs hij noemt, in een eigen tabel_ in `importer.md`).
+- **Alternatieven:** een kolom in `items` (één club per kop).
+  Een tabel die naar `clubs.id` verwijst (de importer leest de clubs bij het bewaren van koppen niet, en de naam is wat `matches.opponent` ook heeft).

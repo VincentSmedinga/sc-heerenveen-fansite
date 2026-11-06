@@ -621,6 +621,29 @@ const articleTitle = customType<{ data: string }>({
 })
 
 /**
+ * The professional clubs a headline names, other than sc Heerenveen: one row for each club of
+ * each item, with the club as `matches.opponent` has its name (the pages of a club find it
+ * through `clubs.name` and `club_names`). The importer fills it for every item it stores, also
+ * for a feed without a filter, and works it out again from the title each time the item comes
+ * by, so a new title gives new rows (see `clubsNamed` in `apps/importer/src/relevance.ts`). The
+ * rows go with their item. It holds names of clubs only, no text of the source.
+ */
+export const itemClubs = mysqlTable(
+  'item_clubs',
+  {
+    itemId: int('item_id', { unsigned: true })
+      .notNull()
+      .references(() => items.id, { onDelete: 'cascade' }),
+    club: varchar('club', { length: matchLimits.opponent }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.itemId, table.club] }), index('item_clubs_club_idx').on(table.club)],
+)
+
+export type ItemClub = typeof itemClubs.$inferSelect
+
+export type NewItemClub = typeof itemClubs.$inferInsert
+
+/**
  * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
  * `wikipedia_page` is the title of that article, after any redirects (unique where there is
  * one), and a club that is named in more than one way is still one row. The titles that lead

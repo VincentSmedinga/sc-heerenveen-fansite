@@ -2481,3 +2481,26 @@
 - **Alternatieven:** de personen van de Engelse spelers opzoeken (verworpen: #743 koos bewust voor spelers zonder pagina).
   Het plafond van `engels` verhogen (een ander besluit, niet dit probleem).
 - **Later:** dit vervangt een regel van _De volledigheid van een selectie is een kans die rust op de bron, met een plafond per bron_ (#745), zoals `docs/volledigheid-selectie.md` hem noemde: de naam gold alleen voor een doelpuntenmaker zonder persoon.
+
+## Een kop onthoudt welke clubs hij noemt, in een eigen tabel
+
+- **Datum:** 6 november 2026
+- **Besluit:** de importer bewaart per kop de profclubs die hij noemt, in `item_clubs`, naast `relevance` (#794).
+  De pagina van een club gebruikt dat voor de kaart "Nieuws over <club>" (#777).
+  - **De regels:** `clubsNamed` in `apps/importer/src/relevance.ts` volgt `judgeRelevance`: hele woorden, hoofdletters, accenten en "s.c." tellen niet, "Asc" is geen "sc" en een lange naam gaat voor een korte.
+    Een naam in een andere naam telt niet: `lookalikeClubs` heeft "Excelsior Maassluis", en `namesakeClubs` heeft "Sparta Praag".
+    sc Heerenveen zelf staat er niet in.
+  - **De naam:** de club staat erin zoals `matches.opponent` hem heeft, uit `otherClubFullNames` in `relevance-terms.ts` ("N.E.C.", "Excelsior Rotterdam").
+    De pagina's van de site vinden de club met `clubs.name` en `club_names`.
+  - **Wanneer:** bij elke kop die de importer bewaart of bijwerkt, ook bij een feed met het filter `none` en buiten de dagen rond een wedstrijd.
+    Een nieuwe titel geeft nieuwe rijen, en een kop die verdwijnt neemt zijn rijen mee.
+  - **Bestaande koppen:** het commando `import:item-clubs` (op de host `import.mjs --item-clubs`) loopt over alle koppen in de database, zonder verzoek aan een bron.
+- **Waarom:** zoeken in de titel bij elke paginalading is traag en onnauwkeurig, en de importer heeft de lijst en de regels al.
+  Een eigen tabel laat een kop meer clubs noemen, wat een kolom in `items` niet kan.
+  De uurlijkse import raakt alleen wat nog in een feed staat, dus voor de oudere koppen is een commando nodig, zoals bij `import:completeness`.
+- **Alternatieven:** een kolom `club` in `items` (maar één club per kop).
+  Zoeken in de titel bij het tonen (geen wijziging in de importer, maar dubbele regels in de site en trager).
+  De clubs alleen bewaren voor koppen in de dagen rond een wedstrijd (mist het nieuws buiten die dagen).
+  De migratie zelf de rijen laten maken (de regels staan in TypeScript, en een tweede kopie in SQL loopt uit de pas).
+- **Later:** `relevance-terms.ts` heeft nu ook de namen waarmee de rijen worden bewaard.
+  _De regels van het filter_ en _Koppen over de tegenstander_ blijven gelden voor `relevance`.

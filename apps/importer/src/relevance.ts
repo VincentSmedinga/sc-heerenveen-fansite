@@ -8,11 +8,44 @@ import {
   clubSurnames,
   footballWords,
   frisianFootballWords,
+  lookalikeClubs,
   namesakeClubs,
   ordinaryClubWords,
+  otherClubFullNames,
   otherClubGroups,
   otherClubs,
 } from './relevance-terms.ts'
+
+/**
+ * The professional clubs a headline names, other than sc Heerenveen, as `matches.opponent` has
+ * them (`otherClubFullNames`), in the order of the list. The rules are those of
+ * `judgeRelevance`: whole words, no capitals, accents or "s.c.", and a longer name goes before
+ * a shorter one, so "Jong Ajax" is not "Ajax" as well and "Excelsior Maassluis" is not
+ * "Excelsior". A headline without a club gives an empty list, and so does one that names
+ * only sc Heerenveen. It does not depend on the opponents around a match or on the filter of
+ * the feed, so the answer is the same for every headline of the news.
+ */
+export function clubsNamed(title: string): string[] {
+  const words = leaveOut(normaliseTitle(title), [...clubPhrases.namesakes, ...clubPhrases.lookalikes])
+  const candidates = otherClubGroups.flatMap((names, group) =>
+    names.map((name) => ({ group, phrase: normaliseTitle(name) })),
+  )
+  const found = new Set<number>()
+
+  for (const { group, phrase } of candidates.toSorted((a, b) => b.phrase.length - a.phrase.length)) {
+    const start = indexOfPhrase(words, phrase)
+
+    if (start >= 0) {
+      found.add(group)
+      words.fill('', start, start + phrase.length)
+    }
+  }
+
+  return [...found]
+    .toSorted((a, b) => a - b)
+    .map((group) => otherClubFullNames[otherClubGroups[group]?.[0] ?? ''] ?? '')
+    .filter((name) => name !== '')
+}
 
 /**
  * Decides from the headline whether an item is about sc Heerenveen. A pure function: the same
@@ -138,6 +171,7 @@ function dayNumber(day: string): number {
 const clubPhrases = {
   footballWords: [...footballWords, ...frisianFootballWords].map(normaliseTitle),
   legends: clubLegends.map(normaliseTitle),
+  lookalikes: lookalikeClubs.map(normaliseTitle),
   namesakes: namesakeClubs.map(normaliseTitle),
   otherClubs: otherClubs.map(normaliseTitle),
   people: clubPeople.map(normaliseTitle),

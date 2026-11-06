@@ -3,7 +3,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { countArchiveItems, listArchivePage, listRecentItems } from '@fansite/db/queries'
-import { adminUsers, feeds, importResults, items, matches, sources } from '@fansite/db/schema'
+import { adminUsers, feeds, importResults, itemClubs, items, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
@@ -70,6 +70,22 @@ async function addFeed(
     .$returningId()
 
   return storedFeed(feed?.id ?? 0)
+}
+
+/** The clubs of each item, by the key of the item, in alphabetical order. */
+async function clubsByKey() {
+  const rows = await database.db
+    .select({ club: itemClubs.club, key: items.key })
+    .from(items)
+    .leftJoin(itemClubs, eq(itemClubs.itemId, items.id))
+    .orderBy(itemClubs.club)
+  const byKey: Record<string, string[]> = {}
+
+  for (const { club, key } of rows) {
+    byKey[key] = [...(byKey[key] ?? []), ...(club === null ? [] : [club])]
+  }
+
+  return byKey
 }
 
 /** An item of that feed. */
@@ -497,6 +513,53 @@ describe('the relevance filter', () => {
       speler: 'doubtful',
       stad: 'doubtful',
     })
+  })
+
+  it('stores the clubs a headline names, also for a feed with the filter none', async () => {
+    const server = await serve(
+      feedWith(
+        entry('een', { title: 'Feyenoord en Ajax spelen gelijk' }),
+        entry('twee', { title: 'sc Heerenveen wint' }),
+        entry('drie', { title: 'Excelsior Maassluis verrast' }),
+      ),
+    )
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'none' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(await clubsByKey()).toEqual({ drie: [], een: ['Ajax', 'Feyenoord'], twee: [] })
+  })
+
+  it('gives a new title new rows and keeps the rows when nothing changed', async () => {
+    const server = await serve(feedWith(entry('een', { title: 'Feyenoord wint' })))
+    const feed = await addFeed(`${server.origin}/rss/`)
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, secondRun)
+
+    expect(await clubsByKey()).toEqual({ een: ['Feyenoord'] })
+
+    servers.splice(0).forEach((old) => void old.close())
+
+    const changed = await serve(feedWith(entry('een', { title: 'PSV wint van Vitesse' })))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${changed.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+    await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+
+    expect(await clubsByKey()).toEqual({ een: ['PSV', 'Vitesse'] })
+  })
+
+  it('removes the rows of an item that goes', async () => {
+    const server = await serve(feedWith(entry('een', { title: 'Feyenoord wint' })))
+    const feed = await addFeed(`${server.origin}/rss/`)
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+    await database.pool.query('DELETE FROM items')
+
+    expect(await database.db.select().from(itemClubs)).toEqual([])
   })
 
   it('follows a feed that is switched to club, and back to none', async () => {
