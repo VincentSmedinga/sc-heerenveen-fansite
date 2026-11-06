@@ -140,6 +140,34 @@ describe('visitOf', () => {
     expect(visitOf(request('/', { 'sec-gpc': '1' }))).toBeUndefined()
   })
 
+  // The emulated browsers of the Lighthouse CLI (13.6.0) have no "Lighthouse" in their text any
+  // more. The daily check (.github/workflows/lighthouse.yml) therefore sends `DNT: 1`, which is
+  // what keeps its visits out of /beheer/bezoek.
+  describe.each([
+    [
+      'the emulated phone',
+      'Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36',
+    ],
+    [
+      'the emulated desktop',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+    ],
+    [
+      'the real browser of the runner',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36',
+    ],
+  ])('a request of the Lighthouse check, %s', (_name, userAgent) => {
+    it('is not counted, because the check sends DNT: 1', () => {
+      expect(visitOf(request('/', { dnt: '1', 'user-agent': userAgent }))).toBeUndefined()
+    })
+
+    it('would be counted without that header, unless the text of the browser says it is a robot', () => {
+      const counted = !notVisitors.test(userAgent)
+
+      expect(visitOf(request('/', { 'user-agent': userAgent })) !== undefined).toBe(counted)
+    })
+  })
+
   it('counts a visitor who sends DNT: 0 or Sec-GPC: 0', () => {
     expect(visitOf(request('/', { dnt: '0', 'sec-gpc': '0' }))).toMatchObject({ path: '/' })
   })

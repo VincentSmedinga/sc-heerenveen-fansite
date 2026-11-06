@@ -155,3 +155,7 @@ storybook-static
 # Worktrees of Claude Code sessions in the main checkout
 .claude/worktrees/
 /screenshots/
+
+# The reports of the daily Lighthouse check (scripts/lighthouse.js)
+/lighthouse-reports/
+/lighthouse-history/
