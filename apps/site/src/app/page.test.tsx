@@ -91,7 +91,7 @@ async function renderDiscussions() {
   const html = await renderSidebar()
   const start = html.indexOf('<section class="hf-card" aria-labelledby="discussions-heading">')
 
-  return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="matches-heading">'))
+  return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
 }
 
 /** The main column alone: the news, without the sidebar. */
@@ -101,7 +101,7 @@ async function renderMain() {
   return html.slice(0, html.indexOf('</main>') + '</main>'.length)
 }
 
-/** The sidebar alone: the forum, the matches, the table and the podcast episodes. */
+/** The sidebar alone: the matches, the table, the forum and the podcast episodes. */
 async function renderSidebar() {
   const html = await render()
 
@@ -139,9 +139,9 @@ describe('the homepage', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
-      '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
       '<h2 class="hf-heading-2" id="matches-heading">Wedstrijden</h2>',
       '<h2 class="hf-heading-2" id="standings-heading">Stand</h2>',
+      '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
       '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
     ])
   })
@@ -520,7 +520,7 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(withoutIcons(await renderSidebar())).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Het forum, de wedstrijden, de stand en de podcasts"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="matches-heading">.*<\/section><section class="hf-card" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
+      /^<aside class="hf-page-sidebar" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card" aria-labelledby="matches-heading">.*<\/section><section class="hf-card" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
     )
   })
 
@@ -773,13 +773,13 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(vi.mocked(getMatchData).mock.calls[0]).toEqual([])
   })
 
-  it('puts the two cards in the sidebar under the discussions and above the podcasts, and after the news', async () => {
+  it('puts the two cards at the top of the sidebar, above the discussions, and after the news', async () => {
     const html = await render()
 
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('matches-heading'))
-    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('matches-heading'))
     expect(html.indexOf('matches-heading')).toBeLessThan(html.indexOf('standings-heading'))
-    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('discussions-heading'))
+    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.lastIndexOf('<section')).toBe(
       html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
