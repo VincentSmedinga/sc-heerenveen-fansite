@@ -181,7 +181,7 @@ Start hem na een wijziging in de lezers van de selectie, en eenmalig vanaf 1990/
 
 - Een seizoen zonder pagina is een gat en geen fout: de run blijft groen.
   Een pagina die een fout geeft maakt de run rood, maar de opdracht gaat door met het volgende seizoen, en het seizoen dat mislukte blijft zoals het was.
-- Vanaf 1990/91 zijn dat ongeveer 35 pagina's en, eenmalig, ongeveer 400 titels voor personen, elk één verzoek.
+- Vanaf 1990/91 zijn dat ongeveer 30 pagina's en, eenmalig, ongeveer 400 titels voor personen, elk één verzoek.
   Een tweede run vraagt alleen de pagina's.
 - Houdt een run van cron de lock vast als een seizoen aan de beurt is, dan slaat de opdracht dat seizoen over en telt het als mislukt.
   Start de workflow dan opnieuw met het beginseizoen van het seizoen dat ontbreekt.

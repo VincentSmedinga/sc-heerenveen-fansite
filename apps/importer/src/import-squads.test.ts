@@ -1,5 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { lockNameFor, withLock } from '@fansite/db/lock'
 import { persons, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -486,6 +487,18 @@ describe('import:squad', () => {
     expect(await database.db.select().from(players)).toEqual([])
   })
 
+  it('does nothing while an import holds the lock, and says so', async () => {
+    const server = await serve({ [squadPageTitle(season)]: twoLists })
+    const held = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, () =>
+      runCommand(runSquadImport, season, server),
+    )
+
+    expect(held.ran && held.result.code).toBe(1)
+    expect(held.ran && held.result.lines.join('\n')).toContain('An import is still running')
+    expect(server.requests).toEqual([])
+    expect(await database.db.select().from(players)).toEqual([])
+  })
+
   it('exits with 1 when the season could not be read', async () => {
     const server = await serve({ [squadPageTitle(season)]: brokenList })
     const { code, lines } = await runCommand(runSquadImport, season, server)
@@ -528,6 +541,21 @@ describe('import:squads', () => {
     )
     expect(await storedPlayers('2013/14')).toEqual([])
     expect((await storedPlayers('2014/15')).length).toBeGreaterThan(0)
+  })
+
+  it('skips every season while an import holds the lock, and counts it as not read', async () => {
+    const server = await serve({ [squadPageTitle('2014/15')]: twoLists })
+    const held = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, () =>
+      runCommand(runSquadsImport, '2024/25', server),
+    )
+
+    expect(held.ran && held.result.code).toBe(1)
+    expect(held.ran && held.result.lines).toEqual([
+      expect.stringContaining('Squad 2024/25: not read. An import is still running on this database'),
+      expect.stringContaining('Squad 2025/26: not read. An import is still running on this database'),
+      expect.stringMatching(/^Squads: 0 of 2 read, 2 not read:\n {2}2024\/25: An import is still running/u),
+    ])
+    expect(server.requests).toEqual([])
   })
 
   it('writes nothing the second time', async () => {

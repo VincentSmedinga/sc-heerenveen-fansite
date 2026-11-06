@@ -31,7 +31,7 @@ jobs:
   import:
     name: Import the squads on acceptance
     runs-on: ubuntu-latest
-    # From 1990/91 there are 36 seasons, of which about 31 have a page, and about 400 titles of
+    # From 1990/91 there are 36 seasons, of which 30 have a page, and about 400 titles of
     # players are asked once (one request each). A request to Wikipedia takes a second or less,
     # so the run takes a few minutes. 30 leaves room for a slow Wikipedia.
     timeout-minutes: 30
