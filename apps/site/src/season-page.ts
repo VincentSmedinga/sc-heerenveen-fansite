@@ -8,9 +8,9 @@ import { getMatchData, getMatchSeasons } from './matches'
 import { pickedAddress, seasonFromSlug } from './seasons'
 
 /**
- * What the pages of a season share: Wedstrijden, Statistieken and its page Spelers all show the
+ * What the pages of a season share: Wedstrijden, Cijfers and its page Spelers all show the
  * data of one season, with a picker for the season, an address for each season
- * (`/wedstrijden/2025-26`, `/statistieken/2025-26`, `/spelers/2025-26`) and the
+ * (`/wedstrijden/2025-26`, `/cijfers/2025-26`, `/spelers/2025-26`) and the
  * route behind the picker (`/wedstrijden/kies`). Each page gives its base address and gets the
  * same answers, so the pages never differ.
  */
@@ -21,7 +21,7 @@ export type SearchParams = Record<string, string | string[] | undefined>
 export const matchesPath = '/wedstrijden'
 
 /** The base address of the statistics page, which is the address of its current season. */
-export const statisticsPath = '/statistieken'
+export const statisticsPath = '/cijfers'
 
 /**
  * The base address of the page Spelers, which is the address of its current

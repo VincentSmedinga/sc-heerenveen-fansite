@@ -44,14 +44,7 @@ test.describe('the item Beheer in the main menu', () => {
 
     await page.goto(publicPage)
     await expect(item(page)).toBeVisible()
-    await expect(menu(page).getByRole('link')).toHaveText([
-      'Nieuws',
-      'Wedstrijden',
-      'Statistieken',
-      'Spelers',
-      'Beheer',
-      'Forum',
-    ])
+    await expect(menu(page).getByRole('link')).toHaveText(['Nieuws', 'Wedstrijden', 'Spelers', 'Beheer', 'Forum'])
     await expect(item(page)).not.toHaveAttribute('aria-current')
 
     // The focus goes from Spelers to Beheer and on to Forum, like between the other items.
@@ -69,7 +62,7 @@ test.describe('the item Beheer in the main menu', () => {
 
   test('does not move the other items, and is in the menu on a phone too', async ({ baseURL, context, page }) => {
     await page.goto(publicPage)
-    const names = ['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum']
+    const names = ['Nieuws', 'Wedstrijden', 'Spelers', 'Forum']
     const boxes = () => Promise.all(names.map((name) => menu(page).getByRole('link', { name }).boundingBox()))
     const before = await boxes()
 

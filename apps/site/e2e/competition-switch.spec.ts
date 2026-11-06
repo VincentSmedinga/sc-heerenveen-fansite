@@ -4,11 +4,11 @@ import { earlierSeasonSlug } from './earlier-season'
 
 const slug = earlierSeasonSlug()
 
-// The switch between all the matches and the Eredivisie on /statistieken and
+// The switch between all the matches and the Eredivisie on /cijfers and
 // /spelers is two links, so it works without JavaScript, and the choice stays in
 // the address when the season is picked. The seed has played cup ties in the current season.
 const switchPages = [
-  { heading: 'Statistieken', path: '/statistieken' },
+  { heading: 'Cijfers', path: '/cijfers' },
   { heading: 'Spelers', path: '/spelers' },
 ] as const
 
@@ -46,8 +46,8 @@ for (const { heading, path } of switchPages) {
 }
 
 test.describe('the switch of the matches with JavaScript', () => {
-  test('keeps the choice in the link from Statistieken to Spelers', async ({ page }) => {
-    await page.goto('/statistieken?competitie=eredivisie')
+  test('keeps the choice in the link from Cijfers to Spelers', async ({ page }) => {
+    await page.goto('/cijfers?competitie=eredivisie')
     await page.getByRole('link', { name: 'Alle doelpuntenmakers' }).click()
 
     await expect(page).toHaveURL(/\/spelers\?competitie=eredivisie$/)

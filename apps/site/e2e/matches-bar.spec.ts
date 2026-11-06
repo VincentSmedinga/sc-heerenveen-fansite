@@ -14,15 +14,27 @@ const bar = (page: Page, name: string) => menu(page).getByRole('link', { exact: 
 test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('has the bar of Tegenstanders on Wedstrijden and on the page of a season, with the plain address', async ({
-    page,
-  }) => {
-    for (const path of ['/wedstrijden', `/wedstrijden/${slug}`]) {
+  test('has the bar of Cijfers and Tegenstanders on Wedstrijden and on the page of a season', async ({ page }) => {
+    for (const [path, figures] of [
+      ['/wedstrijden', '/cijfers'],
+      [`/wedstrijden/${slug}`, `/cijfers/${slug}`],
+    ] as const) {
       await page.goto(path)
 
+      await expect(bar(page, 'Cijfers')).toHaveAttribute('href', figures)
       await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders')
       await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'page')
     }
+  })
+
+  test('marks Cijfers as the current sub-page, and keeps the choice and the season', async ({ page }) => {
+    await page.goto(`/cijfers/${slug}?competitie=eredivisie`)
+
+    await expect(bar(page, 'Cijfers')).toHaveAttribute('href', `/cijfers/${slug}?competitie=eredivisie`)
+    await expect(bar(page, 'Cijfers')).toHaveAttribute('aria-current', 'page')
+    await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders?competitie=eredivisie')
+    await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'true')
+    await expect(menu(page).locator('[aria-current="page"]')).toHaveCount(1)
   })
 
   test('keeps the choice on Tegenstanders, where the switch is, and takes no season along', async ({ page }) => {
@@ -31,24 +43,26 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders?competitie=eredivisie')
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
     await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'true')
-    await expect(bar(page, 'Statistieken')).not.toHaveAttribute('aria-current', /.*/)
+    await expect(bar(page, 'Cijfers')).not.toHaveAttribute('aria-current', /.*/)
   })
 
   test('takes the season, and not the choice, to the links of the main menu', async ({ page }) => {
-    await page.goto(`/statistieken/${slug}?competitie=eredivisie`)
+    await page.goto(`/cijfers/${slug}?competitie=eredivisie`)
 
-    await expect(bar(page, 'Statistieken')).toHaveAttribute('href', `/statistieken/${slug}`)
     await expect(bar(page, 'Wedstrijden')).toHaveAttribute('href', `/wedstrijden/${slug}`)
     await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/spelers/${slug}`)
-    await expect(bar(page, 'Statistieken')).toHaveAttribute('aria-current', 'page')
-    await expect(menu(page).locator('.hf-navigation-bar')).toHaveCount(0)
   })
 
-  test('takes the season from Spelers to Wedstrijden and Statistieken', async ({ page }) => {
-    await page.goto(`/spelers/${slug}`)
+  test('takes the season from Cijfers to Spelers and back to Cijfers, through Wedstrijden', async ({ page }) => {
+    await page.goto(`/cijfers/${slug}`)
+    await bar(page, 'Spelers').click()
+    await expect(page).toHaveURL(new RegExp(`/spelers/${slug}$`))
 
-    await expect(bar(page, 'Wedstrijden')).toHaveAttribute('href', `/wedstrijden/${slug}`)
-    await expect(bar(page, 'Statistieken')).toHaveAttribute('href', `/statistieken/${slug}`)
+    // Spelers has no bar, so the way back to Cijfers goes through Wedstrijden.
+    await bar(page, 'Wedstrijden').click()
+    await expect(page).toHaveURL(new RegExp(`/wedstrijden/${slug}$`))
+    await bar(page, 'Cijfers').click()
+    await expect(page).toHaveURL(new RegExp(`/cijfers/${slug}$`))
   })
 
   test('marks Spelers as the only current item on /spelers, with no bar under the menu', async ({ page }) => {
@@ -74,15 +88,15 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
 
     const names = () => menu(page).getByRole('link').allTextContents()
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Tegenstanders', 'Statistieken', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
 
-    // The bar sits under Wedstrijden, so the keyboard goes from Wedstrijden to Tegenstanders
-    // and on to Statistieken.
+    // The bar sits under Wedstrijden, so the keyboard goes from Wedstrijden to Cijfers and on
+    // to Tegenstanders.
     await bar(page, 'Wedstrijden').focus()
     await page.keyboard.press('Tab')
-    await expect(bar(page, 'Tegenstanders')).toBeFocused()
+    await expect(bar(page, 'Cijfers')).toBeFocused()
     await page.keyboard.press('Tab')
-    await expect(bar(page, 'Statistieken')).toBeFocused()
+    await expect(bar(page, 'Tegenstanders')).toBeFocused()
 
     // A link of the menu loads a whole page (there is no next/link), so the focus starts at the
     // top, as it does after any link on the site.
@@ -91,7 +105,7 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
     await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Tegenstanders', 'Statistieken', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
 
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: /^sc Heerenveen Fansite/ })).toBeFocused()

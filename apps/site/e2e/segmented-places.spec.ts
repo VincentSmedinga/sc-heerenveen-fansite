@@ -2,7 +2,7 @@ import { expect, type Page, test } from '@playwright/test'
 
 // The slide of the thumb of a switch between two pages joins the elements with the same
 // view-transition name on the old and the new page. A name belongs to the place of the switch,
-// so a click from Wedstrijden to Statistieken joins nothing, and the thumb does not fly from
+// so a click from Wedstrijden to Cijfers joins nothing, and the thumb does not fly from
 // the card Stand to the top of the other page. The same switch after another choice keeps its
 // names.
 
@@ -16,7 +16,7 @@ async function names(page: Page, group: string) {
 
 const switches = [
   { group: 'Welke stand', other: '/wedstrijden?stand=laatste-5', path: '/wedstrijden' },
-  { group: 'Welke wedstrijden', other: '/statistieken?competitie=eredivisie', path: '/statistieken' },
+  { group: 'Welke wedstrijden', other: '/cijfers?competitie=eredivisie', path: '/cijfers' },
   { group: 'Welke wedstrijden', other: '/spelers?competitie=eredivisie', path: '/spelers' },
   {
     group: 'Welke wedstrijden',

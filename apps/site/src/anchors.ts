@@ -18,15 +18,9 @@
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
-  '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
-  '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
-  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /statistieken as
-  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
-  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
-  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
-  // The nine cards with figures moved to /statistieken (#483). Their anchors on /wedstrijden
+  // The nine cards with figures moved to /cijfers (#483). Their anchors on /wedstrijden
   // are gone on purpose, without a redirect: a link to one of them breaks.
-  '/statistieken': [
+  '/cijfers': [
     'doelpunten-per-kwartier',
     'doelpuntenmakers',
     'topscorers',
@@ -40,6 +34,12 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'hoe-de-wedstrijden-verlopen',
     'uitersten',
   ],
+  '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
+  '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
+  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /cijfers as
+  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
+  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
+  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium.
   '/tegenstanders/voorbeeld-united': ['stadion'],

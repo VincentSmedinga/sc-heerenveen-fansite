@@ -567,7 +567,7 @@ Een club met wedstrijden is niet te verwijderen (de verwijzing heeft geen cascad
 
 De migratie `0021_add_clubs` maakt van de verschillende waarden van `matches.opponent` een club (hoofdletters tellen niet mee), met een slug van de naam, en koppelt elke wedstrijd.
 De slug heeft geen accenten, punten of apostrofs (`N.E.C.` geeft `nec`) en krijgt `-2`, `-3` erachter als een andere club hem al heeft.
-`kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`; een club die zo heet, krijgt `kies-2`.
+`kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/cijfers/kies`; een club die zo heet, krijgt `kies-2`.
 In een lege database doet de migratie niets.
 Een club zonder artikel krijgt dat van de importer de eerstvolgende keer dat hij het seizoen leest.
 
@@ -636,7 +636,7 @@ Een speler zonder artikel (een rode link) is ook een persoon, met de titel zoals
 
 `match_goals.person_id` en `players.person_id` verwijzen naar `persons` (`ON DELETE SET NULL`, leeg toegestaan).
 `match_goals.wikipedia_page` blijft de titel zoals de wedstrijdpagina hem schrijft, en de rijen van `players` blijven één per speler en seizoen.
-Een andere speler en seizoen kunnen dus dezelfde persoon hebben: dat is wat de pagina's Spelers en Statistieken straks over seizoenen heen laat tellen (#716).
+Een andere speler en seizoen kunnen dus dezelfde persoon hebben: dat is wat de pagina's Spelers en Cijfers straks over seizoenen heen laat tellen (#716).
 
 De importer vraagt Wikipedia per titel één keer of hij een doorverwijzing is, en onthoudt het antwoord in `person_pages`: een titel in die tabel kost geen verzoek meer.
 De regels staan in de [README van de importer](../../apps/importer/README.md), _De personen van de doelpuntenmakers_.

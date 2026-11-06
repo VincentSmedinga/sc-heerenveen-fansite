@@ -17,12 +17,15 @@ const newsSubitems = [
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 
-// The sub-pages of Wedstrijden. Cijfers and Seizoenen come later.
+// The sub-pages of Wedstrijden. Seizoenen comes later.
 const opponentsPath = '/tegenstanders'
 
-const matchesSubitems = [{ href: opponentsPath, label: 'Tegenstanders' }]
+const statisticsPath = '/cijfers'
 
-const statisticsPath = '/statistieken'
+const matchesSubitems = [
+  { href: statisticsPath, label: 'Cijfers' },
+  { href: opponentsPath, label: 'Tegenstanders' },
+]
 
 const matchesPath = '/wedstrijden'
 
@@ -44,7 +47,6 @@ const adminPath = '/beheer'
 const items: MenuItem[] = [
   { href: newsPath, label: 'Nieuws', subitems: newsSubitems },
   { href: matchesPath, label: 'Wedstrijden', subitems: matchesSubitems },
-  { href: statisticsPath, label: 'Statistieken' },
   { href: playersPath, label: 'Spelers' },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
@@ -61,10 +63,10 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
  * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item,
  * because it is the front page of the whole site and the logo links to it. Wedstrijden has
  * the page and every page below it, such as the season, and a sub-page of its own:
- * Tegenstanders, with the page of each club below it (`/tegenstanders/ado-den-haag`).
- * Statistieken has the page and every page below it, and Spelers the same, with the page of
- * each season below it (`/spelers/2025-26`). A path that belongs to no item, such as /bronnen,
- * the home page or a page that does not exist, has neither.
+ * Cijfers, with the page of each season below it (`/cijfers/2025-26`), and Tegenstanders,
+ * with the page of each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page
+ * and the page of each season below it (`/spelers/2025-26`). A path that belongs to no item,
+ * such as /bronnen, the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
@@ -97,8 +99,8 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: matchesPath, subitem: opponentsPath }
   }
 
-  if (pathname === '/statistieken' || pathname.startsWith('/statistieken/')) {
-    return { item: '/statistieken' }
+  if (pathname === statisticsPath || pathname.startsWith(`${statisticsPath}/`)) {
+    return { item: matchesPath, subitem: statisticsPath }
   }
 
   return {}
@@ -106,7 +108,7 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
 /**
  * The address a menu item gets on this path: the address of the season of the page for
- * Wedstrijden, Statistieken and Spelers, so a visitor in a past season stays in it, and the
+ * Wedstrijden, Cijfers and Spelers, so a visitor in a past season stays in it, and the
  * fixed address for every other item and every other page. The current season has no season
  * in its address, so its pages keep the fixed addresses. A path with the current season
  * (`/wedstrijden/2026-27`) is redirected by the page itself to the base address.
@@ -119,7 +121,7 @@ export function hrefOf(href: string, pathname: string): string {
 
 /**
  * The season in the address of a page that has one: `/wedstrijden/2023-24`,
- * `/statistieken/2023-24` and `/spelers/2023-24`. A path without a season, such as
+ * `/cijfers/2023-24` and `/spelers/2023-24`. A path without a season, such as
  * `/wedstrijden`, and one whose last part is not a season, such as `/wedstrijden/kies` or
  * `/wedstrijden/onzin`, has none. The check is the one the pages use (`seasonFromSlug`).
  */
@@ -130,7 +132,7 @@ export function seasonOfPath(pathname: string): string | undefined {
 }
 
 /**
- * The main menu of the site, under the header: the news, the matches, the statistics, the
+ * The main menu of the site, under the header: the news, the matches, the
  * players and the forum, and for somebody who is logged in to the admin Beheer before the
  * forum. The server never renders Beheer: the HTML is the same for every visitor, and the
  * browser adds the item after hydrating when it finds the mark of admin-marker.ts.
@@ -139,7 +141,7 @@ export function seasonOfPath(pathname: string): string | undefined {
  * the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is a
  * client component: usePathname gives the path, also when the server renders the HTML.
  *
- * The addresses of the items are fixed, except Wedstrijden, Statistieken and Spelers on the
+ * The addresses of the items are fixed, except Wedstrijden, Cijfers and Spelers on the
  * page of a season: they take the season of the page along (see `hrefOf`). The links of the
  * bar of Nieuws are fixed too. The bar of Wedstrijden is different: its link keeps the choice
  * between all matches and the Eredivisie of the page, and the choice is in the query

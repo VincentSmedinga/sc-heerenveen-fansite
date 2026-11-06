@@ -62,7 +62,7 @@ export const Default = meta.story({
 
 export const TwoOptionsSmall = meta.story({
   args: { label: 'Welke wedstrijden', options, size: 'small', value: 'league' },
-  name: 'Twee keuzes in de kleine maat, zoals op Statistieken',
+  name: 'Twee keuzes in de kleine maat, zoals op Cijfers',
 })
 
 export const LongLabels = meta.story({

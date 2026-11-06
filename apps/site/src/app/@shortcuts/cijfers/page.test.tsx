@@ -29,7 +29,7 @@ afterEach(() => {
 
 const render = async () => renderToStaticMarkup(await StatisticsShortcuts({ searchParams: Promise.resolve({}) }))
 
-describe('the bar of /statistieken', () => {
+describe('the bar of /cijfers', () => {
   it('is a navigation named by its label, Op deze pagina:, which is not a link', async () => {
     const html = await render()
     const labelId = html.match(/<nav [^>]*aria-labelledby="([^"]+)"/)?.[1]
@@ -84,7 +84,7 @@ describe('the bar of /statistieken', () => {
   })
 })
 
-describe('the bar of /statistieken and the choice of the matches', () => {
+describe('the bar of /cijfers and the choice of the matches', () => {
   it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
     expect(
       renderToStaticMarkup(await StatisticsShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),

@@ -2631,6 +2631,7 @@
   De site is nog niet openbaar, dus er zijn geen links om te bewaren.
 - **Alternatieven:** Spelers vóór Wedstrijden.
   Omleidingen met 308 van de oude adressen (nu niet nodig).
+- **Later:** het onderdeel Statistieken tussen haakjes is sinds #771 weg: de volgorde is Nieuws, Wedstrijden, Spelers, Forum (zie _Cijfers staat in de balk van Wedstrijden, en Statistieken is geen onderdeel meer_).
 
 ## Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum
 
@@ -2724,6 +2725,7 @@
 - **Alternatieven:** een eigen onderdeel Tegenstanders (vijf onderdelen).
   Onder Geschiedenis.
 - **Later:** vervangt voor Tegenstanders de beslissing _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026).
+  De balk heeft sinds #771 ook Cijfers, vóór Tegenstanders (zie _Cijfers staat in de balk van Wedstrijden, en Statistieken is geen onderdeel meer_).
 
 ## De balk van Nieuws heeft Podcasts, Redactie en Zoeken, in die volgorde, altijd alle drie
 
@@ -2764,3 +2766,25 @@
   Een lijst van dertig wedstrijden op een telefoon is een lange scroll, en de acht kaarten erna waren niet te bereiken.
 - **Alternatieven:** vijf regels en een aparte pagina met de hele lijst (zoals #516, maar een extra pagina per club).
   Een samenvatting vóór de lijst op een telefoon (breekt de regel van #768 dat de hoofdkolom vooraan staat).
+
+## Cijfers staat in de balk van Wedstrijden, en Statistieken is geen onderdeel meer
+
+- **Datum:** 6 november 2026
+- **Besluit:** de pagina Statistieken heet Cijfers en staat in de balk van Wedstrijden, naast Tegenstanders (#771).
+  - **De adressen:** `/cijfers`, `/cijfers/<seizoen>` en `/cijfers/kies`, met dezelfde regels als de oude adressen voor een onbekend seizoen en een onbekende keuze.
+    `/statistieken`, `/statistieken/<seizoen>` en `/statistieken/kies` bestaan niet meer, zonder omleiding (zie _Adressen noemen de zaak en niet het menu, en er komen geen omleidingen_).
+    `cijfers` staat in `reservedSlugs` en `statistieken` is eruit, omdat het geen pagina meer is.
+  - **Het menu:** Nieuws, Wedstrijden, Spelers en Forum.
+    Wedstrijden is het huidige onderdeel op `/wedstrijden`, en op `/cijfers` en op `/cijfers/<seizoen>` is het `aria-current="true"` met Cijfers als huidige subpagina in de balk, zoals bij Tegenstanders.
+  - **Wat meereist:** de balk houdt de keuze Alle wedstrijden / Eredivisie vast in beide links, en de link naar Cijfers houdt ook het seizoen van de pagina vast, zoals het menu doet voor Wedstrijden en Spelers.
+    Van Cijfers naar Spelers en terug reist het seizoen dus mee: Spelers staat in het menu, en terug gaat via Wedstrijden naar de balk.
+  - **De naam:** de kop, de titel, de beschrijving, de balk "Op deze pagina:", de README's en de pagina's Over ons en Updates zeggen Cijfers.
+    Het label `statistics` op GitHub en de namen van bestanden en functies, zoals `statisticsShortcuts` en `statistics-page.tsx`, blijven zoals ze zijn.
+  - **De code:** de mappen `app/statistieken` en `app/@shortcuts/statistieken` verhuisden met `git mv` naar `cijfers`.
+    Het slot `@subnav` kreeg een route voor `/cijfers` en `/cijfers/[seizoen]`, en `MatchesBar` krijgt het seizoen van de pagina.
+- **Waarom:** de pagina heette al in de beslissing van #768 Cijfers, en een balk met alleen Tegenstanders had ruimte voor de cijfers van het seizoen.
+  Wie wedstrijden zoekt, vindt de cijfers eronder, en het menu blijft op vier onderdelen.
+- **Alternatieven:** Cijfers als eigen onderdeel van het menu (vijf onderdelen).
+  Omleidingen met 308 van de oude adressen (nu niet nodig).
+- **Later:** vult _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ aan: de cijfers van het seizoen staan onder Wedstrijden.
+  Alle beslissingen hierboven die de pagina Statistieken noemen, bedoelen sinds #771 Cijfers.

@@ -3,9 +3,9 @@ import { expect, test } from '@playwright/test'
 import { earlierSeasonSlug } from './earlier-season'
 
 const slug = earlierSeasonSlug()
-const path = `/statistieken/${slug}`
+const path = `/cijfers/${slug}`
 
-// The card Opmerkelijk on Statistieken is one fact from the made-up matches. The checks put the
+// The card Opmerkelijk on Cijfers is one fact from the made-up matches. The checks put the
 // seed in the season before the current one, and it has exactly one fact: two goals in the
 // 66th and 67th minute of the second round. With one fact the card has no link to a next one,
 // and a number in the address that is too high goes round to the same card. The unit tests have
