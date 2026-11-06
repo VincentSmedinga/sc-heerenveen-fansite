@@ -824,24 +824,10 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      [
-        '#programma',
-        '#uitslagen',
-        '#uitslagen-knvb-beker',
-        '#uitslagen-play-offs',
-        '#stand',
-        '#hoe-vaak-welke-uitslag',
-        '#hoofdtrainer',
-      ],
+      ['#programma', '#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs', '#stand', '#hoofdtrainer'],
     )
-    // The card with how often each score was played is the card under the table: the chart
-    // without text round the ring (hidden from a screen reader), and the tables that are its
-    // key, one for each outcome with its count in the header, and the outcome in words for each
-    // score. It has no sentence with the sums, and under the tables only the number of matches.
-    assert.match(
-      matchesHtml,
-      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
-    )
+    // The card with how often each score was played moved to the statistics page (#774).
+    assert.doesNotMatch(matchesHtml, /hoe-vaak-welke-uitslag/)
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws: the podcasts, the editors and the search.
     assert.doesNotMatch(html, /class="hf-page-shortcuts"|class="hf-navigation-bar"| aria-current="/)
@@ -922,13 +908,13 @@ await withEmptyDatabase((database) =>
       [
         '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
+        '#hoe-de-wedstrijden-verlopen',
         '#reeksen',
         '#thuis-en-uit',
         '#toeschouwers',
-        '#doelpuntenmakers',
+        '#hoe-vaak-welke-uitslag',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
-        '#hoe-de-wedstrijden-verlopen',
         '#uitersten',
       ],
     )
@@ -1002,18 +988,25 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen<\/caption>/,
     )
+    // On the statistics page it is a card of the sidebar: the chart without text round the ring
+    // (hidden from a screen reader), and the tables that are its key, one for each outcome with
+    // its count in the header, and the outcome in words for each score. It has no sentence with
+    // the sums, and under the tables only the number of matches.
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
+      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
-    // The card shows the top 5, with the link to the page with everybody who scored; the whole
-    // list is on that page (below). Demo and Nepper both
-    // scored twice, so they share a row.
-    assert.match(statisticsHtml, /<caption class="hf-visually-hidden">(?:De top 5 van de d|D)oelpuntenmakers van sc /)
-    assert.match(statisticsHtml, /<a href="\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
+    // The card Doelpuntenmakers is on the page Spelers alone (#774): no heading, no anchor and
+    // no link to it on this page.
+    assert.doesNotMatch(
+      statisticsHtml,
+      /id="(?:doelpuntenmakers|topscorers)"|Alle <span class="hf-icon-tail">doelpuntenmakers/,
+    )
+    // The three cards that stay the Eredivisie come first, then the switch, then the cards that
+    // follow it, and each of the three ends with the line that says so.
     assert.match(
       statisticsHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Rick<\/span> <span class="hf-player-name-surname">Demo<\/span><\/span>, <span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
+      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><div aria-label="Welke wedstrijden".*?<\/div><p class="hf-visually-hidden" role="status"><\/p><section[^>]*aria-labelledby="reeksen"/s,
     )
     // Spelers is an item of the menu of its own after Wedstrijden, and Cijfers is not one.
     assert.match(

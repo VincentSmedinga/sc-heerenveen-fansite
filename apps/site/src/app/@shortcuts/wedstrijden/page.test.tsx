@@ -47,7 +47,6 @@ describe('the bar of /wedstrijden', () => {
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
       ['#stand', 'Stand'],
-      ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
     ])
   })
 
@@ -77,7 +76,6 @@ describe('the bar of /wedstrijden', () => {
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
       ['#stand', 'Stand'],
-      ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
       ['#hoofdtrainer', 'Hoofdtrainer'],
     ])
   })

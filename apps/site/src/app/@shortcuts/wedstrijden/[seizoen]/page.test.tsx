@@ -38,7 +38,7 @@ describe('the bar of the page of an earlier season', () => {
 
     // The made-up matches have the league and the cup.
     expect(hrefs(html)).toEqual(matchShortcutsOf(false, 0, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href))
-    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#eindstand', '#hoe-vaak-welke-uitslag'])
+    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#eindstand'])
     expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
     expect(html).toContain('>Eredivisie</a>')
@@ -61,13 +61,7 @@ describe('the bar of the page of an earlier season', () => {
     })
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual([
-      '#uitslagen',
-      '#uitslagen-knvb-beker',
-      '#uitslagen-play-offs',
-      '#eindstand',
-      '#hoe-vaak-welke-uitslag',
-    ])
+    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs', '#eindstand'])
     expect(html).toContain('>Play-offs Conference League</a>')
   })
 
@@ -75,7 +69,7 @@ describe('the bar of the page of an earlier season', () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], season: '2025/26' })
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(['#uitslagen', '#eindstand', '#hoe-vaak-welke-uitslag'])
+    expect(hrefs(html)).toEqual(['#uitslagen', '#eindstand'])
     expect(html).toContain('>Uitslagen</a>')
   })
 

@@ -11,14 +11,13 @@ import {
 } from './matchShortcuts'
 
 describe('matchShortcutsOf', () => {
-  it('has all four links for the current season', () => {
+  it('has all three links for the current season', () => {
     expect(matchShortcutsOf(true)).toEqual(matchShortcuts)
-    expect(matchShortcutsOf(true)).toHaveLength(4)
+    expect(matchShortcutsOf(true)).toHaveLength(3)
   })
 
-  it('has the card Hoe vaak welke uitslag straight after the table', () => {
-    expect(matchShortcutsOf(true).at(3)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
-    expect(matchShortcutsOf(false).at(2)).toEqual({ href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' })
+  it('has no link to the card Hoe vaak welke uitslag, which is on Cijfers', () => {
+    expect(matchShortcutsOf(true).map(({ href }) => href)).not.toContain('#hoe-vaak-welke-uitslag')
     expect(scoreCountsCard.id).toBe('hoe-vaak-welke-uitslag')
   })
 
@@ -29,7 +28,7 @@ describe('matchShortcutsOf', () => {
   it('leaves Programma out for a season that is over, and keeps the order of the others', () => {
     const links = matchShortcutsOf(false)
 
-    expect(links).toHaveLength(3)
+    expect(links).toHaveLength(2)
     expect(links.map(({ href }) => href)).not.toContain('#programma')
     expect(links.map(({ href }) => href)).toEqual(
       matchShortcuts
@@ -48,22 +47,17 @@ describe('matchShortcutsOf', () => {
 })
 
 describe('matchShortcutsOf with head coaches', () => {
-  it('has a link to the card Hoofdtrainer after the card with the scores for one coach', () => {
+  it('has a link to the card Hoofdtrainer after the table for one coach', () => {
     const hrefs = matchShortcutsOf(true, 1).map(({ href }) => href)
 
-    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoe-vaak-welke-uitslag', '#hoofdtrainer'])
+    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoofdtrainer'])
     expect(matchShortcutsOf(true, 1)).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainer' })
   })
 
   it('names the card Hoofdtrainers for more, also after the Eindstand of a season that is over', () => {
     const links = matchShortcutsOf(false, 3)
 
-    expect(links.map(({ href }) => href)).toEqual([
-      '#uitslagen',
-      '#eindstand',
-      '#hoe-vaak-welke-uitslag',
-      '#hoofdtrainer',
-    ])
+    expect(links.map(({ href }) => href)).toEqual(['#uitslagen', '#eindstand', '#hoofdtrainer'])
     expect(links).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainers' })
   })
 
@@ -137,7 +131,6 @@ describe('matchShortcutsOf with the cards with results', () => {
       { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
       { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
       { href: '#eindstand', label: 'Eindstand' },
-      { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
     ])
   })
 
@@ -146,7 +139,6 @@ describe('matchShortcutsOf with the cards with results', () => {
       '#uitslagen',
       '#uitslagen-knvb-beker',
       '#eindstand',
-      '#hoe-vaak-welke-uitslag',
       '#hoofdtrainer',
     ])
   })
@@ -163,13 +155,11 @@ describe('matchShortcutsOf with the cards with results', () => {
       { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
       { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
       { href: '#stand', label: 'Stand' },
-      { href: '#hoe-vaak-welke-uitslag', label: 'Hoe vaak welke uitslag' },
     ])
     expect(matchShortcutsOf(true, 1, ['Eredivisie']).map(({ href }) => href)).toEqual([
       '#programma',
       '#uitslagen',
       '#stand',
-      '#hoe-vaak-welke-uitslag',
       '#hoofdtrainer',
     ])
   })

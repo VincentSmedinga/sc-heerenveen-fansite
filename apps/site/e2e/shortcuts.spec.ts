@@ -7,11 +7,11 @@ import { hydrated } from './hydrated'
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
-// have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
+// have the bar, with the links to their own cards: Wedstrijden six (the made-up season has a
 // result in three competitions and a head coach in the table) and Cijfers ten. The checks
 // of how it behaves while scrolling are on /cijfers below, the page with the long cards.
 const withBar = [
-  { links: 7, path: '/wedstrijden' },
+  { links: 6, path: '/wedstrijden' },
   { links: 10, path: '/cijfers' },
 ] as const
 
@@ -114,10 +114,10 @@ test.describe('the bar under the header of /cijfers', () => {
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: 1500 }))
     expect((await bar.boundingBox())?.y).toBe(0)
 
-    await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
-    await expect(page).toHaveURL(/#doelpuntenmakers$/)
+    await bar.getByRole('link', { name: 'Hoe vaak welke uitslag' }).click()
+    await expect(page).toHaveURL(/#hoe-vaak-welke-uitslag$/)
     await expect
-      .poll(async () => (await page.locator('#doelpuntenmakers').boundingBox())?.y ?? 0)
+      .poll(async () => (await page.locator('#hoe-vaak-welke-uitslag').boundingBox())?.y ?? 0)
       .toBeGreaterThanOrEqual(47)
   })
 
@@ -179,23 +179,23 @@ test.describe('the bar under the header of /cijfers', () => {
       await links.first().focus()
       await walk('Tab', [
         'Verloop van het seizoen',
+        'Hoe wedstrijden verlopen',
         'Reeksen',
         'Thuis en uit',
         'Toeschouwers',
-        'Doelpuntenmakers',
+        'Hoe vaak welke uitslag',
         'De nul gehouden',
         'Doelpunten per kwartier',
-        'Hoe wedstrijden verlopen',
         'Uitersten',
       ])
       await walk('Shift+Tab', [
-        'Hoe wedstrijden verlopen',
         'Doelpunten per kwartier',
         'De nul gehouden',
-        'Doelpuntenmakers',
+        'Hoe vaak welke uitslag',
         'Toeschouwers',
         'Thuis en uit',
         'Reeksen',
+        'Hoe wedstrijden verlopen',
         'Verloop van het seizoen',
         'Plek in de competitie',
       ])
@@ -309,12 +309,12 @@ test.describe('the bar under the header of /cijfers', () => {
     await hydrated(page)
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
+    await bar.getByRole('link', { name: 'Hoe vaak welke uitslag' }).click()
 
-    await expect(page).toHaveURL(/#doelpuntenmakers$/)
-    await expect(bar.locator('[aria-current]')).toHaveText('Doelpuntenmakers')
+    await expect(page).toHaveURL(/#hoe-vaak-welke-uitslag$/)
+    await expect(bar.locator('[aria-current]')).toHaveText('Hoe vaak welke uitslag')
     await expect.poll(async () => (await bar.boundingBox())?.y).toBe(0)
-    await expect(bar.locator('[aria-current]')).toHaveText('Doelpuntenmakers')
+    await expect(bar.locator('[aria-current]')).toHaveText('Hoe vaak welke uitslag')
   })
 
   for (const colorScheme of ['light', 'dark'] as const) {

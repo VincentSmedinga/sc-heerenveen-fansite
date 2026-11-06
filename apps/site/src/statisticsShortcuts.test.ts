@@ -27,7 +27,7 @@ describe('playersShortcuts', () => {
     ])
   })
 
-  it('goes to the same anchor as the card on Cijfers, which keeps its link', () => {
-    expect(statisticsShortcuts.map(({ href }) => href)).toContain('#doelpuntenmakers')
+  it('has no link on Cijfers, which has no card Doelpuntenmakers any more', () => {
+    expect(statisticsShortcuts.map(({ href }) => href)).not.toContain('#doelpuntenmakers')
   })
 })

@@ -12,6 +12,7 @@ const meta = preview.meta({
           'De zijbalk van de pagina: een `aside`.',
           'Een pagina zonder zijbalk laat hem weg.',
           '',
+          '- Hij heeft cijfers over wat in de hoofdkolom staat, op een zacht, warm of sterk vlak, en de bronvermelding is zijn laatste cel. De lijst of tabel waar de pagina voor bestaat staat in de hoofdkolom.',
           '- Hij staat in de `Page.Body`, na de `Page.Main`.',
           '- Op een breed scherm staat hij naast de hoofdkolom, op een smal scherm eronder.',
           '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan, op elk scherm, ook onder de hoofdkolom.',

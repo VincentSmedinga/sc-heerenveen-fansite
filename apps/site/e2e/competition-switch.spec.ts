@@ -44,15 +44,3 @@ for (const { heading, path } of switchPages) {
     })
   })
 }
-
-test.describe('the switch of the matches with JavaScript', () => {
-  test('keeps the choice in the link from Cijfers to Spelers', async ({ page }) => {
-    await page.goto('/cijfers?competitie=eredivisie')
-    await page.getByRole('link', { name: 'Alle doelpuntenmakers' }).click()
-
-    await expect(page).toHaveURL(/\/spelers\?competitie=eredivisie$/)
-    await expect(
-      page.getByRole('group', { name: 'Welke wedstrijden' }).getByRole('link', { name: 'Eredivisie' }),
-    ).toHaveAttribute('aria-current', 'page')
-  })
-})

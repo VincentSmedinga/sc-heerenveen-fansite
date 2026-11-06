@@ -2055,6 +2055,7 @@
   Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
   De pagina heeft geen schakelaar tussen Eredivisie en alle wedstrijden.
 - **Alternatieven:** de kaart op Statistieken, in de kolom met cijfers, met de schakelaar en de regel dat een kaart alleen de Eredivisie telt (#397, #431), waar hij past bij de andere negen kaarten; alleen de Eredivisie tellen op Wedstrijden (het totaal verschilt dan van de lijst).
+- **Later:** zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026): de kaart staat op Cijfers en volgt daar de schakelaar; Wedstrijden heeft hem en zijn link in de balk niet meer.
 
 ## Uitslagen staan van goed naar slecht: winst, gelijk, verlies, dan doelsaldo, dan doelpunten
 
@@ -2606,6 +2607,7 @@
   - **De volgorde in de bron:** de kaart Selectie staat vóór de zijkolom, dus op een telefoon komt de selectie eerst.
     Er is geen `order` in de CSS.
     De schakelaar staat bovenaan de zijkolom, boven de kaarten die hij verandert.
+    **Later:** zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026): de schakelaar staat bovenaan de hoofdkolom.
 - **Waarom:** de projecteigenaar vroeg om de selectie als hoofdkaart en de doelpuntenmakers in de zijkolom op blauw.
   De zin hoort bij de lijst waarover hij gaat.
   De schakelaar verandert alleen de kaarten met doelpunten.
@@ -2788,3 +2790,26 @@
   Omleidingen met 308 van de oude adressen (nu niet nodig).
 - **Later:** vult _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ aan: de cijfers van het seizoen staan onder Wedstrijden.
   Alle beslissingen hierboven die de pagina Statistieken noemen, bedoelen sinds #771 Cijfers.
+
+## Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom
+
+- **Datum:** 6 november 2026
+- **Besluit:** de kaart "Hoe vaak welke uitslag" verhuist van de zijbalk van Wedstrijden naar Cijfers en volgt daar de schakelaar tussen alle wedstrijden en de Eredivisie (#774).
+  De kaart Doelpuntenmakers (de top 5) verdwijnt van Cijfers; Spelers heeft de hele lijst.
+  - **Eredivisie-kaarten bij elkaar:** op Cijfers staan de drie kaarten die de schakelaar negeren, Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen, bij elkaar bovenaan de hoofdkolom, boven de schakelaar.
+    Elk eindigt met de regel "Alleen de Eredivisie".
+    De schakelaar staat direct boven de eerste kaart die hem volgt.
+  - **De schakelaar op alle pagina's:** op Cijfers, Spelers en Tegenstanders is de schakelaar een cel van de hoofdkolom (op Spelers en Tegenstanders de eerste, op Cijfers na de drie Eredivisie-kaarten).
+    Op Spelers staat hij dus niet meer bovenaan de zijkolom.
+  - **De kolommen van Cijfers:** hoofdkolom: onze plek, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen, thuis en uit en Opmerkelijk.
+    Zijkolom: toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten en de bronvermelding.
+    De volgorde van de bron is de volgorde van de balk "Op deze pagina:" en van een telefoon.
+  - **De regel voor de kolommen** staat in de documentatie van `Page.Main` en `Page.Sidebar` in Storybook, zonder maten: de hoofdkolom heeft de lijst of tabel waar de pagina voor bestaat, de zijkolom heeft cijfers erover, en Cijfers is de uitzondering met twee even brede kolommen.
+  - **Ankers:** `#hoe-vaak-welke-uitslag` is verhuisd van `/wedstrijden` naar `/cijfers`, en `#doelpuntenmakers` en `#topscorers` zijn van `/cijfers` verdwenen, zonder omleiding (zie _Adressen noemen de zaak en niet het menu, en er komen geen omleidingen_).
+- **Waarom:** de schakelaar leek op Cijfers voor alle kaarten te gelden, en dat klopte niet.
+  Een vaste plek maakt hem overal te vinden.
+  Een telling van de uitslagen past bij de andere tellingen op Cijfers en volgt daar de keuze, terwijl Wedstrijden de lijst en de stand houdt.
+- **Alternatieven:** elke kaart een eigen schakelaar (te veel herhaling); de schakelaar bovenaan de zijkolom, zoals Spelers had; de kaart op Wedstrijden laten staan met alle wedstrijden; een voorproefje van de doelpuntenmakers op Cijfers.
+- **Later:** vervangt _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026).
+  Het vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: de code toont op Cijfers nu ook geen anker `#doelpuntenmakers` meer.
+  Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
