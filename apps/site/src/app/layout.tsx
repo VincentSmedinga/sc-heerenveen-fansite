@@ -4,6 +4,8 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
 import { Body, Head, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
+import { preloadedFonts } from '@fansite/design-system/fonts'
+import { preload } from 'react-dom'
 
 import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
@@ -93,6 +95,13 @@ export default function RootLayout({
   shortcuts: ReactNode
   subnav: ReactNode
 }) {
+  // The two fonts above the fold are asked for in the head, before the stylesheet has told the
+  // browser it needs them, so they are in before the first paint (see preloadedFonts). A font
+  // needs `crossOrigin`, also from our own domain, or the browser fetches it twice.
+  for (const href of preloadedFonts) {
+    preload(href, { as: 'font', crossOrigin: 'anonymous', type: 'font/woff2' })
+  }
+
   return (
     <Root suppressHydrationWarning>
       <Head script="/theme.js" />

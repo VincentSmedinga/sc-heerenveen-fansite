@@ -32,6 +32,8 @@
 - **Alternatieven:** de CSS van fontsource zelf gebruiken (met de Vietnamese subset en namen als 'Truculenta Variable'), of de woff2-bestanden zelf in de repository zetten (bijwerken met de hand).
 - **Let op:** de `url()` in `fonts.css` verwijst naar een pad in het package, zoals `@fontsource-variable/truculenta/files/…`.
   Vite lost dat op; bij de Next.js-app moeten we controleren of dat daar ook werkt.
+- **Later:** zie _De lettertypes zijn kleiner gemaakt en laden zonder verspringen_ (7 november 2026): Truculenta komt niet meer rechtstreeks uit `@fontsource-variable/truculenta`, maar uit een eigen kleinere versie die uit dat bestand is gemaakt; Atkinson blijft uit zijn package komen.
+  Het package van Truculenta blijft een dependency van het designsysteem, want de opdracht hieronder leest er het brondbestand uit.
 
 ## Licht en donker met light-dark()
 
@@ -2674,3 +2676,50 @@
 - **Alternatieven:** een andere letter voor de kolom (de projecteigenaar koos D/W).
   Een regel achter de naam, zoals bij de hoofdtrainers (#812), die de gedeelde rijen laat staan.
 - **Later:** dit vult _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ (2 november 2026) aan met één afkorting van twee letters, en vervangt voor tabellen met de kolom het deel van _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026) dat rijen met meer dan één speler toestaat.
+
+## De lettertypes zijn kleiner gemaakt en laden zonder verspringen
+
+- **Datum:** 7 november 2026
+- **Besluit:** Truculenta is een eigen, kleinere woff2 (latin en latin-ext) met de assen beperkt tot wat de CSS gebruikt, en de twee lettertypes boven de vouw worden vooraf geladen met terugvallettertypes die de maat van het echte lettertype hebben (#800).
+  - **De assen:** gewicht 700–900 (koppen 800, labels 700, woordmerk 900) en breedte 115–125 (koppen 125 en 115, labels en woordmerk 125), gevonden met een zoekopdracht naar `font-weight` en `font-stretch` bij `--hf-font-family-display` in `typography.css` en de CSS van `heading`, `logo` en `page/shortcuts`.
+    De optische maat staat vast op 24 (px), want de koppen zijn 16 tot 36 pixels groot en 24 zit in het midden: de koppen en het woordmerk zijn het grootst en vallen het meest op.
+    Het bestand voor latin is 66,5 KiB, van 185 KiB (64% kleiner); latin-ext is 57,3 KiB, van 153,8 KiB.
+  - **De opdracht:** Python met `fonttools` 4.60.2 en `brotli` 1.1.0, in een omgeving buiten de repository, dus geen dependency van de repository:
+
+    ```sh
+    python3 -m venv /tmp/fonts && /tmp/fonts/bin/pip install fonttools==4.60.2 brotli==1.1.0
+    /tmp/fonts/bin/python - <<'PY'
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib import instancer
+    files = 'node_modules/.pnpm/@fontsource-variable+truculenta@5.3.0/node_modules/@fontsource-variable/truculenta/files'
+    for subset in ('latin', 'latin-ext'):
+        font = TTFont(f'{files}/truculenta-{subset}-standard-normal.woff2')
+        font = instancer.instantiateVariableFont(font, {'wght': (700, 900), 'wdth': (115, 125), 'opsz': 24})
+        font.flavor = 'woff2'
+        font.save(f'packages/design-system/src/fonts/truculenta-{subset}.woff2')
+    PY
+    ```
+
+    Het bronbestand is dat van `@fontsource-variable/truculenta` 5.3.0, en een volgende versie van het package geeft met dezelfde opdracht dezelfde uitkomst.
+    Wijzigt een token of een component een gewicht of een breedte buiten die bereiken, dan loopt de opdracht opnieuw met andere bereiken, en `fonts.css` krijgt dezelfde.
+
+  - **De licentie:** `fonts/OFL.txt` staat bij de bestanden.
+    De copyrightregel van het lettertype ("Copyright 2020 The Truculenta Project Authors") noemt geen Reserved Font Name, dus de aangepaste versie mag zijn naam houden.
+  - **De terugvallettertypes:** `Truculenta Fallback` en `Atkinson Fallback` in `fonts.css`, op Arial (Arial Bold, Liberation Sans) met `size-adjust` en overrides voor ascent, descent en lijnruimte.
+    De waarden komen uit de breedte van hoofdletters in Truculenta (gewicht 800) tegen Arial Bold, en van lopende tekst in Atkinson tegen Arial: Truculenta is 75,2% (breedte 115) en 81,8% (breedte 125) van Arial Bold, Atkinson 98,9% (Arial) en 99,3% (Arial Bold).
+    Elke override is de maat van het lettertype gedeeld door de `size-adjust`.
+  - **Vooraf laden:** de site laadt Truculenta en Atkinson (latin, niet cursief) vooraf met `preload` van React in `layout.tsx`, met de adressen uit `preloadedFonts` in `@fansite/design-system/fonts`.
+    Next.js zet ze als `Link`-header op het antwoord.
+    Het adres is het gehashte adres van de bundelaar, hetzelfde als in `fonts.css`, dus het is één verzoek.
+  - **Atkinson cursief:** de site gebruikt hem (`Emphasis` en cursief in artikelen), dus hij blijft.
+    De browser haalt hem alleen op in een pagina met cursieve tekst, dus op de gemeten pagina's laadt hij niet.
+  - **Het verschil in beeld:** door de vaste optische maat zijn de letters een fractie anders.
+    De tekst is 0,5% of minder breder of smaller, ten hoogste 1,7 pixel: het woordmerk +1,7 pixel, een kop 1 +1,2 pixel, de andere koppen en labels -0,4 tot +0,1 pixel.
+- **Waarom:** de lettertypes waren 218 van de 415 KiB op de homepage, en Truculenta alleen 185 KiB omdat het bestand drie assen heeft, terwijl de tokens twee breedtes en drie gewichten gebruiken.
+  Het wisselen van lettertype gaf een layoutverschuiving (CLS 0,036 op de homepage op mobiel).
+  Fontsource heeft geen bestand met precies de assen die we gebruiken (alleen gewicht: 58 KiB, optische maat: 69 KiB, breedte: 144 KiB), dus we maken zelf een kleinere versie.
+- **Meting** (Lighthouse 13.6.0, mediaan van drie runs, lokale build met dezelfde gegevens, `devtools`-vertraging; `docs/prestaties.md` heeft de nulmeting van acceptatie): lettertypes op de homepage 219,5 KiB na 100,8 KiB, de pagina 424,6 KiB na 305,1 KiB, de CLS van de homepage op mobiel 0,036 na 0,000.
+  De CLS van Spelers op mobiel is 0,061 (was 0,071): de verschuiving blijft bij de kolommen met kaarten (`div.hf-page-cells`), en dit besluit lost die niet op.
+- **Nadeel:** een vaste optische maat verandert de letters een fractie, en de assen die niemand gebruikt zijn weg: een nieuw gewicht of een nieuwe breedte vraagt een nieuw bestand.
+- **Alternatieven:** alleen vooraf laden en terugvalmaten (de CLS lost op, het gewicht niet); het breedte-bestand van Fontsource (144 KiB, de optische maat is weg, kleine letters zien er anders uit); een lichtere Truculenta zonder breedte (de koppen verliezen hun vorm).
+- **Later:** dit vervangt voor Truculenta het besluit van 20 oktober 2026 dat de lettertypes uit Fontsource komen.

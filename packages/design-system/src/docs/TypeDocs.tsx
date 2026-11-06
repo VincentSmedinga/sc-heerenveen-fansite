@@ -119,8 +119,8 @@ export const TypeStyles = () => (
   </div>
 )
 
-const truculentaWeights = [100, 300, 500, 700, 900]
-const truculentaWidths = [75, 100, 125]
+const truculentaWeights = [700, 800, 900]
+const truculentaWidths = [115, 125]
 const atkinsonWeights = [200, 400, 600, 800]
 
 const display: CSSProperties = { fontFamily: 'var(--hf-font-family-display)', marginBlockEnd: '0.25rem' }
@@ -133,8 +133,9 @@ export const FontSpecimens = () => (
         Truculenta
       </h3>
       <p>
-        Voor woordmerk, alle koppen en labels. Variabel in gewicht (100–900), breedte (75–125) en optische grootte
-        (12–72). Die laatste volgt vanzelf de lettergrootte. Let op de lage middenstrepen van E, F, H en R.
+        Voor woordmerk, alle koppen en labels. Ons eigen, kleinere bestand, variabel in gewicht (700–900) en breedte
+        (115–125), met een vaste optische grootte: alleen de assen die de stijlen gebruiken. Let op de lage
+        middenstrepen van E, F, H en R.
       </p>
       {truculentaWeights.map((weight) => (
         <p key={weight} style={{ ...display, fontSize: '2rem', fontStretch: '125%', fontWeight: weight }}>
