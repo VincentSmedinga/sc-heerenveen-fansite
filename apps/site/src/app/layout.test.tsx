@@ -62,8 +62,8 @@ describe('RootLayout', () => {
     expect(without).not.toContain('aria-label="Balk"')
   })
 
-  it('hands the slot for the bar of Statistieken to the main menu, which draws it inside its own nav', () => {
-    vi.mocked(usePathname).mockReturnValue('/statistieken')
+  it('hands the slot for the bar of Wedstrijden to the main menu, which draws it inside its own nav', () => {
+    vi.mocked(usePathname).mockReturnValue('/wedstrijden')
     const html = renderToStaticMarkup(
       <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
         Inhoud

@@ -1747,6 +1747,8 @@
   Een club zonder lijst heeft geen regel, en toont de schrijfwijze van Wikipedia in zijn wedstrijden zoals voorheen.
 - **Later:** zie _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ (6 november 2026): Tegenstanders en de cijfers van het seizoen komen onder Wedstrijden (#770 en #771).
   Tot dan staat Tegenstanders nog in de balk van Statistieken, die geen Spelers meer heeft.
+- **Later:** zie _Tegenstanders hoort bij Wedstrijden_ (6 november 2026): de lijst en de pagina's van de clubs staan sinds #770 op `/tegenstanders` en `/tegenstanders/<club>`, in de balk onder Wedstrijden.
+  De oude adressen onder `/statistieken` bestaan niet meer, zonder omleiding.
 
 ## De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden
 
@@ -1816,6 +1818,9 @@
 - **Later:** sinds #769 (6 november 2026) heeft de balk van Statistieken alleen nog Tegenstanders, want Spelers is een onderdeel van het hoofdmenu (`/spelers`, zonder balk).
   Het seizoen reist mee via het hoofdmenu (`hrefOf`), en de keuze Alle wedstrijden / Eredivisie via de balk van Statistieken.
   De slot `@subnav` heeft geen route meer voor Spelers.
+- **Later:** sinds #770 (6 november 2026) is het de balk van Wedstrijden, met alleen Tegenstanders.
+  Het slot `@subnav` heeft routes voor `/wedstrijden` en `/tegenstanders`, en Statistieken heeft geen balk meer.
+  De bestanden heten `matchesBar.tsx` en `MatchesBar`.
 
 ## De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
 
@@ -2700,6 +2705,24 @@
 - **Waarom:** Nieuws, Tegenstanders en de homepage hebben geen seizoen.
   Een globale keuze in de kop zou daar niets doen.
 - **Alternatieven:** een seizoenskiezer in de kop van elke pagina.
+
+## Tegenstanders hoort bij Wedstrijden
+
+- **Datum:** 6 november 2026
+- **Besluit:** Tegenstanders staat in de balk van Wedstrijden en niet als eigen onderdeel van het menu (#770).
+  - **De adressen:** de lijst en de pagina's van de clubs staan op `/tegenstanders` en `/tegenstanders/<club>`.
+    De oude adressen onder `/statistieken` geven "niet gevonden", zonder omleiding (zie _Adressen noemen de zaak en niet het menu, en er komen geen omleidingen_).
+    `tegenstanders` staat in `reservedSlugs`.
+  - **Het menu:** Wedstrijden is het huidige onderdeel op `/wedstrijden`, en op `/tegenstanders` en de pagina's van de clubs is het `aria-current="true"` met Tegenstanders als huidige subpagina in de balk, zoals Nieuws op Podcasts.
+    Statistieken heeft geen balk meer.
+  - **Wat meereist:** de keuze Alle wedstrijden / Eredivisie reist mee in de link van de balk.
+    Het seizoen reist niet mee, want Tegenstanders telt alle seizoenen.
+  - **De code:** de map `app/tegenstanders` en het slot `@subnav` verhuisden met `git mv`.
+    `statisticsBar.tsx` is `matchesBar.tsx` geworden, en `opponentsPath` is `/tegenstanders`.
+- **Waarom:** elk gegeven op een clubpagina komt uit de wedstrijden tegen die club, en je komt er via de clubnaam in een wedstrijdregel.
+- **Alternatieven:** een eigen onderdeel Tegenstanders (vijf onderdelen).
+  Onder Geschiedenis.
+- **Later:** vervangt voor Tegenstanders de beslissing _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026).
 
 ## De balk van Nieuws heeft Podcasts, Redactie en Zoeken, in die volgorde, altijd alle drie
 

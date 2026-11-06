@@ -7,7 +7,7 @@ import path from 'node:path'
 /**
  * A made-up list of stadiums of its own for SV Proefdorp, with a name that starts on a day and
  * a note, so the page of the club and the screen of the admin are checked with one (see
- * `/statistieken/tegenstanders/sv-proefdorp` and `/beheer/stadions/sv-proefdorp` in
+ * `/tegenstanders/sv-proefdorp` and `/beheer/stadions/sv-proefdorp` in
  * pages.spec.ts). SV Proefdorp has a cup tie to come and no match played, so its page has the
  * card Stadion only because of this list, also with the choice Eredivisie. The rows go straight
  * into the table, because they are not an action of the admin and no row of the log should

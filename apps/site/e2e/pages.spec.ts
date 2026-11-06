@@ -68,28 +68,32 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The old addresses under Statistieken are gone, with no redirect (#769).
   { path: '/statistieken/spelers', status: 404 },
   { path: '/statistieken/spelers/kies', status: 404 },
-  // The page Tegenstanders: the list, a club met in the league (Testdorp FC), one with two
-  // names of its stadium (Voorbeeld United) and one met in the cup only (FC Maquette, who is
-  // not in the list with the choice Eredivisie and has a sentence on its page), the choice, and
+  // The page Tegenstanders, a sub-page of Wedstrijden: the list, a club met in the league
+  // (Testdorp FC), one with two names of its stadium (Voorbeeld United) and one met in the cup
+  // only (FC Maquette, who is not in the list with the choice Eredivisie and has a sentence on
+  // its page), the choice, and
   // the addresses that say "niet gevonden": a slug no club has, a choice that is not known, and
   // a path below a club.
-  { path: '/statistieken/tegenstanders', status: 200 },
-  { path: '/statistieken/tegenstanders?competitie=eredivisie', status: 200 },
-  { path: '/statistieken/tegenstanders?competitie=onzin', status: 404 },
-  { path: '/statistieken/tegenstanders/testdorp-fc', status: 200 },
-  { path: '/statistieken/tegenstanders/testdorp-fc?competitie=eredivisie', status: 200 },
-  { path: '/statistieken/tegenstanders/voorbeeld-united', status: 200 },
-  { path: '/statistieken/tegenstanders/fc-maquette', status: 200 },
-  { path: '/statistieken/tegenstanders/fc-maquette?competitie=eredivisie', status: 200 },
+  { path: '/tegenstanders', status: 200 },
+  { path: '/tegenstanders?competitie=eredivisie', status: 200 },
+  { path: '/tegenstanders?competitie=onzin', status: 404 },
+  { path: '/tegenstanders/testdorp-fc', status: 200 },
+  { path: '/tegenstanders/testdorp-fc?competitie=eredivisie', status: 200 },
+  { path: '/tegenstanders/voorbeeld-united', status: 200 },
+  { path: '/tegenstanders/fc-maquette', status: 200 },
+  { path: '/tegenstanders/fc-maquette?competitie=eredivisie', status: 200 },
   // Clubs with matches still to come and none played: Nepstad Rangers (a weekend, no time yet),
   // Demo Boys (called off) and SV Proefdorp (a cup tie, so also with the choice Eredivisie).
-  { path: '/statistieken/tegenstanders/nepstad-rangers', status: 200 },
-  { path: '/statistieken/tegenstanders/demo-boys', status: 200 },
-  { path: '/statistieken/tegenstanders/sv-proefdorp', status: 200 },
-  { path: '/statistieken/tegenstanders/sv-proefdorp?competitie=eredivisie', status: 200 },
-  { path: '/statistieken/tegenstanders/testdorp-fc?competitie=onzin', status: 404 },
-  { path: '/statistieken/tegenstanders/bestaat-niet', status: 404 },
-  { path: '/statistieken/tegenstanders/testdorp-fc/extra', status: 404 },
+  { path: '/tegenstanders/nepstad-rangers', status: 200 },
+  { path: '/tegenstanders/demo-boys', status: 200 },
+  { path: '/tegenstanders/sv-proefdorp', status: 200 },
+  { path: '/tegenstanders/sv-proefdorp?competitie=eredivisie', status: 200 },
+  { path: '/tegenstanders/testdorp-fc?competitie=onzin', status: 404 },
+  { path: '/tegenstanders/bestaat-niet', status: 404 },
+  { path: '/tegenstanders/testdorp-fc/extra', status: 404 },
+  // The old addresses under Statistieken are gone, with no redirect (#770).
+  { path: '/statistieken/tegenstanders', status: 404 },
+  { path: '/statistieken/tegenstanders/testdorp-fc', status: 404 },
   // The choice between all the matches and the Eredivisie, on both pages: `eredivisie` is the
   // only value, and anything else or the same twice says "niet gevonden". The route behind the
   // season picker keeps the choice, and drops a value it does not know.

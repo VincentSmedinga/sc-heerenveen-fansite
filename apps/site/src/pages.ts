@@ -35,7 +35,7 @@ export const pages = [
   {
     description:
       'Alle clubs waar sc Heerenveen tegen speelde, met hoe vaak we wonnen, gelijkspeelden en verloren, en de bron erbij: de Nederlandse Wikipedia.',
-    path: '/statistieken/tegenstanders',
+    path: '/tegenstanders',
   },
   {
     description:

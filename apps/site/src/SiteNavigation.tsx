@@ -17,8 +17,10 @@ const newsSubitems = [
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 
-// The sub-pages of Statistieken. Seizoenen comes later.
-const statisticsSubitems = [{ href: '/statistieken/tegenstanders', label: 'Tegenstanders' }]
+// The sub-pages of Wedstrijden. Cijfers and Seizoenen come later.
+const opponentsPath = '/tegenstanders'
+
+const matchesSubitems = [{ href: opponentsPath, label: 'Tegenstanders' }]
 
 const statisticsPath = '/statistieken'
 
@@ -41,8 +43,8 @@ const adminPath = '/beheer'
 
 const items: MenuItem[] = [
   { href: newsPath, label: 'Nieuws', subitems: newsSubitems },
-  { href: matchesPath, label: 'Wedstrijden' },
-  { href: statisticsPath, label: 'Statistieken', subitems: statisticsSubitems },
+  { href: matchesPath, label: 'Wedstrijden', subitems: matchesSubitems },
+  { href: statisticsPath, label: 'Statistieken' },
   { href: playersPath, label: 'Spelers' },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
@@ -58,11 +60,11 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
  * Nieuws has the news overview, its sub-pages and the articles of the editors
  * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item,
  * because it is the front page of the whole site and the logo links to it. Wedstrijden has
- * the page and every page below it, such as the season. Statistieken has the same, and two
- * sub-pages of its own: Spelers, with the page of each season below it (`/spelers/2025-26`),
- * and Tegenstanders, with the page of each club below it
- * (`/statistieken/tegenstanders/ado-den-haag`). A path that belongs to no
- * item, such as /bronnen, the home page or a page that does not exist, has neither.
+ * the page and every page below it, such as the season, and a sub-page of its own:
+ * Tegenstanders, with the page of each club below it (`/tegenstanders/ado-den-haag`).
+ * Statistieken has the page and every page below it, and Spelers the same, with the page of
+ * each season below it (`/spelers/2025-26`). A path that belongs to no item, such as /bronnen,
+ * the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
@@ -91,8 +93,8 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: playersPath }
   }
 
-  if (pathname === '/statistieken/tegenstanders' || pathname.startsWith('/statistieken/tegenstanders/')) {
-    return { item: '/statistieken', subitem: '/statistieken/tegenstanders' }
+  if (pathname === opponentsPath || pathname.startsWith(`${opponentsPath}/`)) {
+    return { item: matchesPath, subitem: opponentsPath }
   }
 
   if (pathname === '/statistieken' || pathname.startsWith('/statistieken/')) {
@@ -133,25 +135,25 @@ export function seasonOfPath(pathname: string): string | undefined {
  * forum. The server never renders Beheer: the HTML is the same for every visitor, and the
  * browser adds the item after hydrating when it finds the mark of admin-marker.ts.
  *
- * The news and the statistics have a bar with their sub-pages under the menu. The menu marks
+ * The news and the matches have a bar with their sub-pages under the menu. The menu marks
  * the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is a
  * client component: usePathname gives the path, also when the server renders the HTML.
  *
  * The addresses of the items are fixed, except Wedstrijden, Statistieken and Spelers on the
  * page of a season: they take the season of the page along (see `hrefOf`). The links of the
- * bar of Nieuws are fixed too. The bar of Statistieken is different: its link keeps the choice
+ * bar of Nieuws are fixed too. The bar of Wedstrijden is different: its link keeps the choice
  * between all matches and the Eredivisie of the page, and the choice is in the query
  * string, which a client component in a layout can only read with `useSearchParams` and a
- * Suspense boundary, and that would touch every page. So the pages of Statistieken draw the bar
- * on the server (the slot `@subnav`, see layout.tsx) and hand it in as `statisticsBar`. The
+ * Suspense boundary, and that would touch every page. So the pages of Wedstrijden draw the bar
+ * on the server (the slot `@subnav`, see layout.tsx) and hand it in as `matchesBar`. The
  * sub-pages listed here only tell which one is the current one, and give the bar when there is
  * no slot.
  *
- * On a sub-page the item Nieuws or Statistieken is not the current page itself (the design
+ * On a sub-page the item Nieuws or Wedstrijden is not the current page itself (the design
  * system gives it `aria-current="true"` then); only on /nieuws and on an article of the
- * editors, and on /statistieken and the page of a season below it, is it.
+ * editors, and on /wedstrijden and the page of a season below it, is it.
  */
-export function SiteNavigation({ statisticsBar }: { statisticsBar?: ReactNode }) {
+export function SiteNavigation({ matchesBar }: { matchesBar?: ReactNode }) {
   const pathname = usePathname()
   const here = currentOf(pathname)
   // The server and the first render in the browser have no item: the HTML is the same for
@@ -164,7 +166,7 @@ export function SiteNavigation({ statisticsBar }: { statisticsBar?: ReactNode })
       items={(loggedIn ? itemsWithAdmin : items).map((item) => ({
         ...item,
         href: hrefOf(item.href, pathname),
-        ...(item.href === statisticsPath && statisticsBar !== undefined && { bar: statisticsBar }),
+        ...(item.href === matchesPath && matchesBar !== undefined && { bar: matchesBar }),
         current: item.href === here.item && here.subitem === undefined,
         ...(item.subitems && {
           subitems: item.subitems.map((subitem) => ({ ...subitem, current: subitem.href === here.subitem })),

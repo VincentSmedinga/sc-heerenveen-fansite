@@ -78,11 +78,11 @@ export const viewport: Viewport = {
 // Page.Body, without JavaScript to move it. A page without a route in the slot gets an empty
 // one. The pages under /beheer fill it with the bar of the admin (app/@shortcuts/beheer).
 //
-// The slot `@subnav` works the same way for the bar of sub-pages of Statistieken, which is part
+// The slot `@subnav` works the same way for the bar of sub-pages of Wedstrijden, which is part
 // of the main menu and so goes into it, not between the menu and the Page.Body. Its links keep
-// the season and the choice of competition of the page, and the choice is only in the query
-// string, which a page and a slot can read on the server and a layout cannot. Only the pages of
-// Statistieken have a route in the slot, and they already render on each request; every other
+// the choice of competition of the page, and the choice is only in the query string, which a
+// page and a slot can read on the server and a layout cannot. Only the pages of Wedstrijden and
+// Tegenstanders have a route in the slot, and they already render on each request; every other
 // page gets an empty slot, which is static (see SiteNavigation for why not `useSearchParams`).
 export default function RootLayout({
   children,
@@ -105,7 +105,7 @@ export default function RootLayout({
             </Link>
             <ThemeToggle />
           </Page.Header>
-          <SiteNavigation statisticsBar={subnav} />
+          <SiteNavigation matchesBar={subnav} />
           {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>

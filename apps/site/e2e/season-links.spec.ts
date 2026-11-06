@@ -25,7 +25,7 @@ test.describe('the links between the pages of a season', () => {
         .filter((target) => seasonPages.some((base) => target === base || target.startsWith(`${base}/`)))
         // The addresses of the picker and of Tegenstanders start with the same words, but are
         // not pages of a season.
-        .filter((target) => !target.endsWith('/kies') && !target.startsWith('/statistieken/tegenstanders'))
+        .filter((target) => !target.endsWith('/kies') && !target.startsWith('/tegenstanders'))
 
       // The menu alone links to two other pages of a season, so the walk cannot pass by finding
       // nothing.

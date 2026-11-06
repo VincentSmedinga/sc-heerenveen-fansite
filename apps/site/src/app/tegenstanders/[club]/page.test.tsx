@@ -423,10 +423,8 @@ describe('the page of a club', () => {
   it('has the switch, with the choice Alle wedstrijden current, because the cup was played', async () => {
     const html = await render()
 
-    expect(html).toMatch(
-      /<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders\/testclub"[^>]*><span[^>]*>Alle wedstrijden/,
-    )
-    expect(html).toContain('href="/statistieken/tegenstanders/testclub?competitie=eredivisie"')
+    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders\/testclub"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toContain('href="/tegenstanders/testclub?competitie=eredivisie"')
   })
 
   it('counts the Eredivisie alone with ?competitie=eredivisie, and says so', async () => {
@@ -443,7 +441,7 @@ describe('the page of a club', () => {
 
     expect(html).toContain('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')
     expect(html).not.toContain('<table')
-    expect(html).toMatch(/<a [^>]*href="\/statistieken\/tegenstanders\/beker-united"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(/<a [^>]*href="\/tegenstanders\/beker-united"[^>]*><span[^>]*>Alle wedstrijden/)
   })
 
   it('shows the summary for that same club with all the matches, a single cup tie', async () => {
@@ -837,13 +835,13 @@ describe('the page of a club', () => {
 
     expect(await render()).toContain('Er ging iets mis')
     expect(error).toHaveBeenCalledWith(
-      'Could not read the opponent testclub for /statistieken/tegenstanders: connect ECONNREFUSED 127.0.0.1:3306',
+      'Could not read the opponent testclub for /tegenstanders: connect ECONNREFUSED 127.0.0.1:3306',
     )
   })
 
   it('has the title, the description and the canonical address of the club', async () => {
     expect(await generateMetadata({ params: Promise.resolve({ club: 'testclub' }) })).toMatchObject({
-      alternates: { canonical: 'https://sc.heerenveen.org/statistieken/tegenstanders/testclub' },
+      alternates: { canonical: 'https://sc.heerenveen.org/tegenstanders/testclub' },
       title: 'sc Heerenveen tegen Testclub',
     })
   })

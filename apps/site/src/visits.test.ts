@@ -224,12 +224,12 @@ describe('visitOf', () => {
   })
 
   it('counts the page of a club through its slug, for the database to confirm, under its own path', () => {
-    expect(visitOf(request('/statistieken/tegenstanders/ado-den-haag?competitie=eredivisie'))).toMatchObject({
+    expect(visitOf(request('/tegenstanders/ado-den-haag?competitie=eredivisie'))).toMatchObject({
       club: 'ado-den-haag',
-      path: '/statistieken/tegenstanders/ado-den-haag',
+      path: '/tegenstanders/ado-den-haag',
     })
-    expect(visitOf(request('/statistieken/tegenstanders'))).toMatchObject({ club: undefined })
-    expect(visitOf(request('/statistieken/tegenstanders/ado-den-haag/extra'))).toBeUndefined()
+    expect(visitOf(request('/tegenstanders'))).toMatchObject({ club: undefined })
+    expect(visitOf(request('/tegenstanders/ado-den-haag/extra'))).toBeUndefined()
   })
 
   it('counts the address of a switch as a page, and not the request the router makes for it', () => {
@@ -265,7 +265,7 @@ describe('visitOf', () => {
       '/redactie/[slug]',
       '/statistieken/[seizoen]',
       '/spelers/[seizoen]',
-      '/statistieken/tegenstanders/[club]',
+      '/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',
     ]
     const paths = readdirSync(`${import.meta.dirname}/app`, { recursive: true, withFileTypes: true })
@@ -322,15 +322,15 @@ describe('countVisit', () => {
     const record = vi.fn().mockResolvedValue(undefined)
     const waitUntil = vi.fn()
 
-    countVisit(request('/statistieken/tegenstanders/ado-den-haag'), waitUntil, record)
+    countVisit(request('/tegenstanders/ado-den-haag'), waitUntil, record)
     await waitUntil.mock.calls[0]?.[0]
     isClubSlug.mockResolvedValue(false)
-    countVisit(request('/statistieken/tegenstanders/bestaat-niet'), waitUntil, record)
+    countVisit(request('/tegenstanders/bestaat-niet'), waitUntil, record)
     await waitUntil.mock.calls[1]?.[0]
 
     expect(isClubSlug).toHaveBeenCalledTimes(2)
     expect(record).toHaveBeenCalledOnce()
-    expect(record).toHaveBeenCalledWith(expect.objectContaining({ path: '/statistieken/tegenstanders/ado-den-haag' }))
+    expect(record).toHaveBeenCalledWith(expect.objectContaining({ path: '/tegenstanders/ado-den-haag' }))
   })
 
   it('does not wait for the counter: the call returns while the database has not answered', async () => {
