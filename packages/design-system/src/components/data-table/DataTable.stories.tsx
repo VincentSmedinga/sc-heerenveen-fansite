@@ -4,6 +4,7 @@ import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
+import { PlayerName } from '../player-name/PlayerName'
 import { signedNumber, tableColumns, tableLegend } from '../table-columns'
 import { Text } from '../text/Text'
 import { DataTable, type DataTableProps, type DataTableRow, type DataTableTextRow } from './DataTable'
@@ -243,6 +244,42 @@ export const Links = meta.story({
           rows={clubs}
         />
         <Text appearance="meta">{clubLegend}</Text>
+      </Card>
+    </div>
+  ),
+})
+
+export const NamesWithPeriods = meta.story({
+  name: 'Namen met een tweede regel op een telefoon',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="trainers-kop">
+        <Heading id="trainers-kop" level={2}>
+          Resultaten per hoofdtrainer
+        </Heading>
+        <DataTable
+          caption="De resultaten per hoofdtrainer, de nieuwste eerst"
+          columns={[
+            'Hoofdtrainer',
+            tableColumns.played,
+            tableColumns.won,
+            { ...tableColumns.pointsPerMatch, key: true },
+          ]}
+          rows={[
+            {
+              cells: [14, 6, '1,71'],
+              display: <PlayerName givenName="Robin" surname="Veldman" />,
+              header: 'Robin Veldman, mrt 2025 – nu',
+              secondary: 'mrt 2025 – nu',
+            },
+            {
+              cells: [2, 1, '1,50'],
+              display: <PlayerName givenName="Kees" surname="van Wonderen" />,
+              header: 'Kees van Wonderen, jul 2022 – jun 2024',
+              secondary: 'jul 2022 – jun 2024',
+            },
+          ]}
+        />
       </Card>
     </div>
   ),

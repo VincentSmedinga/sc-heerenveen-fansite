@@ -2865,6 +2865,34 @@
 - **Alternatieven:** het forum bovenaan laten (de keuze van 1 november 2026).
 - **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) dat zegt dat het forum bovenaan staat.
 
+## Resultaten per hoofdtrainer staan als tabel op Cijfers
+
+- **Datum:** 6 november 2026
+- **Besluit:** een kaart "Resultaten per hoofdtrainer" met een tabel op Cijfers, voor de trainers met minstens één gespeelde wedstrijd in onze gegevens, volgens de schakelaar (#781).
+  - **Plek:** zacht vlak als laatste kaart van de zijkolom van Cijfers, met een item in "Op deze pagina:" en het anker `#resultaten-per-hoofdtrainer`.
+    Een lange tabel krijgt geen knop voor een afbeelding.
+    De kaart telt alle seizoenen en verandert niet met het seizoen van de kiezer.
+  - **Telling:** een wedstrijd telt voor de trainer in wiens periode de dag valt, als hij is gespeeld en een uitslag heeft (`coachResultsOf`).
+    Een periode loopt van de eerste dag van zijn begin tot en met de eerste dag van zijn einde; kennen we een datum alleen op de maand of het jaar, dan is dat de eerste dag van de maand of het jaar.
+    Een trainer zonder wedstrijd staat er niet in, dus de trainers van vóór 2010/11 ook niet.
+  - **Overlap:** twee periodes kunnen door een vage datum elkaar raken (Marco van Basten tot juli 2014 en Dwight Lodeweges vanaf 2014).
+    Een dag die in twee periodes valt, telt voor de trainer die als eerste begon, want zijn begin is het zekerst.
+  - **Interim:** een eigen rij, met "interim" voor de periode op de regel onder de naam: "interim · feb 2025 – mrt 2025".
+  - **Tabel:** de nieuwste trainer eerst, met de kolommen gespeeld, winst, gelijk, verlies en punten per wedstrijd (de sleutelwaarde).
+    De rijkop is de naam, met `PlayerName` zoals elders (de voornaam gewoon, de achternaam zwaarder), en daaronder op een eigen regel in secundaire tekst de periode, "Dwight Lodeweges" met "jan 2014 – okt 2015" eronder.
+    Een kolom van tekst voor de periode maakte de tabel breder dan een telefoon (bij 320 pixels liep de pagina 65 pixels over).
+    `DataTable` kreeg daarvoor `display` (wat de rijkop toont) en `secondary` (een tweede regel) voor een tabel met cijfers; de gewone `header` blijft de sleutel van de rij.
+    Een periode staat op de maand, of op het jaar als alleen het jaar bekend is; een trainer die nog bezig is, eindigt op "nu".
+    De letters komen uit `tableColumns`, met de uitleg eronder.
+    De punten per wedstrijd zijn 3 per winst en 1 per gelijkspel, gedeeld door de wedstrijden, met twee decimalen en een komma.
+  - **Fout:** kunnen de trainers of de wedstrijden niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
+- **Waarom:** de gegevens (`staff` en de wedstrijden) zijn er, en de pagina Seizoenen bestaat pas als #414 is gebouwd.
+  Cijfers is de plek voor cijfers over alle seizoenen.
+- **Alternatieven:** wachten op #782.
+  De kaart Hoofdtrainer(s) op Wedstrijden uitbreiden (die toont één seizoen).
+  Een dag in een overlap voor beide trainers tellen (dubbel geteld), of voor geen van beide (een gat in de telling).
+- **Later:** vult _Geschiedenis wordt geen eigen onderdeel van het menu_ (6 november 2026) aan: tot #782 gebouwd is, staan de resultaten per hoofdtrainer op Cijfers, en kan die pagina de kaart overnemen.
+
 ## De plek van de club en de onze staan in een tabel op de pagina van de club
 
 - **Datum:** 6 november 2026

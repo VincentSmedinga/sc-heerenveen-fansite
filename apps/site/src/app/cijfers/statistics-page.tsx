@@ -4,10 +4,13 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { parseCompetition } from '#src/competition'
+import { coachResultsOf, firstSeasonOf } from '#src/coachResults'
+import { CoachResultsCard } from '#src/CoachResultsCard'
+import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
-import { parseCleanSheetCount } from '#src/matches'
+import { reasonOf } from '#src/errors'
+import { getCoachResultData, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
   CleanSheetsCard,
@@ -58,7 +61,7 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 /**
  * The page of a season: `/cijfers` for the current season and `/cijfers/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
- * heading. The ten cards with figures sit in two equal columns on a wide screen, and under
+ * heading. The eleven cards with figures sit in two equal columns on a wide screen, and under
  * each other on a narrow one, in the order of the bar "Op deze pagina:". The page is the
  * exception to the rule of the columns (see Page.Main): both hold cards with figures. The three
  * cards that stay the Eredivisie come first in the main column, together, and under them is the
@@ -72,8 +75,10 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
  * with `?competitie=eredivisie` (see CompetitionSwitch). Three cards do not follow the choice:
  * our place in the league, the season and how the matches go rest on the table, the 34 rounds
  * or the score after 90 minutes, so they stay the Eredivisie, and say so on their last line.
- * The card Hoe vaak welke uitslag follows the choice. A value other than that one is
- * the page "niet gevonden", and so is one given twice.
+ * The card Hoe vaak welke uitslag follows the choice, and so does the last card, Resultaten per
+ * hoofdtrainer, which counts every season we have matches of and not the season of the page
+ * (see CoachResultsCard). It is left out when its data can't be read. A value other than that
+ * one is the page "niet gevonden", and so is one given twice.
  */
 export async function StatisticsPage({
   searchParams,
@@ -101,6 +106,7 @@ export async function StatisticsPage({
   // one the image has always been of.
   const imageSeason = current ? undefined : season
   const address = seasonAddress(statisticsPath, season, seasonOf(now))
+  const coachResults = await loadCoachResults(competition)
 
   return (
     <>
@@ -149,10 +155,30 @@ export async function StatisticsPage({
         />
         <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
         <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
+        {coachResults}
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
         )}
       </Page.Sidebar>
     </>
   )
+}
+
+/**
+ * The card "Resultaten per hoofdtrainer", or nothing when the head coaches or the matches of
+ * all seasons could not be read (the error is logged): the rest of the page doesn't need it.
+ */
+async function loadCoachResults(competition: CompetitionChoice) {
+  try {
+    const { coaches, matchDays } = await getCoachResultData()
+    const since = firstSeasonOf(matchDays)
+
+    return since === undefined ? null : (
+      <CoachResultsCard choice={competition} results={coachResultsOf(coaches, matchDays, competition)} since={since} />
+    )
+  } catch (error) {
+    console.error(`Could not read the results per head coach for ${statisticsPath}: ${reasonOf(error)}`)
+
+    return null
+  }
 }

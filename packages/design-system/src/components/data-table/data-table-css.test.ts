@@ -12,6 +12,10 @@ describe('data-table.css', () => {
     expect(css.slice(start, css.indexOf('}', start))).toMatch(/overflow-wrap: anywhere/u)
   })
 
+  it('gives the second line of a row header secondary text in both kinds of table', () => {
+    expect(css).toMatch(/\.hf-data-table \.hf-data-table-secondary \{[^}]*display: block;/u)
+  })
+
   it('folds a column under 44rem of the table itself, and not of the window', () => {
     expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container-type: inline-size;/u)
 

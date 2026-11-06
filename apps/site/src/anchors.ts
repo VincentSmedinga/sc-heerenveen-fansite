@@ -34,6 +34,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'hoe-de-wedstrijden-verlopen',
     'hoe-vaak-welke-uitslag',
     'uitersten',
+    'resultaten-per-hoofdtrainer',
   ],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
