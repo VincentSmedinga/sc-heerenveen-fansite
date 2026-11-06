@@ -2388,6 +2388,9 @@
   - De lezer geeft 32, 13, 31, 30 en 30 spelers voor 2018/19, 2019/20, 2020/21, 2021/22 en 2024/25, tegen 31, 21, 28, 29 en 34 in het onderzoek.
     De selecties zijn met de hand geteld (32, 31, 31 en 30 sjablonen; de speler die twee keer voorkomt telt één keer).
     2019/20 heeft alleen transfers, en de onderzoekscijfers tellen ook wie in de zomer vertrok.
+  - 2019/20 heeft geen selectie, alleen transfers: de lezer geeft daar `read` met 13 spelers, een gedeeltelijke selectie.
+    De projecteigenaar koos op 6 november 2026 om dat zo te laten, en niet `none` te geven.
+    De volledigheid van dat seizoen blijft laag (#745).
 - **Waarom:** de projecteigenaar gaf op 5 november 2026 toestemming, voor selecties alleen waar de Nederlandse pagina ontbreekt.
   De licentie is dezelfde (CC BY-SA 4.0).
   Een speler heeft binnen een seizoen één bron, dus geen dubbele namen met twee titels.
