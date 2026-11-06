@@ -585,7 +585,7 @@ Op een telefoon staat onder de kop de balk "Op deze pagina:" met een link naar e
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom.
-Ze heeft zes delen:
+Ze heeft zeven delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Resultaten sinds 2010" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
@@ -617,6 +617,12 @@ Ze heeft zes delen:
   De kaart is er alleen als we minstens 5 gespeelde wedstrijden met een uitslag tegen de club hebben, in alle competities samen (`hasClubScorers` en `clubScorersMinimum` in `src/opponents.ts`), ongeacht de schakelaar.
   Bij minder dan 5 is hij er niet, zonder zin die zegt waarom.
   De lijst zelf telt de wedstrijden van de schakelaar, dus bij Eredivisie kan hij korter zijn of leeg, en dan staat er "We hebben geen doelpuntenmakers van deze wedstrijden." in plaats van de tabel.
+- De kaart "Nieuws over …" op het zachte vlak, na de kaarten met cijfers en vóór het stadion (`ClubNewsCard` in `src/OpponentViews.tsx`, het anker `#nieuws`): de nieuwste vijf koppen die de club noemen (`clubNewsLimit`), nieuwste eerst, elk als `NewsItem` met de kop als link, de bron en de tijd, en "voor abonnees" bij een betaalmuur.
+  Er is geen inleiding, geen foto, geen afbeeldingsknop en geen link naar meer nieuws.
+  De koppen komen uit `listClubNews` in `@fansite/db` (`getClubNews` in `src/opponents.ts`, vijf minuten onthouden): de koppen die `listRecentItems` ook zou geven (bronnen die aanstaan, geen podcast, niet verborgen, relevant, niet van na nu), met een rij in `item_clubs` onder een van de namen van de club (`clubNamesOf`: de naam nu, de andere schrijfwijzen, de eigen lijst met namen en de naam in elke wedstrijd), zodat een kop met de oude naam ook telt.
+  Een kop die twee clubs noemt, staat bij allebei.
+  Zonder kop is er geen kaart en geen zin, ook niet bij een club met alleen wedstrijden die nog komen: dan staat de kaart bovenaan de zijkolom.
+  `item_clubs` heeft rijen voor koppen die de importer opsloeg sinds #794, en voor oudere koppen na `pnpm run import:item-clubs`; tot dan toont een club alleen de nieuwere koppen.
 - De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
   De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
   Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.

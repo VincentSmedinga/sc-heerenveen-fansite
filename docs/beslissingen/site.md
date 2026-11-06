@@ -2691,6 +2691,7 @@
 - **Waarom:** nu betekent hoofdkolom of zijkolom per pagina iets anders.
   Spelers (#765) heeft de duidelijkste vorm: witte lijst, blauwe cijfers.
 - **Alternatieven:** elke pagina zelf laten kiezen (zoals nu).
+- **Later:** de zijkolom van een club heeft ook de kaart "Nieuws over <club>" (#777, zie _De pagina van een club toont de nieuwste vijf koppen die de club noemen_ in `redactie.md`): een lijst met links van anderen, op het zachte vlak, naast de cijfers.
 
 ## Doelpuntenmakers staan op één plek: Spelers
 

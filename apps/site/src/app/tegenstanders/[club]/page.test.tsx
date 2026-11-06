@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
-import { type ClubPage, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubNews, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -15,6 +15,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 }))
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getClubNews: vi.fn(),
   getClubPage: vi.fn(),
   getClubPlaces: vi.fn(),
   getSourcePages: vi.fn(),
@@ -38,6 +39,8 @@ beforeEach(() => {
   vi.mocked(getClubPage).mockImplementation((slug) =>
     Promise.resolve({ 'beker-united': beker, 'komend-fc': komend, 'nieuw-promovendus': promovendus, testclub }[slug]),
   )
+  vi.mocked(getClubNews).mockReset()
+  vi.mocked(getClubNews).mockResolvedValue([])
   vi.mocked(getClubPlaces).mockReset()
   vi.mocked(getClubPlaces).mockResolvedValue([])
   vi.mocked(getMatchSeasons).mockReset()
@@ -1331,5 +1334,89 @@ describe('the card Wedstrijden of a club that is paged', () => {
       'digest',
       expect.stringContaining('404'),
     )
+  })
+})
+
+describe('the card Nieuws over <club> on the page of a club', () => {
+  const headline = (title: string, more: Partial<Awaited<ReturnType<typeof getClubNews>>[number]> = {}) => ({
+    paywalled: false,
+    publishedAt: new Date('2026-10-29T10:00:00Z'),
+    sourceName: 'De Testkrant',
+    title,
+    url: `https://testkrant.test/${encodeURIComponent(title)}`,
+    ...more,
+  })
+
+  const cardOf = (html: string) => {
+    const start = html.indexOf('id="nieuws"')
+
+    return start === -1 ? '' : html.slice(html.lastIndexOf('<section', start), html.indexOf('</section>', start))
+  }
+
+  it('is not there, with no sentence, for a club without headlines', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('id="nieuws"')
+    expect(html).not.toContain('Nieuws over')
+  })
+
+  it('has the heading of the club and the headlines as they are given, newest first, with the source and the time', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([
+      headline('Nieuwste kop', { publishedAt: new Date('2026-10-30T12:00:00Z') }),
+      headline('Oudere kop'),
+    ])
+
+    const card = cardOf(await render())
+
+    expect(plain(card)).toContain('Nieuws over Testclub')
+    expect(card.indexOf('Nieuwste kop')).toBeGreaterThan(-1)
+    expect(card.indexOf('Nieuwste kop')).toBeLessThan(card.indexOf('Oudere kop'))
+    expect(card).toContain('href="https://testkrant.test/Nieuwste%20kop"')
+    expect(plain(card)).toContain('De Testkrant')
+  })
+
+  it('shows only the headline, the link, the source and the time: no intro, no photo and no button for an image', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([headline('Een kop')])
+
+    const card = cardOf(await render())
+
+    expect(card).not.toContain('<img')
+    expect(card).not.toContain('<button')
+    expect(card).not.toContain('Alle nieuws')
+  })
+
+  it('shows a paywall as the rest of the site does', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([headline('Achter de muur', { paywalled: true })])
+
+    expect(plain(cardOf(await render()))).toContain('voor abonnees')
+  })
+
+  it('is in the sidebar after the cards with figures and before the stadium', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([headline('Een kop')])
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      stadiums: [{ name: 'Testlaan', note: null, startDay: null, startSeason: null }],
+    })
+
+    const html = await render()
+
+    expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="nieuws"'))
+    expect(html.indexOf('id="nieuws"')).toBeLessThan(html.indexOf('id="stadion"'))
+    expect(html.indexOf('id="nieuws"')).toBeLessThan(html.indexOf('Wikipedia'))
+  })
+
+  it('is on the page of a club with a match to come and none played, too', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([headline('Een kop')])
+
+    const html = await render('nieuw-promovendus')
+
+    expect(plain(html)).toContain('Nieuws over Nieuw Promovendus')
+    expect(html).toContain('aria-label="Het nieuws en de bron"')
+  })
+
+  it('does not take the headlines away from the page when the reading of them is the cached empty list', async () => {
+    vi.mocked(getClubNews).mockResolvedValue([])
+
+    expect(await render()).toContain('>Doelpuntenmakers tegen Testclub</h2>')
   })
 })

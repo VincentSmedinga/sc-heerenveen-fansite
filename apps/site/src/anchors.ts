@@ -42,7 +42,9 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // Alle tijden (#780) follows it, and the card Bijzondere doelpunten (#403) is under that.
   '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'alle-tijden', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
-  // made-up club with two names of its stadium.
+  // made-up club with two names of its stadium. The card Nieuws is on the page of a club that
+  // headlines name (#777); the smoke test gives Testdorp FC six.
+  '/tegenstanders/testdorp-fc': ['nieuws'],
   '/tegenstanders/voorbeeld-united': ['stadion'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],

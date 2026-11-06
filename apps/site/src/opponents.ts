@@ -7,6 +7,7 @@ import {
   findClubBySlug,
   listAllWikipediaPages,
   listClubMatches,
+  listClubNews,
   listClubRecords,
   listStandingsPlaces,
   type PublicClubMatch,
@@ -98,9 +99,11 @@ export const clubPlacesId = 'plek-in-de-competitie'
  * the headings in `OpponentViews.tsx` (a test checks it). The card Wedstrijden is there with a
  * match to show; the cards of the sidebar follow the page (see `ClubPage`): the figures need a
  * played match, the timeline needs `hasTimeline`, Doelpuntenmakers needs `hasClubScorers`, and
- * Stadion needs a stadium. `since` is the first season we have, as on the card.
+ * Stadion needs a stadium, and Nieuws needs a headline that names the club (between the
+ * figures and Stadion). `since` is the first season we have, as on the card.
  */
 export function clubShortcutsOf({
+  hasNews = false,
   hasPlaces = false,
   hasStadium,
   matches,
@@ -108,6 +111,7 @@ export function clubShortcutsOf({
   since,
   upcoming,
 }: {
+  hasNews?: boolean
   hasPlaces?: boolean
   hasStadium: boolean
   matches: readonly PublicClubMatch[]
@@ -130,6 +134,7 @@ export function clubShortcutsOf({
           ...(hasClubScorers(matches) ? [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] : []),
         ]
       : []),
+    ...(hasNews ? [{ href: '#nieuws', label: 'Nieuws' }] : []),
     ...(hasStadium ? [{ href: '#stadion', label: 'Stadion' }] : []),
   ]
 }
@@ -551,6 +556,39 @@ export async function getClubPage(slug: string): Promise<ClubPage | undefined> {
   return known.some((record) => record.slug === slug) ? clubPages(slug) : undefined
 }
 
+/** How many headlines the card "Nieuws over <club>" shows at most. */
+export const clubNewsLimit = 5
+
+/** A headline for the card "Nieuws over <club>": what the news cards show of an item. */
+export type ClubHeadline = Awaited<ReturnType<typeof listClubNews>>[number]
+
+/**
+ * The names under which a headline can name the club, as `item_clubs` has them: the name now,
+ * the other spellings, the names of its own list and the name of every match against it. Each
+ * is given once as written (the database compares without capitals and accents).
+ */
+export function clubNamesOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): string[] {
+  return [
+    ...new Set([
+      page.club.name,
+      ...page.club.otherNames,
+      ...page.names.map((line) => line.name),
+      ...page.matches.map((match) => match.opponent),
+    ]),
+  ]
+}
+
+const clubNews = cacheForKey(period, (slug) => getClubPage(slug).then((page) => page && readClubNews(page)))
+
+/**
+ * The newest headlines that name the club, at most `clubNewsLimit`, newest first (see
+ * `listClubNews`); empty when no headline names it. Cached for five minutes per club, like the
+ * page itself; `page` must be a page that `getClubPage` gave, so the key is a known slug.
+ */
+export async function getClubNews(page: ClubPage): Promise<ClubHeadline[]> {
+  return (await clubNews(page.club.slug)) ?? []
+}
+
 /**
  * The places of a club and ours per season (see `clubPlacesOf`). Our places are the ones of the
  * card "Onze plek door de jaren" (`getFinalPlaces`), so there is no second question for them.
@@ -564,6 +602,10 @@ export async function getClubPlaces(page: ClubPage): Promise<ClubPlace[]> {
 /** Whether a club has that slug, for the sitemap and the visit counter. */
 export async function isClubSlug(slug: string) {
   return (await getClubRecords('all')).some((record) => record.slug === slug)
+}
+
+function readClubNews(page: ClubPage) {
+  return listClubNews(getDatabase().db, { limit: clubNewsLimit, names: clubNamesOf(page), until: new Date() })
 }
 
 const sourcePages = cacheFor(period, () => listAllWikipediaPages(getDatabase().db))

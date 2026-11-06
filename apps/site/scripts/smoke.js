@@ -211,6 +211,41 @@ async function addTestdorpMeetings(database) {
 }
 
 /**
+ * Gives Testdorp FC six headlines in the news, on the first feed of a news source that is
+ * switched on, with a row in `item_clubs` each, so its page has the card "Nieuws over Testdorp
+ * FC" with the newest five of them.
+ */
+async function addTestdorpNews(database) {
+  const { close, pool } = connect(database)
+
+  try {
+    const [[feed]] = await pool.query(
+      "SELECT feeds.id AS feed, feeds.source_id AS source FROM feeds INNER JOIN sources ON sources.id = feeds.source_id WHERE sources.kind = 'news' AND sources.enabled = 1 ORDER BY feeds.id LIMIT 1",
+    )
+
+    assert.ok(feed, 'the seed has a feed of a news source')
+
+    for (let number = 1; number <= 6; number++) {
+      const [{ insertId }] = await pool.query(
+        'INSERT INTO items (feed_id, source_id, `key`, url, title, published_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [
+          feed.feed,
+          feed.source,
+          `smoke-testdorp-${number}`,
+          `https://smoke.test/testdorp-${number}`,
+          `Testdorp FC-kop ${number}`,
+          new Date(Date.now() - number * 60 * 60 * 1000),
+        ],
+      )
+
+      await pool.query('INSERT INTO item_clubs (item_id, club) VALUES (?, ?)', [insertId, 'Testdorp FC'])
+    }
+  } finally {
+    await close()
+  }
+}
+
+/**
  * Checks what the admin sends on this environment, whichever it is: a visitor without a session
  * goes to the login page, and every response under /beheer, a redirect too, keeps search
  * engines and caches away and sends no referrer. Returns the responses of the login pages, so
@@ -1272,6 +1307,7 @@ await withEmptyDatabase((database) =>
     // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
     // slug that no club has is "niet gevonden".
     await addTestdorpMeetings(database)
+    await addTestdorpNews(database)
     await addProefdorpStadiums(database)
     await addProefdorpNames(database)
     const clubPage = await fetch(`${origin}/tegenstanders/testdorp-fc`)
@@ -1279,6 +1315,20 @@ await withEmptyDatabase((database) =>
     assert.equal(clubPage.status, 200)
     assert.match(clubHtml, /<h1[^>]*>Testdorp FC<\/h1>/)
     assert.match(clubHtml, /<h2[^>]*id="onze-uitslagen">/)
+    // The card Nieuws over Testdorp FC: the newest five of the six headlines that name it, as
+    // links, between the figures and the stadium, and the bar links to it.
+    const newsCard = clubHtml.slice(
+      clubHtml.indexOf('aria-labelledby="nieuws"'),
+      clubHtml.indexOf('</section>', clubHtml.indexOf('aria-labelledby="nieuws"')),
+    )
+    assert.match(newsCard, /<h2[^>]*id="nieuws">.*Nieuws over Testdorp FC/s)
+    assert.deepEqual(
+      [...newsCard.matchAll(/href="https:\/\/smoke\.test\/testdorp-(\d)"/g)].map((match) => match[1]),
+      ['1', '2', '3', '4', '5'],
+    )
+    assert.doesNotMatch(newsCard, /<img|<button|Alle nieuws/)
+    assert.match(clubHtml, /id="doelpuntenmakers".*id="nieuws"/s)
+    assert.match(clubHtml, /href="#nieuws"/)
     assert.match(
       clubHtml,
       /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, thuis, uit en in totaal<\/caption>/,

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ClubPage as ClubPageView } from '#src/app/tegenstanders/opponents-pages'
 import { getMatchSeasons } from '#src/matches'
-import { type ClubPage, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
+import { type ClubPage, getClubNews, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 
 import ClubShortcuts from './page'
@@ -15,10 +15,19 @@ vi.mock('#src/matches', async (importOriginal) => ({
 }))
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getClubNews: vi.fn(),
   getClubPage: vi.fn(),
   getClubPlaces: vi.fn(),
   getSourcePages: vi.fn(),
 }))
+
+const headline = {
+  paywalled: false,
+  publishedAt: new Date('2026-10-29T10:00:00Z'),
+  sourceName: 'De Testkrant',
+  title: 'Testclub wint weer',
+  url: 'https://testkrant.test/testclub-wint',
+}
 
 const pages: Record<string, ClubPage> = {
   'beker-united': beker,
@@ -32,6 +41,8 @@ beforeEach(() => {
   vi.setSystemTime(new Date('2026-10-30T13:40:00Z'))
   vi.mocked(getClubPage).mockReset()
   vi.mocked(getClubPage).mockImplementation((slug) => Promise.resolve(pages[slug]))
+  vi.mocked(getClubNews).mockReset()
+  vi.mocked(getClubNews).mockResolvedValue([])
   vi.mocked(getClubPlaces).mockReset()
   vi.mocked(getClubPlaces).mockResolvedValue([])
   vi.mocked(getMatchSeasons).mockReset()
@@ -104,6 +115,25 @@ describe('the bar of the page of a club', () => {
       '#doelpuntenmakers',
       '#stadion',
     ])
+  })
+
+  it('has a link to the card Nieuws only when a headline names the club, between the figures and Stadion', async () => {
+    expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).not.toContain('#nieuws')
+
+    vi.mocked(getClubNews).mockResolvedValue([headline])
+
+    const { html, ids } = await compare('testclub')
+
+    expect(hrefs(html)).toEqual([
+      '#wedstrijden',
+      '#onze-uitslagen',
+      '#resultaten-sinds',
+      '#hoe-vaak-welke-uitslag',
+      '#doelpuntenmakers',
+      '#nieuws',
+      '#stadion',
+    ])
+    expect(ids).toContain('nieuws')
   })
 
   it('has the card Doelpuntenmakers only with five matches: the bar has no link for a club with fewer', async () => {
