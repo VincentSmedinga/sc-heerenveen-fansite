@@ -505,13 +505,18 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 ### De spelers
 
 `/statistieken/spelers` is de eerste subpagina van Statistieken.
-Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
+Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer en naam, zonder link, in een deel per positie.
+Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
+De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
+In de zijkolom staat bovenaan de schakelaar tussen alle wedstrijden en de Eredivisie, want hij verandert alleen de kaarten met doelpunten.
+Daaronder staat de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
 De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste plaatsen van de lijst (`topFiveOf` in `src/matches.ts`), met spelers met evenveel doelpunten op één rij.
 Spelers heeft zelf een rij per speler.
-Op Spelers heeft de kaart het witte vlak, want de lijst is waar de pagina voor bestaat (de eigenschap `surface`); op Statistieken staat hij in de zijkolom op het zachte vlak.
+Beide pagina's hebben de kaart op het zachte vlak in de zijkolom.
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
-Op een telefoon volgt de zijkolom op de hoofdkolom, en de bronvermelding sluit de zijkolom af.
+Op een telefoon volgt de zijkolom op de hoofdkolom, dus de selectie komt eerst, en de bronvermelding sluit de zijkolom af.
+Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
 De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
 De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
 De delen zijn:

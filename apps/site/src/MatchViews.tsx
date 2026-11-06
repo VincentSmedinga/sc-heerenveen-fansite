@@ -68,6 +68,7 @@ import {
 } from './matches'
 import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitStaffName } from './player-name'
+import { isEnglishPage, squadPageName } from './season-squad'
 
 /**
  * What the button for an image of a statistics card puts under the image: the credit of
@@ -925,16 +926,31 @@ export function SourceCredit({
   edited,
   pages,
   season,
+  squad,
 }: {
   edited: boolean
   pages: PublicWikipediaPage[]
   season: string
+  /**
+   * The pages the squad of the season was read from, for the page Spelers, and whether a player
+   * comes from Wikidata, which the credit then names with its licence (CC0).
+   */
+  squad?: undefined | { pages: { readAt: Date; title: string }[]; wikidata: boolean }
 }) {
-  const credited = pages.map((page) => ({
-    href: wikipediaUrl(page.title, page.kind),
-    name: creditName(page.kind, season),
-    readAt: page.readAt,
-  }))
+  const squadPages = squad?.pages ?? []
+  const dutchPages = squadPages.filter((page) => !isEnglishPage(page.title)).length
+  const credited = [
+    ...pages.map((page) => ({
+      href: wikipediaUrl(page.title, page.kind),
+      name: creditName(page.kind, season),
+      readAt: page.readAt,
+    })),
+    ...squadPages.map((page) => ({
+      href: `https://${isEnglishPage(page.title) ? 'en' : 'nl'}.wikipedia.org/wiki/${encodeURI(page.title.replaceAll(' ', '_'))}`,
+      name: squadPageName(page.title, season, dutchPages),
+      readAt: page.readAt,
+    })),
+  ]
   const [first, ...rest] = credited
 
   if (first === undefined) {
@@ -946,11 +962,17 @@ export function SourceCredit({
   return (
     <Card as="div" surface="transparent">
       <WikipediaCredit
+        {...(squadPages.length > 0 ? { data: 'gegevens' } : {})}
         edited={edited}
         pages={[first, ...rest]}
         readAt={formatReadAt(readAt)}
         readAtDateTime={readAt.toISOString()}
       />
+      {squad?.wikidata === true && (
+        <Text appearance="meta">
+          Enkele spelers komen van <Link href="https://www.wikidata.org/">Wikidata</Link> (CC0).
+        </Text>
+      )}
     </Card>
   )
 }
@@ -1164,8 +1186,7 @@ const onePlayerPlace = (scorer: TopScorer): ScorerPlace => ({
  * link to the page Spelers) and on the page Spelers as the whole list. Both have the same
  * heading, anchor and button for an image, so a link to `#doelpuntenmakers` works on both.
  * `playersHref` is the page Spelers of the season the card is about; the page Spelers leaves it
- * out. The card is soft in the sidebar of Statistieken and white on the page Spelers, where the
- * list is the content of the page (`surface`).
+ * out. The card is soft and in the sidebar on both pages.
  */
 export function TopScorersCard({
   competition,
@@ -1173,20 +1194,18 @@ export function TopScorersCard({
   playersHref,
   season,
   seasonOnImage,
-  surface = 'soft',
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
   playersHref?: string | undefined
   season: string
   seasonOnImage?: string | undefined
-  surface?: 'default' | 'soft'
 }) {
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
       shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage)}
-      surface={surface}
+      surface="soft"
     >
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers

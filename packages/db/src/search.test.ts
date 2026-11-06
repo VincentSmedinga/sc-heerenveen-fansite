@@ -2,7 +2,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { findSquadPage, listSquad, searchPublic } from './queries.ts'
+import {
+  findSquadCompleteness,
+  findSquadPage,
+  listSeasonPlayers,
+  listSquad,
+  listSquadPages,
+  searchPublic,
+} from './queries.ts'
 import { adminUsers, articles, feeds, items, persons, players, sources, wikipediaPages } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -400,5 +407,103 @@ describe('findSquadPage', () => {
       title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',
     })
     expect(await findSquadPage(database.db, '2025/26')).toBeUndefined()
+  })
+})
+
+describe('listSeasonPlayers', () => {
+  it('gives every player of the season, also one who left, by shirt number, then surname and name', async () => {
+    await database.db.insert(players).values([
+      { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
+      { name: 'Anton Zonder', position: null, searchTerm: 'Zonder', season: '2026/27', shirtNumber: null },
+      { name: 'Joost van Aken', position: 'verdediger', searchTerm: 'van Aken', season: '2026/27', shirtNumber: 4 },
+      { name: 'Bas Zeven', position: 'aanvaller', searchTerm: 'Zeven', season: '2026/27', shirtNumber: 4 },
+      { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper', season: '2026/27', shirtNumber: 1 },
+      {
+        inSquad: false,
+        leftSquadAt: new Date('2027-01-31T12:00:00Z'),
+        name: 'Vertrokken Speler',
+        position: 'aanvaller',
+        searchTerm: 'Speler',
+        season: '2026/27',
+        shirtNumber: 7,
+      },
+      { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
+    ])
+
+    const found = await listSeasonPlayers(database.db, '2026/27')
+
+    expect(found.map((player) => player.name)).toEqual([
+      'Een Keeper',
+      'Joost van Aken',
+      'Bas Zeven',
+      'Vertrokken Speler',
+      'Zonder Nummer',
+      'Anton Zonder',
+    ])
+    expect(found[0]).toEqual({
+      name: 'Een Keeper',
+      personFamilyName: null,
+      personFamilyNamePrefix: null,
+      personGivenName: null,
+      position: 'doelman',
+      searchTerm: 'Keeper',
+      shirtNumber: 1,
+      source: 'selectie',
+    })
+  })
+
+  it('gives the name kept for the person of a player', async () => {
+    const [{ insertId: person }] = await database.db.insert(persons).values({
+      familyName: 'Aken',
+      familyNamePrefix: 'van',
+      givenName: 'Joost',
+      wikipediaPage: 'Joost van Aken (seizoenslijst)',
+    })
+
+    await database.db.insert(players).values({
+      name: 'Joost van Aken',
+      personId: person,
+      position: 'verdediger',
+      searchTerm: 'van Aken',
+      season: '2026/27',
+      shirtNumber: 4,
+    })
+
+    expect(await listSeasonPlayers(database.db, '2026/27')).toMatchObject([
+      { personFamilyName: 'Aken', personFamilyNamePrefix: 'van', personGivenName: 'Joost' },
+    ])
+  })
+})
+
+describe('findSquadCompleteness', () => {
+  it('gives the level, the number of players and the best source of a season, and nothing for another', async () => {
+    await database.pool.query('DELETE FROM squad_completeness')
+    await database.pool.query(
+      "INSERT INTO squad_completeness (season, probability, level, player_count, best_source, checks, calculated_at) VALUES ('2026/27', 95, 'compleet', 28, 'selectie', '[]', UTC_TIMESTAMP())",
+    )
+
+    expect(await findSquadCompleteness(database.db, '2026/27')).toEqual({
+      bestSource: 'selectie',
+      level: 'compleet',
+      playerCount: 28,
+    })
+    expect(await findSquadCompleteness(database.db, '2025/26')).toBeUndefined()
+  })
+})
+
+describe('listSquadPages', () => {
+  it('gives every page of the squad of the season by title, and not a page of the matches', async () => {
+    const readAt = new Date('2026-10-25T12:05:00Z')
+
+    await database.db.insert(wikipediaPages).values([
+      { kind: 'squad', readAt, season: '2018/19', title: '2018–19 SC Heerenveen season' },
+      { kind: 'squad', readAt, season: '2018/19', title: 'Sc Heerenveen in het seizoen 2018/19 (mannen)' },
+      { kind: 'standings', readAt, season: '2018/19', title: 'Eredivisie 2018/19' },
+    ])
+
+    expect(await listSquadPages(database.db, '2018/19')).toEqual([
+      { readAt, title: '2018–19 SC Heerenveen season' },
+      { readAt, title: 'Sc Heerenveen in het seizoen 2018/19 (mannen)' },
+    ])
   })
 })

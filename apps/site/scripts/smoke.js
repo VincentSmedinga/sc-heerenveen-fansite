@@ -1037,7 +1037,8 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, closedWikipediaCredit)
     assert.doesNotMatch(statisticsHtml, /action=history/)
 
-    // The page Spelers has the card with everybody who scored, which is the card that stood on
+    // The page Spelers has the card Selectie with the squad of the season in the main column,
+    // and the card with everybody who scored in the sidebar, which is the card that stood on
     // the statistics page before it got the top 5. The menu has Statistieken as the item that
     // holds it and Spelers as the current sub-page.
     const playersPage = await fetch(`${origin}/statistieken/spelers`)
@@ -1050,8 +1051,22 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#doelpuntenmakers', '#bijzondere-doelpunten'],
+      ['#selectie', '#doelpuntenmakers', '#bijzondere-doelpunten'],
     )
+    // The made-up squad is whole: the sentence says so, the four positions are parts of the
+    // card in the order of the goal to the front, and the shirt number comes before the name.
+    const squadCard = /<section[^>]*aria-labelledby="selectie">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+    assert.match(squadCard, /^<section class="hf-card" /)
+    assert.match(
+      squadCard.replaceAll(/<[^>]*>/g, ' '),
+      /We kennen \d+ spelers van dit seizoen\. Waarschijnlijk staat iedereen uit de selectie erbij\./,
+    )
+    assert.deepEqual(
+      [...squadCard.matchAll(/<h3[^>]*>(.*?)<\/h3>/g)].map(([, name]) => name),
+      ['Doelmannen', 'Verdedigers', 'Middenvelders', 'Aanvallers'],
+    )
+    assert.match(squadCard, /hf-short-player-number">1<\/span>.*?Brandsma/s)
+    assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('<aside'))
     assert.match(
       playersHtml,
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
@@ -1088,7 +1103,10 @@ await withEmptyDatabase((database) =>
       playersHtml,
       /<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">.*?id="bijzondere-doelpunten"/s,
     )
-    assert.match(playersHtml, /<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">/)
+    assert.match(
+      playersHtml,
+      /<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">/,
+    )
     assert.equal(specialCard.match(/<h[1-6]/g)?.length, 1)
     const facts = factsOf(specialCard)
     assert.deepEqual(

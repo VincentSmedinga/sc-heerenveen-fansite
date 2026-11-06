@@ -2,8 +2,10 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
+import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
 import SeasonPlayersPage, { generateMetadata } from './page'
@@ -13,6 +15,12 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+}))
+
+// The squad is made up too: the page reads it from the database.
+vi.mock('#src/season-squad', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getSeasonSquad: vi.fn(),
 }))
 
 // The afternoon of Friday 23 October 2026 in the Netherlands, in the season 2026/27.
@@ -41,6 +49,8 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getSeasonSquad).mockReset()
+  vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>
     Promise.resolve(season === '2025/26' ? earlier : { ...matchData, season: season ?? '2026/27' }),

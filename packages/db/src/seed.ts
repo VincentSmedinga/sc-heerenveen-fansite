@@ -24,6 +24,7 @@ import {
   persons,
   players,
   sources,
+  squadCompleteness,
   standings,
   wikipediaPages,
 } from './schema.ts'
@@ -861,9 +862,10 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
 }
 
 /**
- * Puts a made-up squad and the page it credits in the database, but only when the current
- * season has no player. The real import replaces it the first time it runs, and a database that
- * already has the real squad is left alone. Returns whether it put them in.
+ * Puts a made-up squad, the chance that it is complete and the page it credits in the
+ * database, but only when the current season has no player. The real import replaces it the
+ * first time it runs, and a database that already has the real squad is left alone. Returns
+ * whether it put them in.
  */
 export async function seedSquad(db: Database, now: Date = new Date()): Promise<boolean> {
   const season = seasonOf(now)
@@ -879,8 +881,25 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
       return false
     }
 
-    await transaction.insert(players).values(madeUpSquad(now))
+    const squad = madeUpSquad(now)
+
+    await transaction.insert(players).values(squad)
     await linkMadeUpGoals(transaction, season)
+
+    // The made-up squad is a whole table of the squad, so the page Spelers says it is complete.
+    // The import works the chance out again the first time it reads the real squad.
+    await transaction
+      .insert(squadCompleteness)
+      .values({
+        bestSource: 'selectie',
+        calculatedAt: now,
+        checks: [],
+        level: 'compleet',
+        playerCount: squad.length,
+        probability: 95,
+        season,
+      })
+      .onDuplicateKeyUpdate({ set: { calculatedAt: now } })
 
     const page = madeUpSquadPage(now)
 

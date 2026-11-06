@@ -4,8 +4,10 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons, topScorersOf } from '#src/matches'
+import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
+import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
 import StatisticsPage from '../page'
@@ -16,6 +18,12 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+}))
+
+// The squad is made up too: the page reads it from the database.
+vi.mock('#src/season-squad', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getSeasonSquad: vi.fn(),
 }))
 
 // The afternoon of Friday 23 October 2026 in the Netherlands.
@@ -66,6 +74,8 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getSeasonSquad).mockReset()
+  vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 })
@@ -77,11 +87,16 @@ afterEach(() => {
 })
 
 describe('the page /statistieken/spelers', () => {
-  it('has one h1, Spelers, with the season picker beside it, and two h2, the cards Doelpuntenmakers and Bijzondere doelpunten, and no h3', async () => {
+  it('has one h1, Spelers, with the season picker beside it, the h2 Selectie with an h3 for each position, and the h2 of the two cards with goals', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Spelers</h1>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="selectie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#selectie">Selectie</a></h2>',
+      '<h3 class="hf-heading-3">Doelmannen</h3>',
+      '<h3 class="hf-heading-3">Verdedigers</h3>',
+      '<h3 class="hf-heading-3">Middenvelders</h3>',
+      '<h3 class="hf-heading-3">Aanvallers</h3>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
@@ -96,10 +111,13 @@ describe('the page /statistieken/spelers', () => {
     expect(html).toMatch(/<section class="hf-card[ a-z-]*" aria-labelledby="doelpuntenmakers">/)
   })
 
-  it('has the card as Statistieken had it before the top 5, but white, with a button for an image', async () => {
+  it('has the card Doelpuntenmakers soft in the sidebar, with a button for an image, and the card Selectie without one', async () => {
     const html = await render()
 
-    expect(html).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">')
+    expect(html).toContain(
+      '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
+    )
+    expect(html).toContain('<section class="hf-card" aria-labelledby="selectie">')
     expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
   })
 
@@ -111,7 +129,7 @@ describe('the page /statistieken/spelers', () => {
     )
   })
 
-  it('has the main column with the white card Doelpuntenmakers and a named sidebar with the soft card Bijzondere doelpunten', async () => {
+  it('has the main column with the white card Selectie and a named sidebar with the soft cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
     const html = await render()
     const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
@@ -119,11 +137,16 @@ describe('the page /statistieken/spelers', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(sidebar).toMatch(/^<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">/)
-    expect(main).toContain('id="doelpuntenmakers"')
+    expect(main).toContain('id="selectie"')
+    expect(main).not.toContain('id="doelpuntenmakers"')
     expect(main).not.toContain('id="bijzondere-doelpunten"')
+    expect(sidebar).not.toContain('id="selectie"')
+    expect(sidebar).toContain('id="doelpuntenmakers"')
     expect(sidebar).toContain('id="bijzondere-doelpunten"')
-    expect(sidebar).not.toContain('id="doelpuntenmakers"')
-    expect(main).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">')
+    expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(sidebar).toContain(
+      '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
+    )
     expect(sidebar).toContain(
       '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="bijzondere-doelpunten">',
     )
@@ -537,12 +560,14 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     )
   })
 
-  it('puts the switch in a plain cell, the first of the main column, before the card it controls', async () => {
+  it('puts the switch first in the sidebar, before the cards it controls, and not in a card or in the main column', async () => {
     const html = await render()
+    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
 
-    expect(html).toMatch(
-      /<div class="hf-page-cells"><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small"/,
+    expect(sidebar).toMatch(
+      /^<aside class="hf-page-sidebar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small"/,
     )
+    expect(html.indexOf('Welke wedstrijden')).toBeGreaterThan(html.indexOf('id="selectie"'))
     expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
     expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
   })
@@ -579,5 +604,150 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
       await expect(renderWith({ competitie })).rejects.toHaveProperty('digest', expect.stringContaining('404'))
     }
+  })
+})
+
+describe('the card Selectie on /statistieken/spelers', () => {
+  const card = (html: string) =>
+    html.match(/<section class="hf-card" aria-labelledby="selectie">.*?<\/section>/s)?.[0] ?? ''
+
+  /** The lines of the card: the shirt number (empty when none) and the name. */
+  const linesOf = (html: string) =>
+    [...card(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => [
+      /player-number">(\d*)</.exec(line ?? '')?.[1] ?? '',
+      plain(/hf-short-match-opponent">(.*)<\/span><\/div>/s.exec(line ?? '')?.[1]),
+    ])
+
+  const withSquad = (overrides: Partial<typeof squadData>) =>
+    vi.mocked(getSeasonSquad).mockResolvedValue({ ...squadData, ...overrides })
+
+  const sentenceOf = (html: string) => plain(card(html).match(/<\/h2><p>(.*?)<\/p>/s)?.[1])
+
+  it('is the first card, before the sidebar, with the sentence under the heading and above the parts', async () => {
+    const html = await render()
+
+    expect(html.indexOf('id="selectie"')).toBeLessThan(html.indexOf('<aside'))
+    expect(card(html).indexOf('<p>')).toBeLessThan(card(html).indexOf('<h3'))
+    expect(sentenceOf(html)).toBe(
+      'We kennen 5 spelers van dit seizoen. Waarschijnlijk staat iedereen uit de selectie erbij.',
+    )
+  })
+
+  it('has a part for each position from the goal to the front, with the shirt number and the name', async () => {
+    const html = await render()
+
+    expect(
+      plain(
+        card(html)
+          .match(/<h3[^>]*>.*?<\/h3>/gs)
+          ?.join('|'),
+      ),
+    ).toBe('Doelmannen|Verdedigers|Middenvelders|Aanvallers')
+    expect(linesOf(html)).toEqual([
+      ['1', 'Testkeeper Een'],
+      ['4', 'Testspeler van Twee'],
+      ['8', 'Proefman Drie'],
+      ['9', 'Testaanvaller Vier'],
+      ['', 'Testreserve Vijf'],
+    ])
+    expect(card(html).replace(/<h2.*?<\/h2>/s, '')).not.toMatch(/<a |<img|button/)
+  })
+
+  it('has a sentence for each level of the chance, and the other sentence for a table of who played', async () => {
+    const sentences = async (level: string, bestSource = 'selectie') => {
+      withSquad({ completeness: { bestSource, level, playerCount: 22 } as never })
+
+      return sentenceOf(await render())
+    }
+
+    expect(await sentences('bijna')).toBe('We kennen 22 spelers van dit seizoen. Er ontbreken waarschijnlijk een paar.')
+    expect(await sentences('deels')).toBe(
+      'We kennen 22 spelers van dit seizoen. Dat zijn waarschijnlijk niet alle spelers.',
+    )
+    expect(await sentences('deels', 'statistieken')).toBe(
+      'We kennen 22 spelers van dit seizoen: wie speelde. Wie op de bank bleef, ontbreekt waarschijnlijk.',
+    )
+    expect(await sentences('weinig', 'transfers')).toBe(
+      'We kennen 22 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.',
+    )
+    expect(await sentences('onbekend')).toBe('Van dit seizoen kennen we de selectie niet.')
+  })
+
+  it('has one list without headings of parts for a season in which nobody has a position', async () => {
+    withSquad({
+      completeness: { bestSource: 'statistieken', level: 'deels', playerCount: 3 },
+      players: squadData.players.slice(0, 3).map((player) => ({ ...player, position: null, shirtNumber: null })),
+    })
+
+    const html = await render()
+
+    expect(card(html).match(/<h3/g)).toBeNull()
+    expect(card(html).match(/<ul/g)).toHaveLength(1)
+    expect(linesOf(html).map(([, name]) => name)).toEqual(['Testkeeper Een', 'Testspeler van Twee', 'Proefman Drie'])
+    expect(card(html)).not.toContain('hf-short-player-number')
+  })
+
+  it('puts the players without a position, among others who have one, in a last part', async () => {
+    withSquad({
+      players: [...squadData.players.slice(0, 2), { ...squadData.players[2]!, position: null, shirtNumber: null }],
+    })
+
+    const html = await render()
+
+    expect(
+      plain(
+        card(html)
+          .match(/<h3[^>]*>.*?<\/h3>/gs)
+          ?.join('|'),
+      ),
+    ).toBe('Doelmannen|Verdedigers|Positie onbekend')
+  })
+
+  it('shows the heading and the sentence and no part for a season with no squad', async () => {
+    withSquad({ completeness: undefined, pages: [], players: [] })
+
+    const html = await render()
+
+    expect(sentenceOf(html)).toBe('Van dit seizoen kennen we de selectie niet.')
+    expect(card(html)).not.toMatch(/<h3|<ul|<li/)
+  })
+
+  it('shows no players when the chance is unknown, although some are stored', async () => {
+    withSquad({ completeness: { bestSource: 'doelpunten', level: 'onbekend', playerCount: 5 } })
+
+    expect(card(await render())).not.toMatch(/<h3|<ul|<li/)
+  })
+
+  it('credits the pages of the squad in the credit that ends the sidebar, with the English one named as such', async () => {
+    withSquad({
+      pages: [
+        { readAt: new Date('2026-10-23T11:30:00Z'), title: '2018–19 SC Heerenveen season' },
+        { readAt: new Date('2026-10-23T11:30:00Z'), title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' },
+      ],
+    })
+
+    const html = await render()
+    const credit = html.match(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s)?.[0] ?? ''
+
+    expect(credit).toContain('>Selectie 2026/27</a>')
+    expect(credit).toContain(
+      '<a href="https://en.wikipedia.org/wiki/2018%E2%80%9319_SC_Heerenveen_season">Selectie 2026/27 (Engelse Wikipedia)</a>',
+    )
+    expect(html.indexOf('hf-wikipedia-credit')).toBeGreaterThan(html.indexOf('id="bijzondere-doelpunten"'))
+  })
+
+  it('names Wikidata with its licence when a player comes from it, and not otherwise', async () => {
+    expect(await render()).not.toContain('Wikidata')
+
+    withSquad({ players: [{ ...squadData.players[0]!, source: 'wikidata' }, ...squadData.players.slice(1)] })
+
+    expect(await render()).toContain('Enkele spelers komen van <a href="https://www.wikidata.org/">Wikidata</a> (CC0).')
+  })
+
+  it('shows the error page when the squad cannot be read', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getSeasonSquad).mockRejectedValue(new Error('no database'))
+
+    expect(await render()).toContain('Er ging iets mis')
   })
 })

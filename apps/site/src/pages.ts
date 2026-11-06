@@ -29,7 +29,7 @@ export const pages = [
   },
   {
     description:
-      'Alle spelers van sc Heerenveen 1 die dit seizoen scoorden, met hun doelpunten en de bron erbij: de Nederlandse Wikipedia.',
+      'De selectie van sc Heerenveen 1 dit seizoen en alle spelers die scoorden, met hun doelpunten en de bron erbij: Wikipedia.',
     path: '/statistieken/spelers',
   },
   {
