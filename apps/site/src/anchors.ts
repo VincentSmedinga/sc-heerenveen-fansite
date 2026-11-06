@@ -36,10 +36,10 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'hoe-de-wedstrijden-verlopen',
     'uitersten',
   ],
-  // The card Doelpuntenmakers is on /statistieken as the top 5 and here as the whole list, with
-  // the same anchor (#487). The old anchor topscorers comes along. The card Bijzondere
-  // doelpunten (#403) is under it.
-  '/statistieken/spelers': ['doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
+  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /statistieken as
+  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
+  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
+  '/statistieken/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium.
   '/statistieken/tegenstanders/voorbeeld-united': ['stadion'],

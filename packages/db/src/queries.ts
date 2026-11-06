@@ -23,6 +23,7 @@ import {
   players,
   playerSeasonStats,
   sources,
+  squadCompleteness,
   staff,
   standings,
   wikipediaPages,
@@ -62,6 +63,8 @@ export type PublicPlayerStats = Awaited<ReturnType<typeof listSeasonPlayerStats>
 export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
 
 export type PublicSearchHit = Awaited<ReturnType<typeof searchPublic>>['hits'][number]
+
+export type PublicSeasonPlayer = Awaited<ReturnType<typeof listSeasonPlayers>>[number]
 
 export type PublicSeasonWikipediaPage = Awaited<ReturnType<typeof listAllWikipediaPages>>[number]
 
@@ -192,6 +195,25 @@ export async function findPublishedArticle(db: Database, slug: string, until: Da
   return row !== undefined && row.publishedAt !== null && row.slug === slug
     ? { ...row, publishedAt: row.publishedAt }
     : undefined
+}
+
+/**
+ * The chance that the list of players of a season is the whole squad, such as `2026/27`: the
+ * level, the number of players it was worked out for and the source it rests on. It gives
+ * nothing for a season without players, which the site reads as `onbekend`. The probability
+ * and the checks stay internal.
+ */
+export async function findSquadCompleteness(db: Database, season: string) {
+  const [row] = await db
+    .select({
+      bestSource: squadCompleteness.bestSource,
+      level: squadCompleteness.level,
+      playerCount: squadCompleteness.playerCount,
+    })
+    .from(squadCompleteness)
+    .where(eq(squadCompleteness.season, season))
+
+  return row
 }
 
 /**
@@ -627,6 +649,39 @@ export async function listSeasonMatches(db: Database, season: string) {
 }
 
 /**
+ * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
+ * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
+ * `personFamilyName`, null while the importer has not read the article), the position (null
+ * when the list the player comes from gives none), the shirt number (null when it gives none)
+ * and the source of the row. Unlike `listSquad`, this also gives a player who left the squad:
+ * he belongs to the season. The order is the shirt number, players without one last, then the
+ * surname the search page looks for (`searchTerm`, so `van Aken` stands under the V) and the
+ * name.
+ */
+export function listSeasonPlayers(db: Database, season: string) {
+  return db
+    .select({
+      name: players.name,
+      personFamilyName: persons.familyName,
+      personFamilyNamePrefix: persons.familyNamePrefix,
+      personGivenName: persons.givenName,
+      position: players.position,
+      searchTerm: players.searchTerm,
+      shirtNumber: players.shirtNumber,
+      source: players.source,
+    })
+    .from(players)
+    .leftJoin(persons, eq(players.personId, persons.id))
+    .where(eq(players.season, season))
+    .orderBy(
+      asc(sql`${players.shirtNumber} is null`),
+      asc(players.shirtNumber),
+      asc(players.searchTerm),
+      asc(players.name),
+    )
+}
+
+/**
  * The numbers of the players in a season, such as `2026/27`: one row per player and
  * competition, with the appearances (also as a substitute), goals and assists the squad table
  * of the Dutch Wikipedia gives. The rows come in the order of the player's name and then the
@@ -705,6 +760,19 @@ export function listSquad(db: Database, season: string) {
     .leftJoin(persons, eq(players.personId, persons.id))
     .where(and(eq(players.season, season), eq(players.inSquad, true)))
     .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(players.name))
+}
+
+/**
+ * Every Wikipedia page a squad of a season was read from, such as `2018/19`: a season can have
+ * several (a table and a list of transfers, or the English page). The title, the moment it was
+ * last read, in the order of the title. The `Last-Modified` of a page stays internal.
+ */
+export function listSquadPages(db: Database, season: string) {
+  return db
+    .select({ readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .from(wikipediaPages)
+    .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
+    .orderBy(asc(wikipediaPages.title))
 }
 
 /**

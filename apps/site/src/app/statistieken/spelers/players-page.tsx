@@ -7,10 +7,13 @@ import { notFound } from 'next/navigation'
 import { parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
 import { SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
+import { getSeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
+import { SeasonSquadCard } from '#src/SeasonSquadCard'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { SpecialGoalsCard } from '#src/SpecialGoalsCard'
 import { withBranch } from '#src/title'
@@ -36,7 +39,7 @@ export async function playersMetadata(season: string): Promise<Metadata> {
   return season === current
     ? pageMetadata(playersPath, 'Spelers')
     : seasonPageMetadata(playersPath, seasonAddress(playersPath, season, current), {
-        description: `Alle spelers van sc Heerenveen 1 die scoorden in het seizoen ${season}, met hun doelpunten en de bron erbij: de Nederlandse Wikipedia.`,
+        description: `De selectie van sc Heerenveen 1 in het seizoen ${season} en alle spelers die scoorden, met hun doelpunten en de bron erbij: Wikipedia.`,
         title: `Spelers ${season}`,
       })
 }
@@ -44,14 +47,17 @@ export async function playersMetadata(season: string): Promise<Metadata> {
 /**
  * The page Spelers of a season: `/statistieken/spelers` for the current season and
  * `/statistieken/spelers/2025-26` for another, which is what the two routes render. It has the
- * title row and the season picker of Statistieken, and the card Doelpuntenmakers with every
- * player who scored, which is the card that stood on Statistieken before it got the top 5. The
- * card is white: the list is what the page is for. The card Bijzondere doelpunten (hattricks,
- * penalties and own goals) is a record on the side, so it is soft and in the sidebar, which
- * follows the main column on a phone and ends with the credit, as on Statistieken. A season
- * that is over has the cards put the season on their image. A season that has no matches in the
- * database is the page "niet gevonden". The cards count all the matches or, with
- * `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so does the switch.
+ * title row and the season picker of Statistieken, and the card Selectie with every player of
+ * the season in parts by position and, under the heading, how complete that list is. That card
+ * is white: the squad is what the page is for. The sidebar follows the main column on a phone,
+ * so the squad comes first there. It starts with the switch between all matches and the
+ * Eredivisie, because the switch changes only the cards with goals, and then has the card
+ * Doelpuntenmakers (every player who scored) and the card Bijzondere doelpunten (hattricks,
+ * penalties and own goals), both soft, and ends with the credit, as on Statistieken. A season
+ * that is over has the cards with goals put the season on their image. A season that has no
+ * matches in the database is the page "niet gevonden". The cards with goals count all the
+ * matches or, with `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so
+ * does the switch.
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
   const { competitie } = await searchParams
@@ -66,8 +72,15 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
     return <ServerError retryHref={seasonAddress(playersPath, season, seasonOf(new Date()))} />
   }
 
+  const squad = await loadSquad(season)
+
+  if (squad === undefined) {
+    return <ServerError retryHref={seasonAddress(playersPath, season, seasonOf(new Date()))} />
+  }
+
   const { data, seasons } = loaded
   const current = season === seasonOf(new Date())
+  const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
 
   return (
     <>
@@ -84,6 +97,9 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           </Page.Title>
         }
       >
+        <SeasonSquadCard squad={squad} />
+      </Page.Main>
+      <Page.Sidebar aria-label="Meer cijfers over de spelers">
         <CompetitionSwitch
           address={seasonAddress(playersPath, season, seasonOf(new Date()))}
           competition={competition}
@@ -95,19 +111,27 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           matches={data.matches}
           season={data.season}
           seasonOnImage={current ? undefined : season}
-          surface="default"
         />
-      </Page.Main>
-      <Page.Sidebar aria-label="Meer cijfers over de spelers">
         <SpecialGoalsCard
           competition={competition}
           matches={data.matches}
           seasonOnImage={current ? undefined : season}
         />
-        {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
+        {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} squad={squadSource} />
         )}
       </Page.Sidebar>
     </>
   )
+}
+
+/** The squad of the season, or undefined when it could not be read (the error is logged). */
+async function loadSquad(season: string) {
+  try {
+    return await getSeasonSquad(season)
+  } catch (error) {
+    console.error(`Could not read the squad for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }

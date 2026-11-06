@@ -944,7 +944,21 @@ describe('the made-up squad', () => {
 
   beforeEach(async () => {
     await database.pool.query('DELETE FROM players')
+    await database.pool.query('DELETE FROM squad_completeness')
     await database.pool.query('DELETE FROM wikipedia_pages')
+  })
+
+  it('says that the squad is complete, with the number of players it has', async () => {
+    await seedSquad(database.db, now)
+
+    expect(
+      await database.pool.query(
+        'SELECT season, level, player_count AS count, best_source AS source FROM squad_completeness',
+      ),
+    ).toEqual([
+      [{ count: madeUpSquad(now).length, level: 'compleet', season: '2026/27', source: 'selectie' }],
+      expect.anything(),
+    ])
   })
 
   it('puts the squad in the current season, once, with the page it credits', async () => {

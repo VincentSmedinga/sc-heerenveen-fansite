@@ -30,7 +30,7 @@ async function rows(sql: string) {
 }
 
 describe('the migration 0043_add_squad_completeness', () => {
-  it('adds an empty table next to the seeded players, and does nothing the second time', async () => {
+  it('adds a table next to the seeded players, and does nothing the second time', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
     expect(await seedSquad(database.db)).toBe(true)
 
@@ -38,7 +38,8 @@ describe('the migration 0043_add_squad_completeness', () => {
 
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    expect(await rows('SELECT COUNT(*) AS n FROM squad_completeness')).toEqual([{ n: 0 }])
+    // The only row is the chance of the made-up squad, which the seed puts in with the players.
+    expect(await rows('SELECT COUNT(*) AS n FROM squad_completeness')).toEqual([{ n: 1 }])
     expect(await rows('SELECT COUNT(*) AS n FROM players')).toEqual(before)
   })
 

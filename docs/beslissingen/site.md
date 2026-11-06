@@ -1864,6 +1864,7 @@
   Bijzondere doelpunten is een record en een bijzaak, dus de zijkolom en het zachte vlak.
 - **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
 - **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
+- **Later:** zie _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (6 november 2026): de kaart Doelpuntenmakers heeft op Spelers weer het zachte vlak, in de zijkolom, en de kaart Selectie is de witte inhoud van de pagina.
 
 ## Het hoofdmenu neemt het seizoen van de pagina mee
 
@@ -2565,3 +2566,35 @@
 - **Alternatieven:** de code in de importer laten en in de site kopiëren (verworpen: ze lopen uit elkaar).
   Alleen de oude en de nieuwe waarde tonen (verworpen: de beheerder moet raden hoe oud het is en waar hij het controleert).
   De regel `old_value` en `new_value` tonen (verworpen: Engels, en een lange regel op een telefoon).
+
+## Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom
+
+- **Datum:** 6 november 2026
+- **Besluit:** de kaart Selectie is de hoofdkaart van Spelers, op het witte vlak, met de zin over de volledigheid van het seizoen (#765, dat #747 overneemt).
+  De kaart Doelpuntenmakers gaat naar de zijkolom, op het zachte vlak, met Bijzondere doelpunten en de bronvermelding.
+  De schakelaar voor de competitie gaat mee naar de zijkolom.
+  De selectie toont het rugnummer en de naam, zonder link, en ook spelers die de selectie verlieten.
+  - **De kaart:** `SeasonSquadCard` in `src/SeasonSquadCard.tsx` heeft een kop van niveau 2 met het anker `#selectie`, de zin, en een kop van niveau 3 en een lijst per positie: Doelmannen, Verdedigers, Middenvelders en Aanvallers.
+    Een positie zonder spelers blijft weg.
+    Een speler zonder positie, tussen spelers mét positie, staat in een laatste deel "Positie onbekend".
+    Heeft geen enkele speler van het seizoen een positie (de tabellen tot en met 2005/06), dan is er één lijst zonder kopjes.
+    De regel is `ShortPlayer` van het designsysteem: het rugnummer en de naam, met de klassen van `ShortMatch`.
+  - **De volgorde:** op rugnummer, spelers zonder rugnummer achteraan, dan op de zoekterm (de achternaam, dus `van Aken` staat onder de V) en de naam.
+    De volgorde komt uit de query `listSeasonPlayers` in `packages/db`; die geeft, anders dan `listSquad`, ook spelers die de selectie verlieten.
+  - **De zin:** uit `squad_completeness` (de teksten van #747) onder de kop, zonder percentage.
+    Bij `onbekend` en bij een seizoen zonder rij staat alleen de kop en de zin, ook als er spelers zijn opgeslagen.
+    Een seizoen met alleen `statistieken` zegt dat wie op de bank bleef waarschijnlijk ontbreekt.
+  - **De bronvermelding:** `SourceCredit` noemt ook de pagina's van de selectie (`wikipedia_pages` met de soort `squad`), de Engelse met "(Engelse Wikipedia)", en Wikidata met de licentie CC0 als een speler daarvandaan komt.
+  - **De volgorde in de bron:** de kaart Selectie staat vóór de zijkolom, dus op een telefoon komt de selectie eerst.
+    Er is geen `order` in de CSS.
+    De schakelaar staat bovenaan de zijkolom, boven de kaarten die hij verandert.
+- **Waarom:** de projecteigenaar vroeg om de selectie als hoofdkaart en de doelpuntenmakers in de zijkolom op blauw.
+  De zin hoort bij de lijst waarover hij gaat.
+  De schakelaar verandert alleen de kaarten met doelpunten.
+  Een speler die vertrok, hoort bij het seizoen.
+  Een naam zonder link vraagt geen verzoek en laat de bezoeker niet de site verlaten.
+- **Alternatieven:** de schakelaar boven de selectie laten staan (hij lijkt dan de selectie te sturen).
+  Alleen spelers die nu in de selectie staan (een seizoen mist dan wie in de winter vertrok).
+  De naam als link naar Wikipedia (kan later).
+  De zin onderaan de kaart (de bezoeker leest de lijst eerst zonder de kanttekening).
+- **Later:** vult _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026) aan: de ranglijst is niet meer de inhoud van de pagina.
