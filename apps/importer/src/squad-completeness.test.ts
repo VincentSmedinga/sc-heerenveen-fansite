@@ -52,6 +52,26 @@ describe('squadCompleteness', () => {
     expect(result.checks.find((check) => check.name === 'scorers')?.outcome).toBe('passed')
   })
 
+  it('finds scorers with a person in a list without persons, by their names, up to the ceiling of the source', () => {
+    const list = players(30).map((player) => ({ ...player, personId: null }))
+    const result = squadCompleteness(
+      season({ players: list, playersPerSource: { engels: 30 }, scorers: scorersOf(players(30), 12) }),
+    )
+
+    expect(result.checks.find((check) => check.name === 'scorers')?.outcome).toBe('passed')
+    expect(result.probability).toBe(sourceCeilings.engels)
+    expect(result.level).toBe('bijna')
+  })
+
+  it('still fails for a scorer with a person who is in the list by neither person nor name', () => {
+    const list = players(30).map((player) => ({ ...player, personId: null }))
+    const scorers = [...scorersOf(players(30), 12), { goals: 1, name: 'Niet Erbij', personId: 999 }]
+    const result = squadCompleteness(season({ players: list, playersPerSource: { engels: 30 }, scorers }))
+
+    expect(result.checks.find((check) => check.name === 'scorers')?.outcome).toBe('failed')
+    expect(result.probability).toBeLessThan(55)
+  })
+
   it('is at most partly complete for a table of who played with too few matches', () => {
     const result = squadCompleteness(
       season({ matchesTotal: minimumMatches - 1, playersPerSource: { statistieken: 28 } }),

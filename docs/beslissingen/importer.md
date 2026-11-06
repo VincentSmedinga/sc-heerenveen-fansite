@@ -2469,3 +2469,15 @@
 - **Waarom:** de regel staat op één plek met tests, het getal is overal gelijk, en het is te loggen en te controleren.
   De som van de tabel is alleen bekend tijdens het lezen, dus de uitkomst en dat bewijs worden samen bewaard.
 - **Alternatieven:** rekenen op de pagina (de regel zit dan in de site, de bronnen en de doelpunten moeten bij elk verzoek mee, en de som is dan weg).
+
+## De controle op de doelpuntenmakers valt terug op de naam
+
+- **Datum:** 6 november 2026
+- **Besluit:** een doelpuntenmaker telt als gevonden als zijn persoon in de lijst staat of als zijn naam (`nameKey`, zonder accenten en hoofdletters) erin staat (#763).
+  De controle geeft zo nooit minder dan voorheen.
+- **Waarom:** de spelers van de Engelse Wikipedia hebben geen `person_id` (#743), terwijl de doelpunten van de Nederlandse wedstrijdpagina's er wel een hebben.
+  Zo telde elke doelpuntenmaker als gemist, en kregen 2018/19, 2019/20, 2020/21, 2021/22 en 2024/25 de kans 5% bij 30 tot 32 spelers.
+  Een Engelse selectie wordt nu hoogstens `bijna`, het plafond van 70.
+- **Alternatieven:** de personen van de Engelse spelers opzoeken (verworpen: #743 koos bewust voor spelers zonder pagina).
+  Het plafond van `engels` verhogen (een ander besluit, niet dit probleem).
+- **Later:** dit vervangt een regel van _De volledigheid van een selectie is een kans die rust op de bron, met een plafond per bron_ (#745), zoals `docs/volledigheid-selectie.md` hem noemde: de naam gold alleen voor een doelpuntenmaker zonder persoon.

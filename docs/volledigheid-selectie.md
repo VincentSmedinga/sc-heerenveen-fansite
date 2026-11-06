@@ -37,11 +37,13 @@ Een bron met meer spelers komt nooit boven zijn plafond.
 | --------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | `size`    | minder dan 20 spelers                                                                                                | hoogstens 45                                                |
 |           | minder dan 15 spelers                                                                                                | hoogstens 20                                                |
-| `scorers` | een doelpuntenmaker van ons uit `match_goals` staat niet in de lijst (op persoon, anders op naam zonder accenten)    | hoogstens 50, naar rato van het aandeel dat er wel in staat |
+| `scorers` | een doelpuntenmaker van ons uit `match_goals` staat niet in de lijst (op persoon of op naam zonder accenten)         | hoogstens 50, naar rato van het aandeel dat er wel in staat |
 | `matches` | alleen bij de bron `statistieken`: de wedstrijden van de tabel tellen op tot minder dan 11 maal 34                   | hoogstens 45                                                |
 | `goals`   | de doelpunten van de tabel tellen op tot minder dan de doelpunten van ons in `match_goals` (zonder eigen doelpunten) | hoogstens 45                                                |
 
 Eén ontbrekende doelpuntenmaker brengt de kans dus onder `bijna`.
+De naam is de terugval, ook voor een doelpuntenmaker met een persoon: de Engelse selecties hebben geen personen (#743), dus alleen de naam kan hen vinden.
+Een Engelse selectie wordt daarom hoogstens `bijna`, het plafond van 70.
 `scorers` en `goals` kunnen niet draaien in een seizoen zonder doelpunten in de database.
 `matches` en `goals` kunnen niet draaien als de tabel geen wedstrijden of doelpunten geeft.
 
