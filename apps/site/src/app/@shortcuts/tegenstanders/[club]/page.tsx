@@ -4,7 +4,7 @@ import type { SearchParams } from '#src/season-page'
 
 import { competitionParam, parseCompetition } from '#src/competition'
 import { getMatchSeasons } from '#src/matches'
-import { clubShortcutsOf, getClubPage, meetingsOf, stadiumViewsOf, upcomingOf } from '#src/opponents'
+import { clubShortcutsOf, getClubPage, getClubPlaces, meetingsOf, stadiumViewsOf, upcomingOf } from '#src/opponents'
 
 // Render on each request, like the page it belongs to, so the build never reads the database.
 export const dynamic = 'force-dynamic'
@@ -41,6 +41,7 @@ export default async function ClubShortcuts({
     const { matches } = page
 
     items = clubShortcutsOf({
+      hasPlaces: (await getClubPlaces(page)).length > 0,
       hasStadium: stadiumViewsOf(page.stadiums, matches).length > 0,
       matches,
       played: meetingsOf(matches, competition).length,

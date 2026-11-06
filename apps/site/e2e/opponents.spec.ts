@@ -44,6 +44,38 @@ for (const choice of ['', '?competitie=eredivisie']) {
   })
 }
 
+/** The card "De plek van <club> en de onze" of Testdorp FC, with its places per season. */
+const placesCard = (page: Page) => page.getByRole('region', { name: 'De plek van Testdorp FC en de onze' })
+
+for (const choice of ['', '?competitie=eredivisie']) {
+  test(`the page of a club has the places of the club and ours per season${choice === '' ? '' : ', the same for the Eredivisie'}`, async ({
+    page,
+  }) => {
+    await page.goto(`/tegenstanders/testdorp-fc${choice}`)
+
+    const card = placesCard(page)
+    const table = card.getByRole('table', {
+      name: 'De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen',
+    })
+
+    await expect(card.getByRole('heading', { level: 2 })).toHaveText('De plek van Testdorp FC en de onze')
+    await expect(table.getByRole('columnheader')).toHaveText(['Seizoen', 'Onze plek', 'Hun plek'])
+    expect(await table.getByRole('rowheader').count()).toBeGreaterThanOrEqual(2)
+    await expect(card.getByText('Alleen de Eredivisie')).toBeVisible()
+    // The bar "Op deze pagina" links to it.
+    await expect(
+      page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link', { name: 'Plek in de competitie' }),
+    ).toHaveAttribute('href', '#plek-in-de-competitie')
+  })
+}
+
+test('a club that was never in the table with us has no card with the places', async ({ page }) => {
+  await page.goto('/tegenstanders/voorbeeld-united')
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Voorbeeld United')
+  await expect(placesCard(page)).toHaveCount(0)
+})
+
 /** The names of the clubs in the list, from the top. */
 const clubNames = (page: Page) => list(page).locator('tbody th').allInnerTexts()
 

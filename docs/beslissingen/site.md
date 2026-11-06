@@ -2864,3 +2864,21 @@
 - **Waarom:** op een wedstrijddag komt de bezoeker vooral voor de uitslag of het programma, en het forum is een link naar buiten.
 - **Alternatieven:** het forum bovenaan laten (de keuze van 1 november 2026).
 - **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) dat zegt dat het forum bovenaan staat.
+
+## De plek van de club en de onze staan in een tabel op de pagina van de club
+
+- **Datum:** 6 november 2026
+- **Besluit:** de pagina van een club krijgt de kaart "De plek van <club> en de onze": een tabel met per seizoen onze eindplek en die van de club, voor de seizoenen waarin we allebei in de Eredivisie speelden, de nieuwste eerst (#779).
+  De kaart staat in de zijkolom na Hoe vaak welke uitslag, op het zachte vlak, en heeft een item "Plek in de competitie" in de balk "Op deze pagina".
+  - **Onze plek:** uit `getFinalPlaces` (#776), dus geen tweede vraag naar onze rij.
+    Het lopende seizoen telt niet mee: zijn stand is niet af en de kaart toont eindplekken.
+  - **De plek van de club:** `listStandingsPlaces` geeft de plek van elke club in elk seizoen, in één vraag die vijf minuten wordt bewaard.
+    De koppeling met de club loopt via de namen: de naam van de club, de andere namen (`club_names`), de namen van zijn eigen lijst (`club_name_periods`) en de naam van elke wedstrijd tegen hem, allemaal vergeleken zonder hoofdletters, accenten en leestekens (`normaliseClubName`).
+    Een seizoen onder een oude naam telt dus mee, en "P.E.C. Zwolle" is "PEC Zwolle".
+  - **Geen kaart:** zonder seizoen waarin allebei in de stand staan is er geen kaart en geen item in de balk.
+  - **De schakelaar:** de kaart negeert hem en zegt het met de laatste regel "Alleen de Eredivisie".
+  - **Toegankelijkheid:** een tabel met bijschrift dat de club noemt, kolomkoppen met `scope` en een rijkop per seizoen; geen grafiek.
+- **Waarom:** wie een club bekijkt, wil weten hoe de club het deed in de jaren dat we elkaar troffen, en een tabel is genoeg voor een paar tientallen seizoenen.
+  De namen van de wedstrijden erbij nemen vangt een naam die in de stand anders is geschreven dan in `club_names`: de importer legt de namen in de stand niet vast aan een club.
+- **Alternatieven:** een grafiek met twee lijnen (meer ontwerp, weinig extra); een rij onder Verloop sinds 1990; het lopende seizoen met "nu" erbij (zijn stand is nog niet af).
+- **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de vraag die `finalPlacesOf` voor de club van de pagina kon stellen, wordt hier alleen voor onze eigen plek gebruikt; de plek van de club komt uit `listStandingsPlaces`.

@@ -856,6 +856,20 @@ export async function listStaffInSeason(db: Database, role: StaffRole, season: s
   return (await staffOfRole(db, role)).filter((member) => servedInSeason(member, season))
 }
 
+/**
+ * The place of every club in the league table of every season, the oldest season first and
+ * within a season from the top: the season, the club as the table writes it and the place. The
+ * page of a club reads its own place from it (the names of a club are tied to it by
+ * `club_names` and `club_name_periods`, which the caller does), next to ours from
+ * `listClubStandings`. A season without a table gives no rows.
+ */
+export function listStandingsPlaces(db: Database) {
+  return db
+    .select({ club: standings.club, position: standings.position, season: standings.season })
+    .from(standings)
+    .orderBy(asc(standings.season), asc(standings.position))
+}
+
 /** The seasons that have a league table, such as `2026/27`, the oldest first. */
 export async function listStandingsSeasons(db: Database) {
   const rows = await db.selectDistinct({ season: standings.season }).from(standings).orderBy(asc(standings.season))

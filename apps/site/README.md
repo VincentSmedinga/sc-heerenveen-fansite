@@ -608,6 +608,9 @@ Ze heeft zes delen:
   Onder de tabellen van de uitslagen staat een tabel met de competities van de getelde wedstrijden en hun aantal (`competitionCounts`), met de meeste wedstrijden bovenaan en bij gelijk aantal in de volgorde van de site; de schakelaar bepaalt de rijen.
   Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "Gebaseerd op", zonder "sinds" en zonder "in de Eredivisie".
   Een club zonder gespeelde wedstrijd krijgt de kaart niet.
+- De kaart "De plek van … en de onze" op het zachte vlak, onder "Hoe vaak welke uitslag" (`ClubPlacesCard` in `src/OpponentViews.tsx`): een tabel met per seizoen waarin we allebei in de Eredivisie speelden onze eindplek en die van de club, de nieuwste eerst.
+  Onze plek komt uit `getFinalPlaces`, die van de club uit `listStandingsPlaces`, gekoppeld via de namen van de club (`clubKeysOf` en `clubPlacesOf` in `src/opponents.ts`), dus ook onder een oude naam.
+  Het lopende seizoen telt niet mee, de kaart volgt de schakelaar niet en eindigt met "Alleen de Eredivisie"; zonder gemeenschappelijk seizoen is er geen kaart.
 - De kaart "Doelpuntenmakers tegen …" op het zachte vlak, met de afbeeldingsknop, onder "Hoe vaak welke uitslag" en boven het stadion (`ClubTopScorersCard` in `src/OpponentViews.tsx`).
   Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` (spelers met evenveel doelpunten delen een rij) en, bij onvolledige gegevens, "Gebaseerd op de doelpuntenmakers van X van de Y gespeelde wedstrijden".
   Het is dezelfde telling en dezelfde weergave als de kaart op Spelers: `TopScorers` in `src/MatchViews.tsx` krijgt de teksten die verschillen (het bijschrift met `scope`, in plaats van `season`, de zin zonder doelpuntenmakers met `empty`, en met `topOnly` alleen de eerste vijf plaatsen, ook zonder link naar Spelers) en de hulpfuncties in `src/matches.ts` nemen elk type wedstrijd dat een `ScoredMatch` past, dus ook die van een club.
@@ -640,7 +643,7 @@ De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecac
 De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
 De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
 De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
-`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion, en met de kaart Resultaten sinds), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion, en met de kaarten Resultaten sinds en De plek van … en de onze), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 

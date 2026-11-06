@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
 
-import { ClubsCard, ClubScoreCountsCard, ClubTopScorersCard, TopPointsCard } from './OpponentViews'
+import { ClubPlacesCard, ClubsCard, ClubScoreCountsCard, ClubTopScorersCard, TopPointsCard } from './OpponentViews'
 import { testclub } from './test-opponents'
 
 const record = (
@@ -313,5 +313,60 @@ describe('ClubTopScorersCard', () => {
 
     expect(screen.getByText('We hebben geen doelpuntenmakers van deze wedstrijden.')).toBeTruthy()
     expect(screen.queryByRole('table')).toBeNull()
+  })
+})
+
+describe('ClubPlacesCard', () => {
+  const places = [
+    { ours: 8, season: '2025/26', theirs: 16 },
+    { ours: 4, season: '2022/23', theirs: 11 },
+  ]
+
+  it('names the club in the heading and the caption, and says it counts the Eredivisie alone', () => {
+    render(<ClubPlacesCard name="Testclub" places={places} />)
+
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('De plek van Testclub en de onze')
+    expect(
+      screen.getByRole('table', {
+        name: 'De plek in de Eredivisie waarin Testclub en sc Heerenveen eindigden, per seizoen',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByText('Alleen de Eredivisie')).toBeTruthy()
+  })
+
+  it('has a row for each season with the seasons as row headers, in the order given', () => {
+    render(<ClubPlacesCard name="Testclub" places={places} />)
+
+    const table = screen.getByRole('table')
+
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent),
+    ).toEqual(['Seizoen', 'Onze plek', 'Hun plek'])
+    expect(
+      within(table)
+        .getAllByRole('rowheader')
+        .map((header) => header.textContent),
+    ).toEqual(['2025/26', '2022/23'])
+    expect(
+      within(table)
+        .getAllByRole('row')
+        .slice(1)
+        .map((row) =>
+          within(row)
+            .getAllByRole('cell')
+            .map((cell) => cell.textContent),
+        ),
+    ).toEqual([
+      ['8', '16'],
+      ['4', '11'],
+    ])
+  })
+
+  it('is nothing without a season in which both were in the table', () => {
+    const { container } = render(<ClubPlacesCard name="Testclub" places={[]} />)
+
+    expect(container.innerHTML).toBe('')
   })
 })
