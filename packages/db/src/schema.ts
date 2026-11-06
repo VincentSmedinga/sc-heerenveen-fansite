@@ -8,6 +8,7 @@ import {
   datetime,
   index,
   int,
+  json,
   mediumtext,
   mysqlEnum,
   mysqlTable,
@@ -1457,6 +1458,42 @@ export const squadImports = mysqlTable('squad_imports', {
 })
 
 export type SquadImport = typeof squadImports.$inferSelect
+
+/** The levels of the chance that the list of players of a season is the whole squad (#745). */
+export const squadCompletenessLevels = ['onbekend', 'weinig', 'deels', 'bijna', 'compleet'] as const
+
+export type SquadCompletenessLevel = (typeof squadCompletenessLevels)[number]
+
+/** One check of the chance, as it is stored: what it was, how it came out and why. */
+export type StoredCompletenessCheck = {
+  detail: string
+  name: 'goals' | 'matches' | 'scorers' | 'size'
+  outcome: 'failed' | 'passed' | 'unavailable'
+}
+
+/**
+ * The chance that the list of players of a season holds the whole squad, worked out by the
+ * importer (#746). A season without players has no row; the site reads that as `onbekend`.
+ * `matches_total` and `goals_total` are the sums the table of the season gave, which are only
+ * known while the page is read: they stay empty when the page had none.
+ */
+export const squadCompleteness = mysqlTable(
+  'squad_completeness',
+  {
+    season: varchar('season', { length: matchLimits.season }).primaryKey(),
+    probability: smallint('probability', { unsigned: true }).notNull(),
+    level: mysqlEnum('level', squadCompletenessLevels).notNull(),
+    playerCount: int('player_count', { unsigned: true }).notNull(),
+    bestSource: mysqlEnum('best_source', playerSources).notNull(),
+    matchesTotal: int('matches_total', { unsigned: true }),
+    goalsTotal: int('goals_total', { unsigned: true }),
+    checks: json('checks').$type<StoredCompletenessCheck[]>().notNull(),
+    calculatedAt: datetime('calculated_at').notNull(),
+  },
+  (table) => [check('squad_completeness_probability_range', sql`${table.probability} between 0 and 100`)],
+)
+
+export type SquadCompletenessRow = typeof squadCompleteness.$inferSelect
 
 /**
  * What a person of the staff does. The list grows with the roles we keep, such as

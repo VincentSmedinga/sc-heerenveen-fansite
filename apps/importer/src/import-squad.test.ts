@@ -58,6 +58,7 @@ beforeEach(async () => {
     'player_season_stats',
     'players',
     'squad_imports',
+    'squad_completeness',
     'wikipedia_pages',
     'match_changes',
     'matches',
@@ -151,6 +152,7 @@ describe('the first import, into an empty database', () => {
     const report = await importAt(server, first)
 
     expect(report).toEqual({
+      completeness: 'Completeness 2026/27: 95% compleet, 25 players, new',
       kind: 'imported',
       persons: [
         'persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
@@ -165,6 +167,7 @@ describe('the first import, into an empty database', () => {
         'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
         'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
         'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
+        'Completeness 2026/27: 95% compleet, 25 players, new',
       ].join('\n'),
     )
 
@@ -297,6 +300,7 @@ describe('reading again', () => {
         'Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad',
         'Squad 2026/27: numbers of the players: 2 new, 0 updated, 48 unchanged',
         'Squad 2026/27: persons: 1 title asked, 1 new person, 1 title remembered, 1 name stored (1 from a sort key, 0 guessed, 0 from the list)',
+        'Completeness 2026/27: 95% compleet, 26 players, was 95% compleet with 25 players',
       ].join('\n'),
     )
 
@@ -984,8 +988,8 @@ describe('the import command', () => {
       'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
     ])
     // The goals of the made-up matches differ from the made-up table: a line for each.
-    expect(lines.length).toBeGreaterThan(5)
-    expect(lines.slice(5).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
+    expect(lines.length).toBeGreaterThan(6)
+    expect(lines.slice(6).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
       true,
     )
     expect(
@@ -1010,8 +1014,9 @@ describe('the import command', () => {
     expect(lines[4]).toBe(
       'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
     )
+    expect(lines[5]).toBe('Completeness 2026/27: 95% compleet, 25 players, new')
     // No match was played in the database, so there is nothing to compare the goals with.
-    expect(lines).toHaveLength(5)
+    expect(lines).toHaveLength(6)
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

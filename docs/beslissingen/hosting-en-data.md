@@ -557,3 +557,17 @@
   Een bron per rij is nodig om te zeggen hoe volledig een seizoen is.
 - **Alternatieven:** een rij per persoon met een tabel voor seizoenen (een grotere migratie die `match_goals` en `player_season_stats` raakt).
   De positie verplicht houden en bij een transfer gokken (een gok is erger dan leeg).
+
+## De volledigheid van de selectie staat in een tabel `squad_completeness`
+
+- **Datum:** 6 november 2026
+- **Besluit:** migratie `0043_add_squad_completeness` voegt een tabel toe met het seizoen als sleutel: de kans (0 tot en met 100), het niveau, het aantal spelers, de beste bron, de som van de wedstrijden en de doelpunten van de tabel (leeg als de pagina ze niet had), de controles als JSON en het moment van berekenen (UTC) (#746).
+  Een seizoen zonder spelers heeft geen rij.
+  - **De migratie:** ze voegt alleen een tabel toe en kan opnieuw draaien.
+    De deploy volgt `docs/back-ups.md`: een dump vooraf, zoals bij elke migratie.
+  - **Terugdraaien:** de tabel weghalen (`DROP TABLE squad_completeness`) verliest geen gegevens.
+    De importer rekent de rijen opnieuw uit `players` en `match_goals`.
+    Alleen de som van de tabel komt pas terug bij de volgende lezing van de selectie.
+- **Waarom:** de site moet de kans alleen lezen, en de som van de tabel bestaat nergens anders dan tijdens het lezen (zie _De importer berekent de volledigheid en bewaart hem, de site rekent niet_ in `importer.md`).
+- **Alternatieven:** kolommen in `squad_imports` (die tabel is de gezondheid van de import, en een seizoen zonder lezing heeft er geen rij).
+  De kans bij elk verzoek uit `players` rekenen (de som is dan weg).

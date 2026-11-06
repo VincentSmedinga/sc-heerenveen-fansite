@@ -2453,3 +2453,19 @@
   De bron zegt het meest over wat ontbreekt, en een plafond voorkomt dat meer controles ooit meer beloven dan de bron weet.
 - **Alternatieven:** een percentage van het aantal spelers tegenover een vast getal (zegt niets over wie ontbreekt).
   De kans uitrekenen met twee bronnen tegelijk, vangst en terugvangst (zwaar voor de eerste versie en onbetrouwbaar met twee bronnen die niet los van elkaar zijn).
+
+## De importer berekent de volledigheid en bewaart hem, de site rekent niet
+
+- **Datum:** 5 november 2026
+- **Besluit:** de kans staat per seizoen in de tabel `squad_completeness` (#746), berekend door de importer aan het eind van een lezing van de selectie en op verzoek zonder verzoeken aan Wikipedia (`pnpm run import:completeness`).
+  De site leest alleen.
+  - De uurlijkse import zet de kans van het lopende seizoen erin, in dezelfde run na de wedstrijden.
+    `import:squad` en `import:squads` doen dat voor een afgelopen seizoen.
+  - De som van de wedstrijden en de doelpunten van de tabel gaat mee, want ze is alleen bekend terwijl de pagina wordt gelezen.
+    Bij meer lijsten telt de beste die een som geeft.
+  - Een seizoen zonder spelers heeft geen rij.
+    Een tweede berekening zonder nieuwe gegevens schrijft niets.
+  - `import:status` toont het lopende seizoen en waarschuwt als de bron `selectie` is en de kans onder `bijna` valt.
+- **Waarom:** de regel staat op één plek met tests, het getal is overal gelijk, en het is te loggen en te controleren.
+  De som van de tabel is alleen bekend tijdens het lezen, dus de uitkomst en dat bewijs worden samen bewaard.
+- **Alternatieven:** rekenen op de pagina (de regel zit dan in de site, de bronnen en de doelpunten moeten bij elk verzoek mee, en de som is dan weg).
