@@ -16,4 +16,36 @@
   .hf-player-name-surname {
     font-weight: var(--hf-name-font-weight);
   }
+
+  /*
+   * With a shirt number the name is a row: the number in a column that keeps its width, so the
+   * names of a list start at the same place, and the name beside it. A long name goes on under
+   * the name, not under the number. The digits have the same width.
+   */
+  .hf-player-name-numbered {
+    column-gap: var(--hf-space-s);
+    display: flex;
+  }
+
+  .hf-player-name-number {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-body-font-weight);
+    min-inline-size: 2rem;
+  }
+
+  .hf-player-name-text {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  /* The line behind the name: small and quiet, on a line of its own, in the normal weight. */
+  .hf-player-name-meta {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-meta-font-weight);
+    line-height: var(--hf-meta-line-height);
+  }
 }
