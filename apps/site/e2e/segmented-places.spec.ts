@@ -17,7 +17,7 @@ async function names(page: Page, group: string) {
 const switches = [
   { group: 'Welke stand', other: '/wedstrijden?stand=laatste-5', path: '/wedstrijden' },
   { group: 'Welke wedstrijden', other: '/statistieken?competitie=eredivisie', path: '/statistieken' },
-  { group: 'Welke wedstrijden', other: '/statistieken/spelers?competitie=eredivisie', path: '/statistieken/spelers' },
+  { group: 'Welke wedstrijden', other: '/spelers?competitie=eredivisie', path: '/spelers' },
   {
     group: 'Welke wedstrijden',
     other: '/statistieken/tegenstanders?competitie=eredivisie',

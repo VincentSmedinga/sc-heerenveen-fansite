@@ -10,7 +10,7 @@ import { pickedAddress, seasonFromSlug } from './seasons'
 /**
  * What the pages of a season share: Wedstrijden, Statistieken and its page Spelers all show the
  * data of one season, with a picker for the season, an address for each season
- * (`/wedstrijden/2025-26`, `/statistieken/2025-26`, `/statistieken/spelers/2025-26`) and the
+ * (`/wedstrijden/2025-26`, `/statistieken/2025-26`, `/spelers/2025-26`) and the
  * route behind the picker (`/wedstrijden/kies`). Each page gives its base address and gets the
  * same answers, so the pages never differ.
  */
@@ -27,7 +27,7 @@ export const statisticsPath = '/statistieken'
  * The base address of the page Spelers under Statistieken, which is the address of its current
  * season. It has the picker and the addresses of a season that the other pages have.
  */
-export const playersPath = '/statistieken/spelers'
+export const playersPath = '/spelers'
 
 /**
  * The matches, the table and the Wikipedia pages of a season, and the seasons to choose from,

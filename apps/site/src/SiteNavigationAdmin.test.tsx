@@ -38,14 +38,14 @@ describe('the item Beheer in the main menu', () => {
   it('is not there without the mark', () => {
     render(<SiteNavigation />)
 
-    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum'])
+    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Spelers', 'Forum'])
   })
 
   it('comes before Forum, which stays last, as a plain link to /beheer, when the browser has the mark', () => {
     saveAdminMarker(true)
     render(<SiteNavigation />)
 
-    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Beheer', 'Forum'])
+    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Spelers', 'Beheer', 'Forum'])
     expect(screen.getByRole('link', { name: 'Beheer' })).toHaveProperty('pathname', '/beheer')
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('target')).toBe(false)
     expect(screen.getByRole('link', { name: 'Beheer' }).querySelector('svg')).toBeNull()

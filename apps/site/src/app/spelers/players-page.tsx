@@ -18,12 +18,12 @@ import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { SpecialGoalsCard } from '#src/SpecialGoalsCard'
 import { withBranch } from '#src/title'
 
-/** The route that sends the season picker on to its season (app/statistieken/spelers/kies). */
+/** The route that sends the season picker on to its season (app/spelers/kies). */
 export const pickerPath = pickerPathOf(playersPath)
 
 /**
  * The title, description and canonical address of the page Spelers of a season. The current
- * season is the page `/statistieken/spelers`; another season has an address of its own, which
+ * season is the page `/spelers`; another season has an address of its own, which
  * is its canonical address, and a title that names the season.
  */
 export async function playersMetadata(season: string): Promise<Metadata> {
@@ -45,8 +45,8 @@ export async function playersMetadata(season: string): Promise<Metadata> {
 }
 
 /**
- * The page Spelers of a season: `/statistieken/spelers` for the current season and
- * `/statistieken/spelers/2025-26` for another, which is what the two routes render. It has the
+ * The page Spelers of a season: `/spelers` for the current season and
+ * `/spelers/2025-26` for another, which is what the two routes render. It has the
  * title row and the season picker of Statistieken, and the card Selectie with every player of
  * the season in parts by position and, under the heading, how complete that list is. That card
  * is white: the squad is what the page is for. The sidebar follows the main column on a phone,

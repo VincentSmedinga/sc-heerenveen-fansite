@@ -942,7 +942,7 @@ await withEmptyDatabase((database) =>
     // The bar under the menu keeps the choice, and the items of the menu itself do not.
     assert.match(
       leagueHtml,
-      /<div class="hf-navigation-bar">.*?href="\/statistieken\/spelers\?competitie=eredivisie">Spelers<\/a>.*?href="\/statistieken\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
+      /<div class="hf-navigation-bar">.*?href="\/statistieken\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
     )
     assert.match(
       leagueHtml,
@@ -999,15 +999,16 @@ await withEmptyDatabase((database) =>
     // list is on that page (below). Demo and Nepper both
     // scored twice, so they share a row.
     assert.match(statisticsHtml, /<caption class="hf-visually-hidden">(?:De top 5 van de d|D)oelpuntenmakers van sc /)
-    assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
+    assert.match(statisticsHtml, /<a href="\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
       /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Rick<\/span> <span class="hf-player-name-surname">Demo<\/span><\/span>, <span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
-    // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
+    // The menu has the bar of Statistieken, with Tegenstanders and no sub-page as the current
+    // page, and Spelers as an item of its own after it.
     assert.match(
       statisticsHtml,
-      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a>/s,
+      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>.*?<a class="hf-navigation-link" href="\/spelers">Spelers<\/a>/s,
     )
     assert.match(
       statisticsHtml,
@@ -1041,14 +1042,14 @@ await withEmptyDatabase((database) =>
     // and the card with everybody who scored in the sidebar, which is the card that stood on
     // the statistics page before it got the top 5. The menu has Statistieken as the item that
     // holds it and Spelers as the current sub-page.
-    const playersPage = await fetch(`${origin}/statistieken/spelers`)
+    const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)
     assert.match(playersHtml, /<h1[^>]*>Spelers<\/h1>/)
-    assert.match(
-      playersHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a>/s,
-    )
+    // Spelers is an item of the main menu, the current page, and has no bar under the menu.
+    assert.match(playersHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+    assert.doesNotMatch(playersHtml, /aria-current="true"/)
+    assert.doesNotMatch(playersHtml, /hf-navigation-bar/)
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       ['#selectie', '#doelpuntenmakers', '#bijzondere-doelpunten'],
@@ -1118,15 +1119,20 @@ await withEmptyDatabase((database) =>
     assert.match(facts[2][1], /^1 van de \d+ doelpunten$/)
     assert.match(facts[3][1], /^1 door de tegenstander · 0 door ons$/)
     assert.match(specialCard, /Gebaseerd op /)
-    const eredivisieCard = cardOf(await (await fetch(`${origin}/statistieken/spelers?competitie=eredivisie`)).text())
+    const eredivisieCard = cardOf(await (await fetch(`${origin}/spelers?competitie=eredivisie`)).text())
     assert.doesNotMatch(eredivisieCard, /Proefman/)
     assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)
     assert.match(playersHtml, closedWikipediaCredit)
     // The route behind the season picker sends the visitor on to the page of the season.
-    const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
+    const pickedPlayers = await fetch(`${origin}/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
     assert.equal(pickedPlayers.status, 303)
-    assert.equal(pickedPlayers.headers.get('location'), '/statistieken/spelers')
-    assert.equal((await fetch(`${origin}/statistieken/spelers/2099-00`)).status, 404)
+    assert.equal(pickedPlayers.headers.get('location'), '/spelers')
+    assert.equal((await fetch(`${origin}/spelers/2099-00`)).status, 404)
+    // The old addresses under Statistieken are gone, with no redirect (the site is not public).
+    for (const old of ['/statistieken/spelers', '/statistieken/spelers/2025-26', '/statistieken/spelers/kies']) {
+      const gone = await fetch(`${origin}${old}`, { redirect: 'manual' })
+      assert.equal(gone.status, 404, `${old} must be "niet gevonden"`)
+    }
 
     // The page Tegenstanders lists every club of the made-up matches A to Z, each name a link
     // to its page, in a table with a caption and column headers with scope. The menu has it as
@@ -1137,7 +1143,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<h1[^>]*>Tegenstanders<\/h1>/)
     assert.match(
       opponentsHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a><\/li><li role="listitem"><a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/s,
+      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/s,
     )
     assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
     assert.match(
