@@ -1622,6 +1622,7 @@
   Twee items per kaart in de zijbalk van de homepage, om de kolommen even lang te maken (de projecteigenaar koos op 1 november 2026 voor vijf per kaart; de eerste versie van dit besluit had twee).
   Een bezoeker laten kiezen tussen 5, 10, 20 en 50 (meer knoppen en een adres per keuze, terwijl de code de maten vastlegt).
   Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
+- **Later:** zie _De kaart met podcasts toont de afleveringen van de laatste 8 dagen_ (7 november 2026): de kaart met podcasts op de homepage en op `/nieuws` toont alleen afleveringen van de laatste 8 dagen, tot vijf.
 - **Later:** zie _Op de homepage staat Wedstrijden boven het forum_ (6 november 2026): de zijbalk van de homepage begint met Wedstrijden en Stand, dan het forum, dan de podcasts.
 
 ## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
@@ -2945,3 +2946,16 @@
   Het is dezelfde keuze als bij Verloop van het seizoen.
 - **Alternatieven:** de tabel laten staan; de tabel schrappen (verliest de cijfers per wedstrijd).
 - **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de tabel voor een schermlezer staat nu in een Disclosure, dicht bij het laden.
+
+## De kaart met podcasts toont de afleveringen van de laatste 8 dagen
+
+- **Datum:** 7 november 2026
+- **Besluit:** de kaart met podcasts (`EpisodesCard`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu, tot het aantal van `itemsPerCard`.
+  Een aflevering van precies 8 dagen oud staat er nog in.
+  Zonder afleveringen staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
+- **Waarom:** de projecteigenaar wil op de homepage en bij het nieuws alleen verse afleveringen zien.
+  Een aflevering van weken oud is geen nieuws meer.
+  8 dagen dekt een wekelijkse podcast.
+- **Alternatieven:** altijd de vijf nieuwste tonen (zoals eerder).
+  Een venster van 7 dagen (mist een wekelijkse aflevering die iets later komt).
+- **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) en van _Het blok op de homepage staat in de zijbalk onder het forum_ in `docs/beslissingen/importer.md` (24 oktober 2026) dat zegt dat de kaart de nieuwste afleveringen toont zonder grens in de tijd.

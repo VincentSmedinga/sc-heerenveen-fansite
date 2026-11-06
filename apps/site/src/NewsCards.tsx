@@ -86,10 +86,14 @@ export function EditorsCard({
   )
 }
 
+/** How far back the card with the podcasts looks: 8 days, so a weekly podcast stays in it. */
+const episodeWindow = 8 * 24 * 60 * 60 * 1000
+
 /**
- * The card with the newest podcast episodes and the link to all of them. The heading is
- * "Nieuwste podcasts" on the homepage and "Podcasts" on the news page, where the page already
- * says they are the newest.
+ * The card with the newest podcast episodes of the last 8 days, counted from `now` (an episode
+ * of exactly 8 days old is still in), and the link to all of them. The heading is "Nieuwste
+ * podcasts" on the homepage and "Podcasts" on the news page, where the page already says they
+ * are the newest.
  */
 export function EpisodesCard({
   episodes,
@@ -100,16 +104,18 @@ export function EpisodesCard({
   heading: string
   now: Date
 }) {
+  const fresh = episodes.filter((episode) => episode.publishedAt.getTime() >= now.getTime() - episodeWindow)
+
   return (
     <Card aria-labelledby="episodes-heading">
       <Heading id="episodes-heading" level={2}>
         {heading}
       </Heading>
-      {episodes.length === 0 ? (
-        <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
+      {fresh.length === 0 ? (
+        <Text>We hebben de laatste 8 dagen geen podcastafleveringen gevonden.</Text>
       ) : (
         <List role="list">
-          {episodes.map((episode, index) => (
+          {fresh.map((episode, index) => (
             <List.Item key={index}>
               <NewsItem
                 dateTime={dateTimeOf(episode.publishedAt)}
