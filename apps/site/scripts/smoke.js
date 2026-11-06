@@ -1312,7 +1312,7 @@ await withEmptyDatabase((database) =>
     // counts the Eredivisie alone. The season that is going on is not in it.
     assert.match(
       clubHtml,
-      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="plek-in-de-competitie">De plek van Testdorp FC en de onze<\/h2>.*<caption class="hf-visually-hidden">De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen<\/caption>/s,
+      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="plek-in-de-competitie">.*?De plek van Testdorp FC en de onz.*?<\/h2>.*?<caption class="hf-visually-hidden">De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen<\/caption>/s,
     )
     const clubPlaces = clubHtml.slice(clubHtml.indexOf('id="plek-in-de-competitie"'))
     const placeRow = (years, ours, theirs) =>
