@@ -6,7 +6,7 @@
  * - Vivid: blue, red and green, 11 steps each.
  * - Muted: steel, a muted blue (chroma 0.030 to 0.075, steps 200 to 600), and sand (chroma 0.030 and 0.042,
  *   steps 100, 300, 400, 500 and 700). Steel and sand steps are as light as the grey step with
- * the same number, except   sand-100, which is as light as blue-100;
+ *   the same number, except sand-100, which is as light as blue-100.
  * - Neutral: grey, a neutral sand (chroma 0.006 to 0.017), 11 steps: warm and never fully neutral.
  * Roles: the semantic tokens. They have names, never numbers.
  *
@@ -282,11 +282,11 @@
      * above), two more: `line-darker`, a step darker than the border, for the outlines of parts
      * such as a disclosure or a notice, and `line-graphic`, for axes and arrows, which must
      * reach 3:1 against the surface (WCAG 1.4.11). The border and the darker line are
-     * decoration and have no ratio to reach. Card sets them as --hf-card-line, --hf-card-line-
-     * strong and --hf-card-line-graphic (see card.css). Contrast of the graphic line against
-     * its surface, light / dark: surface 4.19 / 6.21, strong 3.46 / 4.89, soft 3.85 / 6.21,
-     * warm 3.47 / 4.89. Contrast of the darker line, which is not required: surface 1.67 /
-     * 2.28, strong 2.10 / 2.66, soft 1.52 / 2.28, warm 2.09 / 2.66.
+     * decoration and have no ratio to reach. Card sets them as --hf-card-line,
+     * --hf-card-line-strong and --hf-card-line-graphic (see card.css). Contrast of the graphic
+     * line against its surface, light / dark: surface 4.19 / 6.21, strong 3.46 / 4.89, soft
+     * 3.85 / 6.21, warm 3.47 / 4.89. Contrast of the darker line, which is not required:
+     * surface 1.67 / 2.28, strong 2.10 / 2.66, soft 1.52 / 2.28, warm 2.09 / 2.66.
      */
     --hf-colour-line-darker-surface: light-dark(var(--hf-colour-grey-300), var(--hf-colour-blue-600));
     --hf-colour-line-darker-surface-strong: light-dark(var(--hf-colour-steel-400), var(--hf-colour-blue-500));

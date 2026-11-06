@@ -39,8 +39,8 @@
    *   fieldset;
    * - --hf-card-line-graphic: reaches 3:1 against the surface, for the axes of a chart and
    *   arrows.
-   * The transparent card sets none of them, so what is in it keeps its own colour. The base is a
-   * :where() so a surface below wins without a specificity fight.
+   * The transparent card sets none of them, so what is in it keeps its own colour. The base is
+   * a :where() so a surface below wins without a specificity fight.
    */
   :where(.hf-card:not(.hf-card-transparent)) {
     --hf-card-line: var(--hf-colour-border-surface);
