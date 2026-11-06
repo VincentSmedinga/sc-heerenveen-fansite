@@ -70,9 +70,10 @@ describe('FinalPlacesCard', () => {
   it('marks the going season as nu, says how many points were taken off and marks a season without a table', () => {
     const html = render()
 
-    expect(html).toContain('nu')
-    expect(html).toContain('2 punten afgetrokken')
+    expect(html).toContain('2026/27 (nu)')
+    expect(html).toContain('2025/26: 2 punten afgetrokken')
     expect(html).toContain('geen stand')
+    expect(html).not.toContain('2024/25: ')
   })
 
   it('links a season to its page, the current season to the base address, and leaves out a season without a page', () => {

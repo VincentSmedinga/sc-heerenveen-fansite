@@ -726,6 +726,9 @@ await withEmptyDatabase((database) =>
   withServer({ database, siteEnv: 'acceptance' }, async (server, log) => {
     await waitUntilUp(server)
     assert.match(log(), /The database is up to date, with the real sources from the seed\./)
+    // Before the first page is asked for: the site keeps our places for five minutes, and the
+    // check of the anchors asks for the matches page long before the checks of its content.
+    await addEarlierStandings(database)
 
     const home = await fetch(origin)
     const html = await home.text()
@@ -832,7 +835,6 @@ await withEmptyDatabase((database) =>
     // Wikipedia under them, and a link under the table and the results to the cards with
     // figures on the statistics page. The homepage has the two blocks, between the forum and
     // the podcasts.
-    await addEarlierStandings(database)
     const matchesPage = await fetch(`${origin}/wedstrijden`)
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
@@ -881,9 +883,8 @@ await withEmptyDatabase((database) =>
       [...placesTable.matchAll(/<th scope="row">.*?(\d{4}\/\d{2})/g)].map(([, season]) => season),
       [0, 1, 2, 3].map(seasonsAgo),
     )
-    assert.match(placesTable, /nu/)
-    assert.match(placesTable, /geen stand/)
-    assert.match(placesTable, /2 punten afgetrokken/)
+    assert.match(placesTable, /\(nu\)/)
+    assert.match(placesCard, /: 2 punten afgetrokken/)
     assert.match(placesCard, new RegExp(`Sinds ${seasonsAgo(3)}`))
     assert.match(placesCard, /Alleen de Eredivisie<\/p><\/section>/)
     // The card with how often each score was played moved to the statistics page (#774).

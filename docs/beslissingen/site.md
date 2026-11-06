@@ -2827,8 +2827,10 @@
   - **De lijn:** `BarChart` met alleen de grond en `BarChart.Trend`.
     De omgekeerde schaal is geen nieuw onderdeel: de pagina zet plek 1 om in de hoogste waarde (`max + 1 - plek`, met 18 clubs als vaste schaal) en geeft de plekken 1, 5, 10, 15 en 18 aan de zijkant.
     De lijn is voor een schermlezer verborgen.
-  - **De tabel:** seizoen (nieuwste bovenaan), plek, punten en doelsaldo, altijd zichtbaar.
-    Afgetrokken punten staan onder het seizoen ("2 punten afgetrokken").
+  - **De tabel:** seizoen (nieuwste bovenaan, het lopende met "(nu)"), plek, punten en doelsaldo, altijd zichtbaar.
+    Een seizoen zonder stand heeft streepjes, en een schermlezer hoort "geen stand".
+    Afgetrokken punten staan als regel onder de tabel ("2025/26: 2 punten afgetrokken"), zoals onder de tabel Stand.
+    Een tabel met tekst past niet op 300 pixels breed.
     Een seizoen is een link naar `/wedstrijden/<seizoen>` als het wedstrijden heeft; zonder wedstrijden is er geen pagina om naar te linken.
   - **De regels onder de kaart:** "Sinds 2010/11" (het eerste seizoen met een stand) en, als laatste, "Alleen de Eredivisie" (zie _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_).
   - **De balk:** "Onze plek door de jaren" staat in "Op deze pagina" na Stand of Eindstand, zodra een seizoen een stand heeft.

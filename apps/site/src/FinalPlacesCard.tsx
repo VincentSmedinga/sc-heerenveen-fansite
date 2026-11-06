@@ -60,6 +60,9 @@ export function FinalPlacesCard({
   }
 
   const { max, ticks, values } = lineOf(places)
+  const deductions = places.flatMap(({ row, season }) =>
+    row !== undefined && row.pointsDeducted > 0 ? [{ points: row.pointsDeducted, season }] : [],
+  )
   const labels = places.map(({ row, season }) =>
     row === undefined ? null : `${season}: plek ${row.position}, ${row.points} punten`,
   )
@@ -79,34 +82,26 @@ export function FinalPlacesCard({
         <BarChart.Trend labels={labels} values={values} />
       </BarChart>
       <DataTable
-        appearance="text"
         caption="De plek van sc Heerenveen in de Eredivisie per seizoen, met punten en doelsaldo"
-        columns={['Seizoen', 'Plek', 'Punten', 'Doelsaldo']}
+        columns={['Seizoen', 'Plek', 'Punten', { abbreviation: 'Saldo', name: 'Doelsaldo' }]}
         rows={[...places].reverse().map(({ now: going, row, season }) => ({
           cells:
             row === undefined
               ? ['–', '–', '–']
               : [String(row.position), String(row.points), signedNumber(row.goalDifference)],
-          header: season,
+          header: going ? `${season} (nu)` : season,
+          ...(row === undefined ? { note: 'geen stand' } : {}),
           ...(linkable.includes(season) ? { href: seasonAddress(matchesPath, season, current) } : {}),
-          ...secondaryOf(going, row),
         }))}
       />
+      {deductions.map(({ points, season }) => (
+        <Text
+          appearance="meta"
+          key={season}
+        >{`${season}: ${points} ${points === 1 ? 'punt' : 'punten'} afgetrokken`}</Text>
+      ))}
       <Text appearance="meta">{`Sinds ${first.season}`}</Text>
       <EredivisieOnly />
     </Card>
   )
-}
-
-/** The line under a season: "nu" for the one going on, the points taken off, or none. */
-function secondaryOf(going: boolean, row: FinalPlace['row']) {
-  const parts = [
-    ...(going ? ['nu'] : []),
-    ...(row === undefined ? ['geen stand'] : []),
-    ...(row !== undefined && row.pointsDeducted > 0
-      ? [`${row.pointsDeducted} ${row.pointsDeducted === 1 ? 'punt' : 'punten'} afgetrokken`]
-      : []),
-  ]
-
-  return parts.length === 0 ? {} : { secondary: parts.join(', ') }
 }
