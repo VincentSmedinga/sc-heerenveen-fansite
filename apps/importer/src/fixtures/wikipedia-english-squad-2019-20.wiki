@@ -1,0 +1,86 @@
+<!--
+  A trimmed piece of https://en.wikipedia.org/wiki/2019–20_SC_Heerenveen_season?action=raw, read on 6 November 2026.
+  No squad on this page, only the tables of transfers: two arrivals, a loan and a departure in the winter,
+  and (all of them left out) a retirement, a departure in the summer and a departure that is no loan.
+-->
+== Player Transfers ==
+
+=== Players In ===
+{| class="wikitable"
+!Date
+!Position
+!Player
+!From
+!<abbr>Type</abbr>
+!Fee
+!<abbr>Ref.</abbr>
+|-
+|1 July 2019
+|[[Defender (association football)|MF]]
+|{{Flagicon|NED}} [[Hicham Faik]]
+|{{Flagicon|BEL}} [[S.V. Zulte Waregem|Zulte Waregem]]
+|Transfer
+|Undisclosed
+|<ref name=":0">{{Cite web|url=https://www.sc-heerenveen.nl/nieuws/hicham-faik/10|title=sc Heerenveen versterkt zich - sc Heerenveen}}</ref>
+|-
+|1 July 2019
+|[[Forward (association football)|FW]]
+|{{Flagicon|DEN}} [[Jens Odgaard]]
+|{{Flagicon|ITA}} [[U.S. Sassuolo Calcio|Sassuolo Calcio]]
+|Loan
+|Undisclosed
+|<ref name=":0" />
+|}
+
+=== Players Out ===
+{| class="wikitable"
+!Date
+!Position
+!Player
+!To
+!<abbr>Type</abbr>
+!Fee
+!<abbr>Ref.</abbr>
+|-
+|1 July 2019
+|[[Defender (association football)|DF]]
+|{{Flagicon|NED}} [[Stijn Schaars]]
+|N/A
+|Retired
+|
+|
+|-
+|4 July 2019
+|[[Defender (association football)|DF]]
+|{{Flagicon|NED}} [[Michel Vlap]]
+|{{Flagicon|BEL}} [[R.S.C. Anderlecht|Anderlecht]]
+|Transfer
+|Undisclosed
+|
+|-
+|1 July 2019
+|[[Midfielder (association football)|MF]]
+|{{Flagicon|NED}} Jan Bekkema
+|{{Flagicon|GER}} [[SV 19 Straelen|SV Straelen]]
+|Transfer
+|
+|
+|-
+|31 January 2020
+|[[Midfielder (association football)|MF]]
+|{{Flagicon|DEN}} [[Emil Frederiksen]]
+|{{Flagicon|DEN}} [[SønderjyskE]]
+|Transfer
+|Undisclosed
+|
+|-
+|5 February 2020
+|[[Defender (association football)|DF]]
+|{{Flagicon|DEN}} [[Andreas Skovgaard]]
+|{{Flagicon|SWE}} [[Örebro SK]]
+|Loan
+|one year
+|<ref>{{Cite web|title=Skovgaard voor een jaar naar Örebro SK|url=https://www.sc-heerenveen.nl/nieuws/skovgaard/10}}</ref>
+|}
+
+==References==

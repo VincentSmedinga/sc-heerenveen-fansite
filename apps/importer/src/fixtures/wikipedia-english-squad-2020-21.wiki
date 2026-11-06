@@ -1,0 +1,65 @@
+<!--
+  A trimmed piece of https://en.wikipedia.org/wiki/2020–21_SC_Heerenveen_season?action=raw, read on 6 November 2026.
+  The squad with a note after a name (the captain, a loan) and a list of players out on loan.
+  The tables of transfers are the template nobody filled in: a row with no name.
+-->
+==Players==
+===First-team squad===
+{{updated|12 February 2021}}<ref>{{Cite web|url=http://www.sc-heerenveen.nl/voetbal/selectie/spelers|title = Selectie}}</ref>
+{{Fs start}}
+{{Fs player|no= 1 |nat=NED |pos=GK |name=[[Erwin Mulder]]}}
+{{Fs player|no= 3 |nat=NED |pos=DF |name=[[Jan Paul van Hecke]]|other=<small>on loan from [[Brighton & Hove Albion F.C.|Brighton & Hove Albion]]</small>}}
+{{Fs player|no= 4 |nat=URU |pos=DF |name=[[Joaquín Fernández Pertusso|Joaquín Fernández]]}}
+{{Fs player|no= 9 |nat=NED |pos=FW |name=[[Henk Veerman]]|other=<small>[[Captain (association football)|captain]]</small>}}
+{{Fs mid}}
+{{Fs player|no=24 |nat=NED |pos=GK |name=Jaimy Kroesen}}
+{{Fs player|no=25 |nat=POL |pos=DF |name=[[Paweł Bochniewicz]]}} 
+{{Fs end}}
+
+===Out on loan===
+{{Fs start}}
+{{Fs player|no=   |nat=NOR |pos=FW |name=[[Runar Espejord]]|other=<small>at [[Tromsø IL]] until 30 June 2021</small>}}
+{{Fs end}}
+
+==Transfers==
+===In===
+{| class="wikitable plainrowheaders sortable"
+|-
+!{{Abbr|No.|Squad Number}}
+!{{Abbr|Pos|Position}}
+!scope=col|Player
+!Transferred from
+!!scope=col; style="width: 65px;"|Fee
+!scope=col|Date
+!scope=col|Source
+|-
+|align=center|15
+|align=center|{{sort|3|}}
+|{{sort|, |{{Flagicon|}} }}
+|TBD
+|
+|{{dts|1 July 2020}}
+|
+|}
+
+===Out===
+{| class="wikitable plainrowheaders sortable"
+|-
+!{{Abbr|No.|Squad Number}}
+!{{Abbr|Pos|Position}}
+!scope=col|Player
+!Transferred to
+!!scope=col; style="width: 65px;"|Fee
+!scope=col|Date
+!scope=col|Source
+|-
+|align=center|15
+|align=center|{{sort|3|}}
+|{{sort|, |{{Flagicon|}} }}
+|TBD
+|
+|{{dts|1 July 2020}}
+|
+|}
+
+==Pre-season and friendlies==
