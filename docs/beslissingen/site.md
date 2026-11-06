@@ -1622,6 +1622,7 @@
   Twee items per kaart in de zijbalk van de homepage, om de kolommen even lang te maken (de projecteigenaar koos op 1 november 2026 voor vijf per kaart; de eerste versie van dit besluit had twee).
   Een bezoeker laten kiezen tussen 5, 10, 20 en 50 (meer knoppen en een adres per keuze, terwijl de code de maten vastlegt).
   Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
+- **Later:** zie _Op de homepage staat Wedstrijden boven het forum_ (6 november 2026): de zijbalk van de homepage begint met Wedstrijden en Stand, dan het forum, dan de podcasts.
 
 ## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -2855,3 +2856,11 @@
 - **Alternatieven:** de hele lijst (#727, groter).
   Een vaste tien rijen met afkappen van gelijke plekken (willekeurig).
 - **Later:** dit vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: Spelers heeft nu de lijst van het seizoen en de top 10 aller tijden.
+
+## Op de homepage staat Wedstrijden boven het forum
+
+- **Datum:** 6 november 2026
+- **Besluit:** de zijkolom van de homepage is Wedstrijden, Stand, Forum ("Nieuwste discussies"), Nieuwste podcasts.
+- **Waarom:** op een wedstrijddag komt de bezoeker vooral voor de uitslag of het programma, en het forum is een link naar buiten.
+- **Alternatieven:** het forum bovenaan laten (de keuze van 1 november 2026).
+- **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) dat zegt dat het forum bovenaan staat.

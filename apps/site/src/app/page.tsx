@@ -125,14 +125,14 @@ export default async function HomePage() {
           </Text>
         </Card>
       </Page.Main>
-      <Page.Sidebar aria-label="Het forum, de wedstrijden, de stand en de podcasts">
-        <DiscussionsCard discussions={discussions} now={now} />
+      <Page.Sidebar aria-label="De wedstrijden, de stand, het forum en de podcasts">
         {matches !== undefined && (
           <>
             <MatchesCard data={matches} now={now} />
             <StandingsCard data={matches} now={now} />
           </>
         )}
+        <DiscussionsCard discussions={discussions} now={now} />
         <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
       </Page.Sidebar>
     </>

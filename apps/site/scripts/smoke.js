@@ -833,7 +833,7 @@ await withEmptyDatabase((database) =>
 
     // The matches page shows the made-up matches and table of the seed, with the credit for
     // Wikipedia under them, and a link under the table and the results to the cards with
-    // figures on the statistics page. The homepage has the two blocks, between the forum and
+    // figures on the statistics page. The homepage has the two blocks, above the forum and
     // the podcasts.
     const matchesPage = await fetch(`${origin}/wedstrijden`)
     const matchesHtml = await matchesPage.text()

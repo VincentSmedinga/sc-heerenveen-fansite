@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/cijfers` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, de wedstrijden en het forum, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/cijfers` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
@@ -244,7 +244,7 @@ De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aa
 Een bezoeker kiest geen maat.
 De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
 
-In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
+In de zijbalk naast het nieuws staat na Wedstrijden en Stand het blok "Nieuwste discussies" (zie _Op de homepage staat Wedstrijden boven het forum_ in `docs/beslissingen/site.md`), want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -262,7 +262,7 @@ Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste aflever
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 
-Tussen de discussies en de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
+Boven de discussies staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
 Zonder gegevens van de wedstrijden staat er een zin voor bezoekers.
 Lukt het lezen van de wedstrijden niet, dan verdwijnen de twee blokken en schrijft de site de reden in het logboek, zoals bij het artikel; de rest van de pagina blijft werken.
