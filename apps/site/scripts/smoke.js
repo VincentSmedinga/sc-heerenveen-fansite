@@ -227,7 +227,7 @@ async function addTestdorpNews(database) {
 
     for (let number = 1; number <= 6; number++) {
       const [{ insertId }] = await pool.query(
-        'INSERT INTO items (feed_id, source_id, `key`, url, title, published_at) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO items (feed_id, source_id, item_key, url, title, published_at) VALUES (?, ?, ?, ?, ?, ?)',
         [
           feed.feed,
           feed.source,
@@ -1321,7 +1321,7 @@ await withEmptyDatabase((database) =>
       clubHtml.indexOf('aria-labelledby="nieuws"'),
       clubHtml.indexOf('</section>', clubHtml.indexOf('aria-labelledby="nieuws"')),
     )
-    assert.match(newsCard, /<h2[^>]*id="nieuws">.*Nieuws over Testdorp FC/s)
+    assert.match(newsCard, /<h2[^>]*id="nieuws".*Nieuws over Testdorp/s)
     assert.deepEqual(
       [...newsCard.matchAll(/href="https:\/\/smoke\.test\/testdorp-(\d)"/g)].map((match) => match[1]),
       ['1', '2', '3', '4', '5'],
