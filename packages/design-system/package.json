@@ -7,9 +7,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./fonts": "./src/fonts.ts",
     "./index.css": "./src/index.css",
     "./rich-text-editor": "./src/rich-text-editor.ts",
-    "./assets/*": "./src/assets/*"
+    "./assets/*": "./src/assets/*",
+    "./fonts/*": "./src/fonts/*"
   },
   "imports": {
     "#.storybook/preview": "./.storybook/preview.tsx"

@@ -14,8 +14,8 @@
 
 @layer hf.tokens {
   :root {
-    --hf-font-family-display: truculenta, 'Arial Narrow', sans-serif;
-    --hf-font-family-text: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+    --hf-font-family-display: truculenta, 'Truculenta Fallback', 'Arial Narrow', sans-serif;
+    --hf-font-family-text: 'Atkinson Hyperlegible Next', 'Atkinson Fallback', system-ui, sans-serif;
     --hf-font-family-code: ui-monospace, menlo, consolas, monospace;
 
     /* Woordmerk */
