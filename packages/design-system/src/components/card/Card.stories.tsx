@@ -173,38 +173,40 @@ export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken
 
 // The lines in a card follow the card: the rows of the table, the outline of the disclosure and
 // the notice, and the axes of the chart take the colour of the surface they are on.
-const renderLines = () => (
+const renderLines = (only?: CardSurface) => (
   <Page.Body>
     <Page.Main>
-      {surfaces.map(({ label, surface }) => (
-        <Card aria-labelledby={`lines-${surface}`} key={surface} surface={surface}>
-          <Heading appearance={3} id={`lines-${surface}`} level={2}>
-            {label}
-          </Heading>
-          <DataTable
-            caption={`Een tabel op het ${label.toLowerCase()}`}
-            columns={['Seizoen', 'Plek', 'Punten']}
-            rows={[
-              { cells: [4, 58], header: '2025/26' },
-              { cells: [2, 64], header: '2024/25' },
-              { cells: [9, 44], header: '2023/24' },
-            ]}
-          />
-          <BarChart
-            axis={{ title: 'Speelronde' }}
-            bars={[3, 1, 3, 0, 3, 1, 3, 3].map((value) => ({
-              tone: value === 3 ? 'positive' : value === 1 ? 'neutral' : 'negative',
-              value,
-            }))}
-            max={3}
-            ticks={[0, 1, 3]}
-          />
-          <Notice>Een mededeling in een kaart.</Notice>
-          <Disclosure summary="Uitslag per speelronde">
-            <Text>Wat achter de samenvatting staat.</Text>
-          </Disclosure>
-        </Card>
-      ))}
+      {surfaces
+        .filter(({ surface }) => only === undefined || surface === only)
+        .map(({ label, surface }) => (
+          <Card aria-labelledby={`lines-${surface}`} key={surface} surface={surface}>
+            <Heading appearance={3} id={`lines-${surface}`} level={2}>
+              {label}
+            </Heading>
+            <DataTable
+              caption={`Een tabel op het ${label.toLowerCase()}`}
+              columns={['Seizoen', 'Plek', 'Punten']}
+              rows={[
+                { cells: [4, 58], header: '2025/26' },
+                { cells: [2, 64], header: '2024/25' },
+                { cells: [9, 44], header: '2023/24' },
+              ]}
+            />
+            <BarChart
+              axis={{ title: 'Speelronde' }}
+              bars={[3, 1, 3, 0, 3, 1, 3, 3].map((value) => ({
+                tone: value === 3 ? 'positive' : value === 1 ? 'neutral' : 'negative',
+                value,
+              }))}
+              max={3}
+              ticks={[0, 1, 3]}
+            />
+            <Notice>Een mededeling in een kaart.</Notice>
+            <Disclosure summary="Uitslag per speelronde">
+              <Text>Wat achter de samenvatting staat.</Text>
+            </Disclosure>
+          </Card>
+        ))}
     </Page.Main>
   </Page.Body>
 )
@@ -212,13 +214,26 @@ const renderLines = () => (
 export const LinesLight = meta.story({
   globals: { theme: 'light' },
   name: 'Lijnen in een kaart, licht',
-  render: renderLines,
+  render: () => renderLines(),
 })
 
 export const LinesDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Lijnen in een kaart, donker',
-  render: renderLines,
+  render: () => renderLines(),
+})
+
+// The warm surface alone, where the lines used to be blue or hardly there.
+export const LinesWarmLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Lijnen in een warme kaart, licht',
+  render: () => renderLines('warm'),
+})
+
+export const LinesWarmDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Lijnen in een warme kaart, donker',
+  render: () => renderLines('warm'),
 })
 
 const renderWithButton = () => (
