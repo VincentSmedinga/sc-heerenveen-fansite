@@ -29,7 +29,7 @@ afterEach(() => {
 
 const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
 
-describe('the bar of /statistieken/spelers', () => {
+describe('the bar of /spelers', () => {
   it('is a navigation named Op deze pagina:, with three links: to the cards Selectie, Doelpuntenmakers and Bijzondere doelpunten', async () => {
     const html = await render()
 
@@ -70,7 +70,7 @@ describe('the bar of /statistieken/spelers', () => {
   })
 })
 
-describe('the bar of /statistieken/spelers and the choice of the matches', () => {
+describe('the bar of /spelers and the choice of the matches', () => {
   it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
     expect(
       renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),

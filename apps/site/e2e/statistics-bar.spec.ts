@@ -17,17 +17,17 @@ test.describe('the bar of Statistieken without JavaScript', () => {
   test('takes the season and the choice from the page of a season to Spelers', async ({ page }) => {
     await page.goto(`/statistieken/${slug}?competitie=eredivisie`)
 
-    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/statistieken/spelers/${slug}?competitie=eredivisie`)
+    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/spelers/${slug}?competitie=eredivisie`)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute(
       'href',
       '/statistieken/tegenstanders?competitie=eredivisie',
     )
     await bar(page, 'Spelers').click()
 
-    await expect(page).toHaveURL(new RegExp(`/statistieken/spelers/${slug}\\?competitie=eredivisie$`))
+    await expect(page).toHaveURL(new RegExp(`/spelers/${slug}\\?competitie=eredivisie$`))
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Spelers')
     await expect(bar(page, 'Spelers')).toHaveAttribute('aria-current', 'page')
-    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/statistieken/spelers/${slug}?competitie=eredivisie`)
+    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/spelers/${slug}?competitie=eredivisie`)
     await expect(
       page.getByRole('group', { name: 'Welke wedstrijden' }).getByRole('link', { name: 'Eredivisie' }),
     ).toHaveAttribute('aria-current', 'page')
@@ -47,17 +47,17 @@ test.describe('the bar of Statistieken without JavaScript', () => {
   test('has the plain addresses for the current season without a choice, as before', async ({ page }) => {
     await page.goto('/statistieken')
 
-    await expect(bar(page, 'Spelers')).toHaveAttribute('href', '/statistieken/spelers')
+    await expect(bar(page, 'Spelers')).toHaveAttribute('href', '/spelers')
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/statistieken/tegenstanders')
   })
 
   test('keeps the choice from Spelers to Tegenstanders and back', async ({ page }) => {
-    await page.goto('/statistieken/spelers?competitie=eredivisie')
+    await page.goto('/spelers?competitie=eredivisie')
     await bar(page, 'Tegenstanders').click()
 
     await expect(page).toHaveURL(/\/statistieken\/tegenstanders\?competitie=eredivisie$/)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
-    await expect(bar(page, 'Spelers')).toHaveAttribute('href', '/statistieken/spelers?competitie=eredivisie')
+    await expect(bar(page, 'Spelers')).toHaveAttribute('href', '/spelers?competitie=eredivisie')
   })
 })
 
@@ -66,7 +66,7 @@ test.describe('the bar of Statistieken with JavaScript', () => {
     const response = await page.goto(`/statistieken/${slug}?competitie=onzin`)
 
     expect(response?.status()).toBe(404)
-    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/statistieken/spelers/${slug}`)
+    await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/spelers/${slug}`)
   })
 
   test('takes the season and the choice to Spelers, and the bar follows the next page', async ({ page }) => {
@@ -74,7 +74,7 @@ test.describe('the bar of Statistieken with JavaScript', () => {
     await hydrated(page)
     await bar(page, 'Spelers').click()
 
-    await expect(page).toHaveURL(new RegExp(`/statistieken/spelers/${slug}\\?competitie=eredivisie$`))
+    await expect(page).toHaveURL(new RegExp(`/spelers/${slug}\\?competitie=eredivisie$`))
     await expect(bar(page, 'Spelers')).toHaveAttribute('aria-current', 'page')
     await expect(menu(page).getByRole('link', { name: 'Statistieken' })).toHaveAttribute('aria-current', 'true')
     await expect(menu(page).locator('.hf-navigation-bar')).toHaveCount(1)
@@ -94,7 +94,7 @@ test.describe('the bar of Statistieken with JavaScript', () => {
     // switches change the page in the browser (see switches.spec.ts).
     await bar(page, 'Spelers').focus()
     await page.keyboard.press('Enter')
-    await expect(page).toHaveURL(/\/statistieken\/spelers\?competitie=eredivisie$/)
+    await expect(page).toHaveURL(/\/spelers\?competitie=eredivisie$/)
     await expect(bar(page, 'Spelers')).toHaveAttribute('aria-current', 'page')
 
     expect(await names()).toEqual(order)

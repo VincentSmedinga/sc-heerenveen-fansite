@@ -20,6 +20,10 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
+  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /statistieken as
+  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
+  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
+  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   // The nine cards with figures moved to /statistieken (#483). Their anchors on /wedstrijden
   // are gone on purpose, without a redirect: a link to one of them breaks.
   '/statistieken': [
@@ -36,10 +40,6 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'hoe-de-wedstrijden-verlopen',
     'uitersten',
   ],
-  // The card Selectie is the main card (#765). The card Doelpuntenmakers is on /statistieken as
-  // the top 5 and here as the whole list, with the same anchor (#487). The old anchor
-  // topscorers comes along. The card Bijzondere doelpunten (#403) is under it.
-  '/statistieken/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium.
   '/statistieken/tegenstanders/voorbeeld-united': ['stadion'],

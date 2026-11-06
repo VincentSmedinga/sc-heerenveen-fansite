@@ -1649,7 +1649,7 @@ describe('the page /statistieken', () => {
     it('has the link "Alle doelpuntenmakers" to the page Spelers under the list', async () => {
       const card = await topScorers()
 
-      expect(card).toContain('<p><a href="/statistieken/spelers">Alle doelpuntenmakers</a></p>')
+      expect(card).toContain('<p><a href="/spelers">Alle doelpuntenmakers</a></p>')
       expect(card.indexOf('Alle doelpuntenmakers')).toBeGreaterThan(card.indexOf('</table>'))
       expect(card.match(/<a /g)).toHaveLength(2)
     })
@@ -1695,7 +1695,7 @@ describe('the page /statistieken', () => {
       // The link of the heading to itself and the link to the page Spelers are not one of them.
       const withoutOurLinks = (await topScorers())
         .replace(/<a class="hf-heading-link" href="#doelpuntenmakers">/, '')
-        .replace(/<a [^>]*href="\/statistieken\/spelers"[^>]*>/, '')
+        .replace(/<a [^>]*href="\/spelers"[^>]*>/, '')
 
       expect(withoutOurLinks).not.toMatch(/https?:|<a |<img|src=/)
     })
@@ -1985,13 +1985,13 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     const all = await render()
     const hidden = (html: string) => [...html.matchAll(/<input [^>]*type="hidden"[^>]*>/g)].map(([input]) => input)
 
-    expect(league).toContain('href="/statistieken/spelers?competitie=eredivisie"')
+    expect(league).toContain('href="/spelers?competitie=eredivisie"')
     expect(hidden(league)).toHaveLength(2)
     expect(hidden(league).join('')).toMatch(/name="competitie"/)
     expect(hidden(league).join('')).toMatch(/value="eredivisie"/)
     expect(section(league, 'de-nul-gehouden')).toMatch(/<input [^>]*name="competitie"[^>]*value="eredivisie"/)
     expect(league).toMatch(/<form [^>]*aria-label="Seizoen kiezen"[^>]*>(<input [^>]*name="competitie"[^>]*>)/)
-    expect(all).toContain('href="/statistieken/spelers"')
+    expect(all).toContain('href="/spelers"')
     expect(hidden(all)).toHaveLength(0)
   })
 

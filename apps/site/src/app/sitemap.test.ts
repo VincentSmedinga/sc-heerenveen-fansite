@@ -42,8 +42,8 @@ const notInSitemap: string[] = [
   '/statistieken/tegenstanders/[club]',
   // The statistics of a season that is over: only the current season, /statistieken, is listed.
   '/statistieken/[seizoen]',
-  // The same for the players of a season that is over: only /statistieken/spelers is listed.
-  '/statistieken/spelers/[seizoen]',
+  // The same for the players of a season that is over: only /spelers is listed.
+  '/spelers/[seizoen]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.
   '/wedstrijden/[seizoen]',
 ]

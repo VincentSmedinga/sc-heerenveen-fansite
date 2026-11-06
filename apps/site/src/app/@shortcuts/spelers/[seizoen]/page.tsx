@@ -8,9 +8,9 @@ import { playersShortcuts } from '#src/statisticsShortcuts'
 export const dynamic = 'force-dynamic'
 
 /**
- * The bar of the page Spelers of another season, such as /statistieken/spelers/2025-26. An
+ * The bar of the page Spelers of another season, such as /spelers/2025-26. An
  * address that isn't a season has no bar: the page is "niet gevonden". The current season is
- * sent to /statistieken/spelers by the page, so it gets the bar there.
+ * sent to /spelers by the page, so it gets the bar there.
  */
 export default async function SeasonPlayersShortcuts({
   params,

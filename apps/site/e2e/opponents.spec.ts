@@ -324,7 +324,7 @@ test.describe('the bar of Statistieken', () => {
   test('marks Tegenstanders on the list and on the page of a club, and leads from Spelers to it', async ({ page }) => {
     const bar = page.getByRole('navigation', { name: 'Hoofdmenu' })
 
-    await page.goto('/statistieken/spelers')
+    await page.goto('/spelers')
     await bar.getByRole('link', { name: 'Tegenstanders' }).click()
 
     await expect(page).toHaveURL(/\/statistieken\/tegenstanders$/)

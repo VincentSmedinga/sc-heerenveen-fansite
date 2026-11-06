@@ -63,7 +63,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the page of an earlier season, /statistieken/spelers/2025-26', () => {
+describe('the page of an earlier season, /spelers/2025-26', () => {
   it('asks for the data of that season and of no other, after finding it among the seasons with matches', async () => {
     await render()
 
@@ -94,7 +94,7 @@ describe('the page of an earlier season, /statistieken/spelers/2025-26', () => {
       )
 
       expect(html).toMatch(/<h1 class="hf-heading-1">Spelers<\/h1><form [^>]*aria-label="Seizoen kiezen"/)
-      expect(html).toContain('action="/statistieken/spelers/kies"')
+      expect(html).toContain('action="/spelers/kies"')
       expect(options).toEqual([
         ['2026-27', '2026/27', false],
         ['2025-26', '2025/26', true],
@@ -122,11 +122,11 @@ describe('the page of an earlier season, /statistieken/spelers/2025-26', () => {
       expect(getMatchData).not.toHaveBeenCalled()
     })
 
-    it('sends the current season to /statistieken/spelers, for a season to have one address', async () => {
+    it('sends the current season to /spelers, for a season to have one address', async () => {
       const digest = await digestOf(render('2026-27'))
 
       expect(digest).toContain('NEXT_REDIRECT')
-      expect(digest).toContain('/statistieken/spelers;')
+      expect(digest).toContain('/spelers;')
       expect(digest).not.toContain('308')
       expect(getMatchData).not.toHaveBeenCalled()
     })
@@ -140,7 +140,7 @@ describe('the page of an earlier season, /statistieken/spelers/2025-26', () => {
     const html = await render()
 
     expect(html).toContain('Er ging iets mis')
-    expect(html).toContain('href="/statistieken/spelers/2025-26"')
+    expect(html).toContain('href="/spelers/2025-26"')
     expect(error).toHaveBeenCalledOnce()
   })
 })
@@ -152,13 +152,13 @@ describe('the title, description and canonical address of a season of Spelers', 
     const metadata = await metadataOf('2025-26')
 
     expect(metadata.title).toBe('Spelers 2025/26')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/statistieken/spelers/2025-26')
-    expect(metadata.openGraph?.url).toBe('https://sc.heerenveen.org/statistieken/spelers/2025-26')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/spelers/2025-26')
+    expect(metadata.openGraph?.url).toBe('https://sc.heerenveen.org/spelers/2025-26')
     expect(metadata.description).toContain('2025/26')
     expect(metadata.description).not.toContain('dit seizoen')
   })
 
-  it('is noindex on the error page, as /statistieken/spelers is', async () => {
+  it('is noindex on the error page, as /spelers is', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.mocked(getMatchSeasons).mockRejectedValue(new Error('down'))
 
