@@ -1006,7 +1006,7 @@ await withEmptyDatabase((database) =>
     // follow it, and each of the three ends with the line that says so.
     assert.match(
       statisticsHtml,
-      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section>(?:<div aria-label="Welke wedstrijden".*?<\/div>)?<section[^>]*aria-labelledby="reeksen"/s,
+      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><div aria-label="Welke wedstrijden".*?<\/div><p class="hf-visually-hidden" role="status"><\/p><section[^>]*aria-labelledby="reeksen"/s,
     )
     // Spelers is an item of the menu of its own after Wedstrijden, and Cijfers is not one.
     assert.match(
