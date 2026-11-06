@@ -67,6 +67,17 @@ describe('FinalPlacesCard', () => {
     expect(table).toContain('+5')
   })
 
+  it('has the table in a closed fold under the chart, and the notes about points taken off outside it', () => {
+    const html = render()
+    const fold = html.indexOf('<details class="hf-disclosure"><summary>Plek per seizoen')
+
+    expect(fold).toBeGreaterThan(html.indexOf('hf-bar-chart'))
+    expect(html).not.toMatch(/<details[^>]* open/)
+    expect(html.indexOf('<table')).toBeGreaterThan(fold)
+    expect(html.indexOf('<table')).toBeLessThan(html.indexOf('</details>'))
+    expect(html.indexOf('punten afgetrokken')).toBeGreaterThan(html.indexOf('</details>'))
+  })
+
   it('marks the going season as nu, says how many points were taken off and marks a season without a table', () => {
     const html = render()
 

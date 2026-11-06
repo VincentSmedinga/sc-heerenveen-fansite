@@ -2931,3 +2931,16 @@
   Een lijst van de late winnende doelpunten (groter, een ander issue).
   De grens bij de 85e minuut.
 - **Later:** dit vult _De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten_ (`redactie.md`) aan: de blessuretijd (`stoppage_minutes`) doet voor de kwartieren nog niet mee, maar telt wel in de regel "In blessuretijd", en de verlenging blijft buiten de tabel maar telt in de twee regels.
+
+## Een tabel die een grafiek herhaalt, staat in een Disclosure
+
+- **Datum:** 6 november 2026
+- **Besluit:** staat bij een grafiek een tabel met dezelfde gegevens, per wedstrijd of per seizoen, dan staat die tabel in een `Disclosure`.
+  De grafiek en de samenvatting blijven zichtbaar.
+  Dit geldt voor Toeschouwers (#808) en Onze plek door de jaren (Plek per seizoen, op verzoek van de projecteigenaar in dezelfde pull request); andere kaarten volgen in eigen issues.
+  De opmerkingen over afgetrokken punten blijven buiten de Disclosure, en de links naar de seizoenen staan ook dicht in de pagina.
+- **Waarom:** de tabel is lang en de kaart wordt rustiger zonder.
+  Bezoekers met een schermlezer houden de tabel, want de samenvatting van een Disclosure is bereikbaar met het toetsenbord.
+  Het is dezelfde keuze als bij Verloop van het seizoen.
+- **Alternatieven:** de tabel laten staan; de tabel schrappen (verliest de cijfers per wedstrijd).
+- **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de tabel voor een schermlezer staat nu in een Disclosure, dicht bij het laden.
