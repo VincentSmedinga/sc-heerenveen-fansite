@@ -1,0 +1,36 @@
+<!--
+  A trimmed piece of https://en.wikipedia.org/wiki/2018–19_SC_Heerenveen_season?action=raw, read on 6 November 2026.
+  The squad with and without shirt numbers, a link with a disambiguation and a name without a link.
+  The table of scorers after it is not a player.
+-->
+==Players==
+===First-team squad===
+{{updated|13 March 2023}}<br><ref>{{cite web | url=https://int.soccerway.com/teams/netherlands/sportclub-heerenveen/1519/ | title=Heerenveen 2018-19 | publisher=Soccerway | access-date=14 March 2023}}</ref>
+{{Fs start}}
+{{Fs player|no=1|nat=NED|pos=GK|name=[[Warner Hahn]]}}
+{{Fs player|no=3|nat=DEN|pos=DF|name=[[Daniel Høegh]]}}
+{{Fs player|no=18|nat=NED|pos=DF|name=[[Michel Vlap]]}}
+{{Fs mid}}
+{{Fs player|no=21|nat=JAP|pos=MF|name=[[Yuki Kobayashi (footballer, born 1992)|Yuki Kobayashi]]}}
+{{Fs player|no=31|nat=NED|pos=GK|name=Jan Bekkema}}
+{{Fs player|no=|nat=KOS|pos=MF|name=[[Arbër Zeneli]]}}
+{{Fs player|no=|nat=NED|pos=GK|name=[[Jan de Boer (footballer, born 2000)|Jan de Boer]]}}
+{{Fs player|no=|nat=NOR|pos=DF|name=[[Nicolai Næss]]}}
+{{Fs end}}
+
+== Scorers ==
+
+{|class="wikitable"
+|-
+!#
+! Player
+! Eredivisie
+! KNVB Cup
+! Total
+|-
+| align=center|1
+| {{flagicon|NED}} [[Sam Lammers]]
+| 14
+| 0
+| 14
+|}

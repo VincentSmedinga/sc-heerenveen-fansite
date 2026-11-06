@@ -1,0 +1,24 @@
+<!--
+  A trimmed piece of https://en.wikipedia.org/wiki/2021–22_SC_Heerenveen_season?action=raw, read on 6 November 2026.
+  A squad with the parameters in another order, a player on both lists and headings of transfers without a table.
+-->
+==Players==
+===First-team squad===
+{{Fs start}}
+{{Fs player|no=1|nat=NED|pos=GK|name=[[Erwin Mulder]]|other=<small>[[Captain (association football)|captain]]</small>}}
+{{Fs player|no=7|nat=SRB|pos=FW|name=[[Filip Stevanović]]|other=<small>on loan from [[Manchester City F.C.|Manchester City]]</small>}}
+{{Fs mid}}
+{{Fs player|nat=NED|pos=FW|name=[[Trustin van 't Loo]]|no=37}}
+{{Fs player|no=|nat=URU|pos=DF|name=[[Joaquín Fernández (footballer, born 1999)|Joaquín Fernández]]}}
+{{Fs end}}
+
+===Out on loan===
+{{Fs start}}
+{{Fs player|no=|nat=URU|pos=DF|name=[[Joaquín Fernández Pertusso|Joaquín Fernández]]|other=<small>at [[Montevideo City Torque]] until 31 December 2021</small>}}
+{{Fs end}}
+
+==Transfers==
+===In===
+===Out===
+
+==Pre-season and friendlies==

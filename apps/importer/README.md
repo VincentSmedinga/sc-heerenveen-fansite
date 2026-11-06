@@ -819,6 +819,34 @@ Een pagina zonder zo'n sectie geeft `none`: 2010/11, 2011/12 en 2012/13 hebben g
 Een sectie in een andere vorm geeft een fout: een kop, een kolom, een rugnummer of een cel die de lezer niet kent, een rij met te weinig cellen, een regel in de lijst die geen speler is, of een sectie zonder spelers.
 De tabellen met statistieken van 2008/09, 2016/17 en 2017/18 leest deze lezer niet.
 
+### De selectie van de Engelse Wikipedia voor vijf seizoenen
+
+Voor 2018/19 tot en met 2021/22 en voor 2024/25 heeft de Nederlandse Wikipedia geen pagina met de selectie.
+De Engelse heeft er een: `2018–19 SC Heerenveen season`, met een lange streep (`englishSquadPage` in [`src/read-english-squad.ts`](src/read-english-squad.ts) noemt de titel per seizoen).
+`readEnglishSquad` in hetzelfde bestand leest de pagina in de vorm `SeasonSquad`, met de bron `engels`.
+Het is een tekstlezer: ze doet zelf geen verzoek en schrijft niets.
+Het verzoek gaat met dezelfde fetcher en regels als bij de Europa League-wedstrijden van 2012/13 (zie _De Europa League van 2012/13_): `pageUrl(englishWikipediaOrigin, titel)` geeft `https://en.wikipedia.org/wiki/<titel>?action=raw`.
+De beslissing is _De Engelse Wikipedia is een bron voor de selectie van vijf seizoenen zonder Nederlandse pagina_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
+De pagina's hebben twee vormen, en een pagina kan beide hebben:
+
+- een lijst onder "First-team squad" met het sjabloon `{{Fs player}}` (rugnummer, positie, naam), en soms een lijst "Out on loan";
+- tabellen onder "Transfers" of "Player Transfers", een voor "In" en een voor "Out".
+
+Wie meetelt uit de transfers is dezelfde regel als bij de Nederlandse pagina's: een speler die is aangetrokken, een speler die is verhuurd en een speler die in de winter (januari tot en met maart) vertrok.
+Wie in de zomer vertrok, telt niet mee.
+Een vertrokken speler zonder datum die we kunnen lezen blijft weg, met een waarschuwing.
+Een speler op beide lijsten is één speler, met het rugnummer van de selectie; het sleutelwoord is zijn naam zonder accenten (`Milovanovic` en `Milovanović`).
+
+De spelers krijgen een naam en geen `wikipedia_page`: een Engelse titel (`Charlie Webster (footballer)`) is geen titel van de Nederlandse Wikipedia (`Charlie Webster`).
+De koppeling met de doelpunten loopt dus via de naam en de achternaam, zoals `playerLinker` dat al doet.
+Een seizoen krijgt de Engelse pagina alleen als de Nederlandse er niet is: een speler heeft binnen een seizoen één bron.
+2025/26 heeft geen van beide en blijft een gat.
+
+Een pagina zonder selectie en zonder transfers geeft `none`.
+Een selectie zonder spelers die we kennen, een sjabloon, positie of rugnummer dat we niet kennen, een tabel zonder kolom Player of onder een kop die we niet kennen, geeft een fout.
+In de transfers is een rij zonder naam (het sjabloon dat niemand invulde, zoals in 2020/21) geen speler.
+
 ### Wat de import bewaart
 
 - Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.

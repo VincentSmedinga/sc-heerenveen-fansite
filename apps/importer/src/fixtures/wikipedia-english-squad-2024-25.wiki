@@ -1,0 +1,91 @@
+<!--
+  A trimmed piece of https://en.wikipedia.org/wiki/2024–25_SC_Heerenveen_season?action=raw, read on 6 November 2026.
+  A squad with a stray bar in a template and a note in {{small}}, and tables of transfers with the position first
+  and a name inside {{sort}}. Milovanovic is Milovanović in the squad. Rows are cut down to a few; the row
+  of a winter departure and the row without a date are made up from the rows around them.
+-->
+== Players ==
+=== First-team squad ===
+{{updated|29 January 2025}}
+{{Fs start}}
+{{Fs player|no=3|nat=NED|pos=DF|name=[[Jordy de Wijs]]|other={{small|on loan from [[Fortuna Düsseldorf]]}}}}
+{{Fs player|no=4|nat=NED||pos=DF|name=[[Sam Kersten]]}}
+{{Fs player|no=8|nat=NED|pos=MF|name=[[Luuk Brouwers]]|other=<small>[[Captain (association football)|captain]]</small>}}
+{{Fs player|no=15|nat=IRQ|pos=DF|name=[[Hussein Ali (footballer, born 2002)]]}}
+{{fs mid}}
+{{Fs player|no=20|pos=FW|nat=DEN|name=[[Jacob Trenskow]]}}
+{{Fs player|no=27|nat=SRB|pos=DF|name=[[Mateja Milovanović]]}}
+{{Fs player|no=32|nat=NED|pos=MF|name=Melle Witteveen}}
+{{Fs end}}
+
+== Transfers ==
+=== In ===
+{| class="wikitable plainrowheaders sortable"
+!{{Abbr|Pos.|Position}}
+! scope="col" |Player
+!Transferred from
+! style="width: 65px;" |Fee
+! scope="col" |Date
+! scope="col" |Source
+|-
+| align="center" |MF
+|{{flagicon|NED}} [[Luuk Brouwers]]
+|{{fbaicon|NED}} [[FC Utrecht]]
+|€750,000
+|{{dts|1 July 2024}}
+|
+|-
+| align="center" |DF
+|{{flagicon|SER}} [[Mateja Milovanovic]]
+|{{fbaicon|NED}} [[AFC Ajax]]
+|Free transfer
+|{{dts|1 July 2024}}
+|
+|-
+| align="center" |{{sort|2|DF}}
+|{{flagicon|BUL}} [[Hristiyan Petrov]]
+|{{fbaicon|BUL}} [[PFC CSKA Sofia|CSKA Sofia]]
+|Loan
+|{{dts|7 January 2025}}
+|<ref>{{cite web |title=Petrov komt op huurbasis |url=https://www.example.org/petrov}}</ref>
+|}
+
+=== Out ===
+{| class="wikitable plainrowheaders sortable"
+!{{Abbr|Pos.|Position}}
+! scope="col" |Player
+!Transferred to
+! style="width: 80px;" |Fee
+! scope="col" |Date
+! scope="col" |Source
+|-
+| align="center" |{{sort|3|MF}}
+|{{sort|Haye, Thom|{{flagicon|IDN}} [[Thom Haye]]}}
+|{{flagicon|NED}} [[Almere City FC|Almere City]]
+|End of contract
+|{{dts|1 July 2024}}
+|
+|-
+| align="center" |{{sort|4|FW}}
+|{{sort|Sahraoui, Osame|{{flagicon|NOR}} [[Osame Sahraoui]]}}
+|{{flagicon|FRA}} [[Lille OSC]]
+|€8,000,000
+|{{dts|1 August 2024}}
+|<ref>{{cite web |title=Sahraoui naar Lille |url=https://www.example.org/sahraoui}}</ref>
+|-
+| align="center" |{{sort|4|FW}}
+|{{sort|Rallis, Dimitris|{{flagicon|GRE}} [[Dimitris Rallis]]}}
+|{{flagicon|GRE}} [[Panathinaikos F.C.|Panathinaikos]]
+|€1,000,000
+|{{dts|30 January 2025}}
+|
+|-
+| align="center" |{{sort|2|DF}}
+|{{sort|Undated, Player|{{flagicon|NED}} [[Player Undated]]}}
+|{{flagicon|NED}} [[Fortuna Sittard]]
+|End of contract
+|
+|
+|}
+
+== Friendlies ==

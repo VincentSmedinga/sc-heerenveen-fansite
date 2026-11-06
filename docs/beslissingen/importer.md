@@ -2369,3 +2369,30 @@
 - **Alternatieven:** alle namen uit de lijst tellen (verworpen, zie hierboven).
   Eén lezer die de transfers en de doelpuntenmakers van 2006/07 samen teruggeeft (verworpen: `SeasonSquad` heeft één bron, en de beste bron per speler kiest #744).
   Een vertrokken speler zonder bekend venster toch tellen (verworpen: dan staat een speler die in de zomer vertrok in het seizoen).
+
+## De Engelse Wikipedia is een bron voor de selectie van vijf seizoenen zonder Nederlandse pagina
+
+- **Datum:** 5 november 2026
+- **Besluit:** voor 2018/19 tot en met 2021/22 en 2024/25 lezen we de selectie van de Engelse Wikipedia, met dezelfde fetcher en regels als bij de Europa League-wedstrijden van 2012/13.
+  De spelers krijgen geen Nederlandse pagina en geen persoon.
+  `read-english-squad.ts` (#743) leest de pagina `JJJJ–JJ SC Heerenveen season` in de vorm `SeasonSquad`, met de bron `engels`.
+  - Het verzoek is `https://en.wikipedia.org/wiki/<titel>?action=raw`, met dezelfde fetcher, dezelfde controle op `robots.txt` en `englishWikipediaOrigin`.
+    De titels staan per seizoen in `englishSquadPage`; een ander seizoen vraagt niets aan de Engelse Wikipedia.
+  - De lijst `{{Fs player}}` onder "First-team squad" en "Out on loan" is de selectie.
+    De tabellen "In" en "Out" onder "Transfers" of "Player Transfers" vullen haar aan met dezelfde regel als `read-transfers.ts`: aangetrokken, verhuurd en in de winter vertrokken.
+    Wie in de zomer vertrok, telt niet mee.
+  - Een speler krijgt een naam en geen `wikipedia_page`.
+    Een speler op beide lijsten is één speler op zijn naam zonder accenten (`Milovanovic` en `Milovanović`).
+  - Een sjabloon, positie of rugnummer dat de lezer niet kent, en een tabel zonder kolom Player, is een fout.
+    Een pagina zonder selectie en zonder transfers geeft `none`.
+  - De lezer geeft 32, 13, 31, 30 en 30 spelers voor 2018/19, 2019/20, 2020/21, 2021/22 en 2024/25, tegen 31, 21, 28, 29 en 34 in het onderzoek.
+    De selecties zijn met de hand geteld (32, 31, 31 en 30 sjablonen; de speler die twee keer voorkomt telt één keer).
+    2019/20 heeft alleen transfers, en de onderzoekscijfers tellen ook wie in de zomer vertrok.
+  - 2019/20 heeft geen selectie, alleen transfers: de lezer geeft daar `read` met 13 spelers, een gedeeltelijke selectie.
+    De projecteigenaar koos op 6 november 2026 om dat zo te laten, en niet `none` te geven.
+    De volledigheid van dat seizoen blijft laag (#745).
+- **Waarom:** de projecteigenaar gaf op 5 november 2026 toestemming, voor selecties alleen waar de Nederlandse pagina ontbreekt.
+  De licentie is dezelfde (CC BY-SA 4.0).
+  Een speler heeft binnen een seizoen één bron, dus geen dubbele namen met twee titels.
+- **Alternatieven:** alleen de Nederlandse Wikipedia (vijf seizoenen zonder spelers).
+  De Engelse pagina ook waar de Nederlandse bestaat (twee titels per speler, en alleen Wikidata voegt ze samen).
