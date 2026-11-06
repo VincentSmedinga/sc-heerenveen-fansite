@@ -1,0 +1,35 @@
+{
+  "address": "https://acc.sc.heerenveen.org",
+  "cliVersion": "13.6.0",
+  "runsPerPage": 3,
+  "pages": [
+    { "name": "Homepage", "path": "/" },
+    { "name": "Archief, pagina 1", "path": "/nieuws" },
+    { "name": "Artikel van de redactie", "path": "/redactie/we-zijn-terug" },
+    { "name": "Spelers", "path": "/spelers" },
+    { "name": "Archief, pagina 2", "path": "/nieuws?pagina=2" },
+    { "name": "Bronnen", "path": "/bronnen" }
+  ],
+  "fixed": {
+    "accessibility": 100,
+    "bestPractices": 100,
+    "thirdPartyRequests": 0,
+    "sizeMarginPercent": 5,
+    "baselineKiB": {
+      "/": { "weight": 415.0, "javascript": 151.8, "fonts": 218.5 },
+      "/nieuws": { "weight": 421.5, "javascript": 151.8, "fonts": 218.7 },
+      "/redactie/we-zijn-terug": { "weight": 410.5, "javascript": 151.8, "fonts": 218.7 },
+      "/spelers": { "weight": 434.5, "javascript": 152.6, "fonts": 237.1 },
+      "/nieuws?pagina=2": { "weight": 420.7, "javascript": 151.9, "fonts": 218.4 },
+      "/bronnen": { "weight": 412.2, "javascript": 151.9, "fonts": 218.7 }
+    }
+  },
+  "timing": {
+    "enforce": false,
+    "decideOn": "2026-11-23",
+    "budgets": {
+      "mobile": { "performanceMin": 90, "lcpMs": 1100, "tbtMs": 200, "cls": 0.1, "ttfbMs": 150 },
+      "desktop": { "performanceMin": 90, "lcpMs": 400, "tbtMs": 150, "cls": 0.05, "ttfbMs": 150 }
+    }
+  }
+}

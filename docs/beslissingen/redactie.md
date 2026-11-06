@@ -1385,6 +1385,8 @@
 - **Hoe:** de lijst met patronen voor de browsertekst staat op één plek, `notVisitors` in `apps/site/src/visits.ts`.
   Een verzoek zonder browsertekst telt ook niet.
   Een bot die zich als browser voordoet, telt wel mee; de lijst groeit als er een opduikt.
+- **Later:** de dagelijkse Lighthouse-controle doet zich voor als een gewone browser, want Lighthouse 13 zet geen "Lighthouse" meer in de browsertekst.
+  Ze blijft buiten de cijfers met `DNT: 1`, dat de controle meestuurt (zie _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_ in `werkwijze.md`, 7 november 2026).
 
 ## De proxy telt, na het antwoord, alleen een aanvraag van een pagina
 

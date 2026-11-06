@@ -1,0 +1,83 @@
+# Measures the main pages of the site with Lighthouse every day, and by hand, and tells the owner when it gets
+# worse (#803). The pages, the address of the site and the budgets are in .github/lighthouse.json, and the method
+# is the one of docs/prestaties.md. The address is acceptance until production exists (#33): change "address" in
+# that file, and nothing else. The Lighthouse CLI comes from npm at an exact version, through npx, so the
+# repository has no dependency on it. scripts/lighthouse.js does the work, and its summary shows the last seven
+# runs, which it reads from the metrics that earlier runs left as an artifact. A fixed check that fails makes the
+# run fail, and GitHub mails the owner. The checks of time only report until the owner sets them in the file.
+# A run asks only our own site for pages and nothing from anyone else, and it needs no secret.
+
+name: Lighthouse
+
+on:
+  schedule:
+    # Every day at 05:17 UTC, a minute that is not on the hour, when GitHub is less busy.
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+
+# Reading the code, and reading the artifacts of earlier runs of this workflow.
+permissions:
+  actions: read
+  contents: read
+
+# One run at a time: runs next to each other would make each other slower.
+concurrency:
+  cancel-in-progress: false
+  group: lighthouse
+
+jobs:
+  lighthouse:
+    name: Measure the site with Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # Three runs of each of six pages on a phone and on a desktop, one after the other. Chrome is on the runner.
+      - name: Measure
+        run: node scripts/lighthouse.js run
+
+      # The metrics file that each run keeps (see the upload below). A run that has none, or that failed before it
+      # wrote one, only costs its place in the table. The values reach the commands as environment variables.
+      - name: Fetch the metrics of earlier runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p lighthouse-history
+          gh run list --repo "$REPOSITORY" --workflow lighthouse.yml --limit 10 --json databaseId --jq '.[].databaseId' |
+            while read -r id; do
+              if [ "$id" != "$RUN_ID" ]; then
+                gh run download "$id" --repo "$REPOSITORY" --name lighthouse-metrics --dir "lighthouse-history/$id" || true
+              fi
+            done
+
+      # Writes the summary of the run, with the last seven runs beside it, and fails the run when a fixed check fails.
+      - name: Summarise and check
+        run: node scripts/lighthouse.js summary
+
+      - name: Keep the reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: ignore
+          name: lighthouse-reports
+          path: lighthouse-reports/*.json
+          retention-days: 30
+
+      # Small, and the only file a later run reads.
+      - name: Keep the metrics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: ignore
+          name: lighthouse-metrics
+          path: lighthouse-reports/metrics.json
+          retention-days: 30

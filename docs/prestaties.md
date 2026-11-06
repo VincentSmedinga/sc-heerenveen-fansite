@@ -174,3 +174,14 @@ Draai de opdracht hierboven met dezelfde versie van Lighthouse, vanaf dezelfde c
 Een andere versie van Lighthouse of van Chrome geeft andere scores, dus noem die bij elke nieuwe meting.
 Zet de nieuwe meting onder de nulmeting, met datum en reden, en laat de nulmeting staan.
 Op productie telt de SEO-score wel mee.
+
+## De dagelijkse controle
+
+De workflow [`lighthouse.yml`](../.github/workflows/lighthouse.yml) herhaalt deze meting elke dag en op verzoek, met de pagina's, het adres en de budgetten uit [`.github/lighthouse.json`](../.github/lighthouse.json).
+De samenvatting van elke run staat bij de run in GitHub, met de laatste zeven runs ernaast.
+De JSON-rapporten blijven 30 dagen als artifact.
+Vaste controles laten de run falen, en GitHub mailt de eigenaar: geen verzoek naar derden, toegankelijkheid en best practices 100, en gewicht, JavaScript en lettertypes niet meer dan de nulmeting hierboven plus 5%.
+De tijdcontroles melden alleen, tot de eigenaar de budgetten vaststelt (`decideOn` in het bestand).
+De beslissing en de redenen staan in `docs/beslissingen/werkwijze.md`, onder _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_.
+Een runner van GitHub meet niet vanuit Nederland en niet op dezelfde machine, dus de tijden wijken af van de nulmeting.
+Vergelijk de tijden van de runs met elkaar, en de nulmeting met de runs alleen voor gewicht en aantallen.

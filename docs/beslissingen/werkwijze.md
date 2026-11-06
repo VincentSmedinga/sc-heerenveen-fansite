@@ -634,3 +634,28 @@
   De map laat hen één onderdeel openen.
   De bestanden blijven in `docs/`: onderdelen sluiten niet aan op packages, beslissingen gaan over meer dan één package, en een pull request die alleen `docs/` wijzigt slaat de zware controles van CI over en heeft geen Reviewer nodig.
 - **Alternatieven:** de beslissingen inkorten (verworpen: de regels _Later_ en de alternatieven zijn het punt); een bestand per package in de packages zelf (verworpen: beslissingen gaan over meer dan één package); alle titels in de index zetten (verworpen: ongeveer 25 KB extra voor elke lezer, en een lijst om bij te houden); de bestandsnaam in elke verwijzing tussen bestanden zetten (verworpen: ongeveer 160 regels veranderen, en een beslissing die verhuist breekt de verwijzing); een blijvende test voor titels en verwijzingen (verworpen: onderhoud voor weinig winst, en eerst moet de dubbele titel opgelost worden).
+
+## We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd
+
+- **Datum:** 7 november 2026
+- **Besluit:** de workflow `.github/workflows/lighthouse.yml` meet elke dag en op verzoek de zes pagina's van de nulmeting (#798) op mobiel en bureaublad, met de Lighthouse-CLI en de mediaan van drie runs (#803).
+  - **Eén bestand:** `.github/lighthouse.json` heeft het adres (acceptatie tot productie er is, #33), de versie van de CLI, de pagina's en de budgetten.
+    Een ander adres is één regel.
+  - **Zonder dependency:** de CLI komt met `npx` op een exacte versie, de acties staan vast op een commit-SHA, de rechten zijn `contents: read` en `actions: read`, en de workflow heeft geen geheim.
+    `scripts/lighthouse.js` doet het werk en heeft tests.
+  - **Vaste controles laten de run falen:** nul verzoeken naar derden, toegankelijkheid 100, best practices 100, en gewicht, JavaScript en lettertypes per pagina niet meer dan de nulmeting plus 5%.
+    De nulmeting is die van `docs/prestaties.md`, dus 151,8 KiB JavaScript op de homepage en niet de 106 KiB uit de tekst van #802.
+    Een pagina zonder basiswaarde laat de run falen.
+  - **Tijdcontroles melden alleen:** prestaties, LCP, TBT, CLS en TTFB melden tot de eigenaar `enforce` zet, op zijn vroegst op 23 november 2026 (`decideOn`, twee weken na de eerste run).
+    Dan wordt elk budget de slechtste waarde van die weken plus ongeveer 10%, met als doel 1 tot 5 foute runs per maand.
+    De voorlopige waarden in het bestand zijn de nulmeting plus een ruime marge.
+    Na elke verbetering uit deze mijlpaal gaat het budget omlaag, in dezelfde pull request.
+  - **De samenvatting en de rapporten:** de samenvatting van de run toont de pagina's met de laatste zeven runs ernaast.
+    Die komen uit `lighthouse-metrics`, een klein bestand dat elke run als artifact achterlaat, 30 dagen, naast de JSON-rapporten.
+  - **De bezoeken tellen niet mee:** de nagebootste browsers van Lighthouse 13 hebben geen "Lighthouse" meer in hun tekst, dus `notVisitors` in `apps/site/src/visits.ts` houdt ze niet tegen.
+    De runs sturen `DNT: 1` mee, dat `visitOf` al respecteert, en een test legt dat vast.
+    Wijzigt een nieuwe versie dat, dan staat het in die test.
+- **Waarom:** een runner meet elke keer anders, dus een vaste grens voor tijd geeft vals alarm.
+  Het gewicht en het aantal verzoeken naar derden zijn precies, dus die falen meteen.
+  Zelf draaien kost niets en geeft geen gegevens aan een dienst.
+- **Alternatieven:** een dienst als SpeedCurve of Calibre (kosten en een derde partij); Lighthouse CI met een eigen server (te veel beheer voor deze site); alle controles meteen laten falen (te veel vals alarm); de runs herkenbaar maken met een eigen browsertekst in plaats van `DNT: 1` (verandert de meting, en de pagina's zien dan een andere browser dan Lighthouse zelf meet).
