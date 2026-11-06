@@ -433,6 +433,7 @@
 - **Later:** zie _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_: het blok toont nu vijf afleveringen.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de link van het blok gaat naar `/nieuws/podcasts`.
 - **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het blok staat onderaan de zijbalk, en de kaart "Podcasts" op `/nieuws` toont ook vijf afleveringen.
+- **Later:** zie _De kaart met podcasts toont de afleveringen van de laatste 8 dagen_ (7 november 2026): het blok toont alleen afleveringen van de laatste 8 dagen, tot vijf.
 
 ## Het filter is een Navigation, en de paginering verdwijnt bij één pagina
 

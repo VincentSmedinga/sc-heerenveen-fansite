@@ -258,9 +258,12 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Onderaan de zijbalk staat het blok "Nieuwste podcasts": de nieuwste afleveringen van alle podcasts van de laatste 8 dagen, tot vijf, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
+De kaart (`EpisodesCard` in `src/NewsCards.tsx`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu; een aflevering van precies 8 dagen oud staat er nog in.
+Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
+Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Boven de discussies staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
@@ -687,7 +690,7 @@ De zijbalk heeft drie kaarten, in deze volgorde, ook op een telefoon:
 - het filter per bron;
 - "Van de redactie": het nieuwste artikel als één nieuwsregel (`NewsItem`, `EditorsCard` in `src/NewsCards.tsx`): de titel als link naar `/redactie/<naam>`, de dag, en "Van de redactie" als bron, zonder pictogram voor een andere site en zonder inleiding.
   Is er geen artikel, dan staat er geen kaart;
-- "Podcasts": de nieuwste afleveringen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
+- "Podcasts": de nieuwste afleveringen van de laatste 8 dagen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
   Het artikel en de podcasts zijn extra's: lukt het lezen ervan niet, dan staat de kaart er niet en schrijft de site de reden in het logboek.
 
 Het filter staat in een lichtblauwe kaart (`surface="soft"`) in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".
