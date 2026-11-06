@@ -243,6 +243,35 @@ test.describe('without JavaScript', () => {
   })
 })
 
+test.describe('the card Toeschouwers tegen <club>', () => {
+  test('has the average and the largest number of the home matches, and the table in an uitklapper', async ({
+    page,
+  }) => {
+    await page.goto('/tegenstanders/testdorp-fc')
+
+    const card = page.getByRole('region', { name: 'Toeschouwers tegen Testdorp FC' })
+
+    await expect(card.getByRole('heading', { level: 2 })).toHaveText('Toeschouwers tegen Testdorp FC')
+    await expect(card).toContainText('Gemiddeld')
+    await expect(card).toContainText('toeschouwers per thuiswedstrijd')
+    await expect(card).toContainText('Het meest: 21.022, in het seizoen')
+    await expect(card).toContainText('Het aantal toeschouwers is een schatting, volgens Wikipedia.')
+    await expect(card.getByRole('table')).toBeHidden()
+
+    await card.getByText('Aantal per thuiswedstrijd').click()
+
+    await expect(card.getByRole('table')).toBeVisible()
+    await expect(card.getByRole('cell', { name: 'Niet bekend' })).toBeVisible()
+    await expect(card.getByRole('cell', { name: 'Zonder publiek' })).toBeVisible()
+  })
+
+  test('is not on the page of a club that has no known number at a home match', async ({ page }) => {
+    await page.goto('/tegenstanders/fc-maquette')
+
+    await expect(page.getByRole('region', { name: /^Toeschouwers tegen/ })).toHaveCount(0)
+  })
+})
+
 test.describe('the card Nieuws over <club>', () => {
   test('has the newest five headlines that name the club, as links with the source, and no intro or image', async ({
     page,

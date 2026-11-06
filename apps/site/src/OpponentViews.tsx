@@ -2,6 +2,7 @@ import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } fro
 
 import { competitions } from '@fansite/db/schema'
 import {
+  BarChart,
   Card,
   DataTable,
   Disclosure,
@@ -22,11 +23,13 @@ import {
 } from '@fansite/design-system'
 
 import { type CompetitionChoice } from './competition'
-import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
+import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { EredivisieOnly, imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
 import {
+  type ClubAttendance,
+  clubAttendanceId,
   type ClubHeadline,
   type ClubNameView,
   type ClubPlace,
@@ -416,6 +419,76 @@ export function ClubTimelineCard({
         title="Seizoen"
         window={timelineWindow}
       />
+    </Card>
+  )
+}
+
+const attendanceFormat = new Intl.NumberFormat('nl-NL')
+
+/**
+ * The card "Toeschouwers tegen <club>" of the page of a club: the visitors at our home matches
+ * against it, a bar for each match from the first season to the last, with the average and the
+ * largest number (with its season) in two sentences, and under them a table in an uitklapper
+ * with the number of every match, as on Cijfers: a table that repeats a chart is folded away.
+ * The chart is hidden from a screen reader, which gets the sentences and the table. Only the
+ * matches at home count, because an away audience is the other club's, and the card follows
+ * the choice between all the matches and the Eredivisie. An unknown number is an empty place
+ * and a match without an audience a stub. The numbers are Wikipedia's estimates. It is soft,
+ * with the button for an image, after the places and before Doelpuntenmakers. Without a known
+ * number there is no card and no sentence.
+ */
+export function ClubAttendanceCard({
+  attendance,
+  choice,
+  name,
+}: {
+  attendance: ClubAttendance
+  choice: CompetitionChoice
+  name: string
+}) {
+  const { average, highest, known, labels, max, slots, ticks } = attendance
+
+  if (known === 0) {
+    return null
+  }
+
+  const cell = (value: null | number) =>
+    value === null ? 'Niet bekend' : value === 0 ? 'Zonder publiek' : attendanceFormat.format(value)
+
+  return (
+    <Card aria-labelledby={clubAttendanceId} shareable={imageCredit(true)} surface="soft">
+      <Heading anchor id={clubAttendanceId} level={2}>
+        {`Toeschouwers tegen ${name}`}
+      </Heading>
+      <BarChart
+        axis={{ labels, title: 'Seizoen' }}
+        bars={slots.map(({ attendance: value }) => (value === null ? null : { tone: 'neutral', value }))}
+        max={max}
+        ticks={ticks}
+        tickText={attendanceFormat.format}
+      />
+      <Text>{`Gemiddeld ${attendanceFormat.format(average ?? 0)} toeschouwers per thuiswedstrijd`}</Text>
+      {highest && (
+        <Text>
+          {`Het meest: ${attendanceFormat.format(highest.attendance ?? 0)}, in het seizoen ${highest.match.season}`}
+        </Text>
+      )}
+      <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
+      <Disclosure summary="Aantal per thuiswedstrijd">
+        <DataTable
+          caption={`Het aantal toeschouwers bij elke thuiswedstrijd van sc Heerenveen tegen ${name}`}
+          columns={['Wedstrijd', ...(choice === 'all' ? ['Competitie'] : []), 'Aantal']}
+          rows={slots.map((slot) => ({
+            cells: [...(choice === 'all' ? [slot.match.competition] : []), cell(slot.attendance)],
+            header: formatTableDay(slot.match.matchDate),
+          }))}
+        />
+      </Disclosure>
+      <Text appearance="meta">
+        {known === slots.length
+          ? `Gebaseerd op ${known === 1 ? '1 thuiswedstrijd' : `alle ${known} thuiswedstrijden`}`
+          : `Gebaseerd op ${known} van de ${slots.length} thuiswedstrijden`}
+      </Text>
     </Card>
   )
 }

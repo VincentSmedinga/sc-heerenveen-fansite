@@ -169,12 +169,15 @@ async function addProefdorpStadiums(database) {
  * Gives Testdorp FC four more played home matches in the Eredivisie, one to four years ago, so
  * with the one of the seed it has the five that the card Doelpuntenmakers needs. Three of them
  * have scorers and the fourth has a score without scorers, so the line "Gebaseerd op" shows.
+ * Three have a number of visitors and one has none, so the card Toeschouwers tegen Testdorp FC
+ * has an average, a largest number and an empty place, next to the match of the seed.
  */
 async function addTestdorpMeetings(database) {
   const { close, pool } = connect(database)
   const meetings = [
     {
       against: 0,
+      attendance: 20500,
       for: 2,
       goals: [
         [12, 'Wouter Proefman'],
@@ -182,20 +185,20 @@ async function addTestdorpMeetings(database) {
       ],
       yearsAgo: 1,
     },
-    { against: 1, for: 0, goals: [], yearsAgo: 2 },
-    { against: 1, for: 1, goals: [[30, 'Rick Demo']], yearsAgo: 3 },
-    { against: 0, for: 3, goals: [], yearsAgo: 4 },
+    { against: 1, attendance: null, for: 0, goals: [], yearsAgo: 2 },
+    { against: 1, attendance: 18750, for: 1, goals: [[30, 'Rick Demo']], yearsAgo: 3 },
+    { against: 0, attendance: 22000, for: 3, goals: [], yearsAgo: 4 },
   ]
 
   try {
     const [[{ club }]] = await pool.query("SELECT club_id AS club FROM matches WHERE opponent = 'Testdorp FC' LIMIT 1")
 
-    for (const { against, for: scored, goals, yearsAgo } of meetings) {
+    for (const { against, attendance, for: scored, goals, yearsAgo } of meetings) {
       const now = new Date()
       const day = new Date(Date.UTC(now.getUTCFullYear() - yearsAgo, now.getUTCMonth(), now.getUTCDate(), 18, 45))
       const [{ insertId }] = await pool.query(
-        "INSERT INTO matches (season, competition, round, opponent, club_id, home, status, goals_for, goals_against, match_date, kickoff_at) VALUES (?, 'Eredivisie', 'Speelronde 1', 'Testdorp FC', ?, 1, 'played', ?, ?, ?, ?)",
-        [seasonOf(day), club, scored, against, day.toISOString().slice(0, 10), day],
+        "INSERT INTO matches (season, competition, round, opponent, club_id, home, status, goals_for, goals_against, match_date, kickoff_at, attendance) VALUES (?, 'Eredivisie', 'Speelronde 1', 'Testdorp FC', ?, 1, 'played', ?, ?, ?, ?, ?)",
+        [seasonOf(day), club, scored, against, day.toISOString().slice(0, 10), day, attendance],
       )
 
       for (const [minute, page] of goals) {
@@ -1344,6 +1347,15 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(newsCard, /<img|<button|Alle nieuws/)
     assert.match(clubHtml, /id="doelpuntenmakers".*id="nieuws"/s)
     assert.match(clubHtml, /href="#nieuws"/)
+    // The card Toeschouwers tegen Testdorp FC: the home matches with a known number (the seed
+    // has one, and the older meetings three), after the places and before Doelpuntenmakers.
+    const crowdCard = clubHtml.slice(clubHtml.indexOf('aria-labelledby="toeschouwers"'))
+    assert.match(crowdCard, /^[^]*?Toeschouwers tegen Testdorp/)
+    assert.match(crowdCard, /Gemiddeld [\d.]+ toeschouwers per thuiswedstrijd/)
+    assert.match(crowdCard, /Het meest: 22\.000, in het seizoen \d{4}\/\d{2}/)
+    assert.match(crowdCard, /Het aantal toeschouwers is een schatting, volgens Wikipedia\./)
+    assert.match(clubHtml, /id="toeschouwers".*id="doelpuntenmakers"/s)
+    assert.match(clubHtml, /href="#toeschouwers"/)
     assert.match(
       clubHtml,
       /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, thuis, uit en in totaal<\/caption>/,

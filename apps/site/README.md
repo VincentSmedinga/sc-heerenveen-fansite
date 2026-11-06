@@ -586,7 +586,7 @@ Op een telefoon staat onder de kop de balk "Op deze pagina:" met een link naar e
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
 De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom.
-Ze heeft zeven delen:
+Ze heeft acht delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Resultaten sinds 2010" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
@@ -612,6 +612,12 @@ Ze heeft zeven delen:
 - De kaart "De plek van … en de onze" op het zachte vlak, onder "Hoe vaak welke uitslag" (`ClubPlacesCard` in `src/OpponentViews.tsx`): een tabel met per seizoen waarin we allebei in de Eredivisie speelden onze eindplek en die van de club, de nieuwste eerst.
   Onze plek komt uit `getFinalPlaces`, die van de club uit `listStandingsPlaces`, gekoppeld via de namen van de club (`clubKeysOf` en `clubPlacesOf` in `src/opponents.ts`), dus ook onder een oude naam.
   Het lopende seizoen telt niet mee, de kaart volgt de schakelaar niet en eindigt met "Alleen de Eredivisie"; zonder gemeenschappelijk seizoen is er geen kaart.
+- De kaart "Toeschouwers tegen …" op het zachte vlak, met de afbeeldingsknop, na "De plek van … en de onze" en vóór Doelpuntenmakers (`ClubAttendanceCard` in `src/OpponentViews.tsx`, het anker `#toeschouwers`): een staaf (`BarChart`) per thuiswedstrijd tegen de club, van het eerste seizoen naar het laatste, met onder de as het jaar van het eerste seizoen en daarna van elk vijfde (`clubAttendanceOf` in `src/opponents.ts`).
+  Eronder staan twee zinnen, "Gemiddeld … toeschouwers per thuiswedstrijd" en "Het meest: …, in het seizoen …", en de regel dat het aantal een schatting is volgens Wikipedia.
+  De tabel met het aantal per wedstrijd staat in een uitklapper, zoals op Cijfers; de grafiek is verborgen voor een schermlezer, die de zinnen en de tabel krijgt.
+  De telling is die van Cijfers (`attendanceOf` in `src/matches.ts`, nu ook voor `PublicClubMatch`): alleen gespeelde thuiswedstrijden, een onbekend aantal is een lege plek, nul toeschouwers een stompje, en het gemiddelde en het hoogste tellen alleen aantallen boven nul.
+  De kaart volgt de schakelaar; zonder een bekend aantal bij een thuiswedstrijd is er geen kaart en geen zin, en dan ook geen link in de balk.
+  `listClubMatches` geeft daarvoor `attendance` mee.
 - De kaart "Doelpuntenmakers tegen …" op het zachte vlak, met de afbeeldingsknop, onder "Hoe vaak welke uitslag" en boven het stadion (`ClubTopScorersCard` in `src/OpponentViews.tsx`).
   Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` (spelers met evenveel doelpunten delen een rij) en, bij onvolledige gegevens, "Gebaseerd op de doelpuntenmakers van X van de Y gespeelde wedstrijden".
   Het is dezelfde telling en dezelfde weergave als de kaart op Spelers: `TopScorers` in `src/MatchViews.tsx` krijgt de teksten die verschillen (het bijschrift met `scope`, in plaats van `season`, de zin zonder doelpuntenmakers met `empty`, en met `topOnly` alleen de eerste vijf plaatsen, ook zonder link naar Spelers) en de hulpfuncties in `src/matches.ts` nemen elk type wedstrijd dat een `ScoredMatch` past, dus ook die van een club.

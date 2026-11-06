@@ -213,6 +213,18 @@ describe('listClubMatches', () => {
     expect(list[0]).toMatchObject({ goalsAgainst: 0, goalsFor: 2, home: true, opponent: 'FC Twente', status: 'played' })
   })
 
+  it('gives the number of spectators of each match, null where it is not known, and not the referee', async () => {
+    await store(
+      played('FC Twente', 2, 0, { attendance: 26500, matchDate: '2026-10-24' }),
+      played('FC Twente', 1, 1, { home: false, matchDate: '2026-02-01', season: '2025/26' }),
+    )
+
+    const list = await listClubMatches(database.db, await idOf('fc-twente'))
+
+    expect(list.map((match) => match.attendance)).toEqual([26500, null])
+    expect(list[0]).not.toHaveProperty('referee')
+  })
+
   it('puts the later kick-off first on a day with two matches', async () => {
     await store(
       played('FC Twente', 1, 0, { kickoffAt: new Date('2026-10-24T12:00:00Z') }),

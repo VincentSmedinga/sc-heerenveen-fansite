@@ -2924,3 +2924,18 @@
   Het is dezelfde keuze als bij Verloop van het seizoen.
 - **Alternatieven:** de tabel laten staan; de tabel schrappen (verliest de cijfers per wedstrijd).
 - **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de tabel voor een schermlezer staat nu in een Disclosure, dicht bij het laden.
+
+## De kaart met toeschouwers op de pagina van een club telt alleen thuiswedstrijden
+
+- **Datum:** 6 november 2026
+- **Besluit:** "Toeschouwers tegen <club>" (#778) toont de thuiswedstrijden tegen de club, als eigen kaart en niet in de grafiek Verloop sinds 1990.
+  Het is een staaf per wedstrijd, van het eerste seizoen naar het laatste, met het gemiddelde en het hoogste aantal (met het seizoen), en de tabel met het aantal per wedstrijd staat in een `Disclosure`.
+  De kaart telt zoals de kaart op Cijfers (`attendanceOf`), volgt de schakelaar, en staat na "De plek van … en de onze" en vóór "Doelpuntenmakers tegen …".
+  Zonder bekend aantal bij een thuiswedstrijd is er geen kaart.
+- **Waarom:** het aantal bij een uitwedstrijd hoort bij het stadion van de ander.
+  Een eigen kaart houdt de grafiek van het verloop eenvoudig.
+  De tabel herhaalt de grafiek, dus ze staat in een Disclosure (zie _Een tabel die een grafiek herhaalt, staat in een Disclosure_).
+- **Nadeel:** de kaart volgt de schakelaar, dus ze verdwijnt met de keuze Eredivisie bij een club waarvan alleen de bekerwedstrijden een bekend aantal hebben.
+- **Alternatieven:** ook uitwedstrijden (zegt iets anders).
+  Een regel in Verloop sinds 1990.
+- **Later:** dit past bij _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ met een uitzondering: de kaart telt de wedstrijden tegen één club en hoort daarom bij die club.

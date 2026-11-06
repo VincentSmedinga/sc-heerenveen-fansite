@@ -11,12 +11,15 @@ import path from 'node:path'
  * before this season, a draw, a loss and a win. With the one of this season and the one of the
  * season before (see earlier-season.ts) Testdorp FC has five played matches, so its page has
  * the row Laatste wedstrijden. Voorbeeld United has four and FC Maquette two, so their pages
- * have no row. Each is at home with no stadium, so the card Stadion stays away.
+ * have no row. Each is at home with no stadium, so the card Stadion stays away. They have a
+ * number of visitors, an unknown one and one without an audience, so the chart of the card
+ * Toeschouwers tegen Testdorp FC has a bar, an empty place and a stub next to the one of the
+ * seed.
  */
 const meetings = [
-  { goalsAgainst: 2, goalsFor: 2, yearsAgo: 2 },
-  { goalsAgainst: 1, goalsFor: 0, yearsAgo: 3 },
-  { goalsAgainst: 0, goalsFor: 3, yearsAgo: 4 },
+  { attendance: 19500, goalsAgainst: 2, goalsFor: 2, yearsAgo: 2 },
+  { attendance: null, goalsAgainst: 1, goalsFor: 0, yearsAgo: 3 },
+  { attendance: 0, goalsAgainst: 0, goalsFor: 3, yearsAgo: 4 },
 ] as const
 
 const day = (yearsAgo: number) => {
@@ -43,8 +46,9 @@ export async function addOlderMeetings() {
     )
     const rows = meetings
       .filter(({ yearsAgo }) => !held.has(seasonOf(day(yearsAgo))))
-      .map(({ goalsAgainst, goalsFor, yearsAgo }) => ({
+      .map(({ attendance, goalsAgainst, goalsFor, yearsAgo }) => ({
         ...madeUp,
+        attendance,
         goalsAgainst,
         goalsFor,
         kickoffAt: day(yearsAgo),

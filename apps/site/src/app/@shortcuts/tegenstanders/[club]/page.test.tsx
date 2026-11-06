@@ -136,6 +136,28 @@ describe('the bar of the page of a club', () => {
     expect(ids).toContain('nieuws')
   })
 
+  it('has a link to the card Toeschouwers only with a known number at a home match, before Doelpuntenmakers', async () => {
+    expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).not.toContain('#toeschouwers')
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      matches: testclub.matches.map((match) => ({ ...match, attendance: 21000 })),
+    })
+
+    const { html, ids } = await compare('testclub')
+
+    expect(hrefs(html)).toEqual([
+      '#wedstrijden',
+      '#onze-uitslagen',
+      '#resultaten-sinds',
+      '#hoe-vaak-welke-uitslag',
+      '#toeschouwers',
+      '#doelpuntenmakers',
+      '#stadion',
+    ])
+    expect(ids).toContain('toeschouwers')
+  })
+
   it('has the card Doelpuntenmakers only with five matches: the bar has no link for a club with fewer', async () => {
     expect(hrefs(renderToStaticMarkup((await bar('beker-united')) ?? <></>))).not.toContain('#doelpuntenmakers')
   })

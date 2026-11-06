@@ -67,6 +67,7 @@ function match(ours: number, theirs: number, more: Partial<PublicClubMatch> = {}
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    attendance: null,
     competition: 'Eredivisie',
     dateText: null,
     extraTime: false,
