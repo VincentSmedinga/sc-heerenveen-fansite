@@ -2600,6 +2600,7 @@
     Een speler zonder positie, tussen spelers mét positie, staat in een laatste deel "Positie onbekend".
     Heeft geen enkele speler van het seizoen een positie (de tabellen tot en met 2005/06), dan is er één lijst zonder kopjes.
     De regel is `ShortPlayer` van het designsysteem: het rugnummer en de naam, met de klassen van `ShortMatch`.
+    **Later:** sinds 7 november 2026 is de regel een `PlayerName` met `shirtNumber` in een `ShortFact`; `ShortPlayer` bestaat niet meer (zie _Het rugnummer en een regel achter de naam zijn opties van PlayerName, en ShortPlayer vervalt_ in `designsysteem.md`).
   - **De volgorde:** op rugnummer, spelers zonder rugnummer achteraan, dan op de zoekterm (de achternaam, dus `van Aken` staat onder de V) en de naam.
     De volgorde komt uit de query `listSeasonPlayers` in `packages/db`; die geeft, anders dan `listSquad`, ook spelers die de selectie verlieten.
   - **De zin:** uit `squad_completeness` (de teksten van #747) onder de kop, zonder percentage.
@@ -2974,3 +2975,11 @@
 - **Alternatieven:** altijd de vijf nieuwste tonen (zoals eerder).
   Een venster van 7 dagen (mist een wekelijkse aflevering die iets later komt).
 - **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) en van _Het blok op de homepage staat in de zijbalk onder het forum_ in `docs/beslissingen/importer.md` (24 oktober 2026) dat zegt dat de kaart de nieuwste afleveringen toont zonder grens in de tijd.
+
+## De kaart Resultaten per hoofdtrainer zegt achter de naam hoeveel wedstrijden en hoeveel punten per wedstrijd
+
+- **Datum:** 7 november 2026
+- **Besluit:** achter de naam van elke hoofdtrainer op Cijfers staat de regel van `PlayerName`: "34 wedstrijden, 1,85 punten per wedstrijd" (bij één wedstrijd "1 wedstrijd", bij precies 1,00 "punt"), met de periode eronder zoals nu (#812).
+  De kolommen G en P van de tabel blijven; de regel is er voor wie de naam leest zonder de tabel te volgen.
+- **Waarom:** de projecteigenaar wilde de aantallen bij de naam, en het is de eerste plek die de regel van `PlayerName` gebruikt.
+- **Alternatieven:** de regel in de plaats van de periode (dan mist de periode); de kolommen weghalen (de tabel wordt minder te vergelijken).

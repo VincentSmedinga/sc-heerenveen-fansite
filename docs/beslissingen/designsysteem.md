@@ -2630,3 +2630,25 @@
 - **Besluit:** assen, de grond en pijlen volgen `--hf-card-line-graphic`; de gegevens van de grafiek blijven vast.
 - **Waarom:** een as betekent iets en moet 3:1 halen (1.4.11), en de grafieken van het seizoen staan op warme kaarten.
 - **Alternatief:** de assen blauw laten (blauw in zand, wat de projecteigenaar niet mooi vindt).
+
+## Het rugnummer en een regel achter de naam zijn opties van PlayerName, en ShortPlayer vervalt
+
+- **Datum:** 7 november 2026
+- **Besluit:** `PlayerName` krijgt de optionele eigenschap `shirtNumber` en een regel achter de naam, die als `children` meekomt (#812).
+  `ShortPlayer` vervalt: het onderdeel, zijn CSS, zijn story en zijn tests.
+  - **Rugnummer:** weggelaten is geen rugnummer en geen kolom; `null` is een lege kolom, zodat de namen van een lijst op dezelfde plek beginnen; een getal staat in de kolom voor de naam.
+    Een lange naam loopt door onder de naam, niet onder het nummer.
+    Het nummer en de naam zijn voor een schermlezer één regel tekst, met een gewone spatie ertussen en zonder verborgen tekst.
+    Zonder `shirtNumber` en zonder regel is de opmaak precies die van voorheen.
+  - **De regel:** kleine, rustige letters op een eigen regel, in het gewone gewicht.
+    Voor een schermlezer komt hij als eigen tekst na de naam, en de naam blijft één naam.
+  - **`children` en niet een eigen eigenschap:** de projecteigenaar stelde `children` voor.
+    Een naam met een regel erachter leest zo als een naam met een toelichting, zoals een `Card` of een `List.Item` zijn inhoud krijgt, en het component houdt één eigenschap minder.
+    Het nadeel is dat `children` nu niet de naam vervangt; de documentatie en de prop-beschrijving zeggen dat het de regel erachter is.
+    Een eigen `meta` zou duidelijker heten maar voegt niets toe, want niets anders kan hier `children` zijn.
+  - **De lijst met lijntjes:** de kaart Selectie zet `PlayerName` in een `ShortFact`, dat de dunne lijnen en de ruimte tussen de regels al tekent, zodat de kaart er hetzelfde uitziet.
+- **Waarom:** `ShortPlayer` had één gebruiker en was `PlayerName` met een kolom ervoor.
+  Eén onderdeel voor de naam van een speler houdt het simpel, en een regel achter de naam kan er zo bij, voor de hoofdtrainers nu en voor het aantal seizoenen later (#811).
+- **Alternatieven:** `ShortPlayer` laten staan als omhulsel om `PlayerName` (twee onderdelen die bijna hetzelfde doen).
+  Een eigenschap `meta` voor de regel (zie boven).
+- **Later:** dit vervangt het onderdeel `ShortPlayer`, dat in _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (`site.md`) de regel van de kaart Selectie was.

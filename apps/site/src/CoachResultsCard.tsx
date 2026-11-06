@@ -27,11 +27,16 @@ const headerOf = ({ name, period }: CoachResult) => `${name}, ${period}`
 /** The line under the name: the period, with "interim" in front where the coach stood in. */
 const periodLineOf = ({ interim, period }: CoachResult) => (interim ? `interim \u00b7 ${period}` : period)
 
+/** The line behind the name: "34 wedstrijden, 1,85 punten per wedstrijd". */
+const matchesLineOf = ({ played, pointsPerMatch }: CoachResult) =>
+  `${played === 1 ? '1 wedstrijd' : `${played} wedstrijden`}, ${pointsPerMatch} ${pointsPerMatch === '1,00' ? 'punt' : 'punten'} per wedstrijd`
+
 /**
  * The card "Resultaten per hoofdtrainer" of Cijfers: a table with a row for each head coach who
  * has a played match in our data, the newest first, with the matches he played, won, drew and
  * lost, and the points per match. The row header is the name (`PlayerName`, the surname in the
- * stronger weight) with his period on a line of its own under it (see `periodLineOf`). The card
+ * stronger weight) with the line "34 wedstrijden, 1,85 punten per wedstrijd" behind it (see
+ * `matchesLineOf`) and his period on a line of its own under it (see `periodLineOf`). The card
  * follows the switch between all the matches and the Eredivisie (see `coachResultsOf`) and, as
  * a long table, has no button for an image. `since` is the season from which we have matches.
  * Without a coach with a match there is no card.
@@ -61,7 +66,7 @@ export function CoachResultsCard({
         columns={['Hoofdtrainer', ...figureColumns]}
         rows={results.map((result) => ({
           cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
-          display: <PlayerName {...splitStaffName(result.name)} />,
+          display: <PlayerName {...splitStaffName(result.name)}>{matchesLineOf(result)}</PlayerName>,
           header: headerOf(result),
           secondary: periodLineOf(result),
         }))}
