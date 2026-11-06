@@ -9,11 +9,11 @@ import { hydrated } from './hydrated'
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
 // have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
 // result in three competitions, a head coach in the table and our place in four seasons) and
-// Cijfers ten. The checks of how it behaves while scrolling are on /cijfers below, the page
+// Cijfers eleven. The checks of how it behaves while scrolling are on /cijfers below, the page
 // with the long cards.
 const withBar = [
   { links: 7, path: '/wedstrijden' },
-  { links: 10, path: '/cijfers' },
+  { links: 11, path: '/cijfers' },
 ] as const
 
 for (const { links, path } of withBar) {
@@ -82,7 +82,7 @@ test.describe('the bar under the header of /cijfers', () => {
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await expect(bar.getByRole('link')).toHaveCount(10)
+    await expect(bar.getByRole('link')).toHaveCount(11)
     await menu.getByRole('link', { name: 'Nieuws' }).click()
     await expect(page).toHaveURL(/\/nieuws$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
@@ -91,7 +91,7 @@ test.describe('the bar under the header of /cijfers', () => {
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
     await menu.getByRole('link', { name: 'Cijfers' }).click()
     await expect(page).toHaveURL(/\/cijfers$/)
-    await expect(bar.getByRole('link')).toHaveCount(10)
+    await expect(bar.getByRole('link')).toHaveCount(11)
 
     // The other page with a bar has its own links, not those of the page before.
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
@@ -188,8 +188,10 @@ test.describe('the bar under the header of /cijfers', () => {
         'De nul gehouden',
         'Doelpunten per kwartier',
         'Uitersten',
+        'Resultaten per hoofdtrainer',
       ])
       await walk('Shift+Tab', [
+        'Uitersten',
         'Doelpunten per kwartier',
         'De nul gehouden',
         'Hoe vaak welke uitslag',
@@ -299,7 +301,7 @@ test.describe('the bar under the header of /cijfers', () => {
 
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
 
-    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Uitersten')
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Resultaten per hoofdtrainer')
   })
 
   test('makes the link that is clicked the current one, and does not scroll the page from under the bar', async ({

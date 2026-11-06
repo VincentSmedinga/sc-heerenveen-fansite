@@ -1,6 +1,6 @@
 import type { PublicLeagueResult, PublicMatch } from '@fansite/db/queries'
 
-import type { MatchData } from './matches'
+import type { getCoachResultData, MatchData } from './matches'
 
 /*
  * Made-up matches, a table and the pages they credit, for the tests of the pages that show
@@ -269,3 +269,32 @@ export const leagueResultsData: PublicLeagueResult[] = [
   { awayClub: 'Testdorp FC', awayGoals: 0, homeClub: 'sc Heerenveen', homeGoals: 2, playedOn: '2026-10-04', round: 8 },
   { awayClub: 'Testdorp FC', awayGoals: 1, homeClub: 'Demo Boys', homeGoals: 1, playedOn: '2026-10-11', round: 9 },
 ]
+
+/** The head coaches and match days the card "Resultaten per hoofdtrainer" is made from. */
+export const coachResultData: Awaited<ReturnType<typeof getCoachResultData>> = {
+  coaches: [
+    {
+      endDate: '2026-01-10',
+      endPrecision: 'day',
+      interim: false,
+      name: 'Anna Voorbeeld',
+      startDate: '2024-07-01',
+      startPrecision: 'day',
+      wikipediaPage: null,
+    },
+    {
+      endDate: null,
+      endPrecision: null,
+      interim: true,
+      name: 'Piet Proef',
+      startDate: '2026-01-11',
+      startPrecision: 'day',
+      wikipediaPage: null,
+    },
+  ],
+  matchDays: [
+    { competition: 'Eredivisie', goalsAgainst: 0, goalsFor: 2, matchDate: '2025-09-14', status: 'played' },
+    { competition: 'KNVB Beker', goalsAgainst: 1, goalsFor: 1, matchDate: '2025-10-30', status: 'played' },
+    { competition: 'Eredivisie', goalsAgainst: 3, goalsFor: 1, matchDate: '2026-02-01', status: 'played' },
+  ],
+}

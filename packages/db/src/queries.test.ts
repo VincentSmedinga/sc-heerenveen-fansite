@@ -8,6 +8,7 @@ import {
   countArchiveItems,
   countPodcastEpisodes,
   findPodcast,
+  listAllMatchDays,
   listAllMatchGoals,
   listAllWikipediaPages,
   listArchivePage,
@@ -1720,6 +1721,20 @@ describe('the matches and the table of a season', () => {
       )
       expect(rows[0]?.goals.map((goal) => goal.player)).toEqual(['Oud'])
       expect(rows[1]?.goals).toEqual([])
+    })
+
+    it('gives the day, competition and score of every match of every season, by day, for the results per coach', async () => {
+      const [first, second] = madeUpMatches(now)
+      const earlier = { ...second!, matchDate: '2010-09-12', season: '2010/11' }
+
+      await database.db.insert(matches).values(await withClubs(database.db, [first!, earlier]))
+
+      const rows = await listAllMatchDays(database.db)
+
+      expect(rows.map((match) => match.matchDate)).toEqual(['2010-09-12', first!.matchDate])
+      expect(Object.keys(rows[0]!).sort()).toEqual(
+        ['competition', 'goalsAgainst', 'goalsFor', 'matchDate', 'status'].sort(),
+      )
     })
 
     it('gives a cup match with extra time the score after 90 minutes when the seed has it', async () => {
