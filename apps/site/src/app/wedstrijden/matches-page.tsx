@@ -6,8 +6,16 @@ import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { FinalPlacesCard } from '#src/FinalPlacesCard'
 import { lastFiveOf } from '#src/last-five'
-import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason, resultsPerCompetition } from '#src/matches'
+import {
+  getFinalPlaces,
+  getLeagueResults,
+  type MatchData,
+  overviewOf,
+  resultsOfSeason,
+  resultsPerCompetition,
+} from '#src/matches'
 import { coachesCardOf, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
@@ -63,6 +71,9 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * belongs to it on the page Cijfers, of the same season. A season that has no matches in
  * the database is the page "niet gevonden".
  *
+ * The card Onze plek door de jaren, under the table, shows our place in every season we have a
+ * table of, whichever season the page shows (see FinalPlacesCard).
+ *
  * The card with the table of the current season has a switch between the whole season and the
  * latest five matches of each club, `?stand=laatste-5` (see StandingsSwitch). It is there only
  * when the results of every club are complete enough (see `lastFiveOf`). An Eindstand has no
@@ -95,6 +106,8 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const lastFive = current ? await lastFiveOfSeason(data) : undefined
   const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
   const coachesCard = coachesCardOf(data.coaches.length)
+  // Our place in every season: the same on every page, so it does not depend on `season`.
+  const finalPlaces = await finalPlacesOfAllSeasons()
   // The cards with figures are on the statistics page of the same season.
   const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
 
@@ -190,6 +203,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             </>
           )}
         </Card>
+        <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
         <CoachesCard coaches={data.coaches} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
@@ -197,6 +211,20 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
       </Page.Sidebar>
     </>
   )
+}
+
+/**
+ * Our place in every season, for the card "Onze plek door de jaren". It is no more than a card:
+ * when it can't be read, the page is shown without it and the error is logged.
+ */
+async function finalPlacesOfAllSeasons() {
+  try {
+    return await getFinalPlaces()
+  } catch (error) {
+    console.error(`Could not read our place in the seasons for ${matchesPath}: ${reasonOf(error)}`)
+
+    return []
+  }
 }
 
 /**

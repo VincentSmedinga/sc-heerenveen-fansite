@@ -3,7 +3,7 @@ import type { Competition } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Page } from '@fansite/design-system'
 
-import { getMatchData, getMatchSeasons, overviewOf, resultsPerCompetition } from '#src/matches'
+import { getFinalPlaces, getMatchData, getMatchSeasons, overviewOf, resultsPerCompetition } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 
 /**
@@ -22,6 +22,7 @@ export async function SeasonShortcuts({ season }: { season: string }) {
 
   let coachCount: number
   let withResults: Competition[]
+  let withFinalPlaces: boolean
 
   try {
     if (!current && !(await getMatchSeasons()).includes(season)) {
@@ -38,5 +39,18 @@ export async function SeasonShortcuts({ season }: { season: string }) {
     return null
   }
 
-  return <Page.Shortcuts items={matchShortcutsOf(current, coachCount, withResults)} label="Op deze pagina:" />
+  try {
+    // The card is no more than a card: when it can't be read the page leaves it out, and so
+    // does the bar.
+    withFinalPlaces = (await getFinalPlaces()).length > 0
+  } catch {
+    withFinalPlaces = false
+  }
+
+  return (
+    <Page.Shortcuts
+      items={matchShortcutsOf(current, coachCount, withResults, withFinalPlaces)}
+      label="Op deze pagina:"
+    />
+  )
 }

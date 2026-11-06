@@ -1,18 +1,21 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchData } from '#src/test-matches'
 
 import MatchesShortcuts from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
 
 beforeEach(() => {
+  vi.mocked(getFinalPlaces).mockReset()
+  vi.mocked(getFinalPlaces).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockReset()
@@ -101,5 +104,23 @@ describe('the bar of /wedstrijden for the current season', () => {
 
   it('has Programma, which the current season has a card for', async () => {
     expect(await render()).toContain('href="#programma"')
+  })
+
+  it('has a link to the card with our place in every season, after the table, when there is one', async () => {
+    vi.mocked(getFinalPlaces).mockResolvedValue([{ now: true, row: undefined, season: '2026/27' }])
+
+    expect([...(await render()).matchAll(/<a [^>]*href="(#[^"]*)"/g)].map(([, href]) => href)).toEqual([
+      '#programma',
+      '#uitslagen',
+      '#uitslagen-knvb-beker',
+      '#stand',
+      '#onze-plek-door-de-jaren',
+    ])
+  })
+
+  it('leaves the link out when the card can not be read', async () => {
+    vi.mocked(getFinalPlaces).mockRejectedValue(new Error('down'))
+
+    expect(await render()).not.toContain('#onze-plek-door-de-jaren')
   })
 })

@@ -82,6 +82,7 @@ Heeft de database al een stand voor dit seizoen, dan laat hij die staan en haalt
 Voor de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, zet hij verzonnen wedstrijden, doelpunten, een stand en de bronpagina's in het seizoen vóór het lopende (`e2e/earlier-season.ts`, met `seedMatches`), en haalt ze na de laatste test weer weg.
 Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laat hij die staan.
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
+Voor de kaart Onze plek door de jaren zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
 `pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.

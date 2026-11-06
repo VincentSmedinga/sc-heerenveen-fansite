@@ -69,6 +69,41 @@ const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-s
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
+/** This day some years ago. */
+function dayYearsAgo(years) {
+  const now = new Date()
+
+  return new Date(Date.UTC(now.getUTCFullYear() - years, now.getUTCMonth(), now.getUTCDate()))
+}
+
+/** The season that some years ago was the current one, such as `2024/25`. */
+const seasonsAgo = (years) => seasonOf(dayYearsAgo(years))
+
+/**
+ * Gives the card "Onze plek door de jaren" three seasons: the one of the seed and our row in
+ * the table of the two seasons before it, the older one with two points taken off. These
+ * seasons have a table and no matches, so their rows are not links.
+ */
+async function addEarlierStandings(database) {
+  const { close, pool } = connect(database)
+
+  try {
+    for (const [yearsAgo, position, pointsDeducted] of [
+      [2, 3, 0],
+      [3, 5, 2],
+    ]) {
+      const day = dayYearsAgo(yearsAgo)
+
+      await pool.query(
+        "INSERT INTO standings (season, position, club, played, won, drawn, lost, goals_for, goals_against, goal_difference, points, points_deducted, valid_on) VALUES (?, ?, 'sc Heerenveen', 34, 18, 6, 10, 60, 40, 20, ?, ?, ?)",
+        [seasonOf(day), position, 60 - pointsDeducted, pointsDeducted, day.toISOString().slice(0, 10)],
+      )
+    }
+  } finally {
+    await close()
+  }
+}
+
 /**
  * Gives SV Proefdorp a list of names of its own: an older name, and the name of now from the
  * season 2012/13, with a note. Its page then says "Eerder" from the list.
@@ -797,6 +832,7 @@ await withEmptyDatabase((database) =>
     // Wikipedia under them, and a link under the table and the results to the cards with
     // figures on the statistics page. The homepage has the two blocks, between the forum and
     // the podcasts.
+    await addEarlierStandings(database)
     const matchesPage = await fetch(`${origin}/wedstrijden`)
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
@@ -824,8 +860,32 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#programma', '#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs', '#stand', '#hoofdtrainer'],
+      [
+        '#programma',
+        '#uitslagen',
+        '#uitslagen-knvb-beker',
+        '#uitslagen-play-offs',
+        '#stand',
+        '#onze-plek-door-de-jaren',
+        '#hoofdtrainer',
+      ],
     )
+    // The card with our place in every season stands under the table: a chart that a screen
+    // reader skips and a table of four seasons, the newest first. One has no table, one has
+    // points taken off. Under it are the first season and the line that it is the Eredivisie.
+    const placesCard = matchesHtml.slice(matchesHtml.indexOf('id="onze-plek-door-de-jaren"'))
+    assert.ok(matchesHtml.indexOf('id="stand"') < matchesHtml.indexOf('id="onze-plek-door-de-jaren"'))
+    assert.match(placesCard, /class="hf-bar-chart/)
+    const placesTable = placesCard.slice(0, placesCard.indexOf('</table>'))
+    assert.deepEqual(
+      [...placesTable.matchAll(/<th scope="row">.*?(\d{4}\/\d{2})/g)].map(([, season]) => season),
+      [0, 1, 2, 3].map(seasonsAgo),
+    )
+    assert.match(placesTable, /nu/)
+    assert.match(placesTable, /geen stand/)
+    assert.match(placesTable, /2 punten afgetrokken/)
+    assert.match(placesCard, new RegExp(`Sinds ${seasonsAgo(3)}`))
+    assert.match(placesCard, /Alleen de Eredivisie<\/p><\/section>/)
     // The card with how often each score was played moved to the statistics page (#774).
     assert.doesNotMatch(matchesHtml, /hoe-vaak-welke-uitslag/)
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
