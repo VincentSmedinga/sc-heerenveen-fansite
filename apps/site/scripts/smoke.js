@@ -1099,7 +1099,7 @@ await withEmptyDatabase((database) =>
     assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="alle-tijden"'))
     assert.ok(playersHtml.indexOf('id="alle-tijden"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
     assert.match(allTimeCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
-    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ' '), /Sinds \d{4}\/\d{2}\./)
+    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ''), /Sinds \d{4}\/\d{2}\./)
     assert.match(
       allTimeCard,
       /<caption class="hf-visually-hidden">De top 10 van de doelpuntenmakers van sc Heerenveen sinds /,

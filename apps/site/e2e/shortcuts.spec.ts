@@ -398,7 +398,7 @@ test.describe('the bar under the header of /spelers', () => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto(`/spelers/${earlierSeasonSlug()}`)
 
-    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(3)
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(4)
   })
 })
 
