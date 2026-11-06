@@ -8,9 +8,19 @@ import { PlayerName } from './PlayerName'
 
 const meta = preview.meta({
   argTypes: {
+    children: {
+      control: 'text',
+      description:
+        'Een regel achter de naam met meer over de speler, in kleine, rustige letters en op een eigen regel, zoals het aantal wedstrijden van een hoofdtrainer. Voor een schermlezer komt hij als eigen tekst na de naam.',
+    },
     givenName: {
       control: 'text',
       description: 'De voornaam, in het gewone gewicht. Laat hem weg bij een speler met één naam.',
+    },
+    shirtNumber: {
+      control: 'number',
+      description:
+        'Het rugnummer, in een kolom voor de naam. `null` is een speler zonder nummer in een lijst waar anderen er wel een hebben: de kolom blijft leeg. Laat hem weg in een lijst waar niemand een nummer heeft.',
     },
     surname: {
       control: 'text',
@@ -25,6 +35,7 @@ const meta = preview.meta({
           'De naam van een speler, met de voornaam gewoon en de achternaam zwaarder, zodat je in één blik ziet over wie het gaat en welk deel de naam is waarop je zoekt.',
           'Voor een schermlezer en bij kopiëren is het één naam in één tekst; het gewicht is alleen voor het oog.',
           'Het gewicht staat op het component zelf, dus de naam ziet er overal hetzelfde uit.',
+          'Met een rugnummer staat het nummer in een kolom voor de naam, en met een regel achter de naam staat daar meer over de speler.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -181,5 +192,65 @@ export const LongInHeaderAndList = meta.story({
         </List.Item>
       </List>
     </div>
+  ),
+})
+
+export const WithShirtNumbers = meta.story({
+  name: 'Met rugnummers, ook een speler zonder',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Het rugnummer staat in een kolom, zodat de namen op dezelfde plek beginnen. Een speler zonder nummer (`null`) houdt een lege kolom. Een lange naam loopt door onder de naam, niet onder het nummer.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName givenName="Testspeler" shirtNumber={4} surname="Een" />
+        </List.Item>
+        <List.Item>
+          <PlayerName givenName="Testspeler" shirtNumber={12} surname="van Twee" />
+        </List.Item>
+        <List.Item>
+          <PlayerName givenName="Testspeler" shirtNumber={null} surname="Drie" />
+        </List.Item>
+        <List.Item>
+          <PlayerName
+            givenName="Jan van der Voorbeeldstraat"
+            shirtNumber={39}
+            surname="Proefmans-Van Nepperveldhuizen"
+          />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})
+
+export const WithLine = meta.story({
+  name: 'Met een regel achter de naam',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De regel komt als `children` mee. De naam blijft één naam, en de regel staat eronder in kleine, rustige letters.',
+      },
+    },
+  },
+  render: () => (
+    <List role="list">
+      <List.Item>
+        <PlayerName givenName="Testtrainer" surname="Een">
+          34 wedstrijden, 1,85 punten per wedstrijd
+        </PlayerName>
+      </List.Item>
+      <List.Item>
+        <PlayerName givenName="Testtrainer" shirtNumber={null} surname="Twee">
+          12 wedstrijden, 1,00 punten per wedstrijd
+        </PlayerName>
+      </List.Item>
+    </List>
   ),
 })

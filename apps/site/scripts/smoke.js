@@ -1194,7 +1194,7 @@ await withEmptyDatabase((database) =>
       [...squadCard.matchAll(/<h3[^>]*>(.*?)<\/h3>/g)].map(([, name]) => name),
       ['Doelmannen', 'Verdedigers', 'Middenvelders', 'Aanvallers'],
     )
-    assert.match(squadCard, /hf-short-player-number">1<\/span>.*?Brandsma/s)
+    assert.match(squadCard, /hf-player-name-number">1<\/span> <span class="hf-player-name-text">.*?Brandsma/s)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('<aside'))
     assert.match(
       playersHtml,

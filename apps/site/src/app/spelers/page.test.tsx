@@ -564,10 +564,11 @@ describe('the card Selectie on /spelers', () => {
 
   /** The lines of the card: the shirt number (empty when none) and the name. */
   const linesOf = (html: string) =>
-    [...card(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => [
-      /player-number">(\d*)</.exec(line ?? '')?.[1] ?? '',
-      plain(/hf-short-match-opponent">(.*)<\/span><\/div>/s.exec(line ?? '')?.[1]),
-    ])
+    [...card(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => {
+      const number = /hf-player-name-number">(\d*)</.exec(line ?? '')?.[1] ?? ''
+
+      return [number, plain(line).slice(number.length).trim()]
+    })
 
   const withSquad = (overrides: Partial<typeof squadData>) =>
     vi.mocked(getSeasonSquad).mockResolvedValue({ ...squadData, ...overrides })
@@ -604,6 +605,13 @@ describe('the card Selectie on /spelers', () => {
     expect(card(html).replace(/<h2.*?<\/h2>/s, '')).not.toMatch(/<a |<img|button/)
   })
 
+  it('reads the shirt number and the name as one line of text, and an empty column as the name alone', async () => {
+    const lines = [...card(await render()).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => plain(line))
+
+    expect(lines).toContain('4 Testspeler van Twee')
+    expect(lines).toContain('Testreserve Vijf')
+  })
+
   it('has a sentence for each level of the chance, and the other sentence for a table of who played', async () => {
     const sentences = async (level: string, bestSource = 'selectie') => {
       withSquad({ completeness: { bestSource, level, playerCount: 22 } as never })
@@ -635,7 +643,7 @@ describe('the card Selectie on /spelers', () => {
     expect(card(html).match(/<h3/g)).toBeNull()
     expect(card(html).match(/<ul/g)).toHaveLength(1)
     expect(linesOf(html).map(([, name]) => name)).toEqual(['Testkeeper Een', 'Testspeler van Twee', 'Proefman Drie'])
-    expect(card(html)).not.toContain('hf-short-player-number')
+    expect(card(html)).not.toContain('hf-player-name-number')
   })
 
   it('puts the players without a position, among others who have one, in a last part', async () => {

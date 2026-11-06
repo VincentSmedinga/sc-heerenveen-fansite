@@ -365,7 +365,7 @@ De kaarten staan in twee gelijke kolommen: de eerste vijf in de hoofdkolom, onde
 Cijfers is de uitzondering op de regel voor de kolommen (zie _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ in `docs/beslissingen/site.md`): hier hebben beide kolommen cijfers, omdat er geen lijst of tabel is waar de pagina voor bestaat.
 Links staan onze plek, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen en thuis en uit, en Opmerkelijk.
 Rechts staan de toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten, de resultaten per hoofdtrainer en de bronvermelding.
-De kaart Resultaten per hoofdtrainer (`src/CoachResultsCard.tsx`, de telling in `src/coachResults.ts`) is een tabel met een rij per trainer met wedstrijden, de nieuwste eerst, volgt de schakelaar, telt alle seizoenen en heeft geen knop voor een afbeelding.
+De kaart Resultaten per hoofdtrainer (`src/CoachResultsCard.tsx`, de telling in `src/coachResults.ts`) is een tabel met een rij per trainer met wedstrijden, de nieuwste eerst, met achter de naam de regel "34 wedstrijden, 1,85 punten per wedstrijd" (`matchesLineOf`, als `children` van `PlayerName`), volgt de schakelaar, telt alle seizoenen en heeft geen knop voor een afbeelding.
 De drie kaarten die de schakelaar negeren (onze plek, het verloop en hoe de wedstrijden verlopen) staan bij elkaar bovenaan de hoofdkolom, boven de schakelaar, en elk eindigt met de regel "Alleen de Eredivisie" (`EredivisieOnly` in `src/MatchViews.tsx`).
 De schakelaar staat daarmee direct boven de eerste kaart die hem volgt.
 De volgorde in de broncode is de volgorde van de balk en van een telefoon: eerst de hoofdkolom, dan de zijbalk.
@@ -505,7 +505,7 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 ### De spelers
 
 `/spelers` is een onderdeel van het hoofdmenu, na Wedstrijden en voor het forum, op `/spelers` en `/spelers/<seizoen>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Spelers staat in het menu na Wedstrijden_).
-Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer en naam, zonder link, in een deel per positie.
+Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer en naam (een `PlayerName` met `shirtNumber`, op een regel van `ShortFact` voor de lijntjes), zonder link, in een deel per positie.
 Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 In de hoofdkolom staat bovenaan de schakelaar tussen alle wedstrijden en de Eredivisie, boven de kaart Selectie, want hij verandert alleen de kaarten met doelpunten in de zijkolom (de schakelaar staat op elke pagina bovenaan de hoofdkolom).
