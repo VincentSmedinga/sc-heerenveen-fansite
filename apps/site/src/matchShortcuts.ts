@@ -22,6 +22,9 @@ export const matchShortcuts = [
 export const standingsCardOf = (current: boolean) =>
   current ? ({ id: 'stand', name: 'Stand' } as const) : ({ id: 'eindstand', name: 'Eindstand' } as const)
 
+/** The name and the anchor of the card with the results per head coach, on Cijfers. */
+export const coachResultsCard = { id: 'resultaten-per-hoofdtrainer', name: 'Resultaten per hoofdtrainer' } as const
+
 /** The name and the anchor of the card with our place in every season, under the table. */
 export const finalPlacesShortcut = { id: 'onze-plek-door-de-jaren', name: 'Onze plek door de jaren' } as const
 

@@ -1,0 +1,69 @@
+import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
+
+import type { CompetitionChoice } from './competition'
+
+import { type CoachResult } from './coachResults'
+import { coachResultsCard } from './matchShortcuts'
+import { BasedOnSince } from './OpponentViews'
+
+/** The columns of the figures, in order, with the points per match as the key figure. */
+const figureColumns = [
+  tableColumns.played,
+  tableColumns.won,
+  tableColumns.drawn,
+  tableColumns.lost,
+  { ...tableColumns.pointsPerMatch, key: true },
+] as const
+
+const legend = tableLegend(figureColumns)
+
+/** The name in the row header: the name, with "(interim)" where the coach stood in. */
+const nameOf = ({ interim, name }: CoachResult) => (interim ? `${name} (interim)` : name)
+
+/**
+ * The card "Resultaten per hoofdtrainer" of Cijfers: a table with a row for each head coach who
+ * has a played match in our data, the newest first, with his period and the matches he played,
+ * won, drew and lost, and the points per match. The row header is the name, with "(interim)"
+ * where that is so; two periods of one person get the period after the name, because a row
+ * header is unique. The card follows the switch between all the matches and the Eredivisie
+ * (see `coachResultsOf`) and, as a long table, has no button for an image. `since` is the
+ * season from which we have matches. Without a coach with a match there is no card.
+ */
+export function CoachResultsCard({
+  choice,
+  results,
+  since,
+}: {
+  choice: CompetitionChoice
+  results: readonly CoachResult[]
+  since: string
+}) {
+  if (results.length === 0) {
+    return null
+  }
+
+  const played = results.reduce((sum, result) => sum + result.played, 0)
+
+  return (
+    <Card aria-labelledby={coachResultsCard.id} surface="soft">
+      <Heading anchor id={coachResultsCard.id} level={2}>
+        {coachResultsCard.name}
+      </Heading>
+      <DataTable
+        caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'league' ? ', in de Eredivisie' : ''}`}
+        columns={['Hoofdtrainer', 'Periode', ...figureColumns]}
+        rows={results.map((result) => {
+          const name = nameOf(result)
+          const twice = results.filter((other) => nameOf(other) === name).length > 1
+
+          return {
+            cells: [result.period, result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
+            header: twice ? `${name}, ${result.period}` : name,
+          }
+        })}
+      />
+      <Text appearance="meta">{legend}</Text>
+      <BasedOnSince choice={choice} played={played} since={since} />
+    </Card>
+  )
+}

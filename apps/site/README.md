@@ -356,12 +356,13 @@ De andere clubs hebben er minder en hebben geen rij.
 
 ## De cijfers
 
-`/cijfers` toont onder tien kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, het verloop van het seizoen, hoe de wedstrijden verlopen, de reeksen, thuis en uit, de toeschouwers, hoe vaak welke uitslag, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten.
+`/cijfers` toont onder elf kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, het verloop van het seizoen, hoe de wedstrijden verlopen, de reeksen, thuis en uit, de toeschouwers, hoe vaak welke uitslag, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten, en daarnaast de resultaten per hoofdtrainer over alle seizoenen.
 Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Cijfers is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen/site.md`, _De site heeft vier onderdelen_).
 De kaarten staan in twee gelijke kolommen: de eerste vijf in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere vijf in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
 Cijfers is de uitzondering op de regel voor de kolommen (zie _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ in `docs/beslissingen/site.md`): hier hebben beide kolommen cijfers, omdat er geen lijst of tabel is waar de pagina voor bestaat.
 Links staan onze plek, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen en thuis en uit, en Opmerkelijk.
-Rechts staan de toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten en de bronvermelding.
+Rechts staan de toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten, de resultaten per hoofdtrainer en de bronvermelding.
+De kaart Resultaten per hoofdtrainer (`src/CoachResultsCard.tsx`, de telling in `src/coachResults.ts`) is een tabel met een rij per trainer met wedstrijden, de nieuwste eerst, volgt de schakelaar, telt alle seizoenen en heeft geen knop voor een afbeelding.
 De drie kaarten die de schakelaar negeren (onze plek, het verloop en hoe de wedstrijden verlopen) staan bij elkaar bovenaan de hoofdkolom, boven de schakelaar, en elk eindigt met de regel "Alleen de Eredivisie" (`EredivisieOnly` in `src/MatchViews.tsx`).
 De schakelaar staat daarmee direct boven de eerste kaart die hem volgt.
 De volgorde in de broncode is de volgorde van de balk en van een telefoon: eerst de hoofdkolom, dan de zijbalk.
@@ -387,7 +388,7 @@ De stand, de reeksen, de nul gehouden, hoe de wedstrijden verlopen en de uiterst
 De pagina deelt met Wedstrijden alles rond het seizoen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, en de onderdelen van `src/seasons.ts`.
 Elk seizoen heeft één adres: `/cijfers` is het lopende seizoen en `/cijfers/2025-26` een eerder seizoen (`app/cijfers/[seizoen]`), en de kiezer gaat via `app/cijfers/kies`, die doorverwijst (303).
 De regels zijn die van Wedstrijden (zie _De wedstrijden_): het lopende seizoen op zijn eigen adres verwijst door, een onbekend seizoen geeft "niet gevonden", en lukt het lezen niet, dan staat er de foutpagina.
-Een eerder seizoen toont dezelfde tien kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
+Een eerder seizoen toont dezelfde elf kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
 De ankers van de kaarten stonden op `/wedstrijden` en zijn verhuisd, met hun oude naam (`nul-gehouden`).
 De kaart Doelpuntenmakers (de top 5, met het anker `#doelpuntenmakers` en `#topscorers`) is van Cijfers verdwenen: Spelers heeft de hele lijst en is de enige plek (#774).
 Op `/wedstrijden` zijn ze weg, met opzet en zonder omleiding (zie `src/anchors.ts`).

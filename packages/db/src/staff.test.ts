@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { NewStaff, StaffRole } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
-import { findStaffOn, listStaffInSeason } from './queries.ts'
+import { findStaffOn, listAllStaff, listStaffInSeason } from './queries.ts'
 import { staff, staffRoles } from './schema.ts'
 import { headCoaches, seedStaff } from './staff-seed.ts'
 import { coverage, rangeOf, servedInSeason } from './staff.ts'
@@ -49,6 +49,14 @@ describe('the table staff', () => {
 
     expect(rows).toHaveLength(headCoaches.length)
     expect(rows.filter((row) => row.name === 'Foppe de Haan')).toHaveLength(2)
+  })
+
+  it('lists every period of the role in the order they began, and no other role', async () => {
+    const rows = await listAllStaff(database.db, 'coach')
+
+    expect(rows).toHaveLength(headCoaches.length)
+    expect(names(rows)).not.toContain('Iemand Anders')
+    expect(rows.map((row) => row.startDate)).toEqual(rows.map((row) => row.startDate).toSorted())
   })
 
   it('stores text as utf8mb4', async () => {

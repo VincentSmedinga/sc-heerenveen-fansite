@@ -4,9 +4,9 @@ import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getCoachResultData, getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
-import { matchData } from '#src/test-matches'
+import { coachResultData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
 import StatisticsPage, { generateMetadata } from './page'
@@ -14,6 +14,7 @@ import StatisticsPage, { generateMetadata } from './page'
 // Only the query is replaced: the split into the programme and the results is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getCoachResultData: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
@@ -41,6 +42,8 @@ beforeEach(() => {
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
+  vi.mocked(getCoachResultData).mockReset()
+  vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
@@ -53,7 +56,7 @@ afterEach(() => {
 })
 
 describe('the page /cijfers', () => {
-  it('has one h1 and ten h2 headings in order: our place in the league, the season, how the matches go, the streaks, home and away, the visitors, how often each score was played, the clean sheets, the goals per quarter and the extremes', async () => {
+  it('has one h1 and eleven h2 headings in order: our place in the league, the season, how the matches go, the streaks, home and away, the visitors, how often each score was played, the clean sheets, the goals per quarter, the extremes and the results per head coach', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -68,6 +71,7 @@ describe('the page /cijfers', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitersten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitersten">Uitersten</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="resultaten-per-hoofdtrainer"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#resultaten-per-hoofdtrainer">Resultaten per hoofdtrainer</a></h2>',
     ])
   })
 
@@ -155,7 +159,7 @@ describe('the page /cijfers', () => {
     expect(statisticsShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the first five cards in the main with the h1 and the other five in a named, wide sidebar after it, so the two columns are equal', async () => {
+  it('has the first five cards in the main with the h1 and the other six in a named, wide sidebar after it, so the two columns are equal', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
@@ -166,7 +170,14 @@ describe('the page /cijfers', () => {
       'reeksen',
       'thuis-en-uit',
     ]
-    const right = ['toeschouwers', 'hoe-vaak-welke-uitslag', 'de-nul-gehouden', 'doelpunten-per-kwartier', 'uitersten']
+    const right = [
+      'toeschouwers',
+      'hoe-vaak-welke-uitslag',
+      'de-nul-gehouden',
+      'doelpunten-per-kwartier',
+      'uitersten',
+      'resultaten-per-hoofdtrainer',
+    ]
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html.match(/<aside/g)).toHaveLength(1)
@@ -221,13 +232,15 @@ describe('the page /cijfers', () => {
     }
   })
 
-  it('lets the visitor make an image of each of the ten cards', async () => {
+  it('lets the visitor make an image of each of the ten cards, and of none with a long table', async () => {
     const html = await render()
     const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
       ([, id]) => id,
     )
 
-    expect(shareable).toEqual(statisticsShortcuts.map(({ href }) => href.slice(1)))
+    expect(shareable).toEqual(
+      statisticsShortcuts.map(({ href }) => href.slice(1)).filter((id) => id !== 'resultaten-per-hoofdtrainer'),
+    )
     expect(html.match(/data-hf-card-share/g)).toHaveLength(10)
   })
 
@@ -1696,8 +1709,11 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
     const league = await render(eredivisie)
 
     // Only the links carry the choice, which is the same page. The visitors table has a column
-    // for the competition under Alle wedstrijden, so it is the one card that differs.
-    for (const id of statisticsShortcuts.map(({ href }) => href.slice(1)).filter((id) => id !== 'toeschouwers')) {
+    // for the competition under Alle wedstrijden, so it is the one card that differs. The
+    // results per head coach count every season, not this one, and have tests of their own.
+    for (const id of statisticsShortcuts
+      .map(({ href }) => href.slice(1))
+      .filter((id) => id !== 'toeschouwers' && id !== 'resultaten-per-hoofdtrainer')) {
       expect(section(all, id), id).toBe(section(league, id).replaceAll('?competitie=eredivisie', ''))
     }
   })
@@ -1976,7 +1992,7 @@ describe('the card Opmerkelijk on /cijfers', () => {
     expect(orders.size).toBeGreaterThan(1)
   })
 
-  it('is in the bar of nobody: the bar has the ten cards with figures', async () => {
+  it('is in the bar of nobody: the bar has the eleven cards with figures', async () => {
     withFacts(...three)
 
     const ids = [...(await render()).matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
@@ -1990,6 +2006,66 @@ describe('the card Opmerkelijk on /cijfers', () => {
     const html = card(await render()) ?? ''
 
     expect(html).not.toMatch(/<script|<button|<form|https?:/)
+  })
+})
+
+describe('the card Resultaten per hoofdtrainer', () => {
+  const card = (html: string) => section(html, 'resultaten-per-hoofdtrainer')
+  const rows = (html: string) =>
+    [...card(html).matchAll(/<tr><th scope="row">([^<]*)<\/th>(.*?)<\/tr>/g)].map(([, name, cells]) => [
+      name,
+      [...(cells ?? '').matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map(([, cell]) => cell),
+    ])
+
+  it('is a soft card with the table, the newest coach first, with his period and the points per match', async () => {
+    const html = await render()
+
+    expect(html).toContain('<section class="hf-card hf-card-soft" aria-labelledby="resultaten-per-hoofdtrainer">')
+    expect(rows(html)).toEqual([
+      ['Piet Proef (interim)', ['jan 2026 \u2013 nu', '1', '0', '0', '1', '0,00']],
+      ['Anna Voorbeeld', ['jul 2024 \u2013 jan 2026', '2', '1', '1', '0', '2,00']],
+    ])
+  })
+
+  it('has the letters of tableColumns in the headers and the words under the table', async () => {
+    const card_ = card(await render())
+
+    expect(card_).toContain('G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd')
+    expect(card_).toMatch(
+      /<th [^>]*scope="col"[^>]*>.*?<abbr title="Punten per wedstrijd"><span aria-hidden="true">P<\/span><span class="hf-visually-hidden">punten per wedstrijd/s,
+    )
+    expect(card_).toContain('<caption class="hf-visually-hidden">De resultaten van sc Heerenveen per hoofdtrainer')
+  })
+
+  it('follows the switch: the Eredivisie alone leaves out the cup tie and says so', async () => {
+    const all = await render()
+    const league = await render(eredivisie)
+
+    expect(rows(all)[1]?.[1]?.[1]).toBe('2')
+    expect(rows(league)[1]).toEqual(['Anna Voorbeeld', ['jul 2024 \u2013 jan 2026', '1', '1', '0', '0', '3,00']])
+    expect(card(all)).toContain('Gebaseerd op alle 3 gespeelde wedstrijden sinds 2025/26')
+    expect(card(league)).toContain('Gebaseerd op alle 2 gespeelde wedstrijden in de Eredivisie sinds 2025/26')
+  })
+
+  it('has no button for an image: it is a long table', async () => {
+    expect(card(await render())).not.toMatch(/hf-card-shareable|<button/)
+  })
+
+  it('is left out, with the rest of the page, when the head coaches could not be read', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getCoachResultData).mockRejectedValue(new Error('no database'))
+
+    const html = await render()
+
+    expect(html).not.toContain('resultaten-per-hoofdtrainer')
+    expect(html).toContain('id="uitersten"')
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Could not read the results per head coach'))
+  })
+
+  it('is left out when there is no coach with a match', async () => {
+    vi.mocked(getCoachResultData).mockResolvedValue({ ...coachResultData, coaches: [] })
+
+    expect(await render()).not.toContain('resultaten-per-hoofdtrainer')
   })
 })
 

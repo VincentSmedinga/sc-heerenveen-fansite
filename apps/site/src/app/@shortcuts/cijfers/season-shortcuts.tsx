@@ -8,7 +8,7 @@ import { getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 
 /**
- * The bar of the page of a season: a link to each of the ten cards, in the order of a narrow
+ * The bar of the page of a season: a link to each of the eleven cards, in the order of a narrow
  * screen, which is the screen the bar is for (the bar is gone where the cards sit side by
  * side). The cards are the same for every season, so the bar is too. When the page can't read
  * its data it shows the error page, which has no cards to jump to, and a season the page

@@ -942,9 +942,9 @@ await withEmptyDatabase((database) =>
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
 
-    // The statistics page shows the ten cards with figures of the made-up matches and table of
-    // the seed, in two equal columns (the sidebar is as wide as the main), with the credit for
-    // Wikipedia under them.
+    // The statistics page shows the eleven cards with figures of the made-up matches and table
+    // of the seed, in two equal columns (the sidebar is as wide as the main), with the credit
+    // for Wikipedia under them.
     const statisticsPage = await fetch(`${origin}/cijfers`)
     const statisticsHtml = await statisticsPage.text()
     assert.equal(statisticsPage.status, 200)
@@ -977,8 +977,21 @@ await withEmptyDatabase((database) =>
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
         '#uitersten',
+        '#resultaten-per-hoofdtrainer',
       ],
     )
+    // The card with the results per head coach counts the matches of every season: with the
+    // older made-up matches (see older-meetings.ts) two or more coaches of the seed have one.
+    const coachCard = statisticsHtml.slice(statisticsHtml.indexOf('id="resultaten-per-hoofdtrainer"'))
+    assert.match(
+      coachCard,
+      /^id="resultaten-per-hoofdtrainer">.*?href="#resultaten-per-hoofdtrainer">Resultaten per hoofdtrainer<\/a><\/h2><table/s,
+    )
+    assert.ok(
+      (coachCard.slice(0, coachCard.indexOf('</table>')).match(/<th scope="row">/g) ?? []).length >= 2,
+      'the card Resultaten per hoofdtrainer has a row for at least two head coaches',
+    )
+    assert.match(coachCard, /G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd<\/p>/)
     // The seed has one fact, two goals in minutes that follow each other, so the card
     // Opmerkelijk has it and no link to a next one.
     assert.match(
