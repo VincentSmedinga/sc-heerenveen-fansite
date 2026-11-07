@@ -5,6 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
+import { incompleteReportPath } from './incomplete-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -18,7 +19,8 @@ import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } f
 // before it that has a made-up change of Wikipedia that is held back (see held-changes.ts), and
 // `{report}` for the page of the made-up match that has a report, and `{cupReport}` for the one
 // with extra time and a shoot-out (see matches.ts), and `{cupMatch}` for the number of that
-// match, for the screen of its report in the admin.
+// match, for the screen of its report in the admin, and `{incompleteReport}` for the page of
+// the report that is still being filled in (see incomplete-report.ts).
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -56,6 +58,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // day, a part that is no match, and a season without matches.
   { path: '{report}', status: 200 },
   { path: '{cupReport}', status: 200 },
+  // The made-up report that is still being filled in: the page with the notice (#857).
+  { path: '{incompleteReport}', status: 200 },
   { path: `/wedstrijden/${earlierSeasonSlug()}/2000-01-01-testdorp-fc`, status: 404 },
   { path: '/wedstrijden/2026-27/onzin', status: 404 },
   { path: '/wedstrijden/2099-00/2099-01-01-testdorp-fc', status: 404 },
@@ -278,6 +282,10 @@ async function withNumbers(path: string) {
         .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '{played}')
         .replace('{report}', path.includes('{report}') ? await reportPath() : '{report}')
         .replace('{cupReport}', path.includes('{cupReport}') ? await cupReportPath() : '{cupReport}')
+        .replace(
+          '{incompleteReport}',
+          path.includes('{incompleteReport}') ? await incompleteReportPath() : '{incompleteReport}',
+        )
         .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')
     : path
 }

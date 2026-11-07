@@ -284,7 +284,7 @@ describe('the page of a match', () => {
     expect(text).toContain('Gestopt: Frank Dummydijk')
     expect(text).toContain('Naast: Thijs Idzenga')
     expect(text.indexOf('Strafschoppenserie')).toBeGreaterThan(text.indexOf('Verloop Eerste helft'))
-    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('De opstelling, de wissels'))
+    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('komen uit onze eigen administratie'))
   })
 
   it('has the line in the header and no card for a shoot-out of which only the result is known', async () => {
@@ -302,6 +302,59 @@ describe('the page of a match', () => {
 
   it('has no card for a shoot-out in a match without one', async () => {
     expect(plain(await render())).not.toContain('Strafschoppenserie')
+  })
+
+  it('has no notice that the report is still being filled in for a report that is klaar', async () => {
+    const html = await render()
+
+    expect(plain(html)).not.toContain('We vullen dit verslag nog in')
+  })
+
+  it('has a notice in words at the top of the page for a report that is bezig, above the header and the cards', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.status = 'bezig'
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const text = plain(await render())
+
+    expect(text).toContain(
+      'We vullen dit verslag nog in. De opstelling, de wissels of de gebeurtenissen kunnen nog ontbreken of veranderen.',
+    )
+    expect(text.indexOf('We vullen dit verslag nog in')).toBeLessThan(text.indexOf('Eindstand'))
+    expect(text.indexOf('We vullen dit verslag nog in')).toBeLessThan(text.indexOf('Opstelling'))
+  })
+
+  it('has the notice for a report that was klaar and no longer follows the rules', async () => {
+    const reported = reportedMatch()
+
+    reported.match.goalsFor = 3
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    expect(plain(await render())).toContain('We vullen dit verslag nog in')
+  })
+
+  it('shows what a report that is bezig has, and leaves out the rest without empty places', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.status = 'bezig'
+    reported.stored.report.opponentComplete = false
+    reported.stored.report.formationOurs = null
+    reported.stored.cards = []
+    reported.stored.goals = []
+    reported.stored.incidents = []
+    reported.stored.substitutions = []
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('We vullen dit verslag nog in')
+    expect(text).toContain('De opstelling van Testdorp FC hebben we niet.')
+    expect(text).toContain('In deze wedstrijd is niets gebeurd wat we bijhouden.')
+    expect(text).toContain('Voor sc Heerenveen past de formatie niet bij de spelers')
+    expect(html).not.toContain('NaN')
+    expect(html).not.toContain('undefined')
   })
 
   it('links back to the matches of the season, and credits Wikipedia and our own records', async () => {
@@ -358,6 +411,26 @@ describe('the metadata of the page of a match', () => {
     expect(metadata.description).toContain('sc Heerenveen – Testdorp FC')
     expect(metadata.description).toContain('24 oktober 2026')
     expect(metadata.description).toContain('2–1')
+  })
+
+  it('has no noindex for a report that is klaar', async () => {
+    expect((await generateMetadata({ params: params() })).robots).toBeUndefined()
+  })
+
+  it('keeps a page whose report is not complete out of the index, and claims nothing about what is missing', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.status = 'bezig'
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const metadata = await generateMetadata({ params: params() })
+
+    expect(metadata.robots).toEqual({ index: false })
+    expect(metadata.title).toBe('sc Heerenveen 2–1 Testdorp FC, 24 oktober 2026')
+    expect(metadata.description).toBe(
+      'Wat we tot nu toe hebben van het verslag van sc Heerenveen – Testdorp FC op 24 oktober 2026, Eredivisie: de uitslag was 2–1. We vullen het verslag nog in.',
+    )
+    expect(metadata.description).not.toContain('de wissels')
   })
 
   it('has the address of the page as the canonical address', async () => {

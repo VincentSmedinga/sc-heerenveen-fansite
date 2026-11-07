@@ -7,10 +7,12 @@ import { getDatabase } from './database'
 import { getMatchSeasons } from './matches'
 import { seasonSlug } from './seasons'
 
-// The page of a match exists for a match with a report that is `klaar` and that the rules of
-// `@fansite/shared/match-report` find no error in. A report that is `bezig`, one that no longer
-// follows the rules and a match without a report have no page (see _De pagina staat op …_ in
-// docs/beslissingen/site.md).
+// The page of a match exists for every played match with a report, whatever its status. A
+// report that is `klaar` and that the rules of `@fansite/shared/match-report` find no error in
+// is complete; any other report (`bezig`, or one that no longer follows the rules) has a page
+// with a notice that it is still being filled in, which search engines do not index and the
+// sitemap does not list. A match without a report has no page (see _De pagina bestaat ook voor
+// een verslag dat nog niet klaar is_ in docs/beslissingen/site.md).
 
 /** The base address of the matches page, which the address of a match builds on. */
 const matchesPath = '/wedstrijden'
@@ -19,8 +21,8 @@ const matchesPath = '/wedstrijden'
 export const reportAddress = (season: string, matchDate: string, clubSlug: string) =>
   `${matchesPath}/${seasonSlug(season)}/${matchDate}-${clubSlug}`
 
-/** Whether the rules find no error in the report of a match. */
-export function isPublicReport(reported: ReportedMatch) {
+/** Whether the report of a match is `klaar` and the rules find no error in it. */
+export function isCompleteReport(reported: ReportedMatch) {
   return (
     reported.stored.report.status === 'klaar' &&
     checkMatchReport(reportForRules(reported.stored), matchForRules(reported.match)).errors.length === 0
@@ -54,19 +56,24 @@ const currentSeasonPeriod = 5 * 60 * 1000
 const pastSeasonPeriod = 60 * 60 * 1000
 
 async function loadSeasonReports(season: string) {
-  return (await listReportedMatches(getDatabase().db, season)).filter((reported) => isPublicReport(reported))
+  return listReportedMatches(getDatabase().db, season)
 }
 
 const currentReports = cacheForKey(currentSeasonPeriod, loadSeasonReports)
 const pastReports = cacheForKey(pastSeasonPeriod, loadSeasonReports)
 
-/** The addresses of all the pages of matches, for the sitemap. */
+/**
+ * The addresses of the pages of matches for the sitemap: those with a complete report. A page
+ * that is not complete is not indexed, so it is not listed.
+ */
 export async function getAllReportAddresses() {
   const addresses: string[] = []
 
   for (const season of await getMatchSeasons()) {
     for (const reported of await getPublicReports(season)) {
-      addresses.push(reportAddress(season, reported.match.matchDate, reported.clubSlug))
+      if (isCompleteReport(reported)) {
+        addresses.push(reportAddress(season, reported.match.matchDate, reported.clubSlug))
+      }
     }
   }
 
@@ -91,7 +98,8 @@ export async function getPublicReport(season: string, slug: string) {
 }
 
 /**
- * The matches of a season that have a page, the first first. The caller asks for a season of
+ * The matches of a season that have a page (a played match with a report, complete or not), the
+ * first first. The caller asks for a season of
  * `getMatchSeasons` only: the cache keeps an entry for every season it is asked for.
  */
 export function getPublicReports(season: string) {

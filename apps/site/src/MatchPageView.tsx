@@ -8,6 +8,7 @@ import {
   MatchScoreBar,
   MatchSubstitutes,
   MatchTimeline,
+  Strong,
   Text,
 } from '@fansite/design-system'
 
@@ -105,29 +106,48 @@ export function MatchPageHeader({ data, preview = false, titleId = 'titel' }: Pa
   const built = buildMatchPage(data)
 
   return (
-    <Card {...(preview ? { as: 'div' as const } : { 'aria-labelledby': titleId })}>
-      {preview ? null : (
-        <Heading className="hf-visually-hidden" id={titleId} level={1}>
-          {matchPageTitle(data)}
-        </Heading>
-      )}
-      <MatchHeader
-        {...(data.afterNinety === null
-          ? {}
-          : { afterNinetyAgainst: data.afterNinety.against, afterNinetyFor: data.afterNinety.for })}
-        {...(data.penalties === null
-          ? {}
-          : { penaltiesAgainst: data.penalties.against, penaltiesFor: data.penalties.for })}
-        extraTime={data.extraTime}
-        facts={data.facts}
-        goalsAgainst={data.goalsAgainst}
-        goalsFor={data.goalsFor}
-        home={data.home}
-        opponent={data.opponent}
-        scorersAgainst={built.scorersAgainst}
-        scorersFor={built.scorersFor}
-      />
-      <MatchScoreBar extraTime={data.extraTime} goals={built.scoreBar} headingLevel={levelOf(2, preview)} />
+    <>
+      {data.complete ? null : <MatchPageNotice />}
+      <Card {...(preview ? { as: 'div' as const } : { 'aria-labelledby': titleId })}>
+        {preview ? null : (
+          <Heading className="hf-visually-hidden" id={titleId} level={1}>
+            {matchPageTitle(data)}
+          </Heading>
+        )}
+        <MatchHeader
+          {...(data.afterNinety === null
+            ? {}
+            : { afterNinetyAgainst: data.afterNinety.against, afterNinetyFor: data.afterNinety.for })}
+          {...(data.penalties === null
+            ? {}
+            : { penaltiesAgainst: data.penalties.against, penaltiesFor: data.penalties.for })}
+          extraTime={data.extraTime}
+          facts={data.facts}
+          goalsAgainst={data.goalsAgainst}
+          goalsFor={data.goalsFor}
+          home={data.home}
+          opponent={data.opponent}
+          scorersAgainst={built.scorersAgainst}
+          scorersFor={built.scorersFor}
+        />
+        <MatchScoreBar extraTime={data.extraTime} goals={built.scoreBar} headingLevel={levelOf(2, preview)} />
+      </Card>
+    </>
+  )
+}
+
+/**
+ * The notice at the top of a page whose report is not complete: in words, not in colour or an
+ * icon alone, and not a `status` that a screen reader announces, since it is there from the
+ * start. It goes when the report is `klaar`.
+ */
+function MatchPageNotice() {
+  return (
+    <Card as="div" surface="warm">
+      <Text>
+        <Strong>We vullen dit verslag nog in.</Strong> De opstelling, de wissels of de gebeurtenissen kunnen nog
+        ontbreken of veranderen.
+      </Text>
     </Card>
   )
 }

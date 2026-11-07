@@ -46,6 +46,11 @@ export type MatchPageData = {
   /** The score after 90 minutes of a match with extra time. */
   afterNinety: null | { against: number; for: number }
   cards: readonly MatchPageCard[]
+  /**
+   * Whether the report is complete: `klaar` and without an error of the rules. A report that is
+   * not shows a notice that it is still being filled in, and what is missing is left out.
+   */
+  complete: boolean
   extraTime: boolean
   /** The facts under the result, in the order they are shown. */
   facts: MatchHeaderFact[]
@@ -274,8 +279,18 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
       ? undefined
       : { kind: cardKinds[heaviest.kind], minute: heaviest.minute, stoppageMinutes: added(heaviest.stoppageMinutes) }
   }
+  // The pitch needs the shirt number of a player to be his alone in his team: a report that is
+  // not finished may have a number twice, and then the first is on the pitch.
+  const shirts = new Set<number>()
+  const firstOfNumber = (player: MatchPagePlayer) => {
+    const known = shirts.has(player.shirtNumber)
+
+    shirts.add(player.shirtNumber)
+
+    return !known
+  }
   const starters = players
-    .filter((player) => player.starter)
+    .filter((player) => player.starter && firstOfNumber(player))
     .map((player) => {
       const minutes = minutesOf(player)
 

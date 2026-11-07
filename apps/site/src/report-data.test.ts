@@ -6,7 +6,7 @@ import {
   getAllReportAddresses,
   getPublicReport,
   getReportAddresses,
-  isPublicReport,
+  isCompleteReport,
   parseReportSlug,
   reportAddress,
 } from './report-data'
@@ -70,9 +70,9 @@ describe('the address of a match', () => {
   })
 })
 
-describe('isPublicReport', () => {
+describe('isCompleteReport', () => {
   it('is true for a report that is klaar and follows the rules', () => {
-    expect(isPublicReport(reportedMatch())).toBe(true)
+    expect(isCompleteReport(reportedMatch())).toBe(true)
   })
 
   it('is false for a report that is bezig', () => {
@@ -80,7 +80,7 @@ describe('isPublicReport', () => {
 
     reported.stored.report.status = 'bezig'
 
-    expect(isPublicReport(reported)).toBe(false)
+    expect(isCompleteReport(reported)).toBe(false)
   })
 
   it('is false for a report that does not follow the rules any more, such as goals that no longer add up', () => {
@@ -88,7 +88,7 @@ describe('isPublicReport', () => {
 
     reported.match.goalsFor = 3
 
-    expect(isPublicReport(reported)).toBe(false)
+    expect(isCompleteReport(reported)).toBe(false)
   })
 })
 
@@ -106,7 +106,7 @@ describe('getPublicReport', () => {
     expect(await getPublicReport('2099/00', '2026-10-24-testdorp-fc')).toBeUndefined()
   })
 
-  it('finds no page for a report that is bezig or no longer follows the rules, as for a match without a report', async () => {
+  it('finds the page of a report that is bezig or no longer follows the rules, and no page for a match without a report', async () => {
     const bezig = reportedMatch()
     const broken = { ...reportedMatch(), clubSlug: 'andere-club' }
 
@@ -114,8 +114,19 @@ describe('getPublicReport', () => {
     broken.match.goalsAgainst = 5
     vi.mocked(listReportedMatches).mockResolvedValue([bezig, broken])
 
-    expect(await getPublicReport('2026/27', '2026-10-24-testdorp-fc')).toBeUndefined()
-    expect(await getPublicReport('2026/27', '2026-10-24-andere-club')).toBeUndefined()
+    expect((await getPublicReport('2026/27', '2026-10-24-testdorp-fc'))?.stored.report.status).toBe('bezig')
+    expect(await getPublicReport('2026/27', '2026-10-24-andere-club')).toBeDefined()
+    expect(await getPublicReport('2026/27', '2026-10-24-zonder-verslag')).toBeUndefined()
+  })
+
+  it('lists no page of a report that is not complete in the sitemap, since search engines do not index it', async () => {
+    const bezig = reportedMatch()
+    const broken = { ...reportedMatch(), clubSlug: 'andere-club' }
+
+    bezig.stored.report.status = 'bezig'
+    broken.match.goalsAgainst = 5
+    vi.mocked(listReportedMatches).mockResolvedValue([bezig, broken])
+
     expect(await getAllReportAddresses()).toEqual([])
   })
 
@@ -127,6 +138,17 @@ describe('getPublicReport', () => {
 
 describe('the addresses of the pages', () => {
   it('gives the address of a match by its competition and round, for the links in the results', async () => {
+    expect(await getReportAddresses('2026/27')).toEqual(
+      new Map([['Eredivisie|Speelronde 1', '/wedstrijden/2026-27/2026-10-24-testdorp-fc']]),
+    )
+  })
+
+  it('links to the page of a report that is bezig too, by the same address', async () => {
+    const bezig = reportedMatch()
+
+    bezig.stored.report.status = 'bezig'
+    vi.mocked(listReportedMatches).mockResolvedValue([bezig])
+
     expect(await getReportAddresses('2026/27')).toEqual(
       new Map([['Eredivisie|Speelronde 1', '/wedstrijden/2026-27/2026-10-24-testdorp-fc']]),
     )

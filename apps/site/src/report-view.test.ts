@@ -31,7 +31,7 @@ describe('nameOfPlayer', () => {
 })
 
 describe('matchPageDataOf', () => {
-  const data = matchPageDataOf(reportedMatch(), [])
+  const data = matchPageDataOf(reportedMatch(), [], true)
 
   it('keeps the players in the order of the report, ours and then the opponent, with the bench after the line-up', () => {
     expect(data.players.map((player) => player.id)).toEqual([
@@ -84,7 +84,7 @@ describe('matchPageDataOf', () => {
       penaltiesFor: 4,
     })
 
-    expect(matchPageDataOf(reported, [])).toMatchObject({
+    expect(matchPageDataOf(reported, [], true)).toMatchObject({
       afterNinety: { against: 1, for: 1 },
       extraTime: true,
       penalties: { against: 3, for: 4 },
@@ -102,7 +102,7 @@ describe('matchPageDataOf', () => {
 
     reported.stored.goals[0]!.appearanceId = null
 
-    expect(matchPageDataOf(reported, []).goals).toHaveLength(2)
+    expect(matchPageDataOf(reported, [], true).goals).toHaveLength(2)
   })
 
   it('takes the kicks of the shoot-out with their player, and the rest of the events by player', () => {
@@ -113,7 +113,7 @@ describe('matchPageDataOf', () => {
       { appearanceId: null, id: 2, matchId: 7, ours: false, outcome: 'naast', round: 1 },
     ]
 
-    expect(matchPageDataOf(reported, []).kicks).toEqual([
+    expect(matchPageDataOf(reported, [], true).kicks).toEqual([
       { ours: true, playerId: 9, result: 'raak', round: 1 },
       { ours: false, playerId: null, result: 'naast', round: 1 },
     ])

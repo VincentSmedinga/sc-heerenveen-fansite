@@ -108,6 +108,15 @@ describe('the preview next to the form of a report', () => {
     expect(aside().querySelector('.hf-match-pitch')).not.toBeNull()
   })
 
+  it('has the notice that the report is still being filled in while the status is Bezig, and not when it is Klaar', () => {
+    render(provider())
+    expect(course()).toContain('We vullen dit verslag nog in')
+
+    fireEvent.change(field('status'), { target: { value: 'klaar' } })
+
+    return waitFor(() => expect(course()).not.toContain('We vullen dit verslag nog in'))
+  })
+
   it('has no h1 and no anchor of its own, since the page it is in has them', () => {
     render(provider())
 
