@@ -3127,6 +3127,33 @@
   `MatchHeader` heeft een pil met de uitkomst en de doelpuntenmakers per club.
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
 
+## Het voorbeeld van de wedstrijdpagina staat naast het formulier van het verslag
+
+- **Datum:** 7 november 2026
+- **Besluit:** het formulier van het verslag heeft een voorbeeld van de echte pagina ernaast, dat bij elke wijziging opnieuw wordt opgebouwd uit dezelfde onderdelen als de pagina (#851).
+  Op een bureaublad staat het voorbeeld rechts (ongeveer 55 om 45) en blijft het staan bij het scrollen; op een telefoon zijn er twee tabs, Formulier en Voorbeeld.
+  De gekozen tab wordt niet bewaard: de site bewaart geen keuzes van bezoekers, en wanneer dat verandert, is dat een beslissing van een eigen issue.
+- **Waarom:** wie typt wil zien wat er uit komt zonder op te slaan.
+- **Alternatieven:** een knop "Bekijk de pagina" die het verslag bewaart en de pagina opent (ook als het verslag nog niet klopt).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Hetzelfde onderdeel als de pagina:** `ReportPreview` bouwt met `previewDataOf` (`src/beheer/report-preview.ts`) de gegevens van de pagina uit de waarden van het formulier en geeft ze aan `MatchPageView`, met `preview` aan.
+    In een voorbeeld staan de koppen een niveau lager, is er geen `h1` en is geen kop een anker, omdat de pagina eromheen die al heeft.
+  - **Een rij die nog niet af is, staat niet in het voorbeeld**: een doelpunt zonder minuut, een kaart zonder speler of een speler zonder rugnummer.
+    Het voorbeeld toont wat klopt, en de fouten blijven bij het formulier, waar de regels van het verslag ze vinden.
+    De stand en de balk tellen de doelpunten die erin staan.
+    Een doelpuntenmaker die alleen met zijn naam is geschreven, staat in het verloop en in de kop, en niet op het veld.
+  - **Het kader:** de regel in Verloop van het veld dat de beheerder het laatst veranderde, krijgt een kader (`highlighted` bij `MatchTimeline`).
+    Het veld van een speler of van een knop geeft geen kader, en het kader blijft staan tot de volgende wijziging.
+  - **De wedstrijd, niet het formulier:** de feiten, de verlenging, de stand na 90 minuten en de uitslag van een serie komen uit de wedstrijd (`previewMatchOf`).
+    De strafschoppenserie staat er niet in: die komt met #852.
+  - **Indeling:** `SideBySide` uit het ontwerpsysteem (zie _`SideBySide` zet twee delen van één taak naast elkaar_ in `designsysteem.md`).
+    De tabs zijn een `SegmentedControl`, en wat niet getoond wordt, houdt `hidden`, zodat het formulier zijn waarden houdt.
+  - **Zonder JavaScript** heeft de pagina alleen het formulier, zoals nu: het voorbeeld en de tabs komen pas als de pagina in de browser leeft, en de pagina zegt dat niet.
+  - **Alleen voorbeeld:** het voorbeeld bewaart niets en praat niet met de server.
+    Het wacht even op de laatste toets (`useDeferredValue`), zodat typen nooit trager wordt.
+    Het vak is geen `aria-live`: een schermlezer zou de hele pagina bij elke toets opnieuw lezen.
+    Het is een gebied met een naam (de kop "Voorbeeld — Zo ziet de pagina eruit") dat met het toetsenbord te bereiken is.
+
 ## Het verslag is een eigen scherm bij de wedstrijd: `/beheer/wedstrijden/<nummer>/verslag`
 
 - **Datum:** 7 november 2026

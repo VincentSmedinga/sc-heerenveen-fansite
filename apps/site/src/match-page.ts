@@ -33,6 +33,8 @@ export type BuiltMatchPage = {
 }
 
 export type MatchPageCard = {
+  /** Draws a frame around the line of this event in the course of the match. */
+  highlighted?: boolean
   kind: 'geel' | 'geel-rood' | 'rood'
   minute: number
   playerId: number
@@ -67,6 +69,8 @@ export type MatchPageData = {
 export type MatchPageGoal = {
   /** The player who gave the assist. */
   assistId: null | number
+  /** Draws a frame around the line of this event in the course of the match. */
+  highlighted?: boolean
   minute: number
   /** Whether sc Heerenveen gains from the goal. An own goal gains for the other team. */
   ours: boolean
@@ -78,6 +82,8 @@ export type MatchPageGoal = {
 }
 
 export type MatchPageIncident = {
+  /** Draws a frame around the line of this event in the course of the match. */
+  highlighted?: boolean
   kind: 'strafschop-gemist' | 'strafschop-gestopt'
   minute: number
   playerId: number
@@ -107,6 +113,8 @@ export type MatchPagePlayer = {
 }
 
 export type MatchPageSubstitution = {
+  /** Draws a frame around the line of this event in the course of the match. */
+  highlighted?: boolean
   /** The player who comes on. */
   inId: number
   minute: number
@@ -153,6 +161,7 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
     events.push({
       ...(goal.assistId === null ? {} : { assist: nameOf(goal.assistId) }),
+      ...(goal.highlighted === true ? { highlighted: true } : {}),
       kind: 'goal',
       minute: goal.minute,
       ours,
@@ -169,6 +178,7 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
     if (player !== undefined) {
       events.push({
+        ...(incident.highlighted === true ? { highlighted: true } : {}),
         kind: incident.kind === 'strafschop-gemist' ? 'penalty-missed' : 'penalty-saved',
         minute: incident.minute,
         ours: player.ours,
@@ -184,6 +194,7 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
     if (player !== undefined) {
       events.push({
+        ...(card.highlighted === true ? { highlighted: true } : {}),
         kind: cardKinds[card.kind],
         minute: card.minute,
         ours: player.ours,
@@ -199,6 +210,7 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
     if (player !== undefined) {
       events.push({
+        ...(substitution.highlighted === true ? { highlighted: true } : {}),
         kind: 'substitution',
         minute: substitution.minute,
         ours: player.ours,

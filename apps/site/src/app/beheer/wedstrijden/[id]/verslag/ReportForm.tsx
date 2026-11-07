@@ -50,6 +50,7 @@ import {
   statusChoices,
 } from '#src/beheer/report-fields'
 import { errorOrder } from '#src/beheer/report-form'
+import { type ChangedRow, changedRowOf, type ReportPreviewMatch } from '#src/beheer/report-preview'
 
 const summaryId = 'fouten'
 
@@ -60,12 +61,19 @@ const formId = 'verslag'
 export type ReportChoices = {
   /** The name of the opponent, as the headings have it. */
   opponent: string
+  /**
+   * What the preview needs of the match. Leave it out for a screen that has no preview, such as
+   * the one that reads a pasted text.
+   */
+  preview?: ReportPreviewMatch
   /** How soon what is saved shows on the site, as "binnen vijf minuten". */
   showDelay: string
   squad: readonly ReportSquadPlayer[]
 }
 
 type ReportFormContext = {
+  /** The row of an event that the last change was in, for the frame in the preview. */
+  changed: ChangedRow | undefined
   choices: ReportChoices
   /** The values as the form has them now, which may be more than the server has seen. */
   current: ReportValues
@@ -549,7 +557,12 @@ export function ReportFormShell({
   /** The title of the list of errors on the page as it opens. */
   title: string
 }) {
-  const [live, setLive] = useState<{ for: ReportFormState; notice: string; values: ReportValues }>()
+  const [live, setLive] = useState<{
+    changed: ChangedRow | undefined
+    for: ReportFormState
+    notice: string
+    values: ReportValues
+  }>()
   // What the form said before the server answered is only good until the server answers.
   const current = live?.for === state ? live.values : state.values
 
@@ -571,6 +584,7 @@ export function ReportFormShell({
   return (
     <ReportFormContext
       value={{
+        changed: live?.for === state ? live.changed : undefined,
         choices,
         current,
         formAction,
@@ -603,7 +617,12 @@ export function ReportFormShell({
             }
           }
 
-          setLive({ for: state, notice: told, values: readReportValues(new FormData(form)) })
+          setLive({
+            changed: target instanceof HTMLElement && 'name' in target ? changedRowOf(String(target.name)) : undefined,
+            for: state,
+            notice: told,
+            values: readReportValues(new FormData(form)),
+          })
         },
         pending,
         // The headline of the errors is the one of the page as it opens, the plain one after.
@@ -658,7 +677,7 @@ const emptyTexts: Record<RowKind, string> = {
   wissel: 'Geen wissels.',
 }
 
-function useReportForm() {
+export function useReportForm() {
   const context = use(ReportFormContext)
 
   if (context === undefined) {

@@ -16,6 +16,11 @@ export type MatchPlayerName = {
 
 /** The moment of an event and the team it belongs to, which every event has. */
 type MatchEventBase = {
+  /**
+   * Draws a frame around the line, such as for the event of the row an editor just changed in
+   * the preview of a form. The frame is a line round the event, so it shows without colour.
+   */
+  highlighted?: boolean | undefined
   /** The minute on the clock: 45 for "45+2". */
   minute: number
   /** Whether the event is of sc Heerenveen. Otherwise it is of the opponent. */
@@ -132,7 +137,7 @@ const spoken = (event: MatchTimelineEvent) => {
 function Event({ event }: { event: MatchTimelineEvent }) {
   return (
     // Two events can share a minute and a player, so the place in the list is the key.
-    <li className="hf-match-event">
+    <li className={classNames('hf-match-event', event.highlighted === true && 'hf-match-event-highlighted')}>
       <span
         aria-hidden="true"
         className={classNames('hf-match-event-minute', event.ours && 'hf-match-event-minute-ours')}

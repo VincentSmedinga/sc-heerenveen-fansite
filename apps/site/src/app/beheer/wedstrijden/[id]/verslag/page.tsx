@@ -9,13 +9,15 @@ import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { contextOf, findReportScreen, valuesOfReport } from '#src/beheer/match-reports'
 import { checkReportForm } from '#src/beheer/report-form'
+import { previewMatchOf } from '#src/beheer/report-preview-match'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
 import { submitRemoveReport, submitReport } from './actions'
 import { RemoveReportForm } from './RemoveReportForm'
-import { ReportErrorSummary, ReportFields, ReportFormProvider, ReportSavePanel } from './ReportForm'
+import { ReportErrorSummary, ReportFormProvider, ReportSavePanel } from './ReportForm'
+import { ReportWorkspace } from './ReportPreview'
 
 // Render on each request: the report changes with every entry and every import.
 export const dynamic = 'force-dynamic'
@@ -74,7 +76,12 @@ export default async function ReportPage({ params, searchParams }: Props) {
   return (
     <ReportFormProvider
       action={submitReport.bind(null, match.id)}
-      choices={{ opponent: match.opponent, showDelay: describeShowDelay(match.season), squad }}
+      choices={{
+        opponent: match.opponent,
+        preview: previewMatchOf(match, new Date()),
+        showDelay: describeShowDelay(match.season),
+        squad,
+      }}
       initial={{ errors: checked?.errors ?? {}, values, version: 0, warnings: checked?.warnings ?? {} }}
       key={`${match.id}-${report?.report.savedAt.getTime() ?? 0}-${gedaan ?? ''}`}
       title={toCheck ? 'Controleer het verslag' : 'Dit is nog niet af'}
@@ -115,7 +122,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
             <Strong>{notice.title}.</Strong> {notice.text}
           </Notice>
         )}
-        <ReportFields />
+        <ReportWorkspace />
       </Page.Main>
       <Page.Sidebar aria-label="Opslaan en verslag" sticky>
         <ReportSavePanel cancelHref={matchPath(match.id)} />

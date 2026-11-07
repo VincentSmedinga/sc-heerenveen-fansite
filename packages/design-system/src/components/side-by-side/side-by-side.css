@@ -1,0 +1,60 @@
+/*
+ * Two parts of one task, such as a form and its preview. The width that counts is the one of
+ * the place they stand in, not of the screen: from 56 rem the main part (a little over half) and
+ * the aside stand side by side, with the aside stuck to the top of the screen. Below it they
+ * stand one at a time, which the page chooses with `hidden` and the tabs.
+ */
+
+@layer hf.components {
+  /* The container is measured by what is in it, so the grid is one level down. */
+  .hf-side-by-side {
+    container-name: hf-side-by-side;
+    container-type: inline-size;
+  }
+
+  .hf-side-by-side-grid {
+    align-items: start;
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* A part that is not shown stays out of the page, but in the document: it keeps its values. */
+  .hf-side-by-side-main[hidden],
+  .hf-side-by-side-aside[hidden] {
+    display: none;
+  }
+
+  .hf-side-by-side-main,
+  .hf-side-by-side-aside {
+    min-inline-size: 0;
+  }
+
+  @container hf-side-by-side (min-width: 56rem) {
+    .hf-side-by-side-grid {
+      gap: var(--hf-space-l);
+    }
+
+    /* The second column is only there when there is an aside: a page without one has the whole width. */
+    .hf-side-by-side-grid:has(> .hf-side-by-side-aside) {
+      grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    }
+
+    /* Both parts are shown, whatever `hidden` says, and nothing has to choose between them. */
+    .hf-side-by-side-tabs {
+      display: none;
+    }
+
+    .hf-side-by-side-main[hidden],
+    .hf-side-by-side-aside[hidden] {
+      display: block;
+    }
+
+    .hf-side-by-side-aside {
+      inset-block-start: var(--hf-space-m);
+      max-block-size: calc(100dvh - 2 * var(--hf-space-m));
+      overflow-y: auto;
+      position: sticky;
+    }
+  }
+}
