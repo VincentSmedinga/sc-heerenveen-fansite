@@ -1,0 +1,144 @@
+/*
+ * How the score stood during a match: a thin bar with a piece for each score, the score as
+ * small text above a piece that is wide enough, and a mark with the minute every 15 minutes
+ * under it. The component gives each element its place as a share of the bar, in custom
+ * properties, and the rows stack on top of each other. The bar is decoration for a screen
+ * reader (aria-hidden), and the text for a screen reader has the same scores, so colour is
+ * never the only sign.
+ */
+
+@layer hf.components {
+  .hf-match-score-bar {
+    display: grid;
+    gap: var(--hf-space-xs);
+  }
+
+  /* The graphic is the container of the rows, and of the dashed line through all three. */
+  .hf-match-score-bar-graphic {
+    display: grid;
+    position: relative;
+    row-gap: var(--hf-space-xs);
+  }
+
+  .hf-match-score-bar-scores,
+  .hf-match-score-bar-pieces,
+  .hf-match-score-bar-ticks {
+    block-size: 1.25rem;
+    position: relative;
+  }
+
+  .hf-match-score-bar-pieces {
+    block-size: 0.5rem;
+  }
+
+  /*
+   * The score sits in the middle of its piece. It is small text in the colour of the text, so
+   * it reaches 4.5:1 on every surface in light and in dark. The piece it belongs to is as wide
+   * as the text allows or wider, so the text does not run into the score next to it; what is
+   * wider than its piece is cut off at the edge rather than laid over a neighbour.
+   */
+  .hf-match-score-bar-score {
+    color: var(--hf-colour-text-default);
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    inset-block: 0;
+    inset-inline: var(--hf-score-start) calc(100% - var(--hf-score-end));
+    line-height: 1.25rem;
+    overflow: hidden;
+    position: absolute;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /*
+   * A piece is the colour of the outcome, at 80% so it is calm. Even then each reaches 3:1 on
+   * every surface of a card in light and in dark (1.4.11): the lowest is grey on the warm and
+   * the blue surface in light, at 3.5:1. The line between two pieces is a transparent border
+   * that the background does not paint under, so the line is the colour of whatever surface the
+   * bar sits on.
+   */
+  .hf-match-score-bar-piece {
+    background-clip: padding-box;
+    background-color: color-mix(in srgb, var(--hf-match-score-bar-colour) 80%, transparent);
+    border-inline-start: 2px solid transparent;
+    inset-block: 0;
+    inset-inline: var(--hf-score-start) calc(100% - var(--hf-score-end));
+    position: absolute;
+
+    &:first-child {
+      border-inline-start-width: 0;
+    }
+  }
+
+  .hf-match-score-bar-win {
+    --hf-match-score-bar-colour: var(--hf-colour-outcome-win);
+  }
+
+  .hf-match-score-bar-draw {
+    --hf-match-score-bar-colour: var(--hf-colour-outcome-draw);
+  }
+
+  .hf-match-score-bar-loss {
+    --hf-match-score-bar-colour: var(--hf-colour-outcome-loss);
+  }
+
+  /* In forced colours a background colour is replaced, unless it is a system colour. */
+  @media (forced-colors: active) {
+    .hf-match-score-bar-piece {
+      background-color: CanvasText;
+      border-inline-start-color: Canvas;
+    }
+
+    .hf-match-score-bar-draw {
+      background-color: GrayText;
+    }
+  }
+
+  /*
+   * The marks sit under their minute, the first one at the start of the bar and the last at the
+   * end, so no number hangs over the edge and makes the page wider.
+   */
+  .hf-match-score-bar-tick {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    inset-inline-start: var(--hf-tick-position);
+    line-height: 1rem;
+    position: absolute;
+    translate: -50% 0;
+
+    &::before {
+      background-color: var(--hf-card-line-graphic, var(--hf-colour-line-graphic-surface));
+      block-size: 0.25rem;
+      content: '';
+      display: block;
+      inline-size: 1px;
+      margin-inline: auto;
+    }
+
+    &:first-child {
+      translate: 0 0;
+
+      &::before {
+        margin-inline-start: 0;
+      }
+    }
+
+    &:last-child {
+      translate: -100% 0;
+
+      &::before {
+        margin-inline-end: 0;
+      }
+    }
+  }
+
+  /* The dashed line where extra time begins, through the scores, the bar and the marks. */
+  .hf-match-score-bar-extra-time {
+    border-inline-start: 1px dashed var(--hf-card-line-graphic, var(--hf-colour-line-graphic-surface));
+    inset-block: 0;
+    inset-inline-start: var(--hf-tick-position);
+    position: absolute;
+  }
+}

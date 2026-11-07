@@ -98,6 +98,8 @@ export { MatchHeader } from './components/match-header/MatchHeader'
 export type { MatchHeaderFact, MatchHeaderProps } from './components/match-header/MatchHeader'
 export { MatchLineup } from './components/match-lineup/MatchLineup'
 export type { MatchLineupPlayer, MatchLineupProps } from './components/match-lineup/MatchLineup'
+export { MatchScoreBar } from './components/match-score-bar/MatchScoreBar'
+export type { MatchScoreBarGoal, MatchScoreBarProps } from './components/match-score-bar/MatchScoreBar'
 export { matchPlayerEventKinds, MatchTimeline } from './components/match-timeline/MatchTimeline'
 export type {
   MatchPlayerEventKind,

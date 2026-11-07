@@ -2752,3 +2752,26 @@
   De tokens staan in `colour.css`, met een terugval voor een browser zonder `light-dark()`, en in de documentatie van de tokens.
 - **Waarom:** de kaarten zijn de enige kleuren die het ontwerp nieuw vraagt.
 - **Alternatieven:** de kleuren in het onderdeel zelf zetten (dan zijn ze niet te hergebruiken en staan ze niet in de tokens die de MCP-server laat zien).
+
+## De balk Wedstrijdverloop toont de stand als gewone kleine tekst boven de balk
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchScoreBar` zet de stand als gewone kleine tekst boven het stuk van de balk waar hij bij hoort, niet in de balk.
+  De tekst staat er alleen als het stuk minstens een tiende van de balk breed is.
+  Het onderdeel maakt een stuk per stand: groen als sc Heerenveen voor staat, grijs bij gelijkstand en rood bij achterstand, met een smalle scheiding in de kleur van de ondergrond.
+  De kleur van een stuk is 80% van de kleur van de uitkomst, zodat elk stuk 3:1 haalt op elk vlak van een kaart in licht en donker (1.4.11).
+  Het onderdeel krijgt per doelpunt de minuut, de blessuretijd en of sc Heerenveen er voordeel van heeft; een eigen doelpunt telt voor het andere team, en de pagina geeft het zo door.
+  Twee doelpunten in dezelfde minuut geven geen stuk ertussen.
+- **Waarom:** de balk is dun, en de cijfers erboven zijn dan altijd te lezen.
+  Een schermlezer slaat de balk over en hoort per stuk de stand en de minuten, dus kleur is niet het enige teken.
+- **Alternatieven:** de cijfers in de balk (te klein, en in donker niet altijd leesbaar).
+
+## De balk Wedstrijdverloop loopt bij een verlenging door tot 120 minuten
+
+- **Datum:** 7 november 2026
+- **Besluit:** bij een verlenging loopt de balk door tot 120 minuten, met een stippellijn waar de verlenging begint.
+  Onder de balk staat elke 15 minuten een markering met het getal.
+  De blessuretijd van 45, 90 en 120 krijgt een beetje ruimte op de balk, zodat een doelpunt in 90+2 niet op 90 valt.
+  Meer blessuretijd dan de ruimte past, komt aan het eind van die ruimte te staan.
+- **Waarom:** de pagina blijft daardoor één balk, ook bij een beker.
+- **Alternatieven:** een tweede balk voor de verlenging.
