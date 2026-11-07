@@ -13,8 +13,9 @@ export type MatchLineupPlayer = {
   name: MatchPlayerName
   /**
    * Sentences about the player in this match, each on a line of its own in small letters, such
-   * as "Gewisseld in de 61e minuut voor Jansen" or "Gele kaart in de 34e minuut". Write them
-   * out: an arrow or a colour says nothing to a screen reader.
+   * as "Gewisseld in de 61e minuut, vervangen door Jansen", "Ingevallen in de 61e minuut voor
+   * Jansen" or "Gele kaart in de 34e minuut". Write them out: an arrow or a colour says
+   * nothing to a screen reader.
    */
   notes?: string[] | undefined
   shirtNumber: number

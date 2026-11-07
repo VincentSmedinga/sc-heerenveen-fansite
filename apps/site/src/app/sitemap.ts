@@ -13,10 +13,9 @@ export const dynamic = 'force-dynamic'
 
 /**
  * The pages of the site, the published articles, the page of each club we played and the page
- * of each match that has one, as
- * addresses and nothing else. Without the database the sitemap has the pages alone, and the log
- * says why: a search engine that finds no articles in it doesn't drop them, but a sitemap that
- * fails could be read as a site that is gone.
+ * of each match that has one, as addresses and nothing else. Without the database the sitemap
+ * has the pages alone, and the log says why: a search engine that finds no articles in it
+ * doesn't drop them, but a sitemap that fails could be read as a site that is gone.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = pages.map(({ path }) => ({ url: urlOf(path) }))
