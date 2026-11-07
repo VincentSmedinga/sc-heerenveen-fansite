@@ -303,6 +303,62 @@ describe('checkReportForm', () => {
       )
     })
 
+    it('tells an own goal of a player of the team that gets the goal, at the field of the scorer', () => {
+      says(
+        report({
+          wij: {
+            doelpunt: [
+              goal({ minuut: '12', soort: 'eigen', speler: 'wij-9' }),
+              goal({ minuut: '77', speler: 'wij-10' }),
+            ],
+          },
+        }),
+        'doelpunt-wij-1-speler',
+        /Speler 9 maakt een eigen doelpunt, maar is van sc Heerenveen, het team dat het doelpunt krijgt/u,
+      )
+    })
+
+    it('tells an assist from the other team, and an assist from a player who is not on the pitch', () => {
+      const opponents = Array.from({ length: 2 }, (_nothing, index) => ({
+        ...emptyRow('speler'),
+        naam: `Tegenstander ${index + 1}`,
+        rugnummer: String(index + 1),
+      }))
+
+      says(
+        report({
+          wij: {
+            doelpunt: [
+              goal({ assist: 'zij-1', minuut: '12', speler: 'wij-9' }),
+              goal({ minuut: '77', speler: 'wij-10' }),
+            ],
+          },
+          zij: { doelpunt: [goal({ minuut: '40', naam: 'Sibbing' })], speler: opponents },
+        }),
+        'doelpunt-wij-1-assist',
+        /Tegenstander 1 geeft een assist aan Speler 9, maar is van het andere team/u,
+      )
+      says(
+        report({
+          wij: {
+            doelpunt: [
+              goal({ assist: 'wij-12', minuut: '12', speler: 'wij-9' }),
+              goal({ minuut: '77', speler: 'wij-10' }),
+            ],
+          },
+        }),
+        'doelpunt-wij-1-assist',
+        /Speler 12 geeft een assist in minuut 12, maar staat dan niet op het veld/u,
+      )
+    })
+
+    it('does not store a player who comes on twice', () => {
+      const twice = [sub({ erin: '12', eruit: '10', minuut: '60' }), sub({ erin: '12', eruit: '11', minuut: '70' })]
+      const checked = says(report({ wij: { wissel: twice } }), 'wissel-wij-2-erin', /komt twee keer binnen/u)
+
+      expect(checked.plan).toBeUndefined()
+    })
+
     it('tells goals that do not add up to the score, at the list of goals of sc Heerenveen', () => {
       says(
         report({ wij: { doelpunt: [goal({ minuut: '12', speler: 'wij-9' })] } }),

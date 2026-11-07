@@ -7,8 +7,7 @@
 // and side, and the fields of a row are named `<kind>-<side>-<number>-<field>`, such as
 // `wissel-wij-2-minuut`. An event points to a player of the report by the number of his row in
 // the list of players of the same side (`3`); a goal points to its scorer and assist by the
-// side
-// and the number (`wij-3`), since a scorer of an own goal is of the other side.
+// side and the number (`wij-3`), since a scorer of an own goal is of the other side.
 
 export const sides = ['wij', 'zij'] as const
 

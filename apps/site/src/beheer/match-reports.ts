@@ -42,8 +42,8 @@ import { checkReportForm } from './report-form'
 // Reading and writing the match report in the admin: the screen of one match, the report as
 // the form fills it, saving it and taking it away. A report and its row in the log of the
 // admin are one transaction. The goals of the report are the goals of the match
-// (`match_goals`),
-// and saving marks them as the editors' in `match_edits`, so the import leaves them alone.
+// (`match_goals`), and saving marks them as the editors' in `match_edits`, so the import
+// leaves them alone.
 
 /** Why a report marks the goals as the editors', in `match_edits` and in the log. */
 export const reportReason = 'Verslag van de wedstrijd'

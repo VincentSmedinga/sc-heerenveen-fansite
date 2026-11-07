@@ -289,7 +289,7 @@ export function ReportFields() {
           (row, number) => {
             const scoring = row.soort === 'eigen' ? (side === 'wij' ? 'zij' : 'wij') : side
             // A scorer chosen on the other side stays a choice, so nothing is lost when the
-            // of the goal changes.
+            // kind of the goal changes.
             const named = (value: string) => {
               const [of, place] = value.split('-') as [Side, string]
               const found = sides.includes(of) ? current[of].speler[Number(place) - 1] : undefined
@@ -438,8 +438,7 @@ export function ReportFormProvider({
 
   // After a button the editor must land somewhere sensible. A save with errors goes to the list
   // of errors, and a row that is added or removed to the row that took its place. The page
-  // as it
-  // opens keeps its errors in view without taking the focus.
+  // as it opens keeps its errors in view without taking the focus.
   useEffect(() => {
     if (state.version === 0) {
       return

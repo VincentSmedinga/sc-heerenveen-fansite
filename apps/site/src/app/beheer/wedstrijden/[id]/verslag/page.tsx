@@ -66,8 +66,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const title = `${match.round} (${match.competition}): ${clubs}`
   const values = valuesOfReport(report, goals, squad)
   // A report that is stored is judged again, so what is wrong shows. A new one has nothing
-  // to say
-  // yet.
+  // to say yet.
   const checked = report === undefined ? undefined : checkReportForm(values, contextOf(screen))
   const status = report?.report.status
   const toCheck = status === 'klaar' && checked !== undefined && Object.keys(checked.errors).length > 0
