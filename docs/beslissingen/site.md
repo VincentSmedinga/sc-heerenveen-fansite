@@ -3348,7 +3348,8 @@
 - **Datum:** 7 november 2026
 - **Besluit:** de lijst "Erin" van een wissel toont altijd de spelers met de rol Bank van dat team, zoals ze nu in het formulier staan, en zegt bij het veld waarom hij leeg is als niemand op de bank staat (#856).
   Dat geldt voor sc Heerenveen en voor de tegenstander, met en zonder JavaScript, en ook als de bank net is ingevuld en het verslag nog niet is opgeslagen.
-  - **Staat er geen bank**, dan heeft de keuzelijst de tekst "Niemand op de bank" in plaats van "Kies een speler", en staat boven de tabel van de wissels een zin met een link: "Bij sc Heerenveen staat niemand met de rol Bank, dus de lijst Erin is leeg. Zet eerst een speler op de bank, bij Opstelling en bank."
+  - **Staat er geen bank**, dan heeft de keuzelijst de tekst "Niemand op de bank" in plaats van "Kies een speler", en staat boven de tabel van de wissels een tekst met een link.
+    Hij zegt "Bij sc Heerenveen staat niemand met de rol Bank, dus de lijst Erin is leeg." en daarna "Zet eerst een speler op de bank, bij Opstelling en bank."
     De link gaat naar de kop van Opstelling en bank van dat team, die de focus krijgt.
     De zin staat er alleen als het team een wissel heeft: zonder wissel is er geen lijst om uit te leggen.
   - **De regels van #838** blijven: de bank toont geen spelers uit de basis, en een speler staat niet dubbel.
