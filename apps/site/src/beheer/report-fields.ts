@@ -242,6 +242,19 @@ export function applyReportButton(
   }
 }
 
+/**
+ * The places of ours that hold a player who is chosen in another place too, after `chosen` was
+ * picked: the other place gives him up, so a player is in the report once and no place is left
+ * with a player who is also somewhere else. The numbers are those of the rows, from 1.
+ */
+export function clearTakenPlayers(values: ReportValues, chosen: number): number[] {
+  const keuze = values.wij.speler[chosen - 1]?.keuze ?? ''
+
+  return keuze === '' || keuze === otherPlayer
+    ? []
+    : values.wij.speler.flatMap((row, index) => (index + 1 !== chosen && row.keuze === keuze ? [index + 1] : []))
+}
+
 /** The number of goals a side has in the report, for the headings. */
 export function goalsOf(values: ReportValues, side: Side) {
   return values[side].doelpunt.filter((goal) => !isUntouchedRow('doelpunt', goal)).length
@@ -249,18 +262,20 @@ export function goalsOf(values: ReportValues, side: Side) {
 
 /**
  * The players of a side as the choices of a list: the value is the number of his row, the text
- * is his number and name. Rows without a name are left out.
+ * is his number and name. Rows without a name are left out. With `bench` only the players on
+ * the bench are in the list, which is where a substitute comes from.
  */
 export function playerChoices(
   values: ReportValues,
   side: Side,
   squad: readonly ReportSquadPlayer[],
   prefix = false,
+  bench = false,
 ): { label: string; value: string }[] {
   return values[side].speler.flatMap((row, index) => {
     const player = playerOf(row, side, squad)
 
-    return player === undefined
+    return player === undefined || (bench && row.rol !== 'bank')
       ? []
       : [{ label: playerLabel(player), value: prefix ? `${side}-${index + 1}` : String(index + 1) }]
   })
@@ -356,4 +371,31 @@ export function readReportValues(formData: FormData): ReportValues {
 /** The sides in words. */
 export function sideName(side: Side, opponent: string) {
   return side === 'wij' ? 'sc Heerenveen' : opponent
+}
+
+/**
+ * The players of the squad that a row of ours can choose. A player is in the report once, in
+ * the line-up or on the bench: a place on the bench takes the players of the squad who are not
+ * in the line-up and not on the bench already, and a place in the line-up takes those who are
+ * not in the line-up already, so a player of the bench can be chosen for the line-up (see
+ * `clearTakenPlayers`, which then empties his place on the bench). The player the row has now
+ * stays in the list.
+ */
+export function squadChoicesForRow(
+  values: ReportValues,
+  index: number,
+  squad: readonly ReportSquadPlayer[],
+): ReportSquadPlayer[] {
+  const rows = values.wij.speler
+  const own = rows[index]
+  const onBench = own?.rol === 'bank'
+  const taken = new Set(
+    rows.flatMap((row, other) =>
+      other === index || row.keuze === undefined || row.keuze === '' || (!onBench && row.rol === 'bank')
+        ? []
+        : [row.keuze],
+    ),
+  )
+
+  return squad.filter((player) => !taken.has(String(player.id)) || String(player.id) === own?.keuze)
 }

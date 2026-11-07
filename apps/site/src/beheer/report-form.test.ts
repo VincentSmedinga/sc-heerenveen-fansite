@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { emptyRow, type ReportValues } from './report-fields'
+import { emptyRow, type ReportValues, type Row } from './report-fields'
 import { report as baseReport, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, errorOrder, type ReportMatch } from './report-form'
 
@@ -86,6 +86,37 @@ describe('checkReportForm', () => {
 
       rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'speler 3', rol: 'bank', rugnummer: '40' }
       fails(report({ wij: { speler: rows } }), 'speler-wij-14-naam', /staat al in het verslag, bij Speler 3/u)
+    })
+
+    it('does not take a player of ours in the line-up and on the bench, or twice on the bench', () => {
+      const rows = [...report().wij.speler]
+
+      // Number 3 is in the line-up; a place on the bench takes him again.
+      rows[13] = { ...rows[2]!, rol: 'bank' }
+      fails(report({ wij: { speler: rows } }), 'speler-wij-14-keuze', /Speler 3 staat al in het verslag, bij Speler 3/u)
+
+      // Number 12 is on the bench; a second place on the bench takes him again.
+      rows[13] = { ...rows[11]! }
+      fails(
+        report({ wij: { speler: rows } }),
+        'speler-wij-14-keuze',
+        /Speler 12 staat al in het verslag, bij Speler 12/u,
+      )
+    })
+
+    it('does not take a player of the opponent in the line-up and on the bench, also by a name in other capitals', () => {
+      const opponent = (naam: string, rugnummer: string, rol: string): Row => ({
+        ...emptyRow('speler'),
+        naam,
+        rol,
+        rugnummer,
+      })
+
+      fails(
+        report({ zij: { speler: [opponent('Sibbing', '7', 'basis'), opponent('SIBBING', '8', 'bank')] } }),
+        'speler-zij-2-naam',
+        /SIBBING staat al in het verslag, bij Speler 1/u,
+      )
     })
 
     it('asks for a name of a player of the opponent', () => {

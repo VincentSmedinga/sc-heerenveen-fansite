@@ -118,6 +118,8 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
    Schrijf nooit een tekst van een verslag, en neem geen hele tabellen over van een site met statistieken.
 2. Kies voor sc Heerenveen de spelers uit de selectie, of kies "Andere speler" en schrijf zijn naam.
    Laat het rugnummer leeg als het hetzelfde is als in de selectie.
+   Een speler staat in het verslag één keer, in de basis of op de bank (de rol).
+   De lijst van een plek op de bank toont de spelers die niet in de basis staan, en kies je een speler van de bank voor de basis, dan wordt zijn plek op de bank leeg.
 3. Vul de wissels, de doelpunten, de kaarten en de gemiste strafschoppen in.
    Bij 45+1 schrijf je 45 als minuut en 1 bij blessuretijd.
 4. Is de kant van de tegenstander ook af, kies dan bij "Is de kant van de tegenstander ook af?" voor Ja.

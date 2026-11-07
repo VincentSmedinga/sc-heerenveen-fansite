@@ -21,6 +21,7 @@ import { createContext, type ReactNode, use, useActionState, useEffect, useState
 import {
   addButtonValue,
   cardKindChoices,
+  clearTakenPlayers,
   type FieldName,
   goalKindChoices,
   incidentKindChoices,
@@ -41,6 +42,7 @@ import {
   rowNames,
   type Side,
   sides,
+  squadChoicesForRow,
   statusChoices,
 } from '#src/beheer/report-fields'
 import { errorOrder } from '#src/beheer/report-form'
@@ -64,7 +66,9 @@ type ReportFormContext = {
   /** The values as the form has them now, which may be more than the server has seen. */
   current: ReportValues
   formAction: (formData: FormData) => void
-  onChange: (form: HTMLFormElement) => void
+  /** What the form did by itself with the last change, for a screen reader. */
+  notice: string
+  onChange: (form: HTMLFormElement, target: EventTarget) => void
   pending: boolean
   state: ReportFormState
   title: string
@@ -96,10 +100,11 @@ export function ReportErrorSummary() {
  * the server makes them again after each button and each save.
  */
 export function ReportFields() {
-  const { choices, current, formAction, onChange, state } = useReportForm()
+  const { choices, current, formAction, notice, onChange, state } = useReportForm()
   const { errors, warnings } = state
   const club = (side: Side) => (side === 'wij' ? 'sc Heerenveen' : choices.opponent)
-  const players = (side: Side, prefix = false) => playerChoices(current, side, choices.squad, prefix)
+  const players = (side: Side, prefix = false, bench = false) =>
+    playerChoices(current, side, choices.squad, prefix, bench)
   const playerOptions = (list: readonly { label: string; value: string }[], selected = '', extra?: string) => (
     <>
       <Select.Option value="">Kies een speler</Select.Option>
@@ -215,6 +220,8 @@ export function ReportFields() {
   const cardsOf = (side: Side) => {
     const own = side === 'wij'
     const mine = players(side)
+    // A substitute comes from the bench.
+    const bench = players(side, false, true)
 
     return [
       card(
@@ -245,7 +252,7 @@ export function ReportFields() {
                     row,
                     <>
                       <Select.Option value="">Kies een speler</Select.Option>
-                      {choices.squad.map((player) => (
+                      {squadChoicesForRow(current, number - 1, choices.squad).map((player) => (
                         <Select.Option key={player.id} value={String(player.id)}>
                           {playerLabel(player)}
                         </Select.Option>
@@ -263,11 +270,18 @@ export function ReportFields() {
       card(
         'wissel',
         side,
-        'Bij 45+1 vul je 45 in als minuut en 1 bij blessuretijd. Wie eruit gaat, staat op het veld; wie erin komt, zat op de bank.',
+        'Bij 45+1 vul je 45 in als minuut en 1 bij blessuretijd. Wie eruit gaat, staat op het veld; wie erin komt, zit op de bank: zet hem eerst bij Opstelling en bank met de rol Bank.',
         table('wissel', side, [...minutes, { line: 2, name: 'Eruit' }, { line: 2, name: 'Erin' }], (row, number) => [
           ...clock('wissel', side, number, row),
           choice('wissel', side, number, 'eruit', row, playerOptions(mine)),
-          choice('wissel', side, number, 'erin', row, playerOptions(mine)),
+          choice(
+            'wissel',
+            side,
+            number,
+            'erin',
+            row,
+            playerOptions(bench, row.erin, mine.find((player) => player.value === row.erin)?.label),
+          ),
         ]),
       ),
       card(
@@ -362,11 +376,20 @@ export function ReportFields() {
   }
 
   return (
-    <Form action={formAction} id={formId} key={state.version} onChange={(event) => onChange(event.currentTarget)}>
+    <Form
+      action={formAction}
+      id={formId}
+      key={state.version}
+      onChange={(event) => onChange(event.currentTarget, event.target)}
+    >
       {/* The first button decides what Enter does: it saves. It is not on the screen. */}
       <Button aria-hidden="true" className="hf-visually-hidden" name="knop" tabIndex={-1} type="submit" value="opslaan">
         Opslaan
       </Button>
+      {/* A player chosen in a place leaves his other place: a screen reader is told. */}
+      <Text className="hf-visually-hidden" role="status">
+        {notice}
+      </Text>
       <Card aria-labelledby="gegevens-kop">
         <Heading id="gegevens-kop" level={2}>
           Gegevens
@@ -462,7 +485,7 @@ export function ReportFormShell({
   /** The title of the list of errors on the page as it opens. */
   title: string
 }) {
-  const [live, setLive] = useState<{ for: ReportFormState; values: ReportValues }>()
+  const [live, setLive] = useState<{ for: ReportFormState; notice: string; values: ReportValues }>()
   // What the form said before the server answered is only good until the server answers.
   const current = live?.for === state ? live.values : state.values
 
@@ -487,7 +510,37 @@ export function ReportFormShell({
         choices,
         current,
         formAction,
-        onChange: (form) => setLive({ for: state, values: readReportValues(new FormData(form)) }),
+        notice: live?.for === state ? live.notice : '',
+        onChange: (form, target) => {
+          // A player chosen in a place gives up the other place he held: he is in the report
+          // once. The form says so before the server does, which does the same on a save.
+          const chosen = target instanceof HTMLSelectElement ? /^speler-wij-(\d+)-keuze$/u.exec(target.name) : null
+
+          let told = ''
+
+          if (chosen !== null) {
+            const taken = clearTakenPlayers(readReportValues(new FormData(form)), Number(chosen[1]))
+
+            for (const number of taken) {
+              const other = form.elements.namedItem(rowFieldId('speler', 'wij', number, 'keuze'))
+
+              if (other instanceof HTMLSelectElement) {
+                other.value = ''
+              }
+            }
+
+            if (taken.length > 0 && target instanceof HTMLSelectElement) {
+              const role = form.elements.namedItem(rowFieldId('speler', 'wij', Number(chosen[1]), 'rol'))
+              const where =
+                role instanceof HTMLSelectElement && role.value === 'bank' ? 'op de bank' : 'in de opstelling'
+              const player = target.selectedOptions[0]?.text ?? 'De speler'
+
+              told = `${player} staat nu ${where}. Zijn andere plaats in het verslag is leeg gemaakt.`
+            }
+          }
+
+          setLive({ for: state, notice: told, values: readReportValues(new FormData(form)) })
+        },
         pending,
         // The headline of the errors is the one of the page as it opens, the plain one after.
         state,
