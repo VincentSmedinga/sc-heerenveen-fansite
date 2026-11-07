@@ -57,6 +57,8 @@
     --hf-colour-green-800: #0a5627;
     --hf-colour-green-900: #06411b;
     --hf-colour-green-950: #032d11;
+    --hf-colour-yellow-300: #f5cd2e;
+    --hf-colour-yellow-400: #f2c200;
     --hf-colour-grey-50: #faf8f4;
     --hf-colour-grey-100: #f1eee7;
     --hf-colour-grey-200: #e3dfd7;
@@ -190,6 +192,15 @@
     --hf-colour-outcome-win: light-dark(var(--hf-colour-green-700), var(--hf-colour-green-300));
     --hf-colour-outcome-loss: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
     --hf-colour-outcome-draw: light-dark(var(--hf-colour-grey-600), var(--hf-colour-blue-200));
+
+    /*
+     * The fill of the yellow and the red card in the icons of a match (MatchEventIcon). The card is a shape with a rim in the
+     * colour of the text (--hf-colour-text-default), and the rim is what reaches 3:1 against the surfaces in both themes:
+     * the yellow alone would not (1,6:1 on white). So the fill only says which card it is, and the word beside the icon says
+     * so too. The red is a step lighter than the red of the outcome in light and as light as it in dark.
+     */
+    --hf-colour-card-yellow: light-dark(var(--hf-colour-yellow-400), var(--hf-colour-yellow-300));
+    --hf-colour-card-red: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
      * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
@@ -397,6 +408,8 @@
       --hf-colour-outcome-win: var(--hf-colour-green-700);
       --hf-colour-outcome-loss: var(--hf-colour-red-700);
       --hf-colour-outcome-draw: var(--hf-colour-grey-600);
+      --hf-colour-card-yellow: var(--hf-colour-yellow-400);
+      --hf-colour-card-red: var(--hf-colour-red-600);
       --hf-colour-background-shortcuts: var(--hf-colour-sand-100);
       --hf-colour-border-shortcuts: var(--hf-colour-sand-300);
       --hf-colour-text-shortcuts-label: var(--hf-colour-sand-700);

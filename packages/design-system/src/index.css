@@ -59,6 +59,7 @@
 @import url('./components/news-item/news-item.css');
 @import url('./components/discussion-item/discussion-item.css');
 @import url('./components/match/match.css');
+@import url('./components/match-event-icon/match-event-icon.css');
 @import url('./components/match-header/match-header.css');
 @import url('./components/match-lineup/match-lineup.css');
 @import url('./components/match-timeline/match-timeline.css');

@@ -2723,3 +2723,32 @@
 - **Nadeel:** een vaste optische maat verandert de letters een fractie, en de assen die niemand gebruikt zijn weg: een nieuw gewicht of een nieuwe breedte vraagt een nieuw bestand.
 - **Alternatieven:** alleen vooraf laden en terugvalmaten (de CLS lost op, het gewicht niet); het breedte-bestand van Fontsource (144 KiB, de optische maat is weg, kleine letters zien er anders uit); een lichtere Truculenta zonder breedte (de koppen verliezen hun vorm).
 - **Later:** dit vervangt voor Truculenta het besluit van 20 oktober 2026 dat de lettertypes uit Fontsource komen.
+
+## Een gebeurtenis in een wedstrijd heeft een vorm én een woord, nooit alleen een kleur
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchEventIcon` (#842) heeft voor elke soort gebeurtenis een eigen vorm: doelpunt, eigen doelpunt, gele, rode en geel-rode kaart, wissel, erin, eruit en een gemiste of gestopte strafschop.
+  Wie geen kleuren ziet, kan ze toch uit elkaar houden.
+  Het woord zelf, zoals "Gele kaart", schrijft de pagina die het pictogram gebruikt: het pictogram is standaard verborgen voor schermlezers, en met een `label` krijgt het een naam, voor de plek waar geen tekst naast staat.
+  - **De vormen:** het doelpunt is een voetbal in twee kleuren (de kleur van een kop met vlakken in de kleur van het vlak; bij een eigen doelpunt de kleur van een verlies).
+    Een kaart is een afgeronde rechthoek in de kaartkleur met een rand in de tekstkleur.
+    De geel-rode kaart is een gele en een rode die half over elkaar liggen.
+    De wissel is één pictogram met twee pijlen (omhoog groen, omlaag rood), en erin en eruit zijn die pijlen apart.
+    De gemiste strafschop is een ring met een kruis.
+  - **De draaiing:** alle pictogrammen staan 12 graden met de klok mee gedraaid, zoals in het ontwerp.
+  - **De maten:** een maat bij gewone tekst en een grotere voor de strafschoppenserie (#848).
+    Ze volgen de tekst, want de maat is in `em`.
+  - **De contrasten:** de rand in de tekstkleur geeft de vorm 3:1 tegen elk vlak in licht en in donker; de gele vulling alleen haalt dat niet (1,6:1 op wit).
+- **Waarom:** kleur mag nooit het enige verschil zijn (WCAG 1.4.1), en een pagina met vijf soorten gebeurtenissen naast elkaar wordt anders alleen een rij gekleurde stippen.
+- **Alternatieven:** een gekleurde stip per soort (kleur is dan het enige onderscheid).
+
+## De kaarten bij een wedstrijd hebben twee kleurtokens, elk met een paar voor licht en donker
+
+- **Datum:** 7 november 2026
+- **Besluit:** er komen twee nieuwe kleurtokens, `--hf-colour-card-yellow` en `--hf-colour-card-red`, elk met een paar voor licht en donker.
+  Het rood is rood-600 in licht en rood-400 in donker.
+  Het geel is de nieuwe reeks `yellow` met twee stappen, 400 in licht (`#f2c200`) en 300 in donker (`#f5cd2e`), want het designsysteem had geen geel.
+  De bal, de pijlen en het kruis gebruiken kleuren die er al zijn: de kop, het vlak, de uitkomst winst en verlies, en de tekstkleur.
+  De tokens staan in `colour.css`, met een terugval voor een browser zonder `light-dark()`, en in de documentatie van de tokens.
+- **Waarom:** de kaarten zijn de enige kleuren die het ontwerp nieuw vraagt.
+- **Alternatieven:** de kleuren in het onderdeel zelf zetten (dan zijn ze niet te hergebruiken en staan ze niet in de tokens die de MCP-server laat zien).

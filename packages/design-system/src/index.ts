@@ -88,6 +88,12 @@ export { Logo } from './components/logo/Logo'
 export type { LogoProps } from './components/logo/Logo'
 export { MarkRow } from './components/mark-row/MarkRow'
 export type { MarkRowMark, MarkRowProps } from './components/mark-row/MarkRow'
+export { MatchEventIcon, matchEventIconKinds, matchEventIconSizes } from './components/match-event-icon/MatchEventIcon'
+export type {
+  MatchEventIconKind,
+  MatchEventIconProps,
+  MatchEventIconSize,
+} from './components/match-event-icon/MatchEventIcon'
 export { MatchHeader } from './components/match-header/MatchHeader'
 export type { MatchHeaderFact, MatchHeaderProps } from './components/match-header/MatchHeader'
 export { MatchLineup } from './components/match-lineup/MatchLineup'

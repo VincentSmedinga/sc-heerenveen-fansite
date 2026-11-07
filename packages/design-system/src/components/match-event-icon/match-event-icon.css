@@ -1,0 +1,90 @@
+/* The icons of the events in a match: a goal, a card, a substitution and a missed penalty. */
+
+@layer hf.components {
+  /*
+   * In line with the text, turned 12 degrees clockwise as the design has it. The size is in em so it follows the text
+   * beside it. The base styles make an svg a block, so it is put back in the line here.
+   */
+  .hf-match-event-icon {
+    --hf-match-event-icon-size: 1;
+
+    block-size: calc(var(--hf-match-event-icon-size) * 1em);
+    display: inline-block;
+    flex-shrink: 0;
+    inline-size: calc(var(--hf-match-event-icon-size) * 1em);
+    transform: rotate(12deg);
+    vertical-align: -0.15em;
+  }
+
+  /* Larger, for the row of kicks in a penalty shoot-out. */
+  .hf-match-event-icon-large {
+    --hf-match-event-icon-size: 1.375;
+  }
+
+  /*
+   * The ball is the colour of a heading with patches in the colour of the surface, so it is dark on light and light on dark.
+   * An own goal has the colour of a loss.
+   */
+  .hf-match-event-icon-ball {
+    fill: var(--hf-colour-text-heading);
+  }
+
+  .hf-match-event-icon-own {
+    fill: var(--hf-colour-outcome-loss);
+  }
+
+  .hf-match-event-icon-patch {
+    fill: var(--hf-colour-background-surface);
+  }
+
+  .hf-match-event-icon-seams {
+    fill: none;
+    stroke: var(--hf-colour-background-surface);
+    stroke-linecap: round;
+    stroke-width: 0.9;
+  }
+
+  /* A card has a rim in the colour of the text, and the rim gives the shape its 3:1 against the surface. */
+  .hf-match-event-icon-card {
+    stroke: var(--hf-colour-text-default);
+    stroke-width: 1.2;
+  }
+
+  .hf-match-event-icon-yellow {
+    fill: var(--hf-colour-card-yellow);
+  }
+
+  .hf-match-event-icon-red {
+    fill: var(--hf-colour-card-red);
+  }
+
+  /* The player who comes on goes up in green, the player who goes off goes down in red. */
+  .hf-match-event-icon-arrow-in,
+  .hf-match-event-icon-arrow-out {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .hf-match-event-icon-arrow-in {
+    stroke: var(--hf-colour-outcome-win);
+  }
+
+  .hf-match-event-icon-arrow-out {
+    stroke: var(--hf-colour-outcome-loss);
+  }
+
+  /* The missed penalty is a ring with a cross, in the colour of the text around it. */
+  .hf-match-event-icon-ring {
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+  }
+
+  .hf-match-event-icon-cross {
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.8;
+  }
+}
