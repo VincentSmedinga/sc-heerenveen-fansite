@@ -176,9 +176,14 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
           <Heading anchor id="opstelling" level={2}>
             Opstelling
           </Heading>
-          <MatchLineup {...ours} headingLevel={3} team={ourClub} />
+          <MatchLineup {...ours} formation={stored.report.formationOurs ?? undefined} headingLevel={3} team={ourClub} />
           {opponentComplete ? (
-            <MatchLineup {...theirs} headingLevel={3} team={match.opponent} />
+            <MatchLineup
+              {...theirs}
+              formation={stored.report.formationOpponent ?? undefined}
+              headingLevel={3}
+              team={match.opponent}
+            />
           ) : (
             <Text>{`De opstelling van ${match.opponent} hebben we niet.`}</Text>
           )}

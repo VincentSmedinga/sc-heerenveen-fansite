@@ -618,6 +618,8 @@
   Een tweede lijst met doelpunten zou op elke plek bijgehouden moeten worden.
   Eén bron per feit houdt een cijfer en de pagina gelijk.
 - **Alternatieven:** één tabel met gebeurtenissen met veel lege kolommen (een wissel, een kaart en een doelpunt hebben elk andere velden, en de database kan dan weinig afdwingen); minuten opslaan naast de wissels (twee plekken die uit elkaar kunnen lopen).
+- **Later:** zie _De formatie van een team staat in het verslag, en de regel ervoor staat bij de regels van het verslag_ (7 november 2026): #828 liet de formatie buiten het verslag, en dat deed #840 erbij.
+  `match_reports` heeft sindsdien `formation_ours` en `formation_opponent`.
 
 ## De regels voor een verslag staan op één plek, in `packages/shared`
 
@@ -688,3 +690,24 @@
 - **Waarom:** de import en de mail over een afwijking werken al, en een verslag heeft meer precisie dan de lijst van Wikipedia.
   Wikipedia blijft de bron van wat zij wel heeft, met de bronvermelding van de pagina's die haar tonen.
 - **Alternatieven:** de doelpunten van Wikipedia houden en die van het verslag erbij (twee lijsten die kunnen afwijken); de uitslag ook uit het verslag halen (de import en de stand per club lezen haar al).
+
+## De formatie van een team staat in het verslag, en de regel ervoor staat bij de regels van het verslag
+
+- **Datum:** 7 november 2026
+- **Besluit:** het verslag bewaart per team een formatie, zoals `4-3-3`, in `match_reports.formation_ours` en `match_reports.formation_opponent` (#840).
+  Beide mogen leeg zijn: een verslag kan klaar zijn zonder formatie.
+  - **Wat een formatie is:** getallen van minstens 1 met een koppelteken ertussen, zonder spaties en zonder koppelteken aan het begin of einde, en de getallen zijn samen tien.
+    De projecteigenaar koos tien, de veldspelers zonder de keeper, op 7 november 2026.
+    Goed zijn `4-1-2-1-2` en `3-4-2-1`; fout zijn `4-3-4` (elf), `4--3-3`, `4-3-3-` en `4 3 3`.
+  - **De regel:** `formationProblem` in `@fansite/shared/match-report` geeft een zin bij een formatie die niet klopt, en niets bij een goede of lege.
+    Het formulier, het plakscherm en de regels van het verslag (`checkMatchReport`, voor de pagina van de wedstrijd) gebruiken dezelfde functie.
+    `formationChoices` is de lijst met de gebruikelijke formaties.
+  - **De database:** twee kolommen `varchar(20)`, leeg toegestaan, en per kolom een check die alleen de vorm vasthoudt (getallen met een koppelteken ertussen).
+    Dat de getallen samen tien zijn, is een regel van het verslag en geen check, zoals bij de minuten en de aantallen in #828.
+  - **De migratie:** `0047_add_report_formations` voegt alleen toe en kan opnieuw draaien.
+    Bestaande verslagen krijgen geen formatie.
+    Terugdraaien op de host kan zonder andere gegevens te verliezen: de twee checks en de twee kolommen weghalen, zoals de opmerking in het bestand zegt.
+  - **De seed:** het verzonnen verslag heeft `4-3-3` voor sc Heerenveen en `4-4-2` voor de tegenstander.
+- **Waarom:** de formatie hoort bij de opstelling van het team en niet bij een speler, en het verslag is de plek waar die ene bron voor de pagina en de cijfers staat.
+  Eén functie voor de regel houdt het formulier, het plakscherm en de pagina gelijk.
+- **Alternatieven:** de formatie als aparte tabel (een rij per team voor één tekst); elf als som, met de keeper (de projecteigenaar koos tien); de regel in de database als check (MariaDB rekent geen som uit een tekst).

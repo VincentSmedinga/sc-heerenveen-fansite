@@ -1,6 +1,7 @@
 import {
   emptyRow,
   emptySide,
+  noFormation,
   type ReportSquadPlayer,
   type ReportValues,
   type Row,
@@ -39,6 +40,10 @@ export function formDataOf(values: ReportValues, knop = 'opslaan'): FormData {
   formData.set('bron', values.bron)
   formData.set('status', values.status)
   formData.set('tegenstander', values.tegenstander)
+  formData.set('formatie-wij', values.formatie.wij.keuze)
+  formData.set('formatie-wij-eigen', values.formatie.wij.eigen)
+  formData.set('formatie-zij', values.formatie.zij.keuze)
+  formData.set('formatie-zij-eigen', values.formatie.zij.eigen)
   formData.set('knop', knop)
 
   for (const side of ['wij', 'zij'] as const) {
@@ -66,6 +71,7 @@ export function report(
 ): ReportValues {
   return {
     bron: 'wedstrijdformulier',
+    formatie: { wij: noFormation(), zij: noFormation() },
     status: 'klaar',
     tegenstander: 'nee',
     wij: {

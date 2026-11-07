@@ -8,6 +8,7 @@
 // `wissel-wij-2-minuut`. An event points to a player of the report by the number of his row in
 // the list of players of the same side (`3`); a goal points to its scorer and assist by the
 // side and the number (`wij-3`), since a scorer of an own goal is of the other side.
+import { formationChoices } from '@fansite/shared/match-report'
 
 export const sides = ['wij', 'zij'] as const
 
@@ -29,6 +30,13 @@ export const rowFields = {
 
 /** The name of a field of any row. */
 export type FieldName = (typeof rowFields)[RowKind][number]
+
+/**
+ * What an editor filled in for the formation of a team: the choice in the list (`''` for none,
+ * one of `formationChoices`, or `otherFormation`), and the text of a formation of his own,
+ * which only counts with that last choice.
+ */
+export type FormationValue = { eigen: string; keuze: string }
 
 /** The errors by the `id` of the field or the list: `wissel-wij-2-minuut` or `doelpunt-zij`. */
 export type ReportErrors = {
@@ -66,6 +74,8 @@ export type ReportSquadPlayer = {
 /** What an editor filled in for a report, as text. */
 export type ReportValues = {
   bron: string
+  /** The formation of each team. */
+  formatie: Record<Side, FormationValue>
   status: string
   /** `ja` when the side of the opponent is complete too. */
   tegenstander: string
@@ -110,6 +120,18 @@ export const statusChoices = [
 /** The keuze of a player of ours that is not in the squad: the name and the number follow. */
 export const otherPlayer = 'andere'
 
+/** The choice for a formation that is not in the list: the text field holds it. */
+export const otherFormation = 'anders'
+
+/**
+ * The `id` of the list of the formation of a side, and of the field for a formation of his own.
+ */
+export const formationId = (side: Side) => `formatie-${side}`
+export const formationOwnId = (side: Side) => `formatie-${side}-eigen`
+
+/** A formation that was not filled in. */
+export const noFormation = (): FormationValue => ({ eigen: '', keuze: '' })
+
 /** What a button of the form asks for. */
 export type ReportButton =
   | { kind: 'add'; row: RowKind; side: Side }
@@ -141,6 +163,21 @@ export function emptyRow(kind: RowKind): Row {
 /** The rows of a side with nothing in them. */
 export function emptySide(): SideRows {
   return { doelpunt: [], kaart: [], speler: [], strafschop: [], wissel: [] }
+}
+
+/**
+ * The form values of a formation that is stored: one of the list shows as that choice, and any
+ * other shows as "Anders" with the text, so a formation of his own comes back where it was
+ * typed. No formation is the empty choice.
+ */
+export function formationValueOf(stored: null | string): FormationValue {
+  if (stored === null || stored === '') {
+    return noFormation()
+  }
+
+  return (formationChoices as readonly string[]).includes(stored)
+    ? { eigen: '', keuze: stored }
+    : { eigen: stored, keuze: otherFormation }
 }
 
 /** Whether nothing was filled in for a row: every field is as a new row has it. */
@@ -361,6 +398,10 @@ export function readReportValues(formData: FormData): ReportValues {
 
   return {
     bron: text('bron'),
+    formatie: {
+      wij: { eigen: text(formationOwnId('wij')), keuze: text(formationId('wij')) },
+      zij: { eigen: text(formationOwnId('zij')), keuze: text(formationId('zij')) },
+    },
     status: text('status'),
     tegenstander: text('tegenstander'),
     wij: read('wij'),

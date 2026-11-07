@@ -127,7 +127,7 @@ describe('the screen Tekst plakken', () => {
     expect(html).toContain('Plak de tekst in het formaat hieronder. Hoogstens 20.000 tekens.')
     expect(html).toContain('Er wordt niets bewaard voordat je in het formulier Opslaan kiest.')
     expect(html).toContain('name="tekst"')
-    expect(html).toMatch(/<textarea[^>]*readOnly=""[^>]*>Opstelling\n/u)
+    expect(html).toMatch(/<textarea[^>]*readOnly=""[^>]*>Formatie: 4-3-3\nOpstelling\n/u)
     expect(html).toContain('Tekst lezen')
 
     // Every kind of line of the format has a rule.

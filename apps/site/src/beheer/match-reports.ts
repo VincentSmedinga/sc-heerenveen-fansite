@@ -31,6 +31,7 @@ import type { ReportContext, ReportPlan } from './report-form'
 import {
   emptyRow,
   emptySide,
+  formationValueOf,
   otherPlayer,
   type ReportSquadPlayer,
   type ReportValues,
@@ -219,6 +220,8 @@ export async function saveReport(
       .where(eq(matchGoals.matchId, id))
       .orderBy(asc(matchGoals.id))
     const row = {
+      formationOpponent: plan.formations.opponent,
+      formationOurs: plan.formations.ours,
       opponentComplete: plan.opponentComplete,
       savedAt: now,
       savedBy: userId,
@@ -405,6 +408,10 @@ export function valuesOfReport(
 ): ReportValues {
   const values: ReportValues = {
     bron: stored?.report.source ?? '',
+    formatie: {
+      wij: formationValueOf(stored?.report.formationOurs ?? null),
+      zij: formationValueOf(stored?.report.formationOpponent ?? null),
+    },
     status: stored?.report.status ?? 'bezig',
     tegenstander: stored?.report.opponentComplete === true ? 'ja' : 'nee',
     wij: emptySide(),
@@ -495,6 +502,7 @@ function planSignature(plan: ReportPlan, known: readonly (undefined | { id: numb
       player.captain,
     ]),
     cards: plan.cards.map((card) => [card.ours, card.appearance, card.kind, card.minute, card.stoppageMinutes]),
+    formations: [plan.formations.ours, plan.formations.opponent],
     goals: plan.goals.map((goal) => [
       goal.ours,
       goal.appearance,
@@ -600,6 +608,7 @@ function storedSignature(stored: StoredMatchReport) {
       appearance.captain,
     ]),
     cards: stored.cards.map((card) => [card.ours, at(card.appearanceId), card.kind, card.minute, card.stoppageMinutes]),
+    formations: [stored.report.formationOurs, stored.report.formationOpponent],
     goals: stored.goals.map((goal) => [
       goal.ours,
       at(goal.appearanceId),

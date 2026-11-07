@@ -160,6 +160,8 @@ export function reportedMatch(): ReportedMatch {
         },
       ],
       report: {
+        formationOpponent: '4-4-2',
+        formationOurs: '4-3-3',
         matchId: 7,
         opponentComplete: true,
         savedAt: new Date('2026-10-25T10:00:00Z'),

@@ -124,7 +124,15 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
    Bij 45+1 schrijf je 45 als minuut en 1 bij blessuretijd.
 4. Is de kant van de tegenstander ook af, kies dan bij "Is de kant van de tegenstander ook af?" voor Ja.
    Dan tellen elf spelers, de bank en wie scoorde ook voor hem mee.
-5. Kies "Opslaan".
+5. Kies bij Opstelling en bank van elk team de formatie, zoals 4-3-3, als je hem weet.
+   Zonder formatie kan het verslag ook klaar zijn.
+6. Kies "Opslaan".
+
+De lijst bij de formatie heeft de gebruikelijke formaties.
+Is jouw formatie er niet bij, kies dan Anders en schrijf hem in het veld eronder, zoals 4-1-2-1-2.
+Een formatie is getallen met een koppelteken ertussen, zonder spaties, en de getallen zijn samen tien: de veldspelers, zonder de keeper.
+Zonder JavaScript staat het veld altijd op het scherm en telt het alleen bij de keuze Anders.
+De formatie komt op de pagina van de wedstrijd bij de naam van het team, en staat er niets als er geen is.
 
 Je kunt een verslag in meerdere keren invullen.
 Zolang de status "Bezig" is, mag er nog iets ontbreken.
@@ -160,6 +168,9 @@ De tekst heeft kopjes, elk op een eigen regel, en daaronder een regel per speler
 - `Kaarten`: de minuut, `geel`, `geel-rood` of `rood`, en de speler, zoals `34 geel Jansen`.
 - `Strafschoppen`: de minuut, `gemist` of `gestopt`, en de nemer, zoals `55 gemist Jansen`.
 - Na het kopje `Tegenstander` staan dezelfde kopjes voor de tegenstander.
+- `Formatie: 4-3-3`: de formatie van een team, op een eigen regel bij het team.
+  Boven het eerste kopje is het de formatie van sc Heerenveen, en onder `Tegenstander` die van de tegenstander.
+  Een formatie die niet klopt, staat onder "Niet gelezen" met de reden.
 
 Hoofdletters en de volgorde van de kopjes doen er niet toe, en een kopje dat ontbreekt is leeg.
 Een regel die met `#` begint, is commentaar.

@@ -28,6 +28,11 @@ export type MatchLineupProps = Omit<ComponentPropsWithoutRef<'section'>, 'childr
    */
   bench: MatchLineupPlayer[]
   /**
+   * The formation of the team, such as `4-3-3`, as a short line next to the name of the team:
+   * "Formatie: 4-3-3". Leave it out when the report has none, and nothing stands there.
+   */
+  formation?: string | undefined
+  /**
    * The level of the heading with the name of the team. The lists under it have a label, not a
    * heading.
    */
@@ -75,9 +80,22 @@ function Players({ label, players, team }: { label: string; players: MatchLineup
  * lists are labelled with the team in the name a screen reader gives them. A team without a
  * bench shows no list for it. match-lineup.css gives it its look.
  */
-export const MatchLineup = ({ bench, className, headingLevel, starters, team, ...props }: MatchLineupProps) => (
+export const MatchLineup = ({
+  bench,
+  className,
+  formation,
+  headingLevel,
+  starters,
+  team,
+  ...props
+}: MatchLineupProps) => (
   <section {...props} className={classNames('hf-match-lineup', className)}>
     <Heading level={headingLevel}>{team}</Heading>
+    {formation === undefined || formation === '' ? null : (
+      <Text appearance="meta" className="hf-match-lineup-formation">
+        Formatie: {formation}
+      </Text>
+    )}
     <Players label="Basis" players={starters} team={team} />
     {bench.length > 0 ? <Players label="Bank" players={bench} team={team} /> : null}
   </section>

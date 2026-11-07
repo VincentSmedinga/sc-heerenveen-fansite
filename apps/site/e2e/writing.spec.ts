@@ -494,7 +494,7 @@ for (const [name, javaScriptEnabled] of [
       await expect(page).toHaveURL(/\/verslag\/plakken$/u)
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Verslag plakken: ')
       await expect(page.getByLabel('Tekst van het verslag', { exact: true })).toBeVisible()
-      await expect(page.getByLabel('Voorbeeld', { exact: true })).toHaveValue(/^Opstelling\n/u)
+      await expect(page.getByLabel('Voorbeeld', { exact: true })).toHaveValue(/^Formatie: 4-3-3\nOpstelling\n/u)
 
       // An empty text is asked for again, with the error at the field.
       await page.getByRole('button', { name: 'Tekst lezen' }).click()
@@ -539,6 +539,56 @@ for (const [name, javaScriptEnabled] of [
       // Nothing was stored: the report screen still has no report.
       await page.goto(address)
       await expect(page.getByText('Nog geen verslag')).toBeVisible()
+    })
+  })
+}
+
+for (const [name, javaScriptEnabled] of [
+  ['with JavaScript', true],
+  ['without JavaScript', false],
+] as const) {
+  test.describe(`the formation of a match report ${name}`, () => {
+    test.use({ javaScriptEnabled })
+
+    test(`is chosen, refused when it is wrong, stored and shown again ${name}`, async ({ page }) => {
+      const address = `/beheer/wedstrijden/${await playedMatchId()}/verslag`
+
+      await page.goto(address)
+      await expect(page.locator('label[for="formatie-wij"]')).toHaveText('Formatie van sc Heerenveen')
+
+      // A formation from the list for our team, and one of his own for the opponent that is
+      // wrong.
+      await page.locator('#formatie-wij').selectOption('4-3-3')
+
+      // The field of his own is there for Anders only, which the browser has to show (jsdom
+      // can't); without JavaScript the page can't change it, so it stays.
+      await expect(page.locator('#formatie-wij-eigen'))[javaScriptEnabled ? 'toBeHidden' : 'toBeVisible']()
+      await page.locator('#formatie-zij').selectOption('anders')
+      await page.locator('#formatie-zij-eigen').fill('4-3-4')
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page.locator('#formatie-zij-eigen-error')).toContainText('tellen op tot 11')
+      await expect(page.locator('#formatie-zij-eigen')).toHaveAttribute('aria-invalid', 'true')
+      await expect(page.locator('#formatie-wij')).toHaveValue('4-3-3')
+
+      if (javaScriptEnabled) {
+        await expect(page.locator('#fouten')).toBeFocused()
+        expect(await checkPage(page)).toEqual([])
+      }
+
+      // With a formation that follows the rule the report is stored, and comes back as it was.
+      await page.locator('#formatie-zij-eigen').fill('4-1-2-1-2')
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page).toHaveURL(/\/verslag\?gedaan=opgeslagen$/u)
+      await expect(page.locator('#formatie-wij')).toHaveValue('4-3-3')
+      await expect(page.locator('#formatie-zij')).toHaveValue('anders')
+      await expect(page.locator('#formatie-zij-eigen')).toHaveValue('4-1-2-1-2')
+
+      // Taking the report away takes the formations with it.
+      await page.locator('summary', { hasText: 'Verslag weghalen' }).click()
+      await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
+      await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
+      await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
+      await expect(page.locator('#formatie-wij')).toHaveValue('')
     })
   })
 }

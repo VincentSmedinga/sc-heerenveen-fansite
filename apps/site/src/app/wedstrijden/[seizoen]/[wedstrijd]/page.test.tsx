@@ -130,6 +130,38 @@ describe('the page of a match', () => {
     expect(text).toContain('Gele kaart in de 30e minuut')
   })
 
+  it('shows the formation of each team next to the name of the team, as eigen administratie', async () => {
+    const html = await render()
+
+    expect(plain(html)).toContain('sc Heerenveen Formatie: 4-3-3')
+    expect(plain(html)).toContain('Testdorp FC Formatie: 4-4-2')
+    expect(html.match(/Formatie: /g)).toHaveLength(2)
+    expect(plain(html)).toContain('komen uit onze eigen administratie')
+  })
+
+  it('shows nothing about a formation for a team that has none, and takes nothing else away', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.formationOurs = null
+    reported.stored.report.formationOpponent = null
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+
+    expect(html).not.toContain('Formatie')
+    expect(html.match(/<h3/g)).toHaveLength(2)
+    expect(plain(html)).toContain('Basis')
+  })
+
+  it('shows the formation of one team only when the other has none', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.formationOpponent = null
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    expect((await render()).match(/Formatie: /g)).toHaveLength(1)
+  })
+
   it('shows one sentence instead of the line-up of an opponent that is not complete', async () => {
     const reported = reportedMatch()
 

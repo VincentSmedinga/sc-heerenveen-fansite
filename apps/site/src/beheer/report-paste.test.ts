@@ -434,3 +434,79 @@ describe('a player who is in the text twice', () => {
     expect(result.unread).toHaveLength(1)
   })
 })
+
+describe('the formation', () => {
+  it('reads "Formatie: 4-3-3" for our side, above the first heading and under any heading of it', () => {
+    expect(read('Formatie: 4-3-3\nOpstelling\n4').values.formatie.wij).toEqual({ eigen: '', keuze: '4-3-3' })
+    expect(read('Opstelling\n4\nFormatie: 4-4-2').values.formatie.wij).toEqual({ eigen: '', keuze: '4-4-2' })
+    expect(read('Opstelling\n4\nFormatie: 4-3-3').unread).toEqual([])
+  })
+
+  it('reads the formation of the opponent under the heading Tegenstander', () => {
+    const result = read('Formatie: 4-3-3\nTegenstander\nFormatie: 5-3-2\nOpstelling\n1 Ruud Oefenman')
+
+    expect(result.values.formatie).toEqual({
+      wij: { eigen: '', keuze: '4-3-3' },
+      zij: { eigen: '', keuze: '5-3-2' },
+    })
+  })
+
+  it('takes a formation that is not in the list as Anders with its text, as the form shows it', () => {
+    expect(read('Formatie: 4-1-2-1-2').values.formatie.wij).toEqual({ eigen: '4-1-2-1-2', keuze: 'anders' })
+  })
+
+  it('does not care for capitals, the colon with or without spaces, or the order', () => {
+    expect(read('FORMATIE : 3-4-2-1').values.formatie.wij.keuze).toBe('3-4-2-1')
+    expect(read('formatie:4-4-2').values.formatie.wij.keuze).toBe('4-4-2')
+  })
+
+  it('says what it read, with the team', () => {
+    expect(read('Formatie: 4-3-3\nTegenstander\nFormatie: 4-4-2').read.map((line) => line.meaning)).toEqual([
+      'Formatie sc Heerenveen: 4-3-3',
+      'Kopje: de tegenstander',
+      'Formatie de tegenstander: 4-4-2',
+    ])
+  })
+
+  it('has a message at the line for a value the rule refuses, and leaves the formation as it was', () => {
+    const result = read('Opstelling\n4\nFormatie: 4-3-4\nFormatie: 4 3 3\nFormatie: 4--3-3\nFormatie:')
+
+    expect(result.unread.map((line) => [line.line, line.reason])).toEqual([
+      [
+        3,
+        'Formatie van sc Heerenveen: De getallen van de formatie tellen op tot 11, en het moeten er 10 zijn: de veldspelers zonder de keeper.',
+      ],
+      [4, 'Formatie van sc Heerenveen: Schrijf de formatie zonder spaties, zoals 4-3-3.'],
+      [
+        5,
+        'Formatie van sc Heerenveen: Zet één koppelteken tussen de getallen, en geen koppelteken aan het begin of einde, zoals 4-3-3.',
+      ],
+      [6, 'Formatie van sc Heerenveen: Schrijf de formatie erachter, zoals "Formatie: 4-3-3".'],
+    ])
+    expect(result.values.formatie.wij).toEqual({ eigen: '', keuze: '' })
+    expect(result.choices).toEqual([])
+  })
+
+  it('has one formation for a side: a second line is not read', () => {
+    const result = read('Formatie: 4-3-3\nFormatie: 4-4-2')
+
+    expect(result.values.formatie.wij.keuze).toBe('4-3-3')
+    expect(result.unread).toEqual([
+      { line: 2, reason: 'sc Heerenveen heeft al een formatie: schrijf er één.', text: 'Formatie: 4-4-2' },
+    ])
+  })
+
+  it('has no formation without the line', () => {
+    expect(read('Opstelling\n4').values.formatie).toEqual({
+      wij: { eigen: '', keuze: '' },
+      zij: { eigen: '', keuze: '' },
+    })
+  })
+
+  it('stays out of the lines of a list: a name that starts with Formatie is a player to be read as one', () => {
+    const result = read('Opstelling\n4 Formatie Speler')
+
+    expect(result.values.wij.speler[0]).toBeDefined()
+    expect(result.values.formatie.wij.keuze).toBe('')
+  })
+})

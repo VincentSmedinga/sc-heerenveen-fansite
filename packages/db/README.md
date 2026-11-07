@@ -262,16 +262,18 @@ We houden het zelf bij, want de Nederlandse Wikipedia heeft het niet.
 Het wordt ingevuld in het beheer (#829), geplakt (#830) en getoond op de pagina van de wedstrijd (#831) en bij de spelers (#832).
 De regels die zeggen of een verslag klopt, staan in `@fansite/shared/match-report`, niet in de database.
 
-| Tabel                 | Wat een rij is                                                                                                                                                          |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `match_reports`       | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `saved_by` en `saved_at` |
-| `match_appearances`   | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                       |
-| `match_substitutions` | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                     |
-| `match_cards`         | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                       |
-| `match_incidents`     | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                             |
+| Tabel                 | Wat een rij is                                                                                                                                                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `match_reports`       | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `formation_ours` en `formation_opponent` (de formatie van elk team, zoals `4-3-3`, of leeg), `saved_by` en `saved_at` |
+| `match_appearances`   | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                                                                                                                    |
+| `match_substitutions` | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                                                                                                                  |
+| `match_cards`         | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                                                                                                                    |
+| `match_incidents`     | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                                                                                                                          |
 
 `match_goals` heeft er twee kolommen bij: `appearance_id` (de speler die scoorde) en `assist_appearance_id` (de assist), leeg bij een doelpunt zonder verslag.
 Er is geen kolom voor de minuten die een speler speelde: `minutesPlayed` rekent ze uit de wissels en de rode kaarten.
+De formatie is een tekst van getallen met een koppelteken ertussen (`4-3-3`): de database houdt alleen die vorm vast (twee checks).
+Dat de getallen samen tien zijn, de veldspelers zonder de keeper, is een regel van het verslag (`formationProblem` in `@fansite/shared/match-report`).
 
 Wat de database afdwingt:
 

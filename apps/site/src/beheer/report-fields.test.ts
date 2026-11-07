@@ -5,7 +5,12 @@ import {
   clearTakenPlayers,
   emptyRow,
   emptySide,
+  formationId,
+  formationOwnId,
+  formationValueOf,
   isUntouchedRow,
+  noFormation,
+  otherFormation,
   playerChoices,
   readReportButton,
   readReportValues,
@@ -21,6 +26,7 @@ const squad = [
 
 const values = (overrides: Partial<ReportValues> = {}): ReportValues => ({
   bron: '',
+  formatie: { wij: noFormation(), zij: noFormation() },
   status: 'bezig',
   tegenstander: 'nee',
   wij: emptySide(),
@@ -243,5 +249,46 @@ describe('playerChoices of the bench', () => {
     const list = playerChoices(values({ wij: { ...emptySide(), speler: rows } }), 'wij', [], false, true)
 
     expect(list).toEqual([{ label: 'Invaller', value: '3' }])
+  })
+})
+
+describe('the formation in the form', () => {
+  it('reads the choice and the text of each team from the request, and trims them', () => {
+    const read = readReportValues(
+      form({
+        'formatie-wij': '4-3-3',
+        'formatie-wij-eigen': ' ',
+        'formatie-zij': 'anders',
+        'formatie-zij-eigen': ' 4-1-2-1-2 ',
+      }),
+    )
+
+    expect(read.formatie).toEqual({
+      wij: { eigen: '', keuze: '4-3-3' },
+      zij: { eigen: '4-1-2-1-2', keuze: 'anders' },
+    })
+  })
+
+  it('has no formation for a request that does not send the fields', () => {
+    expect(readReportValues(form({})).formatie).toEqual({
+      wij: { eigen: '', keuze: '' },
+      zij: { eigen: '', keuze: '' },
+    })
+  })
+
+  it('shows a stored formation of the list as its choice, and any other as Anders with its text', () => {
+    expect(formationValueOf('4-3-3')).toEqual({ eigen: '', keuze: '4-3-3' })
+    expect(formationValueOf('4-1-2-1-2')).toEqual({ eigen: '4-1-2-1-2', keuze: otherFormation })
+    expect(formationValueOf(null)).toEqual(noFormation())
+    expect(formationValueOf('')).toEqual(noFormation())
+  })
+
+  it('has the ids of the fields of a side', () => {
+    expect([formationId('wij'), formationOwnId('wij'), formationId('zij'), formationOwnId('zij')]).toEqual([
+      'formatie-wij',
+      'formatie-wij-eigen',
+      'formatie-zij',
+      'formatie-zij-eigen',
+    ])
   })
 })

@@ -71,4 +71,19 @@ describe('MatchLineup', () => {
       ),
     ).toBe(true)
   })
+
+  it('puts the formation under the name of the team, as a short line', () => {
+    const { container } = render(<MatchLineup {...props} formation="4-3-3" />)
+    const line = container.querySelector('.hf-match-lineup-formation')
+
+    expect(line?.textContent).toBe('Formatie: 4-3-3')
+    expect(container.querySelector('h3')?.nextElementSibling).toBe(line)
+  })
+
+  it('shows nothing for a team without a formation, also an empty one', () => {
+    expect(render(<MatchLineup {...props} />).container.querySelector('.hf-match-lineup-formation')).toBeNull()
+    expect(
+      render(<MatchLineup {...props} formation="" />).container.querySelector('.hf-match-lineup-formation'),
+    ).toBeNull()
+  })
 })
