@@ -276,7 +276,7 @@ Er is geen kolom voor de minuten die een speler speelde: `minutesPlayed` rekent 
 Wat de database afdwingt:
 
 - een verslag, en met hem zijn spelers en hun gebeurtenissen, gaat weg met zijn wedstrijd; de gebeurtenissen gaan ook weg met hun speler in het verslag;
-- een gebeurtenis wijst met `match_id`, `ours` en de speler naar één rij van `match_appearances`, dus naar een speler van dezelfde wedstrijd en hetzelfde team;
+- een wissel, een kaart en een strafschop wijzen met `match_id`, `ours` en de speler naar één rij van `match_appearances`, dus naar een speler van dezelfde wedstrijd en hetzelfde team (de twee kolommen van `match_goals` zijn gewone foreign keys: dat de speler van dezelfde wedstrijd is, controleren de regels);
 - een rugnummer (1 tot en met 99) staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen, niet voor zichzelf;
 - een speler heeft elke soort kaart één keer;
 - een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij minuut 45, 90, 105 of 120;

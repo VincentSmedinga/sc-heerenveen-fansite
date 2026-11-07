@@ -601,7 +601,8 @@
   - Er is geen kolom voor de minuten die een speler speelde.
     Ze volgen uit de wissels en de rode kaarten, zodat ze nooit afwijken van de gebeurtenissen.
 - **Keuzes bij het bouwen** (7 november 2026):
-  - **Wat de database afdwingt:** een gebeurtenis wijst met `match_id`, `ours` en de speler naar één rij van `match_appearances` (een samengestelde sleutel), dus naar een speler van dezelfde wedstrijd en hetzelfde team.
+  - **Wat de database afdwingt:** een wissel, een kaart en een strafschop wijzen met `match_id`, `ours` en de speler naar één rij van `match_appearances` (een samengestelde sleutel), dus naar een speler van dezelfde wedstrijd en hetzelfde team.
+    De twee kolommen van `match_goals` zijn gewone foreign keys, omdat `match_goals.ours` het team van het doelpunt is en niet dat van de speler; dat de speler van dezelfde wedstrijd is, controleren de regels (`unknown-player`).
     Een rugnummer staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen.
     Een speler heeft elke soort kaart één keer.
     Een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij 45, 90, 105 of 120.
