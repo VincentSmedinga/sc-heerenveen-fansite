@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
-import { Breadcrumb, Heading, Text } from '@fansite/design-system'
+import { Breadcrumb, Heading, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { matchesPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { findReportScreen } from '#src/beheer/match-reports'
 import { describeStored } from '#src/beheer/report-paste'
@@ -14,7 +15,7 @@ import { describeShowDelay } from '#src/matches'
 
 import { submitReport } from '../actions'
 import { submitPaste } from './actions'
-import { PasteScreen } from './PasteScreen'
+import { PasteBody, PasteProvider, PasteSidebar } from './PasteScreen'
 
 // Render on each request: the report changes with every entry and every import.
 export const dynamic = 'force-dynamic'
@@ -41,31 +42,39 @@ export default async function PasteReportPage({ params }: Props) {
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
 
   return (
-    <PasteScreen
+    <PasteProvider
       action={submitPaste.bind(null, match.id)}
       cancelHref={reportPath(match.id)}
       choices={{ opponent: match.opponent, showDelay: describeShowDelay(match.season), squad }}
       existing={report === undefined ? undefined : describeStored(report)}
-      intro={
-        <>
-          <Breadcrumb
-            current="Tekst plakken"
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: matchesPath, label: 'Wedstrijden' },
-              { href: matchPath(match.id), label: clubs },
-              { href: reportPath(match.id), label: 'Verslag' },
-            ]}
-            label="Kruimelpad"
-          />
-          <Heading level={1}>Verslag plakken: {clubs}</Heading>
-          <Text appearance="meta">
-            {match.competition}, {match.round} · {describeEntryKickoff(match)} · Uitslag {match.goalsFor}–
-            {match.goalsAgainst}
-          </Text>
-        </>
-      }
       saveAction={submitReport.bind(null, match.id)}
-    />
+    >
+      <Page.Main
+        className={compact}
+        intro={
+          <>
+            <Breadcrumb
+              current="Tekst plakken"
+              items={[
+                { href: '/beheer', label: 'Beheer' },
+                { href: matchesPath, label: 'Wedstrijden' },
+                { href: matchPath(match.id), label: clubs },
+                { href: reportPath(match.id), label: 'Verslag' },
+              ]}
+              label="Kruimelpad"
+            />
+            <Heading level={1}>Verslag plakken: {clubs}</Heading>
+            <Text appearance="meta">
+              {match.competition}, {match.round} · {describeEntryKickoff(match)} · Uitslag {match.goalsFor}–
+              {match.goalsAgainst}
+            </Text>
+          </>
+        }
+        wide
+      >
+        <PasteBody />
+      </Page.Main>
+      <PasteSidebar />
+    </PasteProvider>
   )
 }

@@ -16,7 +16,7 @@ import {
   Text,
   Textarea,
 } from '@fansite/design-system'
-import { type ReactNode, useActionState, useEffect } from 'react'
+import { createContext, type ReactNode, use, useActionState, useEffect } from 'react'
 
 import type { ReportFormState } from '#src/beheer/report-fields'
 
@@ -45,6 +45,15 @@ const formatRules = [
   'Strafschoppen: de minuut, gemist of gestopt, en de nemer, zoals "55 gemist Jansen".',
   'Een naam mag een rugnummer zijn. Een regel die met # begint, is commentaar.',
 ]
+
+type PasteContext = {
+  cancelHref: string
+  /** What the report has now, in words, or `undefined` for a match without a report. */
+  existing: string | undefined
+  formAction: (formData: FormData) => void
+  pending: boolean
+  state: PasteState
+}
 
 /**
  * What the reading says, above the form: how many lines were read, the lines that were not
@@ -117,109 +126,146 @@ export function PasteOutcome({ state }: { state: PasteRead_ }) {
   )
 }
 
+const PasteContext = createContext<PasteContext | undefined>(undefined)
+
 /**
- * The screen "Tekst plakken": a field for the text, and after the text is read the form of the
- * report with the values filled in, the doubts and the lines that could not be read. Nothing is
- * stored until the form is saved. Without JavaScript it is two plain posts: the text, then the
- * form.
+ * The main column: the field for the text and the format before the text is read, and after it
+ * what the reading says above the form of the report.
  */
-export function PasteScreen({
-  action,
-  cancelHref,
-  choices,
-  existing,
-  intro,
-  saveAction,
-}: {
-  action: (previous: PasteState, formData: FormData) => Promise<PasteState>
-  cancelHref: string
-  choices: ReportChoices
-  /** What the report has now, in words, or `undefined` for a match without a report. */
-  existing: string | undefined
-  intro: ReactNode
-  saveAction: (previous: ReportFormState, formData: FormData) => Promise<ReportFormState>
-}) {
-  const [state, formAction, pending] = useActionState(action, firstPasteState)
+export function PasteBody() {
+  const { cancelHref, existing, formAction, pending, state } = usePaste()
 
   if (state.kind === 'read') {
     return (
-      <ReportFormProvider
-        action={saveAction}
-        choices={choices}
-        initial={state.form}
-        key={state.version}
-        title="Controleer het verslag"
-      >
-        <Page.Main className="hf-density-compact" intro={intro} wide>
-          <PasteOutcome state={state} />
-          <ReportErrorSummary />
-          <ReportFields />
-        </Page.Main>
-        <Page.Sidebar aria-label="Opslaan" sticky>
-          <ReportSavePanel cancelHref={cancelHref} />
-        </Page.Sidebar>
-      </ReportFormProvider>
+      <>
+        <PasteOutcome state={state} />
+        <ReportErrorSummary />
+        <ReportFields />
+      </>
     )
   }
 
   return (
     <>
-      <Page.Main intro={intro} wide>
-        <Card aria-labelledby="tekst-kop">
-          <Heading id="tekst-kop" level={2}>
-            Tekst plakken
-          </Heading>
-          <Form action={formAction} key={state.version}>
-            <Field
-              error={state.error}
-              hint={`Plak de tekst in het formaat hieronder. Hoogstens ${pasteMaxLength.toLocaleString('nl-NL')} tekens. Er wordt niets bewaard voordat je in het formulier Opslaan kiest.`}
-              id="tekst"
-              label="Tekst van het verslag"
-            >
-              <Textarea defaultValue={state.text} name="tekst" rows={16} spellCheck={false} />
-            </Field>
-            {existing === undefined ? null : (
-              <>
-                <Text id="vervangen-uitleg">
-                  {`In het verslag staat al iets: ${existing}. Plakken vervangt alles in het formulier. Het verslag in de database verandert pas als je Opslaan kiest.`}
-                </Text>
-                <CheckboxGroup
-                  aria-describedby="vervangen-uitleg"
-                  legend="Vervangen"
-                  name="vervangen"
-                  options={[{ label: 'Ja, vervang wat nu in het verslag staat', value: 'ja' }]}
-                  value={state.replace ? ['ja'] : []}
-                />
-              </>
-            )}
-            <Button disabled={pending} type="submit">
-              Tekst lezen
-            </Button>
-            <Text>
-              <Link href={cancelHref}>Annuleren</Link>
-            </Text>
-          </Form>
-        </Card>
-        <Card aria-labelledby="formaat-kop">
-          <Heading id="formaat-kop" level={2}>
-            Het formaat
-          </Heading>
-          <List>
-            {formatRules.map((rule) => (
-              <List.Item key={rule}>{rule}</List.Item>
-            ))}
-          </List>
+      <Card aria-labelledby="tekst-kop">
+        <Heading id="tekst-kop" level={2}>
+          Tekst plakken
+        </Heading>
+        <Form action={formAction} key={state.version}>
           <Field
-            hideOptional
-            hint="Kopieer dit voorbeeld, het zijn verzonnen spelers, en pas het aan."
-            id="voorbeeld"
-            label="Voorbeeld"
-            required={false}
+            error={state.error}
+            hint={`Plak de tekst in het formaat hieronder. Hoogstens ${pasteMaxLength.toLocaleString('nl-NL')} tekens. Er wordt niets bewaard voordat je in het formulier Opslaan kiest.`}
+            id="tekst"
+            label="Tekst van het verslag"
           >
-            <Textarea defaultValue={pasteExample} readOnly rows={22} spellCheck={false} />
+            <Textarea defaultValue={state.text} name="tekst" rows={16} spellCheck={false} />
           </Field>
-        </Card>
-      </Page.Main>
+          {existing === undefined ? null : (
+            <>
+              <Text id="vervangen-uitleg">
+                {`In het verslag staat al iets: ${existing}. Plakken vervangt alles in het formulier. Het verslag in de database verandert pas als je Opslaan kiest.`}
+              </Text>
+              <CheckboxGroup
+                aria-describedby="vervangen-uitleg"
+                legend="Vervangen"
+                name="vervangen"
+                options={[{ label: 'Ja, vervang wat nu in het verslag staat', value: 'ja' }]}
+                value={state.replace ? ['ja'] : []}
+              />
+            </>
+          )}
+          <Button disabled={pending} type="submit">
+            Tekst lezen
+          </Button>
+          <Text>
+            <Link href={cancelHref}>Annuleren</Link>
+          </Text>
+        </Form>
+      </Card>
+      <Card aria-labelledby="formaat-kop">
+        <Heading id="formaat-kop" level={2}>
+          Het formaat
+        </Heading>
+        <List>
+          {formatRules.map((rule) => (
+            <List.Item key={rule}>{rule}</List.Item>
+          ))}
+        </List>
+        <Field
+          hideOptional
+          hint="Kopieer dit voorbeeld, het zijn verzonnen spelers, en pas het aan."
+          id="voorbeeld"
+          label="Voorbeeld"
+          required={false}
+        >
+          <Textarea defaultValue={pasteExample} readOnly rows={22} spellCheck={false} />
+        </Field>
+      </Card>
     </>
   )
+}
+
+/**
+ * The state of the screen "Tekst plakken", shared by its body and its sidebar: the answer of
+ * the server to the text, and, once the text is read, the form of the report with the values
+ * filled in. The page puts the two in the columns of the page, as the screen of the report
+ * does, so they sit in this provider. Nothing is stored until the form is saved. Without
+ * JavaScript it is two plain posts: the text, then the form.
+ */
+export function PasteProvider({
+  action,
+  cancelHref,
+  children,
+  choices,
+  existing,
+  saveAction,
+}: {
+  action: (previous: PasteState, formData: FormData) => Promise<PasteState>
+  cancelHref: string
+  children: ReactNode
+  choices: ReportChoices
+  existing: string | undefined
+  saveAction: (previous: ReportFormState, formData: FormData) => Promise<ReportFormState>
+}) {
+  const [state, formAction, pending] = useActionState(action, firstPasteState)
+  const context = { cancelHref, existing, formAction, pending, state }
+
+  if (state.kind === 'read') {
+    return (
+      <PasteContext value={context}>
+        <ReportFormProvider
+          action={saveAction}
+          choices={choices}
+          initial={state.form}
+          key={state.version}
+          title="Controleer het verslag"
+        >
+          {children}
+        </ReportFormProvider>
+      </PasteContext>
+    )
+  }
+
+  return <PasteContext value={context}>{children}</PasteContext>
+}
+
+/** The sidebar: "Opslaan" for the form, which is only there once the text is read. */
+export function PasteSidebar() {
+  const { cancelHref, state } = usePaste()
+
+  return state.kind === 'read' ? (
+    <Page.Sidebar aria-label="Opslaan" sticky>
+      <ReportSavePanel cancelHref={cancelHref} />
+    </Page.Sidebar>
+  ) : null
+}
+
+function usePaste() {
+  const context = use(PasteContext)
+
+  if (context === undefined) {
+    throw new Error('PasteBody and PasteSidebar belong in a PasteProvider.')
+  }
+
+  return context
 }
