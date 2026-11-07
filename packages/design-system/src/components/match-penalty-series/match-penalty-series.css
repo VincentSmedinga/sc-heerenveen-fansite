@@ -56,7 +56,7 @@
     justify-content: center;
   }
 
-  /* The deciding rounds, after the fifth, stand a little apart: an open space before the sixth kick. */
+  /* The deciding rounds, after the fifth, stand apart: an open space before the sixth kick. */
   .hf-match-penalty-deciding {
     margin-inline-start: var(--hf-space-s);
   }
