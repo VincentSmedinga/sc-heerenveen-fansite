@@ -101,10 +101,11 @@ export async function submitReport(
   redirect(
     reportPath(
       id,
-      outcome.status === 'unchanged'
-        ? 'ongewijzigd'
-        : downgraded
-          ? 'nog-niet-klaar'
+      // A save that asked for klaar and could not have it says so, even if nothing changed.
+      downgraded
+        ? 'nog-niet-klaar'
+        : outcome.status === 'unchanged'
+          ? 'ongewijzigd'
           : checked.plan.status === 'klaar'
             ? 'klaar'
             : 'opgeslagen',

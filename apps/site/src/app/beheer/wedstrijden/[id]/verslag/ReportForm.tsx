@@ -282,7 +282,7 @@ export function ReportFields() {
           [
             ...minutes,
             { name: 'Soort', width: 'natural' },
-            { line: 2, name: 'Speler', required: false },
+            { hideOptional: true, line: 2, name: 'Speler', required: false },
             { hideOptional: true, line: 2, name: 'Assist', required: false },
             { hideOptional: true, line: 2, name: 'Andere naam', required: false },
           ],

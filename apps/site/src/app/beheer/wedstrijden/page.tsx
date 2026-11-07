@@ -142,7 +142,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                 { fold: true, name: 'Competitie' },
                 'Uitslag',
                 'Status',
-                'Verslag',
+                { fold: true, name: 'Verslag' },
               ]}
               rows={tableRows(shown)}
             />

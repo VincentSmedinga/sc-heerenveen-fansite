@@ -156,6 +156,17 @@ describe('submitReport', () => {
     expect(await database.db.select().from(matchAppearances)).toHaveLength(10)
   })
 
+  it('says klaar did not work every time it is asked for, also when nothing else changed', async () => {
+    const rows = report().wij.speler.slice(0, 10)
+
+    await submit(matchId, report({ wij: { speler: rows } }))
+
+    expect(await submit(matchId, report({ wij: { speler: rows } }))).toEqual({
+      redirect: reportAddress('nog-niet-klaar'),
+    })
+    expect(await database.db.select().from(auditLog)).toHaveLength(1)
+  })
+
   it('takes a report that is klaar back to bezig when it is saved again with a mistake', async () => {
     await submit(matchId, report())
 

@@ -410,7 +410,7 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Verslag: ')
       await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Gegevens' })).toBeVisible()
-      await expect(page.getByRole('button', { name: 'Verslag weghalen' })).toHaveCount(0)
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
 
       // The source says in one sentence what belongs in it.
       await expect(page.getByText('nooit tekst van een verslag', { exact: false })).toBeVisible()
@@ -449,7 +449,7 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByRole('status').filter({ hasText: 'Opgeslagen.' })).toBeVisible()
       await expect(page.getByLabel('Naam, speler 1', { exact: true })).toHaveValue('Verzonnen Tegenstander')
       await expect(page.getByRole('heading', { name: 'Dit is nog niet af' })).toBeVisible()
-      await expect(page.getByRole('button', { name: 'Verslag weghalen' })).toBeVisible()
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toBeVisible()
 
       // "Klaar" does not work yet: the report stays bezig, and says why.
       await page.getByLabel('Status', { exact: true }).selectOption('klaar')
@@ -459,8 +459,7 @@ for (const [name, javaScriptEnabled] of [
 
       // The list says so in words, with a link to the report.
       await page.goto(`/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`)
-      await expect(page.getByRole('columnheader', { name: 'Verslag' })).toBeVisible()
-      await expect(page.locator(`a[href="${address}"]`)).toContainText('Openen')
+      await expect(page.locator(`a[href="${address}"]`).first()).toContainText('Openen')
 
       // A row that is taken away is gone: the form does not make a new row for it.
       await page.goto(address)
@@ -475,7 +474,7 @@ for (const [name, javaScriptEnabled] of [
       await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
       await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
-      await expect(page.getByRole('button', { name: 'Verslag weghalen' })).toHaveCount(0)
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
     })
   })
 }
