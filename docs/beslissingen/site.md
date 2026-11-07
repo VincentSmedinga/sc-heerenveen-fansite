@@ -2056,8 +2056,8 @@
 - **Datum:** 2 november 2026
 - **Besluit:** de kaart "Hoe vaak welke uitslag" staat in de zijbalk van `/wedstrijden`, direct onder de stand en boven de hoofdtrainer, en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
   Een bekerwedstrijd telt met de stand na verlenging, zonder strafschoppen.
-  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): de stand blijft die na de verlenging, maar de uitkomst van een wedstrijd na strafschoppen is een winst of een verlies.
   De balk "Op deze pagina:" heeft er een link naar, na Stand.
+  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): de stand blijft die na de verlenging, maar de uitkomst van een wedstrijd na strafschoppen is een winst of een verlies.
 - **Waarom:** de projecteigenaar wil de kaart op Wedstrijden, naast de lijst van de uitslagen die hij samenvat.
   Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
   De pagina heeft geen schakelaar tussen Eredivisie en alle wedstrijden.
@@ -2218,8 +2218,8 @@
 - **Datum:** 4 november 2026
 - **Besluit:** de donut telt dezelfde wedstrijden als de lijst en "Onze uitslagen tegen …", dus volgens de keuze van de schakelaar op de pagina van de tegenstander, standaard met de beker (#690).
   Een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel, zoals op Wedstrijden.
-  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): zo'n wedstrijd telt als winst of verlies, op Wedstrijden en op de pagina van de tegenstander.
   Een test controleert dat de aantallen kloppen met de rij Totaal, voor beide keuzes.
+  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): zo'n wedstrijd telt als winst of verlies, op Wedstrijden en op de pagina van de tegenstander.
 - **Waarom:** twee kaarten naast elkaar met verschillende aantallen zouden verwarren.
   De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
 - **Alternatieven:** altijd alleen de Eredivisie (de donut zou de rest van de pagina tegenspreken zodra de beker meetelt).

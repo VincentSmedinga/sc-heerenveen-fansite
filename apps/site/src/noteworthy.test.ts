@@ -256,6 +256,7 @@ describe('noteworthyFactsOf: a win after a deficit of two goals', () => {
 
     expect(texts([played(comeback, { competition: 'KNVB Beker', extraTime: true })])).toHaveLength(1)
     expect(shootOut(4, 3)).toHaveLength(1)
+    expect(shootOut(4, 3)[0]).toContain('(2–2, na strafschoppen, 1 augustus 2026)')
     expect(shootOut(3, 4)).toEqual([])
   })
 })

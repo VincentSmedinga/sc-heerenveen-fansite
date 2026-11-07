@@ -80,7 +80,9 @@ const venue = (match: PublicMatch) => `${match.home ? 'thuis tegen' : 'uit bij'}
 
 /** The score as the home club comes first, with the en dash the site writes: "3–2". */
 const score = (match: LeagueMatch) =>
-  match.home ? `${match.goalsFor}–${match.goalsAgainst}` : `${match.goalsAgainst}–${match.goalsFor}`
+  (match.home ? `${match.goalsFor}–${match.goalsAgainst}` : `${match.goalsAgainst}–${match.goalsFor}`) +
+  // The score is the one after extra time, so a win on penalties would read as a mistake.
+  (match.penaltiesFor === null ? '' : ', na strafschoppen')
 
 /** "thuis tegen FC Twente (3–2, 14 maart 2026)": the match, its score and the day. */
 const describe = (match: LeagueMatch) => `${venue(match)} (${score(match)}, ${formatTableDay(match.matchDate)})`

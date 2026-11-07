@@ -346,6 +346,9 @@ export function cleanSheetsOf(matches: PublicMatch[], choice: CompetitionChoice 
   return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
 }
 
+/** The order of the outcomes in the chart: every win, then every draw, then every loss. */
+const outcomeRank: Record<MatchResult, number> = { draw: 1, loss: 2, win: 0 }
+
 /**
  * The counting and the order of `scoreCountsOf`, for any list of played matches with a score:
  * the page of a club counts its meetings (see `meetingsOf` in `opponents.ts`) with it, so both
@@ -370,6 +373,7 @@ export function countScores(results: readonly Scored[]): ScoreCount[] {
 
   return [...counts.values()].sort(
     (a, b) =>
+      outcomeRank[a.outcome] - outcomeRank[b.outcome] ||
       b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst) ||
       b.goalsFor + b.goalsAgainst - (a.goalsFor + a.goalsAgainst),
   )
@@ -417,10 +421,11 @@ export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoic
 
 /**
  * How often each score was played, from the side of sc Heerenveen (our goals first, at home or
- * away), best first: by goal difference from large to small, so every win comes before every
- * draw and every draw before every loss, and a goal difference of 1 before one of 3 in the
- * losses too; then by the goals in the match from many to few. The goal difference and the
- * number of goals fix the score, so the order is complete. Only played matches with a score
+ * away), best first: every win, then every draw, then every loss (a level score that a
+ * shoot-out decided is among the wins or the losses); in a group by goal difference from large
+ * to small, and a goal difference of 1 before one of 3 in the losses too; then by the goals in
+ * the match from many to few. The outcome, the goal difference and the number of goals fix the
+ * score, so the order is complete. Only played matches with a score
  * count, from every competition the choice counts (see `playedMatchesOf`), and the score is the
  * one after extra time, so a cup tie that a shoot-out decided has a level score. It counts
  * as a win or a loss, apart from the draws with the same score (see `countScores`).

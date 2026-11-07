@@ -1186,6 +1186,28 @@ describe('scoreCountsOf', () => {
     expect(shown([shootOut(3, 5), ...scores([[1, 0]])])).toEqual(['1-0 1x win', '1-1 1x loss'])
   })
 
+  it('puts a level score won or lost on penalties among the wins or the losses, not among the draws', () => {
+    const shootOut = (penaltiesFor: number, penaltiesAgainst: number): PublicMatch => ({
+      ...scoreOn('2026-09-23', 1, 1),
+      competition: 'KNVB Beker',
+      extraTime: true,
+      penaltiesAgainst,
+      penaltiesFor,
+    })
+    // The draws come first in time, so only the outcome can put the others before them.
+    const draws = scores([
+      [2, 2],
+      [0, 0],
+    ])
+
+    expect(shown([...draws, shootOut(5, 3), shootOut(3, 5)])).toEqual([
+      '1-1 1x win',
+      '2-2 1x draw',
+      '0-0 1x draw',
+      '1-1 1x loss',
+    ])
+  })
+
   it('keeps a level score that a shoot-out decided apart from a draw with the same score', () => {
     const shootOut: PublicMatch = {
       ...scoreOn('2026-09-23', 1, 1),

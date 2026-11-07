@@ -2420,9 +2420,9 @@
     Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes of de stand na 90 minuten rusten.
   - **De telling van de beker:** een bekerwedstrijd telt met de score na de verlenging, en een strafschoppenserie telt niet mee.
     Een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel in de cijfers, dus de reeks "ongeslagen" loopt door.
-    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: de doelpunten blijven die na de verlenging, maar de uitkomst volgt de strafschoppen, dus zo'n wedstrijd is een winst of een verlies en onderbreekt de reeks "zonder winst" of "ongeslagen" zoals elke andere.
     Doelpunten in de verlenging blijven buiten Doelpunten per kwartier.
     Een bekerwedstrijd zonder uitslag, of die nog niet is gespeeld, telt niet.
+    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: de doelpunten blijven die na de verlenging, maar de uitkomst volgt de strafschoppen, dus zo'n wedstrijd is een winst of een verlies en onderbreekt de reeks "zonder winst" of "ongeslagen" zoals elke andere.
   - **Thuis en uit:** de rijen Punten en Punten per wedstrijd staan er alleen als elke getelde wedstrijd een competitiewedstrijd is (bij Eredivisie en bij een seizoen zonder gespeelde beker), want de beker geeft geen punten.
   - **Seizoen en keuze blijven:** de link "Alle doelpuntenmakers", de schakelaar, de knop "Laad 5 meer" van De nul gehouden en de seizoenskiezer (ook de route `kies`) houden de keuze vast, ook zonder JavaScript.
     De route laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
@@ -2667,8 +2667,8 @@
     De kolom met "voor–tegen" en de sortering op de doelpunten voor zijn vervallen; de uitslagen staan nog op de pagina van de club.
   - **P telt alle wedstrijden die de lijst telt.**
     Bij Alle wedstrijden telt de beker mee: 3 punten per winst en 1 per gelijkspel, ook als een gelijkspel in de beker daarna werd beslist.
-    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: een wedstrijd die we op strafschoppen winnen is een winst en geeft 3 punten, en een die we zo verliezen geeft er 0.
     `pointsOf` rekent het uit, op één plek.
+    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: een wedstrijd die we op strafschoppen winnen is een winst en geeft 3 punten, en een die we zo verliezen geeft er 0.
   - **De regel onder de tabel** zegt "P punten (3 per winst, 1 per gelijkspel)", omdat dit geen stand is en P hier iets anders kan lijken.
   - **De rijen Punten** op de pagina van een club (#406) blijven zoals ze zijn.
 - **Waarom:** de projecteigenaar zoekt de club waartegen we het best deden, en daarvoor zijn de punten en het saldo de maat.
