@@ -3126,6 +3126,33 @@
 - **Later:** zie _Een wissel is één regel met één pictogram: "A voor B"_, _De minuut in het verloop staat in een pil: gevuld voor sc Heerenveen, open voor de tegenstander_ en _Het verloop verdeelt de gebeurtenissen over de helften, en de kop krijgt de doelpuntenmakers per club_ in `designsysteem.md` (7 november 2026): `MatchTimeline` heeft twee helften en een verlenging, één regel per gebeurtenis zonder het woord naast een pictogram dat hetzelfde zegt, en de minuut in een pil; de naam van het team staat alleen nog in de verborgen tekst, en "Doelpunt uit een strafschop" is nu "Doelpunt (strafschop)".
   `MatchHeader` heeft een pil met de uitkomst en de doelpuntenmakers per club.
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
+- **Later:** zie _De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"_ (7 november 2026): de pagina bestaat ook voor een verslag dat `bezig` is of niet meer klopt, met een melding, `noindex` en zonder plek in de sitemap; alleen een wedstrijd zonder verslag heeft geen pagina.
+
+## De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"
+
+- **Datum:** 7 november 2026
+- **Besluit:** de pagina van een wedstrijd bestaat voor elke gespeelde wedstrijd waarvan een verslag is begonnen, ook als het niet klaar is (#857).
+  Een wedstrijd zonder verslag houdt geen pagina en geen link, zoals nu.
+  Wat in het verslag staat, tonen we zoals het is; wat ontbreekt, laten we weg zonder lege plekken of nullen.
+  - **De melding** staat boven op de pagina, boven de kop: "We vullen dit verslag nog in."
+    Daarachter staat een zin die zegt dat de opstelling, de wissels of de gebeurtenissen nog kunnen ontbreken of veranderen.
+    Ze staat in tekst, niet alleen in kleur of een pictogram, en is geen `status` (de pagina laadt er al mee).
+    Ze verdwijnt zodra het verslag klaar is.
+  - **Wanneer een verslag niet klaar telt:** bij de status `bezig`, en bij een verslag dat `klaar` was maar de regels van het verslag niet meer volgt, bijvoorbeeld nadat de import de uitslag veranderde.
+  - **Wedstrijden en Uitslagen linken** naar de pagina zodra die bestaat, met dezelfde link "Het verslag" als bij een klaar verslag.
+  - **Zoekmachines:** de pagina van een verslag dat niet klaar is, heeft `noindex`, staat niet in de sitemap en heeft een beschrijving die niets beweert over wat ontbreekt: "Wat we tot nu toe hebben van het verslag van ...: de uitslag was ...".
+    De titel is die van een klaar verslag, want de uitslag staat vast.
+  - **De cijfers** van de spelers en van het seizoen (#832) tellen alleen klare verslagen, zoals nu.
+  - **Het voorbeeld in het beheer** (#851) toont dezelfde melding zolang de status van het formulier Bezig is.
+- **Waarom:** de projecteigenaar wil een wedstrijd al kunnen openen terwijl het verslag wordt ingevuld; de pagina laat zien wat er is en zegt dat de rest nog komt.
+- **Alternatieven:** de pagina pas tonen bij een klaar verslag (zo was het); de melding alleen bij de status `bezig` (een verslag dat niet meer klopt heeft dan een pagina die iets stelt wat niet zeker is).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **De lezers:** `listReportedMatches` en `findReportedMatch` geven een verslag met elke status, met de status in `stored.report.status`, en `isCompleteReport` in `src/report-data.ts` beslist of het klaar is en klopt.
+  - **De gegevens:** `MatchPageData` heeft `complete`, en `MatchPageHeader` zet de melding boven de kaart van de kop, voor de pagina en voor het voorbeeld.
+    Een rugnummer dat twee keer staat in een verslag dat nog wordt ingevuld, staat één keer op het veld.
+    De balk Wedstrijdverloop staat er bij een klaar verslag altijd, en bij een verslag dat nog wordt ingevuld alleen als de doelpunten van het verslag optellen tot de uitslag: zo'n verslag kan minder doelpunten hebben, en een balk met 0–0 boven een wedstrijd die 2–0 eindigde, zou iets onwaars zeggen.
+  - **De controle in de browser:** `pnpm test:a11y` heeft een verzonnen verslag dat `bezig` is (`e2e/incomplete-report.ts`), dat de controles voor het eerste testen in de database zetten en daarna weghalen, omdat een verslag dat `bezig` is de links op andere pagina's verandert.
+- **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat de pagina alleen voor een klaar verslag bestaat: het adres, de `slug` en de sitemap voor klare verslagen blijven.
 
 ## Het voorbeeld van de wedstrijdpagina staat naast het formulier van het verslag
 

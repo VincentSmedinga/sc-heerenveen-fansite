@@ -1035,7 +1035,7 @@ describe('the matches with a report that is klaar', () => {
     expect(await find({ season: '2025/26' })).toBeUndefined()
   })
 
-  it('leaves out a match without a report, one that is bezig, and one that is not played', async () => {
+  it('leaves out a match without a report and one that is not played, and has one that is bezig with its status', async () => {
     const none = await playedMatch({ round: 'Speelronde 1' })
     const bezig = await playedMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
     const klaar = await playedMatch({ matchDate: '2026-08-22', round: 'Speelronde 3' })
@@ -1053,9 +1053,16 @@ describe('the matches with a report that is klaar', () => {
 
     const list = await listReportedMatches(database.db, season)
 
-    expect(list.map((row) => row.match.id)).toEqual([klaar])
+    expect(list.map((row) => [row.match.id, row.stored.report.status])).toEqual([
+      [bezig, 'bezig'],
+      [klaar, 'klaar'],
+    ])
     expect(none).toBeDefined()
-    expect(await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-15', season })).toBe(
+    expect(
+      (await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-15', season }))?.stored
+        .report.status,
+    ).toBe('bezig')
+    expect(await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-01', season })).toBe(
       undefined,
     )
   })

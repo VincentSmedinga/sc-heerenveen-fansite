@@ -14,7 +14,7 @@ export { ourClub } from './match-page'
  * The data of the page of a match from a stored report that has passed the rules. The players
  * are in the order the form had them: the report keeps them in the order of their rows.
  */
-export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[]): MatchPageData {
+export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[], complete: boolean): MatchPageData {
   const { match, names, stored } = reported
   const players = new Map(stored.appearances.map((player) => [player.id, player]))
 
@@ -29,6 +29,7 @@ export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[
       playerId: card.appearanceId,
       stoppageMinutes: card.stoppageMinutes,
     })),
+    complete,
     extraTime: match.extraTime,
     facts,
     formations: { opponent: stored.report.formationOpponent, ours: stored.report.formationOurs },

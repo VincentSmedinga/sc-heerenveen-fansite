@@ -138,8 +138,10 @@ export type StoredMatchReport = {
 type ReportDatabase = Pick<Database, 'select'>
 
 /**
- * The played match of a season on a day against a club (by its `slug`), when it has a report
- * that is `klaar`: the match of the address `/wedstrijden/<seizoen>/<datum>-<club>`.
+ * The played match of a season on a day against a club (by its `slug`), when it has a report,
+ * whatever its status: the match of the address `/wedstrijden/<seizoen>/<datum>-<club>`. The
+ * status is in `stored.report.status`, and the caller decides what a report that is `bezig`
+ * shows.
  */
 export async function findReportedMatch(
   db: ReportDatabase,
@@ -211,9 +213,9 @@ export async function findReportGoalDifferences(db: ReportDatabase, season: stri
 }
 
 /**
- * The played matches of a season with a report that is `klaar`, from the first to the last. A
- * report that is `bezig` is not in it, and neither is one that does not follow the rules: the
- * caller checks that.
+ * The played matches of a season with a report, from the first to the last, whatever the
+ * status of the report: `bezig` or `klaar`. The caller checks the rules and decides what a
+ * report that is not `klaar` shows. A match without a report is not in it.
  */
 export function listReportedMatches(db: ReportDatabase, season: string): Promise<ReportedMatch[]> {
   return reportedMatchesOf(db, eq(matches.season, season))
@@ -645,7 +647,7 @@ async function reportedMatchRows(db: ReportDatabase, where: ReturnType<typeof an
     .from(matches)
     .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
     .innerJoin(clubs, eq(clubs.id, matches.clubId))
-    .where(and(eq(matches.status, 'played'), eq(matchReports.status, 'klaar'), where))
+    .where(and(eq(matches.status, 'played'), where))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
   const named = await withSeasonNames(
     db,

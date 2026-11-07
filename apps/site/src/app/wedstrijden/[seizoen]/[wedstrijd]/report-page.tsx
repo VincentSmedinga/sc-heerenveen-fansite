@@ -13,7 +13,7 @@ import { getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
-import { getPublicReport, reportAddress } from '#src/report-data'
+import { getPublicReport, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
 import { seasonAddress, seasonFromSlug } from '#src/seasons'
@@ -76,10 +76,16 @@ export async function reportMetadata(seizoen: string, wedstrijd: string): Promis
   const [first, second] = clubsOf(reported)
   const { day, title } = titleOf(reported)
 
-  return seasonPageMetadata(matchesPath, reportAddress(season, reported.match.matchDate, reported.clubSlug), {
-    description: `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`,
+  const complete = isCompleteReport(reported)
+  const metadata = seasonPageMetadata(matchesPath, reportAddress(season, reported.match.matchDate, reported.clubSlug), {
+    // A report that is not complete claims nothing about what is missing, and is not indexed.
+    description: complete
+      ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`
+      : `Wat we tot nu toe hebben van het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}. We vullen het verslag nog in.`,
     title,
   })
+
+  return complete ? metadata : { ...metadata, robots: { index: false } }
 }
 
 /** The title of the page: the clubs and the result, and the day. */
@@ -114,7 +120,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
 
   const { data, reported, season } = loaded
   const now = new Date()
-  const page = matchPageDataOf(reported, factsOf(reported, now))
+  const page = matchPageDataOf(reported, factsOf(reported, now), isCompleteReport(reported))
 
   return (
     <>

@@ -25,6 +25,13 @@ export type BuiltMatchPage = {
   pitch: { opponent: MatchPitchTeam | undefined; ours: MatchPitchTeam }
   /** The goals of the score bar. */
   scoreBar: MatchScoreBarGoal[]
+  /**
+   * Whether the bar may be shown: the report is complete, or its goals add up to the result of
+   * the match. A report that is not complete may have fewer goals than the result, and a bar
+   * that says 0–0 over a match that ended 2–0 would say something false: the page leaves it out
+   * then.
+   */
+  scoreBarAgrees: boolean
   scorersAgainst: MatchHeaderScorer[]
   scorersFor: MatchHeaderScorer[]
   /** The rounds of the shoot-out, from the first. Empty for a match without kicks. */
@@ -46,6 +53,11 @@ export type MatchPageData = {
   /** The score after 90 minutes of a match with extra time. */
   afterNinety: null | { against: number; for: number }
   cards: readonly MatchPageCard[]
+  /**
+   * Whether the report is complete: `klaar` and without an error of the rules. A report that is
+   * not shows a notice that it is still being filled in, and what is missing is left out.
+   */
+  complete: boolean
   extraTime: boolean
   /** The facts under the result, in the order they are shown. */
   facts: MatchHeaderFact[]
@@ -274,8 +286,18 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
       ? undefined
       : { kind: cardKinds[heaviest.kind], minute: heaviest.minute, stoppageMinutes: added(heaviest.stoppageMinutes) }
   }
+  // The pitch needs the shirt number of a player to be his alone in his team: a report that is
+  // not finished may have a number twice, and then the first is on the pitch.
+  const shirts = new Set<number>()
+  const firstOfNumber = (player: MatchPagePlayer) => {
+    const known = shirts.has(player.shirtNumber)
+
+    shirts.add(player.shirtNumber)
+
+    return !known
+  }
   const starters = players
-    .filter((player) => player.starter)
+    .filter((player) => player.starter && firstOfNumber(player))
     .map((player) => {
       const minutes = minutesOf(player)
 
@@ -319,6 +341,9 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
   const byId = new Map(data.players.map((player) => [player.id, player]))
   const ours = teamOf(data, byId, true)
   const theirs = teamOf(data, byId, false)
+  const scoreBar = data.goals
+    .filter((goal) => byId.has(goal.playerId))
+    .map((goal) => ({ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes }))
 
   return {
     events: eventsOf(data, byId),
@@ -328,9 +353,13 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
         : undefined,
       ours: { formation: data.formations.ours, name: ourClub, players: ours.starters },
     },
-    scoreBar: data.goals
-      .filter((goal) => byId.has(goal.playerId))
-      .map((goal) => ({ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes })),
+    scoreBar,
+    // A report that is complete passed the rules, which let a goal of an opponent without a
+    // line-up have no player: its bar is the bar of the goals it has.
+    scoreBarAgrees:
+      data.complete ||
+      (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+        scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst),
     scorersAgainst: scorersOf(data, byId, false),
     scorersFor: scorersOf(data, byId, true),
     series: roundsOf(data, byId),

@@ -7,6 +7,7 @@ import { addEpisodes } from './episodes'
 import { addFinalPlaces } from './final-places'
 import { addHeadlines } from './headlines'
 import { addHeldChange } from './held-changes'
+import { addIncompleteReport } from './incomplete-report'
 import { addOlderMeetings } from './older-meetings'
 import { addStadiums } from './stadiums'
 import { addStandings } from './standings'
@@ -23,7 +24,8 @@ import { addVisits } from './visits'
 // final-places.ts), and a change of Wikipedia that is held back on one of them (see
 // held-changes.ts), and three older matches against Testdorp FC (see older-meetings.ts), and
 // a list of stadiums and a list of names of its own for SV Proefdorp (see stadiums.ts and
-// club-names.ts).
+// club-names.ts), and a made-up report that is still being filled in (see
+// incomplete-report.ts).
 // The homepage keeps its headlines and discussions in memory for five minutes, so nothing may
 // ask for the homepage before this has run: the site is started with robots.txt as its address
 // to wait for (see playwright.config.ts). The function it returns is the teardown.
@@ -44,8 +46,10 @@ export default async function globalSetup() {
   const removeOlderMeetings = await addOlderMeetings()
   const removeStadiums = await addStadiums()
   const removeClubNames = await addClubNames()
+  const removeIncompleteReport = await addIncompleteReport()
 
   return async () => {
+    await removeIncompleteReport()
     await removeHeadlines()
     await removeDiscussions()
     await removeEpisodes()

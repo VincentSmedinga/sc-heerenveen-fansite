@@ -241,6 +241,7 @@ export function previewDataOf(
   return {
     afterNinety: match.afterNinety,
     cards,
+    complete: values.status === 'klaar',
     extraTime: match.extraTime,
     facts,
     formations: { opponent: formationOf(values, 'zij'), ours: formationOf(values, 'wij') },
