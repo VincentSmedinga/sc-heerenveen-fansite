@@ -96,8 +96,9 @@
   }
 
   /*
-   * The marks sit under their minute, the first one at the start of the bar and the last at the
-   * end, so no number hangs over the edge and makes the page wider.
+   * The marks sit under their minute. The first number starts at the start of the bar and the
+   * last one ends at its mark, which is a little before the end of the bar, so no number hangs
+   * over the edge and makes the page wider.
    */
   .hf-match-score-bar-tick {
     color: var(--hf-colour-text-secondary);
