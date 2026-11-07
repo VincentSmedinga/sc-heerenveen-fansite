@@ -1,4 +1,4 @@
--- Adds the action `player.stats-differ` to the log of the admin (#832): the importer writes it when the goals of a player in the match reports differ from the squad table of Wikipedia.
+-- Adds the action `player.stats-differ` to the log of the admin (#832): the importer and the admin write it when the goals of a player in the match reports differ from the squad table of Wikipedia.
 -- The migration only widens the list of values of one column, so every row stays as it is.
 -- To undo it on the host, put the list back as it was (the statement without the last value) after removing the rows with this action (`DELETE FROM audit_log WHERE action = 'player.stats-differ'`).
 -- The statement can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.

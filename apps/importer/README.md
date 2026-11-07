@@ -1875,7 +1875,7 @@ Squad 2026/27: warning, Luca Oyen (2026/27) has 2 goals in the Eredivisie in the
 
 De controle verandert niets en stopt niets: de tabel is de bron van de cijfers die we tonen.
 De waarschuwing komt ook in `squad_imports.last_warning`.
-Na de lezing vergelijkt de importer ook de doelpunten van de verslagen met die van de tabel (`logReportGoalDifferences`, #832): een verschil komt als `player.stats-differ` in het logboek van het beheer en nooit in een waarschuwing of op een pagina.
+Heeft de lezing nieuwe cijfers in de tabel gezet, dan vergelijkt de importer ook de doelpunten van de verslagen met die van de tabel (`logReportGoalDifferences`, #832): een verschil komt als `player.stats-differ` in het logboek van het beheer en nooit in een waarschuwing of op een pagina.
 Is er in het seizoen nog geen wedstrijd gespeeld, dan is er niets om mee te vergelijken en zegt de controle niets.
 Bij de allereerste run op een lege database geeft de controle waarschuwingen voor wie al scoorde.
 De import van de wedstrijden koppelt zijn doelpunten pas zodra de selectie er is.

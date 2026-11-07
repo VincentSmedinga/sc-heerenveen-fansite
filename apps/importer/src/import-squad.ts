@@ -284,7 +284,11 @@ async function readAndStore(
   // The goals of the match reports against the table: a difference goes in the log of the
   // admin, never to a page, and a failure to write it is a warning that undoes nothing (#832).
   try {
-    await logReportGoalDifferences(db, season, now)
+    // Only when the table has new numbers: the log is only added to, so it can't be asked
+    // what it said before, and an hourly run would repeat itself.
+    if (counts.stats.added + counts.stats.updated > 0) {
+      await logReportGoalDifferences(db, season, null, now)
+    }
   } catch (error) {
     warnings.push(`the goals of the match reports are not compared with the table: ${describeError(error)}`)
   }

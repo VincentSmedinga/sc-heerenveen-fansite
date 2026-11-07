@@ -3197,16 +3197,16 @@
 ## De cijfers van Wikipedia blijven een controle op onze verslagen, en een verschil gaat naar het logboek
 
 - **Datum:** 7 november 2026
-- **Besluit:** de kaarten van #832 lezen `player_season_stats` niet, maar de importer vergelijkt de doelpunten ervan met die van de verslagen en schrijft een verschil in het logboek van het beheer (#832).
-  Het is een regel `player.stats-differ` zonder account ("de import"), met de speler (`item_id`) en de tekst "Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2"; de pagina's tonen het niet.
-  - **Wanneer:** na elke lezing van de selectie van een seizoen (`logReportGoalDifferences` in `@fansite/db/match-reports`, aangeroepen door `import-squad.ts`), voor elke competitie waarvan de tabel cijfers heeft.
+- **Besluit:** de kaarten van #832 lezen `player_season_stats` niet, maar de doelpunten ervan worden vergeleken met die van de verslagen, en een verschil gaat in het logboek van het beheer (#832).
+  Het is een regel `player.stats-differ` met de speler (`item_id`) en de tekst "Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2"; de pagina's tonen het niet.
+  - **Wanneer:** op twee momenten waarop een verschil kan ontstaan (`logReportGoalDifferences` in `@fansite/db/match-reports`): als de importer nieuwe cijfers in de tabel van de selectie zet (zonder account, "de import"), en als de redactie een verslag met status `klaar` opslaat (met het account van de redacteur).
+    Het logboek wordt alleen aangevuld en door geen code gelezen (een test bewaakt het), dus de functie kan niet zien wat er al staat: zonder gebeurtenis schrijft ze niets, en elke gebeurtenis schrijft een regel per speler die afwijkt.
   - **Alleen als het te vergelijken valt:** elke gespeelde wedstrijd van de competitie heeft een verslag dat `klaar` is.
     Mist een verslag, dan hebben de verslagen vanzelf minder doelpunten, en dat is geen nieuws.
     Een speler die de tabel niet heeft, telt daar 0 doelpunten.
-  - **Eén keer:** een verschil dat de laatste regel van de speler al zegt, wordt niet nog eens geschreven; veranderen de aantallen, dan komt er een nieuwe regel.
-    Een fout bij het schrijven is een waarschuwing en stopt de import niet.
+  - **Een fout bij het schrijven** is bij de import een waarschuwing en stopt hem niet.
   - **De migratie** `0046_add_player_stats_differ_audit_action` zet de actie in de lijst van `audit_log.action`.
     Ze voegt alleen een waarde toe en kan opnieuw draaien.
 - **Waarom:** de nieuwe bron wint omdat hij preciezer is, en de cijfers van Wikipedia zijn een controle op onze invoer.
   Een verschil is voor de redactie, niet voor de bezoeker.
-- **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); vergelijken ook als een verslag ontbreekt (een regel per speler, elk uur, die niets zegt).
+- **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); bij elke lezing van de importer schrijven en zelf bijhouden wat er al staat (het logboek wordt niet gelezen, dus elke run zou het herhalen); vergelijken ook als een verslag ontbreekt (een regel per speler die niets zegt).

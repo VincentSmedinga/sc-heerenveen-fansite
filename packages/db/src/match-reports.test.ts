@@ -47,6 +47,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM admin_users')
@@ -797,16 +798,16 @@ describe('the goals of the reports against the squad table of Wikipedia', () => 
     expect(await findReportGoalDifferences(database.db, '2025/26')).toEqual([])
   })
 
-  it('writes a difference in the log as the import, once, and again when the numbers change', async () => {
-    const { oyen } = await oneMatch()
+  it('writes each difference in the log, for the player, with the account it is given or as the import', async () => {
+    const { oyen, vos } = await oneMatch()
 
     await table(oyen, 2)
+    await table(vos, 1)
 
     const now = new Date('2026-11-07T12:00:00Z')
 
-    expect(await logReportGoalDifferences(database.db, season, now)).toBe(1)
-    expect(await logReportGoalDifferences(database.db, season, now)).toBe(0)
-    expect(await database.db.select().from(auditLog)).toMatchObject([
+    expect(await logReportGoalDifferences(database.db, season, null, now)).toBe(2)
+    expect(await database.db.select().from(auditLog).orderBy(auditLog.id)).toMatchObject([
       {
         action: 'player.stats-differ',
         createdAt: now,
@@ -815,14 +816,27 @@ describe('the goals of the reports against the squad table of Wikipedia', () => 
         reason: null,
         userId: null,
       },
+      { detail: 'Doelpunten Eredivisie 2026/27: verslagen 0, Wikipedia 1', itemId: vos },
     ])
 
-    await database.db.update(playerSeasonStats).set({ goals: 3 })
+    const [account] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'sanne@example.org', role: 'beheerder' })
+      .$returningId()
 
-    expect(await logReportGoalDifferences(database.db, season, now)).toBe(1)
-    expect((await database.db.select().from(auditLog)).map((row) => row.detail)).toEqual([
-      'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2',
-      'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 3',
-    ])
+    await logReportGoalDifferences(database.db, season, account!.id, now)
+
+    expect((await database.db.select().from(auditLog)).at(-1)).toMatchObject({ userId: account!.id })
+  })
+
+  it('writes nothing when the numbers agree or nothing can be compared', async () => {
+    const { oyen, vos } = await oneMatch()
+
+    await table(oyen, 1)
+    await table(vos, 0)
+
+    expect(await logReportGoalDifferences(database.db, season, null)).toBe(0)
+    expect(await logReportGoalDifferences(database.db, '2025/26', null)).toBe(0)
+    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 })

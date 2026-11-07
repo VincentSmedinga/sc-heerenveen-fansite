@@ -1,7 +1,7 @@
 import type { MatchReport as ReportForRules, ReportMatch } from '@fansite/shared/match-report'
 
 import { minutesPlayed, playedMatch } from '@fansite/shared/match-report'
-import { and, asc, desc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -19,7 +19,6 @@ import type {
 
 import { recordAction } from './audit-log.ts'
 import {
-  auditLog,
   matchAppearances,
   matchCards,
   matches,
@@ -190,36 +189,35 @@ export async function listSeasonReports(db: ReportDatabase, season: string): Pro
 
 /**
  * Writes each difference of `findReportGoalDifferences` in the log of the admin as
- * `player.stats-differ`, for the player and without an account: the importer does it. A
- * difference that the last line of the player says already is not written again, so the log
- * shows a difference once and the next one when the numbers change. Returns the lines written.
- * Nothing is shown to visitors: the cards of Spelers read the reports only.
+ * `player.stats-differ`, for the player, and returns how many lines it wrote. The log is only
+ * added to and never read by code, so the function can't see what it said before: whoever
+ * calls it does so when something changed that can cause a difference, which is a report that
+ * is saved as `klaar` (the editor's account) and a squad table that has new numbers (`userId`
+ * is `null`: the importer). Nothing is shown to visitors: the cards of Spelers read the
+ * reports only.
  */
 export async function logReportGoalDifferences(
   db: Pick<Database, 'insert' | 'select'>,
   season: string,
+  userId: null | number,
   now = new Date(),
 ): Promise<number> {
-  let written = 0
+  const differences = await findReportGoalDifferences(db, season)
 
-  for (const difference of await findReportGoalDifferences(db, season)) {
-    const detail = `Doelpunten ${difference.competition} ${season}: verslagen ${difference.fromReports}, Wikipedia ${difference.fromWikipedia}`
-    const [last] = await db
-      .select({ detail: auditLog.detail })
-      .from(auditLog)
-      .where(and(eq(auditLog.action, 'player.stats-differ'), eq(auditLog.itemId, difference.playerId)))
-      .orderBy(desc(auditLog.id))
-      .limit(1)
-
-    if (last?.detail === detail) {
-      continue
-    }
-
-    await recordAction(db, { action: 'player.stats-differ', detail, itemId: difference.playerId, userId: null }, now)
-    written++
+  for (const difference of differences) {
+    await recordAction(
+      db,
+      {
+        action: 'player.stats-differ',
+        detail: `Doelpunten ${difference.competition} ${season}: verslagen ${difference.fromReports}, Wikipedia ${difference.fromWikipedia}`,
+        itemId: difference.playerId,
+        userId,
+      },
+      now,
+    )
   }
 
-  return written
+  return differences.length
 }
 
 /** The match in the shape the rules read. */

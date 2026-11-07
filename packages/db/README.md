@@ -292,7 +292,7 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 - `listSeasonReports(db, season)` geeft de wedstrijden van een seizoen met de status van hun verslag (`bezig`, `klaar` of leeg);
 - `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
   Een speler van de bank die niet inviel, heeft een rij met nullen, en een speler met een persoon heeft de delen van zijn naam (`personGivenName` en de twee andere).
-- `findReportGoalDifferences(db, season)` en `logReportGoalDifferences(db, season)` vergelijken de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is, en schrijven een verschil als `player.stats-differ` (zonder account, één keer) in het logboek (#832).
+- `findReportGoalDifferences(db, season)` en `logReportGoalDifferences(db, season, userId)` vergelijken de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is, en schrijven een verschil als `player.stats-differ` in het logboek (#832), als de importer nieuwe cijfers in de tabel zet (zonder account) en als de redactie een verslag als `klaar` opslaat.
 
 De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzonnen verslag voor beide teams, dat zonder fout of waarschuwing door de regels komt.
 
