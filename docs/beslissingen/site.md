@@ -3122,6 +3122,9 @@
     Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
   - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.
 - **Later:** zie _De formatie staat op de pagina van de wedstrijd bij het team_ (7 november 2026): onder de naam van een team staat nu ook zijn formatie, als er een is.
+- **Later:** zie _Een wissel is één regel met één pictogram: "A voor B"_, _De minuut in het verloop staat in een pil: gevuld voor sc Heerenveen, open voor de tegenstander_ en _Het verloop verdeelt de gebeurtenissen over de helften, en de kop krijgt de doelpuntenmakers per club_ in `designsysteem.md` (7 november 2026): `MatchTimeline` heeft twee helften en een verlenging, één regel per gebeurtenis zonder het woord naast een pictogram dat hetzelfde zegt, en de minuut in een pil; de naam van het team staat alleen nog in de verborgen tekst, en "Doelpunt uit een strafschop" is nu "Doelpunt (strafschop)".
+  `MatchHeader` heeft een pil met de uitkomst en de doelpuntenmakers per club.
+  De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
 
 ## Het verslag is een eigen scherm bij de wedstrijd: `/beheer/wedstrijden/<nummer>/verslag`
 
