@@ -466,6 +466,29 @@ describe('the shoot-out in the form of a report', () => {
     expect([...select('serie-zij-1-speler').options].map((option) => option.text)[0]).toBe('Kies een speler')
   })
 
+  it('puts the focus on the card that explains, when the last kick of a match without a result is removed', () => {
+    const state: ReportFormState = { errors: {}, focus: 'serie-wij', values, version: 1, warnings: {} }
+
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    expect(document.activeElement?.id).toBe('serie-uitleg')
+  })
+
   it('shows the errors of the rules at the row and at the list', () => {
     withSeries(
       { against: 3, for: 4 },

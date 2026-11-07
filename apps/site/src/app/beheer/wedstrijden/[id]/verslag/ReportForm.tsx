@@ -644,7 +644,13 @@ export function ReportFormShell({
     const target = state.focus ?? (Object.keys(state.errors).length > 0 ? summaryId : undefined)
 
     if (target !== undefined) {
-      document.getElementById(target)?.focus()
+      // The list of the kicks is gone when its last row was removed from a match without a
+      // result of the series: the focus goes to the card that says where to fill it in.
+      const found =
+        document.getElementById(target) ??
+        (target.startsWith('serie-') ? document.getElementById('serie-uitleg') : null)
+
+      found?.focus()
     }
   }, [state])
 
