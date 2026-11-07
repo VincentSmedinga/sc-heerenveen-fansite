@@ -137,7 +137,8 @@ function Event({ event }: { event: MatchTimelineEvent }) {
         aria-hidden="true"
         className={classNames('hf-match-event-minute', event.ours && 'hf-match-event-minute-ours')}
       >
-        {event.minute}’{hasAddedTime(event) ? `+${event.stoppageMinutes}` : ''}
+        {event.minute}
+        {hasAddedTime(event) ? `+${event.stoppageMinutes}` : ''}’
       </span>
       <span className="hf-match-event-text">
         <span className="hf-visually-hidden">{spoken(event)}</span>

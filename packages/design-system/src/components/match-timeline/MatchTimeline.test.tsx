@@ -60,8 +60,8 @@ describe('MatchTimeline', () => {
     const minutes = (block: Element | undefined) =>
       [...(block?.querySelectorAll('.hf-match-event-minute') ?? [])].map((minute) => minute.textContent)
 
-    expect(minutes(blocks(container)[0])).toEqual(['10’', '45’+2'])
-    expect(minutes(blocks(container)[1])).toEqual(['46’', '90’+3'])
+    expect(minutes(blocks(container)[0])).toEqual(['10’', '45+2’'])
+    expect(minutes(blocks(container)[1])).toEqual(['46’', '90+3’'])
     expect(minutes(blocks(container)[2])).toEqual(['91’', '118’'])
     expect(blocks(container)[2]?.querySelector('h3')?.textContent).toBe('Verlenging')
     expect(blocks(container)[2]?.className).toContain('hf-match-timeline-extra-time')
@@ -93,7 +93,7 @@ describe('MatchTimeline', () => {
     const { container } = render(<MatchTimeline events={events} />)
     const pills = [...container.querySelectorAll('.hf-match-event-minute')]
 
-    expect(pills.map((pill) => pill.textContent)).toEqual(['12’', '34’', '45’+2'])
+    expect(pills.map((pill) => pill.textContent)).toEqual(['12’', '34’', '45+2’'])
     expect(pills.map((pill) => pill.classList.contains('hf-match-event-minute-ours'))).toEqual([true, true, false])
     expect(pills.every((pill) => pill.getAttribute('aria-hidden') === 'true')).toBe(true)
   })

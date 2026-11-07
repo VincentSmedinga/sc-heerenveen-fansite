@@ -142,7 +142,7 @@ describe('MatchHeader', () => {
     expect([...lists[0]!.querySelectorAll('[aria-hidden]')].map((part) => part.textContent)).toEqual([
       'Hoekstra 12’',
       ' · ',
-      'Demo 45’+2',
+      'Demo 45+2’',
     ])
   })
 

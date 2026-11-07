@@ -77,7 +77,7 @@ const outcomeWords: Record<Outcome, string> = { draw: 'Gelijkspel', loss: 'Verlo
 const minuteOf = (scorer: MatchHeaderScorer) =>
   scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
     ? `${scorer.minute}’`
-    : `${scorer.minute}’+${scorer.stoppageMinutes}`
+    : `${scorer.minute}+${scorer.stoppageMinutes}’`
 
 /**
  * The goals under a club: "Hoekstra 12’ · Wiersma 58’ (str.)". The abbreviations are written
