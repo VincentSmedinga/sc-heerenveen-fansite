@@ -3327,7 +3327,8 @@
 - **Besluit:** een speler staat in het verslag óf in de basis óf op de bank, en de keuzelijsten van het scherm "Opstelling en bank" en "Wissels" houden daar rekening mee (#838).
   - **Een plek op de bank** toont de spelers van de selectie die niet in de basis staan, en een speler die al op de bank staat, is op een andere plek van de bank niet meer te kiezen.
   - **Een plek in de basis** toont de spelers die niet al in de basis staan, dus ook een speler van de bank.
-    Kies je hem, dan wordt zijn plek op de bank leeg gemaakt, en een schermlezer hoort dat ("… staat nu in de opstelling. Zijn andere plaats in het verslag is leeg gemaakt.").
+    Kies je hem, dan wordt zijn plek op de bank leeg gemaakt.
+    Een schermlezer hoort dat in een melding die niet te zien is (`role="status"`).
   - **De lijsten volgen de basis:** met JavaScript veranderen ze meteen als de basis of een rol verandert.
     Zonder JavaScript maakt de server ze opnieuw na elke knop en elke keer opslaan, en een speler die dan toch twee keer staat, geeft bij het opslaan een fout bij het veld ("Speler 3 staat al in het verslag, bij Speler 3").
   - **Bij een wissel** toont "Erin" alleen de spelers met de rol Bank, en "Eruit" iedereen die in het verslag staat: wie erin komt, zat op de bank.
