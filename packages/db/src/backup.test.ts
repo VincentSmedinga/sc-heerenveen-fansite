@@ -245,6 +245,26 @@ describe('backUp', () => {
     expect(structure).not.toContain('club_stadiums')
   })
 
+  it('takes the tables of the match reports along with their rows, as they hold the work of the editors', async () => {
+    await backUp(env(), now)
+
+    const record = process.env['FAKE_RECORD'] ?? ''
+    const rows = readFileSync(path.join(record, 'args-0'), 'utf8').trim().split('\n')
+    const structure = readFileSync(path.join(record, 'args-1'), 'utf8').trim().split('\n')
+
+    for (const table of [
+      'match_reports',
+      'match_appearances',
+      'match_substitutions',
+      'match_cards',
+      'match_incidents',
+    ]) {
+      expect(structureOnlyTables).not.toContain(table)
+      expect(rows).not.toContain(`--ignore-table=fansite_acc.${table}`)
+      expect(structure).not.toContain(table)
+    }
+  })
+
   it('fails, and leaves no file, when the second pass fails', async () => {
     const second = program(
       'mysqldump',

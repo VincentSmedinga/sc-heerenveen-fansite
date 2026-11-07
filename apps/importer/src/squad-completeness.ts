@@ -63,6 +63,7 @@ export const sourceCeilings: Record<PlayerSource, number> = {
   selectie: 95,
   statistieken: 60,
   transfers: 40,
+  verslag: 30,
   wikidata: 50,
 }
 

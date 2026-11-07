@@ -10,6 +10,7 @@
     "./contact-email": "./src/contact-email.ts",
     "./env": "./src/env.ts",
     "./mail": "./src/mail.ts",
+    "./match-report": "./src/match-report.ts",
     "./mail-env": "./src/mail-env.ts",
     "./site-env": "./src/site-env.ts"
   },

@@ -19,14 +19,15 @@ De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één
 
 ### De plafonds
 
-| Bron           | Plafond | Wat de bron kent                                |
-| -------------- | ------- | ----------------------------------------------- |
-| `selectie`     | 95      | de hele selectie, met de bank                   |
-| `engels`       | 70      | selectie en transfers van de Engelse pagina     |
-| `statistieken` | 60      | wie speelde, niet wie op de bank bleef          |
-| `wikidata`     | 50      | wie een pagina heeft met sc Heerenveen als club |
-| `transfers`    | 40      | wie kwam of ging, niet wie bleef                |
-| `doelpunten`   | 30      | wie scoorde                                     |
+| Bron           | Plafond | Wat de bron kent                                  |
+| -------------- | ------- | ------------------------------------------------- |
+| `selectie`     | 95      | de hele selectie, met de bank                     |
+| `engels`       | 70      | selectie en transfers van de Engelse pagina       |
+| `statistieken` | 60      | wie speelde, niet wie op de bank bleef            |
+| `wikidata`     | 50      | wie een pagina heeft met sc Heerenveen als club   |
+| `transfers`    | 40      | wie kwam of ging, niet wie bleef                  |
+| `doelpunten`   | 30      | wie scoorde                                       |
+| `verslag`      | 30      | wie het beheer uit een wedstrijdverslag toevoegde |
 
 De volgorde en het plafond van `selectie` leggen de tests vast.
 Een bron met meer spelers komt nooit boven zijn plafond.

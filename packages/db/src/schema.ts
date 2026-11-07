@@ -1,11 +1,13 @@
 import { sql } from 'drizzle-orm'
 import {
+  type AnyMySqlColumn,
   boolean,
   char,
   check,
   customType,
   date,
   datetime,
+  foreignKey,
   index,
   int,
   json,
@@ -987,6 +989,12 @@ export const matchGoalPlayerMaxLength = 100
  * of an opponent alike. It is empty for a goal without a page, and until the importer has asked
  * Wikipedia about the title. `wikipedia_page` stays the title as the match page writes it.
  *
+ * `appearance_id` is the player who scored and `assist_appearance_id` the player who gave the
+ * assist, in the report of the match (`match_appearances`). Both are empty for a goal without a
+ * report, and a deleted appearance leaves the goal itself behind. A report is stored with the
+ * goals of the match (see `match_reports`), and then `match_edits` marks the goals as the
+ * editors', so the import leaves them alone.
+ *
  * The importer stores the rows in the order they are shown, so the order of `id` breaks a tie
  * between two goals in the same minute. A match has none of them when the page did not name
  * the scorers yet, or when they did not fit the result.
@@ -1007,10 +1015,19 @@ export const matchGoals = mysqlTable(
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
     ownGoal: boolean('own_goal').notNull().default(false),
     penalty: boolean('penalty').notNull().default(false),
+    appearanceId: int('appearance_id', { unsigned: true }).references((): AnyMySqlColumn => matchAppearances.id, {
+      onDelete: 'set null',
+    }),
+    assistAppearanceId: int('assist_appearance_id', { unsigned: true }).references(
+      (): AnyMySqlColumn => matchAppearances.id,
+      { onDelete: 'set null' },
+    ),
   },
   (table) => [
     index('match_goals_match_id_idx').on(table.matchId),
     index('match_goals_player_id_idx').on(table.playerId),
+    index('match_goals_appearance_id_idx').on(table.appearanceId),
+    index('match_goals_assist_appearance_id_idx').on(table.assistAppearanceId),
     check('match_goals_not_own_goal_and_penalty', sql`${table.ownGoal} = 0 or ${table.penalty} = 0`),
   ],
 )
@@ -1366,10 +1383,20 @@ export type PlayerPosition = (typeof playerPositions)[number]
 /**
  * Where a row in `players` comes from, from the most complete source to the least: `selectie`
  * (a table with the whole squad), `statistieken` (a table of who played), `engels` (a squad or
- * transfers on the English Wikipedia), `transfers`, `doelpunten` and `wikidata`. It says how
- * complete a season is, so a page can tell when a list may be missing players.
+ * transfers on the English Wikipedia), `transfers`, `doelpunten` and `wikidata`. `verslag` is a
+ * player that the editors added in a match report because the squad of Wikipedia did not have
+ * him yet (see `match_reports`). It says how complete a season is, so a page can tell when a
+ * list may be missing players.
  */
-export const playerSources = ['selectie', 'statistieken', 'engels', 'transfers', 'doelpunten', 'wikidata'] as const
+export const playerSources = [
+  'selectie',
+  'statistieken',
+  'engels',
+  'transfers',
+  'doelpunten',
+  'wikidata',
+  'verslag',
+] as const
 
 export type PlayerSource = (typeof playerSources)[number]
 
@@ -1462,6 +1489,236 @@ export const playerSeasonStats = mysqlTable(
 export type NewPlayerSeasonStats = typeof playerSeasonStats.$inferInsert
 
 export type PlayerSeasonStats = typeof playerSeasonStats.$inferSelect
+
+/** Where a match report stands: `bezig` is still being filled in, `klaar` passed the rules. */
+export const matchReportStatuses = ['bezig', 'klaar'] as const
+
+export type MatchReportStatus = (typeof matchReportStatuses)[number]
+
+/**
+ * The limits of a match report: the most characters of the source, the last minute of a match
+ * with extra time and the most minutes of added time. The rules of a report (`@fansite/shared`)
+ * use the same numbers, and the database checks them too.
+ */
+export const matchReportLimits = { lastMinute: 120, source: 100, stoppageMinutes: 15 }
+
+/**
+ * The report of a played match: who played, who came on, the cards, the assists and the missed
+ * penalties, which the Dutch Wikipedia does not give. We keep it ourselves, by typing over what
+ * we can check. One row for each match, and it goes with the match. The rest of the report is
+ * in `match_appearances`, `match_substitutions`, `match_cards` and `match_incidents`, and the
+ * goals are those of `match_goals`, which point to the players of the report. There is one row
+ * for each fact, so a number on a page and the report cannot differ.
+ *
+ * `status` is `bezig` while a person is still filling it in, and `klaar` when it passed the
+ * rules
+ * of `@fansite/shared/match-report`. Only a report that is `klaar` counts in the numbers of a
+ * player. `opponent_complete` says that the side of the opponent is complete too: eleven
+ * players,
+ * the bench and what happened. `source` is the name of what we typed over, such as a match
+ * sheet,
+ * and empty when there is none. `saved_by` and `saved_at` (UTC) are who saved the report last
+ * and
+ * when; `audit_log` has every save. There is no column for the minutes a player played: they
+ * follow from the substitutions and the red cards (`minutesPlayed`), so they never differ from
+ * the events.
+ */
+export const matchReports = mysqlTable(
+  'match_reports',
+  {
+    matchId: int('match_id', { unsigned: true })
+      .primaryKey()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    status: mysqlEnum('status', matchReportStatuses).notNull(),
+    opponentComplete: boolean('opponent_complete').notNull().default(false),
+    source: varchar('source', { length: matchReportLimits.source }),
+    savedBy: int('saved_by', { unsigned: true }).references(() => adminUsers.id, { onDelete: 'set null' }),
+    savedAt: datetime('saved_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    check('match_reports_source_not_empty', sql`${table.source} is null or char_length(${table.source}) > 0`),
+  ],
+)
+
+export type MatchReport = typeof matchReports.$inferSelect
+
+export type NewMatchReport = typeof matchReports.$inferInsert
+
+/**
+ * A player in the line-up or on the bench of a match report, for both teams: one row for each.
+ * `ours` is true for a player of sc Heerenveen. `player_id` is that player in `players` (of the
+ * season of the match) and is empty for a player of the opponent, who has a name and nothing
+ * else. The database cannot check that, since MariaDB does not allow a check on a column that a
+ * deleted player sets to empty, so the rules of a report do. `name` is always filled, so a
+ * deleted player stays in the report with his name.
+ * `shirt_number` is one for each team in a match, `starter` is true for the line-up and false
+ * for
+ * the bench, and `captain` is true for the captain. A player from the bench who did not come
+ * on has this row and no other. A row goes with its report, and its events with it.
+ */
+export const matchAppearances = mysqlTable(
+  'match_appearances',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matchReports.matchId, { onDelete: 'cascade' }),
+    ours: boolean('ours').notNull(),
+    playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    shirtNumber: int('shirt_number', { unsigned: true }).notNull(),
+    starter: boolean('starter').notNull(),
+    captain: boolean('captain').notNull().default(false),
+  },
+  (table) => [
+    unique('match_appearances_match_side_shirt_number_unique').on(table.matchId, table.ours, table.shirtNumber),
+    unique('match_appearances_match_player_unique').on(table.matchId, table.playerId),
+    // The events point to a player with these three columns, so an event cannot name a player
+    // of another match or of the other team.
+    unique('match_appearances_id_match_side_unique').on(table.id, table.matchId, table.ours),
+    index('match_appearances_player_id_idx').on(table.playerId),
+    check('match_appearances_name_not_empty', sql`char_length(${table.name}) > 0`),
+    check('match_appearances_shirt_number_range', sql`${table.shirtNumber} between 1 and 99`),
+  ],
+)
+
+export type MatchAppearance = typeof matchAppearances.$inferSelect
+
+export type NewMatchAppearance = typeof matchAppearances.$inferInsert
+
+/**
+ * The checks that every event of a report has on its minute: from 1 to the last minute of extra
+ * time, and added time (1 to 15 minutes) only after the end of a half: 45, 90, 105 or 120.
+ */
+function minuteChecks(table: string, minute: AnyMySqlColumn, stoppage: AnyMySqlColumn) {
+  return [
+    check(`${table}_minute_range`, sql`${minute} between 1 and ${sql.raw(String(matchReportLimits.lastMinute))}`),
+    check(
+      `${table}_stoppage_range`,
+      sql`${stoppage} is null or (${stoppage} between 1 and ${sql.raw(String(matchReportLimits.stoppageMinutes))} and ${minute} in (45, 90, 105, 120))`,
+    ),
+  ]
+}
+
+/**
+ * A substitution in a match report: the player who goes off (`appearance_out_id`), the player
+ * who
+ * comes on (`appearance_in_id`), the minute on the clock and the minutes of added time after it
+ * (`45` and `2` for "45+2"). `ours` is the team of both. A player goes off once and comes on
+ * once, and both rows belong to the same match and the same team.
+ */
+export const matchSubstitutions = mysqlTable(
+  'match_substitutions',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true }).notNull(),
+    ours: boolean('ours').notNull(),
+    appearanceOutId: int('appearance_out_id', { unsigned: true }).notNull(),
+    appearanceInId: int('appearance_in_id', { unsigned: true }).notNull(),
+    minute: int('minute', { unsigned: true }).notNull(),
+    stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.appearanceOutId, table.matchId, table.ours],
+      foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
+      name: 'match_substitutions_out_appearance_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.appearanceInId, table.matchId, table.ours],
+      foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
+      name: 'match_substitutions_in_appearance_fk',
+    }).onDelete('cascade'),
+    unique('match_substitutions_out_unique').on(table.appearanceOutId),
+    unique('match_substitutions_in_unique').on(table.appearanceInId),
+    index('match_substitutions_match_id_idx').on(table.matchId),
+    check('match_substitutions_two_players', sql`${table.appearanceOutId} <> ${table.appearanceInId}`),
+    ...minuteChecks('match_substitutions', table.minute, table.stoppageMinutes),
+  ],
+)
+
+export type MatchSubstitution = typeof matchSubstitutions.$inferSelect
+
+export type NewMatchSubstitution = typeof matchSubstitutions.$inferInsert
+
+/** The kinds of card: yellow, yellow-red (the second yellow card of a player) and red. */
+export const matchCardKinds = ['geel', 'geel-rood', 'rood'] as const
+
+export type MatchCardKind = (typeof matchCardKinds)[number]
+
+/**
+ * A card for a player in a match report, with the minute on the clock and the minutes of added
+ * time after it. `geel-rood` is the second yellow card of the player, which sends him off, and
+ * is a card of its own next to his `geel`. A player has each kind once.
+ */
+export const matchCards = mysqlTable(
+  'match_cards',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true }).notNull(),
+    ours: boolean('ours').notNull(),
+    appearanceId: int('appearance_id', { unsigned: true }).notNull(),
+    kind: mysqlEnum('kind', matchCardKinds).notNull(),
+    minute: int('minute', { unsigned: true }).notNull(),
+    stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.appearanceId, table.matchId, table.ours],
+      foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
+      name: 'match_cards_appearance_fk',
+    }).onDelete('cascade'),
+    unique('match_cards_appearance_kind_unique').on(table.appearanceId, table.kind),
+    index('match_cards_match_id_idx').on(table.matchId),
+    ...minuteChecks('match_cards', table.minute, table.stoppageMinutes),
+  ],
+)
+
+export type MatchCard = typeof matchCards.$inferSelect
+
+export type NewMatchCard = typeof matchCards.$inferInsert
+
+/**
+ * The kinds of incident: a penalty that was missed, and a penalty that the goalkeeper
+ * stopped.
+ */
+export const matchIncidentKinds = ['strafschop-gemist', 'strafschop-gestopt'] as const
+
+export type MatchIncidentKind = (typeof matchIncidentKinds)[number]
+
+/**
+ * Something that happened in a match report next to the goals, the cards and the substitutions,
+ * of a player and with the minute on the clock: for now a penalty that was missed or stopped,
+ * with the player who took it. It is a table with a kind, so the next kind needs no table.
+ */
+export const matchIncidents = mysqlTable(
+  'match_incidents',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true }).notNull(),
+    ours: boolean('ours').notNull(),
+    appearanceId: int('appearance_id', { unsigned: true }).notNull(),
+    kind: mysqlEnum('kind', matchIncidentKinds).notNull(),
+    minute: int('minute', { unsigned: true }).notNull(),
+    stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.appearanceId, table.matchId, table.ours],
+      foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
+      name: 'match_incidents_appearance_fk',
+    }).onDelete('cascade'),
+    index('match_incidents_match_id_idx').on(table.matchId),
+    index('match_incidents_appearance_id_idx').on(table.appearanceId),
+    ...minuteChecks('match_incidents', table.minute, table.stoppageMinutes),
+  ],
+)
+
+export type MatchIncident = typeof matchIncidents.$inferSelect
+
+export type NewMatchIncident = typeof matchIncidents.$inferInsert
 
 /**
  * The health of the squad import, one row per season, in the same words as `match_imports`:

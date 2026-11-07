@@ -255,6 +255,45 @@ Er is één rij per wedstrijd met een invoer, en ze gaat weg met de wedstrijd.
 
 De import wist een markering als Wikipedia hetzelfde heeft, en de rij als er geen markering meer is (zie _Een wedstrijd die de redactie invulde_ in de [README van de importer](../../apps/importer/README.md)).
 
+## De tabellen van een verslag
+
+Het verslag van een gespeelde wedstrijd: wie speelde, wie viel in en uit, de kaarten, de gemiste strafschoppen en de assists.
+We houden het zelf bij, want de Nederlandse Wikipedia heeft het niet.
+Het wordt ingevuld in het beheer (#829), geplakt (#830) en getoond op de pagina van de wedstrijd (#831) en bij de spelers (#832).
+De regels die zeggen of een verslag klopt, staan in `@fansite/shared/match-report`, niet in de database.
+
+| Tabel                 | Wat een rij is                                                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `match_reports`       | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `saved_by` en `saved_at` |
+| `match_appearances`   | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                       |
+| `match_substitutions` | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                     |
+| `match_cards`         | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                       |
+| `match_incidents`     | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                             |
+
+`match_goals` heeft er twee kolommen bij: `appearance_id` (de speler die scoorde) en `assist_appearance_id` (de assist), leeg bij een doelpunt zonder verslag.
+Er is geen kolom voor de minuten die een speler speelde: `minutesPlayed` rekent ze uit de wissels en de rode kaarten.
+
+Wat de database afdwingt:
+
+- een verslag, en met hem zijn spelers en hun gebeurtenissen, gaat weg met zijn wedstrijd; de gebeurtenissen gaan ook weg met hun speler in het verslag;
+- een gebeurtenis wijst met `match_id`, `ours` en de speler naar één rij van `match_appearances`, dus naar een speler van dezelfde wedstrijd en hetzelfde team;
+- een rugnummer (1 tot en met 99) staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen, niet voor zichzelf;
+- een speler heeft elke soort kaart één keer;
+- een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij minuut 45, 90, 105 of 120;
+- een naam en een `source` zijn nooit leeg.
+
+`player_id` verwijst naar `players` met `ON DELETE SET NULL`: een verwijderde speler blijft met zijn naam in het verslag staan.
+`appearance_id` en `assist_appearance_id` verwijzen naar `match_appearances` met `ON DELETE SET NULL`: het doelpunt blijft staan zonder speler.
+MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler van de tegenstander geen `player_id` heeft en dat een assist niet van de scorer is, controleren de regels.
+
+`@fansite/db/match-reports` leest ze:
+
+- `readMatchReport(db, matchId)` geeft het verslag met zijn spelers en gebeurtenissen op volgorde van de klok (minuut, blessuretijd, dan `id`), of niets;
+- `listSeasonReports(db, season)` geeft de wedstrijden van een seizoen met de status van hun verslag (`bezig`, `klaar` of leeg);
+- `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
+
+De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzonnen verslag voor beide teams, dat zonder fout of waarschuwing door de regels komt.
+
 ## De tabel `articles`
 
 De artikelen van onze eigen redactie (zie [`docs/artikelen.md`](../../docs/artikelen.md)).
@@ -809,12 +848,13 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
 - `@fansite/db/persons`: `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat de persoon van een titel vindt of maakt en zijn titels in `person_pages` zet, met `knownPersonPages` en `rememberedPersonArticles` voor de titels in `person_pages`;
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
+- `@fansite/db/match-reports`: `readMatchReport`, `listSeasonReports`, `readPlayerReportStats`, `reportForRules` en `matchForRules` voor de verslagen van wedstrijden (zie _De tabellen van een verslag_);
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;

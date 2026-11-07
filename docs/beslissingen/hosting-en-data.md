@@ -557,6 +557,7 @@
   Een bron per rij is nodig om te zeggen hoe volledig een seizoen is.
 - **Alternatieven:** een rij per persoon met een tabel voor seizoenen (een grotere migratie die `match_goals` en `player_season_stats` raakt).
   De positie verplicht houden en bij een transfer gokken (een gok is erger dan leeg).
+- **Later:** zie _Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam_: `playerSources` heeft sinds 7 november 2026 ook `verslag`.
 
 ## De volledigheid van de selectie staat in een tabel `squad_completeness`
 
@@ -586,3 +587,102 @@
 - **Waarom:** de kaart "Nieuws over <club>" (#777) moet de koppen van een club kunnen opvragen zonder de titels bij elke lading te doorzoeken, en een kop kan meer clubs noemen (zie _Een kop onthoudt welke clubs hij noemt, in een eigen tabel_ in `importer.md`).
 - **Alternatieven:** een kolom in `items` (één club per kop).
   Een tabel die naar `clubs.id` verwijst (de importer leest de clubs bij het bewaren van koppen niet, en de naam is wat `matches.opponent` ook heeft).
+
+## Het verslag van een wedstrijd staat in eigen tabellen, en elke minuut staat één keer
+
+- **Datum:** 7 november 2026
+- **Besluit:** de opstelling, de wissels, de kaarten en de gemiste strafschoppen van een wedstrijd staan in vijf tabellen, en de assists staan bij de doelpunten (#828).
+  - `match_reports`: één rij per wedstrijd, met `status` (`bezig` of `klaar`), `opponent_complete` (de kant van de tegenstander is ook af), `source` (vrije tekst van hoogstens 100 tekens: de naam van wat we overtypen), `saved_by` en `saved_at`.
+  - `match_appearances`: één rij per speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen voor onze spelers), `name` (altijd gevuld), `shirt_number`, `starter` en `captain`.
+    Een speler van de bank die niet inviel, heeft alleen deze rij.
+  - `match_substitutions`, `match_cards` en `match_incidents`: wie eruit en erin gaat, een kaart (`geel`, `geel-rood` of `rood`) en een gemiste of gestopte strafschop (`strafschop-gemist` of `strafschop-gestopt`, bij de nemer), elk met minuut en blessuretijd.
+    Een soort kost geen tabel.
+  - `match_goals` krijgt `appearance_id` (de speler die scoorde) en `assist_appearance_id` (de assist), leeg bij een doelpunt zonder verslag.
+  - Er is geen kolom voor de minuten die een speler speelde. Ze volgen uit de wissels en de rode kaarten, zodat ze nooit afwijken van de gebeurtenissen.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Wat de database afdwingt:** een gebeurtenis wijst met `match_id`, `ours` en de speler naar één rij van `match_appearances` (een samengestelde sleutel), dus naar een speler van dezelfde wedstrijd en hetzelfde team.
+    Een rugnummer staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen.
+    Een speler heeft elke soort kaart één keer.
+    Een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij 45, 90, 105 of 120.
+  - **Wat de database niet kan:** MariaDB staat geen check toe op een kolom die een verwijderde rij op leeg zet (`player_id`, `appearance_id` en `assist_appearance_id`).
+    Dat een tegenstander geen `player_id` heeft en dat een assist niet van de scorer is, controleren de regels van het verslag (zie hieronder).
+  - **Wat verdwijnt waarmee:** een verslag gaat met zijn wedstrijd weg, de spelers met hun verslag en de gebeurtenissen met hun speler.
+    De doelpunten van de wedstrijd blijven, zonder speler.
+    Een verwijderde rij in `players` laat de speler in het verslag staan met zijn naam.
+  - **De back-up:** de vijf tabellen staan niet in `structureOnlyTables`, want hun rijen zijn ons eigen werk.
+  - **De migratie:** `0045_add_match_reports` voegt alleen toe en kan opnieuw draaien.
+    Terugdraaien kan zonder gegevens van bestaande tabellen te verliezen: de foreign keys, de indexen en de twee kolommen van `match_goals` weghalen, dan de vijf tabellen.
+- **Waarom:** de import en alle pagina's lezen `match_goals` al, en de invoer van de redactie gebruikt die tabel met een markering.
+  Een tweede lijst met doelpunten zou op elke plek bijgehouden moeten worden.
+  Eén bron per feit houdt een cijfer en de pagina gelijk.
+- **Alternatieven:** één tabel met gebeurtenissen met veel lege kolommen (een wissel, een kaart en een doelpunt hebben elk andere velden, en de database kan dan weinig afdwingen); minuten opslaan naast de wissels (twee plekken die uit elkaar kunnen lopen).
+
+## De regels voor een verslag staan op één plek, in `packages/shared`
+
+- **Datum:** 7 november 2026
+- **Besluit:** `checkMatchReport` in `@fansite/shared/match-report` neemt een verslag met de gegevens van de wedstrijd, zonder database, en geeft de fouten en de waarschuwingen terug, elk met een code, de plek en een Nederlandse tekst (#828).
+  Het beheer (#829), het plakken (#830) en de pagina (#831) gebruiken dezelfde functie.
+  - **De fouten:**
+    - een kant die af is, heeft precies 11 spelers in de opstelling, en rugnummers die binnen de kant verschillend zijn;
+    - hoogstens één aanvoerder per kant;
+    - een wissel haalt iemand eruit die op dat moment op het veld staat (in de opstelling of eerder ingevallen, nog niet gewisseld of van het veld gestuurd), en brengt iemand in van de bank die nog niet speelde;
+    - niemand komt twee keer binnen of gaat twee keer eruit;
+    - een kaart gaat naar iemand die op het veld staat of op de bank zit; wie een rode of geel-rode kaart kreeg, krijgt er daarna geen meer, en geel-rood volgt op precies één gele kaart;
+    - wie scoort, een assist geeft of een strafschop mist, staat op dat moment op het veld; een eigen doelpunt is van een speler van het andere team dan het team dat het doelpunt krijgt;
+    - een assist komt van een andere speler uit hetzelfde team als de scorer, en niet bij een strafschop of een eigen doelpunt;
+    - een minuut ligt tussen 1 en 90 (45+x en 90+x zijn blessuretijd van een helft), of tussen 91 en 120 als de wedstrijd een verlenging had; de blessuretijd is 1 tot en met 15 minuten;
+    - de doelpunten per kant komen samen op de uitslag, op dezelfde manier als het formulier van de wedstrijd dat nu al controleert;
+    - alleen een gespeelde wedstrijd heeft een verslag.
+  - **De waarschuwingen** (ze houden "klaar" niet tegen): meer dan vijf wissels van één team in de reguliere tijd, en een kant die af is met een bank van minder dan vijf spelers.
+  - **Bezig en klaar:** een verslag met status `bezig` mag fouten hebben, zodat iemand het in meerdere keren kan invullen; alleen de opbouw van de gegevens moet kloppen (`blockingIssues`).
+    Status `klaar` kan alleen zonder fouten.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - Onze kant is altijd af.
+    De kant van de tegenstander is af als `opponent_complete` aan staat, en dan telt voor hem alles mee.
+  - Een doelpunt heeft een speler die scoorde: altijd voor onze kant, en voor de tegenstander als zijn kant af is.
+    De regel staat niet in de lijst van het issue; zonder hem telt een speler te weinig doelpunten in een verslag dat "klaar" heet.
+  - Binnen dezelfde minuut maakt het niet uit wat eerst kwam: wie in minuut 60 wordt gewisseld, mag in minuut 60 nog scoren, en wie in minuut 60 binnenkomt ook.
+    Blessuretijd van de eerste helft (45+3) komt vóór minuut 46.
+  - De regels zijn de lijst hierboven; de codes staan in `packages/shared/src/match-report.ts`.
+- **Waarom:** precisie is het doel van deze bron, en een regel die op drie plekken staat, wordt op één ervan vergeten.
+- **Alternatieven:** de regels in het beheer en nog eens in de database en de pagina (drie plekken om bij te houden); alles wat kan als check in de database (MariaDB kan een check niet op een kolom die op leeg gaat, en een verslag dat `bezig` is moet fouten mogen hebben).
+
+## Minuten gespeeld tellen op de klok, in hele minuten
+
+- **Datum:** 7 november 2026
+- **Besluit:** `minutesPlayed` geeft de minuten van een speler (#828).
+  Wie begint en niet wordt gewisseld of weggestuurd, speelt 90 minuten (120 bij een verlenging).
+  Wie erin of eruit gaat, telt van of tot de minuut op de klok; blessuretijd telt als de laatste minuut van de helft (45+2 is 45, 90+3 is 90).
+  Wie in de blessuretijd van de tweede helft binnenkomt, krijgt minstens 1 minuut.
+  Wie op de bank bleef, speelde 0 minuten en telt niet als optreden (`playedMatch`).
+  - **Een speler die in minuut 90 invalt,** krijgt ook 1 minuut en telt als optreden.
+    Dat geldt voor iedereen die binnenkomt: wie binnenkomt, heeft gespeeld.
+  - **De totalen per speler** (`readPlayerReportStats`) tellen alleen verslagen met status `klaar` van gespeelde wedstrijden.
+    Een eigen doelpunt telt niet als doelpunt van de speler, en een speler die niet meer in `players` staat heeft geen totaal, want zijn rijen wijzen niet meer naar hem.
+- **Waarom:** de echte duur van de blessuretijd slaan we niet op, en een cijfer in hele minuten dat iedereen kan narekenen is beter dan een schatting die precies lijkt.
+- **Alternatieven:** de blessuretijd meetellen (we kennen het einde niet); wie invalt in de 90e minuut 0 minuten geven (hij staat dan wel in het verslag, maar niet in de optredens).
+
+## Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam
+
+- **Datum:** 7 november 2026
+- **Besluit:** `match_appearances.player_id` verwijst naar `players` van het seizoen van de wedstrijd (#828).
+  `playerSources` krijgt de waarde `verslag`, achteraan de lijst, voor een speler die het beheer toevoegt omdat de selectie van Wikipedia hem nog niet heeft.
+  Een speler van de tegenstander krijgt geen rij in `players` of `persons`.
+  - **De migratie** zet `verslag` ook in de lijst van `squad_completeness.best_source`, want die kolom gebruikt dezelfde lijst.
+    De importer kiest als beste bron de eerste uit de lijst die spelers heeft, dus `verslag` wint nooit van een echte lijst.
+    Het plafond van `verslag` in `sourceCeilings` (de kans dat een lijst de hele selectie is) is 30, zoals dat van `doelpunten`: een speler uit een verslag zegt niets over de rest van de selectie.
+- **Waarom:** de selectie van Wikipedia loopt achter (zie de volledigheid van de selectie, #745), en een verslag mag daar niet op wachten.
+  De tegenstander heeft elk seizoen dezelfde spelers niet, en we tonen geen pagina's of cijfers van hen.
+- **Later:** vult de beslissing _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ aan: `playerSources` heeft nu `verslag` als laatste bron.
+
+## Wikipedia houdt de uitslag, het verslag houdt de rest
+
+- **Datum:** 7 november 2026
+- **Besluit:** de score, de status en de aftrap blijven van de import van Wikipedia (of van de redactie, zoals nu) (#828).
+  De doelpunten van een wedstrijd met een verslag zijn die van het verslag: opslaan van een verslag zet `goals_edited`, zodat de import ze niet overschrijft, en een verschil met Wikipedia gaat naar de redacteuren zoals nu.
+  De minuten, basisplaatsen, kaarten, assists en wissels bestaan alleen hier.
+  - **Dit issue** legt alleen de tabellen en de lezers; het opslaan van een verslag en het zetten van `goals_edited` zijn voor het beheer (#829).
+    De verzonnen wedstrijd van de seed krijgt geen rij in `match_edits`, want de import vervangt de verzonnen wedstrijden bij de eerste lezing.
+- **Waarom:** de import en de mail over een afwijking werken al, en een verslag heeft meer precisie dan de lijst van Wikipedia.
+  Wikipedia blijft de bron van wat zij wel heeft, met de bronvermelding van de pagina's die haar tonen.
+- **Alternatieven:** de doelpunten van Wikipedia houden en die van het verslag erbij (twee lijsten die kunnen afwijken); de uitslag ook uit het verslag halen (de import en de stand per club lezen haar al).

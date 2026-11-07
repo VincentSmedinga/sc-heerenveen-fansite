@@ -144,7 +144,7 @@ describe('squadCompleteness', () => {
   })
 
   it('keeps the sources in order of what they can know', () => {
-    const order = ['selectie', 'engels', 'statistieken', 'wikidata', 'transfers', 'doelpunten'] as const
+    const order = ['selectie', 'engels', 'statistieken', 'wikidata', 'transfers', 'doelpunten', 'verslag'] as const
     const ceilings = order.map((source) => sourceCeilings[source])
 
     expect(ceilings).toEqual([...ceilings].sort((a, b) => b - a))
