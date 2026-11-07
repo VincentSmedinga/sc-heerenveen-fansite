@@ -11,7 +11,10 @@
     gap: var(--hf-space-s);
   }
 
-  /* The clubs wrap at a space and a long name breaks instead of making the page scroll sideways. */
+  /*
+   * The clubs wrap at a space and a long name breaks instead of making the page scroll
+   * sideways.
+   */
   .hf-match-header-clubs {
     font-size: var(--hf-heading-2-font-size);
     font-weight: var(--hf-headline-font-weight);
