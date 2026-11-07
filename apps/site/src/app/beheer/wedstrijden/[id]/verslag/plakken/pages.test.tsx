@@ -142,7 +142,15 @@ describe('the screen Tekst plakken', () => {
 
   it('asks first, with what the report has now, for a match that has a report', async () => {
     const checked = checkReportForm(baseReport(squad), {
-      match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' },
+      match: {
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        opponent: 'N.E.C.',
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      },
       squad,
     })
 

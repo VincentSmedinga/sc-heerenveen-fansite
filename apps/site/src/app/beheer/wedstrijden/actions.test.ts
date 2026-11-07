@@ -699,7 +699,15 @@ describe('submitMatch for a match with a report', () => {
     await submit(matchId, form({ ...(await threeGoals()) }))
 
     const plan = checkReportForm(reportOf(choices), {
-      match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' },
+      match: {
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        opponent: 'N.E.C.',
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      },
       squad: choices,
     }).plan
 

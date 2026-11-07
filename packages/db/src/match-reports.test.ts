@@ -28,13 +28,14 @@ import {
   matchGoals,
   matchIncidents,
   matchReports,
+  matchShootoutKicks,
   matchSubstitutions,
   persons,
   players,
   playerSeasonStats,
 } from './schema.ts'
 import { seasonOf } from './season.ts'
-import { madeUpReportMatch, seedMatches, seedSquad } from './seed.ts'
+import { madeUpCupReportMatch, madeUpReportMatch, seedMatches, seedSquad } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -435,13 +436,25 @@ describe('reading a report', () => {
       ],
       incidents: [],
       opponentComplete: true,
+      shootout: [],
       status: 'bezig',
       substitutions: [],
     })
-    expect(matchForRules({ extraTime: false, goalsAgainst: 0, goalsFor: 1, status: 'played' })).toEqual({
+    expect(
+      matchForRules({
+        extraTime: false,
+        goalsAgainst: 0,
+        goalsFor: 1,
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      }),
+    ).toEqual({
       extraTime: false,
       goalsAgainst: 0,
       goalsFor: 1,
+      penaltiesAgainst: null,
+      penaltiesFor: null,
       status: 'played',
     })
   })
@@ -718,8 +731,9 @@ describe('the made-up report of the seed', () => {
     await seedMatches(database.db)
     await seedSquad(database.db)
 
-    expect(await count('match_reports')).toBe(1)
-    expect(await count('match_appearances')).toBe(34)
+    expect(await count('match_reports')).toBe(2)
+    expect(await count('match_appearances')).toBe(67)
+    expect(await count('match_shootout_kicks')).toBe(10)
   })
 
   it('has numbers for the players from it, and counts only the report that is klaar', async () => {
@@ -735,11 +749,148 @@ describe('the made-up report of the seed', () => {
       minutes: 30,
       substitutions: 1,
     })
-    expect(stats.find((row) => row.name === 'Daan Boerema')).toMatchObject({
-      minutes: 70,
-      yellowCards: 1,
-      yellowRedCards: 1,
+    expect(
+      (await readPlayerReportStats(database.db, seasonOf(new Date()), 'Eredivisie')).find(
+        (row) => row.name === 'Daan Boerema',
+      ),
+    ).toMatchObject({ minutes: 70, yellowCards: 1, yellowRedCards: 1 })
+  })
+
+  it('has a report of the cup tie with extra time, minutes up to 120 and a shoot-out that gets through the rules', async () => {
+    const now = new Date()
+
+    await seedMatches(database.db, now)
+    await seedSquad(database.db, now)
+
+    const [match] = await database.db
+      .select()
+      .from(matches)
+      .where(eq(matches.round, madeUpCupReportMatch.round))
+      .then((rows) => rows.filter((row) => row.season === seasonOf(now) && row.competition === 'KNVB Beker'))
+    const stored = (await readMatchReport(database.db, match!.id))!
+    const hits = (ours: boolean) =>
+      stored.shootout.filter((kick) => kick.ours === ours && kick.outcome === 'raak').length
+
+    expect(match).toMatchObject({ extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4 })
+    expect(stored.report).toMatchObject({ opponentComplete: true, status: 'klaar' })
+    expect(checkMatchReport(reportForRules(stored), matchForRules(match!))).toEqual({ errors: [], warnings: [] })
+    expect(Math.max(...stored.cards.map((card) => card.minute), ...stored.substitutions.map((sub) => sub.minute))).toBe(
+      120,
+    )
+    expect([hits(true), hits(false)]).toEqual([4, 3])
+    expect(stored.shootout.map((kick) => [kick.round, kick.ours, kick.outcome])).toEqual([
+      [1, true, 'raak'],
+      [1, false, 'raak'],
+      [2, true, 'raak'],
+      [2, false, 'gestopt'],
+      [3, true, 'naast'],
+      [3, false, 'raak'],
+      [4, true, 'raak'],
+      [4, false, 'naast'],
+      [5, true, 'raak'],
+      [5, false, 'raak'],
+    ])
+  })
+
+  it('does not count a kick of the shoot-out as a goal, as minutes or as a match', async () => {
+    const now = new Date()
+
+    await seedMatches(database.db, now)
+    await seedSquad(database.db, now)
+
+    const cup = await readPlayerReportStats(database.db, seasonOf(now), 'KNVB Beker')
+
+    // Altena kicks and scores, and came on in minute 62: 58 minutes, and no goal.
+    expect(cup.find((row) => row.name === 'Sjoerd Altena')).toMatchObject({ goals: 0, matches: 1, minutes: 58 })
+    expect(cup.find((row) => row.name === 'Mick van Wieren')).toMatchObject({ goals: 0, minutes: 10 })
+    expect(cup.find((row) => row.name === 'Jan van der Voorbeeldstraat-Proefmans')).toMatchObject({
+      assists: 0,
+      goals: 1,
+      minutes: 120,
     })
+    expect(cup.reduce((sum, row) => sum + row.goals, 0)).toBe(1)
+  })
+})
+
+describe('reading the shoot-out of a report', () => {
+  /** A cup match decided on penalties, with a report and the kicks of both teams. */
+  async function shootoutMatch(status: 'bezig' | 'klaar' = 'klaar') {
+    const matchId = await playedMatch({
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    })
+    const oyen = await player('Luca Oyen', 9)
+
+    await report(matchId, status)
+
+    const ours = await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    const theirs = await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 7 })
+
+    // Written in a mixed order, to see that the reader sorts them.
+    await database.db.insert(matchShootoutKicks).values([
+      { appearanceId: null, matchId, ours: false, outcome: 'gestopt', round: 2 },
+      { appearanceId: theirs, matchId, ours: false, outcome: 'naast', round: 1 },
+      { appearanceId: ours, matchId, ours: true, outcome: 'raak', round: 2 },
+      { appearanceId: ours, matchId, ours: true, outcome: 'raak', round: 1 },
+    ])
+
+    return { matchId, ours, theirs }
+  }
+
+  it('gives the kicks of the report in the order of the rounds, our kick before the opponent in a round', async () => {
+    const { matchId, ours, theirs } = await shootoutMatch()
+    const stored = await readMatchReport(database.db, matchId)
+
+    expect(stored?.shootout.map((kick) => [kick.round, kick.ours, kick.appearanceId, kick.outcome])).toEqual([
+      [1, true, ours, 'raak'],
+      [1, false, theirs, 'naast'],
+      [2, true, ours, 'raak'],
+      [2, false, null, 'gestopt'],
+    ])
+  })
+
+  it('gives the kicks to the page of the match too, with the name of the player as the rest of the report has it', async () => {
+    const { matchId, ours } = await shootoutMatch()
+    const [found] = await listReportedMatches(database.db, season)
+
+    expect(found?.match.id).toBe(matchId)
+    expect(found?.stored.shootout).toHaveLength(4)
+    expect(found?.stored.appearances.find((player) => player.id === ours)?.name).toBe('Luca Oyen')
+    expect(found?.names.get(ours)?.searchTerm).toBe('Luca Oyen')
+    expect(
+      (await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season }))?.stored
+        .shootout,
+    ).toHaveLength(4)
+  })
+
+  it('gives the kicks in the shape of the rules, and has no kicks for a report without any', async () => {
+    const { matchId } = await shootoutMatch()
+    const empty = await playedMatch({ matchDate: '2026-08-15', opponent: 'Andere FC', round: 'Speelronde 2' })
+
+    await report(empty)
+
+    expect(reportForRules((await readMatchReport(database.db, matchId))!).shootout).toHaveLength(4)
+    expect(reportForRules((await readMatchReport(database.db, matchId))!).shootout?.[3]).toEqual({
+      appearanceId: null,
+      ours: false,
+      outcome: 'gestopt',
+      round: 2,
+    })
+    expect((await readMatchReport(database.db, empty))?.shootout).toEqual([])
+  })
+
+  it('leaves the numbers of the players alone', async () => {
+    const { matchId } = await shootoutMatch()
+    const before = await readPlayerReportStats(database.db, season)
+
+    await database.db.delete(matchShootoutKicks).where(eq(matchShootoutKicks.matchId, matchId))
+
+    expect(await readPlayerReportStats(database.db, season)).toEqual(before)
+    expect(before).toMatchObject([{ goals: 0, name: 'Luca Oyen' }])
   })
 })
 

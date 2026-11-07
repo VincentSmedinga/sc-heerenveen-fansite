@@ -99,7 +99,18 @@ const headings = (html: string, level: number) =>
 async function store(overrides: Parameters<typeof baseReport>[1] = {}, status = 'klaar') {
   const checked = checkReportForm(
     { ...baseReport(squad, overrides), status },
-    { match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' }, squad },
+    {
+      match: {
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        opponent: 'N.E.C.',
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      },
+      squad,
+    },
   )
 
   await saveReport(database.db, userId, matchId, { ...checked.plan!, status: status === 'klaar' ? 'klaar' : 'bezig' })

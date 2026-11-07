@@ -169,6 +169,7 @@ export function reportedMatch(): ReportedMatch {
         source: 'het wedstrijdformulier',
         status: 'klaar',
       },
+      shootout: [],
       substitutions: [
         {
           appearanceInId: 12,

@@ -26,6 +26,8 @@ export type MatchReport = {
   incidents: ReportIncident[]
   /** Whether the side of the opponent is complete too. */
   opponentComplete: boolean
+  /** Leave it out for a report that has no shoot-out, such as one that is read from a text. */
+  shootout?: ReportShootoutKick[] | undefined
   status: ReportStatus
   substitutions: ReportSubstitution[]
 }
@@ -73,13 +75,28 @@ export type ReportIncident = ReportTime & {
 }
 
 /**
- * What the rules need to know of the match: whether it was played, its score and extra time.
+ * What the rules need to know of the match: whether it was played, its score, extra time and
+ * the result of the shoot-out (both empty when there was none).
  */
 export type ReportMatch = {
   extraTime: boolean
   goalsAgainst: null | number
   goalsFor: null | number
+  penaltiesAgainst: null | number
+  penaltiesFor: null | number
   status: string
+}
+
+/**
+ * A kick in the penalty shoot-out. `round` counts from 1 for each team, `ours` is the team that
+ * kicks, and `appearanceId` is the kicker, or empty for an opponent whose side is not complete.
+ * A kick is not a goal.
+ */
+export type ReportShootoutKick = {
+  appearanceId: null | number
+  ours: boolean
+  outcome: ShootoutOutcome
+  round: number
 }
 
 export type ReportStatus = 'bezig' | 'klaar'
@@ -96,6 +113,9 @@ export type ReportTime = {
   minute: number
   stoppageMinutes: null | number
 }
+
+/** What came of a kick in the shoot-out: it went in, it missed, or the keeper stopped it. */
+export type ShootoutOutcome = 'gestopt' | 'naast' | 'raak'
 
 /**
  * The most minutes of added time, and the last minute of a match with and without extra time.
@@ -123,7 +143,7 @@ export const formationChoices = [
  */
 export const fieldPlayers = 10
 
-export type IssuePart = 'appearances' | 'cards' | 'goals' | 'incidents' | 'report' | 'substitutions'
+export type IssuePart = 'appearances' | 'cards' | 'goals' | 'incidents' | 'report' | 'shootout' | 'substitutions'
 
 /** Where an issue is: the part of the report, and the row in that part (counted from 0). */
 export type IssuePlace = { index?: number | undefined; part: IssuePart }
@@ -225,8 +245,14 @@ export function blockingIssues(report: MatchReport, match: ReportMatch): ReportI
  * a report. Our own side is always complete; the side of the opponent is when
  * `opponentComplete` is true, and then every goal has its scorer too.
  *
+ * The shoot-out is optional, and checked against the result of the series of the match: it
+ * needs that result, the kicks that went in add up to it for each team, the rounds of a team
+ * run from 1 without a gap, the teams differ by at most one kick, a player kicks once and is of
+ * the team he kicks for, and a complete side names every kicker.
+ *
  * Warnings (they do not keep a report from being `klaar`): more than five substitutions of one
- * team in regular time, and a complete side with fewer than five players on the bench.
+ * team in regular time, a complete side with fewer than five players on the bench, and a kicker
+ * who was not on the pitch at the end of the match.
  */
 export function checkMatchReport(report: MatchReport, match: ReportMatch): ReportCheck {
   const issues: ReportIssue[] = []
@@ -535,6 +561,8 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
     }
   })
 
+  checkShootout(report, match, byId, presence, issues, warnings)
+
   // The goals add up to the score, as the form of the match checks too.
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     const ours = report.goals.filter((goal) => goal.ours).length
@@ -602,6 +630,137 @@ function between(value: number, low: number, high: number) {
  */
 function canBeCarded(presence: Presence | undefined, time: ReportTime) {
   return presence !== undefined && (presence.off === undefined || clock(time) <= presence.off)
+}
+
+/**
+ * Checks the kicks of the shoot-out. A report without kicks has nothing to check: the result of
+ * the series of the match may stand alone.
+ */
+function checkShootout(
+  report: MatchReport,
+  match: ReportMatch,
+  byId: Map<number, ReportAppearance>,
+  presence: Map<number, Presence>,
+  issues: ReportIssue[],
+  warnings: ReportIssue[],
+) {
+  const kicks = report.shootout ?? []
+
+  if (kicks.length === 0) {
+    return
+  }
+
+  const place = { part: 'shootout' } as const
+  const taken = new Set<number>()
+
+  kicks.forEach((kick, index) => {
+    const kickPlace = { index, part: 'shootout' } as const
+    const kicker = kick.appearanceId === null ? undefined : byId.get(kick.appearanceId)
+
+    if (kick.appearanceId !== null && kicker === undefined) {
+      issues.push({
+        code: 'unknown-player',
+        message: `Het schot in ronde ${kick.round} van ${sideName(kick.ours)} verwijst naar een speler die niet in het verslag staat.`,
+        place: kickPlace,
+        structural: true,
+      })
+
+      return
+    }
+
+    if (kicker === undefined) {
+      if (kick.ours || report.opponentComplete) {
+        issues.push({
+          code: 'shootout-kick-without-player',
+          message: `Het schot in ronde ${kick.round} van ${sideName(kick.ours)} heeft geen speler die schoot.`,
+          place: kickPlace,
+          structural: false,
+        })
+      }
+
+      return
+    }
+
+    if (kicker.ours !== kick.ours) {
+      issues.push({
+        code: 'shootout-player-other-team',
+        message: `${kicker.name} is van ${sideName(kicker.ours)}, maar het schot in ronde ${kick.round} is van ${sideName(kick.ours)}.`,
+        place: kickPlace,
+        structural: false,
+      })
+    }
+
+    if (taken.has(kicker.id)) {
+      issues.push({
+        code: 'shootout-player-twice',
+        message: `${kicker.name} schiet twee keer in de strafschoppenserie.`,
+        place: kickPlace,
+        structural: false,
+      })
+    }
+
+    taken.add(kicker.id)
+
+    const found = presence.get(kicker.id)
+
+    if (found === undefined || found.on === undefined || found.off !== undefined) {
+      warnings.push({
+        code: 'shootout-player-not-on-pitch',
+        message: `${kicker.name} schiet in de strafschoppenserie, maar stond aan het einde van de wedstrijd niet op het veld.`,
+        place: kickPlace,
+        structural: false,
+      })
+    }
+  })
+
+  if (match.penaltiesFor === null || match.penaltiesAgainst === null) {
+    issues.push({
+      code: 'shootout-without-score',
+      message:
+        'Het verslag heeft een strafschoppenserie, maar de wedstrijd heeft geen uitslag van de serie. Vul die uitslag in bij de wedstrijd.',
+      place,
+      structural: false,
+    })
+  }
+
+  const counts = { ours: 0, theirs: 0 }
+
+  for (const ours of [true, false]) {
+    const own = kicks.filter((kick) => kick.ours === ours)
+    const rounds = own.map((kick) => kick.round).toSorted((a, b) => a - b)
+
+    if (rounds.some((round, index) => round !== index + 1)) {
+      issues.push({
+        code: 'shootout-rounds-not-in-order',
+        message: `De rondes van ${sideName(ours)} in de strafschoppenserie beginnen niet bij 1, hebben een gat of een dubbele ronde. Het moeten er ${rounds.length} zijn, genummerd van 1 tot en met ${rounds.length}.`,
+        place,
+        structural: false,
+      })
+    }
+
+    counts[ours ? 'ours' : 'theirs'] = own.length
+
+    const hits = own.filter((kick) => kick.outcome === 'raak').length
+    const result = ours ? match.penaltiesFor : match.penaltiesAgainst
+
+    if (result !== null && hits !== result) {
+      issues.push({
+        code: 'shootout-differs-from-score',
+        message: `De schoten van ${sideName(ours)} geven ${hits} raak en de uitslag van de serie is ${match.penaltiesFor}–${match.penaltiesAgainst}. Pas de schoten of de uitslag aan.`,
+        place,
+        structural: false,
+      })
+    }
+  }
+
+  if (Math.abs(counts.ours - counts.theirs) > 1) {
+    issues.push({
+      code: 'shootout-teams-differ',
+      message: `sc Heerenveen heeft ${counts.ours} ${counts.ours === 1 ? 'schot' : 'schoten'} en de tegenstander ${counts.theirs}. Het verschil is hoogstens één schot.`,
+      place,
+      structural: false,
+    })
+  }
 }
 
 /**

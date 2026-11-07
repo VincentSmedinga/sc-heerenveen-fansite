@@ -989,7 +989,15 @@ describe('the report in the list and on the match', () => {
       shirtNumber: player.shirtNumber,
     }))
     const checked = checkReportForm(reportOf(squad), {
-      match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' },
+      match: {
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        opponent: 'N.E.C.',
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played',
+      },
       squad,
     })
 

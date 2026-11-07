@@ -64,7 +64,10 @@ export type ReportContext = {
 }
 
 /** The match, as far as the checks need it. */
-export type ReportMatch = Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' | 'opponent' | 'status'>
+export type ReportMatch = Pick<
+  Match,
+  'extraTime' | 'goalsAgainst' | 'goalsFor' | 'opponent' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'
+>
 
 /**
  * A report as it will be stored. The events point to a player by his place in `appearances`
@@ -615,7 +618,8 @@ function placeIssue(
   places: Record<keyof typeof kindOfPart, [Side, number][]>,
   where: (kind: RowKind, side: Side, number: number) => string,
 ): [string, string] {
-  if (issue.place.part === 'report') {
+  // The form has no place for the shoot-out yet (#852), and its report has none.
+  if (issue.place.part === 'report' || issue.place.part === 'shootout') {
     return ['verslag', issue.message]
   }
 
