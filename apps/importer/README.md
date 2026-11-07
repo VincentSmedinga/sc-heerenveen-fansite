@@ -1924,6 +1924,78 @@ De zoekpagina (#107) kan daarmee de bronvermelding tonen, zoals `/wedstrijden` d
 - Een limiet per host.
 - `Crawl-delay` lezen: dat staat niet in RFC 9309.
 
+## De oude fansite
+
+De wedstrijden van 1 juli 1990 tot en met 29 april 2007 komen uit de database van de oude fansite, die de projecteigenaar aan het project heeft gegeven.
+Productie kan die database niet bereiken.
+Daarom leest een script hem eenmalig op je eigen computer en schrijft de feiten naar bestanden in de repository.
+De import van de oude wedstrijden leest alleen die bestanden en raakt de oude database nooit.
+
+### De oude database laden
+
+De database zit in de back-up van de hosting van 14 oktober 2026, `backup_sc.heerenveen.org_2610141821.tar`, in het lid `databases/fansitedb_1/backup_sqldump_2610141821.tzst`.
+Het andere lid, `forum3db_1`, is het oude forum en hoort hier niet bij.
+Dit zijn de stappen:
+
+1. Pak het `.tzst`-bestand uit de tar.
+2. Pak het uit met Node.
+   `zstd -d` en `tar --zstd` falen, omdat het bestand overslaanbare zstd-frames tussen de datablokken heeft (magic `0x184D2A5x`).
+   Loop door de frames, sla de overslaanbare over en pak elk gewoon frame uit met `zlib.zstdDecompressSync` van Node.
+   Zet de uitkomsten achter elkaar: dat is een tar met één SQL-bestand van ongeveer 38 MB.
+3. Start de database van het project (`docker compose up -d --wait`) en maak er een lege database bij:
+
+   ```sh
+   docker compose exec mariadb mariadb -uroot -e 'CREATE DATABASE oldsite_fansitedb'
+   ```
+
+4. Laad het SQL-bestand erin.
+   De dump begint met `SET NAMES utf8mb4`, dus geef het zelfde mee:
+
+   ```sh
+   docker compose exec -T mariadb mariadb -uroot --default-character-set=utf8mb4 oldsite_fansitedb < dump.sql
+   ```
+
+Gebruik een databasenaam die van niemand anders is.
+De dump bevat ook de gegevens van leden, e-mailadressen en de nieuwsbrief: die komen nooit in de repository.
+
+### Het script draaien
+
+Zet in `.env` de regel `OLD_DATABASE_URL`, zoals `.env.example` die noemt, en draai:
+
+```sh
+pnpm --filter @fansite/importer export:old-site
+```
+
+Zonder `OLD_DATABASE_URL` stopt het script met een melding.
+De verbinding staat op alleen lezen en het script voert alleen `SELECT` uit.
+Het schrijft:
+
+- de bestanden in [`data/oude-fansite/`](data/oude-fansite/): `clubs.json`, `players.json` en een bestand per seizoen, `matches-<seizoen>.json` (het seizoen `9091` is 1990/91);
+- [`docs/oefenwedstrijden-2002-03.md`](../../docs/oefenwedstrijden-2002-03.md): de negen oefenwedstrijden van de zomer van 2002, met de uitslag en de doelpuntenmakers van sc Heerenveen.
+
+Een tweede run geeft dezelfde bytes: de bestanden zijn gesorteerd, hebben vaste sleutels en een versienummer (`version`), en zijn samen ongeveer 2,2 MB.
+Na afloop meldt het script wat niet aan elkaar hangt: wedstrijden zonder uitslag, wedstrijden met een tegenstander die niet in `club` staat, rijen met doelpunten, kaarten, opstellingen, uitslagen of verslagen zonder wedstrijd, en codes van spelers zonder rij in `speler`.
+Het stopt daar niet op.
+Nu is dat één verslagregel zonder wedstrijd (`nec.bekeruit` in 1997/98) en de codes `foppe.dehaan` en `ivan.tzvekov`.
+
+### Wat erin staat
+
+Alleen feiten: per wedstrijd de code, het seizoen, de datum en tijd zoals de oude database ze heeft, de competitiecode, het rondenummer, de opmerking, de uitslag (rust en eindstand met de opmerking), de cijfers over hoekschoppen, buitenspel en overtredingen, de scheidsrechter, de toeschouwers, de doelpunten en kaarten en de opstelling met de minuten erin en eruit.
+Daarbij de tegenstanders (code, naam, land) en de spelers van ons die erin voorkomen (code, voornaam, tussenvoegsel, achternaam).
+Van de verslagen leest het script alleen `scheidsrechter` en `toeschouwers`.
+Er staan geen teksten van verslagen of voorbeschouwingen in, niets van leden, e-mail of de nieuwsbrief, en van een speler geen geboortedatum, biografie, contract, lengte, gewicht of foto.
+
+De bestanden leggen niets uit.
+`home` is de kant die de oude database `t` noemt, een `0` bij hoekschoppen, buitenspel of overtredingen is "onbekend", en een minuut `0` bij een doelpunt of gele kaart ook.
+Welke code een speler van ons is, wat een opmerking `n.v.` betekent en wat het seizoen `9091` is, staat in de import.
+
+### De bestanden lezen
+
+`readOldSiteData()` in [`src/old-site-file.ts`](src/old-site-file.ts) leest de hele map.
+`readOldSiteFile(bestand)` leest één bestand.
+Beide weigeren een bestand met een ander versienummer, een veld dat niet in de vorm past of een waarde buiten de vorm.
+`src/old-site-file.test.ts` controleert de namen van alle velden in de bestanden in de repository tegen een lijst met toegestane namen, zodat persoonsgegevens er niet in kunnen komen zonder dat de test faalt.
+
 ## De import op acceptatie
 
 - `pnpm --filter site assemble <nieuwe map>` bundelt de importer met `esbuild` tot één bestand, `apps/importer/import.mjs` in de map voor de host ([`src/bundle.ts`](src/bundle.ts)).
