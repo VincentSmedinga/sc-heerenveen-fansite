@@ -6,7 +6,7 @@
 
 export const scaleSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 
-export type ScaleName = 'blue' | 'green' | 'grey' | 'red' | 'sand' | 'steel'
+export type ScaleName = 'blue' | 'green' | 'grey' | 'red' | 'sand' | 'steel' | 'yellow'
 
 /**
  * The scales: a colour in one strength (vivid, muted or neutral), numbered from light to dark.
@@ -36,6 +36,12 @@ export const scales: { description: string; label: string; name: ScaleName; step
     steps: [100, 300, 400, 500, 700],
   },
   {
+    description: 'Helder geel, in twee stappen: alleen voor de gele kaart bij een wedstrijd.',
+    label: 'Geel',
+    name: 'yellow',
+    steps: [300, 400],
+  },
+  {
     description: 'Neutraal zand, tint 85° met hooguit 0,017 chroma: warm en nooit helemaal neutraal.',
     label: 'Grijs',
     name: 'grey',
@@ -49,6 +55,7 @@ export const scaleLabels: Record<ScaleName, string> = {
   red: 'rood',
   sand: 'zand',
   steel: 'staal',
+  yellow: 'geel',
 }
 
 export type SemanticToken = {
@@ -136,6 +143,13 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-outcome-win', use: 'Uitslag van een gewonnen wedstrijd van sc Heerenveen' },
       { name: '--hf-colour-outcome-loss', use: 'Uitslag van een verloren wedstrijd van sc Heerenveen' },
       { name: '--hf-colour-outcome-draw', use: 'Uitslag van een gelijkspel, ook in de beker zonder strafschoppen' },
+    ],
+  },
+  {
+    label: 'Kaarten bij een wedstrijd',
+    tokens: [
+      { name: '--hf-colour-card-yellow', use: 'Vulling van de gele kaart in de pictogrammen van een wedstrijd' },
+      { name: '--hf-colour-card-red', use: 'Vulling van de rode kaart in de pictogrammen van een wedstrijd' },
     ],
   },
   {

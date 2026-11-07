@@ -34,6 +34,7 @@ const components = [
   'Logo',
   'MarkRow',
   'Match',
+  'MatchEventIcon',
   'MatchHeader',
   'MatchLineup',
   'MatchTimeline',
