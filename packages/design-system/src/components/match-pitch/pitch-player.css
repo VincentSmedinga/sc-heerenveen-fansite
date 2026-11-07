@@ -7,7 +7,6 @@
 
 @layer hf.components {
   .hf-pitch-player {
-    --hf-pitch-dot: 2.25rem;
     --hf-pitch-gap: 0.125rem;
     --hf-pitch-ring: 0.1875rem;
 
@@ -31,8 +30,8 @@
 
   /* The disc and its ring are one square; the marks sit on its corners. */
   .hf-pitch-player-disc {
-    block-size: var(--hf-pitch-dot);
-    inline-size: var(--hf-pitch-dot);
+    block-size: var(--hf-pitch-dot, 2.25rem);
+    inline-size: var(--hf-pitch-dot, 2.25rem);
     position: relative;
   }
 

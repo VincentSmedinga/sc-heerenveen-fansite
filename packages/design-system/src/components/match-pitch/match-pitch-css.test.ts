@@ -45,6 +45,15 @@ describe('pitch-player.css', () => {
     expect(player).toMatch(/inset: calc\(var\(--hf-pitch-ring\) \+ var\(--hf-pitch-gap\)\)/u)
   })
 
+  it('leaves the size of the disc to the pitch: the player only has a fallback for when it stands alone', () => {
+    // A property on the player itself would win over the one the pitch sets on the field.
+    expect(player).not.toMatch(/--hf-pitch-dot:/u)
+    expect(player).toMatch(/block-size: var\(--hf-pitch-dot, 2\.25rem\)/u)
+    expect(player).toMatch(/inline-size: var\(--hf-pitch-dot, 2\.25rem\)/u)
+    // The pitch sets it: upright, crowded, very narrow and lying down.
+    expect(pitch.match(/--hf-pitch-dot: [\d.]+rem/gu)).toHaveLength(4)
+  })
+
   it('lets a long name run over two lines with hyphens, and then end in an ellipsis', () => {
     expect(player).toMatch(/-webkit-line-clamp: 2/u)
     expect(player).toMatch(/hyphens: auto/u)
