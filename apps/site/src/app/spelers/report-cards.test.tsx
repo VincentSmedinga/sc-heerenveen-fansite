@@ -1,0 +1,193 @@
+import { renderToStaticMarkup } from 'react-dom/server'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
+import { getSeasonPlayerStats } from '#src/season-player-stats'
+import { getSeasonReportFigures } from '#src/season-report-figures'
+import { getSeasonSquad } from '#src/season-squad'
+import { playersShortcutsFor } from '#src/statisticsShortcuts'
+import { matchData } from '#src/test-matches'
+import { figuresData, noReports } from '#src/test-report-figures'
+import { squadData } from '#src/test-squad'
+import { withoutIcons } from '#src/without-icons'
+
+import PlayersPage from './page'
+
+vi.mock('#src/matches', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getAllTimeMatches: vi.fn(),
+  getMatchData: vi.fn(),
+  getMatchSeasons: vi.fn(),
+}))
+vi.mock('#src/season-squad', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getSeasonSquad: vi.fn(),
+}))
+vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
+vi.mock('#src/season-report-figures', () => ({ getSeasonReportFigures: vi.fn(), seasonHasReports: vi.fn() }))
+
+// The afternoon of Friday 23 October 2026 in the Netherlands.
+const now = new Date('2026-10-23T13:40:00Z')
+
+const render = async (searchParams: Record<string, string> = {}) =>
+  withoutIcons(renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve(searchParams) })))
+
+const plain = (html: string | undefined) => (html ?? '').replaceAll(/<[^>]*>/g, '')
+
+/** The card with this heading, as HTML. */
+const cardOf = (html: string, id: string) =>
+  html.match(new RegExp(`<section class="hf-card[^"]*" aria-labelledby="${id}">.*?</section>`, 's'))?.[0] ?? ''
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(now)
+  vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getAllTimeMatches).mockReset()
+  vi.mocked(getAllTimeMatches).mockResolvedValue([])
+  vi.mocked(getMatchData).mockReset()
+  vi.mocked(getMatchData).mockResolvedValue(matchData)
+  vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+  vi.mocked(getSeasonPlayerStats).mockReset()
+  vi.mocked(getSeasonPlayerStats).mockResolvedValue([])
+  vi.mocked(getSeasonReportFigures).mockReset()
+  vi.mocked(getSeasonReportFigures).mockResolvedValue(figuresData)
+  vi.mocked(getSeasonSquad).mockReset()
+  vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+  vi.restoreAllMocks()
+  vi.unstubAllEnvs()
+})
+
+describe('the cards with the figures of the match reports on /spelers', () => {
+  it('has the cards Alle spelers, Assists and Minuten for a season with a report that is klaar', async () => {
+    const html = await render()
+
+    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+      expect(html).toContain(`id="${id}"`)
+    }
+  })
+
+  it('puts Alle spelers after the squad in the main column, and Assists and Minuten at the end of the sidebar, before the credit', async () => {
+    const html = await render()
+    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
+    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+
+    expect(main.indexOf('id="selectie"')).toBeLessThan(main.indexOf('id="alle-spelers"'))
+    expect(sidebar).not.toContain('id="alle-spelers"')
+    expect(sidebar.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(sidebar.indexOf('id="assists"'))
+    expect(sidebar.indexOf('id="assists"')).toBeLessThan(sidebar.indexOf('id="minuten"'))
+    expect(sidebar.indexOf('id="minuten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+  })
+
+  it('has a heading for every link of the bar, in the order of the bar', async () => {
+    const html = await render()
+    const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(playersShortcutsFor(true).map(({ href }) => href)).toEqual(ids)
+  })
+
+  it('says how many of the played matches each card rests on, and that the figures are our own administration', async () => {
+    const html = await render()
+
+    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+      const card = cardOf(html, id)
+
+      expect(plain(card)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
+      expect(plain(card)).toContain('Bron: eigen administratie')
+    }
+  })
+
+  it('has a button for an image on each card, with the credit under the image and not in the copy of the card', async () => {
+    const html = await render()
+
+    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+      expect(cardOf(html, id)).toMatch(/hf-card-shareable/)
+    }
+    expect(html).toContain('data-hf-card-share-skip=""')
+  })
+
+  it('has the top five of the assists with level players on one place, and says how many players gave one', async () => {
+    const card = plain(cardOf(await render(), 'assists'))
+
+    expect(card).toContain('3 spelers gaven een assist')
+    expect(card).toContain('De top 5 van de assists van sc Heerenveen in het seizoen 2026/27, in alle competities')
+    expect(card).toMatch(/1.*Jan Bank, Sander Vos.*4/s)
+  })
+
+  it('has the minutes from the most down', async () => {
+    const html = cardOf(await render(), 'minuten')
+
+    expect(plain(html)).toContain('4 spelers hebben gespeeld')
+    expect(html.indexOf('Oyen')).toBeLessThan(html.indexOf('Mees'))
+    expect(html.indexOf('Mees')).toBeLessThan(html.indexOf('Bank'))
+    expect(html).not.toContain('Reserve')
+  })
+
+  it('has the table with every player of the reports, with a caption and column headers that have a scope, and the bench player with zeros', async () => {
+    const html = cardOf(await render(), 'alle-spelers')
+
+    expect(plain(html)).toContain('5 spelers staan in de verslagen')
+    expect(html).toContain('<caption class="hf-visually-hidden">Alle spelers in de verslagen van sc Heerenveen')
+    expect(html.match(/<th scope="col"/g)?.length).toBeGreaterThan(0)
+    expect(html.match(/<th scope="row">/g)).toHaveLength(5)
+    expect(html).toContain('Reserve')
+    expect(plain(html)).toContain(
+      'G gespeeld, B basis, I invallers, M minuten, D doelpunten, A assists, Y geel, R rood',
+    )
+  })
+
+  it('reads a name as one name', async () => {
+    const html = cardOf(await render(), 'alle-spelers')
+
+    expect(html).toContain(
+      '<span class="hf-player-name-given">Luca</span> <span class="hf-player-name-surname">Oyen</span>',
+    )
+  })
+
+  it('follows the switch: the Eredivisie alone asks the figures for the league', async () => {
+    await render({ competitie: 'eredivisie' })
+
+    expect(getSeasonReportFigures).toHaveBeenCalledWith('2026/27', 'league')
+    await render()
+    expect(getSeasonReportFigures).toHaveBeenCalledWith('2026/27', 'all')
+  })
+
+  it('has none of the cards, and no sentence about them, for a season without a report that is klaar', async () => {
+    vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
+
+    const html = await render()
+
+    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+      expect(html).not.toContain(`id="${id}"`)
+    }
+    expect(html).not.toContain('Op basis van')
+    expect(html).not.toContain('eigen administratie')
+  })
+
+  it('keeps the cards for the other choice of the switch when one competition has no report, and says it rests on none', async () => {
+    vi.mocked(getSeasonReportFigures).mockResolvedValue({ known: 0, played: 12, players: [], seasonHasReports: true })
+
+    const html = await render({ competitie: 'eredivisie' })
+
+    expect(plain(cardOf(html, 'assists'))).toContain('Er is nog geen assist in de verslagen.')
+    expect(plain(cardOf(html, 'assists'))).toContain('Op basis van 0 van de 12 gespeelde wedstrijden.')
+    expect(cardOf(html, 'assists')).not.toContain('hf-card-shareable')
+  })
+
+  it('leaves the cards out and keeps the rest of the page when the reports can not be read, and logs the reason', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getSeasonReportFigures).mockRejectedValue(new Error('connection lost'))
+
+    const html = await render()
+
+    expect(html).toContain('id="selectie"')
+    expect(html).toContain('id="doelpuntenmakers"')
+    expect(html).not.toContain('id="assists"')
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('connection lost'))
+  })
+})

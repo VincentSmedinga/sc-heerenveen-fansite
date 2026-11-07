@@ -3,7 +3,7 @@ import { type ComponentPropsWithoutRef, Fragment } from 'react'
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
-import { tableColumns, tableLegend } from '../table-columns'
+import { type TableColumn, tableColumns, tableLegend } from '../table-columns'
 
 export type TopScorersTablePlayer = {
   /** The given name of the player, in the normal weight. Leave it out when it is not known. */
@@ -28,6 +28,13 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
   caption: string
   /** A top scorers table has no children: everything it shows comes from the props below. */
   children?: never
+  /**
+   * What the places are for, in the header, the name for a screen reader and the legend.
+   * Without it, it is the goals (`tableColumns.goals`). A list of the assists or of the
+   * minutes gives `tableColumns.assists` or `tableColumns.minutes`, and then `goals` in each
+   * row holds that figure. `showGoalsPerMatch` is only for the goals.
+   */
+  figure?: TableColumn
   /** The places, from the most goals down. */
   rows: TopScorersTableRow[]
   /**
@@ -41,7 +48,10 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
 }
 
 export type TopScorersTableRow = {
-  /** The goals of each player in the row: players who share a row have the same number. */
+  /**
+   * The goals of each player in the row (or the figure that the table says it is for): players
+   * who share a row have the same number.
+   */
   goals: number
   /**
    * The players of the row, in the order they are shown. A row has one player, or more when
@@ -76,10 +86,14 @@ const onePlayerPerRow = (rows: TopScorersTableRow[]): TopScorersTableRow[] =>
  * With `showGoalsPerMatch` there is a column D/W after the goals, for a screen reader
  * "doelpunten per wedstrijd", and the legend under the table has it too, with a sentence that
  * says what it is. Every player then has a row of their own.
+ *
+ * With `figure` the list is of something else, such as the assists or the minutes: the places
+ * and the bar are the same, and the header and the legend have its letter and word.
  */
 export const TopScorersTable = ({
   caption,
   className,
+  figure = tableColumns.goals,
   rows: placedRows,
   showGoalsPerMatch = false,
   ...props
@@ -101,9 +115,9 @@ export const TopScorersTable = ({
             </th>
             <th scope="col">Speler</th>
             <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
-              <abbr title="Doelpunten">
-                <span aria-hidden="true">{tableColumns.goals.abbreviation}</span>
-                <span className="hf-visually-hidden">{tableColumns.goals.name}</span>
+              <abbr title={`${figure.name.charAt(0).toUpperCase()}${figure.name.slice(1)}`}>
+                <span aria-hidden="true">{figure.abbreviation}</span>
+                <span className="hf-visually-hidden">{figure.name}</span>
               </abbr>
             </th>
             {showGoalsPerMatch ? (
@@ -139,10 +153,10 @@ export const TopScorersTable = ({
       </table>
       <p className="hf-meta hf-bar-legend">
         {showGoalsPerMatch ? (
-          `${tableLegend([tableColumns.goals, tableColumns.goalsPerMatch])}. ${goalsPerMatchSentence}`
+          `${tableLegend([figure, tableColumns.goalsPerMatch])}. ${goalsPerMatchSentence}`
         ) : (
           <>
-            <b>{tableColumns.goals.abbreviation}</b> {tableColumns.goals.name}
+            <b>{figure.abbreviation}</b> {figure.name}
           </>
         )}
       </p>

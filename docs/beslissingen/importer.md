@@ -1019,6 +1019,8 @@
   - **Het seizoen:** alleen het lopende seizoen, want alleen dat heeft een selectie in onze gegevens.
     Afgelopen seizoenen volgen met #414.
 - **Alternatieven:** kolommen in `players` (een speler met een rij per seizoen krijgt dan cijfers per competitie in breedte, en de schakelaar van #406 raakt ze); de cijfers uit de wedstrijden zelf tellen (het is al wat de kaart met doelpuntenmakers doet, maar assists en optredens staan niet in de wedstrijden); de cijfers van de site van de club of van een statistiekensite halen (geen toestemming, en een tweede bron die met de Wikipedia kan botsen); de tabel van Wikipedia laten winnen van de wedstrijden of andersom bij een verschil (het is onbekend welke van de twee loopt achter, dus de importer laat het verschil zien en kiest niet).
+- **Later:** zie _De kaarten Assists, Minuten en Alle spelers lezen alleen de verslagen_ in `site.md` (7 november 2026): de kaarten die #493 vroeg, komen uit de verslagen en niet uit deze tabel.
+  Deze tabel blijft staan, maar de pagina's tonen hem niet; de doelpunten ervan worden vergeleken met die van de verslagen, en een verschil gaat in het logboek van het beheer (`player.stats-differ`, zie dezelfde beslissing in `site.md`).
 
 ## De bekerpagina's van eerdere seizoenen schrijven de score met de stand bij de rust, en de lezer kent die vorm
 

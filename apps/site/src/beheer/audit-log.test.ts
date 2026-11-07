@@ -131,6 +131,7 @@ describe('recordAction', () => {
       'stadium.reset',
       'club-name.save',
       'club-name.reset',
+      'player.stats-differ',
     ])
   })
 

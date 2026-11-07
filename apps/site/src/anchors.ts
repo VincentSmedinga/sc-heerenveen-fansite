@@ -47,8 +47,19 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
   // list, the only place it is (#774). The old anchor topscorers comes along. The card
-  // Alle tijden (#780) follows it, and the card Bijzondere doelpunten (#403) is under that.
-  '/spelers': ['selectie', 'doelpuntenmakers', 'topscorers', 'alle-tijden', 'bijzondere-doelpunten'],
+  // Alle tijden (#780) follows it, and the card Bijzondere doelpunten (#403) is under that. The
+  // cards Alle spelers, Assists and Minuten (#832) are there for a season with a match report
+  // that is klaar, which the made-up season has.
+  '/spelers': [
+    'selectie',
+    'alle-spelers',
+    'doelpuntenmakers',
+    'topscorers',
+    'alle-tijden',
+    'bijzondere-doelpunten',
+    'assists',
+    'minuten',
+  ],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium. The card Nieuws is on the page of a club that
   // headlines name (#777); the smoke test gives Testdorp FC six, so its page is the one that

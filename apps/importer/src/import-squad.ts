@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
+import { logReportGoalDifferences } from '@fansite/db/match-reports'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { matches, matchGoals, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
@@ -279,6 +280,18 @@ async function readAndStore(
 
   warnings.push(...guessedNameWarnings(personNames.guessed))
   warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
+
+  // The goals of the match reports against the table: a difference goes in the log of the
+  // admin, never to a page, and a failure to write it is a warning that undoes nothing (#832).
+  try {
+    // Only when the table has new numbers: the log is only added to, so it can't be asked
+    // what it said before, and an hourly run would repeat itself.
+    if (counts.stats.added + counts.stats.updated > 0) {
+      await logReportGoalDifferences(db, season, null, now)
+    }
+  } catch (error) {
+    warnings.push(`the goals of the match reports are not compared with the table: ${describeError(error)}`)
+  }
 
   // The chance that the list is whole is a result of its own: a failure to store it is a
   // warning and never undoes a squad that is stored.

@@ -1229,8 +1229,20 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(playersHtml, /hf-navigation-bar/)
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#selectie', '#doelpuntenmakers', '#alle-tijden', '#bijzondere-doelpunten'],
+      // The seed makes up one match report that is klaar, so the three cards with its figures
+      // are there (#832): Alle spelers after the squad, Assists and Minuten after the rest.
+      [
+        '#selectie',
+        '#alle-spelers',
+        '#doelpuntenmakers',
+        '#alle-tijden',
+        '#bijzondere-doelpunten',
+        '#assists',
+        '#minuten',
+      ],
     )
+    assert.match(playersHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
+    assert.match(playersHtml, /Bron: eigen administratie/)
     // The made-up squad is whole: the sentence says so, the four positions are parts of the
     // card in the order of the goal to the front, and the shirt number comes before the name.
     const squadCard = /<section[^>]*aria-labelledby="selectie">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''

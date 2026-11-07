@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { tableColumns } from '../table-columns'
 import { TopScorersTable, type TopScorersTableRow } from './TopScorersTable'
 
 const rows: TopScorersTableRow[] = [
@@ -295,5 +296,18 @@ describe('TopScorersTable', () => {
       expect(container.textContent).not.toContain('0,17')
       expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('D doelpunten')
     })
+  })
+
+  it('has the letter and the word of the figure it is for in the header and the legend, instead of the goals', () => {
+    const { container } = render(<TopScorersTable {...props} figure={tableColumns.minutes} />)
+
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      '#plaats',
+      'Speler',
+      'Mminuten',
+    ])
+    expect(screen.getByRole('columnheader', { name: 'minuten' })).toBeTruthy()
+    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('M minuten')
+    expect(container.querySelector('abbr[title="Minuten"]')).toBeTruthy()
   })
 })

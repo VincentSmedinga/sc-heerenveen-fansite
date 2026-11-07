@@ -17,6 +17,7 @@ import {
   type NewMatch,
   persons,
   players,
+  playerSeasonStats,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -336,6 +337,44 @@ describe('saveReport', () => {
       status: 'not-played',
     })
     expect(await saveReport(database.db, userId, 999_999, checked(report()))).toEqual({ status: 'missing' })
+  })
+})
+
+describe('the goals of a report that is klaar against the squad table of Wikipedia', () => {
+  /** The table of Wikipedia says number 9 scored two goals and number 10 one. */
+  async function tableOfWikipedia() {
+    const nine = squad.find((player) => player.shirtNumber === 9)!
+    const ten = squad.find((player) => player.shirtNumber === 10)!
+
+    await database.db.insert(playerSeasonStats).values([
+      { appearances: 5, assists: 0, competition: 'Eredivisie', goals: 2, playerId: nine.id, season: '2026/27' },
+      { appearances: 5, assists: 0, competition: 'Eredivisie', goals: 1, playerId: ten.id, season: '2026/27' },
+    ])
+
+    return nine.id
+  }
+
+  it('writes a line in the log for a player whose goals differ, with the account of the editor, when the report is saved as klaar', async () => {
+    const nine = await tableOfWikipedia()
+
+    await save(report())
+
+    const lines = (await log()).filter((line) => line.action === 'player.stats-differ')
+
+    // The report has one goal for number 9, where the table has two; number 10 agrees.
+    expect(lines).toMatchObject([
+      { createdAt: t0, detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2', itemId: nine, userId },
+    ])
+  })
+
+  it('writes nothing about it for a report that is bezig, and nothing when a save changes nothing', async () => {
+    await tableOfWikipedia()
+    await save({ ...report(), status: 'bezig' })
+    expect((await log()).filter((line) => line.action === 'player.stats-differ')).toEqual([])
+
+    await save(report(), t1)
+    await save(report(), t1)
+    expect((await log()).filter((line) => line.action === 'player.stats-differ')).toHaveLength(1)
   })
 })
 
