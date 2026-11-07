@@ -678,10 +678,17 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
 export function MatchLines({
   matches,
   now,
+  reportAddresses,
   withCompetition = true,
 }: {
   matches: PublicMatch[]
   now: Date
+  /**
+   * The addresses of the pages of the matches that have one, by `<competition>|<round>` (see
+   * `getReportAddresses`). A line of a match in it ends with the link "Het verslag"; the others
+   * are plain text.
+   */
+  reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
 }) {
   return (
@@ -689,7 +696,12 @@ export function MatchLines({
       <List role="list">
         {matches.map((match) => (
           <List.Item key={`${match.competition}-${match.round}`}>
-            <MatchLine match={match} now={now} withCompetition={withCompetition} />
+            <MatchLine
+              match={match}
+              now={now}
+              reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
+              withCompetition={withCompetition}
+            />
           </List.Item>
         ))}
       </List>
@@ -1335,11 +1347,14 @@ export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
 export function MatchLine({
   match,
   now,
+  reportHref,
   withCompetition = true,
   withYear = false,
 }: {
   match: MatchLineMatch
   now: Date
+  /** The address of the page of the match, when it has one: the line then links to it. */
+  reportHref?: string | undefined
   withCompetition?: boolean
   withYear?: boolean
 }) {
@@ -1363,6 +1378,7 @@ export function MatchLine({
       goals: goalsWithInitials(match.goals),
       goalsAgainst: match.goalsAgainst,
       goalsFor: match.goalsFor,
+      ...(reportHref === undefined ? {} : { reportHref }),
       status: 'played',
     } as const
 

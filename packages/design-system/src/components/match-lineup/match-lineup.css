@@ -1,0 +1,32 @@
+/*
+ * The line-up of a team: its name as a heading, then the line-up and the bench as lists without
+ * bullets, a player to a line with the number in front of the name. The space between the parts
+ * is the gap of the section; a thin line separates the players.
+ */
+
+@layer hf.components {
+  .hf-match-lineup {
+    display: grid;
+    gap: var(--hf-space-s);
+    overflow-wrap: anywhere;
+  }
+
+  .hf-match-lineup-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-match-lineup-list > li {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    padding-block: var(--hf-space-xs);
+  }
+
+  .hf-match-lineup-list > li:first-child {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .hf-match-lineup-list > li:last-child {
+    padding-block-end: 0;
+  }
+}

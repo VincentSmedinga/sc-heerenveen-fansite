@@ -817,3 +817,50 @@ export const Cancelled = meta.story({
   name: 'Geannuleerd: twee wedstrijden die nooit zijn gespeeld, onder een gespeelde',
   render: renderCancelled,
 })
+
+// A match with a report has a page of its own, and its line ends with the link. The club and
+// the
+// address are made up.
+const renderWithReport = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-verslag-kop">
+      <Heading id="uitslagen-verslag-kop" level={2}>
+        Eredivisie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="2026-10-24"
+            goalsAgainst={0}
+            goalsFor={6}
+            home
+            opponent="Testdorp FC"
+            reportHref="#verslag"
+            round="Speelronde 1"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="za 24 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            dateTime="2026-10-17"
+            goalsAgainst={1}
+            goalsFor={1}
+            home={false}
+            opponent="Voorbeeld United"
+            round="Speelronde 2"
+            stadium="Voorbeeldpark"
+            status="played"
+            time="za 17 okt"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const WithReport = meta.story({
+  name: 'Met een pagina: de regel eindigt met de link naar het verslag, de andere regel heeft geen link',
+  render: renderWithReport,
+})

@@ -1,6 +1,7 @@
 import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { classNames } from '../classNames'
+import { Link } from '../link/Link'
 import { outcomeOf } from '../outcome'
 import { Text } from '../text/Text'
 import { Time } from '../time/Time'
@@ -48,6 +49,13 @@ export type MatchProps =
         goalsAgainst: number
         /** The goals of sc Heerenveen. */
         goalsFor: number
+        /**
+         * The address of the page of this match, when it has one: a page exists for a match
+         * with
+         * a report. The line then ends with the link "Het verslag". Leave it out for a match
+         * without a page, which is plain text.
+         */
+        reportHref?: string | undefined
         resultMissing?: never
         status: 'played'
       })
@@ -62,6 +70,7 @@ export type MatchProps =
       goalsFor?: never
       penaltiesAgainst?: never
       penaltiesFor?: never
+      reportHref?: never
       /**
        * Whether the match has begun, long enough ago to be over, and has no result yet. Instead
        * of a result it says "Gegevens nog niet beschikbaar", in a muted red, as the last
@@ -124,6 +133,7 @@ type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBasePr
   goalsFor?: never
   penaltiesAgainst?: never
   penaltiesFor?: never
+  reportHref?: never
   resultMissing?: never
   status: Status
   time?: never
@@ -170,8 +180,9 @@ const separator = (
 
 /**
  * A match of sc Heerenveen 1 as a line in a list: when and where, the two clubs with the result
- * between them, the scorers, and the competition and the round. It is plain text: a match has
- * no page of its own, so there is no link, and no club badge, only the names. match.css gives
+ * between them, the scorers, and the competition and the round. It is plain text, with no club
+ * badge, only the names. Only a match that has a page of its own (`reportHref`) ends with the
+ * link "Het verslag"; the others have no link. match.css gives
  * it its look, and draws the lines between the lines of a List.
  *
  * The order of the lines depends on `competition`. With it, as in Programma and on the
@@ -228,6 +239,7 @@ export const Match = ({
   opponent,
   penaltiesAgainst,
   penaltiesFor,
+  reportHref,
   resultMissing,
   round,
   stadium,
@@ -352,6 +364,14 @@ export const Match = ({
           {round}
         </Text>
       ) : null}
+      {reportHref === undefined ? null : (
+        <Text className="hf-match-report">
+          <Link href={reportHref} icon="arrow-right">
+            Het verslag
+            <span className="hf-visually-hidden">{` van ${first} tegen ${second}`}</span>
+          </Link>
+        </Text>
+      )}
       {resultMissing ? (
         <Text appearance="meta" className="hf-match-missing">
           Gegevens nog niet beschikbaar

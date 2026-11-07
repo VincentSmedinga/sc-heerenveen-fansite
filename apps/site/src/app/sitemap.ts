@@ -5,13 +5,15 @@ import { reasonOf } from '../errors'
 import { urlOf } from '../metadata'
 import { getClubRecords, opponentsPath } from '../opponents'
 import { pages } from '../pages'
+import { getAllReportAddresses } from '../report-data'
 
 // Reads SITE_ENV on every request, like robots.txt. Without this, Next.js builds sitemap.xml
 // once, with the variables of the build.
 export const dynamic = 'force-dynamic'
 
 /**
- * The pages of the site, the published articles and the page of each club we played, as
+ * The pages of the site, the published articles, the page of each club we played and the page
+ * of each match that has one, as
  * addresses and nothing else. Without the database the sitemap has the pages alone, and the log
  * says why: a search engine that finds no articles in it doesn't drop them, but a sitemap that
  * fails could be read as a site that is gone.
@@ -33,6 +35,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (error) {
     console.error(`Could not read the clubs for the sitemap: ${reasonOf(error)}`)
+  }
+
+  try {
+    for (const address of await getAllReportAddresses()) {
+      entries.push({ url: urlOf(address) })
+    }
+  } catch (error) {
+    console.error(`Could not read the match reports for the sitemap: ${reasonOf(error)}`)
   }
 
   return entries

@@ -286,6 +286,10 @@ De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [READM
 `getMatchData(season)` in `src/matches.ts` vraagt één seizoen en bewaart het antwoord vijf minuten voor het lopende seizoen en een uur voor een eerder seizoen; zonder seizoen geeft het het lopende (`seasonOf`), en dat doet de homepage altijd.
 Elk seizoen heeft één adres: `/wedstrijden` is het lopende seizoen en `/wedstrijden/2025-26` een eerder seizoen (`app/wedstrijden/[seizoen]`).
 Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, en een seizoen dat niet in de database staat, een seizoen in de toekomst en een adres dat geen seizoen is, geven "niet gevonden".
+Een wedstrijd met een verslag dat klaar is en klopt, heeft een pagina op `/wedstrijden/2026-27/2026-10-24-testdorp-fc`: het seizoen, de datum en de `slug` van de tegenstander (`app/wedstrijden/[seizoen]/[wedstrijd]`).
+`src/report-data.ts` leest die verslagen (`getPublicReports`, bewaard zoals de wedstrijden) en laat de regels van `@fansite/shared/match-report` er elk een keer over lopen; een verslag dat `bezig` is of niet klopt heeft geen pagina, geen link en geen plek in de sitemap.
+`src/report-view.ts` maakt er het verloop en de opstellingen van, in woorden, voor `MatchTimeline` en `MatchLineup`.
+De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`).
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).

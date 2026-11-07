@@ -786,6 +786,8 @@
 - **Later:** zie _De regel van een wedstrijd zegt niet "Thuis" of "Uit"_ en _De volgorde van de regels van een wedstrijd hangt af van de competitie_ (3 november 2026).
   De regel noemt "Thuis" en "Uit" niet meer, en de competitie en de ronde staan niet altijd bovenaan.
   De thuisclub staat nog eerst, de uitslag is nog "2–0" vanaf de thuiskant, en de aftrap is nog een `Time`.
+- **Later:** zie _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026).
+  Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -3088,3 +3090,32 @@
   De waarde van de homepage in `.github/lighthouse.json` gaat 5,3 KiB omlaag, van 151,8 naar 146,5 KiB.
 - **Alternatieven:** de standaard van Next.js houden (de meeste polyfills blijven niet door deze lijst maar door Next.js zelf); een lijst met een vaste grens zoals de laatste twee versies (een ander beleid dan we besloten); de themaknop, de navigatie en `PullToRefresh` omzetten naar servercomponenten of ze later laden (geeft hooguit 10 KiB, en verandert het gedrag of de toegankelijkheid van onderdelen die elke bezoeker gebruikt).
 - **Later:** dit vervangt het deel van _Alleen Baseline 'widely available', bewaakt door linters_ in `werkruimte.md` (21 oktober 2026) dat een `browserslist` verwerpt.
+
+## De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt
+
+- **Datum:** 7 november 2026
+- **Besluit:** het adres heeft altijd het seizoen, ook voor het lopende seizoen, en de datum van de wedstrijd en de `slug` van de tegenstander, zoals `/wedstrijden/2026-27/2026-11-01-fc-twente` (#831).
+  De pagina bestaat als het verslag de status `klaar` heeft en de regels van `@fansite/shared/match-report` geen fout geven.
+  In elk ander geval is het adres "niet gevonden".
+  De regel van een wedstrijd op Wedstrijden is alleen een link als de pagina bestaat.
+- **Waarom:** een wedstrijd zonder verslag heeft niets te melden dat Wedstrijden niet al zegt, en een pagina die half klopt is erger dan geen pagina.
+  Datum en club blijven leesbaar in een adres en botsen niet met `/wedstrijden/<seizoen>`.
+- **Alternatieven:** het nummer van de wedstrijd in het adres (niet te lezen en niet te raden); een pagina voor elke gespeelde wedstrijd (dat zijn er honderden die leeg zouden zijn).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Wat de pagina controleert:** `getPublicReports` leest de verslagen van een seizoen met status `klaar` en laat de regels over elk verslag lopen.
+    Een verslag dat sinds het opslaan niet meer klopt, bijvoorbeeld omdat de import de uitslag veranderde, heeft geen pagina en geen link, en staat niet in de sitemap.
+    De lezingen worden net als de wedstrijden bewaard: vijf minuten voor het lopende seizoen, een uur voor een seizoen dat voorbij is.
+  - **De link:** de regel krijgt de link "Het verslag", met de clubs in de verborgen tekst, als laatste regel van de wedstrijd (`Match` heeft daarvoor `reportHref`).
+    De sleutel is de competitie met de ronde, want dat is één wedstrijd in een seizoen.
+    De scheidsrechter en het aantal toeschouwers staan nog steeds niet in de regel (#416).
+  - **De onderdelen:** het ontwerpsysteem krijgt `MatchHeader` (de clubs met de uitslag en de feiten), `MatchTimeline` (het verloop) en `MatchLineup` (de opstelling van één team).
+    Ze nemen gewone gegevens en schrijven alles in woorden: de naam van de gebeurtenis ("Gele kaart", "Doelpunt uit een strafschop", "Wissel"), de minuut voor een schermlezer ("Minuut 45 plus 2") en wat een speler overkwam in een zin.
+    Een kleur of een teken is nergens het enige teken.
+  - **Een eigen doelpunt** heeft in het verloop het team van de speler die het maakte, zodat de regel zegt wiens speler het was; de uitslag telt het voor het andere team.
+  - **De wissels bij de speler:** wie eruit gaat heeft "Gewisseld in de 61e minuut, vervangen door Jansen" en wie erin komt "Ingevallen in de 61e minuut voor Jansen".
+    Het issue gaf "Gewisseld in de 61e minuut voor Jansen" als voorbeeld, maar die zin kan twee kanten op.
+  - **De naam van een speler van ons** komt uit de persoon (voornaam en achternaam) of, zonder persoon, uit de zoekterm van de speler als achternaam.
+    Een speler van de tegenstander is één naam in het gewone gewicht: we raden de delen niet.
+  - **De tegenstander die niet af is** (`opponent_complete` uit) heeft in plaats van een opstelling één zin: "De opstelling van <club> hebben we niet."
+    Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
+  - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.

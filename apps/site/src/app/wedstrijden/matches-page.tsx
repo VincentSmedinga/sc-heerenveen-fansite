@@ -27,6 +27,7 @@ import {
   standingsCaption,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { getReportAddresses } from '#src/report-data'
 import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -108,6 +109,8 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const coachesCard = coachesCardOf(data.coaches.length)
   // Our place in every season: the same on every page, so it does not depend on `season`.
   const finalPlaces = await finalPlacesOfAllSeasons()
+  // The matches that have a page of their own: their line links to it.
+  const reportAddresses = await reportAddressesOf(season)
   // The cards with figures are on the statistics page of the same season.
   const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
 
@@ -153,7 +156,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                 <Heading anchor id={id} level={2}>
                   {name}
                 </Heading>
-                <MatchLines matches={matches} now={now} withCompetition={false} />
+                <MatchLines matches={matches} now={now} reportAddresses={reportAddresses} withCompetition={false} />
                 {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
               </Card>
             )
@@ -241,6 +244,22 @@ async function lastFiveOfSeason(data: MatchData) {
     return lastFiveOf(data.matches, await getLeagueResults(data.season), data.standings)
   } catch (error) {
     console.error(`Could not read the league results for ${matchesPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The addresses of the pages of the matches of a season, for the links in the results. A page
+ * is
+ * more than a link: when they can't be read, the results are shown without links and the error
+ * is logged.
+ */
+async function reportAddressesOf(season: string) {
+  try {
+    return await getReportAddresses(season)
+  } catch (error) {
+    console.error(`Could not read the match reports for ${matchesPath}: ${reasonOf(error)}`)
 
     return undefined
   }
