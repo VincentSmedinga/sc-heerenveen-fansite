@@ -189,7 +189,7 @@ export function readPastedReport(
     const found = /^(\d{1,2})(?:\s+(.+))?$/u.exec(entry.text.replace(/\s+\(a\)$/iu, ''))
 
     if (found === null) {
-      miss(entry, 'Begin met het rugnummer, zoals `4 Van Aken` of `4 Van Aken (a)`.')
+      miss(entry, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)".')
 
       continue
     }
@@ -340,7 +340,7 @@ export function readPastedReport(
     const found = eventLine.exec(entry.text)
 
     if (found === null) {
-      miss(entry, 'Begin met de minuut, zoals `34 geel Jansen` of `90+2 Smit voor Jansen`.')
+      miss(entry, 'Begin met de minuut, zoals "34 geel Jansen" of "90+2 Smit voor Jansen".')
 
       continue
     }
@@ -356,7 +356,7 @@ export function readPastedReport(
       const parts = /^(.+?)\s+voor\s+(.+)$/iu.exec(rest)
 
       if (parts === null) {
-        miss(entry, 'Schrijf een wissel als `61 12 voor 8`: wie erin komt, en voor wie.')
+        miss(entry, 'Schrijf een wissel als "61 12 voor 8": wie erin komt, en voor wie.')
 
         continue
       }
@@ -376,7 +376,7 @@ export function readPastedReport(
       const parts = /^(geel-rood|geel|rood)\s+(.+)$/iu.exec(rest)
 
       if (parts === null) {
-        miss(entry, 'Schrijf een kaart als `34 geel Jansen`: geel, geel-rood of rood, en de speler.')
+        miss(entry, 'Schrijf een kaart als "34 geel Jansen": geel, geel-rood of rood, en de speler.')
 
         continue
       }
@@ -395,7 +395,7 @@ export function readPastedReport(
       const parts = /^(gemist|gestopt)\s+(.+)$/iu.exec(rest)
 
       if (parts === null) {
-        miss(entry, 'Schrijf een strafschop als `55 gemist Jansen`: gemist of gestopt, en de nemer.')
+        miss(entry, 'Schrijf een strafschop als "55 gemist Jansen": gemist of gestopt, en de nemer.')
 
         continue
       }
@@ -435,7 +435,7 @@ export function readPastedReport(
       const scorerName = scorerText.trim()
 
       if (scorerName === '') {
-        miss(entry, 'Schrijf een doelpunt als `23 Smit` met `assist Jansen`, `penalty` of `eigen doelpunt` erachter.')
+        miss(entry, 'Schrijf een doelpunt als "23 Smit" met "assist Jansen", "penalty" of "eigen doelpunt" erachter.')
 
         continue
       }

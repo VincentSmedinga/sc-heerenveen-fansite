@@ -203,7 +203,7 @@ describe('a line that is not a player', () => {
     const result = read(`Opstelling\nVan Aken\n0 Nul\n5 ${'x'.repeat(101)}`)
 
     expect(result.unread.map((line) => [line.line, line.reason])).toEqual([
-      [2, 'Begin met het rugnummer, zoals `4 Van Aken` of `4 Van Aken (a)`.'],
+      [2, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)".'],
       [3, 'Een rugnummer is een getal van 1 tot en met 99.'],
       [4, 'Een naam heeft hoogstens 100 tekens.'],
     ])
