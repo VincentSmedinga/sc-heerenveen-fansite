@@ -2738,7 +2738,7 @@
   - **De draaiing:** alle pictogrammen staan 12 graden met de klok mee gedraaid, zoals in het ontwerp.
   - **De maten:** een maat bij gewone tekst en een grotere voor de strafschoppenserie (#848).
     Ze volgen de tekst, want de maat is in `em`.
-  - **De contrasten:** de rand in de tekstkleur geeft de vorm 3:1 tegen elk vlak in licht en in donker; de gele vulling alleen haalt dat niet (1,6:1 op wit).
+  - **De contrasten:** de rand in de tekstkleur geeft de vorm 3:1 tegen elk vlak in licht en in donker; de gele vulling alleen haalt dat niet (1,7:1 op wit).
 - **Waarom:** kleur mag nooit het enige verschil zijn (WCAG 1.4.1), en een pagina met vijf soorten gebeurtenissen naast elkaar wordt anders alleen een rij gekleurde stippen.
 - **Alternatieven:** een gekleurde stip per soort (kleur is dan het enige onderscheid).
 
