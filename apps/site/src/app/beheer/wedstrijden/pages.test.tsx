@@ -20,6 +20,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createAccount } from '#src/beheer/accounts'
 import { saveEntry } from '#src/beheer/match-entries'
+import { saveReport } from '#src/beheer/match-reports'
+import { report as reportOf, squadOf } from '#src/beheer/report-fixtures'
+import { checkReportForm } from '#src/beheer/report-form'
 
 import MatchPage, { metadata as matchMetadata } from './[id]/page'
 import MatchesPage, { metadata as listMetadata } from './page'
@@ -164,7 +167,7 @@ describe('the list', () => {
     expect(html).toContain('Speelronde 11')
   })
 
-  it('is a table of five columns, where the date and the competition fold under the match on a phone', async () => {
+  it('is a table of six columns, where the date, the competition and the report fold under the match on a phone', async () => {
     await addMatch()
 
     const html = await list()
@@ -172,7 +175,7 @@ describe('the list', () => {
     expect(html).toContain('<div class="hf-data-table-fold">')
     expect(
       [...html.matchAll(/<th class="hf-data-table-fold-column" scope="col">(.*?)<\/th>/g)].map(([, name]) => name),
-    ).toEqual(['Datum', 'Competitie'])
+    ).toEqual(['Datum', 'Competitie', 'Verslag'])
     expect(html).toContain('<span class="hf-data-table-secondary hf-data-table-folded">')
     expect(html).toContain('Eredivisie, Speelronde 11')
     expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
@@ -963,5 +966,86 @@ describe('the match', () => {
   it('is not there for a match that does not exist, or a number that is not one', async () => {
     await expect(form(99_999)).rejects.toThrow('not found')
     await expect(form('abc')).rejects.toThrow('not found')
+  })
+})
+
+describe('the report in the list and on the match', () => {
+  /** A match that was played 2-1, with a squad and a report of this status. */
+  async function withReport(status: 'bezig' | 'klaar') {
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    await database.db.insert(players).values(
+      squadOf(1).map((player) => ({
+        name: player.name,
+        searchTerm: player.name,
+        season,
+        shirtNumber: player.shirtNumber,
+      })),
+    )
+
+    const squad = (await database.db.select().from(players)).map((player) => ({
+      id: player.id,
+      name: player.name,
+      shirtNumber: player.shirtNumber,
+    }))
+    const checked = checkReportForm(reportOf(squad), {
+      match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' },
+      squad,
+    })
+
+    await saveReport(database.db, userId, id, { ...checked.plan!, status })
+
+    return id
+  }
+
+  it('has a column Verslag: empty with a link to fill it in, and a dash for a match that was not played', async () => {
+    await addMatch(playedAway)
+    await addMatch()
+
+    const html = await list({ tonen: 'alles' })
+
+    expect(html).toContain('scope="col">Verslag</th>')
+    expect(html).toMatch(/Leeg <a [^>]*href="\/beheer\/wedstrijden\/\d+\/verslag"[^>]*>Invullen/u)
+    expect(html).toContain('Geen verslag: de wedstrijd is niet gespeeld')
+    // The link names the match, since a column of links says the same in every row.
+    expect(html).toContain('verslag van FC Twente - sc Heerenveen')
+  })
+
+  it('says in words if the report is bezig, klaar or has to be checked', async () => {
+    const id = await withReport('klaar')
+
+    expect(await list({ tonen: 'alles' })).toMatch(
+      /Klaar <a [^>]*href="\/beheer\/wedstrijden\/\d+\/verslag"[^>]*>Openen/u,
+    )
+
+    await database.db.update(matches).set({ goalsFor: 3 }).where(eq(matches.id, id))
+    expect(await list({ tonen: 'alles' })).toContain('hf-tag-attention">Controleer</span>')
+
+    await database.db.update(matches).set({ goalsFor: 2 }).where(eq(matches.id, id))
+    await database.pool.query("UPDATE match_reports SET status = 'bezig'")
+    expect(await list({ tonen: 'alles' })).toMatch(/Bezig <a [^>]*>Openen/u)
+  })
+
+  it('links the match to its report, and shows the goals of a match with a report without fields', async () => {
+    const id = await withReport('klaar')
+    const html = await form(id)
+
+    expect(html).toContain(`href="/beheer/wedstrijden/${id}/verslag">Naar het verslag</a>`)
+    expect(html).toContain('De doelpunten van deze wedstrijd staan in het verslag.')
+    expect(html).toContain('12&#x27; Speler 9')
+    expect(html).not.toContain('doelpunt-1-minuut')
+    expect(html).not.toContain('value="doelpunt-toevoegen"')
+    // The rest of the form is there.
+    expect(html).toContain('id="aftrap-datum"')
+    expect(html).toContain('id="uitslag-wij"')
+  })
+
+  it('links a match that was played to its report when it has none, and a match that was not played has no link', async () => {
+    const played = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    const planned = await addMatch({ round: 'Speelronde 12' })
+
+    expect(await form(played)).toContain(`href="/beheer/wedstrijden/${played}/verslag">Het verslag invullen</a>`)
+    expect(await form(played)).toContain('value="doelpunt-toevoegen"')
+    expect(await form(planned)).not.toContain('/verslag')
   })
 })

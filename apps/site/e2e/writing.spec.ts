@@ -2,7 +2,8 @@ import { expect, type Page, test } from '@playwright/test'
 
 import { adminCookie } from './admin'
 import { checkPage } from './check-page'
-import { matchId } from './matches'
+import { earlierSeasonSlug } from './earlier-season'
+import { matchId, playedMatchId } from './matches'
 
 // Writes an article in the admin from start to end, with the editor, as the beheerder of the
 // global setup: a draft that errors can't lose, the preview, publishing, saving a change, and
@@ -391,6 +392,89 @@ for (const [name, javaScriptEnabled] of [
       await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Invoer weggehaald.' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
+    })
+  })
+}
+
+for (const [name, javaScriptEnabled] of [
+  ['with JavaScript', true],
+  ['without JavaScript', false],
+] as const) {
+  test.describe(`a match report ${name}`, () => {
+    test.use({ javaScriptEnabled })
+
+    test(`is filled in, saved as bezig and taken away ${name}`, async ({ page }) => {
+      const address = `/beheer/wedstrijden/${await playedMatchId()}/verslag`
+
+      await page.goto(address)
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Verslag: ')
+      await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Gegevens' })).toBeVisible()
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
+
+      // The source says in one sentence what belongs in it.
+      await expect(page.getByText('nooit tekst van een verslag', { exact: false })).toBeVisible()
+      await page.getByLabel('Bron', { exact: true }).fill('wedstrijdformulier')
+
+      // A player of the opponent: the button adds a row, with the focus on its first field.
+      await page.locator('button[value="speler-zij-toevoegen"]').click()
+      await expect(page.locator('#speler-zij-1-rugnummer')).toHaveCount(1)
+
+      if (javaScriptEnabled) {
+        await expect(page.locator('#speler-zij-1-rugnummer')).toBeFocused()
+      }
+
+      // A number without a name: the error is in the summary and at the field, the summary has
+      // the focus, and what was typed is still there.
+      await page.getByLabel('Rugnummer, speler 1', { exact: true }).last().fill('5')
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page.locator('#fouten')).toBeVisible()
+      await expect(page.locator('#speler-zij-1-naam-error')).toBeVisible()
+      await expect(page.getByLabel('Naam, speler 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+      await expect(page.getByLabel('Bron', { exact: true })).toHaveValue('wedstrijdformulier')
+
+      if (javaScriptEnabled) {
+        await expect(page.locator('#fouten')).toBeFocused()
+      }
+
+      // With the name, the report is saved as bezig. The rules still find the line-up of sc
+      // Heerenveen short, which the page says.
+      await page.getByLabel('Naam, speler 1', { exact: true }).fill('Verzonnen Tegenstander')
+      if (javaScriptEnabled) {
+        // The form with a row in it, which the checks of all the pages never open.
+        expect(await checkPage(page)).toEqual([])
+      }
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page).toHaveURL(/\/verslag\?gedaan=opgeslagen$/u)
+      await expect(page.getByRole('status').filter({ hasText: 'Opgeslagen.' })).toBeVisible()
+      await expect(page.getByLabel('Naam, speler 1', { exact: true })).toHaveValue('Verzonnen Tegenstander')
+      await expect(page.getByRole('heading', { name: 'Dit is nog niet af' })).toBeVisible()
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toBeVisible()
+
+      // "Klaar" does not work yet: the report stays bezig, and says why.
+      await page.getByLabel('Status', { exact: true }).selectOption('klaar')
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page).toHaveURL(/\/verslag\?gedaan=nog-niet-klaar$/u)
+      await expect(page.getByRole('status').filter({ hasText: 'Bewaard als bezig.' })).toBeVisible()
+
+      // The list says so in words, with a link to the report.
+      await page.goto(`/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`)
+      await expect(page.locator(`a[href="${address}"]`).first()).toContainText('Openen')
+
+      // A row that is taken away is gone: the form does not make a new row for it.
+      await page.goto(address)
+      await page.getByRole('button', { name: 'Speler 1 weghalen' }).last().click()
+      await expect(page.locator('#speler-zij-1-naam')).toHaveCount(0)
+
+      // Taking the report away asks for a reason, and brings the goals back.
+      await page.goto(address)
+      await page.locator('summary', { hasText: 'Verslag weghalen' }).click()
+      await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
+      await expect(page.locator('#verslag-weghalen-reden')).toHaveAttribute('aria-invalid', 'true')
+      await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
+      await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
+      await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
+      await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
     })
   })
 }

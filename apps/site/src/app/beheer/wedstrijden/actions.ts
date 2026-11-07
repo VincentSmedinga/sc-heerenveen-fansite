@@ -10,6 +10,7 @@ import {
   findHeldChange,
   findMatch,
   saveEntry,
+  storedEntryGoals,
   undoEntry,
 } from '#src/beheer/match-entries'
 import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '#src/beheer/match-fields'
@@ -159,7 +160,8 @@ export async function submitMatch(
     redirect(`${matchesPath}?fout=weg`)
   }
 
-  const values = readValues(formData)
+  // The goals of a match with a report are the report's: the form shows them, and sends none.
+  const values = found.hasReport ? { ...readValues(formData), doelpunten: [] } : readValues(formData)
   const button = readButton(formData)
 
   if (button.kind === 'add') {
@@ -191,10 +193,18 @@ export async function submitMatch(
 
   if (checked.errors !== undefined) {
     // The form comes back with as many goals as the result asks for, as the page opens.
-    return { errors: checked.errors, values: padGoals(given) }
+    return { errors: checked.errors, values: found.hasReport ? given : padGoals(given) }
+  }
+  if (found.hasReport && checked.entry.result.status !== 'played') {
+    return {
+      errors: { status: 'Een wedstrijd met een verslag blijft gespeeld. Haal eerst het verslag weg.' },
+      values: given,
+    }
   }
 
-  const outcome = await saveEntry(getDatabase().db, userId, id, checked.entry, checked.reason)
+  // The goals stay what the report made them.
+  const entry = found.hasReport ? { ...checked.entry, goals: storedEntryGoals(found.goals) } : checked.entry
+  const outcome = await saveEntry(getDatabase().db, userId, id, entry, checked.reason)
 
   redirect(
     outcome.status === 'missing'

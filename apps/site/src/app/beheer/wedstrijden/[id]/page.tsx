@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
-import { describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
+import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
 import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -20,7 +20,7 @@ import { submitConflict, submitHeldChange, submitMatch, submitRemoveEntry } from
 import { ConflictForm } from '../ConflictForm'
 import { HeldChangeForm } from '../HeldChangeForm'
 import { MatchErrorSummary, MatchFields, MatchFormProvider, MatchSavePanel } from '../MatchForm'
-import { matchesPath } from '../paths'
+import { matchesPath, reportPath } from '../paths'
 import { RemoveEntryForm } from '../RemoveEntryForm'
 
 // Render on each request: the match changes with every entry and every import.
@@ -81,7 +81,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { differences, edit, goals, held, match, pages, squad } = found
+  const { differences, edit, goals, hasReport, held, match, pages, squad } = found
   const { gedaan } = await searchParams
   const showDelay = describeShowDelay(match.season)
   const notice =
@@ -109,11 +109,14 @@ export default async function MatchPage({ params, searchParams }: Props) {
         home: match.home,
         knockout: match.competition !== 'Eredivisie',
         opponent: match.opponent,
+        report: hasReport
+          ? { goals: goals.map((goal) => describeEntryGoals([goal])), href: reportPath(match.id) }
+          : undefined,
         showDelay,
         squad,
         statuses: statusChoices,
       }}
-      initial={valuesOf(match, goals)}
+      initial={hasReport ? { ...valuesOf(match, []), doelpunten: [] } : valuesOf(match, goals)}
       key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
     >
       <Page.Main
@@ -132,6 +135,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
             <Text appearance="meta">
               {match.competition}, {match.round} · {describeEntryKickoff(match)}
             </Text>
+            {match.status === 'played' ? (
+              <Text>
+                <Link href={reportPath(match.id)}>{hasReport ? 'Naar het verslag' : 'Het verslag invullen'}</Link>
+              </Text>
+            ) : null}
             {edit === undefined && !lacking ? null : (
               <Text>
                 {edit === undefined ? null : <Tag tone="highlight">{`Aangepast: ${parts}`}</Tag>}{' '}

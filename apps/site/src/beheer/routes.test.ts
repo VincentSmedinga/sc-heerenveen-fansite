@@ -96,6 +96,17 @@ describe('the admin', () => {
     expect(routes).toContain('app/beheer/bezoek/page.tsx')
     // The articles: the actions that write them and the pages that show a draft.
     expect(actionFiles).toContain('app/beheer/artikelen/actions.ts')
+    // The matches and the report of a match: the actions that write them and the screens.
+    expect(actionFiles).toEqual(
+      expect.arrayContaining(['app/beheer/wedstrijden/actions.ts', 'app/beheer/wedstrijden/[id]/verslag/actions.ts']),
+    )
+    expect(routes).toEqual(
+      expect.arrayContaining([
+        'app/beheer/wedstrijden/[id]/page.tsx',
+        'app/beheer/wedstrijden/[id]/verslag/page.tsx',
+        'app/beheer/wedstrijden/page.tsx',
+      ]),
+    )
     expect(routes).toEqual(
       expect.arrayContaining([
         'app/beheer/artikelen/page.tsx',

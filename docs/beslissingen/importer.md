@@ -1371,6 +1371,7 @@
 - **Later:** zie _Wikipedia houdt de uitslag, het verslag houdt de rest_ in `hosting-en-data.md`: de doelpunten van een wedstrijd met een verslag zijn die van het verslag, en `match_goals` heeft daarvoor de kolommen `appearance_id` en `assist_appearance_id`.
   De markering `goals_edited` en de rest van deze beslissing blijven zoals ze zijn.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
+- **Later:** zie _De doelpunten van een wedstrijd met een verslag bewerk je alleen in het verslag_ in `site.md` (7 november 2026): een verslag van #829 zet ook `goals_edited`, en de import houdt dan de doelpunten met hun spelers (`appearance_id`) vast.
 
 ## Bij een verschil blijft de invoer staan en schrijft de import het op
 

@@ -23,3 +23,8 @@ export function listPath(season?: string, show?: string) {
 export function matchPath(id: number, done?: string) {
   return done === undefined ? `${matchesPath}/${id}` : `${matchesPath}/${id}?gedaan=${done}`
 }
+
+/** The address of the report screen of a match, with what the last action left to say. */
+export function reportPath(id: number, done?: string) {
+  return done === undefined ? `${matchesPath}/${id}/verslag` : `${matchesPath}/${id}/verslag?gedaan=${done}`
+}

@@ -12,6 +12,7 @@ import {
   InputTable,
   type InputTableRow,
   Link,
+  List,
   RadioGroup,
   Select,
   Text,
@@ -50,6 +51,11 @@ export type MatchFormChoices = {
   /** Whether the competition has extra time: the cup and the play-offs. */
   knockout: boolean
   opponent: string
+  /**
+   * The match has a report, and the goals are the report's: the form shows them in words with a
+   * link to the report, and has no fields for them.
+   */
+  report?: undefined | { goals: readonly string[]; href: string }
   /** How soon what is saved shows on the site, as "binnen vijf minuten". */
   showDelay: string
   squad: readonly { id: number; name: string }[]
@@ -135,6 +141,10 @@ export function MatchFields() {
   // The form tells how many goals it has and who scored, from what is in it now. The goals only
   // change with the end result: a goal that was added with the button stays.
   const follow = (event: ChangeEvent<HTMLFormElement>) => {
+    if (choices.report !== undefined) {
+      return
+    }
+
     const { elements } = event.currentTarget
     const read = (name: string) => {
       const element = elements.namedItem(name)
@@ -347,42 +357,66 @@ export function MatchFields() {
           </FieldGroup>
         </Card>
       ) : null}
-      <Card aria-labelledby="doelpunten">
-        <Heading id="doelpunten" level={2} tabIndex={-1}>
-          Doelpunten
-        </Heading>
-        <Text appearance="meta">
-          Team is het team dat het doelpunt krijgt, ook bij een eigen doelpunt. Bij 45+1 vul je 45 in als minuut en 1
-          bij blessuretijd. Schrijf de naam van een speler van de tegenstander zoals Wikipedia hem schrijft.
-        </Text>
-        {/* The goals change by themselves with the end result, so a screen reader is told. */}
-        <Text className="hf-visually-hidden" role="status">
-          {current === undefined || current.count === values.doelpunten.length ? '' : describeCount(current.count)}
-        </Text>
-        {errors.doelpunten === undefined ? null : (
-          <Text className="hf-field-error">
-            <Text as="span" className="hf-visually-hidden">
-              Fout:
-            </Text>{' '}
-            {errors.doelpunten}
+      {choices.report === undefined ? null : (
+        <Card aria-labelledby="doelpunten">
+          <Heading id="doelpunten" level={2} tabIndex={-1}>
+            Doelpunten
+          </Heading>
+          <Text>
+            De doelpunten van deze wedstrijd staan in het verslag. Pas ze daar aan:{' '}
+            <Link href={choices.report.href}>naar het verslag</Link>.
           </Text>
-        )}
-        <InputTable
-          add={{ label: 'Doelpunt toevoegen', name: 'knop', value: 'doelpunt-toevoegen' }}
-          caption="Doelpunten"
-          columns={[
-            { name: 'Minuut', width: 'narrow' },
-            { hideOptional: true, name: 'Blessuretijd', required: false, width: 'narrow' },
-            { name: 'Soort', width: 'natural' },
-            { line: 2, name: 'Team', width: 'natural' },
-            { line: 2, name: 'Speler' },
-            { line: 2, name: 'Andere speler' },
-          ]}
-          empty={<Text>Er zijn geen doelpunten. Dat mag, ook bij een uitslag.</Text>}
-          removeLabel="Weghalen"
-          rows={rows}
-        />
-      </Card>
+          {choices.report.goals.length === 0 ? (
+            <Text>Er zijn geen doelpunten.</Text>
+          ) : (
+            <List role="list">
+              {choices.report.goals.map((goal) => (
+                <List.Item key={goal}>
+                  <Text>{goal}</Text>
+                </List.Item>
+              ))}
+            </List>
+          )}
+        </Card>
+      )}
+      {choices.report !== undefined ? null : (
+        <Card aria-labelledby="doelpunten">
+          <Heading id="doelpunten" level={2} tabIndex={-1}>
+            Doelpunten
+          </Heading>
+          <Text appearance="meta">
+            Team is het team dat het doelpunt krijgt, ook bij een eigen doelpunt. Bij 45+1 vul je 45 in als minuut en 1
+            bij blessuretijd. Schrijf de naam van een speler van de tegenstander zoals Wikipedia hem schrijft.
+          </Text>
+          {/* The end result changes the goals by itself, so a screen reader is told. */}
+          <Text className="hf-visually-hidden" role="status">
+            {current === undefined || current.count === values.doelpunten.length ? '' : describeCount(current.count)}
+          </Text>
+          {errors.doelpunten === undefined ? null : (
+            <Text className="hf-field-error">
+              <Text as="span" className="hf-visually-hidden">
+                Fout:
+              </Text>{' '}
+              {errors.doelpunten}
+            </Text>
+          )}
+          <InputTable
+            add={{ label: 'Doelpunt toevoegen', name: 'knop', value: 'doelpunt-toevoegen' }}
+            caption="Doelpunten"
+            columns={[
+              { name: 'Minuut', width: 'narrow' },
+              { hideOptional: true, name: 'Blessuretijd', required: false, width: 'narrow' },
+              { name: 'Soort', width: 'natural' },
+              { line: 2, name: 'Team', width: 'natural' },
+              { line: 2, name: 'Speler' },
+              { line: 2, name: 'Andere speler' },
+            ]}
+            empty={<Text>Er zijn geen doelpunten. Dat mag, ook bij een uitslag.</Text>}
+            removeLabel="Weghalen"
+            rows={rows}
+          />
+        </Card>
+      )}
     </Form>
   )
 }

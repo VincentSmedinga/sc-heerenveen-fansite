@@ -108,6 +108,36 @@ Alleen een beheerder ziet deze schermen en kan beslissen.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` laat de wedstrijd staan.
 
+## Het verslag invullen
+
+Van een gespeelde wedstrijd kun je ook het verslag invullen: wie speelde, wie er inviel, de doelpunten met wie de assist gaf, de kaarten en de gemiste strafschoppen.
+Open de wedstrijd en kies "Het verslag invullen", of kies "Invullen" in de kolom Verslag van de lijst.
+Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
+
+1. Schrijf bij Bron de naam van wat je overtypt, zoals "wedstrijdformulier" of "uitzending".
+   Schrijf nooit een tekst van een verslag, en neem geen hele tabellen over van een site met statistieken.
+2. Kies voor sc Heerenveen de spelers uit de selectie, of kies "Andere speler" en schrijf zijn naam.
+   Laat het rugnummer leeg als het hetzelfde is als in de selectie.
+3. Vul de wissels, de doelpunten, de kaarten en de gemiste strafschoppen in.
+   Bij 45+1 schrijf je 45 als minuut en 1 bij blessuretijd.
+4. Is de kant van de tegenstander ook af, kies dan bij "Is de kant van de tegenstander ook af?" voor Ja.
+   Dan tellen elf spelers, de bank en wie scoorde ook voor hem mee.
+5. Kies "Opslaan".
+
+Je kunt een verslag in meerdere keren invullen.
+Zolang de status "Bezig" is, mag er nog iets ontbreken.
+Kies "Klaar" als alles erin staat.
+Dat lukt alleen als de regels niets vinden: elf spelers in de opstelling, een wissel van iemand die op het veld staat, doelpunten die samen de uitslag geven, en zo verder.
+Vinden de regels nog iets, dan bewaart het scherm je gegevens als "Bezig" en zegt bij het veld wat er mis is.
+
+Verandert de uitslag daarna, bijvoorbeeld omdat Wikipedia hem verbetert, dan blijft het verslag staan en zegt de lijst "Controleer" bij de wedstrijd.
+Het scherm laat zien wat niet meer klopt.
+
+De doelpunten van een wedstrijd met een verslag pas je alleen in het verslag aan.
+Het formulier van de wedstrijd laat ze dan zien, met een link naar het verslag.
+
+"Verslag weghalen" (in de zijbalk, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
+
 ## Invoer weghalen
 
 Op de pagina van een wedstrijd met een invoer staat naast het formulier, onder "Laatste invoer", een blok "Invoer weghalen".
@@ -115,6 +145,9 @@ Klap het open, schrijf een reden en kies de rode knop.
 Dat zet wat jij invulde terug naar wat er stond voor de eerste invoer.
 Daarna leest de import weer wat Wikipedia zegt, zoals bij elke andere wedstrijd.
 Een afwijking die nog wachtte, vervalt.
+
+Heeft de wedstrijd een verslag, dan blijven de doelpunten staan: ze horen bij het verslag.
+Die haal je weg met "Verslag weghalen".
 
 Een onderdeel dat Wikipedia al had overgenomen, blijft zoals het is.
 
