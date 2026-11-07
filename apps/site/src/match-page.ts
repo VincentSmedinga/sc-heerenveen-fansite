@@ -26,9 +26,10 @@ export type BuiltMatchPage = {
   /** The goals of the score bar. */
   scoreBar: MatchScoreBarGoal[]
   /**
-   * Whether the goals of the report add up to the result of the match. A report that is not
-   * complete may have fewer goals than the result, and a bar that says 0–0 over a match that
-   * ended 2–0 would say something false: the page leaves it out then.
+   * Whether the bar may be shown: the report is complete, or its goals add up to the result of
+   * the match. A report that is not complete may have fewer goals than the result, and a bar
+   * that says 0–0 over a match that ended 2–0 would say something false: the page leaves it out
+   * then.
    */
   scoreBarAgrees: boolean
   scorersAgainst: MatchHeaderScorer[]
@@ -353,9 +354,12 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
       ours: { formation: data.formations.ours, name: ourClub, players: ours.starters },
     },
     scoreBar,
+    // A report that is complete passed the rules, which let a goal of an opponent without a
+    // line-up have no player: its bar is the bar of the goals it has.
     scoreBarAgrees:
-      scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
-      scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst,
+      data.complete ||
+      (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+        scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst),
     scorersAgainst: scorersOf(data, byId, false),
     scorersFor: scorersOf(data, byId, true),
     series: roundsOf(data, byId),

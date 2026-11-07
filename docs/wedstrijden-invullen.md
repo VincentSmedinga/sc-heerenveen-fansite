@@ -141,6 +141,7 @@ De formatie komt op de pagina van de wedstrijd bij de naam van het team, en staa
 
 Je kunt een verslag in meerdere keren invullen.
 Zolang de status "Bezig" is, mag er nog iets ontbreken.
+Het verslag staat dan al op de pagina van de wedstrijd, binnen vijf minuten, met de melding "We vullen dit verslag nog in", en Wedstrijden en Uitslagen linken ernaar.
 Kies "Klaar" als alles erin staat.
 Dat lukt alleen als de regels niets vinden: elf spelers in de opstelling, een wissel van iemand die op het veld staat, doelpunten die samen de uitslag geven, en zo verder.
 Vinden de regels nog iets, dan bewaart het scherm je gegevens als "Bezig" en zegt bij het veld wat er mis is.

@@ -274,9 +274,21 @@ describe('the score bar and the result', () => {
     expect(built().scoreBarAgrees).toBe(true)
   })
 
+  it('have a bar for a report that is complete, also with a goal of the opponent without a player', () => {
+    const changed = data()
+
+    // The rules let a complete report have a goal of an opponent whose line-up is not known:
+    // it has no player, so it is not in the goals of the page.
+    changed.goals = changed.goals.filter((goal) => goal.ours)
+
+    expect(changed.complete).toBe(true)
+    expect(buildMatchPage(changed).scoreBarAgrees).toBe(true)
+  })
+
   it('do not agree when the report has fewer goals than the result, such as a report still being filled in', () => {
     const changed = data()
 
+    changed.complete = false
     changed.goals = changed.goals.slice(0, 1)
 
     expect(buildMatchPage(changed).scoreBarAgrees).toBe(false)
