@@ -526,6 +526,7 @@ async function readSquad(db: Pick<Database, 'select'>, season: string): Promise<
       id: players.id,
       name: players.name,
       personId: players.personId,
+      searchTerm: players.searchTerm,
       shirtNumber: players.shirtNumber,
       wikipediaPage: players.wikipediaPage,
     })

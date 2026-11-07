@@ -125,6 +125,17 @@ describe('the report screen', () => {
     await expect(page('x')).rejects.toThrow('not found')
   })
 
+  it('has a card with a link to the screen that reads a pasted text, for a new report and for one that is stored', async () => {
+    const card = (html: string) => html.match(/<section[^>]*aria-labelledby="plakken-kop".*?<\/section>/su)?.[0] ?? ''
+
+    expect(card(await page(matchId))).toContain(`href="/beheer/wedstrijden/${matchId}/verslag/plakken"`)
+    expect(card(await page(matchId))).toContain('Plak het verslag als tekst')
+
+    await store()
+
+    expect(card(await page(matchId))).toContain(`href="/beheer/wedstrijden/${matchId}/verslag/plakken"`)
+  })
+
   it('opens a new report with a title, the data, and for each team the five parts under a heading', async () => {
     const html = await page(matchId)
 
@@ -142,6 +153,7 @@ describe('the report screen', () => {
       'Kaarten van N.E.C.',
       'Gemiste strafschoppen van N.E.C.',
       'Opslaan',
+      'Tekst plakken',
     ])
     expect(html).toContain('Nog geen verslag')
     // Uitslag 2-1.

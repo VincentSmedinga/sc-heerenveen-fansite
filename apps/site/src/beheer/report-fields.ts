@@ -55,7 +55,13 @@ export type ReportFormState = {
 }
 
 /** A player of ours in the squad of the season, as the form needs him. */
-export type ReportSquadPlayer = { id: number; name: string; shirtNumber: null | number }
+export type ReportSquadPlayer = {
+  id: number
+  name: string
+  /** The surname the search page looks for (`players.search_term`), such as `van Aken`. */
+  searchTerm?: string
+  shirtNumber: null | number
+}
 
 /** What an editor filled in for a report, as text. */
 export type ReportValues = {

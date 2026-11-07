@@ -3166,3 +3166,77 @@
   - **Een afwijking van Wikipedia over de doelpunten** die nog wachtte, vervalt, omdat de doelpunten weer volgen wat Wikipedia zegt.
 - **Waarom:** een verslag dat je weghaalt moet geen stukken van zichzelf achterlaten die de pagina's als doelpunt blijven tonen.
 - **Alternatieven:** de doelpunten van het verslag laten staan met de markering (de import blijft ze dan afhouden van Wikipedia, terwijl het verslag weg is).
+
+## Plakken vult het formulier in, het bewaart niets
+
+- **Datum:** 7 november 2026
+- **Besluit:** op `/beheer/wedstrijden/<nummer>/verslag/plakken` plakt de beheerder een tekst en krijgt het formulier van het verslag terug met alles ingevuld en wat de site niet kon lezen gemarkeerd (#830).
+  De ingang is de kaart "Tekst plakken" in de zijbalk van het scherm van het verslag.
+  Wat er dan staat, bewaart hij met dezelfde knop en dezelfde controle als bij een verslag dat hij met de hand invulde (`submitReport`).
+  Plakken schrijft niets: niet het verslag, niet de doelpunten, niet de selectie en niet het logboek, en de tekst wordt nergens bewaard.
+- **Waarom:** één controle en één plek waar iets wordt bewaard, dus geen tweede manier om een fout verslag in de database te krijgen.
+  Een fout in de tekst kost een correctie in het formulier, geen nieuwe tekst.
+- **Alternatieven:** de tekst direct bewaren (de controle zou dan twee keer bestaan); alleen een voorbeeld tonen en de tekst bewaren zonder formulier (een kleine fout betekent alles opnieuw plakken).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Twee gewone posts:** de tekst gaat met een formulier naar `submitPaste`, dat de waarden teruggeeft; daarna toont dezelfde pagina het formulier van #829 met die waarden.
+    Het werkt zonder JavaScript.
+    De lijst "Niet gelezen" en de keuzes staan in een kaart boven het formulier die de focus krijgt, en elke twijfel staat ook als fout bij zijn veld, omdat de controle van het formulier "kies een speler" al zegt.
+  - **De waarden die het formulier krijgt:** de status is `bezig`, de bron blijft die van het verslag dat er al is, en de kant van de tegenstander staat op ja als de tekst elf spelers in zijn opstelling heeft.
+    De controle van het formulier loopt over wat er staat, dus wat nog ontbreekt (zoals doelpunten die niet kloppen met de uitslag) staat meteen als fout bij het veld.
+
+## Het formaat is een tekst met kopjes, een regel per speler of gebeurtenis, en zo weinig tekens als kan
+
+- **Datum:** 7 november 2026
+- **Besluit:** de tekst heeft kopjes, elk op een eigen regel, voor onze kant (`Opstelling`, `Bank`, `Wissels`, `Doelpunten`, `Kaarten`, `Strafschoppen`) en daarna `Tegenstander` met dezelfde kopjes (#830).
+  Een kopje dat ontbreekt, is leeg, en hoofdletters en de volgorde van de kopjes doen er niet toe.
+  Elke regel is een speler of een gebeurtenis:
+  - `Opstelling` en `Bank`: `<rugnummer> <naam>`, en `(a)` achter de naam van de aanvoerder, zoals `4 Van Aken (a)`.
+    Voor onze kant volstaat een rugnummer van de selectie van het seizoen.
+  - `Wissels`: `<minuut> <in> voor <uit>`, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
+  - `Doelpunten`: `<minuut> <scorer>` met `assist <naam>`, `penalty` of `eigen doelpunt` erachter.
+    Onder het kopje van een kant staan de doelpunten die die kant kreeg.
+    Bij een eigen doelpunt is de naam een speler van de andere kant: `70 Jansen eigen doelpunt` onder onze kant is een eigen doelpunt van de tegenstander.
+  - `Kaarten`: `<minuut> geel|geel-rood|rood <naam>`, zoals `34 geel Jansen`.
+  - `Strafschoppen`: `<minuut> gemist|gestopt <naam>`.
+  - Een naam mag een rugnummer zijn, en een regel die met `#` begint, is commentaar.
+- **Waarom:** de beheerder typt dit uit een bron die hij naast zich heeft, en elk teken dat niet hoeft, kost een fout.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **De regels van de lezer:** `readPastedReport` neemt de tekst, de selectie en wat het verslag al als bron had, en geeft de waarden van het formulier, wat elke regel werd, de keuzes en de regels die niet te lezen waren.
+    Het leest eerst alle spelers, want een wissel, kaart of doelpunt kan boven of onder hen staan.
+  - **Een kopje boven de eerste regel ontbreekt:** een regel zonder kopje is "niet gelezen", want niets zegt waar hij bij hoort.
+  - **Een speler van de bank is geen aanvoerder:** het formulier kent die keuze niet (de rol is basis, basis en aanvoerder, of bank), dus `(a)` bij de bank is "niet gelezen".
+  - **Een doelpunt van de tegenstander zonder opstelling:** staat de opstelling van de tegenstander niet of niet af in de tekst (minder dan elf spelers), dan is de naam van zijn scorer genoeg en komt hij in het veld "Andere naam".
+    Is zijn kant af, dan moet de scorer in zijn opstelling staan.
+  - **Een eigen doelpunt:** de scorer wordt gezocht aan de andere kant dan het kopje waaronder de regel staat, en het formulier krijgt `eigen`.
+  - **Grenzen:** de tekst is hoogstens 20.000 tekens en er worden hoogstens 500 regels gelezen; een naam heeft hoogstens 100 tekens.
+    Een regel in de lijst "Niet gelezen" toont hoogstens 120 tekens.
+    Alles wat de lezer terugschrijft is tekst; React schrijft het uit en er is geen opmaak.
+
+## Een naam wordt eerst op rugnummer gezocht, dan op de naam, en een twijfel is een keuze, geen gok
+
+- **Datum:** 7 november 2026
+- **Besluit:** een speler van ons komt eerst via zijn rugnummer in de selectie van het seizoen, dan via de volledige naam, dan via de zoekterm (de achternaam, `search_term`, zonder hoofdletters en accenten) (#830).
+  Is er niet precies één speler, dan staat hij in het formulier als "kies een speler", met de gevonden namen onder "Kies een speler" in de kaart boven het formulier.
+  Een regel die niet te lezen is, komt in een lijst "Niet gelezen" met zijn regelnummer en de reden, en verandert niets.
+  Er wordt nooit een speler aan de selectie toegevoegd zonder dat de beheerder dat zelf kiest.
+- **Waarom:** precisie.
+  Een speler die verkeerd wordt gekoppeld is erger dan een veld dat leeg blijft, want niemand ziet het.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Rugnummer en naam samen:** staan er een rugnummer en een naam, dan telt het rugnummer als de naam bij die speler past (de hele naam, de achternaam, of een deel van zijn naam, zoals een tikfout in de voornaam).
+    Past de naam bij een andere speler of bij niemand, dan zijn het twee spelers of een twijfel, en kiest de beheerder.
+  - **Een speler die niet in de selectie staat:** het formulier krijgt "kies een speler" met de naam in het verborgen veld, dus "Andere speler" kiezen laat de naam zien.
+    De beheerder voegt hem toe door dat te kiezen en op te slaan, zoals bij een verslag dat hij met de hand invulde; het scherm doet dat nooit zelf.
+  - **Een verwijzing in een regel** (de speler van een wissel, kaart, strafschop, doelpunt of assist) zoekt in de opstelling en de bank van het verslag zelf: op rugnummer, dan op de naam, dan op de achternaam.
+    Meer spelers is een keuze, geen speler is "niet gelezen" (bij de assist een keuze, want de rest van het doelpunt klopt).
+  - **De achternaam van een speler uit de selectie** is zijn zoekterm; zonder zoekterm is het de laatste woorden van de naam vanaf het eerste woord in kleine letters (`van Aken`), en anders het laatste woord.
+
+## Wie plakt, vervangt het hele verslag in het formulier, na een waarschuwing
+
+- **Datum:** 7 november 2026
+- **Besluit:** staat er al iets in het verslag, dan vraagt het scherm eerst of het vervangen mag, met wat er nu is (het aantal spelers, wissels, kaarten en strafschoppen) en een vakje dat de beheerder aanvinkt (#830).
+  Het verslag in de database verandert pas bij opslaan.
+- **Waarom:** een tekst die half in het formulier staat, is een verslag dat niemand heeft nagekeken.
+  Eén bevestiging voor het plakken is minder werk dan een verslag dat per ongeluk uit het formulier verdwijnt.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Zonder verslag** vraagt het scherm niets, ook al staan de doelpunten van Wikipedia in het formulier: die vervangt het plakken ook, en het verslag in de database verandert toch niet.
+  - **Zonder JavaScript** is de bevestiging een vakje dat het scherm bij een fout aangevinkt laat staan, samen met de tekst.

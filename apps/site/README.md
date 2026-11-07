@@ -1015,6 +1015,11 @@ De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controle
   Opslaan schrijft het verslag, de spelers, de gebeurtenissen en de doelpunten met `appearance_id`, de markering `goals_edited` en een regel `match.edit` in één transactie.
   Een opslag zonder verschil schrijft niets.
 - Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
+- `/beheer/wedstrijden/<nummer>/verslag/plakken` (`src/app/beheer/wedstrijden/[id]/verslag/plakken`) leest een tekst in een eenvoudig formaat in de waarden van dit formulier.
+  `readPastedReport` in `src/beheer/report-paste.ts` heeft geen database en geeft de waarden, wat het las, de keuzes bij een twijfel en de regels die het niet las.
+  `submitPaste` schrijft niets, ook niet in het logboek: het geeft het formulier terug (`PasteScreen`), dat met `submitReport` bewaart, met dezelfde controle.
+  Staat er al een verslag, dan vraagt het scherm eerst of het formulier vervangen mag.
+  Het werkt zonder JavaScript: twee gewone posts, de tekst en daarna het formulier.
 
 ### De stadions van een club
 

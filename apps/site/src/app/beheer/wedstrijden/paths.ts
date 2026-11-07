@@ -24,6 +24,11 @@ export function matchPath(id: number, done?: string) {
   return done === undefined ? `${matchesPath}/${id}` : `${matchesPath}/${id}?gedaan=${done}`
 }
 
+/** The address of the screen that reads a pasted text into the report of a match. */
+export function pastePath(id: number) {
+  return `${matchesPath}/${id}/verslag/plakken`
+}
+
 /** The address of the report screen of a match, with what the last action left to say. */
 export function reportPath(id: number, done?: string) {
   return done === undefined ? `${matchesPath}/${id}/verslag` : `${matchesPath}/${id}/verslag?gedaan=${done}`
