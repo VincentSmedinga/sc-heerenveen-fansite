@@ -131,3 +131,32 @@ export const OwnGoalAndYellowRedCard = meta.story({
   },
   name: 'Een eigen doelpunt en een geel-rode kaart',
 })
+
+export const WithHighlightedLine = meta.story({
+  args: {
+    events: [
+      { kind: 'goal', minute: 12, ours: true, player: name('Demo', 'Rick'), team: ours },
+      {
+        assist: name('Idzenga', 'Thijs'),
+        highlighted: true,
+        kind: 'goal',
+        minute: 58,
+        ours: true,
+        player: name('Voorbeeld', 'Jelle'),
+        team: ours,
+      },
+      { kind: 'yellow-card', minute: 63, ours: false, player: name('Dummydijk', 'Frank'), team: theirs },
+    ],
+    extraTime: false,
+    headingLevel: 3,
+  },
+  name: 'Een regel met een kader',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Het kader laat zien welke regel een beheerder net veranderde, zoals in een voorbeeld naast een formulier.',
+      },
+    },
+  },
+})

@@ -246,3 +246,24 @@ describe('the shoot-out', () => {
     ])
   })
 })
+
+describe('a highlighted event', () => {
+  it('marks the line of the event, whatever its kind, and no other', () => {
+    const changed = data()
+
+    changed.goals = [{ ...changed.goals[0]!, highlighted: true }, ...changed.goals.slice(1)]
+    changed.cards = [{ ...changed.cards[0]!, highlighted: true }]
+    changed.incidents = [{ ...changed.incidents[0]!, highlighted: true }]
+    changed.substitutions = [{ ...changed.substitutions[0]!, highlighted: true }, ...changed.substitutions.slice(1)]
+
+    const { events } = buildMatchPage(changed)
+
+    expect(events.filter((event) => event.highlighted === true).map((event) => event.kind)).toEqual([
+      'goal',
+      'yellow-card',
+      'penalty-missed',
+      'substitution',
+    ])
+    expect(events.filter((event) => event.highlighted !== true)).toHaveLength(3)
+  })
+})

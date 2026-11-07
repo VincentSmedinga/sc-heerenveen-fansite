@@ -190,4 +190,14 @@ describe('MatchTimeline', () => {
     expect(root.getAttribute('role')).toBe('group')
     expect(root.getAttribute('aria-labelledby')).toBe('verloop')
   })
+
+  it('puts a frame on the line of an event that is highlighted, and on no other', () => {
+    const { container } = render(
+      <MatchTimeline events={[events[0]!, { ...card(34), highlighted: true }, events[2]!]} />,
+    )
+    const framed = container.querySelectorAll('.hf-match-event-highlighted')
+
+    expect(framed).toHaveLength(1)
+    expect(framed[0]?.textContent).toContain('Boerema')
+  })
 })

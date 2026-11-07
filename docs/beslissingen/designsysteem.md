@@ -2915,3 +2915,21 @@
 - **Waarom:** de lijst laat zien wie het spel veranderde, en een bank die niet inviel zegt daar niets over.
   Dezelfde stip en boog als op het veld laten de lezer één teken leren.
 - **Alternatieven:** de wissels in het veld zelf tekenen (de namen passen daar al niet altijd); een lijst met ook de spelers die niet inviellen (dat vraagt nieuwe velden in het formulier).
+
+## `SideBySide` zet twee delen van één taak naast elkaar, en `MatchTimeline` kan een regel omkaderen
+
+- **Datum:** 7 november 2026
+- **Besluit:** het ontwerpsysteem krijgt `SideBySide` (#851), met de delen `SideBySide.Tabs`, `SideBySide.Main` en `SideBySide.Aside`, en een eigenschap `highlighted` bij een gebeurtenis van `MatchTimeline`.
+  - **`SideBySide`** zet het hoofddeel links en de `aside` rechts, vanaf 56 rem van de plek waarin hij staat (een containerquery, niet het scherm), ongeveer 55 om 45.
+    De `aside` blijft bovenaan staan terwijl het hoofddeel scrolt, en scrolt zelf als hij hoger is dan het scherm.
+    Onder die breedte staat één deel tegelijk: de pagina geeft het deel dat niet getoond wordt het attribuut `hidden`, en de tabs kiezen.
+    Een deel met `hidden` blijft in het document, dus een formulier houdt zijn waarden.
+    Vanaf 56 rem tonen beide delen zich, ook met `hidden`, en zijn de tabs weg.
+    Heeft een pagina geen `aside`, dan heeft het hoofddeel de hele breedte.
+    Het onderdeel heeft geen toestand: de pagina bewaart de gekozen tab.
+  - **`highlighted`** zet een kader (een omtrek van drie pixels in de kleur van de focusring) om de regel van een gebeurtenis.
+    Het kader ligt buiten de regel, dus de regels verschuiven niet, en het is een lijn, dus het is ook zonder kleur te zien.
+- **Waarom:** de pagina zet het formulier van het verslag naast een voorbeeld van de wedstrijdpagina, en een ander formulier kan dat ook willen.
+  De site heeft geen eigen CSS, dus de indeling hoort in het ontwerpsysteem.
+  Het kader laat de beheerder zien welke regel van het verloop bij het veld hoort dat hij net veranderde.
+- **Alternatieven:** de indeling in de site (die heeft geen eigen stijlen, en elke pagina zou het opnieuw uitzoeken); de breedte van het scherm in plaats van van de plek (het formulier staat naast een zijbalk, dus het scherm zegt niet hoeveel plek het heeft); tabs met `role="tab"` (de pagina wisselt geen paneel van één taak maar kiest wat je ziet, en `SegmentedControl` doet dat al met `aria-pressed`).

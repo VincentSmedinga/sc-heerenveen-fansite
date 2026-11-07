@@ -183,6 +183,13 @@ export { ShortMatch } from './components/short-match/ShortMatch'
 export type { ShortMatchProps } from './components/short-match/ShortMatch'
 export { ShortStaff } from './components/short-staff/ShortStaff'
 export type { ShortStaffProps } from './components/short-staff/ShortStaff'
+export { SideBySide } from './components/side-by-side/SideBySide'
+export type {
+  SideBySideAsideProps,
+  SideBySideMainProps,
+  SideBySideProps,
+  SideBySideTabsProps,
+} from './components/side-by-side/SideBySide'
 export { sizes } from './components/size'
 export type { Size } from './components/size'
 export { StandingsTable } from './components/standings-table/StandingsTable'

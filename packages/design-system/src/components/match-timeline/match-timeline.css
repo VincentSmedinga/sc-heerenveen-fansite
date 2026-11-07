@@ -58,6 +58,17 @@
     padding-block: var(--hf-space-s);
   }
 
+  /*
+   * The line an editor just changed: a frame with the colour of the focus ring, which has the
+   * contrast of a graphic and also shows as a line without colour. The frame lies outside the
+   * line, so the lines do not move.
+   */
+  .hf-match-event-highlighted {
+    border-radius: 0.25rem;
+    outline: 0.1875rem solid var(--hf-colour-focus);
+    outline-offset: 2px;
+  }
+
   .hf-match-event:first-child {
     border-block-start: 0;
     padding-block-start: 0;

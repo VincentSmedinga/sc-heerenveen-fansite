@@ -50,6 +50,7 @@ const components = [
   'RecordTable',
   'Root',
   'Select',
+  'SideBySide',
   'StandingsTable',
   'Strong',
   'Tag',
