@@ -612,8 +612,9 @@ async function checkShareImage() {
 }
 
 /**
- * Fetches the sitemap and checks it: the pages of the site and then the page of each club, each
- * with the address of `siteOrigin` (the clubs only when the database has matches), and nothing
+ * Fetches the sitemap and checks it: the pages of the site, then the page of each club and the
+ * page of each match with a report, each with the address of `siteOrigin` (the clubs only when
+ * the database has matches), and nothing
  * but the addresses (no lastmod, changefreq or priority). The feed of Updates is not a page, so
  * it is not in it.
  */
@@ -625,15 +626,22 @@ async function checkSitemap(siteOrigin, { clubs: hasClubs }) {
   const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, location]) => location)
   const listed = pages.map(({ path }) => `${siteOrigin}${path}`)
   assert.deepEqual(locations.slice(0, listed.length), listed)
-  // Then the page of each club the made-up matches have, and nothing else.
-  const clubs = locations.slice(listed.length)
+  // Then the page of each club the made-up matches have, then the page of each match that has
+  // a report that is klaar, and nothing else.
+  const rest = locations.slice(listed.length)
+  const clubs = rest.filter((location) => location.startsWith(`${siteOrigin}/tegenstanders/`))
+  const reports = rest.filter((location) => location.startsWith(`${siteOrigin}/wedstrijden/`))
+  assert.equal(rest.length, clubs.length + reports.length)
   assert.equal(
     clubs.includes(`${siteOrigin}/tegenstanders/testdorp-fc`),
     hasClubs,
     'the page of a club is listed when there are matches',
   )
   assert.equal(clubs.length > 0, hasClubs)
-  assert.ok(clubs.every((location) => location.startsWith(`${siteOrigin}/tegenstanders/`)))
+  assert.ok(
+    reports.every((location) => /\/wedstrijden\/\d{4}-\d{2}\/\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/u.test(location)),
+    'the page of a match is the season, the day and the club',
+  )
   assert.doesNotMatch(xml, /lastmod|changefreq|priority|feed\.xml/)
 
   return sitemap
