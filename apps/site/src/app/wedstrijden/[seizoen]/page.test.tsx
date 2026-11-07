@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getFinalPlaces, getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
+import { getReportAddresses } from '#src/report-data'
 import { matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -17,6 +18,11 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+}))
+
+vi.mock('#src/report-data', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getReportAddresses: vi.fn(),
 }))
 
 // The afternoon of Friday 23 October 2026 in the Netherlands, in the season 2026/27.
@@ -63,6 +69,8 @@ beforeEach(() => {
   vi.mocked(getLeagueResults).mockReset()
   vi.mocked(getLeagueResults).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
+  vi.mocked(getReportAddresses).mockReset()
+  vi.mocked(getReportAddresses).mockResolvedValue(new Map())
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>

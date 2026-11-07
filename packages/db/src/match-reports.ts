@@ -18,7 +18,9 @@ import type {
 } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
+import { withSeasonNames } from './club-name-periods.ts'
 import {
+  clubs,
   matchAppearances,
   matchCards,
   matches,
@@ -62,6 +64,32 @@ export type PlayerReportStats = {
   yellowRedCards: number
 }
 
+/**
+ * A played match with a report that is `klaar`, for the page of the match and the links to it:
+ * the match with the name its opponent had that day, the `slug` of the opponent, the report,
+ * and the names of our players by the id of their row in the report. Whether the report is
+ * right is for the caller to check with `checkMatchReport`.
+ */
+export type ReportedMatch = {
+  clubSlug: string
+  match: Match
+  names: Map<number, ReportedPlayerName>
+  stored: StoredMatchReport
+}
+
+/**
+ * The name of one of our players as the importer kept it, for the players of a report: the
+ * parts of the name of his person, and the search term of his row in `players` (the surname the
+ * search page looks for) when the person has no name yet. Both are null for a player of the
+ * opponent, and for one who is no longer in `players`.
+ */
+export type ReportedPlayerName = {
+  familyName: null | string
+  familyNamePrefix: null | string
+  givenName: null | string
+  searchTerm: null | string
+}
+
 /** A player whose goals in a competition differ between the reports and the squad table. */
 export type ReportGoalDifference = {
   competition: StatsCompetition
@@ -89,8 +117,7 @@ export type SeasonMatchReport = Pick<
 /**
  * A report as it is stored: the report itself, the players, and the events in the order of the
  * clock, and for the same minute the order of `id`. `goals` are the goals of the match, with
- * the
- * players of the report they point to. `rules` is the same report as the rules read it.
+ * the players of the report they point to. `rules` is the same report as the rules read it.
  */
 export type StoredMatchReport = {
   appearances: MatchAppearance[]
@@ -103,6 +130,22 @@ export type StoredMatchReport = {
 
 /** What the reading functions read through. */
 type ReportDatabase = Pick<Database, 'select'>
+
+/**
+ * The played match of a season on a day against a club (by its `slug`), when it has a report
+ * that is `klaar`: the match of the address `/wedstrijden/<seizoen>/<datum>-<club>`.
+ */
+export async function findReportedMatch(
+  db: ReportDatabase,
+  { clubSlug, matchDate, season }: { clubSlug: string; matchDate: string; season: string },
+): Promise<ReportedMatch | undefined> {
+  const [found] = await reportedMatchesOf(
+    db,
+    and(eq(matches.season, season), eq(matches.matchDate, matchDate), eq(clubs.slug, clubSlug)),
+  )
+
+  return found
+}
 
 /**
  * The players whose goals in a competition of the season, counted from the match reports,
@@ -159,6 +202,15 @@ export async function findReportGoalDifferences(db: ReportDatabase, season: stri
   return differences.toSorted(
     (a, b) => a.name.localeCompare(b.name, 'nl') || a.competition.localeCompare(b.competition),
   )
+}
+
+/**
+ * The played matches of a season with a report that is `klaar`, from the first to the last. A
+ * report that is `bezig` is not in it, and neither is one that does not follow the rules: the
+ * caller checks that.
+ */
+export function listReportedMatches(db: ReportDatabase, season: string): Promise<ReportedMatch[]> {
+  return reportedMatchesOf(db, eq(matches.season, season))
 }
 
 /**
@@ -232,8 +284,7 @@ export function matchForRules(match: Pick<Match, 'extraTime' | 'goalsAgainst' | 
 
 /**
  * The report of a match, or `undefined` when it has none. Whatever its status: a page decides
- * for
- * itself whether it shows a report that is still `bezig`.
+ * for itself whether it shows a report that is still `bezig`.
  */
 export async function readMatchReport(db: ReportDatabase, matchId: number): Promise<StoredMatchReport | undefined> {
   const [report] = await db.select().from(matchReports).where(eq(matchReports.matchId, matchId))
@@ -475,4 +526,105 @@ export function reportForRules(stored: StoredMatchReport): ReportForRules {
  */
 function onTheClock<T extends { id: number; minute: number; stoppageMinutes: null | number }>(a: T, b: T) {
   return a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0) || a.id - b.id
+}
+
+/** The names of our players in the reports, by the id of their row in a report. */
+async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<StoredMatchReport>) {
+  const ours = [...reports].flatMap((stored) => stored.appearances.filter((player) => player.playerId !== null))
+  const names = new Map<number, ReportedPlayerName>()
+
+  if (ours.length === 0) {
+    return names
+  }
+
+  const found = await db
+    .select({
+      familyName: persons.familyName,
+      familyNamePrefix: persons.familyNamePrefix,
+      givenName: persons.givenName,
+      id: players.id,
+      searchTerm: players.searchTerm,
+    })
+    .from(players)
+    .leftJoin(persons, eq(persons.id, players.personId))
+    .where(inArray(players.id, [...new Set(ours.map((player) => player.playerId!))]))
+  const byPlayer = new Map(found.map((row) => [row.id, row]))
+
+  for (const player of ours) {
+    const row = byPlayer.get(player.playerId!)
+
+    if (row !== undefined) {
+      names.set(player.id, {
+        familyName: row.familyName,
+        familyNamePrefix: row.familyNamePrefix,
+        givenName: row.givenName,
+        searchTerm: row.searchTerm,
+      })
+    }
+  }
+
+  return names
+}
+
+/** The report, the players and the events of several matches, read with a few queries. */
+async function readStoredReports(db: ReportDatabase, ids: number[]) {
+  if (ids.length === 0) {
+    return new Map<number, StoredMatchReport>()
+  }
+
+  const [reports, appearances, substitutions, cards, incidents, goals] = await Promise.all([
+    db.select().from(matchReports).where(inArray(matchReports.matchId, ids)),
+    db.select().from(matchAppearances).where(inArray(matchAppearances.matchId, ids)).orderBy(asc(matchAppearances.id)),
+    db.select().from(matchSubstitutions).where(inArray(matchSubstitutions.matchId, ids)),
+    db.select().from(matchCards).where(inArray(matchCards.matchId, ids)),
+    db.select().from(matchIncidents).where(inArray(matchIncidents.matchId, ids)),
+    db.select().from(matchGoals).where(inArray(matchGoals.matchId, ids)),
+  ])
+  const ofMatch = <T extends { matchId: number }>(rows: T[], id: number) => rows.filter((row) => row.matchId === id)
+
+  return new Map(
+    reports.map((report): [number, StoredMatchReport] => [
+      report.matchId,
+      {
+        appearances: ofMatch(appearances, report.matchId),
+        cards: ofMatch(cards, report.matchId).toSorted(onTheClock),
+        goals: ofMatch(goals, report.matchId).toSorted(onTheClock),
+        incidents: ofMatch(incidents, report.matchId).toSorted(onTheClock),
+        report,
+        substitutions: ofMatch(substitutions, report.matchId).toSorted(onTheClock),
+      },
+    ]),
+  )
+}
+
+async function reportedMatchesOf(db: ReportDatabase, where: ReturnType<typeof and>): Promise<ReportedMatch[]> {
+  const rows = await reportedMatchRows(db, where)
+  const stored = await readStoredReports(
+    db,
+    rows.map((row) => row.match.id),
+  )
+  const names = await readReportedPlayerNames(db, stored.values())
+
+  return rows.flatMap((row) => {
+    const report = stored.get(row.match.id)
+
+    return report === undefined ? [] : [{ ...row, names, stored: report }]
+  })
+}
+
+/** The matches that have a report, whichever its status, with the opponent's name and slug. */
+async function reportedMatchRows(db: ReportDatabase, where: ReturnType<typeof and>) {
+  const rows = await db
+    .select({ clubSlug: clubs.slug, match: matches })
+    .from(matches)
+    .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .where(and(eq(matches.status, 'played'), eq(matchReports.status, 'klaar'), where))
+    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+  const named = await withSeasonNames(
+    db,
+    rows.map((row) => ({ ...row.match, clubSlug: row.clubSlug })),
+  )
+
+  return named.map(({ clubSlug, ...match }) => ({ clubSlug, match }))
 }

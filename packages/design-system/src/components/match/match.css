@@ -23,6 +23,12 @@
     margin-block: 0;
   }
 
+  /* The link to the page of the match is the last line, in the text of the clubs. */
+  .hf-match-report {
+    margin-block: 0;
+    padding-block-start: var(--hf-space-xs);
+  }
+
   /*
    * The two clubs have the size of the text, heavier than the lines around them. Our own club
    * is heavier still, so it stands out in a list of results; a heavier weight and not a colour,

@@ -2867,3 +2867,17 @@
   Zoeken op titel (zie #794).
   Een link naar alle nieuws over de club (Zoeken kan er niet op filteren).
 - **Later:** dit past bij _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (`site.md`) met een uitzondering: de zijkolom van een club heeft hier een lijst met links in plaats van cijfers.
+
+## Wat we overtypen zijn feiten, nooit tekst
+
+- **Datum:** 7 november 2026
+- **Besluit:** het hoofdstuk Redactie en de checklist van de reviewer krijgen een stuk "Eigen administratie van wedstrijden" (#831).
+  We typen over wie speelde, wanneer en wat er gebeurde, als feiten die iemand kan narekenen.
+  Nooit de tekst, de zinnen of de beoordelingen van een verslag van een journalist, ook niet in eigen woorden, en geen hele tabellen van een site met statistieken (het databankrecht).
+  De bron noemen we op de pagina: "eigen administratie", en als het verslag een bron heeft, die erachter.
+  Wat Wikipedia ook heeft, houdt de bronvermelding van Wikipedia.
+  De pagina laat geen foto's of afbeeldingen van derden zien en laadt niets van een ander domein.
+- **Waarom:** feiten zijn van iedereen, tekst en samengestelde databanken niet.
+  Dat de site een eigen gegevensbron heeft, mag niet betekenen dat hij andermans werk kopieert.
+- **Alternatieven:** niets overtypen en wachten tot een bron de gegevens geeft (de minuten, de opstelling en de kaarten bestaan nergens in een vorm die we mogen overnemen); de verslagen van journalisten samenvatten (het werk van een ander, en de lezer gaat dan niet naar de journalist).
+- **Later:** dit werkt principe 4 (altijd de bron vermelden) uit voor gegevens die we zelf bijhouden: de bron is dan "eigen administratie", met de bron van het verslag erachter.

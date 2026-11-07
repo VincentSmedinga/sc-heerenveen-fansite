@@ -15,6 +15,13 @@
  * CHANGELOG, so a new version needs no line here.
  */
 
+/**
+ * The anchors of the page of a match (`/wedstrijden/2026-27/2026-10-24-testdorp-fc`), which
+ * every such page has. The address of a match depends on its day, so the smoke test takes it
+ * from the sitemap and checks these on it.
+ */
+export const matchPageAnchors: readonly string[] = ['verloop', 'opstelling']
+
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],

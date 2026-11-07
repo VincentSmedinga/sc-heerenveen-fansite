@@ -88,6 +88,17 @@ export { Logo } from './components/logo/Logo'
 export type { LogoProps } from './components/logo/Logo'
 export { MarkRow } from './components/mark-row/MarkRow'
 export type { MarkRowMark, MarkRowProps } from './components/mark-row/MarkRow'
+export { MatchHeader } from './components/match-header/MatchHeader'
+export type { MatchHeaderFact, MatchHeaderProps } from './components/match-header/MatchHeader'
+export { MatchLineup } from './components/match-lineup/MatchLineup'
+export type { MatchLineupPlayer, MatchLineupProps } from './components/match-lineup/MatchLineup'
+export { matchPlayerEventKinds, MatchTimeline } from './components/match-timeline/MatchTimeline'
+export type {
+  MatchPlayerEventKind,
+  MatchPlayerName,
+  MatchTimelineEvent,
+  MatchTimelineProps,
+} from './components/match-timeline/MatchTimeline'
 export { Match, matchStatuses } from './components/match/Match'
 export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Match'
 export { Navigation } from './components/navigation/Navigation'

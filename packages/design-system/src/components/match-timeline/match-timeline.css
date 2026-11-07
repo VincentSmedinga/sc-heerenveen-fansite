@@ -1,0 +1,63 @@
+/*
+ * The course of a match: a list with the minute in a column of its own and the event beside it.
+ * The name of the event is bold and the team is on a line of its own in quiet letters, with our
+ * own team in the stronger weight like its name in a match. Nothing here depends on a colour:
+ * the words say what happened.
+ */
+
+@layer hf.components {
+  .hf-match-timeline {
+    display: grid;
+    gap: 0;
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-match-event {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    column-gap: var(--hf-space-s);
+    display: flex;
+    overflow-wrap: anywhere;
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-match-event:first-child {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .hf-match-event:last-child {
+    padding-block-end: 0;
+  }
+
+  /* The minute keeps its width, so the events of the lines start at the same place. */
+  .hf-match-event-minute {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    min-inline-size: 3.5rem;
+  }
+
+  .hf-match-event-text {
+    flex: 1 1 8rem;
+  }
+
+  .hf-match-event-kind {
+    font-weight: var(--hf-headline-font-weight);
+  }
+
+  .hf-match-event-assist {
+    color: var(--hf-colour-text-secondary);
+  }
+
+  .hf-match-event-team {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-match-event-ours .hf-match-event-team {
+    font-weight: var(--hf-strong-font-weight);
+  }
+}
