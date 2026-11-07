@@ -402,7 +402,7 @@ async function checkEmptyCupPage(db: Database, season: string, title: string): P
   const [cupMatch] = await db
     .select({ id: matches.id })
     .from(matches)
-    .where(and(eq(matches.season, season), eq(matches.competition, 'KNVB Beker')))
+    .where(and(eq(matches.season, season), eq(matches.competition, 'KNVB Beker'), eq(matches.dataSource, 'wikipedia')))
     .limit(1)
   const [page] = await db
     .select({ title: wikipediaPages.title })
@@ -602,7 +602,13 @@ async function hasPlayoffMatch(db: Pick<Database, 'select'>, season: string): Pr
   const [row] = await db
     .select({ id: matches.id })
     .from(matches)
-    .where(and(eq(matches.season, season), inArray(matches.competition, playoffCompetitions)))
+    .where(
+      and(
+        eq(matches.season, season),
+        inArray(matches.competition, playoffCompetitions),
+        eq(matches.dataSource, 'wikipedia'),
+      ),
+    )
     .limit(1)
 
   return row !== undefined
@@ -928,9 +934,11 @@ async function storeMatches(
   { firstRead, pastSeason, personRedirects, previousReadAt, redirects }: StoreContext,
 ) {
   const clubLines: string[] = []
-  const known = new Map(
-    (await db.select().from(matches).where(eq(matches.season, season))).map((row) => [key(row), row]),
-  )
+  // This import reads, changes and removes only the matches it made itself. A match of the old
+  // fansite stays as it is, and a match of Wikipedia on its key is left out (see below).
+  const seasonRows = await db.select().from(matches).where(eq(matches.season, season))
+  const known = new Map(seasonRows.filter((row) => row.dataSource === 'wikipedia').map((row) => [key(row), row]))
+  const oldFansite = new Set(seasonRows.filter((row) => row.dataSource === 'oude-fansite').map(key))
   const existing = new Map(known)
   const squad = await db.select().from(players).where(eq(players.season, season))
   const personBook = await createPersonBook(db, { aliases: aliasMap(personTitleAliases), redirects: personRedirects })
@@ -982,6 +990,14 @@ async function storeMatches(
   const storedStates = (id: number) => (storedGoals.get(id) ?? []).map(goalStateOf)
 
   for (const match of found) {
+    if (oldFansite.has(key(match))) {
+      warnings.push(
+        `${match.competition} ${match.round} left out: the match is already there from the old fansite, and the import of Wikipedia leaves those alone`,
+      )
+      counts.unchanged++
+      continue
+    }
+
     const before = known.get(key(match))
     const scorers = goalsOf(match, link, personOf)
     const club = await book.resolve({ name: match.opponent, page: match.opponentPage, season })

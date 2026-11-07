@@ -564,6 +564,11 @@ export type ArticleVersion = typeof articleVersions.$inferSelect
  * the ticket for the second qualifying round after the league season, from 2020/21. `Play-offs
  * Europa League` is the same for the Europa League, before 2020/21. `Europa League` holds the
  * matches of the Europa League that sc Heerenveen played in 2012/13.
+ *
+ * The last six are the competitions of the old matches, from 1990 to 2007, named as they were
+ * called then (the Europa League did not exist yet): `Eerste divisie` (1991/92 and 1992/93),
+ * `Champions League` (2000/01), `Europacup II` (1998/99), `UEFA Cup` (2002/03 to 2006/07),
+ * `Intertoto Cup` (1995 to 2003, the summer tournament) and `Play-offs UEFA Cup` (2005/06).
  */
 export const competitions = [
   'Eredivisie',
@@ -571,9 +576,24 @@ export const competitions = [
   'Play-offs Conference League',
   'Europa League',
   'Play-offs Europa League',
+  'Eerste divisie',
+  'Champions League',
+  'Europacup II',
+  'UEFA Cup',
+  'Intertoto Cup',
+  'Play-offs UEFA Cup',
 ] as const
 
+/**
+ * Where a match comes from: `wikipedia` is the import of the Dutch Wikipedia, and
+ * `oude-fansite` the import of the matches of the old fansite, 1990 to 2007. Each import
+ * reads, writes and removes only the matches of its own source.
+ */
+export const matchDataSources = ['wikipedia', 'oude-fansite'] as const
+
 export type Competition = (typeof competitions)[number]
+
+export type MatchDataSource = (typeof matchDataSources)[number]
 
 /**
  * The competitions the squad table has numbers for. The play-offs are not in it, so they have
@@ -895,6 +915,10 @@ export type NewClubNamePeriod = typeof clubNamePeriods.$inferInsert
  * date as Wikipedia gives it, such as `12-14 februari 2027`, and is empty when the kick-off is
  * known.
  *
+ * `data_source` says which import the match comes from (see `matchDataSources`), and so which
+ * import may change or remove it. Only a match of the old fansite may have neither `kickoff_at`
+ * nor `date_text`: its date is then known and its time is not, as the old database gave it.
+ *
  * `result_set_at` is the moment the importer first saw the current result, so it can tell a
  * correction of a few hours old from a change after days (see `match_changes`).
  *
@@ -929,6 +953,7 @@ export const matches = mysqlTable(
     attendance: int('attendance', { unsigned: true }),
     referee: varchar('referee', { length: matchLimits.referee }),
     resultSetAt: datetime('result_set_at'),
+    dataSource: mysqlEnum('data_source', matchDataSources).notNull().default('wikipedia'),
   },
   (table) => [
     unique('matches_season_competition_round_unique').on(table.season, table.competition, table.round),
@@ -937,10 +962,13 @@ export const matches = mysqlTable(
       'matches_result_only_when_played',
       sql`(${table.status} = 'played' and ${table.goalsFor} is not null and ${table.goalsAgainst} is not null) or (${table.status} <> 'played' and ${table.goalsFor} is null and ${table.goalsAgainst} is null)`,
     ),
-    check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
+    check(
+      'matches_time_or_text',
+      sql`${table.dataSource} = 'oude-fansite' or ${table.kickoffAt} is not null or ${table.dateText} is not null`,
+    ),
     check(
       'matches_extra_time_only_in_played_knockout',
-      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League', 'Europa League', 'Play-offs Europa League'))`,
+      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} not in ('Eredivisie', 'Eerste divisie'))`,
     ),
     check(
       'matches_penalties_in_a_pair',
@@ -969,6 +997,28 @@ export const matches = mysqlTable(
 export type Match = typeof matches.$inferSelect
 
 export type NewMatch = typeof matches.$inferInsert
+
+/**
+ * The corners, offsides and fouls of a played match, from the old fansite: one row for each
+ * match, and only when at least one of the six numbers is above 0, because 0-0-0 meant "not
+ * known" there. All numbers are from the side of sc Heerenveen, like `goals_for` and
+ * `goals_against`. The row goes with its match. Nothing reads the table yet.
+ */
+export const matchStatistics = mysqlTable('match_statistics', {
+  matchId: int('match_id', { unsigned: true })
+    .primaryKey()
+    .references(() => matches.id, { onDelete: 'cascade' }),
+  cornersFor: int('corners_for', { unsigned: true }).notNull(),
+  cornersAgainst: int('corners_against', { unsigned: true }).notNull(),
+  offsidesFor: int('offsides_for', { unsigned: true }).notNull(),
+  offsidesAgainst: int('offsides_against', { unsigned: true }).notNull(),
+  foulsFor: int('fouls_for', { unsigned: true }).notNull(),
+  foulsAgainst: int('fouls_against', { unsigned: true }).notNull(),
+})
+
+export type MatchStatistics = typeof matchStatistics.$inferSelect
+
+export type NewMatchStatistics = typeof matchStatistics.$inferInsert
 
 /** The most characters the player column of `match_goals` holds. */
 export const matchGoalPlayerMaxLength = 100

@@ -394,6 +394,69 @@ describe('reading again', () => {
   })
 })
 
+describe('a match of the old fansite', () => {
+  it('stays as it is, also when Wikipedia has the match on the same key or lacks it', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+
+    // Speelronde 11 is now a match of the old fansite, with its own time and stadium, and
+    // Speelronde 99 is one the page of Wikipedia does not have at all.
+    await database.db
+      .update(matches)
+      .set({ dataSource: 'oude-fansite', kickoffAt: null, stadium: 'Stadion Oud' })
+      .where(eq(matches.round, 'Speelronde 11'))
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          dataSource: 'oude-fansite',
+          home: true,
+          matchDate: '1996-08-17',
+          opponent: 'Testdorp FC',
+          round: 'Speelronde 99',
+          season,
+          status: 'scheduled',
+        },
+      ]),
+    )
+
+    const before = await snapshot()
+
+    // Wikipedia now says another time for the match against N.E.C.
+    pages.programme = pages.programme.replace(
+      '|time = 18:45 uur\n|team1 = [[sc Heerenveen]]\n|score =  – \n|team2 = [[N.E.C.]]',
+      '|time = 20:00 uur\n|team1 = [[sc Heerenveen]]\n|score =  – \n|team2 = [[N.E.C.]]',
+    )
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      matches: { added: 0, held: 0, removed: 0, unchanged: 35, updated: 0 },
+      warnings: [expect.stringContaining('Eredivisie Speelronde 11 left out')],
+    })
+    expect((await snapshot()).matches).toEqual(before.matches)
+  })
+})
+
+describe('a cup match of the old fansite on an empty cup page', () => {
+  it('is no reason to refuse the cup page, which has no template, and stays as it is', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    // The only cup match is now one of the old fansite, so none came from the page.
+    await database.db.update(matches).set({ dataSource: 'oude-fansite' }).where(eq(matches.competition, 'KNVB Beker'))
+    pages.cup = pages.cup.replaceAll('Footballbox2', 'Wedstrijd')
+
+    const before = await snapshot()
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', warnings: [] })
+    expect((await snapshot()).matches).toEqual(before.matches)
+  })
+})
+
 describe('a match that was postponed and played under an Inhaalronde', () => {
   const later = new Date(first.getTime() + hours(1))
   const zwolle = /(\|team1 = \[\[sc Heerenveen\]\]\n)\|score = 0 – 2(\n\|team2 = \[\[PEC Zwolle\]\])/u
