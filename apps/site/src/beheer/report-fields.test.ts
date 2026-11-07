@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   applyReportButton,
+  clearTakenPlayers,
   emptyRow,
   emptySide,
   isUntouchedRow,
@@ -10,6 +11,7 @@ import {
   readReportValues,
   type ReportValues,
   type Row,
+  squadChoicesForRow,
 } from './report-fields'
 
 const squad = [
@@ -175,5 +177,71 @@ describe('isUntouchedRow', () => {
     expect(isUntouchedRow('doelpunt', emptyRow('doelpunt'))).toBe(true)
     expect(isUntouchedRow('doelpunt', { ...emptyRow('doelpunt'), soort: 'eigen' })).toBe(false)
     expect(isUntouchedRow('speler', { ...emptyRow('speler'), rol: 'bank' })).toBe(false)
+  })
+})
+
+describe('squadChoicesForRow', () => {
+  const players = Array.from({ length: 5 }, (_nothing, index) => ({
+    id: index + 1,
+    name: `Speler ${index + 1}`,
+    shirtNumber: index + 1,
+  }))
+  const row = (keuze: string, rol = 'basis'): Row => ({ ...emptyRow('speler'), keuze, rol })
+  // Two in the line-up (1 and 2), one on the bench (3), and an empty place of each.
+  const base = values({
+    wij: { ...emptySide(), speler: [row('1'), row('2'), row('3', 'bank'), row(''), row('', 'bank')] },
+  })
+  const ids = (index: number) => squadChoicesForRow(base, index, players).map((player) => player.id)
+
+  it('gives a place on the bench the players who are not in the line-up and not on the bench', () => {
+    expect(ids(4)).toEqual([4, 5])
+  })
+
+  it('keeps the player of a place in his own list, also when he is on the bench or in the line-up', () => {
+    expect(ids(2)).toEqual([3, 4, 5])
+    expect(ids(0)).toEqual([1, 3, 4, 5])
+  })
+
+  it('gives a place in the line-up the players who are not in the line-up already, a player of the bench among them', () => {
+    expect(ids(3)).toEqual([3, 4, 5])
+  })
+
+  it('lets a name that is not in the squad stay out of the way: it takes nobody from the list', () => {
+    const other = values({
+      wij: { ...emptySide(), speler: [{ ...emptyRow('speler'), keuze: 'andere', naam: 'Nieuw' }, row('')] },
+    })
+
+    expect(squadChoicesForRow(other, 1, players)).toHaveLength(5)
+  })
+})
+
+describe('clearTakenPlayers', () => {
+  const row = (keuze: string, rol = 'basis'): Row => ({ ...emptyRow('speler'), keuze, rol })
+
+  it('gives the other places of a player who was chosen, so the bench place of a starter is emptied', () => {
+    const found = values({ wij: { ...emptySide(), speler: [row('3'), row('1'), row('3', 'bank')] } })
+
+    expect(clearTakenPlayers(found, 1)).toEqual([3])
+    expect(clearTakenPlayers(found, 3)).toEqual([1])
+  })
+
+  it('gives nothing for an empty choice or a name that is not in the squad, and for a player who is once there', () => {
+    const found = values({ wij: { ...emptySide(), speler: [row(''), row('andere'), row('4'), row('5')] } })
+
+    expect([1, 2, 3, 4].map((chosen) => clearTakenPlayers(found, chosen))).toEqual([[], [], [], []])
+    expect(clearTakenPlayers(found, 9)).toEqual([])
+  })
+})
+
+describe('playerChoices of the bench', () => {
+  it('lists only the players with the role Bank, as the choices of a substitute', () => {
+    const rows: Row[] = [
+      { ...emptyRow('speler'), keuze: 'andere', naam: 'Basis', rol: 'basis' },
+      { ...emptyRow('speler'), keuze: 'andere', naam: 'Aanvoerder', rol: 'aanvoerder' },
+      { ...emptyRow('speler'), keuze: 'andere', naam: 'Invaller', rol: 'bank' },
+    ]
+    const list = playerChoices(values({ wij: { ...emptySide(), speler: rows } }), 'wij', [], false, true)
+
+    expect(list).toEqual([{ label: 'Invaller', value: '3' }])
   })
 })

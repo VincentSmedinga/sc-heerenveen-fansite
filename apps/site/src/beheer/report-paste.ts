@@ -181,6 +181,7 @@ export function readPastedReport(
 
   // The players, line-up and bench, since the other lines point to them.
   const people: Record<Side, Placed[]> = { wij: [], zij: [] }
+  const placedBefore: Record<Side, Set<string>> = { wij: new Set(), zij: new Set() }
 
   for (const entry of entries.filter((item) => item.section === 'opstelling' || item.section === 'bank')) {
     const side = entry.side
@@ -294,6 +295,20 @@ export function readPastedReport(
           )
         }
       }
+    }
+
+    // A player is in the report once: a second place for the same player, in the line-up or on
+    // the bench, is not read, so the form never starts with him twice.
+    const who = row.keuze !== '' ? `id:${row.keuze}` : `naam:${(row.naam ?? '').toLocaleLowerCase('nl')}`
+
+    if (row.keuze !== '' || (row.naam ?? '') !== '') {
+      if (placedBefore[side].has(who)) {
+        miss(entry, `${label} staat al in de opstelling of op de bank van deze kant.`)
+
+        continue
+      }
+
+      placedBefore[side].add(who)
     }
 
     values[side].speler.push(row)

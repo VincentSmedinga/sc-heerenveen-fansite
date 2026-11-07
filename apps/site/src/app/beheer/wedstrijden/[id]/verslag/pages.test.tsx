@@ -250,3 +250,50 @@ describe('the report screen', () => {
     expect(await database.db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId))).toHaveLength(3)
   })
 })
+
+describe('the choices of the line-up, the bench and the substitutes', () => {
+  /** The values of the options of a select of the page, in order. */
+  const optionsOf = (html: string, id: string) =>
+    [
+      ...(new RegExp(`<select[^>]*id="${id}"[^>]*>(.*?)</select>`, 's').exec(html)?.[1] ?? '').matchAll(
+        /<option value="([^"]*)"/g,
+      ),
+    ].map(([, value]) => value)
+  const ids = (from: number, to: number) => squad.slice(from, to).map((player) => String(player.id))
+
+  it('gives a place on the bench the players of the squad who are not in the line-up, and not the other places of the bench', async () => {
+    await store()
+
+    const html = await page(matchId)
+
+    // Row 12 is on the bench: the line-up (rows 1 to 11) and the other places of the bench
+    // (rows 13 and 14) are not in his list, and he is.
+    expect(optionsOf(html, 'speler-wij-12-keuze')).toEqual(['', ...ids(11, 12), 'andere'])
+    expect(optionsOf(html, 'speler-wij-13-keuze')).toEqual(['', ...ids(12, 13), 'andere'])
+  })
+
+  it('gives a place in the line-up the players who are not in the line-up already, the bench among them', async () => {
+    await store()
+
+    const html = await page(matchId)
+
+    expect(optionsOf(html, 'speler-wij-1-keuze')).toEqual(['', ...ids(0, 1), ...ids(11, 14), 'andere'])
+  })
+
+  it('gives a substitute only from the bench, and keeps the player a substitution has already', async () => {
+    await store({ wij: { wissel: [substitution({ erin: '12', eruit: '11', minuut: '60' })] } })
+
+    const html = await page(matchId)
+
+    // The values are the numbers of the rows: 12, 13 and 14 are the places of the bench.
+    expect(optionsOf(html, 'wissel-wij-1-erin')).toEqual(['', '12', '13', '14'])
+    // Who goes off can be anybody who played.
+    expect(optionsOf(html, 'wissel-wij-1-eruit')).toHaveLength(15)
+  })
+
+  it('has the same rule for the opponent: a name, so a place on his bench has no list of players', async () => {
+    const html = await page(matchId)
+
+    expect(html).not.toContain('id="speler-zij-1-keuze"')
+  })
+})

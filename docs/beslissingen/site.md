@@ -3170,6 +3170,7 @@
   - **Het zoekwoord** van een nieuwe speler (`search_term`) is zijn naam zonder de eerste naam, zoals de importer het maakt, maar zonder zijn lijst met voorvoegsels.
 - **Waarom:** de selectie van Wikipedia loopt soms achter, en een verslag mag daar niet op wachten.
 - **Alternatieven:** alleen de selectie (een verslag wacht dan op Wikipedia); elke speler als losse naam (dan kan het verslag geen cijfers per speler geven).
+- **Later:** zie _De bank kiest uit wie niet in de basis staat_ (7 november 2026): een speler staat in het verslag één keer, in de basis of op de bank, en de keuzelijst van elke plek houdt daar rekening mee.
 
 ## "Klaar" kan alleen zonder fouten, en een verslag dat later niet meer klopt, krijgt "Controleer"
 
@@ -3319,3 +3320,21 @@
 - **Waarom:** de nieuwe bron wint omdat hij preciezer is, en de cijfers van Wikipedia zijn een controle op onze invoer.
   Een verschil is voor de redactie, niet voor de bezoeker.
 - **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); bij elke lezing van de importer schrijven en zelf bijhouden wat er al staat (het logboek wordt niet gelezen, dus elke run zou het herhalen); vergelijken ook als een verslag ontbreekt (een regel per speler die niets zegt).
+
+## De bank kiest uit wie niet in de basis staat
+
+- **Datum:** 7 november 2026
+- **Besluit:** een speler staat in het verslag óf in de basis óf op de bank, en de keuzelijsten van het scherm "Opstelling en bank" en "Wissels" houden daar rekening mee (#838).
+  - **Een plek op de bank** toont de spelers van de selectie die niet in de basis staan, en een speler die al op de bank staat, is op een andere plek van de bank niet meer te kiezen.
+  - **Een plek in de basis** toont de spelers die niet al in de basis staan, dus ook een speler van de bank.
+    Kies je hem, dan wordt zijn plek op de bank leeg gemaakt, en een schermlezer hoort dat ("… staat nu in de opstelling. Zijn andere plaats in het verslag is leeg gemaakt.").
+  - **De lijsten volgen de basis:** met JavaScript veranderen ze meteen als de basis of een rol verandert.
+    Zonder JavaScript maakt de server ze opnieuw na elke knop en elke keer opslaan, en een speler die dan toch twee keer staat, geeft bij het opslaan een fout bij het veld ("Speler 3 staat al in het verslag, bij Speler 3").
+  - **Bij een wissel** toont "Erin" alleen de spelers met de rol Bank, en "Eruit" iedereen die in het verslag staat: wie erin komt, zat op de bank.
+  - **De tegenstander** heeft geen keuzelijst, want zijn spelers zijn namen.
+    Dezelfde naam twee keer in zijn verslag, ook met andere hoofdletters, geeft dezelfde fout.
+  - **Het plakscherm** (#830) leest een speler die twee keer in de tekst staat één keer, en meldt de tweede regel als niet gelezen.
+  - **De regels van #828** veranderen niet.
+- **Waarom:** de lijst van een plek op de bank liet alle spelers van de selectie zien, ook die in de basis stonden, zodat de bank met een speler uit de basis gevuld kon worden.
+  De regels vingen dat pas bij het opslaan op.
+- **Alternatieven:** alleen bij het opslaan een fout geven (de beheerder ziet pas daar dat de lijst fout was); een aparte lijst voor de bank in plaats van een rol bij elke speler (een verslag met twee tabellen die elkaar moeten kennen, en een speler verplaatsen vraagt dan weghalen en opnieuw invullen).

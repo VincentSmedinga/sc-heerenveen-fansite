@@ -233,26 +233,30 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
         return
       }
 
+      // A player is in the report once, in the line-up or on the bench: one of ours by his row
+      // in the squad or else by his name, one of the opponent by his name.
       const key =
-        side === 'wij' ? (known === undefined ? `naam:${given.toLocaleLowerCase('nl')}` : `id:${known.id}`) : undefined
+        side === 'wij'
+          ? known === undefined
+            ? `naam:${given.toLocaleLowerCase('nl')}`
+            : `id:${known.id}`
+          : `zij:${given.toLocaleLowerCase('nl')}`
 
-      if (key !== undefined) {
-        const first = squadIds.get(key)
+      const first = squadIds.get(key)
 
-        if (first !== undefined) {
-          parseFail(
-            'speler',
-            side,
-            number,
-            chosen === undefined ? 'naam' : 'keuze',
-            `${given} staat al in het verslag, bij ${first}.`,
-          )
+      if (first !== undefined) {
+        parseFail(
+          'speler',
+          side,
+          number,
+          chosen === undefined ? 'naam' : 'keuze',
+          `${given} staat al in het verslag, bij ${first}.`,
+        )
 
-          return
-        }
-
-        squadIds.set(key, `${rowNames.speler} ${number}`)
+        return
       }
+
+      squadIds.set(key, `${rowNames.speler} ${number}`)
 
       placeOf.set(`${side}-${number}`, players.length)
       origins.appearances.push([side, number])

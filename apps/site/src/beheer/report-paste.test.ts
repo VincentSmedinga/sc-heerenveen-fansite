@@ -107,9 +107,9 @@ describe('a player of ours', () => {
   })
 
   it('takes the number first, and the name only when there is no number in the squad', () => {
-    const result = read('Opstelling\n9 Oyen\n9')
+    const result = read('Opstelling\n9 Oyen\n4')
 
-    expect(result.values.wij.speler.map((row) => row.keuze)).toEqual(['9', '9'])
+    expect(result.values.wij.speler.map((row) => row.keuze)).toEqual(['9', '4'])
   })
 
   it('is a choice, not a guess, when two players have the same surname', () => {
@@ -219,7 +219,8 @@ describe('a line that is not a player', () => {
   })
 
   it('stops after the most lines, and says so', () => {
-    const lines = ['Opstelling', ...Array.from({ length: pasteMaxLines + 5 }, () => '4')]
+    // Every line is another player, since a player is in the report once.
+    const lines = ['Opstelling', ...Array.from({ length: pasteMaxLines + 5 }, (_line, index) => `4 Naam ${index}`)]
     const result = read(lines.join('\n'))
 
     expect(result.values.wij.speler).toHaveLength(pasteMaxLines - 1)
@@ -407,5 +408,29 @@ describe('what was read', () => {
     const result = read(`Opstelling\n${'x'.repeat(500)}`)
 
     expect(result.unread[0]?.text).toHaveLength(120)
+  })
+})
+
+describe('a player who is in the text twice', () => {
+  it('is read once, in the line-up or on the bench, and the second place is said not to be read', () => {
+    const result = read('Opstelling\n9 Oyen\nBank\n9 Oyen\n12')
+
+    expect(result.values.wij.speler.map((row) => [row.keuze, row.rol])).toEqual([
+      ['9', 'basis'],
+      ['12', 'bank'],
+    ])
+    expect(result.unread).toEqual([
+      expect.objectContaining({
+        line: 4,
+        reason: '9 Luca Oyen staat al in de opstelling of op de bank van deze kant.',
+      }),
+    ])
+  })
+
+  it('does the same for a player of the opponent, by his name in any capitals', () => {
+    const result = read('Tegenstander\nOpstelling\n7 Sibbing\nBank\n7 SIBBING')
+
+    expect(result.values.zij.speler).toHaveLength(1)
+    expect(result.unread).toHaveLength(1)
   })
 })
