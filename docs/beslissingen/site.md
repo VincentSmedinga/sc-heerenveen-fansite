@@ -3060,10 +3060,10 @@
     Met `sideEffects` weet hij dat, en de homepage laadt nu 5,3 KiB minder (van 159,2 naar 153,9 KiB, 3,3%).
 - **Waarom:** zonder lijst neemt Next.js de standaard (Chrome 111, Safari 16.4), die ruimer is dan ons beleid.
   De projecteigenaar koos voor dezelfde grens als het beleid.
-- **Niet bereikt:** de eis dat de homepage minstens 25% minder JavaScript stuurt is niet haalbaar.
-  Ook zonder een enkel eigen onderdeel is de bodem 134,2 KiB, en dat is 16% minder dan de 159,2 KiB van de meting vooraf.
-  De rest zit in `react-dom` en de client van Next.js, en daar kunnen we niets aan veranderen zonder het framework te vervangen.
-  Voor TBT geldt de eis wel: die is 2 ms in dezelfde meting (mobiel, mediaan van drie runs).
+- **Geen 25% minder:** het issue vroeg minstens 25% minder JavaScript op de homepage, en dat is niet haalbaar.
+  De projecteigenaar koos op 7 november 2026 voor het criterium dat de `browserslist` en `sideEffects` gedaan en gemeten zijn, dat de oorzaak van het gewicht in de pull request en in `docs/prestaties.md` staat, en dat TBT onder 50 ms blijft (nu 2 ms).
+  Er worden geen onderdelen omgebouwd.
+  Ook zonder een enkel eigen onderdeel is de bodem 134,2 KiB, 16% minder dan de 159,2 KiB van de meting vooraf, want 134,2 KiB is `react-dom` en de client van Next.js.
 - **Meting vooraf en achteraf** (Lighthouse 13.6.0, de opdracht van `docs/prestaties.md` op een lokale build, mediaan van drie runs): JavaScript 159,2 KiB na 153,9 KiB, TBT 2 ms voor en na, prestaties 100, CLS 0,000.
   De waarde van de homepage in `.github/lighthouse.json` gaat 5,3 KiB omlaag, van 151,8 naar 146,5 KiB.
 - **Alternatieven:** de standaard van Next.js houden (de meeste polyfills blijven niet door deze lijst maar door Next.js zelf); een lijst met een vaste grens zoals de laatste twee versies (een ander beleid dan we besloten); de themaknop, de navigatie en `PullToRefresh` omzetten naar servercomponenten of ze later laden (geeft hooguit 10 KiB, en verandert het gedrag of de toegankelijkheid van onderdelen die elke bezoeker gebruikt).
