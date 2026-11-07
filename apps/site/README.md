@@ -1000,6 +1000,26 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 - Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) onder die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
   De vlag komt uit `hasEditedMatches` en is zo vers als de gegevens van het seizoen.
 
+### Het verslag van een wedstrijd invullen
+
+`/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd: de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen.
+Een wedstrijd die niet bestaat of niet gespeeld is, geeft "niet gevonden".
+De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
+
+- Het scherm is een gewone post, zoals het formulier van de wedstrijd, en werkt zonder JavaScript.
+  Elke lijst is een `InputTable` met een knop om een rij toe te voegen en een knop per rij om hem weg te halen.
+  `ReportForm.tsx` heeft de onderdelen (`ReportFormProvider`, `ReportErrorSummary`, `ReportFields` en `ReportSavePanel`), net als `MatchForm.tsx`.
+  Met JavaScript volgen de keuzelijsten met spelers de opstelling zoals ze getypt is.
+- `src/beheer/report-fields.ts` heeft wat de browser ook laadt: de namen van de velden, het lezen van het verzoek en wat een knop met de rijen doet.
+  Een veld heet `<soort>-<kant>-<nummer>-<veld>`, zoals `wissel-wij-2-minuut`.
+- `src/beheer/report-form.ts` controleert wat het formulier stuurt, altijd opnieuw op de server (`checkReportForm`).
+  Eerst de eisen van de database, dan de regels van `@fansite/shared/match-report`, met elke fout bij het veld van de rij waar ze over gaat.
+  Een verslag dat de database niet kan bewaren, wordt niet bewaard; een verslag dat alleen de regels niet goedkeuren, kan als `bezig` worden bewaard, en als `klaar` niet.
+- `src/beheer/match-reports.ts` leest het scherm (`findReportScreen`), zet een bewaard verslag terug in een formulier (`valuesOfReport`), slaat op (`saveReport`) en haalt weg (`removeReport`).
+  Opslaan schrijft het verslag, de spelers, de gebeurtenissen en de doelpunten met `appearance_id`, de markering `goals_edited` en een regel `match.edit` in één transactie.
+  Een opslag zonder verschil schrijft niets.
+- Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
+
 ### De stadions van een club
 
 `/beheer/stadions` (`src/app/beheer/stadions`) is alleen voor beheerders: een moderator krijgt "niet gevonden".

@@ -3119,3 +3119,81 @@
   - **De tegenstander die niet af is** (`opponent_complete` uit) heeft in plaats van een opstelling één zin: "De opstelling van <club> hebben we niet."
     Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
   - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.
+
+## Het verslag is een eigen scherm bij de wedstrijd: `/beheer/wedstrijden/<nummer>/verslag`
+
+- **Datum:** 7 november 2026
+- **Besluit:** het verslag van een gespeelde wedstrijd vul je in op een scherm van zijn eigen, naast het formulier van de wedstrijd (#829).
+  Het scherm heeft kopjes voor Gegevens (de bron, de status en of de tegenstander ook af is) en, voor sc Heerenveen en daarna voor de tegenstander, Opstelling en bank, Wissels, Doelpunten, Kaarten en Gemiste strafschoppen.
+  De tegenstander is optioneel: "Is de kant van de tegenstander ook af?" zet `opponent_complete`.
+  Een wedstrijd die niet bestaat of niet gespeeld is, geeft de pagina "niet gevonden".
+  - **De lijst met wedstrijden** heeft een kolom Verslag met Leeg, Bezig, Klaar of Controleer, en een link naar het scherm; het formulier van de wedstrijd linkt er ook naartoe.
+  - **Rijen en knoppen:** elke lijst is een `InputTable` met een knop om een rij toe te voegen en een knop per rij om hem weg te halen, zodat het scherm zonder JavaScript werkt.
+    Elk veld en elke knop noemt zijn rij ("Wissel 2, minuut"), en de eerste knop van het formulier is een verborgen "Opslaan", zodat Enter niets weghaalt.
+  - **Een gebeurtenis wijst naar een speler met het nummer van zijn rij** in de lijst van zijn team (`3`), en een doelpunt wijst met het team en het nummer (`wij-3`), omdat de scorer van een eigen doelpunt bij het andere team staat.
+    Haal je een speler weg, dan wissen de plekken die naar hem wezen en schuiven de nummers erachter op (`applyReportButton`).
+    De keuzelijsten met spelers volgen de opstelling zoals ze getypt is: met JavaScript meteen, zonder JavaScript na elke knop en na elke keer opslaan.
+  - **Een nieuw verslag** begint met elf lege rijen voor onze opstelling en met de doelpunten van de wedstrijd op naam, zodat de redacteur alleen hoeft te kiezen wie speelde.
+    Een rij waar niets in staat, telt niet mee.
+  - **Het veld Bron:** erboven staat in één zin wat erin hoort: de naam van wat je overtypt, nooit tekst van een verslag en geen hele tabellen van een site met statistieken.
+- **Waarom:** het formulier van de wedstrijd gaat over de uitslag en de aftrap, het verslag is veel groter.
+  Twee schermen houden beide klein, en een beheerder kan een wedstrijd opslaan zonder het verslag te raken.
+- **Alternatieven:** alles in één formulier (honderd velden op één pagina, en elke kleine correctie bewaart ook het verslag).
+
+## De doelpunten van een wedstrijd met een verslag bewerk je alleen in het verslag
+
+- **Datum:** 7 november 2026
+- **Besluit:** heeft een wedstrijd een verslag (in elke status), dan toont het formulier van de wedstrijd de doelpunten als tekst, zonder velden, met een link naar het verslag (#829).
+  Het verslag schrijft de doelpunten naar `match_goals` en zet de markering `goals_edited`, met de vaste reden "Verslag van de wedstrijd".
+  Er is geen veld voor een reden: een verslag in meerdere keren invullen kost dan bij elke keer een zin.
+  - **Het formulier van de wedstrijd** laat de doelpunten dan zoals het verslag ze maakte, en slaat de aftrap en de uitslag op zoals altijd.
+    Een wedstrijd met een verslag blijft gespeeld: de status veranderen kan pas als het verslag weg is.
+  - **"Invoer weghalen"** zet de aftrap en de uitslag terug en laat de doelpunten en hun markering staan.
+    Die haalt alleen "Verslag weghalen" weg.
+  - **Wikipedia neemt de doelpunten over** (de afwijking die een beheerder beslist, of de import na zeven dagen): de doelpunten verliezen dan de speler van het verslag.
+    Het verslag blijft, en de lijst zegt Controleer als het `klaar` was en niet meer klopt.
+- **Waarom:** twee plekken om dezelfde doelpunten te bewerken maken verschillen die niemand ziet.
+  De markering houdt de import van Wikipedia van de doelpunten af.
+- **Alternatieven:** een reden bij elke keer opslaan (zoals de rest van het beheer), wat bij tientallen keren per seizoen vervelend is voor wat een gewone invoer is.
+- **Later:** vult _De invoer van de redactie staat in de gewone tabellen, met een markering_ in `importer.md` aan: ook een verslag zet `goals_edited`, en de import houdt de spelers (`appearance_id`) van de doelpunten vast zolang de markering staat.
+
+## Een speler kies je uit de selectie van het seizoen, of je voegt hem toe
+
+- **Datum:** 7 november 2026
+- **Besluit:** elke speler van sc Heerenveen in het verslag kies je uit een lijst met de selectie van het seizoen van de wedstrijd (rugnummer en naam), met de keuze Andere speler met een veld voor de naam (#829).
+  Het rugnummer van de selectie is de standaard, maar het verslag heeft zijn eigen rugnummer, want het kan voor deze wedstrijd anders zijn.
+  Een speler van de tegenstander is altijd een naam met een rugnummer.
+  - **Bij opslaan** krijgt een speler die niet in de selectie staat een rij in `players` met bron `verslag`, of de rij die er al was met die naam (zonder hoofdletters te vergelijken).
+    Dezelfde speler twee keer in een verslag geeft een fout bij de tweede rij, ook als de ene gekozen is en de andere met de naam is getypt.
+  - **Bij een doelpunt zonder speler uit de lijst** vul je zijn naam in bij Andere naam.
+    Zo blijft het doelpunt van Wikipedia staan met zijn naam, en past het verslag bij de uitslag, ook voor de tegenstander als zijn kant niet af is.
+  - **Het zoekwoord** van een nieuwe speler (`search_term`) is zijn naam zonder de eerste naam, zoals de importer het maakt, maar zonder zijn lijst met voorvoegsels.
+- **Waarom:** de selectie van Wikipedia loopt soms achter, en een verslag mag daar niet op wachten.
+- **Alternatieven:** alleen de selectie (een verslag wacht dan op Wikipedia); elke speler als losse naam (dan kan het verslag geen cijfers per speler geven).
+
+## "Klaar" kan alleen zonder fouten, en een verslag dat later niet meer klopt, krijgt "Controleer"
+
+- **Datum:** 7 november 2026
+- **Besluit:** opslaan met status `bezig` kan altijd, als de gegevens zelf te bewaren zijn (#829).
+  Opslaan met `klaar` doet alleen als de regels van #828 geen fout geven, en laat anders het verslag op `bezig` staan, met de fouten bij de velden en een melding bovenaan.
+  Verandert de uitslag van Wikipedia daarna zo dat de doelpunten niet meer kloppen, dan blijft de status staan en toont de lijst Controleer en het scherm de fout, tot het is hersteld.
+  - **Wat de gegevens zelf te bewaren maakt:** de database wil een minuut van 1 tot 120, blessuretijd van 1 tot 15 na minuut 45, 90, 105 of 120, een rugnummer van 1 tot 99 dat één keer in een team voorkomt, en een speler die één keer eruit en één keer erin gaat en elke soort kaart één keer krijgt.
+    Een verslag dat daar niet aan voldoet, wordt niet bewaard, ook niet als `bezig`: de fout staat bij het veld en niets wordt opgeslagen.
+    Voor het overige (een elftal van tien, een tweede aanvoerder, een assist van een speler die niet op het veld stond) bewaart het scherm het verslag als `bezig` en noemt de fouten.
+  - **Controleer** wordt bij het lezen van de lijst en van het scherm uitgerekend uit de regels, en niet opgeslagen: de status in `match_reports` blijft `klaar`.
+  - **Een opslag zonder verschil schrijft niets**, ook geen regel in het logboek en geen nieuwe tijd van `saved_at`.
+    Het scherm vergelijkt het verslag met wat er staat (spelers, gebeurtenissen en doelpunten, met de plek van elke gebeurtenis).
+  - **Waarschuwingen** (te veel wissels, een korte bank) staan bij hun lijst en houden niets tegen.
+- **Waarom:** iemand moet een verslag kunnen onderbreken, en toch weet de lezer van de pagina (#831) alleen van een verslag dat klopt.
+- **Alternatieven:** "klaar" ook met fouten laten opslaan en alleen waarschuwen (dan telt een verslag dat niet klopt mee in de cijfers); Controleer opslaan als status (een derde waarde die de import of een pagina moet bijhouden terwijl de regels het altijd kunnen uitrekenen).
+
+## Het verslag weghalen zet de doelpunten terug
+
+- **Datum:** 7 november 2026
+- **Besluit:** "Verslag weghalen" haalt de rijen van het verslag weg en zet de doelpunten terug op wat Wikipedia zei voor de eerste invoer van de doelpunten, zoals het bestaande "Weghalen" van de invoer van een wedstrijd (#829).
+  Het vraagt een reden, zoals elke weghaalactie, en schrijft `match.undo` in het logboek.
+  - **Zonder markering** (Wikipedia had dezelfde doelpunten al overgenomen en de import had de markering gewist) blijven de doelpunten staan zoals ze zijn, zonder spelers.
+  - **Een speler die voor het verslag aan `players` werd toegevoegd,** blijft in de selectie van het seizoen: hij kan in een ander verslag staan, en de selectie is geen werk van dit scherm.
+  - **Een afwijking van Wikipedia over de doelpunten** die nog wachtte, vervalt, omdat de doelpunten weer volgen wat Wikipedia zegt.
+- **Waarom:** een verslag dat je weghaalt moet geen stukken van zichzelf achterlaten die de pagina's als doelpunt blijven tonen.
+- **Alternatieven:** de doelpunten van het verslag laten staan met de markering (de import blijft ze dan afhouden van Wikipedia, terwijl het verslag weg is).
