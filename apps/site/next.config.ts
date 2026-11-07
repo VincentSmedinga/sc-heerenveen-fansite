@@ -3,6 +3,7 @@ import type { NextConfig } from 'next'
 import { loadEnvConfig } from '@next/env'
 import { fileURLToPath } from 'node:url'
 
+import { cacheHeaders } from './src/cache-headers.ts'
 import { headerColourEnv } from './src/header-colour-env.ts'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
@@ -19,6 +20,9 @@ const config: NextConfig = {
   // The colour of the header, read from the colour tokens of the design system and put into the
   // code when the site is built, because the server has no such file (see src/colours.ts).
   env: headerColourEnv(),
+  // A short cache for the files in public/, which have no hash in their name (see
+  // src/cache-headers.ts). Pages and /_next/static keep what Next.js sends.
+  headers: cacheHeaders,
   // The build holds only the files the server uses, with a server.js to start it. CI builds it
   // and copies it to the host.
   output: 'standalone',
