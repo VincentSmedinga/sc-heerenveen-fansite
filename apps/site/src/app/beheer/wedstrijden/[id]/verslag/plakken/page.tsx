@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { matchesPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
-import { findReportScreen } from '#src/beheer/match-reports'
+import { findReportScreen, seriesOf } from '#src/beheer/match-reports'
 import { describeStored } from '#src/beheer/report-paste'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -44,7 +44,13 @@ export default async function PasteReportPage({ params }: Props) {
     <PasteProvider
       action={submitPaste.bind(null, match.id)}
       cancelHref={reportPath(match.id)}
-      choices={{ opponent: match.opponent, showDelay: describeShowDelay(match.season), squad }}
+      choices={{
+        matchHref: matchPath(match.id),
+        opponent: match.opponent,
+        series: seriesOf(match),
+        showDelay: describeShowDelay(match.season),
+        squad,
+      }}
       existing={report === undefined ? undefined : describeStored(report)}
     >
       <Page.Main

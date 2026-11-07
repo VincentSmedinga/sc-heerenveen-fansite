@@ -5,7 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
-import { cupReportPath, matchId, playedMatchId, reportPath } from './matches'
+import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -17,7 +17,8 @@ import { cupReportPath, matchId, playedMatchId, reportPath } from './matches'
 // is still to be played, which the database gives, and `{held}` for the match of the season
 // before it that has a made-up change of Wikipedia that is held back (see held-changes.ts), and
 // `{report}` for the page of the made-up match that has a report, and `{cupReport}` for the one
-// with extra time and a shoot-out (see matches.ts).
+// with extra time and a shoot-out (see matches.ts), and `{cupMatch}` for the number of that
+// match, for the screen of its report in the admin.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -212,6 +213,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
+  // The cup tie with a shoot-out has the lists of the kicks, and the series in the preview.
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{cupMatch}/verslag', status: 200 },
   // The screen that reads a pasted text into the form of the report.
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },
@@ -275,6 +278,7 @@ async function withNumbers(path: string) {
         .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '{played}')
         .replace('{report}', path.includes('{report}') ? await reportPath() : '{report}')
         .replace('{cupReport}', path.includes('{cupReport}') ? await cupReportPath() : '{cupReport}')
+        .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')
     : path
 }
 

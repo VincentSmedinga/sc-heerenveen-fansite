@@ -1,8 +1,14 @@
 import type { Match } from '@fansite/db/schema'
-import type { CardKind, IncidentKind, MatchReport as ReportForRules, ReportIssue } from '@fansite/shared/match-report'
+import type {
+  CardKind,
+  IncidentKind,
+  MatchReport as ReportForRules,
+  ReportIssue,
+  ShootoutOutcome,
+} from '@fansite/shared/match-report'
 
 import { matchForRules } from '@fansite/db/match-reports'
-import { matchReportLimits, playerNameMaxLength } from '@fansite/db/schema'
+import { matchReportLimits, playerNameMaxLength, shootoutLimits } from '@fansite/db/schema'
 import { checkMatchReport, formationChoices, formationProblem } from '@fansite/shared/match-report'
 
 import {
@@ -26,6 +32,7 @@ import {
   type RowKind,
   rowKinds,
   rowNames,
+  shootoutOutcomeChoices,
   type Side,
   sides,
   statusChoices,
@@ -88,6 +95,11 @@ export type ReportPlan = {
   })[]
   incidents: (Moment & { appearance: number; kind: IncidentKind; ours: boolean })[]
   opponentComplete: boolean
+  /**
+   * The kicks of the shoot-out. A kick points to its player like an event, and is empty for an
+   * opponent whose side is not complete. The round counts from 1 for each team.
+   */
+  shootout: { appearance: null | number; ours: boolean; outcome: ShootoutOutcome; round: number }[]
   source: null | string
   /** What the editor asked for. The report is stored `bezig` when it can not be `klaar` yet. */
   status: 'bezig' | 'klaar'
@@ -126,6 +138,10 @@ const fieldOfCode: Record<string, FieldName> = {
   'second-yellow-is-yellow-red': 'soort',
   'shirt-number-out-of-range': 'rugnummer',
   'shirt-number-twice': 'rugnummer',
+  'shootout-kick-without-player': 'speler',
+  'shootout-player-not-on-pitch': 'speler',
+  'shootout-player-other-team': 'speler',
+  'shootout-player-twice': 'speler',
   'stoppage-in-the-middle-of-a-half': 'extra',
   'stoppage-out-of-range': 'extra',
   'substitution-in-not-on-bench': 'erin',
@@ -143,6 +159,7 @@ const kindOfPart = {
   cards: 'kaart',
   goals: 'doelpunt',
   incidents: 'strafschop',
+  shootout: 'serie',
   substitutions: 'wissel',
 } as const satisfies Record<string, RowKind>
 
@@ -312,6 +329,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     goals: [],
     incidents: [],
     opponentComplete: values.tegenstander === 'ja',
+    shootout: [],
     source: values.bron === '' ? null : values.bron,
     status: status ?? 'bezig',
     substitutions: [],
@@ -320,6 +338,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     cards: [] as [Side, number][],
     goals: [] as [Side, number][],
     incidents: [] as [Side, number][],
+    shootout: [] as [Side, number][],
     substitutions: [] as [Side, number][],
   }
 
@@ -447,6 +466,38 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       }
     })
 
+    // The round follows from the order of the rows of a team. A kicker may be left empty: the
+    // rules say whether his side needs him.
+    let round = 0
+
+    values[side].serie.forEach((row, index) => {
+      const number = index + 1
+
+      if (isUntouchedRow('serie', row)) {
+        return
+      }
+
+      const outcome = shootoutOutcomeChoices.find((choice) => choice.value === row.uitkomst)?.value
+      const player = point('serie', side, number, 'speler', row.speler ?? '', side, false)
+
+      round += 1
+
+      if (outcome === undefined) {
+        parseFail('serie', side, number, 'uitkomst', 'kies raak, naast of gestopt.')
+      } else if (round > shootoutLimits.lastRound) {
+        parseFail(
+          'serie',
+          side,
+          number,
+          'speler',
+          `een serie heeft hoogstens ${shootoutLimits.lastRound} schoten per team.`,
+        )
+      } else if ((row.speler ?? '') === '' || player !== undefined) {
+        origin.shootout.push([side, number])
+        plan.shootout.push({ appearance: player ?? null, ours, outcome, round })
+      }
+    })
+
     values[side].doelpunt.forEach((row, index) => {
       const number = index + 1
 
@@ -545,6 +596,12 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       stoppageMinutes: incident.stoppageMinutes,
     })),
     opponentComplete: plan.opponentComplete,
+    shootout: plan.shootout.map((kick) => ({
+      appearanceId: kick.appearance === null ? null : kick.appearance + 1,
+      ours: kick.ours,
+      outcome: kick.outcome,
+      round: kick.round,
+    })),
     status: plan.status,
     substitutions: plan.substitutions.map((substitution) => ({
       inId: substitution.in + 1,
@@ -559,6 +616,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     cards: cards.places,
     goals: goals.places,
     incidents: incidents.places,
+    shootout: origin.shootout,
     substitutions: subs.places,
   }
   let blocked = false
@@ -576,7 +634,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
   const warnings: Record<string, string[]> = {}
 
   for (const issue of checked.warnings) {
-    const [id, message] = placeIssue(issue, placesOf, where)
+    const [id, message] = placeIssue(issue, placesOf, where, true)
 
     warnings[id] = [...(warnings[id] ?? []), message]
   }
@@ -617,9 +675,9 @@ function placeIssue(
   issue: ReportIssue,
   places: Record<keyof typeof kindOfPart, [Side, number][]>,
   where: (kind: RowKind, side: Side, number: number) => string,
+  asList = false,
 ): [string, string] {
-  // The form has no place for the shoot-out yet (#852), and its report has none.
-  if (issue.place.part === 'report' || issue.place.part === 'shootout') {
+  if (issue.place.part === 'report') {
     return ['verslag', issue.message]
   }
 
@@ -627,7 +685,12 @@ function placeIssue(
   const found = issue.place.index === undefined ? undefined : places[issue.place.part][issue.place.index]
 
   if (found === undefined) {
-    const side = issue.message.includes('sc Heerenveen') || kind === 'doelpunt' ? 'wij' : 'zij'
+    // A sentence about the whole series is for the list of our team, unless it is about the
+    // other team alone.
+    const side =
+      issue.message.includes('sc Heerenveen') || kind === 'doelpunt' || issue.code === 'shootout-without-score'
+        ? 'wij'
+        : 'zij'
 
     return [listId(kind, side), issue.message]
   }
@@ -640,5 +703,9 @@ function placeIssue(
         : 'naam'
       : (fieldOfCode[issue.code] ?? rowFields[kind][0])
 
-  return [rowFieldId(kind, side, number, field), `${where(kind, side, number)}: ${issue.message}`]
+  // A warning has no field to stand at: the form shows it with the list.
+  return [
+    asList ? listId(kind, side) : rowFieldId(kind, side, number, field),
+    `${where(kind, side, number)}: ${issue.message}`,
+  ]
 }

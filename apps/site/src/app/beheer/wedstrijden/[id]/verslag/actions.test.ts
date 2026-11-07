@@ -9,6 +9,7 @@ import {
   matches,
   matchGoals,
   matchReports,
+  matchShootoutKicks,
   type NewMatch,
   players,
 } from '@fansite/db/schema'
@@ -17,8 +18,8 @@ import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
-import { emptyRow, type ReportFormState, type ReportValues } from '#src/beheer/report-fields'
-import { report as baseReport, formDataOf, squadOf, substitution } from '#src/beheer/report-fixtures'
+import { emptyRow, type ReportFormState, type ReportValues, type Row } from '#src/beheer/report-fields'
+import { report as baseReport, formDataOf, goal, squadOf, substitution } from '#src/beheer/report-fixtures'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
@@ -245,6 +246,81 @@ describe('submitReport', () => {
     const [edit] = await database.db.select().from(matchEdits)
 
     expect(edit).toMatchObject({ goalsEdited: true, resultEdited: false })
+  })
+})
+
+describe('submitReport for the kicks of the shoot-out', () => {
+  const kick = (fields: Row): Row => ({ ...emptyRow('serie'), ...fields })
+
+  /** A cup tie that ended 2-2 after extra time and 4-3 on penalties, with five rounds. */
+  async function cupReport() {
+    await database.db
+      .update(matches)
+      .set({
+        competition: 'KNVB Beker',
+        extraTime: true,
+        goalsAgainst: 2,
+        penaltiesAgainst: 3,
+        penaltiesFor: 4,
+      })
+      .where(eq(matches.id, matchId))
+
+    const values = report({
+      zij: { doelpunt: [goal({ minuut: '40', naam: 'Sibbing' }), goal({ minuut: '100', naam: 'Sibbing' })] },
+    })
+
+    values.wij.serie = [9, 10, 8, 7, 6].map((speler, index) =>
+      kick({ speler: String(speler), uitkomst: index === 2 ? 'naast' : 'raak' }),
+    )
+    values.zij.serie = ['raak', 'raak', 'naast', 'gestopt', 'raak'].map((uitkomst) => kick({ uitkomst }))
+
+    return values
+  }
+
+  it('adds a row to the list with a button, also without JavaScript, and keeps the kicks that were typed', async () => {
+    const values = await cupReport()
+    const added = (await submit(matchId, values, 'serie-zij-toevoegen')) as ReportFormState
+
+    expect(added).toMatchObject({ errors: {}, focus: 'serie-zij-6-speler', version: 1 })
+    expect(added.values.zij.serie).toHaveLength(6)
+    expect(added.values.wij.serie.map((row) => row.uitkomst)).toEqual(['raak', 'raak', 'naast', 'raak', 'raak'])
+    expect(await reports()).toHaveLength(0)
+
+    const removed = (await submit(matchId, values, 'serie-wij-weghalen-2')) as ReportFormState
+
+    expect(removed.values.wij.serie.map((row) => row.speler)).toEqual(['9', '8', '7', '6'])
+    expect(removed.focus).toBe('serie-wij-2-speler')
+  })
+
+  it('stores the kicks with the report, and takes them away when the list is empty', async () => {
+    const values = await cupReport()
+
+    expect(await submit(matchId, values)).toEqual({ redirect: reportAddress('klaar') })
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(10)
+
+    values.wij.serie = []
+    values.zij.serie = []
+    // Without the kicks the result of the series stands alone, which is allowed.
+    expect(await submit(matchId, values)).toEqual({ redirect: reportAddress('klaar') })
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(0)
+  })
+
+  it('gives a wrong series back as errors at the list and at the row, and stores nothing when the report can not be stored', async () => {
+    const values = await cupReport()
+
+    values.wij.serie[3] = kick({ speler: '30', uitkomst: 'raak' })
+
+    const unknown = (await submit(matchId, values)) as ReportFormState
+
+    expect(unknown.errors['serie-wij-4-speler']).toMatch(/in de opstelling of op de bank/u)
+    expect(await reports()).toHaveLength(0)
+
+    values.wij.serie[3] = kick({ speler: '7', uitkomst: 'naast' })
+
+    // Only three of the five went in: the report is stored as bezig, with the error.
+    expect(await submit(matchId, values)).toEqual({ redirect: reportAddress('nog-niet-klaar') })
+    expect(await reports()).toMatchObject([{ status: 'bezig' }])
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(10)
   })
 })
 

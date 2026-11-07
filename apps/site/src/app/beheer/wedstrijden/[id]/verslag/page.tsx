@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
-import { contextOf, findReportScreen, valuesOfReport } from '#src/beheer/match-reports'
+import { contextOf, findReportScreen, seriesOf, valuesOfReport } from '#src/beheer/match-reports'
 import { checkReportForm } from '#src/beheer/report-form'
 import { previewMatchOf } from '#src/beheer/report-preview-match'
 import { requireRole } from '#src/beheer/require-role'
@@ -46,11 +46,11 @@ const notices: Record<string, { text: string; title: string }> = {
 }
 
 // The report of one match: the data, and for both teams the line-up and the bench, the
-// substitutions, the goals, the cards and the missed penalties. The main column holds the cards
-// of the form, the sidebar the save panel and the block that takes the report away. The rules
-// of the report judge what is stored every time the page opens, so a report that was klaar and
-// no longer fits the result says so. The page tells what the last action did from the word in
-// the address.
+// substitutions, the goals, the cards, the missed penalties and the kicks of the shoot-out. The
+// main column holds the cards of the form, the sidebar the save panel and the block that takes
+// the report away. The rules of the report judge what is stored every time the page opens, so a
+// report that was klaar and no longer fits the result says so. The page tells what the last
+// action did from the word in the address.
 export default async function ReportPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -77,8 +77,10 @@ export default async function ReportPage({ params, searchParams }: Props) {
     <ReportFormProvider
       action={submitReport.bind(null, match.id)}
       choices={{
+        matchHref: matchPath(match.id),
         opponent: match.opponent,
         preview: previewMatchOf(match, new Date()),
+        series: seriesOf(match),
         showDelay: describeShowDelay(match.season),
         squad,
       }}

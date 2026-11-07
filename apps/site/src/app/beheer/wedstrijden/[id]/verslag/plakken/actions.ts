@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { matchesPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId } from '#src/beheer/items'
-import { contextOf, findReportScreen } from '#src/beheer/match-reports'
+import { contextOf, findReportScreen, keepShootout } from '#src/beheer/match-reports'
 import { checkReportForm } from '#src/beheer/report-form'
 import { readPastedReport } from '#src/beheer/report-paste'
 import { firstPasteState, pasteMaxLength, type PasteState } from '#src/beheer/report-paste-state'
@@ -79,7 +79,9 @@ export async function submitPaste(matchId: number, previous: PasteState, formDat
     return ask('Vink aan dat je wat nu in het verslag staat wilt vervangen, of kies Annuleren.', 'vervangen')
   }
 
-  const result = readPastedReport(text, screen.squad, { bron: screen.report?.report.source ?? '' })
+  const read = readPastedReport(text, screen.squad, { bron: screen.report?.report.source ?? '' })
+  // The text has no series, so the kicks that are stored stay, as the form holds them.
+  const result = { ...read, values: keepShootout(read.values, screen.report, screen.squad) }
   const checked = checkReportForm(result.values, contextOf(screen))
 
   return {

@@ -110,7 +110,7 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 ## Het verslag invullen
 
-Van een gespeelde wedstrijd kun je ook het verslag invullen: wie speelde, wie er inviel, de doelpunten met wie de assist gaf, de kaarten en de gemiste strafschoppen.
+Van een gespeelde wedstrijd kun je ook het verslag invullen: wie speelde, wie er inviel, de doelpunten met wie de assist gaf, de kaarten, de gemiste strafschoppen en, bij een beslissing op strafschoppen, de schoten van de serie.
 Open de wedstrijd en kies "Het verslag invullen", of kies "Invullen" in de kolom Verslag van de lijst.
 Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
 
@@ -126,7 +126,12 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
    Dan tellen elf spelers, de bank en wie scoorde ook voor hem mee.
 5. Kies bij Opstelling en bank van elk team de formatie, zoals 4-3-3, als je hem weet.
    Zonder formatie kan het verslag ook klaar zijn.
-6. Kies "Opslaan".
+6. Is de wedstrijd op strafschoppen beslist, vul dan eerst bij de wedstrijd de uitslag van de serie in (bij Strafschoppen, op de kaart Verlenging en strafschoppen).
+   Dan staat op het scherm van het verslag voor elk team de lijst Strafschoppenserie.
+   Zet in de volgorde van de rondes één rij per schot: de speler en de uitkomst (Raak, Naast of Gestopt).
+   Bij een tegenstander wiens kant niet af is, mag je de speler leeg laten.
+   Het aantal schoten dat raak is, moet de uitslag van de serie geven.
+7. Kies "Opslaan".
 
 De lijst bij de formatie heeft de gebruikelijke formaties.
 Is jouw formatie er niet bij, kies dan Anders en schrijf hem in het veld eronder, zoals 4-1-2-1-2.

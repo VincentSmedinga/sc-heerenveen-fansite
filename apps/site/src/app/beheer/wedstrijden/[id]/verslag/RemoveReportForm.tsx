@@ -29,8 +29,8 @@ export function RemoveReportForm({
   return (
     <Disclosure open={state.error === undefined ? undefined : true} summary="Verslag weghalen">
       <Text>
-        Dit haalt de spelers, de wissels, de kaarten en de gemiste strafschoppen weg. De doelpunten gaan terug naar wat
-        Wikipedia zegt.
+        Dit haalt de spelers, de wissels, de kaarten, de gemiste strafschoppen en de schoten van de strafschoppenserie
+        weg. De doelpunten gaan terug naar wat Wikipedia zegt.
       </Text>
       <Form action={formAction}>
         <Field

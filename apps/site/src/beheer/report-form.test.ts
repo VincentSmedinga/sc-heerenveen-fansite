@@ -527,3 +527,180 @@ describe('checkReportForm for the formations', () => {
     expect(order.indexOf('formatie-zij')).toBeGreaterThan(order.indexOf('kaart-wij'))
   })
 })
+
+describe('checkReportForm for the shoot-out', () => {
+  const cup: ReportMatch = {
+    ...match,
+    extraTime: true,
+    goalsAgainst: 2,
+    goalsFor: 2,
+    penaltiesAgainst: 3,
+    penaltiesFor: 4,
+  }
+  const kick = (fields: Row): Row => ({ ...emptyRow('serie'), ...fields })
+
+  /** The squad has the ids from 100, so the rows of the line-up are 1 to 14. */
+  const series = (): ReportValues => {
+    const values = report({
+      zij: { doelpunt: [goal({ minuut: '40', naam: 'Sibbing' }), goal({ minuut: '100', naam: 'Sibbing' })] },
+    })
+
+    values.wij.serie = [
+      kick({ speler: '9', uitkomst: 'raak' }),
+      kick({ speler: '10', uitkomst: 'raak' }),
+      kick({ speler: '8', uitkomst: 'naast' }),
+      kick({ speler: '7', uitkomst: 'raak' }),
+      kick({ speler: '6', uitkomst: 'raak' }),
+    ]
+    values.zij.serie = ['raak', 'raak', 'naast', 'gestopt', 'raak'].map((uitkomst) => kick({ uitkomst }))
+
+    return values
+  }
+  const check = (values: ReportValues, of: ReportMatch = cup) => checkReportForm(values, { match: of, squad })
+  const says = (values: ReportValues, id: string, message: RegExp, of: ReportMatch = cup) => {
+    const checked = check(values, of)
+
+    expect(checked.errors[id], id).toMatch(message)
+
+    return checked
+  }
+
+  it('stores the kicks with their round, which follows the order of the rows of a team', () => {
+    const checked = check(series())
+
+    expect(checked.errors).toEqual({})
+    expect(
+      checked.plan?.shootout.filter((item) => item.ours).map((item) => [item.round, item.appearance, item.outcome]),
+    ).toEqual([
+      [1, 8, 'raak'],
+      [2, 9, 'raak'],
+      [3, 7, 'naast'],
+      [4, 6, 'raak'],
+      [5, 5, 'raak'],
+    ])
+    expect(checked.plan?.shootout.filter((item) => !item.ours).map((item) => [item.round, item.appearance])).toEqual([
+      [1, null],
+      [2, null],
+      [3, null],
+      [4, null],
+      [5, null],
+    ])
+  })
+
+  it('leaves out the rows nobody touched, so the rounds do not skip, and a match without kicks is right', () => {
+    const values = series()
+
+    values.wij.serie = [kick({}), ...values.wij.serie.slice(0, 1), kick({}), ...values.wij.serie.slice(1)]
+    values.zij.serie = values.zij.serie.map((row) => row)
+
+    const checked = check(values)
+
+    expect(checked.errors).toEqual({})
+    expect(checked.plan?.shootout.filter((item) => item.ours).map((item) => item.round)).toEqual([1, 2, 3, 4, 5])
+    expect(
+      check({ ...series(), wij: { ...series().wij, serie: [] }, zij: { ...series().zij, serie: [] } }).errors,
+    ).toEqual({})
+  })
+
+  it('says a series needs the result of the shoot-out of the match, at the list of sc Heerenveen', () => {
+    const checked = says(series(), 'serie-wij', /geen uitslag van de serie/u, {
+      ...cup,
+      penaltiesAgainst: null,
+      penaltiesFor: null,
+    })
+
+    expect(checked.plan).toBeDefined()
+  })
+
+  it('says the kicks that went in must add up to the result, at the list of the team they are wrong for', () => {
+    says(series(), 'serie-wij', /sc Heerenveen geven 4 raak en de uitslag van de serie is 5–3/u, {
+      ...cup,
+      penaltiesFor: 5,
+    })
+
+    const checked = says(series(), 'serie-zij', /De schoten van N\.E\.C\.|de tegenstander geven 3 raak/u, {
+      ...cup,
+      penaltiesAgainst: 2,
+    })
+
+    expect(checked.errors['serie-wij']).toBeUndefined()
+  })
+
+  it('says the teams may differ by one kick and not more', () => {
+    const one = series()
+
+    one.zij.serie.pop()
+    expect(check(one, { ...cup, penaltiesAgainst: 2 }).errors).toEqual({})
+
+    const two = series()
+
+    two.zij.serie.splice(3, 2)
+    says(two, 'serie-wij', /sc Heerenveen heeft 5 schoten en de tegenstander 3/u, { ...cup, penaltiesAgainst: 2 })
+  })
+
+  it('says a player kicks once, at his own kick', () => {
+    const values = series()
+
+    values.wij.serie[4] = kick({ speler: '9', uitkomst: 'raak' })
+
+    const checked = says(values, 'serie-wij-5-speler', /Schot 5 van sc Heerenveen: Speler 9 schiet twee keer/u)
+
+    expect(checked.plan).toBeDefined()
+  })
+
+  it('says a kick of sc Heerenveen needs a player, and one of the opponent when his side is complete', () => {
+    const ours = series()
+
+    ours.wij.serie[1] = kick({ uitkomst: 'raak' })
+    says(ours, 'serie-wij-2-speler', /geen speler die schoot/u)
+
+    // A side that is not complete may leave the player out; one that is complete may not.
+    expect(check(series()).errors).toEqual({})
+    says({ ...series(), tegenstander: 'ja' }, 'serie-zij-1-speler', /geen speler die schoot/u)
+  })
+
+  it('says to choose a player of the report, and an outcome', () => {
+    const unknown = series()
+
+    unknown.wij.serie[0] = kick({ speler: '30', uitkomst: 'raak' })
+
+    const checked = says(unknown, 'serie-wij-1-speler', /in de opstelling of op de bank/u)
+
+    expect(checked.plan).toBeUndefined()
+
+    const open = series()
+
+    open.zij.serie[2] = kick({ speler: '', uitkomst: '' })
+    open.zij.serie[1] = kick({ uitkomst: 'later' })
+    says(open, 'serie-zij-2-uitkomst', /kies raak, naast of gestopt/u)
+  })
+
+  it('warns about a kicker who was not on the pitch at the end, and still stores the report', () => {
+    const values = series()
+
+    values.wij.wissel = [sub({ erin: '12', eruit: '9', minuut: '80' })]
+
+    const checked = check(values)
+
+    expect(checked.errors).toEqual({})
+    expect(checked.plan).toBeDefined()
+    expect(checked.warnings['serie-wij']).toEqual([
+      'Schot 1 van sc Heerenveen: Speler 9 schiet in de strafschoppenserie, maar stond aan het einde van de wedstrijd niet op het veld.',
+    ])
+  })
+
+  it('refuses more kicks than the database holds for a team', () => {
+    const values = series()
+
+    values.zij.serie = Array.from({ length: 51 }, () => kick({ uitkomst: 'naast' }))
+    says(values, 'serie-zij-51-speler', /hoogstens 50 schoten per team/u)
+  })
+
+  it('puts the lists of the kicks after the missed penalties of their team in the order of the page', () => {
+    const order = errorOrder(series())
+
+    expect(order.indexOf('serie-wij')).toBeGreaterThan(order.indexOf('strafschop-wij'))
+    expect(order.indexOf('serie-wij-1-uitkomst')).toBeGreaterThan(order.indexOf('serie-wij-1-speler'))
+    expect(order.indexOf('serie-wij')).toBeLessThan(order.indexOf('speler-zij'))
+  })
+})

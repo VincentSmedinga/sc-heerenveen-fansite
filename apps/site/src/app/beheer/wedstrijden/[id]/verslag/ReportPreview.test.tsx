@@ -57,8 +57,10 @@ const provider = (withPreview = true) => (
   <ReportFormProvider
     action={() => Promise.resolve(initial)}
     choices={{
+      matchHref: '/beheer/wedstrijden/7',
       opponent: 'Testclub',
       ...(withPreview ? { preview } : {}),
+      series: null,
       showDelay: 'binnen vijf minuten',
       squad,
     }}
@@ -202,7 +204,14 @@ describe('the tabs after an answer of the server', () => {
     const { getByRole } = render(
       <ReportFormProvider
         action={() => Promise.resolve(answered)}
-        choices={{ opponent: 'Testclub', preview, showDelay: 'binnen vijf minuten', squad }}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          preview,
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
         initial={initial}
         title="Dit is nog niet af"
       >

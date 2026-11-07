@@ -742,6 +742,8 @@
   - **Opslaan:** het formulier en het plakscherm kennen de serie nog niet (#852), dus een nieuw opslaan van het verslag bewaart de schoten van het oude verslag.
     Een schot wijst naar zijn speler op team en rugnummer, want de rijen van de spelers zijn nieuw; staat het rugnummer er niet meer, dan is het schot zonder speler en zegt de regel dat.
     Het formulier controleert de bewaarde schoten nog niet mee; de lijst met wedstrijden zegt wel "Controleer" bij een verslag dat niet meer klopt.
+    **Later:** het formulier kent de serie sinds #852 en schrijft de schoten zelf; zie _De strafschoppenserie staat in het formulier van het verslag, en alleen bij een wedstrijd met een uitslag van de serie_ in `site.md`.
+    Het opslaan bewaart de schoten van het oude verslag niet meer.
   - **Verwijderen en de back-up:** het verslag weghalen haalt de schoten mee weg, en een wedstrijd die verdwijnt ook.
     De tabel staat niet in `structureOnlyTables`, want de rijen zijn ons eigen werk.
   - **De migratie:** `0048_add_shootout_kicks` voegt alleen toe en kan opnieuw draaien.

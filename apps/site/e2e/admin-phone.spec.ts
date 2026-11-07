@@ -4,7 +4,7 @@ import { adminCookie } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
-import { matchId, playedMatchId } from './matches'
+import { cupReportMatchId, matchId, playedMatchId } from './matches'
 
 // Every screen of the admin on a phone (#618): 390 pixels wide, with touch. The pages are
 // those of pages.spec.ts, which checks them with axe and for sideways scrolling at 320
@@ -27,6 +27,7 @@ const screens = [
   '/beheer/wedstrijden/{match}',
   '/beheer/wedstrijden/{held}',
   '/beheer/wedstrijden/{played}/verslag',
+  '/beheer/wedstrijden/{cupMatch}/verslag',
   '/beheer/wedstrijden/{played}/verslag/plakken',
   '/beheer/stadions',
   '/beheer/stadions/sv-proefdorp',
@@ -42,6 +43,7 @@ async function withNumbers(path: string) {
     .replace('{match}', path.includes('{match}') ? String(await matchId()) : '')
     .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '')
     .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '')
+    .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '')
 }
 
 test.use({ hasTouch: true, isMobile: true, viewport: { height: 780, width: 390 } })

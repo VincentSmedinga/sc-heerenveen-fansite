@@ -44,6 +44,7 @@ import {
   rowFieldId,
   type RowKind,
   rowNames,
+  shootoutOutcomeChoices,
   type Side,
   sides,
   squadChoicesForRow,
@@ -59,6 +60,8 @@ const formId = 'verslag'
 
 /** What the form needs to know of the match to word its choices. */
 export type ReportChoices = {
+  /** The address of the form of the match, where the result of the shoot-out is filled in. */
+  matchHref: string
   /** The name of the opponent, as the headings have it. */
   opponent: string
   /**
@@ -66,6 +69,11 @@ export type ReportChoices = {
    * the one that reads a pasted text.
    */
   preview?: ReportPreviewMatch
+  /**
+   * The result of the shoot-out of the match, from the form of the match: `null` when it has
+   * none. The kicks of the series are only asked for with a result.
+   */
+  series: null | { against: number; for: number }
   /** How soon what is saved shows on the site, as "binnen vijf minuten". */
   showDelay: string
   squad: readonly ReportSquadPlayer[]
@@ -102,10 +110,10 @@ export function ReportErrorSummary() {
 
 /**
  * The cards of the form: the data of the report, and for each team the line-up and the bench,
- * the substitutions, the goals, the cards and the missed penalties. The first button in the
- * form is a hidden "Opslaan", so the Enter key in a field saves, and never removes the first
- * row. Every list is a table of fields, and every field and button of it names the row it
- * belongs to.
+ * the substitutions, the goals, the cards, the missed penalties and the shoot-out. The first
+ * button in the form is a hidden "Opslaan", so the Enter key in a field saves, and never
+ * removes the first row. Every list is a table of fields, and every field and button of it
+ * names the row it belongs to.
  *
  * The lists of players in the substitutions, the goals, the cards and the penalties follow the
  * line-up as it is typed: with JavaScript they change as the names come in, and without it
@@ -121,6 +129,7 @@ export function ReportFields() {
     () => false,
   )
   const club = (side: Side) => (side === 'wij' ? 'sc Heerenveen' : choices.opponent)
+  const seriesShown = choices.series !== null || current.wij.serie.length + current.zij.serie.length > 0
   const players = (side: Side, prefix = false, bench = false) =>
     playerChoices(current, side, choices.squad, prefix, bench)
   const playerOptions = (
@@ -279,6 +288,16 @@ export function ReportFields() {
   const cardsOf = (side: Side) => {
     const own = side === 'wij'
     const mine = players(side)
+    const kickOutcomes = (
+      <>
+        <Select.Option value="">Kies de uitkomst</Select.Option>
+        {fixed(shootoutOutcomeChoices)}
+      </>
+    )
+    const seriesHint = (ours: boolean) =>
+      choices.series === null
+        ? 'Elk schot van de serie, in de volgorde van de rondes.'
+        : `Elk schot van ${club(ours ? 'wij' : 'zij')} in de serie, in de volgorde van de rondes. Het aantal schoten dat raak is, moet de uitslag van de serie geven: ${choices.series.for}–${choices.series.against}.${ours ? '' : ' Laat de speler leeg als je hem niet kent en zijn kant niet af is.'}`
     // A substitute comes from the bench.
     const bench = players(side, false, true)
 
@@ -444,6 +463,54 @@ export function ReportFields() {
           ],
         ),
       ),
+      // Only a match with a result of the shoot-out has the list, or a report that already
+      // holds kicks, so they can be taken away. The other match says where to fill it in.
+      ...(seriesShown
+        ? [
+            card(
+              'serie',
+              side,
+              `${seriesHint(own)} De eerste rij is ronde 1.`,
+              table(
+                'serie',
+                side,
+                [
+                  { hideOptional: true, name: 'Speler', required: own || current.tegenstander === 'ja' },
+                  { name: 'Uitkomst', width: 'natural' },
+                ],
+                (row, number) => [
+                  choice(
+                    'serie',
+                    side,
+                    number,
+                    'speler',
+                    row,
+                    playerOptions(
+                      mine,
+                      '',
+                      undefined,
+                      own || current.tegenstander === 'ja' ? 'Kies een speler' : 'Onbekende speler',
+                    ),
+                  ),
+                  choice('serie', side, number, 'uitkomst', row, kickOutcomes, 'natural'),
+                ],
+              ),
+            ),
+          ]
+        : own
+          ? [
+              <Card aria-labelledby="serie-uitleg" key="serie-uitleg">
+                <Heading id="serie-uitleg" level={2} tabIndex={-1}>
+                  {listTitles.serie}
+                </Heading>
+                <Text>
+                  Deze wedstrijd heeft geen uitslag van een strafschoppenserie.{' '}
+                  <Link href={choices.matchHref}>Vul die uitslag in bij de wedstrijd</Link>, dan kun je hier de schoten
+                  invullen.
+                </Text>
+              </Card>,
+            ]
+          : []),
     ]
   }
 
@@ -664,6 +731,7 @@ export function ReportSavePanel({ cancelHref }: { cancelHref: string }) {
 const listTitles: Record<RowKind, string> = {
   doelpunt: 'Doelpunten',
   kaart: 'Kaarten',
+  serie: 'Strafschoppenserie',
   speler: 'Opstelling en bank',
   strafschop: 'Gemiste strafschoppen',
   wissel: 'Wissels',
@@ -672,6 +740,7 @@ const listTitles: Record<RowKind, string> = {
 const emptyTexts: Record<RowKind, string> = {
   doelpunt: 'Geen doelpunten. Dat mag, ook bij een uitslag.',
   kaart: 'Geen kaarten.',
+  serie: 'Geen schoten.',
   speler: 'Nog geen spelers.',
   strafschop: 'Geen gemiste strafschoppen.',
   wissel: 'Geen wissels.',
