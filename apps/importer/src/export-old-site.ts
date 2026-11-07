@@ -7,6 +7,7 @@ import { parseEnv } from '@fansite/shared/env'
 import { createConnection, type RowDataPacket } from 'mysql2/promise'
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { format, resolveConfig } from 'prettier'
 import * as z from 'zod'
 
@@ -24,7 +25,7 @@ const friendliesFile = new URL('../../../docs/oefenwedstrijden-2002-03.md', impo
 async function main() {
   const { OLD_DATABASE_URL } = parseEnv(oldDatabaseEnvSchema, process.env)
   const result = buildOldSiteExport(await readRows(OLD_DATABASE_URL))
-  const folder = oldSiteDataFolder.pathname
+  const folder = fileURLToPath(oldSiteDataFolder)
 
   // A season that is no longer in the export must not stay behind as a file.
   await mkdir(folder, { recursive: true })
@@ -38,7 +39,7 @@ async function main() {
   }
 
   // Prettier lines the table up the way the commit hook would, so a second run changes nothing.
-  const filepath = friendliesFile.pathname
+  const filepath = fileURLToPath(friendliesFile)
 
   await writeFile(filepath, await format(result.friendliesMarkdown, { ...(await resolveConfig(filepath)), filepath }))
 

@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as z from 'zod'
 
 /**
@@ -147,7 +148,7 @@ export function parseOldSiteFile(text: string, name = 'file'): OldSiteFile {
  * double clubs or players file, a season in the wrong file, or a match that comes twice.
  */
 export async function readOldSiteData(folder: string | URL = oldSiteDataFolder): Promise<OldSiteData> {
-  const directory = typeof folder === 'string' ? folder : folder.pathname
+  const directory = typeof folder === 'string' ? folder : fileURLToPath(folder)
   const names = (await readdir(directory)).filter((name) => name.endsWith('.json')).sort()
   const data: OldSiteData = { clubs: [], matches: [], players: [] }
   let clubFiles = 0

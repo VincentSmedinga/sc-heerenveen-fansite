@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -72,7 +73,7 @@ function collectNames(value: unknown, names = new Set<string>()) {
   return names
 }
 
-const folder = oldSiteDataFolder.pathname
+const folder = fileURLToPath(oldSiteDataFolder)
 
 describe('the files of the old fansite in the repository', () => {
   it('only hold field names from the list of allowed names', async () => {
