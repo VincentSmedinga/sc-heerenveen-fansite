@@ -2897,3 +2897,21 @@
   De eigenschappen die er al waren (`afterNinetyFor`, `penaltiesFor` en de rest) houden hun naam.
 - **Waarom:** de pagina van #831 en de stories blijven werken tot #850 de pagina bouwt, en een eigen doelpunt moet bij het team staan dat het doelpunt krijgt, zoals de uitslag het telt.
 - **Alternatieven:** de helft als eigenschap van elke gebeurtenis (de pagina moet dan zelf de minuut uitzoeken), en de doelpuntenmakers uit de gebeurtenissen van het verloop halen (`MatchHeader` kent het verloop niet).
+
+## De wissels per team tonen alleen wie speelde, en delen de stip en de boog met het veld
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchSubstitutes` (#849) toont onder het veld de wissels van één team onder de kop "Wissels `<team>`": wie erin kwam, in welke minuut, voor wie en een doelpunt als hij scoorde.
+  De lijst staat in de volgorde van de klok, ook als de gegevens anders binnenkomen, met blessuretijd op zijn plek (45+2 ligt tussen 45 en 46).
+  Een speler op de bank die niet inviel, staat er niet bij, want het verslag legt hem nu alleen vast voor wie speelde.
+  Een bank en een positie per speler zijn een idee (#855).
+  Een team zonder wissels zegt "Geen wissels.".
+  De stip en de boog zijn die van `PitchPlayer`: een rond vlak met het rugnummer en een ring die begint bij de minuut van invallen, met een spleet ertussen.
+  Ze komen uit één onderdeel dat beide gebruiken (`PlayerDisc`), zodat de boog overal hetzelfde betekent.
+  Onder de boog ligt hier geen grijs spoor, want een speler van de bank is er alleen vanaf zijn minuut.
+  Een schermlezer hoort een lijst met een naam en één zin per wissel, zoals "Sven Kuipers, rugnummer 2, erin in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85".
+  De tekeningen zijn verborgen en elk teken staat als woord in de zin.
+  `MatchSubstitutes.Group` zet de lijsten van twee teams naast elkaar vanaf 40 rem, gemeten aan de breedte van de groep, en anders onder elkaar.
+- **Waarom:** de lijst laat zien wie het spel veranderde, en een bank die niet inviel zegt daar niets over.
+  Dezelfde stip en boog als op het veld laten de lezer één teken leren.
+- **Alternatieven:** de wissels in het veld zelf tekenen (de namen passen daar al niet altijd); een lijst met ook de spelers die niet inviellen (dat vraagt nieuwe velden in het formulier).

@@ -7,9 +7,6 @@
 
 @layer hf.components {
   .hf-pitch-player {
-    --hf-pitch-gap: 0.125rem;
-    --hf-pitch-ring: 0.1875rem;
-
     align-items: center;
     color: var(--hf-colour-text-default);
     display: flex;
@@ -30,13 +27,17 @@
 
   /* The disc and its ring are one square; the marks sit on its corners. */
   .hf-pitch-player-disc {
+    --hf-pitch-gap: 0.125rem;
+    --hf-pitch-ring: 0.1875rem;
+
     block-size: var(--hf-pitch-dot, 2.25rem);
     inline-size: var(--hf-pitch-dot, 2.25rem);
     position: relative;
   }
 
   /*
-   * The ring: the full circle is the track, and the arc on it is the minutes he played. It
+   * The ring: the full circle is the track (--hf-pitch-ring-track, a quiet tint unless a list
+   * says otherwise), and the arc on it is the minutes he played. It
    * starts at the minute he came on and runs as far as he played. Only the rim shows: the mask
    * cuts out the middle, so the gap between ring and disc is the colour of the pitch under it.
    */
@@ -44,7 +45,7 @@
     background: conic-gradient(
       from var(--hf-ring-start, 0deg),
       var(--hf-colour-outcome-win) var(--hf-ring-length, 360deg),
-      color-mix(in srgb, var(--hf-colour-line-graphic-surface) 35%, transparent) 0
+      var(--hf-pitch-ring-track, color-mix(in srgb, var(--hf-colour-line-graphic-surface) 35%, transparent)) 0
     );
     border-radius: 50%;
     inset: 0;
@@ -70,12 +71,12 @@
     position: absolute;
   }
 
-  .hf-pitch-player-ours .hf-pitch-player-number {
+  .hf-pitch-player-disc-ours .hf-pitch-player-number {
     background-color: var(--hf-colour-background-button);
     color: var(--hf-colour-text-on-button);
   }
 
-  .hf-pitch-player-theirs .hf-pitch-player-number {
+  .hf-pitch-player-disc-theirs .hf-pitch-player-number {
     background-color: var(--hf-colour-background-surface);
     box-shadow: inset 0 0 0 2px var(--hf-colour-background-button);
     color: var(--hf-colour-text-default);

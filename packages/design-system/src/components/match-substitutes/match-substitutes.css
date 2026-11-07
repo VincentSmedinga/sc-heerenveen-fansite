@@ -1,0 +1,70 @@
+/*
+ * The substitutes of a team: a heading and a list with a line for each player. On the left is a
+ * disc with a ring, on the right his name with a line of small text under it. The disc is the
+ * one of the pitch (pitch-player.css), a little smaller and without the quiet track under the
+ * arc. The lists of two teams stand side by side from 40 rem in a group, and one under
+ * the other below it.
+ */
+
+@layer hf.components {
+  .hf-match-substitutes {
+    align-content: start;
+    display: grid;
+    gap: var(--hf-space-s);
+    overflow-wrap: anywhere;
+  }
+
+  .hf-match-substitutes-none {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    margin: 0;
+  }
+
+  .hf-match-substitutes-list {
+    display: grid;
+    gap: var(--hf-space-s);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hf-match-substitutes-line {
+    --hf-pitch-dot: 2rem;
+    --hf-pitch-ring-track: transparent;
+
+    align-items: center;
+    display: flex;
+    gap: var(--hf-space-s);
+  }
+
+  /* The disc keeps its size when the text beside it is long. */
+  .hf-match-substitutes-line > .hf-pitch-player-disc {
+    flex: none;
+  }
+
+  .hf-match-substitutes-text {
+    display: grid;
+    min-inline-size: 0;
+  }
+
+  /* The small line under the name: the icon "erin", the minute, "voor <name>" and a goal. */
+  .hf-match-substitutes-detail {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: 1.2;
+  }
+
+  /* The group is the container, and its columns are what asks how wide it is. */
+  .hf-match-substitutes-group {
+    container: hf-match-substitutes / inline-size;
+  }
+
+  .hf-match-substitutes-columns {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-xl);
+
+    @container hf-match-substitutes (min-width: 40rem) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}

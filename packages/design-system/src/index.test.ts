@@ -40,6 +40,7 @@ const components = [
   'MatchPenaltySeries',
   'MatchPitch',
   'MatchScoreBar',
+  'MatchSubstitutes',
   'MatchTimeline',
   'Navigation',
   'NewsItem',
