@@ -1,8 +1,9 @@
 import type { SearchParams } from '#src/season-page'
 
 import { SeasonShortcuts } from '#src/app/@shortcuts/cijfers/season-shortcuts'
+import { seasonHasReports } from '#src/season-report-figures'
 import { seasonFromSlug } from '#src/seasons'
-import { playersShortcuts } from '#src/statisticsShortcuts'
+import { playersShortcutsFor } from '#src/statisticsShortcuts'
 
 // Render on each request, like the page it belongs to, so the build never reads the database.
 export const dynamic = 'force-dynamic'
@@ -21,5 +22,7 @@ export default async function SeasonPlayersShortcuts({
 }) {
   const season = seasonFromSlug((await params).seizoen)
 
-  return season === undefined ? null : SeasonShortcuts({ items: playersShortcuts, searchParams, season })
+  return season === undefined
+    ? null
+    : SeasonShortcuts({ items: playersShortcutsFor(await seasonHasReports(season)), searchParams, season })
 }

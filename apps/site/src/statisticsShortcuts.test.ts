@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { playersShortcuts, statisticsShortcuts } from './statisticsShortcuts'
+import { playersShortcuts, playersShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
   it('has a link for each of the eleven cards with figures', () => {
@@ -30,5 +30,26 @@ describe('playersShortcuts', () => {
 
   it('has no link on Cijfers, which has no card Doelpuntenmakers any more', () => {
     expect(statisticsShortcuts.map(({ href }) => href)).not.toContain('#doelpuntenmakers')
+  })
+})
+
+describe('playersShortcutsFor', () => {
+  it('is the four links without reports', () => {
+    expect(playersShortcutsFor(false)).toBe(playersShortcuts)
+  })
+
+  it('adds Alle spelers after the squad and Assists and Minuten at the end when there are reports, with no anchor twice', () => {
+    const links = playersShortcutsFor(true)
+
+    expect(links.map(({ href }) => href)).toEqual([
+      '#selectie',
+      '#alle-spelers',
+      '#doelpuntenmakers',
+      '#alle-tijden',
+      '#bijzondere-doelpunten',
+      '#assists',
+      '#minuten',
+    ])
+    expect(new Set(links.map(({ href }) => href)).size).toBe(links.length)
   })
 })

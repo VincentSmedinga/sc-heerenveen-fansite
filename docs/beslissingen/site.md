@@ -3166,3 +3166,47 @@
   - **Een afwijking van Wikipedia over de doelpunten** die nog wachtte, vervalt, omdat de doelpunten weer volgen wat Wikipedia zegt.
 - **Waarom:** een verslag dat je weghaalt moet geen stukken van zichzelf achterlaten die de pagina's als doelpunt blijven tonen.
 - **Alternatieven:** de doelpunten van het verslag laten staan met de markering (de import blijft ze dan afhouden van Wikipedia, terwijl het verslag weg is).
+
+## De kaarten Assists, Minuten en Alle spelers lezen alleen de verslagen, en zeggen hoeveel wedstrijden ze tellen
+
+- **Datum:** 7 november 2026
+- **Besluit:** `/spelers` krijgt drie kaarten met cijfers uit de verslagen van #828, die #493 vroeg (#832): de ranglijsten Assists en Minuten en de tabel Alle spelers.
+  Ze tellen alleen de wedstrijden die een verslag met status `klaar` hebben, in de competities die de schakelaar van #406 kiest, en zeggen het onder de kaart: "Op basis van 12 van de 14 gespeelde wedstrijden."
+  Hebben alle gespeelde wedstrijden een verslag, dan staat er "Op basis van alle 14 gespeelde wedstrijden."
+  - **Een seizoen zonder verslag dat `klaar` is,** heeft de kaarten niet en geen zin erover; de balk "Op deze pagina:" heeft er dan ook geen links naar.
+    Heeft het seizoen wel een verslag, maar niet in de gekozen competitie, dan blijven de kaarten staan met "Er is nog geen assist in de verslagen" en "Op basis van 0 van de 12 gespeelde wedstrijden", zodat de pagina niet verspringt als je de schakelaar omzet.
+  - **Waar ze staan:** Alle spelers staat in de hoofdkolom onder de Selectie, want de tabel is breed.
+    Assists en Minuten staan achteraan in de zijkolom, voor de bronvermelding.
+    De balk noemt ze in die volgorde.
+  - **De ranglijsten** hebben de top 5, met alle spelers die een plek delen, zoals de doelpuntenmakers: wie evenveel heeft, deelt de plek en de volgende plek wordt overgeslagen.
+    Een speler zonder assists of zonder minuten staat er niet in, en bij gelijke aantallen telt de achternaam.
+  - **De tabel** heeft een rij voor elke speler die in een verslag stond, dus ook een speler van de bank die niet inviel, met nullen.
+    De volgorde is minuten en dan achternaam.
+    De kolommen zijn G gespeeld (ook als invaller), B basis, I invallers, M minuten, D doelpunten, A assists, Y geel en R rood; een geel-rode kaart telt als een gele en een rode, en dat staat onder de tabel.
+    De minuten zijn vet, want de lijst is erop gesorteerd.
+  - **De letters** komen uit `tableColumns`, dat er zes bij krijgt (B, I, M, A, Y en R); A was gereserveerd voor deze tabel.
+    G is al gelijk en gespeeld, dus de gele kaarten hebben Y.
+  - **De bron:** onder elke kaart en onder het plaatje staat "Bron: eigen administratie".
+    Daarmee loopt deze kaart vooruit op de bronvermelding van #831: zodra die er is, neemt de pagina die over.
+  - **Een geel-rode kaart en een rode kaart** tellen als de kaarten die ze zijn; de minuten van een speler die eruit ging of werd weggestuurd, zijn die van `minutesPlayed` (zie _Minuten gespeeld tellen op de klok, in hele minuten_ in `hosting-en-data.md`).
+- **Waarom:** de lezer moet weten hoe compleet een cijfer is, en een seizoen waarvan we de helft hebben, mag toch iets tonen.
+  Zo kunnen oudere seizoenen later volgen zonder dat een kaart verandert.
+- **Alternatieven:** alleen tonen als elke wedstrijd een verslag heeft (de kaart blijft dan maanden weg); stilzwijgend de cijfers van Wikipedia aanvullen (twee bronnen in één getal); een eigen letter voor geel en rood die op G en R lijkt (G is al twee woorden).
+- **Later:** vervangt de kaarten die #493 vroeg, en vult _De cijfers van een speler staan in een eigen tabel, per seizoen en competitie_ in `importer.md` aan.
+
+## De cijfers van Wikipedia blijven een controle op onze verslagen, en een verschil gaat naar het logboek
+
+- **Datum:** 7 november 2026
+- **Besluit:** de kaarten van #832 lezen `player_season_stats` niet, maar de importer vergelijkt de doelpunten ervan met die van de verslagen en schrijft een verschil in het logboek van het beheer (#832).
+  Het is een regel `player.stats-differ` zonder account ("de import"), met de speler (`item_id`) en de tekst "Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2"; de pagina's tonen het niet.
+  - **Wanneer:** na elke lezing van de selectie van een seizoen (`logReportGoalDifferences` in `@fansite/db/match-reports`, aangeroepen door `import-squad.ts`), voor elke competitie waarvan de tabel cijfers heeft.
+  - **Alleen als het te vergelijken valt:** elke gespeelde wedstrijd van de competitie heeft een verslag dat `klaar` is.
+    Mist een verslag, dan hebben de verslagen vanzelf minder doelpunten, en dat is geen nieuws.
+    Een speler die de tabel niet heeft, telt daar 0 doelpunten.
+  - **Eén keer:** een verschil dat de laatste regel van de speler al zegt, wordt niet nog eens geschreven; veranderen de aantallen, dan komt er een nieuwe regel.
+    Een fout bij het schrijven is een waarschuwing en stopt de import niet.
+  - **De migratie** `0046_add_player_stats_differ_audit_action` zet de actie in de lijst van `audit_log.action`.
+    Ze voegt alleen een waarde toe en kan opnieuw draaien.
+- **Waarom:** de nieuwe bron wint omdat hij preciezer is, en de cijfers van Wikipedia zijn een controle op onze invoer.
+  Een verschil is voor de redactie, niet voor de bezoeker.
+- **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); vergelijken ook als een verslag ontbreekt (een regel per speler, elk uur, die niets zegt).

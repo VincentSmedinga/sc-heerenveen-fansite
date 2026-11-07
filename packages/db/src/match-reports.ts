@@ -1,7 +1,7 @@
 import type { MatchReport as ReportForRules, ReportMatch } from '@fansite/shared/match-report'
 
 import { minutesPlayed, playedMatch } from '@fansite/shared/match-report'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -14,9 +14,12 @@ import type {
   MatchReport,
   MatchReportStatus,
   MatchSubstitution,
+  StatsCompetition,
 } from './schema.ts'
 
+import { recordAction } from './audit-log.ts'
 import {
+  auditLog,
   matchAppearances,
   matchCards,
   matches,
@@ -24,6 +27,10 @@ import {
   matchIncidents,
   matchReports,
   matchSubstitutions,
+  persons,
+  players,
+  playerSeasonStats,
+  statsCompetitions,
 } from './schema.ts'
 
 // What the pages read of the match reports (see `match_reports` in schema.ts). Writing a report
@@ -35,7 +42,8 @@ import {
  * matches he played (in the line-up or from the bench), `starts` the line-ups, `substitutions`
  * the times he came on, `minutes` the minutes from `minutesPlayed`, and `goals` the goals he
  * scored without own goals. `assists` are the goals he gave. A match that is `bezig` counts for
- * nobody.
+ * nobody. A player of ours who was on the bench and did not come on has an entry with zeros, so
+ * he does not disappear from a list of all the players of the reports.
  */
 export type PlayerReportStats = {
   assists: number
@@ -43,12 +51,25 @@ export type PlayerReportStats = {
   matches: number
   minutes: number
   name: string
+  /** The name of the person as the importer kept it, in parts (see `persons`). */
+  personFamilyName: null | string
+  personFamilyNamePrefix: null | string
+  personGivenName: null | string
   playerId: number
   redCards: number
   starts: number
   substitutions: number
   yellowCards: number
   yellowRedCards: number
+}
+
+/** A player whose goals in a competition differ between the reports and the squad table. */
+export type ReportGoalDifference = {
+  competition: StatsCompetition
+  fromReports: number
+  fromWikipedia: number
+  name: string
+  playerId: number
 }
 
 /** A match of a season with the status of its report: `null` for a match without a report. */
@@ -85,6 +106,63 @@ export type StoredMatchReport = {
 type ReportDatabase = Pick<Database, 'select'>
 
 /**
+ * The players whose goals in a competition of the season, counted from the match reports,
+ * differ from those in the squad table of Wikipedia (`player_season_stats`). It compares a
+ * competition only when it can be compared: every played match of it has a report that is
+ * `klaar`, and the squad table has numbers for it. With a report missing, the reports have
+ * fewer goals by themselves, which is no news. A player the table does not have counts as 0
+ * goals there.
+ */
+export async function findReportGoalDifferences(db: ReportDatabase, season: string): Promise<ReportGoalDifference[]> {
+  const differences: ReportGoalDifference[] = []
+
+  for (const competition of statsCompetitions) {
+    const played = await db
+      .select({ reportStatus: matchReports.status })
+      .from(matches)
+      .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
+      .where(and(eq(matches.season, season), eq(matches.competition, competition), eq(matches.status, 'played')))
+
+    if (played.length === 0 || played.some((match) => match.reportStatus !== 'klaar')) {
+      continue
+    }
+
+    const table = await db
+      .select({ goals: playerSeasonStats.goals, name: players.name, playerId: playerSeasonStats.playerId })
+      .from(playerSeasonStats)
+      .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
+      .where(and(eq(playerSeasonStats.season, season), eq(playerSeasonStats.competition, competition)))
+
+    if (table.length === 0) {
+      continue
+    }
+
+    const fromReports = new Map(
+      (await readPlayerReportStats(db, season, competition)).map((stats) => [stats.playerId, stats]),
+    )
+    const tabled = new Set(table.map((row) => row.playerId))
+    const rows = [
+      ...table.map((row) => ({ fromWikipedia: row.goals, name: row.name, playerId: row.playerId })),
+      ...[...fromReports.values()]
+        .filter((stats) => !tabled.has(stats.playerId))
+        .map((stats) => ({ fromWikipedia: 0, name: stats.name, playerId: stats.playerId })),
+    ]
+
+    for (const row of rows) {
+      const goals = fromReports.get(row.playerId)?.goals ?? 0
+
+      if (goals !== row.fromWikipedia) {
+        differences.push({ ...row, competition, fromReports: goals })
+      }
+    }
+  }
+
+  return differences.toSorted(
+    (a, b) => a.name.localeCompare(b.name, 'nl') || a.competition.localeCompare(b.competition),
+  )
+}
+
+/**
  * The matches of a season, from the first to the last, each with the status of its report:
  * `bezig`, `klaar`, or `null` when it has none. A match on the same day keeps the order of the
  * kick-off, and then of `id`.
@@ -108,6 +186,40 @@ export async function listSeasonReports(db: ReportDatabase, season: string): Pro
     .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+}
+
+/**
+ * Writes each difference of `findReportGoalDifferences` in the log of the admin as
+ * `player.stats-differ`, for the player and without an account: the importer does it. A
+ * difference that the last line of the player says already is not written again, so the log
+ * shows a difference once and the next one when the numbers change. Returns the lines written.
+ * Nothing is shown to visitors: the cards of Spelers read the reports only.
+ */
+export async function logReportGoalDifferences(
+  db: Pick<Database, 'insert' | 'select'>,
+  season: string,
+  now = new Date(),
+): Promise<number> {
+  let written = 0
+
+  for (const difference of await findReportGoalDifferences(db, season)) {
+    const detail = `Doelpunten ${difference.competition} ${season}: verslagen ${difference.fromReports}, Wikipedia ${difference.fromWikipedia}`
+    const [last] = await db
+      .select({ detail: auditLog.detail })
+      .from(auditLog)
+      .where(and(eq(auditLog.action, 'player.stats-differ'), eq(auditLog.itemId, difference.playerId)))
+      .orderBy(desc(auditLog.id))
+      .limit(1)
+
+    if (last?.detail === detail) {
+      continue
+    }
+
+    await recordAction(db, { action: 'player.stats-differ', detail, itemId: difference.playerId, userId: null }, now)
+    written++
+  }
+
+  return written
 }
 
 /** The match in the shape the rules read. */
@@ -229,6 +341,9 @@ export async function readPlayerReportStats(
           matches: 0,
           minutes: 0,
           name: appearance.name,
+          personFamilyName: null,
+          personFamilyNamePrefix: null,
+          personGivenName: null,
           playerId: appearance.playerId,
           redCards: 0,
           starts: 0,
@@ -246,6 +361,7 @@ export async function readPlayerReportStats(
     for (const player of players) {
       const found = player.ours ? entry(player) : undefined
 
+      // Somebody who stayed on the bench has his entry and no match.
       if (found === undefined || !playedMatch(report, player.id)) {
         continue
       }
@@ -282,6 +398,31 @@ export async function readPlayerReportStats(
       if (assisting !== undefined) {
         assisting.assists++
       }
+    }
+  }
+
+  // The name of the person behind each player, in parts.
+  const people =
+    stats.size === 0
+      ? []
+      : await db
+          .select({
+            familyName: persons.familyName,
+            familyNamePrefix: persons.familyNamePrefix,
+            givenName: persons.givenName,
+            id: players.id,
+          })
+          .from(players)
+          .innerJoin(persons, eq(players.personId, persons.id))
+          .where(inArray(players.id, [...stats.keys()]))
+
+  for (const person of people) {
+    const found = stats.get(person.id)
+
+    if (found !== undefined) {
+      found.personFamilyName = person.familyName
+      found.personFamilyNamePrefix = person.familyNamePrefix
+      found.personGivenName = person.givenName
     }
   }
 

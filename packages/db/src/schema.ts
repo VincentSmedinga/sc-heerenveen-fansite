@@ -416,6 +416,7 @@ export const auditActions = [
   'stadium.reset',
   'club-name.save',
   'club-name.reset',
+  'player.stats-differ',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -443,7 +444,9 @@ export const auditDetailMaxLength = 1000
  * the log shows as "de import". `match.take-over` and `match.keep` are the decision about a
  * difference between Wikipedia and an entry: an editor decides in the admin, the command
  * `import:changes` decides without an account, and the importer takes Wikipedia over after
- * seven days with `match.take-over`, also without one.
+ * seven days with `match.take-over`, also without one. `player.stats-differ` is written by the
+ * importer only: a player whose goals in the match reports differ from the squad table of
+ * Wikipedia, with his number in `item_id` (see `logReportGoalDifferences`).
  */
 export const auditLog = mysqlTable(
   'audit_log',

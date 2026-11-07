@@ -2,9 +2,12 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import {
+  auditLog,
   feeds,
+  matchAppearances,
   matches,
   matchGoals,
+  matchReports,
   persons,
   players,
   playerSeasonStats,
@@ -55,6 +58,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   for (const table of [
+    'audit_log',
     'player_season_stats',
     'players',
     'squad_imports',
@@ -850,6 +854,51 @@ describe('the numbers of the players', () => {
     })
     // The table stays the source: nothing in the numbers changed.
     expect(await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))).toEqual(before)
+  })
+
+  it('writes the difference between the goals of the match reports and the table in the log, once, and never as a warning (#832)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const matchId = await playMatchWithTheGoalsOfTheTable()
+    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+
+    // The report of the only match is klaar and gives Oyen one goal, where the table says two.
+    await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
+
+    const [appearance] = await database.db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Luca Oyen', ours: true, playerId: oyen?.id ?? null, shirtNumber: 9, starter: true })
+      .$returningId()
+
+    await database.pool.query('UPDATE match_goals SET appearance_id = ? WHERE player_id = ? LIMIT 1', [
+      appearance?.id,
+      oyen?.id,
+    ])
+
+    const later = new Date(first.getTime() + hours(1))
+
+    expect(await importAt(server, later)).toMatchObject({ kind: 'imported', warnings: [] })
+    // Every other scorer of the table has goals the one report does not have; Oyen is one line.
+    const logged = async () =>
+      (await database.db.select().from(auditLog)).filter((row) => row.itemId === (oyen?.id ?? 0))
+
+    expect(await logged()).toMatchObject([
+      {
+        action: 'player.stats-differ',
+        createdAt: later,
+        detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2',
+        itemId: oyen?.id,
+        userId: null,
+      },
+    ])
+
+    // The next run finds the same difference and does not write it again.
+    const written = (await database.db.select().from(auditLog)).length
+
+    await importAt(server, new Date(first.getTime() + hours(2)))
+    expect(await database.db.select().from(auditLog)).toHaveLength(written)
   })
 
   it('compares each competition on its own', async () => {

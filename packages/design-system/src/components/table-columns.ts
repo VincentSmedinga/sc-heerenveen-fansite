@@ -23,26 +23,28 @@ export type TableColumn = {
  *
  * The points come before the goals and the goal difference, as in every league table: `P`
  * stands before `D`.
+ *
+ * The tables of the players have `G` gespeeld (the matches he was in, also as a substitute),
+ * `B` basis (the line-ups), `I` invallers (the times he came on), `M` minuten, `D` doelpunten,
+ * `A` assists, `Y` geel and `R` rood. `G` is taken for gelijk and gespeeld, so the yellow
+ * cards have `Y`; a yellow-red card counts as a yellow and a red card.
  */
 export const tableColumns = {
+  assists: { abbreviation: 'A', name: 'assists' },
   drawn: { abbreviation: 'G', name: 'gelijk' },
   goalDifference: { abbreviation: 'D', name: 'doelsaldo' },
   goals: { abbreviation: 'D', name: 'doelpunten' },
   goalsPerMatch: { abbreviation: 'D/W', name: 'doelpunten per wedstrijd' },
   lost: { abbreviation: 'V', name: 'verlies' },
+  minutes: { abbreviation: 'M', name: 'minuten' },
   played: { abbreviation: 'G', name: 'gespeeld' },
   points: { abbreviation: 'P', name: 'punten' },
   pointsPerMatch: { abbreviation: 'P', name: 'punten per wedstrijd' },
+  red: { abbreviation: 'R', name: 'rood' },
+  started: { abbreviation: 'B', name: 'basis' },
+  substituted: { abbreviation: 'I', name: 'invallers' },
   won: { abbreviation: 'W', name: 'winst' },
-} as const satisfies Record<string, TableColumn>
-
-/**
- * The letters that are taken for a table that does not exist yet. `A` is assists, for the
- * tables of the players: a table that gets the column takes it from here and moves it to
- * `tableColumns`.
- */
-export const reservedTableColumns = {
-  assists: { abbreviation: 'A', name: 'assists' },
+  yellow: { abbreviation: 'Y', name: 'geel' },
 } as const satisfies Record<string, TableColumn>
 
 /**

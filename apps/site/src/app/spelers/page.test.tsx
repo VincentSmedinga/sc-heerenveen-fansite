@@ -5,9 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
+import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
+import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
@@ -20,6 +22,9 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
+
+// The figures of the match reports are made up too, and by default there are none.
+vi.mock('#src/season-report-figures', () => ({ getSeasonReportFigures: vi.fn(), seasonHasReports: vi.fn() }))
 
 // The squad is made up too: the page reads it from the database.
 vi.mock('#src/season-squad', async (importOriginal) => ({
@@ -82,6 +87,8 @@ beforeEach(() => {
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getSeasonPlayerStats).mockReset()
   vi.mocked(getSeasonPlayerStats).mockResolvedValue([])
+  vi.mocked(getSeasonReportFigures).mockReset()
+  vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
   vi.mocked(getSeasonSquad).mockReset()
   vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
   vi.mocked(getMatchData).mockResolvedValue(matchData)
