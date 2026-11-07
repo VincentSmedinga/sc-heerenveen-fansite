@@ -42,6 +42,7 @@ import { type CompetitionChoice, competitionParam, leagueValue } from './competi
 import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { shootOutOf } from './match-result'
 import {
   allTimePlaces,
   allTimeScorersOf,
@@ -149,6 +150,7 @@ export function CleanSheetsCard({
                   {...matchMoment(match, now)}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
+                  {...shootOutOf(match)}
                   home={match.home}
                   opponent={match.opponent}
                 />
@@ -225,6 +227,7 @@ export function ExtremesCard({
                   {...matchMoment(match, now)}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
+                  {...shootOutOf(match)}
                   home={match.home}
                   opponent={match.opponent}
                 />
@@ -1142,6 +1145,7 @@ export function StreaksCard({
                       {...matchMoment(match, now)}
                       goalsAgainst={match.goalsAgainst}
                       goalsFor={match.goalsFor}
+                      {...shootOutOf(match)}
                       home={match.home}
                       opponent={match.opponent}
                     />

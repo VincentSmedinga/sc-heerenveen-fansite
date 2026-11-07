@@ -2056,6 +2056,7 @@
 - **Datum:** 2 november 2026
 - **Besluit:** de kaart "Hoe vaak welke uitslag" staat in de zijbalk van `/wedstrijden`, direct onder de stand en boven de hoofdtrainer, en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
   Een bekerwedstrijd telt met de stand na verlenging, zonder strafschoppen.
+  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): de stand blijft die na de verlenging, maar de uitkomst van een wedstrijd na strafschoppen is een winst of een verlies.
   De balk "Op deze pagina:" heeft er een link naar, na Stand.
 - **Waarom:** de projecteigenaar wil de kaart op Wedstrijden, naast de lijst van de uitslagen die hij samenvat.
   Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
@@ -2217,6 +2218,7 @@
 - **Datum:** 4 november 2026
 - **Besluit:** de donut telt dezelfde wedstrijden als de lijst en "Onze uitslagen tegen …", dus volgens de keuze van de schakelaar op de pagina van de tegenstander, standaard met de beker (#690).
   Een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel, zoals op Wedstrijden.
+  **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026): zo'n wedstrijd telt als winst of verlies, op Wedstrijden en op de pagina van de tegenstander.
   Een test controleert dat de aantallen kloppen met de rij Totaal, voor beide keuzes.
 - **Waarom:** twee kaarten naast elkaar met verschillende aantallen zouden verwarren.
   De kaart krijgt de wedstrijden van `meetingsOf`, dezelfde als de samenvatting, dus ze kunnen niet uit elkaar lopen.
@@ -3387,3 +3389,22 @@
   - `MatchLineup` heeft een eigenschap `formation`, een tekst zonder eigen regels: de pagina geeft de waarde zoals het verslag hem bewaarde.
     De regel is een `Text` met de meta-uitvoering onder de kop met de naam van het team, zodat de kop alleen de naam is.
   - Een verslag met een formatie die de regels afkeuren (bijvoorbeeld na een wijziging buiten het formulier om), heeft geen pagina: `checkMatchReport` keurt hem af zoals elke andere fout.
+
+## Een wedstrijd die we op strafschoppen winnen, telt overal als winst
+
+- **Datum:** 7 november 2026
+- **Besluit:** een wedstrijd die we op strafschoppen winnen, telt overal waar de site winst, gelijkspel en verlies telt als winst, en een die we zo verliezen als verlies (#845).
+  Doelpunten en doelsaldo tellen de serie niet mee: de uitslag van de wedstrijd is die na de verlenging.
+  Besloten door de projecteigenaar.
+- **Waarom:** een beker kent geen gelijkspel, en de kop van de wedstrijd laat de serie al beslissen.
+- **Alternatieven:** gelijkspel laten tellen, zoals Wikipedia de uitslag schrijft; een eigen categorie "winst na strafschoppen" (veel extra uitleg voor weinig wedstrijden).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Eén regel:** `resultOf` in `src/match-result.ts` geeft winst, gelijkspel of verlies, eerst naar de serie als die er is en anders naar de doelpunten; `letterOf` maakt er W, G of V van.
+    De letters, de reeksen, Thuis en uit, de resultaten per hoofdtrainer, de kaart Hoe de wedstrijden verlopen, de opmerkelijke wedstrijden, de kaarten van een tegenstander en de score-donut gebruiken haar.
+    De clubcijfers van `listClubRecords` in `packages/db` rekenen dezelfde regel in SQL uit (`coalesce` van de strafschoppen en de doelpunten).
+  - **Wat op de doelpunten blijft:** doelpunten, doelsaldo, zonder tegendoelpunt, de grootste winst en het grootste verlies (die vragen een verschil in doelpunten, dat een serie niet heeft), de stand en de punten van de Eredivisie, de laatste vijf van de stand (`last-five.ts`) en de controle van de importer tegen de stand: de competitie kent geen strafschoppen.
+  - **De score-donut** telt een stand met een serie apart van de gelijke spelen met dezelfde stand: 1–1 na strafschoppen staat bij Winst of Verloren, 1–1 zonder serie bij Gelijk.
+  - **`ShortMatch`** krijgt `penaltiesFor` en `penaltiesAgainst`, voor de kleur van de uitslag; de regel toont geen serie.
+    Een schermlezer hoort er "na strafschoppen 4 tegen 3" bij, omdat de kleur anders het enige teken van de winst is bij een stand van 1–1.
+    De lijsten die wedstrijden kiezen (De nul gehouden, Doelpuntenmakers, de laatste vijf van de reeksen) geven de serie door; de grootste winst en het grootste verlies hebben nooit een serie.
+  - **Punten:** op de kaarten die 3 punten per winst rekenen over de beker, zoals Thuis en uit bij "Alle wedstrijden" en de kolom Punten van Tegenstanders, is een winst na strafschoppen 3 punten.

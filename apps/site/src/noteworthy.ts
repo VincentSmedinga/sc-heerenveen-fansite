@@ -2,6 +2,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { type CompetitionChoice } from './competition'
 import { formatTableDay } from './match-format'
+import { resultOf } from './match-result'
 import { keyOf, type LeagueMatch, playedMatchesOf, scorerLine } from './matches'
 
 /**
@@ -97,7 +98,7 @@ const follows = (earlier: MatchGoal, later: MatchGoal) =>
  */
 function comeback({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
-    if (match.goalsFor <= match.goalsAgainst || match.goals.length !== match.goalsFor + match.goalsAgainst) {
+    if (resultOf(match) !== 'win' || match.goals.length !== match.goalsFor + match.goalsAgainst) {
       return []
     }
 
@@ -259,7 +260,7 @@ function wins({ played }: FactInput): NoteworthyFact[] {
     }
 
     for (const match of played.filter((item) => item.home === home)) {
-      if (match.goalsFor > match.goalsAgainst) {
+      if (resultOf(match) === 'win') {
         run.push(match)
       } else {
         close()

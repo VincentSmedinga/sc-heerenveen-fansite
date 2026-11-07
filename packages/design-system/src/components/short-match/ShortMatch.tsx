@@ -4,22 +4,33 @@ import { classNames } from '../classNames'
 import { outcomeOf } from '../outcome'
 import { Time } from '../time/Time'
 
-export type ShortMatchProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
-  /** A short match has no children: everything it shows comes from the props below. */
-  children?: never
-  /** The day in a form a machine reads, such as `2026-10-24`. */
-  dateTime: string
-  /** The goals of the opponent, whichever side it played on. */
-  goalsAgainst: number
-  /** The goals of sc Heerenveen, whichever side it played on. The component orders them. */
-  goalsFor: number
-  /** Whether sc Heerenveen played at home. The home club is named first. */
-  home: boolean
-  /** The club sc Heerenveen played, as plain text. */
-  opponent: string
-  /** The day as a visitor reads it, such as `za 24 okt`. The component writes it as given. */
-  time: string
-}
+export type ShortMatchProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> &
+  ShortMatchShootOut & {
+    /** A short match has no children: everything it shows comes from the props below. */
+    children?: never
+    /** The day in a form a machine reads, such as `2026-10-24`. */
+    dateTime: string
+    /** The goals of the opponent, whichever side it played on. */
+    goalsAgainst: number
+    /** The goals of sc Heerenveen, whichever side it played on. The component orders them. */
+    goalsFor: number
+    /** Whether sc Heerenveen played at home. The home club is named first. */
+    home: boolean
+    /** The club sc Heerenveen played, as plain text. */
+    opponent: string
+    /** The day as a visitor reads it, such as `za 24 okt`. The component writes it as given. */
+    time: string
+  }
+
+/** The shoot-out of a cup match that was level after extra time: both scores, or none. */
+type ShortMatchShootOut =
+  | {
+      /** The penalties scored by the opponent. */
+      penaltiesAgainst: number
+      /** The penalties scored by sc Heerenveen. */
+      penaltiesFor: number
+    }
+  | { penaltiesAgainst?: never; penaltiesFor?: never }
 
 /** The name of our own club, which a match always has on one side. */
 const ourClub = 'sc Heerenveen'
@@ -36,8 +47,9 @@ const ourClub = 'sc Heerenveen'
  * colour of the outcome for sc Heerenveen, as in Match: green for a win, red for a loss and
  * neutral for a draw, whichever side it played on, from the same rule and with the same
  * classes, and not from the home club. The goals say the same, so the colour is never the only
- * sign. A cup match that went to a shoot-out is a draw here, because the component doesn't
- * know the shoot-out. short-match.css gives it its look, and draws the lines between the lines
+ * sign, except after a shoot-out: then the colour follows the shoot-out, as in Match, and a
+ * screen reader hears it ("na strafschoppen 4 tegen 3"), while the line shows only the score
+ * after extra time. short-match.css gives it its look, and draws the lines between the lines
  * of a List.
  */
 export const ShortMatch = ({
@@ -47,11 +59,15 @@ export const ShortMatch = ({
   goalsFor,
   home,
   opponent,
+  penaltiesAgainst,
+  penaltiesFor,
   time,
   ...props
 }: ShortMatchProps) => {
   const [first, second] = home ? [ourClub, opponent] : [opponent, ourClub]
   const [firstGoals, secondGoals] = home ? [goalsFor, goalsAgainst] : [goalsAgainst, goalsFor]
+  const shootOut = penaltiesFor !== undefined && penaltiesAgainst !== undefined
+  const outcome = shootOut ? outcomeOf(penaltiesFor, penaltiesAgainst) : outcomeOf(goalsFor, goalsAgainst)
 
   return (
     <div {...props} className={classNames('hf-short-match', className)}>
@@ -60,12 +76,14 @@ export const ShortMatch = ({
       </Time>
       <span className="hf-short-match-clubs">
         <span className={first === ourClub ? 'hf-short-match-own' : undefined}>{first}</span>{' '}
-        <span className={classNames('hf-short-match-score', `hf-match-${outcomeOf(goalsFor, goalsAgainst)}`)}>
+        <span className={classNames('hf-short-match-score', `hf-match-${outcome}`)}>
           <span aria-hidden="true">
             {firstGoals}–{secondGoals}
           </span>
           <span className="hf-visually-hidden">
             {firstGoals} tegen {secondGoals}
+            {shootOut &&
+              `, na strafschoppen ${home ? penaltiesFor : penaltiesAgainst} tegen ${home ? penaltiesAgainst : penaltiesFor}`}
           </span>
         </span>{' '}
         <span className={second === ourClub ? 'hf-short-match-own' : undefined}>{second}</span>

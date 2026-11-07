@@ -243,18 +243,20 @@ describe('noteworthyFactsOf: a win after a deficit of two goals', () => {
     expect(texts([played(comeback, { goalsFor: 4 })])).toEqual([])
   })
 
-  it('counts a win in extra time, but not a win in a shoot-out after a draw', () => {
-    expect(texts([played(comeback, { competition: 'KNVB Beker', extraTime: true })])).toHaveLength(1)
-    expect(
+  it('counts a win in extra time and a win in a shoot-out after a draw, but not a loss in a shoot-out', () => {
+    const shootOut = (penaltiesFor: number, penaltiesAgainst: number) =>
       texts([
         played(comeback.slice(0, 4), {
           competition: 'KNVB Beker',
           extraTime: true,
-          penaltiesAgainst: 3,
-          penaltiesFor: 4,
+          penaltiesAgainst,
+          penaltiesFor,
         }),
-      ]),
-    ).toEqual([])
+      ])
+
+    expect(texts([played(comeback, { competition: 'KNVB Beker', extraTime: true })])).toHaveLength(1)
+    expect(shootOut(4, 3)).toHaveLength(1)
+    expect(shootOut(3, 4)).toEqual([])
   })
 })
 
@@ -291,6 +293,19 @@ describe('noteworthyFactsOf: wins in a row at home or away', () => {
     expect(texts(matches)).toEqual([
       'Vijf uitwedstrijden op rij gewonnen, de laatste bij Testdorp FC (0–1, 5 augustus 2026).',
     ])
+  })
+
+  it('counts a win in a shoot-out in the run, and a loss in a shoot-out ends it', () => {
+    const shootOut = (round: number, penaltiesFor: number, penaltiesAgainst: number) => ({
+      ...home(round, 1, 1),
+      penaltiesAgainst,
+      penaltiesFor,
+    })
+
+    expect(texts([home(1), home(2), shootOut(3, 4, 3), home(4), home(5)])).toEqual([
+      'Vijf thuiswedstrijden op rij gewonnen, de laatste tegen Testdorp FC (1–0, 5 augustus 2026).',
+    ])
+    expect(texts([home(1), home(2), shootOut(3, 3, 4), home(4), home(5)])).toEqual([])
   })
 
   it('says nothing for four wins, or for a draw or a loss in the run', () => {

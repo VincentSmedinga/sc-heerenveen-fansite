@@ -216,17 +216,23 @@ describe('streaksOf with the choice', () => {
     expect(longest(matches, 'all', 'Gewonnen')).toMatchObject({ current: 3, longest: 3 })
   })
 
-  it('ignores a shoot-out: a cup tie that is level after extra time is a draw, and the unbeaten streak goes on', () => {
-    const matches = [
+  it('follows a shoot-out: a cup tie that is level after extra time is won or lost on penalties', () => {
+    const afterShootOut = (penaltiesFor: number, penaltiesAgainst: number) => [
       ...season,
-      cup('Tweede ronde', '2026-08-15', 1, 1, { extraTime: true, penaltiesAgainst: 5, penaltiesFor: 3 }),
+      cup('Tweede ronde', '2026-08-15', 1, 1, { extraTime: true, penaltiesAgainst, penaltiesFor }),
       played('Speelronde 3', '2026-08-22', 1, 0),
     ]
+    const lostOnPenalties = afterShootOut(3, 5)
+    const wonOnPenalties = afterShootOut(5, 3)
 
-    expect(longest(matches, 'all', 'Ongeslagen')).toMatchObject({ current: 4, longest: 4 })
-    expect(longest(matches, 'all', 'Gewonnen')).toMatchObject({ current: 1, longest: 2 })
-    expect(longest(matches, 'all', 'Zonder winst')).toMatchObject({ current: 0, longest: 1 })
-    expect(streaksOf(matches, 'all').last.map(({ result }) => result)).toEqual(['W', 'W', 'G', 'W'])
+    expect(longest(lostOnPenalties, 'all', 'Ongeslagen')).toMatchObject({ current: 1, longest: 2 })
+    expect(longest(lostOnPenalties, 'all', 'Gewonnen')).toMatchObject({ current: 1, longest: 2 })
+    expect(longest(lostOnPenalties, 'all', 'Verloren')).toMatchObject({ current: 0, longest: 1 })
+    expect(streaksOf(lostOnPenalties, 'all').last.map(({ result }) => result)).toEqual(['W', 'W', 'V', 'W'])
+    expect(longest(wonOnPenalties, 'all', 'Ongeslagen')).toMatchObject({ current: 4, longest: 4 })
+    expect(longest(wonOnPenalties, 'all', 'Gewonnen')).toMatchObject({ current: 4, longest: 4 })
+    expect(longest(wonOnPenalties, 'all', 'Zonder winst')).toMatchObject({ current: 0, longest: 0 })
+    expect(streaksOf(wonOnPenalties, 'all').last.map(({ result }) => result)).toEqual(['W', 'W', 'W', 'W'])
   })
 
   it('counts nothing for a cup tie that is not played or has no score', () => {
@@ -275,11 +281,12 @@ describe('homeAwayOf with the choice', () => {
     expect(homeAwayOf([], 'all').leagueOnly).toBe(true)
   })
 
-  it('counts the score after extra time and treats a shoot-out as a draw', () => {
-    const shootOut = cup('Derde ronde', '2026-10-28', 1, 1, { extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4 })
-    const all = homeAwayOf([shootOut], 'all')
+  it('counts the score after extra time and the result of a shoot-out', () => {
+    const shootOut = (penaltiesFor: number, penaltiesAgainst: number) =>
+      cup('Derde ronde', '2026-10-28', 1, 1, { extraTime: true, penaltiesAgainst, penaltiesFor })
 
-    expect(all.total).toMatchObject({ drawn: 1, lost: 0, played: 1, won: 0 })
+    expect(homeAwayOf([shootOut(4, 3)], 'all').total).toMatchObject({ drawn: 0, goalsFor: 1, lost: 0, won: 1 })
+    expect(homeAwayOf([shootOut(3, 4)], 'all').total).toMatchObject({ drawn: 0, goalsFor: 1, lost: 1, won: 0 })
   })
 })
 

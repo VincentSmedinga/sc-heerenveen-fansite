@@ -2420,6 +2420,7 @@
     Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes of de stand na 90 minuten rusten.
   - **De telling van de beker:** een bekerwedstrijd telt met de score na de verlenging, en een strafschoppenserie telt niet mee.
     Een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel in de cijfers, dus de reeks "ongeslagen" loopt door.
+    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: de doelpunten blijven die na de verlenging, maar de uitkomst volgt de strafschoppen, dus zo'n wedstrijd is een winst of een verlies en onderbreekt de reeks "zonder winst" of "ongeslagen" zoals elke andere.
     Doelpunten in de verlenging blijven buiten Doelpunten per kwartier.
     Een bekerwedstrijd zonder uitslag, of die nog niet is gespeeld, telt niet.
   - **Thuis en uit:** de rijen Punten en Punten per wedstrijd staan er alleen als elke getelde wedstrijd een competitiewedstrijd is (bij Eredivisie en bij een seizoen zonder gespeelde beker), want de beker geeft geen punten.
@@ -2469,6 +2470,7 @@
     `pnpm test:stories` toetst het met axe op een story per vlak, in licht en donker.
   - **Een bekerwedstrijd na strafschoppen** staat in `ShortMatch` als gelijkspel, omdat het onderdeel de strafschoppen niet kent.
     Dat is een bekende beperking, geen onderdeel van dit besluit.
+    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: `ShortMatch` krijgt de strafschoppen als eigenschappen, kleurt de uitslag naar de serie en laat een schermlezer "na strafschoppen 4 tegen 3" horen; de regel zelf toont alleen de stand na de verlenging.
   - **`ShortStaff`** leent de opmaak maar heeft geen uitslag, dus hij blijft zoals hij was; een test laat dat zien.
 - **Waarom:** in een lijst als de wedstrijden tegen één club, Uitersten of De nul gehouden ziet een supporter zo in één oogopslag wat we wonnen en verloren.
   De eerdere reden om het weg te laten (alle regels van De nul gehouden hebben dezelfde soort uitslag) gold niet voor de andere lijsten, en een regel die zo hoort te werken als `Match` hoort ook dezelfde kleur te hebben.
@@ -2665,6 +2667,7 @@
     De kolom met "voor–tegen" en de sortering op de doelpunten voor zijn vervallen; de uitslagen staan nog op de pagina van de club.
   - **P telt alle wedstrijden die de lijst telt.**
     Bij Alle wedstrijden telt de beker mee: 3 punten per winst en 1 per gelijkspel, ook als een gelijkspel in de beker daarna werd beslist.
+    **Later:** zie _Een wedstrijd die we op strafschoppen winnen, telt overal als winst_ (7 november 2026) in `site.md`: een wedstrijd die we op strafschoppen winnen is een winst en geeft 3 punten, en een die we zo verliezen geeft er 0.
     `pointsOf` rekent het uit, op één plek.
   - **De regel onder de tabel** zegt "P punten (3 per winst, 1 per gelijkspel)", omdat dit geen stand is en P hier iets anders kan lijken.
   - **De rijen Punten** op de pagina van een club (#406) blijven zoals ze zijn.

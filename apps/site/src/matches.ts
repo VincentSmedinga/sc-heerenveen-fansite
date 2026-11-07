@@ -27,6 +27,7 @@ import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
+import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
 import { type NameParts, personNameParts, personSortName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
@@ -290,7 +291,7 @@ export type ScoreCount = {
 }
 
 /** How a played match went for sc Heerenveen: the three colours of a result. */
-export type ScoreOutcome = 'draw' | 'loss' | 'win'
+export type ScoreOutcome = MatchResult
 
 /** One streak: matches in a row that all meet a condition, as it stands now and the longest. */
 export type Streak = {
@@ -350,16 +351,17 @@ export function cleanSheetsOf(matches: PublicMatch[], choice: CompetitionChoice 
  * the page of a club counts its meetings (see `meetingsOf` in `opponents.ts`) with it, so both
  * pages show one chart.
  */
-export function countScores(results: readonly { goalsAgainst: number; goalsFor: number }[]): ScoreCount[] {
+export function countScores(results: readonly Scored[]): ScoreCount[] {
   const counts = new Map<string, ScoreCount>()
 
-  for (const { goalsAgainst, goalsFor } of results) {
-    const key = `${goalsFor}–${goalsAgainst}`
+  for (const result of results) {
+    const { goalsAgainst, goalsFor } = result
+    const outcome = resultOf(result)
+    // A level score that a shoot-out decided is a count of its own, as a win or a loss.
+    const key = `${goalsFor}–${goalsAgainst} ${outcome}`
     const known = counts.get(key)
 
     if (known === undefined) {
-      const outcome = goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
-
       counts.set(key, { count: 1, goalsAgainst, goalsFor, outcome })
     } else {
       known.count += 1
@@ -397,13 +399,14 @@ export async function getMatchSeasons(): Promise<string[]> {
  * shoot-out, so the score decides.
  */
 export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
-  return playedMatchesOf(matches, 'league').map(resultOf)
+  return playedMatchesOf(matches, 'league').map((match) => letterOf(match))
 }
 
 /**
  * The matches that are played and have a score, in the order given: those of the Eredivisie
  * for the choice `league`, and those of the cup as well for `all`. The score is the one after
- * extra time, and a shoot-out is not in it, so a cup tie that a shoot-out decided is a draw.
+ * extra time, and a shoot-out is not in it. The result is another matter: a cup tie that a
+ * shoot-out decided is a win or a loss (see `resultOf`).
  */
 export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
   return matches.filter(
@@ -419,25 +422,21 @@ export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoic
  * losses too; then by the goals in the match from many to few. The goal difference and the
  * number of goals fix the score, so the order is complete. Only played matches with a score
  * count, from every competition the choice counts (see `playedMatchesOf`), and the score is the
- * one after extra time, so a cup tie that a shoot-out decided is a draw.
+ * one after extra time, so a cup tie that a shoot-out decided has a level score. It counts
+ * as a win or a loss, apart from the draws with the same score (see `countScores`).
  */
 export function scoreCountsOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): ScoreCount[] {
   return countScores(playedMatchesOf(matches, choice))
-}
-
-/** The result of a match from the side of sc Heerenveen: `W` won, `G` drawn and `V` lost. */
-function resultOf(match: LeagueMatch): FormResult {
-  return match.goalsFor > match.goalsAgainst ? 'W' : match.goalsFor === match.goalsAgainst ? 'G' : 'V'
 }
 
 /** How many of the latest matches the card shows. */
 const lastCount = 5
 
 const streakConditions: { counts: (match: LeagueMatch) => boolean; label: string }[] = [
-  { counts: (match) => match.goalsFor >= match.goalsAgainst, label: 'Ongeslagen' },
-  { counts: (match) => match.goalsFor > match.goalsAgainst, label: 'Gewonnen' },
-  { counts: (match) => match.goalsFor <= match.goalsAgainst, label: 'Zonder winst' },
-  { counts: (match) => match.goalsFor < match.goalsAgainst, label: 'Verloren' },
+  { counts: (match) => resultOf(match) !== 'loss', label: 'Ongeslagen' },
+  { counts: (match) => resultOf(match) === 'win', label: 'Gewonnen' },
+  { counts: (match) => resultOf(match) !== 'win', label: 'Zonder winst' },
+  { counts: (match) => resultOf(match) === 'loss', label: 'Verloren' },
   { counts: (match) => match.goalsFor > 0, label: 'Gescoord' },
   { counts: (match) => match.goalsAgainst === 0, label: 'Zonder tegendoelpunt' },
 ]
@@ -455,7 +454,7 @@ export function streaksOf(matches: PublicMatch[], choice: CompetitionChoice = 'l
   const played = playedMatchesOf(matches, choice)
 
   return {
-    last: played.slice(-lastCount).map((match) => ({ match, result: resultOf(match) })),
+    last: played.slice(-lastCount).map((match) => ({ match, result: letterOf(match) })),
     played: played.length,
     streaks: streakConditions.map(({ counts, label }) => {
       let current = 0
@@ -791,9 +790,9 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
  */
 export function homeAwayOf(matches: PublicMatch[], choice: CompetitionChoice = 'league'): HomeAway {
   const played = playedMatchesOf(matches, choice)
-  const tally = (selection: PublicMatch[]): HomeAwayTally => {
-    const won = selection.filter((match) => (match.goalsFor ?? 0) > (match.goalsAgainst ?? 0)).length
-    const drawn = selection.filter((match) => match.goalsFor === match.goalsAgainst).length
+  const tally = (selection: LeagueMatch[]): HomeAwayTally => {
+    const won = selection.filter((match) => resultOf(match) === 'win').length
+    const drawn = selection.filter((match) => resultOf(match) === 'draw').length
     const goalsFor = selection.reduce((sum, match) => sum + (match.goalsFor ?? 0), 0)
     const points = won * 3 + drawn
 
@@ -909,7 +908,7 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
   }
 
   for (const match of known) {
-    const { goalsAgainst, goalsFor } = match
+    const result = resultOf(match)
     const groups = goalGroups(match.goals)
     const [first] = groups
     let lead = 0
@@ -926,9 +925,9 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
       const ours = first.filter((goal) => goal.ours).length
 
       if (ours === first.length) {
-        addToRow(flow.firstGoal.ours, goalsFor, goalsAgainst)
+        addToRow(flow.firstGoal.ours, result)
       } else if (ours === 0) {
-        addToRow(flow.firstGoal.opponent, goalsFor, goalsAgainst)
+        addToRow(flow.firstGoal.opponent, result)
       } else {
         flow.unknownFirstGoal += 1
       }
@@ -940,14 +939,13 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
 
     addToRow(
       atHalfTime > 0 ? flow.atHalfTime.ahead : atHalfTime < 0 ? flow.atHalfTime.behind : flow.atHalfTime.level,
-      goalsFor,
-      goalsAgainst,
+      result,
     )
 
-    if (trailed && goalsFor > goalsAgainst) {
+    if (trailed && result === 'win') {
       flow.wonAfterTrailing += 1
     }
-    if (led && goalsFor <= goalsAgainst) {
+    if (led && result !== 'win') {
       flow.notWonAfterLead += 1
     }
   }
@@ -1375,13 +1373,13 @@ export function specialGoalsOf(matches: PublicMatch[], choice: CompetitionChoice
   }
 }
 
-function addToRow(row: FlowRow, goalsFor: number, goalsAgainst: number) {
+function addToRow(row: FlowRow, result: MatchResult) {
   row.matches += 1
 
-  if (goalsFor > goalsAgainst) {
+  if (result === 'win') {
     row.won += 1
     row.points += 3
-  } else if (goalsFor === goalsAgainst) {
+  } else if (result === 'draw') {
     row.drawn += 1
     row.points += 1
   } else {

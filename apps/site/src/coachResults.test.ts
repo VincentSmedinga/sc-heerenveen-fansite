@@ -20,6 +20,8 @@ const match = (matchDate: string, goalsFor: null | number, goalsAgainst: null | 
   goalsAgainst,
   goalsFor,
   matchDate,
+  penaltiesAgainst: null,
+  penaltiesFor: null,
   status: 'played',
   ...extra,
 })
@@ -68,6 +70,21 @@ describe('coachResultsOf', () => {
       ['Na', 2, 0, 1, 1, '0,50'],
       ['Voor', 1, 1, 0, 0, '3,00'],
     ])
+  })
+
+  it('counts a match decided on penalties as a win or a loss', () => {
+    const results = coachResultsOf(
+      [coach('Eerste Trainer', '2010-07-01', null)],
+      [
+        match('2011-01-15', 1, 1, { competition: 'KNVB Beker', penaltiesAgainst: 3, penaltiesFor: 4 }),
+        match('2011-01-22', 2, 2, { competition: 'KNVB Beker', penaltiesAgainst: 5, penaltiesFor: 4 }),
+        match('2011-01-29', 0, 0),
+      ],
+      'all',
+    )
+
+    // One win, one loss and one draw: four points from three matches.
+    expect(figures(results)).toEqual([['Eerste Trainer', 3, 1, 1, 1, '1,33']])
   })
 
   it('writes an interim as such and gives it a row of its own', () => {

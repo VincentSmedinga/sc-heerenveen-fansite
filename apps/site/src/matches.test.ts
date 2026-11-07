@@ -1173,7 +1173,20 @@ describe('scoreCountsOf', () => {
     ).toEqual(['3-3 1x draw', '2-2 2x draw', '1-1 1x draw', '0-0 1x draw'])
   })
 
-  it('counts a cup tie, with the score after extra time and not the shoot-out', () => {
+  it('counts a cup tie with the score after extra time, and its result from the shoot-out', () => {
+    const shootOut = (penaltiesFor: number, penaltiesAgainst: number): PublicMatch => ({
+      ...scoreOn('2026-09-23', 1, 1),
+      competition: 'KNVB Beker',
+      extraTime: true,
+      penaltiesAgainst,
+      penaltiesFor,
+    })
+
+    expect(shown([shootOut(5, 3), ...scores([[1, 0]])])).toEqual(['1-0 1x win', '1-1 1x win'])
+    expect(shown([shootOut(3, 5), ...scores([[1, 0]])])).toEqual(['1-0 1x win', '1-1 1x loss'])
+  })
+
+  it('keeps a level score that a shoot-out decided apart from a draw with the same score', () => {
     const shootOut: PublicMatch = {
       ...scoreOn('2026-09-23', 1, 1),
       competition: 'KNVB Beker',
@@ -1182,7 +1195,7 @@ describe('scoreCountsOf', () => {
       penaltiesFor: 5,
     }
 
-    expect(shown([shootOut, ...scores([[1, 0]])])).toEqual(['1-0 1x win', '1-1 1x draw'])
+    expect(shown([shootOut, ...scores([[1, 1]])])).toEqual(['1-1 1x win', '1-1 1x draw'])
   })
 
   it('leaves out a match without a score and a match that is not played', () => {
@@ -1327,6 +1340,27 @@ describe('streaksOf', () => {
       'Speelronde 7',
     ])
     expect(last.map(({ result }) => result)).toEqual(['G', 'V', 'G', 'W', 'G'])
+  })
+
+  it('counts a cup tie that a shoot-out decided as a win or a loss in every streak', () => {
+    const cup = (penaltiesFor: number, penaltiesAgainst: number): PublicMatch => ({
+      ...match('Beker', 'played', '2026-08-01'),
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      penaltiesAgainst,
+      penaltiesFor,
+    })
+    const labels = (matches: PublicMatch[]) =>
+      Object.fromEntries(streaksOf(matches, 'all').streaks.map(({ current, label }) => [label, current]))
+    const won = streaksOf([cup(4, 3)], 'all')
+    const lost = streaksOf([cup(3, 4)], 'all')
+
+    expect(labels([cup(4, 3)])).toMatchObject({ Gewonnen: 1, Ongeslagen: 1, Verloren: 0, 'Zonder winst': 0 })
+    expect(labels([cup(3, 4)])).toMatchObject({ Gewonnen: 0, Ongeslagen: 0, Verloren: 1, 'Zonder winst': 1 })
+    expect(won.last.map(({ result }) => result)).toEqual(['W'])
+    expect(lost.last.map(({ result }) => result)).toEqual(['V'])
   })
 
   it('leaves out a cup tie, a match without a score and a match that is not played', () => {
@@ -1763,6 +1797,23 @@ describe('matchFlowOf', () => {
     ])
 
     expect(flow).toMatchObject({ notWonAfterLead: 2, wonAfterTrailing: 0 })
+  })
+
+  it('counts a win on penalties after trailing, and a loss on penalties after leading', () => {
+    const shootOut = (goals: Goal[], penaltiesFor: number, penaltiesAgainst: number) => ({
+      ...played(goals),
+      penaltiesAgainst,
+      penaltiesFor,
+    })
+
+    expect(matchFlowOf([shootOut([theirs(10), ours(50)], 4, 3)])).toMatchObject({
+      notWonAfterLead: 0,
+      wonAfterTrailing: 1,
+    })
+    expect(matchFlowOf([shootOut([ours(10), theirs(50)], 3, 4)])).toMatchObject({
+      notWonAfterLead: 1,
+      wonAfterTrailing: 0,
+    })
   })
 
   it('counts a draw after trailing as neither', () => {
@@ -2255,6 +2306,40 @@ describe('leaguePlaceOf', () => {
     expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3)])).toBeUndefined()
     expect(leaguePlaceOf([club('Een', 1, 1, 3, 1, 2, 0), club('sc Heerenveen', 2, 0, 0, 0, 0, 0)])).toBeUndefined()
     expect(leaguePlaceOf([])).toBeUndefined()
+  })
+})
+
+describe('homeAwayOf: a shoot-out', () => {
+  const cup = (penaltiesFor: number, penaltiesAgainst: number): PublicMatch => ({
+    ...match('Beker', 'played', '2026-08-01'),
+    competition: 'KNVB Beker',
+    extraTime: true,
+    goalsAgainst: 1,
+    goalsFor: 1,
+    penaltiesAgainst,
+    penaltiesFor,
+  })
+
+  it('counts a cup tie won on penalties as a win with its points, and the goals as they were', () => {
+    expect(homeAwayOf([cup(4, 3)], 'all').total).toMatchObject({
+      drawn: 0,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      lost: 0,
+      points: 3,
+      won: 1,
+    })
+  })
+
+  it('counts a cup tie lost on penalties as a loss without points', () => {
+    expect(homeAwayOf([cup(3, 4)], 'all').total).toMatchObject({
+      drawn: 0,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      lost: 1,
+      points: 0,
+      won: 0,
+    })
   })
 })
 

@@ -20,6 +20,7 @@ import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { ownListPeriods, stadiumPeriods } from './match-format'
+import { letterOf, resultOf } from './match-result'
 import { type Attendance, attendanceOf, type FinalPlace, getFinalPlaces, programmeOf } from './matches'
 
 /**
@@ -204,14 +205,18 @@ export const hasClubScorers = (matches: readonly PublicClubMatch[]) =>
 export function tallyOf(meetings: readonly Meeting[]): Tally {
   const tally = emptyTally()
 
-  for (const { goalsAgainst, goalsFor } of meetings) {
+  for (const meeting of meetings) {
+    const { goalsAgainst, goalsFor } = meeting
+
     tally.played += 1
     tally.goalsFor += goalsFor
     tally.goalsAgainst += goalsAgainst
 
-    if (goalsFor > goalsAgainst) {
+    const result = resultOf(meeting)
+
+    if (result === 'win') {
       tally.won += 1
-    } else if (goalsFor === goalsAgainst) {
+    } else if (result === 'draw') {
       tally.drawn += 1
     } else {
       tally.lost += 1
@@ -235,10 +240,6 @@ export function upcomingOf(matches: readonly PublicClubMatch[], choice: Competit
   )
 }
 
-/** The result of a meeting from the side of sc Heerenveen: `W`, `G` or `V` by the score. */
-const resultOf = ({ goalsAgainst, goalsFor }: Meeting): FormResult =>
-  goalsFor > goalsAgainst ? 'W' : goalsFor === goalsAgainst ? 'G' : 'V'
-
 /** How many of the latest meetings the row Laatste wedstrijden shows, and needs. */
 const lastCount = 5
 
@@ -253,7 +254,10 @@ export function lastResultsOf(meetings: readonly Meeting[]): FormResult[] | unde
     return undefined
   }
 
-  return meetings.slice(0, lastCount).map(resultOf).reverse()
+  return meetings
+    .slice(0, lastCount)
+    .map((meeting) => letterOf(meeting))
+    .reverse()
 }
 
 /** The places of a season on the axis of the card Resultaten sinds: two matches. */
@@ -305,7 +309,7 @@ export function timelineOf(matches: readonly PublicClubMatch[], now: Date, first
       .toSorted((a, b) => a.matchDate.localeCompare(b.matchDate) || a.id - b.id)
       .slice(0, timelinePerYear)
       .forEach((meeting, index) => {
-        places[(year - firstYear) * timelinePerYear + index] = resultOf(meeting)
+        places[(year - firstYear) * timelinePerYear + index] = letterOf(meeting)
       })
   }
 

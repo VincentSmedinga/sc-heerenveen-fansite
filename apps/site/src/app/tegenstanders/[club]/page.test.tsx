@@ -549,7 +549,7 @@ describe('the page of a club', () => {
     }
   })
 
-  it('counts a cup tie that a shoot-out decided as a draw, and only the cup with all the matches', async () => {
+  it('counts a cup tie that a shoot-out decided as a loss, and only the cup with all the matches', async () => {
     const cup = testclub.matches[0]!
 
     vi.mocked(getClubPage).mockResolvedValue({
@@ -560,7 +560,7 @@ describe('the page of a club', () => {
       ],
     })
 
-    expect(sentenceOf(await render())).toEqual({ drawn: 2, lost: 0, won: 3 })
+    expect(sentenceOf(await render())).toEqual({ drawn: 1, lost: 1, won: 3 })
     expect(sentenceOf(await render('testclub', { competitie: 'eredivisie' }))).toEqual({ drawn: 1, lost: 0, won: 3 })
   })
 

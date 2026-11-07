@@ -263,6 +263,8 @@ export async function listAllMatchDays(db: Database) {
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
       matchDate: matches.matchDate,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
       status: matches.status,
     })
     .from(matches)
@@ -482,26 +484,31 @@ export async function listClubNews(
 /**
  * The clubs sc Heerenveen has a match against, A to Z by their name, each with the record of
  * the played matches against it: played, won, drawn, lost, and the goals for and against. A
- * match is won, drawn or lost by the goals, as Wikipedia gives them, so a cup tie that a
- * shoot-out decided after a level score is drawn. With `competition` only the matches of that
+ * match is won, drawn or lost by the shoot-out when it had one, and by the goals otherwise, so
+ * a cup tie that a shoot-out decided after a level score is won or lost, with level goals
+ * (the rule is `resultOf` in the site). With `competition` only the matches of that
  * competition count, and a club without one in it is left out; without it all of them count.
  * A club that has matches but none played yet is in the list with zeros.
  */
 export function listClubRecords(db: Database, { competition }: { competition?: Competition } = {}) {
   const played = eq(matches.status, 'played')
   const total = (condition: SQL) => sql<number>`cast(coalesce(sum(${condition}), 0) as unsigned)`.mapWith(Number)
+  // The score that decides a match: the shoot-out when there was one (both numbers are set or
+  // neither is), and the goals otherwise.
+  const ours = sql`coalesce(${matches.penaltiesFor}, ${matches.goalsFor})`
+  const theirs = sql`coalesce(${matches.penaltiesAgainst}, ${matches.goalsAgainst})`
 
   return db
     .select({
-      drawn: total(and(played, sql`${matches.goalsFor} = ${matches.goalsAgainst}`) as SQL),
+      drawn: total(and(played, sql`${ours} = ${theirs}`) as SQL),
       goalsAgainst: sql<number>`cast(coalesce(sum(${matches.goalsAgainst}), 0) as unsigned)`.mapWith(Number),
       goalsFor: sql<number>`cast(coalesce(sum(${matches.goalsFor}), 0) as unsigned)`.mapWith(Number),
       id: clubs.id,
-      lost: total(and(played, sql`${matches.goalsFor} < ${matches.goalsAgainst}`) as SQL),
+      lost: total(and(played, sql`${ours} < ${theirs}`) as SQL),
       name: clubs.name,
       played: total(played),
       slug: clubs.slug,
-      won: total(and(played, sql`${matches.goalsFor} > ${matches.goalsAgainst}`) as SQL),
+      won: total(and(played, sql`${ours} > ${theirs}`) as SQL),
     })
     .from(clubs)
     .innerJoin(

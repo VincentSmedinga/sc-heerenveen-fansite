@@ -438,7 +438,8 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
 - **Hoe vaak welke uitslag:** een kaart in de zijbalk, tussen Toeschouwers en De nul gehouden (`surface="warm"`, anker `#hoe-vaak-welke-uitslag`, `ScoreCountsCard` in `src/MatchViews.tsx`), met een donutdiagram en een tabel van de uitslagen die sc Heerenveen dit seizoen haalde.
   Het zijn de gespeelde wedstrijden die de schakelaar kiest: alle wedstrijden, of alleen de Eredivisie (`scoreCountsOf(matches, competition)`).
   De kaart stond tot #774 op Wedstrijden, onder de stand, en telde daar altijd alle wedstrijden.
-  Een bekerwedstrijd telt met de stand na verlenging, dus 1–1 en dan winnen na strafschoppen is gelijk.
+  Een bekerwedstrijd telt met de stand na verlenging, dus 1–1 blijft 1–1; de uitkomst volgt de strafschoppen, dus 1–1 en dan winnen na strafschoppen is een winst (`resultOf` in `src/match-result.ts`).
+  De donut en de tabel zetten zo'n 1–1 bij Winst, apart van de gelijke spelen met dezelfde stand.
   Elke uitslag staat vanuit sc Heerenveen gezien, onze doelpunten eerst ("4–0" is een winst en "0–1" een nederlaag), en de volgorde is eerst alle winsten, dan de gelijke spelen, dan de nederlagen, binnen een groep van groot naar klein doelsaldo en dan het grootste aantal doelpunten eerst (`scoreCountsOf` in `src/matches.ts`).
   Het diagram (`DonutChart` met `labels={false}` en `ranked`) heeft een plak per uitslag, groen voor winst, grijs voor gelijk en rood voor verlies, zonder tekst rond de ring en verborgen voor een schermlezer.
   De grootste winst en het grootste verlies hebben de sterkste kleur, en de kleur van de sterkste plakken gaat voorbij de volle kleur naar de kleur van de tekst, zodat het verschil met de zwakste goed te zien is.
@@ -624,7 +625,7 @@ Ze heeft acht delen:
   De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.
   Hij is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline` en `timelineMinimum`), zonder zin die zegt waarom.
 - De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Resultaten sinds": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
-  `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als gelijkspel.
+  `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als winst of als verlies.
   Anders dan op Wedstrijden heeft de kaart naast het eerste diagram een tweede, kleiner donutdiagram (`DonutChart` met `size="small"`) met de doelpunten die we maakten (groen, links) en de tegendoelpunten (rood, rechts) van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31" (`centre`) in een kleinere letter dan het totaal van het eerste diagram.
   De twee staan naast elkaar in een `DonutChart.Group`, ook op een telefoon.
   Het diagram is verborgen voor een schermlezer, die direct na de diagrammen de zin hoort "Doelpunten: 45 gemaakt, 31 tegen.".
@@ -695,7 +696,7 @@ De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstri
 Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`), zodat de schakelaar direct boven de eerste kaart staat die hem volgt.
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
-Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
+Een strafschoppenserie telt niet mee in de doelpunten, maar wel in de uitkomst: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een winst of een verlies.
 Doelpunten in de verlenging blijven buiten de tabel van Doelpunten per kwartier, met de zin die dat zegt; de twee regels eronder tellen ze wel.
 De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`CompetitionChoice`); wie het weglaat, krijgt wat de kaart tot nu toe deed.
 
