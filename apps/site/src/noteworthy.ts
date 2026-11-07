@@ -2,6 +2,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { type CompetitionChoice } from './competition'
 import { formatTableDay } from './match-format'
+import { resultOf } from './match-result'
 import { keyOf, type LeagueMatch, playedMatchesOf, scorerLine } from './matches'
 
 /**
@@ -79,7 +80,9 @@ const venue = (match: PublicMatch) => `${match.home ? 'thuis tegen' : 'uit bij'}
 
 /** The score as the home club comes first, with the en dash the site writes: "3–2". */
 const score = (match: LeagueMatch) =>
-  match.home ? `${match.goalsFor}–${match.goalsAgainst}` : `${match.goalsAgainst}–${match.goalsFor}`
+  (match.home ? `${match.goalsFor}–${match.goalsAgainst}` : `${match.goalsAgainst}–${match.goalsFor}`) +
+  // The score is the one after extra time, so a win on penalties would read as a mistake.
+  (match.penaltiesFor === null ? '' : ', na strafschoppen')
 
 /** "thuis tegen FC Twente (3–2, 14 maart 2026)": the match, its score and the day. */
 const describe = (match: LeagueMatch) => `${venue(match)} (${score(match)}, ${formatTableDay(match.matchDate)})`
@@ -97,7 +100,7 @@ const follows = (earlier: MatchGoal, later: MatchGoal) =>
  */
 function comeback({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
-    if (match.goalsFor <= match.goalsAgainst || match.goals.length !== match.goalsFor + match.goalsAgainst) {
+    if (resultOf(match) !== 'win' || match.goals.length !== match.goalsFor + match.goalsAgainst) {
       return []
     }
 
@@ -259,7 +262,7 @@ function wins({ played }: FactInput): NoteworthyFact[] {
     }
 
     for (const match of played.filter((item) => item.home === home)) {
-      if (match.goalsFor > match.goalsAgainst) {
+      if (resultOf(match) === 'win') {
         run.push(match)
       } else {
         close()

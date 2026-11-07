@@ -38,6 +38,26 @@ describe('ShortMatch', () => {
     expect(container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('0–1')
   })
 
+  it('gives a cup match the colour of the shoot-out, and lets a screen reader hear it', () => {
+    const won = render(<ShortMatch {...props} goalsAgainst={1} goalsFor={1} penaltiesAgainst={3} penaltiesFor={4} />)
+    const lost = render(
+      <ShortMatch {...props} goalsAgainst={1} goalsFor={1} home={false} penaltiesAgainst={5} penaltiesFor={4} />,
+    )
+    const draw = render(<ShortMatch {...props} goalsAgainst={1} goalsFor={1} />)
+
+    expect(won.container.querySelector('.hf-short-match-score')?.classList.contains('hf-match-win')).toBe(true)
+    expect(won.container.querySelector('.hf-short-match-score [aria-hidden]')?.textContent).toBe('1–1')
+    expect(won.container.querySelector('.hf-visually-hidden')?.textContent).toBe(
+      '1 tegen 1, na strafschoppen 4 tegen 3',
+    )
+    expect(lost.container.querySelector('.hf-short-match-score')?.classList.contains('hf-match-loss')).toBe(true)
+    expect(lost.container.querySelector('.hf-visually-hidden')?.textContent).toBe(
+      '1 tegen 1, na strafschoppen 5 tegen 4',
+    )
+    expect(draw.container.querySelector('.hf-short-match-score')?.classList.contains('hf-match-draw')).toBe(true)
+    expect(draw.container.querySelector('.hf-visually-hidden')?.textContent).toBe('1 tegen 1')
+  })
+
   it('does not say "thuis" or "uit": the order says where it was played', () => {
     const home = render(<ShortMatch {...props} />)
     const away = render(<ShortMatch {...props} home={false} />)

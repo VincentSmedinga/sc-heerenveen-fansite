@@ -145,21 +145,22 @@ describe('hasClubScorers', () => {
 
 describe('lastResultsOf', () => {
   it('gives the latest five as W, G and V from our side, the oldest first and the newest last', () => {
-    // The newest first: V (cup), G (league), G (cup, level after extra time), W, W.
-    expect(lastResultsOf(meetingsOf(matches, 'all').slice(0, 5))).toEqual(['W', 'W', 'G', 'G', 'V'])
+    // The newest first: V (cup), G (league), W (cup, level after extra time, won on
+    // penalties), W, W.
+    expect(lastResultsOf(meetingsOf(matches, 'all').slice(0, 5))).toEqual(['W', 'W', 'W', 'G', 'V'])
   })
 
   it('leaves older meetings out when there are more than five', () => {
-    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'G', 'G', 'V'])
+    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'W', 'G', 'V'])
   })
 
-  it('counts a cup tie that a shoot-out decided after a level score as a draw', () => {
-    const results = lastResultsOf([
-      ...meetingsOf([match(1, 1, { competition: 'KNVB Beker', penaltiesAgainst: 5, penaltiesFor: 3 })], 'all'),
-      ...meetingsOf(matches, 'league').slice(1, 5),
-    ])
+  it('counts a cup tie that a shoot-out decided after a level score as a win or a loss', () => {
+    const league = meetingsOf(matches, 'league').slice(1, 5)
+    const cup = (penaltiesFor: number, penaltiesAgainst: number) =>
+      meetingsOf([match(1, 1, { competition: 'KNVB Beker', penaltiesAgainst, penaltiesFor })], 'all')
 
-    expect(results?.at(-1)).toBe('G')
+    expect(lastResultsOf([...cup(3, 5), ...league])?.at(-1)).toBe('V')
+    expect(lastResultsOf([...cup(5, 3), ...league])?.at(-1)).toBe('W')
   })
 
   it('has no row for four meetings, and one for five', () => {
@@ -173,20 +174,25 @@ describe('lastResultsOf', () => {
   it('only counts the meetings of the choice it is given', () => {
     // Five in the league: 2-2, 4-1, 1-0, 0-1, 5-1 (newest first).
     expect(lastResultsOf(meetingsOf(matches, 'league'))).toEqual(['W', 'V', 'W', 'W', 'G'])
-    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'G', 'G', 'V'])
+    expect(lastResultsOf(meetingsOf(matches, 'all'))).toEqual(['W', 'W', 'W', 'G', 'V'])
   })
 })
 
 describe('tallyOf', () => {
-  it('counts a cup tie that a shoot-out decided after a level score as a draw', () => {
+  it('counts a cup tie that a shoot-out decided after a level score as a win or a loss', () => {
+    const cup = (penaltiesFor: number, penaltiesAgainst: number) =>
+      meetingsOf([match(1, 1, { competition: 'KNVB Beker', penaltiesAgainst, penaltiesFor })], 'all')
+
+    // The goals stay 1-1 in both: only the result follows the shoot-out.
     expect(tallyOf(meetingsOf([matches[2] as PublicClubMatch], 'all'))).toEqual({
-      drawn: 1,
+      drawn: 0,
       goalsAgainst: 1,
       goalsFor: 1,
       lost: 0,
       played: 1,
-      won: 0,
+      won: 1,
     })
+    expect(tallyOf(cup(3, 5))).toEqual({ drawn: 0, goalsAgainst: 1, goalsFor: 1, lost: 1, played: 1, won: 0 })
   })
 
   it('is all zeros without a meeting', () => {

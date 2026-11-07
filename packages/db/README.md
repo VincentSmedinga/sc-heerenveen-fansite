@@ -632,7 +632,8 @@ Lezen de import de echte wedstrijden, dan verdwijnen de verzonnen wedstrijden ma
 Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 
 - `listClubRecords(db, { competition })` geeft de clubs met minstens één wedstrijd, van A tot Z op naam, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen.
-  Een wedstrijd telt als gespeeld, gewonnen, gelijk of verloren op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gelijk.
+  Een wedstrijd telt als gewonnen, gelijk of verloren op de strafschoppen als die er waren, en anders op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gewonnen of verloren.
+  De doelpunten voor en tegen blijven die van de stand na de verlenging.
   Zonder `competition` tellen alle wedstrijden, met `competition: 'Eredivisie'` alleen die van de competitie, en een club die we alleen in de beker troffen staat er dan niet in.
   Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 - `findClubBySlug(db, slug)` geeft één club met zijn `id`, `slug`, `name`, `wikipediaPage` en de andere schrijfwijzen die Wikipedia gebruikt (`otherNames`, van A tot Z; het zijn geen naamswijzigingen), of niets voor een slug die niemand heeft.

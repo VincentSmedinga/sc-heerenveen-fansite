@@ -82,17 +82,21 @@ describe('listClubRecords', () => {
     ])
   })
 
-  it('counts a cup tie that a shoot-out decided as drawn, by the goals', async () => {
-    await store(
-      played('Testdorp FC', 1, 1, {
-        competition: 'KNVB Beker',
-        extraTime: true,
-        penaltiesAgainst: 3,
-        penaltiesFor: 4,
-      }),
-    )
+  it('counts a cup tie that a shoot-out decided as won or lost, with the goals as they were', async () => {
+    const cup = (penaltiesFor: number, penaltiesAgainst: number) =>
+      played('Testdorp FC', 1, 1, { competition: 'KNVB Beker', extraTime: true, penaltiesAgainst, penaltiesFor })
 
-    expect(await listClubRecords(database.db)).toMatchObject([{ drawn: 1, lost: 0, played: 1, won: 0 }])
+    await store(cup(4, 3))
+
+    expect(await listClubRecords(database.db)).toMatchObject([
+      { drawn: 0, goalsAgainst: 1, goalsFor: 1, lost: 0, played: 1, won: 1 },
+    ])
+
+    await store(cup(3, 5), played('Testdorp FC', 0, 0))
+
+    expect(await listClubRecords(database.db)).toMatchObject([
+      { drawn: 1, goalsAgainst: 2, goalsFor: 2, lost: 1, played: 3, won: 1 },
+    ])
   })
 
   it('counts only the Eredivisie when asked, and leaves out a club that we met in the cup alone', async () => {

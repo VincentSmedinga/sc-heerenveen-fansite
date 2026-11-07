@@ -25,7 +25,8 @@ const meta = preview.meta({
           'De uitkomst volgt uit `goalsFor` en `goalsAgainst`, met dezelfde regel als `Match`, dus er is geen eigenschap voor.',
           'De kleur is nooit het enige teken: de cijfers zijn de uitslag en ze staan in een zwaarder gewicht.',
           'In geforceerde kleuren vervangt de browser de kleur en blijft het gewicht.',
-          'Een bekerwedstrijd die op strafschoppen is beslist, staat hier als gelijkspel, want het onderdeel kent de strafschoppen niet.',
+          'Een bekerwedstrijd die op strafschoppen is beslist, krijgt de kleur van de serie: groen als we winnen, rood als we verliezen.',
+          'Geef daarvoor `penaltiesFor` en `penaltiesAgainst` mee, beide of geen van beide. De regel toont alleen de uitslag na de verlenging; een schermlezer hoort ook de serie.',
           '',
           'De regel heeft geen competitie, ronde, stadion, tijd of doelpuntenmakers: dat is een `Match`.',
           '- `time` is de dag zoals een bezoeker hem leest, zoals "za 24 okt", en `dateTime` is de waarde voor machines, zoals "2026-10-24".',
@@ -246,6 +247,44 @@ export const OutcomesDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Winst, verlies en gelijkspel onder elkaar, donker',
   render: renderOutcomes,
+})
+
+const renderShootOut = () => (
+  <Card>
+    <Heading level={2}>Na strafschoppen</Heading>
+    <List role="list">
+      <List.Item>
+        <ShortMatch
+          dateTime="2026-10-28"
+          goalsAgainst={1}
+          goalsFor={1}
+          home
+          opponent="Testdorp FC"
+          penaltiesAgainst={3}
+          penaltiesFor={4}
+          time="wo 28 okt"
+        />
+      </List.Item>
+      <List.Item>
+        <ShortMatch
+          dateTime="2026-02-04"
+          goalsAgainst={2}
+          goalsFor={2}
+          home={false}
+          opponent="Voorbeeld United"
+          penaltiesAgainst={5}
+          penaltiesFor={4}
+          time="wo 4 feb"
+        />
+      </List.Item>
+    </List>
+  </Card>
+)
+
+export const ShootOutLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Na strafschoppen, gewonnen en verloren, licht',
+  render: renderShootOut,
 })
 
 export const SurfacesLight = meta.story({

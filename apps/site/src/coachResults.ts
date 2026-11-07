@@ -6,6 +6,7 @@ import { rangeOf } from '@fansite/db/staff'
 import type { CompetitionChoice } from './competition'
 
 import { formatStaffDate } from './match-format'
+import { resultOf } from './match-result'
 
 /** A head coach with the matches in his period, for one row of the card. */
 export type CoachResult = {
@@ -28,6 +29,8 @@ export type DatedMatch = {
   goalsAgainst: null | number
   goalsFor: null | number
   matchDate: string
+  penaltiesAgainst: null | number
+  penaltiesFor: null | number
   status: string
 }
 
@@ -85,9 +88,11 @@ export function coachResultsOf(
       continue
     }
 
-    if (match.goalsFor > match.goalsAgainst) {
+    const result = resultOf({ ...match, goalsAgainst: match.goalsAgainst, goalsFor: match.goalsFor })
+
+    if (result === 'win') {
       count.won++
-    } else if (match.goalsFor === match.goalsAgainst) {
+    } else if (result === 'draw') {
       count.drawn++
     } else {
       count.lost++
