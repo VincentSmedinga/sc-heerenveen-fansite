@@ -2,18 +2,7 @@ import type { ReportedMatch } from '@fansite/db/match-reports'
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import {
-  Card,
-  Heading,
-  Link,
-  MatchHeader,
-  type MatchHeaderFact,
-  MatchLineup,
-  MatchTimeline,
-  Page,
-  Text,
-  Time,
-} from '@fansite/design-system'
+import { Card, Link, type MatchHeaderFact, Page, Text, Time } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
@@ -21,10 +10,11 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { matchMoment } from '#src/match-format'
 import { getMatchData, type MatchData } from '#src/matches'
+import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { getPublicReport, reportAddress } from '#src/report-data'
-import { eventsOf, lineupOf, ourClub } from '#src/report-view'
+import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
 import { seasonAddress, seasonFromSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -97,18 +87,19 @@ function titleOf(reported: ReportedMatch) {
   const [first, second] = clubsOf(reported)
   const day = longDay.format(new Date(`${reported.match.matchDate}T00:00:00Z`))
 
-  return { day, heading: `${first} – ${second}`, title: `${first} ${scoreOf(reported)} ${second}, ${day}` }
+  return { day, title: `${first} ${scoreOf(reported)} ${second}, ${day}` }
 }
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
 
 /**
- * The page of one match: the clubs and the result with the facts of the match, the course of
- * the match (goals with their assists, substitutions, cards and missed penalties in the order
- * of the clock), and the line-ups with the bench. The line-up of the opponent is there when its
- * side of the report is complete, and otherwise one sentence says so. The credit follows, in
- * the sidebar: Wikipedia for the result and the goals, and our own records for the rest. A
- * match without a page, and an address that is not one, are the page "niet gevonden".
+ * The page of one match, built by `MatchPageView` from the data of the report: the clubs with
+ * the result, the scorers and the facts, the score bar, the line-up on the pitch with the
+ * substitutes, the course of the match in the halves and, after a shoot-out, its series. The
+ * line-up of the opponent is there when its side of the report is complete, and otherwise one
+ * sentence says so. The credit follows, in the sidebar: Wikipedia for the result and the goals,
+ * and our own records for the rest. A match without a page, and an address that is not one, are
+ * the page "niet gevonden".
  */
 export async function ReportPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadReport(seizoen, slug)
@@ -122,21 +113,8 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   }
 
   const { data, reported, season } = loaded
-  const { match, stored } = reported
   const now = new Date()
-  const { heading } = titleOf(reported)
-  const events = eventsOf(reported)
-  const opponentComplete = stored.report.opponentComplete
-  const ours = lineupOf(reported, true)
-  const theirs = lineupOf(reported, false)
-  const afterNinety =
-    match.afterNinetyFor !== null && match.afterNinetyAgainst !== null
-      ? { afterNinetyAgainst: match.afterNinetyAgainst, afterNinetyFor: match.afterNinetyFor }
-      : {}
-  const shootOut =
-    match.penaltiesFor !== null && match.penaltiesAgainst !== null
-      ? { penaltiesAgainst: match.penaltiesAgainst, penaltiesFor: match.penaltiesFor }
-      : {}
+  const page = matchPageDataOf(reported, factsOf(reported, now))
 
   return (
     <>
@@ -148,46 +126,11 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
                 {`Wedstrijden ${season}`}
               </Link>
             </Text>
-            <Heading level={1}>{heading}</Heading>
-            <MatchHeader
-              {...afterNinety}
-              {...shootOut}
-              extraTime={match.extraTime}
-              facts={factsOf(reported, now)}
-              goalsAgainst={match.goalsAgainst ?? 0}
-              goalsFor={match.goalsFor ?? 0}
-              home={match.home}
-              opponent={match.opponent}
-            />
+            <MatchPageHeader data={page} />
           </Page.Cell>
         }
       >
-        <Card aria-labelledby="verloop">
-          <Heading anchor id="verloop" level={2}>
-            Verloop
-          </Heading>
-          {events.length === 0 ? (
-            <Text>In deze wedstrijd is niets gebeurd wat we bijhouden.</Text>
-          ) : (
-            <MatchTimeline aria-labelledby="verloop" events={events} extraTime={match.extraTime} />
-          )}
-        </Card>
-        <Card aria-labelledby="opstelling">
-          <Heading anchor id="opstelling" level={2}>
-            Opstelling
-          </Heading>
-          <MatchLineup {...ours} formation={stored.report.formationOurs ?? undefined} headingLevel={3} team={ourClub} />
-          {opponentComplete ? (
-            <MatchLineup
-              {...theirs}
-              formation={stored.report.formationOpponent ?? undefined}
-              headingLevel={3}
-              team={match.opponent}
-            />
-          ) : (
-            <Text>{`De opstelling van ${match.opponent} hebben we niet.`}</Text>
-          )}
-        </Card>
+        <MatchPageCards data={page} />
       </Page.Main>
       <Page.Sidebar aria-label="De bron">
         <ReportCredit data={data} reported={reported} />
@@ -203,7 +146,8 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
 function factsOf({ match }: ReportedMatch, now: Date): MatchHeaderFact[] {
   const day = matchMoment({ ...match, status: 'played' }, now, { withYear: true })
   const facts: MatchHeaderFact[] = [
-    { label: 'Competitie', value: `${match.competition}, ${match.round}` },
+    { label: 'Competitie', value: match.competition },
+    { label: 'Ronde', value: match.round },
     { label: 'Datum', value: <Time dateTime={day.dateTime}>{day.time}</Time> },
   ]
 
