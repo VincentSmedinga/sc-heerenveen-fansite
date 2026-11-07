@@ -51,9 +51,12 @@ export function parseFormation(formation: null | string | undefined): null | num
   return rows.reduce((sum, row) => sum + row, 0) === fieldPlayers ? rows : null
 }
 
-/** The distance of a row from the goal line of its team, as a share of the pitch's length. */
-const rowDepth = (index: number, rows: number) =>
-  index === 0 ? 0.06 : rows === 1 ? 0.28 : 0.16 + ((index - 1) * 0.26) / (rows - 1)
+/**
+ * The distance of a row from the goal line of its team, as a share of the pitch's length. The
+ * goalkeeper (row 0) and the rows of the formation are evenly spread over the half of the team,
+ * so no row has less room for the names than another.
+ */
+const rowDepth = (index: number, rows: number) => 0.075 + (index * 0.365) / rows
 
 /** The place of a player along the row, as a share of its width. */
 const rowOffset = (position: number, size: number) =>
@@ -81,8 +84,8 @@ export function pitchSpots(
   }
 
   const lines = [1, ...rows]
-  // The least room between two rows, as a share of the length of the pitch.
-  const rowGap = Math.min(0.1, rows.length === 1 ? 0.26 : 0.26 / (rows.length - 1))
+  // The room between two rows, as a share of the length of the pitch.
+  const rowGap = 0.365 / rows.length
   const spots: PitchSpot[] = []
 
   lines.forEach((size, index) => {

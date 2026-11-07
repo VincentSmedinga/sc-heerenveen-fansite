@@ -48,7 +48,7 @@
   .hf-match-pitch-field {
     --hf-pitch-dot: 2.25rem;
 
-    aspect-ratio: 5 / 9.6;
+    aspect-ratio: 5 / 11;
     background: repeating-linear-gradient(
       to bottom,
       var(--hf-colour-background-pitch) 0 10%,
@@ -64,6 +64,13 @@
 
   .hf-match-pitch-crowded {
     --hf-pitch-dot: 2rem;
+  }
+
+  /* On a very narrow pitch the discs are smaller, so the names under them keep clear of the next row. */
+  @container hf-match-pitch (max-width: 18rem) {
+    .hf-match-pitch-field {
+      --hf-pitch-dot: 2rem;
+    }
   }
 
   .hf-match-pitch-line {

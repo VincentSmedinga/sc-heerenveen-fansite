@@ -23,7 +23,7 @@ const formations = [
 // The least room on a phone and on a small desktop, in pixels: the width of the pitch, the size
 // of a player and the height of the name under it (two lines of small letters).
 const portraitWidth = 288
-const portraitHeight = (portraitWidth * 9.6) / 5
+const portraitHeight = (portraitWidth * 11) / 5
 const landscapeWidth = 640
 const nameHeight = 29
 
@@ -117,6 +117,28 @@ describe('pitchSpots', () => {
         expect(box.left + box.width).toBeLessThanOrEqual(width)
         expect(box.top).toBeGreaterThanOrEqual(0)
         expect(box.top + box.height).toBeLessThanOrEqual(height)
+      })
+    })
+
+    it.each([
+      { name: 'on a phone of 320 pixels, one line of name', nameLines: 1, playerSize: 32, width: 253 },
+      { name: 'on a phone of 390 pixels, two lines of name', nameLines: 2, playerSize: 36, width: 326 },
+    ])('keeps the name of a player clear of the next row $name', ({ nameLines, playerSize, width }) => {
+      const rows = parseFormation(formation) ?? []
+
+      // With a row of five, or five rows, the names are left out on a phone.
+      if (isCrowdedFormation(rows)) {
+        return
+      }
+
+      const height = (width * 11) / 5
+      const ys = [...new Set((pitchSpots(formation, lineUpSize, true) ?? []).map((one) => one.portrait.y))]
+      const gaps = ys.slice(0, -1).map((y, index) => Math.abs(y - (ys[index + 1] ?? y)) * (height / 100))
+      // The disc, a little room, and the lines of the name (12 px, line height 1.1).
+      const needed = playerSize + 3 + nameLines * 13.2
+
+      gaps.forEach((gap) => {
+        expect(gap).toBeGreaterThanOrEqual(needed - 1)
       })
     })
 

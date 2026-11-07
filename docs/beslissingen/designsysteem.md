@@ -2805,6 +2805,10 @@
   Een lange naam gaat over twee regels met afbreking en eindigt dan op "…".
 - **Waarom:** een naam die niet past is slechter dan geen naam, en de lijst blijft altijd beschikbaar.
 - **Eigen keuzes bij het bouwen:**
+  - de keeper en de rijen van de formatie liggen gelijk verdeeld over de helft van het team, zodat geen rij minder ruimte voor de namen heeft dan een andere.
+    Het rechtopstaande veld is 5 bij 11, en de vlakken zijn kleiner (2 in plaats van 2,25 rem) zodra het onderdeel smaller is dan 18 rem.
+    Op een telefoon van 320 pixels breed valt dan de naam van een speler niet meer onder de rij eronder.
+    Zo smal is er tussen twee rijen ruimte voor één regel naam, dus een lange naam eindigt dan op "…" in plaats van over twee regels te gaan.
   - het liggende veld is 16 bij 9, en 3 bij 2 bij een formatie met een rij van vijf of vijf rijen.
     Een kolom met vijf spelers heeft dan hoogte genoeg voor de namen, die onder de vlakken staan.
     Het ontwerp liet 2 bij 1 zien, waarbij de naam van een speler in een kolom van vier of vijf over het vlak eronder viel.
