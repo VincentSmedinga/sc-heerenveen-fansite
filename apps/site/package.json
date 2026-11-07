@@ -8,6 +8,13 @@
   "imports": {
     "#src/*": "./src/*"
   },
+  "browserslist": [
+    "chrome >= 124",
+    "edge >= 124",
+    "firefox >= 125",
+    "safari >= 17.4",
+    "ios_saf >= 17.4"
+  ],
   "scripts": {
     "admin": "node --env-file-if-exists=../../.env src/admin.ts",
     "assemble": "node scripts/assemble.js",

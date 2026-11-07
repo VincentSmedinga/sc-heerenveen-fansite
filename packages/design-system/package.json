@@ -5,6 +5,9 @@
   "description": "Huisstijl, tokens en bouwstenen van de sc Heerenveen Fansite, met Storybook als handboek.",
   "license": "EUPL-1.2",
   "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./fonts": "./src/fonts.ts",

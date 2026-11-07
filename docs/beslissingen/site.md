@@ -3058,3 +3058,33 @@
 - **Alternatieven:** een korte `s-maxage` (onderschat het aantal bezoeken, en helpt alleen met een cache die we niet kennen); de pagina's statisch maken (de koppen komen uit de database en ISR en `'use cache'` vielen eerder af); de cache van de bestanden in de proxy zetten, zoals de beveiligingsheaders (die zijn een besluit per verzoek, dit is een vaste lijst per pad, en `headers` in `next.config.ts` is wat Next.js daarvoor biedt); een jaar en `immutable` voor `theme.js` en de pictogrammen (een wijziging bereikt een bezoeker dan een jaar niet).
 - **Later:** dit raakt _Geen frames en geen vensters met een opener: `frame-ancestors 'none'`, `X-Frame-Options: DENY` en COOP `same-origin`_ (6 november 2026) niet: die headers blijven in de proxy.
   De cache van bestanden staat in `next.config.ts`, omdat het een lijst per pad is.
+
+## De bouw weet welke browsers we ondersteunen: een `browserslist` gelijk aan Baseline 'widely available'
+
+- **Datum:** 7 november 2026
+- **Besluit:** `apps/site/package.json` heeft een `browserslist` met de oudste versies van de vier browsers die op 7 november 2026 in Baseline 'widely available' vallen: Chrome en Edge 124, Firefox 125 en Safari en iOS Safari 17.4 (#802).
+  Het ontwerpsysteem zegt in `package.json` dat alleen zijn CSS bijwerkingen heeft (`"sideEffects": ["**/*.css"]`), zodat een pagina de code van onderdelen die ze niet gebruikt, niet laadt.
+  - **De grens:** een functie is 'widely available' als alle grote browsers haar minstens 30 maanden hebben, dus de oudste versies zijn die van 30 maanden geleden: van vóór 7 mei 2024.
+    Dat zijn Chrome 124 (16 april 2024), Edge 124 (18 april 2024), Firefox 125 (16 april 2024) en Safari 17.4 (5 maart 2024); de volgende versies kwamen op 13 en 14 mei 2024, dus die vallen er niet in.
+    Op een andere dag schuift de lijst op: wie hem verandert, rekent opnieuw vanaf die dag en past de test `src/browserslist.test.ts` aan.
+  - **Geen bewaking:** de lijst is de opdracht aan de bouw om weg te laten wat die browsers niet nodig hebben.
+    De linters bewaken nog altijd wat we schrijven (zie _Alleen Baseline 'widely available', bewaakt door linters_ in `werkruimte.md`).
+  - **Wat de lijst opbrengt:** bijna niets.
+    Next.js zet zijn eigen polyfills (`Array.prototype.at`, `flat`, `Object.hasOwn` en vier andere, 1,4 KiB) altijd in het hoofdbestand, ook met een lijst die ze niet nodig heeft; met `chrome >= 60` blijft hij gelijk en wordt de rest een KiB groter.
+    De 13 KiB aan "verouderde JavaScript" in het rapport van Lighthouse is zijn schatting voor het bestand van `react-dom` waarin die regels staan; de regels zelf zijn 1,4 KiB.
+  - **De meting met de analyse van Next.js:** `@next/bundle-analyzer` werkt alleen met webpack, en de site bouwt met Turbopack, dus de meting gebruikt `next experimental-analyze --output`, dat in Next.js zit en niets toevoegt.
+    De homepage laadt 153,9 KiB JavaScript (gecomprimeerd, in een lokale build).
+    Daarvan is 134,2 KiB van React en Next.js: `react-dom` 71,1 KiB (het grootste stuk), de client van Next.js 37,2 KiB, de hulpcode van Next.js 8,8 KiB, de server-aanroepen 9,3 KiB, de uitvoeromgeving 5,0 KiB en de foutpagina 2,8 KiB.
+    Onze eigen code is 18,5 KiB: de navigatie en de themaknop 10,6 KiB, de kaart met het deelplaatje en de aanwijzer van de staafjes 5,2 KiB, en de rest 2,7 KiB.
+  - **Wat de pagina's laadden:** elk bestand van het ontwerpsysteem dat `'use client'` heeft, stond in de lijst van elke pagina, omdat `index.ts` alles opnieuw exporteert en de bouw niet weet dat de rest zonder bijwerkingen is.
+    Met `sideEffects` weet hij dat, en de homepage laadt nu 5,3 KiB minder (van 159,2 naar 153,9 KiB, 3,3%).
+- **Waarom:** zonder lijst neemt Next.js de standaard (Chrome 111, Safari 16.4), die ruimer is dan ons beleid.
+  De projecteigenaar koos voor dezelfde grens als het beleid.
+- **Geen 25% minder:** het issue vroeg minstens 25% minder JavaScript op de homepage, en dat is niet haalbaar.
+  De projecteigenaar koos op 7 november 2026 voor het criterium dat de `browserslist` en `sideEffects` gedaan en gemeten zijn, dat de oorzaak van het gewicht in de pull request en in `docs/prestaties.md` staat, en dat TBT onder 50 ms blijft (nu 2 ms).
+  Er worden geen onderdelen omgebouwd.
+  Ook zonder een enkel eigen onderdeel is de bodem 134,2 KiB, 16% minder dan de 159,2 KiB van de meting vooraf, want 134,2 KiB is `react-dom` en de client van Next.js.
+- **Meting vooraf en achteraf** (Lighthouse 13.6.0, de opdracht van `docs/prestaties.md` op een lokale build, mediaan van drie runs): JavaScript 159,2 KiB na 153,9 KiB, TBT 2 ms voor en na, prestaties 100, CLS 0,000.
+  De waarde van de homepage in `.github/lighthouse.json` gaat 5,3 KiB omlaag, van 151,8 naar 146,5 KiB.
+- **Alternatieven:** de standaard van Next.js houden (de meeste polyfills blijven niet door deze lijst maar door Next.js zelf); een lijst met een vaste grens zoals de laatste twee versies (een ander beleid dan we besloten); de themaknop, de navigatie en `PullToRefresh` omzetten naar servercomponenten of ze later laden (geeft hooguit 10 KiB, en verandert het gedrag of de toegankelijkheid van onderdelen die elke bezoeker gebruikt).
+- **Later:** dit vervangt het deel van _Alleen Baseline 'widely available', bewaakt door linters_ in `werkruimte.md` (21 oktober 2026) dat een `browserslist` verwerpt.

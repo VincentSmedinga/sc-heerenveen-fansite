@@ -131,6 +131,7 @@ Daarnaast is 14 KiB aan code voor oude browsers (`legacy-javascript`, onder ande
 Op mobiel is er één lange taak van 52 tot 54 ms, en de TBT is 1 tot 6 ms.
 Het artikel van de redactie heeft op mobiel een maximale vertraging bij de eerste invoer (`max-potential-fid`) van 70 ms, met score 0,99.
 Dit is #802.
+Wat #802 deed en waarom het weinig is, staat in _Waarom de JavaScript niet veel kleiner wordt_ hieronder.
 #802 noemt voor de homepage 106 KiB JavaScript en een TBT van 110 ms.
 Deze meting telt 151,8 KiB (alle scripts, overdrachtsgrootte) en een TBT van 1 ms.
 De oorzaak van het verschil is niet bekend.
@@ -167,6 +168,23 @@ Dat hoort bij #800.
 - De LCP is nergens boven 1,0 seconde, en de TBT nergens boven 6 ms.
 - Er is nergens een afbeelding (0 KiB), dus geen LCP-afbeelding om te verbeteren.
 - Elke pagina doet 17 verzoeken, en Spelers 19.
+
+## Waarom de JavaScript niet veel kleiner wordt
+
+Dit is de uitkomst van #802, gemeten op 7 november 2026 met dezelfde opdracht, op een lokale build vóór en na (mediaan van drie runs).
+De homepage stuurt 153,9 KiB JavaScript, gecomprimeerd, en was 159,2 KiB.
+De TBT is 2 ms, voor en na.
+
+- **134,2 KiB is React en Next.js:** `react-dom` 71,1 KiB, de client van Next.js 37,2 KiB, hulpcode van Next.js 8,8 KiB, server-aanroepen 9,3 KiB, de uitvoeromgeving 5,0 KiB en de foutpagina 2,8 KiB.
+  Daar kunnen we niets aan veranderen zonder het framework te vervangen.
+- **18,5 KiB is onze eigen code:** de navigatie en de themaknop 10,6 KiB, de kaart met het deelplaatje en de aanwijzer van de staafjes 5,2 KiB, de rest 2,7 KiB.
+  Ook zonder al die code is de bodem 134,2 KiB, 16% minder dan 159,2 KiB.
+- **De `browserslist` helpt bijna niet:** Next.js zet zijn polyfills (1,4 KiB) altijd in het hoofdbestand.
+  De 13 KiB aan "verouderde JavaScript" in het rapport van Lighthouse is zijn schatting voor het bestand van `react-dom` waarin die regels staan.
+- **`sideEffects` helpt wel:** `package.json` van het ontwerpsysteem zegt dat alleen CSS bijwerkingen heeft, en daardoor laadt een pagina de client-code van onderdelen die ze niet gebruikt niet meer.
+  Dat is 5,3 KiB minder op de homepage, 3,3%.
+
+De beslissing staat in _De bouw weet welke browsers we ondersteunen: een `browserslist` gelijk aan Baseline 'widely available'_ in `docs/beslissingen/site.md`.
 
 ## Zo meet je opnieuw
 
