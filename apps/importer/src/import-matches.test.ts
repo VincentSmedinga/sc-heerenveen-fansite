@@ -440,6 +440,23 @@ describe('a match of the old fansite', () => {
   })
 })
 
+describe('a cup match of the old fansite on an empty cup page', () => {
+  it('is no reason to refuse the cup page, which has no template, and stays as it is', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    // The only cup match is now one of the old fansite, so none came from the page.
+    await database.db.update(matches).set({ dataSource: 'oude-fansite' }).where(eq(matches.competition, 'KNVB Beker'))
+    pages.cup = pages.cup.replaceAll('Footballbox2', 'Wedstrijd')
+
+    const before = await snapshot()
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', warnings: [] })
+    expect((await snapshot()).matches).toEqual(before.matches)
+  })
+})
+
 describe('a match that was postponed and played under an Inhaalronde', () => {
   const later = new Date(first.getTime() + hours(1))
   const zwolle = /(\|team1 = \[\[sc Heerenveen\]\]\n)\|score = 0 – 2(\n\|team2 = \[\[PEC Zwolle\]\])/u
