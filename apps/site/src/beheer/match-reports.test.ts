@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { markedParts } from '@fansite/db/match-edits'
+import { readMatchReport } from '@fansite/db/match-reports'
 import {
   adminUsers,
   auditLog,
@@ -501,6 +502,35 @@ describe('the report as the form reads it', () => {
     expect(await saveReport(database.db, userId, matchId, checkReportForm(again, contextOf(screen)).plan!)).toEqual({
       status: 'unchanged',
     })
+  })
+
+  it('reads the players of a report in the order of the form, which the pitch of the page of the match needs', async () => {
+    const whole = report().wij.speler
+    // The line-up is the order the pitch draws: the goalkeeper first, then the rows of the
+    // formation. Here it is the opposite of the order of the shirt numbers, bench after.
+    const reversed = [...whole.slice(0, 11).toReversed(), ...whole.slice(11)]
+
+    await save(report({ wij: { speler: reversed } }))
+
+    const readOurs = async () =>
+      (await readMatchReport(database.db, matchId))!.appearances
+        .filter((player) => player.ours)
+        .map((player) => player.shirtNumber)
+    const first = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12, 13, 14]
+
+    expect(await readOurs()).toEqual(first)
+
+    // A new save puts the players in the new order, also when the old rows are replaced.
+    await save(report({ wij: { speler: [...reversed.slice(1, 11), reversed[0]!, ...reversed.slice(11)] } }), t1)
+
+    expect(await readOurs()).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 11, 12, 13, 14])
+
+    // The form gets the same order back.
+    const screen = (await findReportScreen(database.db, matchId))!
+
+    expect(valuesOfReport(screen.report, screen.goals, screen.squad).wij.speler.map((row) => row.rugnummer)).toEqual(
+      [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 11, 12, 13, 14].map(String),
+    )
   })
 
   it('starts a match without a report with eleven empty players and the goals of Wikipedia by name', async () => {

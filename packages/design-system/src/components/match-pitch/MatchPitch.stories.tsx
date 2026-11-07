@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
+import { MatchSubstitutes } from '../match-substitutes/MatchSubstitutes'
 import { MatchPitch, type MatchPitchTeam } from './MatchPitch'
 import { type PitchPlayerData } from './PitchPlayer'
 
@@ -9,7 +10,10 @@ const meta = preview.meta({
   argTypes: {
     extraTime: { description: 'Of de wedstrijd in verlenging ging. De ringen lopen dan tot 120 minuten.' },
     headingLevel: { description: 'Het niveau van de koppen met de teams in de lijst onder het veld.' },
-    opponent: { description: 'De tegenstander: bovenaan op een rechtop veld, rechts op een liggend veld.' },
+    opponent: {
+      description:
+        'De tegenstander: bovenaan op een rechtop veld, rechts op een liggend veld. Laat je hem weg, dan staat alleen sc Heerenveen op het veld.',
+    },
     ours: { description: 'sc Heerenveen: onderaan op een rechtop veld, links op een liggend veld.' },
   },
   component: MatchPitch,
@@ -153,6 +157,59 @@ export const WithoutFormation = meta.story({
   },
   decorators: [phone],
   name: 'Een team zonder formatie',
+})
+
+export const WithoutOpponent = meta.story({
+  args: {
+    headingLevel: 3,
+    ours: ours('4-3-3'),
+  },
+  decorators: [phone],
+  name: 'Alleen sc Heerenveen',
+})
+
+export const WithSubstitutes = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2'),
+    ours: ours('4-3-3'),
+  },
+  decorators: [phone],
+  name: 'Met de wissels onder het veld',
+  render: (args) => (
+    <MatchPitch {...args}>
+      <MatchSubstitutes.Group>
+        <MatchSubstitutes
+          headingLevel={3}
+          ours
+          substitutes={[
+            {
+              minute: 62,
+              minutesPlayed: 28,
+              name: { givenName: 'Gerrit', surname: 'Nepper' },
+              playerOut: { givenName: 'Thijs', surname: 'Idzenga' },
+              shirtNumber: 12,
+            },
+          ]}
+          team="sc Heerenveen"
+        />
+        <MatchSubstitutes
+          headingLevel={3}
+          ours={false}
+          substitutes={[
+            {
+              minute: 55,
+              minutesPlayed: 35,
+              name: { givenName: 'Kai', surname: 'Banklaan' },
+              playerOut: { givenName: 'Teun', surname: 'Consectetur' },
+              shirtNumber: 14,
+            },
+          ]}
+          team="Testdorp FC"
+        />
+      </MatchSubstitutes.Group>
+    </MatchPitch>
+  ),
 })
 
 export const ExtraTime = meta.story({

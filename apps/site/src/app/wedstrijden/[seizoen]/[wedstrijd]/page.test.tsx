@@ -30,6 +30,7 @@ const render = async (seizoen?: string, wedstrijd?: string) =>
 const plain = (html: string) =>
   html
     .replaceAll(/<[^>]*>/g, ' ')
+    .replaceAll('&#x27;', "'")
     .replaceAll(/\s+/g, ' ')
     .trim()
 
@@ -52,25 +53,55 @@ afterEach(() => {
 })
 
 describe('the page of a match', () => {
-  it('has one h1 with the clubs, the h2 headings Verloop and Opstelling, and a h3 for each half and each team', async () => {
+  it('has one h1 with the clubs, the h2 headings Wedstrijdverloop, Opstelling and Verloop, and h3 for the teams and the halves', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toEqual([
       'sc Heerenveen – Testdorp FC',
+      'Wedstrijdverloop',
+      'Opstelling',
+      'Wissels sc Heerenveen',
+      'Wissels Testdorp FC',
+      'sc Heerenveen · 4-3-3',
+      'Testdorp FC · 4-4-2',
       'Verloop',
       'Eerste helft',
       'Tweede helft',
-      'Opstelling',
-      'sc Heerenveen',
-      'Testdorp FC',
     ])
+    expect(html.match(/<h1/g)).toHaveLength(1)
+    // The h1 is for a screen reader: the clubs and the result are what the eye sees.
+    expect(html).toMatch(/<h1[^>]*class="[^"]*hf-visually-hidden/u)
+  })
+
+  it('puts the header, the score bar, the line-up, the course of the match and the credit in this order', async () => {
+    const text = plain(await render())
+    const order = [
+      'Eindstand',
+      'Wedstrijdverloop',
+      'Opstelling',
+      'Wissels sc Heerenveen',
+      'Verloop Eerste helft',
+      'De opstelling, de wissels',
+    ].map((part) => text.indexOf(part))
+
+    expect(order.every((place) => place >= 0)).toBe(true)
+    expect(order).toEqual(order.toSorted((a, b) => a - b))
+  })
+
+  it('names the goals under each club in the header, and gives the facts with the round of its own', async () => {
+    const text = plain(await render())
+
+    expect(text).toContain('Doelpunten sc Heerenveen: Demo 12’')
+    expect(text).toContain('Doelpunten Testdorp FC: Frank Dummydijk 40’')
+    expect(text).toContain('Competitie Eredivisie Ronde Speelronde 1 Datum')
   })
 
   it('shows the result, the competition, the day, the stadium, the attendance and the referee', async () => {
     const text = plain(await render())
 
-    expect(text).toContain('sc Heerenveen 2 Testdorp FC 1 2–1 Eindstand: 2 tegen 1 Gewonnen')
-    expect(text).toContain('Competitie Eredivisie, Speelronde 1')
+    expect(text).toContain('Eindstand: 2 tegen 1 Gewonnen')
+    expect(text).toContain('Competitie Eredivisie')
+    expect(text).toContain('Ronde Speelronde 1')
     expect(text).toContain('Datum za 24 okt 2026')
     expect(text).toContain('Stadion Stadion Proeflaan')
     expect(text).toContain('Toeschouwers 21.022')
@@ -103,7 +134,7 @@ describe('the page of a match', () => {
 
   it('shows the course of the match as an ordered list, with a word for every event', async () => {
     const html = await render()
-    const course = html.slice(html.indexOf('<div aria-labelledby="verloop"'), html.indexOf('Opstelling'))
+    const course = html.slice(html.indexOf('id="verloop"'))
 
     expect(course).toContain('role="group"')
     expect(course.match(/<ol aria-label="(?:Eerste|Tweede) helft"/g)).toHaveLength(2)
@@ -117,52 +148,39 @@ describe('the page of a match', () => {
     expect(plain(course)).toContain('assist Thijs Idzenga')
   })
 
-  it('shows the line-ups of both teams with the bench, the captain and what happened in words', async () => {
+  it('shows both teams on the pitch, each with a sentence for every player in the order of the report', async () => {
     const html = await render()
-    const text = plain(html)
+    const lists = [...html.matchAll(/<ol aria-label="(Opstelling [^"]*)"/gu)].map((list) => list[1])
 
-    expect([...html.matchAll(/<ul aria-label="([^"]*)"/gu)].map((list) => list[1])).toEqual([
-      'Basis sc Heerenveen',
-      'Bank sc Heerenveen',
-      'Basis Testdorp FC',
-      'Bank Testdorp FC',
-    ])
-    expect(text).toContain('aanvoerder')
-    expect(text).toContain('Ingevallen in de 60e minuut voor Idzenga')
-    expect(text).toContain('Gewisseld in de 60e minuut, vervangen door Gerrit Nepper')
-    expect(text).toContain('Gele kaart in de 30e minuut')
+    expect(lists).toEqual(['Opstelling sc Heerenveen, 4-3-3', 'Opstelling Testdorp FC, 4-4-2'])
+    expect(plain(html)).toContain('Tjerk Brandsma, rugnummer 1, 90 minuten')
+    expect(plain(html)).toContain("Thijs Idzenga, rugnummer 10, aanvoerder, eruit 60', 60 minuten")
+    expect(plain(html)).toContain("Ruben ten Hove, rugnummer 4, gele kaart 30', 90 minuten")
   })
 
-  it('shows the formation of each team next to the name of the team, as eigen administratie', async () => {
-    const html = await render()
+  it('shows the substitutes of each team under the pitch, and the line-ups as lists in a disclosure', async () => {
+    const text = plain(await render())
 
-    expect(plain(html)).toContain('sc Heerenveen Formatie: 4-3-3')
-    expect(plain(html)).toContain('Testdorp FC Formatie: 4-4-2')
-    expect(html.match(/Formatie: /g)).toHaveLength(2)
-    expect(plain(html)).toContain('komen uit onze eigen administratie')
+    expect(text).toContain('Gerrit Nepper, rugnummer 12, erin in minuut 60 voor Thijs Idzenga')
+    expect(text).toContain('Tegenstander 12, rugnummer 12, erin in minuut 45+2 voor Ronald Proefveld')
+    expect(text).toContain('Opstelling als lijst sc Heerenveen · 4-3-3 1 Tjerk Brandsma')
+    expect(text).toContain('Testdorp FC · 4-4-2 1 Tegenstander 1')
   })
 
-  it('shows nothing about a formation for a team that has none, and takes nothing else away', async () => {
+  it('shows the formation of each team above the pitch, and takes the pitch away for a team without one', async () => {
     const reported = reportedMatch()
+
+    expect(plain(await render())).toContain('sc Heerenveen 4-3-3 Testdorp FC 4-4-2')
 
     reported.stored.report.formationOurs = null
-    reported.stored.report.formationOpponent = null
+    reported.stored.report.formationOpponent = '4-4-2'
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
     const html = await render()
 
-    expect(html).not.toContain('Formatie')
-    expect(html.match(/<h3/g)).toHaveLength(4)
-    expect(plain(html)).toContain('Basis')
-  })
-
-  it('shows the formation of one team only when the other has none', async () => {
-    const reported = reportedMatch()
-
-    reported.stored.report.formationOpponent = null
-    vi.mocked(getPublicReport).mockResolvedValue(reported)
-
-    expect((await render()).match(/Formatie: /g)).toHaveLength(1)
+    expect(html).not.toContain('aria-label="Opstelling sc Heerenveen')
+    expect(plain(html)).toContain('Voor sc Heerenveen past de formatie niet bij de spelers')
+    expect(html).toContain('aria-label="Opstelling Testdorp FC, 4-4-2"')
   })
 
   it('shows one sentence instead of the line-up of an opponent that is not complete', async () => {
@@ -181,8 +199,10 @@ describe('the page of a match', () => {
     const html = await render()
 
     expect(plain(html)).toContain('De opstelling van Testdorp FC hebben we niet.')
-    expect(html).not.toContain('aria-label="Basis Testdorp FC"')
-    expect(html.match(/<h3/g)).toHaveLength(3)
+    expect(html).not.toContain('aria-label="Opstelling Testdorp FC')
+    expect(html).not.toContain('Wissels Testdorp FC')
+    expect(html).not.toContain('Voor Testdorp FC past de formatie niet')
+    expect(html).toContain('aria-label="Opstelling sc Heerenveen, 4-3-3"')
   })
 
   it('says that there was extra time, the score after 90 minutes and the shoot-out in words', async () => {
@@ -198,6 +218,90 @@ describe('the page of a match', () => {
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
     expect(plain(await render())).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
+  })
+
+  /** The made-up match with extra time: 2–2 after extra time, 1–1 after 90 minutes. */
+  const withExtraTime = (reported = reportedMatch()) => {
+    Object.assign(reported.match, {
+      afterNinetyAgainst: 1,
+      afterNinetyFor: 1,
+      extraTime: true,
+      goalsAgainst: 2,
+      goalsFor: 2,
+    })
+    reported.stored.cards.push({
+      appearanceId: 2,
+      id: 3,
+      kind: 'geel',
+      matchId: 7,
+      minute: 105,
+      ours: true,
+      stoppageMinutes: null,
+    })
+
+    return reported
+  }
+
+  it('has a third block Verlenging, a score bar and rings that run to 120 minutes, and the score after 90 minutes', async () => {
+    vi.mocked(getPublicReport).mockResolvedValue(withExtraTime())
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toContain('Verlenging')
+    expect(text).toContain('Na verlenging (na 90 minuten 1–1)')
+    expect(text).toContain('0 15 30 45 60 75 90 105 120')
+    expect(text).toContain("Ruben ten Hove, rugnummer 4, gele kaart 30', 120 minuten")
+    expect(html).toContain('hf-match-score-bar-extra-time')
+  })
+
+  it('has no block Verlenging, no marks after 90 and rings of 90 minutes without extra time', async () => {
+    const html = await render()
+
+    expect(plain(html)).not.toContain('Verlenging')
+    expect(plain(html)).not.toContain('105')
+    expect(html).not.toContain('hf-match-score-bar-extra-time')
+  })
+
+  it('shows the card Strafschoppenserie with a table of the rounds after a shoot-out', async () => {
+    const reported = withExtraTime()
+
+    Object.assign(reported.match, { goalsAgainst: 2, goalsFor: 2, penaltiesAgainst: 3, penaltiesFor: 4 })
+    reported.stored.shootout = [
+      { appearanceId: 9, id: 1, matchId: 7, ours: true, outcome: 'raak', round: 1 },
+      { appearanceId: 109, id: 2, matchId: 7, ours: false, outcome: 'gestopt', round: 1 },
+      { appearanceId: 10, id: 3, matchId: 7, ours: true, outcome: 'naast', round: 2 },
+    ]
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toContain('Strafschoppenserie')
+    expect(text).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
+    expect(text).toContain('Strafschoppenserie, stand 1–0')
+    expect(text).toContain('Raak: Rick Demo')
+    expect(text).toContain('Gestopt: Frank Dummydijk')
+    expect(text).toContain('Naast: Thijs Idzenga')
+    expect(text.indexOf('Strafschoppenserie')).toBeGreaterThan(text.indexOf('Verloop Eerste helft'))
+    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('De opstelling, de wissels'))
+  })
+
+  it('has the line in the header and no card for a shoot-out of which only the result is known', async () => {
+    const reported = withExtraTime()
+
+    Object.assign(reported.match, { penaltiesAgainst: 3, penaltiesFor: 4 })
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+
+    expect(plain(html)).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
+    expect(plain(html)).toContain('Gewonnen')
+    expect(html).not.toContain('Strafschoppenserie')
+  })
+
+  it('has no card for a shoot-out in a match without one', async () => {
+    expect(plain(await render())).not.toContain('Strafschoppenserie')
   })
 
   it('links back to the matches of the season, and credits Wikipedia and our own records', async () => {

@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 import { Disclosure } from '../disclosure/Disclosure'
@@ -9,13 +9,22 @@ import { Tag } from '../tag/Tag'
 import { isCrowdedFormation, parseFormation, pitchSpots } from './pitch-layout'
 import { PitchPlayer, type PitchPlayerData } from './PitchPlayer'
 
-export type MatchPitchProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+export type MatchPitchProps = ComponentPropsWithoutRef<'div'> & {
+  /**
+   * What stands under the explanation of the marks and above the list, such as the substitutes
+   * of the two teams (`MatchSubstitutes.Group`).
+   */
+  children?: ReactNode
   /** Whether the match went into extra time: the rings then run to 120 minutes, not 90. */
   extraTime?: boolean | undefined
   /** The level of the headings of the two teams in the list under the pitch. */
   headingLevel: Exclude<HeadingLevel, 1>
-  /** The opponent: at the top of an upright pitch and on the right of one that lies down. */
-  opponent: MatchPitchTeam
+  /**
+   * The opponent: at the top of an upright pitch and on the right of one that lies down. Leave
+   * it out when his line-up is not known: only sc Heerenveen is then on the pitch and in the
+   * list, and nothing is said about the opponent.
+   */
+  opponent?: MatchPitchTeam | undefined
   /** sc Heerenveen: at the bottom of an upright pitch and on the left of one that lies down. */
   ours: MatchPitchTeam
 }
@@ -117,6 +126,7 @@ function Team({ extraTime, ours, placed }: { extraTime: boolean; ours: boolean; 
  * match-pitch.css gives it its look.
  */
 export const MatchPitch = ({
+  children,
   className,
   extraTime = false,
   headingLevel,
@@ -124,17 +134,16 @@ export const MatchPitch = ({
   ours,
   ...props
 }: MatchPitchProps) => {
-  const teams = [
-    { side: true, team: ours },
-    { side: false, team: opponent },
-  ].map(({ side, team }) => ({
-    ours: side,
-    placed: {
-      drawn: pitchSpots(team.formation, team.players.length, side) !== null,
-      formation: team.formation,
-      team,
-    } satisfies Placed,
-  }))
+  const teams = [{ side: true, team: ours }, ...(opponent === undefined ? [] : [{ side: false, team: opponent }])].map(
+    ({ side, team }) => ({
+      ours: side,
+      placed: {
+        drawn: pitchSpots(team.formation, team.players.length, side) !== null,
+        formation: team.formation,
+        team,
+      } satisfies Placed,
+    }),
+  )
   const missing = teams.filter(({ placed }) => !placed.drawn).map(({ placed }) => placed.team.name)
   const crowded = teams.some(({ placed }) => {
     const rows = placed.drawn ? parseFormation(placed.formation) : null
@@ -198,10 +207,11 @@ export const MatchPitch = ({
           <b aria-hidden="true">A</b> Aanvoerder
         </li>
       </ul>
+      {children}
       <Disclosure summary="Opstelling als lijst">
         <div className="hf-match-pitch-rosters">
           <Roster headingLevel={headingLevel} team={ours} />
-          <Roster headingLevel={headingLevel} team={opponent} />
+          {opponent === undefined ? null : <Roster headingLevel={headingLevel} team={opponent} />}
         </div>
       </Disclosure>
     </div>

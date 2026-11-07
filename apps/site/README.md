@@ -288,7 +288,8 @@ Elk seizoen heeft één adres: `/wedstrijden` is het lopende seizoen en `/wedstr
 Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, en een seizoen dat niet in de database staat, een seizoen in de toekomst en een adres dat geen seizoen is, geven "niet gevonden".
 Een wedstrijd met een verslag dat klaar is en klopt, heeft een pagina op `/wedstrijden/2026-27/2026-10-24-testdorp-fc`: het seizoen, de datum en de `slug` van de tegenstander (`app/wedstrijden/[seizoen]/[wedstrijd]`).
 `src/report-data.ts` leest die verslagen (`getPublicReports`, bewaard zoals de wedstrijden) en laat de regels van `@fansite/shared/match-report` er elk een keer over lopen; een verslag dat `bezig` is of niet klopt heeft geen pagina, geen link en geen plek in de sitemap.
-`src/report-view.ts` maakt er het verloop en de opstellingen van, in woorden, voor `MatchTimeline` en `MatchLineup`.
+`src/report-view.ts` zet een verslag om in gewone gegevens (`matchPageDataOf`, het type `MatchPageData` van `src/match-page.ts`), en `buildMatchPage` maakt daar de eigenschappen van de onderdelen van: de gebeurtenissen voor `MatchTimeline`, het veld met de spelers en hun minuten voor `MatchPitch`, de wissels, de doelpuntenmakers van de kop, de balk Wedstrijdverloop en de rondes van de strafschoppenserie.
+`MatchPageView` (`src/MatchPageView.tsx`) zet die onderdelen op de pagina, uit die gegevens en uit niets anders, zodat het voorbeeld in het beheer (#851) hetzelfde onderdeel kan gebruiken.
 De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`).
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
@@ -1028,7 +1029,7 @@ De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controle
 - Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
 - Elk team heeft in het formulier een formatie (`formatie-wij` en `formatie-zij`): een keuzelijst met de gebruikelijke formaties (`formationChoices`), "Geen formatie" en "Anders", en een tekstveld voor een eigen formatie (`formatie-wij-eigen`) dat alleen bij "Anders" telt.
   `formationProblem` uit `@fansite/shared/match-report` keurt de tekst; `formationValueOf` zet een bewaarde formatie terug als keuze of als "Anders" met zijn tekst.
-  De formatie staat in `match_reports` en op de pagina van de wedstrijd bij het team (`MatchLineup`).
+  De formatie staat in `match_reports` en op de pagina van de wedstrijd bij de naam van het team boven het veld (`MatchPitch`).
 - `/beheer/wedstrijden/<nummer>/verslag/plakken` (`src/app/beheer/wedstrijden/[id]/verslag/plakken`) leest een tekst in een eenvoudig formaat in de waarden van dit formulier.
   `readPastedReport` in `src/beheer/report-paste.ts` heeft geen database en geeft de waarden, wat het las, de keuzes bij een twijfel en de regels die het niet las.
   `submitPaste` schrijft niets, ook niet in het logboek, als het de tekst leest: het geeft het formulier terug (`PasteScreen`).

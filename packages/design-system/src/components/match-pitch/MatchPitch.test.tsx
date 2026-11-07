@@ -116,6 +116,34 @@ describe('MatchPitch', () => {
     expect(within(details).getAllByText('aanvoerder')).toHaveLength(2)
   })
 
+  it('puts only sc Heerenveen on the pitch and in the list when the opponent is left out, without a word about him', () => {
+    const { container } = render(<MatchPitch headingLevel={3} ours={team('sc Heerenveen', '4-3-3')} />)
+
+    expect(container.querySelectorAll('.hf-match-pitch-field ol')).toHaveLength(1)
+    expect(container.querySelectorAll('.hf-match-pitch-team-name')).toHaveLength(1)
+    expect(container.querySelector('.hf-match-pitch-note')).toBeNull()
+    expect([...container.querySelectorAll('details h3')].map((heading) => heading.textContent)).toEqual([
+      'sc Heerenveen · 4-3-3',
+    ])
+  })
+
+  it('puts its children between the explanation of the marks and the list', () => {
+    const { container } = render(
+      <MatchPitch headingLevel={3} opponent={team('Testdorp FC', '4-4-2')} ours={team('sc Heerenveen', '4-3-3')}>
+        <p>Wissels</p>
+      </MatchPitch>,
+    )
+    const children = [...container.querySelector('.hf-match-pitch')!.children]
+    const place = (node: Element | null) => children.findIndex((child) => node !== null && child.contains(node))
+
+    expect(place(container.querySelector('.hf-match-pitch > p:not(.hf-match-pitch-note)'))).toBeGreaterThan(
+      place(container.querySelector('.hf-match-pitch-legend')),
+    )
+    expect(place(container.querySelector('.hf-match-pitch > p:not(.hf-match-pitch-note)'))).toBeLessThan(
+      place(container.querySelector('details')),
+    )
+  })
+
   it('puts the heading of the teams in the list at the level it is given', () => {
     const { container } = render(
       <MatchPitch headingLevel={2} opponent={team('Testdorp FC', '4-4-2')} ours={team('sc Heerenveen', '4-3-3')} />,

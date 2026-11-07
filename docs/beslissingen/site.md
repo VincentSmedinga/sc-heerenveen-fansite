@@ -3122,6 +3122,7 @@
     Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
   - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.
 - **Later:** zie _De formatie staat op de pagina van de wedstrijd bij het team_ (7 november 2026): onder de naam van een team staat nu ook zijn formatie, als er een is.
+- **Later:** zie _De wedstrijdpagina is optie B, "Het veld"_ en _De verlenging en de strafschoppenserie komen uit de wedstrijd, de schoten uit het verslag_ (7 november 2026): de pagina is opnieuw opgebouwd met het veld, de wissels, het verloop in helften en de strafschoppenserie, en de opstelling staat niet meer in lijsten per team (`MatchLineup`) maar op het veld, met de lijsten in een Disclosure.
 - **Later:** zie _Een wissel is één regel met één pictogram: "A voor B"_, _De minuut in het verloop staat in een pil: gevuld voor sc Heerenveen, open voor de tegenstander_ en _Het verloop verdeelt de gebeurtenissen over de helften, en de kop krijgt de doelpuntenmakers per club_ in `designsysteem.md` (7 november 2026): `MatchTimeline` heeft twee helften en een verlenging, één regel per gebeurtenis zonder het woord naast een pictogram dat hetzelfde zegt, en de minuut in een pil; de naam van het team staat alleen nog in de verborgen tekst, en "Doelpunt uit een strafschop" is nu "Doelpunt (strafschop)".
   `MatchHeader` heeft een pil met de uitkomst en de doelpuntenmakers per club.
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
@@ -3392,6 +3393,42 @@
   - `MatchLineup` heeft een eigenschap `formation`, een tekst zonder eigen regels: de pagina geeft de waarde zoals het verslag hem bewaarde.
     De regel is een `Text` met de meta-uitvoering onder de kop met de naam van het team, zodat de kop alleen de naam is.
   - Een verslag met een formatie die de regels afkeuren (bijvoorbeeld na een wijziging buiten het formulier om), heeft geen pagina: `checkMatchReport` keurt hem af zoals elke andere fout.
+- **Later:** zie _De wedstrijdpagina is optie B, "Het veld"_ (7 november 2026): `MatchLineup` bestaat niet meer en de formatie staat bij de naam van het team boven het veld ("4-3-3" naast de naam, en achter de naam in "Opstelling als lijst"), niet meer als de regel "Formatie: 4-3-3" onder de naam.
+
+## De wedstrijdpagina is optie B, "Het veld"
+
+- **Datum:** 7 november 2026
+- **Besluit:** de pagina van een wedstrijd met een verslag volgt optie B uit het ontwerp "Wedstrijdpagina versie 4": de opstelling staat op een veld, en de ring om een speler toont zijn minuten (#850).
+  De projecteigenaar koos uit drie opties: A een minuutas met banen per team (idee #853), B het veld, C een minutenbalk per speler (idee #854).
+- **Waarom:** bij B zie je de opstelling meteen zoals op het veld, en de ring toont de minuten al, zodat een aparte minutenbalk niet nodig is.
+- **Alternatieven:** A en C, die als ideeën bewaard zijn (#853, #854).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **De volgorde:** de kop met de doelpuntenmakers en de balk Wedstrijdverloop, de kaart Opstelling (het veld, de uitleg van de merken, de wissels van beide teams en "Opstelling als lijst"), de kaart Verloop, de kaart Strafschoppenserie als die er is, en de bronvermelding in de zijbalk.
+    De `h1` is voor een schermlezer (visueel verborgen): de namen en de uitslag zijn wat het oog ziet.
+    Elke kaart heeft een `h2`, en de teams, de helften en de wissels een `h3`.
+  - **Eén onderdeel van de site** (`MatchPageView`, met `MatchPageHeader` en `MatchPageCards`) maakt de pagina uit gewone gegevens (`MatchPageData`), zodat het voorbeeld in het beheer (#851) hetzelfde onderdeel gebruikt.
+    `buildMatchPage` rekent uit wat de onderdelen nodig hebben, en `matchPageDataOf` zet een bewaard verslag om in die gegevens.
+  - **De volgorde van de spelers** is die van het formulier: de database bewaart de spelers in de volgorde van hun rijen, `readMatchReport` leest ze op `id`, en een test bewaart een andere volgorde dan die van de rugnummers.
+    Het veld zet de eerste speler van een team als keeper en de rest rij voor rij van achter naar voren.
+  - **De minuten van een speler** lopen van zijn invallen tot zijn wissel, zijn rode of geel-rode kaart of het einde van de wedstrijd (90, bij verlenging 120).
+    Wie in de laatste minuut inviel, speelde minstens een minuut.
+  - **Een tegenstander die niet af is** staat niet op het veld en heeft geen wissels; de zin "De opstelling van <club> hebben we niet." blijft.
+    `MatchPitch` heeft daarvoor een tegenstander die je kunt weglaten, en een plek voor de wissels (`children`) tussen de uitleg van de merken en de lijst.
+  - **Wat weg is:** `MatchLineup` (de lijst van een team) komt nergens meer voor, want "Opstelling als lijst" is een onderdeel van `MatchPitch`.
+    De formatie staat nu naast de naam van het team boven het veld.
+  - **De feiten onder de uitslag** hebben de ronde als eigen feit, naast de competitie.
+- **Later:** vervangt voor de opbouw van de pagina _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (`MatchLineup`, de opstelling in lijsten per team).
+
+## De verlenging en de strafschoppenserie komen uit de wedstrijd, de schoten uit het verslag
+
+- **Datum:** 7 november 2026
+- **Besluit:** of er een verlenging was, de stand na 90 minuten en de uitslag van de strafschoppenserie komen uit de wedstrijd, niet uit het verslag (#850).
+  De schoten van de serie komen wel uit het verslag (#844).
+  Bij een verlenging loopt de balk Wedstrijdverloop tot 120 minuten, lopen de ringen tot 120 en heeft Verloop een derde blok "Verlenging".
+  Met een serie staat de kaart Strafschoppenserie op de pagina; een wedstrijd met alleen een uitslag van de serie heeft de regel in de kop en geen kaart.
+- **Waarom:** de wedstrijd weet dit al, en zo is er één plek om het in te vullen (zie ook #852).
+- **Alternatieven:** de verlenging uit de minuten van de gebeurtenissen afleiden (een verlenging zonder gebeurtenissen bestaat dan niet).
+- **Later:** vult _De formatie staat op de pagina van de wedstrijd bij het team_ aan: de formatie staat nu bij de naam van het team boven het veld.
 
 ## Een wedstrijd die we op strafschoppen winnen, telt overal als winst
 

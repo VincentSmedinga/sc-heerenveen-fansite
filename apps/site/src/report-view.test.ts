@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { eventsOf, lineupOf, minuteWords, nameOfPlayer, ourClub } from './report-view'
+import { matchPageDataOf, nameOfPlayer } from './report-view'
 import { reportedMatch } from './test-reports'
-
-describe('minuteWords', () => {
-  it('says the minute as a visitor does, with the added time behind it', () => {
-    expect(minuteWords(61, null)).toBe('de 61e minuut')
-    expect(minuteWords(45, 2)).toBe('de 45e minuut (+2)')
-  })
-})
 
 describe('nameOfPlayer', () => {
   it('takes the parts of the person the importer kept, with the prefix before the family name', () => {
@@ -37,101 +30,98 @@ describe('nameOfPlayer', () => {
   })
 })
 
-describe('eventsOf', () => {
-  const events = eventsOf(reportedMatch())
+describe('matchPageDataOf', () => {
+  const data = matchPageDataOf(reportedMatch(), [])
 
-  it('puts the goals, the substitutions, the cards and the missed penalties in the order of the clock', () => {
-    expect(events.map((event) => [event.minute, event.stoppageMinutes ?? null, event.kind])).toEqual([
-      [12, null, 'goal'],
-      [30, null, 'yellow-card'],
-      [40, null, 'goal'],
-      [45, 2, 'substitution'],
-      [55, null, 'penalty-missed'],
-      [60, null, 'substitution'],
-      [78, null, 'goal'],
-      [90, 3, 'red-card'],
+  it('keeps the players in the order of the report, ours and then the opponent, with the bench after the line-up', () => {
+    expect(data.players.map((player) => player.id)).toEqual([
+      ...Array.from({ length: 13 }, (_, index) => index + 1),
+      ...Array.from({ length: 12 }, (_, index) => index + 101),
     ])
+    expect(data.players.filter((player) => player.ours && player.starter)).toHaveLength(11)
   })
 
-  it('gives the assist with a goal, and the penalty', () => {
-    expect(events[0]).toMatchObject({ assist: { givenName: 'Thijs', surname: 'Idzenga' }, kind: 'goal', ours: true })
-    expect(events[2]).toMatchObject({ kind: 'goal', ours: false, penalty: true, team: 'Testdorp FC' })
-    expect(events[2]).not.toHaveProperty('assist')
-  })
-
-  it('gives an own goal the team of the player who scored it, and not the team that gets it', () => {
-    expect(events[6]).toMatchObject({ kind: 'goal', ours: false, ownGoal: true, team: 'Testdorp FC' })
-  })
-
-  it('names the team of every event, with sc Heerenveen for ours', () => {
-    expect(events[0]?.team).toBe(ourClub)
-    expect(events[7]).toMatchObject({ ours: false, team: 'Testdorp FC' })
-  })
-
-  it('names who comes on and who goes off in a substitution', () => {
-    expect(events[5]).toMatchObject({
-      kind: 'substitution',
-      playerIn: { givenName: 'Gerrit Nepper', surname: '' },
-      playerOut: { givenName: 'Thijs', surname: 'Idzenga' },
+  it('names the players in two parts, for ours from what the importer kept and for the opponent as one name', () => {
+    expect(data.players[0]?.name).toEqual({ givenName: 'Tjerk', surname: 'Brandsma' })
+    expect(data.players[3]?.name).toEqual({ givenName: 'Ruben', surname: 'ten Hove' })
+    expect(data.players.find((player) => player.id === 103)?.name).toEqual({
+      givenName: 'Dirk Proefland',
+      surname: '',
     })
   })
 
-  it('leaves out a goal without a player, since the page only exists for a report that has them', () => {
+  it('takes the captain, the shirt number and the line-up of each player', () => {
+    expect(data.players.filter((player) => player.captain).map((player) => player.id)).toEqual([10, 105])
+    expect(data.players.find((player) => player.id === 12)).toMatchObject({
+      ours: true,
+      shirtNumber: 12,
+      starter: false,
+    })
+  })
+
+  it('takes the formations, whether the opponent is complete and the result from the match and the report', () => {
+    expect(data).toMatchObject({
+      afterNinety: null,
+      extraTime: false,
+      formations: { opponent: '4-4-2', ours: '4-3-3' },
+      goalsAgainst: 1,
+      goalsFor: 2,
+      home: true,
+      opponent: 'Testdorp FC',
+      opponentComplete: true,
+      penalties: null,
+    })
+  })
+
+  it('takes the score after 90 minutes and the shoot-out from the match', () => {
+    const reported = reportedMatch()
+
+    Object.assign(reported.match, {
+      afterNinetyAgainst: 1,
+      afterNinetyFor: 1,
+      extraTime: true,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    })
+
+    expect(matchPageDataOf(reported, [])).toMatchObject({
+      afterNinety: { against: 1, for: 1 },
+      extraTime: true,
+      penalties: { against: 3, for: 4 },
+    })
+  })
+
+  it('gives the goals with the team that gets them, and leaves out a goal without a player', () => {
+    expect(data.goals.map((goal) => [goal.minute, goal.ours, goal.ownGoal, goal.assistId])).toEqual([
+      [12, true, false, 10],
+      [40, false, false, null],
+      [78, true, true, null],
+    ])
+
     const reported = reportedMatch()
 
     reported.stored.goals[0]!.appearanceId = null
 
-    expect(eventsOf(reported).filter((event) => event.kind === 'goal')).toHaveLength(2)
+    expect(matchPageDataOf(reported, []).goals).toHaveLength(2)
   })
 
-  it('puts the added time of the first half before the next minute', () => {
+  it('takes the kicks of the shoot-out with their player, and the rest of the events by player', () => {
     const reported = reportedMatch()
 
-    reported.stored.cards[0] = { ...reported.stored.cards[0]!, minute: 46 }
+    reported.stored.shootout = [
+      { appearanceId: 9, id: 1, matchId: 7, ours: true, outcome: 'raak', round: 1 },
+      { appearanceId: null, id: 2, matchId: 7, ours: false, outcome: 'naast', round: 1 },
+    ]
 
-    const order = eventsOf(reported).map(
-      (event) =>
-        `${event.minute}${event.stoppageMinutes === undefined || event.stoppageMinutes === null ? '' : `+${event.stoppageMinutes}`}`,
-    )
-
-    expect(order.indexOf('45+2')).toBeLessThan(order.indexOf('46'))
-  })
-})
-
-describe('lineupOf', () => {
-  const ours = lineupOf(reportedMatch(), true)
-  const theirs = lineupOf(reportedMatch(), false)
-
-  it('splits a team in the line-up and the bench, in the order of the report', () => {
-    expect(ours.starters.map((player) => player.shirtNumber)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    expect(ours.bench.map((player) => player.shirtNumber)).toEqual([12, 13])
-    expect(theirs.starters).toHaveLength(11)
-    expect(theirs.bench).toHaveLength(1)
-  })
-
-  it('marks the captain', () => {
-    expect(ours.starters.filter((player) => player.captain === true).map((player) => player.shirtNumber)).toEqual([10])
-    expect(theirs.starters.filter((player) => player.captain === true).map((player) => player.shirtNumber)).toEqual([5])
-  })
-
-  it('writes the substitution in words for the player who went off and for the player who came on', () => {
-    expect(ours.starters.find((player) => player.shirtNumber === 10)?.notes).toEqual([
-      'Gewisseld in de 60e minuut, vervangen door Gerrit Nepper',
+    expect(matchPageDataOf(reported, []).kicks).toEqual([
+      { ours: true, playerId: 9, result: 'raak', round: 1 },
+      { ours: false, playerId: null, result: 'naast', round: 1 },
     ])
-    expect(ours.bench.find((player) => player.shirtNumber === 12)?.notes).toEqual([
-      'Ingevallen in de 60e minuut voor Idzenga',
+    expect(data.cards.map((card) => [card.playerId, card.kind])).toEqual([
+      [4, 'geel'],
+      [105, 'rood'],
     ])
-    expect(theirs.bench[0]?.notes).toEqual(['Ingevallen in de 45e minuut (+2) voor Ronald Proefveld'])
-  })
-
-  it('writes the cards in words, with the minute', () => {
-    expect(ours.starters.find((player) => player.shirtNumber === 4)?.notes).toEqual(['Gele kaart in de 30e minuut'])
-    expect(theirs.starters.find((player) => player.shirtNumber === 5)?.notes).toEqual([
-      'Rode kaart in de 90e minuut (+3)',
-    ])
-  })
-
-  it('gives a player nothing to note when nothing happened to him', () => {
-    expect(ours.starters.find((player) => player.shirtNumber === 2)?.notes).toEqual([])
+    expect(data.incidents).toEqual([{ kind: 'strafschop-gemist', minute: 55, playerId: 9, stoppageMinutes: null }])
+    expect(data.substitutions).toHaveLength(2)
   })
 })
