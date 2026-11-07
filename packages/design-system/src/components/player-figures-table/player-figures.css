@@ -1,8 +1,8 @@
 /*
  * The table of the figures of the players. The table itself takes its look from base/table.css,
  * and the place, the name column and the legend from bar/bar.css. This file keeps the eight
- * columns of figures close together, so the table fits a phone: the figures have a smaller space
- * on each side than the other tables have, and the name takes what is left.
+ * columns of figures close together, so the table fits a phone: the figures have a smaller
+ * space on each side than the other tables have, and the name takes what is left.
  */
 
 @layer hf.components {
