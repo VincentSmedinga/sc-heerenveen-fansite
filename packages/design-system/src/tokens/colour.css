@@ -202,6 +202,19 @@
     --hf-colour-card-red: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
+     * The grass of the pitch in the line-up of a match (MatchPitch): pale blue in light, and
+     * the deepest blue of the page in dark, so the pitch stands out from a card in both themes
+     * (in dark the soft surface is the colour of a card). The stripe is the second colour of
+     * the mowing pattern, half a step towards the neighbouring blue. The lines and the shirt
+     * numbers on the grass reach their contrast on both colours.
+     */
+    --hf-colour-background-pitch: light-dark(var(--hf-colour-blue-50), var(--hf-colour-blue-950));
+    --hf-colour-background-pitch-stripe: light-dark(
+      color-mix(in srgb, var(--hf-colour-blue-50) 50%, var(--hf-colour-blue-100)),
+      color-mix(in srgb, var(--hf-colour-blue-950) 50%, var(--hf-colour-blue-900))
+    );
+
+    /*
      * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
      * too dark there: it reaches 2,65:1 on the band. Blue-300 reaches 3:1 and more on both, in both themes.
      */
@@ -409,6 +422,8 @@
       --hf-colour-outcome-draw: var(--hf-colour-grey-600);
       --hf-colour-card-yellow: var(--hf-colour-yellow-400);
       --hf-colour-card-red: var(--hf-colour-red-600);
+      --hf-colour-background-pitch: var(--hf-colour-blue-50);
+      --hf-colour-background-pitch-stripe: color-mix(in srgb, var(--hf-colour-blue-50) 50%, var(--hf-colour-blue-100));
       --hf-colour-background-shortcuts: var(--hf-colour-sand-100);
       --hf-colour-border-shortcuts: var(--hf-colour-sand-300);
       --hf-colour-text-shortcuts-label: var(--hf-colour-sand-700);
