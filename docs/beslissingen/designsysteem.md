@@ -2775,3 +2775,54 @@
   Meer blessuretijd dan de ruimte past, komt aan het eind van die ruimte te staan.
 - **Waarom:** de pagina blijft daardoor één balk, ook bij een beker.
 - **Alternatieven:** een tweede balk voor de verlenging.
+
+## De opstelling staat als veld, uit de formatie en de volgorde van de spelers
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchPitch` (#846) tekent de opstelling van beide teams op een veld.
+  De keeper staat vooraan in de lijst, daarna komt de formatie rij voor rij, en elke rij is gelijk verdeeld.
+  Een rij van vijf of meer spelers krijgt wat meer ruimte aan de zijkant.
+  Een positie per speler leggen we niet vast (#855): het veld rekent de plaats uit de formatie en de volgorde van het formulier.
+  Een team zonder formatie, of met een formatie die niet bij de elf spelers past, staat niet op het veld.
+  Een zin zegt dat, en de lijst onder het veld noemt de spelers.
+  `PitchPlayer` is één speler: een rond vlak met het rugnummer, een ring met de minuten gespeeld, merken voor een doelpunt, een kaart, eruit gewisseld en de aanvoerder, en de achternaam eronder.
+  Voor een schermlezer is het veld een lijst per team, "Opstelling `<team>`, `<formatie>`", met één zin per speler in de volgorde van de formatie.
+  De tekening is verborgen, en elk merk staat als woord in de zin.
+- **Waarom:** de ring om een speler laat de minuten al zien, dus een aparte tijdlijn per speler voegt weinig toe.
+  Het veld laat in één blik zien wie waar stond, en de lijst blijft voor wie het veld niet kan zien.
+- **Alternatieven:** een minuutas met banen per team (#853) en een balk per speler (#854), uit het ontwerp "Wedstrijdpagina versie 4".
+  Een positie per speler opslaan (#855) vraagt nieuwe velden in het formulier.
+
+## Het veld staat rechtop op een telefoon en ligt vanaf een breedte van 40 rem
+
+- **Datum:** 7 november 2026
+- **Besluit:** het veld staat rechtop, met sc Heerenveen onderaan, zolang het onderdeel smaller is dan 40 rem.
+  Vanaf 40 rem ligt het, met sc Heerenveen links.
+  Het onderdeel meet zijn eigen breedte (een container query), niet die van het scherm.
+  Bij een formatie met vijf spelers in een rij of vijf rijen passen de namen niet op een smal veld.
+  Ze gaan dan weg, en een zin verwijst naar de lijst eronder.
+  Op een veld breder dan 36 rem staat "eruit 62'" onder de naam.
+  Een lange naam gaat over twee regels met afbreking en eindigt dan op "…".
+- **Waarom:** een naam die niet past is slechter dan geen naam, en de lijst blijft altijd beschikbaar.
+- **Eigen keuzes bij het bouwen:**
+  - de keeper en de rijen van de formatie liggen gelijk verdeeld over de helft van het team, zodat geen rij minder ruimte voor de namen heeft dan een andere.
+    Het rechtopstaande veld is 5 bij 11, en de vlakken zijn kleiner (2 in plaats van 2,25 rem) zodra het onderdeel smaller is dan 18 rem.
+    Op een telefoon van 320 pixels breed valt dan de naam van een speler niet meer onder de rij eronder.
+    Zo smal is er tussen twee rijen ruimte voor één regel naam, dus een lange naam eindigt dan op "…" in plaats van over twee regels te gaan.
+  - het liggende veld is 16 bij 9, en 3 bij 2 bij een formatie met een rij van vijf of vijf rijen.
+    Een kolom met vijf spelers heeft dan hoogte genoeg voor de namen, die onder de vlakken staan.
+    Het ontwerp liet 2 bij 1 zien, waarbij de naam van een speler in een kolom van vier of vijf over het vlak eronder viel.
+  - op het liggende veld mag een naam hoogstens zo breed zijn als de ruimte tussen twee rijen, want de rijen staan dan naast elkaar.
+- **Alternatieven:** de namen altijd tonen en laten overlappen (ze haken dan in elkaar, en dat leest slechter dan geen naam); een schakelaar om de namen te verbergen (niet in dit issue).
+
+## Het veld heeft twee eigen kleurtokens voor de grasmat
+
+- **Datum:** 7 november 2026
+- **Besluit:** er komen twee tokens, `--hf-colour-background-pitch` en `--hf-colour-background-pitch-stripe`, elk met een paar voor licht en donker.
+  De grasmat is lichtblauw in licht (blauw-50) en het diepste blauw van de pagina in donker (blauw-950).
+  De tweede streep ligt een halve stap naar het buurblauw toe.
+  Het veld heeft tien strepen, afwisselend in die twee kleuren.
+  De lijnen op het veld hebben de kleur van de grafische lijn van het vlak (`--hf-colour-line-graphic-surface`), die 3:1 haalt op de grasmat.
+  De ring en de vlakken van de spelers gebruiken kleuren die er al zijn: de uitkomst winst voor de ring en de kleur van de knop voor het vlak van sc Heerenveen.
+- **Waarom:** het veld moet in licht en donker afsteken van een kaart, en in donker is het vlak van een kaart (blauw-900) bijna hetzelfde als lichtblauw.
+- **Alternatieven:** de grasmat uit de kleur van een bestaand vlak halen (in donker valt het veld dan weg in de kaart).

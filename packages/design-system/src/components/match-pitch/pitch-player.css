@@ -1,0 +1,182 @@
+/*
+ * A player on the pitch: a round disc with the shirt number, a ring round it for the minutes he
+ * played, marks in the corners of the disc and the surname under it. All of it is drawing,
+ * hidden from a screen reader (aria-hidden), which hears one sentence instead. The size of the
+ * disc (--hf-pitch-dot) is set by the pitch; alone, a player has a size of its own.
+ */
+
+@layer hf.components {
+  .hf-pitch-player {
+    --hf-pitch-gap: 0.125rem;
+    --hf-pitch-ring: 0.1875rem;
+
+    align-items: center;
+    color: var(--hf-colour-text-default);
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  .hf-pitch-player-drawing {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-xs);
+    max-inline-size: 100%;
+  }
+
+  /* The disc and its ring are one square; the marks sit on its corners. */
+  .hf-pitch-player-disc {
+    block-size: var(--hf-pitch-dot, 2.25rem);
+    inline-size: var(--hf-pitch-dot, 2.25rem);
+    position: relative;
+  }
+
+  /*
+   * The ring: the full circle is the track, and the arc on it is the minutes he played. It
+   * starts at the minute he came on and runs as far as he played. Only the rim shows: the mask
+   * cuts out the middle, so the gap between ring and disc is the colour of the pitch under it.
+   */
+  .hf-pitch-player-ring {
+    background: conic-gradient(
+      from var(--hf-ring-start, 0deg),
+      var(--hf-colour-outcome-win) var(--hf-ring-length, 360deg),
+      color-mix(in srgb, var(--hf-colour-line-graphic-surface) 35%, transparent) 0
+    );
+    border-radius: 50%;
+    inset: 0;
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - var(--hf-pitch-ring)),
+      #000 calc(100% - var(--hf-pitch-ring))
+    );
+    position: absolute;
+  }
+
+  /* The disc is filled for sc Heerenveen and open, with a rim, for the opponent. */
+  .hf-pitch-player-number {
+    align-items: center;
+    border-radius: 50%;
+    display: grid;
+    font-size: 0.875em;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    inset: calc(var(--hf-pitch-ring) + var(--hf-pitch-gap));
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+  }
+
+  .hf-pitch-player-ours .hf-pitch-player-number {
+    background-color: var(--hf-colour-background-button);
+    color: var(--hf-colour-text-on-button);
+  }
+
+  .hf-pitch-player-theirs .hf-pitch-player-number {
+    background-color: var(--hf-colour-background-surface);
+    box-shadow: inset 0 0 0 2px var(--hf-colour-background-button);
+    color: var(--hf-colour-text-default);
+  }
+
+  /* A mark is a small disc of the surface with a rim, so its icon stands out from the pitch. */
+  .hf-pitch-player-mark {
+    align-items: center;
+    background-color: var(--hf-colour-background-surface);
+    block-size: 1rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--hf-colour-border-surface);
+    display: grid;
+    font-size: 0.75em;
+    inline-size: 1rem;
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+  }
+
+  .hf-pitch-player-mark-goal {
+    inset-block-start: -0.3rem;
+    inset-inline-end: -0.4rem;
+  }
+
+  .hf-pitch-player-mark-card {
+    inset-block-start: -0.3rem;
+    inset-inline-start: -0.4rem;
+  }
+
+  .hf-pitch-player-mark-out {
+    inset-block-end: -0.2rem;
+    inset-inline-end: -0.4rem;
+  }
+
+  .hf-pitch-player-mark-captain {
+    font-size: 0.6875em;
+    font-weight: var(--hf-strong-font-weight);
+    inset-block-end: -0.2rem;
+    inset-inline-start: -0.4rem;
+  }
+
+  .hf-pitch-player-name {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+  }
+
+  /*
+   * The surname in small letters on a pale label, so it can be read over the stripes and the
+   * lines. A long name runs over two lines with hyphens and then ends in "…".
+   */
+  .hf-pitch-player-surname {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    background-color: color-mix(in srgb, var(--hf-colour-background-pitch) 82%, transparent);
+    border-radius: 0.25rem;
+    display: -webkit-box;
+    font-size: 0.75em;
+    font-weight: var(--hf-name-font-weight);
+    hyphens: auto;
+    line-height: 1.1;
+    max-inline-size: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    padding-inline: var(--hf-space-xs);
+  }
+
+  /*
+   * On a very narrow pitch (a phone of 320 pixels) there is room for one line of name between
+   * two rows, so a long name is cut with "…" and the lines stay clear of the next row.
+   */
+  @container hf-match-pitch (max-width: 18rem) {
+    .hf-pitch-player-surname {
+      -webkit-line-clamp: 1;
+      hyphens: manual;
+    }
+  }
+
+  /* "eruit 62'" under the name, only where the pitch is wide enough for a third line. */
+  .hf-pitch-player-off {
+    color: var(--hf-colour-text-secondary);
+    display: none;
+    font-size: 0.75em;
+    line-height: 1.1;
+
+    @container hf-match-pitch-field (min-width: 36rem) {
+      display: block;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .hf-pitch-player-ring {
+      background: conic-gradient(from var(--hf-ring-start, 0deg), Highlight var(--hf-ring-length, 360deg), GrayText 0);
+    }
+
+    .hf-pitch-player-number {
+      background-color: Canvas;
+      box-shadow: inset 0 0 0 2px CanvasText;
+      color: CanvasText;
+    }
+  }
+}

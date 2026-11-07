@@ -1,0 +1,304 @@
+/*
+ * The pitch with the line-up of both teams. It stands upright below 40 rem (a phone), with
+ * sc Heerenveen at the bottom, and lies down from 40 rem, with sc Heerenveen on the left. The
+ * pitch is a grass mat with ten stripes, the halfway line, the centre circle, the penalty areas
+ * and the goal areas. Players are placed by custom properties that the component sets
+ * (percentages of the pitch, one pair for each position); this file only reads them.
+ */
+
+@layer hf.components {
+  .hf-match-pitch {
+    container: hf-match-pitch / inline-size;
+    display: grid;
+    gap: var(--hf-space-s);
+  }
+
+  /* Above the pitch: each team with the colour of its disc and its formation. */
+  .hf-match-pitch-teams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-xs) var(--hf-space-m);
+    justify-content: space-between;
+  }
+
+  .hf-match-pitch-team-name {
+    align-items: center;
+    display: flex;
+    font-weight: var(--hf-strong-font-weight);
+    gap: var(--hf-space-xs);
+  }
+
+  .hf-match-pitch-swatch {
+    block-size: 1rem;
+    border: 2px solid var(--hf-colour-background-button);
+    border-radius: 50%;
+    box-sizing: border-box;
+    flex: none;
+    inline-size: 1rem;
+  }
+
+  .hf-match-pitch-swatch-ours {
+    background-color: var(--hf-colour-background-button);
+  }
+
+  /*
+   * The field. Its own container, so the players can ask how wide it is. The lines are the
+   * graphic line colour of the surface, which reaches 3:1 on the grass in light and in dark.
+   */
+  .hf-match-pitch-field {
+    --hf-pitch-dot: 2.25rem;
+
+    aspect-ratio: 5 / 11;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--hf-colour-background-pitch) 0 10%,
+      var(--hf-colour-background-pitch-stripe) 10% 20%
+    );
+    border: 1px solid var(--hf-card-line-strong, var(--hf-colour-border-surface-strong));
+    border-radius: 0.5rem;
+    color: var(--hf-card-line-graphic, var(--hf-colour-line-graphic-surface));
+    container: hf-match-pitch-field / inline-size;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hf-match-pitch-crowded {
+    --hf-pitch-dot: 2rem;
+  }
+
+  /* On a very narrow pitch the discs are smaller, so each name keeps clear of the next row. */
+  @container hf-match-pitch (max-width: 18rem) {
+    .hf-match-pitch-field {
+      --hf-pitch-dot: 2rem;
+    }
+  }
+
+  .hf-match-pitch-line {
+    border: 2px solid currentcolor;
+    box-sizing: border-box;
+    position: absolute;
+  }
+
+  .hf-match-pitch-line-half {
+    border-width: 2px 0 0;
+    inline-size: 100%;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+  }
+
+  .hf-match-pitch-line-circle {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    inline-size: 30%;
+    inset-block-start: calc(50% - 15cqw);
+    inset-inline-start: 35%;
+  }
+
+  .hf-match-pitch-line-penalty-area {
+    block-size: 13%;
+    inline-size: 58%;
+    inset-inline-start: 21%;
+  }
+
+  .hf-match-pitch-line-goal-area {
+    block-size: 5%;
+    inline-size: 28%;
+    inset-inline-start: 36%;
+  }
+
+  /* The first area is at the top and the second at the bottom: neither has a goal line. */
+  .hf-match-pitch-line-penalty-area.hf-match-pitch-line-first,
+  .hf-match-pitch-line-goal-area.hf-match-pitch-line-first {
+    border-block-start-width: 0;
+    inset-block-start: -2px;
+  }
+
+  .hf-match-pitch-line-penalty-area.hf-match-pitch-line-second,
+  .hf-match-pitch-line-goal-area.hf-match-pitch-line-second {
+    border-block-end-width: 0;
+    inset-block-end: -2px;
+  }
+
+  /* The players of a team fill the field, so each is placed from its edges. */
+  .hf-match-pitch-team {
+    inset: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+  }
+
+  .hf-match-pitch-team > .hf-pitch-player {
+    inline-size: var(--hf-pitch-share);
+    inset-block-start: var(--hf-pitch-portrait-y);
+    inset-inline-start: var(--hf-pitch-portrait-x);
+    position: absolute;
+    transform: translate(-50%, calc(var(--hf-pitch-dot) / -2));
+  }
+
+  /* On a narrow pitch with five in a row, or five rows, there is no room for the names. */
+  .hf-match-pitch-crowded .hf-pitch-player-name {
+    display: none;
+  }
+
+  .hf-match-pitch-note {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    margin: 0;
+  }
+
+  .hf-match-pitch-legend {
+    color: var(--hf-colour-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--hf-meta-font-size);
+    gap: var(--hf-space-xs) var(--hf-space-m);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    > li {
+      align-items: center;
+      display: flex;
+      gap: var(--hf-space-xs);
+    }
+  }
+
+  /* The sample disc in the explanation: filled, with the ring of a full match round it. */
+  .hf-match-pitch-legend-disc {
+    align-items: center;
+    background-color: var(--hf-colour-background-button);
+    block-size: 1.25rem;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 2px var(--hf-card-surface, var(--hf-colour-background-surface)),
+      0 0 0 4px var(--hf-colour-outcome-win);
+    color: var(--hf-colour-text-on-button);
+    display: inline-grid;
+    font-size: 0.75em;
+    font-weight: var(--hf-figure-font-weight);
+    inline-size: 1.25rem;
+    justify-content: center;
+    margin-inline: var(--hf-space-xs);
+  }
+
+  .hf-match-pitch-rosters {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-xl);
+
+    @container hf-match-pitch (min-width: 40rem) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .hf-match-pitch-roster {
+    align-content: start;
+    display: grid;
+    gap: var(--hf-space-s);
+  }
+
+  .hf-match-pitch-roster-list {
+    list-style: none;
+    margin: 0;
+    padding-inline-start: 0;
+
+    > li {
+      border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+      padding-block: var(--hf-space-xs);
+    }
+
+    > li:first-child {
+      border-block-start: 0;
+      padding-block-start: 0;
+    }
+  }
+
+  /*
+   * From 40 rem the pitch lies down, 16 to 9 (3 to 2 with a crowded row, which needs more
+   * height for the names), and everything turns a quarter: the stripes, the lines and the
+   * places of the players.
+   */
+  @container hf-match-pitch (min-width: 40rem) {
+    .hf-match-pitch-field {
+      --hf-pitch-dot: 2.5rem;
+
+      aspect-ratio: 16 / 9;
+      background: repeating-linear-gradient(
+        to right,
+        var(--hf-colour-background-pitch) 0 10%,
+        var(--hf-colour-background-pitch-stripe) 10% 20%
+      );
+    }
+
+    .hf-match-pitch-crowded {
+      aspect-ratio: 3 / 2;
+    }
+
+    .hf-match-pitch-line-half {
+      block-size: 100%;
+      border-width: 0 0 0 2px;
+      inline-size: auto;
+      inset-block: 0;
+      inset-inline-start: 50%;
+    }
+
+    .hf-match-pitch-line-circle {
+      aspect-ratio: 1;
+      block-size: 30%;
+      inline-size: auto;
+      inset-block-start: 35%;
+      inset-inline-start: 50%;
+      transform: translateX(-50%);
+    }
+
+    .hf-match-pitch-line-penalty-area {
+      block-size: 58%;
+      inline-size: 13%;
+      inset-block-start: 21%;
+    }
+
+    .hf-match-pitch-line-goal-area {
+      block-size: 28%;
+      inline-size: 5%;
+      inset-block-start: 36%;
+    }
+
+    .hf-match-pitch-line-penalty-area.hf-match-pitch-line-first,
+    .hf-match-pitch-line-goal-area.hf-match-pitch-line-first {
+      border-block-start-width: 2px;
+      border-inline-start-width: 0;
+      inset-block-end: auto;
+      inset-inline: -2px auto;
+    }
+
+    .hf-match-pitch-line-penalty-area.hf-match-pitch-line-first {
+      inset-block-start: 21%;
+    }
+
+    .hf-match-pitch-line-goal-area.hf-match-pitch-line-first {
+      inset-block-start: 36%;
+    }
+
+    .hf-match-pitch-line-penalty-area.hf-match-pitch-line-second,
+    .hf-match-pitch-line-goal-area.hf-match-pitch-line-second {
+      border-block-end-width: 2px;
+      border-inline-end-width: 0;
+      inset-block-end: auto;
+      inset-inline: auto -2px;
+    }
+
+    .hf-match-pitch-team > .hf-pitch-player {
+      inline-size: var(--hf-pitch-landscape-share);
+      inset-block-start: var(--hf-pitch-landscape-y);
+      inset-inline-start: var(--hf-pitch-landscape-x);
+    }
+
+    .hf-match-pitch-crowded .hf-pitch-player-name {
+      display: flex;
+    }
+
+    .hf-match-pitch-note-crowded {
+      display: none;
+    }
+  }
+}

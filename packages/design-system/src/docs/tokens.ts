@@ -153,6 +153,13 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
     ],
   },
   {
+    label: 'Veld bij een wedstrijd',
+    tokens: [
+      { name: '--hf-colour-background-pitch', use: 'Grasmat van het veld met de opstelling van een wedstrijd' },
+      { name: '--hf-colour-background-pitch-stripe', use: 'Tweede kleur van de strepen in de grasmat' },
+    ],
+  },
+  {
     label: 'Markeringen',
     tokens: [
       {
