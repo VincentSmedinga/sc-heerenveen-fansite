@@ -559,6 +559,10 @@ for (const [name, javaScriptEnabled] of [
       // A formation from the list for our team, and one of his own for the opponent that is
       // wrong.
       await page.locator('#formatie-wij').selectOption('4-3-3')
+
+      // The field of his own is there for Anders only, which the browser has to show (jsdom
+      // can't); without JavaScript the page can't change it, so it stays.
+      await expect(page.locator('#formatie-wij-eigen'))[javaScriptEnabled ? 'toBeHidden' : 'toBeVisible']()
       await page.locator('#formatie-zij').selectOption('anders')
       await page.locator('#formatie-zij-eigen').fill('4-3-4')
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
