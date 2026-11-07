@@ -542,12 +542,6 @@ Ze volgt de schakelaar, maar niet het seizoen van de kiezer.
 Kan de database niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
 Op een telefoon volgt de zijkolom op de hoofdkolom, dus de selectie komt eerst, en de bronvermelding sluit de zijkolom af.
-De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder de selectie, Assists en Minuten achteraan in de zijkolom.
-Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
-`src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
-Slaat de redactie een verslag als `klaar` op, dan schrijft `saveReport` een regel `player.stats-differ` in het logboek voor elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia.
-De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playersShortcutsFor`, met `seasonHasReports`).
-Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
 Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
 De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
 De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
@@ -563,8 +557,13 @@ De cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze
 Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
 De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
 Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
+De balk "Op deze pagina:" heeft vier links, naar de vier kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`), en zeven bij een seizoen met verslagen (zie hieronder).
+De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder de selectie, Assists en Minuten achteraan in de zijkolom.
+Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
+`src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
 Slaat de redactie een verslag als `klaar` op, dan schrijft `saveReport` een regel `player.stats-differ` in het logboek voor elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia.
-De balk "Op deze pagina:" heeft drie links, naar de drie kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`).
+De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playersShortcutsFor`, met `seasonHasReports`).
+Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
 
 ### De tegenstanders
@@ -698,7 +697,6 @@ De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`Comp
 
 De keuze blijft bij elke link: de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
 `pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
-Slaat de redactie een verslag als `klaar` op, dan schrijft `saveReport` een regel `player.stats-differ` in het logboek voor elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia.
 De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
 De balk onder het hoofdmenu houdt het seizoen en de keuze vast (zie _Het hoofdmenu en de balk van Nieuws_).
 De items Wedstrijden en Spelers van het menu zelf nemen het seizoen van de pagina mee, maar niet de keuze: die kan het menu niet lezen zonder `useSearchParams`.
