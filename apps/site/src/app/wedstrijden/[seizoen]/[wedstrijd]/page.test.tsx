@@ -52,12 +52,14 @@ afterEach(() => {
 })
 
 describe('the page of a match', () => {
-  it('has one h1 with the clubs, and the h2 headings Verloop and Opstelling with a h3 for each team', async () => {
+  it('has one h1 with the clubs, the h2 headings Verloop and Opstelling, and a h3 for each half and each team', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toEqual([
       'sc Heerenveen – Testdorp FC',
       'Verloop',
+      'Eerste helft',
+      'Tweede helft',
       'Opstelling',
       'sc Heerenveen',
       'Testdorp FC',
@@ -67,7 +69,7 @@ describe('the page of a match', () => {
   it('shows the result, the competition, the day, the stadium, the attendance and the referee', async () => {
     const text = plain(await render())
 
-    expect(text).toContain('sc Heerenveen 2–1 2 tegen 1 Testdorp FC')
+    expect(text).toContain('sc Heerenveen 2 Testdorp FC 1 2–1 Eindstand: 2 tegen 1 Gewonnen')
     expect(text).toContain('Competitie Eredivisie, Speelronde 1')
     expect(text).toContain('Datum za 24 okt 2026')
     expect(text).toContain('Stadion Stadion Proeflaan')
@@ -101,17 +103,18 @@ describe('the page of a match', () => {
 
   it('shows the course of the match as an ordered list, with a word for every event', async () => {
     const html = await render()
-    const list = html.slice(html.indexOf('<ol'), html.indexOf('</ol>'))
+    const course = html.slice(html.indexOf('<div aria-labelledby="verloop"'), html.indexOf('Opstelling'))
 
-    expect(list).toContain('aria-labelledby="verloop"')
-    expect(plain(list)).toContain('Doelpunt')
-    expect(plain(list)).toContain('Eigen doelpunt')
-    expect(plain(list)).toContain('Doelpunt uit een strafschop')
-    expect(plain(list)).toContain('Gemiste strafschop')
-    expect(plain(list)).toContain('Wissel')
-    expect(plain(list)).toContain('Gele kaart')
-    expect(plain(list)).toContain('Rode kaart')
-    expect(plain(list)).toContain('assist: Thijs Idzenga')
+    expect(course).toContain('role="group"')
+    expect(course.match(/<ol aria-label="(?:Eerste|Tweede) helft"/g)).toHaveLength(2)
+    expect(plain(course)).toContain('Minuut 12, Doelpunt: ')
+    expect(plain(course)).toContain('Eigen doelpunt: ')
+    expect(plain(course)).toContain('Doelpunt (strafschop): ')
+    expect(plain(course)).toContain('Gemiste strafschop')
+    expect(plain(course)).toContain('Wissel: ')
+    expect(plain(course)).toContain('Gele kaart: ')
+    expect(plain(course)).toContain('Rode kaart: ')
+    expect(plain(course)).toContain('assist Thijs Idzenga')
   })
 
   it('shows the line-ups of both teams with the bench, the captain and what happened in words', async () => {
@@ -149,7 +152,7 @@ describe('the page of a match', () => {
     const html = await render()
 
     expect(html).not.toContain('Formatie')
-    expect(html.match(/<h3/g)).toHaveLength(2)
+    expect(html.match(/<h3/g)).toHaveLength(4)
     expect(plain(html)).toContain('Basis')
   })
 
@@ -179,7 +182,7 @@ describe('the page of a match', () => {
 
     expect(plain(html)).toContain('De opstelling van Testdorp FC hebben we niet.')
     expect(html).not.toContain('aria-label="Basis Testdorp FC"')
-    expect(html.match(/<h3/g)).toHaveLength(1)
+    expect(html.match(/<h3/g)).toHaveLength(3)
   })
 
   it('says that there was extra time, the score after 90 minutes and the shoot-out in words', async () => {
@@ -194,7 +197,7 @@ describe('the page of a match', () => {
     reported.match.penaltiesAgainst = 3
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
-    expect(plain(await render())).toContain('Na verlenging. Na 90 minuten 1–1. Na strafschoppen 4–3.')
+    expect(plain(await render())).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
   })
 
   it('links back to the matches of the season, and credits Wikipedia and our own records', async () => {
