@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
+import { MatchSubstitutes } from '../match-substitutes/MatchSubstitutes'
 import { MatchPitch, type MatchPitchTeam } from './MatchPitch'
 import { type PitchPlayerData } from './PitchPlayer'
 
@@ -165,6 +166,50 @@ export const WithoutOpponent = meta.story({
   },
   decorators: [phone],
   name: 'Alleen sc Heerenveen',
+})
+
+export const WithSubstitutes = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2'),
+    ours: ours('4-3-3'),
+  },
+  decorators: [phone],
+  name: 'Met de wissels onder het veld',
+  render: (args) => (
+    <MatchPitch {...args}>
+      <MatchSubstitutes.Group>
+        <MatchSubstitutes
+          headingLevel={3}
+          ours
+          substitutes={[
+            {
+              minute: 62,
+              minutesPlayed: 28,
+              name: { givenName: 'Gerrit', surname: 'Nepper' },
+              playerOut: { givenName: 'Thijs', surname: 'Idzenga' },
+              shirtNumber: 12,
+            },
+          ]}
+          team="sc Heerenveen"
+        />
+        <MatchSubstitutes
+          headingLevel={3}
+          ours={false}
+          substitutes={[
+            {
+              minute: 55,
+              minutesPlayed: 35,
+              name: { givenName: 'Kai', surname: 'Banklaan' },
+              playerOut: { givenName: 'Teun', surname: 'Consectetur' },
+              shirtNumber: 14,
+            },
+          ]}
+          team="Testdorp FC"
+        />
+      </MatchSubstitutes.Group>
+    </MatchPitch>
+  ),
 })
 
 export const ExtraTime = meta.story({
