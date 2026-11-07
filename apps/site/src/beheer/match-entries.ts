@@ -15,13 +15,14 @@ import {
   removeEntry,
 } from '@fansite/db/match-edits'
 import { listWikipediaPages } from '@fansite/db/queries'
-import { adminUsers, matchChanges, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
+import { adminUsers, matchChanges, matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
 import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
 
 import { lacksResult } from '../matches'
 import { recordAction } from './audit-log'
+import { listReportsToCheck } from './match-reports'
 
 // Writing the matches in the admin: the list, the one match an editor fills in, and the two
 // changes, the entry and removing it. The entry is written into `matches` and `match_goals`,
@@ -197,10 +198,17 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     .where(eq(players.season, match.season))
     .orderBy(asc(players.name))
 
+  const [report] = await db
+    .select({ status: matchReports.status })
+    .from(matchReports)
+    .where(eq(matchReports.matchId, id))
+
   return {
     differences: await waitingDifferences(db, id),
     edit: edit === undefined ? undefined : { ...edit.row, editedByEmail: edit.editedByEmail },
     goals,
+    // A match with a report has its goals in the report: the form of the match shows them only.
+    hasReport: report !== undefined,
     held: await waitingHeldChanges(db, id),
     match,
     pages: await listWikipediaPages(db, match.season),
@@ -213,7 +221,9 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
  * kick-off first (`lacksResult`, as the pages of visitors have it), then the rest in the order
  * of the season. `edited` says which parts the editors hold, `differs` how many of them
  * Wikipedia says something else about, which waits for a decision, and `held` how many changes
- * of Wikipedia the importer holds back for the match.
+ * of Wikipedia the importer holds back for the match. `reportStatus` is the status of its
+ * match report (none for a match without one), and `reportToCheck` says that a report that is
+ * `klaar` is not right any more.
  */
 export async function listAdminMatches(db: Database, season: string, now: Date) {
   const found = await db
@@ -232,10 +242,12 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
       opponent: matches.opponent,
       penaltiesAgainst: matches.penaltiesAgainst,
       penaltiesFor: matches.penaltiesFor,
+      reportStatus: matchReports.status,
       round: matches.round,
       status: matches.status,
     })
     .from(matches)
+    .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
   const edits = new Map((await db.select().from(matchEdits)).map((edit) => [edit.matchId, edit]))
@@ -247,12 +259,15 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
     .select({ matchId: matchChanges.matchId })
     .from(matchChanges)
     .where(and(eq(matchChanges.season, season), eq(matchChanges.status, 'pending'), isNull(matchChanges.part)))
+  const checking = await listReportsToCheck(db, found)
   const rows = found.map((match) => ({
     ...match,
+    // A report that was `klaar` and is not right any more, such as after a new result.
     differs: differing.filter((change) => change.matchId === match.id).length,
     edited: edits.has(match.id) ? markedParts(edits.get(match.id) as MatchEdit) : [],
     held: holding.filter((change) => change.matchId === match.id).length,
     lacksResult: lacksResult(match, now),
+    reportToCheck: checking.has(match.id),
   }))
 
   return { rows: [...rows.filter((row) => row.lacksResult), ...rows.filter((row) => !row.lacksResult)] }
@@ -386,6 +401,26 @@ export async function saveEntry(
 }
 
 /**
+ * The stored goals as the entry of a match holds them. The form of a match with a report has no
+ * goals of its own, so its entry keeps these (see `submitMatch`).
+ */
+export function storedEntryGoals(goals: MatchGoal[]): EntryGoal[] {
+  return goals.map((goal) => ({
+    appearanceId: goal.appearanceId,
+    assistAppearanceId: goal.assistAppearanceId,
+    minute: goal.minute,
+    ours: goal.ours,
+    ownGoal: goal.ownGoal,
+    penalty: goal.penalty,
+    personId: goal.personId,
+    player: goal.player,
+    playerId: goal.playerId,
+    stoppageMinutes: goal.stoppageMinutes,
+    wikipediaPage: goal.wikipediaPage,
+  }))
+}
+
+/**
  * Takes the entry away: the parts the editors hold go back to what they were before the first
  * entry, the row of `match_edits` goes, and `match.undo` with the reason goes in the log. A
  * part that Wikipedia took over has no marker, and stays. The import reads Wikipedia for the
@@ -411,9 +446,27 @@ export async function undoEntry(
       return 'none'
     }
 
-    const parts = markedParts(edit)
+    // The goals of a match with a report are the report's: taking the entry away puts the
+    // kick-off and the result back, and leaves the goals and their marker, which only taking
+    // the report away undoes (see `removeReport`).
+    const [report] = await transaction
+      .select({ matchId: matchReports.matchId })
+      .from(matchReports)
+      .where(eq(matchReports.matchId, id))
+    const parts = markedParts(edit).filter((part) => report === undefined || part !== 'goals')
 
-    await removeEntry(transaction, edit)
+    if (parts.length === 0) {
+      return 'none'
+    }
+
+    await removeEntry(transaction, report === undefined ? edit : { ...edit, goalsEdited: false })
+
+    if (report !== undefined && edit.goalsEdited) {
+      await transaction
+        .insert(matchEdits)
+        .values({ ...edit, kickoffEdited: false, reportedKickoff: null, reportedResult: null, resultEdited: false })
+    }
+
     // The differences with the entry have nothing left to decide.
     await transaction
       .update(matchChanges)

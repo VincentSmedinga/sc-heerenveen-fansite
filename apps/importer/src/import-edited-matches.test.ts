@@ -3,7 +3,17 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { decideConflict } from '@fansite/db/match-conflicts'
 import { encodeGoals, encodeMatch, type MatchPart } from '@fansite/db/match-edits'
-import { adminUsers, auditLog, matchChanges, matchEdits, matches, matchGoals, matchImports } from '@fansite/db/schema'
+import {
+  adminUsers,
+  auditLog,
+  matchAppearances,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  matchImports,
+  matchReports,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -367,6 +377,43 @@ describe('Wikipedia has something else', () => {
     expect(await goalsOf(roundOne)).toEqual([[53, 'Oyen', true]])
     expect(await log()).toMatchObject([{ action: 'match.differs', detail: expect.stringContaining('Doelpunten:') }])
     expect(await log()).toHaveLength(1)
+  })
+
+  it('keeps the goals of a match report with the players they point to when the result changes (issue 829)', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await row(roundOne)
+    const matchId = before?.id ?? 0
+
+    // The report is saved: it has the player, and the goals of the match are the report's and
+    // marked, as the admin does it.
+    await database.db.insert(matchReports).values({ matchId, savedBy: adminId, status: 'klaar' })
+
+    const [appearance] = await database.db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Oyen', ours: true, shirtNumber: 9, starter: true })
+      .$returningId()
+
+    await enter(roundOne, {}, ['goals'], [{ minute: 52, ours: true, player: 'Oyen' }])
+    await database.db
+      .update(matchGoals)
+      .set({ appearanceId: appearance?.id ?? 0 })
+      .where(eq(matchGoals.matchId, matchId))
+
+    // Wikipedia now says 1-1 with a second goal: the result is not marked, so it follows.
+    Object.assign(pages, drawn(original))
+    await importAt(server, later(first, 2))
+    await importAt(server, later(first, 3))
+
+    expect(await row(roundOne)).toMatchObject({ goalsAgainst: 1, goalsFor: 1 })
+    expect(await goalsOf(roundOne)).toEqual([[52, 'Oyen', true]])
+    expect(await database.db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId))).toMatchObject([
+      { appearanceId: appearance?.id },
+    ])
+    expect(await database.db.select().from(matchReports)).toMatchObject([{ matchId, status: 'klaar' }])
+    expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: false }])
   })
 
   it('lets the parts without a marker follow Wikipedia, with no judgement of the change', async () => {

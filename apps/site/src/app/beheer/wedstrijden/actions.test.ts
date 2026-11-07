@@ -20,6 +20,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createAccount } from '#src/beheer/accounts'
 import { type MatchFormState } from '#src/beheer/match-fields'
 import { emptyFields, emptyGoal } from '#src/beheer/match-fields'
+import { saveReport } from '#src/beheer/match-reports'
+import { report as reportOf, squadOf } from '#src/beheer/report-fixtures'
+import { checkReportForm } from '#src/beheer/report-form'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
@@ -675,5 +678,58 @@ describe('submitHeldChange', () => {
     expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({ redirect: '/beheer/inloggen' })
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
     expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
+  })
+})
+
+describe('submitMatch for a match with a report', () => {
+  /** A 2-1 win with a report that is klaar: its goals are the goals of the match. */
+  async function withReport() {
+    await database.db.insert(players).values(
+      squadOf(1).map((player) => ({
+        name: player.name,
+        searchTerm: player.name,
+        season: '2026/27',
+        shirtNumber: player.shirtNumber,
+      })),
+    )
+
+    const squad = (await database.db.select().from(players)).filter((player) => player.name.startsWith('Speler '))
+    const choices = squad.map((player) => ({ id: player.id, name: player.name, shirtNumber: player.shirtNumber }))
+
+    await submit(matchId, form({ ...(await threeGoals()) }))
+
+    const plan = checkReportForm(reportOf(choices), {
+      match: { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' },
+      squad: choices,
+    }).plan
+
+    await saveReport(database.db, userId, matchId, plan!)
+  }
+
+  it('saves the kick-off and leaves the goals as the report made them, with their players', async () => {
+    await withReport()
+
+    const before = await database.db.select().from(matchGoals).orderBy(matchGoals.id)
+
+    expect(before.every((goal) => goal.appearanceId !== null || !goal.ours)).toBe(true)
+
+    // The form of a match with a report has no goals: the request holds none.
+    expect(await submit(matchId, form({ 'aftrap-tijd': '19:45' }))).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=opgeslagen`,
+    })
+    expect(await database.db.select().from(matchGoals).orderBy(matchGoals.id)).toEqual(before)
+    expect((await edits())[0]).toMatchObject({ goalsEdited: true })
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.edit', detail: expect.stringContaining('Aftrap:') })
+  })
+
+  it('keeps a match with a report played, and says so at the status', async () => {
+    await withReport()
+
+    const answer = await submit(matchId, form({ status: 'postponed', 'uitslag-wij': '', 'uitslag-zij': '' }))
+
+    expect(answer).toMatchObject({
+      errors: { status: 'Een wedstrijd met een verslag blijft gespeeld. Haal eerst het verslag weg.' },
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ status: 'played' })
   })
 })

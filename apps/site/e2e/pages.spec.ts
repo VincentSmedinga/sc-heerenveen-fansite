@@ -5,7 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
-import { matchId } from './matches'
+import { matchId, playedMatchId } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -197,6 +197,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/999999', status: 404 },
+  // The report of a match: a played match has one, and the notice after an action. A match that
+  // was not played or does not exist says "niet gevonden".
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag', status: 404 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/999999/verslag', status: 404 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden', status: 404 },
   // The stadiums: the list of the clubs with its filter and search, a club with a list of its
   // own and a note (made up, see stadiums.ts), a club without one, and a club that is no club.
@@ -250,6 +258,7 @@ async function withNumbers(path: string) {
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
         .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
         .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '{held}')
+        .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '{played}')
     : path
 }
 

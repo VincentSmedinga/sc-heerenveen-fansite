@@ -9,6 +9,7 @@ import {
   DataTable,
   Filter,
   Heading,
+  Link,
   Notice,
   Page,
   SeasonPicker,
@@ -25,7 +26,7 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
 
-import { listPath, matchesPath, matchPath } from './paths'
+import { listPath, matchesPath, matchPath, reportPath } from './paths'
 
 // Render on each request: who is logged in and which matches have an entry are not known when
 // the site is built.
@@ -141,6 +142,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                 { fold: true, name: 'Competitie' },
                 'Uitslag',
                 'Status',
+                'Verslag',
               ]}
               rows={tableRows(shown)}
             />
@@ -171,6 +173,7 @@ function tableRows(matches: readonly AdminMatchRow[]) {
         competitionOf(match),
         <ResultCell key="uitslag" match={match} />,
         <StatusCell key="status" match={match} />,
+        <ReportCell clubs={clubs} key="verslag" match={match} />,
       ],
       header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
       href: matchPath(match.id),
@@ -182,6 +185,47 @@ const clubsOf = (match: Pick<AdminMatchRow, 'home' | 'opponent'>) =>
   match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
 
 const competitionOf = (match: Pick<AdminMatchRow, 'competition' | 'round'>) => `${match.competition}, ${match.round}`
+
+/**
+ * The state of the report in words: empty, busy (`bezig`), done (`klaar`) or "Controleer" for a
+ * report that was done and does not fit the match any more. The link names the match, since a
+ * column of links says the same thing in every row.
+ */
+function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
+  if (match.status !== 'played') {
+    return (
+      <>
+        <Text aria-hidden="true" as="span">
+          –
+        </Text>
+        <Text as="span" className="hf-visually-hidden">
+          Geen verslag: de wedstrijd is niet gespeeld
+        </Text>
+      </>
+    )
+  }
+
+  const state = match.reportToCheck
+    ? 'Controleer'
+    : match.reportStatus === 'klaar'
+      ? 'Klaar'
+      : match.reportStatus === 'bezig'
+        ? 'Bezig'
+        : 'Leeg'
+
+  return (
+    <>
+      {state === 'Controleer' ? <Tag tone="attention">Controleer</Tag> : state}{' '}
+      <Link href={reportPath(match.id)}>
+        {state === 'Leeg' ? 'Invullen' : 'Openen'}
+        <Text as="span" className="hf-visually-hidden">
+          {' '}
+          verslag van {clubs}
+        </Text>
+      </Link>
+    </>
+  )
+}
 
 /** The score in the order of the match, as the title has the clubs. */
 function ResultCell({ match }: { match: AdminMatchRow }) {

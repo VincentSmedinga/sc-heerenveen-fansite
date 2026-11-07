@@ -1,0 +1,624 @@
+import type { Database } from '@fansite/db/client'
+import type { StoredMatchReport } from '@fansite/db/match-reports'
+import type { Match, MatchGoal } from '@fansite/db/schema'
+
+import { recordAction } from '@fansite/db/audit-log'
+import {
+  clearParts,
+  encodeGoals,
+  encodeMatch,
+  type GoalSnapshot,
+  insertGoals,
+  refreshSnapshot,
+} from '@fansite/db/match-edits'
+import { readMatchReport } from '@fansite/db/match-reports'
+import {
+  matchAppearances,
+  matchCards,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  matchIncidents,
+  matchReports,
+  matchSubstitutions,
+  players,
+} from '@fansite/db/schema'
+import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm'
+
+import type { ReportContext, ReportPlan } from './report-form'
+
+import {
+  emptyRow,
+  emptySide,
+  otherPlayer,
+  type ReportSquadPlayer,
+  type ReportValues,
+  type Row,
+  type Side,
+} from './report-fields'
+import { checkReportForm } from './report-form'
+
+// Reading and writing the match report in the admin: the screen of one match, the report as
+// the form fills it, saving it and taking it away. A report and its row in the log of the
+// admin are one transaction. The goals of the report are the goals of the match
+// (`match_goals`),
+// and saving marks them as the editors' in `match_edits`, so the import leaves them alone.
+
+/** Why a report marks the goals as the editors', in `match_edits` and in the log. */
+export const reportReason = 'Verslag van de wedstrijd'
+
+/** What taking the report away did: it is gone, there was none, or there is no such match. */
+export type RemoveReportOutcome = 'done' | 'missing' | 'none'
+
+/** The match with a report to fill in, with the report and the squad of its season. */
+export type ReportScreen = NonNullable<Awaited<ReturnType<typeof findReportScreen>>>
+
+/** What saving a report did. */
+export type SaveReportOutcome =
+  { status: 'missing' } | { status: 'not-played' } | { status: 'saved' } | { status: 'unchanged' }
+
+/** A player of the squad of the season, with what the report needs of him. */
+type SquadRow = ReportSquadPlayer & { personId: null | number; wikipediaPage: null | string }
+
+/** The context the checks need for a screen. */
+export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): ReportContext {
+  return { match: screen.match, squad: screen.squad }
+}
+
+/**
+ * The match with this number for the report screen: only a match that was played has one, so
+ * any other gives `undefined`, as a match that does not exist. `report` is empty for a match
+ * without a report.
+ */
+export async function findReportScreen(db: Pick<Database, 'select'>, id: number) {
+  const [match] = await db.select().from(matches).where(eq(matches.id, id))
+
+  if (match === undefined || match.status !== 'played') {
+    return undefined
+  }
+
+  return {
+    goals: await db.select().from(matchGoals).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id)),
+    match,
+    report: await readMatchReport(db, id),
+    squad: await readSquad(db, match.season),
+  }
+}
+
+/**
+ * The matches of a season with a report that is `klaar` but no longer right, such as after
+ * Wikipedia changed the result: the list shows them as "Controleer".
+ */
+export async function listReportsToCheck(
+  db: Pick<Database, 'select'>,
+  rows: readonly { id: number; reportStatus: null | string }[],
+): Promise<Set<number>> {
+  const finished = rows.filter((row) => row.reportStatus === 'klaar')
+
+  if (finished.length === 0) {
+    return new Set()
+  }
+
+  const found = await Promise.all(
+    finished.map(async (row) => {
+      const screen = await findReportScreen(db, row.id)
+
+      // A report of a match that is no longer played can not be right.
+      if (screen === undefined) {
+        return row.id
+      }
+
+      return reportErrors(screen.match, screen.report, screen.goals, screen.squad) ? row.id : undefined
+    }),
+  )
+
+  return new Set(found.filter((id) => id !== undefined))
+}
+
+/**
+ * Takes the report away: the rows of the report go, and the goals go back to what they were
+ * before the first entry of the goals, so the import follows Wikipedia for them again. It
+ * writes `match.undo` with the reason in the log. A player who was added for the report stays
+ * in the squad of the season.
+ */
+export async function removeReport(
+  db: Database,
+  userId: number,
+  id: number,
+  reason: string,
+  now = new Date(),
+): Promise<RemoveReportOutcome> {
+  return db.transaction(async (transaction) => {
+    const [match] = await transaction.select({ id: matches.id }).from(matches).where(eq(matches.id, id)).for('update')
+
+    if (match === undefined) {
+      return 'missing'
+    }
+
+    const [report] = await transaction.select().from(matchReports).where(eq(matchReports.matchId, id)).for('update')
+
+    if (report === undefined) {
+      return 'none'
+    }
+
+    // The players, their events and the links of the goals go with the report.
+    await transaction.delete(matchReports).where(eq(matchReports.matchId, id))
+
+    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
+    let restored = false
+
+    if (edit?.goalsEdited === true) {
+      await transaction.delete(matchGoals).where(eq(matchGoals.matchId, id))
+      await insertGoals(transaction, id, JSON.parse(edit.beforeGoals) as GoalSnapshot[])
+      await clearParts(transaction, edit, ['goals'])
+      restored = true
+    }
+
+    await rejectPending(transaction, id, now, ['goals'])
+    await recordAction(
+      transaction,
+      {
+        action: 'match.undo',
+        detail: `Verslag weggehaald${restored ? '; doelpunten teruggezet' : ''}`,
+        itemId: id,
+        reason,
+        userId,
+      },
+      now,
+    )
+
+    return 'done'
+  })
+}
+
+/**
+ * Saves a report that passed the checks (`checkReportForm`): the report, its players, events
+ * and goals in one transaction, the goals marked as the editors', and a line in the log. A
+ * player of ours who is not in the squad of the season gets a row in `players` with the source
+ * `verslag`, or the row with the same name that is there. A save that changes nothing stores
+ * and logs nothing. A change of Wikipedia that waited for the goals is stale: the report
+ * replaces it.
+ */
+export async function saveReport(
+  db: Database,
+  userId: number,
+  id: number,
+  plan: ReportPlan,
+  now = new Date(),
+): Promise<SaveReportOutcome> {
+  return db.transaction(async (transaction) => {
+    const [match] = await transaction.select().from(matches).where(eq(matches.id, id)).for('update')
+
+    if (match === undefined) {
+      return { status: 'missing' } as const
+    }
+    if (match.status !== 'played') {
+      return { status: 'not-played' } as const
+    }
+
+    const squad = await readSquad(transaction, match.season)
+    const known = plan.appearances.map((player) =>
+      player.ours
+        ? squad.find((row) =>
+            player.squadId === null
+              ? row.name.toLocaleLowerCase('nl') === player.name.toLocaleLowerCase('nl')
+              : row.id === player.squadId,
+          )
+        : undefined,
+    )
+    const stored = await readMatchReport(transaction, id)
+
+    if (stored !== undefined && planSignature(plan, known) === storedSignature(stored)) {
+      return { status: 'unchanged' } as const
+    }
+
+    const oldGoals = await transaction
+      .select()
+      .from(matchGoals)
+      .where(eq(matchGoals.matchId, id))
+      .orderBy(asc(matchGoals.id))
+    const row = {
+      opponentComplete: plan.opponentComplete,
+      savedAt: now,
+      savedBy: userId,
+      source: plan.source,
+      status: plan.status,
+    }
+
+    if (stored === undefined) {
+      await transaction.insert(matchReports).values({ ...row, matchId: id })
+    } else {
+      await transaction.update(matchReports).set(row).where(eq(matchReports.matchId, id))
+      // The players of the old report go, with their events.
+      await transaction.delete(matchAppearances).where(eq(matchAppearances.matchId, id))
+    }
+
+    const playerIds: (null | number)[] = []
+    const appearanceIds: number[] = []
+
+    for (const [index, player] of plan.appearances.entries()) {
+      let playerId = known[index]?.id ?? null
+
+      if (player.ours && playerId === null) {
+        const [added] = await transaction
+          .insert(players)
+          .values({
+            name: player.name,
+            searchTerm: searchTermOf(player.name),
+            season: match.season,
+            shirtNumber: player.shirtNumber,
+            source: 'verslag',
+          })
+          .$returningId()
+
+        playerId = added?.id ?? null
+      }
+
+      const [appearance] = await transaction
+        .insert(matchAppearances)
+        .values({
+          captain: player.captain,
+          matchId: id,
+          name: player.name,
+          ours: player.ours,
+          playerId,
+          shirtNumber: player.shirtNumber,
+          starter: player.starter,
+        })
+        .$returningId()
+
+      playerIds.push(playerId)
+      appearanceIds.push(appearance?.id ?? 0)
+    }
+
+    const appearance = (index: number) => appearanceIds[index] ?? 0
+
+    if (plan.substitutions.length > 0) {
+      await transaction.insert(matchSubstitutions).values(
+        plan.substitutions.map((substitution) => ({
+          appearanceInId: appearance(substitution.in),
+          appearanceOutId: appearance(substitution.out),
+          matchId: id,
+          minute: substitution.minute,
+          ours: substitution.ours,
+          stoppageMinutes: substitution.stoppageMinutes,
+        })),
+      )
+    }
+    if (plan.cards.length > 0) {
+      await transaction.insert(matchCards).values(
+        plan.cards.map((card) => ({
+          appearanceId: appearance(card.appearance),
+          kind: card.kind,
+          matchId: id,
+          minute: card.minute,
+          ours: card.ours,
+          stoppageMinutes: card.stoppageMinutes,
+        })),
+      )
+    }
+    if (plan.incidents.length > 0) {
+      await transaction.insert(matchIncidents).values(
+        plan.incidents.map((incident) => ({
+          appearanceId: appearance(incident.appearance),
+          kind: incident.kind,
+          matchId: id,
+          minute: incident.minute,
+          ours: incident.ours,
+          stoppageMinutes: incident.stoppageMinutes,
+        })),
+      )
+    }
+
+    // The goals of the match are the goals of the report. A goal that was there keeps the page
+    // of its scorer, which the report can not give.
+    await transaction.delete(matchGoals).where(eq(matchGoals.matchId, id))
+
+    if (plan.goals.length > 0) {
+      await transaction.insert(matchGoals).values(
+        plan.goals.map((goal) => {
+          const scorer = goal.appearance === null ? undefined : plan.appearances[goal.appearance]
+          const squadRow = goal.appearance === null ? undefined : known[goal.appearance]
+          const before = oldGoals.find(
+            (old) =>
+              old.ours === goal.ours &&
+              old.minute === goal.minute &&
+              old.stoppageMinutes === goal.stoppageMinutes &&
+              old.ownGoal === goal.ownGoal &&
+              old.penalty === goal.penalty &&
+              old.player.toLocaleLowerCase('nl') === goal.name.toLocaleLowerCase('nl'),
+          )
+
+          return {
+            appearanceId: goal.appearance === null ? null : appearance(goal.appearance),
+            assistAppearanceId: goal.assist === null ? null : appearance(goal.assist),
+            matchId: id,
+            minute: goal.minute,
+            ours: goal.ours,
+            ownGoal: goal.ownGoal,
+            penalty: goal.penalty,
+            personId: squadRow?.personId ?? before?.personId ?? null,
+            player: goal.name,
+            // Only a player of ours has a row in `players`.
+            playerId: scorer?.ours === true && goal.appearance !== null ? (playerIds[goal.appearance] ?? null) : null,
+            stoppageMinutes: goal.stoppageMinutes,
+            wikipediaPage: squadRow?.wikipediaPage ?? before?.wikipediaPage ?? null,
+          }
+        }),
+      )
+    }
+
+    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
+
+    if (edit === undefined) {
+      await transaction.insert(matchEdits).values({
+        beforeGoals: encodeGoals(oldGoals),
+        beforeMatch: encodeMatch(match),
+        editedAt: now,
+        editedBy: userId,
+        goalsEdited: true,
+        matchId: id,
+        reason: reportReason,
+      })
+    } else {
+      await transaction
+        .update(matchEdits)
+        .set({
+          editedAt: now,
+          editedBy: userId,
+          goalsEdited: true,
+          reason: reportReason,
+          reportedGoals: null,
+          // A part that comes back after Wikipedia took it over is kept as Wikipedia has it.
+          ...(edit.goalsEdited ? {} : refreshSnapshot(edit, match, oldGoals, ['goals'])),
+        })
+        .where(eq(matchEdits.matchId, id))
+    }
+
+    await rejectPending(transaction, id, now, ['goals'])
+    await recordAction(
+      transaction,
+      { action: 'match.edit', detail: describeReport(plan), itemId: id, reason: reportReason, userId },
+      now,
+    )
+
+    return { status: 'saved' } as const
+  })
+}
+
+/**
+ * The values of the form for the report as it is stored, for the first view of the page. A
+ * match without a report gets a line-up of eleven empty rows for us and the goals of the match
+ * with the name of their scorers, so the editor only has to choose who played.
+ */
+export function valuesOfReport(
+  stored: StoredMatchReport | undefined,
+  goals: readonly MatchGoal[],
+  squad: readonly ReportSquadPlayer[],
+): ReportValues {
+  const values: ReportValues = {
+    bron: stored?.report.source ?? '',
+    status: stored?.report.status ?? 'bezig',
+    tegenstander: stored?.report.opponentComplete === true ? 'ja' : 'nee',
+    wij: emptySide(),
+    zij: emptySide(),
+  }
+  const sideOf = (ours: boolean): Side => (ours ? 'wij' : 'zij')
+  const number = (value: null | number) => (value === null ? '' : String(value))
+  // Where a stored player is in the form: the side and the number of the row.
+  const place = new Map<number, string>()
+
+  if (stored === undefined) {
+    values.wij.speler = Array.from({ length: 11 }, () => emptyRow('speler'))
+  } else {
+    for (const appearance of stored.appearances) {
+      const side = sideOf(appearance.ours)
+      const inSquad = side === 'wij' && squad.some((player) => player.id === appearance.playerId)
+
+      values[side].speler.push({
+        keuze: side === 'wij' ? (inSquad ? String(appearance.playerId) : otherPlayer) : '',
+        naam: inSquad ? '' : appearance.name,
+        rol: appearance.captain ? 'aanvoerder' : appearance.starter ? 'basis' : 'bank',
+        rugnummer: String(appearance.shirtNumber),
+      })
+      place.set(appearance.id, `${side}-${values[side].speler.length}`)
+    }
+  }
+
+  const ref = (id: null | number) => (id === null ? '' : (place.get(id)?.split('-')[1] ?? ''))
+  const refWithSide = (id: null | number) => (id === null ? '' : (place.get(id) ?? ''))
+  const moment = (event: { minute: number; stoppageMinutes: null | number }): Row => ({
+    extra: number(event.stoppageMinutes),
+    minuut: String(event.minute),
+  })
+
+  for (const substitution of stored?.substitutions ?? []) {
+    values[sideOf(substitution.ours)].wissel.push({
+      ...moment(substitution),
+      erin: ref(substitution.appearanceInId),
+      eruit: ref(substitution.appearanceOutId),
+    })
+  }
+  for (const card of stored?.cards ?? []) {
+    values[sideOf(card.ours)].kaart.push({ ...moment(card), soort: card.kind, speler: ref(card.appearanceId) })
+  }
+  for (const incident of stored?.incidents ?? []) {
+    values[sideOf(incident.ours)].strafschop.push({
+      ...moment(incident),
+      soort: incident.kind,
+      speler: ref(incident.appearanceId),
+    })
+  }
+  for (const goal of goals) {
+    values[sideOf(goal.ours)].doelpunt.push({
+      ...moment(goal),
+      assist: refWithSide(goal.assistAppearanceId),
+      naam: goal.appearanceId === null ? goal.player : '',
+      soort: goal.ownGoal ? 'eigen' : goal.penalty ? 'strafschop' : 'gewoon',
+      speler: refWithSide(goal.appearanceId),
+    })
+  }
+
+  return values
+}
+
+/** Describes what the report holds for the log: the numbers of each list. */
+function describeReport(plan: ReportPlan) {
+  const count = (number: number, one: string, many: string) => `${number} ${number === 1 ? one : many}`
+
+  return [
+    `Verslag (${plan.status})`,
+    count(plan.appearances.length, 'speler', 'spelers'),
+    count(plan.substitutions.length, 'wissel', 'wissels'),
+    count(plan.goals.length, 'doelpunt', 'doelpunten'),
+    count(plan.cards.length, 'kaart', 'kaarten'),
+    count(plan.incidents.length, 'strafschop', 'strafschoppen'),
+  ].join(', ')
+}
+
+/** The plan as a text that two plans share when they store the same rows. */
+function planSignature(plan: ReportPlan, known: readonly (undefined | { id: number })[]) {
+  return JSON.stringify({
+    appearances: plan.appearances.map((player, index) => [
+      player.ours,
+      player.ours ? (known[index]?.id ?? `nieuw:${player.name}`) : null,
+      player.name,
+      player.shirtNumber,
+      player.starter,
+      player.captain,
+    ]),
+    cards: plan.cards.map((card) => [card.ours, card.appearance, card.kind, card.minute, card.stoppageMinutes]),
+    goals: plan.goals.map((goal) => [
+      goal.ours,
+      goal.appearance,
+      goal.assist,
+      goal.minute,
+      goal.stoppageMinutes,
+      goal.name,
+      goal.ownGoal,
+      goal.penalty,
+    ]),
+    incidents: plan.incidents.map((incident) => [
+      incident.ours,
+      incident.appearance,
+      incident.kind,
+      incident.minute,
+      incident.stoppageMinutes,
+    ]),
+    opponentComplete: plan.opponentComplete,
+    source: plan.source,
+    status: plan.status,
+    substitutions: plan.substitutions.map((substitution) => [
+      substitution.ours,
+      substitution.out,
+      substitution.in,
+      substitution.minute,
+      substitution.stoppageMinutes,
+    ]),
+  })
+}
+
+/** The squad of a season, as the report needs it: the numbers and the pages of the players. */
+async function readSquad(db: Pick<Database, 'select'>, season: string): Promise<SquadRow[]> {
+  return db
+    .select({
+      id: players.id,
+      name: players.name,
+      personId: players.personId,
+      shirtNumber: players.shirtNumber,
+      wikipediaPage: players.wikipediaPage,
+    })
+    .from(players)
+    .where(eq(players.season, season))
+    .orderBy(asc(players.shirtNumber), asc(players.name))
+}
+
+/**
+ * Lets a change of Wikipedia go that waited for these parts of the match or for the match as a
+ * whole: the report is a newer word than that change.
+ */
+async function rejectPending(
+  db: Pick<Database, 'update'>,
+  matchId: number,
+  now: Date,
+  parts: ('goals' | 'kickoff' | 'result')[],
+) {
+  await db
+    .update(matchChanges)
+    .set({ decidedAt: now, resolution: 'replaced', status: 'rejected' })
+    .where(
+      and(
+        eq(matchChanges.matchId, matchId),
+        eq(matchChanges.status, 'pending'),
+        or(isNull(matchChanges.part), inArray(matchChanges.part, parts)),
+      ),
+    )
+}
+
+/** Whether a stored report has an error: it was `klaar`, and the rules no longer agree. */
+function reportErrors(
+  match: Match,
+  report: StoredMatchReport | undefined,
+  goals: readonly MatchGoal[],
+  squad: readonly ReportSquadPlayer[],
+) {
+  const values = valuesOfReport(report, goals, squad)
+
+  return Object.keys(checkReportForm(values, { match, squad }).errors).length > 0
+}
+
+/**
+ * The search term of a name, the name without the first given name, as the importer works it
+ * out for a player of the squad table (`Joost van Aken` gives `van Aken`).
+ */
+function searchTermOf(name: string) {
+  const words = name.split(/\s+/u).filter((word) => word !== '')
+
+  return words.length < 2 ? words.join(' ') : words.slice(1).join(' ')
+}
+
+/** The stored report as the same text, so a save that changes nothing can be seen. */
+function storedSignature(stored: StoredMatchReport) {
+  const place = new Map(stored.appearances.map((appearance, index) => [appearance.id, index]))
+  const at = (id: null | number) => (id === null ? null : (place.get(id) ?? null))
+
+  return JSON.stringify({
+    appearances: stored.appearances.map((appearance) => [
+      appearance.ours,
+      appearance.ours ? appearance.playerId : null,
+      appearance.name,
+      appearance.shirtNumber,
+      appearance.starter,
+      appearance.captain,
+    ]),
+    cards: stored.cards.map((card) => [card.ours, at(card.appearanceId), card.kind, card.minute, card.stoppageMinutes]),
+    goals: stored.goals.map((goal) => [
+      goal.ours,
+      at(goal.appearanceId),
+      at(goal.assistAppearanceId),
+      goal.minute,
+      goal.stoppageMinutes,
+      goal.player,
+      goal.ownGoal,
+      goal.penalty,
+    ]),
+    incidents: stored.incidents.map((incident) => [
+      incident.ours,
+      at(incident.appearanceId),
+      incident.kind,
+      incident.minute,
+      incident.stoppageMinutes,
+    ]),
+    opponentComplete: stored.report.opponentComplete,
+    source: stored.report.source,
+    status: stored.report.status,
+    substitutions: stored.substitutions.map((substitution) => [
+      substitution.ours,
+      at(substitution.appearanceOutId),
+      at(substitution.appearanceInId),
+      substitution.minute,
+      substitution.stoppageMinutes,
+    ]),
+  })
+}
