@@ -25,6 +25,12 @@ export type BuiltMatchPage = {
   pitch: { opponent: MatchPitchTeam | undefined; ours: MatchPitchTeam }
   /** The goals of the score bar. */
   scoreBar: MatchScoreBarGoal[]
+  /**
+   * Whether the goals of the report add up to the result of the match. A report that is not
+   * complete may have fewer goals than the result, and a bar that says 0–0 over a match that
+   * ended 2–0 would say something false: the page leaves it out then.
+   */
+  scoreBarAgrees: boolean
   scorersAgainst: MatchHeaderScorer[]
   scorersFor: MatchHeaderScorer[]
   /** The rounds of the shoot-out, from the first. Empty for a match without kicks. */
@@ -334,6 +340,9 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
   const byId = new Map(data.players.map((player) => [player.id, player]))
   const ours = teamOf(data, byId, true)
   const theirs = teamOf(data, byId, false)
+  const scoreBar = data.goals
+    .filter((goal) => byId.has(goal.playerId))
+    .map((goal) => ({ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes }))
 
   return {
     events: eventsOf(data, byId),
@@ -343,9 +352,10 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
         : undefined,
       ours: { formation: data.formations.ours, name: ourClub, players: ours.starters },
     },
-    scoreBar: data.goals
-      .filter((goal) => byId.has(goal.playerId))
-      .map((goal) => ({ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes })),
+    scoreBar,
+    scoreBarAgrees:
+      scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+      scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst,
     scorersAgainst: scorersOf(data, byId, false),
     scorersFor: scorersOf(data, byId, true),
     series: roundsOf(data, byId),

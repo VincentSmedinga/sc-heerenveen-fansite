@@ -3150,6 +3150,7 @@
   - **De lezers:** `listReportedMatches` en `findReportedMatch` geven een verslag met elke status, met de status in `stored.report.status`, en `isCompleteReport` in `src/report-data.ts` beslist of het klaar is en klopt.
   - **De gegevens:** `MatchPageData` heeft `complete`, en `MatchPageHeader` zet de melding boven de kaart van de kop, voor de pagina en voor het voorbeeld.
     Een rugnummer dat twee keer staat in een verslag dat nog wordt ingevuld, staat één keer op het veld.
+    De balk Wedstrijdverloop staat er alleen als de doelpunten van het verslag optellen tot de uitslag: een verslag dat nog wordt ingevuld kan minder doelpunten hebben, en een balk met 0–0 boven een wedstrijd die 2–0 eindigde, zou iets onwaars zeggen.
   - **De controle in de browser:** `pnpm test:a11y` heeft een verzonnen verslag dat `bezig` is (`e2e/incomplete-report.ts`), dat de controles voor het eerste testen in de database zetten en daarna weghalen, omdat een verslag dat `bezig` is de links op andere pagina's verandert.
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat de pagina alleen voor een klaar verslag bestaat: het adres, de `slug` en de sitemap voor klare verslagen blijven.
 

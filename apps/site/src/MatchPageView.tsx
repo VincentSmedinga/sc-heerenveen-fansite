@@ -130,7 +130,9 @@ export function MatchPageHeader({ data, preview = false, titleId = 'titel' }: Pa
           scorersAgainst={built.scorersAgainst}
           scorersFor={built.scorersFor}
         />
-        <MatchScoreBar extraTime={data.extraTime} goals={built.scoreBar} headingLevel={levelOf(2, preview)} />
+        {built.scoreBarAgrees ? (
+          <MatchScoreBar extraTime={data.extraTime} goals={built.scoreBar} headingLevel={levelOf(2, preview)} />
+        ) : null}
       </Card>
     </>
   )

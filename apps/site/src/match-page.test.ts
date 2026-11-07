@@ -268,3 +268,17 @@ describe('a highlighted event', () => {
     expect(events.filter((event) => event.highlighted !== true)).toHaveLength(3)
   })
 })
+
+describe('the score bar and the result', () => {
+  it('agree when the goals of the report add up to the result', () => {
+    expect(built().scoreBarAgrees).toBe(true)
+  })
+
+  it('do not agree when the report has fewer goals than the result, such as a report still being filled in', () => {
+    const changed = data()
+
+    changed.goals = changed.goals.slice(0, 1)
+
+    expect(buildMatchPage(changed).scoreBarAgrees).toBe(false)
+  })
+})

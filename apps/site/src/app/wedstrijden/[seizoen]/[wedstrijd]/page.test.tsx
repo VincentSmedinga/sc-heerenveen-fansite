@@ -220,13 +220,13 @@ describe('the page of a match', () => {
     expect(plain(await render())).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
   })
 
-  /** The made-up match with extra time: 2–2 after extra time, 1–1 after 90 minutes. */
+  /** The made-up match with extra time: 2–1 after extra time, 1–1 after 90 minutes. */
   const withExtraTime = (reported = reportedMatch()) => {
     Object.assign(reported.match, {
       afterNinetyAgainst: 1,
       afterNinetyFor: 1,
       extraTime: true,
-      goalsAgainst: 2,
+      goalsAgainst: 1,
       goalsFor: 2,
     })
     reported.stored.cards.push({
@@ -266,7 +266,7 @@ describe('the page of a match', () => {
   it('shows the card Strafschoppenserie with a table of the rounds after a shoot-out', async () => {
     const reported = withExtraTime()
 
-    Object.assign(reported.match, { goalsAgainst: 2, goalsFor: 2, penaltiesAgainst: 3, penaltiesFor: 4 })
+    Object.assign(reported.match, { penaltiesAgainst: 3, penaltiesFor: 4 })
     reported.stored.shootout = [
       { appearanceId: 9, id: 1, matchId: 7, ours: true, outcome: 'raak', round: 1 },
       { appearanceId: 109, id: 2, matchId: 7, ours: false, outcome: 'gestopt', round: 1 },
@@ -278,7 +278,7 @@ describe('the page of a match', () => {
     const text = plain(html)
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toContain('Strafschoppenserie')
-    expect(text).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
+    expect(text).toContain('Na strafschoppen 4–3 (na verlenging 2–1)')
     expect(text).toContain('Strafschoppenserie, stand 1–0')
     expect(text).toContain('Raak: Rick Demo')
     expect(text).toContain('Gestopt: Frank Dummydijk')
@@ -295,7 +295,7 @@ describe('the page of a match', () => {
 
     const html = await render()
 
-    expect(plain(html)).toContain('Na strafschoppen 4–3 (na verlenging 2–2)')
+    expect(plain(html)).toContain('Na strafschoppen 4–3 (na verlenging 2–1)')
     expect(plain(html)).toContain('Gewonnen')
     expect(html).not.toContain('Strafschoppenserie')
   })
@@ -323,6 +323,23 @@ describe('the page of a match', () => {
     )
     expect(text.indexOf('We vullen dit verslag nog in')).toBeLessThan(text.indexOf('Eindstand'))
     expect(text.indexOf('We vullen dit verslag nog in')).toBeLessThan(text.indexOf('Opstelling'))
+  })
+
+  it('has the score bar for a report that is klaar, and leaves it out when the goals of the report do not add up to the result', async () => {
+    expect(await render()).toContain('hf-match-score-bar')
+
+    const reported = reportedMatch()
+
+    reported.stored.report.status = 'bezig'
+    reported.stored.goals = reported.stored.goals.slice(0, 1)
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+
+    expect(html).not.toContain('hf-match-score-bar')
+    expect(plain(html)).not.toContain('Wedstrijdverloop')
+    // The result comes from the match, so it stands.
+    expect(plain(html)).toContain('Eindstand: 2 tegen 1')
   })
 
   it('has the notice for a report that was klaar and no longer follows the rules', async () => {
