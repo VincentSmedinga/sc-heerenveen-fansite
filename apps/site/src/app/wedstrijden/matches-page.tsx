@@ -251,9 +251,8 @@ async function lastFiveOfSeason(data: MatchData) {
 
 /**
  * The addresses of the pages of the matches of a season, for the links in the results. A page
- * is
- * more than a link: when they can't be read, the results are shown without links and the error
- * is logged.
+ * is more than a link: when they can't be read, the results are shown without links and the
+ * error is logged.
  */
 async function reportAddressesOf(season: string) {
   try {

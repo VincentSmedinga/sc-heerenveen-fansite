@@ -58,9 +58,8 @@ export type PlayerReportStats = {
 /**
  * A played match with a report that is `klaar`, for the page of the match and the links to it:
  * the match with the name its opponent had that day, the `slug` of the opponent, the report,
- * and
- * the names of our players by the id of their row in the report. Whether the report is right is
- * for the caller to check with `checkMatchReport`.
+ * and the names of our players by the id of their row in the report. Whether the report is
+ * right is for the caller to check with `checkMatchReport`.
  */
 export type ReportedMatch = {
   clubSlug: string
@@ -100,8 +99,7 @@ export type SeasonMatchReport = Pick<
 /**
  * A report as it is stored: the report itself, the players, and the events in the order of the
  * clock, and for the same minute the order of `id`. `goals` are the goals of the match, with
- * the
- * players of the report they point to. `rules` is the same report as the rules read it.
+ * the players of the report they point to. `rules` is the same report as the rules read it.
  */
 export type StoredMatchReport = {
   appearances: MatchAppearance[]
@@ -178,8 +176,7 @@ export function matchForRules(match: Pick<Match, 'extraTime' | 'goalsAgainst' | 
 
 /**
  * The report of a match, or `undefined` when it has none. Whatever its status: a page decides
- * for
- * itself whether it shows a report that is still `bezig`.
+ * for itself whether it shows a report that is still `bezig`.
  */
 export async function readMatchReport(db: ReportDatabase, matchId: number): Promise<StoredMatchReport | undefined> {
   const [report] = await db.select().from(matchReports).where(eq(matchReports.matchId, matchId))

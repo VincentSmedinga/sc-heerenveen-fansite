@@ -51,9 +51,8 @@ export type MatchProps =
         goalsFor: number
         /**
          * The address of the page of this match, when it has one: a page exists for a match
-         * with
-         * a report. The line then ends with the link "Het verslag". Leave it out for a match
-         * without a page, which is plain text.
+         * with a report. The line then ends with the link "Het verslag". Leave it out for a
+         * match without a page, which is plain text.
          */
         reportHref?: string | undefined
         resultMissing?: never
@@ -195,9 +194,9 @@ const separator = (
  * the order a screen reader reads.
  *
  * The two clubs are in the order they are announced, the home club first, and the stadium says
- * where it is played; the line does not say "Thuis" or "Uit". A played match has the
- * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
- * "2 tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
+ * where it is played; the line does not say "Thuis" or "Uit". A played match has the result
+ * between the names, as "2–0" seen from the home club's side, and a screen reader hears "2
+ * tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
  * score, as "(4–2 n.s.)" in the order of the clubs; a screen reader hears the full words after
  * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". When the score after 90 minutes is
  * known it follows "n.v." in brackets, as "2–1 n.v. (1–1)", and a shoot-out then follows after
@@ -206,15 +205,14 @@ const separator = (
  * a win, red for a loss and neutral for a draw, whichever side it played on, and in a shoot-out
  * the colour follows the shoot-out. The goals say the same, so a screen reader hears nothing
  * extra. A match that is still to be played has a dash between the names, which is read as
- * "tegen".
- * A postponed match says "Uitgesteld" where the time would be, and a cancelled one, which will
- * not be played any more, says "Geannuleerd" in the same place and the same way, with no
- * result and no line about missing data. A match that has begun long ago
- * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
- * line, under the other lines, in a muted red, and not bold. The words are the sign;
- * the colour only adds to them. A `note` is one more line of plain text at the very end, in the
- * small text of the other lines, for the match that needs a word more, such as "Gestaakt
- * in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
+ * "tegen". A postponed match says "Uitgesteld" where the time would be, and a cancelled one,
+ * which will not be played any more, says "Geannuleerd" in the same place and the same way,
+ * with no result and no line about missing data. A match that has begun long ago and has no
+ * result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last line, under the
+ * other lines, in a muted red, and not bold. The words are the sign; the colour only adds to
+ * them. A `note` is one more line of plain text at the very end, in the small text of the other
+ * lines, for the match that needs a word more, such as "Gestaakt in minuut 82. Het restant is
+ * op 11 mei gespeeld in het Abe Lenstra Stadion."
  *
  * The scorers of a played match are one line under the clubs, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The

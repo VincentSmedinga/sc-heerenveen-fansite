@@ -48,18 +48,12 @@ const sides = (home: boolean, ours: number, theirs: number, dash: string) =>
 /**
  * The head of the page of a match: the two clubs with the result between them, the way it went
  * on in words under it when there was extra time or a shoot-out, and the facts of the match as
- * a
- * list of terms and values. The home club is first and the first number is its, as in a
- * `Match`.
- * The result has the colour of the outcome for sc Heerenveen, from the classes of match.css,
- * and
- * a screen reader hears "3 tegen 0". The words under the result are written out, so they need
- * no
- * abbreviation: "Na verlenging. Na 90 minuten 1–1. Na strafschoppen 5–4." The heading of the
- * page
- * is not part of it: the page has the `h1`, and this stands under it. match-header.css gives it
- * its
- * look.
+ * a list of terms and values. The home club is first and the first number is its, as in a
+ * `Match`. The result has the colour of the outcome for sc Heerenveen, from the classes of
+ * match.css, and a screen reader hears "3 tegen 0". The words under the result are written out,
+ * so they need no abbreviation: "Na verlenging. Na 90 minuten 1–1. Na strafschoppen 5–4." The
+ * heading of the page is not part of it: the page has the `h1`, and this stands under it.
+ * match-header.css gives it its look.
  */
 export const MatchHeader = ({
   afterNinetyAgainst,

@@ -18,7 +18,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { anchorProblems, publishedAnchors } from '../src/anchors.ts'
+import { anchorProblems, matchPageAnchors, publishedAnchors } from '../src/anchors.ts'
 import { iconCache, themeScriptCache } from '../src/cache-headers.ts'
 import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
@@ -331,6 +331,15 @@ async function checkAnchors() {
     ...publishedAnchors,
     '/updates': [...new Set([...(publishedAnchors['/updates'] ?? []), ...versions])],
   }
+  // The page of a match has the same anchors whatever its address, and its address depends on
+  // the day, so it comes from the sitemap: the first match that has a page.
+  const sitemap = await (await fetch(`${origin}/sitemap.xml`)).text()
+  const matchPage = [...sitemap.matchAll(/<loc>[^<]*?(\/wedstrijden\/\d{4}-\d{2}\/[^<]+)<\/loc>/g)][0]?.[1]
+
+  if (matchPage !== undefined) {
+    published[matchPage] = [...matchPageAnchors]
+  }
+
   const problems = []
 
   for (const [page, anchors] of Object.entries(published)) {

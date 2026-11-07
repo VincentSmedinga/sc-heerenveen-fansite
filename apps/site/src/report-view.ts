@@ -17,11 +17,9 @@ export function minuteWords(minute: number, stoppageMinutes: null | number) {
 
 /**
  * The name of a player of the report in the two parts `PlayerName` shows. A player of ours
- * takes
- * the name the importer kept of his person, and otherwise the search term of his row in
- * `players`
- * as the surname when the name ends with it. A player of the opponent, or one we know no parts
- * of, is one name in the normal weight: nothing is guessed.
+ * takes the name the importer kept of his person, and otherwise the search term of his row in
+ * `players` as the surname when the name ends with it. A player of the opponent, or one we know
+ * no parts of, is one name in the normal weight: nothing is guessed.
  */
 export function nameOfPlayer(name: string, known: ReportedPlayerName | undefined): MatchPlayerName {
   if (known === undefined) {

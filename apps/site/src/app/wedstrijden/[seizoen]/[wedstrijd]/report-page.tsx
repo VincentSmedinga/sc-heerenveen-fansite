@@ -68,8 +68,7 @@ const clubsOf = ({ match }: ReportedMatch) => (match.home ? [ourClub, match.oppo
 
 /**
  * The title, the description and the canonical address of the page of a match. The title and
- * the
- * description name the clubs, the result and the day. A match without a page has none.
+ * the description name the clubs, the result and the day. A match without a page has none.
  */
 export async function reportMetadata(seizoen: string, wedstrijd: string): Promise<Metadata> {
   const loaded = await loadReport(seizoen, wedstrijd)
@@ -105,15 +104,11 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
 
 /**
  * The page of one match: the clubs and the result with the facts of the match, the course of
- * the
- * match (goals with their assists, substitutions, cards and missed penalties in the order of
- * the
- * clock), and the line-ups with the bench. The line-up of the opponent is there when its side
- * of
- * the report is complete, and otherwise one sentence says so. The credit follows, in the
- * sidebar:
- * Wikipedia for the result and the goals, and our own records for the rest. A match without a
- * page, and an address that is not one, are the page "niet gevonden".
+ * the match (goals with their assists, substitutions, cards and missed penalties in the order
+ * of the clock), and the line-ups with the bench. The line-up of the opponent is there when its
+ * side of the report is complete, and otherwise one sentence says so. The credit follows, in
+ * the sidebar: Wikipedia for the result and the goals, and our own records for the rest. A
+ * match without a page, and an address that is not one, are the page "niet gevonden".
  */
 export async function ReportPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadReport(seizoen, slug)

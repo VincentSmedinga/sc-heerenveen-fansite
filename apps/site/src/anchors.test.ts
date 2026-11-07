@@ -1,7 +1,7 @@
 import { isAnchorId, isOldAnchorId } from '@fansite/design-system'
 import { describe, expect, it } from 'vitest'
 
-import { anchorProblems, publishedAnchors } from './anchors'
+import { anchorProblems, matchPageAnchors, publishedAnchors } from './anchors'
 
 /** A heading with an anchor, as the Heading of the design system draws it. */
 const heading = (id: string, old: readonly string[] = []) =>
@@ -19,6 +19,11 @@ describe('the published anchors', () => {
         expect(isOldAnchorId(anchor), `${page}#${anchor}`).toBe(true)
       }
     }
+  })
+
+  it('are on the page of a match too, in Dutch and without a double', () => {
+    expect(new Set(matchPageAnchors).size).toBe(matchPageAnchors.length)
+    expect(matchPageAnchors.every((anchor) => isAnchorId(anchor))).toBe(true)
   })
 
   it('follow the rules for an anchor, except the old ones that came before them', () => {

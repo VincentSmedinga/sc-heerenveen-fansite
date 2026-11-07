@@ -6,8 +6,7 @@ import type { Match, MatchAppearance } from '@fansite/db/schema'
  * Read it with the afternoon of Friday 30 October 2026 (Dutch time) as now. It is a home match
  * against Testdorp FC, won 2–1, with an assist, a missed penalty, a penalty of the opponent, an
  * own goal of the opponent, a substitution of both teams and a yellow card. Our players have
- * the
- * ids 1 to 13 (the first eleven are in the line-up) and the opponent 101 to 112.
+ * the ids 1 to 13 (the first eleven are in the line-up) and the opponent 101 to 112.
  */
 
 const match: Match = {
