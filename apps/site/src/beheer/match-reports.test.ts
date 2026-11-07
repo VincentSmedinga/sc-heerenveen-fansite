@@ -13,6 +13,7 @@ import {
   matchGoals,
   matchIncidents,
   matchReports,
+  matchShootoutKicks,
   matchSubstitutions,
   type NewMatch,
   persons,
@@ -281,6 +282,47 @@ describe('saveReport', () => {
     expect((await goalsOf()).every((row) => row.appearanceId !== null || row.player === 'Sibbing')).toBe(true)
   })
 
+  it('keeps the shoot-out when the report is saved again, with the new rows of its players', async () => {
+    await save(report())
+
+    const appearancesOf = async () => database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id))
+    const nine = (await appearancesOf()).find((row) => row.ours && row.shirtNumber === 9)
+    const fourteen = (await appearancesOf()).find((row) => row.ours && row.shirtNumber === 14)
+
+    await database.db.insert(matchShootoutKicks).values([
+      { appearanceId: nine?.id ?? null, matchId, ours: true, outcome: 'raak', round: 1 },
+      { appearanceId: fourteen?.id ?? null, matchId, ours: true, outcome: 'gestopt', round: 2 },
+      { appearanceId: null, matchId, ours: false, outcome: 'naast', round: 1 },
+    ])
+
+    // A new save: the players get new rows, and the player with shirt 14 is gone.
+    const rows = report().wij.speler.map((row) => ({ ...row }))
+
+    rows[13] = { ...emptyRow('speler'), keuze: otherPlayer, naam: 'Nieuwe Speler', rol: 'bank', rugnummer: '40' }
+    await save(report({ wij: { speler: rows, wissel: [substitution({ erin: '12', eruit: '11', minuut: '60' })] } }), t1)
+
+    const newNine = (await appearancesOf()).find((row) => row.ours && row.shirtNumber === 9)
+    const kicks = await database.db
+      .select()
+      .from(matchShootoutKicks)
+      .orderBy(asc(matchShootoutKicks.round), asc(matchShootoutKicks.id))
+
+    expect(newNine?.id).not.toBe(nine?.id)
+    expect(kicks.map((kick) => [kick.round, kick.ours, kick.appearanceId, kick.outcome])).toEqual([
+      [1, true, newNine?.id, 'raak'],
+      [1, false, null, 'naast'],
+      [2, true, null, 'gestopt'],
+    ])
+    // The kicks are not part of the report that is compared: saving it again changes nothing.
+    expect(
+      await save(
+        report({ wij: { speler: rows, wissel: [substitution({ erin: '12', eruit: '11', minuut: '60' })] } }),
+        t1,
+      ),
+    ).toEqual({ status: 'unchanged' })
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(3)
+  })
+
   it('adds a player who is not in the squad to the squad with the source verslag, once, and takes the row with his name if there is one', async () => {
     const rows = report().wij.speler.map((row) => ({ ...row }))
 
@@ -532,8 +574,11 @@ describe('removeReport', () => {
     await wikipediaGoals()
     await save(report({ wij: { wissel: [substitution({ erin: '12', eruit: '11', minuut: '60' })] } }))
 
+    await database.db.insert(matchShootoutKicks).values({ matchId, ours: false, outcome: 'raak', round: 1 })
+
     expect(await removeReport(database.db, userId, matchId, 'Het was een proef', t1)).toBe('done')
     expect(await database.db.select().from(matchReports)).toHaveLength(0)
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(0)
     expect(await database.db.select().from(matchAppearances)).toHaveLength(0)
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(0)
     expect(await edits()).toHaveLength(0)

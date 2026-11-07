@@ -21,6 +21,7 @@ import {
   matchGoals,
   matchIncidents,
   matchReports,
+  matchShootoutKicks,
   matchSubstitutions,
   players,
 } from '@fansite/db/schema'
@@ -233,9 +234,18 @@ export async function saveReport(
       await transaction.insert(matchReports).values({ ...row, matchId: id })
     } else {
       await transaction.update(matchReports).set(row).where(eq(matchReports.matchId, id))
-      // The players of the old report go, with their events.
+      // The players of the old report go, with their events. The kicks go too and come back
+      // below, since a kick without a player would stay behind.
+      await transaction.delete(matchShootoutKicks).where(eq(matchShootoutKicks.matchId, id))
       await transaction.delete(matchAppearances).where(eq(matchAppearances.matchId, id))
     }
+
+    // The shoot-out is not part of the form or the paste (#844), so the kicks of the old report
+    // stay. They point to their player by team and shirt number, since the rows are new.
+    const keptKicks = (stored?.shootout ?? []).map((kick) => ({
+      kick,
+      shirt: stored?.appearances.find((player) => player.id === kick.appearanceId)?.shirtNumber ?? null,
+    }))
 
     const playerIds: (null | number)[] = []
     const appearanceIds: number[] = []
@@ -311,6 +321,24 @@ export async function saveReport(
           ours: incident.ours,
           stoppageMinutes: incident.stoppageMinutes,
         })),
+      )
+    }
+
+    if (keptKicks.length > 0) {
+      await transaction.insert(matchShootoutKicks).values(
+        keptKicks.map(({ kick, shirt }) => {
+          const index = plan.appearances.findIndex(
+            (player) => player.ours === kick.ours && player.shirtNumber === shirt,
+          )
+
+          return {
+            appearanceId: index === -1 ? null : appearance(index),
+            matchId: id,
+            ours: kick.ours,
+            outcome: kick.outcome,
+            round: kick.round,
+          }
+        }),
       )
     }
 

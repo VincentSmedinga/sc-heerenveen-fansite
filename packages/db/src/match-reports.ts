@@ -13,6 +13,7 @@ import type {
   MatchIncident,
   MatchReport,
   MatchReportStatus,
+  MatchShootoutKick,
   MatchSubstitution,
   StatsCompetition,
 } from './schema.ts'
@@ -27,6 +28,7 @@ import {
   matchGoals,
   matchIncidents,
   matchReports,
+  matchShootoutKicks,
   matchSubstitutions,
   persons,
   players,
@@ -117,7 +119,10 @@ export type SeasonMatchReport = Pick<
 /**
  * A report as it is stored: the report itself, the players, and the events in the order of the
  * clock, and for the same minute the order of `id`. `goals` are the goals of the match, with
- * the players of the report they point to. `rules` is the same report as the rules read it.
+ * the players of the report they point to. `shootout` holds the kicks of the penalty shoot-out
+ * in the order of the rounds, our kick before the kick of the opponent in the same round; it is
+ * empty for a match without kicks. A kick points to its player like a card does, and `names`
+ * of a `ReportedMatch` has the name of our players.
  */
 export type StoredMatchReport = {
   appearances: MatchAppearance[]
@@ -125,6 +130,7 @@ export type StoredMatchReport = {
   goals: MatchGoal[]
   incidents: MatchIncident[]
   report: MatchReport
+  shootout: MatchShootoutKick[]
   substitutions: MatchSubstitution[]
 }
 
@@ -273,11 +279,15 @@ export async function logReportGoalDifferences(
 }
 
 /** The match in the shape the rules read. */
-export function matchForRules(match: Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' | 'status'>): ReportMatch {
+export function matchForRules(
+  match: Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'>,
+): ReportMatch {
   return {
     extraTime: match.extraTime,
     goalsAgainst: match.goalsAgainst,
     goalsFor: match.goalsFor,
+    penaltiesAgainst: match.penaltiesAgainst,
+    penaltiesFor: match.penaltiesFor,
     status: match.status,
   }
 }
@@ -293,12 +303,13 @@ export async function readMatchReport(db: ReportDatabase, matchId: number): Prom
     return undefined
   }
 
-  const [appearances, substitutions, cards, incidents, goals] = await Promise.all([
+  const [appearances, substitutions, cards, incidents, goals, shootout] = await Promise.all([
     db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId)).orderBy(asc(matchAppearances.id)),
     db.select().from(matchSubstitutions).where(eq(matchSubstitutions.matchId, matchId)),
     db.select().from(matchCards).where(eq(matchCards.matchId, matchId)),
     db.select().from(matchIncidents).where(eq(matchIncidents.matchId, matchId)),
     db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId)),
+    db.select().from(matchShootoutKicks).where(eq(matchShootoutKicks.matchId, matchId)),
   ])
 
   return {
@@ -307,6 +318,7 @@ export async function readMatchReport(db: ReportDatabase, matchId: number): Prom
     goals: goals.toSorted(onTheClock),
     incidents: incidents.toSorted(onTheClock),
     report,
+    shootout: shootout.toSorted(byRound),
     substitutions: substitutions.toSorted(onTheClock),
   }
 }
@@ -512,6 +524,12 @@ export function reportForRules(stored: StoredMatchReport): ReportForRules {
       stoppageMinutes: incident.stoppageMinutes,
     })),
     opponentComplete: stored.report.opponentComplete,
+    shootout: stored.shootout.map((kick) => ({
+      appearanceId: kick.appearanceId,
+      ours: kick.ours,
+      outcome: kick.outcome,
+      round: kick.round,
+    })),
     status: stored.report.status,
     substitutions: stored.substitutions.map((substitution) => ({
       inId: substitution.appearanceInId,
@@ -520,6 +538,11 @@ export function reportForRules(stored: StoredMatchReport): ReportForRules {
       stoppageMinutes: substitution.stoppageMinutes,
     })),
   }
+}
+
+/** The order of a shoot-out: the rounds, and in a round our kick before the opponent's. */
+function byRound(a: MatchShootoutKick, b: MatchShootoutKick) {
+  return a.round - b.round || Number(b.ours) - Number(a.ours) || a.id - b.id
 }
 
 /**
@@ -573,13 +596,14 @@ async function readStoredReports(db: ReportDatabase, ids: number[]) {
     return new Map<number, StoredMatchReport>()
   }
 
-  const [reports, appearances, substitutions, cards, incidents, goals] = await Promise.all([
+  const [reports, appearances, substitutions, cards, incidents, goals, shootout] = await Promise.all([
     db.select().from(matchReports).where(inArray(matchReports.matchId, ids)),
     db.select().from(matchAppearances).where(inArray(matchAppearances.matchId, ids)).orderBy(asc(matchAppearances.id)),
     db.select().from(matchSubstitutions).where(inArray(matchSubstitutions.matchId, ids)),
     db.select().from(matchCards).where(inArray(matchCards.matchId, ids)),
     db.select().from(matchIncidents).where(inArray(matchIncidents.matchId, ids)),
     db.select().from(matchGoals).where(inArray(matchGoals.matchId, ids)),
+    db.select().from(matchShootoutKicks).where(inArray(matchShootoutKicks.matchId, ids)),
   ])
   const ofMatch = <T extends { matchId: number }>(rows: T[], id: number) => rows.filter((row) => row.matchId === id)
 
@@ -592,6 +616,7 @@ async function readStoredReports(db: ReportDatabase, ids: number[]) {
         goals: ofMatch(goals, report.matchId).toSorted(onTheClock),
         incidents: ofMatch(incidents, report.matchId).toSorted(onTheClock),
         report,
+        shootout: ofMatch(shootout, report.matchId).toSorted(byRound),
         substitutions: ofMatch(substitutions, report.matchId).toSorted(onTheClock),
       },
     ]),

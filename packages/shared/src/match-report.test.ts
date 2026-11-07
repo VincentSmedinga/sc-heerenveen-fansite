@@ -25,7 +25,19 @@ function team(ours: boolean, firstId: number) {
   }))
 }
 
-const match: ReportMatch = { extraTime: false, goalsAgainst: 1, goalsFor: 2, status: 'played' }
+const match: ReportMatch = {
+  extraTime: false,
+  goalsAgainst: 1,
+  goalsFor: 2,
+  penaltiesAgainst: null,
+  penaltiesFor: null,
+  status: 'played',
+}
+
+// A cup match that ended 1–1 after extra time, and was decided 4–3 on penalties.
+const cupMatch: ReportMatch = { ...match, extraTime: true, goalsFor: 1, penaltiesAgainst: 3, penaltiesFor: 4 }
+
+type Kick = NonNullable<MatchReport['shootout']>[number]
 
 /** The report with the change that `change` makes to a copy of it. */
 function changed(change: (report: MatchReport) => void) {
@@ -73,6 +85,172 @@ function valid(): MatchReport {
     ],
   }
 }
+
+/** The report of the cup match: 1–1, and five rounds of kicks that end 4–3. */
+function withShootout(change: (kicks: Kick[], report: MatchReport) => void = () => {}) {
+  const report = valid()
+
+  report.goals.pop()
+  report.shootout = [
+    { appearanceId: 1, ours: true, outcome: 'raak', round: 1 },
+    { appearanceId: 101, ours: false, outcome: 'raak', round: 1 },
+    { appearanceId: 2, ours: true, outcome: 'raak', round: 2 },
+    { appearanceId: 102, ours: false, outcome: 'gestopt', round: 2 },
+    { appearanceId: 3, ours: true, outcome: 'naast', round: 3 },
+    { appearanceId: 103, ours: false, outcome: 'raak', round: 3 },
+    { appearanceId: 5, ours: true, outcome: 'raak', round: 4 },
+    { appearanceId: 104, ours: false, outcome: 'naast', round: 4 },
+    { appearanceId: 15, ours: true, outcome: 'raak', round: 5 },
+    { appearanceId: 106, ours: false, outcome: 'raak', round: 5 },
+  ]
+  change(report.shootout, report)
+
+  return report
+}
+
+describe('the shoot-out', () => {
+  it('passes kicks that add up to the result of the series, without a warning', () => {
+    expect(checkMatchReport(withShootout(), cupMatch)).toEqual({ errors: [], warnings: [] })
+  })
+
+  it('passes a report without kicks, with or without a result of the series', () => {
+    const report = withShootout()
+
+    delete report.shootout
+    expect(checkMatchReport(report, cupMatch).errors).toEqual([])
+    expect(checkMatchReport({ ...report, shootout: [] }, cupMatch).errors).toEqual([])
+    expect(checkMatchReport(report, { ...cupMatch, penaltiesAgainst: null, penaltiesFor: null }).errors).toEqual([])
+  })
+
+  it('passes a series with a team that kicked one more, and a kicker of the opponent without a player', () => {
+    const report = withShootout((kicks) => {
+      kicks.pop()
+      kicks[7]!.appearanceId = null
+    })
+    const result = { ...cupMatch, penaltiesAgainst: 2 }
+
+    expect(codes(report, result)).toEqual(['shootout-kick-without-player'])
+    expect(codes({ ...report, opponentComplete: false }, result)).toEqual([])
+  })
+
+  it('wants the result of the series of the match', () => {
+    expect(codes(withShootout(), { ...cupMatch, penaltiesAgainst: null, penaltiesFor: null })).toEqual([
+      'shootout-without-score',
+    ])
+  })
+
+  it('wants the kicks that went in to add up to the result, for each team', () => {
+    expect(codes(withShootout(), { ...cupMatch, penaltiesFor: 5 })).toEqual(['shootout-differs-from-score'])
+    expect(codes(withShootout(), { ...cupMatch, penaltiesAgainst: 2 })).toEqual(['shootout-differs-from-score'])
+    expect(checkMatchReport(withShootout(), { ...cupMatch, penaltiesFor: 5 }).errors[0]?.message).toBe(
+      'De schoten van sc Heerenveen geven 4 raak en de uitslag van de serie is 5–3. Pas de schoten of de uitslag aan.',
+    )
+  })
+
+  it('wants the rounds of a team to run from 1 without a gap or a repeat', () => {
+    const start = withShootout((kicks) => kicks.forEach((kick) => kick.ours && kick.round++))
+    const gap = withShootout((kicks) => {
+      kicks.find((kick) => kick.ours && kick.round === 3)!.round = 6
+    })
+    const repeat = withShootout((kicks) => {
+      kicks.find((kick) => !kick.ours && kick.round === 4)!.round = 3
+    })
+
+    expect(codes(start, cupMatch)).toEqual(['shootout-rounds-not-in-order'])
+    expect(codes(gap, cupMatch)).toEqual(['shootout-rounds-not-in-order'])
+    expect(codes(repeat, cupMatch)).toEqual(['shootout-rounds-not-in-order'])
+  })
+
+  it('lets the teams differ by one kick, and not by two', () => {
+    const one = withShootout((kicks) => {
+      kicks.pop()
+    })
+    const two = withShootout((kicks) => {
+      kicks.splice(-3, 3, ...kicks.slice(-2, -1))
+    })
+
+    expect(codes(one, { ...cupMatch, penaltiesAgainst: 2 })).toEqual([])
+    expect(two.shootout?.filter((kick) => !kick.ours)).toHaveLength(3)
+    expect(codes(two, { ...cupMatch, penaltiesAgainst: 2 })).toEqual(['shootout-teams-differ'])
+  })
+
+  it('does not let a player kick twice', () => {
+    const report = withShootout((kicks) => {
+      kicks.find((kick) => kick.ours && kick.round === 5)!.appearanceId = 1
+    })
+
+    expect(codes(report, cupMatch)).toEqual(['shootout-player-twice'])
+  })
+
+  it('does not take a kicker who is not in the report, or of the other team', () => {
+    const unknown = withShootout((kicks) => {
+      kicks[0]!.appearanceId = 999
+    })
+    const other = withShootout((kicks) => {
+      kicks[0]!.appearanceId = 101
+      kicks[1]!.appearanceId = 1
+    })
+
+    expect(codes(unknown, cupMatch)).toEqual(['unknown-player'])
+    expect(checkMatchReport(unknown, cupMatch).errors[0]).toMatchObject({
+      place: { index: 0, part: 'shootout' },
+      structural: true,
+    })
+    expect(codes(other, cupMatch)).toEqual(['shootout-player-other-team', 'shootout-player-other-team'])
+  })
+
+  it('wants a player for every kick of a complete side, and for ours always', () => {
+    const theirs = withShootout((kicks) => {
+      kicks[1]!.appearanceId = null
+    })
+    const ours = withShootout((kicks) => {
+      kicks[0]!.appearanceId = null
+    })
+
+    expect(codes(theirs, cupMatch)).toEqual(['shootout-kick-without-player'])
+    expect(codes({ ...theirs, opponentComplete: false }, cupMatch)).toEqual([])
+    expect(codes({ ...ours, opponentComplete: false }, cupMatch)).toEqual(['shootout-kick-without-player'])
+  })
+
+  it('warns about a kicker who was not on the pitch at the end, and does not block for it', () => {
+    // Player 4 was sent off in minute 80, 11 went off in minute 60, and 12 never came on.
+    for (const id of [4, 11, 12]) {
+      const report = withShootout((kicks) => {
+        kicks[0]!.appearanceId = id
+      })
+      const { errors, warnings } = checkMatchReport(report, cupMatch)
+
+      expect(errors).toEqual([])
+      expect(warnings).toEqual([
+        expect.objectContaining({ code: 'shootout-player-not-on-pitch', place: { index: 0, part: 'shootout' } }),
+      ])
+    }
+  })
+
+  it('blocks a report that is klaar for the series, and a report that is bezig only for the structure', () => {
+    const wrong = withShootout()
+
+    wrong.status = 'bezig'
+    expect(blockingIssues(wrong, { ...cupMatch, penaltiesFor: 5 })).toEqual([])
+    expect(blockingIssues({ ...wrong, status: 'klaar' }, { ...cupMatch, penaltiesFor: 5 })).toHaveLength(1)
+
+    const unknown = withShootout((kicks) => {
+      kicks[0]!.appearanceId = 999
+    })
+
+    unknown.status = 'bezig'
+    expect(blockingIssues(unknown, cupMatch).map((issue) => issue.code)).toEqual(['unknown-player'])
+  })
+
+  it('does not count a kick as a goal or as minutes', () => {
+    const report = withShootout()
+
+    expect(minutesPlayed(report, cupMatch, 15)).toBe(minutesPlayed({ ...report, shootout: [] }, cupMatch, 15))
+    expect(checkMatchReport(report, cupMatch).errors.map((issue) => issue.code)).not.toContain(
+      'goals-differ-from-score',
+    )
+  })
+})
 
 describe('checkMatchReport', () => {
   it('passes a report that follows every rule, without a warning', () => {

@@ -1510,7 +1510,8 @@ export const matchReportLimits = { formation: 20, lastMinute: 120, source: 100, 
  * The report of a played match: who played, who came on, the cards, the assists and the missed
  * penalties, which the Dutch Wikipedia does not give. We keep it ourselves, by typing over what
  * we can check. One row for each match, and it goes with the match. The rest of the report is
- * in `match_appearances`, `match_substitutions`, `match_cards` and `match_incidents`, and the
+ * in `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents` and
+ * `match_shootout_kicks`, and the
  * goals are those of `match_goals`, which point to the players of the report. There is one row
  * for each fact, so a number on a page and the report cannot differ.
  *
@@ -1725,6 +1726,56 @@ export const matchIncidents = mysqlTable(
 export type MatchIncident = typeof matchIncidents.$inferSelect
 
 export type NewMatchIncident = typeof matchIncidents.$inferInsert
+
+/** What came of a kick in a shoot-out: it went in, it missed, or the goalkeeper stopped it. */
+export const shootoutOutcomes = ['raak', 'naast', 'gestopt'] as const
+
+export type ShootoutOutcome = (typeof shootoutOutcomes)[number]
+
+/** The last round of a shoot-out the database accepts. The rules of a report do not need it. */
+export const shootoutLimits = { lastRound: 50 } as const
+
+/**
+ * A kick in the penalty shoot-out of a match with a report (#844): the team (`ours`), the round
+ * (`1` is the first kick of each team), the player who took it and what came of it. One kick
+ * for each team in each round. The player is empty for an opponent whose side of the report is
+ * not complete, as with a goal; the rules of a report check that. A kick is not a goal: it
+ * counts for no goals of the match or of the player, and not for the minutes. The result of the
+ * series is `penalties_for` and `penalties_against` of the match, which the rules check the
+ * kicks against. The order in which the teams kicked is not kept. The kicks go with the report.
+ */
+export const matchShootoutKicks = mysqlTable(
+  'match_shootout_kicks',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matchReports.matchId, { onDelete: 'cascade' }),
+    ours: boolean('ours').notNull(),
+    round: int('round', { unsigned: true }).notNull(),
+    appearanceId: int('appearance_id', { unsigned: true }),
+    outcome: mysqlEnum('outcome', shootoutOutcomes).notNull(),
+  },
+  (table) => [
+    // With the match and the team, the kick cannot name a player of another match or of the
+    // other team. A kick without a player has no key to check.
+    foreignKey({
+      columns: [table.appearanceId, table.matchId, table.ours],
+      foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
+      name: 'match_shootout_kicks_appearance_fk',
+    }).onDelete('cascade'),
+    unique('match_shootout_kicks_match_side_round_unique').on(table.matchId, table.ours, table.round),
+    index('match_shootout_kicks_appearance_id_idx').on(table.appearanceId),
+    check(
+      'match_shootout_kicks_round_range',
+      sql`${table.round} between 1 and ${sql.raw(String(shootoutLimits.lastRound))}`,
+    ),
+  ],
+)
+
+export type MatchShootoutKick = typeof matchShootoutKicks.$inferSelect
+
+export type NewMatchShootoutKick = typeof matchShootoutKicks.$inferInsert
 
 /**
  * The health of the squad import, one row per season, in the same words as `match_imports`:

@@ -257,21 +257,24 @@ De import wist een markering als Wikipedia hetzelfde heeft, en de rij als er gee
 
 ## De tabellen van een verslag
 
-Het verslag van een gespeelde wedstrijd: wie speelde, wie viel in en uit, de kaarten, de gemiste strafschoppen en de assists.
+Het verslag van een gespeelde wedstrijd: wie speelde, wie viel in en uit, de kaarten, de gemiste strafschoppen, de assists en de schoten van een strafschoppenserie.
 We houden het zelf bij, want de Nederlandse Wikipedia heeft het niet.
 Het wordt ingevuld in het beheer (#829), geplakt (#830) en getoond op de pagina van de wedstrijd (#831) en bij de spelers (#832).
 De regels die zeggen of een verslag klopt, staan in `@fansite/shared/match-report`, niet in de database.
 
-| Tabel                 | Wat een rij is                                                                                                                                                                                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `match_reports`       | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `formation_ours` en `formation_opponent` (de formatie van elk team, zoals `4-3-3`, of leeg), `saved_by` en `saved_at` |
-| `match_appearances`   | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                                                                                                                    |
-| `match_substitutions` | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                                                                                                                  |
-| `match_cards`         | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                                                                                                                    |
-| `match_incidents`     | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                                                                                                                          |
+| Tabel                  | Wat een rij is                                                                                                                                                                                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `match_reports`        | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `formation_ours` en `formation_opponent` (de formatie van elk team, zoals `4-3-3`, of leeg), `saved_by` en `saved_at` |
+| `match_appearances`    | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                                                                                                                    |
+| `match_substitutions`  | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                                                                                                                  |
+| `match_cards`          | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                                                                                                                    |
+| `match_incidents`      | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                                                                                                                          |
+| `match_shootout_kicks` | Een schot in de strafschoppenserie: `ours`, `round` (1 is het eerste schot van elk team), `appearance_id` (leeg bij een tegenstander wiens kant niet af is) en `outcome` (`raak`, `naast` of `gestopt`)                                                              |
 
 `match_goals` heeft er twee kolommen bij: `appearance_id` (de speler die scoorde) en `assist_appearance_id` (de assist), leeg bij een doelpunt zonder verslag.
 Er is geen kolom voor de minuten die een speler speelde: `minutesPlayed` rekent ze uit de wissels en de rode kaarten.
+De uitslag van de serie blijft `penalties_for` en `penalties_against` van de wedstrijd; de regels van het verslag controleren dat het aantal raak geschoten ballen per team daarmee klopt.
+Een schot in de serie is geen doelpunt en telt niet bij de minuten, en het verslag opnieuw opslaan bewaart de schoten.
 De formatie is een tekst van getallen met een koppelteken ertussen (`4-3-3`): de database houdt alleen die vorm vast (twee checks).
 Dat de getallen samen tien zijn, de veldspelers zonder de keeper, is een regel van het verslag (`formationProblem` in `@fansite/shared/match-report`).
 
@@ -297,6 +300,8 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 - `findReportGoalDifferences(db, season)` en `logReportGoalDifferences(db, season, userId)` vergelijken de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is, en schrijven een verschil als `player.stats-differ` in het logboek (#832), als de importer nieuwe cijfers in de tabel zet (zonder account) en als de redactie een verslag als `klaar` opslaat.
 
 De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzonnen verslag voor beide teams, dat zonder fout of waarschuwing door de regels komt.
+Een tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale: met verlenging, wissels en kaarten tot minuut 120 en een strafschoppenserie die we met 4–3 wonnen.
+`readMatchReport` geeft de schoten van de serie mee als `shootout`, en `listReportedMatches` en `findReportedMatch` ook, voor de pagina van de wedstrijd.
 
 ## De tabel `articles`
 
@@ -852,7 +857,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);

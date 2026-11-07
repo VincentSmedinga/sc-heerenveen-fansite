@@ -5,7 +5,15 @@ import { report as baseReport, goal, squadOf, substitution } from './report-fixt
 import { checkReportForm, errorOrder, type ReportMatch } from './report-form'
 
 const squad = squadOf(100)
-const match: ReportMatch = { extraTime: false, goalsAgainst: 1, goalsFor: 2, opponent: 'N.E.C.', status: 'played' }
+const match: ReportMatch = {
+  extraTime: false,
+  goalsAgainst: 1,
+  goalsFor: 2,
+  opponent: 'N.E.C.',
+  penaltiesAgainst: null,
+  penaltiesFor: null,
+  status: 'played',
+}
 const context = { match, squad }
 const report = (overrides: Parameters<typeof baseReport>[1] = {}) => baseReport(squad, overrides)
 

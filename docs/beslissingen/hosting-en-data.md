@@ -620,6 +620,7 @@
 - **Alternatieven:** één tabel met gebeurtenissen met veel lege kolommen (een wissel, een kaart en een doelpunt hebben elk andere velden, en de database kan dan weinig afdwingen); minuten opslaan naast de wissels (twee plekken die uit elkaar kunnen lopen).
 - **Later:** zie _De formatie van een team staat in het verslag, en de regel ervoor staat bij de regels van het verslag_ (7 november 2026): #828 liet de formatie buiten het verslag, en dat deed #840 erbij.
   `match_reports` heeft sindsdien `formation_ours` en `formation_opponent`.
+- **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): het verslag heeft sindsdien een zesde tabel, `match_shootout_kicks`, met de schoten van de serie.
 
 ## De regels voor een verslag staan op één plek, in `packages/shared`
 
@@ -650,6 +651,7 @@
   - De regels zijn de lijst hierboven; de codes staan in `packages/shared/src/match-report.ts`.
 - **Waarom:** precisie is het doel van deze bron, en een regel die op drie plekken staat, wordt op één ervan vergeten.
 - **Alternatieven:** de regels in het beheer en nog eens in de database en de pagina (drie plekken om bij te houden); alles wat kan als check in de database (MariaDB kan een check niet op een kolom die op leeg gaat, en een verslag dat `bezig` is moet fouten mogen hebben).
+- **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): de lijst van fouten en waarschuwingen hierboven heeft er sindsdien de regels van de serie bij, en `ReportMatch` de uitslag van de serie.
 
 ## Minuten gespeeld tellen op de klok, in hele minuten
 
@@ -711,3 +713,42 @@
 - **Waarom:** de formatie hoort bij de opstelling van het team en niet bij een speler, en het verslag is de plek waar die ene bron voor de pagina en de cijfers staat.
   Eén functie voor de regel houdt het formulier, het plakscherm en de pagina gelijk.
 - **Alternatieven:** de formatie als aparte tabel (een rij per team voor één tekst); elf als som, met de keeper (de projecteigenaar koos tien); de regel in de database als check (MariaDB rekent geen som uit een tekst).
+
+## De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie
+
+- **Datum:** 7 november 2026
+- **Besluit:** het verslag bewaart de schoten van een strafschoppenserie in een tabel `match_shootout_kicks` (#844).
+  De uitslag van de serie blijft in `penalties_for` en `penalties_against` van de wedstrijd staan, en de regels van het verslag controleren de schoten daartegen.
+  - **De serie bepaalt de uitslag niet:** een verslag met een serie is alleen klaar als het aantal raak geschoten ballen per team gelijk is aan de uitslag van de serie.
+    De import en alle cijfers lezen die uitslag al, en Wikipedia houdt de uitslag terwijl het verslag de rest houdt.
+  - **Een serie is niet verplicht:** een bekerwedstrijd met een uitslag van de serie maar zonder bekende schoten kan toch klaar zijn.
+    De pagina toont dan alleen de regel in de kop.
+  - **Een schot in een serie is geen doelpunt:** het telt niet bij de doelpunten van de wedstrijd of van de speler, en niet bij de minuten.
+    In de statistiek tellen strafschoppen in de serie nergens als doelpunt, en de uitslag van de wedstrijd staat zonder de serie.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **De tabel:** één rij per schot, met `match_id`, `ours`, `round` (1 is het eerste schot van elk team), `appearance_id` en `outcome` (`raak`, `naast` of `gestopt`).
+    Een team schiet één keer per ronde (`unique` op wedstrijd, team en ronde), en de ronde ligt tussen 1 en 50.
+    De speler wijst met `match_id`, `ours` en `appearance_id` naar één rij van `match_appearances`, zoals een kaart.
+    De speler mag leeg zijn, voor een tegenstander wiens kant niet af is.
+    Een samengestelde sleutel met een lege kolom wordt niet gecontroleerd, dus leeg kan.
+    De volgorde waarin de teams schoten, bewaren we niet.
+  - **De regels:** `checkMatchReport` en `blockingIssues` krijgen `shootout` in het verslag, en `ReportMatch` krijgt `penaltiesFor` en `penaltiesAgainst`.
+    Fouten (alleen bij een verslag met schoten): `shootout-without-score`, `shootout-differs-from-score`, `shootout-rounds-not-in-order`, `shootout-teams-differ`, `shootout-player-twice`, `shootout-kick-without-player`, `shootout-player-other-team` en `unknown-player`.
+    Waarschuwing: `shootout-player-not-on-pitch`, voor een speler die aan het einde niet op het veld stond.
+    Alleen `unknown-player` is structureel: een verslag dat nog bezig is, mag de andere fouten hebben.
+  - **De lezers:** `readMatchReport` en de lezers van de pagina geven `shootout` mee, op volgorde van de rondes en in een ronde ons schot voor dat van de tegenstander.
+    De naam van de speler staat bij `appearances` en in `names`, zoals bij de rest van het verslag.
+    `readPlayerReportStats` leest de schoten niet.
+  - **Opslaan:** het formulier en het plakscherm kennen de serie nog niet (#852), dus een nieuw opslaan van het verslag bewaart de schoten van het oude verslag.
+    Een schot wijst naar zijn speler op team en rugnummer, want de rijen van de spelers zijn nieuw; staat het rugnummer er niet meer, dan is het schot zonder speler en zegt de regel dat.
+    Het formulier controleert de bewaarde schoten nog niet mee; de lijst met wedstrijden zegt wel "Controleer" bij een verslag dat niet meer klopt.
+  - **Verwijderen en de back-up:** het verslag weghalen haalt de schoten mee weg, en een wedstrijd die verdwijnt ook.
+    De tabel staat niet in `structureOnlyTables`, want de rijen zijn ons eigen werk.
+  - **De migratie:** `0048_add_shootout_kicks` voegt alleen toe en kan opnieuw draaien.
+    Terugdraaien kan door de tabel weg te halen; alleen de schoten gaan dan verloren.
+  - **De seed:** het tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale, die al een verlenging en een uitslag van de serie had (4–3).
+    Het heeft wissels en kaarten tot minuut 120 en tien schoten.
+    Een nieuwe verzonnen wedstrijd was niet nodig en had de cijfers van de andere pagina's veranderd.
+- **Waarom:** de pagina van een wedstrijd (#848, #850) toont wie schoot en wat er van kwam, en het formulier (#852) moet het kunnen invullen.
+  Eén uitslag van de serie, die van de wedstrijd, houdt de import, de cijfers en het verslag gelijk.
+- **Alternatieven:** de serie bepaalt de uitslag (minder typen, maar dan bezit het verslag een uitslag die de rest van de site leest); de serie verplicht stellen (dan kan een wedstrijd waarvan we de schoten niet kennen geen verslag krijgen); de schoten in `match_incidents` zetten (een schot heeft een ronde en geen minuut); de volgorde van de teams bewaren (de pagina heeft haar niet nodig).
