@@ -598,7 +598,8 @@
   - `match_substitutions`, `match_cards` en `match_incidents`: wie eruit en erin gaat, een kaart (`geel`, `geel-rood` of `rood`) en een gemiste of gestopte strafschop (`strafschop-gemist` of `strafschop-gestopt`, bij de nemer), elk met minuut en blessuretijd.
     Een soort kost geen tabel.
   - `match_goals` krijgt `appearance_id` (de speler die scoorde) en `assist_appearance_id` (de assist), leeg bij een doelpunt zonder verslag.
-  - Er is geen kolom voor de minuten die een speler speelde. Ze volgen uit de wissels en de rode kaarten, zodat ze nooit afwijken van de gebeurtenissen.
+  - Er is geen kolom voor de minuten die een speler speelde.
+    Ze volgen uit de wissels en de rode kaarten, zodat ze nooit afwijken van de gebeurtenissen.
 - **Keuzes bij het bouwen** (7 november 2026):
   - **Wat de database afdwingt:** een gebeurtenis wijst met `match_id`, `ours` en de speler naar één rij van `match_appearances` (een samengestelde sleutel), dus naar een speler van dezelfde wedstrijd en hetzelfde team.
     Een rugnummer staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen.
