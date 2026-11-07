@@ -197,13 +197,13 @@ describe('the formation in the form of a report', () => {
       withFormation(
         { eigen: '4-3-4', keuze: 'anders' },
         {
-          'formatie-wij': 'Formatie van sc Heerenveen: kies een formatie uit de lijst, Anders, of niets.',
+          'formatie-wij': 'Formatie van sc Heerenveen: Kies een formatie uit de lijst, Anders, of niets.',
           'formatie-wij-eigen': 'Formatie van sc Heerenveen: De getallen van de formatie tellen op tot 11.',
         },
       ),
     )
 
-    expect(document.getElementById('formatie-wij-error')?.textContent).toContain('kies een formatie uit de lijst')
+    expect(document.getElementById('formatie-wij-error')?.textContent).toContain('Kies een formatie uit de lijst')
     expect(document.getElementById('formatie-wij-eigen-error')?.textContent).toContain('tellen op tot 11')
     expect(document.getElementById('formatie-wij-eigen')?.getAttribute('aria-invalid')).toBe('true')
     expect(document.getElementById('formatie-wij-eigen')?.getAttribute('aria-describedby')).toBe(

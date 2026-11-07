@@ -188,7 +188,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     const own = side === 'wij' ? 'ours' : 'opponent'
 
     if (keuze === otherFormation) {
-      const problem = eigen === '' ? 'schrijf de formatie, zoals 4-3-3.' : formationProblem(eigen)
+      const problem = eigen === '' ? 'Schrijf de formatie, zoals 4-3-3.' : formationProblem(eigen)
 
       if (problem === undefined) {
         formations[own] = eigen
@@ -201,7 +201,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       formations[own] = keuze
     } else if (keuze !== '') {
       parseFailed = true
-      fail(formationId(side), `Formatie van ${team}: kies een formatie uit de lijst, Anders, of niets.`)
+      fail(formationId(side), `Formatie van ${team}: Kies een formatie uit de lijst, Anders, of niets.`)
     }
   }
 

@@ -480,7 +480,7 @@ describe('checkReportForm for the formations', () => {
   it('asks for the formation when Anders is chosen and the text is empty', () => {
     const checked = checkReportForm(withFormations({ eigen: '', keuze: 'anders' }), context)
 
-    expect(checked.errors['formatie-wij-eigen']).toBe('Formatie van sc Heerenveen: schrijf de formatie, zoals 4-3-3.')
+    expect(checked.errors['formatie-wij-eigen']).toBe('Formatie van sc Heerenveen: Schrijf de formatie, zoals 4-3-3.')
     expect(checked.plan).toBeUndefined()
   })
 
@@ -498,7 +498,7 @@ describe('checkReportForm for the formations', () => {
     const checked = checkReportForm(withFormations({ keuze: '4-3-4' }), context)
 
     expect(checked.errors['formatie-wij']).toBe(
-      'Formatie van sc Heerenveen: kies een formatie uit de lijst, Anders, of niets.',
+      'Formatie van sc Heerenveen: Kies een formatie uit de lijst, Anders, of niets.',
     )
   })
 
