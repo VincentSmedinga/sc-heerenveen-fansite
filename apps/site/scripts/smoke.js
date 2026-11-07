@@ -19,6 +19,7 @@ import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { anchorProblems, publishedAnchors } from '../src/anchors.ts'
+import { iconCache, themeScriptCache } from '../src/cache-headers.ts'
 import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
 import { anchorOf, dateOf, oldAnchorOf, releasesOf } from '../src/updates.ts'
@@ -519,6 +520,10 @@ async function checkIcons() {
   assert.equal(svg.status, 200)
   assert.equal(svg.headers.get('content-type'), 'image/svg+xml')
   assert.match(await svg.text(), /^<svg /)
+  // The files in public/ have no hash in their name, so a short cache (src/cache-headers.ts).
+  assert.equal(svg.headers.get('cache-control'), iconCache)
+  assert.equal(favicon.headers.get('cache-control'), iconCache)
+  assert.equal((await fetch(`${origin}/theme.js`)).headers.get('cache-control'), themeScriptCache)
 
   return [...responses, appleIcon, favicon, svg]
 }
@@ -781,6 +786,33 @@ await withEmptyDatabase((database) =>
     assert.equal(home.status, 200)
     assert.match(html, /<html data-scroll-behavior="smooth" lang="nl"/)
     assert.equal(home.headers.get('x-powered-by'), null)
+
+    // A page is made on each request and sends nothing for a cache between the server and the
+    // visitor: such a cache would keep the proxy from running, so the visits would not be
+    // counted (#799). The files of /_next/static have a name from their content, so a year and
+    // immutable. The admin is `no-store` (checked with the admin pages below).
+    for (const path of ['/', '/nieuws', '/wedstrijden', '/spelers', '/bronnen']) {
+      const cacheControl = (await fetch(`${origin}${path}`)).headers.get('cache-control') ?? ''
+
+      assert.doesNotMatch(cacheControl, /s-maxage|stale-while-revalidate|stale-if-error/, `${path}: ${cacheControl}`)
+      assert.match(cacheControl, /no-store|no-cache|max-age=0/, `${path} is cached: ${cacheControl}`)
+      assert.doesNotMatch(cacheControl, /(?:^|,\s*)public(?:,|$)/, `${path} may be kept by a station: ${cacheControl}`)
+    }
+
+    for (const pattern of [
+      /\/_next\/static\/[^"')]+\.js/,
+      /\/_next\/static\/[^"')]+\.css/,
+      /\/_next\/static\/media\/[^"')]+\.woff2/,
+    ]) {
+      const file = pattern.exec(html)?.[0]
+
+      assert.ok(file, `the homepage has no file for ${pattern}`)
+      assert.equal(
+        (await fetch(`${origin}${file}`)).headers.get('cache-control'),
+        'public, max-age=31536000, immutable',
+        file,
+      )
+    }
 
     // The homepage reads the items from the database, and the seed has none. So it says there
     // is no news yet.

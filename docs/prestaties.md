@@ -203,3 +203,67 @@ De tijdcontroles melden alleen, tot de eigenaar de budgetten vaststelt (`decideO
 De beslissing en de redenen staan in `docs/beslissingen/werkwijze.md`, onder _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_.
 Een runner van GitHub meet niet vanuit Nederland en niet op dezelfde machine, dus de tijden wijken af van de nulmeting.
 Vergelijk de tijden van de runs met elkaar, en de nulmeting met de runs alleen voor gewicht en aantallen.
+
+## Waar de antwoordtijd zit (#799)
+
+Het rapport van 6 november 2026 vanuit de VS had 800 ms tot de eerste byte van de homepage.
+Vanuit Nederland is dat 36 tot 107 ms.
+Dit is gemeten op 7 november 2026, met dezelfde opdracht, op acceptatie, vóór de wijziging van #799.
+
+TTFB in milliseconden, de middelste van drie runs met Lighthouse 13.6.0:
+
+| Pagina                        | Apparaat   | Nulmeting (6 november) | 7 november |
+| ----------------------------- | ---------- | ---------------------- | ---------- |
+| Homepage                      | mobiel     | 47                     | 47         |
+| Homepage                      | bureaublad | 44                     | 41         |
+| Archief, pagina 1 (`/nieuws`) | mobiel     | 64                     | 45         |
+| Archief, pagina 1 (`/nieuws`) | bureaublad | 59                     | 54         |
+| Artikel van de redactie       | mobiel     | 40                     | 36         |
+| Artikel van de redactie       | bureaublad | 50                     | 36         |
+
+De wijziging van #799 raakt geen pagina, dus de TTFB erna is dezelfde.
+De dagelijkse controle (zie hierboven) laat hem verder zien.
+De cijfers veranderen binnen de ruis van een run: een enkele run kan 60 of 100 ms zijn.
+
+Met `curl` is te zien waar de tijd zit.
+Elke waarde is de middelste van 15 verzoeken, in milliseconden na het aankomen van het verzoek (zonder verbinding en TLS), met `DNT: 1`:
+
+| Verzoek                                                                         | Eerste byte |
+| ------------------------------------------------------------------------------- | ----------- |
+| Homepage                                                                        | 41          |
+| `/nieuws`                                                                       | 43          |
+| Artikel van de redactie                                                         | 39          |
+| `/bronnen`                                                                      | 40          |
+| Een bestand dat de host zelf geeft (`/icon.svg`, `/robots.txt`, een lettertype) | 28 tot 32   |
+
+- **Afstand:** de verbinding opzetten kost 20 ms (en 20 ms voor TLS) vanuit Nederland.
+  Vanuit de VS zijn dat drie of vier keer zoveel rondjes van ongeveer 150 ms, dus afstand verklaart de 800 ms bijna helemaal.
+- **De applicatie:** een pagina komt ongeveer 10 tot 15 ms later dan een bestand van dezelfde host.
+  Dat is het maken van de pagina, met de koppen uit het geheugen van de server (vijf minuten, zie _De koppen staan vijf minuten in het geheugen van de server_ in `docs/beslissingen/site.md`).
+- **Het tellen van bezoeken:** een verzoek met `DNT: 1` telt niet, en een zonder wel.
+  De eerste byte is bij beide gelijk (41 en 42 ms voor de homepage, 43 en 44 ms voor `/nieuws`), want het tellen gebeurt na het antwoord.
+- **De proxy:** het zetten van de headers is niet te meten naast de rest.
+- **De database:** de koppen komen uit het geheugen, dus bijna elk verzoek raakt hem niet.
+  Het enige verzoek dat opviel was het eerste op `/spelers`, met 122 ms, wat past bij het vullen van dat geheugen.
+- **Koude start:** niet gezien in deze metingen.
+  De applicatie draaide steeds al.
+
+De conclusie is dat weinig van de tijd van ons is.
+Er is daarom niets weggehaald aan de pagina's.
+
+### De cache van bestanden
+
+Wat Next.js en de host al sturen, vóór de wijziging:
+
+| Wat                                                  | Cache-Control                                             |
+| ---------------------------------------------------- | --------------------------------------------------------- |
+| Een pagina                                           | `private, no-cache, no-store, max-age=0, must-revalidate` |
+| `/beheer`                                            | `no-store`                                                |
+| `/_next/static` (scripts, stijlen en lettertypes)    | `public, max-age=31536000, immutable`                     |
+| De bestanden in `public/` (pictogrammen, `theme.js`) | `public, max-age=0`                                       |
+
+De bestanden in `public/` hebben geen hash in hun naam.
+Met `max-age=0` vraagt een browser bij elke pagina of ze veranderd zijn, ook `theme.js`, dat het eerste tekenen blokkeert.
+Nu: de pictogrammen en het plaatje voor gedeelde links een dag, en `theme.js` een uur (`apps/site/src/cache-headers.ts`).
+De rest blijft zoals hij was.
+Een pagina krijgt geen `s-maxage`, en de rooktest controleert dat, en dat het beheer `no-store` houdt.

@@ -3039,6 +3039,26 @@
   Headers via `.htaccess` of `next.config.ts` (verworpen: de headers staan al in de proxy en blijven op één plek).
 - **Let op:** niet in dit besluit: `Strict-Transport-Security`, want HTTPS en zijn headers zijn van de host.
 
+## Eerst meten, bestanden zonder hash een korte cache, pagina's niets voor tussenstations
+
+- **Datum:** 7 november 2026
+- **Besluit:** de antwoordtijd is gemeten vanuit Nederland (zie `docs/prestaties.md`, onder _Waar de antwoordtijd zit_) en bijna alles daarvan is afstand en host: een pagina komt 10 tot 15 ms later dan een bestand van dezelfde host, de eerste byte is 36 tot 54 ms, en het tellen van bezoeken kost niets merkbaars, want het gebeurt na het antwoord (#799).
+  Daarom is er niets aan de pagina's veranderd.
+  - **Bestanden zonder hash:** de bestanden in `public/` krijgen via `headers` in `next.config.ts` een korte cache: de pictogrammen en het plaatje voor gedeelde links een dag (`public, max-age=86400`), `theme.js` een uur (`public, max-age=3600`).
+    `src/cache-headers.ts` heeft de lijst en een test eist een regel voor elk bestand in `public/`.
+  - **Wat al goed was:** `/_next/static`, met de scripts, de stijlen en de lettertypes, heeft `public, max-age=31536000, immutable` van Next.js.
+    Dat blijft zoals het is.
+  - **Pagina's:** geen `s-maxage`, `stale-while-revalidate` of `public`.
+    De beheerpagina's houden `no-store` van de proxy.
+    De rooktest controleert beide, en dat `/_next/static` een jaar en `immutable` houdt.
+- **Waarom:** een cache vóór de site laat de proxy niet draaien, dus bezoeken tellen niet meer (`/beheer/bezoek` klopt dan niet), we weten niet of de host zo'n cache heeft, en nieuws moet snel op de site staan.
+  De 800 ms van het rapport was afstand vanuit de VS.
+  Een bestand zonder hash kan onder hetzelfde adres veranderen, dus het krijgt geen jaar en geen `immutable`.
+  `theme.js` blokkeert het tekenen: met `max-age=0` wacht elke pagina op de vraag of het bestand veranderd is.
+- **Alternatieven:** een korte `s-maxage` (onderschat het aantal bezoeken, en helpt alleen met een cache die we niet kennen); de pagina's statisch maken (de koppen komen uit de database en ISR en `'use cache'` vielen eerder af); de cache van de bestanden in de proxy zetten, zoals de beveiligingsheaders (die zijn een besluit per verzoek, dit is een vaste lijst per pad, en `headers` in `next.config.ts` is wat Next.js daarvoor biedt); een jaar en `immutable` voor `theme.js` en de pictogrammen (een wijziging bereikt een bezoeker dan een jaar niet).
+- **Later:** dit raakt _Geen frames en geen vensters met een opener: `frame-ancestors 'none'`, `X-Frame-Options: DENY` en COOP `same-origin`_ (6 november 2026) niet: die headers blijven in de proxy.
+  De cache van bestanden staat in `next.config.ts`, omdat het een lijst per pad is.
+
 ## De bouw weet welke browsers we ondersteunen: een `browserslist` gelijk aan Baseline 'widely available'
 
 - **Datum:** 7 november 2026
