@@ -5,6 +5,7 @@ import {
   Card,
   CheckboxGroup,
   Disclosure,
+  ErrorSummary,
   Field,
   Form,
   Heading,
@@ -18,32 +19,36 @@ import {
 } from '@fansite/design-system'
 import { createContext, type ReactNode, use, useActionState, useEffect } from 'react'
 
-import type { ReportFormState } from '#src/beheer/report-fields'
-
-import { pasteMaxLength } from '#src/beheer/report-paste'
-import { firstPasteState, pasteExample, type PasteRead_, type PasteState } from '#src/beheer/report-paste-state'
-
 import {
-  type ReportChoices,
-  ReportErrorSummary,
-  ReportFields,
-  ReportFormProvider,
-  ReportSavePanel,
-} from '../ReportForm'
+  firstPasteState,
+  type PasteAsk,
+  pasteExample,
+  pasteMaxLength,
+  type PasteRead_,
+  type PasteState,
+} from '#src/beheer/report-paste-state'
+
+import { type ReportChoices, ReportErrorSummary, ReportFields, ReportFormShell, ReportSavePanel } from '../ReportForm'
 
 /** The `id` of the card with what the reading says, which gets the focus after a paste. */
 const outcomeId = 'plakresultaat'
 
 /** The rules of the format, one line each, for under the field. */
 const formatRules = [
-  'Elk kopje staat op een eigen regel: Opstelling, Bank, Wissels, Doelpunten, Kaarten en Strafschoppen voor sc Heerenveen, en na het kopje Tegenstander dezelfde kopjes voor de tegenstander.',
-  'Een kopje dat ontbreekt is leeg. Hoofdletters en de volgorde van de kopjes doen er niet toe.',
-  'Opstelling en Bank: een rugnummer en een naam, zoals "4 Van Aken", en "(a)" erachter voor de aanvoerder. Een speler van ons mag alleen een rugnummer zijn, als hij in de selectie staat.',
+  'Elk kopje staat op een eigen regel.',
+  'De kopjes voor sc Heerenveen zijn Opstelling, Bank, Wissels, Doelpunten, Kaarten en Strafschoppen.',
+  'Na het kopje Tegenstander staan dezelfde kopjes voor de tegenstander.',
+  'Een kopje dat ontbreekt is leeg, en hoofdletters en de volgorde van de kopjes doen er niet toe.',
+  'Opstelling en Bank: een rugnummer en een naam, zoals "4 Van Aken", met "(a)" erachter voor de aanvoerder.',
+  'Een speler van ons mag alleen een rugnummer zijn, als hij in de selectie van het seizoen staat.',
   'Wissels: de minuut, wie erin komt en voor wie, zoals "61 12 voor 8" of "90+2 Smit voor Jansen".',
-  'Doelpunten: de minuut en de speler die scoorde, met "assist Jansen", "penalty" of "eigen doelpunt" erachter. Onder het kopje van een kant staan de doelpunten die die kant kreeg; bij een eigen doelpunt is de naam een speler van de andere kant.',
+  'Doelpunten: de minuut en de speler die scoorde, zoals "23 Smit".',
+  'Zet "assist Jansen", "penalty" of "eigen doelpunt" achter een doelpunt waar dat bij hoort.',
+  'Onder het kopje van een kant staan de doelpunten die die kant kreeg.',
+  'Bij een eigen doelpunt is de naam een speler van de andere kant.',
   'Kaarten: de minuut, geel, geel-rood of rood, en de speler, zoals "34 geel Jansen".',
   'Strafschoppen: de minuut, gemist of gestopt, en de nemer, zoals "55 gemist Jansen".',
-  'Een naam mag een rugnummer zijn. Een regel die met # begint, is commentaar.',
+  'Een naam mag een rugnummer zijn, en een regel die met # begint, is commentaar.',
 ]
 
 type PasteContext = {
@@ -151,9 +156,10 @@ export function PasteBody() {
         <Heading id="tekst-kop" level={2}>
           Tekst plakken
         </Heading>
+        <PasteError state={state} />
         <Form action={formAction} key={state.version}>
           <Field
-            error={state.error}
+            error={state.field === 'vervangen' ? undefined : state.error}
             hint={`Plak de tekst in het formaat hieronder. Hoogstens ${pasteMaxLength.toLocaleString('nl-NL')} tekens. Er wordt niets bewaard voordat je in het formulier Opslaan kiest.`}
             id="tekst"
             label="Tekst van het verslag"
@@ -165,11 +171,18 @@ export function PasteBody() {
               <Text id="vervangen-uitleg">
                 {`In het verslag staat al iets: ${existing}. Plakken vervangt alles in het formulier. Het verslag in de database verandert pas als je Opslaan kiest.`}
               </Text>
+              {state.field === 'vervangen' ? (
+                <Text id="vervangen-fout">
+                  <Strong>{state.error}</Strong>
+                </Text>
+              ) : null}
               <CheckboxGroup
-                aria-describedby="vervangen-uitleg"
+                aria-describedby={state.field === 'vervangen' ? 'vervangen-uitleg vervangen-fout' : 'vervangen-uitleg'}
+                id="vervangen"
                 legend="Vervangen"
                 name="vervangen"
                 options={[{ label: 'Ja, vervang wat nu in het verslag staat', value: 'ja' }]}
+                tabIndex={-1}
                 value={state.replace ? ['ja'] : []}
               />
             </>
@@ -218,14 +231,12 @@ export function PasteProvider({
   children,
   choices,
   existing,
-  saveAction,
 }: {
   action: (previous: PasteState, formData: FormData) => Promise<PasteState>
   cancelHref: string
   children: ReactNode
   choices: ReportChoices
   existing: string | undefined
-  saveAction: (previous: ReportFormState, formData: FormData) => Promise<ReportFormState>
 }) {
   const [state, formAction, pending] = useActionState(action, firstPasteState)
   const context = { cancelHref, existing, formAction, pending, state }
@@ -233,15 +244,16 @@ export function PasteProvider({
   if (state.kind === 'read') {
     return (
       <PasteContext value={context}>
-        <ReportFormProvider
-          action={saveAction}
+        <ReportFormShell
           choices={choices}
-          initial={state.form}
+          formAction={formAction}
           key={state.version}
+          pending={pending}
+          state={state.form}
           title="Controleer het verslag"
         >
           {children}
-        </ReportFormProvider>
+        </ReportFormShell>
       </PasteContext>
     )
   }
@@ -258,6 +270,29 @@ export function PasteSidebar() {
       <ReportSavePanel cancelHref={cancelHref} />
     </Page.Sidebar>
   ) : null
+}
+
+/**
+ * The error of the field for the text, in a list of its own that gets the focus after the
+ * server answered, as the list of errors of the form does: the remade form would otherwise
+ * leave the focus on the page, and a screen reader would not say what is wrong.
+ */
+function PasteError({ state }: { state: PasteAsk }) {
+  useEffect(() => {
+    if (state.version > 0 && state.error !== undefined) {
+      document.getElementById('plak-fouten')?.focus()
+    }
+  }, [state])
+
+  return state.error === undefined ? null : (
+    <ErrorSummary
+      errors={[{ id: state.field ?? 'tekst', message: state.error }]}
+      id="plak-fouten"
+      level={3}
+      tabIndex={-1}
+      title="Er is iets mis"
+    />
+  )
 }
 
 function usePaste() {

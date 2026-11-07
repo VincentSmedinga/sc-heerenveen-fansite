@@ -498,7 +498,12 @@ for (const [name, javaScriptEnabled] of [
 
       // An empty text is asked for again, with the error at the field.
       await page.getByRole('button', { name: 'Tekst lezen' }).click()
-      await expect(page.getByText('Plak eerst de tekst van het verslag.')).toBeVisible()
+      await expect(page.getByText('Plak eerst de tekst van het verslag.').first()).toBeVisible()
+
+      if (javaScriptEnabled) {
+        // The list of the error has the focus, so a screen reader says what is wrong.
+        await expect(page.locator('#plak-fouten')).toBeFocused()
+      }
 
       // A text with a line that means nothing: the form comes back with the line-up filled in,
       // and the line that could not be read is in the list, with its number.
@@ -519,6 +524,17 @@ for (const [name, javaScriptEnabled] of [
         await expect(page.locator('#plakresultaat')).toBeFocused()
         expect(await checkPage(page)).toEqual([])
       }
+
+      // The form posts on this screen, with and without JavaScript: a row is added, a save with
+      // a doubt that is not settled comes back with its errors, and the field for the text is
+      // gone.
+      await page.locator('button[value="speler-zij-toevoegen"]').click()
+      await expect(page.locator('#speler-zij-1-rugnummer')).toHaveCount(1)
+      await expect(page.getByLabel('Tekst van het verslag', { exact: true })).toHaveCount(0)
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await expect(page.locator('#fouten')).toBeVisible()
+      await expect(page.getByLabel('Tekst van het verslag', { exact: true })).toHaveCount(0)
+      await expect(page.getByRole('heading', { level: 2, name: 'Gegevens' })).toBeVisible()
 
       // Nothing was stored: the report screen still has no report.
       await page.goto(address)

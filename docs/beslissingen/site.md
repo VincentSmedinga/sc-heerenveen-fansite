@@ -3209,9 +3209,12 @@
   Een fout in de tekst kost een correctie in het formulier, geen nieuwe tekst.
 - **Alternatieven:** de tekst direct bewaren (de controle zou dan twee keer bestaan); alleen een voorbeeld tonen en de tekst bewaren zonder formulier (een kleine fout betekent alles opnieuw plakken).
 - **Keuzes bij het bouwen** (7 november 2026):
-  - **Twee gewone posts:** de tekst gaat met een formulier naar `submitPaste`, dat de waarden teruggeeft; daarna toont dezelfde pagina het formulier van #829 met die waarden.
+  - **Eén actie voor het hele scherm:** `submitPaste` beantwoordt de twee posts van het scherm, de tekst en daarna het formulier van het verslag, en heeft daarvoor één `useActionState`.
+    Met een tweede hook voor het formulier valt een post zonder JavaScript terug op het lege veld voor de tekst, omdat het antwoord dan bij een hook hoort die niet draait.
+    De post van het formulier is `submitReport` van het scherm van het verslag, en zijn antwoord vervangt het formulier in dezelfde staat.
     Het werkt zonder JavaScript.
     De lijst "Niet gelezen" en de keuzes staan in een kaart boven het formulier die de focus krijgt, en elke twijfel staat ook als fout bij zijn veld, omdat de controle van het formulier "kies een speler" al zegt.
+    Een fout in het veld voor de tekst of bij het vakje om te vervangen staat in een lijst van fouten die de focus krijgt, zoals bij het formulier.
   - **De waarden die het formulier krijgt:** de status is `bezig`, de bron blijft die van het verslag dat er al is, en de kant van de tegenstander staat op ja als de tekst elf spelers in zijn opstelling heeft.
     De controle van het formulier loopt over wat er staat, dus wat nog ontbreekt (zoals doelpunten die niet kloppen met de uitslag) staat meteen als fout bij het veld.
 
@@ -3253,7 +3256,8 @@
 - **Waarom:** precisie.
   Een speler die verkeerd wordt gekoppeld is erger dan een veld dat leeg blijft, want niemand ziet het.
 - **Keuzes bij het bouwen** (7 november 2026):
-  - **Rugnummer en naam samen:** staan er een rugnummer en een naam, dan telt het rugnummer als de naam bij die speler past (de hele naam, de achternaam, of een deel van zijn naam, zoals een tikfout in de voornaam).
+  - **Rugnummer en naam samen:** staan er een rugnummer en een naam, dan telt het rugnummer als de naam bij die speler past: de hele naam, de achternaam, of hele woorden van zijn naam (`Joost` of `Aken` bij Joost van Aken).
+    Een stuk van een woord telt niet: `Voskuilen` past niet bij een Vos.
     Past de naam bij een andere speler of bij niemand, dan zijn het twee spelers of een twijfel, en kiest de beheerder.
   - **Een speler die niet in de selectie staat:** het formulier krijgt "kies een speler" met de naam in het verborgen veld, dus "Andere speler" kiezen laat de naam zien.
     De beheerder voegt hem toe door dat te kiezen en op te slaan, zoals bij een verslag dat hij met de hand invulde; het scherm doet dat nooit zelf.

@@ -138,6 +138,14 @@ describe('a player of ours', () => {
     expect(read('Opstelling\n4 Joost').values.wij.speler[0]?.keuze).toBe('4')
   })
 
+  it('takes whole words of the name only: a typed name that merely contains the surname is a choice', () => {
+    const vos = [{ id: 1, name: 'Sander Vos', searchTerm: 'Vos', shirtNumber: 77 }]
+
+    expect(readPastedReport('Opstelling\n77 Voskuilen', vos).values.wij.speler[0]).toMatchObject({ keuze: '' })
+    expect(readPastedReport('Opstelling\n77 Sander', vos).values.wij.speler[0]).toMatchObject({ keuze: '1' })
+    expect(readPastedReport('Opstelling\n77 Os', vos).values.wij.speler[0]).toMatchObject({ keuze: '' })
+  })
+
   it('is a choice when the number and the name are two players', () => {
     const result = read('Opstelling\n4 Luca Oyen')
 
@@ -376,6 +384,23 @@ describe('what was read', () => {
     expect(result.read).toEqual([])
     expect(result.unread).toEqual([])
     expect(result.values.wij.speler).toHaveLength(11)
+  })
+
+  it('keeps a sentence about a line short, also with a very long name in it', () => {
+    const long = 'x'.repeat(5000)
+    const result = read(
+      `Opstelling\n4\n9\nBank\n12\nDoelpunten\n10 4 assist ${long}\n11 ${long}\nWissels\n12 12 voor ${long}`,
+    )
+
+    for (const choice of result.choices) {
+      expect(choice.message.length).toBeLessThanOrEqual(300)
+    }
+
+    for (const line of result.read) {
+      expect(line.meaning.length).toBeLessThanOrEqual(300)
+    }
+
+    expect(result.choices.length + result.unread.length).toBeGreaterThan(0)
   })
 
   it('shows at most 120 characters of a line that was not read', () => {

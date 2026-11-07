@@ -1027,9 +1027,10 @@ De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controle
 - Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
 - `/beheer/wedstrijden/<nummer>/verslag/plakken` (`src/app/beheer/wedstrijden/[id]/verslag/plakken`) leest een tekst in een eenvoudig formaat in de waarden van dit formulier.
   `readPastedReport` in `src/beheer/report-paste.ts` heeft geen database en geeft de waarden, wat het las, de keuzes bij een twijfel en de regels die het niet las.
-  `submitPaste` schrijft niets, ook niet in het logboek: het geeft het formulier terug (`PasteScreen`), dat met `submitReport` bewaart, met dezelfde controle.
+  `submitPaste` schrijft niets, ook niet in het logboek, als het de tekst leest: het geeft het formulier terug (`PasteScreen`).
+  Een post van dat formulier gaat naar dezelfde actie, die `submitReport` aanroept: dezelfde controle en dezelfde plek om te bewaren.
   Staat er al een verslag, dan vraagt het scherm eerst of het formulier vervangen mag.
-  Het werkt zonder JavaScript: twee gewone posts, de tekst en daarna het formulier.
+  Het werkt zonder JavaScript: de tekst en daarna het formulier zijn gewone posts naar dezelfde actie, met één `useActionState` voor het hele scherm.
 
 ### De stadions van een club
 

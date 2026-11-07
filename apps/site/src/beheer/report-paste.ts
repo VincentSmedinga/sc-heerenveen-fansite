@@ -7,9 +7,6 @@ import { emptyRow, emptySide, type ReportSquadPlayer, type ReportValues, type Ro
 // same code as a form typed by hand. The format is in the decision _Het formaat is een tekst
 // met kopjes_ in docs/beslissingen/site.md.
 
-/** The most characters of the text. The form refuses more, and so does the action. */
-export const pasteMaxLength = 20_000
-
 /** The most lines that are read. A text can not be made long with short lines. */
 export const pasteMaxLines = 500
 
@@ -174,9 +171,12 @@ export function readPastedReport(
 
   const shown = (content: string) => content.slice(0, 120)
   const miss = (entry: Entry, reason: string) => unread.push({ line: entry.line, reason, text: shown(entry.text) })
+  // What an editor typed comes back in a sentence, so a sentence is as long as a line may be.
+  const cap = (sentence: string) => (sentence.length > 300 ? `${sentence.slice(0, 299)}…` : sentence)
   const doubt = (entry: Entry, message: string, names: string[] = []) =>
-    choices.push({ line: entry.line, message, names, text: shown(entry.text) })
-  const meant = (entry: Entry, meaning: string) => read.push({ line: entry.line, meaning, text: shown(entry.text) })
+    choices.push({ line: entry.line, message: cap(message), names, text: shown(entry.text) })
+  const meant = (entry: Entry, meaning: string) =>
+    read.push({ line: entry.line, meaning: cap(meaning), text: shown(entry.text) })
   const sideWords = (of: Side) => (of === 'wij' ? 'sc Heerenveen' : 'de tegenstander')
 
   // The players, line-up and bench, since the other lines point to them.
@@ -247,8 +247,15 @@ export function readPastedReport(
 
       // A name that matches nobody is a typing error of the number's player only when it is
       // part of his name; otherwise the number and the name disagree and the editor decides.
-      const agrees = (player: ReportSquadPlayer) =>
-        fold(player.name).includes(fold(name)) || fold(name).includes(fold(player.searchTerm ?? termOf(player.name)))
+      // Whole words of the name only: `Aken` and `Joost` agree with Joost van Aken, `Voskuilen`
+      // does not agree with a Vos.
+      const agrees = (player: ReportSquadPlayer) => {
+        const words = fold(player.name).split(' ')
+
+        return fold(name)
+          .split(' ')
+          .every((word) => words.includes(word))
+      }
 
       if (
         byNumber.length === 1 &&

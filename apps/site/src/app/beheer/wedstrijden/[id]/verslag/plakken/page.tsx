@@ -13,7 +13,6 @@ import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
-import { submitReport } from '../actions'
 import { submitPaste } from './actions'
 import { PasteBody, PasteProvider, PasteSidebar } from './PasteScreen'
 
@@ -47,7 +46,6 @@ export default async function PasteReportPage({ params }: Props) {
       cancelHref={reportPath(match.id)}
       choices={{ opponent: match.opponent, showDelay: describeShowDelay(match.season), squad }}
       existing={report === undefined ? undefined : describeStored(report)}
-      saveAction={submitReport.bind(null, match.id)}
     >
       <Page.Main
         className={compact}

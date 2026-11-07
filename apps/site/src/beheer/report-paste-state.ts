@@ -4,10 +4,15 @@ import type { PasteChoice, PasteRead, PasteUnread } from './report-paste'
 // What the screen "Tekst plakken" knows after each answer of the server. It has nothing the
 // browser should not load: the screen is a client component, and it imports this file.
 
+/** The most characters of the text. The field says so, and the action refuses more. */
+export const pasteMaxLength = 20_000
+
 /** The screen before the text is read, or after a text that could not be read at all. */
 export type PasteAsk = {
-  /** What is wrong with the request, as a sentence for the field. */
+  /** What is wrong with the request, as a sentence. */
   error?: string
+  /** The control the error is about, which gets the focus: the text or the box to replace. */
+  field?: 'tekst' | 'vervangen'
   kind: 'ask'
   /** Whether the editor agreed to replace what the report has, so the box stays ticked. */
   replace: boolean
@@ -23,6 +28,7 @@ export type PasteRead_ = {
   kind: 'read'
   read: PasteRead[]
   unread: PasteUnread[]
+  /** Counts the texts that were read, so a new text makes the form anew and a save does not. */
   version: number
 }
 

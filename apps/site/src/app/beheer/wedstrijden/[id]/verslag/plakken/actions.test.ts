@@ -1,17 +1,16 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matches, matchGoals, type NewMatch, players } from '@fansite/db/schema'
+import { adminUsers, matches, matchGoals, matchReports, type NewMatch, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
 import { saveReport } from '#src/beheer/match-reports'
-import { report as baseReport, squadOf } from '#src/beheer/report-fixtures'
+import { report as baseReport, formDataOf, squadOf } from '#src/beheer/report-fixtures'
 import { checkReportForm } from '#src/beheer/report-form'
-import { pasteMaxLength } from '#src/beheer/report-paste'
-import { firstPasteState, type PasteState } from '#src/beheer/report-paste-state'
+import { firstPasteState, pasteMaxLength, type PasteState } from '#src/beheer/report-paste-state'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
@@ -138,6 +137,19 @@ async function paste(fields: Record<string, string>, id: unknown = matchId, prev
   }
 }
 
+/** What an action returned, or where it redirected to. */
+async function resultOf<T>(action: () => Promise<T>): Promise<T | { redirect: string }> {
+  try {
+    return await action()
+  } catch (error) {
+    if (error instanceof Redirect) {
+      return { redirect: error.url }
+    }
+
+    throw error
+  }
+}
+
 /** How many rows every table of the report and its neighbours has: plakken must change none. */
 async function rowCounts() {
   const counts: Record<string, number> = {}
@@ -229,10 +241,10 @@ describe('submitPaste', () => {
   it('asks for text when there is none, and keeps what was typed', async () => {
     expect(await paste({ tekst: '   \n  ' })).toMatchObject({
       error: 'Plak eerst de tekst van het verslag.',
+      field: 'tekst',
       kind: 'ask',
       version: 1,
     })
-    expect(await paste({})).toMatchObject({ error: 'Plak eerst de tekst van het verslag.', kind: 'ask' })
   })
 
   it('refuses a text of more than 20.000 characters, says so, and does not read it', async () => {
@@ -282,6 +294,62 @@ describe('submitPaste', () => {
   })
 })
 
+describe('submitPaste for the post of the form after the text was read', () => {
+  async function readState(tekst = text) {
+    const result = await paste({ tekst })
+
+    if ('redirect' in result || result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    return result
+  }
+
+  it('answers with the screen of the report, in the same state, so a post without JavaScript keeps its form', async () => {
+    const read = await readState()
+    const result = await submitPaste(matchId, read, formDataOf(read.form.values, 'speler-zij-toevoegen'))
+
+    expect(result).toMatchObject({ kind: 'read', version: read.version })
+
+    if (result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    expect(result.form.values.zij.speler).toHaveLength(read.form.values.zij.speler.length + 1)
+    expect(result.form.version).toBe(1)
+    expect(result.unread).toEqual(read.unread)
+  })
+
+  it('saves with the checks of the form: a doubt that is not settled comes back as an error, and nothing is stored', async () => {
+    const read = await readState('Opstelling\n44 Nieuwe Jongen')
+    const before = await rowCounts()
+    const result = await submitPaste(matchId, read, formDataOf(read.form.values, 'opslaan'))
+
+    expect(result).toMatchObject({ kind: 'read' })
+
+    if (result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    expect(result.form.errors['speler-wij-1-keuze']).toContain('kies een speler uit de selectie of Andere speler.')
+    expect(await rowCounts()).toEqual(before)
+  })
+
+  it('saves a form that can be stored as the screen of the report does, and leads to its notice', async () => {
+    const read = await readState()
+    const values = { ...baseReport(squad), status: 'bezig' }
+
+    expect(await resultOf(() => submitPaste(matchId, read, formDataOf(values, 'opslaan')))).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/verslag?gedaan=opgeslagen`,
+    })
+    expect(await database.db.select().from(matchReports)).toHaveLength(1)
+  })
+
+  it('has no form to post when no text was read: it gives the screen as it opens', async () => {
+    expect(await paste({ knop: 'opslaan' })).toEqual({ ...firstPasteState, version: 1 })
+  })
+})
+
 describe('submitPaste for a match that has a report', () => {
   beforeEach(async () => {
     const checked = checkReportForm(baseReport(squad), {
@@ -297,6 +365,7 @@ describe('submitPaste for a match that has a report', () => {
 
     expect(result).toMatchObject({
       error: 'Vink aan dat je wat nu in het verslag staat wilt vervangen, of kies Annuleren.',
+      field: 'vervangen',
       kind: 'ask',
       replace: false,
       text,
