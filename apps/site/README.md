@@ -1025,6 +1025,9 @@ De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controle
   Opslaan schrijft het verslag, de spelers, de gebeurtenissen en de doelpunten met `appearance_id`, de markering `goals_edited` en een regel `match.edit` in één transactie.
   Een opslag zonder verschil schrijft niets.
 - Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
+- Elk team heeft in het formulier een formatie (`formatie-wij` en `formatie-zij`): een keuzelijst met de gebruikelijke formaties (`formationChoices`), "Geen formatie" en "Anders", en een tekstveld voor een eigen formatie (`formatie-wij-eigen`) dat alleen bij "Anders" telt.
+  `formationProblem` uit `@fansite/shared/match-report` keurt de tekst; `formationValueOf` zet een bewaarde formatie terug als keuze of als "Anders" met zijn tekst.
+  De formatie staat in `match_reports` en op de pagina van de wedstrijd bij het team (`MatchLineup`).
 - `/beheer/wedstrijden/<nummer>/verslag/plakken` (`src/app/beheer/wedstrijden/[id]/verslag/plakken`) leest een tekst in een eenvoudig formaat in de waarden van dit formulier.
   `readPastedReport` in `src/beheer/report-paste.ts` heeft geen database en geeft de waarden, wat het las, de keuzes bij een twijfel en de regels die het niet las.
   `submitPaste` schrijft niets, ook niet in het logboek, als het de tekst leest: het geeft het formulier terug (`PasteScreen`).

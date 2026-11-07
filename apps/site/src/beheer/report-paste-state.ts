@@ -42,6 +42,7 @@ export const firstPasteState: PasteAsk = { kind: 'ask', replace: false, text: ''
  * change. The players are made up.
  */
 export const pasteExample = [
+  'Formatie: 4-3-3',
   'Opstelling',
   '1 Brandsma',
   '4 Van Aken (a)',
@@ -60,6 +61,7 @@ export const pasteExample = [
   'Strafschoppen',
   '55 gemist 9',
   'Tegenstander',
+  'Formatie: 4-4-2',
   'Opstelling',
   '1 Ruud Oefenman',
   '5 Joop Voorbeeldlaan (a)',

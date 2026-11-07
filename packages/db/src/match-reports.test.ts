@@ -421,6 +421,7 @@ describe('reading a report', () => {
     expect(reportForRules(stored!)).toEqual({
       appearances: [{ captain: true, id: a, name: 'A', ours: true, shirtNumber: 7, starter: true }],
       cards: [],
+      formations: { opponent: null, ours: null },
       goals: [
         {
           appearanceId: a,
@@ -682,7 +683,13 @@ describe('the made-up report of the seed', () => {
     const stored = await readMatchReport(database.db, match.id)
 
     expect(stored).toBeDefined()
-    expect(stored?.report).toMatchObject({ opponentComplete: true, status: 'klaar' })
+    expect(stored?.report).toMatchObject({
+      formationOpponent: '4-4-2',
+      formationOurs: '4-3-3',
+      opponentComplete: true,
+      status: 'klaar',
+    })
+    expect(reportForRules(stored!).formations).toEqual({ opponent: '4-4-2', ours: '4-3-3' })
     expect(checkMatchReport(reportForRules(stored!), matchForRules(match))).toEqual({ errors: [], warnings: [] })
   })
 

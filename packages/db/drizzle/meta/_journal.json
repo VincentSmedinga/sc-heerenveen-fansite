@@ -330,6 +330,13 @@
       "when": 1794039706198,
       "tag": "0046_add_player_stats_differ_audit_action",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1794047692530,
+      "tag": "0047_add_report_formations",
+      "breakpoints": true
     }
   ]
 }

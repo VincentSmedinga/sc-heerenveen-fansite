@@ -3119,6 +3119,7 @@
   - **De tegenstander die niet af is** (`opponent_complete` uit) heeft in plaats van een opstelling één zin: "De opstelling van <club> hebben we niet."
     Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
   - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.
+- **Later:** zie _De formatie staat op de pagina van de wedstrijd bij het team_ (7 november 2026): onder de naam van een team staat nu ook zijn formatie, als er een is.
 
 ## Het verslag is een eigen scherm bij de wedstrijd: `/beheer/wedstrijden/<nummer>/verslag`
 
@@ -3246,6 +3247,7 @@
   - **Grenzen:** de tekst is hoogstens 20.000 tekens en er worden hoogstens 500 regels gelezen; een naam heeft hoogstens 100 tekens.
     Een regel in de lijst "Niet gelezen" toont hoogstens 120 tekens.
     Alles wat de lezer terugschrijft is tekst; React schrijft het uit en er is geen opmaak.
+- **Later:** zie _De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel_ (7 november 2026): het formaat heeft een regel voor de formatie erbij.
 
 ## Een naam wordt eerst op rugnummer gezocht, dan op de naam, en een twijfel is een keuze, geen gok
 
@@ -3339,3 +3341,32 @@
 - **Waarom:** de lijst van een plek op de bank liet alle spelers van de selectie zien, ook die in de basis stonden, zodat de bank met een speler uit de basis gevuld kon worden.
   De regels vingen dat pas bij het opslaan op.
 - **Alternatieven:** alleen bij het opslaan een fout geven (de beheerder ziet pas daar dat de lijst fout was); een aparte lijst voor de bank in plaats van een rol bij elke speler (een verslag met twee tabellen die elkaar moeten kennen, en een speler verplaatsen vraagt dan weghalen en opnieuw invullen).
+
+## De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel
+
+- **Datum:** 7 november 2026
+- **Besluit:** bij de opstelling van elk team in het formulier van het verslag staat een keuzelijst voor de formatie, met "Geen formatie", de gebruikelijke formaties (`formationChoices`: 4-3-3, 4-4-2, 4-2-3-1, 3-5-2, 3-4-3, 4-1-4-1, 4-3-1-2, 4-4-1-1, 4-5-1, 5-3-2, 5-4-1 en 3-4-2-1) en "Anders" (#840).
+  Bij "Anders" hoort een tekstveld voor een eigen formatie, dat met `formationProblem` wordt gecontroleerd.
+  Het plakscherm leest een regel "Formatie: 4-3-3" onder het kopje van een team met dezelfde regel.
+- **Waarom:** de lijst voorkomt tikfouten bij de formaties die bijna altijd voorkomen, en "Anders" houdt een eigen formatie mogelijk zonder een tweede regel.
+- **Alternatieven:** alleen een tekstveld (elke tikfout is dan een fout); alleen de lijst (een formatie als 4-1-2-1-2 kan dan niet).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Zonder JavaScript** staat het tekstveld er altijd, want de pagina kan het niet laten verschijnen; met JavaScript staat het er alleen bij de keuze "Anders" (`hidden`, pas als de pagina live is).
+    Het veld telt alleen bij die keuze: bij een formatie uit de lijst, of zonder keuze, laat het formulier de tekst staan zonder hem te lezen.
+  - **Een eigen formatie die eerder is opgeslagen** komt terug onder "Anders" met zijn tekst; een formatie uit de lijst komt terug als die keuze (`formationValueOf`).
+  - **De fouten:** elk veld heeft zijn eigen fout, met het team in de zin: `formatie-wij` voor een keuze die niet in de lijst staat, en `formatie-wij-eigen` voor de tekst (leeg bij "Anders", of een zin van de regel).
+    Het formulier slaat een formatie die niet klopt niet op, ook niet als het verslag bezig is, want de database kan hem niet bewaren.
+  - **Het plakscherm:** een regel "Formatie: ..." staat bij het kopje waaronder hij staat, of bij onze kant als hij boven het eerste kopje staat.
+    Een waarde die de regel afkeurt, is een regel onder "Niet gelezen" met de zin van de regel, en geen stille keuze; een tweede formatie voor dezelfde kant ook.
+    Een formatie van de lijst komt in het formulier als die keuze, een andere als "Anders" met zijn tekst.
+
+## De formatie staat op de pagina van de wedstrijd bij het team
+
+- **Datum:** 7 november 2026
+- **Besluit:** de pagina van een wedstrijd toont de formatie van een team als een korte regel onder zijn naam, "Formatie: 4-3-3"; heeft het team er geen, dan staat er niets (#840).
+  Het is eigen administratie, met dezelfde bronvermelding als de rest van het verslag.
+- **Waarom:** de lezer ziet bij de opstelling hoe het team stond, zonder dat een verslag zonder formatie iets mist.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - `MatchLineup` heeft een eigenschap `formation`, een tekst zonder eigen regels: de pagina geeft de waarde zoals het verslag hem bewaarde.
+    De regel is een `Text` met de meta-uitvoering onder de kop met de naam van het team, zodat de kop alleen de naam is.
+  - Een verslag met een formatie die de regels afkeuren (bijvoorbeeld na een wijziging buiten het formulier om), heeft geen pagina: `checkMatchReport` keurt hem af zoals elke andere fout.

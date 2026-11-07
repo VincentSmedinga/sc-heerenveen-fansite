@@ -1,6 +1,16 @@
 import { playerNameMaxLength } from '@fansite/db/schema'
+import { formationProblem } from '@fansite/shared/match-report'
 
-import { emptyRow, emptySide, type ReportSquadPlayer, type ReportValues, type Row, type Side } from './report-fields'
+import {
+  emptyRow,
+  emptySide,
+  formationValueOf,
+  noFormation,
+  type ReportSquadPlayer,
+  type ReportValues,
+  type Row,
+  type Side,
+} from './report-fields'
 
 // Reads the text an editor pasted into the values of the form of a report (see report-form.ts).
 // It has no database and writes nothing: the form it gives back is checked and saved by the
@@ -120,6 +130,7 @@ export function readPastedReport(
 ): PasteResult {
   const values: ReportValues = {
     bron: previous.bron,
+    formatie: { wij: noFormation(), zij: noFormation() },
     status: 'bezig',
     tegenstander: 'nee',
     wij: emptySide(),
@@ -134,6 +145,8 @@ export function readPastedReport(
 
   // First the lines, with the heading they stand under.
   const entries: Entry[] = []
+  // The lines "Formatie: 4-3-3" and the side they stand under: they are read after the players.
+  const formationLines: { line: number; side: Side; text: string; value: string }[] = []
   let current: Side = 'wij'
   let section: Section | undefined
   let counted = 0
@@ -162,6 +175,8 @@ export function readPastedReport(
     } else if (Object.hasOwn(headings, heading)) {
       section = heading as Section
       read.push({ line, meaning: `Kopje: ${heading}`, text: content })
+    } else if (/^formatie\s*:/iu.test(content)) {
+      formationLines.push({ line, side: current, text: content, value: content.replace(/^formatie\s*:/iu, '').trim() })
     } else if (section === undefined) {
       unread.push({ line, reason: 'Deze regel staat niet onder een kopje.', text: content.slice(0, 120) })
     } else {
@@ -178,6 +193,34 @@ export function readPastedReport(
   const meant = (entry: Entry, meaning: string) =>
     read.push({ line: entry.line, meaning: cap(meaning), text: shown(entry.text) })
   const sideWords = (of: Side) => (of === 'wij' ? 'sc Heerenveen' : 'de tegenstander')
+
+  // The formations: the same rule as the form, and a value that is wrong is a line that was not
+  // read, with the reason, and never a formation that is guessed.
+  const formed = new Set<Side>()
+
+  for (const found of formationLines) {
+    const team = sideWords(found.side)
+    const problem =
+      found.value === '' ? 'Schrijf de formatie erachter, zoals "Formatie: 4-3-3".' : formationProblem(found.value)
+
+    if (problem !== undefined) {
+      unread.push({ line: found.line, reason: `Formatie van ${team}: ${problem}`, text: shown(found.text) })
+    } else if (formed.has(found.side)) {
+      unread.push({
+        line: found.line,
+        reason: `${team} heeft al een formatie: schrijf er één.`,
+        text: shown(found.text),
+      })
+    } else {
+      formed.add(found.side)
+      values.formatie[found.side] = formationValueOf(found.value)
+      read.push({
+        line: found.line,
+        meaning: `Formatie ${team}: ${found.value}`,
+        text: shown(found.text),
+      })
+    }
+  }
 
   // The players, line-up and bench, since the other lines point to them.
   const people: Record<Side, Placed[]> = { wij: [], zij: [] }

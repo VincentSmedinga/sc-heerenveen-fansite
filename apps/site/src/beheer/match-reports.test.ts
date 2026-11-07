@@ -378,6 +378,60 @@ describe('the goals of a report that is klaar against the squad table of Wikiped
   })
 })
 
+describe('the formations of a report', () => {
+  const withFormations = (ours: { eigen?: string; keuze: string }, theirs = { eigen: '', keuze: '' }) => ({
+    ...report(),
+    formatie: { wij: { eigen: '', ...ours }, zij: theirs },
+  })
+
+  it('stores a formation from the list and one of his own, and gives them back in the form', async () => {
+    await wikipediaGoals()
+    await save(withFormations({ keuze: '4-3-3' }, { eigen: '4-1-2-1-2', keuze: 'anders' }))
+
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({
+      formationOpponent: '4-1-2-1-2',
+      formationOurs: '4-3-3',
+    })
+
+    const screen = (await findReportScreen(database.db, matchId))!
+    const again = valuesOfReport(screen.report, screen.goals, screen.squad)
+
+    // The one of the list is that choice, and the one of his own comes back in Anders with its
+    // text.
+    expect(again.formatie).toEqual({
+      wij: { eigen: '', keuze: '4-3-3' },
+      zij: { eigen: '4-1-2-1-2', keuze: 'anders' },
+    })
+    expect(await save(again, t1)).toEqual({ status: 'unchanged' })
+  })
+
+  it('stores no formation as empty, and a report may be saved without', async () => {
+    await save(report())
+
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({
+      formationOpponent: null,
+      formationOurs: null,
+    })
+
+    const screen = (await findReportScreen(database.db, matchId))!
+
+    expect(valuesOfReport(screen.report, screen.goals, screen.squad).formatie).toEqual({
+      wij: { eigen: '', keuze: '' },
+      zij: { eigen: '', keuze: '' },
+    })
+  })
+
+  it('sees a change of the formation as a change of the report, and takes a formation away again', async () => {
+    await wikipediaGoals()
+    await save(withFormations({ keuze: '4-3-3' }))
+
+    expect(await save(withFormations({ keuze: '4-4-2' }), t1)).toEqual({ status: 'saved' })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({ formationOurs: '4-4-2', savedAt: t1 })
+    expect(await save(report(), t1)).toEqual({ status: 'saved' })
+    expect((await database.db.select().from(matchReports))[0]?.formationOurs).toBeNull()
+  })
+})
+
 describe('the report as the form reads it', () => {
   it('gives the stored report back as the form it was saved from, so saving it again changes nothing', async () => {
     await wikipediaGoals()

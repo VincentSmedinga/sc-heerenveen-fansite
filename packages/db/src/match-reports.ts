@@ -495,6 +495,7 @@ export function reportForRules(stored: StoredMatchReport): ReportForRules {
       minute: card.minute,
       stoppageMinutes: card.stoppageMinutes,
     })),
+    formations: { opponent: stored.report.formationOpponent, ours: stored.report.formationOurs },
     goals: stored.goals.map((goal) => ({
       appearanceId: goal.appearanceId,
       assistId: goal.assistAppearanceId,

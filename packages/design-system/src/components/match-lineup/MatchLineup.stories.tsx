@@ -7,6 +7,7 @@ import { MatchLineup, type MatchLineupPlayer } from './MatchLineup'
 
 const meta = preview.meta({
   argTypes: {
+    formation: { description: 'De formatie van het team, zoals 4-3-3. Zonder formatie staat er niets.' },
     headingLevel: {
       control: 'radio',
       description: 'Het niveau van de kop met de naam van het team.',
@@ -20,6 +21,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De opstelling van één team: de naam van het team als kop, daaronder de basis en de bank als lijsten, een speler per regel met het rugnummer voor de naam.',
+          'Met een formatie staat er een korte regel onder de naam van het team, zoals "Formatie: 4-3-3".',
           'De aanvoerder heeft het woord erachter, en wat een speler in de wedstrijd overkwam, zoals een wissel of een kaart, staat in een zin onder zijn naam.',
           'Schrijf die zinnen uit: een pijl of een kleur zegt een schermlezer niets.',
           'Zet de twee teams van een wedstrijd naast elkaar in dezelfde kaart, onder één kop.',
@@ -60,6 +62,16 @@ export const Default = meta.story({
       <Heading id="opstelling-kop" level={2}>
         Opstelling
       </Heading>
+      <MatchLineup {...args} />
+    </Card>
+  ),
+})
+
+export const WithFormation = meta.story({
+  args: { bench, formation: '4-3-3', headingLevel: 3, starters, team: 'sc Heerenveen' },
+  name: 'Met een formatie',
+  render: (args) => (
+    <Card>
       <MatchLineup {...args} />
     </Card>
   ),

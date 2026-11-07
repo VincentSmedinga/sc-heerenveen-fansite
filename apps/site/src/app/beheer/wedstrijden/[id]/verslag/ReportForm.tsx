@@ -16,16 +16,20 @@ import {
   Select,
   Text,
 } from '@fansite/design-system'
-import { createContext, type ReactNode, use, useActionState, useEffect, useState } from 'react'
+import { formationChoices } from '@fansite/shared/match-report'
+import { createContext, type ReactNode, use, useActionState, useEffect, useState, useSyncExternalStore } from 'react'
 
 import {
   addButtonValue,
   cardKindChoices,
   clearTakenPlayers,
   type FieldName,
+  formationId,
+  formationOwnId,
   goalKindChoices,
   incidentKindChoices,
   listId,
+  otherFormation,
   otherPlayer,
   playerChoices,
   playerLabel,
@@ -102,6 +106,12 @@ export function ReportErrorSummary() {
 export function ReportFields() {
   const { choices, current, formAction, notice, onChange, state } = useReportForm()
   const { errors, warnings } = state
+  // Whether the page is live in the browser: the server and a page without JavaScript say no.
+  const live = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  )
   const club = (side: Side) => (side === 'wij' ? 'sc Heerenveen' : choices.opponent)
   const players = (side: Side, prefix = false, bench = false) =>
     playerChoices(current, side, choices.squad, prefix, bench)
@@ -191,6 +201,41 @@ export function ReportFields() {
     )
   }
 
+  // The field for a formation of his own is only shown with the choice Anders. Without
+  // JavaScript the page can not change it, so before the page is live it is always there.
+  const formationFields = (side: Side) => (
+    <>
+      <Field
+        error={errors[formationId(side)]}
+        hideOptional
+        hint="Kies een van de gebruikelijke formaties, of Anders voor een eigen formatie. Een formatie mag ontbreken."
+        id={formationId(side)}
+        label={`Formatie van ${club(side)}`}
+        required={false}
+      >
+        <Select defaultValue={current.formatie[side].keuze} name={formationId(side)} width="natural">
+          <Select.Option value="">Geen formatie</Select.Option>
+          {formationChoices.map((formation) => (
+            <Select.Option key={formation} value={formation}>
+              {formation}
+            </Select.Option>
+          ))}
+          <Select.Option value={otherFormation}>Anders</Select.Option>
+        </Select>
+      </Field>
+      <Field
+        error={errors[formationOwnId(side)]}
+        hidden={live && current.formatie[side].keuze !== otherFormation}
+        hideOptional
+        hint="Getallen met een koppelteken ertussen, zoals 4-1-2-1-2. Samen zijn het er tien: de veldspelers, zonder de keeper. Dit veld telt alleen bij de keuze Anders."
+        id={formationOwnId(side)}
+        label={`Eigen formatie van ${club(side)}`}
+        required={false}
+      >
+        <Input autoComplete="off" defaultValue={current.formatie[side].eigen} name={formationOwnId(side)} />
+      </Field>
+    </>
+  )
   const card = (kind: RowKind, side: Side, hint: string, body: ReactNode) => (
     <Card aria-labelledby={listId(kind, side)} key={listId(kind, side)}>
       <Heading id={listId(kind, side)} level={2} tabIndex={-1}>
@@ -213,6 +258,7 @@ export function ReportFields() {
           {errors[listId(kind, side)]}
         </Text>
       )}
+      {kind === 'speler' ? formationFields(side) : null}
       {body}
     </Card>
   )

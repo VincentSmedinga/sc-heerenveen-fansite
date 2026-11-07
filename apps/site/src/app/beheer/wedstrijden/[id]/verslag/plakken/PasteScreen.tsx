@@ -48,6 +48,8 @@ const formatRules = [
   'Bij een eigen doelpunt is de naam een speler van de andere kant.',
   'Kaarten: de minuut, geel, geel-rood of rood, en de speler, zoals "34 geel Jansen".',
   'Strafschoppen: de minuut, gemist of gestopt, en de nemer, zoals "55 gemist Jansen".',
+  'Formatie: de formatie van het team, zoals "Formatie: 4-3-3", op een eigen regel bij het team.',
+  'Een formatie is getallen met een koppelteken ertussen, zonder spaties, en de getallen zijn samen tien.',
   'Een naam mag een rugnummer zijn, en een regel die met # begint, is commentaar.',
 ]
 

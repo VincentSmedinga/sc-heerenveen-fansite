@@ -3,15 +3,18 @@ import type { CardKind, IncidentKind, MatchReport as ReportForRules, ReportIssue
 
 import { matchForRules } from '@fansite/db/match-reports'
 import { matchReportLimits, playerNameMaxLength } from '@fansite/db/schema'
-import { checkMatchReport } from '@fansite/shared/match-report'
+import { checkMatchReport, formationChoices, formationProblem } from '@fansite/shared/match-report'
 
 import {
   cardKindChoices,
   type FieldName,
+  formationId,
+  formationOwnId,
   goalKindChoices,
   incidentKindChoices,
   isUntouchedRow,
   listId,
+  otherFormation,
   otherPlayer,
   type ReportErrors,
   type ReportSquadPlayer,
@@ -70,6 +73,8 @@ export type ReportMatch = Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' 
 export type ReportPlan = {
   appearances: PlannedPlayer[]
   cards: (Moment & { appearance: number; kind: CardKind; ours: boolean })[]
+  /** The formation of each team, or none. */
+  formations: { opponent: null | string; ours: null | string }
   goals: (Moment & {
     appearance: null | number
     assist: null | number
@@ -174,6 +179,32 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     fail('bron', `Schrijf hoogstens ${matchReportLimits.source} tekens.`)
   }
 
+  // The formation of each team: a choice from the list, or one of his own that the rule judges.
+  const formations: ReportPlan['formations'] = { opponent: null, ours: null }
+
+  for (const side of sides) {
+    const { eigen, keuze } = values.formatie[side]
+    const team = side === 'wij' ? 'sc Heerenveen' : opponent
+    const own = side === 'wij' ? 'ours' : 'opponent'
+
+    if (keuze === otherFormation) {
+      const problem = eigen === '' ? 'schrijf de formatie, zoals 4-3-3.' : formationProblem(eigen)
+
+      if (problem === undefined) {
+        formations[own] = eigen
+      } else {
+        parseFailed = true
+        fail(formationOwnId(side), `Formatie van ${team}: ${problem}`)
+      }
+    } else if ((formationChoices as readonly string[]).includes(keuze)) {
+      // The text of a formation of his own only counts with the choice Anders.
+      formations[own] = keuze
+    } else if (keuze !== '') {
+      parseFailed = true
+      fail(formationId(side), `Formatie van ${team}: kies een formatie uit de lijst, Anders, of niets.`)
+    }
+  }
+
   // The players first: the events point to them by the number of the row.
   const players: PlannedPlayer[] = []
   const origins = { appearances: [] as [Side, number][] }
@@ -274,6 +305,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
   const plan: ReportPlan = {
     appearances: players,
     cards: [],
+    formations,
     goals: [],
     incidents: [],
     opponentComplete: values.tegenstander === 'ja',
@@ -556,14 +588,16 @@ export function errorOrder(values: ReportValues): string[] {
     'bron',
     'status',
     'tegenstander',
-    ...sides.flatMap((side) =>
-      rowKinds.flatMap((kind) => [
+    ...sides.flatMap((side) => [
+      formationId(side),
+      formationOwnId(side),
+      ...rowKinds.flatMap((kind) => [
         listId(kind, side),
         ...values[side][kind].flatMap((_row, index) =>
           rowFields[kind].map((field) => rowFieldId(kind, side, index + 1, field)),
         ),
       ]),
-    ),
+    ]),
   ]
 }
 

@@ -435,3 +435,87 @@ describe('checkReportForm', () => {
     })
   })
 })
+
+describe('checkReportForm for the formations', () => {
+  const withFormations = (wij: { eigen?: string; keuze: string }, zij = { eigen: '', keuze: '' }) => ({
+    ...report(),
+    formatie: { wij: { eigen: '', ...wij }, zij },
+  })
+
+  it('has no formation when none is chosen, which a report may do', () => {
+    const checked = checkReportForm(report(), context)
+
+    expect(checked.errors).toEqual({})
+    expect(checked.plan?.formations).toEqual({ opponent: null, ours: null })
+  })
+
+  it('stores a formation from the list for each team', () => {
+    const checked = checkReportForm(withFormations({ keuze: '4-3-3' }, { eigen: '', keuze: '5-3-2' }), context)
+
+    expect(checked.errors).toEqual({})
+    expect(checked.plan?.formations).toEqual({ opponent: '5-3-2', ours: '4-3-3' })
+  })
+
+  it('stores a formation of his own that the rule accepts, from the text with the choice Anders', () => {
+    const checked = checkReportForm(withFormations({ eigen: '4-1-2-1-2', keuze: 'anders' }), context)
+
+    expect(checked.errors).toEqual({})
+    expect(checked.plan?.formations.ours).toBe('4-1-2-1-2')
+  })
+
+  it.each([
+    ['4-3-4', 'tellen op tot 11'],
+    ['4--3-3', 'één koppelteken'],
+    ['4-3-3-', 'één koppelteken'],
+    ['4 3 3', 'zonder spaties'],
+    ['vier', 'getallen met een koppelteken'],
+  ])('refuses the formation of his own %s, at the text field, with the team in the sentence', (eigen, words) => {
+    const checked = checkReportForm(withFormations({ keuze: '4-3-3' }, { eigen, keuze: 'anders' }), context)
+
+    expect(checked.plan).toBeUndefined()
+    expect(checked.errors['formatie-zij-eigen']).toContain('Formatie van de tegenstander: ')
+    expect(checked.errors['formatie-zij-eigen']).toContain(words)
+  })
+
+  it('asks for the formation when Anders is chosen and the text is empty', () => {
+    const checked = checkReportForm(withFormations({ eigen: '', keuze: 'anders' }), context)
+
+    expect(checked.errors['formatie-wij-eigen']).toBe('Formatie van sc Heerenveen: schrijf de formatie, zoals 4-3-3.')
+    expect(checked.plan).toBeUndefined()
+  })
+
+  it('only counts the text with the choice Anders: with a formation from the list or none it is left alone', () => {
+    const listed = checkReportForm(withFormations({ eigen: '9-9-9', keuze: '4-3-3' }), context)
+    const none = checkReportForm(withFormations({ eigen: '9-9-9', keuze: '' }), context)
+
+    expect(listed.errors).toEqual({})
+    expect(listed.plan?.formations.ours).toBe('4-3-3')
+    expect(none.errors).toEqual({})
+    expect(none.plan?.formations.ours).toBeNull()
+  })
+
+  it('refuses a choice that is not in the list', () => {
+    const checked = checkReportForm(withFormations({ keuze: '4-3-4' }), context)
+
+    expect(checked.errors['formatie-wij']).toBe(
+      'Formatie van sc Heerenveen: kies een formatie uit de lijst, Anders, of niets.',
+    )
+  })
+
+  it('does not let a report that is bezig have a formation that can not be stored', () => {
+    const checked = checkReportForm(
+      { ...withFormations({ eigen: '4-3-4', keuze: 'anders' }), status: 'bezig' },
+      context,
+    )
+
+    expect(checked.plan).toBeUndefined()
+  })
+
+  it('puts the formation fields in the order of the page, before the lists of their team', () => {
+    const order = errorOrder(report())
+
+    expect(order.indexOf('formatie-wij')).toBeLessThan(order.indexOf('formatie-wij-eigen'))
+    expect(order.indexOf('formatie-wij-eigen')).toBeLessThan(order.indexOf('speler-wij'))
+    expect(order.indexOf('formatie-zij')).toBeGreaterThan(order.indexOf('kaart-wij'))
+  })
+})

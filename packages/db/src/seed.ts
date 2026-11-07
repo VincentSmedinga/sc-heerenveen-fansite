@@ -998,6 +998,9 @@ const madeUpReportOurs: [name: string, starter: boolean][] = [
   ['Sjoerd Altena', false],
 ]
 
+/** The formations of the two teams in the made-up report. */
+const madeUpReportFormations = { opponent: '4-4-2', ours: '4-3-3' }
+
 /** The captain of sc Heerenveen in the made-up report. */
 const madeUpReportCaptain = 'Milan Reitsma'
 
@@ -1171,6 +1174,8 @@ async function seedMadeUpReport(db: Pick<Database, 'insert' | 'select' | 'update
   }
 
   await db.insert(matchReports).values({
+    formationOpponent: madeUpReportFormations.opponent,
+    formationOurs: madeUpReportFormations.ours,
     matchId: match.id,
     opponentComplete: true,
     savedAt: now,

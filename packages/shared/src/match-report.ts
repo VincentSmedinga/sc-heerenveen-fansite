@@ -7,8 +7,7 @@
  * events point to. `checkMatchReport` gives the errors and the warnings, each with a code, the
  * place and a Dutch sentence; `minutesPlayed` works out the minutes of a player from the same
  * events. The decisions are in docs/beslissingen/hosting-en-data.md, under the heading _De
- * regels
- * voor een verslag staan op één plek_.
+ * regels voor een verslag staan op één plek_.
  *
  * Time is the minute on the clock and the minutes of added time after it, as `45` and `2` for
  * "45+2". Added time of a half comes before the next half, so 45+2 is earlier than 46.
@@ -21,6 +20,8 @@ export type IncidentKind = 'strafschop-gemist' | 'strafschop-gestopt'
 export type MatchReport = {
   appearances: ReportAppearance[]
   cards: ReportCard[]
+  /** Leave it out for a report that has no formations, such as one that is read from a text. */
+  formations?: ReportFormations | undefined
   goals: ReportGoal[]
   incidents: ReportIncident[]
   /** Whether the side of the opponent is complete too. */
@@ -46,6 +47,12 @@ export type ReportCard = ReportTime & {
   appearanceId: number
   kind: CardKind
 }
+
+/**
+ * The formations of the two teams, such as `4-3-3`, or empty when the report has none. They are
+ * checked with `formationProblem`.
+ */
+export type ReportFormations = { opponent: null | string; ours: null | string }
 
 /**
  * A goal. `ours` is the team that gets the goal, so an own goal has the team that benefits,
@@ -95,6 +102,27 @@ export type ReportTime = {
  */
 export const reportLimits = { lastMinute: 90, lastMinuteWithExtraTime: 120, stoppageMinutes: 15 } as const
 
+/** The usual formations, as the form offers them. A formation of another shape is "Anders". */
+export const formationChoices = [
+  '4-3-3',
+  '4-4-2',
+  '4-2-3-1',
+  '3-5-2',
+  '3-4-3',
+  '4-1-4-1',
+  '4-3-1-2',
+  '4-4-1-1',
+  '4-5-1',
+  '5-3-2',
+  '5-4-1',
+  '3-4-2-1',
+] as const
+
+/**
+ * The number of field players of a team, whom a formation divides: the goalkeeper is not one.
+ */
+export const fieldPlayers = 10
+
 export type IssuePart = 'appearances' | 'cards' | 'goals' | 'incidents' | 'report' | 'substitutions'
 
 /** Where an issue is: the part of the report, and the row in that part (counted from 0). */
@@ -112,10 +140,45 @@ export type ReportIssue = {
   /**
    * True for an error in how the data hangs together, such as an event that points to a player
    * who is not in the report. A report that is `bezig` may have the other errors; it may not
-   * have
-   * these, since it could not be read back.
+   * have these, since it could not be read back.
    */
   structural: boolean
+}
+
+/**
+ * Why a formation is not right, in a sentence for the editor, or `undefined` when it is right
+ * (an empty formation is right: a report may have none). A formation is numbers of at least 1
+ * with a hyphen between them, such as `4-1-2-1-2`, without spaces and without a hyphen at the
+ * start or the end, and the numbers add up to ten: the field players, without the goalkeeper.
+ */
+export function formationProblem(value: string): string | undefined {
+  if (value === '') {
+    return undefined
+  }
+
+  if (/\s/u.test(value)) {
+    return 'Schrijf de formatie zonder spaties, zoals 4-3-3.'
+  }
+
+  if (!/^[\d-]+$/u.test(value)) {
+    return 'Een formatie bestaat uit getallen met een koppelteken ertussen, zoals 4-3-3.'
+  }
+
+  if (value.startsWith('-') || value.endsWith('-') || value.includes('--')) {
+    return 'Zet één koppelteken tussen de getallen, en geen koppelteken aan het begin of einde, zoals 4-3-3.'
+  }
+
+  const numbers = value.split('-')
+
+  if (numbers.some((number) => !/^[1-9]\d*$/u.test(number))) {
+    return 'Elk getal van een formatie is minstens 1 en begint niet met een nul.'
+  }
+
+  const total = numbers.reduce((sum, number) => sum + Number(number), 0)
+
+  return total === fieldPlayers
+    ? undefined
+    : `De getallen van de formatie tellen op tot ${total}, en het moeten er ${fieldPlayers} zijn: de veldspelers zonder de keeper.`
 }
 
 /** The team of the players, in the sentences. */
@@ -177,6 +240,22 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
       place: { part: 'report' },
       structural: false,
     })
+  }
+
+  for (const [side, value] of [
+    ['sc Heerenveen', report.formations?.ours],
+    ['de tegenstander', report.formations?.opponent],
+  ] as const) {
+    const problem = value === null || value === undefined ? undefined : formationProblem(value)
+
+    if (problem !== undefined) {
+      issues.push({
+        code: 'formation-invalid',
+        message: `De formatie van ${side}: ${problem}`,
+        place: { part: 'report' },
+        structural: false,
+      })
+    }
   }
 
   // The players: the pointers of the events need them first.
@@ -481,16 +560,14 @@ export function formatReportTime(time: ReportTime) {
 
 /**
  * The minutes a player played, in whole minutes on the clock. A player in the line-up who is
- * not
- * substituted or sent off plays 90 minutes (120 with extra time). Whoever comes on or goes off
- * counts from or to the minute on the clock, and added time counts as the last minute of the
- * half: 45+2 is 45, and 90+3 is 90. Whoever comes on in the added time of the second half gets
- * at least 1 minute. Whoever stayed on the bench played 0 minutes and does not count as an
+ * not substituted or sent off plays 90 minutes (120 with extra time). Whoever comes on or goes
+ * off counts from or to the minute on the clock, and added time counts as the last minute of
+ * the half: 45+2 is 45, and 90+3 is 90. Whoever comes on in the added time of the second half
+ * gets at least 1 minute. Whoever stayed on the bench played 0 minutes and does not count as an
  * appearance (`playedMatch`).
  *
  * The minutes follow from the substitutions and the red and yellow-red cards, so they never
- * differ
- * from what happened. A player who is not in the report has none.
+ * differ from what happened. A player who is not in the report has none.
  */
 export function minutesPlayed(report: MatchReport, match: Pick<ReportMatch, 'extraTime'>, appearanceId: number) {
   const presence = play(report, [])
@@ -599,9 +676,8 @@ function onPitchAt(presence: Presence | undefined, time: ReportTime) {
 /**
  * Plays the substitutions and the red cards in the order of the clock, and returns where each
  * player stands, and the issues of the play itself (a substitution of a player who is not on
- * the
- * pitch, a player who comes on or goes off twice). A tie in the clock goes in the order of the
- * lists, the substitutions first.
+ * the pitch, a player who comes on or goes off twice). A tie in the clock goes in the order of
+ * the lists, the substitutions first.
  */
 function play(report: MatchReport, issues: ReportIssue[]) {
   const presence = new Map<number, Presence>(

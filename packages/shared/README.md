@@ -36,5 +36,6 @@ De README van de site beschrijft hoe `sendMail` werkt.
 `checkMatchReport` (`@fansite/shared/match-report`) neemt een verslag (de spelers van beide teams, de wissels, de kaarten, de gemiste strafschoppen en de doelpunten) met de gegevens van de wedstrijd en geeft de fouten en de waarschuwingen terug, elk met een `code`, een `place` (het onderdeel en de rij) en een Nederlandse `message`.
 `blockingIssues` zegt welke fouten het opslaan tegenhouden: bij status `klaar` alle, bij `bezig` alleen die van de opbouw van de gegevens.
 `minutesPlayed` rekent de minuten van een speler uit de wissels en de rode kaarten, en `playedMatch` zegt of hij speelde.
+`formationProblem` keurt een formatie, zoals `4-3-3`: getallen met een koppelteken ertussen die samen tien zijn, en `formationChoices` is de lijst met de gebruikelijke formaties.
 De functies gebruiken geen database; `@fansite/db/match-reports` (`reportForRules`, `matchForRules`) zet een opgeslagen verslag in de vorm die ze lezen.
 De regels staan in _De regels voor een verslag staan op één plek, in `packages/shared`_ in [`docs/beslissingen/hosting-en-data.md`](../../docs/beslissingen/hosting-en-data.md).

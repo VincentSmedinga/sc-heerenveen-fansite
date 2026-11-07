@@ -1504,7 +1504,7 @@ export type MatchReportStatus = (typeof matchReportStatuses)[number]
  * with extra time and the most minutes of added time. The rules of a report (`@fansite/shared`)
  * use the same numbers, and the database checks them too.
  */
-export const matchReportLimits = { lastMinute: 120, source: 100, stoppageMinutes: 15 }
+export const matchReportLimits = { formation: 20, lastMinute: 120, source: 100, stoppageMinutes: 15 }
 
 /**
  * The report of a played match: who played, who came on, the cards, the assists and the missed
@@ -1536,6 +1536,8 @@ export const matchReports = mysqlTable(
     status: mysqlEnum('status', matchReportStatuses).notNull(),
     opponentComplete: boolean('opponent_complete').notNull().default(false),
     source: varchar('source', { length: matchReportLimits.source }),
+    formationOurs: varchar('formation_ours', { length: matchReportLimits.formation }),
+    formationOpponent: varchar('formation_opponent', { length: matchReportLimits.formation }),
     savedBy: int('saved_by', { unsigned: true }).references(() => adminUsers.id, { onDelete: 'set null' }),
     savedAt: datetime('saved_at')
       .notNull()
