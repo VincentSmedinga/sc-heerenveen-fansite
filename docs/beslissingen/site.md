@@ -3334,6 +3334,7 @@
   - **De lijsten volgen de basis:** met JavaScript veranderen ze meteen als de basis of een rol verandert.
     Zonder JavaScript maakt de server ze opnieuw na elke knop en elke keer opslaan, en een speler die dan toch twee keer staat, geeft bij het opslaan een fout bij het veld ("Speler 3 staat al in het verslag, bij Speler 3").
   - **Bij een wissel** toont "Erin" alleen de spelers met de rol Bank, en "Eruit" iedereen die in het verslag staat: wie erin komt, zat op de bank.
+    **Later:** zie _De lijst Erin zegt waarom hij leeg is_ (7 november 2026): staat er niemand op de bank, dan zegt het scherm dat bij het veld.
   - **De tegenstander** heeft geen keuzelijst, want zijn spelers zijn namen.
     Dezelfde naam twee keer in zijn verslag, ook met andere hoofdletters, geeft dezelfde fout.
   - **Het plakscherm** (#830) leest een speler die twee keer in de tekst staat één keer, en meldt de tweede regel als niet gelezen.
@@ -3341,6 +3342,22 @@
 - **Waarom:** de lijst van een plek op de bank liet alle spelers van de selectie zien, ook die in de basis stonden, zodat de bank met een speler uit de basis gevuld kon worden.
   De regels vingen dat pas bij het opslaan op.
 - **Alternatieven:** alleen bij het opslaan een fout geven (de beheerder ziet pas daar dat de lijst fout was); een aparte lijst voor de bank in plaats van een rol bij elke speler (een verslag met twee tabellen die elkaar moeten kennen, en een speler verplaatsen vraagt dan weghalen en opnieuw invullen).
+
+## De lijst Erin zegt waarom hij leeg is
+
+- **Datum:** 7 november 2026
+- **Besluit:** de lijst "Erin" van een wissel toont altijd de spelers met de rol Bank van dat team, zoals ze nu in het formulier staan, en zegt bij het veld waarom hij leeg is als niemand op de bank staat (#856).
+  Dat geldt voor sc Heerenveen en voor de tegenstander, met en zonder JavaScript, en ook als de bank net is ingevuld en het verslag nog niet is opgeslagen.
+  - **Staat er geen bank**, dan heeft de keuzelijst de tekst "Niemand op de bank" in plaats van "Kies een speler", en staat boven de tabel van de wissels een tekst met een link.
+    Hij zegt "Bij sc Heerenveen staat niemand met de rol Bank, dus de lijst Erin is leeg." en daarna "Zet eerst een speler op de bank, bij Opstelling en bank."
+    De link gaat naar de kop van Opstelling en bank van dat team, die de focus krijgt.
+    De zin staat er alleen als het team een wissel heeft: zonder wissel is er geen lijst om uit te leggen.
+  - **De regels van #838** blijven: de bank toont geen spelers uit de basis, en een speler staat niet dubbel.
+- **Waarom:** een nieuwe rij van de opstelling heeft de rol Basis, dus een speler die de beheerder bij "Opstelling en bank" invult maar op Basis laat staan, is geen speler van de bank.
+  De lijst Erin was dan leeg zonder dat het scherm zei waarom.
+  De zin staat bij het veld, want daar kijkt de beheerder naar.
+- **Alternatieven:** de lijst Erin weer alle spelers laten tonen (dan kan een wissel iemand brengen die niet op de bank zat, en de regels vangen dat pas bij het opslaan op); de keuzelijst uitzetten als de bank leeg is (een uitgezet veld wordt niet meegestuurd, dus een eerder gekozen speler gaat verloren); de rol van een nieuwe rij standaard op Bank zetten (de eerste elf rijen zijn dan de basis en alleen de nieuwe rijen de bank, wat bij een tweede rij in de basis weer verkeerd is).
+- **Later:** vult de vorige beslissing aan: bij een wissel toont "Erin" alleen de spelers met de rol Bank, en zegt zelf waarom hij leeg is.
 
 ## De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel
 

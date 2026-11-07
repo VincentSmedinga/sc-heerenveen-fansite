@@ -115,9 +115,14 @@ export function ReportFields() {
   const club = (side: Side) => (side === 'wij' ? 'sc Heerenveen' : choices.opponent)
   const players = (side: Side, prefix = false, bench = false) =>
     playerChoices(current, side, choices.squad, prefix, bench)
-  const playerOptions = (list: readonly { label: string; value: string }[], selected = '', extra?: string) => (
+  const playerOptions = (
+    list: readonly { label: string; value: string }[],
+    selected = '',
+    extra?: string,
+    placeholder = 'Kies een speler',
+  ) => (
     <>
-      <Select.Option value="">Kies een speler</Select.Option>
+      <Select.Option value="">{placeholder}</Select.Option>
       {list.map((player) => (
         <Select.Option key={player.value} value={player.value}>
           {player.label}
@@ -317,18 +322,31 @@ export function ReportFields() {
         'wissel',
         side,
         'Bij 45+1 vul je 45 in als minuut en 1 bij blessuretijd. Wie eruit gaat, staat op het veld; wie erin komt, zit op de bank: zet hem eerst bij Opstelling en bank met de rol Bank.',
-        table('wissel', side, [...minutes, { line: 2, name: 'Eruit' }, { line: 2, name: 'Erin' }], (row, number) => [
-          ...clock('wissel', side, number, row),
-          choice('wissel', side, number, 'eruit', row, playerOptions(mine)),
-          choice(
-            'wissel',
-            side,
-            number,
-            'erin',
-            row,
-            playerOptions(bench, row.erin, mine.find((player) => player.value === row.erin)?.label),
-          ),
-        ]),
+        <>
+          {bench.length === 0 && current[side].wissel.length > 0 ? (
+            <Text>
+              Bij {club(side)} staat niemand met de rol Bank, dus de lijst Erin is leeg.{' '}
+              <Link href={`#${listId('speler', side)}`}>Zet eerst een speler op de bank</Link>, bij Opstelling en bank.
+            </Text>
+          ) : null}
+          {table('wissel', side, [...minutes, { line: 2, name: 'Eruit' }, { line: 2, name: 'Erin' }], (row, number) => [
+            ...clock('wissel', side, number, row),
+            choice('wissel', side, number, 'eruit', row, playerOptions(mine)),
+            choice(
+              'wissel',
+              side,
+              number,
+              'erin',
+              row,
+              playerOptions(
+                bench,
+                row.erin,
+                mine.find((player) => player.value === row.erin)?.label,
+                bench.length === 0 ? 'Niemand op de bank' : undefined,
+              ),
+            ),
+          ])}
+        </>,
       ),
       card(
         'doelpunt',

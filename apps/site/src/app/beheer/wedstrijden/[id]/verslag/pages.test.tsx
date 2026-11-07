@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matches, matchGoals, type NewMatch, players } from '@fansite/db/schema'
+import { adminUsers, matchAppearances, matches, matchGoals, type NewMatch, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -289,6 +289,34 @@ describe('the choices of the line-up, the bench and the substitutes', () => {
     expect(optionsOf(html, 'wissel-wij-1-erin')).toEqual(['', '12', '13', '14'])
     // Who goes off can be anybody who played.
     expect(optionsOf(html, 'wissel-wij-1-eruit')).toHaveLength(15)
+  })
+
+  it('gives a substitution of the opponent the names of his bench, without JavaScript', async () => {
+    const player = (naam: string, rol: string, rugnummer: string) => ({ ...emptyRow('speler'), naam, rol, rugnummer })
+
+    await store({
+      zij: {
+        speler: [player('Aanvaller', 'basis', '9'), player('Invaller', 'bank', '12'), player('Reserve', 'bank', '13')],
+        wissel: [substitution({ erin: '2', eruit: '1', minuut: '60' })],
+      },
+    })
+
+    const html = await page(matchId)
+
+    // The values are the numbers of the rows: 2 and 3 are the places of his bench.
+    expect(optionsOf(html, 'wissel-zij-1-erin')).toEqual(['', '2', '3'])
+    expect(html).toContain('>12 Invaller</option>')
+    expect(html).not.toContain('de lijst Erin is leeg')
+  })
+
+  it('says why Erin is empty when a team has a substitution and nobody on the bench', async () => {
+    await store({ wij: { wissel: [substitution({ erin: '12', eruit: '11', minuut: '60' })] } })
+    await database.db.update(matchAppearances).set({ starter: true }).where(eq(matchAppearances.ours, true))
+
+    const html = await page(matchId)
+
+    expect(html).toContain('Bij sc Heerenveen staat niemand met de rol Bank, dus de lijst Erin is leeg.')
+    expect(html).toContain('href="#speler-wij"')
   })
 
   it('has the same rule for the opponent: a name, so a place on his bench has no list of players', async () => {
