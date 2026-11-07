@@ -98,6 +98,14 @@ export { MatchHeader } from './components/match-header/MatchHeader'
 export type { MatchHeaderFact, MatchHeaderProps, MatchHeaderScorer } from './components/match-header/MatchHeader'
 export { MatchLineup } from './components/match-lineup/MatchLineup'
 export type { MatchLineupPlayer, MatchLineupProps } from './components/match-lineup/MatchLineup'
+export { MatchPenaltySeries } from './components/match-penalty-series/MatchPenaltySeries'
+export type {
+  MatchPenaltyKick,
+  MatchPenaltyResult,
+  MatchPenaltyRound,
+  MatchPenaltySeriesProps,
+} from './components/match-penalty-series/MatchPenaltySeries'
+export { matchPenaltyResults } from './components/match-penalty-series/penalty-series'
 export { MatchPitch } from './components/match-pitch/MatchPitch'
 export type { MatchPitchProps, MatchPitchTeam } from './components/match-pitch/MatchPitch'
 export { PitchPlayer } from './components/match-pitch/PitchPlayer'
