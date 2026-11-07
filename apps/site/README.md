@@ -1011,7 +1011,7 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 
 ### Het verslag van een wedstrijd invullen
 
-`/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd: de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen.
+`/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd: de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen, en bij een wedstrijd met een uitslag van de strafschoppenserie ook de schoten van de serie.
 Een wedstrijd die niet bestaat of niet gespeeld is, geeft "niet gevonden".
 De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
 
@@ -1027,6 +1027,12 @@ De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controle
 - `src/beheer/match-reports.ts` leest het scherm (`findReportScreen`), zet een bewaard verslag terug in een formulier (`valuesOfReport`), slaat op (`saveReport`) en haalt weg (`removeReport`).
   Opslaan schrijft het verslag, de spelers, de gebeurtenissen en de doelpunten met `appearance_id`, de markering `goals_edited` en een regel `match.edit` in één transactie.
   Een opslag zonder verschil schrijft niets.
+- De lijst Strafschoppenserie (`serie`, een rij per schot: speler en uitkomst) staat alleen op het scherm als de wedstrijd een uitslag van de serie heeft, of als het verslag al schoten heeft.
+  Anders zegt een kaart waar je de uitslag invult: in het formulier van de wedstrijd.
+  De ronde van een schot volgt uit de volgorde van de rijen van een team, en een rij zonder speler en zonder uitkomst telt niet mee.
+  De regels van het verslag controleren de schoten tegen de uitslag van de serie; wat ze zeggen, staat bij het veld van het schot of bij de lijst.
+  Het voorbeeld toont de serie voordat ze is opgeslagen.
+  Tekst plakken leest geen serie: `keepShootout` laat de schoten van het opgeslagen verslag staan, bij dezelfde spelers (op rugnummer).
 - Heeft een wedstrijd een verslag, dan toont het formulier van de wedstrijd de doelpunten als tekst met een link naar het verslag, en bewaart het de doelpunten zoals ze zijn (`storedEntryGoals`).
 - Elk team heeft in het formulier een formatie (`formatie-wij` en `formatie-zij`): een keuzelijst met de gebruikelijke formaties (`formationChoices`), "Geen formatie" en "Anders", en een tekstveld voor een eigen formatie (`formatie-wij-eigen`) dat alleen bij "Anders" telt.
   `formationProblem` uit `@fansite/shared/match-report` keurt de tekst; `formationValueOf` zet een bewaarde formatie terug als keuze of als "Anders" met zijn tekst.

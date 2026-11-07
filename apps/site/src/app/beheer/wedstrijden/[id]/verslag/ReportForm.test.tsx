@@ -38,7 +38,13 @@ const show = () =>
   render(
     <ReportFormProvider
       action={() => Promise.resolve(initial)}
-      choices={{ opponent: 'Testclub', showDelay: 'binnen vijf minuten', squad }}
+      choices={{
+        matchHref: '/beheer/wedstrijden/7',
+        opponent: 'Testclub',
+        series: null,
+        showDelay: 'binnen vijf minuten',
+        squad,
+      }}
       initial={initial}
       title="Dit is nog niet af"
     >
@@ -117,7 +123,13 @@ describe('the formation in the form of a report', () => {
     render(
       <ReportFormProvider
         action={() => Promise.resolve(state)}
-        choices={{ opponent: 'Testclub', showDelay: 'binnen vijf minuten', squad }}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
         initial={state}
         title="Dit is nog niet af"
       >
@@ -179,7 +191,13 @@ describe('the formation in the form of a report', () => {
     const html = renderToStaticMarkup(
       <ReportFormProvider
         action={() => Promise.resolve(initial)}
-        choices={{ opponent: 'Testclub', showDelay: 'binnen vijf minuten', squad }}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
         initial={initial}
         title="Dit is nog niet af"
       >
@@ -247,7 +265,13 @@ describe('the list Erin of a substitution in the form of a report', () => {
     },
   }
   const props = {
-    choices: { opponent: 'Testclub', showDelay: 'binnen vijf minuten', squad },
+    choices: {
+      matchHref: '/beheer/wedstrijden/7',
+      opponent: 'Testclub',
+      series: null,
+      showDelay: 'binnen vijf minuten',
+      squad,
+    },
     title: 'Dit is nog niet af',
   }
   const showWith = (state: ReportFormState) =>
@@ -350,5 +374,134 @@ describe('the list Erin of a substitution in the form of a report', () => {
 
     // Player 3 is in the line-up now, and his place on the bench is empty.
     expect(labelsOf('wissel-wij-1-erin')).toEqual(['Niemand op de bank'])
+  })
+})
+
+describe('the shoot-out in the form of a report', () => {
+  const kick = (fields: Row): Row => ({ ...emptyRow('serie'), ...fields })
+  const withSeries = (
+    series: null | { against: number; for: number },
+    overrides: Partial<ReportValues> = {},
+    errors: ReportFormState['errors'] = {},
+  ) => {
+    const state: ReportFormState = { errors, values: { ...values, ...overrides }, version: 0, warnings: {} }
+
+    return render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  }
+  const headings = () => [...document.querySelectorAll('h2')].map((heading) => heading.textContent)
+
+  it('has a list for each team under the missed penalties when the match has a result of the series', () => {
+    withSeries({ against: 3, for: 4 })
+
+    expect(headings().filter((heading) => heading?.startsWith('Strafschoppenserie'))).toEqual([
+      'Strafschoppenserie van sc Heerenveen',
+      'Strafschoppenserie van Testclub',
+    ])
+    expect(headings().indexOf('Strafschoppenserie van sc Heerenveen')).toBe(
+      headings().indexOf('Gemiste strafschoppen van sc Heerenveen') + 1,
+    )
+    expect(document.body.textContent).toContain('moet de uitslag van de serie geven: 4–3')
+    expect(document.querySelector('button[value="serie-wij-toevoegen"]')?.textContent).toContain('Schot toevoegen')
+    expect(document.querySelector('button[value="serie-zij-toevoegen"]')).not.toBeNull()
+  })
+
+  it('says where to fill in the result when the match has none, instead of a list', () => {
+    withSeries(null)
+
+    expect(headings().filter((heading) => heading?.startsWith('Strafschoppenserie'))).toEqual(['Strafschoppenserie'])
+    expect(document.querySelector('button[value="serie-wij-toevoegen"]')).toBeNull()
+    expect(document.body.textContent).toContain('Deze wedstrijd heeft geen uitslag van een strafschoppenserie.')
+    expect(document.querySelector('a[href="/beheer/wedstrijden/7"]')?.textContent).toBe(
+      'Vul die uitslag in bij de wedstrijd',
+    )
+  })
+
+  it('keeps the list when the report holds kicks and the match has no result, so they can be taken away', () => {
+    withSeries(null, { wij: { ...values.wij, serie: [kick({ speler: '1', uitkomst: 'raak' })] } })
+
+    expect(document.querySelector('button[value="serie-wij-weghalen-1"]')).not.toBeNull()
+    expect(document.body.textContent).not.toContain('Deze wedstrijd heeft geen uitslag')
+  })
+
+  it('offers the players of the report for sc Heerenveen, and an unknown player for a side that is not complete', () => {
+    withSeries(
+      { against: 3, for: 4 },
+      {
+        wij: { ...values.wij, serie: [kick({ speler: '2', uitkomst: 'naast' })] },
+        zij: { ...emptySide(), serie: [kick({ uitkomst: 'raak' })] },
+      },
+    )
+
+    expect(optionsOf('serie-wij-1-speler')).toEqual(['', '1', '2', '3'])
+    expect(select('serie-wij-1-speler').value).toBe('2')
+    expect([...select('serie-wij-1-speler').options].map((option) => option.text)[0]).toBe('Kies een speler')
+    expect([...select('serie-zij-1-speler').options].map((option) => option.text)).toEqual(['Onbekende speler'])
+    expect([...select('serie-wij-1-uitkomst').options].map((option) => option.text)).toEqual([
+      'Kies de uitkomst',
+      'Raak',
+      'Naast',
+      'Gestopt',
+    ])
+    expect(select('serie-wij-1-uitkomst').value).toBe('naast')
+  })
+
+  it('wants a player for the opponent when his side is complete', () => {
+    withSeries({ against: 3, for: 4 }, { tegenstander: 'ja', zij: { ...emptySide(), serie: [kick({})] } })
+
+    expect([...select('serie-zij-1-speler').options].map((option) => option.text)[0]).toBe('Kies een speler')
+  })
+
+  it('puts the focus on the card that explains, when the last kick of a match without a result is removed', () => {
+    const state: ReportFormState = { errors: {}, focus: 'serie-wij', values, version: 1, warnings: {} }
+
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    expect(document.activeElement?.id).toBe('serie-uitleg')
+  })
+
+  it('shows the errors of the rules at the row and at the list', () => {
+    withSeries(
+      { against: 3, for: 4 },
+      { wij: { ...values.wij, serie: [kick({ speler: '1', uitkomst: 'raak' })] } },
+      {
+        'serie-wij': 'De schoten van sc Heerenveen geven 1 raak en de uitslag van de serie is 4–3.',
+        'serie-wij-1-speler': 'Schot 1 van sc Heerenveen: Speler 1 schiet twee keer in de strafschoppenserie.',
+      },
+    )
+
+    expect(document.getElementById('serie-wij')?.parentElement?.textContent).toContain('geven 1 raak')
+    expect(document.getElementById('serie-wij-1-speler-error')?.textContent ?? document.body.textContent).toContain(
+      'schiet twee keer',
+    )
   })
 })

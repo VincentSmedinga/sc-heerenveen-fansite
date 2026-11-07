@@ -9,8 +9,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createAccount } from '#src/beheer/accounts'
 import { saveReport } from '#src/beheer/match-reports'
-import { emptyRow } from '#src/beheer/report-fields'
-import { report as baseReport, squadOf, substitution } from '#src/beheer/report-fixtures'
+import { emptyRow, type Row } from '#src/beheer/report-fields'
+import { report as baseReport, goal, squadOf, substitution } from '#src/beheer/report-fixtures'
 import { checkReportForm } from '#src/beheer/report-form'
 
 import ReportPage, { metadata } from './page'
@@ -96,6 +96,21 @@ const page = async (id: number | string, searchParams: Record<string, string> = 
 const headings = (html: string, level: number) =>
   [...html.matchAll(new RegExp(`<h${level}[^>]*>(.*?)</h${level}>`, 'g'))].map(([, text]) => text)
 
+/** The match becomes a cup tie that ended 2-2 after extra time and 4-3 on penalties. */
+async function makeCup() {
+  await database.db
+    .update(matches)
+    .set({
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 2,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    })
+    .where(eq(matches.id, matchId))
+  await database.db.insert(matchGoals).values({ matchId, minute: 100, ours: false, player: 'Sibbing' })
+}
+
 async function store(overrides: Parameters<typeof baseReport>[1] = {}, status = 'klaar') {
   const checked = checkReportForm(
     { ...baseReport(squad, overrides), status },
@@ -158,6 +173,7 @@ describe('the report screen', () => {
       'Doelpunten van sc Heerenveen',
       'Kaarten van sc Heerenveen',
       'Gemiste strafschoppen van sc Heerenveen',
+      'Strafschoppenserie',
       'Opstelling en bank van N.E.C.',
       'Wissels van N.E.C.',
       'Doelpunten van N.E.C.',
@@ -167,6 +183,10 @@ describe('the report screen', () => {
       'Tekst plakken',
     ])
     expect(html).toContain('Nog geen verslag')
+    // The match has no result of a shoot-out: a sentence says where to fill it in.
+    expect(html).toContain('Deze wedstrijd heeft geen uitslag van een strafschoppenserie.')
+    expect(html).toContain(`href="/beheer/wedstrijden/${matchId}"`)
+    expect(html).not.toContain('serie-wij-toevoegen')
     // Uitslag 2-1.
     expect(html).toContain('Uitslag 2–1')
     // The hint above the source says what belongs there, in one sentence.
@@ -334,5 +354,65 @@ describe('the choices of the line-up, the bench and the substitutes', () => {
     const html = await page(matchId)
 
     expect(html).not.toContain('id="speler-zij-1-keuze"')
+  })
+})
+
+describe('the report screen of a match decided on penalties', () => {
+  const kick = (fields: Row): Row => ({ ...emptyRow('serie'), ...fields })
+
+  async function storeSeries() {
+    await makeCup()
+
+    const values = baseReport(squad, {
+      wij: {
+        serie: [kick({ speler: '9', uitkomst: 'raak' }), kick({ speler: '10', uitkomst: 'raak' })],
+      },
+      zij: { doelpunt: [goal({ minuut: '40', naam: 'Sibbing' }), goal({ minuut: '100', naam: 'Sibbing' })] },
+    })
+
+    // Two kicks each, and 2–1: the result of the series is made to fit.
+    values.zij.serie = [kick({ uitkomst: 'raak' }), kick({ uitkomst: 'gestopt' })]
+    await database.db.update(matches).set({ penaltiesAgainst: 1, penaltiesFor: 2 }).where(eq(matches.id, matchId))
+
+    const [match] = await database.db.select().from(matches).where(eq(matches.id, matchId))
+    const checked = checkReportForm(values, { match: match!, squad })
+
+    expect(checked.errors).toEqual({})
+    await saveReport(database.db, userId, matchId, checked.plan!)
+  }
+
+  it('has a list of kicks for each team under the missed penalties, with the result of the series', async () => {
+    await makeCup()
+
+    const html = await page(matchId)
+
+    expect(headings(html, 2)).toEqual(
+      expect.arrayContaining(['Strafschoppenserie van sc Heerenveen', 'Strafschoppenserie van N.E.C.']),
+    )
+    expect(html).toContain('moet de uitslag van de serie geven: 4–3')
+    expect(html).toContain('value="serie-wij-toevoegen"')
+    expect(html).not.toContain('Deze wedstrijd heeft geen uitslag van een strafschoppenserie.')
+  })
+
+  it('gives a stored series back in the rows of the form, and the preview its rounds', async () => {
+    await storeSeries()
+
+    const html = await page(matchId)
+
+    expect(html.match(/name="serie-wij-\d+-speler"/g)).toHaveLength(2)
+    expect(html.match(/name="serie-zij-\d+-uitkomst"/g)).toHaveLength(2)
+    expect(html).toMatch(/<option value="9" selected="">/u)
+    expect(html).toMatch(/<option value="gestopt" selected="">Gestopt<\/option>/u)
+    expect(html).not.toContain('Controleer')
+  })
+
+  it('says Controleer when the result of the series changes and the stored kicks no longer fit', async () => {
+    await storeSeries()
+    await database.db.update(matches).set({ penaltiesFor: 3 }).where(eq(matches.id, matchId))
+
+    const html = await page(matchId)
+
+    expect(html).toContain('Controleer')
+    expect(html).toMatch(/sc Heerenveen geven 2 raak en de uitslag van de serie is 3–1/u)
   })
 })

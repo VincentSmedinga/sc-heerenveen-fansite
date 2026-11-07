@@ -1,7 +1,16 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matches, matchGoals, matchReports, type NewMatch, players } from '@fansite/db/schema'
+import {
+  adminUsers,
+  matchAppearances,
+  matches,
+  matchGoals,
+  matchReports,
+  matchShootoutKicks,
+  type NewMatch,
+  players,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -163,6 +172,7 @@ async function rowCounts() {
     'match_substitutions',
     'match_cards',
     'match_incidents',
+    'match_shootout_kicks',
     'match_changes',
     'players',
     'audit_log',
@@ -397,5 +407,42 @@ describe('submitPaste for a match that has a report', () => {
 
     expect(result.form.values.bron).toBe('wedstrijdformulier')
     expect(result.form.values.status).toBe('bezig')
+  })
+
+  it('leaves the kicks of the shoot-out as they are, pointing to the same players by their shirt numbers', async () => {
+    const appearances = await database.db.select().from(matchAppearances)
+    const shirt = (number: number) => appearances.find((row) => row.ours && row.shirtNumber === number)?.id ?? null
+
+    // Shirt 9 is in the pasted line-up, shirt 3 is not; the opponent's kicker is unknown.
+    await database.db.insert(matchShootoutKicks).values([
+      { appearanceId: shirt(9), matchId, ours: true, outcome: 'raak', round: 1 },
+      { appearanceId: shirt(3), matchId, ours: true, outcome: 'naast', round: 2 },
+      { appearanceId: null, matchId, ours: false, outcome: 'gestopt', round: 1 },
+    ])
+
+    const result = await paste({ tekst: text, vervangen: 'ja' })
+
+    if ('redirect' in result || result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    // The pasted line-up is 1, 9, 10 and the bench 12: shirt 9 is the second row.
+    expect(result.form.values.wij.serie).toEqual([
+      { speler: '2', uitkomst: 'raak' },
+      { speler: '', uitkomst: 'naast' },
+    ])
+    expect(result.form.values.zij.serie).toEqual([{ speler: '', uitkomst: 'gestopt' }])
+    expect(await database.db.select().from(matchShootoutKicks)).toHaveLength(3)
+  })
+
+  it('has no kicks in the form of a report that has none', async () => {
+    const result = await paste({ tekst: text, vervangen: 'ja' })
+
+    if ('redirect' in result || result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    expect(result.form.values.wij.serie).toEqual([])
+    expect(result.form.values.zij.serie).toEqual([])
   })
 })

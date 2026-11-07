@@ -3457,6 +3457,7 @@
 - **Waarom:** de wedstrijd weet dit al, en zo is er één plek om het in te vullen (zie ook #852).
 - **Alternatieven:** de verlenging uit de minuten van de gebeurtenissen afleiden (een verlenging zonder gebeurtenissen bestaat dan niet).
 - **Later:** vult _De formatie staat op de pagina van de wedstrijd bij het team_ aan: de formatie staat nu bij de naam van het team boven het veld.
+- **Later:** zie _De strafschoppenserie staat in het formulier van het verslag, en alleen bij een wedstrijd met een uitslag van de serie_ (7 november 2026): het formulier van het verslag vult de schoten van de serie in.
 
 ## Een wedstrijd die we op strafschoppen winnen, telt overal als winst
 
@@ -3476,3 +3477,40 @@
     Een schermlezer hoort er "na strafschoppen 4 tegen 3" bij, omdat de kleur anders het enige teken van de winst is bij een stand van 1–1.
     De lijsten die wedstrijden kiezen (De nul gehouden, Doelpuntenmakers, de laatste vijf van de reeksen) geven de serie door; de grootste winst en het grootste verlies hebben nooit een serie.
   - **Punten:** op de kaarten die 3 punten per winst rekenen over de beker, zoals Thuis en uit bij "Alle wedstrijden" en de kolom Punten van Tegenstanders, is een winst na strafschoppen 3 punten.
+
+## De strafschoppenserie staat in het formulier van het verslag, en alleen bij een wedstrijd met een uitslag van de serie
+
+- **Datum:** 7 november 2026
+- **Besluit:** het formulier van het verslag krijgt voor elk team een lijst Strafschoppenserie, met een rij per schot: de speler en de uitkomst (Raak, Naast of Gestopt) (#852).
+  - **De schakelaar "Verlenging" komt niet in het formulier van het verslag.**
+    De wedstrijd heeft al Verlenging, de stand na 90 minuten en de uitslag van de serie (het formulier van de wedstrijd in het beheer), en het verslag laat minuten tot 120 toe als de wedstrijd een verlenging had.
+    Waarom: één plek om het in te vullen.
+    Alternatief: een tweede schakelaar in het verslag met een regel dat ze gelijk moeten zijn.
+  - **De lijst staat alleen in het formulier als de wedstrijd een uitslag van de serie heeft.**
+    Staat die er niet, dan zegt het formulier waar je hem invult.
+    Waarom: de serie wordt tegen die uitslag gecontroleerd (#844).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Een lijst per team, zoals de andere lijsten:** `serie` is een soort rij met de velden `speler` en `uitkomst`, en een veld heet `serie-wij-2-uitkomst`.
+    Het team is dat van de kaart waar de rij in staat, zoals bij de kaarten en de gemiste strafschoppen.
+    De knoppen om een schot toe te voegen en weg te halen zijn knoppen van hetzelfde formulier, dus het werkt ook zonder JavaScript.
+  - **De ronde volgt uit de volgorde:** het eerste schot van een team is ronde 1.
+    Een rij zonder speler en zonder uitkomst telt niet mee, zodat de rondes niet overslaan.
+    Een team heeft hoogstens 50 schoten (de grens van de database).
+  - **De speler:** de keuzelijst heeft de spelers van het verslag van dat team.
+    Bij sc Heerenveen kies je een speler.
+    Bij de tegenstander mag de speler leeg blijven ("Onbekende speler") zolang zijn kant niet af is; is zijn kant af, dan zegt de regel dat er een speler moet zijn.
+    De regels van het verslag zeggen ook of een speler twee keer schiet of aan het einde niet op het veld stond (een waarschuwing).
+  - **De meldingen van de regels** staan bij het veld van het schot, of bij de lijst voor een melding over de hele serie: "geen uitslag van de serie", "het aantal raak komt niet op de uitslag" en "de teams verschillen meer dan één schot".
+    Die laatste krijgen in het overzicht van fouten de focus op de kop van de lijst.
+    Een waarschuwing staat bij de lijst, met de naam van het schot, omdat een waarschuwing geen veld heeft.
+  - **Een lijst die al schoten heeft, blijft zichtbaar,** ook als de wedstrijd geen uitslag van de serie meer heeft (de import kan hem weghalen).
+    Zo kun je de schoten nog weghalen, en de regels zeggen waarom ze niet kloppen.
+  - **Opslaan** zet de serie in `match_shootout_kicks` en haalt hem weg als de lijst leeg is.
+    Dat vervangt de oplossing van #844, waar het opslaan de schoten van het oude verslag bewaarde omdat het formulier ze niet kende.
+  - **Tekst plakken** leest geen serie, en wat er staat blijft staan: `keepShootout` zet de schoten van het opgeslagen verslag terug in het ingelezen formulier, bij dezelfde speler op team en rugnummer.
+    Staat een speler niet meer in de nieuwe opstelling, dan is het schot zonder speler en zegt de regel dat.
+  - **Het voorbeeld** toont de rondes van de serie, ook voordat het is opgeslagen.
+- **Waarom:** de pagina (#850) toont de serie, en de redactie moet hem kunnen invullen zonder aparte schermen.
+  Dezelfde lijsten en regels als de doelpunten en de kaarten houden het formulier gelijk en bruikbaar met een toetsenbord en een schermlezer.
+- **Alternatieven:** één lijst voor beide teams met een kolom Team (de volgorde en de ronde per team worden dan lastiger te lezen); de serie in het plakformaat (dat blijft buiten dit besluit); een tweede schakelaar Verlenging in het verslag.
+- **Later:** vult _De verlenging en de strafschoppenserie komen uit de wedstrijd, de schoten uit het verslag_ aan: de schoten komen uit het verslag, en het formulier van het verslag vult ze in.

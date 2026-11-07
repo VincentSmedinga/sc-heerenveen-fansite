@@ -83,6 +83,37 @@ describe('readReportValues', () => {
   })
 })
 
+describe('the kicks of the shoot-out in the form', () => {
+  it('reads the rows of the list of each team from the request, with the player and the outcome', () => {
+    const read = readReportValues(
+      form({
+        'serie-wij-1-speler': '3',
+        'serie-wij-1-uitkomst': 'raak',
+        'serie-wij-2-speler': '',
+        'serie-wij-2-uitkomst': 'naast',
+        'serie-zij-1-speler': '',
+        'serie-zij-1-uitkomst': 'gestopt',
+      }),
+    )
+
+    expect(read.wij.serie).toEqual([
+      { speler: '3', uitkomst: 'raak' },
+      { speler: '', uitkomst: 'naast' },
+    ])
+    expect(read.zij.serie).toEqual([{ speler: '', uitkomst: 'gestopt' }])
+  })
+
+  it('has a new row with nothing chosen, so an untouched row is left out of the report', () => {
+    expect(emptyRow('serie')).toEqual({ speler: '', uitkomst: '' })
+    expect(isUntouchedRow('serie', emptyRow('serie'))).toBe(true)
+    expect(isUntouchedRow('serie', { speler: '', uitkomst: 'raak' })).toBe(false)
+    expect(applyReportButton(values(), { kind: 'add', row: 'serie', side: 'zij' })).toMatchObject({
+      focus: 'serie-zij-1-speler',
+      values: { zij: { serie: [{ speler: '', uitkomst: '' }] } },
+    })
+  })
+})
+
 describe('readReportButton', () => {
   it('reads the buttons that add and remove a row of a list of a side', () => {
     expect(readReportButton(form({ knop: 'wissel-zij-toevoegen' }))).toEqual({
@@ -94,6 +125,16 @@ describe('readReportButton', () => {
       kind: 'remove',
       number: 12,
       row: 'doelpunt',
+      side: 'wij',
+    })
+  })
+
+  it('reads the buttons of the list of the kicks of the shoot-out too', () => {
+    expect(readReportButton(form({ knop: 'serie-zij-toevoegen' }))).toEqual({ kind: 'add', row: 'serie', side: 'zij' })
+    expect(readReportButton(form({ knop: 'serie-wij-weghalen-4' }))).toEqual({
+      kind: 'remove',
+      number: 4,
+      row: 'serie',
       side: 'wij',
     })
   })
@@ -135,6 +176,11 @@ describe('applyReportButton', () => {
           { ...emptyRow('kaart'), speler: '2' },
           { ...emptyRow('kaart'), speler: '3' },
         ],
+        serie: [
+          { ...emptyRow('serie'), speler: '1', uitkomst: 'raak' },
+          { ...emptyRow('serie'), speler: '2', uitkomst: 'naast' },
+          { ...emptyRow('serie'), speler: '3', uitkomst: 'gestopt' },
+        ],
         speler: [player('A'), player('B'), player('C')],
         wissel: [{ ...emptyRow('wissel'), erin: '3', eruit: '2' }],
       },
@@ -144,6 +190,7 @@ describe('applyReportButton', () => {
 
     expect(next.wij.speler.map((row) => row.naam)).toEqual(['A', 'C'])
     expect(next.wij.kaart.map((row) => row.speler)).toEqual(['1', '', '2'])
+    expect(next.wij.serie.map((row) => row.speler)).toEqual(['1', '', '2'])
     expect(next.wij.wissel[0]).toMatchObject({ erin: '2', eruit: '' })
     expect(next.wij.doelpunt[0]).toMatchObject({ assist: 'wij-2', speler: '' })
     // A player of the other side keeps his number, and a goal of the other side is moved too.

@@ -1,8 +1,9 @@
 // What the form of a match report is made of, with nothing the browser should not load: the
 // form is a client component, and it imports this file. The checks are in `report-form.ts`.
 //
-// A report is two sides, `wij` (sc Heerenveen) and `zij` (the opponent), and each side has five
-// lists of rows: the players, the substitutions, the goals, the cards and the missed penalties.
+// A report is two sides, `wij` (sc Heerenveen) and `zij` (the opponent), and each side has six
+// lists of rows: the players, the substitutions, the goals, the cards, the missed penalties and
+// the kicks of the shoot-out (`serie`, #852).
 // A row is a record of text, as an editor typed it. Rows are numbered from 1 within their list
 // and side, and the fields of a row are named `<kind>-<side>-<number>-<field>`, such as
 // `wissel-wij-2-minuut`. An event points to a player of the report by the number of his row in
@@ -15,7 +16,7 @@ export const sides = ['wij', 'zij'] as const
 export type Side = (typeof sides)[number]
 
 /** The lists of rows of a side, in the order of the form. */
-export const rowKinds = ['speler', 'wissel', 'doelpunt', 'kaart', 'strafschop'] as const
+export const rowKinds = ['speler', 'wissel', 'doelpunt', 'kaart', 'strafschop', 'serie'] as const
 
 export type RowKind = (typeof rowKinds)[number]
 
@@ -23,6 +24,7 @@ export type RowKind = (typeof rowKinds)[number]
 export const rowFields = {
   doelpunt: ['minuut', 'extra', 'soort', 'speler', 'assist', 'naam'],
   kaart: ['minuut', 'extra', 'soort', 'speler'],
+  serie: ['speler', 'uitkomst'],
   speler: ['rugnummer', 'keuze', 'naam', 'rol'],
   strafschop: ['minuut', 'extra', 'soort', 'speler'],
   wissel: ['minuut', 'extra', 'eruit', 'erin'],
@@ -112,6 +114,13 @@ export const incidentKindChoices = [
   { label: 'Gestopt door de keeper', value: 'strafschop-gestopt' },
 ] as const
 
+/** What came of a kick in the shoot-out. */
+export const shootoutOutcomeChoices = [
+  { label: 'Raak', value: 'raak' },
+  { label: 'Naast', value: 'naast' },
+  { label: 'Gestopt', value: 'gestopt' },
+] as const
+
 export const statusChoices = [
   { label: 'Bezig', value: 'bezig' },
   { label: 'Klaar', value: 'klaar' },
@@ -162,7 +171,7 @@ export function emptyRow(kind: RowKind): Row {
 
 /** The rows of a side with nothing in them. */
 export function emptySide(): SideRows {
-  return { doelpunt: [], kaart: [], speler: [], strafschop: [], wissel: [] }
+  return { doelpunt: [], kaart: [], serie: [], speler: [], strafschop: [], wissel: [] }
 }
 
 /**
@@ -206,6 +215,7 @@ export function rowFieldId(kind: RowKind, side: Side, number: number, field: Fie
 export const rowNames: Record<RowKind, string> = {
   doelpunt: 'Doelpunt',
   kaart: 'Kaart',
+  serie: 'Schot',
   speler: 'Speler',
   strafschop: 'Strafschop',
   wissel: 'Wissel',
@@ -249,7 +259,7 @@ export function applyReportButton(
       return of === side ? (moved(number) === '' ? '' : `${of}-${moved(number)}`) : value
     }
 
-    for (const kind of ['wissel', 'kaart', 'strafschop'] as const) {
+    for (const kind of ['wissel', 'kaart', 'strafschop', 'serie'] as const) {
       next[side][kind] = next[side][kind].map((other) =>
         Object.fromEntries(
           Object.entries(other).map(([field, value]) => [
@@ -347,7 +357,7 @@ export function readReportButton(formData: FormData): ReportButton {
     return { kind: 'save' }
   }
 
-  const found = /^(speler|wissel|doelpunt|kaart|strafschop)-(wij|zij)-(toevoegen|weghalen-(\d{1,3}))$/u.exec(knop)
+  const found = /^(speler|wissel|doelpunt|kaart|strafschop|serie)-(wij|zij)-(toevoegen|weghalen-(\d{1,3}))$/u.exec(knop)
 
   if (found === null) {
     return { kind: 'save' }

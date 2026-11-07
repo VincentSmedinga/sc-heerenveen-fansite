@@ -7,6 +7,45 @@ import { databaseEnv, loopback } from './articles'
 import { earlierSeason } from './earlier-season'
 
 /**
+ * The number of the made-up cup match with a report that is klaar, the one with extra time and
+ * a shoot-out, for the screen of its report in the admin (#852). Like `cupReportPath`, it only
+ * reads a database on this computer.
+ */
+export async function cupReportMatchId() {
+  const { DATABASE_URL } = databaseEnv()
+
+  if (!loopback.has(new URL(DATABASE_URL).hostname)) {
+    throw new Error('The checks of the matches only read a database on this computer.')
+  }
+
+  const { close, db } = connect(DATABASE_URL)
+
+  try {
+    const [row] = await db
+      .select({ id: matches.id })
+      .from(matches)
+      .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+      .where(
+        and(
+          eq(matches.season, seasonOf(new Date())),
+          eq(matchReports.status, 'klaar'),
+          eq(matches.competition, 'KNVB Beker'),
+        ),
+      )
+      .orderBy(asc(matches.id))
+      .limit(1)
+
+    if (row === undefined) {
+      throw new Error('There is no made-up cup match with a report in the database. Did the global setup run?')
+    }
+
+    return row.id
+  } finally {
+    await close()
+  }
+}
+
+/**
  * The address of the page of the made-up cup match with a report that is klaar: the one with
  * extra time and a shoot-out (#844): the seed puts it in the cup round "Achtste finale".
  * Like `reportPath`, it only reads a database on this computer.

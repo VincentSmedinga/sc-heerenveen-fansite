@@ -34,6 +34,7 @@ import {
   emptySide,
   formationValueOf,
   otherPlayer,
+  playerOf,
   type ReportSquadPlayer,
   type ReportValues,
   type Row,
@@ -86,6 +87,41 @@ export async function findReportScreen(db: Pick<Database, 'select'>, id: number)
     report: await readMatchReport(db, id),
     squad: await readSquad(db, match.season),
   }
+}
+
+/**
+ * The pasted values with the kicks of the shoot-out that the report holds: the paste does not
+ * read a series (#852), so what is stored stays. A kick points to its player by team and shirt
+ * number, since the pasted line-up has other rows; a player who is not in it any more leaves
+ * the kick without a player, which the rules say.
+ */
+export function keepShootout(
+  pasted: ReportValues,
+  stored: StoredMatchReport | undefined,
+  squad: readonly ReportSquadPlayer[],
+): ReportValues {
+  if (stored === undefined || stored.shootout.length === 0) {
+    return pasted
+  }
+
+  const held = valuesOfReport(stored, [], squad)
+  const shirtOf = (values: ReportValues, side: Side, place: string | undefined) => {
+    const row = place === undefined || place === '' ? undefined : values[side].speler[Number(place) - 1]
+
+    return row === undefined ? undefined : playerOf(row, side, squad)?.shirtNumber
+  }
+  const kept = (side: Side): Row[] =>
+    held[side].serie.map((kick) => {
+      const shirt = shirtOf(held, side, kick.speler)
+      const index =
+        shirt === undefined
+          ? -1
+          : pasted[side].speler.findIndex((row) => playerOf(row, side, squad)?.shirtNumber === shirt)
+
+      return { ...kick, speler: index === -1 ? '' : String(index + 1) }
+    })
+
+  return { ...pasted, wij: { ...pasted.wij, serie: kept('wij') }, zij: { ...pasted.zij, serie: kept('zij') } }
 }
 
 /**
@@ -234,18 +270,11 @@ export async function saveReport(
       await transaction.insert(matchReports).values({ ...row, matchId: id })
     } else {
       await transaction.update(matchReports).set(row).where(eq(matchReports.matchId, id))
-      // The players of the old report go, with their events. The kicks go too and come back
-      // below, since a kick without a player would stay behind.
+      // The players of the old report go, with their events. The kicks go too, since a kick
+      // without a player would stay behind; the form holds the kicks that stay.
       await transaction.delete(matchShootoutKicks).where(eq(matchShootoutKicks.matchId, id))
       await transaction.delete(matchAppearances).where(eq(matchAppearances.matchId, id))
     }
-
-    // The shoot-out is not part of the form or the paste (#844), so the kicks of the old report
-    // stay. They point to their player by team and shirt number, since the rows are new.
-    const keptKicks = (stored?.shootout ?? []).map((kick) => ({
-      kick,
-      shirt: stored?.appearances.find((player) => player.id === kick.appearanceId)?.shirtNumber ?? null,
-    }))
 
     const playerIds: (null | number)[] = []
     const appearanceIds: number[] = []
@@ -324,21 +353,15 @@ export async function saveReport(
       )
     }
 
-    if (keptKicks.length > 0) {
+    if (plan.shootout.length > 0) {
       await transaction.insert(matchShootoutKicks).values(
-        keptKicks.map(({ kick, shirt }) => {
-          const index = plan.appearances.findIndex(
-            (player) => player.ours === kick.ours && player.shirtNumber === shirt,
-          )
-
-          return {
-            appearanceId: index === -1 ? null : appearance(index),
-            matchId: id,
-            ours: kick.ours,
-            outcome: kick.outcome,
-            round: kick.round,
-          }
-        }),
+        plan.shootout.map((kick) => ({
+          appearanceId: kick.appearance === null ? null : appearance(kick.appearance),
+          matchId: id,
+          ours: kick.ours,
+          outcome: kick.outcome,
+          round: kick.round,
+        })),
       )
     }
 
@@ -424,6 +447,13 @@ export async function saveReport(
   })
 }
 
+/** The result of the shoot-out of a match, or `null` when it has none. */
+export function seriesOf(match: Pick<Match, 'penaltiesAgainst' | 'penaltiesFor'>) {
+  return match.penaltiesFor === null || match.penaltiesAgainst === null
+    ? null
+    : { against: match.penaltiesAgainst, for: match.penaltiesFor }
+}
+
 /**
  * The values of the form for the report as it is stored, for the first view of the page. A
  * match without a report gets a line-up of eleven empty rows for us and the goals of the match
@@ -491,6 +521,10 @@ export function valuesOfReport(
       speler: ref(incident.appearanceId),
     })
   }
+  // The rounds of each team, in the order they were kicked.
+  for (const kick of stored?.shootout ?? []) {
+    values[sideOf(kick.ours)].serie.push({ speler: ref(kick.appearanceId), uitkomst: kick.outcome })
+  }
   for (const goal of goals) {
     values[sideOf(goal.ours)].doelpunt.push({
       ...moment(goal),
@@ -504,6 +538,11 @@ export function valuesOfReport(
   return values
 }
 
+/** The order of the kicks in a signature: the rounds, and in a round our kick first. */
+function byKick(a: readonly [boolean, number, ...unknown[]], b: readonly [boolean, number, ...unknown[]]) {
+  return a[1] - b[1] || Number(b[0]) - Number(a[0])
+}
+
 /** Describes what the report holds for the log: the numbers of each list. */
 function describeReport(plan: ReportPlan) {
   const count = (number: number, one: string, many: string) => `${number} ${number === 1 ? one : many}`
@@ -515,6 +554,7 @@ function describeReport(plan: ReportPlan) {
     count(plan.goals.length, 'doelpunt', 'doelpunten'),
     count(plan.cards.length, 'kaart', 'kaarten'),
     count(plan.incidents.length, 'strafschop', 'strafschoppen'),
+    ...(plan.shootout.length === 0 ? [] : [count(plan.shootout.length, 'schot in de serie', 'schoten in de serie')]),
   ].join(', ')
 }
 
@@ -549,6 +589,9 @@ function planSignature(plan: ReportPlan, known: readonly (undefined | { id: numb
       incident.stoppageMinutes,
     ]),
     opponentComplete: plan.opponentComplete,
+    shootout: plan.shootout
+      .map((kick) => [kick.ours, kick.round, kick.appearance, kick.outcome] as const)
+      .toSorted(byKick),
     source: plan.source,
     status: plan.status,
     substitutions: plan.substitutions.map((substitution) => [
@@ -655,6 +698,9 @@ function storedSignature(stored: StoredMatchReport) {
       incident.stoppageMinutes,
     ]),
     opponentComplete: stored.report.opponentComplete,
+    shootout: stored.shootout
+      .map((kick) => [kick.ours, kick.round, at(kick.appearanceId), kick.outcome] as const)
+      .toSorted(byKick),
     source: stored.report.source,
     status: stored.report.status,
     substitutions: stored.substitutions.map((substitution) => [

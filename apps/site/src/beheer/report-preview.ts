@@ -7,6 +7,7 @@ import type {
   MatchPageData,
   MatchPageGoal,
   MatchPageIncident,
+  MatchPageKick,
   MatchPagePlayer,
   MatchPageSubstitution,
 } from '#src/match-page'
@@ -24,6 +25,7 @@ import {
   roleChoices,
   type Row,
   type RowKind,
+  shootoutOutcomeChoices,
   type Side,
   sides,
 } from './report-fields'
@@ -139,6 +141,7 @@ export function previewDataOf(
   const cards: MatchPageCard[] = []
   const incidents: MatchPageIncident[] = []
   const goals: MatchPageGoal[] = []
+  const kicks: MatchPageKick[] = []
   let guests = 0
 
   for (const side of sides) {
@@ -171,6 +174,28 @@ export function previewDataOf(
         incidents.push({ ...frame(isChanged('strafschop', side, index + 1)), kind, playerId: player, ...time })
       }
     })
+
+    // The rounds follow the order of the rows of a team, as they do when the form is saved.
+    let round = 0
+
+    for (const row of values[side].serie) {
+      if (isUntouchedRow('serie', row)) {
+        continue
+      }
+
+      round += 1
+
+      const result = shootoutOutcomeChoices.find((choice) => choice.value === row.uitkomst)?.value
+
+      if (result !== undefined) {
+        kicks.push({
+          ours: side === 'wij',
+          playerId: placeOf.get(`${side}-${row.speler ?? ''}`) ?? null,
+          result,
+          round,
+        })
+      }
+    }
 
     values[side].doelpunt.forEach((row, index) => {
       const kind = goalKindChoices.find((choice) => choice.value === row.soort)?.value
@@ -224,7 +249,7 @@ export function previewDataOf(
     goalsFor: goals.filter((goal) => goal.ours).length,
     home: match.home,
     incidents,
-    kicks: [],
+    kicks,
     opponent: match.opponent,
     opponentComplete: values.tegenstander === 'ja',
     penalties: match.penalties,

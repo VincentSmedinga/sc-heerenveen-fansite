@@ -233,3 +233,50 @@ describe('the formations and the rest of the match in the preview', () => {
     })
   })
 })
+
+describe('the shoot-out in the preview', () => {
+  const kick = (fields: Row): Row => ({ ...emptyRow('serie'), ...fields })
+  const cup = { ...match, extraTime: true, penalties: { against: 3, for: 4 } }
+  const withKicks = () =>
+    values(
+      {
+        serie: [
+          kick({ speler: '9', uitkomst: 'raak' }),
+          kick({}),
+          kick({ speler: '10', uitkomst: 'naast' }),
+          kick({ speler: '99', uitkomst: 'gestopt' }),
+        ],
+      },
+      { serie: [kick({ speler: '2', uitkomst: 'raak' }), kick({ uitkomst: 'gestopt' })] },
+    )
+
+  it('has a kick for each row with an outcome, with the round of its team and its player', () => {
+    const data = previewDataOf(withKicks(), cup, squad)
+    const nameOf = (id: null | number) => {
+      const name = data.players.find((one) => one.id === id)?.name
+
+      return name === undefined ? null : name.surname || name.givenName
+    }
+
+    expect(data.kicks.map((one) => [one.round, one.ours, nameOf(one.playerId), one.result])).toEqual([
+      [1, true, 'Speler 9', 'raak'],
+      [2, true, 'Speler 10', 'naast'],
+      [3, true, null, 'gestopt'],
+      [1, false, 'Frank Dummydijk', 'raak'],
+      [2, false, null, 'gestopt'],
+    ])
+  })
+
+  it('shows the rounds in the card of the page, before the form is saved', () => {
+    const built = buildMatchPage(previewDataOf(withKicks(), cup, squad))
+
+    expect(built.series).toHaveLength(3)
+    expect(built.series[0]).toMatchObject({ ours: { result: 'scored' }, theirs: { result: 'scored' } })
+    expect(built.series[1]).toMatchObject({ ours: { result: 'missed' }, theirs: { result: 'saved' } })
+  })
+
+  it('has no kicks for a form without any, and leaves out a row without an outcome', () => {
+    expect(previewDataOf(values(), cup, squad).kicks).toEqual([])
+    expect(previewDataOf(values({ serie: [kick({ speler: '9' })] }), cup, squad).kicks).toEqual([])
+  })
+})
