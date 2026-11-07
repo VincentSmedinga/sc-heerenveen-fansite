@@ -223,3 +223,132 @@ describe('the formation in the form of a report', () => {
     )
   })
 })
+
+describe('the list Erin of a substitution in the form of a report', () => {
+  const named = (naam: string, rol: string): Row => ({ ...emptyRow('speler'), naam, rol })
+  const substitution = (): Row => emptyRow('wissel')
+  // Ours: players 1 and 2 in the line-up and player 3 on the bench. Theirs: typed names, two in
+  // the line-up and two on the bench. Each team has one substitution to fill in.
+  const withSubstitutions: ReportFormState = {
+    ...initial,
+    values: {
+      ...values,
+      wij: { ...values.wij, speler: [row('1'), row('2'), row('3', 'bank')], wissel: [substitution()] },
+      zij: {
+        ...emptySide(),
+        speler: [
+          named('Aanvaller', 'basis'),
+          named('Keeper', 'aanvoerder'),
+          named('Invaller', 'bank'),
+          named('Reserve', 'bank'),
+        ],
+        wissel: [substitution()],
+      },
+    },
+  }
+  const props = {
+    choices: { opponent: 'Testclub', showDelay: 'binnen vijf minuten', squad },
+    title: 'Dit is nog niet af',
+  }
+  const showWith = (state: ReportFormState) =>
+    render(
+      <ReportFormProvider action={() => Promise.resolve(state)} initial={state} {...props}>
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const labelsOf = (id: string) => [...select(id).options].map((option) => option.text)
+  const withoutBench = (state: ReportFormState): ReportFormState => ({
+    ...state,
+    values: {
+      ...state.values,
+      wij: { ...state.values.wij, speler: [row('1'), row('2'), row('', 'bank')] },
+      zij: { ...state.values.zij, speler: [named('Aanvaller', 'basis'), named('', 'bank')] },
+    },
+  })
+
+  it('lists the players with the role Bank of each team, ours by the squad and theirs by the typed name', () => {
+    showWith(withSubstitutions)
+
+    expect(labelsOf('wissel-wij-1-erin')).toEqual(['Kies een speler', '3 Speler 3'])
+    expect(labelsOf('wissel-zij-1-erin')).toEqual(['Kies een speler', 'Invaller', 'Reserve'])
+    expect(optionsOf('wissel-zij-1-erin')).toEqual(['', '3', '4'])
+  })
+
+  it('lists them without JavaScript too, as the server makes the page', () => {
+    const html = renderToStaticMarkup(
+      <ReportFormProvider action={() => Promise.resolve(withSubstitutions)} initial={withSubstitutions} {...props}>
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+    const optionsIn = (id: string) =>
+      [
+        ...(new RegExp(`<select[^>]*id="${id}"[^>]*>(.*?)</select>`, 's').exec(html)?.[1] ?? '').matchAll(
+          /<option value="([^"]*)"/g,
+        ),
+      ].map(([, value]) => value)
+
+    expect(optionsIn('wissel-wij-1-erin')).toEqual(['', '3'])
+    expect(optionsIn('wissel-zij-1-erin')).toEqual(['', '3', '4'])
+    expect(html).not.toContain('de lijst Erin is leeg')
+  })
+
+  it('fills the list as the bench is filled in, for each team, before anything is saved', () => {
+    showWith(withoutBench(withSubstitutions))
+    expect(labelsOf('wissel-wij-1-erin')).toEqual(['Niemand op de bank'])
+    expect(labelsOf('wissel-zij-1-erin')).toEqual(['Niemand op de bank'])
+
+    choose('speler-wij-3-keuze', '4')
+    fireEvent.change(document.getElementById('speler-zij-2-naam') as HTMLInputElement, {
+      target: { value: 'Invaller' },
+    })
+
+    expect(labelsOf('wissel-wij-1-erin')).toEqual(['Kies een speler', '4 Speler 4'])
+    expect(labelsOf('wissel-zij-1-erin')).toEqual(['Kies een speler', 'Invaller'])
+  })
+
+  it('follows a role that changes to Bank, and leaves the line-up out', () => {
+    showWith(withoutBench(withSubstitutions))
+    choose('speler-wij-2-rol', 'bank')
+    choose('speler-zij-1-rol', 'bank')
+
+    expect(labelsOf('wissel-wij-1-erin')).toEqual(['Kies een speler', '2 Speler 2'])
+    expect(labelsOf('wissel-zij-1-erin')).toEqual(['Kies een speler', 'Aanvaller'])
+  })
+
+  it('says why the list is empty when nobody is on the bench, with a link to the places of the bench', () => {
+    showWith(withoutBench(withSubstitutions))
+
+    for (const [side, club] of [
+      ['wij', 'sc Heerenveen'],
+      ['zij', 'Testclub'],
+    ] as const) {
+      const card = document.getElementById(`wissel-${side}`)?.closest('.hf-card') as HTMLElement
+      const link = card.querySelector('a[href]') as HTMLAnchorElement
+
+      expect(card.textContent).toContain(`Bij ${club} staat niemand met de rol Bank, dus de lijst Erin is leeg.`)
+      expect(link.getAttribute('href')).toBe(`#speler-${side}`)
+      expect(document.getElementById(`speler-${side}`)?.tabIndex).toBe(-1)
+    }
+  })
+
+  it('says it without JavaScript too, and says nothing when there is a bench or no substitution', () => {
+    const html = (state: ReportFormState) =>
+      renderToStaticMarkup(
+        <ReportFormProvider action={() => Promise.resolve(state)} initial={state} {...props}>
+          <ReportFields />
+        </ReportFormProvider>,
+      )
+
+    expect(html(withoutBench(withSubstitutions))).toContain('Bij Testclub staat niemand met de rol Bank')
+    expect(html(withSubstitutions)).not.toContain('staat niemand met de rol Bank')
+    expect(html(withoutBench(initial))).not.toContain('staat niemand met de rol Bank')
+  })
+
+  it('keeps the rules of the bench: the line-up is not on it, and a player stays on it once', () => {
+    showWith(withSubstitutions)
+    choose('speler-wij-1-keuze', '3')
+
+    // Player 3 is in the line-up now, and his place on the bench is empty.
+    expect(labelsOf('wissel-wij-1-erin')).toEqual(['Niemand op de bank'])
+  })
+})
