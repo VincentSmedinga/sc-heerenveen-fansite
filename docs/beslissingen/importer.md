@@ -1368,6 +1368,8 @@
 - **Later:** vervangt voor de plaats van de opslag de beslissing van 25 oktober 2026 uit het issue (een aanpassing naast de gelezen waarde); de rest ervan blijft: een aanpassing geldt tot Wikipedia hetzelfde zegt of een beheerder haar weghaalt.
 - **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_: de lijst toont nu ook oudere seizoenen, met een seizoenskeuze.
   De rest blijft: alleen een beheerder ziet haar.
+- **Later:** zie _Wikipedia houdt de uitslag, het verslag houdt de rest_ in `hosting-en-data.md`: de doelpunten van een wedstrijd met een verslag zijn die van het verslag, en `match_goals` heeft daarvoor de kolommen `appearance_id` en `assist_appearance_id`.
+  De markering `goals_edited` en de rest van deze beslissing blijven zoals ze zijn.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
 
 ## Bij een verschil blijft de invoer staan en schrijft de import het op

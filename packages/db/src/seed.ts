@@ -19,8 +19,13 @@ import { readDatabaseEnv } from './env.ts'
 import {
   feeds,
   leagueResults,
+  matchAppearances,
+  matchCards,
   matches,
   matchGoals,
+  matchIncidents,
+  matchReports,
+  matchSubstitutions,
   persons,
   players,
   playerSeasonStats,
@@ -877,6 +882,7 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
       await transaction.insert(matchGoals).values(goals)
     }
     await linkMadeUpGoals(transaction, season)
+    await seedMadeUpReport(transaction, season, now)
     await transaction.insert(standings).values(madeUpTable(now))
     await transaction.insert(leagueResults).values(madeUpLeagueResults(now))
 
@@ -915,6 +921,7 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
 
     await transaction.insert(players).values(squad)
     await linkMadeUpGoals(transaction, season)
+    await seedMadeUpReport(transaction, season, now)
 
     const seasonPlayers = await transaction
       .select({ id: players.id, page: players.wikipediaPage })
@@ -958,6 +965,79 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
 
     return true
   })
+}
+
+/** The match that has the made-up report: the home win in the first round of the Eredivisie. */
+export const madeUpReportMatch = { competition: 'Eredivisie', round: 'Speelronde 1' } as const
+
+/** The name that the made-up report gives as its source. */
+const madeUpReportSource = 'Verzonnen wedstrijdformulier'
+
+/**
+ * The line-up and the bench of sc Heerenveen in the made-up report, by the name in the made-up
+ * squad: `true` for the line-up. The shirt number is the one of the player in `players`.
+ */
+const madeUpReportOurs: [name: string, starter: boolean][] = [
+  ['Tjerk Brandsma', true],
+  ['Daan Boerema', true],
+  ['Jurre van der Kooi', true],
+  ['Ruben ten Hove', true],
+  ['Stijn de Haan', true],
+  ['Milan Reitsma', true],
+  ['Thijs Idzenga', true],
+  ['Rick Demo', true],
+  ['Teun Dummy', true],
+  ['Sander Monster', true],
+  ['Lennart Probeer', true],
+  ['Wessel Oosting', false],
+  ['Lars Wijbenga', false],
+  ['Gerben Tuinstra', false],
+  ['Joeri Haagsma', false],
+  ['Gerrit Nepper', false],
+  ['Marijn Sjabloon', false],
+  ['Sjoerd Altena', false],
+]
+
+/** The captain of sc Heerenveen in the made-up report. */
+const madeUpReportCaptain = 'Milan Reitsma'
+
+/**
+ * The line-up and the bench of the opponent, Testdorp FC, in the made-up report: shirt number,
+ * name and whether the player is in the line-up. The names are made up, like the club.
+ */
+const madeUpReportOpponent: [shirtNumber: number, name: string, starter: boolean][] = [
+  [1, 'Ruud Oefenman', true],
+  [2, 'Kees Teststraat', true],
+  [3, 'Dirk Proefland', true],
+  [4, 'Henk Maquette', true],
+  [5, 'Joop Voorbeeldlaan', true],
+  [6, 'Arjen Nepveld', true],
+  [7, 'Ties Demostad', true],
+  [8, 'Bert Sjabloonweg', true],
+  [9, 'Frank Dummydijk', true],
+  [10, 'Ronald Proefveld', true],
+  [11, 'Gijs Testwijk', true],
+  [12, 'Maarten Oefenpad', false],
+  [13, 'Sjaak Voorbeeldhof', false],
+  [14, 'Wim Maquettelaan', false],
+  [15, 'Cor Nepstraat', false],
+  [16, 'Evert Demoplein', false],
+]
+
+/** The captain of the opponent in the made-up report: the shirt number. */
+const madeUpReportOpponentCaptain = 5
+
+/**
+ * The goals of the made-up report, by the minute of the made-up goal of the first round: the
+ * scorer and the player who gave the assist. They are the goals of `madeUpGoals`.
+ */
+const madeUpReportGoals: Record<number, [scorer: string, assist: string]> = {
+  12: ['Rick Demo', 'Thijs Idzenga'],
+  25: ['Teun Dummy', 'Rick Demo'],
+  41: ['Sander Monster', 'Milan Reitsma'],
+  58: ['Lennart Probeer', 'Teun Dummy'],
+  77: ['Gerrit Nepper', 'Lennart Probeer'],
+  83: ['Rick Demo', 'Gerrit Nepper'],
 }
 
 /**
@@ -1043,6 +1123,137 @@ async function personsForMadeUpPlayers(db: Pick<Database, 'insert' | 'select' | 
       .set({ personId: person?.id ?? null })
       .where(eq(players.id, player.id))
   }
+}
+
+/**
+ * Puts a made-up report of both teams at the made-up match of the first round: a line-up and a
+ * bench for sc Heerenveen and for Testdorp FC, three substitutions of ours and two of theirs, a
+ * yellow card and a yellow-red card, a red card for the opponent, a penalty that the opponent
+ * took and our goalkeeper stopped, a penalty of ours that was missed, and the assist for every
+ * goal. It passes the rules in `@fansite/shared/match-report` without an error or a warning.
+ *
+ * The report needs the match, its goals and the made-up players, and the seeds of the matches
+ * and of the squad each call this when they are done, so it is there whichever of the two runs
+ * last. It does nothing when the match already has a report, when the match or a player is not
+ * there, and does not mark the goals as the editors' (`match_edits`): the import replaces the
+ * made-up matches with the real ones at its first read. Returns whether it put the report in.
+ */
+async function seedMadeUpReport(db: Pick<Database, 'insert' | 'select' | 'update'>, season: string, now: Date) {
+  const [match] = await db
+    .select({ id: matches.id })
+    .from(matches)
+    .where(
+      and(
+        eq(matches.season, season),
+        eq(matches.competition, madeUpReportMatch.competition),
+        eq(matches.round, madeUpReportMatch.round),
+      ),
+    )
+
+  if (match === undefined) {
+    return false
+  }
+
+  const [existing] = await db
+    .select({ id: matchReports.matchId })
+    .from(matchReports)
+    .where(eq(matchReports.matchId, match.id))
+  const squad = await db.select().from(players).where(eq(players.season, season))
+  const playerNamed = new Map(squad.map((player) => [player.name, player]))
+  const goals = await db.select().from(matchGoals).where(eq(matchGoals.matchId, match.id))
+
+  if (
+    existing !== undefined ||
+    goals.length !== Object.keys(madeUpReportGoals).length ||
+    madeUpReportOurs.some(([name]) => (playerNamed.get(name)?.shirtNumber ?? null) === null)
+  ) {
+    return false
+  }
+
+  await db.insert(matchReports).values({
+    matchId: match.id,
+    opponentComplete: true,
+    savedAt: now,
+    source: madeUpReportSource,
+    status: 'klaar',
+  })
+  await db.insert(matchAppearances).values([
+    ...madeUpReportOurs.map(([name, starter]) => {
+      const player = playerNamed.get(name)!
+
+      return {
+        captain: name === madeUpReportCaptain,
+        matchId: match.id,
+        name,
+        ours: true,
+        playerId: player.id,
+        shirtNumber: player.shirtNumber!,
+        starter,
+      }
+    }),
+    ...madeUpReportOpponent.map(([shirtNumber, name, starter]) => ({
+      captain: shirtNumber === madeUpReportOpponentCaptain,
+      matchId: match.id,
+      name,
+      ours: false,
+      playerId: null,
+      shirtNumber,
+      starter,
+    })),
+  ])
+
+  const appearances = await db.select().from(matchAppearances).where(eq(matchAppearances.matchId, match.id))
+  const ours = (name: string) => appearances.find((player) => player.ours && player.name === name)!
+  const theirs = (shirtNumber: number) =>
+    appearances.find((player) => !player.ours && player.shirtNumber === shirtNumber)!
+  const at = (player: { id: number; ours: boolean }, minute: number, stoppageMinutes: null | number = null) => ({
+    appearanceId: player.id,
+    matchId: match.id,
+    minute,
+    ours: player.ours,
+    stoppageMinutes,
+  })
+  const swap = (out: { id: number; ours: boolean }, on: { id: number }, minute: number) => ({
+    appearanceInId: on.id,
+    appearanceOutId: out.id,
+    matchId: match.id,
+    minute,
+    ours: out.ours,
+    stoppageMinutes: null,
+  })
+
+  await db
+    .insert(matchSubstitutions)
+    .values([
+      swap(ours('Thijs Idzenga'), ours('Gerrit Nepper'), 60),
+      swap(ours('Sander Monster'), ours('Marijn Sjabloon'), 65),
+      swap(ours('Milan Reitsma'), ours('Sjoerd Altena'), 75),
+      swap(theirs(11), theirs(14), 55),
+      swap(theirs(7), theirs(15), 70),
+    ])
+  await db.insert(matchCards).values([
+    { ...at(ours('Daan Boerema'), 34), kind: 'geel' as const },
+    { ...at(ours('Daan Boerema'), 70), kind: 'geel-rood' as const },
+    { ...at(theirs(4), 40), kind: 'geel' as const },
+    { ...at(theirs(9), 85), kind: 'rood' as const },
+  ])
+  await db.insert(matchIncidents).values([
+    { ...at(theirs(10), 22), kind: 'strafschop-gestopt' as const },
+    { ...at(ours('Milan Reitsma'), 50), kind: 'strafschop-gemist' as const },
+  ])
+
+  for (const goal of goals) {
+    const people = madeUpReportGoals[goal.minute]
+
+    if (people !== undefined) {
+      await db
+        .update(matchGoals)
+        .set({ appearanceId: ours(people[0]).id, assistAppearanceId: ours(people[1]).id })
+        .where(eq(matchGoals.id, goal.id))
+    }
+  }
+
+  return true
 }
 
 if (import.meta.main) {
