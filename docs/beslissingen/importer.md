@@ -2510,3 +2510,47 @@
   De migratie zelf de rijen laten maken (de regels staan in TypeScript, en een tweede kopie in SQL loopt uit de pas).
 - **Later:** `relevance-terms.ts` heeft nu ook de namen waarmee de rijen worden bewaard.
   _De regels van het filter_ en _Koppen over de tegenstander_ blijven gelden voor `relevance`.
+
+## De feiten van de oude fansite gaan via een bestand in de repository
+
+- **Datum:** 7 november 2026
+- **Besluit:** een script leest de lokale kopie van de oude database en schrijft JSON naar `apps/importer/data/oude-fansite/` (#875).
+  De import van de oude wedstrijden leest dat bestand en raakt de oude database nooit.
+- **Waarom:** de productie kan de oude database niet bereiken, en de gegevens veranderen niet meer.
+  Een bestand in de repository is te testen en te reviewen en is er voor elke omgeving.
+- **Alternatieven:** de import verbinden met de oude database (kan niet op de host).
+  De dump in de repository zetten (38 MB met persoonsgegevens van leden en e-mail, en ook de teksten van de oude site).
+
+## Uit de oude fansite gaan alleen wedstrijdfeiten mee
+
+- **Datum:** 7 november 2026
+- **Besluit:** het bestand bevat wedstrijden, uitslagen, doelpunten, kaarten, opstellingen met minuten, scheidsrechter, toeschouwers, de cijfers over hoekschoppen, buitenspel en overtredingen, de tegenstanders en de namen van onze spelers.
+  Het bevat geen verslagen of voorbeschouwingen (`wedstrijd_vsg` en `wedstrijd_vbg` op twee kolommen na), geen gegevens van leden, e-mail of de nieuwsbrief, en van een speler alleen zijn naam en code (geen geboortedatum, biografie, contract of foto).
+  Dit is een besluit van de projecteigenaar.
+- **Waarom:** de gegevens zijn van de projecteigenaar, wat de vraag naar de rechten van #414 voor wedstrijdgegevens oplost.
+  Teksten uit kranten en gegevens van personen horen er niet in.
+- **Alternatieven:** ook de teksten overnemen (de rechten van de krantenteksten zijn onduidelijk).
+
+## De oefenwedstrijden van de oude fansite gaan naar een Markdown-bestand
+
+- **Datum:** 7 november 2026
+- **Besluit:** het script schrijft `docs/oefenwedstrijden-2002-03.md`, een tabel met datum, tegenstander, thuis of uit, uitslag, de plaats uit de opmerking (zoals "op Terschelling") en de doelpuntenmakers van sc Heerenveen.
+  Spelers van de tegenstander (amateurclubs) staan er niet in.
+  Deze negen wedstrijden staan niet in de database.
+- **Waarom:** de projecteigenaar wil ze bewaren, maar ze horen niet bij de competities: ze zijn tegen amateurclubs en buitenlandse clubs.
+  Een tabel in de documentatie is genoeg.
+- **Alternatieven:** een competitie `Oefenwedstrijd` in de database (dan tonen alle lijsten ze).
+
+## De bestanden van de oude fansite zijn strikt en per seizoen
+
+- **Datum:** 8 november 2026
+- **Besluit:** het script schrijft `clubs.json`, `players.json` en een bestand per seizoen, `matches-<seizoen>.json`, met een versienummer.
+  De namen van de velden zijn Engels en leggen niets uit.
+  `readOldSiteFile` en `readOldSiteData` in `apps/importer/src/old-site-file.ts` lezen ze met strikte schema's van zod, die een onbekend veld weigeren.
+  Een test controleert de namen van alle velden in de bestanden tegen een lijst met toegestane namen (#875).
+  Het bestand staat in `.prettierignore`: het script schrijft de opmaak, dus de commit-hook maakt geen andere bytes.
+- **Waarom:** een bestand per seizoen houdt een wijziging in een review klein.
+  Een veld dat niet in het schema staat, zoals een geboortedatum, kan er niet in komen zonder dat de lezer en de test falen.
+  Een versienummer laat de import een bestand in een nieuwe vorm weigeren in plaats van fout lezen.
+- **Alternatieven:** één bestand met alle wedstrijden (ongeveer 2 MB aan één diff).
+  Een JSON-schema in een eigen bestand (nog een bestand om bij te houden naast de types).

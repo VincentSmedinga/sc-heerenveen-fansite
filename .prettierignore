@@ -7,3 +7,6 @@ pnpm-lock.yaml
 CHANGELOG.md
 # Written by drizzle-kit, in its own format.
 packages/db/drizzle/
+
+# Facts of the old fansite database, written by `pnpm export:old-site` in its own format.
+apps/importer/data/
