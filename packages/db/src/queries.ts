@@ -251,9 +251,9 @@ export async function findStaffOn(db: Database, role: StaffRole, day: string): P
 }
 
 /**
- * The day, the competition and the score of every match of every season, for the results per
- * head coach. Nothing else leaves the database (no goals, no opponent), and the order is by
- * day.
+ * The day, the competition, the score and the shoot-out of every match of every season, for the
+ * results per head coach, which counts a win on penalties as a win. Nothing else leaves the
+ * database (no goals, no opponent), and the order is by day.
  * The score is ours first, null while a match has none.
  */
 export async function listAllMatchDays(db: Database) {

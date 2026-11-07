@@ -1733,7 +1733,7 @@ describe('the matches and the table of a season', () => {
 
       expect(rows.map((match) => match.matchDate)).toEqual(['2010-09-12', first!.matchDate])
       expect(Object.keys(rows[0]!).sort()).toEqual(
-        ['competition', 'goalsAgainst', 'goalsFor', 'matchDate', 'status'].sort(),
+        ['competition', 'goalsAgainst', 'goalsFor', 'matchDate', 'penaltiesAgainst', 'penaltiesFor', 'status'].sort(),
       )
     })
 
