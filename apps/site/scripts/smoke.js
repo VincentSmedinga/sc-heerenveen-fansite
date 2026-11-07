@@ -18,7 +18,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { anchorProblems, publishedAnchors } from '../src/anchors.ts'
+import { anchorProblems, matchPageAnchors, publishedAnchors } from '../src/anchors.ts'
 import { iconCache, themeScriptCache } from '../src/cache-headers.ts'
 import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
@@ -331,6 +331,15 @@ async function checkAnchors() {
     ...publishedAnchors,
     '/updates': [...new Set([...(publishedAnchors['/updates'] ?? []), ...versions])],
   }
+  // The page of a match has the same anchors whatever its address, and its address depends on
+  // the day, so it comes from the sitemap: the first match that has a page.
+  const sitemap = await (await fetch(`${origin}/sitemap.xml`)).text()
+  const matchPage = [...sitemap.matchAll(/<loc>[^<]*?(\/wedstrijden\/\d{4}-\d{2}\/[^<]+)<\/loc>/g)][0]?.[1]
+
+  if (matchPage !== undefined) {
+    published[matchPage] = [...matchPageAnchors]
+  }
+
   const problems = []
 
   for (const [page, anchors] of Object.entries(published)) {
@@ -612,8 +621,9 @@ async function checkShareImage() {
 }
 
 /**
- * Fetches the sitemap and checks it: the pages of the site and then the page of each club, each
- * with the address of `siteOrigin` (the clubs only when the database has matches), and nothing
+ * Fetches the sitemap and checks it: the pages of the site, then the page of each club and the
+ * page of each match with a report, each with the address of `siteOrigin` (the clubs only when
+ * the database has matches), and nothing
  * but the addresses (no lastmod, changefreq or priority). The feed of Updates is not a page, so
  * it is not in it.
  */
@@ -625,15 +635,22 @@ async function checkSitemap(siteOrigin, { clubs: hasClubs }) {
   const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, location]) => location)
   const listed = pages.map(({ path }) => `${siteOrigin}${path}`)
   assert.deepEqual(locations.slice(0, listed.length), listed)
-  // Then the page of each club the made-up matches have, and nothing else.
-  const clubs = locations.slice(listed.length)
+  // Then the page of each club the made-up matches have, then the page of each match that has
+  // a report that is klaar, and nothing else.
+  const rest = locations.slice(listed.length)
+  const clubs = rest.filter((location) => location.startsWith(`${siteOrigin}/tegenstanders/`))
+  const reports = rest.filter((location) => location.startsWith(`${siteOrigin}/wedstrijden/`))
+  assert.equal(rest.length, clubs.length + reports.length)
   assert.equal(
     clubs.includes(`${siteOrigin}/tegenstanders/testdorp-fc`),
     hasClubs,
     'the page of a club is listed when there are matches',
   )
   assert.equal(clubs.length > 0, hasClubs)
-  assert.ok(clubs.every((location) => location.startsWith(`${siteOrigin}/tegenstanders/`)))
+  assert.ok(
+    reports.every((location) => /\/wedstrijden\/\d{4}-\d{2}\/\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/u.test(location)),
+    'the page of a match is the season, the day and the club',
+  )
   assert.doesNotMatch(xml, /lastmod|changefreq|priority|feed\.xml/)
 
   return sitemap
@@ -1212,8 +1229,20 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(playersHtml, /hf-navigation-bar/)
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#selectie', '#doelpuntenmakers', '#alle-tijden', '#bijzondere-doelpunten'],
+      // The seed makes up one match report that is klaar, so the three cards with its figures
+      // are there (#832): Alle spelers after the squad, Assists and Minuten after the rest.
+      [
+        '#selectie',
+        '#alle-spelers',
+        '#doelpuntenmakers',
+        '#alle-tijden',
+        '#bijzondere-doelpunten',
+        '#assists',
+        '#minuten',
+      ],
     )
+    assert.match(playersHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
+    assert.match(playersHtml, /Bron: eigen administratie/)
     // The made-up squad is whole: the sentence says so, the four positions are parts of the
     // card in the order of the goal to the front, and the shirt number comes before the name.
     const squadCard = /<section[^>]*aria-labelledby="selectie">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''

@@ -59,6 +59,9 @@
 @import url('./components/news-item/news-item.css');
 @import url('./components/discussion-item/discussion-item.css');
 @import url('./components/match/match.css');
+@import url('./components/match-header/match-header.css');
+@import url('./components/match-lineup/match-lineup.css');
+@import url('./components/match-timeline/match-timeline.css');
 @import url('./components/bar/bar.css');
 @import url('./components/chart/chart.css');
 @import url('./components/donut-chart/donut-chart.css');
@@ -70,6 +73,7 @@
 @import url('./components/short-staff/short-staff.css');
 @import url('./components/standings-table/standings-table.css');
 @import url('./components/record-table/record-table.css');
+@import url('./components/player-figures-table/player-figures.css');
 @import url('./components/data-table/data-table.css');
 @import url('./components/wikipedia-credit/wikipedia-credit.css');
 @import url('./components/article/article.css');

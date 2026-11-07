@@ -37,3 +37,25 @@ export const playersShortcuts = [
   { href: '#alle-tijden', label: 'Alle tijden' },
   { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
 ] as const
+
+/**
+ * The bar of /spelers for a season: the links above, and when the season has match reports
+ * the cards from them (#832) in the order of the page: the table Alle spelers after the squad
+ * in the main column, and the lists Assists and Minuten at the end of the sidebar. A season
+ * without reports has none of these cards, so the bar has no links to them.
+ */
+export function playersShortcutsFor(hasReports: boolean) {
+  if (!hasReports) {
+    return playersShortcuts
+  }
+
+  const [squad, ...cards] = playersShortcuts
+
+  return [
+    squad,
+    { href: '#alle-spelers', label: 'Alle spelers' },
+    ...cards,
+    { href: '#assists', label: 'Assists' },
+    { href: '#minuten', label: 'Minuten' },
+  ] as const
+}

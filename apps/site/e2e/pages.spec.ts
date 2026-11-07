@@ -5,7 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
-import { matchId, playedMatchId } from './matches'
+import { matchId, playedMatchId, reportPath } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -15,7 +15,8 @@ import { matchId, playedMatchId } from './matches'
 // `{draft}` and `{published}` in a path stand for the number of the made-up draft and the
 // made-up published article, and `{match}` for the first made-up match of this season that
 // is still to be played, which the database gives, and `{held}` for the match of the season
-// before it that has a made-up change of Wikipedia that is held back (see held-changes.ts).
+// before it that has a made-up change of Wikipedia that is held back (see held-changes.ts), and
+// `{report}` for the page of the made-up match that has a report (see matches.ts).
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -48,6 +49,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/kies', status: 200 },
   { path: '/wedstrijden/2099-00', status: 404 },
   { path: '/wedstrijden/onzin', status: 404 },
+  // The page of a match: the made-up match with a report that is klaar, and the addresses that
+  // say "niet gevonden": another day, a part that is no match, and a season without matches.
+  { path: '{report}', status: 200 },
+  { path: `/wedstrijden/${earlierSeasonSlug()}/2000-01-01-testdorp-fc`, status: 404 },
+  { path: '/wedstrijden/2026-27/onzin', status: 404 },
+  { path: '/wedstrijden/2099-00/2099-01-01-testdorp-fc', status: 404 },
   // The figures of the current season, of an earlier season, the route behind the season
   // picker and the addresses that say "niet gevonden", as for Wedstrijden above.
   { path: '/cijfers', status: 200 },
@@ -263,6 +270,7 @@ async function withNumbers(path: string) {
         .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
         .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '{held}')
         .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '{played}')
+        .replace('{report}', path.includes('{report}') ? await reportPath() : '{report}')
     : path
 }
 

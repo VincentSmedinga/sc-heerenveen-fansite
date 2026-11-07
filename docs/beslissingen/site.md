@@ -786,6 +786,8 @@
 - **Later:** zie _De regel van een wedstrijd zegt niet "Thuis" of "Uit"_ en _De volgorde van de regels van een wedstrijd hangt af van de competitie_ (3 november 2026).
   De regel noemt "Thuis" en "Uit" niet meer, en de competitie en de ronde staan niet altijd bovenaan.
   De thuisclub staat nog eerst, de uitslag is nog "2–0" vanaf de thuiskant, en de aftrap is nog een `Time`.
+- **Later:** zie _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026).
+  Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -3089,6 +3091,35 @@
 - **Alternatieven:** de standaard van Next.js houden (de meeste polyfills blijven niet door deze lijst maar door Next.js zelf); een lijst met een vaste grens zoals de laatste twee versies (een ander beleid dan we besloten); de themaknop, de navigatie en `PullToRefresh` omzetten naar servercomponenten of ze later laden (geeft hooguit 10 KiB, en verandert het gedrag of de toegankelijkheid van onderdelen die elke bezoeker gebruikt).
 - **Later:** dit vervangt het deel van _Alleen Baseline 'widely available', bewaakt door linters_ in `werkruimte.md` (21 oktober 2026) dat een `browserslist` verwerpt.
 
+## De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt
+
+- **Datum:** 7 november 2026
+- **Besluit:** het adres heeft altijd het seizoen, ook voor het lopende seizoen, en de datum van de wedstrijd en de `slug` van de tegenstander, zoals `/wedstrijden/2026-27/2026-11-01-fc-twente` (#831).
+  De pagina bestaat als het verslag de status `klaar` heeft en de regels van `@fansite/shared/match-report` geen fout geven.
+  In elk ander geval is het adres "niet gevonden".
+  De regel van een wedstrijd op Wedstrijden is alleen een link als de pagina bestaat.
+- **Waarom:** een wedstrijd zonder verslag heeft niets te melden dat Wedstrijden niet al zegt, en een pagina die half klopt is erger dan geen pagina.
+  Datum en club blijven leesbaar in een adres en botsen niet met `/wedstrijden/<seizoen>`.
+- **Alternatieven:** het nummer van de wedstrijd in het adres (niet te lezen en niet te raden); een pagina voor elke gespeelde wedstrijd (dat zijn er honderden die leeg zouden zijn).
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **Wat de pagina controleert:** `getPublicReports` leest de verslagen van een seizoen met status `klaar` en laat de regels over elk verslag lopen.
+    Een verslag dat sinds het opslaan niet meer klopt, bijvoorbeeld omdat de import de uitslag veranderde, heeft geen pagina en geen link, en staat niet in de sitemap.
+    De lezingen worden net als de wedstrijden bewaard: vijf minuten voor het lopende seizoen, een uur voor een seizoen dat voorbij is.
+  - **De link:** de regel krijgt de link "Het verslag", met de clubs in de verborgen tekst, als laatste regel van de wedstrijd (`Match` heeft daarvoor `reportHref`).
+    De sleutel is de competitie met de ronde, want dat is één wedstrijd in een seizoen.
+    De scheidsrechter en het aantal toeschouwers staan nog steeds niet in de regel (#416).
+  - **De onderdelen:** het ontwerpsysteem krijgt `MatchHeader` (de clubs met de uitslag en de feiten), `MatchTimeline` (het verloop) en `MatchLineup` (de opstelling van één team).
+    Ze nemen gewone gegevens en schrijven alles in woorden: de naam van de gebeurtenis ("Gele kaart", "Doelpunt uit een strafschop", "Wissel"), de minuut voor een schermlezer ("Minuut 45 plus 2") en wat een speler overkwam in een zin.
+    Een kleur of een teken is nergens het enige teken.
+  - **Een eigen doelpunt** heeft in het verloop het team van de speler die het maakte, zodat de regel zegt wiens speler het was; de uitslag telt het voor het andere team.
+  - **De wissels bij de speler:** wie eruit gaat heeft "Gewisseld in de 61e minuut, vervangen door Jansen" en wie erin komt "Ingevallen in de 61e minuut voor Jansen".
+    Het issue gaf "Gewisseld in de 61e minuut voor Jansen" als voorbeeld, maar die zin kan twee kanten op.
+  - **De naam van een speler van ons** komt uit de persoon (voornaam en achternaam) of, zonder persoon, uit de zoekterm van de speler als achternaam.
+    Een speler van de tegenstander is één naam in het gewone gewicht: we raden de delen niet.
+  - **De tegenstander die niet af is** (`opponent_complete` uit) heeft in plaats van een opstelling één zin: "De opstelling van <club> hebben we niet."
+    Wat we van hem hebben, zoals zijn doelpunten, staat wel in het verloop.
+  - **De bron:** de pagina noemt in de zijbalk de eigen administratie (met de bron van het verslag erachter) en de bestaande vermelding van de Nederlandse Wikipedia, voor de uitslag, de aftrap en de doelpunten die Wikipedia ook heeft.
+
 ## Het verslag is een eigen scherm bij de wedstrijd: `/beheer/wedstrijden/<nummer>/verslag`
 
 - **Datum:** 7 november 2026
@@ -3240,3 +3271,47 @@
 - **Keuzes bij het bouwen** (7 november 2026):
   - **Zonder verslag** vraagt het scherm niets, ook al staan de doelpunten van Wikipedia in het formulier: die vervangt het plakken ook, en het verslag in de database verandert toch niet.
   - **Zonder JavaScript** is de bevestiging een vakje dat het scherm bij een fout aangevinkt laat staan, samen met de tekst.
+
+## De kaarten Assists, Minuten en Alle spelers lezen alleen de verslagen, en zeggen hoeveel wedstrijden ze tellen
+
+- **Datum:** 7 november 2026
+- **Besluit:** `/spelers` krijgt drie kaarten met cijfers uit de verslagen van #828, die #493 vroeg (#832): de ranglijsten Assists en Minuten en de tabel Alle spelers.
+  Ze tellen alleen de wedstrijden die een verslag met status `klaar` hebben, in de competities die de schakelaar van #406 kiest, en zeggen het onder de kaart: "Op basis van 12 van de 14 gespeelde wedstrijden."
+  Hebben alle gespeelde wedstrijden een verslag, dan staat er "Op basis van alle 14 gespeelde wedstrijden."
+  - **Een seizoen zonder verslag dat `klaar` is,** heeft de kaarten niet en geen zin erover; de balk "Op deze pagina:" heeft er dan ook geen links naar.
+    Heeft het seizoen wel een verslag, maar niet in de gekozen competitie, dan blijven de kaarten staan met "Er is nog geen assist in de verslagen" en "Op basis van 0 van de 12 gespeelde wedstrijden", zodat de pagina niet verspringt als je de schakelaar omzet.
+  - **Waar ze staan:** Alle spelers staat in de hoofdkolom onder de Selectie, want de tabel is breed.
+    Assists en Minuten staan achteraan in de zijkolom, voor de bronvermelding.
+    De balk noemt ze in die volgorde.
+  - **De ranglijsten** hebben de top 5, met alle spelers die een plek delen, zoals de doelpuntenmakers: wie evenveel heeft, deelt de plek en de volgende plek wordt overgeslagen.
+    Een speler zonder assists of zonder minuten staat er niet in, en bij gelijke aantallen telt de achternaam.
+  - **De tabel** heeft een rij voor elke speler die in een verslag stond, dus ook een speler van de bank die niet inviel, met nullen.
+    De volgorde is minuten en dan achternaam.
+    De kolommen zijn G gespeeld (ook als invaller), B basis, I invallers, M minuten, D doelpunten, A assists, Y geel en R rood; een geel-rode kaart telt als een gele en een rode, en dat staat onder de tabel.
+    De minuten zijn vet, want de lijst is erop gesorteerd.
+  - **De letters** komen uit `tableColumns`, dat er zes bij krijgt (B, I, M, A, Y en R); A was gereserveerd voor deze tabel.
+    G is al gelijk en gespeeld, dus de gele kaarten hebben Y.
+  - **De bron:** onder elke kaart en onder het plaatje staat "Bron: eigen administratie".
+    Daarmee loopt deze kaart vooruit op de bronvermelding van #831: zodra die er is, neemt de pagina die over.
+  - **Een geel-rode kaart en een rode kaart** tellen als de kaarten die ze zijn; de minuten van een speler die eruit ging of werd weggestuurd, zijn die van `minutesPlayed` (zie _Minuten gespeeld tellen op de klok, in hele minuten_ in `hosting-en-data.md`).
+- **Waarom:** de lezer moet weten hoe compleet een cijfer is, en een seizoen waarvan we de helft hebben, mag toch iets tonen.
+  Zo kunnen oudere seizoenen later volgen zonder dat een kaart verandert.
+- **Alternatieven:** alleen tonen als elke wedstrijd een verslag heeft (de kaart blijft dan maanden weg); stilzwijgend de cijfers van Wikipedia aanvullen (twee bronnen in één getal); een eigen letter voor geel en rood die op G en R lijkt (G is al twee woorden).
+- **Later:** vervangt de kaarten die #493 vroeg, en vult _De cijfers van een speler staan in een eigen tabel, per seizoen en competitie_ in `importer.md` aan.
+
+## De cijfers van Wikipedia blijven een controle op onze verslagen, en een verschil gaat naar het logboek
+
+- **Datum:** 7 november 2026
+- **Besluit:** de kaarten van #832 lezen `player_season_stats` niet, maar de doelpunten ervan worden vergeleken met die van de verslagen, en een verschil gaat in het logboek van het beheer (#832).
+  Het is een regel `player.stats-differ` met de speler (`item_id`) en de tekst "Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2"; de pagina's tonen het niet.
+  - **Wanneer:** op twee momenten waarop een verschil kan ontstaan (`logReportGoalDifferences` in `@fansite/db/match-reports`): als de importer nieuwe cijfers in de tabel van de selectie zet (zonder account, "de import"), en als de redactie een verslag met status `klaar` opslaat (met het account van de redacteur).
+    Het logboek wordt alleen aangevuld en door geen code gelezen (een test bewaakt het), dus de functie kan niet zien wat er al staat: zonder gebeurtenis schrijft ze niets, en elke gebeurtenis schrijft een regel per speler die afwijkt.
+  - **Alleen als het te vergelijken valt:** elke gespeelde wedstrijd van de competitie heeft een verslag dat `klaar` is.
+    Mist een verslag, dan hebben de verslagen vanzelf minder doelpunten, en dat is geen nieuws.
+    Een speler die de tabel niet heeft, telt daar 0 doelpunten.
+  - **Een fout bij het schrijven** is bij de import een waarschuwing en stopt hem niet.
+  - **De migratie** `0046_add_player_stats_differ_audit_action` zet de actie in de lijst van `audit_log.action`.
+    Ze voegt alleen een waarde toe en kan opnieuw draaien.
+- **Waarom:** de nieuwe bron wint omdat hij preciezer is, en de cijfers van Wikipedia zijn een controle op onze invoer.
+  Een verschil is voor de redactie, niet voor de bezoeker.
+- **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); bij elke lezing van de importer schrijven en zelf bijhouden wat er al staat (het logboek wordt niet gelezen, dus elke run zou het herhalen); vergelijken ook als een verslag ontbreekt (een regel per speler die niets zegt).

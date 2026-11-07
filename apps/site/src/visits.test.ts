@@ -217,6 +217,13 @@ describe('visitOf', () => {
     expect(visitOf(request('/wedstrijden/2025-26'))).toMatchObject({ path: '/wedstrijden' })
   })
 
+  it('counts the page of a match as a visit to /wedstrijden, and not an address that is not one', () => {
+    expect(visitOf(request('/wedstrijden/2025-26/2025-11-01-fc-twente'))).toMatchObject({ path: '/wedstrijden' })
+    expect(visitOf(request('/wedstrijden/2025-27/2025-11-01-fc-twente'))).toBeUndefined()
+    expect(visitOf(request('/wedstrijden/2025-26/onzin'))).toBeUndefined()
+    expect(visitOf(request('/cijfers/2025-26/2025-11-01-fc-twente'))).toBeUndefined()
+  })
+
   it('counts the page of a season of Cijfers as a visit to /cijfers', () => {
     expect(visitOf(request('/cijfers'))).toMatchObject({ path: '/cijfers' })
     expect(visitOf(request('/cijfers/2025-26'))).toMatchObject({ path: '/cijfers' })
@@ -284,9 +291,9 @@ describe('visitOf', () => {
 
   it('has a rule for every page of the site', () => {
     // The pages that are on no list on purpose: the admin, the article and the page of a club,
-    // which the database confirms, and the page of a season, which counts as /wedstrijden,
-    // /cijfers or /spelers. A slot of the layout (@shortcuts) is not a page
-    // of its own.
+    // which the database confirms, the page of a season, which counts as /wedstrijden, /cijfers
+    // or /spelers, and the page of a match, which counts as /wedstrijden. A slot of the layout
+    // (@shortcuts) is not a page of its own.
     const withoutCount = [
       '/beheer',
       '/beheer/[...]',
@@ -295,6 +302,7 @@ describe('visitOf', () => {
       '/spelers/[seizoen]',
       '/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',
+      '/wedstrijden/[seizoen]/[wedstrijd]',
     ]
     const paths = readdirSync(`${import.meta.dirname}/app`, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name === 'page.tsx')

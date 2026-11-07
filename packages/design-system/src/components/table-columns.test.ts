@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { reservedTableColumns, tableColumns, tableLegend } from './table-columns'
+import { tableColumns, tableLegend } from './table-columns'
 
-const all = [...Object.values(tableColumns), ...Object.values(reservedTableColumns)]
+const all = Object.values(tableColumns)
 
 describe('tableColumns', () => {
   it('holds the set of the abbreviations and their words', () => {
@@ -11,17 +11,22 @@ describe('tableColumns', () => {
         Object.entries(tableColumns).map(([key, { abbreviation, name }]) => [key, `${abbreviation} ${name}`]),
       ),
     ).toEqual({
+      assists: 'A assists',
       drawn: 'G gelijk',
       goalDifference: 'D doelsaldo',
       goals: 'D doelpunten',
       goalsPerMatch: 'D/W doelpunten per wedstrijd',
       lost: 'V verlies',
+      minutes: 'M minuten',
       played: 'G gespeeld',
       points: 'P punten',
       pointsPerMatch: 'P punten per wedstrijd',
+      red: 'R rood',
+      started: 'B basis',
+      substituted: 'I invallers',
       won: 'W winst',
+      yellow: 'Y geel',
     })
-    expect(reservedTableColumns.assists).toEqual({ abbreviation: 'A', name: 'assists' })
   })
 
   it('gives every abbreviation one letter, except D/W', () => {

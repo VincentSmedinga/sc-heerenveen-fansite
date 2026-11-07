@@ -9,7 +9,11 @@ import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
 import {
+  findReportedMatch,
+  findReportGoalDifferences,
+  listReportedMatches,
   listSeasonReports,
+  logReportGoalDifferences,
   matchForRules,
   readMatchReport,
   readPlayerReportStats,
@@ -17,6 +21,7 @@ import {
 } from './match-reports.ts'
 import {
   adminUsers,
+  auditLog,
   matchAppearances,
   matchCards,
   matches,
@@ -24,7 +29,9 @@ import {
   matchIncidents,
   matchReports,
   matchSubstitutions,
+  persons,
   players,
+  playerSeasonStats,
 } from './schema.ts'
 import { seasonOf } from './season.ts'
 import { madeUpReportMatch, seedMatches, seedSquad } from './seed.ts'
@@ -42,6 +49,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM admin_users')
@@ -526,6 +534,9 @@ describe('the numbers of the players from the reports', () => {
     goals: 0,
     matches: 0,
     minutes: 0,
+    personFamilyName: null,
+    personFamilyNamePrefix: null,
+    personGivenName: null,
     redCards: 0,
     starts: 0,
     substitutions: 0,
@@ -603,6 +614,42 @@ describe('the numbers of the players from the reports', () => {
     expect(found.map((row) => [row.name, row.goals])).toEqual([
       ['Jan Bank', 0],
       ['Sander Vos', 0],
+    ])
+  })
+
+  it('gives a player of the bench who did not come on an entry with zeros, and a player of the opponent none', async () => {
+    const matchId = await playedMatch()
+    const bench = await player('Jan Bank', 14)
+
+    await report(matchId)
+    await appearance(matchId, { name: 'Jan Bank', playerId: bench, shirtNumber: 14, starter: false })
+    await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 4, starter: false })
+
+    expect(await readPlayerReportStats(database.db, season)).toEqual([{ ...zero, name: 'Jan Bank', playerId: bench }])
+  })
+
+  it('gives the name of the person behind a player in parts, for the player who has one', async () => {
+    const matchId = await playedMatch()
+    const [person] = await database.db
+      .insert(persons)
+      .values({
+        familyName: 'Aken',
+        familyNamePrefix: 'van',
+        givenName: 'Joost',
+        name: 'Joost van Aken',
+        wikipediaPage: 'Joost van Aken',
+      })
+      .$returningId()
+    const [inserted] = await database.db
+      .insert(players)
+      .values({ name: 'Joost van Aken', personId: person!.id, searchTerm: 'van Aken', season, shirtNumber: 4 })
+      .$returningId()
+
+    await report(matchId)
+    await appearance(matchId, { name: 'Joost van Aken', playerId: inserted!.id, shirtNumber: 4 })
+
+    expect(await readPlayerReportStats(database.db, season)).toMatchObject([
+      { personFamilyName: 'Aken', personFamilyNamePrefix: 'van', personGivenName: 'Joost', playerId: inserted!.id },
     ])
   })
 
@@ -686,5 +733,184 @@ describe('the made-up report of the seed', () => {
       yellowCards: 1,
       yellowRedCards: 1,
     })
+  })
+})
+
+describe('the goals of the reports against the squad table of Wikipedia', () => {
+  /** One match in the league with a report that is klaar: Oyen scores. */
+  async function oneMatch(status: 'bezig' | 'klaar' = 'klaar') {
+    const oyen = await player('Luca Oyen', 9)
+    const vos = await player('Sander Vos', 10)
+    const matchId = await playedMatch()
+
+    await report(matchId, status)
+
+    const o = await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+
+    await database.db.insert(matchGoals).values({ appearanceId: o, matchId, minute: 12, ours: true, player: 'Oyen' })
+
+    return { matchId, oyen, vos }
+  }
+
+  const table = (playerId: number, goals: number, competition: 'Eredivisie' | 'KNVB Beker' = 'Eredivisie') =>
+    database.db.insert(playerSeasonStats).values({ appearances: 1, assists: 0, competition, goals, playerId, season })
+
+  it('finds a player whose goals differ, and counts a player the table has not as 0 there', async () => {
+    const { oyen, vos } = await oneMatch()
+
+    await table(oyen, 2)
+    await table(vos, 1)
+
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([
+      { competition: 'Eredivisie', fromReports: 1, fromWikipedia: 2, name: 'Luca Oyen', playerId: oyen },
+      { competition: 'Eredivisie', fromReports: 0, fromWikipedia: 1, name: 'Sander Vos', playerId: vos },
+    ])
+  })
+
+  it('finds nothing when the numbers agree', async () => {
+    const { oyen, vos } = await oneMatch()
+
+    await table(oyen, 1)
+    await table(vos, 0)
+
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([])
+  })
+
+  it('compares a competition only when every played match of it has a report that is klaar', async () => {
+    const { oyen } = await oneMatch()
+
+    await table(oyen, 5)
+    // A second match of the league has no report: the reports are expected to have fewer goals.
+    await playedMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([])
+
+    // A report that is bezig does not count either.
+    await database.db.delete(matches).where(eq(matches.round, 'Speelronde 2'))
+    await database.db.update(matchReports).set({ status: 'bezig' })
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([])
+  })
+
+  it('compares each competition on its own, and nothing when the table has no numbers for it', async () => {
+    const { oyen } = await oneMatch()
+
+    await playedMatch({ competition: 'KNVB Beker', matchDate: '2026-08-15', round: 'Eerste ronde' })
+    // The league is compared and agrees; the cup has no report; there is no table for another.
+    await table(oyen, 1)
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([])
+    expect(await findReportGoalDifferences(database.db, '2025/26')).toEqual([])
+  })
+
+  it('writes each difference in the log, for the player, with the account it is given or as the import', async () => {
+    const { oyen, vos } = await oneMatch()
+
+    await table(oyen, 2)
+    await table(vos, 1)
+
+    const now = new Date('2026-11-07T12:00:00Z')
+
+    expect(await logReportGoalDifferences(database.db, season, null, now)).toBe(2)
+    expect(await database.db.select().from(auditLog).orderBy(auditLog.id)).toMatchObject([
+      {
+        action: 'player.stats-differ',
+        createdAt: now,
+        detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2',
+        itemId: oyen,
+        reason: null,
+        userId: null,
+      },
+      { detail: 'Doelpunten Eredivisie 2026/27: verslagen 0, Wikipedia 1', itemId: vos },
+    ])
+
+    const [account] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'sanne@example.org', role: 'beheerder' })
+      .$returningId()
+
+    await logReportGoalDifferences(database.db, season, account!.id, now)
+
+    expect((await database.db.select().from(auditLog)).at(-1)).toMatchObject({ userId: account!.id })
+  })
+
+  it('writes nothing when the numbers agree or nothing can be compared', async () => {
+    const { oyen, vos } = await oneMatch()
+
+    await table(oyen, 1)
+    await table(vos, 0)
+
+    expect(await logReportGoalDifferences(database.db, season, null)).toBe(0)
+    expect(await logReportGoalDifferences(database.db, '2025/26', null)).toBe(0)
+    expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+})
+
+describe('the matches with a report that is klaar', () => {
+  it('gives the match with its report, the slug of the opponent and the names of our players', async () => {
+    const matchId = await playedMatch()
+    const oyen = await player('Luca Oyen', 9)
+
+    await database.db.update(players).set({ searchTerm: 'Oyen' }).where(eq(players.id, oyen))
+    await report(matchId)
+    await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 1 })
+
+    const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
+
+    expect(found?.match).toMatchObject({ id: matchId, opponent: 'Testdorp FC', round: 'Speelronde 1' })
+    expect(found?.clubSlug).toBe('testdorp-fc')
+    expect(found?.stored.appearances.map((row) => row.name)).toEqual(['Luca Oyen', 'Gijs Test'])
+    expect([...(found?.names.values() ?? [])]).toEqual([
+      { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Oyen' },
+    ])
+  })
+
+  it('finds a match by its season, its day and its opponent, and nothing else', async () => {
+    const matchId = await playedMatch()
+
+    await report(matchId)
+
+    const find = (values: { clubSlug?: string; matchDate?: string; season?: string }) =>
+      findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season, ...values })
+
+    expect(await find({})).toBeDefined()
+    expect(await find({ clubSlug: 'andere-club' })).toBeUndefined()
+    expect(await find({ matchDate: '2026-08-09' })).toBeUndefined()
+    expect(await find({ season: '2025/26' })).toBeUndefined()
+  })
+
+  it('leaves out a match without a report, one that is bezig, and one that is not played', async () => {
+    const none = await playedMatch({ round: 'Speelronde 1' })
+    const bezig = await playedMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
+    const klaar = await playedMatch({ matchDate: '2026-08-22', round: 'Speelronde 3' })
+    const scheduled = await playedMatch({
+      goalsAgainst: null,
+      goalsFor: null,
+      matchDate: '2026-08-29',
+      round: 'Speelronde 4',
+      status: 'scheduled',
+    })
+
+    await report(bezig, 'bezig')
+    await report(klaar)
+    await report(scheduled)
+
+    const list = await listReportedMatches(database.db, season)
+
+    expect(list.map((row) => row.match.id)).toEqual([klaar])
+    expect(none).toBeDefined()
+    expect(await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-15', season })).toBe(
+      undefined,
+    )
+  })
+
+  it('gives the matches of a season in the order they were played, and no other season', async () => {
+    const second = await playedMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
+    const first = await playedMatch({ matchDate: '2026-08-08', round: 'Speelronde 1' })
+    const other = await playedMatch({ matchDate: '2025-08-15', round: 'Speelronde 1', season: '2025/26' })
+
+    for (const id of [second, first, other]) {
+      await report(id)
+    }
+
+    expect((await listReportedMatches(database.db, season)).map((row) => row.match.id)).toEqual([first, second])
   })
 })

@@ -7,6 +7,7 @@ import type { FinalPlace } from '#src/matches'
 
 import { getFinalPlaces, getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
+import { getReportAddresses } from '#src/report-data'
 import { leagueResultsData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -19,6 +20,11 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+}))
+
+vi.mock('#src/report-data', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getReportAddresses: vi.fn(),
 }))
 
 // The afternoon of Friday 23 October 2026 in the Netherlands.
@@ -55,12 +61,56 @@ beforeEach(() => {
   vi.mocked(getLeagueResults).mockResolvedValue([])
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+  vi.mocked(getReportAddresses).mockReset()
+  vi.mocked(getReportAddresses).mockResolvedValue(new Map())
 })
 
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllEnvs()
+})
+
+describe('the links to the pages of the matches', () => {
+  it('has no link in the results when no match has a page', async () => {
+    expect(resultCards(await render())).not.toContain('Het verslag')
+  })
+
+  it('ends the line of a match that has a page with a link to it, and leaves the other lines plain', async () => {
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['Eredivisie|Speelronde 7', '/wedstrijden/2026-27/2026-09-20-oud-resultaat']]),
+    )
+
+    const html = await render()
+    const links = [...html.matchAll(/<a[^>]*href="(\/wedstrijden\/2026-27\/[^"]*)"[^>]*>(.*?)<\/a>/gu)]
+
+    expect(links.map((link) => link[1])).toEqual(['/wedstrijden/2026-27/2026-09-20-oud-resultaat'])
+    expect(links[0]?.[2]).toContain('Het verslag')
+    expect(resultCards(html).match(/Het verslag/gu)).toHaveLength(1)
+  })
+
+  it('does not show the referee in the line, also for a match that has a page', async () => {
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['Eredivisie|Speelronde 7', '/wedstrijden/2026-27/2026-09-20-oud-resultaat']]),
+    )
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
+    })
+
+    expect(await render()).not.toContain('Pieter Maquette')
+  })
+
+  it('shows the results without links, and says why in the log, when the pages cannot be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getReportAddresses).mockRejectedValue(new Error('boem'))
+
+    const html = await render()
+
+    expect(resultCards(html)).not.toContain('Het verslag')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the match reports'))
+  })
 })
 
 describe('the page /wedstrijden', () => {

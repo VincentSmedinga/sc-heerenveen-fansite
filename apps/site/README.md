@@ -286,6 +286,10 @@ De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [READM
 `getMatchData(season)` in `src/matches.ts` vraagt één seizoen en bewaart het antwoord vijf minuten voor het lopende seizoen en een uur voor een eerder seizoen; zonder seizoen geeft het het lopende (`seasonOf`), en dat doet de homepage altijd.
 Elk seizoen heeft één adres: `/wedstrijden` is het lopende seizoen en `/wedstrijden/2025-26` een eerder seizoen (`app/wedstrijden/[seizoen]`).
 Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, en een seizoen dat niet in de database staat, een seizoen in de toekomst en een adres dat geen seizoen is, geven "niet gevonden".
+Een wedstrijd met een verslag dat klaar is en klopt, heeft een pagina op `/wedstrijden/2026-27/2026-10-24-testdorp-fc`: het seizoen, de datum en de `slug` van de tegenstander (`app/wedstrijden/[seizoen]/[wedstrijd]`).
+`src/report-data.ts` leest die verslagen (`getPublicReports`, bewaard zoals de wedstrijden) en laat de regels van `@fansite/shared/match-report` er elk een keer over lopen; een verslag dat `bezig` is of niet klopt heeft geen pagina, geen link en geen plek in de sitemap.
+`src/report-view.ts` maakt er het verloop en de opstellingen van, in woorden, voor `MatchTimeline` en `MatchLineup`.
+De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`).
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
@@ -557,7 +561,13 @@ De cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze
 Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
 De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
 Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
-De balk "Op deze pagina:" heeft drie links, naar de drie kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`).
+De balk "Op deze pagina:" heeft vier links, naar de vier kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`), en zeven bij een seizoen met verslagen (zie hieronder).
+De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder de selectie, Assists en Minuten achteraan in de zijkolom.
+Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
+`src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
+Slaat de redactie een verslag als `klaar` op, dan schrijft `saveReport` een regel `player.stats-differ` in het logboek voor elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia.
+De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playersShortcutsFor`, met `seasonHasReports`).
+Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
 
 ### De tegenstanders

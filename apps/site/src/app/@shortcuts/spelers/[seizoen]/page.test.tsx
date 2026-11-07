@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '#src/matches'
-import { playersShortcuts } from '#src/statisticsShortcuts'
+import { seasonHasReports } from '#src/season-report-figures'
+import { playersShortcuts, playersShortcutsFor } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 
 import SeasonPlayersShortcuts from './page'
@@ -13,7 +14,12 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getMatchSeasons: vi.fn(),
 }))
 
+// Whether the season has reports is made up too: it is read from the database.
+vi.mock('#src/season-report-figures', () => ({ seasonHasReports: vi.fn() }))
+
 beforeEach(() => {
+  vi.mocked(seasonHasReports).mockReset()
+  vi.mocked(seasonHasReports).mockResolvedValue(false)
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(new Date('2026-10-23T13:40:00Z'))
   vi.mocked(getMatchData).mockReset()
@@ -62,5 +68,37 @@ describe('the bar of the page Spelers of an earlier season', () => {
     vi.mocked(getMatchData).mockRejectedValue(new Error('no database'))
 
     expect(await render('2025-26')).toBe('')
+  })
+})
+
+describe('the links to the cards with the figures of the match reports, in an earlier season', () => {
+  it('has the links to Alle spelers, Assists and Minuten, in the order of the cards, when the season has reports', async () => {
+    vi.mocked(seasonHasReports).mockResolvedValue(true)
+
+    const html = await render('2025-26')
+    const found = [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+      href,
+      label,
+    ])
+
+    expect(found).toEqual([
+      ['#selectie', 'Selectie'],
+      ['#alle-spelers', 'Alle spelers'],
+      ['#doelpuntenmakers', 'Doelpuntenmakers'],
+      ['#alle-tijden', 'Alle tijden'],
+      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
+      ['#assists', 'Assists'],
+      ['#minuten', 'Minuten'],
+    ])
+    expect(seasonHasReports).toHaveBeenCalledWith('2025/26')
+    expect(playersShortcutsFor(true)).toHaveLength(7)
+  })
+
+  it('has no link to them when the season has no report that is klaar', async () => {
+    const html = await render('2025-26')
+
+    expect(html).not.toContain('href="#alle-spelers"')
+    expect(html).not.toContain('href="#assists"')
+    expect(html).not.toContain('href="#minuten"')
   })
 })

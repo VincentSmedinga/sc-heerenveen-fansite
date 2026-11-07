@@ -821,3 +821,24 @@ describe('the scorers', () => {
     expect(planned).toBeTruthy()
   })
 })
+
+describe('Match with a page of its own', () => {
+  it('ends with the link "Het verslag" for a played match that has a page, with the clubs in its name', () => {
+    const { container } = render(<Match {...played} reportHref="/wedstrijden/2026-27/2026-10-11-testdorp-fc" />)
+    const link = container.querySelector('a')
+
+    expect(link?.getAttribute('href')).toBe('/wedstrijden/2026-27/2026-10-11-testdorp-fc')
+    expect(link?.textContent).toBe('Het verslag van sc Heerenveen tegen Testdorp FC')
+    expect(container.querySelector('.hf-match-report')).not.toBeNull()
+  })
+
+  it('names the clubs of a match away in the order they are announced', () => {
+    const { container } = render(<Match {...played} home={false} reportHref="#verslag" />)
+
+    expect(container.querySelector('a')?.textContent).toBe('Het verslag van Testdorp FC tegen sc Heerenveen')
+  })
+
+  it('has no link for a match without a page', () => {
+    expect(render(<Match {...played} />).container.querySelector('a')).toBeNull()
+  })
+})

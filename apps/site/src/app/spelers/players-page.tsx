@@ -4,15 +4,17 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { parseCompetition } from '#src/competition'
+import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
+import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
@@ -84,6 +86,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
 
   const allTime = await loadAllTime()
   const stats = await loadStats(season)
+  const figures = await loadFigures(season, competition)
   const { data, seasons } = loaded
   const current = season === seasonOf(new Date())
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
@@ -110,6 +113,14 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           place="spelers"
         />
         <SeasonSquadCard squad={squad} />
+        {figures?.seasonHasReports === true && (
+          <AllPlayersCard
+            competition={competition}
+            figures={figures}
+            season={season}
+            seasonOnImage={current ? undefined : season}
+          />
+        )}
       </Page.Main>
       <Page.Sidebar aria-label="Meer cijfers over de spelers">
         <TopScorersCard
@@ -125,6 +136,24 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           matches={data.matches}
           seasonOnImage={current ? undefined : season}
         />
+        {figures?.seasonHasReports === true && (
+          <>
+            <RankingCard
+              competition={competition}
+              figure="assists"
+              figures={figures}
+              season={season}
+              seasonOnImage={current ? undefined : season}
+            />
+            <RankingCard
+              competition={competition}
+              figure="minutes"
+              figures={figures}
+              season={season}
+              seasonOnImage={current ? undefined : season}
+            />
+          </>
+        )}
         {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} squad={squadSource} />
         )}
@@ -143,6 +172,21 @@ async function loadAllTime() {
     return await getAllTimeMatches()
   } catch (error) {
     console.error(`Could not read the goals of all seasons for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The figures from the match reports for the cards Alle spelers, Assists and Minuten, or
+ * undefined when they could not be read (the error is logged). The cards are an extra: the page
+ * is as it was without them.
+ */
+async function loadFigures(season: string, competition: CompetitionChoice) {
+  try {
+    return await getSeasonReportFigures(season, competition)
+  } catch (error) {
+    console.error(`Could not read the match reports for ${playersPath}: ${reasonOf(error)}`)
 
     return undefined
   }

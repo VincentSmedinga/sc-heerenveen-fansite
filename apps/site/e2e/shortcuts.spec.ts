@@ -361,26 +361,34 @@ test.describe('the bar under the header of /cijfers', () => {
   })
 })
 
-// The page Spelers has three cards, so its bar has three links. It is gone from 52rem on, like
-// the other bars, because the cards then sit in the main column and the sidebar side by side.
+// The page Spelers has four cards and, for a season with a match report that is klaar (the seed
+// makes up one for the current season), three more, so its bar has seven links or four. It is
+// gone from 52rem on, like the other bars, because the cards then sit in the main column and
+// the sidebar side by side.
 test.describe('the bar under the header of /spelers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has four links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
+    test(`has seven links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/spelers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(4)
+      await expect(bar.getByRole('link')).toHaveCount(7)
       await bar.getByRole('link', { name: 'Selectie' }).click()
       await expect(page).toHaveURL(/#selectie$/)
+      await bar.getByRole('link', { name: 'Alle spelers' }).click()
+      await expect(page).toHaveURL(/#alle-spelers$/)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
       await bar.getByRole('link', { name: 'Alle tijden' }).click()
       await expect(page).toHaveURL(/#alle-tijden$/)
       await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
       await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
+      await bar.getByRole('link', { name: 'Assists' }).click()
+      await expect(page).toHaveURL(/#assists$/)
+      await bar.getByRole('link', { name: 'Minuten' }).click()
+      await expect(page).toHaveURL(/#minuten$/)
       expect(await checkPage(page)).toEqual([])
     })
   }
@@ -397,7 +405,7 @@ test.describe('the bar under the header of /spelers', () => {
     }
   })
 
-  test('is also on the page of an earlier season', async ({ page }) => {
+  test('is also on the page of an earlier season, with four links: it has no reports', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto(`/spelers/${earlierSeasonSlug()}`)
 

@@ -1,0 +1,50 @@
+/*
+ * The head of the page of a match: the clubs with the result between them in a large size, the
+ * words about extra time under it, and the facts as a list of terms and values in columns that
+ * wrap. The result takes the colour of the outcome from the classes of match.css
+ * (.hf-match-win, .hf-match-loss and .hf-match-draw), and the weight of a result.
+ */
+
+@layer hf.components {
+  .hf-match-header {
+    display: grid;
+    gap: var(--hf-space-s);
+  }
+
+  /*
+   * The clubs wrap at a space and a long name breaks instead of making the page scroll
+   * sideways.
+   */
+  .hf-match-header-clubs {
+    font-size: var(--hf-heading-2-font-size);
+    font-weight: var(--hf-headline-font-weight);
+    overflow-wrap: anywhere;
+  }
+
+  .hf-match-header-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    padding-inline: var(--hf-space-xs);
+    white-space: nowrap;
+  }
+
+  .hf-match-header-how {
+    color: var(--hf-colour-text-secondary);
+  }
+
+  .hf-match-header-facts {
+    display: grid;
+    gap: var(--hf-space-s) var(--hf-space-l);
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+
+  .hf-match-header-facts dt {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-match-header-facts dd {
+    font-weight: var(--hf-headline-font-weight);
+    margin-inline-start: 0;
+  }
+}

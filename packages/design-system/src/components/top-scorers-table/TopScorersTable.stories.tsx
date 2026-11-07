@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
+import { type TableColumn, tableColumns } from '../table-columns'
 import { Text } from '../text/Text'
 import { TopScorersTable, type TopScorersTableRow } from './TopScorersTable'
 
@@ -33,6 +34,8 @@ const meta = preview.meta({
           'De kolom D/W, de doelpunten per wedstrijd, komt er alleen bij als de pagina van elke speler weet hoeveel wedstrijden hij speelde (`showGoalsPerMatch`).',
           'Elke speler heeft dan een eigen rij, en spelers met evenveel doelpunten houden dezelfde plaats.',
           'Onder de tabel staat dan ook wat D/W is.',
+          '',
+          'Met `figure` is de lijst van iets anders, zoals de assists of de minuten: de plaatsen en de balk zijn dezelfde, en de kop en de regel onder de tabel hebben zijn letter en woord uit `tableColumns`.',
           '',
           'Zonder doelpunten geeft de pagina geen tabel, maar een zin voor de lezer in de kaart.',
           '',
@@ -143,15 +146,29 @@ const perMatchRows: TopScorersTableRow[] = [
 
 const caption = 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
+// The minutes of the same players: one row each, and the figure is the minutes.
+const minutesRows: TopScorersTableRow[] = [
+  { goals: 1980, players: [{ givenName: 'Wouter', id: 1, surname: 'Proefman' }], position: 1 },
+  { goals: 1710, players: [{ givenName: 'Gerrit', id: 2, surname: 'Nepper' }], position: 2 },
+  { goals: 1710, players: [{ givenName: 'Joris', id: 3, surname: 'Testvoort' }], position: 2 },
+  { goals: 905, players: [{ givenName: 'Rick', id: 4, surname: 'Demo' }], position: 4 },
+  { goals: 90, players: [{ givenName: 'Pieter', id: 5, surname: 'Voorbeeld' }], position: 5 },
+]
+
 const render =
-  (maxInlineSize: string, tableRows: TopScorersTableRow[], showGoalsPerMatch = false) =>
+  (
+    maxInlineSize: string,
+    tableRows: TopScorersTableRow[],
+    showGoalsPerMatch = false,
+    figure: TableColumn = tableColumns.goals,
+  ) =>
   () => (
     <div style={{ maxInlineSize }}>
       <Card aria-labelledby="doelpuntenmakers-kop">
         <Heading id="doelpuntenmakers-kop" level={2}>
           Doelpuntenmakers
         </Heading>
-        <TopScorersTable caption={caption} rows={tableRows} showGoalsPerMatch={showGoalsPerMatch} />
+        <TopScorersTable caption={caption} figure={figure} rows={tableRows} showGoalsPerMatch={showGoalsPerMatch} />
       </Card>
     </div>
   )
@@ -177,6 +194,12 @@ export const Dark = meta.story({
   globals: { theme: 'dark' },
   name: 'Doelpuntenmakers met balken, donker',
   render: render('32rem', rows),
+})
+
+export const MinutesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een lijst van de minuten, met de letter M, licht',
+  render: render('32rem', minutesRows, false, tableColumns.minutes),
 })
 
 export const LongLight = meta.story({
