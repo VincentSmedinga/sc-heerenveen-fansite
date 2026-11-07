@@ -16,7 +16,7 @@
     "thirdPartyRequests": 0,
     "sizeMarginPercent": 5,
     "baselineKiB": {
-      "/": { "weight": 415.0, "javascript": 151.8, "fonts": 218.5 },
+      "/": { "weight": 415.0, "javascript": 146.5, "fonts": 218.5 },
       "/nieuws": { "weight": 421.5, "javascript": 151.8, "fonts": 218.7 },
       "/redactie/we-zijn-terug": { "weight": 410.5, "javascript": 151.8, "fonts": 218.7 },
       "/spelers": { "weight": 434.5, "javascript": 152.6, "fonts": 237.1 },

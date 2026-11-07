@@ -145,6 +145,7 @@
 - **Alternatieven:** een lijst van doelbrowsers (browserslist), die een versie per browser vastlegt in plaats van per functie.
   Of ook functies toestaan die 'newly available' zijn; dat geeft nieuwere mogelijkheden, maar sluit bezoekers met oudere browsers uit.
   Voor CSS kan ook `css/use-baseline` van `@eslint/css`, maar dat is een tweede CSS-linter naast Stylelint voor één regel.
+- **Later:** zie _De bouw weet welke browsers we ondersteunen: een `browserslist` gelijk aan Baseline 'widely available'_ in `site.md` (7 november 2026): de site heeft toch een `browserslist`, als opdracht aan de bouw en niet als bewaking; de linters bewaken nog altijd wat we schrijven.
 
 ## Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering
 
