@@ -1,0 +1,97 @@
+/*
+ * The penalty shoot-out of a match: a row of kicks and a total for each team, and under them a
+ * table with a line for each round. The row is the quick look; the table is the content. Each
+ * kick is an icon in a small box, so the shape, and not only the colour, says whether it
+ * scored, and the words "(naast)" and "(gestopt)" stand beside a player who missed.
+ */
+
+@layer hf.components {
+  .hf-match-penalty-series {
+    display: grid;
+    gap: var(--hf-space-s);
+  }
+
+  .hf-match-penalty-teams {
+    display: grid;
+    gap: var(--hf-space-s);
+  }
+
+  /* The name and the total on a line, the kicks under them on a line of their own. */
+  .hf-match-penalty-team {
+    align-items: center;
+    display: grid;
+    gap: var(--hf-space-xs) var(--hf-space-s);
+    grid-template-columns: 1fr auto;
+  }
+
+  .hf-match-penalty-name {
+    font-weight: var(--hf-name-font-weight);
+    overflow-wrap: anywhere;
+  }
+
+  /* The total is in the font of the headings, as large as heading 2. */
+  .hf-match-penalty-total {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-heading-2-font-size);
+    font-stretch: var(--hf-heading-2-font-stretch);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-heading-2-font-weight);
+    line-height: var(--hf-heading-2-line-height);
+  }
+
+  .hf-match-penalty-kicks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-xs);
+    grid-column: 1 / -1;
+  }
+
+  .hf-match-penalty-kick {
+    align-items: center;
+    block-size: 1.75rem;
+    border: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    border-radius: 0.375rem;
+    display: inline-flex;
+    inline-size: 1.75rem;
+    justify-content: center;
+  }
+
+  /* The deciding rounds, after the fifth, stand a little apart: an open space before the sixth kick. */
+  .hf-match-penalty-deciding {
+    margin-inline-start: var(--hf-space-s);
+  }
+
+  /* The cells of the table: the icon and the player on one line that wraps, never scrolls. */
+  .hf-match-penalty-table {
+    /* Tighter than other tables: the names need the room on a phone of 320 pixels. */
+    td,
+    th {
+      overflow-wrap: anywhere;
+      padding-inline: var(--hf-space-xs);
+    }
+
+    td > .hf-match-event-icon {
+      margin-inline-end: var(--hf-space-xs);
+    }
+
+    th:first-child {
+      inline-size: 1.5rem;
+    }
+  }
+
+  .hf-match-penalty-standing {
+    font-weight: var(--hf-figure-font-weight);
+    inline-size: 2.75rem;
+    white-space: nowrap;
+  }
+
+  /* "(naast)" and "(gestopt)": the word beside the player, in small quiet letters. */
+  .hf-match-penalty-word {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-match-penalty-unknown {
+    color: var(--hf-colour-text-secondary);
+  }
+}

@@ -2826,3 +2826,31 @@
   De ring en de vlakken van de spelers gebruiken kleuren die er al zijn: de uitkomst winst voor de ring en de kleur van de knop voor het vlak van sc Heerenveen.
 - **Waarom:** het veld moet in licht en donker afsteken van een kaart, en in donker is het vlak van een kaart (blauw-900) bijna hetzelfde als lichtblauw.
 - **Alternatieven:** de grasmat uit de kleur van een bestaand vlak halen (in donker valt het veld dan weg in de kaart).
+
+## De strafschoppenserie staat twee keer: als rij schoten per team en als tabel per ronde
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchPenaltySeries` toont de serie als rij schoten per team, met het totaal in het kopfont, en daaronder als tabel met een regel per ronde en de kolommen Nr., sc Heerenveen, de tegenstander en Stand (#848).
+  De rij laat in één blik zien hoe het ging, de tabel noemt de nemers en de stand.
+  Na de vijfde ronde staat een open ruimte in de rij, want de rondes daarna beslissen de serie.
+- **Waarom:** de tabel is de echte inhoud voor schermlezers, de rij is de snelle kijk.
+  De rij is daarom verborgen voor een schermlezer, op de totalen na, die de naam van het team in de verborgen tekst hebben.
+- **Alternatieven:** alleen een tabel.
+
+## "Naast" en "gestopt" staan ook in woorden
+
+- **Datum:** 7 november 2026
+- **Besluit:** in de tabel van `MatchPenaltySeries` staat bij een schot dat niet raak was "(naast)" of "(gestopt)" in kleine letters achter de speler, en elke cel begint voor een schermlezer met "Raak:", "Naast:" of "Gestopt:" (#848).
+- **Waarom:** een doorgekruiste ring zegt niet wat er gebeurde, en kleur of teken is nooit het enige teken.
+- **Alternatieven:** alleen het pictogram.
+- **Keuzes bij het bouwen** (7 november 2026):
+  - **De eigenschappen** zijn `headingLevel`, `opponent` en `rounds`.
+    Een ronde heeft het schot van `ours` en van `theirs`, en een schot heeft de uitkomst `scored`, `missed` of `saved` en, als hij bekend is, de speler.
+    Een team dat in een ronde niet schoot, heeft er geen: de cel zegt dan "Geen schot" voor een schermlezer.
+  - **Zonder bekende speler** staat er "Speler onbekend", ook bij sc Heerenveen.
+  - **De stand na elke ronde** telt alleen de schoten die raak waren.
+    De rij en de tabel komen uit dezelfde som (`penaltySeriesFigures`), zodat ze niet kunnen verschillen.
+  - **De tabel is smaller opgemaakt** dan andere tabellen: de cellen hebben minder ruimte aan de zijkant, zodat de namen op 320 pixels niet midden in een woord breken, en er scrollt niets zijwaarts.
+  - **Het bijschrift** is onzichtbaar en zegt de eindstand: "Strafschoppenserie, stand 5–4".
+    Het kopje Nr. heet voor een schermlezer "Ronde".
+  - **De kaart eromheen** hoort bij de pagina: het onderdeel heeft een eigen kop en geen kaart, zoals `MatchScoreBar`.
