@@ -1,12 +1,48 @@
 /*
- * The course of a match: a list with the minute in a column of its own and the event beside it.
- * The name of the event is bold and the team is on a line of its own in quiet letters, with our
- * own team in the stronger weight like its name in a match. Nothing here depends on a colour:
- * the words say what happened.
+ * The course of a match: two blocks next to each other, the first and the second half, and a
+ * third over the full width for extra time. In a block every event is a line with the minute in
+ * a pill, filled for sc Heerenveen and open for the opponent, and beside it the icon and the
+ * name. The rows are parted by a thin line. The blocks sit next to each other when the place
+ * they are in is wide enough, and under each other when it is not: the width is that of the
+ * place the timeline is in, such as a card, and not of the screen. Nothing here depends on a
+ * colour: the pill says whose event it is to the eye, and the hidden text says it in words.
  */
 
 @layer hf.components {
   .hf-match-timeline {
+    container-name: hf-match-timeline;
+    container-type: inline-size;
+  }
+
+  .hf-match-timeline-blocks {
+    display: grid;
+    gap: var(--hf-space-l) var(--hf-space-xl);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @container hf-match-timeline (inline-size >= 40rem) {
+    .hf-match-timeline-blocks {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hf-match-timeline-extra-time {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* The rows keep their own height: a block that is shorter than its neighbour does not stretch. */
+  .hf-match-timeline-block {
+    align-content: start;
+    display: grid;
+    gap: var(--hf-space-s);
+    min-inline-size: 0;
+  }
+
+  .hf-match-timeline-empty {
+    color: var(--hf-colour-text-secondary);
+  }
+
+  .hf-match-timeline-list {
     display: grid;
     gap: 0;
     list-style: none;
@@ -14,6 +50,7 @@
   }
 
   .hf-match-event {
+    align-items: start;
     border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     column-gap: var(--hf-space-s);
     display: flex;
@@ -30,34 +67,62 @@
     padding-block-end: 0;
   }
 
-  /* The minute keeps its width, so the events of the lines start at the same place. */
+  /*
+   * The pill with the minute. The pill of sc Heerenveen is filled with the colour of a button,
+   * and the one of the opponent is open, with a rim of that colour: the fill is the difference
+   * and the rim keeps the edge in both. The text on the fill is the text of a button, and the
+   * text in the open pill is the colour of the text, so each reaches 4.5:1 in light and dark.
+   * The pill keeps its width, so the lines of a block start at the same place.
+   */
   .hf-match-event-minute {
-    color: var(--hf-colour-text-secondary);
+    border: 2px solid var(--hf-colour-background-button);
+    border-radius: 999px;
     flex: none;
+    font-size: var(--hf-meta-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
+    line-height: 1.35;
     min-inline-size: 3.5rem;
+    padding-inline: var(--hf-space-s);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .hf-match-event-minute-ours {
+    background-color: var(--hf-colour-background-button);
+    color: var(--hf-colour-text-on-button);
+  }
+
+  /* In forced colours a background colour is replaced, unless it is a system colour. */
+  @media (forced-colors: active) {
+    .hf-match-event-minute-ours {
+      background-color: Highlight;
+      color: HighlightText;
+    }
   }
 
   .hf-match-event-text {
+    display: grid;
     flex: 1 1 8rem;
+    line-height: 1.35;
+    min-inline-size: 0;
+  }
+
+  /* The icon is in front of the name, with the space of a word. */
+  .hf-match-event-line .hf-match-event-icon {
+    margin-inline-end: var(--hf-space-s);
   }
 
   .hf-match-event-kind {
     font-weight: var(--hf-headline-font-weight);
   }
 
+  .hf-match-event-note,
   .hf-match-event-assist {
     color: var(--hf-colour-text-secondary);
   }
 
-  .hf-match-event-team {
-    color: var(--hf-colour-text-secondary);
-    display: block;
+  .hf-match-event-assist {
     font-size: var(--hf-meta-font-size);
-  }
-
-  .hf-match-event-ours .hf-match-event-team {
-    font-weight: var(--hf-strong-font-weight);
   }
 }

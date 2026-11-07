@@ -2741,6 +2741,7 @@
   - **De contrasten:** de rand in de tekstkleur geeft de vorm 3:1 tegen elk vlak in licht en in donker; de gele vulling alleen haalt dat niet (1,7:1 op wit).
 - **Waarom:** kleur mag nooit het enige verschil zijn (WCAG 1.4.1), en een pagina met vijf soorten gebeurtenissen naast elkaar wordt anders alleen een rij gekleurde stippen.
 - **Alternatieven:** een gekleurde stip per soort (kleur is dan het enige onderscheid).
+- **Later:** zie _Een wissel is één regel met één pictogram: "A voor B"_ (7 november 2026): staat er een woord naast het pictogram dat hetzelfde zegt, dan blijft het woord weg voor wie ziet, en hoort een schermlezer het in de verborgen tekst.
 
 ## De kaarten bij een wedstrijd hebben twee kleurtokens, elk met een paar voor licht en donker
 
@@ -2826,3 +2827,45 @@
   De ring en de vlakken van de spelers gebruiken kleuren die er al zijn: de uitkomst winst voor de ring en de kleur van de knop voor het vlak van sc Heerenveen.
 - **Waarom:** het veld moet in licht en donker afsteken van een kaart, en in donker is het vlak van een kaart (blauw-900) bijna hetzelfde als lichtblauw.
 - **Alternatieven:** de grasmat uit de kleur van een bestaand vlak halen (in donker valt het veld dan weg in de kaart).
+
+## Een wissel is één regel met één pictogram: "A voor B"
+
+- **Datum:** 7 november 2026
+- **Besluit:** in het verloop is een wissel één regel met één pictogram: "A voor B".
+  Het woord "Wissel" en de twee pijlen zeiden hetzelfde, dus het woord gaat weg voor wie ziet; een schermlezer hoort "Wissel: A voor B".
+  Hetzelfde geldt voor elk pictogram in `MatchTimeline`: staat er een woord naast dat hetzelfde zegt, dan blijft het woord weg.
+  Een doelpunt, een eigen doelpunt, een kaart en een wissel hebben dus alleen het pictogram en de naam.
+  Een gemiste en een gestopte strafschop hebben hetzelfde pictogram, dus die houden hun woord ("Gemiste strafschop", "Gestopte strafschop").
+  Een doelpunt zegt "(strafschop)" of "(eigen doelpunt)" achter de naam, en een assist staat op een tweede regel in kleine letters.
+- **Waarom:** een woord en een pictogram die hetzelfde zeggen, maken de regel langer zonder iets toe te voegen, en de schermlezer mist niets.
+- **Alternatieven:** een regel voor wie erin komt en een regel voor wie eruit gaat.
+
+## De minuut in het verloop staat in een pil: gevuld voor sc Heerenveen, open voor de tegenstander
+
+- **Datum:** 7 november 2026
+- **Besluit:** in `MatchTimeline` staat de minuut ("45+2'") in een pil.
+  De pil van sc Heerenveen is gevuld met de kleur van een knop, en die van de tegenstander is open, met een rand in dezelfde kleur.
+  Er staat geen clublegenda meer in het verloop, en de naam van het team staat niet meer op een regel van zichzelf.
+  De verborgen tekst vooraan zegt het team, de minuut en de soort: "sc Heerenveen: Minuut 45 plus 2, Doelpunt (strafschop): ...".
+  In forced colours is de gevulde pil `Highlight`, zodat het verschil blijft.
+- **Waarom:** de pil zegt wiens gebeurtenis het is, en de naam van het team staat voor schermlezers in de verborgen tekst.
+  Gevuld en open verschillen in vorm, dus kleur is niet het enige teken (WCAG 1.4.1).
+- **Alternatieven:** de naam van het team onder elke regel (zoals in #831), of een clublegenda boven het verloop.
+
+## Het verloop verdeelt de gebeurtenissen over de helften, en de kop krijgt de doelpuntenmakers per club
+
+- **Datum:** 7 november 2026
+- **Besluit:** `MatchTimeline` zet de gebeurtenissen in drie blokken: "Eerste helft", "Tweede helft" en, met `extraTime`, "Verlenging".
+  De helft volgt uit de minuut: tot en met 45 (ook 45+x) is de eerste helft, 46 tot en met 90 (ook 90+x) de tweede, en alles daarna verlenging.
+  Zonder `extraTime` blijft een minuut na 90 in de tweede helft.
+  De blokken staan naast elkaar vanaf 40 rem, gemeten aan de plek waar het verloop staat en niet aan het scherm, en verlenging staat er over de volle breedte onder.
+  Een blok zonder gebeurtenissen zegt "Niets wat we bijhouden.".
+  Elk blok is een genummerde lijst met een naam, onder een kop van `headingLevel` (standaard 3).
+  `MatchHeader` krijgt `scorersFor` en `scorersAgainst`: per doelpunt de naam, de minuut, de blessuretijd en of het een strafschop of een eigen doelpunt was.
+  Een eigen doelpunt staat bij de club die het doelpunt krijgt, met "(e.d.)", en een strafschop met "(str.)".
+  Een schermlezer hoort de afkortingen uitgeschreven.
+  De kop toont de uitkomst als pil ("Gewonnen", "Verloren", "Gelijkspel", na de strafschoppen als die er waren), en de regel eronder is "Na verlenging (na 90 minuten 1–1)" of "Na strafschoppen 5–4 (na verlenging 1–1)".
+  Op een telefoon staan de naam en de doelpunten van een club op één regel, en vanaf 40 rem de namen links en rechts met de uitslag groot in het midden.
+  De eigenschappen die er al waren (`afterNinetyFor`, `penaltiesFor` en de rest) houden hun naam.
+- **Waarom:** de pagina van #831 en de stories blijven werken tot #850 de pagina bouwt, en een eigen doelpunt moet bij het team staan dat het doelpunt krijgt, zoals de uitslag het telt.
+- **Alternatieven:** de helft als eigenschap van elke gebeurtenis (de pagina moet dan zelf de minuut uitzoeken), en de doelpuntenmakers uit de gebeurtenissen van het verloop halen (`MatchHeader` kent het verloop niet).

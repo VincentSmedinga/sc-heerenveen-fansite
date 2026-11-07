@@ -1,41 +1,137 @@
 /*
- * The head of the page of a match: the clubs with the result between them in a large size, the
- * words about extra time under it, and the facts as a list of terms and values in columns that
- * wrap. The result takes the colour of the outcome from the classes of match.css
- * (.hf-match-win, .hf-match-loss and .hf-match-draw), and the weight of a result.
+ * The head of the page of a match. On a narrow place each club has its name and its goals on a
+ * line with its scorers under it, and the outcome and the words about extra time come after
+ * both. From 40 rem the names stand left and right, the home club on the left, and the result
+ * is large in the middle with the outcome under it. The width is that of the place the header
+ * is in, such as a card, and not of the screen. The result takes the colour of the outcome from
+ * the classes of match.css (.hf-match-win, .hf-match-loss and .hf-match-draw). The facts are a
+ * list of terms and values in small letters in columns that wrap.
  */
 
 @layer hf.components {
   .hf-match-header {
+    container-name: hf-match-header;
+    container-type: inline-size;
+    display: grid;
+    gap: var(--hf-space-m);
+  }
+
+  .hf-match-header-board {
     display: grid;
     gap: var(--hf-space-s);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The name and the goals share a line, and the scorers are under both. */
+  .hf-match-header-club {
+    align-items: baseline;
+    gap: 0 var(--hf-space-s);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   /*
    * The clubs wrap at a space and a long name breaks instead of making the page scroll
    * sideways.
    */
-  .hf-match-header-clubs {
-    font-size: var(--hf-heading-2-font-size);
-    font-weight: var(--hf-headline-font-weight);
+  .hf-match-header-name {
     overflow-wrap: anywhere;
   }
 
-  .hf-match-header-score {
+  .hf-match-header-goals {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* The goals are in small letters, in the colour of secondary text, and take the whole row. */
+  .hf-match-header-scorers {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    grid-column: 1 / -1;
+    overflow-wrap: anywhere;
+  }
+
+  /* The dotted line under an abbreviation has the colour of the text beside it. */
+  .hf-match-header-scorers abbr {
+    text-decoration-color: currentcolor;
+  }
+
+  .hf-match-header-summary {
+    display: grid;
+    gap: var(--hf-space-s);
+    justify-items: start;
+  }
+
+  /* The large result is for the wide place. The goals beside the names do that job on a narrow one. */
+  .hf-match-header-result {
+    display: none;
+  }
+
+  /*
+   * The pill with the outcome: a rim and the text in the colour of the outcome, which reaches
+   * 4.5:1 as text. The word says it, and the colour only adds to it.
+   */
+  .hf-match-header-outcome {
+    border: 1px solid currentcolor;
+    border-radius: var(--hf-space-xs);
+    font-size: var(--hf-meta-font-size);
     font-weight: var(--hf-figure-font-weight);
-    padding-inline: var(--hf-space-xs);
-    white-space: nowrap;
+    line-height: 1.4;
+    padding-inline: var(--hf-space-s);
   }
 
   .hf-match-header-how {
     color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  @container hf-match-header (inline-size >= 40rem) {
+    .hf-match-header-board {
+      align-items: start;
+      column-gap: var(--hf-space-xl);
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .hf-match-header-club {
+      display: block;
+    }
+
+    .hf-match-header-first {
+      grid-column: 1;
+      grid-row: 1;
+      text-align: end;
+    }
+
+    .hf-match-header-second {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    .hf-match-header-goals {
+      display: none;
+    }
+
+    .hf-match-header-summary {
+      grid-column: 2;
+      grid-row: 1;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .hf-match-header-result {
+      display: block;
+      font-family: var(--hf-font-family-display);
+      font-size: var(--hf-heading-1-font-size);
+      font-stretch: var(--hf-heading-1-font-stretch);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--hf-heading-1-font-weight);
+      line-height: 1;
+    }
   }
 
   .hf-match-header-facts {
     display: grid;
     gap: var(--hf-space-s) var(--hf-space-l);
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   }
 
   .hf-match-header-facts dt {
@@ -44,6 +140,7 @@
   }
 
   .hf-match-header-facts dd {
+    font-size: var(--hf-meta-font-size);
     font-weight: var(--hf-headline-font-weight);
     margin-inline-start: 0;
   }

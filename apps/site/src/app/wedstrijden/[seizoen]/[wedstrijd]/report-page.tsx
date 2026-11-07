@@ -169,7 +169,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
           {events.length === 0 ? (
             <Text>In deze wedstrijd is niets gebeurd wat we bijhouden.</Text>
           ) : (
-            <MatchTimeline aria-labelledby="verloop" events={events} />
+            <MatchTimeline aria-labelledby="verloop" events={events} extraTime={match.extraTime} />
           )}
         </Card>
         <Card aria-labelledby="opstelling">
