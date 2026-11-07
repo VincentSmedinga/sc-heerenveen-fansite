@@ -73,7 +73,9 @@ const meta = preview.meta({
           '- `stadium` is het stadion.',
           '  Zonder stadion staat er alleen de dag of de tijd.',
           '',
-          'Een wedstrijd heeft geen eigen pagina, dus er is geen link, en geen clubwapen: alleen de namen.',
+          'Een wedstrijd is gewone tekst, zonder clubwapen: alleen de namen.',
+          'Alleen een wedstrijd met een eigen pagina, die van een verslag dat klaar is, krijgt `reportHref`: de regel eindigt dan met de link "Het verslag".',
+          'De andere wedstrijden hebben geen link.',
           'Het component is een `div`.',
           'Zet hem in een `List.Item` voor een lijst met wedstrijden, en geef de `List` `role="list"`: Safari noemt een lijst zonder opsommingstekens anders geen lijst meer.',
           'De lijst krijgt dan geen opsommingstekens en geen inspringing, en tussen de regels staat een dunne lijn.',
@@ -816,4 +818,50 @@ const renderCancelled = () => (
 export const Cancelled = meta.story({
   name: 'Geannuleerd: twee wedstrijden die nooit zijn gespeeld, onder een gespeelde',
   render: renderCancelled,
+})
+
+// A match with a report has a page of its own, and its line ends with the link. The club and
+// the address are made up.
+const renderWithReport = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-verslag-kop">
+      <Heading id="uitslagen-verslag-kop" level={2}>
+        Eredivisie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="2026-10-24"
+            goalsAgainst={0}
+            goalsFor={6}
+            home
+            opponent="Testdorp FC"
+            reportHref="#verslag"
+            round="Speelronde 1"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="za 24 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            dateTime="2026-10-17"
+            goalsAgainst={1}
+            goalsFor={1}
+            home={false}
+            opponent="Voorbeeld United"
+            round="Speelronde 2"
+            stadium="Voorbeeldpark"
+            status="played"
+            time="za 17 okt"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const WithReport = meta.story({
+  name: 'Met een pagina: de regel eindigt met de link naar het verslag, de andere regel heeft geen link',
+  render: renderWithReport,
 })
