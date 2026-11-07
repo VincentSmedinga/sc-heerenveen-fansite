@@ -1,8 +1,8 @@
 /*
  * Two parts of one task, such as a form and its preview. The width that counts is the one of
  * the place they stand in, not of the screen: from 56 rem the main part (a little over half)
- * and the aside stand side by side, with the aside stuck to the top of the screen. Below it they
- * stand one at a time, which the page chooses with `hidden` and the tabs.
+ * and the aside stand side by side, with the aside stuck to the top of the screen. Below it
+ * they stand one at a time, which the page chooses with `hidden` and the tabs.
  */
 
 @layer hf.components {
