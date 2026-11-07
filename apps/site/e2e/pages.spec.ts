@@ -209,6 +209,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
+  // The screen that reads a pasted text into the form of the report.
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 404 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag', status: 404 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/999999/verslag', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag', status: 404 },

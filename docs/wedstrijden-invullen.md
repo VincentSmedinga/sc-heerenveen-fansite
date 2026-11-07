@@ -138,6 +138,38 @@ Het formulier van de wedstrijd laat ze dan zien, met een link naar het verslag.
 
 "Verslag weghalen" (in de zijbalk, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
 
+## Een verslag plakken
+
+Typ je het verslag liever als tekst uit een bron die je naast je hebt?
+Kies dan in de zijbalk van het verslag "Tekst plakken", of ga naar `/beheer/wedstrijden/<nummer>/verslag/plakken`.
+Je plakt de tekst in een eenvoudig formaat en krijgt het formulier van het verslag terug, met alles ingevuld.
+Plakken bewaart niets: pas "Opslaan" in het formulier doet dat, met dezelfde controle als bij een verslag dat je met de hand invulde.
+
+Het scherm laat het formaat zien, met een voorbeeld dat je kunt kopiëren.
+De tekst heeft kopjes, elk op een eigen regel, en daaronder een regel per speler of gebeurtenis:
+
+- `Opstelling` en `Bank`: een rugnummer en een naam, zoals `4 Van Aken`.
+  Zet `(a)` achter de aanvoerder.
+  Voor sc Heerenveen volstaat het rugnummer van de selectie.
+- `Wissels`: de minuut, wie erin komt en voor wie, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
+- `Doelpunten`: de minuut en de speler die scoorde, met `assist Jansen`, `penalty` of `eigen doelpunt` erachter.
+  Onder het kopje van een kant staan de doelpunten die die kant kreeg.
+  Bij een eigen doelpunt is de naam een speler van de andere kant.
+- `Kaarten`: de minuut, `geel`, `geel-rood` of `rood`, en de speler, zoals `34 geel Jansen`.
+- `Strafschoppen`: de minuut, `gemist` of `gestopt`, en de nemer, zoals `55 gemist Jansen`.
+- Na het kopje `Tegenstander` staan dezelfde kopjes voor de tegenstander.
+
+Hoofdletters en de volgorde van de kopjes doen er niet toe, en een kopje dat ontbreekt is leeg.
+Een regel die met `#` begint, is commentaar.
+Een naam mag een rugnummer zijn.
+
+Het scherm zoekt een speler van ons eerst op rugnummer in de selectie van het seizoen, dan op de volledige naam, en dan op de achternaam.
+Vindt het niet precies één speler, dan staat de regel onder "Kies een speler" en moet je in het formulier kiezen.
+Het zet nooit zelf een speler in de selectie.
+Een regel die het niet kan lezen, staat onder "Niet gelezen", met het nummer van de regel en de reden, en verandert niets in het formulier.
+Staat er al een verslag, dan vraagt het scherm eerst of het formulier vervangen mag.
+De tekst komt niet in het logboek en is hoogstens 20.000 tekens.
+
 ## Invoer weghalen
 
 Op de pagina van een wedstrijd met een invoer staat naast het formulier, onder "Laatste invoer", een blok "Invoer weghalen".

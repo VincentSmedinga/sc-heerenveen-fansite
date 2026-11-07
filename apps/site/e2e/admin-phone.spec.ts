@@ -27,6 +27,7 @@ const screens = [
   '/beheer/wedstrijden/{match}',
   '/beheer/wedstrijden/{held}',
   '/beheer/wedstrijden/{played}/verslag',
+  '/beheer/wedstrijden/{played}/verslag/plakken',
   '/beheer/stadions',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',

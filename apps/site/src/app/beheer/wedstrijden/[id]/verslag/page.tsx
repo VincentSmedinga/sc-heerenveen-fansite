@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
-import { Breadcrumb, Heading, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import { Breadcrumb, Card, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { matchesPath, matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { contextOf, findReportScreen, valuesOfReport } from '#src/beheer/match-reports'
@@ -119,6 +119,15 @@ export default async function ReportPage({ params, searchParams }: Props) {
       </Page.Main>
       <Page.Sidebar aria-label="Opslaan en verslag" sticky>
         <ReportSavePanel cancelHref={matchPath(match.id)} />
+        <Card aria-labelledby="plakken-kop">
+          <Heading id="plakken-kop" level={2}>
+            Tekst plakken
+          </Heading>
+          <Text>Plak het verslag als tekst en vul het formulier er zo mee in. Wat je nu invulde, gaat niet mee.</Text>
+          <Link href={pastePath(match.id)} icon="arrow-right">
+            Tekst plakken
+          </Link>
+        </Card>
         {report === undefined ? null : (
           <RemoveReportForm action={submitRemoveReport.bind(null, match.id)} title={title} />
         )}

@@ -432,6 +432,36 @@ export function ReportFormProvider({
   title: string
 }) {
   const [state, formAction, pending] = useActionState(action, initial)
+
+  return (
+    <ReportFormShell choices={choices} formAction={formAction} pending={pending} state={state} title={title}>
+      {children}
+    </ReportFormShell>
+  )
+}
+
+/**
+ * The same, for a screen that keeps the state of the form in a state of its own, such as the
+ * screen that reads a pasted text: it has one action and one `useActionState`, so what the
+ * server answers after a post without JavaScript reaches the form it belongs to. The shell
+ * only shares what it is given.
+ */
+export function ReportFormShell({
+  children,
+  choices,
+  formAction,
+  pending,
+  state,
+  title,
+}: {
+  children: ReactNode
+  choices: ReportChoices
+  formAction: (formData: FormData) => void
+  pending: boolean
+  state: ReportFormState
+  /** The title of the list of errors on the page as it opens. */
+  title: string
+}) {
   const [live, setLive] = useState<{ for: ReportFormState; values: ReportValues }>()
   // What the form said before the server answered is only good until the server answers.
   const current = live?.for === state ? live.values : state.values
