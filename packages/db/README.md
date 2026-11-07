@@ -416,29 +416,30 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 
 `matches` heeft een rij per wedstrijd.
 
-| Kolom                                      | Betekenis                                                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `season`, `competition`                    | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker`, `Play-offs Conference League`, `Europa League` of `Play-offs Europa League` |
-| `round`                                    | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie                          |
-| `opponent`, `home`, `stadium`              | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)                                |
-| `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                                                       |
-| `status`                                   | `scheduled`, `played`, `postponed` of `cancelled`                                                                                     |
-| `goals_for`, `goals_against`               | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                                                    |
-| `extra_time`                               | Of een gespeelde wedstrijd van de beker of de play-offs in verlenging ging; anders `false`                                            |
-| `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld                           |
-| `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een wedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg                                 |
-| `note`                                     | Een regel onder de wedstrijd, nu alleen voor een gestaakte wedstrijd die later is uitgespeeld; anders leeg                            |
-| `attendance`, `referee`                    | Het aantal toeschouwers (0 is zonder publiek) en de volledige naam van de scheidsrechter; leeg als onbekend                           |
-| `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                                                |
-| `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                                                  |
-| `date_text`                                | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                                         |
-| `result_set_at`                            | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                                                        |
+| Kolom                                      | Betekenis                                                                                                                                                                                                                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `season`, `competition`                    | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker`, `Play-offs Conference League`, `Europa League`, `Play-offs Europa League`, en voor de oude wedstrijden `Eerste divisie`, `Champions League`, `Europacup II`, `UEFA Cup`, `Intertoto Cup` of `Play-offs UEFA Cup` |
+| `round`                                    | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie                                                                                                                                                               |
+| `opponent`, `home`, `stadium`              | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)                                                                                                                                                                     |
+| `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                                                                                                                                                                                            |
+| `status`                                   | `scheduled`, `played`, `postponed` of `cancelled`                                                                                                                                                                                                                          |
+| `goals_for`, `goals_against`               | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                                                                                                                                                                                         |
+| `extra_time`                               | Of een gespeelde wedstrijd van de beker of de play-offs in verlenging ging; anders `false`                                                                                                                                                                                 |
+| `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld                                                                                                                                                                |
+| `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een wedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg                                                                                                                                                                      |
+| `note`                                     | Een regel onder de wedstrijd, nu alleen voor een gestaakte wedstrijd die later is uitgespeeld; anders leeg                                                                                                                                                                 |
+| `attendance`, `referee`                    | Het aantal toeschouwers (0 is zonder publiek) en de volledige naam van de scheidsrechter; leeg als onbekend                                                                                                                                                                |
+| `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                                                                                                                                                                                     |
+| `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                                                                                                                                                                                       |
+| `date_text`                                | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                                                                                                                                                                              |
+| `data_source`                              | De bron van de wedstrijd: `wikipedia` (standaard) of `oude-fansite`; elke import leest, schrijft en haalt alleen weg waar de bron de zijne is                                                                                                                              |
+| `result_set_at`                            | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                                                                                                                                                                                             |
 
 Negen CHECK-constraints houden de rijen heel:
 
 - een uitslag hoort bij `played` en nergens anders (`matches_result_only_when_played`);
-- een wedstrijd heeft een aftrap of een tekst voor de datum (`matches_time_or_text`);
-- verlenging hoort bij een gespeelde wedstrijd van de beker of van de play-offs voor de Conference League of de Europa League en nergens anders (`matches_extra_time_only_in_played_knockout`);
+- een wedstrijd heeft een aftrap of een tekst voor de datum, behalve een wedstrijd van de oude fansite, die alleen een dag mag hebben (`matches_time_or_text`);
+- verlenging hoort bij een gespeelde wedstrijd van elke competitie behalve de `Eredivisie` en de `Eerste divisie`, en nergens anders (`matches_extra_time_only_in_played_knockout`);
 - strafschoppen komen in een paar (`matches_penalties_in_a_pair`);
 - strafschoppen horen bij verlenging en een gelijke stand (`matches_penalties_after_level_extra_time`);
 - de stand na 90 minuten komt in een paar (`matches_after_ninety_in_a_pair`);
@@ -447,6 +448,16 @@ Negen CHECK-constraints houden de rijen heel:
 - de scheidsrechter is nooit een lege tekst (`matches_referee_not_empty`).
 
 `goals_for` en `goals_against` blijven de stand zoals Wikipedia die geeft, zonder de strafschoppen.
+
+De wedstrijden van 1990 tot 2007 komen uit de database van de oude fansite (E7, #873).
+Ze hebben `data_source = 'oude-fansite'`, de zes nieuwe competities en soms een dag zonder tijd.
+De import van Wikipedia leest, wijzigt en haalt alleen de rijen weg met de bron `wikipedia`.
+Staat een wedstrijd van Wikipedia op dezelfde sleutel (seizoen, competitie, ronde) als een rij van de oude fansite, dan slaat de import hem over en meldt dat.
+
+`match_statistics` heeft per wedstrijd hoogstens één rij (`match_id` is de sleutel), met de hoekschoppen, het buitenspel en de overtredingen van sc Heerenveen en van de tegenstander (`corners_for`, `corners_against`, `offsides_for`, `offsides_against`, `fouls_for`, `fouls_against`).
+Alle zes zijn verplicht, en de rij verdwijnt met haar wedstrijd.
+Een wedstrijd krijgt alleen een rij als een van de zes boven 0 is, want 0-0-0 betekent in de oude database "niet bekend".
+Niets leest de tabel nog, en `structureOnlyTables` noemt haar niet, want niets anders bevat deze cijfers.
 
 `match_goals` heeft een rij per doelpunt van een gespeelde wedstrijd.
 De rijen horen bij hun wedstrijd (`match_id`) en verdwijnen met haar.
@@ -858,7 +869,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);

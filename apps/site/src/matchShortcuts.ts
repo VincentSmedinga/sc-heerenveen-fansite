@@ -31,11 +31,17 @@ export const finalPlacesShortcut = { id: 'onze-plek-door-de-jaren', name: 'Onze 
 type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {
+  'Champions League': { id: 'uitslagen-champions-league', name: 'Champions League' },
+  'Eerste divisie': { id: 'uitslagen-eerste-divisie', name: 'Eerste divisie' },
   Eredivisie: { id: 'uitslagen', name: 'Eredivisie' },
+  'Europacup II': { id: 'uitslagen-europacup-ii', name: 'Europacup II' },
   'Europa League': { id: 'uitslagen-europa-league', name: 'Europa League' },
+  'Intertoto Cup': { id: 'uitslagen-intertoto-cup', name: 'Intertoto Cup' },
   'KNVB Beker': { id: 'uitslagen-knvb-beker', name: 'KNVB Beker' },
   'Play-offs Conference League': { id: 'uitslagen-play-offs', name: 'Play-offs Conference League' },
   'Play-offs Europa League': { id: 'uitslagen-play-offs-europa-league', name: 'Play-offs Europa League' },
+  'Play-offs UEFA Cup': { id: 'uitslagen-play-offs-uefa-cup', name: 'Play-offs UEFA Cup' },
+  'UEFA Cup': { id: 'uitslagen-uefa-cup', name: 'UEFA Cup' },
 }
 
 /**
