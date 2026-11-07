@@ -66,7 +66,7 @@
     --hf-pitch-dot: 2rem;
   }
 
-  /* On a very narrow pitch the discs are smaller, so the names under them keep clear of the next row. */
+  /* On a very narrow pitch the discs are smaller, so each name keeps clear of the next row. */
   @container hf-match-pitch (max-width: 18rem) {
     .hf-match-pitch-field {
       --hf-pitch-dot: 2rem;

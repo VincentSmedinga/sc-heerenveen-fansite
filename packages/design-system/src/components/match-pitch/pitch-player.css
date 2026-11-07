@@ -147,8 +147,8 @@
   }
 
   /*
-   * On a very narrow pitch (a phone of 320 pixels) there is room for one line of name between two
-   * rows, so a long name is cut with "…" and the lines stay clear of the next row.
+   * On a very narrow pitch (a phone of 320 pixels) there is room for one line of name between
+   * two rows, so a long name is cut with "…" and the lines stay clear of the next row.
    */
   @container hf-match-pitch (max-width: 18rem) {
     .hf-pitch-player-surname {
