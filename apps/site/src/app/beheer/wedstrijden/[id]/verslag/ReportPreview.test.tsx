@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -188,6 +188,40 @@ describe('the tabs on a phone', () => {
 
     expect(main().hasAttribute('hidden')).toBe(false)
     expect(field('doelpunt-wij-1-minuut').value).toBe('44')
+  })
+})
+
+describe('the tabs after an answer of the server', () => {
+  it('show the form again after a save with errors, so the focus can reach a field or the list of errors', async () => {
+    const answered: ReportFormState = {
+      ...initial,
+      errors: { 'doelpunt-wij-1-minuut': 'Doelpunt 1: vul de minuut in.' },
+      focus: 'fouten',
+      version: 1,
+    }
+    const { getByRole } = render(
+      <ReportFormProvider
+        action={() => Promise.resolve(answered)}
+        choices={{ opponent: 'Testclub', preview, showDelay: 'binnen vijf minuten', squad }}
+        initial={initial}
+        title="Dit is nog niet af"
+      >
+        <ReportWorkspace />
+      </ReportFormProvider>,
+    )
+
+    fireEvent.click(getByRole('button', { name: 'Voorbeeld' }))
+    expect(main().hasAttribute('hidden')).toBe(true)
+
+    const save = document.querySelector('button[name="knop"][value="opslaan"]') as HTMLButtonElement
+
+    await act(async () => {
+      save.click()
+    })
+
+    await waitFor(() => expect(main().hasAttribute('hidden')).toBe(false))
+    expect(aside().hasAttribute('hidden')).toBe(true)
+    expect(getByRole('button', { name: 'Formulier' }).getAttribute('aria-pressed')).toBe('true')
   })
 })
 

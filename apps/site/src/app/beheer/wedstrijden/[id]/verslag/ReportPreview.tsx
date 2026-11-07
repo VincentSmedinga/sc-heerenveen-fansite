@@ -21,11 +21,16 @@ const tabs = [
  * Voorbeeld, choose which of the two is shown, and what is not shown stays in the page, so the
  * form keeps its values. Without JavaScript the page has the form alone: the preview and the
  * tabs only come when the page is live in the browser, since a preview needs a browser to build
- * itself. The choice of the tab is not kept.
+ * itself. The choice of the tab is not kept, and an answer of the server (a save with errors, a
+ * row added or removed) shows the form again, so the focus can reach the field it goes to.
  */
 export function ReportWorkspace() {
-  const { choices } = useReportForm()
-  const [tab, setTab] = useState<Tab>('formulier')
+  const { choices, state } = useReportForm()
+  const [chosen, setChosen] = useState<{ state: typeof state; tab: Tab }>()
+  // What the server answers (a save with errors, a row added or removed) shows the form again,
+  // in the same render: the focus goes to a field or to the list of errors, and a part that is
+  // not shown cannot take it.
+  const tab = chosen?.state === state ? chosen.tab : 'formulier'
   // Whether the page is live in the browser: the server and a page without JavaScript say no.
   const live = useSyncExternalStore(
     () => () => undefined,
@@ -38,7 +43,12 @@ export function ReportWorkspace() {
     <SideBySide>
       {showPreview ? (
         <SideBySide.Tabs>
-          <SegmentedControl label="Formulier of voorbeeld" onChange={setTab} options={tabs} value={tab} />
+          <SegmentedControl
+            label="Formulier of voorbeeld"
+            onChange={(value) => setChosen({ state, tab: value })}
+            options={tabs}
+            value={tab}
+          />
         </SideBySide.Tabs>
       ) : null}
       <SideBySide.Main hidden={showPreview && tab !== 'formulier'}>

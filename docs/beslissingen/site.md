@@ -3148,6 +3148,7 @@
     De strafschoppenserie staat er niet in: die komt met #852.
   - **Indeling:** `SideBySide` uit het ontwerpsysteem (zie _`SideBySide` zet twee delen van één taak naast elkaar_ in `designsysteem.md`).
     De tabs zijn een `SegmentedControl`, en wat niet getoond wordt, houdt `hidden`, zodat het formulier zijn waarden houdt.
+    Een antwoord van de server, zoals een opslag met fouten of een rij die erbij komt, toont het formulier weer, in dezelfde render: de focus gaat naar een veld of naar de lijst met fouten, en een deel dat niet getoond wordt kan hem niet krijgen.
   - **Zonder JavaScript** heeft de pagina alleen het formulier, zoals nu: het voorbeeld en de tabs komen pas als de pagina in de browser leeft, en de pagina zegt dat niet.
   - **Alleen voorbeeld:** het voorbeeld bewaart niets en praat niet met de server.
     Het wacht even op de laatste toets (`useDeferredValue`), zodat typen nooit trager wordt.
