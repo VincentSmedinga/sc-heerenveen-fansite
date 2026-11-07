@@ -30,7 +30,7 @@
     }
   }
 
-  /* The rows keep their own height: a block that is shorter than its neighbour does not stretch. */
+  /* The rows keep their own height: a block shorter than its neighbour does not stretch. */
   .hf-match-timeline-block {
     align-content: start;
     display: grid;
