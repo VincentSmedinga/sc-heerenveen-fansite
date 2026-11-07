@@ -61,7 +61,7 @@
     justify-items: start;
   }
 
-  /* The large result is for the wide place; on a narrow one the goals beside the names do it. */
+  /* The large result is for a wide place; on a narrow one the goals by the names do it. */
   .hf-match-header-result {
     display: none;
   }
