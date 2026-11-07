@@ -109,6 +109,12 @@ export type {
 } from './components/match-pitch/PitchPlayer'
 export { MatchScoreBar } from './components/match-score-bar/MatchScoreBar'
 export type { MatchScoreBarGoal, MatchScoreBarProps } from './components/match-score-bar/MatchScoreBar'
+export { MatchSubstitutes, substituteSentence } from './components/match-substitutes/MatchSubstitutes'
+export type {
+  MatchSubstitute,
+  MatchSubstitutesGroupProps,
+  MatchSubstitutesProps,
+} from './components/match-substitutes/MatchSubstitutes'
 export { matchPlayerEventKinds, MatchTimeline } from './components/match-timeline/MatchTimeline'
 export type {
   MatchPlayerEventKind,

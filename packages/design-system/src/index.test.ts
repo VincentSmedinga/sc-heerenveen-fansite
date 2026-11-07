@@ -39,6 +39,7 @@ const components = [
   'MatchLineup',
   'MatchPitch',
   'MatchScoreBar',
+  'MatchSubstitutes',
   'MatchTimeline',
   'Navigation',
   'NewsItem',

@@ -1,8 +1,9 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 import { MatchEventIcon, type MatchEventIconKind } from '../match-event-icon/MatchEventIcon'
 import { type MatchPlayerName } from '../match-timeline/MatchTimeline'
+import { PlayerDisc } from './PlayerDisc'
 
 /** The heaviest card the player got in the match. */
 export type PitchPlayerCard = {
@@ -150,12 +151,7 @@ export const PitchPlayer = ({
     >
       <span className="hf-visually-hidden">{pitchPlayerSentence(player)}</span>
       <span aria-hidden="true" className="hf-pitch-player-drawing">
-        <span className="hf-pitch-player-disc">
-          <span
-            className="hf-pitch-player-ring"
-            style={{ '--hf-ring-length': `${arc.length}deg`, '--hf-ring-start': `${arc.start}deg` } as CSSProperties}
-          />
-          <span className="hf-pitch-player-number">{shirtNumber}</span>
+        <PlayerDisc arc={arc} ours={ours} shirtNumber={shirtNumber}>
           {goals !== undefined && goals.length > 0 ? (
             <span className="hf-pitch-player-mark hf-pitch-player-mark-goal">
               <MatchEventIcon kind={goalKind(goals)} />
@@ -172,7 +168,7 @@ export const PitchPlayer = ({
             </span>
           )}
           {captain === true ? <span className="hf-pitch-player-mark hf-pitch-player-mark-captain">A</span> : null}
-        </span>
+        </PlayerDisc>
         <span className="hf-pitch-player-name">
           <span className="hf-pitch-player-surname">{shownName}</span>
           {substitutedOffAt === undefined ? null : (
