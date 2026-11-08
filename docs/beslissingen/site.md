@@ -3674,7 +3674,8 @@
 - **Besluit:** onderaan de hoofdkolom van de pagina van een wedstrijd staat een transparante kaart, `MatchNeighbours` (#928).
   De volgorde loopt over alle wedstrijden in de database, van alle competities en seizoenen: op datum, dan op aanvangstijd (een wedstrijd zonder aanvangstijd eerst), dan op id.
   `listMatchSequence` leest de lijst, `apps/site/src/match-neighbours.ts` zoekt de buren en bouwt de regel, en de lijst blijft vijf minuten in het geheugen.
-  - Bij onze eerste wedstrijd ontbreekt "Vorige", bij de laatste "Volgende". Een enkele kant blijft op zijn eigen plek.
+  - Bij onze eerste wedstrijd ontbreekt "Vorige", bij de laatste "Volgende".
+    Een enkele kant blijft op zijn eigen plek.
   - Een wedstrijd met een uitslag toont de stand vanuit ons gezien in de kleur van de uitslag (`outcomeOf`, bij strafschoppen de uitslag daarvan), met verborgen "Gewonnen", "Gelijkspel" of "Verloren".
   - Een wedstrijd zonder uitslag toont de datum in de korte vorm van de lijsten (zonder tijd), of "Live", "Uitgesteld" of "Geannuleerd", zonder kleur.
   - Een wedstrijd zonder pagina staat als tekst zonder link in dezelfde opbouw.
