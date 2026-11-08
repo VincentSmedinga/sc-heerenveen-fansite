@@ -11,7 +11,7 @@ import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
-import { sourceOf } from '#src/match-sources'
+import { sourceName, sourceOf } from '#src/match-sources'
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
@@ -194,7 +194,7 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
   const { name } = loaded.page.club
 
   return seasonPageMetadata(opponentsPath, `${opponentsPath}/${slug}`, {
-    description: `Hoe vaak sc Heerenveen won, gelijkspeelde en verloor tegen ${name}, met alle wedstrijden en de bron erbij: de Nederlandse Wikipedia.`,
+    description: `Hoe vaak sc Heerenveen won, gelijkspeelde en verloor tegen ${name}, met alle wedstrijden en de bron erbij: ${sourceName(sourceOf(loaded.page.matches))}.`,
     title: `sc Heerenveen tegen ${name}`,
   })
 }

@@ -10,7 +10,7 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { sourceOf } from '#src/match-sources'
+import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { getCoachResultData, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
@@ -54,7 +54,7 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
   return season === current
     ? pageMetadata(statisticsPath, 'Cijfers')
     : seasonPageMetadata(statisticsPath, seasonAddress(statisticsPath, season, current), {
-        description: `De cijfers van sc Heerenveen 1 in het seizoen ${season}, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: de Nederlandse Wikipedia.`,
+        description: `De cijfers van sc Heerenveen 1 in het seizoen ${season}, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: ${sourceName(seasonSourceOf(loaded.data))}.`,
         title: `Cijfers ${season}`,
       })
 }

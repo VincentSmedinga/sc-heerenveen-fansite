@@ -3564,6 +3564,7 @@
     De lijst van de tegenstanders en de pagina's die alle seizoenen tellen, noemen de bron van alle wedstrijden in de database (`listMatchDataSources`).
     De kaarten met een knop voor een plaatje geven de bron van hun eigen wedstrijden.
     De bronvermelding van de selectie (`SquadCredit` in Zoeken en de kaart Selectie) blijft Wikipedia: de selecties komen alleen van daar.
+    De beschrijving van de pagina van een seizoen, van een club en van Spelers noemt dezelfde bron (`sourceName`), en die van de lijst Tegenstanders noemt beide.
   - **De volgorde van de competities** op de pagina van een seizoen: de competitie (Eredivisie of Eerste divisie), de beker, de Champions League, de Europacup II, de UEFA Cup, de Intertoto Cup, de play-offs van de UEFA Cup, en dan de volgorde die al bestond (de play-offs van de Conference League, de Europa League en de play-offs van de Europa League).
     De anker-ids van de kaarten stonden al in `matchShortcuts.ts`.
     Een test controleert dat elke competitie precies één keer in de volgorde staat.

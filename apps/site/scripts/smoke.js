@@ -1041,7 +1041,8 @@ await withEmptyDatabase((database) =>
     // archive of the old fansite and not Wikipedia, which has nothing of that season.
     const oldSeasonHtml = await (await fetch(`${origin}/wedstrijden/1992-93`)).text()
     assert.match(oldSeasonHtml, /<h2[^>]*id="uitslagen-eerste-divisie">/)
-    assert.match(oldSeasonHtml, /<time datetime="1992-11-21">za 21 nov 1992<\/time>/)
+    assert.match(oldSeasonHtml, /content="[^"]*met de bron erbij: het archief van de oude sc Heerenveen Fansite\./)
+    assert.match(oldSeasonHtml, /<time dateTime="1992-11-21">za 21 nov 1992<\/time>/)
     assert.doesNotMatch(oldSeasonHtml, /1992-11-21T|tijd nog niet|weekend/i)
     assert.match(
       oldSeasonHtml,
@@ -1052,7 +1053,7 @@ await withEmptyDatabase((database) =>
     // A match of the old fansite with a kick-off is a played match: it shows the day too.
     const uefaSeasonHtml = await (await fetch(`${origin}/wedstrijden/2004-05`)).text()
     assert.match(uefaSeasonHtml, /<h2[^>]*id="uitslagen-uefa-cup">/)
-    assert.match(uefaSeasonHtml, /<time datetime="2004-09-16">do 16 sep 2004<\/time>/)
+    assert.match(uefaSeasonHtml, /<time dateTime="2004-09-16">do 16 sep 2004<\/time>/)
     assert.match(uefaSeasonHtml, /Bron: het archief van de oude sc Heerenveen Fansite/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)

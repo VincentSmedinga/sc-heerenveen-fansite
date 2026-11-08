@@ -16,3 +16,24 @@ export function sourceOf(matches: readonly Pick<PublicMatch, 'dataSource'>[]): M
 
   return archive ? (wikipedia ? 'both' : 'archive') : 'wikipedia'
 }
+
+/**
+ * The source of the page of a season: that of its matches, and Wikipedia as well when the page
+ * has pages of Wikipedia (`pages`), such as for the table. A season that is not found is
+ * Wikipedia, which is what the pages said before there was an archive.
+ */
+export const seasonSourceOf = (
+  data: undefined | { matches: readonly Pick<PublicMatch, 'dataSource'>[]; pages: readonly unknown[] },
+): MatchSource => {
+  const source = data === undefined ? 'wikipedia' : sourceOf(data.matches)
+
+  return source === 'archive' && data !== undefined && data.pages.length > 0 ? 'both' : source
+}
+
+/** The source as a sentence names it, such as in the description of a page. */
+export const sourceName = (source: MatchSource) =>
+  source === 'archive'
+    ? 'het archief van de oude sc Heerenveen Fansite'
+    : source === 'both'
+      ? 'de Nederlandse Wikipedia en het archief van de oude sc Heerenveen Fansite'
+      : 'de Nederlandse Wikipedia'
