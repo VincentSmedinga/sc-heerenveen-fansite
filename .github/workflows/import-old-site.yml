@@ -38,7 +38,7 @@ jobs:
     name: Import the old site on acceptance
     runs-on: ubuntu-latest
     # The files hold 671 matches and 91 clubs, and the command asks nobody for anything: it only
-    # writes to the database. It takes seconds. 30 minutes leaves room for the steps that come
+    # writes to the database (the action report does not even write). It takes seconds. 30 minutes leaves room for the steps that come
     # after the clubs, and for a slow host.
     timeout-minutes: 30
     environment:
