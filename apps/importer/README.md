@@ -2057,6 +2057,8 @@ Hij doet dit:
 
 De stap `spelers` ([`src/old-site-players.ts`](src/old-site-players.ts)) maakt een rij in `players` voor elke speler van ons in een doelpunt, een assist met een code of een opstelling, voor het seizoen van de wedstrijd, met de bron `verslag` en zonder rugnummer, positie, pagina en persoon.
 Een rij die er al is voor dat seizoen en die naam, van welke bron ook, blijft zoals ze is.
+Een rij die deze stap zelf onder een oude schrijfwijze maakte (`Ger Schaap`, bron `verslag`, geen pagina en geen persoon) voegt hij samen met de rij van de gekozen schrijfwijze (`Gerrie Schaap`) en haalt hij weg; de doelpunten, opstellingen en cijfers gaan mee.
+Het aantal staat bij de gewijzigde rijen, en elke rij heeft een regel in het logboek.
 Een code zonder rij in de oude tabel `speler` (`ivan.tzvekov`) krijgt de naam uit de code en een regel in het logboek.
 Een code met een spatie (`X. Alberts`) is een speler van de tegenstander en maakt geen rij.
 

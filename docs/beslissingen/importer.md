@@ -2789,6 +2789,7 @@
     Bij Leeroy Echteld en Igor Korneev is de oude schrijfwijze de gekozen, en de lijst zet de schrijfwijze van Wikipedia om (`Lee-Roy Echteld`, `Igor Kornejev`), voor het geval die als tekst in de bestanden staat.
     De stap `spelers` vindt zo de speler die er al staat (dezelfde naam in hetzelfde seizoen, uit welke bron ook) en maakt geen tweede.
     De import verwijdert of hernoemt nooit een rij die er al staat: wat er onder de oude schrijfwijze staat, regelt de projecteigenaar met de hand.
+    **Later:** zie _De stap `spelers` voegt een verouderde rij samen met de speler van de gekozen schrijfwijze_ (8 november 2026): een rij die de stap zelf maakte onder de oude schrijfwijze wordt wel samengevoegd en weggehaald.
   - **De rest blijft staan.**
     Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken.
     Daarnaast heeft het een korte lijst _Namen op de spelerskaarten om te beslissen_ (`oldSiteSquadNamesToDecide`).
@@ -2819,3 +2820,20 @@
 - **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en een artikel op Wikipedia is een bron die hij kan controleren.
   Een omzetting die de importer bij elke naam toepast, laat de bestanden van de oude fansite onaangeroerd.
 - **Alternatieven:** alle groepen samenvoegen, ook als niet zeker is dat het één persoon is (twee mensen worden dan één speler); de schrijfwijze van de oude fansite behouden (dezelfde persoon blijft op twee manieren in de tellingen staan).
+
+## De stap `spelers` voegt een verouderde rij samen met de speler van de gekozen schrijfwijze
+
+- **Datum:** 8 november 2026
+- **Besluit:** na het aanmaken van de spelers voegt de stap `spelers` (`mergeStaleOldSitePlayers` in `apps/importer/src/old-site-players.ts`) een verouderde rij samen met de rij van de gekozen schrijfwijze, en haalt de verouderde rij weg.
+  - **Wanneer een rij verouderd is:** hij is van hetzelfde seizoen, heeft de bron `verslag` en alleen een naam (geen Wikipedia-pagina, geen persoon), en zijn naam is precies een sleutel van `oldSiteNameCorrections` waarvan de gekozen schrijfwijze in dat seizoen ook een rij heeft.
+    Elke andere rij blijft zoals hij is: een andere naam, een andere bron, een rij met een pagina of een persoon.
+  - **Wat er gebeurt:** de doelpunten, de opstellingen en de cijfers van het seizoen van de verouderde rij gaan naar de andere rij.
+    Heeft de andere rij die wedstrijd of die competitie al, dan blijft die zijn eigen gegevens houden, en gaat het gegeven van de verouderde rij weg met die rij.
+    Het aantal samengevoegde rijen staat bij de gewijzigde rijen in het overzicht van de stap, met een regel per rij.
+    Een tweede run vindt niets meer.
+  - **Rijen van Wikipedia onder de oude schrijfwijze blijven staan:** bij Lee-Roy Echteld en Igor Kornejev is de rij van de selectie de verouderde, en de rij van de oude fansite de gekozen.
+    Samenvoegen zou de gegevens van Wikipedia kwijtraken, en de selectie zet die rij elke run terug.
+    De projecteigenaar hernoemt ze met de hand.
+- **Waarom:** de import voegde alleen toe, dus een rij van vóór de lijst met schrijfwijzen bleef naast de goede staan en een speler stond twee keer op de selectie van een seizoen (acceptatie, `Ger Schaap` en `Gerrie Schaap`).
+  De rij is door deze stap zelf gemaakt en bevat niets dan een naam, dus er gaat niets verloren.
+- **Alternatieven:** een eenmalige opdracht (het volgende geval, een nieuwe schrijfwijze in de lijst, vraagt weer om een opdracht); alle verouderde rijen samenvoegen, ook van Wikipedia (verlies van pagina, rugnummer en cijfers); niets doen en de projecteigenaar de rijen laten weghalen (de lijst is lang, en de fout komt bij elke nieuwe schrijfwijze terug).
