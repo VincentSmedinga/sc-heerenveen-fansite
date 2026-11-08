@@ -341,7 +341,9 @@ for (const [name, javaScriptEnabled] of [
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
       await expect(page.locator('#fouten')).toBeVisible()
       await expect(page.locator('#doelpunt-1-kant-error')).toBeVisible()
-      await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+      // The minute may be empty, but not with added time: the error is at the added time.
+      await expect(page.getByLabel('Blessuretijd, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+      await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).not.toHaveAttribute('aria-invalid', 'true')
       await expect(page.locator('#uitslag-zij')).toHaveValue('1')
       await expect(page.getByLabel('Blessuretijd, doelpunt 1', { exact: true })).toHaveValue('1')
 
