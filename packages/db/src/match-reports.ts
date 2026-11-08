@@ -548,10 +548,16 @@ function byRound(a: MatchShootoutKick, b: MatchShootoutKick) {
 }
 
 /**
- * The order of the clock: the minute, then the added time, then `id` for two events at once.
+ * The order of the clock: the minute, then the added time, then `id` for two events at once. An
+ * event without a minute comes after the ones with a minute, in the order of `id`.
  */
-function onTheClock<T extends { id: number; minute: number; stoppageMinutes: null | number }>(a: T, b: T) {
-  return a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0) || a.id - b.id
+function onTheClock<T extends { id: number; minute: null | number; stoppageMinutes: null | number }>(a: T, b: T) {
+  return (
+    Number(a.minute === null) - Number(b.minute === null) ||
+    (a.minute ?? 0) - (b.minute ?? 0) ||
+    (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0) ||
+    a.id - b.id
+  )
 }
 
 /** The names of our players in the reports, by the id of their row in a report. */

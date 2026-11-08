@@ -1748,6 +1748,31 @@ describe('the matches and the table of a season', () => {
       expect(byRound('Speelronde 1')).toMatchObject({ afterNinetyAgainst: null, afterNinetyFor: null })
     })
 
+    it('gives a goal without a minute after the goals with a minute', async () => {
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+
+      const [cupMatch] = await database.db
+        .select({ id: matches.id })
+        .from(matches)
+        .where(eq(matches.round, 'Kwartfinale'))
+      const id = cupMatch?.id ?? 0
+
+      await database.db.insert(matchGoals).values([
+        { matchId: id, minute: null, ours: false, player: 'Onbekend' },
+        { matchId: id, minute: 88, ours: false, player: 'Late' },
+        { matchId: id, minute: 18, ours: true, player: 'Vroeg' },
+      ])
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const cup = rows.find((match) => match.round === 'Kwartfinale')
+
+      expect(cup?.goals.map((goal) => [goal.player, goal.minute])).toEqual([
+        ['Vroeg', 18],
+        ['Late', 88],
+        ['Onbekend', null],
+      ])
+    })
+
     it('gives a played match its scorers in the order of the clock, and the others none', async () => {
       await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 

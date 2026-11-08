@@ -21,4 +21,9 @@ describe('halfOf', () => {
   it('keeps a minute past 90 in the second half when there was no extra time', () => {
     expect(halfOf(91, false)).toBe('second')
   })
+
+  it('gives an event without a minute a block of its own', () => {
+    expect(halfOf(null, false)).toBe('unknown')
+    expect(halfOf(null, true)).toBe('unknown')
+  })
 })

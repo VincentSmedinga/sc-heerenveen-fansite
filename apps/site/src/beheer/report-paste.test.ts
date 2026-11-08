@@ -386,6 +386,45 @@ describe('the goals', () => {
   })
 })
 
+describe('a minute that nobody knows, written as a question mark', () => {
+  const base = 'Opstelling\n4\n9\n'
+
+  it('is read for a goal and a yellow card as an empty minute, and said so', () => {
+    const goal = read('Opstelling\n4\nDoelpunten\n? 4')
+    const card = read(`${base}Kaarten\n? geel Oyen`)
+
+    expect(goal.values.wij.doelpunt).toMatchObject([{ extra: '', minuut: '' }])
+    expect(goal.read.map((line) => line.meaning)).toContain('Doelpunt voor sc Heerenveen zonder minuut: 4')
+    expect(card.values.wij.kaart).toMatchObject([{ extra: '', minuut: '', soort: 'geel', speler: '2' }])
+    expect(card.read.map((line) => line.meaning)).toContain('geel sc Heerenveen zonder minuut: Oyen')
+    expect(goal.unread).toEqual([])
+    expect(card.unread).toEqual([])
+  })
+
+  it('is left to the rules for a red card, which the form then refuses at its minute', () => {
+    const result = read(`${base}Kaarten\n? rood Oyen`)
+
+    expect(result.values.wij.kaart).toMatchObject([{ minuut: '', soort: 'rood' }])
+  })
+
+  it('is not read for a substitution or a penalty, which need a minute', () => {
+    const result = read(`${base}Wissels\n? 9 voor 4\nStrafschoppen\n? gemist Oyen`)
+
+    expect(result.values.wij.wissel).toEqual([])
+    expect(result.values.wij.strafschop).toEqual([])
+    expect(result.unread.map((line) => line.reason)).toEqual([
+      'Een wissel heeft een minuut nodig.',
+      'Een strafschop heeft een minuut nodig.',
+    ])
+  })
+
+  it('says in the hint that a question mark is for an unknown minute', () => {
+    const result = read(`${base}Kaarten\ngeel Oyen`)
+
+    expect(result.unread[0]?.reason).toContain('vraagteken')
+  })
+})
+
 describe('what was read', () => {
   it('says for every line what it was read as, and keeps the source of the form', () => {
     const result = readPastedReport('Opstelling\n4 Van Aken (a)\nKaarten\n34 geel 4', squad, {

@@ -56,6 +56,19 @@ describe('pitchPlayerSentence', () => {
     ).toContain("rode kaart 80'")
   })
 
+  it('names a goal and a card without a minute, and says nothing about the minute', () => {
+    const sentence = pitchPlayerSentence({
+      card: { kind: 'yellow-card', minute: null },
+      goals: [{ minute: null }, { minute: null, ownGoal: true }],
+      minutesPlayed: 90,
+      name: { givenName: 'Rick', surname: 'Demo' },
+      shirtNumber: 9,
+    })
+
+    expect(sentence).toBe('Rick Demo, rugnummer 9, doelpunt, eigen doelpunt, gele kaart, 90 minuten')
+    expect(sentence).not.toMatch(/null|leeg|0'/u)
+  })
+
   it('leaves out what did not happen', () => {
     expect(
       pitchPlayerSentence({ minutesPlayed: 90, name: { givenName: 'Rick', surname: 'Demo' }, shirtNumber: 9 }),

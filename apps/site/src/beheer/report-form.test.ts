@@ -191,6 +191,71 @@ describe('checkReportForm', () => {
       )
     })
 
+    it('stores a goal and a yellow card without a minute as empty, after the events with a minute', () => {
+      const checked = checkReportForm(
+        report({
+          wij: {
+            doelpunt: [
+              goal({ minuut: '', speler: 'wij-9' }),
+              goal({ assist: 'wij-9', minuut: '77', speler: 'wij-10' }),
+            ],
+            kaart: [
+              { ...emptyRow('kaart'), minuut: '', speler: '3' },
+              { ...emptyRow('kaart'), minuut: '20', speler: '4' },
+            ],
+          },
+        }),
+        context,
+      )
+
+      expect(checked.errors).toEqual({})
+      expect(checked.plan?.goals.map((one) => [one.ours, one.minute, one.stoppageMinutes])).toEqual([
+        [false, 40, null],
+        [true, 77, null],
+        [true, null, null],
+      ])
+      expect(checked.plan?.cards.map((card) => [card.appearance, card.minute])).toEqual([
+        [3, 20],
+        [2, null],
+      ])
+    })
+
+    it('wants a minute for a red card and a yellow-red card, and says so at the minute', () => {
+      const red = report({ wij: { kaart: [{ ...emptyRow('kaart'), minuut: '', soort: 'rood', speler: '3' }] } })
+      const yellowRed = report({
+        wij: {
+          kaart: [
+            { ...emptyRow('kaart'), minuut: '', soort: 'geel', speler: '3' },
+            { ...emptyRow('kaart'), minuut: '', soort: 'geel-rood', speler: '3' },
+          ],
+        },
+      })
+
+      fails(red, 'kaart-wij-1-minuut', /rode kaart heeft een minuut nodig/u)
+      fails(yellowRed, 'kaart-wij-2-minuut', /geel-rode kaart heeft een minuut nodig/u)
+    })
+
+    it('wants a minute for a substitution and a missed penalty', () => {
+      fails(
+        report({ wij: { wissel: [sub({ erin: '12', eruit: '11', minuut: '' })] } }),
+        'wissel-wij-1-minuut',
+        /minuut in, van 1 tot 120/u,
+      )
+      fails(
+        report({ wij: { strafschop: [{ ...emptyRow('strafschop'), minuut: '', speler: '9' }] } }),
+        'strafschop-wij-1-minuut',
+        /minuut in, van 1 tot 120/u,
+      )
+    })
+
+    it('wants a minute for added time of a goal', () => {
+      fails(
+        report({ wij: { doelpunt: [goal({ extra: '2', minuut: '', speler: 'wij-9' })] } }),
+        'doelpunt-wij-1-extra',
+        /Blessuretijd hoort bij een minuut/u,
+      )
+    })
+
     it('wants players for a substitution, a card and a penalty, who are in the report', () => {
       fails(
         report({ wij: { wissel: [sub({ erin: '12', minuut: '60' })] } }),

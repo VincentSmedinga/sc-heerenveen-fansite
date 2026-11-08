@@ -133,3 +133,22 @@ export const OwnGoalAway = meta.story({
   },
   name: 'Uit, met een eigen doelpunt',
 })
+
+export const ScorerWithoutMinute = meta.story({
+  args: {
+    facts: [
+      { label: 'Competitie', value: 'Eredivisie' },
+      { label: 'Ronde', value: 'Speelronde 12' },
+    ],
+    goalsAgainst: 1,
+    goalsFor: 2,
+    home: true,
+    opponent: 'Voorbeeld United',
+    scorersAgainst: [{ minute: null, player: 'Dummydijk' }],
+    scorersFor: [
+      { minute: 12, player: 'Demo' },
+      { minute: null, player: 'Monster' },
+    ],
+  },
+  name: 'Een doelpunt zonder minuut: de naam staat zonder minuut',
+})

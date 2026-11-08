@@ -609,6 +609,29 @@ describe('the report as the form reads it', () => {
     })
   })
 
+  it('keeps a goal and a yellow card without a minute empty, and saving the form again changes nothing', async () => {
+    await wikipediaGoals()
+
+    await save(
+      report({
+        wij: {
+          doelpunt: [goal({ minuut: '', speler: 'wij-9' }), goal({ assist: 'wij-9', minuut: '77', speler: 'wij-10' })],
+          kaart: [card({ minuut: '', speler: '3' })],
+        },
+      }),
+    )
+
+    const screen = (await findReportScreen(database.db, matchId))!
+    const again = valuesOfReport(screen.report, screen.goals, screen.squad)
+
+    expect(again.wij.kaart.map((row) => row.minuut)).toEqual([''])
+    expect(again.wij.doelpunt.map((row) => row.minuut)).toEqual(['77', ''])
+    expect((await database.db.select().from(matchCards))[0]).toMatchObject({ minute: null, stoppageMinutes: null })
+    expect(await saveReport(database.db, userId, matchId, checkReportForm(again, contextOf(screen)).plan!)).toEqual({
+      status: 'unchanged',
+    })
+  })
+
   it('reads the players of a report in the order of the form, which the pitch of the page of the match needs', async () => {
     const whole = report().wij.speler
     // The line-up is the order the pitch draws: the goalkeeper first, then the rows of the

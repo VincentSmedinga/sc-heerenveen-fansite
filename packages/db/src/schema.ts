@@ -1028,8 +1028,10 @@ export const matchGoalPlayerMaxLength = 100
  * goal of sc Heerenveen and false for a goal of the opponent; an own goal belongs to the club
  * that benefits from it, so the goals of a club add up to its goals in `matches`. `minute` is
  * the minute on the clock, and `stoppage_minutes` the minutes of added time after it: 45 and 1
- * for "45+1". Added time is empty for a goal in regular time. `player` is the name as the page
- * shows it, such as `Van Bergen`. A row belongs to its match and goes with it.
+ * for "45+1". Added time is empty for a goal in regular time, and for a goal without a minute:
+ * the old fansite did not know the minute of 4 goals, and the minute is empty then. `player` is
+ * the name as the page shows it, such as `Van Bergen`. A row belongs to its match and goes with
+ * it.
  *
  * `player_id` is the player of ours who scored, in `players`, and `wikipedia_page` the page the
  * goal links to (`Luca Oyen` for `[[Luca Oyen|Oyen]]`), empty when the name has no link. Only
@@ -1061,7 +1063,7 @@ export const matchGoals = mysqlTable(
       .notNull()
       .references(() => matches.id, { onDelete: 'cascade' }),
     ours: boolean('ours').notNull(),
-    minute: int('minute', { unsigned: true }).notNull(),
+    minute: int('minute', { unsigned: true }),
     stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
     player: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
     playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
@@ -1083,6 +1085,7 @@ export const matchGoals = mysqlTable(
     index('match_goals_appearance_id_idx').on(table.appearanceId),
     index('match_goals_assist_appearance_id_idx').on(table.assistAppearanceId),
     check('match_goals_not_own_goal_and_penalty', sql`${table.ownGoal} = 0 or ${table.penalty} = 0`),
+    check('match_goals_stoppage_needs_minute', sql`${table.stoppageMinutes} is null or ${table.minute} is not null`),
   ],
 )
 
@@ -1650,12 +1653,16 @@ export type NewMatchAppearance = typeof matchAppearances.$inferInsert
  * The checks that every event of a report has on its minute: from 1 to the last minute of extra
  * time, and added time (1 to 15 minutes) only after the end of a half: 45, 90, 105 or 120.
  */
-function minuteChecks(table: string, minute: AnyMySqlColumn, stoppage: AnyMySqlColumn) {
+function minuteChecks(table: string, minute: AnyMySqlColumn, stoppage: AnyMySqlColumn, optional = false) {
+  // An empty minute passes the first check, since a check only fails on false. For the events
+  // that may have none, the second check lets added time go with a minute only.
+  const needsMinute = optional ? sql` and ${minute} is not null` : sql``
+
   return [
     check(`${table}_minute_range`, sql`${minute} between 1 and ${sql.raw(String(matchReportLimits.lastMinute))}`),
     check(
       `${table}_stoppage_range`,
-      sql`${stoppage} is null or (${stoppage} between 1 and ${sql.raw(String(matchReportLimits.stoppageMinutes))} and ${minute} in (45, 90, 105, 120))`,
+      sql`${stoppage} is null or (${stoppage} between 1 and ${sql.raw(String(matchReportLimits.stoppageMinutes))}${needsMinute} and ${minute} in (45, 90, 105, 120))`,
     ),
   ]
 }
@@ -1709,7 +1716,9 @@ export type MatchCardKind = (typeof matchCardKinds)[number]
 /**
  * A card for a player in a match report, with the minute on the clock and the minutes of added
  * time after it. `geel-rood` is the second yellow card of the player, which sends him off, and
- * is a card of its own next to his `geel`. A player has each kind once.
+ * is a card of its own next to his `geel`. A player has each kind once. The minute of a yellow
+ * card may be empty (the old fansite did not know it for most), but a red or yellow-red card
+ * keeps its minute, since it decides how long the player played.
  */
 export const matchCards = mysqlTable(
   'match_cards',
@@ -1719,7 +1728,7 @@ export const matchCards = mysqlTable(
     ours: boolean('ours').notNull(),
     appearanceId: int('appearance_id', { unsigned: true }).notNull(),
     kind: mysqlEnum('kind', matchCardKinds).notNull(),
-    minute: int('minute', { unsigned: true }).notNull(),
+    minute: int('minute', { unsigned: true }),
     stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
   },
   (table) => [
@@ -1728,9 +1737,10 @@ export const matchCards = mysqlTable(
       foreignColumns: [matchAppearances.id, matchAppearances.matchId, matchAppearances.ours],
       name: 'match_cards_appearance_fk',
     }).onDelete('cascade'),
+    check('match_cards_red_needs_minute', sql`${table.kind} = 'geel' or ${table.minute} is not null`),
     unique('match_cards_appearance_kind_unique').on(table.appearanceId, table.kind),
     index('match_cards_match_id_idx').on(table.matchId),
-    ...minuteChecks('match_cards', table.minute, table.stoppageMinutes),
+    ...minuteChecks('match_cards', table.minute, table.stoppageMinutes, true),
   ],
 )
 

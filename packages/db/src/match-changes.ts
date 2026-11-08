@@ -21,7 +21,12 @@ import { matchChanges, matches, matchGoals } from './schema.ts'
 export type ChangeDecision = { kind: 'keep' | 'take-over'; reason: string; userId: null | number }
 
 /** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
-export type LinkedGoal = ReadGoal & { personId: null | number; playerId: null | number }
+export type LinkedGoal = Omit<ReadGoal, 'minute'> & {
+  /** Wikipedia always has a minute; a stored goal of the old fansite may not. */
+  minute: null | number
+  personId: null | number
+  playerId: null | number
+}
 
 /** The new state of a match: what the page says, its club and its goals. */
 export type Proposal = { clubId: number; goals: LinkedGoal[]; match: ReadMatch }

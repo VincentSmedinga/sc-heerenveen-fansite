@@ -423,6 +423,37 @@ describe('reading a report', () => {
     expect(stored?.appearances.map((row) => row.name)).toEqual(['A', 'B', 'C'])
   })
 
+  it('gives a goal and a card without a minute last, and takes them along into the shape of the rules', async () => {
+    const matchId = await playedMatch({ goalsFor: 3 })
+
+    await report(matchId)
+
+    const a = await appearance(matchId, { name: 'A', shirtNumber: 1 })
+    const b = await appearance(matchId, { name: 'B', shirtNumber: 2 })
+
+    // Stored before the ones with a minute, on purpose.
+    await database.db.insert(matchCards).values([
+      { appearanceId: a, kind: 'geel', matchId, minute: null, ours: true },
+      { appearanceId: b, kind: 'geel', matchId, minute: 60, ours: true },
+    ])
+    await database.db.insert(matchGoals).values([
+      { matchId, minute: null, ours: true, player: 'Onbekend' },
+      { matchId, minute: 70, ours: true, player: 'Late' },
+      { matchId, minute: 12, ours: true, player: 'Eerste' },
+    ])
+
+    const stored = (await readMatchReport(database.db, matchId))!
+
+    expect(stored.goals.map((row) => [row.player, row.minute])).toEqual([
+      ['Eerste', 12],
+      ['Late', 70],
+      ['Onbekend', null],
+    ])
+    expect(stored.cards.map((row) => row.minute)).toEqual([60, null])
+    expect(reportForRules(stored).goals.map((goal) => goal.minute)).toEqual([12, 70, null])
+    expect(reportForRules(stored).cards.map((card) => card.minute)).toEqual([60, null])
+  })
+
   it('gives the report in the shape of the rules', async () => {
     const matchId = await playedMatch()
 
@@ -791,9 +822,9 @@ describe('the made-up report of the seed', () => {
     expect(match).toMatchObject({ extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4 })
     expect(stored.report).toMatchObject({ opponentComplete: true, status: 'klaar' })
     expect(checkMatchReport(reportForRules(stored), matchForRules(match!))).toEqual({ errors: [], warnings: [] })
-    expect(Math.max(...stored.cards.map((card) => card.minute), ...stored.substitutions.map((sub) => sub.minute))).toBe(
-      120,
-    )
+    expect(
+      Math.max(...stored.cards.map((card) => card.minute ?? 0), ...stored.substitutions.map((sub) => sub.minute)),
+    ).toBe(120)
     expect([hits(true), hits(false)]).toEqual([4, 3])
     expect(stored.shootout.map((kick) => [kick.round, kick.ours, kick.outcome])).toEqual([
       [1, true, 'raak'],

@@ -33,9 +33,9 @@ import {
 // The preview next to the form of a report: the page of the match, built again at every change
 // from what the form holds. The form is a client component and so is this file, so it imports
 // nothing the browser should not load. It reads the values of the form leniently: a row that is
-// not finished, such as a goal without a minute, is left out of the preview and not an error,
-// since the form says what is wrong and the preview only shows what is right. The rules of the
-// report (report-form.ts) are for saving.
+// not finished, such as a substitution without a minute, is left out of the preview and not an
+// error, since the form says what is wrong and the preview only shows what is right. The rules
+// of the report (report-form.ts) are for saving.
 
 /** The last minute and the longest added time a report holds (see `matchReportLimits`). */
 const lastMinute = 120
@@ -168,7 +168,7 @@ export function previewDataOf(
     values[side].kaart.forEach((row, index) => {
       const kind = cardKindChoices.find((choice) => choice.value === row.soort)?.value
       const player = placeOf.get(`${side}-${row.speler ?? ''}`)
-      const time = momentOf(row)
+      const time = optionalMomentOf(row, kind === 'geel')
 
       if (kind !== undefined && player !== undefined && time !== undefined) {
         cards.push({ ...frame(isChanged('kaart', side, index + 1)), kind, playerId: player, ...time })
@@ -209,7 +209,7 @@ export function previewDataOf(
 
     values[side].doelpunt.forEach((row, index) => {
       const kind = goalKindChoices.find((choice) => choice.value === row.soort)?.value
-      const time = momentOf(row)
+      const time = optionalMomentOf(row, true)
       const pointed = (value: string | undefined) => {
         const [of, number] = (value ?? '').split('-')
 
@@ -294,4 +294,19 @@ function momentOf(row: Row): undefined | { minute: number; stoppageMinutes: null
   }
 
   return { minute, stoppageMinutes: stoppage }
+}
+
+/**
+ * Like `momentOf`, for a goal and a yellow card (`optional`) that may have no minute: the
+ * moment is then empty, as long as the row has no added time either.
+ */
+function optionalMomentOf(
+  row: Row,
+  optional: boolean,
+): undefined | { minute: null | number; stoppageMinutes: null | number } {
+  if (optional && (row.minuut ?? '') === '') {
+    return (row.extra ?? '') === '' ? { minute: null, stoppageMinutes: null } : undefined
+  }
+
+  return momentOf(row)
 }

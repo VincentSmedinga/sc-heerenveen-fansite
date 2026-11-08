@@ -24,6 +24,12 @@ const arcOf = (item: Element | null) => {
 }
 
 describe('substituteSentence', () => {
+  it('says a goal without a minute as a goal, with no minute', () => {
+    const sentence = substituteSentence({ ...kuipers, goals: [{ minute: null }, { minute: null, ownGoal: true }] })
+
+    expect(sentence).toBe('Sven Kuipers, rugnummer 2, erin in minuut 62 voor Lars Dijkstra, doelpunt, eigen doelpunt')
+  })
+
   it('says who came on, when, for whom and what he scored', () => {
     expect(substituteSentence(kuipers)).toBe(
       'Sven Kuipers, rugnummer 2, erin in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85',

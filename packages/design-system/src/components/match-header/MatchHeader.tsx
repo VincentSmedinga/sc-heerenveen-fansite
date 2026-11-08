@@ -37,8 +37,11 @@ export type MatchHeaderProps = MatchHeaderBase & {
 
 /** A goal in the list of scorers under a club. */
 export type MatchHeaderScorer = {
-  /** The minute on the clock: 45 for "45+2". */
-  minute: number
+  /**
+   * The minute on the clock: 45 for "45+2". Empty when nobody knows it: the list then has the
+   * name alone.
+   */
+  minute: null | number
   /**
    * Whether it was an own goal. List it under the club that gets the goal, not under the club
    * of the player: it is then written with "(e.d.)".
@@ -75,9 +78,11 @@ const sides = (home: boolean, ours: number, theirs: number, dash: string) =>
 const outcomeWords: Record<Outcome, string> = { draw: 'Gelijkspel', loss: 'Verloren', win: 'Gewonnen' }
 
 const minuteOf = (scorer: MatchHeaderScorer) =>
-  scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
-    ? `${scorer.minute}’`
-    : `${scorer.minute}+${scorer.stoppageMinutes}’`
+  scorer.minute === null
+    ? ''
+    : scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
+      ? ` ${scorer.minute}’`
+      : ` ${scorer.minute}+${scorer.stoppageMinutes}’`
 
 /**
  * The goals under a club: "Hoekstra 12’ · Wiersma 58’ (str.)". The abbreviations are written
@@ -102,7 +107,8 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
             </>
           ) : null}
           <span aria-hidden="true" className="hf-match-header-scorer">
-            {scorer.player} {minuteOf(scorer)}
+            {scorer.player}
+            {minuteOf(scorer)}
             {scorer.ownGoal === true ? (
               <>
                 {' '}
@@ -117,8 +123,9 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
             ) : null}
           </span>
           <span className="hf-visually-hidden">
-            {scorer.player}, minuut {scorer.minute}
-            {scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
+            {scorer.player}
+            {scorer.minute === null ? '' : `, minuut ${scorer.minute}`}
+            {scorer.minute === null || scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
               ? ''
               : ` plus ${scorer.stoppageMinutes}`}
             {scorer.ownGoal === true ? ', eigen doelpunt' : ''}

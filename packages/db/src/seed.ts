@@ -646,7 +646,8 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
       stoppageMinutes: null,
       wikipediaPage: 'Jan van der Voorbeeldstraat-Proefmans',
     },
-    { minute: 90, ours: false, player: 'Oefenaar', stoppageMinutes: 3 },
+    // The minute is not known, like the minute of 4 goals of the old fansite.
+    { minute: null, ours: false, player: 'Oefenaar', stoppageMinutes: null },
   ],
   'KNVB Beker|Eerste ronde': [
     { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
@@ -1002,10 +1003,11 @@ type MadeUpReport = {
   events: (helpers: MadeUpReportHelpers) => MadeUpReportEvents
   formations: { opponent: string; ours: string }
   /**
-   * The goals of the match by their minute: the scorer and the player who gave the assist, or
-   * `null` for no assist. They are the goals of `madeUpGoals`.
+   * The goals of the match by their minute (`unknown` for a goal without one): the scorer and
+   * the player who gave the assist, or `null` for no assist. They are the goals of
+   * `madeUpGoals`.
    */
-  goals: Record<number, [scorer: MadeUpWho, assist: MadeUpWho | null]>
+  goals: Partial<Record<'unknown' | number, [scorer: MadeUpWho, assist: MadeUpWho | null]>>
   match: { competition: Competition; round: string }
   /** The line-up and the bench of the opponent: shirt number, name and whether he starts. */
   opponent: [shirtNumber: number, name: string, starter: boolean][]
@@ -1039,6 +1041,8 @@ type MadeUpReportHelpers = {
   ours: (name: string) => MatchAppearance
   swap: (out: { id: number; ours: boolean }, on: { id: number }, minute: number) => NewMatchSubstitution
   theirs: (shirtNumber: number) => MatchAppearance
+  /** A yellow card of a player at a moment nobody knows. */
+  unknownMinute: (player: { id: number; ours: boolean }) => Omit<MadeUpMoment, 'minute'> & { minute: null }
 }
 
 /** A player in a made-up report: one of ours by name, or the opponent's by shirt number. */
@@ -1098,7 +1102,7 @@ const madeUpReportOpponent: MadeUpReport['opponent'] = [
  * red card for the opponent, a penalty that the opponent took and our goalkeeper stopped, a
  * penalty of ours that was missed, and the assist for every goal; and the draw in the round of
  * 16 of the cup, with extra time, so with minutes up to 120, and a shoot-out that we won 4–3,
- * and four players of ours without a shirt number.
+ * four players of ours without a shirt number, and a yellow card and a goal without a minute.
  * They are the made-up data of the pages of a match and of their checks. The names are made up,
  * like the clubs.
  */
@@ -1141,9 +1145,10 @@ const madeUpReports: MadeUpReport[] = [
   },
   {
     captain: 'Milan Reitsma',
-    events: ({ at, kick, ours, swap, theirs }) => ({
+    events: ({ at, kick, ours, swap, theirs, unknownMinute }) => ({
       cards: [
-        { ...at(theirs(4), 74), kind: 'geel' },
+        // A yellow card without a minute, like most of the old fansite.
+        { ...unknownMinute(theirs(4)), kind: 'geel' },
         { ...at(theirs(3), 117), kind: 'rood' },
         { ...at(ours('Daan Boerema'), 118), kind: 'geel' },
         { ...at(ours('Ruben ten Hove'), 120, 1), kind: 'geel' },
@@ -1171,7 +1176,7 @@ const madeUpReports: MadeUpReport[] = [
       ],
     }),
     formations: { opponent: '4-4-2', ours: '4-2-3-1' },
-    goals: { 30: ['Jan van der Voorbeeldstraat-Proefmans', 'Thijs Idzenga'], 90: [9, null] },
+    goals: { 30: ['Jan van der Voorbeeldstraat-Proefmans', 'Thijs Idzenga'], unknown: [9, null] },
     match: madeUpCupReportMatch,
     opponent: [
       [1, 'Jaap Keepertest', true],
@@ -1428,6 +1433,13 @@ async function seedOneMadeUpReport(
       stoppageMinutes: null,
     }),
     theirs,
+    unknownMinute: (player) => ({
+      appearanceId: player.id,
+      matchId: match.id,
+      minute: null,
+      ours: player.ours,
+      stoppageMinutes: null,
+    }),
   })
 
   await db.insert(matchSubstitutions).values(events.substitutions)
@@ -1441,7 +1453,7 @@ async function seedOneMadeUpReport(
   }
 
   for (const goal of goals) {
-    const people = report.goals[goal.minute]
+    const people = report.goals[goal.minute ?? 'unknown']
 
     if (people !== undefined) {
       await db

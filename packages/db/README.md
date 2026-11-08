@@ -267,7 +267,7 @@ De regels die zeggen of een verslag klopt, staan in `@fansite/shared/match-repor
 | `match_reports`        | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `formation_ours` en `formation_opponent` (de formatie van elk team, zoals `4-3-3`, of leeg), `saved_by` en `saved_at` |
 | `match_appearances`    | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number` (mag leeg zijn), `starter` en `captain`                                                                                                    |
 | `match_substitutions`  | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                                                                                                                  |
-| `match_cards`          | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                                                                                                                    |
+| `match_cards`          | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` (mag leeg zijn bij `geel`) en `stoppage_minutes`                                                                                                                                         |
 | `match_incidents`      | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                                                                                                                          |
 | `match_shootout_kicks` | Een schot in de strafschoppenserie: `ours`, `round` (1 is het eerste schot van elk team), `appearance_id` (leeg bij een tegenstander wiens kant niet af is) en `outcome` (`raak`, `naast` of `gestopt`)                                                              |
 
@@ -285,7 +285,7 @@ Wat de database afdwingt:
 - een rugnummer (1 tot en met 99) staat één keer in een team van een wedstrijd, maar een speler mag er geen hebben, en dan mogen meer spelers in een team zonder zijn;
 - een speler van ons staat één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen, niet voor zichzelf;
 - een speler heeft elke soort kaart één keer;
-- een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij minuut 45, 90, 105 of 120;
+- een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij minuut 45, 90, 105 of 120 en bij een minuut; de minuut van een doelpunt en van een gele kaart mag leeg zijn, die van een rode of geel-rode kaart, een wissel en een strafschop niet;
 - een naam en een `source` zijn nooit leeg.
 
 `player_id` verwijst naar `players` met `ON DELETE SET NULL`: een verwijderde speler blijft met zijn naam in het verslag staan.
@@ -468,7 +468,7 @@ De rijen horen bij hun wedstrijd (`match_id`) en verdwijnen met haar.
 | ------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `match_id`         | De wedstrijd                                                                                                 |
 | `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                             |
-| `minute`           | De minuut op de klok: 45 bij "45+1"                                                                          |
+| `minute`           | De minuut op de klok: 45 bij "45+1"; leeg als niemand hem weet, dan zonder blessuretijd                      |
 | `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                                     |
 | `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                                        |
 | `player_id`        | De speler van ons in `players` die het doelpunt maakte; leeg als er geen is (zie hieronder)                  |

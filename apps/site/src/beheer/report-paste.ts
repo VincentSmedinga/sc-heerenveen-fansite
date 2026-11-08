@@ -99,8 +99,11 @@ function termOf(name: string) {
   return at === -1 ? (words.at(-1) ?? '') : words.slice(at).join(' ')
 }
 
-/** The minute and the added time at the start of an event line, and what follows. */
-const eventLine = /^(\d{1,3})(?:\+(\d{1,2}))?\s+(.+)$/u
+/**
+ * The minute and the added time at the start of an event line, and what follows. A question
+ * mark stands for a minute nobody knows, which a goal and a yellow card may have.
+ */
+const eventLine = /^(?:(\d{1,3})(?:\+(\d{1,2}))?|\?)\s+(.+)$/u
 
 /** What a stored report holds, in words, for the question whether pasting may replace it. */
 export function describeStored(report: {
@@ -408,7 +411,10 @@ export function readPastedReport(
     const found = eventLine.exec(entry.text)
 
     if (found === null) {
-      miss(entry, 'Begin met de minuut, zoals "34 geel Jansen" of "90+2 Smit voor Jansen".')
+      miss(
+        entry,
+        'Begin met de minuut, zoals "34 geel Jansen" of "90+2 Smit voor Jansen", of met een vraagteken als niemand de minuut weet.',
+      )
 
       continue
     }
@@ -418,10 +424,17 @@ export function readPastedReport(
     const rest = (found[3] ?? '').trim()
     const side = entry.side
     const clock = extra === '' ? minuut : `${minuut}+${extra}`
+    const when = minuut === '' ? 'zonder minuut' : `in minuut ${clock}`
     const nameTooLong = (value: string) => value.length > playerNameMaxLength
 
     if (entry.section === 'wissels') {
       const parts = /^(.+?)\s+voor\s+(.+)$/iu.exec(rest)
+
+      if (minuut === '') {
+        miss(entry, 'Een wissel heeft een minuut nodig.')
+
+        continue
+      }
 
       if (parts === null) {
         miss(entry, 'Schrijf een wissel als "61 12 voor 8": wie erin komt, en voor wie.')
@@ -439,7 +452,7 @@ export function readPastedReport(
       }
 
       values[side].wissel.push({ ...emptyRow('wissel'), erin, eruit, extra, minuut })
-      meant(entry, `Wissel ${sideWords(side)} in minuut ${clock}: ${parts[1]} voor ${parts[2]}`)
+      meant(entry, `Wissel ${sideWords(side)} ${when}: ${parts[1]} voor ${parts[2]}`)
     } else if (entry.section === 'kaarten') {
       const parts = /^(geel-rood|geel|rood)\s+(.+)$/iu.exec(rest)
 
@@ -458,9 +471,15 @@ export function readPastedReport(
       }
 
       values[side].kaart.push({ ...emptyRow('kaart'), extra, minuut, soort: fold(parts[1] ?? ''), speler })
-      meant(entry, `${fold(parts[1] ?? '')} ${sideWords(side)} in minuut ${clock}: ${parts[2]}`)
+      meant(entry, `${fold(parts[1] ?? '')} ${sideWords(side)} ${when}: ${parts[2]}`)
     } else if (entry.section === 'strafschoppen') {
       const parts = /^(gemist|gestopt)\s+(.+)$/iu.exec(rest)
+
+      if (minuut === '') {
+        miss(entry, 'Een strafschop heeft een minuut nodig.')
+
+        continue
+      }
 
       if (parts === null) {
         miss(entry, 'Schrijf een strafschop als "55 gemist Jansen": gemist of gestopt, en de nemer.')
@@ -483,7 +502,7 @@ export function readPastedReport(
         soort: `strafschop-${fold(parts[1] ?? '')}`,
         speler,
       })
-      meant(entry, `Strafschop ${fold(parts[1] ?? '')} in minuut ${clock}: ${parts[2]}`)
+      meant(entry, `Strafschop ${fold(parts[1] ?? '')} ${when}: ${parts[2]}`)
     } else {
       // A goal: the side under which it stands is the side that gets it. An own goal is of a
       // player of the other side.
@@ -546,7 +565,7 @@ export function readPastedReport(
       values[side].doelpunt.push(row)
       meant(
         entry,
-        `Doelpunt voor ${sideWords(side)} in minuut ${clock}: ${scorerName}${soort === 'gewoon' ? '' : `, ${soort === 'eigen' ? 'eigen doelpunt' : 'strafschop'}`}${assistText === undefined ? '' : `, assist ${assistText.trim()}`}`,
+        `Doelpunt voor ${sideWords(side)} ${when}: ${scorerName}${soort === 'gewoon' ? '' : `, ${soort === 'eigen' ? 'eigen doelpunt' : 'strafschop'}`}${assistText === undefined ? '' : `, assist ${assistText.trim()}`}`,
       )
     }
   }

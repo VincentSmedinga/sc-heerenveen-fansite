@@ -3,6 +3,7 @@
 // few hours old with a note, and lets anything else wait (see `match-changes.ts`). It knows
 // only what the import saw: the page, the time of the match and the moments the import saw
 // something for the first time. The boundaries are in `reliability`.
+import type { LinkedGoal } from '@fansite/db/match-changes'
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
 import { conflictStandsMs } from '@fansite/db/match-conflicts'
@@ -47,7 +48,9 @@ export type ChangeInput = {
 }
 
 /** A goal as the importer compares it, with the player and the page it is linked to. */
-export type GoalState = Pick<ReadGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty' | 'player' | 'stoppageMinutes'> & {
+export type GoalState = Pick<ReadGoal, 'ours' | 'ownGoal' | 'penalty' | 'player' | 'stoppageMinutes'> & {
+  /** Empty for a stored goal whose minute nobody knows. */
+  minute: null | number
   page: null | string
   /** Left out or null when the goal has no person. */
   personId?: null | number
@@ -136,7 +139,7 @@ export function goalStateOf(goal: MatchGoal): GoalState {
 }
 
 /** The goal of a read match as the importer compares it. */
-export function goalStateOfRead(goal: ReadGoal & { personId: null | number; playerId: null | number }): GoalState {
+export function goalStateOfRead(goal: LinkedGoal): GoalState {
   return { ...goal, page: goal.playerPage }
 }
 
@@ -182,10 +185,13 @@ function compareGoals(before: GoalState[], now: GoalState[]): GoalDifference {
 
 /** The goal as one piece of text, without its links: what a person and the comparison read. */
 function describeGoal(goal: GoalState): string {
-  const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
+  const minute =
+    goal.minute === null
+      ? ''
+      : `${goal.stoppageMinutes === null ? goal.minute : `${goal.minute}+${goal.stoppageMinutes}`}' `
   const kind = goal.ownGoal ? ' own goal' : goal.penalty ? ' penalty' : ''
 
-  return `${minute}' ${goal.player} (${goal.ours ? 'ours' : 'theirs'}${kind})`
+  return `${minute}${goal.player} (${goal.ours ? 'ours' : 'theirs'}${kind})`
 }
 
 /** The part of the change that is about the score and what decides it. */

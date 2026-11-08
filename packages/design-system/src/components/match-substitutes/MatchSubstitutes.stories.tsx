@@ -154,3 +154,22 @@ export const BothTeams = meta.story({
     </MatchSubstitutes.Group>
   ),
 })
+
+export const GoalWithoutMinute = meta.story({
+  args: {
+    headingLevel: 3,
+    ours: true,
+    substitutes: [
+      {
+        goals: [{ minute: null }],
+        minute: 60,
+        minutesPlayed: 30,
+        name: name('Maquette', 'Wim'),
+        playerOut: name('Voorbeeld', 'Jelle'),
+        shirtNumber: 15,
+      },
+    ],
+    team: 'sc Heerenveen',
+  },
+  name: 'Een doelpunt zonder minuut: alleen het pictogram',
+})

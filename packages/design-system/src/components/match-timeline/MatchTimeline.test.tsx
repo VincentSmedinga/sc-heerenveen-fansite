@@ -36,7 +36,7 @@ const events: MatchTimelineEvent[] = [
 ]
 
 const blocks = (container: HTMLElement) => [...container.querySelectorAll('.hf-match-timeline-block')]
-const items = (container: HTMLElement) => [...container.querySelectorAll('li')]
+const items = (container: Element) => [...container.querySelectorAll('li')]
 const spoken = (item: Element) => item.querySelector('.hf-visually-hidden')?.textContent
 
 describe('MatchTimeline', () => {
@@ -199,5 +199,62 @@ describe('MatchTimeline', () => {
 
     expect(framed).toHaveLength(1)
     expect(framed[0]?.textContent).toContain('Boerema')
+  })
+
+  describe('an event without a minute', () => {
+    const unknown = (kind: 'goal' | 'yellow-card'): MatchTimelineEvent => ({
+      kind,
+      minute: null,
+      ours: true,
+      player: name('Demo', 'Rick'),
+      team: 'sc Heerenveen',
+    })
+
+    it('stands in a last block, Minuut onbekend, after the blocks with minutes', () => {
+      const { container } = render(<MatchTimeline events={[...events, unknown('goal')]} />)
+
+      expect(blocks(container).map((block) => block.querySelector('h3')?.textContent)).toEqual([
+        'Eerste helft',
+        'Tweede helft',
+        'Minuut onbekend',
+      ])
+      expect(items(blocks(container)[2]!)).toHaveLength(1)
+    })
+
+    it('has no block when every event has a minute', () => {
+      const { container } = render(<MatchTimeline events={events} />)
+
+      expect(container.textContent).not.toContain('Minuut onbekend')
+    })
+
+    it('keeps the block after Verlenging, and shows it also when it is the only event', () => {
+      const { container } = render(<MatchTimeline events={[card(100), unknown('yellow-card')]} extraTime />)
+
+      expect(blocks(container).map((block) => block.querySelector('h3')?.textContent)).toEqual([
+        'Eerste helft',
+        'Tweede helft',
+        'Verlenging',
+        'Minuut onbekend',
+      ])
+    })
+
+    it('shows a dash instead of a minute, never 0, and a screen reader skips the dash', () => {
+      const { container } = render(<MatchTimeline events={[unknown('goal')]} />)
+      const [item] = items(blocks(container)[2]!)
+      const pill = item!.querySelector('.hf-match-event-minute')
+
+      expect(pill?.textContent).toBe('–')
+      expect(pill?.getAttribute('aria-hidden')).toBe('true')
+      expect(container.textContent).not.toMatch(/\b0’|null/u)
+    })
+
+    it('is read as the team, the kind of event and the player, without a minute', () => {
+      const { container } = render(<MatchTimeline events={[unknown('goal'), unknown('yellow-card')]} />)
+      const [goal, yellow] = items(blocks(container)[2]!)
+
+      expect(spoken(goal!)).toBe('sc Heerenveen: Doelpunt: ')
+      expect(spoken(yellow!)).toBe('sc Heerenveen: Gele kaart: ')
+      expect(goal!.textContent).not.toMatch(/minuut|null/iu)
+    })
   })
 })

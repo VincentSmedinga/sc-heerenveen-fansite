@@ -17,8 +17,11 @@ export const matchStatuses = ['scheduled', 'played', 'postponed', 'cancelled'] a
 
 /** One goal of a played match. */
 export type MatchGoal = {
-  /** The minute on the clock: 45 for "45+1". */
-  minute: number
+  /**
+   * The minute on the clock: 45 for "45+1". Empty when nobody knows it: the line then has a
+   * dash in the colour of the club, which a screen reader skips.
+   */
+  minute: null | number
   /** Whether the goal is for sc Heerenveen. Otherwise it is for the opponent. */
   ours: boolean
   /** Whether it is an own goal. It counts for the club that benefits: that is `ours`. */
@@ -395,13 +398,19 @@ function MatchGoalItem({ goal, opponent }: { goal: MatchGoal; opponent: string }
   return (
     <span className="hf-match-goal">
       <span className={goal.ours ? 'hf-match-goal-ours' : 'hf-match-goal-theirs'}>
-        <span aria-hidden="true">
-          {goal.minute}’{added === null ? '' : `+${added}`}
-        </span>
-        <span className="hf-visually-hidden">
-          minuut {goal.minute}
-          {added === null ? '' : ` plus ${added}`},{' '}
-        </span>
+        {goal.minute === null ? (
+          <span aria-hidden="true">–</span>
+        ) : (
+          <>
+            <span aria-hidden="true">
+              {goal.minute}’{added === null ? '' : `+${added}`}
+            </span>
+            <span className="hf-visually-hidden">
+              minuut {goal.minute}
+              {added === null ? '' : ` plus ${added}`},{' '}
+            </span>
+          </>
+        )}
       </span>
       {'\u00a0'}
       {goal.player}

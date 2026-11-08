@@ -1031,3 +1031,123 @@ describe('checkMatchReport with formations', () => {
     expect(blockingIssues({ ...wrong, status: 'bezig' }, match)).toEqual([])
   })
 })
+
+describe('a goal or a yellow card without a minute', () => {
+  const noMinute = { minute: null, stoppageMinutes: null } as const
+
+  it('passes, since the rules that need the clock have nothing to judge', () => {
+    const report = changed((r) => {
+      // A scorer and an assist who never came on, and a yellow card for a player who went off.
+      r.goals[0] = { ...r.goals[0]!, ...noMinute, appearanceId: 14, assistId: 16 }
+      r.cards.push({ appearanceId: 11, kind: 'geel', ...noMinute })
+    })
+
+    expect(checkMatchReport(report, match)).toEqual({ errors: [], warnings: [] })
+  })
+
+  it('is judged by the clock again as soon as it has a minute', () => {
+    const report = changed((r) => {
+      r.goals[0] = { ...r.goals[0]!, appearanceId: 14, assistId: 16, minute: 12 }
+      r.cards.push({ appearanceId: 11, kind: 'geel', minute: 61, stoppageMinutes: null })
+    })
+
+    expect(codes(report)).toEqual(
+      expect.arrayContaining(['scorer-not-on-pitch', 'assist-not-on-pitch', 'card-after-leaving']),
+    )
+  })
+
+  it('counts a yellow card without a minute as the one before a yellow-red card', () => {
+    const report = changed((r) => {
+      r.cards[0] = { ...r.cards[0]!, ...noMinute }
+    })
+
+    expect(codes(report)).not.toContain('yellow-red-needs-one-yellow')
+    expect(codes(report)).toEqual([])
+  })
+
+  it('still wants one yellow card before a yellow-red card', () => {
+    const report = changed((r) => {
+      r.cards = r.cards.filter((card) => card.kind !== 'geel')
+    })
+
+    expect(codes(report)).toContain('yellow-red-needs-one-yellow')
+  })
+
+  it('names a goal without a player without a minute', () => {
+    const report = changed((r) => {
+      r.goals[0] = { ...r.goals[0]!, ...noMinute, appearanceId: null, assistId: null }
+    })
+    const [issue] = checkMatchReport(report, match).errors
+
+    expect(issue).toMatchObject({
+      code: 'goal-without-player',
+      message: 'Het doelpunt heeft geen speler die scoorde.',
+      place: { index: 0, part: 'goals' },
+    })
+  })
+
+  it('gives no minutes away: a player who scored it plays as before', () => {
+    const report = changed((r) => {
+      r.goals[0] = { ...r.goals[0]!, ...noMinute }
+      r.cards[0] = { ...r.cards[0]!, ...noMinute }
+    })
+
+    expect(minutesPlayed(report, match, 9)).toBe(90)
+    expect(minutesPlayed(report, match, 4)).toBe(80)
+  })
+
+  it('keeps the goals that add up to the score', () => {
+    const report = changed((r) => {
+      r.goals[0] = { ...r.goals[0]!, ...noMinute }
+    })
+
+    expect(codes(report)).not.toContain('goals-differ-from-score')
+  })
+
+  it('needs a minute for the added time', () => {
+    const report = changed((r) => {
+      r.goals[0] = { ...r.goals[0]!, minute: null, stoppageMinutes: 2 }
+    })
+    const [issue] = checkMatchReport(report, match).errors
+
+    expect(issue).toMatchObject({
+      code: 'stoppage-without-minute',
+      message: 'Blessuretijd hoort bij een minuut. Vul de minuut in of laat de blessuretijd leeg.',
+      place: { index: 0, part: 'goals' },
+      structural: false,
+    })
+  })
+})
+
+describe('a red card or a yellow-red card without a minute', () => {
+  it('is an error with a code, a place and a Dutch sentence', () => {
+    const red = changed((r) => {
+      r.cards[2] = { ...r.cards[2]!, minute: null }
+    })
+    const yellowRed = changed((r) => {
+      r.cards[1] = { ...r.cards[1]!, minute: null }
+    })
+
+    expect(checkMatchReport(red, match).errors).toEqual([
+      {
+        code: 'red-card-without-minute',
+        message: 'Een rode kaart heeft een minuut nodig, want daaruit volgt hoe lang de speler speelde.',
+        place: { index: 2, part: 'cards' },
+        structural: false,
+      },
+    ])
+    expect(checkMatchReport(yellowRed, match).errors[0]).toMatchObject({
+      code: 'red-card-without-minute',
+      message: 'Een geel-rode kaart heeft een minuut nodig, want daaruit volgt hoe lang de speler speelde.',
+      place: { index: 1, part: 'cards' },
+    })
+  })
+
+  it('does not decide the minutes of the player: he is not sent off at an unknown moment', () => {
+    const report = changed((r) => {
+      r.cards[2] = { ...r.cards[2]!, minute: null }
+    })
+
+    expect(minutesPlayed(report, match, 105)).toBe(90)
+  })
+})

@@ -386,7 +386,8 @@ export function MatchFields() {
           </Heading>
           <Text appearance="meta">
             Team is het team dat het doelpunt krijgt, ook bij een eigen doelpunt. Bij 45+1 vul je 45 in als minuut en 1
-            bij blessuretijd. Schrijf de naam van een speler van de tegenstander zoals Wikipedia hem schrijft.
+            bij blessuretijd. Weet niemand de minuut, laat hem dan leeg. Schrijf de naam van een speler van de
+            tegenstander zoals Wikipedia hem schrijft.
           </Text>
           {/* The end result changes the goals by itself, so a screen reader is told. */}
           <Text className="hf-visually-hidden" role="status">

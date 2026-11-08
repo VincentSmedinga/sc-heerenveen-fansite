@@ -1088,7 +1088,12 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
     .leftJoin(players, eq(matchGoals.playerId, players.id))
     .leftJoin(persons, eq(matchGoals.personId, persons.id))
     .where(where)
-    .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
+    .orderBy(
+      asc(sql`${matchGoals.minute} is null`),
+      asc(matchGoals.minute),
+      asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`),
+      asc(matchGoals.id),
+    )
 
   return rows.map((match) => ({
     ...match,
