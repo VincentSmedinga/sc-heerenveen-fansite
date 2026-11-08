@@ -268,6 +268,18 @@ test.describe('the open list of the season picker', () => {
       // it is.
       const scrolled = await page.evaluate(() => window.scrollY)
 
+      // The browser scrolls the chosen season into view just after it opens the list, and a
+      // slow machine measures before that has happened.
+      await expect
+        .poll(() =>
+          list.evaluate((select: HTMLSelectElement) => {
+            const { bottom, top } = select.selectedOptions[0]!.getBoundingClientRect()
+
+            return top >= 0 && bottom <= window.innerHeight
+          }),
+        )
+        .toBe(true)
+
       const field = (await list.boundingBox())!
       const menu = await list.evaluate(measureMenu)
 
