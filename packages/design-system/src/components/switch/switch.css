@@ -1,0 +1,14 @@
+/*
+ * A switch: a checkbox with a label in a row as high as a target needs to be (WCAG 2.5.8). The
+ * whole row can be clicked.
+ */
+
+@layer hf.components {
+  .hf-switch {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--hf-space-s);
+    min-block-size: 2rem;
+  }
+}

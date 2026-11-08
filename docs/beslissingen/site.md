@@ -3821,3 +3821,52 @@
   Wat de regels toch al eisen, zoals een geel-rode kaart na precies één gele, hoeft niemand te kiezen.
 - **Alternatieven:** Blessuretijd altijd tonen (neemt ruimte, vraagt iets wat meestal leeg is); alleen bij 45 en 90 (verlenging kan dan niet snel); een tweede geel blijft geel (corrigeren in het volledige formulier).
 - **Later:** dit vult _Een verslag bijhouden vanaf een telefoon: een snel scherm naast het volledige formulier_ aan: de kant heet nu "Voor wie", en het scherm biedt geen geel-rood aan.
+
+## De wedstrijdpagina haalt zichzelf elke 60 seconden opnieuw op, alleen zolang de wedstrijd live is en het tabblad zichtbaar is
+
+- **Datum:** 8 november 2026
+- **Besluit:** het onderdeel `LiveRefresh` vraagt de pagina elke 60 seconden opnieuw aan onze eigen server, zolang `phaseOf` zegt dat de wedstrijd live is, uiterlijk vier uur na de aftrap.
+  Het is één verzoek per bezoeker per minuut, zonder cookies, zonder opslag in de browser en zonder identifier, met `Accept: */*`, zodat het niet als paginaweergave telt (`visitOf`).
+  Is het tabblad verborgen, dan wacht het verversen en komt er één zodra het tabblad weer zichtbaar is.
+  De delen van de pagina die veranderen (`Contents` met `data-live-region`) worden vervangen als hun inhoud anders is; de rest, de focus en de plaats op de pagina blijven staan.
+  Het antwoord is de pagina zelf, dus niet groter dan de pagina.
+  Een verdere maatregel voor de belasting is niet nodig; komt die er toch, dan in een eigen issue.
+- **Waarom:** elke bezoeker belast de gedeelde hosting, die het forum ook draait, en 60 seconden is genoeg voor een doelpunt.
+  In `hosting-en-data.md` staan "live-updates om de paar seconden" als reden om naar een VPS te gaan; elke minuut valt daarbuiten.
+  We halen de pagina zelf op en gebruiken niet `router.refresh`: als dat verzoek mislukt, laadt Next.js de pagina opnieuw, en zonder verbinding is dat een foutpagina van de browser midden in de wedstrijd.
+- **Alternatieven:** alleen een knop "Ververs nu" (geen extra belasting, maar de bezoeker moet tikken); elke 20 seconden (ruim drie keer zoveel verzoeken); `router.refresh` (zie hierboven).
+
+## De bezoeker kan het verversen uitzetten en ziet wanneer de pagina voor het laatst is bijgewerkt
+
+- **Datum:** 8 november 2026
+- **Besluit:** boven de kop van een wedstrijd die live is staan "Bijgewerkt om 15:42" (Nederlandse tijd), een knop "Ververs nu" en een schakelaar "Ververs automatisch" die aan staat (`Switch` uit het designsysteem).
+  Zonder JavaScript is "Ververs nu" een gewone link naar dezelfde pagina en is er geen schakelaar.
+  Een bezoeker die de schakelaar uitzet, houdt hem uit tot de pagina opnieuw wordt geladen: de site bewaart geen keuzes van bezoekers.
+  Mislukt een verzoek, dan blijven de pagina en de tijd van het laatste gelukte verzoek staan, en volgt de volgende poging een minuut later.
+- **Waarom:** bewegende of veranderende inhoud moet te stoppen zijn (WCAG 2.2.2).
+- **Alternatieven:** de keuze bewaren (de site bewaart niets van bezoekers); geen schakelaar.
+
+## Een schermlezer hoort alleen doelpunten en het einde van de wedstrijd
+
+- **Datum:** 8 november 2026
+- **Besluit:** een beleefde regel met `role="status"` staat er al bij het laden en blijft leeg.
+  Bij een nieuw doelpunt zegt ze "Doelpunt sc Heerenveen. Stand 1–0, 23e minuut.", bij het einde "Einde van de wedstrijd. Eindstand 2–1."
+  Een kaart, een wissel of een verversing zonder nieuws zegt niets, en de eerste keer laden ook niet.
+  De pagina zet de zinnen en het aantal doelpunten in een verborgen regel (`data-live-state`), en `LiveRefresh` vergelijkt die met die van het antwoord.
+- **Waarom:** elke minuut een melding is ruis; een doelpunt is wat iemand wil weten (WCAG 4.1.3).
+- **Alternatieven:** alles voorlezen wat verandert; de hele pagina opnieuw laten voorlezen.
+
+## Een wedstrijd die live is, staat 15 seconden in het geheugen van de server
+
+- **Datum:** 8 november 2026
+- **Besluit:** `getPublicReports` leest het huidige seizoen opnieuw na 15 seconden zolang het een wedstrijd heeft die live is (`liveSeasonPeriod` in `report-data.ts`), en anders na 5 minuten.
+  Andere wedstrijden en seizoenen houden hun periode.
+- **Waarom:** een doelpunt moet binnen een halve minuut op de pagina staan, en 15 seconden houdt de database rustig bij veel bezoekers.
+- **Alternatieven:** voor alle pagina's 15 seconden (veel meer lezingen voor niets); een doelpunt dat de cache meteen leegt (werkt niet als er meer processen zijn).
+
+## `Switch` en `Contents` komen in het designsysteem
+
+- **Datum:** 8 november 2026
+- **Besluit:** het designsysteem krijgt `Switch` (een selectievakje met de rol `switch` en een label) en `Contents` (een omhulsel zonder eigen vorm, `display: contents`).
+- **Waarom:** de sjablonen van de site hebben geen HTML (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), dus een schakelaar en een omhulsel om een deel van de pagina te vinden moeten een component zijn.
+- **Alternatieven:** de regel van lint voor deze bestanden uitzetten (de regel is er juist om de HTML uit de site te houden).

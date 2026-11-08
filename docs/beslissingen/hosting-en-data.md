@@ -17,6 +17,8 @@
   Een eigen server kost geld en onderhoud.
 - **Overstappen:** naar een VPS, zodra we tegen een grens aanlopen:
   - live-updates om de paar seconden, of WebSockets;
+    **Later:** een wedstrijdpagina die live is, ververst sinds 8 november 2026 elke minuut; zie _De wedstrijdpagina haalt zichzelf elke 60 seconden opnieuw op_ in `site.md`.
+    Dat valt buiten deze grens;
   - het forum wordt trager;
   - de opslag raakt op;
   - een preview per pull request, of zware statistieken.

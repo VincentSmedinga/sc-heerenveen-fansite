@@ -6,6 +6,7 @@ import {
   getAllReportAddresses,
   getLiveReports,
   getPublicReport,
+  getPublicReports,
   getReportAddresses,
   isCompleteReport,
   parseReportSlug,
@@ -206,5 +207,44 @@ describe('the matches that are live', () => {
     expect(await getPublicReport('2026/27', '2026-10-24-testdorp-fc')).toBeDefined()
     expect(isCompleteReport(live)).toBe(false)
     expect(await getAllReportAddresses()).toEqual([])
+  })
+})
+
+describe('how long the reports are kept', () => {
+  /** A match of today that is live from its kick-off, or one that was played. */
+  function match(live: boolean) {
+    const reported = reportedMatch()
+
+    reported.match.status = live ? 'scheduled' : 'played'
+    reported.match.kickoffAt = new Date(Date.now() - 30 * 60 * 1000)
+    reported.match.matchDate = new Date(Date.now()).toISOString().slice(0, 10)
+
+    return reported
+  }
+
+  it('keeps a season with a live match for 15 seconds, and a goal shows within 20', async () => {
+    vi.mocked(listReportedMatches).mockResolvedValue([match(true)])
+    await getPublicReports('2026/27')
+    // The first read fills both caches: the one of five minutes and the one of 15 seconds.
+    expect(listReportedMatches).toHaveBeenCalledTimes(2)
+
+    vi.setSystemTime(Date.now() + 10 * 1000)
+    await getPublicReports('2026/27')
+    expect(listReportedMatches).toHaveBeenCalledTimes(2)
+
+    vi.setSystemTime(Date.now() + 10 * 1000)
+    await getPublicReports('2026/27')
+    expect(listReportedMatches).toHaveBeenCalledTimes(3)
+  })
+
+  it('keeps a season without a live match for five minutes', async () => {
+    vi.mocked(listReportedMatches).mockResolvedValue([match(false)])
+
+    for (const seconds of [0, 60, 120, 240]) {
+      vi.setSystemTime(now.getTime() + tests * 2 * 60 * 60 * 1000 + seconds * 1000)
+      await getPublicReports('2026/27')
+    }
+
+    expect(listReportedMatches).toHaveBeenCalledTimes(1)
   })
 })

@@ -3,12 +3,13 @@ import type { Metadata } from 'next'
 
 import { phaseOf } from '@fansite/db/match-reports'
 import { seasonOf } from '@fansite/db/season'
-import { Card, Link, type MatchHeaderFact, MatchNeighbours, Page, Text, Time } from '@fansite/design-system'
+import { Card, Contents, Link, type MatchHeaderFact, MatchNeighbours, Page, Text, Time } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
-import { cache } from 'react'
+import { cache, type ReactNode } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { LiveRefresh, LiveState } from '#src/LiveRefresh'
 import { matchMoment } from '#src/match-format'
 import { getMatchNeighbours } from '#src/match-neighbours'
 import { sourceOf } from '#src/match-sources'
@@ -159,11 +160,23 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
                 {`Wedstrijden ${season}`}
               </Link>
             </Text>
-            <MatchPageHeader data={page} />
+            <LiveRegion name="header" on={phase === 'live'}>
+              <MatchPageHeader data={page} />
+              <LiveState {...liveStateOf(reported, phase)} />
+            </LiveRegion>
+            {phase === 'live' && (
+              <LiveRefresh
+                href={`${matchesPath}/${seizoen}/${slug}`}
+                renderedAt={now.getTime()}
+                stopAt={liveStopAt(reported.match)}
+              />
+            )}
           </Page.Cell>
         }
       >
-        <MatchPageCards data={page} />
+        <LiveRegion name="cards" on={phase === 'live'}>
+          <MatchPageCards data={page} />
+        </LiveRegion>
         <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
       </Page.Main>
       <Page.Sidebar aria-label="De bron">
@@ -172,6 +185,9 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
     </>
   )
 }
+
+/** How long after the kick-off a page stops refreshing: a match is over by then. */
+const liveDuration = 4 * 60 * 60 * 1000
 
 /**
  * The facts under the result: the competition and round, the day, the stadium, and what is
@@ -202,6 +218,42 @@ function factsOf({ match }: ReportedMatch, now: Date, phase: ReturnType<typeof p
   }
 
   return facts
+}
+
+/**
+ * The part of the page that a refresh replaces. A page that is not live has no refresh, so it
+ * has no wrapper either. `display: contents` keeps the wrapper out of the layout.
+ */
+function LiveRegion({ children, name, on }: { children: ReactNode; name: string; on: boolean }) {
+  return on ? <Contents data-live-region={name}>{children}</Contents> : children
+}
+
+/**
+ * What a screen reader hears when the page refreshes: the last goal with the stand, and the end
+ * of the match with the final score. See `announcementOf`.
+ */
+function liveStateOf(reported: ReportedMatch, phase: ReturnType<typeof phaseOf>) {
+  const { goals } = reported.stored
+  const ours = goals.filter((goal) => goal.ours).length
+  const stand = reported.match.home ? `${ours}–${goals.length - ours}` : `${goals.length - ours}–${ours}`
+  const goal = goals.at(-1)
+  const minute =
+    goal === undefined
+      ? ''
+      : `, ${goal.minute}e minuut${goal.stoppageMinutes === null || goal.stoppageMinutes === 0 ? '' : ` plus ${goal.stoppageMinutes}`}`
+
+  return {
+    final: `Einde van de wedstrijd. Eindstand ${reported.match.status === 'played' ? scoreOf(reported) : stand}.`,
+    goals: goals.length,
+    last:
+      goal === undefined ? '' : `Doelpunt ${goal.ours ? ourClub : reported.match.opponent}. Stand ${stand}${minute}.`,
+    live: phase === 'live',
+  }
+}
+
+/** When a live page stops refreshing: four hours after the kick-off, or after the day began. */
+function liveStopAt({ kickoffAt, matchDate }: ReportedMatch['match']) {
+  return (kickoffAt ?? new Date(`${matchDate}T00:00:00Z`)).getTime() + liveDuration
 }
 
 /** The credit under the page: Wikipedia for what it has, and our own records for the rest. */
