@@ -54,7 +54,7 @@ export const pasteExample = [
   '61 12 voor 9',
   'Doelpunten',
   '23 Oyen assist Van Aken',
-  '45+1 Van Aken penalty',
+  '45+1 Van Aken strafschop',
   '70 Joop Voorbeeldlaan eigen doelpunt',
   'Kaarten',
   '34 geel Van Aken',

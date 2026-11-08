@@ -445,9 +445,9 @@ function MatchGoalItem({ goal, opponent }: { goal: MatchGoal; opponent: string }
         <>
           <span aria-hidden="true">
             {' '}
-            <abbr title="Penalty">pen.</abbr>
+            <abbr title="Strafschop">str.</abbr>
           </span>
-          <span className="hf-visually-hidden">, penalty</span>
+          <span className="hf-visually-hidden">, strafschop</span>
         </>
       ) : null}
       <span className="hf-visually-hidden">, {goal.ours ? ourClub : opponent}</span>

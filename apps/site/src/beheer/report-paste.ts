@@ -512,9 +512,9 @@ export function readPastedReport(
       if (/\s+eigen doelpunt$/iu.test(tail)) {
         soort = 'eigen'
         tail = tail.replace(/\s+eigen doelpunt$/iu, '')
-      } else if (/\s+penalty$/iu.test(tail)) {
+      } else if (/\s+(?:strafschop|penalty)$/iu.test(tail)) {
         soort = 'strafschop'
-        tail = tail.replace(/\s+penalty$/iu, '')
+        tail = tail.replace(/\s+(?:strafschop|penalty)$/iu, '')
       }
 
       const [scorerText = '', assistText] = tail.split(/\s+assist\s+/iu, 2)
@@ -522,7 +522,10 @@ export function readPastedReport(
       const scorerName = scorerText.trim()
 
       if (scorerName === '') {
-        miss(entry, 'Schrijf een doelpunt als "23 Smit" met "assist Jansen", "penalty" of "eigen doelpunt" erachter.')
+        miss(
+          entry,
+          'Schrijf een doelpunt als "23 Smit" met "assist Jansen", "strafschop" of "eigen doelpunt" erachter.',
+        )
 
         continue
       }

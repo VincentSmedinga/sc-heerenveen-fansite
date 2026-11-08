@@ -770,7 +770,7 @@ describe('the scorers', () => {
     )
     const line = container.querySelector('.hf-match-goals')
 
-    expect(seen(line)).toBe('7’ Klaverboer e.d., 23’ Chery pen.')
+    expect(seen(line)).toBe('7’ Klaverboer e.d., 23’ Chery str.')
     expect(
       [...container.querySelectorAll('.hf-match-goals abbr')].map((abbr) => [
         abbr.textContent,
@@ -778,11 +778,12 @@ describe('the scorers', () => {
       ]),
     ).toEqual([
       ['e.d.', 'Eigen doelpunt'],
-      ['pen.', 'Penalty'],
+      ['str.', 'Strafschop'],
     ])
     expect(heard(line)).toBe(
-      'minuut 7, Klaverboer, eigen doelpunt, sc Heerenveen; minuut 23, Chery, penalty, Testdorp FC',
+      'minuut 7, Klaverboer, eigen doelpunt, sc Heerenveen; minuut 23, Chery, strafschop, Testdorp FC',
     )
+    expect(line?.innerHTML).not.toMatch(/pen\.|penalty/i)
   })
 
   it('shows two goals of one player as two', () => {

@@ -331,6 +331,15 @@ describe('the goals', () => {
     ])
   })
 
+  it('reads strafschop, in any case, and penalty as a penalty', () => {
+    for (const word of ['strafschop', 'Strafschop', 'STRAFSCHOP', 'penalty']) {
+      const result = read(`Opstelling\n4 Van Aken\nDoelpunten\n45+1 Van Aken ${word}`)
+
+      expect(result.values.wij.doelpunt).toMatchObject([{ minuut: '45', soort: 'strafschop', speler: 'wij-1' }])
+      expect(result.unread).toEqual([])
+    }
+  })
+
   it('takes the scorer of an own goal from the other side', () => {
     const result = read('Opstelling\n4\nTegenstander\nOpstelling\n3 Verdediger\nDoelpunten\n70 4 eigen doelpunt')
     const own = read('Opstelling\n4\nDoelpunten\n70 Verdediger eigen doelpunt\nTegenstander\nOpstelling\n3 Verdediger')

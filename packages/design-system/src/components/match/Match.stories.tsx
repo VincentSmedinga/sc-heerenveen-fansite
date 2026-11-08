@@ -37,7 +37,7 @@ const meta = preview.meta({
           'De naam van de club staat er niet.',
           'De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander, met dezelfde betekenis als de uitslag, en bij sc Heerenveen ook vet.',
           'Kleur is niet het enige teken: het vet blijft over in forced colours, en een schermlezer hoort per doelpunt de club: "minuut 45 plus 1, Vente, sc Heerenveen".',
-          'Een eigen doelpunt staat bij de club die ervan profiteert, met "e.d." erachter, en een penalty heeft "pen." erachter.',
+          'Een eigen doelpunt staat bij de club die ervan profiteert, met "e.d." erachter, en een strafschop heeft "str." erachter.',
           'Beide zijn afkortingen met de volle woorden in een `title` en voor een schermlezer, en onder een lijst staat wat ze betekenen, want een `title` toont alleen onder een muis.',
           'Zonder doelpunten, of met een lege lijst, komt er geen regel en geen lege ruimte.',
           '',
@@ -508,7 +508,7 @@ const renderScorers = () => (
           />
         </List.Item>
       </List>
-      <Text appearance="meta">e.d. eigen doelpunt, pen. penalty, n.v. na verlenging</Text>
+      <Text appearance="meta">e.d. eigen doelpunt, str. strafschop, n.v. na verlenging</Text>
     </Card>
   </div>
 )
@@ -684,13 +684,13 @@ export const CupDark = meta.story({
 
 export const ScorersLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Doelpuntenmakers: een of beide clubs, penalty, eigen doelpunt, blessuretijd, lange naam, licht',
+  name: 'Doelpuntenmakers: een of beide clubs, strafschop, eigen doelpunt, blessuretijd, lange naam, licht',
   render: renderScorers,
 })
 
 export const ScorersDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Doelpuntenmakers: een of beide clubs, penalty, eigen doelpunt, blessuretijd, lange naam, donker',
+  name: 'Doelpuntenmakers: een of beide clubs, strafschop, eigen doelpunt, blessuretijd, lange naam, donker',
   render: renderScorers,
 })
 

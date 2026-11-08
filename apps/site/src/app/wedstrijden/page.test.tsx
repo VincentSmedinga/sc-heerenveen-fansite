@@ -679,8 +679,10 @@ describe('the page /wedstrijden', () => {
       const results = resultCards(await render())
 
       expect(results).toContain('<abbr title="Eigen doelpunt">e.d.</abbr>')
-      expect(results).toContain('<abbr title="Penalty">pen.</abbr>')
-      expect(results).toContain('e.d. eigen doelpunt, pen. penalty')
+      expect(results).toContain('<abbr title="Strafschop">str.</abbr>')
+      expect(results).toContain('e.d. eigen doelpunt, str. strafschop')
+      expect(results).not.toMatch(/pen\.|penalty/i)
+      expect(results).not.toMatch(/pen\.|penalty/i)
 
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,
@@ -690,14 +692,14 @@ describe('the page /wedstrijden', () => {
       const own = resultCards(await render())
 
       expect(own).toContain('e.d. eigen doelpunt')
-      expect(own).not.toContain('pen. penalty')
+      expect(own).not.toContain('str. strafschop')
     })
 
     it('has no explanation of abbreviations when no line uses them', async () => {
       const results = resultCards(await render())
 
       expect(results).not.toContain('eigen doelpunt')
-      expect(results).not.toContain('penalty')
+      expect(results).not.toContain('strafschop')
     })
 
     it('shows names as text', async () => {

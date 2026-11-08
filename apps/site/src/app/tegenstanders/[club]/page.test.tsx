@@ -411,7 +411,7 @@ describe('the page of a club', () => {
   it('lists every meeting as a Match, the newest first, with the day and its year, the competition and the result', async () => {
     expect(meetingsOf(await render())).toEqual([
       'zo 20 sep 2026 · Neutraal Stadion Testclub 1–0 n.v. (0–0) 1 tegen 0, na verlenging; na 90 minuten 0 tegen 0 sc Heerenveen 112’ minuut 112, Voorbeeld , Testclub KNVB Beker · Speelronde 1',
-      'vr 24 okt 2025 · Abe Lenstra Stadion sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg pen. , penalty , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen Eredivisie · Speelronde 2',
+      'vr 24 okt 2025 · Abe Lenstra Stadion sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg str. , strafschop , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen Eredivisie · Speelronde 2',
       'za 1 mrt 2025 · Nieuw Testpark Oude Testclub 1–1 1 tegen 1 sc Heerenveen Eredivisie · Speelronde 3',
       'za 9 nov 2024 · Abe Lenstra Stadion sc Heerenveen 2–0 2 tegen 0 Testclub Eredivisie · Speelronde 4',
       'zo 2 apr 2023 · Oud Testpark Testclub 2–4 2 tegen 4 sc Heerenveen Eredivisie · Speelronde 5',
@@ -445,11 +445,11 @@ describe('the page of a club', () => {
 
     expect(list).toContain('hf-match-goals')
     expect(list).toContain('<abbr title="Na verlenging">n.v.</abbr>')
-    expect(list).toContain('<abbr title="Penalty">pen.</abbr>')
+    expect(list).toContain('<abbr title="Strafschop">str.</abbr>')
     // The result is heard as "3 tegen 0", and the legend under the list gives the full words.
     expect(list).toContain('3 tegen 0')
     expect(plain(html.slice(html.indexOf('</ul>', html.indexOf('id="wedstrijden"')), html.indexOf('</section>')))).toBe(
-      'n.v. na verlenging, pen. penalty',
+      'n.v. na verlenging, str. strafschop',
     )
   })
 

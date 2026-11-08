@@ -3296,7 +3296,7 @@
   - `Opstelling` en `Bank`: `<rugnummer> <naam>`, en `(a)` achter de naam van de aanvoerder, zoals `4 Van Aken (a)`.
     Voor onze kant volstaat een rugnummer van de selectie van het seizoen.
   - `Wissels`: `<minuut> <in> voor <uit>`, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
-  - `Doelpunten`: `<minuut> <scorer>` met `assist <naam>`, `penalty` of `eigen doelpunt` erachter.
+  - `Doelpunten`: `<minuut> <scorer>` met `assist <naam>`, `strafschop` of `eigen doelpunt` erachter (`penalty` blijft ook gelezen worden).
     Onder het kopje van een kant staan de doelpunten die die kant kreeg.
     Bij een eigen doelpunt is de naam een speler van de andere kant: `70 Jansen eigen doelpunt` onder onze kant is een eigen doelpunt van de tegenstander.
   - `Kaarten`: `<minuut> geel|geel-rood|rood <naam>`, zoals `34 geel Jansen`.
@@ -3316,6 +3316,7 @@
     Alles wat de lezer terugschrijft is tekst; React schrijft het uit en er is geen opmaak.
 - **Later:** zie _De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel_ (7 november 2026): het formaat heeft een regel voor de formatie erbij.
 - **Later:** zie _Een rugnummer mag ontbreken_ in `hosting-en-data.md` (8 november 2026): een regel onder `Opstelling` of `Bank` die niet met een getal begint, is een speler zonder rugnummer, zoals `Van Aken (a)`.
+- **Later:** het woord achter een strafschop is `strafschop`; `penalty` blijft ook gelezen worden (zie _Een strafschop heet strafschop of str., nooit pen. of penalty_ in `redactie.md`, 8 november 2026).
 
 ## Een naam wordt eerst op rugnummer gezocht, dan op de naam, en een twijfel is een keuze, geen gok
 
