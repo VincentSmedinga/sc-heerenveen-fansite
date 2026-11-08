@@ -112,7 +112,7 @@ describe('the screen "Verslag bijhouden"', () => {
 
     for (const name of ['Doelpunt', 'Kaart', 'Wissel']) {
       expect(html).toContain(`>${name}</h2>`)
-      expect(html).toContain(`>${name} opslaan</button>`)
+      expect(html).toContain(`${name}</span> opslaan</button>`)
     }
 
     // The minute opens the number keyboard on a phone.
@@ -137,6 +137,20 @@ describe('the screen "Verslag bijhouden"', () => {
     expect(html.indexOf('Doelpunt 40&#x27; Sibbing')).toBeLessThan(html.indexOf('Doelpunt 12&#x27; Speler 9'))
     expect(html).toContain('Haal weg: Doelpunt 40')
     expect(html).toContain('Ja, haal weg')
+    expect(html).not.toContain('Weet je zeker')
+    // The focus goes here after a removal.
+    expect(html).toMatch(/<h2[^>]*id="gebeurtenissen-kop"[^>]*tabindex="-1"/iu)
+  })
+
+  it('has no breadcrumb, the bar of the admin and the jumps are in the slot', async () => {
+    await addReport()
+
+    const html = await page(matchId)
+
+    expect(html).not.toContain('Kruimelpad')
+    for (const id of ['live-doelpunt-kop', 'live-kaart-kop', 'live-wissel-kop', 'gebeurtenissen-kop']) {
+      expect(html).toContain(`id="${id}"`)
+    }
   })
 
   it('asks for the line-up first when the match has no report', async () => {

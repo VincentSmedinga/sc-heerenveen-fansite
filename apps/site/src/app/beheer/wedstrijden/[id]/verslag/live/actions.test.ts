@@ -5,6 +5,7 @@ import {
   adminUsers,
   auditLog,
   matchAppearances,
+  matchCards,
   matches,
   matchGoals,
   matchReports,
@@ -119,6 +120,30 @@ describe('submitLiveEvent', () => {
     expect(state).toEqual({ saved: 'Doelpunt opgeslagen: 23e minuut, Speler 9', version: 4 })
     expect(await database.db.select().from(matchGoals)).toHaveLength(1)
     expect(revalidatePath).toHaveBeenCalledWith(`/beheer/wedstrijden/${matchId}/verslag/live`)
+  })
+
+  it('stores a second yellow card of a player as a yellow-red card and says so', async () => {
+    const card = (soort: string) => form({ kant: 'wij', minuut: '30', soort, speler: String(scorer) })
+    const first = await submitLiveEvent(matchId, 'kaart', { version: 0 }, card('geel'))
+
+    expect(first.saved).toBe('Kaart opgeslagen: 30e minuut, Speler 9')
+
+    const second = await submitLiveEvent(matchId, 'kaart', { version: 1 }, card('geel'))
+
+    expect(second.saved).toBe('Geel-rode kaart opgeslagen: 30e minuut, Speler 9')
+    expect((await database.db.select().from(matchCards)).map((stored) => stored.kind)).toEqual(['geel', 'geel-rood'])
+  })
+
+  it('does not take geel-rood as a choice from the form, only yellow or red', async () => {
+    const state = await submitLiveEvent(
+      matchId,
+      'kaart',
+      { version: 0 },
+      form({ kant: 'wij', minuut: '30', soort: 'geel-rood', speler: String(scorer) }),
+    )
+
+    expect(state.errors?.['live-kaart-soort']).toBe('Kies geel of rood.')
+    expect(await database.db.select().from(matchCards)).toEqual([])
   })
 
   it('gives a goal that can not be stored back with the errors and what was typed', async () => {

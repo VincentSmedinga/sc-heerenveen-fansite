@@ -1028,6 +1028,9 @@ Een wedstrijd die niet bestaat, van een latere dag is, uitgesteld of afgelast is
 Bij een wedstrijd die nog wordt gespeeld staat in de zijbalk de knop "Wedstrijd afgelopen", die naar `/beheer/wedstrijden/<nummer>/verslag/afgelopen` gaat: daar bevestigt de redactie de stand uit de doelpunten van het verslag (`finishMatch`), de wedstrijd krijgt zijn uitslag en wordt `played`, en het verslag blijft `bezig`.
 De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
 `/beheer/wedstrijden/<nummer>/verslag/live` (`src/app/beheer/wedstrijden/[id]/verslag/live`) is het snelle scherm om het verslag bij te houden vanaf een telefoon: een formulier voor een doelpunt, een kaart en een wissel.
+Blessuretijd staat naast Minuut en is er met JavaScript alleen bij 45, 90, 105 en 120 (`MomentFields` in `LiveForms.tsx`); zonder JavaScript is het altijd zichtbaar.
+Een tweede gele kaart voor een speler wordt `geel-rood` (`addLiveEvent`).
+De balk "Op deze pagina:" staat in de slot `@shortcuts` (`src/app/@shortcuts/beheer/wedstrijden/[id]/verslag/live`).
 Elk formulier slaat meteen op (`addLiveEvent`, een transactie met een slot op de wedstrijd).
 Onder de formulieren staan de stand en de gebeurtenissen met "Haal weg" (`removeLiveEvent`).
 Het volledige formulier draagt `reportBasis` mee en weigert te bewaren als het verslag veranderde sinds het werd geopend.

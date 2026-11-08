@@ -489,6 +489,39 @@ for (const [name, javaScriptEnabled] of [
   test.describe(`keeping a match report up to date ${name}`, () => {
     test.use({ javaScriptEnabled })
 
+    test(`shows Blessuretijd and the bar of the page ${name}`, async ({ page }) => {
+      // The bar is for a phone: it is gone where the cards sit side by side.
+      await page.setViewportSize({ height: 800, width: 390 })
+      await page.goto(`/beheer/wedstrijden/${await liveReportMatchId()}/verslag/live`)
+
+      const goal = page.locator('form').filter({ has: page.getByRole('button', { name: 'Doelpunt opslaan' }) })
+      const stoppage = goal.getByLabel('Blessuretijd', { exact: false })
+
+      await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Gebeurtenissen' })).toHaveAttribute('href', '#gebeurtenissen-kop')
+      await expect(page.getByText('Weet je zeker')).toHaveCount(0)
+      await expect(goal.getByText('Voor wie')).toBeVisible()
+
+      if (javaScriptEnabled) {
+        // It comes with the minutes 45, 90, 105 and 120 and goes again, and the focus stays.
+        const minute = goal.getByLabel('Minuut', { exact: true })
+
+        await expect(stoppage).toHaveCount(0)
+        // The first typing can come before React has hydrated the page, so it is tried again.
+        await expect(async () => {
+          await minute.fill('45')
+          await expect(stoppage).toBeVisible({ timeout: 1000 })
+        }).toPass()
+        await expect(minute).toBeFocused()
+        await minute.fill('46')
+        await expect(stoppage).toHaveCount(0)
+        await expect(minute).toBeFocused()
+      } else {
+        // Without JavaScript nothing can show it when it is needed, so it is always there.
+        await expect(stoppage).toBeVisible()
+      }
+    })
+
     test(`adds a goal and takes it away again ${name}`, async ({ page }) => {
       await page.goto(`/beheer/wedstrijden/${await liveReportMatchId()}/verslag/live`)
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Bijhouden: ')
@@ -527,6 +560,8 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByRole('heading', { level: 2, name: 'Stand 1–0' })).toBeVisible()
 
       if (javaScriptEnabled) {
+        // The event and its button are gone: the focus is on the heading of the list.
+        await expect(page.locator('#gebeurtenissen-kop')).toBeFocused()
         // The screen with its forms, its list and the questions open, which axe opens too.
         expect(await checkPage(page)).toEqual([])
       }
