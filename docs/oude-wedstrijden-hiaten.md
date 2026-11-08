@@ -11,24 +11,24 @@ Het verslag noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde sp
 
 | Seizoen | Bestand | Database | Goals kloppen | Geen goals | Deel van goals | Opstelling | Klaar | Bezig | Scheids | Publiek | Cijfers | Alleen datum |
 | ------- | ------: | -------: | ------------: | ---------: | -------------: | ---------: | ----: | ----: | ------: | ------: | ------: | -----------: |
-| 1990/91 |      35 |       35 |             9 |         26 |              0 |          7 |     6 |     1 |       6 |       7 |       0 |            0 |
+| 1990/91 |      35 |       35 |             9 |         26 |              0 |          7 |     7 |     0 |       6 |       7 |       0 |            0 |
 | 1991/92 |       6 |        6 |             5 |          1 |              0 |          1 |     1 |     0 |       1 |       1 |       0 |            2 |
-| 1992/93 |      40 |       40 |            23 |         17 |              0 |         21 |    17 |     4 |      19 |      20 |       0 |            2 |
-| 1993/94 |      36 |       36 |            31 |          5 |              0 |         31 |    25 |     6 |      29 |      29 |       0 |            0 |
-| 1994/95 |      41 |       41 |            40 |          1 |              0 |         40 |    30 |    10 |      38 |      37 |       0 |            0 |
-| 1995/96 |      44 |       44 |            37 |          7 |              0 |         37 |    31 |     6 |      37 |      38 |      34 |            0 |
-| 1996/97 |      46 |       46 |            42 |          3 |              1 |         43 |    29 |    14 |      39 |      39 |      32 |            1 |
-| 1997/98 |      46 |       46 |            43 |          3 |              0 |         42 |    33 |     9 |      40 |      40 |      33 |            5 |
-| 1998/99 |      39 |       39 |            38 |          1 |              0 |         39 |    34 |     5 |      36 |      36 |      34 |            0 |
-| 1999/00 |      40 |       40 |            39 |          0 |              1 |         40 |    35 |     5 |      39 |      39 |      33 |            2 |
-| 2000/01 |      43 |       43 |            43 |          0 |              0 |         43 |    40 |     3 |      43 |      42 |      37 |            0 |
-| 2001/02 |      42 |       42 |            42 |          0 |              0 |         42 |    35 |     7 |      40 |      39 |      36 |            0 |
+| 1992/93 |      40 |       40 |            23 |         17 |              0 |         21 |    18 |     3 |      19 |      20 |       0 |            2 |
+| 1993/94 |      36 |       36 |            31 |          5 |              0 |         31 |    26 |     5 |      29 |      29 |       0 |            0 |
+| 1994/95 |      41 |       41 |            40 |          1 |              0 |         40 |    35 |     5 |      38 |      37 |       0 |            0 |
+| 1995/96 |      44 |       44 |            37 |          7 |              0 |         37 |    34 |     3 |      37 |      38 |      34 |            0 |
+| 1996/97 |      46 |       46 |            42 |          3 |              1 |         43 |    33 |    10 |      39 |      39 |      32 |            1 |
+| 1997/98 |      46 |       46 |            43 |          3 |              0 |         42 |    34 |     8 |      40 |      40 |      33 |            5 |
+| 1998/99 |      39 |       39 |            38 |          1 |              0 |         39 |    37 |     2 |      36 |      36 |      34 |            0 |
+| 1999/00 |      40 |       40 |            39 |          0 |              1 |         40 |    36 |     4 |      39 |      39 |      33 |            2 |
+| 2000/01 |      43 |       43 |            43 |          0 |              0 |         43 |    41 |     2 |      43 |      42 |      37 |            0 |
+| 2001/02 |      42 |       42 |            42 |          0 |              0 |         42 |    36 |     6 |      40 |      39 |      36 |            0 |
 | 2002/03 |      38 |       38 |            38 |          0 |              0 |         38 |    35 |     3 |      37 |      36 |      35 |            0 |
-| 2003/04 |      44 |       44 |            44 |          0 |              0 |         44 |    38 |     6 |      43 |      42 |      34 |            0 |
-| 2004/05 |      42 |       42 |            42 |          0 |              0 |         42 |    33 |     9 |      42 |      42 |      26 |            0 |
-| 2005/06 |      48 |       48 |            47 |          1 |              0 |         48 |    44 |     4 |      48 |      47 |      21 |            0 |
+| 2003/04 |      44 |       44 |            44 |          0 |              0 |         44 |    40 |     4 |      43 |      42 |      34 |            0 |
+| 2004/05 |      42 |       42 |            42 |          0 |              0 |         42 |    39 |     3 |      42 |      42 |      26 |            0 |
+| 2005/06 |      48 |       48 |            47 |          1 |              0 |         48 |    45 |     3 |      48 |      47 |      21 |            0 |
 | 2006/07 |      41 |       41 |            41 |          0 |              0 |          8 |     8 |     0 |       8 |       8 |       4 |            0 |
-| Totaal  |     671 |      671 |           604 |         65 |              2 |        566 |   474 |    92 |     545 |     542 |     359 |           12 |
+| Totaal  |     671 |      671 |           604 |         65 |              2 |        566 |   505 |    61 |     545 |     542 |     359 |           12 |
 
 Bestand en Database zijn het aantal wedstrijden in de bestanden en in de database.
 Goals kloppen telt de wedstrijden waarvan de doelpunten optellen tot de uitslag, ook een wedstrijd zonder doelpunten.
@@ -227,33 +227,22 @@ Zo'n wedstrijd krijgt geen doelpunten, want een lijst die de uitslag tegenspreek
 Een verslag is klaar als de regels van het verslag geen fout vinden en er niets is weggelaten of twijfelachtig is.
 Anders is het bezig, met de reden hier.
 
-- 1990/91, Eredivisie, 25 augustus 1990, FC Volendam: regel `yellow-red-needs-one-yellow`: Harry Decheiver krijgt geel-rood zonder precies één gele kaart eerder
-- 1992/93, Eerste divisie, 29 augustus 1992, TOP Oss: regel `yellow-red-needs-one-yellow`: X; rosmalen krijgt geel-rood zonder precies één gele kaart eerder
 - 1992/93, KNVB Beker, 29 september 1992, GVVV: regel `lineup-size`: De opstelling van sc Heerenveen heeft 8 spelers en moet er precies 11 hebben
 - 1992/93, KNVB Beker, 15 december 1992, Fortuna Sittard: Robert Loontjens komt in minuut 67 erin en niemand van het team gaat er dan uit
 - 1992/93, KNVB Beker, 17 februari 1993, PSV: regel `lineup-size`: De opstelling van sc Heerenveen heeft 2 spelers en moet er precies 11 hebben
 - 1993/94, Eredivisie, 25 augustus 1993, PSV: Edwin van Ankeren komt in minuut 47 erin en niemand van het team gaat er dan uit; Erik Meijer komt in minuut 47 erin en niemand van het team gaat er dan uit
 - 1993/94, Eredivisie, 4 september 1993, Roda JC: Marco Roelofsen gaat in minuut 70 eruit zonder invaller en zonder rode kaart; Leeroy Echteld gaat in minuut 78 eruit zonder invaller en zonder rode kaart; regel `lineup-size`: De opstelling van sc Heerenveen heeft 13 spelers en moet er precies 11 hebben
-- 1993/94, Eredivisie, 26 september 1993, FC Twente: regel `yellow-red-needs-one-yellow`: Maarten de Jong krijgt geel-rood zonder precies één gele kaart eerder
 - 1993/94, KNVB Beker, 9 oktober 1993, SDV Barneveld: regel `lineup-size`: De opstelling van sc Heerenveen heeft 4 spelers en moet er precies 11 hebben
 - 1993/94, Eredivisie, 27 maart 1994, FC Volendam: Leeroy Echteld komt in minuut 69 erin en niemand van het team gaat er dan uit; René Groen komt in minuut 69 erin en niemand van het team gaat er dan uit; regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
 - 1993/94, Eredivisie, 1 mei 1994, Ajax: Bert Zuurman komt in minuut 82 erin en niemand van het team gaat er dan uit; Wilco Hellinga gaat in minuut 8 eruit zonder invaller en zonder rode kaart
 - 1994/95, KNVB Beker, 23 augustus 1994, Cambuur Lwd.: regel `lineup-size`: De opstelling van sc Heerenveen heeft 1 spelers en moet er precies 11 hebben
-- 1994/95, Eredivisie, 18 september 1994, FC Volendam: regel `yellow-red-needs-one-yellow`: Tom Sier krijgt geel-rood zonder precies één gele kaart eerder
 - 1994/95, KNVB Beker, 30 september 1994, DOS Kampen: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
 - 1994/95, KNVB Beker, 5 oktober 1994, Cambuur Lwd.: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
-- 1994/95, Eredivisie, 26 oktober 1994, Ajax: regel `yellow-red-needs-one-yellow`: Johan Hansma krijgt geel-rood zonder precies één gele kaart eerder
 - 1994/95, Eredivisie, 5 november 1994, Roda JC: André van Tuinen komt in minuut 71 erin en niemand van het team gaat er dan uit
-- 1994/95, Eredivisie, 19 november 1994, Sparta: regel `yellow-red-needs-one-yellow`: Dennis de Bruin krijgt geel-rood zonder precies één gele kaart eerder
 - 1994/95, KNVB Beker, 30 november 1994, PSV: regel `lineup-size`: De opstelling van sc Heerenveen heeft 1 spelers en moet er precies 11 hebben
-- 1994/95, Eredivisie, 15 januari 1995, FC Groningen: regel `yellow-red-needs-one-yellow`: Romano Sion krijgt geel-rood zonder precies één gele kaart eerder
-- 1994/95, Eredivisie, 6 mei 1995, Go Ahead Eagles: regel `yellow-red-needs-one-yellow`: André van Tuinen krijgt geel-rood zonder precies één gele kaart eerder
 - 1995/96, Intertoto Cup, 29 juli 1995, FC Farul Constanta: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
-- 1995/96, Intertoto Cup, 2 augustus 1995, FC Girondins de Bordeaux: regel `yellow-red-needs-one-yellow`: Arnold Oosterveer krijgt geel-rood zonder precies één gele kaart eerder
 - 1995/96, KNVB Beker, 16 september 1995, SV Urk: regel `lineup-size`: De opstelling van sc Heerenveen heeft 5 spelers en moet er precies 11 hebben
 - 1995/96, Eredivisie, 2 maart 1996, NEC: regel `scorer-not-on-pitch`: Erik Regtop scoort in minuut 83, maar staat dan niet op het veld
-- 1995/96, Eredivisie, 30 maart 1996, NAC Breda: regel `yellow-red-needs-one-yellow`: Yassine Abdellaoui krijgt geel-rood zonder precies één gele kaart eerder
-- 1995/96, Eredivisie, 28 april 1996, FC Volendam: regel `yellow-red-needs-one-yellow`: Radoslav Samardzic krijgt geel-rood zonder precies één gele kaart eerder
 - 1996/97, KNVB Beker, 1 juli 1996, Sneek: regel `lineup-size`: De opstelling van sc Heerenveen heeft 4 spelers en moet er precies 11 hebben
 - 1996/97, Intertoto Cup, 13 juli 1996, FC Nantes Atlantique: regel `lineup-size`: De opstelling van sc Heerenveen heeft 0 spelers en moet er precies 11 hebben; regel `goals-differ-from-score`: De doelpunten geven 0–0 en de uitslag is 1–3; pas de doelpunten of de uitslag aan
 - 1996/97, KNVB Beker, 16 augustus 1996, Cambuur Lwd.: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
@@ -261,64 +250,44 @@ Anders is het bezig, met de reden hier.
 - 1996/97, Eredivisie, 6 september 1996, FC Groningen: Marco Roelofsen komt in minuut 81 erin en niemand van het team gaat er dan uit; Ronnie Pander gaat in minuut 8 eruit zonder invaller en zonder rode kaart
 - 1996/97, Eredivisie, 22 september 1996, FC Volendam: regel `goals-differ-from-score`: De doelpunten geven 0–0 en de uitslag is 2–2; pas de doelpunten of de uitslag aan
 - 1996/97, Eredivisie, 19 oktober 1996, Willem II: Brian Tevreden komt in minuut 67 erin en niemand van het team gaat er dan uit; Roberto Straal gaat in minuut 7 eruit zonder invaller en zonder rode kaart
-- 1996/97, Eredivisie, 12 november 1996, De Graafschap: regel `yellow-red-needs-one-yellow`: Raymond Victoria krijgt geel-rood zonder precies één gele kaart eerder
 - 1996/97, KNVB Beker, 27 november 1996, TOP Oss: regel `lineup-size`: De opstelling van sc Heerenveen heeft 5 spelers en moet er precies 11 hebben
 - 1996/97, KNVB Beker, 8 februari 1997, NEC: regel `lineup-size`: De opstelling van sc Heerenveen heeft 2 spelers en moet er precies 11 hebben
-- 1996/97, Eredivisie, 22 februari 1997, NAC Breda: regel `yellow-red-needs-one-yellow`: Ole Tobiasen krijgt geel-rood zonder precies één gele kaart eerder
 - 1996/97, KNVB Beker, 12 maart 1997, Feyenoord: regel `lineup-size`: De opstelling van sc Heerenveen heeft 7 spelers en moet er precies 11 hebben
-- 1996/97, Eredivisie, 22 maart 1997, PSV: regel `yellow-red-needs-one-yellow`: Wim Jonk krijgt geel-rood zonder precies één gele kaart eerder
-- 1996/97, Eredivisie, 20 april 1997, RKC Waalwijk: regel `yellow-red-needs-one-yellow`: Adilson dos Santos krijgt geel-rood zonder precies één gele kaart eerder
 - 1997/98, KNVB Beker, 12 augustus 1997, Cambuur Lwd.: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
 - 1997/98, KNVB Beker, 27 augustus 1997, Drachtster Boys: regel `lineup-size`: De opstelling van sc Heerenveen heeft 7 spelers en moet er precies 11 hebben
 - 1997/98, Eredivisie, 30 augustus 1997, MVV: regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
 - 1997/98, Eredivisie, 21 september 1997, Roda JC: regel `scorer-not-on-pitch`: Emmanuel Ebiede scoort in minuut 82, maar staat dan niet op het veld
-- 1997/98, KNVB Beker, 19 november 1997, Eindhoven: regel `yellow-red-needs-one-yellow`: Ralf Manders krijgt geel-rood zonder precies één gele kaart eerder
 - 1997/98, Eredivisie, 13 december 1997, Vitesse: Emmanuel Ebiede komt in minuut 58 erin en niemand van het team gaat er dan uit; Meindert Postma komt in minuut 58 erin en niemand van het team gaat er dan uit; regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
 - 1997/98, KNVB Beker, 11 februari 1998, NEC: regel `lineup-size`: De opstelling van sc Heerenveen heeft 3 spelers en moet er precies 11 hebben
 - 1997/98, Eredivisie, 1 maart 1998, Feyenoord: regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
 - 1997/98, Eredivisie, 7 maart 1998, NEC: regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
-- 1998/99, Eredivisie, 4 oktober 1998, NAC Breda: regel `yellow-red-needs-one-yellow`: Erwin van de Looi krijgt geel-rood zonder precies één gele kaart eerder
 - 1998/99, Eredivisie, 16 oktober 1998, AZ: regel `scorer-not-on-pitch`: Jeffrey Talan scoort in minuut 73, maar staat dan niet op het veld
-- 1998/99, Eredivisie, 21 februari 1999, FC Utrecht: regel `yellow-red-needs-one-yellow`: Tieme Klompe krijgt geel-rood zonder precies één gele kaart eerder
-- 1998/99, Eredivisie, 28 februari 1999, Feyenoord: regel `yellow-red-needs-one-yellow`: Brian Tevreden krijgt geel-rood zonder precies één gele kaart eerder
 - 1998/99, Eredivisie, 16 april 1999, Vitesse: regel `goals-differ-from-score`: De doelpunten geven 0–0 en de uitslag is 2–1; pas de doelpunten of de uitslag aan
-- 1999/00, KNVB Beker, 5 oktober 1999, De Graafschap: regel `yellow-red-needs-one-yellow`: Richard Roelofsen krijgt geel-rood zonder precies één gele kaart eerder
 - 1999/00, Eredivisie, 3 november 1999, NEC: Mark Oosterhof gaat in minuut 67 eruit zonder invaller en zonder rode kaart; Maikel Renfurm gaat in minuut 78 eruit zonder invaller en zonder rode kaart
 - 1999/00, Eredivisie, 29 januari 2000, Sparta: regel `assist-not-on-pitch`: Roy Stroeve geeft een assist in minuut 78, maar staat dan niet op het veld
 - 1999/00, Eredivisie, 13 februari 2000, PSV: Jan Heintze gaat in minuut 68 eruit zonder invaller en zonder rode kaart; Dennis Rommedahl gaat in minuut 62 eruit zonder invaller en zonder rode kaart; Arnold Bruggink gaat in minuut 83 eruit zonder invaller en zonder rode kaart
 - 1999/00, Eredivisie, 20 februari 2000, FC Utrecht: regel `goals-differ-from-score`: De doelpunten geven 0–0 en de uitslag is 2–2; pas de doelpunten of de uitslag aan
-- 2000/01, Eredivisie, 20 augustus 2000, FC Utrecht: Daniel Jensen komt in minuut 55 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Ignacio Tuhuteru krijgt geel-rood zonder precies één gele kaart eerder
+- 2000/01, Eredivisie, 20 augustus 2000, FC Utrecht: Daniel Jensen komt in minuut 55 erin en niemand van het team gaat er dan uit
 - 2000/01, Eredivisie, 26 augustus 2000, Fortuna Sittard: Stijn Haeldermans komt in minuut 70 erin en niemand van het team gaat er dan uit; Ronald Hamming komt in minuut 71 erin en niemand van het team gaat er dan uit
-- 2000/01, Eredivisie, 10 december 2000, Vitesse: regel `yellow-red-needs-one-yellow`: Marc van Hintum krijgt geel-rood zonder precies één gele kaart eerder
 - 2001/02, Eredivisie, 7 september 2001, Vitesse: regel `assist-not-on-pitch`: Matthew Amoah geeft een assist in minuut 85, maar staat dan niet op het veld
 - 2001/02, Eredivisie, 22 september 2001, PSV: John de Jong staat twee keer in de opstelling: de tweede is weggelaten; John de Jong komt in minuut 81 erin en niemand van het team gaat er dan uit
-- 2001/02, KNVB Beker, 30 januari 2002, FC Utrecht: Allan Bak Jensen komt in minuut 81 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Karim Touzani krijgt geel-rood zonder precies één gele kaart eerder
+- 2001/02, KNVB Beker, 30 januari 2002, FC Utrecht: Allan Bak Jensen komt in minuut 81 erin en niemand van het team gaat er dan uit
 - 2001/02, Eredivisie, 16 februari 2002, Willem II: Paul Matthijs staat twee keer in de opstelling: de tweede is weggelaten; Chris Janssens gaat in minuut 80 eruit zonder invaller en zonder rode kaart
-- 2001/02, Eredivisie, 9 maart 2002, RKC Waalwijk: Jochen Janssen komt in minuut 67 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Rogier Molhoek krijgt geel-rood zonder precies één gele kaart eerder
-- 2001/02, Eredivisie, 20 april 2002, Roda JC: Jeffrey Talan komt in minuut 55 erin en niemand van het team gaat er dan uit; Jesper Håkansson komt in minuut 67 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Anthony Lurling krijgt geel-rood zonder precies één gele kaart eerder
-- 2001/02, Eredivisie, 28 april 2002, Feyenoord: regel `yellow-red-needs-one-yellow`: Shinji Ono krijgt geel-rood zonder precies één gele kaart eerder
+- 2001/02, Eredivisie, 9 maart 2002, RKC Waalwijk: Jochen Janssen komt in minuut 67 erin en niemand van het team gaat er dan uit
+- 2001/02, Eredivisie, 20 april 2002, Roda JC: Jeffrey Talan komt in minuut 55 erin en niemand van het team gaat er dan uit; Jesper Håkansson komt in minuut 67 erin en niemand van het team gaat er dan uit
 - 2002/03, Eredivisie, 6 oktober 2002, Willem II: Jatto Ceesay gaat in minuut 64 eruit zonder invaller en zonder rode kaart
 - 2002/03, Eredivisie, 19 oktober 2002, FC Twente: Thijs Houwing komt in minuut 87 erin en niemand van het team gaat er dan uit
 - 2002/03, Eredivisie, 1 februari 2003, NAC Breda: Rob Penders gaat in minuut 65 eruit zonder invaller en zonder rode kaart; Rick Versteeg gaat in minuut 65 eruit zonder invaller en zonder rode kaart
 - 2003/04, Eredivisie, 27 september 2003, FC Twente: Kim Christensen komt in minuut 46 erin en niemand van het team gaat er dan uit; Sjaak Polak gaat in minuut 45 eruit zonder invaller en zonder rode kaart
-- 2003/04, Eredivisie, 7 februari 2004, NAC Breda: regel `yellow-red-needs-one-yellow`: Erik Edman krijgt geel-rood zonder precies één gele kaart eerder
-- 2003/04, Eredivisie, 21 februari 2004, PSV: regel `yellow-red-needs-one-yellow`: Mark van Bommel krijgt geel-rood zonder precies één gele kaart eerder
 - 2003/04, Eredivisie, 28 februari 2004, NEC: Jeffrey Leiwakabessy komt in minuut 83 erin en niemand van het team gaat er dan uit; Fabian de Freitas komt in minuut 83 erin en niemand van het team gaat er dan uit
 - 2003/04, Eredivisie, 10 april 2004, FC Utrecht: Jesper Håkansson gaat in minuut 69 eruit zonder invaller en zonder rode kaart; regel `lineup-size`: De opstelling van sc Heerenveen heeft 12 spelers en moet er precies 11 hebben
 - 2003/04, Eredivisie, 16 mei 2004, FC Twente: Kim Christensen komt in minuut 70 erin en niemand van het team gaat er dan uit; Blaise N'Kufo gaat in minuut 7 eruit zonder invaller en zonder rode kaart; regel `scorer-not-on-pitch`: Kim Christensen scoort in minuut 20, maar staat dan niet op het veld
-- 2004/05, Eredivisie, 18 september 2004, NAC Breda: regel `yellow-red-needs-one-yellow`: Said Bakkati krijgt geel-rood zonder precies één gele kaart eerder
-- 2004/05, Eredivisie, 25 september 2004, PSV: regel `yellow-red-needs-one-yellow`: Tomasz Rzasa krijgt geel-rood zonder precies één gele kaart eerder
 - 2004/05, Eredivisie, 3 oktober 2004, ADO Den Haag: Jamie Smith komt in minuut 89 erin en niemand van het team gaat er dan uit
 - 2004/05, Eredivisie, 13 november 2004, Vitesse: Stefan Selakovic komt in minuut 66 erin en niemand van het team gaat er dan uit; Georgios Samaras komt in minuut 66 erin en niemand van het team gaat er dan uit; regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
-- 2004/05, Eredivisie, 5 december 2004, Willem II: regel `yellow-red-needs-one-yellow`: Hannu Haarala krijgt geel-rood zonder precies één gele kaart eerder
-- 2004/05, UEFA Cup, 17 februari 2005, Newcastle United FC: regel `yellow-red-needs-one-yellow`: Lee Bowyer krijgt geel-rood zonder precies één gele kaart eerder
-- 2004/05, Eredivisie, 20 maart 2005, FC Utrecht: regel `yellow-red-needs-one-yellow`: Stefaan Tanghe krijgt geel-rood zonder precies één gele kaart eerder
-- 2004/05, Eredivisie, 9 april 2005, FC Twente: regel `yellow-red-needs-one-yellow`: Sharbel Touma krijgt geel-rood zonder precies één gele kaart eerder
 - 2004/05, Eredivisie, 22 mei 2005, NEC: Lasse Nilsson komt in minuut 63 erin en niemand van het team gaat er dan uit; Yuri Rose komt in minuut 63 erin en niemand van het team gaat er dan uit; regel `lineup-size`: De opstelling van sc Heerenveen heeft 10 spelers en moet er precies 11 hebben
 - 2005/06, Eredivisie, 10 september 2005, Heracles Almelo: regel `assist-not-on-pitch`: Marc Höcher geeft een assist in minuut 90, maar staat dan niet op het veld
 - 2005/06, Eredivisie, 2 oktober 2005, PSV: Said Bakkati staat twee keer in de opstelling: de tweede is weggelaten; Paul Bosvelt gaat in minuut 61 eruit zonder invaller en zonder rode kaart
 - 2005/06, UEFA Cup, 24 november 2005, Olympique de Marseille: regel `goals-differ-from-score`: De doelpunten geven 0–0 en de uitslag is 0–1; pas de doelpunten of de uitslag aan
-- 2005/06, Eredivisie, 30 december 2005, Ajax: regel `yellow-red-needs-one-yellow`: Paul Bosvelt krijgt geel-rood zonder precies één gele kaart eerder
 
 ## Spelers van wie de code geen rij in de oude tabel had
 
@@ -326,13 +295,50 @@ De naam is gemaakt uit de code, dus de schrijfwijze kan afwijken.
 
 Geen.
 
-## Kaarten die de import oversloeg
+## Kaarten die de import oversloeg of afleidde
 
 Kaarten van de trainer en van iemand die niet in de opstelling staat, en rode kaarten zonder minuut en zonder minuut van weggaan.
-Daarnaast hebben 792 gele kaarten een lege minuut in het verslag, want de oude fansite kende de minuut niet.
+Een geel-rode kaart zonder gele kaart krijgt een gele kaart zonder minuut: de oude fansite schreef de twee als één kaart.
+Daarnaast hebben 828 gele kaarten een lege minuut in het verslag, want de oude fansite kende de minuut niet (ook de afgeleide).
 
+- 1990/91, Eredivisie, 25 augustus 1990, FC Volendam: Harry Decheiver heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1992/93, Eerste divisie, 29 augustus 1992, TOP Oss: X. Rosmalen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1993/94, Eredivisie, 26 september 1993, FC Twente: Maarten de Jong heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1994/95, Eredivisie, 18 september 1994, FC Volendam: Tom Sier heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1994/95, Eredivisie, 26 oktober 1994, Ajax: Johan Hansma heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1994/95, Eredivisie, 19 november 1994, Sparta: Dennis de Bruin heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1994/95, Eredivisie, 15 januari 1995, FC Groningen: Romano Sion heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1994/95, Eredivisie, 6 mei 1995, Go Ahead Eagles: André van Tuinen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1995/96, Intertoto Cup, 2 augustus 1995, FC Girondins de Bordeaux: Arnold Oosterveer heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1995/96, Eredivisie, 30 maart 1996, NAC Breda: Yassine Abdellaoui heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1995/96, Eredivisie, 28 april 1996, FC Volendam: Radoslav Samardzic heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1996/97, Eredivisie, 12 november 1996, De Graafschap: Raymond Victoria heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1996/97, Eredivisie, 22 februari 1997, NAC Breda: Ole Tobiasen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1996/97, Eredivisie, 22 maart 1997, PSV: Wim Jonk heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1996/97, Eredivisie, 20 april 1997, RKC Waalwijk: Adilson dos Santos heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1997/98, KNVB Beker, 19 november 1997, Eindhoven: Ralf Manders heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1998/99, Eredivisie, 4 oktober 1998, NAC Breda: Erwin van de Looi heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1998/99, Eredivisie, 21 februari 1999, FC Utrecht: Tieme Klompe heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1998/99, Eredivisie, 28 februari 1999, Feyenoord: Brian Tevreden heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1999/00, KNVB Beker, 5 oktober 1999, De Graafschap: Richard Roelofsen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2000/01, Eredivisie, 20 augustus 2000, FC Utrecht: Ignacio Tuhuteru heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2000/01, Eredivisie, 10 december 2000, Vitesse: Marc van Hintum heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 2001/02, Eredivisie, 8 december 2001, Willem II: rode kaart voor foppe.dehaan: staat niet in de opstelling (de trainer of geen speler), weggelaten
+- 2001/02, KNVB Beker, 30 januari 2002, FC Utrecht: Karim Touzani heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2001/02, Eredivisie, 9 maart 2002, RKC Waalwijk: Rogier Molhoek heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 2001/02, Eredivisie, 13 maart 2002, Fortuna Sittard: rode kaart voor foppe.dehaan: staat niet in de opstelling (de trainer of geen speler), weggelaten
+- 2001/02, Eredivisie, 20 april 2002, Roda JC: Anthony Lurling heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2001/02, Eredivisie, 28 april 2002, Feyenoord: Shinji Ono heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2003/04, Eredivisie, 7 februari 2004, NAC Breda: Erik Edman heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2003/04, Eredivisie, 21 februari 2004, PSV: Mark van Bommel heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 18 september 2004, NAC Breda: Said Bakkati heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 18 september 2004, NAC Breda: Pieter Collen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 25 september 2004, PSV: Tomasz Rzasa heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 5 december 2004, Willem II: Hannu Haarala heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, UEFA Cup, 17 februari 2005, Newcastle United FC: Lee Bowyer heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 20 maart 2005, FC Utrecht: Stefaan Tanghe heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2004/05, Eredivisie, 9 april 2005, FC Twente: Sharbel Touma heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 2005/06, Eredivisie, 30 december 2005, Ajax: Paul Bosvelt heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 
 ## Doelpuntenmakers die niet in de opstelling staan
 
