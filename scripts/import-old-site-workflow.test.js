@@ -22,11 +22,11 @@ function step(text, name) {
   return end === -1 ? rest : rest.slice(0, end)
 }
 
-test('the workflow is named Import old site and starts by hand, with the choice import or report', () => {
+test('the workflow is named Import old site and starts by hand, with the choice import, report or status', () => {
   assert.match(workflow, /^name: Import old site$/mu)
   assert.match(workflow, /\non:\n {2}workflow_dispatch:\n {4}inputs:\n {6}action:\n/)
   assert.match(workflow, /\n {8}default: import\n/)
-  assert.match(workflow, /\n {8}options:\n {10}- import\n {10}- report\n/)
+  assert.match(workflow, /\n {8}options:\n {10}- import\n {10}- report\n {10}- status\n/)
   assert.match(workflow, /\n {8}type: choice\n\npermissions:/)
   // It is the only input.
   assert.equal(
@@ -40,7 +40,7 @@ test('the workflow checks the choice before any step connects, and it reaches th
 
   assert.ok(workflow.indexOf('name: Check the action') < workflow.indexOf('id: secrets'))
   assert.match(check, /ACTION: \$\{\{ inputs\.action \}\}/)
-  assert.match(check, /"\$ACTION" != "import" \] && \[ "\$ACTION" != "report" \]/)
+  assert.match(check, /"\$ACTION" != "import" \] && \[ "\$ACTION" != "report" \] && \[ "\$ACTION" != "status" \]/)
   assert.match(check, /exit 1/)
   // The only place the input is read is an environment variable of a step.
   const reads = workflow.split('\n').filter((line) => line.includes('${{ inputs.'))
@@ -72,14 +72,15 @@ test('the workflow runs the command of the old site on the host, with the path a
   assert.match(run, /if: steps\.secrets\.outputs\.ready == 'true'/)
   assert.match(run, /\/opt\/alt\/alt-nodejs24\/root\/usr\/bin\/node --env-file=\\"\\\$HOME\/fansite-acceptatie\.env\\"/)
   assert.match(run, /\$\(printf '%q' "\$DEPLOY_PATH"\)\/apps\/importer\/import\.mjs \$arguments"/)
-  // The arguments come from two fixed words, chosen by the action.
+  // The arguments come from three fixed words, chosen by the action.
   assert.match(run, /import\) arguments="--old-site" ;;\n/)
   assert.match(run, /report\) arguments="--old-site --report" ;;\n/)
+  assert.match(run, /status\) arguments="--status" ;;\n/)
   assert.doesNotMatch(run, /\$ACTION[^"]*import\.mjs/)
   assert.match(run, /ACTION: \$\{\{ inputs\.action \}\}/)
 })
 
-test('the report goes to the log and, for the action report, to the summary of the run', () => {
+test('the report and the status go to the log and to the summary of the run', () => {
   const run = step(workflow, 'Import the old site on the host')
 
   assert.match(run, /shell: bash\n/)
@@ -88,6 +89,11 @@ test('the report goes to the log and, for the action report, to the summary of t
     run,
     /if \[ "\$ACTION" = "report" \]; then\n\s+cat "\$RUNNER_TEMP\/old-site-output\.txt" >> "\$GITHUB_STEP_SUMMARY"/,
   )
+  // The status is plain text, so it goes in a code block, and the exit code of ssh is kept: an
+  // unhealthy feed shows in the summary first and then turns the step red.
+  assert.match(run, /elif \[ "\$ACTION" = "status" \]; then\n[^]*echo '```text'\n[^]*>> "\$GITHUB_STEP_SUMMARY"/)
+  assert.match(run, /code=\$\{PIPESTATUS\[0\]\}\n/)
+  assert.match(run, /exit "\$code"\n$/)
 })
 
 test('every action of the workflow is pinned on a full commit, with its version as a comment', () => {

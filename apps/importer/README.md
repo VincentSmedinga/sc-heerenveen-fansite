@@ -1096,7 +1096,9 @@ persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a national
 ```
 
 Een run zonder nieuwe personen schrijft niets en vraagt niets.
-`pnpm run import:status` toont hoeveel personen zijn gelezen en wat ze hebben.
+`pnpm run import:status` toont hoeveel personen zijn gelezen en wat ze hebben, en hoeveel personen er per linie zijn (`persons per line`).
+Daaronder staat per seizoen hoeveel verslagen een opstelling van ons hebben en hoeveel daarvan een formatie voor ons en voor de tegenstander (`Formations of match reports`).
+Op acceptatie lees je dat zonder SSH met de workflow _Import old site_ en de keuze `status`: de uitvoer staat in de samenvatting van de run.
 
 ### De clubs van de tegenstanders
 
@@ -2136,7 +2138,7 @@ Het neemt de lock van de import niet, want het leest alleen, en het kan niet sam
 #### Op de host
 
 De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
-Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH, met de keuze `import` of `report` (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH, met de keuze `import`, `report` of `status` (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
 ## De import op acceptatie
 
@@ -2146,7 +2148,8 @@ Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, 
 - De workflow Acceptance draait het bestand één keer op een database zonder feeds, en kopieert het samen met de site naar de host.
 - Cron start het daar elke 15 minuten, op minuut 7, 22, 37 en 52, met `DATABASE_URL` uit een eigen bestand in de thuismap.
   De uitvoer komt achteraan in `~/fansite-import.log`.
-- Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
+- Met `--status` toont hetzelfde bestand het overzicht van de gezondheid, en de aantallen van de personen en de formaties.
+  De workflow _Import old site_ met de keuze `status` draait het op de host en zet de uitvoer in de samenvatting van de run.
 - Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig, en met `--from-season <seizoen>` alle afgelopen seizoenen vanaf dat seizoen (zie _Een afgelopen seizoen_).
 - Met `--old-site` leest het de wedstrijdgegevens van de oude fansite uit de bestanden naast `import.mjs` (zie _De opdracht die de bestanden importeert_), en met `--old-site --dry-run` laat het zien wat het zou doen, en met `--old-site --report` schrijft het het controleverslag.
 - Met `--squad <seizoen>` leest het de selectie van een afgelopen seizoen, en met `--from-squad <seizoen>` die van alle afgelopen seizoenen vanaf dat seizoen (zie _De selectie van afgelopen seizoenen_).

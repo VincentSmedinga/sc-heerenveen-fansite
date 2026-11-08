@@ -2,8 +2,11 @@
 # environment, by running `import.mjs --old-site` on the host over SSH. Started by hand, with one
 # input, the action: `import` (the default) runs the steps, `report` runs `--old-site --report`,
 # which writes the check report as Markdown and nothing to the database, and shows it in the
-# summary of the run. The command reads the files in the repository that were deployed with the
-# app (apps/importer/data/oude-fansite) and runs its steps in a fixed order. A second run changes
+# summary of the run. `status` runs `--status`, which reads the health of the feeds and the
+# counts of the persons and the formations, writes nothing either, and shows the result in the
+# summary too, so the owner can see what is on acceptance without access to the host. The
+# command reads the files in the repository that were deployed with the app
+# (apps/importer/data/oude-fansite) and runs its steps in a fixed order. A second run changes
 # nothing. It uses the environment and the secrets of acceptance.yml, and
 # docs/acceptatieomgeving.md says how to start it. Until the secrets are there, it skips the
 # import with a notice, so the run stays green. Run it again after a step is added to the
@@ -16,10 +19,11 @@ on:
     inputs:
       action:
         default: import
-        description: import runs the steps, report only writes the check report
+        description: import runs the steps, report only writes the check report, status shows the status of the import
         options:
           - import
           - report
+          - status
         required: true
         type: choice
 
@@ -38,7 +42,7 @@ jobs:
     name: Import the old site on acceptance
     runs-on: ubuntu-latest
     # The files hold 671 matches and 91 clubs, and the command asks nobody for anything: it only
-    # writes to the database (the action report does not even write). It takes seconds. 30
+    # writes to the database (the actions report and status do not even write). It takes seconds. 30
     # minutes leaves room for the steps that come after the clubs, and for a slow host.
     timeout-minutes: 30
     environment:
@@ -47,14 +51,14 @@ jobs:
     steps:
       # The action reaches the steps only through an environment variable, never in the text of a
       # command, and it is checked before anything connects. The workflow chooses the arguments
-      # of the command from the two words below, so nothing a person typed ends up on the host.
+      # of the command from the three words below, so nothing a person typed ends up on the host.
       - name: Check the action
         shell: bash
         env:
           ACTION: ${{ inputs.action }}
         run: |
-          if [ "$ACTION" != "import" ] && [ "$ACTION" != "report" ]; then
-            echo "::error title=Action refused::The action must be import or report."
+          if [ "$ACTION" != "import" ] && [ "$ACTION" != "report" ] && [ "$ACTION" != "status" ]; then
+            echo "::error title=Action refused::The action must be import, report or status."
             exit 1
           fi
 
@@ -90,7 +94,8 @@ jobs:
       # Runs the importer as cron does on the host: the Node 24 of the hosting, by its full
       # path, and DATABASE_URL from the file in the home folder. The output goes to this log and
       # not to ~/fansite-import.log. ssh exits with the exit code of the command, so a file that
-      # does not fit, a step that fails and a run of cron that holds the lock turn this step red.
+      # does not fit, a step that fails and a run of cron that holds the lock turn this step red,
+      # and so does `--status` when a feed is unhealthy: it still shows its output first.
       # The path goes through printf %q, so the remote shell reads it as one word.
       - name: Import the old site on the host
         if: steps.secrets.outputs.ready == 'true'
@@ -104,13 +109,26 @@ jobs:
           case "$ACTION" in
             import) arguments="--old-site" ;;
             report) arguments="--old-site --report" ;;
-            *) echo "::error title=Action refused::The action must be import or report."; exit 1 ;;
+            status) arguments="--status" ;;
+            *) echo "::error title=Action refused::The action must be import, report or status."; exit 1 ;;
           esac
-          # The report is Markdown on the standard output. It goes to this log and to the summary of
-          # the run; the standard error and the exit code of the command stay as they are.
+          # The report is Markdown on the standard output, the status is plain text. Both go to this
+          # log and to the summary of the run, the status in a code block; the standard error and
+          # the exit code of the command stay as they are. The exit code is kept while the summary
+          # is written, so a status of an unhealthy feed shows first and then turns the step red.
+          set +e
           ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             "$SSH_USER@$SSH_HOST" "/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=\"\$HOME/fansite-acceptatie.env\" $(printf '%q' "$DEPLOY_PATH")/apps/importer/import.mjs $arguments" \
             | tee "$RUNNER_TEMP/old-site-output.txt"
+          code=${PIPESTATUS[0]}
+          set -e
           if [ "$ACTION" = "report" ]; then
             cat "$RUNNER_TEMP/old-site-output.txt" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$ACTION" = "status" ]; then
+            {
+              echo '```text'
+              cat "$RUNNER_TEMP/old-site-output.txt"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
+          exit "$code"

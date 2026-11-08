@@ -38,6 +38,8 @@ export type PersonData = {
 export type PersonDataCounts = {
   /** With a birth date. */
   birthDate: number
+  /** With each line, whatever its source. */
+  byLine: Record<PlayerPosition, number>
   lines: Record<PersonLineSource, number>
   /** With at least one nationality. */
   nationality: number
@@ -110,6 +112,7 @@ export async function applyManualLines(
 export async function countPersonData(db: Pick<Database, 'select'>): Promise<PersonDataCounts> {
   const counts: PersonDataCounts = {
     birthDate: 0,
+    byLine: { aanvaller: 0, doelman: 0, middenvelder: 0, verdediger: 0 },
     lines: { manual: 0, squad: 0, wikidata: 0 },
     nationality: 0,
     noLine: 0,
@@ -125,6 +128,7 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
     .select({
       birthDate: persons.birthDate,
       id: persons.id,
+      line: persons.line,
       lineSource: persons.lineSource,
       readAt: persons.wikidataReadAt,
       wikidataId: persons.wikidataId,
@@ -140,6 +144,9 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
       counts.noLine++
     } else {
       counts.lines[row.lineSource]++
+    }
+    if (row.line !== null) {
+      counts.byLine[row.line]++
     }
   }
 

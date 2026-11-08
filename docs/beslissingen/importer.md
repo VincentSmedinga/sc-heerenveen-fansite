@@ -2943,3 +2943,16 @@
 - **Waarom:** Wikidata zegt wat de speler is, de selectielijst vult de gaten voor onze eigen spelers, en een handmatige lijst herstelt fouten, zoals bij de namen.
   De negen posities in de lijst zijn gecontroleerd op hun label in Wikidata op 8 november 2026; een andere positie telt niet mee tot iemand hem toevoegt.
 - **Alternatieven:** alleen Wikidata (meer gaten); alleen de selectielijst (een veld van de rij van een seizoen, geen feit over de persoon).
+
+## De stand van acceptatie lezen kan met een actie die niets schrijft
+
+- **Datum:** 8 november 2026
+- **Besluit:** de workflow `import-old-site.yml` heeft een derde keuze, `status`, die `import.mjs --status` op de host draait en de uitvoer in de samenvatting van de run zet, in een codeblok.
+  De keuze gaat vóór de stappen door dezelfde controle als `import` en `report`, en alleen als omgevingsvariabele; de workflow kiest de argumenten, dus wat iemand typt komt niet op de host.
+  `--status` toont naast de feeds en de wedstrijden hoeveel personen er per linie zijn (`persons per line`), en per seizoen hoeveel verslagen een opstelling van ons hebben en hoeveel daarvan een formatie voor ons en voor de tegenstander (`Formations of match reports`).
+  Een opstelling is een verslag met minstens één speler van ons in de basis.
+  De uitvoer bevat alleen aantallen, namen van bronnen en titels van artikelen over spelers.
+- **Waarom:** niemand kan de database van acceptatie lezen zonder toegang tot de host, en #899 moet weten welke gegevens er al zijn.
+  Een keuze in de bestaande workflow is kleiner dan een eigen bestand: de controles, de geheimen, de SSH-opzet en de `concurrency`-groep zijn dan één keer geschreven.
+  De stap bewaart de exitcode van de opdracht tot de samenvatting klaar is, dus een ongezonde feed staat eerst in de samenvatting en maakt de run daarna rood.
+- **Alternatieven:** een eigen workflowbestand (bijna dezelfde 90 regels); een pagina in het beheer (meer werk, en inloggen).
