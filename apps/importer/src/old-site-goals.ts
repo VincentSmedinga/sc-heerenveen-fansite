@@ -121,6 +121,19 @@ function goalOf(
   return { minute, ours: ownGoal, ownGoal, penalty: !ownGoal && penaltyKinds.has(kind), player: name, playerKey: null }
 }
 
+/**
+ * The goal events of a match in the order the goals are stored, so the goal at a place in
+ * `DerivedOldSiteGoals.goals` of a match whose goals add up is the event at that place here.
+ * The report (#879) needs the event for the assist.
+ */
+export const orderedOldSiteGoalEvents = (match: OldSiteMatch): OldSiteEvent[] =>
+  match.events
+    .filter((event) => event.event === 1)
+    .toSorted(
+      (a, b) =>
+        (a.minute === 0 ? Number.POSITIVE_INFINITY : a.minute) - (b.minute === 0 ? Number.POSITIVE_INFINITY : b.minute),
+    )
+
 const goalFields = ['minute', 'ours', 'ownGoal', 'penalty', 'player', 'playerId', 'stoppageMinutes'] as const
 
 /**

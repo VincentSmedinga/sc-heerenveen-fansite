@@ -2684,3 +2684,60 @@
 - **Waarom:** een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen, en de regels van het verslag eisen dat de doelpunten optellen.
 - **Alternatieven:** een deel van de doelpunten tonen, met een zin dat ze niet af zijn.
   De doelpunten van een wedstrijd weghalen en opnieuw maken bij elke run (de koppeling met het verslag van #879 breekt).
+
+## De stap `opstellingen` maakt een verslag per wedstrijd met een opstelling, en het is alleen klaar als de regels het goedkeuren
+
+- **Datum:** 8 november 2026
+- **Besluit:** `import:old-site` krijgt na `doelpunten` de stap `opstellingen` (#879).
+  Elke wedstrijd met een opstelling in de bestanden (566 van de 671) krijgt een verslag met de bron `Oude fansite`.
+  - **Wat erin staat.**
+    Een rij in `match_reports` zonder formatie en zonder `saved_by`, een rij in `match_appearances` voor elke speler van beide teams, de wissels, de kaarten en de koppeling van doelpunten en assists aan de spelers.
+    Een speler van ons wijst naar zijn rij in `players` van dat seizoen (#878).
+    Een speler van de tegenstander heeft alleen een naam.
+    `starter` is waar bij minuut erin 0, `captain` is onwaar en het rugnummer is leeg (#871).
+    Een wedstrijd zonder opstelling krijgt geen verslag, ook al heeft hij doelpunten.
+  - **Klaar of bezig.**
+    De stap draait `checkMatchReport` uit `@fansite/shared/match-report` op elk verslag, met de doelpunten zoals de stap `doelpunten` ze bewaarde.
+    De status is `klaar` als de regels geen fouten vinden en er niets is weggelaten of twijfelachtig is (zie _Wat het verslag bezig houdt_).
+    Anders is hij `bezig`, en de log noemt de reden per wedstrijd.
+    `opponent_complete` is waar bij precies 11 beginspelers van de tegenstander.
+    Waarom: bezoekers zien alleen een verslag dat klaar is, en alleen dat telt in de cijfers van een speler.
+    Een verslag dat de eigen regels niet haalt, mag niet als af in de cijfers komen.
+  - **De wissels volgen uit de minuten erin en eruit.**
+    Het bestand bewaart per speler de minuut erin en de minuut eruit, niet wie wie verving.
+    Wie begint, heeft minuut erin 0.
+    Wie later komt, is een invaller op die minuut en vervangt een speler van hetzelfde team die op die minuut eruit gaat, op het veld staat en nog niet is vervangen.
+    Zijn er meer kandidaten, dan telt de volgorde in het bestand, want de speelminuten komen dan toch goed uit.
+    Een speler die van het veld wordt gestuurd, wordt niet vervangen.
+    Het einde van een wedstrijd is minuut 90.
+    Na verlenging schreven de oude redacteuren 90, 91, 96 of 120, dus daar is het einde de laatste minuut die iemand van het team speelde.
+  - **Wat het verslag bezig houdt, ook als de regels geen fout vinden.**
+    Een invaller waarvoor niemand eruit gaat op zijn minuut (21 wedstrijden).
+    Een speler die voor het einde eruit gaat zonder invaller en zonder rode of geel-rode kaart (13 wedstrijden).
+    Een naam die twee keer in een team staat: de tweede wordt weggelaten (3 wedstrijden).
+    Een rode of geel-rode kaart zonder minuut waarvoor de speler ook geen minuut van weggaan heeft: de kaart wordt weggelaten.
+    Een speler van ons zonder rij in `players`.
+    De spelers en de minuten zijn dan niet te vertrouwen, en een verslag dat er zo uitziet moet de redactie nakijken.
+  - **De kaarten.**
+    Gebeurtenis 2 is `geel`, 3 is `geel-rood` en 4 is `rood`.
+    De minuut 0 van een gele kaart wordt leeg (#872).
+    Een rode of geel-rode kaart zonder minuut krijgt de minuut waarop de speler eruit ging in de opstelling.
+    Een kaart voor iemand die niet in de opstelling staat, zoals de trainer (`foppe.dehaan`), wordt weggelaten en staat in de log.
+    Een tweede kaart van dezelfde soort voor dezelfde speler wordt weggelaten en staat in de log.
+  - **Doelpunten en assists.**
+    Een scorer van ons wordt gevonden via zijn code, een speler van de tegenstander en een assist via de naam.
+    Een naam telt als dezelfde zonder accenten, hoofdletters en leestekens (`Andre` en `André`).
+    Een assist die niet bij een speler van het team van de scorer past, bij een strafschop of een eigen doelpunt hoort, of van de scorer zelf is, blijft leeg en staat in de log.
+  - **De bron en de redactie gaan voor.**
+    De stap raakt alleen wedstrijden met de bron `oude-fansite`.
+    Een wedstrijd met een verslag dat de redactie opsloeg (`match_reports.saved_by`) of doelpunten die zij invulde (`match_edits.goals_edited`) blijft zoals hij is.
+  - **Een tweede run verandert niets.**
+    Een speler wordt op zijn plaats bijgewerkt, gevonden op team en naam.
+    De wissels en de kaarten staan nergens aan vast, dus een verschil vervangt ze als geheel.
+- **Waarom:** het verslag bewaart geen minuten per speler maar wissels en kaarten, en 1.098 van de 1.127 teams per wedstrijd kloppen al op aantal.
+  Een verslag dat twijfelachtig is, moet bezig blijven, want de cijfers van een speler worden daaruit berekend.
+- **Alternatieven:** alle verslagen klaar zetten (ongecontroleerde cijfers) of alleen goede verslagen aanmaken (verlies van wat wel klopt).
+  De minuten per speler bewaren (twee plekken die uit elkaar kunnen lopen).
+  Bij een geel-rode kaart zonder gele kaart de eerste gele kaart verzinnen, met een lege minuut: 35 verslagen worden dan klaar, want de oude fansite schreef een geel-rode kaart als één kaart.
+  Dat is een gevolgtrekking en geen feit uit het bestand, en het verhoogt het aantal gele kaarten van die spelers.
+  Daarom blijven die 35 bezig tot de eigenaar het wil; het is een kleine wijziging in `deriveCards`.

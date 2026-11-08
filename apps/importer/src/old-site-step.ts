@@ -11,7 +11,7 @@ export type OldSiteDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 't
  * second run changes nothing, and it never reads the old database: production can't reach it.
  */
 export type OldSiteStep = {
-  /** The name in the log: `clubs`, `matches`, `spelers`, `doelpunten`, and later `lineups`. */
+  /** The name in the log: `clubs`, `matches`, `spelers`, `doelpunten` and `opstellingen`. */
   name: string
   run: (db: OldSiteDatabase, data: OldSiteData) => Promise<OldSiteStepReport>
 }

@@ -2064,8 +2064,21 @@ De stap `doelpunten` ([`src/old-site-goals.ts`](src/old-site-goals.ts)) maakt de
 Een wedstrijd met een uitslag en zonder doelpunten, of met een deel ervan, krijgt er geen en staat als regel in het logboek.
 Een eigen doelpunt telt voor de club die ervan profiteert, de minuut 0 is een lege minuut en `penalty` is waar bij `strafschop`, `srafschop` en `penalty`.
 De stap raakt alleen wedstrijden met de bron `oude-fansite` en laat een wedstrijd met doelpunten van de redactie of een opgeslagen verslag zoals hij is.
-`resolveOldSiteCode`, `ourCodesOf` en `oldSitePlayerKey` in `old-site-players.ts` zijn voor de stap met de opstellingen (#879).
 De redenen staan in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
+#### De stap opstellingen
+
+De stap `opstellingen` ([`src/old-site-lineups.ts`](src/old-site-lineups.ts)) maakt van elke wedstrijd met een opstelling een verslag met de bron `Oude fansite`: een rij in `match_reports`, de spelers van beide teams in `match_appearances`, de wissels, de kaarten en de koppeling van doelpunten en assists aan de spelers.
+Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts) uit zonder database, zodat een test of het controleverslag (#880) hetzelfde resultaat kan lezen.
+
+- De wissels volgen uit de minuut erin en de minuut eruit: een invaller vervangt een speler van zijn team die op dezelfde minuut eruit gaat.
+- Een kaart zonder minuut krijgt bij geel een lege minuut en bij rood de minuut waarop de speler eruit ging.
+  Een kaart voor de trainer staat in de log.
+- `checkMatchReport` beslist over de status.
+  Een verslag is `klaar` als de regels geen fout vinden en de stap niets wegliet; anders is het `bezig`, en de log noemt per wedstrijd de reden.
+  De eerste regel van de stap telt de verslagen: `566 reports: 474 klaar, 92 bezig`.
+- De stap raakt alleen wedstrijden met de bron `oude-fansite`, en laat een verslag dat de redactie opsloeg zoals het is.
+  Een tweede run verandert niets.
 
 #### Op de host
 
@@ -2104,7 +2117,7 @@ De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
-`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/old-site-matches.test.ts`, `src/old-site-goals.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/old-site-matches.test.ts`, `src/old-site-goals.test.ts`, `src/old-site-lineups.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 
