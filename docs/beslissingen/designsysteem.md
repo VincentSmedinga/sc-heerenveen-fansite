@@ -2965,3 +2965,17 @@
     `pitchSpots` rekent de plaatsen van een halve helft uit met een extra waarde `half`, zodat de afstanden dezelfde zijn als op het hele veld.
   - op het liggende halve veld staat "eruit 62'" onder de naam, net als op het hele veld, ook al is het veld zelf smaller dan 36 rem.
 - **Alternatieven:** het halve veld over de hele breedte uitrekken (de lijnen vervormen en het veld wordt groter dan het hele veld); een lege helft laten staan met een zin erin; beide teams boven het veld laten staan; één zin voor alle gevallen; de lijst dichtgeklapt laten.
+- **Later:** zie _Een half veld heeft rechte hoeken op de middenlijn_ (8 november 2026): de twee hoeken van het halve veld op de middenlijn zijn recht.
+
+## Een half veld heeft rechte hoeken op de middenlijn
+
+- **Datum:** 8 november 2026
+- **Besluit:** de twee hoeken van een half veld van `MatchPitch` (#911) die op de middenlijn liggen, zijn recht.
+  De twee hoeken aan het doel blijven afgerond, net als de vier hoeken van het hele veld.
+  Rechtop zijn dat de hoeken boven bij sc Heerenveen en onder bij de tegenstander.
+  Liggend zijn het de hoeken rechts bij sc Heerenveen en links bij de tegenstander.
+- **Waarom:** het halve veld is een helft van het hele veld, en een middenlijn met afgeronde hoeken laat het veld eruitzien als een los vlak.
+  De rechte rand laat zien dat de andere helft ontbreekt.
+- **Eigen keuzes bij het bouwen:**
+  - het halve veld van alleen de tegenstander stond liggend nergens in Storybook, dus daar komt het verhaal `HalfPitchOpponentLyingDown` voor.
+- **Alternatieven:** alle vier de hoeken afgerond laten, zoals nu; alle vier de hoeken recht maken, ook die aan het doel.

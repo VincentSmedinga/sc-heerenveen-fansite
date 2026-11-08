@@ -36,6 +36,17 @@ describe('match-pitch.css', () => {
     expect(pitch).toMatch(/\.hf-match-pitch-field-half \{\s*aspect-ratio: 8 \/ 9/u)
   })
 
+  it('squares the two corners of a half on the halfway line, upright and lying down', () => {
+    // Upright, ours has the halfway line at the top and theirs at the bottom.
+    expect(pitch).toMatch(/\.hf-match-pitch-field-ours \{[^}]*border-radius: 0 0 0\.5rem 0\.5rem/u)
+    expect(pitch).toMatch(/\.hf-match-pitch-field-theirs \{[^}]*border-radius: 0\.5rem 0\.5rem 0 0/u)
+    // Lying down, ours has it on the right and theirs on the left.
+    expect(pitch).toMatch(/\.hf-match-pitch-field-ours \{[^}]*border-radius: 0\.5rem 0 0 0\.5rem/u)
+    expect(pitch).toMatch(/\.hf-match-pitch-field-theirs \{[^}]*border-radius: 0 0\.5rem 0\.5rem 0/u)
+    // The whole pitch keeps its four rounded corners.
+    expect(pitch).toMatch(/\.hf-match-pitch-field \{[^}]*border-radius: 0\.5rem;/u)
+  })
+
   it('draws the centre circle on the edge of a half, and only the goal at the end of it', () => {
     expect(pitch).toMatch(/\.hf-match-pitch-field-ours \.hf-match-pitch-line-circle \{\s*inset-block-start: -15cqw/u)
     expect(pitch).toMatch(
