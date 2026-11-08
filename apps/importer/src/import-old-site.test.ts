@@ -34,9 +34,9 @@ const small = {
       { code: 'fcbasel', country: 'CH', name: 'FC Basel' },
       { code: 'nec', country: 'NL', name: 'NEC' },
     ],
-    version: 1,
+    version: 2,
   },
-  players: { players: [], version: 1 },
+  players: { players: [], version: 2 },
 }
 
 beforeAll(async () => {
@@ -181,7 +181,7 @@ describe('the command', () => {
     try {
       writeFileSync(
         path.join(bad, 'clubs.json'),
-        JSON.stringify({ clubs: [{ code: 'x', country: 'NL', email: 'a@b.nl', name: 'X' }], version: 1 }),
+        JSON.stringify({ clubs: [{ code: 'x', country: 'NL', email: 'a@b.nl', name: 'X' }], version: 2 }),
       )
       writeFileSync(path.join(bad, 'players.json'), JSON.stringify(small.players))
 

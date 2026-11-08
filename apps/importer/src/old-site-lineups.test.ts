@@ -12,11 +12,11 @@ import {
   matchSubstitutions,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { checkMatchReport } from '@fansite/shared/match-report'
+import { checkMatchReport, formationProblem } from '@fansite/shared/match-report'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { OldSiteEvent, OldSiteLineupEntry, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
+import type { OldSiteEvent, OldSiteLine, OldSiteLineupEntry, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { readOldSiteData } from './old-site-file.ts'
@@ -46,12 +46,32 @@ const zeroStatistics = {
   homeOffside: 0,
 }
 
-const oldPlayers: OldSitePlayer[] = [{ code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake' }]
+const oldPlayers: OldSitePlayer[] = [
+  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake', line: null },
+]
 
 /** Fourteen players of ours; the first eleven start. A code is `<word>.speler`. */
 const ourWords = ['aap', 'bes', 'cas', 'dik', 'eef', 'fok', 'gijs', 'hup', 'ivo', 'jan', 'kor', 'lex', 'mik', 'nol']
 const ourCode = (index: number) => `${ourWords[index]}.speler`
 const ourName = (index: number) => `${ourWords[index]!.charAt(0).toUpperCase()}${ourWords[index]!.slice(1)} Speler`
+
+/** The players of ours who start, one for each line given, in the order of the line-up. */
+const withLines = (...lines: (null | OldSiteLine)[]): OldSitePlayer[] =>
+  lines.map((line, index) => ({
+    code: ourCode(index),
+    firstName: ourName(index).split(' ')[0]!,
+    infix: null,
+    lastName: 'Speler',
+    line,
+  }))
+
+/** The lines of a team of 4-4-2 in the order of the line-up. */
+const fourFourTwo: (null | OldSiteLine)[] = [
+  'doelman',
+  ...Array<OldSiteLine>(4).fill('verdediger'),
+  ...Array<OldSiteLine>(4).fill('middenvelder'),
+  ...Array<OldSiteLine>(2).fill('aanvaller'),
+]
 
 /** Fourteen players of the opponent; the first eleven start. */
 const theirName = (index: number) => `Tegen ${ourWords[index]!.charAt(0).toUpperCase()}${ourWords[index]!.slice(1)}`
@@ -163,6 +183,7 @@ describe('the report of a match', () => {
 
     expect(appearances).toHaveLength(22)
     expect(appearances[0]).toEqual({
+      line: null,
       minuteIn: 0,
       minuteOut: 90,
       name: ourName(0),
@@ -500,13 +521,13 @@ describe('the step opstellingen', () => {
   })
 
   /** Runs the steps before this one, then this one; gives the report of this one. */
-  async function run(list: OldSiteMatch[]) {
+  async function run(list: OldSiteMatch[], players: OldSitePlayer[] = oldPlayers) {
     await importOldSiteClubs(database.db, oldClubs)
     await importOldSiteMatches(database.db, list, oldClubs, await oldSiteClubIds(database.db, oldClubs))
-    await importOldSitePlayers(database.db, list, oldPlayers)
-    await importOldSiteGoals(database.db, list, oldPlayers)
+    await importOldSitePlayers(database.db, list, players)
+    await importOldSiteGoals(database.db, list, players)
 
-    return importOldSiteLineups(database.db, list, oldPlayers)
+    return importOldSiteLineups(database.db, list, players)
   }
 
   const appearanceRows = () => database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id))
@@ -722,6 +743,71 @@ describe('the step opstellingen', () => {
     expect(await appearanceRows()).toEqual([])
   })
 
+  it('gives our team a formation when the order and the lines agree, and the opponent none', async () => {
+    const list = [oldMatch()]
+    const result = await run(list, withLines(...fourFourTwo))
+
+    expect(result).toMatchObject({ changed: 0, created: 1, unchanged: 0 })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({
+      formationOpponent: null,
+      formationOurs: '4-4-2',
+      opponentComplete: true,
+      savedBy: null,
+    })
+  })
+
+  it('leaves the formation empty when the order and the lines do not agree', async () => {
+    const lines = [...fourFourTwo]
+
+    lines[10] = 'verdediger'
+    await run([oldMatch()], withLines(...lines))
+
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({ formationOurs: null })
+  })
+
+  it('changes nothing in a second run, and follows a change of the lines, also to empty', async () => {
+    const list = [oldMatch()]
+
+    await run(list, withLines(...fourFourTwo))
+
+    const first = await snapshot()
+
+    expect(await importOldSiteLineups(database.db, list, withLines(...fourFourTwo))).toMatchObject({
+      changed: 0,
+      unchanged: 1,
+    })
+    expect(await snapshot()).toEqual(first)
+
+    // Another line for a player gives another formation.
+    const three = [...fourFourTwo]
+
+    three[4] = 'middenvelder'
+    expect(await importOldSiteLineups(database.db, list, withLines(...three))).toMatchObject({ changed: 1 })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({ formationOurs: '3-5-2' })
+
+    // Lines that disagree with the order take the formation away again.
+    const back = [...fourFourTwo]
+
+    back[10] = 'verdediger'
+    expect(await importOldSiteLineups(database.db, list, withLines(...back))).toMatchObject({ changed: 1 })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({ formationOurs: null })
+  })
+
+  it('keeps the formation of a report the editors saved', async () => {
+    const list = [oldMatch()]
+
+    await run(list, withLines(...fourFourTwo))
+    await database.db.update(matchReports).set({ formationOpponent: '4-3-3', formationOurs: '5-3-2', savedBy: adminId })
+
+    const result = await importOldSiteLineups(database.db, list, withLines(...fourFourTwo.toReversed()))
+
+    expect(result).toMatchObject({ changed: 0, skipped: 1 })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({
+      formationOpponent: '4-3-3',
+      formationOurs: '5-3-2',
+    })
+  })
+
   it('makes a report for a match whose report an earlier run made, and keeps a report with no editor', async () => {
     const list = [oldMatch()]
 
@@ -796,6 +882,22 @@ describe('the files of the old fansite', () => {
     expect(stored.goals.filter((goal) => goal.assistAppearanceId !== null)).toHaveLength(649)
     expect(stored.appearances.filter((one) => one.ours)).toHaveLength(7351)
     expect(stored.reports.filter((one) => one.opponentComplete)).toHaveLength(534)
+
+    // 269 of the 566 reports have a formation for our team (the issue said about 270): the
+    // order and the lines of the others disagree, or the line of a starter is not known. The
+    // opponent has none. The lines come from `speler.linie`, which the files have for 168
+    // players. The match against FC Volendam of 25 August 1990 has none: Verbeek, a defender,
+    // stands in place eleven.
+    const formations = stored.reports.filter((one) => one.formationOurs !== null)
+
+    expect(formations).toHaveLength(269)
+    expect(stored.reports.filter((one) => one.formationOpponent !== null)).toHaveLength(0)
+    expect(formations.every((one) => formationProblem(one.formationOurs!) === undefined)).toBe(true)
+    expect(formations.every((one) => one.formationOurs!.includes('-'))).toBe(true)
+
+    const [volendam] = await database.db.select().from(matches).where(eq(matches.matchDate, '1990-08-25'))
+
+    expect(stored.reports.find((one) => one.matchId === volendam!.id)).toMatchObject({ formationOurs: null })
 
     // Every report is klaar if and only if the rules find no error and nothing was left out.
     const allMatches = await database.db.select().from(matches)

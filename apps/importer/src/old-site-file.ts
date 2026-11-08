@@ -17,7 +17,7 @@ import * as z from 'zod'
  */
 
 /** The version of the file format. A change to the shape of a file raises it. */
-export const oldSiteFileVersion = 1
+export const oldSiteFileVersion = 2
 
 /** The folder in the repository that holds the files. */
 export const oldSiteDataFolder = new URL('../data/oude-fansite/', import.meta.url)
@@ -26,6 +26,11 @@ export const oldSiteDataFolder = new URL('../data/oude-fansite/', import.meta.ur
 export const oldSiteMaxBytes = 5 * 1024 * 1024
 
 const count = z.number().int().min(0)
+
+/** The four lines of a player: the same words as `playerPositions` of the database. */
+export const oldSiteLines = ['doelman', 'verdediger', 'middenvelder', 'aanvaller'] as const
+
+export type OldSiteLine = (typeof oldSiteLines)[number]
 
 export const oldSiteClubSchema = z.strictObject({
   code: z.string().min(1),
@@ -38,6 +43,8 @@ export const oldSitePlayerSchema = z.strictObject({
   firstName: z.string(),
   infix: z.string().nullable(),
   lastName: z.string().min(1),
+  /** The line of the player's career (`speler.linie`), or null when it is not known (0). */
+  line: z.enum(oldSiteLines).nullable(),
 })
 
 /** A goal (1), a yellow card (2), a yellow-red card (3) or a red card (4) */

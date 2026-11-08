@@ -43,9 +43,9 @@ const zeroStatistics = {
 }
 
 const oldPlayers: OldSitePlayer[] = [
-  { code: 'jan.janssen', firstName: 'Jan', infix: null, lastName: 'Janssen' },
-  { code: 'joost.vanaken', firstName: 'Joost', infix: 'van', lastName: 'Aken' },
-  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake' },
+  { code: 'jan.janssen', firstName: 'Jan', infix: null, lastName: 'Janssen', line: null },
+  { code: 'joost.vanaken', firstName: 'Joost', infix: 'van', lastName: 'Aken', line: null },
+  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake', line: null },
 ]
 
 /** A league match at home that sc Heerenveen won 2-1, without goals. */
@@ -288,8 +288,8 @@ describe('the players of ours in the matches', () => {
 
   it('gives a player the spelling the owner chose, from the old table and from a code', () => {
     const list = [
-      { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema' },
-      { code: 'ali.elkhattabi', firstName: 'Ali', infix: null, lastName: 'Elkhattabi' },
+      { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null },
+      { code: 'ali.elkhattabi', firstName: 'Ali', infix: null, lastName: 'Elkhattabi', line: null },
     ]
     const lineup = ['ronnie.venema', 'ali.elkhattabi', 'ivan.tzvekov', 'igor.korneev'].map((code, index) => ({
       minuteIn: 0,
@@ -435,7 +435,7 @@ describe('the steps spelers and doelpunten', () => {
   })
 
   it('finds a player who is in players already under the spelling the owner chose', async () => {
-    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema' }
+    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
     const list = [{ code: 'ronnie.venema', ...venema }]
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ronnie.venema')],
@@ -459,8 +459,8 @@ describe('the steps spelers and doelpunten', () => {
   })
 
   it('merges a stale row of the step into the player the corrections chose, and only that row', async () => {
-    const venema = { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema' }
-    const meijer = { code: 'hennie.meijer', firstName: 'Hennie', infix: null, lastName: 'Meijer' }
+    const venema = { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
+    const meijer = { code: 'hennie.meijer', firstName: 'Hennie', infix: null, lastName: 'Meijer', line: null }
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'hennie.meijer')],
     })
