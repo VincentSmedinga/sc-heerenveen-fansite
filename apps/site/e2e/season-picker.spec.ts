@@ -183,6 +183,48 @@ test.describe('the title row with the season picker', () => {
   }
 })
 
+// Measures the open list of a select in the page. The list is a popover that the browser
+// draws for the select, so it has no box to measure. A point on its border or padding hits
+// the select, outside the field itself: that finds the top and bottom (on a line through
+// the padding at the left of the options), then the left and right (on a line through the
+// middle of the list).
+const measureMenu = (select: HTMLSelectElement) => {
+  const options = [...select.options].map((option) => option.getBoundingClientRect())
+  const first = options[0]!
+  const chosen = select.selectedOptions[0]!.getBoundingClientRect()
+  const field = select.getBoundingClientRect()
+  const isList = (x: number, y: number) =>
+    document.elementFromPoint(x, y) === select &&
+    !(x >= field.left && x <= field.right && y >= field.top && y <= field.bottom)
+  const rows: number[] = []
+  const columns: number[] = []
+
+  for (let y = 0; y < window.innerHeight; y++) {
+    if (isList(first.left - 1, y)) {
+      rows.push(y)
+    }
+  }
+
+  const middle = Math.round((rows[0]! + rows.at(-1)!) / 2)
+
+  for (let x = 0; x < window.innerWidth; x++) {
+    if (isList(x, middle)) {
+      columns.push(x)
+    }
+  }
+
+  return {
+    bottom: rows.at(-1)! + 1,
+    chosen: { bottom: chosen.bottom, top: chosen.top },
+    left: columns[0]!,
+    longest: Math.max(...options.map((option) => option.height)),
+    optionsHeight: options.reduce((sum, option) => sum + option.height, 0),
+    right: columns.at(-1)! + 1,
+    shortest: Math.min(...options.map((option) => option.height)),
+    top: rows[0]!,
+  }
+}
+
 // The open list of the season picker has the look of the site (`appearance: base-select`), and
 // the rules in select.css keep it inside the screen: it is measured here, on a phone, at 400%
 // zoom and on a low phone. The page has few seasons, so thirty more are added to the list.
@@ -226,47 +268,20 @@ test.describe('the open list of the season picker', () => {
       // it is.
       const scrolled = await page.evaluate(() => window.scrollY)
 
+      // The browser scrolls the chosen season into view just after it opens the list, and a
+      // slow machine measures before that has happened.
+      await expect
+        .poll(() =>
+          list.evaluate((select: HTMLSelectElement) => {
+            const { bottom, top } = select.selectedOptions[0]!.getBoundingClientRect()
+
+            return top >= 0 && bottom <= window.innerHeight
+          }),
+        )
+        .toBe(true)
+
       const field = (await list.boundingBox())!
-      const menu = await list.evaluate((select: HTMLSelectElement) => {
-        const options = [...select.options].map((option) => option.getBoundingClientRect())
-        const first = options[0]!
-        const chosen = select.selectedOptions[0]!.getBoundingClientRect()
-        const field = select.getBoundingClientRect()
-        // The list is a popover that the browser draws for the select, so it has no box to
-        // measure. A point on its border or padding hits the select, outside the field itself:
-        // that finds the top and bottom (on a line through the padding at the left of the
-        // options), then the left and right (on a line through the middle of the list).
-        const isList = (x: number, y: number) =>
-          document.elementFromPoint(x, y) === select &&
-          !(x >= field.left && x <= field.right && y >= field.top && y <= field.bottom)
-        const rows: number[] = []
-        const columns: number[] = []
-
-        for (let y = 0; y < window.innerHeight; y++) {
-          if (isList(first.left - 1, y)) {
-            rows.push(y)
-          }
-        }
-
-        const middle = Math.round((rows[0]! + rows.at(-1)!) / 2)
-
-        for (let x = 0; x < window.innerWidth; x++) {
-          if (isList(x, middle)) {
-            columns.push(x)
-          }
-        }
-
-        return {
-          bottom: rows.at(-1)! + 1,
-          chosen: { bottom: chosen.bottom, top: chosen.top },
-          left: columns[0]!,
-          longest: Math.max(...options.map((option) => option.height)),
-          optionsHeight: options.reduce((sum, option) => sum + option.height, 0),
-          right: columns.at(-1)! + 1,
-          shortest: Math.min(...options.map((option) => option.height)),
-          top: rows[0]!,
-        }
-      })
+      const menu = await list.evaluate(measureMenu)
 
       // Inside the screen on every side, and at least as wide as the field.
       expect(menu.left).toBeGreaterThanOrEqual(0)
@@ -292,7 +307,10 @@ test.describe('the open list of the season picker', () => {
         expect(roomAbove).toBeGreaterThan(roomBelow)
       }
 
-      if (roomAbove > roomBelow) {
+      // With about as much room on both sides either is right: only a clear difference counts.
+      if (Math.abs(roomAbove - roomBelow) < 16) {
+        expect(menu.top >= field.y + field.height || menu.bottom <= field.y + 1).toBe(true)
+      } else if (roomAbove > roomBelow) {
         expect(menu.bottom).toBeLessThanOrEqual(field.y)
       } else {
         expect(menu.top).toBeGreaterThanOrEqual(field.y + field.height)
@@ -302,17 +320,87 @@ test.describe('the open list of the season picker', () => {
       // list.
       await page.keyboard.press('End')
 
-      const focused = await list.evaluate((select: HTMLSelectElement) => {
-        const { bottom, top } = select.querySelector('option:focus-visible')!.getBoundingClientRect()
+      const focusedBox = () =>
+        list.evaluate((select: HTMLSelectElement) => {
+          const { bottom, top } = select.querySelector('option:focus-visible')!.getBoundingClientRect()
 
-        return { bottom, top }
-      })
+          return { bottom, top }
+        })
 
-      expect(focused.top).toBeGreaterThanOrEqual(menu.top)
-      expect(focused.bottom).toBeLessThanOrEqual(menu.bottom)
+      // The browser scrolls to it in a moment, not in the same frame as the key.
+      await expect
+        .poll(async () => {
+          const { bottom, top } = await focusedBox()
+
+          return top >= menu.top && bottom <= menu.bottom
+        })
+        .toBe(true)
+
       expect(await page.evaluate(() => window.scrollY)).toBe(scrolled)
 
       await page.keyboard.press('Escape')
     }
+  })
+
+  // The short menu and the two situations of the list that does not fit below: measured with
+  // the field at a place on the page, by a margin above it.
+  const open = async (page: Page, { count, height, lowerBy }: { count: number; height: number; lowerBy: number }) => {
+    await page.setViewportSize({ height, width: 390 })
+    await page.goto('/wedstrijden')
+    await hydrated(page)
+
+    const list = listOf(page)
+
+    await list.evaluate(
+      (select: HTMLSelectElement, { count, lowerBy }) => {
+        for (let year = 2000; year < 2000 + count; year++) {
+          const season = `${year}-${String(year + 1).slice(2)}`
+
+          select.add(new Option(season, season))
+        }
+
+        select.closest('form')!.style.marginBlockStart = `${lowerBy}px`
+      },
+      { count, lowerBy },
+    )
+    await list.click()
+    await expect.poll(() => list.evaluate((select) => select.matches(':open'))).toBe(true)
+
+    const field = (await list.boundingBox())!
+    const menu = await list.evaluate(measureMenu)
+
+    return { field, menu, roomAbove: field.y, roomBelow: height - field.y - field.height }
+  }
+
+  test('opens a short list below the field, also when there is more room above', async ({ page }) => {
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, height: 844, lowerBy: 150 })
+
+    expect(roomAbove).toBeGreaterThan(roomBelow)
+    expect(menu.optionsHeight).toBeLessThan(roomBelow)
+    expect(menu.top).toBeGreaterThanOrEqual(field.y + field.height)
+    expect(menu.bottom).toBeLessThanOrEqual(844)
+    expect(menu.optionsHeight).toBeLessThanOrEqual(menu.bottom - menu.top)
+  })
+
+  test('opens above the field, without scrolling, when the list does not fit below but does fit above', async ({
+    page,
+  }) => {
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 6, height: 844, lowerBy: 480 })
+
+    expect(menu.optionsHeight).toBeGreaterThan(roomBelow)
+    expect(menu.optionsHeight).toBeLessThan(roomAbove)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.top).toBeGreaterThanOrEqual(0)
+    expect(menu.optionsHeight).toBeLessThanOrEqual(menu.bottom - menu.top)
+  })
+
+  test('opens a list that fits nowhere on the side with most room, a little below the middle too', async ({ page }) => {
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 30, height: 600, lowerBy: 100 })
+
+    expect(menu.optionsHeight).toBeGreaterThan(Math.max(roomAbove, roomBelow))
+    expect(roomBelow).toBeLessThan(roomAbove)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.top).toBeGreaterThanOrEqual(0)
+    expect(menu.bottom - menu.top).toBeLessThanOrEqual(roomAbove)
   })
 })

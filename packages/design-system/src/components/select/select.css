@@ -25,30 +25,18 @@
    */
   /* stylelint-disable plugin/use-baseline -- base-select is not widely available yet */
   @supports (appearance: base-select) {
-    @position-try --hf-select-picker-end {
+    /* Below the field and growing to the left. */
+    @position-try --hf-select-below-end {
       margin-inline: var(--hf-space-xs) 0;
+      max-inline-size: stretch;
       position-area: block-end span-inline-start;
     }
 
-    @position-try --hf-select-picker-across {
-      margin-inline: var(--hf-space-xs);
-      max-inline-size: stretch;
-      position-area: block-end span-all;
-    }
-
-    @position-try --hf-select-picker-up-start {
-      position-area: block-start span-inline-end;
-    }
-
-    @position-try --hf-select-picker-up-end {
+    /* Above the field and growing to the left. */
+    @position-try --hf-select-above-end {
       margin-inline: var(--hf-space-xs) 0;
-      position-area: block-start span-inline-start;
-    }
-
-    @position-try --hf-select-picker-up-across {
-      margin-inline: var(--hf-space-xs);
       max-inline-size: stretch;
-      position-area: block-start span-all;
+      position-area: block-start span-inline-start;
     }
 
     .hf-select-styled,
@@ -61,6 +49,7 @@
       cursor: pointer;
       display: flex;
       gap: var(--hf-space-s);
+      font-variant-numeric: tabular-nums;
       justify-content: space-between;
       padding-inline: var(--hf-space-s);
 
@@ -77,10 +66,10 @@
        * The open list: a surface with a border, next to the closed list and never outside the
        * screen. It is as wide as its longest option and at least as wide as the closed list,
        * but no wider than the screen; a longer option wraps. It opens below the closed list
-       * and grows to the right. Where that does not fit it grows to the left, from the right
-       * edge of the closed list, and where that does not fit either it takes the width of the
-       * screen. When there is more room above than below it opens upward. The height is the
-       * room that is left, so the list scrolls inside itself, and not the page.
+       * and grows to the right, or to the left from the right edge of the closed list where
+       * that does not fit. Where the whole list does not fit below, it opens above. Where it
+       * fits on neither side it opens on the side with most room, as high as that room, so it
+       * scrolls inside itself and not the page.
        */
       &::picker(select) {
         background-color: var(--hf-colour-background-surface);
@@ -89,6 +78,7 @@
         border-radius: 0.25rem;
         box-sizing: border-box;
         color: var(--hf-colour-text-default);
+        font-variant-numeric: tabular-nums;
         inline-size: max-content;
         /* stylelint-disable-next-line declaration-property-value-allowed-list -- The margin keeps the open list a little way from the closed one and from the edge of the screen; the list is a popover, outside the flow, and a gap does not reach it. */
         margin: var(--hf-space-xs);
@@ -97,10 +87,21 @@
         overflow-wrap: anywhere;
         overscroll-behavior: contain;
         padding: var(--hf-space-xs);
-        position-try-fallbacks:
-          --hf-select-picker-end, --hf-select-picker-across, --hf-select-picker-up-start, --hf-select-picker-up-end,
-          --hf-select-picker-up-across;
-        position-try-order: most-block-size;
+
+        /*
+         * The list is never taller than the room on its side (`max-block-size: stretch` of
+         * the browser). It must be at least as tall as its content, or as half of the screen
+         * minus the field and the margins when that is less: where there is less room below than that, the
+         * browser takes the next place, above the field. So a list that fits opens below, a
+         * list that fits only above opens above, and a list that fits on neither side takes
+         * the side with most room, where it scrolls inside itself.
+         */
+        min-block-size: calc-size(
+          max-content,
+          min(size, calc((100dvb - anchor-size(block)) / 2 - var(--hf-space-xs) * 2 - 1px))
+        );
+        position-try-fallbacks: --hf-select-below-end, flip-block, --hf-select-above-end;
+        position-try-order: normal;
       }
 
       option {
@@ -110,6 +111,7 @@
         cursor: pointer;
         display: flex;
         gap: var(--hf-space-s);
+        font-variant-numeric: tabular-nums;
         min-block-size: var(--hf-size-control);
         padding-block: var(--hf-space-s);
         padding-inline: var(--hf-space-s);
