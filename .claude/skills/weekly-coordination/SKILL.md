@@ -58,6 +58,26 @@ Then answer the owner in chat only if there is a decision to make or a question.
 A row for the owner says what to do and links to where; a row for a Builder says what it is doing.
 Keep the order true: `order` within a section is the priority.
 
+### Start of a session
+
+Do this first in a new Coordinator session, without being asked.
+The address of the page and its slug are in the memory note `action-list`; they never go in the repository, which is public.
+
+1. **Show the page in a side pane.**
+   The Artifacts pane only shows pages that the session itself published.
+   So read the live page (`read_artifact`), publish exactly that content again with `publish_version` and `base_version` set to the live version, change no row and no text, and open the pane with `show_pane` (`artifact`).
+   The rows are in the database, not in the page, so a republish touches none of them.
+   Edit the page itself only when the owner asks for a change.
+2. **If that doesn't show the page**, open the address with `preview_start` (`url`) in the built-in browser.
+   The first time, the owner signs in to claude.ai there; after that the sign-in stays.
+3. **If neither works**, give the owner the address once in the chat.
+4. **Make the rows follow the sessions.**
+   Compare every row with `list_sessions` (`linked: true`) and with GitHub (open and merged pull requests, issue states), and change what is wrong.
+   Every session you follow (Specifier, Builder, Reviewer) has a row that matches its state.
+
+After that, change the row of a session in one small write when the session starts, when its state changes (building, waiting for the owner, done) and when it ends.
+The page cannot read sessions itself, so nothing updates a row unless you do.
+
 ## A status update
 
 Before every update, even a short one, check:
