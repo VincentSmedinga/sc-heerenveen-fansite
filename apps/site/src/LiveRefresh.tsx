@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Contents, Link, Switch, Text, Time } from '@fansite/design-system'
+import { Button, Card, Link, Switch, Text, Time } from '@fansite/design-system'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 /** How often the page asks for itself again: one request per visitor per minute. */
@@ -206,7 +206,7 @@ export function LiveRefresh({ href, renderedAt, stopAt }: Props) {
   }, [automatic, live, refresh, stopAt])
 
   return (
-    <Contents>
+    <Card as="div">
       <Text appearance="meta">
         {live ? 'Bijgewerkt om ' : 'Laatst bijgewerkt om '}
         <Time dateTime={new Date(updatedAt).toISOString()}>{timeFormat.format(updatedAt)}</Time>
@@ -233,6 +233,6 @@ export function LiveRefresh({ href, renderedAt, stopAt }: Props) {
       <Text className="hf-visually-hidden" role="status">
         {announcement}
       </Text>
-    </Contents>
+    </Card>
   )
 }
