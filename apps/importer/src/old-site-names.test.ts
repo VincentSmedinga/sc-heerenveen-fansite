@@ -22,12 +22,19 @@ describe('the spellings of Wikipedia', () => {
     ['Rene Bot', 'René Bot'],
     ['Gorgi Gakhokidze', 'Giorgi Gakhokidze'],
     ['Georgi Gakhokidze', 'Giorgi Gakhokidze'],
+    ['Zjelko Petrovic', 'Željko Petrović'],
+    ['Zeljko Petrovic', 'Željko Petrović'],
+    ['Eric Kortchaguine', 'Erik Kortsjagin'],
+    ['Gerry Senden', 'Ger Senden'],
+    ['Bob Penders', 'Rob Penders'],
+    ['Martin van Duren', 'Mart van Duren'],
+    ['Tom van Mol', 'Tom Van Mol'],
   ])('turns %s into %s', (typed, article) => {
     expect(cleanOldSiteName(typed)).toBe(article)
   })
 
-  it('has 124 corrections, so a removed pair fails here', () => {
-    expect(oldSiteNameCorrections.size).toBe(124)
+  it('has 156 corrections, so a removed pair fails here', () => {
+    expect(oldSiteNameCorrections.size).toBe(156)
   })
 
   it('has no chain: no correction leads to a spelling that is corrected again', () => {
@@ -38,7 +45,16 @@ describe('the spellings of Wikipedia', () => {
   })
 
   it('never merges two people the owner or the research told apart', () => {
-    for (const name of ['Erwin Koen', 'Danny Buijs', 'Bob Peeters', 'Rob Penders', 'Frank de Boer', 'Frank Broers']) {
+    for (const name of [
+      'Erwin Koen',
+      'Danny Buijs',
+      'Bob Peeters',
+      'Rob Penders',
+      'Frank de Boer',
+      'Frank Broers',
+      'Martin Drent',
+      'Tom de Mul',
+    ]) {
       expect(cleanOldSiteName(name)).toBe(name)
     }
     for (const group of oldSiteDistinctNames) {
@@ -274,8 +290,9 @@ describe('the names to decide', () => {
     const clusters = findOldSiteNameClusters(countOldSiteNames(await readOldSiteData()))
     const names = clusters.flatMap((group) => group.map((one) => one.name))
 
-    expect(clusters.length).toBeGreaterThan(50)
-    expect(names).toContain('Aleksandar Ilic')
+    expect(clusters.length).toBeGreaterThan(30)
+    expect(names).toContain('Tom de Mul')
+    expect(names).not.toContain('Aleksandar Ilic')
     expect(names).toContain('Erwin Koen')
     expect(names).not.toContain('Tijani Babangida')
     expect(names).toContain('Frank de Boer')

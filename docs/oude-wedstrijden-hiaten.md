@@ -345,9 +345,7 @@ Geen.
 Deze assists zijn leeg gelaten in het verslag.
 
 - 1996/97, Eredivisie, 25 mei 1997, Feyenoord: assist van Henke Larsson bij het doelpunt van Gaston Taument (minuut 52): staat niet in de opstelling van het team, leeg gelaten
-- 1998/99, Eredivisie, 16 mei 1999, MVV: assist van Erik Kortchaguine bij het doelpunt van Emerson (minuut 4): staat niet in de opstelling van het team, leeg gelaten
 - 1999/00, Eredivisie, 13 februari 2000, PSV: assist van ronnie.venema bij het doelpunt van Ruud van Nistelrooij (minuut 57): staat niet in de opstelling van het team, leeg gelaten
-- 1999/00, Eredivisie, 22 april 2000, Roda JC: assist van Gerry Senden bij het doelpunt van Bob Peeters (minuut 6): staat niet in de opstelling van het team, leeg gelaten
 - 2001/02, Eredivisie, 16 december 2001, NEC: assist van Dennis de Nooijer bij het eigen doelpunt van Tieme Klompe (minuut 77): weggelaten
 - 2001/02, Eredivisie, 25 januari 2002, Sparta: assist van mika.nurmela bij het eigen doelpunt van Marilia (minuut 7): weggelaten
 - 2001/02, Eredivisie, 13 april 2002, De Graafschap: assist van gerard.denooijer bij het eigen doelpunt van Purrel Fränkel (minuut 46): weggelaten
@@ -356,71 +354,47 @@ Deze assists zijn leeg gelaten in het verslag.
 ## Namen om te beslissen
 
 Deze namen lijken op elkaar en horen misschien bij één persoon.
-Namen die zeker één persoon zijn, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).
+Namen die zeker één persoon zijn, of waarvan de projecteigenaar de paren goedkeurde, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).
 De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.
 Tussen haakjes staat hoe vaak de spelling in de opstellingen, doelpunten, kaarten en assists voorkomt.
 Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.
 
-- Aleksandar Ilic (1) / Aleksander Ilic (1)
 - Arne van de Berg (1) / Arne van den Berg (1)
 - Bas Gösgens (1) / Jan Gösgens (1)
 - Bas Jacobs (2) / Has Jacobs (1)
-- Bob Peeters (13) / Rob Penders (8) / Bob Penders (2)
-- Boldizsár Bodor (6) / Boldizsár Bödör (3)
 - Brouwer (1) / X. Brouwer (1)
 - Cristea (1) / Cristocea (1)
-- Damiën Hertog (4) / Damien Hertog (2)
 - Danny Buijs (10) / Danny Guijt (3)
 - Dennis van der Ree (4) / Dennis van Es (1)
-- Eric Kortchaguine (2) / Erik Kortchaguine (1)
 - Erik Smit (2) / Eric Smit (1)
 - Eric van de Merwe (1) / Eric van der Merwe (1)
 - Erik Meijer (5) / Erik van der Meer (2) / Erik Maes (1)
 - Erwin Koeman (15) / Erwin Koen (3)
-- Evgenyi Levchenko (2) / Evgeniy Levchenko (1) / Yevgeni Levchenko (1)
 - Frank de Boer (17) / Frank Broers (2)
-- Ger Senden (25) / Gerry Senden (1)
 - Germain Augustien (2) / Germain Agustien (1)
 - Hans van Arum (9) / Hans Adam (1)
 - Hans Vonk (338) / Hans Bond (3)
 - Jan de Visser (283) / Hans Visser (7)
-- Jan-Pieter Martens (5) / Jan Martens (2)
 - Jan Vreman (14) / Jan Veenman (1)
 - Janício (1) / Jánicio (1)
-- John Veldman (10) / John Veltman (2)
-- Kurt van de Paar (3) / Kurt van der Paar (1)
-- László Bodnar (1) / László Bodnár (1)
-- Leonardo dos Santos (3) / Leonardo Dos Santos (1)
-- Luuk Maes (8) / Luc Maes (2)
 - Marco Heering (10) / Marcel Heering (3)
 - Marcel Keizer (5) / Marcel Kleizen (1)
-- Mark Verkuyl (4) / Mark Verkuijl (1)
-- Martin Drent (13) / Mart van Duren (1) / Martin van Duren (1)
 - Martijn Abbenhues (2) / Martin Abbenhuis (1)
-- Martin Reynders (3) / Martin Reijnders (1)
 - Mauro Almeida (1) / Paulo Almeida (1)
 - Michael Jansen (3) / Michael Hansen (1)
 - Michel Nok (12) / Michel Vonk (4) / Michel Vorm (1)
 - Pablo Sánchez (4) / Pablo Sanchez (1)
-- Pavel Mikhalevitch (2) / Pavel Mikalevitch (1)
-- Pedrag Djordjevic (1) / Predrag Djordjevic (1)
 - Perovic (2) / Petrovic (1)
 - Rick Versteeg (4) / Rcik Versteeg (1)
-- Roland Jansen (8) / Ronald Jansen (2)
-- Ruud Brood (10) / Ruud Bond (1)
 - Ruud Hesp (12) / Ruud Heus (5)
 - Sergio (13) / Sérgio (2)
 - Stephan Keller (2) / Stephan keller (1)
-- Timmy Simons (1) / Tommy Simons (1)
-- Tom van Mol (10) / Tom de Mul (2) / Tom Van Mol (1)
-- Ulrich Crüden (11) / Ulrich Cruden (1)
+- Tom Van Mol (11) / Tom de Mul (2)
 - Wim Jonk (8) / Wim de Ron (5)
 - X. Berens (1) / X. van Buren (1)
 - X. Frijns (1) / X. Prins (1)
-- Youssef Mariana (3) / Youssouf Mariana (2) / Youessef Mariana (1)
 - Zdenek Stanek (1) / Zdenìk Stanìk (1)
 - Zefilinho (1) / Zefilino (1)
-- Zjelko Petrovic (11) / Zeljko Petrovic (5)
 
 ## Namen op de spelerskaarten om te beslissen
 

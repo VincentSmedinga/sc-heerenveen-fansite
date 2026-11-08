@@ -2820,6 +2820,7 @@
 - **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en een artikel op Wikipedia is een bron die hij kan controleren.
   Een omzetting die de importer bij elke naam toepast, laat de bestanden van de oude fansite onaangeroerd.
 - **Alternatieven:** alle groepen samenvoegen, ook als niet zeker is dat het één persoon is (twee mensen worden dan één speler); de schrijfwijze van de oude fansite behouden (dezelfde persoon blijft op twee manieren in de tellingen staan).
+- **Later:** zie _De lijst met schrijfwijzen krijgt 32 omzettingen met minder zekerheid_ (8 november 2026): de groepen waarvan het artikel minder zeker is, zijn daarna door de projecteigenaar goedgekeurd en toegevoegd.
 
 ## De stap `spelers` voegt een verouderde rij samen met de speler van de gekozen schrijfwijze
 
@@ -2837,3 +2838,52 @@
 - **Waarom:** de import voegde alleen toe, dus een rij van vóór de lijst met schrijfwijzen bleef naast de goede staan en een speler stond twee keer op de selectie van een seizoen (acceptatie, `Ger Schaap` en `Gerrie Schaap`).
   De rij is door deze stap zelf gemaakt en bevat niets dan een naam, dus er gaat niets verloren.
 - **Alternatieven:** een eenmalige opdracht (het volgende geval, een nieuwe schrijfwijze in de lijst, vraagt weer om een opdracht); alle verouderde rijen samenvoegen, ook van Wikipedia (verlies van pagina, rugnummer en cijfers); niets doen en de projecteigenaar de rijen laten weghalen (de lijst is lang, en de fout komt bij elke nieuwe schrijfwijze terug).
+
+## De lijst met schrijfwijzen krijgt 32 omzettingen met minder zekerheid
+
+- **Datum:** 8 november 2026
+- **Besluit:** `oldSiteNameCorrections` heeft er 32 omzettingen bij (156 in totaal), voor groepen waarvan de schrijfwijze van Wikipedia iets minder vanzelf spreekt dan bij de 102 van _De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze_.
+  De projecteigenaar keurde ze op 8 november 2026 goed.
+  - **Welke:** een tikfout of afwijkende letter (`Ulrich Crüden`, `Zjelko Petrovic`, `Pedrag Djordjevic`), een andere transcriptie (`Eric Kortchaguine` en `Erik Kortchaguine` naar `Erik Kortsjagin`, `Pavel Mikhalevitch` naar `Pavel Mikhalevich`) en een korte of lange vorm van de voornaam (`Gerry Senden` naar `Ger Senden`, `Jan Martens` naar `Jan-Pieter Martens`).
+    Het bewijs per paar is het artikel op nl.wikipedia, of op en.wikipedia als nl er geen heeft:
+    - `Aleksandar Ilic` naar `Aleksandar Ilić`: https://en.wikipedia.org/wiki/Aleksandar_Ilić_(footballer,_born_1969)
+    - `Aleksander Ilic` naar `Aleksandar Ilić`: https://en.wikipedia.org/wiki/Aleksandar_Ilić_(footballer,_born_1969)
+    - `Bob Penders` naar `Rob Penders`: https://nl.wikipedia.org/wiki/Bob_Peeters ; https://nl.wikipedia.org/wiki/Rob_Penders
+    - `Boldizsár Bödör` naar `Boldizsár Bodor`: https://en.wikipedia.org/wiki/Boldizsár_Bodor
+    - `Damiën Hertog` naar `Damien Hertog`: https://nl.wikipedia.org/wiki/Damiën_Hertog
+    - `Eric Kortchaguine` naar `Erik Kortsjagin`: https://nl.wikipedia.org/wiki/Eric_Kortchaguine
+    - `Erik Kortchaguine` naar `Erik Kortsjagin`: https://nl.wikipedia.org/wiki/Eric_Kortchaguine
+    - `Evgenyi Levchenko` naar `Evgeniy Levchenko`: https://en.wikipedia.org/wiki/Evgeniy_Levchenko
+    - `Yevgeni Levchenko` naar `Evgeniy Levchenko`: https://en.wikipedia.org/wiki/Evgeniy_Levchenko
+    - `Gerry Senden` naar `Ger Senden`: https://nl.wikipedia.org/wiki/Ger_Senden
+    - `Jan Martens` naar `Jan-Pieter Martens`: https://en.wikipedia.org/wiki/Jan-Pieter_Martens
+    - `John Veltman` naar `John Veldman`: https://en.wikipedia.org/wiki/John_Veldman
+    - `Kurt van der Paar` naar `Kurt van de Paar`: https://en.wikipedia.org/wiki/Kurt_Van_De_Paar
+    - `László Bodnar` naar `László Bodnár`: https://en.wikipedia.org/wiki/L%C3%A1szl%C3%B3_Bodn%C3%A1r
+    - `Leonardo dos Santos` naar `Leonardo dos Santos Silva`: https://nl.wikipedia.org/wiki/Leonardo_dos_Santos_Silva
+    - `Leonardo Dos Santos` naar `Leonardo dos Santos Silva`: https://nl.wikipedia.org/wiki/Leonardo_dos_Santos_Silva
+    - `Luc Maes` naar `Luuk Maes`: https://nl.wikipedia.org/wiki/Luuk_Maes
+    - `Mark Verkuyl` naar `Mark Verkuijl`: https://nl.wikipedia.org/wiki/Mark_Verkuijl_(1963)
+    - `Martin van Duren` naar `Mart van Duren`: https://en.wikipedia.org/wiki/Martin_Drent ; https://en.wikipedia.org/wiki/Mart_van_Duren
+    - `Martin Reynders` naar `Martin Reijnders`: https://en.wikipedia.org/wiki/Martin_Reijnders
+    - `Pavel Mikhalevitch` naar `Pavel Mikhalevich`: https://en.wikipedia.org/wiki/Pavel_Mikhalevich
+    - `Pavel Mikalevitch` naar `Pavel Mikhalevich`: https://en.wikipedia.org/wiki/Pavel_Mikhalevich
+    - `Pedrag Djordjevic` naar `Predrag Djordjevic`: https://en.wikipedia.org/wiki/Predrag_%C4%90or%C4%91evi%C4%87
+    - `Ronald Jansen` naar `Roland Jansen`: https://nl.wikipedia.org/wiki/Roland_Jansen
+    - `Ruud Bond` naar `Ruud Brood`: https://nl.wikipedia.org/wiki/Ruud_Brood
+    - `Tommy Simons` naar `Timmy Simons`: https://nl.wikipedia.org/wiki/Timmy_Simons
+    - `Tom van Mol` naar `Tom Van Mol`: https://nl.wikipedia.org/wiki/Tom_Van_Mol ; https://nl.wikipedia.org/wiki/Tom_De_Mul
+    - `Ulrich Crüden` naar `Ulrich Cruden`: https://nl.wikipedia.org/wiki/Ulrich_Cruden
+    - `Youssouf Mariana` naar `Youssef Mariana`: https://en.wikipedia.org/wiki/Youssef_Meriana
+    - `Youessef Mariana` naar `Youssef Mariana`: https://en.wikipedia.org/wiki/Youssef_Meriana
+    - `Zjelko Petrovic` naar `Željko Petrović`: https://nl.wikipedia.org/wiki/%C5%BDeljko_Petrovi%C4%87
+    - `Zeljko Petrovic` naar `Željko Petrović`: https://nl.wikipedia.org/wiki/%C5%BDeljko_Petrovi%C4%87
+  - **Drie groepen met een tweede persoon:** `Bob Penders` wordt `Rob Penders` (niet Bob Peeters), `Martin van Duren` wordt `Mart van Duren` (niet Martin Drent) en `Tom van Mol` wordt `Tom Van Mol` (niet Tom de Mul).
+    De omzetting verandert alleen de tikfout in de bedoelde persoon.
+    Bob Penders staat alleen in wedstrijden tegen NAC, waar ook Rob Penders speelt, en Mart en Martin van Duren spelen allebei tegen FC Groningen.
+    De tweede persoon van de groep blijft zoals hij was, en een test controleert dat.
+  - **Wat niet:** de vier paren op de spelerskaarten (_Namen op de spelerskaarten om te beslissen_) en wat na deze omzettingen nog op elkaar lijkt, blijven in het controleverslag staan.
+    `Tom Van Mol` en `Tom de Mul` staan daar nog, omdat het twee spelers zijn.
+  - **Gevolg:** twee assists die als "staat niet in de opstelling" leeg bleven (`Erik Kortchaguine` en `Gerry Senden`) krijgen nu hun speler, en staan niet meer onder _Assists zonder speler_ in het controleverslag.
+- **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en dit zijn de paren waarbij het artikel op Wikipedia de bedoelde persoon aanwijst.
+- **Alternatieven:** deze paren laten staan als namen om te beslissen (dezelfde persoon blijft op twee manieren in de tellingen staan); de drie groepen met een tweede persoon overslaan (de tikfout blijft dan een eigen speler).
