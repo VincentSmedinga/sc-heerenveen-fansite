@@ -510,7 +510,9 @@ for (const [name, javaScriptEnabled] of [
       await page
         .getByLabel('Tekst van het verslag', { exact: true })
         .fill(
-          ['Opstelling', '1 Verzonnen Keeper', '2 Een Verdediger (a)', 'dit is geen regel van het verslag'].join('\n'),
+          ['Opstelling', '1 Verzonnen Keeper', '2 Een Verdediger (a)', '3x dit is geen regel van het verslag'].join(
+            '\n',
+          ),
         )
       await page.getByRole('button', { name: 'Tekst lezen' }).click()
       await expect(page.getByRole('heading', { level: 2, name: 'Gelezen' })).toBeVisible()
