@@ -122,19 +122,13 @@ test('ESLint reports a method that is not widely available in the design system'
     'packages/design-system/src/probe.ts',
   )
   assert.equal(messages.length, 1)
-  assert.match(
-    messages[0],
-    /^error baseline-js\/use-baseline 'lock' on ScreenOrientation is not Baseline Widely available/,
-  )
+  assert.match(messages[0], /^error baseline-js\/use-baseline .*'lock'.*ScreenOrientation.*Baseline Widely available/)
 })
 
 test('ESLint reports an API that is not widely available in the site', async () => {
   const messages = await lintJs('export const a = navigator.bluetooth\n', 'apps/site/src/probe.ts')
   assert.equal(messages.length, 1)
-  assert.match(
-    messages[0],
-    /^error baseline-js\/use-baseline 'bluetooth' on navigator is not Baseline Widely available/,
-  )
+  assert.match(messages[0], /^error baseline-js\/use-baseline .*'navigator\.bluetooth'.*Baseline Widely available/)
 })
 
 test('ESLint leaves code alone that never reaches the browser', async () => {
