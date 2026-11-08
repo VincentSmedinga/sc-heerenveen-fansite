@@ -29,6 +29,13 @@ describe('pitchPlayerSentence', () => {
     )
   })
 
+  it('has his name and no word about the number for a player without a shirt number', () => {
+    const sentence = pitchPlayerSentence({ ...visser, shirtNumber: null })
+
+    expect(sentence).toBe("Bram Visser, aanvoerder, doelpunt 12', gele kaart 27', eruit 62', 62 minuten")
+    expect(sentence).not.toMatch(/rugnummer|null|leeg/)
+  })
+
   it('names own goals, added time and the other cards', () => {
     const sentence = pitchPlayerSentence({
       card: { kind: 'yellow-red-card', minute: 45, stoppageMinutes: 2 },
@@ -112,6 +119,19 @@ describe('PitchPlayer', () => {
     expect(container.querySelector('.hf-pitch-player-mark-card')).not.toBeNull()
     expect(container.querySelector('.hf-pitch-player-mark-out')).not.toBeNull()
     expect(container.querySelector('.hf-pitch-player-mark-captain')?.textContent).toBe('A')
+  })
+
+  it('draws the same disc without a figure for a player without a shirt number', () => {
+    const { container } = render(
+      <ol>
+        <PitchPlayer {...visser} ours shirtNumber={null} />
+      </ol>,
+    )
+
+    expect(container.querySelector('.hf-pitch-player-number')?.textContent).toBe('')
+    expect(container.querySelector('.hf-pitch-player-surname')?.textContent).toBe('Visser')
+    expect(container.querySelector('.hf-pitch-player-disc-ours')).not.toBeNull()
+    expect(container.textContent).not.toContain('null')
   })
 
   it('has no marks for a player who did nothing', () => {

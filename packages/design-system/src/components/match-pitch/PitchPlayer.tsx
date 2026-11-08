@@ -24,7 +24,8 @@ export type PitchPlayerData = {
   /** The minutes he played, also when he was sent off. The ring shows them. */
   minutesPlayed: number
   name: MatchPlayerName
-  shirtNumber: number
+  /** His shirt number, or empty for a player without one (the old line-ups have none). */
+  shirtNumber: null | number
   /** The minute he was substituted. Leave it out for a player who stayed on or was sent off. */
   substitutedOffAt?: number | undefined
 }
@@ -61,10 +62,15 @@ const fullName = (name: MatchPlayerName) =>
 /**
  * The sentence a screen reader hears for a player, such as "Bram Visser, rugnummer 1,
  * aanvoerder, doelpunt 12', gele kaart 27', eruit 62', 90 minuten". Every mark on the pitch has
- * a word in it, so no mark is the only sign.
+ * a word in it, so no mark is the only sign. A player without a shirt number has his name and
+ * no word about the number.
  */
 export function pitchPlayerSentence(player: PitchPlayerData): string {
-  const parts = [fullName(player.name), `rugnummer ${player.shirtNumber}`]
+  const parts = [fullName(player.name)]
+
+  if (player.shirtNumber !== null) {
+    parts.push(`rugnummer ${player.shirtNumber}`)
+  }
 
   if (player.captain === true) {
     parts.push('aanvoerder')

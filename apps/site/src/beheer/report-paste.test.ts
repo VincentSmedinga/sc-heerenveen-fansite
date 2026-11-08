@@ -192,9 +192,7 @@ describe('a player of the opponent', () => {
     expect(result.values.zij.speler).toMatchObject([
       { keuze: '', naam: 'Joop van Voorbeeld', rol: 'aanvoerder', rugnummer: '5' },
     ])
-    expect(result.unread).toMatchObject([
-      { line: 4, reason: 'Een speler van de tegenstander heeft een rugnummer en een naam nodig.' },
-    ])
+    expect(result.unread).toMatchObject([{ line: 4, reason: 'Een speler van de tegenstander heeft een naam nodig.' }])
   })
 
   it('makes the opponent complete only with eleven players in the line-up', () => {
@@ -207,15 +205,40 @@ describe('a player of the opponent', () => {
 })
 
 describe('a line that is not a player', () => {
-  it('is not read when it has no number, a number of 0, a name that is too long or a name that is a number only for the opponent', () => {
-    const result = read(`Opstelling\nVan Aken\n0 Nul\n5 ${'x'.repeat(101)}`)
+  it('is not read when it starts with a figure that is no number, a number of 0, or a name that is too long', () => {
+    const result = read(`Opstelling\n4x Van Aken\n0 Nul\n5 ${'x'.repeat(101)}`)
 
     expect(result.unread.map((line) => [line.line, line.reason])).toEqual([
-      [2, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)".'],
+      [2, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)", of schrijf alleen de naam.'],
       [3, 'Een rugnummer is een getal van 1 tot en met 99.'],
       [4, 'Een naam heeft hoogstens 100 tekens.'],
     ])
     expect(result.values.wij.speler).toHaveLength(11)
+  })
+
+  it('reads a name without a shirt number as a player without one, for both teams', () => {
+    const result = read(
+      'Opstelling\nVan Aken (a)\nSander Vos\nOnbekend Persoon\nTegenstander\nOpstelling\nRuud Oefenman\nPiet Proef',
+    )
+
+    expect(result.unread).toEqual([])
+    expect(result.choices).toMatchObject([{ message: expect.stringContaining('Onbekend Persoon') }])
+    expect(result.values.wij.speler.map((row) => [row.keuze, row.naam, row.rugnummer, row.rol])).toEqual([
+      ['4', '', '', 'aanvoerder'],
+      ['20', '', '', 'basis'],
+      ['', 'Onbekend Persoon', '', 'basis'],
+    ])
+    expect(result.values.zij.speler.map((row) => [row.naam, row.rugnummer])).toEqual([
+      ['Ruud Oefenman', ''],
+      ['Piet Proef', ''],
+    ])
+  })
+
+  it('points to a player without a shirt number by his name in the other lines', () => {
+    const result = read('Tegenstander\nOpstelling\nRuud Oefenman\n7 Piet Proef\nKaarten\n30 rood Ruud Oefenman')
+
+    expect(result.unread).toEqual([])
+    expect(result.values.zij.kaart).toMatchObject([{ minuut: '30', soort: 'rood', speler: '1' }])
   })
 
   it('stops after the most lines, and says so', () => {

@@ -9,12 +9,14 @@ export type PlayerDiscProps = {
   children?: ReactNode
   /** Whether he plays for sc Heerenveen: the disc is filled for them, open for the others. */
   ours: boolean
-  shirtNumber: number
+  /** His shirt number, or empty for a player without one: the disc then has no figure. */
+  shirtNumber: null | number
 }
 
 /**
  * The disc of a player: a round face with the shirt number and a ring round it for the
- * minutes he played, with a gap between the two. The pitch (`PitchPlayer`) and the list of
+ * minutes he played, with a gap between the two. A player without a shirt number gets the same
+ * disc with no figure in it. The pitch (`PitchPlayer`) and the list of
  * substitutes (`MatchSubstitutes`) both draw it, so the ring means the same in both. It is
  * drawing only, and the component that uses it hides it from a screen reader.
  * pitch-player.css gives it its look.

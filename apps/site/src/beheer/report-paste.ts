@@ -230,18 +230,21 @@ export function readPastedReport(
     const side = entry.side
     // The captain is marked with (a) at the end, behind the name or the number.
     const captain = /\s+\(a\)$/iu.test(entry.text)
-    const found = /^(\d{1,2})(?:\s+(.+))?$/u.exec(entry.text.replace(/\s+\(a\)$/iu, ''))
+    const withoutMark = entry.text.replace(/\s+\(a\)$/iu, '')
+    const found = /^(\d{1,2})(?:\s+(.+))?$/u.exec(withoutMark)
 
-    if (found === null) {
-      miss(entry, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)".')
+    // A line that does not start with a figure is a name without a shirt number, as in the old
+    // line-ups. A line that starts with a figure but is not a number and a name is a mistake.
+    if (found === null && (withoutMark === '' || /^\d/u.test(withoutMark))) {
+      miss(entry, 'Begin met het rugnummer, zoals "4 Van Aken" of "4 Van Aken (a)", of schrijf alleen de naam.')
 
       continue
     }
 
-    const number = Number(found[1])
-    const name = found[2]?.trim() ?? ''
+    const number = found === null ? null : Number(found[1])
+    const name = found === null ? withoutMark.trim() : (found[2]?.trim() ?? '')
 
-    if (number < 1) {
+    if (number !== null && number < 1) {
       miss(entry, 'Een rugnummer is een getal van 1 tot en met 99.')
 
       continue
@@ -264,13 +267,13 @@ export function readPastedReport(
       keuze: '',
       naam: '',
       rol: entry.section === 'bank' ? 'bank' : captain ? 'aanvoerder' : 'basis',
-      rugnummer: String(number),
+      rugnummer: number === null ? '' : String(number),
     }
-    let label = name === '' ? `rugnummer ${number}` : `${number} ${name}`
+    let label = number === null ? name : name === '' ? `rugnummer ${number}` : `${number} ${name}`
 
     if (side === 'zij') {
       if (name === '') {
-        miss(entry, 'Een speler van de tegenstander heeft een rugnummer en een naam nodig.')
+        miss(entry, 'Een speler van de tegenstander heeft een naam nodig.')
 
         continue
       }
@@ -278,7 +281,7 @@ export function readPastedReport(
       row.naam = name
     } else {
       // Ours: the number in the squad first, then the whole name, then the surname.
-      const byNumber = squad.filter((player) => player.shirtNumber === number)
+      const byNumber = number === null ? [] : squad.filter((player) => player.shirtNumber === number)
       const mine = squad.map((player, index) => ({
         index,
         name: player.name,
@@ -323,7 +326,7 @@ export function readPastedReport(
 
       if (chosen !== undefined) {
         row.keuze = String(chosen.id)
-        label = `${number} ${chosen.name}`
+        label = number === null ? chosen.name : `${number} ${chosen.name}`
       } else {
         row.naam = name
 

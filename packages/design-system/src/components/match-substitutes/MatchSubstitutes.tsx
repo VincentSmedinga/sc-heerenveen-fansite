@@ -19,7 +19,8 @@ export type MatchSubstitute = {
   name: MatchPlayerName
   /** The player he replaced. */
   playerOut: MatchPlayerName
-  shirtNumber: number
+  /** His shirt number, or empty for a player without one: the disc then has no figure. */
+  shirtNumber: null | number
   /** The minutes of added time after `minute`, as the 2 of 90+2. */
   stoppageMinutes?: number | undefined
 }
@@ -56,11 +57,15 @@ const clock = (minute: number, stoppageMinutes?: number | undefined) => minute +
  * it, so no mark is the only sign.
  */
 export function substituteSentence(substitute: MatchSubstitute): string {
-  const parts = [
-    fullName(substitute.name),
-    `rugnummer ${substitute.shirtNumber}`,
+  const parts = [fullName(substitute.name)]
+
+  if (substitute.shirtNumber !== null) {
+    parts.push(`rugnummer ${substitute.shirtNumber}`)
+  }
+
+  parts.push(
     `erin in minuut ${minuteWords(substitute.minute, substitute.stoppageMinutes)} voor ${fullName(substitute.playerOut)}`,
-  ]
+  )
 
   for (const goal of substitute.goals ?? []) {
     parts.push(
@@ -103,8 +108,8 @@ export const MatchSubstitutes = ({
         <p className="hf-match-substitutes-none">Geen wissels.</p>
       ) : (
         <ul aria-label={`Wissels ${team}`} className="hf-match-substitutes-list" role="list">
-          {ordered.map((substitute) => (
-            <li key={substitute.shirtNumber}>
+          {ordered.map((substitute, index) => (
+            <li key={substitute.shirtNumber ?? `no-number-${index}`}>
               <span className="hf-visually-hidden">{substituteSentence(substitute)}</span>
               <span aria-hidden="true" className="hf-match-substitutes-line">
                 <PlayerDisc

@@ -76,17 +76,50 @@ describe('checkReportForm', () => {
       expect(checked.errors[id]).toMatch(message)
     }
 
-    it('asks for a name of a player who is not in the squad, and for the number when the squad has none', () => {
+    it('asks for a name of a player who is not in the squad, and for a number only when it is wrong', () => {
       const rows = [...report().wij.speler]
 
       rows[13] = { ...emptyRow('speler'), keuze: 'andere', rol: 'bank' }
       fails(report({ wij: { speler: rows } }), 'speler-wij-14-naam', /schrijf de naam/u)
 
-      rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Nieuw', rol: 'bank' }
-      fails(report({ wij: { speler: rows } }), 'speler-wij-14-rugnummer', /rugnummer in, een heel getal van 1 tot 99/u)
+      rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Nieuw', rol: 'bank', rugnummer: 'x' }
+      fails(
+        report({ wij: { speler: rows } }),
+        'speler-wij-14-rugnummer',
+        /leeg, of schrijf een heel getal van 1 tot 99/u,
+      )
 
       rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Nieuw', rol: 'bank', rugnummer: '0' }
       fails(report({ wij: { speler: rows } }), 'speler-wij-14-rugnummer', /1 tot 99/u)
+    })
+
+    it('stores a player without a shirt number as empty, also several in a team', () => {
+      const rows = [...report().wij.speler]
+
+      rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Zonder Een', rol: 'bank' }
+      rows[14] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Zonder Twee', rol: 'bank' }
+
+      const opponent = [
+        { ...emptyRow('speler'), naam: 'Tegen Een', rol: 'basis' },
+        { ...emptyRow('speler'), naam: 'Tegen Twee', rol: 'bank' },
+      ]
+      const checked = checkReportForm(report({ wij: { speler: rows }, zij: { speler: opponent } }), context)
+
+      expect(checked.errors).toEqual({})
+      expect(
+        checked.plan?.appearances.filter((player) => player.shirtNumber === null).map((player) => player.name),
+      ).toEqual(['Zonder Een', 'Zonder Twee', 'Tegen Een', 'Tegen Twee'])
+    })
+
+    it('still finds a number twice in a team that also has players without one', () => {
+      const rows = [...report().wij.speler]
+
+      rows[13] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Zonder Een', rol: 'bank' }
+      rows[14] = { ...emptyRow('speler'), keuze: 'andere', naam: 'Dubbel', rol: 'bank', rugnummer: '1' }
+      const checked = checkReportForm(report({ wij: { speler: rows } }), context)
+
+      expect(checked.plan).toBeUndefined()
+      expect(checked.errors['speler-wij-15-rugnummer']).toMatch(/Rugnummer 1 staat twee keer/u)
     })
 
     it('does not take the same player of ours twice, not even by his name', () => {

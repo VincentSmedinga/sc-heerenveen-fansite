@@ -107,6 +107,16 @@ export const WithGoal = meta.story({
   name: 'Een wissel met een doelpunt',
 })
 
+export const WithoutShirtNumber = meta.story({
+  args: {
+    headingLevel: 3,
+    ours: true,
+    substitutes: ours.map((substitute) => ({ ...substitute, shirtNumber: null })),
+    team: 'sc Heerenveen',
+  },
+  name: 'Wissels zonder rugnummer: de schijf blijft leeg',
+})
+
 export const AddedTime = meta.story({
   args: {
     headingLevel: 3,

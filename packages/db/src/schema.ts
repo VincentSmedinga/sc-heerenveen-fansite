@@ -1560,10 +1560,11 @@ export type NewMatchReport = typeof matchReports.$inferInsert
  * else. The database cannot check that, since MariaDB does not allow a check on a column that a
  * deleted player sets to empty, so the rules of a report do. `name` is always filled, so a
  * deleted player stays in the report with his name.
- * `shirt_number` is one for each team in a match, `starter` is true for the line-up and false
- * for
- * the bench, and `captain` is true for the captain. A player from the bench who did not come
- * on has this row and no other. A row goes with its report, and its events with it.
+ * `shirt_number` is one for each team in a match, or empty for a player without one (the old
+ * line-ups have none): MariaDB does not count empty values as equal in the unique key, so
+ * several players of a team can be without a number. `starter` is true for the line-up and
+ * false for the bench, and `captain` is true for the captain. A player from the bench who did
+ * not come on has this row and no other. A row goes with its report, and its events with it.
  */
 export const matchAppearances = mysqlTable(
   'match_appearances',
@@ -1575,7 +1576,7 @@ export const matchAppearances = mysqlTable(
     ours: boolean('ours').notNull(),
     playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
     name: varchar('name', { length: playerNameMaxLength }).notNull(),
-    shirtNumber: int('shirt_number', { unsigned: true }).notNull(),
+    shirtNumber: int('shirt_number', { unsigned: true }),
     starter: boolean('starter').notNull(),
     captain: boolean('captain').notNull().default(false),
   },

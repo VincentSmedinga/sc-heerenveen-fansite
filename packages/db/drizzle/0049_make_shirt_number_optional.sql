@@ -1,0 +1,4 @@
+-- Lets the shirt number of a player in a match report be empty (#871), since the line-ups of the old fansite have none. The key on match, team and number stays, and MariaDB does not count empty values as equal in it, so several players of a team can be without a number. The check from 1 to 99 lets an empty number through.
+-- The migration only loosens the column. To undo it on the host, first check that no row has an empty number (`SELECT COUNT(*) FROM match_appearances WHERE shirt_number IS NULL`), and only then run `ALTER TABLE match_appearances MODIFY COLUMN shirt_number int unsigned NOT NULL`. Until the rows are given a number, or deleted, MariaDB refuses.
+-- The statement can run again: it leaves the column as it is the second time.
+ALTER TABLE `match_appearances` MODIFY COLUMN `shirt_number` int unsigned;

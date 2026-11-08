@@ -117,7 +117,7 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
 1. Schrijf bij Bron de naam van wat je overtypt, zoals "wedstrijdformulier" of "uitzending".
    Schrijf nooit een tekst van een verslag, en neem geen hele tabellen over van een site met statistieken.
 2. Kies voor sc Heerenveen de spelers uit de selectie, of kies "Andere speler" en schrijf zijn naam.
-   Laat het rugnummer leeg als het hetzelfde is als in de selectie.
+   Laat het rugnummer leeg als het hetzelfde is als in de selectie, of als de speler geen rugnummer had.
    Een speler staat in het verslag één keer, in de basis of op de bank (de rol).
    De lijst van een plek op de bank toont de spelers die niet in de basis staan, en kies je een speler van de bank voor de basis, dan wordt zijn plek op de bank leeg.
 3. Vul de wissels, de doelpunten, de kaarten en de gemiste strafschoppen in.
@@ -167,6 +167,7 @@ De tekst heeft kopjes, elk op een eigen regel, en daaronder een regel per speler
 - `Opstelling` en `Bank`: een rugnummer en een naam, zoals `4 Van Aken`.
   Zet `(a)` achter de aanvoerder.
   Voor sc Heerenveen volstaat het rugnummer van de selectie.
+  Had een speler geen rugnummer, schrijf dan alleen zijn naam, zoals `Van Aken`.
 - `Wissels`: de minuut, wie erin komt en voor wie, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
 - `Doelpunten`: de minuut en de speler die scoorde, met `assist Jansen`, `penalty` of `eigen doelpunt` erachter.
   Onder het kopje van een kant staan de doelpunten die die kant kreeg.

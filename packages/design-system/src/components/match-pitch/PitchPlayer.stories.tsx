@@ -13,7 +13,7 @@ const meta = preview.meta({
     minutesPlayed: { description: 'De minuten die hij speelde. De ring toont ze als een boog.' },
     name: { description: 'De naam. De achternaam staat onder de speler.' },
     ours: { description: 'Of hij voor sc Heerenveen speelt: het vlak is gevuld, bij de tegenstander open.' },
-    shirtNumber: { description: 'Het rugnummer, in het vlak.' },
+    shirtNumber: { description: 'Het rugnummer, in het vlak. Een speler zonder rugnummer laat het vlak leeg (null).' },
     substitutedOffAt: { description: 'De minuut waarop hij eruit ging. Een speler die bleef staan laat het weg.' },
   },
   component: PitchPlayer,
@@ -105,4 +105,15 @@ export const OwnGoal = meta.story({
     shirtNumber: 10,
   },
   name: 'Eigen doelpunt',
+})
+
+export const WithoutShirtNumber = meta.story({
+  args: {
+    captain: true,
+    minutesPlayed: 90,
+    name: { givenName: 'Sieb', surname: 'Zonderman' },
+    ours: true,
+    shirtNumber: null,
+  },
+  name: 'Zonder rugnummer: het vlak blijft leeg',
 })

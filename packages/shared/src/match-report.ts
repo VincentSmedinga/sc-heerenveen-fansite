@@ -34,14 +34,15 @@ export type MatchReport = {
 
 /**
  * A player in the line-up or on the bench. `id` is any number that is different for each player
- * of the report, such as the id in the database; the events point to it.
+ * of the report, such as the id in the database; the events point to it. `shirtNumber` is empty
+ * for a player without one, such as in the old line-ups: the rules skip it then.
  */
 export type ReportAppearance = {
   captain: boolean
   id: number
   name: string
   ours: boolean
-  shirtNumber: number
+  shirtNumber: null | number
   starter: boolean
 }
 
@@ -323,11 +324,16 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
     const team = report.appearances.filter((player) => player.ours === ours)
     const complete = ours || report.opponentComplete
 
-    // A shirt number is of one player in a team.
+    // A shirt number is of one player in a team. A player without one has nothing to check, and
+    // several players of a team may be without.
     const seen = new Map<number, ReportAppearance>()
 
     for (const player of team) {
       const index = report.appearances.indexOf(player)
+
+      if (player.shirtNumber === null) {
+        continue
+      }
 
       if (!between(player.shirtNumber, 1, 99)) {
         issues.push({

@@ -73,6 +73,38 @@ describe('the players in the preview', () => {
     expect(data.players.filter((one) => one.ours).map((one) => one.shirtNumber)).toEqual([2])
   })
 
+  it('keep a player without a shirt number, also several in a team, and leave out a number that is wrong', () => {
+    const data = dataOf(
+      values(
+        {},
+        {
+          speler: [
+            player({ naam: 'Een', rol: 'basis' }),
+            player({ naam: 'Twee', rol: 'basis' }),
+            player({ naam: 'Drie', rol: 'basis', rugnummer: '0' }),
+            player({ naam: 'Vier', rol: 'bank', rugnummer: 'x' }),
+          ],
+        },
+      ),
+    )
+
+    expect(data.players.filter((one) => !one.ours).map((one) => [one.name.givenName, one.shirtNumber])).toEqual([
+      ['Een', null],
+      ['Twee', null],
+    ])
+    expect(buildMatchPage(data).pitch.opponent?.players.map((one) => one.shirtNumber)).toEqual([null, null])
+  })
+
+  it('give a player of the squad his own number when the field is empty, and none when the squad has none', () => {
+    const data = dataOf(values({ speler: [player({ keuze: '3', rol: 'basis' })] }))
+    const nobody = previewDataOf(values({ speler: [player({ keuze: '3', rol: 'basis' })] }), match, [
+      { id: 3, name: 'Speler 3', searchTerm: 'Speler 3', shirtNumber: null },
+    ])
+
+    expect(data.players.filter((one) => one.ours).map((one) => one.shirtNumber)).toEqual([3])
+    expect(nobody.players.filter((one) => one.ours).map((one) => one.shirtNumber)).toEqual([null])
+  })
+
   it('keep the order the form has, also when it is not the order of the shirt numbers', () => {
     const reversed = values({ speler: values().wij.speler.slice(0, 11).toReversed() })
 

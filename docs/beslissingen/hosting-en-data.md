@@ -621,6 +621,7 @@
 - **Later:** zie _De formatie van een team staat in het verslag, en de regel ervoor staat bij de regels van het verslag_ (7 november 2026): #828 liet de formatie buiten het verslag, en dat deed #840 erbij.
   `match_reports` heeft sindsdien `formation_ours` en `formation_opponent`.
 - **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): het verslag heeft sindsdien een zesde tabel, `match_shootout_kicks`, met de schoten van de serie.
+- **Later:** zie _Een rugnummer mag ontbreken_ (8 november 2026): `match_appearances.shirt_number` mag sinds `0049_make_shirt_number_optional` leeg zijn, en dan telt de sleutel op wedstrijd, team en rugnummer niet voor die spelers.
 
 ## De regels voor een verslag staan op één plek, in `packages/shared`
 
@@ -754,3 +755,27 @@
 - **Waarom:** de pagina van een wedstrijd (#848, #850) toont wie schoot en wat er van kwam, en het formulier (#852) moet het kunnen invullen.
   Eén uitslag van de serie, die van de wedstrijd, houdt de import, de cijfers en het verslag gelijk.
 - **Alternatieven:** de serie bepaalt de uitslag (minder typen, maar dan bezit het verslag een uitslag die de rest van de site leest); de serie verplicht stellen (dan kan een wedstrijd waarvan we de schoten niet kennen geen verslag krijgen); de schoten in `match_incidents` zetten (een schot heeft een ronde en geen minuut); de volgorde van de teams bewaren (de pagina heeft haar niet nodig).
+
+## Een rugnummer mag ontbreken
+
+- **Datum:** 8 november 2026
+- **Besluit:** `match_appearances.shirt_number` mag leeg zijn (#871).
+  De oude fansite bewaarde geen rugnummers, en een verzonnen nummer zet een onwaarheid in de database.
+  - **De opslag:** de kolom is niet meer verplicht, en de migratie `0049_make_shirt_number_optional` verandert alleen dat.
+    De sleutel op wedstrijd, team en rugnummer blijft: MariaDB telt lege waarden niet als gelijk, dus een team kan meer spelers zonder nummer hebben, en twee spelers met hetzelfde nummer blijven onmogelijk.
+    De check van 1 tot en met 99 laat een leeg nummer door.
+    Terugdraaien kan alleen als geen rij een leeg nummer heeft; de migratie zegt hoe, en kan opnieuw draaien.
+  - **De regels:** `shirtNumber` van een speler is `number | null` in `@fansite/shared/match-report`.
+    `shirt-number-out-of-range` en `shirt-number-twice` slaan een leeg nummer over, en een leeg nummer geeft geen fout of waarschuwing.
+  - **Het formulier:** een leeg veld geeft de speler van de selectie zijn eigen nummer, en iedereen anders geen nummer.
+    Een verkeerd nummer (geen getal, 0 of boven 99) blijft een fout.
+    Het plakscherm leest een regel onder `Opstelling` of `Bank` zonder getal vooraan als een speler zonder rugnummer.
+    Een speler zonder rugnummer heeft in de rest van de tekst en in de serie van strafschoppen zijn naam als aanwijzing.
+  - **De pagina:** het vlak van de speler (`PlayerDisc`) blijft, zonder cijfer, met hetzelfde contrast.
+    De zin voor een schermlezer heeft de naam en niets over het rugnummer, en de lijst onder het veld heeft geen kolom voor rugnummers als niemand er een heeft.
+  - **Een beperking:** een speler van de selectie met een eigen rugnummer die in een bewaard verslag geen nummer heeft, krijgt bij het opnieuw opslaan het nummer van de selectie.
+    Het formulier kan geen leeg nummer onderscheiden van het nummer van de selectie.
+  - **De seed:** het tweede verzonnen verslag heeft vier spelers van ons zonder rugnummer, twee in de basis en twee op de bank, zodat de pagina, de toegankelijkheidscontrole en de screenshots het tonen.
+- **Waarom:** de opstellingen in de database van de oude fansite (566 wedstrijden) hebben geen rugnummers, en een verslag eiste er een voor elke speler.
+  Zo kunnen ze later zonder verzonnen nummers worden geïmporteerd (#879).
+- **Alternatieven:** de nummers verzinnen, bijvoorbeeld de volgorde in de opstelling; de oude opstellingen niet importeren.

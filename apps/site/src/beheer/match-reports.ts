@@ -92,8 +92,8 @@ export async function findReportScreen(db: Pick<Database, 'select'>, id: number)
 /**
  * The pasted values with the kicks of the shoot-out that the report holds: the paste does not
  * read a series (#852), so what is stored stays. A kick points to its player by team and shirt
- * number, since the pasted line-up has other rows; a player who is not in it any more leaves
- * the kick without a player, which the rules say.
+ * number (or by name for a player without one), since the pasted line-up has other rows; a
+ * player who is not in it any more leaves the kick without a player, which the rules say.
  */
 export function keepShootout(
   pasted: ReportValues,
@@ -105,18 +105,21 @@ export function keepShootout(
   }
 
   const held = valuesOfReport(stored, [], squad)
-  const shirtOf = (values: ReportValues, side: Side, place: string | undefined) => {
-    const row = place === undefined || place === '' ? undefined : values[side].speler[Number(place) - 1]
+  const identityOf = (row: Row | undefined, side: Side) => {
+    const player = row === undefined ? undefined : playerOf(row, side, squad)
 
-    return row === undefined ? undefined : playerOf(row, side, squad)?.shirtNumber
+    return player === undefined
+      ? undefined
+      : player.shirtNumber === null
+        ? `naam:${player.name}`
+        : `nummer:${player.shirtNumber}`
   }
+  const shirtOf = (values: ReportValues, side: Side, place: string | undefined) =>
+    identityOf(place === undefined || place === '' ? undefined : values[side].speler[Number(place) - 1], side)
   const kept = (side: Side): Row[] =>
     held[side].serie.map((kick) => {
       const shirt = shirtOf(held, side, kick.speler)
-      const index =
-        shirt === undefined
-          ? -1
-          : pasted[side].speler.findIndex((row) => playerOf(row, side, squad)?.shirtNumber === shirt)
+      const index = shirt === undefined ? -1 : pasted[side].speler.findIndex((row) => identityOf(row, side) === shirt)
 
       return { ...kick, speler: index === -1 ? '' : String(index + 1) }
     })
@@ -491,7 +494,7 @@ export function valuesOfReport(
         keuze: side === 'wij' ? (inSquad ? String(appearance.playerId) : otherPlayer) : '',
         naam: inSquad ? '' : appearance.name,
         rol: appearance.captain ? 'aanvoerder' : appearance.starter ? 'basis' : 'bank',
-        rugnummer: String(appearance.shirtNumber),
+        rugnummer: appearance.shirtNumber === null ? '' : String(appearance.shirtNumber),
       })
       place.set(appearance.id, `${side}-${values[side].speler.length}`)
     }
