@@ -44,7 +44,7 @@ const formatRules = [
   'Een speler van ons mag alleen een rugnummer zijn, als hij in de selectie van het seizoen staat.',
   'Wissels: de minuut, wie erin komt en voor wie, zoals "61 12 voor 8" of "90+2 Smit voor Jansen".',
   'Doelpunten: de minuut en de speler die scoorde, zoals "23 Smit".',
-  'Zet "assist Jansen", "penalty" of "eigen doelpunt" achter een doelpunt waar dat bij hoort.',
+  'Zet "assist Jansen", "strafschop" of "eigen doelpunt" achter een doelpunt waar dat bij hoort.',
   'Weet niemand de minuut van een doelpunt of een gele kaart, zet dan een vraagteken: "? Smit" of "? geel Jansen".',
   'Onder het kopje van een kant staan de doelpunten die die kant kreeg.',
   'Bij een eigen doelpunt is de naam een speler van de andere kant.',

@@ -1458,6 +1458,7 @@
   De rijen gaan weg met hun wedstrijd (`ON DELETE CASCADE`).
   De import schrijft ze op volgorde van de klok, dus de volgorde van `id` is de volgorde in de regel.
 - **Alternatieven:** het bij de club van de speler zetten (klopt dan niet met de uitslag naast de regel).
+- **Later:** zie _Een strafschop heet strafschop of str., nooit pen. of penalty_ (8 november 2026): op de site staat "str." met "strafschop" voor een schermlezer, niet "pen." en "penalty".
 
 ## Een doelpunt dat niet bij de uitslag past, wordt niet getoond
 
@@ -2884,3 +2885,15 @@
   Dat de site een eigen gegevensbron heeft, mag niet betekenen dat hij andermans werk kopieert.
 - **Alternatieven:** niets overtypen en wachten tot een bron de gegevens geeft (de minuten, de opstelling en de kaarten bestaan nergens in een vorm die we mogen overnemen); de verslagen van journalisten samenvatten (het werk van een ander, en de lezer gaat dan niet naar de journalist).
 - **Later:** dit werkt principe 4 (altijd de bron vermelden) uit voor gegevens die we zelf bijhouden: de bron is dan "eigen administratie", met de bron van het verslag erachter.
+
+## Een strafschop heet strafschop of str., nooit pen. of penalty
+
+- **Datum:** 8 november 2026
+- **Besluit:** de site schrijft "strafschop" en kort "str.", nooit "pen." of "penalty".
+  Dat geldt voor de legenda onder een lijst wedstrijden, de regel met doelpuntenmakers van `Match` en de uitleg voor een schermlezer.
+  Het plakscherm van het beheer leest "strafschop" (met of zonder hoofdletter) en blijft "penalty" lezen.
+  De importer blijft `pen.` lezen.
+- **Waarom:** supporters zeggen strafschop, en de kop van een wedstrijd en het verloop schrijven het al zo.
+  Wikipedia en de oude bestanden schrijven `pen.`, en wat we importeren moeten we kunnen blijven lezen.
+  Wat een redacteur al met "penalty" plakte, mag niet stukgaan.
+- **Alternatieven:** "pen." en "penalty" laten staan, zoals het was; ook de importer en het plakscherm alleen "strafschop" laten lezen, wat bestanden en gewoonten breekt; "pen." en "str." allebei toestaan, wat twee afkortingen voor één ding geeft.

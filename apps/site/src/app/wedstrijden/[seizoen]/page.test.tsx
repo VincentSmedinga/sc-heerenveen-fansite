@@ -234,10 +234,10 @@ describe('the cards with results of an earlier season, one for each competition'
 
     expect(section(html, 'uitslagen')).toContain('e.d. eigen doelpunt')
     expect(section(html, 'uitslagen')).not.toContain('n.v.')
-    expect(section(html, 'uitslagen')).not.toContain('pen. penalty')
+    expect(section(html, 'uitslagen')).not.toContain('str. strafschop')
     expect(section(html, 'uitslagen-knvb-beker')).toContain('n.v. na verlenging')
     expect(section(html, 'uitslagen-knvb-beker')).not.toContain('e.d.')
-    expect(section(html, 'uitslagen-play-offs')).toContain('pen. penalty')
+    expect(section(html, 'uitslagen-play-offs')).toContain('str. strafschop')
     expect(section(html, 'uitslagen-play-offs')).not.toContain('n.v. na verlenging')
   })
 

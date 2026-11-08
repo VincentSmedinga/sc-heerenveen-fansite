@@ -186,7 +186,7 @@ De tekst heeft kopjes, elk op een eigen regel, en daaronder een regel per speler
   Voor sc Heerenveen volstaat het rugnummer van de selectie.
   Had een speler geen rugnummer, schrijf dan alleen zijn naam, zoals `Van Aken`.
 - `Wissels`: de minuut, wie erin komt en voor wie, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
-- `Doelpunten`: de minuut en de speler die scoorde, met `assist Jansen`, `penalty` of `eigen doelpunt` erachter.
+- `Doelpunten`: de minuut en de speler die scoorde, met `assist Jansen`, `strafschop` of `eigen doelpunt` erachter.
   Weet niemand de minuut, zet dan een vraagteken: `? Smit`.
   Onder het kopje van een kant staan de doelpunten die die kant kreeg.
   Bij een eigen doelpunt is de naam een speler van de andere kant.

@@ -701,7 +701,7 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
     extraTime && 'n.v. na verlenging',
     shootOut && 'n.s. na strafschoppen',
     goals.some((goal) => goal.ownGoal) && 'e.d. eigen doelpunt',
-    goals.some((goal) => goal.penalty) && 'pen. penalty',
+    goals.some((goal) => goal.penalty) && 'str. strafschop',
   ].filter((part) => part !== false)
 
   return legend.length > 0 ? <Text appearance="meta">{legend.join(', ')}</Text> : null
