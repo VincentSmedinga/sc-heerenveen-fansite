@@ -6,6 +6,7 @@ import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
+import { liveReportMatchId, liveReportPath } from './live-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -20,7 +21,9 @@ import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } f
 // `{report}` for the page of the made-up match that has a report, and `{cupReport}` for the one
 // with extra time and a shoot-out (see matches.ts), and `{cupMatch}` for the number of that
 // match, for the screen of its report in the admin, and `{incompleteReport}` for the page of
-// the report that is still being filled in (see incomplete-report.ts).
+// the report that is still being filled in (see incomplete-report.ts), and `{liveReport}` and
+// `{liveMatch}` for the page and the number of the made-up match that is being played (see
+// live-report.ts).
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -66,6 +69,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '{cupReport}', status: 200 },
   // The made-up report that is still being filled in: the page with the notice (#857).
   { path: '{incompleteReport}', status: 200 },
+  // The made-up match that is being played: the page with "Live" (#906).
+  { path: '{liveReport}', status: 200 },
   { path: `/wedstrijden/${earlierSeasonSlug()}/2000-01-01-testdorp-fc`, status: 404 },
   { path: '/wedstrijden/2026-27/onzin', status: 404 },
   { path: '/wedstrijden/2099-00/2099-01-01-testdorp-fc', status: 404 },
@@ -233,6 +238,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
   // The cup tie with a shoot-out has the lists of the kicks, and the series in the preview.
   { admin: 'beheerder', path: '/beheer/wedstrijden/{cupMatch}/verslag', status: 200 },
+  // The match that is being played: its report with the button "Wedstrijd afgelopen", and the
+  // confirmation with the stand.
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 200 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 404 },
   // The screen that reads a pasted text into the form of the report.
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },
@@ -300,6 +310,8 @@ async function withNumbers(path: string) {
           '{incompleteReport}',
           path.includes('{incompleteReport}') ? await incompleteReportPath() : '{incompleteReport}',
         )
+        .replace('{liveReport}', path.includes('{liveReport}') ? await liveReportPath() : '{liveReport}')
+        .replace('{liveMatch}', path.includes('{liveMatch}') ? String(await liveReportMatchId()) : '{liveMatch}')
         .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')
     : path
 }

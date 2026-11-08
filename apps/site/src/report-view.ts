@@ -1,4 +1,4 @@
-import type { ReportedMatch, ReportedPlayerName } from '@fansite/db/match-reports'
+import type { ReportedMatch, ReportedPlayerName, ReportPhase } from '@fansite/db/match-reports'
 import type { MatchHeaderFact, MatchPlayerName } from '@fansite/design-system'
 
 import { oldSiteReportSource } from '@fansite/db/schema'
@@ -14,11 +14,20 @@ export { ourClub } from './match-page'
 
 /**
  * The data of the page of a match from a stored report that has passed the rules. The players
- * are in the order the form had them: the report keeps them in the order of their rows.
+ * are in the order the form had them: the report keeps them in the order of their rows. A match
+ * that is still being played (`phase`) has no result: its stand is the number of goals of each
+ * team in the report.
  */
-export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[], complete: boolean): MatchPageData {
+export function matchPageDataOf(
+  reported: ReportedMatch,
+  facts: MatchHeaderFact[],
+  complete: boolean,
+  phase?: ReportPhase,
+): MatchPageData {
   const { match, names, stored } = reported
   const players = new Map(stored.appearances.map((player) => [player.id, player]))
+  const standFor = stored.goals.filter((goal) => goal.ours).length
+  const standAgainst = stored.goals.length - standFor
 
   return {
     afterNinety:
@@ -54,8 +63,8 @@ export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[
             },
           ],
     ),
-    goalsAgainst: match.goalsAgainst ?? 0,
-    goalsFor: match.goalsFor ?? 0,
+    goalsAgainst: phase === undefined ? (match.goalsAgainst ?? 0) : standAgainst,
+    goalsFor: phase === undefined ? (match.goalsFor ?? 0) : standFor,
     home: match.home,
     incidents: stored.incidents.map((incident) => ({
       kind: incident.kind,
@@ -75,6 +84,7 @@ export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[
       match.penaltiesFor !== null && match.penaltiesAgainst !== null
         ? { against: match.penaltiesAgainst, for: match.penaltiesFor }
         : null,
+    ...(phase === undefined ? {} : { phase }),
     players: stored.appearances.map((player) => ({
       captain: player.captain,
       id: player.id,

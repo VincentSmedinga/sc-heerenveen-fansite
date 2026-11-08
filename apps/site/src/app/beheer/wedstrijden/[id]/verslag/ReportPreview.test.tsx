@@ -53,13 +53,13 @@ const preview: ReportPreviewMatch = {
   penalties: null,
 }
 
-const provider = (withPreview = true) => (
+const provider = (withPreview = true, match: ReportPreviewMatch = preview) => (
   <ReportFormProvider
     action={() => Promise.resolve(initial)}
     choices={{
       matchHref: '/beheer/wedstrijden/7',
       opponent: 'Testclub',
-      ...(withPreview ? { preview } : {}),
+      ...(withPreview ? { preview: match } : {}),
       series: null,
       showDelay: 'binnen vijf minuten',
       squad,
@@ -85,6 +85,22 @@ describe('the preview next to the form of a report', () => {
     ).not.toBeNull()
     expect(aside().getAttribute('aria-labelledby')).toBe('voorbeeld-kop')
     expect(aside().tabIndex).toBe(0)
+  })
+
+  it('says Live and the stand so far for a match that is being played, as the page does', () => {
+    render(provider(true, { ...preview, phase: 'live' }))
+
+    expect(aside().querySelector('.hf-match-header-live')?.textContent).toBe('Live')
+    expect(course()).toContain('Tussenstand: 1 tegen 0')
+    expect(course()).not.toContain('Eindstand')
+    expect(course()).not.toContain('Gewonnen')
+  })
+
+  it('says the match has not begun for a match with a report before its kick-off', () => {
+    render(provider(true, { ...preview, phase: 'upcoming' }))
+
+    expect(course()).toContain('Nog niet begonnen')
+    expect(aside().querySelector('.hf-match-header-live')).toBeNull()
   })
 
   it('is not a live region, so a screen reader does not read the page again at every key', () => {

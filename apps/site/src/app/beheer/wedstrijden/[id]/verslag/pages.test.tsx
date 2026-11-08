@@ -1,7 +1,15 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matchAppearances, matches, matchGoals, type NewMatch, players } from '@fansite/db/schema'
+import {
+  adminUsers,
+  matchAppearances,
+  matches,
+  matchGoals,
+  matchReports,
+  type NewMatch,
+  players,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -144,7 +152,7 @@ describe('the report screen', () => {
   })
 
   it('is "not found" for a match that does not exist, was not played, or is no number', async () => {
-    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'postponed' })
 
     await expect(page(matchId)).rejects.toThrow('not found')
     await expect(page(999_999)).rejects.toThrow('not found')
@@ -414,5 +422,70 @@ describe('the report screen of a match decided on penalties', () => {
 
     expect(html).toContain('Controleer')
     expect(html).toMatch(/sc Heerenveen geven 2 raak en de uitslag van de serie is 3–1/u)
+  })
+})
+
+describe('the report screen of a match that is being played', () => {
+  /** The match is being played: scheduled, no result, with a report that is bezig. */
+  async function beginMatch(withReport = true) {
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+      .where(eq(matches.id, matchId))
+
+    if (withReport) {
+      await database.db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'bezig' })
+    }
+  }
+
+  it('says Live and that there is no result yet, and has the button Wedstrijd afgelopen', async () => {
+    await beginMatch()
+
+    const html = await page(matchId)
+
+    expect(html).toContain('De wedstrijd wordt gespeeld, nog geen uitslag')
+    expect(html).toContain('>Live</span>')
+    expect(html).not.toContain('Uitslag 2–1')
+    expect(headings(html, 2)).toContain('Wedstrijd afgelopen')
+    // A form with a real button that goes to the confirmation, so it works without JavaScript.
+    expect(html).toMatch(
+      new RegExp(
+        `<form[^>]*action="/beheer/wedstrijden/${matchId}/verslag/afgelopen"[^>]*method="get"[^>]*>.*?<button[^>]*type="submit"[^>]*>Wedstrijd afgelopen</button>`,
+        'su',
+      ),
+    )
+  })
+
+  it('has no button before there is a report, and none for a match that was played', async () => {
+    await beginMatch(false)
+    expect(await page(matchId)).not.toContain('Wedstrijd afgelopen')
+
+    await database.db.update(matches).set({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    await database.db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'bezig' })
+
+    const html = await page(matchId)
+
+    expect(html).not.toContain('Wedstrijd afgelopen')
+    expect(html).not.toContain('>Live</span>')
+    expect(html).toContain('Uitslag 2–1')
+  })
+
+  it('does not say Live before the kick-off, and says the match has not begun', async () => {
+    await beginMatch()
+    await database.db.update(matches).set({ kickoffAt: new Date(Date.now() + 3 * 60 * 60 * 1000) })
+
+    const html = await page(matchId)
+
+    expect(html).toContain('De wedstrijd is nog niet begonnen')
+    expect(html).not.toContain('>Live</span>')
+  })
+
+  it('tells what the button did, from the word in the address', async () => {
+    await beginMatch()
+
+    expect(await page(matchId, { gedaan: 'afgelopen' })).toContain(
+      'Wedstrijd afgelopen.</strong> De wedstrijd heeft nu',
+    )
+    expect(await page(matchId, { gedaan: 'al-afgelopen' })).toContain('Al afgelopen.</strong>')
   })
 })

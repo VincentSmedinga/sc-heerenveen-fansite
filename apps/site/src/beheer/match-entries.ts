@@ -14,6 +14,7 @@ import {
   refreshSnapshot,
   removeEntry,
 } from '@fansite/db/match-edits'
+import { mayHaveReport, phaseOf } from '@fansite/db/match-reports'
 import { listWikipediaPages } from '@fansite/db/queries'
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
 import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
@@ -222,8 +223,9 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
  * of the season. `edited` says which parts the editors hold, `differs` how many of them
  * Wikipedia says something else about, which waits for a decision, and `held` how many changes
  * of Wikipedia the importer holds back for the match. `reportStatus` is the status of its
- * match report (none for a match without one), and `reportToCheck` says that a report that is
- * `klaar` is not right any more.
+ * match report (none for a match without one), `reportable` that the match can have a report,
+ * `reportLive` that the match is being played and has one, and `reportToCheck` that a report
+ * that is `klaar` is not right any more.
  */
 export async function listAdminMatches(db: Database, season: string, now: Date) {
   const found = await db
@@ -267,6 +269,9 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
     edited: edits.has(match.id) ? markedParts(edits.get(match.id) as MatchEdit) : [],
     held: holding.filter((change) => change.matchId === match.id).length,
     lacksResult: lacksResult(match, now),
+    // A match that is being played can have a report, and says "Live" from its kick-off.
+    reportable: mayHaveReport(match, now),
+    reportLive: match.reportStatus !== null && phaseOf(match, now) === 'live',
     reportToCheck: checking.has(match.id),
   }))
 

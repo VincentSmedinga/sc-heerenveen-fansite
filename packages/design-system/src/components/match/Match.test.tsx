@@ -865,3 +865,41 @@ describe('Match with a page of its own', () => {
     expect(render(<Match {...played} />).container.querySelector('a')).toBeNull()
   })
 })
+
+describe('Match that is being played', () => {
+  const live = { ...scheduled, live: true, reportHref: '/wedstrijden/2026-27/2026-11-01-voorbeeld-united' } as const
+
+  it('ends with the link "Live" to its page, named with the clubs, in place of "Het verslag"', () => {
+    const { container } = render(<Match {...live} />)
+    const link = container.querySelector('a')
+
+    expect(link?.getAttribute('href')).toBe('/wedstrijden/2026-27/2026-11-01-voorbeeld-united')
+    expect(link?.textContent).toBe('Live verslag van Voorbeeld United tegen sc Heerenveen')
+    expect(link?.querySelector('.hf-match-live')?.textContent).toBe('Live')
+    expect(container.textContent).not.toContain('Het verslag')
+  })
+
+  it('has no result between the names, only the dash that is read as "tegen"', () => {
+    const { container } = render(<Match {...live} />)
+
+    expect(container.querySelector('.hf-match-score')?.textContent).toContain('–')
+    expect(container.querySelector('.hf-match-score')?.textContent).toContain('tegen')
+    expect(container.querySelector('.hf-match-score')?.className).toContain('hf-match-versus')
+  })
+
+  it('does not say that the data is not available, also when the result is missing', () => {
+    const { container } = render(<Match {...live} resultMissing />)
+
+    expect(container.textContent).not.toContain('Gegevens nog niet beschikbaar')
+    expect(render(<Match {...scheduled} resultMissing />).container.textContent).toContain(
+      'Gegevens nog niet beschikbaar',
+    )
+  })
+
+  it('links a match before its kick-off that has a page as "Het verslag"', () => {
+    const { container } = render(<Match {...scheduled} reportHref="#opstelling" />)
+
+    expect(container.querySelector('a')?.textContent).toBe('Het verslag van Voorbeeld United tegen sc Heerenveen')
+    expect(container.querySelector('.hf-match-live')).toBeNull()
+  })
+})

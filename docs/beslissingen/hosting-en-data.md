@@ -646,6 +646,7 @@
     - een minuut ligt tussen 1 en 90 (45+x en 90+x zijn blessuretijd van een helft), of tussen 91 en 120 als de wedstrijd een verlenging had; de blessuretijd is 1 tot en met 15 minuten;
     - de doelpunten per kant komen samen op de uitslag, op dezelfde manier als het formulier van de wedstrijd dat nu al controleert;
     - alleen een gespeelde wedstrijd heeft een verslag.
+      Later gaat dit ook op voor een wedstrijd die nog wordt gespeeld (zie de **Later:**-regel onder dit besluit).
   - **De waarschuwingen** (ze houden "klaar" niet tegen): meer dan vijf wissels van één team in de reguliere tijd, en een kant die af is met een bank van minder dan vijf spelers.
   - **Bezig en klaar:** een verslag met status `bezig` mag fouten hebben, zodat iemand het in meerdere keren kan invullen; alleen de opbouw van de gegevens moet kloppen (`blockingIssues`).
     Status `klaar` kan alleen zonder fouten.
@@ -660,6 +661,8 @@
 - **Waarom:** precisie is het doel van deze bron, en een regel die op drie plekken staat, wordt op één ervan vergeten.
 - **Alternatieven:** de regels in het beheer en nog eens in de database en de pagina (drie plekken om bij te houden); alles wat kan als check in de database (MariaDB kan een check niet op een kolom die op leeg gaat, en een verslag dat `bezig` is moet fouten mogen hebben).
 - **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): de lijst van fouten en waarschuwingen hierboven heeft er sindsdien de regels van de serie bij, en `ReportMatch` de uitslag van de serie.
+- **Later:** zie _Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is_ (8 november 2026): "Alleen een gespeelde wedstrijd heeft een verslag" geldt nog voor een uitgestelde en een afgelaste wedstrijd, maar een wedstrijd met status `scheduled` mag vanaf zijn dag een verslag hebben dat `bezig` is.
+  De rest van de regels blijft.
 
 ## Minuten gespeeld tellen op de klok, in hele minuten
 
@@ -903,3 +906,24 @@
   De datum van een levende speler is een persoonsgegeven: hij blijft in de database en de site toont hem pas na een eigen besluit.
 - **Waarom:** Wikidata kent bij oudere spelers soms alleen het jaar, en 1 januari zou een verzonnen dag zijn.
 - **Alternatieven:** een jaarkolom naast de datum.
+
+## Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is
+
+- **Datum:** 8 november 2026
+- **Besluit:** een wedstrijd met een verslag dat nog wordt ingevuld terwijl hij wordt gespeeld, blijft `scheduled` in `matches`, zonder uitslag (#906).
+  - **Wanneer:** vanaf de dag van de wedstrijd (Nederlandse tijd) mag een wedstrijd met status `scheduled` een verslag hebben, tot hij `played` is (`mayHaveReport` in `@fansite/db/match-reports`).
+    Voor een wedstrijd van een latere dag, een uitgestelde en een afgelaste wedstrijd blijft het zoals het was.
+  - **De regels:** `checkMatchReport` laat voor een `scheduled` wedstrijd de regel "alleen een gespeelde wedstrijd" los.
+    Een verslag dat `klaar` is, krijgt daar de fout `match-not-finished` ("De wedstrijd is nog niet afgelopen"), die niet structureel is, dus het verslag wordt als `bezig` bewaard.
+    De regel dat de doelpunten optellen tot de uitslag telt pas als de wedstrijd een uitslag heeft, zoals hij al deed (zonder uitslag slaat hij over).
+  - **De doelpunten** van zo'n wedstrijd staan in `match_goals`, gemarkeerd als die van de redactie (`goals_edited`), maar tellen nergens mee: `withGoals` in `queries.ts` leest alleen de doelpunten van een gespeelde wedstrijd, en `readPlayerReportStats` en `findReportGoalDifferences` namen al alleen gespeelde wedstrijden.
+    De lijsten, de topscorers, de standen en de cijfers veranderen dus niet door een tussenstand.
+  - **Wanneer "Live":** `phaseOf` zegt `live` vanaf de aftrap (zonder bekende aftrap: vanaf de dag), en `upcoming` ervoor.
+    Een wedstrijd met status `played` heeft geen fase, ook niet met een verslag dat `bezig` is.
+  - **De knop "Wedstrijd afgelopen"** (`finishMatch` in `apps/site/src/beheer/match-reports.ts`) zet de uitslag uit de bevestigde stand, de status op `played` en `result_set_at` op het moment, als invoer van de redactie (`result_edited` in `match_edits`) met een regel `match.edit` in het logboek.
+    Het verslag blijft `bezig`.
+    Is de wedstrijd al `played` (de import was eerst), dan schrijft de knop niets.
+  - **Geen migratie:** de tabellen hadden niets dat een verslag aan de status koppelde.
+- **Waarom:** een tussenstand in `matches` komt in elke lijst en elk cijfer, en de import van Wikipedia zou na elk doelpunt een verschil melden.
+  De uitslag uit de doelpunten van het verslag is de eindstand die bezoekers meteen willen zien, en de import loopt uren tot dagen achter.
+- **Alternatieven:** de wedstrijd meteen op `played` zetten met een lopende uitslag; de eindstand zelf intikken in plaats van uit de doelpunten te nemen; een eigen kolom `live` of een eigen tabel voor een lopende stand (meer om bij te houden, en de import kent hem niet).

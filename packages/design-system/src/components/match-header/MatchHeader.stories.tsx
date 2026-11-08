@@ -11,6 +11,10 @@ const meta = preview.meta({
     goalsAgainst: { description: 'De doelpunten van de tegenstander, ook bij een uitwedstrijd.' },
     goalsFor: { description: 'De doelpunten van sc Heerenveen.' },
     home: { description: 'Of sc Heerenveen thuis speelt. De thuisclub staat vooraan.' },
+    phase: {
+      description:
+        '`live` voor een wedstrijd die wordt gespeeld, `upcoming` voor een wedstrijd die nog niet begonnen is. Laat het weg voor een wedstrijd die is gespeeld.',
+    },
     scorersAgainst: { description: 'De doelpuntenmakers van de tegenstander, onder zijn naam.' },
     scorersFor: { description: 'De doelpuntenmakers van sc Heerenveen, onder onze naam.' },
   },
@@ -34,6 +38,8 @@ const meta = preview.meta({
           'Kies hem alleen voor de pagina van één wedstrijd; een regel in een lijst is een `Match`.',
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, en het woord in de pil is het teken: een schermlezer hoort "6 tegen 0".',
           'Na een verlenging of strafschoppen staat dat in woorden onder de uitslag.',
+          'Wordt de wedstrijd nog gespeeld, zet dan `phase` op `live`: de pil zegt "Live" in plaats van een uitkomst, en de stand is die tot nu toe.',
+          'Is de aftrap er nog niet, dan is het `upcoming`: streepjes in plaats van een stand.',
           'De `h1` van de pagina hoort er niet bij: de pagina mag hem visueel verbergen, want de namen en de uitslag zijn wat de ogen zien.',
         ].join('\n'),
       },
@@ -151,4 +157,29 @@ export const ScorerWithoutMinute = meta.story({
     ],
   },
   name: 'Een doelpunt zonder minuut: de naam staat zonder minuut',
+})
+
+export const Live = meta.story({
+  args: {
+    facts,
+    goalsAgainst: 0,
+    goalsFor: 1,
+    home: true,
+    opponent: 'Testdorp FC',
+    phase: 'live',
+    scorersFor: [{ minute: 23, player: 'Hoekstra' }],
+  },
+  name: 'Live: de stand tot nu toe, met "Live" in de pil',
+})
+
+export const NotStarted = meta.story({
+  args: {
+    facts,
+    goalsAgainst: 0,
+    goalsFor: 0,
+    home: true,
+    opponent: 'Testdorp FC',
+    phase: 'upcoming',
+  },
+  name: 'Nog niet begonnen: streepjes en de aftrap bij de feiten',
 })

@@ -713,11 +713,17 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
  * legend under the list holds only the abbreviations of these matches.
  */
 export function MatchLines({
+  liveReports,
   matches,
   now,
   reportAddresses,
   withCompetition = true,
 }: {
+  /**
+   * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): their line
+   * says "Live" in the link to their page.
+   */
+  liveReports?: ReadonlySet<string> | undefined
   matches: PublicMatch[]
   now: Date
   /**
@@ -734,6 +740,7 @@ export function MatchLines({
         {matches.map((match) => (
           <List.Item key={`${match.competition}-${match.round}`}>
             <MatchLine
+              live={liveReports?.has(`${match.competition}|${match.round}`) === true}
               match={match}
               now={now}
               reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
@@ -1409,12 +1416,18 @@ export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
  * `withYear`, which gives the day of a played match its year (see `matchMoment`).
  */
 export function MatchLine({
+  live = false,
   match,
   now,
   reportHref,
   withCompetition = true,
   withYear = false,
 }: {
+  /**
+   * Whether the match is being played and has a page with its report: the link then says "Live"
+   * and the line has no result. It needs `reportHref`.
+   */
+  live?: boolean
   match: MatchLineMatch
   now: Date
   /** The address of the page of the match, when it has one: the line then links to it. */
@@ -1459,8 +1472,16 @@ export function MatchLine({
   }
 
   // A match that has begun and has no result keeps its time, and says after two hours that the
-  // result isn't known yet.
-  return <Match {...common} {...matchMoment(match, now)} resultMissing={lacksResult(match, now)} status="scheduled" />
+  // result isn't known yet. A match that is live links to its page instead: the stand is there.
+  return (
+    <Match
+      {...common}
+      {...matchMoment(match, now)}
+      {...(reportHref === undefined ? {} : { live, reportHref })}
+      resultMissing={lacksResult(match, now)}
+      status="scheduled"
+    />
+  )
 }
 
 /** A goal for the name above a short match: the minute with stoppage time, and the player. */

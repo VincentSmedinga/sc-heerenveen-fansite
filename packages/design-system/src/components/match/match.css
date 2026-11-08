@@ -92,6 +92,11 @@
     text-decoration-color: currentcolor;
   }
 
+  /* "Live" in the link of a match that is being played: the weight of a time. */
+  .hf-match-live {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
   .hf-match-versus {
     font-weight: var(--hf-body-font-weight);
   }

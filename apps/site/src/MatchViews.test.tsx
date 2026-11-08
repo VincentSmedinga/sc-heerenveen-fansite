@@ -1,7 +1,9 @@
+import type { PublicMatch } from '@fansite/db/queries'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { imageCredit, playedLine, SourceCredit } from './MatchViews'
+import { imageCredit, MatchLine, MatchLines, playedLine, SourceCredit } from './MatchViews'
 import { OpponentsCredit } from './OpponentViews'
 
 const textOf = (element: Parameters<typeof renderToStaticMarkup>[0]) =>
@@ -100,5 +102,79 @@ describe('playedLine', () => {
     expect(playedLine(40)).toBe('Alle 40 gespeelde wedstrijden')
     expect(playedLine(2)).toBe('Alle 2 gespeelde wedstrijden')
     expect(playedLine(1)).toBe('1 gespeelde wedstrijd')
+  })
+})
+
+describe('the line of a match that is being played', () => {
+  const now = new Date('2026-10-30T13:40:00Z')
+  const live: PublicMatch = {
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
+    attendance: null,
+    competition: 'Eredivisie',
+    dataSource: 'wikipedia',
+    dateText: null,
+    extraTime: false,
+    goals: [],
+    goalsAgainst: null,
+    goalsFor: null,
+    home: true,
+    // More than two hours ago: without a report the line says the data is not there.
+    kickoffAt: new Date('2026-10-30T10:00:00Z'),
+    matchDate: '2026-10-30',
+    note: null,
+    opponent: 'Testdorp FC',
+    penaltiesAgainst: null,
+    penaltiesFor: null,
+    referee: null,
+    round: 'Speelronde 12',
+    stadium: null,
+    status: 'scheduled',
+  }
+  const address = '/wedstrijden/2026-27/2026-10-30-testdorp-fc'
+
+  it('links to its page with the text Live in place of the result, and no stand', () => {
+    const html = renderToStaticMarkup(<MatchLine live match={live} now={now} reportHref={address} />)
+
+    expect(html).toContain(`href="${address}"`)
+    expect(textOf(<MatchLine live match={live} now={now} reportHref={address} />)).toContain('Live verslag van')
+    expect(html).not.toContain('Het verslag')
+    expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    expect(html).not.toMatch(/\d–\d/u)
+  })
+
+  it('keeps the line plain, with the message about the data, when the match has no page', () => {
+    const html = renderToStaticMarkup(<MatchLine match={live} now={now} />)
+
+    expect(html).not.toContain('<a')
+    expect(html).toContain('Gegevens nog niet beschikbaar')
+  })
+
+  it('links a match before its kick-off with the report to its page as "Het verslag", not as Live', () => {
+    const upcoming = { ...live, kickoffAt: new Date('2026-10-30T18:30:00Z') }
+    const html = renderToStaticMarkup(<MatchLine match={upcoming} now={now} reportHref={address} />)
+
+    expect(html).toContain('Het verslag')
+    expect(html).not.toContain('>Live<')
+  })
+
+  it('says Live for the matches of the set only, in a list', () => {
+    const other = { ...live, opponent: 'Andere Club', round: 'Speelronde 11' }
+    const html = renderToStaticMarkup(
+      <MatchLines
+        liveReports={new Set(['Eredivisie|Speelronde 12'])}
+        matches={[other, live]}
+        now={now}
+        reportAddresses={
+          new Map([
+            ['Eredivisie|Speelronde 11', '/wedstrijden/2026-27/2026-10-29-andere-club'],
+            ['Eredivisie|Speelronde 12', address],
+          ])
+        }
+      />,
+    )
+
+    expect(html.match(/>Live</g)).toHaveLength(1)
+    expect(html.match(/Het verslag/g)).toHaveLength(1)
   })
 })

@@ -15,10 +15,13 @@ import {
   listSeasonReports,
   logReportGoalDifferences,
   matchForRules,
+  mayHaveReport,
+  phaseOf,
   readMatchReport,
   readPlayerReportStats,
   reportForRules,
 } from './match-reports.ts'
+import { listAllMatchGoals, listClubMatches, listSeasonMatches } from './queries.ts'
 import {
   adminUsers,
   auditLog,
@@ -1049,6 +1052,90 @@ describe('the goals of the reports against the squad table of Wikipedia', () => 
   })
 })
 
+describe('a match that is still being played', () => {
+  /** A match that is still `scheduled`, without a result, and its id. */
+  const scheduledMatch = (values: Partial<NewMatch> = {}) =>
+    playedMatch({ goalsAgainst: null, goalsFor: null, status: 'scheduled', ...values })
+
+  it('has a page with its report, in the list and by its address, in the order of the day', async () => {
+    const live = await scheduledMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
+    const played = await playedMatch()
+
+    await report(live, 'bezig')
+    await report(played)
+
+    expect((await listReportedMatches(database.db, season)).map((row) => row.match.id)).toEqual([played, live])
+    expect(
+      (await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-15', season }))?.match
+        .status,
+    ).toBe('scheduled')
+  })
+
+  it('may have a report from its day on, in Dutch time, and only when it is played or scheduled', () => {
+    const at = (text: string) => new Date(text)
+    const match = { matchDate: '2026-08-08', status: 'scheduled' } as const
+
+    // 8 August 00:30 in the Netherlands is 7 August 22:30 in UTC.
+    expect(mayHaveReport(match, at('2026-08-07T22:30:00Z'))).toBe(true)
+    expect(mayHaveReport(match, at('2026-08-07T21:30:00Z'))).toBe(false)
+    expect(mayHaveReport(match, at('2026-08-20T12:00:00Z'))).toBe(true)
+    expect(mayHaveReport({ ...match, status: 'played' }, at('2020-01-01T00:00:00Z'))).toBe(true)
+    expect(mayHaveReport({ ...match, status: 'postponed' }, at('2026-08-08T12:00:00Z'))).toBe(false)
+    expect(mayHaveReport({ ...match, status: 'cancelled' }, at('2026-08-08T12:00:00Z'))).toBe(false)
+  })
+
+  it('is upcoming before its kick-off, live from it, and has no phase when it was played', () => {
+    const kickoffAt = new Date('2026-08-08T16:45:00Z')
+    const match = { kickoffAt, matchDate: '2026-08-08', status: 'scheduled' } as const
+
+    expect(phaseOf(match, new Date('2026-08-08T16:44:59Z'))).toBe('upcoming')
+    expect(phaseOf(match, kickoffAt)).toBe('live')
+    expect(phaseOf(match, new Date('2026-08-08T19:00:00Z'))).toBe('live')
+    expect(phaseOf({ ...match, status: 'played' }, kickoffAt)).toBeUndefined()
+  })
+
+  it('is live on the day of a match without a known kick-off, in Dutch time', () => {
+    const match = { kickoffAt: null, matchDate: '2026-08-08', status: 'scheduled' } as const
+
+    expect(phaseOf(match, new Date('2026-08-07T21:59:00Z'))).toBe('upcoming')
+    expect(phaseOf(match, new Date('2026-08-07T22:00:00Z'))).toBe('live')
+  })
+
+  it('keeps its goals out of the goals the pages count, while the report still has them', async () => {
+    const live = await scheduledMatch({ round: 'Live' })
+    const played = await playedMatch({ matchDate: '2026-08-15', round: 'Gespeeld' })
+
+    for (const matchId of [live, played]) {
+      await report(matchId, 'bezig')
+      await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, player: 'Luca Oyen' })
+    }
+
+    const shown = await listSeasonMatches(database.db, season)
+
+    expect(shown.find((match) => match.round === 'Live')?.goals).toEqual([])
+    expect(shown.find((match) => match.round === 'Gespeeld')?.goals).toHaveLength(1)
+    expect((await readMatchReport(database.db, live))?.goals).toHaveLength(1)
+  })
+
+  it('is in no read of the goals: not the matches of a club, not all the goals, not the numbers of a player', async () => {
+    const live = await scheduledMatch({ round: 'Live' })
+    const oyen = await player('Luca Oyen', 9)
+
+    // Even a report that is klaar (which the rules refuse) would not count for a match that
+    // is not played.
+    await report(live)
+    await appearance(live, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    await database.db.insert(matchGoals).values({ matchId: live, minute: 10, ours: true, player: 'Luca Oyen' })
+
+    const [{ clubId }] = (await database.db.select({ clubId: matches.clubId }).from(matches)) as [{ clubId: number }]
+
+    expect((await listClubMatches(database.db, clubId)).flatMap((match) => match.goals)).toEqual([])
+    expect((await listAllMatchGoals(database.db)).flatMap((match) => match.goals)).toEqual([])
+    expect(await readPlayerReportStats(database.db, season)).toEqual([])
+    expect(await findReportGoalDifferences(database.db, season)).toEqual([])
+  })
+})
+
 describe('the matches with a report that is klaar', () => {
   it('gives the match with its report, the slug of the opponent and the names of our players', async () => {
     const matchId = await playedMatch()
@@ -1083,21 +1170,21 @@ describe('the matches with a report that is klaar', () => {
     expect(await find({ season: '2025/26' })).toBeUndefined()
   })
 
-  it('leaves out a match without a report and one that is not played, and has one that is bezig with its status', async () => {
+  it('leaves out a match without a report and one that is called off, and has one that is bezig with its status', async () => {
     const none = await playedMatch({ round: 'Speelronde 1' })
     const bezig = await playedMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
     const klaar = await playedMatch({ matchDate: '2026-08-22', round: 'Speelronde 3' })
-    const scheduled = await playedMatch({
+    const postponed = await playedMatch({
       goalsAgainst: null,
       goalsFor: null,
       matchDate: '2026-08-29',
       round: 'Speelronde 4',
-      status: 'scheduled',
+      status: 'postponed',
     })
 
     await report(bezig, 'bezig')
     await report(klaar)
-    await report(scheduled)
+    await report(postponed)
 
     const list = await listReportedMatches(database.db, season)
 

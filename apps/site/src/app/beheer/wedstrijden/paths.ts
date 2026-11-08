@@ -2,6 +2,11 @@ import { seasonSlug } from '#src/seasons'
 
 export const matchesPath = '/beheer/wedstrijden'
 
+/** The address of the screen that ends a match that is still being played. */
+export function finishPath(id: number) {
+  return `${matchesPath}/${id}/verslag/afgelopen`
+}
+
 /**
  * The address of the list of the matches of a season (none is the current one) with a filter
  * (`tonen`, none is the default one: the matches without a result).

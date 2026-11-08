@@ -28,7 +28,7 @@ import {
   standingsCaption,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
-import { getReportAddresses } from '#src/report-data'
+import { getLiveReports, getReportAddresses } from '#src/report-data'
 import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -112,6 +112,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const finalPlaces = await finalPlacesOfAllSeasons()
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
+  const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
   // The cards with figures are on the statistics page of the same season.
   const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
 
@@ -157,7 +158,13 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                 <Heading anchor id={id} level={2}>
                   {name}
                 </Heading>
-                <MatchLines matches={matches} now={now} reportAddresses={reportAddresses} withCompetition={false} />
+                <MatchLines
+                  liveReports={liveReports}
+                  matches={matches}
+                  now={now}
+                  reportAddresses={reportAddresses}
+                  withCompetition={false}
+                />
                 {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
               </Card>
             )

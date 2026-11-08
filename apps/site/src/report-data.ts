@@ -1,4 +1,10 @@
-import { listReportedMatches, matchForRules, type ReportedMatch, reportForRules } from '@fansite/db/match-reports'
+import {
+  listReportedMatches,
+  matchForRules,
+  phaseOf,
+  type ReportedMatch,
+  reportForRules,
+} from '@fansite/db/match-reports'
 import { seasonOf } from '@fansite/db/season'
 import { checkMatchReport } from '@fansite/shared/match-report'
 
@@ -12,7 +18,9 @@ import { seasonSlug } from './seasons'
 // is complete; any other report (`bezig`, or one that no longer follows the rules) has a page
 // with a notice that it is still being filled in, which search engines do not index and the
 // sitemap does not list. A match without a report has no page (see _De pagina bestaat ook voor
-// een verslag dat nog niet klaar is_ in docs/beslissingen/site.md).
+// een verslag dat nog niet klaar is_ in docs/beslissingen/site.md). A match that is still being
+// played (`scheduled`) has a page too once it has a report, and it is "Live" from its kick-off
+// (see `phaseOf`).
 
 /** The base address of the matches page, which the address of a match builds on. */
 const matchesPath = '/wedstrijden'
@@ -81,6 +89,19 @@ export async function getAllReportAddresses() {
 }
 
 /**
+ * The matches of a season that are live at `now`, by `<competition>|<round>` as
+ * `getReportAddresses` has them: still `scheduled`, with a report, and past their kick-off. The
+ * lines of a list of matches say "Live" for them.
+ */
+export async function getLiveReports(season: string, now = new Date()): Promise<ReadonlySet<string>> {
+  return new Set(
+    (await getPublicReports(season))
+      .filter((reported) => phaseOf(reported.match, now) === 'live')
+      .map((reported) => `${reported.match.competition}|${reported.match.round}`),
+  )
+}
+
+/**
  * The match of the address `/wedstrijden/<seizoen>/<datum>-<club>` when it has a page, or
  * undefined. Only a season that has matches is asked for, and the day and the club must be
  * written the way the address has them.
@@ -98,8 +119,8 @@ export async function getPublicReport(season: string, slug: string) {
 }
 
 /**
- * The matches of a season that have a page (a played match with a report, complete or not), the
- * first first. The caller asks for a season of
+ * The matches of a season that have a page (a match with a report that was played or is being
+ * played, complete or not), the first first. The caller asks for a season of
  * `getMatchSeasons` only: the cache keeps an entry for every season it is asked for.
  */
 export function getPublicReports(season: string) {

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getMatchSeasons } from './matches'
 import {
   getAllReportAddresses,
+  getLiveReports,
   getPublicReport,
   getReportAddresses,
   isCompleteReport,
@@ -156,5 +157,54 @@ describe('the addresses of the pages', () => {
 
   it('gives all the addresses of all the seasons, for the sitemap', async () => {
     expect(await getAllReportAddresses()).toEqual(['/wedstrijden/2026-27/2026-10-24-testdorp-fc'])
+  })
+})
+
+describe('the matches that are live', () => {
+  /** A match that is still being played from `kickoffAt`, with a report that is bezig. */
+  function scheduled(kickoffAt: Date | null, matchDate = '2026-10-30') {
+    const reported = reportedMatch()
+
+    reported.match.goalsAgainst = null
+    reported.match.goalsFor = null
+    reported.match.kickoffAt = kickoffAt
+    reported.match.matchDate = matchDate
+    reported.match.status = 'scheduled'
+    reported.stored.report.status = 'bezig'
+
+    return reported
+  }
+
+  it('has the match from its kick-off, by competition and round, as the addresses have them', async () => {
+    vi.mocked(listReportedMatches).mockResolvedValue([scheduled(new Date('2026-10-30T12:00:00Z'))])
+
+    expect(await getLiveReports('2026/27', new Date('2026-10-30T13:40:00Z'))).toEqual(
+      new Set(['Eredivisie|Speelronde 1']),
+    )
+    expect(await getLiveReports('2026/27', new Date('2026-10-30T11:59:00Z'))).toEqual(new Set())
+  })
+
+  it('has a match without a kick-off on its day in Dutch time', async () => {
+    vi.mocked(listReportedMatches).mockResolvedValue([scheduled(null)])
+
+    expect(await getLiveReports('2026/27', new Date('2026-10-30T13:40:00Z'))).toEqual(
+      new Set(['Eredivisie|Speelronde 1']),
+    )
+    expect(await getLiveReports('2026/27', new Date('2026-10-29T21:00:00Z'))).toEqual(new Set())
+  })
+
+  it('never has a match that was played', async () => {
+    expect(await getLiveReports('2026/27', new Date('2026-10-30T13:40:00Z'))).toEqual(new Set())
+  })
+
+  it('is on the page and in the addresses, but not in the sitemap', async () => {
+    const live = scheduled(new Date('2026-10-30T12:00:00Z'), '2026-10-24')
+
+    vi.mocked(listReportedMatches).mockResolvedValue([live])
+
+    expect((await getReportAddresses('2026/27')).size).toBe(1)
+    expect(await getPublicReport('2026/27', '2026-10-24-testdorp-fc')).toBeDefined()
+    expect(isCompleteReport(live)).toBe(false)
+    expect(await getAllReportAddresses()).toEqual([])
   })
 })

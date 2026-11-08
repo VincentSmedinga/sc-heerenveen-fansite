@@ -24,6 +24,13 @@ export type MatchHeaderProps = MatchHeaderBase & {
   penaltiesAgainst?: number | undefined
   penaltiesFor?: number | undefined
   /**
+   * Where a match stands that has no result yet. `live` is a match that is being played: the
+   * goals are the stand so far, and the pill says "Live" in place of an outcome. `upcoming` is
+   * a match that has not begun: no stand, a dash, and the pill says "Nog niet begonnen". Leave
+   * it out for a match that was played.
+   */
+  phase?: 'live' | 'upcoming' | undefined
+  /**
    * The goals of the opponent, under its name, in the order of the clock. Leave it out and
    * nothing stands there. An own goal of sc Heerenveen is in this list.
    */
@@ -147,7 +154,10 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
  * the classes of match.css, and the pill says "Gewonnen", "Verloren" or "Gelijkspel", after the
  * shoot-out if there was one. A screen reader hears "3 tegen 0". The words under the result are
  * written out: "Na verlenging (na 90 minuten 1–1)" or "Na strafschoppen 5–4 (na verlenging
- * 1–1)". The heading of the page is not part of it: the page has the `h1`, and may keep it
+ * 1–1)". A match that is being played (`phase` is `live`) has the stand so far in no colour of
+ * an outcome, and the pill says "Live"; a match that has not begun (`upcoming`) has dashes and
+ * the pill says "Nog niet begonnen". The words are the sign, not the colour. The heading of the
+ * page is not part of it: the page has the `h1`, and may keep it
  * visually hidden, since the names and the result are what the eye sees.
  * match-header.css gives it its look.
  */
@@ -163,22 +173,33 @@ export const MatchHeader = ({
   opponent,
   penaltiesAgainst,
   penaltiesFor,
+  phase,
   scorersAgainst,
   scorersFor,
   ...props
 }: MatchHeaderProps) => {
-  const shootOut = penaltiesFor !== undefined && penaltiesAgainst !== undefined
-  const afterNinety = extraTime === true && afterNinetyFor !== undefined && afterNinetyAgainst !== undefined
-  // A shoot-out decides a level score, so the colour and the pill follow it.
-  const outcome = shootOut ? outcomeOf(penaltiesFor, penaltiesAgainst) : outcomeOf(goalsFor, goalsAgainst)
-  const result = sides(home, goalsFor, goalsAgainst, '–')
-  const how = shootOut
-    ? `Na strafschoppen ${sides(home, penaltiesFor, penaltiesAgainst, '–')} (na ${extraTime === true ? 'verlenging' : '90 minuten'} ${result})`
-    : extraTime === true
-      ? `Na verlenging${afterNinety ? ` (na 90 minuten ${sides(home, afterNinetyFor, afterNinetyAgainst, '–')})` : ''}`
-      : undefined
-  const us = { goals: goalsFor, name: ourClub, ours: true, scorers: scorersFor }
-  const them = { goals: goalsAgainst, name: opponent, ours: false, scorers: scorersAgainst }
+  const unfinished = phase !== undefined
+  const shootOut = !unfinished && penaltiesFor !== undefined && penaltiesAgainst !== undefined
+  const afterNinety =
+    !unfinished && extraTime === true && afterNinetyFor !== undefined && afterNinetyAgainst !== undefined
+  // A shoot-out decides a level score, so the colour and the pill follow it. A match that has
+  // no result yet has no outcome, so it has no colour of one either.
+  const outcome = unfinished
+    ? undefined
+    : shootOut
+      ? outcomeOf(penaltiesFor, penaltiesAgainst)
+      : outcomeOf(goalsFor, goalsAgainst)
+  const result = phase === 'upcoming' ? '–' : sides(home, goalsFor, goalsAgainst, '–')
+  const how = unfinished
+    ? undefined
+    : shootOut
+      ? `Na strafschoppen ${sides(home, penaltiesFor, penaltiesAgainst, '–')} (na ${extraTime === true ? 'verlenging' : '90 minuten'} ${result})`
+      : extraTime === true
+        ? `Na verlenging${afterNinety ? ` (na 90 minuten ${sides(home, afterNinetyFor, afterNinetyAgainst, '–')})` : ''}`
+        : undefined
+  const shownGoals = (goals: number) => (phase === 'upcoming' ? '–' : goals)
+  const us = { goals: shownGoals(goalsFor), name: ourClub, ours: true, scorers: scorersFor }
+  const them = { goals: shownGoals(goalsAgainst), name: opponent, ours: false, scorers: scorersAgainst }
   const clubs = home ? [us, them] : [them, us]
 
   return (
@@ -195,7 +216,10 @@ export const MatchHeader = ({
             <p className={classNames('hf-match-header-name hf-heading-3', club.ours && 'hf-match-own')}>{club.name}</p>
             <p
               aria-hidden="true"
-              className={classNames('hf-match-header-goals hf-heading-2', club.ours && `hf-match-${outcome}`)}
+              className={classNames(
+                'hf-match-header-goals hf-heading-2',
+                club.ours && outcome !== undefined && `hf-match-${outcome}`,
+              )}
             >
               {club.goals}
             </p>
@@ -203,11 +227,24 @@ export const MatchHeader = ({
           </div>
         ))}
         <div className="hf-match-header-summary">
-          <p aria-hidden="true" className={classNames('hf-match-header-result', `hf-match-${outcome}`)}>
+          <p
+            aria-hidden="true"
+            className={classNames('hf-match-header-result', outcome !== undefined && `hf-match-${outcome}`)}
+          >
             {result}
           </p>
-          <p className="hf-visually-hidden">Eindstand: {sides(home, goalsFor, goalsAgainst, ' tegen ')}</p>
-          <p className={classNames('hf-match-header-outcome', `hf-match-${outcome}`)}>{outcomeWords[outcome]}</p>
+          {phase === 'upcoming' ? null : (
+            <p className="hf-visually-hidden">
+              {phase === 'live' ? 'Tussenstand' : 'Eindstand'}: {sides(home, goalsFor, goalsAgainst, ' tegen ')}
+            </p>
+          )}
+          {outcome === undefined ? (
+            <p className={classNames('hf-match-header-outcome', phase === 'live' && 'hf-match-header-live')}>
+              {phase === 'live' ? 'Live' : 'Nog niet begonnen'}
+            </p>
+          ) : (
+            <p className={classNames('hf-match-header-outcome', `hf-match-${outcome}`)}>{outcomeWords[outcome]}</p>
+          )}
           {how === undefined ? null : <p className="hf-match-header-how">{how}</p>}
         </div>
       </div>

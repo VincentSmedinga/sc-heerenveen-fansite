@@ -1077,7 +1077,8 @@ function omitId<T extends { id: number }>({ id, ...match }: T): Omit<T, 'id'> {
 /**
  * Gives each of `rows` its `goals`, found by its `id`: the scorers of the match in the order
  * of the clock, both clubs together. `where` picks the matches the rows are of, so one query
- * reads the goals of all of them, and a match without a goal gets an empty list.
+ * reads the goals of all of them, and a match without a goal gets an empty list. A match that
+ * is not played has none, whatever its report holds: its goals do not count anywhere.
  */
 async function withGoals<T extends { id: number }>(db: Database, rows: T[], where: SQL | undefined) {
   const scored = await db
@@ -1100,7 +1101,9 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
     .innerJoin(matches, eq(matchGoals.matchId, matches.id))
     .leftJoin(players, eq(matchGoals.playerId, players.id))
     .leftJoin(persons, eq(matchGoals.personId, persons.id))
-    .where(where)
+    // The goals of a match that is still being played are those of its report: they are on the
+    // page of the match and in no list, figure or table (#906).
+    .where(and(eq(matches.status, 'played'), where))
     .orderBy(
       asc(sql`${matchGoals.minute} is null`),
       asc(matchGoals.minute),

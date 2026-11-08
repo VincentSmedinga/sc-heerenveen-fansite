@@ -103,7 +103,7 @@ describe('the screen Tekst plakken', () => {
   })
 
   it('is "not found" for a match that does not exist, was not played, or is no number', async () => {
-    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'postponed' })
 
     await expect(page(matchId)).rejects.toThrow('not found')
     await expect(page(999_999)).rejects.toThrow('not found')

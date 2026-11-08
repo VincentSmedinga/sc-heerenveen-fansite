@@ -505,9 +505,19 @@ describe('checkReportForm', () => {
     })
 
     it('tells a match that was not played', () => {
-      const checked = checkReportForm(report(), { match: { ...match, status: 'scheduled' }, squad })
+      const checked = checkReportForm(report(), { match: { ...match, status: 'postponed' }, squad })
 
       expect(checked.errors.verslag).toBe('Alleen een gespeelde wedstrijd heeft een verslag.')
+    })
+
+    it('tells a report of a match that is still being played to stay bezig until the match is over', () => {
+      const live = { ...match, goalsAgainst: null, goalsFor: null, status: 'scheduled' as const }
+      const klaar = checkReportForm(report(), { match: live, squad })
+      const bezig = checkReportForm({ ...report(), status: 'bezig' }, { match: live, squad })
+
+      expect(klaar.errors.verslag).toContain('De wedstrijd is nog niet afgelopen')
+      expect(bezig.errors).toEqual({})
+      expect(bezig.plan?.status).toBe('bezig')
     })
 
     it('tells a side of the opponent that is complete but not right, with a line-up of its own', () => {

@@ -494,3 +494,99 @@ describe('the metadata of the page of a match', () => {
     expect((await generateMetadata({ params: params() })).robots).toEqual({ index: false })
   })
 })
+
+describe('the page of a match that is still being played', () => {
+  /** The match of the report, still `scheduled` with no result, and a report that is bezig. */
+  function liveMatch(kickoffAt: Date | null = new Date('2026-10-30T12:30:00Z')) {
+    const reported = reportedMatch()
+
+    reported.match.goalsAgainst = null
+    reported.match.goalsFor = null
+    reported.match.kickoffAt = kickoffAt
+    reported.match.matchDate = '2026-10-30'
+    reported.match.status = 'scheduled'
+    reported.stored.report.status = 'bezig'
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    return reported
+  }
+
+  it('says Live in words, with the stand counted from the goals of the report, and keeps the notice', async () => {
+    liveMatch()
+
+    const text = plain(await render())
+
+    expect(text).toContain('Live')
+    expect(text).toContain('Tussenstand: 2 tegen 1')
+    expect(text).not.toContain('Eindstand')
+    expect(text).not.toContain('Gewonnen')
+    expect(text).toContain('We vullen dit verslag nog in')
+    // The kick-off is in the facts, with the time.
+    expect(text).toContain('Datum vr 30 okt 13:30')
+  })
+
+  it('counts the stand of each side from the goals, an own goal for the side that gets it', async () => {
+    const reported = liveMatch()
+
+    reported.stored.goals = reported.stored.goals.slice(0, 1)
+
+    const text = plain(await render())
+
+    expect(text).toContain('Tussenstand: 1 tegen 0')
+  })
+
+  it('shows the kick-off and the line-up, and no Live, before the kick-off', async () => {
+    liveMatch(new Date('2026-10-30T18:30:00Z'))
+
+    const text = plain(await render())
+
+    expect(text).not.toContain('Live')
+    expect(text).toContain('Nog niet begonnen')
+    expect(text).not.toContain('Tussenstand')
+    expect(text).not.toContain('Eindstand')
+    expect(text).toContain('Datum vr 30 okt 19:30')
+    expect(text).toContain('Opstelling')
+  })
+
+  it('says in the description of a match before its kick-off that the match has not begun', async () => {
+    liveMatch(new Date('2026-10-30T18:30:00Z'))
+
+    const metadata = await generateMetadata({ params: params() })
+
+    expect(metadata.description).toContain('voor de wedstrijd begint')
+    expect(metadata.description).not.toContain('terwijl de wedstrijd wordt gespeeld')
+    expect(metadata.robots).toEqual({ index: false })
+  })
+
+  it('is live on the day of a match without a known kick-off', async () => {
+    liveMatch(null)
+
+    expect(plain(await render())).toContain('Live')
+  })
+
+  it('is not live any more when the match has its result, also with a report that is bezig', async () => {
+    const reported = liveMatch()
+
+    reported.match.goalsAgainst = 1
+    reported.match.goalsFor = 2
+    reported.match.status = 'played'
+
+    const text = plain(await render())
+
+    expect(text).not.toContain('Live')
+    expect(text).toContain('Eindstand: 2 tegen 1')
+    expect(text).toContain('We vullen dit verslag nog in')
+  })
+
+  it('names no stand in the title or the description, and keeps the page out of the index', async () => {
+    liveMatch()
+
+    const metadata = await generateMetadata({ params: params() })
+
+    expect(metadata.title).toBe('sc Heerenveen – Testdorp FC, 30 oktober 2026')
+    expect(metadata.description).toContain('terwijl de wedstrijd wordt gespeeld')
+    expect(metadata.description).not.toMatch(/\d–\d/u)
+    expect(`${metadata.title}`).not.toMatch(/\d–\d/u)
+    expect(metadata.robots).toEqual({ index: false })
+  })
+})

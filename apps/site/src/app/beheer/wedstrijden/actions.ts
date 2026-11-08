@@ -196,9 +196,17 @@ export async function submitMatch(
     // The form comes back with as many goals as the result asks for, as the page opens.
     return { errors: checked.errors, values: found.hasReport ? given : padGoals(given) }
   }
-  if (found.hasReport && checked.entry.result.status !== 'played') {
+  // A match with a report is played, or still being played: it is `scheduled` until the button
+  // "Wedstrijd afgelopen" or the import gives it a result.
+  const keepsReport =
+    checked.entry.result.status === 'played' ||
+    (checked.entry.result.status === 'scheduled' && found.match.status === 'scheduled')
+
+  if (found.hasReport && !keepsReport) {
     return {
-      errors: { status: 'Een wedstrijd met een verslag blijft gespeeld. Haal eerst het verslag weg.' },
+      errors: {
+        status: 'Een wedstrijd met een verslag blijft gespeeld, of wordt nog gespeeld. Haal eerst het verslag weg.',
+      },
       values: given,
     }
   }

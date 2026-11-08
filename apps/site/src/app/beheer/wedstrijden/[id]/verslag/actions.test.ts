@@ -23,7 +23,7 @@ import { report as baseReport, formDataOf, goal, squadOf, substitution } from '#
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitRemoveReport, submitReport } from './actions'
+import { submitFinish, submitRemoveReport, submitReport } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -217,7 +217,7 @@ describe('submitReport', () => {
     expect(await submit(999_999, report())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
     expect(await submit('x', report())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
 
-    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+    await database.db.update(matches).set({ goalsAgainst: null, goalsFor: null, status: 'postponed' })
 
     expect(await submit(matchId, report())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
     expect(await reports()).toHaveLength(0)
@@ -357,5 +357,103 @@ describe('submitRemoveReport', () => {
   it('says there was no report, or no such match', async () => {
     expect(await remove(matchId, 'Weg')).toEqual({ redirect: reportAddress('geen-verslag') })
     expect(await remove(999_999, 'Weg')).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
+  })
+})
+
+describe('submitFinish', () => {
+  /** The match becomes one that is being played, with a report that is bezig. */
+  async function beginMatch() {
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: null, goalsFor: null, resultSetAt: null, status: 'scheduled' })
+      .where(eq(matches.id, matchId))
+    await database.db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'bezig' })
+  }
+
+  const finish = (id: number | string, fields: Record<string, string>) => {
+    const formData = new FormData()
+
+    for (const [name, value] of Object.entries(fields)) {
+      formData.set(name, value)
+    }
+
+    return submitFinish(id as number, {}, formData).catch((error: unknown) => {
+      if (error instanceof Redirect) {
+        return { redirect: error.url }
+      }
+
+      throw error
+    })
+  }
+  const scores = { 'uitslag-wij': '2', 'uitslag-zij': '1' }
+
+  it('gives the match its result, logs it, and ends on the report with a notice', async () => {
+    await beginMatch()
+
+    expect(await finish(matchId, scores)).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/verslag?gedaan=afgelopen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({
+      goalsAgainst: 1,
+      goalsFor: 2,
+      status: 'played',
+    })
+    expect((await database.db.select().from(auditLog)).at(-1)).toMatchObject({
+      action: 'match.edit',
+      detail: 'Uitslag: sc Heerenveen 2–1 N.E.C.',
+      reason: 'Wedstrijd afgelopen',
+      userId,
+    })
+    expect((await database.db.select().from(matchReports))[0]).toMatchObject({ status: 'bezig' })
+  })
+
+  it('takes the numbers the editor changed', async () => {
+    await beginMatch()
+    await finish(matchId, { 'uitslag-wij': '4', 'uitslag-zij': '0' })
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsAgainst: 0, goalsFor: 4 })
+  })
+
+  it.each([
+    [{ 'uitslag-wij': '', 'uitslag-zij': '1' }, ['uitslag-wij']],
+    [{ 'uitslag-wij': '2', 'uitslag-zij': 'x' }, ['uitslag-zij']],
+    [{ 'uitslag-wij': '-1', 'uitslag-zij': '100' }, ['uitslag-wij', 'uitslag-zij']],
+    [{ 'uitslag-wij': '1,5', 'uitslag-zij': '1' }, ['uitslag-wij']],
+  ])(
+    'says at each score that is not a whole number from 0 to 99, and writes nothing: %j',
+    async (fields, fieldsWithError) => {
+      await beginMatch()
+
+      const answer = await finish(matchId, fields)
+
+      expect(Object.keys((answer as { errors: object }).errors)).toEqual(fieldsWithError)
+      // What was typed comes back, so the form can show it again.
+      expect((answer as { values: object }).values).toEqual(fields)
+      expect((answer as { errors: Record<string, string> }).errors[fieldsWithError[0]!]).toBe(
+        'Vul een aantal doelpunten in, een heel getal van 0 tot 99.',
+      )
+      expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: null, status: 'scheduled' })
+    },
+  )
+
+  it('says the match was already over when the import was first, and changes nothing', async () => {
+    await beginMatch()
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: 1, goalsFor: 3, status: 'played' })
+      .where(eq(matches.id, matchId))
+
+    expect(await finish(matchId, scores)).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/verslag?gedaan=al-afgelopen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 3 })
+  })
+
+  it('ends on the list for a match that is gone, and refuses a call without a session', async () => {
+    expect(await finish(999_999, scores)).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
+    expect(await finish('x', scores)).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
+
+    jar.clear()
+    expect(await finish(matchId, scores)).toEqual({ redirect: '/beheer/inloggen' })
   })
 })

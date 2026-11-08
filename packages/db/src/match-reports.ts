@@ -1,7 +1,7 @@
 import type { MatchReport as ReportForRules, ReportMatch } from '@fansite/shared/match-report'
 
 import { minutesPlayed, playedMatch } from '@fansite/shared/match-report'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, or } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -35,6 +35,7 @@ import {
   playerSeasonStats,
   statsCompetitions,
 } from './schema.ts'
+import { utcToAmsterdam } from './season.ts'
 
 // What the pages read of the match reports (see `match_reports` in schema.ts). Writing a report
 // is the work of the admin, and the rules that say whether a report is right are in
@@ -67,7 +68,8 @@ export type PlayerReportStats = {
 }
 
 /**
- * A played match with a report that is `klaar`, for the page of the match and the links to it:
+ * A match with a report that is `klaar` or `bezig`, for the page of the match and the links to
+ * it. The match was played, or it is still being played (see `mayHaveReport`):
  * the match with the name its opponent had that day, the `slug` of the opponent, the report,
  * and the names of our players by the id of their row in the report. Whether the report is
  * right is for the caller to check with `checkMatchReport`.
@@ -100,6 +102,13 @@ export type ReportGoalDifference = {
   name: string
   playerId: number
 }
+
+/**
+ * Where a match with a report stands: `live` while it is being played (it is still `scheduled`
+ * and the kick-off is past), `upcoming` for a match that has a report before its kick-off, and
+ * nothing for a match that was played. See `phaseOf`.
+ */
+export type ReportPhase = 'live' | 'upcoming'
 
 /** A match of a season with the status of its report: `null` for a match without a report. */
 export type SeasonMatchReport = Pick<
@@ -139,9 +148,9 @@ type ReportDatabase = Pick<Database, 'select'>
 
 /**
  * The played match of a season on a day against a club (by its `slug`), when it has a report,
- * whatever its status: the match of the address `/wedstrijden/<seizoen>/<datum>-<club>`. The
- * status is in `stored.report.status`, and the caller decides what a report that is `bezig`
- * shows.
+ * whatever its status: the match of the address `/wedstrijden/<seizoen>/<datum>-<club>`. A
+ * match that is still being played (`scheduled`) has a page too. The status is in
+ * `stored.report.status`, and the caller decides what a report that is `bezig` shows.
  */
 export async function findReportedMatch(
   db: ReportDatabase,
@@ -292,6 +301,31 @@ export function matchForRules(
     penaltiesFor: match.penaltiesFor,
     status: match.status,
   }
+}
+
+/**
+ * Whether a match can have a report at `now`: it was played, or it is still `scheduled` and its
+ * day (in Dutch time) has come, so it is being played or its kick-off is near. A match of a
+ * later day, a postponed one and a cancelled one can not. While the match is `scheduled` its
+ * report is `bezig` and gives the page its score (see `phaseOf`).
+ */
+export function mayHaveReport(match: Pick<Match, 'matchDate' | 'status'>, now: Date): boolean {
+  return match.status === 'played' || (match.status === 'scheduled' && match.matchDate <= utcToAmsterdam(now).day)
+}
+
+/**
+ * Where a match with a report stands at `now`. A match that was played has no phase. One that
+ * is still `scheduled` is `live` from its kick-off, and without a known kick-off from its day
+ * (in Dutch time); before that it is `upcoming`, and the page shows the kick-off and line-up.
+ */
+export function phaseOf(match: Pick<Match, 'kickoffAt' | 'matchDate' | 'status'>, now: Date): ReportPhase | undefined {
+  if (match.status !== 'scheduled') {
+    return undefined
+  }
+
+  const begun = match.kickoffAt === null ? match.matchDate <= utcToAmsterdam(now).day : match.kickoffAt <= now
+
+  return begun ? 'live' : 'upcoming'
 }
 
 /**
@@ -653,7 +687,7 @@ async function reportedMatchRows(db: ReportDatabase, where: ReturnType<typeof an
     .from(matches)
     .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
     .innerJoin(clubs, eq(clubs.id, matches.clubId))
-    .where(and(eq(matches.status, 'played'), where))
+    .where(and(or(eq(matches.status, 'played'), eq(matches.status, 'scheduled')), where))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
   const named = await withSeasonNames(
     db,
