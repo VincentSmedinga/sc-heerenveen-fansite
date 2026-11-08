@@ -130,7 +130,7 @@ describe('the page Privacy', () => {
 
     expect(paragraph).toContain('Alleen een redacteur die inlogt in het beheer krijgt een cookie.')
     expect(paragraph).toContain('een nummer voor die sessie, niets over jou')
-    expect(paragraph).toContain('hooguit 7 dagen')
+    expect(paragraph).toContain('hooguit 14 dagen, en 9 dagen zonder gebruik')
   })
 
   it('says that the browser of that editor also keeps a sign for the menu, which holds nothing and goes nowhere', () => {

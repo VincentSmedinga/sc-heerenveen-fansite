@@ -363,11 +363,20 @@ export const adminLoginLinks = mysqlTable('admin_login_links', {
     .notNull()
     .references(() => adminUsers.id, { onDelete: 'cascade' }),
   expiresAt: datetime('expires_at').notNull(),
+  // The code of 6 digits that goes in the same mail, for logging in where the link can't
+  // open (the app on a Home Screen has a cookie jar of its own). `ref_hash` is the SHA-256
+  // of a random reference that only the page "verstuurd" knows, and `code_hash` the SHA-256
+  // of that reference and the code, so the code is bound to its request and a copy of the
+  // database can't guess it. Both are empty for a link of before the codes.
+  // `failed_attempts` counts the wrong codes; at 5 the code stops working.
+  refHash: varchar('ref_hash', { length: 64 }).unique(),
+  codeHash: varchar('code_hash', { length: 64 }),
+  failedAttempts: int('failed_attempts', { unsigned: true }).notNull().default(0),
 })
 
 /**
  * The sessions of the admin, on the server. The cookie holds a random token and nothing else;
- * the table keeps its SHA-256. A session is valid for 12 hours after `last_seen_at` and for 7
+ * the table keeps its SHA-256. A session is valid for 9 days after `last_seen_at` and for 14
  * days after `created_at`, whichever ends first. Times are UTC.
  */
 export const adminSessions = mysqlTable('admin_sessions', {

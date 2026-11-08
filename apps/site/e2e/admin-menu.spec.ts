@@ -28,8 +28,12 @@ test.describe('the item Beheer in the main menu', () => {
 
     const html = await (await request.get(publicPage)).text()
 
-    expect(html).not.toContain('/beheer')
-    expect(html).not.toContain('Beheer')
+    // The footer has a link to the admin for everybody (#938), but the main menu does not.
+    const mainMenu = html.match(/<nav aria-label="Hoofdmenu".*?<\/nav>/s)?.[0] ?? ''
+
+    expect(mainMenu).toContain('Forum')
+    expect(mainMenu).not.toContain('/beheer')
+    expect(mainMenu).not.toContain('Beheer')
   })
 
   test('comes before Forum once an editor has opened the admin, and leads back to it', async ({

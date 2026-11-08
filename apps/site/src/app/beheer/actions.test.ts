@@ -9,12 +9,12 @@ import { sessionCookieName, sessionCookieOptions } from '#src/beheer/require-rol
 import { hashOf } from '#src/beheer/sessions'
 
 import { logOut } from './actions'
-import { logIn, requestLoginLink } from './inloggen/actions'
+import { logIn, logInWithCode, requestLoginLink } from './inloggen/actions'
 
 const { deferred, jar, sent, set } = vi.hoisted(() => ({
   deferred: [] as (() => Promise<void>)[],
   jar: new Map<string, string>(),
-  sent: [] as { to: string; url: string }[],
+  sent: [] as { code: string; to: string; url: string }[],
   set: vi.fn(),
 }))
 
@@ -49,7 +49,7 @@ vi.mock('next/navigation', () => ({
 }))
 vi.mock('next/server', () => ({ after: (task: () => Promise<void>) => deferred.push(task) }))
 vi.mock('#src/beheer/login-mail', () => ({
-  sendLoginMail: (mail: { to: string; url: string }) => {
+  sendLoginMail: (mail: { code: string; to: string; url: string }) => {
     sent.push(mail)
 
     return Promise.resolve()
@@ -108,8 +108,8 @@ describe('requestLoginLink', () => {
     const known = await redirectOf(requestLoginLink, { email: 'jelle@example.org' })
     const unknown = await redirectOf(requestLoginLink, { email: 'niemand@example.org' })
 
-    expect(known).toBe('/beheer/inloggen/verstuurd')
-    expect(unknown).toBe(known)
+    expect(known).toMatch(/^\/beheer\/inloggen\/verstuurd\?ref=[\w-]{43}$/)
+    expect(unknown).toMatch(/^\/beheer\/inloggen\/verstuurd\?ref=[\w-]{43}$/)
   })
 
   it('mails the link after the answer, to an address with an account only, with the address of the environment', async () => {
@@ -135,7 +135,7 @@ describe('requestLoginLink', () => {
   it('leads back to the form with a message when the rate limit is reached, also for an address without an account', async () => {
     for (const address of ['jelle@example.org', 'niemand@example.org']) {
       for (let attempt = 0; attempt < 5; attempt++) {
-        expect(await redirectOf(requestLoginLink, { email: address })).toBe('/beheer/inloggen/verstuurd')
+        expect(await redirectOf(requestLoginLink, { email: address })).toMatch(/^\/beheer\/inloggen\/verstuurd\?ref=/)
       }
 
       expect(await redirectOf(requestLoginLink, { email: address })).toBe('/beheer/inloggen?fout=te-veel')
@@ -192,6 +192,63 @@ describe('logIn', () => {
     expect(await redirectOf(() => logIn(''), {})).toBe('/beheer/inloggen?fout=link')
     expect(jar.size).toBe(0)
     expect(await database.db.select().from(adminLoginLinks)).toEqual([])
+  })
+})
+
+describe('logInWithCode', () => {
+  /** Asks for a link and returns the reference of the page "verstuurd" and the mailed code. */
+  async function mailed() {
+    const url = (await redirectOf(requestLoginLink, { email: 'jelle@example.org' })) ?? ''
+
+    await deferred[0]?.()
+
+    return { code: sent[0]?.code ?? '', ref: new URL(url, 'https://x.test').searchParams.get('ref') ?? '' }
+  }
+
+  it('starts a session with the code, puts only its token in the cookie with the options of the cookie, and leads to the admin', async () => {
+    const { code, ref } = await mailed()
+
+    expect(await redirectOf((formData) => logInWithCode(ref, formData), { code })).toBe('/beheer')
+    expect(set).toHaveBeenCalledExactlyOnceWith(
+      sessionCookieName,
+      expect.stringMatching(/^[\w-]{43}$/),
+      sessionCookieOptions,
+    )
+    expect(await database.db.select().from(adminSessions)).toHaveLength(1)
+  })
+
+  it('sets a cookie for the 14 days of a session, HttpOnly, Secure, SameSite=Lax and under /beheer only', () => {
+    expect(sessionCookieOptions).toEqual({
+      httpOnly: true,
+      maxAge: 14 * 24 * 60 * 60,
+      path: '/beheer',
+      sameSite: 'lax',
+      secure: true,
+    })
+  })
+
+  it('leads back to the page with one message for a wrong code, and sets no cookie', async () => {
+    const { ref } = await mailed()
+    const back = await redirectOf((formData) => logInWithCode(ref, formData), { code: '000000' })
+
+    expect(back).toBe(`/beheer/inloggen/verstuurd?fout=code&ref=${ref}`)
+    expect(set).not.toHaveBeenCalled()
+    expect(await redirectOf((formData) => logInWithCode(ref, formData), {})).toBe(back)
+  })
+
+  it('works once: the same code a second time leads back', async () => {
+    const { code, ref } = await mailed()
+
+    expect(await redirectOf((formData) => logInWithCode(ref, formData), { code })).toBe('/beheer')
+    expect(await redirectOf((formData) => logInWithCode(ref, formData), { code })).toContain('fout=code')
+  })
+
+  it('does not log in for the reference of an address without an account', async () => {
+    const url = (await redirectOf(requestLoginLink, { email: 'niemand@example.org' })) ?? ''
+    const ref = new URL(url, 'https://x.test').searchParams.get('ref') ?? ''
+
+    expect(await redirectOf((formData) => logInWithCode(ref, formData), { code: '123456' })).toContain('fout=code')
+    expect(set).not.toHaveBeenCalled()
   })
 })
 

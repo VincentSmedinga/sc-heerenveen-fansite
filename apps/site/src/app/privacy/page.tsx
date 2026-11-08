@@ -65,9 +65,9 @@ export default function PrivacyPage() {
         </Text>
         <Text>
           Alleen een redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer voor die sessie, niets
-          over jou, en het werkt hooguit 7 dagen. Daarnaast bewaart de browser van die redacteur een teken dat zegt:
-          hier is iemand ingelogd. Het hoofdmenu toont dan een koppeling naar het beheer. Het teken bevat geen gegevens,
-          gaat nergens heen en verandert alleen dat menu, net als de themakeuze.
+          over jou, en het werkt hooguit 14 dagen, en 9 dagen zonder gebruik. Daarnaast bewaart de browser van die
+          redacteur een teken dat zegt: hier is iemand ingelogd. Het hoofdmenu toont dan een koppeling naar het beheer.
+          Het teken bevat geen gegevens, gaat nergens heen en verandert alleen dat menu, net als de themakeuze.
         </Text>
         <Heading anchor id="berichten" level={2}>
           Als je ons een bericht stuurt

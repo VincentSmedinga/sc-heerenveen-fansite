@@ -317,13 +317,39 @@ describe('the login page', () => {
 })
 
 describe('the page after the request', () => {
-  it('says the same to everybody: if the address has an account, a link was mailed', () => {
-    const html = renderToStaticMarkup(<SentPage />)
+  const render = async (query: Record<string, string> = {}) =>
+    renderToStaticMarkup(await SentPage({ searchParams: Promise.resolve(query) }))
+
+  it('says the same to everybody: if the address has an account, a link and a code were mailed', async () => {
+    const html = await render({ ref: 'abc' })
 
     expect(headings(html)).toEqual(['h1 Kijk in je mail'])
-    expect(html).toContain('Als dit adres een account heeft, hebben we een link gemaild.')
-    expect(html).toContain('De link werkt 15 minuten en één keer.')
+    expect(html).toContain('Als dit adres een account heeft, hebben we een link en een code gemaild.')
+    expect(html).toContain('De link en de code werken 15 minuten en één keer.')
     expect(html).toContain('<a href="/beheer/inloggen">Een ander adres proberen</a>')
+  })
+
+  it('has a field for the code that iOS can fill in from the mail, with a label and no error at first', async () => {
+    const html = await render({ ref: 'abc' })
+    const input = html.match(/<input[^>]*name="code"[^>]*>/)?.[0] ?? ''
+
+    expect(html).toMatch(/<label[^>]*for="code"[^>]*>Code uit de mail/)
+    expect(input).toContain('autoComplete="one-time-code"')
+    expect(input).toContain('inputMode="numeric"')
+    expect(html).toContain('Inloggen met code')
+    expect(html).not.toContain('Die code werkt niet')
+    expect(html).not.toContain('abc')
+  })
+
+  it('shows one error for a code that did not work, on the field and in the summary', async () => {
+    const html = await render({ fout: 'code', ref: 'abc' })
+
+    expect(html.match(/Die code werkt niet\./g)).toHaveLength(2)
+    expect(html).toContain('aria-invalid="true"')
+  })
+
+  it('has no field without a reference of a request', async () => {
+    expect(await render()).not.toContain('name="code"')
   })
 })
 

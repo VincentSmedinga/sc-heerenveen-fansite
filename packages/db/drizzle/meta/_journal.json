@@ -372,6 +372,13 @@
       "when": 1794132546735,
       "tag": "0052_add_wikidata_to_persons",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "5",
+      "when": 1794172640806,
+      "tag": "0053_add_login_code",
+      "breakpoints": true
     }
   ]
 }

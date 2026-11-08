@@ -1,8 +1,8 @@
 import type { Database } from '@fansite/db/client'
 
 import { adminLoginLinks, adminSessions, adminUsers } from '@fansite/db/schema'
-import { and, eq, gt, isNull, lte, or } from 'drizzle-orm'
-import { createHash, randomBytes } from 'node:crypto'
+import { and, eq, gt, isNull, lt, lte, or, sql } from 'drizzle-orm'
+import { createHash, randomBytes, randomInt } from 'node:crypto'
 
 // The sessions of the admin, on the server. The cookie holds a random token and nothing else
 // (see require-role.ts), and the database keeps the SHA-256 of the token, so a copy of the
@@ -14,11 +14,19 @@ const minute = 60 * 1000
 /** How long a login link works. */
 export const linkLifetime = 15 * minute
 
+/** How many wrong codes a login code takes; the next try, right or wrong, is refused. */
+export const codeAttempts = 5
+
 /** A session ends after this long without a request. */
-export const idleLifetime = 12 * 60 * minute
+export const idleLifetime = 9 * 24 * 60 * minute
 
 /** A session ends this long after it began, however often it was used. */
-export const absoluteLifetime = 7 * 24 * 60 * minute
+export const absoluteLifetime = 14 * 24 * 60 * minute
+
+/** What the database keeps of a login code: bound to the reference of its request. */
+export function codeHashOf(ref: string, code: string) {
+  return hashOf(`${ref}:${code}`)
+}
 
 /**
  * Ends a session on the server: the token stops working at once, whatever the browser still
@@ -30,8 +38,10 @@ export async function endSession(db: Database, token: string) {
 
 /**
  * The account behind a session token, or `undefined` when the token is unknown, the session has
- * ended (12 hours without a request, or 7 days since it began) or the account is turned off. A
- * valid session counts as a request, so it stays open another 12 hours. An ended session is
+ * ended (9 days without a request, or 14 days since it began) or the account is turned off. A
+ * valid session counts as a request, so it stays open another 9 days, but never past the 14
+ * days: `createdAt` is never moved, so renewing can't stretch a session, and a stolen token
+ * can't keep it alive for ever. An ended session is
  * removed.
  */
 export async function findSession(db: Database, token: string, now = new Date()) {
@@ -92,9 +102,60 @@ export async function loginLinkWorks(db: Database, token: string, now = new Date
   return row !== undefined
 }
 
+/** A new login code: 6 digits, with the zeros in front kept. */
+export function newCode() {
+  return randomInt(0, 1_000_000).toString().padStart(6, '0')
+}
+
 /** A new random token, for a login link or a session. */
 export function newToken() {
   return randomBytes(32).toString('base64url')
+}
+
+/**
+ * Uses a login code up and starts a session, like `redeemLoginLink`: the token for the
+ * cookie, or `undefined` for a code that is wrong, expired, used before, tried 5 times
+ * already, or that belongs to an account that is turned off, and for a reference nobody
+ * asked for. The answer is the same for all of them. The code belongs to the request with
+ * that reference, so it only works for the address that asked.  Every try is counted
+ * first, with one statement that only counts below the limit, so two requests at the same
+ * time can't both get a sixth try. Then the code is compared, and a right code deletes
+ * the row, so it works once.
+ */
+export async function redeemLoginCode(db: Database, ref: string, value: string, now = new Date()) {
+  const code = value.replaceAll(/\s/g, '')
+
+  if (!/^\d{6}$/.test(code) || ref === '') {
+    return undefined
+  }
+
+  const refHash = hashOf(ref)
+  const [link] = await db
+    .select({ codeHash: adminLoginLinks.codeHash, id: adminLoginLinks.id, user: adminUsers })
+    .from(adminLoginLinks)
+    .innerJoin(adminUsers, eq(adminLoginLinks.userId, adminUsers.id))
+    .where(and(eq(adminLoginLinks.refHash, refHash), gt(adminLoginLinks.expiresAt, now)))
+
+  if (link?.codeHash === undefined || link.codeHash === null) {
+    return undefined
+  }
+
+  const [counted] = await db
+    .update(adminLoginLinks)
+    .set({ failedAttempts: sql`${adminLoginLinks.failedAttempts} + 1` })
+    .where(and(eq(adminLoginLinks.id, link.id), lt(adminLoginLinks.failedAttempts, codeAttempts)))
+
+  if (counted.affectedRows !== 1 || link.codeHash !== codeHashOf(ref, code)) {
+    return undefined
+  }
+
+  const [deleted] = await db.delete(adminLoginLinks).where(eq(adminLoginLinks.id, link.id))
+
+  if (deleted.affectedRows !== 1 || link.user.disabledAt !== null) {
+    return undefined
+  }
+
+  return startSession(db, link.user.id, now)
 }
 
 /**
