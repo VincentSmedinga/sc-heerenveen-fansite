@@ -29,7 +29,7 @@ import type { LiveFormState, LiveRemoveState } from './actions'
 
 const emptyState: LiveFormState = { version: 0 }
 
-/** Where what was done is told: one line for the whole screen, which a screen reader reads. */
+/** Where the removal of an event is told: its form is gone by then, so the screen says it. */
 const StatusContext = createContext<(message: string) => void>(() => {})
 
 /** The `id` of a field of a form, as the errors of the server name it. */
@@ -50,7 +50,6 @@ export function LiveEventForm({
   title: string
 }) {
   const [state, formAction, pending] = useActionState(action, emptyState)
-  const announce = use(StatusContext)
   const errors = state.errors ?? {}
   const values = state.values ?? {}
   const summaryId = `live-${kind}-fouten`
@@ -67,13 +66,12 @@ export function LiveEventForm({
       return
     }
     if (state.saved !== undefined) {
-      announce(state.saved)
       // The next event starts where this one did.
       document.getElementById(fieldId(kind, 'kant'))?.focus()
     } else if (state.errors !== undefined) {
       document.getElementById(summaryId)?.focus()
     }
-  }, [announce, kind, state, summaryId])
+  }, [kind, state, summaryId])
 
   const both = new Set(players.map((player) => player.ours)).size > 1
   const choose = (id: string, label: string, list: readonly LivePlayer[], hint?: string, required = true) => (
@@ -105,6 +103,10 @@ export function LiveEventForm({
         <Heading id={headingId} level={2}>
           {title}
         </Heading>
+        {/* Outside the form, which is made anew after a save, so a screen reader hears it. */}
+        <Text appearance="meta" role="status">
+          {state.saved ?? ''}
+        </Text>
         <Form action={formAction} key={state.version}>
           <RadioGroup
             error={errors[fieldId(kind, 'kant')]}

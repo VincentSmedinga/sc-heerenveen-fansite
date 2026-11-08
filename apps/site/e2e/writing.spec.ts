@@ -3,6 +3,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { adminCookie } from './admin'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
+import { liveReportMatchId } from './live-report'
 import { matchId, playedMatchId } from './matches'
 
 // Writes an article in the admin from start to end, with the editor, as the beheerder of the
@@ -477,6 +478,58 @@ for (const [name, javaScriptEnabled] of [
       await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
       await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
+    })
+  })
+}
+
+for (const [name, javaScriptEnabled] of [
+  ['with JavaScript', true],
+  ['without JavaScript', false],
+] as const) {
+  test.describe(`keeping a match report up to date ${name}`, () => {
+    test.use({ javaScriptEnabled })
+
+    test(`adds a goal and takes it away again ${name}`, async ({ page }) => {
+      await page.goto(`/beheer/wedstrijden/${await liveReportMatchId()}/verslag/live`)
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Bijhouden: ')
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 0' })).toBeVisible()
+
+      // A goal without a minute is refused at the field, with what was typed kept.
+      const goal = page.locator('form').filter({ has: page.getByRole('button', { name: 'Doelpunt opslaan' }) })
+
+      await goal.getByLabel('Testdorp FC', { exact: true }).check()
+      await goal.getByLabel('Naam van de speler', { exact: false }).fill('Verzonnen Aanvaller')
+      await goal.getByRole('button', { name: 'Doelpunt opslaan' }).click()
+      await expect(page.locator('#live-doelpunt-minuut-error')).toBeVisible()
+      await expect(goal.getByLabel('Naam van de speler', { exact: false })).toHaveValue('Verzonnen Aanvaller')
+
+      if (javaScriptEnabled) {
+        await expect(page.locator('#live-doelpunt-fouten')).toBeFocused()
+      }
+
+      // With a minute it is saved at once, said politely, and the stand follows.
+      await goal.getByLabel('Minuut', { exact: true }).fill('88')
+      await goal.getByRole('button', { name: 'Doelpunt opslaan' }).click()
+      await expect(page.getByRole('status').filter({ hasText: 'Doelpunt opgeslagen: 88e minuut' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 1' })).toBeVisible()
+      await expect(page.getByText("Doelpunt 88' Verzonnen Aanvaller", { exact: false }).first()).toBeVisible()
+
+      if (javaScriptEnabled) {
+        // The fields are empty again and the next event starts at the first field.
+        await expect(page.locator('#live-doelpunt-kant')).toBeFocused()
+      }
+
+      // Taking it away asks first, and the stand goes back.
+      const event = page.locator('li').filter({ hasText: "Doelpunt 88' Verzonnen Aanvaller" })
+
+      await event.locator('summary').click()
+      await event.getByRole('button', { name: 'Ja, haal weg' }).click()
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 0' })).toBeVisible()
+
+      if (javaScriptEnabled) {
+        // The screen with its forms, its list and the questions open, which axe opens too.
+        expect(await checkPage(page)).toEqual([])
+      }
     })
   })
 }
