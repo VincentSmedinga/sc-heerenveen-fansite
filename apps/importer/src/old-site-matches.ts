@@ -38,12 +38,12 @@ const leagueSeasonLength = 34
  * Uefa Cup", a rescheduling such as "was 14/9", a link, a `*`) and is not copied: `note` is a
  * public column.
  */
-const publicNotes: Readonly<Record<string, string>> = {
-  '28 januari afgelast wegens sneeuw': '28 januari afgelast wegens sneeuw',
-  'begon later door file': 'Begon later door file',
-  'Debuut in Eredivisie': 'Debuut in Eredivisie',
-  kwartfinale: 'Kwartfinale',
-}
+const publicNotes: ReadonlyMap<string, string> = new Map([
+  ['28 januari afgelast wegens sneeuw', '28 januari afgelast wegens sneeuw'],
+  ['begon later door file', 'Begon later door file'],
+  ['Debuut in Eredivisie', 'Debuut in Eredivisie'],
+  ['kwartfinale', 'Kwartfinale'],
+])
 
 /** A match of the files as the database has it, before the club is known. */
 export type DerivedOldSiteMatch = {
@@ -231,7 +231,7 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       home,
       kickoffAt: unknownTime ? null : amsterdamToUtc({ day, month, year }, { hours, minutes }),
       matchDate: date,
-      note: match.note === null ? null : (publicNotes[match.note.trim()] ?? null),
+      note: match.note === null ? null : (publicNotes.get(match.note.trim()) ?? null),
       penaltiesAgainst: penalties?.against ?? null,
       penaltiesFor: penalties?.for ?? null,
       referee,

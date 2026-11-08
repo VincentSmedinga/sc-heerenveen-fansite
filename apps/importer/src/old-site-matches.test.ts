@@ -362,6 +362,8 @@ describe('referee, attendance, remark and statistics', () => {
       'Play-off',
       'http://members.tripod.com/~rodajc/',
       'olympia.fortunecity.com/lipinsky/524/',
+      'constructor',
+      'toString',
       null,
     ]) {
       expect(note(dropped)).toBeNull()
