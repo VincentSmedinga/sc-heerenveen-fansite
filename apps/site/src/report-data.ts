@@ -57,7 +57,7 @@ export function parseReportSlug(slug: string): undefined | { clubSlug: string; m
     : { clubSlug, matchDate }
 }
 
-/** How long the reports of the current season are kept: a change shows within five minutes. */
+/** How long the current season is kept: five minutes, and see `liveSeasonPeriod`. */
 const currentSeasonPeriod = 5 * 60 * 1000
 
 /** A season that is over doesn't change, so it is kept for an hour. */
@@ -67,7 +67,11 @@ async function loadSeasonReports(season: string) {
   return listReportedMatches(getDatabase().db, season)
 }
 
+/** A match that is live is kept for 15 seconds: a goal shows within half a minute. */
+export const liveSeasonPeriod = 15 * 1000
+
 const currentReports = cacheForKey(currentSeasonPeriod, loadSeasonReports)
+const liveReports = cacheForKey(liveSeasonPeriod, loadSeasonReports)
 const pastReports = cacheForKey(pastSeasonPeriod, loadSeasonReports)
 
 /**
@@ -123,8 +127,17 @@ export async function getPublicReport(season: string, slug: string) {
  * played, complete or not), the first first. The caller asks for a season of
  * `getMatchSeasons` only: the cache keeps an entry for every season it is asked for.
  */
-export function getPublicReports(season: string) {
-  return season === seasonOf(new Date()) ? currentReports(season) : pastReports(season)
+export async function getPublicReports(season: string) {
+  const now = new Date()
+
+  if (season !== seasonOf(now)) {
+    return pastReports(season)
+  }
+
+  const reports = await currentReports(season)
+
+  // While a match is live, the season is read again every 15 seconds, and only then.
+  return reports.some((reported) => phaseOf(reported.match, now) === 'live') ? liveReports(season) : reports
 }
 
 /**

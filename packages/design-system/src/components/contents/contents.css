@@ -1,0 +1,7 @@
+/* A wrapper without a box: its children are laid out as if the wrapper was not there. */
+
+@layer hf.components {
+  .hf-contents {
+    display: contents;
+  }
+}

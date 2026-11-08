@@ -31,6 +31,7 @@ export { monotonePath, movingAverage, runningAverage } from './components/chart/
 export type { TrendCurve } from './components/chart/trend'
 export { CheckboxGroup } from './components/checkbox-group/CheckboxGroup'
 export type { CheckboxGroupOption, CheckboxGroupProps } from './components/checkbox-group/CheckboxGroup'
+export { Contents } from './components/contents/Contents'
 export { DataTable } from './components/data-table/DataTable'
 export type {
   DataTableCell,
@@ -203,6 +204,8 @@ export type { Size } from './components/size'
 export { StandingsTable } from './components/standings-table/StandingsTable'
 export type { StandingsTableProps, StandingsTableRow } from './components/standings-table/StandingsTable'
 export { Strong } from './components/strong/Strong'
+export { Switch } from './components/switch/Switch'
+export type { SwitchProps } from './components/switch/Switch'
 export { signedNumber, tableColumns, tableLegend } from './components/table-columns'
 export type { TableColumn } from './components/table-columns'
 export { Tag, tagTones } from './components/tag/Tag'

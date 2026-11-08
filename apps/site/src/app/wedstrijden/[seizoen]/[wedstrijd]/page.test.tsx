@@ -603,6 +603,32 @@ describe('the page of a match that is still being played', () => {
     expect(text).toContain('We vullen dit verslag nog in')
   })
 
+  it('has the refresh control and the live parts only while the match is live', async () => {
+    const reported = liveMatch()
+    const html = await render()
+
+    expect(html).toContain('data-live-region="header"')
+    expect(html).toContain('data-live-region="cards"')
+    expect(html).toContain('data-live="true"')
+    expect(plain(html)).toContain('Bijgewerkt om 14:40')
+    expect(html).toContain('Ververs nu')
+    expect(html).toContain('href="/wedstrijden/2026-27/2026-10-24-testdorp-fc"')
+    // The last goal and the stand for a screen reader, and the end of the match.
+    expect(html).toContain('data-last="Doelpunt sc Heerenveen. Stand 2–1, 78e minuut."')
+    expect(html).toContain('data-final="Einde van de wedstrijd. Eindstand 2–1."')
+
+    reported.match.goalsAgainst = 1
+    reported.match.goalsFor = 2
+    reported.match.status = 'played'
+
+    const played = await render()
+
+    expect(played).not.toContain('Ververs nu')
+    expect(played).not.toContain('data-live-region')
+    expect(played).toContain('data-live="false"')
+    expect(played).toContain('Eindstand 2–1.')
+  })
+
   it('names no stand in the title or the description, and keeps the page out of the index', async () => {
     liveMatch()
 
