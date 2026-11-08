@@ -691,9 +691,9 @@
      Dat werkt alleen voor sessies die hij zelf startte, die de projecteigenaar niet verplaatste en die niet de worktree van een andere sessie delen; een sessie die hij niet kan losmaken, noemt hij in de notitie en aan de projecteigenaar.
   3. De oude hernoemt zichzelf met `set_session_title`, bijvoorbeeld "Coördinator XXI (overgedragen)".
      De nieuwe krijgt de titel zonder achtervoegsel.
+     Een verzoek dat de oude daarna nog krijgt, geeft hij door aan de opvolger met `SendMessage`.
   4. De oude archiveert zichzelf met `archive_session` en `session_id` "self", pas nadat de nieuwe de notitie heeft gelezen en de projecteigenaar het goed vindt.
      Dat is de laatste stap, want de conversatie eindigt daarna.
-  5. Een oude Coördinator die nog een verzoek krijgt, geeft het door aan de opvolger met `SendMessage`.
 - **Waarom:** een sessie die nog onder de oude hangt, wordt samen met hem gearchiveerd en meldt het einde van haar beurten aan een sessie die er niet meer is.
   Bij de laatste overdrachten werden Builders zo mee gearchiveerd, en bleef onduidelijk wie de actieve Coördinator was.
 - **Alternatieven:** de oude Coördinator laten doorlopen tot zijn context vol is (verworpen: dat maakt elke beurt duurder).

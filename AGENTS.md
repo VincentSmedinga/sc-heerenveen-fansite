@@ -500,6 +500,6 @@ Agents also follow these:
 - put secrets in the repository: tokens, passwords, a real `.env` or personal data;
 - add requests to third parties: no fonts, scripts, images, embeds, analytics or CDNs from another domain;
 - take content from journalists beyond the source policy: the principles in the Redactie chapter, and per source the source register (#9);
-- merge a pull request: the owner does that;
+- merge a pull request: the owner does that, or the Coordinator on the owner's standing approval (see _Coordinator_);
 - request a Copilot review;
 - skip the git hooks (`--no-verify`), or skip or weaken a test to get CI green.

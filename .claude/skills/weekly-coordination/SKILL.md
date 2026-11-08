@@ -150,6 +150,7 @@ The steps are in this order, and the last one ends your conversation:
 3. **Rename.**
    Call `set_session_title` with `session_id` "self" and a title such as "Coordinator XXI (overgedragen)", so the list shows who is active.
    The new session gets the same title without the suffix.
+   From now on, forward any request you still get to the successor with `SendMessage`, and do not do it yourself.
 4. **Archive.**
    Only after the new Coordinator has read the note and the owner agrees, call `archive_session` with `session_id` "self".
-5. **After the handover**, forward any request you still get to the successor with `SendMessage`, and do not do it yourself.
+   This is the last step: the conversation ends after the tool result.
