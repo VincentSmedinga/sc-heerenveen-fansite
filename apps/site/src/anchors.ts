@@ -71,6 +71,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // The results are a card for each competition with a result. The Eredivisie keeps the anchor
   // `uitslagen`; the made-up season has a result in each of the three competitions (#665).
   '/wedstrijden': [
+    'laatste-wedstrijd',
     'programma',
     'stand',
     'onze-plek-door-de-jaren',

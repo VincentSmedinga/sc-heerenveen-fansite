@@ -566,3 +566,9 @@ describe('the card Onze plek door de jaren on the page of an earlier season', ()
     expect(html).toContain('Sinds 2025/26')
   })
 })
+
+describe('a season that is over', () => {
+  it('has no card Laatste wedstrijd', async () => {
+    expect(await render()).not.toContain('laatste-wedstrijd')
+  })
+})

@@ -17,7 +17,7 @@ import {
   resultsOfSeason,
   resultsPerCompetition,
 } from '#src/matches'
-import { coachesCardOf, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
+import { coachesCardOf, lastMatchCard, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
   imageCredit,
@@ -67,11 +67,12 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. The results are in a card for each competition with a result (Eredivisie, KNVB
  * Beker and so on, the link to the course of the season in the first): the newest first in the
- * current season, which also has the card Programma with every competition on one list, and
- * from the first match to the last in a season that is over, which has no Programma and calls
- * its table Eindstand. Under the table and the results is a link to the card with figures that
- * belongs to it on the page Cijfers, of the same season. A season that has no matches in
- * the database is the page "niet gevonden".
+ * current season, which also has the card Laatste wedstrijd above Programma (the newest match
+ * that has begun, which stays in Uitslagen too) and the card Programma with every competition
+ * on one list, and from the first match to the last in a season that is over, which has no
+ * Programma and calls its table Eindstand. Under the table and the results is a link to the
+ * card with figures that belongs to it on the page Cijfers, of the same season. A season that
+ * has no matches in the database is the page "niet gevonden".
  *
  * The card Onze plek door de jaren, under the table, shows our place in every season we have a
  * table of, whichever season the page shows (see FinalPlacesCard).
@@ -99,7 +100,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The cards of a season that is over say which one on their image. The current season is the
   // one the image has always been of.
   const imageSeason = current ? undefined : season
-  const { programme, results: newestFirst } = overviewOf(data.matches, now)
+  const { previous, programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
   // A card for each competition with a result, the newest first in the current season. A season
   // without a result has the one card Uitslagen.
@@ -126,6 +127,15 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           </Page.Title>
         }
       >
+        {/* The latest match that has begun, current season only. Uitslagen has it too. */}
+        {current && previous !== undefined && (
+          <Card aria-labelledby={lastMatchCard.id}>
+            <Heading anchor id={lastMatchCard.id} level={2}>
+              {lastMatchCard.name}
+            </Heading>
+            <MatchLines liveReports={liveReports} matches={[previous]} now={now} reportAddresses={reportAddresses} />
+          </Card>
+        )}
         {current && (
           <Card aria-labelledby="programma">
             <Heading anchor id="programma" level={2}>

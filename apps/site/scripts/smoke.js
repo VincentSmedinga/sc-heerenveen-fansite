@@ -959,6 +959,7 @@ await withEmptyDatabase((database) =>
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       [
+        '#laatste-wedstrijd',
         '#programma',
         '#uitslagen',
         '#uitslagen-knvb-beker',
