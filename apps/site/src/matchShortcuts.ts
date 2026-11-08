@@ -15,6 +15,9 @@ export const matchShortcuts = [
   { href: '#stand', label: 'Stand' },
 ] as const
 
+/** The name and the anchor of the card with the latest match that has begun. */
+export const lastMatchCard = { id: 'laatste-wedstrijd', name: 'Laatste wedstrijd' } as const
+
 /**
  * The name and the anchor of the card with the league table: Stand for the current season, and
  * Eindstand for a season that is over, where the table is the final one.
@@ -71,7 +74,8 @@ export const coachesCardOf = (coachCount: number) =>
  * The links of the bar for the page of a season, in the order of the cards: Programma (only the
  * current season has it), a link for each card with results (`withResults` are the competitions
  * that have one, see `resultsCardsOf`) and Stand (Eindstand for a season that is over), and
- * after it the card with our place in every season when the page has one. The
+ * after it the card with our place in every season when the page has one. The current season
+ * has the card Laatste wedstrijd before Programma when a match has begun (`withLastMatch`). The
  * card with the head coaches, after the table, has a link when the season has a coach in the
  * table (`coachCount` above 0).
  */
@@ -80,10 +84,16 @@ export const matchShortcutsOf = (
   coachCount = 0,
   withResults: readonly Competition[] = [],
   withFinalPlaces = false,
+  withLastMatch = false,
 ): Shortcut[] => {
   const standings = standingsCardOf(current)
   const coaches = coachesCardOf(coachCount)
   const links: Shortcut[] = []
+
+  // The card with the last match is above Programma, in the current season only.
+  if (current && withLastMatch) {
+    links.push({ href: `#${lastMatchCard.id}`, label: lastMatchCard.name })
+  }
 
   for (const shortcut of matchShortcuts as readonly Shortcut[]) {
     if (shortcut.href === '#programma' && !current) {

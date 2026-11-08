@@ -179,3 +179,15 @@ describe('matchShortcutsOf with the cards with results', () => {
     ])
   })
 })
+
+describe('matchShortcutsOf with a last match', () => {
+  it('puts Laatste wedstrijd before Programma in the current season only', () => {
+    expect(matchShortcutsOf(true, 0, [], false, true).map(({ href }) => href)).toEqual([
+      '#laatste-wedstrijd',
+      '#programma',
+      '#uitslagen',
+      '#stand',
+    ])
+    expect(matchShortcutsOf(false, 0, [], false, true).map(({ href }) => href)).not.toContain('#laatste-wedstrijd')
+  })
+})

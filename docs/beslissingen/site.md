@@ -3636,6 +3636,21 @@
   Het verversen is werk van #908.
 - **Alternatieven:** een bevestiging als dialoog met JavaScript (werkt niet zonder, en de focus is moeilijker goed te krijgen); de knop meteen laten schrijven zonder bevestiging (een verkeerde stand komt dan op de site); de stand in de titel en de beschrijving (die veranderen na elk doelpunt).
 
+## De laatste wedstrijd staat in een eigen kaart bovenaan Wedstrijden
+
+- **Datum:** 8 november 2026
+- **Besluit:** Wedstrijden toont in het lopende seizoen een kaart "Laatste wedstrijd" boven Programma, met de nieuwste wedstrijd die begonnen is (`previous` van `overviewOf`, dezelfde als op de homepage) en alleen die (#920).
+  De kaart heeft het anker `laatste-wedstrijd` en een item in de balk "Op deze pagina:" vóór Programma.
+  - **De regel:** dezelfde `MatchLines` als Uitslagen, dus de uitslag (een schermlezer hoort "2 tegen 0"), de doelpuntenmakers, de competitie, de ronde, het stadion en de link "Het verslag".
+    Een wedstrijd die live is staat er met "Live" en zonder uitslag, en een begonnen wedstrijd zonder uitslag met de zin die ook in Uitslagen staat.
+  - **Dubbel:** de wedstrijd blijft in Uitslagen staan, dus die kaart telt dezelfde wedstrijden als eerst.
+  - **Waar niet:** een afgelopen seizoen en een seizoen zonder begonnen wedstrijd hebben de kaart en het item niet.
+    Programma staat dan bovenaan.
+  - **De kaart** volgt de vaste regels voor kaarten van #768: wit in de hoofdkolom, een kop van niveau 2 met anker.
+- **Waarom:** de laatste wedstrijd is het eerste wat supporters willen weten, en stond onder een lange lijst.
+  Dezelfde wedstrijd twee keer is goedkoper dan Uitslagen een wedstrijd laten missen, want Uitslagen telt dezelfde wedstrijden als de rest van de site.
+- **Alternatieven:** een grotere regel in Uitslagen (valt minder op); de laatste wedstrijd uit Uitslagen halen (geen dubbele regel, maar Uitslagen mist dan de nieuwste); de kaart ook in een afgelopen seizoen (de laatste is daar niet bijzonder).
+
 ## Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels
 
 - **Datum:** 8 november 2026

@@ -46,6 +46,7 @@ describe('the bar of /wedstrijden', () => {
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
+      ['#laatste-wedstrijd', 'Laatste wedstrijd'],
       ['#programma', 'Programma'],
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
@@ -75,6 +76,7 @@ describe('the bar of /wedstrijden', () => {
         label,
       ]),
     ).toEqual([
+      ['#laatste-wedstrijd', 'Laatste wedstrijd'],
       ['#programma', 'Programma'],
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
@@ -110,6 +112,7 @@ describe('the bar of /wedstrijden for the current season', () => {
     vi.mocked(getFinalPlaces).mockResolvedValue([{ now: true, row: undefined, season: '2026/27' }])
 
     expect([...(await render()).matchAll(/<a [^>]*href="(#[^"]*)"/g)].map(([, href]) => href)).toEqual([
+      '#laatste-wedstrijd',
       '#programma',
       '#uitslagen',
       '#uitslagen-knvb-beker',

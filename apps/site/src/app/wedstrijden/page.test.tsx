@@ -117,11 +117,12 @@ describe('the links to the pages of the matches', () => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and four h2 headings in order: the programme, a card for each competition with results and the table', async () => {
+  it('has one h1 and five h2 headings in order: the last match, the programme, a card for each competition with results and the table', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="laatste-wedstrijd"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#laatste-wedstrijd">Laatste wedstrijd</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Eredivisie</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen-knvb-beker"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen-knvb-beker">KNVB Beker</a></h2>',
@@ -177,7 +178,7 @@ describe('the page /wedstrijden', () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
-    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker']).map((item) => item.href)).toEqual(ids)
+    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker'], false, true).map((item) => item.href)).toEqual(ids)
   })
 
   it('has the programme and the results in the main with the h1, and the table in a named, wide sidebar after it', async () => {
@@ -934,7 +935,7 @@ describe('the season picker on /wedstrijden', () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
-    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href)).toEqual(ids)
+    expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker'], false, true).map(({ href }) => href)).toEqual(ids)
   })
 })
 
@@ -1040,7 +1041,7 @@ describe('the head coaches of the season', () => {
     expect(html).not.toContain('hoe-vaak-welke-uitslag')
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('hf-wikipedia-credit'))
     expect(card).not.toContain('hf-wikipedia-credit')
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(6)
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(7)
   })
 })
 
@@ -1226,5 +1227,72 @@ describe('the card Onze plek door de jaren on /wedstrijden', () => {
 
     expect(await render()).not.toContain('onze-plek-door-de-jaren')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read our place in the seasons'))
+  })
+})
+
+describe('the card Laatste wedstrijd', () => {
+  // The newest match of matchData that has begun is SV Proefdorp (20 October 2026).
+  const card = (html: string) => section(html, 'laatste-wedstrijd').split('</section>')[0] ?? ''
+  const key = 'KNVB Beker|Tweede ronde'
+
+  it('is above Programma with the newest match that has begun, and only that match', async () => {
+    const html = await render()
+    const last = card(html)
+
+    expect(html.indexOf('id="laatste-wedstrijd"')).toBeLessThan(html.indexOf('id="programma"'))
+    expect(last).toContain('SV Proefdorp')
+    expect(last).not.toContain('Voorbeeld United')
+    expect(last.match(/<li/g)).toHaveLength(1)
+    expect(html).toContain('<section class="hf-card" aria-labelledby="laatste-wedstrijd">')
+  })
+
+  it('has a match with a result as a line that a screen reader hears as "tegen"', async () => {
+    expect(card(await render())).toMatch(/\d+ tegen \d+/)
+  })
+
+  it('keeps the match in Uitslagen too, with the same count', async () => {
+    const html = await render()
+
+    expect(section(html, 'uitslagen-knvb-beker')).toContain('SV Proefdorp')
+    expect(html.match(/SV Proefdorp/g)).toHaveLength(2)
+  })
+
+  it('links to the page of the match with "Het verslag"', async () => {
+    vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/2026-10-20-sv-proefdorp']]))
+
+    expect(card(await render())).toContain('Het verslag')
+  })
+
+  it('says "Live" for a match that is live, without a result', async () => {
+    vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/2026-10-20-sv-proefdorp']]))
+    vi.mocked(getLiveReports).mockResolvedValue(new Set([key]))
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) =>
+        match.opponent === 'SV Proefdorp'
+          ? {
+              ...match,
+              goalsAgainst: null,
+              goalsFor: null,
+              kickoffAt: new Date('2026-10-23T12:30:00Z'),
+              status: 'scheduled',
+            }
+          : match,
+      ),
+    })
+
+    const last = card(await render())
+
+    expect(last).toContain('Live')
+    expect(last).not.toMatch(/\d+ tegen \d+/)
+  })
+
+  it('has no card and no link when no match has begun', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+    const html = await render()
+
+    expect(html).not.toContain('laatste-wedstrijd')
+    expect(html.indexOf('id="programma"')).toBeGreaterThan(-1)
   })
 })
