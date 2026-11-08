@@ -18,6 +18,7 @@ import {
   listLeagueResults,
   listMatchDataSources,
   listMatchSeasons,
+  listMatchSequence,
   listNewestDiscussions,
   listPodcastEpisodes,
   listPodcasts,
@@ -1614,6 +1615,29 @@ describe('the matches and the table of a season', () => {
     await database.pool.query('DELETE FROM players')
     await database.pool.query('DELETE FROM standings')
     await database.pool.query('DELETE FROM wikipedia_pages')
+  })
+
+  describe('listMatchSequence', () => {
+    it('gives the matches of every season in the order of play, with the slug of the club', async () => {
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+      await database.db
+        .insert(matches)
+        .values(await withClubs(database.db, madeUpMatches(new Date('2025-10-25T12:00:00Z'))))
+
+      const sequence = await listMatchSequence(database.db)
+      const days = sequence.map((match) => match.matchDate)
+
+      expect(sequence.length).toBeGreaterThan(2)
+      expect(days).toEqual(days.toSorted())
+      expect(new Set(sequence.map((match) => match.season))).toEqual(new Set(['2025/26', '2026/27']))
+      expect(sequence.at(0)?.season).toBe('2025/26')
+      expect(sequence.at(-1)?.season).toBe('2026/27')
+      expect(sequence.every((match) => match.clubSlug.length > 0)).toBe(true)
+    })
+
+    it('gives nothing without matches', async () => {
+      expect(await listMatchSequence(database.db)).toEqual([])
+    })
   })
 
   describe('listMatchSeasons', () => {

@@ -98,6 +98,12 @@ export type {
 } from './components/match-event-icon/MatchEventIcon'
 export { MatchHeader } from './components/match-header/MatchHeader'
 export type { MatchHeaderFact, MatchHeaderProps, MatchHeaderScorer } from './components/match-header/MatchHeader'
+export { MatchNeighbours } from './components/match-neighbours/MatchNeighbours'
+export type {
+  MatchNeighbour,
+  MatchNeighboursProps,
+  MatchNeighbourState,
+} from './components/match-neighbours/MatchNeighbours'
 export { MatchPenaltySeries } from './components/match-penalty-series/MatchPenaltySeries'
 export type {
   MatchPenaltyKick,

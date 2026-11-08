@@ -3667,3 +3667,18 @@
   De oude volgorde op de hele naam kwam voort uit de fout, niet uit een keuze.
 - **Alternatieven:** alleen het eerste woord nemen (laat "Jan Willem van Hanegem" verkeerd staan); de laatste woorden raden (breekt "Jan Olde Riekerink"); alles in het vet laten staan (de fout van nu); de oude volgorde vastzetten (extra code voor een gevolg van de fout).
 - **Later:** het koppelen van doelpunten aan een persoon in de importer (#918) maakt dit voor de meeste doelpunten overbodig.
+
+## De pagina van een wedstrijd eindigt met links naar de vorige en de volgende wedstrijd
+
+- **Datum:** 8 november 2026
+- **Besluit:** onderaan de hoofdkolom van de pagina van een wedstrijd staat een transparante kaart, `MatchNeighbours` (#928).
+  De volgorde loopt over alle wedstrijden in de database, van alle competities en seizoenen: op datum, dan op aanvangstijd (een wedstrijd zonder aanvangstijd eerst), dan op id.
+  `listMatchSequence` leest de lijst, `apps/site/src/match-neighbours.ts` zoekt de buren en bouwt de regel, en de lijst blijft vijf minuten in het geheugen.
+  - Bij onze eerste wedstrijd ontbreekt "Vorige", bij de laatste "Volgende". Een enkele kant blijft op zijn eigen plek.
+  - Een wedstrijd met een uitslag toont de stand vanuit ons gezien in de kleur van de uitslag (`outcomeOf`, bij strafschoppen de uitslag daarvan), met verborgen "Gewonnen", "Gelijkspel" of "Verloren".
+  - Een wedstrijd zonder uitslag toont de datum in de korte vorm van de lijsten (zonder tijd), of "Live", "Uitgesteld" of "Geannuleerd", zonder kleur.
+  - Een wedstrijd zonder pagina staat als tekst zonder link in dezelfde opbouw.
+  - Onder 40 rem breed staan de links onder elkaar, daarboven naast elkaar met "Volgende" rechts.
+- **Waarom:** een supporter wil het seizoen doorlezen zonder terug te gaan naar de lijst, en een link die een wedstrijd overslaat, zegt niet dat er een wedstrijd mist.
+  Kleur is nooit het enige teken, en de woorden zijn die van de kop van de wedstrijd.
+- **Alternatieven:** alleen wedstrijden met een pagina (dan lijkt een wedstrijd te ontbreken); alleen de stand voorlezen (kleur is dan het enige teken); altijd naast elkaar (lange clubnamen breken slecht in twee smalle kolommen).

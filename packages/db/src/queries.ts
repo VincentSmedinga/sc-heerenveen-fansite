@@ -31,6 +31,8 @@ import {
 } from './schema.ts'
 import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
 
+export type MatchInSequence = Awaited<ReturnType<typeof listMatchSequence>>[number]
+
 export type PublicArchiveItem = Awaited<ReturnType<typeof listArchivePage>>[number]
 
 export type PublicArchiveSource = Awaited<ReturnType<typeof listArchiveSources>>[number]
@@ -606,6 +608,44 @@ export async function listMatchSeasons(db: Database) {
   const rows = await db.selectDistinct({ season: matches.season }).from(matches).orderBy(desc(matches.season))
 
   return rows.map((row) => row.season)
+}
+
+/**
+ * Every match in the database, whatever its competition and season, in the order of play: by
+ * day, then by kick-off (a match without one first), then by `id`. Each has just what a link
+ * to it needs: where it stands in the order, who the opponent was that day (see
+ * `listSeasonMatches`), the slug of the club for its address, its status and its result. The
+ * page of a match finds the match before and after it in this list.
+ */
+export async function listMatchSequence(db: Database) {
+  const rows = await db
+    .select({
+      clubId: matches.clubId,
+      clubSlug: clubs.slug,
+      competition: matches.competition,
+      dateText: matches.dateText,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      home: matches.home,
+      id: matches.id,
+      kickoffAt: matches.kickoffAt,
+      matchDate: matches.matchDate,
+      opponent: matches.opponent,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
+      round: matches.round,
+      season: matches.season,
+      status: matches.status,
+    })
+    .from(matches)
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+
+  return (await withSeasonNames(db, rows)).map(({ clubId, ...match }) => {
+    void clubId
+
+    return match
+  })
 }
 
 /**

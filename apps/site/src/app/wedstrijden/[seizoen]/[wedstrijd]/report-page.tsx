@@ -3,13 +3,14 @@ import type { Metadata } from 'next'
 
 import { phaseOf } from '@fansite/db/match-reports'
 import { seasonOf } from '@fansite/db/season'
-import { Card, Link, type MatchHeaderFact, Page, Text, Time } from '@fansite/design-system'
+import { Card, Link, type MatchHeaderFact, MatchNeighbours, Page, Text, Time } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { matchMoment } from '#src/match-format'
+import { getMatchNeighbours } from '#src/match-neighbours'
 import { sourceOf } from '#src/match-sources'
 import { getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
@@ -41,7 +42,12 @@ const loadReport = cache(async (seizoen: string, wedstrijd: string) => {
       return { kind: 'unknown' } as const
     }
 
-    return { data: await getMatchData(season), kind: 'found', reported, season } as const
+    const [data, neighbours] = await Promise.all([
+      getMatchData(season),
+      getMatchNeighbours(reported.match.id, new Date()),
+    ])
+
+    return { data, kind: 'found', neighbours, reported, season } as const
   } catch (error) {
     console.error(`Could not read the match report for ${matchesPath}/${seizoen}/${wedstrijd}: ${reasonOf(error)}`)
 
@@ -138,7 +144,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
     return <ServerError retryHref={`${matchesPath}/${seizoen}/${slug}`} />
   }
 
-  const { data, reported, season } = loaded
+  const { data, neighbours, reported, season } = loaded
   const now = new Date()
   const phase = phaseOf(reported.match, now)
   const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
@@ -158,6 +164,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         }
       >
         <MatchPageCards data={page} />
+        <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
       </Page.Main>
       <Page.Sidebar aria-label="De bron">
         <ReportCredit data={data} reported={reported} />
