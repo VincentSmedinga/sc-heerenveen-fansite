@@ -182,18 +182,43 @@ describe('validate', () => {
         { ...ours, minuut: '0' },
         { ...ours, extra: '31', minuut: '12', speler: '' },
         { ...theirs, naam: '' },
+        { ...ours, extra: '2', minuut: '' },
       ]),
       league,
     )
 
     expect(checked.errors).toMatchObject({
       'doelpunt-1-kant': expect.stringContaining('doelpunt 1'),
-      'doelpunt-1-minuut': expect.stringContaining('doelpunt 1'),
       'doelpunt-2-minuut': expect.stringContaining('doelpunt 2'),
       'doelpunt-3-extra': expect.stringContaining('doelpunt 3'),
       'doelpunt-3-speler': expect.stringContaining('doelpunt 3'),
       'doelpunt-4-naam': expect.stringContaining('doelpunt 4'),
     })
+  })
+
+  it('lets the minute of a goal be empty and keeps it empty, after the goals with a minute', () => {
+    const checked = validate(
+      filled({ 'uitslag-wij': '2', 'uitslag-zij': '1' }, [
+        { ...ours, minuut: '' },
+        { ...theirs, minuut: '' },
+        { ...ours, minuut: '33' },
+      ]),
+      league,
+    )
+
+    expect(checked.errors).toBeUndefined()
+    expect(checked.entry?.goals.map((goal) => [goal.ours, goal.minute, goal.stoppageMinutes])).toEqual([
+      [true, 33, null],
+      [true, null, null],
+      [false, null, null],
+    ])
+  })
+
+  it('wants a minute for added time, and says so at the added time', () => {
+    const checked = validate(filled({}, [{ ...ours, extra: '2', minuut: '' }]), league)
+
+    expect(checked.errors).toMatchObject({ 'doelpunt-1-extra': expect.stringContaining('minuut') })
+    expect(checked.errors).not.toHaveProperty('doelpunt-1-minuut')
   })
 
   it('links a scorer of ours to the squad and keeps a player of the opponent apart, own goals included', () => {
@@ -351,6 +376,25 @@ describe('valuesOf', () => {
       { extra: '2', kant: 'zij', minuut: '40', naam: 'Sibbing', soort: 'gewoon', speler: '' },
       emptyGoal,
     ])
+  })
+
+  it('shows a goal without a minute with an empty minute, not 0 or null', () => {
+    const values = valuesOf(
+      { goalsAgainst: 0, goalsFor: 1, kickoffAt: null, matchDate: '2026-10-31', status: 'played' } as never,
+      [
+        {
+          minute: null,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: 'Oyen',
+          playerId: 11,
+          stoppageMinutes: null,
+        },
+      ] as never,
+    )
+
+    expect(values.doelpunten).toEqual([{ extra: '', kant: 'wij', minuut: '', naam: '', soort: 'gewoon', speler: '11' }])
   })
 
   it('leaves the score empty for a match that was not played, and shows a date without a time', () => {

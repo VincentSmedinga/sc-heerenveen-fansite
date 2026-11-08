@@ -45,6 +45,25 @@ describe('MatchHeader', () => {
     ).toEqual(['true', 'true'])
   })
 
+  it('writes a scorer without a minute as the name alone, also for a screen reader', () => {
+    const { container } = render(
+      <MatchHeader
+        {...props}
+        goalsAgainst={1}
+        goalsFor={1}
+        scorersAgainst={[{ minute: null, player: 'Dummydijk' }]}
+        scorersFor={[{ minute: null, ownGoal: true, player: 'Demo' }]}
+      />,
+    )
+    const seen = [...container.querySelectorAll('.hf-match-header-scorer')].map((scorer) => scorer.textContent)
+    const heard = [...container.querySelectorAll('.hf-match-header-scorers .hf-visually-hidden')]
+      .map((scorer) => scorer.textContent)
+      .filter((scorer) => !scorer.startsWith('Doelpunten'))
+
+    expect(seen).toEqual(['Demo (e.d.)', 'Dummydijk'])
+    expect(heard).toEqual(['Demo, eigen doelpunt', 'Dummydijk'])
+  })
+
   it('shows the goals of each club beside its name, for a narrow place', () => {
     const { container } = render(<MatchHeader {...props} />)
 

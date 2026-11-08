@@ -718,7 +718,10 @@ describe('the made-up matches', () => {
       expect(own.filter((goal) => goal.ours)).toHaveLength(match.goalsFor ?? 0)
       expect(own.filter((goal) => !goal.ours)).toHaveLength(match.goalsAgainst ?? 0)
 
-      const clock = own.map((goal) => goal.minute * 100 + (goal.stoppageMinutes ?? 0))
+      // A goal without a minute comes last.
+      const clock = own.map((goal) =>
+        goal.minute === null ? Infinity : goal.minute * 100 + (goal.stoppageMinutes ?? 0),
+      )
 
       expect(clock).toEqual([...clock].sort((a, b) => a - b))
     }
@@ -728,7 +731,8 @@ describe('the made-up matches', () => {
     expect(goals.some((goal) => goal.penalty)).toBe(true)
     expect(goals.some((goal) => goal.ownGoal)).toBe(true)
     expect(goals.some((goal) => goal.stoppageMinutes !== null)).toBe(true)
-    expect(goals.some((goal) => goal.minute > 90)).toBe(true)
+    expect(goals.some((goal) => (goal.minute ?? 0) > 90)).toBe(true)
+    expect(goals.some((goal) => goal.minute === null)).toBe(true)
     expect(goals.some((goal) => goal.player.length > 25)).toBe(true)
     expect(goals.filter((goal) => goal.player === 'Proefman' && goal.matchId === goals[0]?.matchId).length).toBe(2)
   })

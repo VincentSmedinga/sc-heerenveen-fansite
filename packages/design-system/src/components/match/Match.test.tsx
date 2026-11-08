@@ -42,6 +42,29 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-label')?.textContent).toBe('Eredivisie · Speelronde 12')
   })
 
+  describe('a goal without a minute', () => {
+    const goals = [
+      { minute: 12, ours: true, player: 'Proefman' },
+      { minute: null, ours: false, player: 'Teststraat' },
+    ]
+
+    it('has the player with a dash for the minute, and no 0', () => {
+      const { container } = render(<Match {...played} goals={goals} goalsAgainst={1} />)
+
+      expect(container.querySelector('.hf-match-goals')?.textContent).toContain('–\u00a0Teststraat')
+      expect(container.querySelector('.hf-match-goals')?.textContent).not.toMatch(/0’|null/u)
+    })
+
+    it('hides the dash from a screen reader and says nothing about the minute', () => {
+      const { container } = render(<Match {...played} goals={goals} goalsAgainst={1} />)
+      const [first, second] = container.querySelectorAll('.hf-match-goal')
+
+      expect(first!.querySelector('.hf-visually-hidden')?.textContent).toContain('minuut 12')
+      expect(second!.textContent).not.toMatch(/minuut/u)
+      expect(second!.querySelector('[aria-hidden="true"]')?.textContent).toBe('–')
+    })
+  })
+
   describe('with a competition', () => {
     it('has the day and the stadium first, then the clubs, the scorers, and the competition and the round', () => {
       const { container } = render(<Match {...played} goals={[{ minute: 12, ours: true, player: 'Proefman' }]} />)

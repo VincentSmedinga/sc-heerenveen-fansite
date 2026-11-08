@@ -46,7 +46,7 @@ export type ReportAppearance = {
   starter: boolean
 }
 
-export type ReportCard = ReportTime & {
+export type ReportCard = ReportOptionalTime & {
   appearanceId: number
   kind: CardKind
 }
@@ -62,7 +62,7 @@ export type ReportFormations = { opponent: null | string; ours: null | string }
  * and its scorer is a player of the other team. `appearanceId` and `assistId` are empty for a
  * goal without a player in the report.
  */
-export type ReportGoal = ReportTime & {
+export type ReportGoal = ReportOptionalTime & {
   appearanceId: null | number
   assistId: null | number
   ours: boolean
@@ -86,6 +86,16 @@ export type ReportMatch = {
   penaltiesAgainst: null | number
   penaltiesFor: null | number
   status: string
+}
+
+/**
+ * A moment that may be unknown: the minute of a goal or a yellow card can be empty, such as in
+ * the old fansite. The added time is empty then too. A red card or a yellow-red card needs its
+ * minute, since it decides how long the player played.
+ */
+export type ReportOptionalTime = {
+  minute: null | number
+  stoppageMinutes: null | number
 }
 
 /**
@@ -438,11 +448,22 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
 
     checkTime(card, match.extraTime, place, issues)
 
+    // A red card sends a player off and so decides his minutes: it needs its minute. A yellow
+    // card may be without, and then no rule that needs the clock can judge it.
+    if (card.minute === null && card.kind !== 'geel') {
+      issues.push({
+        code: 'red-card-without-minute',
+        message: `Een ${card.kind === 'rood' ? 'rode' : 'geel-rode'} kaart heeft een minuut nodig, want daaruit volgt hoe lang de speler speelde.`,
+        place,
+        structural: false,
+      })
+    }
+
     if (player === undefined) {
       return
     }
 
-    if (!canBeCarded(presence.get(player.id), card)) {
+    if (hasMinute(card) && !canBeCarded(presence.get(player.id), card)) {
       issues.push({
         code: 'card-after-leaving',
         message: `${player.name} krijgt een kaart in minuut ${formatReportTime(card)}, maar is dan al van het veld.`,
@@ -463,7 +484,8 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
     }
 
     if (card.kind === 'geel-rood') {
-      const earlier = yellows.filter((yellow) => clock(yellow) <= clock(card))
+      // A yellow card without a minute counts as earlier: the second one comes after it.
+      const earlier = yellows.filter((yellow) => !hasMinute(yellow) || !hasMinute(card) || clock(yellow) <= clock(card))
 
       if (yellows.length !== 1 || earlier.length !== 1) {
         issues.push({
@@ -506,7 +528,7 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
     if (goal.appearanceId === null && (scorerSide || report.opponentComplete)) {
       issues.push({
         code: 'goal-without-player',
-        message: `Het doelpunt in minuut ${formatReportTime(goal)} heeft geen speler die scoorde.`,
+        message: `Het doelpunt${hasMinute(goal) ? ` in minuut ${formatReportTime(goal)}` : ''} heeft geen speler die scoorde.`,
         place,
         structural: false,
       })
@@ -522,7 +544,7 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
           place,
           structural: false,
         })
-      } else if (!onPitchAt(presence.get(scorer.id), goal)) {
+      } else if (hasMinute(goal) && !onPitchAt(presence.get(scorer.id), goal)) {
         issues.push({
           code: 'scorer-not-on-pitch',
           message: `${scorer.name} scoort in minuut ${formatReportTime(goal)}, maar staat dan niet op het veld.`,
@@ -556,7 +578,7 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
           place,
           structural: false,
         })
-      } else if (!onPitchAt(presence.get(assist.id), goal)) {
+      } else if (hasMinute(goal) && !onPitchAt(presence.get(assist.id), goal)) {
         issues.push({
           code: 'assist-not-on-pitch',
           message: `${assist.name} geeft een assist in minuut ${formatReportTime(goal)}, maar staat dan niet op het veld.`,
@@ -772,8 +794,22 @@ function checkShootout(
 /**
  * Checks the minute and the added time of an event, and adds an issue for each that is wrong.
  */
-function checkTime(time: ReportTime, extraTime: boolean, place: IssuePlace, issues: ReportIssue[]) {
+function checkTime(time: ReportOptionalTime, extraTime: boolean, place: IssuePlace, issues: ReportIssue[]) {
   const last = extraTime ? reportLimits.lastMinuteWithExtraTime : reportLimits.lastMinute
+
+  // An unknown minute has nothing to check, and no added time to go with it.
+  if (time.minute === null) {
+    if (time.stoppageMinutes !== null) {
+      issues.push({
+        code: 'stoppage-without-minute',
+        message: 'Blessuretijd hoort bij een minuut. Vul de minuut in of laat de blessuretijd leeg.',
+        place,
+        structural: false,
+      })
+    }
+
+    return
+  }
 
   if (!between(time.minute, 1, last)) {
     issues.push({
@@ -816,6 +852,11 @@ function checkTime(time: ReportTime, extraTime: boolean, place: IssuePlace, issu
  */
 function clock(time: ReportTime) {
   return time.minute + (time.stoppageMinutes ?? 0) / 100
+}
+
+/** Whether the minute of an event is known, so the rules that need the clock can read it. */
+function hasMinute<T extends ReportOptionalTime>(time: T): time is ReportTime & T {
+  return time.minute !== null
 }
 
 /** How long a match lasts: 90 minutes, or 120 with extra time. */
@@ -866,7 +907,7 @@ function play(report: MatchReport, issues: ReportIssue[]) {
     ...report.substitutions.map((substitution, index) => ({ index, substitution, time: substitution })),
     ...report.cards
       .filter((card) => card.kind !== 'geel')
-      .map((card) => ({ card, index: report.cards.indexOf(card), time: card })),
+      .flatMap((card) => (hasMinute(card) ? [{ card, index: report.cards.indexOf(card), time: card }] : [])),
   ].toSorted((a, b) => {
     // A tie in the clock: the substitutions first.
     const kind = (step: object) => ('substitution' in step ? 0 : 1)

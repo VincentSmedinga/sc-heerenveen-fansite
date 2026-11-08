@@ -91,6 +91,10 @@ describe('noteworthyFactsOf: goals in minutes that follow each other', () => {
     ])
   })
 
+  it('says nothing for a goal without a minute, also next to a goal with one', () => {
+    expect(texts([played([goal('A', { minute: null }), goal('B', { minute: 24 })])])).toEqual([])
+  })
+
   it('says nothing for two goals two minutes apart, or in the same minute', () => {
     expect(texts([played([goal('A', { minute: 23 }), goal('B', { minute: 25 })])])).toEqual([])
     expect(texts([played([goal('A', { minute: 23 }), goal('B', { minute: 23 })])])).toEqual([])
@@ -237,6 +241,10 @@ describe('noteworthyFactsOf: a win after a deficit of two goals', () => {
       texts([played([theirs('X', { minute: 10 }), goal('A', { minute: 20 }), goal('B', { minute: 30 })])]),
     ).toEqual([])
     expect(texts([played([...comeback.slice(0, 2), theirs('Z', { minute: 70 })])])).toEqual([])
+  })
+
+  it('says nothing when one of the goals has no minute, since the order is not known', () => {
+    expect(texts([played([...comeback.slice(0, 4), goal('C', { minute: null })])])).toEqual([])
   })
 
   it('says nothing when the goals do not make up the score', () => {

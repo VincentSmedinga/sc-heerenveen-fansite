@@ -96,6 +96,16 @@ describe('specialGoalsOf', () => {
     expect(specialGoalsOf(matches).doubles).toEqual([])
   })
 
+  it('counts a goal without a minute as a goal: for the hattrick and for the penalties', () => {
+    const result = specialGoalsOf([
+      played([goal('Proefman', { minute: null }), goal('Proefman'), goal('Proefman', { penalty: true })]),
+    ])
+
+    expect(names(result.hattricks)).toEqual([['Proefman', 1]])
+    expect(result.penalties).toBe(1)
+    expect(result.goalsFor).toBe(3)
+  })
+
   it('finds a double, which is exactly two goals in a match', () => {
     const matches = [played([goal('Proefman'), goal('Proefman'), goal('Nepper')])]
 

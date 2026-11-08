@@ -1545,6 +1545,29 @@ describe('lateGoalsOf', () => {
   })
 })
 
+describe('a goal without a minute', () => {
+  const unknown = (...rest: Goal[]) => played([goal('Onbekend', { minute: null }), ...rest])
+
+  it('is left out of the quarters, the late goals and the earliest and latest goal, like a minute that can not be played', () => {
+    const match = unknown(goal('Proefman', { minute: 20 }))
+
+    expect(goalsPerQuarter([match]).scored).toEqual([0, 1, 0, 0, 0, 0])
+    expect(lateGoalsOf([match])).toEqual({ late: { conceded: 0, scored: 0 }, stoppage: { conceded: 0, scored: 0 } })
+
+    const extremes = extremesOf([match])
+
+    expect(extremes.earliestGoal?.goal.player).toBe('Proefman')
+    expect(extremes.latestGoal?.goal.player).toBe('Proefman')
+  })
+
+  it('leaves the match out of the flow, which reads the order of the goals, and does not break on it', () => {
+    const flow = matchFlowOf([unknown(goal('Proefman', { minute: 20 })), played([goal('Proefman', { minute: 20 })])])
+
+    expect(flow).toMatchObject({ known: 1, played: 2 })
+    expect(flow.firstGoal.ours.matches).toBe(1)
+  })
+})
+
 describe('goalsPerQuarter', () => {
   const minutes = (...list: number[]) => played(list.map((minute) => goal('Proefman', { minute })))
 

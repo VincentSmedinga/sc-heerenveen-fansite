@@ -24,6 +24,7 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
    - de **doelpunten**, in een tabel met twee regels per doelpunt: de minuut, de blessuretijd en de soort (gewoon, strafschop of eigen doelpunt), en daaronder het team dat het doelpunt krijgt en de speler.
      Vul je de uitslag in, dan krijg je zoveel doelpunten als de uitslag vraagt.
      Een doelpunt dat je niet invult, telt niet mee.
+     Weet niemand de minuut van een doelpunt, dan laat je hem leeg.
      Met "Doelpunt toevoegen" komt er een rij bij, en de prullenbak bij een doelpunt haalt het weg.
      Wie het doelpunt maakte, volgt uit het team en de soort.
      Maakte een speler van sc Heerenveen het doelpunt, dan kies je hem uit de selectie.
@@ -122,6 +123,9 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
    De lijst van een plek op de bank toont de spelers die niet in de basis staan, en kies je een speler van de bank voor de basis, dan wordt zijn plek op de bank leeg.
 3. Vul de wissels, de doelpunten, de kaarten en de gemiste strafschoppen in.
    Bij 45+1 schrijf je 45 als minuut en 1 bij blessuretijd.
+   De minuut van een doelpunt en van een gele kaart mag leeg blijven als niemand hem weet.
+   Dat staat dan onder de andere gebeurtenissen, zonder minuut.
+   Een rode of geel-rode kaart, een wissel en een gemiste strafschop hebben wel een minuut nodig.
 4. Is de kant van de tegenstander ook af, kies dan bij "Is de kant van de tegenstander ook af?" voor Ja.
    Dan tellen elf spelers, de bank en wie scoorde ook voor hem mee.
 5. Kies bij Opstelling en bank van elk team de formatie, zoals 4-3-3, als je hem weet.
@@ -170,9 +174,12 @@ De tekst heeft kopjes, elk op een eigen regel, en daaronder een regel per speler
   Had een speler geen rugnummer, schrijf dan alleen zijn naam, zoals `Van Aken`.
 - `Wissels`: de minuut, wie erin komt en voor wie, zoals `61 12 voor 8` of `90+2 Smit voor Jansen`.
 - `Doelpunten`: de minuut en de speler die scoorde, met `assist Jansen`, `penalty` of `eigen doelpunt` erachter.
+  Weet niemand de minuut, zet dan een vraagteken: `? Smit`.
   Onder het kopje van een kant staan de doelpunten die die kant kreeg.
   Bij een eigen doelpunt is de naam een speler van de andere kant.
 - `Kaarten`: de minuut, `geel`, `geel-rood` of `rood`, en de speler, zoals `34 geel Jansen`.
+  Bij een gele kaart mag een vraagteken de minuut vervangen: `? geel Jansen`.
+  Een rode of geel-rode kaart heeft een minuut nodig.
 - `Strafschoppen`: de minuut, `gemist` of `gestopt`, en de nemer, zoals `55 gemist Jansen`.
 - Na het kopje `Tegenstander` staan dezelfde kopjes voor de tegenstander.
 - `Formatie: 4-3-3`: de formatie van een team, op een eigen regel bij het team.

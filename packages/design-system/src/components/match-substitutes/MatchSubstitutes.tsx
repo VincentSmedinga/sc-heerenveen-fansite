@@ -68,9 +68,9 @@ export function substituteSentence(substitute: MatchSubstitute): string {
   )
 
   for (const goal of substitute.goals ?? []) {
-    parts.push(
-      `${goal.ownGoal === true ? 'eigen doelpunt' : 'doelpunt'} in minuut ${minuteWords(goal.minute, goal.stoppageMinutes)}`,
-    )
+    const word = goal.ownGoal === true ? 'eigen doelpunt' : 'doelpunt'
+
+    parts.push(goal.minute === null ? word : `${word} in minuut ${minuteWords(goal.minute, goal.stoppageMinutes)}`)
   }
 
   return parts.join(', ')
@@ -130,8 +130,8 @@ export const MatchSubstitutes = ({
                   <span className="hf-match-substitutes-detail">
                     <MatchEventIcon kind="in" /> {pitchMinute(substitute.minute, substitute.stoppageMinutes)} voor{' '}
                     {fullName(substitute.playerOut)}
-                    {substitute.goals?.map((goal) => (
-                      <span key={`${goal.minute}-${goal.stoppageMinutes ?? 0}`}>
+                    {substitute.goals?.map((goal, goalIndex) => (
+                      <span key={`${goal.minute ?? 'unknown'}-${goal.stoppageMinutes ?? 0}-${goalIndex}`}>
                         {' '}
                         · <MatchEventIcon kind={goal.ownGoal === true ? 'own-goal' : 'goal'} />{' '}
                         {pitchMinute(goal.minute, goal.stoppageMinutes)}

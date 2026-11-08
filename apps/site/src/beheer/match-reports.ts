@@ -502,9 +502,9 @@ export function valuesOfReport(
 
   const ref = (id: null | number) => (id === null ? '' : (place.get(id)?.split('-')[1] ?? ''))
   const refWithSide = (id: null | number) => (id === null ? '' : (place.get(id) ?? ''))
-  const moment = (event: { minute: number; stoppageMinutes: null | number }): Row => ({
+  const moment = (event: { minute: null | number; stoppageMinutes: null | number }): Row => ({
     extra: number(event.stoppageMinutes),
-    minuut: String(event.minute),
+    minuut: event.minute === null ? '' : String(event.minute),
   })
 
   for (const substitution of stored?.substitutions ?? []) {

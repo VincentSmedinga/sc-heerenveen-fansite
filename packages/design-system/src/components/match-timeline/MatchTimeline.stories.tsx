@@ -160,3 +160,25 @@ export const WithHighlightedLine = meta.story({
     },
   },
 })
+
+export const WithoutMinute = meta.story({
+  args: {
+    events: [
+      ...regularTime.slice(0, 2),
+      { kind: 'goal', minute: null, ours: true, player: name('Demo', 'Rick'), team: ours },
+      { kind: 'yellow-card', minute: null, ours: false, player: name('Proefveld', 'Ronald'), team: theirs },
+      ...regularTime.slice(2, 4),
+    ],
+    extraTime: false,
+    headingLevel: 3,
+  },
+  name: 'Een doelpunt en een gele kaart zonder minuut: in een blok onderaan',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "De oude fansite kende niet van elke gebeurtenis de minuut. Zo'n gebeurtenis staat onder de andere, in een blok Minuut onbekend, met een streepje in plaats van een minuut dat een schermlezer overslaat.",
+      },
+    },
+  },
+})

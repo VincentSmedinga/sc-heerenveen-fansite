@@ -43,7 +43,8 @@ export type MatchPageCard = {
   /** Draws a frame around the line of this event in the course of the match. */
   highlighted?: boolean
   kind: 'geel' | 'geel-rood' | 'rood'
-  minute: number
+  /** Empty for a yellow card whose minute nobody knows. */
+  minute: null | number
   playerId: number
   stoppageMinutes: null | number
 }
@@ -83,7 +84,8 @@ export type MatchPageGoal = {
   assistId: null | number
   /** Draws a frame around the line of this event in the course of the match. */
   highlighted?: boolean
-  minute: number
+  /** Empty for a goal whose minute nobody knows. */
+  minute: null | number
   /** Whether sc Heerenveen gains from the goal. An own goal gains for the other team. */
   ours: boolean
   ownGoal: boolean
@@ -142,6 +144,18 @@ const shortName = (name: MatchPlayerName) => (name.surname === '' ? (name.givenN
 /** A moment as a number to sort on: 45+2 comes after 45 and before 46. */
 const clock = (moment: { minute: number; stoppageMinutes?: null | number | undefined }) =>
   moment.minute + (moment.stoppageMinutes ?? 0) / 100
+
+/** The order of the clock. An event without a minute comes last, in the order it was given. */
+const byClock = (
+  a: { minute: null | number; stoppageMinutes?: null | number | undefined },
+  b: { minute: null | number; stoppageMinutes?: null | number | undefined },
+) => {
+  if (a.minute === null || b.minute === null) {
+    return Number(a.minute === null) - Number(b.minute === null)
+  }
+
+  return clock({ ...a, minute: a.minute }) - clock({ ...b, minute: b.minute })
+}
 
 const cardKinds = {
   geel: 'yellow-card',
@@ -237,14 +251,14 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
   // A stable sort keeps the order above for two events at the same moment. Added time of a half
   // comes before the next half, so 45+2 is earlier than 46.
-  return events.toSorted((a, b) => clock(a) - clock(b))
+  return events.toSorted(byClock)
 }
 
 /** The goals under a club in the header, in the order of the clock. */
 const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>, ours: boolean) =>
   data.goals
     .filter((goal) => goal.ours === ours && byId.has(goal.playerId))
-    .toSorted((a, b) => clock(a) - clock(b))
+    .toSorted(byClock)
     .map((goal): MatchHeaderScorer => ({
       minute: goal.minute,
       ownGoal: goal.ownGoal,
@@ -276,7 +290,7 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
   const goalsOf = (player: MatchPagePlayer) =>
     data.goals
       .filter((goal) => goal.playerId === player.id)
-      .toSorted((a, b) => clock(a) - clock(b))
+      .toSorted(byClock)
       .map((goal) => ({ minute: goal.minute, ownGoal: goal.ownGoal, stoppageMinutes: added(goal.stoppageMinutes) }))
   const cardOf = (player: MatchPagePlayer) => {
     const [heaviest] = data.cards
@@ -326,7 +340,7 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
 
     return [
       {
-        goals: goalsOf(player).filter((goal) => goal.minute >= substitution.minute),
+        goals: goalsOf(player).filter((goal) => goal.minute === null || goal.minute >= substitution.minute),
         minute: substitution.minute,
         minutesPlayed: minutesOf(player).played,
         name: player.name,
@@ -347,9 +361,11 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
   const byId = new Map(data.players.map((player) => [player.id, player]))
   const ours = teamOf(data, byId, true)
   const theirs = teamOf(data, byId, false)
-  const scoreBar = data.goals
-    .filter((goal) => byId.has(goal.playerId))
-    .map((goal) => ({ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes }))
+  const known = data.goals.filter((goal) => byId.has(goal.playerId))
+  // A goal without a minute has no place on the bar, so the bar would not reach the score.
+  const scoreBar = known.flatMap((goal) =>
+    goal.minute === null ? [] : [{ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes }],
+  )
 
   return {
     events: eventsOf(data, byId),
@@ -363,9 +379,10 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
     // A report that is complete passed the rules, which let a goal of an opponent without a
     // line-up have no player: its bar is the bar of the goals it has.
     scoreBarAgrees:
-      data.complete ||
-      (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
-        scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst),
+      scoreBar.length === known.length &&
+      (data.complete ||
+        (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+          scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst)),
     scorersAgainst: scorersOf(data, byId, false),
     scorersFor: scorersOf(data, byId, true),
     series: roundsOf(data, byId),

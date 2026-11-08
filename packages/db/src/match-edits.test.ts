@@ -217,6 +217,39 @@ describe('removeEntry', () => {
 
     expect(await database.db.select().from(matchGoals)).toMatchObject([{ minute: 5, player: 'Oyen', playerId: null }])
   })
+
+  it('brings back a goal without a minute as it was, without a minute', async () => {
+    const [values] = await withClubs(database.db, [scheduled])
+    const [inserted] = await database.db
+      .insert(matches)
+      .values({ ...values!, goalsAgainst: 0, goalsFor: 1, status: 'played' })
+      .$returningId()
+    const id = inserted?.id ?? 0
+
+    await database.db.insert(matchGoals).values({ matchId: id, minute: null, ours: true, player: 'Oyen' })
+
+    const [match] = await database.db.select().from(matches).where(eq(matches.id, id))
+    const goals = await database.db.select().from(matchGoals)
+
+    await database.db.insert(matchEdits).values({
+      beforeGoals: encodeGoals(goals),
+      beforeMatch: encodeMatch(match!),
+      editedAt: new Date(),
+      editedBy: adminId,
+      goalsEdited: true,
+      matchId: id,
+      reason: 'Fout',
+    })
+    await database.db.delete(matchGoals)
+
+    const [edit] = await database.db.select().from(matchEdits)
+
+    await removeEntry(database.db, edit!)
+
+    expect(await database.db.select().from(matchGoals)).toMatchObject([
+      { minute: null, player: 'Oyen', stoppageMinutes: null },
+    ])
+  })
 })
 
 describe('the lines the log and the page use', () => {
@@ -295,5 +328,30 @@ describe('the lines the log and the page use', () => {
         },
       ]),
     ).toBe("12' Oyen, 45+1' Sibbing (tegenstander, eigen doelpunt), 80' Van Dijk (tegenstander, strafschop)")
+  })
+
+  it('writes a goal without a minute with its player only', () => {
+    expect(
+      describeEntryGoals([
+        {
+          minute: null,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: 'Oyen',
+          playerId: 1,
+          stoppageMinutes: null,
+        },
+        {
+          minute: null,
+          ours: false,
+          ownGoal: false,
+          penalty: true,
+          player: 'Van Dijk',
+          playerId: null,
+          stoppageMinutes: null,
+        },
+      ]),
+    ).toBe('Oyen, Van Dijk (tegenstander, strafschop)')
   })
 })

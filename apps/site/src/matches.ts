@@ -641,10 +641,10 @@ export function extremesOf(matches: PublicMatch[], choice: CompetitionChoice = '
   const total = (match: PublicMatch) => (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
   const goals = known.flatMap((match) =>
     match.goals
-      .filter((goal) => goal.ours && goal.minute >= 1 && goal.minute <= 90)
+      .filter((goal) => goal.ours && goal.minute !== null && goal.minute >= 1 && goal.minute <= 90)
       .map((goal): ExtremeGoal => ({ goal, match })),
   )
-  const minuteOf = ({ goal }: ExtremeGoal) => goal.minute + (goal.stoppageMinutes ?? 0)
+  const minuteOf = ({ goal }: ExtremeGoal) => (goal.minute ?? 0) + (goal.stoppageMinutes ?? 0)
   const biggestWin = best(played, difference)
   const biggestLoss = best(played, (match) => -difference(match))
 
@@ -677,7 +677,7 @@ export function goalsPerQuarter(matches: PublicMatch[], choice: CompetitionChoic
   const conceded = quarterLabels.map(() => 0)
 
   for (const goal of known.flatMap((match) => match.goals)) {
-    if (goal.minute < 1 || goal.minute > 90) {
+    if (goal.minute === null || goal.minute < 1 || goal.minute > 90) {
       continue
     }
 
@@ -718,11 +718,11 @@ export function lateGoalsOf(
   for (const goal of known.flatMap((match) => match.goals)) {
     const side = goal.ours ? 'scored' : 'conceded'
 
-    if (goal.minute >= 81) {
+    if (goal.minute !== null && goal.minute >= 81) {
       late[side]++
     }
 
-    if (goal.minute >= 1 && goal.stoppageMinutes !== null && goal.stoppageMinutes > 0) {
+    if (goal.minute !== null && goal.minute >= 1 && goal.stoppageMinutes !== null && goal.stoppageMinutes > 0) {
       stoppage[side]++
     }
   }
@@ -901,7 +901,9 @@ export function leaguePlaceOf(rows: PublicStandingsRow[]): LeaguePlace | undefin
  */
 export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
   const played = matches.filter((match) => match.competition === 'Eredivisie' && match.status === 'played')
-  const known = played.filter(hasKnownGoals)
+  // The flow reads the order of the goals, so a goal without a minute (the old fansite) says
+  // nothing about it: the match is left out, as one without goals.
+  const known = played.filter(hasKnownGoals).filter((match) => match.goals.every((goal) => goal.minute !== null))
   const flow: MatchFlow = {
     atHalfTime: { ahead: emptyRow(), behind: emptyRow(), level: emptyRow() },
     firstGoal: { opponent: emptyRow(), ours: emptyRow() },
@@ -939,7 +941,7 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
     }
 
     const atHalfTime = match.goals
-      .filter((goal) => goal.minute <= 45)
+      .filter((goal) => goal.minute !== null && goal.minute <= 45)
       .reduce((sum, goal) => sum + (goal.ours ? 1 : -1), 0)
 
     addToRow(
@@ -1408,7 +1410,7 @@ function best<T>(items: T[], score: (item: T) => number): T | undefined {
  * group have no known order between them.
  */
 function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
-  const clock = (goal: ScorerGoal) => [goal.minute, goal.stoppageMinutes ?? 0] as const
+  const clock = (goal: ScorerGoal) => [goal.minute ?? 0, goal.stoppageMinutes ?? 0] as const
   const sorted = [...goals].sort((a, b) => clock(a)[0] - clock(b)[0] || clock(a)[1] - clock(b)[1])
   const groups: ScorerGoal[][] = []
 

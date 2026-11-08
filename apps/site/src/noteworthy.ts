@@ -92,7 +92,11 @@ const matchKey = (match: PublicMatch) => `${match.competition}:${match.round}`
 
 /** Whether two goals fell in minutes that follow each other: 23 and 24, but not 45+1 and 46. */
 const follows = (earlier: MatchGoal, later: MatchGoal) =>
-  earlier.stoppageMinutes === null && later.stoppageMinutes === null && later.minute - earlier.minute === 1
+  earlier.minute !== null &&
+  later.minute !== null &&
+  earlier.stoppageMinutes === null &&
+  later.stoppageMinutes === null &&
+  later.minute - earlier.minute === 1
 
 /**
  * A win after we were behind by two goals or more, read from the order of the goals. It needs
@@ -100,7 +104,12 @@ const follows = (earlier: MatchGoal, later: MatchGoal) =>
  */
 function comeback({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
-    if (resultOf(match) !== 'win' || match.goals.length !== match.goalsFor + match.goalsAgainst) {
+    // The order of the goals is needed, so a goal without a minute says nothing.
+    if (
+      resultOf(match) !== 'win' ||
+      match.goals.length !== match.goalsFor + match.goalsAgainst ||
+      match.goals.some((goal) => goal.minute === null)
+    ) {
       return []
     }
 
@@ -126,7 +135,7 @@ function comeback({ played }: FactInput): NoteworthyFact[] {
 /** Two goals in minutes that follow each other, of ours or against us: one fact per match. */
 function consecutiveMinutes({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
-    const goals = match.goals.filter((goal) => goal.minute >= 1)
+    const goals = match.goals.filter((goal) => goal.minute !== null && goal.minute >= 1)
     const first = goals.find((goal, index) => {
       const next = goals[index + 1]
 

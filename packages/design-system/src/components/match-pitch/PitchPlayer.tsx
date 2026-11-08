@@ -8,7 +8,8 @@ import { PlayerDisc } from './PlayerDisc'
 /** The heaviest card the player got in the match. */
 export type PitchPlayerCard = {
   kind: 'red-card' | 'yellow-card' | 'yellow-red-card'
-  minute: number
+  /** Empty when nobody knows the minute: the sentence then has the card and no minute. */
+  minute: null | number
   stoppageMinutes?: number | undefined
 }
 
@@ -32,7 +33,8 @@ export type PitchPlayerData = {
 
 /** A goal of the player. `ownGoal` is a goal against his own team. */
 export type PitchPlayerGoal = {
-  minute: number
+  /** Empty when nobody knows the minute: the sentence then has the goal and no minute. */
+  minute: null | number
   ownGoal?: boolean | undefined
   /** The minutes of added time after `minute`, as the 2 of 90+2. */
   stoppageMinutes?: number | undefined
@@ -46,9 +48,17 @@ export type PitchPlayerProps = Omit<ComponentPropsWithoutRef<'li'>, 'children'> 
     ours: boolean
   }
 
-/** A minute as the page writes it: `12'` or, in added time, `90+2'`. */
-export const pitchMinute = (minute: number, stoppageMinutes?: number | undefined) =>
-  stoppageMinutes === undefined || stoppageMinutes === 0 ? `${minute}'` : `${minute}+${stoppageMinutes}'`
+/** A minute as the page writes it: `12'` or, in added time, `90+2'`. Empty for no minute. */
+export const pitchMinute = (minute: null | number, stoppageMinutes?: number | undefined) =>
+  minute === null
+    ? ''
+    : stoppageMinutes === undefined || stoppageMinutes === 0
+      ? `${minute}'`
+      : `${minute}+${stoppageMinutes}'`
+
+/** A word and its minute for the sentence, such as `doelpunt 12'`, or the word alone. */
+const withMinute = (word: string, minute: null | number, stoppageMinutes?: number | undefined) =>
+  minute === null ? word : `${word} ${pitchMinute(minute, stoppageMinutes)}`
 
 const cardWords: Record<PitchPlayerCard['kind'], string> = {
   'red-card': 'rode kaart',
@@ -77,13 +87,11 @@ export function pitchPlayerSentence(player: PitchPlayerData): string {
   }
 
   for (const goal of player.goals ?? []) {
-    parts.push(
-      `${goal.ownGoal === true ? 'eigen doelpunt' : 'doelpunt'} ${pitchMinute(goal.minute, goal.stoppageMinutes)}`,
-    )
+    parts.push(withMinute(goal.ownGoal === true ? 'eigen doelpunt' : 'doelpunt', goal.minute, goal.stoppageMinutes))
   }
 
   if (player.card !== undefined) {
-    parts.push(`${cardWords[player.card.kind]} ${pitchMinute(player.card.minute, player.card.stoppageMinutes)}`)
+    parts.push(withMinute(cardWords[player.card.kind], player.card.minute, player.card.stoppageMinutes))
   }
 
   if (player.substitutedOffAt !== undefined) {

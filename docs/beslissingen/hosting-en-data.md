@@ -622,6 +622,8 @@
   `match_reports` heeft sindsdien `formation_ours` en `formation_opponent`.
 - **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): het verslag heeft sindsdien een zesde tabel, `match_shootout_kicks`, met de schoten van de serie.
 - **Later:** zie _Een rugnummer mag ontbreken_ (8 november 2026): `match_appearances.shirt_number` mag sinds `0050_make_shirt_number_optional` leeg zijn, en dan telt de sleutel op wedstrijd, team en rugnummer niet voor die spelers.
+- **Later:** zie _De minuut van een doelpunt of een gele kaart mag onbekend zijn, die van een rode kaart niet_ (8 november 2026): `minute` van `match_goals` en `match_cards` mag sinds `0051_make_goal_and_card_minute_optional` leeg zijn, en dan ook de blessuretijd.
+  De minuut van een wissel en van een gemiste strafschop blijft verplicht, en een minuut ligt dus niet meer bij elke gebeurtenis tussen 1 en 120.
 
 ## De regels voor een verslag staan op één plek, in `packages/shared`
 
@@ -811,3 +813,39 @@
 - **Waarom:** de opstellingen in de database van de oude fansite (566 wedstrijden) hebben geen rugnummers, en een verslag eiste er een voor elke speler.
   Zo kunnen ze later zonder verzonnen nummers worden geïmporteerd (#879).
 - **Alternatieven:** de nummers verzinnen, bijvoorbeeld de volgorde in de opstelling; de oude opstellingen niet importeren.
+
+## De minuut van een doelpunt of een gele kaart mag onbekend zijn, die van een rode kaart niet
+
+- **Datum:** 8 november 2026
+- **Besluit:** de minuut van een doelpunt en van een gele kaart mag leeg zijn (#872).
+  De oude fansite kende de minuut van 4 van de 1.771 doelpunten, 793 van de 1.386 gele kaarten en 8 van de 88 rode en geel-rode kaarten niet, en een verzonnen minuut zet een onwaarheid in de database.
+  Een rode of geel-rode kaart bepaalt de speelminuten van een speler, dus daarvan blijft de minuut verplicht.
+  - **De opslag:** `minute` van `match_goals` en `match_cards` is niet meer verplicht (migratie `0051_make_goal_and_card_minute_optional`).
+    De check van 1 tot en met 120 laat een lege minuut door, omdat een check alleen faalt op onwaar.
+    Drie checks komen erbij of veranderen: blessuretijd hoort alleen bij een minuut (`match_goals_stoppage_needs_minute`, en `match_cards_stoppage_range` voor een kaart), en een kaart die niet geel is, heeft een minuut (`match_cards_red_needs_minute`).
+    Een wissel, een gemiste strafschop en een schot van de serie houden hun verplichte minuut.
+    Terugdraaien kan alleen als geen doelpunt of kaart een lege minuut heeft; de migratie zegt hoe, en kan opnieuw draaien.
+  - **De regels:** in `@fansite/shared/match-report` is de minuut van een doelpunt en van een kaart `number | null`.
+    `checkTime` slaat een lege minuut over, en de regels die de klok nodig hebben slaan zo'n gebeurtenis over: een kaart na het verlaten van het veld, een speler of een assist die niet op het veld staat.
+    Een gele kaart zonder minuut telt als eerder dan de geel-rode kaart van dezelfde speler.
+    Een rode of geel-rode kaart zonder minuut is de fout `red-card-without-minute`, en blessuretijd zonder minuut is `stoppage-without-minute`.
+    Beide kan de database niet opslaan, dus ze houden ook een verslag dat `bezig` is tegen (`unstorable`).
+    `minutesPlayed` leest alleen wissels en rode kaarten, en verandert niet.
+  - **De volgorde:** een doelpunt en een kaart zonder minuut staan na die met een minuut, in de volgorde van `id`.
+    Dat geldt voor `readMatchReport`, de doelpuntenlijsten en de wedstrijdpagina.
+  - **De pagina van de wedstrijd:** de tijdlijn heeft een blok _Minuut onbekend_ onder de helften, alleen als een gebeurtenis het nodig heeft, met een streepje in plaats van de minuut.
+    Een schermlezer slaat het streepje over en hoort het team, de soort gebeurtenis en de speler.
+    De lijst van doelpuntenmakers, de regel van een speler op het veld en de wissels laten de minuut weg.
+    De balk van het wedstrijdverloop komt niet, want een doelpunt zonder plek haalt de uitslag niet.
+    Een doelpunt zonder minuut telt wel mee voor de uitslag, de topscorers, de hattricks en de strafschoppen.
+  - **De statistieken:** de tellingen per kwartier, de late doelpunten en het vroegste en laatste doelpunt slaan een doelpunt zonder minuut over, zoals ze al een minuut deden die niet gespeeld kan worden (0).
+    Het verloop van de wedstrijd (wie scoorde eerst, de stand bij de rust) en een wedstrijd waarin we terugkwamen, hebben de volgorde van de doelpunten nodig, dus een wedstrijd met zo'n doelpunt telt daar niet mee.
+  - **Het beheer:** het formulier van een wedstrijd en dat van een verslag laten de minuut van een doelpunt en van een gele kaart leeg, en bewaren hem als leeg.
+    Het formulier van het verslag vraagt wel een minuut voor een rode of geel-rode kaart, een wissel en een gemiste strafschop.
+    Het plakscherm leest een vraagteken als minuut, zoals `? geel Jansen`.
+    De voorvertoning toont zo'n doelpunt en zo'n kaart in het blok _Minuut onbekend_.
+    `before_goals` in `match_edits` neemt de lege minuut mee.
+  - **De seed:** het tweede verzonnen verslag, de bekerwedstrijd in de achtste finale, heeft een gele kaart van de tegenstander en een doelpunt van de tegenstander zonder minuut.
+- **Waarom:** de import van de oude wedstrijden (#878 en #879) hoeft zo niets te verzinnen, en de kaarten per speler kloppen.
+  Een rode kaart zonder minuut zou de speelminuten van een speler onbekend maken.
+- **Alternatieven:** kaarten zonder minuut overslaan (verliest 793 gele kaarten, dus de kaarten per speler kloppen niet); minuut 1 of 0 als plaatsvervanger (valse gegevens); de balk van het wedstrijdverloop toch tonen met de doelpunten die een minuut hebben (de balk zou niet bij de uitslag passen); een doelpunt zonder minuut in de tweede helft zetten (dat zegt iets wat niemand weet).

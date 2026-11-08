@@ -143,9 +143,18 @@ describe('the preview next to the form of a report', () => {
 
     fireEvent.change(field('doelpunt-wij-1-minuut'), { target: { value: '' } })
 
-    // A goal without a minute is not finished: it leaves the preview, and the score goes down.
+    // A goal without a minute stays in the preview, in a block of its own, and the score stays.
+    await waitFor(() => expect(course()).toContain('Minuut onbekend'))
+    expect(aside().querySelector('.hf-match-header-goals')?.textContent).toBe('1')
+    expect(aside().querySelector('.hf-match-event-minute')?.textContent).toBe('–')
+
+    // A goal without a scorer is not finished: it leaves the preview, and the score goes down.
+    fireEvent.change(field('doelpunt-wij-1-speler'), { target: { value: '' } })
+
     await waitFor(() => expect(aside().querySelector('.hf-match-header-goals')?.textContent).toBe('0'))
     expect(aside().querySelector('.hf-match-event')).toBeNull()
+
+    fireEvent.change(field('doelpunt-wij-1-speler'), { target: { value: 'wij-9' } })
 
     fireEvent.change(field('doelpunt-wij-1-minuut'), { target: { value: '70' } })
 

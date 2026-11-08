@@ -865,3 +865,39 @@ export const WithReport = meta.story({
   name: 'Met een pagina: de regel eindigt met de link naar het verslag, de andere regel heeft geen link',
   render: renderWithReport,
 })
+
+// The goals of an old match: the minute of one goal is not known, so its line has a dash.
+const renderGoalWithoutMinute = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-oud-kop">
+      <Heading id="uitslagen-oud-kop" level={2}>
+        Eredivisie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="1998-05-02"
+            goals={[
+              { minute: 14, ours: true, player: 'Demo' },
+              { minute: null, ours: false, player: 'Dummydijk' },
+              { minute: null, ours: true, player: 'Monster' },
+            ]}
+            goalsAgainst={1}
+            goalsFor={2}
+            home
+            opponent="Voorbeeld United"
+            round="Speelronde 34"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="za 2 mei"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const GoalWithoutMinute = meta.story({
+  name: 'Een doelpunt zonder minuut: een streepje in de kleur van de club',
+  render: renderGoalWithoutMinute,
+})

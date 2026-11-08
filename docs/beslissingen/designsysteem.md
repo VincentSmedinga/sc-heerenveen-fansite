@@ -2897,6 +2897,7 @@
   De eigenschappen die er al waren (`afterNinetyFor`, `penaltiesFor` en de rest) houden hun naam.
 - **Waarom:** de pagina van #831 en de stories blijven werken tot #850 de pagina bouwt, en een eigen doelpunt moet bij het team staan dat het doelpunt krijgt, zoals de uitslag het telt.
 - **Alternatieven:** de helft als eigenschap van elke gebeurtenis (de pagina moet dan zelf de minuut uitzoeken), en de doelpuntenmakers uit de gebeurtenissen van het verloop halen (`MatchHeader` kent het verloop niet).
+- **Later:** zie _De minuut van een doelpunt of een gele kaart mag onbekend zijn, die van een rode kaart niet_ in `hosting-en-data.md` (8 november 2026): een gebeurtenis zonder minuut staat in een vierde blok, _Minuut onbekend_, onder de andere, en `MatchHeader`, `Match`, `MatchSubstitutes` en `PitchPlayer` laten de minuut dan weg.
 
 ## De wissels per team tonen alleen wie speelde, en delen de stip en de boog met het veld
 

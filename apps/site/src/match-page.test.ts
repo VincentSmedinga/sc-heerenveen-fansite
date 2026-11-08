@@ -310,3 +310,64 @@ describe('the score bar and the result', () => {
     expect(buildMatchPage(changed).scoreBarAgrees).toBe(false)
   })
 })
+
+describe('a goal and a yellow card without a minute', () => {
+  /** The match with the first goal (12', ours) and the yellow card (30') without a minute. */
+  const unknown = () => {
+    const changed = data()
+
+    changed.goals = changed.goals.map((goal, index) => (index === 0 ? { ...goal, minute: null } : goal))
+    changed.cards = changed.cards.map((card) =>
+      card.kind === 'geel' ? { ...card, minute: null, stoppageMinutes: null } : card,
+    )
+
+    return buildMatchPage(changed)
+  }
+
+  it('stand in the course of the match after the events with a minute, in the order they were given', () => {
+    const { events } = unknown()
+
+    expect(events.map((event) => [event.minute, event.kind])).toEqual([
+      [40, 'goal'],
+      [45, 'substitution'],
+      [55, 'penalty-missed'],
+      [60, 'substitution'],
+      [78, 'goal'],
+      [90, 'red-card'],
+      [null, 'goal'],
+      [null, 'yellow-card'],
+    ])
+  })
+
+  it('stay in the list of scorers, after the goals with a minute', () => {
+    const { scorersFor } = unknown()
+
+    expect(scorersFor.map((scorer) => [scorer.player, scorer.minute])).toEqual([
+      ['Dirk Proefland', 78],
+      ['Demo', null],
+    ])
+  })
+
+  it('are not on the score bar, which then does not agree with the result and is not shown', () => {
+    const page = unknown()
+
+    expect(page.scoreBar.map((goal) => goal.minute)).toEqual([40, 78])
+    expect(page.scoreBarAgrees).toBe(false)
+  })
+
+  it('are marks on the player with no minute, and the minutes he played stay as they were', () => {
+    const before = built().pitch.ours.players
+    const after = unknown().pitch.ours.players
+    const demo = after.find((one) => one.name.surname === 'Demo' || one.name.givenName === 'Rick Demo')
+
+    expect(after.map((one) => one.minutesPlayed)).toEqual(before.map((one) => one.minutesPlayed))
+    expect(demo?.goals).toEqual([{ minute: null, ownGoal: false }])
+  })
+
+  it('keep the red card of a player with its minute, and the minutes he played', () => {
+    const page = unknown()
+    const theirs = page.pitch.opponent?.players ?? []
+
+    expect(theirs.find((one) => one.card?.kind === 'red-card')?.card?.minute).toBe(90)
+  })
+})

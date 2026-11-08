@@ -139,16 +139,46 @@ describe('the events in the preview', () => {
     expect(data.substitutions).toEqual([{ inId: 12, minute: 60, outId: 10, stoppageMinutes: null }])
   })
 
-  it('leave out a row that is not finished: a goal without a minute, or a card without a player', () => {
+  it('leave out a row that is not finished: a goal without a scorer, a card without a player or a substitution without a minute', () => {
     const data = dataOf(
       values({
-        doelpunt: [event('doelpunt', { minuut: '', soort: 'gewoon', speler: 'wij-9' })],
+        doelpunt: [event('doelpunt', { minuut: '12', soort: 'gewoon', speler: '' })],
         kaart: [event('kaart', { minuut: '30', soort: 'geel', speler: '' })],
-        wissel: [event('wissel', { erin: '', eruit: '10', minuut: '60' })],
+        wissel: [event('wissel', { erin: '12', eruit: '10', minuut: '' })],
       }),
     )
 
     expect([data.goals.length, data.cards.length, data.substitutions.length]).toEqual([0, 0, 0])
+  })
+
+  it('keep a goal and a yellow card without a minute, with an empty minute', () => {
+    const data = dataOf(
+      values({
+        doelpunt: [event('doelpunt', { minuut: '', soort: 'gewoon', speler: 'wij-9' })],
+        kaart: [event('kaart', { minuut: '', soort: 'geel', speler: '3' })],
+      }),
+    )
+
+    expect(data.goals).toMatchObject([{ minute: null, playerId: 9, stoppageMinutes: null }])
+    expect(data.cards).toMatchObject([{ kind: 'geel', minute: null, playerId: 3, stoppageMinutes: null }])
+  })
+
+  it('leave out a goal with added time and no minute, and a red card, a substitution and a penalty without one', () => {
+    const data = dataOf(
+      values({
+        doelpunt: [event('doelpunt', { extra: '2', minuut: '', soort: 'gewoon', speler: 'wij-9' })],
+        kaart: [
+          event('kaart', { minuut: '', soort: 'rood', speler: '3' }),
+          event('kaart', { minuut: '', soort: 'geel-rood', speler: '4' }),
+        ],
+        strafschop: [event('strafschop', { minuut: '', soort: 'strafschop-gemist', speler: '9' })],
+        wissel: [event('wissel', { erin: '12', eruit: '10', minuut: '' })],
+      }),
+    )
+
+    expect([data.goals, data.cards, data.incidents, data.substitutions].map((list) => list.length)).toEqual([
+      0, 0, 0, 0,
+    ])
   })
 
   it('leave out a minute that is not a number of 1 to 120, and added time that is not right', () => {

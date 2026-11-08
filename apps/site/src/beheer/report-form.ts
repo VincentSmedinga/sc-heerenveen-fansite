@@ -83,10 +83,10 @@ export type ReportMatch = Pick<
  */
 export type ReportPlan = {
   appearances: PlannedPlayer[]
-  cards: (Moment & { appearance: number; kind: CardKind; ours: boolean })[]
+  cards: (OptionalMoment & { appearance: number; kind: CardKind; ours: boolean })[]
   /** The formation of each team, or none. */
   formations: { opponent: null | string; ours: null | string }
-  goals: (Moment & {
+  goals: (OptionalMoment & {
     appearance: null | number
     assist: null | number
     name: string
@@ -110,14 +110,19 @@ export type ReportPlan = {
 /** A moment in the match. */
 type Moment = { minute: number; stoppageMinutes: null | number }
 
+/** A moment that may be unknown: the minute of a goal or a yellow card may be empty. */
+type OptionalMoment = { minute: null | number; stoppageMinutes: null | number }
+
 /**
  * The errors of the rules that the database can not store: a report with one of them has no
  * place in the tables, whatever its status. The structural ones come with them (`structural`),
  * since an event that points to nobody can not be read back.
  */
 const unstorable = new Set([
+  'red-card-without-minute',
   'second-yellow-is-yellow-red',
   'shirt-number-twice',
+  'stoppage-without-minute',
   'substitution-in-twice',
   'substitution-out-twice',
 ])
@@ -135,6 +140,7 @@ const fieldOfCode: Record<string, FieldName> = {
   'incident-not-on-pitch': 'speler',
   'minute-out-of-range': 'minuut',
   'own-goal-by-own-team': 'speler',
+  'red-card-without-minute': 'minuut',
   'scorer-not-on-pitch': 'speler',
   'second-yellow-is-yellow-red': 'soort',
   'shirt-number-out-of-range': 'rugnummer',
@@ -145,6 +151,7 @@ const fieldOfCode: Record<string, FieldName> = {
   'shootout-player-twice': 'speler',
   'stoppage-in-the-middle-of-a-half': 'extra',
   'stoppage-out-of-range': 'extra',
+  'stoppage-without-minute': 'extra',
   'substitution-in-not-on-bench': 'erin',
   'substitution-in-twice': 'erin',
   'substitution-out-not-on-pitch': 'eruit',
@@ -384,13 +391,20 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     return place
   }
 
-  /** The minute and the added time of an event, as the database allows them. */
-  const moment = (kind: RowKind, side: Side, number: number, row: Row): Moment | undefined => {
-    const minute = /^\d{1,3}$/u.test(row.minuut ?? '') ? Number(row.minuut) : undefined
+  /**
+   * The minute and the added time of an event, as the database allows them. A minute may be
+   * left empty when `optional` says so, and is then `null`: the rules judge a card that needs
+   * it.
+   */
+  function moment(kind: RowKind, side: Side, number: number, row: Row, optional: true): OptionalMoment | undefined
+  function moment(kind: RowKind, side: Side, number: number, row: Row, optional?: false): Moment | undefined
+  function moment(kind: RowKind, side: Side, number: number, row: Row, optional = false) {
+    const empty = optional && (row.minuut ?? '') === ''
+    const minute = empty ? null : /^\d{1,3}$/u.test(row.minuut ?? '') ? Number(row.minuut) : undefined
     const stoppage = row.extra === '' ? null : /^\d{1,2}$/u.test(row.extra ?? '') ? Number(row.extra) : undefined
     let valid = true
 
-    if (minute === undefined || minute < 1 || minute > matchReportLimits.lastMinute) {
+    if (minute !== null && (minute === undefined || minute < 1 || minute > matchReportLimits.lastMinute)) {
       parseFail(kind, side, number, 'minuut', `vul de minuut in, van 1 tot ${matchReportLimits.lastMinute}.`)
       valid = false
     }
@@ -407,7 +421,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
         `vul de blessuretijd in, van 1 tot ${matchReportLimits.stoppageMinutes} minuten, of laat het leeg.`,
       )
       valid = false
-    } else if (stoppage !== null && minute !== undefined && ![45, 90, 105, 120].includes(minute)) {
+    } else if (stoppage !== null && minute !== undefined && minute !== null && ![45, 90, 105, 120].includes(minute)) {
       parseFail(
         kind,
         side,
@@ -450,7 +464,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
 
       const kind = cardKindChoices.find((choice) => choice.value === row.soort)?.value
       const player = point('kaart', side, number, 'speler', row.speler ?? '', side, true)
-      const time = moment('kaart', side, number, row)
+      const time = moment('kaart', side, number, row, true)
 
       if (kind === undefined) {
         parseFail('kaart', side, number, 'soort', 'kies geel, geel-rood of rood.')
@@ -525,7 +539,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       const assistSide = (row.assist ?? '').startsWith('zij-') ? 'zij' : 'wij'
       const scorer = point('doelpunt', side, number, 'speler', row.speler ?? '', scorerSide, false)
       const assist = point('doelpunt', side, number, 'assist', row.assist ?? '', assistSide, false)
-      const time = moment('doelpunt', side, number, row)
+      const time = moment('doelpunt', side, number, row, true)
       const name = scorer === undefined ? (row.naam ?? '') : (players[scorer]?.name ?? '')
 
       if (kind === undefined) {
@@ -563,7 +577,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
 
   // The events in the order of the clock, and for the same moment as they were typed. The
   // origins follow, since the rules name an event by its place in the list.
-  const sorted = <T extends Moment>(events: T[], places: [Side, number][]) => {
+  const sorted = <T extends OptionalMoment>(events: T[], places: [Side, number][]) => {
     const order = events
       .map((_event, index) => index)
       .toSorted((a, b) => clock(events[a]!) - clock(events[b]!) || a - b)
@@ -678,8 +692,9 @@ export function errorOrder(values: ReportValues): string[] {
 }
 
 /** The clock of a moment, so added time comes before the next half: 45+2 is before 46. */
-function clock(moment: Moment) {
-  return moment.minute + (moment.stoppageMinutes ?? 0) / 100
+function clock(moment: OptionalMoment) {
+  // An event without a minute comes after the others.
+  return moment.minute === null ? Infinity : moment.minute + (moment.stoppageMinutes ?? 0) / 100
 }
 
 /**

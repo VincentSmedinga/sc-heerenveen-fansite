@@ -21,8 +21,12 @@ type MatchEventBase = {
    * the preview of a form. The frame is a line round the event, so it shows without colour.
    */
   highlighted?: boolean | undefined
-  /** The minute on the clock: 45 for "45+2". */
-  minute: number
+  /**
+   * The minute on the clock: 45 for "45+2". Empty when nobody knows it, such as for a goal or
+   * a yellow card of the old fansite: the event then stands in a block of its own, last,
+   * without a minute.
+   */
+  minute: null | number
   /** Whether the event is of sc Heerenveen. Otherwise it is of the opponent. */
   ours: boolean
   /** The minutes of added time after `minute`: 2 for "45+2". Leave it out in regular time. */
@@ -102,6 +106,7 @@ const blockNames: Record<MatchHalf, string> = {
   'extra-time': 'Verlenging',
   first: 'Eerste helft',
   second: 'Tweede helft',
+  unknown: 'Minuut onbekend',
 }
 
 const Name = ({ name }: { name: MatchPlayerName }) => <PlayerName givenName={name.givenName} surname={name.surname} />
@@ -129,6 +134,10 @@ const hasAddedTime = (event: MatchTimelineEvent) =>
 
 /** What a screen reader hears first: the team, the minute and the kind of event. */
 const spoken = (event: MatchTimelineEvent) => {
+  if (event.minute === null) {
+    return `${event.team}: ${kindName(event)}: `
+  }
+
   const added = hasAddedTime(event) ? ` plus ${event.stoppageMinutes}` : ''
 
   return `${event.team}: Minuut ${event.minute}${added}, ${kindName(event)}: `
@@ -142,8 +151,7 @@ function Event({ event }: { event: MatchTimelineEvent }) {
         aria-hidden="true"
         className={classNames('hf-match-event-minute', event.ours && 'hf-match-event-minute-ours')}
       >
-        {event.minute}
-        {hasAddedTime(event) ? `+${event.stoppageMinutes}` : ''}’
+        {event.minute === null ? '–' : `${event.minute}${hasAddedTime(event) ? `+${event.stoppageMinutes}` : ''}’`}
       </span>
       <span className="hf-match-event-text">
         <span className="hf-visually-hidden">{spoken(event)}</span>
@@ -182,7 +190,9 @@ function Event({ event }: { event: MatchTimelineEvent }) {
 
 /**
  * The course of a played match in two halves next to each other, and a third block, Verlenging,
- * under them after extra time. In a block every event is one line: the minute in a pill, filled
+ * under them after extra time. Events without a minute stand in a last block, Minuut onbekend,
+ * with a dash in the pill that a screen reader skips, and the team and kind of event only. In a
+ * block every event is one line: the minute in a pill, filled
  * for sc Heerenveen and open for the opponent, then the icon and the name of the player. A goal
  * from a penalty or an own goal says so after the name, a substitution is "A voor B", and the
  * assist is on a line of its own in small letters. A word beside an icon that says the same is
@@ -201,13 +211,20 @@ export const MatchTimeline = ({
   <div {...props} className={classNames('hf-match-timeline', className)} role="group">
     <div className="hf-match-timeline-blocks">
       {matchHalves
-        .filter((half) => half !== 'extra-time' || extraTime)
+        .filter(
+          (half) =>
+            (half !== 'extra-time' || extraTime) &&
+            (half !== 'unknown' || events.some((event) => event.minute === null)),
+        )
         .map((half) => {
           const inBlock = events.filter((event) => halfOf(event.minute, extraTime) === half)
 
           return (
             <div
-              className={classNames('hf-match-timeline-block', half === 'extra-time' && 'hf-match-timeline-extra-time')}
+              className={classNames(
+                'hf-match-timeline-block',
+                (half === 'extra-time' || half === 'unknown') && 'hf-match-timeline-extra-time',
+              )}
               key={half}
             >
               <Heading level={headingLevel}>{blockNames[half]}</Heading>

@@ -96,7 +96,10 @@ export function describeEntryGoals(goals: GoalFields[]): string {
         goal.penalty ? 'strafschop' : undefined,
       ].filter((note) => note !== undefined)
 
-      return `${goal.minute}${goal.stoppageMinutes === null ? '' : `+${goal.stoppageMinutes}`}' ${goal.player}${notes.length === 0 ? '' : ` (${notes.join(', ')})`}`
+      const minute =
+        goal.minute === null ? '' : `${goal.minute}${goal.stoppageMinutes === null ? '' : `+${goal.stoppageMinutes}`}' `
+
+      return `${minute}${goal.player}${notes.length === 0 ? '' : ` (${notes.join(', ')})`}`
     })
     .join(', ')
 }

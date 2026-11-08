@@ -283,18 +283,22 @@ export function validate(
     const id = (field: (typeof goalFieldNames)[number]) => goalFieldId(number, field)
     const ours = goal.kant === 'wij'
     const kind = goalKinds.find((choice) => choice.value === goal.soort)?.value
-    const minute = wholeNumber(goal.minuut, mostMinutes)
+    // The minute may be empty: the old fansite did not know it for some goals.
+    const minute = goal.minuut === '' ? null : wholeNumber(goal.minuut, mostMinutes)
     const stoppage = goal.extra === '' ? null : wholeNumber(goal.extra, mostStoppageMinutes)
 
     if (goal.kant !== 'wij' && goal.kant !== 'zij') {
       errors[id('kant')] = `Kies bij doelpunt ${number} voor welk team het was.`
     }
-    if (minute === undefined || minute < 1) {
-      errors[id('minuut')] = `Vul bij doelpunt ${number} de minuut in, van 1 tot ${mostMinutes}.`
+    if (minute !== null && (minute === undefined || minute < 1)) {
+      errors[id('minuut')] =
+        `Vul bij doelpunt ${number} de minuut in, van 1 tot ${mostMinutes}, of laat het leeg als niemand hem weet.`
     }
     if (stoppage === undefined || stoppage === 0) {
       errors[id('extra')] =
         `Vul bij doelpunt ${number} de blessuretijd in, van 1 tot ${mostStoppageMinutes}, of laat het leeg.`
+    } else if (stoppage !== null && minute === null) {
+      errors[id('extra')] = `Vul bij doelpunt ${number} de minuut in, want blessuretijd hoort bij een minuut.`
     }
     if (kind === undefined) {
       errors[id('soort')] = `Kies bij doelpunt ${number} wat voor doelpunt het was.`
@@ -370,7 +374,13 @@ export function validate(
   return {
     entry: {
       // The goals are kept in the order of the clock, as the importer keeps them.
-      goals: goals.toSorted((a, b) => a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0)),
+      // A goal without a minute comes last.
+      goals: goals.toSorted(
+        (a, b) =>
+          Number(a.minute === null) - Number(b.minute === null) ||
+          (a.minute ?? 0) - (b.minute ?? 0) ||
+          (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0),
+      ),
       kickoff:
         time === ''
           ? { dateText, kickoffAt: null, matchDate: day }
@@ -404,7 +414,7 @@ export function valuesOf(match: Match, goals: MatchGoal[]): MatchValues {
     doelpunten: goals.map((goal) => ({
       extra: number(goal.stoppageMinutes),
       kant: goal.ours ? 'wij' : 'zij',
-      minuut: String(goal.minute),
+      minuut: number(goal.minute),
       naam: goal.playerId === null ? goal.player : '',
       soort: goal.ownGoal ? 'eigen' : goal.penalty ? 'strafschop' : 'gewoon',
       speler: goal.playerId === null ? '' : String(goal.playerId),
