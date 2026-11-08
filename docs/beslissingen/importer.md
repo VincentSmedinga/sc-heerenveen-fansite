@@ -2820,6 +2820,7 @@
 - **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en een artikel op Wikipedia is een bron die hij kan controleren.
   Een omzetting die de importer bij elke naam toepast, laat de bestanden van de oude fansite onaangeroerd.
 - **Alternatieven:** alle groepen samenvoegen, ook als niet zeker is dat het één persoon is (twee mensen worden dan één speler); de schrijfwijze van de oude fansite behouden (dezelfde persoon blijft op twee manieren in de tellingen staan).
+- **Later:** zie _De lijst met schrijfwijzen krijgt 32 omzettingen met minder zekerheid_ (8 november 2026): de groepen waarvan het artikel minder zeker is, zijn daarna door de projecteigenaar goedgekeurd en toegevoegd.
 
 ## De stap `spelers` voegt een verouderde rij samen met de speler van de gekozen schrijfwijze
 
@@ -2837,3 +2838,20 @@
 - **Waarom:** de import voegde alleen toe, dus een rij van vóór de lijst met schrijfwijzen bleef naast de goede staan en een speler stond twee keer op de selectie van een seizoen (acceptatie, `Ger Schaap` en `Gerrie Schaap`).
   De rij is door deze stap zelf gemaakt en bevat niets dan een naam, dus er gaat niets verloren.
 - **Alternatieven:** een eenmalige opdracht (het volgende geval, een nieuwe schrijfwijze in de lijst, vraagt weer om een opdracht); alle verouderde rijen samenvoegen, ook van Wikipedia (verlies van pagina, rugnummer en cijfers); niets doen en de projecteigenaar de rijen laten weghalen (de lijst is lang, en de fout komt bij elke nieuwe schrijfwijze terug).
+
+## De lijst met schrijfwijzen krijgt 32 omzettingen met minder zekerheid
+
+- **Datum:** 8 november 2026
+- **Besluit:** `oldSiteNameCorrections` heeft er 32 omzettingen bij (156 in totaal), voor groepen waarvan de schrijfwijze van Wikipedia iets minder vanzelf spreekt dan bij de 102 van _De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze_.
+  De projecteigenaar keurde ze op 8 november 2026 goed.
+  - **Welke:** een tikfout of afwijkende letter (`Ulrich Crüden`, `Zjelko Petrovic`, `Pedrag Djordjevic`), een andere transcriptie (`Eric Kortchaguine` en `Erik Kortchaguine` naar `Erik Kortsjagin`, `Pavel Mikhalevitch` naar `Pavel Mikhalevich`) en een korte of lange vorm van de voornaam (`Gerry Senden` naar `Ger Senden`, `Jan Martens` naar `Jan-Pieter Martens`).
+    Het bewijs per paar is het artikel op nl.wikipedia, of op en.wikipedia als nl er geen heeft.
+  - **Drie groepen met een tweede persoon:** `Bob Penders` wordt `Rob Penders` (niet Bob Peeters), `Martin van Duren` wordt `Mart van Duren` (niet Martin Drent) en `Tom van Mol` wordt `Tom Van Mol` (niet Tom de Mul).
+    De omzetting verandert alleen de tikfout in de bedoelde persoon.
+    Bob Penders staat alleen in wedstrijden tegen NAC, waar ook Rob Penders speelt, en Mart en Martin van Duren spelen allebei tegen FC Groningen.
+    De tweede persoon van de groep blijft zoals hij was, en een test controleert dat.
+  - **Wat niet:** de vier paren op de spelerskaarten (_Namen op de spelerskaarten om te beslissen_) en wat na deze omzettingen nog op elkaar lijkt, blijven in het controleverslag staan.
+    `Tom Van Mol` en `Tom de Mul` staan daar nog, omdat het twee spelers zijn.
+  - **Gevolg:** twee assists die als "staat niet in de opstelling" leeg bleven (`Erik Kortchaguine` en `Gerry Senden`) krijgen nu hun speler, en staan niet meer onder _Assists zonder speler_ in het controleverslag.
+- **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en dit zijn de paren waarbij het artikel op Wikipedia de bedoelde persoon aanwijst.
+- **Alternatieven:** deze paren laten staan als namen om te beslissen (dezelfde persoon blijft op twee manieren in de tellingen staan); de drie groepen met een tweede persoon overslaan (de tikfout blijft dan een eigen speler).

@@ -2,9 +2,11 @@
 // opponents are free text in the line-ups and the events, so `Dirk Kuijt` and `Dirk Kuyt` would
 // be two players. The owner decided the first spellings below; the others are the spelling of
 // the article on nl.wikipedia (en.wikipedia where nl has none), for a typo or a spelling of the
-// same person. `Erwin Koen` is not one of them: he and Erwin Koeman are both in the line-up of
-// the same match. Any other near-duplicate stays as it is and is listed by the check report
-// (`old-site-name-clusters.ts`) for the owner to decide.
+// same person; a few (`Bob Penders`, `Martin van Duren`, `Tom van Mol`) sit in a group with
+// another person and only turn the misspelling into its own person. `Erwin Koen` is not one of
+// them: he and Erwin Koeman are both in the line-up of the same match. Any other near-duplicate
+// stays as it is and is listed by the check report (`old-site-name-clusters.ts`) for the owner
+// to decide.
 // A name of a player of ours comes from the old table `speler` or from a code, and goes through
 // the same corrections (`resolveOldSiteCode`), so the step `spelers` finds a player who is in
 // `players` already from another source, such as the squad of Wikipedia, and adds no other.
@@ -12,6 +14,8 @@
 /** The spelling the editors typed, and the one spelling it becomes. */
 export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Abdelkrim el Hadrioui', 'Abdelkrim El Hadrioui'],
+  ['Aleksandar Ilic', 'Aleksandar Ilić'],
+  ['Aleksander Ilic', 'Aleksandar Ilić'],
   ['Ali Bouassaboun', 'Ali Boussaboun'],
   ['Ali Elkhattabi', 'Ali El Khattabi'],
   ['Andre Bergdølmo', 'André Bergdølmo'],
@@ -20,9 +24,12 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Bart van den Eede', 'Bart Van Den Eede'],
   ['Bernhard Schuiteman', 'Bernard Schuiteman'],
   ['Bjorn Daelemans', 'Björn Daelemans'],
+  ['Bob Penders', 'Rob Penders'],
+  ['Boldizsár Bödör', 'Boldizsár Bodor'],
   ['Charly van den Ouweland', 'Charlie van den Ouweland'],
   ['Czaba Fehér', 'Csaba Fehér'],
   ['DaMarcus Beasly', 'DaMarcus Beasley'],
+  ['Damiën Hertog', 'Damien Hertog'],
   ['Danny Guyt', 'Danny Guijt'],
   ['David Bystron', 'David Bystroň'],
   ['David Bystroò', 'David Bystroň'],
@@ -30,13 +37,17 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Dirk Kuyt', 'Dirk Kuijt'],
   ['Edward Linksens', 'Edward Linskens'],
   ['Edwin van de Looi', 'Erwin van de Looi'],
+  ['Eric Kortchaguine', 'Erik Kortsjagin'],
+  ['Erik Kortchaguine', 'Erik Kortsjagin'],
   ['Ervin Lee', 'Urvin Lee'],
   ['Étienne Shew-Atjon', 'Etienne Shew-Atjon'],
+  ['Evgenyi Levchenko', 'Evgeniy Levchenko'],
   ['Fernando Picun', 'Fernando Picún'],
   ['Frantisek Metelka', 'František Metelka'],
   ['Frantisek Rajtoral', 'František Rajtoral'],
   ['Gábor Bábos', 'Gábor Babos'],
   ['Georgi Gakhokidze', 'Giorgi Gakhokidze'],
+  ['Gerry Senden', 'Ger Senden'],
   ['Ger Schaap', 'Gerrie Schaap'],
   ['Gorgi Gakhokidze', 'Giorgi Gakhokidze'],
   ['Guilliano Grot', 'Guillano Grot'],
@@ -53,6 +64,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Ivan Tzvekov', 'Ivan Tsvetkov'],
   ['Ivan Tzvetkov', 'Ivan Tsvetkov'],
   ['Jan-Willem van Ede', 'Jan Willem van Ede'],
+  ['Jan Martens', 'Jan-Pieter Martens'],
   ['Jan Paul Saeijs', 'Jan-Paul Saeijs'],
   ['Jattoo Ceesay', 'Jatto Ceesay'],
   ['Jean Paul de Jong', 'Jean-Paul de Jong'],
@@ -60,6 +72,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Jimmy van Fessem', 'Jim van Fessem'],
   ['Johnny Heitinga', 'John Heitinga'],
   ['John van de Brom', 'John van den Brom'],
+  ['John Veltman', 'John Veldman'],
   ['Joris Matthijsen', 'Joris Mathijsen'],
   ['José Fortes Rodriquez', 'José Fortes Rodriguez'],
   ['Jurgen Colin', 'Jürgen Colin'],
@@ -74,10 +87,15 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Kew Jalilens', 'Kew Jaliens'],
   ['Klaas Jan Huntelaar', 'Klaas-Jan Huntelaar'],
   ['Krzystof Bociek', 'Krzysztof Bociek'],
+  ['Kurt van der Paar', 'Kurt van de Paar'],
+  ['László Bodnar', 'László Bodnár'],
   ['Lee-Roy Echteld', 'Leeroy Echteld'],
+  ['Leonardo Dos Santos', 'Leonardo dos Santos Silva'],
+  ['Leonardo dos Santos', 'Leonardo dos Santos Silva'],
   ['Leonhard van Utrecht', 'Leonard van Utrecht'],
   ['Léon Hutten', 'Leon Hutten'],
   ['Lody Rumbiak', 'Lody Roembiak'],
+  ['Luc Maes', 'Luuk Maes'],
   ['Lukas Magera', 'Lukáš Magera'],
   ['Magno Mocelín', 'Magno Mocelin'],
   ['Marc Luijpers', 'Mark Luijpers'],
@@ -85,10 +103,13 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Mark Latupeirissa', 'Marc Latupeirissa'],
   ['Mark Luypers', 'Mark Luijpers'],
   ['Mark Nygaard', 'Marc Nygaard'],
+  ['Mark Verkuyl', 'Mark Verkuijl'],
   ['Maros Klimpl', 'Maroš Klimpl'],
   ['Martin Cizek', 'Martin Čížek'],
   ['Martin Èížek', 'Martin Čížek'],
   ['Martin Raska', 'Martin Raška'],
+  ['Martin Reynders', 'Martin Reijnders'],
+  ['Martin van Duren', 'Mart van Duren'],
   ['Matthieu Assou-Ekotto', 'Mathieu Assou-Ekotto'],
   ['Milan Berck-Beelenkamp', 'Milan Berck Beelenkamp'],
   ['Mourad Mgizhrat', 'Mourad Mghizrat'],
@@ -102,6 +123,9 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Pacal Heije', 'Pascal Heije'],
   ['Paul Matthijsen', 'Paul Matthijs'],
   ['Paulo Roberto Rink', 'Paulo Rink'],
+  ['Pavel Mikalevitch', 'Pavel Mikhalevich'],
+  ['Pavel Mikhalevitch', 'Pavel Mikhalevich'],
+  ['Pedrag Djordjevic', 'Predrag Djordjevic'],
   ['Peter Zois', 'Peter Zoïs'],
   ['Rahim Ouedraego', 'Rahim Ouédraogo'],
   ['Rahim Ouedraegou', 'Rahim Ouédraogo'],
@@ -113,8 +137,10 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Robbie Alflen', 'Rob Alflen'],
   ['Robert McKinnon', 'Rob McKinnon'],
   ['Roberto Lankohr', 'Roberto Lanckohr'],
+  ['Ronald Jansen', 'Roland Jansen'],
   ['Ronnie Venema', 'Ronny Venema'],
   ['Rui Montero', 'Rui Monteiro'],
+  ['Ruud Bond', 'Ruud Brood'],
   ['Said Boutahar', 'Saïd Boutahar'],
   ['Sjinji Ono', 'Shinji Ono'],
   ['Stefan Petterson', 'Stefan Pettersson'],
@@ -125,16 +151,24 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Tomás Galásek', 'Tomáš Galásek'],
   ['Tomeck Iwan', 'Tomasz Iwan'],
   ['Tomek Iwan', 'Tomasz Iwan'],
+  ['Tommy Simons', 'Timmy Simons'],
   ['Tom van der Leegte', 'Tommie van der Leegte'],
+  ['Tom van Mol', 'Tom Van Mol'],
   ['Ullrich van Gobbel', 'Ulrich van Gobbel'],
+  ['Ulrich Crüden', 'Ulrich Cruden'],
   ['Virgil Breetvelt', 'Virgil Breetveld'],
   ['Virgillio Teixeira', 'Virgilio Teixeira'],
   ['Wasio Taiwo', 'Wasiu Taiwo'],
   ['Wilfried Bouma', 'Wilfred Bouma'],
+  ['Yevgeni Levchenko', 'Evgeniy Levchenko'],
+  ['Youessef Mariana', 'Youssef Mariana'],
   ['Youssef El-Akchaoui', 'Youssef El Akchaoui'],
   ['Youssouf Fertout', 'Youssef Fertout'],
+  ['Youssouf Mariana', 'Youssef Mariana'],
   ['Zeljko Kalac', 'Željko Kalac'],
+  ['Zeljko Petrovic', 'Željko Petrović'],
   ['Zjelko Kalac', 'Željko Kalac'],
+  ['Zjelko Petrovic', 'Željko Petrović'],
 ])
 
 /** Names that look alike and are two people, so the check report does not list them. */

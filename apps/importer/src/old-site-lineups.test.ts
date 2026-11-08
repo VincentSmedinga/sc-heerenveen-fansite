@@ -736,9 +736,9 @@ describe('the files of the old fansite', () => {
 
     expect(leftOut).toHaveLength(2)
     expect(leftOut.every((line) => line.includes("'foppe.dehaan'"))).toBe(true)
-    // Every goal has its scorer in the report, and 647 of the assists are linked.
+    // Every goal has its scorer in the report, and 649 of the assists are linked.
     expect(stored.goals.filter((goal) => goal.appearanceId !== null)).toHaveLength(1763)
-    expect(stored.goals.filter((goal) => goal.assistAppearanceId !== null)).toHaveLength(647)
+    expect(stored.goals.filter((goal) => goal.assistAppearanceId !== null)).toHaveLength(649)
     expect(stored.appearances.filter((one) => one.ours)).toHaveLength(7351)
     expect(stored.reports.filter((one) => one.opponentComplete)).toHaveLength(534)
 
