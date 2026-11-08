@@ -3679,7 +3679,9 @@
   - Een wedstrijd met een uitslag toont de stand vanuit ons gezien in de kleur van de uitslag (`outcomeOf`, bij strafschoppen de uitslag daarvan), met verborgen "Gewonnen", "Gelijkspel" of "Verloren".
   - Een wedstrijd zonder uitslag toont de datum in de korte vorm van de lijsten (zonder tijd), of "Live", "Uitgesteld" of "Geannuleerd", zonder kleur.
   - Een wedstrijd zonder pagina staat als tekst zonder link in dezelfde opbouw.
-  - Onder 40 rem breed staan de links onder elkaar, daarboven naast elkaar met "Volgende" rechts.
+  - Onder 40 rem breed staan de links onder elkaar, daarboven naast elkaar met de volgende wedstrijd rechts.
 - **Waarom:** een supporter wil het seizoen doorlezen zonder terug te gaan naar de lijst, en een link die een wedstrijd overslaat, zegt niet dat er een wedstrijd mist.
   Kleur is nooit het enige teken, en de woorden zijn die van de kop van de wedstrijd.
 - **Alternatieven:** alleen wedstrijden met een pagina (dan lijkt een wedstrijd te ontbreken); alleen de stand voorlezen (kleur is dan het enige teken); altijd naast elkaar (lange clubnamen breken slecht in twee smalle kolommen).
+- **Later:** 8 november 2026 (#930): de links beginnen niet meer met "Vorige:" en "Volgende:" en "thuis" en "uit" staan zonder haakjes: "Testdorp FC thuis 2–1".
+  Een schermlezer hoort verborgen "Vorige wedstrijd: " of "Volgende wedstrijd: " voor de club, ook bij een wedstrijd zonder pagina.
