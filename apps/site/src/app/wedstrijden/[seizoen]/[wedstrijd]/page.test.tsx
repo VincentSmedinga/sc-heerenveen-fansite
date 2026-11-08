@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getMatchNeighbours } from '#src/match-neighbours'
 import { getMatchData } from '#src/matches'
 import { getPublicReport } from '#src/report-data'
 import { matchData } from '#src/test-matches'
@@ -9,6 +10,7 @@ import { withoutIcons } from '#src/without-icons'
 
 import MatchReportPage, { generateMetadata } from './page'
 
+vi.mock('#src/match-neighbours', () => ({ getMatchNeighbours: vi.fn() }))
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
@@ -38,6 +40,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
+  vi.mocked(getMatchNeighbours).mockReset()
+  vi.mocked(getMatchNeighbours).mockResolvedValue({ next: undefined, previous: undefined })
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getPublicReport).mockReset()
@@ -106,6 +110,27 @@ describe('the page of a match', () => {
     expect(text).toContain('Stadion Stadion Proeflaan')
     expect(text).toContain('Toeschouwers 21.022')
     expect(text).toContain('Scheidsrechter Pieter Maquette')
+  })
+
+  it('ends the main column with the links to the previous and the next match', async () => {
+    vi.mocked(getMatchNeighbours).mockResolvedValue({
+      next: { club: 'Voorbeeld United', home: false, state: 'zo 1 nov', stateDateTime: '2026-11-01' },
+      previous: {
+        club: 'Proefstad',
+        goalsAgainst: 0,
+        goalsFor: 2,
+        home: true,
+        href: '/wedstrijden/2026-27/2026-10-17-proefstad',
+      },
+    })
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('Vorige: Proefstad (thuis) 2–0 Gewonnen')
+    expect(text).toContain('Volgende: Voorbeeld United (uit) zo 1 nov')
+    expect(html).toContain('href="/wedstrijden/2026-27/2026-10-17-proefstad"')
+    expect(html.indexOf('aria-label="Vorige en volgende wedstrijd"')).toBeGreaterThan(html.indexOf('id="verloop"'))
   })
 
   it('leaves out the facts that are not known', async () => {

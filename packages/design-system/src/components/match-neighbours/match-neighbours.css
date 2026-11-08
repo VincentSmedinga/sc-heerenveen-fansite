@@ -1,0 +1,45 @@
+/*
+ * The links to the match before and the match after: under each other in a narrow place and
+ * side by side in a wide one, the first at the left and the second at the right. The result
+ * has the colour of the outcome from the classes of match.css (.hf-match-win and the others).
+ */
+
+@layer hf.components {
+  /* The card is the container, and the list is what asks how wide it is. */
+  .hf-match-neighbours {
+    container: hf-match-neighbours / inline-size;
+  }
+
+  .hf-match-neighbours-list {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-xl);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    @container hf-match-neighbours (min-width: 40rem) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* A long name of a club breaks instead of making the page scroll sideways. */
+  .hf-match-neighbours-item {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* "Volgende" stands at the right, also when "Vorige" is not there. */
+  .hf-match-neighbours-item[data-side='next'] {
+    @container hf-match-neighbours (min-width: 40rem) {
+      grid-column: 2;
+      text-align: end;
+    }
+  }
+
+  /* The result keeps its digits the same width and stays in one piece, as in Match. */
+  .hf-match-neighbours-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    white-space: nowrap;
+  }
+}
