@@ -16,8 +16,9 @@ import { existsSync } from 'node:fs'
 import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site-step.ts'
 
-import { importOldSiteClubs } from './old-site-clubs.ts'
+import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
+import { importOldSiteMatches } from './old-site-matches.ts'
 import { describeError } from './text.ts'
 
 /** What the command says when a run holds the lock of the import. */
@@ -33,6 +34,10 @@ class DryRunDone extends Error {}
 /** The steps, in the order they run. A step may use what the steps before it wrote. */
 export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'clubs', run: (db, data) => importOldSiteClubs(db, data.clubs) },
+  {
+    name: 'matches',
+    run: async (db, data) => importOldSiteMatches(db, data.matches, data.clubs, await oldSiteClubIds(db, data.clubs)),
+  },
 ]
 
 export type OldSiteImportOptions = {
