@@ -11,7 +11,7 @@ import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
-import { getCoachResultData, parseCleanSheetCount } from '#src/matches'
+import { choiceFor, getCoachResultData, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
   CleanSheetsCard,
@@ -89,10 +89,10 @@ export async function StatisticsPage({
   season: string
 }) {
   const { competitie, [noteworthy.param]: factNumber, nul } = await searchParams
-  const competition = parseCompetition(competitie)
+  const chosen = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, statisticsPath)
 
-  if (competition === undefined || loaded.kind === 'unknown') {
+  if (chosen === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -101,6 +101,7 @@ export async function StatisticsPage({
   }
 
   const { data, seasons } = loaded
+  const competition = choiceFor(data.matches, chosen)
   const now = new Date()
   const current = season === seasonOf(now)
   // The cards of a season that is over say which one on their image. The current season is the

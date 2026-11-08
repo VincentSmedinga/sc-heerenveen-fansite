@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import { competitionQuery, parseCompetition } from './competition'
 import {
+  choiceFor,
   cleanSheetsOf,
   competitionNames,
   extremesOf,
@@ -185,11 +186,21 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
   })
 
-  it('has nothing to choose in a season without a played Eredivisie match, since the choice would count nothing', () => {
+  it('has nothing to choose in a season without an Eredivisie match, since the choice would count nothing', () => {
     const eerste = played('Wedstrijd 1', '1992-08-15', 2, 1, { competition: 'Eerste divisie' })
 
     expect(hasPlayedExtraMatch([eerste, cup('Tweede ronde', '1992-09-23', 1, 0)])).toBe(false)
     expect(hasPlayedExtraMatch([cup('Tweede ronde', '1992-09-23', 1, 0)])).toBe(false)
+  })
+
+  it('counts the choice Eredivisie as all matches in a season without an Eredivisie match', () => {
+    const eerste = played('Wedstrijd 1', '1992-08-15', 2, 1, { competition: 'Eerste divisie' })
+
+    expect(choiceFor([eerste], 'league')).toBe('all')
+    expect(choiceFor([eerste], 'all')).toBe('all')
+    expect(choiceFor([league, eerste], 'league')).toBe('league')
+    // A season that has Eredivisie matches keeps the choice, also before one is played.
+    expect(choiceFor([played('Speelronde 2', '2026-08-08', 0, 0, { status: 'scheduled' })], 'league')).toBe('league')
   })
 
   it('names the cup only when it is counted and was played', () => {

@@ -1712,7 +1712,7 @@
   - **De schakelaar van #406** werkt op beide pagina's, met `?competitie=eredivisie` in elke link, en staat er alleen als er een gespeelde bekerwedstrijd is (bij de club: tegen die club).
     Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt "In de Eredivisie hebben we nog niet tegen deze club gespeeld."
     Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden", en een slug die geen club heeft ook.
-    **Later:** zie _De bron staat bij de wedstrijden, per bron_ (8 november 2026): de schakelaar van een seizoen staat er ook alleen als dat seizoen een gespeelde wedstrijd van de Eredivisie heeft.
+    **Later:** zie _De bron staat bij de wedstrijden, per bron_ (8 november 2026): de schakelaar van een seizoen staat er ook alleen als dat seizoen een wedstrijd van de Eredivisie heeft.
     De pagina's hebben geen seizoenskiezer, want ze tellen alle seizoenen.
   - **De balk van Statistieken** heeft Tegenstanders naast Spelers.
     Op de lijst en op elke clubpagina is Tegenstanders de huidige subpagina (`aria-current="page"`), en Statistieken is het huidige onderdeel van het menu.
@@ -3569,8 +3569,9 @@
     De anker-ids van de kaarten stonden al in `matchShortcuts.ts`.
     Een test controleert dat elke competitie precies één keer in de volgorde staat.
   - **De Eerste divisie telt mee bij "Alle wedstrijden"** en niet bij de keuze "Eredivisie", net als de beker.
-    De schakelaar staat er alleen als het seizoen een gespeelde wedstrijd van de Eredivisie heeft en een gespeelde wedstrijd van een andere competitie.
+    De schakelaar staat er alleen als het seizoen een wedstrijd van de Eredivisie heeft en een gespeelde wedstrijd van een andere competitie.
     Een seizoen in de Eerste divisie (1991/92 en 1992/93) heeft dus geen schakelaar, want de keuze Eredivisie zou niets tellen.
+    De seizoenskiezer neemt de keuze mee naar een ander seizoen, dus `choiceFor` telt in zo'n seizoen de keuze Eredivisie als Alle wedstrijden: er zijn geen lege kaarten zonder schakelaar om terug te gaan.
     De zin onder de kaarten noemt de competities die zijn gespeeld ("de Eerste divisie en de KNVB Beker", "de Eredivisie, de KNVB Beker, de UEFA Cup en de Intertoto Cup").
     Op de pagina's van de tegenstanders blijft de keuze Eredivisie alleen de Eredivisie.
   - **Een datum zonder tijd:** een gespeelde wedstrijd toont op de site al alleen de dag ("za 21 nov 1992") en het `time`-element heeft alleen de datum, met of zonder aftrap in de database.

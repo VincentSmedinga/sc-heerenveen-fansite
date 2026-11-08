@@ -9,7 +9,7 @@ import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
-import { getAllTimeMatches } from '#src/matches'
+import { choiceFor, getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
@@ -69,10 +69,10 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
   const { competitie } = await searchParams
-  const competition = parseCompetition(competitie)
+  const chosen = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, playersPath)
 
-  if (competition === undefined || loaded.kind === 'unknown') {
+  if (chosen === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -80,6 +80,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
     return <ServerError retryHref={seasonAddress(playersPath, season, seasonOf(new Date()))} />
   }
 
+  const competition = choiceFor(loaded.data.matches, chosen)
   const squad = await loadSquad(season)
 
   if (squad === undefined) {

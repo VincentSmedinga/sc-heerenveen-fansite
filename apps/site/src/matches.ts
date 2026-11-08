@@ -43,7 +43,8 @@ export type ScoredMatch = Pick<PublicMatch, 'competition' | 'goals' | 'goalsAgai
 
 /**
  * Whether a match counts for the choice: the league alone, or every competition: the league,
- * the cup, the play-offs (Conference League or Europa League) and the Europa League.
+ * the cup, the play-offs (of the Conference League, the Europa League or the UEFA Cup),
+ * Europe and the Eerste divisie. The choice `league` is the Eredivisie only.
  */
 const countsFor = (match: Pick<ScoredMatch, 'competition'>, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
@@ -59,14 +60,13 @@ const isPlayedExtraMatch = (match: Omit<ScoredMatch, 'goals'>) =>
   match.goalsAgainst !== null
 
 /**
- * Whether there is anything to choose: the season has a played match of the Eredivisie and a
- * played match of another competition (a cup tie, the play-offs, Europe). Without the second,
- * the two choices count the same matches. Without the first, as in the seasons in the Eerste
- * divisie, the choice Eredivisie would count nothing, so the page has no switch.
+ * Whether there is anything to choose: the season has a match of the Eredivisie and a played
+ * match of another competition (a cup tie, the play-offs, Europe). Without the second, the two
+ * choices count the same matches. Without the first, as in the seasons in the Eerste divisie,
+ * the choice Eredivisie would count nothing, so the page has no switch.
  */
 export const hasPlayedExtraMatch = (matches: PublicMatch[]) =>
-  matches.some(isPlayedExtraMatch) &&
-  matches.some((match) => match.competition === 'Eredivisie' && match.status === 'played')
+  matches.some(isPlayedExtraMatch) && matches.some((match) => match.competition === 'Eredivisie')
 
 /**
  * The competitions a card counts, as the captions of the cards name them: the league, the cup,
@@ -102,6 +102,15 @@ export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: 
 
   return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
 }
+
+/**
+ * The choice a page of a season counts with: the one asked for, except that `league` becomes
+ * `all` in a season without a match of the Eredivisie, such as one in the Eerste divisie.
+ * The season picker keeps the choice when it goes to another season, and a season without the
+ * switch would otherwise show empty cards with no way back.
+ */
+export const choiceFor = (matches: PublicMatch[], choice: CompetitionChoice): CompetitionChoice =>
+  choice === 'league' && !matches.some((match) => match.competition === 'Eredivisie') ? 'all' : choice
 
 export type MatchData = {
   /** The head coaches of the season, in the order their periods began. */
