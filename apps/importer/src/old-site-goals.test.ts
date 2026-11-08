@@ -1,6 +1,14 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
+import {
+  adminUsers,
+  matchEdits,
+  matches,
+  matchGoals,
+  matchReports,
+  players,
+  playerSeasonStats,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -447,6 +455,63 @@ describe('the steps spelers and doelpunten', () => {
 
     await importOldSiteGoals(database.db, [match], list)
     expect((await goalRows()).filter((row) => row.ours).map((row) => row.playerId)).toEqual([rows[0]!.id, rows[0]!.id])
+  })
+
+  it('merges a stale row of the step into the player the corrections chose, and only that row', async () => {
+    const venema = { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema' }
+    const meijer = { code: 'hennie.meijer', firstName: 'Hennie', infix: null, lastName: 'Meijer' }
+    const match = oldMatch({
+      events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'hennie.meijer')],
+    })
+    const list = [venema, meijer]
+    const season = '2001/02'
+
+    // The stale rows of an earlier run, next to the player of the squad. Hennie Meijer is a row
+    // of the squad itself, so it is not stale, whatever its name.
+    await database.db.insert(players).values([
+      { name: 'Ronnie Venema', searchTerm: 'Venema', season, source: 'verslag' },
+      { name: 'Ronny Venema', searchTerm: 'Venema', season, source: 'selectie' },
+      { name: 'Hennie Meijer', searchTerm: 'Meijer', season, source: 'selectie' },
+      { name: 'Henny Meijer', searchTerm: 'Meijer', season, source: 'verslag' },
+      { name: 'Ronnie Venema', searchTerm: 'Venema', season: '2002/03', source: 'verslag' },
+    ])
+    await importOldSiteClubs(database.db, oldClubs)
+    await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+
+    const [stale] = await database.db.select().from(players).where(eq(players.name, 'Ronnie Venema'))
+    const [target] = await database.db.select().from(players).where(eq(players.name, 'Ronny Venema'))
+    const [row] = await database.db.select().from(matches)
+
+    await database.db
+      .insert(matchGoals)
+      .values({ matchId: row!.id, minute: 10, ours: true, player: 'Ronnie Venema', playerId: stale!.id })
+    await database.db.insert(playerSeasonStats).values({
+      appearances: 3,
+      assists: 0,
+      competition: 'Eredivisie',
+      goals: 1,
+      playerId: stale!.id,
+      season,
+    })
+
+    const first = await importOldSitePlayers(database.db, [match], list)
+    const names = (await playerRows()).map((one) => `${one.season} ${one.name} ${one.source}`)
+
+    expect(first).toMatchObject({ changed: 1, created: 0 })
+    expect(first.lines).toContain('Ronnie Venema (2001/02) is merged into Ronny Venema')
+    expect(names).toEqual([
+      '2001/02 Hennie Meijer selectie',
+      '2001/02 Henny Meijer verslag',
+      '2002/03 Ronnie Venema verslag',
+      '2001/02 Ronny Venema selectie',
+    ])
+    expect((await goalRows())[0]).toMatchObject({ playerId: target!.id })
+    expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ playerId: target!.id }])
+
+    const second = await importOldSitePlayers(database.db, [match], list)
+
+    expect(second).toMatchObject({ changed: 0, created: 0 })
+    expect((await playerRows()).map((one) => one.name)).toHaveLength(4)
   })
 
   it('links the own goal of a player of ours to him, under the opponent', async () => {

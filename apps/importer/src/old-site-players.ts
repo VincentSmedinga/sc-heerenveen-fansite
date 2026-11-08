@@ -1,11 +1,11 @@
-import { playerNameMaxLength, players } from '@fansite/db/schema'
-import { inArray } from 'drizzle-orm'
+import { matchAppearances, matchGoals, playerNameMaxLength, players, playerSeasonStats } from '@fansite/db/schema'
+import { and, eq, inArray, notInArray } from 'drizzle-orm'
 
 import type { OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { deriveOldSiteMatches } from './old-site-matches.ts'
-import { cleanOldSiteName } from './old-site-names.ts'
+import { cleanOldSiteName, oldSiteNameCorrections } from './old-site-names.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 
 /** A code of the old database is `voornaam.achternaam`: lower case, with dots and no spaces. */
@@ -79,9 +79,10 @@ export function deriveOldSitePlayers(
  * files, for the season of the match, with the source `verslag` and without a shirt number, a
  * position, a Wikipedia page or a person. A row that exists for that season and name, from any
  * source, is used as it is and never changed. Linking a player to a person is a later issue.
+ * The one exception is a stale row of this step itself: see `mergeStaleOldSitePlayers`.
  */
 export async function importOldSitePlayers(
-  db: Pick<OldSiteDatabase, 'insert' | 'select'>,
+  db: OldSiteDatabase,
   oldMatches: readonly OldSiteMatch[],
   oldPlayers: readonly OldSitePlayer[],
 ): Promise<OldSiteStepReport> {
@@ -124,6 +125,7 @@ export async function importOldSitePlayers(
     await db.insert(players).values(fresh.slice(start, start + 200))
   }
   report.created = fresh.length
+  report.changed += await mergeStaleOldSitePlayers(db, seasons, report.lines)
 
   return report
 }
@@ -216,4 +218,72 @@ export function resolveOldSiteCode(
   )
 
   return { code, name, nameFromCode: true, searchTerm: searchTerm(name), season }
+}
+
+/**
+ * Merges a stale row into the player the corrections chose. An earlier run (before the owner
+ * chose a spelling) made a row with the name `Ger Schaap`, and the squad of Wikipedia has
+ * `Gerrie Schaap`, so a season showed him twice. A row is stale when it is of the same season,
+ * has the source `verslag`, nothing else but a name (no page, no person) and a name that is
+ * exactly a key of `oldSiteNameCorrections` whose spelling has a row too. Whatever points to
+ * it (goals, appearances, numbers of the season) is pointed to the other row, and the stale row
+ * is removed. Other names, other sources and a row with a page or a person are never touched.
+ * Returns the number of rows merged: a second run finds none.
+ */
+async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly string[], lines: string[]) {
+  if (seasons.length === 0) {
+    return 0
+  }
+
+  const rows = await db.select().from(players).where(inArray(players.season, seasons))
+  let merged = 0
+
+  for (const stale of rows) {
+    const spelling = oldSiteNameCorrections.get(stale.name)
+    const target =
+      spelling === undefined
+        ? undefined
+        : rows.find((row) => row.season === stale.season && nameKey(row.name) === nameKey(spelling))
+
+    if (
+      target === undefined ||
+      target.id === stale.id ||
+      stale.source !== 'verslag' ||
+      stale.wikipediaPage !== null ||
+      stale.personId !== null
+    ) {
+      continue
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.update(matchGoals).set({ playerId: target.id }).where(eq(matchGoals.playerId, stale.id))
+
+      // A match or a competition the other row has already keeps its own row: the stale one
+      // goes with the player (the appearance loses its link, the numbers are deleted).
+      const played = (await tx.select().from(matchAppearances).where(eq(matchAppearances.playerId, target.id))).map(
+        (row) => row.matchId,
+      )
+      const moveAppearances = and(
+        eq(matchAppearances.playerId, stale.id),
+        played.length === 0 ? undefined : notInArray(matchAppearances.matchId, played),
+      )
+
+      await tx.update(matchAppearances).set({ playerId: target.id }).where(moveAppearances)
+
+      const counted = (await tx.select().from(playerSeasonStats).where(eq(playerSeasonStats.playerId, target.id))).map(
+        (row) => row.competition,
+      )
+      const moveStats = and(
+        eq(playerSeasonStats.playerId, stale.id),
+        counted.length === 0 ? undefined : notInArray(playerSeasonStats.competition, counted),
+      )
+
+      await tx.update(playerSeasonStats).set({ playerId: target.id }).where(moveStats)
+      await tx.delete(players).where(eq(players.id, stale.id))
+    })
+    merged += 1
+    lines.push(`${stale.name} (${stale.season}) is merged into ${target.name}`)
+  }
+
+  return merged
 }
