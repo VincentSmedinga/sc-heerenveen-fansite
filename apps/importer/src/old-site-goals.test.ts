@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import {
   adminUsers,
+  matchAppearances,
   matchEdits,
   matches,
   matchGoals,
@@ -463,6 +464,8 @@ describe('the steps spelers and doelpunten', () => {
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'hennie.meijer')],
     })
+    const second = oldMatch({ code: 'ajax.thuis', dateTime: '2001-10-01 20:00:00', events: match.events })
+    const both = [match, second]
     const list = [venema, meijer]
     const season = '2001/02'
 
@@ -476,25 +479,36 @@ describe('the steps spelers and doelpunten', () => {
       { name: 'Ronnie Venema', searchTerm: 'Venema', season: '2002/03', source: 'verslag' },
     ])
     await importOldSiteClubs(database.db, oldClubs)
-    await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+    await importOldSiteMatches(database.db, both, oldClubs, await oldSiteClubIds(database.db, oldClubs))
 
     const [stale] = await database.db.select().from(players).where(eq(players.name, 'Ronnie Venema'))
     const [target] = await database.db.select().from(players).where(eq(players.name, 'Ronny Venema'))
-    const [row] = await database.db.select().from(matches)
+    const [row, other] = await database.db.select().from(matches).orderBy(asc(matches.matchDate))
+    const ours = { name: 'Ronnie Venema', ours: true, starter: true }
 
     await database.db
       .insert(matchGoals)
       .values({ matchId: row!.id, minute: 10, ours: true, player: 'Ronnie Venema', playerId: stale!.id })
-    await database.db.insert(playerSeasonStats).values({
-      appearances: 3,
-      assists: 0,
-      competition: 'Eredivisie',
-      goals: 1,
-      playerId: stale!.id,
-      season,
-    })
+    await database.db.insert(matchReports).values([
+      { matchId: row!.id, status: 'klaar' },
+      { matchId: other!.id, status: 'klaar' },
+    ])
+    // The first match has the stale row only, so it moves. The second has both: the stale
+    // appearance cannot move (one row for each player and match) and goes with the stale row.
+    await database.db.insert(matchAppearances).values([
+      { ...ours, matchId: row!.id, playerId: stale!.id },
+      { ...ours, matchId: other!.id, playerId: stale!.id },
+      { ...ours, matchId: other!.id, name: 'Ronny Venema', playerId: target!.id },
+    ])
+    // Eredivisie is in both rows, and the other row keeps its own numbers. The cup is in the
+    // stale row only.
+    await database.db.insert(playerSeasonStats).values([
+      { appearances: 3, assists: 0, competition: 'Eredivisie', goals: 1, playerId: stale!.id, season },
+      { appearances: 2, assists: 1, competition: 'KNVB Beker', goals: 0, playerId: stale!.id, season },
+      { appearances: 10, assists: 2, competition: 'Eredivisie', goals: 4, playerId: target!.id, season },
+    ])
 
-    const first = await importOldSitePlayers(database.db, [match], list)
+    const first = await importOldSitePlayers(database.db, both, list)
     const names = (await playerRows()).map((one) => `${one.season} ${one.name} ${one.source}`)
 
     expect(first).toMatchObject({ changed: 1, created: 0 })
@@ -506,11 +520,30 @@ describe('the steps spelers and doelpunten', () => {
       '2001/02 Ronny Venema selectie',
     ])
     expect((await goalRows())[0]).toMatchObject({ playerId: target!.id })
-    expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ playerId: target!.id }])
+    expect(
+      (await database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id))).map((one) => [
+        one.matchId,
+        one.playerId,
+      ]),
+    ).toEqual([
+      [row!.id, target!.id],
+      [other!.id, null],
+      [other!.id, target!.id],
+    ])
+    expect(
+      (await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))).map((one) => [
+        one.playerId,
+        one.competition,
+        one.appearances,
+      ]),
+    ).toEqual([
+      [target!.id, 'KNVB Beker', 2],
+      [target!.id, 'Eredivisie', 10],
+    ])
 
-    const second = await importOldSitePlayers(database.db, [match], list)
+    const again = await importOldSitePlayers(database.db, both, list)
 
-    expect(second).toMatchObject({ changed: 0, created: 0 })
+    expect(again).toMatchObject({ changed: 0, created: 0 })
     expect((await playerRows()).map((one) => one.name)).toHaveLength(4)
   })
 
