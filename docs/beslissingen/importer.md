@@ -2804,3 +2804,18 @@
   Een kleine lijst die de eigenaar goedkeurt, is de kleinste oplossing en laat de gegevens van de oude fansite onaangeroerd.
   Wat de eigenaar niet zeker weet, wordt niet gegokt.
 - **Alternatieven:** de bestanden opnieuw maken met de juiste namen (de bestanden zijn een kopie van de oude database en horen dat te blijven); namen automatisch samenvoegen (twee mensen met bijna dezelfde naam, zoals Michel Vonk en Michel Vorm, worden dan één); een tabel in de database met speler-id's voor de tegenstanders (veel meer werk dan een korte lijst).
+- **Later:** zie _De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze_ (8 november 2026): de lijst bevat nu ook de schrijfwijze van Wikipedia, niet alleen wat de projecteigenaar per groep koos.
+
+## De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze
+
+- **Datum:** 8 november 2026
+- **Besluit:** `oldSiteNameCorrections` heeft er 102 omzettingen bij, in groepen van namen die zeker één persoon zijn.
+  - **De schrijfwijze:** het artikel op nl.wikipedia, of op en.wikipedia als nl geen artikel heeft.
+    De omzetting geldt voor een tikfout (`Pacal Heije`), een afwijkende letter of accent (`Rene Bot`, `Željko Kalac`) en een koppelteken of hoofdletter (`Klaas Jan Huntelaar`, `Bart van den Eede`).
+  - **Wat niet:** een groep waarvan niet zeker is dat het één persoon is, blijft in de lijst _Namen om te beslissen_ van het controleverslag staan.
+    Bij een groep met twee mensen krijgt alleen de tikfout een omzetting (`Danny Guyt` naar `Danny Guijt`), nooit een samenvoeging van de twee (Danny Buijs, Bob Peeters en Rob Penders, Frank de Boer en Frank Broers).
+    `Erwin Koen` blijft ook staan: hij en Erwin Koeman staan in dezelfde opstelling, dus de oude redacteuren bedoelden twee spelers.
+  - **Controle:** een test telt de omzettingen, zodat een weggehaalde omzetting opvalt, en een test zoekt een omzetting die naar een andere omzetting leidt.
+- **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en een artikel op Wikipedia is een bron die hij kan controleren.
+  Een omzetting die de importer bij elke naam toepast, laat de bestanden van de oude fansite onaangeroerd.
+- **Alternatieven:** alle groepen samenvoegen, ook als niet zeker is dat het één persoon is (twee mensen worden dan één speler); de schrijfwijze van de oude fansite behouden (dezelfde persoon blijft op twee manieren in de tellingen staan).

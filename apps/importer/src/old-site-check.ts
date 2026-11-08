@@ -492,7 +492,7 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     `Gemaakt op ${dutchDate(today)}, op een database met de import van de bestanden in \`apps/importer/data/oude-fansite\`.`,
     'Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`, of met de workflow _Import old site_ en de keuze `report`.',
     'De opdracht leest de bestanden en de database en schrijft niets in de database.',
-    'Het verslag noemt namen zoals ze in de wedstrijd stonden, op de spellingen na die de projecteigenaar heeft samengevoegd.',
+    'Het verslag noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde spellingen na.',
     '',
     '## Per seizoen',
     '',
@@ -576,6 +576,7 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     'Namen om te beslissen',
     [
       'Deze namen lijken op elkaar en horen misschien bij één persoon.',
+      'Namen die zeker één persoon zijn, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).',
       'De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.',
       'Tussen haakjes staat hoe vaak de spelling in de opstellingen, doelpunten, kaarten en assists voorkomt.',
       'Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.',
