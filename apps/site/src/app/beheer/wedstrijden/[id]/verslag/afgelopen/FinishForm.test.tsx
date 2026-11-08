@@ -59,4 +59,17 @@ describe('the confirmation that ends a match', () => {
     expect(input('uitslag-zij').getAttribute('aria-invalid')).toBe('true')
     expect(input('uitslag-wij').getAttribute('aria-invalid')).not.toBe('true')
   })
+
+  it('keeps what the editor typed in both fields when a score is wrong', async () => {
+    const { getByRole } = render(
+      form({ errors: { 'uitslag-zij': wrong }, values: { 'uitslag-wij': '4', 'uitslag-zij': 'x' } }),
+    )
+
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: 'Wedstrijd afgelopen' }))
+    })
+
+    await waitFor(() => expect(input('uitslag-zij').value).toBe('x'))
+    expect(input('uitslag-wij').value).toBe('4')
+  })
 })

@@ -427,6 +427,8 @@ describe('submitFinish', () => {
       const answer = await finish(matchId, fields)
 
       expect(Object.keys((answer as { errors: object }).errors)).toEqual(fieldsWithError)
+      // What was typed comes back, so the form can show it again.
+      expect((answer as { values: object }).values).toEqual(fields)
       expect((answer as { errors: Record<string, string> }).errors[fieldsWithError[0]!]).toBe(
         'Vul een aantal doelpunten in, een heel getal van 0 tot 99.',
       )

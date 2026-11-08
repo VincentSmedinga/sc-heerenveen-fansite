@@ -81,12 +81,15 @@ export async function reportMetadata(seizoen: string, wedstrijd: string): Promis
   const complete = isCompleteReport(reported)
   // A match that is being played has no result and its stand changes, so neither the title nor
   // the description names a stand (the page is not indexed either).
+  const phase = phaseOf(reported.match, new Date())
   const description =
-    phaseOf(reported.match, new Date()) !== undefined
+    phase === 'live'
       ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}, terwijl de wedstrijd wordt gespeeld: de opstelling en de gebeurtenissen tot nu toe. We vullen het verslag nog in.`
-      : complete
-        ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`
-        : `Wat we tot nu toe hebben van het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}. We vullen het verslag nog in.`
+      : phase === 'upcoming'
+        ? `De opstelling van ${first} – ${second} op ${day}, ${reported.match.competition}, voor de wedstrijd begint. We vullen het verslag nog in.`
+        : complete
+          ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`
+          : `Wat we tot nu toe hebben van het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}. We vullen het verslag nog in.`
   const metadata = seasonPageMetadata(matchesPath, reportAddress(season, reported.match.matchDate, reported.clubSlug), {
     // A report that is not complete claims nothing about what is missing, and is not indexed.
     description,

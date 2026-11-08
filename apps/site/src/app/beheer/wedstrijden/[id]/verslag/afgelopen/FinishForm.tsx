@@ -63,7 +63,7 @@ export function FinishForm({
               <Field error={errors[field.id]} id={field.id} key={field.id} label={field.label}>
                 <Input
                   autoComplete="off"
-                  defaultValue={String(field.value)}
+                  defaultValue={state.values?.[field.id] ?? String(field.value)}
                   inputMode="numeric"
                   name={field.id}
                   width="narrow"

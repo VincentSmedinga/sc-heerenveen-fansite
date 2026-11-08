@@ -548,6 +548,16 @@ describe('the page of a match that is still being played', () => {
     expect(text).toContain('Opstelling')
   })
 
+  it('says in the description of a match before its kick-off that the match has not begun', async () => {
+    liveMatch(new Date('2026-10-30T18:30:00Z'))
+
+    const metadata = await generateMetadata({ params: params() })
+
+    expect(metadata.description).toContain('voor de wedstrijd begint')
+    expect(metadata.description).not.toContain('terwijl de wedstrijd wordt gespeeld')
+    expect(metadata.robots).toEqual({ index: false })
+  })
+
   it('is live on the day of a match without a known kick-off', async () => {
     liveMatch(null)
 

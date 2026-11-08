@@ -18,7 +18,11 @@ import { getDatabase } from '#src/database'
 // with the form again.
 
 /** Where the form that ends the match comes back to, with an error for each score. */
-export type FinishFormState = { errors?: Partial<Record<'uitslag-wij' | 'uitslag-zij', string>> }
+export type FinishFormState = {
+  errors?: Partial<Record<'uitslag-wij' | 'uitslag-zij', string>>
+  /** What the editor typed, which the form shows again with the errors. */
+  values?: Record<'uitslag-wij' | 'uitslag-zij', string>
+}
 
 /** Where the form for taking the report away comes back to, with its error. */
 export type RemoveReportFormState = { error?: string }
@@ -150,11 +154,18 @@ export async function submitFinish(
   if (goalsFor === undefined || goalsAgainst === undefined) {
     const error = `Vul een aantal doelpunten in, een heel getal van 0 tot ${mostGoals}.`
 
+    const typed = (name: 'uitslag-wij' | 'uitslag-zij') => {
+      const value = formData.get(name)
+
+      return typeof value === 'string' ? value : ''
+    }
+
     return {
       errors: {
         ...(goalsFor === undefined ? { 'uitslag-wij': error } : {}),
         ...(goalsAgainst === undefined ? { 'uitslag-zij': error } : {}),
       },
+      values: { 'uitslag-wij': typed('uitslag-wij'), 'uitslag-zij': typed('uitslag-zij') },
     }
   }
 
