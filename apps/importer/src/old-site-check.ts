@@ -21,6 +21,7 @@ import { deriveOldSiteGoals } from './old-site-goals.ts'
 import { judgeStoredOldSiteMatch } from './old-site-lineups.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSource } from './old-site-matches.ts'
 import { countOldSiteNames, findOldSiteNameClusters } from './old-site-name-clusters.ts'
+import { oldSiteSquadNamesToDecide } from './old-site-names.ts'
 import { deriveOldSitePlayers, oldSitePlayerIds } from './old-site-players.ts'
 
 /** Everything the report says. */
@@ -580,6 +581,15 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
       'Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.',
     ],
     check.nameClusters.map((group) => group.map((one) => `${one.name} (${one.count})`).join(' / ')),
+  )
+  section(
+    'Namen op de spelerskaarten om te beslissen',
+    [
+      'Deze namen staan in de selectie van een seizoen, uit Wikipedia en uit de oude fansite, en horen misschien bij één persoon.',
+      'De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.',
+      'Jordy Bruijn en Jordy Buijs zijn waarschijnlijk twee mensen.',
+    ],
+    oldSiteSquadNamesToDecide.map((group) => group.join(' / ')),
   )
   section(
     'Nieuwe clubs',

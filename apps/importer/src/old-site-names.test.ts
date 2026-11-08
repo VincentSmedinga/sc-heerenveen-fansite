@@ -11,7 +11,15 @@ import { deriveOldSiteReport } from './old-site-report.ts'
 
 describe('the corrections of the names', () => {
   it.each([
+    ['Ali Elkhattabi', 'Ali El Khattabi'],
     ['Dirk Kuyt', 'Dirk Kuijt'],
+    ['Ger Schaap', 'Gerrie Schaap'],
+    ['Hennie Meijer', 'Henny Meijer'],
+    ['Igor Kornejev', 'Igor Korneev'],
+    ['Ivan Tzvekov', 'Ivan Tsvetkov'],
+    ['Ivan Tzvetkov', 'Ivan Tsvetkov'],
+    ['Lee-Roy Echteld', 'Leeroy Echteld'],
+    ['Ronnie Venema', 'Ronny Venema'],
     ['Jürgen Dirckx', 'Jürgen Dirkx'],
     ['Jurgen Dirckx', 'Jürgen Dirkx'],
     ['Humprey Rudge', 'Humphrey Rudge'],

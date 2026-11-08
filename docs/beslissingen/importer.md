@@ -2782,8 +2782,14 @@
     Een spelercode van ons (`lars.nilsson`) geeft al de naam van de rij in de oude tabel (`Lasse Nilsson`), dus daar is niets omgezet.
   - **Wat erin staat:** alleen wat de projecteigenaar per groep koos: Dirk Kuijt, Jürgen Dirkx, Humphrey Rudge, Rahim Ouédraogo, Tomáš Galásek, Mark Luijpers, Marc Nygaard en Tommie van der Leegte.
     Brian Tevreden en Brian Tevreden II zijn twee spelers, en Ruud Kool en Ruud Knol ook (`oldSiteDistinctNames`).
+  - **Ook de spelers van ons.**
+    Een speler van ons komt uit de oude tabel `speler` of uit een code, en gaat door dezelfde lijst (`resolveOldSiteCode`).
+    De lijst zet de schrijfwijze van de oude fansite om in de schrijfwijze van de selectie van Wikipedia: Gerrie Schaap, Ronny Venema, Ivan Tsvetkov, Ali El Khattabi en Henny Meijer.
+    Bij Leeroy Echteld en Igor Korneev is de oude schrijfwijze de gekozen, en de lijst zet de schrijfwijze van Wikipedia om (`Lee-Roy Echteld`, `Igor Kornejev`), voor het geval die als tekst in de bestanden staat.
+    De stap `spelers` vindt zo de speler die er al staat (dezelfde naam in hetzelfde seizoen, uit welke bron ook) en maakt geen tweede.
+    De import verwijdert of hernoemt nooit een rij die er al staat: wat er onder de oude schrijfwijze staat, regelt de projecteigenaar met de hand.
   - **De rest blijft staan.**
-    Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken.
+    Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken, en een korte lijst _Namen op de spelerskaarten om te beslissen_ (`oldSiteSquadNamesToDecide`) met schrijfwijzen uit de selecties die nog niet beslist zijn.
     Twee namen lijken op elkaar in een van deze drie gevallen:
     - ze zijn gelijk zonder hoofdletters, accenten, leestekens en `van`, `de`, `der` en `den`;
     - ze verschillen hoogstens twee letters, en beide zijn zeven tekens of langer;

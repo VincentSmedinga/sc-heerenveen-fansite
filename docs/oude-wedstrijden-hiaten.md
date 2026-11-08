@@ -412,7 +412,6 @@ Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.
 - Hossam Ghaly (2) / Hossam Ghali (1)
 - Houssin Bezzai (3) / Houssine Bezzai (1)
 - István Szekér (2) / Istvan Széker (1)
-- Ivan Tzvetkov (27) / Ivan Tzvekov (1)
 - Jan-Pieter Martens (5) / Jan Martens (2)
 - Jan-Paul Saeijs (6) / Jan Paul Saeijs (1)
 - Jan Vreman (14) / Jan Veenman (1)
@@ -513,6 +512,17 @@ Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.
 - Zefilinho (1) / Zefilino (1)
 - Zjelko Kalac (7) / Zeljko Kalac (1)
 - Zjelko Petrovic (11) / Zeljko Petrovic (5)
+
+## Namen op de spelerskaarten om te beslissen
+
+Deze namen staan in de selectie van een seizoen, uit Wikipedia en uit de oude fansite, en horen misschien bij één persoon.
+De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.
+Jordy Bruijn en Jordy Buijs zijn waarschijnlijk twee mensen.
+
+- Radoslav Samardžić / Radoslav Samardzic
+- Jan Harm Schippers / Jan-Harm Schippers
+- Robert van den Berg / Robert van der Berg
+- Jordy Bruijn / Jordy Buijs
 
 ## Nieuwe clubs
 
