@@ -2001,7 +2001,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu is er één stap, `clubs`; de wedstrijden, de doelpunten en de opstellingen komen erbij (#877 en verder).
+Nu zijn er twee stappen, `clubs` en `matches`; de doelpunten en de opstellingen komen erbij (#878 en verder).
 
 ```sh
 pnpm import:old-site --dry-run
@@ -2032,6 +2032,26 @@ Een naam van de oude fansite die afwijkt, gaat in `club_names`, tenzij een ander
 Een club zonder pagina krijgt de pagina van Wikipedia zodra de import van Wikipedia een wedstrijd met die club leest; hij maakt geen tweede club.
 Een club die samenging of verhuisde (zoals `Dordrecht '90` en `SVV`) blijft een eigen club.
 `oldSiteClubIds` geeft voor de stappen erna de club bij elke clubcode.
+
+#### De stap matches
+
+De stap `matches` ([`src/old-site-matches.ts`](src/old-site-matches.ts)) maakt van elke wedstrijd in de bestanden een rij in `matches`, met `data_source = 'oude-fansite'` en `status = 'played'`, en een rij in `match_statistics` waar ten minste één van de zes cijfers boven 0 is.
+Hij doet dit:
+
+- Het seizoen `9091` wordt `1990/91`, en de competitiecode wordt de naam (1 Eredivisie, 2 KNVB Beker, 3 Champions League, 4 Europacup II, 5 Intertoto Cup, 6 UEFA Cup, 7 Eerste divisie, 8 Play-offs UEFA Cup).
+- `.thuis`, `.bekerthuis` en `.playoffthuis` zijn thuis, de rest uit.
+  De uitslag staat thuis-uit in het bestand en wordt `goals_for` en `goals_against` vanuit sc Heerenveen.
+- De ronde is `Speelronde N` bij een volledig seizoen van 34 wedstrijden in de Eredivisie of de Eerste divisie, anders `Wedstrijd N`, steeds in volgorde van datum.
+  De oude rondenummers worden niet gebruikt.
+- De opmerking van de uitslag geeft verlenging en strafschoppen (zie de beslissing in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
+- `dt` is Amsterdamse tijd.
+  Bij `00:00` blijft `kickoff_at` leeg en is het een datum zonder tijd.
+- `note` krijgt alleen de opmerkingen van de oude redactie die een feit zijn voor een bezoeker; de rest staat in de beslissing en wordt niet gekopieerd.
+- De stap raakt alleen rijen met de bron `oude-fansite`.
+  Een rij met dezelfde sleutel en de bron `wikipedia` slaat hij over en meldt hij.
+  De aftrap en de uitslag die de redactie invulde (`match_edits`) blijven zoals ze zijn.
+  Hij verwijdert nooit een rij: een wedstrijd die niet meer in de bestanden staat, krijgt een regel in het logboek.
+- `deriveOldSiteMatches` geeft ook de sleutel (seizoen, competitie, ronde) van elke wedstrijd, voor de stappen erna.
 
 #### Op de host
 
@@ -2070,7 +2090,7 @@ De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
-`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/old-site-matches.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 

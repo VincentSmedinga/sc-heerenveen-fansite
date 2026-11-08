@@ -2564,7 +2564,8 @@
   Elke stap schrijft alleen wat verschilt en meldt hoeveel rijen hij maakte, wijzigde, ongewijzigd liet of oversloeg.
   Een tweede run verandert niets.
   De opdracht staat in `apps/importer/src/import-old-site.ts`; een stap is een regel in de lijst `oldSiteSteps`.
-  Nu bestaat alleen de stap `clubs`.
+  Nu bestaan de stappen `clubs` en `matches` (#877).
+  **Later:** zie _De stap `matches` leidt ronde, verlenging, strafschoppen en aftrap af uit het bestand_ hieronder (8 november 2026).
 - **Waarom:** de volgorde is nodig, want een doelpunt hangt aan een wedstrijd.
   Een Builder kan een stap toevoegen zonder de rest aan te raken.
 - **Alternatieven:** een opdracht per stap; dan moet de eigenaar de volgorde onthouden.
@@ -2608,3 +2609,48 @@
   Een lijst op de code laat een wijziging in een naam in het bestand geen club naar een andere wijzen.
 - **Alternatieven:** elke club meteen bij Wikipedia opzoeken (de importer vraagt dan voor ongeveer 90 clubs om een pagina, buiten wat de Wikipedia-import al doet).
   De lijst van volledige namen gebruiken voor alle schrijfwijzen (die lijst werkt op de naam, en geldt ook voor de import van Wikipedia).
+
+## De stap `matches` leidt ronde, verlenging, strafschoppen en aftrap af uit het bestand
+
+- **Datum:** 7 november 2026, aangevuld op 8 november 2026
+- **Besluit:** de stap `matches` van `import:old-site` (#877) maakt van elke wedstrijd in de bestanden een rij in `matches` met de bron `oude-fansite`, en volgt daarbij deze regels.
+  - **De ronde heet `Speelronde N` in volgorde van datum, en anders `Wedstrijd N`.**
+    De oude rondenummers kloppen niet: 2000/01 heeft de rondes 7 tot en met 10 twee keer, 1992/93 mist 3, de beker heeft nul als ronde en in 1991/92 staat overal 0.
+    Een seizoen van de Eredivisie of de Eerste divisie met precies 34 wedstrijden krijgt `Speelronde 1` tot en met `Speelronde 34`.
+    Alle andere wedstrijden krijgen `Wedstrijd N` in volgorde van datum binnen het seizoen en de competitie.
+    Waarom: de sleutel (seizoen, competitie, ronde) moet uniek zijn, en een verzonnen "Achtste finale" is erger dan een neutraal nummer.
+    Een uitgestelde wedstrijd kan een ander nummer krijgen dan de officiële speelronde; het controleverslag (#880) laat de verschillen met het oude nummer zien.
+    Alternatief: de oude nummers houden (botsen, en een nul is geen ronde).
+  - **Verlenging en strafschoppen komen uit `wedstrijd_res.opmerking` en de minuten van de doelpunten.**
+    Een lege opmerking of `*` is niets (de `*` van 1990/91 betekent "rust niet bekend").
+    `n.v.` betekent dat er verlengd is en dat `et` en `eu` de stand na verlenging zijn.
+    `X-Y n.v.` betekent dat er verlengd is, dat `et` en `eu` de stand na 90 minuten zijn en dat `X-Y` de stand na verlenging is, in dezelfde volgorde (thuis-uit).
+    `X-Y n.s.` betekent dat het na verlenging gelijk stond (`et` en `eu`) en dat `X-Y` de strafschoppenserie is (thuis-uit).
+    Bij alleen `n.v.` is de stand na 90 minuten leeg, behalve als de doelpunten hem bewijzen: de lijst heeft evenveel doelpunten voor elke kant als de eindstand, alle doelpunten hebben een minuut en geen is een eigen doelpunt (het bestand zegt niet voor wie die tellen).
+    De stand na 90 minuten is dan het aantal doelpunten tot en met minuut 90.
+    Bij `n.s.` blijft de stand na 90 minuten leeg.
+    Een opmerking bij een competitiewedstrijd, een opmerking die we niet kennen, een `X-Y n.v.` die lager is dan de stand na 90 minuten en een `n.s.` bij een ongelijke stand worden niet gebruikt en staan als regel in het logboek, zodat de database ze niet hoeft af te wijzen.
+    Waarom: dit klopt met de doelpunten van de wedstrijden waar het te controleren is (TOP Oss 1996/97: 2-2 na 90 minuten en een doelpunt in minuut 95; Varteks 1998/99: 2-1 na 90 minuten en drie doelpunten in de verlenging; PSV 1992/93).
+    Alternatief: alle uitslagen als 90-minutenstand lezen (verkeerde eindstand in acht wedstrijden).
+  - **De aftrap is Amsterdamse tijd, en 00:00 betekent onbekend.**
+    `dt` uit de oude database wordt `match_date` (de lokale dag) en `kickoff_at` (in UTC, met `amsterdamToUtc` van de import van Wikipedia).
+    Bij `00:00` blijft `kickoff_at` leeg en is de wedstrijd een datum zonder tijd (#873).
+  - **`note` krijgt alleen opmerkingen die een bezoeker kan gebruiken.**
+    De opmerkingen van de oude redactie zijn voor het grootste deel werkaantekeningen: `Datum klopt niet`, `naar zondag als Uefa Cup`, `was 14/9`, `onder voorbehoud`, `Datum is een gokje`, twee verwijzingen naar een website van toen en de `*` van 27 wedstrijden (die in de uitslag, niet in `note`).
+    Een lijst in de code (`publicNotes`) laat precies vier opmerkingen door, met een hoofdletter erbij: `Debuut in Eredivisie`, `Kwartfinale`, `Begon later door file` en `28 januari afgelast wegens sneeuw`.
+    Al het andere, ook `Play-off` (de competitie zegt het al) en elke link, wordt niet gekopieerd en telt de stap in één regel van het logboek.
+    Een nieuwe opmerking in een toekomstig bestand komt dus nooit zomaar in een openbare kolom.
+  - **De bron en de redactie gaan voor.**
+    De stap schrijft, wijzigt en telt alleen rijen met de bron `oude-fansite`.
+    Een rij met dezelfde sleutel en de bron `wikipedia` blijft zoals hij is, en de stap meldt dat.
+    De aftrap en de uitslag die de redactie invulde (`match_edits`: `kickoff_edited`, `result_edited`) blijven zoals ze zijn; de andere kolommen volgen het bestand.
+    De stap verwijdert nooit een rij, en een rij die niet meer in het bestand staat, wordt gemeld.
+    Een tweede run verandert niets: de stap schrijft alleen wat verschilt.
+  - **`result_set_at` blijft leeg en `stadium` ook.**
+    Het eerste is voor de controle op een correctie van Wikipedia; een oude wedstrijd verandert niet meer.
+    Het stadion van een wedstrijd staat niet in de bestanden.
+  - **Een waarde die de checks van de database niet toelaten, wordt niet gekopieerd en gemeld.**
+    Dat zijn een scheidsrechter van meer dan 100 tekens en meer dan 150.000 toeschouwers.
+    Toeschouwers `0` en een lege scheidsrechter zijn "onbekend" en worden leeg.
+- **Waarom:** de oude gegevens zijn een bron met gaten en aantekeningen van redacteuren; de stap kopieert wat een bezoeker mag lezen, en meldt de rest.
+- **Alternatieven:** de opmerkingen van de oude redactie tonen zoals ze zijn (interne aantekeningen en twee links naar sites die niet meer bestaan in een openbare kolom); `note` geheel leeg laten (we verliezen drie feiten, zoals het debuut in de Eredivisie); de stand na 90 minuten ook bij `n.s.` uit de doelpunten halen (de beslissing noemt het alleen bij `n.v.`).

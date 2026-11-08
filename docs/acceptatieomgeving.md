@@ -198,7 +198,7 @@ Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
    De workflow heeft geen invoer.
 2. Lees het logboek van de stap _Import the old site on the host_.
    Daar staat per stap één regel, zoals `Old site, step clubs: 63 new, 6 updated, 22 unchanged, 0 skipped`, met daaronder een regel voor elke nieuwe club en elke club die aan een bestaande is gekoppeld.
-   De laatste regel is `Old site: 1 of 1 steps done.`
+   De laatste regel is `Old site: 2 of 2 steps done.`
    Een tweede run meldt overal `0 new, 0 updated`.
 
 - Wil je eerst zien wat de opdracht zou doen, dan kan dat alleen over SSH, met `--old-site --dry-run` achter `import.mjs` (zie _Controleren_).
@@ -207,7 +207,7 @@ Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
   Een stap die klaar is, blijft staan; de stap die faalde, laat niets achter, en de stappen erna draaien niet.
   Bij een lock probeer je het na een paar minuten opnieuw.
 - De opdracht draait de stappen in vaste volgorde en schrijft alleen wat verschilt, dus je kunt hem zo vaak starten als je wilt.
-  Nu is er één stap, `clubs`; de wedstrijden, doelpunten en opstellingen komen met #877 en verder.
+  Nu zijn er twee stappen, `clubs` en `matches`; de doelpunten en opstellingen komen met #878 en verder.
 - Ontbreekt een geheim, dan slaat de workflow de import over met een melding en blijft hij groen.
 - Net als _Import seasons_ houdt de run de `concurrency`-groep `acceptance` vast tot hij klaar is, en breekt de workflow na 30 minuten af.
   Nu duurt een run seconden.

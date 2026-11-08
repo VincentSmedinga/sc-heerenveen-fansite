@@ -637,6 +637,21 @@ const standingsColumns = {
   won: 'w',
 } as const
 
+/** A local time in the Netherlands as a moment in UTC. */
+export function amsterdamToUtc(
+  day: { day: number; month: number; year: number },
+  time: { hours: number; minutes: number },
+) {
+  const local = Date.UTC(day.year, day.month - 1, day.day, time.hours, time.minutes)
+  // The offset at the first guess may differ from the offset at the answer around a change of
+  // the clock, so the guess is corrected twice.
+  let moment = local - amsterdamOffsetMs(local)
+
+  moment = local - amsterdamOffsetMs(moment)
+
+  return new Date(moment)
+}
+
 /**
  * What is wrong with the two matches of a tie against the aggregate that the summary of the
  * section gives, or undefined: the goals of both legs added up must be that aggregate.
@@ -679,18 +694,6 @@ function amsterdamOffsetMs(moment: number): number {
     Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute')) -
     Math.floor(moment / 60_000) * 60_000
   )
-}
-
-/** A local time in the Netherlands as a moment in UTC. */
-function amsterdamToUtc(day: { day: number; month: number; year: number }, time: { hours: number; minutes: number }) {
-  const local = Date.UTC(day.year, day.month - 1, day.day, time.hours, time.minutes)
-  // The offset at the first guess may differ from the offset at the answer around a change of
-  // the clock, so the guess is corrected twice.
-  let moment = local - amsterdamOffsetMs(local)
-
-  moment = local - amsterdamOffsetMs(moment)
-
-  return new Date(moment)
 }
 
 /** The index of the `}}` that closes the `{{` at `start`, or undefined when there is none. */
