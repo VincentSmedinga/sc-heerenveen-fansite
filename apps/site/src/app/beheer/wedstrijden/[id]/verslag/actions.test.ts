@@ -18,6 +18,7 @@ import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
+import { findReportScreen, reportBasis } from '#src/beheer/match-reports'
 import { emptyRow, type ReportFormState, type ReportValues, type Row } from '#src/beheer/report-fields'
 import { report as baseReport, formDataOf, goal, squadOf, substitution } from '#src/beheer/report-fixtures'
 import { sessionCookieName } from '#src/beheer/require-role'
@@ -123,7 +124,7 @@ async function resultOf<T>(action: () => Promise<T>): Promise<T | { redirect: st
 }
 
 const submit = (id: unknown, values: ReportValues, knop = 'opslaan') =>
-  resultOf(() => submitReport(id as number, initial, formDataOf(values, knop)))
+  resultOf(() => submitReport(id as number, undefined, initial, formDataOf(values, knop)))
 const reports = () => database.db.select().from(matchReports)
 const reportAddress = (done: string) => `/beheer/wedstrijden/${matchId}/verslag?gedaan=${done}`
 
@@ -196,6 +197,30 @@ describe('submitReport', () => {
     expect(await database.db.select().from(auditLog)).toHaveLength(1)
   })
 
+  it('refuses a save of a form that was opened before someone else saved, and gives back what was typed', async () => {
+    await submit(matchId, report())
+
+    const typed = report({ wij: { doelpunt: [goal({ minuut: '12', speler: 'wij-9' })] } })
+    const answer = await resultOf(() => submitReport(matchId, 'leeg', initial, formDataOf(typed)))
+
+    expect(answer).toMatchObject({
+      errors: { verslag: expect.stringContaining('Iemand anders') as string },
+      values: typed,
+    })
+    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+  })
+
+  it('saves a form whose report is the one that is stored', async () => {
+    await submit(matchId, report())
+
+    const screen = await findReportScreen(database.db, matchId)
+    const formData = formDataOf({ ...report(), bron: 'ander wedstrijdformulier' })
+
+    expect(await resultOf(() => submitReport(matchId, reportBasis(screen!.report), initial, formData))).toEqual({
+      redirect: reportAddress('klaar'),
+    })
+  })
+
   it('adds a row with a button, and removes a row, and does not store anything', async () => {
     const added = (await submit(matchId, report(), 'wissel-wij-toevoegen')) as ReportFormState
 
@@ -225,7 +250,7 @@ describe('submitReport', () => {
 
   it('refuses a call without a session, or from a moderator', async () => {
     jar.clear()
-    await expect(submitReport(matchId, initial, formDataOf(report()))).rejects.toMatchObject({
+    await expect(submitReport(matchId, undefined, initial, formDataOf(report()))).rejects.toMatchObject({
       url: '/beheer/inloggen',
     })
 
@@ -234,7 +259,7 @@ describe('submitReport', () => {
     const [moderator] = await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org'))
 
     jar.set(sessionCookieName, await startSession(database.db, moderator?.id ?? 0))
-    await expect(submitReport(matchId, initial, formDataOf(report()))).rejects.toThrow('not found')
+    await expect(submitReport(matchId, undefined, initial, formDataOf(report()))).rejects.toThrow('not found')
     expect(await reports()).toHaveLength(0)
   })
 

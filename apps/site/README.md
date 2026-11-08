@@ -1026,6 +1026,8 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 Een wedstrijd die niet bestaat, van een latere dag is, uitgesteld of afgelast is, geeft "niet gevonden".
 Bij een wedstrijd die nog wordt gespeeld staat in de zijbalk de knop "Wedstrijd afgelopen", die naar `/beheer/wedstrijden/<nummer>/verslag/afgelopen` gaat: daar bevestigt de redactie de stand uit de doelpunten van het verslag (`finishMatch`), de wedstrijd krijgt zijn uitslag en wordt `played`, en het verslag blijft `bezig`.
 De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
+`/beheer/wedstrijden/<nummer>/verslag/live` (`src/app/beheer/wedstrijden/[id]/verslag/live`) is het snelle scherm om het verslag bij te houden vanaf een telefoon: een formulier voor een doelpunt, een kaart en een wissel die elk meteen opslaan (`addLiveEvent`, een transactie met een slot op de wedstrijd), de stand, en de gebeurtenissen met "Haal weg" (`removeLiveEvent`).
+Het volledige formulier draagt `reportBasis` mee en weigert te bewaren als het verslag veranderde sinds het werd geopend.
 
 - Het scherm is een gewone post, zoals het formulier van de wedstrijd, en werkt zonder JavaScript.
   Elke lijst is een `InputTable` met een knop om een rij toe te voegen en een knop per rij om hem weg te halen.

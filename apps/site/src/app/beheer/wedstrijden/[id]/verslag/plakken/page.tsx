@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { matchesPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
-import { findReportScreen, seriesOf } from '#src/beheer/match-reports'
+import { findReportScreen, reportBasis, seriesOf } from '#src/beheer/match-reports'
 import { describeStored } from '#src/beheer/report-paste'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -42,7 +42,7 @@ export default async function PasteReportPage({ params }: Props) {
 
   return (
     <PasteProvider
-      action={submitPaste.bind(null, match.id)}
+      action={submitPaste.bind(null, match.id, reportBasis(report))}
       cancelHref={reportPath(match.id)}
       choices={{
         matchHref: matchPath(match.id),

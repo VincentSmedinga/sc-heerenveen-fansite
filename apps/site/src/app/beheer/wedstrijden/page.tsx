@@ -26,7 +26,7 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
 
-import { listPath, matchesPath, matchPath, reportPath } from './paths'
+import { listPath, livePath, matchesPath, matchPath, reportPath } from './paths'
 
 // Render on each request: who is logged in and which matches have an entry are not known when
 // the site is built.
@@ -226,6 +226,13 @@ function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
         <Text as="span" className="hf-visually-hidden">
           {' '}
           verslag van {clubs}
+        </Text>
+      </Link>{' '}
+      <Link href={livePath(match.id)}>
+        Bijhouden
+        <Text as="span" className="hf-visually-hidden">
+          {' '}
+          van {clubs} tijdens de wedstrijd
         </Text>
       </Link>
     </>
