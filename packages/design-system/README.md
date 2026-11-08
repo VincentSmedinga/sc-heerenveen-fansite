@@ -23,6 +23,12 @@ Met `pnpm --filter design-system build-storybook` bouw je een statische versie i
 De tests van de componenten draai je met `pnpm --filter design-system test`.
 Die draaien in jsdom, zonder browser.
 
+Onder elke story staan de panelen Code en HTML, naast Toegankelijkheid, dat als eerste opent.
+Code toont de JSX van de story, zonder de themawrapper, en is dezelfde code als "Show code" onder een voorbeeld.
+HTML toont de HTML die eruit komt (add-on `@linus_janns/storybook-addon-html`).
+Een story die een hulpcomponent uit `src/docs/ExamplePage.tsx` rendert, zou alleen `<ExampleHeader />` laten zien.
+Zo'n story krijgt in `parameters.docs.source` een korte `code` met de hand, met de echte namen van de componenten en alleen de props die ertoe doen (`language: 'tsx'`, `type: 'code'`).
+
 Axe op elke story draai je met `pnpm test:stories` (in de hoofdmap, of `pnpm --filter design-system test:stories`).
 De Vitest-addon van Storybook opent elke story in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
 Het thema volgt uit de omgevingsvariabele `STORYBOOK_THEME`, die `.storybook/preview.tsx` leest; de opdracht zet hem zelf.

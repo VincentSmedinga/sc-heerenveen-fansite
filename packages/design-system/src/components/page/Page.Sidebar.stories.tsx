@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleMain, ExampleSidebar } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Page } from './Page'
 
 const meta = preview.meta({
@@ -23,7 +22,14 @@ const meta = preview.meta({
           "- Met `narrow` is hij smaller dan op andere pagina's en is de hoofdkolom breder. Kies het voor een zijbalk met iets kleins, zoals een filter, naast een lange lijst. Samen blijven de kolommen even breed als zonder. Kies er niet `wide` bij.",
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Sidebar aria-label="Naast het nieuws">
+  <Page.Cell>…</Page.Cell>
+  <Page.Cell>…</Page.Cell>
+</Page.Sidebar>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

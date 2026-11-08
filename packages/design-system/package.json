@@ -49,6 +49,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@linus_janns/storybook-addon-html": "9.0.0",
     "@storybook/addon-a11y": "10.6.5",
     "@storybook/addon-docs": "10.6.5",
     "@storybook/addon-mcp": "10.6.5",

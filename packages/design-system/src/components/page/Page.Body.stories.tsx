@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleContent, ExampleMain, ExampleMainWithIntro, ExampleSidebar } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Page } from './Page'
 
 const meta = preview.meta({
@@ -20,7 +19,14 @@ const meta = preview.meta({
           '- Het groeit mee met het scherm, zodat de footer onderaan blijft staan.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Body>
+  <Page.Main>…</Page.Main>
+  <Page.Sidebar aria-label="Naast het nieuws">…</Page.Sidebar>
+</Page.Body>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

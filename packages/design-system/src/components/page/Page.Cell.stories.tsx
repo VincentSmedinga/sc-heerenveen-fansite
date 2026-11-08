@@ -1,6 +1,5 @@
 import preview from '#.storybook/preview'
 
-import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
 import { Text } from '../text/Text'
@@ -19,7 +18,16 @@ const meta = preview.meta({
           '- De ruimte tussen de cellen komt van de `Page.Body`.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Cell>
+  <Heading appearance={3} level={2}>
+    Zo lees je de site
+  </Heading>
+  <Text>Wat bij elkaar hoort, staat in één cel.</Text>
+</Page.Cell>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

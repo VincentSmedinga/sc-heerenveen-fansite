@@ -1,6 +1,5 @@
 import preview from '#.storybook/preview'
 
-import { exampleSource } from '../../docs/exampleSource'
 import { Pagination } from './Pagination'
 
 const meta = preview.meta({
@@ -22,7 +21,17 @@ const meta = preview.meta({
           'Op een smal scherm staat de tekst boven de links.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Pagination
+  current={5}
+  label="Pagina's"
+  nextHref="/podcasts?pagina=6"
+  previousHref="/podcasts?pagina=4"
+  total={9}
+/>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],
