@@ -2993,6 +2993,7 @@
   De AGPL-3.0 staat in de bijlage van de EUPL-1.2 als licentie waarmee de EUPL compatibel is.
   De add-on draait alleen in Storybook en komt niet in de site.
 - **Eigen keuzes bij het bouwen:**
+  - de volgorde van de panelen volgt de volgorde van `addons` in `main.ts`: `addon-a11y` staat vóór `addon-docs`, zodat Toegankelijkheid, Code en HTML in die volgorde staan.
   - de decorator van de add-on staat niet in `main.ts` alleen: Storybook registreert hem alleen als `.storybook/preview.tsx` hem in `addons` zet, via `@linus_janns/storybook-addon-html/preview`.
   - `parameters.html.root` is `#storybook-root`, en een `transform` haalt de themawrapper van `withTheme` weg, die een story met een eigen thema omhult.
     Zo staat alleen de story zelf in het paneel.

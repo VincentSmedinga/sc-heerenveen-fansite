@@ -23,7 +23,7 @@ Met `pnpm --filter design-system build-storybook` bouw je een statische versie i
 De tests van de componenten draai je met `pnpm --filter design-system test`.
 Die draaien in jsdom, zonder browser.
 
-Onder elke story staan de panelen Code en HTML, naast Toegankelijkheid, dat als eerste opent.
+Onder elke story staan de panelen Code en HTML, na Toegankelijkheid, dat als eerste opent.
 Code toont de JSX van de story, zonder de themawrapper, en is dezelfde code als "Show code" onder een voorbeeld.
 HTML toont de HTML die eruit komt (add-on `@linus_janns/storybook-addon-html`).
 Een story die een hulpcomponent uit `src/docs/ExamplePage.tsx` rendert, zou alleen `<ExampleHeader />` laten zien.
