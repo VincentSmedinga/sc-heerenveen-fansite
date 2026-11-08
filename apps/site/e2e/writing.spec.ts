@@ -490,6 +490,8 @@ for (const [name, javaScriptEnabled] of [
     test.use({ javaScriptEnabled })
 
     test(`shows Blessuretijd and the bar of the page ${name}`, async ({ page }) => {
+      // The bar is for a phone: it is gone where the cards sit side by side.
+      await page.setViewportSize({ height: 800, width: 390 })
       await page.goto(`/beheer/wedstrijden/${await liveReportMatchId()}/verslag/live`)
 
       const goal = page.locator('form').filter({ has: page.getByRole('button', { name: 'Doelpunt opslaan' }) })
@@ -505,8 +507,11 @@ for (const [name, javaScriptEnabled] of [
         const minute = goal.getByLabel('Minuut', { exact: true })
 
         await expect(stoppage).toHaveCount(0)
-        await minute.fill('45')
-        await expect(stoppage).toBeVisible()
+        // The first typing can come before React has hydrated the page, so it is tried again.
+        await expect(async () => {
+          await minute.fill('45')
+          await expect(stoppage).toBeVisible({ timeout: 1000 })
+        }).toPass()
         await expect(minute).toBeFocused()
         await minute.fill('46')
         await expect(stoppage).toHaveCount(0)

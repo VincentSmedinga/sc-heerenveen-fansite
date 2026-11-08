@@ -81,7 +81,7 @@ export default async function LiveReportPage({ params }: Props) {
           </Link>
         </Card>
       ) : (
-        <LiveStatusProvider>
+        <LiveStatusProvider eventCount={view.events.length}>
           <Card aria-labelledby="stand-kop">
             <Heading id="stand-kop" level={2}>
               Stand {score}

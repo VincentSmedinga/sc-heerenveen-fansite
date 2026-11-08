@@ -15,7 +15,16 @@ import {
   Select,
   Text,
 } from '@fansite/design-system'
-import { createContext, type ReactNode, use, useActionState, useEffect, useState, useSyncExternalStore } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import type { LiveEventInput, LiveEventRow, LiveKind, LivePlayer } from '#src/beheer/live-report'
 
@@ -212,9 +221,22 @@ export function LiveEvents({
   )
 }
 
-/** Holds the line that says what was done, and shows it where a screen reader finds it. */
-export function LiveStatusProvider({ children }: { children: ReactNode }) {
+/**
+ * Holds the line that says what was done, and shows it where a screen reader finds it. When the
+ * list has fewer events than before, one was taken away: the button that was pressed is gone,
+ * and Next puts the focus at the top of the page when it makes the page anew. This effect runs
+ * after that and moves the focus to the heading of the list (WCAG 2.4.3).
+ */
+export function LiveStatusProvider({ children, eventCount }: { children: ReactNode; eventCount: number }) {
   const [message, setMessage] = useState('')
+  const previous = useRef(eventCount)
+
+  useEffect(() => {
+    if (eventCount < previous.current) {
+      document.getElementById('gebeurtenissen-kop')?.focus()
+    }
+    previous.current = eventCount
+  }, [eventCount])
 
   return (
     <StatusContext value={setMessage}>
@@ -233,15 +255,13 @@ function LiveEvent({
   action: (previous: LiveRemoveState) => Promise<LiveRemoveState>
   event: LiveEventRow
 }) {
+  // The action stays the server action itself, so the form also works without JavaScript.
   const [state, formAction, pending] = useActionState(action, {})
   const announce = use(StatusContext)
 
   useEffect(() => {
     if (state.removed !== undefined) {
       announce(state.removed)
-      // The event and its button are gone: the focus goes to the heading of
-      // the list, not to the top of the page (WCAG 2.4.3).
-      document.getElementById('gebeurtenissen-kop')?.focus()
     }
   }, [announce, state])
 
