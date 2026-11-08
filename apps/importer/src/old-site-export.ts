@@ -218,7 +218,6 @@ function lineupEntry(row: LineupRow): OldSiteLineupEntry {
   }
 }
 
-/** The opponent's code is the part of the match code before the first dot (`psv.thuis`). */
 const linesByNumber: readonly (null | OldSiteLine)[] = [null, 'doelman', 'verdediger', 'middenvelder', 'aanvaller']
 
 /** The line of `speler.linie`: 1 to 4, and null for 0 (not known) or anything else. */
@@ -226,6 +225,7 @@ function lineOf(linie: number): null | OldSiteLine {
   return linesByNumber[linie] ?? null
 }
 
+/** The opponent's code is the part of the match code before the first dot (`psv.thuis`). */
 function opponentCode(matchCode: string) {
   return matchCode.split('.')[0] ?? matchCode
 }
