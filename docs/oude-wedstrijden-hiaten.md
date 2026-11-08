@@ -5,7 +5,7 @@ De projecteigenaar leest het, en het issue over de aanvulling met Wikipedia (#41
 Gemaakt op 8 november 2026, op een database met de import van de bestanden in `apps/importer/data/oude-fansite`.
 Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`, of met de workflow _Import old site_ en de keuze `report`.
 De opdracht leest de bestanden en de database en schrijft niets in de database.
-Het verslag noemt namen zoals ze in de wedstrijd stonden, op de spellingen na die de projecteigenaar heeft samengevoegd.
+Het verslag noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde spellingen na.
 
 ## Per seizoen
 
@@ -293,11 +293,11 @@ Anders is het bezig, met de reden hier.
 - 2001/02, Eredivisie, 7 september 2001, Vitesse: regel `assist-not-on-pitch`: Matthew Amoah geeft een assist in minuut 85, maar staat dan niet op het veld
 - 2001/02, Eredivisie, 22 september 2001, PSV: John de Jong staat twee keer in de opstelling: de tweede is weggelaten; John de Jong komt in minuut 81 erin en niemand van het team gaat er dan uit
 - 2001/02, KNVB Beker, 30 januari 2002, FC Utrecht: Allan Bak Jensen komt in minuut 81 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Karim Touzani krijgt geel-rood zonder precies één gele kaart eerder
-- 2001/02, Eredivisie, 16 februari 2002, Willem II: Paul Matthijsen staat twee keer in de opstelling: de tweede is weggelaten; Chris Janssens gaat in minuut 80 eruit zonder invaller en zonder rode kaart
+- 2001/02, Eredivisie, 16 februari 2002, Willem II: Paul Matthijs staat twee keer in de opstelling: de tweede is weggelaten; Chris Janssens gaat in minuut 80 eruit zonder invaller en zonder rode kaart
 - 2001/02, Eredivisie, 9 maart 2002, RKC Waalwijk: Jochen Janssen komt in minuut 67 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Rogier Molhoek krijgt geel-rood zonder precies één gele kaart eerder
 - 2001/02, Eredivisie, 20 april 2002, Roda JC: Jeffrey Talan komt in minuut 55 erin en niemand van het team gaat er dan uit; Jesper Håkansson komt in minuut 67 erin en niemand van het team gaat er dan uit; regel `yellow-red-needs-one-yellow`: Anthony Lurling krijgt geel-rood zonder precies één gele kaart eerder
-- 2001/02, Eredivisie, 28 april 2002, Feyenoord: regel `yellow-red-needs-one-yellow`: Sjinji Ono krijgt geel-rood zonder precies één gele kaart eerder
-- 2002/03, Eredivisie, 6 oktober 2002, Willem II: Jattoo Ceesay gaat in minuut 64 eruit zonder invaller en zonder rode kaart
+- 2001/02, Eredivisie, 28 april 2002, Feyenoord: regel `yellow-red-needs-one-yellow`: Shinji Ono krijgt geel-rood zonder precies één gele kaart eerder
+- 2002/03, Eredivisie, 6 oktober 2002, Willem II: Jatto Ceesay gaat in minuut 64 eruit zonder invaller en zonder rode kaart
 - 2002/03, Eredivisie, 19 oktober 2002, FC Twente: Thijs Houwing komt in minuut 87 erin en niemand van het team gaat er dan uit
 - 2002/03, Eredivisie, 1 februari 2003, NAC Breda: Rob Penders gaat in minuut 65 eruit zonder invaller en zonder rode kaart; Rick Versteeg gaat in minuut 65 eruit zonder invaller en zonder rode kaart
 - 2003/04, Eredivisie, 27 september 2003, FC Twente: Kim Christensen komt in minuut 46 erin en niemand van het team gaat er dan uit; Sjaak Polak gaat in minuut 45 eruit zonder invaller en zonder rode kaart
@@ -324,7 +324,7 @@ Anders is het bezig, met de reden hier.
 
 De naam is gemaakt uit de code, dus de schrijfwijze kan afwijken.
 
-- Ivan Tzvekov (`ivan.tzvekov`), 1998/99
+Geen.
 
 ## Kaarten die de import oversloeg
 
@@ -356,161 +356,70 @@ Deze assists zijn leeg gelaten in het verslag.
 ## Namen om te beslissen
 
 Deze namen lijken op elkaar en horen misschien bij één persoon.
+Namen die zeker één persoon zijn, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).
 De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.
 Tussen haakjes staat hoe vaak de spelling in de opstellingen, doelpunten, kaarten en assists voorkomt.
 Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.
 
-- Abdelkrim el Hadrioui (7) / Abdelkrim El Hadrioui (1)
 - Aleksandar Ilic (1) / Aleksander Ilic (1)
-- Ali Boussaboun (7) / Ali Bouassaboun (1)
-- André Bergdølmo (5) / Andre Bergdølmo (1)
-- Andwelé Slory (2) / Andwélé Slory (1)
-- Arne Slot (5) / Arno Slot (2)
 - Arne van de Berg (1) / Arne van den Berg (1)
-- Bart van den Eede (8) / Bart Van Den Eede (2)
 - Bas Gösgens (1) / Jan Gösgens (1)
 - Bas Jacobs (2) / Has Jacobs (1)
-- Bernard Schuiteman (4) / Bernhard Schuiteman (1)
-- Björn Daelemans (5) / Bjorn Daelemans (3)
 - Bob Peeters (13) / Rob Penders (8) / Bob Penders (2)
 - Boldizsár Bodor (6) / Boldizsár Bödör (3)
 - Brouwer (1) / X. Brouwer (1)
-- Charlie van den Ouweland (1) / Charly van den Ouweland (1)
 - Cristea (1) / Cristocea (1)
-- Csaba Fehér (14) / Czaba Fehér (1)
-- DaMarcus Beasley (5) / DaMarcus Beasly (1)
 - Damiën Hertog (4) / Damien Hertog (2)
-- Danny Buijs (10) / Danny Guyt (2) / Danny Guijt (1)
-- David Bystron (2) / David Bystroò (1)
+- Danny Buijs (10) / Danny Guijt (3)
 - Dennis van der Ree (4) / Dennis van Es (1)
-- Dirk Jan Derksen (5) / Dirk-Jan Derksen (1)
-- Edward Linskens (3) / Edward Linksens (1)
-- Erwin van de Looi (11) / Edwin van de Looi (1)
 - Eric Kortchaguine (2) / Erik Kortchaguine (1)
 - Erik Smit (2) / Eric Smit (1)
 - Eric van de Merwe (1) / Eric van der Merwe (1)
 - Erik Meijer (5) / Erik van der Meer (2) / Erik Maes (1)
-- Ervin Lee (14) / Urvin Lee (1)
 - Erwin Koeman (15) / Erwin Koen (3)
-- Etienne Shew-Atjon (7) / Étienne Shew-Atjon (1)
 - Evgenyi Levchenko (2) / Evgeniy Levchenko (1) / Yevgeni Levchenko (1)
-- Fernando Picún (3) / Fernando Picun (1)
 - Frank de Boer (17) / Frank Broers (2)
-- Frantisek Metelka (1) / František Metelka (1)
-- Frantisek Rajtoral (1) / František Rajtoral (1)
-- Gábor Babos (9) / Gábor Bábos (1)
-- Giorgi Gakhokidze (2) / Gorgi Gakhokidze (2) / Georgi Gakhokidze (1)
 - Ger Senden (25) / Gerry Senden (1)
 - Germain Augustien (2) / Germain Agustien (1)
-- Guillano Grot (4) / Guilliano Grot (1)
 - Hans van Arum (9) / Hans Adam (1)
 - Hans Vonk (338) / Hans Bond (3)
 - Jan de Visser (283) / Hans Visser (7)
-- Hazem Emam (5) / Hazem Eman (1)
-- Henri van der Vegt (3) / Henry van der Vegt (2)
-- Heurelho Gomes (2) / Heurelho da Silva Gomes (1)
-- Hossam Ghaly (2) / Hossam Ghali (1)
-- Houssin Bezzai (3) / Houssine Bezzai (1)
-- István Szekér (2) / Istvan Széker (1)
 - Jan-Pieter Martens (5) / Jan Martens (2)
-- Jan-Paul Saeijs (6) / Jan Paul Saeijs (1)
 - Jan Vreman (14) / Jan Veenman (1)
-- Jan Willem van Ede (2) / Jan-Willem van Ede (2)
 - Janício (1) / Jánicio (1)
-- Jattoo Ceesay (16) / Jatto Ceesay (3)
-- Jean-Paul de Jong (29) / Jean Paul de Jong (2)
-- Jeffery de Visscher (1) / Jeffrey de Visscher (1)
-- Jimmy van Fessem (8) / Jim van Fessem (3)
-- Johnny Heitinga (6) / John Heitinga (2)
-- John van den Brom (15) / John van de Brom (2)
 - John Veldman (10) / John Veltman (2)
-- Joris Mathijsen (13) / Joris Matthijsen (2)
-- José Fortes Rodriquez (8) / José Fortes Rodriguez (5)
-- Jürgen Colin (3) / Jurgen Colin (2)
-- Jurgen Streppel (6) / Jürgen Streppel (1)
-- Kemy Agustien (2) / Kemy Augustien (2)
-- Kenan Durmusoglu (2) / Kenan Durmusoglo (1)
-- Kennedy Bakircioglü (4) / Kennedy Bakircioglu (1)
-- Kew Jaliens (20) / Kew Jalilens (1)
-- Klaas Jan Huntelaar (111) / Klaas-Jan Huntelaar (3)
-- Krzystof Bociek (5) / Krzysztof Bociek (2)
 - Kurt van de Paar (3) / Kurt van der Paar (1)
 - László Bodnar (1) / László Bodnár (1)
-- Leon Hutten (5) / Léon Hutten (2)
-- Leonard van Utrecht (5) / Leonhard van Utrecht (1)
 - Leonardo dos Santos (3) / Leonardo Dos Santos (1)
-- Lody Roembiak (1) / Lody Rumbiak (1)
 - Luuk Maes (8) / Luc Maes (2)
-- Lukáš Magera (2) / Lukas Magera (1)
-- Magno Mocelín (3) / Magno Mocelin (2)
-- Marc Latupeirissa (4) / Mark Latupeirissa (1)
 - Marco Heering (10) / Marcel Heering (3)
 - Marcel Keizer (5) / Marcel Kleizen (1)
-- Mark Jan Fledderus (7) / Mark-Jan Fledderus (1)
 - Mark Verkuyl (4) / Mark Verkuijl (1)
-- Maroš Klimpl (2) / Maros Klimpl (1)
 - Martin Drent (13) / Mart van Duren (1) / Martin van Duren (1)
 - Martijn Abbenhues (2) / Martin Abbenhuis (1)
-- Martin Cizek (1) / Martin Èížek (1)
-- Martin Raška (2) / Martin Raska (1)
 - Martin Reynders (3) / Martin Reijnders (1)
-- Mathieu Assou-Ekotto (1) / Matthieu Assou-Ekotto (1)
 - Mauro Almeida (1) / Paulo Almeida (1)
 - Michael Jansen (3) / Michael Hansen (1)
 - Michel Nok (12) / Michel Vonk (4) / Michel Vorm (1)
-- Milan Berck Beelenkamp (10) / Milan Berck-Beelenkamp (4)
-- Mourad Mghizrat (8) / Mourad Mgizhrat (1)
-- Muslu Nalbantoglu (4) / Muslui Nalbantoglu (1)
-- Nebojsa Gudelj (13) / Nebosja Gudelj (2)
-- Nordin Boukhari (9) / Nourdin Boukhari (4)
-- Ode Thompson (1) / Ode Thomson (1)
-- Ousmane Sanou (11) / Osmane Sanou (3)
 - Pablo Sánchez (4) / Pablo Sanchez (1)
-- Pascal Heije (5) / Pacal Heije (1)
-- Paul Matthijs (19) / Paul Matthijsen (2)
-- Paulo Rink (1) / Paulo Roberto Rink (1)
 - Pavel Mikhalevitch (2) / Pavel Mikalevitch (1)
 - Pedrag Djordjevic (1) / Predrag Djordjevic (1)
 - Perovic (2) / Petrovic (1)
-- Peter Zois (2) / Peter Zoïs (2)
-- Raymond Atteveld (8) / Raymond Attevelt (1)
 - Rick Versteeg (4) / Rcik Versteeg (1)
-- Regillio Simons (5) / Regilio Simons (2)
-- René Bot (10) / Rene Bot (1)
-- René van de Brink (4) / René van den Brink (1)
-- Rob Alflen (7) / Robbie Alflen (1)
-- Rob McKinnon (2) / Robert McKinnon (1)
-- Roberto Lanckohr (7) / Roberto Lankohr (2)
 - Roland Jansen (8) / Ronald Jansen (2)
-- Rui Monteiro (2) / Rui Montero (1)
 - Ruud Brood (10) / Ruud Bond (1)
 - Ruud Hesp (12) / Ruud Heus (5)
-- Said Boutahar (5) / Saïd Boutahar (4)
 - Sergio (13) / Sérgio (2)
-- Shinji Ono (4) / Sjinji Ono (3)
-- Silvan Inia (11) / Sylvan Inia (1)
-- Stefan Petterson (6) / Stefan Pettersson (3)
 - Stephan Keller (2) / Stephan keller (1)
-- Tarik Sektioui (9) / Tarek Sektioui (5)
-- Tijani Babangida (11) / Tijjani Babangida (5)
 - Timmy Simons (1) / Tommy Simons (1)
 - Tom van Mol (10) / Tom de Mul (2) / Tom Van Mol (1)
-- Tomek Iwan (7) / Tomeck Iwan (2)
-- Ulrich van Gobbel (15) / Ullrich van Gobbel (1)
 - Ulrich Crüden (11) / Ulrich Cruden (1)
-- Virgil Breetveld (5) / Virgil Breetvelt (3)
-- Virgilio Teixeira (4) / Virgillio Teixeira (2)
-- Wasiu Taiwo (9) / Wasio Taiwo (1)
-- Wilfred Bouma (18) / Wilfried Bouma (4)
 - Wim Jonk (8) / Wim de Ron (5)
 - X. Berens (1) / X. van Buren (1)
 - X. Frijns (1) / X. Prins (1)
 - Youssef Mariana (3) / Youssouf Mariana (2) / Youessef Mariana (1)
-- Youssef El-Akchaoui (5) / Youssef El Akchaoui (1)
-- Youssef Fertout (3) / Youssouf Fertout (2)
 - Zdenek Stanek (1) / Zdenìk Stanìk (1)
 - Zefilinho (1) / Zefilino (1)
-- Zjelko Kalac (7) / Zeljko Kalac (1)
 - Zjelko Petrovic (11) / Zeljko Petrovic (5)
 
 ## Namen op de spelerskaarten om te beslissen
