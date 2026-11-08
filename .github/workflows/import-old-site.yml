@@ -1,0 +1,79 @@
+# Reads the match data of the old fansite (1990 to 2007) into the database of the acceptance
+# environment, by running `import.mjs --old-site` on the host over SSH. Started by hand, without
+# input: the command reads the files in the repository that were deployed with the app
+# (apps/importer/data/oude-fansite) and runs its steps in a fixed order. A second run changes
+# nothing. It uses the environment and the secrets of acceptance.yml, and
+# docs/acceptatieomgeving.md says how to start it. Until the secrets are there, it skips the
+# import with a notice, so the run stays green. Run it again after a step is added to the
+# command, once the new version is deployed.
+
+name: Import old site
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The same group as acceptance.yml, so an import never runs next to a deploy, and a running one
+# finishes. GitHub keeps one waiting run per group, so start the import again if a newer run
+# took its place.
+concurrency:
+  cancel-in-progress: false
+  group: acceptance
+
+jobs:
+  import:
+    name: Import the old site on acceptance
+    runs-on: ubuntu-latest
+    # The files hold 671 matches and 91 clubs, and the command asks nobody for anything: it only
+    # writes to the database. It takes seconds. 30 minutes leaves room for the steps that come
+    # after the clubs, and for a slow host.
+    timeout-minutes: 30
+    environment:
+      name: acceptatie
+      url: https://acc.sc.heerenveen.org
+    steps:
+      - id: secrets
+        name: Check the secrets
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          for name in DEPLOY_PATH SSH_HOST SSH_KNOWN_HOSTS SSH_PRIVATE_KEY SSH_USER; do
+            if [ -z "${!name}" ]; then
+              echo "::notice title=Import skipped::$name is not set in the environment acceptatie. See docs/acceptatieomgeving.md."
+              echo "ready=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Set up SSH
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/acceptance_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # Runs the importer as cron does on the host: the Node 24 of the hosting, by its full
+      # path, and DATABASE_URL from the file in the home folder. The output goes to this log and
+      # not to ~/fansite-import.log. ssh exits with the exit code of the command, so a file that
+      # does not fit, a step that fails and a run of cron that holds the lock turn this step red.
+      # The path goes through printf %q, so the remote shell reads it as one word.
+      - name: Import the old site on the host
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=\"\$HOME/fansite-acceptatie.env\" $(printf '%q' "$DEPLOY_PATH")/apps/importer/import.mjs --old-site"

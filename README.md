@@ -50,6 +50,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm run import:seasons`      | Leest alle afgelopen seizoenen vanaf een seizoen: `pnpm run import:seasons 2020/21`       |
 | `pnpm run import:squad`        | Leest eenmalig de selectie van een afgelopen seizoen: `pnpm run import:squad 2007/08`     |
 | `pnpm run import:squads`       | Leest de selectie van alle afgelopen seizoenen vanaf een seizoen: `import:squads 1990/91` |
+| `pnpm run import:old-site`     | Leest de wedstrijden van de oude fansite (1990–2007); `--dry-run` schrijft niets          |
 | `pnpm run import:completeness` | Rekent de kans dat de selectie van elk seizoen compleet is opnieuw uit, zonder verzoeken  |
 | `pnpm run import:item-clubs`   | Zet bij elke kop welke profclubs hij noemt, zonder verzoeken                              |
 | `pnpm run import:changes`      | Toont de wijzigingen van Wikipedia die wachten, of beslist ze: `accept 12`, `reject all`  |

@@ -188,6 +188,30 @@ Start hem na een wijziging in de lezers van de selectie, en eenmalig vanaf 1990/
 - Na de selectie draai je _Import seasons_ vanaf 2010/11, zodat de doelpunten hun `player_id` en `person_id` krijgen.
 - Net als _Import seasons_ houdt de run de `concurrency`-groep `acceptance` vast tot hij klaar is, en breekt de workflow na 30 minuten af.
 
+### De wedstrijden van de oude fansite importeren
+
+De workflow [`import-old-site.yml`](../.github/workflows/import-old-site.yml) leest de wedstrijdgegevens van de oude fansite (1990 tot en met 2007) in de database van acceptatie.
+Hij leest de bestanden die met de deploy op de host staan (`apps/importer/data/oude-fansite/`) en vraagt niemand iets.
+Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
+
+1. Open in GitHub _Actions → Import old site_ en kies _Run workflow_, met de branch `main`.
+   De workflow heeft geen invoer.
+2. Lees het logboek van de stap _Import the old site on the host_.
+   Daar staat per stap één regel, zoals `Old site, step clubs: 63 new, 6 updated, 22 unchanged, 0 skipped`, met daaronder een regel voor elke nieuwe club en elke club die aan een bestaande is gekoppeld.
+   De laatste regel is `Old site: 1 of 1 steps done.`
+   Een tweede run meldt overal `0 new, 0 updated`.
+
+- Wil je eerst zien wat de opdracht zou doen, dan kan dat alleen over SSH, met `--old-site --dry-run` achter `import.mjs` (zie _Controleren_).
+  De workflow zelf schrijft altijd.
+- De run wordt rood als de bestanden niet in de vorm passen, een stap faalt of een run van cron de lock vasthoudt.
+  Een stap die klaar is, blijft staan; de stap die faalde, laat niets achter, en de stappen erna draaien niet.
+  Bij een lock probeer je het na een paar minuten opnieuw.
+- De opdracht draait de stappen in vaste volgorde en schrijft alleen wat verschilt, dus je kunt hem zo vaak starten als je wilt.
+  Nu is er één stap, `clubs`; de wedstrijden, doelpunten en opstellingen komen met #877 en verder.
+- Ontbreekt een geheim, dan slaat de workflow de import over met een melding en blijft hij groen.
+- Net als _Import seasons_ houdt de run de `concurrency`-groep `acceptance` vast tot hij klaar is, en breekt de workflow na 30 minuten af.
+  Nu duurt een run seconden.
+
 ### Een mail als een import blijft falen
 
 Faalt dezelfde import drie runs achter elkaar, dan mailt de importer de projecteigenaar.

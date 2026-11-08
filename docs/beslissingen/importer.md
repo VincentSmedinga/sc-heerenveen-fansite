@@ -2556,3 +2556,55 @@
   Een versienummer laat de import een bestand in een nieuwe vorm weigeren in plaats van fout lezen.
 - **Alternatieven:** één bestand met alle wedstrijden (ongeveer 2 MB aan één diff).
   Een JSON-schema in een eigen bestand (nog een bestand om bij te houden naast de types).
+
+## De import van de oude fansite is één opdracht met stappen in vaste volgorde
+
+- **Datum:** 7 november 2026
+- **Besluit:** `import.mjs --old-site` (`pnpm import:old-site`) leest de bestanden van #875 en draait de stappen één voor één: clubs, wedstrijden, doelpunten en spelers, opstellingen en kaarten.
+  Elke stap schrijft alleen wat verschilt en meldt hoeveel rijen hij maakte, wijzigde, ongewijzigd liet of oversloeg.
+  Een tweede run verandert niets.
+  De opdracht staat in `apps/importer/src/import-old-site.ts`; een stap is een regel in de lijst `oldSiteSteps`.
+  Nu bestaat alleen de stap `clubs`.
+- **Waarom:** de volgorde is nodig, want een doelpunt hangt aan een wedstrijd.
+  Een Builder kan een stap toevoegen zonder de rest aan te raken.
+- **Alternatieven:** een opdracht per stap; dan moet de eigenaar de volgorde onthouden.
+
+## Een run van de oude fansite laat zien wat hij zou doen, en stopt bij de eerste stap die faalt
+
+- **Datum:** 8 november 2026
+- **Besluit:** de opdracht controleert de bestanden voordat hij verbinding maakt, en neemt de lock van de import voor de hele run.
+  Elke stap draait in een transactie van zichzelf: een stap die klaar is, blijft staan, en een stap die faalt laat niets achter.
+  De run stopt bij de eerste stap die faalt, want de stappen erna bouwen erop.
+  Met `--dry-run` delen alle stappen één transactie die aan het eind wordt teruggedraaid.
+  De getallen zijn dan wat een echte run zou schrijven, ook voor een stap die leest wat de stap ervoor schreef.
+  De opdracht schrijft één regel per stap met de getallen, en eronder een regel voor elke nieuwe club, gekoppelde club of overgeslagen rij.
+- **Waarom:** het bestand van #875 komt uit een script en kan in de toekomst een andere vorm krijgen; dan mag er niets half geschreven zijn.
+  Een dry run die echt de stappen draait, liegt niet over wat de volgende stap vindt.
+- **Alternatieven:** een dry run die alleen telt zonder te schrijven (hij kan de afhankelijkheid tussen de stappen niet laten zien).
+  Eén transactie voor de hele run (hij houdt rijen vast zolang de stappen langer worden).
+
+## De bestanden van de oude fansite staan naast `import.mjs` op de host, niet erin
+
+- **Datum:** 8 november 2026
+- **Besluit:** `pnpm --filter site assemble` kopieert `apps/importer/data/oude-fansite/` naar dezelfde plaats in de map voor de host.
+  De opdracht zoekt de bestanden eerst naast `import.mjs` (`data/oude-fansite`) en anders in de repository (`defaultOldSiteFolder`).
+  De bestanden zitten niet in de bundel.
+- **Waarom:** cron start `import.mjs` elk kwartier en leest de bestanden nooit; twee megabyte in de bundel kost elke run tijd om te laden.
+  De host kan de oude database niet bereiken, en een bestand in de deploy hoeft niemand los neer te zetten.
+- **Alternatieven:** de bestanden in de bundel laden met een JSON-loader van esbuild (de bundel wordt dertig keer zo groot).
+  De bestanden uit GitHub halen op het moment van de import (een verzoek naar een derde partij).
+
+## Een club van de oude fansite krijgt een naam en een adres, nog geen Wikipedia-pagina
+
+- **Datum:** 7 november 2026
+- **Besluit:** een tegenstander van de oude fansite wordt eerst gezocht in `clubs`, `club_names` en `club_pages` (de naam zonder hoofdletters, spaties en leestekens), dan in een lijst van de Builder voor clubs die anders heten (`N.E.C.` en `NEC`), en wordt anders aangemaakt met een adres uit de naam en zonder `wikipedia_page`.
+  De naam van de oude fansite gaat in `club_names` als hij afwijkt.
+  De lijst is `oldSiteClubNames` in `apps/importer/src/old-site-clubs.ts`, op de clubcode van het bestand en niet op de naam, en een club in de lijst van volledige namen (`club-names.ts`) staat er niet in.
+  Een club van de lijst die er nog niet is, wordt aangemaakt onder de naam van de lijst, met de naam van de oude fansite als andere naam.
+  Een club die samengevoegd of verhuisd is (zoals `Dordrecht '90` en `SVV`, die samen FC Dordrecht werden) is een club van zichzelf, tot een besluit anders zegt.
+  Botst het adres, dan wint de bestaande club en krijgt de nieuwe een nummer erachter (`ajax-2`).
+- **Waarom:** een club hoort één rij te zijn, ook als Wikipedia hem later vindt: de import van Wikipedia geeft een club zonder pagina de pagina zodra een wedstrijd hem noemt (`createClubBook`).
+  Een rij zonder pagina is toegestaan, want `wikipedia_page` mag leeg zijn.
+  Een lijst op de code laat een wijziging in een naam in het bestand geen club naar een andere wijzen.
+- **Alternatieven:** elke club meteen bij Wikipedia opzoeken (de importer vraagt dan voor ongeveer 90 clubs om een pagina, buiten wat de Wikipedia-import al doet).
+  De lijst van volledige namen gebruiken voor alle schrijfwijzen (die lijst werkt op de naam, en geldt ook voor de import van Wikipedia).
