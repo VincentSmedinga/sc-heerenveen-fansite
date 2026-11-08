@@ -346,6 +346,9 @@ describe('the text of the report', () => {
     expect(describeNotice('early-exit', { minute: 40, subject: 'Aap Speler' })).toBe(
       'Aap Speler gaat in minuut 40 eruit zonder invaller en zonder rode kaart',
     )
+    expect(describeNotice('yellow-derived', { kind: 'geel', subject: 'Bes Speler' })).toBe(
+      'Bes Speler heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut',
+    )
     expect(describeNotice('red-card-without-minute', { kind: 'geel-rood', subject: 'Bes Speler' })).toBe(
       'geel-rode kaart voor Bes Speler: geen minuut en ook geen minuut van weggaan, weggelaten',
     )

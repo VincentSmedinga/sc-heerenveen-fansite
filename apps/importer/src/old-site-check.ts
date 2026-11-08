@@ -28,7 +28,7 @@ import { deriveOldSitePlayers, oldSitePlayerIds } from './old-site-players.ts'
 export type OldSiteCheck = {
   /** Assists the report left empty. */
   assists: OldSiteCheckItem[]
-  /** Cards and line-ups the import left out because they have no minute or no place. */
+  /** Cards and line-ups the import left out (no minute or place), and yellow cards it added. */
   cards: OldSiteCheckItem[]
   /** Clubs the old fansite spells in another way than the club in the database. */
   clubsLinked: string[]
@@ -172,6 +172,8 @@ export function describeNotice(
       return kind === 'lineup'
         ? `${subject} komt erin of gaat eruit na minuut 120: de speler is weggelaten`
         : `${cardName(kind)} voor ${subject} valt na minuut 120: weggelaten`
+    case 'yellow-derived':
+      return `${subject} heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut`
   }
 }
 
@@ -374,7 +376,7 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
     for (const note of wanted.notes) {
       const item = { match: label, text: describeNotice(note.code, note.about) }
 
-      if (note.code === 'card-not-in-lineup') {
+      if (note.code === 'card-not-in-lineup' || note.code === 'yellow-derived') {
         check.cards.push(item)
       } else if (note.code === 'goal-scorer-not-found') {
         check.scorers.push(item)
@@ -559,10 +561,11 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     check.players.map((player) => `${player.name} (\`${player.code}\`), ${player.seasons.join(', ')}`),
   )
   section(
-    'Kaarten die de import oversloeg',
+    'Kaarten die de import oversloeg of afleidde',
     [
       'Kaarten van de trainer en van iemand die niet in de opstelling staat, en rode kaarten zonder minuut en zonder minuut van weggaan.',
-      `Daarnaast hebben ${check.yellowWithoutMinute} gele kaarten een lege minuut in het verslag, want de oude fansite kende de minuut niet.`,
+      'Een geel-rode kaart zonder gele kaart krijgt een gele kaart zonder minuut: de oude fansite schreef de twee als één kaart.',
+      `Daarnaast hebben ${check.yellowWithoutMinute} gele kaarten een lege minuut in het verslag, want de oude fansite kende de minuut niet (ook de afgeleide).`,
     ],
     check.cards.map(itemText),
   )

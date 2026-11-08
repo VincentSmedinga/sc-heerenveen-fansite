@@ -2113,10 +2113,11 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
 
 - De wissels volgen uit de minuut erin en de minuut eruit: een invaller vervangt een speler van zijn team die op dezelfde minuut eruit gaat.
 - Een kaart zonder minuut krijgt bij geel een lege minuut en bij rood de minuut waarop de speler eruit ging.
+  Een geel-rode kaart voor een speler zonder gele kaart in die wedstrijd krijgt een gele kaart zonder minuut, want de oude fansite schreef de twee als één kaart.
   Een kaart voor de trainer staat in de log.
 - `checkMatchReport` beslist over de status.
   Een verslag is `klaar` als de regels geen fout vinden en de stap niets wegliet; anders is het `bezig`, en de log noemt per wedstrijd de reden.
-  De eerste regel van de stap telt de verslagen: `566 reports: 474 klaar, 92 bezig`.
+  De eerste regel van de stap telt de verslagen: `566 reports: 505 klaar, 61 bezig`.
 - De stap raakt alleen wedstrijden met de bron `oude-fansite`, en laat een verslag dat de redactie opsloeg zoals het is.
   Een tweede run verandert niets.
 
@@ -2127,7 +2128,7 @@ Het leest de bestanden en de database en schrijft niets in de database.
 Het neemt de lock van de import niet, want het leest alleen, en het kan niet samen met `--dry-run`.
 
 - Een tabel per seizoen telt de wedstrijden in het bestand en in de database, de doelpunten die optellen, ontbreken of een deel zijn, de opstellingen, de verslagen `klaar` en `bezig`, de scheidsrechters, de toeschouwers, de cijfers en de wedstrijden zonder aanvangstijd.
-- Daarna komen de lijsten: wedstrijden die in het bestand maar niet in de database staan, en omgekeerd; rondes met een ander nummer; opmerkingen van de oude redacteuren; doelpunten die niet optellen; verslagen die `bezig` zijn, met de reden per regel; spelers van wie de code geen rij in de oude tabel had; kaarten die de import oversloeg; doelpuntenmakers en assists zonder speler; nieuwe clubs en clubs die aan een bestaande zijn gekoppeld.
+- Daarna komen de lijsten: wedstrijden die in het bestand maar niet in de database staan, en omgekeerd; rondes met een ander nummer; opmerkingen van de oude redacteuren; doelpunten die niet optellen; verslagen die `bezig` zijn, met de reden per regel; spelers van wie de code geen rij in de oude tabel had; kaarten die de import oversloeg of afleidde; doelpuntenmakers en assists zonder speler; nieuwe clubs en clubs die aan een bestaande zijn gekoppeld.
 - Het verslag rekent niets zelf uit.
   Het vraagt het aan de stappen (`deriveOldSiteMatches`, `deriveOldSiteGoals`, `deriveOldSitePlayers`, `judgeStoredOldSiteMatch` en `findOldSiteClubs`), die hun meldingen als gegevens geven, en zet ze om in Nederlandse zinnen.
 - Het noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde schrijfwijzen na (`oldSiteNameCorrections` in `src/old-site-names.ts`: de keuzes van de projecteigenaar en de schrijfwijze van Wikipedia).

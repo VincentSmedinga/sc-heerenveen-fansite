@@ -273,7 +273,9 @@ describe('the report of a match', () => {
     )
 
     expect(anomalies).toEqual([])
-    expect(cards).toEqual([{ appearance: 11, kind: 'geel-rood', minute: 77 }])
+    expect(cards.filter((card) => card.kind === 'geel-rood')).toEqual([
+      { appearance: 11, kind: 'geel-rood', minute: 77 },
+    ])
   })
 
   it('leaves a red card out that has no minute and no minute of leaving, and says so', () => {
@@ -304,6 +306,49 @@ describe('the report of a match', () => {
 
     expect(cards).toHaveLength(1)
     expect(notes.map((one) => one.code)).toEqual(['card-twice'])
+  })
+
+  it('gives a yellow-red card without a yellow card a yellow card without a minute before it, and says so', () => {
+    const { anomalies, cards, notes } = report(
+      oldMatch({
+        events: [...goals(), event(3, 0, { name: theirName(5) })],
+        lineup: lineup({ theirs: { 5: [0, 77] } }),
+      }),
+    )
+
+    expect(anomalies).toEqual([])
+    expect(cards).toEqual([
+      { appearance: 11, kind: 'geel', minute: null },
+      { appearance: 11, kind: 'geel-rood', minute: 77 },
+    ])
+    expect(notes).toMatchObject([
+      {
+        about: { kind: 'geel', subject: theirName(5) },
+        code: 'yellow-derived',
+        text: expect.stringContaining('added'),
+      },
+    ])
+  })
+
+  it('adds nothing to a yellow-red card of a player who has a yellow card, whatever the order in the file', () => {
+    const before = report(
+      oldMatch({
+        events: [...goals(), event(2, 30, { code: ourCode(2) }), event(3, 70, { code: ourCode(2) })],
+      }),
+    )
+    const after = report(
+      oldMatch({
+        events: [...goals(), event(3, 70, { code: ourCode(2) }), event(2, 30, { code: ourCode(2) })],
+      }),
+    )
+
+    expect(before.cards).toEqual([
+      { appearance: 4, kind: 'geel', minute: 30 },
+      { appearance: 4, kind: 'geel-rood', minute: 70 },
+    ])
+    expect(after.cards.map((card) => card.kind).toSorted()).toEqual(['geel', 'geel-rood'])
+    expect(before.notes).toEqual([])
+    expect(after.notes).toEqual([])
   })
 })
 
@@ -714,7 +759,17 @@ describe('the files of the old fansite', () => {
     const second = await importOldSiteLineups(database.db, data.matches, data.players)
 
     expect(first).toMatchObject({ changed: 0, created: 566, skipped: 0, unchanged: 0 })
-    expect(first.lines[0]).toBe('566 reports: 474 klaar, 92 bezig')
+    expect(first.lines[0]).toBe('566 reports: 505 klaar, 61 bezig')
+    // 36 yellow-red cards of 35 reports had no yellow card, so they got one. 4 of those reports
+    // stay bezig for another reason, so 31 reports went from bezig (92) to klaar.
+    const derived = first.lines.filter((line) => line.includes('so a yellow card without a minute is added'))
+    const derivedFor = new Set(derived.map((line) => line.split(': ')[0]))
+
+    expect(derived).toHaveLength(36)
+    expect(derivedFor.size).toBe(35)
+    expect(
+      first.lines.filter((line) => line.includes('the report is bezig') && derivedFor.has(line.split(': ')[0])),
+    ).toHaveLength(4)
     expect(second).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 566 })
     expect({
       appearances: await database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id)),
@@ -726,9 +781,9 @@ describe('the files of the old fansite', () => {
 
     expect(stored.appearances).toHaveLength(14543)
     expect(stored.substitutions).toHaveLength(2413)
-    expect(stored.cards).toHaveLength(1470)
-    expect(stored.cards.filter((card) => card.kind === 'geel')).toHaveLength(1384)
-    expect(stored.cards.filter((card) => card.kind === 'geel' && card.minute === null)).toHaveLength(792)
+    expect(stored.cards).toHaveLength(1506)
+    expect(stored.cards.filter((card) => card.kind === 'geel')).toHaveLength(1420)
+    expect(stored.cards.filter((card) => card.kind === 'geel' && card.minute === null)).toHaveLength(828)
     expect(stored.cards.filter((card) => card.kind === 'geel-rood')).toHaveLength(40)
     expect(stored.cards.filter((card) => card.kind === 'rood')).toHaveLength(46)
     // The only cards left out are the two of the trainer, so no card of a player is lost.
@@ -804,9 +859,9 @@ describe('the files of the old fansite', () => {
     }
 
     expect(klaarWithErrors).toBe(0)
-    // The 18 reports that the rules approve and that are bezig all have a line that says what
+    // The 22 reports that the rules approve and that are bezig all have a line that says what
     // was left out or is doubtful, and no line about a rule.
-    expect(bezigWithoutErrors).toBe(18)
-    expect(first.lines.filter((line) => line.includes('is bezig: ') && !line.includes('rule '))).toHaveLength(18)
+    expect(bezigWithoutErrors).toBe(22)
+    expect(first.lines.filter((line) => line.includes('is bezig: ') && !line.includes('rule '))).toHaveLength(22)
   }, 120_000)
 })

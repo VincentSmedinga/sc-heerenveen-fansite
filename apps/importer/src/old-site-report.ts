@@ -96,9 +96,13 @@ export type OldSiteReportAnomalyCode =
 
 export type OldSiteReportNote = { about: OldSiteReportAbout; code: OldSiteReportNoteCode; text: string }
 
-/** What was left out of the report and does not make it `bezig`, each with a line. */
+/**
+ * What was left out of the report or added to it, and does not make it `bezig`, each with a
+ * line. `yellow-derived`: a yellow-red card whose player has no yellow card in the match gets
+ * one, without a minute, because a yellow-red card is a second yellow card.
+ */
 export type OldSiteReportNoteCode =
-  'assist-empty' | 'assist-not-found' | 'card-not-in-lineup' | 'card-twice' | 'goal-scorer-not-found'
+  'assist-empty' | 'assist-not-found' | 'card-not-in-lineup' | 'card-twice' | 'goal-scorer-not-found' | 'yellow-derived'
 
 /** A name as the report compares it: without accents, capitals and punctuation. */
 export function looseNameKey(name: string): string {
@@ -345,6 +349,26 @@ function deriveCards(
     }
 
     cards.push({ appearance: place, kind, minute })
+  }
+
+  // The old fansite wrote a yellow-red card as one card, without the yellow card before it.
+  // That yellow card follows from the card itself, so it is added, without a minute, before it.
+  for (let index = cards.length - 1; index >= 0; index -= 1) {
+    const card = cards[index]!
+
+    if (
+      card.kind === 'geel-rood' &&
+      !cards.some((other) => other.appearance === card.appearance && other.kind === 'geel')
+    ) {
+      const name = appearances[card.appearance]!.name
+
+      cards.splice(index, 0, { appearance: card.appearance, kind: 'geel', minute: null })
+      notes.push({
+        about: { kind: 'geel', subject: name },
+        code: 'yellow-derived',
+        text: `${name} has a yellow-red card and no yellow card, so a yellow card without a minute is added`,
+      })
+    }
   }
 
   return cards

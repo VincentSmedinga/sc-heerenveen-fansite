@@ -2729,6 +2729,7 @@
     Een rode of geel-rode kaart zonder minuut krijgt de minuut waarop de speler eruit ging in de opstelling.
     Een kaart voor iemand die niet in de opstelling staat, zoals de trainer (`foppe.dehaan`), wordt weggelaten en staat in de log.
     Een tweede kaart van dezelfde soort voor dezelfde speler wordt weggelaten en staat in de log.
+    Een geel-rode kaart voor een speler zonder gele kaart in die wedstrijd krijgt een gele kaart zonder minuut (#900, zie de regel **Later** onder deze beslissing).
   - **Doelpunten en assists.**
     Een scorer van ons wordt gevonden via zijn code, een speler van de tegenstander en een assist via de naam.
     Een naam telt als dezelfde zonder accenten, hoofdletters en leestekens (`Andre` en `André`).
@@ -2746,6 +2747,11 @@
   Bij een geel-rode kaart zonder gele kaart de eerste gele kaart verzinnen, met een lege minuut: 35 verslagen worden dan klaar, want de oude fansite schreef een geel-rode kaart als één kaart.
   Dat is een gevolgtrekking en geen feit uit het bestand, en het verhoogt het aantal gele kaarten van die spelers.
   Daarom blijven die 35 bezig tot de eigenaar het wil; het is een kleine wijziging in `deriveCards`.
+- **Later:** op 8 november 2026 koos de projecteigenaar om de ontbrekende gele kaart toch af te leiden (#900).
+  Een speler met een geel-rode kaart en zonder gele kaart in dezelfde wedstrijd krijgt een gele kaart zonder minuut, vlak voor zijn geel-rode kaart; heeft hij al een gele kaart, dan verandert er niets.
+  De log noemt het per wedstrijd, en het controleverslag zet het onder _Kaarten die de import oversloeg of afleidde_.
+  Het zijn 36 gele kaarten in 35 verslagen; 31 daarvan gingen van `bezig` naar `klaar`, want de andere 4 houden een andere reden (een invaller zonder speler die eruit gaat).
+  De spelers in die verslagen hebben nu één gele kaart meer in de cijfers, en die verslagen komen voor het eerst in de cijfers.
 
 ## Het controleverslag van de oude fansite is een opdracht die niets schrijft
 
@@ -2761,7 +2767,7 @@
     De functies krijgen alleen `select`, dus het type verbiedt een schrijfactie, en een test telt de rijen van alle tabellen voor en na.
     Het neemt de lock van de import niet, want het leest alleen, en het kan niet samen met `--dry-run`.
   - **Wat erin staat.**
-    Een tabel per seizoen en lijsten met wedstrijden (seizoen, competitie, dag, tegenstander) voor: wedstrijden die niet in de database of niet in de bestanden staan, rondes met een ander nummer, opmerkingen van de oude fansite (met of ze zijn overgenomen), doelpunten die niet optellen, verslagen die `bezig` zijn met de reden per regel, kaarten die de import oversloeg, doelpuntenmakers en assists zonder speler.
+    Een tabel per seizoen en lijsten met wedstrijden (seizoen, competitie, dag, tegenstander) voor: wedstrijden die niet in de database of niet in de bestanden staan, rondes met een ander nummer, opmerkingen van de oude fansite (met of ze zijn overgenomen), doelpunten die niet optellen, verslagen die `bezig` zijn met de reden per regel, kaarten die de import oversloeg of afleidde, doelpuntenmakers en assists zonder speler.
     Verder staan er de spelers van wie de code geen rij in de oude tabel had en de clubs: nieuw, aan een bestaande gekoppeld, of niet gevonden.
     Het noemt alleen namen zoals ze in de wedstrijd stonden, dus niets wat niet in de bestanden van #875 staat.
   - **Rondes vergelijkt het alleen bij een competitie.**
@@ -2771,7 +2777,7 @@
     De import bewaart niet welke clubs hij maakte, dus het verslag leidt het af uit de database: dat is wat de stap `clubs` maakt (een club zonder `wikipedia_page`), tot Wikipedia de club vindt.
     Een club met dezelfde naam als de oude fansite (zonder hoofdletters, spaties en leestekens, dus `NEC` is `N.E.C.`) telt als dezelfde; een andere naam telt als gekoppeld.
   - **Het cijfer komt uit de run.**
-    De cijfers staan in het verslag zoals de run ze geeft, en een test houdt ze vast voor de bestanden in de repository: 671 wedstrijden, 604 met doelpunten die optellen, 65 zonder doelpunten en 2 met een deel (de stap `doelpunten` zegt hetzelfde), 566 verslagen waarvan 474 `klaar` en 92 `bezig`.
+    De cijfers staan in het verslag zoals de run ze geeft, en een test houdt ze vast voor de bestanden in de repository: 671 wedstrijden, 604 met doelpunten die optellen, 65 zonder doelpunten en 2 met een deel (de stap `doelpunten` zegt hetzelfde), 566 verslagen waarvan 505 `klaar` en 61 `bezig` (474 en 92 vóór #900).
 - **Waarom:** de projecteigenaar kan lezen wat er niet is, en #414 weet wat het moet aanvullen.
   Een verslag dat hetzelfde antwoord geeft als de import, kan niet liegen over wat de import deed.
 - **Alternatieven:** een tabel in de database met meldingen (de meldingen horen bij één run en verouderen).

@@ -359,8 +359,8 @@ describe('the files in the repository', () => {
     const text = chunks.join('')
 
     expect(code).toBe(0)
-    // 671 matches, 566 reports with a line-up, 474 klaar and 92 bezig, as the steps say.
-    expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 474 | 92 |')
+    // 671 matches, 566 reports with a line-up, 505 klaar and 61 bezig, as the steps say.
+    expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 505 | 61 |')
     expect(text).toContain('## Doelpunten die niet optellen')
     expect(await rowCounts()).toEqual(before)
   })
