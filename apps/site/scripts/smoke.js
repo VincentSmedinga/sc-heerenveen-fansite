@@ -864,13 +864,19 @@ await withEmptyDatabase((database) =>
     const shareImageResponse = await checkShareImage()
 
     // Every page points to the manifest and the icons, and the site serves them itself. No
-    // public page mentions the admin: the item Beheer in the menu comes from a mark in the
-    // browser (src/admin-marker.ts), so the HTML is the same for every visitor.
+    // public page mentions the admin outside the footer: the item Beheer in the main menu comes
+    // from a mark in the browser (src/admin-marker.ts), so the HTML is the same for every
+    // visitor. The footer has a plain link to the login page (#938), as its last item.
     for (const { path } of pages) {
       const pageHtml = await (await fetch(origin + path)).text()
 
       checkIconTags(path, pageHtml)
-      assert.doesNotMatch(pageHtml, /\/beheer|Beheer/, `${path} mentions the admin`)
+      assert.doesNotMatch(
+        pageHtml.replace(/<footer.*<\/footer>/s, '').replace(/<script.*?<\/script>/gs, ''),
+        /\/beheer|Beheer/,
+        `${path} mentions the admin`,
+      )
+      assert.match(pageHtml, /<footer.*href="\/beheer\/inloggen"[^>]*>Beheer<\/a>/s, `${path} has no link to Beheer`)
     }
 
     const iconResponses = await checkIcons()
