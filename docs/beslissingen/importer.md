@@ -2771,3 +2771,22 @@
   Een verslag dat hetzelfde antwoord geeft als de import, kan niet liegen over wat de import deed.
 - **Alternatieven:** een tabel in de database met meldingen (de meldingen horen bij één run en verouderen).
   Het verslag zelf de afleidingen laten herhalen (twee kopieën die uit elkaar lopen).
+- **Later:** zie _Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen_ (8 november 2026): het verslag noemt de namen zoals ze in de wedstrijd stonden, op de schrijfwijzen in die lijst na, en het heeft een lijst _Namen om te beslissen_.
+
+## Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen
+
+- **Datum:** 8 november 2026
+- **Besluit:** `oldSiteNameCorrections` in `apps/importer/src/old-site-names.ts` zet een schrijfwijze van een speler die de oude redacteuren intikten om in de enige juiste schrijfwijze.
+  - **Waar het werkt:** overal waar de importer een naam uit een veld van de bestanden haalt: de opstelling, de doelpuntenmaker, de kaart en de assist (`cleanOldSiteName`).
+    De bestanden in `apps/importer/data/oude-fansite` blijven zoals ze zijn.
+    Een spelercode van ons (`lars.nilsson`) geeft al de naam van de rij in de oude tabel (`Lasse Nilsson`), dus daar is niets omgezet.
+  - **Wat erin staat:** alleen wat de projecteigenaar per groep koos: Dirk Kuijt, Jürgen Dirkx, Humphrey Rudge, Rahim Ouédraogo, Tomáš Galásek, Mark Luijpers, Marc Nygaard en Tommie van der Leegte.
+    Brian Tevreden en Brian Tevreden II zijn twee spelers, en Ruud Kool en Ruud Knol ook (`oldSiteDistinctNames`).
+  - **De rest blijft staan.**
+    Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken: dezelfde naam zonder hoofdletters, accenten, leestekens en `van`, `de`, `der` en `den`, een kleine afstand tussen twee namen van zeven tekens of meer (hoogstens twee letters), of dezelfde achternaam met een voornaam die het begin van de andere is.
+    De lijst wordt bij elk verslag uit de bestanden gemaakt (`findOldSiteNameClusters`) en verandert geen naam.
+    Een groep kan twee mensen zijn; de projecteigenaar beslist per groep.
+- **Waarom:** één mens met drie schrijfwijzen is voor een bezoeker drie spelers, met drie aparte telstanden.
+  Een kleine lijst die de eigenaar goedkeurt, is de kleinste oplossing en laat de gegevens van de oude fansite onaangeroerd.
+  Wat de eigenaar niet zeker weet, wordt niet gegokt.
+- **Alternatieven:** de bestanden opnieuw maken met de juiste namen (de bestanden zijn een kopie van de oude database en horen dat te blijven); namen automatisch samenvoegen (twee mensen met bijna dezelfde naam, zoals Michel Vonk en Michel Vorm, worden dan één); een tabel in de database met speler-id's voor de tegenstanders (veel meer werk dan een lijst van veertien regels).

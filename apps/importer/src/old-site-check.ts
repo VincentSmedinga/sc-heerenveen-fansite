@@ -12,6 +12,7 @@ import { clubs, matches, matchGoals, matchStatistics } from '@fansite/db/schema'
 import { asc } from 'drizzle-orm'
 
 import type { OldSiteData } from './old-site-file.ts'
+import type { OldSiteNameSpelling } from './old-site-name-clusters.ts'
 import type { OldSiteReportAbout, OldSiteReportAnomalyCode, OldSiteReportNoteCode } from './old-site-report.ts'
 import type { OldSiteDatabase } from './old-site-step.ts'
 
@@ -19,6 +20,7 @@ import { findOldSiteClubs } from './old-site-clubs.ts'
 import { deriveOldSiteGoals } from './old-site-goals.ts'
 import { judgeStoredOldSiteMatch } from './old-site-lineups.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSource } from './old-site-matches.ts'
+import { countOldSiteNames, findOldSiteNameClusters } from './old-site-name-clusters.ts'
 import { deriveOldSitePlayers, oldSitePlayerIds } from './old-site-players.ts'
 
 /** Everything the report says. */
@@ -36,6 +38,8 @@ export type OldSiteCheck = {
   /** How many clubs have the name of the old fansite. */
   clubsSame: number
   goals: OldSiteCheckItem[]
+  /** Names that look alike and may be one person, for the owner to decide. */
+  nameClusters: OldSiteNameSpelling[][]
   /** Matches of the files that are not in the database. */
   notInDatabase: OldSiteCheckItem[]
   /** Matches in the database from the old fansite that the files don't have. */
@@ -232,6 +236,7 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
     clubsNew: [],
     clubsSame: 0,
     goals: [],
+    nameClusters: [],
     notInDatabase: [],
     notInFile: [],
     players: [],
@@ -420,6 +425,8 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
   }
   check.players = [...byPlayer.values()].toSorted((a, b) => a.name.localeCompare(b.name))
 
+  check.nameClusters = findOldSiteNameClusters(countOldSiteNames(data))
+
   // The clubs: new, linked to a club that was there, or the same.
   const clubRows = new Map((await db.select().from(clubs)).map((row) => [row.id, row]))
 
@@ -484,7 +491,7 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     `Gemaakt op ${dutchDate(today)}, op een database met de import van de bestanden in \`apps/importer/data/oude-fansite\`.`,
     'Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`, of met de workflow _Import old site_ en de keuze `report`.',
     'De opdracht leest de bestanden en de database en schrijft niets in de database.',
-    'Het verslag noemt alleen namen zoals ze in de wedstrijd stonden.',
+    'Het verslag noemt namen zoals ze in de wedstrijd stonden, op de spellingen na die de projecteigenaar heeft samengevoegd.',
     '',
     '## Per seizoen',
     '',
@@ -564,6 +571,16 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     check.scorers.map(itemText),
   )
   section('Assists zonder speler', ['Deze assists zijn leeg gelaten in het verslag.'], check.assists.map(itemText))
+  section(
+    'Namen om te beslissen',
+    [
+      'Deze namen lijken op elkaar en horen misschien bij één persoon.',
+      'De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.',
+      'Tussen haakjes staat hoe vaak de spelling in de opstellingen, doelpunten, kaarten en assists voorkomt.',
+      'Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.',
+    ],
+    check.nameClusters.map((group) => group.map((one) => `${one.name} (${one.count})`).join(' / ')),
+  )
   section(
     'Nieuwe clubs',
     [
