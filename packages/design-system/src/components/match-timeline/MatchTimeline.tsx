@@ -164,13 +164,7 @@ function Event({ event }: { event: MatchTimelineEvent }) {
               </span>{' '}
             </>
           ) : null}
-          {event.kind === 'substitution' ? (
-            <>
-              <Name name={event.playerIn} /> voor <Name name={event.playerOut} />
-            </>
-          ) : (
-            <Name name={event.player} />
-          )}
+          {event.kind === 'substitution' ? <Name name={event.playerIn} /> : <Name name={event.player} />}
           {event.kind === 'goal' && (event.ownGoal === true || event.penalty === true) ? (
             <span aria-hidden="true" className="hf-match-event-note">
               {' '}
@@ -178,6 +172,11 @@ function Event({ event }: { event: MatchTimelineEvent }) {
             </span>
           ) : null}
         </span>
+        {event.kind === 'substitution' ? (
+          <span className="hf-match-event-assist">
+            voor <Name name={event.playerOut} />
+          </span>
+        ) : null}
         {event.kind === 'goal' && event.assist !== undefined ? (
           <span className="hf-match-event-assist">
             assist <Name name={event.assist} />
@@ -194,8 +193,9 @@ function Event({ event }: { event: MatchTimelineEvent }) {
  * with a dash in the pill that a screen reader skips, and the team and kind of event only. In a
  * block every event is one line: the minute in a pill, filled
  * for sc Heerenveen and open for the opponent, then the icon and the name of the player. A goal
- * from a penalty or an own goal says so after the name, a substitution is "A voor B", and the
- * assist is on a line of its own in small letters. A word beside an icon that says the same is
+ * from a penalty or an own goal says so after the name, a substitution names the player who
+ * comes on, and "voor" and the player who goes off are on a line of their own, like an assist,
+ * in small letters. A word beside an icon that says the same is
  * left out for the eye. A screen reader hears the team, the minute and the kind of event first:
  * "sc Heerenveen: Minuut 45 plus 2, Doelpunt (strafschop): ...". Each block is a numbered list
  * with a name, under a heading of the level given. The blocks stand next to each other from a

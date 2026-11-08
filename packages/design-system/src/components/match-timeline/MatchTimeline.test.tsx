@@ -131,12 +131,14 @@ describe('MatchTimeline', () => {
     expect(items(container)[0]?.querySelector('.hf-match-event-assist')?.textContent).toBe('assist Thijs Idzenga')
   })
 
-  it('writes a substitution as "A voor B" with one icon', () => {
+  it('writes a substitution with the player who comes on, and "voor" and the other player on a line of its own', () => {
     const { container } = render(<MatchTimeline events={events} />)
-    const line = items(container)[2]!.querySelector('.hf-match-event-line')!
+    const item = items(container)[2]!
+    const line = item.querySelector('.hf-match-event-line')!
 
-    expect(line.textContent).toBe('Wim Maquettelaan voor Gijs Testwijk')
+    expect(line.textContent).toBe('Wim Maquettelaan')
     expect(line.querySelectorAll('svg')).toHaveLength(1)
+    expect(item.querySelector('.hf-match-event-assist')?.textContent).toBe('voor Gijs Testwijk')
   })
 
   it('has an icon on every line, hidden from a screen reader', () => {
