@@ -8,6 +8,7 @@ import type { ArticleErrors, ArticleValues } from './article-fields'
 import { databaseErrors } from './article-form'
 import { recordVersion } from './article-versions'
 import { recordAction } from './audit-log'
+import { retryOnDeadlock } from './retry-deadlock'
 
 // Writing articles in the admin: the list, the one article an editor edits, and the four
 // changes. A change and its row in the log of the admin are one transaction, so there is no
@@ -105,25 +106,27 @@ export async function createArticle(
   now = new Date(),
 ): Promise<SaveOutcome> {
   try {
-    return await db.transaction(async (transaction) => {
-      const [result] = await transaction.insert(articles).values({
-        author: values.auteur,
-        body: values.tekst,
-        createdAt: now,
-        createdBy: userId,
-        intro: values.intro,
-        publishedAt: null,
-        slug: values.adres,
-        title: values.titel,
-        updatedAt: now,
-        updatedBy: userId,
-      })
+    return await retryOnDeadlock(() =>
+      db.transaction(async (transaction) => {
+        const [result] = await transaction.insert(articles).values({
+          author: values.auteur,
+          body: values.tekst,
+          createdAt: now,
+          createdBy: userId,
+          intro: values.intro,
+          publishedAt: null,
+          slug: values.adres,
+          title: values.titel,
+          updatedAt: now,
+          updatedBy: userId,
+        })
 
-      await recordVersion(transaction, { articleId: result.insertId, content: contentOf(values), userId }, now)
-      await recordAction(transaction, { action: 'article.create', itemId: result.insertId, userId }, now)
+        await recordVersion(transaction, { articleId: result.insertId, content: contentOf(values), userId }, now)
+        await recordAction(transaction, { action: 'article.create', itemId: result.insertId, userId }, now)
 
-      return { id: result.insertId, status: 'created' } as const
-    })
+        return { id: result.insertId, status: 'created' } as const
+      }),
+    )
   } catch (error) {
     if (isDuplicateAddress(error)) {
       return taken
@@ -151,56 +154,58 @@ export async function saveArticle(
   now = new Date(),
 ): Promise<SaveOutcome> {
   try {
-    return await db.transaction(async (transaction) => {
-      const [row] = await transaction.select().from(articles).where(eq(articles.id, id)).for('update')
+    return await retryOnDeadlock(() =>
+      db.transaction(async (transaction) => {
+        const [row] = await transaction.select().from(articles).where(eq(articles.id, id)).for('update')
 
-      if (row === undefined) {
-        return { status: 'missing' } as const
-      }
+        if (row === undefined) {
+          return { status: 'missing' } as const
+        }
 
-      if (row.publishedAt !== null && values.adres !== row.slug) {
-        return { errors: { adres: databaseErrors.locked }, status: 'invalid' } as const
-      }
+        if (row.publishedAt !== null && values.adres !== row.slug) {
+          return { errors: { adres: databaseErrors.locked }, status: 'invalid' } as const
+        }
 
-      const changed =
-        values.adres !== row.slug ||
-        values.auteur !== row.author ||
-        values.intro !== row.intro ||
-        values.tekst !== row.body ||
-        values.titel !== row.title
+        const changed =
+          values.adres !== row.slug ||
+          values.auteur !== row.author ||
+          values.intro !== row.intro ||
+          values.tekst !== row.body ||
+          values.titel !== row.title
 
-      if (changed) {
-        await transaction
-          .update(articles)
-          .set({
-            author: values.auteur,
-            body: values.tekst,
-            intro: values.intro,
-            slug: values.adres,
-            title: values.titel,
-            updatedAt: now,
-            updatedBy: userId,
-          })
-          .where(eq(articles.id, id))
-        await recordVersion(transaction, { articleId: id, content: contentOf(values), userId }, now)
-        await recordAction(transaction, { action: 'article.update', itemId: id, userId }, now)
-      }
+        if (changed) {
+          await transaction
+            .update(articles)
+            .set({
+              author: values.auteur,
+              body: values.tekst,
+              intro: values.intro,
+              slug: values.adres,
+              title: values.titel,
+              updatedAt: now,
+              updatedBy: userId,
+            })
+            .where(eq(articles.id, id))
+          await recordVersion(transaction, { articleId: id, content: contentOf(values), userId }, now)
+          await recordAction(transaction, { action: 'article.update', itemId: id, userId }, now)
+        }
 
-      // An article with a time of publication, even one for later, is not published again:
-      // two requests that publish together would otherwise each see the time of the other as
-      // "later".
-      const goesLive = publish && row.publishedAt === null
+        // An article with a time of publication, even one for later, is not published again:
+        // two requests that publish together would otherwise each see the time of the other as
+        // "later".
+        const goesLive = publish && row.publishedAt === null
 
-      if (goesLive) {
-        await transaction
-          .update(articles)
-          .set({ publishedAt: now, updatedAt: now, updatedBy: userId })
-          .where(eq(articles.id, id))
-        await recordAction(transaction, { action: 'article.publish', itemId: id, userId }, now)
-      }
+        if (goesLive) {
+          await transaction
+            .update(articles)
+            .set({ publishedAt: now, updatedAt: now, updatedBy: userId })
+            .where(eq(articles.id, id))
+          await recordAction(transaction, { action: 'article.publish', itemId: id, userId }, now)
+        }
 
-      return { id, published: goesLive, saved: changed, status: 'done' } as const
-    })
+        return { id, published: goesLive, saved: changed, status: 'done' } as const
+      }),
+    )
   } catch (error) {
     if (isDuplicateAddress(error)) {
       return taken
