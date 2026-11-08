@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { personNameParts, personSortName, splitStaffName, surnameOnly } from './player-name'
+import { personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
 
 const person = (given: null | string, prefix: null | string, family: null | string) => ({
   personFamilyName: family,
@@ -48,20 +48,32 @@ describe('personSortName', () => {
   })
 })
 
-describe('splitStaffName', () => {
+describe('splitPersonName', () => {
   it('takes the first word as the given name and the rest as the surname', () => {
-    expect(splitStaffName('Henk Brugge')).toEqual({ givenName: 'Henk', surname: 'Brugge' })
-    expect(splitStaffName('Robin van Persie')).toEqual({ givenName: 'Robin', surname: 'van Persie' })
-    expect(splitStaffName('Jan Olde Riekerink')).toEqual({ givenName: 'Jan', surname: 'Olde Riekerink' })
+    expect(splitPersonName('Henk Brugge')).toEqual({ givenName: 'Henk', surname: 'Brugge' })
+    expect(splitPersonName('Robin van Persie')).toEqual({ givenName: 'Robin', surname: 'van Persie' })
+    expect(splitPersonName('Jan Olde Riekerink')).toEqual({ givenName: 'Jan', surname: 'Olde Riekerink' })
   })
 
-  it('makes a name of one word a surname', () => {
-    expect(splitStaffName('Dinho')).toEqual({ surname: 'Dinho' })
+  it('keeps a second given name with the first, and starts the surname at the prefix', () => {
+    expect(splitPersonName('Jan Willem van Hanegem')).toEqual({ givenName: 'Jan Willem', surname: 'van Hanegem' })
+    expect(splitPersonName('Joost van der Meer')).toEqual({ givenName: 'Joost', surname: 'van der Meer' })
+  })
+
+  it('makes a name that starts with a prefix, or has one word, all surname', () => {
+    expect(splitPersonName('van Aken')).toEqual({ surname: 'van Aken' })
+    expect(splitPersonName('Dinho')).toEqual({ surname: 'Dinho' })
+  })
+
+  it('guesses nothing else: Jon Dahl Tomasson is Jon and Dahl Tomasson', () => {
+    expect(splitPersonName('Jon Dahl Tomasson')).toEqual({ givenName: 'Jon', surname: 'Dahl Tomasson' })
   })
 })
 
-describe('surnameOnly', () => {
-  it('shows a name as a surname', () => {
-    expect(surnameOnly('Ramon Zomer')).toEqual({ surname: 'Ramon Zomer' })
+describe('textSortName', () => {
+  it('is the surname without its prefix', () => {
+    expect(textSortName('Afonso Alves')).toBe('Alves')
+    expect(textSortName('Joost van Aken')).toBe('Aken')
+    expect(textSortName('Dinho')).toBe('Dinho')
   })
 })

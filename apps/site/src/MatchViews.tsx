@@ -80,7 +80,7 @@ import {
   topScorersPlaces,
 } from './matches'
 import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
-import { splitStaffName } from './player-name'
+import { splitPersonName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
 
 /**
@@ -846,7 +846,7 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
       <List role="list">
         {coaches.map((coach, index) => (
           <List.Item key={`${coach.name}-${coach.startDate}`}>
-            <ShortStaff interim={coach.interim} period={periods[index]} {...splitStaffName(coach.name)} />
+            <ShortStaff interim={coach.interim} period={periods[index]} {...splitPersonName(coach.name)} />
           </List.Item>
         ))}
       </List>

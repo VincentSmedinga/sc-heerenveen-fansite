@@ -2560,6 +2560,7 @@
   Een doelpunt zonder speler maar met een pagina telt niet meer voor een gekoppeld doelpunt met dezelfde pagina: de persoon doet dat nu.
 - **Alternatieven:** de titel blijven gebruiken en alleen de doorverwijzingen bij het tonen oplossen (een verzoek per bezoek of een lijst in de site).
   De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).
+- **Later:** zie _Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels_ (8 november 2026): zonder persoon staat de naam van de wedstrijdpagina niet meer helemaal als achternaam.
 
 ## Een vastgehouden wijziging van Wikipedia beslist een beheerder in het beheer, in de schermen van de wedstrijden
 
@@ -3634,3 +3635,20 @@
 - **Nadeel:** een pagina wordt tot vijf minuten bewaard (de verslagen van het lopende seizoen), dus een doelpunt staat niet meteen op de pagina.
   Het verversen is werk van #908.
 - **Alternatieven:** een bevestiging als dialoog met JavaScript (werkt niet zonder, en de focus is moeilijker goed te krijgen); de knop meteen laten schrijven zonder bevestiging (een verkeerde stand komt dan op de site); de stand in de titel en de beschrijving (die veranderen na elk doelpunt).
+
+## Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels
+
+- **Datum:** 8 november 2026
+- **Besluit:** één functie, `splitPersonName` in `apps/site/src/player-name.ts`, voor trainers en voor doelpuntenmakers zonder persoon (#917).
+  Het eerste woord is de voornaam.
+  De achternaam begint bij het eerste woord na het eerste dat een voorvoegsel is uit een vaste lijst (`van`, `de`, `der`, `den`, `ten`, `ter`, `te`, `het`, `'t`, `von`, `di`, `da`), anders bij het tweede woord.
+  Een tweede voornaam hoort dus bij de voornaam: "Jan Willem van Hanegem" is "Jan Willem" en "van Hanegem".
+  Begint de hele naam met een voorvoegsel, of is het één woord, dan is alles achternaam.
+  Verder raden we niets: "Jon Dahl Tomasson" is "Jon" en "Dahl Tomasson", een bekende grens.
+  `surnameOnly` is weg.
+- **Rijen zonder persoon staan op de achternaam, zoals de rest:** de volgorde bij gelijke aantallen volgt de achternaam zonder voorvoegsel (`textSortName`), dus "Afonso Alves" staat onder de A.
+- **Waarom:** de hele naam in het vet leest als een vette voornaam.
+  Een vaste lijst is klein, voorspelbaar en raadt niet, en de naam van de wedstrijdpagina is de enige bron die we hebben.
+  De oude volgorde op de hele naam kwam voort uit de fout, niet uit een keuze.
+- **Alternatieven:** alleen het eerste woord nemen (laat "Jan Willem van Hanegem" verkeerd staan); de laatste woorden raden (breekt "Jan Olde Riekerink"); alles in het vet laten staan (de fout van nu); de oude volgorde vastzetten (extra code voor een gevolg van de fout).
+- **Later:** het koppelen van doelpunten aan een persoon in de importer (#918) maakt dit voor de meeste doelpunten overbodig.
