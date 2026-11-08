@@ -34,14 +34,19 @@ const echoMaxLength = 100_000
  * which checks and saves, and its answer replaces the form. The number of the match is input
  * from outside all the same, so it is checked again.
  */
-export async function submitPaste(matchId: number, previous: PasteState, formData: FormData): Promise<PasteState> {
+export async function submitPaste(
+  matchId: number,
+  basis: string | undefined,
+  previous: PasteState,
+  formData: FormData,
+): Promise<PasteState> {
   await requireRole('beheerder')
 
   if (!formData.has('tekst')) {
     // The form of the report: a row added or taken away, or a save, as on the screen of the
     // report. Without a text that was read there is no form to post.
     return previous.kind === 'read'
-      ? { ...previous, form: await submitReport(matchId, previous.form, formData) }
+      ? { ...previous, form: await submitReport(matchId, basis, previous.form, formData) }
       : { ...firstPasteState, version: previous.version + 1 }
   }
 

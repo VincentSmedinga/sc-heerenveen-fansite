@@ -28,6 +28,7 @@ import {
   players,
 } from '@fansite/db/schema'
 import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { createHash } from 'node:crypto'
 
 import type { ReportContext, ReportPlan } from './report-form'
 
@@ -70,10 +71,28 @@ export type ReportScreen = NonNullable<Awaited<ReturnType<typeof findReportScree
 
 /** What saving a report did. */
 export type SaveReportOutcome =
-  { status: 'missing' } | { status: 'not-played' } | { status: 'saved' } | { status: 'unchanged' }
+  { status: 'missing' } | { status: 'not-played' } | { status: 'saved' } | { status: 'stale' } | { status: 'unchanged' }
 
 /** A player of the squad of the season, with what the report needs of him. */
 type SquadRow = ReportSquadPlayer & { personId: null | number; wikipediaPage: null | string }
+
+/**
+ * Where the players of a stored report are in the form: the side and the number of the row
+ * (`wij-3`), by the id of the row in `match_appearances`.
+ */
+export function appearancePlaces(stored: Pick<StoredMatchReport, 'appearances'>): Map<number, string> {
+  const counts = { wij: 0, zij: 0 }
+
+  return new Map(
+    stored.appearances.map((appearance) => {
+      const side = appearance.ours ? 'wij' : 'zij'
+
+      counts[side] += 1
+
+      return [appearance.id, `${side}-${counts[side]}`]
+    }),
+  )
+}
 
 /** The context the checks need for a screen. */
 export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): ReportContext {
@@ -253,6 +272,84 @@ export async function listReportsToCheck(
 }
 
 /**
+ * Marks the goals of a match as the editors' (`match_edits`), so the import leaves them alone.
+ * The first time it keeps what the goals were before, so taking the report away can put them
+ * back. Call it inside the transaction that holds the lock on the match.
+ */
+export async function markGoalsEdited(
+  db: Pick<Database, 'insert' | 'select' | 'update'>,
+  match: Match,
+  oldGoals: MatchGoal[],
+  userId: number,
+  now: Date,
+) {
+  const [edit] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, match.id)).for('update')
+
+  if (edit === undefined) {
+    await db.insert(matchEdits).values({
+      beforeGoals: encodeGoals(oldGoals),
+      beforeMatch: encodeMatch(match),
+      editedAt: now,
+      editedBy: userId,
+      goalsEdited: true,
+      matchId: match.id,
+      reason: reportReason,
+    })
+  } else {
+    await db
+      .update(matchEdits)
+      .set({
+        editedAt: now,
+        editedBy: userId,
+        goalsEdited: true,
+        reason: reportReason,
+        reportedGoals: null,
+        // A part that comes back after Wikipedia took it over is kept as Wikipedia has it.
+        ...(edit.goalsEdited ? {} : refreshSnapshot(edit, match, oldGoals, ['goals'])),
+      })
+      .where(eq(matchEdits.matchId, match.id))
+  }
+}
+
+/** The squad of a season, as the report needs it: the numbers and the pages of the players. */
+export async function readSquad(db: Pick<Database, 'select'>, season: string): Promise<SquadRow[]> {
+  return db
+    .select({
+      id: players.id,
+      name: players.name,
+      personId: players.personId,
+      searchTerm: players.searchTerm,
+      shirtNumber: players.shirtNumber,
+      wikipediaPage: players.wikipediaPage,
+    })
+    .from(players)
+    .where(eq(players.season, season))
+    .orderBy(asc(players.shirtNumber), asc(players.name))
+}
+
+/**
+ * Lets a change of Wikipedia go that waited for these parts of the match or for the match as a
+ * whole: the report is a newer word than that change.
+ */
+export async function rejectPending(
+  db: Pick<Database, 'update'>,
+  matchId: number,
+  now: Date,
+  parts: ('goals' | 'kickoff' | 'result')[],
+) {
+  await db
+    .update(matchChanges)
+    .set({ decidedAt: now, resolution: 'replaced', status: 'rejected' })
+    .where(
+      and(
+        eq(matchChanges.matchId, matchId),
+        eq(matchChanges.status, 'pending'),
+        or(isNull(matchChanges.part), inArray(matchChanges.part, parts)),
+      ),
+    )
+}
+
+/**
  * Takes the report away: the rows of the report go, and the goals go back to what they were
  * before the first entry of the goals, so the import follows Wikipedia for them again. It
  * writes `match.undo` with the reason in the log. A player who was added for the report stays
@@ -309,12 +406,22 @@ export async function removeReport(
 }
 
 /**
+ * A short text that says what a stored report holds, which the form carries to the save. A
+ * save whose text differs from the stored report's text was opened before someone else saved,
+ * and is refused (see `saveReport`). A match without a report has `leeg`.
+ */
+export function reportBasis(stored: StoredMatchReport | undefined): string {
+  return stored === undefined ? 'leeg' : createHash('sha256').update(storedSignature(stored)).digest('hex').slice(0, 24)
+}
+
+/**
  * Saves a report that passed the checks (`checkReportForm`): the report, its players, events
  * and goals in one transaction, the goals marked as the editors', and a line in the log. A
  * player of ours who is not in the squad of the season gets a row in `players` with the source
  * `verslag`, or the row with the same name that is there. A save that changes nothing stores
  * and logs nothing. A change of Wikipedia that waited for the goals is stale: the report
- * replaces it.
+ * replaces it. With `basis`, the text of `reportBasis` of the report the form was opened on, a
+ * report that changed since is not overwritten: the outcome is `stale`.
  */
 export async function saveReport(
   db: Database,
@@ -322,6 +429,7 @@ export async function saveReport(
   id: number,
   plan: ReportPlan,
   now = new Date(),
+  basis?: string,
 ): Promise<SaveReportOutcome> {
   return db.transaction(async (transaction) => {
     const [match] = await transaction.select().from(matches).where(eq(matches.id, id)).for('update')
@@ -345,6 +453,11 @@ export async function saveReport(
     )
     const stored = await readMatchReport(transaction, id)
 
+    // The form was opened on an older report: someone else saved since. Saving it would
+    // replace what they wrote, without anyone noticing.
+    if (basis !== undefined && basis !== reportBasis(stored)) {
+      return { status: 'stale' } as const
+    }
     if (stored !== undefined && planSignature(plan, known) === storedSignature(stored)) {
       return { status: 'unchanged' } as const
     }
@@ -501,33 +614,7 @@ export async function saveReport(
       )
     }
 
-    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
-
-    if (edit === undefined) {
-      await transaction.insert(matchEdits).values({
-        beforeGoals: encodeGoals(oldGoals),
-        beforeMatch: encodeMatch(match),
-        editedAt: now,
-        editedBy: userId,
-        goalsEdited: true,
-        matchId: id,
-        reason: reportReason,
-      })
-    } else {
-      await transaction
-        .update(matchEdits)
-        .set({
-          editedAt: now,
-          editedBy: userId,
-          goalsEdited: true,
-          reason: reportReason,
-          reportedGoals: null,
-          // A part that comes back after Wikipedia took it over is kept as Wikipedia has it.
-          ...(edit.goalsEdited ? {} : refreshSnapshot(edit, match, oldGoals, ['goals'])),
-        })
-        .where(eq(matchEdits.matchId, id))
-    }
-
+    await markGoalsEdited(transaction, match, oldGoals, userId, now)
     await rejectPending(transaction, id, now, ['goals'])
     await recordAction(
       transaction,
@@ -700,44 +787,6 @@ function planSignature(plan: ReportPlan, known: readonly (undefined | { id: numb
       substitution.stoppageMinutes,
     ]),
   })
-}
-
-/** The squad of a season, as the report needs it: the numbers and the pages of the players. */
-async function readSquad(db: Pick<Database, 'select'>, season: string): Promise<SquadRow[]> {
-  return db
-    .select({
-      id: players.id,
-      name: players.name,
-      personId: players.personId,
-      searchTerm: players.searchTerm,
-      shirtNumber: players.shirtNumber,
-      wikipediaPage: players.wikipediaPage,
-    })
-    .from(players)
-    .where(eq(players.season, season))
-    .orderBy(asc(players.shirtNumber), asc(players.name))
-}
-
-/**
- * Lets a change of Wikipedia go that waited for these parts of the match or for the match as a
- * whole: the report is a newer word than that change.
- */
-async function rejectPending(
-  db: Pick<Database, 'update'>,
-  matchId: number,
-  now: Date,
-  parts: ('goals' | 'kickoff' | 'result')[],
-) {
-  await db
-    .update(matchChanges)
-    .set({ decidedAt: now, resolution: 'replaced', status: 'rejected' })
-    .where(
-      and(
-        eq(matchChanges.matchId, matchId),
-        eq(matchChanges.status, 'pending'),
-        or(isNull(matchChanges.part), inArray(matchChanges.part, parts)),
-      ),
-    )
 }
 
 /** Whether a stored report has an error: it was `klaar`, and the rules no longer agree. */

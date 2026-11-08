@@ -3695,7 +3695,54 @@
   Elke andere fout gaat meteen door.
   Na de laatste poging gaat ook de deadlock door.
   De andere opslagen in het beheer hebben geen unieke sleutel die bij gelijktijdige opslagen beslist, dus alleen de artikelen gebruiken de hulpfunctie (#933).
+  **Later:** 8 november 2026 (#907): ook het bijhouden van een verslag tijdens de wedstrijd gebruikt `retryOnDeadlock`, omdat daar meerdere redacteuren tegelijk schrijven.
 - **Waarom:** MariaDB kan bij gelijktijdige inserts op dezelfde unieke sleutel een deadlock geven en raadt zelf aan opnieuw te proberen.
   De nieuwe poging ziet de rij van de winnaar en geeft de gewone uitkomst: het adres bestaat al.
   Zonder dit kreeg een redacteur een foutpagina.
 - **Alternatieven:** de test minder gelijktijdig maken (verbergt de fout); een slot op de tabel (trager, en een deadlock blijft mogelijk).
+
+## Een verslag bijhouden vanaf een telefoon: een snel scherm naast het volledige formulier
+
+- **Datum:** 8 november 2026
+- **Besluit:** naast het volledige formulier staat een snel scherm op `/beheer/wedstrijden/<nummer>/verslag/live` (#907).
+  De opstelling blijft in het volledige formulier of komt via plakken (#830).
+  Het snelle scherm is voor wat tijdens de wedstrijd gebeurt: een doelpunt, een kaart of een wissel, elk met een minuut en een speler, en elk meteen opgeslagen en zichtbaar voor bezoekers.
+  Corrigeren kan met "Haal weg" per gebeurtenis, achter een vraag die zonder JavaScript werkt (een `Disclosure`), en met het volledige formulier.
+  - Elke gebeurtenis is een post van een eigen formulier, dus het scherm werkt zonder JavaScript.
+    Met JavaScript zijn de velden na een opslag leeg, staat de focus op het eerste veld en zegt een regel met `role="status"` wat is toegevoegd.
+  - De spelers in de lijsten zijn de rijen van het verslag, gegroepeerd per team.
+    Bij een wissel gaat iemand eruit die op het veld staat en komt iemand erin van de bank.
+    Een speler van de tegenstander zonder rij in de opstelling kan bij een doelpunt met een getypte naam.
+  - Wat de opbouw van de gegevens breekt (een minuut buiten de wedstrijd, blessuretijd midden in een helft, een speler die twee keer eruit gaat) wordt geweigerd met een fout bij het veld.
+    Wat een regel van het verslag raakt, zoals een kaart voor iemand die al was gewisseld, wordt opgeslagen.
+    Een verslag dat klaar was, wordt dan weer bezig, zoals bij het volledige formulier, en het scherm toont wat de regels vinden.
+    Dezelfde controle (`checkReportForm`) beslist voor beide schermen.
+- **Waarom:** een telefoon heeft geen plek voor een formulier van een pagina lang, en een redacteur kijkt naar het veld.
+- **Alternatieven:** alleen het volledige formulier en vaak opslaan; alleen doelpunten snel en de rest na afloop.
+
+## Elke gebeurtenis van het snelle scherm voegt toe in een transactie met een slot op de wedstrijd
+
+- **Datum:** 8 november 2026
+- **Besluit:** `addLiveEvent` en `removeLiveEvent` (`apps/site/src/beheer/live-report.ts`) lezen het bewaarde verslag, controleren de nieuwe gebeurtenis en voegen één rij toe of halen er één weg, in één transactie die eerst de rij van de wedstrijd vergrendelt (`for update`), zoals elke andere opslag van een verslag.
+  De rest van het verslag wordt niet opnieuw geschreven, dus de rijen van de spelers houden hun id.
+  Twee redacteuren die tegelijk een gebeurtenis toevoegen, wachten op elkaar en allebei de gebeurtenissen blijven staan.
+  De transactie loopt via `retryOnDeadlock`.
+  - Het volledige formulier draagt een tekst mee van het verslag waarmee het werd geopend (`reportBasis`, een korte hash van de inhoud).
+    `saveReport` vergelijkt die binnen de transactie met het bewaarde verslag.
+    Is het verslag veranderd, dan schrijft het niets, zegt het formulier dat iemand anders het verslag heeft bewaard en houdt het wat is getypt.
+    Een formulier zonder die tekst slaat op zoals voorheen.
+  - Ook het scherm van plakken draagt de tekst mee, want het slaat op met dezelfde actie.
+- **Waarom:** het volledige formulier schrijft het hele verslag opnieuw, en de laatste opslag won zonder dat iemand het merkte.
+  Een gebeurtenis die tijdens de wedstrijd tussendoor wordt ingevoerd, zou zo verdwijnen.
+  Het slot op de wedstrijd bestond al voor het volledige formulier en voor "Wedstrijd afgelopen", dus alle schrijvers wachten op dezelfde rij en kunnen elkaar niet in een kring blokkeren.
+- **Alternatieven:** de laatste opslag laten winnen; het verslag vergrendelen voor één redacteur; een versienummer in `match_reports` (een migratie voor iets wat de inhoud al zegt).
+
+## Het logboek krijgt één regel per gebeurtenis van het snelle scherm
+
+- **Datum:** 8 november 2026
+- **Besluit:** elke toevoeging en elke verwijdering schrijft één regel `match.edit` met een korte omschrijving, zoals "Doelpunt 23' Van Aken" of "Doelpunt 23' Van Aken weggehaald", en de reden "Verslag bijhouden tijdens de wedstrijd".
+  `saved_at` en `saved_by` van het verslag volgen elke opslag.
+  Een doelpunt markeert de doelpunten als de invoer van de redactie (`match_edits`), zodat de import ze met rust laat, en laat een wijziging van Wikipedia die op de doelpunten wachtte vervallen.
+  Weghalen van een gebeurtenis die er al niet meer is, schrijft niets.
+- **Waarom:** wie wanneer iets invoerde moet te zien blijven, en een lopende wedstrijd geeft hooguit enkele tientallen regels.
+- **Alternatieven:** één regel per opslag van het hele verslag (zegt niet wat er veranderde); geen regel voor een kaart of wissel (dan is het logboek onvolledig).

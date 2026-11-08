@@ -136,7 +136,7 @@ function formOf(fields: Record<string, string>) {
 
 async function paste(fields: Record<string, string>, id: unknown = matchId, previous: PasteState = firstPasteState) {
   try {
-    return await submitPaste(id as number, previous, formOf(fields))
+    return await submitPaste(id as number, undefined, previous, formOf(fields))
   } catch (error) {
     if (error instanceof Redirect) {
       return { redirect: error.url }
@@ -317,7 +317,7 @@ describe('submitPaste for the post of the form after the text was read', () => {
 
   it('answers with the screen of the report, in the same state, so a post without JavaScript keeps its form', async () => {
     const read = await readState()
-    const result = await submitPaste(matchId, read, formDataOf(read.form.values, 'speler-zij-toevoegen'))
+    const result = await submitPaste(matchId, undefined, read, formDataOf(read.form.values, 'speler-zij-toevoegen'))
 
     expect(result).toMatchObject({ kind: 'read', version: read.version })
 
@@ -333,7 +333,7 @@ describe('submitPaste for the post of the form after the text was read', () => {
   it('saves with the checks of the form: a doubt that is not settled comes back as an error, and nothing is stored', async () => {
     const read = await readState('Opstelling\n44 Nieuwe Jongen')
     const before = await rowCounts()
-    const result = await submitPaste(matchId, read, formDataOf(read.form.values, 'opslaan'))
+    const result = await submitPaste(matchId, undefined, read, formDataOf(read.form.values, 'opslaan'))
 
     expect(result).toMatchObject({ kind: 'read' })
 
@@ -349,7 +349,7 @@ describe('submitPaste for the post of the form after the text was read', () => {
     const read = await readState()
     const values = { ...baseReport(squad), status: 'bezig' }
 
-    expect(await resultOf(() => submitPaste(matchId, read, formDataOf(values, 'opslaan')))).toEqual({
+    expect(await resultOf(() => submitPaste(matchId, undefined, read, formDataOf(values, 'opslaan')))).toEqual({
       redirect: `/beheer/wedstrijden/${matchId}/verslag?gedaan=opgeslagen`,
     })
     expect(await database.db.select().from(matchReports)).toHaveLength(1)

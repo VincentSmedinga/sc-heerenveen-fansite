@@ -24,6 +24,11 @@ export function listPath(season?: string, show?: string) {
   return query.size === 0 ? matchesPath : `${matchesPath}?${query}`
 }
 
+/** The address of the quick screen that keeps a report up to date during the match. */
+export function livePath(id: number) {
+  return `${matchesPath}/${id}/verslag/live`
+}
+
 /** The address of the form of a match, with what the last action left to say (`gedaan`). */
 export function matchPath(id: number, done?: string) {
   return done === undefined ? `${matchesPath}/${id}` : `${matchesPath}/${id}?gedaan=${done}`

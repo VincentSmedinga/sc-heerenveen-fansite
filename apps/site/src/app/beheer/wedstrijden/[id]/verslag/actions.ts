@@ -65,10 +65,13 @@ export async function submitRemoveReport(
  * values kept, or the report is checked and saved. A report that can not be stored comes back
  * with its errors and is not saved. One that can be stored is saved as `klaar` only when the
  * rules have nothing to say; otherwise it is saved as `bezig` and the screen says why. A match
- * that is gone, or was not played, ends on the list with a notice.
+ * that is gone, or was not played, ends on the list with a notice. `basis` is what stands for
+ * the report the form was opened on (`reportBasis`): a report that changed since is not
+ * overwritten, and the form comes back with what was typed. The page binds it to the action.
  */
 export async function submitReport(
   matchId: number,
+  basis: string | undefined,
   previous: ReportFormState,
   formData: FormData,
 ): Promise<ReportFormState> {
@@ -99,10 +102,30 @@ export async function submitReport(
 
   // `klaar` only without errors; the report is kept as `bezig` otherwise.
   const downgraded = checked.plan.status === 'klaar' && Object.keys(checked.errors).length > 0
-  const outcome = await saveReport(db, userId, id, downgraded ? { ...checked.plan, status: 'bezig' } : checked.plan)
+  const outcome = await saveReport(
+    db,
+    userId,
+    id,
+    downgraded ? { ...checked.plan, status: 'bezig' } : checked.plan,
+    new Date(),
+    basis,
+  )
 
   if (outcome.status === 'missing' || outcome.status === 'not-played') {
     redirect(`${matchesPath}?fout=weg`)
+  }
+  if (outcome.status === 'stale') {
+    // Someone else saved the report since this form was opened: nothing is written, and the
+    // form keeps what was typed so it is not lost.
+    return {
+      errors: {
+        verslag:
+          'Iemand anders heeft het verslag bewaard sinds jij het opende. Er is niets opgeslagen en je gegevens staan nog in het formulier. Open het verslag in een nieuw tabblad om te zien wat er veranderde, en pas het hier aan.',
+      },
+      values,
+      version,
+      warnings: checked.warnings,
+    }
   }
 
   redirect(

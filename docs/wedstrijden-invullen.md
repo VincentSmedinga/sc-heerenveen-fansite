@@ -165,6 +165,15 @@ De wedstrijd blijft dan gepland, zonder uitslag, en op de pagina van de wedstrij
 Voor de aftrap staan de aftrap en de opstelling erop.
 De doelpunten van zo'n wedstrijd tellen nergens mee, tot hij is afgelopen.
 
+Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de zijbalk van het verslag, of "Bijhouden" in de lijst met wedstrijden.
+De opstelling maak je eerst in het volledige formulier.
+Op het snelle scherm voeg je een doelpunt, een kaart of een wissel toe: kies de kant, vul de minuut in en kies de speler.
+Elke gebeurtenis is meteen opgeslagen en staat in de lijst eronder, de laatste bovenaan.
+Zie je een fout, kies dan "Haal weg" bij de gebeurtenis en bevestig.
+Slaat een collega tegelijk iets op, dan blijven allebei de gebeurtenissen staan.
+Heb je het volledige formulier open terwijl iemand anders iets bewaart, dan weigert het formulier te bewaren en zegt het dat iemand anders het verslag heeft bewaard.
+Wat je typte blijft staan.
+
 Is de wedstrijd afgelopen, kies dan in de zijbalk van het verslag "Wedstrijd afgelopen".
 Je ziet de stand uit de doelpunten van het bewaarde verslag, die je kunt aanpassen, en kiest dan nog eens "Wedstrijd afgelopen".
 De wedstrijd heeft dan zijn uitslag en "Live" is weg.

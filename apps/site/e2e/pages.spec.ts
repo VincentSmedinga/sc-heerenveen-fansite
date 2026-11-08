@@ -243,6 +243,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 200 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 404 },
+  // The quick screen that keeps a report up to date during the match (#907).
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/live', status: 200 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 404 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/live', status: 404 },
   // The screen that reads a pasted text into the form of the report.
   { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },

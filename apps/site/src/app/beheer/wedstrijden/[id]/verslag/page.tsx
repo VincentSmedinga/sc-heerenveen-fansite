@@ -5,10 +5,10 @@ import { phaseOf } from '@fansite/db/match-reports'
 import { Breadcrumb, Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { finishPath, matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
+import { finishPath, livePath, matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
-import { contextOf, findReportScreen, seriesOf, valuesOfReport } from '#src/beheer/match-reports'
+import { contextOf, findReportScreen, reportBasis, seriesOf, valuesOfReport } from '#src/beheer/match-reports'
 import { checkReportForm } from '#src/beheer/report-form'
 import { previewMatchOf } from '#src/beheer/report-preview-match'
 import { requireRole } from '#src/beheer/require-role'
@@ -86,7 +86,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
 
   return (
     <ReportFormProvider
-      action={submitReport.bind(null, match.id)}
+      action={submitReport.bind(null, match.id, reportBasis(report))}
       choices={{
         matchHref: matchPath(match.id),
         opponent: match.opponent,
@@ -144,6 +144,19 @@ export default async function ReportPage({ params, searchParams }: Props) {
       </Page.Main>
       <Page.Sidebar aria-label="Opslaan en verslag" sticky>
         <ReportSavePanel cancelHref={matchPath(match.id)} />
+        {report === undefined ? null : (
+          <Card aria-labelledby="live-kop">
+            <Heading id="live-kop" level={2}>
+              Tijdens de wedstrijd
+            </Heading>
+            <Text>
+              Houd het verslag bij vanaf een telefoon: een doelpunt, een kaart of een wissel is meteen opgeslagen.
+            </Text>
+            <Link href={livePath(match.id)} icon="arrow-right">
+              Verslag bijhouden
+            </Link>
+          </Card>
+        )}
         <Card aria-labelledby="plakken-kop">
           <Heading id="plakken-kop" level={2}>
             Tekst plakken
