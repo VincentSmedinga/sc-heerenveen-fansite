@@ -12,7 +12,7 @@ const meta = preview.meta({
     headingLevel: { description: 'Het niveau van de koppen met de teams in de lijst onder het veld.' },
     opponent: {
       description:
-        'De tegenstander: bovenaan op een rechtop veld, rechts op een liggend veld. Laat je hem weg, dan staat alleen sc Heerenveen op het veld.',
+        'De tegenstander: bovenaan op een rechtop veld, rechts op een liggend veld. Laat je hem weg, dan staat alleen sc Heerenveen op het veld, en zegt het onderdeel niets over hem.',
     },
     ours: { description: 'sc Heerenveen: onderaan op een rechtop veld, links op een liggend veld.' },
   },
@@ -31,6 +31,7 @@ const meta = preview.meta({
           'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij.',
           'Een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
           'Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
+          'Het veld is zo groot als er teams op staan. Staan beide teams erop, dan is het het hele veld. Is er van één team geen bruikbare formatie, dan staat alleen de helft van het andere team op het veld, op dezelfde schaal. Is er van geen van beide een formatie, dan is er geen veld en staat de lijst open, met een zin over elk team.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -149,23 +150,43 @@ export const LongNames = meta.story({
   name: 'Lange namen',
 })
 
-export const WithoutFormation = meta.story({
+export const HalfPitch = meta.story({
   args: {
     headingLevel: 3,
     opponent: opponent(null),
     ours: ours('4-3-3'),
   },
   decorators: [phone],
-  name: 'Een team zonder formatie',
+  name: 'Het halve veld van sc Heerenveen',
 })
 
-export const WithoutOpponent = meta.story({
+export const HalfPitchOpponent = meta.story({
   args: {
     headingLevel: 3,
-    ours: ours('4-3-3'),
+    opponent: opponent('4-4-2'),
+    ours: ours(null),
   },
   decorators: [phone],
-  name: 'Alleen sc Heerenveen',
+  name: 'Het halve veld van alleen de tegenstander',
+})
+
+export const HalfPitchLyingDown = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2', theirPlayers().slice(0, 10)),
+    ours: ours('4-2-3-1'),
+  },
+  name: 'Het halve veld liggend',
+})
+
+export const NoPitch = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent(null),
+    ours: ours(null),
+  },
+  decorators: [phone],
+  name: 'Geen enkel team',
 })
 
 export const WithSubstitutes = meta.story({

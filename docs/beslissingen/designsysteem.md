@@ -2793,6 +2793,9 @@
   Het veld laat in één blik zien wie waar stond, en de lijst blijft voor wie het veld niet kan zien.
 - **Alternatieven:** een minuutas met banen per team (#853) en een balk per speler (#854), uit het ontwerp "Wedstrijdpagina versie 4".
   Een positie per speler opslaan (#855) vraagt nieuwe velden in het formulier.
+- **Later:** zie _Het veld is zo groot als er teams op staan_ (8 november 2026): een team zonder bruikbare gegevens staat niet meer op een leeg stuk veld.
+  Het andere team staat dan op een half veld, en zonder team is er geen veld.
+  Een team zonder formatie heeft een eigen zin, apart van "past de formatie niet bij de spelers".
 
 ## Het veld staat rechtop op een telefoon en ligt vanaf een breedte van 40 rem
 
@@ -2815,6 +2818,8 @@
     Het ontwerp liet 2 bij 1 zien, waarbij de naam van een speler in een kolom van vier of vijf over het vlak eronder viel.
   - op het liggende veld mag een naam hoogstens zo breed zijn als de ruimte tussen twee rijen, want de rijen staan dan naast elkaar.
 - **Alternatieven:** de namen altijd tonen en laten overlappen (ze haken dan in elkaar, en dat leest slechter dan geen naam); een schakelaar om de namen te verbergen (niet in dit issue).
+- **Later:** zie _Het veld is zo groot als er teams op staan_ (8 november 2026): staat er één team op het veld, dan is het veld een half veld.
+  Rechtop is dat even breed als het hele veld en half zo hoog; vanaf 40 rem is het even hoog als het hele veld en half zo breed, in het midden van de kaart.
 
 ## Het veld heeft twee eigen kleurtokens voor de grasmat
 
@@ -2934,3 +2939,29 @@
   De site heeft geen eigen CSS, dus de indeling hoort in het ontwerpsysteem.
   Het kader laat de beheerder zien welke regel van het verloop bij het veld hoort dat hij net veranderde.
 - **Alternatieven:** de indeling in de site (die heeft geen eigen stijlen, en elke pagina zou het opnieuw uitzoeken); de breedte van het scherm in plaats van van de plek (het formulier staat naast een zijbalk, dus het scherm zegt niet hoeveel plek het heeft); tabs met `role="tab"` (de pagina wisselt geen paneel van één taak maar kiest wat je ziet, en `SegmentedControl` doet dat al met `aria-pressed`).
+
+## Het veld is zo groot als er teams op staan
+
+- **Datum:** 8 november 2026
+- **Besluit:** `MatchPitch` (#901) tekent het veld zo groot als er teams op staan.
+  Een team staat op het veld als zijn formatie bij zijn elf spelers past.
+  Staan beide teams erop, dan is het veld het hele veld.
+  Staat er één team op, dan is het veld de helft van dat team, op dezelfde schaal als het hele veld en uitgesneden uit het hele veld.
+  De spelers hebben dus dezelfde maat en afstand, en de middenlijn ligt aan de rand met de helft van de middencirkel.
+  Rechtop is het halve veld even breed als het hele veld en half zo hoog, met sc Heerenveen onderaan of de tegenstander bovenaan.
+  Vanaf 40 rem is het even hoog als het hele veld en half zo breed, in het midden van de kaart, met sc Heerenveen links of de tegenstander rechts.
+  Staat geen team op het veld, dan is er geen veld, geen regel met teams en geen uitleg van de merken, en "Opstelling als lijst" staat open.
+  Boven het veld staat alleen het team dat erop staat.
+  Een team dat is meegegeven maar niet op het veld staat, krijgt één zin onder het veld.
+  Heeft het geen formatie, dan luidt die: "Van `<team>` hebben we de formatie niet; de spelers staan in de lijst hieronder."
+  Past de formatie niet bij de spelers, dan luidt die: "Voor `<team>` past de formatie niet bij de spelers; de lijst hieronder toont de opstelling."
+  Een team dat de site niet meegeeft, krijgt geen zin van het onderdeel.
+- **Waarom:** een lege helft of een leeg veld zegt niets en neemt ruimte in op een telefoon.
+  Op dezelfde schaal blijven de namen leesbaar en hoeft de plaats van een speler niet opnieuw te worden uitgerekend.
+  Een naam zonder veld erbij suggereert dat er iets te zien is, en "past niet bij de spelers" is onwaar voor een formatie die er niet is.
+  Zonder veld is de lijst het enige wat er te zien is, en de merken uit de uitleg staan er niet.
+- **Eigen keuzes bij het bouwen:**
+  - de strepen en lijnen van het halve veld zijn die van het hele veld, met alleen het doel aan het eind van de helft.
+    `pitchSpots` rekent de plaatsen van een halve helft uit met een extra waarde `half`, zodat de afstanden dezelfde zijn als op het hele veld.
+  - op het liggende halve veld staat "eruit 62'" onder de naam, net als op het hele veld, ook al is het veld zelf smaller dan 36 rem.
+- **Alternatieven:** het halve veld over de hele breedte uitrekken (de lijnen vervormen en het veld wordt groter dan het hele veld); een lege helft laten staan met een zin erin; beide teams boven het veld laten staan; één zin voor alle gevallen; de lijst dichtgeklapt laten.

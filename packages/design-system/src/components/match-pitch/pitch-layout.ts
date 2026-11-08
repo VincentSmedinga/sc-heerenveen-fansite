@@ -71,11 +71,16 @@ export const isCrowdedFormation = (rows: readonly number[]) => rows.length >= ma
  * The spots of the eleven players of a team, in the order of the line-up: the goalkeeper, then
  * the rows of the formation. `null` when the formation can't be drawn or the team has not
  * eleven players in the line-up; the pitch then leaves the team out.
+ *
+ * With `half` the spots are those on a pitch of only the half of the team: the same players at
+ * the same distance from each other, but in percent of the half, so the length (upright) or the
+ * width (lying down) of the spots, and the room for a name between two rows, doubles.
  */
 export function pitchSpots(
   formation: null | string | undefined,
   playerCount: number,
   ours: boolean,
+  half = false,
 ): null | PitchSpot[] {
   const rows = parseFormation(formation)
 
@@ -93,11 +98,18 @@ export function pitchSpots(
 
     for (let position = 0; position < size; position++) {
       const offset = rowOffset(position, size)
+      const length = half ? 2 : 1
+      // On a half the rows run from the halfway line to the goal line, so twice as far.
+      const toward = depth * length
 
       spots.push({
-        landscape: ours ? { x: percent(depth), y: percent(1 - offset) } : { x: percent(1 - depth), y: percent(offset) },
-        landscapeShare: percent(rowGap * 0.95),
-        portrait: ours ? { x: percent(offset), y: percent(1 - depth) } : { x: percent(1 - offset), y: percent(depth) },
+        landscape: ours
+          ? { x: percent(toward), y: percent(1 - offset) }
+          : { x: percent(1 - toward), y: percent(offset) },
+        landscapeShare: percent(rowGap * 0.95 * length),
+        portrait: ours
+          ? { x: percent(offset), y: percent(1 - toward) }
+          : { x: percent(1 - offset), y: percent(toward) },
         share: percent(((size >= 5 ? 0.88 : 0.8) / size) * 0.95),
       })
     }

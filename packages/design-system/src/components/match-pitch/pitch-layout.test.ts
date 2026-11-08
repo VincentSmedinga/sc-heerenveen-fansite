@@ -83,6 +83,33 @@ describe('pitchSpots', () => {
     expect(theirs[0]?.landscape.x).toBeGreaterThan(50)
   })
 
+  it.each(formations)('puts the players of a half where they stand on the whole pitch, for %s', (formation) => {
+    ;[true, false].forEach((ours) => {
+      const whole = pitchSpots(formation, lineUpSize, ours) ?? []
+      const half = pitchSpots(formation, lineUpSize, ours, true) ?? []
+
+      expect(half).toHaveLength(lineUpSize)
+      half.forEach((spot, index) => {
+        const full = whole[index]!
+        // sc Heerenveen has the bottom and left half, the opponent the top and right half.
+        const portraitY = ours ? 50 + spot.portrait.y / 2 : spot.portrait.y / 2
+        const landscapeX = ours ? spot.landscape.x / 2 : 50 + spot.landscape.x / 2
+
+        // A percentage is rounded to a tenth, so doubling it may differ by that much.
+        expect(Math.abs(portraitY - full.portrait.y)).toBeLessThanOrEqual(0.1)
+        expect(Math.abs(landscapeX - full.landscape.x)).toBeLessThanOrEqual(0.1)
+        expect(spot.portrait.x).toBe(full.portrait.x)
+        expect(spot.landscape.y).toBe(full.landscape.y)
+        expect(spot.share).toBe(full.share)
+        expect(Math.abs(spot.landscapeShare / 2 - full.landscapeShare)).toBeLessThanOrEqual(0.1)
+        expect(spot.portrait.y).toBeGreaterThanOrEqual(0)
+        expect(spot.portrait.y).toBeLessThanOrEqual(100)
+        expect(spot.landscape.x).toBeGreaterThanOrEqual(0)
+        expect(spot.landscape.x).toBeLessThanOrEqual(100)
+      })
+    })
+  })
+
   it('gives a row of five or more a little more room to the side', () => {
     const wide = pitchSpots('3-5-2', lineUpSize, true) ?? []
     const normal = pitchSpots('4-4-2', lineUpSize, true) ?? []

@@ -4,6 +4,11 @@
  * pitch is a grass mat with ten stripes, the halfway line, the centre circle, the penalty areas
  * and the goal areas. Players are placed by custom properties that the component sets
  * (percentages of the pitch, one pair for each position); this file only reads them.
+ *
+ * With one team on it the pitch is cut in half, at the same scale as the whole pitch: the half
+ * of that team, with the halfway line and half the centre circle on its edge. Upright it is as
+ * wide as the whole pitch and half as high; lying down it is as high as the whole pitch and
+ * half as wide, in the middle of the card.
  */
 
 @layer hf.components {
@@ -299,6 +304,127 @@
 
     .hf-match-pitch-note-crowded {
       display: none;
+    }
+  }
+
+  /*
+   * A pitch with one team on it: the half of that team, cut from the whole pitch. The stripes
+   * are those of the whole pitch (twice the size, with the right half in view), the goal at
+   * the end of the half is the only one, and the halfway line lies on the edge with half the
+   * centre circle.
+   */
+  .hf-match-pitch-field-half {
+    aspect-ratio: 10 / 11;
+    background-size: 100% 200%;
+  }
+
+  .hf-match-pitch-field-ours {
+    background-position: 0 100%;
+  }
+
+  .hf-match-pitch-field-theirs {
+    background-position: 0 0;
+  }
+
+  .hf-match-pitch-field-ours .hf-match-pitch-line-first,
+  .hf-match-pitch-field-theirs .hf-match-pitch-line-second {
+    display: none;
+  }
+
+  .hf-match-pitch-field-half .hf-match-pitch-line-penalty-area {
+    block-size: 26%;
+  }
+
+  .hf-match-pitch-field-half .hf-match-pitch-line-goal-area {
+    block-size: 10%;
+  }
+
+  .hf-match-pitch-field-ours .hf-match-pitch-line-half {
+    inset-block-start: 0;
+  }
+
+  .hf-match-pitch-field-theirs .hf-match-pitch-line-half {
+    border-width: 0 0 2px;
+    inset-block: auto 0;
+  }
+
+  .hf-match-pitch-field-ours .hf-match-pitch-line-circle {
+    inset-block-start: -15cqw;
+  }
+
+  .hf-match-pitch-field-theirs .hf-match-pitch-line-circle {
+    inset-block-start: calc(100% - 15cqw);
+  }
+
+  @container hf-match-pitch (min-width: 40rem) {
+    /* The half lies down as high as the whole pitch and half as wide, in the card's middle. */
+    .hf-match-pitch-field-half {
+      aspect-ratio: 8 / 9;
+      background-size: 200% 100%;
+      inline-size: 50%;
+      justify-self: center;
+    }
+
+    .hf-match-pitch-field-half.hf-match-pitch-crowded {
+      aspect-ratio: 3 / 4;
+    }
+
+    .hf-match-pitch-field-ours {
+      background-position: 0 0;
+    }
+
+    .hf-match-pitch-field-theirs {
+      background-position: 100% 0;
+    }
+
+    .hf-match-pitch-field-ours .hf-match-pitch-line-first,
+    .hf-match-pitch-field-theirs .hf-match-pitch-line-second {
+      display: block;
+    }
+
+    .hf-match-pitch-field-ours .hf-match-pitch-line-second,
+    .hf-match-pitch-field-theirs .hf-match-pitch-line-first {
+      display: none;
+    }
+
+    .hf-match-pitch-field-half .hf-match-pitch-line-penalty-area {
+      block-size: 58%;
+      inline-size: 26%;
+    }
+
+    .hf-match-pitch-field-half .hf-match-pitch-line-goal-area {
+      block-size: 28%;
+      inline-size: 10%;
+    }
+
+    .hf-match-pitch-field-half .hf-match-pitch-line-half {
+      border-width: 0 0 0 2px;
+      inset-block: 0;
+    }
+
+    .hf-match-pitch-field-ours .hf-match-pitch-line-half {
+      inset-inline-start: calc(100% - 2px);
+    }
+
+    .hf-match-pitch-field-theirs .hf-match-pitch-line-half {
+      inset-inline-start: 0;
+    }
+
+    .hf-match-pitch-field-half .hf-match-pitch-line-circle {
+      inset-block-start: 35%;
+    }
+
+    .hf-match-pitch-field-ours .hf-match-pitch-line-circle {
+      inset-inline-start: 100%;
+    }
+
+    .hf-match-pitch-field-theirs .hf-match-pitch-line-circle {
+      inset-inline-start: 0;
+    }
+
+    /* The half is only half as wide, but the player has the room of the whole pitch. */
+    .hf-match-pitch-field-half .hf-pitch-player-off {
+      display: block;
     }
   }
 }
