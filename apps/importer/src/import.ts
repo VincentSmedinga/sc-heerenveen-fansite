@@ -23,7 +23,8 @@
 //
 // With `--old-site` it reads the match data of the old fansite (1990 to 2007) from the files in
 // the repository, step by step (`pnpm run import:old-site`); `--dry-run` shows what it would do
-// and writes nothing.
+// and writes nothing, and `--report` writes the check report as Markdown, also without writing
+// anything to the database (`pnpm --silent run import:old-site --report`).
 //
 // With `--changes` it lists the changes of a match that wait for a decision, and with
 // `--changes accept 12` or `--changes reject all` it decides them (`pnpm run import:changes`).
@@ -32,7 +33,7 @@ import { parseArgs } from 'node:util'
 
 import { runChangesCommand } from './import-changes.ts'
 import { runImport } from './import-feeds.ts'
-import { oldSiteUsage, runOldSiteImport } from './import-old-site.ts'
+import { oldSiteUsage, runOldSiteImport, runOldSiteReport } from './import-old-site.ts'
 import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from './import-season.ts'
 import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
 import { showStatus } from './status.ts'
@@ -49,6 +50,7 @@ const { positionals, values } = parseArgs({
     'from-squad': { type: 'boolean' },
     'item-clubs': { type: 'boolean' },
     'old-site': { type: 'boolean' },
+    report: { type: 'boolean' },
     season: { type: 'boolean' },
     squad: { type: 'boolean' },
     status: { type: 'boolean' },
@@ -70,13 +72,14 @@ const modes = [
 const wrongArguments =
   modes > 1 ||
   (values['dry-run'] === true && values['old-site'] !== true) ||
+  (values.report === true && (values['old-site'] !== true || values['dry-run'] === true)) ||
   (values.season === true || fromSeason === true || values.squad === true || fromSquad === true
     ? positionals.length > 1
     : values.changes !== true && positionals.length > 0)
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (with or without --dry-run) alone, --completeness alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -100,5 +103,7 @@ process.exitCode = fromSeason
               : values['item-clubs']
                 ? await runItemClubsCommand(DATABASE_URL)
                 : values['old-site']
-                  ? await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                  ? values.report
+                    ? await runOldSiteReport(DATABASE_URL)
+                    : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
                   : await runImport(DATABASE_URL)

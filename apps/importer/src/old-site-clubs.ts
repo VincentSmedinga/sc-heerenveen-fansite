@@ -29,10 +29,31 @@ export const oldSiteClubNames: Readonly<Record<string, string>> = {
   stormvogelstelstar: 'Telstar',
 }
 
+/** The club of an old fansite club in the database, or undefined when it has none. */
+export type FoundOldSiteClub = { club: undefined | { id: number; name: string }; old: OldSiteClub }
+
 type ClubDatabase = Pick<OldSiteDatabase, 'insert' | 'select' | 'update'>
 
 /** What the step knows of a club in the database. */
 type KnownClub = { id: number; name: string; names: Set<string> }
+
+/**
+ * The club of every club in the files, in the order of the files, found by the rules of the
+ * step `clubs`. The check report (#880) reads it to tell a club that has the name of the old
+ * fansite from a club that has it as another name.
+ */
+export async function findOldSiteClubs(
+  db: Pick<OldSiteDatabase, 'select'>,
+  oldClubs: readonly OldSiteClub[],
+): Promise<FoundOldSiteClub[]> {
+  const known = await knownClubs(db)
+
+  return oldClubs.map((old) => {
+    const club = findClub(known, old)
+
+    return { club: club === undefined ? undefined : { id: club.id, name: club.name }, old }
+  })
+}
 
 /** The step `clubs`: finds or makes the club of every club in the files of the old fansite. */
 export async function importOldSiteClubs(
@@ -98,12 +119,9 @@ export async function importOldSiteClubs(
  * give a match its club.
  */
 export async function oldSiteClubIds(db: ClubDatabase, oldClubs: readonly OldSiteClub[]): Promise<Map<string, number>> {
-  const known = await knownClubs(db)
   const ids = new Map<string, number>()
 
-  for (const old of oldClubs) {
-    const club = findClub(known, old)
-
+  for (const { club, old } of await findOldSiteClubs(db, oldClubs)) {
     if (club !== undefined) {
       ids.set(old.code, club.id)
     }

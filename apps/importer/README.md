@@ -2069,7 +2069,7 @@ De redenen staan in [`docs/beslissingen/importer.md`](../../docs/beslissingen/im
 #### De stap opstellingen
 
 De stap `opstellingen` ([`src/old-site-lineups.ts`](src/old-site-lineups.ts)) maakt van elke wedstrijd met een opstelling een verslag met de bron `Oude fansite`: een rij in `match_reports`, de spelers van beide teams in `match_appearances`, de wissels, de kaarten en de koppeling van doelpunten en assists aan de spelers.
-Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts) uit zonder database, zodat een test of het controleverslag (#880) hetzelfde resultaat kan lezen.
+Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts) uit zonder database, zodat een test en het controleverslag hetzelfde resultaat kunnen lezen (`judgeStoredOldSiteMatch` in `src/old-site-lineups.ts` zet het samen met de bewaarde doelpunten).
 
 - De wissels volgen uit de minuut erin en de minuut eruit: een invaller vervangt een speler van zijn team die op dezelfde minuut eruit gaat.
 - Een kaart zonder minuut krijgt bij geel een lege minuut en bij rood de minuut waarop de speler eruit ging.
@@ -2080,10 +2080,24 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
 - De stap raakt alleen wedstrijden met de bron `oude-fansite`, en laat een verslag dat de redactie opsloeg zoals het is.
   Een tweede run verandert niets.
 
+#### Het controleverslag
+
+`pnpm --silent import:old-site --report` (op de host `import.mjs --old-site --report`) schrijft een verslag in Markdown, in het Nederlands, over wat de import niet kon vullen of niet vertrouwde ([`src/old-site-check.ts`](src/old-site-check.ts)).
+Het leest de bestanden en de database en schrijft niets in de database.
+Het neemt de lock van de import niet, want het leest alleen, en het kan niet samen met `--dry-run`.
+
+- Een tabel per seizoen telt de wedstrijden in het bestand en in de database, de doelpunten die optellen, ontbreken of een deel zijn, de opstellingen, de verslagen `klaar` en `bezig`, de scheidsrechters, de toeschouwers, de cijfers en de wedstrijden zonder aanvangstijd.
+- Daarna komen de lijsten: wedstrijden die in het bestand maar niet in de database staan, en omgekeerd; rondes met een ander nummer; opmerkingen van de oude redacteuren; doelpunten die niet optellen; verslagen die `bezig` zijn, met de reden per regel; spelers van wie de code geen rij in de oude tabel had; kaarten die de import oversloeg; doelpuntenmakers en assists zonder speler; nieuwe clubs en clubs die aan een bestaande zijn gekoppeld.
+- Het verslag rekent niets zelf uit.
+  Het vraagt het aan de stappen (`deriveOldSiteMatches`, `deriveOldSiteGoals`, `deriveOldSitePlayers`, `judgeStoredOldSiteMatch` en `findOldSiteClubs`), die hun meldingen als gegevens geven, en zet ze om in Nederlandse zinnen.
+- Het noemt alleen namen zoals ze in de wedstrijd stonden.
+- Het verslag van een run staat in [`docs/oude-wedstrijden-hiaten.md`](../../docs/oude-wedstrijden-hiaten.md).
+  Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`; `--silent` houdt de regels van pnpm uit het bestand.
+
 #### Op de host
 
 De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
-Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH en zonder invoer (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH, met de keuze `import` of `report` (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
 ## De import op acceptatie
 
@@ -2095,7 +2109,7 @@ Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, 
   De uitvoer komt achteraan in `~/fansite-import.log`.
 - Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
 - Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig, en met `--from-season <seizoen>` alle afgelopen seizoenen vanaf dat seizoen (zie _Een afgelopen seizoen_).
-- Met `--old-site` leest het de wedstrijdgegevens van de oude fansite uit de bestanden naast `import.mjs` (zie _De opdracht die de bestanden importeert_), en met `--old-site --dry-run` laat het zien wat het zou doen.
+- Met `--old-site` leest het de wedstrijdgegevens van de oude fansite uit de bestanden naast `import.mjs` (zie _De opdracht die de bestanden importeert_), en met `--old-site --dry-run` laat het zien wat het zou doen, en met `--old-site --report` schrijft het het controleverslag.
 - Met `--squad <seizoen>` leest het de selectie van een afgelopen seizoen, en met `--from-squad <seizoen>` die van alle afgelopen seizoenen vanaf dat seizoen (zie _De selectie van afgelopen seizoenen_).
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).

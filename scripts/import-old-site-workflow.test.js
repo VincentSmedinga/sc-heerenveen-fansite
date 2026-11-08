@@ -1,7 +1,7 @@
 // Checks the workflow that reads the match data of the old fansite on acceptance
 // (.github/workflows/import-old-site.yml). It is read as text, like the other workflows, to
-// keep the rules that make it safe: it starts by hand without input, takes the same group,
-// secrets and SSH set-up as the other imports, and pins every action.
+// keep the rules that make it safe: it starts by hand with one checked choice, takes the same
+// group, secrets and SSH set-up as the other imports, and pins every action.
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
@@ -22,10 +22,33 @@ function step(text, name) {
   return end === -1 ? rest : rest.slice(0, end)
 }
 
-test('the workflow is named Import old site and starts by hand, without input', () => {
+test('the workflow is named Import old site and starts by hand, with the choice import or report', () => {
   assert.match(workflow, /^name: Import old site$/mu)
-  assert.match(workflow, /\non:\n {2}workflow_dispatch:\n\npermissions:/)
-  assert.doesNotMatch(workflow, /inputs/)
+  assert.match(workflow, /\non:\n {2}workflow_dispatch:\n {4}inputs:\n {6}action:\n/)
+  assert.match(workflow, /\n {8}default: import\n/)
+  assert.match(workflow, /\n {8}options:\n {10}- import\n {10}- report\n/)
+  assert.match(workflow, /\n {8}type: choice\n\npermissions:/)
+  // It is the only input.
+  assert.equal(
+    [...workflow.matchAll(/^ {6}\w+:$/gmu)].filter((match) => match.index < workflow.indexOf('permissions:')).length,
+    1,
+  )
+})
+
+test('the workflow checks the choice before any step connects, and it reaches the steps as a variable', () => {
+  const check = step(workflow, 'Check the action')
+
+  assert.ok(workflow.indexOf('name: Check the action') < workflow.indexOf('id: secrets'))
+  assert.match(check, /ACTION: \$\{\{ inputs\.action \}\}/)
+  assert.match(check, /"\$ACTION" != "import" \] && \[ "\$ACTION" != "report" \]/)
+  assert.match(check, /exit 1/)
+  // The only place the input is read is an environment variable of a step.
+  const reads = workflow.split('\n').filter((line) => line.includes('${{ inputs.'))
+
+  assert.ok(reads.length > 0)
+  for (const line of reads) {
+    assert.match(line, /^ {10}ACTION: \$\{\{ inputs\.action \}\}$/)
+  }
 })
 
 test('the workflow has the least permissions, the group of the deploy and 30 minutes', () => {
@@ -40,7 +63,7 @@ test('the workflow checks the secrets and sets up SSH as the import of the seaso
   assert.equal(step(workflow, 'Set up SSH'), step(seasons, 'Set up SSH'))
   // Without the secrets it skips the import with a notice and stays green.
   assert.match(step(workflow, 'Check the secrets'), /::notice title=Import skipped::/)
-  assert.doesNotMatch(workflow, /exit 1/)
+  assert.doesNotMatch(step(workflow, 'Check the secrets'), /exit 1/)
 })
 
 test('the workflow runs the command of the old site on the host, with the path as one word', () => {
@@ -48,9 +71,23 @@ test('the workflow runs the command of the old site on the host, with the path a
 
   assert.match(run, /if: steps\.secrets\.outputs\.ready == 'true'/)
   assert.match(run, /\/opt\/alt\/alt-nodejs24\/root\/usr\/bin\/node --env-file=\\"\\\$HOME\/fansite-acceptatie\.env\\"/)
-  assert.match(run, /\$\(printf '%q' "\$DEPLOY_PATH"\)\/apps\/importer\/import\.mjs --old-site"\n$/)
-  // Nothing typed by a person reaches the command.
-  assert.doesNotMatch(workflow, /\$\{\{ inputs\./)
+  assert.match(run, /\$\(printf '%q' "\$DEPLOY_PATH"\)\/apps\/importer\/import\.mjs \$arguments"/)
+  // The arguments come from two fixed words, chosen by the action.
+  assert.match(run, /import\) arguments="--old-site" ;;\n/)
+  assert.match(run, /report\) arguments="--old-site --report" ;;\n/)
+  assert.doesNotMatch(run, /\$ACTION[^"]*import\.mjs/)
+  assert.match(run, /ACTION: \$\{\{ inputs\.action \}\}/)
+})
+
+test('the report goes to the log and, for the action report, to the summary of the run', () => {
+  const run = step(workflow, 'Import the old site on the host')
+
+  assert.match(run, /shell: bash\n/)
+  assert.match(run, /\| tee "\$RUNNER_TEMP\/old-site-output\.txt"/)
+  assert.match(
+    run,
+    /if \[ "\$ACTION" = "report" \]; then\n\s+cat "\$RUNNER_TEMP\/old-site-output\.txt" >> "\$GITHUB_STEP_SUMMARY"/,
+  )
 })
 
 test('every action of the workflow is pinned on a full commit, with its version as a comment', () => {

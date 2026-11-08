@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
-import { clubNames, clubs } from '@fansite/db/schema'
+import { clubNames, clubs, matchAppearances, matches, matchGoals, matchReports } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
@@ -9,11 +9,17 @@ import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { OldSiteStep } from './old-site-step.ts'
 
-import { defaultOldSiteFolder, formatStepReport, oldSiteSteps, runOldSiteImport } from './import-old-site.ts'
+import {
+  defaultOldSiteFolder,
+  formatStepReport,
+  oldSiteSteps,
+  runOldSiteImport,
+  runOldSiteReport,
+} from './import-old-site.ts'
 import { oldSiteClubIds } from './old-site-clubs.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 
@@ -268,6 +274,52 @@ describe('the command', () => {
   })
 })
 
+const rowCounts = async () => ({
+  appearances: (await database.db.select().from(matchAppearances)).length,
+  clubs: await clubCount(),
+  goals: (await database.db.select().from(matchGoals)).length,
+  matches: (await database.db.select().from(matches)).length,
+  reports: (await database.db.select().from(matchReports)).length,
+})
+
+describe('the check report command', () => {
+  it('writes the report and nothing to the database, and refuses files that do not fit', async () => {
+    const before = await rowCounts()
+    const chunks: string[] = []
+    const code = await runOldSiteReport(database.url, {
+      folder,
+      today: '2026-11-08',
+      write: (text) => chunks.push(text),
+    })
+
+    expect(code).toBe(0)
+    expect(chunks.join('')).toContain('# Oude wedstrijden: wat ontbreekt of niet klopt')
+    expect(chunks.join('')).toContain('| Totaal | 0 | 0 |')
+    expect(await rowCounts()).toEqual(before)
+    expect(await database.db.select().from(clubNames)).toEqual([])
+
+    const errors: string[] = []
+    const spy = vi.spyOn(console, 'error').mockImplementation((line: string) => void errors.push(line))
+
+    try {
+      expect(await runOldSiteReport(database.url, { folder: path.join(folder, 'missing'), write: () => {} })).toBe(1)
+      expect(errors.join('\n')).toContain("The files of the old fansite can't be used, so there is no report.")
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('does not wait for the lock of the import', async () => {
+    const chunks: string[] = []
+    const held = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, async () =>
+      runOldSiteReport(database.url, { folder, today: '2026-11-08', write: (text) => chunks.push(text) }),
+    )
+
+    expect(held.ran && held.result).toBe(0)
+    expect(chunks.join('')).toContain('# Oude wedstrijden')
+  })
+})
+
 describe('the files in the repository', () => {
   it('makes a club of every club of the old fansite, finds them all again, and a second run changes nothing', async () => {
     const { clubs: oldClubs } = await readOldSiteData(oldSiteDataFolder)
@@ -292,6 +344,25 @@ describe('the files in the repository', () => {
     // The two clubs the test started with are among them, so a club is one row, not two.
     expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
     expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'sc-cambuur'))).toHaveLength(1)
+  })
+
+  it('writes a check report of the real import with the numbers of the steps, and writes nothing', async () => {
+    await run({ folder: oldSiteDataFolder })
+
+    const before = await rowCounts()
+    const chunks: string[] = []
+    const code = await runOldSiteReport(database.url, {
+      folder: oldSiteDataFolder,
+      today: '2026-11-08',
+      write: (text) => chunks.push(text),
+    })
+    const text = chunks.join('')
+
+    expect(code).toBe(0)
+    // 671 matches, 566 reports with a line-up, 474 klaar and 92 bezig, as the steps say.
+    expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 474 | 92 |')
+    expect(text).toContain('## Doelpunten die niet optellen')
+    expect(await rowCounts()).toEqual(before)
   })
 
   it('finds the files next to the repository when there is no folder next to the bundle', () => {
@@ -325,6 +396,12 @@ describe('the bundle', () => {
       expect(dry.stdout).toContain('Old site, step matches: 671 new')
       expect(dry.stdout).toContain('Old site, step doelpunten: 1763 new')
       expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 5 of 5 steps done.')
+      const report = await node('--old-site', '--report')
+
+      expect(report.stdout).toContain('# Oude wedstrijden: wat ontbreekt of niet klopt')
+      // --report belongs to --old-site alone, and not with --dry-run.
+      await expect(node('--report')).rejects.toMatchObject({ code: 2 })
+      await expect(node('--old-site', '--report', '--dry-run')).rejects.toMatchObject({ code: 2 })
       // --dry-run belongs to --old-site alone.
       await expect(node('--dry-run')).rejects.toMatchObject({ code: 2 })
       await expect(node('--old-site', '--status')).rejects.toMatchObject({ code: 2 })
