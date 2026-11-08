@@ -14,17 +14,18 @@ import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
 
-// The links in the footer, about the site itself: the search, the page about us, the contact
-// form, the sources, the privacy page, the accessibility statement and the updates. The main
-// menu does not have them.
+// The links in the footer, about the site itself: the page about us, the contact form, the
+// sources, the privacy page, the accessibility statement, the updates and the admin. The main
+// menu does not have them. Beheer is a plain link for everybody: the app on a Home Screen has
+// no address bar and no mark in its storage (#938). The login page is public already.
 const footerItems = [
-  { href: '/nieuws/zoeken', label: 'Zoeken' },
   { href: '/over-ons', label: 'Over ons' },
   { href: '/contact', label: 'Contact' },
   { href: '/bronnen', label: 'Bronnen' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/toegankelijkheid', label: 'Toegankelijkheid' },
   { href: updatesPath, label: updatesTitle },
+  { href: '/beheer/inloggen', label: 'Beheer' },
 ]
 
 const branch = reviewBranch()

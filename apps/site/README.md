@@ -210,7 +210,8 @@ Op `/wedstrijden/<seizoen>`, `/cijfers/<seizoen>` en `/spelers/<seizoen>` nemen 
 Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
 
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen/site.md`).
-De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
+De footer heeft geen link naar Zoeken meer; Zoeken staat in de balk van Nieuws.
+De laatste link van de footer is Beheer, naar `/beheer/inloggen`, voor iedereen zichtbaar: de app op het beginscherm van een iPhone heeft geen adresbalk.
 
 ## Schakelaars die in de pagina wisselen
 

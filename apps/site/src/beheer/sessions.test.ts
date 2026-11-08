@@ -8,6 +8,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createAccount, revokeAccount } from './accounts'
 import {
   absoluteLifetime,
+  codeAttempts,
+  codeHashOf,
   endSession,
   findSession,
   hashOf,
@@ -15,6 +17,7 @@ import {
   linkLifetime,
   loginLinkWorks,
   newToken,
+  redeemLoginCode,
   redeemLoginLink,
   removeEnded,
   startSession,
@@ -40,6 +43,17 @@ beforeEach(async () => {
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
+/** Puts a login link with a code in the table the way requesting one does. */
+async function addCode(code = '123456', expiresAt = new Date(start.getTime() + linkLifetime)) {
+  const ref = newToken()
+
+  await database.db
+    .insert(adminLoginLinks)
+    .values({ codeHash: codeHashOf(ref, code), expiresAt, refHash: hashOf(ref), tokenHash: hashOf(newToken()), userId })
+
+  return ref
+}
+
 /** Puts a login link in the table the way requesting one does, and returns its token. */
 async function addLink(expiresAt = new Date(start.getTime() + linkLifetime)) {
   const token = newToken()
@@ -50,10 +64,10 @@ async function addLink(expiresAt = new Date(start.getTime() + linkLifetime)) {
 }
 
 describe('the lifetimes', () => {
-  it('are 15 minutes for a link, 12 hours without a request and 7 days at most for a session', () => {
+  it('are 15 minutes for a link, 9 days without a request and 14 days at most for a session', () => {
     expect(linkLifetime).toBe(15 * 60 * 1000)
-    expect(idleLifetime).toBe(12 * hour)
-    expect(absoluteLifetime).toBe(7 * 24 * hour)
+    expect(idleLifetime).toBe(9 * 24 * hour)
+    expect(absoluteLifetime).toBe(14 * 24 * hour)
   })
 })
 
@@ -145,13 +159,13 @@ describe('a session', () => {
     expect(await findSession(database.db, '', start)).toBeUndefined()
   })
 
-  it('ends after 12 hours without a request, and not before', async () => {
+  it('ends after 9 days without a request, and not before', async () => {
     const token = await startSession(database.db, userId, start)
 
     expect(await findSession(database.db, token, new Date(start.getTime() + idleLifetime - 1))).toBeDefined()
   })
 
-  it('ends at 12 hours without a request', async () => {
+  it('ends at 9 days without a request', async () => {
     const token = await startSession(database.db, userId, start)
 
     expect(await findSession(database.db, token, new Date(start.getTime() + idleLifetime))).toBeUndefined()
@@ -160,7 +174,7 @@ describe('a session', () => {
     expect(await database.db.select().from(adminSessions)).toEqual([])
   })
 
-  it('stays open as long as a request comes within 12 hours', async () => {
+  it('stays open as long as a request comes within 9 days', async () => {
     const token = await startSession(database.db, userId, start)
     let now = start
 
@@ -171,7 +185,7 @@ describe('a session', () => {
     }
   })
 
-  it('ends 7 days after it began, however often it was used', async () => {
+  it('ends 14 days after it began, however often it was used', async () => {
     const token = await startSession(database.db, userId, start)
     let now = start
 
@@ -235,5 +249,119 @@ describe('removeEnded', () => {
       { hash: hashOf(open) },
     ])
     expect([stale, idle, old]).toHaveLength(3)
+  })
+})
+
+describe('a login code', () => {
+  it('logs in with the right code, once', async () => {
+    const ref = await addCode()
+
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toEqual(expect.any(String))
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toBeUndefined()
+    expect(await database.db.select().from(adminSessions)).toHaveLength(1)
+  })
+
+  it('takes spaces in the code, for somebody who types it as 123 456', async () => {
+    const ref = await addCode()
+
+    expect(await redeemLoginCode(database.db, ref, ' 123 456 ', start)).toEqual(expect.any(String))
+  })
+
+  it.each(['', '12345', '1234567', 'abcdef', '12345a'])('refuses %j without counting it as a try', async (code) => {
+    const ref = await addCode()
+
+    expect(await redeemLoginCode(database.db, ref, code, start)).toBeUndefined()
+    expect((await database.db.select().from(adminLoginLinks))[0]?.failedAttempts).toBe(0)
+  })
+
+  it('refuses a wrong code and counts it', async () => {
+    const ref = await addCode()
+
+    expect(await redeemLoginCode(database.db, ref, '000000', start)).toBeUndefined()
+    expect((await database.db.select().from(adminLoginLinks))[0]?.failedAttempts).toBe(1)
+    expect(await database.db.select().from(adminSessions)).toEqual([])
+  })
+
+  it('stops working after 5 wrong codes, also for the right one', async () => {
+    const ref = await addCode()
+
+    for (let attempt = 0; attempt < codeAttempts; attempt++) {
+      expect(await redeemLoginCode(database.db, ref, '000000', start)).toBeUndefined()
+    }
+
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toBeUndefined()
+    expect((await database.db.select().from(adminLoginLinks))[0]?.failedAttempts).toBe(codeAttempts)
+  })
+
+  it('still works after 4 wrong codes', async () => {
+    const ref = await addCode()
+
+    for (let attempt = 0; attempt < codeAttempts - 1; attempt++) {
+      await redeemLoginCode(database.db, ref, '000000', start)
+    }
+
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toEqual(expect.any(String))
+  })
+
+  it('gives no more than 5 tries when guesses come at the same time', async () => {
+    const ref = await addCode()
+
+    await Promise.all(Array.from({ length: 12 }, () => redeemLoginCode(database.db, ref, '000000', start)))
+
+    expect((await database.db.select().from(adminLoginLinks))[0]?.failedAttempts).toBe(codeAttempts)
+  })
+
+  it('works until 15 minutes after it was made, and not at 15 minutes', async () => {
+    const ref = await addCode()
+
+    expect(await redeemLoginCode(database.db, ref, '123456', new Date(start.getTime() + linkLifetime))).toBeUndefined()
+    expect(await redeemLoginCode(database.db, ref, '123456', new Date(start.getTime() + linkLifetime - 1))).toEqual(
+      expect.any(String),
+    )
+  })
+
+  it('is bound to its request: the code with the reference of another request does not work', async () => {
+    const first = await addCode('111111')
+    const second = await addCode('222222')
+
+    expect(await redeemLoginCode(database.db, first, '222222', start)).toBeUndefined()
+    expect(await redeemLoginCode(database.db, second, '111111', start)).toBeUndefined()
+    expect(await redeemLoginCode(database.db, newToken(), '111111', start)).toBeUndefined()
+    expect(await redeemLoginCode(database.db, first, '111111', start)).toEqual(expect.any(String))
+  })
+
+  it('is used up when the link of the same mail is used, and the other way round', async () => {
+    const ref = await addCode()
+    const [row] = await database.db.select().from(adminLoginLinks)
+
+    await database.db.delete(adminLoginLinks).where(eq(adminLoginLinks.id, row?.id ?? 0))
+
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toBeUndefined()
+  })
+
+  it('does not work for an account that has been turned off', async () => {
+    const ref = await addCode()
+
+    await database.db.update(adminUsers).set({ disabledAt: start })
+
+    expect(await redeemLoginCode(database.db, ref, '123456', start)).toBeUndefined()
+  })
+
+  it('does not work for a link without a code, from before the codes', async () => {
+    await addLink()
+
+    expect(await redeemLoginCode(database.db, '', '123456', start)).toBeUndefined()
+  })
+})
+
+describe('the lifetime of a session', () => {
+  it('is renewed by use, but never past 14 days after it began', async () => {
+    const token = await startSession(database.db, userId, start)
+    const day = 24 * hour
+
+    // Used every 8 days, so it is never idle for 9: it lives on, but only until day 14.
+    expect(await findSession(database.db, token, new Date(start.getTime() + 8 * day))).toBeDefined()
+    expect(await findSession(database.db, token, new Date(start.getTime() + 13 * day))).toBeDefined()
+    expect(await findSession(database.db, token, new Date(start.getTime() + 14 * day))).toBeUndefined()
   })
 })

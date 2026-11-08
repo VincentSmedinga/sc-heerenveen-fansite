@@ -6,7 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createAccount, revokeAccount } from './accounts'
 import { handleLoginRequest, loginLimits, minimumAnswerMilliseconds, noteAttempt } from './login'
-import { hashOf, redeemLoginLink } from './sessions'
+import { codeHashOf, hashOf, redeemLoginCode, redeemLoginLink } from './sessions'
 
 const start = new Date('2026-10-26T10:00:00Z')
 const minute = 60 * 1000
@@ -34,10 +34,10 @@ beforeEach(async () => {
  * done.
  */
 async function request(value: string, now = start) {
-  const mails: { to: string; url: string }[] = []
+  const mails: { code: string; to: string; url: string }[] = []
   const waits: number[] = []
   const deferred: (() => Promise<void>)[] = []
-  const answer = await handleLoginRequest(database.db, value, {
+  const { answer, ...rest } = await handleLoginRequest(database.db, value, {
     defer: (task) => deferred.push(task),
     deliver: (mail) => {
       mails.push(mail)
@@ -53,7 +53,7 @@ async function request(value: string, now = start) {
     },
   })
 
-  return { answer, deferred, mails, waits }
+  return { answer, deferred, mails, ref: 'ref' in rest ? rest.ref : undefined, waits }
 }
 
 describe('a request for a login link', () => {
@@ -74,6 +74,46 @@ describe('a request for a login link', () => {
     expect(url.origin + url.pathname).toBe('https://acc.sc.heerenveen.org/beheer/inloggen/bevestigen')
     expect([...url.searchParams.keys()]).toEqual(['token'])
     expect(await redeemLoginLink(database.db, url.searchParams.get('token') ?? '', start)).toEqual(expect.any(String))
+  })
+
+  it('mails a code of 6 digits with the link, and keeps only hashes of the reference and of the code', async () => {
+    const { deferred, mails, ref } = await request('jelle@example.org')
+
+    await deferred[0]?.()
+
+    const code = mails[0]?.code ?? ''
+    const [link] = await database.db.select().from(adminLoginLinks)
+
+    expect(code).toMatch(/^\d{6}$/)
+    expect(ref).toMatch(/^[\w-]{43}$/)
+    expect(link?.refHash).toBe(hashOf(ref ?? ''))
+    expect(link?.codeHash).toBe(codeHashOf(ref ?? '', code))
+    expect(JSON.stringify(link)).not.toContain(code)
+    expect(link?.failedAttempts).toBe(0)
+  })
+
+  it('gives an address without an account a reference too, and no row', async () => {
+    const { ref } = await request('niemand@example.org')
+
+    expect(ref).toMatch(/^[\w-]{43}$/)
+    expect(await database.db.select().from(adminLoginLinks)).toEqual([])
+  })
+
+  it('takes the code of an earlier link away when a new one is asked for, but keeps its link', async () => {
+    const first = await request('jelle@example.org')
+    const second = await request('jelle@example.org')
+
+    await first.deferred[0]?.()
+    await second.deferred[0]?.()
+
+    const rows = await database.db.select().from(adminLoginLinks)
+
+    expect(rows).toHaveLength(2)
+    expect(rows.filter((row) => row.codeHash !== null)).toHaveLength(1)
+    expect(await redeemLoginCode(database.db, first.ref ?? '', first.mails[0]?.code ?? '', start)).toBeUndefined()
+    expect(await redeemLoginCode(database.db, second.ref ?? '', second.mails[0]?.code ?? '', start)).toEqual(
+      expect.any(String),
+    )
   })
 
   it('gives the same answer for an address without an account, and sends no mail', async () => {
@@ -110,7 +150,7 @@ describe('a request for a login link', () => {
   })
 
   it('does not wait for the mail: a mail server that is slow or down does not change the answer', async () => {
-    const answer = await handleLoginRequest(database.db, 'jelle@example.org', {
+    const { answer } = await handleLoginRequest(database.db, 'jelle@example.org', {
       defer: () => undefined,
       deliver: () => new Promise(() => undefined),
       origin: 'https://acc.sc.heerenveen.org',

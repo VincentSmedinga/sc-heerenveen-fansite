@@ -112,7 +112,7 @@ describe('RootLayout', () => {
     )
   })
 
-  it('links to Zoeken, Over ons, Contact, Bronnen, Privacy, Toegankelijkheid and Updates in the footer, in a navigation named Over de site', () => {
+  it('links to Over ons, Contact, Bronnen, Privacy, Toegankelijkheid, Updates and Beheer in the footer, in a navigation named Over de site', () => {
     const html = renderToStaticMarkup(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
@@ -124,13 +124,13 @@ describe('RootLayout', () => {
     expect(
       [...footer.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
-      ['/nieuws/zoeken', 'Zoeken'],
       ['/over-ons', 'Over ons'],
       ['/contact', 'Contact'],
       ['/bronnen', 'Bronnen'],
       ['/privacy', 'Privacy'],
       ['/toegankelijkheid', 'Toegankelijkheid'],
       ['/updates', 'Updates'],
+      ['/beheer/inloggen', 'Beheer'],
     ])
   })
 })

@@ -4,13 +4,17 @@ import { sendMail } from '../mail'
 import { linkLifetime } from './sessions'
 
 /** The mail with the login link. */
-export function loginMailText(url: string) {
+export function loginMailText(url: string, code: string) {
   return [
     'Je vroeg om een link om in te loggen bij het beheer van de sc Heerenveen Fansite.',
     '',
     url,
     '',
-    `De link werkt ${linkLifetime / 60_000} minuten en één keer.`,
+    'Open je het beheer als app op het beginscherm? Vul dan deze code in op de pagina waar je nu bent:',
+    '',
+    code,
+    '',
+    `De link en de code werken ${linkLifetime / 60_000} minuten en één keer.`,
     'Vroeg je er niet om? Dan hoef je niets te doen.',
     '',
   ].join('\n')
@@ -20,6 +24,10 @@ export function loginMailText(url: string) {
  * Mails the login link. Locally, without the settings of a mail server, sendMail writes the
  * mail in the log of `pnpm dev` and sends nothing, which is how a developer gets the link.
  */
-export async function sendLoginMail({ to, url }: LoginMail) {
-  await sendMail({ subject: 'Inloggen bij het beheer van de sc Heerenveen Fansite', text: loginMailText(url), to })
+export async function sendLoginMail({ code, to, url }: LoginMail) {
+  await sendMail({
+    subject: 'Inloggen bij het beheer van de sc Heerenveen Fansite',
+    text: loginMailText(url, code),
+    to,
+  })
 }

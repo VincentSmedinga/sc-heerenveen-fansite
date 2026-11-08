@@ -101,7 +101,7 @@ describe('requireRole', () => {
     await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
   })
 
-  it('refuses a session that ended after 12 hours without a request or 7 days since it began', async () => {
+  it('refuses a session that ended after 9 days without a request or 14 days since it began', async () => {
     const now = Date.now()
 
     jar.set(sessionCookieName, await startSession(database.db, userId, new Date(now - idleLifetime - 1000)))
@@ -128,7 +128,7 @@ describe('the cookie of the admin', () => {
   it('is HttpOnly, Secure and SameSite=Lax, only under /beheer, and lasts as long as a session can', () => {
     expect(sessionCookieOptions).toEqual({
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 14 * 24 * 60 * 60,
       path: '/beheer',
       sameSite: 'lax',
       secure: true,
@@ -148,7 +148,7 @@ describe('the cookie of the admin', () => {
 
       expect(options).toEqual({
         httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60,
+        maxAge: 14 * 24 * 60 * 60,
         path: '/beheer',
         sameSite: 'lax',
         secure,

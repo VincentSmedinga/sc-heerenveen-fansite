@@ -5,7 +5,7 @@ import { and, count, eq, gt, lt } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { normaliseEmail } from './accounts'
-import { hashOf, linkLifetime, newToken, removeEnded } from './sessions'
+import { codeHashOf, hashOf, linkLifetime, newCode, newToken, removeEnded } from './sessions'
 
 /** The rate limit: so many login links per address, and for the whole site, in one window. */
 export const loginLimits = { perAddress: 5, perSite: 30, windowMilliseconds: 15 * 60 * 1000 }
@@ -17,8 +17,8 @@ export const loginLimits = { perAddress: 5, perSite: 30, windowMilliseconds: 15 
  */
 export const minimumAnswerMilliseconds = 400
 
-/** A login link to mail: where to, and the address of the page that logs in. */
-export type LoginMail = { to: string; url: string }
+/** A login link to mail: where to, the address of the page that logs in, and the code. */
+export type LoginMail = { code: string; to: string; url: string }
 
 export type LoginRequestDeps = {
   /** Runs a task after the response is sent (`after` of Next.js). */
@@ -33,10 +33,12 @@ export type LoginRequestDeps = {
 }
 
 /**
- * What a request for a login link leads to: the same page for every address with a good form,
- * whether it has an account or not.
+ * What a request for a login link leads to: the same page for every address with a good
+ * form, whether it has an account or not. `sent` carries a random reference that the page
+ * "verstuurd" keeps in its form, so the code belongs to this request; an address without
+ * an account gets one too, which leads nowhere.
  */
-export type LoginRequestResult = 'invalid' | 'limited' | 'sent'
+export type LoginRequestResult = { answer: 'invalid' | 'limited' } | { answer: 'sent'; ref: string }
 
 /**
  * Handles a request for a login link: checks the address, the rate limit, and whether the
@@ -68,7 +70,7 @@ export async function handleLoginRequest(
 
   await wait(Math.max(0, minimumAnswerMilliseconds - (Date.now() - started)))
 
-  return result.answer
+  return result.answer === 'sent' ? { answer: 'sent', ref: result.ref } : { answer: result.answer }
 }
 
 /**
@@ -118,19 +120,29 @@ async function decide(db: Database, value: string, now: Date, origin: string) {
 
   const [account] = await db.select().from(adminUsers).where(eq(adminUsers.email, email))
 
+  const ref = newToken()
+
   if (account === undefined || account.disabledAt !== null) {
-    return { answer: 'sent' as const }
+    return { answer: 'sent' as const, ref }
   }
 
   const token = newToken()
+  const code = newCode()
 
-  await db
-    .insert(adminLoginLinks)
-    .values({ expiresAt: new Date(now.getTime() + linkLifetime), tokenHash: hashOf(token), userId: account.id })
+  // One code at a time: an earlier link keeps working, but its code doesn't, so asking again
+  // doesn't give somebody more tries at a code.
+  await db.update(adminLoginLinks).set({ codeHash: null, refHash: null }).where(eq(adminLoginLinks.userId, account.id))
+  await db.insert(adminLoginLinks).values({
+    codeHash: codeHashOf(ref, code),
+    expiresAt: new Date(now.getTime() + linkLifetime),
+    refHash: hashOf(ref),
+    tokenHash: hashOf(token),
+    userId: account.id,
+  })
 
   const url = new URL('/beheer/inloggen/bevestigen', origin)
 
   url.searchParams.set('token', token)
 
-  return { answer: 'sent' as const, mail: { to: email, url: url.href } }
+  return { answer: 'sent' as const, mail: { code, to: email, url: url.href }, ref }
 }

@@ -536,6 +536,8 @@
 - **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
   De rest van deze beslissing blijft.
 - **Later:** zie _Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`_ (2 november 2026): het cookie blijft het enige cookie en gaat nog steeds alleen naar `/beheer`, maar de browser bewaart daarnaast een teken in `localStorage` dat alleen het menu verandert.
+- **Later:** zie _Een sessie duurt 9 dagen zonder gebruik en 14 dagen hoe dan ook_ (8 november 2026): de 12 uur en 7 dagen, en het `Max-Age` van 7 dagen, zijn 9 en 14 dagen geworden.
+  De rest van deze beslissing blijft.
 
 ## Het antwoord op een verzoek om een link is voor elk adres hetzelfde
 
@@ -3746,3 +3748,57 @@
   Weghalen van een gebeurtenis die er al niet meer is, schrijft niets.
 - **Waarom:** wie wanneer iets invoerde moet te zien blijven, en een lopende wedstrijd geeft hooguit enkele tientallen regels.
 - **Alternatieven:** één regel per opslag van het hele verslag (zegt niet wat er veranderde); geen regel voor een kaart of wissel (dan is het logboek onvolledig).
+
+## Een sessie duurt 9 dagen zonder gebruik en 14 dagen hoe dan ook
+
+- **Datum:** 8 november 2026
+- **Besluit:** de grens voor gebruik gaat van 12 uur naar 9 dagen, en de absolute grens van 7 naar 14 dagen.
+  Het cookie krijgt `Max-Age` van 14 dagen en houdt de andere eigenschappen: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/beheer`.
+  Elk verzoek verlengt alleen de 9 dagen (`last_seen_at`); `created_at` verandert nooit, dus verlengen kan een sessie niet voorbij de 14 dagen rekken, ook niet met een gestolen token.
+  Het cookie wordt niet vernieuwd, dus het browserdeel loopt gelijk met de absolute grens, en de server beslist.
+  Uitloggen verwijdert de rij en het cookie, zoals eerst.
+- **Waarom:** de redactie werkt rond wedstrijden, van een vrijdag tot een zondag, en 12 uur is dan te kort.
+  Het cookie blijft een functioneel cookie voor redacteuren, en de server kan elke sessie beëindigen.
+  De prijs is dat een gestolen telefoon langer ingelogd blijft.
+- **Alternatieven:** 14 dagen zonder gebruik en 30 hoe dan ook (langer risico voor weinig winst); alles laten zoals het is (blijft vaak inloggen).
+- **Later:** vervangt de 12 uur en 7 dagen uit _Een link en een sessie bewaren we als SHA-256, in de database_.
+
+## Inloggen kan ook met een code uit de mail
+
+- **Datum:** 8 november 2026
+- **Besluit:** de mail bevat naast de link een code van 6 cijfers, die je invult op de pagina "verstuurd".
+  Een app op het beginscherm van een iPhone heeft een eigen cookiepot, en de link opent in Safari, dus de sessie komt niet in de app.
+  Met de code log je in waar je de pagina open hebt.
+  Het veld heeft `autocomplete="one-time-code"` en `inputmode="numeric"`, zodat iOS de code uit de mail kan aanbieden.
+  - De code werkt 15 minuten en één keer, samen met zijn link: gebruik je de een, dan is ook de ander op.
+  - Elk verzoek krijgt een willekeurige verwijzing (`ref`, 32 bytes). Die staat in het adres van de pagina "verstuurd" en in het formulier, en bevat niets over het e-mailadres.
+    De tabel bewaart de SHA-256 van de verwijzing en de SHA-256 van verwijzing en code samen; de code zelf staat nergens.
+    Zo hoort een code bij het verzoek, en dus bij het adres, dat hem vroeg, en kan een kopie van de database de 6 cijfers niet raden.
+  - Na 5 foute pogingen werkt de code niet meer, ook de goede niet.
+    De teller loopt met één `UPDATE` die alleen onder de grens telt, dus gelijktijdige gokken krijgen er samen niet meer dan 5.
+  - Vraag je een nieuwe link aan, dan verliest de code van de vorige zijn werking (de link blijft werken).
+    Zo levert opnieuw vragen geen extra pogingen op één code op.
+    Met de grens van 5 links per kwartier is het meest wat iemand kan gokken 25 pogingen op 1.000.000 per kwartier, voor een adres dat hij zelf al moet kennen.
+  - Een adres zonder account, of dat is uitgezet, krijgt dezelfde pagina met ook een verwijzing; de code werkt daar nergens op, en een fout geeft overal dezelfde melding.
+  - De bestaande grens voor het aanvragen van links blijft gelden.
+- **Waarom:** de link werkt niet in de app, en een wachtwoord is meer om te beheren en te beveiligen.
+- **Alternatieven:** alleen de link (werkt niet in de app); een wachtwoord; een link die in de app opent (iOS kan een link uit Mail niet naar een app op het beginscherm sturen); het e-mailadres in het adres van de pagina meegeven (persoonsgegevens in een URL).
+
+## De footer heeft een gewone koppeling naar het beheer
+
+- **Datum:** 8 november 2026
+- **Besluit:** "Beheer" staat als laatste in de footer, voor iedereen zichtbaar, en vervangt "Zoeken" daar.
+  Het wijst naar `/beheer/inloggen`.
+- **Waarom:** de app op het beginscherm heeft geen adresbalk en geen teken in de opslag.
+  Een koppeling is geen beveiliging: de inlogpagina is al openbaar en staat niet in zoekmachines, en de toegang blijft bij de sessie.
+  Zoeken staat nog in de balk van Nieuws.
+- **Alternatieven:** de koppeling alleen tonen voor wie ingelogd is (werkt in de app juist niet); een geheim adres (verbergen is geen beveiliging); een cookie delen met Safari (kan niet op iOS).
+- **Later:** vervangt de footer met "Zoeken" als eerste item.
+
+## Het teken voor het menu wordt in de app gezet
+
+- **Datum:** 8 november 2026
+- **Besluit:** na het inloggen met de code zet het beheer het teken in de eigen opslag van de app, zoals het in een browser doet.
+  Dat is geen nieuw werk: de layout van het beheer zet het teken bij elke geldige sessie, ook na `logInWithCode`.
+- **Waarom:** het menu kent dan "Beheer" ook daar.
+- **Alternatieven:** niets, dan toont het menu in de app geen Beheer.

@@ -442,16 +442,18 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 De pagina's onder `/beheer` zijn voor de redactie.
 `/beheer/inloggen` vraagt een e-mailadres.
 Heeft het adres een account dat aanstaat, dan mailt de site (met `sendMail`, stap 11) een link naar `/beheer/inloggen/bevestigen`.
-Het antwoord op het scherm is voor elk adres hetzelfde: "Als dit adres een account heeft, hebben we een link gemaild."
+Het antwoord op het scherm is voor elk adres hetzelfde: "Als dit adres een account heeft, hebben we een link en een code gemaild."
 Zo kan niemand nagaan wie een account heeft.
 
 - De link werkt 15 minuten en één keer.
+  De mail bevat ook een code van 6 cijfers, die je invult op de pagina "Kijk in je mail".
+  De code werkt ook 15 minuten en één keer, en na 5 foute pogingen niet meer.
   De pagina erachter logt niet zelf in, maar toont de knop Inloggen: een virusscanner of voorbeeldweergave die de link opent, gebruikt hem dan niet op.
 - Per e-mailadres kun je 5 links per kwartier vragen, en de hele site 30.
   Daarna zegt de pagina dat er te veel links zijn gevraagd.
   De teller staat in de database en bewaart geen IP-adressen.
 - Na het inloggen staat de sessie in de database, en de browser krijgt één cookie met alleen een nummer erin: `beheer-sessie`, met `HttpOnly`, `Secure` en `SameSite=Lax`, alleen voor de pagina's onder `/beheer`.
-  Een sessie eindigt na 12 uur zonder gebruik, en na 7 dagen hoe dan ook.
+  Een sessie eindigt na 9 dagen zonder gebruik, en na 14 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
 - Het beheer heeft drie schermen.
@@ -529,6 +531,7 @@ Zo kan niemand nagaan wie een account heeft.
   De link werkt maar één keer: opnieuw openen zegt "Deze link werkt niet".
   Uitloggen brengt je terug bij het formulier, en met de terugknop kom je niet meer in het beheer.
   Het cookie `beheer-sessie` zie je in de ontwikkelaarstools van je browser, onder Application → Cookies; het is `HttpOnly` en `Secure`.
+  Het inloggen met de code controleer je op een iPhone, in de app op het beginscherm: de code uit de mail staat als suggestie boven het toetsenbord, en na Inloggen met code zie je het beheer, en het menu toont Beheer.
   De pagina met de knop Inloggen zegt eerst "Deze link klopt." en wat je nu doet.
 - Een bericht verbergen werkt als je ingelogd bent en naar <https://acc.sc.heerenveen.org/beheer/berichten> gaat.
   Zoek een bericht op een deel van de kop of de link (`?q=`), vul bij "Reden" bijvoorbeeld "Fout in het bericht" in en kies Verberg.
