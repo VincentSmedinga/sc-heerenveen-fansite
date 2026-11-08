@@ -127,8 +127,8 @@ describe('the page of a match', () => {
     const html = await render()
     const text = plain(html)
 
-    expect(text).toContain('Vorige: Proefstad (thuis) 2–0 Gewonnen')
-    expect(text).toContain('Volgende: Voorbeeld United (uit) zo 1 nov')
+    expect(text).toContain('Vorige wedstrijd: Proefstad thuis 2–0 Gewonnen')
+    expect(text).toContain('Volgende wedstrijd: Voorbeeld United uit zo 1 nov')
     expect(html).toContain('href="/wedstrijden/2026-27/2026-10-17-proefstad"')
     expect(html.indexOf('aria-label="Vorige en volgende wedstrijd"')).toBeGreaterThan(html.indexOf('id="verloop"'))
   })

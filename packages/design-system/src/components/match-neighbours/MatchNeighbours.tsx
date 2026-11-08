@@ -72,7 +72,7 @@ function Line({ match }: { match: MatchNeighbour }) {
   if (match.state !== undefined) {
     return (
       <>
-        {`${match.club} (${where}) `}
+        {`${match.club} ${where} `}
         {match.stateDateTime === undefined ? match.state : <Time dateTime={match.stateDateTime}>{match.state}</Time>}
       </>
     )
@@ -85,7 +85,7 @@ function Line({ match }: { match: MatchNeighbour }) {
 
   return (
     <>
-      {`${match.club} (${where}) `}
+      {`${match.club} ${where} `}
       <span className={classNames('hf-match-neighbours-score', `hf-match-${outcome}`)}>
         {match.goalsFor}–{match.goalsAgainst}
         <span className="hf-visually-hidden"> {outcomeWords[outcome]}</span>
@@ -94,25 +94,29 @@ function Line({ match }: { match: MatchNeighbour }) {
   )
 }
 
-/** One side of the card: "Vorige" with the arrow in front, "Volgende" with it behind. */
+/**
+ * One side of the card: the arrow in front for the previous match and behind for the next one.
+ * The words "Vorige wedstrijd: " and "Volgende wedstrijd: " are only for a screen reader.
+ */
 function Side({ match, side }: { match: MatchNeighbour | undefined; side: 'next' | 'previous' }) {
   if (match === undefined) {
     return null
   }
 
-  const word = side === 'next' ? 'Volgende' : 'Vorige'
-  const line = <Line match={match} />
+  const word = side === 'next' ? 'Volgende wedstrijd: ' : 'Vorige wedstrijd: '
+  const line = (
+    <>
+      <span className="hf-visually-hidden">{word}</span>
+      <Line match={match} />
+    </>
+  )
 
   return (
     <li className="hf-match-neighbours-item" data-side={side}>
       {match.href === undefined ? (
-        <span>
-          {`${word}: `}
-          {line}
-        </span>
+        <span>{line}</span>
       ) : (
         <Link href={match.href} icon={side === 'next' ? 'arrow-right' : 'arrow-left'}>
-          {`${word}: `}
           {line}
         </Link>
       )}
@@ -122,13 +126,14 @@ function Side({ match, side }: { match: MatchNeighbour | undefined; side: 'next'
 
 /**
  * The links to the match before and the match after the one of the page, at the bottom of its
- * main column, in a transparent Card: "Vorige: Testdorp FC (thuis) 2–1" with the arrow in front
- * and "Volgende: Voorbeeld United (uit) 1–1" with the arrow behind. A match with a result shows
- * it from our side in the colour of the outcome (the words "Gewonnen", "Gelijkspel" or
- * "Verloren" follow it for a screen reader); a match that is not played shows its day, "Live",
- * "Uitgesteld" or "Geannuleerd". A match without a page is plain text. From 40 rem of room the
- * two stand next to each other, "Vorige" at the left and "Volgende" at the right, and below it
- * they stand under each other.
+ * main column, in a transparent Card: "Testdorp FC thuis 2–1" with the arrow in front and
+ * "Voorbeeld United uit 1–1" with the arrow behind. A screen reader hears "Vorige wedstrijd: "
+ * or "Volgende wedstrijd: " before the club. A match with a result shows it from our side in
+ * the colour of the outcome (the words "Gewonnen", "Gelijkspel" or "Verloren" follow it for a
+ * screen reader); a match that is not played shows its day, "Live", "Uitgesteld" or
+ * "Geannuleerd". A match without a page is plain text. From 40 rem of room the two stand next
+ * to each other, the previous at the left and the next at the right, and below it they stand
+ * under each other.
  */
 export const MatchNeighbours = ({
   className,
