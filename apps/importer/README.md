@@ -2090,7 +2090,8 @@ Het neemt de lock van de import niet, want het leest alleen, en het kan niet sam
 - Daarna komen de lijsten: wedstrijden die in het bestand maar niet in de database staan, en omgekeerd; rondes met een ander nummer; opmerkingen van de oude redacteuren; doelpunten die niet optellen; verslagen die `bezig` zijn, met de reden per regel; spelers van wie de code geen rij in de oude tabel had; kaarten die de import oversloeg; doelpuntenmakers en assists zonder speler; nieuwe clubs en clubs die aan een bestaande zijn gekoppeld.
 - Het verslag rekent niets zelf uit.
   Het vraagt het aan de stappen (`deriveOldSiteMatches`, `deriveOldSiteGoals`, `deriveOldSitePlayers`, `judgeStoredOldSiteMatch` en `findOldSiteClubs`), die hun meldingen als gegevens geven, en zet ze om in Nederlandse zinnen.
-- Het noemt alleen namen zoals ze in de wedstrijd stonden.
+- Het noemt namen zoals ze in de wedstrijd stonden, op de schrijfwijzen na die de projecteigenaar heeft samengevoegd (`oldSiteNameCorrections` in `src/old-site-names.ts`).
+  De lijst _Namen om te beslissen_ noemt de namen die op elkaar lijken en niet zijn samengevoegd.
 - Het verslag van een run staat in [`docs/oude-wedstrijden-hiaten.md`](../../docs/oude-wedstrijden-hiaten.md).
   Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`; `--silent` houdt de regels van pnpm uit het bestand.
 
