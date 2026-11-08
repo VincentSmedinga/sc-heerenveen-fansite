@@ -5,7 +5,7 @@ import type { CompetitionChoice } from './competition'
 import { type CoachResult } from './coachResults'
 import { coachResultsCard } from './matchShortcuts'
 import { BasedOnSince } from './OpponentViews'
-import { splitStaffName } from './player-name'
+import { splitPersonName } from './player-name'
 
 /** The columns of the figures, in order, with the points per match as the key figure. */
 const figureColumns = [
@@ -66,7 +66,7 @@ export function CoachResultsCard({
         columns={['Hoofdtrainer', ...figureColumns]}
         rows={results.map((result) => ({
           cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
-          display: <PlayerName {...splitStaffName(result.name)}>{matchesLineOf(result)}</PlayerName>,
+          display: <PlayerName {...splitPersonName(result.name)}>{matchesLineOf(result)}</PlayerName>,
           header: headerOf(result),
           secondary: periodLineOf(result),
         }))}

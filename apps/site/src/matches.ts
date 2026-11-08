@@ -30,7 +30,7 @@ import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
 import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
-import { type NameParts, personNameParts, personSortName, surnameOnly } from './player-name'
+import { type NameParts, personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -355,8 +355,8 @@ export type Streaks = {
  * is the whole name of the person behind the goals, as the importer kept it, and the name as
  * the match page shows it for a goal without a person. `givenName` and `surname` are its parts
  * for `PlayerName`, as the importer kept them (see `personNameParts`), and a name without a
- * person is a surname only. `id` tells the rows apart: it is what the goals counted for (see
- * `keyOf`).
+ * person is split by `splitPersonName`. `id` tells the rows apart: it is what the goals
+ * counted for (see `keyOf`).
  */
 export type TopScorer = NameParts & {
   goals: number
@@ -1179,8 +1179,8 @@ export function standingsLag(matches: PublicMatch[], now: Date) {
  * and without one for the title of the player's Wikipedia page. Without a page it counts for
  * its name as the match page shows it, as a row of its own, so no goal is lost, also when the
  * importer could not look up a title. The name is the one kept for the person, and a goal
- * without a person shows the name of the match page as a surname. Level players are in order
- * on the family name without its prefix (Joost van Aken stands under the A).
+ * without a person shows the name of the match page, split by `splitPersonName`. Level players
+ * are in order on the family name without its prefix (Joost van Aken stands under the A).
  */
 export function topScorersOf(matches: ScoredMatch[], choice: CompetitionChoice = 'all'): TopScorer[] {
   const scorers = new Map<string, { row: Omit<TopScorer, 'position'>; sort: string }>()
@@ -1327,13 +1327,13 @@ export function keyOf(goal: ScorerGoal): string {
 /**
  * The name of a scorer as a row of a list shows it: the whole name and its parts, from the name
  * the importer kept of the person. A goal without a person (no article, or not looked up yet)
- * has only the name of the match page, which is shown as a surname.
+ * has only the name of the match page, which `splitPersonName` splits.
  */
 export function scorerLine(goal: ScorerGoal): NameParts & { player: string } {
   const parts = personNameParts(goal)
 
   if (parts === undefined) {
-    return { player: goal.player, ...surnameOnly(goal.player) }
+    return { player: goal.player, ...splitPersonName(goal.player) }
   }
 
   return {
@@ -1501,10 +1501,11 @@ function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate
 
 /**
  * What a list of scorers is put in order by: the family name without its prefix, or the given
- * name of a person without one, or the name of the match page for a goal without a person.
+ * name of a person without one, or the surname of the name of the match page for a goal without
+ * a person.
  */
 function scorerSortName(goal: ScorerGoal): string {
-  return personNameParts(goal) === undefined ? goal.player : personSortName(goal)
+  return personNameParts(goal) === undefined ? textSortName(goal.player) : personSortName(goal)
 }
 
 export const attendanceStep = 5000

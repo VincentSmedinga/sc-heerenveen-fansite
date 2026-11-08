@@ -615,11 +615,12 @@ describe('topScorersOf', () => {
 
     expect(scorers).toHaveLength(20)
     expect(scorers[0]).toEqual({
+      givenName: 'Speler',
       goals: 2,
       id: 'name:Speler 01',
       player: 'Speler 01',
       position: 1,
-      surname: 'Speler 01',
+      surname: '01',
     })
     expect(scorers.slice(1).every((item) => item.goals === 1 && item.position === 2)).toBe(true)
     expect(scorers.slice(1).map((item) => item.player)).toEqual(names.slice(1))
@@ -729,7 +730,7 @@ describe('topScorersOf', () => {
       ])
     })
 
-    it('shows the name of the match page as a surname for a goal without a person, and guesses nothing', () => {
+    it('splits the name of the match page for a goal without a person, and guesses nothing else', () => {
       const matches = [
         played([
           goal('Ramon Zomer', { playerPage: 'Ramon Zomer' }),
@@ -739,9 +740,27 @@ describe('topScorersOf', () => {
       ]
 
       expect(topScorersOf(matches)).toEqual([
-        { goals: 2, id: 'page:Ramon Zomer', player: 'Ramon Zomer', position: 1, surname: 'Ramon Zomer' },
+        { givenName: 'Ramon', goals: 2, id: 'page:Ramon Zomer', player: 'Ramon Zomer', position: 1, surname: 'Zomer' },
         { goals: 1, id: 'name:Onbekend', player: 'Onbekend', position: 2, surname: 'Onbekend' },
       ])
+    })
+
+    it('never shows the whole name of a scorer without a person as a surname', () => {
+      const names = ['Ringo Meerveld', 'Jan Willem van Hanegem', 'Jon Dahl Tomasson']
+      const rows = topScorersOf([played(names.map((name) => goal(name)))])
+
+      expect(rows.map(({ givenName, surname }) => [givenName, surname])).toEqual([
+        ['Jon', 'Dahl Tomasson'],
+        ['Jan Willem', 'van Hanegem'],
+        ['Ringo', 'Meerveld'],
+      ])
+      expect(rows.map((row) => row.player).toSorted()).toEqual(names.toSorted())
+    })
+
+    it('puts level scorers without a person in order on the surname, so Afonso Alves is under the A', () => {
+      const rows = topScorersOf([played([goal('Lasse Nilsson'), goal('Afonso Alves'), goal('Joost van Aken')])])
+
+      expect(rows.map((row) => row.player)).toEqual(['Joost van Aken', 'Afonso Alves', 'Lasse Nilsson'])
     })
 
     it('counts a goal without a person for its player, then its page, then its name, so no goal is lost', () => {

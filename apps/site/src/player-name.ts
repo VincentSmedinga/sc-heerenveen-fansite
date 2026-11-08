@@ -42,18 +42,40 @@ export function personSortName(name: PersonName): string {
   return (name.personFamilyName ?? '').trim() || (name.personGivenName ?? '').trim()
 }
 
-/**
- * The name of a person of the staff in the two parts `PlayerName` shows: the first word is the
- * given name and the rest the surname, so `Robin van Persie` is `Robin` and `van Persie`, and
- * `Jan Olde Riekerink` is `Jan` and `Olde Riekerink`. A name of one word is a surname.
- */
-export function splitStaffName(name: string): NameParts {
-  const [first = '', ...rest] = name.trim().split(/\s+/)
+/** The words that start a surname after the first word, as in `Jan Willem van Hanegem`. */
+const surnamePrefixes = new Set(["'t", '’t', 'da', 'de', 'den', 'der', 'di', 'het', 'te', 'ten', 'ter', 'van', 'von'])
 
-  return rest.length === 0 ? { surname: first } : { givenName: first, surname: rest.join(' ') }
+const isPrefix = (word: string) => surnamePrefixes.has(word.toLowerCase())
+
+/**
+ * The name of a person of whom we only have the name as text (a trainer, or a scorer without a
+ * person) in the two parts `PlayerName` shows. The first word is the given name and the rest
+ * the surname. When a word after the first is a prefix (`van`, `de`, `der`, ...), the surname
+ * starts there, so a second given name stays with the first: `Jan Willem van Hanegem` is `Jan
+ * Willem` and `van Hanegem`. A name that starts with a prefix, or of one word, is all surname.
+ * Nothing else is guessed: `Jon Dahl Tomasson` is `Jon` and `Dahl Tomasson`.
+ */
+export function splitPersonName(name: string): NameParts {
+  const words = name.trim().split(/\s+/)
+  const [first = ''] = words
+
+  if (words.length < 2 || isPrefix(first)) {
+    return { surname: words.join(' ') }
+  }
+
+  const start = words.findIndex((word, index) => index > 0 && isPrefix(word))
+  const at = start === -1 ? 1 : start
+
+  return { givenName: words.slice(0, at).join(' '), surname: words.slice(at).join(' ') }
 }
 
-/** A name as the page shows it, for a goal without a person: it is a surname. */
-export function surnameOnly(name: string): NameParts {
-  return { surname: name }
+/**
+ * What a list is put in order by for a name given as text: the surname of `splitPersonName`
+ * without its prefix, so `Joost van Aken` stands under the A, like a person with a family name.
+ */
+export function textSortName(name: string): string {
+  const words = splitPersonName(name).surname.split(' ')
+  const at = words.findIndex((word) => !isPrefix(word))
+
+  return (at === -1 ? words : words.slice(at)).join(' ')
 }

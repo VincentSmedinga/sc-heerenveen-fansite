@@ -312,7 +312,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
 - **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
-  Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitStaffName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
+  Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitPersonName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
   Een seizoen met één trainer toont alleen de naam.
   Bij meer trainers staat voor elke trainer behalve de laatste "tot 14 mrt 2026", de dag waarop hij stopte, en voor de laatste "vanaf 1 sep 2025", de dag waarop hij begon (`coachPeriods` in `src/match-format.ts`).
   Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026").
@@ -542,7 +542,7 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Een doelpunt telt voor de persoon erachter (`person_id`, zie _Een speler is een persoon met een eigen `id`_ in `docs/beslissingen/hosting-en-data.md`), dus twee titels van één artikel zijn één rij ("Alfreð Finnbogason" en "Alfred Finnbogason"), en twee personen met dezelfde achternaam zijn twee rijen.
   Heeft het doelpunt geen persoon, dan telt het voor de speler (`player_id`), anders voor de titel van de pagina (`playerPage`), anders voor de naam zoals de wedstrijdpagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat, ook niet als het opvragen van een titel mislukte.
   De naam komt uit `persons`: de voornaam gewoon en het voorvoegsel met de achternaam halfvet, met `PlayerName` (`personNameParts` in `src/player-name.ts`).
-  Heeft de persoon geen achternaam, dan staat de hele naam gewoon; heeft het doelpunt geen persoon, dan staat de naam van de wedstrijdpagina als achternaam (`surnameOnly`), zonder te raden.
+  Heeft de persoon geen achternaam, dan staat de hele naam gewoon; heeft het doelpunt geen persoon, dan staat de naam van de wedstrijdpagina, gesplitst door `splitPersonName`: het eerste woord is de voornaam en de achternaam begint bij het eerste voorvoegsel, zonder verder te raden.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam zonder voorvoegsel: Joost van Aken staat onder de A.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
