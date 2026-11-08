@@ -8,20 +8,20 @@ import type { CardKind, MatchReport, ReportCheck, ReportMatch } from '@fansite/s
 import { playerNameMaxLength } from '@fansite/db/schema'
 import { checkMatchReport } from '@fansite/shared/match-report'
 
-import type { OldSiteEvent, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
+import type { OldSiteEvent, OldSiteLine, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { DerivedOldSiteGoal } from './old-site-goals.ts'
 
+import { deriveOldSiteFormation } from './old-site-formation.ts'
 import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
-
-/** The name of the source of every report this makes. */
-export const oldSiteReportSource = 'Oude fansite'
 
 /** The last minute the database accepts for a substitution or a card. */
 const lastMinute = 120
 
 /** A player in the line-up of a match, ours or the opponent's. */
 export type DerivedOldSiteAppearance = {
+  /** The line of a player of ours in the old table (`line` of the players file), else null. */
+  line: null | OldSiteLine
   /** The minute he came on, 0 for a player in the line-up. */
   minuteIn: number
   /** The minute he went off, as the file has it. */
@@ -48,6 +48,11 @@ export type DerivedOldSiteReport = {
   anomalies: OldSiteReportAnomaly[]
   appearances: DerivedOldSiteAppearance[]
   cards: DerivedOldSiteCard[]
+  /**
+   * The formation of our team when the order of the eleven starters and their lines agree
+   * (`deriveOldSiteFormation`), else null.
+   */
+  formationOurs: null | string
   /** One for each goal that was given, in the same order. */
   goalLinks: DerivedOldSiteGoalLink[]
   notes: OldSiteReportNote[]
@@ -209,6 +214,7 @@ export function deriveOldSiteReport(
 
     found.set(key, appearances.length)
     appearances.push({
+      line: player === undefined ? null : (oldPlayers.get(player.code)?.line ?? null),
       minuteIn: entry.minuteIn,
       minuteOut: entry.minuteOut,
       name,
@@ -225,6 +231,7 @@ export function deriveOldSiteReport(
     anomalies,
     appearances,
     cards,
+    formationOurs: deriveOldSiteFormation(appearances.filter((one) => one.ours && one.starter).map((one) => one.line)),
     goalLinks: goals.map(({ event, goal }) => linkGoal(event, goal, season, oldPlayers, appearances, found, notes)),
     notes,
     opponentComplete: appearances.filter((one) => !one.ours && one.starter).length === 11,

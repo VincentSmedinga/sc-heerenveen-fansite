@@ -8,6 +8,7 @@ import {
   matchGoals,
   matchReports,
   matchSubstitutions,
+  oldSiteReportSource,
 } from '@fansite/db/schema'
 import { asc, eq, inArray } from 'drizzle-orm'
 
@@ -23,7 +24,7 @@ import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 import { deriveOldSiteGoals, orderedOldSiteGoalEvents } from './old-site-goals.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSource } from './old-site-matches.ts'
 import { oldSitePlayerIds } from './old-site-players.ts'
-import { deriveOldSiteReport, judgeOldSiteReport, looseNameKey, oldSiteReportSource } from './old-site-report.ts'
+import { deriveOldSiteReport, judgeOldSiteReport, looseNameKey } from './old-site-report.ts'
 
 /** The key of an appearance within a match, the same as the derived report uses. */
 const appearanceKey = (ours: boolean, name: string) => `${ours ? 'ours' : 'theirs'}|${looseNameKey(name)}`
@@ -40,7 +41,8 @@ type StoredReport = {
  * The step `opstellingen`: makes the report of every match with the source `oude-fansite` that
  * has a line-up in the files (566 of 671): a row in `match_reports` with the source 'Oude
  * fansite', the players of both teams in `match_appearances`, the substitutions, the cards, and
- * the links from the goals and the assists to the players. Needs the matches, the players and
+ * the links from the goals and the assists to the players, and the formation of our team when
+ * the order of the starters and their lines agree (#899). Needs the matches, the players and
  * the goals of the steps before it. The status is `klaar` when the rules of
  * `@fansite/shared/match-report` find no error and nothing in the line-up is left out or
  * doubtful, else `bezig`; a match without a line-up gets no report. A match whose report the
@@ -222,22 +224,26 @@ async function storeReport(
   let touched = false
 
   if (existing === undefined) {
-    await db
-      .insert(matchReports)
-      .values({ matchId, opponentComplete: wanted.opponentComplete, source: oldSiteReportSource, status })
+    await db.insert(matchReports).values({
+      formationOurs: wanted.formationOurs,
+      matchId,
+      opponentComplete: wanted.opponentComplete,
+      source: oldSiteReportSource,
+      status,
+    })
     touched = true
   } else if (
     existing.status !== status ||
     existing.opponentComplete !== wanted.opponentComplete ||
     existing.source !== oldSiteReportSource ||
-    existing.formationOurs !== null ||
+    existing.formationOurs !== wanted.formationOurs ||
     existing.formationOpponent !== null
   ) {
     await db
       .update(matchReports)
       .set({
         formationOpponent: null,
-        formationOurs: null,
+        formationOurs: wanted.formationOurs,
         opponentComplete: wanted.opponentComplete,
         source: oldSiteReportSource,
         status,

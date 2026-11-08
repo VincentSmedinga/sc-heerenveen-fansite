@@ -1,3 +1,4 @@
+import { oldSiteReportSource } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
 
 import { matchPageDataOf, nameOfPlayer } from './report-view'
@@ -71,6 +72,22 @@ describe('matchPageDataOf', () => {
       opponentComplete: true,
       penalties: null,
     })
+  })
+
+  it('says that the formation was derived only for a report of the old fansite that the editors did not save', () => {
+    const derived = (report: Partial<ReturnType<typeof reportedMatch>['stored']['report']>) => {
+      const reported = reportedMatch()
+
+      Object.assign(reported.stored.report, report)
+
+      return matchPageDataOf(reported, [], true).formationOursDerived
+    }
+
+    expect(derived({ savedBy: null, source: oldSiteReportSource })).toBe(true)
+    expect(derived({ savedBy: 3, source: oldSiteReportSource })).toBe(false)
+    expect(derived({ formationOurs: null, savedBy: null, source: oldSiteReportSource })).toBe(false)
+    expect(derived({ savedBy: null, source: 'het wedstrijdformulier' })).toBe(false)
+    expect(data.formationOursDerived).toBe(false)
   })
 
   it('takes the score after 90 minutes and the shoot-out from the match', () => {

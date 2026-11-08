@@ -1,4 +1,11 @@
-import type { OldSiteClub, OldSiteEvent, OldSiteLineupEntry, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
+import type {
+  OldSiteClub,
+  OldSiteEvent,
+  OldSiteLine,
+  OldSiteLineupEntry,
+  OldSiteMatch,
+  OldSitePlayer,
+} from './old-site-file.ts'
 
 import { oldSiteFileVersion, parseOldSiteFile } from './old-site-file.ts'
 
@@ -55,7 +62,14 @@ export type OldSiteRows = {
   results: ResultRow[]
 }
 
-export type PlayerRow = { achternaam: string; code: string; tussenvoegsel: null | string; voornaam: string }
+export type PlayerRow = {
+  achternaam: string
+  code: string
+  /** 1 doelman, 2 verdediger, 3 middenvelder, 4 aanvaller, 0 unknown. */
+  linie: number
+  tussenvoegsel: null | string
+  voornaam: string
+}
 
 /** Only the two columns of a report that the export may read. */
 export type ReportRow = {
@@ -204,6 +218,13 @@ function lineupEntry(row: LineupRow): OldSiteLineupEntry {
   }
 }
 
+const linesByNumber: readonly (null | OldSiteLine)[] = [null, 'doelman', 'verdediger', 'middenvelder', 'aanvaller']
+
+/** The line of `speler.linie`: 1 to 4, and null for 0 (not known) or anything else. */
+function lineOf(linie: number): null | OldSiteLine {
+  return linesByNumber[linie] ?? null
+}
+
 /** The opponent's code is the part of the match code before the first dot (`psv.thuis`). */
 function opponentCode(matchCode: string) {
   return matchCode.split('.')[0] ?? matchCode
@@ -317,6 +338,7 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
             firstName: player.voornaam.trim(),
             infix: text(player.tussenvoegsel),
             lastName: player.achternaam.trim(),
+            line: lineOf(player.linie),
           },
         ]
       : []

@@ -254,6 +254,7 @@ export function previewDataOf(
     complete: values.status === 'klaar',
     extraTime: match.extraTime,
     facts,
+    formationOursDerived: false,
     formations: { opponent: formationOf(values, 'zij'), ours: formationOf(values, 'wij') },
     goals,
     goalsAgainst: goals.filter((goal) => !goal.ours).length,

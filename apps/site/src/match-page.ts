@@ -62,6 +62,12 @@ export type MatchPageData = {
   extraTime: boolean
   /** The facts under the result, in the order they are shown. */
   facts: MatchHeaderFact[]
+  /**
+   * True when the formation of our team was derived from the lines of the players (an import of
+   * the old fansite that the editors did not save), so it can differ from what was played. The
+   * page says so under the pitch.
+   */
+  formationOursDerived: boolean
   formations: { opponent: null | string; ours: null | string }
   goals: readonly MatchPageGoal[]
   goalsAgainst: number

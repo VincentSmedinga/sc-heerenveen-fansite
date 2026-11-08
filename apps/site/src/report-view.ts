@@ -1,6 +1,8 @@
 import type { ReportedMatch, ReportedPlayerName } from '@fansite/db/match-reports'
 import type { MatchHeaderFact, MatchPlayerName } from '@fansite/design-system'
 
+import { oldSiteReportSource } from '@fansite/db/schema'
+
 import type { MatchPageData } from './match-page'
 
 import { type NameParts, personNameParts } from './player-name'
@@ -32,6 +34,10 @@ export function matchPageDataOf(reported: ReportedMatch, facts: MatchHeaderFact[
     complete,
     extraTime: match.extraTime,
     facts,
+    formationOursDerived:
+      stored.report.formationOurs !== null &&
+      stored.report.source === oldSiteReportSource &&
+      stored.report.savedBy === null,
     formations: { opponent: stored.report.formationOpponent, ours: stored.report.formationOurs },
     goals: stored.goals.flatMap((goal) =>
       goal.appearanceId === null || !players.has(goal.appearanceId)

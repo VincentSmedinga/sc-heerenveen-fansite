@@ -39,6 +39,7 @@ const allowedFieldNames = new Set([
   'infix',
   'kind',
   'lastName',
+  'line',
   'lineup',
   'matches',
   'minute',
@@ -122,7 +123,7 @@ describe('the files of the old fansite in the repository', () => {
 })
 
 describe('parseOldSiteFile', () => {
-  const clubs = { clubs: [{ code: 'psv', country: 'NL', name: 'PSV' }], version: 1 }
+  const clubs = { clubs: [{ code: 'psv', country: 'NL', name: 'PSV' }], version: 2 }
 
   it('reads a file that fits the format', () => {
     expect(parseOldSiteFile(JSON.stringify(clubs))).toEqual(clubs)
@@ -133,15 +134,15 @@ describe('parseOldSiteFile', () => {
   })
 
   it('refuses another version', () => {
-    expect(() => parseOldSiteFile(JSON.stringify({ ...clubs, version: 2 }), 'clubs.json')).toThrow(
+    expect(() => parseOldSiteFile(JSON.stringify({ ...clubs, version: 3 }), 'clubs.json')).toThrow(
       'clubs.json does not match',
     )
   })
 
   it('refuses a field that the format does not have', () => {
-    const player = { birthDate: '1970-01-01', code: 'a.b', firstName: 'A', infix: null, lastName: 'B' }
+    const player = { birthDate: '1970-01-01', code: 'a.b', firstName: 'A', infix: null, lastName: 'B', line: null }
 
-    expect(() => parseOldSiteFile(JSON.stringify({ players: [player], version: 1 }), 'players.json')).toThrow(
+    expect(() => parseOldSiteFile(JSON.stringify({ players: [player], version: 2 }), 'players.json')).toThrow(
       'players.json does not match',
     )
   })
@@ -164,7 +165,7 @@ describe('parseOldSiteFile', () => {
     }
 
     expect(() =>
-      parseOldSiteFile(JSON.stringify({ matches: [match], season: '9091', version: 1 }), 'matches-9091.json'),
+      parseOldSiteFile(JSON.stringify({ matches: [match], season: '9091', version: 2 }), 'matches-9091.json'),
     ).toThrow('matches-9091.json does not match')
   })
 })

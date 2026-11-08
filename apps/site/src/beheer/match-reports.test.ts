@@ -17,6 +17,7 @@ import {
   matchShootoutKicks,
   matchSubstitutions,
   type NewMatch,
+  oldSiteReportSource,
   persons,
   players,
   playerSeasonStats,
@@ -567,6 +568,32 @@ describe('the formations of a report', () => {
       wij: { eigen: '', keuze: '' },
       zij: { eigen: '', keuze: '' },
     })
+  })
+
+  it('lets the editors choose both formations of a report the import made, and then the report is theirs', async () => {
+    await wikipediaGoals()
+    await save(report())
+    // As the import of the old fansite leaves it: a derived formation for our team, no editor.
+    await database.db.update(matchReports).set({ formationOurs: '4-4-2', savedBy: null, source: oldSiteReportSource })
+
+    const screen = (await findReportScreen(database.db, matchId))!
+    const form = valuesOfReport(screen.report, screen.goals, screen.squad)
+
+    expect(form.formatie.wij).toEqual({ eigen: '', keuze: '4-4-2' })
+    expect(
+      await save({ ...form, formatie: { wij: { eigen: '', keuze: '4-3-3' }, zij: { eigen: '', keuze: '4-4-2' } } }, t1),
+    ).toEqual({ status: 'saved' })
+
+    const [row] = await database.db.select().from(matchReports)
+
+    expect(row).toMatchObject({
+      formationOpponent: '4-4-2',
+      formationOurs: '4-3-3',
+      savedBy: userId,
+      source: oldSiteReportSource,
+    })
+    // The import leaves a report with an editor as it is, and the page no longer calls the
+    // formation derived (see `matchPageDataOf`).
   })
 
   it('sees a change of the formation as a change of the report, and takes a formation away again', async () => {

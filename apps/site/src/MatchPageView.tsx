@@ -67,6 +67,9 @@ export function MatchPageCards({ data, preview = false }: PartProps) {
           opponent={built.pitch.opponent}
           ours={built.pitch.ours}
         >
+          {data.formationOursDerived ? (
+            <Text>De formatie is afgeleid uit de linie van de spelers en kan afwijken van wat er is gespeeld.</Text>
+          ) : null}
           <Substitutes built={built} data={data} headingLevel={below} />
         </MatchPitch>
         {data.opponentComplete ? null : <Text>{`De opstelling van ${data.opponent} hebben we niet.`}</Text>}
