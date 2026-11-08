@@ -11,7 +11,8 @@ import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
-import { getEditedMatches, getMatchSeasons } from '#src/matches'
+import { sourceName, sourceOf } from '#src/match-sources'
+import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
   clubAttendanceOf,
@@ -57,15 +58,16 @@ import { withBranch } from '#src/title'
  */
 const loadClubList = cache(async () => {
   try {
-    const [all, league, seasons, pages, edited] = await Promise.all([
+    const [all, league, seasons, pages, edited, source] = await Promise.all([
       getClubRecords('all'),
       getClubRecords('league'),
       getMatchSeasons(),
       getSourcePages(),
       getEditedMatches(),
+      getMatchSource(),
     ])
 
-    return { all, edited, kind: 'found', league, pages, seasons } as const
+    return { all, edited, kind: 'found', league, pages, seasons, source } as const
   } catch (error) {
     console.error(`Could not read the opponents for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -171,7 +173,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
           records={records}
           since={since}
         />
-        <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} />
+        <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} source={loaded.source} />
       </Page.Sidebar>
     </>
   )
@@ -192,7 +194,7 @@ export async function clubMetadata(slug: string): Promise<Metadata> {
   const { name } = loaded.page.club
 
   return seasonPageMetadata(opponentsPath, `${opponentsPath}/${slug}`, {
-    description: `Hoe vaak sc Heerenveen won, gelijkspeelde en verloor tegen ${name}, met alle wedstrijden en de bron erbij: de Nederlandse Wikipedia.`,
+    description: `Hoe vaak sc Heerenveen won, gelijkspeelde en verloor tegen ${name}, met alle wedstrijden en de bron erbij: ${sourceName(sourceOf(loaded.page.matches))}.`,
     title: `sc Heerenveen tegen ${name}`,
   })
 }
@@ -288,6 +290,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             name={club.name}
             now={now}
             since={sinceOf(loaded.seasons)}
+            source={sourceOf(meetings)}
             summary={summaryOf(meetings)}
           />
           <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
@@ -297,6 +300,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             attendance={clubAttendanceOf(matches, competition)}
             choice={competition}
             name={club.name}
+            source={sourceOf(matches)}
           />
           {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
           <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
@@ -305,6 +309,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             edited={loaded.edited}
             pages={loaded.pages}
             seasons={seasonsOf([...meetings, ...upcoming])}
+            source={sourceOf([...meetings, ...upcoming])}
           />
         </Page.Sidebar>
       ) : (

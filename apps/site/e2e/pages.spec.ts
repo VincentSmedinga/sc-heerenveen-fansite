@@ -51,6 +51,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/wedstrijden/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/wedstrijden/kies?seizoen=onzin', status: 200 },
   { path: '/wedstrijden/kies', status: 200 },
+  // The made-up matches of the old fansite (see madeUpOldMatches in the seed): a season in the
+  // Eerste divisie, one with the Intertoto Cup and one with the UEFA Cup, so the pages with the
+  // new competitions, the day without a time and the credit of the archive are checked.
+  { path: '/wedstrijden/1992-93', status: 200 },
+  { path: '/wedstrijden/1996-97', status: 200 },
+  { path: '/wedstrijden/2004-05', status: 200 },
   { path: '/wedstrijden/2099-00', status: 404 },
   { path: '/wedstrijden/onzin', status: 404 },
   // The page of a match: the made-up match with a report that is klaar, the made-up cup match
@@ -70,6 +76,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/cijfers/kies?seizoen=onzin', status: 200 },
   { path: '/cijfers/kies', status: 200 },
+  { path: '/cijfers/1992-93', status: 200 },
+  { path: '/cijfers/2004-05', status: 200 },
+  { path: '/cijfers/1992-93?competitie=eredivisie', status: 200 },
+  { path: '/spelers/1992-93', status: 200 },
   { path: '/cijfers/2099-00', status: 404 },
   { path: '/cijfers/onzin', status: 404 },
   // The page Spelers, an item of the main menu, with the same set of addresses.
@@ -93,6 +103,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/tegenstanders/testdorp-fc?competitie=eredivisie', status: 200 },
   { path: '/tegenstanders/voorbeeld-united', status: 200 },
   { path: '/tegenstanders/fc-maquette', status: 200 },
+  // Clubs that only the made-up old matches meet: the archive is the only source of their page.
+  { path: '/tegenstanders/oudstad-fc', status: 200 },
+  { path: '/tegenstanders/sv-archiefdorp', status: 200 },
+  { path: '/tegenstanders/zomerstad-united', status: 200 },
   { path: '/tegenstanders/fc-maquette?competitie=eredivisie', status: 200 },
   // Clubs with matches still to come and none played: Nepstad Rangers (a weekend, no time yet),
   // Demo Boys (called off) and SV Proefdorp (a cup tie, so also with the choice Eredivisie).

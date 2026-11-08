@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
+import { withClubs } from './clubs.ts'
 import {
   consentStatuses,
   feeds,
@@ -27,6 +28,7 @@ import {
   madeUpGoals,
   madeUpLeagueResults,
   madeUpMatches,
+  madeUpOldMatches,
   madeUpPlayerStats,
   madeUpSquad,
   realSources,
@@ -648,12 +650,37 @@ describe('the made-up matches', () => {
     expect(await seedMatches(database.db, now)).toBe(true)
     expect(await seedMatches(database.db, now)).toBe(false)
 
-    const rows = await database.db.select().from(matches)
+    const rows = (await database.db.select().from(matches)).filter((match) => match.dataSource === 'wikipedia')
 
     expect(rows).toHaveLength(madeUpMatches(now).length)
     expect(rows.every((match) => match.season === '2026/27')).toBe(true)
     expect(await database.db.select().from(standings)).toHaveLength(6)
     expect(await database.db.select().from(leagueResults)).toHaveLength(madeUpLeagueResults(now).length)
+  })
+
+  it('puts three made-up matches of the old fansite in old seasons, two of them without a time', async () => {
+    await seedMatches(database.db, now)
+
+    const old = await database.db.select().from(matches).where(eq(matches.dataSource, 'oude-fansite'))
+
+    expect(old.map((match) => [match.season, match.competition, match.kickoffAt === null]).sort()).toEqual([
+      ['1992/93', 'Eerste divisie', true],
+      ['1996/97', 'Intertoto Cup', true],
+      ['2004/05', 'UEFA Cup', false],
+    ])
+    expect(old.every((match) => match.status === 'played' && match.dateText === null)).toBe(true)
+    expect(madeUpOldMatches()).toHaveLength(3)
+  })
+
+  it('leaves the old fansite alone when the database has matches of it already', async () => {
+    const [first] = madeUpOldMatches()
+
+    await database.db
+      .insert(matches)
+      .values((await withClubs(database.db, [{ ...first!, opponent: 'Echte Club', round: 'Wedstrijd 99' }]))[0]!)
+    await seedMatches(database.db, now)
+
+    expect(await database.db.select().from(matches).where(eq(matches.dataSource, 'oude-fansite'))).toHaveLength(1)
   })
 
   it('gives every club of the made-up table as many results as the table says it played', async () => {
@@ -709,7 +736,8 @@ describe('the made-up matches', () => {
   it('gives every played match scorers that add up to its result, in the order of the clock', async () => {
     await seedMatches(database.db, now)
 
-    const rows = await database.db.select().from(matches)
+    // The made-up matches of the old fansite have a score and no scorers, like many old ones.
+    const rows = (await database.db.select().from(matches)).filter((match) => match.dataSource === 'wikipedia')
     const goals = await database.db.select().from(matchGoals).orderBy(matchGoals.id)
 
     for (const match of rows) {
@@ -935,7 +963,7 @@ describe('the made-up matches', () => {
   it('puts them in a new season too, and leaves the rows of the earlier season as they are', async () => {
     await seedMatches(database.db, now)
 
-    const before = await database.db.select().from(matches)
+    const before = (await database.db.select().from(matches)).filter((match) => match.dataSource === 'wikipedia')
 
     expect(await seedMatches(database.db, new Date('2027-08-01T12:00:00Z'))).toBe(true)
 
@@ -943,6 +971,8 @@ describe('the made-up matches', () => {
 
     expect(rows.filter((match) => match.season === seasonOf(now))).toEqual(before)
     expect(rows.filter((match) => match.season === '2027/28')).toHaveLength(before.length)
+    // The old matches are not put in again for the new season.
+    expect(rows.filter((match) => match.dataSource === 'oude-fansite')).toHaveLength(madeUpOldMatches().length)
   })
 })
 

@@ -599,6 +599,8 @@ De rijen komen op naam en dan competitie.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand, de uitslagen van alle clubs en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable`, `madeUpLeagueResults` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
+De seed zet ook drie verzonnen wedstrijden van de oude fansite in oude seizoenen (`madeUpOldMatches`), met `data_source = 'oude-fansite'`, twee ervan zonder aftrap; ze komen erbij als de verzonnen wedstrijden van het lopende seizoen erin gaan, en niet als de database al wedstrijden van die bron heeft.
+De import van de oude fansite haalt ze weg.
 Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seedSquad`), alleen als het lopende seizoen nog geen spelers heeft: met alle posities, een naam met een voorvoegsel, een naam van één woord en een speler zonder rugnummer.
 De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.
 Een database met echte wedstrijden raakt de seed niet aan.

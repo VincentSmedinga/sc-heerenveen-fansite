@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
+import { archiveName } from '../archive-credit/ArchiveCredit'
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
@@ -20,6 +21,12 @@ export type WikipediaCreditPage = {
 
 export type WikipediaCreditProps =
   | (WikipediaCreditBaseProps<'details'> & {
+      /**
+       * Whether some of the matches come from the archive of the old fansite as well. The
+       * summary then names both, "Bron: Wikipedia en het archief van de oude sc Heerenveen
+       * Fansite", and the fold says that the older matches are from the archive.
+       */
+      archive?: boolean
       compact?: false
       /**
        * What our own data from these pages is called in the last sentence, "Onze
@@ -46,7 +53,9 @@ export type WikipediaCreditProps =
       readAtDateTime: string
     })
   | (WikipediaCreditBaseProps<'p'> & {
-      /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
+      /** Whether some of the matches come from the archive of the old fansite as well. */
+      archive?: boolean
+      /** The short form, "Bron: Wikipedia", for a small card. It takes `lead` and `archive`. */
       compact: true
       data?: never
       edited?: never
@@ -80,6 +89,7 @@ type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentProps
  * so a click on it does one thing.
  */
 export const WikipediaCredit = ({
+  archive = false,
   className,
   compact,
   data = 'wedstrijdgegevens',
@@ -95,7 +105,7 @@ export const WikipediaCredit = ({
       {...(props as ComponentPropsWithoutRef<'p'>)}
       className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
     >
-      {`${lead} Wikipedia`}
+      {`${lead} Wikipedia${archive ? ` en ${archiveName}` : ''}`}
     </p>
   ) : (
     <>
@@ -104,7 +114,7 @@ export const WikipediaCredit = ({
         className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
       >
         <summary>
-          Bron: Wikipedia
+          {`Bron: Wikipedia${archive ? ` en ${archiveName}` : ''}`}
           <Icon name="arrow-down" />
         </summary>
         <p>
@@ -116,6 +126,7 @@ export const WikipediaCredit = ({
             </span>
           ))}
           . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
+          {archive ? ` Oudere wedstrijden komen uit ${archiveName}.` : ''}
         </p>
       </details>
       {edited ? <p className="hf-meta hf-wikipedia-credit-edited">{editedSentence}</p> : null}

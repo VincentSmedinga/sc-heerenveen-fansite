@@ -10,7 +10,8 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { getCoachResultData, parseCleanSheetCount } from '#src/matches'
+import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
+import { choiceFor, getCoachResultData, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
   CleanSheetsCard,
@@ -53,7 +54,7 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
   return season === current
     ? pageMetadata(statisticsPath, 'Cijfers')
     : seasonPageMetadata(statisticsPath, seasonAddress(statisticsPath, season, current), {
-        description: `De cijfers van sc Heerenveen 1 in het seizoen ${season}, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: de Nederlandse Wikipedia.`,
+        description: `De cijfers van sc Heerenveen 1 in het seizoen ${season}, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: ${sourceName(seasonSourceOf(loaded.data))}.`,
         title: `Cijfers ${season}`,
       })
 }
@@ -88,10 +89,10 @@ export async function StatisticsPage({
   season: string
 }) {
   const { competitie, [noteworthy.param]: factNumber, nul } = await searchParams
-  const competition = parseCompetition(competitie)
+  const chosen = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, statisticsPath)
 
-  if (competition === undefined || loaded.kind === 'unknown') {
+  if (chosen === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -100,6 +101,7 @@ export async function StatisticsPage({
   }
 
   const { data, seasons } = loaded
+  const competition = choiceFor(data.matches, chosen)
   const now = new Date()
   const current = season === seasonOf(now)
   // The cards of a season that is over say which one on their image. The current season is the
@@ -157,7 +159,7 @@ export async function StatisticsPage({
         <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         {coachResults}
         {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
         )}
       </Page.Sidebar>
     </>

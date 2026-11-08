@@ -104,10 +104,22 @@ export function describeEntryGoals(goals: GoalFields[]): string {
     .join(', ')
 }
 
-/** The kick-off as a line, in Dutch time: `14 november 2026 20:00`, or the date as given. */
+/**
+ * The kick-off as a line, in Dutch time: `14 november 2026 om 20:00`, or the date as given, or
+ * just the day when the match has neither a time nor a text.
+ */
 export function describeEntryKickoff(match: KickoffFields): string {
   if (match.kickoffAt === null) {
-    return match.dateText ?? match.matchDate
+    // A match of the old fansite has a day and no time: write the day out, not `1995-08-27`.
+    return (
+      match.dateText ??
+      new Intl.DateTimeFormat('nl-NL', {
+        day: 'numeric',
+        month: 'long',
+        timeZone: 'Europe/Amsterdam',
+        year: 'numeric',
+      }).format(new Date(`${match.matchDate}T12:00:00Z`))
+    )
   }
 
   const day = new Intl.DateTimeFormat('nl-NL', {

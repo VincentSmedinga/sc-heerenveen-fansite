@@ -8,7 +8,8 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { getAllTimeMatches } from '#src/matches'
+import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
+import { choiceFor, getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
@@ -39,11 +40,12 @@ export async function playersMetadata(season: string): Promise<Metadata> {
   }
 
   const current = seasonOf(new Date())
+  const source = seasonSourceOf(loaded.data)
 
   return season === current
     ? pageMetadata(playersPath, 'Spelers')
     : seasonPageMetadata(playersPath, seasonAddress(playersPath, season, current), {
-        description: `De selectie van sc Heerenveen 1 in het seizoen ${season} en alle spelers die scoorden, met hun doelpunten en de bron erbij: Wikipedia.`,
+        description: `De selectie van sc Heerenveen 1 in het seizoen ${season} en alle spelers die scoorden, met hun doelpunten en de bron erbij: ${source === 'wikipedia' ? 'Wikipedia' : sourceName(source)}.`,
         title: `Spelers ${season}`,
       })
 }
@@ -67,10 +69,10 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
   const { competitie } = await searchParams
-  const competition = parseCompetition(competitie)
+  const chosen = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, playersPath)
 
-  if (competition === undefined || loaded.kind === 'unknown') {
+  if (chosen === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -78,6 +80,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
     return <ServerError retryHref={seasonAddress(playersPath, season, seasonOf(new Date()))} />
   }
 
+  const competition = choiceFor(loaded.data.matches, chosen)
   const squad = await loadSquad(season)
 
   if (squad === undefined) {
@@ -155,7 +158,13 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           </>
         )}
         {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} squad={squadSource} />
+          <SourceCredit
+            edited={data.edited}
+            pages={data.pages}
+            season={data.season}
+            source={sourceOf([...data.matches, ...(allTime ?? [])])}
+            squad={squadSource}
+          />
         )}
       </Page.Sidebar>
     </>

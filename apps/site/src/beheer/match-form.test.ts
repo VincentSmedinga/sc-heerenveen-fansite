@@ -9,7 +9,7 @@ const squad = [
   { id: 11, name: 'Luca Oyen', wikipediaPage: 'Luca Oyen' },
   { id: 12, name: 'Bernt Klaverboer', wikipediaPage: null },
 ]
-const league = { competition: 'Eredivisie', opponent: 'N.E.C.', squad } as const
+const league = { competition: 'Eredivisie', dataSource: 'wikipedia', opponent: 'N.E.C.', squad } as const
 const cup = { ...league, competition: 'KNVB Beker' } as const
 
 /** A played league match won 2-1, with a time, and the reason. */
@@ -128,6 +128,34 @@ describe('validate', () => {
       kickoffAt: null,
       matchDate: '2026-10-31',
     })
+  })
+
+  it('lets a match of the old fansite have a day without a time, and keeps it so', () => {
+    const old = { ...league, dataSource: 'oude-fansite' } as const
+    const dayOnly = validate(filled({ 'aftrap-tekst': '', 'aftrap-tijd': '' }), old)
+
+    expect(dayOnly.errors).toBeUndefined()
+    expect(dayOnly.entry?.kickoff).toEqual({ dateText: null, kickoffAt: null, matchDate: '2026-10-31' })
+    // A time and a text are still not both, and a match from Wikipedia still has one of them.
+    expect(validate(filled({ 'aftrap-tekst': 'zaterdag' }), old).errors).toHaveProperty('aftrap-tekst')
+    expect(validate(filled({ 'aftrap-tekst': '', 'aftrap-tijd': '' }), league).errors).toHaveProperty('aftrap-tekst')
+  })
+
+  it('opens a match without a time with empty fields for the time and the text', () => {
+    const values = valuesOf(
+      {
+        dateText: null,
+        goalsAgainst: 0,
+        goalsFor: 1,
+        kickoffAt: null,
+        matchDate: '1995-08-27',
+        status: 'played',
+      } as never,
+      [],
+    )
+
+    expect(values.velden['aftrap-tijd']).toBe('')
+    expect(values.velden['aftrap-tekst']).toBe('')
   })
 
   it('refuses what the database refuses: a result of a match that was not played, extra time in the league', () => {

@@ -9,7 +9,7 @@ import { compact } from '#src/beheer/density'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
-import { goalKinds, statusChoices, valuesOf } from '#src/beheer/match-form'
+import { goalKinds, isKnockout, statusChoices, valuesOf } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { wikipediaUrl } from '#src/match-format'
@@ -107,7 +107,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
       choices={{
         goalKinds,
         home: match.home,
-        knockout: match.competition !== 'Eredivisie',
+        knockout: isKnockout(match.competition),
         opponent: match.opponent,
         report: hasReport
           ? { goals: goals.map((goal) => describeEntryGoals([goal])), href: reportPath(match.id) }
@@ -115,6 +115,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         showDelay,
         squad,
         statuses: statusChoices,
+        timeOptional: match.dataSource === 'oude-fansite',
       }}
       initial={hasReport ? { ...valuesOf(match, []), doelpunten: [] } : valuesOf(match, goals)}
       key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}

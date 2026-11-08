@@ -1,5 +1,6 @@
 import type { PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
 
+import { competitions } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -19,6 +20,7 @@ import {
   overviewOf,
   parseCleanSheetCount,
   programmeOf,
+  resultsCardOrder,
   resultsOfSeason,
   resultsPerCompetition,
   scoreCountsOf,
@@ -36,6 +38,7 @@ const match = (round: string, status: PublicMatch['status'], matchDate: string):
   afterNinetyFor: null,
   attendance: null,
   competition: 'Eredivisie',
+  dataSource: 'wikipedia',
   dateText: null,
   extraTime: false,
   goals: [],
@@ -142,6 +145,23 @@ describe('resultsPerCompetition', () => {
         ({ competition }) => competition,
       ),
     ).toEqual(['Eredivisie', 'KNVB Beker', 'Play-offs Conference League', 'Europa League'])
+  })
+
+  it('lists the competitions of the old matches after the cup, with the Eerste divisie as the league', () => {
+    const all = competitions.map((competition) => of(competition, 'Ronde'))
+
+    expect(resultsPerCompetition(all).map(({ competition }) => competition)).toEqual([...resultsCardOrder])
+    expect(
+      resultsPerCompetition([
+        of('UEFA Cup', 'Eerste ronde'),
+        of('KNVB Beker', 'Derde ronde'),
+        of('Eerste divisie', 'Wedstrijd 1'),
+      ]).map(({ competition }) => competition),
+    ).toEqual(['Eerste divisie', 'KNVB Beker', 'UEFA Cup'])
+  })
+
+  it('has every competition exactly once in the order, so a new one can not be left out', () => {
+    expect([...resultsCardOrder].sort()).toEqual([...competitions].sort())
   })
 
   it('keeps the order it was given inside each list', () => {

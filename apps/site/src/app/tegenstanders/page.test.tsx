@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getEditedMatches, getMatchSeasons } from '#src/matches'
+import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { getClubRecords, getSourcePages } from '#src/opponents'
 import { allRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
@@ -27,6 +27,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getEditedMatches: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getMatchSource: vi.fn(),
 }))
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -46,6 +47,7 @@ beforeEach(() => {
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getEditedMatches).mockResolvedValue(false)
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
+  vi.mocked(getMatchSource).mockResolvedValue('wikipedia')
   vi.mocked(getSourcePages).mockReset()
   vi.mocked(getSourcePages).mockResolvedValue(sourcePages)
 })
@@ -202,6 +204,24 @@ describe('the page /tegenstanders', () => {
     expect(html).not.toMatch(/<details class="hf-meta hf-wikipedia-credit"[^>]* open/)
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2022/23_(mannenvoetbal)"')
     expect(html).toContain('CC BY-SA 4.0')
+  })
+
+  it('credits the archive of the old fansite next to Wikipedia when the database has matches from both', async () => {
+    vi.mocked(getMatchSource).mockResolvedValue('both')
+
+    const html = await render()
+
+    expect(html).toContain('<summary>Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite</summary>')
+  })
+
+  it('credits the archive alone when no season has a page of Wikipedia', async () => {
+    vi.mocked(getMatchSource).mockResolvedValue('archive')
+    vi.mocked(getSourcePages).mockResolvedValue([])
+
+    const html = await render()
+
+    expect(html).toContain('Bron: het archief van de oude sc Heerenveen Fansite')
+    expect(html).not.toContain('Bron: Wikipedia')
   })
 
   it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the sidebar', async () => {

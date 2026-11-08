@@ -69,6 +69,7 @@ function match(ours: number, theirs: number, more: Partial<PublicClubMatch> = {}
     afterNinetyFor: null,
     attendance: null,
     competition: 'Eredivisie',
+    dataSource: 'wikipedia',
     dateText: null,
     extraTime: false,
     goals: [],

@@ -8,6 +8,7 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { FinalPlacesCard } from '#src/FinalPlacesCard'
 import { lastFiveOf } from '#src/last-five'
+import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import {
   getFinalPlaces,
   getLeagueResults,
@@ -56,7 +57,7 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
   return season === current
     ? pageMetadata(matchesPath, 'Wedstrijden')
     : seasonPageMetadata(matchesPath, seasonAddress(matchesPath, season, current), {
-        description: `De uitslagen en de eindstand van sc Heerenveen 1 in het seizoen ${season}, met de bron erbij: de Nederlandse Wikipedia.`,
+        description: `De uitslagen en de eindstand van sc Heerenveen 1 in het seizoen ${season}, met de bron erbij: ${sourceName(seasonSourceOf(loaded.data))}.`,
         title: `Wedstrijden ${season}`,
       })
 }
@@ -209,7 +210,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
         <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
         <CoachesCard coaches={data.coaches} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
         )}
       </Page.Sidebar>
     </>

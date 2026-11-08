@@ -16,6 +16,7 @@ import {
   listClubStandings,
   listEnabledSources,
   listLeagueResults,
+  listMatchDataSources,
   listMatchSeasons,
   listNewestDiscussions,
   listPodcastEpisodes,
@@ -1717,10 +1718,26 @@ describe('the matches and the table of a season', () => {
 
       expect(rows.map((match) => match.season)).toEqual(['2010/11', first!.season])
       expect(Object.keys(rows[0]!).sort()).toEqual(
-        ['competition', 'goals', 'goalsAgainst', 'goalsFor', 'season', 'status'].sort(),
+        ['competition', 'dataSource', 'goals', 'goalsAgainst', 'goalsFor', 'season', 'status'].sort(),
       )
       expect(rows[0]?.goals.map((goal) => goal.player)).toEqual(['Oud'])
       expect(rows[1]?.goals).toEqual([])
+    })
+
+    it('gives the sources the matches come from, each once', async () => {
+      const [first, second] = madeUpMatches(now)
+
+      expect(await listMatchDataSources(database.db)).toEqual([])
+
+      await database.db.insert(matches).values(await withClubs(database.db, [first!, second!]))
+
+      expect(await listMatchDataSources(database.db)).toEqual(['wikipedia'])
+
+      await database.db
+        .insert(matches)
+        .values(await withClubs(database.db, [{ ...second!, dataSource: 'oude-fansite', season: '1999/00' }]))
+
+      expect((await listMatchDataSources(database.db)).sort()).toEqual(['oude-fansite', 'wikipedia'])
     })
 
     it('gives the day, competition and score of every match of every season, by day, for the results per coach', async () => {
@@ -1966,6 +1983,7 @@ describe('the matches and the table of a season', () => {
         'afterNinetyFor',
         'attendance',
         'competition',
+        'dataSource',
         'dateText',
         'extraTime',
         'goals',

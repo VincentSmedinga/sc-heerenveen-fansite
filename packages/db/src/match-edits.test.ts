@@ -301,6 +301,7 @@ describe('the lines the log and the page use', () => {
     expect(describeEntryKickoff({ dateText: '12-14 februari 2027', kickoffAt: null, matchDate: '2027-02-12' })).toBe(
       '12-14 februari 2027',
     )
+    expect(describeEntryKickoff({ dateText: null, kickoffAt: null, matchDate: '1995-08-27' })).toBe('27 augustus 1995')
   })
 
   it('writes the goals with the minute, the added time and what kind they were', () => {

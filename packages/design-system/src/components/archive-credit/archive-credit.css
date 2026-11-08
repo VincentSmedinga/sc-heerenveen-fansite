@@ -1,0 +1,12 @@
+/*
+ * The credit for matches from the archive of the old fansite: one line of small type in the
+ * colour of secondary text, like the credit for data from Wikipedia.
+ */
+
+@layer hf.components {
+  .hf-archive-credit {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0;
+    overflow-wrap: anywhere;
+  }
+}

@@ -18,6 +18,7 @@ const ours = (overrides: Partial<PublicMatch>): PublicMatch => ({
   afterNinetyFor: null,
   attendance: null,
   competition: 'Eredivisie',
+  dataSource: 'wikipedia',
   dateText: null,
   extraTime: false,
   goals: [],
