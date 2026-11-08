@@ -576,7 +576,7 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     'Namen om te beslissen',
     [
       'Deze namen lijken op elkaar en horen misschien bij één persoon.',
-      'Namen die zeker één persoon zijn, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).',
+      'Namen die zeker één persoon zijn, of waarvan de projecteigenaar de paren goedkeurde, hebben de schrijfwijze van nl.wikipedia gekregen (en.wikipedia als nl geen artikel heeft).',
       'De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.',
       'Tussen haakjes staat hoe vaak de spelling in de opstellingen, doelpunten, kaarten en assists voorkomt.',
       'Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.',
