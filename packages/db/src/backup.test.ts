@@ -265,6 +265,18 @@ describe('backUp', () => {
     }
   })
 
+  it('takes the statistics of the old matches along with their rows, as nothing else holds them', async () => {
+    await backUp(env(), now)
+
+    const record = process.env['FAKE_RECORD'] ?? ''
+    const rows = readFileSync(path.join(record, 'args-0'), 'utf8').trim().split('\n')
+    const structure = readFileSync(path.join(record, 'args-1'), 'utf8').trim().split('\n')
+
+    expect(structureOnlyTables).not.toContain('match_statistics')
+    expect(rows).not.toContain('--ignore-table=fansite_acc.match_statistics')
+    expect(structure).not.toContain('match_statistics')
+  })
+
   it('fails, and leaves no file, when the second pass fails', async () => {
     const second = program(
       'mysqldump',

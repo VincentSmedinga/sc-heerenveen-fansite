@@ -15,6 +15,7 @@ const match: Match = {
   attendance: 21022,
   clubId: 1,
   competition: 'Eredivisie',
+  dataSource: 'wikipedia',
   dateText: null,
   extraTime: false,
   goalsAgainst: 1,

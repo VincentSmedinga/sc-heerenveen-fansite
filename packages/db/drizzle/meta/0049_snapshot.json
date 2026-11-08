@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "3886eb95-7214-4ebe-9d76-bd262e6445af",
+  "id": "38efffc1-004a-4200-b926-25ece00fef8e",
   "prevId": "7014bc8d-7e8f-48ba-94bc-7aac9147c6dd",
   "tables": {
     "admin_login_attempts": {
@@ -1818,7 +1818,7 @@
           "name": "shirt_number",
           "type": "int unsigned",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "starter": {
@@ -2046,7 +2046,7 @@
         },
         "competition": {
           "name": "competition",
-          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League')",
+          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League','Eerste divisie','Champions League','Europacup II','UEFA Cup','Intertoto Cup','Play-offs UEFA Cup')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -2971,6 +2971,86 @@
         }
       }
     },
+    "match_statistics": {
+      "name": "match_statistics",
+      "columns": {
+        "match_id": {
+          "name": "match_id",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "corners_for": {
+          "name": "corners_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "corners_against": {
+          "name": "corners_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "offsides_for": {
+          "name": "offsides_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "offsides_against": {
+          "name": "offsides_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fouls_for": {
+          "name": "fouls_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fouls_against": {
+          "name": "fouls_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "match_statistics_match_id_matches_id_fk": {
+          "name": "match_statistics_match_id_matches_id_fk",
+          "tableFrom": "match_statistics",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "match_statistics_match_id": {
+          "name": "match_statistics_match_id",
+          "columns": [
+            "match_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "match_substitutions": {
       "name": "match_substitutions",
       "columns": {
@@ -3125,7 +3205,7 @@
         },
         "competition": {
           "name": "competition",
-          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League')",
+          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League','Eerste divisie','Champions League','Europacup II','UEFA Cup','Intertoto Cup','Play-offs UEFA Cup')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -3270,6 +3350,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "data_source": {
+          "name": "data_source",
+          "type": "enum('wikipedia','oude-fansite')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'wikipedia'"
         }
       },
       "indexes": {
@@ -3322,11 +3410,11 @@
         },
         "matches_time_or_text": {
           "name": "matches_time_or_text",
-          "value": "`matches`.`kickoff_at` is not null or `matches`.`date_text` is not null"
+          "value": "`matches`.`data_source` = 'oude-fansite' or `matches`.`kickoff_at` is not null or `matches`.`date_text` is not null"
         },
         "matches_extra_time_only_in_played_knockout": {
           "name": "matches_extra_time_only_in_played_knockout",
-          "value": "`matches`.`extra_time` = 0 or (`matches`.`status` = 'played' and `matches`.`competition` in ('KNVB Beker', 'Play-offs Conference League', 'Europa League', 'Play-offs Europa League'))"
+          "value": "`matches`.`extra_time` = 0 or (`matches`.`status` = 'played' and `matches`.`competition` not in ('Eredivisie', 'Eerste divisie'))"
         },
         "matches_penalties_in_a_pair": {
           "name": "matches_penalties_in_a_pair",

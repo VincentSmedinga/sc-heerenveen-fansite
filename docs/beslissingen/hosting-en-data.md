@@ -621,7 +621,7 @@
 - **Later:** zie _De formatie van een team staat in het verslag, en de regel ervoor staat bij de regels van het verslag_ (7 november 2026): #828 liet de formatie buiten het verslag, en dat deed #840 erbij.
   `match_reports` heeft sindsdien `formation_ours` en `formation_opponent`.
 - **Later:** zie _De strafschoppenserie van een wedstrijd staat in een eigen tabel, en wordt gecontroleerd tegen de uitslag van de serie_ (7 november 2026): het verslag heeft sindsdien een zesde tabel, `match_shootout_kicks`, met de schoten van de serie.
-- **Later:** zie _Een rugnummer mag ontbreken_ (8 november 2026): `match_appearances.shirt_number` mag sinds `0049_make_shirt_number_optional` leeg zijn, en dan telt de sleutel op wedstrijd, team en rugnummer niet voor die spelers.
+- **Later:** zie _Een rugnummer mag ontbreken_ (8 november 2026): `match_appearances.shirt_number` mag sinds `0050_make_shirt_number_optional` leeg zijn, en dan telt de sleutel op wedstrijd, team en rugnummer niet voor die spelers.
 
 ## De regels voor een verslag staan op één plek, in `packages/shared`
 
@@ -756,12 +756,44 @@
   Eén uitslag van de serie, die van de wedstrijd, houdt de import, de cijfers en het verslag gelijk.
 - **Alternatieven:** de serie bepaalt de uitslag (minder typen, maar dan bezit het verslag een uitslag die de rest van de site leest); de serie verplicht stellen (dan kan een wedstrijd waarvan we de schoten niet kennen geen verslag krijgen); de schoten in `match_incidents` zetten (een schot heeft een ronde en geen minuut); de volgorde van de teams bewaren (de pagina heeft haar niet nodig).
 
+## De wedstrijden van de oude fansite komen in `matches`, met een eigen bron, zes nieuwe competities en een tabel voor de statistieken
+
+- **Datum:** 7 november 2026
+- **Besluit:** de database kan de wedstrijden van 1990 tot 2007 uit de database van de oude fansite bewaren (#873).
+  - **Zes nieuwe competities, met de namen van toen:** de lijst `competitions` krijgt `Eerste divisie` (1991/92 en 1992/93), `Champions League` (2000/01), `Europacup II` (1998/99), `UEFA Cup` (2002/03 tot en met 2006/07), `Intertoto Cup` (1995 tot en met 2003) en `Play-offs UEFA Cup` (2005/06, tegen Roda JC en FC Twente).
+    De codes zijn gelezen uit de tegenstanders en de data (#875): code 5 is de Intertoto Cup en niet de UEFA Cup, want die wedstrijden zijn in juni en juli.
+    Verlenging kan bij elke competitie behalve `Eredivisie` en `Eerste divisie`.
+    `statsCompetitions` blijft zoals hij is.
+  - **Elke wedstrijd weet uit welke bron hij komt:** `matches.data_source` is `wikipedia` of `oude-fansite`, niet leeg, met `wikipedia` als standaard.
+    De import van Wikipedia leest, schrijft en haalt alleen weg waar de bron `wikipedia` is.
+    Komt een wedstrijd van Wikipedia op dezelfde sleutel (seizoen, competitie, ronde) als een rij van de oude fansite, dan slaat de import hem over en meldt dat.
+  - **Een oude wedstrijd mag een datum zonder tijd hebben:** voor de bron `oude-fansite` mogen `kickoff_at` en `date_text` allebei leeg zijn.
+    Voor `wikipedia` blijft de eis staan.
+  - **Hoekschoppen, buitenspel en overtredingen staan in een eigen tabel:** `match_statistics` heeft per wedstrijd één rij, alleen als ten minste één van de zes cijfers boven 0 is (0-0-0 betekent in de oude database "niet bekend").
+  - **Oefenwedstrijden komen niet in de database.**
+    Ze gaan naar een Markdown-bestand (#875).
+- **Keuzes bij het bouwen** (8 november 2026):
+  - **De migratie:** `0049_add_old_fansite_matches` voegt alleen toe en kan opnieuw draaien.
+    Ze haalt de twee checks van `matches` weg en zet ze terug, want beide veranderen.
+    Terugdraaien staat in de kop van het bestand.
+  - **De statistieken:** de tabel staat niet in `structureOnlyTables`, want deze cijfers staan nergens anders.
+    Er is nog geen lezer en geen pagina.
+  - **Wat al op de competitie schakelt:** de beheerders-formulieren (`match-form.ts`) laten verlenging toe bij elke competitie behalve de twee competities in de lijst, net als de check.
+    De kaarten van Uitslagen (`matchShortcuts.ts`) hebben een eigen anker voor elke nieuwe competitie.
+    De namen in de bijschriften van de cijfers (`competitionNames`) en de keuze tussen alle wedstrijden en alleen de competitie laten de nieuwe waarden bewust ongemoeid: de site toont de oude wedstrijden pas na #874.
+  - **De andere lezers van de import:** de controle op een lege bekerpagina en de vraag of een seizoen play-offs heeft, tellen alleen wedstrijden van Wikipedia.
+- **Waarom:** een wedstrijd heet zoals hij toen heette, want de Europa League bestond nog niet.
+  Wikipedia vult later aan wat de oude database mist (#414), en geen van beide imports mag de rijen van de ander wijzigen of weghalen.
+  Een datum als "25 augustus 1990" in `date_text` zou een wedstrijd laten lijken alsof de aftrap nog moet worden aangekondigd, terwijl 12 wedstrijden de tijd `00:00` hebben, wat "onbekend" betekent.
+  Een eigen tabel houdt `matches` smal, en de import van Wikipedia en de formulieren van de redactie schrijven die tabel zonder dit te weten.
+- **Alternatieven:** alles onder een naam "Europees voetbal" zetten (dan verdwijnt het verschil tussen een zomertoernooi en de UEFA Cup); de bron afleiden uit het seizoen (breekt zodra Wikipedia een oud seizoen aanvult); een tekst als "25 augustus 1990" in `date_text` zetten; zes kolommen op `matches`; de cijfers niet bewaren.
+
 ## Een rugnummer mag ontbreken
 
 - **Datum:** 8 november 2026
 - **Besluit:** `match_appearances.shirt_number` mag leeg zijn (#871).
   De oude fansite bewaarde geen rugnummers, en een verzonnen nummer zet een onwaarheid in de database.
-  - **De opslag:** de kolom is niet meer verplicht, en de migratie `0049_make_shirt_number_optional` verandert alleen dat.
+  - **De opslag:** de kolom is niet meer verplicht, en de migratie `0050_make_shirt_number_optional` verandert alleen dat.
     De sleutel op wedstrijd, team en rugnummer blijft: MariaDB telt lege waarden niet als gelijk, dus een team kan meer spelers zonder nummer hebben, en twee spelers met hetzelfde nummer blijven onmogelijk.
     De check van 1 tot en met 99 laat een leeg nummer door.
     Terugdraaien kan alleen als geen rij een leeg nummer heeft; de migratie zegt hoe, en kan opnieuw draaien.
