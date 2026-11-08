@@ -3683,3 +3683,16 @@
 - **Waarom:** een supporter wil het seizoen doorlezen zonder terug te gaan naar de lijst, en een link die een wedstrijd overslaat, zegt niet dat er een wedstrijd mist.
   Kleur is nooit het enige teken, en de woorden zijn die van de kop van de wedstrijd.
 - **Alternatieven:** alleen wedstrijden met een pagina (dan lijkt een wedstrijd te ontbreken); alleen de stand voorlezen (kleur is dan het enige teken); altijd naast elkaar (lange clubnamen breken slecht in twee smalle kolommen).
+
+## Een opslag van een artikel in het beheer probeert de transactie opnieuw bij een deadlock
+
+- **Datum:** 8 november 2026
+- **Besluit:** `createArticle` en `saveArticle` draaien hun transactie via `retryOnDeadlock` (`apps/site/src/beheer/retry-deadlock.ts`).
+  Bij `ER_LOCK_DEADLOCK` (1213) probeert die de hele transactie opnieuw, in totaal vijf keer.
+  Elke andere fout gaat meteen door.
+  Na de laatste poging gaat ook de deadlock door.
+  De andere opslagen in het beheer hebben geen unieke sleutel die bij gelijktijdige opslagen beslist, dus alleen de artikelen gebruiken de hulpfunctie (#933).
+- **Waarom:** MariaDB kan bij gelijktijdige inserts op dezelfde unieke sleutel een deadlock geven en raadt zelf aan opnieuw te proberen.
+  De nieuwe poging ziet de rij van de winnaar en geeft de gewone uitkomst: het adres bestaat al.
+  Zonder dit kreeg een redacteur een foutpagina.
+- **Alternatieven:** de test minder gelijktijdig maken (verbergt de fout); een slot op de tabel (trager, en een deadlock blijft mogelijk).
