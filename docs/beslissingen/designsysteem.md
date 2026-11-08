@@ -2375,26 +2375,61 @@
     Een lange optie breekt af op meer regels (`white-space: normal`, `overflow-wrap: anywhere`), en het menu krijgt geen horizontale schuifbalk.
   - **Kant:** het menu groeit naar rechts vanaf de linkerkant van het veld.
     Past dat niet, dan lijnt het uit met de rechterkant van het veld en groeit het naar links.
-    Past ook dat niet, dan neemt het de breedte van het scherm.
-    Dat is `position-try-fallbacks` met vijf eigen `@position-try`-regels, naast de standaardplaats onder het veld naar rechts: onder het veld naar links en over de breedte van het scherm, en boven het veld naar rechts, naar links en over de breedte van het scherm.
+    Past ook dat niet, dan neemt het de ruimte tot de rand van het scherm aan de kant waar het groeit.
+    Dat is `position-try-fallbacks` met eigen `@position-try`-regels.
     De breedte is `max-content` en krimpt niet tot de ruimte naast het veld, dus de browser ziet dat het menu daar niet past en gaat door naar de volgende regel.
-    Alleen bij de breedte van het scherm geldt `max-inline-size: stretch`.
     De minimumbreedte, zo breed als het veld, komt uit de standaardstijl van de browser.
-  - **Hoogte en richting:** het menu opent onder het veld, of boven het veld als daar meer ruimte is (`position-try-order: most-block-size`, zoals de browser al deed).
-    Zijn hoogte is de ruimte aan die kant min een marge (`max-block-size: stretch` van de browser), zonder vaste maximumhoogte.
+  - **Hoogte en richting:** zie _Het menu opent onder het veld en omhoog alleen als het daar niet past, met alleen CSS_.
     Alleen het menu scrolt (`overscroll-behavior: contain`).
   - **Toetsenbord:** bij het openen staat de gekozen optie in beeld, en de optie met focus scrolt mee bij de pijltjes, Home, End, Page up, Page down en een letter.
     Dat doet Chromium zelf; de test controleert het.
 - **Waarom:** het menu was bij een veld aan de rechterkant van de pagina breder dan het scherm: het groeide vanaf de linkerkant van het veld naar rechts en `inline-size` was zo breed als de langste optie (642 pixels in het verhaal met de lange optie), zonder grens.
   Een vaste maat past niet bij elk scherm, elke zoom en elke tekstgrootte; de ruimte op het scherm doet dat wel.
   Een menu dat nooit smaller is dan het veld, wordt niet verward met een ander veld, en een lange optie blijft leesbaar.
-- **Nadeel:** een veld in de onderste helft van het scherm opent omhoog, ook als het menu eronder zou passen, omdat `most-block-size` de grootste ruimte kiest en niet de eerste die past.
-  Een kort menu zit dan boven het veld in plaats van eronder.
+- **Nadeel:** een veld in de onderste helft van het scherm opende omhoog, ook als het menu eronder zou passen, omdat `most-block-size` de grootste ruimte koos en niet de eerste die past.
+  Een kort menu zat dan boven het veld in plaats van eronder.
   Firefox en Safari zijn niet bekeken; zonder `base-select` houden ze de lijst die ze hebben.
+- **Later:** zie _Het menu opent onder het veld en omhoog alleen als het daar niet past, met alleen CSS_.
+  De kant en de hoogte van het menu zijn daar vervangen: onder eerst, geen `position-try-order: most-block-size` meer, en de plekken zijn andere dan hier genoemd (er zijn er vijf, zonder een plek over de hele breedte van het scherm).
 - **Alternatieven:** precies zo breed als het veld (een lange optie wordt afgekapt of breekt in smalle regels, en het vinkje vraagt zelf ruimte).
   Een vaste maximumhoogte van ongeveer acht opties (een maat die we moeten onderhouden, en op een laag scherm nog te hoog).
   Alleen scrollen binnen het menu, zonder eis aan zoom (laat de zwaarste situatie ongetest).
   Alle keuzelijsten de opmaak van de site geven (een eigen issue).
+
+## Het menu opent onder het veld en omhoog alleen als het daar niet past, met alleen CSS
+
+- **Datum:** 8 november 2026
+- **Besluit:** het open menu van een `Select` met `hf-select-styled` opent onder het veld als de hele lijst daar past, anders boven het veld als de hele lijst daar past, en anders aan de kant met de meeste ruimte, met de hoogte van die ruimte min een marge (#925, dat #689 overneemt).
+  Dat is `position-try-fallbacks` met `max-block-size: none` op het menu, vijf plekken (onder naar links, `flip-block`, boven naar links, en twee plekken met `max-block-size: stretch`), en de eerste van die twee heeft `min-block-size: calc((100dvb - anchor-size(block)) / 2)`.
+  `position-try-order: most-block-size` uit #687 vervalt, en de plek over de hele breedte van het scherm ook.
+  Er is geen JavaScript.
+- **Waarom:** #668 vroeg onder eerst, en de projecteigenaar koos dat opnieuw op 4 november 2026.
+  Een kort menu hoort bij een veld in de onderste helft van het scherm onder het veld te staan.
+  De eigen stijl van de browser zet `max-block-size: stretch` op het menu, dus het valt nooit buiten zijn gebied en de browser gaat nooit naar de volgende plek; met `max-block-size: none` doet hij dat wel.
+  De ruimte onder plus de ruimte boven is het scherm min het veld, dus de eerste plek voor een lijst die nergens past, geldt alleen als onder minstens zoveel ruimte is als boven.
+  Een vaste `50dvb` koos bij 320 × 256 pixels de kant met minder ruimte.
+  JavaScript zou de kant meten bij het openen: meer code, een test erbij, en zonder hydratatie de verkeerde kant.
+- **Nadeel:** Chromium 156 probeert hoogstens vijf plekken, dus de plek over de hele breedte van het scherm vervalt.
+  Een lijst die nergens past is zo breed als de ruimte aan de kant waar hij groeit, en een veld in het midden met een zeer brede optie krijgt een menu tot de rand van het veld in plaats van het hele scherm.
+  De seizoenen zijn kort, dus alleen het verhaal met de lange optie laat het zien.
+  Het aantal plekken is door meting gevonden en kan in een andere versie veranderen: de CSS-test telt ze.
+- **Alternatieven:** `most-block-size` houden (#687; de projecteigenaar wil dat niet).
+  `flip-block` met `max-block-size: none` alleen (een lijst die nergens past, staat dan over het veld heen).
+  Een vaste `min-block-size: 50dvb`.
+  JavaScript dat de kant bij het openen meet.
+  Een vaste maximumhoogte (zie #668).
+- **Later:** de breedte-regels van _Het menu van een keuzelijst met de opmaak van de site blijft binnen het scherm_ gelden nog, behalve de plek over de hele breedte van het scherm.
+
+## Proportionele cijfers in de keuzelijst met seizoenen
+
+- **Datum:** 8 november 2026
+- **Besluit:** het veld, het open menu en de opties van een `Select` met `hf-select-styled` gebruiken `font-variant-numeric: proportional-nums`.
+  Het is een regel in `select.css`, niet in een algemene stijl.
+- **Waarom:** de projecteigenaar vindt de cijfers in de seizoenskiezer er raar uitzien (2004/05 met gelijk brede cijfers geeft gaten bij de 1).
+  Tabelcijfers horen bij kolommen die onder elkaar staan; een keuzelijst heeft geen kolommen.
+  Alleen de keuzelijst krijgt de regel, dus tabellen, uitslagen en de stand houden hun cijfers.
+- **Alternatieven:** de cijfers van het hele lettertype proportioneel maken (raakt tabellen en uitslagen).
+  Alle `Select` in het beheer ook (de projecteigenaar koos voor alleen de seizoenskiezers).
 
 ## `DataTable` kan de plaats van een rij in een ranglijst tonen
 

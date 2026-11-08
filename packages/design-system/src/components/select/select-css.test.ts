@@ -38,24 +38,50 @@ describe('the styled list in select.css', () => {
 describe('the open list in select.css', () => {
   it('is as wide as its longest option, never wider than the screen, and wraps a long option', () => {
     expect(css).toContain('inline-size: max-content')
-    expect(css).toMatch(/@position-try --hf-select-picker-across \{[^}]*max-inline-size: stretch/)
+    expect(css).toMatch(/@position-try --hf-select-below-end \{[^}]*max-inline-size: stretch/)
     expect(css).not.toMatch(/\dvw/)
     expect(css).toMatch(/white-space: normal/)
     expect(css).toMatch(/overflow-inline: hidden/)
   })
 
-  it('moves to the other side of the field, and then across the screen, instead of leaving the screen', () => {
-    expect(css).toMatch(/position-try-fallbacks:[^;]*--hf-select-picker-end[^;]*--hf-select-picker-across/)
-    expect(css).toMatch(/@position-try --hf-select-picker-end \{[^}]*position-area: block-end span-inline-start/)
-    expect(css).toMatch(/@position-try --hf-select-picker-across \{[^}]*position-area: block-end span-all/)
-    expect(css).toMatch(/@position-try --hf-select-picker-up-across \{[^}]*position-area: block-start span-all/)
+  it('opens below first, then above, and tries the other side of the field before leaving the screen', () => {
+    expect(css).not.toContain('most-block-size')
+    expect(css).toContain('position-try-order: normal')
+    expect(css).toMatch(/max-block-size: none/)
+    expect(css).toMatch(
+      /position-try-fallbacks:\s*--hf-select-below-end, flip-block, --hf-select-above-end, --hf-select-below-shrunk, --hf-select-above-shrunk;/,
+    )
+    expect(css).toMatch(/@position-try --hf-select-below-end \{[^}]*position-area: block-end span-inline-start/)
+    expect(css).toMatch(/@position-try --hf-select-above-end \{[^}]*position-area: block-start span-inline-start/)
   })
 
-  it('opens where there is most room, with no fixed height, and scrolls itself and not the page', () => {
-    expect(css).toContain('position-try-order: most-block-size')
+  it('shrinks to the room on the side with most room when the list fits on neither side', () => {
+    expect(css).toMatch(
+      /@position-try --hf-select-below-shrunk \{[^}]*max-block-size: stretch[^}]*min-block-size: calc\(\(100dvb - anchor-size\(block\)\) \/ 2\)/,
+    )
+    expect(css).toMatch(/@position-try --hf-select-above-shrunk \{[^}]*max-block-size: stretch/)
+    expect(css.match(/anchor-size\(/g)).toHaveLength(1)
+  })
+
+  it('tries at most five places, because Chromium ignores a sixth', () => {
+    const fallbacks = /position-try-fallbacks:([^;]*);/.exec(css)![1]!.split(',')
+
+    expect(fallbacks.length).toBeLessThanOrEqual(5)
+    expect(css.match(/@position-try /g)!.length).toBeLessThanOrEqual(5)
+  })
+
+  it('scrolls itself and not the page, with no fixed height', () => {
     expect(css).toContain('overscroll-behavior: contain')
     expect(css).not.toMatch(/(?:max-)?block-size: \d/)
     expect(css).not.toMatch(/max-height/)
+  })
+
+  it('has proportional figures in the field, the open list and the options, and nowhere outside the styled list', () => {
+    const styled = css.slice(css.indexOf(supports))
+
+    expect(styled.match(/font-variant-numeric: proportional-nums/g)).toHaveLength(3)
+    expect(css.slice(0, css.indexOf(supports))).not.toContain('font-variant-numeric')
+    expect(css).not.toContain('tabular-nums')
   })
 })
 
