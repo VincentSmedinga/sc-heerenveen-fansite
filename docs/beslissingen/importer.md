@@ -2752,6 +2752,8 @@
   De log noemt het per wedstrijd, en het controleverslag zet het onder _Kaarten die de import oversloeg of afleidde_.
   Het zijn 36 gele kaarten in 35 verslagen; 31 daarvan gingen van `bezig` naar `klaar`, want de andere 4 houden een andere reden (een invaller zonder speler die eruit gaat).
   De spelers in die verslagen hebben nu één gele kaart meer in de cijfers, en die verslagen komen voor het eerst in de cijfers.
+- **Later:** zie _De formatie van onze ploeg wordt afgeleid uit de linie van de oude fansite, alleen als de volgorde en de lijnen het eens zijn_ (8 november 2026): een verslag zonder formatie is er niet meer.
+  Een verslag waarvan volgorde en lijnen kloppen krijgt een formatie voor onze ploeg, en een tweede run volgt een andere afleiding ook naar leeg.
 
 ## Het controleverslag van de oude fansite is een opdracht die niets schrijft
 
@@ -2962,3 +2964,42 @@
   Een keuze in de bestaande workflow is kleiner dan een eigen bestand: de controles, de geheimen, de SSH-opzet en de `concurrency`-groep zijn dan één keer geschreven.
   De stap bewaart de exitcode van de opdracht tot de samenvatting klaar is, dus een ongezonde feed staat eerst in de samenvatting en maakt de run daarna rood.
 - **Alternatieven:** een eigen workflowbestand (bijna dezelfde 90 regels); een pagina in het beheer (meer werk, en inloggen).
+
+## De formatie van onze ploeg wordt afgeleid uit de linie van de oude fansite, alleen als de volgorde en de lijnen het eens zijn
+
+- **Datum:** 8 november 2026
+- **Besluit:** `players.json` krijgt per speler `line` (`doelman`, `verdediger`, `middenvelder`, `aanvaller`, of `null` bij 0) uit `speler.linie` van de oude database, en het formaat van de bestanden gaat naar versie 2.
+  `deriveOldSiteFormation` (`old-site-formation.ts`) leidt daar de formatie van onze ploeg uit af, voor de stap `opstellingen`.
+  - **Wanneer er een formatie komt.**
+    Er zijn precies elf beginspelers van ons en de eerste is een doelman.
+    Er staat geen tweede doelman bij de andere tien.
+    De lijnen van die tien lopen in de volgorde van de opstelling niet terug (verdediger, middenvelder, aanvaller).
+    Een speler zonder linie staat tussen twee spelers van dezelfde linie; aan het begin telt een verdediger als linker buur en aan het einde een aanvaller als rechter buur.
+    De formatie is het aantal verdedigers, middenvelders en aanvallers, zonder een linie die leeg is (`4-6` bij geen aanvaller).
+    Tien spelers van één linie zijn geen formatie, want het veld heeft minstens twee rijen.
+    De volgorde van de spelers verandert nooit.
+  - **Wat de stap doet.**
+    Elk verslag zonder `saved_by` krijgt die formatie in `formation_ours`.
+    Kan er geen worden afgeleid, dan blijft `formation_ours` leeg en toont de pagina de lijst, zoals eerder.
+    Een tweede run verandert niets, en een andere afleiding (andere lijnen, een nieuw bestand) past `formation_ours` aan, ook naar leeg.
+    Een verslag met `saved_by` blijft zoals de redactie het opsloeg.
+    `formation_opponent` blijft leeg.
+  - **Wat het oplevert.**
+    269 van de 566 verslagen krijgen een formatie (het issue zei ongeveer 270), een test houdt het aantal vast.
+    De rest blijft een lijst: bij 269 verslagen met elf beginspelers van ons spreken de volgorde en de lijnen elkaar tegen, en 28 verslagen hebben geen elf beginspelers van ons.
+    De wedstrijd tegen FC Volendam van 25 augustus 1990 krijgt er geen: Verbeek staat als verdediger op plaats elf.
+- **Waarom:** de volgorde van de opstelling is wat de oude redacteuren typten, de linie zegt waar de snijpunten liggen, en een formatie die beide tegenspreken zou een gok zijn die als feit op het veld staat.
+  De linie is een eigenschap van de loopbaan van de speler en geen positie in één wedstrijd, dus we tellen niet.
+  Dat past bij eerdere keuzes om niets te verzinnen (het rugnummer, de gele kaart).
+  De linie komt uit het bestand en niet uit `persons.line` (#898): oude spelers hebben daar nog geen persoon, en het verslag blijft zo te maken zonder de database van andere stappen.
+- **Alternatieven:** de lijnen tellen en de spelers daarop ordenen (ongeveer 530 verslagen, maar Verbeek komt in de verdediging); de best passende formatie nemen met een vaste regel bij gelijke uitkomst (ongeveer 540 verslagen, maar in een derde ervan past meer dan één vorm); alles met de hand in het beheer doen (566 verslagen); wachten op de gegevens van #898 (oude spelers hebben daar nog geen persoon).
+
+## De tegenstander van de oude fansite houdt de lijst, en de overige verslagen krijgen met de hand een formatie
+
+- **Datum:** 8 november 2026
+- **Besluit:** er komt geen afgeleide formatie voor de tegenstander.
+  De redactie stelt in het beheer (`/beheer/wedstrijden/<id>/verslag`) de formatie in van de verslagen die een lijst blijven, voor beide teams, en een opgeslagen verslag blijft voor de import zoals het is.
+  Een test van het beheer en een test van de stap `opstellingen` laten dat zien.
+- **Waarom:** er zijn geen posities voor tegenstanders, en elke formatie zou een gok zijn.
+  Het beheer kan het al, het werk is klein per verslag en niets in de code verzint iets.
+- **Alternatieven:** een standaard 4-4-2 voor elke volledige tegenstander (ongeveer 450 verslagen met een verzonnen formatie); een lijst van formaties per wedstrijd in de importer (blijft bestaan bij een nieuwe database, maar de eigenaar moet hem in code onderhouden).

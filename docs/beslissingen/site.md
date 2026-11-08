@@ -3589,3 +3589,17 @@
 - **Waarom:** de redactieregel is dat we de bron altijd noemen (principe 4 van de Redactie), en de oude gegevens zijn van het project zelf, niet van Wikipedia.
   Een oude wedstrijd met "Bron: Wikipedia" erbij zou onwaar zijn.
 - **Alternatieven:** één algemene bronregel voor de hele site (zegt niet wat waar vandaan komt); de Eerste divisie als "de competitie" van haar seizoen laten tellen bij de keuze Eredivisie (het label van de schakelaar zou per seizoen moeten wisselen en elke kaart met "Eredivisie" in de tekst ook); de bron van het archief achter een uitklap met een link (er is niets om heen te linken); een datum als "21 november 1992" in `date_text` (zie _De wedstrijden van de oude fansite komen in `matches`_ in `hosting-en-data.md`).
+
+## Een afgeleide formatie wordt als zodanig getoond
+
+- **Datum:** 8 november 2026
+- **Besluit:** onder het veld van de wedstrijdpagina staat één zin: "De formatie is afgeleid uit de linie van de spelers en kan afwijken van wat er is gespeeld."
+  Ze staat er voor een verslag met de bron `Oude fansite` (`oldSiteReportSource` in `@fansite/db/schema`) zonder `saved_by` met een formatie voor onze ploeg, en voor geen enkel ander verslag.
+  `matchPageDataOf` zet daarvoor `formationOursDerived`; de voorvertoning in het beheer zet het onwaar.
+  De zin is een gewone alinea (`Text`) in de leesvolgorde direct na het veld en de uitleg van de merken, en vóór de wissels en de lijst.
+  Zodra de redactie het verslag opslaat, zet `saved_by` de formatie op eigen gezag en verdwijnt de zin.
+  Een verslag dat de redactie opslaat zonder iets te veranderen, krijgt geen `saved_by` (de opslag ziet geen verschil), dus de zin blijft staan tot er iets verandert.
+- **Waarom:** de linie is een eigenschap van de loopbaan van de speler en geen positie in die wedstrijd, dus de formatie kan afwijken.
+  We laten geen gok als feit zien (zie _De formatie van onze ploeg wordt afgeleid uit de linie van de oude fansite, alleen als de volgorde en de lijnen het eens zijn_ in `importer.md`).
+  De bron en `saved_by` zijn er al, dus er komt geen kolom bij.
+- **Alternatieven:** tonen als een echte formatie (eenvoudiger, maar een afgeleide waarde als feit); een kolom `formation_derived` (een tweede waarheid naast `saved_by`).

@@ -9,11 +9,11 @@ import * as z from 'zod'
  * files and never the old database, which production can't reach.
  *
  * The files hold the facts of the old database in a tidy form and nothing more: no
- * interpretation, no prose and no data of people beyond a name and a code. A number or text
- * means what the old database meant by it: a `0` for corners, offside or fouls is "not known",
- * for instance, and `home` is the side the old database called `t`. Every schema is strict, so
- * a field that isn't listed here makes a file unreadable. That is the guard against personal
- * data slipping in.
+ * interpretation, no prose and no data of people beyond a name, a code and the line they play
+ * in. A number or text means what the old database meant by it: a `0` for corners, offside
+ * or fouls is "not known", for instance, and `home` is the side the old database called `t`.
+ * Every schema is strict, so a field that isn't listed here makes a file unreadable. That is
+ * the guard against personal data slipping in.
  */
 
 /** The version of the file format. A change to the shape of a file raises it. */

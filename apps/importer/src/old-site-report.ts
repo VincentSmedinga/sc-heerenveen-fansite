@@ -15,9 +15,6 @@ import { deriveOldSiteFormation } from './old-site-formation.ts'
 import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
 
-/** The name of the source of every report this makes. */
-export const oldSiteReportSource = 'Oude fansite'
-
 /** The last minute the database accepts for a substitution or a card. */
 const lastMinute = 120
 

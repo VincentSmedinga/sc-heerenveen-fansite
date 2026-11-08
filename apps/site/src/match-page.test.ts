@@ -26,6 +26,7 @@ const cup = (): MatchPageData => ({
   complete: true,
   extraTime: true,
   facts: [],
+  formationOursDerived: false,
   formations: { opponent: '4-4-2', ours: '4-3-3' },
   goals: [],
   goalsAgainst: 1,

@@ -2112,6 +2112,10 @@ De stap `opstellingen` ([`src/old-site-lineups.ts`](src/old-site-lineups.ts)) ma
 Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts) uit zonder database, zodat een test en het controleverslag hetzelfde resultaat kunnen lezen (`judgeStoredOldSiteMatch` in `src/old-site-lineups.ts` zet het samen met de bewaarde doelpunten).
 
 - De wissels volgen uit de minuut erin en de minuut eruit: een invaller vervangt een speler van zijn team die op dezelfde minuut eruit gaat.
+- Onze ploeg krijgt een formatie (`formation_ours`) als de volgorde van de elf beginspelers en hun linie het eens zijn (`deriveOldSiteFormation` in [`src/old-site-formation.ts`](src/old-site-formation.ts)).
+  De linie staat per speler in `players.json` als `line` (`doelman`, `verdediger`, `middenvelder`, `aanvaller` of `null`), uit `speler.linie` van de oude database.
+  Het zijn 269 van de 566 verslagen; de rest blijft een lijst, en de tegenstander altijd.
+  De pagina zegt onder het veld dat de formatie is afgeleid, zolang de redactie het verslag niet opsloeg.
 - Een kaart zonder minuut krijgt bij geel een lege minuut en bij rood de minuut waarop de speler eruit ging.
   Een geel-rode kaart voor een speler zonder gele kaart in die wedstrijd krijgt een gele kaart zonder minuut, want de oude fansite schreef de twee als één kaart.
   Een kaart voor de trainer staat in de log.

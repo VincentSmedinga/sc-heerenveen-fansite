@@ -8,6 +8,7 @@ import {
   matchGoals,
   matchReports,
   matchSubstitutions,
+  oldSiteReportSource,
 } from '@fansite/db/schema'
 import { asc, eq, inArray } from 'drizzle-orm'
 
@@ -23,7 +24,7 @@ import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 import { deriveOldSiteGoals, orderedOldSiteGoalEvents } from './old-site-goals.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSource } from './old-site-matches.ts'
 import { oldSitePlayerIds } from './old-site-players.ts'
-import { deriveOldSiteReport, judgeOldSiteReport, looseNameKey, oldSiteReportSource } from './old-site-report.ts'
+import { deriveOldSiteReport, judgeOldSiteReport, looseNameKey } from './old-site-report.ts'
 
 /** The key of an appearance within a match, the same as the derived report uses. */
 const appearanceKey = (ours: boolean, name: string) => `${ours ? 'ours' : 'theirs'}|${looseNameKey(name)}`

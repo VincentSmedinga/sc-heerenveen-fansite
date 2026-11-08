@@ -1655,6 +1655,13 @@ export type MatchReportStatus = (typeof matchReportStatuses)[number]
 export const matchReportLimits = { formation: 20, lastMinute: 120, source: 100, stoppageMinutes: 15 }
 
 /**
+ * The `source` of the report that the import of the old fansite makes (#879). The page of a
+ * match reads it too: a formation of such a report that the editors did not save (`saved_by` is
+ * empty) is derived from the lines of the players, and the page says so (#899).
+ */
+export const oldSiteReportSource = 'Oude fansite'
+
+/**
  * The report of a played match: who played, who came on, the cards, the assists and the missed
  * penalties, which the Dutch Wikipedia does not give. We keep it ourselves, by typing over what
  * we can check. One row for each match, and it goes with the match. The rest of the report is
