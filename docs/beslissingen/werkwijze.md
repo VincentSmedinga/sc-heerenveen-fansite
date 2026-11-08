@@ -659,3 +659,42 @@
   Het gewicht en het aantal verzoeken naar derden zijn precies, dus die falen meteen.
   Zelf draaien kost niets en geeft geen gegevens aan een dienst.
 - **Alternatieven:** een dienst als SpeedCurve of Calibre (kosten en een derde partij); Lighthouse CI met een eigen server (te veel beheer voor deze site); alle controles meteen laten falen (te veel vals alarm); de runs herkenbaar maken met een eigen browsertekst in plaats van `DNT: 1` (verandert de meting, en de pagina's zien dan een andere browser dan Lighthouse zelf meet).
+
+## De Coördinator coördineert alleen en zet werk strikt door naar een eigen sessie
+
+- **Datum:** 8 november 2026
+- **Besluit:** de Coördinator doet zelf alleen het bord, de issues en de Action List, statusberichten, sessies starten, samenvoegen op "klaar", opruimen en releasenotities schrijven na goedkeuring.
+  Al het andere krijgt een eigen sessie, ook een vraag die onderzoek kost, een kleine wijziging, een issue schrijven, een controle en een pull request met releasenotities.
+  Dat is een Specifier, een Builder, een Reviewer of een sessie voor onderzoek.
+  Alleen als de projecteigenaar zegt dat hij het gewoon zelf moet doen, doet de Coördinator het zelf.
+- **Waarom:** elke beurt in zijn sessie draagt de hele context mee (zie _Zuinig werken is een regel, met harde grenzen_), en een lange Coördinatorsessie maakt alles duurder.
+- **Alternatieven:** een grens in regels of tokens (verworpen: lastiger na te gaan dan "kost het werk, dan krijgt het een sessie").
+- **Later:** dit herziet het besluit _Elk nieuw issue start meteen een Specifier, die zichzelf archiveert_ niet; dat blijft gelden en is hier een voorbeeld van.
+
+## De Coördinator is de enige bron van de stand
+
+- **Datum:** 8 november 2026
+- **Besluit:** de projecteigenaar moet via de Coördinator, dus via de Action List en een korte status, van alles op de hoogte kunnen zijn: wat er bouwt, wat op hem wacht en wat er is samengevoegd.
+  De Coördinator vraagt sessies niet om tussenstanden.
+  Hij zorgt dat elke gebeurtenis die ertoe doet bij hem terechtkomt (een bericht van een sessie, een samengevoegde pull request) en op de Action List staat.
+- **Waarom:** de projecteigenaar kan de sessies zien en erin praten, maar hij hoeft ze niet af te lopen.
+- **Alternatieven:** sessies om tussenstanden vragen (verworpen: elk bericht start een beurt, zie _Zuinig werken is een regel, met harde grenzen_).
+- **Later:** dit sluit aan op _Een Specifier voor een lang gesprek, en de Action List voor de status_; de Action List blijft de plek.
+
+## De overdracht aan een opvolger heeft vaste stappen
+
+- **Datum:** 8 november 2026
+- **Besluit:** de skill `weekly-coordination` beschrijft de overdracht in deze volgorde:
+  1. De nieuwe Coördinator staat klaar.
+     De oude zet een overdrachtsnotitie in het geheugen (de stand van de issues en pull requests, wat er bouwt en bij wie, de open beslissingen voor de projecteigenaar, de lessen) en controleert die tegen GitHub en `list_sessions`.
+  2. De oude geeft elke sessie die hij startte en die moet blijven draaien los met `detach_session`.
+     Dat werkt alleen voor sessies die hij zelf startte, die de projecteigenaar niet verplaatste en die niet de worktree van een andere sessie delen; een sessie die hij niet kan losmaken, noemt hij in de notitie en aan de projecteigenaar.
+  3. De oude hernoemt zichzelf met `set_session_title`, bijvoorbeeld "Coördinator XXI (overgedragen)".
+     De nieuwe krijgt de titel zonder achtervoegsel.
+     Een verzoek dat de oude daarna nog krijgt, geeft hij door aan de opvolger met `SendMessage`.
+  4. De oude archiveert zichzelf met `archive_session` en `session_id` "self", pas nadat de nieuwe de notitie heeft gelezen en de projecteigenaar het goed vindt.
+     Dat is de laatste stap, want de conversatie eindigt daarna.
+- **Waarom:** een sessie die nog onder de oude hangt, wordt samen met hem gearchiveerd en meldt het einde van haar beurten aan een sessie die er niet meer is.
+  Bij de laatste overdrachten werden Builders zo mee gearchiveerd, en bleef onduidelijk wie de actieve Coördinator was.
+- **Alternatieven:** de oude Coördinator laten doorlopen tot zijn context vol is (verworpen: dat maakt elke beurt duurder).
+- **Later:** dit vult _Zuinig werken is een regel, met harde grenzen_ aan: de overdrachtsnotitie in het geheugen blijft, de stappen eromheen zijn nieuw.
