@@ -122,6 +122,14 @@ cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.j
 // node_modules. Deployed together, the importer keeps in step with the schema, which the site
 // brings up to date when it starts.
 await bundleImporter(path.join(target, 'apps/importer/import.mjs'))
+// `import.mjs --old-site` reads the match data of the old fansite from these files, next to
+// the bundle (see defaultOldSiteFolder in apps/importer/src/import-old-site.ts). They are not
+// part of the bundle, so the import of cron doesn't carry two megabytes it never reads.
+cpSync(
+  path.resolve(import.meta.dirname, '../../importer/data/oude-fansite'),
+  path.join(target, 'apps/importer/data/oude-fansite'),
+  { recursive: true },
+)
 // The owner runs this once on the host, to see that mail leaves the site (see
 // docs/acceptatieomgeving.md). It is one file too, because the standalone build only holds the
 // packages that a page imports, and no page sends mail yet.

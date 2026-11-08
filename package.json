@@ -24,6 +24,7 @@
     "import:completeness": "pnpm --filter @fansite/importer run import:completeness",
     "import:item-clubs": "pnpm --filter @fansite/importer run import:item-clubs",
     "import:changes": "pnpm --filter @fansite/importer run import:changes",
+    "import:old-site": "pnpm --filter @fansite/importer run import:old-site",
     "import:season": "pnpm --filter @fansite/importer run import:season",
     "import:seasons": "pnpm --filter @fansite/importer run import:seasons",
     "import:squad": "pnpm --filter @fansite/importer run import:squad",

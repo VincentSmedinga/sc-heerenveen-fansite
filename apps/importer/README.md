@@ -1996,6 +1996,48 @@ Welke code een speler van ons is, wat een opmerking `n.v.` betekent en wat het s
 Beide weigeren een bestand met een ander versienummer, een veld dat niet in de vorm past of een waarde buiten de vorm.
 `src/old-site-file.test.ts` controleert de namen van alle velden in de bestanden in de repository tegen een lijst met toegestane namen, zodat persoonsgegevens er niet in kunnen komen zonder dat de test faalt.
 
+### De opdracht die de bestanden importeert
+
+`pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
+Hij raakt de oude database nooit, want productie kan die niet bereiken.
+Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
+Nu is er één stap, `clubs`; de wedstrijden, de doelpunten en de opstellingen komen erbij (#877 en verder).
+
+```sh
+pnpm import:old-site --dry-run
+pnpm import:old-site
+```
+
+- De opdracht leest en controleert de bestanden voordat hij verbinding maakt.
+  Past een bestand niet in de vorm, dan schrijft hij niets en stopt hij met exitcode 1.
+- Hij neemt de lock van de import, zoals `--season`, en zegt het als een run van cron hem vasthoudt.
+- Elke stap schrijft alleen wat verschilt en zegt in één regel hoeveel rijen hij maakte (`new`), wijzigde (`updated`), ongewijzigd liet (`unchanged`) of oversloeg (`skipped`).
+  Daaronder staat een regel voor elke nieuwe club, elke club die hij aan een bestaande koppelde en elke rij die hij oversloeg.
+  Een tweede run meldt overal `0 new, 0 updated` en schrijft niets.
+- Elke stap draait in een transactie van zichzelf.
+  De run stopt bij de eerste stap die faalt, want de stappen erna bouwen op die stap; wat de stap deed, is dan teruggedraaid.
+- Met `--dry-run` doen alle stappen hun werk in één transactie die aan het eind wordt teruggedraaid: dezelfde getallen en regels, en niets is geschreven.
+- De stappen staan in `oldSiteSteps` in [`src/import-old-site.ts`](src/import-old-site.ts).
+  Een nieuwe stap is een bestand met een functie en een regel in die lijst; de opdracht blijft zoals hij is.
+
+#### De stap clubs
+
+Voor elke club in `clubs.json` zoekt de stap de club in de database, in deze volgorde:
+
+1. de naam van de oude fansite in `clubs.name`, `club_names.name` of een titel in `club_pages`, zonder hoofdletters, spaties en leestekens (`NEC` is `N.E.C.`);
+2. de naam die [`src/old-site-clubs.ts`](src/old-site-clubs.ts) bij de clubcode heeft (`cambuurleeuwarden` is `SC Cambuur`), of de volledige naam uit [`src/club-names.ts`](src/club-names.ts) (`Roda JC` is `Roda JC Kerkrade`);
+3. anders maakt hij de club aan, met een adres uit de naam (`fc-basel`; botst het adres, dan komt er een nummer achter) en zonder `wikipedia_page`.
+
+Een naam van de oude fansite die afwijkt, gaat in `club_names`, tenzij een andere club hem al heeft.
+Een club zonder pagina krijgt de pagina van Wikipedia zodra de import van Wikipedia een wedstrijd met die club leest; hij maakt geen tweede club.
+Een club die samenging of verhuisde (zoals `Dordrecht '90` en `SVV`) blijft een eigen club.
+`oldSiteClubIds` geeft voor de stappen erna de club bij elke clubcode.
+
+#### Op de host
+
+De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
+Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH en zonder invoer (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
 ## De import op acceptatie
 
 - `pnpm --filter site assemble <nieuwe map>` bundelt de importer met `esbuild` tot één bestand, `apps/importer/import.mjs` in de map voor de host ([`src/bundle.ts`](src/bundle.ts)).
@@ -2006,6 +2048,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
   De uitvoer komt achteraan in `~/fansite-import.log`.
 - Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
 - Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig, en met `--from-season <seizoen>` alle afgelopen seizoenen vanaf dat seizoen (zie _Een afgelopen seizoen_).
+- Met `--old-site` leest het de wedstrijdgegevens van de oude fansite uit de bestanden naast `import.mjs` (zie _De opdracht die de bestanden importeert_), en met `--old-site --dry-run` laat het zien wat het zou doen.
 - Met `--squad <seizoen>` leest het de selectie van een afgelopen seizoen, en met `--from-squad <seizoen>` die van alle afgelopen seizoenen vanaf dat seizoen (zie _De selectie van afgelopen seizoenen_).
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
@@ -2027,7 +2070,7 @@ De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
-`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 

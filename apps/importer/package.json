@@ -11,6 +11,7 @@
     "import:completeness": "node --env-file-if-exists=../../.env src/import.ts --completeness",
     "import:item-clubs": "node --env-file-if-exists=../../.env src/import.ts --item-clubs",
     "import:changes": "node --env-file-if-exists=../../.env src/import.ts --changes",
+    "import:old-site": "node --env-file-if-exists=../../.env src/import.ts --old-site",
     "import:season": "node --env-file-if-exists=../../.env src/import.ts --season",
     "import:seasons": "node --env-file-if-exists=../../.env src/import.ts --from-season",
     "import:squad": "node --env-file-if-exists=../../.env src/import.ts --squad",
