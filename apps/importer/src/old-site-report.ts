@@ -118,7 +118,7 @@ export type OldSiteStoredGoal = { minute: null | number; ours: boolean; ownGoal:
  * The report of a match with a line-up. `season` is the season of the match (`1999/00`),
  * `extraTime` says whether it had extra time. `goals` are the goals as the step `doelpunten`
  * stores them, or none when that step stores none. `hasPlayerRow` says whether a player of ours
- * has a row in `players` for the season. `label` starts the lines.
+ * has a row in `players` for the season.
  */
 export function deriveOldSiteReport(
   match: OldSiteMatch,
@@ -277,14 +277,7 @@ function deriveCards(
 
     const who = { code: event.playerCode, name: event.playerName }
     const label = cleanName(isOurCode(event.playerCode) ? event.playerCode : (event.playerName ?? event.playerCode))
-    const place = findAppearance(
-      who,
-      isOurCode(event.playerCode) ? true : false,
-      season,
-      oldPlayers,
-      appearances,
-      found,
-    )
+    const place = findAppearance(who, isOurCode(event.playerCode), season, oldPlayers, appearances, found)
 
     if (place === undefined) {
       notes.push({

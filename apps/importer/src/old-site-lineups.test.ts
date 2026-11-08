@@ -731,6 +731,11 @@ describe('the files of the old fansite', () => {
     expect(stored.cards.filter((card) => card.kind === 'geel' && card.minute === null)).toHaveLength(792)
     expect(stored.cards.filter((card) => card.kind === 'geel-rood')).toHaveLength(40)
     expect(stored.cards.filter((card) => card.kind === 'rood')).toHaveLength(46)
+    // The only cards left out are the two of the trainer, so no card of a player is lost.
+    const leftOut = first.lines.filter((line) => line.includes('card for'))
+
+    expect(leftOut).toHaveLength(2)
+    expect(leftOut.every((line) => line.includes("'foppe.dehaan'"))).toBe(true)
     // Every goal has its scorer in the report, and 647 of the assists are linked.
     expect(stored.goals.filter((goal) => goal.appearanceId !== null)).toHaveLength(1763)
     expect(stored.goals.filter((goal) => goal.assistAppearanceId !== null)).toHaveLength(647)

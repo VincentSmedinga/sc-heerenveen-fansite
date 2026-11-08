@@ -2001,7 +2001,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er twee stappen, `clubs` en `matches`; de doelpunten en de opstellingen komen erbij (#878 en verder).
+Nu zijn er vijf stappen: `clubs`, `matches`, `spelers`, `doelpunten` en `opstellingen`.
 
 ```sh
 pnpm import:old-site --dry-run
