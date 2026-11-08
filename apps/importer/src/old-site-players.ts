@@ -5,6 +5,7 @@ import type { OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { deriveOldSiteMatches } from './old-site-matches.ts'
+import { cleanOldSiteName } from './old-site-names.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 
 /** A code of the old database is `voornaam.achternaam`: lower case, with dots and no spaces. */
@@ -175,8 +176,10 @@ export function ourCodesOf(match: OldSiteMatch): string[] {
 
 /**
  * The player of ours that a code stands for: the row of the old table `speler`, or else a name
- * made from a code in the shape `voornaam.achternaam` (`ivan.tzvekov` is `Ivan Tzvekov`). Else
- * undefined: the code is not a player (a coach such as `foppe.dehaan` is, but is never asked).
+ * made from a code in the shape `voornaam.achternaam` (`ivan.tzvekov` is `Ivan Tzvekov`). The
+ * name is the spelling the owner chose (`oldSiteNameCorrections`), so a player who is in
+ * `players` already from another source is found, not added again. Else undefined: the code is
+ * not a player (a coach such as `foppe.dehaan` is, but is never asked).
  */
 export function resolveOldSiteCode(
   code: string,
@@ -187,12 +190,17 @@ export function resolveOldSiteCode(
 
   if (known !== undefined) {
     const name = oldSitePlayerName(known)
+    const chosen = cleanOldSiteName(name)
 
     return {
       code,
-      name,
+      name: chosen,
       nameFromCode: false,
-      searchTerm: [known.infix, known.lastName].filter((part) => part !== null && part !== '').join(' '),
+      // A name the owner corrected has the surname of the chosen spelling (`El Khattabi`).
+      searchTerm:
+        chosen === name
+          ? [known.infix, known.lastName].filter((part) => part !== null && part !== '').join(' ')
+          : searchTerm(chosen),
       season,
     }
   }
@@ -200,10 +208,12 @@ export function resolveOldSiteCode(
     return undefined
   }
 
-  const name = code
-    .split('.')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+  const name = cleanOldSiteName(
+    code
+      .split('.')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' '),
+  )
 
   return { code, name, nameFromCode: true, searchTerm: searchTerm(name), season }
 }

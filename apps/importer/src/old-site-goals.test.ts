@@ -270,16 +270,32 @@ describe('the players of ours in the matches', () => {
 
   it('makes a name of a code that has no row in the old table', () => {
     const [player] = deriveOldSitePlayers(
-      [oldMatch({ lineup: [{ minuteIn: 0, minuteOut: 90, order: 1, playerCode: 'ivan.tzvekov', playerName: null }] })],
+      [oldMatch({ lineup: [{ minuteIn: 0, minuteOut: 90, order: 1, playerCode: 'ivo.visser', playerName: null }] })],
       oldPlayers,
     )
 
-    expect(player).toMatchObject({
-      code: 'ivan.tzvekov',
-      name: 'Ivan Tzvekov',
-      nameFromCode: true,
-      searchTerm: 'Tzvekov',
-    })
+    expect(player).toMatchObject({ code: 'ivo.visser', name: 'Ivo Visser', nameFromCode: true, searchTerm: 'Visser' })
+  })
+
+  it('gives a player the spelling the owner chose, from the old table and from a code', () => {
+    const list = [
+      { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema' },
+      { code: 'ali.elkhattabi', firstName: 'Ali', infix: null, lastName: 'Elkhattabi' },
+    ]
+    const lineup = ['ronnie.venema', 'ali.elkhattabi', 'ivan.tzvekov', 'igor.korneev'].map((code, index) => ({
+      minuteIn: 0,
+      minuteOut: 90,
+      order: index + 1,
+      playerCode: code,
+      playerName: null,
+    }))
+
+    expect(deriveOldSitePlayers([oldMatch({ lineup })], list)).toMatchObject([
+      { code: 'ronnie.venema', name: 'Ronny Venema', nameFromCode: false, searchTerm: 'Venema' },
+      { code: 'ali.elkhattabi', name: 'Ali El Khattabi', nameFromCode: false, searchTerm: 'El Khattabi' },
+      { code: 'ivan.tzvekov', name: 'Ivan Tsvetkov', nameFromCode: true, searchTerm: 'Tsvetkov' },
+      { code: 'igor.korneev', name: 'Igor Korneev', nameFromCode: true, searchTerm: 'Korneev' },
+    ])
   })
 })
 
@@ -359,18 +375,18 @@ describe('the steps spelers and doelpunten', () => {
     const { players: playersReport } = await run([
       oldMatch({
         events: [goal(1, 'jan.janssen')],
-        lineup: [{ minuteIn: 0, minuteOut: 90, order: 1, playerCode: 'ivan.tzvekov', playerName: null }],
+        lineup: [{ minuteIn: 0, minuteOut: 90, order: 1, playerCode: 'ivo.visser', playerName: null }],
         result: { awayFullTime: 0, awayHalfTime: 0, homeFullTime: 1, homeHalfTime: 0, note: null },
       }),
     ])
 
     expect((await playerRows()).map((row) => `${row.season} ${row.name}`)).toEqual([
-      '2001/02 Ivan Tzvekov',
+      '2001/02 Ivo Visser',
       '2000/01 Jan Janssen',
       '2001/02 Jan Janssen',
     ])
     expect(playersReport.lines).toEqual([
-      "ivan.tzvekov (2001/02) has no row in the old table speler, so its name 'Ivan Tzvekov' comes from the code",
+      "ivo.visser (2001/02) has no row in the old table speler, so its name 'Ivo Visser' comes from the code",
     ])
   })
 
@@ -407,6 +423,30 @@ describe('the steps spelers and doelpunten', () => {
     for (const row of await goalRows()) {
       expect(row).toMatchObject({ appearanceId: null, personId: null, stoppageMinutes: null, wikipediaPage: null })
     }
+  })
+
+  it('finds a player who is in players already under the spelling the owner chose', async () => {
+    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema' }
+    const list = [{ code: 'ronnie.venema', ...venema }]
+    const match = oldMatch({
+      events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ronnie.venema')],
+    })
+
+    await database.db
+      .insert(players)
+      .values({ name: 'Ronny Venema', searchTerm: 'Venema', season: '2001/02', source: 'selectie' })
+    await importOldSiteClubs(database.db, oldClubs)
+    await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+
+    const report = await importOldSitePlayers(database.db, [match], list)
+    const rows = await playerRows()
+
+    expect(report).toMatchObject({ created: 0, unchanged: 1 })
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ name: 'Ronny Venema', source: 'selectie' })
+
+    await importOldSiteGoals(database.db, [match], list)
+    expect((await goalRows()).filter((row) => row.ours).map((row) => row.playerId)).toEqual([rows[0]!.id, rows[0]!.id])
   })
 
   it('links the own goal of a player of ours to him, under the opponent', async () => {
@@ -569,8 +609,8 @@ describe('the files of the old fansite', () => {
       perSeason.set(row.season, (perSeason.get(row.season) ?? 0) + 1)
     }
 
-    expect(firstPlayers).toMatchObject({ changed: 0, created: 427, skipped: 0, unchanged: 0 })
-    expect(secondPlayers).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 427 })
+    expect(firstPlayers).toMatchObject({ changed: 0, created: 426, skipped: 0, unchanged: 0 })
+    expect(secondPlayers).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 426 })
     expect(Object.fromEntries(perSeason)).toEqual({
       '1990/91': 23,
       '1991/92': 13,
@@ -580,7 +620,7 @@ describe('the files of the old fansite', () => {
       '1995/96': 27,
       '1996/97': 24,
       '1997/98': 28,
-      '1998/99': 27,
+      '1998/99': 26,
       '1999/00': 28,
       '2000/01': 27,
       '2001/02': 27,

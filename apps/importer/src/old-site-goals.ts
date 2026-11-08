@@ -7,6 +7,7 @@ import type { OldSiteEvent, OldSiteMatch, OldSitePlayer } from './old-site-file.
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { deriveOldSiteMatches, matchKey, oldSiteSeason, oldSiteSource } from './old-site-matches.ts'
+import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, oldSitePlayerIds, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
 
 /** The kinds of goal that are a penalty, with the spellings of the old editors. */
@@ -112,7 +113,7 @@ function goalOf(
 
   // A player of the opponent: the name is in the field for the name, or in the field for the
   // code when the old editors typed it there (`X. Alberts`).
-  const name = (event.playerName ?? event.playerCode ?? '').replace(/\s+/gu, ' ').trim()
+  const name = cleanOldSiteName(event.playerName ?? event.playerCode)
 
   if (name === '' || name.length > matchGoalPlayerMaxLength) {
     return undefined

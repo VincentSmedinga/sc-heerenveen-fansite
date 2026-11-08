@@ -11,6 +11,7 @@ import { checkMatchReport } from '@fansite/shared/match-report'
 import type { OldSiteEvent, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { DerivedOldSiteGoal } from './old-site-goals.ts'
 
+import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
 
 /** The name of the source of every report this makes. */
@@ -109,8 +110,8 @@ export function looseNameKey(name: string): string {
     .trim()
 }
 
-/** The name in a field of the file with single spaces, or empty. */
-const cleanName = (name: null | string) => (name ?? '').replace(/\s+/gu, ' ').trim()
+/** The name in a field of the file with single spaces, and the owner's spelling of it. */
+const cleanName = cleanOldSiteName
 
 /** What the rules of a report make of it. */
 export type OldSiteReportVerdict = {
