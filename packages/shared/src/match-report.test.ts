@@ -272,8 +272,24 @@ describe('checkMatchReport', () => {
 
   describe('the match', () => {
     it('only has a report when it was played', () => {
-      expect(codes(valid(), { ...match, status: 'scheduled' })).toContain('match-not-played')
+      expect(codes(valid(), { ...match, status: 'postponed' })).toContain('match-not-played')
+      expect(codes(valid(), { ...match, status: 'cancelled' })).toContain('match-not-played')
       expect(codes(valid())).not.toContain('match-not-played')
+    })
+
+    it('lets a match that is still being played have a report that is bezig', () => {
+      const live: ReportMatch = { ...match, goalsAgainst: null, goalsFor: null, status: 'scheduled' }
+
+      // No result yet, so the goals have nothing to add up to.
+      expect(codes({ ...valid(), status: 'bezig' }, live)).toEqual([])
+      expect(blockingIssues({ ...valid(), status: 'bezig' }, live)).toEqual([])
+    })
+
+    it('keeps a report of a match that is still being played from being klaar', () => {
+      const live: ReportMatch = { ...match, goalsAgainst: null, goalsFor: null, status: 'scheduled' }
+
+      expect(codes(valid(), live)).toEqual(['match-not-finished'])
+      expect(blockingIssues(valid(), live).map((issue) => issue.code)).toEqual(['match-not-finished'])
     })
 
     it('has goals that add up to the score, in both sides', () => {

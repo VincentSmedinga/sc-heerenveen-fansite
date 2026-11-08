@@ -253,8 +253,10 @@ export function blockingIssues(report: MatchReport, match: ReportMatch): ReportI
  * misses a penalty is on the pitch; an own goal is of a player of the other team; an assist is
  * of another player of the team of the scorer, and not with a penalty or an own goal; every
  * minute is in the match; the goals of a side add up to the score; and only a played match has
- * a report. Our own side is always complete; the side of the opponent is when
- * `opponentComplete` is true, and then every goal has its scorer too.
+ * a report that is `klaar` (a match that is still being played, `scheduled`, has a report that
+ * is `bezig`, and the goals of the report give the score until the match has a result). Our own
+ * side is always complete; the side of the opponent is when `opponentComplete` is true, and
+ * then every goal has its scorer too.
  *
  * The shoot-out is optional, and checked against the result of the series of the match: it
  * needs that result, the kicks that went in add up to it for each team, the rounds of a team
@@ -270,7 +272,17 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
   const warnings: ReportIssue[] = []
   const byId = new Map<number, ReportAppearance>()
 
-  if (match.status !== 'played') {
+  if (match.status === 'scheduled') {
+    // A match that is still being played has a report that stays `bezig` until it is over.
+    if (report.status === 'klaar') {
+      issues.push({
+        code: 'match-not-finished',
+        message: 'De wedstrijd is nog niet afgelopen. Zet het verslag op klaar zodra de wedstrijd is afgelopen.',
+        place: { part: 'report' },
+        structural: false,
+      })
+    }
+  } else if (match.status !== 'played') {
     issues.push({
       code: 'match-not-played',
       message: 'Alleen een gespeelde wedstrijd heeft een verslag.',

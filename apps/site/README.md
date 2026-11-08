@@ -290,10 +290,11 @@ Een wedstrijd met een verslag heeft een pagina op `/wedstrijden/2026-27/2026-10-
 `src/report-data.ts` leest die verslagen (`getPublicReports`, bewaard zoals de wedstrijden), met elke status.
 `isCompleteReport` laat de regels van `@fansite/shared/match-report` over een verslag lopen: een verslag dat `klaar` is en klopt, is af.
 Een verslag dat `bezig` is of niet klopt, heeft een pagina met de melding "We vullen dit verslag nog in", met `noindex` en zonder plek in de sitemap, en de lijsten linken ernaar; een wedstrijd zonder verslag heeft geen pagina en geen link.
+Een wedstrijd die nog `scheduled` is, heeft een pagina zodra hij een verslag heeft (`getPublicReports`): vanaf de aftrap zegt de kop "Live" met de stand uit de doelpunten van het verslag (`phaseOf` van `@fansite/db/match-reports`, `MatchPageData.phase`), ervoor staat "Nog niet begonnen", de titel en de beschrijving noemen geen stand, en zijn doelpunten tellen nergens mee.
 `src/report-view.ts` zet een verslag om in gewone gegevens (`matchPageDataOf`, het type `MatchPageData` van `src/match-page.ts`), en `buildMatchPage` maakt daar de eigenschappen van de onderdelen van: de gebeurtenissen voor `MatchTimeline`, het veld met de spelers en hun minuten voor `MatchPitch`, de wissels, de doelpuntenmakers van de kop, de balk Wedstrijdverloop en de rondes van de strafschoppenserie.
 `MatchPageView` (`src/MatchPageView.tsx`) zet die onderdelen op de pagina, uit die gegevens en uit niets anders.
 Het voorbeeld naast het formulier van het verslag (`ReportPreview`, `src/beheer/report-preview.ts`) maakt die gegevens uit de waarden van het formulier en gebruikt datzelfde onderdeel, met `preview` aan.
-De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`).
+De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`), en die van een wedstrijd die live is met "Live" (`Match` met `live`, de sleutels uit `getLiveReports`).
 Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
@@ -1021,8 +1022,9 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 
 ### Het verslag van een wedstrijd invullen
 
-`/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd: de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen, en bij een wedstrijd met een uitslag van de strafschoppenserie ook de schoten van de serie.
-Een wedstrijd die niet bestaat of niet gespeeld is, geeft "niet gevonden".
+`/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd, of van een wedstrijd die nog wordt gespeeld (`scheduled`, vanaf zijn dag): de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen, en bij een wedstrijd met een uitslag van de strafschoppenserie ook de schoten van de serie.
+Een wedstrijd die niet bestaat, van een latere dag is, uitgesteld of afgelast is, geeft "niet gevonden".
+Bij een wedstrijd die nog wordt gespeeld staat in de zijbalk de knop "Wedstrijd afgelopen", die naar `/beheer/wedstrijden/<nummer>/verslag/afgelopen` gaat: daar bevestigt de redactie de stand uit de doelpunten van het verslag (`finishMatch`), de wedstrijd krijgt zijn uitslag en wordt `played`, en het verslag blijft `bezig`.
 De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
 
 - Het scherm is een gewone post, zoals het formulier van de wedstrijd, en werkt zonder JavaScript.

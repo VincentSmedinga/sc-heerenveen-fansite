@@ -763,3 +763,153 @@ describe('a difference becomes a change that waits (issue 577)', () => {
     })
   })
 })
+
+describe('a match that is being played (issue 906)', () => {
+  /** The day after round 11 (31 October): before it Wikipedia has no result for the match. */
+  const afterMatch = new Date('2026-11-01T12:00:00Z')
+
+  /** Round 11 on Wikipedia once the match is over: 2-1 with the three goals of the editors. */
+  function overWithTheSameGoals(pages: Pages, ours = 2, theirs = 1, oyenAt = 12) {
+    const score = `${ours} – ${theirs}`
+    const oursGoals = [
+      `[[Luca Oyen|Oyen]] {{goal|${oyenAt}}}`,
+      '[[Bernt Klaverboer|Klaverboer]] {{goal|77}}',
+      '[[Luca Oyen|Oyen]] {{goal|85}}',
+    ]
+      .slice(0, ours)
+      .join('<br />')
+
+    return {
+      ...pages,
+      programme: pages.programme.replace(
+        /\|score =\s+–\s*\n\|team2 = \[\[N\.E\.C\.\]\]\n\|goals1 =\s*\n\|goals2 =\s*\n/u,
+        `|score = ${score}\n|team2 = [[N.E.C.]]\n|goals1 = ${oursGoals}\n|goals2 = {{goal|40}} [[Test Speler|Sibbing]]\n`,
+      ),
+      // The table has the result too, or the import does not believe the matches.
+      standings: pages.standings
+        .replace(
+          '|win_HEE=4 |draw_HEE=3 |loss_HEE=3 |gf_HEE=18 |ga_HEE=13',
+          `|win_HEE=5 |draw_HEE=3 |loss_HEE=3 |gf_HEE=${18 + ours} |ga_HEE=${13 + theirs}`,
+        )
+        .replace(
+          '|win_NEC=2 |draw_NEC=5 |loss_NEC=3 |gf_NEC=17 |ga_NEC=18',
+          `|win_NEC=2 |draw_NEC=5 |loss_NEC=4 |gf_NEC=${17 + theirs} |ga_NEC=${18 + ours}`,
+        ),
+    }
+  }
+
+  /**
+   * The editors fill in a report while the match is played, as the admin does: the match stays
+   * `scheduled` without a result, the report is bezig and the goals are marked as the editors'.
+   */
+  async function playLive() {
+    await enter(roundEleven, {}, ['goals'], elevenGoals)
+
+    const matchId = (await row(roundEleven))?.id ?? 0
+
+    await database.db.insert(matchReports).values({ matchId, savedBy: adminId, status: 'bezig' })
+  }
+
+  /** The editor uses the button "Wedstrijd afgelopen": the result is entered and marked. */
+  async function pressTheButton(result: { goalsAgainst: number; goalsFor: number }) {
+    const matchId = (await row(roundEleven))?.id ?? 0
+
+    await database.db
+      .update(matches)
+      .set({ ...result, resultSetAt: first, status: 'played' })
+      .where(eq(matches.id, matchId))
+    await database.db.update(matchEdits).set({ resultEdited: true }).where(eq(matchEdits.matchId, matchId))
+  }
+
+  it('keeps the match without a result and the goals of the report while Wikipedia has nothing, run after run', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await playLive()
+
+    for (const count of [1, 2, 30]) {
+      const report = await importAt(server, later(first, count))
+
+      expect(report.kind === 'imported' ? report.warnings : []).toEqual([])
+    }
+
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+    expect(await goalsOf(roundEleven)).toHaveLength(3)
+    expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: false }])
+    expect(await log()).toEqual([])
+  })
+
+  it('stops being live when the import is first: the result follows Wikipedia, and the same goals catch up', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await playLive()
+    Object.assign(pages, overWithTheSameGoals(pages))
+    await importAt(server, afterMatch)
+
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    expect(await edits()).toEqual([])
+    expect((await log()).map((line) => line.action)).toEqual(['match.caught-up'])
+    expect(await database.db.select().from(matchReports)).toMatchObject([{ status: 'bezig' }])
+  })
+
+  it('follows the existing handling when the import is first and the goals differ from the report', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await playLive()
+    // The same result, but Oyen scored in minute 14 and not 12.
+    Object.assign(pages, overWithTheSameGoals(pages, 2, 1, 14))
+
+    const report = await importAt(server, afterMatch)
+
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    // The goals stay the editors', and the difference is said once, with the change that waits.
+    expect(await goalsOf(roundEleven)).toHaveLength(3)
+    expect(await edits()).toMatchObject([{ goalsEdited: true }])
+    expect(report.kind === 'imported' ? report.warnings : []).toEqual([
+      expect.stringContaining('Wikipedia differs from the entry of the editors in the goals'),
+    ])
+    expect((await log()).filter((line) => line.action === 'match.differs')).toHaveLength(1)
+  })
+
+  it('stops being live when the button is first, and Wikipedia with the same result catches up', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await playLive()
+    await pressTheButton({ goalsAgainst: 1, goalsFor: 2 })
+
+    const report = await importAt(server, afterMatch)
+
+    expect(report.kind === 'imported' ? report.warnings : []).toEqual([])
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    Object.assign(pages, overWithTheSameGoals(pages))
+    await importAt(server, later(afterMatch, 2))
+
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    expect(await edits()).toEqual([])
+    expect((await log()).map((line) => line.action)).toEqual(['match.caught-up', 'match.caught-up'])
+  })
+
+  it('keeps the result of the button and says so once when Wikipedia has another result later', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await playLive()
+    await pressTheButton({ goalsAgainst: 1, goalsFor: 2 })
+    Object.assign(pages, overWithTheSameGoals(pages, 3, 1))
+
+    const report = await importAt(server, afterMatch)
+
+    expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    expect(report.kind === 'imported' ? report.warnings : []).toContainEqual(
+      expect.stringContaining('Wikipedia differs from the entry of the editors in the result'),
+    )
+    expect((await log()).filter((line) => line.action === 'match.differs').map((line) => line.detail)).toEqual(
+      expect.arrayContaining([expect.stringContaining('Uitslag')]),
+    )
+    expect(await edits()).toMatchObject([{ resultEdited: true }])
+  })
+})

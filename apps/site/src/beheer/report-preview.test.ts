@@ -342,3 +342,17 @@ describe('the shoot-out in the preview', () => {
     expect(previewDataOf(values({ serie: [kick({ speler: '9' })] }), cup, squad).kicks).toEqual([])
   })
 })
+
+describe('a match that is still being played', () => {
+  it('takes its phase from the match, and has the stand counted from the goals in the form', () => {
+    const goals = [
+      event('doelpunt', { minuut: '12', speler: 'wij-9' }),
+      event('doelpunt', { minuut: '30', speler: 'wij-10' }),
+    ]
+    const data = previewDataOf(values({ doelpunt: goals }), { ...match, phase: 'live' }, squad)
+
+    expect(data.phase).toBe('live')
+    expect([data.goalsFor, data.goalsAgainst]).toEqual([2, 0])
+    expect(previewDataOf(values(), match, squad).phase).toBeUndefined()
+  })
+})

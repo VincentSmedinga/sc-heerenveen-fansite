@@ -192,7 +192,7 @@ const competitionOf = (match: Pick<AdminMatchRow, 'competition' | 'round'>) => `
  * column of links says the same thing in every row.
  */
 function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
-  if (match.status !== 'played') {
+  if (!match.reportable) {
     return (
       <>
         <Text aria-hidden="true" as="span">
@@ -216,6 +216,11 @@ function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
   return (
     <>
       {state === 'Controleer' ? <Tag tone="attention">Controleer</Tag> : state}{' '}
+      {match.reportLive ? (
+        <>
+          <Tag tone="highlight">Live</Tag>{' '}
+        </>
+      ) : null}
       <Link href={reportPath(match.id)}>
         {state === 'Leeg' ? 'Invullen' : 'Openen'}
         <Text as="span" className="hf-visually-hidden">

@@ -80,6 +80,12 @@ export type MatchPageData = {
   opponentComplete: boolean
   /** The score of the shoot-out. */
   penalties: null | { against: number; for: number }
+  /**
+   * Where the match stands when it has no result: `live` while it is being played, and
+   * `upcoming` before its kick-off. Leave it out for a match that was played. The goals of
+   * `goalsFor` and `goalsAgainst` are then the stand so far, counted from the report.
+   */
+  phase?: 'live' | 'upcoming'
   /** The players of both teams, in the order of the form. */
   players: readonly MatchPagePlayer[]
   substitutions: readonly MatchPageSubstitution[]

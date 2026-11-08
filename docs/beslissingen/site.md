@@ -3155,6 +3155,8 @@
     De balk Wedstrijdverloop staat er bij een klaar verslag altijd, en bij een verslag dat nog wordt ingevuld alleen als de doelpunten van het verslag optellen tot de uitslag: zo'n verslag kan minder doelpunten hebben, en een balk met 0–0 boven een wedstrijd die 2–0 eindigde, zou iets onwaars zeggen.
   - **De controle in de browser:** `pnpm test:a11y` heeft een verzonnen verslag dat `bezig` is (`e2e/incomplete-report.ts`), dat de controles voor het eerste testen in de database zetten en daarna weghalen, omdat een verslag dat `bezig` is de links op andere pagina's verandert.
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat de pagina alleen voor een klaar verslag bestaat: het adres, de `slug` en de sitemap voor klare verslagen blijven.
+- **Later:** zie _Een wedstrijd die nog wordt gespeeld heeft een pagina met "Live" en een knop voor het einde_ (8 november 2026): de pagina bestaat ook voor een wedstrijd die nog `scheduled` is, vanaf zijn dag.
+  Zijn titel en beschrijving noemen dan geen stand, want die verandert; alleen de titel "... 2–1 ..." van een wedstrijd met een uitslag blijft zoals hij was.
 
 ## Het voorbeeld van de wedstrijdpagina staat naast het formulier van het verslag
 
@@ -3220,6 +3222,7 @@
   De markering houdt de import van Wikipedia van de doelpunten af.
 - **Alternatieven:** een reden bij elke keer opslaan (zoals de rest van het beheer), wat bij tientallen keren per seizoen vervelend is voor wat een gewone invoer is.
 - **Later:** vult _De invoer van de redactie staat in de gewone tabellen, met een markering_ in `importer.md` aan: ook een verslag zet `goals_edited`, en de import houdt de spelers (`appearance_id`) van de doelpunten vast zolang de markering staat.
+- **Later:** zie _Een wedstrijd die nog wordt gespeeld heeft een pagina met "Live" en een knop voor het einde_ (8 november 2026): een wedstrijd met een verslag is gespeeld, of wordt nog gespeeld (`scheduled`) en blijft dat tot de knop "Wedstrijd afgelopen" of de import hem een uitslag geeft; andere statussen kan het formulier nog niet zetten zolang het verslag er is.
 
 ## Een speler kies je uit de selectie van het seizoen, of je voegt hem toe
 
@@ -3603,3 +3606,30 @@
   We laten geen gok als feit zien (zie _De formatie van onze ploeg wordt afgeleid uit de linie van de oude fansite, alleen als de volgorde en de lijnen het eens zijn_ in `importer.md`).
   De bron en `saved_by` zijn er al, dus er komt geen kolom bij.
 - **Alternatieven:** tonen als een echte formatie (eenvoudiger, maar een afgeleide waarde als feit); een kolom `formation_derived` (een tweede waarheid naast `saved_by`).
+
+## Een wedstrijd die nog wordt gespeeld heeft een pagina met "Live" en een knop voor het einde
+
+- **Datum:** 8 november 2026
+- **Besluit:** de redactie kan een verslag invullen en publiceren terwijl de wedstrijd wordt gespeeld, en de pagina zegt dan "Live" (#906).
+  De basis staat in _Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is_ in `hosting-en-data.md`.
+  - **De pagina:** vanaf de aftrap (zonder bekende aftrap: op de dag) zegt de kop van de pagina "Live" in de pil, in woorden en niet alleen in kleur, en de stand is het aantal doelpunten per kant uit het verslag; een schermlezer hoort "Tussenstand: 2 tegen 1".
+    Voor de aftrap staan de aftrap en de opstelling er, met streepjes in plaats van een stand en "Nog niet begonnen" in de pil, zonder "Live".
+    De melding "We vullen dit verslag nog in" blijft staan.
+    `MatchHeader` heeft daarvoor `phase` (`live` of `upcoming`), en `MatchPageData` ook.
+  - **Zoekmachines en delen:** de pagina heeft `noindex`, staat niet in de sitemap, en de titel ("sc Heerenveen – N.E.C., 31 oktober 2026") en de beschrijving noemen geen stand.
+  - **Links:** een wedstrijd die live is, linkt in Wedstrijden naar zijn pagina met de tekst "Live" in plaats van "Het verslag" (`Match` met `live`).
+    Een wedstrijd met een verslag voor de aftrap linkt met "Het verslag".
+    Een geplande wedstrijd zonder verslag houdt geen link.
+    De regel meldt bij een live wedstrijd niet dat de gegevens nog niet beschikbaar zijn.
+  - **Het beheer:** het scherm van het verslag staat open voor een wedstrijd die `scheduled` is vanaf zijn dag, de lijst Verslag toont "Live" erbij, en het formulier van de wedstrijd laat een wedstrijd met een verslag `scheduled` blijven (voorheen "blijft gespeeld").
+  - **De knop "Wedstrijd afgelopen"** staat in de zijbalk van het scherm van het verslag en gaat naar een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag/afgelopen`, met twee velden (de stand uit de doelpunten van het bewaarde verslag, te wijzigen) en een knop.
+    Dat is de bevestiging: het werkt zonder JavaScript, en de redactie ziet de stand voordat de wedstrijd zijn uitslag krijgt.
+    Een stand die geen heel getal van 0 tot 99 is, komt terug met een fout bij het veld en in een lijst die het focus krijgt.
+    Verlenging en strafschoppen vult de redactie daarna in met het formulier van de wedstrijd.
+  - **De import van Wikipedia:** zet de import de wedstrijd op `played` voordat de knop is gebruikt, dan stopt "Live" ook, en een verschil met de doelpunten volgt de bestaande afhandeling (`edited-matches.ts`); gebruikt de redactie de knop eerst, dan is de uitslag een invoer van de redactie die de import als zodanig beoordeelt.
+    Tests in `import-edited-matches.test.ts` dekken beide volgorden.
+- **Waarom:** bezoekers willen de opstelling en de doelpunten zien zodra ze er zijn, en een wedstrijd die nog bezig is mag niets veranderen aan de lijsten en cijfers van de site.
+  De knop maakt het einde een bewuste stap, waarna de wedstrijd zijn uitslag heeft zonder te wachten op Wikipedia.
+- **Nadeel:** een pagina wordt tot vijf minuten bewaard (de verslagen van het lopende seizoen), dus een doelpunt staat niet meteen op de pagina.
+  Het verversen is werk van #908.
+- **Alternatieven:** een bevestiging als dialoog met JavaScript (werkt niet zonder, en de focus is moeilijker goed te krijgen); de knop meteen laten schrijven zonder bevestiging (een verkeerde stand komt dan op de site); de stand in de titel en de beschrijving (die veranderen na elk doelpunt).

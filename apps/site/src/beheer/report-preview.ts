@@ -58,6 +58,8 @@ export type ReportPreviewMatch = {
   opponent: string
   /** The score of the shoot-out. */
   penalties: null | { against: number; for: number }
+  /** `live` or `upcoming` for a match that is still being played; none for a played one. */
+  phase?: 'live' | 'upcoming'
 }
 
 /** The row a field belongs to, from the name of the field, when it is the row of an event. */
@@ -265,6 +267,7 @@ export function previewDataOf(
     opponent: match.opponent,
     opponentComplete: values.tegenstander === 'ja',
     penalties: match.penalties,
+    ...(match.phase === undefined ? {} : { phase: match.phase }),
     players,
     substitutions,
   }

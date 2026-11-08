@@ -124,6 +124,7 @@ export function MatchPageHeader({ data, preview = false, titleId = 'titel' }: Pa
           {...(data.penalties === null
             ? {}
             : { penaltiesAgainst: data.penalties.against, penaltiesFor: data.penalties.for })}
+          {...(data.phase === undefined ? {} : { phase: data.phase })}
           extraTime={data.extraTime}
           facts={data.facts}
           goalsAgainst={data.goalsAgainst}

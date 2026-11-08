@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getFinalPlaces, getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
-import { getReportAddresses } from '#src/report-data'
+import { getLiveReports, getReportAddresses } from '#src/report-data'
 import { matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -22,6 +22,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 
 vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getLiveReports: vi.fn(),
   getReportAddresses: vi.fn(),
 }))
 
@@ -71,6 +72,8 @@ beforeEach(() => {
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getReportAddresses).mockReset()
   vi.mocked(getReportAddresses).mockResolvedValue(new Map())
+  vi.mocked(getLiveReports).mockReset()
+  vi.mocked(getLiveReports).mockResolvedValue(new Set())
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>

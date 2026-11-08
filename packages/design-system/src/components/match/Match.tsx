@@ -57,6 +57,7 @@ export type MatchProps =
          * with a report. The line then ends with the link "Het verslag". Leave it out for a
          * match without a page, which is plain text.
          */
+        live?: never
         reportHref?: string | undefined
         resultMissing?: never
         status: 'played'
@@ -70,9 +71,20 @@ export type MatchProps =
       goals?: never
       goalsAgainst?: never
       goalsFor?: never
+      /**
+       * Whether the match is being played and has a page with a report that is filled in as it
+       * goes. The link under the match then says "Live" instead of "Het verslag", and the line
+       * does not say that the data is not available. It needs `reportHref`.
+       */
+      live?: boolean
       penaltiesAgainst?: never
       penaltiesFor?: never
-      reportHref?: never
+      /**
+       * The address of the page of this match, when it has one before the match is over: a
+       * report that is filled in while the match is played (`live`), or a line-up before the
+       * kick-off. The line then ends with a link. Leave it out for a match without a page.
+       */
+      reportHref?: string | undefined
       /**
        * Whether the match has begun, long enough ago to be over, and has no result yet. Instead
        * of a result it says "Gegevens nog niet beschikbaar", in a muted red, as the last
@@ -133,6 +145,7 @@ type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBasePr
   goals?: never
   goalsAgainst?: never
   goalsFor?: never
+  live?: never
   penaltiesAgainst?: never
   penaltiesFor?: never
   reportHref?: never
@@ -217,6 +230,10 @@ const separator = (
  * lines, for the match that needs a word more, such as "Gestaakt in minuut 82. Het restant is
  * op 11 mei gespeeld in het Abe Lenstra Stadion."
  *
+ * A match that is being played and has a report that is filled in as it goes (`live`, with
+ * `reportHref`) ends with the link "Live" in place of "Het verslag" and has no result between
+ * the names: the stand changes, and the page of the match has it.
+ *
  * The scorers of a played match are one line under the clubs, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
  * club is not named. The minute is green for a goal of sc Heerenveen and red for one of the
@@ -236,6 +253,7 @@ export const Match = ({
   goalsAgainst,
   goalsFor,
   home,
+  live,
   note,
   opponent,
   penaltiesAgainst,
@@ -368,12 +386,12 @@ export const Match = ({
       {reportHref === undefined ? null : (
         <Text className="hf-match-report">
           <Link href={reportHref} icon="arrow-right">
-            Het verslag
-            <span className="hf-visually-hidden">{` van ${first} tegen ${second}`}</span>
+            {live === true ? <span className="hf-match-live">Live</span> : 'Het verslag'}
+            <span className="hf-visually-hidden">{` ${live === true ? 'verslag ' : ''}van ${first} tegen ${second}`}</span>
           </Link>
         </Text>
       )}
-      {resultMissing ? (
+      {resultMissing && live !== true ? (
         <Text appearance="meta" className="hf-match-missing">
           Gegevens nog niet beschikbaar
         </Text>

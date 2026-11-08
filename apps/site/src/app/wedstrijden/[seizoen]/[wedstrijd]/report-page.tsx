@@ -1,6 +1,7 @@
 import type { ReportedMatch } from '@fansite/db/match-reports'
 import type { Metadata } from 'next'
 
+import { phaseOf } from '@fansite/db/match-reports'
 import { seasonOf } from '@fansite/db/season'
 import { Card, Link, type MatchHeaderFact, Page, Text, Time } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
@@ -78,23 +79,38 @@ export async function reportMetadata(seizoen: string, wedstrijd: string): Promis
   const { day, title } = titleOf(reported)
 
   const complete = isCompleteReport(reported)
+  // A match that is being played has no result and its stand changes, so neither the title nor
+  // the description names a stand (the page is not indexed either).
+  const description =
+    phaseOf(reported.match, new Date()) !== undefined
+      ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}, terwijl de wedstrijd wordt gespeeld: de opstelling en de gebeurtenissen tot nu toe. We vullen het verslag nog in.`
+      : complete
+        ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`
+        : `Wat we tot nu toe hebben van het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}. We vullen het verslag nog in.`
   const metadata = seasonPageMetadata(matchesPath, reportAddress(season, reported.match.matchDate, reported.clubSlug), {
     // A report that is not complete claims nothing about what is missing, and is not indexed.
-    description: complete
-      ? `Het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}, met het verloop, de wissels, de kaarten en de opstellingen.`
-      : `Wat we tot nu toe hebben van het verslag van ${first} – ${second} op ${day}, ${reported.match.competition}: de uitslag was ${scoreOf(reported)}. We vullen het verslag nog in.`,
+    description,
     title,
   })
 
   return complete ? metadata : { ...metadata, robots: { index: false } }
 }
 
-/** The title of the page: the clubs and the result, and the day. */
+/**
+ * The title of the page: the clubs and the result, and the day. A match that is being played
+ * has no result yet: its title has the clubs and the day alone.
+ */
 function titleOf(reported: ReportedMatch) {
   const [first, second] = clubsOf(reported)
   const day = longDay.format(new Date(`${reported.match.matchDate}T00:00:00Z`))
 
-  return { day, title: `${first} ${scoreOf(reported)} ${second}, ${day}` }
+  return {
+    day,
+    title:
+      reported.match.status === 'played'
+        ? `${first} ${scoreOf(reported)} ${second}, ${day}`
+        : `${first} – ${second}, ${day}`,
+  }
 }
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -121,7 +137,8 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
 
   const { data, reported, season } = loaded
   const now = new Date()
-  const page = matchPageDataOf(reported, factsOf(reported, now), isCompleteReport(reported))
+  const phase = phaseOf(reported.match, now)
+  const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
 
   return (
     <>
@@ -150,8 +167,9 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
  * The facts under the result: the competition and round, the day, the stadium, and what is
  * known.
  */
-function factsOf({ match }: ReportedMatch, now: Date): MatchHeaderFact[] {
-  const day = matchMoment({ ...match, status: 'played' }, now, { withYear: true })
+function factsOf({ match }: ReportedMatch, now: Date, phase: ReturnType<typeof phaseOf>): MatchHeaderFact[] {
+  // A match that is being played shows its kick-off; one that was played, its day alone.
+  const day = matchMoment(phase === undefined ? { ...match, status: 'played' } : match, now, { withYear: true })
   const facts: MatchHeaderFact[] = [
     { label: 'Competitie', value: match.competition },
     { label: 'Ronde', value: match.round },

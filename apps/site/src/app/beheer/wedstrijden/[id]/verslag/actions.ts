@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { matchesPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId, parseReason } from '#src/beheer/items'
-import { contextOf, findReportScreen, removeReport, saveReport } from '#src/beheer/match-reports'
+import { contextOf, findReportScreen, finishMatch, removeReport, saveReport } from '#src/beheer/match-reports'
 import { applyReportButton, readReportButton, readReportValues, type ReportFormState } from '#src/beheer/report-fields'
 import { checkReportForm } from '#src/beheer/report-form'
 import { requireRole } from '#src/beheer/require-role'
@@ -16,6 +16,9 @@ import { getDatabase } from '#src/database'
 // values kept, and one that works ends on the screen with a notice: both work without
 // JavaScript. Adding and removing a row are buttons of the same form, which the server answers
 // with the form again.
+
+/** Where the form that ends the match comes back to, with an error for each score. */
+export type FinishFormState = { errors?: Partial<Record<'uitslag-wij' | 'uitslag-zij', string>> }
 
 /** Where the form for taking the report away comes back to, with its error. */
 export type RemoveReportFormState = { error?: string }
@@ -110,5 +113,56 @@ export async function submitReport(
             ? 'klaar'
             : 'opgeslagen',
     ),
+  )
+}
+
+/** The most goals a team scores in a match we accept, as the form of the match has it. */
+const mostGoals = 99
+
+/**
+ * Ends a match that is still being played with the score the editor confirmed: the match gets
+ * its result as an entry of the editors and is `played` from then on. The report stays as is.
+ * A score that is not a whole number comes back with an error at its field. If the match is not
+ * being played any more, such as when the import was first, nothing is written and the screen
+ * of the report says so.
+ */
+export async function submitFinish(
+  matchId: number,
+  _previous: FinishFormState,
+  formData: FormData,
+): Promise<FinishFormState> {
+  const { userId } = await requireRole('beheerder')
+  const id = parseItemId(matchId)
+
+  if (id === undefined) {
+    redirect(`${matchesPath}?fout=weg`)
+  }
+
+  const read = (name: 'uitslag-wij' | 'uitslag-zij') => {
+    const value = formData.get(name)
+    const text = typeof value === 'string' ? value.trim() : ''
+
+    return /^\d{1,2}$/u.test(text) && Number(text) <= mostGoals ? Number(text) : undefined
+  }
+  const goalsFor = read('uitslag-wij')
+  const goalsAgainst = read('uitslag-zij')
+
+  if (goalsFor === undefined || goalsAgainst === undefined) {
+    const error = `Vul een aantal doelpunten in, een heel getal van 0 tot ${mostGoals}.`
+
+    return {
+      errors: {
+        ...(goalsFor === undefined ? { 'uitslag-wij': error } : {}),
+        ...(goalsAgainst === undefined ? { 'uitslag-zij': error } : {}),
+      },
+    }
+  }
+
+  const outcome = await finishMatch(getDatabase().db, userId, id, { goalsAgainst, goalsFor })
+
+  redirect(
+    outcome === 'missing'
+      ? `${matchesPath}?fout=weg`
+      : reportPath(id, outcome === 'done' ? 'afgelopen' : 'al-afgelopen'),
   )
 }

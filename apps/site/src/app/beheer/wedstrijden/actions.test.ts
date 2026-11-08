@@ -736,7 +736,9 @@ describe('submitMatch for a match with a report', () => {
     const answer = await submit(matchId, form({ status: 'postponed', 'uitslag-wij': '', 'uitslag-zij': '' }))
 
     expect(answer).toMatchObject({
-      errors: { status: 'Een wedstrijd met een verslag blijft gespeeld. Haal eerst het verslag weg.' },
+      errors: {
+        status: 'Een wedstrijd met een verslag blijft gespeeld, of wordt nog gespeeld. Haal eerst het verslag weg.',
+      },
     })
     expect((await database.db.select().from(matches))[0]).toMatchObject({ status: 'played' })
   })

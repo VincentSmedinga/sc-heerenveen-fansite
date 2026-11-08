@@ -79,6 +79,14 @@
     padding-inline: var(--hf-space-s);
   }
 
+  /*
+   * "Live" in the pill of a match that is being played: the accent colour of text, with the rim
+   * and the weight of the pill. The word is the sign; the colour only adds to it.
+   */
+  .hf-match-header-live {
+    color: var(--hf-colour-text-accent);
+  }
+
   .hf-match-header-how {
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);

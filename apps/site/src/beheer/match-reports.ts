@@ -5,13 +5,15 @@ import type { Match, MatchGoal } from '@fansite/db/schema'
 import { recordAction } from '@fansite/db/audit-log'
 import {
   clearParts,
+  describeEntryResult,
   encodeGoals,
   encodeMatch,
   type GoalSnapshot,
   insertGoals,
+  markedParts,
   refreshSnapshot,
 } from '@fansite/db/match-edits'
-import { logReportGoalDifferences, readMatchReport } from '@fansite/db/match-reports'
+import { logReportGoalDifferences, mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
 import {
   matchAppearances,
   matchCards,
@@ -51,6 +53,15 @@ import { checkReportForm } from './report-form'
 /** Why a report marks the goals as the editors', in `match_edits` and in the log. */
 export const reportReason = 'Verslag van de wedstrijd'
 
+/** Why the button "Wedstrijd afgelopen" marks the result as the editors', in the log. */
+export const finishReason = 'Wedstrijd afgelopen'
+
+/**
+ * What the button "Wedstrijd afgelopen" did: the match has its result, or it was not being
+ * played any more (`not-live`: the import or an editor was first), or there is no such match.
+ */
+export type FinishMatchOutcome = 'done' | 'missing' | 'not-live'
+
 /** What taking the report away did: it is gone, there was none, or there is no such match. */
 export type RemoveReportOutcome = 'done' | 'missing' | 'none'
 
@@ -70,14 +81,15 @@ export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): Report
 }
 
 /**
- * The match with this number for the report screen: only a match that was played has one, so
- * any other gives `undefined`, as a match that does not exist. `report` is empty for a match
- * without a report.
+ * The match with this number for the report screen: a match that was played has one, and so
+ * does a match that is still `scheduled` from the day it is played (`mayHaveReport`). Any other
+ * gives `undefined`, as a match that does not exist. `report` is empty for a match without a
+ * report.
  */
-export async function findReportScreen(db: Pick<Database, 'select'>, id: number) {
+export async function findReportScreen(db: Pick<Database, 'select'>, id: number, now = new Date()) {
   const [match] = await db.select().from(matches).where(eq(matches.id, id))
 
-  if (match === undefined || match.status !== 'played') {
+  if (match === undefined || !mayHaveReport(match, now)) {
     return undefined
   }
 
@@ -87,6 +99,89 @@ export async function findReportScreen(db: Pick<Database, 'select'>, id: number)
     report: await readMatchReport(db, id),
     squad: await readSquad(db, match.season),
   }
+}
+
+/**
+ * Ends a match that is still being played: the match gets the result the editor confirmed, as
+ * an entry of the editors (`match_edits`, like a result they enter in the form of the match),
+ * and the log gets `match.edit` with the reason. The match becomes `played`, so the page stops
+ * saying "Live" and the usual rules of a report apply. The report itself stays as it is: it is
+ * still `bezig` and the editor finishes it. A change of Wikipedia that waited for this match is
+ * stale, since the entry is a newer word. If the match is not `scheduled` any more, such as
+ * when the import was first, nothing is written.
+ */
+export async function finishMatch(
+  db: Database,
+  userId: number,
+  id: number,
+  result: { goalsAgainst: number; goalsFor: number },
+  now = new Date(),
+): Promise<FinishMatchOutcome> {
+  return db.transaction(async (transaction) => {
+    const [match] = await transaction.select().from(matches).where(eq(matches.id, id)).for('update')
+
+    if (match === undefined) {
+      return 'missing'
+    }
+
+    const [report] = await transaction.select().from(matchReports).where(eq(matchReports.matchId, id)).for('update')
+
+    if (match.status !== 'scheduled' || report === undefined) {
+      return 'not-live'
+    }
+
+    const goals = await transaction
+      .select()
+      .from(matchGoals)
+      .where(eq(matchGoals.matchId, id))
+      .orderBy(asc(matchGoals.id))
+    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
+
+    await transaction
+      .update(matches)
+      .set({ goalsAgainst: result.goalsAgainst, goalsFor: result.goalsFor, resultSetAt: now, status: 'played' })
+      .where(eq(matches.id, id))
+
+    if (edit === undefined) {
+      await transaction.insert(matchEdits).values({
+        beforeGoals: encodeGoals(goals),
+        beforeMatch: encodeMatch(match),
+        editedAt: now,
+        editedBy: userId,
+        matchId: id,
+        reason: finishReason,
+        resultEdited: true,
+      })
+    } else {
+      await transaction
+        .update(matchEdits)
+        .set({
+          editedAt: now,
+          editedBy: userId,
+          reason: finishReason,
+          reportedResult: null,
+          resultEdited: true,
+          // A part that comes back after Wikipedia took it over is kept as Wikipedia has it.
+          ...(markedParts(edit).includes('result') ? {} : refreshSnapshot(edit, match, goals, ['result'])),
+        })
+        .where(eq(matchEdits.matchId, id))
+    }
+
+    await rejectPending(transaction, id, now, ['result'])
+    await recordAction(
+      transaction,
+      {
+        action: 'match.edit',
+        detail: `Uitslag: ${describeEntryResult({ ...match, ...result, status: 'played' })}`,
+        itemId: id,
+        reason: finishReason,
+        userId,
+      },
+      now,
+    )
+
+    return 'done'
+  })
 }
 
 /**
@@ -234,7 +329,7 @@ export async function saveReport(
     if (match === undefined) {
       return { status: 'missing' } as const
     }
-    if (match.status !== 'played') {
+    if (!mayHaveReport(match, now)) {
       return { status: 'not-played' } as const
     }
 

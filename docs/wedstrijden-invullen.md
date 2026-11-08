@@ -158,6 +158,19 @@ Het formulier van de wedstrijd laat ze dan zien, met een link naar het verslag.
 
 "Verslag weghalen" (in de zijbalk, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
 
+### Een verslag tijdens de wedstrijd
+
+Vanaf de dag van de wedstrijd kun je het verslag al invullen, terwijl de wedstrijd nog wordt gespeeld.
+De wedstrijd blijft dan gepland, zonder uitslag, en op de pagina van de wedstrijd staat "Live" zodra de aftrap voorbij is, met de stand uit de doelpunten die je invult.
+Voor de aftrap staan de aftrap en de opstelling erop.
+De doelpunten van zo'n wedstrijd tellen nergens mee, tot hij is afgelopen.
+
+Is de wedstrijd afgelopen, kies dan in de zijbalk van het verslag "Wedstrijd afgelopen".
+Je ziet de stand uit de doelpunten van het bewaarde verslag, die je kunt aanpassen, en kiest dan nog eens "Wedstrijd afgelopen".
+De wedstrijd heeft dan zijn uitslag en "Live" is weg.
+Het verslag blijft bezig: maak het af (de bank, de minuten) en zet het dan op klaar.
+Verlenging en strafschoppen vul je in met het formulier van de wedstrijd.
+
 ## Een verslag plakken
 
 Typ je het verslag liever als tekst uit een bron die je naast je hebt?

@@ -54,6 +54,7 @@ const meta = preview.meta({
           'Een wedstrijd die nooit meer wordt gespeeld, zoals in een seizoen dat is stilgelegd, is `cancelled` en zegt op dezelfde plaats en op dezelfde manier "Geannuleerd".',
           'Hij heeft geen uitslag en geen regel over gegevens die ontbreken.',
           '',
+          'Wordt een wedstrijd gespeeld en heeft hij al een pagina met een verslag dat bijgewerkt wordt, dan zet je `live` en geef je `reportHref`: de link zegt "Live" in plaats van "Het verslag", en de regel meldt geen ontbrekende gegevens.',
           'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
           'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de andere regels, in een gedempt rood, en niet vet.',
           'De tijd blijft staan.',
@@ -864,6 +865,37 @@ const renderWithReport = () => (
 export const WithReport = meta.story({
   name: 'Met een pagina: de regel eindigt met de link naar het verslag, de andere regel heeft geen link',
   render: renderWithReport,
+})
+
+// A match that is being played and has a page: the link says "Live", with no result.
+const renderLive = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="live-kop">
+      <Heading id="live-kop" level={2}>
+        Eredivisie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="2026-11-01T13:30:00Z"
+            home
+            live
+            opponent="Voorbeeld United"
+            reportHref="#live"
+            round="Speelronde 12"
+            stadium="Stadion Proeflaan"
+            status="scheduled"
+            time="zo 1 nov 14:30"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const Live = meta.story({
+  name: 'Wordt gespeeld: de regel eindigt met de link "Live", zonder uitslag',
+  render: renderLive,
 })
 
 // The goals of an old match: the minute of one goal is not known, so its line has a dash.

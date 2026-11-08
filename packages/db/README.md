@@ -296,6 +296,7 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 
 - `readMatchReport(db, matchId)` geeft het verslag met zijn spelers en gebeurtenissen op volgorde van de klok (minuut, blessuretijd, dan `id`), of niets;
 - `listSeasonReports(db, season)` geeft de wedstrijden van een seizoen met de status van hun verslag (`bezig`, `klaar` of leeg);
+- `mayHaveReport(match, now)` zegt of een wedstrijd een verslag kan hebben: hij is gespeeld, of hij is nog `scheduled` en zijn dag (Nederlandse tijd) is gekomen, en `phaseOf(match, now)` zegt of zo'n wedstrijd `live` is (vanaf de aftrap, zonder aftrap vanaf de dag) of `upcoming`;
 - `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
   Een speler van de bank die niet inviel, heeft een rij met nullen, en een speler met een persoon heeft de delen van zijn naam (`personGivenName` en de twee andere).
 - `findReportGoalDifferences(db, season)` en `logReportGoalDifferences(db, season, userId)` vergelijken de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is, en schrijven een verschil als `player.stats-differ` in het logboek (#832), als de importer nieuwe cijfers in de tabel zet (zonder account) en als de redactie een verslag als `klaar` opslaat.
@@ -304,6 +305,8 @@ De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzo
 Een tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale: met verlenging, wissels en kaarten tot minuut 120 en een strafschoppenserie die we met 4–3 wonnen.
 Vier spelers van ons staan er zonder rugnummer in, twee in de basis en twee op de bank, zoals in de oude opstellingen.
 `readMatchReport` geeft de schoten van de serie mee als `shootout`, en `listReportedMatches` en `findReportedMatch` ook, voor de pagina van de wedstrijd.
+Die twee geven ook een wedstrijd die nog `scheduled` is, als hij een verslag heeft (zie _Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is_ in `docs/beslissingen/hosting-en-data.md`).
+De doelpunten van zo'n wedstrijd staan in `match_goals` en in het verslag, maar de lijsten van de site lezen alleen de doelpunten van een gespeelde wedstrijd (`withGoals` in `queries.ts`).
 
 ## De tabel `articles`
 
@@ -910,7 +913,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
 - `@fansite/db/persons`: `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat de persoon van een titel vindt of maakt en zijn titels in `person_pages` zet, met `knownPersonPages` en `rememberedPersonArticles` voor de titels in `person_pages`;
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
-- `@fansite/db/match-reports`: `readMatchReport`, `listSeasonReports`, `readPlayerReportStats`, `reportForRules` en `matchForRules` voor de verslagen van wedstrijden (zie _De tabellen van een verslag_);
+- `@fansite/db/match-reports`: `readMatchReport`, `listSeasonReports`, `readPlayerReportStats`, `reportForRules`, `matchForRules`, `mayHaveReport` en `phaseOf` voor de verslagen van wedstrijden (zie _De tabellen van een verslag_);
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;

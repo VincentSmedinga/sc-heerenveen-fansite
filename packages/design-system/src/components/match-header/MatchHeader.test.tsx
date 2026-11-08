@@ -209,3 +209,45 @@ describe('MatchHeader', () => {
     ])
   })
 })
+
+describe('MatchHeader for a match without a result', () => {
+  it('says "Live" in the pill and "Tussenstand" for a screen reader, with no outcome and no colour of one', () => {
+    const { container } = render(<MatchHeader {...props} goalsAgainst={1} goalsFor={2} phase="live" />)
+
+    expect(text(container, '.hf-match-header-outcome')).toBe('Live')
+    expect(container.querySelector('.hf-match-header-outcome')?.classList.contains('hf-match-header-live')).toBe(true)
+    expect(text(container, '.hf-match-header-result')).toBe('2–1')
+    expect(container.textContent).toContain('Tussenstand: 2 tegen 1')
+    expect(container.textContent).not.toContain('Eindstand')
+    expect(container.textContent).not.toMatch(/Gewonnen|Verloren|Gelijkspel/u)
+    expect(container.querySelector('.hf-match-win, .hf-match-loss, .hf-match-draw')).toBeNull()
+  })
+
+  it('keeps the pill of a match that was played as it was, with the outcome in words', () => {
+    const { container } = render(<MatchHeader {...props} />)
+
+    expect(text(container, '.hf-match-header-outcome')).toBe('Gewonnen')
+    expect(container.textContent).toContain('Eindstand: 6 tegen 0')
+    expect(container.querySelector('.hf-match-header-live')).toBeNull()
+  })
+
+  it('shows dashes and "Nog niet begonnen" for a match before its kick-off, with no stand to read', () => {
+    const { container } = render(<MatchHeader {...props} phase="upcoming" />)
+
+    expect(text(container, '.hf-match-header-outcome')).toBe('Nog niet begonnen')
+    expect(text(container, '.hf-match-header-result')).toBe('–')
+    expect([...container.querySelectorAll('.hf-match-header-goals')].map((goals) => goals.textContent)).toEqual([
+      '–',
+      '–',
+    ])
+    expect(container.textContent).not.toMatch(/Tussenstand|Eindstand/u)
+  })
+
+  it('does not write extra time or a shoot-out into a match that is being played', () => {
+    const { container } = render(
+      <MatchHeader {...props} extraTime penaltiesAgainst={3} penaltiesFor={4} phase="live" />,
+    )
+
+    expect(container.querySelector('.hf-match-header-how')).toBeNull()
+  })
+})

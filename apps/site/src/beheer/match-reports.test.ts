@@ -31,6 +31,7 @@ import { findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entri
 import {
   contextOf,
   findReportScreen,
+  finishMatch,
   listReportsToCheck,
   removeReport,
   reportReason,
@@ -447,7 +448,7 @@ describe('saveReport', () => {
     expect((await database.db.select().from(players)).filter((player) => player.source === 'verslag')).toHaveLength(1)
   })
 
-  it('lets a change of Wikipedia that waited for the goals go, and writes nothing for a match that was not played', async () => {
+  it('lets a change of Wikipedia that waited for the goals go, and writes nothing for a match that is called off', async () => {
     await database.db.insert(matchChanges).values({
       changed: 'doelpunten',
       class: 'suspicious',
@@ -477,7 +478,7 @@ describe('saveReport', () => {
         goalsFor: null,
         matchDate: '2026-11-07',
         round: 'Speelronde 12',
-        status: 'scheduled',
+        status: 'postponed',
       },
     ])
     const [scheduled] = await database.db.insert(matches).values(other!).$returningId()
@@ -700,7 +701,7 @@ describe('the report as the form reads it', () => {
     expect(values.status).toBe('bezig')
   })
 
-  it('has a screen only for a match that was played', async () => {
+  it('has a screen only for a match that was played or is being played', async () => {
     const [values] = await withClubs(database.db, [
       {
         ...played,
@@ -708,13 +709,192 @@ describe('the report as the form reads it', () => {
         goalsFor: null,
         matchDate: '2026-11-07',
         round: 'Speelronde 12',
-        status: 'scheduled',
+        status: 'postponed',
       },
     ])
-    const [scheduled] = await database.db.insert(matches).values(values!).$returningId()
+    const [postponed] = await database.db.insert(matches).values(values!).$returningId()
 
-    expect(await findReportScreen(database.db, scheduled?.id ?? 0)).toBeUndefined()
+    expect(await findReportScreen(database.db, postponed?.id ?? 0)).toBeUndefined()
     expect(await findReportScreen(database.db, 999_999)).toBeUndefined()
+  })
+})
+
+describe('a match that is still being played', () => {
+  /** The report of the match as an editor saves it while it is played: bezig. */
+  const bezig = (): ReportValues => ({ ...report(), status: 'bezig' })
+  const day = new Date('2026-10-31T19:00:00Z')
+  const live: Omit<NewMatch, 'clubId'> = {
+    ...played,
+    goalsAgainst: null,
+    goalsFor: null,
+    status: 'scheduled',
+  }
+
+  /** Turns the match of the test into one that is being played, as the checks see it. */
+  async function beginMatch(overrides: Partial<typeof live> = {}) {
+    await database.db
+      .update(matches)
+      .set({ ...live, ...overrides })
+      .where(eq(matches.id, matchId))
+
+    seen = { ...live, ...overrides } as never
+  }
+
+  it('has a screen from its day, and not before', async () => {
+    await beginMatch()
+
+    expect((await findReportScreen(database.db, matchId, day))?.match.status).toBe('scheduled')
+    // The day begins at midnight in the Netherlands: 23:00 in UTC, the clocks being back.
+    expect(await findReportScreen(database.db, matchId, new Date('2026-10-30T22:59:00Z'))).toBeUndefined()
+    expect(await findReportScreen(database.db, matchId, new Date('2026-10-30T23:00:00Z'))).toBeDefined()
+  })
+
+  it('saves a report that is bezig, keeps the goals out of the match, and gives no result to the match', async () => {
+    await beginMatch()
+
+    const plan = checked(bezig())
+
+    expect(await saveReport(database.db, userId, matchId, plan, t0)).toEqual({ status: 'saved' })
+    expect((await goalsOf()).length).toBe(3)
+    expect((await edits())[0]).toMatchObject({ goalsEdited: true, resultEdited: false })
+    expect((await database.db.select().from(matches).where(eq(matches.id, matchId)))[0]).toMatchObject({
+      goalsAgainst: null,
+      goalsFor: null,
+      resultSetAt: null,
+      status: 'scheduled',
+    })
+    expect((await readMatchReport(database.db, matchId))?.report.status).toBe('bezig')
+  })
+
+  it('does not let a report be klaar before the match is over', async () => {
+    await beginMatch()
+
+    const found = checkReportForm(report(), { match: seen, squad })
+
+    expect(Object.values(found.errors).join(' ')).toContain('De wedstrijd is nog niet afgelopen')
+    expect(found.plan?.status).toBe('klaar')
+  })
+
+  it('is not "to check" in the list, and has a status for the list', async () => {
+    await beginMatch()
+    await save(bezig())
+
+    expect((await listAdminMatches(database.db, '2026/27', day)).rows[0]).toMatchObject({
+      goalsFor: null,
+      reportable: true,
+      reportLive: true,
+      reportStatus: 'bezig',
+      reportToCheck: false,
+    })
+    // Before the kick-off the report is there, but the match is not live.
+    expect((await listAdminMatches(database.db, '2026/27', new Date('2026-10-31T10:00:00Z'))).rows[0]).toMatchObject({
+      reportable: true,
+      reportLive: false,
+    })
+  })
+
+  describe('finishMatch', () => {
+    it('gives the match the result as an entry of the editors, logs it, and leaves the report bezig', async () => {
+      await beginMatch()
+      await save(bezig())
+
+      expect(await finishMatch(database.db, userId, matchId, { goalsAgainst: 1, goalsFor: 2 }, t1)).toBe('done')
+
+      expect((await database.db.select().from(matches).where(eq(matches.id, matchId)))[0]).toMatchObject({
+        goalsAgainst: 1,
+        goalsFor: 2,
+        resultSetAt: t1,
+        status: 'played',
+      })
+      expect((await edits())[0]).toMatchObject({ goalsEdited: true, reason: 'Wedstrijd afgelopen', resultEdited: true })
+      expect(markedParts((await edits())[0]!)).toEqual(['result', 'goals'])
+      expect((await readMatchReport(database.db, matchId))?.report.status).toBe('bezig')
+      expect((await goalsOf()).length).toBe(3)
+      expect((await log()).at(-1)).toMatchObject({
+        action: 'match.edit',
+        detail: 'Uitslag: sc Heerenveen 2–1 N.E.C.',
+        itemId: matchId,
+        reason: 'Wedstrijd afgelopen',
+        userId,
+      })
+    })
+
+    it('takes the result the editor changed, and then the usual rules apply: the goals must add up', async () => {
+      await beginMatch()
+      await save(bezig())
+      await finishMatch(database.db, userId, matchId, { goalsAgainst: 1, goalsFor: 3 }, t1)
+
+      const screen = await findReportScreen(database.db, matchId)
+      const found = checkReportForm(valuesOfReport(screen?.report, screen?.goals ?? [], squad), contextOf(screen!))
+
+      expect(found.errors).not.toEqual({})
+      expect(Object.values(found.errors).join(' ')).toContain('De doelpunten geven 2–1 en de uitslag is 3–1')
+    })
+
+    it('lets a change of Wikipedia that waited for the result go, and keeps a mark of the result once', async () => {
+      await beginMatch()
+      await save(bezig())
+      await database.db.insert(matchChanges).values({
+        changed: 'uitslag',
+        class: 'suspicious',
+        competition: 'Eredivisie',
+        firstSeenAt: t0,
+        lastSeenAt: t0,
+        matchId,
+        newValue: 'x',
+        oldValue: 'y',
+        part: 'result',
+        reason: 'wijkt af van de invoer van de redactie',
+        round: 'Speelronde 11',
+        season: '2026/27',
+        status: 'pending',
+      })
+
+      await finishMatch(database.db, userId, matchId, { goalsAgainst: 1, goalsFor: 2 }, t1)
+
+      expect((await database.db.select().from(matchChanges))[0]).toMatchObject({
+        resolution: 'replaced',
+        status: 'rejected',
+      })
+      expect(await edits()).toHaveLength(1)
+    })
+
+    it('writes nothing when the import was first, or the match has no report, or there is no such match', async () => {
+      await beginMatch()
+      await save(bezig())
+      // The import took the result over before the editor used the button.
+      await database.db
+        .update(matches)
+        .set({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+        .where(eq(matches.id, matchId))
+
+      const before = (await log()).length
+
+      expect(await finishMatch(database.db, userId, matchId, { goalsAgainst: 5, goalsFor: 5 }, t1)).toBe('not-live')
+      expect((await database.db.select().from(matches).where(eq(matches.id, matchId)))[0]).toMatchObject({
+        goalsAgainst: 1,
+        goalsFor: 2,
+      })
+      expect(await finishMatch(database.db, userId, 999_999, { goalsAgainst: 0, goalsFor: 0 }, t1)).toBe('missing')
+      expect((await log()).length).toBe(before)
+
+      await database.db.delete(matchReports)
+      await database.db.update(matches).set(live).where(eq(matches.id, matchId))
+      expect(await finishMatch(database.db, userId, matchId, { goalsAgainst: 0, goalsFor: 0 }, t1)).toBe('not-live')
+    })
+
+    it('undoes with the entry of the match: back to a match that is not played, with its goals', async () => {
+      await beginMatch()
+      await save(bezig())
+      await finishMatch(database.db, userId, matchId, { goalsAgainst: 1, goalsFor: 2 }, t1)
+
+      expect(await undoEntry(database.db, userId, matchId, 'Per ongeluk', t1)).toBe('done')
+      expect((await database.db.select().from(matches).where(eq(matches.id, matchId)))[0]).toMatchObject({
+        goalsAgainst: null,
+        goalsFor: null,
+        status: 'scheduled',
+      })
+    })
   })
 })
 

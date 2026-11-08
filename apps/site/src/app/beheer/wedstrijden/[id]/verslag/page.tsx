@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
-import { Breadcrumb, Card, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import { phaseOf } from '@fansite/db/match-reports'
+import { Breadcrumb, Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
+import { finishPath, matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { contextOf, findReportScreen, seriesOf, valuesOfReport } from '#src/beheer/match-reports'
@@ -31,6 +32,14 @@ type Props = {
 
 /** What the last action says, by the word in the address. */
 const notices: Record<string, { text: string; title: string }> = {
+  afgelopen: {
+    text: 'De wedstrijd heeft nu zijn uitslag en telt mee in de cijfers. Het verslag is nog bezig: maak het af en zet het dan op klaar.',
+    title: 'Wedstrijd afgelopen',
+  },
+  'al-afgelopen': {
+    text: 'De wedstrijd had al een uitslag, bijvoorbeeld van de import van Wikipedia. Er is niets veranderd.',
+    title: 'Al afgelopen',
+  },
   'geen-verslag': { text: 'Er was geen verslag om weg te halen.', title: 'Niets weggehaald' },
   klaar: { text: 'De regels vinden niets mis. Dit verslag telt mee op de site.', title: 'Klaar' },
   'nog-niet-klaar': {
@@ -63,6 +72,8 @@ export default async function ReportPage({ params, searchParams }: Props) {
 
   const { goals, match, report, squad } = screen
   const { gedaan } = await searchParams
+  const now = new Date()
+  const phase = phaseOf(match, now)
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
@@ -79,7 +90,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
       choices={{
         matchHref: matchPath(match.id),
         opponent: match.opponent,
-        preview: previewMatchOf(match, new Date()),
+        preview: previewMatchOf(match, now),
         series: seriesOf(match),
         showDelay: describeShowDelay(match.season),
         squad,
@@ -103,8 +114,12 @@ export default async function ReportPage({ params, searchParams }: Props) {
             />
             <Heading level={1}>Verslag: {clubs}</Heading>
             <Text appearance="meta">
-              {match.competition}, {match.round} · {describeEntryKickoff(match)} · Uitslag {match.goalsFor}–
-              {match.goalsAgainst}
+              {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
+              {phase === undefined
+                ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}`
+                : phase === 'live'
+                  ? 'De wedstrijd wordt gespeeld, nog geen uitslag'
+                  : 'De wedstrijd is nog niet begonnen'}
             </Text>
             <Text>
               {status === undefined ? (
@@ -112,6 +127,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
               ) : (
                 <Tag tone="highlight">{status === 'klaar' ? 'Klaar' : 'Bezig'}</Tag>
               )}{' '}
+              {phase === 'live' && status !== undefined ? <Tag tone="highlight">Live</Tag> : null}{' '}
               {toCheck ? <Tag tone="attention">Controleer</Tag> : null}
             </Text>
           </>
@@ -137,6 +153,20 @@ export default async function ReportPage({ params, searchParams }: Props) {
             Tekst plakken
           </Link>
         </Card>
+        {phase === undefined || report === undefined ? null : (
+          <Card aria-labelledby="afgelopen-kop">
+            <Heading id="afgelopen-kop" level={2}>
+              Wedstrijd afgelopen
+            </Heading>
+            <Text>
+              Zodra de wedstrijd is afgelopen, krijgt hij zijn uitslag uit de doelpunten van dit verslag. Bewaar eerst
+              je wijzigingen.
+            </Text>
+            <Form action={finishPath(match.id)} method="get">
+              <Button type="submit">Wedstrijd afgelopen</Button>
+            </Form>
+          </Card>
+        )}
         {report === undefined ? null : (
           <RemoveReportForm action={submitRemoveReport.bind(null, match.id)} title={title} />
         )}

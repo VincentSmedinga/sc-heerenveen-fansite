@@ -69,8 +69,8 @@ export default async function PasteReportPage({ params }: Props) {
             />
             <Heading level={1}>Verslag plakken: {clubs}</Heading>
             <Text appearance="meta">
-              {match.competition}, {match.round} · {describeEntryKickoff(match)} · Uitslag {match.goalsFor}–
-              {match.goalsAgainst}
+              {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
+              {match.status === 'played' ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}` : 'Nog geen uitslag'}
             </Text>
           </>
         }

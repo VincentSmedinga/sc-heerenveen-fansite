@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
+import { mayHaveReport } from '@fansite/db/match-reports'
 import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -136,7 +137,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
             <Text appearance="meta">
               {match.competition}, {match.round} · {describeEntryKickoff(match)}
             </Text>
-            {match.status === 'played' ? (
+            {mayHaveReport(match, new Date()) ? (
               <Text>
                 <Link href={reportPath(match.id)}>{hasReport ? 'Naar het verslag' : 'Het verslag invullen'}</Link>
               </Text>

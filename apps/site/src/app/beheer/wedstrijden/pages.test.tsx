@@ -8,6 +8,7 @@ import {
   matchEdits,
   matches,
   matchGoals,
+  matchReports,
   type NewMatch,
   players,
   wikipediaPages,
@@ -1008,7 +1009,8 @@ describe('the report in the list and on the match', () => {
 
   it('has a column Verslag: empty with a link to fill it in, and a dash for a match that was not played', async () => {
     await addMatch(playedAway)
-    await addMatch()
+    // A match of a later day has no report yet; one of today or before can have one.
+    await addMatch({ matchDate: '2099-01-01' })
 
     const html = await list({ tonen: 'alles' })
 
@@ -1050,10 +1052,28 @@ describe('the report in the list and on the match', () => {
 
   it('links a match that was played to its report when it has none, and a match that was not played has no link', async () => {
     const played = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
-    const planned = await addMatch({ round: 'Speelronde 12' })
+    const planned = await addMatch({ matchDate: '2099-01-01', round: 'Speelronde 12' })
+    const today = await addMatch({ round: 'Speelronde 13' })
 
     expect(await form(played)).toContain(`href="/beheer/wedstrijden/${played}/verslag">Het verslag invullen</a>`)
     expect(await form(played)).toContain('value="doelpunt-toevoegen"')
     expect(await form(planned)).not.toContain('/verslag')
+    // A match that is still being played, from its day on, can have a report too.
+    expect(await form(today)).toContain(`href="/beheer/wedstrijden/${today}/verslag">Het verslag invullen</a>`)
+  })
+
+  it('says Live in the column Verslag for a match that is being played and has a report', async () => {
+    const id = await addMatch()
+
+    await database.db.insert(matchReports).values({ matchId: id, opponentComplete: false, status: 'bezig' })
+
+    expect(await list({ tonen: 'alles' })).toMatch(/Bezig <span[^>]*>Live<\/span> <a [^>]*>Openen/u)
+
+    // Before the kick-off the match has a report, and is not live.
+    await database.db
+      .update(matches)
+      .set({ kickoffAt: new Date(Math.floor(Date.now() / 1000) * 1000 + 60 * 60 * 1000) })
+      .where(eq(matches.id, id))
+    expect(await list({ tonen: 'alles' })).not.toContain('>Live<')
   })
 })

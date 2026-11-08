@@ -1,5 +1,7 @@
 import type { Match } from '@fansite/db/schema'
 
+import { phaseOf } from '@fansite/db/match-reports'
+
 import { matchMoment } from '#src/match-format'
 
 import type { ReportPreviewMatch } from './report-preview'
@@ -12,7 +14,9 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
  * the result of the shoot-out. They come from the match, not from the form.
  */
 export function previewMatchOf(match: Match, now: Date): ReportPreviewMatch {
-  const day = matchMoment({ ...match, status: 'played' }, now, { withYear: true })
+  const phase = phaseOf(match, now)
+  // A match that is being played shows its kick-off, as the page of the match does.
+  const day = matchMoment(phase === undefined ? { ...match, status: 'played' } : match, now, { withYear: true })
   const facts = [
     { label: 'Competitie', value: match.competition },
     { label: 'Ronde', value: match.round },
@@ -43,6 +47,7 @@ export function previewMatchOf(match: Match, now: Date): ReportPreviewMatch {
     facts,
     home: match.home,
     opponent: match.opponent,
+    ...(phase === undefined ? {} : { phase }),
     penalties:
       match.penaltiesFor !== null && match.penaltiesAgainst !== null
         ? { against: match.penaltiesAgainst, for: match.penaltiesFor }
