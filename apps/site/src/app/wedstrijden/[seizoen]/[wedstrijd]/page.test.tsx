@@ -179,8 +179,26 @@ describe('the page of a match', () => {
     const html = await render()
 
     expect(html).not.toContain('aria-label="Opstelling sc Heerenveen')
-    expect(plain(html)).toContain('Voor sc Heerenveen past de formatie niet bij de spelers')
+    expect(plain(html)).toContain('Van sc Heerenveen hebben we de formatie niet')
     expect(html).toContain('aria-label="Opstelling Testdorp FC, 4-4-2"')
+  })
+
+  it('draws no pitch for a report without formations, and opens the list with a sentence for each team', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.formationOurs = null
+    reported.stored.report.formationOpponent = null
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(html).not.toContain('hf-match-pitch-field')
+    expect(html).not.toContain('Uitleg van de merken')
+    expect(html).toMatch(/<details[^>]* open/u)
+    expect(text).toContain('Van sc Heerenveen hebben we de formatie niet; de spelers staan in de lijst hieronder.')
+    expect(text).toContain('Van Testdorp FC hebben we de formatie niet; de spelers staan in de lijst hieronder.')
+    expect(text).toContain('Opstelling als lijst')
   })
 
   it('shows one sentence instead of the line-up of an opponent that is not complete', async () => {
@@ -369,7 +387,7 @@ describe('the page of a match', () => {
     expect(text).toContain('We vullen dit verslag nog in')
     expect(text).toContain('De opstelling van Testdorp FC hebben we niet.')
     expect(text).toContain('In deze wedstrijd is niets gebeurd wat we bijhouden.')
-    expect(text).toContain('Voor sc Heerenveen past de formatie niet bij de spelers')
+    expect(text).toContain('Van sc Heerenveen hebben we de formatie niet')
     expect(html).not.toContain('NaN')
     expect(html).not.toContain('undefined')
   })

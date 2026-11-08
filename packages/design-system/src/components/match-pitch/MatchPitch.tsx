@@ -45,6 +45,9 @@ export type MatchPitchTeam = {
   players: readonly PitchPlayerData[]
 }
 
+const hasFormation = (formation: null | string | undefined) =>
+  formation !== undefined && formation !== null && formation.trim() !== ''
+
 type Placed = { drawn: boolean; formation: null | string | undefined; team: MatchPitchTeam }
 
 function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>; team: MatchPitchTeam }) {
@@ -55,9 +58,9 @@ function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>
     <div className="hf-match-pitch-roster">
       <Heading appearance={4} level={headingLevel}>
         {team.name}
-        {team.formation === undefined || team.formation === null || team.formation === '' ? null : (
+        {hasFormation(team.formation) ? (
           <span className="hf-match-pitch-roster-formation"> · {team.formation}</span>
-        )}
+        ) : null}
       </Heading>
       <ol className="hf-match-pitch-roster-list" role="list">
         {team.players.map((player, index) => (
@@ -76,8 +79,8 @@ function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>
   )
 }
 
-function Team({ extraTime, ours, placed }: { extraTime: boolean; ours: boolean; placed: Placed }) {
-  const spots = placed.drawn ? pitchSpots(placed.formation, placed.team.players.length, ours) : null
+function Team({ extraTime, half, ours, placed }: { extraTime: boolean; half: boolean; ours: boolean; placed: Placed }) {
+  const spots = placed.drawn ? pitchSpots(placed.formation, placed.team.players.length, ours, half) : null
 
   if (spots === null) {
     return null
@@ -112,21 +115,26 @@ function Team({ extraTime, ours, placed }: { extraTime: boolean; ours: boolean; 
 }
 
 /**
- * The line-up of both teams on a pitch: a striped grass mat with the halfway line, the centre
+ * The line-up of the teams on a pitch: a striped grass mat with the halfway line, the centre
  * circle, the penalty areas and the goal areas, and on it the eleven players of each team in
  * the place of their formation (see `pitchSpots`). It stands upright on a phone, with sc
  * Heerenveen at the bottom, and lies down from 40 rem wide, with sc Heerenveen on the left.
- * Above the pitch stand the two teams with the colour of their disc (filled for sc Heerenveen,
- * open for the opponent) and their formation; under it the explanation of the marks, and under
- * that the disclosure "Opstelling als lijst" with the players of each team.
+ * Above the pitch stand the teams on it with the colour of their disc (filled for sc
+ * Heerenveen, open for the opponent) and their formation; under it the explanation of the
+ * marks, and under that the disclosure "Opstelling als lijst" with the players of each team.
+ *
+ * The pitch is as big as the number of teams on it. With two teams it is the whole pitch. With
+ * one it is the half of that team, at the same scale, so the players are as big and as far
+ * apart as on the whole pitch. With none there is no pitch, no teams above it and no
+ * explanation of the marks, and the disclosure starts open.
  *
  * For a screen reader the pitch is a list for each team, "Opstelling <team>, <formation>", with
  * one sentence for each player in the order of the formation; everything drawn is hidden from
- * it. The pitch has no controls of its own. A team without a formation, or with one that
- * does not fit the number of its players, is not on the pitch: a sentence says so, and the list
- * under the pitch names its players. With a row of five players, or five rows, the names do not
- * fit on a narrow pitch, so they are left out there and a sentence points to the list.
- * match-pitch.css gives it its look.
+ * it. The pitch has no controls of its own. A team that was given but is not on the pitch has
+ * one sentence under it: the formation is not known, or it does not fit the number of players.
+ * The list under the pitch names its players. With a row of five players, or five rows, the
+ * names do not fit on a narrow pitch, so they are left out there and a sentence points to the
+ * list. match-pitch.css gives it its look.
  */
 export const MatchPitch = ({
   children,
@@ -147,7 +155,9 @@ export const MatchPitch = ({
       } satisfies Placed,
     }),
   )
-  const missing = teams.filter(({ placed }) => !placed.drawn).map(({ placed }) => placed.team.name)
+  const drawn = teams.filter(({ placed }) => placed.drawn)
+  const half = drawn.length === 1
+  const withoutPitch = teams.filter(({ placed }) => !placed.drawn).map(({ placed }) => placed)
   const crowded = teams.some(({ placed }) => {
     const rows = placed.drawn ? parseFormation(placed.formation) : null
 
@@ -156,62 +166,77 @@ export const MatchPitch = ({
 
   return (
     <div {...props} className={classNames('hf-match-pitch', className)}>
-      <div className="hf-match-pitch-teams">
-        {teams.map(({ ours: isOurs, placed }) => (
-          <span className="hf-match-pitch-team-name" key={placed.team.name}>
-            <span
-              aria-hidden="true"
-              className={classNames('hf-match-pitch-swatch', isOurs && 'hf-match-pitch-swatch-ours')}
-            />
-            {placed.team.name}
-            {placed.drawn ? <Tag>{placed.formation ?? ''}</Tag> : null}
-          </span>
-        ))}
-      </div>
-      <div className={classNames('hf-match-pitch-field', crowded && 'hf-match-pitch-crowded')}>
-        <span className="hf-match-pitch-line hf-match-pitch-line-half" />
-        <span className="hf-match-pitch-line hf-match-pitch-line-circle" />
-        <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-first" />
-        <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-second" />
-        <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-first" />
-        <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-second" />
-        {teams.map(({ ours: isOurs, placed }) => (
-          <Team extraTime={extraTime} key={placed.team.name} ours={isOurs} placed={placed} />
-        ))}
-      </div>
+      {drawn.length === 0 ? null : (
+        <>
+          <div className="hf-match-pitch-teams">
+            {drawn.map(({ ours: isOurs, placed }) => (
+              <span className="hf-match-pitch-team-name" key={placed.team.name}>
+                <span
+                  aria-hidden="true"
+                  className={classNames('hf-match-pitch-swatch', isOurs && 'hf-match-pitch-swatch-ours')}
+                />
+                {placed.team.name}
+                <Tag>{placed.formation ?? ''}</Tag>
+              </span>
+            ))}
+          </div>
+          <div
+            className={classNames(
+              'hf-match-pitch-field',
+              half && 'hf-match-pitch-field-half',
+              half && (drawn[0]?.ours === true ? 'hf-match-pitch-field-ours' : 'hf-match-pitch-field-theirs'),
+              crowded && 'hf-match-pitch-crowded',
+            )}
+          >
+            <span className="hf-match-pitch-line hf-match-pitch-line-half" />
+            <span className="hf-match-pitch-line hf-match-pitch-line-circle" />
+            <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-first" />
+            <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-second" />
+            <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-first" />
+            <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-second" />
+            {drawn.map(({ ours: isOurs, placed }) => (
+              <Team extraTime={extraTime} half={half} key={placed.team.name} ours={isOurs} placed={placed} />
+            ))}
+          </div>
+        </>
+      )}
       {crowded ? (
         <p className="hf-match-pitch-note hf-match-pitch-note-crowded">
           Bij deze formatie passen de namen niet op een smal scherm. De lijst hieronder noemt ze.
         </p>
       ) : null}
-      {missing.length === 0 ? null : (
-        <p className="hf-match-pitch-note">
-          Voor {missing.join(' en ')} past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.
+      {withoutPitch.map((placed) => (
+        <p className="hf-match-pitch-note" key={placed.team.name}>
+          {hasFormation(placed.formation)
+            ? `Voor ${placed.team.name} past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.`
+            : `Van ${placed.team.name} hebben we de formatie niet; de spelers staan in de lijst hieronder.`}
         </p>
+      ))}
+      {drawn.length === 0 ? null : (
+        <ul aria-label="Uitleg van de merken" className="hf-match-pitch-legend" role="list">
+          <li>
+            <span aria-hidden="true" className="hf-match-pitch-legend-disc">
+              9
+            </span>
+            Rugnummer
+          </li>
+          <li>Ring: minuten gespeeld</li>
+          <li>
+            <MatchEventIcon kind="goal" /> Doelpunt
+          </li>
+          <li>
+            <MatchEventIcon kind="yellow-card" /> Kaart
+          </li>
+          <li>
+            <MatchEventIcon kind="out" /> Eruit gewisseld
+          </li>
+          <li>
+            <b aria-hidden="true">A</b> Aanvoerder
+          </li>
+        </ul>
       )}
-      <ul aria-label="Uitleg van de merken" className="hf-match-pitch-legend" role="list">
-        <li>
-          <span aria-hidden="true" className="hf-match-pitch-legend-disc">
-            9
-          </span>
-          Rugnummer
-        </li>
-        <li>Ring: minuten gespeeld</li>
-        <li>
-          <MatchEventIcon kind="goal" /> Doelpunt
-        </li>
-        <li>
-          <MatchEventIcon kind="yellow-card" /> Kaart
-        </li>
-        <li>
-          <MatchEventIcon kind="out" /> Eruit gewisseld
-        </li>
-        <li>
-          <b aria-hidden="true">A</b> Aanvoerder
-        </li>
-      </ul>
       {children}
-      <Disclosure summary="Opstelling als lijst">
+      <Disclosure open={drawn.length === 0 ? true : undefined} summary="Opstelling als lijst">
         <div className="hf-match-pitch-rosters">
           <Roster headingLevel={headingLevel} team={ours} />
           {opponent === undefined ? null : <Roster headingLevel={headingLevel} team={opponent} />}

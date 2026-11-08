@@ -54,26 +54,106 @@ describe('MatchPitch', () => {
     expect(container.querySelectorAll('.hf-match-pitch-swatch')).toHaveLength(2)
   })
 
-  it('leaves a team without a formation off the pitch and says so', () => {
-    const { container, getByText } = renderPitch(team('sc Heerenveen', '4-3-3'), team('Testdorp FC', null))
+  it('draws the whole pitch when both teams are on it', () => {
+    const { container } = renderPitch(team('sc Heerenveen', '4-3-3'), team('Testdorp FC', '4-4-2'))
 
-    expect(container.querySelectorAll('.hf-match-pitch-field ol')).toHaveLength(1)
-    expect(
-      getByText('Voor Testdorp FC past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.'),
-    ).not.toBeNull()
+    expect(container.querySelector('.hf-match-pitch-field-half')).toBeNull()
+    expect(container.querySelectorAll('.hf-match-pitch-team-name')).toHaveLength(2)
   })
 
-  it('leaves a team out when its formation does not fit its players', () => {
+  it.each([
+    ['the opponent has no formation', team('sc Heerenveen', '4-3-3'), team('Testdorp FC', null)],
+    ['the opponent has a formation that does not fit', team('sc Heerenveen', '4-3-3'), team('Testdorp FC', '4-4-3')],
+    ['the opponent has too few players', team('sc Heerenveen', '4-3-3'), team('Testdorp FC', '4-4-2', 10)],
+  ])('draws the half of sc Heerenveen alone when %s', (_case, ours, opponent) => {
+    const { container } = renderPitch(ours, opponent)
+    const names = container.querySelectorAll('.hf-match-pitch-team-name')
+
+    expect(container.querySelector('.hf-match-pitch-field')?.className).toContain('hf-match-pitch-field-ours')
+    expect(container.querySelector('.hf-match-pitch-field')?.className).toContain('hf-match-pitch-field-half')
+    expect(container.querySelectorAll('.hf-match-pitch-field ol')).toHaveLength(1)
+    expect(names).toHaveLength(1)
+    expect(names[0]?.textContent).toBe('sc Heerenveen4-3-3')
+  })
+
+  it.each([
+    ['has no formation', team('sc Heerenveen', null)],
+    ['has a formation that does not fit', team('sc Heerenveen', '4-3-3', 9)],
+  ])('draws the half of the opponent alone when sc Heerenveen %s', (_case, ours) => {
+    const { container } = renderPitch(ours, team('Testdorp FC', '4-4-2'))
+    const names = container.querySelectorAll('.hf-match-pitch-team-name')
+
+    expect(container.querySelector('.hf-match-pitch-field')?.className).toContain('hf-match-pitch-field-theirs')
+    expect(container.querySelector('.hf-match-pitch-field')?.className).toContain('hf-match-pitch-field-half')
+    expect(names).toHaveLength(1)
+    expect(names[0]?.textContent).toBe('Testdorp FC4-4-2')
+  })
+
+  it('draws the half of sc Heerenveen when the opponent is left out', () => {
+    const { container } = render(<MatchPitch headingLevel={3} ours={team('sc Heerenveen', '4-3-3')} />)
+
+    expect(container.querySelector('.hf-match-pitch-field-ours.hf-match-pitch-field-half')).not.toBeNull()
+  })
+
+  it('draws no pitch when neither team is on it, and opens the list', () => {
+    const { container } = renderPitch(team('sc Heerenveen', null), team('Testdorp FC', '4-4-4'))
+
+    expect(container.querySelector('.hf-match-pitch-field')).toBeNull()
+    expect(container.querySelector('.hf-match-pitch-teams')).toBeNull()
+    expect(container.querySelector('[aria-label="Uitleg van de merken"]')).toBeNull()
+    expect(container.querySelector('details')?.hasAttribute('open')).toBe(true)
+    expect(container.querySelectorAll('details li')).toHaveLength(22)
+  })
+
+  it('keeps the children when there is no pitch', () => {
+    const { getByText } = render(
+      <MatchPitch headingLevel={3} ours={team('sc Heerenveen', null)}>
+        <p>Wissels</p>
+      </MatchPitch>,
+    )
+
+    expect(getByText('Wissels')).not.toBeNull()
+  })
+
+  it('leaves the list closed when there is a pitch', () => {
+    const { container } = renderPitch(team('sc Heerenveen', '4-3-3'), team('Testdorp FC', null))
+
+    expect(container.querySelector('details')?.hasAttribute('open')).toBe(false)
+  })
+
+  it('says under the pitch that the formation is not known, for a team that has none', () => {
+    const { container, getByText } = renderPitch(team('sc Heerenveen', '4-3-3'), team('Testdorp FC', ''))
+
+    expect(
+      getByText('Van Testdorp FC hebben we de formatie niet; de spelers staan in de lijst hieronder.').tagName,
+    ).toBe('P')
+    expect(container.textContent).not.toContain('past de formatie niet')
+  })
+
+  it('says under the pitch that the formation does not fit, for a team whose formation does not fit its players', () => {
     const { container, getByText } = renderPitch(team('sc Heerenveen', '4-3-3', 10), team('Testdorp FC', '4-4-2'))
 
-    expect(container.querySelectorAll('.hf-match-pitch-field ol')).toHaveLength(1)
-    expect(getByText(/Voor sc Heerenveen past de formatie niet bij de spelers/u)).not.toBeNull()
+    expect(
+      getByText('Voor sc Heerenveen past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.')
+        .tagName,
+    ).toBe('P')
+    expect(container.textContent).not.toContain('hebben we de formatie niet')
   })
 
-  it('names both teams when neither fits', () => {
-    const { getByText } = renderPitch(team('sc Heerenveen', 'x'), team('Testdorp FC', ''))
+  it('gives each team that is not on the pitch a sentence of its own', () => {
+    const { container } = renderPitch(team('sc Heerenveen', null), team('Testdorp FC', 'x'))
+    const notes = [...container.querySelectorAll('.hf-match-pitch-note')].map((note) => note.textContent)
 
-    expect(getByText(/Voor sc Heerenveen en Testdorp FC past de formatie/u)).not.toBeNull()
+    expect(notes).toEqual([
+      'Van sc Heerenveen hebben we de formatie niet; de spelers staan in de lijst hieronder.',
+      'Voor Testdorp FC past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.',
+    ])
+  })
+
+  it('says nothing about a team that is not given', () => {
+    const { container } = render(<MatchPitch headingLevel={3} ours={team('sc Heerenveen', '4-3-3')} />)
+
+    expect(container.querySelector('.hf-match-pitch-note')).toBeNull()
   })
 
   it('tells that the names do not fit on a narrow screen for five in a row, and for five rows', () => {

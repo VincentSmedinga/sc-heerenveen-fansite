@@ -29,6 +29,20 @@ describe('match-pitch.css', () => {
     expect(pitch).toMatch(/\.hf-match-pitch-crowded \.hf-pitch-player-name \{\s*display: flex/u)
   })
 
+  it('cuts a pitch with one team on it in half, at the scale of the whole pitch', () => {
+    // Twice the size of the pitch, with the right half in view: the stripes of the whole pitch.
+    expect(pitch).toMatch(/\.hf-match-pitch-field-half \{\s*aspect-ratio: 10 \/ 11;\s*background-size: 100% 200%/u)
+    expect(pitch).toMatch(/background-size: 200% 100%;\s*inline-size: 50%/u)
+    expect(pitch).toMatch(/\.hf-match-pitch-field-half \{\s*aspect-ratio: 8 \/ 9/u)
+  })
+
+  it('draws the centre circle on the edge of a half, and only the goal at the end of it', () => {
+    expect(pitch).toMatch(/\.hf-match-pitch-field-ours \.hf-match-pitch-line-circle \{\s*inset-block-start: -15cqw/u)
+    expect(pitch).toMatch(
+      /\.hf-match-pitch-field-ours \.hf-match-pitch-line-first,\s*\.hf-match-pitch-field-theirs \.hf-match-pitch-line-second \{\s*display: none/u,
+    )
+  })
+
   it('has nothing that scrolls sideways or sets a minimum width that makes the names hook into each other', () => {
     expect(pitch).not.toMatch(/min-inline-size|overflow-x|scroll/u)
   })
