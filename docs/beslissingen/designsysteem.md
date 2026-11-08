@@ -283,7 +283,7 @@
 - **Datum:** 22 oktober 2026
 - **Besluit:** onder elk voorbeeld in Storybook toont "Show code" de JSX die het voorbeeld rendert, en niet de aanroep `meta.story({ ... })` eromheen.
   Daarvoor staat `parameters.docs.source` op `dynamic`, zonder de decorators.
-  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via `src/docs/exampleSource.ts`, dat het met `?raw` inleest.
+  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via een hulpbestand dat het met `?raw` inleest.
 - **Waarom:** wie een component wil gebruiken, wil zien hoe dat moet, en zo bedient één `render` de lichte en de donkere story.
   Een hulpcomponent zoals `ExampleHeader` zou anders alleen `<ExampleHeader />` laten zien, en de story van `Page` draait in een eigen venster, waar de gegenereerde code niets zegt.
   De themawrapper is een decorator en hoort niet in het voorbeeld.
@@ -291,7 +291,7 @@
   Of de standaard laten staan, die de aanroep van `meta.story` toont.
 - **Later:** zie _Een pagina in Storybook is kort, met het voorbeeld en een story per variant_.
   Een component krijgt geen lichte en donkere story meer; "Show code" toont nog steeds de JSX van het voorbeeld.
-- **Later:** zie _Show code en het paneel Code tonen de kortste code die het voorbeeld laat zien_ (8 november 2026): de stories met een hulpcomponent krijgen een korte `source.code` met de hand, en `exampleSource.ts` vervalt.
+- **Later:** zie _Show code en het paneel Code tonen de kortste code die het voorbeeld laat zien_ (8 november 2026): de stories met een hulpcomponent krijgen een korte `source.code` met de hand, en dat hulpbestand vervalt.
 
 ## Elk component heeft zijn eigen CSS
 
@@ -3004,7 +3004,7 @@
 
 - **Datum:** 8 november 2026
 - **Besluit:** de stories die een hulpcomponent uit `ExamplePage.tsx` renderen, krijgen een korte `source.code` met de hand: alleen het component en zijn belangrijkste props.
-  `exampleSource.ts` vervalt.
+  Het hulpbestand dat het hele bestand inlas, vervalt.
 - **Waarom:** het hele bestand `ExamplePage.tsx` (287 regels) laat niet zien hoe je één component gebruikt, en de projecteigenaar wil per voorbeeld de minimale code.
 - **Alternatieven:** het voorbeeld in de story zelf klein maken, zodat de gegenereerde JSX klopt en niet kan achterlopen; dan toont het canvas ook alleen het kleine voorbeeld in plaats van de volledige pagina.
   Of het hele bestand laten staan.
