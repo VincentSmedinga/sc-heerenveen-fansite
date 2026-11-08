@@ -2783,9 +2783,13 @@
   - **Wat erin staat:** alleen wat de projecteigenaar per groep koos: Dirk Kuijt, Jürgen Dirkx, Humphrey Rudge, Rahim Ouédraogo, Tomáš Galásek, Mark Luijpers, Marc Nygaard en Tommie van der Leegte.
     Brian Tevreden en Brian Tevreden II zijn twee spelers, en Ruud Kool en Ruud Knol ook (`oldSiteDistinctNames`).
   - **De rest blijft staan.**
-    Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken: dezelfde naam zonder hoofdletters, accenten, leestekens en `van`, `de`, `der` en `den`, een kleine afstand tussen twee namen van zeven tekens of meer (hoogstens twee letters), of dezelfde achternaam met een voornaam die het begin van de andere is.
-    De lijst wordt bij elk verslag uit de bestanden gemaakt (`findOldSiteNameClusters`) en verandert geen naam.
-    Een groep kan twee mensen zijn; de projecteigenaar beslist per groep.
+    Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken.
+    Twee namen lijken op elkaar in een van deze drie gevallen:
+    - ze zijn gelijk zonder hoofdletters, accenten, leestekens en `van`, `de`, `der` en `den`;
+    - ze verschillen hoogstens twee letters, en beide zijn zeven tekens of langer;
+    - ze hebben dezelfde achternaam, en een voornaam is het begin van de andere.
+      De lijst wordt bij elk verslag uit de bestanden gemaakt (`findOldSiteNameClusters`) en verandert geen naam.
+      Een groep kan twee mensen zijn; de projecteigenaar beslist per groep.
 - **Waarom:** één mens met drie schrijfwijzen is voor een bezoeker drie spelers, met drie aparte telstanden.
   Een kleine lijst die de eigenaar goedkeurt, is de kleinste oplossing en laat de gegevens van de oude fansite onaangeroerd.
   Wat de eigenaar niet zeker weet, wordt niet gegokt.
