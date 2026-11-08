@@ -2654,3 +2654,33 @@
     Toeschouwers `0` en een lege scheidsrechter zijn "onbekend" en worden leeg.
 - **Waarom:** de oude gegevens zijn een bron met gaten en aantekeningen van redacteuren; de stap kopieert wat een bezoeker mag lezen, en meldt de rest.
 - **Alternatieven:** de opmerkingen van de oude redactie tonen zoals ze zijn (interne aantekeningen en twee links naar sites die niet meer bestaan in een openbare kolom); `note` geheel leeg laten (we verliezen drie feiten, zoals het debuut in de Eredivisie); de stand na 90 minuten ook bij `n.s.` uit de doelpunten halen (de beslissing noemt het alleen bij `n.v.`).
+
+## De stappen `spelers` en `doelpunten` slaan een lijst doelpunten alleen op als ze optellen tot de uitslag
+
+- **Datum:** 7 november 2026
+- **Besluit:** `import:old-site` krijgt na `clubs` en `matches` de stappen `spelers` en `doelpunten` (#878).
+  `spelers` maakt de rijen in `players` (zie _Een oude speler is een rij in `players`, nog zonder persoon_ in `hosting-en-data.md`).
+  `doelpunten` maakt de rijen in `match_goals`.
+  - **Alleen als het optelt.**
+    Een wedstrijd krijgt zijn doelpunten alleen als het aantal voor sc Heerenveen en tegen optelt tot `goals_for` en `goals_against`.
+    Dat zijn de eindstand met verlenging en zonder strafschoppenserie, eigen doelpunten bij de club die ervan profiteert.
+    Anders krijgt de wedstrijd er geen, en heeft hij er een uit een eerdere run, dan gaan die weg.
+    In de bestanden zijn dat 65 wedstrijden met een uitslag en zonder doelpunten (vooral 1990 tot 1993) en 2 met een deel van de doelpunten; 79 wedstrijden eindigden in 0-0 en hebben een lege lijst die klopt en 525 hebben doelpunten.
+    De stap meldt het aantal in een regel en elke wedstrijd zonder lijst in een eigen regel, voor het controleverslag (#880).
+  - **Het team.** `ours` is het team dat het doelpunt krijgt.
+    Een eigen doelpunt van een speler van ons telt voor de tegenstander, en andersom (`own_goal` waar).
+    `player` is de volledige naam, en `player_id` is de speler van ons die scoorde, ook bij een eigen doelpunt van hem.
+    Een speler van de tegenstander heeft geen `player_id`.
+  - **De soort.** `penalty` is waar bij `strafschop`, `srafschop` en `penalty`.
+    De andere soorten (kopbal, schot) worden niet bewaard.
+  - **De minuut.** Minuut 0 betekent onbekend en wordt een lege minuut (#872); `stoppage_minutes` blijft leeg.
+    Een doelpunt zonder minuut komt achteraan, want het bestand zegt niet waar het hoort.
+    `wikipedia_page` en `person_id` blijven leeg.
+  - **De bron en de redactie gaan voor.**
+    De stap raakt alleen wedstrijden met de bron `oude-fansite`.
+    Een wedstrijd waarvan de redactie de doelpunten invulde (`match_edits.goals_edited`) of een verslag opsloeg (`match_reports.saved_by`) blijft zoals hij is.
+  - **Een tweede run verandert niets.**
+    Een doelpunt dat er al is, wordt op zijn plaats bijgewerkt (op volgorde van `id`), zodat de koppeling met een verslag (#879) blijft.
+- **Waarom:** een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen, en de regels van het verslag eisen dat de doelpunten optellen.
+- **Alternatieven:** een deel van de doelpunten tonen, met een zin dat ze niet af zijn.
+  De doelpunten van een wedstrijd weghalen en opnieuw maken bij elke run (de koppeling met het verslag van #879 breekt).

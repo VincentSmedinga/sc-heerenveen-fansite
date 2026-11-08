@@ -2053,6 +2053,20 @@ Hij doet dit:
   Hij verwijdert nooit een rij: een wedstrijd die niet meer in de bestanden staat, krijgt een regel in het logboek.
 - `deriveOldSiteMatches` geeft ook de sleutel (seizoen, competitie, ronde) van elke wedstrijd, voor de stappen erna.
 
+#### De stappen spelers en doelpunten
+
+De stap `spelers` ([`src/old-site-players.ts`](src/old-site-players.ts)) maakt een rij in `players` voor elke speler van ons in een doelpunt, een assist met een code of een opstelling, voor het seizoen van de wedstrijd, met de bron `verslag` en zonder rugnummer, positie, pagina en persoon.
+Een rij die er al is voor dat seizoen en die naam, van welke bron ook, blijft zoals ze is.
+Een code zonder rij in de oude tabel `speler` (`ivan.tzvekov`) krijgt de naam uit de code en een regel in het logboek.
+Een code met een spatie (`X. Alberts`) is een speler van de tegenstander en maakt geen rij.
+
+De stap `doelpunten` ([`src/old-site-goals.ts`](src/old-site-goals.ts)) maakt de rijen in `match_goals`, alleen voor een wedstrijd waarvan de doelpunten optellen tot de uitslag.
+Een wedstrijd met een uitslag en zonder doelpunten, of met een deel ervan, krijgt er geen en staat als regel in het logboek.
+Een eigen doelpunt telt voor de club die ervan profiteert, de minuut 0 is een lege minuut en `penalty` is waar bij `strafschop`, `srafschop` en `penalty`.
+De stap raakt alleen wedstrijden met de bron `oude-fansite` en laat een wedstrijd met doelpunten van de redactie of een opgeslagen verslag zoals hij is.
+`resolveOldSiteCode`, `ourCodesOf` en `oldSitePlayerKey` in `old-site-players.ts` zijn voor de stap met de opstellingen (#879).
+De redenen staan in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
 #### Op de host
 
 De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
@@ -2090,7 +2104,7 @@ De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
-`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/old-site-matches.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-old-site.test.ts`, `src/old-site-clubs.test.ts`, `src/old-site-matches.test.ts`, `src/old-site-goals.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 

@@ -558,6 +558,7 @@
 - **Alternatieven:** een rij per persoon met een tabel voor seizoenen (een grotere migratie die `match_goals` en `player_season_stats` raakt).
   De positie verplicht houden en bij een transfer gokken (een gok is erger dan leeg).
 - **Later:** zie _Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam_: `playerSources` heeft sinds 7 november 2026 ook `verslag`.
+- **Later:** de oude wedstrijden (1990 tot 2007) maken sinds 8 november 2026 rijen met de bron `verslag` zonder rugnummer, positie, pagina en persoon; zie _Een oude speler is een rij in `players`, nog zonder persoon_.
 
 ## De volledigheid van de selectie staat in een tabel `squad_completeness`
 
@@ -849,3 +850,24 @@
 - **Waarom:** de import van de oude wedstrijden (#878 en #879) hoeft zo niets te verzinnen, en de kaarten per speler kloppen.
   Een rode kaart zonder minuut zou de speelminuten van een speler onbekend maken.
 - **Alternatieven:** kaarten zonder minuut overslaan (verliest 793 gele kaarten, dus de kaarten per speler kloppen niet); minuut 1 of 0 als plaatsvervanger (valse gegevens); de balk van het wedstrijdverloop toch tonen met de doelpunten die een minuut hebben (de balk zou niet bij de uitslag passen); een doelpunt zonder minuut in de tweede helft zetten (dat zegt iets wat niemand weet).
+
+## Een oude speler is een rij in `players`, nog zonder persoon
+
+- **Datum:** 7 november 2026
+- **Besluit:** voor elke speler van ons die in een doelpunt, een assist (met een code) of een opstelling van de oude wedstrijden voorkomt, zoekt of maakt de import één rij in `players` voor het seizoen van de wedstrijd (#878).
+  De sleutel is seizoen en naam.
+  De rij heeft de bron `verslag`, `in_squad` waar en `left_squad_at` leeg (zoals een afgelopen seizoen bij `import-past-squad`), en geen rugnummer, positie, `wikipedia_page` en `person_id`.
+  Het koppelen aan een persoon (een Wikipedia-titel, met de geboortedatum uit de oude tabel `speler` om spelers met dezelfde naam uit elkaar te houden) is een apart issue na dit werk.
+  - **De naam** is voornaam, tussenvoegsel en achternaam uit het bestand, met enkele spaties.
+    `search_term` is tussenvoegsel plus achternaam (`van Aken`), zoals bij Wikipedia.
+  - **Een rij die er al is** voor dat seizoen en die naam (zonder accenten en hoofdletters), van welke bron ook, wordt gebruikt zoals ze is.
+    De stap wijzigt nooit een bestaande rij, dus een speler uit de selectie van Wikipedia houdt zijn positie, rugnummer en pagina.
+  - **Een code zonder rij in de oude tabel `speler`** in de vorm `voornaam.achternaam` (`ivan.tzvekov`) wordt een speler met de naam uit de code (`Ivan Tzvekov`) en staat als regel in het logboek, voor het controleverslag (#880).
+  - **Een code met een spatie** (`X. Alberts`) is de naam van een speler van de tegenstander, die de oude redactie in het veld voor de code typte.
+    Zo iemand krijgt geen rij.
+  - **Een assist met een gewone naam** (`Dennis de Nooijer`) maakt in deze stap geen speler: het bestand zegt niet of het een speler van ons of van de tegenstander is.
+    Dat doet #879 met de opstellingen.
+    De kaarten maken ook geen spelers, want elke speler met een kaart staat in een opstelling en de coach is geen speler.
+- **Waarom:** doelpunten, kaarten en minuten hangen dan aan een speler van ons, terwijl `persons` een echte Wikipedia-pagina vraagt (`wikipedia_page` is verplicht en uniek).
+  De stap maakt 427 rijen voor 17 seizoenen.
+- **Alternatieven:** alleen namen (niets over eigen spelers uit 1990 tot 2007 is dan per speler te tellen); `persons` met een verzonnen titel.

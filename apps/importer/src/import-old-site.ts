@@ -18,7 +18,9 @@ import type { OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site
 
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
+import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteMatches } from './old-site-matches.ts'
+import { importOldSitePlayers } from './old-site-players.ts'
 import { describeError } from './text.ts'
 
 /** What the command says when a run holds the lock of the import. */
@@ -38,6 +40,8 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
     name: 'matches',
     run: async (db, data) => importOldSiteMatches(db, data.matches, data.clubs, await oldSiteClubIds(db, data.clubs)),
   },
+  { name: 'spelers', run: (db, data) => importOldSitePlayers(db, data.matches, data.players) },
+  { name: 'doelpunten', run: (db, data) => importOldSiteGoals(db, data.matches, data.players) },
 ]
 
 export type OldSiteImportOptions = {

@@ -198,7 +198,7 @@ Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
    De workflow heeft geen invoer.
 2. Lees het logboek van de stap _Import the old site on the host_.
    Daar staat per stap één regel, zoals `Old site, step clubs: 63 new, 6 updated, 22 unchanged, 0 skipped`, met daaronder een regel voor elke nieuwe club en elke club die aan een bestaande is gekoppeld.
-   De laatste regel is `Old site: 2 of 2 steps done.`
+   De laatste regel is `Old site: 4 of 4 steps done.`
    Een tweede run meldt overal `0 new, 0 updated`.
 
 - Wil je eerst zien wat de opdracht zou doen, dan kan dat alleen over SSH, met `--old-site --dry-run` achter `import.mjs` (zie _Controleren_).

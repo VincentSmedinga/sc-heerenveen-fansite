@@ -48,6 +48,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM clubs')
   await database.db.insert(clubs).values([
     { name: 'N.E.C.', slug: 'nec', wikipediaPage: 'N.E.C.' },
@@ -75,7 +76,10 @@ describe('the command', () => {
       "  club 'SC Cambuur' is old fansite club 'Cambuur Lwd.' (cambuurleeuwarden), name added",
       "  new club 'FC Basel' for old fansite club 'FC Basel' (fcbasel)",
       'Old site, step matches: 0 new, 0 updated, 0 unchanged, 0 skipped',
-      'Old site: 2 of 2 steps done.',
+      'Old site, step spelers: 0 new, 0 updated, 0 unchanged, 0 skipped',
+      'Old site, step doelpunten: 0 new, 0 updated, 0 unchanged, 0 skipped',
+      '  0 matches get goals, 0 add up without goals, 0 have a score and no goals, 0 have part of the goals',
+      'Old site: 4 of 4 steps done.',
     ])
   })
 
@@ -90,7 +94,10 @@ describe('the command', () => {
       [
         'Old site, step clubs: 0 new, 0 updated, 3 unchanged, 0 skipped',
         'Old site, step matches: 0 new, 0 updated, 0 unchanged, 0 skipped',
-        'Old site: 2 of 2 steps done.',
+        'Old site, step spelers: 0 new, 0 updated, 0 unchanged, 0 skipped',
+        'Old site, step doelpunten: 0 new, 0 updated, 0 unchanged, 0 skipped',
+        '  0 matches get goals, 0 add up without goals, 0 have a score and no goals, 0 have part of the goals',
+        'Old site: 4 of 4 steps done.',
       ].join('\n'),
     )
     expect({
@@ -125,8 +132,8 @@ describe('the command', () => {
     ])
   })
 
-  it('has the step clubs first and the step matches after it', () => {
-    expect(oldSiteSteps.map((step) => step.name)).toEqual(['clubs', 'matches'])
+  it('has the steps clubs, matches, spelers and doelpunten, in that order', () => {
+    expect(oldSiteSteps.map((step) => step.name)).toEqual(['clubs', 'matches', 'spelers', 'doelpunten'])
   })
 
   it('shows what it would do with --dry-run, and writes nothing', async () => {
@@ -135,7 +142,7 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(text).toContain('Old site, step clubs: 1 new, 1 updated, 1 unchanged, 0 skipped')
-    expect(text).toContain('Dry run, nothing is written. Old site: 2 of 2 steps done.')
+    expect(text).toContain('Dry run, nothing is written. Old site: 4 of 4 steps done.')
     expect(await clubCount()).toBe(before)
     expect(await database.db.select().from(clubNames)).toEqual([])
   })
@@ -270,7 +277,11 @@ describe('the files in the repository', () => {
     expect(second.text).toContain(`Old site, step clubs: 0 new, 0 updated, ${oldClubs.length} unchanged, 0 skipped`)
     expect(first.text).toContain('Old site, step matches: 671 new, 0 updated, 0 unchanged, 0 skipped')
     expect(second.text).toContain('Old site, step matches: 0 new, 0 updated, 671 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site: 2 of 2 steps done.')
+    expect(first.text).toContain('Old site, step spelers: 427 new, 0 updated, 0 unchanged, 0 skipped')
+    expect(second.text).toContain('Old site, step spelers: 0 new, 0 updated, 427 unchanged, 0 skipped')
+    expect(first.text).toContain('Old site, step doelpunten: 1763 new, 0 updated, 0 unchanged, 67 skipped')
+    expect(second.text).toContain('Old site, step doelpunten: 0 new, 0 updated, 1763 unchanged, 67 skipped')
+    expect(second.text).toContain('Old site: 4 of 4 steps done.')
     expect(ids.size).toBe(oldClubs.length)
     // The two clubs the test started with are among them, so a club is one row, not two.
     expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
@@ -306,7 +317,8 @@ describe('the bundle', () => {
 
       expect(dry.stdout).toContain('Old site, step clubs:')
       expect(dry.stdout).toContain('Old site, step matches: 671 new')
-      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 2 of 2 steps done.')
+      expect(dry.stdout).toContain('Old site, step doelpunten: 1763 new')
+      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 4 of 4 steps done.')
       // --dry-run belongs to --old-site alone.
       await expect(node('--dry-run')).rejects.toMatchObject({ code: 2 })
       await expect(node('--old-site', '--status')).rejects.toMatchObject({ code: 2 })
