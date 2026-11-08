@@ -127,6 +127,23 @@ describe('the tables of a report', () => {
     await expect(appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 9 })).resolves.toBeTypeOf('number')
   })
 
+  it('lets a report have players without a shirt number, also several in a team, and gives them back empty', async () => {
+    const matchId = await playedMatch()
+
+    await report(matchId)
+    await appearance(matchId, { name: 'Eerste', shirtNumber: null })
+    await appearance(matchId, { name: 'Tweede', shirtNumber: null })
+    await appearance(matchId, { name: 'Derde', ours: false, shirtNumber: null })
+    await appearance(matchId, { name: 'Vierde', ours: false, shirtNumber: null })
+    await appearance(matchId, { name: 'Met nummer', shirtNumber: 9 })
+
+    await expect(appearance(matchId, { name: 'Dubbel', shirtNumber: 9 })).rejects.toThrow()
+
+    const stored = await readMatchReport(database.db, matchId)
+
+    expect(reportForRules(stored!).appearances.map((one) => one.shirtNumber)).toEqual([null, null, null, null, 9])
+  })
+
   it('needs a name, a shirt number from 1 to 99, and a report to belong to', async () => {
     const matchId = await playedMatch()
 

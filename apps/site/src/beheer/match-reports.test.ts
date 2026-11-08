@@ -367,6 +367,29 @@ describe('saveReport', () => {
     expect((await log()).at(-1)?.detail).toContain('10 schoten in de serie')
   })
 
+  it('stores a player without a shirt number as empty, gives him back empty, and saving it again changes nothing', async () => {
+    const values = report()
+
+    values.zij.speler = [
+      ...values.zij.speler,
+      { ...emptyRow('speler'), naam: 'Zonder Een', rol: 'bank' },
+      { ...emptyRow('speler'), naam: 'Zonder Twee', rol: 'bank' },
+    ]
+    values.wij.speler = [...values.wij.speler, { ...emptyRow('speler'), keuze: 'andere', naam: 'Gast', rol: 'bank' }]
+    expect(await save(values)).toEqual({ status: 'saved' })
+
+    const stored = await readMatchReport(database.db, matchId)
+    const without = stored!.appearances.filter((one) => one.shirtNumber === null)
+
+    expect(without.map((one) => one.name)).toEqual(['Gast', 'Zonder Een', 'Zonder Twee'])
+    expect((await database.db.select().from(players).where(eq(players.name, 'Gast')))[0]?.shirtNumber).toBeNull()
+
+    const again = valuesOfReport(stored, await goalsOf(), squad)
+
+    expect(again.zij.speler.slice(-2).map((row) => row.rugnummer)).toEqual(['', ''])
+    expect(await save(again, t1)).toEqual({ status: 'unchanged' })
+  })
+
   it('gives the kicks back to the form as they were saved, so saving it again changes nothing', async () => {
     await save(await cupReport(series()))
 

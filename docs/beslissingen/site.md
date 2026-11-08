@@ -3233,6 +3233,7 @@
 - **Waarom:** de selectie van Wikipedia loopt soms achter, en een verslag mag daar niet op wachten.
 - **Alternatieven:** alleen de selectie (een verslag wacht dan op Wikipedia); elke speler als losse naam (dan kan het verslag geen cijfers per speler geven).
 - **Later:** zie _De bank kiest uit wie niet in de basis staat_ (7 november 2026): een speler staat in het verslag één keer, in de basis of op de bank, en de keuzelijst van elke plek houdt daar rekening mee.
+- **Later:** zie _Een rugnummer mag ontbreken_ in `hosting-en-data.md` (8 november 2026): een speler van de tegenstander is een naam, met of zonder rugnummer, en het rugnummer van een speler van ons mag leeg blijven zonder dat de selectie er een geeft.
 
 ## "Klaar" kan alleen zonder fouten, en een verslag dat later niet meer klopt, krijgt "Controleer"
 
@@ -3309,6 +3310,7 @@
     Een regel in de lijst "Niet gelezen" toont hoogstens 120 tekens.
     Alles wat de lezer terugschrijft is tekst; React schrijft het uit en er is geen opmaak.
 - **Later:** zie _De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel_ (7 november 2026): het formaat heeft een regel voor de formatie erbij.
+- **Later:** zie _Een rugnummer mag ontbreken_ in `hosting-en-data.md` (8 november 2026): een regel onder `Opstelling` of `Bank` die niet met een getal begint, is een speler zonder rugnummer, zoals `Van Aken (a)`.
 
 ## Een naam wordt eerst op rugnummer gezocht, dan op de naam, en een twijfel is een keuze, geen gok
 

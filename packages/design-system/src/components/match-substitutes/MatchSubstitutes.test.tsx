@@ -36,6 +36,13 @@ describe('substituteSentence', () => {
     )
   })
 
+  it('has his name and no word about the number for a player without a shirt number', () => {
+    const sentence = substituteSentence({ ...kuipers, shirtNumber: null })
+
+    expect(sentence).toBe('Sven Kuipers, erin in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85')
+    expect(sentence).not.toMatch(/rugnummer|null|leeg/)
+  })
+
   it('names added time, own goals and several goals', () => {
     expect(
       substituteSentence({
@@ -69,6 +76,24 @@ describe('MatchSubstitutes', () => {
     expect(list?.getAttribute('aria-label')).toBe('Wissels sc Heerenveen')
     expect(item?.querySelector('.hf-visually-hidden')?.textContent).toBe(substituteSentence(kuipers))
     expect(item?.querySelector('.hf-match-substitutes-line')?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('draws a disc without a figure for substitutes without a shirt number, also several in a team', () => {
+    const { container } = render(
+      <MatchSubstitutes
+        headingLevel={3}
+        ours
+        substitutes={[
+          { ...kuipers, shirtNumber: null },
+          { ...kuipers, minute: 70, name: name('Bakker', 'Jan'), shirtNumber: null },
+        ]}
+        team="sc Heerenveen"
+      />,
+    )
+
+    expect(container.querySelectorAll('li')).toHaveLength(2)
+    expect([...container.querySelectorAll('.hf-pitch-player-number')].map((node) => node.textContent)).toEqual(['', ''])
+    expect(container.textContent).not.toContain('null')
   })
 
   it('writes "Geen wissels." for a team without substitutes, and no list', () => {

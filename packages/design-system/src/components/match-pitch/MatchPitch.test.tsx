@@ -116,6 +116,24 @@ describe('MatchPitch', () => {
     expect(within(details).getAllByText('aanvoerder')).toHaveLength(2)
   })
 
+  it('puts a team without shirt numbers on the pitch, with no figure and no column in the list', () => {
+    const ours = team('sc Heerenveen', '4-3-3')
+    const { container } = renderPitch(
+      { ...ours, players: ours.players.map((player) => ({ ...player, shirtNumber: null })) },
+      team('Testdorp FC', '4-4-2'),
+    )
+    const sentences = [
+      ...container.querySelectorAll('.hf-match-pitch-field ol')[0]!.querySelectorAll('.hf-visually-hidden'),
+    ]
+    const rosters = container.querySelectorAll('.hf-match-pitch-roster')
+
+    expect(sentences[0]?.textContent).toBe('s Speler1, aanvoerder, 90 minuten')
+    expect(container.querySelectorAll('.hf-match-pitch-team')[0]?.querySelectorAll('li')).toHaveLength(11)
+    expect(rosters[0]?.querySelector('.hf-player-name-number')).toBeNull()
+    expect(rosters[1]?.querySelector('.hf-player-name-number')).not.toBeNull()
+    expect(container.textContent).not.toContain('null')
+  })
+
   it('puts only sc Heerenveen on the pitch and in the list when the opponent is left out, without a word about him', () => {
     const { container } = render(<MatchPitch headingLevel={3} ours={team('sc Heerenveen', '4-3-3')} />)
 

@@ -100,20 +100,30 @@ export function previewDataOf(
 
       const chosen = side === 'wij' ? squad.find((candidate) => String(candidate.id) === row.keuze) : undefined
       const name = chosen === undefined ? (row.naam ?? '') : chosen.name
-      const typed = /^\d{1,2}$/u.test(row.rugnummer ?? '') ? Number(row.rugnummer) : undefined
-      const shirtNumber = typed ?? (row.rugnummer === '' ? (chosen?.shirtNumber ?? undefined) : undefined)
+      const typedText = (row.rugnummer ?? '').trim()
+      const typed = /^\d{1,2}$/u.test(typedText) ? Number(typedText) : undefined
+      // An empty field gives the number of a player of the squad, and else none.
+      const shirtNumber = typedText === '' ? (chosen?.shirtNumber ?? null) : typed
       const role = roleChoices.find((choice) => choice.value === row.rol)?.value
 
-      if (name === '' || shirtNumber === undefined || shirtNumber < 1 || shirtNumber > 99 || role === undefined) {
+      if (
+        name === '' ||
+        shirtNumber === undefined ||
+        (shirtNumber !== null && (shirtNumber < 1 || shirtNumber > 99)) ||
+        role === undefined
+      ) {
         return
       }
 
-      // The pitch needs the shirt number of a player to be his alone in his team.
-      if (shirts.has(shirtNumber)) {
-        return
-      }
+      // The pitch needs the shirt number of a player to be his alone in his team. Players
+      // without a number are all there.
+      if (shirtNumber !== null) {
+        if (shirts.has(shirtNumber)) {
+          return
+        }
 
-      shirts.add(shirtNumber)
+        shirts.add(shirtNumber)
+      }
 
       const id = idOf(side, index + 1)
 
@@ -217,7 +227,7 @@ export function previewDataOf(
           id: scorer,
           name: { givenName: row.naam ?? '', surname: '' },
           ours: (side === 'wij') !== (kind === 'eigen'),
-          shirtNumber: 0,
+          shirtNumber: null,
           starter: false,
         })
       }

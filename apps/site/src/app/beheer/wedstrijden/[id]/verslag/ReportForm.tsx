@@ -306,8 +306,8 @@ export function ReportFields() {
         'speler',
         side,
         own
-          ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie.'
-          : 'Schrijf de naam van de speler zoals de bron hem schrijft. Een kant die niet af is, mag leeg blijven.',
+          ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie, of als de speler geen rugnummer had.'
+          : 'Schrijf de naam van de speler zoals de bron hem schrijft. Het rugnummer mag leeg blijven. Een kant die niet af is, mag leeg blijven.',
         table(
           'speler',
           side,

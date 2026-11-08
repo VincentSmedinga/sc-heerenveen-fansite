@@ -10,7 +10,7 @@ import { reportedMatch } from './test-reports'
 const data = () => matchPageDataOf(reportedMatch(), [], true)
 const built = () => buildMatchPage(data())
 
-const player = (id: number, ours: boolean, shirtNumber: number, starter = true): MatchPagePlayer => ({
+const player = (id: number, ours: boolean, shirtNumber: null | number, starter = true): MatchPagePlayer => ({
   captain: false,
   id,
   name: { givenName: `Speler ${id}`, surname: '' },
@@ -139,6 +139,22 @@ describe('the pitch', () => {
     expect(buildMatchPage(reversed).pitch.ours.players.map((one) => one.shirtNumber)).toEqual([
       11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
     ])
+  })
+
+  it('puts every player without a shirt number on the pitch, and a number twice only once', () => {
+    const changed = data()
+
+    changed.players = changed.players.map((one, index) =>
+      one.ours && index < 3
+        ? { ...one, shirtNumber: null }
+        : one.ours && index === 3
+          ? { ...one, shirtNumber: 11 }
+          : one,
+    )
+
+    const { pitch: other } = buildMatchPage(changed)
+
+    expect(other.ours.players.map((one) => one.shirtNumber)).toEqual([null, null, null, 11, 5, 6, 7, 8, 9, 10])
   })
 
   it('marks the captain, the goals, the card and the minute of a player who went off, with the minutes he played', () => {

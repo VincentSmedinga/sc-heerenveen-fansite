@@ -1013,6 +1013,11 @@ type MadeUpReport = {
   opponentCaptain: number
   /** The line-up and the bench of sc Heerenveen, by the name in the made-up squad. */
   ours: [name: string, starter: boolean][]
+  /**
+   * The players of ours who have no shirt number in this report, like the old line-ups, by the
+   * name in the made-up squad. The squad keeps his number.
+   */
+  withoutShirtNumber?: string[]
 }
 
 type MadeUpReportEvents = {
@@ -1092,7 +1097,8 @@ const madeUpReportOpponent: MadeUpReport['opponent'] = [
  * bench, three substitutions of ours and two of theirs, a yellow card and a yellow-red card, a
  * red card for the opponent, a penalty that the opponent took and our goalkeeper stopped, a
  * penalty of ours that was missed, and the assist for every goal; and the draw in the round of
- * 16 of the cup, with extra time, so with minutes up to 120, and a shoot-out that we won 4–3.
+ * 16 of the cup, with extra time, so with minutes up to 120, and a shoot-out that we won 4–3,
+ * and four players of ours without a shirt number.
  * They are the made-up data of the pages of a match and of their checks. The names are made up,
  * like the clubs.
  */
@@ -1205,6 +1211,9 @@ const madeUpReports: MadeUpReport[] = [
       ['Mick van Wieren', false],
       ['Dinho', false],
     ],
+    // Line-ups without shirt numbers, like the old fansite has: two in the line-up and two on
+    // the bench, so the pitch and the bench show a player without a number.
+    withoutShirtNumber: ['Bram van Dijkhuizen', 'Floris de Wal', 'Mick van Wieren', 'Dinho'],
   },
 ]
 
@@ -1347,7 +1356,10 @@ async function seedOneMadeUpReport(
   if (
     existing !== undefined ||
     goals.length !== Object.keys(report.goals).length ||
-    report.ours.some(([name]) => (playerNamed.get(name)?.shirtNumber ?? null) === null)
+    report.ours.some(
+      ([name]) =>
+        !(report.withoutShirtNumber ?? []).includes(name) && (playerNamed.get(name)?.shirtNumber ?? null) === null,
+    )
   ) {
     return false
   }
@@ -1371,7 +1383,7 @@ async function seedOneMadeUpReport(
         name,
         ours: true,
         playerId: player.id,
-        shirtNumber: player.shirtNumber!,
+        shirtNumber: (report.withoutShirtNumber ?? []).includes(name) ? null : player.shirtNumber!,
         starter,
       }
     }),

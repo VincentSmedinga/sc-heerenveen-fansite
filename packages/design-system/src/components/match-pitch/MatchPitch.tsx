@@ -48,6 +48,9 @@ export type MatchPitchTeam = {
 type Placed = { drawn: boolean; formation: null | string | undefined; team: MatchPitchTeam }
 
 function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>; team: MatchPitchTeam }) {
+  // A list where nobody has a number has no column for it.
+  const numbered = team.players.some((player) => player.shirtNumber !== null)
+
   return (
     <div className="hf-match-pitch-roster">
       <Heading appearance={4} level={headingLevel}>
@@ -57,11 +60,11 @@ function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>
         )}
       </Heading>
       <ol className="hf-match-pitch-roster-list" role="list">
-        {team.players.map((player) => (
-          <li key={player.shirtNumber}>
+        {team.players.map((player, index) => (
+          <li key={player.shirtNumber ?? `no-number-${index}`}>
             <PlayerName
               givenName={player.name.givenName}
-              shirtNumber={player.shirtNumber}
+              shirtNumber={numbered ? player.shirtNumber : undefined}
               surname={player.name.surname}
             >
               {player.captain === true ? 'aanvoerder' : undefined}
@@ -89,7 +92,7 @@ function Team({ extraTime, ours, placed }: { extraTime: boolean; ours: boolean; 
           <PitchPlayer
             {...player}
             extraTime={extraTime}
-            key={player.shirtNumber}
+            key={player.shirtNumber ?? `no-number-${index}`}
             ours={ours}
             style={
               {

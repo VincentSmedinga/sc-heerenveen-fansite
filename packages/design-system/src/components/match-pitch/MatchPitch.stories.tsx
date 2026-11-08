@@ -41,7 +41,7 @@ const meta = preview.meta({
 })
 
 const player = (
-  shirtNumber: number,
+  shirtNumber: null | number,
   surname: string,
   givenName: string,
   rest: Partial<PitchPlayerData> = {},
@@ -206,6 +206,49 @@ export const WithSubstitutes = meta.story({
             },
           ]}
           team="Testdorp FC"
+        />
+      </MatchSubstitutes.Group>
+    </MatchPitch>
+  ),
+})
+
+export const WithoutShirtNumbers = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent(
+      '4-4-2',
+      theirPlayers().map((one) => ({ ...one, shirtNumber: null })),
+    ),
+    ours: ours(
+      '4-3-3',
+      ourPlayers().map((one) => ({ ...one, shirtNumber: null })),
+    ),
+  },
+  decorators: [phone],
+  name: 'Zonder rugnummers, zoals in de oude opstellingen',
+  render: (args) => (
+    <MatchPitch {...args}>
+      <MatchSubstitutes.Group>
+        <MatchSubstitutes
+          headingLevel={3}
+          ours
+          substitutes={[
+            {
+              minute: 62,
+              minutesPlayed: 28,
+              name: { givenName: 'Gerrit', surname: 'Nepper' },
+              playerOut: { givenName: 'Thijs', surname: 'Idzenga' },
+              shirtNumber: null,
+            },
+            {
+              minute: 80,
+              minutesPlayed: 10,
+              name: { givenName: 'Ties', surname: 'Proefveld' },
+              playerOut: { givenName: 'Luuk', surname: 'Schijn' },
+              shirtNumber: null,
+            },
+          ]}
+          team="sc Heerenveen"
         />
       </MatchSubstitutes.Group>
     </MatchPitch>

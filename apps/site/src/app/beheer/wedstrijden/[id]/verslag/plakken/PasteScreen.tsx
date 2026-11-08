@@ -40,6 +40,7 @@ const formatRules = [
   'Na het kopje Tegenstander staan dezelfde kopjes voor de tegenstander.',
   'Een kopje dat ontbreekt is leeg, en hoofdletters en de volgorde van de kopjes doen er niet toe.',
   'Opstelling en Bank: een rugnummer en een naam, zoals "4 Van Aken", met "(a)" erachter voor de aanvoerder.',
+  'Had een speler geen rugnummer, schrijf dan alleen de naam, zoals "Van Aken".',
   'Een speler van ons mag alleen een rugnummer zijn, als hij in de selectie van het seizoen staat.',
   'Wissels: de minuut, wie erin komt en voor wie, zoals "61 12 voor 8" of "90+2 Smit voor Jansen".',
   'Doelpunten: de minuut en de speler die scoorde, zoals "23 Smit".',

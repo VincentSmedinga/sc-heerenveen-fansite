@@ -119,7 +119,8 @@ export type MatchPagePlayer = {
   name: MatchPlayerName
   /** Whether he is ours. Otherwise he plays for the opponent. */
   ours: boolean
-  shirtNumber: number
+  /** Empty for a player without a shirt number, such as in the old line-ups. */
+  shirtNumber: null | number
   /** Whether he is in the line-up. Otherwise he is on the bench. */
   starter: boolean
 }
@@ -287,9 +288,14 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
       : { kind: cardKinds[heaviest.kind], minute: heaviest.minute, stoppageMinutes: added(heaviest.stoppageMinutes) }
   }
   // The pitch needs the shirt number of a player to be his alone in his team: a report that is
-  // not finished may have a number twice, and then the first is on the pitch.
+  // not finished may have a number twice, and then the first is on the pitch. Players without a
+  // number are all on the pitch.
   const shirts = new Set<number>()
   const firstOfNumber = (player: MatchPagePlayer) => {
+    if (player.shirtNumber === null) {
+      return true
+    }
+
     const known = shirts.has(player.shirtNumber)
 
     shirts.add(player.shirtNumber)

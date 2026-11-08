@@ -265,7 +265,7 @@ De regels die zeggen of een verslag klopt, staan in `@fansite/shared/match-repor
 | Tabel                  | Wat een rij is                                                                                                                                                                                                                                                       |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `match_reports`        | Het verslag van een wedstrijd (`match_id` is de sleutel): `status` (`bezig` of `klaar`), `opponent_complete`, `source` (hoogstens 100 tekens), `formation_ours` en `formation_opponent` (de formatie van elk team, zoals `4-3-3`, of leeg), `saved_by` en `saved_at` |
-| `match_appearances`    | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number`, `starter` en `captain`                                                                                                                    |
+| `match_appearances`    | Een speler in de opstelling of op de bank, voor beide teams: `ours`, `player_id` (alleen van ons), `name`, `shirt_number` (mag leeg zijn), `starter` en `captain`                                                                                                    |
 | `match_substitutions`  | Een wissel: `appearance_out_id`, `appearance_in_id`, `minute` en `stoppage_minutes`                                                                                                                                                                                  |
 | `match_cards`          | Een kaart voor een speler: `kind` (`geel`, `geel-rood` of `rood`), `minute` en `stoppage_minutes`                                                                                                                                                                    |
 | `match_incidents`      | Een strafschop die de nemer miste of de keeper stopte: `kind` (`strafschop-gemist` of `strafschop-gestopt`), `minute` en `stoppage_minutes`                                                                                                                          |
@@ -282,7 +282,8 @@ Wat de database afdwingt:
 
 - een verslag, en met hem zijn spelers en hun gebeurtenissen, gaat weg met zijn wedstrijd; de gebeurtenissen gaan ook weg met hun speler in het verslag;
 - een wissel, een kaart en een strafschop wijzen met `match_id`, `ours` en de speler naar één rij van `match_appearances`, dus naar een speler van dezelfde wedstrijd en hetzelfde team (de twee kolommen van `match_goals` zijn gewone foreign keys: dat de speler van dezelfde wedstrijd is, controleren de regels);
-- een rugnummer (1 tot en met 99) staat één keer in een team van een wedstrijd, een speler van ons één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen, niet voor zichzelf;
+- een rugnummer (1 tot en met 99) staat één keer in een team van een wedstrijd, maar een speler mag er geen hebben, en dan mogen meer spelers in een team zonder zijn;
+- een speler van ons staat één keer in een verslag, en een speler gaat één keer eruit en komt één keer binnen, niet voor zichzelf;
 - een speler heeft elke soort kaart één keer;
 - een minuut ligt tussen 1 en 120, en blessuretijd (1 tot en met 15) hoort bij minuut 45, 90, 105 of 120;
 - een naam en een `source` zijn nooit leeg.
@@ -301,6 +302,7 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 
 De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzonnen verslag voor beide teams, dat zonder fout of waarschuwing door de regels komt.
 Een tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale: met verlenging, wissels en kaarten tot minuut 120 en een strafschoppenserie die we met 4–3 wonnen.
+Vier spelers van ons staan er zonder rugnummer in, twee in de basis en twee op de bank, zoals in de oude opstellingen.
 `readMatchReport` geeft de schoten van de serie mee als `shootout`, en `listReportedMatches` en `findReportedMatch` ook, voor de pagina van de wedstrijd.
 
 ## De tabel `articles`

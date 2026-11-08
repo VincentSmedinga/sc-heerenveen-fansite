@@ -354,6 +354,29 @@ describe('checkMatchReport', () => {
       expect(codes(report)).toEqual(['shirt-number-out-of-range'])
     })
 
+    it('lets a player be without a shirt number, also several in a side', () => {
+      const report = changed((r) => {
+        r.appearances[1]!.shirtNumber = null
+        r.appearances[2]!.shirtNumber = null
+        r.appearances[17]!.shirtNumber = null
+        r.appearances[18]!.shirtNumber = null
+      })
+
+      expect(codes(report)).toEqual([])
+      expect(checkMatchReport(report, match).warnings).toEqual([])
+    })
+
+    it('still rejects a number twice or out of range next to players without one', () => {
+      const report = changed((r) => {
+        r.appearances[0]!.shirtNumber = null
+        r.appearances[1]!.shirtNumber = null
+        r.appearances[2]!.shirtNumber = 4
+        r.appearances[15]!.shirtNumber = 100
+      })
+
+      expect(codes(report)).toEqual(['shirt-number-twice', 'shirt-number-out-of-range'])
+    })
+
     it('has at most one captain in a side', () => {
       const report = changed((r) => {
         r.appearances[1]!.captain = true

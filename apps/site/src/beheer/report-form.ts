@@ -58,7 +58,8 @@ export type PlannedPlayer = {
   captain: boolean
   name: string
   ours: boolean
-  shirtNumber: number
+  /** Empty for a player without a shirt number. */
+  shirtNumber: null | number
   /** The player in `players` of the season, or `null` for an opponent or a player to add. */
   squadId: null | number
   starter: boolean
@@ -265,12 +266,26 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
           ? context.squad.find((player) => player.name.toLocaleLowerCase('nl') === given.toLocaleLowerCase('nl'))
           : undefined
       const known = chosen ?? sameName
-      const typed = /^\d{1,2}$/u.test(row.rugnummer ?? '') ? Number(row.rugnummer) : undefined
-      const shirtNumber = typed ?? (row.rugnummer === '' ? (known?.shirtNumber ?? undefined) : undefined)
+      // The shirt number may stay empty: a player of the squad then has his own, and anybody
+      // else has none.
+      let shirtNumber: null | number = known?.shirtNumber ?? null
+      const typedText = (row.rugnummer ?? '').trim()
 
-      if (shirtNumber === undefined || shirtNumber < 1 || shirtNumber > 99) {
-        parseFail('speler', side, number, 'rugnummer', 'vul het rugnummer in, een heel getal van 1 tot 99.')
-        failed = true
+      if (typedText !== '') {
+        const typed = /^\d{1,2}$/u.test(typedText) ? Number(typedText) : undefined
+
+        if (typed === undefined || typed < 1 || typed > 99) {
+          parseFail(
+            'speler',
+            side,
+            number,
+            'rugnummer',
+            'laat het rugnummer leeg, of schrijf een heel getal van 1 tot 99.',
+          )
+          failed = true
+        } else {
+          shirtNumber = typed
+        }
       }
 
       const role = roleChoices.find((choice) => choice.value === row.rol)?.value
@@ -280,7 +295,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
         failed = true
       }
 
-      if (failed || shirtNumber === undefined || role === undefined) {
+      if (failed || role === undefined) {
         return
       }
 
