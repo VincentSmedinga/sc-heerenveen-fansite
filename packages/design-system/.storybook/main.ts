@@ -6,9 +6,13 @@ import { addNoindexTo } from './noindex.ts'
 
 export default defineMain({
   addons: [
-    '@storybook/addon-docs',
+    // The order of the panels under a story follows this list: Accessibility, Code, HTML.
     '@storybook/addon-a11y',
+    '@storybook/addon-docs',
     'storybook-addon-pseudo-states',
+    // The HTML panel next to Code and Accessibility. It runs in Storybook only, never in the
+    // site.
+    '@linus_janns/storybook-addon-html',
     {
       // The MCP server for agents, at /mcp on the dev server. The docs and dev toolsets are on.
       // The test toolset is off: `pnpm test:stories` runs the stories (see vitest.config.ts).

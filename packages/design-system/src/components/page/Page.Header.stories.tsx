@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleBanner } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
   parameters: {
@@ -28,7 +27,16 @@ const meta = preview.meta({
           'Het hoofdmenu staat niet in de header: het is een `Navigation` met `appearance="header"`, direct na de `Page.Header`.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Header>
+  <Link href="#home">
+    <Logo />
+  </Link>
+  <ThemeButton label="Donker" />
+</Page.Header>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
     layout: 'fullscreen',
   },

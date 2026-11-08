@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleFooter, ExampleHeader } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
 import { Page } from './Page'
@@ -34,7 +33,11 @@ const meta = preview.meta({
           'In het verhaal over een lange pagina werkt de regel echt: scrol naar beneden en de knop verschijnt.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.TopLink label="Naar boven" />`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
     layout: 'fullscreen',
   },

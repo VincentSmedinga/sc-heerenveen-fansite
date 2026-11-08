@@ -283,7 +283,7 @@
 - **Datum:** 22 oktober 2026
 - **Besluit:** onder elk voorbeeld in Storybook toont "Show code" de JSX die het voorbeeld rendert, en niet de aanroep `meta.story({ ... })` eromheen.
   Daarvoor staat `parameters.docs.source` op `dynamic`, zonder de decorators.
-  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via `src/docs/exampleSource.ts`, dat het met `?raw` inleest.
+  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via een hulpbestand dat het met `?raw` inleest.
 - **Waarom:** wie een component wil gebruiken, wil zien hoe dat moet, en zo bedient één `render` de lichte en de donkere story.
   Een hulpcomponent zoals `ExampleHeader` zou anders alleen `<ExampleHeader />` laten zien, en de story van `Page` draait in een eigen venster, waar de gegenereerde code niets zegt.
   De themawrapper is een decorator en hoort niet in het voorbeeld.
@@ -291,6 +291,7 @@
   Of de standaard laten staan, die de aanroep van `meta.story` toont.
 - **Later:** zie _Een pagina in Storybook is kort, met het voorbeeld en een story per variant_.
   Een component krijgt geen lichte en donkere story meer; "Show code" toont nog steeds de JSX van het voorbeeld.
+- **Later:** zie _Show code en het paneel Code tonen de kortste code die het voorbeeld laat zien_ (8 november 2026): de stories met een hulpcomponent krijgen een korte `source.code` met de hand, en dat hulpbestand vervalt.
 
 ## Elk component heeft zijn eigen CSS
 
@@ -2979,3 +2980,36 @@
 - **Eigen keuzes bij het bouwen:**
   - het halve veld van alleen de tegenstander stond liggend nergens in Storybook, dus daar komt het verhaal `HalfPitchOpponentLyingDown` voor.
 - **Alternatieven:** alle vier de hoeken afgerond laten, zoals nu; alle vier de hoeken recht maken, ook die aan het doel.
+
+## Storybook toont de code en de HTML van een story, in twee panelen
+
+- **Datum:** 8 november 2026
+- **Besluit:** onder elke story staan de panelen Code (`parameters.docs.codePanel`, uit `@storybook/addon-docs`) en HTML (`@linus_janns/storybook-addon-html` 9.0.0, hetzelfde als het Amsterdam Design System).
+  Het paneel Toegankelijkheid blijft het paneel dat opent.
+- **Waarom:** de projecteigenaar wil bij elke story kunnen zien hoe het voorbeeld in elkaar zit en welke HTML eruit komt.
+  Het paneel Code kost geen dependency.
+  Het paneel HTML bestaat niet in Storybook zelf; deze add-on past bij Storybook 10.1.11 en hoger, heeft geen eigen dependencies en geen installatiescript, en wordt door het Amsterdam Design System gebruikt.
+- **Licentie:** de add-on heeft de AGPL-3.0-of-later.
+  De AGPL-3.0 staat in de bijlage van de EUPL-1.2 als licentie waarmee de EUPL compatibel is.
+  De add-on draait alleen in Storybook en komt niet in de site.
+- **Eigen keuzes bij het bouwen:**
+  - de volgorde van de panelen volgt de volgorde van `addons` in `main.ts`: `addon-a11y` staat vóór `addon-docs`, zodat Toegankelijkheid, Code en HTML in die volgorde staan.
+  - de decorator van de add-on staat niet in `main.ts` alleen: Storybook registreert hem alleen als `.storybook/preview.tsx` hem in `addons` zet, via `@linus_janns/storybook-addon-html/preview`.
+  - `parameters.html.root` is `#storybook-root`, en een `transform` haalt de themawrapper van `withTheme` weg, die een story met een eigen thema omhult.
+    Zo staat alleen de story zelf in het paneel.
+- **Alternatieven:** alleen het paneel Code.
+  Of het paneel Code pas aanzetten voor stories met een voorbeeld; dat vergeet je bij een nieuwe story.
+  Of het paneel Code als eerste laten openen; de toegankelijkheidscontrole is wat elke story nodig heeft.
+
+## Show code en het paneel Code tonen de kortste code die het voorbeeld laat zien
+
+- **Datum:** 8 november 2026
+- **Besluit:** de stories die een hulpcomponent uit `ExamplePage.tsx` renderen, krijgen een korte `source.code` met de hand: alleen het component en zijn belangrijkste props.
+  Het hulpbestand dat het hele bestand inlas, vervalt.
+- **Waarom:** het hele bestand `ExamplePage.tsx` (287 regels) laat niet zien hoe je één component gebruikt, en de projecteigenaar wil per voorbeeld de minimale code.
+- **Alternatieven:** het voorbeeld in de story zelf klein maken, zodat de gegenereerde JSX klopt en niet kan achterlopen; dan toont het canvas ook alleen het kleine voorbeeld in plaats van de volledige pagina.
+  Of het hele bestand laten staan.
+- **Nadeel:** een met de hand geschreven bron kan achterlopen op het voorbeeld.
+  Bij een paar regels is dat te overzien.
+- **Later:** dit vervangt het besluit van 22 oktober 2026 voor de stories met een hulpcomponent: daar was een bron met de hand afgewezen als dubbele code.
+  De gegenereerde JSX voor stories zonder hulpcomponent blijft zoals hij was.

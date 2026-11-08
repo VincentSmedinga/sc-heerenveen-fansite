@@ -417,6 +417,9 @@ importers:
         specifier: 4.7.0
         version: 4.7.0
     devDependencies:
+      '@linus_janns/storybook-addon-html':
+        specifier: 9.0.0
+        version: 9.0.0(storybook@10.6.5(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1))
       '@storybook/addon-a11y':
         specifier: 10.6.5
         version: 10.6.5(storybook@10.6.5(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1))
@@ -1491,6 +1494,11 @@ packages:
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
+
+  '@linus_janns/storybook-addon-html@9.0.0':
+    resolution: {integrity: sha512-/VnyB6kbLV2BVmrec49JPM6WkPDzSNCsJizhq1ybL9Ec4jrJ4Op8G7iyVcUjYPFNACVxMt4xn/pg4a6r+avY0w==}
+    peerDependencies:
+      storybook: ^10.1.11
 
   '@mdx-js/react@3.1.1':
     resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
@@ -4953,6 +4961,10 @@ snapshots:
       keyv: 5.6.0
 
   '@keyv/serialize@1.1.1': {}
+
+  '@linus_janns/storybook-addon-html@9.0.0(storybook@10.6.5(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1))':
+    dependencies:
+      storybook: 10.6.5(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1)
 
   '@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1)':
     dependencies:

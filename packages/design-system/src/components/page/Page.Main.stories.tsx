@@ -2,7 +2,6 @@ import preview from '#.storybook/preview'
 
 import { ExampleInputTable } from '../../docs/ExampleInputTable'
 import { ExampleMain, ExampleSidebar } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Card } from '../card/Card'
 import { Form } from '../form/Form'
 import { Heading } from '../heading/Heading'
@@ -24,7 +23,14 @@ const meta = preview.meta({
           '- Met de eigenschap `intro` zet je de inleiding van de pagina, zoals de kop met een tekst, bovenaan. De kinderen zijn dan de cellen eronder, en op een breed scherm begint de zijbalk onder de inleiding. Zie `Page.Body`.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Main intro={<Heading level={1}>Nieuws over sc Heerenveen</Heading>}>
+  <Text>Een cel in de hoofdkolom.</Text>
+  <Page.Cell>…</Page.Cell>
+</Page.Main>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

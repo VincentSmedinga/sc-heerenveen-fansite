@@ -1,6 +1,7 @@
 import '../src/index.css'
 import '../src/docs/docs.css'
 
+import addonHtml from '@linus_janns/storybook-addon-html/preview'
 import addonA11y from '@storybook/addon-a11y'
 import addonDocs from '@storybook/addon-docs'
 import { definePreview } from '@storybook/react-vite'
@@ -15,7 +16,7 @@ import { withTheme } from './withTheme'
 document.documentElement.lang = 'nl'
 
 export default definePreview({
-  addons: [addonDocs(), addonA11y(), addonPseudoStates()],
+  addons: [addonDocs(), addonA11y(), addonPseudoStates(), addonHtml],
   decorators: [withTheme],
   globalTypes: {
     theme: {
@@ -47,6 +48,8 @@ export default definePreview({
       disable: true,
     },
     docs: {
+      // The Code panel under the story, with the same code as 'Show code'.
+      codePanel: true,
       container: ThemedDocsContainer,
       page: DocsPage,
       source: {
@@ -56,6 +59,14 @@ export default definePreview({
         excludeDecorators: true,
         type: 'dynamic',
       },
+    },
+    html: {
+      // The HTML panel shows what is inside the root of the story. A story with its own theme
+      // sits in the wrapper of withTheme, which isn't part of the example, so the transform
+      // takes that wrapper off.
+      root: '#storybook-root',
+      transform: (code: string) =>
+        code.replace(/^\s*<div data-theme="(?:light|dark)">([\s\S]*)<\/div>\s*$/, '$1').trim(),
     },
     options: {
       // Only Card has controls so far, and the accessibility check is what every story needs;

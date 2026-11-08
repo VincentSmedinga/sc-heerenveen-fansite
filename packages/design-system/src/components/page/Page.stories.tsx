@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExamplePage, ExamplePageWithSidebar } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
   parameters: {
@@ -36,7 +35,18 @@ const meta = preview.meta({
           'De verhalen voor een smal, een middelgroot en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page>
+  <Page.Header>…</Page.Header>
+  <Navigation appearance="header" items={items} label="Hoofdmenu" />
+  <Page.Body>
+    <Page.Main>…</Page.Main>
+  </Page.Body>
+  <Page.Footer>…</Page.Footer>
+</Page>`,
+        language: 'tsx',
+        type: 'code',
+      },
       story: { iframeHeight: '30rem', inline: false },
     },
     layout: 'fullscreen',

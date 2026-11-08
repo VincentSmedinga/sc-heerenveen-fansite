@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleFooter, ExampleHeader } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
 import { Page } from './Page'
@@ -43,7 +42,14 @@ const meta = preview.meta({
           'Hij heeft een eigen pagina.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Footer>
+  <Text appearance="meta">Alles over onze club op één plek.</Text>
+  <Navigation items={[{ href: '#over-ons', label: 'Over ons' }]} label="Over de site" />
+</Page.Footer>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
     layout: 'fullscreen',
   },

@@ -1,6 +1,5 @@
 import preview from '#.storybook/preview'
 
-import { exampleSource } from '../../docs/exampleSource'
 import { Filter } from './Filter'
 
 const meta = preview.meta({
@@ -22,7 +21,17 @@ const meta = preview.meta({
           'De links zijn 44 pixels hoog en lopen op een smal scherm door op een tweede regel.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Filter
+  items={[
+    { href: '/podcasts', label: 'Alle podcasts' },
+    { current: true, href: '/podcasts?podcast=omroep-abe', label: 'Omroep Abe' },
+  ]}
+  label="Podcasts filteren"
+/>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

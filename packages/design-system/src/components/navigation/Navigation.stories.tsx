@@ -10,7 +10,6 @@ import {
   type ExampleMenuPage,
   exampleMenuWithSubpages,
 } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Navigation } from './Navigation'
 import { NavigationBar } from './NavigationBar'
 
@@ -78,7 +77,17 @@ const meta = preview.meta({
           'Past hij daar niet, dan blijft hij in de lijst en krijgt de knop de rode streep.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Navigation
+  items={[
+    { current: true, href: '#nieuws', label: 'Nieuws' },
+    { external: true, href: '#forum', label: 'Forum' },
+  ]}
+  label="Hoofdmenu"
+/>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
   },
   tags: ['autodocs'],

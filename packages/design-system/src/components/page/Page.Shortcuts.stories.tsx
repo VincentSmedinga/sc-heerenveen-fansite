@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ExampleHeader, ExampleMain } from '../../docs/ExamplePage'
-import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
 import { Page } from './Page'
@@ -30,7 +29,17 @@ const meta = preview.meta({
           'Kies bij Viewport in de werkbalk een smal scherm.',
         ].join('\n'),
       },
-      source: exampleSource,
+      source: {
+        code: `<Page.Shortcuts
+  items={[
+    { href: '#programma', label: 'Programma' },
+    { href: '#uitslagen', label: 'Uitslagen' },
+  ]}
+  label="Op deze pagina:"
+/>`,
+        language: 'tsx',
+        type: 'code',
+      },
     },
     layout: 'fullscreen',
   },
