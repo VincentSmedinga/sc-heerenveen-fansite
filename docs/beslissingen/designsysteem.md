@@ -2390,7 +2390,7 @@
   Een kort menu zat dan boven het veld in plaats van eronder.
   Firefox en Safari zijn niet bekeken; zonder `base-select` houden ze de lijst die ze hebben.
 - **Later:** zie _Het menu opent onder het veld en omhoog alleen als het daar niet past, met alleen CSS_.
-  De kant en de hoogte van het menu zijn daar vervangen: onder eerst, geen `position-try-order: most-block-size` meer, en de plekken zijn andere dan hier genoemd (er zijn er vijf, zonder een plek over de hele breedte van het scherm).
+  De kant en de hoogte van het menu zijn daar vervangen: onder eerst, geen `position-try-order: most-block-size` meer, en de plekken zijn andere dan hier genoemd (er zijn er drie, zonder een plek over de hele breedte van het scherm).
 - **Alternatieven:** precies zo breed als het veld (een lange optie wordt afgekapt of breekt in smalle regels, en het vinkje vraagt zelf ruimte).
   Een vaste maximumhoogte van ongeveer acht opties (een maat die we moeten onderhouden, en op een laag scherm nog te hoog).
   Alleen scrollen binnen het menu, zonder eis aan zoom (laat de zwaarste situatie ongetest).
@@ -2400,22 +2400,25 @@
 
 - **Datum:** 8 november 2026
 - **Besluit:** het open menu van een `Select` met `hf-select-styled` opent onder het veld als de hele lijst daar past, anders boven het veld als de hele lijst daar past, en anders aan de kant met de meeste ruimte, met de hoogte van die ruimte min een marge (#925, dat #689 overneemt).
-  Dat is `position-try-fallbacks` met `max-block-size: none` op het menu, vijf plekken (onder naar links, `flip-block`, boven naar links, en twee plekken met `max-block-size: stretch`), en de eerste van die twee heeft `min-block-size: calc((100dvb - anchor-size(block)) / 2)`.
+  Het menu blijft zo hoog als de ruimte aan zijn kant (`max-block-size: stretch` van de browser) en heeft een `min-block-size` van `calc-size(max-content, min(size, <het halve scherm min het veld, min de marges>))`: minstens zo hoog als zijn inhoud, of als de helft van wat naast het veld overblijft als dat minder is.
+  Is er onder het veld minder ruimte dan dat, dan past het menu daar niet en gaat de browser door met `position-try-fallbacks`: onder naar links, boven (`flip-block`) en boven naar links.
   `position-try-order: most-block-size` uit #687 vervalt, en de plek over de hele breedte van het scherm ook.
   Er is geen JavaScript.
 - **Waarom:** #668 vroeg onder eerst, en de projecteigenaar koos dat opnieuw op 4 november 2026.
   Een kort menu hoort bij een veld in de onderste helft van het scherm onder het veld te staan.
-  De eigen stijl van de browser zet `max-block-size: stretch` op het menu, dus het valt nooit buiten zijn gebied en de browser gaat nooit naar de volgende plek; met `max-block-size: none` doet hij dat wel.
-  De ruimte onder plus de ruimte boven is het scherm min het veld, dus de eerste plek voor een lijst die nergens past, geldt alleen als onder minstens zoveel ruimte is als boven.
-  Een vaste `50dvb` koos bij 320 × 256 pixels de kant met minder ruimte.
+  De eigen stijl van de browser zet `max-block-size: stretch` op het menu, dus het valt nooit buiten zijn gebied en de browser gaat nooit naar de volgende plek; de `min-block-size` laat het daar wel buiten vallen als de ruimte onder te klein is.
+  De ruimte onder plus de ruimte boven is het scherm min het veld: is er onder minder dan de helft daarvan, dan is er boven meer, en gaat het menu omhoog.
+  Een lijst die nergens past, blijft zo onder het veld als daar de meeste ruimte is, en anders gaat hij omhoog, in beide gevallen met de hoogte van die ruimte.
+  Het menu wordt zo nooit eerst op zijn volle hoogte gelegd en daarna verkleind.
+  Dat bleek nodig: met `max-block-size: none` zette Chrome (157) het menu daarna soms terug op de bovenkant, zodat de gekozen optie buiten beeld stond.
   JavaScript zou de kant meten bij het openen: meer code, een test erbij, en zonder hydratatie de verkeerde kant.
-- **Nadeel:** Chromium 156 probeert hoogstens vijf plekken, dus de plek over de hele breedte van het scherm vervalt.
+- **Nadeel:** `calc-size()` is nieuw (Chrome 129); zonder dat valt de regel weg en gedraagt het menu zich als de browser het zelf doet, op de kant met de meeste ruimte.
   Een lijst die nergens past is zo breed als de ruimte aan de kant waar hij groeit, en een veld in het midden met een zeer brede optie krijgt een menu tot de rand van het veld in plaats van het hele scherm.
   De seizoenen zijn kort, dus alleen het verhaal met de lange optie laat het zien.
-  Het aantal plekken is door meting gevonden en kan in een andere versie veranderen: de CSS-test telt ze.
+  De CSS-test telt de plekken en leest de regels.
 - **Alternatieven:** `most-block-size` houden (#687; de projecteigenaar wil dat niet).
-  `flip-block` met `max-block-size: none` alleen (een lijst die nergens past, staat dan over het veld heen).
-  Een vaste `min-block-size: 50dvb`.
+  `max-block-size: none` met twee plekken die het menu verkleinen (het eerste voorstel in #925: Chrome scrolt de gekozen optie dan soms weg).
+  Een vaste `min-block-size: 50dvb` (kiest bij 320 × 256 pixels de kant met minder ruimte).
   JavaScript dat de kant bij het openen meet.
   Een vaste maximumhoogte (zie #668).
 - **Later:** de breedte-regels van _Het menu van een keuzelijst met de opmaak van de site blijft binnen het scherm_ gelden nog, behalve de plek over de hele breedte van het scherm.

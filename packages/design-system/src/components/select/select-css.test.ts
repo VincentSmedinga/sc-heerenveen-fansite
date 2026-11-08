@@ -47,20 +47,16 @@ describe('the open list in select.css', () => {
   it('opens below first, then above, and tries the other side of the field before leaving the screen', () => {
     expect(css).not.toContain('most-block-size')
     expect(css).toContain('position-try-order: normal')
-    expect(css).toMatch(/max-block-size: none/)
-    expect(css).toMatch(
-      /position-try-fallbacks:\s*--hf-select-below-end, flip-block, --hf-select-above-end, --hf-select-below-shrunk, --hf-select-above-shrunk;/,
-    )
+    expect(css).toMatch(/position-try-fallbacks: --hf-select-below-end, flip-block, --hf-select-above-end;/)
     expect(css).toMatch(/@position-try --hf-select-below-end \{[^}]*position-area: block-end span-inline-start/)
     expect(css).toMatch(/@position-try --hf-select-above-end \{[^}]*position-area: block-start span-inline-start/)
   })
 
-  it('shrinks to the room on the side with most room when the list fits on neither side', () => {
+  it('is as tall as its content, or half of the screen minus the field, and never taller than its room', () => {
+    expect(css).not.toMatch(/max-block-size: none/)
     expect(css).toMatch(
-      /@position-try --hf-select-below-shrunk \{[^}]*max-block-size: stretch[^}]*min-block-size: calc\(\(100dvb - anchor-size\(block\)\) \/ 2\)/,
+      /min-block-size: calc-size\(\s*max-content,\s*min\(size, calc\(\(100dvb - anchor-size\(block\)\) \/ 2 - var\(--hf-space-xs\) \* 2 - 1px\)\)\s*\);/,
     )
-    expect(css).toMatch(/@position-try --hf-select-above-shrunk \{[^}]*max-block-size: stretch/)
-    expect(css.match(/anchor-size\(/g)).toHaveLength(1)
   })
 
   it('tries at most five places, because Chromium ignores a sixth', () => {

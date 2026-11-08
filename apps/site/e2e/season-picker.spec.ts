@@ -320,14 +320,22 @@ test.describe('the open list of the season picker', () => {
       // list.
       await page.keyboard.press('End')
 
-      const focused = await list.evaluate((select: HTMLSelectElement) => {
-        const { bottom, top } = select.querySelector('option:focus-visible')!.getBoundingClientRect()
+      const focusedBox = () =>
+        list.evaluate((select: HTMLSelectElement) => {
+          const { bottom, top } = select.querySelector('option:focus-visible')!.getBoundingClientRect()
 
-        return { bottom, top }
-      })
+          return { bottom, top }
+        })
 
-      expect(focused.top).toBeGreaterThanOrEqual(menu.top)
-      expect(focused.bottom).toBeLessThanOrEqual(menu.bottom)
+      // The browser scrolls to it in a moment, not in the same frame as the key.
+      await expect
+        .poll(async () => {
+          const { bottom, top } = await focusedBox()
+
+          return top >= menu.top && bottom <= menu.bottom
+        })
+        .toBe(true)
+
       expect(await page.evaluate(() => window.scrollY)).toBe(scrolled)
 
       await page.keyboard.press('Escape')

@@ -25,7 +25,7 @@
    */
   /* stylelint-disable plugin/use-baseline -- base-select is not widely available yet */
   @supports (appearance: base-select) {
-    /* Below the field and growing to the left, for a list that fits there. */
+    /* Below the field and growing to the left. */
     @position-try --hf-select-below-end {
       margin-inline: var(--hf-space-xs) 0;
       max-inline-size: stretch;
@@ -37,25 +37,6 @@
       margin-inline: var(--hf-space-xs) 0;
       max-inline-size: stretch;
       position-area: block-start span-inline-start;
-    }
-
-    /*
-     * For a list that fits on neither side. The browser's own style gives the list
-     * `max-block-size: stretch`, so it shrinks to the room and is the height of that room.
-     * Below the field only when there is at least as much room there as above: the room below
-     * plus the room above is the screen minus the field, so the minimum is half of that.
-     */
-    @position-try --hf-select-below-shrunk {
-      max-block-size: stretch;
-      max-inline-size: stretch;
-      min-block-size: calc((100dvb - anchor-size(block)) / 2);
-      position-area: block-end span-inline-end;
-    }
-
-    @position-try --hf-select-above-shrunk {
-      max-block-size: stretch;
-      max-inline-size: stretch;
-      position-area: block-start span-inline-end;
     }
 
     .hf-select-styled,
@@ -108,13 +89,18 @@
         padding: var(--hf-space-xs);
 
         /*
-         * Without a height limit, a list that is too tall falls outside its area, and the
-         * browser tries the next place: below to the left, above (flip-block), above to the
-         * left, and then the two places where the list shrinks to the room.
+         * The list is never taller than the room on its side (`max-block-size: stretch` of
+         * the browser). It must be at least as tall as its content, or as half of the screen
+         * minus the field and the margins when that is less: where there is less room below than that, the
+         * browser takes the next place, above the field. So a list that fits opens below, a
+         * list that fits only above opens above, and a list that fits on neither side takes
+         * the side with most room, where it scrolls inside itself.
          */
-        max-block-size: none;
-        position-try-fallbacks:
-          --hf-select-below-end, flip-block, --hf-select-above-end, --hf-select-below-shrunk, --hf-select-above-shrunk;
+        min-block-size: calc-size(
+          max-content,
+          min(size, calc((100dvb - anchor-size(block)) / 2 - var(--hf-space-xs) * 2 - 1px))
+        );
+        position-try-fallbacks: --hf-select-below-end, flip-block, --hf-select-above-end;
         position-try-order: normal;
       }
 
