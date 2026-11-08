@@ -179,6 +179,15 @@ export const HalfPitchLyingDown = meta.story({
   name: 'Het halve veld liggend',
 })
 
+export const HalfPitchOpponentLyingDown = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2'),
+    ours: ours(null),
+  },
+  name: 'Het halve veld van alleen de tegenstander liggend',
+})
+
 export const NoPitch = meta.story({
   args: {
     headingLevel: 3,

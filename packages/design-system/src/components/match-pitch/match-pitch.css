@@ -318,12 +318,15 @@
     background-size: 100% 200%;
   }
 
+  /* The corners on the halfway line are square, where the other half would begin. */
   .hf-match-pitch-field-ours {
     background-position: 0 100%;
+    border-radius: 0 0 0.5rem 0.5rem;
   }
 
   .hf-match-pitch-field-theirs {
     background-position: 0 0;
+    border-radius: 0.5rem 0.5rem 0 0;
   }
 
   .hf-match-pitch-field-ours .hf-match-pitch-line-first,
@@ -371,10 +374,12 @@
 
     .hf-match-pitch-field-ours {
       background-position: 0 0;
+      border-radius: 0.5rem 0 0 0.5rem;
     }
 
     .hf-match-pitch-field-theirs {
       background-position: 100% 0;
+      border-radius: 0 0.5rem 0.5rem 0;
     }
 
     .hf-match-pitch-field-ours .hf-match-pitch-line-first,
