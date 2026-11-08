@@ -2873,6 +2873,7 @@
   Een doelpunt zegt "(strafschop)" of "(eigen doelpunt)" achter de naam, en een assist staat op een tweede regel in kleine letters.
 - **Waarom:** een woord en een pictogram die hetzelfde zeggen, maken de regel langer zonder iets toe te voegen, en de schermlezer mist niets.
 - **Alternatieven:** een regel voor wie erin komt en een regel voor wie eruit gaat.
+- **Later:** zie _Bij een wissel staat "voor (naam speler)" kleiner op een nieuwe regel_ (8 november 2026): de wissel is niet meer één regel; "voor" en de speler die eraf gaat staan onder de regel met het pictogram.
 
 ## De minuut in het verloop staat in een pil: gevuld voor sc Heerenveen, open voor de tegenstander
 
@@ -3013,3 +3014,11 @@
   Bij een paar regels is dat te overzien.
 - **Later:** dit vervangt het besluit van 22 oktober 2026 voor de stories met een hulpcomponent: daar was een bron met de hand afgewezen als dubbele code.
   De gegenereerde JSX voor stories zonder hulpcomponent blijft zoals hij was.
+
+## Bij een wissel staat "voor (naam speler)" kleiner op een nieuwe regel
+
+- **Datum:** 8 november 2026
+- **Besluit:** in `MatchTimeline` staat bij een wissel de speler die erin komt naast het pictogram, en "voor" met de speler die eraf gaat op een eigen regel eronder, met dezelfde klasse en stijl als de assist (`hf-match-event-assist`).
+  Het woord "voor" blijft zichtbare tekst, en de tekst voor een schermlezer blijft "Wissel: A voor B".
+- **Waarom:** een kleine regel onder de hoofdregel is al het patroon in Verloop; hergebruik houdt de kaart rustig en voorkomt een tweede stijl om te onderhouden.
+- **Alternatieven:** een eigen klasse met dezelfde waarden (dubbel werk); de hele wissel op één regel laten staan.
