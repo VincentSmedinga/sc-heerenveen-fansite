@@ -43,6 +43,11 @@ De proef stuurde daarom één SPARQL-verzoek met onze User-Agent, buiten de fetc
 Dat valt niet binnen het besluit _Een herkenbare fetcher die zich aan robots.txt houdt_.
 Of Wikidata in de importer mag, beslist de projecteigenaar (zie _De open vragen_).
 
+**Later (8 november 2026):** de `robots.txt` van Wikidata weert de API onder `/w/` en `/sparql`, maar laat `/wiki/Special:EntityData/Q….json` toe (`Allow: /wiki/Special:EntityData/*.`, een langere regel dan `Disallow: /wiki/Special:`).
+Onze eigen `parseRobots` bevestigt dat voor het item van één persoon.
+De importer leest daarom sinds #898 het item van elke persoon met de fetcher, zie _Wikidata is de bron voor de gegevens van een persoon_ in `docs/beslissingen/importer.md`.
+Voor de selecties per seizoen blijft Wikidata ongeschikt: de lijst van alle spelers van sc Heerenveen vraagt de SPARQL-dienst, en die blijft geweigerd.
+
 ### Zo herhaal je de proef
 
 1. Maak per seizoen de titels `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)` en, voor de seizoenen tot en met 2006/07, `Sc Heerenveen in het seizoen JJJJ/JJ`.
@@ -286,6 +291,9 @@ De besluiten _De selectie komt van de Nederlandse Wikipedia, zoals de wedstrijde
 | Transfermarkt en andere databanken       | Nee                                 | Besluit van 29 oktober 2026: de rechten zijn onduidelijk en de bron past niet bij het bronbeleid.                                                                                                 |
 | Site van de club                         | Nee                                 | Geen toestemming (besluit van 26 oktober 2026).                                                                                                                                                   |
 
+**Later (8 november 2026):** de regel over Wikidata geldt voor de API en het querysysteem.
+Het item van één persoon op `Special:EntityData` mag wel, en de importer leest het sinds #898 voor de gegevens van een persoon (geboorte, nationaliteit, linie).
+
 Een naam is een feit en geen werk van een journalist, dus de regel "alleen kop, link en bronnaam" van het hoofdstuk Redactie geldt hier niet.
 De bronvermelding van de site noemt per seizoen de pagina's waar de gegevens vandaan komen.
 Bij 36 seizoenen worden dat er veel, want elk seizoen heeft tot vijf pagina's.
@@ -474,6 +482,8 @@ Een tabel `persons` (b) en de bron Wikidata komen daar niet bij.
    Aanbeveling: nu niet gebruiken.
    De `robots.txt` weert ons, de data zijn alleen jaren, en voor 2018 en later heeft maar een deel van de spelers een uitspraak.
    Als je het gat van 2000/01 tot en met 2004/05 toch wilt vullen, dan is een uitzondering op `robots.txt` voor `query.wikidata.org` nodig, met een eigen besluit.
+   **Later (8 november 2026):** voor de seizoenen blijft dit zo.
+   Wikidata is wel de bron voor de gegevens per persoon (#898), via het item dat `robots.txt` toelaat.
 3. **Welk datamodel?**
    Aanbeveling: (a) voor de eerste versie en (b) later.
 4. **Mag de eerste versie met gaten?**

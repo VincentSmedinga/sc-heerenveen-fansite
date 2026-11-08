@@ -365,6 +365,13 @@
       "when": 1794097869983,
       "tag": "0051_make_goal_and_card_minute_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1794132546735,
+      "tag": "0052_add_wikidata_to_persons",
+      "breakpoints": true
     }
   ]
 }

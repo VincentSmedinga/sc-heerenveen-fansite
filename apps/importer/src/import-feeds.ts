@@ -21,6 +21,7 @@ import type { MatchDay } from './relevance.ts'
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
+import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
 import {
   paywallCategoryFor,
@@ -102,6 +103,14 @@ export type ImportOptions = {
    * reach its own web servers.
    */
   makeFetcher?: (robots: RobotsStore) => Fetcher
+  /** The wait between two requests of the persons step in milliseconds. A test gives 0. */
+  personDataPause?: number
+  /**
+   * The address of Wikidata, where the run reads the persons (#898). Without it, a run reads
+   * Wikidata only when it reads the real Wikipedia, so a test with its own Wikipedia reaches
+   * nothing real. A test that is about the persons gives its own web server, or null.
+   */
+  wikidataOrigin?: null | string
   /**
    * The address of the Wikipedia the matches come from. A test gives the address of its own web
    * server, or null when it is about something else and must not reach Wikipedia.
@@ -324,6 +333,8 @@ export async function runImport(
     alerts = {},
     clock = () => new Date(),
     makeFetcher = (robots) => createFetcher({ robots }),
+    personDataPause,
+    wikidataOrigin: wikidata,
     wikipediaOrigin: origin = wikipediaOrigin,
     write = console.log,
   }: ImportOptions = {},
@@ -351,9 +362,18 @@ export async function runImport(
         origin === null ? [] : importWikipedia(db, fetcher, clock, origin, { ...alerts, clock, write }),
       ])
 
+      // After the Wikipedia pages: the persons they made are read from Wikidata in the same
+      // run.
+      const personLines = await importPersonData(db, fetcher, {
+        clock,
+        origin,
+        pause: personDataPause,
+        wikidata: wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata,
+      })
+
       await finishRun(db, runId, clock())
 
-      return { clubLines, reports, wikipedia }
+      return { clubLines, personLines, reports, wikipedia }
     })
 
     if (!run.ran) {
@@ -363,7 +383,7 @@ export async function runImport(
       return 0
     }
 
-    const { clubLines, reports, wikipedia } = run.result
+    const { clubLines, personLines, reports, wikipedia } = run.result
 
     for (const line of clubLines) {
       write(line)
@@ -378,6 +398,9 @@ export async function runImport(
     // A run that finds the hour not over yet is the usual case, three in four, and says
     // nothing.
     for (const line of wikipedia.status === 'fulfilled' ? wikipedia.value : []) {
+      write(line)
+    }
+    for (const line of personLines) {
       write(line)
     }
     if (reports.status === 'rejected') {
@@ -477,6 +500,38 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
     relevance: { doubtful: 0, irrelevant: 0, relevant: 0 },
     skipped: read.skipped,
     url: feed.url,
+  }
+}
+
+/**
+ * Reads the persons that Wikidata was not asked about yet, and returns the lines to write. A
+ * failure is a warning and no failed import. It says nothing when it read and asked nothing.
+ */
+async function importPersonData(
+  db: Database,
+  fetcher: Fetcher,
+  {
+    clock,
+    origin,
+    pause,
+    wikidata,
+  }: { clock: () => Date; origin: null | string; pause: number | undefined; wikidata: null | string },
+): Promise<string[]> {
+  if (origin === null || wikidata === null) {
+    return []
+  }
+
+  try {
+    const report = await readPersonData(db, fetcher, {
+      clock,
+      origin,
+      wikidata,
+      ...(pause === undefined ? {} : { pause }),
+    })
+
+    return [...report.warnings, ...describePersonData(report)]
+  } catch (error) {
+    return [`Persons: warning, not read from Wikidata: ${describeError(error)}`]
   }
 }
 

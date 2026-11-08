@@ -1062,6 +1062,42 @@ De import leest ze uit hetzelfde verzoek waarmee hij de titel opvraagt, dus een 
   Een tweede run schrijft en vraagt niets.
 - **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en `pnpm run import:status` toont de aantallen per bron voor alle personen.
 
+### De gegevens van de personen uit Wikidata
+
+Van elke persoon bewaart de importer ook wat Wikidata (CC0) weet: het Q-nummer, het paginanummer van het Nederlandse artikel, de geboortedatum met de precisie, de geboorteplaats, de nationaliteiten, de posities en de linie (zie de [README van `@fansite/db`](../../packages/db/README.md), _De gegevens van Wikidata_).
+De site toont ze nog niet, en de site vraagt nooit iets aan Wikidata of Wikipedia.
+De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en draait aan het eind van elke run, na de pagina's van Wikipedia, in de vergrendeling van die run:
+
+- **Welke personen:** elke persoon zonder `wikidata_read_at`, de oudste eerst, hoogstens 200 per run.
+  De eerste ronde loopt dus over meerdere runs.
+  Een persoon wordt één keer gelezen.
+- **Twee verzoeken per persoon:** de pagina-informatie van het artikel (`/wiki/<titel>?action=info`) geeft het paginanummer en het Q-nummer, en daarna het item (`/wiki/Special:EntityData/Q….json` op `www.wikidata.org`).
+  De API's onder `/w/` en `/api/` laat `robots.txt` niet toe, en de importer vraagt ze niet.
+- **De namen** van een land, een plaats of een positie komen uit hun eigen item: het Nederlandse label, anders het Engelse.
+  Elk Q-nummer wordt één keer opgevraagd en staat dan in `wikidata_items`.
+  Een Q-nummer zonder een van beide labels geeft een waarschuwing met `Persons:` vooraan en wordt overgeslagen.
+- **Wat uit het item komt:** `P569` (geboortedatum, met de precisie; een datum grover dan een jaar blijft leeg), `P19` (geboorteplaats), `P27` (nationaliteit, alle waarden) en `P413` (positie, alle waarden).
+  Een uitspraak met de rang "deprecated" telt niet, en bij een voorkeursrang telt alleen de voorkeur.
+- **De linie** komt uit de lijst `personLines` in [`src/person-lines.ts`](src/person-lines.ts) (`manual`), anders uit de eerste positie van Wikidata die in `wikidataPositionLines` staat (`wikidata`), anders uit de linie die het vaakst in de rijen van `players` van de persoon staat, bij gelijkstand die van het laatste seizoen (`squad`).
+  Zonder een van de drie blijft hij leeg.
+  `personLines` wordt bij elke run toegepast, ook op personen die al gelezen zijn, en wordt nooit vervangen.
+  Een positie die niet in `wikidataPositionLines` staat, zegt niets over de linie.
+  Voeg hem toe als je ziet dat iemand daardoor zonder linie blijft.
+- **Een persoon zonder artikel of zonder item** blijft leeg zonder gok en is toch gelezen, dus de volgende run vraagt niets over hem.
+  Heeft een andere persoon hetzelfde Q-nummer, dan houdt de eerste het en waarschuwt de run.
+- **Een verzoek dat mislukt** laat de persoon ongelezen en geeft een waarschuwing.
+  Het Q-nummer blijft bewaard, dus de volgende run vraagt dan alleen het item.
+  Na drie mislukte verzoeken achter elkaar, bij een `robots.txt` die weigert en bij een verzoek om te wachten (429 of 503) stopt de stap voor deze run.
+- **Het tempo:** de stap wacht 250 milliseconden tussen twee verzoeken en vraagt alles met onze User-Agent, door de fetcher.
+- **Het logboek** noemt per run hoeveel personen zijn gelezen, hoeveel een geboortedatum, nationaliteit en linie kregen (de linie per bron), hoeveel leeg bleven en hoeveel artikelen en items zijn opgevraagd:
+
+```text
+persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a nationality, 170 with a line (120 from Wikidata, 50 from the squad, 0 from the list), 3 left empty; 200 articles and 230 items asked
+```
+
+Een run zonder nieuwe personen schrijft niets en vraagt niets.
+`pnpm run import:status` toont hoeveel personen zijn gelezen en wat ze hebben.
+
 ### De clubs van de tegenstanders
 
 Elke wedstrijd hangt aan een club (`matches.club_id`, zie _De tabellen `clubs` en `club_names`_ in de [README van `@fansite/db`](../../packages/db/README.md)).

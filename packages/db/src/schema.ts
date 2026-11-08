@@ -740,6 +740,45 @@ export type PersonNameSource = (typeof personNameSources)[number]
 /** The most characters the columns with the name of a person hold. */
 export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
 
+/** The four lines of a player, and the lines of a person too (`persons.line`). */
+export const playerPositions = ['doelman', 'verdediger', 'middenvelder', 'aanvaller'] as const
+
+export type PlayerPosition = (typeof playerPositions)[number]
+
+/**
+ * Where the line of a person comes from: Wikidata, the squad lists of the seasons, or our own
+ * list.
+ */
+export const personLineSources = ['wikidata', 'squad', 'manual'] as const
+
+export type PersonLineSource = (typeof personLineSources)[number]
+
+/**
+ * How exact a birth date is: a day, a month (the first of it is stored) or a year (1 January).
+ */
+export const birthDatePrecisions = ['day', 'month', 'year'] as const
+
+export type BirthDatePrecision = (typeof birthDatePrecisions)[number]
+
+/** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
+export const wikidataLimits = { id: 20, label: 255 }
+
+/**
+ * The name of an item of Wikidata that a person points at: a country, a place or a position
+ * (#898). `id` is the Q-number (`Q29999`) and `label` the Dutch name of the item, or the
+ * English one when it has no Dutch name. The importer reads an item once, so it never asks
+ * again about a Q-number that is here. The data are CC0
+ * (https://creativecommons.org/publicdomain/zero/1.0/).
+ */
+export const wikidataItems = mysqlTable('wikidata_items', {
+  id: varchar('id', { length: wikidataLimits.id }).primaryKey(),
+  label: varchar('label', { length: wikidataLimits.label }).notNull(),
+})
+
+export type NewWikidataItem = typeof wikidataItems.$inferInsert
+
+export type WikidataItem = typeof wikidataItems.$inferSelect
+
 /**
  * A person who scored a goal or stood in the squad of a match, ours or an opponent's: one row
  * for each article about a player on the Dutch Wikipedia, with an `id` that never changes. The
@@ -762,6 +801,21 @@ export const persons = mysqlTable('persons', {
   familyNamePrefix: varchar('family_name_prefix', { length: personNameLimits.familyNamePrefix }),
   familyName: varchar('family_name', { length: personNameLimits.familyName }),
   nameSource: mysqlEnum('name_source', personNameSources),
+  // What the importer reads from Wikidata (#898), once for each person. All are empty until
+  // `wikidata_read_at` is set, and stay empty for a person without an article or an item.
+  // `wikidata_id` is the Q-number and `wikipedia_page_id` the number of the article on the
+  // Dutch Wikipedia. `birth_date` is a day, or the first of the month or of the year when
+  // `birth_date_precision` says that is all Wikidata knows. A birth date of a living player is
+  // a personal datum: it stays in the database and the site shows it only after a decision of
+  // its own. `line` is the line (`playerPositions`) and `line_source` where it came from.
+  wikidataId: varchar('wikidata_id', { length: wikidataLimits.id }).unique(),
+  wikipediaPageId: int('wikipedia_page_id', { unsigned: true }),
+  birthDate: date('birth_date', { mode: 'string' }),
+  birthDatePrecision: mysqlEnum('birth_date_precision', birthDatePrecisions),
+  birthPlaceId: varchar('birth_place_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
+  line: mysqlEnum('line', playerPositions),
+  lineSource: mysqlEnum('line_source', personLineSources),
+  wikidataReadAt: datetime('wikidata_read_at'),
 })
 
 export type NewPerson = typeof persons.$inferInsert
@@ -785,6 +839,51 @@ export const personPages = mysqlTable('person_pages', {
 export type NewPersonPage = typeof personPages.$inferInsert
 
 export type PersonPage = typeof personPages.$inferSelect
+
+/**
+ * The nationalities of a person (`P27` on Wikidata), in the order Wikidata lists them:
+ * `position` counts from 0. The rows go with their person. The country is a row of
+ * `wikidata_items`, so "all Dutch players" is a query without JSON.
+ */
+export const personNationalities = mysqlTable(
+  'person_nationalities',
+  {
+    personId: int('person_id', { unsigned: true })
+      .notNull()
+      .references(() => persons.id, { onDelete: 'cascade' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    itemId: varchar('item_id', { length: wikidataLimits.id })
+      .notNull()
+      .references(() => wikidataItems.id),
+  },
+  (table) => [primaryKey({ columns: [table.personId, table.position] }), unique().on(table.personId, table.itemId)],
+)
+
+export type NewPersonNationality = typeof personNationalities.$inferInsert
+
+export type PersonNationality = typeof personNationalities.$inferSelect
+
+/**
+ * The positions of a person (`P413` on Wikidata), in the order Wikidata lists them:
+ * `position` counts from 0. The rows go with their person.
+ */
+export const personPositions = mysqlTable(
+  'person_positions',
+  {
+    personId: int('person_id', { unsigned: true })
+      .notNull()
+      .references(() => persons.id, { onDelete: 'cascade' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    itemId: varchar('item_id', { length: wikidataLimits.id })
+      .notNull()
+      .references(() => wikidataItems.id),
+  },
+  (table) => [primaryKey({ columns: [table.personId, table.position] }), unique().on(table.personId, table.itemId)],
+)
+
+export type NewPersonPosition = typeof personPositions.$inferInsert
+
+export type PersonPosition = typeof personPositions.$inferSelect
 
 /** The most characters a column of `club_stadiums` holds. The admin checks them first. */
 export const clubStadiumLimits = { name: 100, note: 200 }
@@ -1432,10 +1531,6 @@ export const visitorHashes = mysqlTable(
 
 /** The most characters the name and the search term of a player hold. */
 export const playerNameMaxLength = 100
-
-export const playerPositions = ['doelman', 'verdediger', 'middenvelder', 'aanvaller'] as const
-
-export type PlayerPosition = (typeof playerPositions)[number]
 
 /**
  * Where a row in `players` comes from, from the most complete source to the least: `selectie`

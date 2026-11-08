@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { MatchImport, WikipediaPage } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
-import { countPersonNames } from '@fansite/db/persons'
+import { countPersonData, countPersonNames } from '@fansite/db/persons'
 import {
   feeds,
   importRuns,
@@ -111,6 +111,7 @@ export async function showStatus(
 
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
+    await showPersonData(db, write)
     await showWaitingChanges(db, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
@@ -208,6 +209,23 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
   }
 
   return unhealthy
+}
+
+/**
+ * Shows how many persons the importer has read from Wikidata, and what they have: the Q-number,
+ * a birth date, a nationality and a line, by where the line came from. It is information and no
+ * fault.
+ */
+async function showPersonData(db: Database, write: (line: string) => void): Promise<void> {
+  const counts = await countPersonData(db)
+
+  write(`Persons from Wikidata: ${counts.read} of ${counts.total} read, ${counts.total - counts.read} to go`)
+  write(
+    `  with a Q-number: ${counts.wikidataId}, with a birth date: ${counts.birthDate}, with a nationality: ${counts.nationality}`,
+  )
+  write(
+    `  line: ${counts.lines.wikidata} from Wikidata, ${counts.lines.squad} from the squad, ${counts.lines.manual} from the list, ${counts.noLine} without`,
+  )
 }
 
 /**
