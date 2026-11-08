@@ -682,7 +682,6 @@ describe('the page /wedstrijden', () => {
       expect(results).toContain('<abbr title="Strafschop">str.</abbr>')
       expect(results).toContain('e.d. eigen doelpunt, str. strafschop')
       expect(results).not.toMatch(/pen\.|penalty/i)
-      expect(results).not.toMatch(/pen\.|penalty/i)
 
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,
