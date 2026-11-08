@@ -36,7 +36,11 @@ export function SpecialGoalsCard({
   const hasGoals = goalsFor > 0
 
   return (
-    <Card aria-labelledby="bijzondere-doelpunten" shareable={imageCredit(hasGoals, seasonOnImage)} surface="soft">
+    <Card
+      aria-labelledby="bijzondere-doelpunten"
+      shareable={imageCredit(hasGoals, seasonOnImage, matches)}
+      surface="soft"
+    >
       <Heading anchor id="bijzondere-doelpunten" level={2}>
         Bijzondere doelpunten
       </Heading>

@@ -28,6 +28,7 @@ const played = (goals: Goal[], options: Partial<PublicMatch> = {}): PublicMatch 
   afterNinetyFor: null,
   attendance: null,
   competition: 'Eredivisie',
+  dataSource: 'wikipedia',
   dateText: null,
   extraTime: false,
   goals,

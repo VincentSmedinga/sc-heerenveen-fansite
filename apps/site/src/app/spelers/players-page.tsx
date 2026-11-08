@@ -8,6 +8,7 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { sourceOf } from '#src/match-sources'
 import { getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
@@ -155,7 +156,13 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           </>
         )}
         {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} squad={squadSource} />
+          <SourceCredit
+            edited={data.edited}
+            pages={data.pages}
+            season={data.season}
+            source={sourceOf([...data.matches, ...(allTime ?? [])])}
+            squad={squadSource}
+          />
         )}
       </Page.Sidebar>
     </>

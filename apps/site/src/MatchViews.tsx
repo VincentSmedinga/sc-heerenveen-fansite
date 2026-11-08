@@ -9,6 +9,7 @@ import type { FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
 import {
+  ArchiveCredit,
   averagesOf,
   BarChart,
   Button,
@@ -43,6 +44,7 @@ import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { shootOutOf } from './match-result'
+import { type MatchSource, sourceOf } from './match-sources'
 import {
   allTimePlaces,
   allTimeScorersOf,
@@ -82,13 +84,40 @@ import { splitStaffName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
 
 /**
- * What the button for an image of a statistics card puts under the image: the credit of
- * Wikipedia, where the facts come from, as the cards of the homepage give it. It is a function,
- * so a card that has no facts yet has no button. A card of a season that is over also gets the
- * season (`2025/26`), which goes under the image and into the name of the file.
+ * The short credit of a small card for the source of its matches: Wikipedia, the archive of the
+ * old fansite, or both. `lead` is what stands before the name instead of `Bron:`.
  */
-export const imageCredit = (hasFacts: boolean, season?: string) =>
-  hasFacts ? { season, source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
+export function CompactCredit({ lead, source }: { lead?: string; source: MatchSource }) {
+  const leadProps = lead === undefined ? {} : { lead }
+
+  return source === 'archive' ? (
+    <ArchiveCredit {...leadProps} />
+  ) : (
+    <WikipediaCredit archive={source === 'both'} compact {...leadProps} />
+  )
+}
+
+/**
+ * What the button for an image of a statistics card puts under the image: the credit of
+ * where the facts come from, as the cards of the homepage give it: Wikipedia, or the archive
+ * of the old fansite for the matches that come from it (`matches` are the matches the card
+ * counts; without them it is Wikipedia). It is a function, so a card that has no facts yet has
+ * no button. A card of a season that is over also gets the season (`2025/26`), which goes under
+ * the image and into the name of the file.
+ */
+export const imageCredit = (
+  hasFacts: boolean,
+  season?: string,
+  matches: MatchSource | readonly Pick<PublicMatch, 'dataSource'>[] = 'wikipedia',
+) =>
+  hasFacts
+    ? {
+        season,
+        source: (
+          <CompactCredit lead="Gegevens van" source={typeof matches === 'string' ? matches : sourceOf(matches)} />
+        ),
+      }
+    : undefined
 
 /**
  * The line under a card with statistics that says how many matches it is based on: all the
@@ -131,7 +160,7 @@ export function CleanSheetsCard({
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0, season)} surface="soft">
+    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0, season, matches)} surface="soft">
       <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
@@ -207,7 +236,7 @@ export function ExtremesCard({
   const shown = lines.flatMap(({ goal, match, name }) => (match === undefined ? [] : [{ goal, match, name }]))
 
   return (
-    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0, season)} surface="soft">
+    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0, season, matches)} surface="soft">
       <Heading anchor id="uitersten" level={2}>
         Uitersten
       </Heading>
@@ -276,6 +305,7 @@ export function GoalsPerQuarterCard({
       shareable={imageCredit(
         [...scored, ...conceded].some((count) => count > 0),
         season,
+        matches,
       )}
       surface="warm"
     >
@@ -439,7 +469,7 @@ export function HomeAwayCard({
   })
 
   return (
-    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season)}>
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season, matches)}>
       <Heading anchor id="thuis-en-uit" level={2}>
         Thuis en uit
       </Heading>
@@ -503,7 +533,7 @@ export function AttendanceCard({
     </Heading>
   )
   const card = (children: ReactNode, shareable = false) => (
-    <Card aria-labelledby="toeschouwers" shareable={imageCredit(shareable, season)}>
+    <Card aria-labelledby="toeschouwers" shareable={imageCredit(shareable, season, matches)}>
       {heading}
       {children}
     </Card>
@@ -587,7 +617,7 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
           Alle wedstrijden
         </Link>
       </Text>
-      {shown.length > 0 && <WikipediaCredit compact />}
+      {shown.length > 0 && <CompactCredit source={sourceOf(shown)} />}
     </Card>
   )
 }
@@ -605,7 +635,11 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
     matchFlowOf(matches)
 
   return (
-    <Card aria-labelledby="hoe-de-wedstrijden-verlopen" shareable={imageCredit(known > 0, season)} surface="soft">
+    <Card
+      aria-labelledby="hoe-de-wedstrijden-verlopen"
+      shareable={imageCredit(known > 0, season, matches)}
+      surface="soft"
+    >
       <Heading anchor id="hoe-de-wedstrijden-verlopen" level={2}>
         Hoe de wedstrijden verlopen
       </Heading>
@@ -731,7 +765,11 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
   const [won, drawn, lost] = [count('W'), count('G'), count('V')]
 
   return (
-    <Card aria-labelledby="verloop-van-het-seizoen" shareable={imageCredit(results.length > 0, season)} surface="warm">
+    <Card
+      aria-labelledby="verloop-van-het-seizoen"
+      shareable={imageCredit(results.length > 0, season, matches)}
+      surface="warm"
+    >
       <Heading anchor id="verloop-van-het-seizoen" level={2}>
         Verloop van het seizoen
       </Heading>
@@ -857,7 +895,13 @@ export function ScoreCountsCard({
   const counts = scoreCountsOf(matches, competition)
 
   return (
-    <ScoreCountsView anchored counts={counts} empty="We hebben nog geen uitslagen van dit seizoen." season={season} />
+    <ScoreCountsView
+      anchored
+      counts={counts}
+      empty="We hebben nog geen uitslagen van dit seizoen."
+      season={season}
+      source={sourceOf(matches)}
+    />
   )
 }
 
@@ -894,6 +938,7 @@ export function ScoreCountsView({
   empty,
   goals,
   season,
+  source,
 }: {
   anchored?: boolean
   children?: ReactNode
@@ -901,6 +946,8 @@ export function ScoreCountsView({
   empty: string
   goals?: undefined | { against: number; for: number }
   season?: string | undefined
+  /** Where the matches the counts are made from come from, for the credit under the image. */
+  source?: MatchSource | undefined
 }) {
   const played = playedOfCounts(counts)
   const slices = counts.map(({ count, goalsAgainst, goalsFor, outcome }) => ({
@@ -910,7 +957,7 @@ export function ScoreCountsView({
   }))
 
   return (
-    <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season)} surface="warm">
+    <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season, source)} surface="warm">
       {anchored ? (
         <Heading anchor id={scoreCountsCard.id} level={2}>
           {scoreCountsCard.name}
@@ -984,11 +1031,19 @@ export function SourceCredit({
   edited,
   pages,
   season,
+  source = 'wikipedia',
   squad,
 }: {
   edited: boolean
   pages: PublicWikipediaPage[]
   season: string
+  /**
+   * Where the matches on the page come from (see `sourceOf`). The pages of Wikipedia are also
+   * the source of the table, so with them the credit names Wikipedia, and the archive of the
+   * old fansite next to it when some matches come from it. Without a page of Wikipedia it is
+   * the archive alone.
+   */
+  source?: MatchSource
   /**
    * The pages the squad of the season was read from, for the page Spelers, and whether a player
    * comes from Wikidata, which the credit then names with its licence (CC0).
@@ -1012,7 +1067,11 @@ export function SourceCredit({
   const [first, ...rest] = credited
 
   if (first === undefined) {
-    return null
+    return source === 'wikipedia' ? null : (
+      <Card as="div" surface="transparent">
+        <ArchiveCredit />
+      </Card>
+    )
   }
 
   const readAt = new Date(Math.max(...credited.map((page) => page.readAt.getTime())))
@@ -1021,6 +1080,7 @@ export function SourceCredit({
     <Card as="div" surface="transparent">
       <WikipediaCredit
         {...(squadPages.length > 0 ? { data: 'gegevens' } : {})}
+        archive={source !== 'wikipedia'}
         edited={edited}
         pages={[first, ...rest]}
         readAt={formatReadAt(readAt)}
@@ -1118,7 +1178,7 @@ export function StreaksCard({
   const when = over ? `in ${season}` : 'dit seizoen'
 
   return (
-    <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0, season)} surface="soft">
+    <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0, season, matches)} surface="soft">
       <Heading anchor id="reeksen" level={2}>
         Reeksen
       </Heading>
@@ -1255,13 +1315,13 @@ export function AllTimeScorersCard({
   matches,
 }: {
   competition: CompetitionChoice
-  matches: (ScoredMatch & { season: string })[]
+  matches: (Pick<PublicMatch, 'dataSource'> & ScoredMatch & { season: string })[]
 }) {
   const { scorers, since, total } = allTimeScorersOf(matches, competition)
   const { known, played } = scorersCoverage(matches, competition)
 
   return (
-    <Card aria-labelledby="alle-tijden" shareable={imageCredit(scorers.length > 0)} surface="soft">
+    <Card aria-labelledby="alle-tijden" shareable={imageCredit(scorers.length > 0, undefined, matches)} surface="soft">
       <Heading anchor id="alle-tijden" level={2}>
         Alle tijden
       </Heading>
@@ -1313,7 +1373,7 @@ export function TopScorersCard({
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
-      shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage)}
+      shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage, matches)}
       surface="soft"
     >
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>

@@ -60,9 +60,10 @@ const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFi
 
 // The credit of Wikipedia on a page of match data: a details that is closed (it has no `open`
 // attribute after its class), with "Bron: Wikipedia" in the summary, and the licence and the
-// time of the last reading in the fold.
+// time of the last reading in the fold. A page that counts across all seasons also names the
+// archive of the old fansite, because the made-up matches of the seed include some of its own.
 const closedWikipediaCredit =
-  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia(?: en het archief van de oude sc Heerenveen Fansite)?<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
 
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.
@@ -1034,6 +1035,25 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /<h2[^>]*id="uitslagen-knvb-beker">/)
     assert.match(matchesHtml, closedWikipediaCredit)
     assert.doesNotMatch(matchesHtml, /action=history/)
+
+    // The made-up matches of the old fansite: a season in the Eerste divisie shows its card
+    // first, a played match without a time shows the day alone, and the credit names the
+    // archive of the old fansite and not Wikipedia, which has nothing of that season.
+    const oldSeasonHtml = await (await fetch(`${origin}/wedstrijden/1992-93`)).text()
+    assert.match(oldSeasonHtml, /<h2[^>]*id="uitslagen-eerste-divisie">/)
+    assert.match(oldSeasonHtml, /<time datetime="1992-11-21">za 21 nov 1992<\/time>/)
+    assert.doesNotMatch(oldSeasonHtml, /1992-11-21T|tijd nog niet|weekend/i)
+    assert.match(
+      oldSeasonHtml,
+      /<p class="hf-meta hf-archive-credit">Bron: het archief van de oude sc Heerenveen Fansite<\/p>/,
+    )
+    assert.doesNotMatch(oldSeasonHtml, /Bron: Wikipedia|hf-wikipedia-credit/)
+
+    // A match of the old fansite with a kick-off is a played match: it shows the day too.
+    const uefaSeasonHtml = await (await fetch(`${origin}/wedstrijden/2004-05`)).text()
+    assert.match(uefaSeasonHtml, /<h2[^>]*id="uitslagen-uefa-cup">/)
+    assert.match(uefaSeasonHtml, /<time datetime="2004-09-16">do 16 sep 2004<\/time>/)
+    assert.match(uefaSeasonHtml, /Bron: het archief van de oude sc Heerenveen Fansite/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
 

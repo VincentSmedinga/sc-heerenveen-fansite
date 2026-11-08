@@ -10,6 +10,7 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { sourceOf } from '#src/match-sources'
 import { getCoachResultData, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
@@ -157,7 +158,7 @@ export async function StatisticsPage({
         <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         {coachResults}
         {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
         )}
       </Page.Sidebar>
     </>

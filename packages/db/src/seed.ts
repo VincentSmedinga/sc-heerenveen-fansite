@@ -791,6 +791,58 @@ export const madeUpPlayerStats: Record<
   ],
 }
 
+/**
+ * Made-up matches of the old fansite (1990 to 2007), for the pages and the accessibility
+ * checks: a match of the Eerste divisie and one of the Intertoto Cup that have a day and no
+ * time (a played match shows its day only), and one of the UEFA Cup with a kick-off. Unlike
+ * `madeUpMatches` they are in fixed seasons, because the old seasons never move. They have the
+ * source `oude-fansite`, so the page names the archive of the old fansite as their source.
+ * Each has an opponent of its own that the current season does not meet, so the page of that
+ * club has the archive as its only source. The import of the old fansite replaces them: it
+ * removes a match of its source that is not in its files.
+ */
+export function madeUpOldMatches(): MadeUpMatch[] {
+  const base = { dataSource: 'oude-fansite', resultSetAt: null, stadium: null, status: 'played' } as const
+
+  return [
+    {
+      ...base,
+      competition: 'Eerste divisie',
+      goalsAgainst: 1,
+      goalsFor: 3,
+      home: false,
+      matchDate: '1992-11-21',
+      opponent: 'Oudstad FC',
+      round: 'Wedstrijd 14',
+      season: '1992/93',
+    },
+    {
+      ...base,
+      competition: 'Intertoto Cup',
+      goalsAgainst: 0,
+      goalsFor: 0,
+      home: false,
+      matchDate: '1996-06-22',
+      opponent: 'SV Archiefdorp',
+      round: 'Wedstrijd 1',
+      season: '1996/97',
+    },
+    {
+      ...base,
+      attendance: 13500,
+      competition: 'UEFA Cup',
+      goalsAgainst: 0,
+      goalsFor: 2,
+      home: true,
+      kickoffAt: new Date('2004-09-16T17:00:00Z'),
+      matchDate: '2004-09-16',
+      opponent: 'Zomerstad United',
+      round: 'Eerste ronde',
+      season: '2004/05',
+    },
+  ]
+}
+
 /** The page that the made-up squad pretends to come from, with the title the importer reads. */
 export function madeUpSquadPage(now: Date): NewWikipediaPage {
   const season = seasonOf(now)
@@ -880,6 +932,17 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
     }
 
     await transaction.insert(matches).values(await withClubs(transaction, madeUpMatches(now)))
+
+    // The made-up matches of the old fansite, unless the database has some of its own.
+    const [anyOld] = await transaction
+      .select({ id: matches.id })
+      .from(matches)
+      .where(eq(matches.dataSource, 'oude-fansite'))
+      .limit(1)
+
+    if (anyOld === undefined) {
+      await transaction.insert(matches).values(await withClubs(transaction, madeUpOldMatches()))
+    }
 
     const goals = (await transaction.select().from(matches).where(eq(matches.season, season))).flatMap((match) =>
       (madeUpGoals[`${match.competition}|${match.round}`] ?? []).map((goal) => ({ ...goal, matchId: match.id })),

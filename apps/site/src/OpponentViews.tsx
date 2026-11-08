@@ -2,6 +2,7 @@ import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } fro
 
 import { competitions } from '@fansite/db/schema'
 import {
+  ArchiveCredit,
   BarChart,
   Card,
   DataTable,
@@ -24,6 +25,7 @@ import {
 
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { type MatchSource, sourceOf } from './match-sources'
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { EredivisieOnly, imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
@@ -309,6 +311,7 @@ export function ClubScoreCountsCard({ meetings }: { meetings: readonly Meeting[]
         against: meetings.reduce((sum, meeting) => sum + meeting.goalsAgainst, 0),
         for: meetings.reduce((sum, meeting) => sum + meeting.goalsFor, 0),
       }}
+      source={sourceOf(meetings)}
     >
       <DataTable
         caption="De competities van deze wedstrijden en hoeveel wedstrijden er in elke werden gespeeld"
@@ -333,12 +336,15 @@ export function ClubSummaryCard({
   name,
   now,
   since,
+  source,
   summary,
 }: {
   choice: CompetitionChoice
   name: string
   now: Date
   since: string
+  /** Where the matches of the summary come from, for the credit under the image. */
+  source?: MatchSource | undefined
   summary: ClubSummary
 }) {
   // Only the Eredivisie gives points, so the choice with the cup has no column for them.
@@ -354,7 +360,7 @@ export function ClubSummaryCard({
   ].flatMap(({ match, name: label }) => (match === undefined ? [] : [{ label, match }]))
 
   return (
-    <Card aria-labelledby="onze-uitslagen" shareable={imageCredit(true)} surface="soft">
+    <Card aria-labelledby="onze-uitslagen" shareable={imageCredit(true, undefined, source)} surface="soft">
       <Heading id="onze-uitslagen" level={2}>
         {`Onze uitslagen tegen ${name}`}
       </Heading>
@@ -441,10 +447,13 @@ export function ClubAttendanceCard({
   attendance,
   choice,
   name,
+  source,
 }: {
   attendance: ClubAttendance
   choice: CompetitionChoice
   name: string
+  /** Where the matches of the figures come from, for the credit under the image. */
+  source?: MatchSource | undefined
 }) {
   const { average, highest, known, labels, max, slots, ticks } = attendance
 
@@ -456,7 +465,7 @@ export function ClubAttendanceCard({
     value === null ? 'Niet bekend' : value === 0 ? 'Zonder publiek' : attendanceFormat.format(value)
 
   return (
-    <Card aria-labelledby={clubAttendanceId} shareable={imageCredit(true)} surface="soft">
+    <Card aria-labelledby={clubAttendanceId} shareable={imageCredit(true, undefined, source)} surface="soft">
       <Heading anchor id={clubAttendanceId} level={2}>
         {`Toeschouwers tegen ${name}`}
       </Heading>
@@ -516,7 +525,7 @@ export function ClubTopScorersCard({
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
-      shareable={imageCredit(topScorersOf(counted, 'all').length > 0)}
+      shareable={imageCredit(topScorersOf(counted, 'all').length > 0, undefined, counted)}
       surface="soft"
     >
       <Heading id="doelpuntenmakers" level={2}>
@@ -557,10 +566,13 @@ export function OpponentsCredit({
   edited,
   pages,
   seasons,
+  source = 'wikipedia',
 }: {
   edited: boolean
   pages: PublicSeasonWikipediaPage[]
   seasons: readonly string[]
+  /** Where the matches on the page come from (see `sourceOf`), as `SourceCredit` has it. */
+  source?: MatchSource
 }) {
   const credited = pages
     .filter((page) => seasons.includes(page.season))
@@ -572,7 +584,11 @@ export function OpponentsCredit({
   const [first, ...rest] = credited
 
   if (first === undefined) {
-    return null
+    return source === 'wikipedia' ? null : (
+      <Card as="div" surface="transparent">
+        <ArchiveCredit />
+      </Card>
+    )
   }
 
   const readAt = new Date(Math.max(...credited.map((page) => page.readAt.getTime())))
@@ -580,6 +596,7 @@ export function OpponentsCredit({
   return (
     <Card as="div" surface="transparent">
       <WikipediaCredit
+        archive={source !== 'wikipedia'}
         edited={edited}
         pages={[first, ...rest]}
         readAt={formatReadAt(readAt)}

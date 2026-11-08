@@ -34,6 +34,9 @@ const knockoutCompetitions: readonly Match['competition'][] = competitions.filte
   (competition) => competition !== 'Eredivisie' && competition !== 'Eerste divisie',
 )
 
+/** Whether the competition has extra time: every one but the two leagues. */
+export const isKnockout = (competition: Match['competition']) => knockoutCompetitions.includes(competition)
+
 /** A goal as entered: a row of `match_goals` without its numbers. */
 export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 'id' | 'matchId' | 'personId'> & {
   /**
@@ -48,6 +51,8 @@ export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 
 /** What the checks need to know about the match and the season. */
 export type MatchContext = {
   competition: Match['competition']
+  /** Where the match comes from: only one of the old fansite may have a day without a time. */
+  dataSource: Match['dataSource']
   opponent: string
   squad: SquadPlayer[]
 }
@@ -159,9 +164,10 @@ export function validate(
   | { entry?: undefined; errors: MatchErrors; reason?: undefined } {
   const errors: MatchErrors = {}
   const { velden: fields } = values
-  const knockout = knockoutCompetitions.includes(context.competition)
+  const knockout = isKnockout(context.competition)
 
-  // The kick-off: a day and a time, or a day and a text when the time is not known.
+  // The kick-off: a day and a time, or a day and a text when the time is not known. A match of
+  // the old fansite may have a day alone, as the old database gave it.
   const day = fields['aftrap-datum']
   const time = fields['aftrap-tijd']
   const dateText = fields['aftrap-tekst']
@@ -172,7 +178,7 @@ export function validate(
   if (time !== '' && !isTime(time)) {
     errors['aftrap-tijd'] = 'Vul de tijd in als uren en minuten, zoals 20:00.'
   }
-  if (time === '' && dateText === '') {
+  if (time === '' && dateText === '' && context.dataSource !== 'oude-fansite') {
     errors['aftrap-tekst'] =
       'Vul de tijd in. Is de tijd nog niet bekend, schrijf dan wanneer de wedstrijd is, zoals 12-14 februari 2027.'
   } else if (time !== '' && dateText !== '') {
@@ -373,7 +379,7 @@ export function validate(
       goals: goals.toSorted((a, b) => a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0)),
       kickoff:
         time === ''
-          ? { dateText, kickoffAt: null, matchDate: day }
+          ? { dateText: dateText === '' ? null : dateText, kickoffAt: null, matchDate: day }
           : { dateText: null, kickoffAt: amsterdamToUtc(day, time), matchDate: day },
       result: {
         afterNinetyAgainst: afterNinety?.[1] ?? null,

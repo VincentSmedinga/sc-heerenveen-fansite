@@ -273,14 +273,15 @@ export async function listAllMatchDays(db: Database) {
 
 /**
  * Every match of every season with what the list of all-time goal scorers counts: the season,
- * the competition, the status, the score and the goals, in the form of `listSeasonMatches` (see
- * there for the goals). Nothing else leaves the database, and the order is by season, day and
- * `id`.
+ * the competition, where the match comes from (`dataSource`), the status, the score and the
+ * goals, in the form of `listSeasonMatches` (see there for the goals). Nothing else leaves the
+ * database, and the order is by season, day and `id`.
  */
 export async function listAllMatchGoals(db: Database) {
   const rows = await db
     .select({
       competition: matches.competition,
+      dataSource: matches.dataSource,
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
       id: matches.id,
@@ -420,6 +421,7 @@ export async function listClubMatches(db: Database, club: number, { competition 
       afterNinetyFor: matches.afterNinetyFor,
       attendance: matches.attendance,
       competition: matches.competition,
+      dataSource: matches.dataSource,
       dateText: matches.dateText,
       extraTime: matches.extraTime,
       goalsAgainst: matches.goalsAgainst,
@@ -583,6 +585,16 @@ export function listLeagueResults(db: Database, season: string) {
       asc(leagueResults.homeClub),
       asc(leagueResults.awayClub),
     )
+}
+
+/**
+ * The sources the matches in the database come from (`wikipedia`, `oude-fansite`), each once.
+ * A page that counts across all seasons, such as the list of the opponents, credits these.
+ */
+export async function listMatchDataSources(db: Database) {
+  const rows = await db.selectDistinct({ dataSource: matches.dataSource }).from(matches)
+
+  return rows.map((row) => row.dataSource)
 }
 
 /**
@@ -758,6 +770,7 @@ export async function listSeasonMatches(db: Database, season: string) {
       attendance: matches.attendance,
       clubId: matches.clubId,
       competition: matches.competition,
+      dataSource: matches.dataSource,
       dateText: matches.dateText,
       extraTime: matches.extraTime,
       goalsAgainst: matches.goalsAgainst,

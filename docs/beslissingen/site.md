@@ -842,6 +842,7 @@
 - **Hoe:** de seed zet ook de pagina's van de verzonnen wedstrijden in `wikipedia_pages` (`madeUpWikipediaPages`), zodat de bronvermelding er op acceptatie en in de toegankelijkheidscontrole ook is.
 - **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
   De bronvermelding linkt niet meer naar de geschiedenis van de pagina's en staat op `/wedstrijden` in een kaart zonder zichtbare rand en achtergrond.
+- **Later:** zie _De bron staat bij de wedstrijden, per bron_ (8 november 2026): een pagina met wedstrijden uit het archief van de oude fansite noemt het archief, naast Wikipedia of in plaats ervan.
 
 ## De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis
 
@@ -1711,6 +1712,7 @@
   - **De schakelaar van #406** werkt op beide pagina's, met `?competitie=eredivisie` in elke link, en staat er alleen als er een gespeelde bekerwedstrijd is (bij de club: tegen die club).
     Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt "In de Eredivisie hebben we nog niet tegen deze club gespeeld."
     Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden", en een slug die geen club heeft ook.
+    **Later:** zie _De bron staat bij de wedstrijden, per bron_ (8 november 2026): de schakelaar van een seizoen staat er ook alleen als dat seizoen een gespeelde wedstrijd van de Eredivisie heeft.
     De pagina's hebben geen seizoenskiezer, want ze tellen alle seizoenen.
   - **De balk van Statistieken** heeft Tegenstanders naast Spelers.
     Op de lijst en op elke clubpagina is Tegenstanders de huidige subpagina (`aria-current="page"`), en Statistieken is het huidige onderdeel van het menu.
@@ -3543,3 +3545,45 @@
   Dezelfde lijsten en regels als de doelpunten en de kaarten houden het formulier gelijk en bruikbaar met een toetsenbord en een schermlezer.
 - **Alternatieven:** één lijst voor beide teams met een kolom Team (de volgorde en de ronde per team worden dan lastiger te lezen); de serie in het plakformaat (dat blijft buiten dit besluit); een tweede schakelaar Verlenging in het verslag.
 - **Later:** vult _De verlenging en de strafschoppenserie komen uit de wedstrijd, de schoten uit het verslag_ aan: de schoten komen uit het verslag, en het formulier van het verslag vult ze in.
+
+## De bron staat bij de wedstrijden, per bron
+
+- **Datum:** 8 november 2026
+- **Besluit:** de site toont de wedstrijden van de oude fansite (1990 tot 2007) met de zes nieuwe competities, een datum zonder tijd en een eigen bronvermelding (#874).
+  Een pagina of kaart met wedstrijden van Wikipedia noemt Wikipedia, zoals nu.
+  Eén met wedstrijden van de oude fansite noemt "het archief van de oude sc Heerenveen Fansite".
+  Eén met allebei noemt beide.
+- **Keuzes bij het bouwen** (8 november 2026):
+  - **De bronvermelding:** `ArchiveCredit` is één regel die altijd te zien is: "Bron: het archief van de oude sc Heerenveen Fansite".
+    Het archief is van ons, dus er is geen licentie, pagina of tijd van lezen om te noemen en geen uitklap nodig.
+    `WikipediaCredit` kreeg `archive`: de korte vorm zegt dan "Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite", en de volledige vorm zegt het in de `summary` en voegt in de uitklap toe "Oudere wedstrijden komen uit het archief van de oude sc Heerenveen Fansite."
+    De zin over CC BY-SA 4.0 blijft over de gegevens die we van Wikipedia nemen.
+    De projecteigenaar leest de zin in de pull request.
+  - **Welke bron:** `sourceOf` leest `data_source` van de wedstrijden die op de pagina of de kaart staan (`PublicMatch.dataSource`).
+    Een pagina met pagina's van Wikipedia, voor de stand of het programma van het seizoen, noemt Wikipedia altijd erbij, ook als alle wedstrijden uit het archief komen.
+    De lijst van de tegenstanders en de pagina's die alle seizoenen tellen, noemen de bron van alle wedstrijden in de database (`listMatchDataSources`).
+    De kaarten met een knop voor een plaatje geven de bron van hun eigen wedstrijden.
+    De bronvermelding van de selectie (`SquadCredit` in Zoeken en de kaart Selectie) blijft Wikipedia: de selecties komen alleen van daar.
+  - **De volgorde van de competities** op de pagina van een seizoen: de competitie (Eredivisie of Eerste divisie), de beker, de Champions League, de Europacup II, de UEFA Cup, de Intertoto Cup, de play-offs van de UEFA Cup, en dan de volgorde die al bestond (de play-offs van de Conference League, de Europa League en de play-offs van de Europa League).
+    De anker-ids van de kaarten stonden al in `matchShortcuts.ts`.
+    Een test controleert dat elke competitie precies één keer in de volgorde staat.
+  - **De Eerste divisie telt mee bij "Alle wedstrijden"** en niet bij de keuze "Eredivisie", net als de beker.
+    De schakelaar staat er alleen als het seizoen een gespeelde wedstrijd van de Eredivisie heeft en een gespeelde wedstrijd van een andere competitie.
+    Een seizoen in de Eerste divisie (1991/92 en 1992/93) heeft dus geen schakelaar, want de keuze Eredivisie zou niets tellen.
+    De zin onder de kaarten noemt de competities die zijn gespeeld ("de Eerste divisie en de KNVB Beker", "de Eredivisie, de KNVB Beker, de UEFA Cup en de Intertoto Cup").
+    Op de pagina's van de tegenstanders blijft de keuze Eredivisie alleen de Eredivisie.
+  - **Een datum zonder tijd:** een gespeelde wedstrijd toont op de site al alleen de dag ("za 21 nov 1992") en het `time`-element heeft alleen de datum, met of zonder aftrap in de database.
+    Er is dus geen tekst als "tijd nog niet bekend" en geen weekend.
+    Het beheer laat voor een wedstrijd van het archief de tijd en de tekst allebei leeg (het formulier zegt het bij het veld Tijd), en schrijft in de regel boven het formulier de dag uit ("21 november 1992") in plaats van `1992-11-21`.
+    De wedstrijden van Wikipedia houden de eis dat de tijd of de tekst er is.
+    De Eerste divisie heeft geen verlenging in het formulier, net als de Eredivisie.
+  - **De seed** (`madeUpOldMatches`): drie verzonnen wedstrijden met `data_source = 'oude-fansite'` in vaste seizoenen, een Eerste-divisiewedstrijd (1992/93) en een wedstrijd van de Intertoto Cup (1996/97) zonder tijd, en een wedstrijd van de UEFA Cup (2004/05) met aftrap.
+    Elke wedstrijd heeft een tegenstander die het lopende seizoen niet kent, zodat de pagina van die club het archief als enige bron heeft.
+    Ze komen erbij als de seed de verzonnen wedstrijden van het lopende seizoen zet, en niet als de database al wedstrijden van het archief heeft.
+    De import van de oude fansite haalt ze weg, want hij haalt elke wedstrijd van zijn bron weg die niet in zijn bestanden staat.
+  - **Wat hier niet verandert:** de kaarten Onze plek in de competitie en Stand zeggen voor een seizoen zonder stand nog dat we de eindstand nog niet gevonden hebben, en "Alleen de Eredivisie".
+    Een stand voor de Eerste divisie en de oude seizoenen is werk van #782 en van de opvolger van de stand.
+    De statistieken (hoekschoppen enzovoort) staan niet op de site.
+- **Waarom:** de redactieregel is dat we de bron altijd noemen (principe 4 van de Redactie), en de oude gegevens zijn van het project zelf, niet van Wikipedia.
+  Een oude wedstrijd met "Bron: Wikipedia" erbij zou onwaar zijn.
+- **Alternatieven:** één algemene bronregel voor de hele site (zegt niet wat waar vandaan komt); de Eerste divisie als "de competitie" van haar seizoen laten tellen bij de keuze Eredivisie (het label van de schakelaar zou per seizoen moeten wisselen en elke kaart met "Eredivisie" in de tekst ook); de bron van het archief achter een uitklap met een link (er is niets om heen te linken); een datum als "21 november 1992" in `date_text` (zie _De wedstrijden van de oude fansite komen in `matches`_ in `hosting-en-data.md`).

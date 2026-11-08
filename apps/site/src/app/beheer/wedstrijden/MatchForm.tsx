@@ -60,6 +60,8 @@ export type MatchFormChoices = {
   showDelay: string
   squad: readonly { id: number; name: string }[]
   statuses: readonly { label: string; value: string }[]
+  /** Whether the time may stay empty: a match of the old fansite's archive has a day only. */
+  timeOptional: boolean
 }
 
 type MatchFormContext = {
@@ -292,7 +294,16 @@ export function MatchFields() {
           >
             <Input {...field('aftrap-datum')} type="date" width="natural" />
           </Field>
-          <Field error={errors['aftrap-tijd']} hideOptional id="aftrap-tijd" label="Tijd" required={false}>
+          <Field
+            error={errors['aftrap-tijd']}
+            hideOptional
+            {...(choices.timeOptional
+              ? { hint: 'Staat de tijd niet in het archief van de oude fansite? Laat hem dan leeg.' }
+              : {})}
+            id="aftrap-tijd"
+            label="Tijd"
+            required={false}
+          >
             <Input {...field('aftrap-tijd')} type="time" width="natural" />
           </Field>
           <Field

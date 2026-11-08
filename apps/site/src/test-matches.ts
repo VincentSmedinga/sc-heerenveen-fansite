@@ -13,6 +13,7 @@ const base = {
   afterNinetyAgainst: null,
   afterNinetyFor: null,
   attendance: null,
+  dataSource: 'wikipedia',
   dateText: null,
   extraTime: false,
   goals: noGoals,

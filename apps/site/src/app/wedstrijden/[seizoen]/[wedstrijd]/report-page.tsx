@@ -9,6 +9,7 @@ import { cache } from 'react'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { matchMoment } from '#src/match-format'
+import { sourceOf } from '#src/match-sources'
 import { getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { SourceCredit } from '#src/MatchViews'
@@ -186,7 +187,7 @@ function ReportCredit({ data, reported }: { data: MatchData; reported: ReportedM
           {`De opstelling, de wissels, de kaarten en de assists komen uit onze eigen administratie${source === null ? '' : `, naar ${source}`}.`}
         </Text>
       </Card>
-      <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
+      <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf([reported.match])} />
     </>
   )
 }

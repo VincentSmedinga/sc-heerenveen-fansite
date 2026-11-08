@@ -42,6 +42,7 @@ function match(ours: null | number, theirs: null | number, more: Partial<PublicC
     afterNinetyFor: null,
     attendance: null,
     competition: 'Eredivisie',
+    dataSource: 'wikipedia',
     dateText: null,
     extraTime: false,
     goals: [],

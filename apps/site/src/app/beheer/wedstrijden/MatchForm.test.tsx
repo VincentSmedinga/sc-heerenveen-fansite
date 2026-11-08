@@ -23,6 +23,7 @@ const choices: MatchFormChoices = {
   showDelay: 'binnen vijf minuten',
   squad: [{ id: 11, name: 'Luca Oyen' }],
   statuses: [{ label: 'Gespeeld', value: 'played' }],
+  timeOptional: false,
 }
 
 // As the server gives it to the page: with as many goals as the end result asks for.
@@ -54,6 +55,36 @@ const hiddenFields = () =>
   [...document.querySelectorAll('fieldset[hidden]')].map((item) =>
     item.querySelector('input, select')?.getAttribute('name'),
   )
+
+describe('the time of the form of a match', () => {
+  const rendered = (timeOptional: boolean) => {
+    const values = initial('1', '0')
+
+    return render(
+      <MatchFormProvider
+        action={() => Promise.resolve({ errors: {}, values })}
+        choices={{ ...choices, timeOptional }}
+        initial={values}
+      >
+        <MatchFields />
+      </MatchFormProvider>,
+    )
+  }
+
+  it('says that the time may stay empty for a match from the archive of the old fansite', () => {
+    rendered(true)
+
+    expect(document.body.textContent).toContain(
+      'Staat de tijd niet in het archief van de oude fansite? Laat hem dan leeg.',
+    )
+  })
+
+  it('says nothing about it for any other match', () => {
+    rendered(false)
+
+    expect(document.body.textContent).not.toContain('Laat hem dan leeg')
+  })
+})
 
 describe('the goals of the form of a match', () => {
   it('has as many goals as the end result adds up to, and adds or removes them when it changes', () => {

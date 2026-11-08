@@ -7,6 +7,7 @@ import {
   listAllStaff,
   listClubStandings,
   listLeagueResults,
+  listMatchDataSources,
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
@@ -19,7 +20,7 @@ import {
   type PublicStandingsRow,
   type PublicWikipediaPage,
 } from '@fansite/db/queries'
-import { type Competition, competitions } from '@fansite/db/schema'
+import { type Competition } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
@@ -28,6 +29,7 @@ import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
 import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
+import { type MatchSource, sourceOf } from './match-sources'
 import { type NameParts, personNameParts, personSortName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
@@ -57,29 +59,45 @@ const isPlayedExtraMatch = (match: Omit<ScoredMatch, 'goals'>) =>
   match.goalsAgainst !== null
 
 /**
- * Whether the season has a cup tie, a match of the play-offs or a match of the Europa League
- * that was played, so whether there is anything to choose: without one, the two choices count
- * the same matches and the page has no switch.
+ * Whether there is anything to choose: the season has a played match of the Eredivisie and a
+ * played match of another competition (a cup tie, the play-offs, Europe). Without the second,
+ * the two choices count the same matches. Without the first, as in the seasons in the Eerste
+ * divisie, the choice Eredivisie would count nothing, so the page has no switch.
  */
-export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPlayedExtraMatch)
+export const hasPlayedExtraMatch = (matches: PublicMatch[]) =>
+  matches.some(isPlayedExtraMatch) &&
+  matches.some((match) => match.competition === 'Eredivisie' && match.status === 'played')
 
 /**
- * The competitions a card counts, as the captions of the cards name them: the cup, the
- * play-offs and the Europa League are in only when the choice is `all` and a match of theirs
- * was played, because then it is in the numbers.
+ * The competitions a card counts, as the captions of the cards name them: the league, the cup,
+ * the matches in Europe and the play-offs are in only when the choice is `all` and a match of
+ * theirs was played, because then it is in the numbers. The Eredivisie is always named, unless
+ * the season was played in the Eerste divisie and has no Eredivisie match. The play-offs are
+ * one name, whatever they were for.
  */
 export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: CompetitionChoice) => {
   if (choice === 'league') {
     return 'de Eredivisie'
   }
 
-  const played = (competition: PublicMatch['competition']) =>
-    matches.some((match) => match.competition === competition && isPlayedExtraMatch(match))
+  const played = (...among: PublicMatch['competition'][]) =>
+    matches.some(
+      (match) =>
+        among.includes(match.competition) &&
+        match.status === 'played' &&
+        match.goalsFor !== null &&
+        match.goalsAgainst !== null,
+    )
   const names = [
-    'de Eredivisie',
+    ...(played('Eredivisie') || !played('Eerste divisie') ? ['de Eredivisie'] : []),
+    ...(played('Eerste divisie') ? ['de Eerste divisie'] : []),
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
-    ...(played('Play-offs Conference League') || played('Play-offs Europa League') ? ['de play-offs'] : []),
+    ...(played('Champions League') ? ['de Champions League'] : []),
+    ...(played('Europacup II') ? ['de Europacup II'] : []),
+    ...(played('UEFA Cup') ? ['de UEFA Cup'] : []),
     ...(played('Europa League') ? ['de Europa League'] : []),
+    ...(played('Intertoto Cup') ? ['de Intertoto Cup'] : []),
+    ...(played('Play-offs Conference League', 'Play-offs Europa League', 'Play-offs UEFA Cup') ? ['de play-offs'] : []),
   ]
 
   return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
@@ -253,6 +271,16 @@ export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
  * all time. One query for all seasons, kept for an hour like a season that is over.
  */
 export const getAllTimeMatches = cacheFor(pastSeasonPeriod, () => listAllMatchGoals(getDatabase().db))
+
+const allMatchSources = cacheFor(pastSeasonPeriod, () => listMatchDataSources(getDatabase().db))
+
+/**
+ * Where the matches of all seasons come from, for a page that counts across them, such as the
+ * list of the opponents: Wikipedia, the archive of the old fansite, or both.
+ */
+export async function getMatchSource(): Promise<MatchSource> {
+  return sourceOf((await allMatchSources()).map((dataSource) => ({ dataSource })))
+}
 
 /**
  * Every head coach and the day and score of every match of every season, for the card
@@ -1004,11 +1032,26 @@ export function resultsOfSeason(results: PublicMatch[], season: string, now: Dat
   return season === seasonOf(now) ? results : [...results].reverse()
 }
 
-/** The competitions in the order a season that is over shows them: league, cup, the rest. */
-const resultsCardOrder: readonly Competition[] = [
+/**
+ * The competitions in the order a season shows them: the league (the Eredivisie, or the Eerste
+ * divisie in the two seasons sc Heerenveen played there), the cup, the competitions of Europe
+ * of the old matches from the biggest to the summer tournament, the play-offs of the UEFA Cup,
+ * and then the competitions that were there before, in the order they had: the play-offs of
+ * the Conference League, the Europa League and its play-offs. A season has hardly more than
+ * one competition of Europe, so the order among them hardly matters.
+ */
+export const resultsCardOrder: readonly Competition[] = [
   'Eredivisie',
+  'Eerste divisie',
   'KNVB Beker',
-  ...competitions.filter((competition) => competition !== 'Eredivisie' && competition !== 'KNVB Beker'),
+  'Champions League',
+  'Europacup II',
+  'UEFA Cup',
+  'Intertoto Cup',
+  'Play-offs UEFA Cup',
+  'Play-offs Conference League',
+  'Europa League',
+  'Play-offs Europa League',
 ]
 
 /**

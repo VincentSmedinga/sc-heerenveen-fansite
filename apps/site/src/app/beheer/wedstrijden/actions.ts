@@ -187,6 +187,7 @@ export async function submitMatch(
   const given = { ...values, doelpunten: values.doelpunten.filter((goal) => !isUntouchedGoal(goal)) }
   const checked = validate(given, {
     competition: found.match.competition,
+    dataSource: found.match.dataSource,
     opponent: found.match.opponent,
     squad: found.squad,
   })
