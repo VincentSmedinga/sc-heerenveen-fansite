@@ -75,7 +75,7 @@ A queue, a deadline or a free slot is no reason to pass them.
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                                                                                                                                                                                   |
 | Review rounds per pull request      | 2                                                                                                                                                                                                                                                                                                                    |
-| Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory.                                                                                                                                                                                                           |
+| Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory (see `weekly-coordination`).                                                                                                                                                                               |
 | Specifying an issue                 | At most four questions per round, each with a recommendation: at most two rounds, in the Specifier's session. Then the issue is written.                                                                                                                                                                             |
 | Messages from a Builder or Reviewer | One per event that needs the owner or the Coordinator. No status messages.                                                                                                                                                                                                                                           |
 | Fable                               | The Coordinator may use it (see _Models_). A Reviewer only for a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. A Builder or Specifier gets a stronger model only for an issue that asks for a lot of judgment, and the brief names it. |
@@ -101,9 +101,13 @@ The owner can talk to every session directly, and passes messages between them.
 ### Coordinator
 
 The session the project owner plans with.
-Its work is coordination: the board, starting sessions, status, and what follows a merge, plus the release notes.
-Building, reviewing, design, research for their own sake, long conversations about one issue, and help with the owner's setup go to a Builder, a Reviewer, a Specifier or a session of their own.
-It stays thin: its context is carried by every later turn, so it answers a note only when there is something to decide or do, and it starts a fresh session when the limits say so (see _Working efficiently_).
+It only coordinates.
+What it does itself: the board, the issues and the Action List, status updates, starting sessions, merging on "klaar" (see below), clean-up after merges, and the release notes once the owner approves the lines.
+Everything else gets a session of its own, however small: a question that takes research, a small change, writing an issue, a check, a pull request with release notes, building, reviewing, design, long conversations about one issue, and help with the owner's setup.
+It starts a Specifier, a Builder, a Reviewer or a research session for it, unless the owner says to just do it itself.
+It stays thin: its context is carried by every later turn, so it answers a note only when there is something to decide or do, and it hands over to a successor when the limits say so (see _Working efficiently_).
+It is the single source of status: the owner can know everything through the Action List and a short status, without opening sessions.
+So it doesn't ask sessions for interim status, and it makes sure each event that matters reaches it and the Action List.
 The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
 
 - Keeps the board and the issues true to reality, without asking: it moves their status, assigns them, sets labels and milestones, posts status updates and closes what is done.
@@ -140,7 +144,8 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
 - Removes stale branches and worktrees without asking: the remote and local branches of merged or closed pull requests, and their worktrees.
   It first checks that nothing uncommitted or unpushed is lost.
   It leaves the branch `pr-screenshots` alone, on the remote and locally: it is never merged and never deleted (see _Screenshots_).
-- Never merges.
+- Merges only with the owner's standing approval, when the Reviewer says ready and CI is green; otherwise the owner merges.
+- Hands over to a successor at the limit, with the steps in `weekly-coordination` (_Hand over_): a note in memory, detach the sessions that must keep running, rename, then archive itself last.
 
 ### Specifier
 

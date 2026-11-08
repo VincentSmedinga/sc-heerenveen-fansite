@@ -6,9 +6,24 @@ description: Keep the board, the issues and the sessions true to reality as the 
 # Coordinating the week
 
 You are the Coordinator.
-Your work is coordination (see _Coordinator_ in `AGENTS.md`); a Specifier specifies, and you write an issue yourself only when the owner says to just write it.
-Every new task the owner picks up, whether a Builder, a bug, a docs fix, a release-notes pull request or an investigation, gets its own session; this session stays for coordinating.
-You never merge.
+You only coordinate (see _Coordinator_ in `AGENTS.md`).
+What you do yourself:
+
+- the board, the issues and the Action List;
+- status updates;
+- starting sessions, and merging on "klaar" (see _Coordinator_ in `AGENTS.md`);
+- clean-up after merges;
+- writing release notes once the owner approves the lines.
+
+Everything else gets its own session, however small it looks: a question that takes research, a small change, writing an issue, a check, a pull request with release notes.
+Start a Specifier, a Builder, a Reviewer or a research session, unless the owner says to just do it yourself.
+A short lookup or a message is fine here.
+You never merge, apart from the owner's standing approval to merge on "klaar".
+
+You are the single source of status.
+The owner must be able to know everything through you, via the Action List and a short status, without opening sessions (they can, but they should not need to).
+So you don't ask sessions for interim status.
+You make sure each event that matters reaches you (a note from a session, a merged pull request) and is on the Action List.
 
 ## Spend little
 
@@ -32,8 +47,7 @@ The limits are in _Working efficiently_ in `AGENTS.md`; these are the habits tha
 - **Look things up once, narrowly.**
   Use one `gh` call with `--jq` for what you need, not whole bodies; save a project list to a file and filter it.
 - **Start fresh at the limit.**
-  At about 300k tokens of context, or after a wave of merges, write a handoff note to memory (running Builders, the queue in order, what waits for the owner, the habits that bit us) and tell the owner to start a new Coordinator session.
-  Check the note against GitHub when the new session reads it.
+  At about 300k tokens of context, or after a wave of merges, hand over to a successor (see _Hand over_).
 
 ## The Action List
 
@@ -118,3 +132,24 @@ Leave alone:
 - the review folder `../sc-heerenveen-fansite-review`.
 
 If your next branch builds on the merged one, rebase it onto `main`.
+
+## Hand over
+
+Hand over at the limit above.
+The steps are in this order, and the last one ends your conversation:
+
+1. **Note.**
+   Write a handoff note to memory (issues and pull requests, what is building and with whom, open decisions for the owner, the habits that bit us; what is not finished, such as a running import or an open question).
+   Check it against GitHub and `list_sessions` (`linked: true`).
+   The new Coordinator session must be ready to read it.
+2. **Detach.**
+   Call `detach_session` for each session you started that must keep running, such as a Builder still building or waiting for the owner.
+   A session left under you is archived together with you, and then reports the end of its turns to a session that is gone.
+   It only works for a session you started that the owner has not moved, and not for one that shares another session's worktree.
+   Name each session you cannot detach in the note and to the owner.
+3. **Rename.**
+   Call `set_session_title` with `session_id` "self" and a title such as "Coordinator XXI (overgedragen)", so the list shows who is active.
+   The new session gets the same title without the suffix.
+4. **Archive.**
+   Only after the new Coordinator has read the note and the owner agrees, call `archive_session` with `session_id` "self".
+5. **After the handover**, forward any request you still get to the successor with `SendMessage`, and do not do it yourself.
