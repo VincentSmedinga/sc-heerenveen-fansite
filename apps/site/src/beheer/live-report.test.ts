@@ -207,6 +207,17 @@ describe('addLiveEvent for a card and a substitution', () => {
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(1)
   })
 
+  it('stores a substitution that a rule objects to, and takes a klaar report back to bezig', async () => {
+    // Someone from the bench goes off, who is not on the pitch.
+    expect(
+      await add('wissel', { erin: await appearanceOf(13), eruit: await appearanceOf(12), minuut: '60' }),
+    ).toMatchObject({
+      status: 'saved',
+    })
+    expect(await database.db.select().from(matchSubstitutions)).toHaveLength(1)
+    expect((await database.db.select().from(matchReports))[0]?.status).toBe('bezig')
+  })
+
   it('stores a card for a player who left the pitch, and the report needs a look', async () => {
     await add('wissel', { erin: await appearanceOf(12), eruit: await appearanceOf(9), minuut: '60' })
 

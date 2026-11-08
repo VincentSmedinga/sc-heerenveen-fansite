@@ -98,7 +98,7 @@ export function LiveEventForm({
 
   return (
     <>
-      <ErrorSummary errors={summary} id={summaryId} level={3} tabIndex={-1} />
+      <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       <Card aria-labelledby={headingId}>
         <Heading id={headingId} level={2}>
           {title}
@@ -256,6 +256,10 @@ function LiveEvent({
         <Form action={formAction}>
           <Button appearance="danger" disabled={pending} type="submit">
             Ja, haal weg
+            <Text as="span" className="hf-visually-hidden">
+              {' '}
+              {event.text}
+            </Text>
           </Button>
         </Form>
       </Disclosure>

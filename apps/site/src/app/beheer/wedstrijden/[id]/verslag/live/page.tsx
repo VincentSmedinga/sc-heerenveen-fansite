@@ -52,8 +52,8 @@ export default async function LiveReportPage({ params }: Props) {
     view === undefined
       ? ''
       : match.home
-        ? `${view.score.ours} - ${view.score.opponent}`
-        : `${view.score.opponent} - ${view.score.ours}`
+        ? `${view.score.ours}–${view.score.opponent}`
+        : `${view.score.opponent}–${view.score.ours}`
 
   return (
     <Page.Main

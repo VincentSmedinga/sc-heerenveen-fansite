@@ -492,7 +492,7 @@ for (const [name, javaScriptEnabled] of [
     test(`adds a goal and takes it away again ${name}`, async ({ page }) => {
       await page.goto(`/beheer/wedstrijden/${await liveReportMatchId()}/verslag/live`)
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Bijhouden: ')
-      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 0' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1–0' })).toBeVisible()
 
       // A goal without a minute is refused at the field, with what was typed kept.
       const goal = page.locator('form').filter({ has: page.getByRole('button', { name: 'Doelpunt opslaan' }) })
@@ -511,7 +511,7 @@ for (const [name, javaScriptEnabled] of [
       await goal.getByLabel('Minuut', { exact: true }).fill('88')
       await goal.getByRole('button', { name: 'Doelpunt opslaan' }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Doelpunt opgeslagen: 88e minuut' })).toBeVisible()
-      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 1' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1–1' })).toBeVisible()
       await expect(page.getByText("Doelpunt 88' Verzonnen Aanvaller", { exact: false }).first()).toBeVisible()
 
       if (javaScriptEnabled) {
@@ -524,7 +524,7 @@ for (const [name, javaScriptEnabled] of [
 
       await event.locator('summary').click()
       await event.getByRole('button', { name: 'Ja, haal weg' }).click()
-      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1 - 0' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Stand 1–0' })).toBeVisible()
 
       if (javaScriptEnabled) {
         // The screen with its forms, its list and the questions open, which axe opens too.

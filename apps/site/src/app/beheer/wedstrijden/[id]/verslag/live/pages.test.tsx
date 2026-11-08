@@ -100,7 +100,7 @@ describe('the screen "Verslag bijhouden"', () => {
     expect(html.match(/<h1[^>]*>(.*?)<\/h1>/gu)).toHaveLength(1)
     expect(html).toContain('Bijhouden: N.E.C. - sc Heerenveen')
     // sc Heerenveen plays away: one goal for N.E.C. first, then one for us.
-    expect(html).toContain('Stand 1 - 1')
+    expect(html).toContain('Stand 1–1')
     expect(html).toContain(`action="/beheer/wedstrijden/${matchId}/verslag/afgelopen"`)
     expect(html).toContain('>Wedstrijd afgelopen</button>')
   })
