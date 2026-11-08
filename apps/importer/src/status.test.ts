@@ -32,6 +32,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
   await database.pool.query('DELETE FROM import_runs')
   await database.pool.query('DELETE FROM persons')
+  await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM clubs')
   await database.pool.query('DELETE FROM wikidata_items')
 })
 
@@ -118,6 +120,8 @@ describe('the overview', () => {
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
+        '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
+        'Formations of match reports: no report has a line-up yet',
       ],
     })
   })
@@ -193,6 +197,8 @@ describe('the overview', () => {
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
+        '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
+        'Formations of match reports: no report has a line-up yet',
       ],
     })
   })
@@ -210,10 +216,41 @@ describe('the overview', () => {
       "INSERT INTO person_nationalities (person_id, position, item_id) SELECT id, 0, 'Q29999' FROM persons WHERE wikipedia_page = 'A'",
     )
 
-    expect((await statusAt(start)).lines.slice(-3)).toEqual([
+    expect((await statusAt(start)).lines.slice(-5, -1)).toEqual([
       'Persons from Wikidata: 2 of 3 read, 1 to go',
       '  with a Q-number: 1, with a birth date: 1, with a nationality: 1',
       '  line: 1 from Wikidata, 0 from the squad, 0 from the list, 2 without',
+      '  persons per line: 1 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
+    ])
+  })
+
+  it('shows per season how many match reports have a line-up and a formation', async () => {
+    await database.pool.query("INSERT INTO clubs (name, slug) VALUES ('Testdorp FC', 'testdorp-fc')")
+
+    // Two matches of 2004/05: one with a formation for both teams, one with a formation for us.
+    // One of 2003/04 without a formation. One of 2004/05 with a bench only, and one without a
+    // report at all: neither counts.
+    for (const [index, season] of ['2004/05', '2004/05', '2003/04', '2004/05', '2004/05'].entries()) {
+      await database.pool.query(
+        "INSERT INTO matches (season, competition, round, opponent, club_id, home, status, goals_for, goals_against, match_date, date_text) VALUES (?, 'Eredivisie', ?, 'Testdorp FC', 1, 1, 'played', 1, 1, '2005-01-01', 'x')",
+        [season, `Speelronde ${index + 1}`],
+      )
+    }
+    await database.pool.query(
+      `INSERT INTO match_reports (match_id, status, formation_ours, formation_opponent)
+       VALUES (1, 'klaar', '4-3-3', '4-4-2'), (2, 'klaar', '4-3-3', NULL), (3, 'klaar', NULL, NULL), (4, 'bezig', '4-3-3', NULL)`,
+    )
+    await database.pool.query(
+      `INSERT INTO match_appearances (match_id, ours, name, shirt_number, starter)
+       VALUES (1, 1, 'Eigen', NULL, 1), (2, 1, 'Eigen', NULL, 1), (3, 1, 'Eigen', NULL, 1), (3, 0, 'Andere', NULL, 1),
+              (4, 1, 'Eigen', NULL, 0)`,
+    )
+
+    expect((await statusAt(start)).lines.slice(-4)).toEqual([
+      '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
+      'Formations of match reports, by season, of the reports with a line-up:',
+      '  2004/05: 2 with a line-up, 2 with a formation for us, 1 for the opponent',
+      '  2003/04: 1 with a line-up, 0 with a formation for us, 0 for the opponent',
     ])
   })
 

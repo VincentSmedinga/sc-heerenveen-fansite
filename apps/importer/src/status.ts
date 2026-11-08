@@ -6,17 +6,19 @@ import { countPersonData, countPersonNames } from '@fansite/db/persons'
 import {
   feeds,
   importRuns,
+  matchAppearances,
   matches,
   matchGoals,
   matchImports,
   matchPageKinds,
+  matchReports,
   sources,
   squadCompleteness,
   squadImports,
   wikipediaPages,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, asc, desc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { ImportOptions } from './import-feeds.ts'
 
@@ -112,6 +114,7 @@ export async function showStatus(
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
     await showPersonData(db, write)
+    await showFormations(db, write)
     await showWaitingChanges(db, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
@@ -146,6 +149,48 @@ async function showCompleteness(db: Database, now: Date, write: (line: string) =
 
     write(
       `  warning: the table of the selection should hold the whole squad, but the chance is ${row.level}${failed.length === 0 ? '' : `: ${printable(failed.join('; '))}`}`,
+    )
+  }
+}
+
+/**
+ * Shows, for each season with a match report that has a line-up of ours, how many such reports
+ * there are and how many of them have a formation for sc Heerenveen and for the opponent. The
+ * newest season comes first. It is information and no fault.
+ */
+async function showFormations(db: Database, write: (line: string) => void): Promise<void> {
+  const rows = await db
+    .select({
+      formationOpponent: matchReports.formationOpponent,
+      formationOurs: matchReports.formationOurs,
+      season: matches.season,
+    })
+    .from(matchReports)
+    .innerJoin(matches, eq(matches.id, matchReports.matchId))
+    .where(
+      sql`exists (select 1 from ${matchAppearances} where ${matchAppearances.matchId} = ${matchReports.matchId} and ${matchAppearances.ours} = true and ${matchAppearances.starter} = true)`,
+    )
+  const seasons = new Map<string, { opponent: number; ours: number; reports: number }>()
+
+  for (const row of rows) {
+    const counts = seasons.get(row.season) ?? { opponent: 0, ours: 0, reports: 0 }
+
+    counts.reports++
+    counts.ours += row.formationOurs === null ? 0 : 1
+    counts.opponent += row.formationOpponent === null ? 0 : 1
+    seasons.set(row.season, counts)
+  }
+
+  if (seasons.size === 0) {
+    write('Formations of match reports: no report has a line-up yet')
+
+    return
+  }
+
+  write('Formations of match reports, by season, of the reports with a line-up:')
+  for (const [season, counts] of [...seasons].sort((a, b) => b[0].localeCompare(a[0]))) {
+    write(
+      `  ${season}: ${counts.reports} with a line-up, ${counts.ours} with a formation for us, ${counts.opponent} for the opponent`,
     )
   }
 }
@@ -225,6 +270,9 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
   )
   write(
     `  line: ${counts.lines.wikidata} from Wikidata, ${counts.lines.squad} from the squad, ${counts.lines.manual} from the list, ${counts.noLine} without`,
+  )
+  write(
+    `  persons per line: ${counts.byLine.doelman} doelman, ${counts.byLine.verdediger} verdediger, ${counts.byLine.middenvelder} middenvelder, ${counts.byLine.aanvaller} aanvaller`,
   )
 }
 

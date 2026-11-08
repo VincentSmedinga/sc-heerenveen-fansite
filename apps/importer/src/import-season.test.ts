@@ -1098,7 +1098,8 @@ describe('the health and the status', () => {
 
     // The status of the current season is the same, and says nothing of the goals without a
     // player or the pages of the season that is over. The line with the names of the persons
-    // counts all seasons, so it grows, and so do the lines with the persons read from Wikidata.
+    // counts all seasons, so it grows, and so do the lines with the persons read from Wikidata
+    // and the formations.
     const withoutNames = (shown: { code: number; lines: string }) => ({
       ...shown,
       lines: shown.lines
