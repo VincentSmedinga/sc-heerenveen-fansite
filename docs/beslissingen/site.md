@@ -3771,7 +3771,8 @@
   Met de code log je in waar je de pagina open hebt.
   Het veld heeft `autocomplete="one-time-code"` en `inputmode="numeric"`, zodat iOS de code uit de mail kan aanbieden.
   - De code werkt 15 minuten en één keer, samen met zijn link: gebruik je de een, dan is ook de ander op.
-  - Elk verzoek krijgt een willekeurige verwijzing (`ref`, 32 bytes). Die staat in het adres van de pagina "verstuurd" en in het formulier, en bevat niets over het e-mailadres.
+  - Elk verzoek krijgt een willekeurige verwijzing (`ref`, 32 bytes).
+    Die staat in het adres van de pagina "verstuurd" en in het formulier, en bevat niets over het e-mailadres.
     De tabel bewaart de SHA-256 van de verwijzing en de SHA-256 van verwijzing en code samen; de code zelf staat nergens.
     Zo hoort een code bij het verzoek, en dus bij het adres, dat hem vroeg, en kan een kopie van de database de 6 cijfers niet raden.
   - Na 5 foute pogingen werkt de code niet meer, ook de goede niet.
