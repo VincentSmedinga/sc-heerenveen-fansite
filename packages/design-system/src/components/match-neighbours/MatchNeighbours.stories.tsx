@@ -44,7 +44,7 @@ export const FirstMatch = meta.story({
   args: {
     next: { club: 'Voorbeeld United', goalsAgainst: 3, goalsFor: 0, home: true, href: '/volgende' },
   },
-  name: 'De eerste wedstrijd: alleen Volgende',
+  name: 'De eerste wedstrijd: alleen de volgende',
 })
 
 export const LongNames = meta.story({
