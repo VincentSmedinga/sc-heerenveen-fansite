@@ -698,3 +698,19 @@
   Bij de laatste overdrachten werden Builders zo mee gearchiveerd, en bleef onduidelijk wie de actieve Coördinator was.
 - **Alternatieven:** de oude Coördinator laten doorlopen tot zijn context vol is (verworpen: dat maakt elke beurt duurder).
 - **Later:** dit vult _Zuinig werken is een regel, met harde grenzen_ aan: de overdrachtsnotitie in het geheugen blijft, de stappen eromheen zijn nieuw.
+
+## De Action List verschijnt vanzelf en de rijen volgen de sessies
+
+- **Datum:** 8 november 2026
+- **Besluit:** een nieuwe Coördinator toont de Action List aan het begin van zijn sessie in een paneel naast het gesprek, zonder dat de projecteigenaar erom vraagt.
+  Omdat de Artifacts-pane alleen pagina's toont die de sessie zelf publiceerde, leest hij de live pagina en publiceert hij die opnieuw, zonder inhoudelijke wijziging en zonder de rijen aan te raken.
+  Werkt dat niet, dan opent hij het adres met `preview_start` in de ingebouwde browser (de projecteigenaar logt eenmalig in bij claude.ai).
+  Werkt ook dat niet, dan geeft hij het adres één keer in de chat.
+  Het adres staat in de geheugennotitie `action-list`, niet in de repository, want die is openbaar.
+- **Besluit:** de Coördinator laat de rijen de sessies volgen.
+  Bij het begin van een sessie vergelijkt hij alle rijen met `list_sessions` (`linked: true`) en GitHub.
+  Daarna past hij de rij van een sessie aan met één kleine schrijfactie wanneer die begint, van staat verandert of eindigt.
+- **Waarom:** de projecteigenaar wil de status zien zonder erom te vragen.
+  De pagina kan sessies zelf niet lezen, dus de rijen kloppen alleen als de Coördinator ze bijhoudt.
+- **Alternatieven:** alleen op verzoek tonen (de projecteigenaar moet erom denken); het adres in de repository zetten (verworpen: de repository is openbaar); direct de browser gebruiken (werkt altijd, maar vraagt eenmalig om in te loggen); een script dat sessies naar rijen overzet (nieuw gereedschap, past niet bij "houd het licht").
+- **Later:** dit vult _Een Specifier voor een lang gesprek, en de Action List voor de status_ en _De Coördinator is de enige bron van de stand_ aan.

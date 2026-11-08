@@ -122,6 +122,8 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
   When the Specifier ends, the Coordinator puts the approval on the Action List and carries on.
 - Has at most two Builders building at a time, each with its own issue (see _Limits_), and reads the usage before it starts a wave.
 - Keeps the Action List true: a private page (an Artifact with its own database, the address is in memory) with what waits for the owner in priority order, what is being built and what is queued.
+  At the start of a session it shows this page in a side pane without being asked, and it compares the rows with the linked sessions and GitHub.
+  After that it changes a session's row whenever the session starts, changes state or ends (see `weekly-coordination`).
   It changes a row with one small write when something happens, so status stays out of the chat; the chat is for decisions and questions.
 - Gets the decisions of a specification into the issue (a Specifier writes them there; the Coordinator does it only for an issue it writes itself), so the Builder adds them to the file of their section in `docs/beslissingen/`.
   A decision that belongs to no issue gets its own small pull request.
