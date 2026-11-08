@@ -16,6 +16,7 @@ import { existsSync } from 'node:fs'
 import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site-step.ts'
 
+import { buildOldSiteCheck, formatOldSiteCheck } from './old-site-check.ts'
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
@@ -29,7 +30,7 @@ const lockBusy =
   'An import is still running on this database, so this command does nothing. Try again in a few minutes.'
 
 /** What the command says when it gets a wrong argument. */
-export const oldSiteUsage = 'Usage: pnpm run import:old-site [--dry-run]'
+export const oldSiteUsage = 'Usage: pnpm run import:old-site [--dry-run | --report]'
 
 /** Thrown to roll back the transaction of a dry run; it is no fault. */
 class DryRunDone extends Error {}
@@ -55,6 +56,15 @@ export type OldSiteImportOptions = {
   steps?: readonly OldSiteStep[]
   /** Where the lines go. */
   write?: (line: string) => void
+}
+
+export type OldSiteReportOptions = {
+  /** The folder with the files, by default the one next to `import.mjs`. */
+  folder?: string | URL
+  /** The day on the report, as `2026-11-08`. By default today in Amsterdam. */
+  today?: string
+  /** Where the report goes. */
+  write?: (text: string) => void
 }
 
 /**
@@ -141,6 +151,45 @@ export async function runOldSiteImport(
   } finally {
     await close()
   }
+}
+
+/**
+ * The check report (#880): reads the files and the database and writes the report as Markdown.
+ * It writes nothing to the database, takes no lock (it only reads) and does not run the steps.
+ * Returns the exit code: 0 when the report is written, 1 when the files can't be used.
+ */
+export async function runOldSiteReport(
+  databaseUrl: string,
+  {
+    folder = defaultOldSiteFolder(),
+    today = amsterdamToday(),
+    write = (text) => process.stdout.write(text),
+  }: OldSiteReportOptions = {},
+): Promise<number> {
+  let data: OldSiteData
+
+  try {
+    data = await readOldSiteData(folder)
+  } catch (error) {
+    console.error(`The files of the old fansite can't be used, so there is no report. ${describeError(error)}`)
+
+    return 1
+  }
+
+  const { close, db } = connect(databaseUrl)
+
+  try {
+    write(formatOldSiteCheck(await buildOldSiteCheck(db, data), today))
+
+    return 0
+  } finally {
+    await close()
+  }
+}
+
+/** Today in Amsterdam as `2026-11-08`. */
+function amsterdamToday(): string {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' })
 }
 
 /** Runs the steps in order; each in a transaction of its own. Returns the exit code. */

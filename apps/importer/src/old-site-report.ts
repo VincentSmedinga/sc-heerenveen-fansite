@@ -66,7 +66,15 @@ export type DerivedOldSiteSubstitution = {
 /** The goals of a match, each with its event, in the order the goals are stored. */
 export type OldSiteGoalWithEvent = { event: OldSiteEvent; goal: DerivedOldSiteGoal }
 
-export type OldSiteReportAnomaly = { code: OldSiteReportAnomalyCode; text: string }
+/**
+ * What a notice is about, as data: the check report (#880) words it in Dutch from this, since
+ * `text` is the English line of the log. `subject` is the player (or the code or the assist)
+ * it names, `minute` the minute it speaks of, `kind` the kind of card or goal or the reason,
+ * and `other` the scorer of the goal it belongs to.
+ */
+export type OldSiteReportAbout = { kind?: string; minute?: null | number; other?: string; subject: string }
+
+export type OldSiteReportAnomaly = { about: OldSiteReportAbout; code: OldSiteReportAnomalyCode; text: string }
 
 /**
  * Why a report stays `bezig` although the rules of a report do not mind, or what was left
@@ -85,7 +93,7 @@ export type OldSiteReportAnomalyCode =
   | 'red-card-without-minute'
   | 'unusable-minute'
 
-export type OldSiteReportNote = { code: OldSiteReportNoteCode; text: string }
+export type OldSiteReportNote = { about: OldSiteReportAbout; code: OldSiteReportNoteCode; text: string }
 
 /** What was left out of the report and does not make it `bezig`, each with a line. */
 export type OldSiteReportNoteCode =
@@ -149,6 +157,7 @@ export function deriveOldSiteReport(
 
     if (isOurCode(entry.playerCode) && player === undefined) {
       anomalies.push({
+        about: { kind: 'code', subject: entry.playerCode! },
         code: 'no-player-row',
         text: `the code '${entry.playerCode}' in the line-up is not a player`,
       })
@@ -156,6 +165,7 @@ export function deriveOldSiteReport(
     }
     if (name === '' || name.length > playerNameMaxLength) {
       anomalies.push({
+        about: { kind: name === '' ? 'no-name' : 'long-name', subject: name },
         code: 'no-player-row',
         text: name === '' ? 'a player in the line-up has no name' : `the name '${name}' is too long`,
       })
@@ -165,18 +175,30 @@ export function deriveOldSiteReport(
     const playerKey = ours ? oldSitePlayerKey(season, name) : null
 
     if (playerKey !== null && !hasPlayerRow(playerKey)) {
-      anomalies.push({ code: 'no-player-row', text: `${name} has no row in players for ${season}` })
+      anomalies.push({
+        about: { kind: 'no-row', subject: name },
+        code: 'no-player-row',
+        text: `${name} has no row in players for ${season}`,
+      })
       continue
     }
     if (entry.minuteIn > lastMinute || entry.minuteOut > lastMinute) {
-      anomalies.push({ code: 'unusable-minute', text: `${name} comes on or goes off after minute ${lastMinute}` })
+      anomalies.push({
+        about: { kind: 'lineup', subject: name },
+        code: 'unusable-minute',
+        text: `${name} comes on or goes off after minute ${lastMinute}`,
+      })
       continue
     }
 
     const key = `${ours ? 'ours' : 'theirs'}|${looseNameKey(name)}`
 
     if (found.has(key)) {
-      anomalies.push({ code: 'duplicate-player', text: `${name} is twice in the line-up, the second is left out` })
+      anomalies.push({
+        about: { subject: name },
+        code: 'duplicate-player',
+        text: `${name} is twice in the line-up, the second is left out`,
+      })
       continue
     }
 
@@ -281,6 +303,7 @@ function deriveCards(
 
     if (place === undefined) {
       notes.push({
+        about: { kind, subject: label },
         code: 'card-not-in-lineup',
         text: `the ${kind} card for '${label}' is left out: he is not in the line-up, so he is the trainer or not a player`,
       })
@@ -296,6 +319,7 @@ function deriveCards(
         minute = player.minuteOut
       } else {
         anomalies.push({
+          about: { kind, subject: player.name },
           code: 'red-card-without-minute',
           text: `the ${kind} card for ${player.name} is left out: it has no minute and he has no minute of leaving`,
         })
@@ -304,13 +328,18 @@ function deriveCards(
     }
     if (minute !== null && minute > lastMinute) {
       anomalies.push({
+        about: { kind, minute, subject: player.name },
         code: 'unusable-minute',
         text: `the ${kind} card for ${player.name} is after minute ${lastMinute}`,
       })
       continue
     }
     if (cards.some((card) => card.appearance === place && card.kind === kind)) {
-      notes.push({ code: 'card-twice', text: `${player.name} has two ${kind} cards, the second is left out` })
+      notes.push({
+        about: { kind, subject: player.name },
+        code: 'card-twice',
+        text: `${player.name} has two ${kind} cards, the second is left out`,
+      })
       continue
     }
 
@@ -360,6 +389,7 @@ function deriveSubstitutions(
 
       if (out === undefined) {
         anomalies.push({
+          about: { minute: sub.minuteIn, subject: sub.name },
           code: 'no-substitute-out',
           text: `${sub.name} comes on in minute ${sub.minuteIn} and nobody of the team goes off then`,
         })
@@ -376,6 +406,7 @@ function deriveSubstitutions(
 
       if (entered.has(place) && !replaced.has(place) && !sentOff.has(place) && player.minuteOut < end) {
         anomalies.push({
+          about: { minute: player.minuteOut, subject: player.name },
           code: 'early-exit',
           text: `${player.name} goes off in minute ${player.minuteOut} without a substitute and without a red card`,
         })
@@ -433,7 +464,11 @@ function linkGoal(
   const scorer = found.get(`${scorerOurs ? 'ours' : 'theirs'}|${looseNameKey(goal.player)}`)
 
   if (scorer === undefined) {
-    notes.push({ code: 'goal-scorer-not-found', text: `the scorer of the goal (${at}) is not in the line-up` })
+    notes.push({
+      about: { minute: goal.minute, subject: goal.player },
+      code: 'goal-scorer-not-found',
+      text: `the scorer of the goal (${at}) is not in the line-up`,
+    })
   }
 
   const assistName = cleanName(event.assist)
@@ -443,6 +478,12 @@ function linkGoal(
   }
   if (goal.penalty || goal.ownGoal) {
     notes.push({
+      about: {
+        kind: goal.penalty ? 'penalty' : 'own-goal',
+        minute: goal.minute,
+        other: goal.player,
+        subject: assistName,
+      },
       code: 'assist-empty',
       text: `the assist '${assistName}' of the ${goal.penalty ? 'penalty' : 'own goal'} (${at}) is left out`,
     })
@@ -461,11 +502,16 @@ function linkGoal(
 
   if (assist === undefined) {
     notes.push({
+      about: { minute: goal.minute, other: goal.player, subject: assistName },
       code: 'assist-not-found',
       text: `the assist '${assistName}' of the goal (${at}) is not in the line-up of the team of the scorer, so it is left empty`,
     })
   } else if (assist === scorer) {
-    notes.push({ code: 'assist-empty', text: `the assist '${assistName}' is the scorer (${at}), so it is left empty` })
+    notes.push({
+      about: { kind: 'scorer', minute: goal.minute, other: goal.player, subject: assistName },
+      code: 'assist-empty',
+      text: `the assist '${assistName}' is the scorer (${at}), so it is left empty`,
+    })
 
     return { appearance: scorer ?? null, assist: null }
   }

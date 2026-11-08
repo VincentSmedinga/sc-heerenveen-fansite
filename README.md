@@ -35,30 +35,30 @@ Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is.
 
 Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:3000>.
 
-| Opdracht                       | Wat het doet                                                                              |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| `pnpm lint`                    | ESLint, Stylelint en Prettier                                                             |
-| `pnpm format`                  | Prettier zet de opmaak recht                                                              |
-| `pnpm typecheck`               | TypeScript in alle packages                                                               |
-| `pnpm test`                    | De tests van alle packages, van de hooks en van de linters                                |
-| `pnpm build`                   | De build van alle packages                                                                |
-| `pnpm test:a11y`               | axe op de pagina's van de gebouwde site, na `pnpm build`                                  |
-| `pnpm test:stories`            | axe op elke story van het designsysteem, in licht en donker                               |
-| `pnpm run import`              | Haalt de feeds, de wedstrijden en de selectie op                                          |
-| `pnpm run import:status`       | Toont per feed, voor de wedstrijden en de selectie of ze gezond zijn                      |
-| `pnpm run import:season`       | Leest eenmalig een afgelopen seizoen, zoals `pnpm run import:season 2025/26`              |
-| `pnpm run import:seasons`      | Leest alle afgelopen seizoenen vanaf een seizoen: `pnpm run import:seasons 2020/21`       |
-| `pnpm run import:squad`        | Leest eenmalig de selectie van een afgelopen seizoen: `pnpm run import:squad 2007/08`     |
-| `pnpm run import:squads`       | Leest de selectie van alle afgelopen seizoenen vanaf een seizoen: `import:squads 1990/91` |
-| `pnpm run import:old-site`     | Leest de wedstrijden van de oude fansite (1990–2007); `--dry-run` schrijft niets          |
-| `pnpm run import:completeness` | Rekent de kans dat de selectie van elk seizoen compleet is opnieuw uit, zonder verzoeken  |
-| `pnpm run import:item-clubs`   | Zet bij elke kop welke profclubs hij noemt, zonder verzoeken                              |
-| `pnpm run import:changes`      | Toont de wijzigingen van Wikipedia die wachten, of beslist ze: `accept 12`, `reject all`  |
-| `pnpm release`                 | Opent of werkt de release-pull request bij (vraagt `gh`)                                  |
-| `pnpm review <branch>`         | Start de site en Storybook voor een branch of pull request                                |
-| `pnpm review:stop`             | Stopt ze weer                                                                             |
-| `pnpm screenshots`             | Maakt plaatjes van een draaiende build voor een pull request                              |
-| `pnpm rollover`                | Schuift het bord naar de nieuwe week (vraagt `gh`)                                        |
+| Opdracht                       | Wat het doet                                                                                    |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `pnpm lint`                    | ESLint, Stylelint en Prettier                                                                   |
+| `pnpm format`                  | Prettier zet de opmaak recht                                                                    |
+| `pnpm typecheck`               | TypeScript in alle packages                                                                     |
+| `pnpm test`                    | De tests van alle packages, van de hooks en van de linters                                      |
+| `pnpm build`                   | De build van alle packages                                                                      |
+| `pnpm test:a11y`               | axe op de pagina's van de gebouwde site, na `pnpm build`                                        |
+| `pnpm test:stories`            | axe op elke story van het designsysteem, in licht en donker                                     |
+| `pnpm run import`              | Haalt de feeds, de wedstrijden en de selectie op                                                |
+| `pnpm run import:status`       | Toont per feed, voor de wedstrijden en de selectie of ze gezond zijn                            |
+| `pnpm run import:season`       | Leest eenmalig een afgelopen seizoen, zoals `pnpm run import:season 2025/26`                    |
+| `pnpm run import:seasons`      | Leest alle afgelopen seizoenen vanaf een seizoen: `pnpm run import:seasons 2020/21`             |
+| `pnpm run import:squad`        | Leest eenmalig de selectie van een afgelopen seizoen: `pnpm run import:squad 2007/08`           |
+| `pnpm run import:squads`       | Leest de selectie van alle afgelopen seizoenen vanaf een seizoen: `import:squads 1990/91`       |
+| `pnpm run import:old-site`     | Leest de wedstrijden van de oude fansite (1990–2007); `--dry-run` en `--report` schrijven niets |
+| `pnpm run import:completeness` | Rekent de kans dat de selectie van elk seizoen compleet is opnieuw uit, zonder verzoeken        |
+| `pnpm run import:item-clubs`   | Zet bij elke kop welke profclubs hij noemt, zonder verzoeken                                    |
+| `pnpm run import:changes`      | Toont de wijzigingen van Wikipedia die wachten, of beslist ze: `accept 12`, `reject all`        |
+| `pnpm release`                 | Opent of werkt de release-pull request bij (vraagt `gh`)                                        |
+| `pnpm review <branch>`         | Start de site en Storybook voor een branch of pull request                                      |
+| `pnpm review:stop`             | Stopt ze weer                                                                                   |
+| `pnpm screenshots`             | Maakt plaatjes van een draaiende build voor een pull request                                    |
+| `pnpm rollover`                | Schuift het bord naar de nieuwe week (vraagt `gh`)                                              |
 
 Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Updates.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).

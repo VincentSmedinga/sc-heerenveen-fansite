@@ -2741,3 +2741,33 @@
   Bij een geel-rode kaart zonder gele kaart de eerste gele kaart verzinnen, met een lege minuut: 35 verslagen worden dan klaar, want de oude fansite schreef een geel-rode kaart als één kaart.
   Dat is een gevolgtrekking en geen feit uit het bestand, en het verhoogt het aantal gele kaarten van die spelers.
   Daarom blijven die 35 bezig tot de eigenaar het wil; het is een kleine wijziging in `deriveCards`.
+
+## Het controleverslag van de oude fansite is een opdracht die niets schrijft
+
+- **Datum:** 8 november 2026 (de keuze van het issue, 7 november)
+- **Besluit:** `import.mjs --old-site --report` (#880) leest de bestanden en de database en schrijft een Markdown-verslag in het Nederlands naar het scherm.
+  De workflow `import-old-site.yml` heeft daarvoor een keuze `action` (`import` of `report`), die vóór de stappen wordt gecontroleerd en alleen als omgevingsvariabele doorgaat, en zet het verslag in de samenvatting van de run.
+  De Builder draait het één keer na de import en zet het resultaat als `docs/oude-wedstrijden-hiaten.md` in de repository.
+  - **Het rekent niets zelf uit.**
+    Het verslag vraagt de stappen: `deriveOldSiteMatches` (ronde, aftijd, opmerking), `deriveOldSiteGoals` (optellen), `deriveOldSitePlayers` (naam uit de code), `judgeStoredOldSiteMatch` (klaar of bezig, de regels en de meldingen) en `findOldSiteClubs` (de club bij een oude club).
+    De stap `opstellingen` gebruikt dezelfde `judgeStoredOldSiteMatch`, zodat het verslag en de import niet uit elkaar kunnen lopen.
+    De meldingen van een verslag (`OldSiteReportAnomaly` en `OldSiteReportNote`) hebben naast hun Engelse regel voor de log een veld `about` met de speler, de minuut en de soort, waaruit het verslag zijn Nederlandse zin maakt.
+  - **Het schrijft niets.**
+    De functies krijgen alleen `select`, dus het type verbiedt een schrijfactie, en een test telt de rijen van alle tabellen voor en na.
+    Het neemt de lock van de import niet, want het leest alleen, en het kan niet samen met `--dry-run`.
+  - **Wat erin staat.**
+    Een tabel per seizoen en lijsten met wedstrijden (seizoen, competitie, dag, tegenstander) voor: wedstrijden die niet in de database of niet in de bestanden staan, rondes met een ander nummer, opmerkingen van de oude fansite (met of ze zijn overgenomen), doelpunten die niet optellen, verslagen die `bezig` zijn met de reden per regel, kaarten die de import oversloeg, doelpuntenmakers en assists zonder speler.
+    Verder staan er de spelers van wie de code geen rij in de oude tabel had en de clubs: nieuw, aan een bestaande gekoppeld, of niet gevonden.
+    Het noemt alleen namen zoals ze in de wedstrijd stonden, dus niets wat niet in de bestanden van #875 staat.
+  - **Rondes vergelijkt het alleen bij een competitie.**
+    De oude fansite nummerde de speelrondes van de competitie (en die nummers klopten soms niet); bij de beker gaf ze het nummer van de ronde van de beker, terwijl de import de wedstrijden telt (zie _De stap `matches` leidt ronde, verlenging, strafschoppen en aftrap af uit het bestand_).
+    Dat zijn twee soorten nummers, dus een verschil zegt daar niets.
+  - **Een club is nieuw als ze geen Wikipedia-pagina en geen wedstrijd van een andere bron heeft.**
+    De import bewaart niet welke clubs hij maakte, dus het verslag leidt het af uit de database: dat is wat de stap `clubs` maakt (een club zonder `wikipedia_page`), tot Wikipedia de club vindt.
+    Een club met dezelfde naam als de oude fansite (zonder hoofdletters, spaties en leestekens, dus `NEC` is `N.E.C.`) telt als dezelfde; een andere naam telt als gekoppeld.
+  - **Het cijfer komt uit de run.**
+    De cijfers staan in het verslag zoals de run ze geeft, en een test houdt ze vast voor de bestanden in de repository: 671 wedstrijden, 604 met doelpunten die optellen, 65 zonder doelpunten en 2 met een deel (de stap `doelpunten` zegt hetzelfde), 566 verslagen waarvan 474 `klaar` en 92 `bezig`.
+- **Waarom:** de projecteigenaar kan lezen wat er niet is, en #414 weet wat het moet aanvullen.
+  Een verslag dat hetzelfde antwoord geeft als de import, kan niet liegen over wat de import deed.
+- **Alternatieven:** een tabel in de database met meldingen (de meldingen horen bij één run en verouderen).
+  Het verslag zelf de afleidingen laten herhalen (twee kopieën die uit elkaar lopen).

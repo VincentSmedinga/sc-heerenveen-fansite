@@ -195,12 +195,15 @@ Hij leest de bestanden die met de deploy op de host staan (`apps/importer/data/o
 Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
 
 1. Open in GitHub _Actions → Import old site_ en kies _Run workflow_, met de branch `main`.
-   De workflow heeft geen invoer.
+   De workflow heeft één keuze, `action`: `import` (de standaard) draait de stappen, `report` schrijft alleen het controleverslag (zie hieronder).
 2. Lees het logboek van de stap _Import the old site on the host_.
    Daar staat per stap één regel, zoals `Old site, step clubs: 63 new, 6 updated, 22 unchanged, 0 skipped`, met daaronder een regel voor elke nieuwe club en elke club die aan een bestaande is gekoppeld.
    De laatste regel is `Old site: 4 of 4 steps done.`
    Een tweede run meldt overal `0 new, 0 updated`.
 
+- Met de keuze `report` draait de workflow `--old-site --report`.
+  Dat schrijft niets in de database: het zet een verslag in Markdown in het logboek en in de samenvatting van de run, over wat er nog ontbreekt of niet klopt.
+  Het verslag van de laatste run staat in [`docs/oude-wedstrijden-hiaten.md`](oude-wedstrijden-hiaten.md).
 - Wil je eerst zien wat de opdracht zou doen, dan kan dat alleen over SSH, met `--old-site --dry-run` achter `import.mjs` (zie _Controleren_).
   De workflow zelf schrijft altijd.
 - De run wordt rood als de bestanden niet in de vorm passen, een stap faalt of een run van cron de lock vasthoudt.

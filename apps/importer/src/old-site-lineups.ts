@@ -12,7 +12,12 @@ import {
 import { asc, eq, inArray } from 'drizzle-orm'
 
 import type { OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
-import type { DerivedOldSiteReport, OldSiteGoalWithEvent } from './old-site-report.ts'
+import type {
+  DerivedOldSiteReport,
+  OldSiteGoalWithEvent,
+  OldSiteReportVerdict,
+  OldSiteStoredGoal,
+} from './old-site-report.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { deriveOldSiteGoals, orderedOldSiteGoalEvents } from './old-site-goals.ts'
@@ -105,37 +110,13 @@ export async function importOldSiteLineups(
     }
 
     const storedGoals = goalsOf.get(before.id) ?? []
-    const { goals, state } = deriveOldSiteGoals(
+    const { aligned, verdict, wanted } = judgeStoredOldSiteMatch(
       match,
-      { against: values.goalsAgainst ?? 0, for: values.goalsFor ?? 0 },
-      byCode,
-    )
-    const events = orderedOldSiteGoalEvents(match)
-    // The stored goals are the goals of the step before this one: they link to the report only
-    // when they are the goals of the files.
-    const aligned = state === 'adds-up' && storedGoals.length === goals.length && events.length === goals.length
-    const pairs: OldSiteGoalWithEvent[] = aligned
-      ? goals.flatMap((goal, index) => (events[index] === undefined ? [] : [{ event: events[index], goal }]))
-      : []
-    const wanted = deriveOldSiteReport(match, {
-      extraTime: before.extraTime,
-      goals: pairs,
-      hasPlayerRow: (key) => playerIds.has(key),
-      oldPlayers: byCode,
-      season: values.season,
-    })
-    const verdict = judgeOldSiteReport(
-      wanted,
-      {
-        extraTime: before.extraTime,
-        goalsAgainst: before.goalsAgainst,
-        goalsFor: before.goalsFor,
-        penaltiesAgainst: before.penaltiesAgainst,
-        penaltiesFor: before.penaltiesFor,
-        status: before.status,
-      },
+      values.season,
+      before,
       storedGoals,
-      aligned ? wanted.goalLinks : [],
+      byCode,
+      playerIds,
     )
 
     counts[verdict.status] += 1
@@ -163,6 +144,57 @@ export async function importOldSiteLineups(
   report.lines.unshift(`${counts.klaar + counts.bezig} reports: ${counts.klaar} klaar, ${counts.bezig} bezig`)
 
   return report
+}
+
+/**
+ * The report of a match of the files and what the rules make of it, given the match and its
+ * goals as the database has them and the players of the season. The step `opstellingen` stores
+ * the result, and the check report (#880) reads the same result, so they can't drift apart.
+ * `aligned` says whether the stored goals are the goals of the files, the only case in which
+ * the report links to them.
+ */
+export function judgeStoredOldSiteMatch(
+  match: OldSiteMatch,
+  season: string,
+  stored: Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'>,
+  storedGoals: readonly OldSiteStoredGoal[],
+  byCode: ReadonlyMap<string, OldSitePlayer>,
+  playerIds: ReadonlyMap<string, number>,
+): { aligned: boolean; verdict: OldSiteReportVerdict; wanted: DerivedOldSiteReport } {
+  const { goals, state } = deriveOldSiteGoals(
+    match,
+    { against: stored.goalsAgainst ?? 0, for: stored.goalsFor ?? 0 },
+    byCode,
+  )
+  const events = orderedOldSiteGoalEvents(match)
+  // The stored goals are the goals of the step before this one: they link to the report only
+  // when they are the goals of the files.
+  const aligned = state === 'adds-up' && storedGoals.length === goals.length && events.length === goals.length
+  const pairs: OldSiteGoalWithEvent[] = aligned
+    ? goals.flatMap((goal, index) => (events[index] === undefined ? [] : [{ event: events[index], goal }]))
+    : []
+  const wanted = deriveOldSiteReport(match, {
+    extraTime: stored.extraTime,
+    goals: pairs,
+    hasPlayerRow: (key) => playerIds.has(key),
+    oldPlayers: byCode,
+    season,
+  })
+  const verdict = judgeOldSiteReport(
+    wanted,
+    {
+      extraTime: stored.extraTime,
+      goalsAgainst: stored.goalsAgainst,
+      goalsFor: stored.goalsFor,
+      penaltiesAgainst: stored.penaltiesAgainst,
+      penaltiesFor: stored.penaltiesFor,
+      status: stored.status,
+    },
+    storedGoals,
+    aligned ? wanted.goalLinks : [],
+  )
+
+  return { aligned, verdict, wanted }
 }
 
 /** The players, substitutions and cards stored for a match. */
