@@ -31,8 +31,10 @@ Do all of this when you create an issue, so it is complete from the first minute
 - **Title:** one Dutch sentence that says the result, like the existing issues ("De pagina van een club toont …").
 - **Labels:** the `gebied: …` label that fits, `statistics` for figures, and `idee` for an idea that is not planned.
 - **Milestone:** by area, not by time.
-  The title starts with a code: A Grondslag, B De site als geheel, C Designsysteem, D Nieuws, E Het voetbal, and Z – Voor later for an idea that has no theme yet.
-  List the exact titles with `gh api repos/VincentSmedinga/sc-heerenveen-fansite/milestones` and pass one to `gh issue create --milestone "E3 – Spelers"`.
+  The title starts with a code: a letter for the area and a number that tells the milestones of that area apart, as in "E3 – Spelers".
+  The areas so far are A groundwork and ways of working, B the site as a whole, C the design system, D news, E football (matches, players, clubs), F speed and monitoring, and Z – Voor later for an idea that has no theme yet.
+  New milestones appear, so read the list before you choose: `gh api 'repos/VincentSmedinga/sc-heerenveen-fansite/milestones?state=all&per_page=100'` gives the exact titles.
+  Pass one to `gh issue create --milestone "E3 – Spelers"`.
   A new theme gets a new milestone with the next free number in its letter, never a "Release N".
   Time is the field Iteratie, not the milestone.
 - **Board:** add the issue to project 1 and set its fields, with `gh project item-add 1 --owner VincentSmedinga --url <issue url> --format json --jq .id` and then `gh project item-edit --id <item> --project-id <project> --field-id <field> --single-select-option-id <option>`.
@@ -130,6 +132,7 @@ Finish with a short summary for the owner: the link to the issue, the Definition
 ## 8. Archive your session
 
 When the issue has the owner's approval line and the board shows it, and nothing else is open (such as a small pull request for a decision that belongs to no issue), you are done.
+Issues that are only summaries (see _When the owner has no time to specify_) never get that line: for them you are done when every issue is written, has its milestone and fields, and is on the board.
 Write the summary above as your last message, then archive your own session (`archive_session` with `session_id` "self") as the very last thing you do.
 The app tells the Coordinator that your turn has ended, so you send no separate message.
 The session has nothing left to say, and an open one only adds to the list.
