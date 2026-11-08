@@ -167,9 +167,12 @@ De doelpunten van zo'n wedstrijd tellen nergens mee, tot hij is afgelopen.
 
 Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de zijbalk van het verslag, of "Bijhouden" in de lijst met wedstrijden.
 De opstelling maak je eerst in het volledige formulier.
-Op het snelle scherm voeg je een doelpunt, een kaart of een wissel toe: kies de kant, vul de minuut in en kies de speler.
+Op het snelle scherm voeg je een doelpunt, een kaart of een wissel toe: kies bij "Voor wie" sc Heerenveen of de tegenstander, vul de minuut in en kies de speler.
+Bij minuut 45, 90, 105 en 120 verschijnt het veld Blessuretijd naast de minuut.
+Een tweede gele kaart voor dezelfde speler wordt vanzelf een geel-rode kaart.
+Bovenaan staat de balk "Op deze pagina:" met sprongen naar Doelpunt, Kaart, Wissel en Gebeurtenissen.
 Elke gebeurtenis is meteen opgeslagen en staat in de lijst eronder, de laatste bovenaan.
-Zie je een fout, kies dan "Haal weg" bij de gebeurtenis en bevestig.
+Zie je een fout, kies dan "Haal weg" bij de gebeurtenis en daarna "Ja, haal weg".
 Slaat een collega tegelijk iets op, dan blijven allebei de gebeurtenissen staan.
 Heb je het volledige formulier open terwijl iemand anders iets bewaart, dan weigert het formulier te bewaren en zegt het dat iemand anders het verslag heeft bewaard.
 Wat je typte blijft staan.

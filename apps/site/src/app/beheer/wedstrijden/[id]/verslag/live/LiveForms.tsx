@@ -6,6 +6,7 @@ import {
   Disclosure,
   ErrorSummary,
   Field,
+  FieldGroup,
   Form,
   Heading,
   Input,
@@ -14,7 +15,7 @@ import {
   Select,
   Text,
 } from '@fansite/design-system'
-import { createContext, type ReactNode, use, useActionState, useEffect, useState } from 'react'
+import { createContext, type ReactNode, use, useActionState, useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { LiveEventInput, LiveEventRow, LiveKind, LivePlayer } from '#src/beheer/live-report'
 
@@ -111,7 +112,7 @@ export function LiveEventForm({
           <RadioGroup
             error={errors[fieldId(kind, 'kant')]}
             id={fieldId(kind, 'kant')}
-            legend={kind === 'doelpunt' ? 'Wie scoorde?' : 'Welke kant?'}
+            legend="Voor wie"
             name="kant"
             options={[
               { label: 'sc Heerenveen', value: 'wij' },
@@ -119,31 +120,14 @@ export function LiveEventForm({
             ]}
             {...(values.kant === undefined ? {} : { value: values.kant })}
           />
-          <Field error={errors[fieldId(kind, 'minuut')]} id={fieldId(kind, 'minuut')} label="Minuut">
-            <Input
-              autoComplete="off"
-              defaultValue={values.minuut ?? ''}
-              inputMode="numeric"
-              name="minuut"
-              width="narrow"
-            />
-          </Field>
-          <Field
-            error={errors[fieldId(kind, 'extra')]}
-            hideOptional
-            hint="Alleen als de minuut 45, 90, 105 of 120 is."
-            id={fieldId(kind, 'extra')}
-            label="Blessuretijd in minuten"
-            required={false}
-          >
-            <Input
-              autoComplete="off"
-              defaultValue={values.extra ?? ''}
-              inputMode="numeric"
-              name="extra"
-              width="narrow"
-            />
-          </Field>
+          <MomentFields
+            extraError={errors[fieldId(kind, 'extra')]}
+            extraId={fieldId(kind, 'extra')}
+            extraValue={values.extra ?? ''}
+            minuteError={errors[fieldId(kind, 'minuut')]}
+            minuteId={fieldId(kind, 'minuut')}
+            minuteValue={values.minuut ?? ''}
+          />
           {kind === 'doelpunt' ? (
             <>
               {choose('speler', 'Speler die scoorde', players, undefined, false)}
@@ -176,7 +160,7 @@ export function LiveEventForm({
                 id={fieldId(kind, 'soort')}
                 legend="Soort kaart"
                 name="soort"
-                options={cardKindChoices}
+                options={cardKindChoices.filter((choice) => choice.value !== 'geel-rood')}
                 {...(values.soort === undefined ? {} : { value: values.soort })}
               />
             </>
@@ -186,7 +170,7 @@ export function LiveEventForm({
               {choose('erin', 'Speler die erin komt', bench)}
             </>
           )}
-          <Button disabled={pending} type="submit">
+          <Button disabled={pending} icon="save" type="submit">
             {title} opslaan
           </Button>
         </Form>
@@ -194,6 +178,17 @@ export function LiveEventForm({
     </>
   )
 }
+
+/** The minutes that have added time, as `checkReportForm` allows. */
+const stoppageMinutes = new Set([45, 90, 105, 120])
+
+/** Whether the page runs JavaScript: false on the server and in the first render. */
+const useScripted = () =>
+  useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
 /** The events of the report from the last to the first, each with "Haal weg" and a question. */
 export function LiveEvents({
@@ -244,6 +239,9 @@ function LiveEvent({
   useEffect(() => {
     if (state.removed !== undefined) {
       announce(state.removed)
+      // The event and its button are gone: the focus goes to the heading of
+      // the list, not to the top of the page (WCAG 2.4.3).
+      document.getElementById('gebeurtenissen-kop')?.focus()
     }
   }, [announce, state])
 
@@ -252,7 +250,6 @@ function LiveEvent({
       <Text as="span">{event.text}</Text>
       <Disclosure open={state.error === undefined ? undefined : true} summary={`Haal weg: ${event.text}`}>
         {state.error === undefined ? null : <Text role="alert">Fout: {state.error}</Text>}
-        <Text>Weet je zeker dat je dit weghaalt? Het komt in het logboek.</Text>
         <Form action={formAction}>
           <Button appearance="danger" disabled={pending} type="submit">
             Ja, haal weg
@@ -264,5 +261,53 @@ function LiveEvent({
         </Form>
       </Disclosure>
     </>
+  )
+}
+
+/**
+ * The minute and, next to it, the added time. With JavaScript the added time is only there when
+ * the minute is 45, 90, 105 or 120, and it comes and goes while the editor types: the field of
+ * the minute keeps the focus, and the added time keeps its label. A field that is gone is not
+ * sent and has lost its value. Without JavaScript, and with an error on it, it is always there.
+ */
+function MomentFields({
+  extraError,
+  extraId,
+  extraValue,
+  minuteError,
+  minuteId,
+  minuteValue,
+}: {
+  extraError: string | undefined
+  extraId: string
+  extraValue: string
+  minuteError: string | undefined
+  minuteId: string
+  minuteValue: string
+}) {
+  const [minute, setMinute] = useState(minuteValue)
+  const scripted = useScripted()
+  const showExtra = !scripted || extraError !== undefined || stoppageMinutes.has(Number(minute.trim() || Number.NaN))
+
+  return (
+    <FieldGroup legend="Moment">
+      <Field error={minuteError} id={minuteId} label="Minuut">
+        <Input
+          autoComplete="off"
+          inputMode="numeric"
+          name="minuut"
+          onChange={(event) => {
+            setMinute(event.currentTarget.value)
+          }}
+          value={minute}
+          width="narrow"
+        />
+      </Field>
+      {showExtra ? (
+        <Field error={extraError} id={extraId} label="Blessuretijd" required={false}>
+          <Input autoComplete="off" defaultValue={extraValue} inputMode="numeric" name="extra" width="narrow" />
+        </Field>
+      ) : null}
+    </FieldGroup>
   )
 }

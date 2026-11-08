@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
 import { phaseOf } from '@fansite/db/match-reports'
-import { Breadcrumb, Button, Card, Form, Heading, Link, Notice, Page, Strong, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { finishPath, matchesPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { finishPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { liveViewOf } from '#src/beheer/live-report'
@@ -60,16 +60,6 @@ export default async function LiveReportPage({ params }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current="Bijhouden"
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: matchesPath, label: 'Wedstrijden' },
-              { href: matchPath(id), label: clubs },
-              { href: reportPath(id), label: 'Verslag' },
-            ]}
-            label="Kruimelpad"
-          />
           <Heading level={1}>Bijhouden: {clubs}</Heading>
           <Text appearance="meta">
             {match.competition}, {match.round} · {describeEntryKickoff(match)}
@@ -130,7 +120,7 @@ export default async function LiveReportPage({ params }: Props) {
             title="Wissel"
           />
           <Card aria-labelledby="gebeurtenissen-kop">
-            <Heading id="gebeurtenissen-kop" level={2}>
+            <Heading id="gebeurtenissen-kop" level={2} tabIndex={-1}>
               Gebeurtenissen
             </Heading>
             <LiveEvents

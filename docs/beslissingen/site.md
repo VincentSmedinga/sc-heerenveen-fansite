@@ -3742,7 +3742,7 @@
 ## Het logboek krijgt één regel per gebeurtenis van het snelle scherm
 
 - **Datum:** 8 november 2026
-- **Besluit:** elke toevoeging en elke verwijdering schrijft één regel `match.edit` met een korte omschrijving, zoals "Doelpunt 23' Van Aken" of "Doelpunt 23' Van Aken weggehaald", en de reden "Verslag bijhouden tijdens de wedstrijd".
+- **Besluit:** elke toevoeging en elke verwijdering schrijft één regel `match.edit` met een korte omschrijving, zoals "Doelpunt 23' Van Aken" of "Doelpunt 23' Van Aken weggehaald", en de reden "Verslag bijgehouden tijdens de wedstrijd".
   `saved_at` en `saved_by` van het verslag volgen elke opslag.
   Een doelpunt markeert de doelpunten als de invoer van de redactie (`match_edits`), zodat de import ze met rust laat, en laat een wijziging van Wikipedia die op de doelpunten wachtte vervallen.
   Weghalen van een gebeurtenis die er al niet meer is, schrijft niets.
@@ -3803,3 +3803,21 @@
   Dat is geen nieuw werk: de layout van het beheer zet het teken bij elke geldige sessie, ook na `logInWithCode`.
 - **Waarom:** het menu kent dan "Beheer" ook daar.
 - **Alternatieven:** niets, dan toont het menu in de app geen Beheer.
+
+## Het snelle scherm vraagt minder: Blessuretijd op zijn plek, geen geel-rood en geen kruimelpad
+
+- **Datum:** 8 november 2026
+- **Besluit:** het snelle scherm voor het bijhouden van een verslag wordt eenvoudiger (#939).
+  - Het veld Blessuretijd staat naast Minuut, heet alleen "Blessuretijd" en toont zelf dat het niet verplicht is.
+    Met JavaScript is het er alleen bij minuut 45, 90, 105 en 120, de minuten die `checkReportForm` toestaat.
+    Het verschijnt en verdwijnt terwijl je typt, zonder dat de focus verspringt, en een veld dat weg is, wordt niet meegestuurd.
+    Zonder JavaScript, en met een fout erop, staat het er altijd.
+  - De vraag boven sc Heerenveen of de tegenstander is "Voor wie".
+  - Geel-rood is geen keuze meer: een tweede gele kaart voor een speler die er precies één heeft, wordt een kaart `geel-rood`, en de bevestiging zegt "Geel-rode kaart opgeslagen".
+    Het volledige formulier, plakken, de importer en de wedstrijdpagina houden geel-rood zoals het was.
+  - De knoppen om op te slaan hebben het icoon `save`, de Disclosure van "Haal weg" herhaalt de vraag niet en het kruimelpad vervalt voor de balk "Op deze pagina:" onder de beheerbalk (de slot `@shortcuts`).
+  - Na "Haal weg" met JavaScript gaat de focus naar de kop Gebeurtenissen.
+- **Waarom:** redacteuren gebruiken het scherm vaak, kennen de woorden en hebben op een telefoon weinig ruimte.
+  Wat de regels toch al eisen, zoals een geel-rode kaart na precies één gele, hoeft niemand te kiezen.
+- **Alternatieven:** Blessuretijd altijd tonen (neemt ruimte, vraagt iets wat meestal leeg is); alleen bij 45 en 90 (verlenging kan dan niet snel); een tweede geel blijft geel (corrigeren in het volledige formulier).
+- **Later:** dit vult _Een verslag bijhouden vanaf een telefoon: een snel scherm naast het volledige formulier_ aan: de kant heet nu "Voor wie", en het scherm biedt geen geel-rood aan.

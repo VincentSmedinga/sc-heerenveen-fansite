@@ -157,11 +157,18 @@ export async function addLiveEvent(
         if (player === '' && errors[liveFieldId(kind, 'speler')] === undefined) {
           errors[liveFieldId(kind, 'speler')] = 'Kies de speler die de kaart kreeg.'
         }
-        if (!cardKindChoices.some((choice) => choice.value === asked)) {
-          errors[liveFieldId(kind, 'soort')] = 'Kies geel, geel-rood of rood.'
+        // The screen offers yellow and red. A second yellow for a player who has one
+        // is a yellow-red card, as the rules of the full form want it.
+        const secondYellow =
+          asked === 'geel' &&
+          player !== '' &&
+          rows.filter((card) => card.speler === player && card.soort === 'geel').length === 1
+
+        if (asked !== 'geel' && asked !== 'rood') {
+          errors[liveFieldId(kind, 'soort')] = 'Kies geel of rood.'
         }
 
-        row = { ...moment, soort: asked, speler: player }
+        row = { ...moment, soort: secondYellow ? 'geel-rood' : asked, speler: player }
       } else {
         const out = refer(input.eruit, 'eruit', 'De speler die eruit gaat', true)
         const into = refer(input.erin, 'erin', 'De speler die erin komt', true)
@@ -255,7 +262,10 @@ export async function addLiveEvent(
 
       await settle(transaction, userId, match, stored, goals, kind, checked.errors, described, now)
 
-      return { saved: announce(kind, clock, who), status: 'saved' }
+      return {
+        saved: announce(kind === 'kaart' && row.soort === 'geel-rood' ? 'Geel-rode kaart' : kind, clock, who),
+        status: 'saved',
+      }
     }),
   )
 }
@@ -454,8 +464,12 @@ export function liveViewOf(stored: StoredMatchReport, goals: readonly MatchGoal[
 }
 
 /** What the screen tells after a save: `Doelpunt opgeslagen: 23e minuut, Van Aken`. */
-function announce(kind: LiveKind, moment: { minute: null | number; stoppageMinutes: null | number }, who: string) {
-  const label = { doelpunt: 'Doelpunt', kaart: 'Kaart', wissel: 'Wissel' }[kind]
+function announce(
+  kind: 'Geel-rode kaart' | LiveKind,
+  moment: { minute: null | number; stoppageMinutes: null | number },
+  who: string,
+) {
+  const label = { doelpunt: 'Doelpunt', 'Geel-rode kaart': kind, kaart: 'Kaart', wissel: 'Wissel' }[kind]
   const minute =
     moment.minute === null
       ? ''
