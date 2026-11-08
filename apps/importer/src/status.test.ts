@@ -31,6 +31,8 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
   await database.pool.query('DELETE FROM import_runs')
+  await database.pool.query('DELETE FROM persons')
+  await database.pool.query('DELETE FROM wikidata_items')
 })
 
 afterEach(async () => {
@@ -113,6 +115,9 @@ describe('the overview', () => {
         '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
+        'Persons from Wikidata: 0 of 0 read, 0 to go',
+        '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
+        '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
       ],
     })
   })
@@ -185,8 +190,31 @@ describe('the overview', () => {
         '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
+        'Persons from Wikidata: 0 of 0 read, 0 to go',
+        '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
+        '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
       ],
     })
+  })
+
+  it('shows how many persons are read from Wikidata and what they have', async () => {
+    await database.pool.query("INSERT INTO wikidata_items (id, label) VALUES ('Q29999', 'Nederland')")
+    await database.pool.query(
+      `INSERT INTO persons (wikipedia_page, wikidata_id, birth_date, birth_date_precision, line, line_source, wikidata_read_at)
+       VALUES ('A', 'Q1', '1990-01-01', 'year', 'doelman', 'wikidata', ?),
+              ('B', NULL, NULL, NULL, NULL, NULL, ?),
+              ('C', NULL, NULL, NULL, NULL, NULL, NULL)`,
+      [start, start],
+    )
+    await database.pool.query(
+      "INSERT INTO person_nationalities (person_id, position, item_id) SELECT id, 0, 'Q29999' FROM persons WHERE wikipedia_page = 'A'",
+    )
+
+    expect((await statusAt(start)).lines.slice(-3)).toEqual([
+      'Persons from Wikidata: 2 of 3 read, 1 to go',
+      '  with a Q-number: 1, with a birth date: 1, with a nationality: 1',
+      '  line: 1 from Wikidata, 0 from the squad, 0 from the list, 2 without',
+    ])
   })
 
   it('says when the last run has not finished', async () => {

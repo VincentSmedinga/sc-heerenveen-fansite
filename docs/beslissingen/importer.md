@@ -1993,6 +1993,9 @@
   Het besluit om er een te gebruiken in de importer komt na het antwoord van de projecteigenaar.
 - **Later:** het onderzoek vond dat de `robots.txt` van Wikidata ons weert, dus Wikidata kan niet met de fetcher.
   De keuze wat we ermee doen, staat als open vraag in `docs/onderzoek-spelers-sinds-1990.md`.
+- **Later:** zie _Wikidata is de bron voor de gegevens van een persoon_.
+  De `robots.txt` weert alleen de API onder `/w/`; het item per persoon op `Special:EntityData/Q….json` mag wel, dus Wikidata kan met de fetcher.
+  Wat het onderzoek over de spelers per seizoen vond, blijft gelden: Wikidata is voor een lijst per seizoen een bovengrens.
 
 ## De oude fansite-database staat alleen in een alinea van het onderzoek
 
@@ -2255,6 +2258,8 @@
 - **Nadeel:** het eenmalig opvragen van het artikel van elke bestaande persoon kost ongeveer 680 verzoeken.
   Een artikel zonder pagina (een rode link) heeft nooit een sleutel, dus zijn naam is altijd een gok.
 - **Alternatieven:** de naam bij het tonen raden (de huidige fout); Wikidata (de `robots.txt` weert ons); de sleutel laten gelden zonder te controleren of hij op de titel past (een foute sleutel geeft dan een foute naam zonder dat iemand het ziet).
+- **Later:** zie _Wikidata is de bron voor de gegevens van een persoon_.
+  Wikidata is bereikbaar voor het item van een persoon, maar de naam in delen blijft uit de sorteersleutel komen: het item heeft geen voornaam en achternaam in de vorm die we bewaren.
 
 ## Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd
 
@@ -2887,3 +2892,54 @@
   - **Gevolg:** twee assists die als "staat niet in de opstelling" leeg bleven (`Erik Kortchaguine` en `Gerry Senden`) krijgen nu hun speler, en staan niet meer onder _Assists zonder speler_ in het controleverslag.
 - **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en dit zijn de paren waarbij het artikel op Wikipedia de bedoelde persoon aanwijst.
 - **Alternatieven:** deze paren laten staan als namen om te beslissen (dezelfde persoon blijft op twee manieren in de tellingen staan); de drie groepen met een tweede persoon overslaan (de tikfout blijft dan een eigen speler).
+
+## Wikidata is de bron voor de gegevens van een persoon
+
+- **Datum:** 8 november 2026
+- **Besluit:** de importer leest per persoon het item van Wikidata via `Special:EntityData/Q….json`, met de fetcher (#898).
+  Uit het item komen de geboortedatum (`P569`), de geboorteplaats (`P19`), de nationaliteiten (`P27`) en de posities (`P413`).
+  - **De rang:** een uitspraak met de rang "deprecated" telt niet, en bij een voorkeursrang telt alleen de voorkeur.
+  - **De datum:** een datum met een precisie grover dan een jaar blijft leeg.
+  - **De namen:** landen, plaatsen en posities komen uit hun eigen item, het Nederlandse label of anders het Engelse, één keer per Q-nummer.
+    Een Q-nummer zonder een van beide labels geeft een waarschuwing met `Persons:` en wordt overgeslagen.
+  - **Het logboek:** `persons (Wikidata): …` noemt per run hoeveel personen zijn gelezen en wat ze kregen, en `pnpm run import:status` toont de totalen.
+  - **De licentie:** we nemen alleen feiten over die Wikidata zelf onder CC0 publiceert, geen foto's en geen tekst.
+    De bronvermelding op de site (`SourceCredit`) verandert niet.
+- **Waarom:** de `robots.txt` laat dat adres toe (`Allow: /wiki/Special:EntityData/*.`, getoetst met onze eigen `parseRobots` op de `robots.txt` van 8 november 2026), de gegevens zijn gestructureerd en CC0, en de Wikipedia-infobox heeft geen veld voor nationaliteit en een vrije tekst voor de positie.
+- **Alternatieven:** alleen de infobox van de Nederlandse Wikipedia (geen nationaliteit, een positie als tekst); Wikidata met de infobox als terugval (twee lezers voor één issue).
+- **Gevolg:** dit vervangt de aanname dat Wikidata niet bereikbaar is (zie de regels **Later** bij de oudere besluiten).
+  De API onder `/w/` en de pagina's `Special:Search` en `Special:ItemByTitle` blijven geweigerd, en de importer vraagt ze niet.
+
+## De Q-nummers en paginanummers komen uit de pagina-informatie van het artikel
+
+- **Datum:** 8 november 2026
+- **Besluit:** voor elke persoon zonder Q-nummer vraagt de importer één keer de pagina-informatie van het artikel (`/wiki/<titel>?action=info`) en leest daaruit het paginanummer (`wgArticleId`) en het Q-nummer (de link naar `Special:EntityPage/Q…`).
+  Een titel zonder artikel (paginanummer 0) en een artikel zonder item blijven leeg, zonder gok, en de persoon is dan toch gelezen.
+  Tussen twee verzoeken wacht de stap 250 milliseconden.
+  De lijn van een positie komt uit een lijst op Q-nummer (`wikidataPositionLines` in `person-lines.ts`), niet op het label.
+- **Waarom:** de API en de REST-adressen van de Nederlandse Wikipedia staan in de `robots.txt` onder `/w/` en `/api/`, en de pagina-informatie onder `/wiki/` is het enige adres dat beide gegevens in één verzoek geeft en door `robots.txt` mag.
+  Het is een pagina van ongeveer 57 kilobyte.
+  De wachttijd houdt een run van 200 personen naar onze schatting op ongeveer vijf minuten, zodat de vergrendeling niet lang vastzit.
+  Een Q-nummer verandert niet als het label verandert, en een positie die niet in de lijst staat is een bewuste leemte in plaats van een gok.
+- **Nadeel:** de pagina-informatie is html, dus de importer leest twee vaste stukken tekst eruit.
+  Verandert MediaWiki die, dan geeft de stap een waarschuwing en leest hij niemand tot dat is hersteld.
+- **Alternatieven:** de gewone pagina (meer html dan nodig); de API met `prop=pageprops` (geweigerd door `robots.txt`); het Q-nummer zoeken via de titel op Wikidata (`Special:ItemByTitle`, geweigerd).
+
+## De stap geldt voor alle personen, ook tegenstanders
+
+- **Datum:** 8 november 2026
+- **Besluit:** elke rij in `persons` wordt gelezen, en hoogstens 200 personen per run.
+- **Waarom:** de regel is eenvoudig, de gegevens zijn er dan als de site ooit een tegenstander toont, en de eerste ronde is ongeveer 1.400 verzoeken voor ongeveer 680 personen, plus de labels.
+  Een persoon wordt één keer gelezen; opnieuw lezen is een eigen issue.
+- **Alternatieven:** alleen personen met een rij in `players` van ons (minder verzoeken).
+
+## De linie komt uit een lijst van ons, anders uit Wikidata, anders uit de selectielijst
+
+- **Datum:** 8 november 2026
+- **Besluit:** de linie (`doelman`, `verdediger`, `middenvelder`, `aanvaller`) komt uit `personLines`, anders uit de eerste positie van Wikidata die in `wikidataPositionLines` staat, anders uit de linie die het vaakst in de rijen van `players` van de persoon staat (bij gelijkstand die van het laatste seizoen).
+  `line_source` zegt welke het was: `manual`, `wikidata` of `squad`.
+  Zonder een van de drie blijft de linie leeg.
+  De lijst `personLines` wordt bij elke run toegepast, ook op personen die al gelezen zijn, en wordt nooit vervangen.
+- **Waarom:** Wikidata zegt wat de speler is, de selectielijst vult de gaten voor onze eigen spelers, en een handmatige lijst herstelt fouten, zoals bij de namen.
+  De negen posities in de lijst zijn gecontroleerd op hun label in Wikidata op 8 november 2026; een andere positie telt niet mee tot iemand hem toevoegt.
+- **Alternatieven:** alleen Wikidata (meer gaten); alleen de selectielijst (een veld van de rij van een seizoen, geen feit over de persoon).

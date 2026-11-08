@@ -511,6 +511,8 @@
   `players` omvormen tot een rij per persoon (een grotere migratie, en `player_season_stats` en het koppelen per seizoen moeten mee).
 - **Later:** zie ook _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_ in `importer.md`.
 - **Later:** de rij heeft sinds #715 ook een naam in delen; zie _De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij_ hieronder.
+- **Later:** zie _Een persoon krijgt het Q-nummer en het paginanummer van het Nederlandse artikel_.
+  De titel blijft de sleutel voor de import; het Q-nummer staat er nu naast, omdat de `robots.txt` van Wikidata het item per persoon toelaat.
 
 ## De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij
 
@@ -538,6 +540,8 @@
   Wikidata (voornaam en achternaam als gegevens; de `robots.txt` weert ons).
   Een vaste lijst voor alle spelers (loopt achter bij elke transfer).
   Het voorvoegsel bij de achternaam bewaren (dan kan een lijst er niet op sorteren).
+- **Later:** zie _Wikidata is de bron voor de gegevens van een persoon_ in `importer.md`.
+  De naam blijft uit de sorteersleutel komen; Wikidata is nu wel bereikbaar voor andere gegevens van een persoon.
 
 ## Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie
 
@@ -871,3 +875,31 @@
 - **Waarom:** doelpunten, kaarten en minuten hangen dan aan een speler van ons, terwijl `persons` een echte Wikipedia-pagina vraagt (`wikipedia_page` is verplicht en uniek).
   De stap maakt 427 rijen voor 17 seizoenen.
 - **Alternatieven:** alleen namen (niets over eigen spelers uit 1990 tot 2007 is dan per speler te tellen); `persons` met een verzonnen titel.
+
+## Een persoon krijgt het Q-nummer en het paginanummer van het Nederlandse artikel
+
+- **Datum:** 8 november 2026
+- **Besluit:** `persons` krijgt `wikidata_id` (uniek, leeg toegestaan) en `wikipedia_page_id`, beide leeg tot de importer de persoon uit Wikidata heeft gelezen (#898).
+  De titel blijft de sleutel voor de import.
+  Twee personen met hetzelfde Q-nummer kunnen niet: de eerste houdt het, de tweede blijft leeg en de run waarschuwt.
+- **Waarom:** het Q-nummer is de stabiele sleutel naar Wikidata en over talen heen, en het paginanummer komt uit hetzelfde verzoek.
+- **Alternatieven:** alleen het Q-nummer; alleen het paginanummer (geeft geen weg naar Wikidata).
+
+## Meer waarden staan in een tabel, labels in `wikidata_items`
+
+- **Datum:** 8 november 2026
+- **Besluit:** nationaliteiten en posities staan in `person_nationalities` en `person_positions`, elk met `person_id`, `item_id` en `position` (de volgorde van Wikidata, vanaf 0), en gaan weg met hun persoon.
+  De namen van landen, plaatsen en posities staan één keer in `wikidata_items` (het Q-nummer en het label), en `persons.birth_place_id` wijst daarheen.
+  De migratie `0052_add_wikidata_to_persons` voegt alleen toe en kan opnieuw draaien.
+- **Waarom:** je kunt zo filteren ("alle Nederlanders") zonder JSON te lezen, en de API van Wikidata, die labels van meerdere items tegelijk geeft, is geweigerd.
+- **Nadeel:** een label wordt niet ververst; een land dat van naam verandert, houdt zijn oude naam tot iemand de rij aanpast.
+- **Alternatieven:** een JSON-kolom (korter, maar niet te doorzoeken).
+
+## Een geboortedatum heeft een precisie
+
+- **Datum:** 8 november 2026
+- **Besluit:** `birth_date` heeft `birth_date_precision` (`day`, `month` of `year`) naast zich.
+  Bij een maand of een jaar staat de eerste van die maand of van dat jaar in `birth_date`.
+  De datum van een levende speler is een persoonsgegeven: hij blijft in de database en de site toont hem pas na een eigen besluit.
+- **Waarom:** Wikidata kent bij oudere spelers soms alleen het jaar, en 1 januari zou een verzonnen dag zijn.
+- **Alternatieven:** een jaarkolom naast de datum.
