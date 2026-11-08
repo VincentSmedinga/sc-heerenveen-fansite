@@ -76,12 +76,12 @@ describe('the open list in select.css', () => {
     expect(css).not.toMatch(/max-height/)
   })
 
-  it('has proportional figures in the field, the open list and the options, and nowhere outside the styled list', () => {
+  it('has tabular figures in the field, the open list and the options, and nowhere outside the styled list', () => {
     const styled = css.slice(css.indexOf(supports))
 
-    expect(styled.match(/font-variant-numeric: proportional-nums/g)).toHaveLength(3)
+    expect(styled.match(/font-variant-numeric: tabular-nums/g)).toHaveLength(3)
     expect(css.slice(0, css.indexOf(supports))).not.toContain('font-variant-numeric')
-    expect(css).not.toContain('tabular-nums')
+    expect(css).not.toContain('proportional-nums')
   })
 })
 

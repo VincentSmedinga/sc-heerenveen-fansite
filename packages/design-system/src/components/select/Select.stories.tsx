@@ -27,7 +27,7 @@ const meta = preview.meta({
           'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, gesloten en open: ruimte tussen het pijltje en de rand, en een lijst met keuzes in onze kleuren, waarin de gekozen keuze een vinkje heeft.',
           'Dat werkt in een browser die dat kan; een andere browser houdt zijn eigen lijst.',
           'De open lijst blijft binnen het scherm: hij opent onder het veld, boven het veld als hij daar niet past, en anders aan de kant met de meeste ruimte, waar een lange lijst in zichzelf scrolt.',
-          'De cijfers in die lijst zijn proportioneel, want een keuzelijst heeft geen kolommen.',
+          'De cijfers in die lijst zijn even breed, zodat 1996/97 en 2004/05 even breed zijn en de seizoenen onder elkaar recht staan.',
           'De seizoenskiezer gebruikt het al.',
         ].join('\n'),
       },

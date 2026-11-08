@@ -68,7 +68,7 @@
       cursor: pointer;
       display: flex;
       gap: var(--hf-space-s);
-      font-variant-numeric: proportional-nums;
+      font-variant-numeric: tabular-nums;
       justify-content: space-between;
       padding-inline: var(--hf-space-s);
 
@@ -97,7 +97,7 @@
         border-radius: 0.25rem;
         box-sizing: border-box;
         color: var(--hf-colour-text-default);
-        font-variant-numeric: proportional-nums;
+        font-variant-numeric: tabular-nums;
         inline-size: max-content;
         /* stylelint-disable-next-line declaration-property-value-allowed-list -- The margin keeps the open list a little way from the closed one and from the edge of the screen; the list is a popover, outside the flow, and a gap does not reach it. */
         margin: var(--hf-space-xs);
@@ -125,7 +125,7 @@
         cursor: pointer;
         display: flex;
         gap: var(--hf-space-s);
-        font-variant-numeric: proportional-nums;
+        font-variant-numeric: tabular-nums;
         min-block-size: var(--hf-size-control);
         padding-block: var(--hf-space-s);
         padding-inline: var(--hf-space-s);

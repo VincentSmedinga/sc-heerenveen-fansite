@@ -2420,16 +2420,16 @@
   Een vaste maximumhoogte (zie #668).
 - **Later:** de breedte-regels van _Het menu van een keuzelijst met de opmaak van de site blijft binnen het scherm_ gelden nog, behalve de plek over de hele breedte van het scherm.
 
-## Proportionele cijfers in de keuzelijst met seizoenen
+## Tabelcijfers in de keuzelijst met seizoenen
 
 - **Datum:** 8 november 2026
-- **Besluit:** het veld, het open menu en de opties van een `Select` met `hf-select-styled` gebruiken `font-variant-numeric: proportional-nums`.
+- **Besluit:** het veld, het open menu en de opties van een `Select` met `hf-select-styled` gebruiken `font-variant-numeric: tabular-nums`.
   Het is een regel in `select.css`, niet in een algemene stijl.
-- **Waarom:** de projecteigenaar vindt de cijfers in de seizoenskiezer er raar uitzien (2004/05 met gelijk brede cijfers geeft gaten bij de 1).
-  Tabelcijfers horen bij kolommen die onder elkaar staan; een keuzelijst heeft geen kolommen.
-  Alleen de keuzelijst krijgt de regel, dus tabellen, uitslagen en de stand houden hun cijfers.
-- **Alternatieven:** de cijfers van het hele lettertype proportioneel maken (raakt tabellen en uitslagen).
-  Alle `Select` in het beheer ook (de projecteigenaar koos voor alleen de seizoenskiezers).
+- **Waarom:** het lettertype heeft proportionele cijfers als standaard, en daarin is een 1 veel smaller dan een 0 of een 2.
+  Seizoenen als 1996/97 zijn zo merkbaar smaller dan 2004/05 en staan in de lijst onder elkaar scheef.
+  De projecteigenaar wil dat ze even breed zijn, en vond dat de regel in #925 (eerst als proportioneel opgeschreven) het omgekeerde deed.
+- **Alternatieven:** proportionele cijfers (het eerste voorstel in #925: gaten bij de 1 en wisselende breedte per seizoen).
+  De cijfers van het hele lettertype tabelcijfers maken (raakt alle tekst).
 
 ## `DataTable` kan de plaats van een rij in een ranglijst tonen
 
