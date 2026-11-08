@@ -1254,6 +1254,7 @@
   - **De competitie:** `Play-offs Conference League` in `matches.competition`, en de soort `playoffs` in `wikipedia_pages.kind`, met een migratie (`0023_add_conference_playoffs`).
     De ronde is `Halve finale` of `Finale`, de kop boven de wedstrijd, en bij een halve finale over twee wedstrijden (2022 en 2023) `Halve finale, wedstrijd 1/2`.
     Verlenging en strafschoppen leest hij zoals bij de beker, dus de CHECK-constraint voor verlenging staat nu op beide competities (`matches_extra_time_only_in_played_knockout`).
+    **Later:** zie _De wedstrijden van de oude fansite komen in `matches`, met een eigen bron, zes nieuwe competities en een tabel voor de statistieken_ in `hosting-en-data.md` (7 november 2026): de check laat verlenging toe bij elke competitie behalve `Eredivisie` en `Eerste divisie`, dus een nieuwe waarde hoeft niet meer in de lijst.
   - **Een pagina die er niet is:** Wikipedia geeft 404 zolang de pagina niet bestaat, en dat is geen mislukking.
     De import gaat door met de andere pagina's, schrijft geen fout en telt niet mee voor `failures_in_a_row`, dus ook niet voor de mail van #533.
     De play-offwedstrijden die er al zijn, blijven staan.
@@ -1954,6 +1955,7 @@
     Een pagina met geen van beide koppen blijft een fout.
   - **De competitie:** `Play-offs Europa League` in `matches.competition` en `match_changes.competition`, met een migratie (`0035_add_europa_league_playoffs`).
     De CHECK-constraint voor verlenging (`matches_extra_time_only_in_played_knockout`) laat de nieuwe waarde toe, en een test in `packages/db` laat dat zien.
+    **Later:** zie _De wedstrijden van de oude fansite komen in `matches`, met een eigen bron, zes nieuwe competities en een tabel voor de statistieken_ in `hosting-en-data.md` (7 november 2026): de check laat verlenging toe bij elke competitie behalve `Eredivisie` en `Eerste divisie`, dus een nieuwe waarde hoeft niet meer in de lijst.
     `player_season_stats` houdt zijn twee competities: de tabel van de selectie heeft geen kolommen voor de play-offs.
   - **De ronde:** de kop boven de wedstrijd, `Eerste ronde` of `Tweede ronde`, met `, wedstrijd 1/2` bij een paar van twee wedstrijden.
     Op de pagina's van 2013 tot en met 2018 staat in het sjabloon `Wedstrijd 1` en `Wedstrijd 2`, zonder `/2`, en de lezer neemt dan twee wedstrijden aan.

@@ -1,6 +1,6 @@
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
-import { hiddenReasonMaxLength, matchGoalPlayerMaxLength, matchLimits } from '@fansite/db/schema'
+import { competitions, hiddenReasonMaxLength, matchGoalPlayerMaxLength, matchLimits } from '@fansite/db/schema'
 import { amsterdamToUtc, utcToAmsterdam } from '@fansite/db/season'
 
 import { parseReason } from './items'
@@ -29,13 +29,10 @@ export const mostStoppageMinutes = 30
 /** The most goals a team scores in a match we accept. */
 const mostGoals = 99
 
-/** The competitions in which a match can go to extra time. */
-const knockoutCompetitions: readonly Match['competition'][] = [
-  'KNVB Beker',
-  'Play-offs Conference League',
-  'Europa League',
-  'Play-offs Europa League',
-]
+/** The competitions in which a match can go to extra time: every one but the two leagues. */
+const knockoutCompetitions: readonly Match['competition'][] = competitions.filter(
+  (competition) => competition !== 'Eredivisie' && competition !== 'Eerste divisie',
+)
 
 /** A goal as entered: a row of `match_goals` without its numbers. */
 export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 'id' | 'matchId' | 'personId'> & {
