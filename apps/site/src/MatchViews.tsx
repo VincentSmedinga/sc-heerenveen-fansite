@@ -767,7 +767,7 @@ export function MatchLines({
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
-  /** Whether the line of a played match ends with the referee, when the match has one. */
+  /** Whether the line of a match ends with the referee, when it is known. */
   withReferee?: boolean
 }) {
   return (
@@ -780,7 +780,7 @@ export function MatchLines({
               live={liveReports?.has(`${match.competition}|${match.round}`) === true}
               match={match}
               now={now}
-              referee={withReferee && match.status === 'played' ? match.referee : undefined}
+              referee={withReferee ? match.referee : undefined}
               reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
               withCompetition={withCompetition}
             />

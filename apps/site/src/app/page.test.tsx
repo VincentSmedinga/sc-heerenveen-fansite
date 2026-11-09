@@ -1098,15 +1098,35 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(await renderMatchesCard()).not.toContain('hf-match-referee')
   })
 
-  it('never shows a referee for the next match', async () => {
+  it('ends the line of the next match with the referee too, when Wikipedia names him before the match', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) =>
+        match.status === 'scheduled' ? { ...match, referee: 'Pieter Maquette' } : match,
+      ),
+    })
+
+    const html = await renderMatchesCard()
+    const next = html.slice(html.indexOf('Proefstad SV'))
+
+    expect(html.match(/hf-match-referee/g)).toHaveLength(1)
+    expect(next).toContain('<span class="hf-match-referee">Pieter Maquette</span>')
+  })
+
+  it('shows the referee of both matches when both are known, and nothing for a match without one', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
       matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
     })
 
-    const html = await renderMatchesCard()
+    expect((await renderMatchesCard()).match(/hf-match-referee/g)).toHaveLength(2)
 
-    expect(html.match(/hf-match-referee/g)).toHaveLength(1)
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({ ...match, referee: null })),
+    })
+
+    expect(await renderMatchesCard()).not.toContain('hf-match-referee')
   })
 
   it('has the previous meeting and the form under the clubs of the next match, before its competition', async () => {

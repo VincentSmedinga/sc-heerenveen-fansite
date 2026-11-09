@@ -4053,7 +4053,7 @@
     Er zijn er minder dan vijf als de tegenstander er minder speelde, en geen regel zonder uitslag, zoals bij een bekertegenstander uit een lagere divisie of een promovendus in de eerste ronde.
     Er is geen terugval op vorig seizoen.
   - De scheidsrechter staat zonder label aan het eind van de laatste regel: "Eredivisie · Speelronde 2 · Danny Makkelie".
-    Een geplande wedstrijd heeft hem nooit, want Wikipedia vult hem pas na de wedstrijd in, en een gespeelde wedstrijd zonder naam toont niets.
+    De volgende wedstrijd toont hem ook als Wikipedia hem al noemt (de projecteigenaar, 9 november 2026); zonder naam toont een wedstrijd niets.
   - Geen kop, geen doelpuntenmakers en dus geen legenda in dit deel van de kaart.
   - De bronregel van de kaart vervalt.
     De kaart Stand heeft de bronvermelding "Wedstrijden en stand: Wikipedia", met het archief erbij als de vorige ontmoeting daaruit komt (`WikipediaCredit` met `archive`).
