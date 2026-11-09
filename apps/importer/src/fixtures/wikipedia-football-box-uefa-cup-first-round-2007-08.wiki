@@ -1,0 +1,71 @@
+Times are [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]]), as listed by UEFA.
+
+==Teams==
+
+==Seeding==
+
+==Summary==
+
+==Matches==
+
+{{Football box
+|date       = {{Start date|2007|9|20|df=y}}
+|time       =
+|team1      = [[FC Midtjylland|Midtjylland]] {{fbaicon|DEN}}
+|score      = 1–3
+|team2      = {{fbaicon|RUS}} [[FC Lokomotiv Moscow|Lokomotiv Moscow]]
+|goals1     =
+*[[Babajide Collins Babatunde|Collins]] {{goal|30}}
+|goals2     =
+*[[Aleksandr Samedov|Samedov]] {{goal|61}}
+*[[Diniyar Bilyaletdinov|Bilyaletdinov]] {{goal|69}}
+*[[Dmitri Sychev|Sychev]] {{goal|90+1}}
+|stadium    = [[MCH Arena]], [[Herning]]
+|attendance =
+|referee    = [[Tomasz Mikulski]] ([[Polish Football Association|Poland]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/301414/
+}}
+
+{{Football box
+|date       = {{Start date|2007|9|20|df=y}}
+|time       = 20:45
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 5–3
+|team2      = {{fbaicon|SWE}} [[Helsingborgs IF]]
+|goals1     =
+*[[Michael Bradley (soccer)|Bradley]] {{goal|20||60}}
+*[[Gerald Sibon|Sibon]] {{goal|30||35}}
+*[[Kristian Bak Nielsen|Nielsen]] {{goal|59}}
+|goals2     =
+*[[Henrik Larsson|Larsson]] {{goal|53||71|pen.}}
+*[[Razak Omotoyossi|Omotoyossi]] {{goal|57}}
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance =
+|referee    = [[Novo Panić]] ([[Football Federation of Bosnia and Herzegovina|Bosnia and Herzegovina]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/301434/
+}}
+
+{{Football box
+|date       = {{Start date|2007|10|4|df=y}}
+|time       = 20:45
+|team1      = [[Helsingborgs IF]] {{fbaicon|SWE}}
+|score      = 5–1
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Henrik Larsson|Larsson]] {{goal|18}}
+*[[Andreas Dahl|Dahl]] {{goal|37}}
+*[[Razak Omotoyossi|Omotoyossi]] {{goal|45+1||80}}
+*[[René Makondele|Makondele]] {{goal|51}}
+|goals2     =
+*[[Gerald Sibon|Sibon]] {{goal|89}}
+|stadium    = [[Olympia (Helsingborg)|Olympia]], [[Helsingborg]]
+|attendance =
+|referee    = [[Gerald Lehner (referee)|Gerald Lehner]] ([[Austrian Football Association|Austria]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/301474/
+}}
+
+==Notes==
+
+==References==
+
+==External links==

@@ -652,7 +652,11 @@ describe('the Europa League matches of 2012/13', () => {
     expect(
       await database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'europa-league')),
     ).toMatchObject([
-      { season: europa, title: '2012–13 UEFA Europa League qualifying (third and play-off round matches)' },
+      {
+        language: 'en',
+        season: europa,
+        title: '2012–13 UEFA Europa League qualifying (third and play-off round matches)',
+      },
     ])
   })
 

@@ -353,6 +353,7 @@ export async function listAllWikipediaPages(db: Database) {
   const rows = await db
     .select({
       kind: wikipediaPages.kind,
+      language: wikipediaPages.language,
       readAt: wikipediaPages.readAt,
       season: wikipediaPages.season,
       title: wikipediaPages.title,
@@ -1046,13 +1047,19 @@ export async function listStandingsSeasons(db: Database) {
 
 /**
  * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
- * page, which kind it is and the moment it was last read, so a page can credit them. The
+ * page, which kind it is, the language edition it is on and the moment it was last read, so a
+ * page can credit them. The
  * order is the standings, the programme and the cup. The page of the squad is not one of them.
  * The `Last-Modified` of a page stays internal.
  */
 export async function listWikipediaPages(db: Pick<Database, 'select'>, season: string) {
   const rows = await db
-    .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .select({
+      kind: wikipediaPages.kind,
+      language: wikipediaPages.language,
+      readAt: wikipediaPages.readAt,
+      title: wikipediaPages.title,
+    })
     .from(wikipediaPages)
     .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
     .orderBy(asc(wikipediaPages.kind), asc(wikipediaPages.title))

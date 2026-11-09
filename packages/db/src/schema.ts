@@ -582,12 +582,16 @@ export type ArticleVersion = typeof articleVersions.$inferSelect
  * The competitions of a match. `Play-offs Conference League` is the match or two that decide
  * the ticket for the second qualifying round after the league season, from 2020/21. `Play-offs
  * Europa League` is the same for the Europa League, before 2020/21. `Europa League` holds the
- * matches of the Europa League that sc Heerenveen played in 2012/13.
+ * matches of the Europa League that sc Heerenveen played in 2009/10 and 2012/13. `Johan
+ * Cruijff Schaal` is the one match for the shield of 2009, and `Play-offs Champions League` the
+ * play-offs of 2008 for a ticket to the qualifying round of the Champions League: the two
+ * matches against Ajax and the two against NAC Breda that followed them.
  *
- * The last six are the competitions of the old matches, from 1990 to 2007, named as they were
- * called then (the Europa League did not exist yet): `Eerste divisie` (1991/92 and 1992/93),
- * `Champions League` (2000/01), `Europacup II` (1998/99), `UEFA Cup` (2002/03 to 2006/07),
- * `Intertoto Cup` (1995 to 2003, the summer tournament) and `Play-offs UEFA Cup` (2005/06).
+ * The six after `Play-offs Europa League` are the competitions of the old matches, from 1990 to
+ * 2007, named as they were called then (the Europa League did not exist yet): `Eerste divisie`
+ * (1991/92 and 1992/93), `Champions League` (2000/01), `Europacup II` (1998/99), `UEFA Cup`
+ * (2002/03 to 2006/07, and 2007/08 and 2008/09 from Wikipedia), `Intertoto Cup` (1995 to 2003,
+ * the summer tournament) and `Play-offs UEFA Cup` (2005/06).
  */
 export const competitions = [
   'Eredivisie',
@@ -601,6 +605,8 @@ export const competitions = [
   'UEFA Cup',
   'Intertoto Cup',
   'Play-offs UEFA Cup',
+  'Johan Cruijff Schaal',
+  'Play-offs Champions League',
 ] as const
 
 /**
@@ -1347,9 +1353,11 @@ export type NewLeagueResult = typeof leagueResults.$inferInsert
 
 /**
  * The pages that hold the matches and the table: what `/wedstrijden` credits. `europa-league`
- * is a page of the English Wikipedia, the only one of these that is not on the Dutch one.
+ * is the page of the English Wikipedia with the Europa League matches of 2012/13. `matches` is
+ * a page with the matches of 2007/08 to 2009/10 in `football box` blocks, of any competition
+ * and in any language (see `language` in `wikipedia_pages`).
  */
-export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs', 'europa-league'] as const
+export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs', 'europa-league', 'matches'] as const
 
 export type MatchPageKind = (typeof matchPageKinds)[number]
 
@@ -1363,12 +1371,14 @@ export type WikipediaPageKind = (typeof wikipediaPageKinds)[number]
  * page, such as `KNVB Beker 2026/27 (mannen)`. `version` is the `Last-Modified` of the page as
  * Wikipedia sent it: the raw text of a page comes without a revision number, and this is the
  * time of the revision we read. `read_at` is the last time the page was read and every check
- * passed, in UTC.
+ * passed, in UTC. `language` is the language edition of Wikipedia the page is on, as in its
+ * address: `nl` for `nl.wikipedia.org`, `en` for the English one.
  */
 export const wikipediaPages = mysqlTable('wikipedia_pages', {
   title: varchar('title', { length: 200 }).primaryKey(),
   season: varchar('season', { length: matchLimits.season }).notNull(),
   kind: mysqlEnum('kind', wikipediaPageKinds).notNull(),
+  language: varchar('language', { length: 12 }).notNull().default('nl'),
   version: varchar('version', { length: 100 }),
   readAt: datetime('read_at').notNull(),
 })

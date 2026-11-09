@@ -93,12 +93,20 @@ export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: 
     ...(played('Eredivisie') || !played('Eerste divisie') ? ['de Eredivisie'] : []),
     ...(played('Eerste divisie') ? ['de Eerste divisie'] : []),
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
+    ...(played('Johan Cruijff Schaal') ? ['de Johan Cruijff Schaal'] : []),
     ...(played('Champions League') ? ['de Champions League'] : []),
     ...(played('Europacup II') ? ['de Europacup II'] : []),
     ...(played('UEFA Cup') ? ['de UEFA Cup'] : []),
     ...(played('Europa League') ? ['de Europa League'] : []),
     ...(played('Intertoto Cup') ? ['de Intertoto Cup'] : []),
-    ...(played('Play-offs Conference League', 'Play-offs Europa League', 'Play-offs UEFA Cup') ? ['de play-offs'] : []),
+    ...(played(
+      'Play-offs Conference League',
+      'Play-offs Europa League',
+      'Play-offs UEFA Cup',
+      'Play-offs Champions League',
+    )
+      ? ['de play-offs']
+      : []),
   ]
 
   return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
@@ -1144,21 +1152,24 @@ export function resultsOfSeason(results: PublicMatch[], season: string, now: Dat
 
 /**
  * The competitions in the order a season shows them: the league (the Eredivisie, or the Eerste
- * divisie in the two seasons sc Heerenveen played there), the cup, the competitions of Europe
- * of the old matches from the biggest to the summer tournament, the play-offs of the UEFA Cup,
- * and then the competitions that were there before, in the order they had: the play-offs of
- * the Conference League, the Europa League and its play-offs. A season has hardly more than
- * one competition of Europe, so the order among them hardly matters.
+ * divisie in the two seasons sc Heerenveen played there), the cup, the Johan Cruijff Schaal,
+ * the competitions of Europe of the old matches from the biggest to the summer tournament, the
+ * play-offs of the UEFA Cup and of the Champions League, and then the competitions that were
+ * there before, in the order they had: the play-offs of the Conference League, the Europa
+ * League and its play-offs. A season has hardly more than one competition of Europe, so the
+ * order among them hardly matters.
  */
 export const resultsCardOrder: readonly Competition[] = [
   'Eredivisie',
   'Eerste divisie',
   'KNVB Beker',
+  'Johan Cruijff Schaal',
   'Champions League',
   'Europacup II',
   'UEFA Cup',
   'Intertoto Cup',
   'Play-offs UEFA Cup',
+  'Play-offs Champions League',
   'Play-offs Conference League',
   'Europa League',
   'Play-offs Europa League',

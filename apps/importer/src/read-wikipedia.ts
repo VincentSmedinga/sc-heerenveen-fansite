@@ -15,7 +15,10 @@ import {
 
 import { printable } from './text.ts'
 
-export type { ReadGoal, ReadMatch }
+export type { ReadGoal, ReadMatch, Template }
+
+// What the reader of the `football box` blocks shares with this file (`read-football-box.ts`).
+export { findTemplates, linkTarget, months, readMatch, withoutRefn }
 
 export type ReadProgramme =
   | {
@@ -78,6 +81,7 @@ export type SeasonPages = { cup: string; playoffs: string; programme: string; st
 
 type Heading = { index: number; title: string }
 
+/** A template of a page: its parameters, where it starts and the heading above it. */
 type Template = { heading: null | string; index: number; params: Map<string, string> }
 
 /** The name Wikipedia knows us by in the links of a match. */
@@ -92,6 +96,7 @@ const playoffHeadings: readonly { competition: Competition; heading: RegExp }[] 
   { competition: 'Play-offs Europa League', heading: /^Play-offs voor de UEFA Europa League$/iu },
 ]
 
+/** The months as the Dutch Wikipedia writes them, January first. */
 const months = [
   'januari',
   'februari',
