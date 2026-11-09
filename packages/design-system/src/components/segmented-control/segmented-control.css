@@ -214,10 +214,13 @@
    * A name that only one of the two pages has, because the switch is not on the other page, is
    * not joined to anything: the old one is gone at once, and the new one has no fade.
    */
+
+  /* stylelint-disable-next-line selector-no-unmatchable -- the View Transitions spec allows :only-child here */
   ::view-transition-old(*):only-child {
     display: none;
   }
 
+  /* stylelint-disable-next-line selector-no-unmatchable -- the View Transitions spec allows :only-child here */
   ::view-transition-new(*):only-child {
     animation: none;
   }
