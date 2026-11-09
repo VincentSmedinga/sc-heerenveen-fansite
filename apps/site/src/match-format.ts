@@ -44,17 +44,25 @@ const singleDay = /^(\d{1,2}) (\p{L}+)(?: \d{4})?$/u
 /**
  * What the link to a Wikipedia page says: the league table, the programme, the cup or the
  * play-offs of the season, such as "Eredivisie 2026/27". The play-offs are for the Europa
- * League before 2020/21 and for the Conference League from then on. The page with the Europa
- * League matches is on the English Wikipedia, and the name says so.
+ * League before 2020/21 and for the Conference League from then on. A page with the matches of
+ * 2007/08 to 2009/10 (`matches`) holds more than one competition, so it is named by its own
+ * title. A page that is not on the Dutch Wikipedia says which Wikipedia it is on: "(Engelse
+ * Wikipedia)".
  */
-export function creditName(kind: PublicWikipediaPage['kind'], season: string) {
-  return {
+export function creditName(
+  { kind, language, title }: Pick<PublicWikipediaPage, 'kind' | 'language' | 'title'>,
+  season: string,
+) {
+  const name = {
     cup: `KNVB Beker ${season}`,
-    'europa-league': `Europa League ${season} (Engelse Wikipedia)`,
+    'europa-league': `Europa League ${season}`,
+    matches: title,
     playoffs: `Play-offs ${Number(season.slice(0, 4)) < 2020 ? 'Europa' : 'Conference'} League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
   }[kind]
+
+  return language === 'nl' ? name : `${name} (${language === 'en' ? 'Engelse Wikipedia' : `${language}.wikipedia.org`})`
 }
 
 /**
@@ -257,11 +265,14 @@ export function weekendText(dateText: string) {
 }
 
 /**
- * The address of a page on the Dutch Wikipedia, or on the English one for the kind of page that
- * is: the page with the Europa League matches.
+ * The address of a page on the Dutch Wikipedia, or on the Wikipedia of the language the page
+ * is on (`language` in `wikipedia_pages`), such as `en` for the English one.
  */
-export function wikipediaUrl(title: string, kind?: PublicWikipediaPage['kind']) {
-  return `https://${kind === 'europa-league' ? 'en' : 'nl'}.wikipedia.org/wiki/${encodeURI(title.replaceAll(' ', '_'))}`
+export function wikipediaUrl(title: string, language: PublicWikipediaPage['language'] = 'nl') {
+  // The language comes from our own database; what is no language code is the Dutch one.
+  const host = /^[a-z]{2,3}(?:-[a-z]{2,8})?$/u.test(language) ? language : 'nl'
+
+  return `https://${host}.wikipedia.org/wiki/${encodeURI(title.replaceAll(' ', '_'))}`
 }
 
 /** A calendar day such as `2026-10-25` as a moment in the middle of that day in UTC. */

@@ -131,23 +131,43 @@ describe('the links to Wikipedia', () => {
   })
 
   it('names the pages for a link', () => {
-    expect(creditName('standings', '2026/27')).toBe('Eredivisie 2026/27')
-    expect(creditName('programme', '2026/27')).toBe('Programma Eredivisie 2026/27')
-    expect(creditName('cup', '2026/27')).toBe('KNVB Beker 2026/27')
-    expect(creditName('europa-league', '2012/13')).toBe('Europa League 2012/13 (Engelse Wikipedia)')
-    expect(creditName('playoffs', '2025/26')).toBe('Play-offs Conference League 2025/26')
-    expect(creditName('playoffs', '2012/13')).toBe('Play-offs Europa League 2012/13')
+    const name = (
+      kind: Parameters<typeof creditName>[0]['kind'],
+      season: string,
+      language = 'nl',
+      title = 'Een titel',
+    ) => creditName({ kind, language, title }, season)
+
+    expect(name('standings', '2026/27')).toBe('Eredivisie 2026/27')
+    expect(name('programme', '2026/27')).toBe('Programma Eredivisie 2026/27')
+    expect(name('cup', '2026/27')).toBe('KNVB Beker 2026/27')
+    expect(name('europa-league', '2012/13', 'en')).toBe('Europa League 2012/13 (Engelse Wikipedia)')
+    expect(name('playoffs', '2025/26')).toBe('Play-offs Conference League 2025/26')
+    expect(name('playoffs', '2012/13')).toBe('Play-offs Europa League 2012/13')
   })
 
-  it('links to the English Wikipedia for the page with the Europa League matches, and only for that', () => {
+  it('names a page with the matches of 2007/08 to 2009/10 by its title, and says when it is the English Wikipedia', () => {
+    expect(creditName({ kind: 'matches', language: 'nl', title: 'KNVB Beker 2008/09 (mannen)' }, '2008/09')).toBe(
+      'KNVB Beker 2008/09 (mannen)',
+    )
+    expect(creditName({ kind: 'matches', language: 'en', title: '2009–10 SC Heerenveen season' }, '2009/10')).toBe(
+      '2009–10 SC Heerenveen season (Engelse Wikipedia)',
+    )
+    expect(creditName({ kind: 'matches', language: 'de', title: 'Een Duitse pagina' }, '2009/10')).toBe(
+      'Een Duitse pagina (de.wikipedia.org)',
+    )
+  })
+
+  it('links to the Wikipedia of the language of the page, and to the Dutch one without a language', () => {
     const title = '2012–13 UEFA Europa League qualifying (third and play-off round matches)'
 
-    expect(wikipediaUrl(title, 'europa-league')).toBe(
+    expect(wikipediaUrl(title, 'en')).toBe(
       'https://en.wikipedia.org/wiki/2012%E2%80%9313_UEFA_Europa_League_qualifying_(third_and_play-off_round_matches)',
     )
-    expect(wikipediaUrl('KNVB Beker 2026/27 (mannen)', 'cup')).toBe(
+    expect(wikipediaUrl('KNVB Beker 2026/27 (mannen)', 'nl')).toBe(
       'https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)',
     )
+    expect(wikipediaUrl('Een pagina', 'evil.example/')).toBe('https://nl.wikipedia.org/wiki/Een_pagina')
   })
 })
 

@@ -1,0 +1,68 @@
+Times are [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]]), as listed by UEFA.
+
+==Teams==
+
+==Seeding==
+
+==Summary==
+
+==Matches==
+
+{{Football box
+|date       = {{Start date|2008|9|18|df=y}}
+|time       = 20:45
+|team1      = [[AC Milan|Milan]] {{fbaicon|ITA}}
+|score      = 3–1
+|team2      = {{fbaicon|SUI}} [[FC Zürich|Zürich]]
+|goals1     =
+*[[Florian Stahel|Stahel]] {{goal|45+1|o.g.}}
+*[[Alexandre Pato|Pato]] {{goal|57}}
+*[[Marco Borriello|Borriello]] {{goal|74}}
+|goals2     =
+*[[Dusan Djuric|Djuric]] {{goal|78}}
+|stadium    = [[San Siro]], [[Milan]]
+|attendance = 25,000
+|referee    = [[Eduardo Iturralde González]] ([[Royal Spanish Football Federation|Spain]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/303913/
+}}
+
+{{Football box
+|date       = {{Start date|2008|9|18|df=y}}
+|time       = 22:00
+|team1      = [[Vitória F.C.|Vitória de Setúbal]] {{fbaicon|POR}}
+|score      = 1–1
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Leandro Carrijo Silva|Leandro Carrijo]] {{goal|67}}
+|goals2     =
+*[[Tarik Elyounoussi|Elyounoussi]] {{goal|90}}
+|stadium    = [[Estádio José Alvalade]], [[Lisbon]]{{refn|group=note|Played at Alvalade XXI, since Vitória FC's home ground at Setúbal does not meet UEFA criteria}}
+|attendance = 3,500
+|referee    = [[Fredy Fautrel]] ([[French Football Federation|France]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/303936/
+}}
+
+{{Football box
+|date       = {{Start date|2008|10|2|df=y}}
+|time       = 20:00
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 5–2
+|team2      = {{fbaicon|POR}} [[Vitória F.C.|Vitória de Setúbal]]
+|goals1     =
+*[[Paulo Henrique Carneiro Filho|Paulo Henrique]] {{goal|4}}
+*[[Gerald Sibon|Sibon]] {{goal|11||24}}
+*[[Tarik Elyounoussi|Elyounoussi]] {{goal|50||68}}
+|goals2     =
+*[[Bruno Gama|Gama]] {{goal|57}}
+*[[Ricardo Chaves|Chaves]] {{goal|63}}
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance = 23,000
+|referee    = [[Alon Yefet]] ([[Israel Football Association|Israel]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/303976/
+}}
+
+==Notes==
+
+==References==
+
+==External links==

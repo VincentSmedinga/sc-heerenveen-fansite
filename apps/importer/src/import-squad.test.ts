@@ -201,6 +201,7 @@ describe('the first import, into an empty database', () => {
     expect(await database.db.select().from(wikipediaPages)).toEqual([
       {
         kind: 'squad',
+        language: 'nl',
         readAt: first,
         season,
         title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',

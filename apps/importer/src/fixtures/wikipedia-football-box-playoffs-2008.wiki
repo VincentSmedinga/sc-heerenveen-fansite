@@ -1,0 +1,125 @@
+== Play-offs voor de voorronde Champions League ==
+
+==== Programma/Uitslagen ====
+
+=== Wedstrijd A ===
+
+{{footballbox2
+| round=Wedstrijd 1
+| date=1 mei 2008
+| time=14:30
+| team1=[[sc Heerenveen]]
+| score=1 – 2
+| team2=[[AFC Ajax|Ajax]]
+| goals1=[[Gerald Sibon|Sibon]] {{goal|71}}
+| goals2={{goal|61}} [[Luis Alberto Suárez|Suárez]]<br />{{goal|76}} [[John Heitinga|Heitinga]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=23.000
+| referee=[[Eric Braamhaar|Braamhaar]]
+| report=
+}}
+
+{{footballbox2
+| round=Wedstrijd 2
+| date=5 mei 2008
+| time=20:15
+| team1=[[AFC Ajax|Ajax]]
+| score=3 – 1
+| team2=[[sc Heerenveen]]
+| goals1=[[Kenneth Pérez|Pérez]] {{goal|45|pen.|55}}<br />[[Dennis Rommedahl|Rommedahl]] {{goal|48}}
+| goals2={{rode kaart|2|9|39}} [[Michael Bradley (voetballer)|Bradley]]<br />{{goal|87}} [[Danijel Pranjić|Pranjić]]
+| location=[[Amsterdam]]
+| stadium=[[Amsterdam ArenA]]
+| attendance=49.144
+| referee=[[Dick van Egmond|Van Egmond]]
+| report=
+}}
+
+=== Wedstrijd B ===
+
+{{footballbox2
+| round=Wedstrijd 1
+| date=29 april 2008
+| time=19:30
+| team1=[[FC Twente]]
+| score=3 – 0
+| team2=[[NAC Breda]]
+| goals1=[[Rob Wielaert|Wielaert]] {{goal|32}}<br />[[Romano Denneboom|Denneboom]] {{goal|80}}<br />[[Stein Huysegems|Huysegems]] {{goal|90}}
+| goals2={{rode kaart|2|62|64}} [[Patrick Mtiliga|Mtiliga]]<br />{{rode kaart|0|77}} [[Ronnie Stam|Stam]]
+| location=[[Emmen (Drenthe)|Emmen]]
+| stadium=[[Univé Stadion]] (in verband met verbouwing [[Arke Stadion]])
+| attendance=6.000
+| referee=[[Pieter Vink|Vink]]
+| report=
+}}
+
+=== Ticket voorronde Champions League ===
+
+== Play-offs om UEFA Cup/Intertoto-voetbal ==
+
+==== Programma/Uitslagen ====
+
+=== Play-offs UEFA Cup/Intertoto Ronde 1 ===
+
+=== Play-offs UEFA Cup/Intertoto Ronde 2 ===
+
+{{footballbox2
+| round=Wedstrijd 1
+| date=8 mei 2008
+| time=18:30
+| team1=[[sc Heerenveen]]
+| score=2 – 0
+| team2=[[NAC Breda]]
+| goals1=[[Paulo Henrique Carneiro Filho|Paulo Henrique]] {{goal|75||84}}
+| goals2=
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=20.000
+| referee=[[Björn Kuipers|Kuipers]]
+| report=
+}}
+
+{{footballbox2
+| round=Wedstrijd 2
+| date=12 mei 2008
+| time=14:30
+| team1=[[NAC Breda]]
+| score=2 – 2
+| team2=[[sc Heerenveen]]
+| goals1=[[Fouad Idabdelhay|Idabdelhay]] {{goal|28}}<br />[[Rogier Veenstra|Veenstra]] {{goal|84}}
+| goals2={{goal|42||74}} [[Gerald Sibon|Sibon]]
+| location=[[Breda]]
+| stadium=[[Rat Verlegh Stadion]]
+| attendance=9.450
+| referee=[[Ruud Bossen|Bossen]]
+| report=
+}}
+
+=== Play-offs UEFA Cup/Intertoto Ronde 3 ===
+
+== Play-offs om promotie/degradatie ==
+
+=== Wedstrijdschema ===
+
+=== Eerste ronde ===
+
+==== Wedstrijd A ====
+
+==== Wedstrijd B ====
+
+=== Tweede ronde ===
+
+==== Wedstrijd C ====
+
+==== Wedstrijd D ====
+
+==== Wedstrijd E ====
+
+==== Wedstrijd F ====
+
+=== Derde ronde ===
+
+==== Wedstrijd G ====
+
+==== Wedstrijd H ====

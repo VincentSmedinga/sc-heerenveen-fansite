@@ -1,0 +1,9 @@
+-- Lets a match be the match for the Johan Cruijff Schaal or a match of the play-offs for the Champions League (2008), for the matches of 2007/08 to 2009/10 that the importer reads from `football box` blocks on Wikipedia.
+-- A Wikipedia page gets the kind `matches` for such a page, and `language` says which language edition a page is on: `nl`, or `en` for the pages of the English Wikipedia. The page of the Europa League matches of 2012/13, the one English page there was, gets `en`.
+-- The check for extra time names the two leagues that have none, so it holds for the new competitions as it is.
+-- The statements can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.
+ALTER TABLE `match_changes` MODIFY COLUMN `competition` enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League','Eerste divisie','Champions League','Europacup II','UEFA Cup','Intertoto Cup','Play-offs UEFA Cup','Johan Cruijff Schaal','Play-offs Champions League') NOT NULL;--> statement-breakpoint
+ALTER TABLE `matches` MODIFY COLUMN `competition` enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League','Eerste divisie','Champions League','Europacup II','UEFA Cup','Intertoto Cup','Play-offs UEFA Cup','Johan Cruijff Schaal','Play-offs Champions League') NOT NULL;--> statement-breakpoint
+ALTER TABLE `wikipedia_pages` MODIFY COLUMN `kind` enum('standings','programme','cup','playoffs','europa-league','matches','squad') NOT NULL;--> statement-breakpoint
+ALTER TABLE `wikipedia_pages` ADD COLUMN IF NOT EXISTS `language` varchar(12) DEFAULT 'nl' NOT NULL;--> statement-breakpoint
+UPDATE `wikipedia_pages` SET `language` = 'en' WHERE `kind` = 'europa-league';

@@ -245,7 +245,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
               </Text>
               {page === undefined ? null : (
                 <Text>
-                  <Link href={wikipediaUrl(page.title, page.kind)} icon="external-link">
+                  <Link href={wikipediaUrl(page.title, page.language)} icon="external-link">
                     Bekijk {page.title} op Wikipedia
                   </Link>
                 </Text>

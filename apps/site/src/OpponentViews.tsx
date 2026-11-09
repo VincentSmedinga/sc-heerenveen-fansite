@@ -580,8 +580,8 @@ export function OpponentsCredit({
   const credited = pages
     .filter((page) => seasons.includes(page.season))
     .map((page) => ({
-      href: wikipediaUrl(page.title, page.kind),
-      name: creditName(page.kind, page.season),
+      href: wikipediaUrl(page.title, page.language),
+      name: creditName(page, page.season),
       readAt: page.readAt,
     }))
   const [first, ...rest] = credited

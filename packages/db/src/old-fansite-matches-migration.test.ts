@@ -98,7 +98,8 @@ describe(`the migration ${migration}`, () => {
 
     const type = `enum(${competitions.map((competition) => `'${competition}'`).join(',')})`
 
-    expect(competitions.slice(-6)).toEqual(newCompetitions)
+    // The two competitions of migration 0058 came behind these six.
+    expect(competitions.slice(-8, -2)).toEqual(newCompetitions)
     expect(await rows("SHOW COLUMNS FROM matches LIKE 'competition'")).toMatchObject([{ Type: type }])
     expect(await rows("SHOW COLUMNS FROM match_changes LIKE 'competition'")).toMatchObject([{ Type: type }])
 

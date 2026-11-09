@@ -12,7 +12,12 @@ const textOf = (element: Parameters<typeof renderToStaticMarkup>[0]) =>
     .replaceAll(/\s+/g, ' ')
     .trim()
 
-const page = { kind: 'programme', readAt: new Date('2026-10-25T12:05:00Z'), title: 'Eredivisie 2026/27' } as const
+const page = {
+  kind: 'programme',
+  language: 'nl',
+  readAt: new Date('2026-10-25T12:05:00Z'),
+  title: 'Eredivisie 2026/27',
+} as const
 const seasonPage = { ...page, season: '1996/97' }
 
 describe('imageCredit', () => {
@@ -71,6 +76,23 @@ describe('SourceCredit', () => {
   it('names Wikipedia alone when the matches come from it, as it always did', () => {
     expect(credit({ pages: [page] })).toContain('Bron: Wikipedia Licentie')
     expect(credit({ pages: [page] })).not.toContain('archief')
+  })
+
+  it('names the English Wikipedia for a page of it, with the licence, and links to that Wikipedia', () => {
+    const english = {
+      kind: 'matches',
+      language: 'en',
+      readAt: new Date('2026-11-09T12:05:00Z'),
+      title: '2009–10 SC Heerenveen season',
+    } as const
+    const dutch = { ...english, language: 'nl', title: 'KNVB Beker 2008/09 (mannen)' } as const
+
+    expect(credit({ pages: [english, dutch], season: '2009/10' })).toContain(
+      'Licentie: CC BY-SA 4.0 . Pagina’s: 2009–10 SC Heerenveen season (Engelse Wikipedia) , KNVB Beker 2008/09 (mannen) .',
+    )
+    expect(
+      renderToStaticMarkup(<SourceCredit edited={false} pages={[english]} season="2009/10" source="wikipedia" />),
+    ).toContain('href="https://en.wikipedia.org/wiki/2009%E2%80%9310_SC_Heerenveen_season"')
   })
 
   it('is nothing for Wikipedia without a page, as it always was', () => {

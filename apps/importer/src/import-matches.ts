@@ -54,6 +54,7 @@ import {
   similarPersons,
   similarPersonsWarning,
 } from './person-pages.ts'
+import { footballBoxPages, readFootballBoxes } from './read-football-box.ts'
 import {
   europaLeaguePage,
   pageCandidates,
@@ -82,8 +83,8 @@ export type HealthReport =
 export type MatchImportOptions = {
   clock?: () => Date
   /**
-   * The address of the English Wikipedia, which has the Europa League matches of 2012/13. A
-   * test gives the address of its own web server.
+   * The address of the English Wikipedia, which has the Europa League matches of 2012/13 and
+   * most matches of 2007/08 to 2009/10. A test gives the address of its own web server.
    */
   englishOrigin?: string
   /** The address of Wikipedia. A test gives the address of its own web server. */
@@ -117,7 +118,7 @@ export type MatchReport =
       /** The results of the league matches of every club (`league_results`). */
       results: ResultCounts
       season: string
-      /** The number of clubs in the table. */
+      /** The number of clubs in the table: 0 for a season whose pages have no table. */
       standings: number
       /** The day the table holds for. */
       validOn: string
@@ -152,10 +153,16 @@ type PageRead = { kind: WikipediaPageKind; text: string; title: string; version:
 
 type Problem = Exclude<MatchReport, { kind: 'imported' | 'postponed' }>
 
+/** What came of asking for one title: the page, that it does not exist, or why it failed. */
+type TitleRead = Problem | { kind: 'missing'; message: string } | { kind: 'page'; text: string; version: null | string }
+
 /** The address of the Dutch Wikipedia. */
 export const wikipediaOrigin = 'https://nl.wikipedia.org'
 
-/** The address of the English Wikipedia: the Europa League matches come from there. */
+/**
+ * The address of the English Wikipedia: the Europa League matches of 2012/13 and most matches
+ * of 2007/08 to 2009/10 come from there.
+ */
 export const englishWikipediaOrigin = 'https://en.wikipedia.org'
 
 export type { LinkedGoal } from './match-changes.ts'
@@ -183,8 +190,13 @@ export function formatMatchReport(report: MatchReport): string {
       return `${head}: warning, nothing changed and the last good copy stays: ${printable(report.message)}`
     case 'imported':
       return [
-        `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed${report.matches.held === 0 ? '' : `, ${report.matches.held} held`}; table of ${report.standings} clubs for ${report.validOn}`,
-        `${head}: league results of all clubs: ${report.results.added} new, ${report.results.updated} updated, ${report.results.unchanged} unchanged, ${report.results.removed} removed`,
+        `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed${report.matches.held === 0 ? '' : `, ${report.matches.held} held`}; ${report.standings === 0 ? 'the pages of this season have no table' : `table of ${report.standings} clubs for ${report.validOn}`}`,
+        // A season without a table (2007/08 to 2009/10) has no results of every club either.
+        ...(report.standings === 0
+          ? []
+          : [
+              `${head}: league results of all clubs: ${report.results.added} new, ${report.results.updated} updated, ${report.results.unchanged} unchanged, ${report.results.removed} removed`,
+            ]),
         ...report.clubs.map((club) => `${head}: ${printable(club)}`),
         ...report.persons.map((line) => `${head}: ${printable(line)}`),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
@@ -287,11 +299,12 @@ export async function importMatches(
 /**
  * Reads the three Wikipedia pages of a season that is over, once, and stores its matches,
  * goals, table and pages like `importMatches` does, with the same checks and in one
- * transaction. A season that is over doesn't change, so the hourly import doesn't read it
- * again: this is the command that does (`pnpm import:season`), and it asks every time it is
- * run. It writes the rows of that season only, and never those of the current season, which is
- * the hourly import's. A season that is not over is an error report, and nothing is asked or
- * written.
+ * transaction. The seasons 2007/08 to 2009/10 have other pages, and no table (see
+ * `readAndStoreFootballBoxes`). A season that is over doesn't change, so the hourly import
+ * doesn't read it again: this is the command that does (`pnpm import:season`), and it asks
+ * every time it is run. It writes the rows of that season only, and never those of the current
+ * season, which is the hourly import's. A season that is not over is an error report, and
+ * nothing is asked or written.
  */
 export async function importPastSeason(
   db: Database,
@@ -467,32 +480,17 @@ async function fetchPages(fetcher: Fetcher, season: string, origins: Origins): P
     let missing = ''
 
     for (const title of titles) {
-      const outcome = await fetcher.fetch(pageUrl(origin, title))
+      const read = await fetchTitle(fetcher, origin, title, season)
 
-      if (outcome.kind === 'error' && outcome.reason === 'http-status' && outcome.status === 404) {
-        missing = `${title}: ${outcome.message}`
+      if (read.kind === 'missing') {
+        missing = read.message
         continue
       }
-
-      switch (outcome.kind) {
-        case 'blocked-by-robots':
-          return { kind: 'blocked-by-robots', season, url: outcome.url }
-        case 'error':
-          return { kind: 'error', message: `${title}: ${outcome.message}`, season }
-        case 'fetched':
-          pages.push({
-            kind,
-            text: new TextDecoder('utf-8').decode(outcome.body),
-            title,
-            version: outcome.lastModified,
-          })
-          break
-        case 'not-modified':
-          return { kind: 'error', message: `${title}: the page answered 304 to a request without conditions`, season }
-        case 'wait':
-          return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, season, url: outcome.url }
+      if (read.kind !== 'page') {
+        return read
       }
 
+      pages.push({ kind, text: read.text, title, version: read.version })
       missing = ''
       break
     }
@@ -507,6 +505,72 @@ async function fetchPages(fetcher: Fetcher, season: string, origins: Origins): P
   }
 
   return pages
+}
+
+/**
+ * Asks for the raw text of one page (`pageUrl`). A page that does not exist (404) is `missing`,
+ * so the caller can try another title or do without; anything else that is no page is the
+ * report of the season.
+ */
+async function fetchTitle(fetcher: Fetcher, origin: string, title: string, season: string): Promise<TitleRead> {
+  const outcome = await fetcher.fetch(pageUrl(origin, title))
+
+  switch (outcome.kind) {
+    case 'blocked-by-robots':
+      return { kind: 'blocked-by-robots', season, url: outcome.url }
+    case 'error':
+      return outcome.reason === 'http-status' && outcome.status === 404
+        ? { kind: 'missing', message: `${title}: ${outcome.message}` }
+        : { kind: 'error', message: `${title}: ${outcome.message}`, season }
+    case 'fetched':
+      return { kind: 'page', text: new TextDecoder('utf-8').decode(outcome.body), version: outcome.lastModified }
+    case 'not-modified':
+      return { kind: 'error', message: `${title}: the page answered 304 to a request without conditions`, season }
+    case 'wait':
+      return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, season, url: outcome.url }
+  }
+}
+
+/**
+ * Asks the Dutch Wikipedia about the articles the matches link to and the database does not
+ * know yet, before the transaction: no request is made while rows are locked. First the clubs
+ * (`lookUpClubPages`), where a failure is the report of the season. Then the persons: the
+ * scorers, ours and the opponents', and the squad. A request for a person that fails is a
+ * warning, never a failed season (see `lookUpPersonPages`).
+ */
+async function lookUpArticles(db: Database, fetcher: Fetcher, origin: string, season: string, found: ReadMatch[]) {
+  const lookup = await lookUpClubPages(
+    db,
+    fetcher,
+    origin,
+    found.flatMap((match) => (match.opponentPage === null ? [] : [match.opponentPage])),
+  )
+
+  if (lookup.kind === 'error') {
+    return { kind: 'error', message: `the article of a club, ${lookup.message}`, season } as const
+  }
+  if (lookup.kind !== 'found') {
+    return { ...lookup, season }
+  }
+
+  const squadPages = await db
+    .select({ page: players.wikipediaPage })
+    .from(players)
+    .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
+  const personLookup = await lookUpPersonPages(
+    db,
+    fetcher,
+    origin,
+    [
+      ...found.flatMap((match) =>
+        (match.goals ?? []).flatMap((goal) => (goal.playerPage === null ? [] : [goal.playerPage])),
+      ),
+      ...squadPages.flatMap((row) => (row.page === null ? [] : [row.page])),
+    ],
+    aliasMap(personTitleAliases),
+  )
+
+  return { kind: 'found', lookup, personLookup } as const
 }
 
 /** The most names of players the warning about goals without a player lists. */
@@ -676,6 +740,10 @@ async function readAndStore(
   clock: () => Date,
   previousReadAt: Date | null,
 ): Promise<MatchReport> {
+  if (footballBoxPages(season).length > 0) {
+    return readAndStoreFootballBoxes(db, fetcher, season, origins, clock, previousReadAt)
+  }
+
   const pages = await fetchPages(fetcher, season, origins)
 
   if (!Array.isArray(pages)) {
@@ -732,39 +800,13 @@ async function readAndStore(
   }
 
   // Wikipedia is asked before the transaction: no request is made while rows are locked.
-  const lookup = await lookUpClubPages(
-    db,
-    fetcher,
-    origins.nl,
-    found.flatMap((match) => (match.opponentPage === null ? [] : [match.opponentPage])),
-  )
+  const asked = await lookUpArticles(db, fetcher, origins.nl, season, found)
 
-  if (lookup.kind === 'error') {
-    return { kind: 'error', message: `the article of a club, ${lookup.message}`, season }
-  }
-  if (lookup.kind !== 'found') {
-    return { ...lookup, season }
+  if (asked.kind !== 'found') {
+    return asked
   }
 
-  // The same for the persons: the scorers, ours and the opponents', and the squad. A request
-  // that fails is a warning, never a failed season (see `lookUpPersonPages`).
-  const squadPages = await db
-    .select({ page: players.wikipediaPage })
-    .from(players)
-    .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
-  const personLookup = await lookUpPersonPages(
-    db,
-    fetcher,
-    origins.nl,
-    [
-      ...found.flatMap((match) =>
-        (match.goals ?? []).flatMap((goal) => (goal.playerPage === null ? [] : [goal.playerPage])),
-      ),
-      ...squadPages.flatMap((row) => (row.page === null ? [] : [row.page])),
-    ],
-    aliasMap(personTitleAliases),
-  )
-
+  const { lookup, personLookup } = asked
   const validOn = league.lastPlayedOn ?? seasonStart(season)
   const stored = await db.transaction(async (transaction) => {
     const [read] = await transaction
@@ -810,7 +852,9 @@ async function readAndStore(
         continue
       }
 
-      const values = { kind: page.kind, readAt: now, season, version: page.version }
+      // The page of the Europa League is the one page of these on the English Wikipedia.
+      const language = page.kind === 'europa-league' ? 'en' : 'nl'
+      const values = { kind: page.kind, language, readAt: now, season, version: page.version }
 
       await transaction
         .insert(wikipediaPages)
@@ -849,6 +893,125 @@ async function readAndStore(
       ...guessedNameWarnings(personNames.guessed),
       ...alike,
       ...resultWarnings(everyClub.unread, playedWarning(named.results, table.rows, named.strangers)),
+    ],
+  }
+}
+
+/**
+ * Reads, checks and stores a season whose matches are in `football box` blocks: 2007/08 to
+ * 2009/10 (`read-football-box.ts`). It asks for the pages of the list of that season and for
+ * no other, each on the Wikipedia of its language, and stores the matches the way
+ * `readAndStore` does: every page must be read and every check must pass, or nothing changes.
+ * These pages have no league table and no results of the other clubs, so the report has none.
+ * Each page is kept in `wikipedia_pages` with the kind `matches` and its language, for the
+ * credit.
+ */
+async function readAndStoreFootballBoxes(
+  db: Database,
+  fetcher: Fetcher,
+  season: string,
+  origins: Origins,
+  clock: () => Date,
+  previousReadAt: Date | null,
+): Promise<MatchReport> {
+  const pages: (PageRead & { language: string })[] = []
+  const found: ReadMatch[] = []
+  const problems: string[] = []
+
+  for (const page of footballBoxPages(season)) {
+    const read = await fetchTitle(fetcher, page.language === 'en' ? origins.english : origins.nl, page.title, season)
+
+    if (read.kind === 'missing') {
+      return { kind: 'error', message: read.message, season }
+    }
+    if (read.kind !== 'page') {
+      return read
+    }
+
+    const matchesOfPage = readFootballBoxes(read.text, page)
+
+    if (matchesOfPage.kind === 'error') {
+      problems.push(matchesOfPage.message)
+    } else {
+      found.push(...matchesOfPage.matches)
+    }
+    pages.push({ kind: 'matches', language: page.language, text: read.text, title: page.title, version: read.version })
+  }
+
+  if (problems.length === 0) {
+    problems.push(...checkMatches(found, { league: found.some((match) => match.competition === 'Eredivisie') }))
+  }
+  if (problems.length > 0) {
+    return { kind: 'error', message: problems.join('; '), season }
+  }
+
+  const asked = await lookUpArticles(db, fetcher, origins.nl, season, found)
+
+  if (asked.kind !== 'found') {
+    return asked
+  }
+
+  const now = clock()
+  const stored = await db.transaction(async (transaction) => {
+    const [read] = await transaction
+      .select({ title: wikipediaPages.title })
+      .from(wikipediaPages)
+      .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
+      .limit(1)
+    const result = await storeMatches(
+      transaction,
+      season,
+      found,
+      now,
+      { europaLeague: true, playoffs: true },
+      {
+        firstRead: read === undefined,
+        pastSeason: isPastSeason(season, now),
+        personRedirects: asked.personLookup.redirects,
+        previousReadAt,
+        redirects: asked.lookup.redirects,
+      },
+    )
+
+    if (!result.heldAll) {
+      for (const page of pages) {
+        const values = { kind: page.kind, language: page.language, readAt: now, season, version: page.version }
+
+        await transaction
+          .insert(wikipediaPages)
+          .values({ title: page.title, ...values })
+          .onDuplicateKeyUpdate({ set: values })
+      }
+    }
+
+    return result
+  })
+
+  if (stored.heldAll) {
+    return {
+      kind: 'error',
+      message: `${stored.overwrites} matches changed at once, which looks like an edit of the whole page: the changes wait (pnpm run import:changes)`,
+      season,
+    }
+  }
+
+  const personNames = await storePersonNames(db, asked.personLookup.names)
+  const alikeWarning = similarPersonsWarning(await similarPersons(db))
+
+  return {
+    clubs: stored.clubs,
+    kind: 'imported',
+    matches: stored.counts,
+    persons: describePersons(asked.personLookup.asked, stored.persons, personNames.counts),
+    results: { added: 0, removed: 0, unchanged: 0, updated: 0 },
+    season,
+    standings: 0,
+    validOn: seasonStart(season),
+    warnings: [
+      ...stored.warnings,
+      ...asked.personLookup.warnings,
+      ...guessedNameWarnings(personNames.guessed),
+      ...(alikeWarning === undefined ? [] : [alikeWarning]),
     ],
   }
 }
@@ -1037,13 +1200,21 @@ async function storeMatches(
           `${match.competition} ${match.round} (${match.matchDate}) fits ${lookup.matches.length} matches against the same club within a day, so it is not matched to one of them`,
         )
       }
+      if (lookup.kind === 'found' && lookup.match.dataSource === 'redactie') {
+        // A match the editors added is theirs: it is skipped whole, with one line, and never
+        // filled or compared, also when one of its fields is empty (#970).
+        warnings.push(
+          `${match.competition} ${match.round} (${match.matchDate}) left out: the editors added this match (match ${lookup.match.id}), and the import of Wikipedia leaves it as it is`,
+        )
+        counts.unchanged++
+        continue
+      }
       if (lookup.kind === 'found' && lookup.match.dataSource !== 'wikipedia') {
         const { differences, fill } = compareClaim(lookup.match, match, lockedFields(edits.get(lookup.match.id)))
 
         warnings.push(...differences.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
 
-        // A match the editors added is theirs: it is compared and never filled.
-        if (Object.keys(fill).length > 0 && lookup.match.dataSource !== 'redactie') {
+        if (Object.keys(fill).length > 0) {
           counts.updated++
           await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
         } else {

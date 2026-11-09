@@ -17,4 +17,7 @@ import type { ClubFullName } from '@fansite/db/clubs'
 export const clubFullNames: readonly ClubFullName[] = [
   { aliases: ['Excelsior', 'SBV Excelsior'], name: 'Excelsior Rotterdam' },
   { aliases: ['Roda JC'], name: 'Roda JC Kerkrade' },
+  // The old fansite calls the club of 2006/07 `Vitória Setúbal FC`; Wikipedia has the matches
+  // of 2008/09 against the same club.
+  { aliases: ['Vitória Setúbal FC'], name: 'Vitória Setúbal' },
 ]

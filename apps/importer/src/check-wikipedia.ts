@@ -49,15 +49,21 @@ export function checkGoals(match: ReadMatch): string | undefined {
 
 /**
  * Checks the matches of sc Heerenveen: 34 in the league, one in each round, 17 at home and 17
- * away; and a cup round at most once. Returns what is wrong, or nothing.
+ * away; and a cup round at most once. Returns what is wrong, or nothing. With `league` false
+ * the pages of the season hold no league matches (2007/08 and 2008/09, see
+ * `read-football-box.ts`), and none is what the check then expects.
  */
-export function checkMatches(matches: ReadMatch[]): string[] {
+export function checkMatches(matches: ReadMatch[], { league: hasLeague = true } = {}): string[] {
   const problems: string[] = []
   const league = matches.filter((match) => match.competition === 'Eredivisie')
   const rounds = new Set(league.map((match) => match.round))
   const home = league.filter((match) => match.home).length
 
-  if (league.length !== leagueMatches) {
+  if (!hasLeague) {
+    if (league.length > 0) {
+      problems.push(`the league has ${league.length} matches for ${ourClub}, and the pages of the season have none`)
+    }
+  } else if (league.length !== leagueMatches) {
     problems.push(`the league has ${league.length} matches for ${ourClub}, not ${leagueMatches}`)
   } else if (home !== leagueMatches / 2) {
     problems.push(`the league has ${home} home matches and ${league.length - home} away, not 17 and 17`)

@@ -775,7 +775,7 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 De gegevens vallen onder CC BY-SA 4.0.
-Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_) en om de Europa League van 2012/13 (zie _De Europa League van 2012/13_).
+Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_) om de Europa League van 2012/13 (zie _De Europa League van 2012/13_) en om 63 wedstrijden van 2007/08 tot en met 2009/10 (zie _De wedstrijden van 2007/08 tot en met 2009/10_).
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
@@ -1547,13 +1547,13 @@ De beslissing is _De lezer kent de oudere vormen van de stand, de beker en de ti
 ### De Europa League van 2012/13
 
 De Nederlandse Wikipedia heeft van de vier Europa League-wedstrijden van 2012/13 alleen de scores, zonder datum of stadion.
-Voor dit ene seizoen leest de import ze van de Engelse Wikipedia, met dezelfde fetcher en regels: dezelfde user agent, `robots.txt` en alleen `/wiki/<pagina>?action=raw`.
+Voor dit seizoen leest de import ze van de Engelse Wikipedia, met dezelfde fetcher en regels: dezelfde user agent, `robots.txt` en alleen `/wiki/<pagina>?action=raw`.
 De beslissing is _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 
 - **De pagina:** `2012–13 UEFA Europa League qualifying (third and play-off round matches)` op `en.wikipedia.org`.
   `europaLeaguePage` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) zegt voor welk seizoen er zo'n pagina is.
-  Voor elk ander seizoen vraagt de import niets aan de Engelse Wikipedia.
-  `wikipedia_pages` bewaart de pagina met de soort `europa-league`, en de bronvermelding noemt hem "Engelse Wikipedia".
+  Voor elk ander seizoen vraagt de import deze pagina niet.
+  `wikipedia_pages` bewaart de pagina met de soort `europa-league` en de taal `en`, en de bronvermelding noemt hem "Engelse Wikipedia".
 - **De wedstrijden:** de competitie is `Europa League`, en de ronde is `Derde voorronde, wedstrijd 1/2` en `Play-offronde, wedstrijd 1/2`.
   `readEuropaLeague` leest de blokken `{{#invoke:Football box|main` van sc Heerenveen: de datum, de tijd, thuis of uit, het stadion (zonder de plaats erachter), de score, de toeschouwers en de scheidsrechter (zonder land).
   De doelpuntenmakers laat hij weg, want de Engelse links zijn geen Nederlandse artikelen van spelers.
@@ -1565,6 +1565,46 @@ De beslissing is _De vier Europa League-wedstrijden van 2012/13 komen van de Eng
   Een tegenstander die er niet in staat, is een fout.
 - Een seizoen zonder pagina laat de Europa League-wedstrijden die er zijn, staan.
 - De fixture `wikipedia-europa-league-2012.wiki` in `src/fixtures/` is een kort stuk van de echte pagina.
+
+### De wedstrijden van 2007/08 tot en met 2009/10
+
+Deze drie seizoenen hebben geen pagina die de andere lezers kennen.
+`pnpm run import:season 2009/10` (en `2007/08` en `2008/09`) leest ze uit de blokken `football box`, `footballbox2` en `Football box collapsible` van zes pagina's, samen 63 wedstrijden.
+Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/onderzoek-wedstrijden-2007-2010.md), en de beslissing is _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de blokken `football box`_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+
+| Seizoen | Pagina                              | Wikipedia | Wedstrijden | Competitie                                                                           |
+| ------- | ----------------------------------- | --------- | ----------- | ------------------------------------------------------------------------------------ |
+| 2007/08 | `Play-offs Nederlands voetbal 2008` | nl        | 4           | `Play-offs Champions League`                                                         |
+| 2007/08 | `2007–08 UEFA Cup first round`      | en        | 2           | `UEFA Cup`                                                                           |
+| 2008/09 | `KNVB Beker 2008/09 (mannen)`       | nl        | 5           | `KNVB Beker`                                                                         |
+| 2008/09 | `2008–09 UEFA Cup first round`      | en        | 2           | `UEFA Cup`                                                                           |
+| 2008/09 | `2008–09 UEFA Cup group stage`      | en        | 4           | `UEFA Cup`                                                                           |
+| 2009/10 | `2009–10 SC Heerenveen season`      | en        | 46          | `Johan Cruijff Schaal` (1), `Eredivisie` (34), `KNVB Beker` (3), `Europa League` (8) |
+
+- **De lijst:** `footballBoxPages` in [`src/read-football-box.ts`](src/read-football-box.ts) zegt per seizoen welke pagina's er zijn, in welke taal, hoeveel wedstrijden van ons erop staan en onder welke kop welke competitie staat.
+  Voor een ander seizoen vraagt de import geen van deze pagina's.
+  De import haalt een pagina op bij de Wikipedia van haar taal, met dezelfde fetcher en regels: dezelfde user agent, `robots.txt` en alleen `/wiki/<pagina>?action=raw`.
+- **De lezer:** `readFootballBoxes` zet een blok om naar de vorm die `readMatch` leest, zodat een wedstrijd dezelfde controles krijgt als elke andere.
+  Hij leest het seizoen, de competitie, de ronde, de datum, de tijd, het stadion (zonder de plaats erachter), de tegenstander, thuis of uit, de uitslag (met verlenging en strafschoppen), de doelpunten met de minuut, de toeschouwers en de scheidsrechter (zonder land).
+  Een veld dat er niet staat, blijft leeg.
+- **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `2e ronde` tot en met `4e ronde` en de kop van de bekerpagina (`Kwartfinales`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
+- **De controles:** elke pagina heeft het aantal wedstrijden uit de lijst, elke wedstrijd staat onder een kop en in een ronde die we kennen, en elke wedstrijd heeft een uitslag.
+  Het seizoen 2009/10 moet 34 competitiewedstrijden hebben, 17 thuis en 17 uit; 2007/08 en 2008/09 hebben er op deze pagina's geen.
+  Anders schrijft de import niets, en de melding noemt de pagina.
+- **De tijd:** een blok van de seizoenspagina noemt zijn eigen tijdzone, en een tijd in een andere zone (`22:05 EEST (UTC+3)`) wordt onze tijd.
+  De pagina's van de UEFA Cup zeggen één keer boven de wedstrijden dat de tijden Midden-Europese tijd zijn.
+  Staat de zone er niet, dan bewaart de import alleen de dag (`date_text`).
+- **De clubs:** `englishClubs` vertaalt de Engelse titel van een tegenstander naar de naam en het artikel van de Nederlandse Wikipedia (`PSV Eindhoven` wordt `PSV`, `Sporting CP` wordt `Sporting Lissabon`).
+  Een tegenstander die er niet in staat, is een fout.
+- **De doelpuntenmakers:** de kaarten, de wissels en de gemiste strafschoppen tussen de doelpunten laat de lezer weg.
+  Een doelpunt van een Engelse pagina houdt de naam (`Sibon`) en verliest de link, en `playerLinker` koppelt het op de naam aan een speler van het seizoen; het wordt geen persoon.
+  Een doelpunt dat geen speler vindt, staat in de regel `goals of ours have no player in the squad table` in het logboek.
+  Tellen de doelpunten niet op tot de uitslag, zoals bij speelronde 15 van 2009/10, dan krijgt de wedstrijd geen doelpuntenlijst en de regel `no scorers`.
+- **De redactie:** vindt de import op datum en club een wedstrijd met de bron `redactie`, dan slaat hij die over en schrijft hij één regel: `left out: the editors added this match`.
+- **Geen stand:** deze seizoenen krijgen geen ranglijst en geen uitslagen van de andere clubs.
+  De regel in het logboek zegt `the pages of this season have no table`.
+- **De bron:** `wikipedia_pages` bewaart elke pagina met de soort `matches` en de taal (`language`), en de bronvermelding op de site noemt een Engelse pagina "(Engelse Wikipedia)".
+- De fixtures `wikipedia-football-box-*.wiki` in `src/fixtures/` zijn stukken van de echte pagina's van 9 november 2026: de koppen, de blokken van sc Heerenveen en één blok van andere clubs.
 
 ### Een afgelopen seizoen
 

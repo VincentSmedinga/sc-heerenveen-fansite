@@ -1,0 +1,139 @@
+== Deelnemers ==
+
+==== [[Eredivisie (mannenvoetbal)|Eredivisie]] ====
+
+==== [[Eerste divisie (voetbal Nederland)|Eerste divisie]] ====
+
+==== Beloftenteams ====
+
+==== [[Hoofdklasse (Nederlands amateurvoetbal)|Hoofdklasse amateurs]] ====
+
+==== Overige amateurs ====
+
+==== Reservehoofdklasse ====
+
+== 1e ronde ==
+
+=== Wedstrijden ===
+
+== 2e ronde ==
+
+=== Wedstrijden ===
+
+== 3e ronde ==
+
+=== Wedstrijden ===
+
+{{footballbox
+| date = 11 november 2008
+| time = 20:00
+| team1 = [[AGOVV|AGOVV Apeldoorn]]
+| score = 2 – 3 (2 – 1)
+| size = <!-- Optional -->
+| report = 
+| team2 = '''[[FC Dordrecht]]'''
+| goals1 = [[Jeremy Bokila]] {{goal|25}}<br />[[Dries Mertens]] {{goal|36}}
+| goals2 = {{goal|23}} [[Didi Longuet]]<br />{{goal|63}} ([[Strafschop|pen]]) [[Eddy Putter]]<br />{{goal|66}} [[Jerson Anes Ribeiro]]
+| stadium = [[Sportpark Berg & Bos|Stadion Berg & Bos]]
+| attendance = 2.500
+| referee = [[Jan Wegereef]]
+}}
+
+{{footballbox
+| date = 12 november 2008
+| time = 20:00
+| team1 = '''[[sc Heerenveen]]'''
+| score = 7 – 0 (5 – 0)
+| size = <!-- Optional -->
+| report = 
+| team2 = [[Haaglandia|Haaglandia/Sir Winston]]
+| goals1 = [[Christian Grindheim]] {{goal|9}}<br />[[Danijel Pranjić]] {{goal|14}}<br />[[Danijel Pranjić]] {{goal|22}}<br />[[Bonaventure Kalou]] {{goal|24}}<br />[[Danijel Pranjić]] {{goal|33}}<br />[[Tarik Elyounoussi]] {{goal|55}}<br />[[Goran Popov]] {{goal|90}}
+| goals2 =
+| stadium = [[Abe Lenstra Stadion]]
+| attendance = 8.000
+| referee = [[Serdar Gözübüyük]]
+}}
+
+== 4e ronde ==
+
+=== Wedstrijden ===
+
+{{footballbox
+| date = 20 januari 2009
+| time = 20:45
+| team1 = [[Feyenoord]]
+| score = 0 – 3 (0 – 1)
+| size = <!-- Optional -->
+| report = 
+| team2 = '''[[sc Heerenveen]]'''
+| goals1 = [[André Bahia]] [[Bestand:Yellow card.svg|10px]] 46'
+| goals2 = {{goal|37}} [[Viktor Elm]]<br />52' [[Bestand:Yellow card.svg|10px]] [[Michel Breuer]]<br />{{goal|73}} [[Viktor Elm]]<br />{{goal|82}} [[Roy Beerens]]
+| stadium = [[Stadion Feijenoord]]
+| attendance = 22.700
+| referee = [[Pieter Vink]]
+}}
+
+== Kwartfinales ==
+
+=== Wedstrijden ===
+
+{{footballbox
+| date = 4 maart 2009
+| time = 20:45
+| team1 = '''[[sc Heerenveen]]'''
+| score = 3 – 1 (1 – 1)
+| size = <!-- Optional -->
+| report = 
+| team2 = [[N.E.C.]]
+| goals1 = [[Paulo Henrique Carneiro Filho]] {{goal|38}}<br />[[Patrik Ingelsten]] {{goal|75}}<br />[[Viktor Elm]] {{goal|77}}<br />[[Arnór Smárason]] [[Bestand:Yellow card.svg|10px]] 81'
+| goals2 = 11' [[Bestand:Yellow card.svg|10px]] [[Rachid Bouaouzan]]<br />{{goal|37}} [[Lasse Schöne]]
+| stadium = [[Abe Lenstra Stadion]]
+| attendance = 20.000
+| referee = [[Björn Kuipers]]
+}}
+
+== Halve finales ==
+
+=== Wedstrijden ===
+
+{{footballbox
+| date = 22 april 2009
+| time = 20:45
+| team1 = [[FC Volendam]]
+| score = 0 – 2 (0 – 1)
+| size = <!-- Optional -->
+| report = 
+| team2 = '''[[sc Heerenveen]]'''
+| goals1 = [[Paul de Lange]] [[Bestand:Yellow card.svg|10px]] 47'<br /> [[Jack Tuijp]] [[Bestand:Red Arrow Down.svg|10px]] [[Melvin Platje]] [[Bestand:Green Arrow Up.svg|10px]] 65'<br />[[Yannick de Wit]] [[Bestand:Yellow card.svg|10px]] 66'<br /> [[Yannick de Wit]] [[Bestand:Red Arrow Down.svg|10px]] [[Aaron Meijers]] [[Bestand:Green Arrow Up.svg|10px]] 70'<br /> [[Tim Bakens]] [[Bestand:Red Arrow Down.svg|10px]] [[Hamit Yildiz]] [[Bestand:Green Arrow Up.svg|10px]] 85'
+| goals2 = {{goal|10}} [[Viktor Elm]]<br />46' [[Bestand:Red Arrow Down.svg|10px]] [[Brian Vandenbussche]] 46' [[Bestand:Green Arrow Up.svg|10px]] [[Hans Vonk (doelman)|Hans Vonk]]<br />{{goal|84}} [[Danijel Pranjić]]<br />80' [[Bestand:Red Arrow Down.svg|10px]] [[Gerald Sibon]] [[Bestand:Green Arrow Up.svg|10px]][[Paulo Henrique Carneiro Filho]]<br />87' [[Bestand:Red Arrow Down.svg|10px]] [[Roy Beerens]] [[Bestand:Green Arrow Up.svg|10px]] [[Tarik Elyounoussi]]
+| stadium = [[Kras Stadion]]
+| attendance = 6.000
+| referee =[[Björn Kuipers]]
+}}
+
+== Finale ==
+
+===Wedstrijd===
+
+{{Footballbox
+| date  = <small>17 mei 2009</small><br><small>18:00</small>
+| round = <small>'''Finale [[KNVB Beker]]'''</small>
+| team1 = <big>'''[[sc Heerenveen]]'''</big>
+| team2 = <big>'''[[FC Twente]]'''</big>
+| score = <big>2 – 2 ([[Verlenging|n.v.]]) (1 – 1) (1 – 0)</big>
+| goals1= [[Goran Popov]] {{goal|27}}<br />[[Bonaventure Kalou]] {{goal|112}}
+| goals2= {{goal|54}} [[Eljero Elia]]<br />{{goal|118}} [[Youssouf Hersi]]
+| report=
+| stadium = [[Stadion Feijenoord|De Kuip]], [[Rotterdam (hoofdbetekenis)|Rotterdam]]
+| attendance = 45.000
+| referee = [[Jan Wegereef]]
+| penaltyscore= 5 – 4
+| penalties1  = [[Viktor Elm]] {{pengoal}}<br />[[Michael Dingsdag]] {{pengoal}}<br />[[Michel Breuer]] {{pengoal}}<br />[[Bonaventure Kalou]] {{pengoal}}<br />[[Gerald Sibon]] {{pengoal}}
+| penalties2 ={{pengoal}} [[Theo Janssen]]<br />{{pengoal}} [[Blaise Nkufo|Blaise N'Kufo]]<br />{{penmiss}} [[Youssouf Hersi]]<br />{{pengoal}} [[Edson Braafheid]]<br />{{pengoal}} [[Douglas Franco Teixeira]]
+}}
+
+== Geëlimineerde clubs ==
+
+== Topscorers ==
+
+== Deelnemers per ronde ==

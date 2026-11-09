@@ -330,7 +330,14 @@ describe('importPastSquad', () => {
     // The matches and goals of a table do not go to the numbers of the players.
     expect(await database.db.select().from(playerSeasonStats)).toEqual([])
     expect(await database.db.select().from(wikipediaPages)).toEqual([
-      { kind: 'squad', readAt: now, season, title: squadPageTitle(season), version: wiki['Last-Modified'] },
+      {
+        kind: 'squad',
+        language: 'nl',
+        readAt: now,
+        season,
+        title: squadPageTitle(season),
+        version: wiki['Last-Modified'],
+      },
     ])
     expect(await database.db.select().from(squadImports)).toMatchObject([
       { failuresInARow: 0, lastOutcome: 'imported', season },

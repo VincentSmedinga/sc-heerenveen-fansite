@@ -1174,8 +1174,8 @@ export function SourceCredit({
   const dutchPages = squadPages.filter((page) => !isEnglishPage(page.title)).length
   const credited = [
     ...pages.map((page) => ({
-      href: wikipediaUrl(page.title, page.kind),
-      name: creditName(page.kind, season),
+      href: wikipediaUrl(page.title, page.language),
+      name: creditName(page, season),
       readAt: page.readAt,
     })),
     ...squadPages.map((page) => ({

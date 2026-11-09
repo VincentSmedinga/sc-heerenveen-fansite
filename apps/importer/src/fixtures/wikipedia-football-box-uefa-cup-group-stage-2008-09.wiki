@@ -1,0 +1,117 @@
+==Teams==
+
+==Tie-breaking criteria==
+
+==Groups==
+
+Times are [[Central European Time|CET]]/[[Central European Summer Time|CEST]],{{refn|group=note|[[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]]) for dates up to 25 October 2008 (matchday 1), and [[Central European Time|CET]] ([[UTC+01:00|UTC+1]]) for dates thereafter (matchdays 2–5).}} as listed by UEFA (local times, if different, are in parentheses).
+
+===Group A===
+
+{{Football box
+|date       = {{Start date|2008|10|23|df=y}}
+|time       = 18:15
+|team1      = [[FC Schalke 04|Schalke 04]] {{fbaicon|GER}}
+|score      = 3–1
+|team2      = {{fbaicon|FRA|1974}} [[Paris Saint-Germain FC|Paris Saint-Germain]]
+|goals1     =
+*[[Larrys Mabiala|Mabiala]] {{goal|12|o.g.}}
+*[[Kevin Kurányi|Kurányi]] {{goal|39}}
+*[[Halil Altıntop|Altıntop]] {{goal|70}}
+|goals2     =
+*[[Clément Chantôme|Chantôme]] {{goal|90+2}}
+|stadium    = [[Veltins-Arena]], [[Gelsenkirchen]]
+|attendance = 48,919
+|referee    = [[Gianluca Rocchi]] ([[Italian Football Federation|Italy]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/304169/
+}}
+
+===Group B===
+
+===Group C===
+
+===Group D===
+
+===Group E===
+
+{{Football box
+|date       = {{Start date|2008|10|23|df=y}}
+|time       = 20:45
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 1–3
+|team2      = {{fbaicon|ITA}} [[AC Milan|Milan]]
+|goals1     =
+*[[Danijel Pranjić|Pranjić]] {{goal|86|pen.}}
+|goals2     =
+*[[Calvin Jong-a-Pin|Jong-a-Pin]] {{goal|19|o.g.}}
+*[[Gennaro Gattuso|Gattuso]] {{goal|23}}
+*[[Filippo Inzaghi|Inzaghi]] {{goal|69}}
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance = 25,600
+|referee    = [[Julian Rodriguez Santiago]] ([[Royal Spanish Football Federation|Spain]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/304176/
+}}
+
+{{Football box
+|date       = {{Start date|2008|11|6|df=y}}
+|time       = 19:45
+|team1      = [[VfL Wolfsburg]] {{fbaicon|GER}}
+|score      = 5–1
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Edin Džeko|Džeko]] {{goal|34||61}}
+*[[Grafite]] {{goal|39}}
+*[[Zvjezdan Misimović|Misimović]] {{goal|53}}
+*[[Jacek Krzynówek|Krzynówek]] {{goal|71}}
+|goals2     =
+*[[Mika Väyrynen|Väyrynen]] {{goal|31}}
+|stadium    = [[Volkswagen Arena]], [[Wolfsburg]]
+|attendance = 15,615
+|referee    = [[Jonas Eriksson (referee)|Jonas Eriksson]] ([[Swedish Football Association|Sweden]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/304193/
+}}
+
+{{Football box
+|date       = {{Start date|2008|12|4|df=y}}
+|time       = 20:45
+|team1      = [[SC Heerenveen|Heerenveen]] {{fbaicon|NED}}
+|score      = 1–2
+|team2      = {{fbaicon|POR}} [[S.C. Braga|Braga]]
+|goals1     =
+*[[Gerald Sibon|Sibon]] {{goal|19}}
+|goals2     =
+*[[Wason Rentería|Rentería]] {{goal|35}}
+*[[Luis Aguiar|Aguiar]] {{goal|56}}
+|stadium    = [[Abe Lenstra Stadion]], [[Heerenveen]]
+|attendance = 25,500
+|referee    = [[Fritz Stuchlik]] ([[Austrian Football Association|Austria]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/304225/
+}}
+
+{{Football box
+|date       = {{Start date|2008|12|17|df=y}}
+|time       = 20:45 {{small|(19:45 [[UTC+00:00|UTC+0]])}}
+|team1      = [[Portsmouth F.C.|Portsmouth]] {{fbaicon|ENG}}
+|score      = 3–0
+|team2      = {{fbaicon|NED}} [[SC Heerenveen|Heerenveen]]
+|goals1     =
+*[[Peter Crouch|Crouch]] {{goal|40||42}}
+*[[Hermann Hreiðarsson|Hreiðarsson]] {{goal|90}}
+|goals2     =
+|stadium    = [[Fratton Park]], [[Portsmouth]]
+|attendance = 19,612
+|referee    = [[Richard Havrilla]] ([[Slovak Football Association|Slovakia]])
+|report     = https://www.uefa.com/uefaeuropaleague/match/304232/
+}}
+
+===Group F===
+
+===Group G===
+
+===Group H===
+
+==Notes==
+
+==References==
+
+==External links==

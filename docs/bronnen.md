@@ -883,7 +883,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 
 ## Wikipedia, voor de wedstrijden
 
-De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse Wikipedia, onder CC BY-SA 4.0 (zie [`beslissingen/importer.md`](beslissingen/importer.md)).
+De wedstrijden en de stand komen niet van een mediabron maar van Wikipedia, vooral de Nederlandse, onder CC BY-SA 4.0 (zie [`beslissingen/importer.md`](beslissingen/importer.md)).
 De import leest per seizoen vier pagina's van de Nederlandse Wikipedia, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
 
 - `Eredivisie <seizoen> (mannenvoetbal)`: de stand;
@@ -892,7 +892,10 @@ De import leest per seizoen vier pagina's van de Nederlandse Wikipedia, en de br
 - `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League (vanaf 2020/21) of de Europa League (daarvoor), met het jaar waarin het seizoen eindigt.
   Die pagina komt pas in mei, en de bronvermelding noemt hem alleen als sc Heerenveen meespeelde.
 - `2012–13 UEFA Europa League qualifying (third and play-off round matches)` op de Engelse Wikipedia: de vier Europa League-wedstrijden van 2012/13, die de Nederlandse pagina's alleen met de score hebben.
-  Alleen dat seizoen heeft zo'n pagina, en de bronvermelding noemt hem "Engelse Wikipedia".
+  De bronvermelding noemt hem "Engelse Wikipedia".
+- Voor 2007/08 tot en met 2009/10 zes pagina's met blokken `football box`, samen 63 wedstrijden: `Play-offs Nederlands voetbal 2008` en `KNVB Beker 2008/09 (mannen)` op de Nederlandse Wikipedia, en `2007–08 UEFA Cup first round`, `2008–09 UEFA Cup first round`, `2008–09 UEFA Cup group stage` en `2009–10 SC Heerenveen season` op de Engelse.
+  De import mag sinds 9 november 2026 elke taal van Wikipedia lezen onder een geschikte CC-licentie, en de bronvermelding noemt de taal.
+  Deze seizoenen hebben geen stand.
 
 De uitslagen van de andere clubs bewaren we ook, in de tabel `league_results`: de ronde, de dag, de twee clubs en de doelpunten van allebei, voor de stand over de laatste wedstrijden.
 Een andere pagina is er niet voor nodig.
