@@ -706,6 +706,36 @@ export function madeUpLeagueResults(now: Date): NewLeagueResult[] {
 }
 
 /**
+ * The made-up country of each player of the squad, in the order of the rows of `madeUpSquad`: a
+ * white flag (Netherlands, Finland, Japan), a country without a flag in the design system
+ * (Brazil), and players without a country, so the card Selectie shows each case. The made-up
+ * scorers have no country.
+ */
+const madeUpCountries: (null | string)[] = [
+  'NL',
+  'NL',
+  null,
+  'DE',
+  'BE',
+  'NL',
+  'FI',
+  'NL',
+  'JP',
+  null,
+  'BR',
+  'NL',
+  'SE',
+  'NO',
+  'NL',
+  'DK',
+  'NL',
+  'FI',
+  'NL',
+  null,
+  'NL',
+]
+
+/**
  * A made-up squad for the current season, for the pages and the accessibility checks: invented
  * names, all four positions, a name with a particle, a name of one word and a player without a
  * shirt number. It passes the checks of the importer (18 to 45 players, two goalkeepers). The
@@ -739,7 +769,8 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     ['aanvaller', 22, 'Dinho', 'Dinho'],
   ]
 
-  const squad = rows.map(([position, shirtNumber, name, searchTerm]): NewPlayer => ({
+  const squad = rows.map(([position, shirtNumber, name, searchTerm], index): NewPlayer => ({
+    country: madeUpCountries[index] ?? null,
     name,
     position,
     searchTerm,

@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
+import { countryName, flagAddress } from './flags'
 
 export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
   /**
@@ -9,6 +10,14 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
    * after the name as text of its own. Leave it out for a name alone.
    */
   children?: ReactNode
+  /**
+   * The country of the player as a code of two letters (`NL`). The flag stands between the
+   * shirt number and the name, as an image with the Dutch name of the country as its text
+   * alternative. `null`, or a country without a flag here, is a player without one in a list
+   * where others have one: an empty place of the same width, so the names still start at the
+   * same place. Leave it out in a list where nobody has a flag, and the name has no place.
+   */
+  country?: null | string | undefined
   /** The given name, in the normal weight. Leave it out for a player known by one name. */
   givenName?: string | undefined
   /**
@@ -34,11 +43,21 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
  * anywhere.
  *
  * With `shirtNumber` the number stands in a column before the name, and a long name goes on
- * under the name, not under the number. The number and the name are one line of text, one space
- * apart. With children there is a line behind the name (see `PlayerNameProps`). Without both
- * the markup is a name alone. player-name.css gives the look.
+ * under the name, not under the number. With `country` the flag of the country stands in a
+ * column of its own between them. The number, the flag and the name are one line of text, one
+ * space apart, and the flag reads as the name of the country. With children there is a line
+ * behind the name (see `PlayerNameProps`). Without any of these the markup is a name alone.
+ * player-name.css gives the look.
  */
-export const PlayerName = ({ children, className, givenName, shirtNumber, surname, ...props }: PlayerNameProps) => {
+export const PlayerName = ({
+  children,
+  className,
+  country,
+  givenName,
+  shirtNumber,
+  surname,
+  ...props
+}: PlayerNameProps) => {
   const name = (
     <>
       {givenName === undefined || givenName === '' ? null : (
@@ -57,7 +76,7 @@ export const PlayerName = ({ children, className, givenName, shirtNumber, surnam
     </>
   )
 
-  if (shirtNumber === undefined) {
+  if (shirtNumber === undefined && country === undefined) {
     return (
       <span {...props} className={classNames('hf-player-name', className)}>
         {name}
@@ -65,10 +84,24 @@ export const PlayerName = ({ children, className, givenName, shirtNumber, surnam
     )
   }
 
+  const address = country === undefined || country === null ? undefined : flagAddress(country)
+  const label = country === undefined || country === null ? undefined : countryName(country)
+
   return (
     <span {...props} className={classNames('hf-player-name', 'hf-player-name-numbered', className)}>
-      <span className="hf-player-name-number">{shirtNumber}</span>
-      {shirtNumber === null ? null : ' '}
+      {shirtNumber === undefined ? null : (
+        <>
+          <span className="hf-player-name-number">{shirtNumber}</span>
+          {shirtNumber === null ? null : ' '}
+        </>
+      )}
+      {country === undefined ? null : address === undefined ? (
+        <span className="hf-player-name-flag" />
+      ) : (
+        <>
+          <img alt={label} className="hf-player-name-flag" height={15} src={address} width={20} />{' '}
+        </>
+      )}
       <span className="hf-player-name-text">{name}</span>
     </span>
   )

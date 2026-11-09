@@ -32,6 +32,17 @@ describe('squadParts', () => {
     expect(parts[1]?.players.map((line) => line.shirtNumber)).toEqual([undefined])
   })
 
+  it('gives a player without a country an empty place where others have one, and no place where nobody has', () => {
+    const parts = squadParts([
+      player({ country: 'NL', name: 'Een Keeper', position: 'doelman' }),
+      player({ country: null, name: 'Twee Keeper', position: 'doelman' }),
+      player({ country: null, name: 'Een Verdediger', position: 'verdediger' }),
+    ])
+
+    expect(parts[0]?.players.map((line) => line.country)).toEqual(['NL', null])
+    expect(parts[1]?.players.map((line) => line.country)).toEqual([undefined])
+  })
+
   it('splits a name as the person is kept, and shows a name without a kept name whole', () => {
     const [part] = squadParts([
       player({
