@@ -3103,3 +3103,17 @@
   Op 700 zijn de hoofdletters 0,4 tot 0,5% breder dan op 800, en de terugvalletter staat toch al in Arial Bold.
 - **Alternatieven:** Atkinson Hyperlegible Next voor de koppen (vier versies, onder meer met kleine kapitalen voor tussenkoppen en met Truculenta alleen voor de paginatitel), Truculenta op 600, en Kop 1 in een nieuw, donkerder zand (de hiërarchie ging verloren).
   De projecteigenaar verwierp ze op 9 november 2026.
+
+## De regelhoogte van meta wordt 24/14
+
+- **Datum:** 9 november 2026
+- **Besluit:** `--hf-meta-line-height` wordt `calc(24 / 14)`: 24 pixels bij 14 pixels, ongeveer 22 pixels in de compacte weergave van 13 pixels (#958).
+  - **Waarom:** 1,4 was krap, en 24 pixels past op het raster van 4 pixels en bij de ruimte in `.hf-match`.
+  - **Alternatieven:** 1,7 (23,8 pixels, praktisch hetzelfde, maar geen rond aantal pixels); 1,6 (22,4 pixels, een kleinere stap dan gevraagd).
+  - **Later:** vervangt de regelhoogte 1,4 van meta uit "Kleinere koppen en vaste tekstmaten" (23 oktober 2026), voor zover die daar staat.
+- **Alleen lopende tekst gebruikt het token:** `.hf-match-goals`, `Tooltip` en `MatchPenaltySeries` gebruiken `--hf-meta-line-height`.
+  Knop, datatabel, formulieren, label, tag en het veld houden hun regelhoogte, omdat een hogere regel bedienelementen en rijen hoger maakt zonder dat het leest.
+  - **Alternatieven:** alle componenten van 14 pixels (hogere tabelrijen en knoppen); alleen `.hf-meta` en `.hf-match-goals`.
+- **Componenten met een eigen krappe regelhoogte blijven:** grafieken, het veld, de scorebalk, `MatchHeader`, `MatchSubstitutes`, `MatchTimeline` en `MarkRow` veranderen niet.
+  Ze zijn krap bedoeld en staan op een vast raster.
+  - **Alternatieven:** ze ook nalopen en per component beslissen; een groter issue.

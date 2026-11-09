@@ -110,6 +110,7 @@
    */
   .hf-match-goals {
     font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
   }
 
   .hf-match-goal-ours {

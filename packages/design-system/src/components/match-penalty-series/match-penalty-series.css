@@ -89,6 +89,7 @@
   .hf-match-penalty-word {
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
   }
 
   .hf-match-penalty-unknown {
