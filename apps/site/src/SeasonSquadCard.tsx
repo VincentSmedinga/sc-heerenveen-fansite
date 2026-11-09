@@ -1,7 +1,7 @@
 import { Card, Heading, List, PlayerName, ShortFact, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
-import { completenessSentence, type SeasonSquad, showsPlayers, squadParts } from './season-squad'
+import { cardPlayers, completenessSentence, type SeasonSquad, showsPlayers, squadParts } from './season-squad'
 
 /**
  * The card Selectie on the page Spelers: every player of the season in parts by position, and
@@ -12,7 +12,7 @@ import { completenessSentence, type SeasonSquad, showsPlayers, squadParts } from
  * list, not a figure to share.
  */
 export function SeasonSquadCard({ squad }: { squad: SeasonSquad }) {
-  const parts = showsPlayers(squad) ? squadParts(squad.players) : []
+  const parts = showsPlayers(squad) ? squadParts(cardPlayers(squad)) : []
 
   return (
     <Card aria-labelledby="selectie">

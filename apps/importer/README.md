@@ -2064,7 +2064,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er vijf stappen: `clubs`, `matches`, `spelers`, `doelpunten` en `opstellingen`.
+Nu zijn er zes stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run
@@ -2149,6 +2149,13 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
   De eerste regel van de stap telt de verslagen: `566 reports: 505 klaar, 61 bezig`.
 - De stap raakt alleen wedstrijden met de bron `oude-fansite`, en laat een verslag dat de redactie opsloeg zoals het is.
   Een tweede run verandert niets.
+
+#### De stap selecties
+
+De stap `selecties` ([`src/old-site-completeness.ts`](src/old-site-completeness.ts)) bewaart de volledigheid van de selectie van elk seizoen waarin een speler met de bron `verslag` staat, met `storeCompleteness`.
+Zonder die rij toont de kaart Selectie "onbekend" bij een seizoen met alleen spelers uit de verslagen.
+Een seizoen met alleen die spelers krijgt de beste bron `verslag`; een seizoen met een betere lijst houdt die bron.
+Een tweede run zonder nieuwe gegevens schrijft niets.
 
 #### Het controleverslag
 
