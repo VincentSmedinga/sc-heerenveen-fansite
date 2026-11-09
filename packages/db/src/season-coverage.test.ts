@@ -92,7 +92,7 @@ describe('the coverage per season', () => {
     expect(coverage[0]).toEqual({
       goalsWithoutPlayer: 1,
       hasStanding: true,
-      matchesBySource: { 'oude-fansite': 2, wikipedia: 0 },
+      matchesBySource: { 'oude-fansite': 2, redactie: 0, wikipedia: 0 },
       matchesTotal: 2,
       played: 2,
       playedWithoutGoalList: 1,
@@ -108,7 +108,7 @@ describe('the coverage per season', () => {
     expect(coverage[1]).toEqual({
       goalsWithoutPlayer: 0,
       hasStanding: false,
-      matchesBySource: { 'oude-fansite': 0, wikipedia: 0 },
+      matchesBySource: { 'oude-fansite': 0, redactie: 0, wikipedia: 0 },
       matchesTotal: 0,
       played: 0,
       playedWithoutGoalList: 0,

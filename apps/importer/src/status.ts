@@ -364,6 +364,7 @@ async function showWaitingChanges(db: Database, write: (line: string) => void): 
 const coverageColumns: { cell: (row: SeasonCoverage) => string; letter: string; meaning: string }[] = [
   { cell: (row) => String(row.matchesBySource.wikipedia), letter: 'W', meaning: 'matches from Wikipedia' },
   { cell: (row) => String(row.matchesBySource['oude-fansite']), letter: 'O', meaning: 'matches from the old fansite' },
+  { cell: (row) => String(row.matchesBySource.redactie), letter: 'R', meaning: 'matches added by the editors' },
   { cell: (row) => String(row.played), letter: 'P', meaning: 'matches played' },
   { cell: (row) => String(row.playedWithoutGoalList), letter: 'G', meaning: 'played with goals, without a goal list' },
   { cell: (row) => `${row.reportsDone}/${row.reports}`, letter: 'R', meaning: 'reports done / all reports' },
