@@ -1680,7 +1680,8 @@ Zo komt een late verbetering op Wikipedia binnen zonder dat iemand `import:seaso
   Hij doet dat na het lopende seizoen, in dezelfde run en met dezelfde fetcher.
 - De pauze staat in `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
   Is die niet voorbij, dan vraagt de import niets en schrijft hij geen regel.
-  Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week min tien minuten (`rereadEveryMs`), zodat de run van precies een week later leest.
+  Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week en vijf minuten (`rereadEveryMs`).
+  Zo heeft een wijziging die wacht bij de volgende lezing altijd zeven dagen gestaan, en schuift de lezing elke week één run van cron op.
   Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze van `healthAfter` staan, want er is niets gelezen.
 - De opdrachten `import:season` en `import:squad` kijken niet naar de pauze en zetten haar op een uur min een minuut.
   Na zo'n opdracht leest de uurlijkse import het seizoen dus een uur later nog eens, en wacht dan weer een week.

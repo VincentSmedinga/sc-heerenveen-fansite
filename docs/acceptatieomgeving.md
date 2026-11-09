@@ -165,7 +165,8 @@ Je hoeft er niets voor in te stellen: het gebeurt in dezelfde run als het lopend
   De run van het lopende seizoen gaat door, de exitcode verandert niet en er komt geen mail.
   De import probeert het een week later opnieuw.
   Vraagt Wikipedia om te wachten, dan probeert hij het na die tijd opnieuw.
-- De pauze is tien minuten korter dan een week, zodat de run van precies een week later leest.
+- De pauze is vijf minuten langer dan een week, zodat een wijziging die wacht altijd zeven dagen heeft gestaan.
+  De lezing schuift daardoor elke week één run van cron op.
 - Vanaf 1 september leest cron dat seizoen niet meer.
   Een latere verbetering haal je binnen met _Import season_ en _Import squads_.
 

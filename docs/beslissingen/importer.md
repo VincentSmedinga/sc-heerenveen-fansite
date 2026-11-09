@@ -3387,7 +3387,8 @@
     De wedstrijden leest het met `importPastSeason`, de functie achter `import:season`.
     Er komt geen tweede cronjob en geen nieuwe workflow.
   - **De pauze:** `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
-    Na een lezing die is opgeslagen of die faalt, zet de import de pauze op een week min tien minuten, zodat de run van precies een week later leest.
+    Na een lezing die is opgeslagen of die faalt, zet de import de pauze op een week en vijf minuten.
+    Een wijziging die wacht, heeft bij de volgende lezing dan altijd zeven dagen gestaan (`hasStood`), en de lezing schuift elke week één run van cron op.
     Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze staan, want er is niets gelezen.
   - **Een fout:** een waarschuwing in de uitvoer en in de rij van dat seizoen.
     Ze stopt het lopende seizoen niet, verandert de exitcode niet en telt niet voor de mail over een import die blijft falen.

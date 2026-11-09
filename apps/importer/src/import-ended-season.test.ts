@@ -47,7 +47,7 @@ const firstOfJuly = new Date('2026-07-01T00:00:00Z')
 
 const hour = 60 * 60 * 1000
 
-/** A week: cron runs at the same minute, so the read a week later is this far on. */
+/** A week: the run of cron at the same minute a week later, which comes just too early. */
 const week = 7 * 24 * hour
 
 let database: TestDatabase
@@ -189,11 +189,15 @@ describe('the weekly read of the season that has just ended', () => {
     expect(await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs - 1))).toEqual([])
     expect(seasonRequests(server)).toHaveLength(asked)
 
-    // The run a week later, also when cron starts it some minutes early.
-    expect(rereadEveryMs).toBeLessThan(week)
-    expect(rereadEveryMs).toBeGreaterThan(week - hour / 4)
+    // Not a week later either, to the second or some seconds early: seven days must be over
+    // for a change that waits, so the pause is some minutes more than a week.
+    expect(await rereadAt(server, new Date(firstOfJuly.getTime() + week - 5000))).toEqual([])
+    expect(await rereadAt(server, new Date(firstOfJuly.getTime() + week))).toEqual([])
+    expect(seasonRequests(server)).toHaveLength(asked)
+    expect(rereadEveryMs).toBeGreaterThan(week)
+    expect(rereadEveryMs).toBeLessThan(week + hour / 4)
 
-    const again = await rereadAt(server, new Date(firstOfJuly.getTime() + week))
+    const again = await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs))
 
     // The goals of the first read get their players now: the squad came after the matches.
     expect(again.some((line) => line.startsWith('Matches 2025/26: 0 new, '))).toBe(true)
@@ -242,12 +246,12 @@ describe('the weekly read of the season that has just ended', () => {
     await rereadAt(await serve({ [season]: { pages: ended, squad } }), firstOfJuly)
 
     const server = await serve({ [season]: { pages: corrected, squad } })
-    const held = await rereadAt(server, new Date(firstOfJuly.getTime() + week))
+    const held = await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs))
 
     expect(held.join('\n')).toContain(' 0 removed, 1 held;')
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ season, status: 'pending' }])
 
-    await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * week))
+    await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * rereadEveryMs))
 
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
       { kickoffAt: new Date('2025-08-09T18:30:00Z') },
@@ -264,7 +268,7 @@ describe('the weekly read of the season that has just ended', () => {
     const counted = squad.replace(row, "[[Bernt Klaverboer]]||2029||10||0||0||0||0||0||'''10'''")
     const lines = await rereadAt(
       await serve({ [season]: { pages: ended, squad: counted } }),
-      new Date(firstOfJuly.getTime() + week),
+      new Date(firstOfJuly.getTime() + rereadEveryMs),
     )
 
     expect(lines).toContain('Squad 2025/26: 0 new, 0 updated, 25 unchanged, 0 left the squad')
@@ -290,7 +294,7 @@ describe('the weekly read of the season that has just ended', () => {
     })
 
     // A first good read of the current season replaces the made-up squad; this one does not.
-    await rereadAt(await serve({ [season]: { pages: ended, squad } }), new Date(firstOfJuly.getTime() + week))
+    await rereadAt(await serve({ [season]: { pages: ended, squad } }), new Date(firstOfJuly.getTime() + rereadEveryMs))
     expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(26)
   })
 
@@ -299,7 +303,7 @@ describe('the weekly read of the season that has just ended', () => {
 
     const before = await database.db.select().from(matches).where(eq(matches.season, season))
     const broken = await serve({ [season]: { pages: { ...ended, programme: 'Geen wedstrijden meer.' }, squad } })
-    const at = new Date(firstOfJuly.getTime() + week)
+    const at = new Date(firstOfJuly.getTime() + rereadEveryMs)
 
     const lines = await rereadAt(broken, at)
 

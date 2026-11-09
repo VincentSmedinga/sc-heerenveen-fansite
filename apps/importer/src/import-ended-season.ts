@@ -19,11 +19,13 @@ import { formatSquadReport, importSquad } from './import-squad.ts'
 import { describeError } from './text.ts'
 
 /**
- * The pause between two reads of the season that has ended: a week. The pause starts when a
- * read is done, and cron starts each run a moment earlier or later, so ten minutes less makes
- * sure the run a week later reads it, and not the one after that.
+ * The pause between two reads of the season that has ended: a week and five minutes. A change
+ * that overwrites something is taken over once it has stood for seven days (`hasStood`), and
+ * cron starts each run a moment earlier or later. With a pause of a week or less, the next read
+ * could come seconds before those seven days are over, and the change would wait a week more.
+ * So the read moves on by one run of cron each week.
  */
-export const rereadEveryMs = 7 * 24 * 60 * 60 * 1000 - 10 * 60 * 1000
+export const rereadEveryMs = 7 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
 
 /**
  * The season that has just ended, while the hourly import still reads it: the season before
