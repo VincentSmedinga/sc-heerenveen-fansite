@@ -8,7 +8,7 @@ import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
 import { showStatus } from './status.ts'
-import { fetcherFor, reply, startServer } from './test-server.ts'
+import { fetcherFor, reply, startServer, writeWithoutCoverage } from './test-server.ts'
 
 const start = new Date('2026-10-22T10:07:00Z')
 
@@ -75,7 +75,7 @@ async function importAt(now: Date) {
 
 async function statusAt(now: Date) {
   const lines: string[] = []
-  const code = await showStatus(database.url, { clock: () => now, write: (line) => lines.push(line) })
+  const code = await showStatus(database.url, { clock: () => now, write: writeWithoutCoverage(lines) })
 
   return { code, lines }
 }
@@ -258,6 +258,18 @@ describe('the overview', () => {
     await database.pool.query('INSERT INTO import_runs (started_at) VALUES (?)', [start])
 
     expect((await statusAt(start)).lines[0]).toBe('Last run: started 2026-10-22 10:07:00 UTC, not finished')
+  })
+
+  it('ends with a line for each season since 1990/91, also for one without matches', async () => {
+    const lines: string[] = []
+
+    await showStatus(database.url, { clock: () => start, write: (line) => lines.push(line) })
+
+    const table = lines.slice(lines.indexOf('Coverage per season:'))
+
+    expect(table).toHaveLength(3 + 37)
+    expect(table.at(-1)).toBe('  2026/27  0 0 0 0 0/0 0 0 0 - - 0 no')
+    expect(table[3]).toBe('  1990/91  0 0 0 0 0/0 0 0 0 - - 0 no')
   })
 
   it('changes nothing in the database', async () => {

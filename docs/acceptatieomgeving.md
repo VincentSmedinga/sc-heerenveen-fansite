@@ -523,7 +523,7 @@ Zo kan niemand nagaan wie een account heeft.
   De opdracht doet drie verzoeken aan Wikipedia en zegt in één regel wat ze bewaarde.
   Een tweede keer draaien verandert niets.
   Houdt een run van cron de lock vast, dan doet de opdracht niets en zegt dat; probeer het na een paar minuten opnieuw.
-  De site laat het seizoen nog niet zien, en `--status` blijft over het lopende seizoen gaan.
+  De site laat het seizoen nog niet zien, en `--status` toont de gezondheid van het lopende seizoen, en daaronder de dekking van elk seizoen.
 
 - `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: same-origin`.
   Een bezoeker zonder sessie die `/beheer` opvraagt, krijgt een doorverwijzing (307) naar `/beheer/inloggen`, met dezelfde headers.

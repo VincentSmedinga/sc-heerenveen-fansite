@@ -74,3 +74,33 @@ export async function startServer(routes: Record<string, Handler>, host = '127.0
     requests,
   }
 }
+
+/**
+ * A `write` for `showStatus` that collects the lines but leaves out the table of the coverage
+ * per season at the end, which has a test of its own, so the other tests keep to what they
+ * check.
+ */
+export function writeWithoutCoverage(lines: string[]): (line: string) => void {
+  let blank = false
+  let inCoverage = false
+
+  return (line) => {
+    if (line === 'Coverage per season:') {
+      inCoverage = true
+      blank = false
+    }
+    if (inCoverage) {
+      return
+    }
+    // The blank line before the table is held back, so it does not end the other output.
+    if (blank) {
+      lines.push('')
+      blank = false
+    }
+    if (line === '') {
+      blank = true
+    } else {
+      lines.push(line)
+    }
+  }
+}

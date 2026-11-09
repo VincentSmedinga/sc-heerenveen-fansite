@@ -3062,3 +3062,15 @@
 - **Waarom:** op 9 november 2026 faalde _Import squads_ op alle 36 seizoenen met `ER_BAD_FIELD_ERROR`, omdat hij draaide voordat de deploy had gemigreerd.
   Eén duidelijke regel is beter dan dezelfde fout per seizoen.
 - **Alternatieven:** de importer zelf laten migreren (de site migreert bij het starten onder een slot, en twee migrerende processen zijn een risico); de workflows op de deploy laten wachten (dekt cron en een handmatige run niet).
+
+## De status toont de dekking per seizoen sinds 1990/91
+
+- **Datum:** 9 november 2026
+- **Besluit:** `--status` schrijft onder de bestaande regels een tabel met een regel per seizoen sinds 1990/91 tot en met het lopende seizoen (#965).
+  De cijfers komen uit één functie die alleen leest, `readSeasonCoverage` in `@fansite/db/season-coverage`, met een getypeerd resultaat, zodat de pagina in het beheer (#972) haar kan hergebruiken.
+  - De lijst van seizoenen wordt gemaakt en niet uit `matches` gelezen, dus een seizoen zonder wedstrijden staat erin, met nullen.
+  - Een regel heeft de wedstrijden per bron, de gespeelde, de gespeelde met doelpunten maar zonder doelpuntenlijst, de verslagen (en hoeveel `klaar`), de wedstrijden met toeschouwers en met een scheidsrechter, het aantal spelers met de beste bron en het niveau van de selectie, onze doelpunten zonder speler en of er een stand is.
+  - De tabel is smal: één letter per kolom, met een legenda erboven.
+  - Het is informatie en geen fout, dus de exitcode verandert niet.
+- **Waarom:** wie wil weten hoe compleet een eerder seizoen is, moest logboeken van runs lezen.
+- **Alternatieven:** de seizoenen uit `matches` halen (een seizoen zonder wedstrijden valt dan weg); de tekst in `showStatus` samenstellen (de pagina in het beheer kan dat niet hergebruiken).
