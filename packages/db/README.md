@@ -159,6 +159,8 @@ Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de li
 | `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                               |
 | `relevance`                     | Wat de importer van de kop vond: `relevant` (de beginwaarde), `doubtful` of `irrelevant`           |
 | `thread_key`                    | De sleutel van het verhaal waar het bericht een versie van is (hoogstens 100 tekens); meestal leeg |
+| `approved_at`                   | Wanneer een moderator het bericht op de site zette, in UTC; leeg als niemand dat deed              |
+| `approved_by`                   | Het account dat het op de site zette (`admin_users`); leeg als niemand dat deed                    |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
 Een lengte die niet past, geeft een fout in plaats van dat de database de tekst afkapt; de importer slaat zo'n bericht eerder al over.
@@ -220,18 +222,25 @@ Het bericht blijft in de tabel, zodat de importer het niet opnieuw als nieuw zie
 De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUPLICATE KEY UPDATE` zelf, dus een bericht dat een moderator verbergt terwijl een run bezig is, blijft ook ongemoeid.
 "Toon weer" maakt de drie kolommen leeg.
 
+### Een bericht op de site zetten
+
+Een moderator zet een twijfelgeval of een bericht dat het filter weghoudt op de site met "Op de site zetten"; dat zet `approved_at` en `approved_by`.
+De importer beoordeelt elk bericht bij elke run opnieuw en overschrijft `relevance`, maar raakt deze twee kolommen nooit aan.
+`isShown` laat een bericht door als het niet verborgen is en `relevant` of goedgekeurd; verbergen wint.
+"Terug naar het oordeel van het filter" maakt de twee kolommen leeg.
+
 ## De tabel `audit_log`
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                           |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                              |
-| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset` of `player.stats-differ` |
-| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                              |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`                                                                                                                                                                                                                     |
-| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                     |
+| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                                                             |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                                                                |
+| `action`     | Wat: `item.hide`, `item.show`, `item.approve`, `item.unapprove`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset` of `player.stats-differ` |
+| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                                                                |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`, `item.approve` en `item.unapprove`                                                                                                                                                                                                                   |
+| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                                                       |
 
 Alleen `recordAction` in `packages/db/src/audit-log.ts` schrijft erin, en alleen met `INSERT`.
 De site en de importer gebruiken dezelfde functie.

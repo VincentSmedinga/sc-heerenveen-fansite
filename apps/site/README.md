@@ -972,7 +972,7 @@ Boven de lijst staat een schakelaar met twee keuzes: "Op de site" en "Niet op de
 Het zijn gewone links, dus hij werkt zonder JavaScript, en de huidige keuze heeft `aria-current="page"`.
 Met JavaScript wisselt een gewone klik de pagina zonder haar opnieuw te laden (zie _Schakelaars die in de pagina wisselen_).
 "Op de site" is de standaard en heeft niets in het adres, "Niet op de site" is `?toon=niet-op-de-site`, en een andere waarde valt terug op de standaard.
-Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden en al gepubliceerd.
+Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden of door een moderator op de site gezet (zie _Een bericht op de site zetten_), en al gepubliceerd.
 `isShown` in `@fansite/db/queries` is strenger voor de bezoeker (een bron die uitstaat, en een verhaal dat de site samenvouwt), dus een bericht dat hier "op de site" staat, kan voor een bezoeker ontbreken.
 De lijst telt per groep de nieuwste 50 berichten, en de tekst erboven zegt welke groep het is.
 Onder de schakelaar staat een zoekveld: een formulier met `method="get"` dat `?q=` vult en op een deel van de kop of van de link zoekt, zonder letters- of hoofdlettergevoeligheid en zonder dat `%` of `_` een patroon zijn (`listItems`).
@@ -991,6 +991,21 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 - Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`packages/db/src/audit-log.ts`, die `src/beheer/audit-log.ts` doorgeeft).
   Daar staat het nummer van het account, de tijd, de actie, het nummer van het bericht en de reden: geen e-mailadres en niets anders van het verzoek.
 - De pagina gebruikt `NewsItem`, `Form`, `Field` en de andere componenten van het designsysteem, en heeft geen eigen component.
+
+#### Een bericht op de site zetten
+
+Een bericht dat de import een twijfelgeval of "niet over de club" noemde, kan een moderator op de site zetten.
+Dat staat in de kolommen `approved_at` en `approved_by` van `items`, niet in `relevance`: de import beoordeelt elk bericht bij elke run opnieuw, en een goedkeuring in `relevance` zou verdwijnen.
+De import raakt die twee kolommen nooit aan, en een test in `apps/importer/src/import-feeds.test.ts` houdt dat vast.
+Een bericht staat op de site als het niet verborgen is en `relevant` of goedgekeurd: verbergen wint van goedkeuren (`isShown` en `isOnSite`).
+
+- Een bericht met `doubtful` of `irrelevant` en zonder goedkeuring heeft de knop "Op de site zetten" ("Op de site zetten: <kop>" voor een schermlezer), zonder reden.
+- Een goedgekeurd bericht staat in de groep "Op de site", zegt "door een moderator op de site gezet" met het adres van wie en wanneer, en heeft de knop "Terug naar het oordeel van het filter".
+  Die maakt `approved_at` en `approved_by` leeg, en het bericht is weer wat het filter zei.
+- De acties zijn `approveItem` en `unapproveItem` in `src/beheer/items.ts`, met dezelfde uitkomsten als verbergen: `done`, `unchanged` (al zo, of door de import `relevant` gevonden) en `missing`.
+  Elke actie schrijft in één transactie met de wijziging een regel in het logboek: `item.approve` of `item.unapprove`.
+- Na de actie staat bovenaan "Op de site gezet" of "Terug naar het oordeel van het filter", uit de database van dat moment (`?opgenomen=<nummer>` en `?teruggezet=<nummer>`).
+- `e2e/relevance.spec.ts` zet een verzonnen twijfelgeval op de site en haalt het terug.
 
 Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-data`) en een login, zoals hierboven.
 
@@ -1156,6 +1171,7 @@ De inloglink is een mail, en een browsertest heeft geen mailbox.
 De tokens zijn voor elke run nieuw, staan alleen in het geheugen van de controle en in de omgeving van haar processen, en de accounts, de sessies, de logregels, de artikelen die een test schreef en de verzonnen berichten gaan er na afloop weer uit.
 De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
 De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.
+`relevance.spec.ts` zet een verzonnen twijfelgeval op de site en haalt het weer terug.
 `admin.spec.ts` verbergt en toont een verzonnen bericht van de uitgezette testbron, met en zonder JavaScript, en toetst de staten met axe.
 `writing.spec.ts` schrijft met de editor, bekijkt, publiceert, wijzigt en trekt een verzonnen artikel in, en leest het gepubliceerde artikel ook zonder JavaScript.
 Omdat het een artikel publiceert dat de kaart op de homepage kan worden, draait het als eigen project (`chromium-writing`) nadat alle andere controles klaar zijn.

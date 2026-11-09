@@ -466,7 +466,7 @@ Zo kan niemand nagaan wie een account heeft.
 - Het beheer heeft drie schermen.
   `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
   `/beheer/bezoek` is voor een beheerder: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
-  `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont.
+  `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont, en een twijfelgeval of een bericht dat het filter weghoudt op de site zet.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/nieuws/podcasts`, en de import zet het niet terug.
   Een schakelaar kiest tussen de berichten die op de site staan en die er niet op staan.
   De tweede groep toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
@@ -546,7 +546,14 @@ Zo kan niemand nagaan wie een account heeft.
   De pagina zegt "Staat binnen vijf minuten niet meer op de site"; na hoogstens vijf minuten staat het bericht niet meer op de homepage.
   Na de volgende import (hoogstens een kwartier later) is het nog steeds weg, ook als de bron het bericht opnieuw aanbiedt.
   "Toon weer" zet het terug, binnen vijf minuten.
-  De vraag onder _Het beheer_ toont voor elke actie een regel in het logboek, met jouw adres, de tijd, `item.hide` of `item.show`, het nummer van het bericht en de reden.
+- Een bericht op de site zetten werkt op dezelfde pagina onder "Niet op de site".
+  Een bericht met "twijfelgeval, niet op de site" of "niet over de club, niet op de site" heeft de knop "Op de site zetten", zonder reden.
+  De pagina zegt "Op de site gezet", en na hoogstens vijf minuten staat het bericht op de homepage en op `/nieuws`, ook na de volgende import.
+  Het staat dan onder "Op de site", met "door een moderator op de site gezet" en jouw adres.
+  "Terug naar het oordeel van het filter" haalt het weer van de site, tenzij het filter het bericht goed vindt.
+  Een bericht dat je ook verbergt, staat nergens.
+  Het logboek toont `item.approve` en `item.unapprove`, met het nummer van het bericht en zonder reden.
+  De vraag onder _Het beheer_ toont voor elke actie een regel in het logboek, met jouw adres, de tijd, `item.hide`, `item.show`, `item.approve` of `item.unapprove`, het nummer van het bericht en de reden.
   Een actie bij een artikel (`article.create`, `article.update`, `article.publish` of `article.unpublish`) heeft het nummer van het artikel en geen reden.
 - De proefmail laat zien dat de site kan mailen.
   Het bestand `apps/site/send-test-mail.mjs` staat sinds de deploy op de host, naast de importer.

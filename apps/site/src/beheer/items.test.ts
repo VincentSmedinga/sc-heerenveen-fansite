@@ -7,6 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createAccount } from './accounts'
 import {
+  approveItem,
   findItem,
   hideItem,
   type ItemFilter,
@@ -18,6 +19,7 @@ import {
   parseReason,
   parseSearch,
   showItem,
+  unapproveItem,
 } from './items'
 import { addItem, addSource } from './test-items'
 
@@ -158,6 +160,8 @@ describe('listItems', () => {
     const [item] = await listItems(database.db, '')
 
     expect(Object.keys(item ?? {}).toSorted()).toEqual([
+      'approvedAt',
+      'approvedByEmail',
       'hiddenAt',
       'hiddenByEmail',
       'hiddenReason',
@@ -343,7 +347,7 @@ describe('findItem', () => {
   it('gives the headline and whether the item is hidden, or nothing for no item', async () => {
     const id = await addItem(database, ids, 'een')
 
-    expect(await findItem(database.db, id)).toEqual({ hiddenAt: null, title: 'Kop een' })
+    expect(await findItem(database.db, id)).toEqual({ approvedAt: null, hiddenAt: null, title: 'Kop een' })
     expect(await findItem(database.db, 99_999)).toBeUndefined()
   })
 })
@@ -451,5 +455,98 @@ describe('parseEditorsOnly', () => {
 
   it('is off under the group on the site, where no hidden item can be', () => {
     expect(parseEditorsOnly('1', 'on-site')).toBe(false)
+  })
+})
+
+describe('approveItem', () => {
+  it('puts a doubtful item on the site with the time and the account, and writes one row in the log', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+    const approvedAt = new Date('2026-11-02T10:00:00Z')
+
+    expect(await titles()).toEqual([])
+    expect(await approveItem(database.db, userId, id, approvedAt)).toBe('done')
+    expect(await titles()).toEqual(['Kop twijfel'])
+    expect((await database.db.select().from(items).where(eq(items.id, id)))[0]).toMatchObject({
+      approvedAt,
+      approvedBy: userId,
+      relevance: 'doubtful',
+    })
+    expect(await database.db.select().from(auditLog)).toEqual([
+      {
+        action: 'item.approve',
+        createdAt: approvedAt,
+        detail: null,
+        id: expect.any(Number),
+        itemId: id,
+        reason: null,
+        userId,
+      },
+    ])
+  })
+
+  it('does nothing for an item that is approved already, and keeps the first approval', async () => {
+    const id = await addItem(database, ids, 'weg', { relevance: 'irrelevant' })
+
+    await approveItem(database.db, userId, id, new Date('2026-11-02T10:00:00Z'))
+
+    expect(await approveItem(database.db, userId, id, new Date('2026-11-02T11:00:00Z'))).toBe('unchanged')
+    expect((await database.db.select().from(items))[0]?.approvedAt).toEqual(new Date('2026-11-02T10:00:00Z'))
+    expect(await database.db.select().from(auditLog)).toHaveLength(1)
+  })
+
+  it('does nothing for an item the importer found relevant', async () => {
+    const id = await addItem(database, ids, 'goed')
+
+    expect(await approveItem(database.db, userId, id)).toBe('unchanged')
+    expect((await database.db.select().from(items))[0]?.approvedAt).toBeNull()
+    expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+
+  it('says missing for an item that does not exist, and writes nothing', async () => {
+    expect(await approveItem(database.db, userId, 99_999)).toBe('missing')
+    expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+
+  it('changes nothing when the log cannot be written', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+
+    await expect(approveItem(database.db, 99_999, id)).rejects.toBeDefined()
+    expect((await database.db.select().from(items))[0]?.approvedAt).toBeNull()
+  })
+
+  it('keeps an approved item that is hidden off the site, and approved items out of the other group', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+
+    await approveItem(database.db, userId, id)
+    await hideItem(database.db, userId, id, 'Fout in het bericht')
+
+    expect(await titles()).toEqual([])
+    expect(await titles('', offSite())).toEqual(['Kop twijfel'])
+  })
+})
+
+describe('unapproveItem', () => {
+  it('takes the approval back, writes the log, and the item is what the filter said again', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+
+    await approveItem(database.db, userId, id, new Date('2026-11-02T10:00:00Z'))
+
+    const withdrawn = new Date('2026-11-02T11:00:00Z')
+
+    expect(await unapproveItem(database.db, userId, id, withdrawn)).toBe('done')
+    expect(await titles()).toEqual([])
+    expect((await database.db.select().from(items))[0]).toMatchObject({ approvedAt: null, approvedBy: null })
+    expect(await database.db.select().from(auditLog).orderBy(auditLog.id)).toMatchObject([
+      { action: 'item.approve' },
+      { action: 'item.unapprove', createdAt: withdrawn, itemId: id, userId },
+    ])
+  })
+
+  it('does nothing for an item that is not approved, or does not exist', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+
+    expect(await unapproveItem(database.db, userId, id)).toBe('unchanged')
+    expect(await unapproveItem(database.db, userId, 99_999)).toBe('missing')
+    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 })
