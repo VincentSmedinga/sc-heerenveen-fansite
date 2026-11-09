@@ -243,7 +243,7 @@ De aantallen staan op één plek in `src/items-per-card.ts`: `fewestHeadlines` (
 `getHeadlines` haalt de 20 nieuwste koppen op en staat vijf minuten in het geheugen van de server (`src/headlines.ts`); `headlinesOfTheWindow` kiest daar bij elk bezoek de lijst uit.
 De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
-Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont tien koppen.
+Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20.
 De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
 Een bezoeker kiest geen maat.
 De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
