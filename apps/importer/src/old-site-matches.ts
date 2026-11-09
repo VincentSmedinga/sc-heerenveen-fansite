@@ -3,6 +3,7 @@ import type { Competition, Match, MatchEdit, NewMatchStatistics } from '@fansite
 import { lockedFields } from '@fansite/db/match-edits'
 import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
+import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
 import { eq } from 'drizzle-orm'
 
 import type { OldSiteClub, OldSiteMatch } from './old-site-file.ts'
@@ -312,6 +313,7 @@ export async function importOldSiteMatches(
   oldMatches: readonly OldSiteMatch[],
   oldClubs: readonly OldSiteClub[],
   clubIds: ReadonlyMap<string, number>,
+  now = new Date(),
 ): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const names = new Map(oldClubs.map((club) => [club.code, club.name]))
@@ -328,6 +330,12 @@ export async function importOldSiteMatches(
   for (const row of await db.select().from(matchStatistics)) {
     statistics.set(row.matchId, row)
   }
+
+  // The parts the editors took over from another source (#974) stay as they decided.
+  const takenOver = await readTakenOverParts(
+    db,
+    [...stored.values()].filter((row) => row.dataSource === oldSiteSource).map((row) => row.id),
+  )
 
   const derived = deriveOldSiteMatches(oldMatches)
   const keys = new Set<string>()
@@ -377,12 +385,30 @@ export async function importOldSiteMatches(
         )
       }
       if (lookup.kind === 'found' && lookup.match.dataSource !== oldSiteSource) {
-        const { differences, fill } = compareClaim(lookup.match, values, lockedFields(edits.get(lookup.match.id)))
+        const compared = compareClaim(lookup.match, values, lockedFields(edits.get(lookup.match.id)))
 
-        report.lines.push(...differences.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)))
-
+        // A difference waits for the editors as a change, once (#974). The match keeps the
+        // value of its own source until they decide.
         // A match the editors added is theirs: it is compared and never filled.
-        if (Object.keys(fill).length > 0 && lookup.match.dataSource !== 'redactie') {
+        const fill = lookup.match.dataSource === 'redactie' ? {} : compared.fill
+        const { kept, rest } = await keepSourceDifferences(
+          db,
+          lookup.match,
+          values,
+          { differences: compared.differences, fill },
+          oldSiteSource,
+          now,
+        )
+
+        report.lines.push(
+          ...kept.map(
+            (part) =>
+              `${label}: the ${part} differs from match ${lookup.match.id} of ${lookup.match.dataSource}, kept as a change that waits for the editors`,
+          ),
+          ...rest.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)),
+        )
+
+        if (Object.keys(fill).length > 0) {
           await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
           report.changed += 1
         } else {
@@ -407,10 +433,11 @@ export async function importOldSiteMatches(
     }
 
     const edit = edits.get(before.id)
+    const held = takenOver.get(before.id)
     const fields = [
-      ...(edit?.kickoffEdited === true ? [] : kickoffFields),
-      ...(edit?.resultEdited === true ? [] : resultFields),
-      ...(edit?.factsEdited === true ? [] : factFields),
+      ...(edit?.kickoffEdited === true || held?.has('kickoff') === true ? [] : kickoffFields),
+      ...(edit?.resultEdited === true || held?.has('result') === true ? [] : resultFields),
+      ...(edit?.factsEdited === true || held?.has('facts') === true ? [] : factFields),
       ...otherFields,
     ] as const
     const change: Record<string, unknown> = {}

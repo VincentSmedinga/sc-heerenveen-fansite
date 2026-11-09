@@ -1,7 +1,7 @@
 import type { AlertMail } from '@fansite/db/alerts'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { decideConflict } from '@fansite/db/match-conflicts'
+import { decideConflict, sourceDifferenceReasons } from '@fansite/db/match-conflicts'
 import { encodeGoals, encodeMatch, type MatchPart } from '@fansite/db/match-edits'
 import {
   adminUsers,
@@ -618,6 +618,21 @@ describe('a difference becomes a change that waits (issue 577)', () => {
       },
       { detail: expect.stringContaining('Doelpunten: onze invoer'), userId: null },
     ])
+  })
+
+  it('never takes a difference between two sources over, however long it stands (#974)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await importAt(server, later(first, 2))
+    // The same rows, as a difference between two sources: only a person decides those.
+    await database.db.update(matchChanges).set({ reason: sourceDifferenceReasons.wikipedia })
+
+    await importAt(server, new Date(later(first, 2).getTime() + days(8)))
+
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+    expect(await changes()).toMatchObject([{ status: 'pending' }, { status: 'pending' }])
   })
 
   it('does not take over a value that Wikipedia changed again, but keeps the new one', async () => {

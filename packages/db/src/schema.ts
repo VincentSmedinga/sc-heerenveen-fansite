@@ -436,6 +436,8 @@ export const auditActions = [
   'club-name.save',
   'club-name.reset',
   'player.stats-differ',
+  'player.stats-take-over',
+  'player.stats-keep',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -465,8 +467,11 @@ export const auditDetailMaxLength = 1000
  * `import:changes` decides without an account, and the importer takes Wikipedia over after
  * seven days with `match.take-over`, also without one. `player.stats-differ` is a player
  * whose goals in the match reports differ from the squad table of Wikipedia, with his number
- * in `item_id`: the importer writes it when the table has new numbers (without an account), and
- * the admin when a report is saved as `klaar` (see `logReportGoalDifferences`).
+ * in `item_id`: the importer wrote it when the table had new numbers (without an account), and
+ * the admin when a report was saved as `klaar`. Since issue 974 such a difference is a row in
+ * `player_stat_differences` and nothing writes this action any more. `player.stats-take-over`
+ * and `player.stats-keep` are the decision of an editor about such a row, with the player in
+ * `item_id`.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -1475,6 +1480,12 @@ export type MatchChangeResolution = (typeof matchChangeResolutions)[number]
  * match of the old fansite that do not add up to its score (`oldSiteGoalsReason` in `reason`).
  * `old_value` is the goals the match had, `new_value` the list of the files, and `proposal` has
  * both. Nobody is mailed about it and the importer never takes it over by itself.
+ *
+ * Another kind is a difference between two sources about a part of a match (issue 974,
+ * `sourceDifferenceReasons` in `reason`): `old_value` is the part as the match has it, from
+ * the source it comes from, `new_value` what the second source says, and `proposal` that part
+ * as the second source has it. The match stays as it is, nobody is mailed, and only a person
+ * decides it (see `source-differences.ts`).
  */
 export const matchChanges = mysqlTable(
   'match_changes',
@@ -1669,8 +1680,13 @@ export type Player = typeof players.$inferSelect
  * row, and a dash is zero. A player who leaves the squad keeps his last numbers. `updated_at`
  * (UTC) is the moment the numbers last changed, and stays when a run finds the same numbers.
  * The table is kept by volunteers, so it can run a round behind the matches; the importer
- * compares the goals with those in `match_goals` and warns when they differ (see
- * `import-squad.ts`). A row goes with its player.
+ * compares the goals with those in `match_goals` and keeps a difference for the editors (see
+ * `player_stat_differences`). A row goes with its player.
+ *
+ * `table_goals` is empty until the editors take the goals of the matches or the reports over:
+ * it then keeps the goals the table of Wikipedia had, and `goals` is the number the editors
+ * chose. While the table still says `table_goals` the importer leaves `goals` alone; when the
+ * table says something else, `goals` follows it again and `table_goals` is emptied.
  */
 export const playerSeasonStats = mysqlTable(
   'player_season_stats',
@@ -1684,6 +1700,7 @@ export const playerSeasonStats = mysqlTable(
     appearances: int('appearances', { unsigned: true }).notNull(),
     goals: int('goals', { unsigned: true }).notNull(),
     assists: int('assists', { unsigned: true }).notNull(),
+    tableGoals: int('table_goals', { unsigned: true }),
     updatedAt: datetime('updated_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),
@@ -1697,6 +1714,56 @@ export const playerSeasonStats = mysqlTable(
 export type NewPlayerSeasonStats = typeof playerSeasonStats.$inferInsert
 
 export type PlayerSeasonStats = typeof playerSeasonStats.$inferSelect
+
+/** What the goals of the squad table are compared with: the matches or the match reports. */
+export const playerStatSources = ['matches', 'reports'] as const
+
+export type PlayerStatSource = (typeof playerStatSources)[number]
+
+/** How a difference in the numbers of a player was closed (see `matchChangeResolutions`). */
+export const playerStatResolutions = ['person', 'reverted', 'replaced'] as const
+
+/**
+ * A difference between the goals of a player in the squad table (`player_season_stats`) and
+ * the goals counted from the matches or from the match reports, in a competition of a season
+ * (issue 974). The importer and the admin keep it when they compare the numbers, once for the
+ * same two numbers, and it waits (`pending`) until an editor decides or the difference is
+ * gone. `table_goals` is what the squad table said and `other_goals` what `compared_with`
+ * counted.
+ *
+ * An editor takes the other number over (`accepted`, `person`: `player_season_stats.goals`
+ * becomes `other_goals`) or keeps the table (`rejected`, `person`). A difference a person
+ * decided does not come back while both numbers stay the same. A difference that is gone
+ * closes itself as `rejected`, `reverted`, and one whose numbers changed as `rejected`,
+ * `replaced`, with a new row for the new numbers. Times are UTC. A row goes with its player.
+ */
+export const playerStatDifferences = mysqlTable(
+  'player_stat_differences',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    playerId: int('player_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    competition: mysqlEnum('competition', statsCompetitions).notNull(),
+    comparedWith: mysqlEnum('compared_with', playerStatSources).notNull(),
+    tableGoals: int('table_goals', { unsigned: true }).notNull(),
+    otherGoals: int('other_goals', { unsigned: true }).notNull(),
+    status: mysqlEnum('status', matchChangeStatuses).notNull(),
+    resolution: mysqlEnum('resolution', playerStatResolutions),
+    firstSeenAt: datetime('first_seen_at').notNull(),
+    lastSeenAt: datetime('last_seen_at').notNull(),
+    decidedAt: datetime('decided_at'),
+  },
+  (table) => [
+    index('player_stat_differences_season_status_idx').on(table.season, table.status),
+    index('player_stat_differences_player_idx').on(table.playerId),
+  ],
+)
+
+export type NewPlayerStatDifference = typeof playerStatDifferences.$inferInsert
+
+export type PlayerStatDifference = typeof playerStatDifferences.$inferSelect
 
 /** Where a match report stands: `bezig` is still being filled in, `klaar` passed the rules. */
 export const matchReportStatuses = ['bezig', 'klaar'] as const

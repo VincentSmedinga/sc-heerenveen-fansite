@@ -6,6 +6,7 @@ import type { MatchChange } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
+import { secondSourceOf } from '@fansite/db/match-conflicts'
 
 import type { ImportOptions } from './import-feeds.ts'
 
@@ -22,15 +23,30 @@ export type ChangesRequest =
   | { kind: 'list' }
   | { kind: 'refused'; message: string }
 
-/** The lines that show a change that waits: the two values and when it is taken over. */
+/**
+ * The lines that show a change that waits: the two values and when it is taken over, or that
+ * it waits for a person.
+ */
 export function describeWaitingChange(change: MatchChange): string[] {
   const takenOver = new Date(change.firstSeenAt.getTime() + reliability.suspiciousStands)
+  const second = secondSourceOf(change.reason)
+  const seen = `first seen ${formatTime(change.firstSeenAt)}, last seen ${formatTime(change.lastSeenAt)}, seen ${change.timesSeen} ${change.timesSeen === 1 ? 'time' : 'times'}`
+
+  if (second !== undefined) {
+    // A difference between two sources (#974): nothing is taken over without a decision.
+    return [
+      `${nameChange(change)}: ${printable(change.reason)}`,
+      `  now: ${printable(change.oldValue)}`,
+      `  ${second}: ${printable(change.newValue ?? '')}`,
+      `  ${seen}; it waits until a person decides`,
+    ]
+  }
 
   return [
     `${nameChange(change)}: ${printable(change.reason)}`,
     `  now: ${printable(change.oldValue)}`,
     `  Wikipedia: ${change.newValue === null ? 'the match is not on the page' : printable(change.newValue)}`,
-    `  first seen ${formatTime(change.firstSeenAt)}, last seen ${formatTime(change.lastSeenAt)}, seen ${change.timesSeen} ${change.timesSeen === 1 ? 'time' : 'times'}; taken over from ${formatTime(takenOver)} if it stays`,
+    `  ${seen}; taken over from ${formatTime(takenOver)} if it stays`,
   ]
 }
 

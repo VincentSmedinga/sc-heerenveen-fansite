@@ -13,7 +13,8 @@ import {
   markedParts,
   refreshSnapshot,
 } from '@fansite/db/match-edits'
-import { logReportGoalDifferences, mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
+import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
+import { compareReportGoals } from '@fansite/db/player-stat-differences'
 import {
   matchAppearances,
   matchCards,
@@ -623,9 +624,9 @@ export async function saveReport(
     )
 
     // A report that is klaar can show that the goals differ from the squad table of Wikipedia:
-    // the log gets a line for each player (#832). It is only added to, so this is the moment.
+    // each difference is kept for the editors, once, until they decide or it is gone (#974).
     if (plan.status === 'klaar') {
-      await logReportGoalDifferences(transaction, match.season, userId, now)
+      await compareReportGoals(transaction, match.season, now)
     }
 
     return { status: 'saved' } as const

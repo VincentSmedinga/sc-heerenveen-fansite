@@ -1497,6 +1497,21 @@ Wat daarna gebeurt:
 - **Zet Wikipedia de waarde van de redactie terug**, dan vervalt de afwijking (`reverted`) en staat dat in het logboek (`match.caught-up`).
   Maakt Wikipedia er iets anders van, dan is de oude afwijking `replaced` en begint een nieuwe.
 
+#### Een verschil tussen twee bronnen
+
+Vindt een import een wedstrijd van een andere bron op datum en club (`findMatchByDate`), dan vult hij alleen de lege velden.
+Zegt hij iets anders over de aftrap, de uitslag of de gegevens, dan komt er een rij in `match_changes` met `part`, `old_value` (de wedstrijd), `new_value` (de tweede bron) en in `proposal` dat onderdeel zoals de tweede bron het heeft (`keepSourceDifferences` in `@fansite/db/source-differences`, #974).
+De `reason` zegt welke bron de tweede is: `Wikipedia zegt iets anders dan de bron van de wedstrijd` of `de oude fansite zegt iets anders dan de bron van de wedstrijd`.
+De wedstrijd houdt de waarde van zijn eigen bron.
+
+- De rij komt één keer voor dezelfde twee waarden, en bij elke run die ze weer ziet telt `times_seen` op.
+- Alleen een mens beslist, op de pagina van de wedstrijd of met `pnpm run import:changes`.
+  De import neemt na zeven dagen niets over en er gaat geen mail uit.
+- Wijst iemand het verschil af, dan komt het niet terug zolang beide waarden gelijk blijven.
+- Neemt iemand de tweede bron over, dan laat de stap `matches` van `import:old-site` dat onderdeel van zijn eigen wedstrijd voortaan met rust.
+- Is het verschil weg, of vulde de redactie het onderdeel zelf in, dan vervalt de rij (`reverted`); zegt een bron iets nieuws, dan is ze `replaced` en begint een nieuwe.
+- Een veld buiten deze drie onderdelen, zoals thuis of uit, blijft een regel `match difference: …` in het logboek.
+
 ### Oudere bekerpagina's
 
 De bekerpagina's van 2021/22 tot en met 2024/25 schrijven de score en de tijd anders dan die van 2025/26.
@@ -1981,17 +1996,21 @@ Het totaal leest hij niet: dat is de som, en wie het toont, telt de rijen op.
 
 De tabel loopt soms een speelronde achter op de wedstrijden.
 Daarom vergelijkt de import na het wegschrijven het aantal doelpunten per speler en competitie in de tabel met het aantal uit de wedstrijden: de doelpunten van ons in `match_goals` die aan de speler gekoppeld zijn, zonder eigen doelpunten.
-Verschilt het, dan komt er een waarschuwing met de naam, het seizoen, de competitie en de twee aantallen:
+Hij vergelijkt de tabel ook met de doelpunten uit de verslagen, voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is (#832).
+Verschilt het, dan komt er een rij in `player_stat_differences` met de speler, het seizoen, de competitie en de twee aantallen (`comparePlayerGoals` in `@fansite/db/player-stat-differences`, #974).
+Het is geen waarschuwing meer en er komt geen regel in het logboek van het beheer.
 
-```text
-Squad 2026/27: warning, Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches
-```
+- Hetzelfde verschil komt er één keer: een volgende run zet alleen `last_seen_at` bij.
+- Veranderen de aantallen, dan vervalt de rij (`replaced`) en komt er een nieuwe.
+- Is het verschil weg, dan sluit de rij zichzelf (`reverted`).
+- De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelerscijfers`.
+  Neemt ze het andere aantal over, dan staat dat in `player_season_stats.goals`, en `table_goals` onthoudt wat de tabel van Wikipedia zei.
+  Zolang de tabel dat nog zegt, laat de import het aantal van de redactie staan; zegt de tabel iets anders, dan geldt de tabel weer.
+- Een verschil waarover een mens besliste, komt niet terug zolang de twee aantallen gelijk blijven.
 
-De controle verandert niets en stopt niets: de tabel is de bron van de cijfers die we tonen.
-De waarschuwing komt ook in `squad_imports.last_warning`.
-Heeft de lezing nieuwe cijfers in de tabel gezet, dan vergelijkt de importer ook de doelpunten van de verslagen met die van de tabel (`logReportGoalDifferences`, #832): een verschil komt als `player.stats-differ` in het logboek van het beheer en nooit in een waarschuwing of op een pagina.
+De vergelijking stopt niets: lukt ze niet, dan is dat een waarschuwing en blijft de selectie staan.
 Is er in het seizoen nog geen wedstrijd gespeeld, dan is er niets om mee te vergelijken en zegt de controle niets.
-Bij de allereerste run op een lege database geeft de controle waarschuwingen voor wie al scoorde.
+Bij de allereerste run op een lege database geeft de controle rijen voor wie al scoorde, en de volgende run sluit ze weer.
 De import van de wedstrijden koppelt zijn doelpunten pas zodra de selectie er is.
 De run een uur later vindt ze, en de waarschuwingen zijn weg.
 

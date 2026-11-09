@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
+import { sourceDifferenceReasons } from '@fansite/db/match-conflicts'
 import {
   adminUsers,
   matchChanges,
@@ -668,6 +669,32 @@ describe('the match', () => {
       expect(html).toContain('Onze invoer: sc Heerenveen 2–0 N.E.C.')
       expect(html).toContain('Wikipedia: sc Heerenveen 1–1 N.E.C.')
       expect(html).toContain('9 nov')
+    })
+
+    it('names both sources of a difference between two sources, and says that nothing is taken over by itself (#974)', async () => {
+      const id = await withDifference()
+
+      await database.db.update(matchChanges).set({ reason: sourceDifferenceReasons['oude-fansite'] })
+
+      const html = await form(id)
+      const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map(
+        ([, name, text]) => [text, name],
+      )
+
+      expect(headings(html)).toContain('h2 De oude fansite wijkt af: uitslag')
+      expect(html).toContain('Wikipedia: sc Heerenveen 2–0 N.E.C.')
+      expect(html).toContain('De oude fansite: sc Heerenveen 1–1 N.E.C.')
+      expect(html).toContain('De import neemt hier niets vanzelf over.')
+      expect(html).not.toContain('Onze invoer: sc Heerenveen')
+      expect(buttons).toEqual(
+        expect.arrayContaining([
+          [
+            'Neem de oude fansite over',
+            expect.stringMatching(/^Neem de oude fansite over: de uitslag van Speelronde 11/),
+          ],
+          ['Houd Wikipedia', expect.stringMatching(/^Houd Wikipedia: de uitslag van Speelronde 11/)],
+        ]),
+      )
     })
 
     it('has two buttons, each with a name that says which match and part it is for, and one reason', async () => {

@@ -1,11 +1,11 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
-import { logReportGoalDifferences } from '@fansite/db/match-reports'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
-import { matches, matchGoals, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
+import { comparePlayerGoals } from '@fansite/db/player-stat-differences'
+import { players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, count, eq, isNotNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -91,8 +91,8 @@ export function formatSquadReport(report: SquadReport): string {
  * the database only when the table is found and every check passes (`checkSquad`), and then
  * all at once in one transaction. Otherwise nothing changes: the last good squad stays, and
  * the report says why. A number we cannot read or link to a player is a warning and a skipped
- * row, and so is a player whose goals in the table differ from the goals in the matches
- * (`goalsWarnings`): they never stop the import.
+ * row: they never stop the import. A player whose goals in the table differ from the goals in
+ * the matches or the match reports is kept for the editors (`player_stat_differences`).
  *
  * It reads the current season only. The rows of an earlier season are never changed or removed.
  * A player who is no longer in the table is never removed either, since goals point to his row.
@@ -138,70 +138,6 @@ export async function importSquad(
   }
 
   return report
-}
-
-/**
- * Compares the goals in the table with the goals of the matches, for each player and
- * competition the table gives numbers for. The goals of the matches are those of ours that the
- * match import linked to the player and that are not own goals. One warning for each
- * difference, with the name, the season, the competition and both numbers. It changes nothing:
- * the table is the source of the numbers we show. A match page that did not name the scorers
- * yet or a table that runs a round behind shows up here, and so does the first run on an empty
- * database, before the match import has linked the goals to the new players (the next run
- * finds them). A season without a match that was played has nothing to compare with and gives
- * no warning.
- */
-async function goalsWarnings(
-  db: Database,
-  season: string,
-  found: ReadPlayer[],
-  ids: Map<ReadPlayer, null | number>,
-): Promise<string[]> {
-  const [played] = await db
-    .select({ total: count() })
-    .from(matches)
-    .where(and(eq(matches.season, season), eq(matches.status, 'played')))
-
-  // Without a match that was played there is nothing to compare with, which is no news.
-  if (played === undefined || played.total === 0) {
-    return []
-  }
-
-  const counted = await db
-    .select({ competition: matches.competition, goals: count(), playerId: matchGoals.playerId })
-    .from(matchGoals)
-    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
-    .where(
-      and(
-        eq(matches.season, season),
-        eq(matchGoals.ours, true),
-        eq(matchGoals.ownGoal, false),
-        isNotNull(matchGoals.playerId),
-      ),
-    )
-    .groupBy(matches.competition, matchGoals.playerId)
-  const fromMatches = new Map(counted.map((row) => [`${row.playerId}/${row.competition}`, row.goals]))
-  const warnings: string[] = []
-
-  for (const player of found) {
-    const playerId = ids.get(player) ?? null
-
-    if (playerId === null) {
-      continue
-    }
-
-    for (const { competition, goals } of player.stats) {
-      const matched = fromMatches.get(`${playerId}/${competition}`) ?? 0
-
-      if (matched !== goals) {
-        warnings.push(
-          `${player.name} (${season}) has ${goals} ${goals === 1 ? 'goal' : 'goals'} in the ${competition} in the squad table and ${matched} in the matches`,
-        )
-      }
-    }
-  }
-
-  return warnings
 }
 
 /**
@@ -282,18 +218,14 @@ async function readAndStore(
   const personNames = await storePersonNames(db, personLookup.names)
 
   warnings.push(...guessedNameWarnings(personNames.guessed))
-  warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
 
-  // The goals of the match reports against the table: a difference goes in the log of the
-  // admin, never to a page, and a failure to write it is a warning that undoes nothing (#832).
+  // The goals of the table against the matches and the match reports: a difference is kept for
+  // the editors, once, until they decide or it is gone (#974). A failure to keep it is a
+  // warning that undoes nothing.
   try {
-    // Only when the table has new numbers: the log is only added to, so it can't be asked
-    // what it said before, and an hourly run would repeat itself.
-    if (counts.stats.added + counts.stats.updated > 0) {
-      await logReportGoalDifferences(db, season, null, now)
-    }
+    await db.transaction((transaction) => comparePlayerGoals(transaction, season, now))
   } catch (error) {
-    warnings.push(`the goals of the match reports are not compared with the table: ${describeError(error)}`)
+    warnings.push(`the goals of the table are not compared with the matches and the reports: ${describeError(error)}`)
   }
 
   // The chance that the list is whole is a result of its own: a failure to store it is a
@@ -460,14 +392,26 @@ async function storeStats(
         await db
           .insert(playerSeasonStats)
           .values({ appearances, assists, competition, goals, playerId, season, updatedAt: now })
-      } else if (before.appearances === appearances && before.goals === goals && before.assists === assists) {
-        counts.unchanged++
       } else {
-        counts.updated++
-        await db
-          .update(playerSeasonStats)
-          .set({ appearances, assists, goals, updatedAt: now })
-          .where(eq(playerSeasonStats.id, before.id))
+        // The editors took another number of goals over, and the table still says what it said
+        // then: their number stays (`player_season_stats.table_goals`).
+        const held = before.tableGoals !== null && before.tableGoals === goals
+        const wanted = { appearances, assists, goals: held ? before.goals : goals, tableGoals: held ? goals : null }
+
+        if (
+          before.appearances === wanted.appearances &&
+          before.goals === wanted.goals &&
+          before.assists === wanted.assists &&
+          before.tableGoals === wanted.tableGoals
+        ) {
+          counts.unchanged++
+        } else {
+          counts.updated++
+          await db
+            .update(playerSeasonStats)
+            .set({ ...wanted, updatedAt: now })
+            .where(eq(playerSeasonStats.id, before.id))
+        }
       }
     }
   }

@@ -20,7 +20,7 @@ import type { Database } from '@fansite/db/client'
 import type { Match, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
 import { recordAction } from '@fansite/db/audit-log'
-import { decideConflict, encodePartProposal } from '@fansite/db/match-conflicts'
+import { decideConflict, encodePartProposal, quietReasons } from '@fansite/db/match-conflicts'
 import {
   clearParts,
   describeEntryFacts,
@@ -36,7 +36,7 @@ import {
   type ResultFields,
 } from '@fansite/db/match-edits'
 import { matchChanges, matchEdits, matches } from '@fansite/db/schema'
-import { and, eq, inArray, isNotNull } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, notInArray } from 'drizzle-orm'
 
 import type { LinkedGoal } from './match-changes.ts'
 import type { ReadMatch } from './read-wikipedia.ts'
@@ -121,7 +121,13 @@ export async function importEditedMatch(
         .select()
         .from(matchChanges)
         .where(
-          and(eq(matchChanges.matchId, before.id), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)),
+          and(
+            eq(matchChanges.matchId, before.id),
+            eq(matchChanges.status, 'pending'),
+            isNotNull(matchChanges.part),
+            // A difference between two sources has its own rules: only a person decides it.
+            notInArray(matchChanges.reason, [...quietReasons]),
+          ),
         )
     ).map((change) => [change.part as MatchPart, change]),
   )

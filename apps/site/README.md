@@ -602,7 +602,8 @@ De balk "Op deze pagina:" heeft vier links, naar de vier kaarten (`playersShortc
 De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder de selectie, Assists en Minuten achteraan in de zijkolom.
 Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
 `src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
-Slaat de redactie een verslag als `klaar` op, dan schrijft `saveReport` een regel `player.stats-differ` in het logboek voor elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia.
+Slaat de redactie een verslag als `klaar` op, dan bewaart `saveReport` elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia als een rij in `player_stat_differences` (`compareReportGoals`, #974).
+De redactie beslist erover op `/beheer/kwaliteit/<seizoen>/spelerscijfers` (zie _De kwaliteit van de gegevens_).
 De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playersShortcutsFor`, met `seasonHasReports`).
 Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`.
@@ -1161,12 +1162,20 @@ De laatste kolom, Te doen, heeft een koppeling voor elke werklijst van het seizo
 - `zonder-doelpunten`: gespeelde wedstrijden met doelpunten in de uitslag en geen doelpunt in `match_goals`;
 - `verslagen-bezig`: wedstrijden met een verslag dat `bezig` is;
 - `doelpunten-zonder-speler`: wedstrijden met een doelpunt van ons zonder speler uit de selectie;
-- `wachtende-wijzigingen`: wedstrijden met een wijziging van Wikipedia of een afwijking die op een besluit wacht.
+- `wachtende-wijzigingen`: wedstrijden met een wijziging van Wikipedia, een afwijking van de invoer of een verschil tussen twee bronnen dat op een besluit wacht.
 
 `listWork` in `src/beheer/quality.ts` leest een lijst, de oudste wedstrijd eerst.
 Elke rij leidt naar de wedstrijd in het beheer, en een verslag dat niet af is naar het verslag.
 Een lijst telt wat de tabel telt; `src/beheer/quality.test.ts` houdt ze daaraan.
 Een adres zonder seizoen sinds 1990/91 of zonder bestaande lijst geeft "niet gevonden".
+
+Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de kolom ook een koppeling "spelerscijfers verschillen" (#974).
+Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`), met per verschil de speler, de competitie en de twee aantallen.
+Elk verschil heeft een formulier met een reden en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
+
+Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).
+De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen de bron die je overneemt of houdt.
 
 Onder de tabel staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
 De import waarschuwt voor dezelfde groepen en voegt ze niet samen.

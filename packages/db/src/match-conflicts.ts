@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm'
 // same outcome wherever it is made.
 import type { Database } from './client.ts'
 import type { FactsFields, GoalSnapshot, KickoffFields, ResultFields } from './match-edits.ts'
-import type { Match, MatchChange, MatchPart } from './schema.ts'
+import type { Match, MatchChange, MatchDataSource, MatchPart } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
 import { clearParts, insertGoals } from './match-edits.ts'
@@ -76,6 +76,40 @@ export const conflictStandsMs = 7 * 24 * 60 * 60 * 1000
  * is mailed about it and the importer never takes it over by itself.
  */
 export const oldSiteGoalsReason = 'de doelpunten van de oude fansite tellen niet op tot de uitslag'
+
+/**
+ * Why a field of a match waits as a change: a second source says something else than the
+ * source the match comes from (issue 974), by the second source. The value of the match stays
+ * until an editor decides: nobody is mailed about it and the importer never takes it over by
+ * itself.
+ */
+export const sourceDifferenceReasons = {
+  'oude-fansite': 'de oude fansite zegt iets anders dan de bron van de wedstrijd',
+  wikipedia: 'Wikipedia zegt iets anders dan de bron van de wedstrijd',
+} as const
+
+/** A source that is compared with a match of another source. */
+export type SecondSource = keyof typeof sourceDifferenceReasons
+
+/** The sources of a match in the words of a sentence. */
+export const sourceLabels: Record<MatchDataSource, string> = {
+  'oude-fansite': 'de oude fansite',
+  redactie: 'de redactie',
+  wikipedia: 'Wikipedia',
+}
+
+/**
+ * The reasons of the changes with a part that are no difference between Wikipedia and an entry
+ * of the editors: no mail goes out for them, and only a person decides them.
+ */
+export const quietReasons: readonly string[] = [oldSiteGoalsReason, ...Object.values(sourceDifferenceReasons)]
+
+/** The second source of a difference between two sources, or undefined for any other change. */
+export function secondSourceOf(reason: string): SecondSource | undefined {
+  return (Object.keys(sourceDifferenceReasons) as SecondSource[]).find(
+    (source) => sourceDifferenceReasons[source] === reason,
+  )
+}
 
 /** The parts of a match in the words of the admin, the log and the mails. */
 export const partLabels: Record<MatchPart, string> = {
@@ -177,13 +211,20 @@ export function decodePartProposal(text: null | string): PartProposal | undefine
 
 /**
  * The line for the log: the part with the entry and Wikipedia, or, for the kept goals of the
- * old fansite, with the goals the match had and the list of the files.
+ * old fansite, with the goals the match had and the list of the files, or, for a difference
+ * between two sources, with what the match had and what the second source says.
  */
 export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValue' | 'part' | 'reason'>): string {
   const name = change.part === null ? '' : partLabels[change.part]
 
   if (change.reason === oldSiteGoalsReason) {
     return `Doelpunten van de oude fansite: in de database: ${change.oldValue}; in de bestanden: ${change.newValue ?? 'niets'}`
+  }
+
+  const second = secondSourceOf(change.reason)
+
+  if (second !== undefined) {
+    return `${name.slice(0, 1).toLocaleUpperCase('nl')}${name.slice(1)}: in de database: ${change.oldValue}; ${sourceLabels[second]}: ${change.newValue ?? 'niets'}`
   }
 
   return `${name.slice(0, 1).toLocaleUpperCase('nl')}${name.slice(1)}: onze invoer: ${change.oldValue}; Wikipedia: ${change.newValue ?? 'niets'}`

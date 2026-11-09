@@ -15,6 +15,7 @@ import {
   wikipediaPages,
 } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
+import { keepSourceDifferences } from '@fansite/db/source-differences'
 import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
 
 import type { Judgement } from './classify-change.ts'
@@ -1212,13 +1213,17 @@ async function storeMatches(
         continue
       }
       if (lookup.kind === 'found' && lookup.match.dataSource !== 'wikipedia') {
-        const { differences, fill } = compareClaim(lookup.match, match, lockedFields(edits.get(lookup.match.id)))
+        const compared = compareClaim(lookup.match, match, lockedFields(edits.get(lookup.match.id)))
 
-        warnings.push(...differences.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
+        // A difference waits for the editors as a change, once, and is no warning (#974).
+        // The match keeps the value of its own source until they decide.
+        const { rest } = await keepSourceDifferences(db, lookup.match, match, compared, 'wikipedia', now)
 
-        if (Object.keys(fill).length > 0) {
+        warnings.push(...rest.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
+
+        if (Object.keys(compared.fill).length > 0) {
           counts.updated++
-          await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
+          await db.update(matches).set(compared.fill).where(eq(matches.id, lookup.match.id))
         } else {
           counts.unchanged++
         }
