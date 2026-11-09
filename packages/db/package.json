@@ -26,6 +26,7 @@
     "./queries": "./src/queries.ts",
     "./schema": "./src/schema.ts",
     "./season": "./src/season.ts",
+    "./season-coverage": "./src/season-coverage.ts",
     "./seed": "./src/seed.ts",
     "./staff": "./src/staff.ts",
     "./staff-seed": "./src/staff-seed.ts",

@@ -27,7 +27,7 @@ import {
 import { europaLeaguePage, pageTitles, pageUrl, readEuropaLeague, readStandings } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { articleRoutes } from './test-articles.ts'
-import { fetcherFor, reply, startServer } from './test-server.ts'
+import { fetcherFor, reply, startServer, writeWithoutCoverage } from './test-server.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
 
@@ -972,7 +972,7 @@ describe('the command that decides the changes', () => {
     const status = async () => {
       const lines: string[] = []
 
-      await showStatus(database.url, { clock: () => now, write: (line) => lines.push(line) })
+      await showStatus(database.url, { clock: () => now, write: writeWithoutCoverage(lines) })
 
       return lines.join('\n')
     }
@@ -1060,7 +1060,7 @@ describe('the health and the status', () => {
   /** Runs `pnpm run import:status` at a moment and returns the exit code and the lines. */
   async function status(at: Date = now) {
     const lines: string[] = []
-    const code = await showStatus(database.url, { clock: () => at, write: (line) => lines.push(line) })
+    const code = await showStatus(database.url, { clock: () => at, write: writeWithoutCoverage(lines) })
 
     return { code, lines: lines.join('\n') }
   }

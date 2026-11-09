@@ -40,7 +40,7 @@ import { acceptChanges, rejectChanges } from './match-changes.ts'
 import { pageCandidates, pageTitles, pageUrl, readLeague } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { articleRoutes } from './test-articles.ts'
-import { fetcherFor, reply, startServer } from './test-server.ts'
+import { fetcherFor, reply, startServer, writeWithoutCoverage } from './test-server.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
 
@@ -2482,7 +2482,7 @@ describe('the import command', () => {
 describe('the status', () => {
   async function status(at: Date) {
     const lines: string[] = []
-    const code = await showStatus(database.url, { clock: () => at, write: (line) => lines.push(line) })
+    const code = await showStatus(database.url, { clock: () => at, write: writeWithoutCoverage(lines) })
 
     return { code, text: lines.join('\n') }
   }
@@ -3271,7 +3271,7 @@ describe('the persons of the scorers', () => {
 
     const lines: string[] = []
 
-    await showStatus(database.url, { clock: () => first, write: (line) => lines.push(line) })
+    await showStatus(database.url, { clock: () => first, write: writeWithoutCoverage(lines) })
 
     expect(lines).toContain('Persons that look alike: 1 (Daniël Jansen and Daniel Jansen)')
   })
