@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the sports feed of RTV Noord (see docs/bronnen.md, RTV
+  Noord): RSS 2.0, headlines and descriptions in CDATA, a guid that is a link ending in a dash,
+  an image as an enclosure and times in GMT. The headlines, links and texts are invented; none
+  is copied from a real feed. The description and the image are here to show that the importer
+  does not read them. The headlines are about FC Groningen on days around and far from the match
+  that import-feeds.test.ts gives, on 22 November 2026, and one is about skating at Thialf in
+  Heerenveen, which is not about the club.
+-->
+<rss version="2.0">
+<channel>
+  <title>RTV Noord.test - Sport</title>
+  <description>Verzonnen sportnieuws</description>
+  <link>https://www.rtvnoord.test/sport</link>
+  <language>nl</language>
+  <lastBuildDate>Sun, 29 Nov 2026 09:00:00 GMT</lastBuildDate>
+  <item>
+    <title><![CDATA[FC Groningen-trainer wil geen ruimte geven aan de bezoekers]]></title>
+    <link>https://www.rtvnoord.test/sport/9300001/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300001/-</guid>
+    <pubDate>Fri, 20 Nov 2026 09:30:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300001.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[De Koffiecorner #900: een verzonnen blik op FC Groningen]]></title>
+    <link>https://www.rtvnoord.test/sport/9300002/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300002/-</guid>
+    <pubDate>Tue, 24 Nov 2026 15:00:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300002.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[FC Groningen presenteert een nieuw uitshirt]]></title>
+    <link>https://www.rtvnoord.test/sport/9300003/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300003/-</guid>
+    <pubDate>Tue, 17 Nov 2026 10:00:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300003.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[FC Groningen verliest bij de hekkensluiter]]></title>
+    <link>https://www.rtvnoord.test/sport/9300004/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300004/-</guid>
+    <pubDate>Sat, 28 Nov 2026 19:45:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300004.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[Schaatsers pakken punten op Thialf in Heerenveen]]></title>
+    <link>https://www.rtvnoord.test/sport/9300005/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300005/-</guid>
+    <pubDate>Sat, 21 Nov 2026 12:00:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300005.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[sc Heerenveen haalt een nieuwe spits]]></title>
+    <link>https://www.rtvnoord.test/sport/9300006/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300006/-</guid>
+    <pubDate>Thu, 01 Oct 2026 12:00:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300006.jpg" length="0" type="image/jpg"/>
+  </item>
+  <item>
+    <title><![CDATA[Ajax wint nipt van PEC Zwolle]]></title>
+    <link>https://www.rtvnoord.test/sport/9300007/een-verzonnen-bericht</link>
+    <guid>https://www.rtvnoord.test/sport/9300007/-</guid>
+    <pubDate>Sat, 21 Nov 2026 20:00:00 GMT</pubDate>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <enclosure url="https://images.rtvnoord.test/9300007.jpg" length="0" type="image/jpg"/>
+  </item>
+</channel>
+</rss>

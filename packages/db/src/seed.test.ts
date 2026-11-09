@@ -123,6 +123,8 @@ describe('the seed', () => {
       'https://www.gelderlander.nl/sport/rss.xml',
       'https://www.espn.nl/espn/rss/soccer/news',
       'https://www.rijnmond.nl/rss/sport.xml',
+      'https://www.rtvnoord.nl/rss/sport.xml',
+      'https://www.oogtv.nl/tag/fc-groningen/feed/',
     ])
   })
 
@@ -275,6 +277,57 @@ describe('the seed', () => {
     expect(rijnmond?.description?.length).toBeLessThanOrEqual(300)
     expect(rijnmondFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
       ['https://www.rijnmond.nl/rss/sport.xml', 'club'],
+    ])
+  })
+
+  it('puts RTV Noord in the register with its sports feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [rtv] = await database.db.select().from(sources).where(eq(sources.domain, 'www.rtvnoord.nl'))
+    const rtvFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, rtv?.id ?? 0))
+
+    expect(rtv).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'RTV Noord',
+      slug: 'rtv-noord',
+    })
+    expect(rtv?.consentStatus).not.toBe('given')
+    expect(rtv?.description).toBeTruthy()
+    expect(rtv?.description?.length).toBeLessThanOrEqual(300)
+    expect(rtvFeeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://www.rtvnoord.nl/rss/sport.xml', 'club']])
+  })
+
+  it('puts OOG Groningen in the register with a plain feed of the club and a feed on the club filter', async () => {
+    await seedSources(database.db)
+
+    const [oog] = await database.db.select().from(sources).where(eq(sources.domain, 'www.oogtv.nl'))
+    const oogFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, oog?.id ?? 0))
+
+    expect(oog).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'OOG Groningen',
+      slug: 'oog-groningen',
+    })
+    expect(oog?.consentStatus).not.toBe('given')
+    expect(oog?.description).toBeTruthy()
+    expect(oog?.description?.length).toBeLessThanOrEqual(300)
+    expect(oogFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.oogtv.nl/tag/sc-heerenveen/feed/', 'none'],
+      ['https://www.oogtv.nl/tag/fc-groningen/feed/', 'club'],
     ])
   })
 

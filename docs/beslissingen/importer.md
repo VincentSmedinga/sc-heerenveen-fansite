@@ -242,6 +242,8 @@
 - **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; ook een brede feed nemen we, als het relevantiefilter (`club`) erop staat.
 - **Later:** zie _We nemen Rijnmond na het relevantiefilter, voor de Rotterdamse tegenstanders_; Rijnmond, op 24 oktober 2026 afgewezen om zijn regionieuws, staat met de feed van de sport in het register.
   Het regionieuws van Rijnmond blijft afgewezen.
+- **Later:** zie _We nemen RTV Noord en OOG Groningen_; RTV Noord, op 24 oktober 2026 afgewezen om zijn regionieuws, staat met de feed van de sport in het register.
+  Het regionieuws van RTV Noord blijft afgewezen.
 
 ## De feeds van andere clubs nemen we niet
 
@@ -3157,3 +3159,37 @@
 - **Waarom:** ook een wedstrijd zonder verslag heeft een bron nodig, en de bron van het verslag hoort bij de opstelling en de kaarten, niet bij de uitslag.
   Een kolom is één plaats die elke pagina en elke check kan lezen.
 - **Alternatieven:** de bron van het verslag (een wedstrijd zonder verslag zou geen bron hebben); een eigen tabel met bronnen (te veel voor één regel tekst).
+
+## We nemen RTV Noord en OOG Groningen
+
+- **Datum:** 9 november 2026
+- **Besluit:** het register krijgt RTV Noord met de feed van de sport (`https://www.rtvnoord.nl/rss/sport.xml`, filter `club`) en OOG Groningen (`www.oogtv.nl`) met twee feeds: de tagfeed van sc Heerenveen als gewone feed, en de tagfeed van FC Groningen met het filter `club`.
+  Slugs: `rtv-noord` en `oog-groningen`.
+  We tonen de kop, de link, de bronnaam en de tijd, en bewaren niets van de beschrijving, de auteur, de tekst of de afbeelding.
+  Er is geen regel voor een betaalmuur: geen van de feeds geeft een teken.
+  Een kop over FC Groningen is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen hen, en een kop over sc Heerenveen telt op elke dag (de regel van #315, zoals bij Rijnmond).
+  Het regionieuws van RTV Noord en de hoofdfeed van OOG (`/feed/`, geen enkele kop over Heerenveen) staan niet in het register.
+- **Het filter:** de lijst met clubs en de regel bleven zoals ze waren.
+  Een kop over schaatsen op Thialf in Heerenveen noemt de plaats, niet de club, en krijgt de waarde `doubtful`; de site toont hem niet.
+  Op de echte feeds van 9 november 2026 misrekende het filter niets: RTV Noord had geen kop over Heerenveen, en de koppen over FC Groningen buiten de dagen rond een wedstrijd waren `irrelevant`.
+- **De links:** de feed van OOG zet `utm_`-tags achter elke link.
+  `parseLink` haalt elke parameter die met `utm_` begint van elke link af, voor alle bronnen, zodat we niet bewaren hoe een bezoeker bij een pagina kwam.
+  Een parameter die er niet mee begint, blijft.
+- **Gemeten op de echte feeds** (9 november 2026, één run van de importer): RTV Noord 50 bewaard en 50 `irrelevant`; OOG sc Heerenveen 10 bewaard en 10 `relevant`; OOG FC Groningen 10 bewaard en 10 `irrelevant`; 0 overgeslagen.
+  De tijden kloppen met de feeds.
+- **Waarom:** de Groningse media schrijven vooral over de derby en over FC Groningen.
+  Met het filter van #315 toont de site wat ze over de tegenstander schrijven in de dagen rond de wedstrijd, en wat ze over sc Heerenveen zelf schrijven.
+  De feed van sc Heerenveen van OOG levert weinig (een paar berichten per jaar) maar is goed gemikt.
+  `robots.txt` laat ons de feeds toe, en de voorwaarden van OOG zeggen niets over automatisch lezen of het overnemen van koppen (zie `docs/bronnen.md`).
+- **Alternatieven:** alleen de feed van sc Heerenveen van OOG; OOG weglaten; RTV Noord afgewezen laten staan; de hoofdfeed van OOG (10 berichten en geen kop over Heerenveen).
+- **Later:** zie _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_; de tweede regel daarbij over RTV Noord.
+
+## We wijzen het Dagblad van het Noorden af
+
+- **Datum:** 9 november 2026
+- **Besluit:** het Dagblad van het Noorden (`www.dvhn.nl`) staat niet in het register.
+- **Waarom:** elk feedadres dat we op 9 november 2026 één keer probeerden, gaf een 403, ook de sitemaps in `robots.txt` (Cloudflare).
+  We omzeilen dat niet.
+  Daarbij verbiedt `robots.txt` tekst- en datamining, scrapen en het automatisch verzamelen van gegevens.
+  Dat is een ander voorbehoud dan bij de bronnen die we wel nemen, want daar stond de feed voor ons open (zie _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_).
+- **Alternatieven:** eerst toestemming vragen; dat kan later, buiten #1004.
