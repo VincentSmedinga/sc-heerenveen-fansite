@@ -7,8 +7,6 @@ import {
   personNamesBySource,
   rememberedPersonArticles,
 } from '@fansite/db/persons'
-import { persons } from '@fansite/db/schema'
-import { asc } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 
@@ -16,6 +14,10 @@ import { lookUpTitles } from './club-pages.ts'
 import { fitsColumns, manualNames, personNameOf } from './person-name.ts'
 import { personNames } from './person-names.ts'
 import { printable } from './text.ts'
+
+// The page Kwaliteit of the admin lists the same groups, so the function is in the database
+// package; the import and the status keep finding it here.
+export { similarPersons } from '@fansite/db/persons'
 
 /** The most requests in a row that may fail before the import stops asking for this run. */
 export const mostFailuresInARow = 3
@@ -195,25 +197,6 @@ export async function lookUpPersonPages(
   return { asked, names, redirects, warnings }
 }
 
-/**
- * The persons whose titles are the same without accents, capitals, hyphens, spaces and
- * apostrophes, the addition between brackets included (`Johnny Jansen (1952)` and `(1975)` are
- * not alike). Each group lists the titles of the persons, in the order of their `id`. The
- * import warns about them and merges nothing: two players can have the same name. Join them
- * with `personTitleAliases` when they are one person.
- */
-export async function similarPersons(db: Pick<Database, 'select'>): Promise<string[][]> {
-  const groups = new Map<string, string[]>()
-
-  for (const { wikipediaPage } of await db.select().from(persons).orderBy(asc(persons.id))) {
-    const key = normalisePersonTitle(wikipediaPage)
-
-    groups.set(key, [...(groups.get(key) ?? []), wikipediaPage])
-  }
-
-  return [...groups.values()].filter((titles) => titles.length > 1)
-}
-
 /** The warning for `similarPersons`, or undefined when no persons look alike. */
 export function similarPersonsWarning(groups: readonly (readonly string[])[]): string | undefined {
   if (groups.length === 0) {
@@ -226,13 +209,4 @@ export function similarPersonsWarning(groups: readonly (readonly string[])[]): s
     .join(', ')
 
   return `Persons: ${groups.length} ${groups.length === 1 ? 'group' : 'groups'} of persons look alike and are not merged: ${printable(shown)}${groups.length > 5 ? ', …' : ''}`
-}
-
-/** A title as a computer compares it: no accents, capitals, hyphens, spaces or apostrophes. */
-function normalisePersonTitle(title: string): string {
-  return title
-    .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]/gu, '')
 }

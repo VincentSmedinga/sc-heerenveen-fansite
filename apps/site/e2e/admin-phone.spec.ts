@@ -33,6 +33,8 @@ const screens = [
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
   '/beheer/clubnamen/sv-proefdorp',
+  '/beheer/kwaliteit',
+  `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`,
   '/beheer/bezoek',
 ]
 

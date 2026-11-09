@@ -2993,3 +2993,13 @@
   De bron staat bij de wedstrijd op de site.
 - **Waarom:** feiten zijn vrij, de tekst van een journalist niet.
 - **Alternatieven:** alleen Wikipedia als bron (de gaten blijven); ook citaten (past niet bij het bronbeleid).
+
+## We aanvaarden het gat in de opstellingen van 2007/08 tot en met 2025/26
+
+- **Datum:** 9 november 2026
+- **Besluit:** er komt nu geen inhaalslag voor de opstellingen van die seizoenen (#972).
+  De pagina's zeggen dat de speelminuten bekend zijn van 1990 tot 2007 en vanaf 2026/27.
+  Een inhaalslag begint pas als vrijwilligers zich melden, de recente seizoenen eerst.
+  De zin op de openbare pagina's is een eigen issue; #854 en #855 houden met dit gat rekening.
+- **Waarom:** er is geen vrije bron per wedstrijd, en met de hand zijn het ongeveer 730 wedstrijden.
+- **Alternatieven:** nu een inhaalslag plannen; de speelminuten overal weglaten.

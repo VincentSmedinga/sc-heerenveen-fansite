@@ -15,6 +15,7 @@ describe('the screens of the admin', () => {
       'Wedstrijden',
       'Stadions',
       'Clubnamen',
+      'Kwaliteit',
       'Bezoek',
     ])
   })
@@ -30,6 +31,7 @@ describe('the screens of the admin', () => {
     ['/beheer/artikelen/nieuw', '/beheer/artikelen'],
     ['/beheer/artikelen/12/versies/3', '/beheer/artikelen'],
     ['/beheer/wedstrijden/2025-26', '/beheer/wedstrijden'],
+    ['/beheer/kwaliteit/2005-06/zonder-doelpunten', '/beheer/kwaliteit'],
     ['/beheer/bezoek', '/beheer/bezoek'],
   ])('puts %s under %s', (pathname, href) => {
     expect(currentScreen(pathname)).toBe(href)

@@ -112,6 +112,15 @@
     vertical-align: top;
   }
 
+  /*
+   * A row header breaks anywhere (see above), so next to columns full of text the table would
+   * squeeze a short one, such as a season, until it breaks in two. It keeps room for seven
+   * characters, which is `2025/26`.
+   */
+  .hf-data-table-text tbody th {
+    min-inline-size: 7ch;
+  }
+
   /* The second line of a row header, in either table, is secondary text under the header or its link. */
   .hf-data-table .hf-data-table-secondary {
     color: var(--hf-colour-text-secondary);

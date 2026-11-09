@@ -102,6 +102,7 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/wedstrijden">Wedstrijden</a>',
       '<a class="hf-tile-link" href="/beheer/stadions">Stadions</a>',
       '<a class="hf-tile-link" href="/beheer/clubnamen">Clubnamen</a>',
+      '<a class="hf-tile-link" href="/beheer/kwaliteit">Kwaliteit</a>',
       '<a class="hf-tile-link" href="/beheer/bezoek">Bezoek</a>',
     ])
     expect(html).toContain('Vul wedstrijden in of verbeter ze.')

@@ -15,6 +15,7 @@ export const screens: readonly Screen[] = [
   { href: '/beheer/wedstrijden', label: 'Wedstrijden', roles: ['beheerder'] },
   { href: '/beheer/stadions', label: 'Stadions', roles: ['beheerder'] },
   { href: '/beheer/clubnamen', label: 'Clubnamen', roles: ['beheerder'] },
+  { href: '/beheer/kwaliteit', label: 'Kwaliteit', roles: ['beheerder'] },
   { href: '/beheer/bezoek', label: 'Bezoek', roles: ['beheerder'] },
 ]
 

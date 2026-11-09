@@ -328,6 +328,25 @@ export async function rememberWikidataId(
 }
 
 /**
+ * The persons whose titles are the same without accents, capitals, hyphens, spaces and
+ * apostrophes, the addition between brackets included (`Johnny Jansen (1952)` and `(1975)` are
+ * not alike). Each group lists the titles of the persons, in the order of their `id`. The
+ * import warns about them and merges nothing: two players can have the same name. Join them
+ * with `personTitleAliases` when they are one person.
+ */
+export async function similarPersons(db: Pick<Database, 'select'>): Promise<string[][]> {
+  const groups = new Map<string, string[]>()
+
+  for (const { wikipediaPage } of await db.select().from(persons).orderBy(asc(persons.id))) {
+    const key = normalisePersonTitle(wikipediaPage)
+
+    groups.set(key, [...(groups.get(key) ?? []), wikipediaPage])
+  }
+
+  return [...groups.values()].filter((titles) => titles.length > 1)
+}
+
+/**
  * The line that the squad lists give a person: the one that stands most often in his rows of
  * `players`, and for a tie the one of the latest season. A person with no row with a position
  * is not in the map.
@@ -464,4 +483,13 @@ export async function storeWikidataLabel(db: Pick<Database, 'insert'>, id: strin
     .insert(wikidataItems)
     .values({ id, label })
     .onDuplicateKeyUpdate({ set: { id: sql`id` } })
+}
+
+/** A title as a computer compares it: no accents, capitals, hyphens, spaces or apostrophes. */
+function normalisePersonTitle(title: string): string {
+  return title
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, '')
 }
