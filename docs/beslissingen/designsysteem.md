@@ -1806,6 +1806,7 @@
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 - **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: op de pagina Tegenstanders is de lijst met alle tegenstanders de hoofdinhoud en dus wit (regel 1); de top 10 in de zijkolom is zacht (regel 4).
+- **Later:** zie _De homepage kiest zijn kaartvlakken op soort inhoud, en dit geldt alleen voor de homepage_ (9 november 2026) in `site.md`: op de homepage zijn `ArticleCard` warm en Wedstrijden en Stand zacht, en de blokken zijn niet meer allemaal wit; `ArticleCard` is niet meer zacht.
 
 ## De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
 
