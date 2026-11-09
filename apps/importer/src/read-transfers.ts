@@ -203,7 +203,7 @@ function addPlayer(players: Map<string, SeasonPlayer>, name: string, page: null 
   const earlier = players.get(key)
 
   if (earlier === undefined) {
-    players.set(key, { appearances: null, goals, name, page, position: null, shirtNumber: null })
+    players.set(key, { appearances: null, country: null, goals, name, page, position: null, shirtNumber: null })
   } else if (goals !== null) {
     earlier.goals = (earlier.goals ?? 0) + goals
   }

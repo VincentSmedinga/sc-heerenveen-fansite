@@ -35,8 +35,13 @@ function readPlayers(text: string): SeasonPlayer[] {
 }
 
 /** What a player of these pages looks like: a name, no page, and no matches or goals. */
-function seen(name: string, position: SeasonPlayer['position'], shirtNumber: null | number): SeasonPlayer {
-  return { appearances: null, goals: null, name, page: null, position, shirtNumber }
+function seen(
+  name: string,
+  position: SeasonPlayer['position'],
+  shirtNumber: null | number,
+  country: null | string = null,
+): SeasonPlayer {
+  return { appearances: null, country, goals: null, name, page: null, position, shirtNumber }
 }
 
 /** A page with a squad of the given templates. */
@@ -56,14 +61,14 @@ describe('readEnglishSquad', () => {
       warnings: [],
     })
     expect(readPlayers(fixture('2018-19'))).toEqual([
-      seen('Warner Hahn', 'doelman', 1),
-      seen('Daniel Høegh', 'verdediger', 3),
-      seen('Michel Vlap', 'verdediger', 18),
-      seen('Yuki Kobayashi', 'middenvelder', 21),
-      seen('Jan Bekkema', 'doelman', 31),
-      seen('Arbër Zeneli', 'middenvelder', null),
-      seen('Jan de Boer', 'doelman', null),
-      seen('Nicolai Næss', 'verdediger', null),
+      seen('Warner Hahn', 'doelman', 1, 'NL'),
+      seen('Daniel Høegh', 'verdediger', 3, 'DK'),
+      seen('Michel Vlap', 'verdediger', 18, 'NL'),
+      seen('Yuki Kobayashi', 'middenvelder', 21, 'JP'),
+      seen('Jan Bekkema', 'doelman', 31, 'NL'),
+      seen('Arbër Zeneli', 'middenvelder', null, 'XK'),
+      seen('Jan de Boer', 'doelman', null, 'NL'),
+      seen('Nicolai Næss', 'verdediger', null, 'NO'),
     ])
   })
 
@@ -79,31 +84,31 @@ describe('readEnglishSquad', () => {
 
   it('reads 2019/20, which has only transfers: who came, was loaned out or left in the winter', () => {
     expect(readPlayers(fixture('2019-20'))).toEqual([
-      seen('Hicham Faik', 'middenvelder', null),
-      seen('Jens Odgaard', 'aanvaller', null),
-      seen('Emil Frederiksen', 'middenvelder', null),
-      seen('Andreas Skovgaard', 'verdediger', null),
+      seen('Hicham Faik', 'middenvelder', null, null),
+      seen('Jens Odgaard', 'aanvaller', null, null),
+      seen('Emil Frederiksen', 'middenvelder', null, null),
+      seen('Andreas Skovgaard', 'verdediger', null, null),
     ])
   })
 
   it('reads 2020/21 with the notes after a name and the player out on loan, and an unfilled template', () => {
     expect(readPlayers(fixture('2020-21'))).toEqual([
-      seen('Erwin Mulder', 'doelman', 1),
-      seen('Jan Paul van Hecke', 'verdediger', 3),
-      seen('Joaquín Fernández', 'verdediger', 4),
-      seen('Henk Veerman', 'aanvaller', 9),
-      seen('Jaimy Kroesen', 'doelman', 24),
-      seen('Paweł Bochniewicz', 'verdediger', 25),
-      seen('Runar Espejord', 'aanvaller', null),
+      seen('Erwin Mulder', 'doelman', 1, 'NL'),
+      seen('Jan Paul van Hecke', 'verdediger', 3, 'NL'),
+      seen('Joaquín Fernández', 'verdediger', 4, 'UY'),
+      seen('Henk Veerman', 'aanvaller', 9, 'NL'),
+      seen('Jaimy Kroesen', 'doelman', 24, 'NL'),
+      seen('Paweł Bochniewicz', 'verdediger', 25, 'PL'),
+      seen('Runar Espejord', 'aanvaller', null, 'NO'),
     ])
   })
 
   it('reads 2021/22 with the parameters in another order and a player once who is on both lists', () => {
     expect(readPlayers(fixture('2021-22'))).toEqual([
-      seen('Erwin Mulder', 'doelman', 1),
-      seen('Filip Stevanović', 'aanvaller', 7),
-      seen("Trustin van 't Loo", 'aanvaller', 37),
-      seen('Joaquín Fernández', 'verdediger', null),
+      seen('Erwin Mulder', 'doelman', 1, 'NL'),
+      seen('Filip Stevanović', 'aanvaller', 7, 'RS'),
+      seen("Trustin van 't Loo", 'aanvaller', 37, 'NL'),
+      seen('Joaquín Fernández', 'verdediger', null, 'UY'),
     ])
   })
 
@@ -111,15 +116,15 @@ describe('readEnglishSquad', () => {
     const squad = readEnglishSquad(fixture('2024-25'))
 
     expect(readPlayers(fixture('2024-25'))).toEqual([
-      seen('Jordy de Wijs', 'verdediger', 3),
-      seen('Sam Kersten', 'verdediger', 4),
-      seen('Luuk Brouwers', 'middenvelder', 8),
-      seen('Hussein Ali', 'verdediger', 15),
-      seen('Jacob Trenskow', 'aanvaller', 20),
-      seen('Mateja Milovanović', 'verdediger', 27),
-      seen('Melle Witteveen', 'middenvelder', 32),
-      seen('Hristiyan Petrov', 'verdediger', null),
-      seen('Dimitris Rallis', 'aanvaller', null),
+      seen('Jordy de Wijs', 'verdediger', 3, 'NL'),
+      seen('Sam Kersten', 'verdediger', 4, 'NL'),
+      seen('Luuk Brouwers', 'middenvelder', 8, 'NL'),
+      seen('Hussein Ali', 'verdediger', 15, 'IQ'),
+      seen('Jacob Trenskow', 'aanvaller', 20, 'DK'),
+      seen('Mateja Milovanović', 'verdediger', 27, 'RS'),
+      seen('Melle Witteveen', 'middenvelder', 32, 'NL'),
+      seen('Hristiyan Petrov', 'verdediger', null, null),
+      seen('Dimitris Rallis', 'aanvaller', null, null),
     ])
     expect(squad).toMatchObject({
       kind: 'read',
@@ -225,5 +230,50 @@ describe('englishSquadPage', () => {
     expect(pageUrl(englishWikipediaOrigin, title)).toBe(
       'https://en.wikipedia.org/wiki/2019%E2%80%9320_SC_Heerenveen_season?action=raw',
     )
+  })
+})
+
+describe('the country of a player', () => {
+  const read = (...lines: string[]) => readEnglishSquad(squadPage(...lines))
+  const player = (nat: string) => `{{Fs player|no=1|nat=${nat}|pos=GK|name=[[Ab Cd]]}}`
+
+  it('turns the code of the football association into the code of the country', () => {
+    expect(read(player('NED'))).toMatchObject({ players: [{ country: 'NL' }], warnings: [] })
+    expect(read(player('JAP'))).toMatchObject({ players: [{ country: 'JP' }] })
+    expect(read(player('kos'))).toMatchObject({ players: [{ country: 'XK' }] })
+  })
+
+  it('leaves the country empty, without a warning, when the template has no nat', () => {
+    expect(read('{{Fs player|no=1|pos=GK|name=[[Ab Cd]]}}')).toMatchObject({
+      players: [{ country: null }],
+      warnings: [],
+    })
+    expect(read(player(''))).toMatchObject({ players: [{ country: null }], warnings: [] })
+  })
+
+  it.each([['ENG'], ['XYZ'], ['Netherlands']])('leaves the country empty, with a warning, for %s', (nat) => {
+    expect(read(player(nat))).toMatchObject({
+      players: [{ country: null, name: 'Ab Cd' }],
+      warnings: [`Ab Cd: the country '${nat.toUpperCase()}' is not one we know, so it is left empty`],
+    })
+  })
+
+  it('keeps the country of the squad when the same player is in the transfers too', () => {
+    const text = [
+      squadPage(player('NED')),
+      '== Transfers ==',
+      '=== In ===',
+      '{| class="wikitable"',
+      '!Pos.',
+      '!Player',
+      '!Date',
+      '|-',
+      '|GK',
+      '|[[Ab Cd]]',
+      '|{{dts|3 January 2025}}',
+      '|}',
+    ].join('\n')
+
+    expect(readEnglishSquad(text)).toMatchObject({ players: [{ country: 'NL', name: 'Ab Cd' }] })
   })
 })

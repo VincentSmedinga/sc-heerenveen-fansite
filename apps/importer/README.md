@@ -833,6 +833,7 @@ Alleen de lijst of de tabel in die sectie telt; een link in de tekst eromheen of
   2009/10 zet het rugnummer voor de naam; 2008/09 heeft geen rugnummers.
   De cel na een vlag is de naam, de rest van de regel is het contract en de vorige club.
 - 2013/14 tot en met 2017/18: een tabel met het rugnummer, de naam, de nationaliteit, de geboortedatum en de vorige club in een rij, onder een kop per positie.
+  De nationaliteit is hier `{{NL}}`, geen `{{NL-VLAG}}`.
   Het teken van de aanvoerder achter een naam (een link naar een bestand, of `{{aanvoerder}}`) valt weg.
 
 De wedstrijden en de doelpunten zijn leeg, want de pagina's geven ze niet.
@@ -1645,13 +1646,14 @@ Op acceptatie start je `--from-squad` met de workflow _Import squads_ (zie _De s
   De regel zegt waarom (`Squad 2013/14: warning, nothing changed: ...`), `squad_imports` telt de mislukking, en de exitcode is 1.
   `import:squads` gaat dan door met het volgende seizoen en eindigt met een samenvatting, zoals `Squads: 35 of 36 read, 6 of them without a page, 1 not read:`.
 - De spelers van de lezers van een seizoen worden samengevoegd per persoon: dezelfde pagina is dezelfde speler, en anders dezelfde naam zonder accenten en hoofdletters (`mergePlayers` in [`src/import-past-squad.ts`](src/import-past-squad.ts)).
-  De rij krijgt de beste bron uit `playerSources` van de lijsten die de speler hebben, en de positie en het rugnummer van de beste lijst die ze geeft.
+  De rij krijgt de beste bron uit `playerSources` van de lijsten die de speler hebben, en de positie, het rugnummer en het land van de beste lijst die ze geeft.
   De wedstrijden en doelpunten uit de tabellen gaan niet naar `player_season_stats`.
 - Elke pagina van een speler gaat langs `lookUpPersonPages`: een nieuwe titel kost één verzoek, een bekende titel niets.
   Een mislukt verzoek is een waarschuwing en laat `person_id` leeg tot de volgende lezing.
   Het logboek noemt het aantal opgevraagde titels: `Squad 2013/14: persons: 16 titles asked, 16 new persons, ...`.
+  Direct na de eerste regel staat hoeveel spelers een land hebben: `Squad 2013/14: countries of the players: 14 of 16 have one`.
   De rij krijgt `in_squad` waar en `left_squad_at` leeg.
-- Een tweede lezing van een seizoen voegt nieuwe spelers toe en verbetert een bron, een positie, een rugnummer, een pagina of een persoon.
+- Een tweede lezing van een seizoen voegt nieuwe spelers toe en verbetert een bron, een positie, een rugnummer, een land, een pagina of een persoon.
   Ze haalt nooit een speler weg en schrijft niets in `players` als er niets nieuw is: `Squad 2013/14: 0 new, 0 improved, 16 unchanged, from 1 page`.
 - De pagina's die zijn gelezen komen in `wikipedia_pages` met `kind` `squad`, voor de bronvermelding.
   Er komt een rij in `squad_imports` per gelezen seizoen, zoals bij `match_imports` van een afgelopen seizoen.
@@ -1781,7 +1783,8 @@ Een andere groepskop is een fout.
 Bij de eerste cel staat het rugnummer, vet gedrukt of niet.
 Een streepje (`| -`) of een lege cel is een speler zonder rugnummer.
 Een nummer buiten 1 tot en met 99 is een fout.
-De tweede cel is de nationaliteit en blijft weg, net als de vierde, het contract.
+De tweede cel is de nationaliteit: de landcode van de vlag gaat naar `players.country` (zie _Het land van een speler_).
+De vierde cel, het contract, blijft weg.
 De cijfers komen uit de cellen daarna (zie _De cijfers van een speler_).
 De naam komt uit de derde cel, zonder attribuut als `align="left"` of `align=left` (zonder aanhalingstekens):
 
@@ -1862,7 +1865,8 @@ Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen 
 ### Wat de import bewaart
 
 Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken), de zoekterm en de pagina op Wikipedia (`wikipedia_page`, mag ontbreken).
-Nationaliteit, leeftijd, contract en foto's bewaart hij niet, en vlaggen ook niet.
+Daarbij komt het land: de landcode van twee letters van de vlag (`country`, mag ontbreken; zie _Het land van een speler_).
+Leeftijd, contract en foto's bewaart hij niet, en ook geen landnaam of vlag zelf.
 De cijfers van een speler staan in een eigen tabel (zie _De cijfers van een speler_).
 De zoekterm is de naam zonder de eerste voornaam, uit `searchTerm` in `src/read-squad.ts`: `Bernt Klaverboer` geeft `Klaverboer` en `Joost van Aken` geeft `van Aken`.
 Een naam van één woord blijft zoals hij is.
@@ -1937,12 +1941,33 @@ De import schrijft een waarschuwing met de reden, en de wedstrijden en de feeds 
 Squad 2026/27: warning, nothing changed and the last good copy stays: Sc Heerenveen in het seizoen 2026/27 (mannen): the squad has 17 players, not 18 to 45
 ```
 
-Een goede lezing schrijft twee regels, en daarna een regel voor elke waarschuwing:
+Een goede lezing schrijft drie regels, en daarna een regel voor elke waarschuwing:
 
 ```text
 Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad
 Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged
+Squad 2026/27: countries of the players: 25 of 25 have one
 ```
+
+De derde regel noemt hoeveel spelers van deze lezing een land hebben, op het aantal spelers dat de lezing vond.
+Een vlag die geen land van twee letters is, krijgt een waarschuwing en een leeg land (zie _Het land van een speler_).
+
+### Het land van een speler
+
+De selectietabel noemt het land van elke speler met een vlag, en de import bewaart de landcode van twee letters in `players.country` (`NL`).
+Een speler zonder vlag houdt een lege kolom.
+De vlag is een sjabloon:
+
+- `{{NL-VLAG}}` in de tabel van de recente seizoenen en in de lijsten van 2007/08 tot en met 2009/10 (daar staat de vlag voor de naam);
+- `{{NL}}` in de tabellen van 2013/14 tot en met 2017/18;
+- `nat=NED` in `{{Fs player}}` op de Engelse pagina's, met de code van de voetbalbonden; `countryOfAssociation` in [`src/read-country.ts`](src/read-country.ts) zet die om naar twee letters.
+
+Staan er twee vlaggen in de cel, dan telt de eerste, zoals Wikipedia hem toont.
+Een sjabloon dat geen code van twee letters is (`{{ENG-VLAG}}`), een onbekende code van de bonden en een cel met tekst zonder sjabloon geven een leeg land en een waarschuwing met de naam van de speler: `Pim Verbeek: the country '{{ENG-VLAG}}' is not one we know, so it is left empty`.
+Een lege cel of een streepje is geen waarschuwing.
+Het lopende seizoen neemt het land over zoals de tabel het geeft, ook als het weggaat.
+Een seizoen dat voorbij is, vult een leeg land aan en vervangt een land alleen met een betere lijst; zo hoort het bij het rugnummer.
+De vlaggen van een vorige club, in de laatste kolommen, zijn nooit het land van de speler.
 
 ### Hoogstens één keer per uur
 

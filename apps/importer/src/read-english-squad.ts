@@ -31,11 +31,12 @@ import { playerNameMaxLength } from '@fansite/db/schema'
 
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
+import { countryOfAssociation, countryWarning } from './read-country.ts'
 import { dataCells, headerCells, nameKey, nameOf } from './read-squad.ts'
 import { clean, plain } from './read-wikipedia.ts'
 
 /** A player as a list or a table gives him, before the lists are put together. */
-type Found = { name: string; position: null | PlayerPosition; shirtNumber: null | number }
+type Found = { country: null | string; name: string; position: null | PlayerPosition; shirtNumber: null | number }
 
 /** A heading of the text: its level (`==` is 2), its title, and where its text runs. */
 type Heading = { end: number; level: number; start: number; title: string }
@@ -107,7 +108,7 @@ export function readEnglishSquad(text: string): SeasonSquad {
   const squad: Found[] = []
 
   for (const heading of squadHeadings) {
-    const found = readFsList(cleaned.slice(heading.start, heading.end), heading.title)
+    const found = readFsList(cleaned.slice(heading.start, heading.end), heading.title, warnings)
 
     if (typeof found === 'string') {
       return { kind: 'error', message: found }
@@ -219,14 +220,15 @@ function nameOfTransfer(cell: string): string {
 function put(squad: Found[], transfers: Found[]): SeasonPlayer[] {
   const seen = new Map<string, SeasonPlayer>()
 
-  for (const { name, position, shirtNumber } of [...squad, ...transfers]) {
+  for (const { country, name, position, shirtNumber } of [...squad, ...transfers]) {
     const key = nameKey(name)
     const known = seen.get(key)
 
     if (known === undefined) {
-      seen.set(key, { appearances: null, goals: null, name, page: null, position, shirtNumber })
-    } else if (known.position === null && position !== null) {
-      known.position = position
+      seen.set(key, { appearances: null, country, goals: null, name, page: null, position, shirtNumber })
+    } else {
+      known.position ??= position
+      known.country ??= country
     }
   }
 
@@ -238,7 +240,7 @@ function put(squad: Found[], transfers: Found[]): SeasonPlayer[] {
  * links and templates of its own (`other=<small>on loan from [[Club]]</small>`), so the end is
  * found by counting the braces and the parameters are split at the bars outside of them.
  */
-function readFsList(section: string, title: string): Found[] | string {
+function readFsList(section: string, title: string, warnings: string[]): Found[] | string {
   const found: Found[] = []
   const lines = section.match(/\{\{\s*fs\b[^|}]*/giu) ?? []
   const known = lines.filter((line) => /^\{\{\s*fs\s+(?:start|mid|end|player)\s*$/iu.test(line))
@@ -280,7 +282,12 @@ function readFsList(section: string, title: string): Found[] | string {
     if (shirtNumber === undefined) {
       return `a player of the list '${title}' has a shirt number we do not know: '${plain(parameters.get('no') ?? '').slice(0, 40)}'`
     }
-    found.push({ name, position, shirtNumber })
+    const country = countryOfAssociation(plain(parameters.get('nat') ?? ''))
+
+    if (country.problem !== null) {
+      warnings.push(countryWarning(name, country.problem))
+    }
+    found.push({ country: country.country, name, position, shirtNumber })
   }
 
   return found
@@ -354,7 +361,7 @@ function readTransferTable(table: string, arrivals: boolean, warnings: string[])
 
     const position = positions[lastArgument(cells[columns.position] ?? '').toLowerCase()] ?? null
 
-    players.push({ name, position, shirtNumber: null })
+    players.push({ country: null, name, position, shirtNumber: null })
   }
 
   return players

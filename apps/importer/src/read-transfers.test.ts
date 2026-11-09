@@ -87,7 +87,15 @@ describe('readSeasonTransfers', () => {
     const friends = squad.players.filter((player) => player.name === 'Rob Friend')
 
     expect(friends).toEqual<SeasonPlayer[]>([
-      { appearances: null, goals: null, name: 'Rob Friend', page: 'Rob Friend', position: null, shirtNumber: null },
+      {
+        appearances: null,
+        country: null,
+        goals: null,
+        name: 'Rob Friend',
+        page: 'Rob Friend',
+        position: null,
+        shirtNumber: null,
+      },
     ])
     expect(squad.players.every((player) => player.position === null && player.shirtNumber === null)).toBe(true)
   })

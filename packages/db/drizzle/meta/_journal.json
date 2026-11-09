@@ -379,6 +379,13 @@
       "when": 1794172640806,
       "tag": "0053_add_login_code",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1794182134875,
+      "tag": "0054_add_player_country",
+      "breakpoints": true
     }
   ]
 }

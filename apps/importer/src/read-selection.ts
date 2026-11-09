@@ -21,6 +21,7 @@ import { playerNameMaxLength } from '@fansite/db/schema'
 
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
+import { countryOfCell, countryWarning } from './read-country.ts'
 import { dataCells, headerCells, nameOf, squadGroups } from './read-squad.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
 
@@ -43,7 +44,13 @@ const yearLink = /^\[\[\d{4}\]\]$/u
 const leadingNumber = /^(\d{1,2})\s+/u
 
 /** A player as the page gives him, before the checks on the name. */
-type Positioned = { cell: string; position: null | PlayerPosition; shirtNumber: null | number }
+type Positioned = {
+  cell: string
+  /** The cell with the flag, or an empty string when the row has none. */
+  countryCell: string
+  position: null | PlayerPosition
+  shirtNumber: null | number
+}
 
 /**
  * Reads the squad of a season in the shape every reader of a season returns. The section lists
@@ -68,7 +75,7 @@ export function readSeasonSelection(text: string): SeasonSquad {
 
   const players: SeasonPlayer[] = []
 
-  for (const { cell, position, shirtNumber } of candidates) {
+  for (const { cell, countryCell, position, shirtNumber } of candidates) {
     const name = nameOf(cell.replace(captainMark, ''))
     const linked = linkedPage(cell.replace(captainMark, ''))
 
@@ -77,7 +84,12 @@ export function readSeasonSelection(text: string): SeasonSquad {
     } else if (name === '' || name.length > playerNameMaxLength || /[{}[\]|<>=]/u.test(name)) {
       return { kind: 'error', message: `a row of the section Selectie has no usable name: '${name.slice(0, 40)}'` }
     } else {
-      players.push({ appearances: null, goals: null, name, page: linked, position, shirtNumber })
+      const { country, problem } = countryOfCell(countryCell)
+
+      if (problem !== null) {
+        warnings.push(countryWarning(name, problem))
+      }
+      players.push({ appearances: null, country, goals: null, name, page: linked, position, shirtNumber })
     }
   }
 
@@ -133,14 +145,14 @@ function readList(section: string): Positioned[] | string {
     }
 
     const match = line.startsWith('*')
-      ? /^\*\s*(?:\{\{[A-Za-z0-9-]+-VLAG\}\}\s*)*(\[\[[^\]]+\]\]|[^([{]+?)\s*(?:\(.*\))?$/u.exec(line)
+      ? /^\*\s*((?:\{\{[A-Za-z0-9-]+-VLAG\}\}\s*)*)(\[\[[^\]]+\]\]|[^([{]+?)\s*(?:\(.*\))?$/u.exec(line)
       : null
-    const cell = match?.[1]
+    const cell = match?.[2]
 
     if (cell === undefined) {
       return `a line of the list Selectie has a shape we do not know: '${plain(line).slice(0, 40)}'`
     }
-    players.push({ cell, position: null, shirtNumber: null })
+    players.push({ cell, countryCell: match?.[1] ?? '', position: null, shirtNumber: null })
   }
 
   return players
@@ -148,7 +160,7 @@ function readList(section: string): Positioned[] | string {
 
 /** A row with the shirt number, the name and four more cells. Anything else is an error. */
 function readNarrowRow(cells: string[], position: PlayerPosition): Positioned[] | string {
-  const [numberCell = '', nameCell = ''] = cells
+  const [numberCell = '', nameCell = '', countryCell = ''] = cells
   const number = plain(numberCell)
 
   if (cells.length < 4 || nameCell === '') {
@@ -164,7 +176,7 @@ function readNarrowRow(cells: string[], position: PlayerPosition): Positioned[] 
     return `a row of the table Selectie has a shirt number we do not know: '${number}'`
   }
 
-  return [{ cell: nameCell, position, shirtNumber }]
+  return [{ cell: nameCell, countryCell, position, shirtNumber }]
 }
 
 /** The players of the table, under the heading of their position. */
@@ -243,7 +255,12 @@ function readWideRow(row: string, position: PlayerPosition): Positioned[] | stri
         return `a row of the table Selectie has a cell after a flag that is not a name: '${plain(next).slice(0, 40)}'`
       }
       if (!yearLink.test(rest)) {
-        players.push({ cell: rest, position, shirtNumber: shirt === undefined ? null : Number(shirt) })
+        players.push({
+          cell: rest,
+          countryCell: cell,
+          position,
+          shirtNumber: shirt === undefined ? null : Number(shirt),
+        })
       }
     }
   }

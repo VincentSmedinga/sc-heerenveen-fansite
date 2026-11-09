@@ -157,6 +157,7 @@ describe('the first import, into an empty database', () => {
 
     expect(report).toEqual({
       completeness: 'Completeness 2026/27: 95% compleet, 25 players, new',
+      countries: { known: 25, total: 25 },
       kind: 'imported',
       persons: [
         'persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
@@ -170,6 +171,7 @@ describe('the first import, into an empty database', () => {
       [
         'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
         'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
+        'Squad 2026/27: countries of the players: 25 of 25 have one',
         'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
         'Completeness 2026/27: 95% compleet, 25 players, new',
       ].join('\n'),
@@ -303,6 +305,7 @@ describe('reading again', () => {
       [
         'Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad',
         'Squad 2026/27: numbers of the players: 2 new, 0 updated, 48 unchanged',
+        'Squad 2026/27: countries of the players: 25 of 25 have one',
         'Squad 2026/27: persons: 1 title asked, 1 new person, 1 title remembered, 1 name stored (1 from a sort key, 0 guessed, 0 from the list)',
         'Completeness 2026/27: 95% compleet, 26 players, was 95% compleet with 25 players',
       ].join('\n'),
@@ -319,6 +322,56 @@ describe('reading again', () => {
     expect(after.slice(0, 25).map((player) => [player.id, player.name])).toEqual(
       before.map((player) => [player.id, player.name]),
     )
+  })
+
+  it('stores the country of the flag, and takes over a flag that changes or goes', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const country = async (name: string) =>
+      (await database.db.select().from(players).where(eq(players.name, name)))[0]?.country
+
+    expect(await country('Dirk Proper')).toBe('NL')
+    expect(await country('Marko Farji')).toBe('IQ')
+    expect(new Set((await database.db.select().from(players)).map((player) => player.country))).toEqual(
+      new Set(['BE', 'BG', 'CD', 'DK', 'FR', 'GR', 'ID', 'IQ', 'LV', 'NL', 'NO', 'SE', 'SR']),
+    )
+
+    page.squad = original.replace(
+      '|{{NL-VLAG}}\n| align="left" |[[Dirk Proper]]',
+      '|{{BE-VLAG}}\n| align="left" |[[Dirk Proper]]',
+    )
+
+    const changed = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(changed).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
+    expect(await country('Dirk Proper')).toBe('BE')
+
+    page.squad = original.replace('|{{NL-VLAG}}\n| align="left" |[[Dirk Proper]]', '|\n| align="left" |[[Dirk Proper]]')
+
+    const gone = await importAt(server, new Date(first.getTime() + hours(2)))
+
+    expect(gone).toMatchObject({ countries: { known: 24, total: 25 }, kind: 'imported', players: { updated: 1 } })
+    expect(await country('Dirk Proper')).toBeNull()
+  })
+
+  it('leaves the country empty and warns when the flag is not a country of two letters', async () => {
+    const { page, server } = await serve()
+
+    page.squad = original.replace(
+      '|{{NL-VLAG}}\n| align="left" |[[Dirk Proper]]',
+      '|{{ENG-VLAG}}\n| align="left" |[[Dirk Proper]]',
+    )
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({
+      countries: { known: 24, total: 25 },
+      kind: 'imported',
+      warnings: ["Dirk Proper: the country '{{ENG-VLAG}}' is not one we know, so it is left empty"],
+    })
+    expect((await database.db.select().from(players).where(eq(players.name, 'Dirk Proper')))[0]?.country).toBeNull()
   })
 
   it('keeps the id of a player when his number, position, name or page change', async () => {
@@ -1035,16 +1088,17 @@ describe('the import command', () => {
       .filter((line) => !/: (new (club|name) |persons: )/u.test(line))
 
     expect(code).toBe(0)
-    expect(lines.slice(0, 5)).toEqual([
+    expect(lines.slice(0, 6)).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       expect.stringContaining('Matches 2026/27: 35 new'),
       expect.stringContaining('Matches 2026/27: league results of all clubs'),
       expect.stringContaining('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad'),
       'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
+      'Squad 2026/27: countries of the players: 25 of 25 have one',
     ])
     // The goals of the made-up matches differ from the made-up table: a line for each.
-    expect(lines.length).toBeGreaterThan(6)
-    expect(lines.slice(6).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
+    expect(lines.length).toBeGreaterThan(7)
+    expect(lines.slice(7).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
       true,
     )
     expect(
@@ -1066,12 +1120,13 @@ describe('the import command', () => {
     expect(lines[1]).toContain('Matches 2026/27: warning, nothing changed and the last good copy stays')
     expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
     expect(lines[3]).toBe('Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged')
-    expect(lines[4]).toBe(
+    expect(lines[4]).toBe('Squad 2026/27: countries of the players: 25 of 25 have one')
+    expect(lines[5]).toBe(
       'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
     )
-    expect(lines[5]).toBe('Completeness 2026/27: 95% compleet, 25 players, new')
+    expect(lines[6]).toBe('Completeness 2026/27: 95% compleet, 25 players, new')
     // No match was played in the database, so there is nothing to compare the goals with.
-    expect(lines).toHaveLength(6)
+    expect(lines).toHaveLength(7)
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

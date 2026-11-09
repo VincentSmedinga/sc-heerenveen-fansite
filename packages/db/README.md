@@ -559,13 +559,15 @@ Een naam komt in een seizoen één keer voor, en een pagina ook.
 | `name`           | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                                                           |
 | `position`       | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                                                             |
 | `shirt_number`   | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                                                                  |
+| `country`        | De landcode van twee letters van de vlag in de tabel, zoals `NL`; leeg als de tabel er geen noemt                                                  |
 | `search_term`    | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                                                                    |
 | `wikipedia_page` | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link                                        |
 | `person_id`      | De persoon in `persons` van die pagina; leeg zonder pagina of als de pagina nog niet is opgevraagd (zie _De tabellen `persons` en `person_pages`_) |
 | `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`                                                    |
 | `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                                                        |
 
-Er staat niets anders in: geen nationaliteit, leeftijd, contract of foto.
+Er staat niets anders in: geen landnaam, leeftijd, contract of foto.
+Het land is alleen de landcode van de vlag in de tabel; de nationaliteiten van Wikidata staan in `person_nationalities`.
 De cijfers van een speler staan in `player_season_stats` (zie hieronder).
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
 

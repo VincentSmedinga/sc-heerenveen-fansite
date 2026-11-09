@@ -9,6 +9,8 @@ import type { PlayerPosition, PlayerSource } from '@fansite/db/schema'
 export type SeasonPlayer = {
   /** The matches the player played this season, all competitions the table gives added up. */
   appearances: null | number
+  /** The code of two letters of the flag the page shows (`NL`), or null when it shows none. */
+  country: null | string
   /** The goals of the player this season, all competitions the table gives added up. */
   goals: null | number
   /** The name as the page shows it, such as `Joost van Aken`. */

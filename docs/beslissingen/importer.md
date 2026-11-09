@@ -886,6 +886,7 @@
   Er is nog niets gekozen, dus de bron en de licentie hier blijven gelden.
 - **Later:** zie _De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg_.
   Sinds 6 november 2026 lezen `import:squad` en `import:squads` de selectie van eerdere seizoenen, uit dezelfde Nederlandse Wikipedia en met dezelfde fetcher, controle op `robots.txt` en licentie.
+- **Later:** sinds 9 november 2026 bewaren we ook de landcode van de vlag (`players.country`); zie _Het land van een speler komt als landcode uit de vlag in de selectietabel_.
 
 ## De zoekterm is de achternaam, als eigen kolom
 
@@ -3003,3 +3004,24 @@
 - **Waarom:** er zijn geen posities voor tegenstanders, en elke formatie zou een gok zijn.
   Het beheer kan het al, het werk is klein per verslag en niets in de code verzint iets.
 - **Alternatieven:** een standaard 4-4-2 voor elke volledige tegenstander (ongeveer 450 verslagen met een verzonnen formatie); een lijst van formaties per wedstrijd in de importer (blijft bestaan bij een nieuwe database, maar de eigenaar moet hem in code onderhouden).
+
+## Het land van een speler komt als landcode uit de vlag in de selectietabel
+
+- **Datum:** 9 november 2026
+- **Besluit:** de importer bewaart per speler het land dat de selectietabel van de Wikipedia noemt, als landcode van twee letters in `players.country` (#946).
+  - **De bron:** het sjabloon in de cel van de nationaliteit: `{{NL-VLAG}}` (recente seizoenen), `{{NL}}` (2013/14 tot en met 2017/18), de vlag voor de naam in de lijsten van 2007/08 tot en met 2009/10 en `nat=NED` op de Engelse pagina's.
+    Staan er twee vlaggen, dan telt de eerste, zoals Wikipedia hem toont.
+  - **Geen gok:** een sjabloon dat geen code van twee letters is (`{{ENG-VLAG}}`), een code van de bonden die we niet kennen en een cel met tekst zonder sjabloon geven een leeg land en een waarschuwing in het logboek.
+  - **De import:** het lopende seizoen neemt het land over zoals de tabel het geeft.
+    Een seizoen dat voorbij is, vult een leeg land aan en vervangt een land alleen met een betere lijst, zoals bij het rugnummer.
+    Een tweede run met dezelfde bron schrijft niets.
+    Het logboek noemt hoeveel spelers een land hebben: `countries of the players: 25 of 25 have one`.
+  - **De migratie:** `0054_add_player_country` voegt de kolom `country` (`char(2)`, mag leeg zijn) toe aan `players`.
+    Bestaande rijen blijven leeg tot de volgende import van hun seizoen.
+    Ze voegt alleen toe en kan opnieuw draaien.
+    Terugdraaien op de host: `ALTER TABLE players DROP COLUMN country`.
+  - **De licentie:** een landcode is een feit, geen tekst of foto, dus de bronvermelding verandert niet.
+- **Waarom:** de tabel noemt het land bij elke speler zonder extra verzoek, en de gegevens van Wikidata (`person_nationalities`) staan als Q-nummer zonder landcode en zijn niet voor elke speler gelezen.
+  De kaart Selectie kan er zo een vlag bij tonen (#947).
+- **Alternatieven:** alleen Wikidata (P27: geen wijziging in de importer, maar een tabel van Q-nummers naar landen en een lagere dekking); beide bronnen (twee lezers voor één issue).
+- **Later:** nationaliteit uit Wikidata als terugval voor een speler zonder sjabloon is niet gedaan en kan een eigen issue worden.
