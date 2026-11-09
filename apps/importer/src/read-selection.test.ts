@@ -60,8 +60,9 @@ function seen(
   page: null | string,
   position: SeasonPlayer['position'],
   shirtNumber: null | number,
+  country: null | string,
 ): SeasonPlayer {
-  return { appearances: null, goals: null, name, page, position, shirtNumber }
+  return { appearances: null, country, goals: null, name, page, position, shirtNumber }
 }
 
 describe('the list of 2007/08', () => {
@@ -71,12 +72,12 @@ describe('the list of 2007/08', () => {
       goalsTotal: null,
       kind: 'read',
       players: [
-        seen('Rob van Dijk', 'Rob van Dijk (voetballer)', null, null),
-        seen('Jakob Poulsen', 'Jakob Poulsen', null, null),
-        seen('Michael Bradley', 'Michael Bradley (voetballer)', null, null),
-        seen('Agil Etemadi', 'Agil Etemadi', null, null),
-        seen('Paul Bosvelt', 'Paul Bosvelt', null, null),
-        seen('Will Johnson', 'Will Johnson (voetballer)', null, null),
+        seen('Rob van Dijk', 'Rob van Dijk (voetballer)', null, null, 'NL'),
+        seen('Jakob Poulsen', 'Jakob Poulsen', null, null, 'DK'),
+        seen('Michael Bradley', 'Michael Bradley (voetballer)', null, null, 'US'),
+        seen('Agil Etemadi', 'Agil Etemadi', null, null, 'IR'),
+        seen('Paul Bosvelt', 'Paul Bosvelt', null, null, 'NL'),
+        seen('Will Johnson', 'Will Johnson (voetballer)', null, null, 'CA'),
       ],
       source: 'selectie',
       warnings: [],
@@ -86,7 +87,7 @@ describe('the list of 2007/08', () => {
   it('keeps a name without a link when the source gives a full name', () => {
     const text = '== Voorlopige selectie ==\n;Doorlopend contract\n* {{NL-VLAG}} Pim Verbeek (medio 2009)'
 
-    expect(playersOf(text)).toEqual([seen('Pim Verbeek', null, null, null)])
+    expect(playersOf(text)).toEqual([seen('Pim Verbeek', null, null, null, 'NL')])
   })
 
   it('leaves out a name without a link that is not a full name, with a warning', () => {
@@ -118,19 +119,19 @@ describe('the list of 2007/08', () => {
 describe('the wide tables of 2008/09 and 2009/10', () => {
   it('reads two players to a line and takes the position from the heading', () => {
     expect(playersOf(page200809)).toEqual([
-      seen('Brian Vandenbussche', 'Brian Vandenbussche', 'doelman', null),
-      seen('Agil Etemadi', 'Agil Etemadi', 'doelman', null),
-      seen('Hans Vonk', 'Hans Vonk (doelman)', 'doelman', null),
-      seen('Michel Breuer', 'Michel Breuer', 'verdediger', null),
-      seen('Lázaro', 'Lázaro Vinícius', 'verdediger', null),
-      seen('Lesly Fellinga', 'Lesly Fellinga', 'verdediger', null),
-      seen('Geert Arend Roorda', 'Geert Arend Roorda', 'middenvelder', null),
-      seen('Roy Beerens', 'Roy Beerens', 'middenvelder', null),
-      seen('Patrik Ingelsten', 'Patrik Ingelsten', 'aanvaller', null),
-      seen('Bonaventure Kalou', 'Bonaventure Kalou', 'aanvaller', null),
-      seen('Tarik Elyounoussi', 'Tarik Elyounoussi', 'aanvaller', null),
-      seen('Samuel Armenteros', 'Samuel Armenteros', 'aanvaller', null),
-      seen('Paweł Wojciechowski', 'Paweł Wojciechowski (voetballer 1990)', 'aanvaller', null),
+      seen('Brian Vandenbussche', 'Brian Vandenbussche', 'doelman', null, 'BE'),
+      seen('Agil Etemadi', 'Agil Etemadi', 'doelman', null, 'NL'),
+      seen('Hans Vonk', 'Hans Vonk (doelman)', 'doelman', null, 'ZA'),
+      seen('Michel Breuer', 'Michel Breuer', 'verdediger', null, 'NL'),
+      seen('Lázaro', 'Lázaro Vinícius', 'verdediger', null, 'BR'),
+      seen('Lesly Fellinga', 'Lesly Fellinga', 'verdediger', null, 'NL'),
+      seen('Geert Arend Roorda', 'Geert Arend Roorda', 'middenvelder', null, 'NL'),
+      seen('Roy Beerens', 'Roy Beerens', 'middenvelder', null, 'NL'),
+      seen('Patrik Ingelsten', 'Patrik Ingelsten', 'aanvaller', null, 'SE'),
+      seen('Bonaventure Kalou', 'Bonaventure Kalou', 'aanvaller', null, 'CI'),
+      seen('Tarik Elyounoussi', 'Tarik Elyounoussi', 'aanvaller', null, 'NO'),
+      seen('Samuel Armenteros', 'Samuel Armenteros', 'aanvaller', null, 'SE'),
+      seen('Paweł Wojciechowski', 'Paweł Wojciechowski (voetballer 1990)', 'aanvaller', null, 'PL'),
     ])
   })
 
@@ -145,22 +146,22 @@ describe('the wide tables of 2008/09 and 2009/10', () => {
 
   it('reads the shirt number in front of the name', () => {
     expect(playersOf(page200910)).toEqual([
-      seen('Brian Vandenbussche', 'Brian Vandenbussche', 'doelman', 25),
-      seen('Kenny Steppe', 'Kenny Steppe', 'doelman', 1),
-      seen('Daryl Janmaat', 'Daryl Janmaat', 'verdediger', 19),
-      seen('Goran Popov', 'Goran Popov', 'verdediger', 20),
-      seen('Gerry Koning', 'Gerry Koning', 'verdediger', 37),
-      seen('Viktor Elm', 'Viktor Elm', 'middenvelder', 7),
-      seen('Roy Beerens', 'Roy Beerens', 'aanvaller', 8),
-      seen('Gerald Sibon', 'Gerald Sibon', 'aanvaller', 35),
-      seen('Samir Fazli', 'Samir Fazli', 'aanvaller', null),
+      seen('Brian Vandenbussche', 'Brian Vandenbussche', 'doelman', 25, 'BE'),
+      seen('Kenny Steppe', 'Kenny Steppe', 'doelman', 1, 'BE'),
+      seen('Daryl Janmaat', 'Daryl Janmaat', 'verdediger', 19, 'NL'),
+      seen('Goran Popov', 'Goran Popov', 'verdediger', 20, 'MK'),
+      seen('Gerry Koning', 'Gerry Koning', 'verdediger', 37, 'NL'),
+      seen('Viktor Elm', 'Viktor Elm', 'middenvelder', 7, 'SE'),
+      seen('Roy Beerens', 'Roy Beerens', 'aanvaller', 8, 'NL'),
+      seen('Gerald Sibon', 'Gerald Sibon', 'aanvaller', 35, 'NL'),
+      seen('Samir Fazli', 'Samir Fazli', 'aanvaller', null, 'MK'),
     ])
   })
 
   it('keeps a name without a link in a cell after a flag', () => {
     const text = page200910.replace('[[Kenny Steppe]]', 'Kenny Steppe')
 
-    expect(playersOf(text)[1]).toEqual(seen('Kenny Steppe', null, 'doelman', 1))
+    expect(playersOf(text)[1]).toEqual(seen('Kenny Steppe', null, 'doelman', 1, 'BE'))
   })
 
   it('gives an error for a cell after a flag that is not a name', () => {
@@ -173,12 +174,12 @@ describe('the wide tables of 2008/09 and 2009/10', () => {
 describe('the tables of 2013/14 to 2017/18', () => {
   it('reads the shirt number, the name and the position of the heading', () => {
     expect(playersOf(page201415)).toEqual([
-      seen('Kristoffer Nordfeldt', 'Kristoffer Nordfeldt', 'doelman', 1),
-      seen('Robin Kist', 'Robin Kist', 'doelman', 30),
-      seen('Kenneth Otigba', 'Kenny Otigba', 'verdediger', 2),
-      seen('Pelé van Anholt', 'Pelé van Anholt', 'verdediger', 5),
-      seen('Marten de Roon', 'Marten de Roon', 'middenvelder', 15),
-      seen('Sam Larsson', 'Sam Larsson', 'aanvaller', 11),
+      seen('Kristoffer Nordfeldt', 'Kristoffer Nordfeldt', 'doelman', 1, 'SE'),
+      seen('Robin Kist', 'Robin Kist', 'doelman', 30, 'NL'),
+      seen('Kenneth Otigba', 'Kenny Otigba', 'verdediger', 2, 'HU'),
+      seen('Pelé van Anholt', 'Pelé van Anholt', 'verdediger', 5, 'NL'),
+      seen('Marten de Roon', 'Marten de Roon', 'middenvelder', 15, 'NL'),
+      seen('Sam Larsson', 'Sam Larsson', 'aanvaller', 11, 'SE'),
     ])
   })
 
@@ -206,12 +207,12 @@ describe('the tables of 2013/14 to 2017/18', () => {
   it('takes a dash for a player without a shirt number', () => {
     const text = tablePage(heading('Keepers'), player('-', '[[Jan Bekkema]]'))
 
-    expect(playersOf(text)).toEqual([seen('Jan Bekkema', 'Jan Bekkema', 'doelman', null)])
+    expect(playersOf(text)).toEqual([seen('Jan Bekkema', 'Jan Bekkema', 'doelman', null, 'NL')])
   })
 
   it('keeps a name without a link when the source gives a full name', () => {
     expect(playersOf(tablePage(heading('Keepers'), player('1', 'Erwin Mulder')))).toEqual([
-      seen('Erwin Mulder', null, 'doelman', 1),
+      seen('Erwin Mulder', null, 'doelman', 1, 'NL'),
     ])
   })
 
@@ -285,5 +286,90 @@ describe('a page that has changed shape', () => {
 
   it('gives an error for a table without players', () => {
     expect(problemOf(tablePage(heading('Keepers')))).toBe('the section Selectie has no players')
+  })
+})
+
+describe('the country of a player', () => {
+  const countries = (text: string) => playersOf(text).map((entry) => [entry.name, entry.country])
+
+  it('reads the flag in front of the name in the list of 2007/08', () => {
+    expect(countries(page200708)).toEqual([
+      ['Rob van Dijk', 'NL'],
+      ['Jakob Poulsen', 'DK'],
+      ['Michael Bradley', 'US'],
+      ['Agil Etemadi', 'IR'],
+      ['Paul Bosvelt', 'NL'],
+      ['Will Johnson', 'CA'],
+    ])
+  })
+
+  it('reads the flag before the name in the wide tables of 2008/09 and 2009/10, and not the flag of the club', () => {
+    expect(countries(page200809).slice(0, 3)).toEqual([
+      ['Brian Vandenbussche', 'BE'],
+      ['Agil Etemadi', 'NL'],
+      ['Hans Vonk', 'ZA'],
+    ])
+    expect(countries(page200910).map(([, country]) => country)).toEqual([
+      'BE',
+      'BE',
+      'NL',
+      'MK',
+      'NL',
+      'SE',
+      'NL',
+      'NL',
+      'MK',
+    ])
+  })
+
+  it('reads the column Nationaliteit of the tables of 2013/14 to 2017/18, where the template is {{NL}}', () => {
+    expect(countries(page201314).map(([, country]) => country)).toEqual(['SE', 'BE', 'HU', 'NL', 'NL', 'IS'])
+    expect(countries(page201415).map(([, country]) => country)).toEqual(['SE', 'NL', 'HU', 'NL', 'NL', 'SE'])
+    expect(countries(page201617).map(([, country]) => country)).toEqual(['NL', 'NL', 'BE', 'NL', 'NL'])
+  })
+
+  it('takes the first flag of a player with two', () => {
+    const text = tablePage(
+      heading('Keepers'),
+      '|-\n| 1 || [[Erwin Mulder]] || {{NL}} {{BE}} || 03-03-1989 || [[Feyenoord]]',
+    )
+
+    expect(countries(text)).toEqual([['Erwin Mulder', 'NL']])
+    expect(countries('== Selectie ==\n* {{BE-VLAG}} {{NL-VLAG}} [[Jakob Poulsen]]')).toEqual([['Jakob Poulsen', 'BE']])
+  })
+
+  it('leaves the country empty, without a warning, for a player without a flag', () => {
+    const text = tablePage(heading('Keepers'), '|-\n| 1 || [[Erwin Mulder]] ||  || 03-03-1989 || [[Feyenoord]]')
+    const squad = readSeasonSelection(text)
+
+    expect(countries(text)).toEqual([['Erwin Mulder', null]])
+    expect(squad).toMatchObject({ warnings: [] })
+    expect(countries('== Selectie ==\n* [[Jakob Poulsen]]')).toEqual([['Jakob Poulsen', null]])
+  })
+
+  it.each([['{{ENG}}'], ['{{Nederland}}'], ['Nederland']])(
+    'leaves the country empty, with a warning that names the player, for %s',
+    (cell) => {
+      const text = tablePage(
+        heading('Keepers'),
+        `|-\n| 1 || [[Erwin Mulder]] || ${cell} || 03-03-1989 || [[Feyenoord]]`,
+      )
+
+      expect(countries(text)).toEqual([['Erwin Mulder', null]])
+      expect(readSeasonSelection(text)).toMatchObject({
+        warnings: [expect.stringMatching(/^Erwin Mulder: the country '.*' is not one we know/u)],
+      })
+    },
+  )
+
+  it('leaves the country of a flag with a code that is not two letters empty, in a list and in a wide table', () => {
+    expect(readSeasonSelection('== Selectie ==\n* {{ENG-VLAG}} [[Jakob Poulsen]]')).toMatchObject({
+      players: [{ country: null, name: 'Jakob Poulsen' }],
+      warnings: ["Jakob Poulsen: the country '{{ENG-VLAG}}' is not one we know, so it is left empty"],
+    })
+    expect(readSeasonSelection(page200809.replace('{{BE-VLAG}}', '{{ENG-VLAG}}'))).toMatchObject({
+      players: expect.arrayContaining([expect.objectContaining({ country: null, name: 'Brian Vandenbussche' })]),
+      warnings: ["Brian Vandenbussche: the country '{{ENG-VLAG}}' is not one we know, so it is left empty"],
+    })
   })
 })

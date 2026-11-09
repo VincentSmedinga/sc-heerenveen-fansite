@@ -12,10 +12,13 @@ import { playerNameMaxLength } from '@fansite/db/schema'
 
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
+import { countryOfCell, countryWarning } from './read-country.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
 
 /** What the import keeps of one player. */
 export type ReadPlayer = {
+  /** The code of two letters of the flag in the table (`NL`), or null when it has none. */
+  country: null | string
   /** The name as the table shows it, such as `Joost van Aken`. */
   name: string
   position: PlayerPosition
@@ -275,8 +278,9 @@ function findTable(text: string): string | undefined {
 }
 
 /**
- * Turns the cells of a row into a player: the shirt number, the nationality (left out), then
- * the name. The contract is left out, and the numbers come after it (see `readStats`).
+ * Turns the cells of a row into a player: the shirt number, the nationality (the flag gives the
+ * country), then the name. The contract is left out, and the numbers come after it (see
+ * `readStats`).
  */
 function readPlayer(
   cells: string[],
@@ -284,7 +288,7 @@ function readPlayer(
   columnsKnown: boolean,
   warnings: string[],
 ): ReadPlayer | string {
-  const [numberCell = '', , nameCell = ''] = cells
+  const [numberCell = '', countryCell = '', nameCell = ''] = cells
 
   if (cells.length < 3) {
     return `a row of the squad table has ${cells.length} cells, not three or more`
@@ -307,8 +311,21 @@ function readPlayer(
   }
 
   const stats = columnsKnown ? readStats(cells, name, warnings) : []
+  const { country, problem } = countryOfCell(countryCell)
 
-  return { name, position, searchTerm: searchTerm(name), shirtNumber, stats, wikipediaPage: linkedPage(nameCell) }
+  if (problem !== null) {
+    warnings.push(countryWarning(name, problem))
+  }
+
+  return {
+    country,
+    name,
+    position,
+    searchTerm: searchTerm(name),
+    shirtNumber,
+    stats,
+    wikipediaPage: linkedPage(nameCell),
+  }
 }
 
 /**
@@ -351,6 +368,7 @@ function seasonPlayerOf(player: ReadPlayer): SeasonPlayer {
 
   return {
     appearances: given ? sum(player.stats.map((stats) => stats.appearances)) : null,
+    country: player.country,
     goals: given ? sum(player.stats.map((stats) => stats.goals)) : null,
     name: player.name,
     page: player.wikipediaPage,

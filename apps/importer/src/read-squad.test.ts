@@ -94,6 +94,7 @@ describe('the page of the squad', () => {
 
   it('reads a row with all cells on one line', () => {
     expect(players.find((player) => player.name === 'Bernt Klaverboer')).toEqual({
+      country: 'NL',
       name: 'Bernt Klaverboer',
       position: 'doelman',
       searchTerm: 'Klaverboer',
@@ -109,6 +110,7 @@ describe('the page of the squad', () => {
 
   it('reads a row with a cell on every line', () => {
     expect(players.find((player) => player.name === 'Maas Willemsen')).toEqual({
+      country: 'NL',
       name: 'Maas Willemsen',
       position: 'verdediger',
       searchTerm: 'Willemsen',
@@ -123,6 +125,7 @@ describe('the page of the squad', () => {
 
   it('reads a player without a shirt number, written as a dash', () => {
     expect(players.find((player) => player.name === 'Sten Kremers')).toEqual({
+      country: 'NL',
       name: 'Sten Kremers',
       position: 'doelman',
       searchTerm: 'Kremers',
@@ -143,9 +146,10 @@ describe('the page of the squad', () => {
     })
   })
 
-  it('keeps nothing but the name, the position, the number, the search term, the numbers and the page', () => {
+  it('keeps nothing but the country, the name, the position, the number, the search term, the numbers and the page', () => {
     for (const player of players) {
       expect(Object.keys(player).sort()).toEqual([
+        'country',
         'name',
         'position',
         'searchTerm',
@@ -472,6 +476,7 @@ describe('what a reader of a season gives back', () => {
     expect(read.players).toHaveLength(25)
     expect(read.players.find((player) => player.name === 'Bernt Klaverboer')).toEqual({
       appearances: 9,
+      country: 'NL',
       goals: 0,
       name: 'Bernt Klaverboer',
       page: 'Bernt Klaverboer',
@@ -488,7 +493,15 @@ describe('what a reader of a season gives back', () => {
     expect(read.goalsTotal).toBeGreaterThan(0)
 
     for (const player of read.players) {
-      expect(Object.keys(player).sort()).toEqual(['appearances', 'goals', 'name', 'page', 'position', 'shirtNumber'])
+      expect(Object.keys(player).sort()).toEqual([
+        'appearances',
+        'country',
+        'goals',
+        'name',
+        'page',
+        'position',
+        'shirtNumber',
+      ])
     }
   })
 
@@ -504,6 +517,7 @@ describe('what a reader of a season gives back', () => {
     expect(read.players.every((player) => player.appearances === null && player.goals === null)).toBe(true)
     expect(read.players.find((player) => player.name === 'Xavier Mous')).toEqual({
       appearances: null,
+      country: 'NL',
       goals: null,
       name: 'Xavier Mous',
       page: 'Xavier Mous',
@@ -563,5 +577,48 @@ describe('what a reader of a season gives back', () => {
 
     expect(season.players.map((player) => player.name)).toEqual(squad.players.map((player) => player.name))
     expect(season.warnings).toEqual(squad.warnings)
+  })
+})
+
+describe('the country of a player', () => {
+  const row = (flag: string) => `${keeper}\n|-\n|2||${flag}||[[Pim Verbeek]]||2029`
+  const countryWarnings = (flag: string) => warningsOf(pageWith(row(flag))).filter((line) => line.includes('country'))
+  const countryOf = (flag: string) => playersOf(pageWith(row(flag))).find((player) => player.name === 'Pim Verbeek')
+
+  it('reads the code of the flag of every player of the squad', () => {
+    expect(new Set(playersOf(page).map((player) => player.country))).toEqual(
+      new Set(['BE', 'BG', 'CD', 'DK', 'FR', 'GR', 'ID', 'IQ', 'LV', 'NL', 'NO', 'SE', 'SR']),
+    )
+    expect(warningsOf(page)).toEqual([])
+  })
+
+  it('takes the first flag of a player with two', () => {
+    expect(countryOf('{{NL-VLAG}} {{BE-VLAG}}')?.country).toBe('NL')
+    expect(countryOf('{{BE-VLAG}}<br />{{NL-VLAG}}')?.country).toBe('BE')
+  })
+
+  it('writes the code in capitals', () => {
+    expect(countryOf('{{nl-vlag}}')?.country).toBe('NL')
+  })
+
+  it('leaves the country empty, without a warning, for an empty cell or a dash', () => {
+    expect(countryOf('')?.country).toBeNull()
+    expect(countryOf('-')?.country).toBeNull()
+    expect(countryWarnings('')).toEqual([])
+    expect(countryWarnings('-')).toEqual([])
+  })
+
+  it.each([['{{ENG-VLAG}}'], ['{{Vlag|Nederland}}'], ['{{N-VLAG}}'], ['Nederland']])(
+    'leaves the country empty, with a warning, for %s',
+    (flag) => {
+      expect(countryOf(flag)?.country).toBeNull()
+      expect(countryWarnings(flag)).toEqual([
+        expect.stringMatching(/^Pim Verbeek: the country '.*' is not one we know/u),
+      ])
+    },
+  )
+
+  it('still reads the rest of the row when the country is unknown', () => {
+    expect(countryOf('{{ENG-VLAG}}')).toMatchObject({ name: 'Pim Verbeek', shirtNumber: 2 })
   })
 })

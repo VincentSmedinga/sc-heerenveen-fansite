@@ -847,7 +847,8 @@ export async function listSeasonMatches(db: Database, season: string) {
  * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
  * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
  * `personFamilyName`, null while the importer has not read the article), the position (null
- * when the list the player comes from gives none), the shirt number (null when it gives none)
+ * when the list the player comes from gives none), the shirt number (null when it gives none),
+ * the country code of the flag in the table (`country`, null when it names none)
  * and the source of the row. Unlike `listSquad`, this also gives a player who left the squad:
  * he belongs to the season. The order is the shirt number, players without one last, then the
  * surname the search page looks for (`searchTerm`, so `van Aken` stands under the V) and the
@@ -856,6 +857,7 @@ export async function listSeasonMatches(db: Database, season: string) {
 export function listSeasonPlayers(db: Database, season: string) {
   return db
     .select({
+      country: players.country,
       name: players.name,
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,

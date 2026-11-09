@@ -64,13 +64,13 @@ describe('the tables of 1990/91 to 1999/00', () => {
       goalsTotal: 1 + 12 + 3 + 2 + 0 + 14 + 0,
       kind: 'read',
       players: [
-        { appearances: 44, goals: 1, name: 'Marco Roelofsen', page: 'Marco Roelofsen' },
-        { appearances: 39, goals: 12, name: 'Erik Regtop', page: 'Erik Regtop' },
-        { appearances: 31, goals: 3, name: 'Johan Hansma', page: 'Johan Hansma' },
-        { appearances: 31, goals: 2, name: 'Jan de Visser', page: 'Jan de Visser (voetballer)' },
-        { appearances: 31, goals: 0, name: 'Tom Sier', page: 'Tom Sier' },
-        { appearances: 30, goals: 14, name: 'Jon Dahl Tomasson', page: 'Jon Dahl Tomasson' },
-        { appearances: 3, goals: 0, name: "Carlo l'Ami", page: "Carlo l'Ami" },
+        { appearances: 44, country: null, goals: 1, name: 'Marco Roelofsen', page: 'Marco Roelofsen' },
+        { appearances: 39, country: null, goals: 12, name: 'Erik Regtop', page: 'Erik Regtop' },
+        { appearances: 31, country: null, goals: 3, name: 'Johan Hansma', page: 'Johan Hansma' },
+        { appearances: 31, country: null, goals: 2, name: 'Jan de Visser', page: 'Jan de Visser (voetballer)' },
+        { appearances: 31, country: null, goals: 0, name: 'Tom Sier', page: 'Tom Sier' },
+        { appearances: 30, country: null, goals: 14, name: 'Jon Dahl Tomasson', page: 'Jon Dahl Tomasson' },
+        { appearances: 3, country: null, goals: 0, name: "Carlo l'Ami", page: "Carlo l'Ami" },
       ].map((player) => ({ ...player, position: null, shirtNumber: null })),
       source: 'statistieken',
       warnings: [],
@@ -119,7 +119,7 @@ describe('the tables of 1990/91 to 1999/00', () => {
       warnings: ["Carlo l'Ami: the matches '`3' is not a number, so it is left out"],
     })
     expect(playersOf(page199596)).toContainEqual(
-      expect.objectContaining({ appearances: null, goals: 0, name: "Carlo l'Ami" }),
+      expect.objectContaining({ appearances: null, country: null, goals: 0, name: "Carlo l'Ami" }),
     )
   })
 
@@ -131,7 +131,7 @@ describe('the tables of 1990/91 to 1999/00', () => {
 
   it('keeps a player without a link when the cell gives his full name', () => {
     expect(playersOf(matchesPage(row('Pim Verbeek')))).toEqual([
-      { appearances: 10, goals: 1, name: 'Pim Verbeek', page: null, position: null, shirtNumber: null },
+      { appearances: 10, country: null, goals: 1, name: 'Pim Verbeek', page: null, position: null, shirtNumber: null },
     ])
   })
 
@@ -148,14 +148,14 @@ describe('the tables of 1990/91 to 1999/00', () => {
     expect(squad).toMatchObject({
       appearancesTotal: 24,
       goalsTotal: 6,
-      players: [{ appearances: 24, goals: 6, name: 'Dumitru Mitriță' }],
+      players: [{ appearances: 24, country: null, goals: 6, name: 'Dumitru Mitriță' }],
     })
   })
 
   it('reads a player of three tables as one player', () => {
     const roelofsen = playersOf(page199596).filter((player) => player.name === 'Marco Roelofsen')
 
-    expect(roelofsen).toEqual([expect.objectContaining({ appearances: 44, goals: 1 })])
+    expect(roelofsen).toEqual([expect.objectContaining({ appearances: 44, country: null, goals: 1 })])
   })
 })
 
@@ -166,9 +166,18 @@ describe('the table of 2005/06', () => {
       goalsTotal: 0 + 0 + 1 + 5 + 20,
       kind: 'read',
       players: [
-        { appearances: 15, goals: 0, name: 'Boy Waterman', page: 'Boy Waterman', position: 'doelman', shirtNumber: 24 },
+        {
+          appearances: 15,
+          country: null,
+          goals: 0,
+          name: 'Boy Waterman',
+          page: 'Boy Waterman',
+          position: 'doelman',
+          shirtNumber: 24,
+        },
         {
           appearances: 34,
+          country: null,
           goals: 0,
           name: 'Brian Vandenbussche',
           page: 'Brian Vandenbussche',
@@ -177,6 +186,7 @@ describe('the table of 2005/06', () => {
         },
         {
           appearances: 10,
+          country: null,
           goals: 1,
           name: 'Jakob Poulsen',
           page: 'Jakob Poulsen',
@@ -185,6 +195,7 @@ describe('the table of 2005/06', () => {
         },
         {
           appearances: 41,
+          country: null,
           goals: 5,
           name: 'Paul Bosvelt',
           page: 'Paul Bosvelt',
@@ -193,6 +204,7 @@ describe('the table of 2005/06', () => {
         },
         {
           appearances: 22,
+          country: null,
           goals: 20,
           name: 'Klaas-Jan Huntelaar',
           page: 'Klaas-Jan Huntelaar',

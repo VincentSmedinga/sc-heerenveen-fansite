@@ -202,6 +202,7 @@ describe('mergePlayers', () => {
   const read = (source: MergedPlayer['source'], ...found: Partial<MergedPlayer>[]) => ({
     players: found.map((one) => ({
       appearances: 12,
+      country: null,
       goals: 3,
       name: 'Name',
       page: null,
@@ -219,7 +220,14 @@ describe('mergePlayers', () => {
     ])
 
     expect(merged).toEqual([
-      { name: 'Marten de Roon', page: 'Marten de Roon', position: 'middenvelder', shirtNumber: 15, source: 'selectie' },
+      {
+        country: null,
+        name: 'Marten de Roon',
+        page: 'Marten de Roon',
+        position: 'middenvelder',
+        shirtNumber: 15,
+        source: 'selectie',
+      },
     ])
   })
 
@@ -230,7 +238,14 @@ describe('mergePlayers', () => {
     ])
 
     expect(merged).toEqual([
-      { name: 'Jakob Poulsen', page: 'Jakob Poulsen', position: 'middenvelder', shirtNumber: 8, source: 'selectie' },
+      {
+        country: null,
+        name: 'Jakob Poulsen',
+        page: 'Jakob Poulsen',
+        position: 'middenvelder',
+        shirtNumber: 8,
+        source: 'selectie',
+      },
     ])
   })
 
@@ -241,7 +256,14 @@ describe('mergePlayers', () => {
     ])
 
     expect(merged).toEqual([
-      { name: 'Arbër Zeneli', page: 'Arbër Zeneli', position: 'middenvelder', shirtNumber: null, source: 'engels' },
+      {
+        country: null,
+        name: 'Arbër Zeneli',
+        page: 'Arbër Zeneli',
+        position: 'middenvelder',
+        shirtNumber: null,
+        source: 'engels',
+      },
     ])
   })
 
@@ -258,10 +280,22 @@ describe('mergePlayers', () => {
     expect(warnings).toEqual(['Jan de Boer: a second player with this name, so he is left out'])
   })
 
+  it('takes the country of the best list that has one', () => {
+    const { players: merged } = mergePlayers([
+      read('transfers', { country: 'BE', name: 'Brian Vandenbussche', page: 'Brian Vandenbussche' }),
+      read('engels', { country: 'NL', name: 'Brian Vandenbussche' }),
+      read('selectie', { name: 'Brian Vandenbussche', page: 'Brian Vandenbussche' }),
+    ])
+
+    expect(merged).toMatchObject([{ country: 'NL', source: 'selectie' }])
+  })
+
   it('leaves out a number the database cannot hold, and does not keep the matches and goals', () => {
     const { players: merged } = mergePlayers([read('selectie', { name: 'Een Speler', shirtNumber: 120 })])
 
-    expect(merged).toEqual([{ name: 'Een Speler', page: null, position: null, shirtNumber: null, source: 'selectie' }])
+    expect(merged).toEqual([
+      { country: null, name: 'Een Speler', page: null, position: null, shirtNumber: null, source: 'selectie' },
+    ])
   })
 })
 
@@ -342,6 +376,44 @@ describe('importPastSquad', () => {
     expect(again).toMatchObject({ kind: 'imported', players: { added: 0, improved: 0 } })
     expect(await storedPlayers()).toEqual(before.players)
     expect(await database.db.select().from(persons)).toEqual(before.persons)
+  })
+
+  it('stores the country of the flag, says how many players have one, and changes nothing the second time', async () => {
+    const server = await serve({ [squadPageTitle(season)]: twoLists })
+    const report = await importAt(server, season)
+    const rows = await storedPlayers()
+
+    expect(rows.find((row) => row.name === 'Marten de Roon')?.country).toBe('NL')
+    expect(rows.find((row) => row.name === 'Kenny Otigba')?.country).toBe('HU')
+    // A player of the transfers only has no flag.
+    expect(rows.find((row) => row.name === 'Niek Loohuis')?.country).toBeNull()
+    expect(report.kind === 'imported' && report.countries).toEqual({
+      known: rows.filter((row) => row.country !== null).length,
+      total: rows.length,
+    })
+    expect(formatPastSquadReport(report)).toContain(
+      `countries of the players: ${rows.filter((row) => row.country !== null).length} of ${rows.length} have one`,
+    )
+
+    const again = await importAt(server, season)
+
+    expect(again).toMatchObject({ kind: 'imported', players: { added: 0, improved: 0 } })
+    expect(await storedPlayers()).toEqual(rows)
+  })
+
+  it('fills in a country that is empty, and keeps one that is there when the list is not better', async () => {
+    const server = await serve({ [squadPageTitle(season)]: twoLists })
+
+    await database.db.insert(players).values([
+      { name: 'Marten de Roon', searchTerm: 'de Roon', season, source: 'selectie', wikipediaPage: 'Marten de Roon' },
+      { country: 'BE', name: 'Kenny Otigba', searchTerm: 'Otigba', season, source: 'selectie' },
+    ])
+    await importAt(server, season)
+
+    const rows = await storedPlayers()
+
+    expect(rows.find((row) => row.name === 'Marten de Roon')?.country).toBe('NL')
+    expect(rows.find((row) => row.name === 'Kenny Otigba')?.country).toBe('BE')
   })
 
   it('improves a source, a position and a number on a second read, and removes nobody', async () => {

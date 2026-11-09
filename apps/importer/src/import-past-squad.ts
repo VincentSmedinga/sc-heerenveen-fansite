@@ -36,6 +36,8 @@ import { describeError, printable } from './text.ts'
 
 /** A player as the readers of a season give him, put together (see `mergePlayers`). */
 export type MergedPlayer = {
+  /** The code of two letters of the flag, from the best list that shows one (`NL`). */
+  country: null | string
   name: string
   page: null | string
   position: null | PlayerPosition
@@ -49,6 +51,8 @@ export type PastSquadReport =
   | {
       /** The chance that the list is the whole squad, as a line (see `storeCompleteness`). */
       completeness: string
+      /** How many of the players found have a country, as the tables give it. */
+      countries: { known: number; total: number }
       kind: 'imported'
       /** The pages that gave players. */
       pages: number
@@ -98,6 +102,7 @@ export function formatPastSquadReport(report: PastSquadReport): string {
     case 'imported':
       return [
         `${head}: ${report.players.added} new, ${report.players.improved} improved, ${report.players.unchanged} unchanged, from ${report.pages} ${report.pages === 1 ? 'page' : 'pages'}`,
+        `${head}: countries of the players: ${report.countries.known} of ${report.countries.total} have one`,
         ...report.persons.map((line) => `${head}: ${printable(line)}`),
         report.completeness,
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
@@ -258,6 +263,7 @@ export async function importPastSquad(
   const completeness = await storeCompleteness(db, season, totalsOf(reads), now)
   const report: PastSquadReport = {
     completeness: describeChange(season, completeness),
+    countries: countriesOf(merged.players),
     kind: 'imported',
     pages: pagesRead.length,
     persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
@@ -313,6 +319,7 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
         }
 
         const entry: MergedPlayer = {
+          country: player.country,
           name: player.name,
           page: player.page,
           position: player.position,
@@ -331,6 +338,7 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
 
       // The list that came first is the better one, so it only gets what it lacks.
       same.position ??= player.position
+      same.country ??= player.country
       same.shirtNumber ??= shirtNumber
       if (same.page === null && player.page !== null && !byPage.has(nameKey(player.page))) {
         same.page = player.page
@@ -340,6 +348,11 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
   }
 
   return { players: merged, warnings }
+}
+
+/** How many of the players have a country. */
+function countriesOf(found: readonly { country: null | string }[]) {
+  return { known: found.filter((player) => player.country !== null).length, total: found.length }
 }
 
 /**
@@ -401,6 +414,7 @@ async function storePlayers(
 
     if (before === undefined) {
       const row = {
+        country: player.country,
         name: player.name,
         personId,
         position: player.position,
@@ -422,7 +436,9 @@ async function storePlayers(
     }
 
     const better = rank(player.source) < rank(before.source)
-    const changes: Partial<Pick<Player, 'personId' | 'position' | 'shirtNumber' | 'source' | 'wikipediaPage'>> = {}
+    const changes: Partial<
+      Pick<Player, 'country' | 'personId' | 'position' | 'shirtNumber' | 'source' | 'wikipediaPage'>
+    > = {}
 
     if (better) {
       changes.source = player.source
@@ -436,6 +452,9 @@ async function storePlayers(
       (better || before.shirtNumber === null)
     ) {
       changes.shirtNumber = player.shirtNumber
+    }
+    if (player.country !== null && player.country !== before.country && (better || before.country === null)) {
+      changes.country = player.country
     }
     if (before.wikipediaPage === null && player.page !== null && !byPage.has(nameKey(player.page))) {
       changes.wikipediaPage = player.page

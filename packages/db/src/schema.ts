@@ -1570,8 +1570,9 @@ export type PlayerSource = (typeof playerSources)[number]
  * longer in the table stays, with `in_squad` false and the moment he left in
  * `left_squad_at` (UTC), and comes back into the squad when the table has him again. The rows
  * of an earlier season are kept and never shown. Only what the pages need is kept: no
- * nationality, age, contract or photo. The numbers of a player (appearances, goals and assists)
- * are in `player_season_stats`, not here.
+ * age, contract or photo, and as nationality only the country code of the flag (`country`).
+ * The numbers of a player (appearances, goals and assists) are in `player_season_stats`,
+ * not here.
  *
  * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
  * it is under. `position` is empty for a player from a list that gives none, such as a transfer
@@ -1581,7 +1582,9 @@ export type PlayerSource = (typeof playerSources)[number]
  * own column so one player can be corrected: the importer fills it for a new player and leaves
  * it alone for a known one. `wikipedia_page` is the page the table links to, such as `Luca
  * Oyen` or `Pim Verbeek (voetballer, 1999)`, empty when the table does not link the name. It
- * is the key that ties a goal to a player, and it is unique within a season. `person_id` is the
+ * is the key that ties a goal to a player, and it is unique within a season. `country` is the
+ * code of two letters (`NL`) of the flag the selection table gives the player, empty when the
+ * table names none. `person_id` is the
  * person (`persons`) of that page, which is the same for the same player in every season.
  */
 export const players = mysqlTable(
@@ -1593,6 +1596,7 @@ export const players = mysqlTable(
     position: mysqlEnum('position', playerPositions),
     source: mysqlEnum('source', playerSources).notNull().default('selectie'),
     shirtNumber: int('shirt_number', { unsigned: true }),
+    country: char('country', { length: 2 }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),

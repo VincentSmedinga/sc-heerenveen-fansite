@@ -342,7 +342,14 @@ describe('listSquad', () => {
       { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
       { name: 'Zonder Positie', position: null, searchTerm: 'Positie', season: '2026/27', shirtNumber: null },
       { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler', season: '2026/27', shirtNumber: 10 },
-      { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper', season: '2026/27', shirtNumber: 1 },
+      {
+        country: 'NL',
+        name: 'Een Keeper',
+        position: 'doelman',
+        searchTerm: 'Keeper',
+        season: '2026/27',
+        shirtNumber: 1,
+      },
       { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
       {
         inSquad: false,
@@ -417,7 +424,14 @@ describe('listSeasonPlayers', () => {
       { name: 'Anton Zonder', position: null, searchTerm: 'Zonder', season: '2026/27', shirtNumber: null },
       { name: 'Joost van Aken', position: 'verdediger', searchTerm: 'van Aken', season: '2026/27', shirtNumber: 4 },
       { name: 'Bas Zeven', position: 'aanvaller', searchTerm: 'Zeven', season: '2026/27', shirtNumber: 4 },
-      { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper', season: '2026/27', shirtNumber: 1 },
+      {
+        country: 'NL',
+        name: 'Een Keeper',
+        position: 'doelman',
+        searchTerm: 'Keeper',
+        season: '2026/27',
+        shirtNumber: 1,
+      },
       {
         inSquad: false,
         leftSquadAt: new Date('2027-01-31T12:00:00Z'),
@@ -441,6 +455,7 @@ describe('listSeasonPlayers', () => {
       'Anton Zonder',
     ])
     expect(found[0]).toEqual({
+      country: 'NL',
       name: 'Een Keeper',
       personFamilyName: null,
       personFamilyNamePrefix: null,

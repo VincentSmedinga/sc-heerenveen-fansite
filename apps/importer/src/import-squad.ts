@@ -32,6 +32,8 @@ export type SquadReport =
   | {
       /** The chance that the list is the whole squad, as a line; absent if not stored. */
       completeness?: string | undefined
+      /** How many of the players found have a country, as the table gives it. */
+      countries: { known: number; total: number }
       kind: 'imported'
       persons: string[]
       players: { added: number; left: number; unchanged: number; updated: number }
@@ -71,6 +73,7 @@ export function formatSquadReport(report: SquadReport): string {
       return [
         `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.left} left the squad`,
         `${head}: numbers of the players: ${report.stats.added} new, ${report.stats.updated} updated, ${report.stats.unchanged} unchanged`,
+        `${head}: countries of the players: ${report.countries.known} of ${report.countries.total} have one`,
         ...report.persons.map((line) => `${head}: ${printable(line)}`),
         ...(report.completeness === undefined ? [] : [report.completeness]),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
@@ -305,6 +308,10 @@ async function readAndStore(
 
   return {
     completeness,
+    countries: {
+      known: read.players.filter((player) => player.country !== null).length,
+      total: read.players.length,
+    },
     kind: 'imported',
     persons: describePersons(personLookup.asked, counts.persons, personNames.counts),
     players: counts.players,
@@ -383,6 +390,7 @@ async function storePlayers(
       before.name === player.name &&
       before.position === player.position &&
       before.shirtNumber === player.shirtNumber &&
+      before.country === player.country &&
       before.wikipediaPage === player.wikipediaPage &&
       (personId === null || before.personId === personId)
     ) {
@@ -392,6 +400,7 @@ async function storePlayers(
       await db
         .update(players)
         .set({
+          country: player.country,
           inSquad: true,
           leftSquadAt: null,
           name: player.name,

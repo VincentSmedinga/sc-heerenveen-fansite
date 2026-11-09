@@ -77,6 +77,7 @@ export function readSeasonStatistics(text: string): SeasonSquad {
 
   const players = rows.map((row): SeasonPlayer => ({
     appearances: row.appearances,
+    country: null,
     goals: row.goals,
     name: row.name,
     page: row.page,
