@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS `player_stat_differences` (
 	CONSTRAINT `player_stat_differences_player_id_players_id_fk` FOREIGN KEY (`player_id`) REFERENCES `players`(`id`) ON DELETE cascade ON UPDATE no action,
 	INDEX `player_stat_differences_season_status_idx` (`season`,`status`),
 	INDEX `player_stat_differences_player_idx` (`player_id`)
-);
---> statement-breakpoint
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;--> statement-breakpoint
 ALTER TABLE `audit_log` MODIFY COLUMN `action` enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep') NOT NULL;--> statement-breakpoint
 ALTER TABLE `player_season_stats` ADD COLUMN IF NOT EXISTS `table_goals` int unsigned;
