@@ -285,6 +285,7 @@ describe('the overview', () => {
       goalsWithoutPlayer: 0,
       hasStanding: false,
       matchesBySource: { 'oude-fansite': 0, redactie: 0, wikipedia: 0 },
+      matchesTotal: 0,
       played: 0,
       playedWithoutGoalList: 0,
       playerCount: 0,
@@ -305,7 +306,7 @@ describe('the overview', () => {
         reports: 38,
         reportsDone: 38,
         season: '2004/05',
-        squad: { bestSource: 'wikipedia', level: 'volledig' },
+        squad: { bestSource: 'selectie', level: 'compleet' },
       }),
     ])
     const legend = lines.slice(0, seasonCoverageColumns.length)
@@ -328,9 +329,9 @@ describe('the overview', () => {
 
     it('pads each column to its widest value, with two spaces between the columns', () => {
       expect(table).toEqual([
-        'season   wiki    old  edit  played  nolist  reports  att  ref  players  best       level     noscorer  table',
-        '1990/91     0      0     0       0       0      0/0    0    0        0  -          -                0  no   ',
-        '2004/05    38  12345     3      38       0    38/38    0    0        0  wikipedia  volledig       120  yes  ',
+        'season   wiki    old  edit  played  nolist  reports  att  ref  players  best      level     noscorer  table',
+        '1990/91     0      0     0       0       0      0/0    0    0        0  -         -                0  no   ',
+        '2004/05    38  12345     3      38       0    38/38    0    0        0  selectie  compleet       120  yes  ',
       ])
       expect(new Set(table.map((line) => line.length)).size).toBe(1)
     })
