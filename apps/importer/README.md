@@ -384,7 +384,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_) de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
 
 ### De uitkomst bekijken
 
