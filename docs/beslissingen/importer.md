@@ -1376,6 +1376,7 @@
   De markering `goals_edited` en de rest van deze beslissing blijven zoals ze zijn.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
 - **Later:** zie _De doelpunten van een wedstrijd met een verslag bewerk je alleen in het verslag_ in `site.md` (7 november 2026): een verslag van #829 zet ook `goals_edited`, en de import houdt dan de doelpunten met hun spelers (`appearance_id`) vast.
+- **Later:** zie _Een vierde deel in `match_edits` voor de gegevens van een wedstrijd_ (9 november 2026): de tabel markeert sinds #969 ook de toeschouwers, de scheidsrechter, het stadion en de opmerking.
 
 ## Bij een verschil blijft de invoer staan en schrijft de import het op
 
@@ -3108,3 +3109,22 @@
 - **Waarom:** de oude fansite maakt zelf de ronde (`Wedstrijd 3`) en Wikipedia schrijft `Eerste ronde`, dus dezelfde wedstrijd kon twee keer in de database komen.
   De gegevens van de oude fansite zijn van de projecteigenaar, en een tweede bron is een controle, geen vervanging.
 - **Alternatieven:** Wikipedia gaat voor (een eigen bron verandert dan door een bewerking elders); wie het eerst schrijft wint, zoals voorheen (een verschil blijft onzichtbaar); de sleutel veranderen in datum en club (een herspeelde wedstrijd past dan niet).
+
+## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
+
+- **Datum:** 9 november 2026
+- **Besluit:** `match_edits` krijgt een vierde markering, `facts_edited`, voor `attendance`, `referee`, `stadium` en `note`, met `reported_facts` voor wat Wikipedia de vorige keer zei, en `matchParts` krijgt `facts` (#969).
+  Er komt nog geen algemene tabel.
+  - Het formulier van een wedstrijd heeft vier velden met de grenzen van de database: toeschouwers (0 tot 150.000, alleen bij een gespeelde wedstrijd), scheidsrechter (100 tekens), stadion (150) en opmerking (255).
+    Elk veld heeft zijn eigen fout.
+  - `before_match` bewaart de vier waarden vóór de eerste invoer.
+    "Invoer weghalen" zet ze terug, en de toeschouwers alleen bij een gespeelde wedstrijd.
+  - De import van Wikipedia (`edited-matches.ts`) en de stap `matches` van de oude fansite laten een gemarkeerd deel staan.
+    Ook een wedstrijd die ze op datum en club vinden (`findMatchByDate`, #968) vullen ze niet aan voor een gemarkeerd deel (`lockedFields`).
+  - Een gegeven van Wikipedia dat verschilt, wordt een wachtende wijziging met het deel `facts`, zoals bij de andere delen.
+    Wikipedia zegt niets over een gegeven dat het mist: alleen een gegeven dat Wikipedia wel heeft, kan verschillen.
+    De markering verdwijnt als alle vier gelijk zijn.
+  - Het logboek heeft één regel `match.edit` per invoer, met de waarden ervoor en erna.
+- **Waarom:** het past in wat er is: de wachtende wijziging, het terugzetten en de logregel werken voor elk deel op dezelfde manier.
+  Een verbeterde scheidsrechter of een toeschouwersaantal verdween bij de volgende import.
+- **Alternatieven:** een algemene tabel met entiteit, veld en waarde (meer werk nu, en de import moet anders lezen; die komt pas als ook selecties of personen dat nodig hebben, zie #977).

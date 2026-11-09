@@ -33,12 +33,87 @@ function filled(overrides: Partial<MatchValues['velden']> = {}, goals: MatchValu
 const ours = { ...emptyGoal, kant: 'wij', minuut: '12', speler: '11' }
 const theirs = { ...emptyGoal, kant: 'zij', minuut: '40', naam: 'Sibbing' }
 
+describe('the facts', () => {
+  it('takes the spectators, the referee, the stadium and the note, and reads empty as none', () => {
+    const checked = validate(
+      filled({
+        opmerking: 'Begon later door file',
+        scheidsrechter: 'Bas Nijhuis',
+        stadion: 'Abe Lenstra Stadion',
+        toeschouwers: '21022',
+      }),
+      league,
+    )
+
+    expect(checked.entry?.facts).toEqual({
+      attendance: 21_022,
+      note: 'Begon later door file',
+      referee: 'Bas Nijhuis',
+      stadium: 'Abe Lenstra Stadion',
+    })
+    expect(validate(filled({ toeschouwers: '0' }), league).entry?.facts.attendance).toBe(0)
+  })
+
+  it('has an error at each field that is too long, and at spectators that are not a number', () => {
+    const checked = validate(
+      filled({
+        opmerking: 'x'.repeat(256),
+        scheidsrechter: 'x'.repeat(101),
+        stadion: 'x'.repeat(151),
+        toeschouwers: '150001',
+      }),
+      league,
+    )
+
+    expect(checked.errors).toMatchObject({
+      opmerking: 'Schrijf hoogstens 255 tekens.',
+      scheidsrechter: 'Schrijf hoogstens 100 tekens.',
+      stadion: 'Schrijf hoogstens 150 tekens.',
+      toeschouwers: expect.stringContaining('0 tot 150000'),
+    })
+    expect(validate(filled({ toeschouwers: 'veel' }), league).errors?.toeschouwers).toBeDefined()
+  })
+
+  it('has spectators for a played match only, as the database has it', () => {
+    const checked = validate(
+      filled({ status: 'scheduled', toeschouwers: '500', 'uitslag-wij': '', 'uitslag-zij': '' }),
+      league,
+    )
+
+    expect(checked.errors?.toeschouwers).toContain('gespeelde wedstrijd')
+  })
+
+  it('puts the stored facts in the form', () => {
+    const values = valuesOf(
+      {
+        ...({} as Parameters<typeof valuesOf>[0]),
+        attendance: 21_022,
+        kickoffAt: null,
+        matchDate: '2026-10-31',
+        note: null,
+        referee: 'Bas Nijhuis',
+        stadium: null,
+        status: 'played',
+      } as Parameters<typeof valuesOf>[0],
+      [],
+    )
+
+    expect(values.velden).toMatchObject({
+      opmerking: '',
+      scheidsrechter: 'Bas Nijhuis',
+      stadion: '',
+      toeschouwers: '21022',
+    })
+  })
+})
+
 describe('validate', () => {
   it('understands a played match: the kick-off in UTC, the result, and no goals', () => {
     const checked = validate(filled(), league)
 
     expect(checked.errors).toBeUndefined()
     expect(checked.entry).toEqual({
+      facts: { attendance: null, note: null, referee: null, stadium: null },
       goals: [],
       kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T18:45:00Z'), matchDate: '2026-10-31' },
       result: {

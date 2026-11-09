@@ -56,6 +56,27 @@ const hiddenFields = () =>
     item.querySelector('input, select')?.getAttribute('name'),
   )
 
+describe('the facts in the form of a match', () => {
+  it('has a field for each fact with its label, and the error at its own field', () => {
+    const values = {
+      ...initial('1', '0'),
+      velden: { ...emptyFields, opmerking: 'Begon later', status: 'played', toeschouwers: '21022' },
+    }
+
+    render(
+      <MatchFormProvider action={() => Promise.resolve({ errors: {}, values })} choices={choices} initial={values}>
+        <MatchFields />
+      </MatchFormProvider>,
+    )
+
+    for (const label of ['Toeschouwers', 'Scheidsrechter', 'Stadion', 'Opmerking']) {
+      expect(screen.getByLabelText(new RegExp(`^${label}`, 'u'))).toBeTruthy()
+    }
+    expect((screen.getByLabelText(/^Toeschouwers/u) as HTMLInputElement).value).toBe('21022')
+    expect((screen.getByLabelText(/^Opmerking/u) as HTMLInputElement).value).toBe('Begon later')
+  })
+})
+
 describe('the time of the form of a match', () => {
   const rendered = (timeOptional: boolean) => {
     const values = initial('1', '0')

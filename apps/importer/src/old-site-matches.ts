@@ -1,5 +1,6 @@
-import type { Competition, Match, NewMatchStatistics } from '@fansite/db/schema'
+import type { Competition, Match, MatchEdit, NewMatchStatistics } from '@fansite/db/schema'
 
+import { lockedFields } from '@fansite/db/match-edits'
 import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
@@ -291,7 +292,8 @@ const resultFields = [
   'penaltiesFor',
   'status',
 ] as const
-const otherFields = ['attendance', 'clubId', 'home', 'note', 'opponent', 'referee'] as const
+const factFields = ['attendance', 'note', 'referee'] as const
+const otherFields = ['clubId', 'home', 'opponent'] as const
 
 const sameValue = (a: unknown, b: unknown) =>
   a instanceof Date && b instanceof Date ? a.getTime() === b.getTime() : a === b
@@ -313,14 +315,14 @@ export async function importOldSiteMatches(
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const names = new Map(oldClubs.map((club) => [club.code, club.name]))
   const stored = new Map<string, StoredMatch>()
-  const edits = new Map<number, { kickoff: boolean; result: boolean }>()
+  const edits = new Map<number, MatchEdit>()
   const statistics = new Map<number, typeof matchStatistics.$inferSelect>()
 
   for (const row of await db.select().from(matches)) {
     stored.set(matchKey(row), row)
   }
   for (const row of await db.select().from(matchEdits)) {
-    edits.set(row.matchId, { kickoff: row.kickoffEdited, result: row.resultEdited })
+    edits.set(row.matchId, row)
   }
   for (const row of await db.select().from(matchStatistics)) {
     statistics.set(row.matchId, row)
@@ -374,7 +376,7 @@ export async function importOldSiteMatches(
         )
       }
       if (lookup.kind === 'found' && lookup.match.dataSource !== oldSiteSource) {
-        const { differences, fill } = compareClaim(lookup.match, values)
+        const { differences, fill } = compareClaim(lookup.match, values, lockedFields(edits.get(lookup.match.id)))
 
         report.lines.push(...differences.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)))
 
@@ -404,8 +406,9 @@ export async function importOldSiteMatches(
 
     const edit = edits.get(before.id)
     const fields = [
-      ...(edit?.kickoff === true ? [] : kickoffFields),
-      ...(edit?.result === true ? [] : resultFields),
+      ...(edit?.kickoffEdited === true ? [] : kickoffFields),
+      ...(edit?.resultEdited === true ? [] : resultFields),
+      ...(edit?.factsEdited === true ? [] : factFields),
       ...otherFields,
     ] as const
     const change: Record<string, unknown> = {}

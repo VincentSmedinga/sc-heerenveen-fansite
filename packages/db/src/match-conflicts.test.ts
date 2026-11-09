@@ -47,14 +47,18 @@ const scheduled: Omit<NewMatch, 'clubId'> = {
 const wikipedia = {
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   dateText: null,
   extraTime: false,
   goalsAgainst: 1,
   goalsFor: 3,
   kickoffAt: scheduled.kickoffAt ?? null,
   matchDate: '2026-10-31',
+  note: null,
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
+  stadium: null,
   status: 'played',
 } as const
 

@@ -170,6 +170,7 @@ async function enter(
     beforeMatch: encodeMatch(before),
     editedAt: first,
     editedBy: adminId,
+    factsEdited: parts.includes('facts'),
     goalsEdited: parts.includes('goals'),
     kickoffEdited: parts.includes('kickoff'),
     matchId: before.id,
@@ -425,6 +426,63 @@ describe('Wikipedia has something else', () => {
     await importAt(server, later(first, 2))
 
     expect(await row(roundOne)).toMatchObject({ attendance: 22_000, goalsFor: 2 })
+  })
+})
+
+describe('the facts of a match (issue 969)', () => {
+  it('keeps the spectators and the referee of the editors, and keeps the difference once as a change that waits', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enter(roundOne, { attendance: 21_500, referee: 'Bas Nijhuis' }, ['facts'])
+
+    const second = later(first, 2)
+    const report = await importAt(server, second)
+
+    expect(await row(roundOne)).toMatchObject({ attendance: 21_500, referee: 'Bas Nijhuis' })
+    expect(report.kind === 'imported' ? report.warnings : []).toEqual([
+      expect.stringContaining('Wikipedia differs from the entry of the editors in the facts'),
+    ])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { newValue: expect.stringContaining('toeschouwers 21.022'), part: 'facts', status: 'pending' },
+    ])
+    expect(await edits()).toMatchObject([{ factsEdited: true }])
+
+    // The same difference at the next runs is not reported again, and the entry stays.
+    const again = await importAt(server, later(first, 3))
+
+    expect(again.kind === 'imported' ? again.warnings : []).toEqual([])
+    expect(await row(roundOne)).toMatchObject({ attendance: 21_500, referee: 'Bas Nijhuis' })
+    expect(await log()).toHaveLength(1)
+  })
+
+  it('clears the marker when Wikipedia says the same, and the facts follow Wikipedia from then on', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    // The entry is what Wikipedia says already.
+    await enter(roundOne, {}, ['facts'])
+    await importAt(server, later(first, 2))
+
+    expect(await edits()).toEqual([])
+    expect(await log()).toMatchObject([{ action: 'match.caught-up' }])
+
+    pages.programme = pages.programme.replace('|attendance = 21.022', '|attendance = 22.000')
+    await importAt(server, later(first, 3))
+
+    expect(await row(roundOne)).toMatchObject({ attendance: 22_000 })
+  })
+
+  it('leaves the facts alone that Wikipedia does not say anything about', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    // Wikipedia has no referee and no note, so the entry adds them without a difference.
+    await enter(roundOne, { note: 'Begon later door file', referee: 'Bas Nijhuis' }, ['facts'])
+    await importAt(server, later(first, 2))
+
+    expect(await row(roundOne)).toMatchObject({ note: 'Begon later door file', referee: 'Bas Nijhuis' })
+    expect(await database.db.select().from(matchChanges)).toEqual([])
   })
 })
 

@@ -1,6 +1,6 @@
 import { eq, inArray } from 'drizzle-orm'
 
-// What the editors filled in of a match (`match_edits`): the three parts of a match they can
+// What the editors filled in of a match (`match_edits`): the four parts of a match they can
 // enter, the match and its goals as they were before the first entry, and putting that back.
 // The site writes the entries; the importer reads the markers and clears them (see the
 // importer's `edited-matches.ts`).
@@ -11,6 +11,9 @@ import { matchEdits, matches, matchGoals, matchParts, players } from './schema.t
 
 export { matchParts }
 export type { MatchPart }
+
+/** The facts of one match, for a judgement and a line of text. */
+export type FactsFields = Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'>
 
 /** The goals that are stored, as the comparison needs them. */
 export type GoalFields = Pick<
@@ -24,19 +27,26 @@ export type GoalSnapshot = Omit<NewMatchGoal, 'id' | 'matchId'>
 /** The kick-off of one match, for a judgement and a line of text. */
 export type KickoffFields = Pick<Match, 'dateText' | 'kickoffAt' | 'matchDate'>
 
-/** The fields of a match that `before_match` keeps, with the moments as ISO text. */
+/**
+ * The fields of a match that `before_match` keeps, with the moments as ISO text. The facts are
+ * left out of a snapshot that was made before the facts could be entered.
+ */
 export type MatchSnapshot = {
   afterNinetyAgainst: null | number
   afterNinetyFor: null | number
+  attendance?: null | number
   dateText: null | string
   extraTime: boolean
   goalsAgainst: null | number
   goalsFor: null | number
   kickoffAt: null | string
   matchDate: string
+  note?: null | string
   penaltiesAgainst: null | number
   penaltiesFor: null | number
+  referee?: null | string
   resultSetAt: null | string
+  stadium?: null | string
   status: Match['status']
 }
 
@@ -73,6 +83,7 @@ export async function clearParts(db: Pick<Database, 'delete' | 'update'>, edit: 
   await db
     .update(matchEdits)
     .set({
+      ...(parts.includes('facts') ? { factsEdited: false, reportedFacts: null } : {}),
       ...(parts.includes('goals') ? { goalsEdited: false, reportedGoals: null } : {}),
       ...(parts.includes('kickoff') ? { kickoffEdited: false, reportedKickoff: null } : {}),
       ...(parts.includes('result') ? { reportedResult: null, resultEdited: false } : {}),
@@ -80,6 +91,19 @@ export async function clearParts(db: Pick<Database, 'delete' | 'update'>, edit: 
     .where(eq(matchEdits.matchId, edit.matchId))
 
   return left
+}
+
+/**
+ * The facts as a line: `toeschouwers 12.345, scheidsrechter Bas Nijhuis, stadion Abe Lenstra,
+ * opmerking geen`.
+ */
+export function describeEntryFacts(facts: FactsFields): string {
+  return [
+    `toeschouwers ${facts.attendance === null ? 'geen' : new Intl.NumberFormat('nl-NL').format(facts.attendance)}`,
+    `scheidsrechter ${facts.referee ?? 'geen'}`,
+    `stadion ${facts.stadium ?? 'geen'}`,
+    `opmerking ${facts.note ?? 'geen'}`,
+  ].join(', ')
 }
 
 /** The goals as a line: `12' Van Bergen, 45+1' Meijer (tegenstander, eigen doelpunt)`. */
@@ -166,6 +190,8 @@ export function describeEntryResult(match: ResultFields): string {
 
 const kickoffKeys = ['dateText', 'kickoffAt', 'matchDate'] as const
 
+const factsKeys = ['attendance', 'note', 'referee', 'stadium'] as const
+
 const resultKeys = [
   'afterNinetyAgainst',
   'afterNinetyFor',
@@ -177,6 +203,9 @@ const resultKeys = [
   'resultSetAt',
   'status',
 ] as const
+
+/** The markers of a row of `match_edits`. */
+export type EditMarkers = Pick<MatchEdit, 'factsEdited' | 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>
 
 /** The goals as `before_goals` keeps them, in the order they are shown. */
 export function encodeGoals(goals: MatchGoal[]): string {
@@ -200,15 +229,19 @@ export function encodeMatch(match: Match): string {
   const snapshot: MatchSnapshot = {
     afterNinetyAgainst: match.afterNinetyAgainst,
     afterNinetyFor: match.afterNinetyFor,
+    attendance: match.attendance,
     dateText: match.dateText,
     extraTime: match.extraTime,
     goalsAgainst: match.goalsAgainst,
     goalsFor: match.goalsFor,
     kickoffAt: match.kickoffAt?.toISOString() ?? null,
     matchDate: match.matchDate,
+    note: match.note,
     penaltiesAgainst: match.penaltiesAgainst,
     penaltiesFor: match.penaltiesFor,
+    referee: match.referee,
     resultSetAt: match.resultSetAt?.toISOString() ?? null,
+    stadium: match.stadium,
     status: match.status,
   }
 
@@ -242,15 +275,34 @@ export async function insertGoals(db: Pick<Database, 'insert' | 'select'>, match
 }
 
 /** Whether the editors hold this part of the match. */
-export function isMarked(
-  edit: Pick<MatchEdit, 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>,
-  part: MatchPart,
-): boolean {
-  return part === 'kickoff' ? edit.kickoffEdited : part === 'result' ? edit.resultEdited : edit.goalsEdited
+export function isMarked(edit: EditMarkers, part: MatchPart): boolean {
+  return part === 'kickoff'
+    ? edit.kickoffEdited
+    : part === 'result'
+      ? edit.resultEdited
+      : part === 'goals'
+        ? edit.goalsEdited
+        : edit.factsEdited
+}
+
+/**
+ * The columns of `matches` that the marked parts hold, so an import that fills or compares
+ * columns leaves them alone. The goals are in another table.
+ */
+export function lockedFields(edit: EditMarkers | undefined): (keyof Match)[] {
+  if (edit === undefined) {
+    return []
+  }
+
+  return [
+    ...(edit.kickoffEdited ? kickoffKeys : []),
+    ...(edit.resultEdited ? resultKeys : []),
+    ...(edit.factsEdited ? factsKeys : []),
+  ]
 }
 
 /** The parts of the match the editors still hold, in the order of `matchParts`. */
-export function markedParts(edit: Pick<MatchEdit, 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>): MatchPart[] {
+export function markedParts(edit: EditMarkers): MatchPart[] {
   return matchParts.filter((part) => isMarked(edit, part))
 }
 
@@ -266,6 +318,7 @@ export function refreshSnapshot(edit: MatchEdit, match: Match, goals: MatchGoal[
   for (const key of [
     ...(parts.includes('kickoff') ? kickoffKeys : []),
     ...(parts.includes('result') ? resultKeys : []),
+    ...(parts.includes('facts') ? factsKeys : []),
   ]) {
     next[key] = now[key]
   }
@@ -309,6 +362,21 @@ export async function removeEntry(db: Writer, edit: MatchEdit) {
         ...(parts.includes('result') ? result : {}),
         // Only a played match has spectators (`matches_attendance_in_range_when_played`).
         ...(parts.includes('result') && before.status !== 'played' ? { attendance: null } : {}),
+      })
+      .where(eq(matches.id, edit.matchId))
+  }
+  if (parts.includes('facts')) {
+    const [now] = await db.select({ status: matches.status }).from(matches).where(eq(matches.id, edit.matchId))
+    // Only a played match has spectators; the result may have been taken over since.
+    const played = parts.includes('result') ? before.status === 'played' : now?.status === 'played'
+
+    await db
+      .update(matches)
+      .set({
+        attendance: played ? (before.attendance ?? null) : null,
+        note: before.note ?? null,
+        referee: before.referee ?? null,
+        stadium: before.stadium ?? null,
       })
       .where(eq(matches.id, edit.matchId))
   }

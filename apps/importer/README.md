@@ -1444,7 +1444,7 @@ De tabel `match_changes` verzamelt dat vanaf nu zelf: na een paar maanden telt d
 ### Een wedstrijd die de redactie invulde
 
 Een beheerder kan een wedstrijd invullen of verbeteren (`/beheer/wedstrijden`, zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
-De invoer staat in `matches` en `match_goals`, en de tabel `match_edits` markeert welke onderdelen van de wedstrijd van de redactie zijn: de aftrap, de uitslag (met de status) en de doelpunten.
+De invoer staat in `matches` en `match_goals`, en de tabel `match_edits` markeert welke onderdelen van de wedstrijd van de redactie zijn: de aftrap, de uitslag (met de status), de doelpunten en de gegevens (de toeschouwers, de scheidsrechter, het stadion en de opmerking).
 Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`.
 `src/edited-matches.ts` beoordeelt elk onderdeel met een markering apart, want Wikipedia zet meestal eerst de uitslag en pas later de doelpuntenmakers:
 
@@ -1457,6 +1457,8 @@ Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`
 - Hetzelfde is bij de uitslag: de status, de score, de verlenging, de stand na 90 minuten en de strafschoppen zijn gelijk.
   Bij de doelpunten zijn de kant, de minuut, de blessuretijd, de soort en de speler gelijk, in elke volgorde.
   Een speler van ons is dezelfde als hij hetzelfde `player_id` heeft, een andere speler als de naam overeenkomt.
+  Bij de gegevens zijn de toeschouwers, de scheidsrechter, het stadion en de opmerking gelijk.
+  Wikipedia zegt niets over een gegeven dat het mist: alleen een gegeven dat Wikipedia wel heeft, kan van de invoer verschillen.
 - Een verschil staat één keer in het logboek (`audit_log`, zonder account, dus "de import") en één keer in de waarschuwing van het seizoen, met beide waarden: "held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ours sc Heerenveen 2–0 FC Twente, Wikipedia sc Heerenveen 1–0 FC Twente".
   `match_edits.reported_*` bewaart wat Wikipedia zei, zodat de volgende run zwijgt zolang Wikipedia hetzelfde zegt.
   Zegt Wikipedia iets anders dan de vorige keer, dan is het weer nieuws.

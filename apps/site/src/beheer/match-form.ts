@@ -59,6 +59,7 @@ export type MatchContext = {
 
 /** What an editor entered, understood and in the shape of the tables. */
 export type MatchEntry = {
+  facts: Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'>
   goals: EntryGoal[]
   kickoff: Pick<Match, 'dateText' | 'kickoffAt' | 'matchDate'>
   result: Pick<
@@ -276,6 +277,25 @@ export function validate(
     }
   }
 
+  // The facts: spectators (a played match only), referee, stadium and note, each of them
+  // optional, with the limits of the columns.
+  const attendance = wholeNumber(fields.toeschouwers, matchLimits.attendance, 6)
+
+  if (fields.toeschouwers !== '' && attendance === undefined) {
+    errors.toeschouwers = `Vul een heel getal in van 0 tot ${matchLimits.attendance}, of laat het leeg.`
+  } else if (attendance !== undefined && !played && status !== undefined) {
+    errors.toeschouwers = 'Toeschouwers horen bij een gespeelde wedstrijd. Maak dit veld leeg of kies Gespeeld.'
+  }
+  for (const [name, limit] of [
+    ['scheidsrechter', matchLimits.referee],
+    ['stadion', matchLimits.stadium],
+    ['opmerking', matchLimits.note],
+  ] as const) {
+    if (fields[name].length > limit) {
+      errors[name] = `Schrijf hoogstens ${limit} tekens.`
+    }
+  }
+
   // The goals.
   const goals: MatchEntry['goals'] = []
   const squad = new Map(context.squad.map((player) => [String(player.id), player]))
@@ -379,6 +399,12 @@ export function validate(
 
   return {
     entry: {
+      facts: {
+        attendance: attendance ?? null,
+        note: fields.opmerking === '' ? null : fields.opmerking,
+        referee: fields.scheidsrechter === '' ? null : fields.scheidsrechter,
+        stadium: fields.stadion === '' ? null : fields.stadion,
+      },
       // The goals are kept in the order of the clock, as the importer keeps them.
       // A goal without a minute comes last.
       goals: goals.toSorted(
@@ -433,9 +459,13 @@ export function valuesOf(match: Match, goals: MatchGoal[]): MatchValues {
       'aftrap-tijd': local?.time ?? '',
       'na90-wij': number(match.afterNinetyFor),
       'na90-zij': number(match.afterNinetyAgainst),
+      opmerking: match.note ?? '',
+      scheidsrechter: match.referee ?? '',
+      stadion: match.stadium ?? '',
       status: match.status,
       'strafschoppen-wij': number(match.penaltiesFor),
       'strafschoppen-zij': number(match.penaltiesAgainst),
+      toeschouwers: number(match.attendance),
       'uitslag-wij': played ? number(match.goalsFor) : '',
       'uitslag-zij': played ? number(match.goalsAgainst) : '',
       verlenging: match.extraTime ? 'ja' : 'nee',
@@ -469,8 +499,8 @@ function text(formData: FormData, name: string) {
 }
 
 /** A whole number from 0 to `most`, or undefined for anything else. */
-function wholeNumber(value: string, most: number): number | undefined {
-  return /^\d{1,3}$/u.test(value) && Number(value) <= most ? Number(value) : undefined
+function wholeNumber(value: string, most: number, digits = 3): number | undefined {
+  return new RegExp(`^\\d{1,${digits}}$`, 'u').test(value) && Number(value) <= most ? Number(value) : undefined
 }
 
 /**

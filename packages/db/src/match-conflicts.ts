@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 // `import:changes` decides too. All of them call `decideConflict`, so the same decision has the
 // same outcome wherever it is made.
 import type { Database } from './client.ts'
-import type { GoalSnapshot, KickoffFields, ResultFields } from './match-edits.ts'
+import type { FactsFields, GoalSnapshot, KickoffFields, ResultFields } from './match-edits.ts'
 import type { Match, MatchChange, MatchPart } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
@@ -46,6 +46,13 @@ export type PartProposal =
       penaltiesFor: null | number
       status: Match['status']
     }
+  | {
+      attendance: null | number
+      note: null | string
+      part: 'facts'
+      referee: null | string
+      stadium: null | string
+    }
   | { dateText: null | string; kickoffAt: null | string; matchDate: string; part: 'kickoff' }
   | { goals: GoalSnapshot[]; part: 'goals' }
 
@@ -60,6 +67,7 @@ export const conflictStandsMs = 7 * 24 * 60 * 60 * 1000
 
 /** The parts of a match in the words of the admin, the log and the mails. */
 export const partLabels: Record<MatchPart, string> = {
+  facts: 'gegevens',
   goals: 'doelpunten',
   kickoff: 'aftrap',
   result: 'uitslag',
@@ -146,7 +154,8 @@ export function decodePartProposal(text: null | string): PartProposal | undefine
 
     return (parsed.part === 'goals' && Array.isArray(parsed.goals)) ||
       (parsed.part === 'kickoff' && typeof parsed.matchDate === 'string') ||
-      (parsed.part === 'result' && typeof parsed.status === 'string')
+      (parsed.part === 'result' && typeof parsed.status === 'string') ||
+      (parsed.part === 'facts' && 'attendance' in parsed && 'referee' in parsed)
       ? parsed
       : undefined
   } catch {
@@ -167,30 +176,41 @@ export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValu
  */
 export function encodePartProposal(
   part: MatchPart,
-  wikipedia: { goals: GoalSnapshot[]; match: KickoffFields & Omit<ResultFields, 'home' | 'opponent'> },
+  wikipedia: {
+    goals: GoalSnapshot[]
+    match: FactsFields & KickoffFields & Omit<ResultFields, 'home' | 'opponent'>
+  },
 ): string {
   const { goals, match } = wikipedia
   const proposal: PartProposal =
     part === 'goals'
       ? { goals, part }
-      : part === 'kickoff'
+      : part === 'facts'
         ? {
-            dateText: match.dateText,
-            kickoffAt: match.kickoffAt?.toISOString() ?? null,
-            matchDate: match.matchDate,
+            attendance: match.attendance,
+            note: match.note,
             part,
+            referee: match.referee,
+            stadium: match.stadium,
           }
-        : {
-            afterNinetyAgainst: match.afterNinetyAgainst,
-            afterNinetyFor: match.afterNinetyFor,
-            extraTime: match.extraTime,
-            goalsAgainst: match.goalsAgainst,
-            goalsFor: match.goalsFor,
-            part,
-            penaltiesAgainst: match.penaltiesAgainst,
-            penaltiesFor: match.penaltiesFor,
-            status: match.status,
-          }
+        : part === 'kickoff'
+          ? {
+              dateText: match.dateText,
+              kickoffAt: match.kickoffAt?.toISOString() ?? null,
+              matchDate: match.matchDate,
+              part,
+            }
+          : {
+              afterNinetyAgainst: match.afterNinetyAgainst,
+              afterNinetyFor: match.afterNinetyFor,
+              extraTime: match.extraTime,
+              goalsAgainst: match.goalsAgainst,
+              goalsFor: match.goalsFor,
+              part,
+              penaltiesAgainst: match.penaltiesAgainst,
+              penaltiesFor: match.penaltiesFor,
+              status: match.status,
+            }
 
   return JSON.stringify(proposal)
 }
@@ -200,6 +220,22 @@ async function applyPart(db: Writer, matchId: number, proposal: PartProposal, no
   if (proposal.part === 'goals') {
     await db.delete(matchGoals).where(eq(matchGoals.matchId, matchId))
     await insertGoals(db, matchId, proposal.goals)
+
+    return
+  }
+  if (proposal.part === 'facts') {
+    const [current] = await db.select({ status: matches.status }).from(matches).where(eq(matches.id, matchId))
+
+    await db
+      .update(matches)
+      .set({
+        // Only a played match has spectators (`matches_attendance_in_range_when_played`).
+        attendance: current?.status === 'played' ? proposal.attendance : null,
+        note: proposal.note,
+        referee: proposal.referee,
+        stadium: proposal.stadium,
+      })
+      .where(eq(matches.id, matchId))
 
     return
   }

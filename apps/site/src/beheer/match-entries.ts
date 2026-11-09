@@ -2,8 +2,9 @@ import type { Database } from '@fansite/db/client'
 import type { Match, MatchChange, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
 import { decideChange } from '@fansite/db/match-changes'
-import { type ConflictOutcome, decideConflict } from '@fansite/db/match-conflicts'
+import { type ConflictOutcome, decideConflict, partLabels } from '@fansite/db/match-conflicts'
 import {
+  describeEntryFacts,
   describeEntryGoals,
   describeEntryKickoff,
   describeEntryResult,
@@ -314,10 +315,10 @@ export async function saveEntry(
       return { status: 'unchanged' } as const
     }
 
-    const { kickoff, result } = entry
+    const { facts, kickoff, result } = entry
     const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
 
-    if (parts.includes('kickoff') || parts.includes('result')) {
+    if (parts.includes('kickoff') || parts.includes('result') || parts.includes('facts')) {
       await transaction
         .update(matches)
         .set({
@@ -330,6 +331,8 @@ export async function saveEntry(
                 resultSetAt: result.status === 'played' ? now : null,
               }
             : {}),
+          // The facts come last: the form has checked that only a played match has spectators.
+          ...(parts.includes('facts') ? facts : {}),
         })
         .where(eq(matches.id, id))
     }
@@ -345,6 +348,7 @@ export async function saveEntry(
     }
 
     const marks = {
+      factsEdited: parts.includes('facts') || edit?.factsEdited === true,
       goalsEdited: parts.includes('goals') || edit?.goalsEdited === true,
       kickoffEdited: parts.includes('kickoff') || edit?.kickoffEdited === true,
       resultEdited: parts.includes('result') || edit?.resultEdited === true,
@@ -352,6 +356,7 @@ export async function saveEntry(
     // A part that is entered again is judged again: what Wikipedia was last reported to say
     // about it no longer counts.
     const forgotten = {
+      ...(parts.includes('facts') ? { reportedFacts: null } : {}),
       ...(parts.includes('goals') ? { reportedGoals: null } : {}),
       ...(parts.includes('kickoff') ? { reportedKickoff: null } : {}),
       ...(parts.includes('result') ? { reportedResult: null } : {}),
@@ -469,9 +474,15 @@ export async function undoEntry(
     await removeEntry(transaction, report === undefined ? edit : { ...edit, goalsEdited: false })
 
     if (report !== undefined && edit.goalsEdited) {
-      await transaction
-        .insert(matchEdits)
-        .values({ ...edit, kickoffEdited: false, reportedKickoff: null, reportedResult: null, resultEdited: false })
+      await transaction.insert(matchEdits).values({
+        ...edit,
+        factsEdited: false,
+        kickoffEdited: false,
+        reportedFacts: null,
+        reportedKickoff: null,
+        reportedResult: null,
+        resultEdited: false,
+      })
     }
 
     // The differences with the entry have nothing left to decide.
@@ -483,7 +494,7 @@ export async function undoEntry(
       transaction,
       {
         action: 'match.undo',
-        detail: `Teruggezet: ${parts.map((part) => ({ goals: 'doelpunten', kickoff: 'aftrap', result: 'uitslag' })[part]).join(', ')}`,
+        detail: `Teruggezet: ${parts.map((part) => partLabels[part]).join(', ')}`,
         itemId: id,
         reason,
         userId,
@@ -548,6 +559,14 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): Matc
   if (!sameGoals(goals, entry.goals)) {
     parts.push('goals')
   }
+  if (
+    match.attendance !== entry.facts.attendance ||
+    match.referee !== entry.facts.referee ||
+    match.stadium !== entry.facts.stadium ||
+    match.note !== entry.facts.note
+  ) {
+    parts.push('facts')
+  }
 
   return parts
 }
@@ -566,6 +585,10 @@ function describeChanges(match: Match, goals: MatchGoal[], entry: MatchEntry, pa
   }
   if (parts.includes('goals')) {
     lines.push(`Doelpunten: ${describeEntryGoals(goals)} → ${describeEntryGoals(entry.goals)}`)
+  }
+
+  if (parts.includes('facts')) {
+    lines.push(`Gegevens: ${describeEntryFacts(match)} → ${describeEntryFacts(entry.facts)}`)
   }
 
   return lines.join('; ')
