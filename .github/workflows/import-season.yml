@@ -77,6 +77,29 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/acceptance_key
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
+      # Backs up the database first, with the same Node and the same file of variables as the
+      # import, so a mistake in a long run costs nothing. The step turns red when the backup
+      # fails, and the steps after it do not run, so nothing is imported without a backup. The
+      # line with the name of the file goes to the summary of the run
+      # (docs/back-ups.md says how to restore it).
+      - name: Back up the database on the host
+        if: steps.secrets.outputs.ready == 'true'
+        shell: bash
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=\"\$HOME/fansite-acceptatie.env\" $(printf '%q' "$DEPLOY_PATH")/packages/db/backup.mjs backup" \
+            | tee "$RUNNER_TEMP/backup-output.txt"
+          {
+            echo '### Back-up before the import'
+            echo '```text'
+            cat "$RUNNER_TEMP/backup-output.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # Runs the importer as cron does on the host: the Node 24 of the hosting, by its full
       # path, and DATABASE_URL from the file in the home folder. The output goes to this log and
       # not to ~/fansite-import.log. ssh exits with the exit code of the command, so a refused
