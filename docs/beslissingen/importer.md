@@ -558,9 +558,9 @@
   Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
 - **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
-- **Later:** zie _Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`_ (9 november 2026): een achternaam met een voetbalwoord, of met een tweede achternaam, is nu `relevant`, ook zonder "Heerenveen"; een achternaam alleen blijft `doubtful`.
   Zie ook _De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd_: de naam van een andere profclub naast "Heerenveen" maakt een kop ook `relevant`.
   Zie ook _Het relevantiefilter kent de Friese schrijfwijze van de club en Friese voetbalwoorden_: "Hearrenfean" telt als "Heerenveen".
+- **Later:** zie _Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`_ (9 november 2026): een achternaam met een voetbalwoord, of met een tweede achternaam, is nu `relevant`, ook zonder "Heerenveen"; een achternaam alleen blijft `doubtful`.
 
 ## De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
