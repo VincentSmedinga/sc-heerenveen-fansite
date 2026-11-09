@@ -4108,4 +4108,6 @@
   Een tabel met zes kolommen past niet op een telefoon, en het beheer schuift nergens opzij.
   Met een kolom voor elk getal, negen in totaal, paste ze ook niet in de brede kolom van een bureaublad.
   Een ingeklapte cel staat zonder haar kolomkop onder het seizoen, dus ze moet zelf zeggen wat ze telt.
+- **Gevolg:** de rijkop van een tabel met tekst houdt in het designsysteem ruimte voor zeven tekens (`data-table.css`).
+  Zonder die regel brak de tabel een seizoen als `2025/26` in tweeën, naast kolommen vol tekst.
 - **Alternatieven:** vier filters erbij in `/beheer/wedstrijden`; een tabel met getallen en afkortingen die opzij schuift; `similarPersons` in de site nog een keer schrijven.
