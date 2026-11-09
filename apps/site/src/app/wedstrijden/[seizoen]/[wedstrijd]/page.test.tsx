@@ -13,6 +13,7 @@ import MatchReportPage, { generateMetadata } from './page'
 vi.mock('#src/match-neighbours', () => ({ getMatchNeighbours: vi.fn() }))
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getEditorSources: vi.fn(() => Promise.resolve([])),
   getMatchData: vi.fn(),
 }))
 vi.mock('#src/report-data', async (importOriginal) => ({

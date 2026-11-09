@@ -18,6 +18,7 @@ import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
+import { emptyAddValues } from '#src/beheer/match-add-fields'
 import { type MatchFormState } from '#src/beheer/match-fields'
 import { emptyFields, emptyGoal } from '#src/beheer/match-fields'
 import { saveReport } from '#src/beheer/match-reports'
@@ -26,7 +27,14 @@ import { checkReportForm } from '#src/beheer/report-form'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitConflict, submitHeldChange, submitMatch, submitRemoveEntry } from './actions'
+import {
+  submitAddMatch,
+  submitConflict,
+  submitDeleteMatch,
+  submitHeldChange,
+  submitMatch,
+  submitRemoveEntry,
+} from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -741,5 +749,105 @@ describe('submitMatch for a match with a report', () => {
       },
     })
     expect((await database.db.select().from(matches))[0]).toMatchObject({ status: 'played' })
+  })
+})
+
+describe('submitAddMatch and submitDeleteMatch (issue 970)', () => {
+  /** The form for a cup match of 2008/09 against a new club, and the changes in `overrides`. */
+  function addForm(overrides: Record<string, string> = {}) {
+    const formData = new FormData()
+    const values: Record<string, string> = {
+      ...emptyAddValues,
+      'aftrap-datum': '2009-05-12',
+      bron: 'Leeuwarder Courant, 12 mei 2009',
+      competitie: 'KNVB Beker',
+      'nieuwe-club': 'Be Quick 1887',
+      ronde: 'Finale',
+      seizoen: '2008/09',
+      status: 'played',
+      tegenstander: 'nieuw',
+      thuis: 'uit',
+      'uitslag-wij': '2',
+      'uitslag-zij': '1',
+      ...overrides,
+    }
+
+    for (const [name, value] of Object.entries(values)) {
+      formData.set(name, value)
+    }
+
+    return formData
+  }
+
+  const add = (formData: FormData) => resultOf(() => submitAddMatch({ errors: {}, values: emptyAddValues }, formData))
+  const deleteMatch = (id: number, reden: string) =>
+    resultOf(() => {
+      const formData = new FormData()
+
+      formData.set('reden', reden)
+
+      return submitDeleteMatch(id, {}, formData)
+    })
+  const added = () => database.db.select().from(matches).where(eq(matches.dataSource, 'redactie'))
+
+  it('adds the match for the account of the session and leads to its form, with a notice', async () => {
+    const [row] = await (async () => {
+      const result = await add(addForm())
+
+      expect(result).toEqual({ redirect: expect.stringMatching(/^\/beheer\/wedstrijden\/\d+\?gedaan=toegevoegd$/u) })
+
+      return added()
+    })()
+
+    expect(row).toMatchObject({
+      opponent: 'Be Quick 1887',
+      sourceLine: 'Leeuwarder Courant, 12 mei 2009',
+      status: 'played',
+    })
+    expect(await log()).toMatchObject([{ action: 'match.add', itemId: row?.id, userId }])
+  })
+
+  it('returns the form with an error at each field and the values kept, and stores nothing', async () => {
+    const result = await add(addForm({ bron: '', ronde: '' }))
+
+    expect(result).toMatchObject({
+      errors: { bron: expect.any(String), ronde: expect.any(String) },
+      values: { 'nieuwe-club': 'Be Quick 1887', seizoen: '2008/09' },
+    })
+    expect(await added()).toEqual([])
+  })
+
+  it('refuses a match that is there already, with an error at the day', async () => {
+    await add(addForm())
+
+    expect(await add(addForm({ ronde: 'Halve finale' }))).toMatchObject({
+      errors: { 'aftrap-datum': expect.stringContaining('staat er al') },
+    })
+    expect(await added()).toHaveLength(1)
+  })
+
+  it('is for a beheerder: a moderator adds nothing', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+
+    await expect(add(addForm())).rejects.toThrow()
+    expect(await added()).toEqual([])
+  })
+
+  it('deletes a match the editors added, with a reason, and leads to the list with a notice', async () => {
+    await add(addForm())
+
+    const [row] = await added()
+
+    expect(await deleteMatch(row!.id, 'Dubbel')).toEqual({ redirect: '/beheer/wedstrijden?gedaan=wedstrijd-weg' })
+    expect(await added()).toEqual([])
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.delete', reason: 'Dubbel', userId })
+  })
+
+  it('asks for a reason, and never deletes a match of an import', async () => {
+    expect(await deleteMatch(matchId, '')).toMatchObject({ error: expect.any(String) })
+    expect(await deleteMatch(matchId, 'Waarom')).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=niet-van-ons`,
+    })
+    expect(await database.db.select().from(matches).where(eq(matches.id, matchId))).toHaveLength(1)
   })
 })

@@ -14,6 +14,7 @@ import MatchesPage, { generateMetadata } from './page'
 // Only the query is replaced: the split into the programme and the results is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getEditorSources: vi.fn(() => Promise.resolve([])),
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),

@@ -217,6 +217,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The numbers of the visit are for a beheerder. A moderator gets "niet gevonden".
   // The matches are for a beheerder: the list, the notice for a match that is gone, the form of
   // a match with and without a notice, and the addresses that say "niet gevonden".
+  { admin: 'beheerder', path: '/beheer/wedstrijden/nieuw', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=alles', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=aangepast', status: 200 },
