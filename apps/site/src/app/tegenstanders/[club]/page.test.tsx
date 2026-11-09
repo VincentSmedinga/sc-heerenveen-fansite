@@ -458,7 +458,7 @@ describe('the page of a club', () => {
   })
 
   it('says how many matches it is based on and since which season we have them', async () => {
-    expect(await render()).toContain('Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23')
+    expect(await render()).toContain('Alle 5 gespeelde wedstrijden sinds 2022/23')
   })
 
   it('has the switch, with the choice Alle wedstrijden current, because the cup was played', async () => {
@@ -473,7 +473,7 @@ describe('the page of a club', () => {
 
     expect(meetingsOf(html)).toHaveLength(4)
     expect(meetingsOf(html).join(' ')).not.toContain('KNVB Beker')
-    expect(html).toContain('Gebaseerd op alle 4 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
+    expect(html).toContain('Alle 4 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
     expect(html).toContain('in de Eredivisie, thuis, uit en in totaal')
   })
 
@@ -577,7 +577,6 @@ describe('the page of a club', () => {
 
     for (const card of [all, league]) {
       expect(card).not.toContain('keer gewonnen')
-      expect(card).not.toContain('Gebaseerd op')
       expect(card).not.toContain('sinds')
       expect(card).not.toContain('in de Eredivisie')
       expect(card.lastIndexOf('<p class="hf-meta">')).toBeGreaterThan(card.lastIndexOf('</table>'))
@@ -1066,10 +1065,10 @@ describe('the card Doelpuntenmakers on the page of a club', () => {
     const league = cardOf(await render('testclub', { competitie: 'eredivisie' }))
 
     expect(plain(all)).toContain('4 spelers hebben gescoord')
-    expect(plain(all)).toContain('Gebaseerd op de doelpuntenmakers van 3 van de 5 gespeelde wedstrijden')
+    expect(plain(all)).toContain('De doelpuntenmakers van 3 van de 5 gespeelde wedstrijden')
     expect(plain(all)).toContain('Beker')
     expect(plain(league)).toContain('3 spelers hebben gescoord')
-    expect(plain(league)).toContain('Gebaseerd op de doelpuntenmakers van 1 van de 2 gespeelde wedstrijden')
+    expect(plain(league)).toContain('De doelpuntenmakers van 1 van de 2 gespeelde wedstrijden')
     expect(plain(league)).not.toContain('Beker')
   })
 
@@ -1464,7 +1463,7 @@ describe('the card Toeschouwers tegen <club> on the page of a club', () => {
     expect(text).toContain('Gemiddeld 20.667 toeschouwers per thuiswedstrijd')
     expect(text).toMatch(/Het meest: 24\.000, in het seizoen \d{4}\/\d{2}/)
     expect(text).toContain('Het aantal toeschouwers is een schatting, volgens Wikipedia.')
-    expect(text).toContain('Gebaseerd op 3 van de')
+    expect(text).toContain('3 van de')
     expect(card).toContain('hf-card-shareable')
   })
 

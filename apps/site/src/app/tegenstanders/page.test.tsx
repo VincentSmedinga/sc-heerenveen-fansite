@@ -158,7 +158,7 @@ describe('the page /tegenstanders', () => {
   })
 
   it('says how many matches the table is based on and since which season we have them', async () => {
-    expect(await render()).toContain('Gebaseerd op alle 9 gespeelde wedstrijden sinds 2022/23')
+    expect(await render()).toContain('Alle 9 gespeelde wedstrijden sinds 2022/23')
   })
 
   it('has the switch, with the choice Alle wedstrijden current, when a cup tie was played', async () => {
@@ -183,7 +183,7 @@ describe('the page /tegenstanders', () => {
       '/tegenstanders/fc-voorbeeld?competitie=eredivisie',
       '/tegenstanders/testclub?competitie=eredivisie',
     ])
-    expect(html).toContain('Gebaseerd op alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
+    expect(html).toContain('Alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
     expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Eredivisie</)
   })
 
@@ -250,7 +250,7 @@ describe('the page /tegenstanders', () => {
     // Beker United (1 match) and FC Voorbeeld (3) are under the minimum; Testclub has 11 in 5.
     expect(placesOf(html)).toEqual([['1', 'Testclub', '/tegenstanders/testclub', '2,20', '5']])
     expect(sidebarOf(html)).toContain(
-      'Gebaseerd op alle 5 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
+      'Alle 5 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
     )
     expect(sidebarOf(html)).toContain(
       '<caption class="hf-visually-hidden">De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
