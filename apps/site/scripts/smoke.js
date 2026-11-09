@@ -971,25 +971,13 @@ await withEmptyDatabase((database) =>
         '#uitslagen-knvb-beker',
         '#uitslagen-play-offs',
         '#stand',
-        '#onze-plek-door-de-jaren',
         '#hoofdtrainer',
       ],
     )
-    // The card with our place in every season stands under the table: a chart that a screen
-    // reader skips and a table of four seasons, the newest first. One has no table, one has
-    // points taken off. Under it are the first season and the line that it is the Eredivisie.
-    const placesCard = matchesHtml.slice(matchesHtml.indexOf('id="onze-plek-door-de-jaren"'))
-    assert.ok(matchesHtml.indexOf('id="stand"') < matchesHtml.indexOf('id="onze-plek-door-de-jaren"'))
-    assert.match(placesCard, /class="hf-bar-chart/)
-    const placesTable = placesCard.slice(0, placesCard.indexOf('</table>'))
-    assert.deepEqual(
-      [...placesTable.matchAll(/<th scope="row">.*?(\d{4}\/\d{2})/g)].map(([, season]) => season),
-      [0, 1, 2, 3].map(seasonsAgo),
-    )
-    assert.match(placesTable, /\(nu\)/)
-    assert.match(placesCard, /: 2 punten afgetrokken/)
-    assert.match(placesCard, new RegExp(`Sinds ${seasonsAgo(3)}`))
-    assert.match(placesCard, /Alleen de Eredivisie<\/p><\/section>/)
+    // The made-up results of the current season are of six clubs, so the card with our place
+    // per round is left out, with its link in the bar. The card with our place in every season
+    // moved to the statistics page (#411): none of them is left on this one.
+    assert.doesNotMatch(matchesHtml, /onze-plek-per-speelronde|onze-plek-door-de-jaren/)
     // The card with how often each score was played moved to the statistics page (#774).
     assert.doesNotMatch(matchesHtml, /hoe-vaak-welke-uitslag/)
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
@@ -1091,6 +1079,7 @@ await withEmptyDatabase((database) =>
       [...statisticsHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       [
         '#onze-plek-in-de-competitie',
+        '#onze-plek-door-de-jaren',
         '#verloop-van-het-seizoen',
         '#hoe-de-wedstrijden-verlopen',
         '#reeksen',
@@ -1103,6 +1092,28 @@ await withEmptyDatabase((database) =>
         '#resultaten-per-hoofdtrainer',
       ],
     )
+    // The card with our place in every season moved here from Wedstrijden (#411), directly
+    // under our place in the competition: a chart that a screen reader skips and a table of
+    // four seasons, the newest first. One has no table, one has points taken off. Under it are
+    // the first season and the line that it is the Eredivisie.
+    assert.ok(
+      statisticsHtml.indexOf('id="onze-plek-in-de-competitie"') <
+        statisticsHtml.indexOf('id="onze-plek-door-de-jaren"'),
+    )
+    assert.ok(
+      statisticsHtml.indexOf('id="onze-plek-door-de-jaren"') < statisticsHtml.indexOf('id="verloop-van-het-seizoen"'),
+    )
+    const placesCard = statisticsHtml.slice(statisticsHtml.indexOf('id="onze-plek-door-de-jaren"'))
+    assert.match(placesCard, /class="hf-bar-chart/)
+    const placesTable = placesCard.slice(0, placesCard.indexOf('</table>'))
+    assert.deepEqual(
+      [...placesTable.matchAll(/<th scope="row">.*?(\d{4}\/\d{2})/g)].map(([, season]) => season),
+      [0, 1, 2, 3].map(seasonsAgo),
+    )
+    assert.match(placesTable, /\(nu\)/)
+    assert.match(placesCard, /: 2 punten afgetrokken/)
+    assert.match(placesCard, new RegExp(`Sinds ${seasonsAgo(3)}`))
+    assert.match(placesCard, /Alleen de Eredivisie<\/p><\/section>/)
     // The card with the results per head coach counts the matches of every season: with the
     // older made-up matches (see older-meetings.ts) two or more coaches of the seed have one.
     const coachCard = statisticsHtml.slice(statisticsHtml.indexOf('id="resultaten-per-hoofdtrainer"'))

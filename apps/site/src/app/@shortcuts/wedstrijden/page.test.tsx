@@ -1,21 +1,21 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
+import { getMatchData, getMatchSeasons, getPlacePerRound } from '#src/matches'
 import { matchData } from '#src/test-matches'
 
 import MatchesShortcuts from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
-  getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getPlacePerRound: vi.fn(),
 }))
 
 beforeEach(() => {
-  vi.mocked(getFinalPlaces).mockReset()
-  vi.mocked(getFinalPlaces).mockResolvedValue([])
+  vi.mocked(getPlacePerRound).mockReset()
+  vi.mocked(getPlacePerRound).mockResolvedValue(undefined)
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockReset()
@@ -108,8 +108,8 @@ describe('the bar of /wedstrijden for the current season', () => {
     expect(await render()).toContain('href="#programma"')
   })
 
-  it('has a link to the card with our place in every season, after the table, when there is one', async () => {
-    vi.mocked(getFinalPlaces).mockResolvedValue([{ now: true, row: undefined, season: '2026/27' }])
+  it('has a link to the card with our place per round, after the table, when the season has one', async () => {
+    vi.mocked(getPlacePerRound).mockResolvedValue([{ points: 3, position: 1, round: 1 }])
 
     expect([...(await render()).matchAll(/<a [^>]*href="(#[^"]*)"/g)].map(([, href]) => href)).toEqual([
       '#laatste-wedstrijd',
@@ -117,13 +117,17 @@ describe('the bar of /wedstrijden for the current season', () => {
       '#uitslagen',
       '#uitslagen-knvb-beker',
       '#stand',
-      '#onze-plek-door-de-jaren',
+      '#onze-plek-per-speelronde',
     ])
   })
 
-  it('leaves the link out when the card can not be read', async () => {
-    vi.mocked(getFinalPlaces).mockRejectedValue(new Error('down'))
+  it('has no link when the season has no line', async () => {
+    expect(await render()).not.toContain('#onze-plek-per-speelronde')
+  })
 
-    expect(await render()).not.toContain('#onze-plek-door-de-jaren')
+  it('leaves the link out when the card can not be read', async () => {
+    vi.mocked(getPlacePerRound).mockRejectedValue(new Error('down'))
+
+    expect(await render()).not.toContain('#onze-plek-per-speelronde')
   })
 })

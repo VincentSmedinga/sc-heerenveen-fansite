@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { playersShortcuts, playersShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
-  it('has a link for each of the eleven cards with figures', () => {
-    expect(statisticsShortcuts).toHaveLength(11)
+  it('has a link for each of the twelve cards with figures', () => {
+    expect(statisticsShortcuts).toHaveLength(12)
   })
 
   it('has an anchor and a name for each link, and no anchor twice', () => {

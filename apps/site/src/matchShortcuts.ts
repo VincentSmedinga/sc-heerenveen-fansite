@@ -28,7 +28,10 @@ export const standingsCardOf = (current: boolean) =>
 /** The name and the anchor of the card with the results per head coach, on Cijfers. */
 export const coachResultsCard = { id: 'resultaten-per-hoofdtrainer', name: 'Resultaten per hoofdtrainer' } as const
 
-/** The name and the anchor of the card with our place in every season, under the table. */
+/** The name and the anchor of the card with our place after each round, under the table. */
+export const placePerRoundShortcut = { id: 'onze-plek-per-speelronde', name: 'Onze plek per speelronde' } as const
+
+/** The name and the anchor of the card with our place in every season, on Cijfers. */
 export const finalPlacesShortcut = { id: 'onze-plek-door-de-jaren', name: 'Onze plek door de jaren' } as const
 
 type Shortcut = { href: string; label: string }
@@ -74,16 +77,16 @@ export const coachesCardOf = (coachCount: number) =>
  * The links of the bar for the page of a season, in the order of the cards: Programma (only the
  * current season has it), a link for each card with results (`withResults` are the competitions
  * that have one, see `resultsCardsOf`) and Stand (Eindstand for a season that is over), and
- * after it the card with our place in every season when the page has one. The current season
- * has the card Laatste wedstrijd before Programma when a match has begun (`withLastMatch`). The
- * card with the head coaches, after the table, has a link when the season has a coach in the
- * table (`coachCount` above 0).
+ * after it the card with our place after each round when the season has one
+ * (`withPlacePerRound`). The current season has the card Laatste wedstrijd before Programma
+ * when a match has begun (`withLastMatch`). The card with the head coaches, after the table,
+ * has a link when the season has a coach in the table (`coachCount` above 0).
  */
 export const matchShortcutsOf = (
   current: boolean,
   coachCount = 0,
   withResults: readonly Competition[] = [],
-  withFinalPlaces = false,
+  withPlacePerRound = false,
   withLastMatch = false,
 ): Shortcut[] => {
   const standings = standingsCardOf(current)
@@ -108,8 +111,8 @@ export const matchShortcutsOf = (
     if (shortcut.href === '#stand') {
       links.push({ href: `#${standings.id}`, label: standings.name })
 
-      if (withFinalPlaces) {
-        links.push({ href: `#${finalPlacesShortcut.id}`, label: finalPlacesShortcut.name })
+      if (withPlacePerRound) {
+        links.push({ href: `#${placePerRoundShortcut.id}`, label: placePerRoundShortcut.name })
       }
       continue
     }

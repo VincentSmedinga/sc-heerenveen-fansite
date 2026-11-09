@@ -3,12 +3,10 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { FinalPlace } from '#src/matches'
-
-import { getFinalPlaces, getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
+import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 import { getLiveReports, getReportAddresses } from '#src/report-data'
-import { leagueResultsData, matchData } from '#src/test-matches'
+import { leagueResultsData, leagueRoundOf, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
 import MatchesPage, { generateMetadata } from './page'
@@ -16,7 +14,6 @@ import MatchesPage, { generateMetadata } from './page'
 // Only the query is replaced: the split into the programme and the results is the real one.
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
-  getFinalPlaces: vi.fn(),
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
@@ -54,8 +51,6 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
-  vi.mocked(getFinalPlaces).mockReset()
-  vi.mocked(getFinalPlaces).mockResolvedValue([])
   vi.mocked(getLeagueResults).mockReset()
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchSeasons).mockReset()
@@ -1183,50 +1178,70 @@ describe('the switch of the card Stand, between the whole season and the latest 
   })
 })
 
-describe('the card Onze plek door de jaren on /wedstrijden', () => {
-  const row = (position: number, pointsDeducted = 0) => ({ goalDifference: 5, points: 60, pointsDeducted, position })
-  const places: FinalPlace[] = [
-    { now: false, row: row(4), season: '2024/25' },
-    { now: false, row: row(2, 2), season: '2025/26' },
-    { now: true, row: row(1), season: '2026/27' },
-  ]
+describe('the card Onze plek per speelronde on /wedstrijden', () => {
+  const card = (html: string) => section(html, 'onze-plek-per-speelronde')
 
   beforeEach(() => {
-    vi.mocked(getFinalPlaces).mockResolvedValue(places)
+    vi.mocked(getLeagueResults).mockResolvedValue([...leagueRoundOf(1, 2), ...leagueRoundOf(2, 0)])
   })
 
-  it('stands under the table, with the soft surface', async () => {
+  it('stands under the table and before the head coaches, with the soft surface', async () => {
     const html = await render()
     const stand = html.indexOf('id="stand"')
-    const card = html.indexOf('id="onze-plek-door-de-jaren"')
+    const place = html.indexOf('id="onze-plek-per-speelronde"')
 
     expect(stand).toBeGreaterThan(-1)
-    expect(card).toBeGreaterThan(stand)
+    expect(place).toBeGreaterThan(stand)
     expect(html).toMatch(
-      /hf-card-soft[^>]*aria-labelledby="onze-plek-door-de-jaren"|aria-labelledby="onze-plek-door-de-jaren"[^>]*hf-card-soft/,
+      /hf-card-soft[^>]*aria-labelledby="onze-plek-per-speelronde"|aria-labelledby="onze-plek-per-speelronde"[^>]*hf-card-soft/,
     )
   })
 
-  it('is the same card for every season of the picker and for both choices of the switch', async () => {
-    const card = (html: string) => section(html, 'onze-plek-door-de-jaren')
-    const base = card(await render())
+  it('has our place after each complete round, and the old card of every season is not here', async () => {
+    const html = await render()
 
-    expect(base).toContain('2025/26')
-    expect(card(await render({ stand: 'laatste-5' }))).toBe(base)
-    expect(card(await render({ stand: 'onzin' }))).toBe(base)
-    // The request for the places has no season in it.
-    expect(vi.mocked(getFinalPlaces).mock.calls.every((call) => call.length === 0)).toBe(true)
+    expect(card(html)).toMatch(
+      /<th scope="row">Ronde 1<\/th><td class="hf-numeric">1<\/td><td class="hf-numeric">3<\/td>/,
+    )
+    expect(card(html)).toMatch(
+      /<th scope="row">Ronde 2<\/th><td class="hf-numeric">1<\/td><td class="hf-numeric">4<\/td>/,
+    )
+    expect(html).not.toContain('onze-plek-door-de-jaren')
   })
 
-  it('has no card when no season has a table, and logs and leaves it out when it can not be read', async () => {
-    vi.mocked(getFinalPlaces).mockResolvedValue([])
-    expect(await render()).not.toContain('onze-plek-door-de-jaren')
+  it('is the same card for both choices of the switch, and asks for the results of the season only once', async () => {
+    const base = card(await render())
 
+    expect(card(await render({ stand: 'laatste-5' }))).toBe(base)
+    expect(getLeagueResults).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(getLeagueResults).mock.calls.every((call) => call[0] === '2026/27')).toBe(true)
+  })
+
+  it('has no card, and no sentence, for a season whose results are not of all clubs', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData)
+
+    expect(await render()).not.toContain('onze-plek-per-speelronde')
+  })
+
+  it('has no card for a season in which points were taken off', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      standings: matchData.standings.map((row, index) => (index === 0 ? { ...row, pointsDeducted: 2 } : row)),
+    })
+
+    expect(await render()).not.toContain('onze-plek-per-speelronde')
+  })
+
+  it('logs and leaves the card out when the results can not be read', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(getFinalPlaces).mockRejectedValue(new Error('down'))
 
-    expect(await render()).not.toContain('onze-plek-door-de-jaren')
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read our place in the seasons'))
+    vi.mocked(getLeagueResults).mockRejectedValue(new Error('down'))
+
+    const html = await render()
+
+    expect(html).not.toContain('onze-plek-per-speelronde')
+    expect(html).toContain('id="stand"')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the league results'))
   })
 })
 

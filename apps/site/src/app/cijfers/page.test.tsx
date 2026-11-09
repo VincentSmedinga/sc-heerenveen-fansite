@@ -4,7 +4,9 @@ import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getCoachResultData, getMatchData, getMatchSeasons } from '#src/matches'
+import type { FinalPlace } from '#src/matches'
+
+import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 import { coachResultData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
@@ -15,9 +17,15 @@ import StatisticsPage, { generateMetadata } from './page'
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getCoachResultData: vi.fn(),
+  getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
+
+const finalPlaces: FinalPlace[] = [
+  { now: false, row: { goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 }, season: '2025/26' },
+  { now: true, row: { goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 }, season: '2026/27' },
+]
 
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
@@ -43,6 +51,8 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getCoachResultData).mockReset()
+  vi.mocked(getFinalPlaces).mockReset()
+  vi.mocked(getFinalPlaces).mockResolvedValue(finalPlaces)
   vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
@@ -56,12 +66,13 @@ afterEach(() => {
 })
 
 describe('the page /cijfers', () => {
-  it('has one h1 and eleven h2 headings in order: our place in the league, the season, how the matches go, the streaks, home and away, the visitors, how often each score was played, the clean sheets, the goals per quarter, the extremes and the results per head coach', async () => {
+  it('has one h1 and twelve h2 headings in order: our place in the league, our place through the years, the season, how the matches go, the streaks, home and away, the visitors, how often each score was played, the clean sheets, the goals per quarter, the extremes and the results per head coach', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Cijfers</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="onze-plek-in-de-competitie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#onze-plek-in-de-competitie">Onze plek in de competitie</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="onze-plek-door-de-jaren"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#onze-plek-door-de-jaren">Onze plek door de jaren</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="verloop-van-het-seizoen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#verloop-van-het-seizoen">Verloop van het seizoen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-de-wedstrijden-verlopen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#hoe-de-wedstrijden-verlopen">Hoe de wedstrijden verlopen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="reeksen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#reeksen">Reeksen</a></h2>',
@@ -159,12 +170,13 @@ describe('the page /cijfers', () => {
     expect(statisticsShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the first five cards in the main with the h1 and the other six in a named, wide sidebar after it, so the two columns are equal', async () => {
+  it('has the first six cards in the main with the h1 and the other six in a named, wide sidebar after it, so the two columns are equal', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
     const left = [
       'onze-plek-in-de-competitie',
+      'onze-plek-door-de-jaren',
       'verloop-van-het-seizoen',
       'hoe-de-wedstrijden-verlopen',
       'reeksen',
@@ -232,14 +244,16 @@ describe('the page /cijfers', () => {
     }
   })
 
-  it('lets the visitor make an image of each of the ten cards, and of none with a long table', async () => {
+  it('lets the visitor make an image of each of the ten cards, and of none with a long table or a line', async () => {
     const html = await render()
     const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
       ([, id]) => id,
     )
 
     expect(shareable).toEqual(
-      statisticsShortcuts.map(({ href }) => href.slice(1)).filter((id) => id !== 'resultaten-per-hoofdtrainer'),
+      statisticsShortcuts
+        .map(({ href }) => href.slice(1))
+        .filter((id) => id !== 'resultaten-per-hoofdtrainer' && id !== 'onze-plek-door-de-jaren'),
     )
     expect(html.match(/data-hf-card-share/g)).toHaveLength(10)
   })
@@ -2029,7 +2043,7 @@ describe('the card Opmerkelijk on /cijfers', () => {
     expect(orders.size).toBeGreaterThan(1)
   })
 
-  it('is in the bar of nobody: the bar has the eleven cards with figures', async () => {
+  it('is in the bar of nobody: the bar has the twelve cards with figures', async () => {
     withFacts(...three)
 
     const ids = [...(await render()).matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)

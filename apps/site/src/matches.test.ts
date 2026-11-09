@@ -1,4 +1,4 @@
-import type { PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
+import type { PublicLeagueResult, PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
 
 import { competitions } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
@@ -19,6 +19,7 @@ import {
   matchFlowOf,
   overviewOf,
   parseCleanSheetCount,
+  placePerRoundOf,
   programmeOf,
   resultsCardOrder,
   resultsOfSeason,
@@ -2588,5 +2589,88 @@ describe('attendanceOf', () => {
       max: 0,
       ticks: [],
     })
+  })
+})
+
+describe('placePerRoundOf', () => {
+  const clubs = [
+    'sc Heerenveen',
+    ...Array.from({ length: 17 }, (_, index) => `Club ${String(index + 1).padStart(2, '0')}`),
+  ]
+  const table = [{ pointsDeducted: 0 }]
+
+  /**
+   * The nine matches of a round: the clubs meet in pairs (sc Heerenveen and Club 01, Club 02
+   * and Club 03, and so on) and every match ends 0-0, except those in `scores`, which give the
+   * goals of the home club and the away club by the place of the pair.
+   */
+  const round = (number: number, scores: Record<number, [number, number]> = {}): PublicLeagueResult[] =>
+    Array.from({ length: 9 }, (_, pair) => ({
+      awayClub: clubs[pair * 2 + 1]!,
+      awayGoals: scores[pair]?.[1] ?? 0,
+      homeClub: clubs[pair * 2]!,
+      homeGoals: scores[pair]?.[0] ?? 0,
+      playedOn: '2026-08-01',
+      round: number,
+    }))
+
+  it('has no line for a season without results or without a table', () => {
+    expect(placePerRoundOf([], table)).toBeUndefined()
+    expect(placePerRoundOf(round(1), [])).toBeUndefined()
+  })
+
+  it('has no line when the results are not of all clubs', () => {
+    expect(placePerRoundOf(round(1).slice(0, 1), table)).toBeUndefined()
+  })
+
+  it('has no line for a season in which points were taken off', () => {
+    expect(placePerRoundOf(round(1), [{ pointsDeducted: 0 }, { pointsDeducted: 2 }])).toBeUndefined()
+  })
+
+  it('counts three points for a win and puts the winner on top, with 34 rounds on the line', () => {
+    const places = placePerRoundOf(round(1, { 0: [2, 0] }), table)
+
+    expect(places).toHaveLength(34)
+    expect(places?.[0]).toEqual({ points: 3, position: 1, round: 1 })
+    expect(places?.slice(1).every((place) => place === null)).toBe(true)
+  })
+
+  it('gives a loss no points and a draw one', () => {
+    expect(placePerRoundOf(round(1, { 0: [0, 1] }), table)?.[0]).toEqual({ points: 0, position: 18, round: 1 })
+    expect(placePerRoundOf(round(1), table)?.[0]?.points).toBe(1)
+  })
+
+  it('puts clubs level on points in the order of goal difference, then goals for', () => {
+    // We win 1-0. Club 02 wins 3-0 (goal difference +3), Club 04 wins 2-1 (+1, two goals for).
+    const places = placePerRoundOf(round(1, { 0: [1, 0], 1: [3, 0], 2: [2, 1] }), table)
+
+    expect(places?.[0]).toEqual({ points: 3, position: 3, round: 1 })
+  })
+
+  it('puts clubs level on everything in the order of their name', () => {
+    // All nine matches end 0-0, so every club has one point: sc sorts after the Club names.
+    expect(placePerRoundOf(round(1), table)?.[0]).toEqual({ points: 1, position: 18, round: 1 })
+  })
+
+  it('leaves an open place for a round with a postponed match, and for every round after it', () => {
+    const places = placePerRoundOf([...round(1), ...round(2).slice(1), ...round(3)], table)
+
+    expect(places?.[0]).not.toBeNull()
+    expect(places?.[1]).toBeNull()
+    expect(places?.[2]).toBeNull()
+  })
+
+  it('counts a postponed match in its own round once it has been played', () => {
+    const played = { ...round(2)[0]!, homeGoals: 1, playedOn: '2026-12-01' }
+    const places = placePerRoundOf([...round(1), ...round(2).slice(1), played, ...round(3)], table)
+
+    expect(places?.slice(0, 3).map((place) => place?.round)).toEqual([1, 2, 3])
+    expect(places?.[1]?.points).toBe(4)
+  })
+
+  it('stops at the last complete round in a season that is going on', () => {
+    const places = placePerRoundOf([...round(1), ...round(2)], table)
+
+    expect(places?.filter((place) => place !== null)).toHaveLength(2)
   })
 })

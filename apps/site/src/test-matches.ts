@@ -271,6 +271,21 @@ export const leagueResultsData: PublicLeagueResult[] = [
   { awayClub: 'Testdorp FC', awayGoals: 1, homeClub: 'Demo Boys', homeGoals: 1, playedOn: '2026-10-11', round: 9 },
 ]
 
+/**
+ * The nine league matches of a round of made-up clubs, for the line of our place per round: sc
+ * Heerenveen plays Club 01, Club 02 plays Club 03 and so on, and every match ends 0-0 except
+ * ours, which sc Heerenveen wins by `goals` to 0. A season of these has all 18 clubs.
+ */
+export const leagueRoundOf = (round: number, goals = 0): PublicLeagueResult[] =>
+  Array.from({ length: 9 }, (_, pair) => ({
+    awayClub: pair === 0 ? 'Club 01' : `Club ${String(pair * 2 + 1).padStart(2, '0')}`,
+    awayGoals: 0,
+    homeClub: pair === 0 ? 'sc Heerenveen' : `Club ${String(pair * 2).padStart(2, '0')}`,
+    homeGoals: pair === 0 ? goals : 0,
+    playedOn: '2026-09-20',
+    round,
+  }))
+
 /** The head coaches and match days the card "Resultaten per hoofdtrainer" is made from. */
 export const coachResultData: Awaited<ReturnType<typeof getCoachResultData>> = {
   coaches: [

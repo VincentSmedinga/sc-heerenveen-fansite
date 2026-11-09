@@ -1,3 +1,4 @@
+import type { PublicLeagueResult } from '@fansite/db/queries'
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
@@ -6,14 +7,13 @@ import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { FinalPlacesCard } from '#src/FinalPlacesCard'
 import { lastFiveOf } from '#src/last-five'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import {
-  getFinalPlaces,
   getLeagueResults,
   type MatchData,
   overviewOf,
+  placePerRoundOf,
   resultsOfSeason,
   resultsPerCompetition,
 } from '#src/matches'
@@ -28,6 +28,7 @@ import {
   standingsCaption,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { PlacePerRoundCard } from '#src/PlacePerRoundCard'
 import { getLiveReports, getReportAddresses } from '#src/report-data'
 import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
@@ -74,8 +75,10 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * card with figures that belongs to it on the page Cijfers, of the same season. A season that
  * has no matches in the database is the page "niet gevonden".
  *
- * The card Onze plek door de jaren, under the table, shows our place in every season we have a
- * table of, whichever season the page shows (see FinalPlacesCard).
+ * The card Onze plek per speelronde, under the table, shows our place after each round of the
+ * season as a line. A season whose results are not of all clubs, or in which points were taken
+ * off, has no such card (see `placePerRoundOf`). Our place in every season, the card Onze plek
+ * door de jaren, is on Cijfers (see FinalPlacesCard).
  *
  * The card with the table of the current season has a switch between the whole season and the
  * latest five matches of each club, `?stand=laatste-5` (see StandingsSwitch). It is there only
@@ -106,11 +109,12 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // without a result has the one card Uitslagen.
   const resultCards = resultsPerCompetition(results)
   const standingsCard = standingsCardOf(current)
-  const lastFive = current ? await lastFiveOfSeason(data) : undefined
+  // The results of every club, for the switch of the table and for the line of our place.
+  const leagueResults = await leagueResultsOfSeason(data)
+  const lastFive = current ? lastFiveOfSeason(data, leagueResults) : undefined
   const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
   const coachesCard = coachesCardOf(data.coaches.length)
-  // Our place in every season: the same on every page, so it does not depend on `season`.
-  const finalPlaces = await finalPlacesOfAllSeasons()
+  const placePerRound = leagueResults === undefined ? undefined : placePerRoundOf(leagueResults, data.standings)
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
@@ -224,7 +228,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             </>
           )}
         </Card>
-        <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
+        {placePerRound !== undefined && <PlacePerRoundCard places={placePerRound} />}
         <CoachesCard coaches={data.coaches} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
@@ -235,31 +239,26 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
 }
 
 /**
- * Our place in every season, for the card "Onze plek door de jaren". It is no more than a card:
- * when it can't be read, the page is shown without it and the error is logged.
- */
-async function finalPlacesOfAllSeasons() {
-  try {
-    return await getFinalPlaces()
-  } catch (error) {
-    console.error(`Could not read our place in the seasons for ${matchesPath}: ${reasonOf(error)}`)
-
-    return []
-  }
-}
-
-/**
  * The table over the latest five matches of the season, or undefined when the card has no
  * switch: the results of every club are not complete enough (see `lastFiveOf`), or they could
  * not be read, which leaves the card as it is without them.
  */
-async function lastFiveOfSeason(data: MatchData) {
-  if (data.standings.length === 0) {
+function lastFiveOfSeason(data: MatchData, results: PublicLeagueResult[] | undefined) {
+  if (data.standings.length === 0 || results === undefined) {
     return undefined
   }
 
+  return lastFiveOf(data.matches, results, data.standings)
+}
+
+/**
+ * The results of the league for every club in the season of the page, or undefined when they
+ * could not be read, which leaves the table without a switch and the page without the line of
+ * our place per round: the error is logged.
+ */
+async function leagueResultsOfSeason(data: MatchData) {
   try {
-    return lastFiveOf(data.matches, await getLeagueResults(data.season), data.standings)
+    return await getLeagueResults(data.season)
   } catch (error) {
     console.error(`Could not read the league results for ${matchesPath}: ${reasonOf(error)}`)
 
