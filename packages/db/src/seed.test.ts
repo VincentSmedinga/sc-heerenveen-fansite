@@ -326,7 +326,7 @@ describe('the seed', () => {
     expect(oog?.description).toBeTruthy()
     expect(oog?.description?.length).toBeLessThanOrEqual(300)
     expect(oogFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
-      ['https://www.oogtv.nl/tag/sc-heerenveen/feed/', null],
+      ['https://www.oogtv.nl/tag/sc-heerenveen/feed/', 'none'],
       ['https://www.oogtv.nl/tag/fc-groningen/feed/', 'club'],
     ])
   })
