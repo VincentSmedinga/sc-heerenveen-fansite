@@ -3987,7 +3987,8 @@
 - **Datum:** 9 november 2026
 - **Besluit:** de kaart Selectie toont een speler met de bron `verslag` alleen als `verslag` de beste bron van het seizoen is in `squad_completeness` (`cardPlayers` in `src/season-squad.ts`, #935).
   "Alle spelers" toont iedereen uit de verslagen, wat de bron van het seizoen ook is.
-  - Bij `verslag` zegt de zin onder de kop waar de lijst vandaan komt, zonder percentage: "We kennen 25 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk."
+  - Bij `verslag` zegt de zin onder de kop waar de lijst vandaan komt, zonder percentage:
+    "We kennen 25 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk."
     Er komt geen bronvermelding bij, want de gegevens zijn van onszelf.
   - Zonder rugnummers en posities is de kaart één lijst met alleen namen, zonder koppen.
   - Een seizoen zonder rij blijft "onbekend" zonder lijst.
