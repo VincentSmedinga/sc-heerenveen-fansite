@@ -102,7 +102,7 @@ export function fullRounds(season: string) {
     const turned = others.map((_, place) => others[(place + index) % others.length]!)
     const pairs = [
       [clubs[0]!, turned[0]!],
-      ...Array.from({ length: 8 }, (_, step) => [turned[step + 1]!, turned[15 - step]!]),
+      ...Array.from({ length: 8 }, (_, step) => [turned[step + 1]!, turned[16 - step]!]),
     ] as const
 
     return pairs.map(([homeClub, awayClub], pair) => ({
