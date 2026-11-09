@@ -1,0 +1,24 @@
+/*
+ * A list of terms and descriptions in small letters: the term quiet, the description a little
+ * heavier than running text.
+ * The pairs are columns that wrap, by the width of the place the list is in.
+ */
+
+@layer hf.components {
+  .hf-description-list {
+    display: grid;
+    gap: var(--hf-space-s) var(--hf-space-l);
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
+
+  .hf-description-list dt {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-description-list dd {
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-headline-font-weight);
+    margin-inline-start: 0;
+  }
+}

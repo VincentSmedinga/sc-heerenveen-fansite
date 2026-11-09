@@ -5,7 +5,7 @@
  * is large in the middle with the outcome under it. The width is that of the place the header
  * is in, such as a card, and not of the screen. The result takes the colour of the outcome from
  * the classes of match.css (.hf-match-win, .hf-match-loss and .hf-match-draw). The facts are a
- * list of terms and values in small letters in columns that wrap.
+ * DescriptionList, which has its own look.
  */
 
 @layer hf.components {
@@ -134,22 +134,5 @@
       font-weight: var(--hf-heading-1-font-weight);
       line-height: 1;
     }
-  }
-
-  .hf-match-header-facts {
-    display: grid;
-    gap: var(--hf-space-s) var(--hf-space-l);
-    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  }
-
-  .hf-match-header-facts dt {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
-
-  .hf-match-header-facts dd {
-    font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-headline-font-weight);
-    margin-inline-start: 0;
   }
 }

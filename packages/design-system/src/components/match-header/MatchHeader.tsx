@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
+import { DescriptionList } from '../description-list/DescriptionList'
 import { type Outcome, outcomeOf } from '../outcome'
 
 /** The name of our own club, which a match always has on one side. */
@@ -147,7 +148,7 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
 /**
  * The head of the page of a match: the two clubs with the result, the outcome in a pill, the
  * scorers under each club, the way it went on in words when there was extra time or a
- * shoot-out, and the facts of the match as a list of terms and values in small letters. The
+ * shoot-out, and the facts of the match as a `DescriptionList`. The
  * home club is first and the first number is its, as in a `Match`. On a narrow place each club
  * has its name and its goals on a line, and from 40 rem the names stand left and right with the
  * result large in the middle. The result has the colour of the outcome for sc Heerenveen, from
@@ -248,14 +249,13 @@ export const MatchHeader = ({
           {how === undefined ? null : <p className="hf-match-header-how">{how}</p>}
         </div>
       </div>
-      <dl className="hf-match-header-facts">
+      <DescriptionList>
         {facts.map((fact) => (
-          <div key={fact.label}>
-            <dt>{fact.label}</dt>
-            <dd>{fact.value}</dd>
-          </div>
+          <DescriptionList.Item key={fact.label} term={fact.label}>
+            {fact.value}
+          </DescriptionList.Item>
         ))}
-      </dl>
+      </DescriptionList>
     </div>
   )
 }
