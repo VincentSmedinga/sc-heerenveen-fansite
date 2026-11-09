@@ -2,6 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
+import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import {
   matches,
@@ -1017,6 +1018,34 @@ async function storeMatches(
     const proposal: Proposal = { clubId: club.id, goals: scorers.goals, match }
 
     if (before === undefined) {
+      // The same match may be there already from another source under another round.
+      const lookup = await findMatchByDate(db, {
+        clubId: club.id,
+        competition: match.competition,
+        date: match.matchDate,
+        season,
+      })
+
+      if (lookup.kind === 'ambiguous' && lookup.matches.some((row) => row.dataSource !== 'wikipedia')) {
+        warnings.push(
+          `${match.competition} ${match.round} (${match.matchDate}) fits ${lookup.matches.length} matches against the same club within a day, so it is not matched to one of them`,
+        )
+      }
+      if (lookup.kind === 'found' && lookup.match.dataSource !== 'wikipedia') {
+        const { differences, fill } = compareClaim(lookup.match, match)
+
+        warnings.push(...differences.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
+
+        if (Object.keys(fill).length > 0) {
+          counts.updated++
+          await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
+        } else {
+          counts.unchanged++
+        }
+
+        continue
+      }
+
       entries.push({ kind: 'add', proposal })
       continue
     }

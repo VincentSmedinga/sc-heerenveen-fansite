@@ -19,6 +19,7 @@
     "./match-conflict-mail": "./src/match-conflict-mail.ts",
     "./match-conflicts": "./src/match-conflicts.ts",
     "./match-edits": "./src/match-edits.ts",
+    "./match-lookup": "./src/match-lookup.ts",
     "./match-reports": "./src/match-reports.ts",
     "./migration-check": "./src/migration-check.ts",
     "./prepare": "./src/prepare.ts",

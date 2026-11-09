@@ -1,5 +1,6 @@
 import type { Competition, Match, NewMatchStatistics } from '@fansite/db/schema'
 
+import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -297,7 +298,9 @@ const sameValue = (a: unknown, b: unknown) =>
 
 /**
  * The step `matches`: makes a row in `matches` for every match in the files, and a row in
- * `match_statistics` where there are numbers. It touches only rows with the source
+ * `match_statistics` where there are numbers. It finds a match first by club and date
+ * (`findMatchByDate`): one from another source only gets its empty fields filled, and a field
+ * that differs is a line in the log. Else it touches only rows with the source
  * `oude-fansite`, leaves the parts the editors filled in as they are (`match_edits`) and
  * never removes a row. Needs the clubs of the step before it (`clubIds`, by club code).
  */
@@ -357,6 +360,34 @@ export async function importOldSiteMatches(
     report.lines.push(...one.lines)
 
     if (before === undefined) {
+      // The same match may be there already from another source under another round.
+      const lookup = await findMatchByDate(db, {
+        clubId,
+        competition: values.competition,
+        date: values.matchDate,
+        season: values.season,
+      })
+
+      if (lookup.kind === 'ambiguous' && lookup.matches.some((row) => row.dataSource !== oldSiteSource)) {
+        report.lines.push(
+          `${label}: ${lookup.matches.length} matches against the same club within a day, so it is not matched to one of them`,
+        )
+      }
+      if (lookup.kind === 'found' && lookup.match.dataSource !== oldSiteSource) {
+        const { differences, fill } = compareClaim(lookup.match, values)
+
+        report.lines.push(...differences.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)))
+
+        if (Object.keys(fill).length > 0) {
+          await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
+          report.changed += 1
+        } else {
+          report.unchanged += 1
+        }
+
+        continue
+      }
+
       const [{ insertId }] = await db.insert(matches).values(values)
 
       if (one.statistics !== null) {
