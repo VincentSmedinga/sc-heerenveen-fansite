@@ -848,7 +848,9 @@ async function readAndStore(
         playoffs.matches.length === 0 &&
         !(await hasPlayoffMatch(transaction, season))
       ) {
-        await transaction.delete(wikipediaPages).where(eq(wikipediaPages.title, page.title))
+        await transaction
+          .delete(wikipediaPages)
+          .where(and(eq(wikipediaPages.title, page.title), eq(wikipediaPages.kind, 'playoffs')))
         continue
       }
 
