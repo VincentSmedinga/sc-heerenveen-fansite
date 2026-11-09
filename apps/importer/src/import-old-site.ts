@@ -9,13 +9,15 @@
 // The command checks the files before it connects, takes the lock of the import for the whole
 // run, and writes a line for each step. With `--dry-run` it does the same inside a transaction
 // that it rolls back, so the numbers are what a real run would write, and nothing is written.
-import { connect } from '@fansite/db/client'
+import { connect, type Database } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { existsSync } from 'node:fs'
 
 import type { OldSiteData } from './old-site-file.ts'
-import type { OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site-step.ts'
+import type { OldSiteContext, OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site-step.ts'
 
+import { createFetcher } from './fetcher.ts'
+import { wikipediaOrigin } from './import-matches.ts'
 import { buildOldSiteCheck, formatOldSiteCheck } from './old-site-check.ts'
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { importOldSiteCompleteness } from './old-site-completeness.ts'
@@ -23,7 +25,9 @@ import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteLineups } from './old-site-lineups.ts'
 import { importOldSiteMatches } from './old-site-matches.ts'
+import { importOldSitePersons, type TitleLookup, wikipediaTitleLookup } from './old-site-persons.ts'
 import { importOldSitePlayers } from './old-site-players.ts'
+import { robotsStoreFor } from './robots-store.ts'
 import { describeError } from './text.ts'
 
 /** What the command says when a run holds the lock of the import. */
@@ -46,6 +50,7 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'spelers', run: (db, data) => importOldSitePlayers(db, data.matches, data.players) },
   { name: 'doelpunten', run: (db, data) => importOldSiteGoals(db, data.matches, data.players) },
   { name: 'opstellingen', run: (db, data) => importOldSiteLineups(db, data.matches, data.players) },
+  { name: 'personen', run: (db, _data, context) => importOldSitePersons(db, context.titles) },
   { name: 'selecties', run: (db) => importOldSiteCompleteness(db, new Date()) },
 ]
 
@@ -56,6 +61,8 @@ export type OldSiteImportOptions = {
   folder?: string | URL
   /** The steps to run. By default `oldSiteSteps`. */
   steps?: readonly OldSiteStep[]
+  /** Asks Wikipedia about a title. By default the real one, made at the first title. */
+  titles?: TitleLookup
   /** Where the lines go. */
   write?: (line: string) => void
 }
@@ -103,6 +110,7 @@ export async function runOldSiteImport(
     dryRun = false,
     folder = defaultOldSiteFolder(),
     steps = oldSiteSteps,
+    titles,
     write = console.log,
   }: OldSiteImportOptions = {},
 ): Promise<number> {
@@ -117,19 +125,20 @@ export async function runOldSiteImport(
   }
 
   const { close, db, pool } = connect(databaseUrl)
+  const context: OldSiteContext = { titles: titles ?? realTitles(db) }
   const prefix = dryRun ? 'Dry run, nothing is written. ' : ''
 
   try {
     const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
       if (!dryRun) {
-        return runSteps(db, data, steps, write)
+        return runSteps(db, data, steps, write, context)
       }
 
       let code = 0
 
       try {
         await db.transaction(async (transaction) => {
-          code = await runSteps(transaction, data, steps, write)
+          code = await runSteps(transaction, data, steps, write, context)
           throw new DryRunDone()
         })
       } catch (error) {
@@ -194,16 +203,28 @@ function amsterdamToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' })
 }
 
+/** The lookup that asks the Dutch Wikipedia. Its fetcher is made at the first title. */
+function realTitles(db: Database & OldSiteDatabase): TitleLookup {
+  let lookup: TitleLookup | undefined
+
+  return (title) => {
+    lookup ??= wikipediaTitleLookup(createFetcher({ robots: robotsStoreFor(db) }), wikipediaOrigin)
+
+    return lookup(title)
+  }
+}
+
 /** Runs the steps in order; each in a transaction of its own. Returns the exit code. */
 async function runSteps(
   db: OldSiteDatabase,
   data: OldSiteData,
   steps: readonly OldSiteStep[],
   write: (line: string) => void,
+  context: OldSiteContext,
 ): Promise<number> {
   for (const step of steps) {
     try {
-      const report = await db.transaction((transaction) => step.run(transaction, data))
+      const report = await db.transaction((transaction) => step.run(transaction, data, context))
 
       write(formatStepReport(step.name, report))
     } catch (error) {

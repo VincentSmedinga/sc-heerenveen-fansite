@@ -881,6 +881,7 @@
     De kaarten maken ook geen spelers, want elke speler met een kaart staat in een opstelling en de coach is geen speler.
 - **Waarom:** doelpunten, kaarten en minuten hangen dan aan een speler van ons, terwijl `persons` een echte Wikipedia-pagina vraagt (`wikipedia_page` is verplicht en uniek).
   De stap maakt 427 rijen voor 17 seizoenen.
+  - **Later:** de stap `personen` koppelt die rijen sinds 9 november 2026 aan een persoon, maar zonder geboortedatum uit de oude tabel; zie _De spelers van de oude fansite worden alleen bij zekerheid personen_ in `importer.md`.
 - **Alternatieven:** alleen namen (niets over eigen spelers uit 1990 tot 2007 is dan per speler te tellen); `persons` met een verzonnen titel.
 
 ## Een persoon krijgt het Q-nummer en het paginanummer van het Nederlandse artikel

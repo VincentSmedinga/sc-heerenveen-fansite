@@ -8,8 +8,8 @@
 import type { Match } from '@fansite/db/schema'
 
 import { normaliseClubName } from '@fansite/db/clubs'
-import { clubs, matches, matchGoals, matchStatistics } from '@fansite/db/schema'
-import { asc } from 'drizzle-orm'
+import { clubs, matches, matchGoals, matchStatistics, players } from '@fansite/db/schema'
+import { and, asc, eq, isNull } from 'drizzle-orm'
 
 import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteNameSpelling } from './old-site-name-clusters.ts'
@@ -45,6 +45,8 @@ export type OldSiteCheck = {
   notInDatabase: OldSiteCheckItem[]
   /** Matches in the database from the old fansite that the files don't have. */
   notInFile: OldSiteCheckItem[]
+  /** Players of the old matches (source `verslag`) that `personen` left without a person. */
+  personless: string[]
   /** Players whose name comes from their code. */
   players: OldSiteCheckPlayer[]
   /** The remarks of the old editors, with whether the import copied them. */
@@ -242,6 +244,7 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
     nameClusters: [],
     notInDatabase: [],
     notInFile: [],
+    personless: [],
     players: [],
     remarks: [],
     reportsBezig: [],
@@ -428,6 +431,18 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
   }
   check.players = [...byPlayer.values()].toSorted((a, b) => a.name.localeCompare(b.name))
 
+  const personless = new Map<string, Set<string>>()
+
+  for (const row of await db
+    .select({ name: players.name, season: players.season })
+    .from(players)
+    .where(and(eq(players.source, 'verslag'), isNull(players.personId)))) {
+    personless.set(row.name, (personless.get(row.name) ?? new Set()).add(row.season))
+  }
+
+  check.personless = [...personless]
+    .toSorted(([a], [b]) => a.localeCompare(b))
+    .map(([name, seasons]) => `${name}, ${[...seasons].toSorted().join(', ')}`)
   check.nameClusters = findOldSiteNameClusters(countOldSiteNames(data))
 
   // The clubs: new, linked to a club that was there, or the same.
@@ -559,6 +574,14 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     'Spelers van wie de code geen rij in de oude tabel had',
     ['De naam is gemaakt uit de code, dus de schrijfwijze kan afwijken.'],
     check.players.map((player) => `${player.name} (\`${player.code}\`), ${player.seasons.join(', ')}`),
+  )
+  section(
+    'Spelers zonder persoon',
+    [
+      'De stap `personen` koppelt een speler alleen aan een Wikipedia-titel als het zeker is: de titel bestaat en wijst naar een voetballer.',
+      'Bij twijfel (geen artikel, een doorverwijspagina, geen voetballer) blijft de speler zonder persoon; de reden staat in het logboek van de import.',
+    ],
+    check.personless,
   )
   section(
     'Kaarten die de import oversloeg of afleidde',
