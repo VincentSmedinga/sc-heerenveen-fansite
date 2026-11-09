@@ -58,7 +58,7 @@ export function PlacePerRoundCard({ places }: { places: readonly (null | PlaceIn
       >
         <BarChart.Trend labels={labelsOf(places)} values={values} />
       </BarChart>
-      <List>
+      <List plain role="list">
         {lines.map((line) => (
           <List.Item key={line}>{line}</List.Item>
         ))}

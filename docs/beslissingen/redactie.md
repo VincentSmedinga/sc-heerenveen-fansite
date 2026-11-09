@@ -2944,6 +2944,7 @@
   - **De lijst:** "Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14", "Laagste: plek 11, ronde 20" en "Totaal verschoven: 23 plekken".
     Een open ronde breekt een reeks, maar niet het totaal: tussen twee volledige rondes met een open ronde ertussen telt het verschil tussen die twee.
     Hadden we na elke ronde dezelfde plek, dan staat er één regel, "Plek: 3, alle rondes".
+    De lijst heeft geen opsommingstekens en geen inspringing (`List` met `plain` en `role="list"`), want met de 24 pixels van het teken breekt "Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14" op 390 pixels.
   - **De tabel:** de uitklapper heet nog "Plek per speelronde", heeft geen inleiding meer en toont Ronde, # en P.
     De kopjes hebben een verborgen volledige naam ("plek", "punten"), zodat een schermlezer ze ook op een aanraakscherm goed zegt.
   - **De lijn:** de x-as heeft een streepje met een getal bij ronde 5, 10, 15, 20, 25 en 30.

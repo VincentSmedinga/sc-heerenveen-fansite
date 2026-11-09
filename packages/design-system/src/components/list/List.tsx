@@ -26,6 +26,12 @@ type LooseProps = {
    * without a paragraph in them.
    */
   loose?: boolean
+  /**
+   * A list without markers and without the indent, for a few short lines that must fit the
+   * width of a phone, such as facts in a card. The list has no markers, so give it
+   * `role="list"`: some screen readers then no longer announce it as a list.
+   */
+  plain?: boolean
 }
 
 /**
@@ -40,14 +46,14 @@ Item.displayName = 'List.Item'
 /** A list of List.Item elements, bulleted or numbered. list.css gives it its look. */
 export const List = (props: ListProps) => {
   if (props.as === 'ol') {
-    const { as: Element, className, loose, ...rest } = props
+    const { as: Element, className, loose, plain, ...rest } = props
 
-    return <Element className={classNames(loose && 'hf-list-loose', className)} {...rest} />
+    return <Element className={classNames(loose && 'hf-list-loose', plain && 'hf-list-plain', className)} {...rest} />
   }
 
-  const { as: Element = 'ul', className, loose, ...rest } = props
+  const { as: Element = 'ul', className, loose, plain, ...rest } = props
 
-  return <Element className={classNames(loose && 'hf-list-loose', className)} {...rest} />
+  return <Element className={classNames(loose && 'hf-list-loose', plain && 'hf-list-plain', className)} {...rest} />
 }
 
 List.Item = Item

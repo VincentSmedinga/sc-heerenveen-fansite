@@ -95,6 +95,7 @@ describe('PlacePerRoundCard', () => {
       'Laagste: plek 3, ronde 1',
       'Totaal verschoven: 3 plekken',
     ])
+    expect(html).toContain('<ul class="hf-list-plain" role="list">')
     expect(html.indexOf('</ul>')).toBeLessThan(html.indexOf('<details'))
   })
 

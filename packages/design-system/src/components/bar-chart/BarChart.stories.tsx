@@ -213,3 +213,21 @@ export const PlaceOpenPlace = meta.story({
     <PlaceLine rounds={places.map((place, index) => (index === 14 || index === 15 || index > 29 ? null : place))} />
   ),
 })
+
+export const PlaceTooltip = meta.story({
+  name: 'Lijn met omgekeerde as: tooltip met een vet deel, open',
+  play: async ({ canvasElement }) => {
+    const layer = canvasElement.querySelector<HTMLElement>('.hf-bar-chart-pointer')
+
+    if (layer) {
+      const box = layer.getBoundingClientRect()
+
+      // Round 12, where the line has a point.
+      await userEvent.pointer({
+        coords: { clientX: box.left + box.width * (11.5 / 34), clientY: box.top + box.height / 2 },
+        target: layer,
+      })
+    }
+  },
+  render: () => <PlaceLine rounds={places} />,
+})

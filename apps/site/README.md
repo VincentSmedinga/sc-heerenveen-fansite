@@ -321,7 +321,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Verloop op de ranglijst:** een kaart op het zachte vlak (`surface="soft"`, anker `#verloop-op-de-ranglijst`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
   De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
   De x-as heeft een streepje met een getal bij elke vijfde ronde, en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.
-  Boven een gesloten `Disclosure` staat een lijst met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
+  Boven een gesloten `Disclosure` staat een lijst zonder opsommingstekens (`List plain`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
   `placePerRoundOf` in `src/matches.ts` rekent de stand na elke ronde uit `league_results` (punten, doelsaldo, doelpunten voor, dan de naam).
   Een ronde is een punt als alle wedstrijden van die ronde en van de rondes ervoor gespeeld zijn; anders is het een open plek.
   Het lopende seizoen toont de lijn tot de laatste complete ronde.

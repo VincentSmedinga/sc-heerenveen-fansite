@@ -17,6 +17,10 @@ const meta = preview.meta({
       control: 'boolean',
       description: 'Een ruime lijst, zoals Markdown die kent: elk item heeft ruimte onder zich.',
     },
+    plain: {
+      control: 'boolean',
+      description: 'Een lijst zonder opsommingstekens en inspringing, voor korte regels op een telefoon.',
+    },
   },
   component: List,
   parameters: {
@@ -55,6 +59,17 @@ export const Default = meta.story({
       <List {...args}>{items}</List>
     )
   },
+})
+
+export const Plain = meta.story({
+  name: 'Zonder opsommingstekens',
+  render: () => (
+    <List plain role="list">
+      <List.Item>Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14</List.Item>
+      <List.Item>Laagste: plek 11, ronde 20</List.Item>
+      <List.Item>Totaal verschoven: 23 plekken</List.Item>
+    </List>
+  ),
 })
 
 export const Numbered = meta.story({

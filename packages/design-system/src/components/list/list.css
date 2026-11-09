@@ -59,3 +59,11 @@
     gap: var(--hf-space-m);
   }
 }
+
+/* A plain list: no marker and no indent, so short lines have the whole width. */
+@layer hf.components {
+  .hf-list-plain {
+    list-style-type: none;
+    padding-inline-start: 0;
+  }
+}
