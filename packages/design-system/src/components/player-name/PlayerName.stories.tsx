@@ -334,15 +334,15 @@ export const AllFlags = meta.story({
     docs: {
       description: {
         story:
-          'Alle vlaggen van de set, met de landnaam die een schermlezer voorleest. Een land dat hier niet staat, krijgt een lege plek.',
+          'Alle vlaggen van de set, bij een speler met de landcode als naam. Een schermlezer leest de landnaam voor. Een land dat hier niet staat, krijgt een lege plek.',
       },
     },
   },
   render: () => (
     <List role="list">
-      {Object.entries(countryNames).map(([code, name]) => (
+      {Object.keys(countryNames).map((code) => (
         <List.Item key={code}>
-          <PlayerName country={code} givenName={name} surname="" />
+          <PlayerName country={code} givenName={`Testspeler ${code}`} surname="" />
         </List.Item>
       ))}
     </List>
