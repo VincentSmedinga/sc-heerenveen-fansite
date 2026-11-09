@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react'
+
 /** A place to point at: how far along and how high it is (0 to 100), and its text. */
-export type TrendPoint = { across: number; at: number; label: string }
+export type TrendPoint = { across: number; at: number; label: ReactNode }
 
 /**
  * The place with a point that is nearest to a position across the chart, as the number of the

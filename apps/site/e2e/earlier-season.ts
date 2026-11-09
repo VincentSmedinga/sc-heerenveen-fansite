@@ -52,7 +52,7 @@ export async function addEarlierSeason() {
     added = await seedMatches(db, aYearAgo())
 
     if (added) {
-      // The results of the seed are of six clubs. The card Onze plek per speelronde needs all
+      // The results of the seed are of six clubs. The card Verloop op de ranglijst needs all
       // eighteen, so the made-up season gets five whole rounds instead (see fullRounds).
       await db.delete(leagueResults).where(eq(leagueResults.season, season))
       await db.insert(leagueResults).values(fullRounds(season))

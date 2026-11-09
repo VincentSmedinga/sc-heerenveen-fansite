@@ -1,6 +1,14 @@
 'use client'
 
-import { type ComponentPropsWithoutRef, type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import { classNames } from '../classNames'
 import { placeTooltip, type TooltipPlacement } from './placement'
@@ -8,8 +16,8 @@ import { placeTooltip, type TooltipPlacement } from './placement'
 export type TooltipProps = Omit<ComponentPropsWithoutRef<'div'>, 'aria-hidden' | 'children' | 'style'> & {
   /** How far up the place is, from 0 (the bottom of the parent) to 100 (the top). */
   bottom: number
-  /** The text of the tooltip. It is short: a value, say. */
-  children: string
+  /** The text of the tooltip. It is short: a value, say. A part can be a `Strong`. */
+  children: ReactNode
   /** How far along the place is, from 0 (the left of the parent) to 100 (the right). */
   left: number
   /** Called at Escape. The parent should stop showing the tooltip then. */

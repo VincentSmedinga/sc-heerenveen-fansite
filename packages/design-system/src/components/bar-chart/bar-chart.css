@@ -171,6 +171,25 @@
     transform: translateX(-50%);
   }
 
+  /* A stroke above each number, on the line between the plot and the numbers. */
+  .hf-bar-chart-numbers-marked {
+    block-size: 1.5rem;
+  }
+
+  .hf-bar-chart-numbers-marked .hf-bar-chart-number {
+    padding-block-start: var(--hf-space-xs);
+  }
+
+  .hf-bar-chart-numbers-marked .hf-bar-chart-number::before {
+    background-color: currentcolor;
+    block-size: 0.25rem;
+    content: '';
+    inline-size: 1px;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    position: absolute;
+  }
+
   .hf-bar-chart-number-wide {
     display: none;
   }

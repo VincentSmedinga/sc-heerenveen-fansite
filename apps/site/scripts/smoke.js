@@ -981,7 +981,7 @@ await withEmptyDatabase((database) =>
     // The made-up results of the current season are of six clubs, so the card with our place
     // per round is left out, with its link in the bar. The card with our place in every season
     // moved to the statistics page (#411): none of them is left on this one.
-    assert.doesNotMatch(matchesHtml, /onze-plek-per-speelronde|onze-plek-door-de-jaren/)
+    assert.doesNotMatch(matchesHtml, /verloop-op-de-ranglijst|onze-plek-door-de-jaren/)
     // The card with how often each score was played moved to the statistics page (#774).
     assert.doesNotMatch(matchesHtml, /hoe-vaak-welke-uitslag/)
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is

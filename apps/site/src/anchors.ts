@@ -70,8 +70,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
   // The card Onze plek door de jaren moved to /cijfers (#411), and its anchor on /wedstrijden
-  // is gone on purpose, without a redirect. The card Onze plek per speelronde (anchor
-  // `onze-plek-per-speelronde`) is only on a season whose results are of all clubs, which the
+  // is gone on purpose, without a redirect. The card Verloop op de ranglijst (anchor
+  // `verloop-op-de-ranglijst`) is only on a season whose results are of all clubs, which the
   // made-up current season has not, so it is not published here.
   // The results are a card for each competition with a result. The Eredivisie keeps the anchor
   // `uitslagen`; the made-up season has a result in each of the three competitions (#665).

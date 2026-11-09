@@ -547,7 +547,7 @@ describe('the title, description and canonical address of a season', () => {
   })
 })
 
-describe('the card Onze plek per speelronde on the page of an earlier season', () => {
+describe('the card Verloop op de ranglijst on the page of an earlier season', () => {
   it('has the line of a season whose results are of all clubs, with the data of that season', async () => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
     vi.mocked(getMatchData).mockImplementation(async (season) => (season === '2025/26' ? earlier : matchData))
@@ -556,13 +556,15 @@ describe('the card Onze plek per speelronde on the page of an earlier season', (
     )
     const html = await render('2025-26')
 
-    expect(html).toContain('id="onze-plek-per-speelronde"')
-    expect(html).toMatch(/<th scope="row">Ronde 34<\/th><td class="hf-numeric">1<\/td><td class="hf-numeric">102<\/td>/)
+    expect(html).toContain('id="verloop-op-de-ranglijst"')
+    expect(html).toMatch(
+      /<th scope="row"><span class="hf-meta">34<\/span><\/th><td class="hf-numeric hf-key">1<\/td><td class="hf-numeric">102<\/td>/,
+    )
     expect(getLeagueResults).toHaveBeenCalledExactlyOnceWith('2025/26')
   })
 
   it('has no card when the results are not of all clubs', async () => {
-    expect(await render('2025-26')).not.toContain('onze-plek-per-speelronde')
+    expect(await render('2025-26')).not.toContain('verloop-op-de-ranglijst')
   })
 })
 

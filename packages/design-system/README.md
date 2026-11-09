@@ -106,8 +106,9 @@ De keuzes en hun redenen staan in [`docs/beslissingen/designsysteem.md`](../../d
 `BarChart`, `BarChart.Trend`, `DonutChart` en `MarkRow` weten niets van voetbal.
 `FormChart` zet ze samen voor een seizoen, een staafje per speelronde, en `FormTimeline` voor uitslagen over de jaren, met een vaste as van jaren en gaten waar niets is gespeeld.
 `FormTimeline` krijgt per plek een uitslag of niets en de teksten; de woorden van de sleutel komen uit `tableColumns`, zoals bij `FormChart`.
-`BarChart` heeft daarvoor labels onder de plekken die de pagina kiest (`axis.labels`).
+`BarChart` heeft daarvoor labels onder de plekken die de pagina kiest (`axis.labels`), met op verzoek een streepje erboven (`axis.marks`).
 Een `BarChart.Trend` met `labels` krijgt een `Tooltip` die de aanwijzer volgt; `Tooltip` weet niets van grafieken en is ook elders te gebruiken.
+Een label mag een stukje opmaak zijn, zoals een `Strong` om het antwoord.
 De grafiek zelf blijft verborgen voor een schermlezer, dus de pagina zet dezelfde getallen als tekst ernaast.
 
 ## Een pagina in Storybook

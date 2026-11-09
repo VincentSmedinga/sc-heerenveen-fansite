@@ -8,6 +8,7 @@ import { type ChartTone } from '../chart/tones'
 import { movingAverage } from '../chart/trend'
 import { DataTable } from '../data-table/DataTable'
 import { Heading } from '../heading/Heading'
+import { Strong } from '../strong/Strong'
 import { Text } from '../text/Text'
 import { BarChart, type BarChartBar } from './BarChart'
 
@@ -171,7 +172,11 @@ const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
         Plek per speelronde
       </Heading>
       <BarChart
-        axis={{ title: 'Speelronde' }}
+        axis={{
+          labels: [5, 10, 15, 20, 25, 30].map((round) => ({ at: round - 0.5, text: String(round) })),
+          marks: true,
+          title: 'Speelronde',
+        }}
         bars={rounds.map(() => null)}
         max={18}
         ticks={[18, 14, 9, 4, 1]}
@@ -179,7 +184,11 @@ const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
       >
         <BarChart.Trend
           labels={rounds.map((place, index) =>
-            place === null ? null : `Ronde ${index + 1}: plek ${place}, ${(index + 1) * 2} punten`,
+            place === null ? null : (
+              <>
+                Ronde {index + 1}: <Strong>plek {place}</Strong>
+              </>
+            ),
           )}
           values={rounds.map((place) => (place === null ? null : 19 - place))}
         />
@@ -189,7 +198,7 @@ const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
 )
 
 export const PlaceFullSeason = meta.story({
-  name: 'Lijn met omgekeerde as: een heel seizoen, plek 1 bovenaan',
+  name: 'Lijn met omgekeerde as: een heel seizoen, met streepjes en een vet deel in de tooltip',
   render: () => <PlaceLine rounds={places} />,
 })
 
