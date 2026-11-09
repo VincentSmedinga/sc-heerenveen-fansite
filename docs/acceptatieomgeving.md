@@ -123,6 +123,13 @@ De workflow draait op de host hetzelfde bestand als cron (`apps/importer/import.
 Hij gebruikt de omgeving `acceptatie` en dezelfde geheimen als de deploy, dus hij vraagt niets extra's.
 Ontbreekt een geheim, dan slaat de workflow de import over met een melding en blijft hij groen.
 
+Elke run van _Import season_, _Import seasons_, _Import squads_ en _Import old site_ (de actie `import`) maakt eerst een back-up van de database, met `packages/db/backup.mjs backup`.
+Dat gebeurt in de stap _Back up the database on the host_, over SSH, met dezelfde Node en hetzelfde bestand voor `DATABASE_URL` als de import.
+Faalt de back-up, dan wordt de run rood en importeert hij niets.
+De samenvatting van de run noemt het bestand van de back-up, zodat je weet wat je kunt terugzetten (zie [Back-ups](back-ups.md)).
+De acties `report` en `status` van _Import old site_ schrijven niets en maken geen back-up.
+De map houdt de back-ups 14 dagen, of zoveel dagen als `BACKUP_KEEP_DAYS` zegt; daarna ruimt de volgende back-up ze op.
+
 - De run wordt rood als de opdracht een andere exitcode geeft dan 0: de opdracht weigert het seizoen, een controle faalt, Wikipedia vraagt om te wachten of een run van cron houdt de lock vast.
   Bij een lock probeer je het na een paar minuten opnieuw.
   De database blijft dan zoals ze was.
