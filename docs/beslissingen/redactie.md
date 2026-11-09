@@ -2015,6 +2015,8 @@
   Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
 - **Later:** zie _De kaart Gemiddeld resultaat toont de top 10 van clubs met minstens 5 wedstrijden en volgt de schakelaar_ (4 november 2026): die kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen.
 - **Later:** zie _De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram_ (4 november 2026) in `site.md`: die kaart zegt het aantal wedstrijden zonder "Gebaseerd op" en zonder "sinds"; de regel voor de andere kaarten blijft tot #494.
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust_ (9 november 2026): de zin heet niet meer "Gebaseerd op …".
+  Het voorvoegsel is weg, de vaste plek in de kaart blijft.
 - **Later:** zie _De pagina van een club heeft een kaart met doelpuntenmakers, vanaf 5 wedstrijden_ (4 november 2026): de regel "een kaart blijft zichtbaar bij weinig wedstrijden" geldt niet voor die kaart; die is er pas bij minstens 5 wedstrijden tegen de club.
 
 ## Reeksen staan in een eigen kaart na Verloop van het seizoen
@@ -2919,3 +2921,17 @@
   De zijkolom wordt langer, en op een telefoon staat hij onder de top 10.
   Met 10 tot en met 14 clubs staat een club nog in allebei de lijsten (bij 10 clubs staan alle tien in de top 10); pas vanaf 15 clubs zijn de lijsten gescheiden.
 - **Alternatieven:** beide lijsten in één kaart (twee tabellen, twee bijschriften, één "Gebaseerd op" die voor beide niet klopt); drie clubs (dun naast tien); de kaart ook tonen met minder dan 10 clubs; "Lastigste tegenstanders" als kop (leest als het gemiddelde van de tegenstander).
+
+## De zin onder een kaart met cijfers zegt alleen waarop de telling rust
+
+- **Datum:** 9 november 2026
+- **Besluit:** de zin onder een kaart met een telling begint niet meer met "Gebaseerd op" (#494).
+  Hij zegt alleen waarop de telling rust: "Alle 7 gespeelde wedstrijden", "1 gespeelde wedstrijd" of "6 van de 7 gespeelde wedstrijden".
+  De eigen zinnen volgen dezelfde vorm: "Vroegste en laatste doelpunt: 6 van de 7 gespeelde wedstrijden", "Stand na 34 wedstrijden" en "De doelpuntenmakers van 6 van de 7 gespeelde wedstrijden".
+  De kaarten van de tegenstanders houden hun "sinds …" en "in de Eredivisie".
+  De zin staat nog op dezelfde plek in de kaart en blijft op elke kaart met een telling, en de zin over wat de telling buiten beschouwing laat staat direct erna.
+  Het aantal in de zin is hetzelfde als eerst.
+- **Waarom:** het voorvoegsel voegt niets toe: een aantal wedstrijden onder een kaart leest al als de grondslag.
+  Een kortere regel kost minder ruimte, vooral op een telefoon.
+- **Alternatieven:** "Gebaseerd op" laten staan; "Op basis van" of "Telt" als voorvoegsel (zelfde opvulling); de zin weglaten (dan staat het aantal nergens).
+- **Later:** de regel in het hoofdstuk Redactie van Storybook (`editorial.mdx`) noemt nu "de zin over het aantal wedstrijden".
