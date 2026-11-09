@@ -14,6 +14,8 @@
 // - 2018/19 to 2021/22 and 2024/25: the page of the English Wikipedia (`englishSquadPage`).
 // - 2022/23 and 2023/24: the same Dutch title, the squad table that the current season has.
 // - 2000/01 to 2004/05 and 2025/26: no page on either Wikipedia, so no reader.
+// - 2026/27 and later: the same Dutch title and squad table, which the hourly import read while
+//   the season was the current one (#975).
 import type { SeasonSquad } from './season-squad.ts'
 
 import { englishSquadPage, readEnglishSquad } from './read-english-squad.ts'
@@ -50,6 +52,12 @@ const selectionYears = { first: 2007, last: 2017 }
 /** The seasons whose Dutch page has the squad table that the current season has. */
 const squadTableYears = new Set([2022, 2023])
 
+/**
+ * The first season the hourly import read as the current one. The page of such a season has the
+ * squad table, so the season needs no line here once it is over.
+ */
+const firstCurrentYear = 2026
+
 const statistics = { name: 'statistics', read: readSeasonStatistics }
 const selection = { name: 'selection', read: readSeasonSelection }
 const transfers = { name: 'transfers', read: readSeasonTransfers }
@@ -78,7 +86,7 @@ export function squadSources(season: string): SquadSource[] {
   if (year >= selectionYears.first && year <= selectionYears.last) {
     return [{ origin: 'nl', readers: [selection, transfers], title: squadPageTitle(season) }]
   }
-  if (squadTableYears.has(year)) {
+  if (squadTableYears.has(year) || year >= firstCurrentYear) {
     return [{ origin: 'nl', readers: [squadTable], title: squadPageTitle(season) }]
   }
 

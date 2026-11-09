@@ -72,7 +72,9 @@ export function describeHeldChange(
 /**
  * What happens to a held change when nobody decides, in a sentence. In the season that is on,
  * the import takes the change over after seven days if the page still says the same. In a
- * season that is over the import does not read the page any more, so nothing happens.
+ * season that is over the import does not read the page any more, so nothing happens. The
+ * weekly read of the season that has just ended, in July and August (#975), is not told here
+ * yet.
  */
 export function describeWithoutDecision(change: Pick<HeldChange, 'firstSeenAt' | 'season'>, now: Date): HeldOutcome {
   return change.season < seasonOf(now)

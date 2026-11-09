@@ -132,6 +132,8 @@ Het besluit komt in het logboek, met wie en waarom.
 In het lopende seizoen neemt de import de wijziging over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
 In een seizoen dat voorbij is leest de import de pagina niet meer.
 Daar blijft de huidige waarde staan tot iemand beslist.
+Alleen het seizoen dat net voorbij is, leest de import in juli en augustus nog één keer per week.
+Hij neemt de wijziging dan over bij de eerste lezing na die zeven dagen, ook al zegt het scherm dat er niets verandert.
 Alleen een beheerder ziet deze schermen en kan beslissen.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` laat de wedstrijd staan.

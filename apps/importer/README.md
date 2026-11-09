@@ -24,7 +24,8 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
 Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
-Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig, en `pnpm run import:seasons <seizoen>` voor alle afgelopen seizoenen vanaf een seizoen (zie _Een afgelopen seizoen_).
+In juli en augustus leest hij ook het seizoen dat net voorbij is, één keer per week (zie _Het seizoen dat net voorbij is_).
+Een ander afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig, en `pnpm run import:seasons <seizoen>` voor alle afgelopen seizoenen vanaf een seizoen (zie _Een afgelopen seizoen_).
 De selectie van afgelopen seizoenen lezen `pnpm run import:squad <seizoen>` en `pnpm run import:squads <seizoen>` (zie _De selectie van afgelopen seizoenen_).
 Wat verdacht lijkt, houdt hij vast; de opdracht `pnpm run import:changes` toont en beslist die wijzigingen (zie _Hoe betrouwbaar een wijziging is_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
@@ -124,6 +125,7 @@ Hij mailt naar `ALERT_MAIL_TO`, via de brievenbus van de site (`sendMail` in `@f
   Een waarschuwing bij een lezing die wel is bewaard telt ook niet, zoals een uitslag die veranderde of een doelpunt zonder speler.
   Dat geldt ook voor de clubs die niet hersteld zijn.
   Ook een afgelopen seizoen met `pnpm run import:season` telt niet: dat start de projecteigenaar zelf.
+  De wekelijkse lezing van het seizoen dat net voorbij is, in juli en augustus, telt evenmin.
   Is de database niet bereikbaar, dan kan de importer niet bijhouden wat hij mailde, en blijft ook de mail uit.
 - **De melding:** de derde mislukte run stuurt één mail.
   Hij zegt welke import het is, sinds wanneer, hoe vaak het misging, de laatste foutmelding en de omgeving (acceptatie of productie).
@@ -778,6 +780,7 @@ De gegevens vallen onder CC BY-SA 4.0.
 Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_), om de Europa League van 2012/13 (zie _De Europa League van 2012/13_) en om 63 wedstrijden van 2007/08 tot en met 2009/10 (zie _De wedstrijden van 2007/08 tot en met 2009/10_).
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
+Het seizoen dat net voorbij is, leest de uurlijkse import in juli en augustus nog één keer per week (zie _Het seizoen dat net voorbij is_).
 
 ### Welke pagina's
 
@@ -1434,6 +1437,7 @@ Zulke wedstrijden zijn de verzonnen wedstrijden van de seed, en de eerste echte 
 Een afgelopen seizoen verandert niet meer, dus een wijziging daarin die iets overschrijft is verdacht.
 Wat leeg was invullen mag wel, zoals de stand na 90 minuten of doelpuntenmakers bij een wedstrijd die er geen had, en een nieuwe wedstrijd ook.
 De uurlijkse import leest een afgelopen seizoen niet, dus een wijziging daarin wacht tot iemand haar besluit, of tot `pnpm run import:season` het seizoen na zeven dagen weer leest en de pagina nog dezelfde waarde toont.
+In juli en augustus doet de uurlijkse import dat zelf voor het seizoen dat net voorbij is: de lezing van een week later neemt de wijziging over (zie _Het seizoen dat net voorbij is_).
 
 #### De stand en de selectie
 
@@ -1626,6 +1630,7 @@ De beslissingen zijn _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de
 ### Een afgelopen seizoen
 
 Een afgelopen seizoen verandert niet meer, dus de uurlijkse import leest het niet opnieuw.
+De uitzondering is het seizoen dat net voorbij is, in juli en augustus (zie _Het seizoen dat net voorbij is_).
 Eenmalig leest de opdracht `pnpm run import:season` het wel, bijvoorbeeld het vorige seizoen:
 
 ```sh
@@ -1660,6 +1665,28 @@ node --env-file=<omgevingsbestand> <map van de app>/apps/importer/import.mjs --s
 ```
 
 Op acceptatie start je dat in GitHub met de workflow _Import season_, zonder SSH (zie _Een afgelopen seizoen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
+#### Het seizoen dat net voorbij is
+
+Van 1 juli tot en met 31 augustus leest de uurlijkse import ook het seizoen dat op 30 juni is afgelopen, één keer per week (`importEndedSeason` in [`src/import-ended-season.ts`](src/import-ended-season.ts)).
+Zo komt een late verbetering op Wikipedia binnen zonder dat iemand `import:season` draait.
+
+- `endedSeasonOf` zegt welk seizoen dat is: het seizoen vóór dat van het moment, in juli en augustus, en anders geen.
+  De dagen zijn die van UTC, zoals bij `seasonOf`.
+- De import leest eerst de wedstrijden met `importPastSeason` en dan de selectie met `importPastSquad`.
+  Dat zijn de functies achter `import:season` en `import:squad`, dus de controles en de opslag zijn dezelfde.
+  Hij doet dat na het lopende seizoen, in dezelfde run en met dezelfde fetcher.
+- De pauze staat in `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
+  Is die niet voorbij, dan vraagt de import niets en schrijft hij geen regel.
+  Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week (`rereadEveryMs`).
+  Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze van `healthAfter` staan, want er is niets gelezen.
+- De opdrachten `import:season` en `import:squad` kijken niet naar de pauze en zetten haar op een uur.
+  Na zo'n opdracht leest de uurlijkse import het seizoen dus een uur later nog eens, en wacht dan weer een week.
+- Een lezing die faalt, is een waarschuwing in de uitvoer en in de rij van dat seizoen in `match_imports` of `squad_imports`.
+  Ze stopt de selectie en het lopende seizoen niet, verandert de exitcode niet en telt niet voor de mail over een import die blijft falen.
+- De selectie komt van `squadSources`: voor 2026/27 en later is dat de pagina met de tabel die de uurlijkse import las toen het seizoen liep.
+  Zoals bij elke lezing van `importPastSquad` gaan de wedstrijden en doelpunten uit die tabel niet naar `player_season_stats`.
+- `pnpm run import:status` blijft over het lopende seizoen gaan.
 
 #### Alle afgelopen seizoenen
 
@@ -1710,6 +1737,7 @@ Op acceptatie start je `--from-squad` met de workflow _Import squads_ (zie _De s
   | 2022/23 en 2023/24                  | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSquad`                            |
   | 2018/19 tot en met 2021/22, 2024/25 | `JJJJ–JJ SC Heerenveen season` (Engelse Wikipedia) | `readEnglishSquad`                           |
   | 2000/01 tot en met 2004/05, 2025/26 | geen                                               | geen                                         |
+  | 2026/27 en later                    | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSquad`                            |
 
 - Een seizoen zonder lezers, een pagina die niet bestaat (404) en een pagina zonder tabel (`none`) zijn een gat.
   Het logboek krijgt één regel en niets wordt geschreven: `Squad 2002/03: no squad page on Wikipedia, so no squad`.
@@ -1827,6 +1855,7 @@ De reader werkt zo (zie _Een wedstrijd onder Inhaalronde telt voor de ronde waar
 - De reden van een puntenaftrek bewaart hij niet: Wikipedia geeft die alleen in een voetnoot.
 - Opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
 - Andere seizoenen leest hij niet in de uurlijkse import (alleen `pnpm run import:season` leest een afgelopen seizoen), en wedstrijden van andere teams van de club ook niet.
+  De uitzondering is het seizoen dat net voorbij is, in juli en augustus (zie _Het seizoen dat net voorbij is_).
 
 ## De selectie
 

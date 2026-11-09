@@ -108,7 +108,9 @@ Zo past hij bij het schema, dat de site bijwerkt als de host haar start.
 ### Een afgelopen seizoen importeren
 
 Een afgelopen seizoen leest cron niet, want het verandert niet meer.
-De workflow [`import-season.yml`](../.github/workflows/import-season.yml) leest het eenmalig, zonder dat je zelf inlogt met SSH:
+Er is één uitzondering: het seizoen dat op 30 juni is afgelopen.
+Van 1 juli tot en met 31 augustus leest cron dat nog één keer per week, de wedstrijden en de selectie (zie _Het seizoen dat net voorbij is_ hieronder).
+Elk ander afgelopen seizoen leest de workflow [`import-season.yml`](../.github/workflows/import-season.yml) eenmalig, zonder dat je zelf inlogt met SSH:
 
 1. Open in GitHub _Actions → Import season_ en kies _Run workflow_, met de branch `main`.
    De omgeving `acceptatie` staat alleen `main` toe (stap 6 van _Eenmalig instellen_).
@@ -141,6 +143,29 @@ De map houdt de back-ups 14 dagen, of zoveel dagen als `BACKUP_KEEP_DAYS` zegt; 
 - De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
 - De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
 - Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
+
+#### Het seizoen dat net voorbij is
+
+Na de laatste wedstrijd verbetert Wikipedia nog weleens een doelpuntenmaker of een aantal toeschouwers.
+Daarom leest cron het vorige seizoen van 1 juli tot en met 31 augustus nog één keer per week.
+Je hoeft er niets voor in te stellen: het gebeurt in dezelfde run als het lopende seizoen, met dezelfde cronjob.
+
+- Cron leest de wedstrijden en de selectie, met dezelfde controles als _Import season_ en _Import squads_.
+  De dagen zijn die van UTC, zoals het begin van een seizoen.
+- De eerste lezing is in de nacht van 1 juli, in het eerste uur van die dag in UTC.
+  Daarna wacht de import een week, met de pauze van dat seizoen in `match_imports.retry_at` en `squad_imports.retry_at`.
+  Draai je in die tijd zelf _Import season_ voor dat seizoen, dan leest cron het een uur later nog een keer en wacht daarna weer een week.
+- Het logboek `~/fansite-import.log` krijgt dan regels zoals `Matches 2026/27: 0 new, 0 updated, 38 unchanged, ...` en `Squad 2026/27: 0 new, 0 improved, 27 unchanged, from 1 page`.
+  In de weken ertussen staat er niets over dat seizoen.
+- Een wijziging die iets overschrijft, wacht eerst zeven dagen (zie _Hoe betrouwbaar een wijziging is_ in de [README van de importer](../apps/importer/README.md)).
+  De lezing van een week later neemt haar over als Wikipedia dan nog hetzelfde zegt.
+  Wat leeg was, wordt meteen ingevuld.
+- Faalt de lezing, dan is dat een waarschuwing in het logboek: `Matches 2026/27: warning, nothing changed and the last good copy stays: ...`.
+  De run van het lopende seizoen gaat door, de exitcode verandert niet en er komt geen mail.
+  De import probeert het een week later opnieuw.
+  Vraagt Wikipedia om te wachten, dan probeert hij het na die tijd opnieuw.
+- Vanaf 1 september leest cron dat seizoen niet meer.
+  Een latere verbetering haal je binnen met _Import season_ en _Import squads_.
 
 #### Alle afgelopen seizoenen importeren
 
@@ -520,6 +545,7 @@ Zo kan niemand nagaan wie een account heeft.
   De README van de importer laat zien hoe het eruitziet.
 
 - Een afgelopen seizoen lees je eenmalig met de workflow _Import season_, en alle afgelopen seizoenen vanaf een beginseizoen met _Import seasons_ (zie _Een afgelopen seizoen importeren_).
+  Het seizoen dat net voorbij is, leest cron in juli en augustus zelf, één keer per week.
   Wil je het toch met SSH, draai dan hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
 
   ```sh

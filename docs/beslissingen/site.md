@@ -2590,6 +2590,10 @@
   Een extra opdracht op de host kost werk en opent het seizoen voor bewerkingen zonder dat iemand kijkt; het scherm maakt het besluit goedkoop.
 - **Alternatieven:** een geplande opdracht die afgelopen seizoenen met een vastgehouden wijziging opnieuw leest (verworpen: een cron-opdracht en een extra import erbij, en een vandaal kan wachten).
   Wachten tot iemand `pnpm run import:season` draait, de gang van zaken tot nu toe (verworpen: niemand ziet de wijziging).
+- **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ in `importer.md` (9 november 2026): voor het seizoen dat net voorbij is komt er toch een geplande lezing, één keer per week in juli en augustus, in de bestaande run van cron.
+  Daar werken de zeven dagen dus weer, en een wijziging die een week blijft staan neemt de import over.
+  Voor elk ouder seizoen, en vanaf 1 september ook voor dit seizoen, blijft dit besluit gelden.
+  Het scherm zegt in die twee maanden nog dat er zonder besluit niets verandert (`describeWithoutDecision`); dat is nog niet aangepast.
 
 ## Het scherm en het commando gebruiken dezelfde code voor het besluit, en het scherm toont wat de import bewaarde
 

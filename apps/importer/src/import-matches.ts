@@ -301,7 +301,8 @@ export async function importMatches(
  * goals, table and pages like `importMatches` does, with the same checks and in one
  * transaction. The seasons 2007/08 to 2009/10 have other pages, and no table (see
  * `readAndStoreFootballBoxes`). A season that is over doesn't change, so the hourly import
- * doesn't read it again: this is the command that does (`pnpm import:season`), and it asks
+ * doesn't read it again, but for the season that has just ended, once a week in July and August
+ * (`importEndedSeason`). This is the command that does (`pnpm import:season`), and it asks
  * every time it is run. It writes the rows of that season only, and never those of the current
  * season, which is the hourly import's. A season that is not over is an error report, and
  * nothing is asked or written.
