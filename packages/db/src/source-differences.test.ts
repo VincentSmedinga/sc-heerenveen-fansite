@@ -8,6 +8,7 @@ import type { TestDatabase } from './test-database.ts'
 import { withClubs } from './clubs.ts'
 import { mailConflicts } from './match-conflict-mail.ts'
 import { decideConflict, decodePartProposal, describeConflict, sourceDifferenceReasons } from './match-conflicts.ts'
+import { partOfField } from './match-edits.ts'
 import { compareClaim } from './match-lookup.ts'
 import { adminUsers, auditLog, matchChanges, matches } from './schema.ts'
 import { keepSourceDifferences, readTakenOverParts } from './source-differences.ts'
@@ -78,7 +79,7 @@ describe('keepSourceDifferences', () => {
 
     const before = await stored()
 
-    expect(await keep({ goalsFor: 3, referee: 'Jan Bel' })).toEqual({ kept: ['result', 'facts'], rest: [] })
+    expect(await keep({ goalsFor: 3, referee: 'Jan Bel' })).toEqual(['result', 'facts'])
     expect(await stored()).toEqual(before)
     expect(await changes()).toMatchObject([
       {
@@ -109,7 +110,7 @@ describe('keepSourceDifferences', () => {
     await insert()
     await keep({ goalsFor: 3 })
 
-    expect(await keep({ goalsFor: 3 }, later)).toEqual({ kept: [], rest: [] })
+    expect(await keep({ goalsFor: 3 }, later)).toEqual([])
     expect(await changes()).toMatchObject([{ firstSeenAt: first, lastSeenAt: later, status: 'pending', timesSeen: 2 }])
   })
 
@@ -120,7 +121,7 @@ describe('keepSourceDifferences', () => {
 
     expect(await changes()).toMatchObject([{ decidedAt: later, resolution: 'reverted', status: 'rejected' }])
 
-    expect(await keep({ goalsFor: 3 }, later)).toMatchObject({ kept: ['result'] })
+    expect(await keep({ goalsFor: 3 }, later)).toEqual(['result'])
     expect(await changes()).toMatchObject([{ status: 'rejected' }, { status: 'pending' }])
   })
 
@@ -142,12 +143,12 @@ describe('keepSourceDifferences', () => {
     const [change] = await changes()
 
     expect(await decide(change!.id, 'keep')).toBe('done')
-    expect(await keep({ goalsFor: 3 }, later)).toEqual({ kept: [], rest: [] })
+    expect(await keep({ goalsFor: 3 }, later)).toEqual([])
     expect(await changes()).toMatchObject([{ resolution: 'person', status: 'rejected' }])
     expect((await stored()).goalsFor).toBe(2)
 
     // Another value of the second source is a new difference.
-    expect(await keep({ goalsFor: 4 }, later)).toMatchObject({ kept: ['result'] })
+    expect(await keep({ goalsFor: 4 }, later)).toEqual(['result'])
   })
 
   it('lets an editor take the second source over, with a line in the log that names it', async () => {
@@ -166,7 +167,7 @@ describe('keepSourceDifferences', () => {
       },
     ])
     // The sources agree now, so there is nothing to keep.
-    expect(await keep({ goalsFor: 3 }, later)).toEqual({ kept: [], rest: [] })
+    expect(await keep({ goalsFor: 3 }, later)).toEqual([])
     expect(await readTakenOverParts(database.db, [change!.matchId!])).toEqual(
       new Map([[change!.matchId, new Set(['result'])]]),
     )
@@ -186,21 +187,79 @@ describe('keepSourceDifferences', () => {
     expect(decodePartProposal(change!.proposal)).toMatchObject({ afterNinetyFor: 1, goalsFor: 3, part: 'result' })
   })
 
-  it('leaves a difference that the line of its part does not show to the caller', async () => {
+  it('names the column that differs when the line of its part reads the same for both', async () => {
     await insert({ dateText: 'x' })
 
     // The kick-off is filled, and its line names the day of the kick-off, not `matchDate`.
-    const kept = await keep({ kickoffAt: new Date('2001-09-02T12:30:00Z'), matchDate: '2001-09-02' })
-
-    expect(kept).toMatchObject({ kept: [], rest: [{ field: 'matchDate' }] })
-    expect(await changes()).toEqual([])
+    expect(await keep({ kickoffAt: new Date('2001-09-02T12:30:00Z'), matchDate: '2001-09-02' })).toEqual(['kickoff'])
+    expect(await changes()).toMatchObject([
+      {
+        newValue: '2 september 2001 om 14:30 (speeldag 2001-09-02)',
+        oldValue: '2 september 2001 om 14:30 (speeldag 2001-09-01)',
+        part: 'kickoff',
+      },
+    ])
   })
 
-  it('leaves a field of no part, such as home, to the caller', async () => {
+  it('keeps a difference in who played at home with the result, and takes it over with it', async () => {
     await insert()
 
-    expect(await keep({ home: false })).toMatchObject({ kept: [], rest: [{ field: 'home' }] })
-    expect(await changes()).toEqual([])
+    expect(await keep({ home: false })).toEqual(['result'])
+
+    const [change] = await changes()
+
+    expect(change).toMatchObject({
+      newValue: 'Testdorp FC 1–2 sc Heerenveen',
+      oldValue: 'sc Heerenveen 2–1 Testdorp FC',
+      part: 'result',
+    })
+    expect(await decide(change!.id, 'take-over')).toBe('done')
+    expect(await stored()).toMatchObject({ goalsFor: 2, home: false })
+  })
+
+  it('has a part for every column that is compared', async () => {
+    await insert({ competition: 'KNVB Beker' })
+
+    const match = await stored()
+    const claim = {
+      afterNinetyAgainst: 9,
+      afterNinetyFor: 9,
+      attendance: 9,
+      dateText: 'y',
+      extraTime: true,
+      goalsAgainst: 9,
+      goalsFor: 9,
+      home: false,
+      kickoffAt: new Date('2001-09-03T12:00:00Z'),
+      matchDate: '2001-09-02',
+      note: 'y',
+      penaltiesAgainst: 9,
+      penaltiesFor: 9,
+      referee: 'y',
+      stadium: 'y',
+      status: 'postponed',
+    } as const
+    const filled = { ...match, ...claim, goalsFor: 1, status: 'played' as const }
+
+    for (const { field } of compareClaim(filled, { ...claim, goalsFor: 9 }).differences) {
+      expect(partOfField(field), field).toBeDefined()
+    }
+    for (const field of Object.keys(claim)) {
+      expect(partOfField(field), field).toBeDefined()
+    }
+  })
+
+  it('brings a difference back that was taken over, when the match has its old value again', async () => {
+    await insert()
+    await keep({ goalsFor: 3 })
+
+    const [change] = await changes()
+
+    await decide(change!.id, 'take-over')
+    // Something put the old result back.
+    await database.pool.query('UPDATE matches SET goals_for = 2')
+
+    expect(await keep({ goalsFor: 3 }, later)).toEqual(['result'])
   })
 
   it('never mails about a difference between two sources', async () => {

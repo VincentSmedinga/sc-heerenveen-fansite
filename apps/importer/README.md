@@ -1500,7 +1500,7 @@ Wat daarna gebeurt:
 #### Een verschil tussen twee bronnen
 
 Vindt een import een wedstrijd van een andere bron op datum en club (`findMatchByDate`), dan vult hij alleen de lege velden.
-Zegt hij iets anders over de aftrap, de uitslag of de gegevens, dan komt er een rij in `match_changes` met `part`, `old_value` (de wedstrijd), `new_value` (de tweede bron) en in `proposal` dat onderdeel zoals de tweede bron het heeft (`keepSourceDifferences` in `@fansite/db/source-differences`, #974).
+Zegt hij iets anders over de aftrap, de uitslag, thuis of uit, of de gegevens, dan komt er een rij in `match_changes` met `part`, `old_value` (de wedstrijd), `new_value` (de tweede bron) en in `proposal` dat onderdeel zoals de tweede bron het heeft (`keepSourceDifferences` in `@fansite/db/source-differences`, #974).
 De `reason` zegt welke bron de tweede is: `Wikipedia zegt iets anders dan de bron van de wedstrijd` of `de oude fansite zegt iets anders dan de bron van de wedstrijd`.
 De wedstrijd houdt de waarde van zijn eigen bron.
 
@@ -1508,9 +1508,10 @@ De wedstrijd houdt de waarde van zijn eigen bron.
 - Alleen een mens beslist, op de pagina van de wedstrijd of met `pnpm run import:changes`.
   De import neemt na zeven dagen niets over en er gaat geen mail uit.
 - Wijst iemand het verschil af, dan komt het niet terug zolang beide waarden gelijk blijven.
-- Neemt iemand de tweede bron over, dan laat de stap `matches` van `import:old-site` dat onderdeel van zijn eigen wedstrijd voortaan met rust.
+- Neemt iemand de tweede bron over, dan laat de import van de eigen bron dat onderdeel voortaan met rust: de stap `matches` van `import:old-site` en de import van Wikipedia (`readTakenOverParts`).
 - Is het verschil weg, of vulde de redactie het onderdeel zelf in, dan vervalt de rij (`reverted`); zegt een bron iets nieuws, dan is ze `replaced` en begint een nieuwe.
-- Een veld buiten deze drie onderdelen, zoals thuis of uit, blijft een regel `match difference: …` in het logboek.
+- Thuis of uit hoort bij de uitslag.
+  Leest de regel van een onderdeel voor beide bronnen hetzelfde, zoals bij een andere dag met dezelfde aftrap, dan staat het veld dat verschilt erachter: `(speeldag 2001-09-01)`.
 
 ### Oudere bekerpagina's
 
@@ -2006,13 +2007,13 @@ Het is geen waarschuwing meer en er komt geen regel in het logboek van het behee
 - De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelerscijfers`.
   Neemt ze het andere aantal over, dan staat dat in `player_season_stats.goals`, en `table_goals` onthoudt wat de tabel van Wikipedia zei.
   Zolang de tabel dat nog zegt, laat de import het aantal van de redactie staan; zegt de tabel iets anders, dan geldt de tabel weer.
-- Een verschil waarover een mens besliste, komt niet terug zolang de twee aantallen gelijk blijven.
+- Een verschil dat een mens afwees, komt niet terug zolang de twee aantallen gelijk blijven.
 
 De vergelijking stopt niets: lukt ze niet, dan is dat een waarschuwing en blijft de selectie staan.
 Is er in het seizoen nog geen wedstrijd gespeeld, dan is er niets om mee te vergelijken en zegt de controle niets.
-Bij de allereerste run op een lege database geeft de controle rijen voor wie al scoorde, en de volgende run sluit ze weer.
+Bij de allereerste run op een lege database geeft de controle rijen voor wie al scoorde.
 De import van de wedstrijden koppelt zijn doelpunten pas zodra de selectie er is.
-De run een uur later vindt ze, en de waarschuwingen zijn weg.
+De run een uur later vindt ze, en de rijen sluiten zich.
 
 ### De controles
 

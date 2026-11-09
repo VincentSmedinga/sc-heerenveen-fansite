@@ -22,8 +22,6 @@ export type DifferenceWords = {
   takeOver: string
   /** The name of the other value. */
   theirs: string
-  /** Whether it is a difference between two sources, for the notice after the decision. */
-  twoSources: boolean
 }
 
 const capital = (text: string) => `${text.slice(0, 1).toLocaleUpperCase('nl')}${text.slice(1)}`
@@ -42,7 +40,6 @@ export function differenceWords(
       ours: 'Onze invoer',
       takeOver: 'Neem Wikipedia over',
       theirs: 'Wikipedia',
-      twoSources: false,
     }
   }
 
@@ -56,6 +53,5 @@ export function differenceWords(
     ours: capital(owner),
     takeOver: `Neem ${sourceLabels[second]} over`,
     theirs: capital(sourceLabels[second]),
-    twoSources: true,
   }
 }

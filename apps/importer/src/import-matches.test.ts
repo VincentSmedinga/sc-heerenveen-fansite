@@ -564,6 +564,48 @@ describe('a match of another source that Wikipedia has differently', () => {
   })
 })
 
+describe('a part of a match of Wikipedia that the editors took over from another source', () => {
+  it('stays as the editors decided at the next import, and the rest follows the page (#974)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const [match] = await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 11'))
+
+    // The old fansite named another referee and stadium, and an editor took them over.
+    await database.db
+      .update(matches)
+      .set({ attendance: null, referee: 'Iemand Anders', stadium: 'Elders' })
+      .where(eq(matches.id, match!.id))
+    await database.db.insert(matchChanges).values({
+      changed: 'gegevens',
+      class: 'suspicious',
+      competition: match!.competition,
+      decidedAt: first,
+      firstSeenAt: first,
+      lastSeenAt: first,
+      matchId: match!.id,
+      newValue: 'de oude fansite',
+      oldValue: 'Wikipedia',
+      part: 'facts',
+      reason: sourceDifferenceReasons['oude-fansite'],
+      resolution: 'person',
+      round: match!.round,
+      season: match!.season,
+      status: 'accepted',
+    })
+
+    await importAt(server, new Date(first.getTime() + hours(24 * 8)))
+
+    expect((await database.db.select().from(matches).where(eq(matches.id, match!.id)))[0]).toMatchObject({
+      goalsFor: match!.goalsFor,
+      referee: 'Iemand Anders',
+      stadium: 'Elders',
+    })
+    expect(await database.db.select().from(matchChanges).where(eq(matchChanges.status, 'pending'))).toEqual([])
+  })
+})
+
 describe('a cup match of the old fansite on an empty cup page', () => {
   it('is no reason to refuse the cup page, which has no template, and stays as it is', async () => {
     const { pages, server } = await serve()

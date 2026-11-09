@@ -308,10 +308,15 @@ export function markedParts(edit: EditMarkers): MatchPart[] {
 
 /**
  * The part of a match that a column of `matches` belongs to, or undefined for a column that is
- * in no part, such as `home`. The goals are in another table.
+ * in no part. `home` goes with the result, whose line names the home club first. The goals are
+ * in another table.
  */
 export function partOfField(field: string): Exclude<MatchPart, 'goals'> | undefined {
   const has = (keys: readonly string[]) => keys.includes(field)
+
+  if (field === 'home') {
+    return 'result'
+  }
 
   return has(kickoffKeys) ? 'kickoff' : has(resultKeys) ? 'result' : has(factsKeys) ? 'facts' : undefined
 }

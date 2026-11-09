@@ -4,7 +4,7 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { compareClaim, differenceLine, findMatchByDate } from './match-lookup.ts'
+import { compareClaim, findMatchByDate } from './match-lookup.ts'
 import { matches } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -96,14 +96,5 @@ describe('compareClaim', () => {
     expect(row.clubId).toBeGreaterThan(0)
     expect(fill).toEqual({ referee: 'Piet Fluit' })
     expect(differences.map((difference) => difference.field).sort()).toEqual(['goalsFor', 'stadium'])
-    expect(
-      differenceLine(
-        stored!,
-        differences.find((d) => d.field === 'goalsFor')!,
-        'wikipedia',
-      ),
-    ).toMatch(
-      /^match difference: 2001\/02 Eredivisie Wedstrijd 1 \(match \d+\) goalsFor: oude-fansite says 2, wikipedia says 3$/,
-    )
   })
 })

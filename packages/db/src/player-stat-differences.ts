@@ -195,7 +195,7 @@ export async function findMatchGoalDifferences(db: Reader, season: string): Prom
  * Keeps the differences a comparison of a season found, and returns how many are new.
  *
  * - The same difference (the same player, competition and two numbers) is kept once: one that
- *   waits is seen again, and one a person decided does not come back while both numbers stay
+ *   waits is seen again, and one a person rejected does not come back while both numbers stay
  *   the same.
  * - A difference whose numbers changed replaces the one that waits (`replaced`).
  * - A difference that waits and was not found any more closes itself (`reverted`).
@@ -246,8 +246,9 @@ export async function keepPlayerStatDifferences(
       await db.update(playerStatDifferences).set({ lastSeenAt: now }).where(eq(playerStatDifferences.id, seen.id))
       continue
     }
-    // Only a decision of a person counts: a difference that lapsed by itself may come back.
-    if (ofPlayer.some((row) => row.resolution === 'person' && isSame(row))) {
+    // Only a person who kept the table counts: a difference that lapsed by itself may come
+    // back, and so may one that was taken over when the table has its old number again.
+    if (ofPlayer.some((row) => row.resolution === 'person' && row.status === 'rejected' && isSame(row))) {
       continue
     }
 

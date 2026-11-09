@@ -218,6 +218,10 @@ describe('deciding a difference', () => {
     // The numbers agree now.
     expect(await comparePlayerGoals(database.db, season, later)).toBe(0)
     expect(await rows()).toHaveLength(1)
+
+    // The same difference may come back when the table has its old number again.
+    await database.pool.query('UPDATE player_season_stats SET goals = 1, table_goals = NULL')
+    expect(await comparePlayerGoals(database.db, season, later)).toBe(1)
   })
 
   it('says so when the squad table has no row for the player, and leaves the difference waiting', async () => {

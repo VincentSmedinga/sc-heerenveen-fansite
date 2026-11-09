@@ -41,6 +41,8 @@ export type PartProposal =
       extraTime: boolean
       goalsAgainst: null | number
       goalsFor: null | number
+      /** Only for a difference between two sources about who played at home. */
+      home?: boolean
       part: 'result'
       penaltiesAgainst: null | number
       penaltiesFor: null | number
@@ -320,6 +322,7 @@ async function applyPart(db: Writer, matchId: number, proposal: PartProposal, no
       extraTime: proposal.extraTime,
       goalsAgainst: proposal.goalsAgainst,
       goalsFor: proposal.goalsFor,
+      ...(typeof proposal.home === 'boolean' ? { home: proposal.home } : {}),
       penaltiesAgainst: proposal.penaltiesAgainst,
       penaltiesFor: proposal.penaltiesFor,
       resultSetAt: proposal.status === 'played' ? now : null,

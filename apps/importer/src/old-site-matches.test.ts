@@ -588,9 +588,12 @@ describe('the step matches', () => {
       status: 'accepted',
     })
 
+    await database.db.update(matches).set({ home: false }).where(eq(matches.id, own!.id))
+
     expect(await run([oldMatch({ referee: 'Piet Fluit' })])).toMatchObject({ changed: 1 })
-    // The result stays as the editors decided; the rest still follows the files.
-    expect(await rows()).toMatchObject([{ goalsFor: 3, referee: 'Piet Fluit' }])
+    // The result stays as the editors decided, with who played at home; the rest still follows
+    // the files.
+    expect(await rows()).toMatchObject([{ goalsFor: 3, home: false, referee: 'Piet Fluit' }])
   })
 
   it('finds a match that moved by a day, and makes a new row for one that moved further', async () => {

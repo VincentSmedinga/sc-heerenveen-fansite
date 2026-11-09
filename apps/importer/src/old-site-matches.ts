@@ -1,7 +1,7 @@
 import type { Competition, Match, MatchEdit, NewMatchStatistics } from '@fansite/db/schema'
 
 import { lockedFields } from '@fansite/db/match-edits'
-import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
+import { compareClaim, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
 import { eq } from 'drizzle-orm'
@@ -391,7 +391,7 @@ export async function importOldSiteMatches(
         // value of its own source until they decide.
         // A match the editors added is theirs: it is compared and never filled.
         const fill = lookup.match.dataSource === 'redactie' ? {} : compared.fill
-        const { kept, rest } = await keepSourceDifferences(
+        const kept = await keepSourceDifferences(
           db,
           lookup.match,
           values,
@@ -405,7 +405,6 @@ export async function importOldSiteMatches(
             (part) =>
               `${label}: the ${part} differs from match ${lookup.match.id} of ${lookup.match.dataSource}, kept as a change that waits for the editors`,
           ),
-          ...rest.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)),
         )
 
         if (Object.keys(fill).length > 0) {
@@ -438,7 +437,8 @@ export async function importOldSiteMatches(
       ...(edit?.kickoffEdited === true || held?.has('kickoff') === true ? [] : kickoffFields),
       ...(edit?.resultEdited === true || held?.has('result') === true ? [] : resultFields),
       ...(edit?.factsEdited === true || held?.has('facts') === true ? [] : factFields),
-      ...otherFields,
+      // Who played at home goes with the result.
+      ...(held?.has('result') === true ? otherFields.filter((field) => field !== 'home') : otherFields),
     ] as const
     const change: Record<string, unknown> = {}
 

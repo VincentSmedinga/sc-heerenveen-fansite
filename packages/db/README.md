@@ -634,7 +634,7 @@ De rijen komen op naam en dan competitie.
 | `decided_at`                    | Wanneer het verschil werd beslist of verviel, in UTC                                               |
 
 `@fansite/db/player-stat-differences` heeft de code: `comparePlayerGoals` en `compareReportGoals` vergelijken en bewaren, `decidePlayerStatDifference` beslist, en `listWaitingStatDifferences` en `countWaitingStatDifferences` lezen voor het beheer.
-Hetzelfde verschil komt er één keer, en een verschil waarover een mens besliste komt niet terug zolang beide aantallen gelijk blijven.
+Hetzelfde verschil komt er één keer, en een verschil dat een mens afwees komt niet terug zolang beide aantallen gelijk blijven.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand, de uitslagen van alle clubs en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable`, `madeUpLeagueResults` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.

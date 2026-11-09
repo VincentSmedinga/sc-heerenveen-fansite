@@ -78,16 +78,6 @@ export function compareClaim(
 }
 
 /**
- * The line of the log for a difference that is no change that waits: a field of no part of a
- * match, such as `home` (see `keepSourceDifferences`). One line for each field, in a fixed
- * shape: `match difference: <season> <competition> <round> (match <id>) <field>: <source> says
- * <stored>, <other source> says <theirs>`.
- */
-export function differenceLine(stored: Match, difference: MatchDifference, otherSource: string): string {
-  return `match difference: ${stored.season} ${stored.competition} ${stored.round} (match ${stored.id}) ${difference.field}: ${stored.dataSource} says ${difference.stored}, ${otherSource} says ${difference.theirs}`
-}
-
-/**
  * The match of a season and competition against a club on a date, with a day of slack, whatever
  * its source and round. The round is only a property: another source names it differently.
  * When two matches fit (a replay within a day) none is returned and the matches come back as

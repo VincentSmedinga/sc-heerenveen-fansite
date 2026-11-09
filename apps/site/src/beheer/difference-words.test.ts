@@ -19,7 +19,6 @@ describe('the words of a difference', () => {
       ours: 'Onze invoer',
       takeOver: 'Neem Wikipedia over',
       theirs: 'Wikipedia',
-      twoSources: false,
     })
   })
 
@@ -36,7 +35,6 @@ describe('the words of a difference', () => {
       ours: 'De oude fansite',
       takeOver: 'Neem Wikipedia over',
       theirs: 'Wikipedia',
-      twoSources: true,
     })
   })
 

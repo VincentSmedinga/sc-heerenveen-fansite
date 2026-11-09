@@ -3125,7 +3125,7 @@
   De gegevens van de oude fansite zijn van de projecteigenaar, en een tweede bron is een controle, geen vervanging.
 - **Alternatieven:** Wikipedia gaat voor (een eigen bron verandert dan door een bewerking elders); wie het eerst schrijft wint, zoals voorheen (een verschil blijft onzichtbaar); de sleutel veranderen in datum en club (een herspeelde wedstrijd past dan niet).
 - **Later:** sinds #974 is een verschil in de aftrap, de uitslag of de gegevens geen regel meer maar een wachtende wijziging; zie _Een verschil tussen twee bronnen wacht op de redactie_.
-  De regel `match difference` blijft alleen voor een veld dat in geen deel van een wedstrijd zit, zoals thuis of uit.
+  De regel `match difference` vervalt.
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -3388,11 +3388,13 @@
   - Alleen een mens beslist, in het beheer of met `import:changes`.
     De import neemt na zeven dagen niets over en er gaat geen mail uit.
   - Wijst de redactie het verschil af, dan komt het niet terug zolang beide waarden gelijk blijven.
-    Een wijziging die vanzelf verviel, telt daarbij niet.
-  - Neemt de redactie de tweede bron over, dan laat de stap `matches` van `import:old-site` dat deel van zijn eigen wedstrijd voortaan met rust (`readTakenOverParts`).
-    Anders zette de volgende run de oude waarde terug, en bleef dat onzichtbaar.
-  - Een veld dat in geen deel zit, zoals thuis of uit, blijft een regel `match difference` in het logboek.
-    Dat geldt ook voor een verschil dat de regel van een deel niet laat zien, zoals een andere dag bij dezelfde aftrap.
+    Een wijziging die vanzelf verviel of die werd overgenomen, telt daarbij niet.
+  - Neemt de redactie de tweede bron over, dan laat de import van de eigen bron dat deel voortaan met rust (`readTakenOverParts`): de stap `matches` van `import:old-site`, en de import van Wikipedia voor een wedstrijd van Wikipedia.
+    Anders zette de volgende run de oude waarde terug.
+    De rest van zo'n wedstrijd van Wikipedia volgt de pagina zonder het oordeel van `classify-change.ts`, zoals bij een invoer van de redactie.
+  - Thuis of uit hoort bij de uitslag: de regel van de uitslag noemt de thuisclub eerst, en het voorstel heeft dan ook `home`.
+  - Leest de regel van een deel voor beide bronnen hetzelfde, zoals bij een andere dag met dezelfde aftrap, dan staat het veld dat verschilt erachter.
+    Zo wordt elk veld dat `compareClaim` vergelijkt een wachtende wijziging, en is er geen regel `match difference` meer.
   - De doelpunten vergelijkt deze stap niet: die hebben hun eigen regels (#973).
 - **Waarom:** een waarschuwing in `last_warning` is weg na de volgende run, en een regel in het logboek leest niemand terug.
   `match_changes` had het deel, het voorstel en het besluit al, dus het beheer en `import:changes` werken zonder nieuw scherm.
@@ -3410,7 +3412,7 @@
     Overnemen zet het getal van de wedstrijden of de verslagen in `player_season_stats`.
     `table_goals` onthoudt wat de tabel van Wikipedia toen zei: zolang die hetzelfde zegt, laat de import het getal van de redactie staan.
     Houden laat de tabel zoals hij is.
-    In beide gevallen komt het verschil niet terug zolang de twee getallen gelijk blijven.
+    Een verschil dat de redactie afwees, komt niet terug zolang de twee getallen gelijk blijven.
   - Het besluit staat in het logboek van het beheer als `player.stats-take-over` of `player.stats-keep`.
     De waarschuwing van de import en de regel `player.stats-differ` vervallen.
 - **Waarom:** `match_changes` hangt aan één wedstrijd, en de doelpunten van een speler in een seizoen horen bij geen enkele wedstrijd.

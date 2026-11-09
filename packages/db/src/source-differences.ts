@@ -12,7 +12,7 @@ import type { FactsFields, KickoffFields, ResultFields } from './match-edits.ts'
 import type { MatchClaim, MatchDifference } from './match-lookup.ts'
 import type { Match, MatchPart } from './schema.ts'
 
-import { encodePartProposal, partLabels, sourceDifferenceReasons } from './match-conflicts.ts'
+import { decodePartProposal, encodePartProposal, partLabels, sourceDifferenceReasons } from './match-conflicts.ts'
 import { describeEntryFacts, describeEntryKickoff, describeEntryResult, partOfField } from './match-edits.ts'
 import { matchChanges } from './schema.ts'
 
@@ -30,19 +30,23 @@ export function describePart(part: SourcePart, match: FactsFields & KickoffField
       : describeEntryFacts(match)
 }
 
+/** The columns the line of the kick-off does not always show, in the words of the admin. */
+const hiddenLabels: Record<string, string> = { dateText: 'tekst bij de datum', matchDate: 'speeldag' }
+
 /**
  * Keeps the differences between a stored match and what a second source says about it (what
  * `compareClaim` returned) as changes that wait, one for each part of the match that differs,
  * and returns the parts that got a new change. The match itself is not touched.
  *
  * - The same difference (the same two values of the part) is kept once: a change that waits is
- *   seen again, and one a person decided does not come back while both values stay the same.
+ *   seen again, and one a person rejected does not come back while both values stay the same.
  * - A difference whose values changed replaces the change that waits (`replaced`).
  * - A part without a difference closes the change that waits for it (`reverted`): the sources
  *   agree now, or the editors hold the part.
  *
- * `rest` are the differences that fit no part, such as `home`, and those that the line of a
- * part does not show: they stay a line in the log for the caller.
+ * Every column `compareClaim` compares is in a part: `home` goes with the result. Where the
+ * line of a part reads the same for both sources, such as another day with the same kick-off,
+ * the columns that differ are named behind it, so the editors always see what differs.
  */
 export async function keepSourceDifferences(
   db: Pick<Database, 'insert' | 'select' | 'update'>,
@@ -51,7 +55,7 @@ export async function keepSourceDifferences(
   { differences, fill }: { differences: readonly MatchDifference[]; fill: Partial<Match> },
   source: SecondSource,
   now: Date,
-): Promise<{ kept: SourcePart[]; rest: MatchDifference[] }> {
+): Promise<SourcePart[]> {
   const reason = sourceDifferenceReasons[source]
   const rows = await db
     .select()
@@ -62,7 +66,6 @@ export async function keepSourceDifferences(
   // source, so a later run describes the same match.
   const match: Match = { ...stored, ...fill }
   const kept: SourcePart[] = []
-  const rest = differences.filter((difference) => partOfField(difference.field) === undefined)
   const close = (ids: number[], resolution: 'replaced' | 'reverted') =>
     ids.length === 0
       ? undefined
@@ -91,8 +94,13 @@ export async function keepSourceDifferences(
       Object.assign(proposed, { [field]: claim[field as keyof MatchClaim] })
     }
 
-    const oldValue = describePart(part, match)
-    const newValue = describePart(part, proposed)
+    // The line of a part does not show every column: name the ones it leaves out.
+    const hidden = (side: 'stored' | 'theirs') =>
+      describePart(part, match) === describePart(part, proposed)
+        ? ` (${fields.map((field) => `${hiddenLabels[field.field] ?? field.field} ${field[side]}`).join(', ')})`
+        : ''
+    const oldValue = `${describePart(part, match)}${hidden('stored')}`
+    const newValue = `${describePart(part, proposed)}${hidden('theirs')}`
     const isSame = (row: (typeof rows)[number]) => row.oldValue === oldValue && row.newValue === newValue
     const seen = waiting.find(isSame)
 
@@ -101,13 +109,13 @@ export async function keepSourceDifferences(
       'replaced',
     )
 
-    if (oldValue === newValue) {
-      // The line of the part reads the same for both, so there is nothing to show an editor.
-      rest.push(...fields)
-      continue
-    }
-
-    const proposal = encodePartProposal(part, { goals: [], match: proposed })
+    // The result as the second source has it, with who played at home when that differs.
+    const encoded = decodePartProposal(encodePartProposal(part, { goals: [], match: proposed }))
+    const proposal = JSON.stringify(
+      encoded?.part === 'result' && fields.some((field) => field.field === 'home')
+        ? { ...encoded, home: proposed.home }
+        : encoded,
+    )
 
     if (seen !== undefined) {
       await db
@@ -116,8 +124,9 @@ export async function keepSourceDifferences(
         .where(eq(matchChanges.id, seen.id))
       continue
     }
-    // Only a decision of a person counts: a change that lapsed by itself may come back.
-    if (ofPart.some((row) => row.resolution === 'person' && isSame(row))) {
+    // Only a person who kept the match counts: a change that lapsed by itself may come back,
+    // and so may one that was taken over when the match has its old value again.
+    if (ofPart.some((row) => row.resolution === 'person' && row.status === 'rejected' && isSame(row))) {
       continue
     }
 
@@ -140,7 +149,7 @@ export async function keepSourceDifferences(
     kept.push(part)
   }
 
-  return { kept, rest }
+  return kept
 }
 
 /**
