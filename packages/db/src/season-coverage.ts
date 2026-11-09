@@ -35,6 +35,17 @@ export type SeasonCoverage = {
   withReferee: number
 }
 
+/** A column of the coverage table: its header, what it counts, and its cell for a season. */
+export type SeasonCoverageColumn = {
+  /** Where the cell stands in its column: numbers on the right, text on the left. */
+  align: 'left' | 'right'
+  cell: (row: SeasonCoverage) => string
+  /** A short word that no other column has, of at most eight characters. */
+  header: string
+  /** What the column counts, for the legend. */
+  meaning: string
+}
+
 /**
  * What we have of each season since 1990/91 up to the current one, the oldest first. The list
  * of seasons is made here and not read from `matches`, so a season without matches is in it
@@ -177,3 +188,46 @@ export function seasonsBetween(from: string, to: string): string[] {
 
   return seasons
 }
+
+const counted = (header: string, meaning: string, value: (row: SeasonCoverage) => number): SeasonCoverageColumn => ({
+  align: 'right',
+  cell: (row) => String(value(row)),
+  header,
+  meaning,
+})
+
+/**
+ * The columns of the coverage table, in order, with the season first. The headers and the
+ * legend are here, in one place, so the status of the import and a page can share them.
+ */
+export const seasonCoverageColumns: SeasonCoverageColumn[] = [
+  { align: 'left', cell: (row) => row.season, header: 'season', meaning: 'the season' },
+  counted('wiki', 'matches from Wikipedia', (row) => row.matchesBySource.wikipedia),
+  counted('old', 'matches from the old fansite', (row) => row.matchesBySource['oude-fansite']),
+  counted('edit', 'matches added by the editors', (row) => row.matchesBySource.redactie),
+  counted('played', 'matches played', (row) => row.played),
+  counted('nolist', 'matches played with goals, without a goal list', (row) => row.playedWithoutGoalList),
+  {
+    align: 'right',
+    cell: (row) => `${row.reportsDone}/${row.reports}`,
+    header: 'reports',
+    meaning: 'match reports: done / all',
+  },
+  counted('att', 'matches with an attendance', (row) => row.withAttendance),
+  counted('ref', 'matches with a referee', (row) => row.withReferee),
+  counted('players', 'players of the squad', (row) => row.playerCount),
+  {
+    align: 'left',
+    cell: (row) => row.squad?.bestSource ?? '-',
+    header: 'best',
+    meaning: 'best source of the squad',
+  },
+  { align: 'left', cell: (row) => row.squad?.level ?? '-', header: 'level', meaning: 'level of the squad' },
+  counted('noscorer', 'goals of ours without a player', (row) => row.goalsWithoutPlayer),
+  {
+    align: 'left',
+    cell: (row) => (row.hasStanding ? 'yes' : 'no'),
+    header: 'table',
+    meaning: 'has a league table',
+  },
+]
