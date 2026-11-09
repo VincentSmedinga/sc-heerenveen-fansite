@@ -13,7 +13,8 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
    Kies "Alles" voor alle wedstrijden van het seizoen, met die zonder uitslag bovenaan, of "Aangepast" voor wat de redactie aanpaste.
    Een ouder seizoen kies je naast de titel.
 2. Kies de wedstrijd.
-   De naam in de eerste kolom is de koppeling.
+   De naam in de eerste kolom is de enige koppeling in een regel, en onder de naam staan de dag, de tijd en de competitie.
+   Tijdens de wedstrijd opent de koppeling het scherm Bijhouden, bij een wedstrijd die een verslag kan hebben het verslag, en anders de pagina van de wedstrijd.
 3. Vul in wat je weet.
    Je hoeft niet alles in te vullen:
    - de **aftrap**: de datum en de tijd, of de datum en een tekst als de tijd nog niet bekend is (zoals "12-14 februari 2027");
@@ -112,7 +113,9 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 ## Het verslag invullen
 
 Van een gespeelde wedstrijd kun je ook het verslag invullen: wie speelde, wie er inviel, de doelpunten met wie de assist gaf, de kaarten, de gemiste strafschoppen en, bij een beslissing op strafschoppen, de schoten van de serie.
-Open de wedstrijd en kies "Het verslag invullen", of kies "Invullen" in de kolom Verslag van de lijst.
+Kies de wedstrijd in de lijst: de koppeling opent het verslag.
+Of open de wedstrijd en kies "Het verslag invullen".
+De kolom Verslag zegt in één woord hoe het ervoor staat: "Geen", "Niet af", "Klaar" of "Live".
 Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
 
 1. Schrijf bij Bron de naam van wat je overtypt, zoals "wedstrijdformulier" of "uitzending".
@@ -144,13 +147,13 @@ Zonder JavaScript staat het veld altijd op het scherm en telt het alleen bij de 
 De formatie komt op de pagina van de wedstrijd bij de naam van het team, en staat er niets als er geen is.
 
 Je kunt een verslag in meerdere keren invullen.
-Zolang de status "Bezig" is, mag er nog iets ontbreken.
+Zolang de status "Bezig" is (de lijst zegt "Niet af"), mag er nog iets ontbreken.
 Het verslag staat dan al op de pagina van de wedstrijd, binnen vijf minuten, met de melding "We vullen dit verslag nog in", en Wedstrijden en Uitslagen linken ernaar.
 Kies "Klaar" als alles erin staat.
 Dat lukt alleen als de regels niets vinden: elf spelers in de opstelling, een wissel van iemand die op het veld staat, doelpunten die samen de uitslag geven, en zo verder.
 Vinden de regels nog iets, dan bewaart het scherm je gegevens als "Bezig" en zegt bij het veld wat er mis is.
 
-Verandert de uitslag daarna, bijvoorbeeld omdat Wikipedia hem verbetert, dan blijft het verslag staan en zegt de lijst "Controleer" bij de wedstrijd.
+Verandert de uitslag daarna, bijvoorbeeld omdat Wikipedia hem verbetert, dan blijft het verslag staan en zegt de lijst "Klopt niet" bij de wedstrijd.
 Het scherm laat zien wat niet meer klopt.
 
 De doelpunten van een wedstrijd met een verslag pas je alleen in het verslag aan.
@@ -165,7 +168,7 @@ De wedstrijd blijft dan gepland, zonder uitslag, en op de pagina van de wedstrij
 Voor de aftrap staan de aftrap en de opstelling erop.
 De doelpunten van zo'n wedstrijd tellen nergens mee, tot hij is afgelopen.
 
-Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de zijbalk van het verslag, of "Bijhouden" in de lijst met wedstrijden.
+Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de zijbalk van het verslag, of de naam van de wedstrijd in de lijst, zolang de wedstrijd bezig is.
 De opstelling maak je eerst in het volledige formulier.
 Op het snelle scherm voeg je een doelpunt, een kaart of een wissel toe: kies bij "Voor wie" sc Heerenveen of de tegenstander, vul de minuut in en kies de speler.
 Bij minuut 45, 90, 105 en 120 verschijnt het veld Blessuretijd naast de minuut.

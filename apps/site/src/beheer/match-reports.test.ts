@@ -781,15 +781,15 @@ describe('a match that is still being played', () => {
 
     expect((await listAdminMatches(database.db, '2026/27', day)).rows[0]).toMatchObject({
       goalsFor: null,
+      live: true,
       reportable: true,
-      reportLive: true,
       reportStatus: 'bezig',
       reportToCheck: false,
     })
     // Before the kick-off the report is there, but the match is not live.
     expect((await listAdminMatches(database.db, '2026/27', new Date('2026-10-31T10:00:00Z'))).rows[0]).toMatchObject({
+      live: false,
       reportable: true,
-      reportLive: false,
     })
   })
 
