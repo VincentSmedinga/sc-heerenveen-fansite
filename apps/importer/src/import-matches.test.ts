@@ -440,6 +440,53 @@ describe('a match of the old fansite', () => {
   })
 })
 
+describe('a match the editors added (issue 970)', () => {
+  it('is never changed or removed by the import of Wikipedia: on its key, on its day, or missing from the page', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+
+    // Speelronde 11 is now a match of the editors under another round, on the same day, with
+    // another referee; Speelronde 12 is one of theirs under the same key as Wikipedia has it;
+    // and Finale is one that the page of Wikipedia does not have at all.
+    await database.db
+      .update(matches)
+      .set({ dataSource: 'redactie', referee: 'Piet Fluit', round: 'Wedstrijd 11', sourceLine: 'Krant, 1 mei 2027' })
+      .where(eq(matches.round, 'Speelronde 11'))
+    await database.db
+      .update(matches)
+      .set({ dataSource: 'redactie', sourceLine: 'Krant, 2 mei 2027', stadium: 'Ergens' })
+      .where(eq(matches.round, 'Speelronde 12'))
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          dataSource: 'redactie',
+          home: true,
+          matchDate: '2009-05-12',
+          opponent: 'Testdorp FC',
+          round: 'Finale',
+          season,
+          sourceLine: 'Krant, 12 mei 2009',
+          status: 'scheduled',
+        },
+      ]),
+    )
+
+    const editorMatches = () =>
+      database.db.select().from(matches).where(eq(matches.dataSource, 'redactie')).orderBy(asc(matches.id))
+    const before = await editorMatches()
+
+    // Wikipedia says something else about the matches around them, too.
+    pages.programme = pages.programme.replaceAll('|referee =', '|referee = Bas Nijhuis')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+    await importAt(server, new Date(first.getTime() + hours(2)))
+
+    expect(before).toHaveLength(3)
+    expect(await editorMatches()).toEqual(before)
+  })
+})
+
 describe('the same match from another source under another round', () => {
   it('is one row: Wikipedia fills what is empty and logs what differs', async () => {
     const { server } = await serve()

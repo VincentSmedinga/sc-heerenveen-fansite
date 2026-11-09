@@ -13,9 +13,9 @@ import { LiveRefresh, LiveState } from '#src/LiveRefresh'
 import { matchMoment } from '#src/match-format'
 import { getMatchNeighbours } from '#src/match-neighbours'
 import { sourceOf } from '#src/match-sources'
-import { getMatchData, type MatchData } from '#src/matches'
+import { getEditorSources, getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
-import { SourceCredit } from '#src/MatchViews'
+import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { getPublicReport, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
@@ -43,12 +43,13 @@ const loadReport = cache(async (seizoen: string, wedstrijd: string) => {
       return { kind: 'unknown' } as const
     }
 
-    const [data, neighbours] = await Promise.all([
+    const [data, neighbours, editorSources] = await Promise.all([
       getMatchData(season),
       getMatchNeighbours(reported.match.id, new Date()),
+      getEditorSources(season),
     ])
 
-    return { data, kind: 'found', neighbours, reported, season } as const
+    return { data, editorSources, kind: 'found', neighbours, reported, season } as const
   } catch (error) {
     console.error(`Could not read the match report for ${matchesPath}/${seizoen}/${wedstrijd}: ${reasonOf(error)}`)
 
@@ -145,7 +146,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
     return <ServerError retryHref={`${matchesPath}/${seizoen}/${slug}`} />
   }
 
-  const { data, neighbours, reported, season } = loaded
+  const { data, editorSources, neighbours, reported, season } = loaded
   const now = new Date()
   const phase = phaseOf(reported.match, now)
   const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
@@ -180,7 +181,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
       </Page.Main>
       <Page.Sidebar aria-label="De bron">
-        <ReportCredit data={data} reported={reported} />
+        <ReportCredit data={data} editorSources={editorSources} reported={reported} />
       </Page.Sidebar>
     </>
   )
@@ -257,7 +258,15 @@ function liveStopAt({ kickoffAt, matchDate }: ReportedMatch['match']) {
 }
 
 /** The credit under the page: Wikipedia for what it has, and our own records for the rest. */
-function ReportCredit({ data, reported }: { data: MatchData; reported: ReportedMatch }) {
+function ReportCredit({
+  data,
+  editorSources,
+  reported,
+}: {
+  data: MatchData
+  editorSources: Awaited<ReturnType<typeof getEditorSources>>
+  reported: ReportedMatch
+}) {
   const { source } = reported.stored.report
 
   return (
@@ -272,6 +281,7 @@ function ReportCredit({ data, reported }: { data: MatchData; reported: ReportedM
           <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
         </Card>
       )}
+      <EditorSources sources={editorSources.filter((added) => added.id === reported.match.id)} />
       <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf([reported.match])} />
     </>
   )

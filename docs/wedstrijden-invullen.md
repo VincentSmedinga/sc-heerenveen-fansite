@@ -43,6 +43,30 @@ De doelpunten moeten samen de uitslag geven.
 Een uitslag zonder doelpunten mag: voeg ze toe als je ze weet.
 De stand komt van Wikipedia en verandert niet mee, dus hij loopt achter tot Wikipedia de uitslag heeft.
 
+## Een wedstrijd toevoegen
+
+Soms bestaat een wedstrijd nergens als bron die de import kan lezen, zoals een bekerwedstrijd uit 2009.
+Dan voeg je hem zelf toe.
+
+1. Open `/beheer/wedstrijden` en kies "Wedstrijd toevoegen".
+2. Vul het seizoen (zoals 2008/09), de competitie, de ronde, de tegenstander, thuis of uit, de datum, de status en de uitslag in.
+   Is de tijd niet bekend, laat hem dan leeg.
+   Staat de club er niet bij, kies dan "Een andere club" en schrijf de naam.
+3. Vul de **bron** in, zoals "Leeuwarder Courant, 12 mei 2009".
+   Je mag feiten overnemen uit een krantenarchief, zoals Delpher: de datum, de uitslag, de doelpuntenmakers en de opstelling.
+   Neem nooit de tekst van een krant over.
+4. Bewaar de wedstrijd.
+   Staat dezelfde wedstrijd er al, ook uit een andere bron, dan weigert het formulier hem en zegt het welke.
+
+De wedstrijd staat daarna op de pagina van de wedstrijd, en je vult er de doelpunten, de gegevens en het verslag in zoals bij elke andere wedstrijd.
+Geen import wijzigt of verwijdert hem.
+De site toont de bron bij de wedstrijd.
+Het logboek heeft een regel `match.add` met de bron als reden.
+
+Een wedstrijd die je toevoegde, kun je verwijderen met "Wedstrijd verwijderen" op de pagina van de wedstrijd.
+Dat vraagt een reden, haalt de doelpunten en het verslag mee weg en kan niet terug.
+Een wedstrijd uit een import kun je niet verwijderen.
+
 ## Wat de bezoeker ziet
 
 De waarden die je invult, op de plekken waar de waarden van Wikipedia staan.

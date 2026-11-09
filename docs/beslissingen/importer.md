@@ -3128,3 +3128,32 @@
 - **Waarom:** het past in wat er is: de wachtende wijziging, het terugzetten en de logregel werken voor elk deel op dezelfde manier.
   Een verbeterde scheidsrechter of een toeschouwersaantal verdween bij de volgende import.
 - **Alternatieven:** een algemene tabel met entiteit, veld en waarde (meer werk nu, en de import moet anders lezen; die komt pas als ook selecties of personen dat nodig hebben, zie #977).
+
+## De redactie mag wedstrijden toevoegen die geen bron heeft
+
+- **Datum:** 9 november 2026
+- **Besluit:** de redactie voegt wedstrijden toe als derde bron, `redactie` (`matchDataSources`, #970), met een verplichte bronregel.
+  - **De bron:** `matches.data_source` krijgt de waarde `redactie`.
+    Geen import wijzigt of verwijdert zo'n rij: de import van Wikipedia en de stap `matches` van `import:old-site` raken alleen hun eigen bron, laten een wedstrijd van de redactie op dezelfde sleutel staan en melden dat.
+  - **Op datum en club:** vinden ze zo'n wedstrijd met `findMatchByDate` (#968), dan vullen ze er niets aan en melden alleen een verschil in het logboek.
+  - **Het formulier:** "Wedstrijd toevoegen" op de lijst van `/beheer/wedstrijden` vraagt het seizoen, de competitie, de ronde, de tegenstander (een bestaande club of een nieuwe naam, via `clubs.ts`), thuis of uit, de datum, de tijd of "tijd onbekend", de status, de uitslag en de bron.
+    Het formulier weigert een wedstrijd die er al is op seizoen, competitie, club en datum met `findMatchByDate`, en een ronde die in het seizoen en de competitie al bestaat.
+    Elk veld heeft een eigen fout, en een fout zonder veld krijgt de focus.
+  - **Daarna:** doelpunten, gegevens en een verslag werken zoals bij elke wedstrijd.
+    Het logboek heeft `match.add` (met de bron als reden) en `match.delete`.
+  - **Verwijderen:** alleen een wedstrijd met de bron `redactie`, na een reden, met de doelpunten en het verslag erbij.
+    Het blok is een Disclosure met een rode knop, zodat het niet één klik is.
+  - **Zonder tijd:** een wedstrijd van de redactie mag, net als een van de oude fansite, een dag zonder tijd hebben (`matches_time_or_text`).
+- **Waarom:** voor 1991/92 (6 van ongeveer 40 wedstrijden) en voor 2007/08 tot en met 2009/10 (de bekerwinst van 2009) is er geen bron die een import kan lezen.
+  Zonder weg blijven die gaten.
+- **Alternatieven:** alleen imports (de gaten blijven); wachten tot vrijwilligers Wikipedia aanvullen (kost jaren en geeft de redactie geen controle).
+
+## De bronregel van een wedstrijd is een kolom van `matches`
+
+- **Datum:** 9 november 2026
+- **Besluit:** de bron van een wedstrijd van de redactie staat in `matches.source_line` (`varchar(255)`), niet in de bron van het verslag (`match_reports.source`) (#970).
+  Een check eist de kolom bij de bron `redactie` (`matches_source_line_for_editors`).
+  De site toont hem bij de wedstrijd: op de pagina van de wedstrijd en onder de bronvermelding van de pagina Wedstrijden (`listEditorSources`, `EditorSources`).
+- **Waarom:** ook een wedstrijd zonder verslag heeft een bron nodig, en de bron van het verslag hoort bij de opstelling en de kaarten, niet bij de uitslag.
+  Een kolom is één plaats die elke pagina en elke check kan lezen.
+- **Alternatieven:** de bron van het verslag (een wedstrijd zonder verslag zou geen bron hebben); een eigen tabel met bronnen (te veel voor één regel tekst).

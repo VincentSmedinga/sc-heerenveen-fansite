@@ -2984,3 +2984,12 @@
   Vijf getallen op de assen lezen rustiger dan een streepje per vijf rondes.
 - **Alternatieven:** de kaart Hoofdtrainer overal weghalen (seizoenen zonder grafiek verliezen de trainers); alleen een lijst zonder lijnen; de datum erbij houden (twee tijdsvormen in één kaart).
 - **Later:** vervangt voor de seizoenen met de kaart Verloop op de ranglijst _De trainers van een seizoen staan in een kaart met het sterke blauwe vlak onder de stand_.
+
+## Feiten uit krantenarchieven mogen, tekst niet
+
+- **Datum:** 9 november 2026
+- **Besluit:** de redactie mag feiten overnemen uit krantenarchieven zoals Delpher: de datum, de uitslag, de doelpuntenmakers en de opstelling (#970).
+  Nooit de tekst, en altijd met de bron erbij, zoals "Leeuwarder Courant, 12 mei 2009".
+  De bron staat bij de wedstrijd op de site.
+- **Waarom:** feiten zijn vrij, de tekst van een journalist niet.
+- **Alternatieven:** alleen Wikipedia als bron (de gaten blijven); ook citaten (past niet bij het bronbeleid).

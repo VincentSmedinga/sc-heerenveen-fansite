@@ -1011,6 +1011,37 @@ export const playedLine = (played: number) =>
   played === 1 ? '1 gespeelde wedstrijd' : `Alle ${played} gespeelde wedstrijden`
 
 /**
+ * The credit of the matches the editors added themselves, which no import reads: each with the
+ * source the editors took it from, such as a newspaper. Without such a match it shows nothing.
+ */
+export function EditorSources({
+  sources,
+}: {
+  sources: readonly { id: number; matchDate: string; opponent: string; round: string; sourceLine: string }[]
+}) {
+  if (sources.length === 0) {
+    return null
+  }
+
+  return (
+    <Card as="div" surface="transparent">
+      <Text appearance="meta">
+        {sources.length === 1
+          ? 'Een wedstrijd heeft onze redactie zelf toegevoegd, met de bron erbij:'
+          : 'Enkele wedstrijden heeft onze redactie zelf toegevoegd, met de bron erbij:'}
+      </Text>
+      <List role="list">
+        {sources.map((source) => (
+          <List.Item key={source.id}>
+            <Text appearance="meta">{`Tegen ${source.opponent}, ${formatTableDay(source.matchDate)}: ${source.sourceLine}`}</Text>
+          </List.Item>
+        ))}
+      </List>
+    </Card>
+  )
+}
+
+/**
  * The card "Hoe vaak welke uitslag" for the `counts` it is given, which the page of the
  * matches and the page of a club share: the chart and a table for each outcome, with the
  * count of the outcome in its header, and under them the line with the number of matches.

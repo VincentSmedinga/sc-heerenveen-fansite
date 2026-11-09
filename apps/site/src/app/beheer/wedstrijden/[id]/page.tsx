@@ -17,12 +17,13 @@ import { wikipediaUrl } from '#src/match-format'
 import { describeShowDelay, lacksResult } from '#src/matches'
 import { formatVersionTime } from '#src/news'
 
-import { submitConflict, submitHeldChange, submitMatch, submitRemoveEntry } from '../actions'
+import { submitConflict, submitDeleteMatch, submitHeldChange, submitMatch, submitRemoveEntry } from '../actions'
 import { ConflictForm } from '../ConflictForm'
 import { HeldChangeForm } from '../HeldChangeForm'
 import { MatchErrorSummary, MatchFields, MatchFormProvider, MatchSavePanel } from '../MatchForm'
 import { matchesPath, reportPath } from '../paths'
 import { RemoveEntryForm } from '../RemoveEntryForm'
+import { RemoveMatchForm } from '../RemoveMatchForm'
 
 // Render on each request: the match changes with every entry and every import.
 export const dynamic = 'force-dynamic'
@@ -45,10 +46,18 @@ const notices: Record<string, { text: string; title: string }> = {
     text: 'Er is niets veranderd: van deze afwijking is niet te lezen wat Wikipedia zegt. Houd de invoer, of haal hem weg.',
     title: 'Niet overgenomen',
   },
+  'niet-van-ons': {
+    text: 'Alleen een wedstrijd die de redactie toevoegde, kan worden verwijderd. Deze komt van een import.',
+    title: 'Niet verwijderd',
+  },
   ongewijzigd: { text: 'Je had niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' },
   overgenomen: {
     text: 'Dit onderdeel is nu wat Wikipedia zegt en volgt Wikipedia weer.',
     title: 'Wikipedia overgenomen',
+  },
+  toegevoegd: {
+    text: 'De wedstrijd is toegevoegd. Vul hieronder de doelpunten en de gegevens in, en maak daarna het verslag.',
+    title: 'Toegevoegd',
   },
   weggehaald: {
     text: 'De wedstrijd is teruggezet naar wat er stond voor de eerste invoer. De import leest bij de volgende keer weer wat Wikipedia zegt.',
@@ -141,6 +150,9 @@ export default async function MatchPage({ params, searchParams }: Props) {
               <Text>
                 <Link href={reportPath(match.id)}>{hasReport ? 'Naar het verslag' : 'Het verslag invullen'}</Link>
               </Text>
+            ) : null}
+            {match.dataSource === 'redactie' ? (
+              <Text appearance="meta">Toegevoegd door de redactie. Bron: {match.sourceLine}</Text>
             ) : null}
             {edit === undefined && !lacking ? null : (
               <Text>
@@ -251,6 +263,9 @@ export default async function MatchPage({ params, searchParams }: Props) {
       </Page.Main>
       <Page.Sidebar aria-label="Opslaan en invoer" sticky>
         <MatchSavePanel cancelHref={matchesPath} />
+        {match.dataSource === 'redactie' ? (
+          <RemoveMatchForm action={submitDeleteMatch.bind(null, match.id)} title={title} />
+        ) : null}
         {edit === undefined ? null : (
           <>
             <Card aria-labelledby="invoer-kop" surface="soft">

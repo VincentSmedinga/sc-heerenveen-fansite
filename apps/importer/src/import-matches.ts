@@ -937,10 +937,13 @@ async function storeMatches(
 ) {
   const clubLines: string[] = []
   // This import reads, changes and removes only the matches it made itself. A match of the old
-  // fansite stays as it is, and a match of Wikipedia on its key is left out (see below).
+  // fansite or of the editors stays as it is, and a match of Wikipedia on its key is left out
+  // (see below).
   const seasonRows = await db.select().from(matches).where(eq(matches.season, season))
   const known = new Map(seasonRows.filter((row) => row.dataSource === 'wikipedia').map((row) => [key(row), row]))
-  const oldFansite = new Set(seasonRows.filter((row) => row.dataSource === 'oude-fansite').map(key))
+  const otherSources = new Map(
+    seasonRows.filter((row) => row.dataSource !== 'wikipedia').map((row) => [key(row), row.dataSource]),
+  )
   const existing = new Map(known)
   const squad = await db.select().from(players).where(eq(players.season, season))
   const personBook = await createPersonBook(db, { aliases: aliasMap(personTitleAliases), redirects: personRedirects })
@@ -992,9 +995,11 @@ async function storeMatches(
   const storedStates = (id: number) => (storedGoals.get(id) ?? []).map(goalStateOf)
 
   for (const match of found) {
-    if (oldFansite.has(key(match))) {
+    const otherSource = otherSources.get(key(match))
+
+    if (otherSource !== undefined) {
       warnings.push(
-        `${match.competition} ${match.round} left out: the match is already there from the old fansite, and the import of Wikipedia leaves those alone`,
+        `${match.competition} ${match.round} left out: the match is already there from ${otherSource === 'redactie' ? 'the editors' : 'the old fansite'}, and the import of Wikipedia leaves those alone`,
       )
       counts.unchanged++
       continue
@@ -1037,7 +1042,8 @@ async function storeMatches(
 
         warnings.push(...differences.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
 
-        if (Object.keys(fill).length > 0) {
+        // A match the editors added is theirs: it is compared and never filled.
+        if (Object.keys(fill).length > 0 && lookup.match.dataSource !== 'redactie') {
           counts.updated++
           await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
         } else {

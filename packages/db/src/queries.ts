@@ -1238,6 +1238,29 @@ export async function hasEditedMatches(db: Database): Promise<boolean> {
 }
 
 /**
+ * The matches of a season that the editors added themselves (`data_source` is `redactie`), with
+ * the source they took each from, in the order of the season. The pages say so next to the
+ * credit of the matches, because a match without a source to read is credited on its own.
+ */
+export async function listEditorSources(db: Database, season: string) {
+  const rows = await db
+    .select({
+      competition: matches.competition,
+      home: matches.home,
+      id: matches.id,
+      matchDate: matches.matchDate,
+      opponent: matches.opponent,
+      round: matches.round,
+      sourceLine: matches.sourceLine,
+    })
+    .from(matches)
+    .where(and(eq(matches.season, season), eq(matches.dataSource, 'redactie')))
+    .orderBy(asc(matches.matchDate), asc(matches.id))
+
+  return rows.flatMap(({ sourceLine, ...row }) => (sourceLine === null ? [] : [{ ...row, sourceLine }]))
+}
+
+/**
  * The conditions that make an item an episode to show: of a podcast that is switched on, not
  * hidden, not later than `until`, and of one of the podcasts with these slugs when some are
  * given.

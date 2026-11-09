@@ -8,6 +8,7 @@ import {
   DataTable,
   Filter,
   Heading,
+  Link,
   Notice,
   Page,
   SeasonPicker,
@@ -24,7 +25,7 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
 
-import { listPath, livePath, matchesPath, matchPath, reportPath } from './paths'
+import { addPath, listPath, livePath, matchesPath, matchPath, reportPath } from './paths'
 
 // Render on each request: who is logged in and which matches have an entry are not known when
 // the site is built.
@@ -47,6 +48,7 @@ const defaultShow: Show = 'zonder-uitslag'
 
 const done: Record<string, string> = {
   verwijderd: 'De wedstrijd is weggehaald, omdat hij niet meer op de pagina van Wikipedia staat.',
+  'wedstrijd-weg': 'De wedstrijd is verwijderd, met zijn doelpunten en zijn verslag.',
 }
 
 const notices: Record<string, string> = {
@@ -98,6 +100,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <Text appearance="intro">
             Vul een wedstrijd in of verbeter hem, als Wikipedia achterloopt of een fout heeft. Wat je opslaat, staat{' '}
             {describeShowDelay(season, now)} op de site.
+          </Text>
+          <Text>
+            <Link href={addPath}>Wedstrijd toevoegen</Link>
           </Text>
         </>
       }

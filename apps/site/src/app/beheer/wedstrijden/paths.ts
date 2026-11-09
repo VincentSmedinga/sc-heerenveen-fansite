@@ -2,6 +2,9 @@ import { seasonSlug } from '#src/seasons'
 
 export const matchesPath = '/beheer/wedstrijden'
 
+/** The address of the form that adds a match no import reads. */
+export const addPath = `${matchesPath}/nieuw`
+
 /** The address of the screen that ends a match that is still being played. */
 export function finishPath(id: number) {
   return `${matchesPath}/${id}/verslag/afgelopen`

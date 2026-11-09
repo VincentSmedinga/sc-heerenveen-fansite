@@ -581,6 +581,29 @@ describe('the step matches', () => {
     expect((await rows())[0]).toMatchObject({ attendance: 4500, referee: 'Bas Nijhuis' })
   })
 
+  it('never changes a match the editors added: on its key, or found by its day', async () => {
+    await wikipediaMatch({
+      dataSource: 'redactie',
+      referee: null,
+      round: 'Wedstrijd 1',
+      sourceLine: 'Krant, 1 sep 2001',
+    })
+
+    // Under the same key: the step skips it.
+    const sameKey = await run([oldMatch({ referee: 'Piet Fluit' })])
+
+    expect(sameKey).toMatchObject({ created: 0, skipped: 1 })
+
+    // Under another round, on the same day: the step finds it, and fills nothing.
+    await database.pool.query("UPDATE matches SET round = 'Finale'")
+
+    const found = await run([oldMatch({ referee: 'Piet Fluit', result: { ...oldMatch().result, homeFullTime: 3 } })])
+
+    expect(found).toMatchObject({ changed: 0, created: 0 })
+    expect(found.lines.join('\n')).toContain('goalsFor: redactie says 2, oude-fansite says 3')
+    expect(await rows()).toMatchObject([{ dataSource: 'redactie', referee: null, round: 'Finale' }])
+  })
+
   it('keeps two matches against the same club within a day, and says so', async () => {
     await wikipediaMatch({ matchDate: '2001-09-02', round: 'Eerste ronde' })
     await database.db.insert(matches).values({
