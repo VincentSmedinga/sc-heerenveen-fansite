@@ -57,7 +57,7 @@ export function creditName(
   const name = {
     cup: `KNVB Beker ${season}`,
     'europa-league': `Europa League ${season}`,
-    matches: Object.hasOwn(englishPageNames, title) ? englishPageNames[title] : title,
+    matches: (Object.hasOwn(englishPageNames, title) ? englishPageNames[title] : undefined) ?? title,
     playoffs: `Play-offs ${Number(season.slice(0, 4)) < 2020 ? 'Europa' : 'Conference'} League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
