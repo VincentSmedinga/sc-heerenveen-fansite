@@ -1,11 +1,23 @@
-import type { Match, NewMatchGoal } from '@fansite/db/schema'
+import type { PartProposal } from '@fansite/db/match-conflicts'
+import type { GoalFields, GoalSnapshot } from '@fansite/db/match-edits'
+import type { Match, MatchChange, NewMatchGoal } from '@fansite/db/schema'
 
-import { matchEdits, matches, matchGoalPlayerMaxLength, matchGoals, matchReports } from '@fansite/db/schema'
-import { asc, eq, inArray } from 'drizzle-orm'
+import { oldSiteGoalsReason } from '@fansite/db/match-conflicts'
+import { describeEntryGoals } from '@fansite/db/match-edits'
+import {
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoalPlayerMaxLength,
+  matchGoals,
+  matchReports,
+} from '@fansite/db/schema'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import type { OldSiteEvent, OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
+import { decide } from './match-changes.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSeason, oldSiteSource } from './old-site-matches.ts'
 import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, oldSitePlayerIds, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
@@ -29,6 +41,9 @@ export type DerivedOldSiteGoal = {
 }
 
 export type DerivedOldSiteGoals = {
+  /** The goals of the files that name a scorer, by minute, whether they add up or not. */
+  found: DerivedOldSiteGoal[]
+  /** The goals the match gets: `found` when they add up to the score, and none otherwise. */
   goals: DerivedOldSiteGoal[]
   /** The goals for and against sc Heerenveen in the list, an own goal for the beneficiary. */
   listed: { against: number; for: number }
@@ -77,10 +92,10 @@ export function deriveOldSiteGoals(
   const addsUp = usable && listed.for === score.for && listed.against === score.against
 
   if (addsUp) {
-    return { goals, listed, state: 'adds-up' }
+    return { found: goals, goals, listed, state: 'adds-up' }
   }
 
-  return { goals: [], listed, state: goals.length === 0 && usable ? 'none' : 'partial' }
+  return { found: goals, goals: [], listed, state: goals.length === 0 && usable ? 'none' : 'partial' }
 }
 
 /** The goal of an event, or undefined when it has no scorer to name. */
@@ -139,9 +154,13 @@ const goalFields = ['minute', 'ours', 'ownGoal', 'penalty', 'player', 'playerId'
 
 /**
  * The step `doelpunten`: makes the rows in `match_goals` for every match with the source
- * `oude-fansite` whose goals add up to its score. Needs the matches and the players of the
- * steps before it. A match whose goals do not add up gets none, and any it had from an earlier
- * run are removed, since a list that contradicts the result would contradict the visitor.
+ * `oude-fansite` whose goals add up to its score in the database, which is the score of the
+ * editors when they corrected it. Needs the matches and the players of the steps before it. A
+ * match whose goals do not add up gets none, and any it had from an earlier run are removed,
+ * since a list that contradicts the result would contradict the visitor. They are not thrown
+ * away: the list of the files and the goals the match had wait for the editors as a change
+ * with the part `goals` (`oldSiteGoalsReason`), once for the same list (issue 973). The step
+ * leaves the goals alone once the editors took that list over.
  * A match whose goals the editors filled in (`match_edits.goals_edited`), or whose report they
  * saved (`match_reports.saved_by`), is left as it is, and so is a match from another source.
  * A goal that exists is updated in place, so the links to a report (#879) stay.
@@ -150,6 +169,7 @@ export async function importOldSiteGoals(
   db: Pick<OldSiteDatabase, 'delete' | 'insert' | 'select' | 'update'>,
   oldMatches: readonly OldSiteMatch[],
   oldPlayers: readonly OldSitePlayer[],
+  now = new Date(),
 ): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const byCode = new Map(oldPlayers.map((player) => [player.code, player]))
@@ -159,6 +179,7 @@ export async function importOldSiteGoals(
   const stored = new Map<string, Match>()
   const editors = new Set<number>()
   const goalsOf = new Map<number, StoredGoal[]>()
+  const keptOf = new Map<number, MatchChange[]>()
 
   for (const row of await db.select().from(matches).where(eq(matches.dataSource, oldSiteSource))) {
     stored.set(matchKey(row), row)
@@ -177,6 +198,15 @@ export async function importOldSiteGoals(
     }
     for (const row of await db.select().from(matchGoals).orderBy(asc(matchGoals.id))) {
       goalsOf.set(row.matchId, [...(goalsOf.get(row.matchId) ?? []), row])
+    }
+    for (const row of await db
+      .select()
+      .from(matchChanges)
+      .where(and(eq(matchChanges.part, 'goals'), eq(matchChanges.reason, oldSiteGoalsReason)))
+      .orderBy(asc(matchChanges.id))) {
+      if (row.matchId !== null) {
+        keptOf.set(row.matchId, [...(keptOf.get(row.matchId) ?? []), row])
+      }
     }
   }
 
@@ -203,24 +233,11 @@ export async function importOldSiteGoals(
       continue
     }
 
-    const { goals, listed, state } = deriveOldSiteGoals(
-      match,
-      { against: values.goalsAgainst, for: values.goalsFor },
-      byCode,
-    )
-
-    counts[state] += 1
-    if (goals.length > 0) {
-      counts.withGoals += 1
-    }
-    if (state !== 'adds-up') {
-      report.skipped += 1
-      report.lines.push(
-        `${label}: ${state === 'none' ? 'no goals' : `${listed.for + listed.against} of the goals`} for the score ${values.goalsFor}-${values.goalsAgainst}, so the match gets none`,
-      )
-    }
-
-    const wanted: NewMatchGoal[] = goals.map((goal) => ({
+    // The score in the database counts, not the one of the files: the editors may have
+    // corrected the result (`match_edits.result_edited`), and the step `matches` leaves it.
+    const score = { against: before.goalsAgainst ?? values.goalsAgainst, for: before.goalsFor ?? values.goalsFor }
+    const { found, goals, listed, state } = deriveOldSiteGoals(match, score, byCode)
+    const rowOf = (goal: DerivedOldSiteGoal): NewMatchGoal => ({
       matchId: before.id,
       minute: goal.minute,
       ours: goal.ours,
@@ -229,8 +246,71 @@ export async function importOldSiteGoals(
       player: goal.player,
       playerId: goal.playerKey === null ? null : (playerIds.get(goal.playerKey) ?? null),
       stoppageMinutes: null,
-    }))
+    })
     const existing = goalsOf.get(before.id) ?? []
+    const kept = keptOf.get(before.id) ?? []
+
+    counts[state] += 1
+    if (goals.length > 0) {
+      counts.withGoals += 1
+    }
+    if (state === 'adds-up') {
+      // The list is back in `match_goals`, so a change that waits for it has nothing to ask.
+      for (const change of kept.filter((one) => one.status === 'pending')) {
+        await decide(db, change, 'rejected', 'reverted', now)
+      }
+    } else {
+      const inFiles = found.map((goal) => snapshotOf(rowOf(goal)))
+      const list = describeEntryGoals(inFiles)
+
+      if (kept.some((change) => change.status === 'accepted' && change.newValue === list)) {
+        report.skipped += 1
+        report.lines.push(`skipped the goals of ${label}: the editors took the list of the files over, so it stays`)
+        continue
+      }
+
+      report.skipped += 1
+      report.lines.push(
+        `${label}: ${state === 'none' ? 'no goals' : `${listed.for + listed.against} of the goals`} for the score ${score.for}-${score.against}, so the match gets none`,
+      )
+
+      const waiting = kept.filter((change) => change.status === 'pending')
+
+      for (const change of waiting.filter((one) => one.newValue !== list)) {
+        await decide(db, change, 'rejected', 'replaced', now)
+      }
+
+      // Something to keep: goals in the files, or goals that are about to leave the match. The
+      // same list is kept once: not again while it waits, and not again after a decision unless
+      // the match has goals to lose.
+      const known = waiting.some((change) => change.newValue === list)
+      const decided = existing.length === 0 && kept.some((change) => change.newValue === list)
+
+      if ((inFiles.length > 0 || existing.length > 0) && !known && !decided) {
+        const proposal: PartProposal = { goals: inFiles, part: 'goals', stored: existing.map(snapshotOf) }
+
+        await db.insert(matchChanges).values({
+          changed: 'doelpunten',
+          class: 'suspicious',
+          competition: before.competition,
+          firstSeenAt: now,
+          lastSeenAt: now,
+          matchId: before.id,
+          newValue: list,
+          oldValue: describeEntryGoals(existing),
+          part: 'goals',
+          proposal: JSON.stringify(proposal),
+          reason: oldSiteGoalsReason,
+          round: before.round,
+          season: before.season,
+          status: 'pending',
+        })
+        report.created += 1
+        report.lines.push(`${label}: the goals are kept as a change that waits for the editors`)
+      }
+    }
+
+    const wanted = goals.map(rowOf)
 
     for (const [index, goal] of wanted.entries()) {
       const row = existing[index]
@@ -261,7 +341,9 @@ export async function importOldSiteGoals(
     if (surplus.length > 0) {
       await db.delete(matchGoals).where(inArray(matchGoals.id, surplus))
       report.changed += surplus.length
-      report.lines.push(`${label}: ${surplus.length} goals removed, the files no longer have them`)
+      report.lines.push(
+        `${label}: ${surplus.length} goals removed, ${state === 'adds-up' ? 'the files no longer have them' : 'they do not add up to the score'}`,
+      )
     }
   }
 
@@ -270,4 +352,19 @@ export async function importOldSiteGoals(
   )
 
   return report
+}
+
+/** A goal as a proposal keeps it: the row of `match_goals` without the links to a report. */
+function snapshotOf(goal: NewMatchGoal): GoalFields & GoalSnapshot {
+  return {
+    minute: goal.minute ?? null,
+    ours: goal.ours,
+    ownGoal: goal.ownGoal ?? false,
+    penalty: goal.penalty ?? false,
+    personId: goal.personId ?? null,
+    player: goal.player,
+    playerId: goal.playerId ?? null,
+    stoppageMinutes: goal.stoppageMinutes ?? null,
+    wikipediaPage: goal.wikipediaPage ?? null,
+  }
 }

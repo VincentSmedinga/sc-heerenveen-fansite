@@ -9,6 +9,7 @@ import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
 import { mailConflicts } from './match-conflict-mail.ts'
+import { oldSiteGoalsReason } from './match-conflicts.ts'
 import { matchChanges, matches } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -149,6 +150,14 @@ describe('the mail about a difference', () => {
     await run()
 
     expect(mails).toEqual([])
+  })
+
+  it('does not mail about the goals of the old fansite that are kept', async () => {
+    await waits({ part: 'goals', reason: oldSiteGoalsReason })
+    await run()
+
+    expect(mails).toEqual([])
+    expect((await changes())[0]?.mailedAt).toBeNull()
   })
 
   it('does not fail when a mail cannot be sent, says so, and tries again at the next run', async () => {

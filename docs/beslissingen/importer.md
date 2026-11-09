@@ -2707,6 +2707,8 @@
 - **Waarom:** een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen, en de regels van het verslag eisen dat de doelpunten optellen.
 - **Alternatieven:** een deel van de doelpunten tonen, met een zin dat ze niet af zijn.
   De doelpunten van een wedstrijd weghalen en opnieuw maken bij elke run (de koppeling met het verslag van #879 breekt).
+- **Later:** zie _Doelpunten van de oude fansite die niet optellen, wachten als wijziging op de redactie_.
+  De doelpunten gaan nog steeds uit `match_goals`, maar ze worden bewaard.
 
 ## De stap `opstellingen` maakt een verslag per wedstrijd met een opstelling, en het is alleen klaar als de regels het goedkeuren
 
@@ -3296,3 +3298,34 @@
 - **Waarom:** twee kolommen heetten allebei R, de wedstrijden van de redactie en de verslagen.
   Een kop als `edit` of `players` is te lezen zonder de legenda.
 - **Alternatieven:** unieke letters (smaller, maar elke keer met de legenda erbij); de kolommen in `apps/importer` laten staan (de site kan ze dan niet hergebruiken).
+
+## Doelpunten van de oude fansite die niet optellen, wachten als wijziging op de redactie
+
+- **Datum:** 9 november 2026
+- **Besluit:** de stap `doelpunten` gooit een lijst die niet optelt tot de uitslag niet meer weg (#973).
+  De doelpunten gaan nog steeds uit `match_goals`, en de wedstrijd krijgt een wachtende wijziging in `match_changes` met het deel `goals`.
+  - **Wat erin staat.**
+    `new_value` is de lijst van de bestanden en `old_value` zijn de doelpunten die in de database stonden, allebei als één regel tekst.
+    `proposal` heeft de lijst van de bestanden (`goals`) en de doelpunten uit de database (`stored`), met de speler van elk doelpunt.
+    De reden is `oldSiteGoalsReason` uit `@fansite/db/match-conflicts`; daaraan herkent de code deze wijziging.
+  - **De uitslag in de database telt.**
+    De stap vergelijkt de lijst met `goals_for` en `goals_against` van de rij in `matches`, niet met de uitslag in de bestanden.
+    Verbetert de redactie de uitslag (`result_edited`), dan ziet de volgende run dat de doelpunten niet meer optellen.
+  - **Eén wijziging per lijst.**
+    Wacht er al een wijziging met dezelfde lijst, dan komt er geen tweede.
+    Is over die lijst al beslist, dan komt er alleen een nieuwe als de wedstrijd weer doelpunten heeft die weggaan.
+    Hebben de bestanden een andere lijst, dan vervalt de oude wijziging (`replaced`) en komt er een nieuwe.
+    Tellen de doelpunten weer op, dan vervalt de wijziging (`reverted`) en staan ze weer in `match_goals`.
+  - **Overnemen blijft staan.**
+    Neemt de redactie de lijst over, dan staat ze in `match_goals` en laat de stap de wedstrijd met rust.
+    Vult de redactie de lijst daarna aan, dan is het haar invoer (`goals_edited`).
+  - **Geen mail en geen termijn.**
+    `mailConflicts` slaat deze wijzigingen over, en de import neemt ze nooit zelf over na zeven dagen.
+    Een wedstrijd met een uitslag en zonder lijst in de bestanden krijgt geen wijziging: er is niets om te bewaren.
+- **Waarom:** vaak ontbreekt er maar één doelpunt, en de redactie vult een lijst sneller aan dan dat ze hem opnieuw intikt.
+  Een regel in het logboek van een run leest niemand terug, en een wijziging staat op de werklijst van het beheer.
+  In de bestanden zijn het nu 2 wedstrijden.
+- **Nadeel:** het beheer toont de wijziging met de woorden van een verschil met Wikipedia, want het deel `goals` was daar tot nu toe altijd een verschil met Wikipedia.
+- **Alternatieven:** de lijst in `match_goals` laten staan en de wedstrijd markeren (een bezoeker ziet dan een lijst die de uitslag tegenspreekt).
+  Een eigen tabel voor bewaarde doelpunten (een tweede plek voor wat `match_changes` al kan bewaren, met een eigen scherm in het beheer).
+  Een mail aan de beheerders, zoals bij een verschil met Wikipedia (die mail belooft dat de import na zeven dagen Wikipedia overneemt, en dat klopt hier niet).
