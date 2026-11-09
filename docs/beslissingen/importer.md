@@ -2811,6 +2811,7 @@
 - **Alternatieven:** een tabel in de database met meldingen (de meldingen horen bij één run en verouderen).
   Het verslag zelf de afleidingen laten herhalen (twee kopieën die uit elkaar lopen).
 - **Later:** zie _Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen_ (8 november 2026): het verslag noemt de namen zoals ze in de wedstrijd stonden, op de schrijfwijzen in die lijst na, en het heeft een lijst _Namen om te beslissen_.
+- **Later:** zie _Het controleverslag legt de competitie naast de kruistabellen van Wikipedia_ (10 november 2026): het verslag vraagt Wikipedia om de kruistabellen en vergelijkt de uitslagen zelf, en schrijft nog steeds niets.
 
 ## Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen
 
