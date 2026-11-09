@@ -496,7 +496,8 @@ describe('the step matches', () => {
     expect((await database.db.select().from(matchStatistics))[0]?.cornersFor).toBe(6)
   })
 
-  it('skips a match under the same key from Wikipedia, and says so', async () => {
+  /** A match of Wikipedia against NEC on a date, under a round of its own. */
+  async function wikipediaMatch(values: Partial<typeof matches.$inferInsert> = {}) {
     await run([])
     await importOldSiteClubs(database.db, oldClubs)
 
@@ -506,22 +507,66 @@ describe('the step matches', () => {
       clubId: club!.id,
       competition: 'Eredivisie',
       dataSource: 'wikipedia',
-      goalsAgainst: 0,
-      goalsFor: 3,
+      goalsAgainst: 1,
+      goalsFor: 2,
       home: true,
       kickoffAt: new Date('2001-09-01T18:00:00Z'),
       matchDate: '2001-09-01',
       opponent: 'N.E.C.',
-      round: 'Wedstrijd 1',
+      round: 'Eerste ronde',
       season: '2001/02',
       status: 'played',
+      ...values,
+    })
+  }
+
+  it('makes no second row for a match that Wikipedia has under another round, and fills what is empty', async () => {
+    await wikipediaMatch({ referee: null })
+
+    const report = await run([oldMatch({ referee: 'Piet Fluit' })])
+
+    expect(report).toMatchObject({ changed: 1, created: 0, skipped: 0 })
+    expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', referee: 'Piet Fluit', round: 'Eerste ronde' }])
+  })
+
+  it('logs a field that differs from the other source and leaves it as it is', async () => {
+    await wikipediaMatch({ goalsFor: 3 })
+
+    const report = await run([oldMatch()])
+
+    expect(report.lines.join('\n')).toMatch(
+      /match difference: 2001\/02 Eredivisie Eerste ronde \(match \d+\) goalsFor: wikipedia says 3, oude-fansite says 2/,
+    )
+    expect(await rows()).toMatchObject([{ goalsFor: 3 }])
+  })
+
+  it('finds a match that moved by a day, and makes a new row for one that moved further', async () => {
+    await wikipediaMatch({ matchDate: '2001-09-02' })
+
+    expect(await run([oldMatch()])).toMatchObject({ created: 0 })
+    expect(await rows()).toHaveLength(1)
+
+    await database.pool.query('DELETE FROM matches')
+    await wikipediaMatch({ matchDate: '2001-10-10' })
+
+    expect(await run([oldMatch()])).toMatchObject({ created: 1 })
+    expect(await rows()).toHaveLength(2)
+  })
+
+  it('keeps two matches against the same club within a day, and says so', async () => {
+    await wikipediaMatch({ matchDate: '2001-09-02', round: 'Eerste ronde' })
+    await database.db.insert(matches).values({
+      ...(await rows())[0]!,
+      id: undefined,
+      matchDate: '2001-09-01',
+      round: 'Replay',
     })
 
     const report = await run([oldMatch()])
 
-    expect(report).toMatchObject({ created: 0, skipped: 1 })
-    expect(report.lines.join('\n')).toContain('a match from wikipedia under the same key')
-    expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', goalsFor: 3, opponent: 'N.E.C.' }])
+    expect(report).toMatchObject({ created: 1 })
+    expect(report.lines.join('\n')).toContain('2 matches against the same club within a day')
+    expect(await rows()).toHaveLength(3)
   })
 
   it('leaves the kick-off and the result that the editors filled in as they are', async () => {
