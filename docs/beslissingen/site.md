@@ -3970,3 +3970,13 @@
   De regels voor wat bezoekers zien staan in _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ in `redactie.md`.
 - **Waarom:** een eigen kaart en een eigen functie houden de top 10 zoals hij was, en de kaart verdwijnt zonder lege staat, want een zin "geen clubs" zou hier niets toevoegen.
 - **Alternatieven:** `topPointsOf` laten kiezen tussen boven- en onderkant (de teruggegeven vorm wordt dan voor twee dingen gebruikt); de kaart een zin laten tonen als er te weinig clubs zijn.
+
+## Het aantal toeschouwers staat als feit op de pagina van een wedstrijd, met de bron en de melding dat het een schatting is
+
+- **Datum:** 9 november 2026
+- **Besluit:** de pagina van een gespeelde wedstrijd toont "Toeschouwers" bij de feiten, thuis en uit: een getal met punten als duizendtallen, "Zonder publiek" bij `0` en niets bij een leeg veld.
+  Onder de pagina staat de zin "Het aantal toeschouwers is een schatting, volgens Wikipedia." zodra er een aantal is.
+  `Match` en `ShortMatch` en de lijsten tonen het niet (#416).
+- **Waarom:** het is een feit over één wedstrijd waar weinig supporters in een lijst op letten, en een lijst wordt er op een telefoon vier regels langer van.
+  Redacteuren van Wikipedia schatten het aantal en stellen het bij, dus we noemen het een schatting.
+- **Alternatieven:** het aantal in de regel van elke wedstrijd; "onbekend" tonen bij een leeg veld.

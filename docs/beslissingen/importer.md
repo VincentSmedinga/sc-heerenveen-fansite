@@ -1532,6 +1532,8 @@
   Elke wijziging van de toeschouwers laten wachten (ze worden juist na afloop bijgesteld).
 - **Later:** de pagina Statistieken toont het aantal toeschouwers sinds #729, in een kaart met een staaf per thuiswedstrijd; zie _De pagina Statistieken heeft een kaart met het aantal toeschouwers per thuiswedstrijd_ in `site.md`.
   De scheidsrechter wordt nog nergens getoond.
+- **Later (9 november 2026):** de pagina van een wedstrijd toont het aantal toeschouwers nu (#416), met de bron en de melding dat het een schatting is.
+  De regels van een wedstrijd (`Match` en `ShortMatch`) tonen het nog steeds niet; de scheidsrechter volgt in #417.
 
 ## Van een bericht met meerdere versies toont de site alleen de laatste kop
 
