@@ -560,6 +560,7 @@
 - **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
   Zie ook _De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd_: de naam van een andere profclub naast "Heerenveen" maakt een kop ook `relevant`.
   Zie ook _Het relevantiefilter kent de Friese schrijfwijze van de club en Friese voetbalwoorden_: "Hearrenfean" telt als "Heerenveen".
+- **Later:** zie _Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`_ (9 november 2026): een achternaam met een voetbalwoord, of met een tweede achternaam, is nu `relevant`, ook zonder "Heerenveen"; een achternaam alleen blijft `doubtful`.
 
 ## De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
@@ -577,6 +578,7 @@
   Alleen namen, geen andere gegevens over een persoon.
 - **Alternatieven:** alleen volledige namen (een kop als "Vente is los bij Heerenveen" valt dan weg, dat zagen we in de opname van Voetbal International); alle oud-spelers van de club (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
 - **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; een volledige naam maakt een kop nu `relevant`, en een achternaam alleen blijft `doubtful`.
+- **Later:** zie _Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`_ (9 november 2026): een achternaam met een voetbalwoord, of met een tweede achternaam, is nu `relevant`, ook zonder "Heerenveen"; een achternaam alleen blijft `doubtful`.
 
 ## Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw
 
@@ -648,6 +650,7 @@
   Ook de volledige naam van iemand die in 2026 vertrok, maakt een kop `relevant`.
 - **Alternatieven:** een lijst met andere clubs, zodat "ADO Den Haag" in een kop de wedstrijd verraadt (nog een lijst om bij te houden); een regel voor een uitslag als "3-2" in de kop (nieuwe code, en alleen voor koppen met een uitslag).
 - **Later:** zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok_ voor de regels die hier veranderden.
+- **Later:** zie _Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`_ (9 november 2026): een achternaam met een voetbalwoord, of met een tweede achternaam, is nu `relevant`, ook zonder "Heerenveen"; een achternaam alleen blijft `doubtful`.
 
 ## De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd
 
@@ -3193,3 +3196,21 @@
   Daarbij verbiedt `robots.txt` tekst- en datamining, scrapen en het automatisch verzamelen van gegevens.
   Dat is een ander voorbehoud dan bij de bronnen die we wel nemen, want daar stond de feed voor ons open (zie _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_).
 - **Alternatieven:** eerst toestemming vragen; dat kan later, buiten #1004.
+
+## Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`
+
+- **Datum:** 9 november 2026
+- **Besluit:** `judgeRelevance` geeft `relevant` voor een kop met twee verschillende achternamen uit `clubSurnames`, of met één achternaam uit `clubSurnames` en een voetbalwoord (`footballWords` of `frisianFootballWords`), ook zonder "Heerenveen".
+  Dezelfde achternaam twee keer telt als één.
+  Eén achternaam alleen blijft `doubtful`.
+  "basis" is een voetbalwoord ("in de basis").
+- **Waarom:** de kop "Meerveld in plaats van Rivera?" (Omrop Fryslân, 9 november 2026) ging over twee spelers van de club en kreeg toch "twijfelgeval, niet op de site".
+  Twee namen van spelers in één kop gaan bijna altijd over de club, en één naam met een voetbalwoord ook.
+  Eén achternaam alleen kan een andere Kersten of Scholten zijn, dus die houdt een mens tegen: de moderator kan hem met #1007 alsnog op de site zetten.
+- **Alternatieven:** elke achternaam alleen `relevant` maken (meer valse treffers); de selectie uit de tabel `players` lezen (het filter hangt dan af van de squadimport en krijgt een extra argument); alleen de twee-namenregel.
+- **Beslissing:** de namen blijven in `relevance-terms.ts`.
+  Achternamen die gewone woorden zijn, staan niet op de lijst en tellen dus niet mee.
+  Het filter blijft zuiver en kijkt niet in de database.
+- **Geen migratie:** de importer beoordeelt elk bericht bij elke run opnieuw, dus een bestaand bericht verandert bij de volgende run.
+  Een bericht dat een moderator verborg, blijft verborgen.
+- **Later:** dit vult _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ aan: een achternaam alleen is nog `doubtful`, maar twee achternamen, of een achternaam met een voetbalwoord, zijn `relevant`.

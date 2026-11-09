@@ -283,11 +283,11 @@ Het filter bepaalt voor elk bericht uit zo'n feed of het over sc Heerenveen gaat
 Het kijkt naar de kop en naar de tegenstanders van de wedstrijden rond de publicatie, want de importer bewaart geen intro of categorie.
 De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop met dezelfde tegenstanders (zie _Koppen over de tegenstander_) geeft altijd dezelfde waarde.
 
-| Waarde       | Wanneer                                                                                                                                                                                                                                                             | Wat de site doet          |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `relevant`   | De kop noemt "sc Heerenveen" of "sc Hearrenfean" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" of "Hearrenfean" met een voetbalwoord, een achternaam van de club of een andere profclub | Toont het bericht         |
-| `doubtful`   | De kop noemt alleen "Heerenveen" of "Hearrenfean" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                                        | Toont het bericht nergens |
-| `irrelevant` | Verder                                                                                                                                                                                                                                                              | Toont het bericht nergens |
+| Waarde       | Wanneer                                                                                                                                                                                                                                                                                                                                                    | Wat de site doet          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `relevant`   | De kop noemt "sc Heerenveen" of "sc Hearrenfean" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" of "Hearrenfean" met een voetbalwoord, een achternaam van de club of een andere profclub, of twee verschillende achternamen van de club, of één achternaam met een voetbalwoord | Toont het bericht         |
+| `doubtful`   | De kop noemt alleen "Heerenveen" of "Hearrenfean" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                                                                                                                               | Toont het bericht nergens |
+| `irrelevant` | Verder                                                                                                                                                                                                                                                                                                                                                     | Toont het bericht nergens |
 
 Een kop over de tegenstander van een wedstrijd rond de publicatie is ook `relevant` (zie _Koppen over de tegenstander_).
 Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
@@ -407,7 +407,7 @@ Zo voeg je er een toe:
 1. Schrijf de term in kleine letters zonder accenten, met een spatie tussen de woorden: `'nolhan courtens'`, niet `'Nolhan Courtens'`.
    Een test controleert dat.
 2. Zet van een persoon de volledige naam in `clubPeople`, en de achternaam erbij in `clubSurnames`.
-   Een volledige naam maakt een kop `relevant`; een achternaam alleen maakt hem `doubtful`, en `relevant` met "Heerenveen".
+   Een volledige naam maakt een kop `relevant`; een achternaam alleen maakt hem `doubtful`, en `relevant` met "Heerenveen", met een voetbalwoord of met een tweede achternaam van de club.
    Is de achternaam ook een gewoon woord, zoals Proper of Zaal, zet dan alleen de volledige naam op de lijst.
    Ook een speler die vertrok mag erop; berichten over hem lezen we graag.
 3. Pas bovenaan de datum van de laatste controle aan.

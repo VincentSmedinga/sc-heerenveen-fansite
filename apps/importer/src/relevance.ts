@@ -55,7 +55,9 @@ export function clubsNamed(title: string): string[] {
  * - `relevant`: the headline names "sc Heerenveen" or the Frisian "sc Hearrenfean", a club
  *   legend (Abe Lenstra) or the full name of someone from the club, or it names "Heerenveen" or
  *   "Hearrenfean" together with a word from football (Dutch or Frisian), the surname of someone
- *   from the club or another professional club;
+ *   from the club or another professional club; or it names two different surnames of people
+ *   from the club, or one such surname with a word from football, with or without the club
+ *   (the same surname twice is one);
  * - `doubtful`: it names only "Heerenveen" or "Hearrenfean", the town and the municipality, or
  *   only the surname of someone from the club;
  * - `irrelevant`: neither.
@@ -84,13 +86,16 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
   }
 
   const named = clubNames.some((name) => words.includes(name))
-  const surname = clubPhrases.surnames.some((phrase) => containsPhrase(words, phrase))
+  const surnames = new Set(
+    clubPhrases.surnames.filter((phrase) => containsPhrase(words, phrase)).map((phrase) => phrase.join(' ')),
+  )
+  const footballWord = clubPhrases.footballWords.some((phrase) => containsPhrase(words, phrase))
 
   if (
-    named &&
-    (surname ||
-      clubPhrases.footballWords.some((phrase) => containsPhrase(words, phrase)) ||
-      clubPhrases.otherClubs.some((phrase) => containsPhrase(words, phrase)))
+    surnames.size >= 2 ||
+    (surnames.size === 1 && footballWord) ||
+    (named &&
+      (surnames.size > 0 || footballWord || clubPhrases.otherClubs.some((phrase) => containsPhrase(words, phrase))))
   ) {
     return 'relevant'
   }
@@ -101,7 +106,7 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
     return 'relevant'
   }
 
-  return named || surname ? 'doubtful' : 'irrelevant'
+  return named || surnames.size > 0 ? 'doubtful' : 'irrelevant'
 }
 
 /** How many days before a match an item about the opponent is `relevant`. */

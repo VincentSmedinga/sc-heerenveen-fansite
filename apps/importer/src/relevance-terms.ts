@@ -16,11 +16,12 @@
  * The filter is not strict on purpose: a headline that slips through is hidden by a moderator
  * in a moment, and one that is held back is not seen by anyone. So:
  * - A person is on the lists with the full name and with the surname, also a common one such
- *   as Kersten or Veldman. A full name makes a headline `relevant` on its own. A surname alone
- *   only makes it `relevant` together with "Heerenveen", and on its own it only makes it
- *   `doubtful`, so the damage of a common surname is small. Left out are surnames that are an
- *   ordinary word (Proper, Machine, Schaken, De Haan, Zaal, Bakker, Brugge). Those only count
- *   as a full name.
+ *   as Kersten or Veldman. A full name makes a headline `relevant` on its own. A surname makes
+ *   it `relevant` together with "Heerenveen", with a word from football or with a second
+ *   surname (two names in one headline are nearly always about the club). On its own it only
+ *   makes it `doubtful`, so the damage of a common surname is small. Left out are surnames
+ *   that are an ordinary word (Proper, Machine, Schaken, De Haan, Zaal, Bakker, Brugge).
+ *   Those only count as a full name.
  * - Players and staff who left in 2026 are on the list too: news about them is nice to read.
  *   Older former players are not; add one when a headline shows that we miss him.
  * - The Frisian football words are in a list of their own, `frisianFootballWords`, after the
@@ -107,7 +108,8 @@ export const clubPeople = [
 
 /**
  * The surnames of the people above, the ones that are not ordinary words. A surname alone only
- * makes a headline `doubtful`, and `relevant` together with "Heerenveen".
+ * makes a headline `doubtful`. It is `relevant` together with "Heerenveen", together with a
+ * word from football, or together with another surname from this list.
  */
 export const clubSurnames = [
   // Goalkeepers
@@ -317,6 +319,7 @@ export const ordinaryClubWords = ['concordia', 'hercules', 'olympia', 'quick', '
 export const footballWords = [
   'aanvaller',
   'aanwinst',
+  'basis',
   'basiself',
   'bekerwedstrijd',
   'blessure',
