@@ -224,7 +224,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
  * Wikipedia says something else about, which waits for a decision, and `held` how many changes
  * of Wikipedia the importer holds back for the match. `reportStatus` is the status of its
  * match report (none for a match without one), `reportable` that the match can have a report,
- * `reportLive` that the match is being played and has one, and `reportToCheck` that a report
+ * `live` that the match is being played, and `reportToCheck` that a report
  * that is `klaar` is not right any more.
  */
 export async function listAdminMatches(db: Database, season: string, now: Date) {
@@ -269,9 +269,11 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
     edited: edits.has(match.id) ? markedParts(edits.get(match.id) as MatchEdit) : [],
     held: holding.filter((change) => change.matchId === match.id).length,
     lacksResult: lacksResult(match, now),
+    // From the kick-off until the match lacks its result (two hours on), so an old match that
+    // was never filled in is not "live" for ever.
+    live: phaseOf(match, now) === 'live' && !lacksResult(match, now),
     // A match that is being played can have a report, and says "Live" from its kick-off.
     reportable: mayHaveReport(match, now),
-    reportLive: match.reportStatus !== null && phaseOf(match, now) === 'live',
     reportToCheck: checking.has(match.id),
   }))
 

@@ -8,7 +8,6 @@ import {
   matchEdits,
   matches,
   matchGoals,
-  matchReports,
   type NewMatch,
   players,
   wikipediaPages,
@@ -160,7 +159,7 @@ describe('the list', () => {
     const html = await list()
 
     expect(headings(html)).toEqual(['h1 Wedstrijden', 'h2 Wedstrijden in het seizoen ' + season])
-    expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+">(.*?)<\/a>/g)).toEqual([
+    expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+[^"]*">(.*?)<\/a>/g)).toEqual([
       expect.stringContaining('sc Heerenveen - N.E.C.'),
     ])
     expect(html).toContain('Uitslag ontbreekt')
@@ -168,16 +167,18 @@ describe('the list', () => {
     expect(html).toContain('Speelronde 11')
   })
 
-  it('is a table of six columns, where the date, the competition and the report fold under the match on a phone', async () => {
+  it('is a table of three columns, with the day and the competition as a line under the name', async () => {
     await addMatch()
 
     const html = await list()
 
-    expect(html).toContain('<div class="hf-data-table-fold">')
-    expect(
-      [...html.matchAll(/<th class="hf-data-table-fold-column" scope="col">(.*?)<\/th>/g)].map(([, name]) => name),
-    ).toEqual(['Datum', 'Competitie', 'Verslag'])
-    expect(html).toContain('<span class="hf-data-table-secondary hf-data-table-folded">')
+    expect([...html.matchAll(/<th scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
+      'Wedstrijd',
+      'Uitslag',
+      'Verslag',
+    ])
+    expect(html).not.toContain('hf-data-table-fold')
+    expect(html).toContain('<span class="hf-data-table-secondary">')
     expect(html).toContain('Eredivisie, Speelronde 11')
     expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
   })
@@ -200,13 +201,38 @@ describe('the list', () => {
 
     const html = await list({ tonen: 'alles' })
 
-    expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+">(.*?)<\/a>/g)).toEqual([
+    expect(html.match(/<a href="\/beheer\/wedstrijden\/\d+[^"]*">(.*?)<\/a>/g)).toEqual([
       expect.stringContaining('sc Heerenveen - N.E.C.'),
       expect.stringContaining('FC Twente - sc Heerenveen'),
     ])
     expect(html).toContain('2 - 1')
-    expect(html).toContain('Gespeeld')
+    expect(html).not.toContain('Gespeeld')
     expect(html).toContain('Gepland')
+  })
+
+  it('puts the result and the status in one column, and the day and competition under the name', async () => {
+    await addMatch(playedAway)
+    await addMatch({ kickoffAt: new Date('2026-11-01T19:00:00Z'), matchDate: '2026-11-01', status: 'postponed' })
+    await addMatch({
+      dateText: '5 december 2026',
+      goalsAgainst: 0,
+      goalsFor: 0,
+      kickoffAt: null,
+      matchDate: '2026-12-05',
+      round: 'Speelronde 20',
+      status: 'played',
+    })
+
+    const html = await list({ tonen: 'alles' })
+
+    expect(html).not.toContain('>Status</th>')
+    expect(html).not.toContain('>Datum</th>')
+    expect(html).not.toContain('>Competitie</th>')
+    expect(html).toContain('>Uitgesteld<')
+    expect(html).toContain('zo 9 aug, 16.45 · Eredivisie, Speelronde 1')
+    expect(html).toContain('zo 1 nov, 20.00 · Eredivisie, Speelronde 11')
+    // An old match has no time.
+    expect(html).toContain('za 5 dec · Eredivisie, Speelronde 20')
   })
 
   it('says Geannuleerd for a cancelled match, which is not one without a result', async () => {
@@ -234,10 +260,10 @@ describe('the list', () => {
 
     const changed = await list({ tonen: 'aangepast' })
 
-    expect(changed.match(/<a href="\/beheer\/wedstrijden\/\d+">/g)).toHaveLength(1)
-    expect(changed).toMatch(/<span class="hf-tag hf-tag-highlight">Aangepast<\/span>/u)
+    expect(changed.match(/<a href="\/beheer\/wedstrijden\/\d+[^"]*">/g)).toHaveLength(1)
+    // The tag is only on the page of the match; the list has the filter.
+    expect(changed).not.toMatch(/hf-tag-highlight/u)
     expect(changed).toContain('Aangepast (1)')
-    expect(await list()).not.toMatch(/hf-tag-highlight/u)
   })
 
   it('says so when the editors changed no match', async () => {
@@ -678,7 +704,7 @@ describe('the match', () => {
       const html = await list({ tonen: 'aangepast' })
 
       expect(html).toContain('Aangepast (1)')
-      expect(html).toContain('<span class="hf-tag hf-tag-highlight">Aangepast</span>')
+      expect(html).not.toContain('hf-tag-highlight')
       expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
       expect(html).toContain('N.E.C.')
       expect(html).not.toContain('Speelronde 12')
@@ -1007,7 +1033,7 @@ describe('the report in the list and on the match', () => {
     return id
   }
 
-  it('has a column Verslag: empty with a link to fill it in, and a dash for a match that was not played', async () => {
+  it('has a column Verslag with one word, and a dash for a match that was not played', async () => {
     await addMatch(playedAway)
     // A match of a later day has no report yet; one of today or before can have one.
     await addMatch({ matchDate: '2099-01-01' })
@@ -1015,25 +1041,39 @@ describe('the report in the list and on the match', () => {
     const html = await list({ tonen: 'alles' })
 
     expect(html).toContain('scope="col">Verslag</th>')
-    expect(html).toMatch(/Leeg <a [^>]*href="\/beheer\/wedstrijden\/\d+\/verslag"[^>]*>Invullen/u)
+    expect(html).toMatch(/<td>Geen<\/td>/u)
     expect(html).toContain('Geen verslag: de wedstrijd is niet gespeeld')
-    // The link names the match, since a column of links says the same in every row.
-    expect(html).toContain('verslag van FC Twente - sc Heerenveen')
+    // The name of the match is the only link in a row.
+    expect(html).not.toMatch(/>(Invullen|Openen|Bijhouden)</u)
   })
 
-  it('says in words if the report is bezig, klaar or has to be checked', async () => {
+  it('says in words if the report is not finished, done or does not fit', async () => {
     const id = await withReport('klaar')
 
-    expect(await list({ tonen: 'alles' })).toMatch(
-      /Klaar <a [^>]*href="\/beheer\/wedstrijden\/\d+\/verslag"[^>]*>Openen/u,
-    )
+    expect(await list({ tonen: 'alles' })).toMatch(/<td>Klaar<\/td>/u)
 
     await database.db.update(matches).set({ goalsFor: 3 }).where(eq(matches.id, id))
-    expect(await list({ tonen: 'alles' })).toContain('hf-tag-attention">Controleer</span>')
+    expect(await list({ tonen: 'alles' })).toContain('hf-tag-attention">Klopt niet</span>')
 
     await database.db.update(matches).set({ goalsFor: 2 }).where(eq(matches.id, id))
     await database.pool.query("UPDATE match_reports SET status = 'bezig'")
-    expect(await list({ tonen: 'alles' })).toMatch(/Bezig <a [^>]*>Openen/u)
+    expect(await list({ tonen: 'alles' })).toMatch(/<td>Niet af<\/td>/u)
+  })
+
+  it('sends the link of a match to Bijhouden while it is played, to the report when it can have one, and else to the match', async () => {
+    const live = await addMatch({ kickoffAt: new Date(Date.now() - 30 * 60 * 1000) })
+    const played = await addMatch({ goalsAgainst: 1, goalsFor: 2, round: 'Speelronde 12', status: 'played' })
+    const planned = await addMatch({ matchDate: '2099-01-01', round: 'Speelronde 13' })
+    const postponed = await addMatch({ round: 'Speelronde 14', status: 'postponed' })
+
+    const html = await list({ tonen: 'alles' })
+    const link = (id: number) => new RegExp(`<a href="/beheer/wedstrijden/${id}[^"]*">`, 'u').exec(html)?.[0]
+
+    expect(link(live)).toBe(`<a href="/beheer/wedstrijden/${live}/verslag/live">`)
+    expect(link(played)).toBe(`<a href="/beheer/wedstrijden/${played}/verslag">`)
+    expect(link(planned)).toBe(`<a href="/beheer/wedstrijden/${planned}">`)
+    expect(link(postponed)).toBe(`<a href="/beheer/wedstrijden/${postponed}">`)
+    expect(html).toMatch(/<td>Live<\/td>/u)
   })
 
   it('links the match to its report, and shows the goals of a match with a report without fields', async () => {
@@ -1060,20 +1100,5 @@ describe('the report in the list and on the match', () => {
     expect(await form(planned)).not.toContain('/verslag')
     // A match that is still being played, from its day on, can have a report too.
     expect(await form(today)).toContain(`href="/beheer/wedstrijden/${today}/verslag">Het verslag invullen</a>`)
-  })
-
-  it('says Live in the column Verslag for a match that is being played and has a report', async () => {
-    const id = await addMatch()
-
-    await database.db.insert(matchReports).values({ matchId: id, opponentComplete: false, status: 'bezig' })
-
-    expect(await list({ tonen: 'alles' })).toMatch(/Bezig <span[^>]*>Live<\/span> <a [^>]*>Openen/u)
-
-    // Before the kick-off the match has a report, and is not live.
-    await database.db
-      .update(matches)
-      .set({ kickoffAt: new Date(Math.floor(Date.now() / 1000) * 1000 + 60 * 60 * 1000) })
-      .where(eq(matches.id, id))
-    expect(await list({ tonen: 'alles' })).not.toContain('>Live<')
   })
 })
