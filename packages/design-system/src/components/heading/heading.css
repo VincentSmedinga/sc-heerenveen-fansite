@@ -36,7 +36,8 @@
  * Type styles. Each style is a class, so the look stays separate from the HTML level:
  * <h2 class="hf-heading-3"> is a level 2 heading that looks like Kop 3.
  * Headings h1–h6 get a style by default, all in the display font: h1–h4 the style with the same number, and h5 and h6 as
- * a fallback that looks like heading 4, in weight 600 (h6 also in the colour of secondary text). Nothing uses h5 or h6 yet.
+ * a fallback that looks like heading 4, in weight 700 (h6 also in the colour of secondary text).
+ * Nothing uses h5 or h6 yet.
  * A class wins over the element because it is more specific.
  * Every rule sets the same properties, so a class fully replaces the element's default style.
  */

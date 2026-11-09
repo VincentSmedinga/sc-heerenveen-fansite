@@ -39,11 +39,11 @@
    * The main menu (appearance="header") is a band of its own under the Page.Header, on the same
    * blue, so the two read as one. It is a flex row that wraps, with a thin line above it that
    * stops at the inset of the page (the first item, ::before, as wide as the row), and with
-   * 1rem between the links. Every link is in the lightest colour of the header, in semibold
-   * (600) and not underlined, except under the mouse. The size grows with the window, from 16px
+   * 1rem between the links. Every link is in the lightest colour of the header, in medium
+   * (500) and not underlined, except under the mouse. The size grows with the window, from 16px
    * at 320px wide to 18px at 900px and up. The weight, and not the size, sets the menu apart
    * from the bar under it, because on a phone the two are nearly the same size. The current
-   * page is told by a red bar under its text, 3px thick, and by the heaviest weight (800), not
+   * page is told by a red bar under its text, 3px thick, and by the heavier weight (700), not
    * by colour. So is the item whose sub-page is the current one (aria-current="true"). A menu
    * elsewhere, such as the one in the footer, keeps the look above. The last link, the forum,
    * is on the right: a link to another site sits apart from the pages of this one. On a screen
@@ -317,7 +317,7 @@
   /*
    * A link is a pill 36px high (2.25rem, so it grows with the text size), in the lightest
    * colour of the header and without an underline, in regular weight (400): the menu above it
-   * is in 600, and on a phone the two are nearly the same size, so the weight tells the levels
+   * is in 500, and on a phone the two are nearly the same size, so the weight tells the levels
    * apart. Under the mouse (only where there is one, so nothing stays lit after a tap) it turns
    * white and gets an underline. Pressed it gets a pill. The focus ring is the ordinary one, in
    * the colour of the header. The change of colour takes the short motion duration, the fill

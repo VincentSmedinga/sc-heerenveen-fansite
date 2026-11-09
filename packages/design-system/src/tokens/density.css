@@ -31,9 +31,9 @@
 
     /* Headings 1 to 3: seven eighths of the size at every width, on the same fluid scale. */
     --hf-heading-1-font-size: clamp(1.3125rem, 1.2269rem + 0.3804vw, 1.5313rem);
-    --hf-heading-2-font-size: clamp(1.1484rem, 1.1003rem + 0.214vw, 1.2715rem);
-    --hf-heading-3-font-size: clamp(0.998rem, 0.9766rem + 0.0951vw, 1.0527rem);
-    --hf-heading-4-font-size: 0.9375rem;
+    --hf-heading-2-font-size: clamp(1.1211rem, 1.0729rem + 0.214vw, 1.2441rem);
+    --hf-heading-3-font-size: clamp(0.957rem, 0.9356rem + 0.0951vw, 1.0117rem);
+    --hf-heading-4-font-size: 0.875rem;
 
     /* Text: a step down, with the same line heights. */
     --hf-label-font-size: 0.8125rem;
