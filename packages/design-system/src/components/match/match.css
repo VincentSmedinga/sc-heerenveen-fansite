@@ -37,7 +37,7 @@
     line-height: inherit;
   }
 
-  /* The result of the previous meeting under the next match: bold, in the colour of the outcome. */
+  /* The result of the previous meeting under the next match: bold, in the outcome colour. */
   .hf-match-previous-score {
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
