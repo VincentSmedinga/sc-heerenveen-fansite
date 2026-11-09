@@ -56,8 +56,8 @@ import {
 /**
  * What the cards of the opponents say about the matches they count: all the played matches
  * since the first season we have, in the Eredivisie alone when the choice is `league`. The
- * form is the one of the cards on Cijfers ("Gebaseerd op …"), with the season from which
- * we have data, so a visitor knows how far back the record goes.
+ * form is the one of the cards on Cijfers ("Alle 7 gespeelde wedstrijden"), with the
+ * season from which we have data, so a visitor knows how far back the record goes.
  */
 export function BasedOnSince({
   choice,
@@ -71,11 +71,11 @@ export function BasedOnSince({
   played: number
   since: string
 }) {
-  const matches = played === 1 ? '1 gespeelde wedstrijd' : `alle ${played} gespeelde wedstrijden`
+  const matches = played === 1 ? '1 gespeelde wedstrijd' : `Alle ${played} gespeelde wedstrijden`
   const where = condition === undefined ? '' : `, ${condition}`
 
   return (
-    <Text appearance="meta">{`Gebaseerd op ${matches}${choice === 'league' ? ' in de Eredivisie' : ''} sinds ${since}${where}`}</Text>
+    <Text appearance="meta">{`${matches}${choice === 'league' ? ' in de Eredivisie' : ''} sinds ${since}${where}`}</Text>
   )
 }
 
@@ -496,8 +496,10 @@ export function ClubAttendanceCard({
       </Disclosure>
       <Text appearance="meta">
         {known === slots.length
-          ? `Gebaseerd op ${known === 1 ? '1 thuiswedstrijd' : `alle ${known} thuiswedstrijden`}`
-          : `Gebaseerd op ${known} van de ${slots.length} thuiswedstrijden`}
+          ? known === 1
+            ? '1 thuiswedstrijd'
+            : `Alle ${known} thuiswedstrijden`
+          : `${known} van de ${slots.length} thuiswedstrijden`}
       </Text>
     </Card>
   )

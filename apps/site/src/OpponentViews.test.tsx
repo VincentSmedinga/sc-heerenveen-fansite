@@ -143,9 +143,7 @@ describe('TopPointsCard', () => {
 
     expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
     expect(
-      screen.getByText(
-        'Gebaseerd op alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden',
-      ),
+      screen.getByText('Alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden'),
     ).toBeTruthy()
   })
 
@@ -163,7 +161,7 @@ describe('TopPointsCard', () => {
     expect(screen.getByRole('heading', { name: 'Gemiddeld resultaat' })).toBeTruthy()
     expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(screen.queryByRole('table')).toBeNull()
-    expect(screen.queryByText(/Gebaseerd op/)).toBeNull()
+    expect(screen.queryByText(/^Alle \d+ gespeelde wedstrijden/)).toBeNull()
   })
 })
 
@@ -189,9 +187,7 @@ describe('HardestCard', () => {
       }),
     ).toBeTruthy()
     expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
-    expect(
-      screen.getByText(/^Gebaseerd op alle 50 gespeelde wedstrijden sinds 2022\/23, tegen clubs met minstens 5/),
-    ).toBeTruthy()
+    expect(screen.getByText(/^Alle 50 gespeelde wedstrijden sinds 2022\/23, tegen clubs met minstens 5/)).toBeTruthy()
   })
 
   it('follows the switch: Eredivisie in the caption and in every link', () => {
@@ -293,10 +289,10 @@ describe('ClubTopScorersCard', () => {
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat, Midden, Vroeg'])
   })
 
-  it('says "Gebaseerd op" only because three of the four matches of the Eredivisie lack their scorers', () => {
+  it('says how many matches have scorers only because three of the four matches of the Eredivisie lack their scorers', () => {
     render(card('league'))
 
-    expect(screen.getByText('Gebaseerd op de doelpuntenmakers van 1 van de 4 gespeelde wedstrijden')).toBeTruthy()
+    expect(screen.getByText('De doelpuntenmakers van 1 van de 4 gespeelde wedstrijden')).toBeTruthy()
   })
 
   it('follows the choice: with all the matches the cup tie counts, and the caption names the cup', () => {
@@ -307,7 +303,7 @@ describe('ClubTopScorersCard', () => {
         name: 'Doelpuntenmakers van sc Heerenveen tegen Testclub, in de Eredivisie en de KNVB Beker',
       }),
     ).toBeTruthy()
-    expect(screen.getByText('Gebaseerd op de doelpuntenmakers van 2 van de 5 gespeelde wedstrijden')).toBeTruthy()
+    expect(screen.getByText('De doelpuntenmakers van 2 van de 5 gespeelde wedstrijden')).toBeTruthy()
     // The goal of the opponent in the cup tie is nobody's goal of ours: three share one row.
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Laat, Midden, Vroeg'])
   })
@@ -317,7 +313,7 @@ describe('ClubTopScorersCard', () => {
 
     render(card('all', complete))
 
-    expect(screen.queryByText(/Gebaseerd op/)).toBeNull()
+    expect(screen.queryByText(/^Alle \d+ gespeelde wedstrijden/)).toBeNull()
   })
 
   it('counts a penalty, and counts neither an own goal of an opponent nor a goal of the opponent', () => {

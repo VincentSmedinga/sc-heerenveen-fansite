@@ -127,8 +127,10 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
   return (
     <Text appearance="meta">
       {known === played
-        ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
-        : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
+        ? known === 1
+          ? '1 gespeelde wedstrijd'
+          : `Alle ${known} gespeelde wedstrijden`
+        : `${known} van de ${played} gespeelde wedstrijden`}
     </Text>
   )
 }
@@ -265,7 +267,7 @@ export function ExtremesCard({
           </List>
           <BasedOn known={played} played={played} />
           {known > 0 && known < played && (
-            <Text appearance="meta">{`Vroegste en laatste doelpunt: gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}</Text>
+            <Text appearance="meta">{`Vroegste en laatste doelpunt: ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
         </>
       )}
@@ -431,7 +433,7 @@ export function LeaguePlaceCard({
             <Text key={sentence}>{sentence}</Text>
           ))}
           <Text appearance="meta">
-            {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
+            {`Stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'}`}
           </Text>
         </>
       )}
@@ -1296,7 +1298,7 @@ export function TopScorers({
       />
       {known < played && (
         <Text appearance="meta">
-          Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
+          De doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
         </Text>
       )}
     </>
@@ -1350,7 +1352,7 @@ export function AllTimeScorersCard({
           />
           {known < played && (
             <Text appearance="meta">
-              Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
+              De doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
             </Text>
           )}
         </>

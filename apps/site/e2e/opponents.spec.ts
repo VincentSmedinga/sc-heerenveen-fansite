@@ -370,9 +370,7 @@ test.describe('the page of a club', () => {
       await expect(
         card.getByText(/^\d+ spelers hebben gescoord$|^De top 5 van \d+ spelers die scoorden$/),
       ).toBeVisible()
-      await expect(
-        card.getByText(/^Gebaseerd op de doelpuntenmakers van \d+ van de \d+ gespeelde wedstrijden$/),
-      ).toBeVisible()
+      await expect(card.getByText(/^De doelpuntenmakers van \d+ van de \d+ gespeelde wedstrijden$/)).toBeVisible()
       // Players with the same goals share a row, so the made-up data has a row with commas.
       await expect(
         card

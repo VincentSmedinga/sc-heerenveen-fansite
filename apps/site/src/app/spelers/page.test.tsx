@@ -223,7 +223,7 @@ describe('the page /spelers', () => {
   })
 
   it('says which part of the played matches the list is based on, when scorers are missing', async () => {
-    expect(await render()).toContain('Gebaseerd op de doelpuntenmakers van 2 van de 4 gespeelde wedstrijden')
+    expect(await render()).toContain('De doelpuntenmakers van 2 van de 4 gespeelde wedstrijden')
   })
 
   it('says there are no scorers yet in a sentence, and shows no table, when there is no goal', async () => {
@@ -393,7 +393,7 @@ describe('the card Bijzondere doelpunten on /spelers', () => {
   })
 
   it('says how many matches it is based on, in the form of the other cards', async () => {
-    expect(plain(cardOf(await render()))).toContain('Gebaseerd op 2 van de 4 gespeelde wedstrijden')
+    expect(plain(cardOf(await render()))).toContain('2 van de 4 gespeelde wedstrijden')
   })
 
   it('has a sentence and no parts and no button for an image when there is no goal', async () => {
@@ -438,11 +438,11 @@ describe('the card Bijzondere doelpunten on /spelers', () => {
 
     expect(all).toContain('HattricksBekerman')
     expect(all).toContain('1 van de 4 doelpunten')
-    expect(all).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
+    expect(all).toContain('Alle 2 gespeelde wedstrijden')
     expect(league).not.toContain('Bekerman')
     expect(league).toContain('HattricksNog geen')
     expect(league).toContain('0 van de 1 doelpunt')
-    expect(league).toContain('Gebaseerd op 1 gespeelde wedstrijd')
+    expect(league).toContain('1 gespeelde wedstrijd')
   })
 
   it('loads nothing from another domain and has no link outside the page', async () => {
