@@ -206,3 +206,72 @@ describe('the import command', () => {
     expect(server.requests).toEqual([])
   })
 })
+
+describe('the check of the migrations', () => {
+  let behind: TestDatabase
+
+  beforeAll(async () => {
+    behind = await createTestDatabase()
+    // As if the deploy hadn't run its newest migration yet.
+    await behind.pool.query('DELETE FROM __drizzle_migrations ORDER BY created_at DESC LIMIT 1')
+    await behind.pool.query("INSERT INTO sources (domain, kind, name) VALUES ('wacht.test', 'news', 'wacht.test')")
+  })
+
+  afterAll(async () => {
+    await behind?.drop()
+  })
+
+  async function countRows() {
+    const [rows] = await behind.pool.query(
+      'SELECT (SELECT COUNT(*) FROM sources) AS sources, (SELECT COUNT(*) FROM match_imports) AS matchImports, (SELECT COUNT(*) FROM squad_imports) AS squadImports',
+    )
+
+    return rows
+  }
+
+  it.each([
+    [],
+    ['--season', '2024/25'],
+    ['--from-season', '2024/25'],
+    ['--squad', '2024/25'],
+    ['--from-squad', '2024/25'],
+    ['--old-site'],
+  ])('stops with one line and exit code 1, and writes nothing: %s', async (...args) => {
+    const before = await countRows()
+    const { code, stderr, stdout } = await runCommand({ DATABASE_URL: behind.url }, args)
+
+    expect(code).toBe(1)
+    expect(stdout).toBe('')
+    expect(stderr.trim().split('\n')).toHaveLength(1)
+    expect(stderr).toMatch(/The database lacks the migration \d{4}_\w+\. Wait until the deploy has finished/)
+    expect(await countRows()).toEqual(before)
+  })
+
+  it('says it in a line with --status and carries on', async () => {
+    const { code, stderr, stdout } = await runCommand({ DATABASE_URL: behind.url }, ['--status'])
+
+    expect(code).toBe(0)
+    expect(stderr).toContain('The database lacks the migration')
+    expect(stdout).toContain('Last run: none yet')
+  })
+
+  it('carries on without a word on a database that is up to date', async () => {
+    const { code, stderr } = await runCommand({ DATABASE_URL: database.url }, ['--status'])
+
+    expect(code).toBe(0)
+    expect(stderr).toBe('')
+  })
+
+  it('warns and carries on with a database that is newer', async () => {
+    await database.pool.query('INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)', ['newer', 9e15])
+
+    try {
+      const { code, stderr } = await runCommand({ DATABASE_URL: database.url }, ['--status'])
+
+      expect(code).toBe(0)
+      expect(stderr).toContain('is newer')
+    } finally {
+      await database.pool.query('DELETE FROM __drizzle_migrations WHERE hash = ?', ['newer'])
+    }
+  })
+})
