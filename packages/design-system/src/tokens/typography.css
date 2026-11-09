@@ -79,7 +79,10 @@
     --hf-meta-font-size: 0.875rem;
     --hf-meta-font-weight: 400;
 
-    /* 24 px at 14 px (about 22 px in the compact density): 1.4 was cramped, and 24 px sits on the 4 px grid. */
+    /*
+     * 24 px at 14 px (about 22 px in the compact density). 1.4 was cramped, and 24 px sits on
+     * the 4 px grid.
+     */
     --hf-meta-line-height: calc(24 / 14);
 
     /*
