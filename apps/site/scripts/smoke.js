@@ -1362,7 +1362,7 @@ await withEmptyDatabase((database) =>
     assert.match(facts[1][1], /Demo.*Proefman/)
     assert.match(facts[2][1], /^1 van de \d+ doelpunten$/)
     assert.match(facts[3][1], /^1 door de tegenstander · 0 door ons$/)
-    assert.match(specialCard, /van de \d+ gespeelde wedstrijden/)
+    assert.match(specialCard, /Alle \d+ gespeelde wedstrijden/)
     // The column D/W is only there when the matches of every scorer are known and agree with
     // the goals. The made-up season has a played match of the play-offs, which the squad table
     // has no figures for, so all matches has no column, and the Eredivisie has one: Nepper
