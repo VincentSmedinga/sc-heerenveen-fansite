@@ -775,7 +775,7 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 De gegevens vallen onder CC BY-SA 4.0.
-Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_) om de Europa League van 2012/13 (zie _De Europa League van 2012/13_) en om 63 wedstrijden van 2007/08 tot en met 2009/10 (zie _De wedstrijden van 2007/08 tot en met 2009/10_).
+Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen, om de play-offs voor de Europa League van 2010/11 tot en met 2019/20 (zie _De play-offs_), om de Europa League van 2012/13 (zie _De Europa League van 2012/13_) en om 63 wedstrijden van 2007/08 tot en met 2009/10 (zie _De wedstrijden van 2007/08 tot en met 2009/10_).
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
@@ -1603,7 +1603,7 @@ Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/on
 - **De redactie:** vindt de import op datum en club een wedstrijd met de bron `redactie`, dan slaat hij die over en schrijft hij één regel: `left out: the editors added this match`.
 - **Geen stand:** deze seizoenen krijgen geen ranglijst en geen uitslagen van de andere clubs.
   De regel in het logboek zegt `the pages of this season have no table`.
-- **De bron:** `wikipedia_pages` bewaart elke pagina met de soort `matches` en de taal (`language`), en de bronvermelding op de site noemt een Engelse pagina "(Engelse Wikipedia)".
+- **De bron:** `wikipedia_pages` bewaart elke pagina met de soort `matches` en de taal (`language`), en de bronvermelding op de site geeft een Engelse pagina een Nederlandse naam met "(Engelse Wikipedia)" erachter.
 - De fixtures `wikipedia-football-box-*.wiki` in `src/fixtures/` zijn stukken van de echte pagina's van 9 november 2026: de koppen, de blokken van sc Heerenveen en één blok van andere clubs.
 
 ### Een afgelopen seizoen

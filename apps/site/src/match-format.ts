@@ -46,8 +46,9 @@ const singleDay = /^(\d{1,2}) (\p{L}+)(?: \d{4})?$/u
  * play-offs of the season, such as "Eredivisie 2026/27". The play-offs are for the Europa
  * League before 2020/21 and for the Conference League from then on. A page with the matches of
  * 2007/08 to 2009/10 (`matches`) holds more than one competition, so it is named by its own
- * title. A page that is not on the Dutch Wikipedia says which Wikipedia it is on: "(Engelse
- * Wikipedia)".
+ * title, or by its Dutch name when the title is English (`englishPageNames`): the text of a
+ * link is Dutch. A page that is not on the Dutch Wikipedia says which Wikipedia it is on:
+ * "(Engelse Wikipedia)".
  */
 export function creditName(
   { kind, language, title }: Pick<PublicWikipediaPage, 'kind' | 'language' | 'title'>,
@@ -56,7 +57,7 @@ export function creditName(
   const name = {
     cup: `KNVB Beker ${season}`,
     'europa-league': `Europa League ${season}`,
-    matches: title,
+    matches: Object.hasOwn(englishPageNames, title) ? englishPageNames[title] : title,
     playoffs: `Play-offs ${Number(season.slice(0, 4)) < 2020 ? 'Europa' : 'Conference'} League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
@@ -81,6 +82,14 @@ export function formatReadAt(moment: Date) {
  */
 export function formatTableDay(day: PublicStandingsRow['validOn']) {
   return longDayFormat.format(noonOf(day))
+}
+
+/** What the link to an English page with matches says, by the title of the page. */
+const englishPageNames: Readonly<Record<string, string>> = {
+  '2007–08 UEFA Cup first round': 'UEFA Cup 2007/08, eerste ronde',
+  '2008–09 UEFA Cup first round': 'UEFA Cup 2008/09, eerste ronde',
+  '2008–09 UEFA Cup group stage': 'UEFA Cup 2008/09, groepsfase',
+  '2009–10 SC Heerenveen season': 'sc Heerenveen in het seizoen 2009/10',
 }
 
 const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })

@@ -88,7 +88,7 @@ describe('SourceCredit', () => {
     const dutch = { ...english, language: 'nl', title: 'KNVB Beker 2008/09 (mannen)' } as const
 
     expect(credit({ pages: [english, dutch], season: '2009/10' })).toContain(
-      'Licentie: CC BY-SA 4.0 . Pagina’s: 2009–10 SC Heerenveen season (Engelse Wikipedia) , KNVB Beker 2008/09 (mannen) .',
+      'Licentie: CC BY-SA 4.0 . Pagina’s: sc Heerenveen in het seizoen 2009/10 (Engelse Wikipedia) , KNVB Beker 2008/09 (mannen) .',
     )
     expect(
       renderToStaticMarkup(<SourceCredit edited={false} pages={[english]} season="2009/10" source="wikipedia" />),

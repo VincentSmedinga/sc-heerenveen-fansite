@@ -146,12 +146,15 @@ describe('the links to Wikipedia', () => {
     expect(name('playoffs', '2012/13')).toBe('Play-offs Europa League 2012/13')
   })
 
-  it('names a page with the matches of 2007/08 to 2009/10 by its title, and says when it is the English Wikipedia', () => {
+  it('names a page with the matches of 2007/08 to 2009/10 in Dutch, and says when it is the English Wikipedia', () => {
     expect(creditName({ kind: 'matches', language: 'nl', title: 'KNVB Beker 2008/09 (mannen)' }, '2008/09')).toBe(
       'KNVB Beker 2008/09 (mannen)',
     )
     expect(creditName({ kind: 'matches', language: 'en', title: '2009–10 SC Heerenveen season' }, '2009/10')).toBe(
-      '2009–10 SC Heerenveen season (Engelse Wikipedia)',
+      'sc Heerenveen in het seizoen 2009/10 (Engelse Wikipedia)',
+    )
+    expect(creditName({ kind: 'matches', language: 'en', title: '2008–09 UEFA Cup group stage' }, '2008/09')).toBe(
+      'UEFA Cup 2008/09, groepsfase (Engelse Wikipedia)',
     )
     expect(creditName({ kind: 'matches', language: 'de', title: 'Een Duitse pagina' }, '2009/10')).toBe(
       'Een Duitse pagina (de.wikipedia.org)',
