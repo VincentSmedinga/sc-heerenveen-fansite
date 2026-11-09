@@ -286,6 +286,9 @@ The other checks are capped too, so they can run next to a heavy one: `pnpm test
 The decision is in `docs/beslissingen/werkwijze.md`, under _De zware controles delen de machine_.
 
 - The Builder runs the heavy checks before it asks for the go-ahead, once, after the last commit.
+  The exception is a change that only touches CSS or design tokens (no TypeScript, markup, page text or log line): it runs lint, typecheck, `pnpm test` and the Storybook build, the last one for the screenshots, and leaves `pnpm build`, `pnpm test:a11y` and `pnpm test:stories` to CI.
+  A failure there comes back through Auto-fix or the Coordinator.
+  Every other change keeps the full chain.
 - The Reviewer doesn't run them again when CI has: it runs lint, typecheck and the tests of the packages the change touches, and reads the rest from CI.
   It runs a heavy check itself only when CI skipped it and the change can still affect it.
 - CI skips the slot and keeps the default number of test processes of Vitest and Playwright, because a runner has one job (`CI` is set).

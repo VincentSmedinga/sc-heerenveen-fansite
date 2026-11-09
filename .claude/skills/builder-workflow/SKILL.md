@@ -47,6 +47,7 @@ The ones Builders break most:
 1. The checks from _De controles_ in `CONTRIBUTING.md`: `pnpm lint`, `typecheck`, `test`, `build`, `test:a11y`, with `docker compose up -d --wait` first.
    The smoke test when markup, page text or a log line changed.
    `pnpm --filter design-system build-storybook` and `pnpm test:stories` after a design system change.
+   A change that only touches CSS or design tokens (no TypeScript, markup, page text or log line) runs `lint`, `typecheck`, `test` and the Storybook build, and leaves `build`, `test:a11y` and `test:stories` to CI (see _De controles_).
    `build`, `test:a11y`, `test:stories` and the Storybook build take a slot and wait for each other, also across worktrees (see _Heavy checks_ in `AGENTS.md`): run them once, one at a time, after the last commit.
 2. The pull request title: `printf '%s\n' '<title>' | pnpm exec commitlint`.
 3. The final check in `AGENTS.md`, point by point.
