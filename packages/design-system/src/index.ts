@@ -41,6 +41,8 @@ export type {
   DataTableTextColumn,
   DataTableTextRow,
 } from './components/data-table/DataTable'
+export { DescriptionList } from './components/description-list/DescriptionList'
+export type { DescriptionListItemProps, DescriptionListProps } from './components/description-list/DescriptionList'
 export { Disclosure } from './components/disclosure/Disclosure'
 export type { DisclosureProps } from './components/disclosure/Disclosure'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'

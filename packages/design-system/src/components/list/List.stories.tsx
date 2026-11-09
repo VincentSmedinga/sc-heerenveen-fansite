@@ -65,9 +65,9 @@ export const Plain = meta.story({
   name: 'Zonder opsommingstekens',
   render: () => (
     <List plain role="list">
-      <List.Item>Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14</List.Item>
-      <List.Item>Laagste: plek 11, ronde 20</List.Item>
-      <List.Item>Totaal verschoven: 23 plekken</List.Item>
+      <List.Item>Nieuws over sc Heerenveen uit de media</List.Item>
+      <List.Item>De nieuwste discussies op het forum</List.Item>
+      <List.Item>De stand en de uitslagen</List.Item>
     </List>
   ),
 })
