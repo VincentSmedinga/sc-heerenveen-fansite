@@ -70,7 +70,7 @@
     --hf-body-font-weight: 400;
     --hf-body-line-height: 1.5;
 
-    /* Inleiding: the first paragraph under the h1. Larger than Tekst and smaller than Kop 2, which is 20.5px at its smallest. */
+    /* Inleiding: the first paragraph under the h1. Larger than Tekst, smaller than Kop 2 (20.5px at least). */
     --hf-intro-font-size: 1.25rem;
     --hf-intro-font-weight: 400;
     --hf-intro-line-height: 1.4;

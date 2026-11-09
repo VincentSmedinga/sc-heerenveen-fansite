@@ -42,14 +42,14 @@
 }
 
 /*
- * The fonts that show until the real ones are in, adjusted so that the swap moves nothing: the width of the
- * letters (size-adjust) and the height of the line (the overrides) are those of Truculenta, in capitals at
- * weight 700, as the headings and labels set it (the wordmark is 900). Measured at 700 the capitals are 0,4 to
- * 0,5% wider than at 800, which the figures below were taken at, so they stay. Truculenta is narrower than
- * Arial Bold: 75,2% at width 115 and 81,8% at width 125. Each override is the metric of Truculenta (ascent 1,05,
- * descent 0,34, no gap) divided by the size-adjust, because the browser scales it by that again. Arial Bold, or
- * Liberation Sans Bold, which has the same widths, is on most computers; elsewhere the fallback is the next
- * family in the list, as before.
+ * The fonts that show until the real ones are in, adjusted so that the swap moves nothing: the width of
+ * the letters (size-adjust) and the height of the line (the overrides) are those of Truculenta, in
+ * capitals at weight 700, as the headings and labels set it (the wordmark is 900). Measured at 700 the
+ * capitals are 0,4 to 0,5% wider than at 800, which the figures below were taken at, so they stay.
+ * Truculenta is narrower than Arial Bold: 75,2% at width 115 and 81,8% at width 125. Each override is
+ * the metric of Truculenta (ascent 1,05, descent 0,34, no gap) divided by the size-adjust, because the
+ * browser scales it by that again. Arial Bold, or Liberation Sans Bold, which has the same widths, is
+ * on most computers; elsewhere the fallback is the next family in the list, as before.
  */
 @font-face {
   ascent-override: 139.6%;
