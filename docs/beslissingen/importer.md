@@ -3087,6 +3087,7 @@
   - Het is informatie en geen fout, dus de exitcode verandert niet.
 - **Waarom:** wie wil weten hoe compleet een eerder seizoen is, moest logboeken van runs lezen.
 - **Alternatieven:** de seizoenen uit `matches` halen (een seizoen zonder wedstrijden valt dan weg); de tekst in `showStatus` samenstellen (de pagina in het beheer kan dat niet hergebruiken).
+- **Later:** de tabel heeft geen letters meer: elke kolom heeft een eigen kort woord als kop en is uitgelijnd (#1003), zie _De tabel met dekking blijft opgevulde tekst in een codeblok_ en _Elke kolom van de tabel met dekking heeft een eigen kort woord als kop_.
 
 ## De spelers van de oude fansite worden alleen bij zekerheid personen
 
@@ -3270,3 +3271,28 @@
   Hij vergelijkt de velden niet meer, dus er komen geen regels `match difference` voor zo'n wedstrijd.
 - **Waarom:** geen import wijzigt een rij van de redactie (#970).
 - **Alternatieven:** alleen de lege velden vullen, zoals #968 voor andere bronnen doet (past niet bij #970).
+
+## De tabel met dekking blijft opgevulde tekst in een codeblok
+
+- **Datum:** 9 november 2026
+- **Besluit:** de tabel met dekking per seizoen in `--status` blijft opgevulde tekst, geen Markdown-tabel (#1003).
+  `coverageTable` in `apps/importer/src/status.ts` maakt de regels.
+  - Elke kolom is zo breed als zijn breedste waarde, de kop meegeteld, en tussen de kolommen staan twee spaties.
+    Elke regel van de tabel heeft dus evenveel tekens.
+  - Getallen en `klaar/alle` staan rechts, tekst (het seizoen, `best`, `level` en `table`) links.
+  - De legenda staat erboven, met één regel per kolom: de kop, opgevuld tot de langste kop, en wat de kolom telt.
+- **Waarom:** het log en de samenvatting van de run tonen de tabel allebei met een lettertype met vaste breedte.
+  Zo is er één opmaak voor beide, en de workflow `import-old-site.yml` verandert niet.
+- **Alternatieven:** een Markdown-tabel, die op GitHub mooier rendert (de workflow moet de tabel dan van de rest van de status scheiden, en het log toont ruwe streepjes).
+
+## Elke kolom van de tabel met dekking heeft een eigen kort woord als kop
+
+- **Datum:** 9 november 2026
+- **Besluit:** elke kolom van de tabel met dekking heeft een eigen Engels woord van hoogstens acht tekens als kop, geen letter (#1003):
+  `season`, `wiki`, `old`, `edit`, `played`, `nolist`, `reports`, `att`, `ref`, `players`, `best`, `level`, `noscorer` en `table`.
+  - De koppen, de legenda en de uitlijning staan op één plek: `seasonCoverageColumns` in `@fansite/db/season-coverage`, naast `readSeasonCoverage`.
+    Een pagina van de site kan ze daar ook lezen; uit `apps/importer` kan dat niet.
+  - De kolom met onze doelpunten zonder speler heet `noscorer` en niet `nogoals`, het voorbeeld uit het issue: de doelpunten zijn er wel, de speler ontbreekt.
+- **Waarom:** twee kolommen heetten allebei R, de wedstrijden van de redactie en de verslagen.
+  Een kop als `edit` of `players` is te lezen zonder de legenda.
+- **Alternatieven:** unieke letters (smaller, maar elke keer met de legenda erbij); de kolommen in `apps/importer` laten staan (de site kan ze dan niet hergebruiken).

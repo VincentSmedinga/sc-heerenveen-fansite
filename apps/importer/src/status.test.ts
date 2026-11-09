@@ -1,13 +1,15 @@
+import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { feeds, sources, squadCompleteness } from '@fansite/db/schema'
+import { seasonCoverageColumns } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
-import { showStatus } from './status.ts'
+import { coverageTable, showStatus } from './status.ts'
 import { fetcherFor, reply, startServer, writeWithoutCoverage } from './test-server.ts'
 
 const start = new Date('2026-10-22T10:07:00Z')
@@ -267,9 +269,81 @@ describe('the overview', () => {
 
     const table = lines.slice(lines.indexOf('Coverage per season:'))
 
-    expect(table).toHaveLength(3 + 37)
-    expect(table.at(-1)).toBe('  2026/27  0 0 0 0 0 0/0 0 0 0 - - 0 no')
-    expect(table[3]).toBe('  1990/91  0 0 0 0 0 0/0 0 0 0 - - 0 no')
+    // The title, a line of the legend for each column, the headers and the 37 seasons.
+    expect(table).toHaveLength(1 + 14 + 1 + 37)
+    expect(table.slice(15, 17)).toEqual([
+      '  season   wiki  old  edit  played  nolist  reports  att  ref  players  best  level  noscorer  table',
+      '  1990/91     0    0     0       0       0      0/0    0    0        0  -     -             0  no   ',
+    ])
+    expect(table.at(-1)).toBe(
+      '  2026/27     0    0     0       0       0      0/0    0    0        0  -     -             0  no   ',
+    )
+  })
+
+  describe('the coverage table', () => {
+    const season = (values: Partial<SeasonCoverage> & { season: string }): SeasonCoverage => ({
+      goalsWithoutPlayer: 0,
+      hasStanding: false,
+      matchesBySource: { 'oude-fansite': 0, redactie: 0, wikipedia: 0 },
+      matchesTotal: 0,
+      played: 0,
+      playedWithoutGoalList: 0,
+      playerCount: 0,
+      reports: 0,
+      reportsDone: 0,
+      squad: null,
+      withAttendance: 0,
+      withReferee: 0,
+      ...values,
+    })
+    const lines = coverageTable([
+      season({ season: '1990/91' }),
+      season({
+        goalsWithoutPlayer: 120,
+        hasStanding: true,
+        matchesBySource: { 'oude-fansite': 12345, redactie: 3, wikipedia: 38 },
+        played: 38,
+        reports: 38,
+        reportsDone: 38,
+        season: '2004/05',
+        squad: { bestSource: 'selectie', level: 'compleet' },
+      }),
+    ])
+    const legend = lines.slice(0, seasonCoverageColumns.length)
+    const table = lines.slice(seasonCoverageColumns.length)
+
+    it('gives each column a short header of its own', () => {
+      const headers = seasonCoverageColumns.map((column) => column.header)
+
+      expect(new Set(headers).size).toBe(headers.length)
+      expect(headers.every((header) => /^[a-z]{1,8}$/.test(header))).toBe(true)
+      expect(table[0]?.trim().split(/ +/)).toEqual(headers)
+    })
+
+    it('has a legend with a line for each column, the header padded to the longest one', () => {
+      expect(legend).toHaveLength(14)
+      expect(legend).toContain('edit      matches added by the editors')
+      expect(legend).toContain('reports   match reports: done / all')
+      expect(legend).toContain('noscorer  goals of ours without a player')
+    })
+
+    it('pads each column to its widest value, with two spaces between the columns', () => {
+      expect(table).toEqual([
+        'season   wiki    old  edit  played  nolist  reports  att  ref  players  best      level     noscorer  table',
+        '1990/91     0      0     0       0       0      0/0    0    0        0  -         -                0  no   ',
+        '2004/05    38  12345     3      38       0    38/38    0    0        0  selectie  compleet       120  yes  ',
+      ])
+      expect(new Set(table.map((line) => line.length)).size).toBe(1)
+    })
+
+    it('starts and ends each column at the same place in every line', () => {
+      // A column of spaces in every line is a gap between two columns of the table.
+      const gaps = (line: string) => [...line].map((character) => character === ' ')
+      const shared = table.map(gaps).reduce((all, line) => all.map((gap, index) => gap && line[index] === true))
+      const starts = shared.filter((gap, index) => !gap && (index === 0 || shared[index - 1] === true))
+
+      expect(starts).toHaveLength(seasonCoverageColumns.length)
+    })
   })
 
   it('changes nothing in the database', async () => {

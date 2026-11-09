@@ -19,7 +19,7 @@ import {
   wikipediaPages,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { readSeasonCoverage } from '@fansite/db/season-coverage'
+import { readSeasonCoverage, seasonCoverageColumns } from '@fansite/db/season-coverage'
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { ImportOptions } from './import-feeds.ts'
@@ -31,6 +31,32 @@ import { waitingChanges } from './match-changes.ts'
 import { similarPersons } from './person-pages.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime, printable } from './text.ts'
+
+/**
+ * The lines of the coverage table (`seasonCoverageColumns`): a legend with a line for each
+ * column, then the headers and a line for each season. It is padded text for a font of a
+ * fixed width: each column is as wide as its widest value, header included, with two spaces
+ * between the columns, so every line of the table is as long as the others.
+ */
+export function coverageTable(rows: SeasonCoverage[]): string[] {
+  const headerWidth = Math.max(...seasonCoverageColumns.map((column) => column.header.length))
+  const legend = seasonCoverageColumns.map((column) => `${column.header.padEnd(headerWidth)}  ${column.meaning}`)
+  const table = [
+    seasonCoverageColumns.map((column) => column.header),
+    ...rows.map((row) => seasonCoverageColumns.map((column) => column.cell(row))),
+  ]
+  const widths = seasonCoverageColumns.map((_, index) => Math.max(...table.map((cells) => cells[index]?.length ?? 0)))
+  const line = (cells: string[]) =>
+    cells
+      .map((cell, index) =>
+        seasonCoverageColumns[index]?.align === 'right'
+          ? cell.padStart(widths[index] ?? 0)
+          : cell.padEnd(widths[index] ?? 0),
+      )
+      .join('  ')
+
+  return [...legend, ...table.map(line)]
+}
 
 /**
  * Shows the health of each feed of the sources that are switched on: the source, the address,
@@ -153,6 +179,19 @@ async function showCompleteness(db: Database, now: Date, write: (line: string) =
     write(
       `  warning: the table of the selection should hold the whole squad, but the chance is ${row.level}${failed.length === 0 ? '' : `: ${printable(failed.join('; '))}`}`,
     )
+  }
+}
+
+/**
+ * Shows what we have of each season since 1990/91 (`readSeasonCoverage`): a line for each
+ * season, with a legend above it, so the summary of a run stays readable. It is information
+ * and no fault.
+ */
+async function showCoverage(db: Database, now: Date, write: (line: string) => void): Promise<void> {
+  write('')
+  write('Coverage per season:')
+  for (const line of coverageTable(await readSeasonCoverage(db, now))) {
+    write(`  ${line}`)
   }
 }
 
@@ -357,39 +396,5 @@ async function showWaitingChanges(db: Database, write: (line: string) => void): 
     for (const line of describeWaitingChange(change)) {
       write(`  ${line}`)
     }
-  }
-}
-
-/** The columns of the coverage table: the letter of the header, what it counts and its cell. */
-const coverageColumns: { cell: (row: SeasonCoverage) => string; letter: string; meaning: string }[] = [
-  { cell: (row) => String(row.matchesBySource.wikipedia), letter: 'W', meaning: 'matches from Wikipedia' },
-  { cell: (row) => String(row.matchesBySource['oude-fansite']), letter: 'O', meaning: 'matches from the old fansite' },
-  { cell: (row) => String(row.matchesBySource.redactie), letter: 'R', meaning: 'matches added by the editors' },
-  { cell: (row) => String(row.played), letter: 'P', meaning: 'matches played' },
-  { cell: (row) => String(row.playedWithoutGoalList), letter: 'G', meaning: 'played with goals, without a goal list' },
-  { cell: (row) => `${row.reportsDone}/${row.reports}`, letter: 'R', meaning: 'reports done / all reports' },
-  { cell: (row) => String(row.withAttendance), letter: 'A', meaning: 'matches with an attendance' },
-  { cell: (row) => String(row.withReferee), letter: 'F', meaning: 'matches with a referee' },
-  { cell: (row) => String(row.playerCount), letter: 'S', meaning: 'players' },
-  { cell: (row) => row.squad?.bestSource ?? '-', letter: 'B', meaning: 'best source of the squad' },
-  { cell: (row) => row.squad?.level ?? '-', letter: 'L', meaning: 'level of the squad' },
-  { cell: (row) => String(row.goalsWithoutPlayer), letter: 'U', meaning: 'goals of ours without a player' },
-  { cell: (row) => (row.hasStanding ? 'yes' : 'no'), letter: 'T', meaning: 'has a league table' },
-]
-
-/**
- * Shows what we have of each season since 1990/91 (`readSeasonCoverage`): one narrow line for
- * each season, with a legend above it, so the summary of a run stays readable. It is
- * information and no fault.
- */
-async function showCoverage(db: Database, now: Date, write: (line: string) => void): Promise<void> {
-  const rows = await readSeasonCoverage(db, now)
-
-  write('')
-  write('Coverage per season:')
-  write(`  ${coverageColumns.map((column) => `${column.letter} ${column.meaning}`).join(', ')}`)
-  write(`  season  ${coverageColumns.map((column) => column.letter).join(' ')}`)
-  for (const row of rows) {
-    write(`  ${row.season}  ${coverageColumns.map((column) => column.cell(row)).join(' ')}`)
   }
 }
