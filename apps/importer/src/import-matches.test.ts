@@ -440,6 +440,30 @@ describe('a match of the old fansite', () => {
   })
 })
 
+describe('the same match from another source under another round', () => {
+  it('is one row: Wikipedia fills what is empty and logs what differs', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    // The old fansite has this match as Wedstrijd 11, without a kick-off.
+    await database.db
+      .update(matches)
+      .set({ dataSource: 'oude-fansite', kickoffAt: null, round: 'Wedstrijd 11' })
+      .where(eq(matches.round, 'Speelronde 11'))
+
+    const count = (await database.db.select().from(matches)).length
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+    const rows = await database.db.select().from(matches).where(eq(matches.dataSource, 'oude-fansite'))
+
+    expect((await database.db.select().from(matches)).length).toBe(count)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ round: 'Wedstrijd 11' })
+    expect(rows[0]?.kickoffAt).not.toBeNull()
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0 } })
+  })
+})
+
 describe('a cup match of the old fansite on an empty cup page', () => {
   it('is no reason to refuse the cup page, which has no template, and stays as it is', async () => {
     const { pages, server } = await serve()

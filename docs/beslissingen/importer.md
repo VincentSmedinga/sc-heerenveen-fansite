@@ -2653,6 +2653,7 @@
   - **De bron en de redactie gaan voor.**
     De stap schrijft, wijzigt en telt alleen rijen met de bron `oude-fansite`.
     Een rij met dezelfde sleutel en de bron `wikipedia` blijft zoals hij is, en de stap meldt dat.
+    **Later:** zie _Een import zoekt een wedstrijd eerst op datum en club_ (9 november 2026): een wedstrijd van een andere bron wordt gevonden op datum en club, en de stap vult er alleen lege velden van.
     De aftrap en de uitslag die de redactie invulde (`match_edits`: `kickoff_edited`, `result_edited`) blijven zoals ze zijn; de andere kolommen volgen het bestand.
     De stap verwijdert nooit een rij, en een rij die niet meer in het bestand staat, wordt gemeld.
     Een tweede run verandert niets: de stap schrijft alleen wat verschilt.
@@ -3089,3 +3090,21 @@
 - **Waarom:** een speler is zo geen nieuwe rij zonder verband in elk seizoen, en het Wikidata-deel van de import (#898) kan zijn gegevens lezen.
   Een verkeerde koppeling is erger dan geen: dezelfde naam kan een andere voetballer zijn, daarom blijft elke twijfel zonder persoon.
 - **Alternatieven:** de geboortedatum in het bestand zetten om namen uit elkaar te houden (een persoonsgegeven zonder besluit); zoeken met de zoekfunctie van Wikipedia (meer verzoeken en meer raden); een titel met `(voetballer)` proberen als de naam zelf geen voetballer is (meer verzoeken, en twee titels is juist twijfel).
+
+## Een import zoekt een wedstrijd eerst op datum en club
+
+- **Datum:** 9 november 2026
+- **Besluit:** elke import zoekt een wedstrijd eerst op seizoen, competitie, club en datum, met een dag speling, wat de bron en de ronde ook zijn (`findMatchByDate` in `@fansite/db/match-lookup`, #968).
+  De import van Wikipedia (`storeMatches`) en de stap `matches` van `import:old-site` gebruiken haar voordat ze een rij maken.
+  - Vindt ze een wedstrijd van een andere bron, dan komt er geen tweede rij.
+    De import vult alleen de lege velden (`compareClaim`): de aftrap, de tekst bij de datum, het stadion, de toeschouwers, de scheidsrechter, de opmerking, en de stand na negentig minuten en de strafschoppen.
+    De uitslag en de status vult hij niet.
+  - Verschilt een veld, dan staat er een regel in het logboek in een vaste vorm: `match difference: <seizoen> <competitie> <ronde> (match <id>) <veld>: <bron> says <waarde>, <andere bron> says <waarde>`.
+    #974 maakt van die regel later een wachtende wijziging.
+  - Passen twee wedstrijden tegen dezelfde club binnen een dag (een herspeelde wedstrijd), dan kiest de functie er geen, de import meldt het in het logboek, en het blijven twee wedstrijden.
+  - De ronde blijft een eigenschap, en de sleutel op seizoen, competitie en ronde blijft staan.
+  - Voor 1990/91 tot en met 2006/07 gaat de oude fansite voor.
+    Een andere bron (Wikipedia, een kruistabel) vult alleen lege velden, en een verschil wordt een wachtende wijziging voor de redactie (#974).
+- **Waarom:** de oude fansite maakt zelf de ronde (`Wedstrijd 3`) en Wikipedia schrijft `Eerste ronde`, dus dezelfde wedstrijd kon twee keer in de database komen.
+  De gegevens van de oude fansite zijn van de projecteigenaar, en een tweede bron is een controle, geen vervanging.
+- **Alternatieven:** Wikipedia gaat voor (een eigen bron verandert dan door een bewerking elders); wie het eerst schrijft wint, zoals voorheen (een verschil blijft onzichtbaar); de sleutel veranderen in datum en club (een herspeelde wedstrijd past dan niet).
