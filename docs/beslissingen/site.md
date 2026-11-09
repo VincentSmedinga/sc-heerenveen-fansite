@@ -3994,3 +3994,23 @@
   - Een seizoen zonder rij blijft "onbekend" zonder lijst.
 - **Waarom:** een seizoen met verslagen mag geen leeg vak hebben, maar een lijst uit de zwakste bron mag niet naast een echte selectie staan: een gemengde lijst zegt niet meer waar de spelers vandaan komen.
 - **Alternatieven:** spelers uit verslagen onder een echte selectie bijvoegen; spelers groeperen naar wat de verslagen zeggen, zoals doelmannen uit de opstelling (gokwerk).
+
+## De homepage kiest zijn kaartvlakken op soort inhoud, en dit geldt alleen voor de homepage
+
+- **Datum:** 9 november 2026
+- **Besluit:** op de homepage is het eigen stuk van de redactie warm, zijn nieuws, discussies en podcasts wit (redactionele inhoud) en zijn Wedstrijden en Stand zacht (wedstrijdcijfers naast de hoofdkolom).
+  `ArticleCard` krijgt warm als standaardvlak, want het wordt alleen op de homepage gebruikt.
+  `MatchesCard` en `StandingsCard` krijgen zelf het zachte vlak, want ze worden alleen op de homepage gebruikt (#979).
+- **Waarom:** het eigen stuk van de redactie is iets opmerkelijks (regel 3 van _De vier vlakken van een kaart hebben een betekenis_), en Wedstrijden en Stand vullen de pagina aan (regel 4).
+  De regel "de blokken van de homepage zijn allemaal wit" gaf de homepage te weinig aanwijzingen over wat bij elkaar hoort.
+  Een kaart die alleen op één plek staat, krijgt zijn vlak in het onderdeel zelf, zodat de pagina er niets voor hoeft door te geven.
+- **Geen algemene regel:** het vlak van een kaart hangt van de pagina af.
+  Wat voor de homepage klopt, hoeft niet te kloppen voor de pagina's van wedstrijden, spelers en statistieken: daar zijn cijfers de hoofdinhoud, en een pagina met alleen zachte of blauwe kaarten helpt niemand.
+  De regels van 1 november 2026 blijven daar zoals ze zijn.
+- **Stand, eigen rij:** de lichtblauwe vulling van onze eigen rij (`--hf-colour-background-highlight`) haalt 1,11:1 op het zachte vlak (op wit 1,21:1).
+  Dat blijft zo: de vulling is decoratief, en de donkerblauwe balk aan het begin van de rij en de tekst maken de rij herkenbaar.
+- **Donker:** zacht en wit zijn daar gelijk (blauw-900), dus alleen Van de redactie verandert (warm is blauw-800).
+  Het scheiden van de vlakken in donker is een eigen issue.
+- **Contrast:** alle tekst haalt minstens 5,9:1, in licht en in donker.
+  De randen van de kaarten en de lijnen tussen rijen zijn decoratief.
+- **Alternatieven:** `surface="warm"` meegeven vanuit `page.tsx` en `ArticleCard` zacht laten; Wedstrijden en Stand alleen op de homepage zacht maken met een prop of een `surface` vanuit de pagina (beide: meer code op de pagina voor een onderdeel dat nergens anders staat); de eigen rij in Stand een sterkere vulling geven (niet nodig, de balk draagt de betekenis); alle homepagekaarten wit laten.

@@ -66,7 +66,7 @@ const meta = preview.meta({
           '',
           '- **Wit** (`default`): de kaart is waar de pagina voor bestaat.',
           '  Dat zijn de hoofdinhoud van de pagina, zoals de lijsten met nieuws, het programma en de uitslagen, en het overzicht van ons seizoen.',
-          '  De blokken van de homepage zijn allemaal wit, want elk blok is er de inhoud.',
+          '  Op de homepage zijn het nieuws, de discussies en de podcasts wit, want dat is de redactionele inhoud.',
           '- **Sterk** (`strong`): de kaart gaat over de mensen of organisaties achter de inhoud, of is aan hen gericht.',
           '  Denk aan de hoofdtrainer, "Ben je zelf een bron?" en later het officiële clubnieuws.',
           '- **Warm** (`warm`): iets opmerkelijks.',
