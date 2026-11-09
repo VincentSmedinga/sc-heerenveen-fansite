@@ -156,3 +156,51 @@ export const Tooltip = meta.story({
   },
   render: () => <GoalsCard />,
 })
+
+/** Made-up places in a table of 18 after each of 34 rounds, place 1 being the best. */
+const places = [9, 7, 5, 4, 6, 8, 7, 5, 4, 3, 5, 6, 8, 9, 7, 6, 5, 4, 4, 6, 7, 9, 10, 8, 7, 6, 5, 5, 4, 6, 7, 6, 5, 4]
+
+/**
+ * A line of places with place 1 at the top: the chart grows upwards, so a place is turned into
+ * a height (`19 - place`). A round without a place is a gap (`null`).
+ */
+const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
+  <div style={{ maxInlineSize: '36rem' }}>
+    <Card aria-labelledby="plek-kop">
+      <Heading id="plek-kop" level={2}>
+        Plek per speelronde
+      </Heading>
+      <BarChart
+        axis={{ title: 'Speelronde' }}
+        bars={rounds.map(() => null)}
+        max={18}
+        ticks={[18, 14, 9, 4, 1]}
+        tickText={(height) => String(19 - height)}
+      >
+        <BarChart.Trend
+          labels={rounds.map((place, index) =>
+            place === null ? null : `Ronde ${index + 1}: plek ${place}, ${(index + 1) * 2} punten`,
+          )}
+          values={rounds.map((place) => (place === null ? null : 19 - place))}
+        />
+      </BarChart>
+    </Card>
+  </div>
+)
+
+export const PlaceFullSeason = meta.story({
+  name: 'Lijn met omgekeerde as: een heel seizoen, plek 1 bovenaan',
+  render: () => <PlaceLine rounds={places} />,
+})
+
+export const PlaceSeasonInProgress = meta.story({
+  name: 'Lijn met omgekeerde as: een seizoen dat nog bezig is',
+  render: () => <PlaceLine rounds={[...places.slice(0, 12), ...Array.from({ length: 22 }, () => null)]} />,
+})
+
+export const PlaceOpenPlace = meta.story({
+  name: 'Lijn met omgekeerde as: een open plek in de lijn',
+  render: () => (
+    <PlaceLine rounds={places.map((place, index) => (index === 14 || index === 15 || index > 29 ? null : place))} />
+  ),
+})

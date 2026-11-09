@@ -19,12 +19,17 @@ const tickPlaces = [1, 5, 10, 15, 18] as const
  * row is a gap (`null`). A table with more clubs than 18 stretches the scale.
  */
 export function lineOf(places: readonly FinalPlace[]) {
-  const max = Math.max(clubsInTable, ...places.map(({ row }) => row?.position ?? 0))
+  return lineOfPositions(places.map(({ row }) => row?.position ?? null))
+}
+
+/** `lineOf` for places as plain numbers: `null` is a gap. The card per round uses it too. */
+export function lineOfPositions(positions: readonly (null | number)[]) {
+  const max = Math.max(clubsInTable, ...positions.map((position) => position ?? 0))
 
   return {
     max,
     ticks: tickPlaces.filter((place) => place <= max).map((place) => max + 1 - place),
-    values: places.map(({ row }) => (row === undefined ? null : max + 1 - row.position)),
+    values: positions.map((position) => (position === null ? null : max + 1 - position)),
   }
 }
 
@@ -37,12 +42,14 @@ const shortSeason = (season: string) => season.slice(2)
 /**
  * The card "Onze plek door de jaren": our place in the Eredivisie in every season we have a
  * table of, as a line with place 1 at the top, and under it the same numbers in a table,
- * which is what a screen reader gets because the line is hidden from it. The table is in a
- * closed Disclosure (#808). It does not depend on the season of the page or on the switch:
- * `places` is the same on every page. The season that is going on is marked "nu", a season
- * with points taken off says how many in the table, and a season without a table is a gap in
- * the line and a row that says so. A season links to its page when it has one (`linkable`
- * are the seasons that have matches). Without a table of any season there is no card.
+ * which is what a screen reader gets because the line is hidden from it. It is on Cijfers,
+ * under our place in the league (#411), and is the same on every season of the page. The table
+ * is in a closed Disclosure (#808). It does not depend on the season of the page or on the
+ * switch: `places` is the same on every page. The season that is going on is marked "nu", a
+ * season with points taken off says how many in the table, and a season without a table is a
+ * gap in the line and a row that says so. A season links to its page when it has one
+ * (`linkable` are the seasons that have matches). Without a table of any season there is no
+ * card.
  */
 export function FinalPlacesCard({
   current,

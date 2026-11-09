@@ -1,8 +1,8 @@
-import { coachResultsCard, scoreCountsCard } from './matchShortcuts'
+import { coachResultsCard, finalPlacesShortcut, scoreCountsCard } from './matchShortcuts'
 
 /**
  * The links in the bar under the header of /cijfers: each goes to the heading of one of
- * the eleven cards with figures, in the order the cards have in the source, which is the order
+ * the twelve cards with figures, in the order the cards have in the source, which is the order
  * on a narrow screen and the order of the two columns on a wide one, the left one first. The
  * three cards that stay the Eredivisie come first, above the switch. The ids
  * are those of the headings in app/cijfers/statistics-page.tsx (a test checks it). The
@@ -12,6 +12,7 @@ import { coachResultsCard, scoreCountsCard } from './matchShortcuts'
  */
 export const statisticsShortcuts = [
   { href: '#onze-plek-in-de-competitie', label: 'Plek in de competitie' },
+  { href: `#${finalPlacesShortcut.id}`, label: finalPlacesShortcut.name },
   { href: '#verloop-van-het-seizoen', label: 'Verloop van het seizoen' },
   { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe wedstrijden verlopen' },
   { href: '#reeksen', label: 'Reeksen' },

@@ -3,7 +3,9 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getCoachResultData, getMatchData, getMatchSeasons } from '#src/matches'
+import type { FinalPlace } from '#src/matches'
+
+import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 import { coachResultData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
@@ -14,9 +16,15 @@ import SeasonStatisticsPage, { generateMetadata } from './page'
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getCoachResultData: vi.fn(),
+  getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
+
+const finalPlaces: FinalPlace[] = [
+  { now: false, row: { goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 }, season: '2025/26' },
+  { now: true, row: { goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 }, season: '2026/27' },
+]
 
 // The afternoon of Friday 23 October 2026 in the Netherlands, in the season 2026/27.
 const now = new Date('2026-10-23T13:40:00Z')
@@ -48,6 +56,8 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getCoachResultData).mockReset()
+  vi.mocked(getFinalPlaces).mockReset()
+  vi.mocked(getFinalPlaces).mockResolvedValue(finalPlaces)
   vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
@@ -91,11 +101,12 @@ describe('the page of an earlier season, /cijfers/2025-26', () => {
     }
   })
 
-  it('has the same eleven cards as the current season, in the order of the bar', async () => {
+  it('has the same twelve cards as the current season, in the order of the bar', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'onze-plek-in-de-competitie',
+      'onze-plek-door-de-jaren',
       'verloop-van-het-seizoen',
       'hoe-de-wedstrijden-verlopen',
       'reeksen',

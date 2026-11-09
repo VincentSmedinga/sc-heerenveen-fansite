@@ -80,9 +80,10 @@ Zo toetst axe de homepage met de kaart "Van de redactie" en de pagina `/redactie
 Voor `/wedstrijden` zet hij een verzonnen stand in de database (`e2e/standings.ts`), want de seed heeft geen wedstrijden en zonder stand heeft de kaart Stand geen knop voor een afbeelding.
 Heeft de database al een stand voor dit seizoen, dan laat hij die staan en haalt hij niets weg.
 Voor de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, zet hij verzonnen wedstrijden, doelpunten, een stand en de bronpagina's in het seizoen vóór het lopende (`e2e/earlier-season.ts`, met `seedMatches`), en haalt ze na de laatste test weer weg.
+Dat seizoen krijgt vijf hele speelronden van alle 18 clubs (`fullRounds`), zodat de kaart Onze plek per speelronde een lijn heeft; het lopende seizoen heeft die kaart niet, want zijn verzonnen uitslagen zijn van zes clubs.
 Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laat hij die staan.
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
-Voor de kaart Onze plek door de jaren zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
+Voor de kaart Onze plek door de jaren op `/cijfers` zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
 `pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
@@ -279,7 +280,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 De kaarten met cijfers staan op `/cijfers` (zie _De cijfers_).
 Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Cijfers waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
-Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand en Hoofdtrainer; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
+Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Onze plek per speelronde als het seizoen die heeft, en Hoofdtrainer; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand heeft een zacht vlak (`surface="soft"`), de hoofdtrainers een sterk vlak, en het programma en de uitslagen zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
@@ -315,6 +316,13 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende personen in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
   De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
+- **Onze plek per speelronde:** een kaart op het zachte vlak (`surface="soft"`, anker `#onze-plek-per-speelronde`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
+  De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
+  Onder de lijn staat in een gesloten `Disclosure` een zin met onze hoogste en laagste plek en een tabel met Ronde, Plek en Punten, de nieuwste ronde bovenaan.
+  `placePerRoundOf` in `src/matches.ts` rekent de stand na elke ronde uit `league_results` (punten, doelsaldo, doelpunten voor, dan de naam).
+  Een ronde is een punt als alle wedstrijden van die ronde en van de rondes ervoor gespeeld zijn; anders is het een open plek.
+  Het lopende seizoen toont de lijn tot de laatste complete ronde.
+  Een seizoen zonder uitslagen van alle clubs, of met afgetrokken punten, heeft geen kaart en geen link in de balk.
 - **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
   Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitPersonName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
@@ -381,11 +389,11 @@ De andere clubs hebben er minder en hebben geen rij.
 
 ## De cijfers
 
-`/cijfers` toont onder elf kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, het verloop van het seizoen, hoe de wedstrijden verlopen, de reeksen, thuis en uit, de toeschouwers, hoe vaak welke uitslag, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten, en daarnaast de resultaten per hoofdtrainer over alle seizoenen.
+`/cijfers` toont onder twaalf kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, onze plek door de jaren, het verloop van het seizoen, hoe de wedstrijden verlopen, de reeksen, thuis en uit, de toeschouwers, hoe vaak welke uitslag, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten, en daarnaast de resultaten per hoofdtrainer over alle seizoenen.
 Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Cijfers is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen/site.md`, _De site heeft vier onderdelen_).
-De kaarten staan in twee gelijke kolommen: de eerste vijf in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere vijf in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
+De kaarten staan in twee gelijke kolommen: de eerste zes in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere zes in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
 Cijfers is de uitzondering op de regel voor de kolommen (zie _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ in `docs/beslissingen/site.md`): hier hebben beide kolommen cijfers, omdat er geen lijst of tabel is waar de pagina voor bestaat.
-Links staan onze plek, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen en thuis en uit, en Opmerkelijk.
+Links staan onze plek, onze plek door de jaren, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen en thuis en uit, en Opmerkelijk.
 Rechts staan de toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten, de resultaten per hoofdtrainer en de bronvermelding.
 De kaart Resultaten per hoofdtrainer (`src/CoachResultsCard.tsx`, de telling in `src/coachResults.ts`) is een tabel met een rij per trainer met wedstrijden, de nieuwste eerst, met achter de naam de regel "34 wedstrijden, 1,85 punten per wedstrijd" (`matchesLineOf`, als `children` van `PlayerName`), volgt de schakelaar, telt alle seizoenen en heeft geen knop voor een afbeelding.
 De drie kaarten die de schakelaar negeren (onze plek, het verloop en hoe de wedstrijden verlopen) staan bij elkaar bovenaan de hoofdkolom, boven de schakelaar, en elk eindigt met de regel "Alleen de Eredivisie" (`EredivisieOnly` in `src/MatchViews.tsx`).
@@ -413,12 +421,16 @@ De stand, de reeksen, de nul gehouden, hoe de wedstrijden verlopen en de uiterst
 De pagina deelt met Wedstrijden alles rond het seizoen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, en de onderdelen van `src/seasons.ts`.
 Elk seizoen heeft één adres: `/cijfers` is het lopende seizoen en `/cijfers/2025-26` een eerder seizoen (`app/cijfers/[seizoen]`), en de kiezer gaat via `app/cijfers/kies`, die doorverwijst (303).
 De regels zijn die van Wedstrijden (zie _De wedstrijden_): het lopende seizoen op zijn eigen adres verwijst door, een onbekend seizoen geeft "niet gevonden", en lukt het lezen niet, dan staat er de foutpagina.
-Een eerder seizoen toont dezelfde elf kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
+Een eerder seizoen toont dezelfde twaalf kaarten, met het seizoen op de afbeelding; de kaarten zelf zijn dezelfde als vroeger op `/wedstrijden`, met dezelfde cijfers.
 De ankers van de kaarten stonden op `/wedstrijden` en zijn verhuisd, met hun oude naam (`nul-gehouden`).
 De kaart Doelpuntenmakers (de top 5, met het anker `#doelpuntenmakers` en `#topscorers`) is van Cijfers verdwenen: Spelers heeft de hele lijst en is de enige plek (#774).
 Op `/wedstrijden` zijn ze weg, met opzet en zonder omleiding (zie `src/anchors.ts`).
 Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze plek in de competitie" en naar "Het verloop van het seizoen", met het seizoen in het adres.
 
+- **Onze plek door de jaren:** de tweede kaart, links, direct onder Onze plek in de competitie (`FinalPlacesCard`, `surface="soft"`, anker `#onze-plek-door-de-jaren`, #411; hij stond tot dan op Wedstrijden).
+  Hij toont onze eindplek in elk seizoen met een stand als lijn, met plek 1 bovenaan, en is op elke seizoenspagina van Cijfers dezelfde.
+  Een link naar een seizoen gaat naar `/wedstrijden/<seizoen>`.
+  De kaart ontbreekt als geen seizoen een stand heeft of als de plekken niet gelezen kunnen worden.
 - **Onze plek in de competitie:** de eerste kaart, links, op het witte vlak en met de laatste regel "Alleen de Eredivisie", met een `DataTable` die de plaats van sc Heerenveen in de hele Eredivisie geeft op vijf onderdelen: punten per wedstrijd, gewonnen wedstrijden, de beste aanval (doelpunten voor), de beste verdediging (doelpunten tegen, minder is beter) en het doelsaldo.
   `leaguePlaceOf` in `src/matches.ts` rekent ze uit de stand, dus de import verandert niet.
   Punten per wedstrijd is de eerlijke vergelijking, want de clubs hebben niet evenveel gespeeld; twee clubs zijn gelijk als hun punten en wedstrijden in dezelfde verhouding staan.

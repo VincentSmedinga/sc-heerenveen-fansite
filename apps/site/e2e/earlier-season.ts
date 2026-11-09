@@ -23,6 +23,17 @@ const aYearAgo = () => {
 /** The address of that season in a path, `2025-26`. */
 export const earlierSeasonSlug = () => earlierSeason().replace('/', '-')
 
+/** The 18 clubs of the made-up Eredivisie: the clubs of the seed and twelve more. */
+const clubs = [
+  'sc Heerenveen',
+  'Voorbeeld United',
+  'Proefstad SV',
+  'Nepstad Rangers',
+  'Demo Boys',
+  'Testdorp FC',
+  ...Array.from({ length: 12 }, (_, index) => `Testclub ${index + 1}`),
+]
+
 /**
  * Puts made-up matches, goals, a league table with the results of every club and the pages they
  * credit in the database for the season before the current one, so the checks of
@@ -39,6 +50,13 @@ export async function addEarlierSeason() {
 
   try {
     added = await seedMatches(db, aYearAgo())
+
+    if (added) {
+      // The results of the seed are of six clubs. The card Onze plek per speelronde needs all
+      // eighteen, so the made-up season gets five whole rounds instead (see fullRounds).
+      await db.delete(leagueResults).where(eq(leagueResults.season, season))
+      await db.insert(leagueResults).values(fullRounds(season))
+    }
   } finally {
     await close()
   }
@@ -61,6 +79,42 @@ export async function addEarlierSeason() {
       await connection.close()
     }
   }
+}
+
+/**
+ * Five whole rounds of the league, paired the way a round-robin does (the first club stays and
+ * the others turn), so every pair meets once and a result is kept once for a home club and an
+ * away club. sc Heerenveen scores the goals of `ours` against the club it meets, which is the
+ * first match of a round, and every other match is a 1-0 home win. The card "Onze plek per
+ * speelronde" then has a line that goes up and down.
+ */
+export function fullRounds(season: string) {
+  const ours: [number, number][] = [
+    [2, 0],
+    [0, 1],
+    [1, 1],
+    [3, 0],
+    [0, 2],
+  ]
+
+  return ours.flatMap(([goalsFor, goalsAgainst], index) => {
+    const others = clubs.slice(1)
+    const turned = others.map((_, place) => others[(place + index) % others.length]!)
+    const pairs = [
+      [clubs[0]!, turned[0]!],
+      ...Array.from({ length: 8 }, (_, step) => [turned[step + 1]!, turned[16 - step]!]),
+    ] as const
+
+    return pairs.map(([homeClub, awayClub], pair) => ({
+      awayClub,
+      awayGoals: pair === 0 ? goalsAgainst : 0,
+      homeClub,
+      homeGoals: pair === 0 ? goalsFor : 1,
+      playedOn: `${season.slice(0, 4)}-09-${String(index * 7 + 1).padStart(2, '0')}`,
+      round: index + 1,
+      season,
+    }))
+  })
 }
 
 /**

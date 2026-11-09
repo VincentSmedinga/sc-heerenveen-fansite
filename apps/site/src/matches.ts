@@ -208,6 +208,9 @@ export type FinalPlace = {
   season: string
 }
 
+/** Our place after one round, with the points we had then. */
+export type PlaceInRound = { points: number; position: number; round: number }
+
 /**
  * Our place in the table of every season from the first season that has a table up to the
  * current one, the oldest first. A season in between without our row is a place with no row (an
@@ -261,6 +264,90 @@ export function getLeagueResults(season: string): Promise<PublicLeagueResult[]> 
   return season === seasonOf(new Date()) ? currentLeagueResults(season) : pastLeagueResults(season)
 }
 
+/** The clubs in the Eredivisie, and so the matches in a round and the rounds in a season. */
+const eredivisieClubs = 18
+const matchesPerRound = eredivisieClubs / 2
+const roundsPerSeason = (eredivisieClubs - 1) * 2
+
+type RoundTally = { club: string; goalsAgainst: number; goalsFor: number; points: number }
+
+/**
+ * Our place after each round of a season, for the card "Onze plek per speelronde" of
+ * Wedstrijden (see `placePerRoundOf`), or undefined when the season has no such line. The two
+ * queries are the ones the page asks anyway and are kept like the data of the season.
+ */
+export async function getPlacePerRound(season: string) {
+  const [data, results] = await Promise.all([getMatchData(season), getLeagueResults(season)])
+
+  return placePerRoundOf(results, data.standings)
+}
+
+/**
+ * Our place in the Eredivisie after each of the 34 rounds, worked out from the results of every
+ * club (`league_results`) with points, goal difference and goals for as the order, then the
+ * name from A to Z for clubs that are still level. A round is a point when every match of that
+ * round and of the rounds before it is played: a round with fewer than nine results (a match
+ * that is postponed keeps its round and has no result yet) is an open place, `null`, and so is
+ * every round after it, because the table is not known without it. The season that is going on
+ * gives points up to its last complete round and `null` after it.
+ *
+ * `undefined` means the season has no such line: it has no results, no table, a club lost
+ * points (the results do not show it), or not one round has the results of all 18 clubs, as in
+ * a season whose page lists only our matches. The card is then left out. `standings` is the
+ * table of the season, which says whether points were taken off.
+ */
+export function placePerRoundOf(
+  results: readonly PublicLeagueResult[],
+  standings: readonly Pick<PublicStandingsRow, 'pointsDeducted'>[],
+): (null | PlaceInRound)[] | undefined {
+  if (results.length === 0 || standings.length === 0 || standings.some((row) => row.pointsDeducted > 0)) {
+    return undefined
+  }
+
+  const tallies = new Map<string, RoundTally>()
+  const places: (null | PlaceInRound)[] = []
+  let complete = true
+
+  const add = (club: string, goalsFor: number, goalsAgainst: number) => {
+    const tally = tallies.get(club) ?? { club, goalsAgainst: 0, goalsFor: 0, points: 0 }
+
+    tally.goalsAgainst += goalsAgainst
+    tally.goalsFor += goalsFor
+    tally.points += goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0
+    tallies.set(club, tally)
+  }
+
+  for (let round = 1; round <= roundsPerSeason; round++) {
+    const ofRound = results.filter((result) => result.round === round)
+    const clubs = new Set(ofRound.flatMap((result) => [result.homeClub, result.awayClub]))
+
+    complete = complete && ofRound.length === matchesPerRound && clubs.size === eredivisieClubs
+
+    if (!complete) {
+      places.push(null)
+      continue
+    }
+
+    for (const result of ofRound) {
+      add(result.homeClub, result.homeGoals, result.awayGoals)
+      add(result.awayClub, result.awayGoals, result.homeGoals)
+    }
+
+    const table = [...tallies.values()].sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst) ||
+        b.goalsFor - a.goalsFor ||
+        a.club.localeCompare(b.club, 'nl'),
+    )
+    const index = table.findIndex((tally) => tally.club === ourClub)
+
+    places.push(index === -1 ? null : { points: table[index]!.points, position: index + 1, round })
+  }
+
+  return places.some((place) => place !== null) ? places : undefined
+}
+
 async function loadFinalPlaces(): Promise<FinalPlace[]> {
   const { db } = getDatabase()
   const [rows, seasons] = await Promise.all([listClubStandings(db, ourClub), listStandingsSeasons(db)])
@@ -270,7 +357,7 @@ async function loadFinalPlaces(): Promise<FinalPlace[]> {
 
 /**
  * Our place in the table of every season we have one, for the card "Onze plek door de jaren" of
- * Wedstrijden (see `finalPlacesOf`). It does not depend on the season of the page. It is kept
+ * Cijfers (see `finalPlacesOf`). It does not depend on the season of the page. It is kept
  * for five minutes, like the data of the current season, which is in it.
  */
 export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)

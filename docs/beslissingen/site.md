@@ -2855,6 +2855,8 @@
   Een lijn laat de lezer in een oogopslag zien of het beter of slechter gaat.
 - **Alternatieven:** staafjes (zeggen minder over beter of slechter); op Cijfers (de kaart hoort bij de stand); alleen een tabel; een nieuw onderdeel in het designsysteem voor de omgekeerde schaal (niet nodig, zolang er één plek is die hem gebruikt).
 - **Later:** vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de zijkolom van Wedstrijden heeft nu Stand, Onze plek door de jaren en de bronvermelding, met Hoofdtrainer tussen de laatste twee.
+- **Later:** vervangen door _"Onze plek door de jaren" verhuist naar Cijfers_ (9 november 2026) waar het de plek van de kaart betreft: hij staat op Cijfers en niet meer op Wedstrijden, onder Stand of Eindstand staat nu de kaart Onze plek per speelronde.
+  De rest (de lijn, de tabel, de gegevens, de regels onder de kaart) blijft.
 
 ## Spelers toont ook de doelpuntenmakers aller tijden, als top 10
 
@@ -3881,6 +3883,49 @@
   Staat er wel iemand, dan krijgt een speler zonder land of zonder vlag in onze set een lege plek van dezelfde breedte.
 - **Waarom:** de namen van één deel blijven zo op één lijn, en een seizoen zonder landen (de tabellen van 1990/91 tot 2005/06) verandert niet.
 - **Alternatieven:** de plek altijd tonen (een lege kolom in een lijst zonder één land); de vlag overal waar een speler staat (veel componenten, en tegenstanders hebben geen land).
+
+## De plek per speelronde staat op Wedstrijden, onder de stand
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart "Onze plek per speelronde" staat in de zijkolom van Wedstrijden, direct onder Stand of Eindstand, op de plek waar "Onze plek door de jaren" stond (#411).
+  Hij heeft het anker `#onze-plek-per-speelronde`, een link in "Op deze pagina:", de regel "Alleen de Eredivisie" en de bronvermelding onderaan de zijkolom.
+  - **De lijn:** `BarChart.Trend` met een omgekeerde schaal (plek 1 bovenaan, 1 tot 18) en de speelrondes 1 tot 34 onderaan.
+    De lijn is voor een schermlezer verborgen.
+  - **De gegevens:** `placePerRoundOf` rekent de stand na elke ronde uit `league_results`, dus er is niets nieuws bewaard.
+    De volgorde is punten, doelsaldo, gescoorde doelpunten, en dan de naam van A tot Z voor clubs die dan nog gelijk staan (zoals `lastFiveStandings`); de echte regels voor een onderling duel kennen we niet uit de uitslagen.
+    Een ronde telt als er negen uitslagen van 18 verschillende clubs zijn, en een ronde is een punt als ook alle rondes ervoor tellen.
+    Een uitgestelde wedstrijd houdt zijn eigen ronde en is er pas als hij gespeeld is, dus tot dan is zijn ronde en elke ronde erna een open plek in de lijn.
+    Het lopende seizoen toont de lijn tot de laatste complete ronde.
+  - **Onder de lijn:** een gesloten `Disclosure` met één zin met de hoogste en de laagste plek van het seizoen, met de ronde erbij (de eerste ronde waarin we die plek hadden), en een `DataTable` met Ronde, Plek en Punten, de nieuwste bovenaan.
+    Een open ronde tussen twee rondes met een punt is een rij met streepjes en de notitie "nog niet alle wedstrijden gespeeld".
+    Elk punt heeft een label zoals "Ronde 12: plek 4, 20 punten".
+- **Waarom:** de stand en onze plek erin horen bij elkaar, en de plek in de zijbalk was al van een kaart met een lijn.
+  Een open plek is eerlijker dan een gok.
+- **Alternatieven:** op Cijfers, naast "Onze plek in de competitie"; een nieuw onderdeel `LineChart`.
+
+## Een seizoen zonder gegevens heeft geen kaart Onze plek per speelronde
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart ontbreekt, en dus ook de link in "Op deze pagina:", als de uitslagen niet van alle clubs zijn, er geen stand is of er in de stand punten zijn afgetrokken.
+  Er komt geen lege kaart en geen zin voor in de plaats.
+  De regel is `placePerRoundOf` (undefined betekent geen kaart), met tests voor elk van de gevallen.
+- **Waarom:** een kaart die niets toont, vraagt om uitleg die niet helpt.
+  Een foute lijn is erger dan geen lijn: de uitslagen laten een aftrek van punten niet zien, dus de plek na elke ronde zou kloppen met niets.
+  Wikipedia heeft voor sommige seizoenen alleen onze eigen wedstrijden.
+- **Alternatieven:** een zin dat we de plek per ronde niet hebben; de lijn tonen en een aftrek vermelden.
+
+## "Onze plek door de jaren" verhuist naar Cijfers
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart `FinalPlacesCard` staat op Cijfers, direct onder "Onze plek in de competitie", in de hoofdkolom, en is op elke seizoenspagina van Cijfers dezelfde.
+  Zijn link staat in "Op deze pagina:" van Cijfers en niet meer in die van Wedstrijden.
+  Het anker `onze-plek-door-de-jaren` blijft, en het oude adres op Wedstrijden vervalt zonder omleiding (de site is nog niet openbaar).
+  Cijfers heeft nu twaalf kaarten, zes in elke kolom.
+  Later kan de kaart naar `/seizoenen` (#782).
+- **Waarom:** het is een kaart met cijfers, en #768 zet die op Cijfers.
+  Wachten op `/seizoenen` laat de kaart zonder plek.
+- **Alternatieven:** wachten op `/seizoenen` (#414 en #782 zijn nog niet gebouwd); op Wedstrijden laten staan.
+- **Later:** vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de zijkolom van Wedstrijden heeft nu Stand, Onze plek per speelronde en de bronvermelding, met Hoofdtrainer tussen de laatste twee.
 
 ## De lijst met wedstrijden in het beheer heeft één link per regel, die volgt uit de staat
 

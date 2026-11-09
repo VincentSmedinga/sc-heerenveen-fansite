@@ -38,6 +38,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'thuis-en-uit',
     'toeschouwers',
     'onze-plek-in-de-competitie',
+    'onze-plek-door-de-jaren',
     'hoe-de-wedstrijden-verlopen',
     'hoe-vaak-welke-uitslag',
     'uitersten',
@@ -68,13 +69,16 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/tegenstanders/voorbeeld-united': ['stadion'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
+  // The card Onze plek door de jaren moved to /cijfers (#411), and its anchor on /wedstrijden
+  // is gone on purpose, without a redirect. The card Onze plek per speelronde (anchor
+  // `onze-plek-per-speelronde`) is only on a season whose results are of all clubs, which the
+  // made-up current season has not, so it is not published here.
   // The results are a card for each competition with a result. The Eredivisie keeps the anchor
   // `uitslagen`; the made-up season has a result in each of the three competitions (#665).
   '/wedstrijden': [
     'laatste-wedstrijd',
     'programma',
     'stand',
-    'onze-plek-door-de-jaren',
     'uitslagen',
     'uitslagen-knvb-beker',
     'uitslagen-play-offs',

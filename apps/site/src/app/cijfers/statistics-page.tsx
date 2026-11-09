@@ -10,8 +10,9 @@ import { type CompetitionChoice, parseCompetition } from '#src/competition'
 import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { FinalPlacesCard } from '#src/FinalPlacesCard'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
-import { choiceFor, getCoachResultData, parseCleanSheetCount } from '#src/matches'
+import { choiceFor, getCoachResultData, getFinalPlaces, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
   CleanSheetsCard,
@@ -62,7 +63,7 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 /**
  * The page of a season: `/cijfers` for the current season and `/cijfers/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
- * heading. The eleven cards with figures sit in two equal columns on a wide screen, and under
+ * heading. The twelve cards with figures sit in two equal columns on a wide screen, and under
  * each other on a narrow one, in the order of the bar "Op deze pagina:". The page is the
  * exception to the rule of the columns (see Page.Main): both hold cards with figures. The three
  * cards that stay the Eredivisie come first in the main column, together, and under them is the
@@ -109,6 +110,8 @@ export async function StatisticsPage({
   const imageSeason = current ? undefined : season
   const address = seasonAddress(statisticsPath, season, seasonOf(now))
   const coachResults = await loadCoachResults(competition)
+  // Our place in every season: the same on every page, so it does not depend on `season`.
+  const finalPlaces = await loadFinalPlaces()
 
   return (
     <>
@@ -126,6 +129,7 @@ export async function StatisticsPage({
         }
       >
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
+        <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <MatchFlowCard matches={data.matches} season={imageSeason} />
         <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="cijfers" />
@@ -182,5 +186,19 @@ async function loadCoachResults(competition: CompetitionChoice) {
     console.error(`Could not read the results per head coach for ${statisticsPath}: ${reasonOf(error)}`)
 
     return null
+  }
+}
+
+/**
+ * Our place in every season, for the card "Onze plek door de jaren". It is no more than a card:
+ * when it can't be read, the page is shown without it and the error is logged.
+ */
+async function loadFinalPlaces() {
+  try {
+    return await getFinalPlaces()
+  } catch (error) {
+    console.error(`Could not read our place in the seasons for ${statisticsPath}: ${reasonOf(error)}`)
+
+    return []
   }
 }
