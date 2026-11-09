@@ -14,8 +14,15 @@ export const listSizes = [5, 10, 20, 50] as const
  */
 export const itemsPerCard = listSizes[0]
 
-/** How many headlines the news card on the homepage shows. Older news is for /nieuws. */
-export const firstHeadlines = listSizes[1]
+/**
+ * The fewest headlines the news card on the homepage shows, however old they are, and the most
+ * it shows, however many the last `headlineWindowDays` days have. Older news is for /nieuws.
+ */
+export const fewestHeadlines = listSizes[0]
+export const mostHeadlines = listSizes[2]
+
+/** How many days back the news card on the homepage looks: the 72 hours up to now. */
+export const headlineWindowDays = 3
 
 /** How many headlines a page of /nieuws shows. */
 export const headlinesPerPage = listSizes[3]

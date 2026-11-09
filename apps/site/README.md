@@ -234,11 +234,13 @@ Een klik op een schakelaar telt dus niet mee, en het openen van hetzelfde adres 
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
 Bovenaan de hoofdkolom staat de kaart "Van de redactie": het nieuwste artikel van onze eigen redactie, in de lange vorm van `ArticleCard`, met de titel, de datum, de inleiding en de link "Lees verder".
-Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
+Daaronder staat het blok "Laatste nieuws": de berichten van de laatste 3 dagen (de 72 uur tot nu) van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag: minstens 5 (de 5 nieuwste, hoe oud ook) en hoogstens 20.
+Direct onder de kop staat een regel in de stijl `meta`, zoals "15 artikelen over de laatste 3 dagen": het aantal koppen in de lijst en de ouderdom van de oudste in hele dagen, naar boven afgerond (minstens 1), met "1 artikel" en "de laatste dag" in het enkelvoud.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
-Zijn er geen berichten, dan staat er een tekst voor bezoekers.
-Onder de lijst staat de link "Alle nieuws" naar `/nieuws` (zie _De nieuwspagina_): ouder nieuws is daarvoor.
-Het aantal staat op één plek, `firstHeadlines` (10, uit `listSizes`) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+Zijn er geen berichten, dan staat er een tekst voor bezoekers, zonder die regel.
+Onder de lijst staat de link "Al het nieuws" naar `/nieuws` (zie _De nieuwspagina_): ouder nieuws is daarvoor.
+De aantallen staan op één plek in `src/items-per-card.ts`: `fewestHeadlines` (5) en `mostHeadlines` (20), uit `listSizes`, en `headlineWindowDays` (3).
+`getHeadlines` haalt de 20 nieuwste koppen op en staat vijf minuten in het geheugen van de server (`src/headlines.ts`); `headlinesOfTheWindow` kiest daar bij elk bezoek de lijst uit.
 De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
 Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont tien koppen.

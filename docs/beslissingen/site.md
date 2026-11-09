@@ -1469,6 +1469,7 @@
 - **Gevolg:** de koppen van de homepage hebben geen `id` meer, en de knop blijft op de pagina met de gehouden nullen en op `/zoeken`.
 - **Alternatieven:** de knop houden naast de link (twee manieren om meer koppen te zien, en de knop en de link raken elkaar onder de lijst).
 - **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de link heet "Alle nieuws".
+- **Later:** zie _De kaart Laatste nieuws toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20_ (9 november 2026): geen tien koppen meer, en de link heet "Al het nieuws".
 
 ## Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk
 
@@ -1631,6 +1632,7 @@
   Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
 - **Later:** zie _De kaart met podcasts toont de afleveringen van de laatste 8 dagen_ (7 november 2026): de kaart met podcasts op de homepage en op `/nieuws` toont alleen afleveringen van de laatste 8 dagen, tot vijf.
 - **Later:** zie _Op de homepage staat Wedstrijden boven het forum_ (6 november 2026): de zijbalk van de homepage begint met Wedstrijden en Stand, dan het forum, dan de podcasts.
+- **Later:** zie _De kaart Laatste nieuws toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20_ (9 november 2026): de link heet "Al het nieuws", en "Laatste nieuws" toont geen vaste tien koppen (`firstHeadlines`) meer.
 
 ## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -3980,3 +3982,25 @@
 - **Waarom:** het is een feit over één wedstrijd waar weinig supporters in een lijst op letten, en een lijst wordt er op een telefoon vier regels langer van.
   Redacteuren van Wikipedia schatten het aantal en stellen het bij, dus we noemen het een schatting.
 - **Alternatieven:** het aantal in de regel van elke wedstrijd; "onbekend" tonen bij een leeg veld.
+
+## De kaart Laatste nieuws toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart Laatste nieuws op de homepage toont de koppen van de 72 uur tot nu, minstens 5 en hoogstens 20.
+  Onder de kop staat "N artikelen over de laatste T dagen".
+  T is de ouderdom van de oudste getoonde kop in hele dagen, naar boven afgerond, minstens 1, met enkelvoud bij 1 ("1 artikel", "de laatste dag").
+  De regel heeft de stijl `meta`.
+  De link onder de lijst heet "Al het nieuws".
+- **Waarom:** op acceptatie (25 oktober tot 9 november 2026, 106 koppen) had een venster van 3 dagen minstens 3, meestal 15 en in 90% van de uren hoogstens 21 koppen, met een piek van 51 na de 5-3 tegen Feyenoord.
+  Tien vaste koppen verborgen toen 33 koppen, en reikten op rustige dagen een week terug.
+  Met 3 dagen en 5 tot 20 toont de kaart meestal 16 koppen, en knipt het maximum in ongeveer 16% van de uren af.
+  Een T die de echte ouderdom van de lijst volgt, klopt altijd, ook als de 5 of de 20 de lijst bepaalt.
+  Een venster van 72 uur verspringt niet om middernacht, anders dan kalenderdagen.
+  "Al het nieuws" is beter Nederlands dan "Alle nieuws".
+- **Gevolg:** `getHeadlines` haalt de 20 nieuwste koppen op (vijf minuten in het geheugen), en `headlinesOfTheWindow` in `src/headlines.ts` kiest er bij elk bezoek de lijst uit, zodat het venster met de klok meeloopt.
+  `firstHeadlines` is vervangen door `fewestHeadlines`, `mostHeadlines` en `headlineWindowDays`.
+- **Alternatieven:** 4 dagen met hoogstens 30 koppen (meer nieuws, maar een langere homepage).
+  Altijd "3 dagen" in de regel, ook als de lijst verder teruggaat of korter is.
+  De regel weglaten als de 5 of de 20 geldt.
+  Kalenderdagen in Nederlandse tijd, of "vandaag" bij één dag.
+  De regel in dezelfde grootte als de koppen.
