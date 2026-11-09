@@ -6,7 +6,7 @@ import { cache } from 'react'
 import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
-import { getHeadlines } from '../headlines'
+import { getHeadlines, headlineCount, headlinesOfTheWindow } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
@@ -100,6 +100,7 @@ export default async function HomePage() {
 
   const { article, details, discussions, episodes, headlines, matches } = content
   const now = new Date()
+  const news = headlinesOfTheWindow(headlines, now)
 
   return (
     <>
@@ -122,27 +123,30 @@ export default async function HomePage() {
           <Heading id="media-heading" level={2}>
             Laatste nieuws
           </Heading>
-          {headlines.length === 0 ? (
+          {news.items.length === 0 ? (
             <Text>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</Text>
           ) : (
-            <List role="list">
-              {headlines.map((item, index) => (
-                <List.Item key={index}>
-                  <NewsItem
-                    dateTime={dateTimeOf(item.publishedAt)}
-                    headline={item.title}
-                    href={item.url}
-                    paywalled={item.paywalled}
-                    source={item.sourceName}
-                    time={formatNewsTime(item.publishedAt, now)}
-                  />
-                </List.Item>
-              ))}
-            </List>
+            <>
+              <Text appearance="meta">{headlineCount(news.items.length, news.days)}</Text>
+              <List role="list">
+                {news.items.map((item, index) => (
+                  <List.Item key={index}>
+                    <NewsItem
+                      dateTime={dateTimeOf(item.publishedAt)}
+                      headline={item.title}
+                      href={item.url}
+                      paywalled={item.paywalled}
+                      source={item.sourceName}
+                      time={formatNewsTime(item.publishedAt, now)}
+                    />
+                  </List.Item>
+                ))}
+              </List>
+            </>
           )}
           <Text>
             <Link href="/nieuws" icon="arrow-right">
-              Alle nieuws
+              Al het nieuws
             </Link>
           </Text>
         </Card>

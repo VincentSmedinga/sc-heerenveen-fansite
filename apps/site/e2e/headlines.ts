@@ -23,10 +23,10 @@ type Row = {
  * check puts them in the database before the first test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times
- * are counted back from the moment the check starts. The homepage shows the first ten, and the
- * link to /nieuws under them. The first seven are from the last six days and show a weekday and
- * the time; the next four are older and show a weekday and the date. The news page shows them
- * all.
+ * are counted back from the moment the check starts. The homepage shows those of the last
+ * three days, at least 5 and at most 20, with the link to /nieuws under them. The first seven
+ * are from the last six days and show a weekday and the time; the next four are older and show
+ * a weekday and the date. The news page shows them all.
  *
  * Behind them come 45 older headlines of two sources, so that the news page (/nieuws) has 56 in
  * all and a second page of 50 per page, and a page of one source (`/nieuws?bron=testkrant`).
