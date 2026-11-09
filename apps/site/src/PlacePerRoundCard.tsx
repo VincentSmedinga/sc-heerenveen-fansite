@@ -53,9 +53,15 @@ const Spoken = ({ text }: { text: string }) =>
     ),
   )
 
-/** The name of a head coach, with "(interim)" behind it for one who is. */
+/**
+ * The name of a head coach, with "(interim)" behind it on the same line for one who is: the
+ * line `PlayerName` keeps for such a word stands under the name, so it is not used here.
+ */
 const CoachName = ({ coach }: { coach: Pick<PublicStaff, 'interim' | 'name'> }) => (
-  <PlayerName {...splitPersonName(coach.name)}>{coach.interim ? '(interim)' : null}</PlayerName>
+  <>
+    <PlayerName {...splitPersonName(coach.name)} />
+    {coach.interim ? ' (interim)' : null}
+  </>
 )
 
 /**

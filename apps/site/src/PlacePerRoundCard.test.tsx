@@ -62,6 +62,7 @@ describe('PlacePerRoundCard with head coaches', () => {
     expect(html).toContain('<p>Hoofdtrainers:</p><ul>')
     expect(items).toHaveLength(2)
     expect(items[0]).toMatch(/^<span class="hf-player-name">.*<\/span><p class="hf-meta">.*<\/p>$/)
+    expect(items[1]).toMatch(/^<span class="hf-player-name">.*<\/span> \(interim\)<p class="hf-meta">/)
     expect(items.map(text)).toEqual([
       'Robin van PersieRonde 1– t/m 8 · plek 1 →  naar 2',
       'Henk Brugge (interim)Vanaf ronde 9 · plek 3 →  naar 4',
@@ -86,9 +87,12 @@ describe('PlacePerRoundCard with head coaches', () => {
   })
 
   it('writes "(interim)" behind the name of one coach who is', () => {
-    expect(text(renderWith([staff('Henk Brugge', '2026-07-01', true)]))).toContain(
-      'Hoofdtrainer: Henk Brugge (interim)',
-    )
+    const html = renderWith([staff('Henk Brugge', '2026-07-01', true)])
+
+    expect(text(html)).toContain('Hoofdtrainer: Henk Brugge (interim)')
+    // Behind the name on the same line, not on the line of its own that PlayerName has.
+    expect(html).toContain('</span> (interim)</p>')
+    expect(html).not.toContain('hf-player-name-meta')
   })
 
   it('has a dashed line in the chart on the edge before the round of each new coach, not for the first', () => {
