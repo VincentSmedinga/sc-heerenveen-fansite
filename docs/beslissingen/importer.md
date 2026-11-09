@@ -1534,6 +1534,7 @@
   De scheidsrechter wordt nog nergens getoond.
 - **Later (9 november 2026):** de pagina van een wedstrijd toont het aantal toeschouwers nu (#416), met de bron en de melding dat het een schatting is.
   De regels van een wedstrijd (`Match` en `ShortMatch`) tonen het nog steeds niet; de scheidsrechter volgt in #417.
+- **Later (9 november 2026):** de kaart Wedstrijden op home toont de scheidsrechter van een gespeelde wedstrijd; zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ in `site.md`.
 
 ## Van een bericht met meerdere versies toont de site alleen de laatste kop
 

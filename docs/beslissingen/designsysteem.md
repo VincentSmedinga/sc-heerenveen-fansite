@@ -3118,3 +3118,14 @@
 - **Componenten met een eigen krappe regelhoogte blijven:** grafieken, het veld, de scorebalk, `MatchHeader`, `MatchSubstitutes`, `MatchTimeline` en `MarkRow` veranderen niet.
   Ze zijn krap bedoeld en staan op een vast raster.
   - **Alternatieven:** ze ook nalopen en per component beslissen; een groter issue.
+
+## `Match` heeft de props `referee` en `extra`
+
+- **Datum:** 9 november 2026
+- **Besluit:** `Match` krijgt twee props.
+  `referee` is de naam van de scheidsrechter als tekst: hij staat na de ronde in de laatste regel, zonder label ("Eredivisie · Speelronde 2 · Danny Makkelie"), en alleen met `competition`.
+  `extra` is een plek voor kleine regels onder de clubs: de wedstrijd zet ze in kleine tekst en laat de pagina bepalen wat erin staat.
+  Dit wijzigt de keuze van #416 dat `Match` en `ShortMatch` geen scheidsrechter tonen; zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ in `site.md`.
+- **Waarom:** een plek voor kleine regels houdt het component klein en vraagt geen kennis van vorm, uitkomsten of kleuren; de regels van de kaart blijven in de site.
+  De naam van de scheidsrechter breekt niet midden in zijn naam af (`white-space: nowrap`).
+- **Alternatieven:** de vorige ontmoeting en de vorm als eigen props (het component krijgt kennis van de uitkomst en van `MarkRow`); een eigen component voor de kaart op home (een tweede soort regel voor een wedstrijd).

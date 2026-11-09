@@ -4,7 +4,7 @@ import type { NewMatchWithoutClub } from './clubs.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { findClubBySlug, listClubMatches, listClubRecords } from './queries.ts'
+import { findClubBySlug, findPreviousMeeting, listClubMatches, listClubRecords } from './queries.ts'
 import { clubNames, clubs, matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -314,5 +314,53 @@ describe('listClubMatches', () => {
     const [club] = await database.db.insert(clubs).values({ name: 'Oefenstad FC', slug: 'oefenstad-fc' }).$returningId()
 
     expect(await listClubMatches(database.db, club!.id)).toEqual([])
+  })
+})
+
+describe('findPreviousMeeting', () => {
+  it('gives the newest played match at the same ground, from any competition', async () => {
+    await store(
+      played('FC Twente', 2, 1, { matchDate: '2026-04-12', season: '2025/26' }),
+      played('FC Twente', 0, 0, { competition: 'KNVB Beker', matchDate: '2026-10-30' }),
+      played('FC Twente', 3, 3, { home: false, matchDate: '2026-02-01', season: '2025/26' }),
+    )
+
+    expect(await findPreviousMeeting(database.db, { home: true, opponent: 'FC Twente' })).toEqual({
+      dataSource: 'wikipedia',
+      goalsAgainst: 0,
+      goalsFor: 0,
+      matchDate: '2026-10-30',
+    })
+    expect(await findPreviousMeeting(database.db, { home: false, opponent: 'FC Twente' })).toEqual(
+      expect.objectContaining({ goalsFor: 3, matchDate: '2026-02-01' }),
+    )
+  })
+
+  it('gives the archive match when that is the last one, with its source', async () => {
+    await store(played('Ajax', 1, 4, { dataSource: 'oude-fansite', matchDate: '2005-03-05', season: '2004/05' }))
+
+    expect(await findPreviousMeeting(database.db, { home: true, opponent: 'Ajax' })).toEqual(
+      expect.objectContaining({ dataSource: 'oude-fansite', goalsAgainst: 4, goalsFor: 1 }),
+    )
+  })
+
+  it('skips a match that is not played and gives nothing without a meeting', async () => {
+    await store(
+      {
+        competition: 'Eredivisie',
+        home: true,
+        kickoffAt: new Date('2026-12-01T18:45:00Z'),
+        matchDate: '2026-12-01',
+        opponent: 'PSV',
+        round: 'Ronde 99',
+        season: '2026/27',
+        status: 'scheduled',
+      },
+      played('Ajax', 1, 0, { home: false }),
+    )
+
+    expect(await findPreviousMeeting(database.db, { home: true, opponent: 'PSV' })).toBeUndefined()
+    expect(await findPreviousMeeting(database.db, { home: true, opponent: 'Ajax' })).toBeUndefined()
+    expect(await findPreviousMeeting(database.db, { home: true, opponent: 'Onbekend' })).toBeUndefined()
   })
 })

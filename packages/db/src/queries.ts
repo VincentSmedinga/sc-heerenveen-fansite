@@ -33,6 +33,8 @@ import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
 
 export type MatchInSequence = Awaited<ReturnType<typeof listMatchSequence>>[number]
 
+export type PreviousMeeting = NonNullable<Awaited<ReturnType<typeof findPreviousMeeting>>>
+
 export type PublicArchiveItem = Awaited<ReturnType<typeof listArchivePage>>[number]
 
 export type PublicArchiveSource = Awaited<ReturnType<typeof listArchiveSources>>[number]
@@ -180,6 +182,43 @@ export async function findPodcast(db: Database, slug: string) {
     .where(and(eq(sources.enabled, true), eq(sources.kind, 'podcast'), hasSlug(slug)))
 
   return row
+}
+
+/**
+ * The last played match against a club, at the same ground, from every competition and every
+ * season (the archive of the old fansite included), for the line "Vorige keer" under the next
+ * match on the homepage. `opponent` is the name of the club as the matches spell it, and `home`
+ * is whether sc Heerenveen played at home: the match is the newest played one with the same
+ * `home`. It gives the day and the goals of sc Heerenveen and of the club, and where the
+ * match comes from, or nothing for a club that is not known, one that sc Heerenveen has not
+ * played at that ground, or a match without a result.
+ */
+export async function findPreviousMeeting(db: Database, { home, opponent }: { home: boolean; opponent: string }) {
+  const [known] = await db
+    .select({ clubId: matches.clubId })
+    .from(matches)
+    .where(eq(matches.opponent, opponent))
+    .limit(1)
+
+  if (known === undefined) {
+    return undefined
+  }
+
+  const [meeting] = await db
+    .select({
+      dataSource: matches.dataSource,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      matchDate: matches.matchDate,
+    })
+    .from(matches)
+    .where(and(eq(matches.clubId, known.clubId), eq(matches.home, home), eq(matches.status, 'played')))
+    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+    .limit(1)
+
+  return meeting === undefined || meeting.goalsFor === null || meeting.goalsAgainst === null
+    ? undefined
+    : { ...meeting, goalsAgainst: meeting.goalsAgainst, goalsFor: meeting.goalsFor }
 }
 
 /**

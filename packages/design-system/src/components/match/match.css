@@ -16,6 +16,38 @@
     padding-block: var(--hf-space-m);
   }
 
+  /* Small lines the page adds under the clubs: they sit close together, in the meta text. */
+  .hf-match-extra-lines {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
+  }
+
+  .hf-match-extra-lines > * {
+    margin-block: 0;
+  }
+
+  .hf-match-extra-lines .hf-mark-row-title {
+    color: inherit;
+    font-weight: inherit;
+  }
+
+  .hf-match-extra-lines .hf-mark-row-mark {
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  /* The result of the previous meeting under the next match: bold, in the outcome colour. */
+  .hf-match-previous-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+  }
+
+  /* The name of the referee stays in one piece, so the line breaks before it and not in it. */
+  .hf-match-referee {
+    white-space: nowrap;
+  }
+
   .hf-match-label,
   .hf-match-note,
   .hf-match-when {

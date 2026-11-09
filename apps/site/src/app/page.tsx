@@ -15,6 +15,7 @@ import { DiscussionsCard, EpisodesCard, loadArticle } from '../NewsCards'
 import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
+import { getUpcomingDetails, type UpcomingDetails } from '../upcoming-match'
 
 // Render on each request, so the build never reads the database. getHeadlines caches the list
 // itself.
@@ -30,6 +31,25 @@ async function loadMatches(): Promise<MatchData | undefined> {
     return await getMatchData()
   } catch (error) {
     console.error(`Could not read the matches and the table for the homepage: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The previous meeting and the form of the next opponent for the card Wedstrijden, or undefined
+ * when the database can't give them: the card then has no small lines under the clubs, and the
+ * log says why.
+ */
+async function loadUpcomingDetails(data: MatchData | undefined): Promise<undefined | UpcomingDetails> {
+  if (data === undefined) {
+    return undefined
+  }
+
+  try {
+    return await getUpcomingDetails(data, new Date())
+  } catch (error) {
+    console.error(`Could not read the previous meeting and the form for the homepage: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -52,7 +72,9 @@ const loadContent = cache(async () => {
       loadMatches(),
     ])
 
-    return { article, discussions, episodes, headlines, matches }
+    const details = await loadUpcomingDetails(matches)
+
+    return { article, details, discussions, episodes, headlines, matches }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -76,7 +98,7 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const { article, discussions, episodes, headlines, matches } = content
+  const { article, details, discussions, episodes, headlines, matches } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
 
@@ -132,8 +154,8 @@ export default async function HomePage() {
       <Page.Sidebar aria-label="De wedstrijden, de stand, het forum en de podcasts">
         {matches !== undefined && (
           <>
-            <MatchesCard data={matches} now={now} />
-            <StandingsCard data={matches} now={now} />
+            <MatchesCard data={matches} details={details} now={now} />
+            <StandingsCard archive={details?.previousMeeting?.dataSource === 'oude-fansite'} data={matches} now={now} />
           </>
         )}
         <DiscussionsCard discussions={discussions} now={now} />

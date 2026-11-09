@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, Fragment } from 'react'
+import { type ComponentPropsWithoutRef, Fragment, type ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
@@ -109,7 +109,7 @@ type MatchAfterNinety =
     }
   | { afterNinetyAgainst?: never; afterNinetyFor?: never }
 
-type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+type MatchBaseProps = {
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
   /**
@@ -119,6 +119,12 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
    * line then starts with the round.
    */
   competition?: string | undefined
+  /**
+   * Small lines under the clubs, before the line with the competition: something about this
+   * match that the page puts there, such as the previous meeting or the form of the opponent.
+   * The match sets them in the small text of its other lines and has no say in what they say.
+   */
+  extra?: ReactNode
   /** Whether sc Heerenveen plays at home. The home club is named first. */
   home: boolean
   /**
@@ -130,11 +136,17 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   note?: null | string | undefined
   /** The club sc Heerenveen plays, as plain text. */
   opponent: string
+  /**
+   * The name of the referee, as plain text. It ends the line with the competition and the
+   * round, after another separator: `Eredivisie · Speelronde 2 · Danny Makkelie`, without a
+   * label. It needs `competition`, which has that line, and shows nothing without a name.
+   */
+  referee?: null | string | undefined
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
   round: string
   /** The stadium, as plain text. Without it the line has the day or the time alone. */
   stadium?: null | string | undefined
-}
+} & Omit<ComponentPropsWithoutRef<'div'>, 'children'>
 
 /** A match that is called off has no time and no result, only the word for its status. */
 type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBaseProps & {
@@ -248,6 +260,7 @@ export const Match = ({
   className,
   competition,
   dateTime,
+  extra,
   extraTime,
   goals,
   goalsAgainst,
@@ -258,6 +271,7 @@ export const Match = ({
   opponent,
   penaltiesAgainst,
   penaltiesFor,
+  referee,
   reportHref,
   resultMissing,
   round,
@@ -376,11 +390,18 @@ export const Match = ({
           ))}
         </p>
       ) : null}
+      {extra ? <div className="hf-match-extra-lines">{extra}</div> : null}
       {competition ? (
         <Text appearance="meta" className="hf-match-label">
           {competition}
           {separator}
           {round}
+          {referee ? (
+            <>
+              {separator}
+              <span className="hf-match-referee">{referee}</span>
+            </>
+          ) : null}
         </Text>
       ) : null}
       {reportHref === undefined ? null : (

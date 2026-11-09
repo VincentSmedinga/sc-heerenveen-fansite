@@ -3,6 +3,7 @@ import preview from '#.storybook/preview'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
+import { MarkRow } from '../mark-row/MarkRow'
 import { Text } from '../text/Text'
 import { WikipediaCredit } from '../wikipedia-credit/WikipediaCredit'
 import { Match } from './Match'
@@ -19,6 +20,8 @@ const meta = preview.meta({
           'Daaronder staan de twee clubs met de uitslag ertussen, en eventueel de doelpuntenmakers, en onderaan de competitie met de ronde: "Eredivisie · Speelronde 12".',
           'Zonder `competition`, onder een kop die de competitie al noemt, begint de regel met de ronde, de dag en het stadion: "Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA".',
           'Daaronder staan de clubs en de doelpuntenmakers.',
+          'Met `referee` eindigt die laatste regel met de naam van de scheidsrechter, zonder label: "Eredivisie · Speelronde 2 · Danny Makkelie".',
+          'Met `extra` zet de pagina kleine regels onder de clubs, zoals de vorige ontmoeting of de vorm van de tegenstander; de wedstrijd zet ze in kleine tekst en bepaalt niet wat erin staat.',
           'De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.',
           '',
           'De clubs staan in de volgorde van de aankondiging: de thuisclub eerst.',
@@ -932,4 +935,65 @@ const renderGoalWithoutMinute = () => (
 export const GoalWithoutMinute = meta.story({
   name: 'Een doelpunt zonder minuut: een streepje in de kleur van de club',
   render: renderGoalWithoutMinute,
+})
+
+// The referee ends the last line of a played match; the next match has small lines of its own
+// under the clubs. The clubs and the referee are made up.
+const renderRefereeAndExtra = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="wedstrijden-extra-kop">
+      <Heading id="wedstrijden-extra-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-10-25"
+            goalsAgainst={1}
+            goalsFor={2}
+            home
+            opponent="Voorbeeld United"
+            referee="Pieter Maquette"
+            round="Speelronde 2"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 25 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-08T11:15:00Z"
+            extra={
+              <>
+                <Text appearance="meta">Vorige keer: 12 apr 2026, 2–1</Text>
+                <MarkRow
+                  marks={[
+                    { label: 'winst', mark: 'W', tone: 'positive' },
+                    { label: 'gelijk', mark: 'G', tone: 'neutral' },
+                    { label: 'verlies', mark: 'V', tone: 'negative' },
+                    { label: 'winst', mark: 'W', tone: 'positive' },
+                    { label: 'gelijk', mark: 'G', tone: 'neutral' },
+                  ]}
+                  title="Vorm Testdorp FC"
+                />
+              </>
+            }
+            home={false}
+            opponent="Testdorp FC"
+            round="Speelronde 3"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="zo 8 nov 12:15"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const WithRefereeAndExtra = meta.story({
+  name: 'Met de scheidsrechter na de ronde, en kleine regels onder de clubs',
+  render: renderRefereeAndExtra,
 })

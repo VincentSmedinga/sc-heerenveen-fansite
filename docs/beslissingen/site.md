@@ -845,6 +845,7 @@
 - **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
   De bronvermelding linkt niet meer naar de geschiedenis van de pagina's en staat op `/wedstrijden` in een kaart zonder zichtbare rand en achtergrond.
 - **Later:** zie _De bron staat bij de wedstrijden, per bron_ (8 november 2026): een pagina met wedstrijden uit het archief van de oude fansite noemt het archief, naast Wikipedia of in plaats ervan.
+- **Later:** zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026): de korte bronvermelding staat nu één keer onder de kaart Stand, als "Wedstrijden en stand: Wikipedia", en niet meer onder elke kaart.
 
 ## De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis
 
@@ -3137,6 +3138,7 @@
   `MatchHeader` heeft een pil met de uitkomst en de doelpuntenmakers per club.
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
 - **Later:** zie _De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"_ (7 november 2026): de pagina bestaat ook voor een verslag dat `bezig` is of niet meer klopt, met een melding, `noindex` en zonder plek in de sitemap; alleen een wedstrijd zonder verslag heeft geen pagina.
+- **Later:** zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026): de scheidsrechter staat in de regel van de kaart Wedstrijden op home.
 
 ## De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"
 
@@ -4038,3 +4040,29 @@
   De regel weglaten als de 5 of de 20 geldt.
   Kalenderdagen in Nederlandse tijd, of "vandaag" bij één dag.
   De regel in dezelfde grootte als de koppen.
+
+## De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter
+
+- **Datum:** 9 november 2026
+- **Besluit:** onder de clubs van de volgende wedstrijd staan twee regels in kleine tekst, en de regel van een gespeelde wedstrijd eindigt met de scheidsrechter:
+  - "Vorige keer: 12 apr 2026, 2–1": de laatste gespeelde wedstrijd tegen die club op dezelfde grond (thuis of uit), uit alle competities en alle seizoenen, met het archief van de oude fansite erbij.
+    De thuisclub staat eerst in de uitslag.
+    De uitslag is vet in de kleur van de uitkomst voor sc Heerenveen, en een schermlezer hoort "2 tegen 1".
+    Zonder eerdere ontmoeting is er geen regel.
+  - "Vorm <club>: W G V W G": de laatste vijf competitieuitslagen van de tegenstander, de oudste eerst, uit `league_results` (met onze eigen wedstrijden erbij).
+    Er zijn er minder dan vijf als de tegenstander er minder speelde, en geen regel zonder uitslag, zoals bij een bekertegenstander uit een lagere divisie of een promovendus in de eerste ronde.
+    Er is geen terugval op vorig seizoen.
+  - De scheidsrechter staat zonder label aan het eind van de laatste regel: "Eredivisie · Speelronde 2 · Danny Makkelie".
+    De volgende wedstrijd toont hem ook als Wikipedia hem al noemt (de projecteigenaar, 9 november 2026); zonder naam toont een wedstrijd niets.
+  - Geen kop, geen doelpuntenmakers en dus geen legenda in dit deel van de kaart.
+  - De bronregel van de kaart vervalt.
+    De kaart Stand heeft de bronvermelding "Wedstrijden en stand: Wikipedia", met het archief erbij als de vorige ontmoeting daaruit komt (`WikipediaCredit` met `archive`).
+    Eén regel voor de twee kaarten naast elkaar voldoet aan principe 4 van de Redactie: de bron staat op de pagina.
+- **Waarom:** supporters vragen zich voor een wedstrijd af hoe het de vorige keer ging en hoe de tegenstander speelt.
+  De scheidsrechter is een feit dat in de media bij elke wedstrijd staat.
+  De query en de tests staan in `apps/site/src/upcoming-match.ts` en `findPreviousMeeting` in `packages/db`, en de kaart krijgt ze van de pagina, zodat `MatchesCard` geen database kent.
+  Als de query mislukt, staat de kaart zonder de twee regels en logt de site waarom.
+- **Gevolg:** de scheidsrechter staat alleen op de kaart op home.
+  De lijsten Wedstrijden en de pagina's van clubs tonen hem niet; de projecteigenaar kijkt later of dat ook moet.
+  `Match` heeft de props `referee` en `extra` (zie de beslissing in `designsysteem.md`).
+- **Alternatieven:** de vorm laten terugvallen op vorig seizoen (een andere ploeg en een andere stand); alleen competitiewedstrijden tellen voor "Vorige keer" (mist de bekerontmoeting van vorige maand); een eigen kop met een tabel (te zwaar voor de kaart); de scheidsrechter meteen in elke lijst (de regel wordt overal een regel langer, wat #416 juist wilde voorkomen).
