@@ -23,7 +23,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 1',
     sample: 'ADO Den Haag – sc Heerenveen',
-    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,0 · +0,01 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 125 · schaalt mee met de breedte · 1,0 · geen extra letterafstand · kapitalen',
     use: 'Paginatitel, titel op de wedstrijdband.',
   },
   {
@@ -31,7 +31,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 2',
     sample: 'Laatste nieuws',
-    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,05 · +0,02 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 125 · schaalt mee met de breedte · 1,05 · geen extra letterafstand · kapitalen',
     use: 'Secties op een pagina.',
   },
   {
@@ -39,7 +39,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 3',
     sample: 'Nieuwste discussies',
-    spec: 'Truculenta 800 · breedte 115 · schaalt mee met de breedte · 1,15 · +0,03 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 115 · schaalt mee met de breedte · 1,15 · geen extra letterafstand · kapitalen',
     use: 'Titels van kaarten en blokken in de zijbalk.',
   },
   {
@@ -55,7 +55,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 4',
     sample: 'Hoe we bronnen kiezen',
-    spec: 'Truculenta 800 · breedte 115 · één maat · 1,3 · +0,03 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 115 · één maat · 1,3 · geen extra letterafstand · kapitalen',
     use: 'Tussenkoppen in lopende tekst, zoals op Over ons.',
   },
   {
@@ -166,7 +166,7 @@ export const FontSpecimens = () => (
       <h3 className="hf-heading-3" id="font-characters">
         Nederlands en Fries
       </h3>
-      <p style={{ ...display, fontSize: '1.5rem', fontStretch: '125%', fontWeight: 800, textTransform: 'uppercase' }}>
+      <p style={{ ...display, fontSize: '1.5rem', fontStretch: '125%', fontWeight: 700, textTransform: 'uppercase' }}>
         Skûtsjesilen op het IJsselmeer, ideeën uit Fryslân
       </p>
       <p style={{ ...text, fontSize: '1.25rem' }}>

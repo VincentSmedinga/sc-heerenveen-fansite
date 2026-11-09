@@ -4,7 +4,7 @@
  * Truculenta (display) for the wordmark, all headings (1–4, and 5–6 as a fallback) and labels: always uppercase through
  * text-transform.
  * Atkinson Hyperlegible Next (text) for news headlines, body text and meta.
- * Letter spacing never goes beyond +0.04em.
+ * Headings have no extra letter spacing; letter spacing never goes beyond +0.04em.
  *
  * Headings 1–3 scale fluidly with clamp() between a 360px and a 1280px viewport, on one scale between heading 4 and
  * heading 1: the ratio between two headings is about the same at every width.
@@ -28,22 +28,22 @@
     /* Kop 1: 24px at 360px, 28px from 1280px, under the wordmark */
     --hf-heading-1-font-size: clamp(1.5rem, 1.402rem + 0.435vw, 1.75rem);
     --hf-heading-1-font-stretch: 125%;
-    --hf-heading-1-font-weight: 800;
-    --hf-heading-1-letter-spacing: 0.01em;
+    --hf-heading-1-font-weight: 700;
+    --hf-heading-1-letter-spacing: 0;
     --hf-heading-1-line-height: 1;
 
-    /* Kop 2: 21px at 360px, 23.25px from 1280px */
-    --hf-heading-2-font-size: clamp(1.3125rem, 1.257rem + 0.245vw, 1.4531rem);
+    /* Kop 2: 20.5px at 360px, 22.75px from 1280px */
+    --hf-heading-2-font-size: clamp(1.2813rem, 1.2262rem + 0.2446vw, 1.4219rem);
     --hf-heading-2-font-stretch: 125%;
-    --hf-heading-2-font-weight: 800;
-    --hf-heading-2-letter-spacing: 0.02em;
+    --hf-heading-2-font-weight: 700;
+    --hf-heading-2-letter-spacing: 0;
     --hf-heading-2-line-height: 1.05;
 
-    /* Kop 3: 18.25px at 360px, 19.25px from 1280px */
-    --hf-heading-3-font-size: clamp(1.1406rem, 1.116rem + 0.109vw, 1.2031rem);
+    /* Kop 3: 17.5px at 360px, 18.5px from 1280px */
+    --hf-heading-3-font-size: clamp(1.0938rem, 1.0693rem + 0.1087vw, 1.1563rem);
     --hf-heading-3-font-stretch: 115%;
-    --hf-heading-3-font-weight: 800;
-    --hf-heading-3-letter-spacing: 0.03em;
+    --hf-heading-3-font-weight: 700;
+    --hf-heading-3-letter-spacing: 0;
     --hf-heading-3-line-height: 1.15;
 
     /* Label */
@@ -54,10 +54,10 @@
     --hf-label-line-height: 1.2;
 
     /* Kop 4: the same style as heading 3, at the size of body text */
-    --hf-heading-4-font-size: 1rem;
+    --hf-heading-4-font-size: 0.9375rem;
     --hf-heading-4-font-stretch: 115%;
-    --hf-heading-4-font-weight: 800;
-    --hf-heading-4-letter-spacing: 0.03em;
+    --hf-heading-4-font-weight: 700;
+    --hf-heading-4-letter-spacing: 0;
     --hf-heading-4-line-height: 1.3;
 
     /* Nieuwskop: the line readers come for. Also the first line of a match. */
@@ -70,7 +70,7 @@
     --hf-body-font-weight: 400;
     --hf-body-line-height: 1.5;
 
-    /* Inleiding: the first paragraph under the h1. Larger than Tekst and smaller than Kop 2, which is 21px at its smallest. */
+    /* Inleiding: the first paragraph under the h1. Larger than Tekst and smaller than Kop 2, which is 20.5px at its smallest. */
     --hf-intro-font-size: 1.25rem;
     --hf-intro-font-weight: 400;
     --hf-intro-line-height: 1.4;
@@ -116,8 +116,8 @@
     --hf-name-font-weight: 600;
 
     /* The menu in the header and its current item, 200 heavier */
-    --hf-menu-font-weight: 600;
-    --hf-menu-current-font-weight: 800;
+    --hf-menu-font-weight: 500;
+    --hf-menu-current-font-weight: 700;
 
     /* The bar with sub-pages and the menu in the footer, and their current item, 200 heavier */
     --hf-submenu-font-weight: 400;

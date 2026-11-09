@@ -576,6 +576,7 @@
 - **Alternatieven:** Kop 1 op de maat van het woordmerk (36 pixels), of de maten laten staan en alleen het gewicht verlagen; beide blijven te zwaar.
   Kop 4 in Atkinson laten; dan staat één kop in een ander lettertype dan de rest.
   Tekst laten meeschalen van 16 naar 18 pixels; dat maakt de tekst op een brede pagina te groot.
+- **Later:** op 9 november 2026 zijn de koppen lichter en de schaal steiler: gewicht 700 in plaats van 800, Kop 2 20,5 tot 22,75 pixels, Kop 3 17,5 tot 18,5 en Kop 4 15 pixels, ook voor Kop 5 en Kop 6 (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
   Tekst op 17 of 18 pixels laten staan; de projecteigenaar vond 18 pixels te groot voor een gewone alinea.
 
 ## Een inleidende alinea heeft een eigen typestijl, met een `b` erin
@@ -1477,6 +1478,7 @@
 - **Later:** vervangt delen van vier eerdere besluiten; zie de **Later:**-regels bij _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_, _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_, _De balk met links naar de kaarten volgt de pagina_ en _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
   Nadruk (700) blijft de regel, maar in een tabel is hij alleen nog voor het kerngetal en de rij met het totaal; koppen en rijkoppen zijn 600.
+- **Later:** op 9 november 2026 is het menu in de header lichter: `--hf-menu-font-weight` 500 en `--hf-menu-current-font-weight` 700, nog steeds 200 verschil (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
 
 ## De acht voorlopige kleuren blijven en heten niet meer voorlopig
 
@@ -2748,6 +2750,8 @@
   - **De terugvallettertypes:** `Truculenta Fallback` en `Atkinson Fallback` in `fonts.css`, op Arial (Arial Bold, Liberation Sans) met `size-adjust` en overrides voor ascent, descent en lijnruimte.
     De waarden komen uit de breedte van hoofdletters in Truculenta (gewicht 800) tegen Arial Bold, en van lopende tekst in Atkinson tegen Arial: Truculenta is 75,2% (breedte 115) en 81,8% (breedte 125) van Arial Bold, Atkinson 98,9% (Arial) en 99,3% (Arial Bold).
     Elke override is de maat van het lettertype gedeeld door de `size-adjust`.
+    **Later:** op 9 november 2026 zijn de koppen van gewicht 800 naar 700 gegaan.
+    Op 700 zijn de hoofdletters 0,4 tot 0,5% breder dan op 800, dus de percentages blijven staan (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
   - **Vooraf laden:** de site laadt Truculenta en Atkinson (latin, niet cursief) vooraf met `preload` van React in `layout.tsx`, met de adressen uit `preloadedFonts` in `@fansite/design-system/fonts`.
     Next.js zet ze als `Link`-header op het antwoord.
     Het adres is het gehashte adres van de bundelaar, hetzelfde als in `fonts.css`, dus het is één verzoek.
@@ -3083,3 +3087,19 @@
   Een speler uit een land met een zware vlag krijgt geen vlag.
 - **Alternatieven:** emoji-vlaggen; bestanden die de pagina opvraagt (een pad per vlag voor Storybook, de site en de host); alle vlaggen, ook de zware (ruim 500 kB).
 - **Later:** de vlaggen met veel details kunnen met de hand worden vereenvoudigd, in een eigen issue.
+
+## Koppen op gewicht 700, een steilere schaal en een lichter menu
+
+- **Datum:** 9 november 2026
+- **Besluit:** Kop 1 tot en met Kop 4 blijven Truculenta in kapitalen, op gewicht 700 met letterafstand 0, en Kop 5 en Kop 6 krijgen ook gewicht 700.
+  De schaal wordt steiler: Kop 1 blijft 24 tot 28 pixels, Kop 2 wordt 20,5 tot 22,75, Kop 3 17,5 tot 18,5 en Kop 4 15 pixels.
+  In `density.css` gaan de maten mee met dezelfde stap omlaag: Kop 2 en Kop 3 zeven achtste van de nieuwe maat, Kop 4 14 pixels.
+  Het menu in de header gaat naar 500, met 700 voor de huidige pagina.
+  Kleuren, het label (700, +0,04 em) en het woordmerk (900) blijven gelijk.
+- **Waarom:** de koppen in 800 met extra letterafstand wogen nog zwaar naast de tekst.
+  Op 700 zonder extra afstand zijn ze rustiger en blijft het verschil tussen de niveaus zichtbaar.
+  Een lichter menu laat de koppen de leiding houden, en de huidige pagina valt nog steeds op doordat hij 200 zwaarder is.
+- **Terugvalmaten:** de maten in `fonts.css` blijven staan.
+  Op 700 zijn de hoofdletters 0,4 tot 0,5% breder dan op 800, en de terugvalletter staat toch al in Arial Bold.
+- **Alternatieven:** Atkinson Hyperlegible Next voor de koppen (vier versies, onder meer met kleine kapitalen voor tussenkoppen en met Truculenta alleen voor de paginatitel), Truculenta op 600, en Kop 1 in een nieuw, donkerder zand (de hiërarchie ging verloren).
+  De projecteigenaar verwierp ze op 9 november 2026.
