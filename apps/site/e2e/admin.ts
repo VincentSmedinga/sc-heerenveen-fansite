@@ -44,7 +44,7 @@ export const sessionCookieName = 'beheer-sessie'
 export const adminItems = {
   // The importer judged this one `doubtful`: `relevance.spec.ts` puts it on the site and takes
   // it back.
-  approving: 'Verzonnen twijfelgeval om op de site te zetten',
+  approving: 'Bedacht twijfelgeval om op de site te zetten',
   withoutScript: 'Verzonnen bericht om te verbergen zonder JavaScript',
   withScript: 'Verzonnen bericht om te verbergen met JavaScript',
 } as const
