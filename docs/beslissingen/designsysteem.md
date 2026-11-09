@@ -576,8 +576,8 @@
 - **Alternatieven:** Kop 1 op de maat van het woordmerk (36 pixels), of de maten laten staan en alleen het gewicht verlagen; beide blijven te zwaar.
   Kop 4 in Atkinson laten; dan staat één kop in een ander lettertype dan de rest.
   Tekst laten meeschalen van 16 naar 18 pixels; dat maakt de tekst op een brede pagina te groot.
-- **Later:** op 9 november 2026 zijn de koppen lichter en de schaal steiler: gewicht 700 in plaats van 800, Kop 2 20,5 tot 22,75 pixels, Kop 3 17,5 tot 18,5 en Kop 4 15 pixels, ook voor Kop 5 en Kop 6 (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
   Tekst op 17 of 18 pixels laten staan; de projecteigenaar vond 18 pixels te groot voor een gewone alinea.
+- **Later:** op 9 november 2026 zijn de koppen lichter en de schaal steiler: gewicht 700 in plaats van 800, Kop 2 20,5 tot 22,75 pixels, Kop 3 17,5 tot 18,5 en Kop 4 15 pixels, ook voor Kop 5 en Kop 6 (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
 
 ## Een inleidende alinea heeft een eigen typestijl, met een `b` erin
 
