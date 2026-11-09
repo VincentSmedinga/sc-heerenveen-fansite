@@ -1,4 +1,5 @@
 import type {
+  PreviousMeeting,
   PublicMatch,
   PublicPlayerStats,
   PublicStaff,
@@ -38,11 +39,20 @@ import {
 } from '@fansite/design-system'
 
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
+import type { UpcomingDetails } from './upcoming-match'
 
 import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
 import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
-import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import {
+  coachPeriods,
+  creditName,
+  formatReadAt,
+  formatStaffDate,
+  formatTableDay,
+  matchMoment,
+  wikipediaUrl,
+} from './match-format'
 import { shootOutOf } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import {
@@ -82,6 +92,7 @@ import {
 import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitPersonName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
+import { meetingOutcomeOf, meetingScoreOf } from './upcoming-match'
 
 /**
  * The short credit of a small card for the source of its matches: Wikipedia, the archive of the
@@ -600,7 +611,16 @@ export function AttendanceCard({
  * The block of the homepage with the previous and the next match in one list, and a link to the
  * page with them all. Without matches it says so in a sentence for visitors.
  */
-export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
+export function MatchesCard({
+  data,
+  details,
+  now,
+}: {
+  data: MatchData
+  /** What goes under the clubs of the next match; without it that match has no small lines. */
+  details?: undefined | UpcomingDetails
+  now: Date
+}) {
   const { next, previous } = overviewOf(data.matches, now)
   const shown = [previous, next].filter((match) => match !== undefined)
 
@@ -612,14 +632,22 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
       {shown.length === 0 ? (
         <Text>We hebben het programma nog niet gevonden. Kijk straks nog eens.</Text>
       ) : (
-        <MatchLines matches={shown} now={now} />
+        <MatchLines
+          extraOf={(match) =>
+            match === next && details !== undefined && hasUpcomingDetails(details) ? (
+              <NextMatchExtra details={details} match={match} />
+            ) : null
+          }
+          matches={shown}
+          now={now}
+          withReferee
+        />
       )}
       <Text>
         <Link href="/wedstrijden" icon="arrow-right">
           Alle wedstrijden
         </Link>
       </Text>
-      {shown.length > 0 && <CompactCredit source={sourceOf(shown)} />}
     </Card>
   )
 }
@@ -715,12 +743,16 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
  * legend under the list holds only the abbreviations of these matches.
  */
 export function MatchLines({
+  extraOf,
   liveReports,
   matches,
   now,
   reportAddresses,
   withCompetition = true,
+  withReferee = false,
 }: {
+  /** Small lines under the clubs of a match, or nothing for a match that has none. */
+  extraOf?: ((match: PublicMatch) => ReactNode) | undefined
   /**
    * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): their line
    * says "Live" in the link to their page.
@@ -735,6 +767,8 @@ export function MatchLines({
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
+  /** Whether the line of a played match ends with the referee, when the match has one. */
+  withReferee?: boolean
 }) {
   return (
     <>
@@ -742,9 +776,11 @@ export function MatchLines({
         {matches.map((match) => (
           <List.Item key={`${match.competition}-${match.round}`}>
             <MatchLine
+              extra={extraOf?.(match)}
               live={liveReports?.has(`${match.competition}|${match.round}`) === true}
               match={match}
               now={now}
+              referee={withReferee && match.status === 'played' ? match.referee : undefined}
               reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
               withCompetition={withCompetition}
             />
@@ -752,6 +788,50 @@ export function MatchLines({
         ))}
       </List>
       <MatchLegend matches={matches} />
+    </>
+  )
+}
+
+/** Whether there is a previous meeting or a form to show under the next match. */
+const hasUpcomingDetails = ({ opponentForm, previousMeeting }: UpcomingDetails) =>
+  previousMeeting !== undefined || opponentForm.length > 0
+
+/**
+ * The small lines under the clubs of the next match on the homepage: the last meeting at the
+ * same ground and the form of the opponent. Each is left out when there is nothing to say, so a
+ * club we never met and one without league results give no lines at all.
+ */
+function NextMatchExtra({ details, match }: { details: UpcomingDetails; match: PublicMatch }) {
+  const { opponentForm, previousMeeting } = details
+
+  return (
+    <>
+      {previousMeeting === undefined ? null : (
+        <Text appearance="meta">
+          {`Vorige keer: ${formatStaffDate({ date: previousMeeting.matchDate, precision: 'day' })}, `}
+          <PreviousScore home={match.home} meeting={previousMeeting} />
+        </Text>
+      )}
+      <MarkRow marks={opponentForm.map((result) => markOf[result])} title={`Vorm ${match.opponent}`} />
+    </>
+  )
+}
+
+/**
+ * The result of the previous meeting in bold, in the colour of the outcome for sc Heerenveen.
+ * The colour is not the only sign: it is the score, and a screen reader hears "2 tegen 1".
+ */
+function PreviousScore({ home, meeting }: { home: boolean; meeting: PreviousMeeting }) {
+  const [first, second] = meetingScoreOf(meeting, home)
+
+  return (
+    <>
+      <Text
+        aria-hidden="true"
+        as="span"
+        className={`hf-match-previous-score hf-match-${meetingOutcomeOf(meeting)}`}
+      >{`${first}–${second}`}</Text>
+      <Text as="span" className="hf-visually-hidden">{`${first} tegen ${second}`}</Text>
     </>
   )
 }
@@ -1132,7 +1212,16 @@ export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
  * The block of the homepage with three clubs of the league table in its short form, with sc
  * Heerenveen in the middle if possible, and a link to the full table on the matches page.
  */
-export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
+export function StandingsCard({
+  archive = false,
+  data,
+  now,
+}: {
+  /** Whether the previous meeting under the next match comes from the old fansite's archive. */
+  archive?: boolean
+  data: MatchData
+  now: Date
+}) {
   return (
     <Card aria-labelledby="standings-heading" surface="soft">
       <Heading id="standings-heading" level={2}>
@@ -1153,7 +1242,9 @@ export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
           De volledige stand
         </Link>
       </Text>
-      {data.standings.length > 0 && <WikipediaCredit compact />}
+      {(data.standings.length > 0 || data.matches.length > 0) && (
+        <WikipediaCredit archive={archive} compact lead="Wedstrijden en stand:" />
+      )}
     </Card>
   )
 }
@@ -1418,13 +1509,17 @@ export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
  * `withYear`, which gives the day of a played match its year (see `matchMoment`).
  */
 export function MatchLine({
+  extra,
   live = false,
   match,
   now,
+  referee,
   reportHref,
   withCompetition = true,
   withYear = false,
 }: {
+  /** Small lines under the clubs, such as the previous meeting. */
+  extra?: ReactNode
   /**
    * Whether the match is being played and has a page with its report: the link then says "Live"
    * and the line has no result. It needs `reportHref`.
@@ -1432,6 +1527,8 @@ export function MatchLine({
   live?: boolean
   match: MatchLineMatch
   now: Date
+  /** The referee, for the end of the last line of the match; only the homepage card has it. */
+  referee?: null | string | undefined
   /** The address of the page of the match, when it has one: the line then links to it. */
   reportHref?: string | undefined
   withCompetition?: boolean
@@ -1439,9 +1536,11 @@ export function MatchLine({
 }) {
   const common = {
     competition: withCompetition ? match.competition : undefined,
+    extra,
     home: match.home,
     note: match.note,
     opponent: match.opponent,
+    referee,
     round: match.round,
     stadium: match.stadium,
   }

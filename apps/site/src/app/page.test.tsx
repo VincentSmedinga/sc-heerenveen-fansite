@@ -9,6 +9,7 @@ import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { getLatestEpisodes } from '../podcasts'
 import { matchData } from '../test-matches'
+import { getUpcomingDetails } from '../upcoming-match'
 import { withoutIcons } from '../without-icons'
 import HomePage, { generateMetadata } from './page'
 
@@ -17,6 +18,10 @@ vi.mock('../headlines', async (importOriginal) => ({ ...(await importOriginal<ob
 vi.mock('../articles', () => ({ getNewestArticle: vi.fn() }))
 vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
+vi.mock('../upcoming-match', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getUpcomingDetails: vi.fn(),
+}))
 // The query is replaced; the split into the next match and the results is the real one.
 vi.mock('../matches', async (importOriginal) => ({ ...(await importOriginal<object>()), getMatchData: vi.fn() }))
 
@@ -120,6 +125,8 @@ beforeEach(() => {
   vi.mocked(getLatestEpisodes).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(noMatchData)
+  vi.mocked(getUpcomingDetails).mockReset()
+  vi.mocked(getUpcomingDetails).mockResolvedValue({ opponentForm: [], previousMeeting: undefined })
 })
 
 afterEach(() => {
@@ -1018,25 +1025,137 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     const matches = withoutIcons(await renderMatchesCard())
     const standings = withoutIcons(await renderStandingsCard())
 
-    for (const [card, link] of [
-      [matches, 'Alle wedstrijden'],
-      [standings, 'De volledige stand'],
+    for (const [card, link, credit] of [
+      [matches, 'Alle wedstrijden', undefined],
+      [standings, 'De volledige stand', 'hf-wikipedia-credit'],
     ] as const) {
-      const places = ['</h2>', card.includes('<table') ? '</table>' : '</ul>', link, 'hf-wikipedia-credit'].map(
-        (part) => card.indexOf(part),
-      )
+      const places = ['</h2>', card.includes('<table') ? '</table>' : '</ul>', link, credit]
+        .filter((part) => part !== undefined)
+        .map((part) => card.indexOf(part))
 
       expect(places.every((place) => place > -1)).toBe(true)
       expect(places).toEqual([...places].sort((a, b) => a - b))
     }
   })
 
-  it('has "Bron: Wikipedia" under each card, and nothing more: the full credit is on /wedstrijden', async () => {
-    for (const html of [await renderMatchesCard(), await renderStandingsCard()]) {
-      expect(html).toContain('<p class="hf-meta hf-wikipedia-credit">Bron: Wikipedia</p>')
-      expect(html).not.toContain('CC BY-SA')
-      expect(html).not.toContain('wikipedia.org')
-    }
+  it('has the credit for the two cards under the table alone, and nothing more: the full credit is on /wedstrijden', async () => {
+    const matches = await renderMatchesCard()
+    const standings = await renderStandingsCard()
+
+    expect(matches).not.toContain('hf-wikipedia-credit')
+    expect(standings).toContain('<p class="hf-meta hf-wikipedia-credit">Wedstrijden en stand: Wikipedia</p>')
+    expect(standings).not.toContain('CC BY-SA')
+    expect(standings).not.toContain('wikipedia.org')
+  })
+
+  it('names the archive in the credit when the previous meeting comes from it', async () => {
+    vi.mocked(getUpcomingDetails).mockResolvedValue({
+      opponentForm: [],
+      previousMeeting: { dataSource: 'oude-fansite', goalsAgainst: 4, goalsFor: 1, matchDate: '2005-03-05' },
+    })
+
+    expect(await renderStandingsCard()).toContain(
+      'Wedstrijden en stand: Wikipedia en het archief van de oude sc Heerenveen Fansite',
+    )
+  })
+
+  it('shows the credit with a programme and no table', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings: [] })
+
+    expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia')
+  })
+
+  it('ends the line of a played match with the referee, and leaves it out when it is not known', async () => {
+    const played = matchData.matches.filter((match) => match.status === 'played')
+    const last = played.at(-1)!
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => (match === last ? { ...match, referee: 'Pieter Maquette' } : match)),
+    })
+
+    expect(withoutIcons(await renderMatchesCard())).toContain(
+      '<span aria-hidden="true">·</span> Tweede ronde <span aria-hidden="true">·</span> <span class="hf-match-referee">Pieter Maquette</span>',
+    )
+    vi.mocked(getMatchData).mockResolvedValue(matchData)
+    expect(await renderMatchesCard()).not.toContain('hf-match-referee')
+  })
+
+  it('never shows a referee for the next match', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
+    })
+
+    const html = await renderMatchesCard()
+
+    expect(html.match(/hf-match-referee/g)).toHaveLength(1)
+  })
+
+  it('has the previous meeting and the form under the clubs of the next match, before its competition', async () => {
+    vi.mocked(getUpcomingDetails).mockResolvedValue({
+      opponentForm: ['W', 'G', 'V'],
+      previousMeeting: { dataSource: 'wikipedia', goalsAgainst: 1, goalsFor: 2, matchDate: '2026-04-12' },
+    })
+
+    const html = await renderMatchesCard()
+    const next = html.slice(html.indexOf('Proefstad SV'))
+
+    expect(next).toContain('Vorige keer: 12 apr')
+    // At home: sc Heerenveen is named first, so its 2 goals come first, in the colour of a win.
+    expect(next).toContain('<span class="hf-match-previous-score hf-match-win" aria-hidden="true">2–1</span>')
+    expect(next).toContain('<span class="hf-visually-hidden">2 tegen 1</span>')
+    expect(next).toContain('Vorm Proefstad SV: winst, gelijk, verlies')
+    expect(next.indexOf('Vorige keer')).toBeLessThan(next.indexOf('Vorm Proefstad SV'))
+    expect(next.indexOf('Vorm Proefstad SV')).toBeLessThan(next.indexOf('Eredivisie'))
+    // The previous match of the card has no small lines.
+    expect(html.slice(0, html.indexOf('Proefstad SV'))).not.toContain('Vorige keer')
+    // No heading, no scorers and no legend for the abbreviations in this part of the card.
+    expect(next).not.toContain('hf-match-goals')
+  })
+
+  it('names the home club first in the previous meeting, and takes the colour from the side of sc Heerenveen', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => (match.status === 'scheduled' ? { ...match, home: false } : match)),
+    })
+    vi.mocked(getUpcomingDetails).mockResolvedValue({
+      opponentForm: [],
+      previousMeeting: { dataSource: 'wikipedia', goalsAgainst: 1, goalsFor: 2, matchDate: '2026-04-12' },
+    })
+
+    expect(await renderMatchesCard()).toContain('hf-match-win" aria-hidden="true">1–2</span>')
+  })
+
+  it('leaves out the line without a previous meeting, and the form of a club with no league results', async () => {
+    vi.mocked(getUpcomingDetails).mockResolvedValue({
+      opponentForm: ['G'],
+      previousMeeting: undefined,
+    })
+
+    const onlyForm = await renderMatchesCard()
+
+    expect(onlyForm).not.toContain('Vorige keer')
+    expect(onlyForm).toContain('Vorm Proefstad SV')
+
+    vi.mocked(getUpcomingDetails).mockResolvedValue({ opponentForm: [], previousMeeting: undefined })
+
+    const none = await renderMatchesCard()
+
+    expect(none).not.toContain('Vorm ')
+    expect(none).not.toContain('hf-match-extra-lines')
+  })
+
+  it('shows the card without the small lines, and logs why, when they can not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getUpcomingDetails).mockRejectedValue(new Error('Failed query: select 1'))
+
+    const html = await renderMatchesCard()
+
+    expect(html).toContain('Proefstad SV')
+    expect(html).not.toContain('Vorige keer')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the previous meeting and the form'))
   })
 
   it('says in a sentence for visitors that there is no programme or table yet, with no credit', async () => {

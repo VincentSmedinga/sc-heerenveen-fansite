@@ -903,4 +903,43 @@ describe('Match that is being played', () => {
     expect(container.querySelector('a')?.textContent).toBe('Het verslag van Voorbeeld United tegen sc Heerenveen')
     expect(container.querySelector('.hf-match-live')).toBeNull()
   })
+
+  describe('referee', () => {
+    it('ends the line with the competition and the round, after a separator and without a label', () => {
+      const { container } = render(<Match {...played} referee="Pieter Maquette" />)
+
+      expect(container.querySelector('.hf-match-label')?.textContent).toBe(
+        'Eredivisie · Speelronde 9 · Pieter Maquette',
+      )
+    })
+
+    it('shows nothing for a missing name', () => {
+      const { container: none } = render(<Match {...played} referee={null} />)
+      const { container: empty } = render(<Match {...played} referee="" />)
+
+      expect(none.querySelector('.hf-match-label')?.textContent).toBe('Eredivisie · Speelronde 9')
+      expect(empty.querySelector('.hf-match-label')?.textContent).toBe('Eredivisie · Speelronde 9')
+    })
+
+    it('shows nothing without a competition, which has no such line', () => {
+      const { container } = render(<Match {...played} competition={undefined} referee="Pieter Maquette" />)
+
+      expect(textOf(container)).not.toContain('Pieter Maquette')
+    })
+  })
+
+  describe('extra', () => {
+    it('puts the small lines under the clubs and before the competition and the round', () => {
+      const { container } = render(<Match {...scheduled} extra={<p>Vorige keer: 12 apr 2026, 2–1</p>} />)
+
+      expect(lines(container)).toEqual(['hf-match-when', 'hf-match-clubs', 'hf-match-extra', 'hf-match-label'])
+      expect(container.querySelector('.hf-match-extra-lines')?.textContent).toBe('Vorige keer: 12 apr 2026, 2–1')
+    })
+
+    it('adds no line without small lines', () => {
+      const { container } = render(<Match {...scheduled} />)
+
+      expect(container.querySelector('.hf-match-extra-lines')).toBeNull()
+    })
+  })
 })
