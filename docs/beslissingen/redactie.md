@@ -2383,6 +2383,8 @@
   Een "van … tot …" bij elke trainer (de regel wordt lang, en de dag van het begin van een trainer is de dag van het einde van de vorige).
   Een eigen lijstregel met eigen CSS (dubbel werk, en de twee lijsten gaan dan uit elkaar lopen).
 - **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): de kaart "Hoe vaak welke uitslag" staat tussen de stand en de hoofdtrainer, dus Hoofdtrainer is de laatste kaart van de zijbalk en de link staat na die van Hoe vaak welke uitslag.
+- **Later:** op 9 november 2026 (#992) staan de trainers in de kaart Verloop op de ranglijst, met rondes en plekken in plaats van datums; waar die kaart staat, vervalt deze kaart en haar link.
+  Zie _De kaart Verloop op de ranglijst toont de hoofdtrainers, en de kaart Hoofdtrainer vervalt daar_.
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026) in `site.md`: de kolom met de periode van `ShortStaff` is 9,5 in plaats van 8,5 rem, zodat een periode van twee seizoenen erin past.
 
 ## De hoofdtrainers staan in de seed met de laatste dag, en een afgeleide laatste dag is de dag voor de opvolger
@@ -2957,3 +2959,28 @@
   Het streepje per 5 rondes laat de as rustig lezen.
 - **Alternatieven:** "Bewogen: N keer van plek veranderd" (telt niet hoe ver); "Ruimte: 9 plekken" (staat al in de twee regels erboven); het gemiddelde (zegt niets over beweging); twee kolommen met plek en ronde in één cel (een schermlezer noemt de cel dan niet goed).
 - **Later:** vervangt de naam, het anker en de zin boven de tabel uit _De plek per speelronde staat op Wedstrijden, onder de stand_ in `site.md`.
+- **Later:** op 9 november 2026 (#992) vervangen de streepjes per 5 rondes door ronde 1, een kwart, de helft, driekwart en de laatste ronde (1, 8, 17, 25 en 34), en krijgt de plek-as hulplijnen en cijfers bij plek 1, de helft en de laatste plek (1, 9 en 18).
+  Zie _De kaart Verloop op de ranglijst toont de hoofdtrainers_ hieronder.
+
+## De kaart Verloop op de ranglijst toont de hoofdtrainers, en de kaart Hoofdtrainer vervalt daar
+
+- **Datum:** 9 november 2026
+- **Besluit:** de trainers staan in de kaart Verloop op de ranglijst (#992), met rondes in plaats van datums en "plek A → B" als regel erachter, en een gestreepte lijn in de grafiek bij elke nieuwe trainer.
+  De kaart Hoofdtrainer en haar link in de balk "Op deze pagina:" vervallen alleen op de pagina's waar deze kaart staat; seizoenen zonder deze kaart houden ze, met het anker `#hoofdtrainer`.
+  - **De regel:** de naam zoals die van een speler, met "(interim)" erachter, en dan "Ronde 1 t/m 12 · plek 5 → 9" (`coachLines` en `coachText` in `src/placeHistory.ts`).
+    Een trainer die in het midden begint en blijft heeft "Vanaf ronde 13", een die vertrekt "Ronde 13 t/m 20", en één ronde is "Ronde 5".
+    De pijl is voor het oog; een schermlezer krijgt het woord "naar".
+  - **De rondes komen uit de wedstrijden:** het begin is de ronde van de eerste Eredivisie-wedstrijd van de trainer, geteld vanaf de dag dat die begon tot de dag dat de volgende begon.
+    Het einde is de ronde vóór het begin van de volgende trainer met een wedstrijd, of de laatste ronde van het seizoen.
+    Een trainer zonder wedstrijd staat in de lijst zonder rondes en zonder plek.
+  - **De plek:** de plek na de eerste en na de laatste volledige ronde van de trainer; zijn die gelijk, dan staat er "plek 5", en zonder volledige ronde staat er geen plek.
+  - **De lijn:** `BarChart` heeft een prop `dividers`, gestreepte verticale lijnen op de rand tussen twee rondes, in het token voor de grondlijn van de grafiek (`--hf-colour-marker-graphic`, 3:1 in licht en donker).
+    De lijnen zijn voor een schermlezer verborgen met de rest van de grafiek: de lijst is het tekstalternatief.
+  - **De assen:** zie de **Later:**-regel bij de beslissing van #991: 1, 9 en 18 voor de plekken en 1, 8, 17, 25 en 34 voor de rondes, de tussenstappen naar beneden afgerond (`axisTicks`).
+- **Waarom:** bij een grafiek over de rondes zijn rondes de natuurlijke tijd; een datum moet de lezer zelf omzetten.
+  De plek van begin naar einde laat zien wat een trainer deed.
+  De lijst is het tekstalternatief voor de gestreepte lijnen.
+  Een seizoen zonder deze kaart houdt zijn trainers, zodat nergens informatie verdwijnt.
+  Vijf getallen op de assen lezen rustiger dan een streepje per vijf rondes.
+- **Alternatieven:** de kaart Hoofdtrainer overal weghalen (seizoenen zonder grafiek verliezen de trainers); alleen een lijst zonder lijnen; de datum erbij houden (twee tijdsvormen in één kaart).
+- **Later:** vervangt voor de seizoenen met de kaart Verloop op de ranglijst _De trainers van een seizoen staan in een kaart met het sterke blauwe vlak onder de stand_.

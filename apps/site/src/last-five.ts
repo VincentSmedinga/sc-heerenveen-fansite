@@ -19,7 +19,7 @@ export type LastFiveRow = {
 }
 
 /** The number at the end of a round as the matches have it, such as 12 for `Speelronde 12`. */
-const roundNumberOf = (round: string) => Number(/(\d+)\s*$/u.exec(round)?.[1] ?? 0)
+export const roundNumberOf = (round: string) => Number(/(\d+)\s*$/u.exec(round)?.[1] ?? 0)
 
 /** The table over the latest five matches, and the day of the last result it is based on. */
 export type LastFive = { lastResultOn: string; rows: LastFiveRow[] }

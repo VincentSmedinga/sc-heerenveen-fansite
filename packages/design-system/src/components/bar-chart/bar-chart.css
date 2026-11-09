@@ -53,6 +53,15 @@
     position: absolute;
   }
 
+  /* A dashed line down the plot, on the edge between two places. */
+  .hf-bar-chart-divider {
+    border-inline-start: 2px dashed var(--hf-card-line-graphic, var(--hf-colour-marker-graphic));
+    inline-size: 0;
+    inset-block: 0;
+    inset-inline-start: calc(var(--hf-bar-chart-across) * 1%);
+    position: absolute;
+  }
+
   /*
    * One column for each place, all as wide as each other, with the room round a bar as
    * padding of the place and not as a gap between places. So the middle of place i is
@@ -249,6 +258,10 @@
 
     .hf-bar-chart-guide {
       border-block-start-color: GrayText;
+    }
+
+    .hf-bar-chart-divider {
+      border-inline-start-color: GrayText;
     }
 
     .hf-bar-chart-trend-line {

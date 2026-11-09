@@ -25,15 +25,14 @@ describe('matchShortcutsOf', () => {
     const hrefs = (current: boolean, withPlacePerRound: boolean) =>
       matchShortcutsOf(current, 1, [], withPlacePerRound).map(({ href }) => href)
 
-    expect(hrefs(true, true)).toEqual([
-      '#programma',
-      '#uitslagen',
-      '#stand',
-      '#verloop-op-de-ranglijst',
-      '#hoofdtrainer',
-    ])
-    expect(hrefs(false, true)).toEqual(['#uitslagen', '#eindstand', '#verloop-op-de-ranglijst', '#hoofdtrainer'])
+    expect(hrefs(true, true)).toEqual(['#programma', '#uitslagen', '#stand', '#verloop-op-de-ranglijst'])
+    expect(hrefs(false, true)).toEqual(['#uitslagen', '#eindstand', '#verloop-op-de-ranglijst'])
     expect(hrefs(true, false)).not.toContain('#verloop-op-de-ranglijst')
+  })
+
+  it('has the link Hoofdtrainer only when the season has no card with our place per round', () => {
+    expect(matchShortcutsOf(true, 1, [], false).map(({ href }) => href)).toContain('#hoofdtrainer')
+    expect(matchShortcutsOf(true, 2, [], true).map(({ href }) => href)).not.toContain('#hoofdtrainer')
   })
 
   it('has Stand in the current season', () => {

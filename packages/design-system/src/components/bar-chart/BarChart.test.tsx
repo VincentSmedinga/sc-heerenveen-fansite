@@ -103,6 +103,25 @@ describe('BarChart', () => {
     ])
   })
 
+  it('draws a dashed divider on the edge between two places, and leaves out one outside the chart', () => {
+    const { container } = render(
+      <BarChart bars={Array.from({ length: 34 }, () => null)} dividers={[0, 12, 34, 40]} max={3} />,
+    )
+
+    expect(
+      [...container.querySelectorAll<HTMLElement>('.hf-bar-chart-divider')].map((divider) =>
+        divider.style.getPropertyValue('--hf-bar-chart-across'),
+      ),
+    ).toEqual(['35.29'])
+    expect(container.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('has no dividers by default', () => {
+    const { container } = render(<BarChart bars={bars} max={3} />)
+
+    expect(container.querySelector('.hf-bar-chart-divider')).toBeNull()
+  })
+
   it('has no guides or numbers at the side without ticks', () => {
     const { container } = render(<BarChart bars={bars} max={3} />)
 

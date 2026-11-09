@@ -65,6 +65,13 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   bars: readonly (BarChartBar | null)[]
   /** Layers on the same chart, such as a `BarChart.Trend`. They sit right on the places. */
   children?: ReactNode
+  /**
+   * Dashed vertical lines across the plot, where something changes, such as a new coach. Each
+   * is a number of places from the start side: 12 is the line between the twelfth and the
+   * thirteenth place. A number outside the chart is left out. The lines are part of the
+   * picture, so give what they mean as text next to the chart.
+   */
+  dividers?: readonly number[]
   /** The value of a full bar. It is the scale of the chart, and of a trend on it. */
   max: number
   /**
@@ -181,6 +188,7 @@ export const BarChart = ({
   bars,
   children,
   className,
+  dividers = [],
   max,
   style,
   ticks = [],
@@ -226,6 +234,15 @@ export const BarChart = ({
                 className="hf-bar-chart-guide"
                 key={tick}
                 style={{ '--hf-bar-chart-at': percentOf(tick, max) } as CSSProperties}
+              />
+            ))}
+          {dividers
+            .filter((divider) => divider > 0 && divider < slots)
+            .map((divider) => (
+              <span
+                className="hf-bar-chart-divider"
+                key={divider}
+                style={{ '--hf-bar-chart-across': acrossOf(divider, slots) } as CSSProperties}
               />
             ))}
           <div className="hf-bar-chart-bars">

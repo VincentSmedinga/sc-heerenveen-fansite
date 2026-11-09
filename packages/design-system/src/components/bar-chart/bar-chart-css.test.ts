@@ -43,6 +43,12 @@ describe('bar-chart.css', () => {
     expect(declarationsOf('.hf-bar-chart-guide')).toMatch(/var\(--hf-card-line, var\(--hf-colour-border-default\)\)/u)
   })
 
+  it('draws a divider as a dashed line in the graphic line colour, which has 3:1 in light and dark', () => {
+    expect(declarationsOf('.hf-bar-chart-divider')).toMatch(
+      /border-inline-start: 2px dashed var\(--hf-card-line-graphic, var\(--hf-colour-marker-graphic\)\)/u,
+    )
+  })
+
   it('keeps the stroke of the line at 2 pixels and its edge at 5, whatever the stretch of the drawing', () => {
     expect(declarationsOf('.hf-bar-chart')).toMatch(/--hf-bar-chart-line: 2px/u)
     expect(declarationsOf('.hf-bar-chart')).toMatch(/--hf-bar-chart-edge: 5px/u)
