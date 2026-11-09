@@ -382,9 +382,9 @@ for (const [name, javaScriptEnabled] of [
         await expect(page.getByRole('button', { name: 'Doelpunt toevoegen' })).toBeFocused()
       }
 
-      // The list says so in words.
+      // The filter finds the match, which is the link of its row.
       await page.goto('/beheer/wedstrijden?tonen=aangepast')
-      await expect(page.getByText('Aangepast', { exact: true }).first()).toBeVisible()
+      await expect(page.locator(`a[href^="${address}"]`).first()).toBeVisible()
 
       // Taking the entry away asks for a reason, and brings the match back.
       await page.goto(address)
@@ -460,9 +460,10 @@ for (const [name, javaScriptEnabled] of [
       await expect(page).toHaveURL(/\/verslag\?gedaan=nog-niet-klaar$/u)
       await expect(page.getByRole('status').filter({ hasText: 'Bewaard als bezig.' })).toBeVisible()
 
-      // The list says so in words, with a link to the report.
+      // The list says so in words, and the name of the match links to the report.
       await page.goto(`/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`)
-      await expect(page.locator(`a[href="${address}"]`).first()).toContainText('Openen')
+      await expect(page.locator(`a[href="${address}"]`).first()).toBeVisible()
+      await expect(page.locator('tr', { has: page.locator(`a[href="${address}"]`) }).first()).toContainText('Niet af')
 
       // A row that is taken away is gone: the form does not make a new row for it.
       await page.goto(address)

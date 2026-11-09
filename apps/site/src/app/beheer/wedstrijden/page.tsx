@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 
-import { describeEntryKickoff } from '@fansite/db/match-edits'
 import { listMatchSeasons } from '@fansite/db/queries'
 import { seasonOf } from '@fansite/db/season'
 import {
@@ -9,7 +8,6 @@ import {
   DataTable,
   Filter,
   Heading,
-  Link,
   Notice,
   Page,
   SeasonPicker,
@@ -136,14 +134,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <DataTable
               appearance="text"
               caption={`Wedstrijden in het seizoen ${season}`}
-              columns={[
-                'Wedstrijd',
-                { fold: true, name: 'Datum' },
-                { fold: true, name: 'Competitie' },
-                'Uitslag',
-                'Status',
-                { fold: true, name: 'Verslag' },
-              ]}
+              columns={['Wedstrijd', 'Uitslag', 'Verslag']}
               rows={tableRows(shown)}
             />
           )}
@@ -160,7 +151,10 @@ const emptyTexts: Record<Show, string> = {
   'zonder-uitslag': 'Alle wedstrijden hebben een uitslag.',
 }
 
-/** The rows of the table. The clubs are the row header, so a second meeting gets its round. */
+/**
+ * The rows of the table. The clubs are the row header and the only link, so a second meeting
+ * gets its round. The line under it has the day, the kick-off and the competition.
+ */
 function tableRows(matches: readonly AdminMatchRow[]) {
   const names = matches.map(clubsOf)
 
@@ -168,15 +162,10 @@ function tableRows(matches: readonly AdminMatchRow[]) {
     const clubs = names[index] as string
 
     return {
-      cells: [
-        describeEntryKickoff(match),
-        competitionOf(match),
-        <ResultCell key="uitslag" match={match} />,
-        <StatusCell key="status" match={match} />,
-        <ReportCell clubs={clubs} key="verslag" match={match} />,
-      ],
+      cells: [<ResultCell key="uitslag" match={match} />, <ReportCell key="verslag" match={match} />],
       header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
-      href: matchPath(match.id),
+      href: targetOf(match),
+      secondary: `${whenOf(match)} · ${match.competition}, ${match.round}`,
     }
   })
 }
@@ -184,14 +173,33 @@ function tableRows(matches: readonly AdminMatchRow[]) {
 const clubsOf = (match: Pick<AdminMatchRow, 'home' | 'opponent'>) =>
   match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
 
-const competitionOf = (match: Pick<AdminMatchRow, 'competition' | 'round'>) => `${match.competition}, ${match.round}`
+/** Where the link of a match goes: what the editor wants to do with it in its state. */
+function targetOf(match: Pick<AdminMatchRow, 'id' | 'live' | 'reportable'>) {
+  if (match.live) {
+    return livePath(match.id)
+  }
+
+  return match.reportable ? reportPath(match.id) : matchPath(match.id)
+}
+
+const shortDay = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'Europe/Amsterdam',
+  weekday: 'short',
+})
+const shortTime = new Intl.DateTimeFormat('nl-NL', {
+  hour: '2-digit',
+  hourCycle: 'h23',
+  minute: '2-digit',
+  timeZone: 'Europe/Amsterdam',
+})
 
 /**
- * The state of the report in words: empty, busy (`bezig`), done (`klaar`) or "Controleer" for a
- * report that was done and does not fit the match any more. The link names the match, since a
- * column of links says the same thing in every row.
+ * The state of the report in one word: `Geen`, `Niet af`, `Klaar`, or `Live` while the match is
+ * being played. A report that was done and does not fit the match any more is `Klopt niet`.
  */
-function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
+function ReportCell({ match }: { match: AdminMatchRow }) {
   if (!match.reportable) {
     return (
       <>
@@ -205,82 +213,49 @@ function ReportCell({ clubs, match }: { clubs: string; match: AdminMatchRow }) {
     )
   }
 
-  const state = match.reportToCheck
-    ? 'Controleer'
-    : match.reportStatus === 'klaar'
-      ? 'Klaar'
-      : match.reportStatus === 'bezig'
-        ? 'Bezig'
-        : 'Leeg'
+  if (match.live) {
+    return 'Live'
+  }
+
+  if (match.reportToCheck) {
+    return <Tag tone="attention">Klopt niet</Tag>
+  }
+
+  return match.reportStatus === 'klaar' ? 'Klaar' : match.reportStatus === 'bezig' ? 'Niet af' : 'Geen'
+}
+
+/**
+ * The score in the order of the match, or the status in a word when there is none yet. Only
+ * what asks for action is a Tag: a missing result and a change of Wikipedia.
+ */
+function ResultCell({ match }: { match: AdminMatchRow }) {
+  const played = match.status === 'played'
+  const score =
+    played && match.goalsFor !== null && match.goalsAgainst !== null
+      ? match.home
+        ? `${match.goalsFor} - ${match.goalsAgainst}`
+        : `${match.goalsAgainst} - ${match.goalsFor}`
+      : undefined
+  const status = { cancelled: 'Geannuleerd', played: '–', postponed: 'Uitgesteld', scheduled: 'Gepland' }[match.status]
 
   return (
     <>
-      {state === 'Controleer' ? <Tag tone="attention">Controleer</Tag> : state}{' '}
-      {match.reportLive ? (
-        <>
-          <Tag tone="highlight">Live</Tag>{' '}
-        </>
-      ) : null}
-      <Link href={reportPath(match.id)}>
-        {state === 'Leeg' ? 'Invullen' : 'Openen'}
-        <Text as="span" className="hf-visually-hidden">
-          {' '}
-          verslag van {clubs}
+      {score ?? (
+        <Text aria-hidden={played ? 'true' : undefined} as="span">
+          {status}
         </Text>
-      </Link>{' '}
-      <Link href={livePath(match.id)}>
-        Bijhouden
-        <Text as="span" className="hf-visually-hidden">
-          {' '}
-          van {clubs} tijdens de wedstrijd
-        </Text>
-      </Link>
-    </>
-  )
-}
-
-/** The score in the order of the match, as the title has the clubs. */
-function ResultCell({ match }: { match: AdminMatchRow }) {
-  if (match.status !== 'played' || match.goalsFor === null || match.goalsAgainst === null) {
-    return (
-      <>
-        <Text aria-hidden="true" as="span">
-          –
-        </Text>
+      )}
+      {score === undefined && played ? (
         <Text as="span" className="hf-visually-hidden">
           Geen uitslag
         </Text>
-      </>
-    )
-  }
-
-  return match.home ? `${match.goalsFor} - ${match.goalsAgainst}` : `${match.goalsAgainst} - ${match.goalsFor}`
-}
-
-/** The status in words, with a Tag for what needs a look: a missing result and an entry. */
-function StatusCell({ match }: { match: AdminMatchRow }) {
-  const status = {
-    cancelled: 'Geannuleerd',
-    played: 'Gespeeld',
-    postponed: 'Uitgesteld',
-    scheduled: 'Gepland',
-  }[match.status]
-
-  return (
-    <>
-      {status}
+      ) : null}
       {match.lacksResult ? (
         <>
           {' '}
           <Tag tone="attention">Uitslag ontbreekt</Tag>
         </>
       ) : null}
-      {match.edited.length === 0 ? null : (
-        <>
-          {' '}
-          <Tag tone="highlight">Aangepast</Tag>
-        </>
-      )}
       {match.held === 0 ? null : (
         <>
           {' '}
@@ -295,4 +270,13 @@ function StatusCell({ match }: { match: AdminMatchRow }) {
       )}
     </>
   )
+}
+
+/** The short day and the time, no year: `za 1 nov, 20.00`. An old match has no time. */
+function whenOf(match: Pick<AdminMatchRow, 'kickoffAt' | 'matchDate'>) {
+  const day = (date: Date) => shortDay.format(date).replaceAll('.', '')
+
+  return match.kickoffAt === null
+    ? day(new Date(`${match.matchDate}T12:00:00Z`))
+    : `${day(match.kickoffAt)}, ${shortTime.format(match.kickoffAt).replace(':', '.')}`
 }

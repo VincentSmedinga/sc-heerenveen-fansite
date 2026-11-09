@@ -3197,6 +3197,7 @@
   De tegenstander is optioneel: "Is de kant van de tegenstander ook af?" zet `opponent_complete`.
   Een wedstrijd die niet bestaat of niet gespeeld is, geeft de pagina "niet gevonden".
   - **De lijst met wedstrijden** heeft een kolom Verslag met Leeg, Bezig, Klaar of Controleer, en een link naar het scherm; het formulier van de wedstrijd linkt er ook naartoe.
+    Later: zie _De lijst met wedstrijden in het beheer heeft één link per regel, die volgt uit de staat_ (8 november 2026): de kolom heeft nu andere woorden en geen link meer.
   - **Rijen en knoppen:** elke lijst is een `InputTable` met een knop om een rij toe te voegen en een knop per rij om hem weg te halen, zodat het scherm zonder JavaScript werkt.
     Elk veld en elke knop noemt zijn rij ("Wissel 2, minuut"), en de eerste knop van het formulier is een verborgen "Opslaan", zodat Enter niets weghaalt.
   - **Een gebeurtenis wijst naar een speler met het nummer van zijn rij** in de lijst van zijn team (`3`), en een doelpunt wijst met het team en het nummer (`wij-3`), omdat de scorer van een eigen doelpunt bij het andere team staat.
@@ -3258,6 +3259,7 @@
   - **Waarschuwingen** (te veel wissels, een korte bank) staan bij hun lijst en houden niets tegen.
 - **Waarom:** iemand moet een verslag kunnen onderbreken, en toch weet de lezer van de pagina (#831) alleen van een verslag dat klopt.
 - **Alternatieven:** "klaar" ook met fouten laten opslaan en alleen waarschuwen (dan telt een verslag dat niet klopt mee in de cijfers); Controleer opslaan als status (een derde waarde die de import of een pagina moet bijhouden terwijl de regels het altijd kunnen uitrekenen).
+- **Later:** zie _De kolom Verslag heeft gewone woorden_ (8 november 2026): de lijst zegt nu "Klopt niet" in plaats van Controleer.
 
 ## Het verslag weghalen zet de doelpunten terug
 
@@ -3879,3 +3881,37 @@
   Staat er wel iemand, dan krijgt een speler zonder land of zonder vlag in onze set een lege plek van dezelfde breedte.
 - **Waarom:** de namen van één deel blijven zo op één lijn, en een seizoen zonder landen (de tabellen van 1990/91 tot 2005/06) verandert niet.
 - **Alternatieven:** de plek altijd tonen (een lege kolom in een lijst zonder één land); de vlag overal waar een speler staat (veel componenten, en tegenstanders hebben geen land).
+
+## De lijst met wedstrijden in het beheer heeft één link per regel, die volgt uit de staat
+
+- **Datum:** 8 november 2026
+- **Besluit:** in de lijst met wedstrijden in het beheer is de naam van de wedstrijd de enige link.
+  Het doel volgt uit de staat: het scherm Bijhouden vanaf de aftrap tot twee uur later (daarna mist de wedstrijd zijn uitslag, en is hij niet meer "live"), het verslag als de wedstrijd er een kan hebben (`mayHaveReport`), anders de pagina van de wedstrijd.
+- **Waarom:** de naam en "Openen" gingen naar net andere pagina's, en drie links per regel waren onduidelijk.
+  De redacteur wil bijna altijd naar het verslag, en tijdens de wedstrijd naar Bijhouden.
+- **Alternatieven:** de naam altijd naar de pagina van de wedstrijd, met daar een blok voor het verslag (een klik meer); de naam plus één actielink per regel (nog steeds twee links).
+
+## De kolom Verslag heeft gewone woorden
+
+- **Datum:** 8 november 2026
+- **Besluit:** de staat van het verslag heet "Geen", "Niet af", "Klaar" of "Live", en een verslag dat niet meer past heet "Klopt niet".
+  De tag "Live" naast de staat is weg: "Live" is zelf de staat.
+- **Waarom:** "Leeg", "Bezig" en "Controleer" zeiden niet wat er aan de hand was.
+- **Alternatieven:** de oude woorden houden met een legenda boven de tabel.
+
+## Uitslag en Status zijn één kolom, met alleen tags die om actie vragen
+
+- **Datum:** 8 november 2026
+- **Besluit:** de kolom Uitslag toont de stand, of anders "Gepland", "Uitgesteld" of "Geannuleerd".
+  Alleen "Uitslag ontbreekt", "Wikipedia wacht" en "Wikipedia wijkt af" staan als tag in de regel; "Aangepast" staat alleen in het filter en op de pagina van de wedstrijd.
+- **Waarom:** "Gespeeld" naast elke uitslag herhaalt zich, en "Aangepast" vraagt geen actie.
+- **Alternatieven:** de kolommen samenvoegen en alle tags houden.
+
+## Datum, tijd, competitie en ronde staan als één regel onder de naam van de wedstrijd
+
+- **Datum:** 8 november 2026
+- **Besluit:** de lijst heeft geen kolommen Datum en Competitie meer.
+  Onder de naam staat één korte regel zonder jaar, zoals "za 1 nov, 20.00 · Eredivisie, ronde 11"; een wedstrijd zonder tijd toont alleen de korte datum.
+- **Waarom:** de kolommen herhaalden zich in elke regel en namen op een telefoon de meeste ruimte.
+- **Alternatieven:** groeperen per maand (veel tabellen voor een schermlezer); kortere tekst in aparte kolommen; de competitie alleen noemen als het niet de Eredivisie is.
+- **Later:** deze beslissing vervangt de kolommen Datum en Competitie die onder de naam inklapten (zie de beslissing over de lijst in het beheer van eerder).
