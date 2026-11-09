@@ -951,6 +951,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/stadions` is voor beheerders alleen: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/clubnamen` is voor beheerders alleen: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
+- `/beheer/kwaliteit` is voor beheerders alleen: wat we van elk seizoen weten en wat ontbreekt, met werklijsten (zie _De kwaliteit van de gegevens_).
 - `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - Het beheer is compact: kleinere letters en kortere afstanden dan de publieke pagina's.
   Elke pagina onder `/beheer` zet de klasse `compact` uit `src/beheer/density.ts` op zijn `Page.Main`, en `src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die haar vergeet (zie _Dichtheid_ in Storybook).
@@ -1145,6 +1146,30 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 - `replaceClubNamePeriods` en `removeClubNamePeriods` uit `@fansite/db/club-name-periods` schrijven de lijst en `club-name.save` of `club-name.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
 - Een opslag staat binnen vijf minuten op de pagina van de club (de tijd die `getClubPage` zijn gegevens bewaart); de lijsten met wedstrijden volgen als de pagina's van het seizoen verversen.
 - `e2e/club-names.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
+
+### De kwaliteit van de gegevens
+
+`/beheer/kwaliteit` (`src/app/beheer/kwaliteit`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan.
+De cijfers komen uit `readSeasonCoverage` in `@fansite/db/season-coverage`, dezelfde functie als `import:status` gebruikt.
+De wachtende wijzigingen telt `waitingChangesBySeason` in `src/beheer/quality.ts` erbij.
+Elke cel zegt in woorden wat ze telt, zoals "12 wedstrijden, 10 gespeeld (12 van Wikipedia)" en "Geen stand".
+Zo leest de cel ook op een telefoon, waar de kolommen onder het seizoen staan en hun kop weg is, en zegt geen kleur iets.
+
+Waar een redacteur iets aan kan doen, is de cel een koppeling naar een werklijst, `/beheer/kwaliteit/<seizoen>/<lijst>`:
+
+- `zonder-doelpunten`: gespeelde wedstrijden met doelpunten in de uitslag en geen doelpunt in `match_goals`;
+- `verslagen-bezig`: wedstrijden met een verslag dat `bezig` is;
+- `doelpunten-zonder-speler`: wedstrijden met een doelpunt van ons zonder speler uit de selectie;
+- `wachtende-wijzigingen`: wedstrijden met een wijziging van Wikipedia of een afwijking die op een besluit wacht.
+
+`listWork` in `src/beheer/quality.ts` leest een lijst, de oudste wedstrijd eerst.
+Elke rij leidt naar de wedstrijd in het beheer, en een verslag dat niet af is naar het verslag.
+Een lijst telt wat de tabel telt; `src/beheer/quality.test.ts` houdt ze daaraan.
+Een adres zonder seizoen sinds 1990/91 of zonder bestaande lijst geeft "niet gevonden".
+
+Onder de tabel staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
+De import waarschuwt voor dezelfde groepen en voegt ze niet samen.
 
 ### Het bezoek bekijken
 

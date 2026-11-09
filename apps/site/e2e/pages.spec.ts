@@ -283,6 +283,15 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{match}', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{held}', status: 404 },
+  // The quality of the data: the table of the seasons, a work list with a row (the made-up
+  // change that waits, see held-changes.ts), an empty one, and addresses that are no list.
+  { admin: 'beheerder', path: '/beheer/kwaliteit', status: 200 },
+  { admin: 'beheerder', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
+  { admin: 'moderator', path: '/beheer/kwaliteit', status: 404 },
+  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 404 },
   { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
   { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
   // The overview of the articles of the editors: the first page, and the addresses that say

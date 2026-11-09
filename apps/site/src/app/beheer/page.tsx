@@ -89,6 +89,9 @@ export default async function AdminPage() {
               <Tile href="/beheer/clubnamen" icon="ball" level={2} title="Clubnamen">
                 Houd bij welke namen een club droeg, en sinds wanneer.
               </Tile>
+              <Tile href="/beheer/kwaliteit" icon="chart" level={2} title="Kwaliteit">
+                Bekijk per seizoen wat we weten en wat ontbreekt.
+              </Tile>
               <Tile href="/beheer/bezoek" icon="chart" level={2} title="Bezoek">
                 Bekijk hoeveel mensen de site bezoeken.
               </Tile>
