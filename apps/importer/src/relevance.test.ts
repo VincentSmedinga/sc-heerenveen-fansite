@@ -159,8 +159,8 @@ const recordings: Case[] = [
   // A full name is enough.
   ['De comeback van Levi Smans: positief denken, positieve uitkomst', 'relevant'],
   ['Timo Zaal verkast naar Zweedse club & nieuwe aflevering van Omroep Abe', 'relevant'],
-  // Missed: only a surname, no club.
-  ["Veldman kritisch op kansen missende Rivera: 'Moet streng voor zichzelf zijn'", 'doubtful'],
+  // Was missed: two surnames, no club (#1006).
+  ["Veldman kritisch op kansen missende Rivera: 'Moet streng voor zichzelf zijn'", 'relevant'],
   // Missed: the club is only "Heerenveen" and the headline has no word from football.
   ["Bosz onder de indruk van Heerenveen: 'Dit is al jaren'", 'doubtful'],
   // Missed: not a word of the club in it.
@@ -241,6 +241,26 @@ const doubtful: Case[] = [
   ['Klaverboer maakt indruk', 'doubtful'],
   // Someone from another club, next to the town, without a word from football.
   ['Oud-Ajacied koopt boerderij in Heerenveen', 'doubtful'],
+]
+
+/** Rule 3b: surnames from the club without "Heerenveen" (#1006). Made-up headlines. */
+const surnamesAlone: Case[] = [
+  // Two different surnames.
+  ['Veldman in plaats van Hilgers?', 'relevant'],
+  ['Kersten of Willemsen: wie start er vrijdag?', 'relevant'],
+  // One surname with a word from football, also "basis".
+  ['Hilgers keert terug in de basis', 'relevant'],
+  ['Veldman scoort twee keer', 'relevant'],
+  // One surname alone, or the same one twice, stays doubtful.
+  ['Veldman verlengt, Veldman blij', 'doubtful'],
+  ['Hilgers bezoekt de markt', 'doubtful'],
+  // A surname that is an ordinary word is not on the list.
+  ['Bakker en Zaal bezoeken de markt', 'irrelevant'],
+  // A player of another club does not count.
+  ['Mbappé in plaats van Haaland?', 'irrelevant'],
+  ['Haaland scoort twee keer', 'irrelevant'],
+  // "basis" is a football word.
+  ['Nieuwe basis voor Heerenveen', 'relevant'],
 ]
 
 /** Rule 4: nothing to do with the club. */
@@ -393,6 +413,7 @@ describe('judgeRelevance', () => {
     ['names the club', namesTheClub],
     ['names Heerenveen with football', heerenveenWithFootball],
     ['is doubtful', doubtful],
+    ['names surnames from the club', surnamesAlone],
     ['is irrelevant', irrelevant],
     ['looks at whole words only', wholeWordsOnly],
     ['treats names like words with care', namesLikeWords],

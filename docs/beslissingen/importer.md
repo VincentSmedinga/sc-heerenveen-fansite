@@ -3193,3 +3193,21 @@
   Daarbij verbiedt `robots.txt` tekst- en datamining, scrapen en het automatisch verzamelen van gegevens.
   Dat is een ander voorbehoud dan bij de bronnen die we wel nemen, want daar stond de feed voor ons open (zie _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_).
 - **Alternatieven:** eerst toestemming vragen; dat kan later, buiten #1004.
+
+## Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`
+
+- **Datum:** 9 november 2026
+- **Besluit:** `judgeRelevance` geeft `relevant` voor een kop met twee verschillende achternamen uit `clubSurnames`, of met één achternaam uit `clubSurnames` en een voetbalwoord (`footballWords` of `frisianFootballWords`), ook zonder "Heerenveen".
+  Dezelfde achternaam twee keer telt als één.
+  Eén achternaam alleen blijft `doubtful`.
+  "basis" is een voetbalwoord ("in de basis").
+- **Waarom:** de kop "Meerveld in plaats van Rivera?" (Omrop Fryslân, 9 november 2026) ging over twee spelers van de club en kreeg toch "twijfelgeval, niet op de site".
+  Twee namen van spelers in één kop gaan bijna altijd over de club, en één naam met een voetbalwoord ook.
+  Eén achternaam alleen kan een andere Kersten of Scholten zijn, dus die houdt een mens tegen: de moderator kan hem met #1007 alsnog op de site zetten.
+- **Alternatieven:** elke achternaam alleen `relevant` maken (meer valse treffers); de selectie uit de tabel `players` lezen (het filter hangt dan af van de squadimport en krijgt een extra argument); alleen de twee-namenregel.
+- **Beslissing:** de namen blijven in `relevance-terms.ts`.
+  Achternamen die gewone woorden zijn, staan niet op de lijst en tellen dus niet mee.
+  Het filter blijft zuiver en kijkt niet in de database.
+- **Geen migratie:** de importer beoordeelt elk bericht bij elke run opnieuw, dus een bestaand bericht verandert bij de volgende run.
+  Een bericht dat een moderator verborg, blijft verborgen.
+- **Later:** dit vult _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ aan: een achternaam alleen is nog `doubtful`, maar twee achternamen, of een achternaam met een voetbalwoord, zijn `relevant`.
