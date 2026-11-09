@@ -19,7 +19,7 @@ export function SeasonSquadCard({ squad }: { squad: SeasonSquad }) {
       <Heading anchor id="selectie" level={2}>
         Selectie
       </Heading>
-      <Text>{completenessSentence(squad.completeness)}</Text>
+      <Text>{completenessSentence(squad.completeness, cardPlayers(squad).length)}</Text>
       {parts.map((part) => (
         <Fragment key={part.label ?? 'selectie'}>
           {part.label === null ? null : <Heading level={3}>{part.label}</Heading>}

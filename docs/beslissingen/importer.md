@@ -3041,5 +3041,8 @@
   - Het lopende seizoen en de seizoenen van Wikipedia veranderen niet: hun bron staat vóór `verslag`.
 - **Waarom:** zonder rij toonde de kaart Selectie "onbekend" bij 25 spelers uit de verslagen, bijvoorbeeld in 2004/05.
   Een lijst uit een zwakke bron mag nooit voor een echte selectie doorgaan, dus de regel blijft in de importer en de kaart zegt waar de lijst vandaan komt (zie _De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_ in `site.md`).
-- **Alternatieven:** de site de volledigheid laten uitrekenen als de rij ontbreekt (breekt het besluit van 5 november 2026); een eigen opdracht erbij (een stap in de bestaande import is genoeg, want alleen die import maakt spelers met de bron `verslag`).
+- **Alternatieven:** de site de volledigheid laten uitrekenen als de rij ontbreekt (breekt het besluit van 5 november 2026); een eigen opdracht erbij (de opdracht `import:completeness` rekent al voor elk seizoen met spelers, dus een nieuwe is niet nodig).
+- **Verslagen uit het beheer:** een redacteur die een speler aan een verslag toevoegt, maakt ook een rij met de bron `verslag` (`saveReport`).
+  Het seizoen krijgt zijn rij bij de eerstvolgende `import:completeness` of import van de oude site, niet meteen.
+- **Aantal:** de zin onder de kaart noemt het aantal spelers op de kaart, dus zonder die uit de verslagen als een betere bron het seizoen heeft.
 - **Op acceptatie:** na de deploy draait de import van de oude site opnieuw, zodat de rijen voor alle seizoenen zonder andere bron er zijn.

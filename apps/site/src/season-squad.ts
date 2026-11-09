@@ -80,12 +80,12 @@ export function cardPlayers(squad: SeasonSquad): PublicSeasonPlayer[] {
  * that the list is the whole squad, without a percentage. A season without a row is a season
  * without players.
  */
-export function completenessSentence(completeness: SeasonSquad['completeness']): string {
+export function completenessSentence(completeness: SeasonSquad['completeness'], playerCount?: number): string {
   if (completeness === undefined || completeness.level === 'onbekend') {
     return 'Van dit seizoen kennen we de selectie niet.'
   }
 
-  const known = `We kennen ${completeness.playerCount} spelers van dit seizoen`
+  const known = `We kennen ${playerCount ?? completeness.playerCount} spelers van dit seizoen`
 
   // The list of the reports is our own and the weakest: say where it comes from.
   if (completeness.bestSource === 'verslag') {

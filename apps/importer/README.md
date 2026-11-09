@@ -2156,6 +2156,7 @@ De stap `selecties` ([`src/old-site-completeness.ts`](src/old-site-completeness.
 Zonder die rij toont de kaart Selectie "onbekend" bij een seizoen met alleen spelers uit de verslagen.
 Een seizoen met alleen die spelers krijgt de beste bron `verslag`; een seizoen met een betere lijst houdt die bron.
 Een tweede run zonder nieuwe gegevens schrijft niets.
+Spelers die een redacteur in het beheer aan een verslag toevoegt, hebben ook de bron `verslag`: het seizoen krijgt zijn rij bij de eerstvolgende `pnpm import:completeness` of import van de oude site.
 
 #### Het controleverslag
 
