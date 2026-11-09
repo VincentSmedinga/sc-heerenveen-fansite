@@ -7,13 +7,13 @@ import { hydrated } from './hydrated'
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
-// have the bar, with the links to their own cards: Wedstrijden eight (the made-up season has a
-// last match, a result in three competitions, a head coach in the table and our place in four
-// seasons) and Cijfers eleven. The checks of how it behaves while scrolling are on /cijfers
-// below, the page with the long cards.
+// have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
+// last match, a result in three competitions and a head coach in the table; its results are of
+// six clubs, so it has no card with our place per round) and Cijfers twelve. The checks of how
+// it behaves while scrolling are on /cijfers below, the page with the long cards.
 const withBar = [
-  { links: 8, path: '/wedstrijden' },
-  { links: 11, path: '/cijfers' },
+  { links: 7, path: '/wedstrijden' },
+  { links: 12, path: '/cijfers' },
 ] as const
 
 for (const { links, path } of withBar) {
@@ -82,7 +82,7 @@ test.describe('the bar under the header of /cijfers', () => {
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await expect(bar.getByRole('link')).toHaveCount(11)
+    await expect(bar.getByRole('link')).toHaveCount(12)
     await menu.getByRole('link', { name: 'Nieuws' }).click()
     await expect(page).toHaveURL(/\/nieuws$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
@@ -91,7 +91,7 @@ test.describe('the bar under the header of /cijfers', () => {
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
     await menu.getByRole('link', { name: 'Cijfers' }).click()
     await expect(page).toHaveURL(/\/cijfers$/)
-    await expect(bar.getByRole('link')).toHaveCount(11)
+    await expect(bar.getByRole('link')).toHaveCount(12)
 
     // The other page with a bar has its own links, not those of the page before.
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
@@ -179,6 +179,7 @@ test.describe('the bar under the header of /cijfers', () => {
 
       await links.first().focus()
       await walk('Tab', [
+        'Onze plek door de jaren',
         'Verloop van het seizoen',
         'Hoe wedstrijden verlopen',
         'Reeksen',
@@ -200,6 +201,7 @@ test.describe('the bar under the header of /cijfers', () => {
         'Reeksen',
         'Hoe wedstrijden verlopen',
         'Verloop van het seizoen',
+        'Onze plek door de jaren',
         'Plek in de competitie',
       ])
     })

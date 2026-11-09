@@ -82,9 +82,11 @@ export async function addEarlierSeason() {
 }
 
 /**
- * Five whole rounds of the league, the clubs meeting in pairs from the list above, so the card
- * "Onze plek per speelronde" has a line that goes up and down. sc Heerenveen scores the goals
- * of `ours` against the club it meets; every other match is a 1-0 home win.
+ * Five whole rounds of the league, paired the way a round-robin does (the first club stays and
+ * the others turn), so every pair meets once and a result is kept once for a home club and an
+ * away club. sc Heerenveen scores the goals of `ours` against the club it meets, which is the
+ * first match of a round, and every other match is a 1-0 home win. The card "Onze plek per
+ * speelronde" then has a line that goes up and down.
  */
 export function fullRounds(season: string) {
   const ours: [number, number][] = [
@@ -95,17 +97,24 @@ export function fullRounds(season: string) {
     [0, 2],
   ]
 
-  return ours.flatMap(([goalsFor, goalsAgainst], index) =>
-    Array.from({ length: 9 }, (_, pair) => ({
-      awayClub: clubs[pair * 2 + 1]!,
+  return ours.flatMap(([goalsFor, goalsAgainst], index) => {
+    const others = clubs.slice(1)
+    const turned = others.map((_, place) => others[(place + index) % others.length]!)
+    const pairs = [
+      [clubs[0]!, turned[0]!],
+      ...Array.from({ length: 8 }, (_, step) => [turned[step + 1]!, turned[15 - step]!]),
+    ] as const
+
+    return pairs.map(([homeClub, awayClub], pair) => ({
+      awayClub,
       awayGoals: pair === 0 ? goalsAgainst : 0,
-      homeClub: clubs[pair * 2]!,
+      homeClub,
       homeGoals: pair === 0 ? goalsFor : 1,
       playedOn: `${season.slice(0, 4)}-09-${String(index * 7 + 1).padStart(2, '0')}`,
       round: index + 1,
       season,
-    })),
-  )
+    }))
+  })
 }
 
 /**
