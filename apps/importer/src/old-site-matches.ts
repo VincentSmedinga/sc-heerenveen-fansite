@@ -240,6 +240,7 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       resultSetAt: null,
       round: league ? `Speelronde ${number}` : `Wedstrijd ${number}`,
       season: oldSiteSeason(match.season),
+      sourceLine: null,
       stadium: null,
       status: 'played',
     },
@@ -380,7 +381,8 @@ export async function importOldSiteMatches(
 
         report.lines.push(...differences.map((difference) => differenceLine(lookup.match, difference, oldSiteSource)))
 
-        if (Object.keys(fill).length > 0) {
+        // A match the editors added is theirs: it is compared and never filled.
+        if (Object.keys(fill).length > 0 && lookup.match.dataSource !== 'redactie') {
           await db.update(matches).set(fill).where(eq(matches.id, lookup.match.id))
           report.changed += 1
         } else {

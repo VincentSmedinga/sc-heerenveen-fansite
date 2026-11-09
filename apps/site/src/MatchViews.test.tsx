@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { imageCredit, MatchLine, MatchLines, playedLine, SourceCredit } from './MatchViews'
+import { EditorSources, imageCredit, MatchLine, MatchLines, playedLine, SourceCredit } from './MatchViews'
 import { OpponentsCredit } from './OpponentViews'
 
 const textOf = (element: Parameters<typeof renderToStaticMarkup>[0]) =>
@@ -176,5 +176,31 @@ describe('the line of a match that is being played', () => {
 
     expect(html.match(/>Live</g)).toHaveLength(1)
     expect(html.match(/Het verslag/g)).toHaveLength(1)
+  })
+})
+
+describe('EditorSources', () => {
+  const added = { id: 5, matchDate: '2009-05-12', opponent: 'FC Groningen', round: 'Finale' }
+
+  it('names the source of a match the editors added, next to the match', () => {
+    const text = textOf(<EditorSources sources={[{ ...added, sourceLine: 'Leeuwarder Courant, 12 mei 2009' }]} />)
+
+    expect(text).toContain('Een wedstrijd heeft onze redactie zelf toegevoegd, met de bron erbij')
+    expect(text).toContain('FC Groningen')
+    expect(text).toContain('Leeuwarder Courant, 12 mei 2009')
+  })
+
+  it('names every source when there are more, and shows nothing without a match of the editors', () => {
+    expect(
+      textOf(
+        <EditorSources
+          sources={[
+            { ...added, sourceLine: 'Krant A' },
+            { ...added, id: 6, sourceLine: 'Krant B' },
+          ]}
+        />,
+      ),
+    ).toContain('Enkele wedstrijden heeft onze redactie zelf toegevoegd')
+    expect(textOf(<EditorSources sources={[]} />)).toBe('')
   })
 })

@@ -421,6 +421,8 @@ export const auditActions = [
   'match.differs',
   'match.take-over',
   'match.keep',
+  'match.add',
+  'match.delete',
   'stadium.save',
   'stadium.reset',
   'club-name.save',
@@ -595,10 +597,12 @@ export const competitions = [
 
 /**
  * Where a match comes from: `wikipedia` is the import of the Dutch Wikipedia, and
- * `oude-fansite` the import of the matches of the old fansite, 1990 to 2007. Each import
- * reads, writes and removes only the matches of its own source.
+ * `oude-fansite` the import of the matches of the old fansite, 1990 to 2007, and `redactie` a
+ * match the editors added themselves, with the source they took it from (`source_line`). Each
+ * import reads, writes and removes only the matches of its own source, so no import touches a
+ * match of the editors.
  */
-export const matchDataSources = ['wikipedia', 'oude-fansite'] as const
+export const matchDataSources = ['wikipedia', 'oude-fansite', 'redactie'] as const
 
 export type Competition = (typeof competitions)[number]
 
@@ -633,6 +637,7 @@ export const matchLimits = {
   referee: 100,
   round: 60,
   season: 7,
+  sourceLine: 255,
   stadium: 150,
 }
 
@@ -1024,8 +1029,9 @@ export type NewClubNamePeriod = typeof clubNamePeriods.$inferInsert
  * known.
  *
  * `data_source` says which import the match comes from (see `matchDataSources`), and so which
- * import may change or remove it. Only a match of the old fansite may have neither `kickoff_at`
- * nor `date_text`: its date is then known and its time is not, as the old database gave it.
+ * import may change or remove it. Only a match of the old fansite or of the editors may have
+ * neither `kickoff_at` nor `date_text`: its date is then known and its time is not. A match of
+ * the editors has `source_line`, where they took it from, (required).
  *
  * `result_set_at` is the moment the importer first saw the current result, so it can tell a
  * correction of a few hours old from a change after days (see `match_changes`).
@@ -1062,6 +1068,7 @@ export const matches = mysqlTable(
     referee: varchar('referee', { length: matchLimits.referee }),
     resultSetAt: datetime('result_set_at'),
     dataSource: mysqlEnum('data_source', matchDataSources).notNull().default('wikipedia'),
+    sourceLine: varchar('source_line', { length: matchLimits.sourceLine }),
   },
   (table) => [
     unique('matches_season_competition_round_unique').on(table.season, table.competition, table.round),
@@ -1072,7 +1079,7 @@ export const matches = mysqlTable(
     ),
     check(
       'matches_time_or_text',
-      sql`${table.dataSource} = 'oude-fansite' or ${table.kickoffAt} is not null or ${table.dateText} is not null`,
+      sql`${table.dataSource} <> 'wikipedia' or ${table.kickoffAt} is not null or ${table.dateText} is not null`,
     ),
     check(
       'matches_extra_time_only_in_played_knockout',
@@ -1097,6 +1104,10 @@ export const matches = mysqlTable(
     check(
       'matches_attendance_in_range_when_played',
       sql`${table.attendance} is null or (${table.status} = 'played' and ${table.attendance} <= ${sql.raw(String(matchLimits.attendance))})`,
+    ),
+    check(
+      'matches_source_line_for_editors',
+      sql`${table.dataSource} <> 'redactie' or coalesce(char_length(${table.sourceLine}), 0) > 0`,
     ),
     check('matches_referee_not_empty', sql`${table.referee} is null or char_length(${table.referee}) > 0`),
   ],

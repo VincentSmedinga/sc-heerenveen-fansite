@@ -2,7 +2,10 @@
 
 import { redirect } from 'next/navigation'
 
+import type { AddFormState } from '#src/beheer/match-add-fields'
+
 import { parseItemId, parseReason } from '#src/beheer/items'
+import { addMatch, deleteAddedMatch, listClubChoices, readAddValues, validateAdd } from '#src/beheer/match-additions'
 import {
   decideDifference,
   decideHeldChange,
@@ -35,6 +38,38 @@ export type HeldChangeFormState = { error?: string }
 
 /** Where the form for removing the entry of a match comes back to, with its error. */
 export type RemoveFormState = { error?: string }
+
+/**
+ * Adds a match that no import reads (issue 970). A form that is wrong comes back with the
+ * values kept and an error at each field, and one that works ends on the form of the new match,
+ * where the goals and the report are filled in as for any other match.
+ */
+export async function submitAddMatch(_previous: AddFormState, formData: FormData): Promise<AddFormState> {
+  const { userId } = await requireRole('beheerder')
+  const { db } = getDatabase()
+  const values = readAddValues(formData)
+  const checked = validateAdd(values, await listClubChoices(db))
+
+  if (checked.errors !== undefined) {
+    return { errors: checked.errors, values }
+  }
+
+  let outcome: Awaited<ReturnType<typeof addMatch>>
+
+  try {
+    outcome = await addMatch(db, userId, checked.entry)
+  } catch (error) {
+    console.error(`Could not add a match: ${error instanceof Error ? error.message : String(error)}`)
+
+    return { errors: { algemeen: 'De wedstrijd is niet opgeslagen. Probeer het nog eens.' }, values }
+  }
+
+  if (outcome.status === 'refused') {
+    return { errors: outcome.errors, values }
+  }
+
+  redirect(matchPath(outcome.id, 'toegevoegd'))
+}
 
 /**
  * Decides a difference between Wikipedia and the entry of the editors: "overnemen" takes
@@ -84,6 +119,41 @@ export async function submitConflict(
       : outcome === 'no-proposal'
         ? matchPath(difference.matchId, 'niet-gelukt')
         : `${matchesPath}?fout=besloten`,
+  )
+}
+
+/**
+ * Deletes a match the editors added, after the reason is given. Only a match with the source
+ * `redactie` goes: the answer for any other match is the page of the match with a notice.
+ */
+export async function submitDeleteMatch(
+  matchId: number,
+  _previous: RemoveFormState,
+  formData: FormData,
+): Promise<RemoveFormState> {
+  const { userId } = await requireRole('beheerder')
+  const id = parseItemId(matchId)
+
+  if (id === undefined) {
+    redirect(`${matchesPath}?fout=weg`)
+  }
+
+  const reason = parseReason(formData.get('reden'))
+
+  if ('error' in reason) {
+    return {
+      error: reason.error === 'leeg' ? 'Schrijf waarom je de wedstrijd verwijdert.' : 'Schrijf hoogstens 300 tekens.',
+    }
+  }
+
+  const outcome = await deleteAddedMatch(getDatabase().db, userId, id, reason.reason)
+
+  redirect(
+    outcome === 'missing'
+      ? `${matchesPath}?fout=weg`
+      : outcome === 'not-ours'
+        ? matchPath(id, 'niet-van-ons')
+        : `${matchesPath}?gedaan=wedstrijd-weg`,
   )
 }
 

@@ -6,6 +6,7 @@ import {
   listAllMatchGoals,
   listAllStaff,
   listClubStandings,
+  listEditorSources,
   listLeagueResults,
   listMatchDataSources,
   listMatchSeasons,
@@ -194,6 +195,17 @@ const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
  */
 export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {
   return season === seasonOf(new Date()) ? currentSeasonData(season) : pastSeasonData(season)
+}
+
+const currentEditorSources = cacheForKey(currentSeasonPeriod, (season) => listEditorSources(getDatabase().db, season))
+const pastEditorSources = cacheForKey(pastSeasonPeriod, (season) => listEditorSources(getDatabase().db, season))
+
+/**
+ * The matches of one season that the editors added, each with its source. They are kept like
+ * the data of the season, and the caller asks for a season of `getMatchSeasons` only.
+ */
+export function getEditorSources(season = seasonOf(new Date())) {
+  return season === seasonOf(new Date()) ? currentEditorSources(season) : pastEditorSources(season)
 }
 
 const currentLeagueResults = cacheForKey(currentSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))

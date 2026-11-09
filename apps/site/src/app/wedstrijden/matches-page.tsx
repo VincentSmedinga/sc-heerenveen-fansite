@@ -17,9 +17,11 @@ import {
   resultsOfSeason,
   resultsPerCompetition,
 } from '#src/matches'
+import { getEditorSources } from '#src/matches'
 import { coachesCardOf, lastMatchCard, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
+  EditorSources,
   imageCredit,
   lastFiveCaption,
   MatchLines,
@@ -98,6 +100,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   }
 
   const { data, seasons } = loaded
+  const editorSources = await getEditorSources(season)
   const now = new Date()
   const current = season === seasonOf(now)
   // The cards of a season that is over say which one on their image. The current season is the
@@ -236,6 +239,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
         )}
+        <EditorSources sources={editorSources} />
       </Page.Sidebar>
     </>
   )

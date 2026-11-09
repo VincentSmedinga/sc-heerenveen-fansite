@@ -8,6 +8,7 @@ import MatchesShortcuts from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getEditorSources: vi.fn(() => Promise.resolve([])),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
   getPlacePerRound: vi.fn(),

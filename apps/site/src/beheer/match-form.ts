@@ -51,7 +51,7 @@ export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 
 /** What the checks need to know about the match and the season. */
 export type MatchContext = {
   competition: Match['competition']
-  /** Where the match comes from: only one of the old fansite may have a day without a time. */
+  /** Where the match comes from: only one from Wikipedia must have a time or a text. */
   dataSource: Match['dataSource']
   opponent: string
   squad: SquadPlayer[]
@@ -179,7 +179,7 @@ export function validate(
   if (time !== '' && !isTime(time)) {
     errors['aftrap-tijd'] = 'Vul de tijd in als uren en minuten, zoals 20:00.'
   }
-  if (time === '' && dateText === '' && context.dataSource !== 'oude-fansite') {
+  if (time === '' && dateText === '' && context.dataSource === 'wikipedia') {
     errors['aftrap-tekst'] =
       'Vul de tijd in. Is de tijd nog niet bekend, schrijf dan wanneer de wedstrijd is, zoals 12-14 februari 2027.'
   } else if (time !== '' && dateText !== '') {

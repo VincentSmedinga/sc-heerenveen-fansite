@@ -89,7 +89,7 @@ describe(`the migration ${migration}`, () => {
       { competition: 'Eredivisie', data_source: 'wikipedia', round: 'Speelronde 1' },
     ])
     expect(await rows("SHOW COLUMNS FROM matches LIKE 'data_source'")).toMatchObject([
-      { Default: 'wikipedia', Null: 'NO', Type: "enum('wikipedia','oude-fansite')" },
+      { Default: 'wikipedia', Null: 'NO', Type: "enum('wikipedia','oude-fansite','redactie')" },
     ])
   })
 

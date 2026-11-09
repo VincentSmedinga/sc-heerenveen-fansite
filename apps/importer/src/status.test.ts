@@ -268,8 +268,8 @@ describe('the overview', () => {
     const table = lines.slice(lines.indexOf('Coverage per season:'))
 
     expect(table).toHaveLength(3 + 37)
-    expect(table.at(-1)).toBe('  2026/27  0 0 0 0 0/0 0 0 0 - - 0 no')
-    expect(table[3]).toBe('  1990/91  0 0 0 0 0/0 0 0 0 - - 0 no')
+    expect(table.at(-1)).toBe('  2026/27  0 0 0 0 0 0/0 0 0 0 - - 0 no')
+    expect(table[3]).toBe('  1990/91  0 0 0 0 0 0/0 0 0 0 - - 0 no')
   })
 
   it('changes nothing in the database', async () => {

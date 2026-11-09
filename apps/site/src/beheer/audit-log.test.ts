@@ -127,6 +127,8 @@ describe('recordAction', () => {
       'match.differs',
       'match.take-over',
       'match.keep',
+      'match.add',
+      'match.delete',
       'stadium.save',
       'stadium.reset',
       'club-name.save',
