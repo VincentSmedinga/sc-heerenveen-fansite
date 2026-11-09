@@ -175,9 +175,16 @@ export function decodePartProposal(text: null | string): PartProposal | undefine
   }
 }
 
-/** The line for the log: the part with the entry and Wikipedia. */
-export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValue' | 'part'>): string {
+/**
+ * The line for the log: the part with the entry and Wikipedia, or, for the kept goals of the
+ * old fansite, with the goals the match had and the list of the files.
+ */
+export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValue' | 'part' | 'reason'>): string {
   const name = change.part === null ? '' : partLabels[change.part]
+
+  if (change.reason === oldSiteGoalsReason) {
+    return `Doelpunten van de oude fansite: in de database: ${change.oldValue}; in de bestanden: ${change.newValue ?? 'niets'}`
+  }
 
   return `${name.slice(0, 1).toLocaleUpperCase('nl')}${name.slice(1)}: onze invoer: ${change.oldValue}; Wikipedia: ${change.newValue ?? 'niets'}`
 }

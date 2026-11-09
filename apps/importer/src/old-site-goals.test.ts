@@ -773,6 +773,28 @@ describe('the steps spelers and doelpunten', () => {
     ])
   })
 
+  it('keeps a list again when the files go back to it after another list', async () => {
+    await run([oldMatch({ events: winGoals.slice(0, 2) })])
+    await run([oldMatch({ events: winGoals.slice(0, 1) })])
+    await run([oldMatch({ events: winGoals.slice(0, 2) })])
+
+    expect((await changeRows()).map((change) => [change.newValue, change.status])).toEqual([
+      ["10' Jan Janssen, 30' Piet Pietersen (tegenstander)", 'rejected'],
+      ["10' Jan Janssen", 'rejected'],
+      ["10' Jan Janssen, 30' Piet Pietersen (tegenstander)", 'pending'],
+    ])
+  })
+
+  it('makes no new change for a list a person rejected, while the match has no goals', async () => {
+    const list = [oldMatch({ events: winGoals.slice(0, 2) })]
+
+    await run(list)
+    await database.db.update(matchChanges).set({ resolution: 'person', status: 'rejected' })
+    await run(list)
+
+    expect(await changeRows()).toHaveLength(1)
+  })
+
   it('changes nothing in a second run, and keeps the id of a goal', async () => {
     const list = [oldMatch({ events: winGoals })]
 

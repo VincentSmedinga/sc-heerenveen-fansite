@@ -281,10 +281,12 @@ export async function importOldSiteGoals(
       }
 
       // Something to keep: goals in the files, or goals that are about to leave the match. The
-      // same list is kept once: not again while it waits, and not again after a decision unless
-      // the match has goals to lose.
+      // same list is kept once: not again while it waits, and not again after a person decided
+      // about it unless the match has goals to lose. A change that lapsed by itself does not
+      // count, or a list that comes back in the files would wait nowhere.
       const known = waiting.some((change) => change.newValue === list)
-      const decided = existing.length === 0 && kept.some((change) => change.newValue === list)
+      const decided =
+        existing.length === 0 && kept.some((change) => change.newValue === list && change.resolution === 'person')
 
       if ((inFiles.length > 0 || existing.length > 0) && !known && !decided) {
         const proposal: PartProposal = { goals: inFiles, part: 'goals', stored: existing.map(snapshotOf) }
