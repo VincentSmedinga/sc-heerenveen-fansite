@@ -4,13 +4,15 @@
 // functions take only `select`, so the type forbids a write. It does not work anything out
 // itself: it asks the steps, which hand over their notices as data (`deriveOldSiteMatches`,
 // `deriveOldSiteGoals`, `deriveOldSitePlayers`, `judgeStoredOldSiteMatch`, `findOldSiteClubs`),
-// so the report and the import can't disagree.
+// so the report and the import can't disagree. The chapter about the cross tables of Wikipedia
+// (#976) is worked out in `old-site-cross-tables.ts` and only written here.
 import type { Match } from '@fansite/db/schema'
 
 import { normaliseClubName } from '@fansite/db/clubs'
 import { clubs, matches, matchGoals, matchStatistics, players } from '@fansite/db/schema'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 
+import type { OldSiteCrossTable } from './old-site-cross-tables.ts'
 import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteNameSpelling } from './old-site-name-clusters.ts'
 import type { OldSiteReportAbout, OldSiteReportAnomalyCode, OldSiteReportNoteCode } from './old-site-report.ts'
@@ -486,8 +488,15 @@ const tableColumns: readonly [header: string, value: (season: OldSiteCheckSeason
 const itemText = ({ match, text }: OldSiteCheckItem) =>
   `${match.season}, ${match.competition}, ${dutchDate(match.date)}, ${match.opponent}: ${text}`
 
-/** The report as Markdown: an introduction, a table per season and the lists. */
-export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
+/**
+ * The report as Markdown: an introduction, a table per season and the lists. `crossTables` is
+ * the comparison with the cross tables of Wikipedia, a part for each season that was asked for.
+ */
+export function formatOldSiteCheck(
+  check: OldSiteCheck,
+  today: string,
+  crossTables: readonly OldSiteCrossTable[] = [],
+): string {
   const lines: string[] = []
   const section = (title: string, intro: string[], items: string[]) => {
     lines.push('', `## ${title}`, '', ...intro)
@@ -509,6 +518,7 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     `Gemaakt op ${dutchDate(today)}, op een database met de import van de bestanden in \`apps/importer/data/oude-fansite\`.`,
     'Maak het opnieuw na de import met `pnpm --silent import:old-site --report > docs/oude-wedstrijden-hiaten.md`, of met de workflow _Import old site_ en de keuze `report`.',
     'De opdracht leest de bestanden en de database en schrijft niets in de database.',
+    'Voor de kruistabellen vraagt ze Wikipedia om één pagina per seizoen.',
     'Het verslag noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde spellingen na.',
     '',
     '## Per seizoen',
@@ -562,6 +572,36 @@ export function formatOldSiteCheck(check: OldSiteCheck, today: string): string {
     ],
     check.goals.map(itemText),
   )
+  lines.push(
+    '',
+    '## Uitslagen naast de kruistabellen van Wikipedia',
+    '',
+    'De pagina van een seizoen op de Nederlandse Wikipedia heeft een kruistabel met de uitslagen van de competitie.',
+    'Hier staan de wedstrijden van sc Heerenveen waarvan de uitslag in de database anders is dan in die tabel, en de wedstrijden die in de tabel staan en niet in de database.',
+    'De thuisclub staat eerst in een uitslag.',
+    'De tabel heeft geen datums, dus die zijn niet vergeleken.',
+    'De import verandert hier niets aan: de redactie verbetert een wedstrijd in het beheer.',
+  )
+  if (crossTables.length === 0) {
+    lines.push('', 'Geen: de bestanden hebben geen competitiewedstrijden van 1990/91 tot en met 2006/07.')
+  }
+  for (const table of crossTables) {
+    lines.push(
+      '',
+      `### ${table.season}, ${table.competition}`,
+      '',
+      `Bron: [${table.title}](${table.url}) op Wikipedia.`,
+      '',
+    )
+    if (table.unreadable !== null) {
+      lines.push(`De kruistabel is niet te lezen: ${table.unreadable}.`)
+    } else if (table.lines.length === 0) {
+      lines.push(`Geen verschillen in de ${table.compared} uitslagen van de tabel.`)
+    } else {
+      lines.push(...table.lines.map((line) => `- ${line}`))
+    }
+  }
+
   section(
     'Verslagen die bezig zijn',
     [

@@ -238,6 +238,7 @@ Start hem na elke deploy die een stap aan de opdracht toevoegt of wijzigt:
 
 - Met de keuze `report` draait de workflow `--old-site --report`.
   Dat schrijft niets in de database: het zet een verslag in Markdown in het logboek en in de samenvatting van de run, over wat er nog ontbreekt of niet klopt.
+  Voor het hoofdstuk over de kruistabellen vraagt het Wikipedia om één pagina per seizoen van de competitie.
   Het verslag van de laatste run staat in [`docs/oude-wedstrijden-hiaten.md`](oude-wedstrijden-hiaten.md).
 - Met de keuze `status` draait de workflow `--status`: het overzicht van de import op de host, zonder SSH.
   Dat schrijft niets in de database: de uitvoer staat in het logboek en, in een codeblok, in de samenvatting van de run.

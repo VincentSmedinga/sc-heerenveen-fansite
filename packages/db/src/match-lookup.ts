@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { Competition, Match } from './schema.ts'
@@ -104,4 +104,26 @@ export async function findMatchByDate(
   }
 
   return rows[0] === undefined ? { kind: 'none' } : { kind: 'found', match: rows[0] }
+}
+
+/**
+ * The matches of a season and competition against a club, whatever their source, round and
+ * date, the earliest first. For a source that has no dates, such as a cross table (#976): a
+ * league has one match at home and one away against a club, so the caller chooses on `home`.
+ */
+export async function findMatchesByClub(
+  db: Pick<Database, 'select'>,
+  query: { clubId: number; competition: Competition; season: string },
+): Promise<Match[]> {
+  return db
+    .select()
+    .from(matches)
+    .where(
+      and(
+        eq(matches.season, query.season),
+        eq(matches.competition, query.competition),
+        eq(matches.clubId, query.clubId),
+      ),
+    )
+    .orderBy(asc(matches.matchDate), asc(matches.id))
 }

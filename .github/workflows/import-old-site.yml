@@ -41,9 +41,10 @@ jobs:
   import:
     name: Import the old site on acceptance
     runs-on: ubuntu-latest
-    # The files hold 671 matches and 91 clubs, and the command asks nobody for anything: it only
-    # writes to the database (the actions report and status do not even write). It takes seconds. 30
-    # minutes leaves room for the steps that come after the clubs, and for a slow host.
+    # The files hold 671 matches and 91 clubs. The command writes to the database (the actions
+    # report and status do not even write), and asks Wikipedia about the players without a
+    # person and, for the report, for the page with the cross table of each season. It takes
+    # seconds, and the report under a minute. 30 minutes leaves room for a slow host.
     timeout-minutes: 30
     environment:
       name: acceptatie

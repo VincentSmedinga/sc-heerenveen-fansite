@@ -38,6 +38,39 @@ type ClubDatabase = Pick<OldSiteDatabase, 'insert' | 'select' | 'update'>
 type KnownClub = { id: number; name: string; names: Set<string> }
 
 /**
+ * A finder of the club of a name from another source, such as a cross table of Wikipedia
+ * (#976): the first of the names that a club has as its name, another name or a title of an
+ * article (its own in `clubs.wikipedia_page`, or one in `club_pages`), else the club of the
+ * full name `club-names.ts` lists for one of them. It reads the clubs once and writes nothing.
+ */
+export async function clubFinder(
+  db: Pick<OldSiteDatabase, 'select'>,
+): Promise<(names: readonly string[]) => undefined | { id: number; name: string }> {
+  const byId = await knownClubs(db)
+
+  for (const row of await db.select({ id: clubs.id, page: clubs.wikipediaPage }).from(clubs)) {
+    if (row.page !== null) {
+      byId.get(row.id)?.names.add(normaliseClubName(row.page))
+    }
+  }
+
+  const known = [...byId.values()]
+
+  return (names) => {
+    for (const name of [...names, ...names.flatMap((one) => listedName(one) ?? [])]) {
+      const key = normaliseClubName(name)
+      const club = known.find((one) => one.names.has(key))
+
+      if (club !== undefined) {
+        return { id: club.id, name: club.name }
+      }
+    }
+
+    return undefined
+  }
+}
+
+/**
  * The club of every club in the files, in the order of the files, found by the rules of the
  * step `clubs`. The check report (#880) reads it to tell a club that has the name of the old
  * fansite from a club that has it as another name.
@@ -165,15 +198,18 @@ async function knownClubs(db: Pick<OldSiteDatabase, 'select'>): Promise<Map<numb
   return found
 }
 
+/** The full name `club-names.ts` lists for a name or one of its other spellings. */
+function listedName(name: string): string | undefined {
+  const key = normaliseClubName(name)
+
+  return clubFullNames.find((entry) => [entry.name, ...entry.aliases].some((one) => normaliseClubName(one) === key))
+    ?.name
+}
+
 /**
  * The names the lists give an old fansite club, the one a new club gets first: the name in
  * `oldSiteClubNames` by its code, then the full name of `club-names.ts`.
  */
 function otherNames(old: OldSiteClub): string[] {
-  const key = normaliseClubName(old.name)
-  const listed = clubFullNames.find((entry) =>
-    [entry.name, ...entry.aliases].some((name) => normaliseClubName(name) === key),
-  )
-
-  return [oldSiteClubNames[old.code], listed?.name].flatMap((name) => (name === undefined ? [] : [name]))
+  return [oldSiteClubNames[old.code], listedName(old.name)].flatMap((name) => (name === undefined ? [] : [name]))
 }

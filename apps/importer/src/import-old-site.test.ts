@@ -5,7 +5,7 @@ import { clubNames, clubs, matchAppearances, matches, matchGoals, matchReports }
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -328,6 +328,93 @@ describe('the check report command', () => {
       expect(errors.join('\n')).toContain("The files of the old fansite can't be used, so there is no report.")
     } finally {
       spy.mockRestore()
+    }
+  })
+
+  it('asks Wikipedia for nothing when the files have no league match', async () => {
+    const asked: string[] = []
+    const chunks: string[] = []
+    const code = await runOldSiteReport(database.url, {
+      fetcher: {
+        fetch: async (url) => {
+          asked.push(String(url))
+
+          return { kind: 'blocked-by-robots', url: String(url) }
+        },
+      },
+      folder,
+      today: '2026-11-10',
+      write: (text) => chunks.push(text),
+    })
+
+    expect(code).toBe(0)
+    expect(asked).toEqual([])
+    expect(chunks.join('')).toContain(
+      'Geen: de bestanden hebben geen competitiewedstrijden van 1990/91 tot en met 2006/07.',
+    )
+  })
+
+  it('lays the league matches next to the cross table of the season, and writes nothing', async () => {
+    const withMatches = mkdtempSync(path.join(tmpdir(), 'fansite-old-site-league-'))
+    const page = readFileSync(new URL('./fixtures/wikipedia-cross-table-1990-91.wiki', import.meta.url))
+    const match = {
+      attendance: null,
+      code: 'nec.thuis',
+      competition: 1,
+      dateTime: '1990-09-01 19:30:00',
+      events: [],
+      lineup: [],
+      note: null,
+      referee: null,
+      result: { awayFullTime: 2, awayHalfTime: 0, homeFullTime: 1, homeHalfTime: 0, note: null },
+      round: 1,
+      season: '9091',
+      statistics: { awayCorners: 0, awayFouls: 0, awayOffside: 0, homeCorners: 0, homeFouls: 0, homeOffside: 0 },
+    }
+
+    try {
+      cpSync(folder, withMatches, { recursive: true })
+      writeFileSync(
+        path.join(withMatches, 'matches-9091.json'),
+        JSON.stringify({ matches: [match], season: '9091', version: 2 }),
+      )
+      expect((await run({ folder: withMatches })).code).toBe(0)
+
+      const before = await rowCounts()
+      const asked: string[] = []
+      const chunks: string[] = []
+      const code = await runOldSiteReport(database.url, {
+        fetcher: {
+          fetch: async (url) => {
+            asked.push(String(url))
+
+            return {
+              body: new Uint8Array(page),
+              contentType: 'text/x-wiki',
+              etag: null,
+              kind: 'fetched',
+              lastModified: null,
+              url: String(url),
+            }
+          },
+        },
+        folder: withMatches,
+        pause: 0,
+        today: '2026-11-10',
+        write: (text) => chunks.push(text),
+      })
+
+      expect(code).toBe(0)
+      expect(asked).toEqual(['https://nl.wikipedia.org/wiki/Eredivisie_1990/91?action=raw'])
+      expect(chunks.join('')).toContain('### 1990/91, Eredivisie')
+      // The files have 1-2 at home against NEC, the table has 1-1.
+      expect(chunks.join('')).toContain(
+        '- Thuis tegen N.E.C., 1 september 1990: de database heeft 1-2, de kruistabel heeft 1-1',
+      )
+      expect(chunks.join('')).toContain('- Uit tegen N.E.C.: staat in de kruistabel (2-1) en niet in de database')
+      expect(await rowCounts()).toEqual(before)
+    } finally {
+      rmSync(withMatches, { force: true, recursive: true })
     }
   })
 

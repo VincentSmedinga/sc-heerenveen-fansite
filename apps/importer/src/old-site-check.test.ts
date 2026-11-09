@@ -331,6 +331,49 @@ describe('the text of the report', () => {
     expect(text.endsWith('\n')).toBe(true)
   })
 
+  it('has a part for each season of the cross tables, with the lines, no difference or the reason', async () => {
+    const check = await buildOldSiteCheck(database.db, dataOf([]))
+    const table = (season: string) => ({
+      compared: 34,
+      competition: 'Eredivisie' as const,
+      lines: [],
+      season,
+      title: `Eredivisie ${season}`,
+      unreadable: null,
+      url: `https://nl.wikipedia.org/wiki/Eredivisie_${season}`,
+    })
+    const text = formatOldSiteCheck(check, '2026-11-10', [
+      {
+        ...table('1990/91'),
+        lines: ['Thuis tegen Testdorp FC, 1 september 1990: de database heeft 1-0, de kruistabel heeft 1-1'],
+      },
+      table('1993/94'),
+      { ...table('1994/95'), compared: 0, unreadable: 'de pagina heeft geen kopje Uitslagen' },
+    ])
+
+    expect(text).toContain(
+      [
+        '### 1990/91, Eredivisie',
+        '',
+        'Bron: [Eredivisie 1990/91](https://nl.wikipedia.org/wiki/Eredivisie_1990/91) op Wikipedia.',
+        '',
+        '- Thuis tegen Testdorp FC, 1 september 1990: de database heeft 1-0, de kruistabel heeft 1-1',
+        '',
+        '### 1993/94, Eredivisie',
+      ].join('\n'),
+    )
+    expect(text).toMatch(
+      /### 1993\/94, Eredivisie\n\nBron: .*\n\nGeen verschillen in de 34 uitslagen van de tabel\.\n/u,
+    )
+    expect(text).toMatch(
+      /### 1994\/95, Eredivisie\n\nBron: .*\n\nDe kruistabel is niet te lezen: de pagina heeft geen kopje Uitslagen\.\n/u,
+    )
+    // Without a season to compare, the chapter says so.
+    expect(formatOldSiteCheck(check, '2026-11-10')).toMatch(
+      /## Uitslagen naast de kruistabellen van Wikipedia\n[^#]*\nGeen: de bestanden hebben geen competitiewedstrijden/u,
+    )
+  })
+
   it('keeps one sentence to a line, also when a rule says two', async () => {
     const data = dataOf(matchesOfTheSeason)
 

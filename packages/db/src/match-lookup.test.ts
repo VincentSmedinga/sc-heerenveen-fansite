@@ -4,7 +4,7 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { compareClaim, findMatchByDate } from './match-lookup.ts'
+import { compareClaim, findMatchByDate, findMatchesByClub } from './match-lookup.ts'
 import { matches } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -84,6 +84,32 @@ describe('findMatchByDate', () => {
     await insert({ matchDate: '2001-09-02', round: 'Wedstrijd 2' })
 
     expect(await lookup(row.clubId, '2001-09-01')).toMatchObject({ kind: 'ambiguous', matches: [{}, {}] })
+  })
+})
+
+describe('findMatchesByClub', () => {
+  it('finds the matches against a club in a season and competition, whatever the date and the source', async () => {
+    const away = await insert({ home: false, matchDate: '2002-02-02', round: 'Wedstrijd 20' })
+
+    await insert({ dataSource: 'wikipedia', dateText: '1 september 2001', round: 'Speelronde 3' })
+    await insert({ opponent: 'Andere Club', round: 'Wedstrijd 2' })
+    await insert({ competition: 'KNVB Beker', round: 'Eerste ronde' })
+    await insert({ round: 'Wedstrijd 1', season: '2002/03' })
+
+    const found = await findMatchesByClub(database.db, {
+      clubId: away.clubId,
+      competition: 'Eredivisie',
+      season: '2001/02',
+    })
+
+    // The earliest first.
+    expect(found.map((match) => [match.matchDate, match.home, match.dataSource])).toEqual([
+      ['2001-09-01', true, 'wikipedia'],
+      ['2002-02-02', false, 'oude-fansite'],
+    ])
+    expect(await findMatchesByClub(database.db, { clubId: 0, competition: 'Eredivisie', season: '2001/02' })).toEqual(
+      [],
+    )
   })
 })
 
