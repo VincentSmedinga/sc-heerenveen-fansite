@@ -837,6 +837,10 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
     assert.match(html, /<h2[^>]*>Laatste nieuws<\/h2>/)
     assert.match(html, /We hebben nog geen nieuws gevonden\. Kijk straks nog eens\./)
+    // With no headlines there is no count line, and the link to the archive has its new name.
+    assert.doesNotMatch(html, /artikelen? over de laatste/)
+    assert.match(html, /<a href="\/nieuws">Al het <span[^>]*>nieuws<svg/)
+    assert.doesNotMatch(html, /Alle nieuws/)
     // The homepage has no text about the sources; the footer links to them.
     assert.doesNotMatch(html, /Welke media we volgen/)
     assert.match(html, /<footer[^>]*>.*<a[^>]*href="\/bronnen"[^>]*>Bronnen<\/a>.*<\/footer>/s)
@@ -925,7 +929,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(archiveHtml, /<fieldset|type="checkbox"/)
     assert.match(archiveHtml, /<aside.*<h2[^>]*>Podcasts<\/h2>.*<\/aside>/s)
     assert.doesNotMatch(archiveHtml, /Wedstrijden<\/h2>|Stand<\/h2>|Nieuwste discussies/)
-    assert.match(html, /<a href="\/nieuws">Alle <span class="hf-icon-tail">nieuws</)
+    assert.match(html, /<a href="\/nieuws">Al het <span class="hf-icon-tail">nieuws</)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant&bron=nos`)).status, 404)

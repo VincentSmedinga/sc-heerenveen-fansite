@@ -8,7 +8,7 @@ describe('the counts of the lists', () => {
   })
 
   it('are all one of those sizes', () => {
-    const numbers = Object.entries(counts).filter(([name]) => name !== 'listSizes')
+    const numbers = Object.entries(counts).filter(([name]) => name !== 'listSizes' && name !== 'headlineWindowDays')
 
     expect(numbers.length).toBeGreaterThan(0)
     for (const [name, value] of numbers) {
@@ -16,9 +16,11 @@ describe('the counts of the lists', () => {
     }
   })
 
-  it('show 5 items on a card by default, 10 headlines on the homepage and 50 on a page of /nieuws', () => {
+  it('show 5 items on a card by default, 5 to 20 headlines on the homepage and 50 on a page of /nieuws', () => {
     expect(counts.itemsPerCard).toBe(5)
-    expect(counts.firstHeadlines).toBe(10)
+    expect(counts.fewestHeadlines).toBe(5)
+    expect(counts.mostHeadlines).toBe(20)
+    expect(counts.headlineWindowDays).toBe(3)
     expect(counts.headlinesPerPage).toBe(50)
     expect(counts.articlesPerPage).toBe(10)
   })

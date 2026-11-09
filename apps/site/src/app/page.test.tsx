@@ -288,11 +288,11 @@ describe('the homepage', () => {
 
     const html = await renderMain()
 
-    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Alle nieuws<\/a><\/p><\/section><\/main>$/)
+    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Al het nieuws<\/a><\/p><\/section><\/main>$/)
     expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
   })
 
-  it('draws an arrow to the right behind "Alle nieuws", hidden from screen readers', async () => {
+  it('draws an arrow to the right behind "Al het nieuws", hidden from screen readers', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
@@ -300,15 +300,32 @@ describe('the homepage', () => {
 
     expect(link).toContain('<path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path>')
     expect(link).toContain('aria-hidden="true"')
-    expect(link.replace(/<[^>]*>/g, '')).toBe('Alle nieuws')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Al het nieuws')
   })
 
   it('keeps the link to the archive when there is no news yet, like the card of the podcasts', async () => {
     vi.mocked(getHeadlines).mockResolvedValue([])
 
     expect(withoutIcons(await renderMain())).toContain(
-      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle nieuws</a></p></section>',
+      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Al het nieuws</a></p></section>',
     )
+  })
+
+  it('says how many headlines the card has and how many days they cover, right under the heading', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+
+    const html = await renderMain()
+
+    // The oldest of the three is 52 hours and 40 minutes old, so 3 days.
+    expect(html).toContain(
+      '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2><p class="hf-meta">3 artikelen over de laatste 3 dagen</p><ul',
+    )
+  })
+
+  it('has no count line when there is no news yet', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue([])
+
+    expect(await renderMain()).not.toContain('over de laatste')
   })
 
   it('tells visitors there is no news yet, without a heading for a day', async () => {
