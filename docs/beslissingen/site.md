@@ -3907,6 +3907,7 @@
 - **Waarom:** de stand en onze plek erin horen bij elkaar, en de plek in de zijbalk was al van een kaart met een lijn.
   Een open plek is eerlijker dan een gok.
 - **Alternatieven:** op Cijfers, naast "Onze plek in de competitie"; een nieuw onderdeel `LineChart`.
+- **Later:** zie _De kaart heet "Verloop op de ranglijst" en toont de hoogste en laagste plek als lijst_ in `redactie.md`: de kaart heet nu "Verloop op de ranglijst" met het anker `#verloop-op-de-ranglijst`, de zin boven de tabel is een lijst boven de uitklapper en het label van een punt noemt de punten niet meer.
 
 ## Een seizoen zonder gegevens heeft geen kaart Onze plek per speelronde
 

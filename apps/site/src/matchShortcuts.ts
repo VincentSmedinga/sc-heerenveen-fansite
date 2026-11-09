@@ -29,7 +29,7 @@ export const standingsCardOf = (current: boolean) =>
 export const coachResultsCard = { id: 'resultaten-per-hoofdtrainer', name: 'Resultaten per hoofdtrainer' } as const
 
 /** The name and the anchor of the card with our place after each round, under the table. */
-export const placePerRoundShortcut = { id: 'onze-plek-per-speelronde', name: 'Onze plek per speelronde' } as const
+export const placePerRoundShortcut = { id: 'verloop-op-de-ranglijst', name: 'Verloop op de ranglijst' } as const
 
 /** The name and the anchor of the card with our place in every season, on Cijfers. */
 export const finalPlacesShortcut = { id: 'onze-plek-door-de-jaren', name: 'Onze plek door de jaren' } as const

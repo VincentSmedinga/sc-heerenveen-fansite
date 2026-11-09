@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { PlaceInRound } from './matches'
 
-import { extremesOfPlaces, labelsOf, PlacePerRoundCard } from './PlacePerRoundCard'
+import { labelsOf, PlacePerRoundCard } from './PlacePerRoundCard'
 import { withoutIcons } from './without-icons'
 
 const at = (round: number, position: number, points = round * 2): PlaceInRound => ({ points, position, round })
@@ -13,25 +13,18 @@ const full = Array.from({ length: 34 }, (_, index) => at(index + 1, 1 + (index %
 const going = [at(1, 3), at(2, 1), at(3, 2), ...Array.from({ length: 31 }, () => null)]
 const gap = [at(1, 4), null, at(3, 7), ...Array.from({ length: 31 }, () => null)]
 
+const rounds = (html: string) =>
+  [...html.matchAll(/<th scope="row"><span class="hf-meta">(\d+)/g)].map(([, round]) => round)
+
 const render = (places: readonly (null | PlaceInRound)[]) =>
   withoutIcons(renderToStaticMarkup(<PlacePerRoundCard places={places} />))
 
 describe('labelsOf', () => {
-  it('says the round, the place and the points, and nothing for an open round', () => {
-    expect(labelsOf([at(12, 4, 20), null])).toEqual(['Ronde 12: plek 4, 20 punten', null])
-  })
-})
+  it('says the round and the place, with only the place heavy, and nothing for an open round', () => {
+    const [label, open] = labelsOf([at(12, 4, 20), null])
 
-describe('extremesOfPlaces', () => {
-  it('finds the highest and the lowest place, with the first round of each', () => {
-    expect(extremesOfPlaces([at(1, 3), at(2, 1), at(3, 1), at(4, 5), at(5, 5)])).toEqual({
-      highest: at(2, 1),
-      lowest: at(4, 5),
-    })
-  })
-
-  it('has nothing without a round', () => {
-    expect(extremesOfPlaces([null, null])).toBeUndefined()
+    expect(open).toBeNull()
+    expect(withoutIcons(renderToStaticMarkup(<>{label}</>))).toBe('Ronde 12: <strong>plek 4</strong>')
   })
 })
 
@@ -44,8 +37,8 @@ describe('PlacePerRoundCard', () => {
   it('has the anchor, the soft surface and the Eredivisie note', () => {
     const html = render(full)
 
-    expect(html).toContain('aria-labelledby="onze-plek-per-speelronde"')
-    expect(html).toContain('id="onze-plek-per-speelronde"')
+    expect(html).toContain('aria-labelledby="verloop-op-de-ranglijst"')
+    expect(html).toContain('id="verloop-op-de-ranglijst"')
     expect(html).toContain('hf-card-soft')
     expect(html).toContain('Eredivisie')
   })
@@ -61,20 +54,21 @@ describe('PlacePerRoundCard', () => {
 
   it('keeps the table and the sentence in a closed Disclosure, with a caption', () => {
     const html = render(full)
-    const disclosure = html.slice(html.indexOf('<details'))
+    const disclosure = html.slice(html.indexOf('<details'), html.indexOf('</details>'))
 
     expect(disclosure).not.toContain('<details open')
     expect(disclosure).toContain('<summary>Plek per speelronde</summary>')
     expect(disclosure).toContain('<caption class="hf-visually-hidden">')
-    expect(disclosure).toContain('Onze hoogste plek was 1, na ronde 1, en onze laagste plek was 6, na ronde 6.')
-    expect([...disclosure.matchAll(/<th scope="row">Ronde (\d+)<\/th>/g)]).toHaveLength(34)
-    expect(disclosure.indexOf('Ronde 34')).toBeLessThan(disclosure.indexOf('Ronde 1<'))
+    expect(disclosure).not.toContain('<p')
+    expect([...disclosure.matchAll(/<th scope="row">/g)]).toHaveLength(34)
+    expect(rounds(html)[0]).toBe('34')
+    expect(rounds(html).at(-1)).toBe('1')
   })
 
   it('stops the table at the last complete round in a season that is going on', () => {
     const html = render(going)
 
-    expect([...html.matchAll(/<th scope="row">Ronde (\d+)<\/th>/g)].map(([, round]) => round)).toEqual(['3', '2', '1'])
+    expect(rounds(html)).toEqual(['3', '2', '1'])
     expect(html).toContain('--hf-bar-chart-slots:34')
   })
 
@@ -82,10 +76,60 @@ describe('PlacePerRoundCard', () => {
     const html = render(gap)
 
     expect(html).toContain('nog niet alle wedstrijden gespeeld')
-    expect(html.slice(html.indexOf('Ronde 2<'), html.indexOf('Ronde 1<'))).toContain('–')
+    expect(html.slice(html.indexOf('>2<'), html.indexOf('>1<', html.indexOf('>2<')))).toContain('–')
   })
 
-  it('says one place when it never changed', () => {
-    expect(render([at(1, 3), at(2, 3)])).toContain('Onze plek was na elke ronde 3.')
+  it('says one place and no shift when it never changed', () => {
+    const html = render([at(1, 3), at(2, 3)])
+
+    expect(html).toContain('<li>Plek: 3, alle rondes</li>')
+    expect(html).not.toContain('Totaal verschoven')
+  })
+
+  it('has a list of three lines above the Disclosure, not a sentence', () => {
+    const html = render(going)
+    const list = html.slice(html.indexOf('<ul'), html.indexOf('</ul>'))
+
+    expect([...list.matchAll(/<li>(.*?)<\/li>/g)].map(([, line]) => line)).toEqual([
+      'Hoogste: plek 1, ronde 2',
+      'Laagste: plek 3, ronde 1',
+      'Totaal verschoven: 3 plekken',
+    ])
+    expect(html).toContain('<ul class="hf-list-plain" role="list">')
+    expect(html.indexOf('</ul>')).toBeLessThan(html.indexOf('<details'))
+  })
+
+  it('has strokes with a number at every fifth round, and no others', () => {
+    const html = render(full)
+    const numbers = html.slice(html.indexOf('hf-bar-chart-numbers'), html.indexOf('hf-bar-chart-title'))
+
+    expect(html).toContain('hf-bar-chart-numbers-marked')
+    expect([...numbers.matchAll(/hf-bar-chart-number"[^>]*>(\d+)</g)].map(([, number]) => number)).toEqual([
+      '5',
+      '10',
+      '15',
+      '20',
+      '25',
+      '30',
+    ])
+  })
+
+  it('has the headers Ronde, # and P, and says Plek and Punten to a screen reader', () => {
+    const html = render(full)
+    const head = html.slice(html.indexOf('<thead'), html.indexOf('</thead>'))
+
+    expect(head).toContain('Ronde')
+    expect(head).toContain('<span aria-hidden="true">#</span><span class="hf-visually-hidden">plek</span>')
+    expect(head).toContain('<span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span>')
+    expect(html).toContain('Plek en punten van sc Heerenveen in de Eredivisie na elke speelronde')
+  })
+
+  it('shows the round in the muted colour and the place heavy, without the word Ronde in a row', () => {
+    const html = render(going)
+    const row = html.slice(html.indexOf('<tbody'))
+
+    expect(row).toContain('<th scope="row"><span class="hf-meta">3</span></th>')
+    expect(row).toContain('hf-numeric hf-key')
+    expect(row).not.toContain('>Ronde ')
   })
 })

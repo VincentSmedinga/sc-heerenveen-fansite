@@ -272,7 +272,7 @@ const roundsPerSeason = (eredivisieClubs - 1) * 2
 type RoundTally = { club: string; goalsAgainst: number; goalsFor: number; points: number }
 
 /**
- * Our place after each round of a season, for the card "Onze plek per speelronde" of
+ * Our place after each round of a season, for the card "Verloop op de ranglijst" of
  * Wedstrijden (see `placePerRoundOf`), or undefined when the season has no such line. The two
  * queries are the ones the page asks anyway and are kept like the data of the season.
  */

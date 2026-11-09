@@ -174,6 +174,19 @@ describe('BarChart', () => {
     expect(container.querySelector('.hf-bar-chart-title')?.textContent).toBe('Seizoen')
   })
 
+  it('puts a stroke above the numbers only when the axis asks for marks', () => {
+    const labels = [{ at: 4.5, text: '5' }]
+    const plain = render(<BarChart axis={{ labels }} bars={Array.from({ length: 10 }, () => null)} max={3} />)
+
+    expect(plain.container.querySelector('.hf-bar-chart-numbers-marked')).toBeNull()
+
+    const marked = render(
+      <BarChart axis={{ labels, marks: true }} bars={Array.from({ length: 10 }, () => null)} max={3} />,
+    )
+
+    expect(marked.container.querySelector('.hf-bar-chart-numbers-marked')).not.toBeNull()
+  })
+
   it('has no numbers or caption when the axis is false', () => {
     const { container } = render(<BarChart axis={false} bars={bars} max={3} />)
 

@@ -1,6 +1,9 @@
+import type { ReactNode } from 'react'
+
 import { act, fireEvent, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { Strong } from '../strong/Strong'
 import { BarChart } from './BarChart'
 
 // Six places in a plot of 300 wide, so a place is 50 wide and the middles are at 25, 75, ...
@@ -8,7 +11,7 @@ const values = [null, null, 1, 2, null, 3]
 const labels = [null, null, '1,0', '2,0', null, '3,0']
 const bars = values.map(() => null)
 
-function chart(props: { labels?: readonly (null | string)[] } = {}) {
+function chart(props: { labels?: readonly (null | ReactNode)[] } = {}) {
   return render(
     <>
       <BarChart bars={bars} max={3}>
@@ -44,6 +47,28 @@ afterEach(() => {
 })
 
 describe('BarChart.Trend with labels', () => {
+  it('shows a label with a heavier part, in a strong element', () => {
+    const { container } = chart({
+      labels: [
+        null,
+        null,
+        null,
+        <>
+          Ronde 4: <Strong>plek 2</Strong>
+        </>,
+        null,
+        null,
+      ],
+    })
+
+    fireEvent.pointerMove(layerOf(container), { ...mouse, clientX: 175, clientY: 10 })
+
+    const tooltip = tooltipOf(container)!
+
+    expect(tooltip.textContent).toBe('Ronde 4: plek 2')
+    expect(tooltip.querySelector('strong')?.textContent).toBe('plek 2')
+  })
+
   it('has no tooltip and no layer for the pointer without labels', () => {
     const { container } = chart()
 

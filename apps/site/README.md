@@ -80,7 +80,7 @@ Zo toetst axe de homepage met de kaart "Van de redactie" en de pagina `/redactie
 Voor `/wedstrijden` zet hij een verzonnen stand in de database (`e2e/standings.ts`), want de seed heeft geen wedstrijden en zonder stand heeft de kaart Stand geen knop voor een afbeelding.
 Heeft de database al een stand voor dit seizoen, dan laat hij die staan en haalt hij niets weg.
 Voor de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, zet hij verzonnen wedstrijden, doelpunten, een stand en de bronpagina's in het seizoen vóór het lopende (`e2e/earlier-season.ts`, met `seedMatches`), en haalt ze na de laatste test weer weg.
-Dat seizoen krijgt vijf hele speelronden van alle 18 clubs (`fullRounds`), zodat de kaart Onze plek per speelronde een lijn heeft; het lopende seizoen heeft die kaart niet, want zijn verzonnen uitslagen zijn van zes clubs.
+Dat seizoen krijgt vijf hele speelronden van alle 18 clubs (`fullRounds`), zodat de kaart Verloop op de ranglijst een lijn heeft; het lopende seizoen heeft die kaart niet, want zijn verzonnen uitslagen zijn van zes clubs.
 Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laat hij die staan.
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 Voor de kaart Onze plek door de jaren op `/cijfers` zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
@@ -282,7 +282,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 De kaarten met cijfers staan op `/cijfers` (zie _De cijfers_).
 Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Cijfers waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
-Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Onze plek per speelronde als het seizoen die heeft, en Hoofdtrainer; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
+Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Verloop op de ranglijst als het seizoen die heeft, en Hoofdtrainer; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand heeft een zacht vlak (`surface="soft"`), de hoofdtrainers een sterk vlak, en het programma en de uitslagen zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
@@ -318,9 +318,10 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende personen in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
   De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
-- **Onze plek per speelronde:** een kaart op het zachte vlak (`surface="soft"`, anker `#onze-plek-per-speelronde`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
+- **Verloop op de ranglijst:** een kaart op het zachte vlak (`surface="soft"`, anker `#verloop-op-de-ranglijst`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
   De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
-  Onder de lijn staat in een gesloten `Disclosure` een zin met onze hoogste en laagste plek en een tabel met Ronde, Plek en Punten, de nieuwste ronde bovenaan.
+  De x-as heeft een streepje met een getal bij elke vijfde ronde, en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.
+  Boven een gesloten `Disclosure` staat een lijst zonder opsommingstekens (`List plain`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
   `placePerRoundOf` in `src/matches.ts` rekent de stand na elke ronde uit `league_results` (punten, doelsaldo, doelpunten voor, dan de naam).
   Een ronde is een punt als alle wedstrijden van die ronde en van de rondes ervoor gespeeld zijn; anders is het een open plek.
   Het lopende seizoen toont de lijn tot de laatste complete ronde.

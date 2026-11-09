@@ -134,4 +134,16 @@ describe('List.Item', () => {
   it('is called List.Item in the developer tools and the code examples', () => {
     expect(List.Item.displayName).toBe('List.Item')
   })
+
+  it('is a plain list, without markers or indent, when plain', () => {
+    const { container } = render(
+      <List className="extra" plain role="list">
+        <List.Item>Een</List.Item>
+      </List>,
+    )
+
+    expect(container.firstElementChild?.className).toBe('hf-list-plain extra')
+    expect(container.firstElementChild?.hasAttribute('plain')).toBe(false)
+    expect(container.firstElementChild?.getAttribute('role')).toBe('list')
+  })
 })

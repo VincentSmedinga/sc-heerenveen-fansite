@@ -75,7 +75,7 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * card with figures that belongs to it on the page Cijfers, of the same season. A season that
  * has no matches in the database is the page "niet gevonden".
  *
- * The card Onze plek per speelronde, under the table, shows our place after each round of the
+ * The card Verloop op de ranglijst, under the table, shows our place after each round of the
  * season as a line. A season whose results are not of all clubs, or in which points were taken
  * off, has no such card (see `placePerRoundOf`). Our place in every season, the card Onze plek
  * door de jaren, is on Cijfers (see FinalPlacesCard).

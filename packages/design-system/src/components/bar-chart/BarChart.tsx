@@ -26,6 +26,11 @@ export type BarChartAxis = {
    * as many as fit. `labelOf` is not used then.
    */
   labels?: readonly BarChartAxisLabel[]
+  /**
+   * Whether each number has a short stroke above it, that marks the place it belongs to. Use it
+   * with `labels`, where the numbers are few and apart. The default is no.
+   */
+  marks?: boolean
   /** The caption under the numbers, such as `Speelronde`. */
   title?: string
 }
@@ -89,10 +94,12 @@ export type BarChartTrendProps = {
   /**
    * The text of the tooltip at each place, as long as `values`: `null` is a place without a
    * point. Without `labels` there is no tooltip. The page gives the text ready, such as "1,8",
-   * because the chart knows nothing about what it shows. A tooltip is for a mouse, a pen and a
-   * finger; the chart stays hidden from a screen reader, so give the same numbers as text.
+   * because the chart knows nothing about what it shows. A part of it can be heavier, as
+   * `<>Ronde 12: <Strong>plek 4</Strong></>`: the answer in a tooltip, the rest its context.
+   * A tooltip is for a mouse, a pen and a finger; the chart stays hidden from a screen reader,
+   * so give the same numbers as text.
    */
-  labels?: readonly (null | string)[]
+  labels?: readonly (null | ReactNode)[]
   /**
    * The scale of the values. The `BarChart` it sits in gives it. Only set it for a trend
    * outside a chart, where it is the largest value if you don't.
@@ -121,7 +128,7 @@ const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, valu
     ? values.map((value, index) => {
         const label = labels[index]
 
-        return value === null || label === null || label === undefined
+        return value === null || label === null || label === undefined || label === false
           ? null
           : { across: acrossOf(index + 0.5, values.length), at: percentOf(value, scale), label }
       })
@@ -242,7 +249,7 @@ export const BarChart = ({
         </div>
         {axis && (
           <div className="hf-bar-chart-axis">
-            <div className="hf-bar-chart-numbers">
+            <div className={classNames('hf-bar-chart-numbers', axis.marks === true && 'hf-bar-chart-numbers-marked')}>
               {numbers.map((number) => (
                 <span
                   className={classNames('hf-bar-chart-number', number.wide && 'hf-bar-chart-number-wide')}

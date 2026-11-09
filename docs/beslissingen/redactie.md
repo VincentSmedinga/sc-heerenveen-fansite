@@ -2935,3 +2935,25 @@
   Een kortere regel kost minder ruimte, vooral op een telefoon.
 - **Alternatieven:** "Gebaseerd op" laten staan; "Op basis van" of "Telt" als voorvoegsel (zelfde opvulling); de zin weglaten (dan staat het aantal nergens).
 - **Later:** de regel in het hoofdstuk Redactie van Storybook (`editorial.mdx`) noemt nu "de zin over het aantal wedstrijden".
+
+## De kaart heet "Verloop op de ranglijst" en toont de hoogste en laagste plek als lijst
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart "Onze plek per speelronde" heet "Verloop op de ranglijst" (#991), met het anker `#verloop-op-de-ranglijst`.
+  De hoogste en laagste plek staan als lijst boven de uitklapper, met een derde regel "Totaal verschoven: N plekken", de som van de verschillen in plek van ronde tot ronde.
+  - **De lijst:** "Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14", "Laagste: plek 11, ronde 20" en "Totaal verschoven: 23 plekken".
+    Een open ronde breekt een reeks, maar niet het totaal: tussen twee volledige rondes met een open ronde ertussen telt het verschil tussen die twee.
+    Hadden we na elke ronde dezelfde plek, dan staat er één regel, "Plek: 3, alle rondes".
+    De lijst heeft geen opsommingstekens en geen inspringing (`List` met `plain` en `role="list"`), want met de 24 pixels van het teken breekt "Hoogste: plek 2, ronde 6 t/m 7 en 10 t/m 14" op 390 pixels.
+  - **De tabel:** de uitklapper heet nog "Plek per speelronde", heeft geen inleiding meer en toont Ronde, # en P.
+    De kopjes hebben een verborgen volledige naam ("plek", "punten"), zodat een schermlezer ze ook op een aanraakscherm goed zegt.
+  - **De lijn:** de x-as heeft een streepje met een getal bij ronde 5, 10, 15, 20, 25 en 30.
+    De tooltip zegt "Ronde 12: **plek 4**" met alleen de plek vet, zonder de punten.
+    Daarvoor kan het label van `BarChart.Trend` nu ook een stukje opmaak zijn (`ReactNode`), en heeft `axis` de optie `marks`.
+- **Waarom:** de zin met de hoogste en de laagste plek was lang en stond verstopt.
+  Een lijst leest in één blik.
+  "Totaal verschoven" is een gewoon woord voor het verloop van de plek en laat zien hoe onrustig een seizoen was, wat het gemiddelde niet doet.
+  "#" en "P" houden de tabel smal op een telefoon; de volledige namen staan voor de schermlezer en in het onderschrift.
+  Het streepje per 5 rondes laat de as rustig lezen.
+- **Alternatieven:** "Bewogen: N keer van plek veranderd" (telt niet hoe ver); "Ruimte: 9 plekken" (staat al in de twee regels erboven); het gemiddelde (zegt niets over beweging); twee kolommen met plek en ronde in één cel (een schermlezer noemt de cel dan niet goed).
+- **Later:** vervangt de naam, het anker en de zin boven de tabel uit _De plek per speelronde staat op Wedstrijden, onder de stand_ in `site.md`.

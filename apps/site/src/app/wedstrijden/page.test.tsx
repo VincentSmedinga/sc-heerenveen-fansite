@@ -1178,8 +1178,8 @@ describe('the switch of the card Stand, between the whole season and the latest 
   })
 })
 
-describe('the card Onze plek per speelronde on /wedstrijden', () => {
-  const card = (html: string) => section(html, 'onze-plek-per-speelronde')
+describe('the card Verloop op de ranglijst on /wedstrijden', () => {
+  const card = (html: string) => section(html, 'verloop-op-de-ranglijst')
 
   beforeEach(() => {
     vi.mocked(getLeagueResults).mockResolvedValue([...leagueRoundOf(1, 2), ...leagueRoundOf(2, 0)])
@@ -1188,12 +1188,12 @@ describe('the card Onze plek per speelronde on /wedstrijden', () => {
   it('stands under the table and before the head coaches, with the soft surface', async () => {
     const html = await render()
     const stand = html.indexOf('id="stand"')
-    const place = html.indexOf('id="onze-plek-per-speelronde"')
+    const place = html.indexOf('id="verloop-op-de-ranglijst"')
 
     expect(stand).toBeGreaterThan(-1)
     expect(place).toBeGreaterThan(stand)
     expect(html).toMatch(
-      /hf-card-soft[^>]*aria-labelledby="onze-plek-per-speelronde"|aria-labelledby="onze-plek-per-speelronde"[^>]*hf-card-soft/,
+      /hf-card-soft[^>]*aria-labelledby="verloop-op-de-ranglijst"|aria-labelledby="verloop-op-de-ranglijst"[^>]*hf-card-soft/,
     )
   })
 
@@ -1201,10 +1201,10 @@ describe('the card Onze plek per speelronde on /wedstrijden', () => {
     const html = await render()
 
     expect(card(html)).toMatch(
-      /<th scope="row">Ronde 1<\/th><td class="hf-numeric">1<\/td><td class="hf-numeric">3<\/td>/,
+      /<th scope="row"><span class="hf-meta">1<\/span><\/th><td class="hf-numeric hf-key">1<\/td><td class="hf-numeric">3<\/td>/,
     )
     expect(card(html)).toMatch(
-      /<th scope="row">Ronde 2<\/th><td class="hf-numeric">1<\/td><td class="hf-numeric">4<\/td>/,
+      /<th scope="row"><span class="hf-meta">2<\/span><\/th><td class="hf-numeric hf-key">1<\/td><td class="hf-numeric">4<\/td>/,
     )
     expect(html).not.toContain('onze-plek-door-de-jaren')
   })
@@ -1220,7 +1220,7 @@ describe('the card Onze plek per speelronde on /wedstrijden', () => {
   it('has no card, and no sentence, for a season whose results are not of all clubs', async () => {
     vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData)
 
-    expect(await render()).not.toContain('onze-plek-per-speelronde')
+    expect(await render()).not.toContain('verloop-op-de-ranglijst')
   })
 
   it('has no card for a season in which points were taken off', async () => {
@@ -1229,7 +1229,7 @@ describe('the card Onze plek per speelronde on /wedstrijden', () => {
       standings: matchData.standings.map((row, index) => (index === 0 ? { ...row, pointsDeducted: 2 } : row)),
     })
 
-    expect(await render()).not.toContain('onze-plek-per-speelronde')
+    expect(await render()).not.toContain('verloop-op-de-ranglijst')
   })
 
   it('logs and leaves the card out when the results can not be read', async () => {
@@ -1239,7 +1239,7 @@ describe('the card Onze plek per speelronde on /wedstrijden', () => {
 
     const html = await render()
 
-    expect(html).not.toContain('onze-plek-per-speelronde')
+    expect(html).not.toContain('verloop-op-de-ranglijst')
     expect(html).toContain('id="stand"')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the league results'))
   })

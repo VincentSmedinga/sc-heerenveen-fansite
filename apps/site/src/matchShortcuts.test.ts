@@ -29,11 +29,11 @@ describe('matchShortcutsOf', () => {
       '#programma',
       '#uitslagen',
       '#stand',
-      '#onze-plek-per-speelronde',
+      '#verloop-op-de-ranglijst',
       '#hoofdtrainer',
     ])
-    expect(hrefs(false, true)).toEqual(['#uitslagen', '#eindstand', '#onze-plek-per-speelronde', '#hoofdtrainer'])
-    expect(hrefs(true, false)).not.toContain('#onze-plek-per-speelronde')
+    expect(hrefs(false, true)).toEqual(['#uitslagen', '#eindstand', '#verloop-op-de-ranglijst', '#hoofdtrainer'])
+    expect(hrefs(true, false)).not.toContain('#verloop-op-de-ranglijst')
   })
 
   it('has Stand in the current season', () => {

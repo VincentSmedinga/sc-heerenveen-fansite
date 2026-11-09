@@ -117,17 +117,17 @@ describe('the bar of /wedstrijden for the current season', () => {
       '#uitslagen',
       '#uitslagen-knvb-beker',
       '#stand',
-      '#onze-plek-per-speelronde',
+      '#verloop-op-de-ranglijst',
     ])
   })
 
   it('has no link when the season has no line', async () => {
-    expect(await render()).not.toContain('#onze-plek-per-speelronde')
+    expect(await render()).not.toContain('#verloop-op-de-ranglijst')
   })
 
   it('leaves the link out when the card can not be read', async () => {
     vi.mocked(getPlacePerRound).mockRejectedValue(new Error('down'))
 
-    expect(await render()).not.toContain('#onze-plek-per-speelronde')
+    expect(await render()).not.toContain('#verloop-op-de-ranglijst')
   })
 })
