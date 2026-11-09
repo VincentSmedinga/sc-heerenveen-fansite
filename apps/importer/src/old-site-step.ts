@@ -1,6 +1,13 @@
 import type { Database } from '@fansite/db/client'
 
 import type { OldSiteData } from './old-site-file.ts'
+import type { TitleLookup } from './old-site-persons.ts'
+
+/** What a step may use besides the database and the files. */
+export type OldSiteContext = {
+  /** Asks Wikipedia about a title. Only the step `personen` uses it. */
+  titles: TitleLookup
+}
 
 /** What a step writes through: the connection, or the transaction of a dry run. */
 export type OldSiteDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'transaction' | 'update'>
@@ -13,7 +20,7 @@ export type OldSiteDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 't
 export type OldSiteStep = {
   /** The name in the log, such as `clubs`, `spelers` or `selecties`. */
   name: string
-  run: (db: OldSiteDatabase, data: OldSiteData) => Promise<OldSiteStepReport>
+  run: (db: OldSiteDatabase, data: OldSiteData, context: OldSiteContext) => Promise<OldSiteStepReport>
 }
 
 /** What a step of the import of the old site did, in numbers and in lines for the log. */

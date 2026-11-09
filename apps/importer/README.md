@@ -2064,7 +2064,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er zes stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen` en `selecties`.
+Nu zijn er zeven stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run
@@ -2149,6 +2149,20 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
   De eerste regel van de stap telt de verslagen: `566 reports: 505 klaar, 61 bezig`.
 - De stap raakt alleen wedstrijden met de bron `oude-fansite`, en laat een verslag dat de redactie opsloeg zoals het is.
   Een tweede run verandert niets.
+
+#### De stap personen
+
+De stap `personen` ([`src/old-site-persons.ts`](src/old-site-persons.ts)) koppelt de spelers met de bron `verslag` en zonder persoon aan een persoon, een titel van de Nederlandse Wikipedia.
+Hij koppelt alleen als het zeker is, en hergebruikt `createPersonBook`, dus titels en doorverwijzingen komen in `person_pages`.
+
+- Heeft een andere rij met dezelfde naam al een persoon, in een ander seizoen of met een andere bron, dan krijgt de speler die persoon, zonder verzoek.
+- Anders is de titel de naam.
+  De stap vraagt de tekst van de pagina (`?action=raw`), volgt een doorverwijzing en koppelt alleen als het artikel in een categorie van voetballers staat.
+- Twijfel koppelt niets en komt als regel in het logboek: geen artikel, een doorverwijspagina, geen voetballer, of een verzoek dat niet kon.
+  `--report` noemt de spelers die nog geen persoon hebben, onder _Spelers zonder persoon_.
+- De bestanden hebben geen geboortedatum, dus er is er geen om te vergelijken met die van Wikidata.
+  Een tweede run vraagt alleen nog naar de namen zonder persoon, en raakt geen rij met een andere bron dan `verslag`.
+- De tests vragen Wikipedia nooit: ze geven de stap eigen antwoorden (`titles` in `runOldSiteImport`) of gebruiken een webserver op deze computer.
 
 #### De stap selecties
 

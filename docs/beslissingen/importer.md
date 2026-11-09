@@ -3076,6 +3076,21 @@
 - **Waarom:** wie wil weten hoe compleet een eerder seizoen is, moest logboeken van runs lezen.
 - **Alternatieven:** de seizoenen uit `matches` halen (een seizoen zonder wedstrijden valt dan weg); de tekst in `showStatus` samenstellen (de pagina in het beheer kan dat niet hergebruiken).
 
+## De spelers van de oude fansite worden alleen bij zekerheid personen
+
+- **Datum:** 9 november 2026
+- **Besluit:** de stap `personen` van `import:old-site` (#967) koppelt elke speler met de bron `verslag` en zonder persoon aan een persoon, en alleen als het zeker is.
+  - Heeft een andere rij met dezelfde naam al een persoon, dan krijgt de speler die persoon.
+  - Anders is de titel de naam: de stap leest de tekst van de pagina, volgt een doorverwijzing en koppelt alleen als het artikel in een categorie van voetballers staat.
+  - Geen artikel, een doorverwijspagina of een artikel over iemand anders koppelt niets en komt als regel in het logboek.
+    `--report` noemt de spelers die nog geen persoon hebben.
+  - De geboortedatum uit de oude tabel gaat niet mee in `players.json`: het is een persoonsgegeven, en het issue vroeg eerst om een besluit.
+    De stap vergelijkt dus geen geboortedatum.
+  - De stap zet alleen `person_id`, niet `wikipedia_page`, en raakt geen rij met een andere bron.
+- **Waarom:** een speler is zo geen nieuwe rij zonder verband in elk seizoen, en het Wikidata-deel van de import (#898) kan zijn gegevens lezen.
+  Een verkeerde koppeling is erger dan geen: dezelfde naam kan een andere voetballer zijn, daarom blijft elke twijfel zonder persoon.
+- **Alternatieven:** de geboortedatum in het bestand zetten om namen uit elkaar te houden (een persoonsgegeven zonder besluit); zoeken met de zoekfunctie van Wikipedia (meer verzoeken en meer raden); een titel met `(voetballer)` proberen als de naam zelf geen voetballer is (meer verzoeken, en twee titels is juist twijfel).
+
 ## Een import zoekt een wedstrijd eerst op datum en club
 
 - **Datum:** 9 november 2026

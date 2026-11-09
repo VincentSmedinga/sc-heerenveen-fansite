@@ -121,7 +121,9 @@ const dataOf = (list: OldSiteMatch[]): OldSiteData => ({ clubs: oldClubs, matche
 /** Runs every step of the import on the data, in their order. */
 async function importAll(data: OldSiteData) {
   for (const step of oldSiteSteps) {
-    await database.db.transaction((transaction) => step.run(transaction, data))
+    await database.db.transaction((transaction) =>
+      step.run(transaction, data, { titles: async () => ({ kind: 'missing' }) }),
+    )
   }
 }
 

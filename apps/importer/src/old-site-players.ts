@@ -78,7 +78,7 @@ export function deriveOldSitePlayers(
  * The step `spelers`: makes a row in `players` for every player of ours in the matches of the
  * files, for the season of the match, with the source `verslag` and without a shirt number, a
  * position, a Wikipedia page or a person. A row that exists for that season and name, from any
- * source, is used as it is and never changed. Linking a player to a person is a later issue.
+ * source, is used as it is and never changed. The step `personen` links them later (#967).
  * The one exception is a stale row of this step itself: see `mergeStaleOldSitePlayers`.
  */
 export async function importOldSitePlayers(
