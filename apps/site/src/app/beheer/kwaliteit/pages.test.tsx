@@ -68,13 +68,10 @@ describe('the page Kwaliteit', () => {
     expect([...html.matchAll(/<th[^>]*scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
       'Seizoen',
       'Wedstrijden',
-      'Doelpunten',
-      'Verslagen',
-      'Toeschouwers',
-      'Scheidsrechter',
+      'Details',
       'Selectie',
-      'Wijzigingen',
-      'Stand',
+      'Verslagen',
+      'Te doen',
     ])
     expect(seasons.at(-1)).toBe('1990/91')
     expect(seasons).toEqual(seasons.toSorted().reverse())
@@ -89,21 +86,19 @@ describe('the page Kwaliteit', () => {
     expect(row).toContain('href="/beheer/kwaliteit/2005-06/doelpunten-zonder-speler">2 doelpunten zonder speler</a>')
     expect(row).toContain('1 verslag klaar')
     expect(row).toContain('href="/beheer/kwaliteit/2005-06/verslagen-bezig">1 verslag niet af</a>')
-    expect(row).toContain('Toeschouwers bij 0 wedstrijden')
-    expect(row).toContain('Scheidsrechter bij 0 wedstrijden')
+    expect(row).toContain('Toeschouwers bij 0, scheidsrechter bij 0, geen stand')
     expect(row).toContain('1 speler, onbekend hoe compleet')
     expect(row).toContain('href="/beheer/kwaliteit/2005-06/wachtende-wijzigingen">2 wijzigingen wachten</a>')
-    expect(row).toContain('Geen stand')
   })
 
   it('has words and no link in a season without matches', async () => {
     const row = rowOf(renderToStaticMarkup(await QualityPage()), '1990/91')
 
     expect(row).toContain('Geen wedstrijden')
-    expect(row).toContain('Doelpunten in orde')
-    expect(row).toContain('Geen verslagen')
+    expect(row).toContain('Geen stand')
     expect(row).toContain('Geen spelers')
-    expect(row).toContain('Geen wachtende wijzigingen')
+    expect(row).toContain('Geen verslagen')
+    expect(row).toContain('Niets te doen')
     expect(row).not.toContain('<a ')
   })
 

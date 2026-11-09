@@ -1,13 +1,13 @@
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
 
 import { similarPersons } from '@fansite/db/persons'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Fragment } from 'react'
 
 import { compact } from '#src/beheer/density'
-import { waitingChangesBySeason, workListPath } from '#src/beheer/quality'
+import { waitingChangesBySeason, type WorkList, workListPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -38,7 +38,8 @@ const levelWords: Record<NonNullable<SeasonCoverage['squad']>['level'], string> 
 // What we have of each season since 1990/91, for a beheerder: one row for each season, the
 // newest first, and the persons that look alike. A cell says in words what it counts, so it
 // still reads where the column is folded under the season and its header is gone, and nothing
-// is told by colour. What an editor can do something about is a link to its work list.
+// is told by colour. What an editor can do something about is a link to its work list, in the
+// last column.
 export default async function QualityPage() {
   await requireRole('beheerder')
 
@@ -71,24 +72,18 @@ export default async function QualityPage() {
           columns={[
             'Seizoen',
             { fold: true, name: 'Wedstrijden' },
-            { fold: true, name: 'Doelpunten' },
-            { fold: true, name: 'Verslagen' },
-            { fold: true, name: 'Toeschouwers' },
-            { fold: true, name: 'Scheidsrechter' },
+            { fold: true, name: 'Details' },
             { fold: true, name: 'Selectie' },
-            { fold: true, name: 'Wijzigingen' },
-            { fold: true, name: 'Stand' },
+            { fold: true, name: 'Verslagen' },
+            { fold: true, name: 'Te doen' },
           ]}
           rows={coverage.map((row) => ({
             cells: [
               matchesText(row),
-              <GoalsCell key="doelpunten" row={row} />,
-              <ReportsCell key="verslagen" row={row} />,
-              `Toeschouwers bij ${plural(row.withAttendance, 'wedstrijd', 'wedstrijden')}`,
-              `Scheidsrechter bij ${plural(row.withReferee, 'wedstrijd', 'wedstrijden')}`,
+              detailsText(row),
               squadText(row),
-              <ChangesCell key="wijzigingen" season={row.season} total={waiting.get(row.season) ?? 0} />,
-              row.hasStanding ? 'Stand bekend' : 'Geen stand',
+              row.reports === 0 ? 'Geen verslagen' : plural(row.reportsDone, 'verslag klaar', 'verslagen klaar'),
+              <TodoCell key="te-doen" row={row} waiting={waiting.get(row.season) ?? 0} />,
             ],
             header: row.season,
           }))}
@@ -118,37 +113,13 @@ export default async function QualityPage() {
   )
 }
 
-/** The changes that wait for a decision, as a link to their work list when there are any. */
-function ChangesCell({ season, total }: { season: string; total: number }) {
-  return total === 0 ? (
-    'Geen wachtende wijzigingen'
-  ) : (
-    <Link href={workListPath(season, 'wachtende-wijzigingen')}>
-      {plural(total, 'wijziging wacht', 'wijzigingen wachten')}
-    </Link>
-  )
-}
-
-/** What is missing of the goals, each as a link to its work list, or that nothing is. */
-function GoalsCell({ row }: { row: SeasonCoverage }) {
-  const links: ReactNode[] = []
-
-  if (row.playedWithoutGoalList > 0) {
-    links.push(
-      <Link href={workListPath(row.season, 'zonder-doelpunten')} key="zonder-doelpunten">
-        {plural(row.playedWithoutGoalList, 'wedstrijd zonder doelpunten', 'wedstrijden zonder doelpunten')}
-      </Link>,
-    )
-  }
-  if (row.goalsWithoutPlayer > 0) {
-    links.push(
-      <Link href={workListPath(row.season, 'doelpunten-zonder-speler')} key="doelpunten-zonder-speler">
-        {plural(row.goalsWithoutPlayer, 'doelpunt zonder speler', 'doelpunten zonder speler')}
-      </Link>,
-    )
+/** What we know of the matches besides the result, and whether the season has a table. */
+function detailsText(row: SeasonCoverage) {
+  if (row.matchesTotal === 0) {
+    return row.hasStanding ? 'Stand bekend' : 'Geen stand'
   }
 
-  return links.length === 0 ? 'Doelpunten in orde' : links.length === 1 ? links : [links[0], ', ', links[1]]
+  return `Toeschouwers bij ${row.withAttendance}, scheidsrechter bij ${row.withReferee}, ${row.hasStanding ? 'stand bekend' : 'geen stand'}`
 }
 
 /** The matches of a season, how many were played and where they came from. */
@@ -162,29 +133,6 @@ function matchesText(row: SeasonCoverage) {
     .map(([source, total]) => `${total} ${sourceWords[source as keyof typeof sourceWords]}`)
 
   return `${plural(row.matchesTotal, 'wedstrijd', 'wedstrijden')}, ${row.played} gespeeld (${sources.join(', ')})`
-}
-
-/** The reports that are done, and those that are not as a link to their work list. */
-function ReportsCell({ row }: { row: SeasonCoverage }) {
-  const unfinished = row.reports - row.reportsDone
-
-  if (row.reports === 0) {
-    return 'Geen verslagen'
-  }
-
-  return (
-    <>
-      {plural(row.reportsDone, 'verslag klaar', 'verslagen klaar')}
-      {unfinished === 0 ? null : (
-        <>
-          {', '}
-          <Link href={workListPath(row.season, 'verslagen-bezig')}>
-            {plural(unfinished, 'verslag niet af', 'verslagen niet af')}
-          </Link>
-        </>
-      )}
-    </>
-  )
 }
 
 /** Names in a sentence: "A en B", "A, B en C". */
@@ -203,4 +151,41 @@ function squadText(row: SeasonCoverage) {
   return row.squad === null
     ? `${players}, onbekend hoe compleet`
     : `${players}, ${levelWords[row.squad.level]} (beste bron: ${row.squad.bestSource})`
+}
+
+/**
+ * What an editor can do about a season, each as a link to its work list: the matches without
+ * goals, the goals without a player, the reports that are not finished and the changes that
+ * wait. A season without work says so.
+ */
+function TodoCell({ row, waiting }: { row: SeasonCoverage; waiting: number }) {
+  const unfinished = row.reports - row.reportsDone
+  const work: { list: WorkList; text: string; total: number }[] = [
+    {
+      list: 'zonder-doelpunten',
+      text: plural(row.playedWithoutGoalList, 'wedstrijd zonder doelpunten', 'wedstrijden zonder doelpunten'),
+      total: row.playedWithoutGoalList,
+    },
+    {
+      list: 'doelpunten-zonder-speler',
+      text: plural(row.goalsWithoutPlayer, 'doelpunt zonder speler', 'doelpunten zonder speler'),
+      total: row.goalsWithoutPlayer,
+    },
+    { list: 'verslagen-bezig', text: plural(unfinished, 'verslag niet af', 'verslagen niet af'), total: unfinished },
+    {
+      list: 'wachtende-wijzigingen',
+      text: plural(waiting, 'wijziging wacht', 'wijzigingen wachten'),
+      total: waiting,
+    },
+  ]
+  const links = work.filter(({ total }) => total > 0)
+
+  return links.length === 0
+    ? 'Niets te doen'
+    : links.map(({ list, text }, index) => (
+        <Fragment key={list}>
+          {index === 0 ? null : ', '}
+          <Link href={workListPath(row.season, list)}>{text}</Link>
+        </Fragment>
+      ))
 }

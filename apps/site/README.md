@@ -1153,10 +1153,10 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan.
 De cijfers komen uit `readSeasonCoverage` in `@fansite/db/season-coverage`, dezelfde functie als `import:status` gebruikt.
 De wachtende wijzigingen telt `waitingChangesBySeason` in `src/beheer/quality.ts` erbij.
-Elke cel zegt in woorden wat ze telt, zoals "12 wedstrijden, 10 gespeeld (12 van Wikipedia)" en "Geen stand".
+Elke cel zegt in woorden wat ze telt, zoals "12 wedstrijden, 10 gespeeld (12 van Wikipedia)" en "Geen spelers".
 Zo leest de cel ook op een telefoon, waar de kolommen onder het seizoen staan en hun kop weg is, en zegt geen kleur iets.
 
-Waar een redacteur iets aan kan doen, is de cel een koppeling naar een werklijst, `/beheer/kwaliteit/<seizoen>/<lijst>`:
+De laatste kolom, Te doen, heeft een koppeling voor elke werklijst van het seizoen waar werk in zit, `/beheer/kwaliteit/<seizoen>/<lijst>`:
 
 - `zonder-doelpunten`: gespeelde wedstrijden met doelpunten in de uitslag en geen doelpunt in `match_goals`;
 - `verslagen-bezig`: wedstrijden met een verslag dat `bezig` is;

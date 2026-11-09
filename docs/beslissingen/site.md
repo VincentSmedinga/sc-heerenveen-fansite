@@ -4100,10 +4100,12 @@
 - **Datum:** 9 november 2026
 - **Besluit:** een werklijst heeft een eigen adres, `/beheer/kwaliteit/<seizoen>/<lijst>`, en is geen filter van `/beheer/wedstrijden` (#972).
   De tabel van de seizoenen is een `DataTable` met tekst waarvan elke kolom kan inklappen.
-  Een cel is daarom een hele zin, zoals "2 doelpunten zonder speler" en "Geen stand", en geen los getal.
+  Een cel is daarom een hele zin, zoals "2 doelpunten zonder speler" en "Geen spelers", en geen los getal.
+  De tabel heeft zes kolommen: de koppelingen naar de werklijsten staan samen in de laatste, Te doen.
   `similarPersons` staat nu in `@fansite/db/persons`, zodat de site en de importer dezelfde functie gebruiken.
 - **Waarom:** de lijst van `/beheer/wedstrijden` opent op wat er vandaag te doen is, en haar filters gaan over de uitslag en over Wikipedia.
   Vier filters erbij maken haar drukker voor wie een uitslag invult.
-  Een tabel met negen kolommen past niet op een telefoon, en het beheer schuift nergens opzij.
+  Een tabel met zes kolommen past niet op een telefoon, en het beheer schuift nergens opzij.
+  Met een kolom voor elk getal, negen in totaal, paste ze ook niet in de brede kolom van een bureaublad.
   Een ingeklapte cel staat zonder haar kolomkop onder het seizoen, dus ze moet zelf zeggen wat ze telt.
 - **Alternatieven:** vier filters erbij in `/beheer/wedstrijden`; een tabel met getallen en afkortingen die opzij schuift; `similarPersons` in de site nog een keer schrijven.
