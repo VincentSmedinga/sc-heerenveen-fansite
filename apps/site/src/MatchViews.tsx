@@ -605,7 +605,7 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
   const shown = [previous, next].filter((match) => match !== undefined)
 
   return (
-    <Card aria-labelledby="matches-heading">
+    <Card aria-labelledby="matches-heading" surface="soft">
       <Heading id="matches-heading" level={2}>
         Wedstrijden
       </Heading>
@@ -1134,7 +1134,7 @@ export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
  */
 export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
   return (
-    <Card aria-labelledby="standings-heading">
+    <Card aria-labelledby="standings-heading" surface="soft">
       <Heading id="standings-heading" level={2}>
         Stand
       </Heading>

@@ -80,6 +80,14 @@ describe('completenessSentence', () => {
   it('says the squad is unknown for a season without a row', () => {
     expect(completenessSentence(undefined)).toBe('Van dit seizoen kennen we de selectie niet.')
   })
+
+  it('says the list comes from the reports, without a percentage, whatever the level', () => {
+    for (const level of ['weinig', 'deels', 'bijna', 'compleet'] as const) {
+      expect(completenessSentence({ bestSource: 'verslag', level, playerCount: 25 })).toBe(
+        'We kennen 25 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk.',
+      )
+    }
+  })
 })
 
 describe('the credit of the pages of the squad', () => {

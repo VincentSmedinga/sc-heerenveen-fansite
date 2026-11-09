@@ -2636,6 +2636,7 @@
   De naam als link naar Wikipedia (kan later).
   De zin onderaan de kaart (de bezoeker leest de lijst eerst zonder de kanttekening).
 - **Later:** vult _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026) aan: de ranglijst is niet meer de inhoud van de pagina.
+- **Later:** de kaart Selectie toont sinds 9 november 2026 ook een seizoen met alleen spelers uit de verslagen, als één lijst met namen en met een zin die de bron noemt; zie _De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_ (#935).
 
 ## Spelers staat in het menu na Wedstrijden
 
@@ -3982,6 +3983,39 @@
 - **Waarom:** het is een feit over één wedstrijd waar weinig supporters in een lijst op letten, en een lijst wordt er op een telefoon vier regels langer van.
   Redacteuren van Wikipedia schatten het aantal en stellen het bij, dus we noemen het een schatting.
 - **Alternatieven:** het aantal in de regel van elke wedstrijd; "onbekend" tonen bij een leeg veld.
+
+## De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart Selectie toont een speler met de bron `verslag` alleen als `verslag` de beste bron van het seizoen is in `squad_completeness` (`cardPlayers` in `src/season-squad.ts`, #935).
+  "Alle spelers" toont iedereen uit de verslagen, wat de bron van het seizoen ook is.
+  - Bij `verslag` zegt de zin onder de kop waar de lijst vandaan komt, zonder percentage:
+    "We kennen 25 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk."
+    Er komt geen bronvermelding bij, want de gegevens zijn van onszelf.
+  - Zonder rugnummers en posities is de kaart één lijst met alleen namen, zonder koppen.
+  - Een seizoen zonder rij blijft "onbekend" zonder lijst.
+- **Waarom:** een seizoen met verslagen mag geen leeg vak hebben, maar een lijst uit de zwakste bron mag niet naast een echte selectie staan: een gemengde lijst zegt niet meer waar de spelers vandaan komen.
+- **Alternatieven:** spelers uit verslagen onder een echte selectie bijvoegen; spelers groeperen naar wat de verslagen zeggen, zoals doelmannen uit de opstelling (gokwerk).
+
+## De homepage kiest zijn kaartvlakken op soort inhoud, en dit geldt alleen voor de homepage
+
+- **Datum:** 9 november 2026
+- **Besluit:** op de homepage is het eigen stuk van de redactie warm, zijn nieuws, discussies en podcasts wit (redactionele inhoud) en zijn Wedstrijden en Stand zacht (wedstrijdcijfers naast de hoofdkolom).
+  `ArticleCard` krijgt warm als standaardvlak, want het wordt alleen op de homepage gebruikt.
+  `MatchesCard` en `StandingsCard` krijgen zelf het zachte vlak, want ze worden alleen op de homepage gebruikt (#979).
+- **Waarom:** het eigen stuk van de redactie is iets opmerkelijks (regel 3 van _De vier vlakken van een kaart hebben een betekenis_), en Wedstrijden en Stand vullen de pagina aan (regel 4).
+  De regel "de blokken van de homepage zijn allemaal wit" gaf de homepage te weinig aanwijzingen over wat bij elkaar hoort.
+  Een kaart die alleen op één plek staat, krijgt zijn vlak in het onderdeel zelf, zodat de pagina er niets voor hoeft door te geven.
+- **Geen algemene regel:** het vlak van een kaart hangt van de pagina af.
+  Wat voor de homepage klopt, hoeft niet te kloppen voor de pagina's van wedstrijden, spelers en statistieken: daar zijn cijfers de hoofdinhoud, en een pagina met alleen zachte of blauwe kaarten helpt niemand.
+  De regels van 1 november 2026 blijven daar zoals ze zijn.
+- **Stand, eigen rij:** de lichtblauwe vulling van onze eigen rij (`--hf-colour-background-highlight`) haalt 1,11:1 op het zachte vlak (op wit 1,21:1).
+  Dat blijft zo: de vulling is decoratief, en de donkerblauwe balk aan het begin van de rij en de tekst maken de rij herkenbaar.
+- **Donker:** zacht en wit zijn daar gelijk (blauw-900), dus alleen Van de redactie verandert (warm is blauw-800).
+  Het scheiden van de vlakken in donker is een eigen issue.
+- **Contrast:** alle tekst haalt minstens 5,9:1, in licht en in donker.
+  De randen van de kaarten en de lijnen tussen rijen zijn decoratief.
+- **Alternatieven:** `surface="warm"` meegeven vanuit `page.tsx` en `ArticleCard` zacht laten; Wedstrijden en Stand alleen op de homepage zacht maken met een prop of een `surface` vanuit de pagina (beide: meer code op de pagina voor een onderdeel dat nergens anders staat); de eigen rij in Stand een sterkere vulling geven (niet nodig, de balk draagt de betekenis); alle homepagekaarten wit laten.
 
 ## De kaart Laatste nieuws toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20
 

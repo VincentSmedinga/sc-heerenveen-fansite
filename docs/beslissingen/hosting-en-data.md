@@ -694,6 +694,7 @@
 - **Waarom:** de selectie van Wikipedia loopt achter (zie de volledigheid van de selectie, #745), en een verslag mag daar niet op wachten.
   De tegenstander heeft elk seizoen dezelfde spelers niet, en we tonen geen pagina's of cijfers van hen.
 - **Later:** vult de beslissing _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ aan: `playerSources` heeft nu `verslag` als laatste bron.
+- **Later:** `verslag` wint nog steeds nooit van een echte lijst, maar is sinds 9 november 2026 wel de beste bron van een seizoen zonder andere lijst: de import van de oude site bewaart dan een rij in `squad_completeness`, en de kaart Selectie toont die spelers met de zin dat ze uit de verslagen komen (#935); zie _De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen_ in `importer.md`.
 
 ## Wikipedia houdt de uitslag, het verslag houdt de rest
 

@@ -18,6 +18,7 @@ import type { OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site
 
 import { buildOldSiteCheck, formatOldSiteCheck } from './old-site-check.ts'
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
+import { importOldSiteCompleteness } from './old-site-completeness.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteLineups } from './old-site-lineups.ts'
@@ -45,6 +46,7 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'spelers', run: (db, data) => importOldSitePlayers(db, data.matches, data.players) },
   { name: 'doelpunten', run: (db, data) => importOldSiteGoals(db, data.matches, data.players) },
   { name: 'opstellingen', run: (db, data) => importOldSiteLineups(db, data.matches, data.players) },
+  { name: 'selecties', run: (db) => importOldSiteCompleteness(db, new Date()) },
 ]
 
 export type OldSiteImportOptions = {

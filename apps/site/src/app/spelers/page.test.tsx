@@ -668,17 +668,61 @@ describe('the card Selectie on /spelers', () => {
       return sentenceOf(await render())
     }
 
-    expect(await sentences('bijna')).toBe('We kennen 22 spelers van dit seizoen. Er ontbreken waarschijnlijk een paar.')
+    expect(await sentences('bijna')).toBe('We kennen 5 spelers van dit seizoen. Er ontbreken waarschijnlijk een paar.')
     expect(await sentences('deels')).toBe(
-      'We kennen 22 spelers van dit seizoen. Dat zijn waarschijnlijk niet alle spelers.',
+      'We kennen 5 spelers van dit seizoen. Dat zijn waarschijnlijk niet alle spelers.',
     )
     expect(await sentences('deels', 'statistieken')).toBe(
-      'We kennen 22 spelers van dit seizoen: wie speelde. Wie op de bank bleef, ontbreekt waarschijnlijk.',
+      'We kennen 5 spelers van dit seizoen: wie speelde. Wie op de bank bleef, ontbreekt waarschijnlijk.',
     )
     expect(await sentences('weinig', 'transfers')).toBe(
-      'We kennen 22 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.',
+      'We kennen 5 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.',
     )
     expect(await sentences('onbekend')).toBe('Van dit seizoen kennen we de selectie niet.')
+  })
+
+  it('shows the players from the reports as one list of names, with a sentence that says where they come from', async () => {
+    withSquad({
+      completeness: { bestSource: 'verslag', level: 'weinig', playerCount: 3 },
+      players: squadData.players
+        .slice(0, 3)
+        .map((player) => ({ ...player, country: null, position: null, shirtNumber: null, source: 'verslag' as const })),
+    })
+
+    const html = await render()
+
+    expect(sentenceOf(html)).toBe(
+      'We kennen 3 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk.',
+    )
+    expect(card(html).match(/<h3/g)).toBeNull()
+    expect(linesOf(html).map(([number]) => number)).toEqual(['', '', ''])
+    expect(linesOf(html).map(([, name]) => name)).toEqual(['Testkeeper Een', 'Testspeler van Twee', 'Proefman Drie'])
+  })
+
+  it('counts only the players on the card in the sentence', async () => {
+    withSquad({
+      completeness: { bestSource: 'selectie', level: 'compleet', playerCount: 6 },
+      players: [
+        ...squadData.players,
+        { ...squadData.players[0]!, name: 'Verslag Speler', position: null, shirtNumber: null, source: 'verslag' },
+      ],
+    })
+
+    expect(sentenceOf(await render())).toContain('We kennen 5 spelers')
+  })
+
+  it('leaves the players from the reports off the card when a better source has the season', async () => {
+    withSquad({
+      players: [
+        ...squadData.players,
+        { ...squadData.players[0]!, name: 'Verslag Speler', position: null, shirtNumber: null, source: 'verslag' },
+      ],
+    })
+
+    const html = await render()
+
+    expect(linesOf(html).map(([, name]) => name)).not.toContain('Verslag Speler')
+    expect(linesOf(html)).toHaveLength(5)
   })
 
   it('has one list without headings of parts for a season in which nobody has a position', async () => {
