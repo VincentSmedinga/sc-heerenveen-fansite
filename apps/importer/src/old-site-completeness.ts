@@ -19,9 +19,10 @@ import { describeChange, storeCompleteness } from './store-completeness.ts'
 export async function importOldSiteCompleteness(db: OldSiteDatabase, now: Date): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const rows = await db
-    .selectDistinct({ season: players.season })
+    .select({ season: players.season })
     .from(players)
     .where(eq(players.source, 'verslag'))
+    .groupBy(players.season)
     .orderBy(asc(players.season))
 
   for (const { season } of rows) {
