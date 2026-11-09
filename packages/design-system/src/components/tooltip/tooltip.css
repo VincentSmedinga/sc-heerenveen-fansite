@@ -16,7 +16,7 @@
     font-weight: var(--hf-tooltip-font-weight);
     inset-block-start: var(--hf-tooltip-y);
     inset-inline-start: var(--hf-tooltip-x);
-    line-height: 1.25rem;
+    line-height: var(--hf-meta-line-height);
     padding-block: 1px;
     padding-inline: var(--hf-space-s);
     pointer-events: none;

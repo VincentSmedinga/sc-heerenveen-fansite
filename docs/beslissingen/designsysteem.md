@@ -3083,3 +3083,17 @@
   Een speler uit een land met een zware vlag krijgt geen vlag.
 - **Alternatieven:** emoji-vlaggen; bestanden die de pagina opvraagt (een pad per vlag voor Storybook, de site en de host); alle vlaggen, ook de zware (ruim 500 kB).
 - **Later:** de vlaggen met veel details kunnen met de hand worden vereenvoudigd, in een eigen issue.
+
+## De regelhoogte van meta wordt 24/14
+
+- **Datum:** 9 november 2026
+- **Besluit:** `--hf-meta-line-height` wordt `calc(24 / 14)`: 24 pixels bij 14 pixels, ongeveer 22 pixels in de compacte weergave van 13 pixels (#958).
+  - **Waarom:** 1,4 was krap, en 24 pixels past op het raster van 4 pixels en bij de ruimte in `.hf-match`.
+  - **Alternatieven:** 1,7 (23,8 pixels, praktisch hetzelfde, maar geen rond aantal pixels); 1,6 (22,4 pixels, een kleinere stap dan gevraagd).
+  - **Later:** vervangt de regelhoogte 1,4 van meta uit "Kleinere koppen en vaste tekstmaten" (23 oktober 2026), voor zover die daar staat.
+- **Alleen lopende tekst gebruikt het token:** `.hf-match-goals`, `Tooltip` en `MatchPenaltySeries` gebruiken `--hf-meta-line-height`.
+  Knop, datatabel, formulieren, label, tag en het veld houden hun regelhoogte, omdat een hogere regel bedienelementen en rijen hoger maakt zonder dat het leest.
+  - **Alternatieven:** alle componenten van 14 pixels (hogere tabelrijen en knoppen); alleen `.hf-meta` en `.hf-match-goals`.
+- **Componenten met een eigen krappe regelhoogte blijven:** grafieken, het veld, de scorebalk, `MatchHeader`, `MatchSubstitutes`, `MatchTimeline` en `MarkRow` veranderen niet.
+  Ze zijn krap bedoeld en staan op een vast raster.
+  - **Alternatieven:** ze ook nalopen en per component beslissen; een groter issue.
