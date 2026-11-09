@@ -1372,16 +1372,22 @@ export type WikipediaPageKind = (typeof wikipediaPageKinds)[number]
  * Wikipedia sent it: the raw text of a page comes without a revision number, and this is the
  * time of the revision we read. `read_at` is the last time the page was read and every check
  * passed, in UTC. `language` is the language edition of Wikipedia the page is on, as in its
- * address: `nl` for `nl.wikipedia.org`, `en` for the English one.
+ * address: `nl` for `nl.wikipedia.org`, `en` for the English one. A page has a row for each
+ * kind it is read as: the page of the club's season of 2008/09 holds the squad and the league
+ * matches, and each import keeps its own row of it.
  */
-export const wikipediaPages = mysqlTable('wikipedia_pages', {
-  title: varchar('title', { length: 200 }).primaryKey(),
-  season: varchar('season', { length: matchLimits.season }).notNull(),
-  kind: mysqlEnum('kind', wikipediaPageKinds).notNull(),
-  language: varchar('language', { length: 12 }).notNull().default('nl'),
-  version: varchar('version', { length: 100 }),
-  readAt: datetime('read_at').notNull(),
-})
+export const wikipediaPages = mysqlTable(
+  'wikipedia_pages',
+  {
+    title: varchar('title', { length: 200 }).notNull(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    kind: mysqlEnum('kind', wikipediaPageKinds).notNull(),
+    language: varchar('language', { length: 12 }).notNull().default('nl'),
+    version: varchar('version', { length: 100 }),
+    readAt: datetime('read_at').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.title, table.kind] })],
+)
 
 export type NewWikipediaPage = typeof wikipediaPages.$inferInsert
 

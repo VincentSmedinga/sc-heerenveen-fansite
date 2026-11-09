@@ -53,6 +53,7 @@ describe('the pages with football box blocks', () => {
         ['nl', 'KNVB Beker 2008/09 (mannen)'],
         ['en', '2008–09 UEFA Cup first round'],
         ['en', '2008–09 UEFA Cup group stage'],
+        ['nl', 'Sc Heerenveen in het seizoen 2008/09 (mannen)'],
       ],
       [['en', '2009–10 SC Heerenveen season']],
     ])
@@ -62,10 +63,10 @@ describe('the pages with football box blocks', () => {
     expect(footballBoxPages(season)).toEqual([])
   })
 
-  it('reads 63 matches from the six pages, each with a result', () => {
+  it('reads 97 matches from the seven pages, each with a result', () => {
     const matches = footballBoxTitles.flatMap((title) => read(title))
 
-    expect(matches).toHaveLength(63)
+    expect(matches).toHaveLength(97)
     expect(matches.every((match) => match.status === 'played' && match.goalsFor !== null)).toBe(true)
   })
 })
@@ -402,5 +403,153 @@ describe('the English pages of the UEFA Cup', () => {
       [null, '18 september 2008'],
       [null, '2 oktober 2008'],
     ])
+  })
+})
+
+describe('the Dutch page of the season 2008/09, with the league in a table', () => {
+  const title = 'Sc Heerenveen in het seizoen 2008/09 (mannen)'
+  const matches = read(title)
+  const scorers = (round: string) =>
+    roundOf(matches, round)?.goals?.map((goal) => [goal.ours, goal.player, goal.playerPage]) ?? null
+
+  it('has the 34 league matches, and passes the checks of a season', () => {
+    expect(matches).toHaveLength(34)
+    expect(matches.every((match) => match.competition === 'Eredivisie' && match.status === 'played')).toBe(true)
+    expect(matches.map((match) => match.round)).toEqual(matches.map((_, index) => `Speelronde ${index + 1}`))
+    expect(checkMatches(matches)).toEqual([])
+    expect(matches.map(checkGoals).filter((problem) => problem !== undefined)).toEqual([])
+    // The tables of the UEFA Cup and the cup on the same page are not read.
+    expect(matches.some((match) => match.opponent === 'AC Milan' || match.opponent === 'HHC Hardenberg')).toBe(false)
+  })
+
+  it('reads a home match: the date, the stadium, the opponent with his article and the result', () => {
+    expect(roundOf(matches, 'Speelronde 2')).toMatchObject({
+      attendance: null,
+      dateText: '12 september 2008',
+      goalsAgainst: 2,
+      goalsFor: 2,
+      home: true,
+      kickoffAt: null,
+      matchDate: '2008-09-12',
+      opponent: 'Heracles Almelo',
+      opponentPage: 'Heracles Almelo',
+      referee: null,
+      stadium: 'Abe Lenstra Stadion',
+    })
+  })
+
+  it('reads an away match, with our goals from our column and theirs from the other', () => {
+    expect(roundOf(matches, 'Speelronde 1')).toMatchObject({
+      goalsAgainst: 2,
+      goalsFor: 3,
+      home: false,
+      matchDate: '2008-08-31',
+      opponent: 'FC Volendam',
+      stadium: 'Kras Stadion',
+    })
+    // The home club first. `Tuyp 2X` is two goals, and the club name that stands before
+    // `{{goal}}` in our cell is no scorer.
+    expect(scorers('Speelronde 1')).toEqual([
+      [false, 'Tuyp', 'Jack Tuyp'],
+      [false, 'Tuyp', 'Jack Tuyp'],
+      [true, 'Grindheim', 'Christian Grindheim'],
+      [true, 'Elyounoussi', 'Tarik Elyounoussi'],
+      [true, 'Pranjic', 'Danijel Pranjić'],
+    ])
+  })
+
+  it('gives a goal no minute, and reads an own goal and a player who scored twice', () => {
+    const goals = roundOf(matches, 'Speelronde 5')?.goals ?? []
+
+    expect(matches.flatMap((match) => match.goals ?? []).every((goal) => goal.minute === null)).toBe(true)
+    expect(goals.map((goal) => [goal.ours, goal.player, goal.ownGoal])).toEqual([
+      [true, 'Silva', true],
+      [true, 'Beerens', false],
+      [true, 'Sibon', false],
+      [true, 'Pranjic', false],
+      [true, 'Pranjic', false],
+      [false, 'Huntelaar', false],
+      [false, 'Suárez', false],
+    ])
+    expect(goals.every((goal) => goal.stoppageMinutes === null && !goal.penalty)).toBe(true)
+  })
+
+  it('reads a row with an empty column of scorers, and one with cards alone', () => {
+    // 0-2 at home against Vitesse: our cell is empty.
+    expect(scorers('Speelronde 8')).toEqual([
+      [false, 'Kolk', 'Santi Kolk'],
+      [false, 'Hofs', 'Nicky Hofs'],
+    ])
+    // 6-0 away at FC Twente: our cell has two cards and no goal.
+    expect(scorers('Speelronde 12')?.map(([ours]) => ours)).toEqual([false, false, false, false, false, false])
+    // 0-1 away at ADO Den Haag: their cell is empty.
+    expect(scorers('Speelronde 10')).toEqual([[true, 'B.Kalou', 'Bonaventure Kalou']])
+  })
+
+  it('fills in the opponent the row of 15 November 2008 leaves open, and only while it is open', () => {
+    expect(roundOf(matches, 'Speelronde 11')).toMatchObject({
+      home: true,
+      matchDate: '2008-11-15',
+      opponent: 'FC Utrecht',
+      opponentPage: 'FC Utrecht',
+    })
+
+    const filled = read(title, (text) => text.replace('3 - 2 ||  ||', '3 - 2 || [[FC Dordrecht]] ||'))
+
+    expect(roundOf(filled, 'Speelronde 11')?.opponent).toBe('FC Dordrecht')
+  })
+
+  it('leaves a match without scorers when a cell has a part we do not know, and says why', () => {
+    const changed = read(title, (text) => text.replace('[[Jack Tuyp|Tuyp]] 2X', '[[Jack Tuyp|Tuyp]] twee keer'))
+    const match = roundOf(changed, 'Speelronde 1')
+
+    expect(match?.goals).toBeNull()
+    expect(match === undefined ? undefined : checkGoals(match)).toBe(
+      "Speelronde 1 (Eredivisie): the scorers have a part we do not know: 'Tuyp twee keer'",
+    )
+  })
+
+  it('has a match whose scorers do not add up when the page names one too few', () => {
+    const changed = read(title, (text) => text.replace('[[Jack Tuyp|Tuyp]] 2X', '[[Jack Tuyp|Tuyp]]'))
+    const match = roundOf(changed, 'Speelronde 1')
+
+    expect(match === undefined ? undefined : checkGoals(match)).toBe(
+      'Speelronde 1 (Eredivisie): the scorers are 3-1, the result is 3-2',
+    )
+  })
+
+  it('is an error when the table has gone, has other columns, or has a row of another shape', () => {
+    expect(errorOf(title, (text) => text.replace('|Eredivisie]]===', '|Competitie]]==='))).toBe(
+      `the page '${title}': the page has no table with the league matches under the heading we know`,
+    )
+    expect(errorOf(title, (text) => text.replace(/(\|Eredivisie\]\]===[\s\S]*?!Uit\n)/u, '$1!Toeschouwers\n'))).toBe(
+      `the page '${title}': the table with the league matches has other columns than the ones we know`,
+    )
+    expect(errorOf(title, (text) => text.replace('|31-08-2008||', '|31-08-2008|| 1.234 ||'))).toBe(
+      `the page '${title}': row 1 of the league table has 8 cells, not 7`,
+    )
+    expect(errorOf(title, (text) => text.replace('|31-08-2008||', '|31 aug||'))).toContain(
+      "Speelronde 1 (Eredivisie) has a date we do not know: '31 aug'",
+    )
+    expect(errorOf(title, (text) => text.replace('|12-09-2008||', '|12-08-2008||'))).toBe(
+      `the page '${title}': Speelronde 2 (Eredivisie) is on an earlier day than the row above it`,
+    )
+    expect(
+      errorOf(title, (text) =>
+        text.replace(
+          "[[FC Volendam]] ||align=\"center\"| 2 - 3 || '''sc Heerenveen'''",
+          '[[FC Volendam]] ||align="center"| 2 - 3 || [[FC Emmen]]',
+        ),
+      ),
+    ).toBe(`the page '${title}': row 1 of the league table is no match of ours against another club`)
+  })
+
+  it('is an error when a row has no result, or the table has a row fewer', () => {
+    expect(errorOf(title, (text) => text.replace('| 2 - 3 ||', '| ||'))).toBe(
+      `the page '${title}': Speelronde 1 (Eredivisie) has no result`,
+    )
+    expect(errorOf(title, (text) => text.replace(/^\| \[\[Kras Stadion\]\].*\n\|-\s*\n/mu, ''))).toBe(
+      `the page '${title}' has 33 matches of sc Heerenveen, not 34`,
+    )
   })
 })

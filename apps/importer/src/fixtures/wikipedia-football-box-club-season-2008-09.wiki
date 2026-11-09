@@ -1,0 +1,135 @@
+== Wedstrijdstatistieken ==
+===Oefenduels===
+
+===[[UEFA Cup 2008/09|UEFA Cup]]===
+
+{|border="0" cellpadding="2" cellspacing="0" style="border:1px solid #AAAAAA;font-size:90%;"
+|-bgcolor="#E4E4E4"
+!style="border-bottom:1px solid #AAAAAA"  |Stadion
+!style="border-bottom:1px solid #AAAAAA" |Datum
+!style="border-bottom:1px solid #AAAAAA"  width="110" |Thuis
+!style="border-bottom:1px solid #AAAAAA"  |Uitslag
+!style="border-bottom:1px solid #AAAAAA"  width="110"  |Uit
+!style="border-bottom:1px solid #AAAAAA"  |Doelpuntenmakers/kaarten (Heerenveen)
+!style="border-bottom:1px solid #AAAAAA" |Doelpuntenmakers/kaarten (tegenstander)
+|- 
+| 	Estádio do Bonfim ||align="center"|18-09-2008|| {{PT-VLAG}} [[Vitória Setúbal]]||align="center"| 1 - 1 ||align="center"| {{NL-VLAG}} '''sc Heerenveen'''  ||{{goal}} [[Tarik Elyounoussi|Elyounoussi]]<br />[[Bestand:Yellow card.svg|10px]] [[Calvin Jong-A-Pin|Jong-a-Pin]], [[Danijel Pranjić|Pranjic]] en [[Gerald Sibon|Sibon]]   ||{{goal}} [[Leandro Branco|Carrijo]]<br />[[Bestand:Yellow card.svg|10px]] [[Ricardo Chaves|Chaves]] en [[Aly Cissokho|Cissokho]] ||
+|- bgcolor="#F8F8FF"
+| [[Abe Lenstra Stadion]] ||align="center"|2-10-2008||{{NL-VLAG}} '''sc Heerenveen''' ||align="center"| 5 - 2 ||align="center"| {{PT-VLAG}} [[Vitória Setúbal]]  ||{{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]], [[Gerald Sibon|Sibon]] 2X<br />en [[Tarik Elyounoussi|Elyounoussi]] 2X    || {{goal}} [[Bruno Gama]], [[Ricardo Chaves]]<br />[[Bestand:Yellow card.svg|10px]] [[Bruno Moraes]]   ||
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|2-10-2008||{{NL-VLAG}} '''sc Heerenveen''' ||align="center"| 1 - 3 ||align="center"| {{IT-VLAG}} [[AC Milan]]  ||{{goal}} [[Danijel Pranjić|Pranjic]] || {{goal}} [[Filippo Inzaghi|Inzaghi]] 2X, [[Gennaro Gattuso|Gattuso]]<br />[[Bestand:Yellow card.svg|10px]] [[Giuseppe Favalli|Favalli]], [[Mathieu Flamini|Flamini]] ||
+|-  
+| [[Volkswagen-Arena]] ||align="center"|6-11-2008||{{DE-VLAG}} [[VfL Wolfsburg]] ||align="center"| 5 - 1 ||align="center"| {{NL-VLAG}} '''sc Heerenveen'''   ||{{goal}} [[Mika Väyrynen|Väyrynen]]<br />[[Bestand:Yellow card.svg|10px]] [[Mika Väyrynen|Väyrynen]]|| {{goal}} [[Edin Džeko|Dzeko]] (x2), [[Grafite]], [[Zvjezdan Misimović|Misimovic]]<br />en [[Jacek Krzynówek|Krzynowek]] ||
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|4-12-2008||{{NL-VLAG}} '''sc Heerenveen''' ||align="center"| 1 - 2 ||align="center"| {{PT-VLAG}} [[Sporting Braga]]   ||{{goal}} [[Gerald Sibon|Sibon]]<br />[[Bestand:Yellow card.svg|10px]] [[Michal Svec|Svec]]|| {{goal}} [[Wason Rentería|Rentería]]  en [[Luis Aguiar]]<br />[[Bestand:Yellow card.svg|10px]][[Wason Rentería|Rentería]]|| 
+|-  
+| [[Fratton Park]] ||align="center"|17-12-2008||{{EN-VLAG}} [[Portsmouth FC]] ||align="center"| 3 - 0 ||align="center"| {{NL-VLAG}} '''sc Heerenveen'''   ||[[Bestand:Yellow card.svg|10px]] [[Mika Väyrynen|Väyrynen]]|| {{goal}} [[Peter Crouch|Crouch]]2X en [[Hermann Hreidarsson|Hreidarsson]] ||
+|-  
+|}
+
+===[[KNVB beker 2008/09 (mannen)|KNVB beker]]===
+{|class="wikitable"
+|-
+!Stadion
+!Datum
+!Thuis
+!Uitslag
+!Uit
+!Doelpuntenmakers/kaarten (Heerenveen) 
+!Doelpuntenmakers/kaarten (tegenstander)
+|- 
+| [[Geusselt (stadion)|Geusselt]] ||align="center"|24-09-2008|| [[MVV Maastricht|MVV]] ||align="center"| 0 - 3 ||align="center"|  '''sc Heerenveen'''  ||{{goal}} [[Roy Beerens|Beerens]], [[Paulo Henrique Carneiro Filho|Paulo Henrique]], [[Gerald Sibon|Sibon]] ||    
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|12-11-2008|| '''sc Heerenveen''' ||align="center"| 7 - 0 ||align="center"|[[Haaglandia]]  || {{goal}} [[Christian Grindheim|Grindheim]], [[Danijel Pranjić|Pranjic]] 3×,  [[Bonaventure Kalou|Kalou]], [[Tarik Elyounoussi|Elyounoussi]] en [[Goran Popov|Popov]]  ||  [[Bestand:Yellow-red card.svg|15px]]  van Otterloo
+|-
+| [[Stadion Feijenoord]] ||align="center"|20-01-2009|| [[Feyenoord]] ||align="center"| 0 - 3 ||'''sc Heerenveen'''  || {{goal}} [[Viktor Elm|Elm]] 2X en [[Roy Beerens|Beerens]]<br />[[Bestand:Yellow card.svg|10px]] [[Michel Breuer|Breuer]]  ||[[Bestand:Yellow card.svg|10px]] [[André Bahia|Bahia]]
+|- 
+| [[Abe Lenstra Stadion]] ||align="center"|4-03-2009|| '''sc Heerenveen'''||align="center"| 3 - 1  || [[N.E.C.]]   || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]], [[Viktor Elm|Elm]] en [[Patrik Ingelsten|Ingelsten]]  || {{goal}} [[Lasse Schöne|Schöne]]
+|- 
+| [[Kras Stadion]] ||align="center"|22-04-2009|| [[FC Volendam]] ||align="center"| 0 - 2  ||  '''sc Heerenveen'''  || {{goal}} [[Viktor Elm|Elm]] en [[Danijel Pranjić|Pranjic]]  ||  [[Bestand:Yellow card.svg|10px]] [[Paul de Lange|de Lange]], [[Yannick de Wit|de Wit]] 
+|- bgcolor=ccffcc
+| [[Stadion Feijenoord]] ||align="center"|17-05-2009|| '''sc Heerenveen''' ||align="center"| 2 - 2 <BR> (5 - 4)|| [[FC Twente]]  || {{goal}} [[Goran Popov|Popov]] en [[Bonaventure Kalou|Kalou]] <BR>[[Bestand:Yellow card.svg|10px]] [[Michal Švec|Svec]], [[Gerald Sibon|Sibon]], [[Geert Arend Roorda|Roorda]] en [[Goran Popov|Popov]]|| {{goal}} [[Eljero Elia|Elia]] en [[Youssouf Hersi|Hersi]]<BR>[[Bestand:Yellow card.svg|10px]] [[Eljero Elia|Elia]] en [[Theo Janssen|Janssen]]
+|}
+
+===[[Eredivisie 2008/09 (mannen)|Eredivisie]]===
+{|class="wikitable"
+|-
+!Stadion
+!Datum
+!Thuis
+!Uitslag
+!Uit
+!Doelpuntenmakers/kaarten (Heerenveen)
+!Doelpuntenmakers/kaarten (tegenstander)
+|- 
+| [[Kras Stadion]] ||align="center"|31-08-2008|| [[FC Volendam]] ||align="center"| 2 - 3 || '''sc Heerenveen'''  ||FC Utrecht    {{goal}} [[Christian Grindheim|Grindheim]], [[Tarik Elyounoussi|Elyounoussi]] en [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Henrico Drost|H. Drost]]   ||{{goal}} [[Jack Tuyp|Tuyp]] 2X
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|12-09-2008|| '''sc Heerenveen'''||align="center"| 2 - 2  ||  [[Heracles Almelo]]||{{goal}} [[Danijel Pranjić|Pranjic]] 2x<br />[[Bestand:Yellow card.svg|10px]] [[Calvin Jong-A-Pin|Jong-a-Pin]], [[Michael Dingsdag|Dingsdag]]   || {{goal}} [[Jan Wuytens|Wuytens]], [[Bas Dost|Dost]]<br />[[Bestand:Yellow card.svg|10px]] [[Jan Wuytens|Wuytens]], [[Ragnar Klavan|Klavan]]
+|- 
+| [[Abe Lenstra Stadion]] ||align="center"|21-09-2008|| '''sc Heerenveen'''||align="center"| 2 - 1  || [[N.E.C.]]  || {{goal}} [[Danijel Pranjić|Pranjic]], [[Tarik Elyounoussi|Elyounoussi]]<br />[[Bestand:Yellow card.svg|10px]][[Christian Grindheim|Grindheim]], [[Michael Dingsdag|Dingsdag]] || {{goal}} [[Jhon van Beukering|Van Beukering]]  
+|- 
+| [[Rat Verlegh Stadion]] ||align="center"|27-09-2008||  [[NAC Breda]]||align="center"| 4 - 2  || '''sc Heerenveen'''  ||  {{goal}} [[Michael Dingsdag|Dingsdag]] en [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Roy Beerens|Beerens]], [[Gerald Sibon|Sibon]] ||{{goal}}  [[Martijn Reuser|Reuser]], [[Anthony Lurling|Lurling]] [[Matthew Amoah|Amoah]] 2x<br />[[Bestand:Yellow card.svg|10px]][[Martijn Reuser|Reuser]], [[Tom van der Leegte|Van der Leegte]] en [[Csaba Fehér|Fehér]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|5-10-2008|| '''sc Heerenveen'''||align="center"| 5 - 2 |||  [[AFC Ajax]]  ||{{goal}} [[Bruno Silva|Silva]] e.d.,[[Roy Beerens|Beerens]], [[Gerald Sibon|Sibon]]<br />en [[Danijel Pranjić|Pranjic]] 2X<br />[[Bestand:Yellow card.svg|10px]] [[Christian Grindheim|Grindheim]] en [[Mika Väyrynen|Väyrynen]] || {{goal}} [[Klaas-Jan Huntelaar|Huntelaar]] en [[Luis Suárez (1987)|Suárez]]<br />[[Bestand:Yellow card.svg|10px]]  [[Luis Suárez (1987)|Suárez]], [[Jan Vertonghen|Vertonghen]] en [[Jeffrey Sarpong|Sarpong]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Gregory van der Wiel|van der Wiel]]  
+|- bgcolor="#F8F8FF"
+| [[Parkstad Limburg Stadion]] ||align="center"|18-10-2008|| [[Roda JC Kerkrade|Roda JC]]||align="center"| 2 - 2 || '''sc Heerenveen'''  || {{goal}} [[Christian Grindheim|Grindheim]] en [[Arnar Smárason|Smárason]]<br />[[Bestand:Yellow card.svg|10px]] [[Mika Väyrynen|Väyrynen]] en [[Michael Dingsdag|Dingsdag]] || {{goal}} [[Sekou Cissé|Cissé]] en [[Boldizsár Bodor|Bodor]] 
+|-
+| [[Stadion Feijenoord]] ||align="center"|26-10-2008||[[Feyenoord]] ||align="center"| 2 - 2 || '''sc Heerenveen'''  || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]] en [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Mika Väyrynen|Väyrynen]], [[Brian Vandenbussche|Vandenbussche]]<br />en [[Michel Breuer|Breuer]] || {{goal}} [[Roy Makaay|Makaay]] en [[Michael Mols|Mols]]<br />[[Bestand:Yellow card.svg|10px]] [[Giovanni van Bronckhorst|van Bronckhorst]], [[André Bahia|Bahia]] en [[Leroy Fer|Fer]]
+|- 
+| [[Abe Lenstra Stadion]] ||align="center"|29-10-2008||  '''sc Heerenveen'''||align="center"| 0 - 2 ||  [[SBV Vitesse|Vitesse]]  ||    || {{goal}}[[Santi Kolk|Kolk]] en [[Nicky Hofs|Hofs]]<br />[[Bestand:Yellow card.svg|10px]] [[Claudemir]] en [[Alexander Büttner|Büttner]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|1-11-2008||  '''sc Heerenveen'''||align="center"| 3 - 3 || [[AZ (voetbalclub)|AZ]]  || {{goal}} [[Paweł Wojciechowski (voetballer 1990)|Wojciechowski]]<br />en [[Paulo Henrique Carneiro Filho|Paulo Henrique]] 2X    ||{{goal}} [[Mounir El Hamdaoui|El Hamdaoui]], [[Brett Holman|Holman]]<br />en [[Sébastien Pocognoli|Pocognoli]]<br />[[Bestand:Yellow card.svg|10px]] [[Héctor Moreno|Moreno]] en [[Kew Jaliens|Jaliens]]  
+|- 
+| [[ADO Den Haag Stadion]] ||align="center"|9-11-2008|| [[ADO Den Haag]]||align="center"| 0 - 1 || '''sc Heerenveen'''  || {{goal}} [[Bonaventure Kalou|B.Kalou]]<br />[[Bestand:Yellow card.svg|10px]] [[Christian Grindheim|Grindheim]] || 
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|15-11-2008|| '''sc Heerenveen'''||align="center"| 3 - 2 ||  || {{goal}} [[Danijel Pranjić|Pranjic]] 2X en [[Roy Beerens|Beerens]]<br />[[Bestand:Yellow card.svg|10px]] [[Michel Breuer|Breuer]] en  [[Michal Švec|Švec]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Goran Popov|Popov]] || {{goal}} [[Ali Boussaboun|Boussaboun]] en [[Tim Cornelisse|Cornelisse]]<br />[[Bestand:Yellow card.svg|10px]]  [[Étienne Shew-Atjon|Shew-Atjon]] en [[Tim Cornelisse|Cornelisse]]
+|-  
+| [[De Grolsch Veste]] ||align="center"|22-11-2008|| [[FC Twente]]||align="center"| 6 - 0 || '''sc Heerenveen'''  || [[Bestand:Yellow card.svg|10px]] [[Gerald Sibon]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Mika Väyrynen|Väyrynen]]  || {{goal}} [[Marko Arnautovic|Arnautovic]], [[Blaise Nkufo|Nkufo]] 3X en [[Kenneth Pérez|Pérez]] 2X 
+|- 
+| [[Abe Lenstra Stadion]] ||align="center"|29-11-2008|| '''sc Heerenveen'''||align="center"| 2 - 2 || [[PSV (voetbalclub)|PSV]] ||{{goal}} [[Roy Beerens|Beerens]] 2X<br />[[Bestand:Yellow card.svg|10px]] [[Kristian Bak Nielsen|Bak Nielsen]] en [[Michal Svec|Svec]]|| {{goal}} [[Danny Koevermans|Koevermans]] en [[Stefan Nijland|Nijland]]<br />[[Bestand:Yellow card.svg|10px]] [[Balázs Dzsudzsák|Dzsudzsák]] en [[Danko Lazović|Lazović]] 
+|- 
+| [[Willem II Stadion]] ||align="center"|7-12-2008|| [[Willem II (voetbalclub)|Willem II]]||align="center"| 1 - 3 ||  '''sc Heerenveen'''  || {{goal}} [[Arnar Smárason|Smárason]], [[Christian Grindheim|Grindheim]] en [[Mika Väyrynen|Väyrynen]]<br />[[Bestand:Yellow card.svg|10px]] [[Arnar Smárason|Smárason]], [[Christian Grindheim|Grindheim]], [[Roy Beerens|Beerens]]<br />en [[Michel Breuer|Breuer]] || {{goal}} [[Frank Demouge|Demouge]]<br />[[Bestand:Yellow card.svg|10px]] [[Ibrahim Kargbo|Kargbo]] en [[Jens Janse|Janse]] 
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|13-12-2008||  '''sc Heerenveen'''||align="center"| 2 - 0 || [[BV De Graafschap]]  || {{goal}} [[Roy Beerens|Beerens]] 2X   || [[Bestand:Yellow card.svg|10px]] [[Léon Hese|Hese]] 
+|- 
+| [[Sparta-Stadion Het Kasteel]] ||align="center"|20-12-2008|| [[Sparta Rotterdam]] ||align="center"| 4 - 1 || '''sc Heerenveen'''  || {{goal}} [[Gerald Sibon|Sibon]]<br />[[Bestand:Yellow card.svg|10px]] [[Paulo Henrique Carneiro Filho|Paulo Henrique]] en [[Goran Popov|Popov]] || {{goal}} [[Erik Falkenburg|Falkenburg]], [[Arne Slot|Slot]], [[Rydell Poepon|Poepon]] en [[Yuri Rose|Rose]]<br />[[Bestand:Yellow card.svg|10px]] [[Kevin Strootman|Strootman]] 
+|-
+| [[Euroborg]] ||align="center"|28-12-2008|| [[FC Groningen]]||align="center"| 2 - 3 ||  '''sc Heerenveen'''  || {{goal}} [[Danijel Pranjić|Pranjic]], [[Arnar Smárason|Smárason]]<br />en [[Paulo Henrique Carneiro Filho|Paulo Henrique]]<br />[[Bestand:Yellow card.svg|10px]] [[Christian Grindheim|Grindheim]], [[Mika Väyrynen|Väyrynen]] en [[Goran Popov|Popov]]    || {{goal}} [[Gonzalo García|García]] en [[Andreas Granqvist|Granqvist]]<br />[[Bestand:Yellow card.svg|10px]] [[Luciano Da Silva|Da Silva]] en [[Danny Holla|Holla]] 
+|- 
+| [[Abe Lenstra Stadion]] ||align="center"|16-01-2009||  '''sc Heerenveen'''  ||align="center"| 3 - 1 || [[Feyenoord]]  || {{goal}} [[Kristian Bak Nielsen|Bak Nielsen]], [[Danijel Pranjić|Pranjic]] en [[Arnar Smárason|Smárason]]<br />[[Bestand:Yellow card.svg|10px]] [[Mika Väyrynen|Väyrynen]]|| {{goal}} [[Roy Makaay|Makaay]]
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|24-01-2009||  '''sc Heerenveen'''  ||align="center"| 2 - 0 || [[Roda JC Kerkrade|Roda JC]]  || {{goal}}[[Roy Beerens|Beerens]] en [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Michal Švec|Švec]] en [[Christian Grindheim|Grindheim]]  ||[[Bestand:Yellow card.svg|10px]] [[Davy de Fauw|De Fauw]]
+|-  
+| [[Amsterdam ArenA]] ||align="center"|31-01-2009|| [[AFC Ajax]] ||align="center"| 0 - 1 ||   '''sc Heerenveen''' || {{goal}} [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Arnar Smárason|Smárason]] en [[Goran Popov|Popov]]  || [[Bestand:Yellow card.svg|10px]] [[Gabri]] en [[Robbert Schilder|Schilder]]<br />[[Bestand:Red card.svg|10px]] [[Thomas Vermaelen|Vermaelen]]
+|-
+| [[GelreDome]] ||align="center"|3-02-2009||  [[SBV Vitesse|Vitesse]] ||align="center"| 1 - 0 ||   '''sc Heerenveen''' || [[Bestand:Yellow card.svg|10px]] [[Danijel Pranjić|Pranjic]], [[Gerald Sibon|Sibon]] en [[Michael Dingsdag|Dingsdag]]    ||{{goal}}  [[Nicky Hofs|Hofs]]<br />[[Bestand:Yellow card.svg|10px]] [[Sébastien Sansoni|Sansoni]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|7-02-2009||  '''sc Heerenveen'''  ||align="center"| 3 - 1 ||  [[NAC Breda]]   ||{{goal}} [[Goran Popov|Popov]], [[Arnar Smárason|Smárason]] en [[Viktor Elm|Elm]]<br />[[Bestand:Yellow card.svg|10px]] [[Goran Popov|Popov]]    || {{goal}} [[Patrick Zwaanswijk|Zwaanswijk]]<br />[[Bestand:Yellow card.svg|10px]] [[Fouad Idabdelhay|Idabdelhay]] En [[Joonas Kolkka|Kolkka]]
+|-  
+|  [[McDOS Goffertstadion]]  ||align="center"|15-02-2009|| [[N.E.C.]] ||align="center"| 1 - 1 ||   '''sc Heerenveen''' || {{goal}} [[Viktor Elm|Elm]]<br />[[Bestand:Yellow card.svg|10px]] [[Brian Vandenbussche|Vandenbussche]] en [[Michael Dingsdag|Dingsdag]]  || {{goal}}[[Youssef El-Akchaoui|El-Akchaoui]]<br />[[Bestand:Yellow card.svg|10px]] [[Jhon van Beukering|Van Beukering]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|21-02-2009||  '''sc Heerenveen'''  ||align="center"| 3 - 1 || [[Willem II (voetbalclub)|Willem II]]  || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]], [[Kristian Bak Nielsen|Bak Nielsen]] en [[Roy Beerens|Beerens]]  || {{goal}} [[Mohamed Messoudi|Messoudi]]<br />[[Bestand:Yellow card.svg|10px]] [[Léo Veloso|Veloso]] en [[Jens Janse|Janse]]
+|-  
+|  [[Philips Stadion]]    ||align="center"|28-02-2009|| [[PSV (voetbalclub)|PSV]] ||align="center"| 2 - 3 ||   '''sc Heerenveen''' || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]]2X en [[Danijel Pranjić|Pranjic]]<br />[[Bestand:Yellow card.svg|10px]] [[Roy Beerens|Beerens]] en [[Goran Popov|Popov]]   || {{goal}} [[Balázs Dzsudzsák|Dzsudzsák]] en [[Timmy Simons|Simons]]<br />[[Bestand:Yellow card.svg|10px]] [[Ola Toivonen|Toivonen]] en [[Edison Méndez|Méndez]]<br />[[Bestand:Red card.svg|10px]] [[Jason Čulina|Culina]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|7-03-2009||  '''sc Heerenveen'''  ||align="center"| 2 - 1 ||[[FC Groningen]]   || {{goal}} [[Viktor Elm|Elm]] en [[Christian Grindheim|Grindheim]]<br />[[Bestand:Yellow card.svg|10px]]  [[Michael Dingsdag|Dinsdag]], [[Calvin Jong-A-Pin|Jong-a-Pin]] en [[Kristian Bak Nielsen|Bak Nielsen]] || {{goal}} [[Danny Holla|Hola]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Martijn Meerdink|Meerdink]] en [[Gonzalo García|García-García]]<br />[[Bestand:Red card.svg|10px]] [[Ron Jans|Jans]] (trainer)
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|14-03-2009||  '''sc Heerenveen'''  ||align="center"| 5 - 1 || [[Sparta Rotterdam]]  || {{goal}} [[Danijel Pranjić|Pranjic]], [[Roy Beerens|Beerens]], [[Patrik Ingelsten|Ingelsten]], [[Michal Svec|Svec]] en [[Bonaventure Kalou|B.Kalou]]<br />[[Bestand:Yellow card.svg|10px]] [[Goran Popov|Popov]]  ||{{goal}} [[Édouard Duplan|Duplan]]<br />[[Bestand:Yellow card.svg|10px]] [[Rydell Poepon|Poepon]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Kim Jaggy|Jaggy]] en [[Ruud Knol|Knol]] 
+|-  bgcolor="#F8F8FF"
+|  [[De Vijverberg]]   ||align="center"|20-03-2009|| [[BV De Graafschap]]  ||align="center"| 2 - 0 ||   '''sc Heerenveen''' ||    || {{goal}} [[Ben Sahar|Sahar]] en [[Peter Jungschläger|Jungschläger]]<br />[[Bestand:Yellow card.svg|10px]] [[Rogier Meijer|Meijer]] 
+|-
+|  [[Polman Stadion]]  ||align="center"|4-04-2009||[[Heracles Almelo]]||align="center"| 1 - 1 ||   '''sc Heerenveen''' || {{goal}} [[Kristian Bak Nielsen|Bak Nielsen]]<br />[[Bestand:Yellow card.svg|10px]] [[Roy Beerens|Beerens]], [[Patrik Ingelsten|Ingelsten]], [[Michal Svec|Svec]], [[Michel Breuer|Breuer]]<br />en [[Kristian Bak Nielsen|Bak Nielsen]] || {{goal}} [[Mark-Jan Fledderus|Fledderus]]<br />[[Bestand:Yellow card.svg|10px]] [[Tim Breukers (voetballer)|Breukers]], [[Martin Pieckenhagen|Pieckenhagen]]<br />en [[Mark-Jan Fledderus|Fledderus]]<br />[[Bestand:Red card.svg|10px]] [[Kwame Quansah|Quansah]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|12-04-2009||  '''sc Heerenveen'''  ||align="center"| 1 - 0 || [[FC Volendam]]     || {{goal}} [[Viktor Elm|Elm]]<br />[[Bestand:Yellow-red card.svg|15px]] [[Danijel Pranjić|Pranjic]]  || [[Bestand:Yellow card.svg|10px]] [[Paul de Lange|de Lange]] en [[Yannick de Wit|de Wit]] 
+|-  
+|  [[Stadion Galgenwaard]] ||align="center"|19-04-2009||[[FC Utrecht]] ||align="center"| 2 - 1 ||   '''sc Heerenveen''' || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]]<br />[[Bestand:Yellow card.svg|10px]]  [[Goran Popov|Popov]] en [[Arnar Smárason|Smárason]]<br />[[Bestand:Red card.svg|10px]] [[Daryl Janmaat|Janmaat]]   || {{goal}} [[Michael Silberbauer|Silberbauer]] en [[Gregoor van Dijk|van Dijk]]<br />[[Bestand:Yellow card.svg|10px]]  [[Sander Keller|Keller]] en [[Tom Caluwé|Caluwé]]
+|-
+| [[Abe Lenstra Stadion]] ||align="center"|25-04-2009||  '''sc Heerenveen'''  ||align="center"| 1 - 1 || [[FC Twente]] || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]]<br />[[Bestand:Yellow card.svg|10px]]  [[Gerald Sibon|Sibon]], [[Daryl Janmaat|Janmaat]] en [[Michal Švec|Švec]]   ||{{goal}} [[Theo Janssen|Janssen]]<br />[[Bestand:Yellow card.svg|10px]]  [[Niels Wellenberg|Wellenberg]] [[Sander Boschker|Boschker]] 
+|-  
+| [[Abe Lenstra Stadion]] ||align="center"|3-05-2009||  '''sc Heerenveen'''  ||align="center"| 2 - 2 || [[ADO Den Haag]] || {{goal}} [[Paulo Henrique Carneiro Filho|Paulo Henrique]] en [[Kristian Bak Nielsen|Bak Nielsen]]<br />[[Bestand:Yellow card.svg|10px]]  [[Daryl Janmaat|Janmaat]]  ||{{goal}} [[Csaba Horváth (Slowaaks voetballer)|Horváth]] en [[Lex Immers|Immers]] <br />[[Bestand:Yellow card.svg|10px]] [[Danny Buijs|Buijs]], [[Christiaan Kum|Kum]] en [[Karim Soltani|Soltani]]  
+|- 
+|   [[DSB Stadion]]  ||align="center"|10-05-2009||  [[AZ (voetbalclub)|AZ]]||align="center"| 3 - 1 || '''sc Heerenveen''' ||{{goal}} [[Patrik Ingelsten|Ingelsten]]    || {{goal}} [[Mounir El Hamdaoui|El Hamdaoui]] en [[Mousa Dembélé|Dembélé]] 2X
+|-
+|}
+
+==== Positie sc Heerenveen na wedstrijd ====

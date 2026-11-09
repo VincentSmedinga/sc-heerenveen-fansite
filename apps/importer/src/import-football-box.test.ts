@@ -119,7 +119,7 @@ async function serve(change: Record<string, (text: string) => string> = {}) {
   return { dutch, english }
 }
 
-/** The paths of the six pages among the requests of a server. */
+/** The paths of the seven pages among the requests of a server. */
 const pageRequests = (server: TestServer) => {
   const paths = new Set(footballBoxTitles.map((title) => pageUrl('', title)))
 
@@ -144,7 +144,7 @@ async function rowsOf(season: string) {
 }
 
 describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
-  it('stores the 63 matches of the six pages with the source wikipedia, and a second run changes nothing', async () => {
+  it('stores the 97 matches of the seven pages with the source wikipedia, and a second run changes nothing', async () => {
     const wikipedia = await serve()
     const first = []
 
@@ -155,14 +155,14 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
     expect(first.map((result) => result.code)).toEqual([0, 0, 0])
     expect(first.map((result) => result.lines[0])).toEqual([
       'Matches 2007/08: 6 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
-      'Matches 2008/09: 11 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
+      'Matches 2008/09: 45 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2009/10: 46 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
     ])
     expect(first.flatMap((result) => result.lines).some((line) => line.includes('league results'))).toBe(false)
 
     const stored = await database.db.select().from(matches)
 
-    expect(stored).toHaveLength(63)
+    expect(stored).toHaveLength(97)
     expect(stored.every((match) => match.dataSource === 'wikipedia' && match.status === 'played')).toBe(true)
     expect(await database.db.select().from(standings)).toEqual([])
 
@@ -175,11 +175,11 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
 
     expect(second.map((result) => result.lines[0])).toEqual([
       'Matches 2007/08: 0 new, 0 updated, 6 unchanged, 0 removed; the pages of this season have no table',
-      'Matches 2008/09: 0 new, 0 updated, 11 unchanged, 0 removed; the pages of this season have no table',
+      'Matches 2008/09: 0 new, 0 updated, 45 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2009/10: 0 new, 0 updated, 46 unchanged, 0 removed; the pages of this season have no table',
     ])
     expect(await Promise.all(seasons.map(rowsOf))).toEqual(before)
-    expect(await database.db.select().from(matches)).toHaveLength(63)
+    expect(await database.db.select().from(matches)).toHaveLength(97)
   })
 
   it('asks for the pages of the season alone, each on the Wikipedia of its language', async () => {
@@ -187,7 +187,10 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
 
     await run(wikipedia, '2008/09')
 
-    expect(pageRequests(wikipedia.dutch)).toEqual([pageUrl('', 'KNVB Beker 2008/09 (mannen)')])
+    expect(pageRequests(wikipedia.dutch)).toEqual([
+      pageUrl('', 'KNVB Beker 2008/09 (mannen)'),
+      pageUrl('', 'Sc Heerenveen in het seizoen 2008/09 (mannen)'),
+    ])
     expect(pageRequests(wikipedia.english)).toEqual([
       pageUrl('', '2008–09 UEFA Cup first round'),
       pageUrl('', '2008–09 UEFA Cup group stage'),
@@ -331,6 +334,165 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
 
     expect(await editorMatch()).toEqual(before)
     expect(await database.db.select().from(matches)).toHaveLength(6)
+  })
+
+  it('stores the 34 league matches of 2008/09 from the table, with scorers that have no minute', async () => {
+    const wikipedia = await serve()
+    const { code } = await run(wikipedia, '2008/09')
+    const league = await database.db
+      .select()
+      .from(matches)
+      .where(eq(matches.competition, 'Eredivisie'))
+      .orderBy(asc(matches.matchDate))
+
+    expect(code).toBe(0)
+    expect(league).toHaveLength(34)
+    expect(league.every((match) => match.dataSource === 'wikipedia' && match.season === '2008/09')).toBe(true)
+    expect(league.filter((match) => match.home)).toHaveLength(17)
+    // An away match: the first of the season, at FC Volendam.
+    expect(league[0]).toMatchObject({
+      goalsAgainst: 2,
+      goalsFor: 3,
+      home: false,
+      matchDate: '2008-08-31',
+      opponent: 'FC Volendam',
+      round: 'Speelronde 1',
+      stadium: 'Kras Stadion',
+    })
+
+    const goals = await database.db
+      .select()
+      .from(matchGoals)
+      .where(eq(matchGoals.matchId, league[0]?.id ?? 0))
+      .orderBy(asc(matchGoals.id))
+
+    expect(goals.map((goal) => [goal.ours, goal.minute, goal.player, goal.wikipediaPage])).toEqual([
+      [false, null, 'Tuyp', 'Jack Tuyp'],
+      [false, null, 'Tuyp', 'Jack Tuyp'],
+      [true, null, 'Grindheim', 'Christian Grindheim'],
+      [true, null, 'Elyounoussi', 'Tarik Elyounoussi'],
+      [true, null, 'Pranjic', 'Danijel Pranjić'],
+    ])
+  })
+
+  it('adds the league matches to a season that has the other matches already, and then changes nothing', async () => {
+    const wikipedia = await serve()
+
+    // As on acceptance before this page was read: the pages are known, the league is not there.
+    await run(wikipedia, '2008/09')
+    await database.db.delete(matches).where(eq(matches.competition, 'Eredivisie'))
+    await database.db
+      .delete(wikipediaPages)
+      .where(eq(wikipediaPages.title, 'Sc Heerenveen in het seizoen 2008/09 (mannen)'))
+
+    expect((await run(wikipedia, '2008/09')).lines[0]).toBe(
+      'Matches 2008/09: 34 new, 0 updated, 11 unchanged, 0 removed; the pages of this season have no table',
+    )
+
+    const before = await rowsOf('2008/09')
+
+    expect((await run(wikipedia, '2008/09')).lines[0]).toBe(
+      'Matches 2008/09: 0 new, 0 updated, 45 unchanged, 0 removed; the pages of this season have no table',
+    )
+    expect(await rowsOf('2008/09')).toEqual(before)
+  })
+
+  it('keeps the page of the season for the credit of the matches, next to its row for the squad', async () => {
+    const title = 'Sc Heerenveen in het seizoen 2008/09 (mannen)'
+    const squadReadAt = new Date('2026-11-01T12:00:00Z')
+
+    // The import of the squad has read the same page.
+    await database.db
+      .insert(wikipediaPages)
+      .values({ kind: 'squad', readAt: squadReadAt, season: '2008/09', title, version: 'an older version' })
+
+    const wikipedia = await serve()
+
+    await run(wikipedia, '2008/09')
+
+    expect(
+      await database.db
+        .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, version: wikipediaPages.version })
+        .from(wikipediaPages)
+        .where(eq(wikipediaPages.title, title))
+        .orderBy(asc(wikipediaPages.kind)),
+    ).toEqual([
+      { kind: 'matches', readAt: now, version: wiki['Last-Modified'] },
+      { kind: 'squad', readAt: squadReadAt, version: 'an older version' },
+    ])
+    expect((await listWikipediaPages(database.db, '2008/09')).map((page) => [page.language, page.title])).toEqual([
+      ['en', '2008–09 UEFA Cup first round'],
+      ['en', '2008–09 UEFA Cup group stage'],
+      ['nl', 'KNVB Beker 2008/09 (mannen)'],
+      ['nl', title],
+    ])
+  })
+
+  it('leaves a league match without scorers when they do not add up to the result, with a line in the log', async () => {
+    const wikipedia = await serve({
+      'Sc Heerenveen in het seizoen 2008/09 (mannen)': (text) =>
+        text.replace('[[Jack Tuyp|Tuyp]] 2X', '[[Jack Tuyp|Tuyp]]'),
+    })
+    const { code, lines } = await run(wikipedia, '2008/09')
+    const [match] = await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))
+
+    expect(code).toBe(0)
+    expect(match).toMatchObject({ goalsAgainst: 2, goalsFor: 3, opponent: 'FC Volendam' })
+    expect(
+      await database.db
+        .select()
+        .from(matchGoals)
+        .where(eq(matchGoals.matchId, match?.id ?? 0)),
+    ).toEqual([])
+    expect(lines).toContain(
+      'Matches 2008/09: warning, no scorers: Speelronde 1 (Eredivisie): the scorers are 3-1, the result is 3-2',
+    )
+  })
+
+  it('skips a league match the editors added on the same day, with one line, and never changes it', async () => {
+    const wikipedia = await serve()
+
+    // The editors have the away match at FC Volendam under another round, with a field left
+    // open.
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          dataSource: 'redactie',
+          goalsAgainst: 2,
+          goalsFor: 3,
+          home: false,
+          matchDate: '2008-08-31',
+          opponent: 'FC Volendam',
+          round: 'Eerste speelronde',
+          season: '2008/09',
+          sourceLine: 'Leeuwarder Courant, 1 september 2008',
+          status: 'played',
+        },
+      ]),
+    )
+    await database.db.update(clubs).set({ wikipediaPage: 'FC Volendam' }).where(eq(clubs.name, 'FC Volendam'))
+
+    const editorMatch = () => database.db.select().from(matches).where(eq(matches.dataSource, 'redactie'))
+    const before = await editorMatch()
+    const { code, lines } = await run(wikipedia, '2008/09')
+
+    expect(code).toBe(0)
+    expect(lines[0]).toBe(
+      'Matches 2008/09: 44 new, 0 updated, 1 unchanged, 0 removed; the pages of this season have no table',
+    )
+    expect(lines.filter((line) => line.includes('Speelronde 1 '))).toEqual([
+      `Matches 2008/09: warning, Eredivisie Speelronde 1 (2008-08-31) left out: the editors added this match (match ${before[0]?.id}), and the import of Wikipedia leaves it as it is`,
+    ])
+    expect(await editorMatch()).toEqual(before)
+    expect(before[0]).toMatchObject({ stadium: null })
+    expect(await database.db.select().from(matches)).toHaveLength(45)
+    expect(
+      await database.db
+        .select()
+        .from(matchGoals)
+        .where(eq(matchGoals.matchId, before[0]?.id ?? 0)),
+    ).toEqual([])
   })
 
   it('changes nothing when a page has changed shape, and says which', async () => {

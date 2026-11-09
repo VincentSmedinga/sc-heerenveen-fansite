@@ -896,6 +896,7 @@ De import leest per seizoen vier pagina's van de Nederlandse Wikipedia, en de br
 - Voor 2007/08 tot en met 2009/10 zes pagina's met blokken `football box`, samen 63 wedstrijden: `Play-offs Nederlands voetbal 2008` en `KNVB Beker 2008/09 (mannen)` op de Nederlandse Wikipedia, en `2007–08 UEFA Cup first round`, `2008–09 UEFA Cup first round`, `2008–09 UEFA Cup group stage` en `2009–10 SC Heerenveen season` op de Engelse.
   De import mag sinds 9 november 2026 elke taal van Wikipedia lezen onder een geschikte CC-licentie, en de bronvermelding noemt de taal.
   Deze seizoenen hebben geen stand.
+- `Sc Heerenveen in het seizoen 2008/09 (mannen)` op de Nederlandse Wikipedia: de 34 competitiewedstrijden van 2008/09, uit de tabel `Eredivisie`, met de doelpuntenmakers zonder minuut.
 
 De uitslagen van de andere clubs bewaren we ook, in de tabel `league_results`: de ronde, de dag, de twee clubs en de doelpunten van allebei, voor de stand over de laatste wedstrijden.
 Een andere pagina is er niet voor nodig.

@@ -3253,6 +3253,8 @@
   - **Geen stand:** deze pagina's hebben geen ranglijst en geen uitslagen van de andere clubs, dus `standings` en `league_results` blijven leeg voor deze seizoenen.
 - **Waarom:** het zijn de enige pagina's met de datum, de uitslag en de doelpuntenmakers, en de lezer past op alle zes.
 - **Alternatieven:** een kruistabel met alleen een uitslag (geen datum, dus geen wedstrijd); alle wedstrijden met de hand invoeren (63 wedstrijden invoeren kost de redactie veel tijd).
+- **Later:** sinds 9 november 2026 leest dezelfde lezer ook een zevende pagina, met de 34 competitiewedstrijden van 2008/09 in een tabel; zie _De competitie van 2008/09 komt uit de tabel op de seizoenspagina van de club_.
+  Samen zijn het 97 wedstrijden.
 
 ## De Johan Cruijff Schaal en de play-offs voor de Champions League zijn competities
 
@@ -3296,3 +3298,42 @@
 - **Waarom:** twee kolommen heetten allebei R, de wedstrijden van de redactie en de verslagen.
   Een kop als `edit` of `players` is te lezen zonder de legenda.
 - **Alternatieven:** unieke letters (smaller, maar elke keer met de legenda erbij); de kolommen in `apps/importer` laten staan (de site kan ze dan niet hergebruiken).
+
+## De competitie van 2008/09 komt uit de tabel op de seizoenspagina van de club
+
+- **Datum:** 9 november 2026
+- **Besluit:** `readFootballBoxes` leest ook de tabel `Eredivisie` op `Sc Heerenveen in het seizoen 2008/09 (mannen)` van de Nederlandse Wikipedia, voor de 34 competitiewedstrijden van 2008/09 (#1002).
+  De pagina staat in de vaste lijst `footballBoxPages`, en de licentie valt onder _Elke taal van Wikipedia mag, onder een geschikte CC-licentie_.
+  - **De rij:** een rij is een wedstrijd, en gaat door `readMatch` zoals een blok: het stadion, de datum, thuis of uit, de tegenstander en de uitslag.
+    De tabel heeft geen tijd, geen toeschouwers en geen scheidsrechter.
+  - **De ronde:** de tabel heeft geen ronde, dus de wedstrijden heten `Speelronde 1` tot en met `Speelronde 34` in de volgorde van de rijen.
+    Die volgorde moet de volgorde van de datums zijn; anders is het een fout.
+    Een wedstrijd die later is ingehaald, krijgt daardoor het nummer van de dag waarop ze is gespeeld, zoals bij de wedstrijden van de oude fansite.
+  - **De tegenstander van 15 november 2008:** die rij noemt geen uitclub.
+    De lijst vult FC Utrecht in, alleen zolang de cel leeg is: het is de enige club die de tabel wel uit en niet thuis heeft, en de doelpuntenmakers van de rij speelden er.
+  - **De controles:** de tabel heeft de zeven kolommen die we kennen, elke rij heeft zeven cellen en een uitslag, en het zijn 34 wedstrijden, 17 thuis en 17 uit.
+    Anders schrijft de import niets.
+  - **De andere tabellen** op de pagina, van de UEFA Cup en de beker, leest de import niet: die wedstrijden komen van de pagina's van #1001.
+- **Waarom:** het is de enige pagina van Wikipedia met de datum van de competitiewedstrijden van 2008/09.
+- **Alternatieven:** een eigen lezer naast `readFootballBoxes` (een tweede vaste lijst en een tweede weg door de import voor één pagina); de officiële speelronde erbij zoeken (staat op geen pagina met een datum); een rij zonder tegenstander als fout zien (dan komt geen van de 34 wedstrijden erin, om één lege cel); de tegenstander afleiden uit de andere rijen (meer code dan één regel in de lijst, voor één rij).
+
+## Een doelpunt van de oude pagina heeft geen minuut
+
+- **Datum:** 9 november 2026
+- **Besluit:** de doelpunten van de competitie van 2008/09 gaan zonder minuut mee, want de pagina heeft er geen (#1002).
+  `ReadGoal.minute` mag daarvoor leeg zijn, zoals `match_goals.minute` al mocht.
+  - Een cel noemt de doelpuntenmakers achter `{{goal}}` en vóór het eerste plaatje van een kaart: `2X` achter een naam zijn twee doelpunten, en `e.d.` is een eigen doelpunt bij de club die ervan profiteert.
+  - De doelpunten van de thuisclub staan eerst, en binnen een club in de volgorde van de cel: zonder minuut is er geen andere volgorde.
+  - Tekst vóór `{{goal}}` is geen doelpuntenmaker: de eerste rij heeft daar de naam van een club.
+  - Tellen de doelpunten niet op tot de uitslag, of staat er iets wat de lezer niet kent, dan krijgt de wedstrijd geen doelpuntenlijst en een regel in het logboek.
+- **Waarom:** de scorers zijn meer waard dan een lege lijst, en de minuut mag leeg zijn in `match_goals`.
+- **Alternatieven:** de wedstrijd zonder doelpunten importeren (verliest de doelpuntenmakers die er wel zijn); een minuut raden (valse gegevens).
+
+## Een pagina van Wikipedia heeft een rij per soort
+
+- **Datum:** 9 november 2026
+- **Besluit:** de sleutel van `wikipedia_pages` is de titel met de soort (`title`, `kind`), met de migratie `0059_wikipedia_page_per_kind` (#1002).
+  Een pagina die twee imports lezen, heeft twee rijen, elk met een eigen `read_at` en `version`.
+- **Waarom:** `Sc Heerenveen in het seizoen 2008/09 (mannen)` is de pagina van de selectie en nu ook die van de competitiewedstrijden.
+  Met de titel alleen als sleutel schreef elke import de soort van de ander over, en dan miste `/wedstrijden` of de selectie zijn bronvermelding.
+- **Alternatieven:** de rij van de selectie laten staan en de pagina niet bij de wedstrijden noemen (de bronvermelding van 34 wedstrijden ontbreekt dan); een kolom per gebruik op één rij (elke lezer van de tabel moet dan anders vragen).

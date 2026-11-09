@@ -528,6 +528,8 @@ De site leest ze met `listLeagueResults`, voor de stand over de laatste vijf wed
 
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `europa-league` voor de pagina van de Engelse Wikipedia met de Europa League-wedstrijden van 2012/13, en `matches` voor een pagina met de wedstrijden van 2007/08 tot en met 2009/10; `squad` voor de selectie), de `language` (de taal van de Wikipedia waar de pagina staat, `nl` of `en` voor een pagina met wedstrijden), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
+De sleutel is de `title` met de `kind`: een pagina die de import voor twee dingen leest, heeft twee rijen.
+Zo heeft `Sc Heerenveen in het seizoen 2008/09 (mannen)` een rij `squad` voor de selectie en een rij `matches` voor de competitiewedstrijden.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
 
 Een wijziging die de importer vasthoudt (een rij zonder `part`) beslist `decideChange` in `src/match-changes.ts`, zoals `decideConflict` een afwijking met de invoer van de redactie beslist: het beheer en het commando `import:changes` roepen allebei die functie aan, in één transactie met de regel in `audit_log`.
