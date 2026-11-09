@@ -3870,3 +3870,12 @@
 - **Besluit:** het designsysteem krijgt `Switch` (een selectievakje met de rol `switch` en een label) en `Contents` (een omhulsel zonder eigen vorm, `display: contents`).
 - **Waarom:** de sjablonen van de site hebben geen HTML (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), dus een schakelaar en een omhulsel om een deel van de pagina te vinden moeten een component zijn.
 - **Alternatieven:** de regel van lint voor deze bestanden uitzetten (de regel is er juist om de HTML uit de site te houden).
+
+## De kaart Selectie toont de vlag van het land, en een speler zonder land krijgt een lege plek
+
+- **Datum:** 9 november 2026
+- **Besluit:** `SeasonSquadCard` geeft het land van elke speler (`listSeasonPlayers`, `players.country`, #946) door aan `PlayerName` (#947).
+  Staat er in een deel van de lijst (de spelers van één positie) niemand met een land, dan krijgt dat deel geen plek voor een vlag, net als bij het rugnummer.
+  Staat er wel iemand, dan krijgt een speler zonder land of zonder vlag in onze set een lege plek van dezelfde breedte.
+- **Waarom:** de namen van één deel blijven zo op één lijn, en een seizoen zonder landen (de tabellen van 1990/91 tot 2005/06) verandert niet.
+- **Alternatieven:** de plek altijd tonen (een lege kolom in een lijst zonder één land); de vlag overal waar een speler staat (veel componenten, en tegenstanders hebben geen land).

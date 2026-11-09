@@ -1283,7 +1283,12 @@ await withEmptyDatabase((database) =>
       [...squadCard.matchAll(/<h3[^>]*>(.*?)<\/h3>/g)].map(([, name]) => name),
       ['Doelmannen', 'Verdedigers', 'Middenvelders', 'Aanvallers'],
     )
-    assert.match(squadCard, /hf-player-name-number">1<\/span> <span class="hf-player-name-text">.*?Brandsma/s)
+    assert.match(
+      squadCard,
+      /hf-player-name-number">1<\/span> <img alt="Nederland" class="hf-player-name-flag"[^>]*\/> <span class="hf-player-name-text">.*?Brandsma/s,
+    )
+    // A player without a country, among others who have one, has an empty place for the flag.
+    assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('<aside'))
     assert.match(
       playersHtml,

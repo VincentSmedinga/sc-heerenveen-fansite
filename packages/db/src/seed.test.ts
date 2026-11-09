@@ -906,6 +906,13 @@ describe('the made-up matches', () => {
     })
   })
 
+  it('gives the made-up squad countries: a white flag, a country without a flag and players without one', () => {
+    const countries = madeUpSquad(now).map((player) => player.country)
+
+    expect(countries).toEqual(expect.arrayContaining(['NL', 'FI', 'JP', 'BR', null]))
+    expect(countries.every((country) => /^[A-Z]{2}$/u.test(country ?? 'NL'))).toBe(true)
+  })
+
   it('puts the pages the made-up matches credit in too, and moves on when they are already there', async () => {
     await database.pool.query('DELETE FROM wikipedia_pages')
     await database.db.insert(wikipediaPages).values({

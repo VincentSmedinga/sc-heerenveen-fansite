@@ -23,8 +23,13 @@ export type SquadPart = {
   players: SquadPlayer[]
 }
 
-/** A player as a line of the card: the shirt number and the name in two parts. */
+/** A player as a line of the card: the shirt number, the country and the name in two parts. */
 export type SquadPlayer = NameParts & {
+  /**
+   * The code of two letters of the country (`NL`). Null: none, where others have one.
+   * Undefined: nobody in the part has one.
+   */
+  country: null | string | undefined
   /** Tells the lines apart: the name as the importer kept it, which is unique in a season. */
   key: string
   /** Null: no number, where others have one. Undefined: nobody in the part has a number. */
@@ -135,8 +140,10 @@ export function squadParts(players: PublicSeasonPlayer[]): SquadPart[] {
 
 function linesOf(players: PublicSeasonPlayer[]): SquadPlayer[] {
   const numbered = players.some((player) => player.shirtNumber !== null)
+  const flagged = players.some((player) => player.country !== null)
 
   return players.map((player) => ({
+    country: flagged ? player.country : undefined,
     key: player.name,
     shirtNumber: numbered ? player.shirtNumber : undefined,
     ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),

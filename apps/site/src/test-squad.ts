@@ -13,7 +13,7 @@ export const squadData: SeasonSquad = {
   pages: [{ readAt: new Date('2026-10-23T11:30:00Z'), title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' }],
   players: [
     {
-      country: null,
+      country: 'NL',
       name: 'Testkeeper Een',
       ...noName,
       position: 'doelman',
@@ -22,7 +22,7 @@ export const squadData: SeasonSquad = {
       source: 'selectie',
     },
     {
-      country: null,
+      country: 'NL',
       name: 'Testspeler van Twee',
       ...noName,
       position: 'verdediger',
@@ -31,7 +31,7 @@ export const squadData: SeasonSquad = {
       source: 'selectie',
     },
     {
-      country: null,
+      country: 'BR',
       name: 'Proefman Drie',
       personFamilyName: 'Drie',
       personFamilyNamePrefix: null,
@@ -42,7 +42,7 @@ export const squadData: SeasonSquad = {
       source: 'selectie',
     },
     {
-      country: null,
+      country: 'SE',
       name: 'Testaanvaller Vier',
       ...noName,
       position: 'aanvaller',

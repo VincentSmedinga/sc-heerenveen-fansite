@@ -219,7 +219,7 @@ describe('the page /spelers', () => {
     const outside = html.replace(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s, '')
 
     expect(outside).not.toContain('Alle doelpuntenmakers')
-    expect(outside).not.toMatch(/https?:|<img|src=/)
+    expect(withoutFlags(outside)).not.toMatch(/https?:|<img|src=/)
   })
 
   it('says which part of the played matches the list is based on, when scorers are missing', async () => {
@@ -247,7 +247,7 @@ describe('the page /spelers', () => {
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
     expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
-    expect(html).not.toMatch(/<(?:img|script|iframe|link)\b/u)
+    expect(withoutFlags(html)).not.toMatch(/<(?:img|script|iframe|link)\b/u)
   })
 
   it('shows the error page in the HTML, and logs the reason, when the database can not be read', async () => {
@@ -448,7 +448,7 @@ describe('the card Bijzondere doelpunten on /spelers', () => {
   it('loads nothing from another domain and has no link outside the page', async () => {
     const html = cardOf(await render())
 
-    expect(html).not.toMatch(/https?:|<img|src=/)
+    expect(withoutFlags(html)).not.toMatch(/https?:|<img|src=/)
   })
 })
 
@@ -574,6 +574,9 @@ describe('the choice between all the matches and the Eredivisie on /spelers', ()
   })
 })
 
+/** The page without the flags: images whose address holds the drawing. */
+const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-player-name-flag"[^>]*\/>/g, '')
+
 describe('the card Selectie on /spelers', () => {
   const card = (html: string) =>
     html.match(/<section class="hf-card" aria-labelledby="selectie">.*?<\/section>/s)?.[0] ?? ''
@@ -583,7 +586,7 @@ describe('the card Selectie on /spelers', () => {
     [...card(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => {
       const number = /hf-player-name-number">(\d*)</.exec(line ?? '')?.[1] ?? ''
 
-      return [number, plain(line).slice(number.length).trim()]
+      return [number, plain(line).slice(number.length).replace(/\s+/g, ' ').trim()]
     })
 
   const withSquad = (overrides: Partial<typeof squadData>) =>
@@ -618,14 +621,44 @@ describe('the card Selectie on /spelers', () => {
       ['9', 'Testaanvaller Vier'],
       ['', 'Testreserve Vijf'],
     ])
-    expect(card(html).replace(/<h2.*?<\/h2>/s, '')).not.toMatch(/<a |<img|button/)
+    expect(withoutFlags(card(html).replace(/<h2.*?<\/h2>/s, ''))).not.toMatch(/<a |<img|button/)
   })
 
   it('reads the shirt number and the name as one line of text, and an empty column as the name alone', async () => {
     const lines = [...card(await render()).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => plain(line))
 
-    expect(lines).toContain('4 Testspeler van Twee')
+    expect(lines.map((line) => line.replace(/\s+/g, ' '))).toContain('4 Testspeler van Twee')
     expect(lines).toContain('Testreserve Vijf')
+  })
+
+  it('shows the flag between the shirt number and the name, with the name of the country as its text', async () => {
+    const lines = [...card(await render()).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => line ?? '')
+    const alt = (name: string) =>
+      /<img alt="([^"]*)"/u.exec(lines.find((line) => plain(line).includes(name)) ?? '')?.[1]
+
+    expect(alt('Testkeeper Een')).toBe('Nederland')
+    expect(alt('Testaanvaller Vier')).toBe('Zweden')
+    expect(lines.join('').match(/<img /g)).toHaveLength(3)
+    // In the line the number comes first, then the flag, then the name.
+    expect(lines[0]).toMatch(/hf-player-name-number">1<\/span> <img [^>]*\/> <span class="hf-player-name-text">/u)
+  })
+
+  it('gives a player without a flag an empty place, also when the country has no flag here', async () => {
+    const html = card(await render())
+
+    // Proefman Drie is from Brazil, which has no flag in the set.
+    expect(html).toMatch(/hf-player-name-number">8<\/span> <span class="hf-player-name-flag"><\/span><span/)
+    // Testreserve Vijf has no country, among others who have one.
+    expect(html).toMatch(/hf-player-name-number"><\/span><span class="hf-player-name-flag"><\/span><span/)
+  })
+
+  it('has no place for a flag in a part where nobody has a country', async () => {
+    vi.mocked(getSeasonSquad).mockResolvedValue({
+      ...squadData,
+      players: squadData.players.map((player) => ({ ...player, country: null })),
+    })
+
+    expect(card(await render())).not.toContain('hf-player-name-flag')
   })
 
   it('has a sentence for each level of the chance, and the other sentence for a table of who played', async () => {
@@ -659,7 +692,7 @@ describe('the card Selectie on /spelers', () => {
     expect(card(html).match(/<h3/g)).toBeNull()
     expect(card(html).match(/<ul/g)).toHaveLength(1)
     expect(linesOf(html).map(([, name]) => name)).toEqual(['Testkeeper Een', 'Testspeler van Twee', 'Proefman Drie'])
-    expect(card(html)).not.toContain('hf-player-name-number')
+    expect(card(html)).not.toContain('hf-player-name-number"')
   })
 
   it('puts the players without a position, among others who have one, in a last part', async () => {

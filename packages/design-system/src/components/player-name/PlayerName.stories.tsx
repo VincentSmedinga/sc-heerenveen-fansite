@@ -4,6 +4,7 @@ import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Link } from '../link/Link'
 import { List } from '../list/List'
 import { Text } from '../text/Text'
+import { countryNames } from './flags'
 import { PlayerName } from './PlayerName'
 
 const meta = preview.meta({
@@ -12,6 +13,11 @@ const meta = preview.meta({
       control: 'text',
       description:
         'Een regel achter de naam met meer over de speler, in kleine, rustige letters en op een eigen regel, zoals het aantal wedstrijden van een hoofdtrainer. Voor een schermlezer komt hij als eigen tekst na de naam.',
+    },
+    country: {
+      control: 'text',
+      description:
+        'Het land van de speler als landcode van twee letters, zoals `NL`. De vlag staat tussen het rugnummer en de naam, met de Nederlandse landnaam als tekst voor een schermlezer. `null`, of een land zonder vlag in onze set, is een speler zonder vlag in een lijst waar anderen er wel een hebben: een lege plek van dezelfde breedte. Laat hem weg in een lijst waar niemand een vlag heeft.',
     },
     givenName: {
       control: 'text',
@@ -36,6 +42,7 @@ const meta = preview.meta({
           'Voor een schermlezer en bij kopiëren is het één naam in één tekst; het gewicht is alleen voor het oog.',
           'Het gewicht staat op het component zelf, dus de naam ziet er overal hetzelfde uit.',
           'Met een rugnummer staat het nummer in een kolom voor de naam, en met een regel achter de naam staat daar meer over de speler.',
+          'Met een land staat er een klein vlagje tussen het nummer en de naam: een supporter ziet in één blik waar een speler vandaan komt, en een schermlezer leest de landnaam voor.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -251,6 +258,93 @@ export const WithLine = meta.story({
           12 wedstrijden, 1,00 punten per wedstrijd
         </PlayerName>
       </List.Item>
+    </List>
+  ),
+})
+
+export const WithFlags = meta.story({
+  name: 'Met vlaggen, ook een speler zonder land',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) en een speler uit een land waar we geen vlag voor hebben (hier Brazilië) houden een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een vlag met veel wit, zoals die van Nederland, Finland en Japan, heeft een dunne rand.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName country="NL" givenName="Testspeler" shirtNumber={4} surname="Een" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="FI" givenName="Testspeler" shirtNumber={12} surname="van Twee" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="JP" givenName="Testspeler" shirtNumber={null} surname="Drie" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country={null} givenName="Testspeler" shirtNumber={21} surname="Vier" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="BR" givenName="Testspeler" shirtNumber={30} surname="Vijf" />
+        </List.Item>
+        <List.Item>
+          <PlayerName
+            country="DK"
+            givenName="Jan van der Voorbeeldstraat"
+            shirtNumber={39}
+            surname="Proefmans-Van Nepperveldhuizen"
+          />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})
+
+export const WithFlagsDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met vlaggen, donker',
+  parameters: {
+    docs: {
+      description: {
+        story: 'In het donker haalt de rand om een witte vlag ook 3:1 tegen de kaart.',
+      },
+    },
+  },
+  render: () => (
+    <List role="list">
+      <List.Item>
+        <PlayerName country="NL" givenName="Testspeler" shirtNumber={4} surname="Een" />
+      </List.Item>
+      <List.Item>
+        <PlayerName country="FI" givenName="Testspeler" shirtNumber={12} surname="van Twee" />
+      </List.Item>
+      <List.Item>
+        <PlayerName country="JP" givenName="Testspeler" shirtNumber={null} surname="Drie" />
+      </List.Item>
+    </List>
+  ),
+})
+
+export const AllFlags = meta.story({
+  name: 'De landen die we hebben',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Alle vlaggen van de set, bij een speler met de landcode als naam. Een schermlezer leest de landnaam voor. Een land dat hier niet staat, krijgt een lege plek.',
+      },
+    },
+  },
+  render: () => (
+    <List role="list">
+      {Object.keys(countryNames).map((code) => (
+        <List.Item key={code}>
+          <PlayerName country={code} givenName={`Testspeler ${code}`} surname="" />
+        </List.Item>
+      ))}
     </List>
   ),
 })

@@ -2696,6 +2696,7 @@
 - **Alternatieven:** `ShortPlayer` laten staan als omhulsel om `PlayerName` (twee onderdelen die bijna hetzelfde doen).
   Een eigenschap `meta` voor de regel (zie boven).
 - **Later:** dit vervangt het onderdeel `ShortPlayer`, dat in _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (`site.md`) de regel van de kaart Selectie was.
+- **Later:** sinds 9 november 2026 heeft `PlayerName` ook `country`, een vlag tussen het rugnummer en de naam; zie _De vlag bij een speler zijn eigen SVG-tekeningen in `PlayerName`, met de landnaam als alt-tekst_.
 
 ## `TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters
 
@@ -3060,3 +3061,25 @@
   Het woord "voor" blijft zichtbare tekst, en de tekst voor een schermlezer blijft "Wissel: A voor B".
 - **Waarom:** een kleine regel onder de hoofdregel is al het patroon in Verloop; hergebruik houdt de kaart rustig en voorkomt een tweede stijl om te onderhouden.
 - **Alternatieven:** een eigen klasse met dezelfde waarden (dubbel werk); de hele wissel op één regel laten staan.
+
+## De vlag bij een speler zijn eigen SVG-tekeningen in `PlayerName`, met de landnaam als alt-tekst
+
+- **Datum:** 9 november 2026
+- **Besluit:** `PlayerName` krijgt `country`, een landcode van twee letters (#947).
+  - **De vlag:** een afbeelding tussen het rugnummer en de naam, 1,25 rem breed en 0,9375 rem hoog, met de Nederlandse landnaam als alt-tekst (`countryNames` in `flags.ts`).
+    Een schermlezer en een kopie van de tekst houden zo de volgorde nummer, land en naam.
+  - **Geen land:** `null`, en een land zonder vlag in onze set, geven een lege plek van dezelfde grootte, nooit een kapot plaatje.
+    Zonder `country` heeft de naam geen plek voor een vlag en blijft de opmaak zoals die was.
+  - **De tekeningen:** uit flag-icons 7.6.0 (MIT, de licentietekst staat in `flag-icons-licence.txt` naast `flags.ts`), formaat 4x3, zonder witruimte en `id`.
+    Alleen vlaggen van hoogstens 900 bytes komen erin, en geen met `use` of een link, zodat de hele set klein blijft (56 vlaggen, samen 18.145 bytes, de grootste 801) en niets een verzoek doet.
+    Een zwaardere vlag, zoals die van Brazilië, Servië, Spanje, Portugal en Kosovo, krijgt de lege plek.
+  - **Hoe ze op de pagina komen:** als tekst in `flags.ts`, getoond als `<img>` met een `data:`-adres.
+    Zo is er één weg voor Storybook, de site en de statische host, zonder bestand of verzoek per vlag.
+  - **De rand:** een dunne rand in `--hf-card-line-graphic`, de lijn van het vlak van de kaart die 3:1 haalt (1.4.11), in licht en donker; een test toetst dat voor elk vlak.
+    Zonder de rand valt een witte vlag (Nederland, Finland, Japan) weg in de kaart.
+- **Waarom:** een emoji-vlag is op Windows twee letters, en een eigen afbeelding doet geen verzoek naar derden.
+  De landnaam als alt-tekst zegt de informatie ook aan wie de vlag niet ziet.
+- **Nadeel:** de tekeningen staan als tekst in de code, en elke vlag op een pagina draagt zijn tekening in het HTML.
+  Een speler uit een land met een zware vlag krijgt geen vlag.
+- **Alternatieven:** emoji-vlaggen; bestanden die de pagina opvraagt (een pad per vlag voor Storybook, de site en de host); alle vlaggen, ook de zware (ruim 500 kB).
+- **Later:** de vlaggen met veel details kunnen met de hand worden vereenvoudigd, in een eigen issue.
