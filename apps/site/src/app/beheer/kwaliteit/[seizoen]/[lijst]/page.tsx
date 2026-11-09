@@ -48,7 +48,16 @@ const lists: Record<WorkList, { intro: string; title: string; todo: (total: numb
   },
 }
 
-const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' })
+const dayFormat = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+  weekday: 'short',
+  year: 'numeric',
+})
+
+/** The day of a match with its year, without points: `za 27 aug 2005`. */
+const dayOf = (matchDate: string) => dayFormat.format(new Date(`${matchDate}T12:00:00Z`)).replaceAll('.', '')
 
 // A work list of the page Kwaliteit, for a beheerder: the matches of one season that miss
 // something, the oldest first. Each row leads to the match in the admin, a report that is not
@@ -113,7 +122,7 @@ export default async function WorkListPage({ params }: Props) {
                 // A second meeting in the season gets its round, so every row has its own name.
                 header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
                 href: list === 'verslagen-bezig' ? reportPath(match.id) : matchPath(match.id),
-                secondary: `${dayFormat.format(new Date(`${match.matchDate}T12:00:00Z`))} · ${match.competition}, ${match.round}`,
+                secondary: `${dayOf(match.matchDate)} · ${match.competition}, ${match.round}`,
               }
             })}
           />

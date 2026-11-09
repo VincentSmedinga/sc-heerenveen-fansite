@@ -185,7 +185,14 @@ function TodoCell({ row, waiting }: { row: SeasonCoverage; waiting: number }) {
     : links.map(({ list, text }, index) => (
         <Fragment key={list}>
           {index === 0 ? null : ', '}
-          <Link href={workListPath(row.season, list)}>{text}</Link>
+          <Link href={workListPath(row.season, list)}>
+            {text}
+            {/* The same words are in every row, so the name of the link says which season. */}
+            <Text as="span" className="hf-visually-hidden">
+              {' '}
+              in {row.season}
+            </Text>
+          </Link>
         </Fragment>
       ))
 }

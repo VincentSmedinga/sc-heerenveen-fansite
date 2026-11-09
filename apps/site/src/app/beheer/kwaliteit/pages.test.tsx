@@ -82,13 +82,21 @@ describe('the page Kwaliteit', () => {
     const row = rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')
 
     expect(row).toContain('6 wedstrijden, 6 gespeeld (6 van de oude fansite)')
-    expect(row).toContain('href="/beheer/kwaliteit/2005-06/zonder-doelpunten">1 wedstrijd zonder doelpunten</a>')
-    expect(row).toContain('href="/beheer/kwaliteit/2005-06/doelpunten-zonder-speler">2 doelpunten zonder speler</a>')
+    expect(row).toContain(
+      'href="/beheer/kwaliteit/2005-06/zonder-doelpunten">1 wedstrijd zonder doelpunten<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
+    expect(row).toContain(
+      'href="/beheer/kwaliteit/2005-06/doelpunten-zonder-speler">2 doelpunten zonder speler<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
     expect(row).toContain('1 verslag klaar')
-    expect(row).toContain('href="/beheer/kwaliteit/2005-06/verslagen-bezig">1 verslag niet af</a>')
+    expect(row).toContain(
+      'href="/beheer/kwaliteit/2005-06/verslagen-bezig">1 verslag niet af<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
     expect(row).toContain('Toeschouwers bij 0, scheidsrechter bij 0, geen stand')
     expect(row).toContain('1 speler, onbekend hoe compleet')
-    expect(row).toContain('href="/beheer/kwaliteit/2005-06/wachtende-wijzigingen">2 wijzigingen wachten</a>')
+    expect(row).toContain(
+      'href="/beheer/kwaliteit/2005-06/wachtende-wijzigingen">2 wijzigingen wachten<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
   })
 
   it('has words and no link in a season without matches', async () => {
@@ -134,7 +142,7 @@ describe('a work list', () => {
     expect(html).toContain('Wedstrijden zonder doelpunten in 2005/06</h1>')
     expect(html).toContain(`<a href="/beheer/wedstrijden/${ids.withoutGoals}"`)
     expect(html).toContain('Voorbeeld United - sc Heerenveen')
-    expect(html).toContain('27 aug 2005 · Eredivisie, 3')
+    expect(html).toContain('za 27 aug 2005 · Eredivisie, 3')
     expect(html).toContain('<td>1 - 2</td><td>Doelpunten invullen</td>')
     expect(html.match(/<tr>/g)).toHaveLength(2)
   })

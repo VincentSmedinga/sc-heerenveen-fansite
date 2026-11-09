@@ -3129,3 +3129,12 @@
 - **Waarom:** een plek voor kleine regels houdt het component klein en vraagt geen kennis van vorm, uitkomsten of kleuren; de regels van de kaart blijven in de site.
   De naam van de scheidsrechter breekt niet midden in zijn naam af (`white-space: nowrap`).
 - **Alternatieven:** de vorige ontmoeting en de vorm als eigen props (het component krijgt kennis van de uitkomst en van `MarkRow`); een eigen component voor de kaart op home (een tweede soort regel voor een wedstrijd).
+
+## De rijkop van een tabel met tekst houdt ruimte voor zeven tekens
+
+- **Datum:** 9 november 2026
+- **Besluit:** in een `DataTable` met tekst is een rijkop minstens zeven tekens breed (`min-inline-size: 7ch` in `data-table.css`).
+- **Waarom:** een rijkop breekt overal af waar dat moet, zodat een lang pad de pagina niet breder maakt.
+  Naast kolommen vol tekst kneep de tabel daardoor een korte rijkop samen: het seizoen `2025/26` op `/beheer/kwaliteit` brak in tweeën (#972).
+  Zeven tekens is zo'n seizoen.
+- **Alternatieven:** het afbreken per tabel uitzetten met een prop; de rijkop nooit laten afbreken (een lang pad maakt de pagina dan breder dan een telefoon).
