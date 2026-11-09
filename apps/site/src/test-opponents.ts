@@ -202,12 +202,12 @@ export const promovendus: ClubPage = {
 const readAt = new Date('2026-10-25T12:00:00Z')
 
 export const sourcePages: PublicSeasonWikipediaPage[] = [
-  { kind: 'standings', readAt, season: '2026/27', title: 'Eredivisie 2026/27 (mannenvoetbal)' },
-  { kind: 'cup', readAt, season: '2026/27', title: 'KNVB Beker 2026/27 (mannen)' },
-  { kind: 'standings', readAt, season: '2025/26', title: 'Eredivisie 2025/26 (mannenvoetbal)' },
-  { kind: 'standings', readAt, season: '2024/25', title: 'Eredivisie 2024/25 (mannenvoetbal)' },
-  { kind: 'standings', readAt, season: '2023/24', title: 'Eredivisie 2023/24 (mannenvoetbal)' },
-  { kind: 'standings', readAt, season: '2022/23', title: 'Eredivisie 2022/23 (mannenvoetbal)' },
+  { kind: 'standings', language: 'nl', readAt, season: '2026/27', title: 'Eredivisie 2026/27 (mannenvoetbal)' },
+  { kind: 'cup', language: 'nl', readAt, season: '2026/27', title: 'KNVB Beker 2026/27 (mannen)' },
+  { kind: 'standings', language: 'nl', readAt, season: '2025/26', title: 'Eredivisie 2025/26 (mannenvoetbal)' },
+  { kind: 'standings', language: 'nl', readAt, season: '2024/25', title: 'Eredivisie 2024/25 (mannenvoetbal)' },
+  { kind: 'standings', language: 'nl', readAt, season: '2023/24', title: 'Eredivisie 2023/24 (mannenvoetbal)' },
+  { kind: 'standings', language: 'nl', readAt, season: '2022/23', title: 'Eredivisie 2022/23 (mannenvoetbal)' },
 ]
 
 /** The seasons with matches, the newest first, as `getMatchSeasons` gives them. */

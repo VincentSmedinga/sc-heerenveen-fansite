@@ -205,13 +205,19 @@ export const matchData: MatchData = {
     },
   ] satisfies PublicMatch[],
   pages: [
-    { kind: 'standings', readAt: new Date('2026-10-23T12:05:00Z'), title: 'Eredivisie 2026/27 (mannenvoetbal)' },
+    {
+      kind: 'standings',
+      language: 'nl',
+      readAt: new Date('2026-10-23T12:05:00Z'),
+      title: 'Eredivisie 2026/27 (mannenvoetbal)',
+    },
     {
       kind: 'programme',
+      language: 'nl',
       readAt: new Date('2026-10-23T12:05:00Z'),
       title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
     },
-    { kind: 'cup', readAt: new Date('2026-10-23T11:05:00Z'), title: 'KNVB Beker 2026/27 (mannen)' },
+    { kind: 'cup', language: 'nl', readAt: new Date('2026-10-23T11:05:00Z'), title: 'KNVB Beker 2026/27 (mannen)' },
   ],
   season: '2026/27',
   standings: [

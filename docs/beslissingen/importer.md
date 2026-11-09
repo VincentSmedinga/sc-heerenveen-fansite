@@ -707,6 +707,7 @@
   OpenFootball (verouderd).
   Eredivisie.nl en andere sites (verbieden scrapen).
 - **Later:** zie _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_ (3 november 2026): de taal geldt niet meer voor dit ene seizoen.
+- **Later:** sinds 9 november 2026 mag de import elke taal van Wikipedia lezen onder een geschikte CC-licentie; zie _Elke taal van Wikipedia mag, onder een geschikte CC-licentie_.
 
 ## Onze wedstrijdgegevens zijn CC BY-SA 4.0
 
@@ -1897,6 +1898,7 @@
   De stand overslaan voor de oudere seizoenen (dan vervalt de controle op 18 clubs en op onze eigen rij).
 - **Later:** de Europa League is sinds 3 november 2026 wel een competitie in `competitions`, maar alleen met de wedstrijden van 2012/13 die de Engelse Wikipedia heeft; zie _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_.
   De play-offs voor de Europa League op de Nederlandse pagina blijven staan zoals ze waren, tot #672 ze leest.
+- **Later:** sinds 9 november 2026 heeft `Europa League` ook de wedstrijden van 2009/10, van de Engelse seizoenspagina van de club; zie _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de blokken `football box`_.
 - **Later:** zie _De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League_ (3 november 2026): de import leest ze nu, als competitie `Play-offs Europa League`, voor de seizoenen 2010/11 tot en met 2019/20.
   Voor de seizoenen voor 2020/21 staat er nu wel een titel voor de play-offs.
 - **Later:** zie _Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`_ (3 november 2026).
@@ -1955,6 +1957,8 @@
   De datum van een wedstrijd leeg laten (raakt de volgorde en alle lijsten).
   De wedstrijden met de hand invoeren vanaf voetbalstats.nl (geen bron die de import kan lezen).
 - **Later:** zie _Wedstrijdgegevens komen van de Nederlandse Wikipedia, voor het eerste mannenelftal_ (25 oktober 2026): de taal geldt niet meer voor dit ene seizoen.
+- **Later:** sinds 9 november 2026 is de Engelse Wikipedia geen uitzondering voor dit ene seizoen meer; zie _Elke taal van Wikipedia mag, onder een geschikte CC-licentie_.
+  `Europa League` heeft sindsdien ook de acht wedstrijden van 2009/10.
 
 ## De play-offs voor de Europa League zijn een eigen competitie, naast die voor de Conference League
 
@@ -3155,6 +3159,8 @@
 - **Waarom:** voor 1991/92 (6 van ongeveer 40 wedstrijden) en voor 2007/08 tot en met 2009/10 (de bekerwinst van 2009) is er geen bron die een import kan lezen.
   Zonder weg blijven die gaten.
 - **Alternatieven:** alleen imports (de gaten blijven); wachten tot vrijwilligers Wikipedia aanvullen (kost jaren en geeft de redactie geen controle).
+- **Later:** de import van Wikipedia meldt sinds 9 november 2026 geen verschil per veld meer voor een wedstrijd van de redactie die hij op datum en club vindt, maar één regel dat hij haar overslaat; zie _De import slaat een wedstrijd van de redactie over_.
+  Voor 63 wedstrijden van 2007/08 tot en met 2009/10 is er sindsdien wel een bron die de import leest (#1001).
 
 ## De bronregel van een wedstrijd is een kolom van `matches`
 
@@ -3217,6 +3223,54 @@
 - **Geen migratie:** de importer beoordeelt elk bericht bij elke run opnieuw, dus een bestaand bericht verandert bij de volgende run.
   Een bericht dat een moderator verborg, blijft verborgen.
 - **Later:** dit vult _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ aan: een achternaam alleen is nog `doubtful`, maar twee achternamen, of een achternaam met een voetbalwoord, zijn `relevant`.
+
+## Elke taal van Wikipedia mag, onder een geschikte CC-licentie
+
+- **Datum:** 9 november 2026
+- **Besluit:** de import mag pagina's van elke taaleditie van Wikipedia lezen, zolang de pagina een geschikte CC-licentie heeft (nu CC BY-SA 4.0).
+  We halen ze op met de bestaande fetcher en alleen via `/wiki/<pagina>?action=raw`.
+  Welke pagina's we lezen, staat per seizoen in een vaste lijst in de code (`footballBoxPages` in `apps/importer/src/read-football-box.ts`, en `europaLeaguePage`).
+  De bronvermelding noemt de taal: `wikipedia_pages.language` bewaart haar (`nl` of `en`), en de site schrijft "(Engelse Wikipedia)" achter de pagina en linkt naar die Wikipedia.
+- **Waarom:** de Engelse Wikipedia heeft de datum, de uitslag en de doelpuntenmakers van wedstrijden die de Nederlandse niet heeft, onder dezelfde licentie en met dezelfde regels.
+- **Alternatieven:** een besluit voor elke pagina (te veel werk voor dezelfde licentie); alleen de Nederlandse Wikipedia (de gaten van 2007 tot 2010 blijven).
+- **Later:** dit vervangt _De vier Europa League-wedstrijden van 2012/13 komen van de Engelse Wikipedia_ (3 november 2026), waar de Engelse Wikipedia een uitzondering was voor dat ene seizoen, en het deel van _Wedstrijdgegevens komen van de Nederlandse Wikipedia, voor het eerste mannenelftal_ (25 oktober 2026) dat alleen de Nederlandse noemt.
+
+## De wedstrijden van 2007/08 tot en met 2009/10 komen uit de blokken `football box`
+
+- **Datum:** 9 november 2026
+- **Besluit:** één lezer van `football box` en `footballbox2` (`readFootballBoxes`) leest de zes pagina's uit het onderzoek in `docs/onderzoek-wedstrijden-2007-2010.md`, voor 63 wedstrijden (#1001).
+  De wedstrijden die alleen in een kruistabel staan, importeren we niet, want een wedstrijd heeft bij ons een datum nodig.
+  - **De pagina's:** de vaste lijst zegt per pagina de taal, het aantal wedstrijden van ons en onder welke kop welke competitie staat.
+    Een ander aantal, een kop of een ronde die we niet kennen, of een wedstrijd zonder uitslag is een fout, en de import schrijft dan niets.
+  - **De rondes:** de ronde krijgt een Nederlandse naam, zoals `Speelronde 12`, `3e ronde`, `Groepsfase, wedstrijd 2/6` en `Halve finale, wedstrijd 1/2`.
+  - **De clubs:** een lijst in de lezer (`englishClubs`) vertaalt de Engelse titel van een tegenstander naar de naam en het artikel van de Nederlandse Wikipedia.
+    Een club die er niet in staat, is een fout.
+  - **De doelpuntenmakers:** een doelpunt van een Engelse pagina houdt de naam en verliest de link, want een Engelse titel is geen artikel dat we kennen.
+    `playerLinker` koppelt het doelpunt op de naam aan een speler van het seizoen, en het wordt geen persoon.
+    Tellen de doelpunten niet op tot de uitslag, dan krijgt de wedstrijd geen doelpuntenlijst en een regel in het logboek.
+  - **De tijd:** een tijd telt alleen als de pagina de tijdzone noemt.
+    Een tijd in een andere zone, zoals `22:05 EEST (UTC+3)`, rekent de lezer om naar onze tijd; zonder zone houdt de wedstrijd alleen de dag.
+  - **Geen stand:** deze pagina's hebben geen ranglijst en geen uitslagen van de andere clubs, dus `standings` en `league_results` blijven leeg voor deze seizoenen.
+- **Waarom:** het zijn de enige pagina's met de datum, de uitslag en de doelpuntenmakers, en de lezer past op alle zes.
+- **Alternatieven:** een kruistabel met alleen een uitslag (geen datum, dus geen wedstrijd); alle wedstrijden met de hand invoeren (63 wedstrijden invoeren kost de redactie veel tijd).
+
+## De Johan Cruijff Schaal en de play-offs voor de Champions League zijn competities
+
+- **Datum:** 9 november 2026
+- **Besluit:** `Johan Cruijff Schaal` (2009) en `Play-offs Champions League` (2008, de vier wedstrijden tegen Ajax en NAC Breda) komen erbij in `competitions`, naast `UEFA Cup` en `Europa League` die er al zijn.
+  Ze tellen alleen onder "Alle wedstrijden", zoals de Europa League.
+  De pagina van de play-offs zet de twee wedstrijden tegen NAC Breda onder de play-offs voor de UEFA Cup, als `Ronde 2`: de verliezers van de halve finales speelden daar om een ticket.
+  Bij ons horen ze bij dezelfde play-offs, en de ronde heet `Ronde 2, wedstrijd 1/2`.
+- **Waarom:** een wedstrijd heeft een competitie nodig, en geen bestaande past.
+- **Alternatieven:** ze bij `Eredivisie` zetten (verkeerde cijfers); ze weglaten (de bekerwinst van 2009 en het seizoen van 2008 missen er dan een stuk van).
+
+## De import slaat een wedstrijd van de redactie over
+
+- **Datum:** 9 november 2026
+- **Besluit:** vindt de import van Wikipedia op datum en club een wedstrijd met de bron `redactie`, dan laat hij die zoals ze is en schrijft hij één regel in het logboek, ook als een veld leeg is.
+  Hij vergelijkt de velden niet meer, dus er komen geen regels `match difference` voor zo'n wedstrijd.
+- **Waarom:** geen import wijzigt een rij van de redactie (#970).
+- **Alternatieven:** alleen de lege velden vullen, zoals #968 voor andere bronnen doet (past niet bij #970).
 
 ## De tabel met dekking blijft opgevulde tekst in een codeblok
 

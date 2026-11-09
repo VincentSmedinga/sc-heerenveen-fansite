@@ -1,0 +1,1168 @@
+==Squad==
+
+==Competitions==
+
+===Overview===
+
+===Johan Cruyff Shield===
+
+{{Football box collapsible
+|round = [[2009 Johan Cruyff Shield|Final]]
+|date = 25 July 2009
+|time = 20:00 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[AZ Alkmaar|AZ]]
+|score = 5–1
+|report = https://int.soccerway.com/matches/2009/07/25/netherlands/super-cup/stichting-az/sportclub-heerenveen/780448/
+|team2 = Heerenveen
+|goals1 =
+*[[Brett Holman|Holman]] {{goal|15}}
+*[[Mounir El Hamdaoui|El Hamdaoui]] {{goal|25}}
+*[[Maarten Martens|Martens]] {{goal|28}}
+*[[Jeremain Lens|Lens]] {{goal|67||87}}
+|goals2 =
+*[[Michel Breuer|Breuer]] {{yel|10}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|60}}
+|stadium = [[Amsterdam Arena]]
+|location = [[Amsterdam]]
+|attendance =
+|referee = [[Björn Kuipers]]
+|assistantreferees = Patrick Gerritsen, Sander van Roekel
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+===Eredivisie===
+
+====League table====
+
+====Results summary====
+
+====Matches====
+
+{{Football box collapsible
+|round = 1
+|date = 31 July 2009
+|time = 20:47 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 0–0
+|report = https://int.soccerway.com/matches/2009/07/31/netherlands/eredivisie/sportclub-heerenveen/roda-jc/781577/
+|team2 = [[Roda JC]]
+|goals1 =
+*[[Paulo Henrique (footballer, born March 1989)|Paulo Henrique]] {{yel|90+2}}
+|goals2 =
+*[[Marcel de Jong|De Jong]] {{yel|79}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Richard Liesveld
+|assistantreferees = Jac Schenkels, Erwin Zeinstra
+|fourthofficial = Mario Diks
+|result = D
+}}
+
+{{Football box collapsible
+|round = 2
+|date = 7 August 2009
+|time = 18:01 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[N.E.C. (football club)|NEC]]
+|score = 4–1
+|report = https://int.soccerway.com/matches/2009/08/07/netherlands/eredivisie/nijmegen-eendracht-combinatie/sportclub-heerenveen/781586/
+|team2 = Heerenveen
+|goals1 =
+*[[Björn Vleminckx|Vleminckx]] {{goal|6||82}}
+*[[Gábor Babos|Babos]] {{yel|29}}
+*[[Erton Fejzullahu|Fejzullahu]] {{goal|56}}
+*[[Youssef El Akchaoui|El Akchaoui]] {{goal|65}}
+|goals2 =
+*[[Michel Breuer|Breuer]] {{yel|3}}
+*[[Richard Stolte|Stolte]] {{yel|39}}
+*[[Goran Popov|Popov]] {{yel|75}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|85}}
+|stadium = [[Goffertstadion]]
+|location = [[Nijmegen]]
+|attendance =
+|referee = [[Pol van Boekel]]
+|assistantreferees = Angelo Boonman, Dave Goossens
+|fourthofficial = Kristian Bakkelo
+|result = L
+}}
+
+{{Football box collapsible
+|round = 3
+|date = 15 August 2009
+|time = 20:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 1–0
+|report = https://int.soccerway.com/matches/2009/08/15/netherlands/eredivisie/sportclub-heerenveen/sbv-vitesse/781598/
+|team2 = [[Vitesse Arnhem]]
+|goals1 =
+*[[Hernán Losada|Losada]] {{goal|13}}, {{yel|42}}
+*[[Bonaventure Kalou|Kalou]] {{yel|89}}
+|goals2 =
+*[[Calvin Jong-a-Pin|Jong-a-Pin]] {{yel|28}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Roelof Luinge
+|assistantreferees = Jantinus Meints, Wilfred van der Pas
+|fourthofficial = [[Jochem Kamphuis]]
+|result = W
+}}
+
+{{Football box collapsible
+|round = 4
+|date = 23 August 2009
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 0–2
+|report = https://int.soccerway.com/matches/2009/08/23/netherlands/eredivisie/sportclub-heerenveen/stichting-az/781611/
+|team2 = [[AZ Alkmaar|AZ]]
+|goals1 =
+|goals2 =
+*[[Martin Lejsal|Lejsal]] {{goal|30|o.g.}}
+*[[Mounir El Hamdaoui|El Hamdaoui]] {{goal|64}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Ruud Bossen
+|assistantreferees = Berry Simons, Sander van Roekel
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+{{Football box collapsible
+|round = 5
+|date = 30 August 2009
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[NAC Breda]]
+|score = 2–0
+|report = https://int.soccerway.com/matches/2009/08/30/netherlands/eredivisie/nac-bv/sportclub-heerenveen/781621/
+|team2 = Heerenveen
+|goals1 =
+*[[Edwin de Graaf|De Graaf]] {{yel|34}}
+*[[Kees Kwakman|Kwakman]] {{goal|51}}
+*[[Matthew Amoah|Amoah]] {{goal|58}}
+*[[Donny Gorter|Gorter]] {{yel|86}}
+|goals2 =
+*[[Michal Papadopulos|Papadopulos]] {{yel|39}}
+*[[Bonaventure Kalou|Kalou]] {{yel|45}}
+|stadium = [[Rat Verlegh Stadion]]
+|location = [[Breda]]
+|attendance =
+|referee = [[Eric Braamhaar]]
+|assistantreferees = Patrick Gerritsen, Nicky Siebert
+|fourthofficial = Maarten Ketting
+|result = L
+}}
+
+{{Football box collapsible
+|round = [[Derby of the North|6]]
+|date = 12 September 2009
+|time = 19:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 0–1
+|report = https://int.soccerway.com/matches/2009/09/12/netherlands/eredivisie/sportclub-heerenveen/stichting-fc-groningen/781624/
+|team2 = [[FC Groningen|Groningen]]
+|goals1 =
+*[[Kristian Bach Bak|Bak]] {{yel|30}}
+*[[Michael Dingsdag|Dingsdag]] {{sent off|2|74|90}}
+|goals2 =
+*[[Mike Zonneveld|Zonneveld]] {{yel|43}}
+*[[Morten Nordstrand|Nordstrand]] {{goal|61}}
+*[[Goran Lovre|Lovre]] {{yel|90}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Björn Kuipers]]
+|assistantreferees = Berry Simons, Sander van Roekel
+|fourthofficial = Mario Diks
+|result = L
+}}
+
+{{Football box collapsible
+|round = 7
+|date = 20 September 2009
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 0–2
+|report = https://int.soccerway.com/matches/2009/09/20/netherlands/eredivisie/sportclub-heerenveen/stichting-fc-twente-65/781636/
+|team2 = [[F.C. Twente|Twente]]
+|goals1 =
+*[[Michel Breuer|Breuer]] {{yel|39}}
+*[[Hernán Losada|Losada]] {{yel|55}}
+*[[Goran Popov|Popov]] {{yel|76}}
+|goals2 =
+*[[Miroslav Stoch|Stoch]] {{goal|22||72}}
+*[[Kenneth Perez|Perez]] {{yel|29}}
+*[[Wout Brama|Brama]] {{yel|51}}
+*[[Blaise Nkufo|Nkufo]] {{yel|61}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Pieter Vink]]
+|assistantreferees = Angelo Boonman, Hans ten Hoove
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+{{Football box collapsible
+|round = 8
+|date = 30 September 2009
+|time = 14:31 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[Sparta Rotterdam]]
+|score = 0–2
+|report = https://int.soccerway.com/matches/2009/09/27/netherlands/eredivisie/sparta-rotterdam-bv/sportclub-heerenveen/781646/
+|team2 = Heerenveen
+|goals1 =
+*[[Dele Adeleye|Adeleye]] {{yel|17}}
+*[[Nathan Rutjes|Rutjes]] {{yel|73}}
+|goals2 =
+*[[Viktor Elm|Elm]] {{yel|14}}, {{goal|73|pen.}}
+*[[Michael Dingsdag|Dingsdag]] {{yel|28}}
+*[[Paulo Henrique (footballer, born March 1989)|Paulo Henrique]] {{goal|45}}
+*[[Daryl Janmaat|Janmaat]] {{yel|71}}
+|stadium = [[Sparta Stadion Het Kasteel]]
+|location = [[Rotterdam]]
+|attendance =
+|referee = [[Pol van Boekel]]
+|assistantreferees = Angelo Boonman, Charles Schaap
+|fourthofficial = [[Jochem Kamphuis]]
+|result = W
+}}
+
+{{Football box collapsible
+|round = 9
+|date = 4 October 2009
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 1–1
+|report = https://int.soccerway.com/matches/2009/10/04/netherlands/eredivisie/sportclub-heerenveen/vvv-venlo/781655/
+|team2 = [[VVV-Venlo]]
+|goals1 =
+*[[Christian Grindheim|Grindheim]] {{yel|78}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|90+3}}
+|goals2 =
+*[[Sandro Calabro|Calabro]] {{goal|88}}, {{yel|89}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Raymond van Meenen
+|assistantreferees = Frank Jansen, Rob van de Ven
+|fourthofficial = Kristian Bakkelo
+|result = D
+}}
+
+{{Football box collapsible
+|round = 10
+|date = 17 October 2009
+|time = 20:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[PSV Eindhoven|PSV]]
+|score = 1–0
+|report = https://int.soccerway.com/matches/2009/10/17/netherlands/eredivisie/psv-nv/sportclub-heerenveen/781658/
+|team2 = Heerenveen
+|goals1 =
+*[[Danko Lazović|Lazović]] {{goal|81}}
+|goals2 =
+*[[Goran Popov|Popov]] {{yel|24}}
+*[[Christian Grindheim|Grindheim]] {{yel|33}}
+*[[Michal Švec|Švec]] {{yel|50}}
+*[[Michel Breuer|Breuer]] {{yel|61}}
+|stadium = [[Philips Stadion]]
+|location = [[Eindhoven]]
+|attendance =
+|referee = Jack van Hulten
+|assistantreferees = Adriaan Inia, Erwin Zeinstra
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+{{Football box collapsible
+|round = 11
+|date = 25 October 2009
+|time = 14:30 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[Willem II (football club)|Willem II]]
+|score = 4–1
+|report = https://int.soccerway.com/matches/2009/10/25/netherlands/eredivisie/sbv-willem-ii-tilburg/sportclub-heerenveen/781674/
+|team2 = Heerenveen
+|goals1 =
+*[[Sergio Zijler|Zijler]] {{yel|13}}, {{goal|48}}
+*[[Saïd Boutahar|Boutahar]] {{goal|51}}
+*[[Frank Demouge|Demouge]] {{goal|70||90+3}}
+|goals2 =
+*[[Michal Švec|Švec]] {{yel|36}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|65}}
+|stadium = [[Koning Willem II Stadion]]
+|location = [[Tilburg]]
+|attendance =
+|referee = [[Bas Nijhuis]]
+|assistantreferees = Coen Droste, Wilco Lobbert
+|fourthofficial = Maarten Ketting
+|result = L
+}}
+
+{{Football box collapsible
+|round = 12
+|date = 31 October 2009
+|time = 18:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 3–0
+|report = https://int.soccerway.com/matches/2009/10/31/netherlands/eredivisie/sportclub-heerenveen/hfc-ado-den-haag/781678/
+|team2 = [[ADO Den Haag]]
+|goals1 =
+*[[Roy Beerens|Beerens]] {{goal|21}}
+*[[Michel Breuer|Breuer]] {{yel|53}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|63||77}}
+|goals2 =
+*[[Pascal Bosschaart|Bosschaart]] {{sent off|2|14|43}}
+*[[Levi Schwiebbe|Schwiebbe]] {{yel|58}}
+*[[Barry Ditewig|Ditewig]] {{yel|77}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Eric Braamhaar]]
+|assistantreferees = Dave Goossens, Charles John Schaap
+|fourthofficial = Mario Diks
+|result = W
+}}
+
+{{Football box collapsible
+|round = 13
+|date = 8 November 2009
+|time = 14:30 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[FC Utrecht|Utrecht]]
+|score = 2–3
+|report = https://int.soccerway.com/matches/2009/11/08/netherlands/eredivisie/stichting-fc-utrecht/sportclub-heerenveen/781692/
+|team2 = Heerenveen
+|goals1 =
+*[[Gregoor van Dijk|Van Dijk]] {{yel|45}}
+*[[Tim Cornelisse|Cornelisse]] {{goal|81}}
+*[[Jacob Mulenga|Mulenga]] {{goal|90}}
+|goals2 =
+*[[Viktor Elm|Elm]] {{goal|15}}
+*[[Goran Popov|Popov]] {{yel|16}}
+*[[Daryl Janmaat|Janmaat]] {{yel|33}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|68||78}}
+|stadium = [[Stadion Galgenwaard]]
+|location = [[Utrecht]]
+|attendance =
+|referee = [[Pol van Boekel]]
+|assistantreferees = Angelo Boonman, Rob van de Ven
+|fourthofficial = Maarten Ketting
+|result = W
+}}
+
+{{Football box collapsible
+|round = 14
+|date = 22 November 2009
+|time = 14:30 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[AFC Ajax|Ajax]]
+|score = 5–1
+|report = https://int.soccerway.com/matches/2009/11/22/netherlands/eredivisie/afc-ajax/sportclub-heerenveen/781699/
+|team2 = Heerenveen
+|goals1 =
+*[[Demy de Zeeuw|De Zeeuw]] {{goal|7||24}}
+*[[Marko Pantelić|Pantelić]] {{goal|28}}
+*[[Luis Suárez (Uruguayan footballer)|Suárez]] {{goal|35|pen.}}
+*[[Ismaïl Aissati|Aissati]] {{goal|40}}
+|goals2 =
+*[[Oussama Assaidi|Assaidi]] {{yel|34}}
+*[[Goran Popov|Popov]] {{goal|39}}
+*[[Michel Breuer|Breuer]] {{yel|79}}
+|stadium = [[Amsterdam Arena]]
+|location = [[Amsterdam]]
+|attendance =
+|referee = Roelof Luinge
+|assistantreferees = Patrick Gerritsen, Adriaan Inia
+|fourthofficial = Ed Janssen
+|result = L
+}}
+
+{{Football box collapsible
+|round = 15
+|date = 28 November 2009
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 3–1
+|report = https://int.soccerway.com/matches/2009/11/28/netherlands/eredivisie/sportclub-heerenveen/rkc-waalwijk/781707/
+|team2 = [[RKC Waalwijk]]
+|goals1 =
+*[[Oussama Assaidi|Assaidi]] {{yel|23}}
+*[[Viktor Elm|Elm]] {{goal|39||54}}, {{penmiss}} 58'
+*[[Michal Papadopulos|Papadopulos]] {{yel|42}}
+*[[Mika Väyrynen|Väyrynen]] {{yel|90}}
+*[[Roy Beerens|Beerens]] {{goal|90+2}}
+|goals2 =
+*[[Dustley Mulder|Mulder]] {{yel|57}}
+*[[Fred Benson|Benson]] {{yel|79}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Kevin Blom]]
+|assistantreferees = Angelo Boonman, Roger Geutjes
+|fourthofficial = Karel van den Heuvel
+|result = W
+}}
+
+{{Football box collapsible
+|round = 16
+|date = 6 December 2009
+|time = 16:28 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[Heracles Almelo|Heracles]]
+|score = 3–1
+|report = https://int.soccerway.com/matches/2009/12/06/netherlands/eredivisie/stichting-heracles-almelo/sportclub-heerenveen/781718/
+|team2 = Heerenveen
+|goals1 =
+*[[Mark Looms|Looms]] {{goal|16}}
+*[[Willie Overtoom|Overtoom]] {{goal|26|pen.}}
+*[[Sebastiaan Steur|Steur]] {{yel|88}}
+*[[Bas Dost|Dost]] {{goal|90}}
+|goals2 =
+*[[Michal Papadopulos|Papadopulos]] {{yel|48}}
+*[[Oussama Assaidi|Assaidi]] {{goal|82}}
+|stadium = [[Polman Stadion]]
+|location = [[Almelo]]
+|attendance =
+|referee = Ed Janssen
+|assistantreferees = Hans Olde Olthof, Jac Schenkels
+|fourthofficial = Jeroen Sanders
+|result = L
+}}
+
+{{Football box collapsible
+|round = 17
+|date = 12 December 2009
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 0–2
+|report = https://int.soccerway.com/matches/2009/12/12/netherlands/eredivisie/sportclub-heerenveen/feyenoord-rotterdam-nv/781724/
+|team2 = [[Feyenoord]]
+|goals1 =
+|goals2 =
+*[[Kevin Hofland|Hofland]] {{goal|68}}
+*[[Jon Dahl Tomasson|Tomasson]] {{goal|82}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Ruud Bossen
+|assistantreferees = Wilco Lobbert, Nicky Siebert
+|fourthofficial = Jeroen Sanders
+|result = L
+}}
+
+{{Football box collapsible
+|round = [[Derby of the North|18]]
+|date = 20 January 2010
+|time = 20:00 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[FC Groningen|Groningen]]
+|score = 2–0
+|report = https://int.soccerway.com/matches/2010/01/20/netherlands/eredivisie/stichting-fc-groningen/sportclub-heerenveen/781735/
+|team2 = Heerenveen
+|goals1 =
+*[[Tim Matavž|Matavž]] {{goal|13}}, {{yel|82}}
+*[[Andreas Granqvist|Granqvist]] {{goal|60}}
+|goals2 =
+*[[Michel Breuer|Breuer]] {{yel|60}}
+|stadium = [[Euroborg]]
+|location = [[Groningen]]
+|attendance =
+|referee = [[Pieter Vink]]
+|assistantreferees = Hans ten Hoove, Rob van de Ven
+|fourthofficial = Rutger Bekebrede
+|result = L
+}}
+
+{{Football box collapsible
+|round = 19
+|date = 23 January 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 4–2
+|report = https://int.soccerway.com/matches/2010/01/23/netherlands/eredivisie/sportclub-heerenveen/sbv-willem-ii-tilburg/781743/
+|team2 = [[Willem II (football club)|Willem II]]
+|goals1 =
+*[[Michal Švec|Švec]] {{yel|44}}
+*[[Michel Breuer|Breuer]] {{goal|56}}
+*[[Paulo Henrique (footballer, born March 1989)|Paulo Henrique]] {{goal|78||89}}
+*[[Hernán Losada|Losada]] {{goal|79}}, {{yel|79}}
+|goals2 =
+*[[Sergio Zijler|Zijler]] {{yel|36}}
+*[[Frank Demouge|Demouge]] {{goal|47}}
+*[[Marciano Bruma|Bruma]] {{yel|53}}
+*[[Stef Nijland|Nijland]] {{goal|72}}, {{yel|90}}
+*[[Marlon Pereira Freire|Pereira]] {{sent off|0|83}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Eric Braamhaar]]
+|assistantreferees = Patrick Gerritsen, Wilco Lobbert
+|fourthofficial = Michel Winter
+|result = W
+}}
+
+{{Football box collapsible
+|round = 20
+|date = 30 January 2010
+|time = 20:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[ADO Den Haag]]
+|score = 2–1
+|report = https://int.soccerway.com/matches/2010/01/30/netherlands/eredivisie/hfc-ado-den-haag/sportclub-heerenveen/781750/
+|team2 = Heerenveen
+|goals1 =
+*[[Kai van Hese|Van Hese]] {{yel|51}}
+*[[Wesley Verhoek|Verhoek]] {{goal|78}}
+*[[Bogdan Milić|Milić]] {{goal|80}}, {{yel|90+3}}
+|goals2 =
+*[[Gerald Sibon|Sibon]] {{goal|30}}
+*[[Daryl Janmaat|Janmaat]] {{sent off|2|33|45}}
+*[[Michel Breuer|Breuer]] {{yel|59}}
+*[[Goran Popov|Popov]] {{yel|80}}
+*[[Brian Vandenbussche|Vandenbussche]] {{yel|90+3}}
+|stadium = [[ADO Den Haag Stadion]]
+|location = [[The Hague]]
+|attendance =
+|referee = [[Kevin Blom]]
+|assistantreferees = Ruud Bexkens, Erwin Zeinstra
+|fourthofficial = Lorenzo Cairo
+|result = L
+}}
+
+{{Football box collapsible
+|round = 21
+|date = 2 February 2010
+|time = 20:00 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[VVV-Venlo]]
+|score = 3–1
+|report = https://int.soccerway.com/matches/2010/02/02/netherlands/eredivisie/vvv-venlo/sportclub-heerenveen/781757/
+|team2 = Heerenveen
+|goals1 =
+*[[Ferry de Regt|De Regt]] {{goal|11}}
+*[[Gonzalo García (footballer, born 1983)|Gonzalo García]] {{goal|14}}
+*[[Sandro Calabro|Calabro]] {{goal|16}}
+*[[Patrick Paauwe|Paauwe]] {{yel|34}}
+*[[Ruben Schaken|Schaken]] {{yel|89}}
+|goals2 =
+*[[Christian Grindheim|Grindheim]] {{yel|4}}
+*[[Gerald Sibon|Sibon]] {{goal|35|pen.}}
+*[[Michal Papadopulos|Papadopulos]] {{yel|73}}
+|stadium = [[De Koel]]
+|location = [[Venlo]]
+|attendance =
+|referee = Roelof Luinge
+|assistantreferees = Jac Schenkels, Jurgen Schiphorst
+|fourthofficial = Jordy de Goeij
+|result = L
+}}
+
+{{Football box collapsible
+|round = 22
+|date = 6 February 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 2–0
+|report = https://int.soccerway.com/matches/2010/02/06/netherlands/eredivisie/sportclub-heerenveen/stichting-fc-utrecht/781770/
+|team2 = [[FC Utrecht|Utrecht]]
+|goals1 =
+*[[Gerald Sibon|Sibon]] {{goal|5||51|pen.}}
+*[[Paulo Henrique (footballer, born March 1989)|Paulo Henrique]] {{yel|40}}
+|goals2 =
+*[[Nana Akwasi Asare|Asare]] {{yel|2}}
+*[[Michel Vorm|Vorm]] {{yel|50}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Ed Janssen
+|assistantreferees = Mark Strijker, Bas van Dongen
+|fourthofficial = Edwin van de Graaf
+|result = W
+}}
+
+{{Football box collapsible
+|round = 23
+|date = 13 February 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 0–2
+|report = https://int.soccerway.com/matches/2010/02/13/netherlands/eredivisie/sportclub-heerenveen/afc-ajax/781776/
+|team2 = [[AFC Ajax|Ajax]]
+|goals1 =
+*[[Daryl Janmaat|Janmaat]] {{yel|51}}
+*[[Christian Grindheim|Grindheim]] {{sent off|0|73}}
+|goals2 =
+*[[Gregory van der Wiel|Van der Wiel]] {{yel|25}}
+*[[Marko Pantelić|Pantelić]] {{yel|45}}
+*[[Dennis Rommedahl|Rommedahl]] {{goal|48}}
+*[[Luis Suárez (Uruguayan footballer)|Suárez]] {{goal|90}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Ruud Bossen
+|assistantreferees = Angelo Boonman, Erwin Zeinstra
+|fourthofficial = Stefan Tulleners
+|result = L
+}}
+
+{{Football box collapsible
+|round = 24
+|date = 20 February 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[RKC Waalwijk]]
+|score = 1–2
+|report = https://int.soccerway.com/matches/2010/02/20/netherlands/eredivisie/rkc-waalwijk/sportclub-heerenveen/781791/
+|team2 = Heerenveen
+|goals1 =
+*[[Benjamin De Ceulaer|De Ceulaer]] {{yel|17}}, {{goal|68}}
+*[[Alexandre Di Gregorio|Di Gregorio]] {{yel|17}}
+*[[Derk Boerrigter|Boerrigter]] {{yel|62}}
+*[[Jürgen Colin|Colin]] {{yel|84}}
+|goals2 =
+*[[Gerald Sibon|Sibon]] {{goal|13||84|pen.}}
+|stadium = [[Mandemakers Stadion]]
+|location = [[Waalwijk]]
+|attendance =
+|referee = [[Bas Nijhuis]]
+|assistantreferees = Angelo Boonman, Erwin Zeinstra
+|fourthofficial = Edwin van de Graaf
+|result = W
+}}
+
+{{Football box collapsible
+|round = 25
+|date = 27 February 2010
+|time = 18:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 1–2
+|report = https://int.soccerway.com/matches/2010/02/27/netherlands/eredivisie/sportclub-heerenveen/stichting-heracles-almelo/781797/
+|team2 = [[Heracles Almelo|Heracles]]
+|goals1 =
+*[[Gerald Sibon|Sibon]] {{goal|64}}
+*[[Mika Väyrynen|Väyrynen]] {{yel|66}}
+|goals2 =
+*[[Bas Dost|Dost]] {{goal|50}}
+*[[Everton (footballer, born 1983)|Everton]] {{goal|75}}
+*[[Antoine van der Linden|Van der Linden]] {{yel|90}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Richard Liesveld
+|assistantreferees = Dave Goossens, Peter Janson
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+{{Football box collapsible
+|round = 26
+|date = 6 March 2010
+|time = 18:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[AZ Alkmaar|AZ]]
+|score = 4–1
+|report = https://int.soccerway.com/matches/2010/03/06/netherlands/eredivisie/stichting-az/sportclub-heerenveen/781804/
+|team2 = Heerenveen
+|goals1 =
+*[[Maarten Martens|Martens]] {{goal|22}}
+*[[Stijn Schaars|Schaars]] {{yel|25}}
+*[[Mounir El Hamdaoui|El Hamdaoui]] {{goal|35}}
+*[[Jeremain Lens|Lens]] {{goal|68}}
+*[[Brett Holman|Holman]] {{goal|90}}
+|goals2 =
+*[[Filip Đuričić|Đuričić]] {{goal|20}}, {{yel|21}}
+|stadium = [[DSB Stadion]]
+|location = [[Alkmaar]]
+|attendance =
+|referee = [[Pieter Vink]]
+|assistantreferees = Arie Brink, Hans ten Hoove
+|fourthofficial = Bart van der Scheer
+|result = L
+}}
+
+{{Football box collapsible
+|round = 27
+|date = 14 March 2010
+|time = 14:30 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[Vitesse Arnhem]]
+|score = 0–1
+|report = https://int.soccerway.com/matches/2010/03/14/netherlands/eredivisie/sbv-vitesse/sportclub-heerenveen/781818/
+|team2 = Heerenveen
+|goals1 =
+*[[Lasse Nilsson|Nilsson]] {{yel|89}}
+|goals2 =
+*[[Roy Beerens|Beerens]] {{goal|83}}
+|stadium = [[GelreDome]]
+|location = [[Arnhem]]
+|attendance =
+|referee = [[Danny Makkelie]]
+|assistantreferees = Jaap Pool, Wijnand Rutgers
+|fourthofficial = Martin van den Kerkhof
+|result = W
+}}
+
+{{Football box collapsible
+|round = 28
+|date = 19 March 2010
+|time = 20:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 4–1
+|report = https://int.soccerway.com/matches/2010/03/19/netherlands/eredivisie/sportclub-heerenveen/nijmegen-eendracht-combinatie/781820/
+|team2 = [[N.E.C. (football club)|NEC]]
+|goals1 =
+*[[Gerald Sibon|Sibon]] {{goal|31|pen.|50}}
+*[[Roy Beerens|Beerens]] {{yel|54}}
+*[[Michel Breuer|Breuer]] {{goal|90+2|pen.}}
+*[[Samir Fazli|Fazli]] {{goal|90+4}}
+|goals2 =
+*[[John Goossens|Goossens]] {{goal|12}}
+*[[Ramon Zomer|Zomer]] {{yel|30}}
+*[[Patrick Pothuizen|Pothuizen]] {{yel|69}}
+*[[Jeffrey Sarpong|Sarpong]] {{sent off|0|90+1}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Roelof Luinge
+|assistantreferees = Jantinus Meints, Jac Schenkels
+|fourthofficial = Dennis Higler
+|result = W
+}}
+
+{{Football box collapsible
+|round = 29
+|date = 27 March 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = [[Roda JC]]
+|score = 4–2
+|report = https://int.soccerway.com/matches/2010/03/27/netherlands/eredivisie/roda-jc/sportclub-heerenveen/781830/
+|team2 = Heerenveen
+|goals1 =
+*[[Mads Junker|Junker]] {{goal|7||33}}
+*[[Marcel de Jong|De Jong]] {{goal|13}}
+*[[Davy De fauw|De fauw]] {{penmiss}} 32'
+*[[Boldizsár Bodor|Bodor]] {{goal|37}}
+*[[Arnaud Djoum|Djoum]] {{yel|72}}
+|goals2 =
+*[[Oussama Assaidi|Assaidi]] {{sent off|0|9}}
+*[[Henk Timmer|Timmer]] {{yel|31}}
+*[[Mika Väyrynen|Väyrynen]] {{yel|32}}, {{goal|88}}
+*[[Michel Breuer|Breuer]] {{goal|73|pen.}}
+|stadium = [[Parkstad Limburg Stadion]]
+|location = [[Kerkrade]]
+|attendance =
+|referee = [[Kevin Blom]]
+|assistantreferees = Nicky Siebert, Bas van Dongen
+|fourthofficial = Stefan Tulleners
+|result = L
+}}
+
+{{Football box collapsible
+|round = 30
+|date = 3 April 2010
+|time = 20:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 4–1
+|report = https://int.soccerway.com/matches/2010/04/03/netherlands/eredivisie/sportclub-heerenveen/sparta-rotterdam-bv/781842/
+|team2 = [[Sparta Rotterdam]]
+|goals1 =
+*[[Hernán Losada|Losada]] {{goal|9||77}}
+*[[Michael Dingsdag|Dingsdag]] {{sent off|0|17}}
+*[[Gerald Sibon|Sibon]] {{goal|39|pen.}}
+*[[Roy Beerens|Beerens]] {{goal|43}}
+|goals2 =
+*[[Joshua John|John]] {{penmiss}} 18'
+*[[Sander van Gessel|Van Gessel]] {{yel|27}}
+*[[Dele Adeleye|Adeleye]] {{yel|38}}
+*[[Erik Falkenburg|Falkenburg]] {{goal|60}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Bas Nijhuis]]
+|assistantreferees = Ruud Bexkens, Wilco Lobbert
+|fourthofficial = Jeroen Sanders
+|result = W
+}}
+
+{{Football box collapsible
+|round = 31
+|date = 10 April 2010
+|time = 18:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[F.C. Twente|Twente]]
+|score = 2–0
+|report = https://int.soccerway.com/matches/2010/04/10/netherlands/eredivisie/stichting-fc-twente-65/sportclub-heerenveen/781849/
+|team2 = Heerenveen
+|goals1 =
+*[[Cheick Tioté|Tioté]] {{goal|70}}
+*[[Luuk de Jong|De Jong]] {{goal|90+1}}
+|goals2 =
+|stadium = [[De Grolsch Veste]]
+|location = [[Enschede]]
+|attendance =
+|referee = [[Jan Wegereef]]
+|assistantreferees = Rob van de Ven, Erwin Zeinstra
+|fourthofficial = Maarten Ketting
+|result = L
+}}
+
+{{Football box collapsible
+|round = 32
+|date = 14 April 2010
+|time = 20:00 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 2–2
+|report = https://int.soccerway.com/matches/2010/04/14/netherlands/eredivisie/sportclub-heerenveen/psv-nv/781863/
+|team2 = [[PSV Eindhoven|PSV]]
+|goals1 =
+*[[Michal Švec|Švec]] {{yel|14}}
+*[[Gerald Sibon|Sibon]] {{goal|51}}
+*[[Paweł Wojciechowski (footballer, born 1990)|Wojciechowski]] {{goal|66}}
+|goals2 =
+*[[Carlos Salcido|Salcido]] {{yel|45}}
+*[[Balázs Dzsudzsák|Dzsudzsák]] {{goal|49}}
+*[[Stanislav Manolev|Manolev]] {{goal|62}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Jack van Hulten
+|assistantreferees = Angelo Boonman, Jac Schenkels
+|fourthofficial = Kristian Bakkelo
+|result = D
+}}
+
+{{Football box collapsible
+|round = 33
+|date = 18 April 2010
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen
+|score = 0–0
+|report = https://int.soccerway.com/matches/2010/04/18/netherlands/eredivisie/sportclub-heerenveen/nac-bv/781865/
+|team2 = [[NAC Breda]]
+|goals1 =
+*[[Gerald Sibon|Sibon]] {{penmiss}} 76'
+*[[Samir Fazli|Fazli]] {{yel|81}}
+*[[Arnór Smárason|Smárason]] {{yel|90+3}}
+|goals2 =
+*[[Rob Penders|Penders]] {{yel|45+1}}
+*[[Jelle ten Rouwelaar|Ten Rouwelaar]] {{yel|45+1}}
+*[[Robbert Schilder|Schilder]] {{sent off|0|74}}
+*[[Anthony Lurling|Lurling]] {{yel|75}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Björn Kuipers]]
+|assistantreferees = Berry Simons, Sander van Roekel
+|fourthofficial = Bart van der Scheer
+|result = D
+}}
+
+{{Football box collapsible
+|round = 34
+|date = 2 May 2010
+|time = 14:30 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[Feyenoord]]
+|score = 6–2
+|report = https://int.soccerway.com/matches/2010/05/02/netherlands/eredivisie/feyenoord-rotterdam-nv/sportclub-heerenveen/781875/
+|team2 = Heerenveen
+|goals1 =
+*[[Roy Makaay|Makaay]] {{goal|13||58||75}}
+*[[Stefan de Vrij|De Vrij]] {{goal|32}}
+*[[Jon Dahl Tomasson|Tomasson]] {{goal|51}}
+*[[André Bahia|Bahia]] {{goal|86}}
+|goals2 =
+*[[Christian Grindheim|Grindheim]] {{goal|12}}
+*[[Geert Arend Roorda|Roorda]] {{yel|14}}
+*[[Viktor Elm|Elm]] {{goal|23}}
+|stadium = [[De Kuip]]
+|location = [[Rotterdam]]
+|attendance =
+|referee = [[Danny Makkelie]]
+|assistantreferees = Adriaan Inia, Wim van der Zanden
+|fourthofficial = Bart van der Scheer
+|result = L
+}}
+
+===KNVB Cup===
+
+{{Football box collapsible
+|round = [[2009–10 KNVB Cup#Round 2|Second round]]
+|date = 23 September 2009
+|time = 17:00 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[Sterk Door Combinatie Putten|SDC Putten]]
+|score = 0–7
+|report = https://int.soccerway.com/matches/2009/09/23/netherlands/knvb-beker/sterk-door-combinatie-putten/sportclub-heerenveen/857110/
+|team2 = Heerenveen
+|goals1 =
+|goals2 =
+*[[Hernán Losada|Losada]] {{goal|6}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|26||49||84}}
+*[[Oussama Assaidi|Assaidi]] {{goal|55}}
+*[[Viktor Elm|Elm]] {{goal|56||74}}
+|stadium = Sportpark Puttereng
+|location = [[Putten]]
+|attendance =
+|referee =
+|result = W
+}}
+
+{{Football box collapsible
+|round = [[2009–10 KNVB Cup#Round 3|Third round]]
+|date = 28 October 2009
+|time = 20:00 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 4–2
+|report = https://int.soccerway.com/matches/2009/10/28/netherlands/knvb-beker/sportclub-heerenveen/rbc-roosendaal/874507/
+|team2 = [[RBC Roosendaal]]
+|goals1 =
+*[[Daryl Janmaat|Janmaat]] {{goal|13}}
+*[[Goran Popov|Popov]] {{goal|59}}
+*[[Michal Papadopulos|Papadopulos]] {{goal|72}}
+*[[Michel Breuer|Breuer]] {{goal|90|pen.}}
+*[[Oussama Assaidi|Assaidi]] {{yel}}
+|goals2 =
+*[[Sjoerd Ars|Ars]] {{goal|65||85}}
+*[[Maarten Boddaert|Boddaert]] {{yel}}
+*[[Umut Gündoğan|Gündoğan]] {{yel}}
+*[[Nicky Hayen|Hayen]] {{yel}}
+*[[Wesley Pollemans|Pollemans]] {{yel}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = Michel Winter
+|assistantreferees = Jermaine Lapar, Jantinus Meints
+|fourthofficial = [[Jochem Kamphuis]]
+|result = W
+}}
+
+{{Football box collapsible
+|round = [[2009–10 KNVB Cup#Round 4|Fourth round]]
+|date = 16 January 2010
+|time = 19:45 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen
+|score = 1–3
+|report = https://int.soccerway.com/matches/2010/01/16/netherlands/knvb-beker/sportclub-heerenveen/psv-nv/879661/
+|team2 = [[PSV Eindhoven|PSV]]
+|goals1 =
+*[[Christian Grindheim|Grindheim]] {{yel|27}}
+*[[Gerald Sibon|Sibon]] {{goal|79}}
+|goals2 =
+*[[Balázs Dzsudzsák|Dzsudzsák]] {{goal|25}}, {{yel|33}}
+*[[Otman Bakkal|Bakkal]] {{yel|63}}
+*[[Danko Lazović|Lazović]] {{goal|64}}
+*[[Nordin Amrabat|Amrabat]] {{goal|90+2}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]]
+|attendance =
+|referee = [[Bas Nijhuis]]
+|assistantreferees = Coen Droste, Richard Slot
+|fourthofficial = Michel Winter
+|result = L
+}}
+
+===UEFA Europa League===
+
+====Play-off round====
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League qualifying phase and play-off round#PAOK v Heerenveen|First leg]]
+|date = 20 August 2009
+|time = 20:00 [[Eastern European Summer Time|EEST]] ([[UTC+03:00|UTC+3]])
+|team1 = [[PAOK FC|PAOK]] {{fbaicon|GRE}}
+|score = 1–1
+|report = https://www.uefa.com/uefaeuropaleague/match/2000689/
+|team2 = {{fbaicon|NED}} Heerenveen
+|goals1 =
+*[[Vieirinha]] {{yel|52}}
+*[[Vladimir Ivić|Ivić]] {{goal|54}}
+*[[Stelios Malezas|Malezas]] {{yel|61}}
+*[[Vitolo (footballer, born 1983)|Vitolo]] {{yel|62}}
+|goals2 =
+*[[Paulo Henrique (footballer, born March 1989)|Paulo Henrique]] {{goal|45}}, {{yel|50}}
+*[[Gerry Koning|Koning]] {{yel|56}}
+|stadium = [[Toumba Stadium]]
+|location = [[Thessaloniki]], Greece
+|attendance = 22,403<ref>{{UEFA match attendance|2000689|PAOK vs. Heerenveen|date=20 August 2009|access-date=7 November 2024}}</ref>
+|referee = [[Willie Collum]] ([[Scottish Football Association|Scotland]])
+|assistantreferees = Francis Andrews ([[Scottish Football Association|Scotland]]), Keith Sorbie ([[Scottish Football Association|Scotland]])
+|fourthofficial = [[Bobby Madden]] ([[Scottish Football Association|Scotland]])
+|result = D
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League qualifying phase and play-off round#Heerenveen v PAOK|Second leg]]
+|date = 27 August 2009
+|time = 18:45 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen {{fbaicon|NED}}
+|score = 0–0
+|aggregatescore = ([[Away goals rule|a]]) 1–1
+|report = https://www.uefa.com/uefaeuropaleague/match/2000726/
+|team2 = {{fbaicon|GRE}} [[PAOK FC|PAOK]]
+|goals1 =
+*[[Michel Breuer|Breuer]] {{yel|25}}
+*[[Michael Dingsdag|Dingsdag]] {{yel|56}}
+*[[Hernán Losada|Losada]] {{yel|61}}
+*[[Igor Đurić (Serbian footballer)|Đurić]] (not on pitch) {{yel|89}}
+*[[Kristian Bach Bak|Bak]] {{yel|90+5}}
+|goals2 =
+*[[Vitolo (footballer, born 1983)|Vitolo]] {{yel|69}}
+*[[Joe Bizera|Bizera]] {{yel|86}}
+*[[Bruno Cirillo|Cirillo]] {{yel|90+5}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]], Netherlands
+|attendance = 15,000<ref>{{UEFA match attendance|2000726|Heerenveen vs. PAOK|date=27 August 2009|access-date=7 November 2024}}</ref>
+|referee = [[Eduardo Iturralde González]] ([[Royal Spanish Football Federation|Spain]])
+|assistantreferees = Roberto del Palomar ([[Royal Spanish Football Federation|Spain]]), Jon Núñez ([[Royal Spanish Football Federation|Spain]])
+|fourthofficial = Javier Turienzo Alvarez ([[Royal Spanish Football Federation|Spain]])
+|result = D
+|note = 1–1 on aggregate. Heerenveen won on away goals.
+}}
+
+====Group stage====
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Heerenveen v Sporting CP|1]]
+|date = 17 September 2009
+|time = 19:00 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = Heerenveen {{fbaicon|NED}}
+|score = 2–3
+|report = https://www.uefa.com/uefaeuropaleague/match/2000770/
+|team2 = {{fbaicon|POR}} [[Sporting CP]]
+|goals1 =
+*[[Gerald Sibon|Sibon]] {{goal|12}}
+*[[Michael Dingsdag|Dingsdag]] {{goal|77}}
+*[[Oussama Assaidi|Assaidi]] {{yel|79}}
+|goals2 =
+*[[Liédson]] {{goal|17||40||88}}
+*[[Miguel Veloso|Veloso]] {{yel|66}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]], Netherlands
+|attendance = 13,000<ref>{{UEFA match attendance|2000770|Heerenveen vs. Sporting CP|date=17 September 2009|access-date=8 November 2024}}</ref>
+|referee = [[Aleksei Nikolaev (referee)|Aleksei Nikolaev]] ([[Russian Football Union|Russia]])
+|assistantreferees = Tikhon Kalugin ([[Russian Football Union|Russia]]), Oleg Tselovalnikov ([[Russian Football Union|Russia]])
+|fourthofficial = [[Stanislav Sukhina]] ([[Russian Football Union|Russia]])
+|goallineassistants = [[Sergei Karasev]] ([[Russian Football Union|Russia]]), Maksim Layushkin ([[Russian Football Union|Russia]])
+|result = L
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Ventspils v Heerenveen|2]]
+|date = 1 October 2009
+|time = 22:05 [[Eastern European Summer Time|EEST]] ([[UTC+03:00|UTC+3]])
+|team1 = [[FK Ventspils|Ventspils]] {{fbaicon|LVA}}
+|score = 0–0
+|report = https://www.uefa.com/uefaeuropaleague/match/2000794/
+|team2 = {{fbaicon|NED}} Heerenveen
+|goals1 =
+|goals2 =
+*[[Michael Dingsdag|Dingsdag]] {{yel|90+3}}
+|stadium = [[Skonto Stadium]]
+|location = [[Riga]], Latvia{{r|g=note|name=Skonto|r=The match was played at the Skonto Stadium in Riga, instead of Ventspils regular stadium, the [[Ventspils Olimpiskais Stadions]] in [[Ventspils]], which did not meet UEFA requirements.}}
+|attendance = 3,500<ref>{{UEFA match attendance|2000794|Ventspils vs. Heerenveen|date=1 October 2009|access-date=8 November 2024}}</ref>
+|referee = [[Oleh Oriekhov]] ([[Football Federation of Ukraine|Ukraine]])
+|assistantreferees = Oleg Pluzhnyk ([[Football Federation of Ukraine|Ukraine]]), Oleksandr Voytyuk ([[Football Federation of Ukraine|Ukraine]])
+|fourthofficial = Yuriy Moseychuk ([[Football Federation of Ukraine|Ukraine]])
+|goallineassistants = [[Andriy Shandor]] ([[Football Federation of Ukraine|Ukraine]]), [[Viktor Shvetsov]] ([[Football Federation of Ukraine|Ukraine]])
+|result = D
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Hertha BSC v Heerenveen|3]]
+|date = 22 October 2009
+|time = 21:05 [[Central European Summer Time|CEST]] ([[UTC+02:00|UTC+2]])
+|team1 = [[Hertha BSC]] {{fbaicon|GER}}
+|score = 0–1
+|report = https://www.uefa.com/uefaeuropaleague/match/2000818/
+|team2 = {{fbaicon|NED}} Heerenveen
+|goals1 =
+*[[Arne Friedrich|Friedrich]] {{yel|62}}
+*[[Fabian Lustenberger|Lustenberger]] {{yel|71}}
+*[[Patrick Ebert|Ebert]] {{sent off|2|78|90+4}}
+|goals2 =
+*[[Hernán Losada|Losada]] {{goal|36}}
+*[[Kristian Bach Bak|Bak]] {{yel|55}}
+*[[Oussama Assaidi|Assaidi]] {{yel|65}}
+*[[Daryl Janmaat|Janmaat]] {{sent off|0|76}}
+|stadium = [[Olympiastadion (Berlin)|Olympiastadion]]
+|location = [[Berlin]], Germany
+|attendance = 13,134<ref>{{UEFA match attendance|2000818|Hertha vs. Heerenveen|date=22 October 2009|access-date=8 November 2024}}</ref>
+|referee = [[Costas Kapitanis]] ([[Cyprus Football Association|Cyprus]])
+|assistantreferees = Michael Soteriou ([[Cyprus Football Association|Cyprus]]), Andreas Xanthou ([[Cyprus Football Association|Cyprus]])
+|fourthofficial = Demetris Chrysostomou ([[Cyprus Football Association|Cyprus]])
+|goallineassistants = Panayiotis Kailis ([[Cyprus Football Association|Cyprus]]), Leontios Trattou ([[Cyprus Football Association|Cyprus]])
+|result = W
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Heerenveen v Hertha BSC|4]]
+|date = 5 November 2009
+|time = 19:00 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen {{fbaicon|NED}}
+|score = 2–3
+|report = https://www.uefa.com/uefaeuropaleague/match/2000842/
+|team2 = {{fbaicon|GER}} [[Hertha BSC]]
+|goals1 =
+*[[Michal Papadopulos|Papadopulos]] {{goal|4||36}}
+|goals2 =
+*[[Valeri Domovchiyski|Domovchiyski]] {{goal|21||52}}
+*[[Arne Friedrich|Friedrich]] {{yel|45}}
+*[[Artur Wichniarek|Wichniarek]] {{goal|90+1}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]], Netherlands
+|attendance = 20,000<ref>{{UEFA match attendance|2000842|Heerenveen vs. Hertha|date=5 November 2009|access-date=8 November 2024}}</ref>
+|referee = [[Cristian Balaj]] ([[Romanian Football Federation|Romania]])
+|assistantreferees = Zoltán Székely ([[Romanian Football Federation|Romania]]), George Adrian Vidan ([[Romanian Football Federation|Romania]])
+|fourthofficial = Teodor Crăciunescu ([[Romanian Football Federation|Romania]])
+|goallineassistants = [[Ovidiu Hațegan]] ([[Romanian Football Federation|Romania]]), [[István Kovács (referee)|István Kovács]] ([[Romanian Football Federation|Romania]])
+|result = L
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Sporting CP v Heerenveen|5]]
+|date = 3 December 2009
+|time = 20:05 [[Western European Time|WET]] ([[UTC+00:00|UTC]])
+|team1 = [[Sporting CP]] {{fbaicon|POR}}
+|score = 1–1
+|report = https://www.uefa.com/uefaeuropaleague/match/2000866/
+|team2 = {{fbaicon|NED}} Heerenveen
+|goals1 =
+*[[Liédson]] {{yel|52}}
+*[[Leandro Grimi|Grimi]] {{goal|90+1}}
+|goals2 =
+*[[Oussama Assaidi|Assaidi]] {{goal|47}}
+*[[Goran Popov|Popov]] {{yel|67}}
+*[[Viktor Elm|Elm]] {{yel|78}}
+|stadium = [[Estádio José Alvalade]]
+|location = [[Lisbon]], Portugal
+|attendance = 12,264<ref>{{UEFA match attendance|2000866|Sporting CP vs. Heerenveen|date=3 December 2009|access-date=8 November 2024}}</ref>
+|referee = [[Pavel Královec]] ([[Football Association of the Czech Republic|Czech Republic]])
+|assistantreferees = Martin Wilczek ([[Football Association of the Czech Republic|Czech Republic]]), Miroslav Zlámal ([[Football Association of the Czech Republic|Czech Republic]])
+|fourthofficial = Tomáš Kocourek ([[Football Association of the Czech Republic|Czech Republic]])
+|goallineassistants = [[Libor Kovařík]] ([[Football Association of the Czech Republic|Czech Republic]]), Michal Paták ([[Football Association of the Czech Republic|Czech Republic]])
+|result = D
+}}
+
+{{Football box collapsible
+|round = [[2009–10 UEFA Europa League group stage#Heerenveen v Ventspils|6]]
+|date = 16 December 2009
+|time = 19:00 [[Central European Time|CET]] ([[UTC+01:00|UTC+1]])
+|team1 = Heerenveen {{fbaicon|NED}}
+|score = 5–0
+|report = https://www.uefa.com/uefaeuropaleague/match/2000902/
+|team2 = {{fbaicon|LVA}} [[FK Ventspils|Ventspils]]
+|goals1 =
+*[[Michal Papadopulos|Papadopulos]] {{yel|41}}
+*[[Mika Väyrynen|Väyrynen]] {{goal|55}}
+*[[Viktor Elm|Elm]] {{goal|58}}
+*[[Gerald Sibon|Sibon]] {{goal|77||78}}
+*[[Daryl Janmaat|Janmaat]] {{goal|88}}
+|goals2 =
+*[[Ritvars Rugins|Rugins]] {{yel|30}}
+*[[Grigori Chirkin|Chirkin]] {{yel|40}}
+|stadium = [[Abe Lenstra Stadion]]
+|location = [[Heerenveen]], Netherlands
+|attendance = 16,000<ref>{{UEFA match attendance|2000902|Heerenveen vs. Ventspils|date=16 December 2009|access-date=8 November 2024}}</ref>
+|referee = [[Robert Schörgenhofer]] ([[Austrian Football Association|Austria]])
+|assistantreferees = Alain Hoxha ([[Austrian Football Association|Austria]]), Mario Strudl ([[Austrian Football Association|Austria]])
+|fourthofficial = Gerhard Grobelnik ([[Austrian Football Association|Austria]])
+|goallineassistants = Thomas Gangl ([[Austrian Football Association|Austria]]), Stefan Messner ([[Austrian Football Association|Austria]])
+|result = W
+}}
+
+==Notes==
+
+==References==
+
+==External links==

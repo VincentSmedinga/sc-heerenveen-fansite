@@ -223,6 +223,7 @@ describe('the first import, into an empty database', () => {
     expect(await database.db.select().from(wikipediaPages).orderBy(asc(wikipediaPages.kind))).toEqual([
       {
         kind: 'standings',
+        language: 'nl',
         readAt: first,
         season,
         title: 'Eredivisie 2026/27 (mannenvoetbal)',
@@ -230,12 +231,20 @@ describe('the first import, into an empty database', () => {
       },
       {
         kind: 'programme',
+        language: 'nl',
         readAt: first,
         season,
         title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
         version: wiki['Last-Modified'],
       },
-      { kind: 'cup', readAt: first, season, title: 'KNVB Beker 2026/27 (mannen)', version: wiki['Last-Modified'] },
+      {
+        kind: 'cup',
+        language: 'nl',
+        readAt: first,
+        season,
+        title: 'KNVB Beker 2026/27 (mannen)',
+        version: wiki['Last-Modified'],
+      },
     ])
   })
 
