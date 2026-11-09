@@ -11,7 +11,6 @@ import {
   type MatchOfCoach,
   placeLines,
   roundRanges,
-  totalShift,
 } from './placeHistory'
 
 const at = (round: number, position: number): PlaceInRound => ({ points: round, position, round })
@@ -24,12 +23,12 @@ describe('roundRanges', () => {
   })
 
   it('names a stretch', () => {
-    expect(roundRanges([6, 7])).toBe('ronde 6 t/m 7')
-    expect(roundRanges([10, 11, 12, 13, 14])).toBe('ronde 10 t/m 14')
+    expect(roundRanges([6, 7])).toBe('ronde 6–7')
+    expect(roundRanges([10, 11, 12, 13, 14])).toBe('ronde 10–14')
   })
 
   it('names more stretches with commas and "en" before the last', () => {
-    expect(roundRanges([3, 6, 7, 10, 11, 12, 13, 14])).toBe('ronde 3, 6 t/m 7 en 10 t/m 14')
+    expect(roundRanges([3, 6, 7, 10, 11, 12, 13, 14])).toBe('ronde 3, 6–7 en 10–14')
     expect(roundRanges([3, 5])).toBe('ronde 3 en 5')
   })
 })
@@ -52,39 +51,19 @@ describe('extremesOfPlaces', () => {
   })
 })
 
-describe('totalShift', () => {
-  it('adds the differences between rounds, without the sign', () => {
-    expect(totalShift(season([4, 2, 4]))).toBe(4)
-    expect(totalShift(season([3, 1, 2, 11]))).toBe(2 + 1 + 9)
-  })
-
-  it('counts the difference between the two complete rounds round an open one', () => {
-    expect(totalShift(season([4, null, 7]))).toBe(3)
-  })
-
-  it('is 0 for one place', () => {
-    expect(totalShift(season([5]))).toBe(0)
-  })
-})
-
 describe('placeLines', () => {
-  it('has three lines, with the plural of places', () => {
+  it('has a fact for the highest and one for the lowest place, and none for the shift', () => {
     expect(placeLines(season([3, 2, 2, 11, 5, 2, 2, 2, 5]))).toEqual([
-      'Hoogste: plek 2, ronde 2 t/m 3 en 6 t/m 8',
-      'Laagste: plek 11, ronde 4',
-      'Totaal verschoven: 22 plekken',
+      { description: 'plek 2, ronde 2–3 en 6–8', term: 'Hoogste' },
+      { description: 'plek 11, ronde 4', term: 'Laagste' },
     ])
   })
 
-  it('says "1 plek" for a shift of one', () => {
-    expect(placeLines(season([3, 2]))[2]).toBe('Totaal verschoven: 1 plek')
+  it('has one fact when the place never changed', () => {
+    expect(placeLines(season([3, 3, null, 3]))).toEqual([{ description: '3, alle rondes', term: 'Plek' }])
   })
 
-  it('has one line and no shift when the place never changed', () => {
-    expect(placeLines(season([3, 3, null, 3]))).toEqual(['Plek: 3, alle rondes'])
-  })
-
-  it('has no lines without a round', () => {
+  it('has no facts without a round', () => {
     expect(placeLines([])).toEqual([])
   })
 })
@@ -122,7 +101,7 @@ describe('coachLines', () => {
 
     expect(line?.rounds).toEqual({ first: 1, last: 34 })
     expect(line?.places).toEqual({ first: 1, last: 17 })
-    expect(coachText(line!, 34)).toBe('Ronde 1 t/m 34 · plek 1 → 17')
+    expect(coachText(line!, 34)).toBe('Ronde 1–34 · plek 1 → 17')
   })
 
   it('ends a coach the round before the next one begins, from the matches and not from the dates', () => {
@@ -137,12 +116,12 @@ describe('coachLines', () => {
       { first: 13, last: 34 },
     ])
     expect(lines.map((line) => coachText(line, 34))).toEqual([
-      'Ronde 1 t/m 12 · plek 1 → 12',
+      'Ronde 1–12 · plek 1 → 12',
       'Vanaf ronde 13 · plek 13 → 17',
     ])
   })
 
-  it('says "ronde 13 t/m 20" for a coach in the middle who leaves', () => {
+  it('says "ronde 13–20" for a coach in the middle who leaves', () => {
     const lines = coachLines(
       [coach('A', '2026-07-01'), coach('B', dayOf(13)), coach('C', dayOf(21))],
       rounds34,
@@ -150,8 +129,8 @@ describe('coachLines', () => {
     )
 
     expect(lines.map((line) => coachText(line, 34))).toEqual([
-      'Ronde 1 t/m 12 · plek 1 → 12',
-      'Ronde 13 t/m 20 · plek 13 → 3',
+      'Ronde 1–12 · plek 1 → 12',
+      'Ronde 13–20 · plek 13 → 3',
       'Vanaf ronde 21 · plek 4 → 17',
     ])
   })

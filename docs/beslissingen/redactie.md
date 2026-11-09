@@ -2961,6 +2961,9 @@
 - **Later:** vervangt de naam, het anker en de zin boven de tabel uit _De plek per speelronde staat op Wedstrijden, onder de stand_ in `site.md`.
 - **Later:** op 9 november 2026 (#992) vervangen de streepjes per 5 rondes door ronde 1, een kwart, de helft, driekwart en de laatste ronde (1, 8, 17, 25 en 34), en krijgt de plek-as hulplijnen en cijfers bij plek 1, de helft en de laatste plek (1, 9 en 18).
   Zie _De kaart Verloop op de ranglijst toont de hoofdtrainers_ hieronder.
+- **Later:** op 9 november 2026 (#1015) vervalt de regel "Totaal verschoven" en zijn "Hoogste" en "Laagste" een beschrijvingslijst (`DescriptionList`) in plaats van een `List` met `plain`.
+  Een reeks rondes heeft een gedachtestreepje in plaats van "t/m", en de uitklapper heeft twee tabellen naast elkaar met ronde 1 bovenaan.
+  Zie _De tekst onder de grafiek van Verloop op de ranglijst heeft vaste vormen_ hieronder.
 
 ## De kaart Verloop op de ranglijst toont de hoofdtrainers, en de kaart Hoofdtrainer vervalt daar
 
@@ -2984,6 +2987,8 @@
   Vijf getallen op de assen lezen rustiger dan een streepje per vijf rondes.
 - **Alternatieven:** de kaart Hoofdtrainer overal weghalen (seizoenen zonder grafiek verliezen de trainers); alleen een lijst zonder lijnen; de datum erbij houden (twee tijdsvormen in één kaart).
 - **Later:** vervangt voor de seizoenen met de kaart Verloop op de ranglijst _De trainers van een seizoen staan in een kaart met het sterke blauwe vlak onder de stand_.
+- **Later:** op 9 november 2026 (#1015) staat één hoofdtrainer als alinea zonder rondes of plek, en staan meer hoofdtrainers in een lijst met opsommingstekens, met de rondes en de plek op een tweede regel: "Ronde 1–12 · plek 5 → 9".
+  Zie _De tekst onder de grafiek van Verloop op de ranglijst heeft vaste vormen_ hieronder.
 
 ## Feiten uit krantenarchieven mogen, tekst niet
 
@@ -3003,3 +3008,35 @@
   De zin op de openbare pagina's is een eigen issue; #854 en #855 houden met dit gat rekening.
 - **Waarom:** er is geen vrije bron per wedstrijd, en met de hand zijn het ongeveer 730 wedstrijden.
 - **Alternatieven:** nu een inhaalslag plannen; de speelminuten overal weglaten.
+
+## De tekst onder de grafiek van Verloop op de ranglijst heeft vaste vormen
+
+- **Datum:** 9 november 2026
+- **Besluit:** de tekst onder de grafiek van "Verloop op de ranglijst" is een beschrijvingslijst voor Hoogste en Laagste, zonder "Totaal verschoven" (#1015).
+  Eén hoofdtrainer staat in een alinea, meer hoofdtrainers staan in een alinea met een lijst.
+  De tabel in de uitklapper bestaat uit twee tabellen die altijd naast elkaar staan, met ronde 1 bovenaan.
+  - **De beschrijvingslijst:** "Hoogste" met "plek 8, ronde 24, 28 en 30–32" en "Laagste" met "plek 16, ronde 9" (`placeLines` in `src/placeHistory.ts`).
+    Hadden we na elke ronde dezelfde plek, dan staat er één paar: "Plek" met "3, alle rondes".
+    De functie `totalShift` is weg.
+  - **Eén hoofdtrainer:** de alinea "Hoofdtrainer: Johnny Jansen", met "(interim)" erachter waar dat zo is, zonder rondes of plek.
+  - **Meer hoofdtrainers:** de alinea "Hoofdtrainers:" en een lijst met opsommingstekens.
+    Elk item heeft de naam op de eerste regel en de rondes en de plek op de tweede, in de gedempte tekst: "Ronde 1–20 · plek 15 → 10".
+    Een trainer zonder wedstrijd heeft alleen de naam.
+  - **De tabellen:** de eerste heeft ronde 1 tot en met de helft van de rondes van het seizoen, naar boven afgerond (1–17 bij 34 rondes), de tweede de rest.
+    Ze staan in een `DataTable.Group` en tonen de rondes tot de laatste complete ronde, zodat een seizoen met 17 rondes of minder één tabel heeft.
+    Elke tabel heeft een eigen bijschrift met haar rondes, zoals "na ronde 18 tot en met 34".
+- **Waarom:** vaste vormen lezen sneller dan zinnen met komma's en regeleinden, en een schermlezer kent een beschrijvingslijst en een lijst.
+  Twee tabellen naast elkaar blijven op een telefoon leesbaar, drie worden te smal.
+  "Totaal verschoven" voegde weinig toe aan de twee plekken erboven.
+- **Alternatieven:** drie tabellen (te krap in sommige omgevingen); de oude regels houden met een andere opmaak; een beschrijvingslijst alleen voor deze kaart (een tweede onderdeel dat lijkt op het eerste).
+
+## Een reeks rondes heeft een gedachtestreepje, en een schermlezer hoort "t/m"
+
+- **Datum:** 9 november 2026
+- **Besluit:** een reeks rondes in de kaart "Verloop op de ranglijst" heeft een gedachtestreepje in plaats van "t/m", zoals "ronde 6–7 en 10–14" en "Ronde 1–20" (#1015).
+  Een schermlezer hoort "t/m": het streepje is voor hem verborgen en de tekst ernaast is alleen voor hem, zoals "naar" bij de pijl.
+  "Vanaf ronde 27" blijft.
+  De seizoenen in `match-format.ts` en `opponents.ts` houden "t/m".
+- **Waarom:** het streepje is korter en de regels hebben weinig ruimte.
+  De verborgen tekst houdt de zin goed hoorbaar.
+- **Alternatieven:** "t/m" houden; alleen het streepje zonder verborgen tekst (een schermlezer slaat het over of zegt "streepje").

@@ -322,7 +322,10 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
   De x-as heeft een streepje met een getal bij ronde 1, een kwart, de helft, driekwart en de laatste ronde (1, 8, 17, 25 en 34), de y-as bij plek 1, de helft en de laatste plek (1, 9 en 18) (`axisTicks` in `src/placeHistory.ts`), en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.
   Bij elke nieuwe hoofdtrainer na de eerste staat een gestreepte lijn op de rand tussen twee rondes (`dividers` van `BarChart`, #992).
-  Boven een gesloten `Disclosure` staat een lijst zonder opsommingstekens (`List plain`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`), en daaronder een regel per hoofdtrainer met zijn of haar naam, de rondes en de plek van begin naar einde ("Ronde 1 t/m 12 · plek 5 → 9", `coachLines` en `coachText`; de rondes komen uit de wedstrijden); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
+  Boven een gesloten `Disclosure` staat een beschrijvingslijst (`DescriptionList`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` en `placeLines` in `src/placeHistory.ts`).
+  Eén hoofdtrainer staat daaronder in een alinea met de naam; meer hoofdtrainers staan in een lijst, elk met de rondes en de plek van begin naar einde op een tweede regel ("Ronde 1–12 · plek 5 → 9", `coachLines` en `coachText`; de rondes komen uit de wedstrijden).
+  Een schermlezer hoort "t/m" bij het streepje en "naar" bij de pijl.
+  De uitklapper heeft twee tabellen naast elkaar met Ronde, # en P, ronde 1 bovenaan: de eerste helft van de rondes van het seizoen en de rest.
   `placePerRoundOf` in `src/matches.ts` rekent de stand na elke ronde uit `league_results` (punten, doelsaldo, doelpunten voor, dan de naam).
   Een ronde is een punt als alle wedstrijden van die ronde en van de rondes ervoor gespeeld zijn; anders is het een open plek.
   Het lopende seizoen toont de lijn tot de laatste complete ronde.

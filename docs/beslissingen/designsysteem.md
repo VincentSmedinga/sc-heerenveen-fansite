@@ -3138,3 +3138,13 @@
   Naast kolommen vol tekst kneep de tabel daardoor een korte rijkop samen: het seizoen `2025/26` op `/beheer/kwaliteit` brak in tweeën (#972).
   Zeven tekens is zo'n seizoen.
 - **Alternatieven:** het afbreken per tabel uitzetten met een prop; de rijkop nooit laten afbreken (een lang pad maakt de pagina dan breder dan een telefoon).
+
+## De beschrijvingslijst is een onderdeel dat niet weet waar het staat
+
+- **Datum:** 9 november 2026
+- **Besluit:** `DescriptionList` is een presentatieonderdeel van het designsysteem: een `dl` met paren van een term en een omschrijving (`DescriptionList.Item`), dat niet weet waar het staat (#1015).
+  De stijl van de feiten in de kop van een wedstrijd (`hf-match-header-facts`) is erheen verhuisd, en `MatchHeader` gebruikt het onderdeel.
+  De kaart "Verloop op de ranglijst" gebruikt het voor de hoogste en de laagste plek.
+- **Waarom:** onderdelen die bijna hetzelfde zijn maar een eigen betekenis hebben, groeien uit elkaar.
+  Een neutraal onderdeel houdt de opmaak op één plek.
+- **Alternatieven:** de CSS van `MatchHeader` kopiëren; een onderdeel met een naam uit de wedstrijdwereld.
