@@ -20,6 +20,7 @@ import type { MatchDay } from './relevance.ts'
 
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
+import { importEndedSeason } from './import-ended-season.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
@@ -94,8 +95,8 @@ export type ImportOptions = {
   /** Gives the time. A test gives its own, to run the import at a moment it chooses. */
   clock?: () => Date
   /**
-   * The address of the English Wikipedia, for the Europa League matches of 2012/13 (only the
-   * command that reads a season that is over asks it). A test gives its own web server.
+   * The address of the English Wikipedia, for the Europa League matches of 2012/13 (only a
+   * read of a season that is over asks it). A test gives its own web server.
    */
   englishOrigin?: string
   /**
@@ -314,7 +315,8 @@ export function listFeedsToImport(db: Database) {
  * Reads every feed of every source that is switched on and writes a line for each. One
  * fetcher serves all feeds, so a host's robots.txt is read once, and the database keeps
  * it for a day. In the same run it reads the matches, the table and the squad of the season
- * from Wikipedia, at most once an hour each (see `importMatches` and `importSquad`). The feeds
+ * from Wikipedia, at most once an hour each (see `importMatches` and `importSquad`), and in
+ * July and August those of the season that has just ended, once a week. The feeds
  * and Wikipedia start together and do not depend on each other: a failure of one stops neither
  * the other nor its report. The pages of Wikipedia are read one after the other: the matches
  * first, then the squad, and the squad is read also when the matches fail.
@@ -332,6 +334,7 @@ export async function runImport(
   {
     alerts = {},
     clock = () => new Date(),
+    englishOrigin,
     makeFetcher = (robots) => createFetcher({ robots }),
     personDataPause,
     wikidataOrigin: wikidata,
@@ -359,7 +362,9 @@ export async function runImport(
       const clubLines = await repairKnownClubs(db, fetcher, origin, clock)
       const [reports, wikipedia] = await Promise.allSettled([
         importFeeds(db, fetcher, { alerts, clock, runId, write }),
-        origin === null ? [] : importWikipedia(db, fetcher, clock, origin, { ...alerts, clock, write }),
+        origin === null
+          ? []
+          : importWikipedia(db, fetcher, clock, { english: englishOrigin, nl: origin }, { ...alerts, clock, write }),
       ])
 
       // After the Wikipedia pages: the persons they made are read from Wikidata in the same
@@ -537,16 +542,18 @@ async function importPersonData(
 
 /**
  * Reads the matches and then the squad, and returns the lines to write. A failure of one does
- * not stop the other, and an import that finds its hour not over yet says nothing.
+ * not stop the other, and an import that finds its hour not over yet says nothing. In July and
+ * August it then reads the season that has just ended, once a week (`importEndedSeason`).
  */
 async function importWikipedia(
   db: Database,
   fetcher: Fetcher,
   clock: () => Date,
-  origin: string,
+  origins: { english: string | undefined; nl: string },
   alerts: AlertOptions,
 ): Promise<string[]> {
   const lines: string[] = []
+  const origin = origins.nl
 
   try {
     const report = await importMatches(db, fetcher, { clock, origin })
@@ -570,6 +577,15 @@ async function importWikipedia(
   } catch (error) {
     lines.push(`Squad: warning, not imported: ${describeError(error)}`)
   }
+
+  // After the current season, so a failure here never stops it: a warning at most.
+  lines.push(
+    ...(await importEndedSeason(db, fetcher, {
+      clock,
+      origin,
+      ...(origins.english === undefined ? {} : { englishOrigin: origins.english }),
+    })),
+  )
 
   // The beheerders hear of a difference with an entry of the editors, also one that an earlier
   // run could not mail. A mail that fails is a line here, never a failed import.

@@ -1,5 +1,6 @@
 // The command that reads a season that is over, `pnpm run import:season 2025/26`, and on the
-// host `import.mjs --season 2025/26`. The hourly import reads the current season only; a
+// host `import.mjs --season 2025/26`. The hourly import reads the current season and, in July
+// and August, once a week the season that has just ended (`import-ended-season.ts`); any other
 // season that is over doesn't change, so this reads it once, by hand. It checks the season
 // before it asks Wikipedia for anything or writes anything.
 //
