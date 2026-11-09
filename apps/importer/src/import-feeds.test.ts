@@ -601,6 +601,40 @@ describe('the relevance filter', () => {
     expect((await relevanceByKey())['elders']).toBe('relevant')
   })
 
+  it('leaves the approval of a moderator as it is when a new run judges the item differently', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .$returningId()
+    const approvedAt = new Date('2026-10-22T10:30:00Z')
+
+    await database.db
+      .update(items)
+      .set({ approvedAt, approvedBy: user?.id ?? 0 })
+      .where(eq(items.key, 'elders'))
+
+    // The filter is switched off: the judgement changes to `relevant`. Then it is switched on
+    // again: back to `irrelevant`. The approval stays through both runs.
+    for (const [filter, relevance] of [
+      ['none', 'relevant'],
+      ['club', 'irrelevant'],
+    ] as const) {
+      await database.db.update(feeds).set({ filter }).where(eq(feeds.id, feed.id))
+      await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+
+      expect((await relevanceByKey())['elders']).toBe(relevance)
+      expect((await itemsInDatabase()).find((row) => row.key === 'elders')).toMatchObject({
+        approvedAt,
+        approvedBy: user?.id,
+      })
+    }
+  })
+
   it('writes the counts per value in the log of the run', async () => {
     const server = await serve(mixed())
 

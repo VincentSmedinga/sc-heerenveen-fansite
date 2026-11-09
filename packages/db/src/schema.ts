@@ -229,6 +229,12 @@ export const items = mysqlTable(
     hiddenAt: datetime('hidden_at'),
     hiddenBy: int('hidden_by', { unsigned: true }).references(() => adminUsers.id),
     hiddenReason: varchar('hidden_reason', { length: hiddenReasonMaxLength }),
+    // Set when a moderator puts an item on the site that the importer judged `doubtful` or
+    // `irrelevant`: when and by whom. Both are empty for an item nobody approved. The importer
+    // never touches them, so an approval survives every later run, whatever the filter says.
+    // Hiding wins over approving.
+    approvedAt: datetime('approved_at'),
+    approvedBy: int('approved_by', { unsigned: true }).references(() => adminUsers.id),
   },
   (table) => [
     unique('items_source_id_item_key_unique').on(table.sourceId, table.key),
@@ -411,6 +417,8 @@ export const adminLoginAttempts = mysqlTable(
 export const auditActions = [
   'item.hide',
   'item.show',
+  'item.approve',
+  'item.unapprove',
   'article.create',
   'article.update',
   'article.publish',

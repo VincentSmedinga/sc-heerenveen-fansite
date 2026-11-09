@@ -42,6 +42,9 @@ export const sessionCookieName = 'beheer-sessie'
  * one can't change what another test reads there.
  */
 export const adminItems = {
+  // The importer judged this one `doubtful`: `relevance.spec.ts` puts it on the site and takes
+  // it back.
+  approving: 'Bedacht twijfelgeval om op de site te zetten',
   withoutScript: 'Verzonnen bericht om te verbergen zonder JavaScript',
   withScript: 'Verzonnen bericht om te verbergen met JavaScript',
 } as const
@@ -106,6 +109,7 @@ export async function addAdmin() {
         key: `e2e-admin-${index}`,
         // The newest items of all, so the list shows them first.
         publishedAt: new Date(now.getTime() - index * 60 * 1000),
+        relevance: title === adminItems.approving ? ('doubtful' as const) : ('relevant' as const),
         sourceId: source.id,
         title,
         url: `https://${sourceDomain}/e2e-admin-${index}`,

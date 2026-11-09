@@ -1945,6 +1945,7 @@
   We nemen dat voor lief: de groep is er om een bericht te vinden dat een redacteur wil verbergen, en dat bericht staat er dan nog steeds.
 - **Nadeel:** de groep "Op de site" kan een bericht tonen dat de bezoeker door de samenvouwregel of een bron die uitstaat niet ziet.
 - **Alternatieven:** `isShown` hergebruiken (hij is geen losse voorwaarde: hij hoort bij de query van de homepage en heeft de bron en de andere versies van het verhaal nodig); een derde keuze "Alles" (de projecteigenaar koos twee groepen); een apart vakje voor de twijfelgevallen (een eigen issue als het nodig blijkt).
+- **Later:** zie _Een redacteur kan een twijfelgeval of een bericht dat het filter weghoudt op de site zetten_ (9 november 2026): een bericht staat ook op de site als een moderator het goedkeurde (`approved_at`), en een goedgekeurd bericht zegt "door een moderator op de site gezet".
 
 ## Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`
 
@@ -4067,3 +4068,21 @@
   De lijsten Wedstrijden en de pagina's van clubs tonen hem niet; de projecteigenaar kijkt later of dat ook moet.
   `Match` heeft de props `referee` en `extra` (zie de beslissing in `designsysteem.md`).
 - **Alternatieven:** de vorm laten terugvallen op vorig seizoen (een andere ploeg en een andere stand); alleen competitiewedstrijden tellen voor "Vorige keer" (mist de bekerontmoeting van vorige maand); een eigen kop met een tabel (te zwaar voor de kaart); de scheidsrechter meteen in elke lijst (de regel wordt overal een regel langer, wat #416 juist wilde voorkomen).
+
+## Een redacteur kan een twijfelgeval of een bericht dat het filter weghoudt op de site zetten
+
+- **Datum:** 9 november 2026
+- **Besluit:** `items` krijgt `approved_at` en `approved_by` (de moderator).
+  Een bericht staat op de site als `hidden_at IS NULL` en (`relevance = 'relevant'` of `approved_at IS NOT NULL`).
+  Verbergen wint van goedkeuren.
+  De importer raakt `approved_at` en `approved_by` nooit aan, ook niet als het filter later anders oordeelt.
+  `isShown` in `@fansite/db/queries` en `isOnSite` in `apps/site/src/beheer/items.ts` volgen die regel, en een goedgekeurd bericht telt ook mee bij een verhaal met meerdere versies.
+- **Besluit:** elke moderator met een beheerrol (dezelfde rollen als bij verbergen) kan een twijfelgeval of een "niet over de club"-bericht goedkeuren, zonder reden, met de knop "Op de site zetten".
+  Het logboek (`audit_log`) krijgt de acties `item.approve` en `item.unapprove`.
+- **Besluit:** een goedgekeurd bericht kan weer van de site worden gehaald met "Terug naar het oordeel van het filter": `approved_at` en `approved_by` worden leeg, en het bericht is weer wat het filter zei.
+  Een bericht dat de import `relevant` vond, is niets om goed te keuren: `approveItem` doet er niets mee (`unchanged`).
+- **Waarom:** een eigen kolom overleeft elke import en laat in de database zien wie het deed.
+  Zonder reden is het één klik, en het logboek bewaart wie en wanneer.
+  De moderator hoeft geen gelijk te halen op het filter.
+- **Alternatieven:** `relevance` zelf overschrijven (gaat tegen de import in, die het bij elke run opnieuw bepaalt); een reden verplichten zoals bij verbergen; de goedkeuring laten vervallen als het filter van mening verandert (een keuze van een mens verdwijnt dan ongemerkt).
+- **Gevolg:** het beheer heeft geen scherm voor het logboek, dus de twee acties staan alleen in `audit_log`.

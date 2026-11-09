@@ -12,7 +12,7 @@ import { addItem, addSource } from '#src/beheer/test-items'
 
 import type { ListView } from './paths'
 
-import { submitHide, submitShow } from './actions'
+import { submitApprove, submitHide, submitShow, submitUnapprove } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -101,6 +101,12 @@ const hide = (
 
 const show = (id: unknown, view: ListView | string) =>
   redirectOf(() => submitShow(id as number, typeof view === 'string' ? onSite(view) : view))
+
+const approve = (id: unknown, view: ListView | string) =>
+  redirectOf(() => submitApprove(id as number, typeof view === 'string' ? onSite(view) : view))
+
+const unapprove = (id: unknown, view: ListView | string) =>
+  redirectOf(() => submitUnapprove(id as number, typeof view === 'string' ? onSite(view) : view))
 
 const stored = async () => (await database.db.select().from(items).where(eq(items.id, itemId)))[0]
 
@@ -246,5 +252,43 @@ describe('submitShow', () => {
     jar.clear()
 
     expect(await show(itemId, '')).toBe('/beheer/inloggen')
+  })
+})
+
+describe('submitApprove and submitUnapprove', () => {
+  beforeEach(async () => {
+    await database.db.update(items).set({ relevance: 'doubtful' }).where(eq(items.id, itemId))
+  })
+
+  it('puts the item on the site, writes the log with the account, and leads back with the search', async () => {
+    expect(await approve(itemId, 'wint')).toBe(`/beheer/berichten?q=wint&opgenomen=${itemId}`)
+    expect(await stored()).toMatchObject({ approvedAt: expect.any(Date), approvedBy: userId })
+    expect(await database.db.select().from(auditLog)).toMatchObject([{ action: 'item.approve', itemId, userId }])
+  })
+
+  it('takes the approval back, and writes the log', async () => {
+    await approve(itemId, '')
+
+    expect(await unapprove(itemId, '')).toBe(`/beheer/berichten?teruggezet=${itemId}`)
+    expect(await stored()).toMatchObject({ approvedAt: null, approvedBy: null })
+    expect(await database.db.select().from(auditLog).orderBy(auditLog.id)).toMatchObject([
+      { action: 'item.approve' },
+      { action: 'item.unapprove', itemId, userId },
+    ])
+  })
+
+  it('says the item is gone for a number that is no item, and for one that is no number', async () => {
+    expect(await approve(99_999, '')).toBe('/beheer/berichten?fout=weg')
+    expect(await unapprove(99_999, '')).toBe('/beheer/berichten?fout=weg')
+    expect(await approve('abc', '')).toBe('/beheer/berichten?fout=weg')
+    expect(await unapprove(0, '')).toBe('/beheer/berichten?fout=weg')
+    expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+
+  it('refuses without a session, before it changes anything', async () => {
+    jar.clear()
+
+    expect(await approve(itemId, '')).toBe('/beheer/inloggen')
+    expect((await stored())?.approvedAt).toBeNull()
   })
 })

@@ -1,12 +1,13 @@
 import type { Database } from '@fansite/db/client'
 
 import { adminUsers, hiddenReasonMaxLength, items, sources } from '@fansite/db/schema'
-import { and, desc, eq, isNotNull, isNull, lte, not, or, sql } from 'drizzle-orm'
+import { and, desc, eq, isNotNull, isNull, lte, ne, not, or, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/mysql-core'
 
 import { recordAction } from './audit-log'
 
-// Hiding and showing items in the admin: the list a moderator searches, and the two changes. A
-// change and its row in the log of the admin are one transaction.
+// Hiding, showing and approving items in the admin: the list a moderator searches, and the
+// changes. A change and its row in the log of the admin are one transaction.
 
 /** How many items the list shows. */
 export const listLength = 50
@@ -24,14 +25,17 @@ export type AdminItem = Awaited<ReturnType<typeof listItems>>[number]
 export type ItemGroup = 'not-on-site' | 'on-site'
 
 /**
- * What a hide or a show did: the item was changed, it already was as asked, or there is no such
- * item.
+ * What a hide, a show, an approval or a withdrawal did: the item was changed, it already was as
+ * asked, or there is no such item.
  */
 export type Outcome = 'done' | 'missing' | 'unchanged'
 
 /** One item as the list shows it, or `undefined` when there is none. */
 export async function findItem(db: Pick<Database, 'select'>, id: number) {
-  const [row] = await db.select({ hiddenAt: items.hiddenAt, title: items.title }).from(items).where(eq(items.id, id))
+  const [row] = await db
+    .select({ approvedAt: items.approvedAt, hiddenAt: items.hiddenAt, title: items.title })
+    .from(items)
+    .where(eq(items.id, id))
 
   return row
 }
@@ -77,17 +81,39 @@ export type ItemFilter = {
 }
 
 /**
+ * Puts an item on the site that the importer judged `doubtful` or `irrelevant`, and writes
+ * `item.approve` in the log. An item that is approved already, or that the importer found
+ * `relevant`, is left as it is and writes nothing. The importer never changes the approval.
+ */
+export async function approveItem(db: Database, userId: number, id: number, now = new Date()): Promise<Outcome> {
+  return db.transaction(async (transaction) => {
+    const [result] = await transaction
+      .update(items)
+      .set({ approvedAt: now, approvedBy: userId })
+      .where(and(eq(items.id, id), isNull(items.approvedAt), ne(items.relevance, 'relevant')))
+
+    if (result.affectedRows === 1) {
+      await recordAction(transaction, { action: 'item.approve', itemId: id, userId }, now)
+
+      return 'done'
+    }
+
+    return (await findItem(transaction, id)) === undefined ? 'missing' : 'unchanged'
+  })
+}
+
+/**
  * The condition that makes an item "on the site" for the list: no moderator hid it, the
- * importer found it `relevant` and it is published already. Every other item is not on the
- * site: the hidden ones, the `doubtful` and `irrelevant` ones the importer leaves off, and the
- * ones with a time to come. The pages of visitors add more (see `isShown` in
- * `@fansite/db/queries`): a source that is switched off, a story that a live blog puts in the
- * feed again and a story that two sources of one publisher both have are shown once. The list
- * doesn't follow that, so such an item can be here on the site while the pages of visitors
- * show a newer one of its story instead.
+ * importer found it `relevant` or a moderator approved it, and it is published already. Every
+ * other item is not on the site: the hidden ones (hiding wins over approving), the `doubtful`
+ * and `irrelevant` ones nobody approved, and the ones with a time to come. The pages of
+ * visitors add more (see `isShown` in `@fansite/db/queries`): a source that is switched off, a
+ * story that a live blog puts in the feed again and a story that two sources of one publisher
+ * both have are shown once. The list doesn't follow that, so such an item can be here on the
+ * site while the pages of visitors show a newer one of its story instead.
  */
 export function isOnSite(now: Date) {
-  return sql`(${isNull(items.hiddenAt)} and ${eq(items.relevance, 'relevant')} and ${lte(items.publishedAt, now)})`
+  return sql`(${isNull(items.hiddenAt)} and (${eq(items.relevance, 'relevant')} or ${isNotNull(items.approvedAt)}) and ${lte(items.publishedAt, now)})`
 }
 
 /**
@@ -104,10 +130,13 @@ export function listItems(
   search: string,
   { editorsOnly = false, group = 'on-site', now = new Date() }: ItemFilter = {},
 ) {
+  const approver = alias(adminUsers, 'approver')
   const pattern = `%${search.replaceAll(/[%_|]/gu, '|$&')}%`
 
   return db
     .select({
+      approvedAt: items.approvedAt,
+      approvedByEmail: approver.email,
       hiddenAt: items.hiddenAt,
       hiddenByEmail: adminUsers.email,
       hiddenReason: items.hiddenReason,
@@ -122,6 +151,7 @@ export function listItems(
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
     .leftJoin(adminUsers, eq(items.hiddenBy, adminUsers.id))
+    .leftJoin(approver, eq(items.approvedBy, approver.id))
     .where(
       and(
         group === 'on-site' ? isOnSite(now) : not(isOnSite(now)),
@@ -203,6 +233,27 @@ export async function showItem(db: Database, userId: number, id: number, now = n
 
     if (result.affectedRows === 1) {
       await recordAction(transaction, { action: 'item.show', itemId: id, userId }, now)
+
+      return 'done'
+    }
+
+    return (await findItem(transaction, id)) === undefined ? 'missing' : 'unchanged'
+  })
+}
+
+/**
+ * Takes an approval back, and writes `item.unapprove` in the log: the item is what the filter
+ * said again.
+ */
+export async function unapproveItem(db: Database, userId: number, id: number, now = new Date()): Promise<Outcome> {
+  return db.transaction(async (transaction) => {
+    const [result] = await transaction
+      .update(items)
+      .set({ approvedAt: null, approvedBy: null })
+      .where(and(eq(items.id, id), isNotNull(items.approvedAt)))
+
+    if (result.affectedRows === 1) {
+      await recordAction(transaction, { action: 'item.unapprove', itemId: id, userId }, now)
 
       return 'done'
     }

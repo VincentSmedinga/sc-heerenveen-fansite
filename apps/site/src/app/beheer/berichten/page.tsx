@@ -37,7 +37,7 @@ import { getDatabase } from '#src/database'
 import { dateTimeOf, formatNewsTime } from '#src/news'
 import { SwitchLinks } from '#src/SwitchLinks'
 
-import { submitHide, submitShow } from './actions'
+import { submitApprove, submitHide, submitShow, submitUnapprove } from './actions'
 import { itemsPath, type ListView } from './paths'
 
 // Render on each request: who is logged in and which items are hidden are not known when the
@@ -91,6 +91,22 @@ function listSummary(view: ListView, count: number) {
   return `${number} ${count === 1 ? 'bericht' : 'berichten'} ${groupWords(view, count !== 1)}${quoted}.`
 }
 
+/** The notice after an action: its heading and what happens to the item on the site. */
+const noticeTexts = {
+  approved: {
+    heading: 'Op de site gezet',
+    text: 'Staat binnen vijf minuten op de site, tenzij het bericht verborgen is.',
+  },
+  hidden: { heading: 'Verborgen', text: 'Staat binnen vijf minuten niet meer op de site.' },
+  shown: { heading: 'Weer getoond', text: 'Staat binnen vijf minuten weer op de site.' },
+  unapproved: {
+    heading: 'Terug naar het oordeel van het filter',
+    text: 'Staat binnen vijf minuten niet meer op de site, tenzij het filter het bericht goed vindt.',
+  },
+} as const
+
+type NoticeKind = keyof typeof noticeTexts
+
 /**
  * What the list says of an item the importer did not find about the club. A `relevant` item
  * has nothing to say. These are not on the site, whatever the moderator does.
@@ -108,7 +124,7 @@ const relevanceDetails = {
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole(...adminRoles)
 
-  const { bericht, fout, getoond, q: rawSearch, redactie, toon, verborgen } = await searchParams
+  const { bericht, fout, getoond, opgenomen, q: rawSearch, redactie, teruggezet, toon, verborgen } = await searchParams
   const search = parseSearch(rawSearch)
   const group: ItemGroup = parseGroup(toon)
   const editorsOnly = parseEditorsOnly(redactie, group)
@@ -125,7 +141,11 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
   const loneError = fieldError !== undefined && failedItem === undefined ? fieldError : undefined
   const gone = fout === 'weg'
 
-  const done = (await noticeFor(db, verborgen, true)) ?? (await noticeFor(db, getoond, false))
+  const done =
+    (await noticeFor(db, verborgen, 'hidden')) ??
+    (await noticeFor(db, getoond, 'shown')) ??
+    (await noticeFor(db, opgenomen, 'approved')) ??
+    (await noticeFor(db, teruggezet, 'unapproved'))
 
   return (
     <Page.Main
@@ -196,13 +216,10 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
       {done === undefined ? null : (
         <Card aria-labelledby="gedaan-kop" surface="soft">
           <Heading id="gedaan-kop" level={2}>
-            {done.hidden ? 'Verborgen' : 'Weer getoond'}
+            {noticeTexts[done.kind].heading}
           </Heading>
           <Text>
-            {done.title}.{' '}
-            {done.hidden
-              ? 'Staat binnen vijf minuten niet meer op de site.'
-              : 'Staat binnen vijf minuten weer op de site.'}
+            {done.title}. {noticeTexts[done.kind].text}
           </Text>
         </Card>
       )}
@@ -237,7 +254,9 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             {found.map((item) => {
               const hidden = item.hiddenAt !== null
               // An item the import leaves off the site is not on it, so hiding it does nothing.
-              const canHide = !hidden && item.relevance === 'relevant'
+              const approved = item.approvedAt !== null
+              const canHide = !hidden && (item.relevance === 'relevant' || approved)
+              const canApprove = !hidden && !approved && item.relevance !== 'relevant'
               const error = item.id === failedItem?.id ? fieldError : undefined
 
               return (
@@ -246,8 +265,8 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                     dateTime={dateTimeOf(item.publishedAt)}
                     details={[
                       ...(hidden ? ['verborgen'] : []),
-                      ...relevanceDetails[item.relevance],
-                      ...(!hidden && item.relevance === 'relevant' && item.publishedAt > now
+                      ...(approved ? ['door een moderator op de site gezet'] : relevanceDetails[item.relevance]),
+                      ...(!hidden && (item.relevance === 'relevant' || approved) && item.publishedAt > now
                         ? ['nog niet gepubliceerd, niet op de site']
                         : []),
                     ]}
@@ -278,6 +297,30 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                       </Button>
                     </Form>
                   ) : null}
+                  {canApprove ? (
+                    <Form action={submitApprove.bind(null, item.id, view)}>
+                      <Button aria-label={`Op de site zetten: ${item.title}`} type="submit">
+                        Op de site zetten
+                      </Button>
+                    </Form>
+                  ) : null}
+                  {item.approvedAt === null ? null : (
+                    <>
+                      <Text>
+                        Door een moderator op de site gezet op {formatNewsTime(item.approvedAt, now)} door{' '}
+                        {item.approvedByEmail ?? 'een verwijderd account'}.
+                      </Text>
+                      <Form action={submitUnapprove.bind(null, item.id, view)}>
+                        <Button
+                          appearance="soft"
+                          aria-label={`Terug naar het oordeel van het filter: ${item.title}`}
+                          type="submit"
+                        >
+                          Terug naar het oordeel van het filter
+                        </Button>
+                      </Form>
+                    </>
+                  )}
                   {item.hiddenAt === null ? null : (
                     <>
                       <Text>
@@ -305,13 +348,26 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
 }
 
 /**
- * The notice for an item, when the item is in the state the notice says: hidden for
- * `verborgen`, shown for `getoond`. Undefined for no number, for a number that is no item, and
- * for an item that is not in that state, so the page tells only what is true.
+ * The notice for an item, when the item is in the state the notice says: hidden, shown,
+ * approved or taken back to the filter's judgement. Undefined for no number, for a number that
+ * is no item, and for an item that is not in that state, so the page tells only what is true.
+ * An item that is shown again or no longer approved can be hidden or approved by something
+ * else, so those two only check the part they change.
  */
-async function noticeFor(db: Database, value: string | string[] | undefined, hidden: boolean) {
+async function noticeFor(db: Database, value: string | string[] | undefined, kind: NoticeKind) {
   const id = parseItemId(value)
   const item = id === undefined ? undefined : await findItem(db, id)
 
-  return item === undefined || (item.hiddenAt !== null) !== hidden ? undefined : { hidden, title: item.title }
+  if (item === undefined) {
+    return undefined
+  }
+
+  const inState = {
+    approved: item.approvedAt !== null,
+    hidden: item.hiddenAt !== null,
+    shown: item.hiddenAt === null,
+    unapproved: item.approvedAt === null,
+  }[kind]
+
+  return inState ? { kind, title: item.title } : undefined
 }

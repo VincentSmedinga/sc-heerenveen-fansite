@@ -1302,8 +1302,10 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
 
 /**
  * The condition that makes an item one to show to a visitor: no moderator hid it, and the
- * importer found it `relevant` (see `items.relevance`). Every query that puts items on a page
- * includes it. The admin's list is the one that doesn't, so a moderator finds every item.
+ * importer found it `relevant` (see `items.relevance`) or a moderator put it on the site
+ * (`approved_at`, which the importer never changes). Hiding wins over approving. Every query
+ * that puts items on a page includes it. The admin's list is the one that doesn't, so a
+ * moderator finds every item.
  *
  * An item with a `thread_key` is a version of a story that its source put in the feed again
  * under a new headline, such as a live blog. Only the newest version of the story is shown (the
@@ -1327,11 +1329,11 @@ function isShown(until?: Date, { merge = false }: { merge?: boolean } = {}) {
   const ofItsSource = and(
     isNull(items.hiddenAt),
     or(
-      and(isNull(items.threadKey), eq(items.relevance, 'relevant')),
+      and(isNull(items.threadKey), or(eq(items.relevance, 'relevant'), isNotNull(items.approvedAt))),
       and(
         isNotNull(items.threadKey),
         sql`not exists (select 1 from items sibling where ${sameStory} and (${sibling.publishedAt} > ${items.publishedAt} or (${sibling.publishedAt} = ${items.publishedAt} and ${sibling.id} > ${items.id})))`,
-        sql`exists (select 1 from items sibling where ${sameStory} and ${sibling.relevance} = 'relevant')`,
+        sql`exists (select 1 from items sibling where ${sameStory} and (${sibling.relevance} = 'relevant' or ${sibling.approvedAt} is not null))`,
       ),
     ),
   )
@@ -1369,7 +1371,7 @@ function isShownOnce(until?: Date) {
     isNotNull(items.threadKey),
     isNull(items.hiddenAt),
     newestOf(items),
-    sql`exists (select 1 from items other, sources other_source where ${ofStory} and ${other.relevance} = 'relevant')`,
+    sql`exists (select 1 from items other, sources other_source where ${ofStory} and (${other.relevance} = 'relevant' or ${other.approvedAt} is not null))`,
     sql`not exists (select 1 from items other, sources other_source where ${ofStory} and ${other.sourceId} <> ${items.sourceId} and ${newestOf(other)} and ${beats})`,
   )
 }

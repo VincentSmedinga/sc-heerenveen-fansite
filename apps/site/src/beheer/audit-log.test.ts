@@ -117,6 +117,8 @@ describe('recordAction', () => {
     expect(auditActions).toEqual([
       'item.hide',
       'item.show',
+      'item.approve',
+      'item.unapprove',
       'article.create',
       'article.update',
       'article.publish',

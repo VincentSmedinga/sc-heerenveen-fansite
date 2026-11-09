@@ -264,6 +264,24 @@ describe('listRecentItems', () => {
     },
   )
 
+  it('gives a doubtful item that a moderator approved, and not one that is hidden too', async () => {
+    const ids = await addSource()
+    const approvedAt = new Date('2026-10-22T09:00:00Z')
+
+    await addItem(ids, 'goedgekeurd', new Date('2026-10-22T08:00:00Z'), { approvedAt, relevance: 'doubtful' })
+    await addItem(ids, 'verborgen', new Date('2026-10-22T07:00:00Z'), {
+      approvedAt,
+      hiddenAt: approvedAt,
+      relevance: 'irrelevant',
+    })
+    await addItem(ids, 'derde', new Date('2026-10-22T06:00:00Z'))
+
+    expect((await listRecentItems(database.db, { limit: 5, until: now })).map((item) => item.title)).toEqual([
+      'Kop goedgekeurd',
+      'Kop derde',
+    ])
+  })
+
   it('gives an item again once it is shown', async () => {
     const ids = await addSource()
 
@@ -520,6 +538,20 @@ describe('the news archive', () => {
         expect(await titles()).toEqual(['Kop tweede'])
       },
     )
+
+    it('gives an irrelevant headline that a moderator approved, and not one that is hidden too', async () => {
+      const ids = await addSource()
+      const approvedAt = new Date('2026-10-22T09:00:00Z')
+
+      await addItem(ids, 'goedgekeurd', new Date('2026-10-22T08:00:00Z'), { approvedAt, relevance: 'irrelevant' })
+      await addItem(ids, 'verborgen', new Date('2026-10-22T07:00:00Z'), {
+        approvedAt,
+        hiddenAt: approvedAt,
+        relevance: 'doubtful',
+      })
+
+      expect(await titles()).toEqual(['Kop goedgekeurd'])
+    })
 
     it('gives an item again once it is shown', async () => {
       const ids = await addSource()
@@ -816,6 +848,19 @@ describe('the versions of a story', () => {
 
     expect(await archive()).toEqual([])
     expect(await countArchiveItems(database.db, { until: now })).toBe(0)
+  })
+
+  it('shows the newest version of a story when a moderator approved one version', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', {
+      approvedAt: new Date('2026-10-22T09:30:00Z'),
+      relevance: 'doubtful',
+      threadKey: '~aaaa1111',
+    })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { relevance: 'irrelevant', threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-2'])
   })
 
   it('shows the version before the newest when a moderator hid the newest, and nothing when all are hidden', async () => {

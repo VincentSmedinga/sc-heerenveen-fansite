@@ -3,7 +3,15 @@
 import { adminRoles } from '@fansite/db/schema'
 import { redirect } from 'next/navigation'
 
-import { hideItem, parseItemId, parseReason, parseSearch, showItem } from '#src/beheer/items'
+import {
+  approveItem,
+  hideItem,
+  parseItemId,
+  parseReason,
+  parseSearch,
+  showItem,
+  unapproveItem,
+} from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -14,6 +22,24 @@ import { itemsPath, type ListView } from './paths'
 // (`submitHide.bind(null, id, view)`), which Next.js keeps encrypted in the form. They are
 // input from outside all the same, so each is checked again. A form that sends nothing wrong
 // ends on the list as it was, with a notice: it works without JavaScript.
+
+/**
+ * Puts an item on the site that the importer judged `doubtful` or `irrelevant`, without a
+ * reason. It is on the site within five minutes, unless a moderator hid it.
+ */
+export async function submitApprove(itemId: number, view: ListView) {
+  const { userId } = await requireRole(...adminRoles)
+  const id = parseItemId(itemId)
+  const list = cleanView(view)
+
+  if (id === undefined) {
+    redirect(itemsPath(list, { fout: 'weg' }))
+  }
+
+  const outcome = await approveItem(getDatabase().db, userId, id)
+
+  redirect(outcome === 'missing' ? itemsPath(list, { fout: 'weg' }) : itemsPath(list, { opgenomen: id }))
+}
 
 /**
  * Hides an item with the reason from the form. Without a reason, or with one that is too long,
@@ -53,6 +79,21 @@ export async function submitShow(itemId: number, view: ListView) {
   const outcome = await showItem(getDatabase().db, userId, id)
 
   redirect(outcome === 'missing' ? itemsPath(list, { fout: 'weg' }) : itemsPath(list, { getoond: id }))
+}
+
+/** Takes an approval back: the item is what the filter said again. */
+export async function submitUnapprove(itemId: number, view: ListView) {
+  const { userId } = await requireRole(...adminRoles)
+  const id = parseItemId(itemId)
+  const list = cleanView(view)
+
+  if (id === undefined) {
+    redirect(itemsPath(list, { fout: 'weg' }))
+  }
+
+  const outcome = await unapproveItem(getDatabase().db, userId, id)
+
+  redirect(outcome === 'missing' ? itemsPath(list, { fout: 'weg' }) : itemsPath(list, { teruggezet: id }))
 }
 
 /** What the list shows, checked again: a group that is none becomes `on-site`. */

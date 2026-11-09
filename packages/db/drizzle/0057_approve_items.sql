@@ -1,0 +1,6 @@
+-- Lets the editors put an item on the site that the importer judged `doubtful` or `irrelevant`: `items` gets `approved_at` and `approved_by` (empty for every item that exists), and the log of the admin gets `item.approve` and `item.unapprove`.
+-- The statements can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.
+ALTER TABLE `audit_log` MODIFY COLUMN `action` enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ') NOT NULL;--> statement-breakpoint
+ALTER TABLE `items` ADD COLUMN IF NOT EXISTS `approved_at` datetime;--> statement-breakpoint
+ALTER TABLE `items` ADD COLUMN IF NOT EXISTS `approved_by` int unsigned;--> statement-breakpoint
+ALTER TABLE `items` ADD CONSTRAINT `items_approved_by_admin_users_id_fk` FOREIGN KEY IF NOT EXISTS (`approved_by`) REFERENCES `admin_users`(`id`) ON DELETE no action ON UPDATE no action;

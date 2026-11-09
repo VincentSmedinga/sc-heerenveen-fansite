@@ -613,6 +613,8 @@
 - **Later:** zie _De lijst in het beheer heeft een schakelaar voor wel en niet op de site_ (2 november 2026): het beheer toont nog steeds alles, maar verdeeld over de groepen "Op de site" en "Niet op de site", en een twijfelgeval staat onder de tweede.
 - **Later:** zie _Van een bericht met meerdere versies toont de site alleen de laatste kop_ (1 november 2026): `isShown` kijkt bij een bericht met een `thread_key` naar het hele verhaal.
   Een bericht zonder sleutel gaat door dezelfde voorwaarde als hier.
+- **Later:** zie _Een redacteur kan een twijfelgeval of een bericht dat het filter weghoudt op de site zetten_ (9 november 2026): de voorwaarde is nu `hidden_at IS NULL` en (`relevance = 'relevant'` of `approved_at IS NOT NULL`).
+  De importer raakt `approved_at` en `approved_by` nooit aan.
 
 ## Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed
 

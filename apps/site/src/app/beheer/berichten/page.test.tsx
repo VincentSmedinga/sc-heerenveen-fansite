@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
-import { hideItem } from '#src/beheer/items'
+import { approveItem, hideItem } from '#src/beheer/items'
 import { addItem, addSource } from '#src/beheer/test-items'
 
 import ItemsPage, { metadata } from './page'
@@ -146,6 +146,46 @@ describe('the list', () => {
     // Hiding what is not on the site already does nothing, so those two have no form for it.
     expect(html).not.toContain('aria-label="Verberg:')
     expect(html).not.toContain('for="reden-')
+    // They have a button to put them on the site, named after the item.
+    expect(hasButton(html, 'Op de site zetten: Kop twijfel', 'Op de site zetten')).toBe(true)
+    expect(hasButton(html, 'Op de site zetten: Kop elders', 'Op de site zetten')).toBe(true)
+    expect(buttons(html)).toHaveLength(2)
+  })
+
+  it('puts an approved item in the group on the site, with who approved it and a button to take it back', async () => {
+    const id = await addItem(database, ids, 'twijfel', {
+      publishedAt: new Date('2026-10-20T08:00:00Z'),
+      relevance: 'doubtful',
+    })
+
+    await approveItem(database.db, userId, id, new Date('2026-10-21T08:00:00Z'))
+
+    const html = text(await render())
+
+    expect(html).toContain('Kop twijfel')
+    expect(html).toContain('door een moderator op de site gezet')
+    expect(html).toContain('door jelle@example.org')
+    expect(
+      hasButton(html, 'Terug naar het oordeel van het filter: Kop twijfel', 'Terug naar het oordeel van het filter'),
+    ).toBe(true)
+    expect(hasButton(html, 'Verberg: Kop twijfel', 'Verberg')).toBe(true)
+    expect(html).not.toContain('aria-label="Op de site zetten:')
+    expect(text(await render({ toon: 'niet-op-de-site' }))).not.toContain('Kop twijfel')
+  })
+
+  it('tells that an item was put on the site or taken back only when it is true', async () => {
+    const id = await addItem(database, ids, 'twijfel', { relevance: 'doubtful' })
+
+    expect(text(await render({ opgenomen: String(id) }))).not.toContain('Op de site gezet')
+    expect(text(await render({ teruggezet: String(id) }))).toContain('Terug naar het oordeel van het filter')
+
+    await approveItem(database.db, userId, id)
+
+    const html = text(await render({ opgenomen: String(id) }))
+
+    expect(html).toContain('Op de site gezet')
+    expect(html).toContain('Kop twijfel. Staat binnen vijf minuten op de site')
+    expect(text(await render({ teruggezet: String(id) }))).not.toMatch(/<h2[^>]*>Terug naar het oordeel/)
   })
 
   it('says of an item that is published later that it is not on the site yet, and lets it be hidden', async () => {
