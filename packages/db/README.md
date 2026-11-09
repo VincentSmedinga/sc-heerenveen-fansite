@@ -245,13 +245,13 @@ Wat de redactie van een wedstrijd invulde of verbeterde (zie [`docs/wedstrijden-
 De invoer zelf staat in `matches` en `match_goals`; deze tabel markeert welke onderdelen van de redactie zijn.
 Er is één rij per wedstrijd met een invoer, en ze gaat weg met de wedstrijd.
 
-| Kolom                                                   | Betekenis                                                                                                                      |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `match_id`                                              | De wedstrijd; de sleutel                                                                                                       |
-| `kickoff_edited`, `result_edited`, `goals_edited`       | Welke onderdelen de redactie vasthoudt: de aftrap, de uitslag met de status, de doelpunten. Minstens één staat aan (een check) |
-| `edited_by`, `edited_at`, `reason`                      | Wie het laatst invulde (het nummer van het account), wanneer (UTC) en waarom; het logboek heeft elke invoer                    |
-| `before_match`, `before_goals`                          | De wedstrijd en de doelpunten zoals ze waren vóór de eerste invoer, als JSON; "invoer weghalen" zet ze terug                   |
-| `reported_kickoff`, `reported_result`, `reported_goals` | Wat Wikipedia de vorige keer zei toen het van de invoer afweek, zodat de import een verschil één keer meldt                    |
+| Kolom                                                                     | Betekenis                                                                                                                                                                                          |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `match_id`                                                                | De wedstrijd; de sleutel                                                                                                                                                                           |
+| `kickoff_edited`, `result_edited`, `goals_edited`, `facts_edited`         | Welke onderdelen de redactie vasthoudt: de aftrap, de uitslag met de status, de doelpunten en de gegevens (toeschouwers, scheidsrechter, stadion en opmerking). Minstens één staat aan (een check) |
+| `edited_by`, `edited_at`, `reason`                                        | Wie het laatst invulde (het nummer van het account), wanneer (UTC) en waarom; het logboek heeft elke invoer                                                                                        |
+| `before_match`, `before_goals`                                            | De wedstrijd en de doelpunten zoals ze waren vóór de eerste invoer, als JSON; "invoer weghalen" zet ze terug                                                                                       |
+| `reported_kickoff`, `reported_result`, `reported_goals`, `reported_facts` | Wat Wikipedia de vorige keer zei toen het van de invoer afweek, zodat de import een verschil één keer meldt                                                                                        |
 
 De import wist een markering als Wikipedia hetzelfde heeft, en de rij als er geen markering meer is (zie _Een wedstrijd die de redactie invulde_ in de [README van de importer](../../apps/importer/README.md)).
 

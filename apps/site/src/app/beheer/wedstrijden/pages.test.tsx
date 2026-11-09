@@ -27,6 +27,8 @@ import { checkReportForm } from '#src/beheer/report-form'
 import MatchPage, { metadata as matchMetadata } from './[id]/page'
 import MatchesPage, { metadata as listMetadata } from './page'
 
+const noFacts = { attendance: null, note: null, referee: null, stadium: null }
+
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => database }))
@@ -123,6 +125,7 @@ async function editMatch(id: number) {
     userId,
     id,
     {
+      facts: noFacts,
       goals: [],
       kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
       result: {
@@ -427,6 +430,7 @@ describe('the match', () => {
       userId,
       id,
       {
+        facts: noFacts,
         goals: [
           {
             minute: 12,
@@ -487,6 +491,7 @@ describe('the match', () => {
       userId,
       id,
       {
+        facts: noFacts,
         goals: [goal(12, true), goal(40, false)],
         kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
         result: {
@@ -579,6 +584,7 @@ describe('the match', () => {
       userId,
       id,
       {
+        facts: noFacts,
         goals: [],
         kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
         result: {
@@ -619,6 +625,7 @@ describe('the match', () => {
         userId,
         id,
         {
+          facts: noFacts,
           goals: [],
           kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
           result: {

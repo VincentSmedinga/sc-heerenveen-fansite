@@ -553,6 +553,34 @@ describe('the step matches', () => {
     expect(await rows()).toHaveLength(2)
   })
 
+  it('leaves the facts the editors entered as they are, also for a match found by its date', async () => {
+    await run([oldMatch({ attendance: 4000, referee: 'Piet Fluit' })])
+
+    const [own] = await rows()
+
+    await database.db.update(matches).set({ attendance: 4500, referee: 'Bas Nijhuis' }).where(eq(matches.id, own!.id))
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: JSON.stringify({ attendance: 4000, referee: 'Piet Fluit' }),
+      editedAt: new Date('2026-11-09T10:00:00Z'),
+      editedBy: adminId,
+      factsEdited: true,
+      matchId: own!.id,
+      reason: 'Beter bekend',
+    })
+
+    await run([oldMatch({ attendance: 4000, referee: 'Piet Fluit' })])
+    expect((await rows())[0]).toMatchObject({ attendance: 4500, referee: 'Bas Nijhuis' })
+
+    // A match of another source on the same day: the flagged facts are not filled or compared.
+    await database.pool.query("UPDATE matches SET data_source = 'wikipedia', round = 'Eerste ronde'")
+
+    const report = await run([oldMatch({ attendance: 4000, referee: 'Piet Fluit' })])
+
+    expect(report.lines.join('\n')).not.toContain('match difference')
+    expect((await rows())[0]).toMatchObject({ attendance: 4500, referee: 'Bas Nijhuis' })
+  })
+
   it('keeps two matches against the same club within a day, and says so', async () => {
     await wikipediaMatch({ matchDate: '2001-09-02', round: 'Eerste ronde' })
     await database.db.insert(matches).values({

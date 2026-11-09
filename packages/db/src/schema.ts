@@ -1206,16 +1206,17 @@ export type NewMatchGoal = typeof matchGoals.$inferInsert
  * entry itself is in `matches` and `match_goals`, where every page reads it; this row marks
  * which parts of the match are theirs: `kickoff_edited` for the kick-off (`match_date`,
  * `kickoff_at`, `date_text`), `result_edited` for the status and the result (the score, extra
- * time, the score after 90 minutes and the penalties) and `goals_edited` for the goals. The
- * importer keeps a marked part as it is until Wikipedia has the same, and then clears the
- * marker; the row is gone when no marker is left.
+ * time, the score after 90 minutes and the penalties), `goals_edited` for the goals and
+ * `facts_edited` for the spectators, the referee, the stadium and the note. The importer keeps
+ * a marked part as it is until Wikipedia has the same, and then clears the marker; the row is
+ * gone when no marker is left.
  *
  * `edited_by`, `edited_at` and `reason` are who made the last entry, when (UTC) and why;
  * `audit_log` has every entry. `before_match` and `before_goals` are the match and its goals
  * as JSON, as they were before the first entry (see `match-edits.ts`), so removing the entry
- * can put them back. `reported_kickoff`, `reported_result` and `reported_goals` are what
- * Wikipedia said the last time it differed from the entry of that part, so the importer reports
- * a difference once and not on every run.
+ * can put them back. `reported_kickoff`, `reported_result`, `reported_goals` and
+ * `reported_facts` are what Wikipedia said the last time it differed from the entry of that
+ * part, so the importer reports a difference once and not on every run.
  */
 export const matchEdits = mysqlTable(
   'match_edits',
@@ -1226,6 +1227,7 @@ export const matchEdits = mysqlTable(
     kickoffEdited: boolean('kickoff_edited').notNull().default(false),
     resultEdited: boolean('result_edited').notNull().default(false),
     goalsEdited: boolean('goals_edited').notNull().default(false),
+    factsEdited: boolean('facts_edited').notNull().default(false),
     editedBy: int('edited_by', { unsigned: true })
       .notNull()
       .references(() => adminUsers.id),
@@ -1236,11 +1238,12 @@ export const matchEdits = mysqlTable(
     reportedKickoff: text('reported_kickoff'),
     reportedResult: text('reported_result'),
     reportedGoals: text('reported_goals'),
+    reportedFacts: text('reported_facts'),
   },
   (table) => [
     check(
       'match_edits_a_part_is_edited',
-      sql`${table.kickoffEdited} = 1 or ${table.resultEdited} = 1 or ${table.goalsEdited} = 1`,
+      sql`${table.kickoffEdited} = 1 or ${table.resultEdited} = 1 or ${table.goalsEdited} = 1 or ${table.factsEdited} = 1`,
     ),
   ],
 )
@@ -1382,10 +1385,10 @@ export type MatchImport = typeof matchImports.$inferSelect
 
 /**
  * The parts of a match an editor fills in, and the importer judges one by one: the kick-off,
- * the result (with the status) and the goals. Wikipedia often has the result long before the
- * goals.
+ * the result (with the status), the goals and the facts (the spectators, the referee, the
+ * stadium and the note). Wikipedia often has the result long before the goals.
  */
-export const matchParts = ['kickoff', 'result', 'goals'] as const
+export const matchParts = ['kickoff', 'result', 'goals', 'facts'] as const
 
 export type MatchPart = (typeof matchParts)[number]
 

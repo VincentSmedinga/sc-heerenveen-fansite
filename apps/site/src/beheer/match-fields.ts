@@ -14,6 +14,10 @@ export const matchFieldNames = [
   'na90-zij',
   'strafschoppen-wij',
   'strafschoppen-zij',
+  'toeschouwers',
+  'scheidsrechter',
+  'stadion',
+  'opmerking',
 ] as const
 
 export type MatchFieldName = (typeof matchFieldNames)[number]
@@ -30,8 +34,12 @@ export type GoalValues = Record<GoalFieldName, string>
 export type MatchErrors = {
   [id: string]: string | undefined
   doelpunten?: string
+  opmerking?: string
   reden?: string
+  scheidsrechter?: string
+  stadion?: string
   status?: string
+  toeschouwers?: string
   verlenging?: string
 }
 

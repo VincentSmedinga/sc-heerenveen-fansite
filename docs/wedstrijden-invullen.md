@@ -22,6 +22,8 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
    - de **uitslag**, bij een gespeelde wedstrijd.
      De clubs staan in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop.
      Bij de beker en de play-offs staat er een kaart met de verlenging, de stand na 90 minuten en de strafschoppen;
+   - de **gegevens**: de toeschouwers (alleen bij een gespeelde wedstrijd), de scheidsrechter, het stadion en een opmerking.
+     Laat een veld leeg als je het niet weet;
    - de **doelpunten**, in een tabel met twee regels per doelpunt: de minuut, de blessuretijd en de soort (gewoon, strafschop of eigen doelpunt), en daaronder het team dat het doelpunt krijgt en de speler.
      Vul je de uitslag in, dan krijg je zoveel doelpunten als de uitslag vraagt.
      Een doelpunt dat je niet invult, telt niet mee.
@@ -49,7 +51,7 @@ Zolang minstens één wedstrijd van de redactie is, staat onder de bronvermeldin
 
 ## Wat de import doet
 
-De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (de aftrap, de uitslag en de doelpunten, elk apart):
+De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (de aftrap, de uitslag, de doelpunten en de gegevens, elk apart):
 
 - **Wikipedia heeft nog niets:** jouw invoer blijft staan.
   Je hoeft niets te doen.

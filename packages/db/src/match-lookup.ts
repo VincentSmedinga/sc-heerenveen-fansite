@@ -40,11 +40,14 @@ const show = (value: unknown) => (value instanceof Date ? value.toISOString() : 
 
 /**
  * Compares a stored match with what another source says. `fill` holds the empty columns the
- * other source can fill, and `differences` the columns that both have and that differ.
+ * other source can fill, and `differences` the columns that both have and that differ. The
+ * columns in `locked` are the editors' (see `lockedFields` in `match-edits.ts`): they are left
+ * out, as the rest of the import leaves them alone.
  */
 export function compareClaim(
   stored: Match,
   claim: MatchClaim,
+  locked: readonly string[] = [],
 ): { differences: MatchDifference[]; fill: Partial<Match> } {
   const fill: Record<string, unknown> = {}
   const differences: MatchDifference[] = []
@@ -54,7 +57,7 @@ export function compareClaim(
   for (const field of fillable) {
     const theirs = claim[field]
 
-    if (theirs === undefined || theirs === null) {
+    if (locked.includes(field) || theirs === undefined || theirs === null) {
       continue
     }
     if (stored[field] === null) {
@@ -66,7 +69,7 @@ export function compareClaim(
   for (const field of compared) {
     const theirs = claim[field]
 
-    if (theirs !== undefined && !same(stored[field], theirs)) {
+    if (!locked.includes(field) && theirs !== undefined && !same(stored[field], theirs)) {
       differences.push({ field, stored: show(stored[field]), theirs: show(theirs) })
     }
   }

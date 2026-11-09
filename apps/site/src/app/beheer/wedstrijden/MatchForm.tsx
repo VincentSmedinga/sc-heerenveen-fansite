@@ -368,6 +368,37 @@ export function MatchFields() {
           </FieldGroup>
         </Card>
       ) : null}
+      <Card aria-labelledby="gegevens-kop">
+        <Heading id="gegevens-kop" level={2}>
+          Gegevens
+        </Heading>
+        <Field
+          error={errors.toeschouwers}
+          hideOptional
+          hint="Alleen bij een gespeelde wedstrijd. Een wedstrijd zonder publiek heeft 0."
+          id="toeschouwers"
+          label="Toeschouwers"
+          required={false}
+        >
+          <Input {...field('toeschouwers')} autoComplete="off" inputMode="numeric" width="narrow" />
+        </Field>
+        <Field error={errors.scheidsrechter} hideOptional id="scheidsrechter" label="Scheidsrechter" required={false}>
+          <Input {...field('scheidsrechter')} autoComplete="off" />
+        </Field>
+        <Field error={errors.stadion} hideOptional id="stadion" label="Stadion" required={false}>
+          <Input {...field('stadion')} autoComplete="off" />
+        </Field>
+        <Field
+          error={errors.opmerking}
+          hideOptional
+          hint="Een feit voor de bezoeker, zoals Begon later door file."
+          id="opmerking"
+          label="Opmerking"
+          required={false}
+        >
+          <Input {...field('opmerking')} autoComplete="off" />
+        </Field>
+      </Card>
       {choices.report === undefined ? null : (
         <Card aria-labelledby="doelpunten">
           <Heading id="doelpunten" level={2} tabIndex={-1}>

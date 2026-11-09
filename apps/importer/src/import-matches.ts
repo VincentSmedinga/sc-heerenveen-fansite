@@ -2,6 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
+import { lockedFields } from '@fansite/db/match-edits'
 import { compareClaim, differenceLine, findMatchByDate } from '@fansite/db/match-lookup'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import {
@@ -1032,7 +1033,7 @@ async function storeMatches(
         )
       }
       if (lookup.kind === 'found' && lookup.match.dataSource !== 'wikipedia') {
-        const { differences, fill } = compareClaim(lookup.match, match)
+        const { differences, fill } = compareClaim(lookup.match, match, lockedFields(edits.get(lookup.match.id)))
 
         warnings.push(...differences.map((difference) => differenceLine(lookup.match, difference, 'wikipedia')))
 

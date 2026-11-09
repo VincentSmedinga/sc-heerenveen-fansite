@@ -42,6 +42,8 @@ import { emptyRow, otherPlayer, type ReportSquadPlayer, type ReportValues, type 
 import { report as baseReport, card, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, type ReportPlan } from './report-form'
 
+const noFacts = { attendance: null, note: null, referee: null, stadium: null }
+
 let database: TestDatabase
 let userId: number
 let matchId: number
@@ -292,6 +294,7 @@ describe('saveReport', () => {
       userId,
       matchId,
       {
+        facts: noFacts,
         goals: [],
         kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T18:00:00Z'), matchDate: '2026-10-31' },
         result: playedResult,
@@ -991,6 +994,7 @@ describe('the match with a report', () => {
       userId,
       matchId,
       {
+        facts: noFacts,
         goals: [],
         kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T18:00:00Z'), matchDate: '2026-10-31' },
         result: playedResult,

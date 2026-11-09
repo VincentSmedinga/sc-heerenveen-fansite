@@ -1,6 +1,7 @@
 // What the import does with a match the editors filled in (`match_edits`, see issue 272). The
 // entry is in `matches` and `match_goals`, and the import judges each part of it on its own,
-// the kick-off, the result and the goals, because Wikipedia usually has the result long
+// the kick-off, the result, the goals and the facts (the spectators, the referee, the stadium
+// and the note), because Wikipedia usually has the result long
 // before the goals:
 //
 // - Wikipedia has nothing for the part yet: the entry stays, and nothing is said.
@@ -22,9 +23,11 @@ import { recordAction } from '@fansite/db/audit-log'
 import { decideConflict, encodePartProposal } from '@fansite/db/match-conflicts'
 import {
   clearParts,
+  describeEntryFacts,
   describeEntryGoals,
   describeEntryKickoff,
   describeEntryResult,
+  type FactsFields,
   type GoalFields,
   type GoalSnapshot,
   type KickoffFields,
@@ -47,13 +50,14 @@ export type Verdict = 'different' | 'nothing' | 'same'
 export const conflictReason = 'wijkt af van de invoer van de redactie'
 
 const partNames: Record<MatchPart, { dutch: string; english: string }> = {
+  facts: { dutch: 'gegevens', english: 'facts' },
   goals: { dutch: 'doelpunten', english: 'goals' },
   kickoff: { dutch: 'aftrap', english: 'kick-off' },
   result: { dutch: 'uitslag', english: 'result' },
 }
 
 /**
- * Handles one match with an entry: judges its three parts, writes what the log and the warning
+ * Handles one match with an entry: judges its four parts, writes what the log and the warning
  * need and clears the markers of the parts Wikipedia caught up with. The caller makes the match
  * the entry where a marker stays and Wikipedia where there is none (`mergeEntry`). It returns
  * the parts that stay the entry's, and the warnings for the import.
@@ -93,6 +97,13 @@ export async function importEditedMatch(
       wikipedia: describeEntryResult({ ...wikipedia, opponent: before.opponent }),
     }
   }
+  if (edit.factsEdited) {
+    judged.facts = {
+      entry: describeEntryFacts(before),
+      verdict: judgeFacts(before, wikipedia),
+      wikipedia: describeEntryFacts(wikipedia),
+    }
+  }
   if (edit.goalsEdited) {
     judged.goals = {
       entry: describeEntryGoals(storedGoals),
@@ -115,15 +126,19 @@ export async function importEditedMatch(
     ).map((change) => [change.part as MatchPart, change]),
   )
 
-  for (const part of ['kickoff', 'result', 'goals'] as const) {
+  for (const part of ['kickoff', 'result', 'goals', 'facts'] as const) {
     const found = judged[part]
 
     if (found === undefined) {
       continue
     }
 
-    const previous =
-      part === 'kickoff' ? edit.reportedKickoff : part === 'result' ? edit.reportedResult : edit.reportedGoals
+    const previous = {
+      facts: edit.reportedFacts,
+      goals: edit.reportedGoals,
+      kickoff: edit.reportedKickoff,
+      result: edit.reportedResult,
+    }[part]
     const pending = waiting.get(part)
 
     if (found.verdict === 'same') {
@@ -215,6 +230,7 @@ export async function importEditedMatch(
     await db
       .update(matchEdits)
       .set({
+        ...('facts' in reported ? { reportedFacts: reported.facts } : {}),
         ...('goals' in reported ? { reportedGoals: reported.goals } : {}),
         ...('kickoff' in reported ? { reportedKickoff: reported.kickoff } : {}),
         ...('result' in reported ? { reportedResult: reported.result } : {}),
@@ -231,6 +247,20 @@ export async function importEditedMatch(
   }
 
   return { keep: markedParts(edit).filter((part) => !caughtUp.includes(part) && !takenOver.includes(part)), warnings }
+}
+
+/**
+ * Whether the facts of the entry are what Wikipedia says. Wikipedia says nothing about a fact
+ * it lacks, so only a fact it has can differ from the entry.
+ */
+export function judgeFacts(entry: FactsFields, wikipedia: FactsFields): Verdict {
+  const keys = ['attendance', 'note', 'referee', 'stadium'] as const
+
+  if (keys.every((key) => entry[key] === wikipedia[key])) {
+    return 'same'
+  }
+
+  return keys.some((key) => wikipedia[key] !== null && wikipedia[key] !== entry[key]) ? 'different' : 'nothing'
 }
 
 /**
@@ -306,6 +336,9 @@ export function mergeEntry(before: Match, wikipedia: ReadMatch, keep: MatchPart[
           penaltiesFor: before.penaltiesFor,
           status: before.status,
         }
+      : {}),
+    ...(keep.includes('facts')
+      ? { attendance: before.attendance, note: before.note, referee: before.referee, stadium: before.stadium }
       : {}),
   }
 

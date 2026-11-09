@@ -78,6 +78,7 @@ async function addMatch(overrides: Partial<Omit<NewMatch, 'clubId'>> = {}) {
 }
 
 const entry = (overrides: Partial<MatchEntry> = {}): MatchEntry => ({
+  facts: { attendance: null, note: null, referee: null, stadium: null },
   goals: [],
   kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T17:45:00Z'), matchDate: '2026-10-31' },
   result: {
@@ -461,6 +462,76 @@ describe('saveEntry', () => {
     expect(await log()).toEqual([])
     expect(await edit(id)).toBeUndefined()
     expect(await stored(id)).toMatchObject({ goalsFor: null, status: 'scheduled' })
+  })
+})
+
+describe('the facts of a match', () => {
+  const facts = { attendance: 21_022, note: 'Begon later door file', referee: 'Bas Nijhuis', stadium: 'Abe Lenstra' }
+
+  it('stores them, marks them as a part of their own and writes one line in the log', async () => {
+    const id = await addMatch()
+
+    expect(await saveEntry(database.db, userId, id, entry({ facts }), 'Uit het archief', t0)).toEqual({
+      parts: ['result', 'facts'],
+      status: 'saved',
+    })
+    expect(await stored(id)).toMatchObject(facts)
+    expect(await edit(id)).toMatchObject({ factsEdited: true, resultEdited: true })
+    expect(await log()).toHaveLength(1)
+    expect((await log())[0]?.detail).toContain('Gegevens: toeschouwers geen, scheidsrechter geen')
+    expect((await log())[0]?.detail).toContain('→ toeschouwers 21.022, scheidsrechter Bas Nijhuis')
+
+    // The same facts again are no change.
+    expect(await saveEntry(database.db, userId, id, entry({ facts }), 'Nog eens', t1)).toEqual({ status: 'unchanged' })
+    expect(await log()).toHaveLength(1)
+  })
+
+  it('marks the facts alone when only they change', async () => {
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    expect(await saveEntry(database.db, userId, id, entry({ facts }), 'Uit het archief', t0)).toEqual({
+      parts: ['facts'],
+      status: 'saved',
+    })
+    expect(await edit(id)).toMatchObject({ factsEdited: true, goalsEdited: false, resultEdited: false })
+  })
+
+  it('puts the four fields back as they were when the entry is taken away', async () => {
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, referee: 'Piet Fluit', status: 'played' })
+    const before = await stored(id)
+
+    await saveEntry(database.db, userId, id, entry({ facts }), 'Uit het archief', t0)
+
+    expect(await undoEntry(database.db, userId, id, 'Vergissing', t1)).toBe('done')
+    expect(await stored(id)).toEqual(before)
+    expect(await edit(id)).toBeUndefined()
+    expect((await log())[1]?.detail).toBe('Teruggezet: gegevens')
+  })
+
+  it('lets a change of Wikipedia for the facts go when they are entered again', async () => {
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    await saveEntry(database.db, userId, id, entry({ facts }), 'Eerst', t0)
+    await database.db.insert(matchChanges).values({
+      changed: 'gegevens',
+      class: 'suspicious',
+      competition: 'Eredivisie',
+      firstSeenAt: t0,
+      lastSeenAt: t0,
+      matchId: id,
+      newValue: 'toeschouwers 20.000',
+      oldValue: 'x',
+      part: 'facts',
+      reason: 'wijkt af van de invoer van de redactie',
+      round: 'Speelronde 11',
+      season: '2026/27',
+      status: 'pending',
+    })
+    await saveEntry(database.db, userId, id, entry({ facts: { ...facts, attendance: 22_000 } }), 'Opnieuw', t1)
+
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { resolution: 'replaced', status: 'rejected' },
+    ])
   })
 })
 
