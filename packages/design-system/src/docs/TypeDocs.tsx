@@ -85,7 +85,7 @@ export const typeStyles: TypeStyle[] = [
     className: 'hf-meta',
     name: 'Meta',
     sample: 'Leeuwarder Courant · 83 reacties · laatst 13:28',
-    spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,4',
+    spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,7',
     use: 'Bron, tijd en aantallen.',
   },
 ]
