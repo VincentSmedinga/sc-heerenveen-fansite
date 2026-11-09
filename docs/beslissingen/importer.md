@@ -2485,6 +2485,7 @@
 - **Waarom:** de regel staat op één plek met tests, het getal is overal gelijk, en het is te loggen en te controleren.
   De som van de tabel is alleen bekend tijdens het lezen, dus de uitkomst en dat bewijs worden samen bewaard.
 - **Alternatieven:** rekenen op de pagina (de regel zit dan in de site, de bronnen en de doelpunten moeten bij elk verzoek mee, en de som is dan weg).
+- **Later:** een seizoen met alleen spelers uit de verslagen (`verslag`) heeft sinds 9 november 2026 ook een rij, ook al leest geen lijst een selectie; zie _De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen_ (#935).
 
 ## De controle op de doelpuntenmakers valt terug op de naam
 
@@ -3027,3 +3028,21 @@
   De kaart Selectie kan er zo een vlag bij tonen (#947).
 - **Alternatieven:** alleen Wikidata (P27: geen wijziging in de importer, maar een tabel van Q-nummers naar landen en een lagere dekking); beide bronnen (twee lezers voor één issue).
 - **Later:** nationaliteit uit Wikidata als terugval voor een speler zonder sjabloon is niet gedaan en kan een eigen issue worden.
+
+## De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen
+
+- **Datum:** 9 november 2026
+- **Besluit:** de import van de oude site (`import.mjs --old-site`) heeft een zesde stap, `selecties` (#935).
+  Ze bewaart met `storeCompleteness` de volledigheid van elk seizoen waarin een speler met de bron `verslag` staat, op de som van de tabel na, die ze laat zoals hij was.
+  - Een seizoen met alleen spelers uit verslagen krijgt een rij met de beste bron `verslag`.
+    Een seizoen met een betere lijst houdt die bron als beste.
+  - Een tweede run zonder nieuwe gegevens schrijft niets, want `storeCompleteness` vergelijkt de uitkomst met de rij.
+  - De rij komt van de importer, niet van de site: de site leest alleen (zie _De importer berekent de volledigheid en bewaart hem, de site rekent niet_).
+  - Het lopende seizoen en de seizoenen van Wikipedia veranderen niet: hun bron staat vóór `verslag`.
+- **Waarom:** zonder rij toonde de kaart Selectie "onbekend" bij 25 spelers uit de verslagen, bijvoorbeeld in 2004/05.
+  Een lijst uit een zwakke bron mag nooit voor een echte selectie doorgaan, dus de regel blijft in de importer en de kaart zegt waar de lijst vandaan komt (zie _De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_ in `site.md`).
+- **Alternatieven:** de site de volledigheid laten uitrekenen als de rij ontbreekt (breekt het besluit van 5 november 2026); een eigen opdracht erbij (de opdracht `import:completeness` rekent al voor elk seizoen met spelers, dus een nieuwe is niet nodig).
+- **Verslagen uit het beheer:** een redacteur die een speler aan een verslag toevoegt, maakt ook een rij met de bron `verslag` (`saveReport`).
+  Het seizoen krijgt zijn rij bij de eerstvolgende `import:completeness` of import van de oude site, niet meteen.
+- **Aantal:** de zin onder de kaart noemt het aantal spelers op de kaart, dus zonder die uit de verslagen als een betere bron het seizoen heeft.
+- **Op acceptatie:** na de deploy draait de import van de oude site opnieuw, zodat de rijen voor alle seizoenen zonder andere bron er zijn.

@@ -87,7 +87,8 @@ describe('the command', () => {
       '  0 matches get goals, 0 add up without goals, 0 have a score and no goals, 0 have part of the goals',
       'Old site, step opstellingen: 0 new, 0 updated, 0 unchanged, 0 skipped',
       '  0 reports: 0 klaar, 0 bezig',
-      'Old site: 5 of 5 steps done.',
+      'Old site, step selecties: 0 new, 0 updated, 0 unchanged, 0 skipped',
+      'Old site: 6 of 6 steps done.',
     ])
   })
 
@@ -107,7 +108,8 @@ describe('the command', () => {
         '  0 matches get goals, 0 add up without goals, 0 have a score and no goals, 0 have part of the goals',
         'Old site, step opstellingen: 0 new, 0 updated, 0 unchanged, 0 skipped',
         '  0 reports: 0 klaar, 0 bezig',
-        'Old site: 5 of 5 steps done.',
+        'Old site, step selecties: 0 new, 0 updated, 0 unchanged, 0 skipped',
+        'Old site: 6 of 6 steps done.',
       ].join('\n'),
     )
     expect({
@@ -142,8 +144,15 @@ describe('the command', () => {
     ])
   })
 
-  it('has the steps clubs, matches, spelers, doelpunten and opstellingen, in that order', () => {
-    expect(oldSiteSteps.map((step) => step.name)).toEqual(['clubs', 'matches', 'spelers', 'doelpunten', 'opstellingen'])
+  it('has the steps clubs, matches, spelers, doelpunten, opstellingen and selecties, in that order', () => {
+    expect(oldSiteSteps.map((step) => step.name)).toEqual([
+      'clubs',
+      'matches',
+      'spelers',
+      'doelpunten',
+      'opstellingen',
+      'selecties',
+    ])
   })
 
   it('shows what it would do with --dry-run, and writes nothing', async () => {
@@ -152,7 +161,7 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(text).toContain('Old site, step clubs: 1 new, 1 updated, 1 unchanged, 0 skipped')
-    expect(text).toContain('Dry run, nothing is written. Old site: 5 of 5 steps done.')
+    expect(text).toContain('Dry run, nothing is written. Old site: 6 of 6 steps done.')
     expect(await clubCount()).toBe(before)
     expect(await database.db.select().from(clubNames)).toEqual([])
   })
@@ -339,7 +348,7 @@ describe('the files in the repository', () => {
     expect(second.text).toContain('Old site, step doelpunten: 0 new, 0 updated, 1763 unchanged, 67 skipped')
     expect(first.text).toContain('Old site, step opstellingen: 566 new, 0 updated, 0 unchanged, 0 skipped')
     expect(second.text).toContain('Old site, step opstellingen: 0 new, 0 updated, 566 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site: 5 of 5 steps done.')
+    expect(second.text).toContain('Old site: 6 of 6 steps done.')
     expect(ids.size).toBe(oldClubs.length)
     // The two clubs the test started with are among them, so a club is one row, not two.
     expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
@@ -395,7 +404,7 @@ describe('the bundle', () => {
       expect(dry.stdout).toContain('Old site, step clubs:')
       expect(dry.stdout).toContain('Old site, step matches: 671 new')
       expect(dry.stdout).toContain('Old site, step doelpunten: 1763 new')
-      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 5 of 5 steps done.')
+      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 6 of 6 steps done.')
       const report = await node('--old-site', '--report')
 
       expect(report.stdout).toContain('# Oude wedstrijden: wat ontbreekt of niet klopt')

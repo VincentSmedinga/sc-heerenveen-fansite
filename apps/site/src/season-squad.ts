@@ -64,16 +64,33 @@ async function loadSquad(season: string): Promise<SeasonSquad> {
 const seasonSquads = cacheForKey(keptFor, loadSquad)
 
 /**
+ * The players on the card: those of the season, except the players from our reports when a
+ * better source has the season (#935). The reports are the last source, so their players are
+ * on the card only when nothing better is there; the page lists them under "Alle spelers" in
+ * every case.
+ */
+export function cardPlayers(squad: SeasonSquad): PublicSeasonPlayer[] {
+  return squad.completeness?.bestSource === 'verslag'
+    ? squad.players
+    : squad.players.filter((player) => player.source !== 'verslag')
+}
+
+/**
  * The sentence under the heading of the card: what we know of the season and how sure we are
  * that the list is the whole squad, without a percentage. A season without a row is a season
  * without players.
  */
-export function completenessSentence(completeness: SeasonSquad['completeness']): string {
+export function completenessSentence(completeness: SeasonSquad['completeness'], playerCount?: number): string {
   if (completeness === undefined || completeness.level === 'onbekend') {
     return 'Van dit seizoen kennen we de selectie niet.'
   }
 
-  const known = `We kennen ${completeness.playerCount} spelers van dit seizoen`
+  const known = `We kennen ${playerCount ?? completeness.playerCount} spelers van dit seizoen`
+
+  // The list of the reports is our own and the weakest: say where it comes from.
+  if (completeness.bestSource === 'verslag') {
+    return `${known}, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk.`
+  }
 
   switch (completeness.level) {
     case 'bijna':
@@ -104,7 +121,7 @@ export function isEnglishPage(title: string) {
 
 /** Whether the card has a list: a season whose squad we don't know shows the sentence alone. */
 export function showsPlayers(squad: SeasonSquad) {
-  return squad.players.length > 0 && squad.completeness !== undefined && squad.completeness.level !== 'onbekend'
+  return cardPlayers(squad).length > 0 && squad.completeness !== undefined && squad.completeness.level !== 'onbekend'
 }
 
 /**
