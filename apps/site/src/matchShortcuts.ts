@@ -80,7 +80,8 @@ export const coachesCardOf = (coachCount: number) =>
  * after it the card with our place after each round when the season has one
  * (`withPlacePerRound`). The current season has the card Laatste wedstrijd before Programma
  * when a match has begun (`withLastMatch`). The card with the head coaches, after the table,
- * has a link when the season has a coach in the table (`coachCount` above 0).
+ * has a link when the season has a coach in the table (`coachCount` above 0), unless the season
+ * has the card with our place after each round, which lists the coaches itself.
  */
 export const matchShortcutsOf = (
   current: boolean,
@@ -120,8 +121,9 @@ export const matchShortcutsOf = (
     links.push(shortcut)
   }
 
-  // The card with the head coaches comes last, under the table.
-  if (coachCount > 0) {
+  // The card with the head coaches comes last, under the table. A season with the card of our
+  // place per round has no such card: the coaches are in that one.
+  if (coachCount > 0 && !withPlacePerRound) {
     links.push({ href: `#${coaches.id}`, label: coaches.name })
   }
 

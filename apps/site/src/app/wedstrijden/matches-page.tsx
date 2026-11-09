@@ -113,8 +113,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const leagueResults = await leagueResultsOfSeason(data)
   const lastFive = current ? lastFiveOfSeason(data, leagueResults) : undefined
   const lastFiveShown = lastFive !== undefined && parseStandingsView(standingsChoice) === 'last-five'
-  const coachesCard = coachesCardOf(data.coaches.length)
   const placePerRound = leagueResults === undefined ? undefined : placePerRoundOf(leagueResults, data.standings)
+  // The card of our place per round lists the head coaches, so Hoofdtrainer is left out.
+  const coachesCard = coachesCardOf(data.coaches.length)
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
@@ -188,7 +189,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
           the results: the table and the head coaches. */}
       <Page.Sidebar
-        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
+        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 && placePerRound === undefined ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
         wide
       >
         <Card
@@ -228,8 +229,10 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             </>
           )}
         </Card>
-        {placePerRound !== undefined && <PlacePerRoundCard places={placePerRound} />}
-        <CoachesCard coaches={data.coaches} />
+        {placePerRound !== undefined && (
+          <PlacePerRoundCard coaches={data.coaches} matches={data.matches} places={placePerRound} />
+        )}
+        {placePerRound === undefined && <CoachesCard coaches={data.coaches} />}
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
         )}

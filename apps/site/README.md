@@ -282,7 +282,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 De kaarten met cijfers staan op `/cijfers` (zie _De cijfers_).
 Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Cijfers waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
-Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Verloop op de ranglijst als het seizoen die heeft, en Hoofdtrainer; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
+Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Verloop op de ranglijst als het seizoen die heeft, en Hoofdtrainer, behalve in een seizoen met Verloop op de ranglijst; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand heeft een zacht vlak (`surface="soft"`), de hoofdtrainers een sterk vlak, en het programma en de uitslagen zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
@@ -320,13 +320,14 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
 - **Verloop op de ranglijst:** een kaart op het zachte vlak (`surface="soft"`, anker `#verloop-op-de-ranglijst`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
   De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
-  De x-as heeft een streepje met een getal bij elke vijfde ronde, en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.
-  Boven een gesloten `Disclosure` staat een lijst zonder opsommingstekens (`List plain`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
+  De x-as heeft een streepje met een getal bij ronde 1, een kwart, de helft, driekwart en de laatste ronde (1, 8, 17, 25 en 34), de y-as bij plek 1, de helft en de laatste plek (1, 9 en 18) (`axisTicks` in `src/placeHistory.ts`), en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.
+  Bij elke nieuwe hoofdtrainer na de eerste staat een gestreepte lijn op de rand tussen twee rondes (`dividers` van `BarChart`, #992).
+  Boven een gesloten `Disclosure` staat een lijst zonder opsommingstekens (`List plain`) met de hoogste en de laagste plek (met alle rondes, `roundRanges` in `src/placeHistory.ts`) en het totaal aantal plekken dat we verschoven zijn (`placeLines`), en daaronder een regel per hoofdtrainer met zijn of haar naam, de rondes en de plek van begin naar einde ("Ronde 1 t/m 12 · plek 5 → 9", `coachLines` en `coachText`; de rondes komen uit de wedstrijden); de uitklapper heeft een tabel met Ronde, # en P, de nieuwste ronde bovenaan.
   `placePerRoundOf` in `src/matches.ts` rekent de stand na elke ronde uit `league_results` (punten, doelsaldo, doelpunten voor, dan de naam).
   Een ronde is een punt als alle wedstrijden van die ronde en van de rondes ervoor gespeeld zijn; anders is het een open plek.
   Het lopende seizoen toont de lijn tot de laatste complete ronde.
   Een seizoen zonder uitslagen van alle clubs, of met afgetrokken punten, heeft geen kaart en geen link in de balk.
-- **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
+- **Hoofdtrainer of Hoofdtrainers:** (alleen in een seizoen zonder de kaart Verloop op de ranglijst, want die toont de trainers zelf, en dan staat ook de link in de balk er niet) een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
   Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitPersonName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
   Een seizoen met één trainer toont alleen de naam.

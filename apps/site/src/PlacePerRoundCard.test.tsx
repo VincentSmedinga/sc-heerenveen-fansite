@@ -1,3 +1,5 @@
+import type { PublicStaff } from '@fansite/db/queries'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -25,6 +27,62 @@ describe('labelsOf', () => {
 
     expect(open).toBeNull()
     expect(withoutIcons(renderToStaticMarkup(<>{label}</>))).toBe('Ronde 12: <strong>plek 4</strong>')
+  })
+})
+
+const staff = (name: string, startDate: string, interim = false) =>
+  ({ interim, name, startDate }) as unknown as PublicStaff
+const game = (round: number, matchDate: string) => ({
+  competition: 'Eredivisie' as const,
+  matchDate,
+  round: `Speelronde ${round}`,
+})
+const matchesOf = Array.from({ length: 34 }, (_, index) =>
+  game(
+    index + 1,
+    `2026-${String(Math.floor(index / 4) + 8).padStart(2, '0')}-${String((index % 4) * 7 + 1).padStart(2, '0')}`,
+  ),
+)
+
+describe('PlacePerRoundCard with head coaches', () => {
+  const coaches = [staff('Robin van Persie', '2026-07-01'), staff('Henk Brugge', '2026-10-01', true)]
+  const renderWith = (list: PublicStaff[]) =>
+    withoutIcons(renderToStaticMarkup(<PlacePerRoundCard coaches={list} matches={matchesOf} places={full} />))
+
+  it('has a line for each coach after the lines of the places, with the rounds and the places', () => {
+    const html = renderWith(coaches)
+    const list = html.slice(html.indexOf('<ul'), html.indexOf('</ul>'))
+    const items = [...list.matchAll(/<li>(.*?)<\/li>/g)].map(([, item]) => item!.replaceAll(/<[^>]+>/g, ''))
+
+    expect(items.slice(3)).toEqual([
+      'Robin van Persie Ronde 1 t/m 8 · plek 1 →  naar 2',
+      'Henk Brugge (interim) Vanaf ronde 9 · plek 3 →  naar 4',
+    ])
+  })
+
+  it('writes the arrow for the eye and the word "naar" for a screen reader', () => {
+    const html = renderWith(coaches)
+
+    expect(html).toContain('<span aria-hidden="true"> → </span><span class="hf-visually-hidden"> naar </span>')
+  })
+
+  it('has a dashed line in the chart on the edge before the round of each new coach, not for the first', () => {
+    const html = renderWith(coaches)
+
+    expect(
+      [...html.matchAll(/hf-bar-chart-divider" style="--hf-bar-chart-across:([\d.]+)"/g)].map(([, at]) => at),
+    ).toEqual(['23.53'])
+  })
+
+  it('has no line for a coach without a match, and no dashed line for one', () => {
+    const html = renderWith([coaches[0]!, staff('Zonder Wedstrijd', '2027-06-01')])
+
+    expect(html).toContain('Zonder')
+    expect(html).not.toContain('hf-bar-chart-divider')
+  })
+
+  it('has no coach lines without coaches', () => {
+    expect(render(full)).not.toContain('Ronde 1 t/m')
   })
 })
 
@@ -99,18 +157,27 @@ describe('PlacePerRoundCard', () => {
     expect(html.indexOf('</ul>')).toBeLessThan(html.indexOf('<details'))
   })
 
-  it('has strokes with a number at every fifth round, and no others', () => {
+  it('has strokes with a number at rounds 1, 8, 17, 25 and 34, and no others', () => {
     const html = render(full)
     const numbers = html.slice(html.indexOf('hf-bar-chart-numbers'), html.indexOf('hf-bar-chart-title'))
 
     expect(html).toContain('hf-bar-chart-numbers-marked')
     expect([...numbers.matchAll(/hf-bar-chart-number"[^>]*>(\d+)</g)].map(([, number]) => number)).toEqual([
-      '5',
-      '10',
-      '15',
-      '20',
+      '1',
+      '8',
+      '17',
       '25',
-      '30',
+      '34',
+    ])
+  })
+
+  it('has the numbers 1, 9 and 18 at the side', () => {
+    const html = render(full)
+
+    expect([...html.matchAll(/hf-bar-chart-scale-number"[^>]*>(\d+)</g)].map(([, number]) => number)).toEqual([
+      '1',
+      '9',
+      '18',
     ])
   })
 

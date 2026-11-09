@@ -17,6 +17,10 @@ const meta = preview.meta({
     axis: { description: 'De nummers onder de plekken en het bijschrift, of `false` voor niets.' },
     bars: { description: 'De staafjes, één per plek. `null` is een plek zonder staafje.' },
     children: { description: 'Lagen op dezelfde grafiek, zoals een `BarChart.Trend`.' },
+    dividers: {
+      description:
+        'Gestreepte verticale lijnen waar iets verandert, zoals een nieuwe trainer: 12 is de lijn tussen de twaalfde en de dertiende plek.',
+    },
     max: { description: 'De waarde van een vol staafje. Ook de schaal van de lijn.' },
     ticks: { description: 'Hulplijnen op deze waarden, en op een brede grafiek de cijfers aan de zijkant.' },
     tickText: { description: 'De tekst van een cijfer aan de zijkant, bijvoorbeeld met een punt bij duizendtallen.' },
@@ -165,7 +169,7 @@ const places = [9, 7, 5, 4, 6, 8, 7, 5, 4, 3, 5, 6, 8, 9, 7, 6, 5, 4, 4, 6, 7, 9
  * A line of places with place 1 at the top: the chart grows upwards, so a place is turned into
  * a height (`19 - place`). A round without a place is a gap (`null`).
  */
-const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
+const PlaceLine = ({ dividers = [], rounds }: { dividers?: readonly number[]; rounds: readonly (null | number)[] }) => (
   <div style={{ maxInlineSize: '36rem' }}>
     <Card aria-labelledby="plek-kop">
       <Heading id="plek-kop" level={2}>
@@ -173,13 +177,14 @@ const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
       </Heading>
       <BarChart
         axis={{
-          labels: [5, 10, 15, 20, 25, 30].map((round) => ({ at: round - 0.5, text: String(round) })),
+          labels: [1, 8, 17, 25, 34].map((round) => ({ at: round - 0.5, text: String(round) })),
           marks: true,
           title: 'Speelronde',
         }}
         bars={rounds.map(() => null)}
+        dividers={dividers}
         max={18}
-        ticks={[18, 14, 9, 4, 1]}
+        ticks={[18, 10, 1]}
         tickText={(height) => String(19 - height)}
       >
         <BarChart.Trend
@@ -200,6 +205,17 @@ const PlaceLine = ({ rounds }: { rounds: readonly (null | number)[] }) => (
 export const PlaceFullSeason = meta.story({
   name: 'Lijn met omgekeerde as: een heel seizoen, met streepjes en een vet deel in de tooltip',
   render: () => <PlaceLine rounds={places} />,
+})
+
+export const PlaceDividers = meta.story({
+  name: 'Lijn met omgekeerde as: gestreepte lijnen bij een nieuwe trainer, na ronde 12 en na ronde 25',
+  render: () => <PlaceLine dividers={[12, 25]} rounds={places} />,
+})
+
+export const PlaceDividersDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Lijn met omgekeerde as: gestreepte lijnen in het donker',
+  render: () => <PlaceLine dividers={[12, 25]} rounds={places} />,
 })
 
 export const PlaceSeasonInProgress = meta.story({
