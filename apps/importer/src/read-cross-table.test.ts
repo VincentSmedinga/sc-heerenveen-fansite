@@ -125,20 +125,21 @@ describe('readCrossTable', () => {
   it('refuses a table whose rows do not fit its columns', () => {
     // A row is missing.
     expect(readCrossTable(page({}, { rows: clubs.slice(1) }))).toEqual({
-      detail: '11 rows for 12 columns',
+      columns: 12,
       kind: 'error',
-      problem: 'rows-differ',
+      problem: 'row-count',
+      rows: 11,
     })
     // A club has a score against itself: the columns are not in the order the reader thinks.
     expect(readCrossTable(page({ 'Club 2-Club 2': '1 – 0' }))).toEqual({
-      detail: 'the row of Club 2',
       kind: 'error',
-      problem: 'rows-differ',
+      problem: 'row',
+      row: 'Club 2',
     })
     // A row of a club the columns do not have.
     expect(readCrossTable(page({}, { rows: [...clubs.slice(1), 'Club 99'] }))).toMatchObject({
-      detail: 'the row of Club 99',
-      problem: 'rows-differ',
+      problem: 'row',
+      row: 'Club 99',
     })
   })
 })

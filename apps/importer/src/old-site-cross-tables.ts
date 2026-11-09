@@ -58,7 +58,6 @@ const problems: Readonly<Record<CrossTableProblem, string>> = {
   'no-clubs': 'de tabel onder het kopje Uitslagen heeft geen kolom voor elke club',
   'no-heading': 'de pagina heeft geen kopje Uitslagen',
   'no-table': 'onder het kopje Uitslagen staat geen tabel',
-  'rows-differ': 'de rijen van de tabel passen niet bij de kolommen',
 }
 
 /**
@@ -110,7 +109,12 @@ export async function compareCrossTables(
       continue
     }
     if (read.kind === 'error') {
-      one.unreadable = `${problems[read.problem]}${read.detail === undefined ? '' : ` (${inline(read.detail)})`}`
+      one.unreadable =
+        read.problem === 'row-count'
+          ? `de tabel heeft ${read.rows} rijen voor ${read.columns} kolommen`
+          : read.problem === 'row'
+            ? `de rij van ${inline(read.row)} past niet bij de kolommen van de tabel`
+            : problems[read.problem]
       continue
     }
 
@@ -258,8 +262,8 @@ export async function fetchCrossTables(
           return { reason: stopped }
         case 'error':
           return outcome.reason === 'http-status' && outcome.status === 404
-            ? { reason: `de pagina ${title} bestaat niet` }
-            : { reason: `de pagina ${title} was niet op te halen (${printable(outcome.message)})` }
+            ? { reason: `de pagina ${inline(title)} bestaat niet` }
+            : { reason: `de pagina ${inline(title)} was niet op te halen (${failureOf(outcome)})` }
         case 'fetched': {
           const text = new TextDecoder('utf-8').decode(outcome.body)
           const marker = redirectStart.exec(text.trimStart())
@@ -271,21 +275,21 @@ export async function fetchCrossTables(
           const target = linkedPage(text.trimStart().slice(marker[0].length))
 
           if (target === null) {
-            return { reason: `de pagina ${title} verwijst door zonder titel` }
+            return { reason: `de pagina ${inline(title)} verwijst door zonder titel` }
           }
 
           title = target
           break
         }
         case 'not-modified':
-          return { reason: `de pagina ${title} gaf geen tekst terug` }
+          return { reason: `de pagina ${inline(title)} gaf geen tekst terug` }
         case 'wait':
           stopped = 'Wikipedia vroeg om te wachten'
           return { reason: stopped }
       }
     }
 
-    return { reason: `de pagina ${first} verwijst te vaak door` }
+    return { reason: `de pagina ${inline(first)} verwijst te vaak door` }
   }
 
   for (const season of seasons) {
@@ -297,6 +301,14 @@ export async function fetchCrossTables(
   }
 
   return fetched
+}
+
+/**
+ * What went wrong with a request, for the Dutch report: the status of the answer, or the code
+ * of the fetcher for the fault. The message of the fetcher is English and stays in the log.
+ */
+function failureOf(outcome: { reason: string; status?: number }): string {
+  return outcome.status === undefined ? `fout \`${outcome.reason}\`` : `HTTP ${outcome.status}`
 }
 
 /**

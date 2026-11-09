@@ -7,10 +7,9 @@ import { clean, clubName, linkedPage, plain } from './read-wikipedia.ts'
 
 /**
  * Why a table could not be read: the page has no heading `Uitslagen`, the heading has no table
- * under it, the table has no row of headers with a link for each club, or its rows do not fit
- * its columns (`detail` says which row).
+ * under it, or the table has no row of headers with a link for each club.
  */
-export type CrossTableProblem = 'no-clubs' | 'no-heading' | 'no-table' | 'rows-differ'
+export type CrossTableProblem = 'no-clubs' | 'no-heading' | 'no-table'
 
 /** One cell of the table that has a score. A club is named as its own row shows it. */
 export type CrossTableResult = {
@@ -30,7 +29,11 @@ export type CrossTableUnread = Pick<CrossTableResult, 'awayClub' | 'awayPage' | 
 }
 
 export type ReadCrossTable =
-  | { detail?: string; kind: 'error'; problem: CrossTableProblem }
+  /** The table has another number of rows than of columns. */
+  | { columns: number; kind: 'error'; problem: 'row-count'; rows: number }
+  /** The row of this club does not fit the columns; the club is named as the page shows it. */
+  | { kind: 'error'; problem: 'row'; row: string }
+  | { kind: 'error'; problem: CrossTableProblem }
   | { kind: 'read'; results: CrossTableResult[]; unread: CrossTableUnread[] }
 
 /** A league has at least this many clubs; fewer columns is no cross table of a league. */
@@ -87,14 +90,14 @@ export function readCrossTable(text: string): ReadCrossTable {
   const unread: CrossTableUnread[] = []
 
   if (homes.length !== columns.length) {
-    return { detail: `${homes.length} rows for ${columns.length} columns`, kind: 'error', problem: 'rows-differ' }
+    return { columns: columns.length, kind: 'error', problem: 'row-count', rows: homes.length }
   }
 
   for (const home of homes) {
     const own = home.page === null ? -1 : columns.indexOf(home.page)
 
     if (home.page === null || own === -1 || home.cells.length !== columns.length || cellText(home.cells[own]) !== '') {
-      return { detail: `the row of ${home.name}`, kind: 'error', problem: 'rows-differ' }
+      return { kind: 'error', problem: 'row', row: home.name }
     }
 
     for (const [index, awayPage] of columns.entries()) {

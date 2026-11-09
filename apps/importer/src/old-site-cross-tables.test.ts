@@ -143,9 +143,29 @@ describe('fetchCrossTables', () => {
     expect(fetched).toMatchObject([
       {
         kind: 'none',
-        reason: 'de pagina Eredivisie 1990/91 was niet op te halen (The request took longer than 10 seconds)',
+        reason: 'de pagina Eredivisie 1990/91 was niet op te halen (fout `timeout`)',
       },
       { kind: 'page', text: 'pagina' },
+    ])
+  })
+
+  it('gives up on a redirect without a title and on redirects in a row, in Dutch and without Markdown', async () => {
+    const { fetcher } = fetcherOf({
+      [`${origin}/wiki/Eredivisie_1990/91?action=raw`]: '#REDIRECT nergens heen',
+      [`${origin}/wiki/Eredivisie_1993/94?action=raw`]: '#REDIRECT [[Eredivisie 1993/94]]',
+      [`${origin}/wiki/Eredivisie_1994/95?action=raw`]: '#REDIRECT [[Een_*pagina*_`met`_tekens]]',
+    })
+    const fetched = await fetchCrossTables(
+      fetcher,
+      origin,
+      [season('1990/91'), season('1993/94'), season('1994/95')],
+      0,
+    )
+
+    expect(fetched.map((one) => one.kind === 'none' && one.reason)).toEqual([
+      'de pagina Eredivisie 1990/91 verwijst door zonder titel',
+      'de pagina Eredivisie 1993/94 verwijst te vaak door',
+      'de pagina Een pagina met tekens bestaat niet',
     ])
   })
 
@@ -304,6 +324,11 @@ describe('compareCrossTables', () => {
       // The Eredivisie of a season sc Heerenveen played a division lower.
       { ...season('1992/93'), kind: 'page', text: eredivisie199091.replaceAll('sc Heerenveen', 'Testdorp FC') },
       {
+        ...season('1995/96'),
+        kind: 'page',
+        text: eredivisie199091.replace(/\|-\n\|align=right\|'''\[\[Feyenoord\]\]'''.*\n/u, ''),
+      },
+      {
         ...season('1994/95'),
         kind: 'page',
         text: eredivisie199091.replace(
@@ -317,7 +342,8 @@ describe('compareCrossTables', () => {
       'de pagina Eredivisie 1990/91 bestaat niet',
       'de pagina heeft geen kopje Uitslagen',
       'sc Heerenveen staat niet in de tabel',
-      'de rijen van de tabel passen niet bij de kolommen (the row of Feyenoord)',
+      'de tabel heeft 17 rijen voor 18 kolommen',
+      'de rij van Feyenoord past niet bij de kolommen van de tabel',
     ])
     expect(tables.flatMap((table) => table.lines)).toEqual([])
     expect(await compareCrossTables(database.db, [])).toEqual([])
