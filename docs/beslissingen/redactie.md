@@ -2808,6 +2808,7 @@
   Het gemiddelde zegt niets over wanneer de wedstrijden waren.
 - **Alternatieven:** het gemiddelde van de tegenstander (leest als "de lastigste tegenstanders" en kan met deze kaart verward worden); geen minimum (de lijst bestaat dan uit clubs die we één keer troffen); een minimum van 3 (de aantallen blijven klein); altijd de Eredivisie (de kaart zou bij de keuze "alles" afwijken van de tabel ernaast); sorteren op het afgeronde gemiddelde (twee clubs met "2,38" staan dan op toeval).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397): deze kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen, en volgt de schakelaar in plaats van altijd de Eredivisie te tellen.
+- **Later:** zie _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ (9 november 2026): onder deze kaart staat sindsdien een tweede kaart met de andere kant van dezelfde lijst, en die komt er alleen als minstens 10 clubs aan het minimum voldoen.
 
 ## De pagina van een club heeft een kaart met doelpuntenmakers, vanaf 5 wedstrijden
 
@@ -2897,3 +2898,24 @@
   Wikipedia en de oude bestanden schrijven `pen.`, en wat we importeren moeten we kunnen blijven lezen.
   Wat een redacteur al met "penalty" plakte, mag niet stukgaan.
 - **Alternatieven:** "pen." en "penalty" laten staan, zoals het was; ook de importer en het plakscherm alleen "strafschop" laten lezen, wat bestanden en gewoonten breekt; "pen." en "str." allebei toestaan, wat twee afkortingen voor één ding geeft.
+
+## De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs
+
+- **Datum:** 9 november 2026
+- **Besluit:** de zijkolom van Tegenstanders krijgt onder "Gemiddeld resultaat" een eigen zachte kaart "Het moeilijkst" met de vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt (#787).
+  - **De clubs:** alleen clubs met minstens 5 gespeelde wedstrijden, de laagste punten per wedstrijd eerst.
+    Bij gelijke verhouding (kruislings vermenigvuldigd, zoals bij de top 10) gaat de club met de meeste wedstrijden voor, daarna beslist de naam.
+    Elke club heeft een eigen plaats, 1 tot en met 5.
+  - **De tabel** heeft dezelfde kolommen als de top 10: plaats, club (een link die de keuze van de schakelaar houdt), P en G.
+    Het bijschrift zegt dat het onze punten per wedstrijd zijn, van laag naar hoog, zodat de kaart niet gelezen wordt als het gemiddelde van de tegenstander.
+    Onder de tabel staan dezelfde legenda en dezelfde regel "Gebaseerd op" (`BasedOnSince`) als bij de top 10, met de wedstrijden van de clubs die meedoen.
+  - **De kaart staat er alleen als minstens 10 clubs aan het minimum voldoen.**
+    Met minder dan 10 clubs staat de top 10 alleen, zoals eerder.
+  - **De schakelaar** beslist, zoals bij de top 10 (`?competitie=eredivisie`).
+- **Waarom:** de top 10 laat alleen de goede kant zien, en voor supporters is "tegen wie gaat het slecht?" een even natuurlijke vraag.
+  Een eigen kaart houdt twee ranglijsten met elk hun bijschrift en "Gebaseerd op" overzichtelijk.
+  Vijf clubs is genoeg voor een lijst naast de tien, en drie ziet er dun uit.
+- **Nadeel:** met de keuze Eredivisie kunnen minder dan 10 clubs het minimum halen, dan ontbreekt de kaart.
+  De zijkolom wordt langer, en op een telefoon staat hij onder de top 10.
+  Met 10 tot en met 14 clubs staat een club nog in allebei de lijsten (bij 10 clubs staan alle tien in de top 10); pas vanaf 15 clubs zijn de lijsten gescheiden.
+- **Alternatieven:** beide lijsten in één kaart (twee tabellen, twee bijschriften, één "Gebaseerd op" die voor beide niet klopt); drie clubs (dun naast tien); de kaart ook tonen met minder dan 10 clubs; "Lastigste tegenstanders" als kop (leest als het gemiddelde van de tegenstander).

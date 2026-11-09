@@ -619,6 +619,8 @@ De zijkolom heeft de zachte kaart "Gemiddeld resultaat" (`TopPointsCard`), met d
 De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
 Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
+Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de vijf clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
+Ze heeft dezelfde tabel, legenda en regel "Gebaseerd op" als de top 10, van laag naar hoog, en staat er alleen als minstens 10 clubs 5 gespeelde wedstrijden hebben.
 
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als de redactie een lijst van namen heeft ingevuld (zie _De namen van een club_ onder _Het beheer_).
 De regel noemt de namen vóór de naam van nu met hun periode, zoals "Eerder: FC Zwolle t/m 2011/12" (`earlierNames` in `src/opponents.ts`).

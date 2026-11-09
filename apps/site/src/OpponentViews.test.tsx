@@ -6,7 +6,14 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
 
-import { ClubPlacesCard, ClubsCard, ClubScoreCountsCard, ClubTopScorersCard, TopPointsCard } from './OpponentViews'
+import {
+  ClubPlacesCard,
+  ClubsCard,
+  ClubScoreCountsCard,
+  ClubTopScorersCard,
+  HardestCard,
+  TopPointsCard,
+} from './OpponentViews'
 import { testclub } from './test-opponents'
 
 const record = (
@@ -157,6 +164,49 @@ describe('TopPointsCard', () => {
     expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(screen.queryByRole('table')).toBeNull()
     expect(screen.queryByText(/Gebaseerd op/)).toBeNull()
+  })
+})
+
+describe('HardestCard', () => {
+  // Ten clubs of five matches: five that won them all, and Club 5 to 9 with 4 down to 0 points.
+  const many = Array.from({ length: 10 }, (_, index) =>
+    index < 5 ? record(`Club ${index}`, 5, 0, 0, 0, 0) : record(`Club ${index}`, 0, 9 - index, index - 4, 0, 0),
+  )
+  const card = (choice: 'all' | 'league' = 'all', query = '', list = many) => (
+    <HardestCard address="/tegenstanders" choice={choice} query={query} records={list} since="2022/23" />
+  )
+
+  it('ranks the five lowest averages from low to high, with the caption of our points', () => {
+    render(card())
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Het moeilijkst' })).toBeTruthy()
+    expect(names()).toEqual(['Club 9', 'Club 8', 'Club 7', 'Club 6', 'Club 5'])
+    expect(figures(1)).toEqual(['1', '2', '3', '4', '5'])
+    expect(figures(2)).toEqual(['0,00', '0,20', '0,40', '0,60', '0,80'])
+    expect(
+      screen.getByRole('table', {
+        name: 'De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
+    expect(
+      screen.getByText(/^Gebaseerd op alle 50 gespeelde wedstrijden sinds 2022\/23, tegen clubs met minstens 5/),
+    ).toBeTruthy()
+  })
+
+  it('follows the switch: Eredivisie in the caption and in every link', () => {
+    render(card('league', '?competitie=eredivisie'))
+
+    expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, in de Eredivisie$/)
+    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))[0]).toBe(
+      '/tegenstanders/club 9?competitie=eredivisie',
+    )
+  })
+
+  it('is not there with fewer than ten clubs that count', () => {
+    const { container } = render(card('all', '', many.slice(0, 9)))
+
+    expect(container.textContent).toBe('')
   })
 })
 

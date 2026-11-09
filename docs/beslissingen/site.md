@@ -3960,3 +3960,13 @@
 - **Waarom:** de kolommen herhaalden zich in elke regel en namen op een telefoon de meeste ruimte.
 - **Alternatieven:** groeperen per maand (veel tabellen voor een schermlezer); kortere tekst in aparte kolommen; de competitie alleen noemen als het niet de Eredivisie is.
 - **Later:** deze beslissing vervangt de kolommen Datum en Competitie die onder de naam inklapten (zie de beslissing over de lijst in het beheer van eerder).
+
+## De kaart Het moeilijkst is een eigen kaart onder Gemiddeld resultaat, berekend met `hardestOf`
+
+- **Datum:** 9 november 2026
+- **Besluit:** de zijkolom van Tegenstanders toont onder `TopPointsCard` de zachte kaart `HardestCard`, die niets rendert als `hardestOf` in `src/opponents.ts` geen plaatsen geeft.
+  `hardestOf` gebruikt dezelfde punten (`pointsOf`), hetzelfde minimum (`topPointsMinimum`) en dezelfde volgorde op de echte verhouding als `topPointsOf`, maar dan laag naar hoog, met de vijf laagste, zonder database.
+  Heeft minder dan `topPointsPlaces` (10) clubs het minimum, dan zijn `places` leeg en `played` 0.
+  De regels voor wat bezoekers zien staan in _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ in `redactie.md`.
+- **Waarom:** een eigen kaart en een eigen functie houden de top 10 zoals hij was, en de kaart verdwijnt zonder lege staat, want een zin "geen clubs" zou hier niets toevoegen.
+- **Alternatieven:** `topPointsOf` laten kiezen tussen boven- en onderkant (de teruggegeven vorm wordt dan voor twee dingen gebruikt); de kaart een zin laten tonen als er te weinig clubs zijn.
