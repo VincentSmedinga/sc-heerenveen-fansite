@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { matchChanges, matches, matchImports, players, squadImports } from '@fansite/db/schema'
+import { matchChanges, matches, matchImports, players, playerSeasonStats, squadImports } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -46,6 +46,9 @@ const season = '2025/26'
 const firstOfJuly = new Date('2026-07-01T00:00:00Z')
 
 const hour = 60 * 60 * 1000
+
+/** A week: cron runs at the same minute, so the read a week later is this far on. */
+const week = 7 * 24 * hour
 
 let database: TestDatabase
 const servers: TestServer[] = []
@@ -157,23 +160,25 @@ describe('the season that has just ended', () => {
 
 describe('the weekly read of the season that has just ended', () => {
   it('reads the matches on 1 July with the checks of the command, and waits a week', async () => {
-    const server = await serve({ [season]: { pages: ended } })
+    const server = await serve({ [season]: { pages: ended, squad } })
 
     const lines = await rereadAt(server, firstOfJuly)
 
     expect(lines).toContain(
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
     )
-    expect(lines).toContain('Squad 2025/26: no squad page on Wikipedia, so no squad')
+    expect(lines).toContain('Squad 2025/26: 25 new, 0 updated, 0 unchanged, 0 left the squad')
+    expect(lines).toContain('Squad 2025/26: numbers of the players: 50 new, 0 updated, 0 unchanged')
     expect(await database.db.select().from(matches).where(eq(matches.season, season))).toHaveLength(38)
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(25)
     expect(await healthOf(season)).toMatchObject({
       matches: { lastOutcome: 'imported', retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs) },
-      squad: { retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs) },
+      squad: { lastOutcome: 'imported', retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs) },
     })
   })
 
   it('asks nothing and says nothing within the week, and reads again once the week is over', async () => {
-    const server = await serve({ [season]: { pages: ended } })
+    const server = await serve({ [season]: { pages: ended, squad } })
 
     await rereadAt(server, firstOfJuly)
 
@@ -184,16 +189,20 @@ describe('the weekly read of the season that has just ended', () => {
     expect(await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs - 1))).toEqual([])
     expect(seasonRequests(server)).toHaveLength(asked)
 
-    const again = await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs))
+    // The run a week later, also when cron starts it some minutes early.
+    expect(rereadEveryMs).toBeLessThan(week)
+    expect(rereadEveryMs).toBeGreaterThan(week - hour / 4)
 
-    expect(again).toContain(
-      'Matches 2025/26: 0 new, 0 updated, 38 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
-    )
+    const again = await rereadAt(server, new Date(firstOfJuly.getTime() + week))
+
+    // The goals of the first read get their players now: the squad came after the matches.
+    expect(again.some((line) => line.startsWith('Matches 2025/26: 0 new, '))).toBe(true)
+    expect(again).toContain('Squad 2025/26: 0 new, 0 updated, 25 unchanged, 0 left the squad')
     expect(seasonRequests(server)).toHaveLength(asked * 2)
   })
 
   it('waits for the pause the hourly import left on 30 June before the first read', async () => {
-    const server = await serve({ [season]: { pages: ended } })
+    const server = await serve({ [season]: { pages: ended, squad } })
     const retryAt = new Date(firstOfJuly.getTime() + hour / 2)
 
     await database.db.insert(matchImports).values({ lastOutcome: 'imported', retryAt, season })
@@ -205,7 +214,7 @@ describe('the weekly read of the season that has just ended', () => {
   })
 
   it('asks nothing on 30 June, when the season is still the current one', async () => {
-    const server = await serve({ [season]: { pages: ended } })
+    const server = await serve({ [season]: { pages: ended, squad } })
 
     expect(await rereadAt(server, new Date('2026-06-30T23:59:59Z'))).toEqual([])
     expect(server.requests).toEqual([])
@@ -214,7 +223,7 @@ describe('the weekly read of the season that has just ended', () => {
   })
 
   it('still reads on 31 August, and no more from 1 September on', async () => {
-    const server = await serve({ [season]: { pages: ended } })
+    const server = await serve({ [season]: { pages: ended, squad } })
 
     expect(await rereadAt(server, new Date('2026-08-31T23:59:59Z'))).toContain(
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
@@ -230,15 +239,15 @@ describe('the weekly read of the season that has just ended', () => {
   })
 
   it('brings a correction in by itself: held in the first week, taken over in the next', async () => {
-    await rereadAt(await serve({ [season]: { pages: ended } }), firstOfJuly)
+    await rereadAt(await serve({ [season]: { pages: ended, squad } }), firstOfJuly)
 
-    const server = await serve({ [season]: { pages: corrected } })
-    const held = await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs))
+    const server = await serve({ [season]: { pages: corrected, squad } })
+    const held = await rereadAt(server, new Date(firstOfJuly.getTime() + week))
 
-    expect(held.join('\n')).toContain('0 new, 0 updated, 37 unchanged, 0 removed, 1 held;')
+    expect(held.join('\n')).toContain(' 0 removed, 1 held;')
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ season, status: 'pending' }])
 
-    await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * rereadEveryMs))
+    await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * week))
 
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
       { kickoffAt: new Date('2025-08-09T18:30:00Z') },
@@ -246,39 +255,56 @@ describe('the weekly read of the season that has just ended', () => {
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'stood', status: 'accepted' }])
   })
 
-  it('reads the squad of a season the hourly import read, from its squad table', async () => {
-    const server = await serve({ '2026/27': { pages: next, squad } })
-    const at = new Date('2027-07-01T00:00:00Z')
+  it('brings a number of a player in that the squad table had not counted yet', async () => {
+    const row = "[[Bernt Klaverboer]]||2029||9||0||0||0||0||0||'''9'''"
 
-    const lines = await rereadAt(server, at)
+    expect(squad).toContain(row)
+    await rereadAt(await serve({ [season]: { pages: ended, squad } }), firstOfJuly)
 
-    expect(lines).toContain('Squad 2026/27: 25 new, 0 improved, 0 unchanged, from 1 page')
-    expect(await database.db.select().from(players).where(eq(players.season, '2026/27'))).toHaveLength(25)
-    expect((await healthOf('2026/27')).squad).toMatchObject({
-      lastOutcome: 'imported',
-      retryAt: new Date(at.getTime() + rereadEveryMs),
+    const counted = squad.replace(row, "[[Bernt Klaverboer]]||2029||10||0||0||0||0||0||'''10'''")
+    const lines = await rereadAt(
+      await serve({ [season]: { pages: ended, squad: counted } }),
+      new Date(firstOfJuly.getTime() + week),
+    )
+
+    expect(lines).toContain('Squad 2025/26: 0 new, 0 updated, 25 unchanged, 0 left the squad')
+    expect(lines).toContain('Squad 2025/26: numbers of the players: 0 new, 1 updated, 49 unchanged')
+    expect(
+      await database.db
+        .select({ appearances: playerSeasonStats.appearances })
+        .from(playerSeasonStats)
+        .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
+        .where(eq(players.name, 'Bernt Klaverboer')),
+    ).toContainEqual({ appearances: 10 })
+  })
+
+  it('keeps the players of a season it reads for the first time, and makes a warning of a missing page', async () => {
+    await database.db.insert(players).values({ name: 'Speler Van Vroeger', searchTerm: 'Speler Van Vroeger', season })
+
+    const lines = await rereadAt(await serve({ [season]: { pages: ended } }), firstOfJuly)
+
+    expect(lines.some((line) => line.startsWith('Squad 2025/26: warning, nothing changed'))).toBe(true)
+    expect((await healthOf(season)).squad).toMatchObject({
+      lastOutcome: 'error',
+      retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs),
     })
 
-    const asked = server.requests.length
-
-    expect(await rereadAt(server, new Date(at.getTime() + hour))).toEqual([])
-    expect(server.requests).toHaveLength(asked)
-    expect(await rereadAt(server, new Date(at.getTime() + rereadEveryMs))).toContain(
-      'Squad 2026/27: 0 new, 0 improved, 25 unchanged, from 1 page',
-    )
+    // A first good read of the current season replaces the made-up squad; this one does not.
+    await rereadAt(await serve({ [season]: { pages: ended, squad } }), new Date(firstOfJuly.getTime() + week))
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(26)
   })
 
   it('makes a warning of a page that fails a check, keeps the rows, and reads the squad anyway', async () => {
-    await rereadAt(await serve({ [season]: { pages: ended } }), firstOfJuly)
+    await rereadAt(await serve({ [season]: { pages: ended, squad } }), firstOfJuly)
 
     const before = await database.db.select().from(matches).where(eq(matches.season, season))
-    const broken = await serve({ [season]: { pages: { ...ended, programme: 'Geen wedstrijden meer.' } } })
-    const at = new Date(firstOfJuly.getTime() + rereadEveryMs)
+    const broken = await serve({ [season]: { pages: { ...ended, programme: 'Geen wedstrijden meer.' }, squad } })
+    const at = new Date(firstOfJuly.getTime() + week)
 
     const lines = await rereadAt(broken, at)
 
     expect(lines[0]).toMatch(/^Matches 2025\/26: warning, nothing changed and the last good copy stays: /u)
-    expect(lines).toContain('Squad 2025/26: no squad page on Wikipedia, so no squad')
+    expect(lines).toContain('Squad 2025/26: 0 new, 0 updated, 25 unchanged, 0 left the squad')
     expect(await database.db.select().from(matches).where(eq(matches.season, season))).toEqual(before)
     // A page that fails a check today fails it in an hour too: the next read is a week later.
     expect((await healthOf(season)).matches).toMatchObject({
@@ -290,7 +316,7 @@ describe('the weekly read of the season that has just ended', () => {
 
   it('keeps the shorter pause when Wikipedia asks us to wait: nothing was read', async () => {
     const server = await serve(
-      { [season]: { pages: ended } },
+      { [season]: { pages: ended, squad } },
       { [pageUrl('', pageTitles(season).programme)]: reply(429, 'Te druk', { 'Retry-After': '120' }) },
     )
 
@@ -320,7 +346,7 @@ describe('the hourly import in July and August', () => {
   }
 
   it('reads the season that has ended after the current one, in the same run', async () => {
-    const server = await serve({ '2026/27': { pages: next, squad }, [season]: { pages: ended } })
+    const server = await serve({ '2026/27': { pages: next, squad }, [season]: { pages: ended, squad } })
 
     const { code, lines } = await run(server, firstOfJuly)
     const heads = lines.filter((line) => /^(Matches|Squad) \d{4}\/\d{2}: \d+ new/u.test(line))
@@ -330,6 +356,7 @@ describe('the hourly import in July and August', () => {
       'Matches 2026/27',
       'Squad 2026/27',
       'Matches 2025/26',
+      'Squad 2025/26',
     ])
     expect(await database.db.select().from(matches).where(eq(matches.season, season))).toHaveLength(38)
   })
@@ -337,7 +364,7 @@ describe('the hourly import in July and August', () => {
   it('stays a run that worked when the season that has ended fails: a warning, and the current season is stored', async () => {
     const server = await serve({
       '2026/27': { pages: next, squad },
-      [season]: { pages: { ...ended, programme: 'Geen wedstrijden meer.' } },
+      [season]: { pages: { ...ended, programme: 'Geen wedstrijden meer.' }, squad },
     })
 
     const { code, lines } = await run(server, firstOfJuly)
@@ -353,7 +380,7 @@ describe('the hourly import in July and August', () => {
   })
 
   it('reads the current season only from 1 September on', async () => {
-    const server = await serve({ '2026/27': { pages: next, squad }, [season]: { pages: ended } })
+    const server = await serve({ '2026/27': { pages: next, squad }, [season]: { pages: ended, squad } })
 
     const { code, lines } = await run(server, new Date('2026-09-01T00:00:00Z'))
 

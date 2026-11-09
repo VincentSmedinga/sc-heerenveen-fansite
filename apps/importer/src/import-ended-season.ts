@@ -1,10 +1,11 @@
 // The hourly import reads the season that has just ended once a week, from 1 July up to and
 // including 31 August (#975). A late correction on Wikipedia, such as a scorer or an
-// attendance, then comes in without a run of `Import season` by hand. It reads the matches and
-// the squad with the commands for a season that is over (`importPastSeason` and
-// `importPastSquad`), so with the same checks, and it uses the pause of the season in
-// `match_imports.retry_at` and `squad_imports.retry_at`: after a read that came to a verdict,
-// the next one is a week later.
+// attendance, then comes in without a run of `Import season` by hand. It reads the matches
+// with the command for a season that is over (`importPastSeason`), so with the same checks,
+// and the squad as the hourly import read it while the season was the current one
+// (`importSquad`), so the numbers of the players come along. It uses the pause of the season
+// in `match_imports.retry_at` and `squad_imports.retry_at`: after a read that came to a
+// verdict, the next one is a week later.
 import type { Database } from '@fansite/db/client'
 
 import { matchImports, squadImports } from '@fansite/db/schema'
@@ -14,11 +15,15 @@ import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
 
 import { formatMatchReport, importPastSeason } from './import-matches.ts'
-import { formatPastSquadReport, importPastSquad } from './import-past-squad.ts'
+import { formatSquadReport, importSquad } from './import-squad.ts'
 import { describeError } from './text.ts'
 
-/** The time between two reads of the season that has ended: a week. */
-export const rereadEveryMs = 7 * 24 * 60 * 60 * 1000
+/**
+ * The pause between two reads of the season that has ended: a week. The pause starts when a
+ * read is done, and cron starts each run a moment earlier or later, so ten minutes less makes
+ * sure the run a week later reads it, and not the one after that.
+ */
+export const rereadEveryMs = 7 * 24 * 60 * 60 * 1000 - 10 * 60 * 1000
 
 /**
  * The season that has just ended, while the hourly import still reads it: the season before
@@ -47,7 +52,8 @@ export function endedSeasonOf(moment: Date): string | undefined {
  * throws, it stops neither the other part nor the current season, and it counts for no alert.
  * After a read that is stored or that fails, the next one is a week later. When Wikipedia asks
  * us to wait or robots.txt refuses, the shorter pause of the health stays, since nothing was
- * read.
+ * read. The squad is read like that of the current season, so the numbers of the players are
+ * stored too.
  */
 export async function importEndedSeason(
   db: Database,
@@ -86,17 +92,15 @@ export async function importEndedSeason(
     const [before] = await db.select().from(squadImports).where(eq(squadImports.season, season))
 
     if (!isPaused(before, clock())) {
-      const report = await importPastSquad(db, fetcher, season, options)
+      const report = await importSquad(db, fetcher, { ...options, endedSeason: season })
 
-      lines.push(formatPastSquadReport(report))
-      if (report.kind === 'imported' || report.kind === 'error' || report.kind === 'none') {
+      lines.push(formatSquadReport(report))
+      if (report.kind === 'imported' || report.kind === 'error') {
         const retryAt = new Date(clock().getTime() + rereadEveryMs)
 
-        // A season without a squad page has no row yet: it gets one, so that it waits a week
-        // too.
         await db
           .insert(squadImports)
-          .values({ lastOutcome: report.kind === 'error' ? 'error' : 'imported', retryAt, season })
+          .values({ lastOutcome: report.kind, retryAt, season })
           .onDuplicateKeyUpdate({ set: { retryAt } })
       }
     }

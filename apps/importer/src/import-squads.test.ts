@@ -181,16 +181,6 @@ describe('squadSources', () => {
     }
   })
 
-  it('has the squad table for 2026/27 and later, which the hourly import read as the current season', () => {
-    for (const forSeason of ['2026/27', '2027/28', '2031/32']) {
-      const [source] = squadSources(forSeason)
-
-      expect(source?.title).toBe(squadPageTitle(forSeason))
-      expect(source?.origin).toBe('nl')
-      expect(source?.readers.map((reader) => reader.name)).toEqual(['squad table'])
-    }
-  })
-
   it('has the English page for the five seasons the Dutch Wikipedia has no squad for', () => {
     for (const forSeason of ['2018/19', '2019/20', '2020/21', '2021/22', '2024/25']) {
       const [source] = squadSources(forSeason)

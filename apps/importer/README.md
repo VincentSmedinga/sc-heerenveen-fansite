@@ -1673,19 +1673,19 @@ Zo komt een late verbetering op Wikipedia binnen zonder dat iemand `import:seaso
 
 - `endedSeasonOf` zegt welk seizoen dat is: het seizoen vóór dat van het moment, in juli en augustus, en anders geen.
   De dagen zijn die van UTC, zoals bij `seasonOf`.
-- De import leest eerst de wedstrijden met `importPastSeason` en dan de selectie met `importPastSquad`.
-  Dat zijn de functies achter `import:season` en `import:squad`, dus de controles en de opslag zijn dezelfde.
+- De import leest eerst de wedstrijden met `importPastSeason`, de functie achter `import:season`, dus met dezelfde controles en opslag.
+  Dan leest hij de selectie met `importSquad`, zoals toen het seizoen liep: dezelfde pagina, dezelfde controles, en de cijfers van de spelers gaan naar `player_season_stats`.
+  `importPastSquad` van `import:squad` bewaart die cijfers niet, en heeft voor een seizoen na 2024/25 geen pagina.
+  De eerste lezing vervangt hier nooit de spelers die er al staan.
   Hij doet dat na het lopende seizoen, in dezelfde run en met dezelfde fetcher.
 - De pauze staat in `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
   Is die niet voorbij, dan vraagt de import niets en schrijft hij geen regel.
-  Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week (`rereadEveryMs`).
+  Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week min tien minuten (`rereadEveryMs`), zodat de run van precies een week later leest.
   Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze van `healthAfter` staan, want er is niets gelezen.
-- De opdrachten `import:season` en `import:squad` kijken niet naar de pauze en zetten haar op een uur.
+- De opdrachten `import:season` en `import:squad` kijken niet naar de pauze en zetten haar op een uur min een minuut.
   Na zo'n opdracht leest de uurlijkse import het seizoen dus een uur later nog eens, en wacht dan weer een week.
 - Een lezing die faalt, is een waarschuwing in de uitvoer en in de rij van dat seizoen in `match_imports` of `squad_imports`.
   Ze stopt de selectie en het lopende seizoen niet, verandert de exitcode niet en telt niet voor de mail over een import die blijft falen.
-- De selectie komt van `squadSources`: voor 2026/27 en later is dat de pagina met de tabel die de uurlijkse import las toen het seizoen liep.
-  Zoals bij elke lezing van `importPastSquad` gaan de wedstrijden en doelpunten uit die tabel niet naar `player_season_stats`.
 - `pnpm run import:status` blijft over het lopende seizoen gaan.
 
 #### Alle afgelopen seizoenen
@@ -1737,7 +1737,6 @@ Op acceptatie start je `--from-squad` met de workflow _Import squads_ (zie _De s
   | 2022/23 en 2023/24                  | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSquad`                            |
   | 2018/19 tot en met 2021/22, 2024/25 | `JJJJ–JJ SC Heerenveen season` (Engelse Wikipedia) | `readEnglishSquad`                           |
   | 2000/01 tot en met 2004/05, 2025/26 | geen                                               | geen                                         |
-  | 2026/27 en later                    | `Sc Heerenveen in het seizoen JJJJ/JJ (mannen)`    | `readSeasonSquad`                            |
 
 - Een seizoen zonder lezers, een pagina die niet bestaat (404) en een pagina zonder tabel (`none`) zijn een gat.
   Het logboek krijgt één regel en niets wordt geschreven: `Squad 2002/03: no squad page on Wikipedia, so no squad`.

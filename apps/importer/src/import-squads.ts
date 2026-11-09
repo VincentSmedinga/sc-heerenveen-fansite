@@ -2,7 +2,7 @@
 // and on the host `import.mjs --squad 2007/08`, and the squads of every season that is over
 // from a season on, the oldest first (`pnpm run import:squads 1990/91`, `import.mjs
 // --from-squad 1990/91`). The hourly import reads the squad of the current season and, in
-// July and August, once a week that of the season that has just ended
+// July and August, once a week that of the season that has just ended, with its own reader
 // (`import-ended-season.ts`). These commands check the season before they ask Wikipedia for
 // anything or write anything, take the lock of the import, and share one fetcher, as
 // `import:season` and `import:seasons` do.

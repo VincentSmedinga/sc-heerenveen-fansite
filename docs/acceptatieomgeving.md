@@ -150,12 +150,13 @@ Na de laatste wedstrijd verbetert Wikipedia nog weleens een doelpuntenmaker of e
 Daarom leest cron het vorige seizoen van 1 juli tot en met 31 augustus nog één keer per week.
 Je hoeft er niets voor in te stellen: het gebeurt in dezelfde run als het lopende seizoen, met dezelfde cronjob.
 
-- Cron leest de wedstrijden en de selectie, met dezelfde controles als _Import season_ en _Import squads_.
+- Cron leest de wedstrijden met dezelfde controles als _Import season_.
+  De selectie leest hij zoals in de maanden ervoor, toen het seizoen nog liep: zo komen ook de wedstrijden en doelpunten per speler mee.
   De dagen zijn die van UTC, zoals het begin van een seizoen.
 - De eerste lezing is in de nacht van 1 juli, in het eerste uur van die dag in UTC.
   Daarna wacht de import een week, met de pauze van dat seizoen in `match_imports.retry_at` en `squad_imports.retry_at`.
   Draai je in die tijd zelf _Import season_ voor dat seizoen, dan leest cron het een uur later nog een keer en wacht daarna weer een week.
-- Het logboek `~/fansite-import.log` krijgt dan regels zoals `Matches 2026/27: 0 new, 0 updated, 38 unchanged, ...` en `Squad 2026/27: 0 new, 0 improved, 27 unchanged, from 1 page`.
+- Het logboek `~/fansite-import.log` krijgt dan regels zoals `Matches 2026/27: 0 new, 0 updated, 38 unchanged, ...` en `Squad 2026/27: 0 new, 0 updated, 27 unchanged, 0 left the squad`.
   In de weken ertussen staat er niets over dat seizoen.
 - Een wijziging die iets overschrijft, wacht eerst zeven dagen (zie _Hoe betrouwbaar een wijziging is_ in de [README van de importer](../apps/importer/README.md)).
   De lezing van een week later neemt haar over als Wikipedia dan nog hetzelfde zegt.
@@ -164,6 +165,7 @@ Je hoeft er niets voor in te stellen: het gebeurt in dezelfde run als het lopend
   De run van het lopende seizoen gaat door, de exitcode verandert niet en er komt geen mail.
   De import probeert het een week later opnieuw.
   Vraagt Wikipedia om te wachten, dan probeert hij het na die tijd opnieuw.
+- De pauze is tien minuten korter dan een week, zodat de run van precies een week later leest.
 - Vanaf 1 september leest cron dat seizoen niet meer.
   Een latere verbetering haal je binnen met _Import season_ en _Import squads_.
 

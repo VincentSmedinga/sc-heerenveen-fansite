@@ -2470,8 +2470,7 @@
   De selectie bij elke lezing vervangen, zoals de verzonnen selectie (de `id`'s veranderen en de doelpunten raken hun speler kwijt).
   Een seizoen met een falende lezer toch half opslaan (verworpen: zie hierboven).
 - **Later:** dit vervangt het uitgangspunt van _Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie_ dat een eerder seizoen geen selectie heeft.
-- **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ (9 november 2026): `squadSources` geeft voor 2026/27 en later de Nederlandse pagina met de tabel `readSquad`, die de uurlijkse import las toen het seizoen liep.
-  De uurlijkse import leest de selectie van het seizoen dat net voorbij is in juli en augustus zelf, één keer per week.
+- **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ (9 november 2026): de uurlijkse import leest de selectie van het seizoen dat net voorbij is in juli en augustus zelf, één keer per week, met de lezer van het lopende seizoen en niet met deze opdrachten.
 
 ## De volledigheid van een selectie is een kans die rust op de bron, met een plafond per bron
 
@@ -3384,17 +3383,19 @@
   De projecteigenaar keurde dat op 9 november 2026 goed; de punten hieronder zijn de keuzes bij het bouwen.
   - **Welk seizoen:** `endedSeasonOf` in `apps/importer/src/import-ended-season.ts` geeft het seizoen vóór dat van het moment, in juli en augustus, en anders geen.
     De dagen zijn die van UTC, zoals bij `seasonOf`: met de klok van Nederland zou de import op 1 juli tussen middernacht en twee uur het seizoen van twee jaar terug lezen.
-  - **Hoe:** `importEndedSeason` roept `importPastSeason` en `importPastSquad` aan, de functies achter `import:season` en `import:squad`, na het lopende seizoen en in dezelfde run.
+  - **Hoe:** `importEndedSeason` leest na het lopende seizoen, in dezelfde run.
+    De wedstrijden leest het met `importPastSeason`, de functie achter `import:season`.
     Er komt geen tweede cronjob en geen nieuwe workflow.
   - **De pauze:** `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
-    Na een lezing die is opgeslagen of die faalt, zet de import de pauze op een week.
+    Na een lezing die is opgeslagen of die faalt, zet de import de pauze op een week min tien minuten, zodat de run van precies een week later leest.
     Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze staan, want er is niets gelezen.
-    Een seizoen zonder pagina voor de selectie krijgt een rij in `squad_imports`, alleen voor de pauze.
   - **Een fout:** een waarschuwing in de uitvoer en in de rij van dat seizoen.
     Ze stopt het lopende seizoen niet, verandert de exitcode niet en telt niet voor de mail over een import die blijft falen.
-  - **De selectie:** `squadSources` geeft voor 2026/27 en later de pagina met de tabel `readSquad`.
-    Zonder die regel had geen enkel seizoen dat nog afloopt een lezer, en las de import nooit een selectie.
-    De wedstrijden en doelpunten uit de tabel gaan niet naar `player_season_stats`, zoals bij elke lezing van `importPastSquad`.
+  - **De selectie:** de import leest haar met `importSquad`, de lezer van het lopende seizoen, met de optie `endedSeason`: dezelfde pagina en dezelfde controles als op 30 juni.
+    Dat wijkt af van het issue, dat de controles van _Import squads_ noemt.
+    `importPastSquad` bewaart de wedstrijden en doelpunten per speler niet in `player_season_stats` en heeft voor een seizoen na 2024/25 geen pagina in `squadSources`.
+    Een selectietabel die een ronde achterliep, het voorbeeld uit het issue, kwam zo dus niet binnen.
+    De eerste lezing vervangt bij dit seizoen nooit de spelers die er al staan.
   - **Wijzigingen die wachten:** de regels van _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_ blijven gelden.
     Wat leeg was, wordt meteen ingevuld; wat iets overschrijft, wacht en wordt overgenomen door de lezing van een week later, als de pagina dan nog hetzelfde zegt.
 - **Waarom:** na de laatste wedstrijd verbetert Wikipedia nog een doelpuntenmaker of een aantal toeschouwers, en die verbetering kwam alleen binnen als iemand _Import season_ startte.
@@ -3403,5 +3404,6 @@
 - **Alternatieven:** na een fout na een uur opnieuw proberen, zoals bij het lopende seizoen (een pagina die blijft falen kost dan twee maanden lang elk uur verzoeken en een regel in het logboek).
   De fouten meetellen voor de mail (met één lezing per week komt de mail pas na drie weken, en de status gaat over het lopende seizoen).
   De klok van Nederland voor de grenzen (wijkt af van `seasonOf`, met een verkeerd seizoen in de eerste uren van 1 juli).
-  De selectie lezen met `importSquad` van het lopende seizoen, zodat ook de cijfers van de spelers meekomen (die functie haalt spelers uit de selectie en hoort bij het lopende seizoen; het issue vraagt de controles van _Import squads_).
+  De selectie lezen met `importPastSquad`, zoals het issue vraagt (de eerste versie van deze wijziging; de cijfers van de spelers komen dan niet mee, en de reviewer wees daarop).
+  `squadSources` een regel geven voor 2026/27 en later (lost de pagina op, niet de cijfers).
   Een eigen cronjob of workflow met een schema (meer om in te stellen op de host, terwijl de uurlijkse run er al is).

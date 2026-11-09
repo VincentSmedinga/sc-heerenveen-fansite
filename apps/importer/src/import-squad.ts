@@ -94,7 +94,10 @@ export function formatSquadReport(report: SquadReport): string {
  * row, and so is a player whose goals in the table differ from the goals in the matches
  * (`goalsWarnings`): they never stop the import.
  *
- * It reads the current season only. The rows of an earlier season are never changed or removed.
+ * It reads the current season only, unless `endedSeason` names the season that has just ended:
+ * the hourly import reads that one in July and August, from the same page and with the same
+ * checks as when it was the current season (`importEndedSeason`). Its players are never removed
+ * for a first read. The rows of any other season are never changed or removed.
  * A player who is no longer in the table is never removed either, since goals point to his row.
  * The one exception is the first good read of a season, which replaces the made-up squad of the
  * seed (see `readAndStore`).
@@ -104,9 +107,13 @@ export function formatSquadReport(report: SquadReport): string {
 export async function importSquad(
   db: Database,
   fetcher: Fetcher,
-  { clock = () => new Date(), origin = wikipediaOrigin }: MatchImportOptions = {},
+  {
+    clock = () => new Date(),
+    endedSeason,
+    origin = wikipediaOrigin,
+  }: MatchImportOptions & { endedSeason?: string } = {},
 ): Promise<SquadReport> {
-  const season = seasonOf(clock())
+  const season = endedSeason ?? seasonOf(clock())
   const [before] = await db.select().from(squadImports).where(eq(squadImports.season, season))
 
   if (before?.retryAt !== null && before?.retryAt !== undefined && before.retryAt > clock()) {
@@ -122,7 +129,7 @@ export async function importSquad(
       season,
       origin,
       clock,
-      before?.lastSuccessAt === null || before?.lastSuccessAt === undefined,
+      endedSeason === undefined && (before?.lastSuccessAt === null || before?.lastSuccessAt === undefined),
     )
   } catch (error) {
     report = { kind: 'error', message: describeError(error), season }

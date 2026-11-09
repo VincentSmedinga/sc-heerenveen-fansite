@@ -2,12 +2,10 @@
 // (`squadSources`), puts what the readers find together per player, and stores it in `players`.
 // The commands `import:squad` and `import:squads` are in `import-squads.ts`.
 //
-// A past season is read once, by hand, and gets what Wikipedia has; the hourly import reads the
-// season that has just ended the same way, once a week in July and August
-// (`import-ended-season.ts`). A season without a page is a gap in the log and no row. A season
-// with a part of the squad keeps that part, with the source of each row. A second read adds and
-// improves but never removes a player, because the goals point to his row (decision of
-// 5 November 2026).
+// A past season is read once, by hand, and gets what Wikipedia has. A season without a page is
+// a gap in the log and no row. A season with a part of the squad keeps that part, with the
+// source of each row. A second read adds and improves but never removes a player, because the
+// goals point to his row (decision of 5 November 2026).
 import type { Database } from '@fansite/db/client'
 import type { Player, PlayerPosition, PlayerSource } from '@fansite/db/schema'
 
@@ -120,8 +118,7 @@ export function formatPastSquadReport(report: PastSquadReport): string {
  * Reads the squad of a season that is over, once, and stores it. It asks each page of
  * `squadSources` one time (a page with more than one reader is fetched once), runs the readers,
  * puts their players together and stores them in one transaction. It asks as often as it is
- * run: the hourly pause of the current season does not apply to a season that is over, and the
- * week between two reads of the season that has just ended is kept by `importEndedSeason`.
+ * run: the hourly pause of the current season does not apply to a season that is over.
  *
  * A page that does not exist or has no table gives no players. When no page gives any, the
  * season is a gap and nothing is written. A page that fails, or a reader that reports an error,
