@@ -43,6 +43,7 @@ import {
   ClubSummaryCard,
   ClubTimelineCard,
   ClubTopScorersCard,
+  HardestCard,
   OpponentsCredit,
   StadiumsCard,
   TopPointsCard,
@@ -123,7 +124,8 @@ export async function clubListMetadata(): Promise<Metadata> {
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
  * white surface. The sidebar has the top 10 of the average points per match (`TopPointsCard`),
- * which counts the same matches as the list, and the credit under it. On a phone it follows the
+ * which counts the same matches as the list, the card Het moeilijkst (`HardestCard`) when at
+ * least ten clubs count, and the credit under it. On a phone it follows the
  * list.
  */
 export async function ClubListPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -167,6 +169,13 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
       </Page.Main>
       <Page.Sidebar aria-label="Het gemiddelde resultaat en de bron">
         <TopPointsCard
+          address={opponentsPath}
+          choice={competition}
+          query={competitionQuery(competition)}
+          records={records}
+          since={since}
+        />
+        <HardestCard
           address={opponentsPath}
           choice={competition}
           query={competitionQuery(competition)}

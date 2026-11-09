@@ -506,6 +506,35 @@ export function topPointsOf(records: readonly PublicClubRecord[]) {
   return { places, played: counting.reduce((sum, record) => sum + record.played, 0) }
 }
 
+/** How many places the card Het moeilijkst has. */
+export const hardestPlaces = 5
+
+/**
+ * The five clubs against which sc Heerenveen took the fewest points per match, for the card Het
+ * moeilijkst under the top 10. It counts the same clubs (`topPointsMinimum` played matches) and
+ * the same points, and orders on the real ratio, lowest first. Level ratios go by the most
+ * matches, then by name. It has places only when at least `topPointsPlaces` clubs count, as the
+ * issue decided; otherwise `places` is empty and `played` is 0. `played` is the number of
+ * matches of all the clubs that count.
+ */
+export function hardestOf(records: readonly PublicClubRecord[]) {
+  const counting = records.filter((record) => record.played >= topPointsMinimum)
+
+  if (counting.length < topPointsPlaces) {
+    return { places: [] as PointsPlace[], played: 0 }
+  }
+
+  const places = counting
+    .map((record) => ({ name: record.name, played: record.played, points: pointsOf(record), slug: record.slug }))
+    .toSorted(
+      (a, b) => a.points * b.played - b.points * a.played || b.played - a.played || a.name.localeCompare(b.name, 'nl'),
+    )
+    .slice(0, hardestPlaces)
+    .map((place, index) => ({ ...place, place: index + 1 }))
+
+  return { places, played: counting.reduce((sum, record) => sum + record.played, 0) }
+}
+
 /** The seasons of the meetings, the newest first, each once. */
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()

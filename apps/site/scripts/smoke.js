@@ -1422,6 +1422,12 @@ await withEmptyDatabase((database) =>
       opponentsHtml,
       /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,
     )
+    // The card Het moeilijkst is there only with ten clubs of five played matches, so the
+    // made-up matches may or may not have it; if so, it has its own heading and caption.
+    if (opponentsHtml.includes('id="het-moeilijkst"')) {
+      assert.match(opponentsHtml, /<h2[^>]*id="het-moeilijkst">Het moeilijkst<\/h2>/)
+      assert.match(opponentsHtml, /van laag naar hoog/)
+    }
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.

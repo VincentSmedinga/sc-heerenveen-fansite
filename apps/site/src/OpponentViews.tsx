@@ -37,6 +37,7 @@ import {
   type ClubPlace,
   clubPlacesId,
   type ClubSummary,
+  hardestOf,
   hasTimeline,
   lastResultsOf,
   type Meeting,
@@ -649,6 +650,58 @@ export function ClubNewsCard({
           </List.Item>
         ))}
       </List>
+    </Card>
+  )
+}
+
+/**
+ * The card Het moeilijkst under the top 10: the five clubs against which sc Heerenveen took the
+ * fewest points per match (see `hardestOf`), on the soft surface. It has the same table and
+ * legend as `TopPointsCard`, ordered from low to high. The caption says they are our points, so
+ * the card is not read as the average of the opponent. It is not there at all when fewer than
+ * ten clubs count.
+ */
+export function HardestCard({
+  address,
+  choice,
+  query,
+  records,
+  since,
+}: {
+  address: string
+  choice: CompetitionChoice
+  query: string
+  records: PublicClubRecord[]
+  since: string
+}) {
+  const { places, played } = hardestOf(records)
+
+  if (places.length === 0) {
+    return null
+  }
+
+  return (
+    <Card aria-labelledby="het-moeilijkst" surface="soft">
+      <Heading id="het-moeilijkst" level={2}>
+        Het moeilijkst
+      </Heading>
+      <DataTable
+        caption={`De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog${choice === 'league' ? ', in de Eredivisie' : ''}`}
+        columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
+        rows={places.map((place) => ({
+          cells: [averageFormat.format(place.points / place.played), place.played],
+          header: place.name,
+          href: `${address}/${place.slug}${query}`,
+          position: place.place,
+        }))}
+      />
+      <Text appearance="meta">{topPointsLegend}</Text>
+      <BasedOnSince
+        choice={choice}
+        condition={`tegen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden`}
+        played={played}
+        since={since}
+      />
     </Card>
   )
 }
