@@ -65,6 +65,11 @@ pnpm test:a11y
 pnpm test:stories
 ```
 
+Raakt je wijziging alleen CSS of designtokens, en dus geen TypeScript, markup, paginatekst of logregel?
+Dan draai je lokaal `pnpm lint`, `pnpm typecheck`, `pnpm test` en `pnpm --filter design-system build-storybook`, die laatste voor de screenshots.
+`pnpm build`, `pnpm test:a11y` en `pnpm test:stories` laat je dan aan CI, want CI draait ze toch, naast elkaar, terwijl ze lokaal wachten op één slot.
+Een fout die CI vindt, komt terug via Auto-fix of de Coördinator.
+Elke andere wijziging draait de hele keten.
 De tests van `packages/db` draaien op een echte MariaDB.
 Start die eerst met `docker compose up -d --wait` (zie de [README van het package](packages/db/README.md)).
 `pnpm test:a11y` toetst na de build de pagina's met axe.

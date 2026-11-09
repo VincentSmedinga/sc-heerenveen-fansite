@@ -565,6 +565,7 @@
   Het slot in de repository of in de database; het is een eigenschap van de computer en niet van een worktree, en de tests van de database zijn juist wat hier faalde.
 - **Later:** de getallen (twee processen, 30 minuten, 30 seconden) volgen uit een meting op deze computer.
   Is de computer sneller of zijn er meer Builders, dan meten we opnieuw.
+- **Later:** sinds 9 november 2026 draait een Builder bij een wijziging die alleen CSS of tokens raakt `pnpm build`, `pnpm test:a11y` en `pnpm test:stories` niet meer zelf (zie _Een wijziging die alleen CSS of tokens raakt, draait lokaal minder_).
 
 ## Issue-formulieren in YAML, met drie soorten en zonder lege issues
 
@@ -714,3 +715,18 @@
   De pagina kan sessies zelf niet lezen, dus de rijen kloppen alleen als de Coördinator ze bijhoudt.
 - **Alternatieven:** alleen op verzoek tonen (de projecteigenaar moet erom denken); het adres in de repository zetten (verworpen: de repository is openbaar); direct de browser gebruiken (werkt altijd, maar vraagt eenmalig om in te loggen); een script dat sessies naar rijen overzet (nieuw gereedschap, past niet bij "houd het licht").
 - **Later:** dit vult _Een Specifier voor een lang gesprek, en de Action List voor de status_ en _De Coördinator is de enige bron van de stand_ aan.
+
+## Een wijziging die alleen CSS of tokens raakt, draait lokaal minder
+
+- **Datum:** 9 november 2026
+- **Besluit:** raakt een wijziging alleen CSS of designtokens, dus geen TypeScript, markup, paginatekst of logregel, dan draait de Builder lokaal `pnpm lint`, `pnpm typecheck`, `pnpm test` en `pnpm --filter design-system build-storybook`.
+  `pnpm build`, `pnpm test:a11y` en `pnpm test:stories` laat hij aan CI.
+  Elke andere wijziging houdt de hele keten.
+  Voor de Reviewer verandert niets: die neemt de zware controles al uit CI over.
+- **Waarom:** CI draait dezelfde zware controles toch, in parallelle jobs.
+  Lokaal wachten ze op één slot dat alle worktrees delen: twee Builders op tokenwijzigingen (#957 en #958) wachtten elk 15 tot 25 minuten.
+  De Storybook-build blijft lokaal, want de screenshots komen eruit.
+- **Nadeel:** een fout die alleen de zware controles zien, komt later boven, via Auto-fix of de Coördinator, en kost dan een extra push.
+- **Alternatieven:** de hele keten lokaal houden; dat is trager en geeft dezelfde uitkomst.
+  Alle controles aan CI laten; dan mist de Builder de snelle fouten en de screenshots.
+- **Later:** dit beperkt _De zware controles delen de machine_ voor deze soort wijziging; de rest van die beslissing geldt nog.
