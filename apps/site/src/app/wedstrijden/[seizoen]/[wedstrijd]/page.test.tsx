@@ -154,7 +154,10 @@ describe('the page of a match', () => {
     reported.match.attendance = 0
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
-    expect(plain(await render())).toContain('Toeschouwers Zonder publiek')
+    const text = plain(await render())
+
+    expect(text).toContain('Toeschouwers Zonder publiek')
+    expect(text).not.toContain('schatting')
   })
 
   it('shows the attendance of an away match too, and says that it is an estimate by Wikipedia', async () => {
