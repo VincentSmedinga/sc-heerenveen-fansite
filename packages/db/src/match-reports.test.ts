@@ -13,7 +13,6 @@ import {
   findReportGoalDifferences,
   listReportedMatches,
   listSeasonReports,
-  logReportGoalDifferences,
   matchForRules,
   mayHaveReport,
   phaseOf,
@@ -24,7 +23,6 @@ import {
 import { listAllMatchGoals, listClubMatches, listSeasonMatches } from './queries.ts'
 import {
   adminUsers,
-  auditLog,
   matchAppearances,
   matchCards,
   matches,
@@ -1007,48 +1005,6 @@ describe('the goals of the reports against the squad table of Wikipedia', () => 
     await table(oyen, 1)
     expect(await findReportGoalDifferences(database.db, season)).toEqual([])
     expect(await findReportGoalDifferences(database.db, '2025/26')).toEqual([])
-  })
-
-  it('writes each difference in the log, for the player, with the account it is given or as the import', async () => {
-    const { oyen, vos } = await oneMatch()
-
-    await table(oyen, 2)
-    await table(vos, 1)
-
-    const now = new Date('2026-11-07T12:00:00Z')
-
-    expect(await logReportGoalDifferences(database.db, season, null, now)).toBe(2)
-    expect(await database.db.select().from(auditLog).orderBy(auditLog.id)).toMatchObject([
-      {
-        action: 'player.stats-differ',
-        createdAt: now,
-        detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2',
-        itemId: oyen,
-        reason: null,
-        userId: null,
-      },
-      { detail: 'Doelpunten Eredivisie 2026/27: verslagen 0, Wikipedia 1', itemId: vos },
-    ])
-
-    const [account] = await database.db
-      .insert(adminUsers)
-      .values({ email: 'sanne@example.org', role: 'beheerder' })
-      .$returningId()
-
-    await logReportGoalDifferences(database.db, season, account!.id, now)
-
-    expect((await database.db.select().from(auditLog)).at(-1)).toMatchObject({ userId: account!.id })
-  })
-
-  it('writes nothing when the numbers agree or nothing can be compared', async () => {
-    const { oyen, vos } = await oneMatch()
-
-    await table(oyen, 1)
-    await table(vos, 0)
-
-    expect(await logReportGoalDifferences(database.db, season, null)).toBe(0)
-    expect(await logReportGoalDifferences(database.db, '2025/26', null)).toBe(0)
-    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 })
 

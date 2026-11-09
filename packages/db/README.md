@@ -233,14 +233,14 @@ De importer beoordeelt elk bericht bij elke run opnieuw en overschrijft `relevan
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                                                             |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                                                                |
-| `action`     | Wat: `item.hide`, `item.show`, `item.approve`, `item.unapprove`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset` of `player.stats-differ` |
-| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                                                                |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`, `item.approve` en `item.unapprove`                                                                                                                                                                                                                   |
-| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                                                       |
+| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                                                                                                            |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                                                                                                               |
+| `action`     | Wat: `item.hide`, `item.show`, `item.approve`, `item.unapprove`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset`, `player.stats-differ`, `player.stats-take-over` of `player.stats-keep` |
+| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                                                                                                               |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`, `item.approve` en `item.unapprove`                                                                                                                                                                                                                                                                  |
+| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                                                                                                      |
 
 Alleen `recordAction` in `packages/db/src/audit-log.ts` schrijft erin, en alleen met `INSERT`.
 De site en de importer gebruiken dezelfde functie.
@@ -308,7 +308,8 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 - `mayHaveReport(match, now)` zegt of een wedstrijd een verslag kan hebben: hij is gespeeld, of hij is nog `scheduled` en zijn dag (Nederlandse tijd) is gekomen, en `phaseOf(match, now)` zegt of zo'n wedstrijd `live` is (vanaf de aftrap, zonder aftrap vanaf de dag) of `upcoming`;
 - `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
   Een speler van de bank die niet inviel, heeft een rij met nullen, en een speler met een persoon heeft de delen van zijn naam (`personGivenName` en de twee andere).
-- `findReportGoalDifferences(db, season)` en `logReportGoalDifferences(db, season, userId)` vergelijken de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is, en schrijven een verschil als `player.stats-differ` in het logboek (#832), als de importer nieuwe cijfers in de tabel zet (zonder account) en als de redactie een verslag als `klaar` opslaat.
+- `findReportGoalDifferences(db, season)` vergelijkt de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is (#832).
+  `compareReportGoals` in `@fansite/db/player-stat-differences` bewaart elk verschil als een rij in `player_stat_differences` (#974).
 
 De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzonnen verslag voor beide teams, dat zonder fout of waarschuwing door de regels komt.
 Een tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale: met verlenging, wissels en kaarten tot minuut 120 en een strafschoppenserie die we met 4–3 wonnen.
@@ -557,6 +558,10 @@ De module bewaart ook de typen en de code van een voorstel (`Proposal`, `updateM
 Een wijziging die niets bijzonders is (een nieuwe uitslag, een doelpunt erbij, een aanvangstijd) krijgt geen rij.
 De rijen blijven staan: ze laten zien hoe vaak Wikipedia iets verdachts deed.
 
+Een rij met een `part` en de `reason` `Wikipedia zegt iets anders dan de bron van de wedstrijd` of `de oude fansite zegt iets anders dan de bron van de wedstrijd` is een verschil tussen twee bronnen (#974).
+`old_value` is dan het onderdeel zoals de wedstrijd het heeft, `new_value` wat de tweede bron zegt, en `proposal` dat onderdeel zoals de tweede bron het heeft.
+Zo'n rij krijgt geen mail en wordt nooit vanzelf overgenomen: alleen een mens beslist (`keepSourceDifferences` en `readTakenOverParts` in `@fansite/db/source-differences`).
+
 `match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
 Het zijn dezelfde velden als bij een feed.
 
@@ -602,6 +607,7 @@ De importer schrijft de rijen in dezelfde run als de selectie (zie de [README va
 | `competition` | `Eredivisie` of `KNVB Beker`; het totaal heeft geen rij, wie het toont telt de rijen op                         |
 | `appearances` | Het aantal wedstrijden dat de speler erbij was, ook als invaller: het zijn geen minuten en geen basisplaatsen   |
 | `goals`       | Het aantal doelpunten                                                                                           |
+| `table_goals` | Leeg, tot de redactie een ander aantal doelpunten overneemt: dan het aantal dat de tabel van Wikipedia had      |
 | `assists`     | Het aantal assists                                                                                              |
 | `updated_at`  | Het moment waarop de cijfers voor het laatst veranderden (UTC); een run met dezelfde cijfers laat het ongemoeid |
 
@@ -609,10 +615,26 @@ Een speler, een seizoen en een competitie komen samen één keer voor.
 Een competitie waarvoor de tabel geen cijfers geeft (een lege cel) heeft geen rij, en een streepje is nul.
 Een speler die de selectie verlaat, houdt zijn laatste cijfers, want de importer haalt geen rij weg.
 De tabel wordt met de hand bijgehouden en loopt soms een speelronde achter.
-De importer vergelijkt de doelpunten met die in `match_goals` en waarschuwt bij een verschil, maar verbetert niets.
+De importer vergelijkt de doelpunten met die in `match_goals` en bewaart een verschil voor de redactie (zie `player_stat_differences` hieronder), maar verbetert zelf niets.
 `listSeasonPlayerStats(db, season)` in `queries.ts` geeft de cijfers van een seizoen, per speler en competitie.
 Bij elke rij staan de naam, de positie, de pagina op Wikipedia en of de speler in de selectie staat.
 De rijen komen op naam en dan competitie.
+
+`player_stat_differences` bewaart een verschil tussen de doelpunten in deze tabel en die uit de wedstrijden of de verslagen, tot de redactie beslist (#974).
+
+| Kolom                           | Betekenis                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `player_id`                     | De speler in `players`; de rij gaat met haar speler                                                |
+| `season`, `competition`         | Het seizoen en de competitie van de cijfers                                                        |
+| `compared_with`                 | Waarmee de tabel is vergeleken: `matches` of `reports`                                             |
+| `table_goals`, `other_goals`    | Het aantal in de selectietabel, en het aantal uit de wedstrijden of de verslagen                   |
+| `status`                        | `pending` (wacht), `accepted` (het andere aantal overgenomen) of `rejected`                        |
+| `resolution`                    | `person`, `reverted` (het verschil is weg) of `replaced` (andere aantallen); leeg zolang het wacht |
+| `first_seen_at`, `last_seen_at` | De eerste en de laatste vergelijking die dit verschil zag, in UTC                                  |
+| `decided_at`                    | Wanneer het verschil werd beslist of verviel, in UTC                                               |
+
+`@fansite/db/player-stat-differences` heeft de code: `comparePlayerGoals` en `compareReportGoals` vergelijken en bewaren, `decidePlayerStatDifference` beslist, en `listWaitingStatDifferences` en `countWaitingStatDifferences` lezen voor het beheer.
+Hetzelfde verschil komt er één keer, en een verschil dat een mens afwees komt niet terug zolang beide aantallen gelijk blijven.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand, de uitslagen van alle clubs en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable`, `madeUpLeagueResults` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.

@@ -36,7 +36,8 @@ const lists: Record<WorkList, { intro: string; title: string; todo: (total: numb
     todo: () => 'Verslag afmaken',
   },
   'wachtende-wijzigingen': {
-    intro: 'Bij deze wedstrijden wacht een wijziging van Wikipedia op een besluit. Beslis bij de wedstrijd wat klopt.',
+    intro:
+      'Bij deze wedstrijden wacht een wijziging van Wikipedia of een verschil tussen twee bronnen op een besluit. Beslis bij de wedstrijd wat klopt.',
     title: 'Wachtende wijzigingen',
     todo: (total) => plural(total, 'wijziging wacht', 'wijzigingen wachten'),
   },

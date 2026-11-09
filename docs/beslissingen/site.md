@@ -3408,6 +3408,8 @@
 - **Waarom:** de nieuwe bron wint omdat hij preciezer is, en de cijfers van Wikipedia zijn een controle op onze invoer.
   Een verschil is voor de redactie, niet voor de bezoeker.
 - **Alternatieven:** het verschil op de pagina tonen (de bezoeker kan er niets mee); de vergelijking bij elke aanvraag van de pagina doen (een bezoeker laat de database schrijven); bij elke lezing van de importer schrijven en zelf bijhouden wat er al staat (het logboek wordt niet gelezen, dus elke run zou het herhalen); vergelijken ook als een verslag ontbreekt (een regel per speler die niets zegt).
+- **Later:** sinds #974 gaat het verschil niet meer naar het logboek maar naar `player_stat_differences`, waar de redactie het beslist; zie _Een verschil in de cijfers van een speler staat in een eigen tabel_ in `importer.md` (9 november 2026).
+  De vergelijking zelf, en wanneer een competitie te vergelijken valt, blijven zoals hier staat.
 
 ## De bank kiest uit wie niet in de basis staat
 

@@ -33,7 +33,7 @@ const fillable = [
   'stadium',
 ] as const
 
-/** The columns that are only compared: a difference is for the editors to settle. */
+/** The columns that are only compared: a difference is for the editors to settle (#974). */
 const compared = ['extraTime', 'goalsAgainst', 'goalsFor', 'home', 'matchDate', 'status'] as const
 
 const show = (value: unknown) => (value instanceof Date ? value.toISOString() : String(value))
@@ -75,15 +75,6 @@ export function compareClaim(
   }
 
   return { differences, fill: fill as Partial<Match> }
-}
-
-/**
- * The line of the log for a difference. One line for each field, in a fixed shape that #974
- * reads: `match difference: <season> <competition> <round> (match <id>) <field>: <source> says
- * <stored>, <other source> says <theirs>`.
- */
-export function differenceLine(stored: Match, difference: MatchDifference, otherSource: string): string {
-  return `match difference: ${stored.season} ${stored.competition} ${stored.round} (match ${stored.id}) ${difference.field}: ${stored.dataSource} says ${difference.stored}, ${otherSource} says ${difference.theirs}`
 }
 
 /**

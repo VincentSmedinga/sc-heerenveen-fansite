@@ -7,7 +7,8 @@ import type { ConflictFormState } from './actions'
 
 /**
  * The form that decides one difference between Wikipedia and the entry of the editors: one
- * reason, and two buttons, one that takes Wikipedia over and one that keeps the entry. Every
+ * reason, and two buttons, one that takes Wikipedia over and one that keeps the entry. A
+ * difference between two other values gives its own words for the buttons (`labels`). Every
  * button names the match and the part, so a page with several differences still tells them
  * apart. A missing reason comes back as an error with the focus on the list of errors. The
  * form is a plain POST that works without JavaScript.
@@ -15,12 +16,15 @@ import type { ConflictFormState } from './actions'
 export function ConflictForm({
   action,
   id,
+  labels = { keep: 'Houd onze invoer', takeOver: 'Neem Wikipedia over' },
   part,
   title,
 }: {
   action: (previous: ConflictFormState, formData: FormData) => Promise<ConflictFormState>
   /** The number of the difference, so the ids on a page with several forms stay unique. */
   id: number
+  /** The words of the two buttons. */
+  labels?: { keep: string; takeOver: string }
   /** The part in words: "de uitslag". */
   part: string
   /** The name of the match. */
@@ -54,23 +58,23 @@ export function ConflictForm({
           <Input autoComplete="off" name="reden" />
         </Field>
         <Button
-          aria-label={`Neem Wikipedia over: ${part} van ${title}`}
+          aria-label={`${labels.takeOver}: ${part} van ${title}`}
           disabled={pending}
           name="besluit"
           type="submit"
           value="overnemen"
         >
-          Neem Wikipedia over
+          {labels.takeOver}
         </Button>
         <Button
           appearance="soft"
-          aria-label={`Houd onze invoer: ${part} van ${title}`}
+          aria-label={`${labels.keep}: ${part} van ${title}`}
           disabled={pending}
           name="besluit"
           type="submit"
           value="houden"
         >
-          Houd onze invoer
+          {labels.keep}
         </Button>
       </Form>
     </>

@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
+import { sourceDifferenceReasons } from '@fansite/db/match-conflicts'
 import {
   clubNames,
   clubs,
@@ -27,6 +28,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { LinkedGoal } from './import-matches.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
+import { describeWaitingChange } from './import-changes.ts'
 import { runImport } from './import-feeds.ts'
 import {
   cancelledOf,
@@ -517,6 +519,90 @@ describe('the same match from another source under another round', () => {
     expect(rows[0]).toMatchObject({ round: 'Wedstrijd 11' })
     expect(rows[0]?.kickoffAt).not.toBeNull()
     expect(report).toMatchObject({ kind: 'imported', matches: { added: 0 } })
+  })
+})
+
+describe('a match of another source that Wikipedia has differently', () => {
+  it('keeps the difference as a change that waits, once, without a warning, and leaves the match (#974)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    // The old fansite has this match as Wedstrijd 11, with another referee.
+    await database.db
+      .update(matches)
+      .set({ dataSource: 'oude-fansite', referee: 'Iemand Anders', round: 'Wedstrijd 11', stadium: 'Elders' })
+      .where(eq(matches.round, 'Speelronde 11'))
+
+    const waiting = () => database.db.select().from(matchChanges).where(eq(matchChanges.status, 'pending'))
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+    const [match] = await database.db.select().from(matches).where(eq(matches.dataSource, 'oude-fansite'))
+
+    expect(report).toMatchObject({ kind: 'imported' })
+    expect(formatMatchReport(report)).not.toContain('match difference:')
+    expect(match).toMatchObject({ referee: 'Iemand Anders', stadium: 'Elders' })
+    expect(await waiting()).toMatchObject([
+      {
+        matchId: match?.id,
+        oldValue: expect.stringContaining('stadion Elders'),
+        part: 'facts',
+        reason: sourceDifferenceReasons.wikipedia,
+        timesSeen: 1,
+      },
+    ])
+
+    expect(describeWaitingChange((await waiting())[0]!).join('\n')).toMatch(
+      /\n {2}now: .*stadion Elders.*\n {2}wikipedia: .*\n.*it waits until a person decides$/u,
+    )
+
+    // The next run sees the same difference, and seven days later nothing is taken over.
+    await importAt(server, new Date(first.getTime() + hours(24 * 8)))
+    expect(await waiting()).toMatchObject([{ timesSeen: 2 }])
+    expect((await database.db.select().from(matches).where(eq(matches.dataSource, 'oude-fansite')))[0]).toMatchObject({
+      stadium: 'Elders',
+    })
+  })
+})
+
+describe('a part of a match of Wikipedia that the editors took over from another source', () => {
+  it('stays as the editors decided at the next import, and the rest follows the page (#974)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const [match] = await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 11'))
+
+    // The old fansite named another referee and stadium, and an editor took them over.
+    await database.db
+      .update(matches)
+      .set({ attendance: null, referee: 'Iemand Anders', stadium: 'Elders' })
+      .where(eq(matches.id, match!.id))
+    await database.db.insert(matchChanges).values({
+      changed: 'gegevens',
+      class: 'suspicious',
+      competition: match!.competition,
+      decidedAt: first,
+      firstSeenAt: first,
+      lastSeenAt: first,
+      matchId: match!.id,
+      newValue: 'de oude fansite',
+      oldValue: 'Wikipedia',
+      part: 'facts',
+      reason: sourceDifferenceReasons['oude-fansite'],
+      resolution: 'person',
+      round: match!.round,
+      season: match!.season,
+      status: 'accepted',
+    })
+
+    await importAt(server, new Date(first.getTime() + hours(24 * 8)))
+
+    expect((await database.db.select().from(matches).where(eq(matches.id, match!.id)))[0]).toMatchObject({
+      goalsFor: match!.goalsFor,
+      referee: 'Iemand Anders',
+      stadium: 'Elders',
+    })
+    expect(await database.db.select().from(matchChanges).where(eq(matchChanges.status, 'pending'))).toEqual([])
   })
 })
 

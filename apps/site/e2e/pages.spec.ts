@@ -4,7 +4,7 @@ import { adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
-import { heldMatchId } from './held-changes'
+import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
@@ -288,6 +288,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/kwaliteit', status: 200 },
   { admin: 'beheerder', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
+  // The players whose numbers differ: a season with the made-up difference, and an empty one.
+  { admin: 'beheerder', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/spelerscijfers', status: 404 },
+  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 404 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
   { admin: 'moderator', path: '/beheer/kwaliteit', status: 404 },

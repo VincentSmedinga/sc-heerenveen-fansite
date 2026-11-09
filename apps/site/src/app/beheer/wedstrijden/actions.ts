@@ -1,5 +1,6 @@
 'use server'
 
+import { secondSourceOf } from '@fansite/db/match-conflicts'
 import { redirect } from 'next/navigation'
 
 import type { AddFormState } from '#src/beheer/match-add-fields'
@@ -72,11 +73,11 @@ export async function submitAddMatch(_previous: AddFormState, formData: FormData
 }
 
 /**
- * Decides a difference between Wikipedia and the entry of the editors: "overnemen" takes
- * Wikipedia over for that part, "houden" keeps the entry. It asks for a reason, as every change
- * does. The number of the difference is bound to the action and checked again, and one that is
- * decided already (by someone else, or by the import after seven days) ends on the list with a
- * notice.
+ * Decides a difference between Wikipedia and the entry of the editors, or between two sources
+ * of a match: "overnemen" takes the other value over for that part, "houden" keeps the match.
+ * It asks for a reason, as every change does. The number of the difference is bound to the
+ * action and checked again, and one that is decided already (by someone else, or by the import
+ * after seven days) ends on the list with a notice.
  */
 export async function submitConflict(
   changeId: number,
@@ -115,7 +116,11 @@ export async function submitConflict(
 
   redirect(
     outcome === 'done'
-      ? matchPath(difference.matchId, decision === 'overnemen' ? 'overgenomen' : 'gehouden')
+      ? matchPath(
+          difference.matchId,
+          // A difference between two sources (#974) has its own notice: no entry is involved.
+          `${secondSourceOf(difference.reason) === undefined ? '' : 'bron-'}${decision === 'overnemen' ? 'overgenomen' : 'gehouden'}`,
+        )
       : outcome === 'no-proposal'
         ? matchPath(difference.matchId, 'niet-gelukt')
         : `${matchesPath}?fout=besloten`,
