@@ -305,7 +305,7 @@ export async function importOldSiteGoals(
           season: before.season,
           status: 'pending',
         })
-        report.created += 1
+        // Not in `created`: that counts the goals, and the line says a change was made.
         report.lines.push(`${label}: the goals are kept as a change that waits for the editors`)
       }
     }

@@ -623,7 +623,7 @@ describe('the steps spelers and doelpunten', () => {
     const [partial] = await database.db.select().from(matches).orderBy(asc(matches.matchDate))
     const kept = await changeRows()
 
-    expect(goals.created).toBe(1)
+    expect(goals.created).toBe(0)
     expect(kept).toMatchObject([
       {
         changed: 'doelpunten',
@@ -900,9 +900,9 @@ describe('the files of the old fansite', () => {
       '2005/06': 28,
       '2006/07': 18,
     })
-    // 1,771 goals in the files; 8 of them are in the 2 matches whose list does not add up, and
-    // those 2 lists are kept as a change that waits each.
-    expect(firstGoals).toMatchObject({ changed: 0, created: 1765, skipped: 67, unchanged: 0 })
+    // 1,771 goals in the files; 8 of them are in the 2 matches whose list does not add up.
+    // Those 2 lists are kept as a change that waits each, which `created` does not count.
+    expect(firstGoals).toMatchObject({ changed: 0, created: 1763, skipped: 67, unchanged: 0 })
     expect((await changeRows()).map((change) => [change.part, change.status])).toEqual([
       ['goals', 'pending'],
       ['goals', 'pending'],
