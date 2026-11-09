@@ -1054,7 +1054,10 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
     // One credit for the two cards, under the table: the card Wedstrijden has none of its own.
     assert.match(html, /<p class="hf-meta hf-wikipedia-credit">Wedstrijden en stand: Wikipedia/)
-    assert.equal(html.match(/hf-wikipedia-credit/g)?.length, 1)
+    assert.doesNotMatch(
+      html.slice(html.indexOf('id="matches-heading"'), html.indexOf('id="standings-heading"')),
+      /hf-wikipedia-credit/,
+    )
 
     // The statistics page shows the eleven cards with figures of the made-up matches and table
     // of the seed, in two equal columns (the sidebar is as wide as the main), with the credit
