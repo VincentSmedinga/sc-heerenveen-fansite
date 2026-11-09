@@ -108,6 +108,30 @@ Zet Wikipedia zelf de waarde van de redactie terug, dan vervalt de afwijking.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` houdt de invoer.
 
+## Een verschil tussen twee bronnen beslissen
+
+Soms zeggen twee bronnen iets anders over dezelfde wedstrijd, zoals de oude fansite en Wikipedia over de uitslag.
+De wedstrijd houdt dan de waarde van de bron waar hij van komt, en het verschil wacht op een besluit.
+Je vindt zo'n wedstrijd op `/beheer/kwaliteit`, onder "wijzigingen wachten" bij het seizoen.
+
+Op de pagina van de wedstrijd staat een kaart met de twee waarden en de namen van de bronnen.
+Schrijf bij "Reden" waarom je beslist, en kies welke bron je overneemt of houdt.
+De import neemt hier niets vanzelf over, en er gaat geen mail uit.
+Een verschil dat je afwijst, komt niet terug zolang beide bronnen hetzelfde blijven zeggen.
+
+## Spelerscijfers die verschillen
+
+De selectietabel van Wikipedia heeft per speler het aantal doelpunten in een competitie.
+Is dat een ander aantal dan in de wedstrijden of de verslagen, dan staat op `/beheer/kwaliteit` bij het seizoen "spelerscijfers verschillen".
+De pagina erachter noemt de speler, de competitie en de twee aantallen.
+Schrijf een reden, en kies:
+
+- **Neem de wedstrijden over** of **Neem de verslagen over:** het andere aantal komt in de selectietabel.
+  De import laat het staan zolang de tabel van Wikipedia hetzelfde zegt als nu.
+- **Houd de selectietabel:** de tabel blijft zoals hij is.
+
+Klopt een wedstrijd of een verslag niet, verbeter dan die: het verschil verdwijnt daarna vanzelf.
+
 ## Een vastgehouden wijziging beslissen
 
 De import houdt soms een wijziging van Wikipedia vast, omdat hij verdacht lijkt.

@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { persons } from '@fansite/db/schema'
+import { persons, players, playerStatDifferences } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { addQualitySeason } from '#src/beheer/quality-fixtures'
 
 import WorkListPage, { metadata as listMetadata } from './[seizoen]/[lijst]/page'
+import StatDifferencesPage, { metadata as statMetadata } from './[seizoen]/spelerscijfers/page'
 import QualityPage, { metadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
@@ -36,6 +37,7 @@ beforeEach(async () => {
   requireRole.mockReset()
   requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
   await database.db.delete(persons)
+  await database.db.delete(playerStatDifferences)
 })
 
 const workList = async (seizoen: string, lijst: string) =>
@@ -172,5 +174,83 @@ describe('a work list', () => {
     ['2005-06', 'bestaat-niet'],
   ])('says "niet gevonden" for %s/%s', async (seizoen, lijst) => {
     await expect(workList(seizoen, lijst)).rejects.toThrow('not found')
+  })
+})
+
+describe('the players whose numbers differ', () => {
+  const statDifferences = async (seizoen: string, query: Record<string, string> = {}) =>
+    renderToStaticMarkup(
+      await StatDifferencesPage({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve(query) }),
+    )
+
+  /** Sanne Spits has one goal in the squad table of 2005/06 and two in the matches. */
+  async function addDifference() {
+    const [player] = await database.db.select().from(players)
+
+    await database.db.insert(playerStatDifferences).values({
+      comparedWith: 'matches',
+      competition: 'Eredivisie',
+      firstSeenAt: new Date('2026-11-09T10:00:00Z'),
+      lastSeenAt: new Date('2026-11-09T10:00:00Z'),
+      otherGoals: 2,
+      playerId: player!.id,
+      season: '2005/06',
+      status: 'pending',
+      tableGoals: 1,
+    })
+  }
+
+  it('is for a beheerder only, and stays out of search engines', async () => {
+    await statDifferences('2005-06')
+
+    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(statMetadata.robots).toEqual({ follow: false, index: false })
+  })
+
+  it('has a link on the page Kwaliteit in a season with a difference, and none without', async () => {
+    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).not.toContain('spelerscijfer')
+
+    await addDifference()
+
+    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).toContain(
+      'href="/beheer/kwaliteit/2005-06/spelerscijfers">1 spelerscijfer verschilt<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
+  })
+
+  it('shows the player, the season, the competition and both numbers, with a form to decide', async () => {
+    await addDifference()
+
+    const html = await statDifferences('2005-06')
+    const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map(
+      ([, name, text]) => [text, name],
+    )
+
+    expect(html).toContain('Spelerscijfers die verschillen in 2005/06</h1>')
+    expect(html).toContain('Sanne Spits: Eredivisie, tegen de wedstrijden</h2>')
+    expect(html).toContain('Selectietabel: 1 doelpunt')
+    expect(html).toContain('Wedstrijden: 2 doelpunten')
+    expect(buttons).toEqual([
+      [
+        'Neem de wedstrijden over',
+        'Neem de wedstrijden over: de doelpunten van Sanne Spits in de Eredivisie, tegen de wedstrijden',
+      ],
+      [
+        'Houd de selectietabel',
+        'Houd de selectietabel: de doelpunten van Sanne Spits in de Eredivisie, tegen de wedstrijden',
+      ],
+    ])
+    expect(html).toContain('Reden voor je besluit over de doelpunten')
+  })
+
+  it('says so when nothing differs, and says what the last decision did', async () => {
+    const html = await statDifferences('2005-06', { gedaan: 'overgenomen' })
+
+    expect(html).toContain('Er zijn geen spelerscijfers die verschillen in het seizoen 2005/06.')
+    expect(html).toContain('<strong>Overgenomen.</strong>')
+    expect(await statDifferences('2005-06', { fout: 'geen-rij' })).toContain('De speler staat niet in de selectietabel')
+  })
+
+  it.each(['1989-90', '2999-00', 'geen-seizoen'])('does not exist for the season %s', async (seizoen) => {
+    await expect(statDifferences(seizoen)).rejects.toThrow('not found')
   })
 })

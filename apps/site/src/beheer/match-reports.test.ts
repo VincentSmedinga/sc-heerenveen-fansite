@@ -21,6 +21,7 @@ import {
   persons,
   players,
   playerSeasonStats,
+  playerStatDifferences,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -507,27 +508,38 @@ describe('the goals of a report that is klaar against the squad table of Wikiped
     return nine.id
   }
 
-  it('writes a line in the log for a player whose goals differ, with the account of the editor, when the report is saved as klaar', async () => {
+  const kept = () => database.db.select().from(playerStatDifferences)
+
+  it('keeps a player whose goals differ for the editors, once, when the report is saved as klaar (#974)', async () => {
     const nine = await tableOfWikipedia()
 
     await save(report())
 
-    const lines = (await log()).filter((line) => line.action === 'player.stats-differ')
-
     // The report has one goal for number 9, where the table has two; number 10 agrees.
-    expect(lines).toMatchObject([
-      { createdAt: t0, detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2', itemId: nine, userId },
+    expect(await kept()).toMatchObject([
+      {
+        comparedWith: 'reports',
+        competition: 'Eredivisie',
+        firstSeenAt: t0,
+        otherGoals: 1,
+        playerId: nine,
+        season: '2026/27',
+        status: 'pending',
+        tableGoals: 2,
+      },
     ])
+    expect((await log()).filter((line) => line.action.startsWith('player.'))).toEqual([])
+
+    // Saving the report again finds the same difference and keeps nothing more.
+    await save({ ...report(), bron: 'Een andere bron' }, t1)
+    expect(await kept()).toMatchObject([{ firstSeenAt: t0, status: 'pending' }])
   })
 
-  it('writes nothing about it for a report that is bezig, and nothing when a save changes nothing', async () => {
+  it('keeps nothing for a report that is bezig', async () => {
     await tableOfWikipedia()
     await save({ ...report(), status: 'bezig' })
-    expect((await log()).filter((line) => line.action === 'player.stats-differ')).toEqual([])
 
-    await save(report(), t1)
-    await save(report(), t1)
-    expect((await log()).filter((line) => line.action === 'player.stats-differ')).toHaveLength(1)
+    expect(await kept()).toEqual([])
   })
 })
 

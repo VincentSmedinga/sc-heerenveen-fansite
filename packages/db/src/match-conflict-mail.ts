@@ -1,7 +1,7 @@
 import { sendMail } from '@fansite/shared/mail'
 import { readMailEnv } from '@fansite/shared/mail-env'
 import { siteOrigins } from '@fansite/shared/site-env'
-import { and, asc, eq, isNotNull, isNull, ne, or } from 'drizzle-orm'
+import { and, asc, eq, isNotNull, isNull, notInArray, or } from 'drizzle-orm'
 
 // The mails to the beheerders about a difference between Wikipedia and an entry of the editors
 // (issue 577): one when the importer sees the difference, and one when it takes Wikipedia over
@@ -12,7 +12,7 @@ import type { Database } from './client.ts'
 import type { Match, MatchChange } from './schema.ts'
 
 import { describeProblem, environmentNames, formatDateTime } from './alerts.ts'
-import { conflictStandsMs, oldSiteGoalsReason, partLabels } from './match-conflicts.ts'
+import { conflictStandsMs, partLabels, quietReasons } from './match-conflicts.ts'
 import { adminUsers, matchChanges, matches } from './schema.ts'
 
 /** How a run mails about the differences. A test gives its own mailer: nothing real is sent. */
@@ -134,8 +134,9 @@ async function unmailed(db: Pick<Database, 'select'>): Promise<Waiting[]> {
     .where(
       and(
         isNotNull(matchChanges.part),
-        // The kept goals of the old fansite are no difference with Wikipedia.
-        ne(matchChanges.reason, oldSiteGoalsReason),
+        // The kept goals of the old fansite and a difference between two sources are no
+        // difference between Wikipedia and an entry of the editors.
+        notInArray(matchChanges.reason, [...quietReasons]),
         or(
           and(eq(matchChanges.status, 'pending'), isNull(matchChanges.mailedAt)),
           and(

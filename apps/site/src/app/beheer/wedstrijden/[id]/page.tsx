@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 
-import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
+import { partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
 import { mayHaveReport } from '@fansite/db/match-reports'
 import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { compact } from '#src/beheer/density'
+import { differenceWords } from '#src/beheer/difference-words'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
@@ -37,6 +38,14 @@ type Props = {
 
 /** What the last action says, by the word in the address. */
 const notices: Record<string, { text: string; title: string }> = {
+  'bron-gehouden': {
+    text: 'De wedstrijd blijft zoals hij is. De import meldt dit verschil niet nog eens, zolang beide bronnen hetzelfde blijven zeggen.',
+    title: 'Niet overgenomen',
+  },
+  'bron-overgenomen': {
+    text: 'Dit onderdeel is nu wat de andere bron zegt.',
+    title: 'Overgenomen',
+  },
   'geen-invoer': { text: 'Er was geen invoer van de redactie om weg te halen.', title: 'Niets weggehaald' },
   gehouden: {
     text: 'Onze invoer blijft staan. De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.',
@@ -170,32 +179,37 @@ export default async function MatchPage({ params, searchParams }: Props) {
             <Strong>{notice.title}.</Strong> {notice.text}
           </Notice>
         )}
-        {differences.map((difference) => (
-          <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
-            <Heading id={`afwijking-${difference.id}-kop`} level={2}>
-              Wikipedia wijkt af: {partLabels[difference.part]}
-            </Heading>
-            <List role="list">
-              <List.Item>
-                <Text>Onze invoer: {difference.oldValue}</Text>
-              </List.Item>
-              <List.Item>
-                <Text>Wikipedia: {difference.newValue}</Text>
-              </List.Item>
-            </List>
-            <Text appearance="meta">
-              Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
-              {formatVersionTime(new Date(difference.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia dan nog
-              hetzelfde zegt.
-            </Text>
-            <ConflictForm
-              action={submitConflict.bind(null, difference.id)}
-              id={difference.id}
-              part={`de ${partLabels[difference.part]}`}
-              title={title}
-            />
-          </Card>
-        ))}
+        {differences.map((difference) => {
+          const words = differenceWords(difference, match)
+
+          return (
+            <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
+              <Heading id={`afwijking-${difference.id}-kop`} level={2}>
+                {words.heading}
+              </Heading>
+              <List role="list">
+                <List.Item>
+                  <Text>
+                    {words.ours}: {difference.oldValue}
+                  </Text>
+                </List.Item>
+                <List.Item>
+                  <Text>
+                    {words.theirs}: {difference.newValue}
+                  </Text>
+                </List.Item>
+              </List>
+              <Text appearance="meta">{words.note}</Text>
+              <ConflictForm
+                action={submitConflict.bind(null, difference.id)}
+                id={difference.id}
+                labels={{ keep: words.keep, takeOver: words.takeOver }}
+                part={`de ${partLabels[difference.part]}`}
+                title={title}
+              />
+            </Card>
+          )
+        })}
         {held.map((change) => {
           const summary = describeHeldChange(change, match, goals)
           const outcome = describeWithoutDecision(change, now)

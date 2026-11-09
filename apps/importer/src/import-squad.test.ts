@@ -11,6 +11,7 @@ import {
   persons,
   players,
   playerSeasonStats,
+  playerStatDifferences,
   sources,
   squadImports,
   wikipediaPages,
@@ -874,7 +875,7 @@ describe('the numbers of the players', () => {
     expect((await database.db.select().from(squadImports))[0]).toMatchObject({ lastWarning: null })
   })
 
-  it('warns when the goals differ, with the name, the season and both numbers, and changes nothing', async () => {
+  it('keeps a difference with the goals of the matches for the editors, once, and never as a warning (#974)', async () => {
     const { server } = await serve()
 
     await importAt(server, first)
@@ -893,24 +894,73 @@ describe('the numbers of the players', () => {
     const later = new Date(first.getTime() + hours(1))
     const report = await importAt(server, later)
 
-    expect(report).toMatchObject({
-      kind: 'imported',
-      warnings: ['Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches'],
-    })
-    expect(formatSquadReport(report).split('\n').at(-1)).toBe(
-      'Squad 2026/27: warning, Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches',
-    )
-    expect((await database.db.select().from(squadImports))[0]).toMatchObject({
-      failuresInARow: 0,
-      lastOutcome: 'imported',
-      lastWarning: 'Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches',
-      lastWarningAt: later,
-    })
-    // The table stays the source: nothing in the numbers changed.
+    expect(report).toMatchObject({ kind: 'imported', warnings: [] })
+    expect((await database.db.select().from(squadImports))[0]).toMatchObject({ lastOutcome: 'imported' })
+    expect(await database.db.select().from(playerStatDifferences)).toMatchObject([
+      {
+        comparedWith: 'matches',
+        competition: 'Eredivisie',
+        firstSeenAt: later,
+        otherGoals: 1,
+        playerId: oyen?.id,
+        season: '2026/27',
+        status: 'pending',
+        tableGoals: 2,
+      },
+    ])
+    // The table stays the source until an editor decides: nothing in the numbers changed.
     expect(await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))).toEqual(before)
+
+    // The next run sees the same difference, and the one after it finds it gone.
+    const next = new Date(first.getTime() + hours(2))
+
+    await importAt(server, next)
+    expect(await database.db.select().from(playerStatDifferences)).toMatchObject([
+      { firstSeenAt: later, lastSeenAt: next, status: 'pending' },
+    ])
+
+    await database.db
+      .insert(matchGoals)
+      .values({ matchId, minute: 82, ours: true, player: 'Oyen', playerId: oyen?.id ?? null })
+    await importAt(server, new Date(first.getTime() + hours(3)))
+    expect(await database.db.select().from(playerStatDifferences)).toMatchObject([
+      { resolution: 'reverted', status: 'rejected' },
+    ])
   })
 
-  it('writes the difference between the goals of the match reports and the table in the log, when the table has new numbers, and never as a warning (#832)', async () => {
+  it('leaves the goals the editors took over while the table says the same, and follows the table when it changes', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const league = () =>
+      database.db
+        .select()
+        .from(playerSeasonStats)
+        .where(eq(playerSeasonStats.playerId, oyen?.id ?? 0))
+        .then((rows) => rows.find((row) => row.competition === 'Eredivisie'))
+    const tabled = (await league())?.goals ?? 0
+
+    // An editor took one goal less over: the table said `tabled` then.
+    await database.pool.query(
+      "UPDATE player_season_stats SET goals = ?, table_goals = ? WHERE player_id = ? AND competition = 'Eredivisie'",
+      [tabled - 1, tabled, oyen?.id],
+    )
+
+    await importAt(server, new Date(first.getTime() + hours(1)))
+    expect(await league()).toMatchObject({ goals: tabled - 1, tableGoals: tabled })
+
+    // The table of Wikipedia says something else now: its number counts again.
+    const changed = await serve(
+      withNumbers(original, 'Luca Oyen', 11, `8||${tabled + 1}||1||1||0||0||9||${tabled + 1}||1`),
+    )
+
+    await importAt(changed.server, new Date(first.getTime() + hours(2)))
+    expect(await league()).toMatchObject({ goals: tabled + 1, tableGoals: null })
+  })
+
+  it('keeps a difference with the goals of the match reports for the editors, and never as a warning (#974)', async () => {
     const { server } = await serve()
 
     await importAt(server, first)
@@ -931,34 +981,26 @@ describe('the numbers of the players', () => {
       oyen?.id,
     ])
 
-    // A run that finds the same numbers writes nothing: the log is only added to.
-    await importAt(server, new Date(first.getTime() + hours(1)))
-    expect(await database.db.select().from(auditLog)).toEqual([])
-
-    // The table has new numbers (here: the stored ones were different).
-    await database.pool.query('UPDATE player_season_stats SET appearances = appearances + 1')
-
-    const later = new Date(first.getTime() + hours(2))
+    const later = new Date(first.getTime() + hours(1))
 
     expect(await importAt(server, later)).toMatchObject({ kind: 'imported', warnings: [] })
 
-    // Every other scorer of the table has goals the one report does not have; Oyen is one line.
-    const logged = (await database.db.select().from(auditLog)).filter((row) => row.itemId === (oyen?.id ?? 0))
+    // Every other scorer of the table has goals the one report does not have; Oyen is one row.
+    const kept = () =>
+      database.db
+        .select()
+        .from(playerStatDifferences)
+        .then((rows) => rows.filter((row) => row.playerId === (oyen?.id ?? 0)))
 
-    expect(logged).toMatchObject([
-      {
-        action: 'player.stats-differ',
-        createdAt: later,
-        detail: 'Doelpunten Eredivisie 2026/27: verslagen 1, Wikipedia 2',
-        userId: null,
-      },
+    expect(await kept()).toMatchObject([
+      { comparedWith: 'reports', firstSeenAt: later, otherGoals: 1, status: 'pending', tableGoals: 2 },
     ])
+    // Nothing goes in the log of the admin until an editor decides.
+    expect(await database.db.select().from(auditLog)).toEqual([])
 
-    // The next run finds the same numbers and says nothing more.
-    const written = (await database.db.select().from(auditLog)).length
-
-    await importAt(server, new Date(first.getTime() + hours(3)))
-    expect(await database.db.select().from(auditLog)).toHaveLength(written)
+    // The next run finds the same numbers and keeps nothing more.
+    await importAt(server, new Date(first.getTime() + hours(2)))
+    expect(await kept()).toHaveLength(1)
   })
 
   it('compares each competition on its own', async () => {
@@ -967,12 +1009,16 @@ describe('the numbers of the players', () => {
     await importAt(server, first)
     await playMatchWithTheGoalsOfTheTable()
 
-    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
 
     // Oyen has no Eredivisie goal in the table now, so the goals of the matches are not his.
-    expect(report).toMatchObject({
-      warnings: ['Luca Oyen (2026/27) has 2 goals in the KNVB Beker in the squad table and 0 in the matches'],
-    })
+    expect(
+      (await database.db.select().from(playerStatDifferences))
+        .filter((row) => row.playerId === oyen?.id)
+        .map((row) => [row.competition, row.tableGoals, row.otherGoals]),
+    ).toEqual([['KNVB Beker', 2, 0]])
   })
 })
 
@@ -1097,11 +1143,10 @@ describe('the import command', () => {
       'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
       'Squad 2026/27: countries of the players: 25 of 25 have one',
     ])
-    // The goals of the made-up matches differ from the made-up table: a line for each.
-    expect(lines.length).toBeGreaterThan(7)
-    expect(lines.slice(7).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
-      true,
-    )
+    // The goals of the made-up matches differ from the made-up table: a row for each, for the
+    // editors, and no warning.
+    expect(lines).toHaveLength(7)
+    expect((await database.db.select().from(playerStatDifferences)).length).toBeGreaterThan(0)
     expect(
       pageRequests(server)
         .filter((path) => path?.includes('Sc_Heerenveen_in_het_seizoen'))

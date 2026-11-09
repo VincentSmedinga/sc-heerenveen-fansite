@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, clubs, matchEdits, matches, matchStatistics } from '@fansite/db/schema'
+import { sourceDifferenceReasons } from '@fansite/db/match-conflicts'
+import { adminUsers, clubs, matchChanges, matchEdits, matches, matchStatistics } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -406,7 +407,7 @@ describe('the step matches', () => {
   let adminId = 0
 
   beforeEach(async () => {
-    for (const table of ['match_edits', 'match_statistics', 'matches', 'clubs', 'admin_users']) {
+    for (const table of ['match_changes', 'match_edits', 'match_statistics', 'matches', 'clubs', 'admin_users']) {
       await database.pool.query(`DELETE FROM ${table}`)
     }
     await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
@@ -529,15 +530,70 @@ describe('the step matches', () => {
     expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', referee: 'Piet Fluit', round: 'Eerste ronde' }])
   })
 
-  it('logs a field that differs from the other source and leaves it as it is', async () => {
+  it('keeps a field that differs from the other source as a change that waits, once, and leaves the match', async () => {
     await wikipediaMatch({ goalsFor: 3 })
 
     const report = await run([oldMatch()])
 
     expect(report.lines.join('\n')).toMatch(
-      /match difference: 2001\/02 Eredivisie Eerste ronde \(match \d+\) goalsFor: wikipedia says 3, oude-fansite says 2/,
+      /2001\/02 nec\.thuis: the result differs from match \d+ of wikipedia, kept as a change that waits for the editors/,
     )
+    expect(report.lines.join('\n')).not.toContain('match difference:')
     expect(await rows()).toMatchObject([{ goalsFor: 3 }])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      {
+        newValue: 'sc Heerenveen 2–1 N.E.C.',
+        oldValue: 'sc Heerenveen 3–1 N.E.C.',
+        part: 'result',
+        reason: sourceDifferenceReasons['oude-fansite'],
+        status: 'pending',
+      },
+    ])
+
+    // The next run sees the same difference and says nothing new.
+    const again = await run([oldMatch()])
+
+    expect(again.lines.join('\n')).not.toContain('kept as a change')
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending', timesSeen: 2 }])
+
+    // The difference is gone when the files say what the match has.
+    await run([oldMatch({ result: { ...oldMatch().result, homeFullTime: 3 } })])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { resolution: 'reverted', status: 'rejected' },
+    ])
+  })
+
+  it('leaves a part of its own match alone once the editors took another source over', async () => {
+    await run([oldMatch()])
+
+    const [own] = await rows()
+
+    // Wikipedia said 3-1, and an editor took that over.
+    await database.db.update(matches).set({ goalsFor: 3 }).where(eq(matches.id, own!.id))
+    await database.db.insert(matchChanges).values({
+      changed: 'uitslag',
+      class: 'suspicious',
+      competition: own!.competition,
+      decidedAt: new Date(),
+      firstSeenAt: new Date(),
+      lastSeenAt: new Date(),
+      matchId: own!.id,
+      newValue: 'sc Heerenveen 3–1 N.E.C.',
+      oldValue: 'sc Heerenveen 2–1 N.E.C.',
+      part: 'result',
+      reason: sourceDifferenceReasons.wikipedia,
+      resolution: 'person',
+      round: own!.round,
+      season: own!.season,
+      status: 'accepted',
+    })
+
+    await database.db.update(matches).set({ home: false }).where(eq(matches.id, own!.id))
+
+    expect(await run([oldMatch({ referee: 'Piet Fluit' })])).toMatchObject({ changed: 1 })
+    // The result stays as the editors decided, with who played at home; the rest still follows
+    // the files.
+    expect(await rows()).toMatchObject([{ goalsFor: 3, home: false, referee: 'Piet Fluit' }])
   })
 
   it('finds a match that moved by a day, and makes a new row for one that moved further', async () => {
@@ -600,7 +656,8 @@ describe('the step matches', () => {
     const found = await run([oldMatch({ referee: 'Piet Fluit', result: { ...oldMatch().result, homeFullTime: 3 } })])
 
     expect(found).toMatchObject({ changed: 0, created: 0 })
-    expect(found.lines.join('\n')).toContain('goalsFor: redactie says 2, oude-fansite says 3')
+    expect(found.lines.join('\n')).toContain('the result differs from match')
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ part: 'result', status: 'pending' }])
     expect(await rows()).toMatchObject([{ dataSource: 'redactie', referee: null, round: 'Finale' }])
   })
 

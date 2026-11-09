@@ -31,8 +31,8 @@ export const qualityPath = '/beheer/kwaliteit'
  * - `zonder-doelpunten`: played, with goals in the result and no row in `match_goals`;
  * - `verslagen-bezig`: with a report that is not finished;
  * - `doelpunten-zonder-speler`: with a goal of ours that has no player;
- * - `wachtende-wijzigingen`: with a change of Wikipedia or a difference that waits for a
- *   decision.
+ * - `wachtende-wijzigingen`: with a change of Wikipedia, a difference with an entry of the
+ *   editors or a difference between two sources that waits for a decision.
  *
  * `total` is how many goals or changes the match has in the list, and 1 in the first two.
  */
@@ -64,9 +64,18 @@ export async function listWork(db: Pick<Database, 'select'>, season: string, lis
 }
 
 /**
+ * The address of the page with the players of a season whose numbers differ between the squad
+ * table and the matches or the reports: `/beheer/kwaliteit/2026-27/spelerscijfers`.
+ */
+export function statDifferencesPath(season: string) {
+  return `${qualityPath}/${seasonSlug(season)}/spelerscijfers`
+}
+
+/**
  * How many changes wait for a decision in each season that has any: the changes of Wikipedia
- * that the importer holds back and the differences with an entry of the editors, of a match
- * that still exists. `readSeasonCoverage` does not count them.
+ * that the importer holds back, the differences with an entry of the editors and the
+ * differences between two sources, of a match that still exists. `readSeasonCoverage` does not
+ * count them.
  */
 export async function waitingChangesBySeason(db: Pick<Database, 'select'>): Promise<Map<string, number>> {
   const found = await db

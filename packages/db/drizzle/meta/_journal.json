@@ -421,6 +421,13 @@
       "when": 1794257487729,
       "tag": "0059_wikipedia_page_per_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1794260603827,
+      "tag": "0060_add_player_stat_differences",
+      "breakpoints": true
     }
   ]
 }

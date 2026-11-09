@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { adminCookie } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { earlierSeasonSlug } from './earlier-season'
-import { heldMatchId } from './held-changes'
+import { heldMatchId, statSeasonSlug } from './held-changes'
 import { cupReportMatchId, matchId, playedMatchId } from './matches'
 
 // Every screen of the admin on a phone (#618): 390 pixels wide, with touch. The pages are
@@ -35,6 +35,7 @@ const screens = [
   '/beheer/clubnamen/sv-proefdorp',
   '/beheer/kwaliteit',
   `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`,
+  `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`,
   '/beheer/bezoek',
 ]
 

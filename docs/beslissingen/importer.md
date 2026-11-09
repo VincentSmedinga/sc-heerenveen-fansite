@@ -1030,6 +1030,7 @@
 - **Alternatieven:** kolommen in `players` (een speler met een rij per seizoen krijgt dan cijfers per competitie in breedte, en de schakelaar van #406 raakt ze); de cijfers uit de wedstrijden zelf tellen (het is al wat de kaart met doelpuntenmakers doet, maar assists en optredens staan niet in de wedstrijden); de cijfers van de site van de club of van een statistiekensite halen (geen toestemming, en een tweede bron die met de Wikipedia kan botsen); de tabel van Wikipedia laten winnen van de wedstrijden of andersom bij een verschil (het is onbekend welke van de twee loopt achter, dus de importer laat het verschil zien en kiest niet).
 - **Later:** zie _De kaarten Assists, Minuten en Alle spelers lezen alleen de verslagen_ in `site.md` (7 november 2026): de kaarten die #493 vroeg, komen uit de verslagen en niet uit deze tabel.
   Deze tabel blijft staan, maar de pagina's tonen hem niet; de doelpunten ervan worden vergeleken met die van de verslagen, en een verschil gaat in het logboek van het beheer (`player.stats-differ`, zie dezelfde beslissing in `site.md`).
+- **Later:** sinds #974 is zo'n verschil een rij in `player_stat_differences` en geen waarschuwing of regel in het logboek; zie _Een verschil in de cijfers van een speler staat in een eigen tabel_.
 
 ## De bekerpagina's van eerdere seizoenen schrijven de score met de stand bij de rust, en de lezer kent die vorm
 
@@ -3123,6 +3124,8 @@
 - **Waarom:** de oude fansite maakt zelf de ronde (`Wedstrijd 3`) en Wikipedia schrijft `Eerste ronde`, dus dezelfde wedstrijd kon twee keer in de database komen.
   De gegevens van de oude fansite zijn van de projecteigenaar, en een tweede bron is een controle, geen vervanging.
 - **Alternatieven:** Wikipedia gaat voor (een eigen bron verandert dan door een bewerking elders); wie het eerst schrijft wint, zoals voorheen (een verschil blijft onzichtbaar); de sleutel veranderen in datum en club (een herspeelde wedstrijd past dan niet).
+- **Later:** sinds #974 is een verschil in de aftrap, de uitslag of de gegevens geen regel meer maar een wachtende wijziging; zie _Een verschil tussen twee bronnen wacht op de redactie_.
+  De regel `match difference` vervalt.
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -3370,3 +3373,48 @@
 - **Waarom:** `Sc Heerenveen in het seizoen 2008/09 (mannen)` is de pagina van de selectie en nu ook die van de competitiewedstrijden.
   Met de titel alleen als sleutel schreef elke import de soort van de ander over, en dan miste `/wedstrijden` of de selectie zijn bronvermelding.
 - **Alternatieven:** de rij van de selectie laten staan en de pagina niet bij de wedstrijden noemen (de bronvermelding van 34 wedstrijden ontbreekt dan); een kolom per gebruik op één rij (elke lezer van de tabel moet dan anders vragen).
+
+## Een verschil tussen twee bronnen wacht op de redactie
+
+- **Datum:** 9 november 2026
+- **Besluit:** zegt een tweede bron iets anders over een wedstrijd dan de bron waar de wedstrijd van komt, dan wordt dat een wachtende wijziging in `match_changes` (#974).
+  De wedstrijd houdt de waarde van zijn eigen bron tot de redactie beslist.
+  - Er komt één wijziging per deel dat verschilt: de aftrap, de uitslag of de gegevens.
+    Ze heeft het deel, de twee waarden in woorden en het voorstel van de tweede bron, zoals een afwijking van de invoer van de redactie (`keepSourceDifferences` in `@fansite/db/source-differences`).
+    De reden zegt welke bron de tweede is (`sourceDifferenceReasons`).
+  - Hetzelfde verschil, met dezelfde twee waarden, komt er één keer: een volgende run telt het alleen opnieuw.
+    Verandert een waarde, dan vervalt de wijziging en komt er een nieuwe.
+    Is het verschil weg, of houdt de redactie het deel inmiddels zelf, dan sluit de wijziging zichzelf.
+  - Alleen een mens beslist, in het beheer of met `import:changes`.
+    De import neemt na zeven dagen niets over en er gaat geen mail uit.
+  - Wijst de redactie het verschil af, dan komt het niet terug zolang beide waarden gelijk blijven.
+    Een wijziging die vanzelf verviel of die werd overgenomen, telt daarbij niet.
+  - Neemt de redactie de tweede bron over, dan laat de import van de eigen bron dat deel voortaan met rust (`readTakenOverParts`): de stap `matches` van `import:old-site`, en de import van Wikipedia voor een wedstrijd van Wikipedia.
+    Anders zette de volgende run de oude waarde terug.
+    De rest van zo'n wedstrijd van Wikipedia volgt de pagina zonder het oordeel van `classify-change.ts`, zoals bij een invoer van de redactie.
+  - Thuis of uit hoort bij de uitslag: de regel van de uitslag noemt de thuisclub eerst, en het voorstel heeft dan ook `home`.
+  - Leest de regel van een deel voor beide bronnen hetzelfde, zoals bij een andere dag met dezelfde aftrap, dan staat het veld dat verschilt erachter.
+    Zo wordt elk veld dat `compareClaim` vergelijkt een wachtende wijziging, en is er geen regel `match difference` meer.
+  - De doelpunten vergelijkt deze stap niet: die hebben hun eigen regels (#973).
+- **Waarom:** een waarschuwing in `last_warning` is weg na de volgende run, en een regel in het logboek leest niemand terug.
+  `match_changes` had het deel, het voorstel en het besluit al, dus het beheer en `import:changes` werken zonder nieuw scherm.
+- **Alternatieven:** de tweede bron na zeven dagen overnemen, zoals bij de invoer van de redactie (de eigen bron is hier juist de baas); een eigen tabel voor deze verschillen (een tweede plek voor hetzelfde besluit); het overgenomen deel markeren in `match_edits` (die rij vraagt een account, en `import:changes` heeft er geen).
+
+## Een verschil in de cijfers van een speler staat in een eigen tabel
+
+- **Datum:** 9 november 2026
+- **Besluit:** een verschil tussen de doelpunten van een speler in de selectietabel en die uit de wedstrijden of de verslagen wordt een rij in `player_stat_differences`, met de migratie `0060_add_player_stat_differences` (#974).
+  De rij heeft de speler, het seizoen, de competitie, waarmee is vergeleken en de twee getallen.
+  - De import vergelijkt na elke lezing van de selectie, met de wedstrijden en met de verslagen (`comparePlayerGoals` in `@fansite/db/player-stat-differences`).
+    Het beheer vergelijkt met de verslagen als de redactie een verslag als `klaar` opslaat.
+  - Hetzelfde verschil komt er één keer, een verschil met andere getallen vervangt het oude, en een verschil dat weg is sluit zichzelf.
+  - De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelerscijfers`, met een reden, en de pagina Kwaliteit linkt erheen.
+    Overnemen zet het getal van de wedstrijden of de verslagen in `player_season_stats`.
+    `table_goals` onthoudt wat de tabel van Wikipedia toen zei: zolang die hetzelfde zegt, laat de import het getal van de redactie staan.
+    Houden laat de tabel zoals hij is.
+    Een verschil dat de redactie afwees, komt niet terug zolang de twee getallen gelijk blijven.
+  - Het besluit staat in het logboek van het beheer als `player.stats-take-over` of `player.stats-keep`.
+    De waarschuwing van de import en de regel `player.stats-differ` vervallen.
+- **Waarom:** `match_changes` hangt aan één wedstrijd, en de doelpunten van een speler in een seizoen horen bij geen enkele wedstrijd.
+  Zonder `table_goals` schreef de volgende lezing van de selectie het oude getal terug, een uur na het besluit.
+- **Alternatieven:** `match_changes` met een lege wedstrijd (de rij verliest dan zijn betekenis, en elk scherm moet die uitzondering kennen); het besluit alleen vastleggen en de tabel nooit aanpassen (overnemen en houden doen dan hetzelfde); de waarschuwing houden naast de rij (twee plekken voor hetzelfde nieuws).

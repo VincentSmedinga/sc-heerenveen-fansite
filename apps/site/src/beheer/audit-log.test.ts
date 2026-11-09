@@ -136,6 +136,8 @@ describe('recordAction', () => {
       'club-name.save',
       'club-name.reset',
       'player.stats-differ',
+      'player.stats-take-over',
+      'player.stats-keep',
     ])
   })
 

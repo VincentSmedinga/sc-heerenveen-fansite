@@ -18,7 +18,6 @@ import type {
   StatsCompetition,
 } from './schema.ts'
 
-import { recordAction } from './audit-log.ts'
 import { withSeasonNames } from './club-name-periods.ts'
 import {
   clubs,
@@ -254,39 +253,6 @@ export async function listSeasonReports(db: ReportDatabase, season: string): Pro
     .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
-}
-
-/**
- * Writes each difference of `findReportGoalDifferences` in the log of the admin as
- * `player.stats-differ`, for the player, and returns how many lines it wrote. The log is only
- * added to and never read by code, so the function can't see what it said before: whoever
- * calls it does so when something changed that can cause a difference, which is a report that
- * is saved as `klaar` (the editor's account) and a squad table that has new numbers (`userId`
- * is `null`: the importer). Nothing is shown to visitors: the cards of Spelers read the
- * reports only.
- */
-export async function logReportGoalDifferences(
-  db: Pick<Database, 'insert' | 'select'>,
-  season: string,
-  userId: null | number,
-  now = new Date(),
-): Promise<number> {
-  const differences = await findReportGoalDifferences(db, season)
-
-  for (const difference of differences) {
-    await recordAction(
-      db,
-      {
-        action: 'player.stats-differ',
-        detail: `Doelpunten ${difference.competition} ${season}: verslagen ${difference.fromReports}, Wikipedia ${difference.fromWikipedia}`,
-        itemId: difference.playerId,
-        userId,
-      },
-      now,
-    )
-  }
-
-  return differences.length
 }
 
 /** The match in the shape the rules read. */

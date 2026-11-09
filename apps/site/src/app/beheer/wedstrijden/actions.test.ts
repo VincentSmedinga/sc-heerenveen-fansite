@@ -2,7 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
-import { encodePartProposal } from '@fansite/db/match-conflicts'
+import { encodePartProposal, sourceDifferenceReasons } from '@fansite/db/match-conflicts'
 import {
   adminUsers,
   auditLog,
@@ -449,6 +449,22 @@ describe('submitConflict', () => {
       ['match.edit', 'Wikipedia is achter', userId],
       ['match.take-over', 'Wikipedia heeft de bron', userId],
     ])
+  })
+
+  it('decides a difference between two sources with its own notice (#974)', async () => {
+    const id = await waiting()
+
+    await database.db.update(matchChanges).set({ reason: sourceDifferenceReasons.wikipedia })
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Wikipedia heeft de bron' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=bron-overgenomen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 3, status: 'played' })
+
+    await database.db.update(matchChanges).set({ decidedAt: null, resolution: null, status: 'pending' })
+    expect(await decide(id, { besluit: 'houden', reden: 'De oude fansite klopt' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=bron-gehouden`,
+    })
   })
 
   it('keeps the entry, with the reason and the account in the log', async () => {
