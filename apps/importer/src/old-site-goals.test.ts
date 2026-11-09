@@ -1,8 +1,10 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { decideConflict, decodePartProposal, oldSiteGoalsReason } from '@fansite/db/match-conflicts'
 import {
   adminUsers,
   matchAppearances,
+  matchChanges,
   matchEdits,
   matches,
   matchGoals,
@@ -81,6 +83,8 @@ const goal = (minute: number, who: string, kind: null | string = null, ours = tr
 const winGoals = [goal(10, 'jan.janssen'), goal(30, 'Piet Pietersen', null, false), goal(80, 'joost.vanaken')]
 
 const goalRows = () => database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))
+
+const changeRows = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
 
 const byCode = new Map(oldPlayers.map((player) => [player.code, player]))
 
@@ -316,7 +320,15 @@ describe('the steps spelers and doelpunten', () => {
   let adminId = 0
 
   beforeEach(async () => {
-    for (const table of ['match_edits', 'match_statistics', 'matches', 'players', 'clubs', 'admin_users']) {
+    for (const table of [
+      'match_changes',
+      'match_edits',
+      'match_statistics',
+      'matches',
+      'players',
+      'clubs',
+      'admin_users',
+    ]) {
       await database.pool.query(`DELETE FROM ${table}`)
     }
     await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
@@ -596,9 +608,191 @@ describe('the steps spelers and doelpunten', () => {
     expect(goals.lines).toEqual([
       '0 matches get goals, 0 add up without goals, 1 have a score and no goals, 2 have part of the goals',
       '2001/02 nec.thuis: 2 of the goals for the score 2-1, so the match gets none',
+      '2001/02 nec.thuis: the goals are kept as a change that waits for the editors',
       '2001/02 ajax.thuis: no goals for the score 2-1, so the match gets none',
       '2001/02 nec.uit: 3 of the goals for the score 1-2, so the match gets none',
+      '2001/02 nec.uit: the goals are kept as a change that waits for the editors',
     ])
+  })
+
+  it('keeps the goals of the files that do not add up as a change that waits, and none for a match without a list', async () => {
+    const { goals } = await run([
+      oldMatch({ events: winGoals.slice(0, 2) }),
+      oldMatch({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' }),
+    ])
+    const [partial] = await database.db.select().from(matches).orderBy(asc(matches.matchDate))
+    const kept = await changeRows()
+
+    expect(goals.created).toBe(0)
+    expect(kept).toMatchObject([
+      {
+        changed: 'doelpunten',
+        competition: partial!.competition,
+        matchId: partial!.id,
+        newValue: "10' Jan Janssen, 30' Piet Pietersen (tegenstander)",
+        oldValue: 'geen doelpunten',
+        part: 'goals',
+        reason: oldSiteGoalsReason,
+        round: partial!.round,
+        season: '2001/02',
+        status: 'pending',
+      },
+    ])
+    expect(decodePartProposal(kept[0]!.proposal)).toMatchObject({
+      goals: [
+        { minute: 10, ours: true, player: 'Jan Janssen', playerId: expect.any(Number) },
+        { minute: 30, ours: false, player: 'Piet Pietersen', playerId: null },
+      ],
+      part: 'goals',
+      stored: [],
+    })
+  })
+
+  /** The editors make the 2-1 of the only match a 3-1, and leave the goals. */
+  async function correctResult() {
+    const [stored] = await database.db.select().from(matches)
+
+    await database.db.update(matches).set({ goalsFor: 3 }).where(eq(matches.id, stored!.id))
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: adminId,
+      matchId: stored!.id,
+      reason: 'De uitslag was 3-1',
+      resultEdited: true,
+    })
+
+    return stored!.id
+  }
+
+  it('keeps the goals a match had when the editors corrected its result, and takes them off the match', async () => {
+    const list = [oldMatch({ events: winGoals })]
+
+    await run(list)
+
+    const before = await goalRows()
+    const matchId = await correctResult()
+    const { goals } = await run(list)
+    const kept = await changeRows()
+    const line = "10' Jan Janssen, 30' Piet Pietersen (tegenstander), 80' Joost van Aken"
+    const fields = before.map((goal) => ({ minute: goal.minute, player: goal.player, playerId: goal.playerId }))
+
+    expect(await goalRows()).toHaveLength(0)
+    expect(goals.lines).toEqual([
+      '0 matches get goals, 0 add up without goals, 0 have a score and no goals, 1 have part of the goals',
+      '2001/02 nec.thuis: 3 of the goals for the score 3-1, so the match gets none',
+      '2001/02 nec.thuis: the goals are kept as a change that waits for the editors',
+      '2001/02 nec.thuis: 3 goals removed, they do not add up to the score',
+    ])
+    expect(kept).toMatchObject([{ matchId, newValue: line, oldValue: line, part: 'goals', status: 'pending' }])
+    expect(decodePartProposal(kept[0]!.proposal)).toMatchObject({ goals: fields, stored: fields })
+  })
+
+  it('makes no second change for the same list in a second run', async () => {
+    const list = [oldMatch({ events: winGoals })]
+
+    await run(list)
+    await correctResult()
+    await run(list)
+
+    const before = await changeRows()
+    const { goals } = await run(list)
+
+    expect(goals).toMatchObject({ changed: 0, created: 0 })
+    expect(await changeRows()).toEqual(before)
+  })
+
+  it('leaves the list the editors took over on the match, and makes no new change', async () => {
+    const list = [oldMatch({ events: winGoals })]
+
+    await run(list)
+    await correctResult()
+    await run(list)
+
+    const [kept] = await changeRows()
+
+    expect(
+      await decideConflict(
+        database.db,
+        kept!.id,
+        { kind: 'take-over', reason: 'Er mist er een', resolution: 'person', userId: null },
+        new Date(),
+      ),
+    ).toBe('done')
+
+    const taken = await goalRows()
+    const { goals } = await run(list)
+
+    expect(taken).toHaveLength(3)
+    expect(await goalRows()).toEqual(taken)
+    expect(await changeRows()).toHaveLength(1)
+    expect(goals.lines).toContain(
+      'skipped the goals of 2001/02 nec.thuis: the editors took the list of the files over, so it stays',
+    )
+  })
+
+  it('keeps the goals again when the editors kept the result and the match had goals once more', async () => {
+    const list = [oldMatch({ events: winGoals })]
+
+    await run(list)
+
+    const matchId = await correctResult()
+
+    await run(list)
+    await database.db.update(matchChanges).set({ resolution: 'person', status: 'rejected' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, player: 'Jan Janssen' })
+    await run(list)
+
+    expect((await changeRows()).map((change) => change.status)).toEqual(['rejected', 'pending'])
+    expect(await goalRows()).toHaveLength(0)
+  })
+
+  it('lets a change that waits lapse when the goals add up again, and stores them', async () => {
+    const list = [oldMatch({ events: winGoals })]
+
+    await run(list)
+
+    const matchId = await correctResult()
+
+    await run(list)
+    await database.db.update(matches).set({ goalsFor: 2 }).where(eq(matches.id, matchId))
+    await run(list)
+
+    expect(await goalRows()).toHaveLength(3)
+    expect(await changeRows()).toMatchObject([{ resolution: 'reverted', status: 'rejected' }])
+  })
+
+  it('replaces a change that waits when the files have another list', async () => {
+    await run([oldMatch({ events: winGoals.slice(0, 2) })])
+    await run([oldMatch({ events: winGoals.slice(0, 1) })])
+
+    expect(await changeRows()).toMatchObject([
+      { newValue: "10' Jan Janssen, 30' Piet Pietersen (tegenstander)", resolution: 'replaced', status: 'rejected' },
+      { newValue: "10' Jan Janssen", status: 'pending' },
+    ])
+  })
+
+  it('keeps a list again when the files go back to it after another list', async () => {
+    await run([oldMatch({ events: winGoals.slice(0, 2) })])
+    await run([oldMatch({ events: winGoals.slice(0, 1) })])
+    await run([oldMatch({ events: winGoals.slice(0, 2) })])
+
+    expect((await changeRows()).map((change) => [change.newValue, change.status])).toEqual([
+      ["10' Jan Janssen, 30' Piet Pietersen (tegenstander)", 'rejected'],
+      ["10' Jan Janssen", 'rejected'],
+      ["10' Jan Janssen, 30' Piet Pietersen (tegenstander)", 'pending'],
+    ])
+  })
+
+  it('makes no new change for a list a person rejected, while the match has no goals', async () => {
+    const list = [oldMatch({ events: winGoals.slice(0, 2) })]
+
+    await run(list)
+    await database.db.update(matchChanges).set({ resolution: 'person', status: 'rejected' })
+    await run(list)
+
+    expect(await changeRows()).toHaveLength(1)
   })
 
   it('changes nothing in a second run, and keeps the id of a goal', async () => {
@@ -686,7 +880,7 @@ describe('the steps spelers and doelpunten', () => {
 
 describe('the files of the old fansite', () => {
   it('make the players of 17 seasons and the goals of 525 matches, and a second run changes nothing', async () => {
-    for (const table of ['match_edits', 'match_statistics', 'matches', 'players', 'clubs']) {
+    for (const table of ['match_changes', 'match_edits', 'match_statistics', 'matches', 'players', 'clubs']) {
       await database.pool.query(`DELETE FROM ${table}`)
     }
 
@@ -729,7 +923,12 @@ describe('the files of the old fansite', () => {
       '2006/07': 18,
     })
     // 1,771 goals in the files; 8 of them are in the 2 matches whose list does not add up.
+    // Those 2 lists are kept as a change that waits each, which `created` does not count.
     expect(firstGoals).toMatchObject({ changed: 0, created: 1763, skipped: 67, unchanged: 0 })
+    expect((await changeRows()).map((change) => [change.part, change.status])).toEqual([
+      ['goals', 'pending'],
+      ['goals', 'pending'],
+    ])
     expect(secondGoals).toMatchObject({ changed: 0, created: 0, skipped: 67, unchanged: 1763 })
     expect(new Set(stored.map((row) => row.matchId)).size).toBe(525)
     expect(stored.filter((row) => row.penalty)).toHaveLength(94)
