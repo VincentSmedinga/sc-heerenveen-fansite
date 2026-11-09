@@ -26,9 +26,13 @@
 // and writes nothing, and `--report` writes the check report as Markdown, also without writing
 // anything to the database (`pnpm --silent run import:old-site --report`).
 //
+// Before any of them it checks that the database has every migration of this version (see
+// `checkMigrations`), and stops with exit code 1 and one line when it doesn't.
+//
 // With `--changes` it lists the changes of a match that wait for a decision, and with
 // `--changes accept 12` or `--changes reject all` it decides them (`pnpm run import:changes`).
 import { readDatabaseEnv } from '@fansite/db/env'
+import { checkMigrations, describeMigrationCheck } from '@fansite/db/migration-check'
 import { parseArgs } from 'node:util'
 
 import { runChangesCommand } from './import-changes.ts'
@@ -85,6 +89,24 @@ if (wrongArguments) {
 }
 
 const { DATABASE_URL } = readDatabaseEnv()
+
+// The site migrates the database when the host starts it, so an import that runs before the
+// deploy has finished would fail on every query that needs the new columns. Stop before it asks
+// or writes anything. `--status` only reads, so it says so in a line and carries on.
+const { error, warning } = describeMigrationCheck(await checkMigrations(DATABASE_URL))
+
+if (warning !== undefined) {
+  console.warn(warning)
+}
+
+if (error !== undefined) {
+  if (values.status) {
+    console.warn(error)
+  } else {
+    console.error(error)
+    process.exit(1)
+  }
+}
 
 process.exitCode = fromSeason
   ? await runSeasonsImport(DATABASE_URL, positionals[0])

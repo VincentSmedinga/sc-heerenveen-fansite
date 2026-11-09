@@ -3046,3 +3046,18 @@
   Het seizoen krijgt zijn rij bij de eerstvolgende `import:completeness` of import van de oude site, niet meteen.
 - **Aantal:** de zin onder de kaart noemt het aantal spelers op de kaart, dus zonder die uit de verslagen als een betere bron het seizoen heeft.
 - **Op acceptatie:** na de deploy draait de import van de oude site opnieuw, zodat de rijen voor alle seizoenen zonder andere bron er zijn.
+
+## De import controleert eerst of de database alle migraties heeft
+
+- **Datum:** 9 november 2026
+- **Besluit:** elke vorm van `import.mjs` vergelijkt eerst de migraties in de database met die van zijn eigen versie (`checkMigrations` in `@fansite/db/migration-check`, #963).
+  Hij vraagt en schrijft nog niets.
+  - Mist de database een migratie, dan stopt de import met exitcode 1 en één regel die de eerste ontbrekende migratie noemt en zegt dat de deploy eerst klaar moet zijn.
+    `--status` meldt dezelfde regel op de foutuitvoer en gaat door, want hij leest alleen.
+  - Kent de database een migratie die de importer niet kent, dan geeft de import een waarschuwing en gaat door.
+  - De lijst komt uit `meta/_journal.json`, dezelfde als waarmee `prepareDatabase` migreert.
+    Het bestand zit in de bundel, dus `import.mjs` heeft geen losse map met migraties nodig.
+    De vergelijking gaat op `created_at` in `__drizzle_migrations`, zoals Drizzle zelf: een migratie is nog te doen als hij nieuwer is dan de nieuwste die de database kent.
+- **Waarom:** op 9 november 2026 faalde _Import squads_ op alle 36 seizoenen met `ER_BAD_FIELD_ERROR`, omdat hij draaide voordat de deploy had gemigreerd.
+  Eén duidelijke regel is beter dan dezelfde fout per seizoen.
+- **Alternatieven:** de importer zelf laten migreren (de site migreert bij het starten onder een slot, en twee migrerende processen zijn een risico); de workflows op de deploy laten wachten (dekt cron en een handmatige run niet).
