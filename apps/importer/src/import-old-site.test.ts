@@ -460,14 +460,29 @@ describe('the files in the repository', () => {
 
     const before = await rowCounts()
     const chunks: string[] = []
+    const asked: string[] = []
     const code = await runOldSiteReport(database.url, {
+      // The real files have league matches, so the report asks for pages: never the real
+      // Wikipedia in a test. Every page is missing here.
+      fetcher: {
+        fetch: async (url) => {
+          asked.push(String(url))
+
+          return { kind: 'error', message: 'HTTP 404', reason: 'http-status', status: 404, url: String(url) }
+        },
+      },
       folder: oldSiteDataFolder,
+      pause: 0,
       today: '2026-11-08',
       write: (text) => chunks.push(text),
     })
     const text = chunks.join('')
 
     expect(code).toBe(0)
+    // One page for each of the seventeen seasons, and a season without a page has the reason.
+    expect(asked).toHaveLength(17)
+    expect(asked).toContain('https://nl.wikipedia.org/wiki/Eerste_divisie_1992/93?action=raw')
+    expect(text).toContain('De kruistabel is niet te lezen: de pagina Eredivisie 1990/91 bestaat niet.')
     // 671 matches, 566 reports with a line-up, 505 klaar and 61 bezig, as the steps say.
     expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 505 | 61 |')
     expect(text).toContain('## Doelpunten die niet optellen')
