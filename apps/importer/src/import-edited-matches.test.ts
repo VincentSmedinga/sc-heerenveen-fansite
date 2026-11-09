@@ -635,6 +635,39 @@ describe('a difference becomes a change that waits (issue 577)', () => {
     expect(await changes()).toMatchObject([{ status: 'pending' }, { status: 'pending' }])
   })
 
+  it('keeps a part the editors took over from another source, next to their entry (#974)', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+
+    const before = await row(roundOne)
+
+    // An editor took the stadium of the old fansite over for the same match.
+    await database.db.update(matches).set({ stadium: 'Elders' }).where(eq(matches.id, before!.id))
+    await database.db.insert(matchChanges).values({
+      changed: 'gegevens',
+      class: 'suspicious',
+      competition: before!.competition,
+      decidedAt: first,
+      firstSeenAt: first,
+      lastSeenAt: first,
+      matchId: before!.id,
+      newValue: 'de oude fansite',
+      oldValue: 'Wikipedia',
+      part: 'facts',
+      reason: sourceDifferenceReasons['oude-fansite'],
+      resolution: 'person',
+      round: before!.round,
+      season: before!.season,
+      status: 'accepted',
+    })
+
+    await importAt(server, later(first, 2))
+
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2, stadium: 'Elders' })
+  })
+
   it('does not take over a value that Wikipedia changed again, but keeps the new one', async () => {
     const { pages, server } = await serve()
 

@@ -1511,7 +1511,7 @@ De wedstrijd houdt de waarde van zijn eigen bron.
 - Neemt iemand de tweede bron over, dan laat de import van de eigen bron dat onderdeel voortaan met rust: de stap `matches` van `import:old-site` en de import van Wikipedia (`readTakenOverParts`).
 - Is het verschil weg, of vulde de redactie het onderdeel zelf in, dan vervalt de rij (`reverted`); zegt een bron iets nieuws, dan is ze `replaced` en begint een nieuwe.
 - Thuis of uit hoort bij de uitslag.
-  Leest de regel van een onderdeel voor beide bronnen hetzelfde, zoals bij een andere dag met dezelfde aftrap, dan staat het veld dat verschilt erachter: `(speeldag 2001-09-01)`.
+  Leest de regel van een onderdeel voor beide bronnen hetzelfde, zoals bij een andere dag met dezelfde aftrap, dan staat het veld dat verschilt erachter: `(speeldag 1 september 2001)`.
 
 ### Oudere bekerpagina's
 

@@ -30,9 +30,6 @@ export function describePart(part: SourcePart, match: FactsFields & KickoffField
       : describeEntryFacts(match)
 }
 
-/** The columns the line of the kick-off does not always show, in the words of the admin. */
-const hiddenLabels: Record<string, string> = { dateText: 'tekst bij de datum', matchDate: 'speeldag' }
-
 /**
  * Keeps the differences between a stored match and what a second source says about it (what
  * `compareClaim` returned) as changes that wait, one for each part of the match that differs,
@@ -97,7 +94,7 @@ export async function keepSourceDifferences(
     // The line of a part does not show every column: name the ones it leaves out.
     const hidden = (side: 'stored' | 'theirs') =>
       describePart(part, match) === describePart(part, proposed)
-        ? ` (${fields.map((field) => `${hiddenLabels[field.field] ?? field.field} ${field[side]}`).join(', ')})`
+        ? ` (${fields.map((field) => describeHidden(field.field, field[side])).join(', ')})`
         : ''
     const oldValue = `${describePart(part, match)}${hidden('stored')}`
     const newValue = `${describePart(part, proposed)}${hidden('theirs')}`
@@ -196,4 +193,19 @@ export async function readTakenOverParts(
   }
 
   return found
+}
+
+/**
+ * A column the line of its part does not show, with its value, in the words of the admin:
+ * `speeldag 1 september 2001`, `thuis`.
+ */
+function describeHidden(field: string, value: string): string {
+  if (field === 'home') {
+    return value === 'true' ? 'thuis' : 'uit'
+  }
+  if (field === 'matchDate') {
+    return `speeldag ${describeEntryKickoff({ dateText: null, kickoffAt: null, matchDate: value })}`
+  }
+
+  return field === 'dateText' ? `tekst bij de datum ${value}` : `${field} ${value}`
 }

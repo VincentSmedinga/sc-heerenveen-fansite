@@ -1733,7 +1733,7 @@ export const playerStatResolutions = ['person', 'reverted', 'replaced'] as const
  *
  * An editor takes the other number over (`accepted`, `person`: `player_season_stats.goals`
  * becomes `other_goals`) or keeps the table (`rejected`, `person`). A difference a person
- * decided does not come back while both numbers stay the same. A difference that is gone
+ * rejected does not come back while both numbers stay the same. A difference that is gone
  * closes itself as `rejected`, `reverted`, and one whose numbers changed as `rejected`,
  * `replaced`, with a new row for the new numbers. Times are UTC. A row goes with its player.
  */

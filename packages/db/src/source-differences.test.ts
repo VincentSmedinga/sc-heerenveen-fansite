@@ -194,8 +194,8 @@ describe('keepSourceDifferences', () => {
     expect(await keep({ kickoffAt: new Date('2001-09-02T12:30:00Z'), matchDate: '2001-09-02' })).toEqual(['kickoff'])
     expect(await changes()).toMatchObject([
       {
-        newValue: '2 september 2001 om 14:30 (speeldag 2001-09-02)',
-        oldValue: '2 september 2001 om 14:30 (speeldag 2001-09-01)',
+        newValue: '2 september 2001 om 14:30 (speeldag 2 september 2001)',
+        oldValue: '2 september 2001 om 14:30 (speeldag 1 september 2001)',
         part: 'kickoff',
       },
     ])
@@ -215,6 +215,13 @@ describe('keepSourceDifferences', () => {
     })
     expect(await decide(change!.id, 'take-over')).toBe('done')
     expect(await stored()).toMatchObject({ goalsFor: 2, home: false })
+  })
+
+  it('says thuis or uit behind the result of a match that is not played', async () => {
+    await insert({ goalsAgainst: null, goalsFor: null, status: 'postponed' })
+
+    expect(await keep({ home: false })).toEqual(['result'])
+    expect(await changes()).toMatchObject([{ newValue: 'uitgesteld (uit)', oldValue: 'uitgesteld (thuis)' }])
   })
 
   it('has a part for every column that is compared', async () => {

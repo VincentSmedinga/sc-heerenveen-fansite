@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
-import { lockedFields } from '@fansite/db/match-edits'
+import { lockedFields, type MatchPart } from '@fansite/db/match-edits'
 import { compareClaim, findMatchByDate } from '@fansite/db/match-lookup'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import {
@@ -1239,6 +1239,13 @@ async function storeMatches(
     }
 
     const edit = edits.get(before.id)
+    // The parts the editors took over from another source stay, with who played at home for
+    // the result, next to the parts of an entry (`keep`).
+    const held = [...(takenOver.get(before.id) ?? [])]
+    const mergeKept = (keep: MatchPart[]) => ({
+      ...mergeEntry(before, match, [...new Set([...keep, ...held])]),
+      ...(held.includes('result') ? { home: before.home } : {}),
+    })
 
     if (edit !== undefined) {
       // The editors filled in a part of this match: see `edited-matches.ts`. What stays theirs
@@ -1249,7 +1256,7 @@ async function storeMatches(
         { before, edit, storedGoals: stored, wikipedia: match, wikipediaGoals: scorers.goals },
         now,
       )
-      const merged = mergeEntry(before, match, outcome.keep)
+      const merged = mergeKept(outcome.keep)
       const keepsGoals = outcome.keep.includes('goals')
       const goalsDiffer = !keepsGoals && !isSameGoals(stored, scorers.goals)
 
@@ -1265,15 +1272,10 @@ async function storeMatches(
       continue
     }
 
-    const held = takenOver.get(before.id)
-
-    if (held !== undefined && held.size > 0) {
-      // The editors took a part of this match over from another source: that part stays, with
-      // who played at home for the result, and the rest follows the page, as for an entry.
-      const merged = {
-        ...mergeEntry(before, match, [...held]),
-        ...(held.has('result') ? { home: before.home } : {}),
-      }
+    if (held.length > 0) {
+      // The editors took a part of this match over from another source: that part stays and
+      // the rest follows the page, as for an entry.
+      const merged = mergeKept([])
       const goalsDiffer = !isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)
 
       if (isSame(before, merged, club.id) && !goalsDiffer) {
