@@ -267,6 +267,11 @@ function ReportCredit({ data, reported }: { data: MatchData; reported: ReportedM
           {`De opstelling, de wissels, de kaarten en de assists komen uit onze eigen administratie${source === null ? '' : `, naar ${source}`}.`}
         </Text>
       </Card>
+      {reported.match.attendance !== null && (
+        <Card as="div" surface="transparent">
+          <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
+        </Card>
+      )}
       <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf([reported.match])} />
     </>
   )

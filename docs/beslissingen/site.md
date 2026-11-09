@@ -3915,3 +3915,13 @@
 - **Waarom:** de kolommen herhaalden zich in elke regel en namen op een telefoon de meeste ruimte.
 - **Alternatieven:** groeperen per maand (veel tabellen voor een schermlezer); kortere tekst in aparte kolommen; de competitie alleen noemen als het niet de Eredivisie is.
 - **Later:** deze beslissing vervangt de kolommen Datum en Competitie die onder de naam inklapten (zie de beslissing over de lijst in het beheer van eerder).
+
+## Het aantal toeschouwers staat als feit op de pagina van een wedstrijd, met de bron en de melding dat het een schatting is
+
+- **Datum:** 9 november 2026
+- **Besluit:** de pagina van een gespeelde wedstrijd toont "Toeschouwers" bij de feiten, thuis en uit: een getal met punten als duizendtallen, "Zonder publiek" bij `0` en niets bij een leeg veld.
+  Onder de pagina staat de zin "Het aantal toeschouwers is een schatting, volgens Wikipedia." zodra er een aantal is.
+  `Match` en `ShortMatch` en de lijsten tonen het niet (#416).
+- **Waarom:** het is een feit over één wedstrijd waar weinig supporters in een lijst op letten, en een lijst wordt er op een telefoon vier regels langer van.
+  Redacteuren van Wikipedia schatten het aantal en stellen het bij, dus we noemen het een schatting.
+- **Alternatieven:** het aantal in de regel van elke wedstrijd; "onbekend" tonen bij een leeg veld.
