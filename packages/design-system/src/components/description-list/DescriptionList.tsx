@@ -28,10 +28,10 @@ Item.displayName = 'DescriptionList.Item'
 
 /**
  * A few short facts as pairs of a term and a description: a `dl` of DescriptionList.Item
- * elements. The term is small and quiet and the description is heavy, and the pairs stand next
- * to each other as far as they fit and wrap where they do not. It does not know where it
- * stands: the head of a match and a card with figures both use it. description-list.css gives
- * it its look.
+ * elements. The term is small and quiet, the description is a little heavier than running
+ * text, and the pairs stand next to each other as far as they fit and wrap where they do not.
+ * It does not know where it stands: the head of a match and a card with figures both use it.
+ * description-list.css gives it its look.
  */
 export const DescriptionList = ({ className, ...props }: DescriptionListProps) => (
   <dl {...props} className={classNames('hf-description-list', className)} />
