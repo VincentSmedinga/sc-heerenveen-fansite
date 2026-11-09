@@ -2199,6 +2199,11 @@ Een code met een spatie (`X. Alberts`) is een speler van de tegenstander en maak
 
 De stap `doelpunten` ([`src/old-site-goals.ts`](src/old-site-goals.ts)) maakt de rijen in `match_goals`, alleen voor een wedstrijd waarvan de doelpunten optellen tot de uitslag.
 Een wedstrijd met een uitslag en zonder doelpunten, of met een deel ervan, krijgt er geen en staat als regel in het logboek.
+De uitslag is die in de database, dus de uitslag van de redactie als die hem verbeterde.
+Tellen de doelpunten niet op, dan gaan ze uit `match_goals` en bewaart de stap ze voor de redactie: een wachtende wijziging in `match_changes` met het deel `goals` en de reden `oldSiteGoalsReason`.
+`new_value` is de lijst van de bestanden, `old_value` zijn de doelpunten die de wedstrijd had, en `proposal` heeft allebei.
+Dezelfde lijst geeft bij een tweede run geen tweede wijziging, en een lijst die de redactie overnam, laat de stap staan.
+Over zo'n wijziging gaat geen mail uit, en de import neemt haar nooit zelf over.
 Een eigen doelpunt telt voor de club die ervan profiteert, de minuut 0 is een lege minuut en `penalty` is waar bij `strafschop`, `srafschop` en `penalty`.
 De stap raakt alleen wedstrijden met de bron `oude-fansite` en laat een wedstrijd met doelpunten van de redactie of een opgeslagen verslag zoals hij is.
 De redenen staan in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).

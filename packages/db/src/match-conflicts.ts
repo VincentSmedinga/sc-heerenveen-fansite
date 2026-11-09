@@ -54,7 +54,12 @@ export type PartProposal =
       stadium: null | string
     }
   | { dateText: null | string; kickoffAt: null | string; matchDate: string; part: 'kickoff' }
-  | { goals: GoalSnapshot[]; part: 'goals' }
+  | {
+      goals: GoalSnapshot[]
+      part: 'goals'
+      /** The goals the match had, only for the goals of the old fansite that are kept. */
+      stored?: GoalSnapshot[]
+    }
 
 type Writer = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
@@ -64,6 +69,13 @@ type Writer = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
  * admin all read it here.
  */
 export const conflictStandsMs = 7 * 24 * 60 * 60 * 1000
+
+/**
+ * Why the goals of a match of the old fansite wait as a change: the list of the files does not
+ * add up to the score of the match (issue 973). It is no difference with Wikipedia, so nobody
+ * is mailed about it and the importer never takes it over by itself.
+ */
+export const oldSiteGoalsReason = 'de doelpunten van de oude fansite tellen niet op tot de uitslag'
 
 /** The parts of a match in the words of the admin, the log and the mails. */
 export const partLabels: Record<MatchPart, string> = {
@@ -163,9 +175,16 @@ export function decodePartProposal(text: null | string): PartProposal | undefine
   }
 }
 
-/** The line for the log: the part with the entry and Wikipedia. */
-export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValue' | 'part'>): string {
+/**
+ * The line for the log: the part with the entry and Wikipedia, or, for the kept goals of the
+ * old fansite, with the goals the match had and the list of the files.
+ */
+export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValue' | 'part' | 'reason'>): string {
   const name = change.part === null ? '' : partLabels[change.part]
+
+  if (change.reason === oldSiteGoalsReason) {
+    return `Doelpunten van de oude fansite: in de database: ${change.oldValue}; in de bestanden: ${change.newValue ?? 'niets'}`
+  }
 
   return `${name.slice(0, 1).toLocaleUpperCase('nl')}${name.slice(1)}: onze invoer: ${change.oldValue}; Wikipedia: ${change.newValue ?? 'niets'}`
 }

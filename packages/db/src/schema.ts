@@ -1470,6 +1470,11 @@ export type MatchChangeResolution = (typeof matchChangeResolutions)[number]
  * `mailed_at` is when the beheerders were mailed about the difference, and
  * `taken_over_mailed_at` when they were mailed that the importer took Wikipedia over; both stay
  * empty until a mail went out.
+ *
+ * One kind of change with the part `goals` is no difference with Wikipedia: the goals of a
+ * match of the old fansite that do not add up to its score (`oldSiteGoalsReason` in `reason`).
+ * `old_value` is the goals the match had, `new_value` the list of the files, and `proposal` has
+ * both. Nobody is mailed about it and the importer never takes it over by itself.
  */
 export const matchChanges = mysqlTable(
   'match_changes',

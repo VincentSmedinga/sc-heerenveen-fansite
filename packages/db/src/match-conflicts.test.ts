@@ -5,7 +5,13 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { decideConflict, decodePartProposal, encodePartProposal } from './match-conflicts.ts'
+import {
+  decideConflict,
+  decodePartProposal,
+  describeConflict,
+  encodePartProposal,
+  oldSiteGoalsReason,
+} from './match-conflicts.ts'
 import { encodeGoals, encodeMatch } from './match-edits.ts'
 import { adminUsers, auditLog, matchChanges, matchEdits, matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -248,5 +254,21 @@ describe('the proposal of a part', () => {
     expect(decodePartProposal(null)).toBeUndefined()
     expect(decodePartProposal('{"part":"result"}')).toBeUndefined()
     expect(decodePartProposal('niet json')).toBeUndefined()
+  })
+})
+
+describe('the line for the log', () => {
+  const values = { newValue: "10' Jan Janssen", oldValue: 'geen doelpunten', part: 'goals' as const }
+
+  it('names the entry and Wikipedia for a difference', () => {
+    expect(describeConflict({ ...values, reason: 'wijkt af van de invoer van de redactie' })).toBe(
+      "Doelpunten: onze invoer: geen doelpunten; Wikipedia: 10' Jan Janssen",
+    )
+  })
+
+  it('names the database and the files for the kept goals of the old fansite', () => {
+    expect(describeConflict({ ...values, reason: oldSiteGoalsReason })).toBe(
+      "Doelpunten van de oude fansite: in de database: geen doelpunten; in de bestanden: 10' Jan Janssen",
+    )
   })
 })
