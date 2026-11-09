@@ -410,7 +410,7 @@ function keyOf({ guid, link }: Pick<RawItem, 'guid' | 'link'>): string {
 
 /**
  * The address of a link, or the reason we can't use it. Only `http` and `https`, and without a
- * username or password.
+ * username or password. The `utm_` tags are taken off.
  */
 function parseLink(raw: string | undefined): { href: string } | { reason: string } {
   const text = raw?.trim() ?? ''
@@ -432,6 +432,14 @@ function parseLink(raw: string | undefined): { href: string } | { reason: string
   }
   if (url.username !== '' || url.password !== '') {
     return { reason: 'the link has a username or password' }
+  }
+
+  // A feed such as the one of OOG Groningen adds `utm_` campaign tags to its links. We keep
+  // no trace of how a visitor got to a page, so the link goes without them.
+  for (const name of [...url.searchParams.keys()]) {
+    if (name.toLowerCase().startsWith('utm_')) {
+      url.searchParams.delete(name)
+    }
   }
 
   return { href: url.href }

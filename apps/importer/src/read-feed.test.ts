@@ -306,6 +306,15 @@ describe('the link', () => {
     expect(itemsOf(feed).map((item) => item.key)).toEqual(['goed'])
   })
 
+  it('goes without the utm tags that a feed adds, and keeps the other parameters', () => {
+    const link = 'https://krant.test/een?id=7&amp;utm_source=rss&amp;UTM_medium=rss&amp;utm_campaign=een'
+
+    expect(itemsOf(rss(rssItem({ link })))[0]?.url).toBe('https://krant.test/een?id=7')
+    expect(itemsOf(rss(rssItem({ link: 'https://krant.test/een?utm_source=rss' })))[0]?.url).toBe(
+      'https://krant.test/een',
+    )
+  })
+
   it('is skipped when it is longer than the column', () => {
     const feed = rss(rssItem({ link: `https://krant.test/${'a'.repeat(2048)}` }))
 

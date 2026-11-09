@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the FC Groningen tag feed of OOG Groningen (see docs/bronnen.md,
+  OOG Groningen): RSS 2.0 from WordPress, with the author in dc:creator, the text in
+  content:encoded, a guid that is a `?p=` address, times written as +0000 and a link with `utm_`
+  tags. The headlines, links and texts are invented; none is copied from a real feed. The
+  description, the author and the text are here to show that the importer does not read them.
+-->
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <title>OOG Groningen.test - FC Groningen</title>
+  <link>https://www.oogtv.test/tag/een-verzonnen-tag/</link>
+  <description>Verzonnen nieuws</description>
+  <language>nl-NL</language>
+  <lastBuildDate>Sun, 29 Nov 2026 09:00:00 +0000</lastBuildDate>
+  <item>
+    <title>FC Groningen bereidt zich voor op de bezoekers</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-1/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-1</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Sat, 21 Nov 2026 18:17:11 +0000</pubDate>
+    <category><![CDATA[FC Groningen]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400001</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>FC Groningen sluit de week af met een zege</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-2/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-2</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Mon, 23 Nov 2026 10:00:00 +0000</pubDate>
+    <category><![CDATA[FC Groningen]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400002</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>FC Groningen haalt een nieuwe keeper</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-3/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-3</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Wed, 04 Nov 2026 10:00:00 +0000</pubDate>
+    <category><![CDATA[FC Groningen]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400003</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>FC Groningen kijkt vooruit op december</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-4/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-4</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Tue, 01 Dec 2026 10:00:00 +0000</pubDate>
+    <category><![CDATA[FC Groningen]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400004</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>Schaatsers trainen op Thialf in Heerenveen</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-5/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-5</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Sat, 21 Nov 2026 12:00:00 +0000</pubDate>
+    <category><![CDATA[Sport]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400005</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>Een verzonnen reportage over sc Heerenveen</title>
+    <link>https://www.oogtv.test/2026/11/een-verzonnen-bericht-6/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=een-verzonnen-bericht-6</link>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <pubDate>Thu, 01 Oct 2026 12:00:00 +0000</pubDate>
+    <category><![CDATA[sc Heerenveen]]></category>
+    <guid isPermaLink="false">https://www.oogtv.test/?p=9400006</guid>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <content:encoded><![CDATA[<p>Een verzonnen tekst die we niet bewaren.</p>]]></content:encoded>
+  </item>
+</channel>
+</rss>

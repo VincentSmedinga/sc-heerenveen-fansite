@@ -283,6 +283,27 @@ export const realSources = [
     name: 'Rijnmond',
     slug: 'rijnmond',
   },
+  {
+    description:
+      'Regionale publieke omroep van Groningen en Drenthe. In de sportfeed staat vooral nieuws over FC Groningen; we tonen alleen berichten over sc Heerenveen, en over FC Groningen rond een wedstrijd tegen ons.',
+    domain: 'www.rtvnoord.nl',
+    feeds: [{ filter: 'club', url: 'https://www.rtvnoord.nl/rss/sport.xml' }],
+    kind: 'news',
+    name: 'RTV Noord',
+    slug: 'rtv-noord',
+  },
+  {
+    description:
+      'Lokale omroep van de stad Groningen. We lezen twee feeds: de berichten die OOG bij sc Heerenveen heeft gezet, en die bij FC Groningen, waarvan we alleen de berichten rond een wedstrijd tegen ons tonen.',
+    domain: 'www.oogtv.nl',
+    feeds: [
+      'https://www.oogtv.nl/tag/sc-heerenveen/feed/',
+      { filter: 'club', url: 'https://www.oogtv.nl/tag/fc-groningen/feed/' },
+    ],
+    kind: 'news',
+    name: 'OOG Groningen',
+    slug: 'oog-groningen',
+  },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**

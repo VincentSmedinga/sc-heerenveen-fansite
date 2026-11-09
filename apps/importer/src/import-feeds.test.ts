@@ -1427,6 +1427,174 @@ describe('importing the sports feed of Rijnmond, the way the register has it', (
   })
 })
 
+describe('importing RTV Noord and OOG Groningen, the way the register has them', () => {
+  const rtvSample = readFileSync(new URL('./fixtures/rtv-noord-sample.xml', import.meta.url), 'utf8')
+  const oogSample = readFileSync(new URL('./fixtures/oog-groningen-sample.xml', import.meta.url), 'utf8')
+  const oogClubSample = readFileSync(new URL('./fixtures/oog-groningen-club-sample.xml', import.meta.url), 'utf8')
+  const groningenRun = new Date('2026-11-29T09:30:00Z')
+
+  /** The match against FC Groningen of the season, as the table of matches has it. */
+  const opponents: MatchDay[] = [{ matchDate: '2026-11-22', opponent: 'FC Groningen', status: 'scheduled' }]
+
+  /** The feed of a source as the seed registers it, pointed at the test server. */
+  async function registeredFeed(domain: string, urlPart: string, origin: string) {
+    await seedSources(database.db)
+
+    const rows = await database.db
+      .select({ id: feeds.id, url: feeds.url })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, domain))
+    const row = rows.find((candidate) => candidate.url.includes(urlPart))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the sports feed of RTV Noord on the club filter and gives every item its value', async () => {
+    const server = await serve(rtvSample)
+    const feed = await registeredFeed('www.rtvnoord.nl', 'sport.xml', server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, groningenRun, opponents)
+
+    expect(report).toMatchObject({ added: 7, relevance: { doubtful: 1, irrelevant: 3, relevant: 3 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.key, row.relevance]))).toEqual({
+      // FC Groningen on 22 November: relevant from 19 to 25 November, not on 17 or 28 November.
+      'https://www.rtvnoord.test/sport/9300001/-': 'relevant',
+      'https://www.rtvnoord.test/sport/9300002/-': 'relevant',
+      'https://www.rtvnoord.test/sport/9300003/-': 'irrelevant',
+      'https://www.rtvnoord.test/sport/9300004/-': 'irrelevant',
+      // Skating at Thialf names Heerenveen as a place, not the club: doubtful, so not shown.
+      'https://www.rtvnoord.test/sport/9300005/-': 'doubtful',
+      // The club itself counts on any day.
+      'https://www.rtvnoord.test/sport/9300006/-': 'relevant',
+      'https://www.rtvnoord.test/sport/9300007/-': 'irrelevant',
+    })
+  })
+
+  it('reads the times of RTV Noord in GMT as they are', async () => {
+    const server = await serve(rtvSample)
+
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await registeredFeed('www.rtvnoord.nl', 'sport.xml', server.origin),
+      groningenRun,
+      opponents,
+    )
+
+    const rows = await itemsInDatabase()
+
+    expect(rows.find((row) => row.key.endsWith('9300001/-'))?.publishedAt).toEqual(new Date('2026-11-20T09:30:00Z'))
+  })
+
+  it('reads the FC Groningen feed of OOG Groningen on the club filter, without the utm tags', async () => {
+    const server = await serve(oogSample)
+    const feed = await registeredFeed('www.oogtv.nl', 'fc-groningen', server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, groningenRun, opponents)
+
+    expect(report).toMatchObject({ added: 6, relevance: { doubtful: 1, irrelevant: 2, relevant: 3 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.key, row.relevance]))).toEqual({
+      'https://www.oogtv.test/?p=9400001': 'relevant',
+      'https://www.oogtv.test/?p=9400002': 'relevant',
+      'https://www.oogtv.test/?p=9400003': 'irrelevant',
+      'https://www.oogtv.test/?p=9400004': 'irrelevant',
+      'https://www.oogtv.test/?p=9400005': 'doubtful',
+      'https://www.oogtv.test/?p=9400006': 'relevant',
+    })
+    expect((await itemsInDatabase()).every((row) => !row.url.includes('utm_'))).toBe(true)
+  })
+
+  it('reads the sc Heerenveen feed of OOG Groningen as it is, without a filter', async () => {
+    const server = await serve(oogClubSample)
+    const feed = await registeredFeed('www.oogtv.nl', 'sc-heerenveen', server.origin)
+
+    expect(feed.filter).toBe('none')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, groningenRun, opponents)
+
+    expect(report).toMatchObject({ added: 2, skipped: [] })
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
+
+    expect(shown).toHaveLength(2)
+    expect(shown.every((item) => item.sourceName === 'OOG Groningen')).toBe(true)
+  })
+
+  it('keeps nothing of the description, the author, the text, the image or the logo', async () => {
+    const rtv = await serve(rtvSample)
+    const oog = await serve(oogSample)
+
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await registeredFeed('www.rtvnoord.nl', 'sport.xml', rtv.origin),
+      groningenRun,
+      opponents,
+    )
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await registeredFeed('www.oogtv.nl', 'fc-groningen', oog.origin),
+      groningenRun,
+      opponents,
+    )
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('verzonnen tekst')
+    expect(stored).not.toContain('Verzonnen Auteur')
+    expect(stored).not.toContain('.jpg')
+  })
+
+  it('shows only the relevant items to a visitor, with the name of the source', async () => {
+    const server = await serve(rtvSample)
+
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await registeredFeed('www.rtvnoord.nl', 'sport.xml', server.origin),
+      groningenRun,
+      opponents,
+    )
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'De Koffiecorner #900: een verzonnen blik op FC Groningen',
+      'FC Groningen-trainer wil geen ruimte geven aan de bezoekers',
+      'sc Heerenveen haalt een nieuwe spits',
+    ])
+    expect(shown.every((item) => item.sourceName === 'RTV Noord')).toBe(true)
+  })
+
+  it('shows nothing of FC Groningen without a match around', async () => {
+    const server = await serve(rtvSample)
+
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await registeredFeed('www.rtvnoord.nl', 'sport.xml', server.origin),
+      groningenRun,
+      [],
+    )
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual(['sc Heerenveen haalt een nieuwe spits'])
+  })
+})
+
 describe('the versions of a story', () => {
   const later = new Date('2026-10-22T12:00:00Z')
 
