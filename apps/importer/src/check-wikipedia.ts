@@ -50,8 +50,8 @@ export function checkGoals(match: ReadMatch): string | undefined {
 /**
  * Checks the matches of sc Heerenveen: 34 in the league, one in each round, 17 at home and 17
  * away; and a cup round at most once. Returns what is wrong, or nothing. With `league` false
- * the pages of the season hold no league matches (2007/08 and 2008/09, see
- * `read-football-box.ts`), and none is what the check then expects.
+ * the pages of the season hold no league matches (2007/08, see `read-football-box.ts`), and
+ * none is what the check then expects.
  */
 export function checkMatches(matches: ReadMatch[], { league: hasLeague = true } = {}): string[] {
   const problems: string[] = []

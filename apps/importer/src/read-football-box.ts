@@ -1,24 +1,54 @@
 // Reads the matches of sc Heerenveen of 2007/08 to 2009/10 from the blocks `football box`,
-// `footballbox2` and `Football box collapsible` of six Wikipedia pages, Dutch and English. The
-// seasons have no page the other readers know (`read-wikipedia.ts`), so a fixed list says per
-// season which pages there are, and under which heading each competition stands. A block is put
-// into the shape `readMatch` reads, so a match is checked the way every other match is. A page
-// that has changed shape gives an error, never a guess, and a field the page leaves open stays
-// empty.
+// `footballbox2` and `Football box collapsible` of six Wikipedia pages, Dutch and English, and
+// the league matches of 2008/09 from a table on the page of the club's season. The seasons have
+// no page the other readers know (`read-wikipedia.ts`), so a fixed list says per season which
+// pages there are, and under which heading each competition stands. A block or a row of the
+// table is put into the shape `readMatch` reads, so a match is checked the way every other
+// match is. A page that has changed shape gives an error, never a guess, and a field the page
+// leaves open stays empty.
 import type { Competition } from '@fansite/db/schema'
 
-import type { ReadMatch, ReadProgramme, Template } from './read-wikipedia.ts'
+import { matchGoalPlayerMaxLength } from '@fansite/db/schema'
 
-import { clean, findTemplates, linkTarget, months, plain, readMatch, withoutRefn } from './read-wikipedia.ts'
+import type { ReadGoal, ReadMatch, ReadProgramme, Template } from './read-wikipedia.ts'
+
+import {
+  clean,
+  findTemplates,
+  linkedPage,
+  linkTarget,
+  months,
+  plain,
+  readMatch,
+  withoutRefn,
+} from './read-wikipedia.ts'
 
 /** A page with `football box` blocks, and where on it the matches of each competition are. */
 export type FootballBoxPage = {
   /** The language edition of Wikipedia the page is on, as in its address. */
   language: 'en' | 'nl'
+  /** The table with the league matches, on a page that has them in a table, not in blocks. */
+  leagueTable?: LeagueTable
   /** The matches of ours the page has. Another number is a page that has changed shape. */
   matches: number
   sections: readonly Section[]
   title: string
+}
+
+/**
+ * The table with a row for each league match of ours, on the page of the club's season of
+ * 2008/09: the stadium, the date, the home club, the result, the away club, and the scorers and
+ * the cards of each club.
+ */
+type LeagueTable = {
+  /** The heading right above the table. */
+  heading: RegExp
+  /**
+   * The opponent of a row that leaves the club open, by the date as the row writes it. It is
+   * filled in by hand after someone has looked the match up, and counts only while the cell is
+   * empty.
+   */
+  opponents: Readonly<Record<string, string>>
 }
 
 /** What a section knows of a block when it names the round. */
@@ -127,6 +157,15 @@ const footballBoxSeasons: Readonly<Record<string, readonly FootballBoxPage[]>> =
       sections: [{ competition: 'UEFA Cup', heading: /^Group E$/u, round: numbered('Groepsfase') }],
       title: '2008–09 UEFA Cup group stage',
     },
+    {
+      language: 'nl',
+      // The row of 15 November 2008 names no away club. It was FC Utrecht: the one club of the
+      // league the table has away and not at home, and the scorers of the row played there.
+      leagueTable: { heading: /^Eredivisie$/u, opponents: { '15-11-2008': '[[FC Utrecht]]' } },
+      matches: 34,
+      sections: [],
+      title: 'Sc Heerenveen in het seizoen 2008/09 (mannen)',
+    },
   ],
   '2009/10': [
     {
@@ -229,9 +268,27 @@ const englishExtras = new RegExp(`\\{\\{\\s*(?:yel|sent off|penmiss)\\b[^{}]*\\}
 /** The picture of a card or a substitution on a Dutch page, with the minute beside it. */
 const dutchExtras = new RegExp(`(?:${minuteMark}\\s*)?\\[\\[Bestand:[^\\]]*\\]\\](?:\\s*${minuteMark})?`, 'giu')
 
+/** The headers of the league table, in the order of its columns. */
+const leagueTableHeaders = [
+  'Stadion',
+  'Datum',
+  'Thuis',
+  'Uitslag',
+  'Uit',
+  'Doelpuntenmakers/kaarten (Heerenveen)',
+  'Doelpuntenmakers/kaarten (tegenstander)',
+]
+
 /**
- * The pages with `football box` blocks of a season, such as `2009/10`, or none: only the
- * seasons 2007/08, 2008/09 and 2009/10 have them.
+ * A scorer in the league table: the link of the player, `e.d.` after it for an own goal, and
+ * `2X` when he scored twice. The groups are the page, the name shown, the own goal and the
+ * number.
+ */
+const tableScorer = /\[\[([^\]|]*)(?:\|([^\]]*))?\]\]\s*(e\.d\.)?\s*(?:(\d)\s*x(?![a-z]))?/giu
+
+/**
+ * The pages with the matches of a season, such as `2009/10`, or none: only the seasons 2007/08,
+ * 2008/09 and 2009/10 have them.
  */
 export function footballBoxPages(season: string): readonly FootballBoxPage[] {
   return Object.hasOwn(footballBoxSeasons, season) ? (footballBoxSeasons[season] ?? []) : []
@@ -241,7 +298,8 @@ export function footballBoxPages(season: string): readonly FootballBoxPage[] {
  * Reads one of the pages of `footballBoxPages` for the matches of sc Heerenveen. Every block
  * of ours must be under a heading the page is listed with, name a round we know and have a
  * result, and the page must have as many matches of ours as the list says. Anything else is an
- * error that names the page. A match of "Jong sc Heerenveen" is not one of ours.
+ * error that names the page. A match of "Jong sc Heerenveen" is not one of ours. A page with a
+ * league table gives the rows of that table as well (see `readLeagueTable`).
  *
  * A scorer on an English page keeps his name and loses his link: an English title is no
  * article we know, so the import ties the goal to a player by the name alone. The opponent
@@ -307,6 +365,13 @@ export function readFootballBoxes(text: string, page: FootballBoxPage): ReadProg
     } else {
       matches.push(read)
     }
+  }
+
+  if (page.leagueTable !== undefined) {
+    const table = readLeagueTable(cleaned, page.leagueTable)
+
+    matches.push(...table.matches)
+    problems.push(...table.problems.map((problem) => `${name}: ${problem}`))
   }
 
   if (problems.length === 0 && matches.length !== page.matches) {
@@ -456,6 +521,100 @@ function isOurs(box: Template): boolean {
   )
 }
 
+/**
+ * Reads the league table of the page of the club's season: a row is a match. The table has no
+ * round, so a match gets `Speelronde 1` to `Speelronde 34` in the order of the rows, which must
+ * be the order of the dates; a match that was played later than its round then has the number
+ * of the day it was played, as the matches of the old fansite have. The date `31-08-2008` is
+ * written the way the other pages write one, and our club, which the table shows without a
+ * link, gets its link. The rest of a row goes through `readMatch`. The scorers have no minute
+ * (see `tableGoals`). A header, a row or a date of another shape is a problem, and so is a row
+ * without us or without a result.
+ */
+function readLeagueTable(cleaned: string, table: LeagueTable): { matches: ReadMatch[]; problems: string[] } {
+  const headings = [...cleaned.matchAll(/^(={2,})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)]
+  const heading = headings.find((found) => table.heading.test(plain(found[2] ?? '')))
+  const end = headings.find((found) => heading !== undefined && found.index > heading.index)?.index
+  const body =
+    heading === undefined
+      ? undefined
+      : /^\{\|[^\n]*\n([\s\S]*?)^\|\}/mu.exec(cleaned.slice(heading.index + heading[0].length, end))?.[1]
+
+  if (body === undefined) {
+    return { matches: [], problems: ['the page has no table with the league matches under the heading we know'] }
+  }
+
+  const [header = '', ...rows] = body
+    .split(/^\|-[^\n]*$/mu)
+    .map((row) => row.trim())
+    .filter((row) => row !== '')
+  const headers = header.split('\n').map((line) => plain(line.replace(/^!/u, '')))
+
+  if (headers.join('|') !== leagueTableHeaders.join('|')) {
+    return { matches: [], problems: ['the table with the league matches has other columns than the ones we know'] }
+  }
+
+  const matches: ReadMatch[] = []
+  const problems: string[] = []
+
+  for (const [index, row] of rows.entries()) {
+    const round = `Speelronde ${index + 1}`
+    // A cell may start with a stray bar or with an attribute: `align="center"|31-08-2008`.
+    const cells = row
+      .replace(/^\|/u, '')
+      .split('||')
+      .map((cell) => cell.replace(/^\s*(?:\|\s*)?(?:(?:[a-z]+="[^"]*"\s*)+\|)?/u, '').trim())
+    const [stadium = '', date = '', team1 = '', score = '', team2 = '', ourGoals = '', theirGoals = ''] = cells
+    const day = /^(\d{1,2})-(\d{1,2})-(\d{4})$/u.exec(plain(date))
+    const teams = [team1, team2].map((team) => {
+      const shown = plain(team)
+
+      return ourNames.includes(shown.toLowerCase())
+        ? '[[sc Heerenveen]]'
+        : shown === '' && Object.hasOwn(table.opponents, plain(date))
+          ? (table.opponents[plain(date)] ?? '')
+          : team
+    })
+
+    if (cells.length !== leagueTableHeaders.length) {
+      problems.push(`row ${index + 1} of the league table has ${cells.length} cells, not ${leagueTableHeaders.length}`)
+      continue
+    }
+    if (teams.filter((team) => team === '[[sc Heerenveen]]').length !== 1) {
+      problems.push(`row ${index + 1} of the league table is no match of ours against another club`)
+      continue
+    }
+
+    const read = readMatch(
+      {
+        heading: null,
+        index: heading?.index ?? 0,
+        params: new Map([
+          ['date', day === null ? date : `${Number(day[1])} ${months[Number(day[2]) - 1] ?? day[2]} ${day[3]}`],
+          ['score', score],
+          ['stadium', stadium],
+          ['team1', teams[0] ?? ''],
+          ['team2', teams[1] ?? ''],
+        ]),
+      },
+      'Eredivisie',
+      round,
+    )
+
+    if (typeof read === 'string') {
+      problems.push(read)
+    } else if (read.status !== 'played') {
+      problems.push(`${round} (Eredivisie) has no result`)
+    } else if (read.matchDate < (matches.at(-1)?.matchDate ?? '')) {
+      problems.push(`${round} (Eredivisie) is on an earlier day than the row above it`)
+    } else {
+      matches.push({ ...read, ...tableGoals(read.home ? [ourGoals, theirGoals] : [theirGoals, ourGoals], read) })
+    }
+  }
+
+  return { matches, problems }
+}
+
 /** The stadium of a block without the town after it: `De Kuip` for `De Kuip, Rotterdam`. */
 function stadiumOf(box: Template): string {
   return (
@@ -463,6 +622,72 @@ function stadiumOf(box: Template): string {
       .split(',')[0]
       ?.trim() ?? ''
   )
+}
+
+/**
+ * The goals of a row of the league table, the home club first: `[ours, theirs]` or the other
+ * way round. A cell names the scorers after `{{goal}}` and before the first picture of a card:
+ * `{{goal}} [[Danijel Pranjić|Pranjic]] 2X en [[Roy Beerens|Beerens]]`, with commas, `en` and
+ * line breaks between them. `2X` is two goals of that player and `e.d.` an own goal, which
+ * stands with the club that benefits. The table has no minutes, so a goal has none, and the
+ * goals of a club keep the order of the cell. What stands before `{{goal}}` is no scorer. Two
+ * cells without a goal mean the page names no scorers; a part we do not know is a problem and
+ * no goals at all, since half a list says something false.
+ */
+function tableGoals(
+  cells: string[],
+  match: Pick<ReadMatch, 'competition' | 'home' | 'round'>,
+): Pick<ReadMatch, 'goals' | 'goalsProblem'> {
+  const goals: ReadGoal[] = []
+  const problem = (text: string) => ({ goals: null, goalsProblem: `${match.round} (${match.competition}): ${text}` })
+
+  if (cells.every((cell) => !/\{\{/u.test(cell))) {
+    return { goals: null, goalsProblem: null }
+  }
+
+  for (const [index, cell] of cells.entries()) {
+    const marks = [...cell.matchAll(/\{\{\s*goal\s*\}\}/giu)]
+    const [mark] = marks
+
+    if (marks.length > 1 || (mark === undefined && /\{\{/u.test(cell))) {
+      return problem(`the scorers have a template we do not know: '${plain(cell).slice(0, 40)}'`)
+    }
+    if (mark === undefined) {
+      continue
+    }
+
+    const scorers = cell
+      .slice(mark.index + mark[0].length)
+      .replace(/\[\[Bestand:[\s\S]*$/iu, '')
+      .replace(/<br\s*\/?>/giu, ' ')
+    const found = [...scorers.matchAll(tableScorer)]
+    const rest = scorers.replace(tableScorer, ' ').replace(/,|(?<![^\s,])en(?![^\s,])/giu, ' ')
+
+    if (found.length === 0 || rest.trim() !== '') {
+      return problem(`the scorers have a part we do not know: '${plain(scorers).slice(0, 40)}'`)
+    }
+
+    for (const scorer of found) {
+      const player = plain(scorer[2] ?? scorer[1] ?? '')
+
+      if (player === '' || player.length > matchGoalPlayerMaxLength) {
+        return problem(`a goal has no usable name: '${plain(scorers).slice(0, 40)}'`)
+      }
+      for (let count = Number(scorer[4] ?? 1); count > 0; count -= 1) {
+        goals.push({
+          minute: null,
+          ours: (index === 0) === match.home,
+          ownGoal: scorer[3] !== undefined,
+          penalty: false,
+          player,
+          playerPage: linkedPage(scorer[0]),
+          stoppageMinutes: null,
+        })
+      }
+    }
+  }
+
+  return { goals, goalsProblem: null }
 }
 
 /** Where the link of a team points, or its name, without the flag beside it. */

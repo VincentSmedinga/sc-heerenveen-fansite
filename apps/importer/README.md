@@ -1570,16 +1570,20 @@ De beslissing is _De vier Europa League-wedstrijden van 2012/13 komen van de Eng
 
 Deze drie seizoenen hebben geen pagina die de andere lezers kennen.
 `pnpm run import:season 2009/10` (en `2007/08` en `2008/09`) leest ze uit de blokken `football box`, `footballbox2` en `Football box collapsible` van zes pagina's, samen 63 wedstrijden.
-Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/onderzoek-wedstrijden-2007-2010.md), en de beslissing is _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de blokken `football box`_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+De 34 competitiewedstrijden van 2008/09 komen uit een tabel op de seizoenspagina van de club, de zevende pagina.
+Samen zijn het 97 wedstrijden.
+Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/onderzoek-wedstrijden-2007-2010.md).
+De beslissingen zijn _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de blokken `football box`_ en _De competitie van 2008/09 komt uit de tabel op de seizoenspagina van de club_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
 
-| Seizoen | Pagina                              | Wikipedia | Wedstrijden | Competitie                                                                           |
-| ------- | ----------------------------------- | --------- | ----------- | ------------------------------------------------------------------------------------ |
-| 2007/08 | `Play-offs Nederlands voetbal 2008` | nl        | 4           | `Play-offs Champions League`                                                         |
-| 2007/08 | `2007–08 UEFA Cup first round`      | en        | 2           | `UEFA Cup`                                                                           |
-| 2008/09 | `KNVB Beker 2008/09 (mannen)`       | nl        | 5           | `KNVB Beker`                                                                         |
-| 2008/09 | `2008–09 UEFA Cup first round`      | en        | 2           | `UEFA Cup`                                                                           |
-| 2008/09 | `2008–09 UEFA Cup group stage`      | en        | 4           | `UEFA Cup`                                                                           |
-| 2009/10 | `2009–10 SC Heerenveen season`      | en        | 46          | `Johan Cruijff Schaal` (1), `Eredivisie` (34), `KNVB Beker` (3), `Europa League` (8) |
+| Seizoen | Pagina                                          | Wikipedia | Wedstrijden | Competitie                                                                           |
+| ------- | ----------------------------------------------- | --------- | ----------- | ------------------------------------------------------------------------------------ |
+| 2007/08 | `Play-offs Nederlands voetbal 2008`             | nl        | 4           | `Play-offs Champions League`                                                         |
+| 2007/08 | `2007–08 UEFA Cup first round`                  | en        | 2           | `UEFA Cup`                                                                           |
+| 2008/09 | `KNVB Beker 2008/09 (mannen)`                   | nl        | 5           | `KNVB Beker`                                                                         |
+| 2008/09 | `2008–09 UEFA Cup first round`                  | en        | 2           | `UEFA Cup`                                                                           |
+| 2008/09 | `2008–09 UEFA Cup group stage`                  | en        | 4           | `UEFA Cup`                                                                           |
+| 2008/09 | `Sc Heerenveen in het seizoen 2008/09 (mannen)` | nl        | 34          | `Eredivisie`, uit een tabel                                                          |
+| 2009/10 | `2009–10 SC Heerenveen season`                  | en        | 46          | `Johan Cruijff Schaal` (1), `Eredivisie` (34), `KNVB Beker` (3), `Europa League` (8) |
 
 - **De lijst:** `footballBoxPages` in [`src/read-football-box.ts`](src/read-football-box.ts) zegt per seizoen welke pagina's er zijn, in welke taal, hoeveel wedstrijden van ons erop staan en onder welke kop welke competitie staat.
   Voor een ander seizoen vraagt de import geen van deze pagina's.
@@ -1587,9 +1591,16 @@ Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/on
 - **De lezer:** `readFootballBoxes` zet een blok om naar de vorm die `readMatch` leest, zodat een wedstrijd dezelfde controles krijgt als elke andere.
   Hij leest het seizoen, de competitie, de ronde, de datum, de tijd, het stadion (zonder de plaats erachter), de tegenstander, thuis of uit, de uitslag (met verlenging en strafschoppen), de doelpunten met de minuut, de toeschouwers en de scheidsrechter (zonder land).
   Een veld dat er niet staat, blijft leeg.
+- **De tabel van 2008/09:** de seizoenspagina van de club heeft de competitie in een tabel onder de kop `Eredivisie`, met per rij het stadion, de datum (`31-08-2008`), de thuisclub, de uitslag, de uitclub en de doelpuntenmakers en kaarten van beide clubs.
+  `readFootballBoxes` leest elke rij als een wedstrijd, ook via `readMatch`.
+  De tabel heeft geen ronde: de wedstrijden heten `Speelronde 1` tot en met `Speelronde 34` in de volgorde van de rijen, en die moet de volgorde van de datums zijn.
+  De tabel heeft geen tijd, geen toeschouwers en geen scheidsrechter.
+  De tabellen van de UEFA Cup en de beker op dezelfde pagina leest hij niet.
+  De rij van 15 november 2008 noemt geen uitclub; de lijst vult daar FC Utrecht in, zolang de cel leeg is.
 - **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `2e ronde` tot en met `4e ronde` en de kop van de bekerpagina (`Kwartfinales`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
 - **De controles:** elke pagina heeft het aantal wedstrijden uit de lijst, elke wedstrijd staat onder een kop en in een ronde die we kennen, en elke wedstrijd heeft een uitslag.
-  Het seizoen 2009/10 moet 34 competitiewedstrijden hebben, 17 thuis en 17 uit; 2007/08 en 2008/09 hebben er op deze pagina's geen.
+  De seizoenen 2008/09 en 2009/10 moeten 34 competitiewedstrijden hebben, 17 thuis en 17 uit; 2007/08 heeft er op deze pagina's geen.
+  De tabel van 2008/09 moet de zeven kolommen hebben die we kennen, en elke rij zeven cellen.
   Anders schrijft de import niets, en de melding noemt de pagina.
 - **De tijd:** een blok van de seizoenspagina noemt zijn eigen tijdzone, en een tijd in een andere zone (`22:05 EEST (UTC+3)`) wordt onze tijd.
   De pagina's van de UEFA Cup zeggen één keer boven de wedstrijden dat de tijden Midden-Europese tijd zijn.
@@ -1600,11 +1611,17 @@ Het onderzoek staat in [`docs/onderzoek-wedstrijden-2007-2010.md`](../../docs/on
   Een doelpunt van een Engelse pagina houdt de naam (`Sibon`) en verliest de link, en `playerLinker` koppelt het op de naam aan een speler van het seizoen; het wordt geen persoon.
   Een doelpunt dat geen speler vindt, staat in de regel `goals of ours have no player in the squad table` in het logboek.
   Tellen de doelpunten niet op tot de uitslag, zoals bij speelronde 15 van 2009/10, dan krijgt de wedstrijd geen doelpuntenlijst en de regel `no scorers`.
+  Een doelpunt uit de tabel van 2008/09 heeft geen minuut, want de tabel heeft er geen: `match_goals.minute` blijft leeg.
+  De doelpuntenmakers staan in een cel achter `{{goal}}` en vóór het eerste plaatje van een kaart, met hun link: `2X` achter een naam zijn twee doelpunten, en `e.d.` is een eigen doelpunt.
+  De doelpunten van de thuisclub staan eerst, in de volgorde van de cel.
+  Staat er iets wat de lezer niet kent, dan krijgt de wedstrijd geen doelpuntenlijst en de regel `no scorers`.
 - **De redactie:** vindt de import op datum en club een wedstrijd met de bron `redactie`, dan slaat hij die over en schrijft hij één regel: `left out: the editors added this match`.
 - **Geen stand:** deze seizoenen krijgen geen ranglijst en geen uitslagen van de andere clubs.
   De regel in het logboek zegt `the pages of this season have no table`.
 - **De bron:** `wikipedia_pages` bewaart elke pagina met de soort `matches` en de taal (`language`), en de bronvermelding op de site geeft een Engelse pagina een Nederlandse naam met "(Engelse Wikipedia)" erachter.
+  De seizoenspagina van 2008/09 is ook de pagina van de selectie: ze heeft een rij met de soort `matches` en een rij met de soort `squad`.
 - De fixtures `wikipedia-football-box-*.wiki` in `src/fixtures/` zijn stukken van de echte pagina's van 9 november 2026: de koppen, de blokken van sc Heerenveen en één blok van andere clubs.
+  De fixture van de seizoenspagina van 2008/09 heeft de hele tabel van de competitie, met de tabellen van de UEFA Cup en de beker erboven.
 
 ### Een afgelopen seizoen
 

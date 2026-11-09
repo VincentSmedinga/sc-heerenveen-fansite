@@ -1046,7 +1046,7 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
             playerPage,
             stoppageMinutes: minute[2] === undefined ? null : Number(minute[2]),
           }
-          if (last.minute < 1 || last.minute > 150 || last.stoppageMinutes === 0) {
+          if (Number(minute[1]) < 1 || Number(minute[1]) > 150 || last.stoppageMinutes === 0) {
             return { problem: `a goal of ${name} has a minute we do not know: '${token}'` }
           }
           goals.push(last)
@@ -1491,7 +1491,7 @@ function readGoals(box: Template, home: boolean): { goals: null | ReadGoal[]; pr
   }
 
   // A stable sort: two goals in the same minute keep the order of the page.
-  goals.sort((a, b) => a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0))
+  goals.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0) || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0))
 
   return { goals, problem: null }
 }

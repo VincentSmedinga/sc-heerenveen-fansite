@@ -21,9 +21,7 @@ import { matchChanges, matches, matchGoals } from './schema.ts'
 export type ChangeDecision = { kind: 'keep' | 'take-over'; reason: string; userId: null | number }
 
 /** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
-export type LinkedGoal = Omit<ReadGoal, 'minute'> & {
-  /** Wikipedia always has a minute; a stored goal of the old fansite may not. */
-  minute: null | number
+export type LinkedGoal = ReadGoal & {
   personId: null | number
   playerId: null | number
 }
@@ -33,8 +31,11 @@ export type Proposal = { clubId: number; goals: LinkedGoal[]; match: ReadMatch }
 
 /** One goal of a played match, as the page names it. */
 export type ReadGoal = {
-  /** The minute on the clock: 45 for "45+1". */
-  minute: number
+  /**
+   * The minute on the clock: 45 for "45+1". Null when the page has none, as the table with the
+   * league matches of 2008/09.
+   */
+  minute: null | number
   /** True for a goal of sc Heerenveen, false for a goal of the opponent. */
   ours: boolean
   /** An own goal, which is listed under the club that benefits from it. */
