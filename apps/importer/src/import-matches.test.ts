@@ -103,7 +103,6 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
 
-/** Runs the match import at this moment against this server. */
 function importAt(server: TestServer, at: Date) {
   return importMatches(database.db, fetcherFor([server]), { clock: () => at, origin: server.origin })
 }
@@ -174,6 +173,15 @@ async function snapshot() {
     pages: await database.db.select().from(wikipediaPages).orderBy(asc(wikipediaPages.title)),
     standings: await database.db.select().from(standings).orderBy(asc(standings.season), asc(standings.position)),
   }
+}
+
+/** Runs the match import at this moment against this server. */
+/** The text of a page with the scorers of these surnames named without a link to a page. */
+function withoutLinks(text: string, surnames: string[]): string {
+  return surnames.reduce(
+    (result, surname) => result.replaceAll(new RegExp(`\\[\\[[^\\]|]+\\|${surname}\\]\\]`, 'gu'), surname),
+    text,
+  )
 }
 
 const goalsCup = fixture('wikipedia-cup-goals.wiki')
@@ -2607,6 +2615,7 @@ describe('the import command', () => {
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
       'Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed',
+      expect.stringMatching(/^Matches 2026\/27: 10 players added from a goal: Luca Oyen, /u),
     ])
     expect(await database.db.select().from(items)).toHaveLength(1)
   })
@@ -2661,29 +2670,21 @@ describe('the status', () => {
   })
 
   it('shows how many goals of ours have no player, and whose they are, and no more once they are linked', async () => {
-    const { server } = await serve()
+    // A scorer with a link becomes a player (#1024), so these two are named without one.
+    const unlinked = ['Braude', 'Courtens']
+    const { server } = await serve({
+      cup: withoutLinks(original.cup, unlinked),
+      programme: withoutLinks(original.programme, unlinked),
+    })
 
     await importAt(server, first)
-    expect((await status(first)).text.split('\n').filter((line) => line.includes('goals of ours'))).toEqual([
-      '  goals of ours without a player: 20 of 20 (Braude, Courtens, Farji, Klaverboer, Linday, Meerveld, Oyen, Rivera, Trenskow, Vente)',
+    expect((await status(first)).text.split('\n').filter((line) => line.startsWith('  goals of ours'))).toEqual([
+      '  goals of ours without a player: 4 of 20 (Braude, Courtens)',
     ])
 
+    // The squad has the two now. The other scorers are players already, made from their goals.
     await database.db.insert(players).values(
-      [
-        'Luciano Valente',
-        'Bernt Klaverboer',
-        'Jacob Trenskow',
-        'Maxence Rivera',
-        'Oliver Braude',
-        'Nolhan Courtens',
-        'Marko Farji',
-        'Dylan Vente',
-        'Luca Oyen',
-        'Ringo Meerveld',
-        'Marcus Linday',
-        'Esmir Bajraktarevic',
-        'Jesper Uneken',
-      ].map((name) => ({
+      ['Oliver Braude', 'Nolhan Courtens'].map((name) => ({
         name,
         position: 'aanvaller' as const,
         searchTerm: name,
@@ -2701,12 +2702,15 @@ describe('the status', () => {
   })
 
   it('shows the names of goals without a player on one line, without control characters', async () => {
-    const { server } = await serve()
+    const { server } = await serve({
+      cup: withoutLinks(original.cup, ['Oyen']),
+      programme: withoutLinks(original.programme, ['Oyen']),
+    })
 
     await importAt(server, first)
     await database.pool.query("UPDATE match_goals SET player = 'Oy\nen\u0007' WHERE player = 'Oyen'")
 
-    const line = (await status(first)).text.split('\n').find((item) => item.includes('goals of ours'))
+    const line = (await status(first)).text.split('\n').find((item) => item.startsWith('  goals of ours'))
 
     expect(line).toContain('Oy en')
     expect(line).not.toContain('\u0007')
@@ -2840,10 +2844,11 @@ describe('linking the goals to the players of the squad', () => {
   })
 
   it('links the goals when the player comes into the table later, and writes only the match that changed', async () => {
-    const { server } = await serve()
+    // Rivera is named without a link, so the goal waits for the squad (see #1024 below).
+    const { server } = await serve({ programme: withoutLinks(original.programme, ['Rivera']) })
 
     await importAt(server, first)
-    expect((await linksOf('Speelronde 2')).map(([, player]) => player)).toEqual([null, null, null, null])
+    expect(await linksOf('Speelronde 2')).toContainEqual(['Rivera', null, null])
 
     await addPlayers([['Maxence Rivera', 'Maxence Rivera']])
 
@@ -2851,23 +2856,27 @@ describe('linking the goals to the players of the squad', () => {
 
     expect(report).toMatchObject({ kind: 'imported' })
     expect(report.kind === 'imported' && report.matches.updated).toBeGreaterThan(0)
-    expect(await linksOf('Speelronde 2')).toContainEqual(['Rivera', 'Maxence Rivera', 'Maxence Rivera'])
+    expect(await linksOf('Speelronde 2')).toContainEqual(['Rivera', 'Maxence Rivera', null])
   })
 
   it('warns, once the squad is read, how many goals of ours have no player and whose they are', async () => {
     await addPlayers([['Jacob Trenskow', 'Jacob Trenskow']])
 
-    const { server } = await serve()
+    const unlinked = ['Braude', 'Courtens']
+    const { server } = await serve({
+      cup: withoutLinks(original.cup, unlinked),
+      programme: withoutLinks(original.programme, unlinked),
+    })
     const report = await importAt(server, first)
 
     expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 } })
 
     const [warning] = report.kind === 'imported' ? report.warnings : []
 
-    // Every goal of ours but those of Trenskow, from A to Z, and not Ouazane (the opponent's).
-    expect(warning).toMatch(/^\d+ goals of ours have no player in the squad table: Braude, Courtens, /u)
-    expect(warning).not.toContain('Ouazane')
-    expect(warning).not.toContain('Trenskow')
+    // The goals of ours without a link, from A to Z: not those of Trenskow, who is in the
+    // squad, not those of a scorer with a page, who becomes a player, and not Ouazane (the
+    // opponent's).
+    expect(warning).toBe('4 goals of ours have no player in the squad table: Braude, Courtens')
     expect(formatMatchReport(report)).toContain('Matches 2026/27: warning, ')
     expect((await database.db.select().from(matchImports))[0]).toMatchObject({
       failuresInARow: 0,
@@ -2881,6 +2890,225 @@ describe('linking the goals to the players of the squad', () => {
 
     expect(await importAt(server, first)).toMatchObject({ kind: 'imported', matches: { added: 35 }, warnings: [] })
     expect(await database.db.select().from(matchGoals)).not.toHaveLength(0)
+  })
+
+  describe('a scorer of ours with a page who is not among the players (#1024)', () => {
+    // Shaped like match 183 on acceptance: the list of the match names Pelle van Amersfoort
+    // with a link, and the squad has every other scorer but not him.
+    const others: [string, string][] = [
+      'Bernt Klaverboer',
+      'Jacob Trenskow',
+      'Maxence Rivera',
+      'Oliver Braude',
+      'Nolhan Courtens',
+      'Marko Farji',
+      'Dylan Vente',
+      'Luca Oyen',
+      'Ringo Meerveld',
+      'Marcus Linday',
+    ].map((name) => [name, name])
+    const rivera = '{{goal|82}} [[Maxence Rivera|Rivera]]'
+    const linked = original.programme.replace(rivera, '{{goal|82}} [[Pelle van Amersfoort|Van Amersfoort]]')
+    const ofPelle = () => database.db.select().from(players).where(eq(players.name, 'Pelle van Amersfoort'))
+
+    it('becomes a player of the season with the source doelpunten, his page and its person, and gets the goal', async () => {
+      expect(linked).not.toBe(original.programme)
+      await addPlayers(others)
+
+      const { server } = await serve({ programme: linked })
+      const report = await importAt(server, first)
+
+      expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 }, warnings: [] })
+      expect(report.kind === 'imported' && report.persons).toContain('1 player added from a goal: Pelle van Amersfoort')
+      expect(formatMatchReport(report)).toContain('Matches 2026/27: 1 player added from a goal: Pelle van Amersfoort')
+
+      const [person] = await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Pelle van Amersfoort'))
+      const [pelle] = await ofPelle()
+
+      expect(person).toBeDefined()
+      expect(pelle).toMatchObject({
+        inSquad: true,
+        personId: person?.id,
+        position: null,
+        searchTerm: 'van Amersfoort',
+        season: '2026/27',
+        shirtNumber: null,
+        source: 'doelpunten',
+        wikipediaPage: 'Pelle van Amersfoort',
+      })
+      expect(await database.db.select().from(players)).toHaveLength(others.length + 1)
+      expect(await linksOf('Speelronde 2')).toContainEqual([
+        'Van Amersfoort',
+        'Pelle van Amersfoort',
+        'Pelle van Amersfoort',
+      ])
+      expect(
+        await database.db.select().from(matchGoals).where(eq(matchGoals.wikipediaPage, 'Pelle van Amersfoort')),
+      ).toMatchObject([{ personId: person?.id, playerId: pelle?.id }])
+    })
+
+    it('gets the goal of a match that was stored before, as at the next import of the season', async () => {
+      await addPlayers(others)
+
+      const { pages, server } = await serve(
+        { programme: linked.replace('[[Pelle van Amersfoort|Van Amersfoort]]', 'Van Amersfoort') },
+        { routes: articleRoutes([], { titles: ['Pelle van Amersfoort'] }) },
+      )
+
+      await importAt(server, first)
+      expect(await ofPelle()).toEqual([])
+      expect(await linksOf('Speelronde 2')).toContainEqual(['Van Amersfoort', null, null])
+
+      pages.programme = linked
+
+      const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, held: 0, updated: 1 }, warnings: [] })
+      expect(await linksOf('Speelronde 2')).toContainEqual([
+        'Van Amersfoort',
+        'Pelle van Amersfoort',
+        'Pelle van Amersfoort',
+      ])
+    })
+
+    it('stays a warning without a link to a page, and is no player', async () => {
+      await addPlayers(others)
+
+      const { server } = await serve({
+        programme: linked.replace('[[Pelle van Amersfoort|Van Amersfoort]]', 'Van Amersfoort'),
+      })
+      const report = await importAt(server, first)
+
+      expect(report).toMatchObject({
+        kind: 'imported',
+        warnings: ['1 goal of ours has no player in the squad table: Van Amersfoort'],
+      })
+      expect(report.kind === 'imported' && report.persons.join('\n')).not.toContain('added from a goal')
+      expect(await database.db.select().from(players)).toHaveLength(others.length)
+      expect(await linksOf('Speelronde 2')).toContainEqual(['Van Amersfoort', null, null])
+    })
+
+    it('is made once: the same import again writes nothing and makes no second player', async () => {
+      await addPlayers(others)
+
+      const { server } = await serve({ programme: linked })
+
+      await importAt(server, first)
+
+      const before = await database.db.select().from(players).orderBy(asc(players.id))
+      const goals = await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))
+      const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(again).toMatchObject({ kind: 'imported', matches: { added: 0, unchanged: 35, updated: 0 }, warnings: [] })
+      expect(again.kind === 'imported' && again.persons).toEqual([])
+      expect(await database.db.select().from(players).orderBy(asc(players.id))).toEqual(before)
+      expect(await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))).toEqual(goals)
+    })
+
+    it('is one player for two goals that link to two titles of his page', async () => {
+      await addPlayers(others)
+
+      const twice = linked.replace(
+        '{{goal|56}} [[Maxence Rivera|Rivera]]',
+        '{{goal|56}} [[P. van Amersfoort|Van Amersfoort]]',
+      )
+
+      expect(twice).not.toBe(linked)
+
+      const { server } = await serve(
+        { programme: twice },
+        { routes: articleRoutes([], { redirects: { 'P. van Amersfoort': 'Pelle van Amersfoort' } }) },
+      )
+
+      const report = await importAt(server, first)
+
+      // Every goal of ours has a player: the only warnings are about names of persons.
+      expect(report.kind === 'imported' && report.warnings.filter((line) => !line.startsWith('Persons:'))).toEqual([])
+
+      const rows = await database.db.select().from(players)
+      const [pelle] = await ofPelle()
+
+      expect(rows).toHaveLength(others.length + 1)
+      expect(
+        (await database.db.select().from(matchGoals).where(eq(matchGoals.player, 'Van Amersfoort'))).map(
+          (goal) => goal.playerId,
+        ),
+      ).toEqual([pelle?.id, pelle?.id])
+    })
+
+    it('gets the person his page already has, so he is one scorer in two seasons', async () => {
+      const { server } = await serve({ programme: linked })
+
+      await importAt(server, first)
+      // The pages of 2027/28 hold the same text here.
+      await importAt(server, new Date('2027-07-02T12:00:00Z'))
+
+      const rows = await ofPelle()
+
+      expect(rows.map((row) => [row.season, row.source])).toEqual([
+        ['2026/27', 'doelpunten'],
+        ['2027/28', 'doelpunten'],
+      ])
+      expect(rows[0]?.personId).not.toBeNull()
+      expect(rows[1]?.personId).toBe(rows[0]?.personId)
+      expect(
+        await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Pelle van Amersfoort')),
+      ).toHaveLength(1)
+    })
+
+    it('is made in a season that is over too', async () => {
+      await addPlayers(others)
+
+      const { server } = await serve({ programme: linked })
+      const report = await importPastSeason(database.db, fetcherFor([server]), '2026/27', {
+        clock: () => new Date('2027-08-01T12:00:00Z'),
+        origin: server.origin,
+      })
+
+      expect(report).toMatchObject({ kind: 'imported', season: '2026/27', warnings: [] })
+      expect(await ofPelle()).toMatchObject([{ season: '2026/27', source: 'doelpunten' }])
+      expect(await linksOf('Speelronde 2')).toContainEqual([
+        'Van Amersfoort',
+        'Pelle van Amersfoort',
+        'Pelle van Amersfoort',
+      ])
+    })
+
+    it('is no player in a season with matches of the old fansite, which has its own players', async () => {
+      await addPlayers(others)
+      await database.db.insert(matches).values(
+        await withClubs(database.db, [
+          {
+            competition: 'Eredivisie',
+            dataSource: 'oude-fansite',
+            home: true,
+            matchDate: '2026-08-01',
+            opponent: 'Testdorp FC',
+            round: 'Speelronde 99',
+            season: '2026/27',
+            status: 'scheduled',
+          },
+        ]),
+      )
+
+      const { server } = await serve({ programme: linked })
+      const report = await importAt(server, first)
+
+      expect(report.kind === 'imported' && report.warnings).toContain(
+        '1 goal of ours has no player in the squad table: Van Amersfoort',
+      )
+      expect(await ofPelle()).toEqual([])
+    })
+
+    it('makes no player of a scorer of the opponent, who is not ours', async () => {
+      await addPlayers(others)
+
+      const { server } = await serve({ programme: linked })
+
+      await importAt(server, first)
+
+      expect(await database.db.select().from(players).where(eq(players.name, 'Abdellah Ouazane'))).toEqual([])
+    })
   })
 })
 

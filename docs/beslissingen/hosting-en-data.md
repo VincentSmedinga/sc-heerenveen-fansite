@@ -566,6 +566,7 @@
 - **Later:** zie _Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam_: `playerSources` heeft sinds 7 november 2026 ook `verslag`.
 - **Later:** de oude wedstrijden (1990 tot 2007) maken sinds 8 november 2026 rijen met de bron `verslag` zonder rugnummer, positie, pagina en persoon; zie _Een oude speler is een rij in `players`, nog zonder persoon_.
 - **Later:** `players` heeft sinds 9 november 2026 ook `country`, de landcode van twee letters van de vlag in de selectietabel (migratie `0054_add_player_country`); zie _Het land van een speler komt als landcode uit de vlag in de selectietabel_ in `importer.md`.
+- **Later:** de bron `doelpunten` krijgt sinds 10 november 2026 ook een doelpuntenmaker met een eigen pagina die de import van de wedstrijden als speler maakt; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ in `importer.md`.
 
 ## De volledigheid van de selectie staat in een tabel `squad_completeness`
 

@@ -1017,8 +1017,22 @@ Twee spelers met dezelfde achternaam koppelt de import dus alleen als de link va
 Alleen een doelpunt van een speler van ons wordt gekoppeld: een doelpunt van sc Heerenveen dat geen eigen doelpunt is, en een eigen doelpunt dat bij de tegenstander staat.
 Een doelpunt van de tegenstander en een eigen doelpunt van een tegenstander krijgen geen speler, want de spelers van andere clubs staan niet in `players`.
 
-Een doelpunt van ons zonder speler is geen fout: de wedstrijd en zijn doelpunten blijven bewaard.
-De import telt ze, en schrijft per lezing een waarschuwing met het aantal en de namen zoals de pagina's ze tonen, als de selectie al gelezen is:
+Vindt geen regel een speler, en linkt het doelpunt naar een pagina?
+Dan maakt de import de doelpuntenmaker eerst als speler van het seizoen (`adoptScorers` in [`src/import-matches.ts`](src/import-matches.ts)), want de tabel van de selectie op Wikipedia loopt soms achter.
+De speler krijgt de bron `doelpunten`, de pagina van de link, de persoon van die pagina en als naam de titel zonder de toevoeging tussen haakjes.
+Het logboek zegt het in één regel:
+
+```text
+Matches 2022/23: 1 player added from a goal: Pelle van Amersfoort
+```
+
+Dat gebeurt niet in een seizoen met wedstrijden van de oude fansite, en niet voor een wedstrijd zolang de redactie er iets bij invulde.
+Het gebeurt ook niet als een andere speler van het seizoen dezelfde naam of dezelfde persoon heeft.
+Staat de speler later in de tabel van de selectie, dan krijgt hij die rij met de bron `selectie`, en houdt hij zijn `id` en zijn doelpunten.
+Tot dan blijft hij in de selectie staan: hij stond nooit in de tabel, dus hij is er ook niet uit vertrokken.
+
+Een doelpunt van ons zonder link en zonder speler is geen fout: de wedstrijd en zijn doelpunten blijven bewaard.
+De import telt ze, en schrijft per lezing een waarschuwing met het aantal en de namen zoals de pagina's ze tonen, als het seizoen spelers heeft:
 
 ```text
 Matches 2026/27: warning, 3 goals of ours have no player in the squad table: Oyen, Vente
@@ -2003,6 +2017,7 @@ Een goede lezing werkt de selectie van het lopende seizoen bij en vervangt haar 
 De import houdt namen uit elkaar zoals de database dat doet: zonder accenten en hoofdletters.
 Rijen van een eerder seizoen blijven bewaard en worden niet getoond.
 De eerste goede lezing van een seizoen haalt eerst de verzonnen selectie van de seed weg.
+Een speler met de bron `doelpunten` blijft daarbij staan: de import van de wedstrijden maakte hem van een doelpuntenmaker (zie _De doelpunten koppelen aan de spelers_).
 
 ### De cijfers van een speler
 

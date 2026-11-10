@@ -282,7 +282,9 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(
-      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines
+        .flatMap((line) => line.split('\n'))
+        .filter((line) => !/: (new (club|name) |persons: |\d+ players? added from a goal: )/u.test(line)),
     ).toEqual([
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
@@ -353,7 +355,9 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(
-      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines
+        .flatMap((line) => line.split('\n'))
+        .filter((line) => !/: (new (club|name) |persons: |\d+ players? added from a goal: )/u.test(line)),
     ).toEqual([
       'Matches 2025/26: 39 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
@@ -403,7 +407,9 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(
-      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines
+        .flatMap((line) => line.split('\n'))
+        .filter((line) => !/: (new (club|name) |persons: |\d+ players? added from a goal: )/u.test(line)),
     ).toEqual([
       `Matches 2025/26: ${34 + stored.length} new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17`,
       'Matches 2025/26: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
@@ -428,17 +434,22 @@ describe('the command', () => {
     expect(await database.db.select().from(matches)).toEqual([])
   })
 
-  it('stores no squad, and no goal has a player, without an error or a warning', async () => {
+  it('reads no squad table, and makes a player of each scorer of ours with a page, without an error or a warning (#1024)', async () => {
     const server = await serve()
 
     await runCommand(server, past)
 
     const goals = await database.db.select().from(matchGoals)
+    const made = await database.db.select().from(players)
+    // A goal of ours is one of a player of ours: not an own goal that counts for us.
+    const withPage = goals.filter((goal) => goal.ours !== goal.ownGoal && goal.wikipediaPage !== null)
 
     expect(goals.length).toBeGreaterThan(50)
-    expect(goals.every((goal) => goal.playerId === null)).toBe(true)
-    expect(goals.some((goal) => goal.ours && goal.wikipediaPage !== null)).toBe(true)
-    expect(await database.db.select().from(players)).toEqual([])
+    expect(withPage.length).toBeGreaterThan(0)
+    expect(withPage.every((goal) => goal.playerId !== null)).toBe(true)
+    expect(made.length).toBeGreaterThan(0)
+    expect(made.every((player) => player.season === past && player.source === 'doelpunten')).toBe(true)
+    expect(made.every((player) => player.personId !== null && player.wikipediaPage !== null)).toBe(true)
     expect((await database.db.select().from(matchImports))[0]).toMatchObject({ lastError: null, lastWarning: null })
 
     const kemper = await database.db
@@ -619,7 +630,9 @@ describe('the Europa League matches of 2012/13', () => {
 
     return {
       code,
-      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines: lines
+        .flatMap((line) => line.split('\n'))
+        .filter((line) => !/: (new (club|name) |persons: |\d+ players? added from a goal: )/u.test(line)),
     }
   }
 
@@ -717,7 +730,9 @@ describe('the command for all seasons', () => {
 
     return {
       code,
-      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines: lines
+        .flatMap((line) => line.split('\n'))
+        .filter((line) => !/: (new (club|name) |persons: |\d+ players? added from a goal: )/u.test(line)),
     }
   }
 

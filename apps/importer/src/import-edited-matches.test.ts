@@ -13,6 +13,7 @@ import {
   matchGoals,
   matchImports,
   matchReports,
+  players,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -162,7 +163,14 @@ async function enter(
 
   if (goals !== undefined) {
     await database.db.delete(matchGoals).where(eq(matchGoals.matchId, before.id))
-    await database.db.insert(matchGoals).values(goals.map((goal) => ({ ...goal, matchId: before.id })))
+    // A scorer who is a player of the season is entered as that player, as the form does.
+    const squad = await database.db.select().from(players).where(eq(players.season, before.season))
+    const playerOf = (goal: { ours: boolean; player: string }) =>
+      goal.ours ? (squad.find((player) => player.name.endsWith(` ${goal.player}`))?.id ?? null) : null
+
+    await database.db
+      .insert(matchGoals)
+      .values(goals.map((goal) => ({ ...goal, matchId: before.id, playerId: playerOf(goal) })))
   }
 
   await database.db.insert(matchEdits).values({
@@ -272,6 +280,41 @@ describe('Wikipedia has the same', () => {
       [52, 'Oyen', true],
       [88, 'Speler', false],
     ])
+  })
+
+  it('sees a goal the editors entered by name as the goal of the page that links a scorer who is no player yet (#1024)', async () => {
+    const { pages, server } = await serve()
+    const unlinked = (text: string) => text.replaceAll('[[Luca Oyen|Oyen]]', 'Oyen')
+    const ofOyen = () => database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+
+    // No page names Oyen with a link, so the import makes no player of him.
+    pages.programme = unlinked(original.programme)
+    pages.cup = unlinked(original.cup)
+    await importAt(server, first)
+    expect(await ofOyen()).toEqual([])
+    await enter(roundOne, {}, ['goals'], [{ minute: 52, ours: true, player: 'Oyen' }])
+
+    // The page of this match links him now. The entry is compared before he becomes a player.
+    pages.programme = pages.programme.replace('Oyen {{goal|52}}', '[[Luca Oyen|Oyen]] {{goal|52}}')
+    expect(pages.programme).toContain('[[Luca Oyen|Oyen]] {{goal|52}}')
+
+    const report = await importAt(server, later(first, 2))
+
+    expect(report.kind === 'imported' ? report.warnings.filter((line) => line.includes('differs')) : null).toEqual([])
+    expect(await edits()).toEqual([])
+    expect(await ofOyen()).toEqual([])
+
+    // The entry is gone, so the next import makes him a player and gives him the goal.
+    await importAt(server, later(first, 3))
+
+    const [oyen] = await ofOyen()
+
+    expect(oyen).toMatchObject({ source: 'doelpunten', wikipediaPage: 'Luca Oyen' })
+    expect(
+      (await database.db.select().from(matchGoals).where(eq(matchGoals.wikipediaPage, 'Luca Oyen'))).map(
+        (goal) => goal.playerId,
+      ),
+    ).toEqual([oyen?.id])
   })
 
   it('treats the result and the goals apart: the goals caught up, the result still differs', async () => {

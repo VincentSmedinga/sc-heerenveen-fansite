@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import {
+  personPages,
   persons,
   players,
   playerSeasonStats,
@@ -451,6 +452,32 @@ describe('importPastSquad', () => {
       source: 'selectie',
     })
     expect(rows.find((row) => row.name === 'Een Oude Speler')).toMatchObject({ inSquad: true, source: 'doelpunten' })
+  })
+
+  it('gives a scorer the import of the matches made the row of the list, found by his page or his person (#1024)', async () => {
+    const server = await serve({ [squadPageTitle(season)]: twoLists })
+    const [{ insertId: personId }] = await database.db.insert(persons).values({ wikipediaPage: 'Marten de Roon' })
+
+    await database.db.insert(personPages).values([
+      { page: 'Marten de Roon', personId },
+      { page: 'M. de Roon', personId },
+    ])
+    await database.db.insert(players).values({
+      name: 'M. de Roon',
+      personId,
+      searchTerm: 'de Roon',
+      season,
+      source: 'doelpunten',
+      wikipediaPage: 'M. de Roon',
+    })
+
+    const [before] = await storedPlayers()
+    const report = await importAt(server, season)
+
+    expect(report).toMatchObject({ kind: 'imported', players: { improved: 1 } })
+    expect((await storedPlayers()).filter((row) => row.personId === personId)).toMatchObject([
+      { id: before!.id, position: 'middenvelder', shirtNumber: 15, source: 'selectie' },
+    ])
   })
 
   it('does not replace a position or number with one of a worse list', async () => {

@@ -1,5 +1,5 @@
 import type { Database } from '@fansite/db/client'
-import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
+import type { Competition, Match, MatchGoal, MatchImport, Player, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
 import { lockedFields, type MatchPart } from '@fansite/db/match-edits'
@@ -10,6 +10,7 @@ import {
   matchGoals,
   matchImports,
   matchPageKinds,
+  playerNameMaxLength,
   players,
   standings,
   wikipediaPages,
@@ -47,6 +48,7 @@ import {
   storeGoals,
   updateMatch,
 } from './match-changes.ts'
+import { nameOfTitle } from './person-name.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
 import {
   describePersons,
@@ -56,6 +58,7 @@ import {
   similarPersonsWarning,
 } from './person-pages.ts'
 import { footballBoxPages, readFootballBoxes } from './read-football-box.ts'
+import { nameKey, searchTerm } from './read-squad.ts'
 import {
   europaLeaguePage,
   pageCandidates,
@@ -622,6 +625,65 @@ export function unlinkedWarning(goals: LinkedGoal[]): string | undefined {
   return `${unlinked.length} ${unlinked.length === 1 ? 'goal' : 'goals'} of ours ${unlinked.length === 1 ? 'has' : 'have'} no player in the squad table: ${shown}${names.length > mostUnlinkedNames ? ', …' : ''}`
 }
 
+/**
+ * Makes a player of the season of each scorer of ours who links to a page and whom no rule of
+ * `playerLinker` finds among the players (#1024): the squad table of Wikipedia runs behind, and
+ * the page says who he is. The player gets the source `doelpunten`, the page, the person of the
+ * page and the name of the title, and is added to `squad`, so the goals of the run find him. A
+ * goal without a link, or with a page that has no person yet, makes no player, and neither
+ * does a scorer whose name or person another player of the season already has: such a goal
+ * stays without a player and is in the warning. Gives the names of the players it made.
+ */
+async function adoptScorers(
+  db: Pick<Database, 'insert'>,
+  season: string,
+  squad: Player[],
+  goals: (ReadGoal & { personId: null | number })[],
+): Promise<string[]> {
+  const adopted: string[] = []
+
+  for (const goal of goals) {
+    const { personId, playerPage } = goal
+
+    if (!isGoalOfOurPlayer(goal) || playerPage === null || personId === null || playerLinker(squad)(goal) !== null) {
+      continue
+    }
+
+    const name = nameOfTitle(playerPage)
+
+    if (
+      name === '' ||
+      name.length > playerNameMaxLength ||
+      squad.some((player) => player.personId === personId || nameKey(player.name) === nameKey(name))
+    ) {
+      continue
+    }
+
+    const row = {
+      name,
+      personId,
+      searchTerm: searchTerm(name),
+      season,
+      source: 'doelpunten' as const,
+      wikipediaPage: playerPage,
+    }
+    const [{ insertId }] = await db.insert(players).values(row)
+
+    squad.push({
+      ...row,
+      country: null,
+      id: insertId,
+      inSquad: true,
+      leftSquadAt: null,
+      position: null,
+      shirtNumber: null,
+    })
+    adopted.push(name)
+  }
+
+  return adopted
+}
+
 /** The line of the log for a change that was taken over with a note, or that waits. */
 function changeLine(
   waits: boolean,
@@ -886,7 +948,7 @@ async function readAndStore(
     clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
-    persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
+    persons: [...describePersons(personLookup.asked, stored.persons, personNames.counts), ...stored.players],
     results: stored.results,
     season,
     standings: table.rows.length,
@@ -1006,7 +1068,7 @@ async function readAndStoreFootballBoxes(
     clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
-    persons: describePersons(asked.personLookup.asked, stored.persons, personNames.counts),
+    persons: [...describePersons(asked.personLookup.asked, stored.persons, personNames.counts), ...stored.players],
     results: { added: 0, removed: 0, unchanged: 0, updated: 0 },
     season,
     standings: 0,
@@ -1083,8 +1145,10 @@ function standingsRow(season: string, row: ReadStandingsRow, validOn: string) {
  *
  * The goals are linked to the players of the season as they are in the table now, so a goal
  * gets its player as soon as the squad has him, and a goal that is linked keeps its link until
- * the table says otherwise. A goal of ours that has no player is a warning too (once the squad
- * has been read), and no reason to keep the match out. The play-offs have a page that may be
+ * the table says otherwise. A scorer of ours who links to a page and is not among the players
+ * of the season becomes one, with the source `doelpunten` (see `adoptScorers`). A goal of
+ * ours that still has no player is a warning (once the season has players), and no reason to
+ * keep the match out. The play-offs have a page that may be
  * missing (`fetchPages`), and then `read.playoffs` is false: the play-off matches we have stay,
  * since a page that is not there tells us nothing about them. The same goes for the Europa
  * League matches, which only some seasons have a page for (`read.europaLeague`). Every match
@@ -1138,7 +1202,6 @@ async function storeMatches(
     }
   }
 
-  const link = playerLinker(squad)
   const storedGoals = new Map<number, MatchGoal[]>()
 
   for (const goal of await db
@@ -1151,6 +1214,30 @@ async function storeMatches(
   }
 
   const edits = await readEdits(db, season)
+  // The scorers of the matches this import may write become players first, so every goal of the
+  // run finds them. A season with matches of the old fansite has its players from there. A
+  // match with an entry of the editors is compared with the page as it is: its scorer becomes a
+  // player once the entry is gone, so a goal they entered by name stays the same goal as the
+  // one on the page (`judgeGoals`).
+  const adopted = seasonRows.some((row) => row.dataSource === 'oude-fansite')
+    ? []
+    : await adoptScorers(
+        db,
+        season,
+        squad,
+        found
+          .filter((match) => {
+            const stored = known.get(key(match))
+
+            return !otherSources.has(key(match)) && (stored === undefined || !edits.has(stored.id))
+          })
+          .flatMap((match) => (checkGoals(match) === undefined ? (match.goals ?? []) : []))
+          .map((goal) => ({
+            ...goal,
+            personId: goal.playerPage === null ? null : (personOf.get(goal.playerPage) ?? null),
+          })),
+      )
+  const link = playerLinker(squad)
   // The parts the editors took over from another source (#974) stay as they decided.
   const takenOver = await readTakenOverParts(
     db,
@@ -1495,12 +1582,24 @@ async function storeMatches(
     }
   }
 
-  // Before the first read of the squad nobody can be linked, which is no news.
+  // In a season without players nobody can be linked, which is no news.
   const unlinked = squad.length === 0 ? undefined : unlinkedWarning(linkedGoals)
 
   if (unlinked !== undefined) {
     warnings.push(unlinked)
   }
 
-  return { clubs: clubLines, counts, heldAll, overwrites: mass, persons: personBook.counts, warnings }
+  return {
+    clubs: clubLines,
+    counts,
+    heldAll,
+    overwrites: mass,
+    persons: personBook.counts,
+    // One line for the log, such as `1 player added from a goal: Pelle van Amersfoort`.
+    players:
+      adopted.length === 0
+        ? []
+        : [`${adopted.length} ${adopted.length === 1 ? 'player' : 'players'} added from a goal: ${adopted.join(', ')}`],
+    warnings,
+  }
 }

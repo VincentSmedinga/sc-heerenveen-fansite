@@ -946,6 +946,9 @@
   De rij blijft één per speler en seizoen.
   Zie _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ in `hosting-en-data.md`.
   De import van de selectie schrijft `selectie` bij een nieuwe speler.
+- **Later:** een speler met de bron `doelpunten` stond nooit in de tabel van de selectie en krijgt sinds 10 november 2026 dus ook niet "niet meer in de selectie".
+  Staat hij later wel in de tabel, dan houdt hij zijn `id` en wordt zijn bron `selectie`.
+  Zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_.
 
 ## De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -965,6 +968,9 @@
   Een doelpunt onder een doorverwijzing van de pagina van de speler krijgt zo zijn `player_id`.
   Hebben twee spelers van een seizoen dezelfde persoon, dan slaat de regel van de persoon over en beslist de pagina.
   Zie _Een titel wordt één keer opgevraagd, en een mislukt verzoek is een waarschuwing_.
+- **Later:** zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
+  Vindt geen regel de doelpuntenmaker en linkt het doelpunt naar zijn pagina, dan maakt de import hem als speler van het seizoen.
+  De waarschuwing blijft voor een doelpunt zonder link.
 
 ## De eerste goede lezing van de selectie vervangt de verzonnen selectie
 
@@ -975,6 +981,8 @@
   Zonder deze regel bleven die spelers voor altijd staan als "niet meer in de selectie", en kon een doelpunt van een echte speler op een verzonnen speler met dezelfde achternaam vallen.
   De import herkent de eerste goede lezing eraan dat `squad_imports` nog geen geslaagde lezing heeft.
 - **Alternatieven:** de verzonnen spelers laten staan (rommel in de tabel en kans op een verkeerde koppeling); de verzonnen spelers een eigen seizoen geven (de pagina's tonen dan niets in het lopende seizoen, zoals bij de verzonnen wedstrijden).
+- **Later:** de eerste goede lezing laat sinds 10 november 2026 de spelers met de bron `doelpunten` staan: de import van de wedstrijden maakte ze, niet de seed.
+  Zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_.
 
 ## Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie
 
@@ -1003,6 +1011,7 @@
   Een eerste lezing en een lezing zonder verschil werken zoals hier staat.
 - **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ (9 november 2026): de uurlijkse import leest in juli en augustus ook het vorige seizoen, één keer per week.
   Het alternatief "de uurlijkse import ook het vorige seizoen laten lezen" is daarmee voor twee maanden gekozen; de status en de mail gaan nog steeds alleen over het lopende seizoen.
+- **Later:** `import:season` leest nog steeds geen selectie, maar maakt sinds 10 november 2026 wel een speler van een doelpuntenmaker van ons met een eigen pagina; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_.
 
 ## De cijfers van een speler staan in een eigen tabel, per seizoen en competitie
 
@@ -3131,6 +3140,10 @@
 - **Alternatieven:** Wikipedia gaat voor (een eigen bron verandert dan door een bewerking elders); wie het eerst schrijft wint, zoals voorheen (een verschil blijft onzichtbaar); de sleutel veranderen in datum en club (een herspeelde wedstrijd past dan niet).
 - **Later:** sinds #974 is een verschil in de aftrap, de uitslag of de gegevens geen regel meer maar een wachtende wijziging; zie _Een verschil tussen twee bronnen wacht op de redactie_.
   De regel `match difference` vervalt.
+- **Later:** zie _Wikipedia is de waarheid voor wat het heeft, het beheer verbetert, en de oude fansite blijft van ons_ (10 november 2026).
+  De volgorde blijft: voor 1990/91 tot en met 2006/07 gaat de oude fansite voor.
+  Voor de seizoenen daarna volgt de import Wikipedia, en de redactie verbetert in het beheer wat niet klopt of ontbreekt.
+- **Later:** in een seizoen met wedstrijden van de oude fansite maakt de import van Wikipedia geen speler van een doelpuntenmaker; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -3456,3 +3469,61 @@
   De selectie lezen met `importPastSquad`, zoals het issue vraagt (de eerste versie van deze wijziging; de cijfers van de spelers komen dan niet mee, en de reviewer wees daarop).
   `squadSources` een regel geven voor 2026/27 en later (lost de pagina op, niet de cijfers).
   Een eigen cronjob of workflow met een schema (meer om in te stellen op de host, terwijl de uurlijkse run er al is).
+
+## Wikipedia is de waarheid voor wat het heeft, het beheer verbetert, en de oude fansite blijft van ons
+
+- **Datum:** 10 november 2026
+- **Besluit:** we maken van Wikipedia niet de enige bron van waarheid.
+  - Voor 1990/91 tot en met 2006/07 gaat de oude fansite voor, zoals _Een import zoekt een wedstrijd eerst op datum en club_ (9 november 2026) zegt.
+  - Voor de seizoenen daarna volgt de import Wikipedia, en de redactie verbetert in het beheer wat niet klopt of ontbreekt.
+  - Een verbetering staat meteen op de site.
+    Zegt Wikipedia later hetzelfde, dan volgt dat deel Wikipedia weer.
+  - Wie wil, zet de verbetering zelf op Wikipedia: met de hand, onder een eigen account en met een gepubliceerde bron.
+  - We bouwen geen bot.
+    We noemen onze eigen site niet als bron op Wikipedia, en we zetten de gegevens van de oude fansite er niet in.
+  - Dit besluit hoort bij #1024, #1025 en #1026 samen.
+- **Waarom:** Wikipedia neemt geen feiten zonder gepubliceerde bron (Wikipedia:Geen origineel onderzoek) en wil geen links naar eigen sites of fansites (Wikipedia:Wanneer extern linken).
+  De gegevens van 1990 tot 2007 kunnen er dus niet heen.
+  Een verbetering via Wikipedia is ook traag: een seizoen dat voorbij is leest de import alleen als iemand hem start.
+  En wat wij er zelf in zetten en weer uitlezen, is geen tweede bron meer.
+  Een bot vraagt een eigen account, steun van de gemeenschap en 50 tot 100 proefbewerkingen (Wikipedia:Bots), voor een paar bewerkingen per maand.
+- **Alternatieven:** alles op Wikipedia verbeteren en het beheer klein houden (kan niet voor 1990 tot 2007, en de bezoeker wacht).
+  Een bot die onze verbeteringen schrijft (veel werk voor een paar bewerkingen per maand).
+  Alleen het beheer, zonder iets terug te geven (Wikipedia blijft dan de fout houden).
+
+## Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen
+
+- **Datum:** 10 november 2026
+- **Besluit:** noemt een wedstrijd op Wikipedia een doelpuntenmaker van ons met een link naar zijn pagina, en staat hij niet bij de spelers van dat seizoen, dan maakt de import hem als speler (#1024).
+  Een naam zonder link blijft een waarschuwing en maakt geen speler.
+  Op de site staat hij als elke speler, zonder markering en zonder extra bronvermelding.
+  Dit zijn de keuzes bij het bouwen.
+  - **De speler:** `adoptScorers` in `apps/importer/src/import-matches.ts` maakt de rij, met de bron `doelpunten`, de pagina van de link en de persoon van die pagina.
+    De naam is de titel van de pagina zonder de toevoeging tussen haakjes (`nameOfTitle`), want het doelpunt zelf noemt vaak alleen de achternaam.
+    Een positie, een rugnummer en een land heeft hij niet.
+  - **De persoon:** de import vraagt de persoon aan `createPersonBook`, zoals de selectie dat doet.
+    Hoort de pagina al bij een persoon, dan krijgt de speler die persoon.
+    Heeft de pagina nog geen persoon, omdat Wikipedia niet antwoordde, dan wacht het doelpunt op een volgende run.
+    Heeft een andere speler van het seizoen dezelfde persoon of dezelfde naam, dan komt er geen tweede rij en blijft het doelpunt een waarschuwing.
+  - **Wanneer:** vóór het koppelen van de doelpunten, in dezelfde transactie, bij de uurlijkse import en bij `import:season`.
+    Zo vindt elk doelpunt van de run hem, ook een doelpunt zonder link met alleen zijn achternaam.
+  - **Welke wedstrijden:** alleen de wedstrijden waarvan de import van Wikipedia de doelpunten mag schrijven.
+    Een seizoen met wedstrijden van de oude fansite doet niet mee: die spelers komen van de oude fansite.
+    Een wedstrijd met een invoer van de redactie doet niet mee zolang die invoer er is.
+    De import vergelijkt de invoer dan met de pagina zoals die is, en een doelpunt dat de redactie op naam invulde blijft hetzelfde doelpunt (`judgeGoals`).
+  - **Later in de selectie:** staat hij later in de tabel van de selectie, dan krijgt hij die rij en houdt hij zijn `id`.
+    `storePlayers` in `import-squad.ts` en in `import-past-squad.ts` vinden hem op zijn pagina, zijn naam of zijn persoon (`scorersByPerson`), en de bron wordt de betere bron.
+    Op de persoon zoeken ze alleen bij een rij met de bron `doelpunten`, voor een tabel die een andere titel van zijn pagina linkt.
+  - **Niet in de selectie:** zolang de tabel hem niet heeft, blijft hij `in_squad` en krijgt hij geen `left_squad_at`.
+    De eerste goede lezing van de selectie haalt hem ook niet weg.
+  - **Het logboek:** één regel per run, zoals `Matches 2022/23: 1 player added from a goal: Pelle van Amersfoort`.
+- **Waarom:** de lijst van de selectie op Wikipedia loopt achter, en de pagina zegt wie de persoon is.
+  Zo miste Pelle van Amersfoort in 2022/23, terwijl beide Wikipedia's hem bij drie doelpunten noemen.
+  Wedstrijd 183 had daardoor een doelpunt zonder speler.
+- **Gevolg:** een seizoen waarvan de selectie nog niet is gelezen, krijgt bij de import van de wedstrijden al de doelpuntenmakers met een pagina als spelers.
+  De kaart Selectie toont ze pas als het seizoen een rij in `squad_completeness` heeft, en de zin op die kaart volgt de beste bron.
+- **Alternatieven:** de redactie voegt hem toe in het beheer (#1020, blijft voor spelers die geen pagina noemt).
+  De selectie op Wikipedia aanvullen (een tabel met 27 kolommen die sinds ronde 4 stilstaat).
+  Een toelichting op de kaart (meer tekst zonder dat de bezoeker er iets aan heeft).
+  De naam van het doelpunt als naam van de speler (vaak alleen een achternaam, en dan staat er een halve naam op de kaart).
+  De speler maken bij elke wedstrijd apart, tijdens het koppelen (een eerder doelpunt zonder link kreeg hem dan pas bij de volgende run).
