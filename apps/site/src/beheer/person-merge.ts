@@ -73,15 +73,17 @@ export function describeMerge(plan: PersonMergePlan): string {
       .map((value) => `${label.toLowerCase()} ${value}`),
   )
 
+  // What went comes before the lists, which can be long: the log cuts a long line off at its
+  // end, and the values that went are what nothing else remembers.
   return [
     `Samengevoegd: ${person(other)} in ${person(kept)}.`,
+    `Verdwenen: ${list(gone)}.`,
     `Verhuisd: ${count(goals, 'doelpunt', 'doelpunten')}, ${count(appearances, 'wedstrijdoptreden', 'wedstrijdoptredens')}, ${count(editorsValues, 'waarde van de redactie', 'waarden van de redactie')}, spelersrijen: ${list(rows.map((row) => `${row.id} (${row.season})`))}, titels: ${list(pages)}.`,
     ...(doubles.length === 0
       ? []
       : [
           `Eén rij geworden: ${doubles.map(({ gone: row, season, stays }) => `${row.id} (${row.name}, ${season}) in ${stays.id}`).join(', ')}.`,
         ]),
-    `Verdwenen: ${list(gone)}.`,
   ].join(' ')
 }
 

@@ -161,7 +161,7 @@ describe('mergePersons', () => {
       {
         action: 'person.merge',
         createdAt: t0,
-        detail: `Samengevoegd: persoon ${old} (Oude Naam, Wikipedia: Oude Naam (voetballer)) in persoon ${renamed} (Nieuwe Naam, Wikipedia: Nieuwe Naam). Verhuisd: 0 doelpunten, 0 wedstrijdoptredens, 1 waarde van de redactie, spelersrijen: ${row?.id} (2020/21), titels: Oude Naam (voetballer). Verdwenen: naam Oude Naam, wikipedia-pagina Oude Naam (voetballer), linie middenvelder (Wikidata).`,
+        detail: `Samengevoegd: persoon ${old} (Oude Naam, Wikipedia: Oude Naam (voetballer)) in persoon ${renamed} (Nieuwe Naam, Wikipedia: Nieuwe Naam). Verdwenen: naam Oude Naam, wikipedia-pagina Oude Naam (voetballer), linie middenvelder (Wikidata). Verhuisd: 0 doelpunten, 0 wedstrijdoptredens, 1 waarde van de redactie, spelersrijen: ${row?.id} (2020/21), titels: Oude Naam (voetballer).`,
         id: expect.any(Number),
         itemId: renamed,
         reason: null,
@@ -199,6 +199,14 @@ describe('mergePersons', () => {
     expect(await database.db.select({ season: squadCompleteness.season }).from(squadCompleteness)).toEqual([
       { season: '2021/22' },
     ])
+  })
+
+  it('names what went before the lists, so a long line of the log does not cut it off', async () => {
+    const plan = await findMerge(database.db, old, renamed, renamed)
+    const detail = describeMerge(plan as Exclude<typeof plan, string>)
+
+    expect(detail.indexOf('Verdwenen:')).toBeLessThan(detail.indexOf('Verhuisd:'))
+    expect(detail.indexOf('Verdwenen:')).toBeGreaterThan(0)
   })
 
   it('writes nothing for one person twice or a person who is gone', async () => {
