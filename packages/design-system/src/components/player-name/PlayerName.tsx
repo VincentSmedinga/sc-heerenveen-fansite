@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
-import { countryName, flagAddress } from './flags'
+import { countryName, flagAddress, isCodeOnly } from './flags'
 
 export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
   /**
@@ -13,9 +13,11 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
   /**
    * The country of the player as a code of two letters (`NL`). The flag stands between the
    * shirt number and the name, as an image with the Dutch name of the country as its text
-   * alternative. `null`, or a country without a flag here, is a player without one in a list
-   * where others have one: an empty place of the same width, so the names still start at the
-   * same place. Leave it out in a list where nobody has a flag, and the name has no place.
+   * alternative. A country without a drawing shows its code of two letters in a frame of the
+   * same size, with the same text alternative. `null`, or a code that is not a country, is a
+   * player without one in a list where others have one: an empty place of the same width, so
+   * the names still start at the same place. Leave it out in a list where nobody has a flag,
+   * and the name has no place.
    */
   country?: null | string | undefined
   /** The given name, in the normal weight. Leave it out for a player known by one name. */
@@ -45,8 +47,10 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
  * With `shirtNumber` the number stands in a column before the name, and a long name goes on
  * under the name, not under the number. With `country` the flag of the country stands in a
  * column of its own between them. The number, the flag and the name are one line of text, one
- * space apart, and the flag reads as the name of the country. With children there is a line
- * behind the name (see `PlayerNameProps`). Without any of these the markup is a name alone.
+ * space apart, and the flag reads as the name of the country. A country without a drawing has
+ * its code in a frame of the size of a flag, which reads as the name of the country too. With
+ * children there is a line behind the name (see `PlayerNameProps`). Without any of these the
+ * markup is a name alone.
  * player-name.css gives the look.
  */
 export const PlayerName = ({
@@ -96,7 +100,15 @@ export const PlayerName = ({
         </>
       )}
       {country === undefined ? null : address === undefined ? (
-        <span className="hf-player-name-flag" />
+        country !== null && label !== undefined && isCodeOnly(country) ? (
+          <>
+            <span aria-label={label} className="hf-player-name-flag hf-player-name-code" role="img">
+              {country.toUpperCase()}
+            </span>{' '}
+          </>
+        ) : (
+          <span className="hf-player-name-flag" />
+        )
       ) : (
         <>
           <img alt={label} className="hf-player-name-flag" height={15} src={address} width={20} />{' '}

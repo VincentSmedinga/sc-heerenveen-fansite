@@ -36,26 +36,48 @@
   }
 
   /*
-   * The flag of the country, between the number and the name, with a thin line round it: a
-   * white flag (Netherlands, Finland, Japan) would melt into the card without it. The line
-   * reaches 3:1 against the surface of its card in light and in dark (player-name-css.test.ts).
-   * A player without a flag has an empty place of the same size. The flag is a little lower than
-   * the top of the line, so it stands beside the letters.
+   * The flag of the country, between the number and the name, with a thin line round it and a
+   * pixel of white between the line and the drawing. The line is the quiet line of the card the
+   * name stands in, like the lines of tables and lists. A player without a flag has an empty
+   * place of the same size, and a country without a drawing a frame of the same size with its
+   * code. The flag is a little lower than the top of the line, so it stands beside the letters.
    */
   .hf-player-name-flag {
     block-size: 0.9375rem;
-    border: 1px solid var(--hf-card-line-graphic, var(--hf-colour-line-graphic-surface));
+    border: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     box-sizing: border-box;
     display: block;
     flex: none;
     inline-size: 1.25rem;
     inset-block-start: 0.3em;
+    padding: 1px;
     position: relative;
   }
 
+  img.hf-player-name-flag {
+    background-color: var(--hf-colour-white);
+  }
+
   /* The empty place of a player without a flag has no line round it. */
-  span.hf-player-name-flag {
+  span.hf-player-name-flag:not(.hf-player-name-code) {
     border-color: transparent;
+  }
+
+  /*
+   * A country without a drawing shows its code of two letters in a frame of the size of a flag,
+   * with the same line round it. The letters are small, bold and in the colour of the text, so
+   * they read on the card in light and in dark (player-name-css.test.ts).
+   */
+  .hf-player-name-code {
+    align-items: center;
+    color: var(--hf-colour-text-default);
+    display: flex;
+    font-size: var(--hf-flag-code-font-size);
+    font-weight: var(--hf-name-font-weight);
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: 1;
+    overflow: hidden;
   }
 
   .hf-player-name-text {

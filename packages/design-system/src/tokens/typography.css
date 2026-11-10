@@ -79,6 +79,9 @@
     --hf-meta-font-size: 0.875rem;
     --hf-meta-font-weight: 400;
 
+    /* The country code in the frame of a flag: two capitals that fit a frame of 20 by 15 px. */
+    --hf-flag-code-font-size: 0.625rem;
+
     /*
      * 24 px at 14 px (about 22 px in the compact density). 1.4 was cramped, and 24 px sits on
      * the 4 px grid.
