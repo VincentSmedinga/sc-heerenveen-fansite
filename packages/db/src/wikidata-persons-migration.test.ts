@@ -75,7 +75,7 @@ describe(`the migration ${migration}`, () => {
       },
     ])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'line_source'")).toMatchObject([
-      { Null: 'YES', Type: "enum('wikidata','squad','manual')" },
+      { Null: 'YES', Type: "enum('wikidata','squad','manual','old-site')" },
     ])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'birth_date_precision'")).toMatchObject([
       { Null: 'YES', Type: "enum('day','month','year')" },

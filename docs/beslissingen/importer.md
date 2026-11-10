@@ -3011,6 +3011,7 @@
 - **Alternatieven:** alleen Wikidata (meer gaten); alleen de selectielijst (een veld van de rij van een seizoen, geen feit over de persoon).
 - **Later:** sinds 10 november 2026 bepaalt de importer de linie uit de selectielijst bij elke run opnieuw, en niet alleen bij de eerste lezing.
   Ook het beheer zet de bron `manual`, naast `personLines` (#1051, zie _De linie van een persoon volgt de posities van zijn seizoenen_).
+- **Later:** sinds 10 november 2026 (#1052) staat de tabel van de oude fansite tussen Wikidata en de selectielijst, met de bron `old-site`; zie _De bronnen van de linie en het land hebben een vaste volgorde_.
 
 ## De stand van acceptatie lezen kan met een actie die niets schrijft
 
@@ -3053,6 +3054,9 @@
   Dat past bij eerdere keuzes om niets te verzinnen (het rugnummer, de gele kaart).
   De linie komt uit het bestand en niet uit `persons.line` (#898): oude spelers hebben daar nog geen persoon, en het verslag blijft zo te maken zonder de database van andere stappen.
 - **Alternatieven:** de lijnen tellen en de spelers daarop ordenen (ongeveer 530 verslagen, maar Verbeek komt in de verdediging); de best passende formatie nemen met een vaste regel bij gelijke uitkomst (ongeveer 540 verslagen, maar in een derde ervan past meer dan één vorm); alles met de hand in het beheer doen (566 verslagen); wachten op de gegevens van #898 (oude spelers hebben daar nog geen persoon).
+- **Later:** sinds 10 november 2026 (#1052) is het formaat versie 3: `players.json` heeft per speler ook `country`.
+  De stap `linie en land` zet de linie uit het bestand nu ook op de persoon (`persons.line`), als die leeg is of uit de selectie kwam.
+  De formatie van een verslag blijft uit het bestand komen.
 
 ## De tegenstander van de oude fansite houdt de lijst, en de overige verslagen krijgen met de hand een formatie
 
@@ -3893,6 +3897,8 @@
 - **Waarom:** de lijst heeft geen seizoenen (alle spelers van alle tijden), dus ze past niet bij de plaats van een bron in de volgorde van bronnen; ze is wel een tweede bron voor een naam.
   `personTitleAliases` staat daarom, net als `personsWhoDiffer`, in het databasepakket: de pagina Kwaliteit leest hem ook.
 - **Alternatieven:** de lijst als bron voor spelers (kan niet zonder seizoenen); de lijst niet lezen (fouten in namen vind je dan alleen met de hand); de lijst bij elke run lezen (een verzoek per run voor een pagina die zelden verandert).
+- **Later:** sinds 10 november 2026 (#1052) bewaart de import bij elke titel ook het land van de eerste vlag, en krijgt de persoon van die titel dat land met de bron `list`.
+  De lijst maakt nog steeds geen speler en verandert geen naam; zie _Van de lijst van spelers telt de eerste vlag_.
 
 ## Een persoon heeft een linie en een land, en een seizoen kan afwijken
 
@@ -3906,6 +3912,7 @@
   De gaten die overblijven zijn aantallen van personen, niet van rijen.
 - **Alternatieven:** alles per seizoen laten (dezelfde gegevens tientallen keren invullen).
   Alleen het land van de eerste nationaliteit van Wikidata tonen, zonder eigen veld (de redactie kan het dan niet verbeteren).
+- **Later:** sinds 10 november 2026 (#1052) vult de importer ook de bronnen `list`, `old-site` en `squad`; zie _De bronnen van de linie en het land hebben een vaste volgorde_.
 
 ## De linie van een persoon volgt de posities van zijn seizoenen
 
@@ -3921,6 +3928,8 @@
   Een positie die later in `wikidataPositionLines` komt, werkt zo ook voor personen die al gelezen zijn.
   Een linie die het beheer zette voordat de persoon gelezen is, blijft bij de eerste lezing staan.
 - **Alternatieven:** alleen de selectie gebruiken bij het aanvullen (een leeggemaakte linie krijgt dan een zwakkere bron dan hij had).
+- **Later:** sinds 10 november 2026 (#1052) kijkt `refreshPersonLines` ook naar een persoon met de bron `old-site`.
+  Die linie wijkt voor een positie van Wikidata en blijft anders staan, ook als zijn rijen in `players` iets anders zeggen.
 
 ## Het land komt uit de eerste nationaliteit van Wikidata, via een lijst op Q-nummer
 
@@ -3938,3 +3947,50 @@
 - **Alternatieven:** de landcode per persoon bij Wikidata opvragen (een verzoek per land erbij, en `P297` ontbreekt bij de koninkrijken).
   Een korte lijst van de landen die we nu kennen (elke nieuwe speler uit een ander land is dan een leemte).
   De tweede nationaliteit nemen als de eerste geen code heeft (een gok).
+- **Later:** sinds 10 november 2026 (#1052) vervangt het land van Wikidata ook een land met de bron `list`, `old-site` of `squad`.
+  Alleen `manual` blijft altijd staan; zie _De bronnen van de linie en het land hebben een vaste volgorde_.
+
+## De bronnen van de linie en het land hebben een vaste volgorde
+
+- **Datum:** 10 november 2026
+- **Besluit:** de volgorde van de bronnen is voor de linie `manual`, `wikidata`, `old-site`, `squad`, en voor het land `manual`, `wikidata`, `list`, `old-site`, `squad` (#1052).
+  Een sterkere bron vervangt een zwakkere bij de volgende run, en een zwakkere vervangt nooit een sterkere.
+  `old-site` is nieuw in de lijst van bronnen van de linie (`line_source`).
+- **Waarom:** een handmatige keuze of een uitspraak van Wikidata is gecontroleerder dan de tabel van de oude site, en die is weer directer dan een afleiding uit seizoensrijen.
+  De vlag van de lijst is actueler dan een land uit 2007.
+- **Eigen keuze bij het bouwen:** twee imports vullen de bronnen, elk zonder een verzoek erbij.
+  - De import van de feeds (`refreshPersonCountries` en `refreshPersonLines`, in `packages/db/src/persons.ts`) vult bij elke run `wikidata`, `list` en `squad`.
+    Het land van de selectie is het land dat het vaakst op de rijen van de persoon in `players` staat, en bij een gelijke stand dat van het laatste seizoen.
+  - De import van de oude fansite vult `old-site`, in de stap `linie en land` (`apps/importer/src/old-site-person-facts.ts`).
+    Een oude speler hoort bij een persoon via zijn rijen in `players`, van zijn seizoenen en zijn naam, zoals de stappen `doelpunten` en `opstellingen` ze vinden.
+    Hebben die rijen geen persoon, of twee personen, dan slaat de stap de oude speler over en telt hem.
+  - Elke stap kijkt alleen naar personen zonder waarde of met een zwakkere bron, en verbetert een waarde van zijn eigen bron als de bron verandert.
+    Een tweede run verandert dus niets.
+  - Een persoon die Wikidata voor het eerst leest, houdt de linie van de oude fansite als Wikidata geen positie noemt die we kennen.
+  - De lijst van spelers geeft het land alleen aan de persoon met precies die titel, nooit op een naam.
+    Een naamgenoot zonder artikel krijgt dus niets.
+- **Alternatieven:** de oude fansite bovenaan (die kent geen dubbele nationaliteit en is van 2007); de bronnen elkaar laten tegenspreken in een lijst van afwijkingen (te veel werk voor een gat dat een mens snel zelf sluit).
+
+## Van de lijst van spelers telt de eerste vlag
+
+- **Datum:** 10 november 2026
+- **Besluit:** van een regel met twee vlaggen telt de eerste (#1052).
+  Een vlag die we niet kennen, geeft een waarschuwing en wordt overgeslagen: de titel krijgt dan geen land.
+  Dat geldt voor een sjabloon dat geen landcode uit `@fansite/shared/countries` is, zoals `{{YU-VLAG|15}}` of `{{EN-VLAG|15}}`.
+  `readPlayerList` leest de vlag, `storePlayerList` bewaart de code in `player_list_titles.country`, en het logboek noemt de titels met een onbekende vlag in een regel `Player list: …`.
+- **Waarom:** de volgorde in de lijst is die van de nationaliteit waarvoor de speler uitkwam, en een gok bij een onbekend sjabloon zet een fout in de gegevens.
+- **Eigen keuze bij het bouwen:** is de eerste vlag onbekend, dan telt de tweede niet.
+  De tweede vlag is dan net zo'n gok als de tweede nationaliteit van Wikidata.
+- **Alternatieven:** de tweede vlag nemen als de eerste onbekend is (een gok); Engeland en Joegoslavië met de hand op een land zetten (de redactie kiest dat per persoon in het beheer).
+
+## De landcodes van de oude fansite gaan via een eigen lijst
+
+- **Datum:** 10 november 2026
+- **Besluit:** `players.json` bewaart `speler.nationaliteit` zoals de oude database hem schreef, en de stap `linie en land` vertaalt de code met de lijst `oldSiteCountryCodes` (`apps/importer/src/old-site-person-facts.ts`, #1052).
+  Elke code van de oude tabel staat in de lijst, ook een code die gelijk blijft.
+  Een code die er niet in staat, geeft geen land en een regel in het logboek; `YU` (Joegoslavië) staat er daarom niet in.
+- **Waarom:** de oude site gebruikte eigen codes, en een deel daarvan is in ISO 3166 een ander land.
+  `CR` was Kroatië (in ISO Costa Rica), `MA` Macedonië (in ISO Marokko) en `MC` Marokko (in ISO Monaco).
+  Wie de twee letters als ISO-code leest, zet dus een fout land in de gegevens.
+  De lijst is op 10 november 2026 nagekeken tegen de spelers die elke code hebben.
+- **Alternatieven:** de code overnemen als hij in ISO bestaat (drie soorten fouten, zie hierboven); de code al bij de export vertalen (het bestand is dan geen kopie van de oude database meer).

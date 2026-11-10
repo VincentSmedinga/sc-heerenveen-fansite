@@ -176,8 +176,8 @@ describe('the corrections of the names', () => {
 })
 
 const oldPlayers: OldSitePlayer[] = [
-  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake', line: null },
-  { code: 'lars.nilsson', firstName: 'Lasse', infix: null, lastName: 'Nilsson', line: null },
+  { code: 'rene.hake', country: null, firstName: 'René', infix: null, lastName: 'Hake', line: null },
+  { code: 'lars.nilsson', country: null, firstName: 'Lasse', infix: null, lastName: 'Nilsson', line: null },
 ]
 const byCode = new Map(oldPlayers.map((player) => [player.code, player]))
 

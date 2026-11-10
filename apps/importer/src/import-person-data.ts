@@ -59,6 +59,10 @@ export type PersonDataReport = {
   birthDate: number
   /** The persons that got their country from the first nationality of Wikidata this run. */
   countriesFilled: number
+  /** The persons that got their country from the first flag in the list of players this run. */
+  countriesFromList: number
+  /** The persons that got their country from their rows of the squad lists this run. */
+  countriesFromSquad: number
   /** Persons without an article or without an item: read, with nothing from Wikidata. */
   empty: number
   /** The items of Wikidata it asked about: persons, countries, places and positions. */
@@ -88,18 +92,18 @@ export function describePersonData(report: PersonDataReport): string[] {
   const described: string[] = []
 
   if (report.read > 0 || report.articlesAsked > 0 || report.itemsAsked > 0) {
-    const withLine = lines.wikidata + lines.squad + lines.manual
+    const withLine = lines.wikidata + lines.squad + lines.manual + lines['old-site']
     const person = report.read === 1 ? 'person' : 'persons'
 
     described.push(
-      `persons (Wikidata): ${report.read} ${person} read, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
+      `persons (Wikidata): ${report.read} ${person} read, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines['old-site']} from the old fansite, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
     )
   }
-  if (linesAgain.squad + linesAgain.wikidata + linesAgain.cleared + report.countriesFilled > 0) {
-    const { countriesFilled: countries } = report
+  const { countriesFilled: countries, countriesFromList: fromList, countriesFromSquad: fromSquad } = report
 
+  if (linesAgain.squad + linesAgain.wikidata + linesAgain.cleared + countries + fromList + fromSquad > 0) {
     described.push(
-      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata`,
+      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata, ${fromList} from the list of players, ${fromSquad} from the squad`,
     )
   }
 
@@ -134,8 +138,9 @@ export function itemUrl(origin: string, id: string): string {
  *
  * After that, every run works out two things again for all persons, without a request (#1051):
  * the line of a person who has none or has the one of the squad (`refreshPersonLines`), and
- * the country of a person from his first nationality (`refreshPersonCountries`). What the
- * editors set stays. A first nationality that is not in the list of countries is a warning.
+ * the country of a person from his first nationality, the list of players or the squad
+ * (`refreshPersonCountries`, #1052). What the editors set stays. A first nationality that is
+ * not in the list of countries is a warning.
  */
 export async function readPersonData(
   db: Database,
@@ -146,9 +151,14 @@ export async function readPersonData(
 
   report.linesAgain = await refreshPersonLines(db, wikidataPositionLines)
 
-  const { filled, unknown } = await refreshPersonCountries(db, options.countryCodes ?? wikidataCountryCodes)
+  const { filled, list, squad, unknown } = await refreshPersonCountries(
+    db,
+    options.countryCodes ?? wikidataCountryCodes,
+  )
 
   report.countriesFilled = filled
+  report.countriesFromList = list
+  report.countriesFromSquad = squad
 
   if (unknown.length > 0) {
     const persons = unknown.reduce((sum, item) => sum + item.persons, 0)
@@ -177,9 +187,11 @@ async function readUnreadPersons(
     articlesAsked: 0,
     birthDate: 0,
     countriesFilled: 0,
+    countriesFromList: 0,
+    countriesFromSquad: 0,
     empty: 0,
     itemsAsked: 0,
-    lines: { manual: 0, squad: 0, wikidata: 0 },
+    lines: { manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
     linesAgain: { cleared: 0, squad: 0, wikidata: 0 },
     nationality: 0,
     read: 0,
@@ -436,8 +448,9 @@ async function readUnreadPersons(
 
   /**
    * Stores a person whole and counts him. His line is the one of our list, else the one of the
-   * positions on Wikidata, else the one of the squad lists, else none. A line the editors set
-   * in the admin before he was read stays as it is.
+   * positions on Wikidata, else the one he has from the old fansite (#1052), else the one of
+   * the squad lists, else none. A line the editors set in the admin before he was read stays
+   * as it is.
    */
   async function finish(
     person: { id: number; lineSource: null | PersonLineSource; wikipediaPage: string },
@@ -455,7 +468,12 @@ async function readUnreadPersons(
             ? { line: squad, source: 'squad' as const }
             : null
 
-    const stored = manual === undefined && person.lineSource === 'manual' ? ('keep' as const) : line
+    const kept =
+      manual === undefined &&
+      (person.lineSource === 'manual' || (person.lineSource === 'old-site' && positionLine === null))
+        ? person.lineSource
+        : null
+    const stored = kept === null ? line : ('keep' as const)
 
     await db.transaction((transaction) => storePersonData(transaction, person.id, { ...data, line: stored }, clock()))
     report.read++
@@ -466,8 +484,8 @@ async function readUnreadPersons(
     if (data.nationalityIds.length > 0) {
       report.nationality++
     }
-    if (stored === 'keep') {
-      report.lines.manual++
+    if (kept !== null) {
+      report.lines[kept]++
     } else if (line !== null) {
       report.lines[line.source]++
     }

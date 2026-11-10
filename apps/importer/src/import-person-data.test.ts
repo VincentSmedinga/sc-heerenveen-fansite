@@ -33,6 +33,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.pool.query('DELETE FROM wikidata_items')
+  await database.pool.query('DELETE FROM player_list_titles')
 })
 
 afterEach(async () => {
@@ -152,8 +153,8 @@ describe('readPersonData', () => {
       warnings: [],
     })
     expect(describePersonData(report)).toEqual([
-      'persons (Wikidata): 1 person read, 1 with a birth date, 1 with a nationality, 1 with a line (1 from Wikidata, 0 from the squad, 0 set by hand), 0 left empty; 1 articles and 6 items asked',
-      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 1 country from Wikidata',
+      'persons (Wikidata): 1 person read, 1 with a birth date, 1 with a nationality, 1 with a line (1 from Wikidata, 0 from the squad, 0 from the old fansite, 0 set by hand), 0 left empty; 1 articles and 6 items asked',
+      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 1 country from Wikidata, 0 from the list of players, 0 from the squad',
     ])
   })
 
@@ -371,7 +372,7 @@ describe('readPersonData', () => {
       { line: 'middenvelder', line_source: 'squad', wikipedia_page: 'Veel Middenvelder' },
       { line: 'aanvaller', line_source: 'squad', wikipedia_page: 'Gelijk Spel' },
     ])
-    expect(report.lines).toEqual({ manual: 0, squad: 2, wikidata: 0 })
+    expect(report.lines).toEqual({ manual: 0, 'old-site': 0, squad: 2, wikidata: 0 })
   })
 
   it('leaves the line empty without a position of Wikidata and without a squad row', async () => {
@@ -394,7 +395,7 @@ describe('readPersonData', () => {
     expect(await rows('SELECT line, line_source FROM persons')).toEqual([
       { line: 'middenvelder', line_source: 'manual' },
     ])
-    expect(report.lines).toEqual({ manual: 1, squad: 0, wikidata: 0 })
+    expect(report.lines).toEqual({ manual: 1, 'old-site': 0, squad: 0, wikidata: 0 })
 
     // A person that was read earlier gets the line of the list at the next run, without a
     // request.
@@ -524,7 +525,7 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
     expect(await rows('SELECT line, line_source FROM persons')).toEqual([{ line: 'verdediger', line_source: 'squad' }])
     expect(report.linesAgain).toEqual({ cleared: 0, squad: 1, wikidata: 0 })
     expect(describePersonData(report)).toEqual([
-      'persons (line and country): 1 line from the squad, 0 from Wikidata, 0 taken away; 0 countries from Wikidata',
+      'persons (line and country): 1 line from the squad, 0 from Wikidata, 0 taken away; 0 countries from Wikidata, 0 from the list of players, 0 from the squad',
     ])
     expect(asked(served.nl)).toEqual([])
     expect(asked(served.data)).toEqual([])
@@ -596,7 +597,7 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
     expect(await rows('SELECT line, line_source, wikidata_id FROM persons')).toEqual([
       { line: 'aanvaller', line_source: 'manual', wikidata_id: 'Q15943430' },
     ])
-    expect(report.lines).toEqual({ manual: 1, squad: 0, wikidata: 0 })
+    expect(report.lines).toEqual({ manual: 1, 'old-site': 0, squad: 0, wikidata: 0 })
   })
 
   it('fills in the country from the first nationality, also for a person read before, and only once', async () => {
@@ -618,7 +619,7 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
     expect(report.countriesFilled).toBe(2)
     expect(report.warnings).toEqual([])
     expect(describePersonData(report)).toEqual([
-      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 2 countries from Wikidata',
+      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 2 countries from Wikidata, 0 from the list of players, 0 from the squad',
     ])
     expect(asked(served.data)).toEqual([])
     expect((await read(served)).countriesFilled).toBe(0)
@@ -657,10 +658,9 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
 
   it('never changes a country the editors set, and follows Wikidata for one it filled in itself', async () => {
     const manual = await addReadPerson('Door De Redactie', { country: 'RS', country_source: 'manual' })
-    const old = await addReadPerson('Van De Oude Site', { country: 'BE', country_source: 'old-site' })
     const ours = await addReadPerson('Van Wikidata', { country: 'BE', country_source: 'wikidata' })
 
-    for (const id of [manual, old, ours]) {
+    for (const id of [manual, ours]) {
       await addNationalities(id, ['Q29999', 'Koninkrijk der Nederlanden'])
     }
 
@@ -668,9 +668,190 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
 
     expect(await rows('SELECT country, country_source FROM persons ORDER BY id')).toEqual([
       { country: 'RS', country_source: 'manual' },
-      { country: 'BE', country_source: 'old-site' },
       { country: 'NL', country_source: 'wikidata' },
     ])
     expect(report.countriesFilled).toBe(1)
+  })
+})
+
+describe('the order of the sources of a line and a country (#1052)', () => {
+  const nobody = { data: {}, nl: {} }
+  const state = () =>
+    rows('SELECT wikipedia_page AS title, line, line_source, country, country_source FROM persons ORDER BY id')
+  const countries = async () =>
+    (await rows('SELECT country, country_source FROM persons ORDER BY id')).map(
+      (row) => `${row['country']} ${row['country_source']}`,
+    )
+
+  async function addPerson(title: string, columns: Record<string, null | string> = {}) {
+    const names = ['wikipedia_page', 'wikidata_read_at', ...Object.keys(columns)]
+
+    await database.pool.query(`INSERT INTO persons (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`, [
+      title,
+      new Date('2026-11-01T10:00:00Z'),
+      ...Object.values(columns),
+    ])
+
+    const [row] = await rows('SELECT max(id) AS id FROM persons')
+
+    return row?.['id'] as number
+  }
+
+  const addRow = (personId: number, season: string, columns: { country?: string; position?: string }) =>
+    database.pool.query(
+      'INSERT INTO players (season, name, search_term, position, country, person_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [season, `speler ${personId}`, 'speler', columns.position ?? null, columns.country ?? null, personId],
+    )
+
+  const addToList = (title: string, country: null | string) =>
+    database.pool.query('INSERT INTO player_list_titles (title, country, read_at) VALUES (?, ?, ?)', [
+      title,
+      country,
+      now,
+    ])
+
+  async function addDutchNationality(personId: number) {
+    await database.pool.query("INSERT IGNORE INTO wikidata_items (id, label) VALUES ('Q29999', 'Nederland')")
+    await database.pool.query(
+      "INSERT INTO person_nationalities (person_id, item_id, position) VALUES (?, 'Q29999', 0)",
+      [personId],
+    )
+  }
+
+  /** One person for each source a country can have, all with the country `BE`. */
+  async function onePersonPerSource() {
+    const ids: number[] = []
+
+    for (const source of [null, 'squad', 'old-site', 'list', 'wikidata', 'manual']) {
+      ids.push(
+        await addPerson(`Bron ${source ?? 'leeg'}`, source === null ? {} : { country: 'BE', country_source: source }),
+      )
+    }
+
+    return ids
+  }
+
+  it('lets Wikidata replace every source but the editors, and changes nothing in a second run', async () => {
+    for (const id of await onePersonPerSource()) {
+      await addDutchNationality(id)
+    }
+
+    const served = await serve(nobody.nl, nobody.data)
+    const report = await read(served)
+
+    expect(await countries()).toEqual([
+      'NL wikidata',
+      'NL wikidata',
+      'NL wikidata',
+      'NL wikidata',
+      'NL wikidata',
+      'BE manual',
+    ])
+    expect(report.countriesFilled).toBe(5)
+
+    const again = await read(served)
+
+    expect([again.countriesFilled, again.countriesFromList, again.countriesFromSquad]).toEqual([0, 0, 0])
+    expect(describePersonData(again)).toEqual([])
+  })
+
+  it('lets the list replace the old fansite and the squad, and never Wikidata or the editors', async () => {
+    await onePersonPerSource()
+    for (const source of ['leeg', 'squad', 'old-site', 'list', 'wikidata', 'manual']) {
+      await addToList(`Bron ${source}`, 'DK')
+    }
+
+    const served = await serve(nobody.nl, nobody.data)
+    const report = await read(served)
+
+    expect(await countries()).toEqual(['DK list', 'DK list', 'DK list', 'DK list', 'BE wikidata', 'BE manual'])
+    expect(report.countriesFromList).toBe(4)
+    expect(describePersonData(report)).toEqual([
+      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 0 countries from Wikidata, 4 from the list of players, 0 from the squad',
+    ])
+    expect((await read(served)).countriesFromList).toBe(0)
+    expect(await countries()).toEqual(['DK list', 'DK list', 'DK list', 'DK list', 'BE wikidata', 'BE manual'])
+  })
+
+  it('lets the squad fill only a person without a country, and follow its own rows', async () => {
+    for (const id of await onePersonPerSource()) {
+      await addRow(id, '2003/04', { country: 'SE' })
+    }
+
+    const served = await serve(nobody.nl, nobody.data)
+    const report = await read(served)
+
+    expect(await countries()).toEqual(['SE squad', 'SE squad', 'BE old-site', 'BE list', 'BE wikidata', 'BE manual'])
+    expect(report.countriesFromSquad).toBe(2)
+    expect((await read(served)).countriesFromSquad).toBe(0)
+  })
+
+  it('takes from the squad the country that stands most often, for a tie the latest season, and no unknown code', async () => {
+    const most = await addPerson('Het Vaakst')
+    const tie = await addPerson('Gelijk')
+    const unknown = await addPerson('Onbekende Code')
+
+    await addRow(most, '2001/02', { country: 'DK' })
+    await addRow(most, '2002/03', { country: 'DK' })
+    await addRow(most, '2003/04', { country: 'NL' })
+    await addRow(tie, '2001/02', { country: 'DK' })
+    await addRow(tie, '2003/04', { country: 'NL' })
+    await addRow(unknown, '2003/04', { country: 'YU' })
+
+    await read(await serve(nobody.nl, nobody.data))
+
+    expect(await countries()).toEqual(['DK squad', 'NL squad', 'null null'])
+  })
+
+  it('gives the country of the list to the person of that title only, never to a namesake', async () => {
+    await addPerson('Jan Jansen (voetballer, 1990)')
+    await addPerson('Jan Jansen')
+    await database.pool.query("INSERT INTO persons (name) VALUES ('Jan Jansen (voetballer, 1990)')")
+    await addToList('Jan Jansen (voetballer, 1990)', 'NL')
+    await addToList('Zonder Vlag', null)
+    await addPerson('Zonder Vlag')
+
+    const report = await read(await serve(nobody.nl, nobody.data))
+
+    expect(await countries()).toEqual(['NL list', 'null null', 'null null', 'null null'])
+    expect(report.countriesFromList).toBe(1)
+  })
+
+  it('keeps a line of the old fansite against the squad, and gives way to Wikidata', async () => {
+    const kept = await addPerson('Blijft', { line: 'doelman', line_source: 'old-site' })
+    const replaced = await addPerson('Wijkt', { line: 'doelman', line_source: 'old-site' })
+
+    await addRow(kept, '2003/04', { position: 'aanvaller' })
+    await addRow(replaced, '2003/04', { position: 'aanvaller' })
+    await database.pool.query("INSERT INTO wikidata_items (id, label) VALUES ('Q336286', 'verdediger')")
+    await database.pool.query("INSERT INTO person_positions (person_id, item_id, position) VALUES (?, 'Q336286', 0)", [
+      replaced,
+    ])
+
+    const served = await serve(nobody.nl, nobody.data)
+    const report = await read(served)
+
+    expect((await state()).map((row) => `${row['line']} ${row['line_source']}`)).toEqual([
+      'doelman old-site',
+      'verdediger wikidata',
+    ])
+    expect(report.linesAgain).toEqual({ cleared: 0, squad: 0, wikidata: 1 })
+    expect((await read(served)).linesAgain).toEqual({ cleared: 0, squad: 0, wikidata: 0 })
+  })
+
+  it('keeps the line of the old fansite of a person it reads when Wikidata names no position', async () => {
+    await addPersons('Zonder Artikel')
+    await database.pool.query("UPDATE persons SET line = 'middenvelder', line_source = 'old-site'")
+
+    const [person] = await rows('SELECT id FROM persons')
+
+    await addRow(person?.['id'] as number, '2003/04', { position: 'aanvaller' })
+
+    const report = await read(await serve({}, {}))
+
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([
+      { line: 'middenvelder', line_source: 'old-site' },
+    ])
+    expect(report.lines).toEqual({ manual: 0, 'old-site': 1, squad: 0, wikidata: 0 })
   })
 })

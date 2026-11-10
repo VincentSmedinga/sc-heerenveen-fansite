@@ -9,15 +9,16 @@ import * as z from 'zod'
  * files and never the old database, which production can't reach.
  *
  * The files hold the facts of the old database in a tidy form and nothing more: no
- * interpretation, no prose and no data of people beyond a name, a code and the line they play
- * in. A number or text means what the old database meant by it: a `0` for corners, offside
- * or fouls is "not known", for instance, and `home` is the side the old database called `t`.
+ * interpretation, no prose and no data of people beyond a name, a code, the line they play in
+ * and the country they play for. A number or text means what the old database meant by it: a
+ * `0` for corners, offside or fouls is "not known", for instance, and `home` is the side the
+ * old database called `t`.
  * Every schema is strict, so a field that isn't listed here makes a file unreadable. That is
  * the guard against personal data slipping in.
  */
 
 /** The version of the file format. A change to the shape of a file raises it. */
-export const oldSiteFileVersion = 2
+export const oldSiteFileVersion = 3
 
 /** The folder in the repository that holds the files. */
 export const oldSiteDataFolder = new URL('../data/oude-fansite/', import.meta.url)
@@ -40,6 +41,15 @@ export const oldSiteClubSchema = z.strictObject({
 
 export const oldSitePlayerSchema = z.strictObject({
   code: z.string().min(1),
+  /**
+   * The country of the player as the old database wrote it (`speler.nationaliteit`): two
+   * capitals, or null when it is empty. It is a code of the old site and not always the one of
+   * ISO 3166 (`VS`, `CR` for Croatia): `oldSiteCountryCodes` knows which country it is.
+   */
+  country: z
+    .string()
+    .regex(/^[A-Z]{2}$/)
+    .nullable(),
   firstName: z.string(),
   infix: z.string().nullable(),
   lastName: z.string().min(1),

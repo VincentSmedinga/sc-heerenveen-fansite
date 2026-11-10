@@ -45,9 +45,9 @@ const zeroStatistics = {
 }
 
 const oldPlayers: OldSitePlayer[] = [
-  { code: 'jan.janssen', firstName: 'Jan', infix: null, lastName: 'Janssen', line: null },
-  { code: 'joost.vanaken', firstName: 'Joost', infix: 'van', lastName: 'Aken', line: null },
-  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake', line: null },
+  { code: 'jan.janssen', country: null, firstName: 'Jan', infix: null, lastName: 'Janssen', line: null },
+  { code: 'joost.vanaken', country: null, firstName: 'Joost', infix: 'van', lastName: 'Aken', line: null },
+  { code: 'rene.hake', country: null, firstName: 'René', infix: null, lastName: 'Hake', line: null },
 ]
 
 /** A league match at home that sc Heerenveen won 2-1, without goals. */
@@ -292,8 +292,8 @@ describe('the players of ours in the matches', () => {
 
   it('gives a player the spelling the owner chose, from the old table and from a code', () => {
     const list = [
-      { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null },
-      { code: 'ali.elkhattabi', firstName: 'Ali', infix: null, lastName: 'Elkhattabi', line: null },
+      { code: 'ronnie.venema', country: null, firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null },
+      { code: 'ali.elkhattabi', country: null, firstName: 'Ali', infix: null, lastName: 'Elkhattabi', line: null },
     ]
     const lineup = ['ronnie.venema', 'ali.elkhattabi', 'ivan.tzvekov', 'igor.korneev'].map((code, index) => ({
       minuteIn: 0,
@@ -447,7 +447,7 @@ describe('the steps spelers and doelpunten', () => {
   })
 
   it('finds a player who is in players already under the spelling the owner chose', async () => {
-    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
+    const venema = { country: null, firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
     const list = [{ code: 'ronnie.venema', ...venema }]
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ronnie.venema')],
@@ -471,7 +471,7 @@ describe('the steps spelers and doelpunten', () => {
   })
 
   it('uses a player the editors added or changed as he is, and makes no second row (#1022)', async () => {
-    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
+    const venema = { country: null, firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
     const list = [{ code: 'ronnie.venema', ...venema }]
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ronnie.venema')],
@@ -503,8 +503,22 @@ describe('the steps spelers and doelpunten', () => {
   })
 
   it('merges a stale row of the step into the player the corrections chose, and only that row', async () => {
-    const venema = { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
-    const meijer = { code: 'hennie.meijer', firstName: 'Hennie', infix: null, lastName: 'Meijer', line: null }
+    const venema = {
+      code: 'ronnie.venema',
+      country: null,
+      firstName: 'Ronnie',
+      infix: null,
+      lastName: 'Venema',
+      line: null,
+    }
+    const meijer = {
+      code: 'hennie.meijer',
+      country: null,
+      firstName: 'Hennie',
+      infix: null,
+      lastName: 'Meijer',
+      line: null,
+    }
     const match = oldMatch({
       events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'hennie.meijer')],
     })
@@ -593,10 +607,24 @@ describe('the steps spelers and doelpunten', () => {
 
   it('gives the rows of an earlier run the spellings the owner chose on 10 November 2026', async () => {
     const list = [
-      { code: 'radoslav.samardzic', firstName: 'Radoslav', infix: null, lastName: 'Samardzic', line: null },
-      { code: 'ugur.yildirim', firstName: 'Ugur', infix: null, lastName: 'Yildirim', line: null },
-      { code: 'janharm.schippers', firstName: 'Jan-Harm', infix: null, lastName: 'Schippers', line: null },
-      { code: 'robert.vanderberg', firstName: 'Robert', infix: 'van der', lastName: 'Berg', line: null },
+      {
+        code: 'radoslav.samardzic',
+        country: null,
+        firstName: 'Radoslav',
+        infix: null,
+        lastName: 'Samardzic',
+        line: null,
+      },
+      { code: 'ugur.yildirim', country: null, firstName: 'Ugur', infix: null, lastName: 'Yildirim', line: null },
+      {
+        code: 'janharm.schippers',
+        country: null,
+        firstName: 'Jan-Harm',
+        infix: null,
+        lastName: 'Schippers',
+        line: null,
+      },
+      { code: 'robert.vanderberg', country: null, firstName: 'Robert', infix: 'van der', lastName: 'Berg', line: null },
     ]
     const match = oldMatch({ events: list.map((player, index) => goal(10 + index, player.code)) })
     const season = '2001/02'

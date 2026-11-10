@@ -48,8 +48,8 @@ async function main() {
 
 /**
  * Reads the tables the export needs. It asks for named columns only: of the reports it takes
- * the referee and the attendance, and of the players the name, the code and the line (`linie`),
- * so nothing else of the old database can reach the files.
+ * the referee and the attendance, and of the players the name, the code, the line (`linie`)
+ * and the country (`nationaliteit`), so nothing else of the old database can reach the files.
  */
 async function readRows(url: string): Promise<OldSiteRows> {
   const connection = await createConnection({ charset: 'UTF8MB4_UNICODE_CI', dateStrings: true, uri: url })
@@ -70,7 +70,9 @@ async function readRows(url: string): Promise<OldSiteRows> {
       matches: await select(
         'SELECT code, seizoen, dt, competitie, speelronde, opmerking FROM wedstrijd ORDER BY dt, code',
       ),
-      players: await select('SELECT voornaam, tussenvoegsel, achternaam, code, linie FROM speler ORDER BY code'),
+      players: await select(
+        'SELECT voornaam, tussenvoegsel, achternaam, code, linie, nationaliteit FROM speler ORDER BY code',
+      ),
       reports: await select(
         'SELECT wsd_code, wsd_seizoen, scheidsrechter, toeschouwers FROM wedstrijd_vsg ORDER BY id',
       ),

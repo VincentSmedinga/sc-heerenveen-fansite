@@ -47,7 +47,7 @@ const zeroStatistics = {
 }
 
 const oldPlayers: OldSitePlayer[] = [
-  { code: 'rene.hake', firstName: 'René', infix: null, lastName: 'Hake', line: null },
+  { code: 'rene.hake', country: null, firstName: 'René', infix: null, lastName: 'Hake', line: null },
 ]
 
 /** Fourteen players of ours; the first eleven start. A code is `<word>.speler`. */
@@ -59,6 +59,7 @@ const ourName = (index: number) => `${ourWords[index]!.charAt(0).toUpperCase()}$
 const withLines = (...lines: (null | OldSiteLine)[]): OldSitePlayer[] =>
   lines.map((line, index) => ({
     code: ourCode(index),
+    country: null,
     firstName: ourName(index).split(' ')[0]!,
     infix: null,
     lastName: 'Speler',

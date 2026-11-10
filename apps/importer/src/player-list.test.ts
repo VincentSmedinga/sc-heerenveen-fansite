@@ -3,6 +3,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 import { playerListReport } from '@fansite/db/persons'
 import { persons, playerListTitles, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
@@ -21,7 +22,8 @@ const page = `Dit is een lijst van [[voetballer]]s van [[sc Heerenveen]].
 {{Kolommen lijst | breedte=19 | aantal=4 | inhoud=* {{NL-VLAG|15}} [[Gerrit Abma]]
 * {{NL-VLAG|15}}{{GH-VLAG|15}} [[Piet Adema (voetballer)|Piet Adema]]
 * [[Daniël Jansen]]
-* [[Luca Oyen]]
+* {{YU-VLAG|15}}{{RS-VLAG|15}} [[Luca Oyen]]
+* {{be-vlag}} [[Piet Adema (voetballer)|Nog eens]]
 }}
 
 [[Categorie:Sc Heerenveen]]
@@ -63,11 +65,39 @@ async function serve(text: null | string) {
 
 describe('readPlayerList', () => {
   it('takes the first link of each item, without the templates, and nothing above the first heading', () => {
-    expect(readPlayerList(page)).toEqual(['Gerrit Abma', 'Piet Adema (voetballer)', 'Daniël Jansen', 'Luca Oyen'])
+    expect(readPlayerList(page).entries.map((entry) => entry.title)).toEqual([
+      'Gerrit Abma',
+      'Piet Adema (voetballer)',
+      'Daniël Jansen',
+      'Luca Oyen',
+    ])
+  })
+
+  it('gives the country of the first flag, none without a flag, and none with a warning for a flag we do not know', () => {
+    expect(readPlayerList(page)).toEqual({
+      entries: [
+        { country: 'NL', title: 'Gerrit Abma' },
+        // Two flags: the first counts, and the second line of the same title is not read.
+        { country: 'NL', title: 'Piet Adema (voetballer)' },
+        { country: null, title: 'Daniël Jansen' },
+        // Yugoslavia is gone, and the second flag is no guess for the first.
+        { country: null, title: 'Luca Oyen' },
+      ],
+      unknownFlags: [{ flag: 'YU-VLAG', title: 'Luca Oyen' }],
+    })
+  })
+
+  it('reads a flag without a size and in small letters, and no other template as a flag', () => {
+    expect(
+      readPlayerList('==A==\n* {{Zie artikel|X}} {{dk-vlag}} [[Een Deen]]\n* {{NL}} [[Zonder Vlag]]').entries,
+    ).toEqual([
+      { country: 'DK', title: 'Een Deen' },
+      { country: null, title: 'Zonder Vlag' },
+    ])
   })
 
   it('gives nothing for a page that is a redirect', () => {
-    expect(readPlayerList('#REDIRECT [[Iets anders]]')).toEqual([])
+    expect(readPlayerList('#REDIRECT [[Iets anders]]').entries).toEqual([])
   })
 })
 
@@ -76,18 +106,39 @@ describe('importPlayerList', () => {
     const server = await serve(page)
     const fetcher = fetcherFor([server])
 
+    const warning =
+      'Player list: 1 title has a first flag that is no country we know, so no country is kept: Luca Oyen (YU-VLAG)'
+
     expect(await importPlayerList(database.db, fetcher, server.origin, () => first)).toEqual([
-      'Player list: 4 titles read, 4 new, 0 gone',
+      'Player list: 4 titles read (2 with a country), 4 new, 0 gone',
+      warning,
     ])
 
     const later = new Date(first.getTime() + playerListMaxAge + 1)
 
-    expect(await importPlayerList(database.db, fetcher, server.origin, () => later)).toEqual([])
+    expect(await importPlayerList(database.db, fetcher, server.origin, () => later)).toEqual([warning])
+    expect(
+      (await database.db.select().from(playerListTitles)).map((row) => `${row.title}: ${row.country}`).sort(),
+    ).toEqual(['Daniël Jansen: null', 'Gerrit Abma: NL', 'Luca Oyen: null', 'Piet Adema (voetballer): NL'])
     expect((await database.db.select().from(playerListTitles)).map((row) => row.title).sort()).toEqual([
       'Daniël Jansen',
       'Gerrit Abma',
       'Luca Oyen',
       'Piet Adema (voetballer)',
+    ])
+  })
+
+  it('gives a title that was stored without a country its country at the next read (#1052)', async () => {
+    await database.db
+      .insert(playerListTitles)
+      .values({ readAt: new Date('2026-11-01T12:00:00Z'), title: 'Gerrit Abma' })
+
+    const server = await serve(page)
+
+    await importPlayerList(database.db, fetcherFor([server]), server.origin, () => first)
+
+    expect(await database.db.select().from(playerListTitles).where(eq(playerListTitles.title, 'Gerrit Abma'))).toEqual([
+      { country: 'NL', readAt: first, title: 'Gerrit Abma' },
     ])
   })
 
