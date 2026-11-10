@@ -4200,7 +4200,9 @@
 ## De kaart Selectie heeft een eigen zin voor een lijst uit doelpunten en van de redactie
 
 - **Datum:** 10 november 2026
-- **Besluit:** is de beste bron van het seizoen `doelpunten` of `redactie`, dan zegt de zin onder de kop: "We kennen N spelers van dit seizoen: wie scoorde of door de redactie is toegevoegd. De selectie is niet compleet." (#1040).
+- **Besluit:** is de beste bron van het seizoen `doelpunten` of `redactie`, dan zegt de zin onder de kop:
+  "We kennen N spelers van dit seizoen: wie scoorde of door de redactie is toegevoegd.
+  De selectie is niet compleet." (#1040).
   De zinnen voor de andere bronnen veranderen niet.
   Beheer rekent de rij van het seizoen opnieuw uit na het toevoegen, wijzigen en uit de selectie halen van een speler.
   Mislukt dat, dan blijft de wijziging van de speler staan en komt er een waarschuwing in het logboek.
