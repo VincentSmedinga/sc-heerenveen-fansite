@@ -96,7 +96,7 @@ export function previewDataOf(
     const shirts = new Set<number>()
 
     values[side].speler.forEach((row, index) => {
-      if (isUntouchedRow('speler', row)) {
+      if (isUntouchedRow('speler', row, index)) {
         return
       }
 

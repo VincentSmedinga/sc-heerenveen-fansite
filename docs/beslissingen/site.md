@@ -3426,6 +3426,7 @@
     Zonder JavaScript maakt de server ze opnieuw na elke knop en elke keer opslaan, en een speler die dan toch twee keer staat, geeft bij het opslaan een fout bij het veld ("Speler 3 staat al in het verslag, bij Speler 3").
   - **Bij een wissel** toont "Erin" alleen de spelers met de rol Bank, en "Eruit" iedereen die in het verslag staat: wie erin komt, zat op de bank.
     **Later:** zie _De lijst Erin zegt waarom hij leeg is_ (7 november 2026): staat er niemand op de bank, dan zegt het scherm dat bij het veld.
+    **Later:** zie _De lijsten van het verslagformulier volgen de opstelling en staan op volgorde_ (10 november 2026): "Eruit" toont met JavaScript alleen wie op dat moment op het veld staat.
   - **De tegenstander** heeft geen keuzelijst, want zijn spelers zijn namen.
     Dezelfde naam twee keer in zijn verslag, ook met andere hoofdletters, geeft dezelfde fout.
   - **Het plakscherm** (#830) leest een speler die twee keer in de tekst staat één keer, en meldt de tweede regel als niet gelezen.
@@ -3449,6 +3450,7 @@
   De zin staat bij het veld, want daar kijkt de beheerder naar.
 - **Alternatieven:** de lijst Erin weer alle spelers laten tonen (dan kan een wissel iemand brengen die niet op de bank zat, en de regels vangen dat pas bij het opslaan op); de keuzelijst uitzetten als de bank leeg is (een uitgezet veld wordt niet meegestuurd, dus een eerder gekozen speler gaat verloren); de rol van een nieuwe rij standaard op Bank zetten (de eerste elf rijen zijn dan de basis en alleen de nieuwe rijen de bank, wat bij een tweede rij in de basis weer verkeerd is).
 - **Later:** vult de vorige beslissing aan: bij een wissel toont "Erin" alleen de spelers met de rol Bank, en zegt zelf waarom hij leeg is.
+- **Later:** zie _De lijsten van het verslagformulier volgen de opstelling en staan op volgorde_ (10 november 2026): een nieuwe rij van de opstelling heeft vanaf rij 12 de rol Bank, bij beide teams.
 
 ## De formatie staat in een keuzelijst met Anders, en de regel "Formatie: 4-3-3" leest het plakscherm met dezelfde regel
 
@@ -4324,3 +4326,31 @@
   Altijd de waarde van de persoon die blijft (een waarde die de redactie instelde, gaat dan verloren).
   Een kopie bewaren en een knop "Maak ongedaan".
   Een vierde kolom "Na het samenvoegen" in de tabel (te breed voor een telefoon).
+
+## De lijsten van het verslagformulier volgen de opstelling en staan op volgorde
+
+- **Datum:** 10 november 2026
+- **Besluit:** de lijsten met spelers in het formulier van een wedstrijdverslag staan op rugnummer en dan naam, spelers zonder rugnummer achteraan.
+  "Eruit" toont alleen wie op dat moment op het veld staat, en "Rol" toont Basis en aanvoerder niet meer zodra een andere speler van dat team hem heeft (#1061).
+  Dit is een hulp met JavaScript: de server houdt zijn regels.
+  - **Volgorde:** dat geldt voor Eruit, Erin, doelpunten, assists, kaarten, gemiste strafschoppen en de serie.
+    De waarde van een keuze blijft het nummer van de rij van de speler; alleen de volgorde van de lijst verandert.
+  - **Eruit:** de spelers met de rol Basis of Basis en aanvoerder, plus wie in een eerdere wissel erin kwam, min wie in een eerdere wissel eruit ging en min wie al een rode of geel-rode kaart had.
+    Het moment is de minuut met de blessuretijd.
+    Bij hetzelfde moment gaat een wissel voor een kaart, en daarna telt de volgorde van de rijen, zoals de regel in `packages/shared`.
+    Is de minuut nog leeg, dan telt de rij als laatste, en een kaart zonder minuut laat niemand van het veld gaan.
+    De speler die de rij nu heeft, blijft in de lijst met de toelichting "staat dan niet op het veld", zodat er niets stilletjes verdwijnt en de server de fout kan melden.
+  - **Rol:** de speler die Basis en aanvoerder heeft houdt de keuze, en haalt hij hem weg, dan komt hij terug bij de anderen van dat team.
+  - **Een nieuwe rij** van de opstelling heeft vanaf rij 12 de rol Bank, bij beide teams.
+    Een rol die al gekozen of opgeslagen is, verandert niet.
+    Een rij die niemand aanraakte, telt als leeg met de rol van zijn plaats (`isUntouchedRow` krijgt het nummer van de rij), en na het weghalen van een rij krijgt zo'n lege rij de rol van zijn nieuwe plaats.
+  - **Zonder JavaScript** toont het formulier alle keuzes, op volgorde, en maakt de server de lijsten opnieuw na elke knop en elke opslag.
+    De server weigert twee aanvoerders (`captain-twice`) en een wissel van een speler die niet op het veld staat (`substitution-out-not-on-pitch`), met de fout bij het veld.
+    De regel in `packages/shared` kende de rode kaart al, dus de lijst Eruit en de regel zeggen hetzelfde; een test vergelijkt ze.
+  - **Erin vóór Eruit:** in de tabel van de wissels staat Erin voor Eruit, in het formulier, in de volgorde van de fouten en in de teksten die de volgorde noemen.
+  - **Hints:** bij Eruit en bij Rol staat een korte tekst boven de tabel die zegt wat de lijst toont, gekoppeld met `aria-describedby`.
+    `Field` laat daarvoor een beschrijving staan die het veld zelf meebrengt, voor de hint en de fout van het veld.
+    Een schermlezer hoort een lijst die verandert niet apart: de keuzes zijn de opties van het veld, en de bestaande regel met `role="status"` blijft alleen voor wat al werd gemeld.
+- **Waarom:** de eigenaar vult het verslag in zoals de wedstrijd verliep, en een lijst met wie niet kan, kost tijd en geeft fouten pas na het opslaan.
+  Op rugnummer zoeken sluit aan bij de selectie.
+- **Alternatieven:** sorteren op alleen naam (past niet bij hoe de selectie bekend is); kaarten niet meetellen bij Eruit (kleiner, maar dan blijft een speler in de lijst die niet meer op het veld kan staan); de keuze verbergen zonder de server te laten weigeren (zonder JavaScript zou dan niets meer worden gecontroleerd).

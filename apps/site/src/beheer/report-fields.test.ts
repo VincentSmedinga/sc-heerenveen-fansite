@@ -12,9 +12,11 @@ import {
   noFormation,
   otherFormation,
   playerChoices,
+  playersOnPitch,
   readReportButton,
   readReportValues,
   type ReportValues,
+  roleChoicesForRow,
   type Row,
   squadChoicesForRow,
 } from './report-fields'
@@ -337,5 +339,164 @@ describe('the formation in the form', () => {
       'formatie-zij',
       'formatie-zij-eigen',
     ])
+  })
+})
+
+describe('the order of the lists of players', () => {
+  const named = (naam: string, rugnummer = ''): Row => ({ ...emptyRow('speler'), keuze: 'andere', naam, rugnummer })
+
+  it('puts the shirt numbers first, then the names, and the players without a number last by name', () => {
+    const rows = [named('Zoon', '9'), named('Berg'), named('Aap', '9'), named('Dal', '2'), named('Aal')]
+    const list = playerChoices(values({ wij: { ...emptySide(), speler: rows } }), 'wij', [])
+
+    expect(list.map((player) => player.label)).toEqual(['2 Dal', '9 Aap', '9 Zoon', 'Aal', 'Berg'])
+  })
+
+  it('keeps the value of a choice the number of its row, with and without the side', () => {
+    const rows = [named('Zoon', '9'), named('Dal', '2')]
+    const start = values({ wij: { ...emptySide(), speler: rows } })
+
+    expect(playerChoices(start, 'wij', []).map((player) => player.value)).toEqual(['2', '1'])
+    expect(playerChoices(start, 'wij', [], true).map((player) => player.value)).toEqual(['wij-2', 'wij-1'])
+  })
+})
+
+describe('the role of a new row of the players', () => {
+  it('is Basis up to row 11 and Bank from row 12, for each team', () => {
+    expect(emptyRow('speler', 10).rol).toBe('basis')
+    expect(emptyRow('speler', 11).rol).toBe('bank')
+
+    for (const side of ['wij', 'zij'] as const) {
+      const eleven = Array.from({ length: 11 }, () => emptyRow('speler'))
+      const start = values({ [side]: { ...emptySide(), speler: eleven } })
+      const next = applyReportButton(start, { kind: 'add', row: 'speler', side })
+
+      expect(next.values[side].speler[11]?.rol).toBe('bank')
+    }
+  })
+
+  it('leaves the role of a row that is chosen or stored as it is', () => {
+    const rows = [...Array.from({ length: 11 }, () => emptyRow('speler')), { ...emptyRow('speler', 11), rol: 'basis' }]
+    const next = applyReportButton(values({ wij: { ...emptySide(), speler: rows } }), {
+      kind: 'add',
+      row: 'speler',
+      side: 'wij',
+    })
+
+    expect(next.values.wij.speler[11]?.rol).toBe('basis')
+    expect(next.values.wij.speler[12]?.rol).toBe('bank')
+  })
+
+  it('counts an empty row of the bench as untouched, and gives it the role of its new place after a removal', () => {
+    expect(isUntouchedRow('speler', emptyRow('speler', 11), 11)).toBe(true)
+    expect(isUntouchedRow('speler', emptyRow('speler', 11), 3)).toBe(false)
+
+    const rows = Array.from({ length: 12 }, (_row, index) => emptyRow('speler', index))
+    const next = applyReportButton(values({ wij: { ...emptySide(), speler: rows } }), {
+      kind: 'remove',
+      number: 3,
+      row: 'speler',
+      side: 'wij',
+    })
+
+    expect(next.values.wij.speler.map((row) => row.rol)).toEqual(Array(11).fill('basis'))
+  })
+})
+
+describe('the roles of a row', () => {
+  const rows = (...roles: string[]): ReportValues =>
+    values({ wij: { ...emptySide(), speler: roles.map((rol) => ({ ...emptyRow('speler'), rol })) } })
+
+  it('leaves out the captain when another player of the team has him', () => {
+    const start = rows('basis', 'aanvoerder', 'bank')
+
+    expect(roleChoicesForRow(start, 'wij', 0).map((role) => role.value)).toEqual(['basis', 'bank'])
+    expect(roleChoicesForRow(start, 'wij', 2).map((role) => role.value)).toEqual(['basis', 'bank'])
+  })
+
+  it('keeps the captain for the player who has him, and gives it back when he gives it up', () => {
+    expect(roleChoicesForRow(rows('basis', 'aanvoerder'), 'wij', 1).map((role) => role.value)).toEqual([
+      'basis',
+      'aanvoerder',
+      'bank',
+    ])
+    expect(roleChoicesForRow(rows('basis', 'basis'), 'wij', 0)).toHaveLength(3)
+  })
+
+  it('looks at one team only', () => {
+    const start = { ...rows('basis'), zij: { ...emptySide(), speler: [{ ...emptyRow('speler'), rol: 'aanvoerder' }] } }
+
+    expect(roleChoicesForRow(start, 'wij', 0)).toHaveLength(3)
+  })
+})
+
+describe('playersOnPitch', () => {
+  const lineUp = [
+    ...Array.from({ length: 11 }, () => ({ ...emptyRow('speler'), keuze: 'andere', naam: 'A' })),
+    { ...emptyRow('speler'), keuze: 'andere', naam: 'B', rol: 'bank' },
+    { ...emptyRow('speler'), keuze: 'andere', naam: 'C', rol: 'bank' },
+  ]
+  const at = (minuut: string, extra = '', more: Partial<Row> = {}): Row => ({
+    ...emptyRow('wissel'),
+    extra,
+    minuut,
+    ...more,
+  })
+  const start = (wissel: Row[], kaart: Row[] = []) => values({ wij: { ...emptySide(), kaart, speler: lineUp, wissel } })
+
+  it('is the line-up before any substitution, with the captain and without the bench', () => {
+    const rows = lineUp.map((row, index) => (index === 0 ? { ...row, rol: 'aanvoerder' } : row))
+    const pitch = playersOnPitch(values({ wij: { ...emptySide(), speler: rows, wissel: [at('60')] } }), 'wij', 0)
+
+    expect([...pitch]).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+  })
+
+  it('adds who came on and takes away who went off in an earlier substitution', () => {
+    const pitch = playersOnPitch(start([at('30', '', { erin: '12', eruit: '11' }), at('60')]), 'wij', 1)
+
+    expect(pitch.has('12')).toBe(true)
+    expect(pitch.has('11')).toBe(false)
+  })
+
+  it('goes by the clock, not by the order of the rows', () => {
+    const rows = [at('60'), at('30', '', { erin: '12', eruit: '11' })]
+
+    expect(playersOnPitch(start(rows), 'wij', 0).has('12')).toBe(true)
+    expect(playersOnPitch(start(rows), 'wij', 1).has('12')).toBe(false)
+  })
+
+  it('goes by the order of the rows at the same moment, and when the minute is still empty', () => {
+    const same = [at('45', '1', { erin: '12', eruit: '10' }), at('45', '1')]
+
+    expect(playersOnPitch(start(same), 'wij', 1).has('10')).toBe(false)
+    expect(playersOnPitch(start(same), 'wij', 0).has('10')).toBe(true)
+
+    const empty = [at('', '', { erin: '12', eruit: '10' }), at('')]
+
+    expect(playersOnPitch(start(empty), 'wij', 1).has('10')).toBe(false)
+    expect(playersOnPitch(start(empty), 'wij', 0).has('10')).toBe(true)
+  })
+
+  it('takes away a player with a red or a yellow-red card before the moment, and not one with a yellow card', () => {
+    const card = (soort: string, minuut: string, speler: string): Row => ({
+      ...emptyRow('kaart'),
+      minuut,
+      soort,
+      speler,
+    })
+    const cards = [
+      card('rood', '20', '3'),
+      card('geel-rood', '20', '4'),
+      card('geel', '20', '5'),
+      card('rood', '70', '6'),
+      card('rood', '', '7'),
+    ]
+    const pitch = playersOnPitch(start([at('60')], cards), 'wij', 0)
+
+    expect(pitch.has('3')).toBe(false)
+    expect(pitch.has('4')).toBe(false)
+    expect(pitch.has('5')).toBe(true)
+    expect(pitch.has('6')).toBe(true)
+    expect(pitch.has('7')).toBe(true)
   })
 })

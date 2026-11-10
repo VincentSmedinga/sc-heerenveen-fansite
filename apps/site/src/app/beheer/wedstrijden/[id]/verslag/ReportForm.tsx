@@ -34,12 +34,14 @@ import {
   playerChoices,
   playerLabel,
   playerOf,
+  playersOnPitch,
   readReportValues,
   removeButtonValue,
   type ReportFormState,
   type ReportSquadPlayer,
   type ReportValues,
   roleChoices,
+  roleChoicesForRow,
   type Row,
   rowFieldId,
   type RowKind,
@@ -54,6 +56,10 @@ import { errorOrder } from '#src/beheer/report-form'
 import { type ChangedRow, changedRowOf, type ReportPreviewMatch } from '#src/beheer/report-preview'
 
 const summaryId = 'fouten'
+
+/** The `id` of the hint under the list Rol, and under the list Eruit, of a team. */
+const roleHintId = (side: Side) => `rol-hint-${side}`
+const outHintId = (side: Side) => `eruit-hint-${side}`
 
 /** The `id` of the form, which the field and button in the sidebar name in their `form`. */
 const formId = 'verslag'
@@ -170,9 +176,15 @@ export function ReportFields() {
     row: Row,
     options: ReactNode,
     width: 'default' | 'natural' = 'default',
+    describedBy?: string,
   ) => ({
     control: (
-      <Select defaultValue={row[field] ?? ''} name={rowFieldId(kind, side, number, field)} width={width}>
+      <Select
+        aria-describedby={describedBy}
+        defaultValue={row[field] ?? ''}
+        name={rowFieldId(kind, side, number, field)}
+        width={width}
+      >
         {options}
       </Select>
     ),
@@ -308,47 +320,63 @@ export function ReportFields() {
         own
           ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie, of als de speler geen rugnummer had.'
           : 'Schrijf de naam van de speler zoals de bron hem schrijft. Het rugnummer mag leeg blijven. Een kant die niet af is, mag leeg blijven.',
-        table(
-          'speler',
-          side,
-          [
-            { hideOptional: true, name: 'Rugnummer', required: false, width: 'narrow' },
-            ...(own
-              ? [{ name: 'Speler' }, { hideOptional: true, name: 'Naam van de andere speler', required: false }]
-              : [{ name: 'Naam' }]),
-            { name: 'Rol', width: 'natural' as const },
-          ],
-          (row, number) => [
-            text('speler', side, number, 'rugnummer', row, true),
-            ...(own
-              ? [
-                  choice(
-                    'speler',
-                    side,
-                    number,
-                    'keuze',
-                    row,
-                    <>
-                      <Select.Option value="">Kies een speler</Select.Option>
-                      {squadChoicesForRow(current, number - 1, choices.squad).map((player) => (
-                        <Select.Option key={player.id} value={String(player.id)}>
-                          {playerLabel(player)}
-                        </Select.Option>
-                      ))}
-                      <Select.Option value={otherPlayer}>Andere speler</Select.Option>
-                    </>,
-                  ),
-                  { ...text('speler', side, number, 'naam', row), hidden: row.keuze !== otherPlayer },
-                ]
-              : [text('speler', side, number, 'naam', row)]),
-            choice('speler', side, number, 'rol', row, fixed(roleChoices), 'natural'),
-          ],
-        ),
+        <>
+          <Text appearance="meta" id={roleHintId(side)}>
+            Een team heeft één aanvoerder. Zodra een speler Basis en aanvoerder heeft, staat die keuze niet meer bij de
+            anderen van {club(side)}.
+          </Text>
+          {table(
+            'speler',
+            side,
+            [
+              { hideOptional: true, name: 'Rugnummer', required: false, width: 'narrow' },
+              ...(own
+                ? [{ name: 'Speler' }, { hideOptional: true, name: 'Naam van de andere speler', required: false }]
+                : [{ name: 'Naam' }]),
+              { name: 'Rol', width: 'natural' as const },
+            ],
+            (row, number) => [
+              text('speler', side, number, 'rugnummer', row, true),
+              ...(own
+                ? [
+                    choice(
+                      'speler',
+                      side,
+                      number,
+                      'keuze',
+                      row,
+                      <>
+                        <Select.Option value="">Kies een speler</Select.Option>
+                        {squadChoicesForRow(current, number - 1, choices.squad).map((player) => (
+                          <Select.Option key={player.id} value={String(player.id)}>
+                            {playerLabel(player)}
+                          </Select.Option>
+                        ))}
+                        <Select.Option value={otherPlayer}>Andere speler</Select.Option>
+                      </>,
+                    ),
+                    { ...text('speler', side, number, 'naam', row), hidden: row.keuze !== otherPlayer },
+                  ]
+                : [text('speler', side, number, 'naam', row)]),
+              choice(
+                'speler',
+                side,
+                number,
+                'rol',
+                row,
+                // Without JavaScript every role is there: the server refuses a second captain.
+                fixed(live ? roleChoicesForRow(current, side, number - 1) : roleChoices),
+                'natural',
+                roleHintId(side),
+              ),
+            ],
+          )}
+        </>,
       ),
       card(
         'wissel',
         side,
-        'Bij 45+1 vul je 45 in als minuut en 1 bij blessuretijd. Wie eruit gaat, staat op het veld; wie erin komt, zit op de bank: zet hem eerst bij Opstelling en bank met de rol Bank.',
+        'Bij 45+1 vul je 45 in als minuut en 1 bij blessuretijd. Wie erin komt, zit op de bank: zet hem eerst bij Opstelling en bank met de rol Bank. Wie eruit gaat, staat op het veld.',
         <>
           {bench.length === 0 && current[side].wissel.length > 0 ? (
             <Text>
@@ -356,23 +384,49 @@ export function ReportFields() {
               <Link href={`#${listId('speler', side)}`}>Zet eerst een speler op de bank</Link>, bij Opstelling en bank.
             </Text>
           ) : null}
-          {table('wissel', side, [...minutes, { line: 2, name: 'Eruit' }, { line: 2, name: 'Erin' }], (row, number) => [
-            ...clock('wissel', side, number, row),
-            choice('wissel', side, number, 'eruit', row, playerOptions(mine)),
-            choice(
-              'wissel',
-              side,
-              number,
-              'erin',
-              row,
-              playerOptions(
-                bench,
-                row.erin,
-                mine.find((player) => player.value === row.erin)?.label,
-                bench.length === 0 ? 'Niemand op de bank' : undefined,
+          <Text appearance="meta" id={outHintId(side)}>
+            {live
+              ? 'Eruit: alleen spelers die op dat moment op het veld staan.'
+              : 'Eruit: alle spelers staan in de lijst. Bij het opslaan controleert de site of de speler op het veld stond.'}
+          </Text>
+          {table('wissel', side, [...minutes, { line: 2, name: 'Erin' }, { line: 2, name: 'Eruit' }], (row, number) => {
+            // With JavaScript the list holds who is on the pitch at the moment of this row. The
+            // player the row has now stays, with a note, so nothing disappears quietly.
+            const pitch = live ? playersOnPitch(current, side, number - 1) : undefined
+            const leaving = pitch === undefined ? mine : mine.filter((player) => pitch.has(player.value))
+            const chosen = mine.find((player) => player.value === row.eruit)
+
+            return [
+              ...clock('wissel', side, number, row),
+              choice(
+                'wissel',
+                side,
+                number,
+                'erin',
+                row,
+                playerOptions(
+                  bench,
+                  row.erin,
+                  mine.find((player) => player.value === row.erin)?.label,
+                  bench.length === 0 ? 'Niemand op de bank' : undefined,
+                ),
               ),
-            ),
-          ])}
+              choice(
+                'wissel',
+                side,
+                number,
+                'eruit',
+                row,
+                playerOptions(
+                  leaving,
+                  row.eruit,
+                  chosen === undefined ? undefined : `${chosen.label} (staat dan niet op het veld)`,
+                ),
+                'default',
+                outHintId(side),
+              ),
+            ]
+          })}
         </>,
       ),
       card(

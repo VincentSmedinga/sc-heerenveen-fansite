@@ -27,7 +27,7 @@ export const rowFields = {
   serie: ['speler', 'uitkomst'],
   speler: ['rugnummer', 'keuze', 'naam', 'rol'],
   strafschop: ['minuut', 'extra', 'soort', 'speler'],
-  wissel: ['minuut', 'extra', 'eruit', 'erin'],
+  wissel: ['minuut', 'extra', 'erin', 'eruit'],
 } as const satisfies Record<RowKind, readonly string[]>
 
 /** The name of a field of any row. */
@@ -152,12 +152,23 @@ export function addButtonValue(kind: RowKind, side: Side) {
   return `${kind}-${side}-toevoegen`
 }
 
-/** A row as a new one has it. A new player is in the line-up, a new goal is a normal goal. */
-export function emptyRow(kind: RowKind): Row {
+/** The number of places in the line-up: a player from the twelfth row on is on the bench. */
+export const lineUpSize = 11
+
+/** The role a new row of the players has: from row 12 on (`index` 11) it is the bench. */
+export function defaultRole(index = 0) {
+  return index >= lineUpSize ? 'bank' : 'basis'
+}
+
+/**
+ * A row as a new one has it. A new player is in the line-up, or on the bench from row 12 on
+ * (the `index` of the row, from 0), and a new goal is a normal goal.
+ */
+export function emptyRow(kind: RowKind, index = 0): Row {
   const row: Row = Object.fromEntries(rowFields[kind].map((field) => [field, ''] as const))
 
   if (kind === 'speler') {
-    row.rol = 'basis'
+    row.rol = defaultRole(index)
   } else if (kind === 'doelpunt') {
     row.soort = 'gewoon'
   } else if (kind === 'kaart') {
@@ -190,8 +201,8 @@ export function formationValueOf(stored: null | string): FormationValue {
 }
 
 /** Whether nothing was filled in for a row: every field is as a new row has it. */
-export function isUntouchedRow(kind: RowKind, row: Row): boolean {
-  const empty = emptyRow(kind)
+export function isUntouchedRow(kind: RowKind, row: Row, index = 0): boolean {
+  const empty = emptyRow(kind, index)
 
   return (rowFields[kind] as readonly FieldName[]).every((field) => (row[field] ?? '') === empty[field])
 }
@@ -234,12 +245,21 @@ export function applyReportButton(
   const { row, side } = button
 
   if (button.kind === 'add') {
-    next[side][row] = [...values[side][row], emptyRow(row)]
+    next[side][row] = [...values[side][row], emptyRow(row, values[side][row].length)]
 
     return { focus: rowFieldId(row, side, next[side][row].length, rowFields[row][0]), values: next }
   }
 
   next[side][row] = values[side][row].filter((_row, index) => index + 1 !== button.number)
+
+  if (row === 'speler') {
+    // A row nobody touched takes the role of its new place.
+    next[side][row] = next[side][row].map((other, index) => {
+      const before = index >= button.number - 1 ? index + 1 : index
+
+      return isUntouchedRow('speler', other, before) ? { ...other, rol: defaultRole(index) } : other
+    })
+  }
 
   if (row === 'speler') {
     const moved = (value: string) => {
@@ -309,8 +329,10 @@ export function goalsOf(values: ReportValues, side: Side) {
 
 /**
  * The players of a side as the choices of a list: the value is the number of his row, the text
- * is his number and name. Rows without a name are left out. With `bench` only the players on
- * the bench are in the list, which is where a substitute comes from.
+ * is his number and name. Rows without a name are left out. The list is in the order of the
+ * shirt numbers, then the names, and the players without a number come last, by name: only the
+ * order changes, never the value. With `bench` only the players on the bench are in the list,
+ * which is where a substitute comes from.
  */
 export function playerChoices(
   values: ReportValues,
@@ -319,13 +341,19 @@ export function playerChoices(
   prefix = false,
   bench = false,
 ): { label: string; value: string }[] {
-  return values[side].speler.flatMap((row, index) => {
-    const player = playerOf(row, side, squad)
+  return values[side].speler
+    .flatMap((row, index) => {
+      const player = playerOf(row, side, squad)
 
-    return player === undefined || (bench && row.rol !== 'bank')
-      ? []
-      : [{ label: playerLabel(player), value: prefix ? `${side}-${index + 1}` : String(index + 1) }]
-  })
+      return player === undefined || (bench && row.rol !== 'bank')
+        ? []
+        : [{ index, label: playerLabel(player), name: player.name, number: player.shirtNumber }]
+    })
+    .toSorted(
+      (a, b) =>
+        (a.number ?? Infinity) - (b.number ?? Infinity) || a.name.localeCompare(b.name, 'nl') || a.index - b.index,
+    )
+    .map(({ index, label }) => ({ label, value: prefix ? `${side}-${index + 1}` : String(index + 1) }))
 }
 
 /** The text of a player in a list: `9 Naam`, or the name alone when he has no number. */
@@ -347,6 +375,60 @@ export function playerOf(
   const typed = /^\d{1,2}$/u.test(row.rugnummer ?? '') ? Number(row.rugnummer) : null
 
   return name === '' ? undefined : { name, shirtNumber: typed ?? chosen?.shirtNumber ?? null }
+}
+
+/**
+ * The rows of the players of a side that are on the pitch when substitution `index` (from 0)
+ * takes place: the line-up (Basis and Basis en aanvoerder), plus who came on in an earlier
+ * substitution, minus who went off in one and who has a red or a yellow-red card by then. This
+ * is the same play as `play` in `@fansite/shared/match-report`: the clock decides, a tie goes
+ * in the order of the rows with the substitutions first, and a row without a minute comes after
+ * the others. Cards without a minute leave nobody off.
+ */
+export function playersOnPitch(values: ReportValues, side: Side, index: number): Set<string> {
+  const rows = values[side]
+  const onPitch = new Set(
+    rows.speler.flatMap((row, place) => (row.rol === 'basis' || row.rol === 'aanvoerder' ? [String(place + 1)] : [])),
+  )
+  const own = rows.wissel[index]
+
+  if (own === undefined) {
+    return onPitch
+  }
+
+  type Step = { at: number; kind: 0 | 1; order: number; row: Row }
+
+  const before = (step: Step) => {
+    const at = clockOfRow(own)
+
+    return step.at !== at ? step.at < at : step.kind !== 0 ? false : step.order < index
+  }
+  const steps: Step[] = [
+    ...rows.wissel.flatMap((row, order) =>
+      order === index ? [] : [{ at: clockOfRow(row), kind: 0 as const, order, row }],
+    ),
+    ...rows.kaart.flatMap((row, order) =>
+      (row.soort === 'rood' || row.soort === 'geel-rood') && Number.isFinite(clockOfRow(row))
+        ? [{ at: clockOfRow(row), kind: 1 as const, order, row }]
+        : [],
+    ),
+  ]
+    .filter(before)
+    .toSorted((a, b) => (a.at === b.at ? a.kind - b.kind || a.order - b.order : a.at - b.at))
+
+  for (const { kind, row } of steps) {
+    if (kind === 1) {
+      onPitch.delete(row.speler ?? '')
+    } else {
+      onPitch.delete(row.eruit ?? '')
+
+      if ((row.erin ?? '') !== '') {
+        onPitch.add(row.erin ?? '')
+      }
+    }
+  }
+
+  return onPitch
 }
 
 /** Which button of the form was pressed: save, or add or remove a row. */
@@ -419,6 +501,17 @@ export function readReportValues(formData: FormData): ReportValues {
   }
 }
 
+/**
+ * The roles a row of the players can choose. A team has one captain: once another row of the
+ * side has "Basis en aanvoerder", that choice is left out for this row. The row that has it
+ * keeps it, and is given it back to the others when he gives it up.
+ */
+export function roleChoicesForRow(values: ReportValues, side: Side, index: number) {
+  const taken = values[side].speler.some((row, other) => other !== index && row.rol === 'aanvoerder')
+
+  return roleChoices.filter((role) => !(taken && role.value === 'aanvoerder'))
+}
+
 /** The sides in words. */
 export function sideName(side: Side, opponent: string) {
   return side === 'wij' ? 'sc Heerenveen' : opponent
@@ -449,4 +542,12 @@ export function squadChoicesForRow(
   )
 
   return squad.filter((player) => !taken.has(String(player.id)) || String(player.id) === own?.keuze)
+}
+
+/** The place on the clock of a row: minute and added time, or `Infinity` with no minute. */
+function clockOfRow(row: Row) {
+  const minute = /^\d{1,3}$/u.test(row.minuut ?? '') ? Number(row.minuut) : Infinity
+  const extra = /^\d{1,2}$/u.test(row.extra ?? '') ? Number(row.extra) : 0
+
+  return minute + extra / 100
 }

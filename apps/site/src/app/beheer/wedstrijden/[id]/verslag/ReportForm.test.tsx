@@ -505,3 +505,158 @@ describe('the shoot-out in the form of a report', () => {
     )
   })
 })
+
+describe('the choices of the substitutions and the roles in the form of a report', () => {
+  const card = (soort: string, minuut: string, speler: string): Row => ({ ...emptyRow('kaart'), minuut, soort, speler })
+  const moment = (minuut: string, fields: Row = {}): Row => ({ ...emptyRow('wissel'), minuut, ...fields })
+  const stateOf = (wij: Partial<ReportValues['wij']>, speler = values.wij.speler): ReportFormState => ({
+    ...initial,
+    values: { ...values, wij: { ...values.wij, speler, ...wij } },
+  })
+  const choices = {
+    matchHref: '/beheer/wedstrijden/7',
+    opponent: 'Testclub',
+    series: null,
+    showDelay: 'binnen vijf minuten',
+    squad,
+  }
+  const showState = (state: ReportFormState) =>
+    render(
+      <ReportFormProvider action={() => Promise.resolve(state)} choices={choices} initial={state} title="Titel">
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const labelsOf = (id: string) => [...select(id).options].map((option) => option.text)
+
+  it('has Erin before Eruit in the table of the substitutions', () => {
+    showState(stateOf({ wissel: [moment('60')] }))
+
+    expect(
+      select('wissel-wij-1-erin').compareDocumentPosition(select('wissel-wij-1-eruit')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('lists in Eruit only who is on the pitch at that moment: a substitution and a red card change it', () => {
+    const speler = [row('1'), row('2'), row('3'), row('4', 'bank')]
+
+    showState(
+      stateOf(
+        {
+          kaart: [card('rood', '20', '2')],
+          wissel: [moment('30', { erin: '4', eruit: '1' }), moment('60')],
+        },
+        speler,
+      ),
+    )
+
+    expect(optionsOf('wissel-wij-1-eruit')).toEqual(['', '1', '3'])
+    expect(optionsOf('wissel-wij-2-eruit')).toEqual(['', '3', '4'])
+  })
+
+  it('leaves the list Eruit as it is while the minute is empty, in the order of the rows', () => {
+    showState(
+      stateOf({ wissel: [moment('', { erin: '3', eruit: '1' }), moment('')] }, [row('1'), row('2'), row('3', 'bank')]),
+    )
+
+    expect(optionsOf('wissel-wij-1-eruit')).toEqual(['', '1', '2'])
+    expect(optionsOf('wissel-wij-2-eruit')).toEqual(['', '2', '3'])
+  })
+
+  it('keeps the player the row has, with a note, when he is not on the pitch', () => {
+    showState(stateOf({ wissel: [moment('60', { eruit: '3' })] }, [row('1'), row('2'), row('3', 'bank')]))
+
+    expect(optionsOf('wissel-wij-1-eruit')).toEqual(['', '1', '2', '3'])
+    expect(labelsOf('wissel-wij-1-eruit').at(-1)).toBe('3 Speler 3 (staat dan niet op het veld)')
+  })
+
+  it('changes the list Eruit while the editor types the minute', () => {
+    showState(
+      stateOf({ wissel: [moment('60', { erin: '3', eruit: '1' }), moment('')] }, [
+        row('1'),
+        row('2'),
+        row('4', 'bank'),
+      ]),
+    )
+
+    expect(optionsOf('wissel-wij-2-eruit')).toEqual(['', '2', '3'])
+    fireEvent.change(
+      select('wissel-wij-1-erin').ownerDocument.getElementById('wissel-wij-2-minuut') as HTMLInputElement,
+      {
+        target: { value: '50' },
+      },
+    )
+
+    expect(optionsOf('wissel-wij-2-eruit')).toEqual(['', '1', '2'])
+  })
+
+  it('shows every player in Eruit and every role without JavaScript, where the server does the checking', () => {
+    const html = renderToStaticMarkup(
+      <ReportFormProvider
+        action={() => Promise.resolve(initial)}
+        choices={choices}
+        initial={stateOf({ wissel: [moment('60', { erin: '3' })] }, [
+          row('1'),
+          row('2', 'aanvoerder'),
+          row('3', 'bank'),
+        ])}
+        title="Titel"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+    const eruit = /<select[^>]*name="wissel-wij-1-eruit"[^>]*>(.*?)<\/select>/u.exec(html)?.[1] ?? ''
+    const role = /<select[^>]*name="speler-wij-1-rol"[^>]*>(.*?)<\/select>/u.exec(html)?.[1] ?? ''
+
+    expect(eruit.match(/<option/gu)).toHaveLength(4)
+    expect(role).toContain('value="aanvoerder"')
+  })
+
+  it('takes the captain out of the list Rol of the other players, and gives it back when he gives it up', () => {
+    showState(stateOf({}, [row('1'), row('2', 'aanvoerder'), row('3', 'bank')]))
+
+    expect(optionsOf('speler-wij-1-rol')).toEqual(['basis', 'bank'])
+    expect(optionsOf('speler-wij-2-rol')).toEqual(['basis', 'aanvoerder', 'bank'])
+
+    choose('speler-wij-2-rol', 'basis')
+
+    expect(optionsOf('speler-wij-1-rol')).toEqual(['basis', 'aanvoerder', 'bank'])
+  })
+
+  it('puts the lists of players in the order of the shirt numbers and the names', () => {
+    showState(
+      stateOf({ wissel: [moment('60')] }, [
+        { ...emptyRow('speler'), keuze: 'andere', naam: 'Zonder', rugnummer: '' },
+        { ...emptyRow('speler'), keuze: 'andere', naam: 'Negen', rugnummer: '9' },
+        { ...emptyRow('speler'), keuze: 'andere', naam: 'Twee', rugnummer: '2' },
+      ]),
+    )
+
+    expect(labelsOf('wissel-wij-1-eruit')).toEqual(['Kies een speler', '2 Twee', '9 Negen', 'Zonder'])
+  })
+
+  it('tells what Eruit and Rol show, tied to the lists with aria-describedby', () => {
+    showState(stateOf({ wissel: [moment('60')] }))
+
+    for (const [id, hint] of [
+      ['wissel-wij-1-eruit', 'eruit-hint-wij'],
+      ['speler-wij-1-rol', 'rol-hint-wij'],
+    ] as const) {
+      expect(select(id).getAttribute('aria-describedby')).toBe(hint)
+      expect(document.getElementById(hint)?.textContent).not.toBe('')
+    }
+
+    expect(document.getElementById('eruit-hint-wij')?.textContent).toContain('op dat moment op het veld')
+  })
+
+  it('keeps the error of a field next to the hint it is tied to', () => {
+    showState({
+      ...stateOf({ wissel: [moment('60', { eruit: '3' })] }, [row('1'), row('2'), row('3', 'bank')]),
+      errors: { 'wissel-wij-1-eruit': 'Speler 3 staat dan niet op het veld.' },
+    })
+
+    expect(select('wissel-wij-1-eruit').getAttribute('aria-describedby')).toBe(
+      'eruit-hint-wij wissel-wij-1-eruit-error',
+    )
+  })
+})

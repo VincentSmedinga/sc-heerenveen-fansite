@@ -180,6 +180,15 @@ describe('submitReport', () => {
     expect(await reports()).toMatchObject([{ status: 'bezig' }])
   })
 
+  it('takes a report back to bezig when a player goes off who is not on the pitch, as a form without JavaScript sends it', async () => {
+    await submit(matchId, report())
+
+    const wissel = [{ ...emptyRow('wissel'), erin: '13', eruit: '12', minuut: '60' }]
+
+    expect(await submit(matchId, report({ wij: { wissel } }))).toEqual({ redirect: reportAddress('nog-niet-klaar') })
+    expect(await reports()).toMatchObject([{ status: 'bezig' }])
+  })
+
   it('does not store a report that the database could not hold, and gives the form back with its values and errors', async () => {
     const rows = report().wij.speler.map((row, index) => (index === 1 ? { ...row, rugnummer: '1' } : row))
     const answer = (await submit(matchId, { ...report({ wij: { speler: rows } }), status: 'bezig' })) as ReportFormState

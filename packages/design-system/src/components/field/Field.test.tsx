@@ -137,6 +137,19 @@ describe('Field', () => {
     ).toBeTruthy()
   })
 
+  it('keeps a description of the control itself, before the hint and the error', () => {
+    render(
+      <>
+        <p id="gedeeld">Gedeelde uitleg</p>
+        <Field error="Fout hier." hint="Eigen hint" id="veld" label="Veld">
+          <Input aria-describedby="gedeeld" />
+        </Field>
+      </>,
+    )
+
+    expect(screen.getByRole('textbox').getAttribute('aria-describedby')).toBe('gedeeld veld-hint veld-error')
+  })
+
   it('puts the error in text, so a colour is not the only sign', () => {
     render(
       <Field error="Vul je naam in." id="naam" label="Naam">
