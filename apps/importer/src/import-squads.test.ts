@@ -430,6 +430,30 @@ describe('importPastSquad', () => {
     ).toMatchObject([{ wikipediaPage: 'Jan Harm Schippers' }])
   })
 
+  it('renames a row that has the other spelling still, when the list writes the other title too', async () => {
+    const page = twoLists.replaceAll('Marten de Roon', 'Jan-Harm Schippers')
+    const server = await serve({ [squadPageTitle(season)]: page })
+
+    await importAt(server, season)
+
+    // A row of before the owner chose: the name and the page are the other spelling.
+    const [row] = (await storedPlayers()).filter((one) => one.name === 'Jan Harm Schippers')
+
+    await database.db
+      .update(players)
+      .set({ name: 'Jan-Harm Schippers', wikipediaPage: 'Jan-Harm Schippers' })
+      .where(eq(players.id, row!.id))
+
+    const count = (await storedPlayers()).length
+    const again = await importAt(server, season)
+
+    expect(again).toMatchObject({ kind: 'imported', players: { added: 0 } })
+    expect(await storedPlayers()).toHaveLength(count)
+    expect((await storedPlayers()).filter((one) => one.name.includes('Schippers'))).toMatchObject([
+      { id: row!.id, name: 'Jan Harm Schippers', wikipediaPage: 'Jan Harm Schippers' },
+    ])
+  })
+
   it('fills in a country that is empty, and keeps one that is there when the list is not better', async () => {
     const server = await serve({ [squadPageTitle(season)]: twoLists })
 

@@ -26,7 +26,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
-import { scorersByPerson } from './import-squad.ts'
+import { scorersByPerson, storeChosenSpellings } from './import-squad.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
@@ -256,6 +256,8 @@ export async function importPastSquad(
       aliases: aliasMap(personTitleAliases),
       redirects: personLookup.redirects,
     })
+    await storeChosenSpellings(transaction, season)
+
     const counts = await storePlayers(transaction, season, merged.players, personBook)
 
     for (const { title, version } of pagesRead) {

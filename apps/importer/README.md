@@ -1062,6 +1062,7 @@ Daarvoor vraagt de import elke titel die nog niet in `person_pages` staat één 
   Alles wat naar de persoon wijst gaat mee, en twee rijen van de persoon in `players` van één seizoen worden één rij (`mergePersons` in `@fansite/db/person-merge`).
   De run meldt het één keer, als waarschuwing: `Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'`.
   Schrijft een tabel van de selectie de andere titel nog, dan zet de import de pagina en de naam om in de schrijfwijze die blijft (`chosenSpelling`), zodat er geen tweede rij komt.
+  Een rij van het seizoen die de andere schrijfwijze nog heeft, krijgt eerst de schrijfwijze die blijft (`storeChosenSpellings`).
 - Een doelpunt in een seizoen dat voorbij is, krijgt zijn `person_id` zonder dat een wijziging wacht: een verschil alleen in de koppelingen telt als een aanvulling.
 
 Het logboek noemt het aantal titels dat is opgevraagd, alleen als dat meer dan nul is:

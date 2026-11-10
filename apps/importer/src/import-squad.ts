@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
+import { mergePlayerInto } from '@fansite/db/person-merge'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { comparePlayerGoals } from '@fansite/db/player-stat-differences'
 import { players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
@@ -16,7 +17,7 @@ import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
-import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
+import { nameKey, readSquad, searchTerm, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { describeChange, storeCompleteness } from './store-completeness.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -173,6 +174,63 @@ export function scorersByPerson(rows: readonly Player[]): Map<number, Player> {
 }
 
 /**
+ * Gives the rows of a season that still have a spelling the owner replaced the one that stays
+ * (`chosenSpelling`), before the squad is stored: the table is read in that spelling, so a row
+ * under the other one would not be found and the player would get a second row. A row keeps
+ * its `id`; when the season has a row in the spelling that stays already, the other is merged
+ * into it (`mergePlayerInto`). The search term follows when it was the surname of the old
+ * name. Returns how many rows changed: a second run finds none. Use the transaction.
+ */
+export async function storeChosenSpellings(
+  db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
+  season: string,
+): Promise<number> {
+  const rows = await db.select().from(players).where(eq(players.season, season))
+  const gone = new Set<number>()
+  let changed = 0
+
+  for (const row of rows) {
+    const chosen = chosenSpelling(row.name, row.wikipediaPage)
+
+    if (chosen.name === row.name && chosen.page === row.wikipediaPage) {
+      continue
+    }
+
+    const stays = rows.find(
+      (one) =>
+        one.id !== row.id &&
+        !gone.has(one.id) &&
+        (nameKey(one.name) === nameKey(chosen.name) ||
+          (chosen.page !== null && one.wikipediaPage !== null && nameKey(one.wikipediaPage) === nameKey(chosen.page))),
+    )
+
+    if (stays === undefined) {
+      // The surname of the old name in the new spelling (`Samardžić`), or the new surname.
+      const term =
+        chosen.name.length === row.name.length && nameKey(row.name).endsWith(nameKey(row.searchTerm))
+          ? chosen.name.slice(-row.searchTerm.length)
+          : nameKey(chosen.name).endsWith(` ${nameKey(row.searchTerm)}`)
+            ? row.searchTerm
+            : searchTerm(chosen.name)
+
+      await db
+        .update(players)
+        .set({ name: chosen.name, searchTerm: term, wikipediaPage: chosen.page })
+        .where(eq(players.id, row.id))
+      row.name = chosen.name
+      row.wikipediaPage = chosen.page
+    } else {
+      await mergePlayerInto(db, row.id, stays.id)
+      gone.add(row.id)
+    }
+
+    changed++
+  }
+
+  return changed
+}
+
+/**
  * Reads, checks and stores. A database failure throws; `importSquad` turns it into a report.
  */
 async function readAndStore(
@@ -242,6 +300,8 @@ async function readAndStore(
     if (firstRead) {
       await transaction.delete(players).where(and(eq(players.season, season), ne(players.source, 'doelpunten')))
     }
+
+    await storeChosenSpellings(transaction, season)
 
     const result = await storePlayers(transaction, season, read.players, now, personBook)
     const stats = await storeStats(transaction, season, read.players, result.ids, now)

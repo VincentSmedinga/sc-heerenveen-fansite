@@ -3680,6 +3680,10 @@
   - **Een tabel die de andere schrijfwijze nog schrijft:** de import van de selectie en van een vorige selectie zet de pagina en de naam eerst om in de schrijfwijze die blijft (`chosenSpelling`).
     Zonder dat kreeg `Jan-Harm Schippers` een tweede rij naast `Jan Harm Schippers`, met dezelfde persoon, en kwam de oude schrijfwijze terug.
     Een naam zonder link wordt ook omgezet; een naam met een link naar een ander artikel is een ander mens en blijft zoals hij is.
+  - **Een rij die de andere schrijfwijze nog heeft:** vóór het opslaan van de selectie krijgt zo'n rij van dat seizoen de schrijfwijze die blijft (`storeChosenSpellings`), en hij houdt zijn `id`.
+    Heeft het seizoen al een rij in de schrijfwijze die blijft, dan gaat de andere rij daarin op (`mergePlayerInto`).
+    Zonder dat vond de import de rij niet meer, omdat hij de tabel al in de nieuwe schrijfwijze las, en kwam er een tweede rij.
+    De zoekterm volgt de nieuwe naam: `van den Berg`, `Samardžić`.
   - **Alleen de andere schrijfwijze bestaat:** de persoon krijgt de titel die blijft en houdt zijn `id`.
     Zijn naam wordt de naam die de import uit die titel afleidt, of die van de lijst `personNames`.
   - **De spelers van de oude fansite:** de stap `spelers` zet de naam om met `oldSiteNameCorrections` en voegt de oude rij samen met de nieuwe.
