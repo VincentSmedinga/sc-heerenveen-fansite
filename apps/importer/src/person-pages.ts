@@ -17,7 +17,7 @@ import type { Fetcher } from './fetcher.ts'
 import { lookUpTitles } from './club-pages.ts'
 import { oldSiteNameCorrections } from './old-site-names.ts'
 import { fitsColumns, manualNames, nameOfTitle, personNameOf } from './person-name.ts'
-import { personNames, type PersonTitleAlias, personTitleAliases } from './person-names.ts'
+import { listedName, personNames, type PersonTitleAlias, personTitleAliases } from './person-names.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 import { printable } from './text.ts'
 
@@ -325,6 +325,48 @@ export function similarPersonsWarning(groups: readonly (readonly string[])[]): s
 }
 
 /**
+ * Gives a player whose page is the title of an entry of `personNames` the name of that entry
+ * (issue 1045): the article is `Igor Kornejev`, the owner chose `Igor Korneev`. The person has
+ * the name already, from the list, but the row of a season keeps the name of the table of
+ * Wikipedia, and the admin shows that one. A name the editors set stays. When the season has a
+ * row with the chosen name already, the two become one. A second run finds nothing to change.
+ */
+async function chooseListedNames(db: Pick<Database, 'select' | 'transaction'>): Promise<string[]> {
+  const lines: string[] = []
+  const titles = personNames.map((entry) => entry.title)
+  const rows = await db.select().from(players).where(inArray(players.wikipediaPage, titles))
+
+  for (const row of rows) {
+    const name = listedName(row.name, row.wikipediaPage)
+
+    if (name === undefined || name === row.name || row.editorsFields.includes('name')) {
+      continue
+    }
+
+    await db.transaction(async (tx) => {
+      const same = (await tx.select().from(players).where(eq(players.season, row.season))).find(
+        (one) => one.id !== row.id && (one.wikipediaPage === row.wikipediaPage || one.name === name),
+      )
+
+      if (same !== undefined) {
+        await mergePlayerInto(tx, row.id, same.id)
+        lines.push(`${row.name} (${row.season}) is merged into ${same.name}`)
+
+        return
+      }
+
+      await tx
+        .update(players)
+        .set({ name, searchTerm: renamedSearchTerm(row, name) })
+        .where(eq(players.id, row.id))
+      lines.push(`${row.name} (${row.season}) is now ${name}`)
+    })
+  }
+
+  return lines
+}
+
+/**
  * Gives a player whose page is an other title of the list the title that stays (issue 1036).
  * A scorer that Wikipedia links under a redirect (`Filip Djuričić`) already has the person of
  * the title that stays, because the person book follows the redirect, so `mergePersons` finds
@@ -341,14 +383,14 @@ async function chooseListedPlayerSpellings(
   const aliases = list.flatMap((entry) => entry.aliases)
 
   if (aliases.length === 0) {
-    return lines
+    return chooseListedNames(db)
   }
 
   const rows = await db.select().from(players).where(inArray(players.wikipediaPage, aliases))
 
   for (const { aliases: others, title } of list) {
     for (const row of rows.filter((one) => one.wikipediaPage !== null && others.includes(one.wikipediaPage))) {
-      const name = nameOfTitle(title)
+      const name = listedName(nameOfTitle(title), title) ?? nameOfTitle(title)
 
       await db.transaction(async (tx) => {
         const same = (await tx.select().from(players).where(eq(players.season, row.season))).find(
@@ -371,7 +413,7 @@ async function chooseListedPlayerSpellings(
     }
   }
 
-  return lines
+  return [...lines, ...(await chooseListedNames(db))]
 }
 
 function groupBy<Key>(rows: readonly Player[], key: (row: Player) => Key): Map<Key, Player[]> {

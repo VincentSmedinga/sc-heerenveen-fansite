@@ -9,6 +9,8 @@
 // to decide.
 // The owner decided four more on 10 November 2026 (issue 1027): Jan Harm Schippers, Radoslav
 // Samardžić, Robert van den Berg and Uğur Yıldırım. The same four are in `personTitleAliases`.
+// The same day (issue 1045) he chose Igor Korneev, Radu Gușatu, Arek Radomski and Hjalte Bo
+// Nørregaard, and Lee-Roy Echteld, the spelling of Wikipedia, instead of Leeroy.
 // A name of a player of ours comes from the old table `speler` or from a code, and goes through
 // the same corrections (`resolveOldSiteCode`), so the step `spelers` finds a player who is in
 // `players` already from another source, such as the squad of Wikipedia, and adds no other.
@@ -22,6 +24,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Ali Elkhattabi', 'Ali El Khattabi'],
   ['Andre Bergdølmo', 'André Bergdølmo'],
   ['Andwelé Slory', 'Andwélé Slory'],
+  ['Arkadiusz Radomski', 'Arek Radomski'],
   ['Arno Slot', 'Arne Slot'],
   ['Bart van den Eede', 'Bart Van Den Eede'],
   ['Bernhard Schuiteman', 'Bernard Schuiteman'],
@@ -57,11 +60,15 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Hennie Meijer', 'Henny Meijer'],
   ['Henri van der Vegt', 'Henry van der Vegt'],
   ['Heurelho da Silva Gomes', 'Heurelho Gomes'],
+  ['Hjalte Bonorregaard', 'Hjalte Bo Nørregaard'],
+  ['Hjalte Norregaard', 'Hjalte Bo Nørregaard'],
+  ['Hjalte Nørregaard', 'Hjalte Bo Nørregaard'],
   ['Hossam Ghali', 'Hossam Ghaly'],
   ['Houssine Bezzai', 'Houssin Bezzai'],
   ['Humphery Rudge', 'Humphrey Rudge'],
   ['Humprey Rudge', 'Humphrey Rudge'],
   ['Igor Kornejev', 'Igor Korneev'],
+  ['Igor Korneyev', 'Igor Korneev'],
   ['Istvan Széker', 'István Szekér'],
   ['Ivan Tzvekov', 'Ivan Tsvetkov'],
   ['Ivan Tzvetkov', 'Ivan Tsvetkov'],
@@ -92,7 +99,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Krzystof Bociek', 'Krzysztof Bociek'],
   ['Kurt van der Paar', 'Kurt van de Paar'],
   ['László Bodnar', 'László Bodnár'],
-  ['Lee-Roy Echteld', 'Leeroy Echteld'],
+  ['Leeroy Echteld', 'Lee-Roy Echteld'],
   ['Leonardo Dos Santos', 'Leonardo dos Santos Silva'],
   ['Leonardo dos Santos', 'Leonardo dos Santos Silva'],
   ['Leonhard van Utrecht', 'Leonard van Utrecht'],
@@ -116,6 +123,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Matthieu Assou-Ekotto', 'Mathieu Assou-Ekotto'],
   ['Milan Berck-Beelenkamp', 'Milan Berck Beelenkamp'],
   ['Mourad Mgizhrat', 'Mourad Mghizrat'],
+  ['Mugur Radu Gușatu', 'Radu Gușatu'],
   ['Muslui Nalbantoglu', 'Muslu Nalbantoğlu'],
   ['Muslu Nalbantoglu', 'Muslu Nalbantoğlu'],
   ['Nebojsa Gudelj', 'Nebojša Gudelj'],
@@ -131,6 +139,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Pedrag Djordjevic', 'Predrag Djordjevic'],
   ['Peter Zois', 'Peter Zoïs'],
   ['Radoslav Samardzic', 'Radoslav Samardžić'],
+  ['Radu Gusatu', 'Radu Gușatu'],
   ['Rahim Ouedraego', 'Rahim Ouédraogo'],
   ['Rahim Ouedraegou', 'Rahim Ouédraogo'],
   ['Rahim Ouedraogo', 'Rahim Ouédraogo'],

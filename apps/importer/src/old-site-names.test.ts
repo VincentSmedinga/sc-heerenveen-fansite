@@ -8,7 +8,8 @@ import { deriveOldSiteMatches } from './old-site-matches.ts'
 import { countOldSiteNames, editDistance, findOldSiteNameClusters, nameClusterKey } from './old-site-name-clusters.ts'
 import { cleanOldSiteName, oldSiteNameCorrections } from './old-site-names.ts'
 import { deriveOldSiteReport } from './old-site-report.ts'
-import { personsWhoDiffer, personTitleAliases } from './person-names.ts'
+import { manualNames } from './person-name.ts'
+import { personNames, personsWhoDiffer, personTitleAliases } from './person-names.ts'
 
 describe('the spellings of Wikipedia', () => {
   it.each([
@@ -41,19 +42,29 @@ describe('the spellings of Wikipedia', () => {
 
   it('has the persons the owner decided as titles that are one person too', () => {
     expect(personTitleAliases).toEqual([
+      { aliases: ['Arek Radomski'], title: 'Arkadiusz Radomski' },
       { aliases: ['Filip Djuričić'], title: 'Filip Đuričić' },
+      { aliases: ['Hjalte Norregaard'], title: 'Hjalte Bo Nørregaard' },
+      { aliases: ['Igor Korneev'], title: 'Igor Kornejev' },
       { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
       { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
+      { aliases: ['Radu Gusatu'], title: 'Mugur Radu Gușatu' },
       { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },
       { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' },
     ])
 
-    // The title that stays is where the names of the old fansite end up, and is never changed.
+    // The names of the old fansite end up in the name of the title that stays: the title, or
+    // the name of `personNames` when the owner chose a spelling that is no title.
+    const chosen = manualNames(personNames)
+
     for (const { aliases, title } of personTitleAliases) {
-      expect(cleanOldSiteName(title)).toBe(title)
+      const name = chosen.get(title)?.name ?? title
+
+      expect(cleanOldSiteName(title)).toBe(name)
+      expect(cleanOldSiteName(name)).toBe(name)
 
       for (const alias of aliases) {
-        expect(cleanOldSiteName(alias) === alias || cleanOldSiteName(alias) === title).toBe(true)
+        expect(cleanOldSiteName(alias) === alias || cleanOldSiteName(alias) === name).toBe(true)
       }
     }
   })
@@ -68,8 +79,8 @@ describe('the spellings of Wikipedia', () => {
     }
   })
 
-  it('has 160 corrections, so a removed pair fails here', () => {
-    expect(oldSiteNameCorrections.size).toBe(160)
+  it('has 167 corrections, so a removed pair fails here', () => {
+    expect(oldSiteNameCorrections.size).toBe(167)
   })
 
   it('has no chain: no correction leads to a spelling that is corrected again', () => {
@@ -109,7 +120,12 @@ describe('the corrections of the names', () => {
     ['Igor Kornejev', 'Igor Korneev'],
     ['Ivan Tzvekov', 'Ivan Tsvetkov'],
     ['Ivan Tzvetkov', 'Ivan Tsvetkov'],
-    ['Lee-Roy Echteld', 'Leeroy Echteld'],
+    ['Leeroy Echteld', 'Lee-Roy Echteld'],
+    ['Arkadiusz Radomski', 'Arek Radomski'],
+    ['Hjalte Bonorregaard', 'Hjalte Bo Nørregaard'],
+    ['Hjalte Norregaard', 'Hjalte Bo Nørregaard'],
+    ['Mugur Radu Gușatu', 'Radu Gușatu'],
+    ['Radu Gusatu', 'Radu Gușatu'],
     ['Ronnie Venema', 'Ronny Venema'],
     ['Jürgen Dirckx', 'Jürgen Dirkx'],
     ['Jurgen Dirckx', 'Jürgen Dirkx'],

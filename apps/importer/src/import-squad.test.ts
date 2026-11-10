@@ -616,6 +616,31 @@ describe('reading again', () => {
   })
 
   it.each([
+    ['Igor Kornejev', 'Igor Korneev'],
+    ['Arkadiusz Radomski', 'Arek Radomski'],
+    ['Mugur Radu Gușatu', 'Radu Gușatu'],
+  ])(
+    'stores %s under the name the owner chose, %s, also when the table writes the title again',
+    async (title, name) => {
+      const { page, server } = await serve(original.replace('[[Luca Oyen]]', `[[${title}]]`))
+
+      await importAt(server, first)
+
+      const [before] = await database.db.select().from(players).where(eq(players.wikipediaPage, title))
+
+      expect(before).toMatchObject({ name, wikipediaPage: title })
+      page.squad = original.replace('[[Luca Oyen]]', `[[${title}|${title}]]`)
+
+      const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
+      expect(await database.db.select().from(players).where(eq(players.wikipediaPage, title))).toMatchObject([
+        { id: before!.id, name, personId: before!.personId },
+      ])
+    },
+  )
+
+  it.each([
     ['Jan-Harm Schippers', 'Schippers', 'Jan Harm Schippers', 'Schippers'],
     ['Robert van der Berg', 'van der Berg', 'Robert van den Berg', 'van den Berg'],
   ])(
