@@ -144,6 +144,7 @@ describe('recordAction', () => {
       'player.field-take-over',
       'player.field-keep',
       'person.edit',
+      'person.merge',
     ])
   })
 

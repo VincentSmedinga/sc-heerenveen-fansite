@@ -1,8 +1,9 @@
-import { and, asc, eq, inArray, notInArray } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, notInArray, or } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PersonName } from './persons.ts'
 
+import { type AuditEntry, recordAction } from './audit-log.ts'
 import { isOfEditors } from './player-field-differences.ts'
 import {
   matchAppearances,
@@ -18,6 +19,39 @@ import {
   playerSources,
   playerStatDifferences,
 } from './schema.ts'
+
+/** A row of `players` as a plan of a merge names it. */
+export type MergedRow = Pick<Player, 'id' | 'name' | 'season'>
+
+/**
+ * What a merge of two persons does, worked out before it happens (`planPersonMerge`): the
+ * confirmation page of the admin shows it and the row of the log is written from it.
+ */
+export type PersonMergePlan = {
+  /** How many appearances in our reports are on the rows of the person that goes. */
+  appearances: number
+  /** The seasons in which both have a row: `gone` goes into `stays` (`mergePlayerInto`). */
+  doubles: { gone: MergedRow; season: string; stays: MergedRow }[]
+  /**
+   * How many values the editors set go along: the fields they set on the rows of the person
+   * that goes, and his name, line and country when those are theirs.
+   */
+  editorsValues: number
+  /** How many goals point at the person that goes, or at one of his rows. */
+  goals: number
+  /** The person that stays, as he is before the merge. */
+  kept: Person
+  /** The seasons of the rows of the person that stays, from the first. */
+  keptSeasons: string[]
+  /** The person that goes. */
+  other: Person
+  /** The titles that lead to the person that goes, his own among them. */
+  pages: string[]
+  /** What the person that stays has after the merge (`mergedPersonValues`). */
+  result: ReturnType<typeof mergedPersonValues>
+  /** The rows of `players` of the person that goes, by season. */
+  rows: MergedRow[]
+}
 
 /** The title that stays and the other titles that are the same person. */
 export type PersonTitleAlias = {
@@ -50,6 +84,93 @@ export async function fillPlayerFrom(db: Pick<Database, 'update'>, stays: Player
 }
 
 /**
+ * Merges two persons the editors chose in the admin (issue 977): everything of `otherId` goes
+ * to `keptId` with `mergePersonInto`, the function the importer merges with, and one row of the
+ * log (`person.merge`, with the person that stays in `item_id`) says what moved. The plan, the
+ * merge and the row are one transaction, so the row describes what the merge found. `describe`
+ * writes the `detail` of the row from the plan. Returns the plan, or `same` for one person
+ * twice and `missing` when either is gone: nothing is written then.
+ *
+ * A later import leaves the merge alone: the title of the person that goes stays in
+ * `person_pages` and leads to the one that stays, and every row of `players` points at him.
+ */
+export async function mergeChosenPersons(
+  db: Pick<Database, 'transaction'>,
+  {
+    describe,
+    keptId,
+    otherId,
+    userId,
+  }: { describe: (plan: PersonMergePlan) => string; keptId: number; otherId: number; userId: AuditEntry['userId'] },
+  now = new Date(),
+): Promise<'missing' | 'same' | PersonMergePlan> {
+  if (otherId === keptId) {
+    return 'same'
+  }
+
+  return db.transaction(async (tx) => {
+    // Both rows are locked, lowest number first, so two merges at once wait for each other.
+    await tx
+      .select({ id: persons.id })
+      .from(persons)
+      .where(inArray(persons.id, [otherId, keptId]))
+      .orderBy(asc(persons.id))
+      .for('update')
+
+    const plan = await planPersonMerge(tx, otherId, keptId)
+
+    if (plan === 'missing' || plan === 'same') {
+      return plan
+    }
+
+    await mergePersonInto(tx, plan.other, plan.kept)
+    await recordAction(tx, { action: 'person.merge', detail: describe(plan), itemId: keptId, userId }, now)
+
+    return plan
+  })
+}
+
+/**
+ * What the person that stays has after a merge. This is the one rule, for the importer and the
+ * admin alike:
+ *
+ * - What Wikidata said, the article and its title are those of the person that stays, and what
+ *   he lacks comes from the other.
+ * - The line and the country too, but one the editors set (`manual`) goes before one from
+ *   another source (#1051).
+ * - The name is that of the person that stays, but a name the editors gave the other person
+ *   (`redactie`) stays when the first has none of theirs.
+ */
+export function mergedPersonValues(other: Person, kept: Person) {
+  const editorsOnly = (mine: null | string, theirs: null | string) => theirs === 'manual' && mine !== 'manual'
+  const lineFrom = kept.line === null || editorsOnly(kept.lineSource, other.lineSource) ? other : kept
+  const countryFrom = kept.country === null || editorsOnly(kept.countrySource, other.countrySource) ? other : kept
+  const nameFrom = other.nameSource === 'redactie' && kept.nameSource !== 'redactie' ? other : kept
+  // The importer always keeps the person with the title; the editors can keep one without.
+  const pageFrom = kept.wikipediaPage === null ? other : kept
+
+  return {
+    birthDate: kept.birthDate ?? other.birthDate,
+    birthDatePrecision: kept.birthDate === null ? other.birthDatePrecision : kept.birthDatePrecision,
+    birthPlaceId: kept.birthPlaceId ?? other.birthPlaceId,
+    country: countryFrom.country,
+    countrySource: countryFrom.countrySource,
+    englishTitle: pageFrom.englishTitle,
+    familyName: nameFrom.familyName,
+    familyNamePrefix: nameFrom.familyNamePrefix,
+    givenName: nameFrom.givenName,
+    line: lineFrom.line,
+    lineSource: lineFrom.lineSource,
+    name: nameFrom.name,
+    nameSource: nameFrom.nameSource,
+    wikidataId: kept.wikidataId ?? other.wikidataId,
+    wikidataReadAt: kept.wikidataReadAt ?? other.wikidataReadAt,
+    wikipediaPage: pageFrom.wikipediaPage,
+    wikipediaPageId: kept.wikipediaPageId ?? other.wikipediaPageId,
+  }
+}
+
+/**
  * Makes the person the editors made without an article (`fromId`) and the person of the article
  * the import found for his player (`intoId`) one person: the second stays, with the name the
  * editors gave, and Wikidata can fill in the rest (issue 1022). Does nothing when the first
@@ -67,6 +188,60 @@ export async function mergeEditorsPersonInto(db: MergeDatabase, fromId: number, 
   await mergePersonInto(db, other, kept)
 
   return true
+}
+
+/**
+ * Moves everything of `other` to `kept` and removes `other`: whatever points to the other
+ * person points to the one that stays, his title is remembered in `person_pages`, the person
+ * that stays gets `mergedPersonValues`, and two rows of one season become one. Returns the
+ * warnings. Use the transaction of the step.
+ */
+export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Person): Promise<string[]> {
+  const warnings = differences(other, kept)
+  const values = mergedPersonValues(other, kept)
+
+  await tx.update(players).set({ personId: kept.id }).where(eq(players.personId, other.id))
+  await tx.update(matchGoals).set({ personId: kept.id }).where(eq(matchGoals.personId, other.id))
+  await tx.update(personPages).set({ personId: kept.id }).where(eq(personPages.personId, other.id))
+  await rememberPage(tx, other.wikipediaPage, kept.id)
+
+  for (const table of [personNationalities, personPositions]) {
+    const has = await tx.select().from(table).where(eq(table.personId, kept.id)).orderBy(asc(table.position))
+    const extra = (await tx.select().from(table).where(eq(table.personId, other.id)).orderBy(asc(table.position)))
+      .map((row) => row.itemId)
+      .filter((itemId) => !has.some((row) => row.itemId === itemId))
+    const next = has.reduce((most, row) => Math.max(most, row.position + 1), 0)
+
+    if (extra.length > 0) {
+      await tx
+        .insert(table)
+        .values(extra.map((itemId, index) => ({ itemId, personId: kept.id, position: next + index })))
+    }
+  }
+
+  // The other person goes first: the Q-number and the title are unique, so two persons cannot
+  // have them at once.
+  await tx.delete(persons).where(eq(persons.id, other.id))
+  await tx.update(persons).set(values).where(eq(persons.id, kept.id))
+
+  const rows = await tx.select().from(players).where(eq(players.personId, kept.id)).orderBy(asc(players.id))
+
+  for (const { doubles, season, stays } of doubleRows(rows, values.wikipediaPage)) {
+    for (const double of doubles) {
+      const dropped = await mergePlayerInto(tx, double.id, stays.id)
+
+      // What the row that stays lacks comes from the other, so the squad loses nothing.
+      await fillPlayerFrom(tx, stays, double)
+
+      if (dropped.length > 0) {
+        warnings.push(
+          `Persons: '${double.name}' and '${stays.name}' (${season}) are one player now and had different numbers in ${dropped.join(', ')}; those of '${stays.name}' stay, check which are right`,
+        )
+      }
+    }
+  }
+
+  return warnings
 }
 
 /**
@@ -201,6 +376,73 @@ export async function mergePlayerInto(db: MergeDatabase, fromId: number, intoId:
   return dropped.map((row) => row.competition)
 }
 
+/**
+ * Works out what a merge of the person `otherId` into the person `keptId` does, and changes
+ * nothing. `same` for one person twice, `missing` when either is not there.
+ */
+export async function planPersonMerge(
+  db: Pick<Database, 'select'>,
+  otherId: number,
+  keptId: number,
+): Promise<'missing' | 'same' | PersonMergePlan> {
+  if (otherId === keptId) {
+    return 'same'
+  }
+
+  const found = await db
+    .select()
+    .from(persons)
+    .where(inArray(persons.id, [otherId, keptId]))
+  const other = found.find((person) => person.id === otherId)
+  const kept = found.find((person) => person.id === keptId)
+
+  if (other === undefined || kept === undefined) {
+    return 'missing'
+  }
+
+  const all = await db
+    .select()
+    .from(players)
+    .where(inArray(players.personId, [otherId, keptId]))
+    .orderBy(asc(players.season), asc(players.id))
+  const rows = all.filter((row) => row.personId === otherId)
+  const rowIds = rows.map((row) => row.id)
+  const [[goals], [appearances], pages] = await Promise.all([
+    db
+      .select({ n: count() })
+      .from(matchGoals)
+      .where(
+        or(eq(matchGoals.personId, otherId), rowIds.length === 0 ? undefined : inArray(matchGoals.playerId, rowIds)),
+      ),
+    rowIds.length === 0
+      ? [{ n: 0 }]
+      : db.select({ n: count() }).from(matchAppearances).where(inArray(matchAppearances.playerId, rowIds)),
+    db.select({ page: personPages.page }).from(personPages).where(eq(personPages.personId, otherId)),
+  ])
+  const result = mergedPersonValues(other, kept)
+  const named = ({ id, name, season }: Player): MergedRow => ({ id, name, season })
+
+  return {
+    appearances: appearances?.n ?? 0,
+    doubles: doubleRows(all, result.wikipediaPage).flatMap(({ doubles, season, stays }) =>
+      doubles.map((gone) => ({ gone: named(gone), season, stays: named(stays) })),
+    ),
+    editorsValues:
+      rows.reduce((sum, row) => sum + row.editorsFields.length, 0) +
+      [other.nameSource === 'redactie', other.lineSource === 'manual', other.countrySource === 'manual'].filter(Boolean)
+        .length,
+    goals: goals?.n ?? 0,
+    kept,
+    keptSeasons: all.filter((row) => row.personId === keptId).map((row) => row.season),
+    other,
+    pages: [
+      ...new Set([...pages.map((row) => row.page), ...(other.wikipediaPage === null ? [] : [other.wikipediaPage])]),
+    ].sort(),
+    result,
+    rows: rows.map(named),
+  }
+}
+
 /** The warnings for what both persons have and differs: the one that stays keeps his own. */
 function differences(other: Person, kept: Person): string[] {
   // A date of birth is a personal datum, so the line says that the dates differ and not what
@@ -223,86 +465,17 @@ function differences(other: Person, kept: Person): string[] {
 }
 
 /**
- * Moves everything of `other` to `kept` and removes `other`. Returns the warnings.
+ * The seasons in which the rows of one person hold more than one row, with the row that stays
+ * (the lowest `rank`, then the oldest) and the rows that go into it.
  */
-async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Person): Promise<string[]> {
-  const warnings = differences(other, kept)
-
-  await tx.update(players).set({ personId: kept.id }).where(eq(players.personId, other.id))
-  await tx.update(matchGoals).set({ personId: kept.id }).where(eq(matchGoals.personId, other.id))
-  await tx.update(personPages).set({ personId: kept.id }).where(eq(personPages.personId, other.id))
-  await rememberPage(tx, other.wikipediaPage, kept.id)
-
-  for (const table of [personNationalities, personPositions]) {
-    const has = await tx.select().from(table).where(eq(table.personId, kept.id)).orderBy(asc(table.position))
-    const extra = (await tx.select().from(table).where(eq(table.personId, other.id)).orderBy(asc(table.position)))
-      .map((row) => row.itemId)
-      .filter((itemId) => !has.some((row) => row.itemId === itemId))
-    const next = has.reduce((most, row) => Math.max(most, row.position + 1), 0)
-
-    if (extra.length > 0) {
-      await tx
-        .insert(table)
-        .values(extra.map((itemId, index) => ({ itemId, personId: kept.id, position: next + index })))
-    }
-  }
-
-  // The line and the country are those of the person that stays, or of the other when he has
-  // none. One the editors set (`manual`) goes before one from another source (#1051).
-  const editorsOnly = (mine: null | string, theirs: null | string) => theirs === 'manual' && mine !== 'manual'
-  const lineFrom = kept.line === null || editorsOnly(kept.lineSource, other.lineSource) ? other : kept
-  const countryFrom = kept.country === null || editorsOnly(kept.countrySource, other.countrySource) ? other : kept
-
-  // The other person goes first: the Q-number is unique, so two persons cannot have it at once.
-  await tx.delete(persons).where(eq(persons.id, other.id))
-  await tx
-    .update(persons)
-    .set({
-      birthDate: kept.birthDate ?? other.birthDate,
-      birthDatePrecision: kept.birthDate === null ? other.birthDatePrecision : kept.birthDatePrecision,
-      birthPlaceId: kept.birthPlaceId ?? other.birthPlaceId,
-      country: countryFrom.country,
-      countrySource: countryFrom.countrySource,
-      line: lineFrom.line,
-      lineSource: lineFrom.lineSource,
-      wikidataId: kept.wikidataId ?? other.wikidataId,
-      wikidataReadAt: kept.wikidataReadAt ?? other.wikidataReadAt,
-      wikipediaPageId: kept.wikipediaPageId ?? other.wikipediaPageId,
-      // A name of the editors stays, also when it was on the person that goes.
-      ...(other.nameSource === 'redactie' && kept.nameSource !== 'redactie'
-        ? {
-            familyName: other.familyName,
-            familyNamePrefix: other.familyNamePrefix,
-            givenName: other.givenName,
-            name: other.name,
-            nameSource: other.nameSource,
-          }
-        : {}),
-    })
-    .where(eq(persons.id, kept.id))
-
-  const rows = await tx.select().from(players).where(eq(players.personId, kept.id)).orderBy(asc(players.id))
-
-  for (const season of new Set(rows.map((row) => row.season))) {
+function doubleRows(rows: readonly Player[], title: null | string) {
+  return [...new Set(rows.map((row) => row.season))].flatMap((season) => {
     const [stays, ...doubles] = rows
       .filter((row) => row.season === season)
-      .toSorted((a, b) => rank(a, kept.wikipediaPage) - rank(b, kept.wikipediaPage) || a.id - b.id)
+      .toSorted((a, b) => rank(a, title) - rank(b, title) || a.id - b.id)
 
-    for (const double of doubles) {
-      const dropped = await mergePlayerInto(tx, double.id, stays!.id)
-
-      // What the row that stays lacks comes from the other, so the squad loses nothing.
-      await fillPlayerFrom(tx, stays!, double)
-
-      if (dropped.length > 0) {
-        warnings.push(
-          `Persons: '${double.name}' and '${stays!.name}' (${season}) are one player now and had different numbers in ${dropped.join(', ')}; those of '${stays!.name}' stay, check which are right`,
-        )
-      }
-    }
-  }
-
-  return warnings
+    return stays === undefined || doubles.length === 0 ? [] : [{ doubles, season, stays }]
+  })
 }
 
 /**

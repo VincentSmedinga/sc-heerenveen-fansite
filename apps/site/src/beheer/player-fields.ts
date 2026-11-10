@@ -19,8 +19,16 @@ export type PlayerErrors = Partial<Record<'algemeen' | PlayerFieldName, string>>
 
 export type PlayerFieldName = (typeof playerFieldNames)[number]
 
-/** What the form shows after a save that did not work: the errors and the values. */
-export type PlayerFormState = { errors: PlayerErrors; values: PlayerValues }
+/**
+ * What the form shows after a save that did not work: the errors and the values. `merge` is
+ * the link to the page that merges two persons, under the field of the Wikipedia page, for a
+ * page that belongs to another person (issue 977).
+ */
+export type PlayerFormState = {
+  errors: PlayerErrors
+  merge?: { href: string; label: string }
+  values: PlayerValues
+}
 
 /** What an editor filled in, as text. A field left out is an empty string. */
 export type PlayerValues = Record<PlayerFieldName, string>

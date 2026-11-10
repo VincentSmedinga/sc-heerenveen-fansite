@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
+import { mergeChosenPersons } from '@fansite/db/person-merge'
 import {
   auditLog,
   feeds,
@@ -934,6 +935,69 @@ describe('what the editors set of a player (#1022)', () => {
     ])
     expect(await waiting()).toEqual([])
     expect(await importAt(server, later)).toMatchObject({ players: { added: 0, unchanged: 25, updated: 0 } })
+  })
+})
+
+describe('two persons the editors merged in the admin (#977)', () => {
+  const later = new Date(first.getTime() + hours(1))
+
+  it('does not make the person that went again, and leaves what the editors set', async () => {
+    // A made-up player who changed his name: an earlier season has him under the old name.
+    const [{ insertId: old }] = await database.db.insert(persons).values({
+      line: 'aanvaller',
+      lineSource: 'manual',
+      name: 'Bernt Oudenaam',
+      nameSource: 'sort_key',
+      wikipediaPage: 'Bernt Oudenaam',
+    })
+
+    await database.db.insert(personPages).values({ page: 'Bernt Oudenaam', personId: old })
+    await database.db.insert(players).values({
+      name: 'Bernt Oudenaam',
+      personId: old,
+      searchTerm: 'Oudenaam',
+      season: '2025/26',
+      wikipediaPage: 'Bernt Oudenaam',
+    })
+
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const [renamed] = await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Bernt Klaverboer'))
+    const kept = renamed!.id
+
+    // What the admin does: the same function, with the row of the log.
+    await mergeChosenPersons(database.db, { describe: () => 'merged', keptId: kept, otherId: old, userId: null })
+
+    const merged = await database.db.select().from(persons).orderBy(asc(persons.id))
+
+    // The table links the old title from now on, under the new name.
+    page.squad = original.replace('[[Bernt Klaverboer]]', '[[Bernt Oudenaam|Bernt Klaverboer]]')
+
+    // The row of the season is the same row: only its page changes.
+    expect(await importAt(server, later)).toMatchObject({ players: { added: 0, left: 0, updated: 1 } })
+    // Nobody is made and nobody changed: the old title leads to the person that stays.
+    expect(await database.db.select().from(persons).orderBy(asc(persons.id))).toEqual(merged)
+    expect(merged.find((person) => person.id === kept)).toMatchObject({
+      line: 'aanvaller',
+      lineSource: 'manual',
+      wikipediaPage: 'Bernt Klaverboer',
+    })
+    expect(merged.some((person) => person.id === old)).toBe(false)
+    expect(await database.db.select().from(personPages).where(eq(personPages.page, 'Bernt Oudenaam'))).toEqual([
+      { page: 'Bernt Oudenaam', personId: kept },
+    ])
+    expect(
+      await database.db
+        .select({ name: players.name, season: players.season })
+        .from(players)
+        .where(eq(players.personId, kept))
+        .orderBy(asc(players.season)),
+    ).toEqual([
+      { name: 'Bernt Oudenaam', season: '2025/26' },
+      { name: 'Bernt Klaverboer', season },
+    ])
   })
 })
 

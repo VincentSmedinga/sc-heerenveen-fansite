@@ -4148,6 +4148,7 @@
   - **Aanpassen:** een andere naam geldt ook voor de persoon, in elk seizoen.
     Een pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel.
     Een pagina van een andere persoon, en een andere pagina voor een persoon die er al een heeft, weigert het formulier.
+    **Later:** sinds 10 november 2026 heeft de weigering van een pagina van een andere persoon een link naar het samenvoegen; zie _De redactie voegt twee personen samen in het beheer_.
     Een speler zonder persoon en zonder pagina krijgt bij het aanpassen geen persoon.
   - **Uit de selectie halen** zet `in_squad` uit en laat de rij staan, na een bevestiging in een uitklapblok.
     Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel kan niet weg: de pagina toont dan geen knop, en zegt waarom.
@@ -4157,6 +4158,7 @@
 - **Waarom:** een zoeklijst als gewone `Select` werkt zonder JavaScript en met elk hulpmiddel, en het designsysteem heeft geen zoekveld met suggesties.
   De seizoenen tot 2006 hebben geen rugnummers en vaak geen posities, dus die velden kunnen niet verplicht zijn.
   Twee personen samenvoegen raakt doelpunten in elk seizoen en heeft een eigen issue (#1027).
+  **Later:** sinds 10 november 2026 voegt de redactie twee personen samen in het beheer (#977); zie _De redactie voegt twee personen samen in het beheer_.
   Een speler met doelpunten hoort bij het seizoen: zijn vertrek uit de selectie leest de import.
 - **Gevolg:** wat de import doet met een speler die de redactie toevoegde of aanpaste, regelt #1022; tot dan kan een run een aangepast veld van een speler uit Wikipedia overschrijven.
   De link vanuit een doelpunt en vanuit de werklijst naar dit formulier komt met #1021.
@@ -4287,3 +4289,38 @@
   Na elke keuze de pagina opnieuw laden (wist wat de redactie in een andere rij al koos).
   De actie `player.edit` van een speler van de persoon gebruiken (een persoon zonder speler heeft er geen, en het logboek zou een speler noemen die niet veranderde).
   Een zoekveld met suggesties voor het land (zie het besluit over het formulier van een speler hierboven).
+
+## De redactie voegt twee personen samen in het beheer
+
+- **Datum:** 10 november 2026
+- **Besluit:** de redactie voegt twee personen van één speler samen vanuit het formulier van een speler, op een bevestigingspagina (#977).
+  Een speler die van naam verandert, heeft twee personen: de ene met de oude naam, de andere met de nieuwe.
+  Tot nu toe was een samenvoeging een regel in `personTitleAliases`, en dus een pull request.
+  - **Twee wegen, één pagina:** de weigering "Deze pagina hoort bij een andere persoon" heeft een link naar het samenvoegen met die persoon.
+    Daarnaast heeft het formulier het blok "Dezelfde persoon als", waarin de redactie de andere persoon zoekt en kiest.
+    Beide leiden naar `/beheer/spelers/samenvoegen`.
+  - **De code van de importer:** het beheer voegt samen met `mergePersonInto` en `mergePlayerInto` uit `@fansite/db/person-merge`.
+    `mergeChosenPersons` doet dat in één transactie met de regel in het logboek, en `planPersonMerge` rekent vooraf uit wat er gebeurt.
+  - **De redactie kiest wie blijft:** de standaard is de persoon met een artikel op de Nederlandse Wikipedia, anders de oudste, en een link wisselt de twee om.
+    De titel van de persoon die verdwijnt staat daarna in `person_pages`, zodat de import hem bij dezelfde persoon vindt.
+  - **Welke waarde blijft:** een waarde van de redactie gaat voor, dan die van de persoon die blijft, en een leeg veld wordt uit de andere persoon gevuld.
+    Dat is de regel van `mergePersonInto` sinds #1051, nu in `mergedPersonValues`; de bevestigingspagina toont elk verschil vooraf.
+    De regel geldt nu ook voor de Wikipedia-pagina: blijft een persoon zonder pagina, dan krijgt hij de pagina van de andere.
+    De importer liet altijd de persoon met de titel blijven, dus daar verandert niets.
+  - **Geen ongedaan maken:** de bevestigingspagina en één regel `person.merge` in het logboek zijn de bescherming.
+    De regel noemt beide personen met nummer, naam en titel, de spelersrijen en titels die verhuisden, de aantallen en de waarden die verdwenen.
+    De migratie `0068_add_person_merge_action` voegt de actie toe.
+  - **De knop noemt beide personen:** op de knop staat "Voeg X samen met Y", niet alleen "Voeg samen".
+    Twee personen met dezelfde naam krijgen hun nummer erachter.
+  - **Een tabel van drie kolommen:** het gegeven, de persoon die blijft en de persoon die verdwijnt, met kopcellen.
+    Wat er daarna geldt, staat in zinnen onder de tabel, zodat de tabel op een telefoon past.
+- **Waarom:** een samenvoeging die een pull request vraagt, is bij elke naamswijziging werk voor een Builder.
+  Twee manieren om samen te voegen kunnen elkaar tegenspreken, dus het beheer en de importer delen één functie.
+  Een vaste regel voor wie blijft, faalt bij twee personen zonder artikel of met twee artikelen.
+  Terugdraaien vraagt een kopie van de verdwenen persoon en van elke verhuisde rij, en dat is veel meer werk dan een samenvoeging die zelden voorkomt.
+  Een knop met alleen "Voeg samen" heeft een toegankelijke naam nodig die anders is dan de tekst die je ziet; met de namen op de knop zijn die twee gelijk.
+- **Alternatieven:** een aparte pagina "Personen samenvoegen", los van de rij waar de redactie het probleem ziet.
+  Alleen de lijst in de code, de weg die we verlaten.
+  Altijd de waarde van de persoon die blijft (een waarde die de redactie instelde, gaat dan verloren).
+  Een kopie bewaren en een knop "Maak ongedaan".
+  Een vierde kolom "Na het samenvoegen" in de tabel (te breed voor een telefoon).

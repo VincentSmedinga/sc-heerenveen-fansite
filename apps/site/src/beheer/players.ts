@@ -38,6 +38,7 @@ import { isCountryCode } from '@fansite/shared/countries'
 import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
+import { personLabels } from './person-labels'
 import {
   emptyPlayerValues,
   newPersonChoice,
@@ -67,9 +68,16 @@ export type AdminPlayer = {
 /** A player as the list of a season shows him. */
 export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'name' | 'position' | 'shirtNumber' | 'source'>
 
-/** What changing did. `unchanged` is a save that changes nothing, which writes no row. */
+/**
+ * What changing did. `unchanged` is a save that changes nothing, which writes no row. A save
+ * that is refused because the page belongs to another person names the two (`merge`), so the
+ * form can lead to the page that merges them (issue 977).
+ */
 export type EditPlayerOutcome =
-  { errors: PlayerErrors; status: 'refused' } | { status: 'changed' | 'missing' | 'unchanged' }
+  { errors: PlayerErrors; merge?: MergeOffer; status: 'refused' } | { status: 'changed' | 'missing' | 'unchanged' }
+
+/** The two persons a refused save says may be one: that of the player and that of the page. */
+export type MergeOffer = { label: string; personId: number; withId: number }
 
 /** A person to choose from, with what tells two persons of one name apart. */
 export type PersonChoice = { id: number; label: string }
@@ -107,10 +115,12 @@ type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
 /** The errors of a player that is refused, thrown to roll back the transaction. */
 class Refusal extends Error {
   errors: PlayerErrors
+  merge: MergeOffer | undefined
 
-  constructor(errors: PlayerErrors) {
+  constructor(errors: PlayerErrors, merge?: MergeOffer) {
     super('The player is refused')
     this.errors = errors
+    this.merge = merge
   }
 }
 
@@ -447,10 +457,14 @@ async function personOfNewPage(
   }
   if (owner !== undefined) {
     const other = await findPerson(transaction, owner)
+    const [own, theirs] = personLabels(person, other ?? { id: owner, name: null, wikipediaPage: null })
 
-    throw new Refusal({
-      wikipedia: `Deze pagina hoort bij een andere persoon: ${other?.name ?? other?.wikipediaPage ?? owner}. Twee personen samenvoegen kan hier niet.`,
-    })
+    throw new Refusal(
+      {
+        wikipedia: `Deze pagina hoort bij een andere persoon: ${theirs}. Is dat dezelfde persoon? Voeg de twee dan samen met de link onder dit veld.`,
+      },
+      { label: `Voeg ${own} samen met ${theirs}`, personId: person.id, withId: owner },
+    )
   }
   if (person.wikipediaPage !== null) {
     throw new Refusal({
@@ -593,14 +607,15 @@ async function storePlayer(
  * Changes a player: the name, the shirt number, the line and the title. A name the editor
  * changed goes to the person too, with the source `redactie`, so it changes in every season. A
  * new title gives a person without one his title, and gives a player without a person the
- * person of the title; a title that belongs to another person is refused, because joining two
- * persons is not done here. The goals of a player who gets a person get it too. Writes
- * `player.edit` with what changed, and nothing for a save that changes nothing. Each field that
- * changed is the editors' from then on (`players.editors_fields`, issue 1022), so the importer
- * leaves it alone. A line or a country that differs from what his person has goes to the person
- * (#1051): a value with the source `manual`, and an empty one takes it away, so the importer
- * fills it in again. That is so only for the person the form showed: a player without a person,
- * or one who gets another person in this save, keeps what that person has.
+ * person of the title; a title that belongs to another person is refused, and the outcome names
+ * the two persons, because joining them is done on a page of its own (issue 977). The goals of
+ * a player who gets a person get it too. Writes `player.edit` with what changed, and nothing
+ * for a save that changes nothing. Each field that changed is the editors' from then on
+ * (`players.editors_fields`, issue 1022), so the importer leaves it alone. A line or a country
+ * that differs from what his person has goes to the person (#1051): a value with the source
+ * `manual`, and an empty one takes it away, so the importer fills it in again. That is so only
+ * for the person the form showed: a player without a person, or one who gets another person in
+ * this save, keeps what that person has.
  */
 async function storePlayerEdit(
   db: Database,
@@ -744,7 +759,7 @@ async function storePlayerEdit(
     })
   } catch (error) {
     if (error instanceof Refusal) {
-      return { errors: error.errors, status: 'refused' }
+      return { errors: error.errors, status: 'refused', ...(error.merge === undefined ? {} : { merge: error.merge }) }
     }
 
     throw error
@@ -840,6 +855,20 @@ export async function editPlayer(
   return outcome
 }
 
+/**
+ * Works out the chance that the list of a season is the whole squad again, after its players
+ * changed (#1040), also when two rows of a season became one (issue 977). The change of the
+ * player stays when this fails: it logs a warning, and the
+ * next import of that season works the row out again.
+ */
+export async function refreshCompleteness(db: Database, season: string, now: Date): Promise<void> {
+  try {
+    await storeCompleteness(db, season, undefined, now)
+  } catch (error) {
+    console.warn(`Could not work out the completeness of ${season} after a change of a player`, error)
+  }
+}
+
 /** Takes a player out of the squad (see `storePlayerRemoval`) and rates the season again. */
 export async function removePlayer(
   db: Database,
@@ -866,19 +895,6 @@ export async function removePlayer(
  */
 function playerNameOf(person: Pick<Person, 'name' | 'wikipediaPage'>) {
   return person.name ?? (person.wikipediaPage ?? '').replace(/\s*\([^)]*\)$/u, '')
-}
-
-/**
- * Works out the chance that the list of a season is the whole squad again, after its players
- * changed (#1040). The change of the player stays when this fails: it logs a warning, and the
- * next import of that season works the row out again.
- */
-async function refreshCompleteness(db: Database, season: string, now: Date): Promise<void> {
-  try {
-    await storeCompleteness(db, season, undefined, now)
-  } catch (error) {
-    console.warn(`Could not work out the completeness of ${season} after a change of a player`, error)
-  }
 }
 
 /**

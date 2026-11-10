@@ -675,11 +675,16 @@ describe('editPlayer', () => {
     const id = await added({ name: { familyName: 'Vos', familyNamePrefix: null, givenName: 'Jan' } })
     const jan = { familyName: 'Vos', familyNamePrefix: null, givenName: 'Jan' }
 
+    const [pelle] = await allPersons()
+    const own = (await allPlayers()).find((row) => row.id === id)?.personId
+
+    // The refusal names the two persons, so the form can lead to the page that merges them.
     expect(await editPlayer(database.db, userId, id, entry({ name: jan, page: 'Pelle van Amersfoort' }))).toEqual({
       errors: {
         wikipedia:
-          'Deze pagina hoort bij een andere persoon: Pelle van Amersfoort. Twee personen samenvoegen kan hier niet.',
+          'Deze pagina hoort bij een andere persoon: Pelle van Amersfoort. Is dat dezelfde persoon? Voeg de twee dan samen met de link onder dit veld.',
       },
+      merge: { label: 'Voeg Jan Vos samen met Pelle van Amersfoort', personId: own, withId: pelle?.id },
       status: 'refused',
     })
 

@@ -1,11 +1,14 @@
 'use server'
 
+import { players } from '@fansite/db/schema'
+import { and, eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 
 import type { PlayerFormState } from '#src/beheer/player-fields'
 
 import { matchPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId } from '#src/beheer/items'
+import { mergePersons } from '#src/beheer/person-merge'
 import { findReturnMatch } from '#src/beheer/player-return'
 import {
   addPlayer,
@@ -19,13 +22,16 @@ import {
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { listPath, playerPath, playersPath } from './paths'
+import { listPath, mergePath, playerPath, playersPath } from './paths'
 
 // The actions of the players. Only a beheerder keeps them, as with the matches. The season and
 // the number of the player are bound to the action (`submitPlayer.bind(null, id)`) and are
 // input from outside all the same, so each action checks them again. A form that is wrong
 // returns to the form with the values kept, and one that works ends on a page with a notice:
 // both work without JavaScript.
+
+/** What the form that merges two persons shows after a merge that did not work. */
+export type MergeFormState = { error?: string }
 
 /**
  * Adds a player to the squad of a season (issue 1020). A form that is wrong comes back with
@@ -75,6 +81,55 @@ export async function submitAddPlayer(
 }
 
 /**
+ * Merges two persons (issue 977): `otherId` goes into `keptId`. The form has only a button, on
+ * a page that says what the merge does. A merge that worked ends on the form of the player the
+ * editor came from, or, when his row went into another row of the season, on that row. One
+ * person twice or a person who is gone ends on the page of the merge again, which says so; a
+ * merge that failed comes back as an error, which gets the focus.
+ */
+export async function submitMergePersons(
+  otherId: number,
+  keptId: number,
+  playerId: number | undefined,
+): Promise<MergeFormState> {
+  const { userId } = await requireRole('beheerder')
+  const { db } = getDatabase()
+  const other = parseItemId(otherId)
+  const kept = parseItemId(keptId)
+  const player = playerId === undefined ? undefined : parseItemId(playerId)
+  const before = player === undefined ? undefined : await findAdminPlayer(db, player)
+
+  if (other === undefined || kept === undefined) {
+    redirect(`${playersPath}?fout=weg`)
+  }
+
+  let outcome: Awaited<ReturnType<typeof mergePersons>>
+
+  try {
+    outcome = await mergePersons(db, userId, { keptId: kept, otherId: other })
+  } catch (error) {
+    console.error(`Could not merge two persons: ${error instanceof Error ? error.message : String(error)}`)
+
+    return { error: 'De personen zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.' }
+  }
+
+  if (outcome === 'missing' || outcome === 'same') {
+    redirect(mergePath({ personId: other, playerId: before?.player.id, withId: kept }))
+  }
+  if (before === undefined) {
+    redirect(listPath(undefined, 'samengevoegd'))
+  }
+
+  // The row the editor came from, or the row of the season it went into.
+  const [row] = await db
+    .select({ id: players.id })
+    .from(players)
+    .where(and(eq(players.personId, kept), eq(players.season, before.player.season)))
+
+  redirect(row === undefined ? listPath(before.player.season, 'samengevoegd') : playerPath(row.id, 'samengevoegd'))
+}
+
+/**
  * Changes a player. A form that is wrong comes back with the values kept, and one that works
  * ends on the form of the player with a notice, also when nothing changed. A player that is
  * gone ends on the list with a notice.
@@ -109,7 +164,13 @@ export async function submitPlayer(
   }
 
   if (outcome.status === 'refused') {
-    return { errors: outcome.errors, values }
+    const { merge } = outcome
+
+    return {
+      errors: outcome.errors,
+      ...(merge === undefined ? {} : { merge: { href: mergePath({ ...merge, playerId: id }), label: merge.label } }),
+      values,
+    }
   }
 
   redirect(

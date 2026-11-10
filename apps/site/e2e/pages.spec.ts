@@ -8,6 +8,7 @@ import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
+import { mergePair } from './persons'
 import { squadPlayerId } from './players'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -270,6 +271,13 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/spelers/{player}', status: 200 },
   { admin: 'beheerder', path: '/beheer/spelers/{player}?gedaan=opgeslagen', status: 200 },
   { admin: 'beheerder', path: '/beheer/spelers/999999', status: 404 },
+  // "Dezelfde persoon als" on the form of a player, and the page that merges two persons
+  // (issue 977): two made-up persons, one person twice, and an address without persons.
+  { admin: 'beheerder', path: '/beheer/spelers/{player}?zoek=verzonnen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen?persoon={person}&met={otherPerson}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen?persoon={person}&met={person}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen', status: 200 },
+  { admin: 'moderator', path: '/beheer/spelers/samenvoegen', status: 404 },
   { admin: 'moderator', path: '/beheer/spelers', status: 404 },
   { admin: 'moderator', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 404 },
   { admin: 'moderator', path: '/beheer/spelers/{player}', status: 404 },
@@ -363,6 +371,8 @@ async function withNumbers(path: string) {
         .replace('{liveMatch}', path.includes('{liveMatch}') ? String(await liveReportMatchId()) : '{liveMatch}')
         .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')
         .replace('{player}', path.includes('{player}') ? String(await squadPlayerId()) : '{player}')
+        .replaceAll('{person}', path.includes('{person}') ? String((await mergePair()).person) : '{person}')
+        .replace('{otherPerson}', path.includes('{otherPerson}') ? String((await mergePair()).other) : '{otherPerson}')
     : path
 }
 
