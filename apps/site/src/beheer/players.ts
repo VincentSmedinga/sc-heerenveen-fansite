@@ -32,6 +32,7 @@ import {
   wikipediaPageMaxLength,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
@@ -96,255 +97,6 @@ class Refusal extends Error {
   constructor(errors: PlayerErrors) {
     super('The player is refused')
     this.errors = errors
-  }
-}
-
-/**
- * Adds a player to the squad of a season, with the source `redactie`. The person is the one
- * the editor chose, or the person of the title, or a new one (`findOrAddEditorsPerson`). A
- * person, a name or a title the season already has is refused. Writes `player.add`, so there is
- * no player without a row and no row without a player. The name and every field the editor
- * filled in are the editors' from then on (`players.editors_fields`, issue 1022): the importer
- * leaves them alone and fills in the rest.
- */
-export async function addPlayer(
-  db: Database,
-  userId: number,
-  season: string,
-  entry: PlayerEntry,
-  now = new Date(),
-): Promise<AddPlayerOutcome> {
-  try {
-    return await db.transaction(async (transaction) => {
-      // Where an error about the person goes: the list, or the field that named him.
-      const personField = entry.personId === null ? (entry.page === null ? 'achternaam' : 'wikipedia') : 'persoon'
-      let personId = entry.personId
-      let created = false
-
-      if (personId === null) {
-        if (entry.name === null) {
-          throw new Refusal({ achternaam: 'Vul de achternaam in.' })
-        }
-
-        ;({ created, id: personId } = await findOrAddEditorsPerson(transaction, { name: entry.name, page: entry.page }))
-      }
-
-      const [person] = await transaction.select().from(persons).where(eq(persons.id, personId))
-
-      if (person === undefined) {
-        throw new Refusal({ persoon: 'Deze persoon bestaat niet meer. Zoek hem opnieuw, of maak een nieuwe persoon.' })
-      }
-
-      const name = playerNameOf(person)
-
-      if (name === '' || [...name].length > playerNameMaxLength) {
-        throw new Refusal({
-          [personField]: `De naam van deze persoon past niet: hoogstens ${playerNameMaxLength} tekens.`,
-        })
-      }
-
-      const page = person.wikipediaPage
-      const [same] = await transaction
-        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
-        .from(players)
-        .where(
-          and(
-            eq(players.season, season),
-            or(
-              eq(players.personId, personId),
-              eq(players.name, name),
-              page === null ? undefined : eq(players.wikipediaPage, page),
-            ),
-          ),
-        )
-
-      if (same !== undefined) {
-        throw new Refusal({
-          [same.personId === personId || entry.personId !== null
-            ? personField
-            : same.wikipediaPage !== null && same.wikipediaPage === page
-              ? 'wikipedia'
-              : 'achternaam']: alreadyThere(same, { name, page, personId }, season),
-        })
-      }
-
-      const [{ insertId }] = await transaction.insert(players).values({
-        editorsFields: [
-          'name',
-          ...(entry.shirtNumber === null ? [] : (['shirt_number'] as const)),
-          ...(entry.position === null ? [] : (['position'] as const)),
-          ...(page === null ? [] : (['wikipedia_page'] as const)),
-        ],
-        name,
-        personId,
-        position: entry.position,
-        searchTerm: searchTermOf(person, name),
-        season,
-        shirtNumber: entry.shirtNumber,
-        source: 'redactie',
-        wikipediaPage: page,
-      })
-
-      await recordAction(
-        transaction,
-        {
-          action: 'player.add',
-          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}`,
-          itemId: insertId,
-          userId,
-        },
-        now,
-      )
-
-      return { id: insertId, status: 'added' } as const
-    })
-  } catch (error) {
-    // A refused player rolls the transaction back, so a person made on the way is not kept.
-    if (error instanceof Refusal) {
-      return { errors: error.errors, status: 'refused' }
-    }
-
-    throw error
-  }
-}
-
-/**
- * Changes a player: the name, the shirt number, the line and the title. A name the editor
- * changed goes to the person too, with the source `redactie`, so it changes in every season. A
- * new title gives a person without one his title, and gives a player without a person the
- * person of the title; a title that belongs to another person is refused, because joining two
- * persons is not done here. The goals of a player who gets a person get it too. Writes
- * `player.edit` with what changed, and nothing for a save that changes nothing. Each field that
- * changed is the editors' from then on (`players.editors_fields`, issue 1022), so the importer
- * leaves it alone.
- */
-export async function editPlayer(
-  db: Database,
-  userId: number,
-  id: number,
-  entry: PlayerEntry,
-  now = new Date(),
-): Promise<EditPlayerOutcome> {
-  try {
-    return await db.transaction(async (transaction) => {
-      const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
-
-      if (player === undefined) {
-        return { status: 'missing' } as const
-      }
-      if (entry.name === null) {
-        throw new Refusal({ achternaam: 'Vul de achternaam in.' })
-      }
-
-      const person = player.personId === null ? undefined : await findPerson(transaction, player.personId)
-      const name = joinNameParts(entry.name)
-      const before = nameValuesOf(player, person)
-      const renamed =
-        (entry.name.givenName ?? '') !== before.voornaam ||
-        (entry.name.familyNamePrefix ?? '') !== before.tussenvoegsel ||
-        entry.name.familyName !== before.achternaam
-      let personId = player.personId
-
-      if (entry.page !== null && entry.page !== player.wikipediaPage) {
-        personId = await personOfNewPage(transaction, {
-          entry: { ...entry, name: entry.name, page: entry.page },
-          person,
-        })
-      }
-
-      const [same] = await transaction
-        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
-        .from(players)
-        .where(
-          and(
-            eq(players.season, player.season),
-            ne(players.id, id),
-            or(
-              eq(players.name, name),
-              entry.page === null ? undefined : eq(players.wikipediaPage, entry.page),
-              personId === null || personId === player.personId ? undefined : eq(players.personId, personId),
-            ),
-          ),
-        )
-
-      if (same !== undefined) {
-        throw new Refusal({
-          [same.name.toLowerCase() === name.toLowerCase() ? 'achternaam' : 'wikipedia']: alreadyThere(
-            same,
-            { name, page: entry.page, personId },
-            player.season,
-          ),
-        })
-      }
-
-      const edited: PlayerField[] = [
-        ...(renamed || name !== player.name ? (['name'] as const) : []),
-        ...(entry.shirtNumber === player.shirtNumber ? [] : (['shirt_number'] as const)),
-        ...(entry.position === player.position ? [] : (['position'] as const)),
-        ...(entry.page === player.wikipediaPage ? [] : (['wikipedia_page'] as const)),
-      ]
-      const changes = [
-        name === player.name ? undefined : `naam: ${player.name} → ${name}`,
-        entry.shirtNumber === player.shirtNumber
-          ? undefined
-          : `rugnummer: ${player.shirtNumber ?? 'geen'} → ${entry.shirtNumber ?? 'geen'}`,
-        entry.position === player.position
-          ? undefined
-          : `positie: ${player.position ?? 'onbekend'} → ${entry.position ?? 'onbekend'}`,
-        entry.page === player.wikipediaPage
-          ? undefined
-          : `Wikipedia: ${player.wikipediaPage ?? 'geen'} → ${entry.page ?? 'geen'}`,
-        personId === player.personId ? undefined : `persoon: ${player.personId ?? 'geen'} → ${personId ?? 'geen'}`,
-        // The parts can change while the whole name stays, such as a prefix that moves.
-        renamed && person !== undefined && name === player.name ? 'naam in delen van de persoon' : undefined,
-      ].filter((change) => change !== undefined)
-
-      if (changes.length === 0) {
-        return { status: 'unchanged' } as const
-      }
-      if (renamed && person !== undefined) {
-        await setEditorsName(transaction, person.id, entry.name)
-      }
-
-      await transaction
-        .update(players)
-        .set({
-          editorsFields: [...new Set([...player.editorsFields, ...edited])],
-          name,
-          personId,
-          position: entry.position,
-          searchTerm: renamed ? searchTermOf(entry.name, name) : player.searchTerm,
-          shirtNumber: entry.shirtNumber,
-          wikipediaPage: entry.page,
-        })
-        .where(eq(players.id, id))
-
-      if (personId !== null && player.personId === null) {
-        await transaction
-          .update(matchGoals)
-          .set({ personId })
-          .where(and(eq(matchGoals.playerId, id), isNull(matchGoals.personId)))
-      }
-
-      await recordAction(
-        transaction,
-        {
-          action: 'player.edit',
-          detail: `Aangepast: ${player.name}, ${player.season}. ${changes.join('; ')}`,
-          itemId: id,
-          userId,
-        },
-        now,
-      )
-
-      return { status: 'changed' } as const
-    })
-  } catch (error) {
-    if (error instanceof Refusal) {
-      return { errors: error.errors, status: 'refused' }
-    }
-
-    throw error
   }
 }
 
@@ -424,49 +176,6 @@ export function readPlayerValues(formData: FormData): PlayerValues {
       ]
     }),
   ) as PlayerValues
-}
-
-/**
- * Takes a player out of the squad of his season: `in_squad` goes off, with the moment. The row
- * stays, as it does when the importer finds a player gone. A player with a goal or an
- * appearance belongs to the season and stays in. Writes `player.remove`.
- */
-export async function removePlayer(
-  db: Database,
-  userId: number,
-  id: number,
-  now = new Date(),
-): Promise<RemovePlayerOutcome> {
-  return db.transaction(async (transaction) => {
-    const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
-
-    if (player === undefined) {
-      return 'missing'
-    }
-    if (!player.inSquad) {
-      return 'unchanged'
-    }
-
-    const { appearances, goals } = await usageOf(transaction, id)
-
-    if (appearances > 0 || goals > 0) {
-      return 'in-use'
-    }
-
-    await transaction.update(players).set({ inSquad: false, leftSquadAt: now }).where(eq(players.id, id))
-    await recordAction(
-      transaction,
-      {
-        action: 'player.remove',
-        detail: `Uit de selectie gehaald: ${player.name}, ${player.season}`,
-        itemId: id,
-        userId,
-      },
-      now,
-    )
-
-    return 'done'
-  })
 }
 
 /**
@@ -723,6 +432,298 @@ async function personOfNewPage(
   return person.id
 }
 
+/**
+ * Adds a player to the squad of a season, with the source `redactie`. The person is the one
+ * the editor chose, or the person of the title, or a new one (`findOrAddEditorsPerson`). A
+ * person, a name or a title the season already has is refused. Writes `player.add`, so there is
+ * no player without a row and no row without a player. The name and every field the editor
+ * filled in are the editors' from then on (`players.editors_fields`, issue 1022): the importer
+ * leaves them alone and fills in the rest.
+ */
+async function storePlayer(
+  db: Database,
+  userId: number,
+  season: string,
+  entry: PlayerEntry,
+  now = new Date(),
+): Promise<AddPlayerOutcome> {
+  try {
+    return await db.transaction(async (transaction) => {
+      // Where an error about the person goes: the list, or the field that named him.
+      const personField = entry.personId === null ? (entry.page === null ? 'achternaam' : 'wikipedia') : 'persoon'
+      let personId = entry.personId
+      let created = false
+
+      if (personId === null) {
+        if (entry.name === null) {
+          throw new Refusal({ achternaam: 'Vul de achternaam in.' })
+        }
+
+        ;({ created, id: personId } = await findOrAddEditorsPerson(transaction, { name: entry.name, page: entry.page }))
+      }
+
+      const [person] = await transaction.select().from(persons).where(eq(persons.id, personId))
+
+      if (person === undefined) {
+        throw new Refusal({ persoon: 'Deze persoon bestaat niet meer. Zoek hem opnieuw, of maak een nieuwe persoon.' })
+      }
+
+      const name = playerNameOf(person)
+
+      if (name === '' || [...name].length > playerNameMaxLength) {
+        throw new Refusal({
+          [personField]: `De naam van deze persoon past niet: hoogstens ${playerNameMaxLength} tekens.`,
+        })
+      }
+
+      const page = person.wikipediaPage
+      const [same] = await transaction
+        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
+        .from(players)
+        .where(
+          and(
+            eq(players.season, season),
+            or(
+              eq(players.personId, personId),
+              eq(players.name, name),
+              page === null ? undefined : eq(players.wikipediaPage, page),
+            ),
+          ),
+        )
+
+      if (same !== undefined) {
+        throw new Refusal({
+          [same.personId === personId || entry.personId !== null
+            ? personField
+            : same.wikipediaPage !== null && same.wikipediaPage === page
+              ? 'wikipedia'
+              : 'achternaam']: alreadyThere(same, { name, page, personId }, season),
+        })
+      }
+
+      const [{ insertId }] = await transaction.insert(players).values({
+        editorsFields: [
+          'name',
+          ...(entry.shirtNumber === null ? [] : (['shirt_number'] as const)),
+          ...(entry.position === null ? [] : (['position'] as const)),
+          ...(page === null ? [] : (['wikipedia_page'] as const)),
+        ],
+        name,
+        personId,
+        position: entry.position,
+        searchTerm: searchTermOf(person, name),
+        season,
+        shirtNumber: entry.shirtNumber,
+        source: 'redactie',
+        wikipediaPage: page,
+      })
+
+      await recordAction(
+        transaction,
+        {
+          action: 'player.add',
+          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}`,
+          itemId: insertId,
+          userId,
+        },
+        now,
+      )
+
+      return { id: insertId, status: 'added' } as const
+    })
+  } catch (error) {
+    // A refused player rolls the transaction back, so a person made on the way is not kept.
+    if (error instanceof Refusal) {
+      return { errors: error.errors, status: 'refused' }
+    }
+
+    throw error
+  }
+}
+
+/**
+ * Changes a player: the name, the shirt number, the line and the title. A name the editor
+ * changed goes to the person too, with the source `redactie`, so it changes in every season. A
+ * new title gives a person without one his title, and gives a player without a person the
+ * person of the title; a title that belongs to another person is refused, because joining two
+ * persons is not done here. The goals of a player who gets a person get it too. Writes
+ * `player.edit` with what changed, and nothing for a save that changes nothing. Each field that
+ * changed is the editors' from then on (`players.editors_fields`, issue 1022), so the importer
+ * leaves it alone.
+ */
+async function storePlayerEdit(
+  db: Database,
+  userId: number,
+  id: number,
+  entry: PlayerEntry,
+  now = new Date(),
+): Promise<EditPlayerOutcome> {
+  try {
+    return await db.transaction(async (transaction) => {
+      const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
+
+      if (player === undefined) {
+        return { status: 'missing' } as const
+      }
+      if (entry.name === null) {
+        throw new Refusal({ achternaam: 'Vul de achternaam in.' })
+      }
+
+      const person = player.personId === null ? undefined : await findPerson(transaction, player.personId)
+      const name = joinNameParts(entry.name)
+      const before = nameValuesOf(player, person)
+      const renamed =
+        (entry.name.givenName ?? '') !== before.voornaam ||
+        (entry.name.familyNamePrefix ?? '') !== before.tussenvoegsel ||
+        entry.name.familyName !== before.achternaam
+      let personId = player.personId
+
+      if (entry.page !== null && entry.page !== player.wikipediaPage) {
+        personId = await personOfNewPage(transaction, {
+          entry: { ...entry, name: entry.name, page: entry.page },
+          person,
+        })
+      }
+
+      const [same] = await transaction
+        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
+        .from(players)
+        .where(
+          and(
+            eq(players.season, player.season),
+            ne(players.id, id),
+            or(
+              eq(players.name, name),
+              entry.page === null ? undefined : eq(players.wikipediaPage, entry.page),
+              personId === null || personId === player.personId ? undefined : eq(players.personId, personId),
+            ),
+          ),
+        )
+
+      if (same !== undefined) {
+        throw new Refusal({
+          [same.name.toLowerCase() === name.toLowerCase() ? 'achternaam' : 'wikipedia']: alreadyThere(
+            same,
+            { name, page: entry.page, personId },
+            player.season,
+          ),
+        })
+      }
+
+      const edited: PlayerField[] = [
+        ...(renamed || name !== player.name ? (['name'] as const) : []),
+        ...(entry.shirtNumber === player.shirtNumber ? [] : (['shirt_number'] as const)),
+        ...(entry.position === player.position ? [] : (['position'] as const)),
+        ...(entry.page === player.wikipediaPage ? [] : (['wikipedia_page'] as const)),
+      ]
+      const changes = [
+        name === player.name ? undefined : `naam: ${player.name} → ${name}`,
+        entry.shirtNumber === player.shirtNumber
+          ? undefined
+          : `rugnummer: ${player.shirtNumber ?? 'geen'} → ${entry.shirtNumber ?? 'geen'}`,
+        entry.position === player.position
+          ? undefined
+          : `positie: ${player.position ?? 'onbekend'} → ${entry.position ?? 'onbekend'}`,
+        entry.page === player.wikipediaPage
+          ? undefined
+          : `Wikipedia: ${player.wikipediaPage ?? 'geen'} → ${entry.page ?? 'geen'}`,
+        personId === player.personId ? undefined : `persoon: ${player.personId ?? 'geen'} → ${personId ?? 'geen'}`,
+        // The parts can change while the whole name stays, such as a prefix that moves.
+        renamed && person !== undefined && name === player.name ? 'naam in delen van de persoon' : undefined,
+      ].filter((change) => change !== undefined)
+
+      if (changes.length === 0) {
+        return { status: 'unchanged' } as const
+      }
+      if (renamed && person !== undefined) {
+        await setEditorsName(transaction, person.id, entry.name)
+      }
+
+      await transaction
+        .update(players)
+        .set({
+          editorsFields: [...new Set([...player.editorsFields, ...edited])],
+          name,
+          personId,
+          position: entry.position,
+          searchTerm: renamed ? searchTermOf(entry.name, name) : player.searchTerm,
+          shirtNumber: entry.shirtNumber,
+          wikipediaPage: entry.page,
+        })
+        .where(eq(players.id, id))
+
+      if (personId !== null && player.personId === null) {
+        await transaction
+          .update(matchGoals)
+          .set({ personId })
+          .where(and(eq(matchGoals.playerId, id), isNull(matchGoals.personId)))
+      }
+
+      await recordAction(
+        transaction,
+        {
+          action: 'player.edit',
+          detail: `Aangepast: ${player.name}, ${player.season}. ${changes.join('; ')}`,
+          itemId: id,
+          userId,
+        },
+        now,
+      )
+
+      return { status: 'changed' } as const
+    })
+  } catch (error) {
+    if (error instanceof Refusal) {
+      return { errors: error.errors, status: 'refused' }
+    }
+
+    throw error
+  }
+}
+
+/**
+ * Takes a player out of the squad of his season: `in_squad` goes off, with the moment. The row
+ * stays, as it does when the importer finds a player gone. A player with a goal or an
+ * appearance belongs to the season and stays in. Writes `player.remove`.
+ */
+async function storePlayerRemoval(
+  db: Database,
+  userId: number,
+  id: number,
+  now = new Date(),
+): Promise<RemovePlayerOutcome> {
+  return db.transaction(async (transaction) => {
+    const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
+
+    if (player === undefined) {
+      return 'missing'
+    }
+    if (!player.inSquad) {
+      return 'unchanged'
+    }
+
+    const { appearances, goals } = await usageOf(transaction, id)
+
+    if (appearances > 0 || goals > 0) {
+      return 'in-use'
+    }
+
+    await transaction.update(players).set({ inSquad: false, leftSquadAt: now }).where(eq(players.id, id))
+    await recordAction(
+      transaction,
+      {
+        action: 'player.remove',
+        detail: `Uit de selectie gehaald: ${player.name}, ${player.season}`,
+        itemId: id,
+        userId,
+      },
+      now,
+    )
+
+    return 'done'
+  })
+}
+
 const plain = (text: string) =>
   text
     .normalize('NFD')
@@ -731,12 +732,83 @@ const plain = (text: string) =>
     .replaceAll(/[\s‐-―-]+/gu, ' ')
     .trim()
 
+/** Adds a player (see `storePlayer`) and works out the completeness of the season again. */
+export async function addPlayer(
+  db: Database,
+  userId: number,
+  season: string,
+  entry: PlayerEntry,
+  now = new Date(),
+): Promise<AddPlayerOutcome> {
+  const outcome = await storePlayer(db, userId, season, entry, now)
+
+  if (outcome.status === 'added') {
+    await refreshCompleteness(db, season, now)
+  }
+
+  return outcome
+}
+
+/** Changes a player (see `storePlayerEdit`) and rates the season again. */
+export async function editPlayer(
+  db: Database,
+  userId: number,
+  id: number,
+  entry: PlayerEntry,
+  now = new Date(),
+): Promise<EditPlayerOutcome> {
+  const outcome = await storePlayerEdit(db, userId, id, entry, now)
+
+  if (outcome.status === 'changed') {
+    const [player] = await db.select({ season: players.season }).from(players).where(eq(players.id, id))
+
+    if (player !== undefined) {
+      await refreshCompleteness(db, player.season, now)
+    }
+  }
+
+  return outcome
+}
+
+/** Takes a player out of the squad (see `storePlayerRemoval`) and rates the season again. */
+export async function removePlayer(
+  db: Database,
+  userId: number,
+  id: number,
+  now = new Date(),
+): Promise<RemovePlayerOutcome> {
+  const outcome = await storePlayerRemoval(db, userId, id, now)
+
+  if (outcome === 'done') {
+    const [player] = await db.select({ season: players.season }).from(players).where(eq(players.id, id))
+
+    if (player !== undefined) {
+      await refreshCompleteness(db, player.season, now)
+    }
+  }
+
+  return outcome
+}
+
 /**
  * The name of the row of a player of this person: the name of the person, or, while the
  * importer has not read his article, its title without the addition between brackets.
  */
 function playerNameOf(person: Pick<Person, 'name' | 'wikipediaPage'>) {
   return person.name ?? (person.wikipediaPage ?? '').replace(/\s*\([^)]*\)$/u, '')
+}
+
+/**
+ * Works out the chance that the list of a season is the whole squad again, after its players
+ * changed (#1040). The change of the player stays when this fails: it logs a warning, and the
+ * next import of that season works the row out again.
+ */
+async function refreshCompleteness(db: Database, season: string, now: Date): Promise<void> {
+  try {
+    await storeCompleteness(db, season, undefined, now)
+  } catch (error) {
+    console.warn(`Could not work out the completeness of ${season} after a change of a player`, error)
+  }
 }
 
 /**

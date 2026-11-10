@@ -1812,7 +1812,7 @@ De tests staan in [`src/import-squads.test.ts`](src/import-squads.test.ts): ze d
 #### De volledigheid van de selectie
 
 De kans dat de spelers van een seizoen de hele selectie zijn (`squadCompleteness`, zie [`docs/volledigheid-selectie.md`](../../docs/volledigheid-selectie.md)) staat per seizoen in de tabel `squad_completeness`.
-De site leest haar alleen; de importer rekent haar uit (`storeCompleteness` in [`src/store-completeness.ts`](src/store-completeness.ts)).
+De site leest haar alleen; de importer en Beheer rekenen haar uit (`storeCompleteness` in [`packages/db/src/store-completeness.ts`](../../packages/db/src/store-completeness.ts)), de import van wedstrijden ook voor een seizoen zonder selectiepagina.
 Een seizoen zonder spelers heeft geen rij, en de site leest dat als `onbekend`.
 
 - **Wanneer:** aan het eind van een lezing van de selectie.

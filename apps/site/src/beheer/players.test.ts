@@ -11,10 +11,11 @@ import {
   persons,
   players,
   playerSeasonStats,
+  squadCompleteness,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from './accounts'
 import { findMatch, saveEntry } from './match-entries'
@@ -51,6 +52,7 @@ const t0 = new Date('2026-11-10T12:00:00Z')
 beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM squad_completeness')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
@@ -597,6 +599,48 @@ describe('editPlayer', () => {
 
     expect(await allPersons()).toEqual([])
     expect((await allPlayers())[0]).toMatchObject({ name: 'Jan Willem van der Vos', personId: null, shirtNumber: 3 })
+  })
+})
+
+describe('the completeness of the season (#1040)', () => {
+  const rows = () => database.db.select().from(squadCompleteness)
+
+  it('gets a row when a player is added, and is worked out again after a second player and a removal', async () => {
+    expect(await rows()).toEqual([])
+
+    const outcome = await addPlayer(database.db, userId, season, entry(), t0)
+    const id = 'id' in outcome ? outcome.id : 0
+
+    expect(await rows()).toMatchObject([{ bestSource: 'redactie', playerCount: 1, season }])
+    expect((await rows())[0]?.level).not.toBe('onbekend')
+
+    await addPlayer(
+      database.db,
+      userId,
+      season,
+      entry({ name: { familyName: 'Tweede', familyNamePrefix: null, givenName: 'Piet' } }),
+      t0,
+    )
+    expect(await rows()).toMatchObject([{ playerCount: 2 }])
+
+    expect(await removePlayer(database.db, userId, id, t0)).toBe('done')
+    // The row of the player stays in the table, so the list keeps its two players.
+    expect(await rows()).toMatchObject([{ playerCount: 2, season }])
+  })
+
+  it('leaves the change of the player standing and logs a warning when the calculation fails', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    await database.pool.query('RENAME TABLE squad_completeness TO squad_completeness_away')
+
+    try {
+      expect(await addPlayer(database.db, userId, season, entry(), t0)).toMatchObject({ status: 'added' })
+      expect(await allPlayers()).toHaveLength(1)
+      expect(warn).toHaveBeenCalledOnce()
+    } finally {
+      await database.pool.query('RENAME TABLE squad_completeness_away TO squad_completeness')
+      warn.mockRestore()
+    }
   })
 })
 

@@ -3,7 +3,7 @@
 Dit is het antwoord op issue #745.
 Per seizoen geven we een kans dat de lijst met spelers iedereen bevat die in de selectie zat, ook wie niet speelde.
 Het is een schatting en geen gemeten waarheid, en elk getal op de site zegt dat ook.
-De regel staat in `apps/importer/src/squad-completeness.ts` (`squadCompleteness`).
+De regel staat in `packages/db/src/squad-completeness.ts` (`squadCompleteness`).
 De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één seizoen.
 
 ## De regel

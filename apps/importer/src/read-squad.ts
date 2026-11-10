@@ -126,10 +126,7 @@ export function headerCells(row: string): string[] {
   return cells
 }
 
-/** A key that treats names as the database does: without accents and capitals. */
-export function nameKey(name: string): string {
-  return name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
-}
+export { nameKey } from '@fansite/db/squad-completeness'
 
 /**
  * The name of a cell: what the link shows, `Roberts Uldrikis` for `[[Roberts Uldriķis|Roberts
