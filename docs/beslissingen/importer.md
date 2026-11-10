@@ -3835,4 +3835,7 @@
   `import:status` noemt per seizoen "Players without a person <seizoen>: N of M", en geen regel als het er nul zijn.
 - **Waarom:** de Nederlandse titel is de sleutel van de personen, en zonder persoon kan de kaart Selectie de naam niet splitsen en is de speler niet aan andere seizoenen te koppelen.
   De Engelse Wikipedia geeft de Nederlandse titel alleen via Wikidata, omdat `?action=raw` geen taallinks heeft en `api.php` voor ons dicht staat in `robots.txt`.
+  De vijf rijen van 2000/01 tot 2002/03 hebben geen leesdienst voor de selectie (`squadSources`): het zijn rijen met de bron `verslag` van `import:old-site`.
+  Zijn stap `personen` (`importOldSitePersons`) koppelt alleen als hij zeker is en meldt de rest als twijfel (een doorverwijspagina, een ontbrekend artikel, geen voetballer).
+  Dat blijft zo en hoort bij een eigen issue.
 - **Alternatieven:** alleen de naamstap, maar dan blijven nieuwe spelers zonder persoon; een speler zonder Nederlands artikel zonder persoon laten.

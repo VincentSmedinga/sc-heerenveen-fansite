@@ -870,6 +870,27 @@ describe('importPastSquad', () => {
       expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).toBe(other)
     })
 
+    it('leaves a player alone whose page the editors set, also when the Dutch title is another one', async () => {
+      await database.db.insert(players).values({
+        editorsFields: ['wikipedia_page'],
+        name: 'Daniel Høegh',
+        searchTerm: 'Høegh',
+        season: '2018/19',
+        source: 'redactie',
+        wikipediaPage: 'Daniel Høegh (voetballer)',
+      })
+
+      const report = await run(await servers3())
+      const row = (await storedPlayers('2018/19')).find((one) => one.name === 'Daniel Høegh')
+
+      expect(report).toMatchObject({ kind: 'imported' })
+      expect(row).toMatchObject({
+        personId: null,
+        source: 'redactie',
+        wikipediaPage: 'Daniel Høegh (voetballer)',
+      })
+    })
+
     it('leaves a player without a person when a request fails, warns, and fills him in the next run', async () => {
       const broken = await servers3({ [infoUrl('', 'Daniel Høegh')]: reply(500, 'Kapot') })
       const first = await run(broken)
