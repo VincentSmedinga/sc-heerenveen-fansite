@@ -101,12 +101,11 @@ async function writeBody(page: Page) {
 test.describe('with JavaScript', () => {
   const slug = 'e2e-schrijven-met-js'
   const title = 'Verzonnen artikel met JavaScript'
+  // The tests of this block follow each other on the one article: the first writes the draft
+  // and the others read its address. Each has its own time, not one for the whole story.
+  let editAddress = ''
 
-  test('writes, previews, publishes, changes and withdraws an article with the editor', async ({
-    browser,
-    page,
-    request,
-  }) => {
+  test('writes a draft with the editor, with the errors that cannot lose what was typed', async ({ page }) => {
     // The list has the button for a new article.
     await page.goto('/beheer/artikelen')
     await page.getByRole('button', { name: 'Nieuw artikel' }).click()
@@ -158,13 +157,15 @@ test.describe('with JavaScript', () => {
     await expect(page.getByRole('button', { name: 'Intrekken' })).toHaveCount(0)
     expect(await checkPage(page)).toEqual([])
 
-    const editAddress = new URL(page.url()).pathname
-    const draftResponse = await request.get(`/redactie/${slug}`)
+    editAddress = new URL(page.url()).pathname
+  })
 
-    // A draft is not on the site.
-    expect(draftResponse.status()).toBe(404)
+  test('keeps a draft off the site', async ({ request }) => {
+    expect((await request.get(`/redactie/${slug}`)).status()).toBe(404)
     expect(await (await request.get('/sitemap.xml')).text()).not.toContain(slug)
+  })
 
+  test('previews the draft as a visitor will see it', async ({ page }) => {
     // The preview shows the draft as a visitor will see it, and is never kept or indexed.
     const previewResponse = await page.goto(`${editAddress}/voorbeeld`)
 
@@ -184,7 +185,13 @@ test.describe('with JavaScript', () => {
     await expect(page.locator('article')).toContainText('<b>geen HTML</b>')
     await expect(page.locator('article p:not(.hf-intro) b')).toHaveCount(0)
     expect(await checkPage(page)).toEqual([])
+  })
 
+  test('publishes the draft and puts it on the site, where a visitor reads it with and without JavaScript', async ({
+    browser,
+    page,
+    request,
+  }) => {
     // Publiceren saves what is on the screen and then publishes it.
     await page.goto(editAddress)
     await page.getByLabel('Intro', { exact: true }).fill('Een verzonnen inleiding, nu aangepast voor het publiceren.')
@@ -214,7 +221,9 @@ test.describe('with JavaScript', () => {
     await expect(readerPage.locator('article h2')).toHaveText(['Wie zijn wij?', 'Wat je van ons mag verwachten'])
     await expect(readerPage.locator('article li')).toHaveCount(3)
     await reader.close()
+  })
 
+  test('saves a change that is on the site at once, and keeps the versions', async ({ page }) => {
     // A change is saved and is on the site at once.
     await page.goto(editAddress)
     await page.getByLabel('Titel', { exact: true }).fill(`${title}, verbeterd`)
@@ -247,7 +256,9 @@ test.describe('with JavaScript', () => {
 
     // A version that the article never had is "niet gevonden".
     expect((await page.goto(`${editAddress}/versies/4`))?.status()).toBe(404)
+  })
 
+  test('withdraws the article and makes it a draft again', async ({ page, request }) => {
     // Withdrawing takes it off the site and makes it a draft again.
     await page.goto(editAddress)
     await page.getByRole('button', { name: 'Intrekken' }).click()

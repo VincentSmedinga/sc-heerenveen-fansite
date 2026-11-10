@@ -21,6 +21,8 @@ export const minimumAnswerMilliseconds = 400
 export type LoginMail = { code: string; to: string; url: string }
 
 export type LoginRequestDeps = {
+  /** The clock in milliseconds that the work is timed with; only a test passes another one. */
+  clock?: () => number
   /** Runs a task after the response is sent (`after` of Next.js). */
   defer: (task: () => Promise<void>) => void
   /** Hands the mail over, after the answer has gone out. */
@@ -51,8 +53,8 @@ export async function handleLoginRequest(
   value: string,
   deps: LoginRequestDeps,
 ): Promise<LoginRequestResult> {
-  const { defer, deliver, now = () => new Date(), origin, wait = sleep } = deps
-  const started = Date.now()
+  const { clock = Date.now, defer, deliver, now = () => new Date(), origin, wait = sleep } = deps
+  const started = clock()
   const result = await decide(db, value, now(), origin)
 
   if (result.mail !== undefined) {
@@ -68,7 +70,7 @@ export async function handleLoginRequest(
     })
   }
 
-  await wait(Math.max(0, minimumAnswerMilliseconds - (Date.now() - started)))
+  await wait(Math.max(0, minimumAnswerMilliseconds - (clock() - started)))
 
   return result.answer === 'sent' ? { answer: 'sent', ref: result.ref } : { answer: result.answer }
 }

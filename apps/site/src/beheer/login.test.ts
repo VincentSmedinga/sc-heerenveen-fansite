@@ -33,11 +33,12 @@ beforeEach(async () => {
  * Handles a request the way the action does, with the mails and the waiting recorded instead of
  * done.
  */
-async function request(value: string, now = start) {
+async function request(value: string, now = start, clock: () => number = Date.now) {
   const mails: { code: string; to: string; url: string }[] = []
   const waits: number[] = []
   const deferred: (() => Promise<void>)[] = []
   const { answer, ...rest } = await handleLoginRequest(database.db, value, {
+    clock,
     defer: (task) => deferred.push(task),
     deliver: (mail) => {
       mails.push(mail)
@@ -137,16 +138,18 @@ describe('a request for a login link', () => {
   })
 
   it('takes the same time for an address with an account and one without, however long the work took', async () => {
-    const known = await request('jelle@example.org')
-    const unknown = await request('niemand@example.org')
+    // A clock that the test controls: the work takes 125 ms for both, on any machine.
+    const clockOf = () => {
+      let reading = 0
 
-    // The work takes a few milliseconds, so what is left to wait is the minimum minus that, for
-    // both.
-    for (const { waits } of [known, unknown]) {
-      expect(waits).toHaveLength(1)
-      expect(waits[0]).toBeGreaterThan(minimumAnswerMilliseconds - 300)
-      expect(waits[0]).toBeLessThanOrEqual(minimumAnswerMilliseconds)
+      return () => (reading += 125)
     }
+    const known = await request('jelle@example.org', start, clockOf())
+    const unknown = await request('niemand@example.org', start, clockOf())
+
+    // What is left to wait is the minimum minus the time the work took, for both, exactly.
+    expect(known.waits).toEqual([minimumAnswerMilliseconds - 125])
+    expect(unknown.waits).toEqual(known.waits)
   })
 
   it('does not wait for the mail: a mail server that is slow or down does not change the answer', async () => {
