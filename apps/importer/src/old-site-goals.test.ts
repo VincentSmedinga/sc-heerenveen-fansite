@@ -559,6 +559,75 @@ describe('the steps spelers and doelpunten', () => {
     expect((await playerRows()).map((one) => one.name)).toHaveLength(4)
   })
 
+  it('gives the rows of an earlier run the spellings the owner chose on 10 November 2026', async () => {
+    const list = [
+      { code: 'radoslav.samardzic', firstName: 'Radoslav', infix: null, lastName: 'Samardzic', line: null },
+      { code: 'ugur.yildirim', firstName: 'Ugur', infix: null, lastName: 'Yildirim', line: null },
+      { code: 'janharm.schippers', firstName: 'Jan-Harm', infix: null, lastName: 'Schippers', line: null },
+      { code: 'robert.vanderberg', firstName: 'Robert', infix: 'van der', lastName: 'Berg', line: null },
+    ]
+    const match = oldMatch({ events: list.map((player, index) => goal(10 + index, player.code)) })
+    const season = '2001/02'
+
+    // The rows of an earlier run. The database calls `Samardzic` and `Samardžić` the same name
+    // (the collation ignores accents), so that row is renamed. The others are another name:
+    // the run makes the row of the chosen spelling and merges the old row into it. Robert van
+    // den Berg is in the squad of Wikipedia already, and the row of the squad stays.
+    await database.db.insert(players).values([
+      { name: 'Radoslav Samardzic', searchTerm: 'Samardzic', season, source: 'verslag' },
+      { name: 'Ugur Yildirim', searchTerm: 'Yildirim', season, source: 'verslag' },
+      { name: 'Jan-Harm Schippers', searchTerm: 'Schippers', season, source: 'verslag' },
+      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'verslag' },
+      { name: 'Robert van den Berg', searchTerm: 'van den Berg', season, source: 'selectie' },
+    ])
+    await importOldSiteClubs(database.db, oldClubs)
+    await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+
+    const [row] = await database.db.select().from(matches)
+    const before = await playerRows()
+    const idOf = (name: string) => before.find((one) => one.name === name)!.id
+
+    await database.db.insert(matchGoals).values(
+      ['Radoslav Samardzic', 'Ugur Yildirim', 'Jan-Harm Schippers', 'Robert van der Berg'].map((player, index) => ({
+        matchId: row!.id,
+        minute: 10 + index,
+        ours: true,
+        player,
+        playerId: idOf(player),
+      })),
+    )
+
+    const first = await importOldSitePlayers(database.db, [match], list)
+    const after = await playerRows()
+
+    expect(first).toMatchObject({ changed: 4, created: 2, unchanged: 1 })
+    expect(first.lines).toEqual([
+      'Radoslav Samardzic (2001/02) is now Radoslav Samardžić',
+      'Ugur Yildirim (2001/02) is merged into Uğur Yıldırım',
+      'Jan-Harm Schippers (2001/02) is merged into Jan Harm Schippers',
+      'Robert van der Berg (2001/02) is merged into Robert van den Berg',
+    ])
+    expect(after.map((one) => `${one.name} | ${one.searchTerm} | ${one.source}`)).toEqual([
+      'Jan Harm Schippers | Schippers | verslag',
+      'Radoslav Samardžić | Samardžić | verslag',
+      'Robert van den Berg | van den Berg | selectie',
+      'Uğur Yıldırım | Yıldırım | verslag',
+    ])
+    // The renamed row keeps its `id`, and every goal has a player still.
+    expect(after.find((one) => one.name === 'Radoslav Samardžić')!.id).toBe(idOf('Radoslav Samardzic'))
+    expect((await goalRows()).map((one) => after.find((player) => player.id === one.playerId)?.name)).toEqual([
+      'Radoslav Samardžić',
+      'Uğur Yıldırım',
+      'Jan Harm Schippers',
+      'Robert van den Berg',
+    ])
+
+    const again = await importOldSitePlayers(database.db, [match], list)
+
+    expect(again).toMatchObject({ changed: 0, created: 0, lines: [], unchanged: 4 })
+    expect(await playerRows()).toEqual(after)
+  })
+
   it('links the own goal of a player of ours to him, under the opponent', async () => {
     await run([
       oldMatch({

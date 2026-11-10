@@ -1,5 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
+import { mergePersons } from '@fansite/db/person-merge'
 import {
   knownPersonPages,
   type PersonName,
@@ -12,7 +13,7 @@ import type { Fetcher } from './fetcher.ts'
 
 import { lookUpTitles } from './club-pages.ts'
 import { fitsColumns, manualNames, personNameOf } from './person-name.ts'
-import { personNames } from './person-names.ts'
+import { personNames, type PersonTitleAlias, personTitleAliases } from './person-names.ts'
 import { printable } from './text.ts'
 
 // The page Kwaliteit of the admin lists the same groups, so the function is in the database
@@ -195,6 +196,31 @@ export async function lookUpPersonPages(
   }
 
   return { asked, names, redirects, warnings }
+}
+
+/**
+ * Merges the persons the owner said are one person (`personTitleAliases`), before an import
+ * asks Wikipedia about its titles: see `mergePersons`. A person that gets the title that stays
+ * gets the name the import guesses from that title, or the one of the list `personNames`.
+ * Returns the lines for the warnings of the run, each starting with `Persons:`: one for each
+ * person merged or renamed, and one for what two merged persons had and differed. A run with
+ * nothing to merge returns none.
+ */
+export async function mergeListedPersons(
+  db: Pick<Database, 'select' | 'transaction'>,
+  list: readonly PersonTitleAlias[] = personTitleAliases,
+): Promise<string[]> {
+  const manual = manualNames(personNames)
+  const names = new Map(
+    list.flatMap(({ title }) => {
+      const name = personNameOf(title, null, manual)
+
+      return fitsColumns(name) ? [[title, name] as const] : []
+    }),
+  )
+  const { merged, warnings } = await mergePersons(db, list, names)
+
+  return [...merged.map((line) => printable(`Persons: ${line}`)), ...warnings.map((line) => printable(line))]
 }
 
 /** The warning for `similarPersons`, or undefined when no persons look alike. */

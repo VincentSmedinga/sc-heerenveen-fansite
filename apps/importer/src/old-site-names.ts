@@ -7,6 +7,8 @@
 // them: he and Erwin Koeman are both in the line-up of the same match. Any other near-duplicate
 // stays as it is and is listed by the check report (`old-site-name-clusters.ts`) for the owner
 // to decide.
+// The owner decided four more on 10 November 2026 (issue 1027): Jan Harm Schippers, Radoslav
+// Samardžić, Robert van den Berg and Uğur Yıldırım. The same four are in `personTitleAliases`.
 // A name of a player of ours comes from the old table `speler` or from a code, and goes through
 // the same corrections (`resolveOldSiteCode`), so the step `spelers` finds a player who is in
 // `players` already from another source, such as the squad of Wikipedia, and adds no other.
@@ -63,6 +65,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Istvan Széker', 'István Szekér'],
   ['Ivan Tzvekov', 'Ivan Tsvetkov'],
   ['Ivan Tzvetkov', 'Ivan Tsvetkov'],
+  ['Jan-Harm Schippers', 'Jan Harm Schippers'],
   ['Jan-Willem van Ede', 'Jan Willem van Ede'],
   ['Jan Martens', 'Jan-Pieter Martens'],
   ['Jan Paul Saeijs', 'Jan-Paul Saeijs'],
@@ -127,6 +130,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Pavel Mikhalevitch', 'Pavel Mikhalevich'],
   ['Pedrag Djordjevic', 'Predrag Djordjevic'],
   ['Peter Zois', 'Peter Zoïs'],
+  ['Radoslav Samardzic', 'Radoslav Samardžić'],
   ['Rahim Ouedraego', 'Rahim Ouédraogo'],
   ['Rahim Ouedraegou', 'Rahim Ouédraogo'],
   ['Rahim Ouedraogo', 'Rahim Ouédraogo'],
@@ -137,6 +141,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Robbie Alflen', 'Rob Alflen'],
   ['Robert McKinnon', 'Rob McKinnon'],
   ['Roberto Lankohr', 'Roberto Lanckohr'],
+  ['Robert van der Berg', 'Robert van den Berg'],
   ['Ronald Jansen', 'Roland Jansen'],
   ['Ronnie Venema', 'Ronny Venema'],
   ['Rui Montero', 'Rui Monteiro'],
@@ -154,6 +159,7 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Tommy Simons', 'Timmy Simons'],
   ['Tom van der Leegte', 'Tommie van der Leegte'],
   ['Tom van Mol', 'Tom Van Mol'],
+  ['Ugur Yildirim', 'Uğur Yıldırım'],
   ['Ullrich van Gobbel', 'Ulrich van Gobbel'],
   ['Ulrich Crüden', 'Ulrich Cruden'],
   ['Virgil Breetvelt', 'Virgil Breetveld'],
@@ -171,26 +177,9 @@ export const oldSiteNameCorrections: ReadonlyMap<string, string> = new Map([
   ['Zjelko Petrovic', 'Željko Petrović'],
 ])
 
-/** Names that look alike and are two people, so the check report does not list them. */
-export const oldSiteDistinctNames: readonly (readonly string[])[] = [
-  ['Brian Tevreden', 'Brian Tevreden II'],
-  ['Ruud Kool', 'Ruud Knol'],
-]
-
 /** The name in a field of the file with single spaces and the owner's correction, or empty. */
 export function cleanOldSiteName(name: null | string): string {
   const clean = (name ?? '').replace(/\s+/gu, ' ').trim()
 
   return oldSiteNameCorrections.get(clean) ?? clean
 }
-
-/**
- * Spellings on the squad cards that may be one person, not decided yet: the check report lists
- * them and nothing changes. They come from the squads, not from the files of the old fansite.
- */
-export const oldSiteSquadNamesToDecide: readonly (readonly string[])[] = [
-  ['Radoslav Samardžić', 'Radoslav Samardzic'],
-  ['Jan Harm Schippers', 'Jan-Harm Schippers'],
-  ['Robert van den Berg', 'Robert van der Berg'],
-  ['Jordy Bruijn', 'Jordy Buijs'],
-]

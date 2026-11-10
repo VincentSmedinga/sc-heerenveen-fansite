@@ -26,7 +26,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
-import { formatSquadReport, importSquad } from './import-squad.ts'
+import { formatSquadReport, importSquad, storeChosenSpellings } from './import-squad.ts'
 import { squadPageTitle } from './read-squad.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
@@ -545,6 +545,82 @@ describe('reading again', () => {
       { name: 'Luca Öyen', searchTerm: 'Oyen' },
     ])
   })
+
+  it('merges the persons the owner said are one person at the start of a run, and says so once', async () => {
+    const { server } = await serve()
+    const [{ insertId: kept }] = await database.db.insert(persons).values({ wikipediaPage: 'Uğur Yıldırım' })
+
+    await database.db.insert(persons).values({ wikipediaPage: 'Ugur Yıldırım' })
+
+    const report = await importAt(server, first)
+    const titles = async () => (await database.db.select().from(persons)).map((row) => row.wikipediaPage)
+
+    expect(report.kind === 'imported' ? report.warnings : []).toContain(
+      "Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'",
+    )
+    expect(await titles()).toContain('Uğur Yıldırım')
+    expect(await titles()).not.toContain('Ugur Yıldırım')
+    expect(await database.db.select().from(personPages).where(eq(personPages.page, 'Ugur Yıldırım'))).toEqual([
+      { page: 'Ugur Yıldırım', personId: kept },
+    ])
+
+    const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(again.kind).toBe('imported')
+    expect((again.kind === 'imported' ? again.warnings : []).filter((line) => line.includes('merged'))).toEqual([])
+  })
+
+  it('keeps one row and the spelling that stays when the table writes the other title again', async () => {
+    const { page, server } = await serve(original.replace('[[Luca Oyen]]', '[[Jan Harm Schippers]]'))
+
+    await importAt(server, first)
+
+    const [before] = await database.db.select().from(players).where(eq(players.name, 'Jan Harm Schippers'))
+
+    expect(before).toMatchObject({ wikipediaPage: 'Jan Harm Schippers' })
+    page.squad = original.replace('[[Luca Oyen]]', '[[Jan-Harm Schippers]]')
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
+    expect(await database.db.select().from(players)).toHaveLength(25)
+    expect(await database.db.select().from(players).where(eq(players.id, before!.id))).toMatchObject([
+      { name: 'Jan Harm Schippers', personId: before!.personId, wikipediaPage: 'Jan Harm Schippers' },
+    ])
+    expect(
+      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage?.includes('Schippers')),
+    ).toMatchObject([{ id: before!.personId, wikipediaPage: 'Jan Harm Schippers' }])
+  })
+
+  it.each([
+    ['Jan-Harm Schippers', 'Schippers', 'Jan Harm Schippers', 'Schippers'],
+    ['Robert van der Berg', 'van der Berg', 'Robert van den Berg', 'van den Berg'],
+  ])(
+    'renames the row of %s when the row and the table both have the other spelling still',
+    async (other, otherTerm, stays, term) => {
+      const { page, server } = await serve()
+
+      await importAt(server, first)
+
+      // A row of before the owner chose: the name and the page are the other spelling.
+      const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+
+      await database.db
+        .update(players)
+        .set({ name: other, searchTerm: otherTerm, wikipediaPage: other })
+        .where(eq(players.id, oyen!.id))
+      page.squad = original.replace('[[Luca Oyen]]', `[[${other}]]`)
+
+      const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0 } })
+      // The season ends with one row for him: the same row, in the spelling that stays.
+      expect(await database.db.select().from(players)).toHaveLength(25)
+      expect(
+        (await database.db.select().from(players)).filter((row) => [other, stays].includes(row.name)),
+      ).toMatchObject([{ id: oyen!.id, inSquad: true, name: stays, searchTerm: term, wikipediaPage: stays }])
+    },
+  )
 
   describe('a player the import of the matches made of a scorer (#1024)', () => {
     const scorer = { searchTerm: 'Klaverboer', season, source: 'doelpunten' as const }
@@ -1335,5 +1411,66 @@ describe('the status', () => {
 
     expect(matchPart).not.toContain('Sc Heerenveen in het seizoen')
     expect(text.slice(text.indexOf('Squad'))).toContain('page: Sc Heerenveen in het seizoen 2026/27 (mannen)')
+  })
+})
+
+describe('storeChosenSpellings', () => {
+  const season = '1996/97'
+  const rows = async () =>
+    (await database.db.select().from(players).where(eq(players.season, season)).orderBy(asc(players.name))).map(
+      (row) => `${row.name} | ${row.searchTerm} | ${row.wikipediaPage}`,
+    )
+
+  it('gives each of the four the spelling that stays, with the surname as search term, and then changes nothing', async () => {
+    await database.db.insert(players).values([
+      { name: 'Jan-Harm Schippers', searchTerm: 'Schippers', season, wikipediaPage: 'Jan-Harm Schippers' },
+      { name: 'Radoslav Samardzic', searchTerm: 'Samardzic', season },
+      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'transfers' },
+      { name: 'Ugur Yıldırım', searchTerm: 'Yıldırım', season, wikipediaPage: 'Ugur Yıldırım' },
+      { name: 'Jordy Buijs', searchTerm: 'Buijs', season },
+      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season: '1997/98' },
+    ])
+
+    const before = await database.db.select().from(players).orderBy(asc(players.id))
+
+    expect(await storeChosenSpellings(database.db, season)).toBe(4)
+    expect(await rows()).toEqual([
+      'Jan Harm Schippers | Schippers | Jan Harm Schippers',
+      'Jordy Buijs | Buijs | null',
+      'Radoslav Samardžić | Samardžić | null',
+      'Robert van den Berg | van den Berg | null',
+      'Uğur Yıldırım | Yıldırım | Uğur Yıldırım',
+    ])
+    // Every row keeps its `id`, and the row of another season is not touched.
+    expect((await database.db.select().from(players).orderBy(asc(players.id))).map((row) => row.id)).toEqual(
+      before.map((row) => row.id),
+    )
+    expect(await database.db.select().from(players).where(eq(players.season, '1997/98'))).toMatchObject([
+      { name: 'Robert van der Berg' },
+    ])
+    expect(await storeChosenSpellings(database.db, season)).toBe(0)
+  })
+
+  it('merges the row of the other spelling into the row that stays when the season has both', async () => {
+    const [{ insertId: stays }] = await database.db
+      .insert(players)
+      .values({ name: 'Robert van den Berg', searchTerm: 'van den Berg', season })
+    const [{ insertId: other }] = await database.db
+      .insert(players)
+      .values({ name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'transfers' })
+
+    await database.db.insert(playerSeasonStats).values({
+      appearances: 3,
+      assists: 0,
+      competition: 'Eredivisie',
+      goals: 1,
+      playerId: other,
+      season,
+    })
+
+    expect(await storeChosenSpellings(database.db, season)).toBe(1)
+    expect(await rows()).toEqual(['Robert van den Berg | van den Berg | null'])
+    expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ goals: 1, playerId: stays }])
+    expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
 })
