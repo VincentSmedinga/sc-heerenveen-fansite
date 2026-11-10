@@ -62,36 +62,8 @@ export default async function MergePersonsPage({ searchParams }: Props) {
         ]),
   ]
 
-  if (view === 'missing' || view === 'same') {
-    return (
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Breadcrumb current="Personen samenvoegen" items={crumbs} label="Kruimelpad" />
-            <Heading level={1}>Personen samenvoegen</Heading>
-          </>
-        }
-        wide
-      >
-        <Text>
-          <Strong>Samenvoegen kan niet.</Strong>{' '}
-          {view === 'same'
-            ? 'Je koos twee keer dezelfde persoon. Kies een andere persoon om mee samen te voegen.'
-            : 'Een van de twee personen bestaat niet meer. Misschien zijn ze al samengevoegd. Zoek de speler opnieuw op en kijk wat er nu staat.'}
-        </Text>
-        <Text>
-          <Link href={back.href}>{back.label}</Link>
-        </Text>
-      </Page.Main>
-    )
-  }
-
-  const { kept, other } = view
-  const [keptName, otherName] = personLabels(kept, other)
-  const differences = mergeDifferences(view)
-  const keptFacts = personFacts(kept)
-  const otherFacts = personFacts(other)
+  const plan = view === 'missing' || view === 'same' ? undefined : view
+  const [keptName, otherName] = plan === undefined ? [] : personLabels(plan.kept, plan.other)
 
   return (
     <Page.Main
@@ -100,14 +72,64 @@ export default async function MergePersonsPage({ searchParams }: Props) {
         <>
           <Breadcrumb current="Personen samenvoegen" items={crumbs} label="Kruimelpad" />
           <Heading level={1}>Personen samenvoegen</Heading>
-          <Text appearance="intro">
-            Je maakt van twee personen één persoon. {keptName} blijft en {otherName} verdwijnt: alles van {otherName}{' '}
-            gaat naar {keptName}. Dat kun je niet terugdraaien. Lees daarom eerst wat er gebeurt.
-          </Text>
+          {plan === undefined ? null : (
+            <Text appearance="intro">
+              Je maakt van twee personen één persoon. {keptName} blijft en {otherName} verdwijnt: alles van {otherName}{' '}
+              gaat naar {keptName}. Dat kun je niet terugdraaien. Lees daarom eerst wat er gebeurt.
+            </Text>
+          )}
         </>
       }
       wide
     >
+      {plan === undefined ? (
+        <>
+          <Text>
+            <Strong>Samenvoegen kan niet.</Strong>{' '}
+            {view === 'same'
+              ? 'Je koos twee keer dezelfde persoon. Kies een andere persoon om mee samen te voegen.'
+              : 'Een van de twee personen bestaat niet meer. Misschien zijn ze al samengevoegd. Zoek de speler opnieuw op en kijk wat er nu staat.'}
+          </Text>
+          <Text>
+            <Link href={back.href}>{back.label}</Link>
+          </Text>
+        </>
+      ) : (
+        <MergePlan back={back} plan={plan} playerId={from?.player.id} />
+      )}
+    </Page.Main>
+  )
+}
+
+/** One value the two persons do not share, as a sentence that says which stays and why. */
+function differenceText({ kept, label, other, result }: MergeDifference, otherName: string) {
+  if (result === kept) {
+    return other === none ? `${label}: ${kept} blijft.` : `${label}: ${kept} blijft, ${other} verdwijnt.`
+  }
+
+  return kept === none
+    ? `${label}: ${result} komt van ${otherName} en blijft.`
+    : `${label}: ${result} blijft, want de redactie stelde die in bij ${otherName}. ${kept} verdwijnt.`
+}
+
+/** What the merge does, in three cards, and the form that confirms it. */
+function MergePlan({
+  back,
+  plan,
+  playerId,
+}: {
+  back: { href: string; label: string }
+  plan: PersonMergePlan
+  playerId: number | undefined
+}) {
+  const { kept, other } = plan
+  const [keptName, otherName] = personLabels(kept, other)
+  const differences = mergeDifferences(plan)
+  const keptFacts = personFacts(kept)
+  const otherFacts = personFacts(other)
+
+  return (
+    <>
       <Card aria-labelledby="personen-kop">
         <Heading id="personen-kop" level={2}>
           De twee personen
@@ -122,7 +144,7 @@ export default async function MergePersonsPage({ searchParams }: Props) {
               header: label,
             })),
             {
-              cells: [seasonsText(view.keptSeasons), seasonsText(view.rows.map((row) => row.season))],
+              cells: [seasonsText(plan.keptSeasons), seasonsText(plan.rows.map((row) => row.season))],
               header: 'Seizoenen',
             },
             { cells: [kept.id, other.id], header: 'Nummer van de persoon' },
@@ -130,7 +152,7 @@ export default async function MergePersonsPage({ searchParams }: Props) {
         />
         <Text>
           Moet de andere blijven?{' '}
-          <Link href={mergePath({ keptId: other.id, personId: kept.id, playerId: from?.player.id, withId: other.id })}>
+          <Link href={mergePath({ keptId: other.id, personId: kept.id, playerId, withId: other.id })}>
             Laat {otherName} blijven en {keptName} verdwijnen
           </Link>
         </Text>
@@ -163,11 +185,11 @@ export default async function MergePersonsPage({ searchParams }: Props) {
           Dit gaat van {otherName} naar {keptName}:
         </Text>
         <List role="list">
-          {movedLines(view).map((line) => (
+          {movedLines(plan).map((line) => (
             <List.Item key={line}>{line}</List.Item>
           ))}
         </List>
-        {view.doubles.map(({ gone, season, stays }) => (
+        {plan.doubles.map(({ gone, season, stays }) => (
           <Text key={gone.id}>
             <Strong>In {season} hebben beide personen een rij.</Strong> Die twee rijen worden één:{' '}
             {gone.name === stays.name
@@ -178,24 +200,13 @@ export default async function MergePersonsPage({ searchParams }: Props) {
         ))}
       </Card>
       <MergeForm
-        action={submitMergePersons.bind(null, other.id, kept.id, from?.player.id)}
+        action={submitMergePersons.bind(null, other.id, kept.id, playerId)}
         backHref={back.href}
         backLabel={`${back.label}, zonder samen te voegen`}
         label={`Voeg ${otherName} samen met ${keptName}`}
       />
-    </Page.Main>
+    </>
   )
-}
-
-/** One value the two persons do not share, as a sentence that says which stays and why. */
-function differenceText({ kept, label, other, result }: MergeDifference, otherName: string) {
-  if (result === kept) {
-    return other === none ? `${label}: ${kept} blijft.` : `${label}: ${kept} blijft, ${other} verdwijnt.`
-  }
-
-  return kept === none
-    ? `${label}: ${result} komt van ${otherName} en blijft.`
-    : `${label}: ${result} blijft, want de redactie stelde die in bij ${otherName}. ${kept} verdwijnt.`
 }
 
 /** What moves from the person that goes to the person that stays, a line for each kind. */
