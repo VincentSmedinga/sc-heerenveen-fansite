@@ -6,9 +6,7 @@
 // come from a measurement on ten seasons with a table of the whole squad
 // (docs/volledigheid-selectie.md).
 // The function reads nothing and asks nothing: the caller gives it the facts of one season.
-import type { PlayerSource } from '@fansite/db/schema'
-
-import { nameKey } from './read-squad.ts'
+import type { PlayerSource } from './schema.ts'
 
 export type CompletenessCheck = {
   /** What the check found, in one sentence. */
@@ -51,6 +49,11 @@ export type SquadCompletenessInput = {
    * when the season has no goals in the database.
    */
   scorers: CompletenessScorer[] | null
+}
+
+/** A key that treats names as the database does: without accents and capitals. */
+export function nameKey(name: string): string {
+  return name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
 /**

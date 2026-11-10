@@ -2527,6 +2527,7 @@
   De som van de tabel is alleen bekend tijdens het lezen, dus de uitkomst en dat bewijs worden samen bewaard.
 - **Alternatieven:** rekenen op de pagina (de regel zit dan in de site, de bronnen en de doelpunten moeten bij elk verzoek mee, en de som is dan weg).
 - **Later:** een seizoen met alleen spelers uit de verslagen (`verslag`) heeft sinds 9 november 2026 ook een rij, ook al leest geen lijst een selectie; zie _De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen_ (#935).
+- **Later:** zie _De rij van de volledigheid staat ook voor een seizoen zonder selectiepagina_ (10 november 2026): de code staat in `packages/db`, en Beheer rekent de rij uit na een wijziging van een speler.
 
 ## De controle op de doelpuntenmakers valt terug op de naam
 
@@ -3793,3 +3794,15 @@
   Een doelpuntenmaker die Wikipedia onder de doorverwijzing linkt (`Filip Djuričić`) heeft al de persoon van de titel die blijft, want de personenlijst volgt de doorverwijzing.
   Er was dus geen persoon om samen te voegen, en zijn rij van 2010/11 bleef de oude spelling houden.
 - **Alternatieven:** de rij alleen veranderen bij het maken in `adoptScorers` (een rij die al bestaat blijft dan fout).
+
+## De rij van de volledigheid staat ook voor een seizoen zonder selectiepagina
+
+- **Datum:** 10 november 2026
+- **Besluit:** de beoordeling van de selectie (`squadCompleteness` en `storeCompleteness`) staat in `packages/db` (`squad-completeness.ts` en `store-completeness.ts`), zodat de importer en Beheer haar op dezelfde manier uitrekenen (#1040).
+  De import van wedstrijden rekent de rij van het seizoen uit bij elke lezing, niet alleen als er een speler uit een doelpunt bij komt.
+  Een rij die niet verandert, wordt niet herschreven.
+  Een seizoen met een selectiepagina houdt zijn hogere niveau, want de beoordeling neemt het beste plafond.
+- **Waarom:** de beoordeling blijft de enige plek die zegt hoe compleet een lijst is, en de kaart leest haar alleen.
+  Voor 2025/26 bestaat geen pagina op Wikipedia (#1037), dus er was nooit een rij, en de kaart verborg 18 bekende spelers.
+  Elke lezing, omdat een seizoen dat zijn spelers kreeg vóór deze regel anders pas een rij krijgt bij de volgende speler uit een doelpunt.
+- **Alternatieven:** de kaart laat spelers ook zonder rij zien (twee plekken die beslissen); de code in de importer laten en Beheer de importer laten aanroepen (een app die een andere app importeert).

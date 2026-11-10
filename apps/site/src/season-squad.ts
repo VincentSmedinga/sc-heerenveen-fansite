@@ -92,6 +92,11 @@ export function completenessSentence(completeness: SeasonSquad['completeness'], 
     return `${known}, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk.`
   }
 
+  // The list of the matches and the editors: who scored and who the editors added.
+  if (completeness.bestSource === 'doelpunten' || completeness.bestSource === 'redactie') {
+    return `${known}: wie scoorde of door de redactie is toegevoegd. De selectie is niet compleet.`
+  }
+
   switch (completeness.level) {
     case 'bijna':
       return `${known}. Er ontbreken waarschijnlijk een paar.`

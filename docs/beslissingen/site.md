@@ -4196,3 +4196,17 @@
   De invoer bewaren in `sessionStorage` en na terugkomst terugzetten (werkt alleen met JavaScript, en de invoer van een ander bezoek kan blijven hangen).
   De invoer bewaren op de server als concept (een tabel erbij voor iets wat minuten leeft).
   Een link bij elk doelpunt.
+
+## De kaart Selectie heeft een eigen zin voor een lijst uit doelpunten en van de redactie
+
+- **Datum:** 10 november 2026
+- **Besluit:** is de beste bron van het seizoen `doelpunten` of `redactie`, dan zegt de zin onder de kop:
+  "We kennen N spelers van dit seizoen: wie scoorde of door de redactie is toegevoegd.
+  De selectie is niet compleet." (#1040).
+  De zinnen voor de andere bronnen veranderen niet.
+  Beheer rekent de rij van het seizoen opnieuw uit na het toevoegen, wijzigen en uit de selectie halen van een speler.
+  Mislukt dat, dan blijft de wijziging van de speler staan en komt er een waarschuwing in het logboek.
+- **Waarom:** de lezer ziet waar de lijst vandaan komt, zoals bij de verslagen.
+  De zin van `weinig` ("vooral wie scoorde of overkwam") klopt niet voor spelers die de redactie toevoegde.
+  De kaart leest alleen de rij (_De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_): de fix zit in de beoordeling.
+- **Alternatieven:** de bestaande zin van `weinig` houden; Beheer laten falen als de rij niet lukt (een speler die de redactie niet kan toevoegen om een reden die haar niet raakt).

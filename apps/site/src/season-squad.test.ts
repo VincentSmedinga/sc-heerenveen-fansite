@@ -90,6 +90,25 @@ describe('completenessSentence', () => {
   })
 })
 
+describe('completenessSentence for a list from goals or the editors (#1040)', () => {
+  it('says who is on the list and that the squad is not complete, for both sources', () => {
+    for (const bestSource of ['doelpunten', 'redactie'] as const) {
+      expect(completenessSentence({ bestSource, level: 'weinig', playerCount: 18 })).toBe(
+        'We kennen 18 spelers van dit seizoen: wie scoorde of door de redactie is toegevoegd. De selectie is niet compleet.',
+      )
+    }
+  })
+
+  it('keeps the sentences of the other sources', () => {
+    expect(completenessSentence({ bestSource: 'selectie', level: 'weinig', playerCount: 5 })).toBe(
+      'We kennen 5 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.',
+    )
+    expect(completenessSentence({ bestSource: 'selectie', level: 'compleet', playerCount: 25 })).toContain(
+      'Waarschijnlijk staat iedereen',
+    )
+  })
+})
+
 describe('the credit of the pages of the squad', () => {
   it('knows the page of the English Wikipedia by its title', () => {
     expect(isEnglishPage('2018–19 SC Heerenveen season')).toBe(true)

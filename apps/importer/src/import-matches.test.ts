@@ -16,6 +16,7 @@ import {
   persons,
   players,
   sources,
+  squadCompleteness,
   squadImports,
   standings,
   wikipediaPages,
@@ -93,6 +94,7 @@ beforeEach(async () => {
     'wikipedia_pages',
     'match_imports',
     'squad_imports',
+    'squad_completeness',
     'sources',
   ]) {
     await database.pool.query(`DELETE FROM ${table}`)
@@ -2910,6 +2912,20 @@ describe('linking the goals to the players of the squad', () => {
     const rivera = '{{goal|82}} [[Maxence Rivera|Rivera]]'
     const linked = original.programme.replace(rivera, '{{goal|82}} [[Pelle van Amersfoort|Van Amersfoort]]')
     const ofPelle = () => database.db.select().from(players).where(eq(players.name, 'Pelle van Amersfoort'))
+
+    it('gives a season whose players come from goals only a row of completeness, once (#1040)', async () => {
+      const { server } = await serve({ programme: linked })
+
+      await importAt(server, first)
+      const rows = await database.db.select().from(squadCompleteness)
+
+      expect(rows).toMatchObject([{ bestSource: 'doelpunten', playerCount: 11, season: '2026/27' }])
+      expect(rows[0]?.level).not.toBe('onbekend')
+
+      // A second read changes nothing, so the row keeps its moment.
+      await importAt(server, new Date(first.getTime() + 3_600_000))
+      expect(await database.db.select().from(squadCompleteness)).toEqual(rows)
+    })
 
     it('becomes a player of the season with the source doelpunten, his page and its person, and gets the goal', async () => {
       expect(linked).not.toBe(original.programme)

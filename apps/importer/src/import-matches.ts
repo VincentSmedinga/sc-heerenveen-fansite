@@ -72,6 +72,7 @@ import {
   readStandings,
 } from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
+import { storeCompleteness } from './store-completeness.ts'
 import { describeError, formatTime, printable } from './text.ts'
 
 /**
@@ -1601,6 +1602,13 @@ async function storeMatches(
         squad,
         new Set([...edits].flatMap(([matchId, edit]) => (edit.goalsEdited ? [matchId] : []))),
       )
+
+  // A season whose players come from goals has no page of the squad to rate it, so the rating
+  // is worked out here (#1040). It runs on every read, not only when a player was just added:
+  // a season that got its players before this rule has no row yet. A row that doesn't change
+  // is not written again.
+  await storeCompleteness(db, season, undefined, now)
+
   const linkNow = adopted.length === 0 ? link : playerLinker(squad)
   // In a season without players nobody can be linked, which is no news.
   const unlinked =
