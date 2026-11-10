@@ -32,6 +32,8 @@ import {
 import {
   canonicalValues,
   clearDraft,
+  clearDraftAfterSave,
+  draftDueAfterSave,
   parseDraft,
   readDraftText,
   saveDraft,
@@ -148,26 +150,30 @@ const draftNoticeId = 'bewaarde-invoer'
  * after a save that failed: Herstel puts it in the form, Weggooien takes it away, and nothing
  * changes without one of the two. It is a status, so a screen reader reads it without the focus
  * moving. The focus only moves, to the note, after a choice, since the button is gone then.
- * With `saved` (the page after a save that worked) the input is taken away and nothing shows.
+ * With `savedAt` (the page after a save that worked, with the moment of that save) the input is
+ * taken away once for that save, and nothing shows until then.
  * Without JavaScript it draws nothing.
  */
-export function ReportDraftNotice({ saved = false }: { saved?: boolean | undefined }) {
+export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined }) {
   const { choices, restore, state } = useReportForm()
   const matchId = choices.matchId
   const [handled, setHandled] = useState<'discarded' | 'restored'>()
   const text = useSyncExternalStore(
     subscribeToDrafts,
-    () => (matchId === undefined || saved ? null : readDraftText(matchId)),
+    () =>
+      matchId === undefined || (savedAt !== undefined && draftDueAfterSave(matchId, savedAt))
+        ? null
+        : readDraftText(matchId),
     () => null,
   )
   const draft = useMemo(() => parseDraft(text), [text])
   const differs = draft !== undefined && canonicalValues(draft.values) !== canonicalValues(state.values)
 
   useEffect(() => {
-    if (saved && matchId !== undefined) {
-      clearDraft(matchId)
+    if (savedAt !== undefined && matchId !== undefined) {
+      clearDraftAfterSave(matchId, savedAt)
     }
-  }, [matchId, saved])
+  }, [matchId, savedAt])
 
   const choose = (choice: 'discarded' | 'restored') => {
     if (draft !== undefined && matchId !== undefined) {

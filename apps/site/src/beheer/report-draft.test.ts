@@ -5,6 +5,8 @@ import {
   canonicalValues,
   clearAllDrafts,
   clearDraft,
+  clearDraftAfterSave,
+  draftDueAfterSave,
   draftKey,
   draftLifetime,
   parseDraft,
@@ -169,5 +171,43 @@ describe('clearDraft and clearAllDrafts', () => {
   it('does not throw when the storage is blocked', () => {
     expect(() => clearAllDrafts(blockedStorage)).not.toThrow()
     expect(() => clearDraft(7, blockedStorage)).not.toThrow()
+  })
+})
+
+describe('clearDraftAfterSave', () => {
+  it('takes the draft away once for each save, and leaves what is typed after it', () => {
+    const storage = memoryStorage()
+
+    saveDraft(7, typed, server, now, storage)
+
+    expect(draftDueAfterSave(7, 1000, storage)).toBe(true)
+
+    clearDraftAfterSave(7, 1000, storage)
+
+    expect(storage.getItem('fansite-verslag-7')).toBeNull()
+    expect(draftDueAfterSave(7, 1000, storage)).toBe(false)
+
+    saveDraft(7, typed, server, now + 1, storage)
+    clearDraftAfterSave(7, 1000, storage)
+
+    expect(storage.getItem('fansite-verslag-7')).not.toBeNull()
+
+    clearDraftAfterSave(7, 2000, storage)
+
+    expect(storage.getItem('fansite-verslag-7')).toBeNull()
+  })
+
+  it('goes away with every other key of the forms at logging out', () => {
+    const storage = memoryStorage()
+
+    clearDraftAfterSave(7, 1000, storage)
+    clearAllDrafts(storage)
+
+    expect(storage.length).toBe(0)
+  })
+
+  it('does not throw when the storage is blocked', () => {
+    expect(() => clearDraftAfterSave(7, 1000, blockedStorage)).not.toThrow()
+    expect(draftDueAfterSave(7, 1000, blockedStorage)).toBe(false)
   })
 })

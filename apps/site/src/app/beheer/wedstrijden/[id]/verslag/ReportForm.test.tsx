@@ -674,7 +674,7 @@ describe('the input that the browser keeps for the form of a report', () => {
   const choices = { ...withoutMatch, matchId: 7 }
   const typed: ReportValues = { ...values, bron: 'Wedstrijdformulier' }
   const keep = (draft: ReportValues = typed) => saveDraft(7, draft, values, Date.now())
-  const open = (more: { noMatch?: boolean; saved?: boolean } = {}) =>
+  const open = (more: { noMatch?: boolean; savedAt?: number } = {}) =>
     render(
       <ReportFormProvider
         action={() => Promise.resolve(initial)}
@@ -682,7 +682,7 @@ describe('the input that the browser keeps for the form of a report', () => {
         initial={initial}
         title="Titel"
       >
-        <ReportDraftNotice saved={more.saved} />
+        <ReportDraftNotice savedAt={more.savedAt} />
         <ReportFields />
       </ReportFormProvider>,
     )
@@ -775,10 +775,30 @@ describe('the input that the browser keeps for the form of a report', () => {
 
   it('takes the input away on the page after a save that worked, and shows nothing', () => {
     keep()
-    open({ saved: true })
+    open({ savedAt: 1000 })
 
     expect(localStorage.getItem('fansite-verslag-7')).toBeNull()
     expect(notice().textContent).toBe('')
+  })
+
+  it('leaves input typed after that save alone when the page opens again at the same address', () => {
+    keep()
+    open({ savedAt: 1000 })
+    cleanup()
+
+    // Typing on, then a save that fails: the page opens again at the same address.
+    keep({ ...typed, bron: 'Verder getypt' })
+    open({ savedAt: 1000 })
+
+    expect(localStorage.getItem('fansite-verslag-7')).not.toBeNull()
+    expect(notice().textContent).toContain('bewaarde invoer')
+    expect(button('Herstel')).toBeDefined()
+    cleanup()
+
+    // The next save has its own moment, and takes the input away again.
+    open({ savedAt: 2000 })
+
+    expect(localStorage.getItem('fansite-verslag-7')).toBeNull()
   })
 
   it('works as it did when the text is broken or the storage is blocked', () => {

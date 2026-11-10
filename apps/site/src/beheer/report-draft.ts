@@ -51,6 +51,9 @@ export function canonicalValues(values: ReportValues): string {
 
 const isText = (value: unknown): value is string => typeof value === 'string'
 
+/** The key that holds for which save the draft of a match was taken away. */
+const afterSaveKey = (matchId: number) => `${draftKey(matchId)}-opgeslagen`
+
 /** Takes away every draft, at logging out. */
 export function clearAllDrafts(storage?: Storage) {
   try {
@@ -78,6 +81,34 @@ export function clearDraft(matchId: number, storage?: Storage) {
   }
 
   tell()
+}
+
+/** Takes the draft away after the save at `savedAt`, once, and remembers that it did. */
+export function clearDraftAfterSave(matchId: number, savedAt: number, storage?: Storage) {
+  if (!draftDueAfterSave(matchId, savedAt, storage)) {
+    return
+  }
+
+  try {
+    ;(storage ?? localStorage).setItem(afterSaveKey(matchId), String(savedAt))
+  } catch {
+    // Storage can be blocked: there is no draft either.
+  }
+
+  clearDraft(matchId, storage)
+}
+
+/**
+ * Whether the page after a save still has to take the draft away: once for each save, so a page
+ * that opens again at the same address (a reload, the way back) leaves input typed after that
+ * save alone. `savedAt` is the moment the server saved the report, which changes with a save.
+ */
+export function draftDueAfterSave(matchId: number, savedAt: number, storage?: Storage): boolean {
+  try {
+    return (storage ?? localStorage).getItem(afterSaveKey(matchId)) !== String(savedAt)
+  } catch {
+    return false
+  }
 }
 
 /** The draft in a text, or `undefined` when the text is not one. */
@@ -189,6 +220,7 @@ export function subscribeToDrafts(onChange: () => void) {
 }
 
 /** Whether a parsed value has the shape of the values of the form: texts in rows in lists. */
+/** Whether a parsed value has the shape of the values of the form: texts in rows in lists. */
 function isValues(value: unknown): value is ReportValues {
   const record = (item: unknown): item is Record<string, unknown> => typeof item === 'object' && item !== null
   const get = (item: Record<string, unknown>, key: string) => item[key]
@@ -229,7 +261,6 @@ function isValues(value: unknown): value is ReportValues {
   })
 }
 
-/** Whether a parsed value has the shape of the values of the form: texts in rows in lists. */
 /** Tells the form in this tab that a draft changed. */
 function tell() {
   try {

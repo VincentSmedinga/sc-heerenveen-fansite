@@ -30,10 +30,10 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-/** What the last action says, by the word in the address. */
 // The words of the address after a save that worked, so the input the browser kept is gone.
 const savedNotices = ['klaar', 'nog-niet-klaar', 'ongewijzigd', 'opgeslagen', 'weggehaald']
 
+/** What the last action says, by the word in the address. */
 const notices: Record<string, { text: string; title: string }> = {
   afgelopen: {
     text: 'De wedstrijd heeft nu zijn uitslag en telt mee in de cijfers. Het verslag is nog bezig: maak het af en zet het dan op klaar.',
@@ -139,7 +139,13 @@ export default async function ReportPage({ params, searchParams }: Props) {
         wide
       >
         <ReportErrorSummary />
-        <ReportDraftNotice saved={typeof gedaan === 'string' && savedNotices.includes(gedaan)} />
+        <ReportDraftNotice
+          savedAt={
+            typeof gedaan === 'string' && savedNotices.includes(gedaan)
+              ? (report?.report.savedAt.getTime() ?? 0)
+              : undefined
+          }
+        />
         {notice === undefined ? null : (
           <Notice>
             <Strong>{notice.title}.</Strong> {notice.text}

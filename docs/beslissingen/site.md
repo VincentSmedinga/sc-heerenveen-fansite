@@ -4367,6 +4367,8 @@
     De tekst wordt alleen geschreven als hij verschilt van wat er stond, en waarden die gelijk zijn aan wat de server heeft, zijn geen invoer: dan gaat de sleutel weg.
   - **Wanneer hij weggaat:** na een geslaagde opslag, bij uitloggen en na dertig dagen.
     Een geslaagde opslag gaat naar de pagina met `?gedaan=opgeslagen`, `nog-niet-klaar`, `klaar`, `ongewijzigd` of `weggehaald`, en daar haalt `ReportDraftNotice` de sleutel weg.
+    Dat gebeurt één keer per opslag: de browser onthoudt onder `fansite-verslag-<id>-opgeslagen` het moment van de opslag (`report.savedAt` van de server), zodat een pagina die opnieuw opent op hetzelfde adres invoer die daarna is getypt niet weghaalt.
+    Die tweede sleutel bevat alleen dat moment en gaat bij uitloggen met de andere weg.
     Bij uitloggen leidt `logOut` naar `/beheer/inloggen?uitgelogd=1`, en `AdminMarker` haalt daar alle sleutels met `fansite-verslag-` weg, op dezelfde plek en op dezelfde manier als het teken van het menu.
     Een sessie die verloopt, haalt de invoer niet weg: de inlogpagina zonder dat woord laat hem staan, want daar is hij voor.
     Na dertig dagen haalt het lezen hem weg.
