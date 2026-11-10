@@ -123,7 +123,8 @@ describe(`the migration ${migration}`, () => {
   it('has the two decisions about a field of a player in the log of the admin', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    expect(auditActions.slice(-2)).toEqual(['player.field-take-over', 'player.field-keep'])
+    // Later migrations add actions behind these two, such as `person.edit` (0067).
+    expect(auditActions).toEqual(expect.arrayContaining(['player.field-take-over', 'player.field-keep']))
     expect(await rows("SHOW COLUMNS FROM audit_log LIKE 'action'")).toMatchObject([
       { Type: list('enum', auditActions) },
     ])
