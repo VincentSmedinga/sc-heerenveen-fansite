@@ -41,6 +41,7 @@ vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
     throw new Error(`redirect to ${url}`)
   },
+  useRouter: () => ({ refresh: () => undefined }),
 }))
 
 let database: TestDatabase
@@ -1136,5 +1137,25 @@ describe('the report in the list and on the match', () => {
     expect(await form(planned)).not.toContain('/verslag')
     // A match that is still being played, from its day on, can have a report too.
     expect(await form(today)).toContain(`href="/beheer/wedstrijden/${today}/verslag">Het verslag invullen</a>`)
+  })
+})
+
+describe('the way to a new player in the form of a match', () => {
+  it('has a link at the goals to the form that adds a player to the season, with the match to come back to', async () => {
+    const id = await addMatch({ round: 'Speelronde 12' })
+    const html = await form(id)
+
+    expect(html).toMatch(
+      new RegExp(
+        `<a[^>]*href="/beheer/spelers/nieuw\\?seizoen=2026-27&amp;wedstrijd=${id}"[^>]*>De speler staat er niet in\\? Voeg hem toe aan de selectie van 2026/27 \\(opent in een nieuw tabblad\\)</a>`,
+        'u',
+      ),
+    )
+  })
+
+  it('says after the save that the player is in the list of the goals', async () => {
+    const html = await form(await addMatch({ round: 'Speelronde 12' }), { gedaan: 'speler-toegevoegd' })
+
+    expect(html).toContain('<strong>Speler toegevoegd.</strong> De speler staat nu in de kiezer bij de doelpunten.')
   })
 })

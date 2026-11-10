@@ -4,7 +4,7 @@ import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { listWork, waitingChangesBySeason, workListPath, workLists } from './quality'
+import { listWork, seasonHasPlayers, waitingChangesBySeason, workListPath, workLists } from './quality'
 import { addQualitySeason, season } from './quality-fixtures'
 
 let database: TestDatabase
@@ -38,6 +38,14 @@ describe('the work lists of a season', () => {
     // An own goal of ours and a goal of the opponent are not ours to link; an own goal of the
     // opponent is.
     expect(found.map(({ id, total }) => ({ id, total }))).toEqual([{ id: ids.unlinked, total: 2 }])
+    // The names those two goals came with, and not the one of the opponent's goal.
+    expect(found[0]?.names).toEqual(['Onbekende Een', 'Onbekende Twee'])
+    expect((await listWork(database.db, season, 'wachtende-wijzigingen'))[0]?.names).toEqual([])
+  })
+
+  it('knows whether a season has a player to choose from', async () => {
+    expect(await seasonHasPlayers(database.db, season)).toBe(true)
+    expect(await seasonHasPlayers(database.db, '2006/07')).toBe(false)
   })
 
   it('lists the matches with a change that waits, with how many, and not a decided one', async () => {
@@ -56,6 +64,7 @@ describe('the work lists of a season', () => {
         id: ids.withoutGoals,
         kickoffAt: null,
         matchDate: '2005-08-27',
+        names: [],
         opponent: 'Voorbeeld United',
         round: '3',
         status: 'played',

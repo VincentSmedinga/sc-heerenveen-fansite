@@ -1164,6 +1164,8 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Elke keuze noemt de seizoenen van de persoon en, als die anders is dan de naam, de titel van zijn artikel.
   Kiest de redactie een persoon die we kennen, dan blijft dat dezelfde persoon; anders vult ze voornaam, tussenvoegsel, achternaam en een Wikipedia-pagina in, die leeg mag blijven.
   Rugnummer (1 tot en met 99) en positie mogen ook leeg blijven: de oude seizoenen hebben ze niet.
+  Met `wedstrijd=<nummer>` in het adres komt de redactie na het opslaan, en met "Annuleren", terug op het formulier van die wedstrijd (#1021).
+  De kaart Doelpunten van een wedstrijd heeft de link met dat adres, die een nieuw tabblad opent, zodat het formulier van de wedstrijd zijn invoer houdt.
 - De speler krijgt de bron `redactie` in `players`, en een nieuwe persoon de bron `redactie` voor zijn naam.
   Een Wikipedia-pagina die al bij een persoon hoort, maakt geen tweede persoon: de speler wordt die persoon.
   De site vraagt Wikipedia niets: de titel geldt zoals de redactie hem invult.
@@ -1200,6 +1202,8 @@ De laatste kolom, Te doen, heeft een koppeling voor elke werklijst van het seizo
 
 `listWork` in `src/beheer/quality.ts` leest een lijst, de oudste wedstrijd eerst.
 Elke rij leidt naar de wedstrijd in het beheer, en een verslag dat niet af is naar het verslag.
+De lijst `doelpunten-zonder-speler` leidt naar de kaart Doelpunten van de wedstrijd (`#doelpunten`) en heeft een kolom "Naam bij het doelpunt", met de naam waarmee elk doelpunt binnenkwam (#1021).
+Heeft het seizoen geen enkele speler (`seasonHasPlayers`), dan staat dat in een zin boven de rijen, met een link naar `/beheer/spelers?seizoen=<seizoen>`.
 Een lijst telt wat de tabel telt; `src/beheer/quality.test.ts` houdt ze daaraan.
 Een adres zonder seizoen sinds 1990/91 of zonder bestaande lijst geeft "niet gevonden".
 

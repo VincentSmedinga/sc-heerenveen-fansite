@@ -1,17 +1,23 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { emptyFields, emptyGoal, type MatchFormState, type MatchValues, padGoals } from '#src/beheer/match-fields'
 
 import { MatchFields, type MatchFormChoices, MatchFormProvider } from './MatchForm'
 
+const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }))
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
+
 afterEach(() => {
   // Vitest has no globals here, so Testing Library doesn't clean up by itself.
   cleanup()
+  refresh.mockReset()
 })
 
 const choices: MatchFormChoices = {
+  addPlayer: { href: '/beheer/spelers/nieuw?seizoen=2026-27&wedstrijd=183', season: '2026/27' },
   goalKinds: [
     { label: 'Gewoon', value: 'gewoon' },
     { label: 'Strafschop', value: 'strafschop' },
@@ -188,5 +194,53 @@ describe('the goals of the form of a match', () => {
     ).toEqual(['wij', 'zij'])
     expect((within(team).getByRole('radio', { name: 'sc Heerenveen' }) as HTMLInputElement).checked).toBe(true)
     expect(screen.getByRole('button', { name: 'Doelpunt 1 weghalen' })).toBeTruthy()
+  })
+})
+
+describe('the way to a new player in the form of a match', () => {
+  const link = () => screen.getByRole('link', { name: /^De speler staat er niet in\? Voeg hem toe/u })
+
+  it('has a link at the goals that names the season, and opens in a new tab so the form keeps its input', () => {
+    show(initial('1', '0'))
+
+    expect(link().textContent).toBe(
+      'De speler staat er niet in? Voeg hem toe aan de selectie van 2026/27 (opent in een nieuw tabblad)',
+    )
+    expect(link().getAttribute('href')).toBe('/beheer/spelers/nieuw?seizoen=2026-27&wedstrijd=183')
+    expect(link().getAttribute('target')).toBe('_blank')
+  })
+
+  it('asks the server for the squad again each time the editor comes back to the tab, and keeps what was typed', () => {
+    show(initial('1', '0'))
+    type('doelpunt-1-minuut', '12')
+
+    // Coming back to the tab without having followed the link asks nothing.
+    fireEvent.focus(window)
+    expect(refresh).not.toHaveBeenCalled()
+
+    // jsdom follows no link; the click is what the form remembers.
+    link().addEventListener('click', (event) => event.preventDefault())
+    fireEvent.click(link())
+    fireEvent.focus(window)
+    expect(refresh).toHaveBeenCalledTimes(1)
+
+    // The editor may look back before the player is saved, so every later return asks again.
+    fireEvent.focus(window)
+    expect(refresh).toHaveBeenCalledTimes(2)
+    expect((document.getElementById('doelpunt-1-minuut') as HTMLInputElement).value).toBe('12')
+  })
+
+  it('has no such link without an address for it', () => {
+    render(
+      <MatchFormProvider
+        action={() => Promise.resolve({ errors: {}, values: initial('1', '0') })}
+        choices={{ ...choices, addPlayer: undefined }}
+        initial={initial('1', '0')}
+      >
+        <MatchFields />
+      </MatchFormProvider>,
+    )
+
+    expect(screen.queryByRole('link', { name: /Voeg hem toe/u })).toBeNull()
   })
 })

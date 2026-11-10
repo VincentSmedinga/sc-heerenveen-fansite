@@ -6,6 +6,7 @@ import { mayHaveReport } from '@fansite/db/match-reports'
 import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { addPlayerPath } from '#src/app/beheer/spelers/paths'
 import { compact } from '#src/beheer/density'
 import { differenceWords } from '#src/beheer/difference-words'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
@@ -63,6 +64,10 @@ const notices: Record<string, { text: string; title: string }> = {
   overgenomen: {
     text: 'Dit onderdeel is nu wat Wikipedia zegt en volgt Wikipedia weer.',
     title: 'Wikipedia overgenomen',
+  },
+  'speler-toegevoegd': {
+    text: 'De speler staat nu in de kiezer bij de doelpunten. Had je in het andere tabblad al iets ingevuld? Ga daar dan verder en sluit dit tabblad: de speler staat daar ook in de kiezer.',
+    title: 'Speler toegevoegd',
   },
   toegevoegd: {
     text: 'De wedstrijd is toegevoegd. Vul hieronder de doelpunten en de gegevens in, en maak daarna het verslag.',
@@ -124,6 +129,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
     <MatchFormProvider
       action={submitMatch.bind(null, match.id)}
       choices={{
+        addPlayer: { href: addPlayerPath(match.season, undefined, match.id), season: match.season },
         goalKinds,
         home: match.home,
         knockout: isKnockout(match.competition),
