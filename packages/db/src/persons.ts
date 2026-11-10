@@ -111,6 +111,18 @@ export const personsWhoDiffer: readonly (readonly string[])[] = [
 ]
 
 /**
+ * Names of opponents' scorers in the old seasons that are a namesake of a person of ours
+ * (#1054). The step `doelpunten tegen ons` of `import:old-site` links a goal against us to
+ * the one person of ours with exactly that name. A name in this list is never linked, and a
+ * link that was laid disappears at the next import. The owner reads the list that
+ * `import:status` shows after the import, and adds a name here when the man who scored against
+ * us is another man.
+ *
+ * Example: `'Jan Jansen'`.
+ */
+export const opponentGoalNamesakes: readonly string[] = []
+
+/**
  * Two or more titles of Wikipedia that are one person while no redirect says so, each with the
  * title that stays and the other titles. The importer looks a title up here before it asks
  * Wikipedia: an other title is the person of the title that stays, and costs no request.

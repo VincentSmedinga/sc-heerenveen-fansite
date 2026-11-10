@@ -3994,3 +3994,18 @@
   Wie de twee letters als ISO-code leest, zet dus een fout land in de gegevens.
   De lijst is op 10 november 2026 nagekeken tegen de spelers die elke code hebben.
 - **Alternatieven:** de code overnemen als hij in ISO bestaat (drie soorten fouten, zie hierboven); de code al bij de export vertalen (het bestand is dan geen kopie van de oude database meer).
+
+## Een doelpunt tegen ons in de oude seizoenen krijgt de persoon met dezelfde naam
+
+- **Datum:** 10 november 2026
+- **Besluit:** de stap `doelpunten tegen ons` van `import:old-site` (`apps/importer/src/old-site-opponent-goals.ts`, #1054) zet `match_goals.person_id` bij een doelpunt van een tegenstander in 1990/91 tot en met 2006/07, als de volledige naam exact gelijk is aan de naam van precies één persoon van ons.
+  Een naam die twee personen hebben of die in `personsWhoDiffer` staat, wordt niet gekoppeld.
+  Ook een naam in de uitzonderingslijst `opponentGoalNamesakes` (`packages/db/src/persons.ts`) wordt niet gekoppeld, en een koppeling die er al was, verdwijnt bij de volgende import.
+  `wikipedia_page` en `player_id` blijven leeg.
+  `pnpm run import:status` toont de gekoppelde namen met de seizoenen tegen en voor ons.
+- **Waarom:** de gegevens zeggen niets over de club van de tegenstander in de loopbaan van de persoon, dus meer zekerheid dan een gelijke naam is er niet.
+  Een foute link naar Wikipedia ziet iedereen meteen, dus we koppelen alleen de persoon.
+  De projecteigenaar kijkt de korte lijst na de import na en zet een naamgenoot in de uitzonderingslijst.
+- **Eigen keuze bij het bouwen:** de stap loopt na `personen`, zodat de personen van deze run er al zijn.
+  Een doelpunt in een wedstrijd waarvan de redactie de doelpunten invulde of het verslag bewaarde, blijft zoals het is, net als bij de andere stappen.
+- **Alternatieven:** ook `wikipedia_page` invullen zoals vanaf 2007/08 (kan later, als de lijst met naamgenoten is nagekeken); alleen koppelen bij een unieke naam in beide richtingen (koppelt vrijwel niets).

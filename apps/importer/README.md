@@ -2269,7 +2269,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er acht stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `linie en land` en `selecties`.
+Nu zijn er negen stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `doelpunten tegen ons`, `linie en land` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run
@@ -2378,6 +2378,26 @@ Hij koppelt alleen als het zeker is, en hergebruikt `createPersonBook`, dus tite
 - De bestanden hebben geen geboortedatum, dus er is er geen om te vergelijken met die van Wikidata.
   Een tweede run vraagt alleen nog naar de namen zonder persoon, en raakt geen rij met een andere bron dan `verslag`.
 - De tests vragen Wikipedia nooit: ze geven de stap eigen antwoorden (`titles` in `runOldSiteImport`) of gebruiken een webserver op deze computer.
+
+#### De stap doelpunten tegen ons
+
+De stap `doelpunten tegen ons` ([`src/old-site-opponent-goals.ts`](src/old-site-opponent-goals.ts), #1054) koppelt een doelpunt van een tegenstander in de oude seizoenen aan de persoon die we al hebben.
+De verslagen van de oude fansite geven zo'n doelpunt alleen als naam, ook als de man ook voor ons speelde en zijn doelpunten voor ons wel bij zijn persoon hangen.
+De stap zet alleen `person_id`.
+`wikipedia_page` en `player_id` blijven leeg, dus de wedstrijdpagina toont de naam nog zonder link.
+
+- De regel is een exact gelijke volledige naam, en precies één persoon van ons met die naam (`persons.name`).
+  Een naam die twee personen hebben, blijft een naam, en de stap telt hem apart.
+  Een naam uit `personsWhoDiffer` wordt nooit gekoppeld.
+  Een achternaam alleen wordt ook nooit gekoppeld.
+- Een gelijke naam bewijst niet dat het dezelfde man is.
+  `opponentGoalNamesakes` in `packages/db/src/persons.ts` is de uitzonderingslijst voor een tegenstander die een naamgenoot is.
+  Zet een naam erin, en de volgende import haalt de koppeling weg.
+- Eigen doelpunten, doelpunten van ons en doelpunten in een wedstrijd waarvan de redactie de doelpunten invulde of het verslag bewaarde (`match_edits`, `match_reports.saved_by`), verandert de stap niet.
+- Een tweede run verandert niets.
+  De stap `doelpunten` laat `person_id` staan, en een samenvoeging van personen in het beheer zet de koppeling mee om.
+- `pnpm run import:status` toont onder `Goals against us linked to a person (old seasons)` per seizoen hoeveel doelpunten een persoon kregen en hoeveel een naam hebben die bij meer dan één persoon past.
+  Daarna volgt elke gekoppelde naam met de seizoenen tegen ons en voor ons, zodat de lijst in één keer na te kijken is.
 
 #### De stap linie en land
 
