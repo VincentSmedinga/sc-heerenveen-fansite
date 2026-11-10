@@ -3,13 +3,15 @@
 // when it is certain, and says why when it is not. It reuses `createPersonBook`, so the titles
 // and redirects are remembered in `person_pages` like everywhere else.
 import { createPersonBook } from '@fansite/db/persons'
-import { players } from '@fansite/db/schema'
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { persons, players } from '@fansite/db/schema'
+import { and, eq, inArray, isNotNull, isNull, type SQL } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { pauseBetweenRequests } from './import-person-data.ts'
+import { fitsColumns, manualNames, personNameOf } from './person-name.ts'
+import { personNames } from './person-names.ts'
 import { nameKey } from './read-squad.ts'
 import { linkedPage, pageUrl } from './read-wikipedia.ts'
 import { printable } from './text.ts'
@@ -93,32 +95,51 @@ export function wikipediaTitleLookup(fetcher: Fetcher, origin: string, pause = p
   }
 }
 
-const reasons: Record<Exclude<TitleAnswer['kind'], 'footballer' | 'unknown'>, string> = {
+const reasons: Record<Exclude<TitleAnswer['kind'], 'footballer' | 'missing' | 'unknown'>, string> = {
   disambiguation: 'the title is a disambiguation page',
-  missing: 'no article under that title',
   'not-a-footballer': 'the article is not about a footballer',
 }
 
 /**
- * Links every player with the source `verslag` and no person. A name that another row (of any
- * source, in another season) already has a person for gets that person. Otherwise the title is
- * the name; it is linked only when the article is a footballer's. A date of birth is not in the
- * files (see `docs/beslissingen/importer.md`), so there is none to compare.
- * Any doubt links nothing and becomes a line. Rows with another source are never touched.
+ * Links every player with the source `verslag` and no person (see `linkPersonsByName`). Rows
+ * with another source are never touched.
  */
 export async function importOldSitePersons(db: OldSiteDatabase, lookup: TitleLookup): Promise<OldSiteStepReport> {
+  return await linkPersonsByName(db, lookup, eq(players.source, 'verslag'))
+}
+
+/**
+ * Gives the rows of `scope` that have no person one (issue 1048), by name, since they have no
+ * link to a page. A name that another row (of any source, in another season) already has a
+ * person for gets that person. Otherwise the name is the title: a footballer's article gives
+ * the person of that article, and a title without any article gives a person on the name
+ * alone, with no title and so no link to Wikipedia. A disambiguation page, an article about
+ * someone else and a question that could not be asked link nothing and become a line, because
+ * the rules can't tell whether the player has an article under another title. A date of birth
+ * is not in the files (see `docs/beslissingen/importer.md`), so there is none to compare. It
+ * asks Wikipedia only through `lookup`.
+ */
+export async function linkPersonsByName(
+  db: OldSiteDatabase,
+  lookup: TitleLookup,
+  scope: SQL,
+  /** The names (`nameKey`) of rows that wait for an answer they were given no chance to get. */
+  skip: ReadonlySet<string> = new Set(),
+): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
-  const open = await db
-    .select()
-    .from(players)
-    .where(and(eq(players.source, 'verslag'), isNull(players.personId)))
+  const open = (
+    await db
+      .select()
+      .from(players)
+      .where(and(scope, isNull(players.personId)))
+  ).filter((row) => !skip.has(nameKey(row.name)))
   const linked = await db.select().from(players).where(isNotNull(players.personId))
 
   report.unchanged = (
     await db
       .select()
       .from(players)
-      .where(and(eq(players.source, 'verslag'), isNotNull(players.personId)))
+      .where(and(scope, isNotNull(players.personId)))
   ).length
 
   const personsOfName = new Map<string, Set<number>>()
@@ -171,6 +192,17 @@ export async function importOldSitePersons(db: OldSiteDatabase, lookup: TitleLoo
 
     if (answer.kind === 'unknown') {
       doubt(`not asked: ${answer.message}`)
+    } else if (answer.kind === 'missing') {
+      const made = personOnName(name)
+
+      if (made === null) {
+        doubt('the name does not fit the columns of a person')
+      } else {
+        const [{ insertId }] = await db.insert(persons).values(made)
+
+        report.created++
+        decided.set(insertId, [...(decided.get(insertId) ?? []), ...rows.map((row) => row.id)])
+      }
     } else if (answer.kind !== 'footballer') {
       doubt(reasons[answer.kind])
     } else {
@@ -191,14 +223,29 @@ export async function importOldSitePersons(db: OldSiteDatabase, lookup: TitleLoo
     await db
       .update(players)
       .set({ personId })
-      .where(and(inArray(players.id, ids), eq(players.source, 'verslag'), isNull(players.personId)))
+      .where(and(inArray(players.id, ids), scope, isNull(players.personId)))
     report.changed += ids.length
   }
 
   report.lines.push(
-    `${report.changed} of ${open.length} players without a person linked, ${book.counts.people} new ${book.counts.people === 1 ? 'person' : 'persons'}, ${report.skipped} left alone`,
+    `${report.changed} of ${open.length} players without a person linked, ${book.counts.people + report.created} new ${book.counts.people + report.created === 1 ? 'person' : 'persons'}, ${report.skipped} left alone`,
     ...doubts,
   )
 
   return report
+}
+
+/** The columns of a person that has a name and no title, or null when the name does not fit. */
+function personOnName(name: string) {
+  const parts = personNameOf(name, null, manualNames(personNames))
+
+  return fitsColumns(parts)
+    ? {
+        familyName: parts.familyName,
+        familyNamePrefix: parts.familyNamePrefix,
+        givenName: parts.givenName,
+        name: parts.name,
+        nameSource: parts.source,
+      }
+    : null
 }

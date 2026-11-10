@@ -2,12 +2,12 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { personPages, persons, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { asc } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TitleAnswer, TitleLookup } from './old-site-persons.ts'
 
-import { importOldSitePersons, wikipediaTitleLookup } from './old-site-persons.ts'
+import { importOldSitePersons, linkPersonsByName, wikipediaTitleLookup } from './old-site-persons.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
@@ -98,7 +98,6 @@ describe('the step personen', () => {
 
   it.each([
     ['disambiguation', 'the title is a disambiguation page'],
-    ['missing', 'no article under that title'],
     ['not-a-footballer', 'the article is not about a footballer'],
   ] as const)('links nothing on %s and says why', async (kind, reason) => {
     await database.db.insert(players).values(row('1990/91', 'Jan Jansen'))
@@ -109,6 +108,45 @@ describe('the step personen', () => {
     expect(report.lines).toContain(`no person for 'Jan Jansen' (1 row): ${reason}`)
     expect((await stored())[0]!.personId).toBeNull()
     expect(await database.db.select().from(persons)).toEqual([])
+  })
+
+  it('makes a person on the name alone for a name without an article, the same one in every season', async () => {
+    await database.db
+      .insert(players)
+      .values([row('1990/91', 'Piet van der Poel'), row('1991/92', 'Piet van der Poel'), row('1991/92', 'Dinho')])
+
+    const report = await importOldSitePersons(database.db, fake({}).lookup)
+    const rows = await stored()
+
+    expect(report).toMatchObject({ changed: 3, created: 2, skipped: 0 })
+    expect(rows[0]!.personId).not.toBeNull()
+    expect(rows[1]!.personId).toBe(rows[0]!.personId)
+    expect(rows[2]!.personId).not.toBe(rows[0]!.personId)
+    expect(await database.db.select().from(persons).orderBy(asc(persons.name))).toMatchObject([
+      { familyName: 'Dinho', givenName: null, name: 'Dinho', wikipediaPage: null },
+      {
+        familyName: 'Poel',
+        familyNamePrefix: 'van der',
+        givenName: 'Piet',
+        name: 'Piet van der Poel',
+        nameSource: 'guess',
+        wikipediaPage: null,
+      },
+    ])
+    expect(await database.db.select().from(personPages)).toEqual([])
+  })
+
+  it('leaves a row alone that the caller says waits, and rows outside the scope', async () => {
+    await database.db
+      .insert(players)
+      .values([row('1990/91', 'Jan Jansen'), row('1990/91', 'Piet Poel'), row('1991/92', 'Ger Dijk')])
+
+    const { asked, lookup } = fake({})
+    const report = await linkPersonsByName(database.db, lookup, eq(players.season, '1990/91'), new Set(['jan jansen']))
+
+    expect(asked).toEqual(['Piet Poel'])
+    expect(report).toMatchObject({ changed: 1 })
+    expect((await stored()).map((one) => one.personId === null)).toEqual([true, false, true])
   })
 
   it('links nothing when the lookup could not ask', async () => {

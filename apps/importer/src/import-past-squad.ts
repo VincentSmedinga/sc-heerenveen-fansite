@@ -25,7 +25,7 @@ import {
   wikipediaPageMaxLength,
   wikipediaPages,
 } from '@fansite/db/schema'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNull, ne, type SQL } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -36,6 +36,7 @@ import { addEnglishOnly, findEnglishPersons } from './english-persons.ts'
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
 import { pauseBetweenRequests, wikidataOrigin } from './import-person-data.ts'
 import { editorsByPerson, scorersByPerson, storeChosenSpellings } from './import-squad.ts'
+import { linkPersonsByName, wikipediaTitleLookup } from './old-site-persons.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
@@ -308,6 +309,18 @@ export async function importPastSquad(
     return { persons: personBook.counts, players: counts }
   })
   const personNames = await storePersonNames(db, personLookup.names)
+  // A row without a link has no person yet: the name is its title (issue 1048).
+  // Rows with no page and not of the editors: the others wait for their title.
+  const byName = await linkPersonsByName(
+    db,
+    wikipediaTitleLookup(fetcher, origin, pause),
+    and(eq(players.season, season), ne(players.source, 'redactie'), isNull(players.wikipediaPage)) as SQL,
+    new Set(
+      merged.players
+        .filter((player) => player.englishPage !== null && english.undecided.has(player.englishPage))
+        .map((player) => nameKey(player.name)),
+    ),
+  )
   const completeness = await storeCompleteness(db, season, totalsOf(reads), now)
   const report: PastSquadReport = {
     completeness: describeChange(season, completeness),
@@ -317,6 +330,9 @@ export async function importPastSquad(
     persons: [
       ...describePersons(personLookup.asked, stored.persons, personNames.counts),
       ...(english.asked === 0 ? [] : [`persons: ${english.asked} English requests asked`]),
+      ...(byName.changed === 0
+        ? []
+        : [`persons: ${byName.changed} players linked by name, ${byName.created} on the name alone`]),
     ],
     players: stored.players,
     season,
@@ -325,6 +341,7 @@ export async function importPastSquad(
       ...mergedPersons,
       ...english.warnings,
       ...personLookup.warnings,
+      ...byName.lines.slice(1).map((line) => `Persons: ${line}`),
       ...guessedNameWarnings(personNames.guessed),
     ],
   }
