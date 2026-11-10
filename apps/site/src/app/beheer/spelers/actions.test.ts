@@ -119,8 +119,8 @@ async function resultOf(run: () => Promise<unknown>) {
 }
 
 const initial: PlayerFormState = { errors: {}, values: emptyPlayerValues }
-const add = (formData: FormData, ofSeason: unknown = season) =>
-  resultOf(() => submitAddPlayer(ofSeason as string, initial, formData))
+const add = (formData: FormData, ofSeason: unknown = season, from?: unknown) =>
+  resultOf(() => submitAddPlayer(ofSeason as string, from as number | undefined, initial, formData))
 const edit = (id: unknown, formData: FormData) => resultOf(() => submitPlayer(id as number, initial, formData))
 const remove = (id: unknown) => resultOf(() => submitRemovePlayer(id as number))
 const stored = () => database.db.select().from(players).orderBy(asc(players.id))
@@ -136,6 +136,37 @@ describe('submitAddPlayer', () => {
     ])
     expect(await database.db.select().from(persons)).toMatchObject([{ nameSource: 'redactie', wikipediaPage: null }])
     expect(await log()).toMatchObject([{ action: 'player.add', itemId: await firstId(), userId }])
+  })
+
+  it('ends on the form of the match the editor came from, with a notice', async () => {
+    expect(await add(form(), season, matchId)).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=speler-toegevoegd`,
+    })
+    expect(await stored()).toMatchObject([{ name: 'Pelle van Amersfoort', season }])
+  })
+
+  it('ends on the list for a match of another season, a match that is gone and something that is no number', async () => {
+    const [{ insertId: other }] = await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          goalsAgainst: 0,
+          goalsFor: 1,
+          home: true,
+          kickoffAt: new Date('2018-09-01T12:30:00Z'),
+          matchDate: '2018-09-01',
+          opponent: 'Oefenstad AZ',
+          round: 'Speelronde 4',
+          season: '2018/19',
+          status: 'played',
+        },
+      ]),
+    )
+    const onList = { redirect: '/beheer/spelers?seizoen=2019-20&gedaan=toegevoegd' }
+
+    expect(await add(form(), season, other)).toEqual(onList)
+    expect(await add(form({ achternaam: 'Twee' }), season, 999_999)).toEqual(onList)
+    expect(await add(form({ achternaam: 'Drie' }), season, '//example.org')).toEqual(onList)
   })
 
   it('adds the player with a person from the list', async () => {

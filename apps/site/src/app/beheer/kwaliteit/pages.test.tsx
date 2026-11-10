@@ -1,7 +1,8 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { persons, players, playerStatDifferences } from '@fansite/db/schema'
+import { matchGoals, persons, players, playerStatDifferences } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { and, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -158,6 +159,44 @@ describe('a work list', () => {
   it('says how many goals have no player and how many changes wait', async () => {
     expect(await workList('2005-06', 'doelpunten-zonder-speler')).toContain('<td>2 doelpunten zonder speler</td>')
     expect(await workList('2005-06', 'wachtende-wijzigingen')).toContain('<td>2 wijzigingen wachten</td>')
+  })
+
+  it('leads a goal without a player to the goals of its match, with the name the goal came with', async () => {
+    const html = await workList('2005-06', 'doelpunten-zonder-speler')
+
+    expect(html).toMatch(
+      new RegExp(
+        `<a[^>]*href="/beheer/wedstrijden/${ids.unlinked}#doelpunten"[^>]*>sc Heerenveen - Nepstad Rangers`,
+        'u',
+      ),
+    )
+    expect([...html.matchAll(/<th[^>]*scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
+      'Wedstrijd',
+      'Uitslag',
+      'Naam bij het doelpunt',
+      'Te doen',
+    ])
+    expect(html).toContain('<td>Onbekende Een, Onbekende Twee</td><td>2 doelpunten zonder speler</td>')
+    // The season has a player to choose, so the list does not send the editor to the players.
+    expect(html).not.toContain('nog geen enkele speler')
+  })
+
+  it('says above the rows that a season has no player, with a link to its players, and counts a goal without a name', async () => {
+    await database.db.insert(matchGoals).values({ matchId: ids.later, ours: true, player: '' })
+
+    try {
+      const html = await workList('2006-07', 'doelpunten-zonder-speler')
+
+      expect(html).toContain('Het seizoen 2006/07 heeft nog geen enkele speler')
+      expect(html).toContain('<a href="/beheer/spelers?seizoen=2006-07"')
+      expect(html).toContain('>naar de spelers van 2006/07</a>')
+      expect(html.indexOf('nog geen enkele speler')).toBeLessThan(html.indexOf('<table'))
+      expect(html).toContain('<td>1 zonder naam</td><td>1 doelpunt zonder speler</td>')
+      // The other lists of the season say nothing about players.
+      expect(await workList('2006-07', 'zonder-doelpunten')).not.toContain('nog geen enkele speler')
+    } finally {
+      await database.db.delete(matchGoals).where(and(eq(matchGoals.matchId, ids.later), eq(matchGoals.ours, true)))
+    }
   })
 
   it('says so when a list is empty', async () => {

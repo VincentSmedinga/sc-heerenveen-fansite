@@ -216,6 +216,30 @@ describe('the form that adds a player', () => {
     }
   })
 
+  it('says which match the editor goes back to, and keeps the match in the search and in "Annuleren"', async () => {
+    const html = await addForm({ seizoen: '2019-20', wedstrijd: String(matchId) })
+
+    expect(html).toContain(
+      'Na het opslaan ga je terug naar het formulier van de wedstrijd sc Heerenveen - Oefenstad AZ.',
+    )
+    expect(html).toContain(`<input type="hidden" name="wedstrijd" value="${matchId}"/>`)
+    expect(html).toMatch(new RegExp(`<a[^>]*href="/beheer/wedstrijden/${matchId}"[^>]*>Annuleren</a>`, 'u'))
+  })
+
+  it('goes back to the list for a match of another season or something that is no match', async () => {
+    for (const wedstrijd of ['999999', 'abc', '//example.org']) {
+      const html = await addForm({ seizoen: '2019-20', wedstrijd })
+
+      expect(html).not.toContain('Na het opslaan ga je terug')
+      expect(html).not.toContain('name="wedstrijd"')
+      expect(html).toMatch(/<a[^>]*href="\/beheer\/spelers\?seizoen=2019-20"[^>]*>Annuleren<\/a>/u)
+    }
+
+    expect(await addForm({ seizoen: String(current).replace('/', '-'), wedstrijd: String(matchId) })).not.toContain(
+      'Na het opslaan ga je terug',
+    )
+  })
+
   it('lists the persons the search finds, the first one chosen, and says how many', async () => {
     const html = await addForm({ q: 'oyen', seizoen: '2019-20' })
 

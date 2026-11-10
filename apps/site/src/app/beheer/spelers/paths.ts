@@ -4,13 +4,17 @@ export const playersPath = '/beheer/spelers'
 
 /**
  * The address of the form that adds a player to a season, with the search for a person we
- * know (`q`).
+ * know (`q`) and the match the editor comes from and goes back to after the save
+ * (`wedstrijd`).
  */
-export function addPlayerPath(season: string, search?: string) {
+export function addPlayerPath(season: string, search?: string, matchId?: number) {
   const query = new URLSearchParams({ seizoen: seasonSlug(season) })
 
   if (search !== undefined && search !== '') {
     query.set('q', search)
+  }
+  if (matchId !== undefined) {
+    query.set('wedstrijd', String(matchId))
   }
 
   return `${playersPath}/nieuw?${query}`
