@@ -12,6 +12,7 @@ import { personNameOf } from './person-name.ts'
 import { aliasMap, chosenSpelling, personsWhoDiffer } from './person-names.ts'
 import {
   describePersons,
+  doublePlayers,
   lookUpPersonPages,
   mergeListedPersons,
   mostFailuresInARow,
@@ -456,6 +457,137 @@ describe('mergeListedPersons for Filip Đuričić', () => {
     expect(await mergeListedPersons(database.db)).toContain("Persons: 'Filip Djuričić' is now 'Filip Đuričić'")
     expect(await database.db.select().from(persons)).toMatchObject([{ id: only, wikipediaPage: 'Filip Đuričić' }])
     expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+})
+
+describe('a player twice in a season', () => {
+  afterEach(async () => {
+    await database.pool.query('DELETE FROM match_goals')
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM players')
+    await database.pool.query('DELETE FROM persons')
+    await database.pool.query('DELETE FROM clubs')
+  })
+
+  async function person(page: string) {
+    const [{ id }] = (await database.db.insert(persons).values({ wikipediaPage: page }).$returningId()) as [
+      { id: number },
+    ]
+
+    return id
+  }
+
+  it('merges a row with a person into a row without one of the same name, keeps the goals and says nothing the second time', async () => {
+    const id = await person('Youssef El Akchaoui')
+    const [{ id: clubId }] = (await database.db
+      .insert(clubs)
+      .values({ name: 'Club', slug: 'club' })
+      .$returningId()) as [{ id: number }]
+    const [{ id: matchId }] = (await database.db
+      .insert(matches)
+      .values({
+        clubId,
+        competition: 'Eredivisie',
+        dateText: 'x',
+        home: true,
+        matchDate: '2010-09-01',
+        opponent: 'Club',
+        round: 'Speelronde 1',
+        season: '2010/11',
+        status: 'scheduled',
+      })
+      .$returningId()) as [{ id: number }]
+
+    await database.db.insert(players).values([
+      { name: 'Youssef El Akchaoui', searchTerm: 'Akchaoui', season: '2010/11', source: 'selectie' },
+      {
+        name: 'Youssef El-Akchaoui',
+        personId: id,
+        searchTerm: 'Akchaoui',
+        season: '2010/11',
+        shirtNumber: 9,
+        source: 'verslag',
+        wikipediaPage: 'Youssef El-Akchaoui',
+      },
+    ])
+    const [gone] = await database.db.select().from(players).where(eq(players.name, 'Youssef El-Akchaoui'))
+
+    await database.db.insert(matchGoals).values({ matchId, ours: true, personId: id, player: 'x', playerId: gone!.id })
+
+    expect(await mergeListedPersons(database.db)).toEqual([
+      'Players: Youssef El-Akchaoui (2010/11) is merged into Youssef El Akchaoui',
+    ])
+
+    const rows = await database.db.select().from(players)
+
+    expect(rows).toMatchObject([
+      { name: 'Youssef El Akchaoui', personId: id, shirtNumber: 9, wikipediaPage: 'Youssef El-Akchaoui' },
+    ])
+    expect((await database.db.select().from(matchGoals))[0]!.playerId).toBe(rows[0]!.id)
+    expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+
+  it.each([
+    ['transfers', 'Youssef El-Akchaoui', 'Youssef El Akchaoui', '2010/11'],
+    ['verslag', 'Ugur Yildirim', 'Uğur Yıldırım', '2004/05'],
+  ] as const)(
+    'merges two rows of the source %s, and the chosen spelling stays',
+    async (source, old, chosen, season) => {
+      // The row with the old spelling is the older one, and has a person; the other has none.
+      const id = await person(chosen)
+
+      await database.db.insert(players).values({ name: old, personId: id, searchTerm: 'X', season, source })
+      await database.db.insert(players).values({ name: chosen, searchTerm: 'X', season, source })
+
+      expect(await mergeListedPersons(database.db)).toEqual([`Players: ${old} (${season}) is merged into ${chosen}`])
+      expect(await database.db.select().from(players)).toMatchObject([{ name: chosen, personId: id }])
+      expect(await mergeListedPersons(database.db)).toEqual([])
+    },
+  )
+
+  it('merges two rows of one person with different names', async () => {
+    const id = await person('Uğur Yıldırım')
+
+    await database.db.insert(players).values([
+      { name: 'Uğur Yıldırım', personId: id, searchTerm: 'Yıldırım', season: '2004/05', source: 'selectie' },
+      { name: 'Ugur Yildirim', personId: id, searchTerm: 'Yildirim', season: '2004/05', source: 'verslag' },
+    ])
+
+    expect(await mergeListedPersons(database.db)).toEqual([
+      'Players: Ugur Yildirim (2004/05) is merged into Uğur Yıldırım',
+    ])
+    expect(await database.db.select().from(players)).toHaveLength(1)
+  })
+
+  it('keeps two rows of one name that have two different persons, and the status names them', async () => {
+    const a = await person('Uğur Yıldırım (a)')
+    const b = await person('Uğur Yıldırım (b)')
+
+    await database.db.insert(players).values([
+      { name: 'Uğur Yıldırım', personId: a, searchTerm: 'Yıldırım', season: '2000/01' },
+      { name: 'Ugur Yildirim', personId: b, searchTerm: 'Yildirim', season: '2000/01' },
+    ])
+
+    expect(await mergeListedPersons(database.db)).toEqual([])
+    expect(await database.db.select().from(players)).toHaveLength(2)
+    expect(await doublePlayers(database.db)).toMatchObject([{ name: 'Uğur Yıldırım', season: '2000/01' }])
+  })
+
+  it('lets what the editors set win over the row that goes', async () => {
+    await database.db.insert(players).values([
+      { name: 'Youssef El Akchaoui', searchTerm: 'Akchaoui', season: '2000/01', shirtNumber: 5, source: 'selectie' },
+      {
+        editorsFields: ['shirt_number'],
+        name: 'Youssef El-Akchaoui',
+        searchTerm: 'Akchaoui',
+        season: '2000/01',
+        shirtNumber: 7,
+        source: 'verslag',
+      },
+    ])
+
+    expect(await mergeListedPersons(database.db)).toHaveLength(1)
+    expect(await database.db.select().from(players)).toMatchObject([{ shirtNumber: 7 }])
   })
 })
 
