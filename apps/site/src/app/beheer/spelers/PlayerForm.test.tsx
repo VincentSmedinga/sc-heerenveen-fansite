@@ -16,11 +16,17 @@ const people = [
   { id: 9, label: 'Piet Amersfoort (2019/20, geen Wikipedia-pagina)' },
 ]
 
+const countries = [
+  { code: 'DK', label: 'Denemarken (DK)' },
+  { code: 'NL', label: 'Nederland (NL)' },
+]
+
 const show = (answer: PlayerFormState, more: Partial<Parameters<typeof PlayerForm>[0]> = {}) =>
   render(
     <PlayerForm
       action={() => Promise.resolve(answer)}
       cancelHref="/beheer/spelers"
+      countries={countries}
       initial={answer.values}
       submitLabel="Speler toevoegen"
       {...more}
@@ -31,21 +37,72 @@ describe('the form of a player', () => {
   it('has a field for each thing of the player, each with its label', () => {
     show({ errors: {}, values: emptyPlayerValues })
 
-    for (const label of ['Voornaam', 'Tussenvoegsel', 'Achternaam', 'Wikipedia-pagina', 'Rugnummer', 'Positie']) {
+    for (const label of [
+      'Voornaam',
+      'Tussenvoegsel',
+      'Achternaam',
+      'Wikipedia-pagina',
+      'Linie',
+      'Land',
+      'Rugnummer',
+      'Positie',
+    ]) {
       expect(screen.getAllByLabelText(new RegExp(`^${label}`, 'u')).length).toBeGreaterThan(0)
     }
 
     expect(screen.queryByLabelText(/^Persoon/u)).toBeNull()
     expect((document.getElementById('achternaam') as HTMLInputElement).required).toBe(true)
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-      'Onbekend',
-      'Doelman',
-      'Verdediger',
-      'Middenvelder',
-      'Aanvaller',
-    ])
+    const lines = ['Onbekend', 'Doelman', 'Verdediger', 'Middenvelder', 'Aanvaller']
+    const options = (id: string) =>
+      [...(document.getElementById(id) as HTMLSelectElement).options].map((option) => option.textContent)
+
+    expect(options('positie')).toEqual(lines)
+    // The line and the country of the person each have an empty choice, and the country is a
+    // list by name with the code.
+    expect(options('linie')).toEqual(lines)
+    expect(options('land')).toEqual(['Onbekend', 'Denemarken (DK)', 'Nederland (NL)'])
+    expect((document.getElementById('land') as HTMLSelectElement).options[2]?.value).toBe('NL')
     expect(screen.getByRole('button', { name: 'Speler toevoegen' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Annuleren' }).getAttribute('href')).toBe('/beheer/spelers')
+  })
+
+  it('opens with the line and the country of the person, and says what they are for', () => {
+    show({ errors: {}, values: { ...emptyPlayerValues, land: 'NL', linie: 'verdediger' } })
+
+    expect((screen.getByLabelText(/^Linie/u) as HTMLSelectElement).value).toBe('verdediger')
+    expect((screen.getByLabelText(/^Land/u) as HTMLSelectElement).value).toBe('NL')
+    expect(screen.getByText('De linie van deze persoon, in elk seizoen.')).toBeTruthy()
+    expect(screen.getByText('Alleen voor dit seizoen. Bij Onbekend geldt de linie van de persoon.')).toBeTruthy()
+  })
+
+  it('has no line and no country for a player without a person', () => {
+    show({ errors: {}, values: emptyPlayerValues }, { withoutPerson: true })
+
+    expect(screen.queryByLabelText(/^Linie/u)).toBeNull()
+    expect(screen.queryByLabelText(/^Land/u)).toBeNull()
+    expect(screen.getByLabelText(/^Positie/u)).toBeTruthy()
+  })
+
+  it('shows an error of the line and of the country each at its own field', async () => {
+    show({
+      errors: {
+        land: 'Kies een land uit de lijst, of kies Onbekend.',
+        linie: 'Kies een linie uit de lijst, of kies Onbekend.',
+      },
+      values: emptyPlayerValues,
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Speler toevoegen' }))
+
+    await waitFor(() => expect(document.activeElement?.id).toBe('fouten'))
+
+    for (const id of ['linie', 'land']) {
+      expect(document.getElementById(id)?.getAttribute('aria-invalid')).toBe('true')
+      expect(document.getElementById(id)?.getAttribute('aria-describedby')).toBeTruthy()
+    }
+
+    expect(
+      screen.getByRole('link', { name: 'Kies een land uit de lijst, of kies Onbekend.' }).getAttribute('href'),
+    ).toBe('#land')
   })
 
   it('lists the persons the search found, with a new person as the last choice', () => {

@@ -92,6 +92,8 @@ const filled = (overrides: Partial<PlayerValues> = {}): PlayerValues => ({
 })
 
 const entry = (overrides: Partial<PlayerEntry> = {}): PlayerEntry => ({
+  country: null,
+  line: null,
   name: { familyName: 'Amersfoort', familyNamePrefix: 'van', givenName: 'Pelle' },
   page: null,
   personId: null,
@@ -135,10 +137,24 @@ describe('validatePlayer', () => {
     })
   })
 
+  it('understands the line and the country of the person, for a new person and for one from the list', () => {
+    expect(validatePlayer(filled({ land: 'NL', linie: 'verdediger' }), 'edit').entry).toMatchObject({
+      country: 'NL',
+      line: 'verdediger',
+      position: 'middenvelder',
+    })
+    expect(
+      validatePlayer({ ...emptyPlayerValues, land: 'XK', linie: 'doelman', persoon: '7' }, 'add').entry,
+    ).toMatchObject({ country: 'XK', line: 'doelman', name: null, personId: 7 })
+    expect(validatePlayer(filled(), 'edit').entry).toMatchObject({ country: null, line: null })
+  })
+
   it('gives each field that is wrong its own error', () => {
     const { errors } = validatePlayer(
       filled({
         achternaam: '',
+        land: 'Nederland',
+        linie: 'spits',
         positie: 'spits',
         rugnummer: '100',
         tussenvoegsel: 'x'.repeat(31),
@@ -150,6 +166,8 @@ describe('validatePlayer', () => {
 
     expect(Object.keys(errors ?? {}).sort()).toEqual([
       'achternaam',
+      'land',
+      'linie',
       'positie',
       'rugnummer',
       'tussenvoegsel',
@@ -158,6 +176,13 @@ describe('validatePlayer', () => {
     ])
     expect(errors?.rugnummer).toBe('Vul een getal van 1 tot en met 99 in, of laat het veld leeg.')
     expect(errors?.wikipedia).toContain('niet het adres')
+    expect(errors?.linie).toBe('Kies een linie uit de lijst, of kies Onbekend.')
+    expect(errors?.land).toBe('Kies een land uit de lijst, of kies Onbekend.')
+
+    // A code is two capitals of the list: no small letters, and no country that is gone.
+    for (const land of ['nl', 'YU', 'NLD', 'N']) {
+      expect(validatePlayer(filled({ land }), 'edit').errors?.land).toBeDefined()
+    }
 
     for (const rugnummer of ['0', '1,5', '-3', 'tien', '007']) {
       expect(validatePlayer(filled({ rugnummer }), 'add').errors?.rugnummer).toBeDefined()
@@ -250,6 +275,33 @@ describe('addPlayer', () => {
     })
     expect((await log())[0]?.detail).toContain(`persoon ${personId}`)
     expect((await log())[0]?.detail).not.toContain('nieuw')
+  })
+
+  it('gives a new person the line and the country by hand, and leaves a person we know as he is for an empty one', async () => {
+    await addPlayer(database.db, userId, season, entry({ country: 'SE', line: 'aanvaller' }), t0)
+
+    expect((await allPersons())[0]).toMatchObject({
+      country: 'SE',
+      countrySource: 'manual',
+      line: 'aanvaller',
+      lineSource: 'manual',
+    })
+    expect((await log())[0]?.detail).toContain(
+      '(nieuw), linie van de persoon: geen → aanvaller, land van de persoon: geen → SE',
+    )
+
+    // The same person in another season, with the fields left empty and then with a country.
+    const personId = (await allPersons())[0]?.id ?? 0
+
+    await addPlayer(database.db, userId, '2018/19', entry({ name: null, personId }), t0)
+
+    expect((await allPersons())[0]).toMatchObject({ country: 'SE', line: 'aanvaller' })
+    expect((await log())[1]?.detail).not.toContain('van de persoon')
+
+    await addPlayer(database.db, userId, '2017/18', entry({ country: 'NO', name: null, personId }), t0)
+
+    expect((await allPersons())[0]).toMatchObject({ country: 'NO', countrySource: 'manual', line: 'aanvaller' })
+    expect((await log())[2]?.detail).toContain(', land van de persoon: SE → NO')
   })
 
   it('makes no second person for a title that belongs to a person: the player becomes that person', async () => {
@@ -436,6 +488,102 @@ describe('editPlayer', () => {
         userId,
       },
     ])
+  })
+
+  it('sets the line and the country of the person by hand, and writes them in the log (#1051)', async () => {
+    const id = await added()
+    const found = await findAdminPlayer(database.db, id)
+
+    expect(found === undefined ? undefined : playerValuesOf(found)).toMatchObject({ land: '', linie: '' })
+    expect(await editPlayer(database.db, userId, id, entry({ country: 'NL', line: 'verdediger' }), t0)).toEqual({
+      status: 'changed',
+    })
+    expect((await allPersons())[0]).toMatchObject({
+      country: 'NL',
+      countrySource: 'manual',
+      line: 'verdediger',
+      lineSource: 'manual',
+    })
+    // The position of the season stays, and is not the editors' because of this.
+    expect((await allPlayers())[0]).toMatchObject({
+      editorsFields: ['name', 'shirt_number', 'position'],
+      position: 'middenvelder',
+    })
+    expect(await log()).toMatchObject([
+      {
+        action: 'player.edit',
+        detail:
+          'Aangepast: Pelle van Amersfoort, 2019/20. linie van de persoon: geen → verdediger; land van de persoon: geen → NL',
+        itemId: id,
+      },
+    ])
+
+    const again = await findAdminPlayer(database.db, id)
+
+    expect(again === undefined ? undefined : playerValuesOf(again)).toMatchObject({ land: 'NL', linie: 'verdediger' })
+    // The same values again change nothing.
+    expect(await editPlayer(database.db, userId, id, entry({ country: 'NL', line: 'verdediger' }), t0)).toEqual({
+      status: 'unchanged',
+    })
+  })
+
+  it('takes a line and a country away with their source, so the importer fills them in again', async () => {
+    const id = await added({ country: 'NL', line: 'verdediger' })
+
+    expect(await editPlayer(database.db, userId, id, entry({ country: 'NL' }), t0)).toEqual({ status: 'changed' })
+    expect((await allPersons())[0]).toMatchObject({
+      country: 'NL',
+      countrySource: 'manual',
+      line: null,
+      lineSource: null,
+    })
+    expect((await log())[0]?.detail).toBe(
+      'Aangepast: Pelle van Amersfoort, 2019/20. linie van de persoon: verdediger → geen',
+    )
+
+    await editPlayer(database.db, userId, id, entry(), t0)
+
+    expect((await allPersons())[0]).toMatchObject({ country: null, countrySource: null })
+  })
+
+  it('leaves the source of a line and a country that the editor did not change', async () => {
+    const id = await added()
+
+    await database.pool.query(
+      "UPDATE persons SET line = 'aanvaller', line_source = 'wikidata', country = 'BE', country_source = 'wikidata'",
+    )
+
+    // The form opens with what the person has, and the editor changes the number only.
+    await editPlayer(database.db, userId, id, entry({ country: 'BE', line: 'aanvaller', shirtNumber: 9 }), t0)
+
+    expect((await allPersons())[0]).toMatchObject({
+      country: 'BE',
+      countrySource: 'wikidata',
+      line: 'aanvaller',
+      lineSource: 'wikidata',
+    })
+    expect((await log())[0]?.detail).toBe('Aangepast: Pelle van Amersfoort, 2019/20. rugnummer: 14 → 9')
+  })
+
+  it('leaves the line and the country of a person the player gets in the same save', async () => {
+    const personId = await knownPerson('Jan Vos', '2018/19')
+
+    await database.pool.query("UPDATE persons SET line = 'doelman', line_source = 'wikidata' WHERE id = ?", [personId])
+
+    const [{ insertId: id }] = await database.db
+      .insert(players)
+      .values({ name: 'Jan Vos', searchTerm: 'Vos', season, source: 'verslag' })
+
+    // The form of a player without a person has no line and no country, so both are empty.
+    await editPlayer(
+      database.db,
+      userId,
+      id,
+      entry({ name: { familyName: 'Vos', familyNamePrefix: null, givenName: 'Jan' }, page: 'Jan Vos' }),
+    )
+
+    expect((await allPlayers()).find((player) => player.id === id)?.personId).toBe(personId)
+    expect((await allPersons())[0]).toMatchObject({ line: 'doelman', lineSource: 'wikidata' })
   })
 
   it('writes nothing for a save that changes nothing', async () => {

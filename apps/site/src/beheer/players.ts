@@ -13,6 +13,7 @@ import {
   givePersonPage,
   joinNameParts,
   setEditorsName,
+  setEditorsPersonFacts,
 } from '@fansite/db/persons'
 import { listMatchSeasons } from '@fansite/db/queries'
 import {
@@ -33,6 +34,7 @@ import {
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { storeCompleteness } from '@fansite/db/store-completeness'
+import { isCountryCode } from '@fansite/shared/countries'
 import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
@@ -53,7 +55,12 @@ export type AdminPlayer = {
   appearances: number
   /** How many goals in the matches point at him. */
   goals: number
-  person: Pick<Person, 'familyName' | 'familyNamePrefix' | 'givenName' | 'id' | 'name' | 'wikipediaPage'> | undefined
+  person:
+    | Pick<
+        Person,
+        'country' | 'familyName' | 'familyNamePrefix' | 'givenName' | 'id' | 'line' | 'name' | 'wikipediaPage'
+      >
+    | undefined
   player: Player
 }
 
@@ -69,6 +76,13 @@ export type PersonChoice = { id: number; label: string }
 
 /** What an editor entered, understood and in the shape of the tables. */
 export type PlayerEntry = {
+  /**
+   * The country of the person, as a code of two letters. Null for none: the form that changes a
+   * player then takes the country away, and the form that adds one leaves the person as he is.
+   */
+  country: null | string
+  /** The line of the person. Null as for `country`. */
+  line: null | PlayerPosition
   /** The name in parts. Null when the editor chose a person we know, who has his own. */
   name: EditorsName | null
   /** The title of the article. Null for none. */
@@ -156,6 +170,8 @@ export function playerValuesOf({ person, player }: Pick<AdminPlayer, 'person' | 
   return {
     ...emptyPlayerValues,
     ...nameValuesOf(player, person),
+    land: person?.country ?? '',
+    linie: person?.line ?? '',
     positie: player.position ?? '',
     rugnummer: player.shirtNumber === null ? '' : String(player.shirtNumber),
     wikipedia: player.wikipediaPage ?? '',
@@ -307,12 +323,25 @@ export function validatePlayer(
   if (values.positie !== '' && position === null) {
     errors.positie = 'Kies een positie uit de lijst.'
   }
+
+  // The line and the country of the person, for a person we know and for a new one alike.
+  const line = playerPositions.find((choice) => choice === values.linie) ?? null
+  const country = isCountryCode(values.land) ? values.land : null
+
+  if (values.linie !== '' && line === null) {
+    errors.linie = 'Kies een linie uit de lijst, of kies Onbekend.'
+  }
+  if (values.land !== '' && country === null) {
+    errors.land = 'Kies een land uit de lijst, of kies Onbekend.'
+  }
   if (Object.keys(errors).length > 0) {
     return { errors }
   }
 
   return {
     entry: {
+      country,
+      line,
       name: chosen
         ? null
         : {
@@ -347,10 +376,12 @@ function alreadyThere(
 async function findPerson(db: Pick<Database, 'select'>, id: number) {
   const [person] = await db
     .select({
+      country: persons.country,
       familyName: persons.familyName,
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
       id: persons.id,
+      line: persons.line,
       name: persons.name,
       wikipediaPage: persons.wikipediaPage,
     })
@@ -438,7 +469,9 @@ async function personOfNewPage(
  * person, a name or a title the season already has is refused. Writes `player.add`, so there is
  * no player without a row and no row without a player. The name and every field the editor
  * filled in are the editors' from then on (`players.editors_fields`, issue 1022): the importer
- * leaves them alone and fills in the rest.
+ * leaves them alone and fills in the rest. A line or a country the editor chose goes to the
+ * person, with the source `manual` (#1051); an empty one leaves the person as he is, because
+ * the form does not show what a person we know has.
  */
 async function storePlayer(
   db: Database,
@@ -518,11 +551,26 @@ async function storePlayer(
         wikipediaPage: page,
       })
 
+      const facts = {
+        ...(entry.country === null || entry.country === person.country ? {} : { country: entry.country }),
+        ...(entry.line === null || entry.line === person.line ? {} : { line: entry.line }),
+      }
+
+      await setEditorsPersonFacts(transaction, personId, facts)
+
+      const personChanges = [
+        facts.line === undefined ? undefined : `linie van de persoon: ${person.line ?? 'geen'} → ${facts.line}`,
+        facts.country === undefined ? undefined : `land van de persoon: ${person.country ?? 'geen'} → ${facts.country}`,
+      ]
+        .filter((change) => change !== undefined)
+        .map((change) => `, ${change}`)
+        .join('')
+
       await recordAction(
         transaction,
         {
           action: 'player.add',
-          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}`,
+          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}${personChanges}`,
           itemId: insertId,
           userId,
         },
@@ -549,7 +597,10 @@ async function storePlayer(
  * persons is not done here. The goals of a player who gets a person get it too. Writes
  * `player.edit` with what changed, and nothing for a save that changes nothing. Each field that
  * changed is the editors' from then on (`players.editors_fields`, issue 1022), so the importer
- * leaves it alone.
+ * leaves it alone. A line or a country that differs from what his person has goes to the person
+ * (#1051): a value with the source `manual`, and an empty one takes it away, so the importer
+ * fills it in again. That is so only for the person the form showed: a player without a person,
+ * or one who gets another person in this save, keeps what that person has.
  */
 async function storePlayerEdit(
   db: Database,
@@ -610,6 +661,16 @@ async function storePlayerEdit(
         })
       }
 
+      // The line and the country of the person the form showed, where they differ.
+      const shown = person !== undefined && personId === person.id ? person : undefined
+      const facts =
+        shown === undefined
+          ? {}
+          : {
+              ...(entry.country === shown.country ? {} : { country: entry.country }),
+              ...(entry.line === shown.line ? {} : { line: entry.line }),
+            }
+
       const edited: PlayerField[] = [
         ...(renamed || name !== player.name ? (['name'] as const) : []),
         ...(entry.shirtNumber === player.shirtNumber ? [] : (['shirt_number'] as const)),
@@ -630,6 +691,12 @@ async function storePlayerEdit(
         personId === player.personId ? undefined : `persoon: ${player.personId ?? 'geen'} → ${personId ?? 'geen'}`,
         // The parts can change while the whole name stays, such as a prefix that moves.
         renamed && person !== undefined && name === player.name ? 'naam in delen van de persoon' : undefined,
+        facts.line === undefined
+          ? undefined
+          : `linie van de persoon: ${shown?.line ?? 'geen'} → ${facts.line ?? 'geen'}`,
+        facts.country === undefined
+          ? undefined
+          : `land van de persoon: ${shown?.country ?? 'geen'} → ${facts.country ?? 'geen'}`,
       ].filter((change) => change !== undefined)
 
       if (changes.length === 0) {
@@ -637,6 +704,9 @@ async function storePlayerEdit(
       }
       if (renamed && person !== undefined) {
         await setEditorsName(transaction, person.id, entry.name)
+      }
+      if (shown !== undefined) {
+        await setEditorsPersonFacts(transaction, shown.id, facts)
       }
 
       await transaction

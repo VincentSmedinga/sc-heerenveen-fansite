@@ -39,3 +39,10 @@ De README van de site beschrijft hoe `sendMail` werkt.
 `formationProblem` keurt een formatie, zoals `4-3-3`: getallen met een koppelteken ertussen die samen tien zijn, en `formationChoices` is de lijst met de gebruikelijke formaties.
 De functies gebruiken geen database; `@fansite/db/match-reports` (`reportForRules`, `matchForRules`) zet een opgeslagen verslag in de vorm die ze lezen.
 De regels staan in _De regels voor een verslag staan op één plek, in `packages/shared`_ in [`docs/beslissingen/hosting-en-data.md`](../../docs/beslissingen/hosting-en-data.md).
+
+## De landcodes
+
+`@fansite/shared/countries` heeft de landcodes van twee letters die een persoon kan hebben (`countryCodes`), en `isCountryCode`.
+Het zijn de 249 codes van ISO 3166-1 die in gebruik zijn, en `XK` voor Kosovo.
+De importer zet er de nationaliteiten van Wikidata mee om, en het beheer maakt er de keuzelijst van het land van (#1051).
+Een land dat niet meer bestaat, zoals Joegoslavië, heeft hier geen code.

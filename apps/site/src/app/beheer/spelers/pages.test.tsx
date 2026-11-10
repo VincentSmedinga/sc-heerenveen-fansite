@@ -101,6 +101,8 @@ beforeEach(async () => {
   ])
 
   const added = await addPlayer(database.db, userId, season, {
+    country: null,
+    line: null,
     name: { familyName: 'Amersfoort', familyNamePrefix: 'van', givenName: 'Pelle' },
     page: null,
     personId: null,

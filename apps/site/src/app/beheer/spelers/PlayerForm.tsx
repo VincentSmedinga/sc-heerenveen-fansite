@@ -3,6 +3,8 @@
 import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Link, Select, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
+import type { CountryChoice } from '#src/beheer/countries'
+
 import {
   newPersonChoice,
   type PlayerFieldName,
@@ -22,23 +24,34 @@ const summaryId = 'fouten'
  * of errors gets the focus after a save that did not work, also an error that belongs to no
  * field (`algemeen`), which has a line of its own above the fields. It works without
  * JavaScript: the server answers with the form again.
+ *
+ * The line and the country are those of the person (#1051), in every season; the position
+ * under "In dit seizoen" is for a season that differs. Both are lists of the browser itself,
+ * so a keyboard and a screen reader work them as any list, and typing the first letters of a
+ * country finds it. A player without a person has neither field (`withoutPerson`).
  */
 export function PlayerForm({
   action,
   cancelHref,
+  countries,
   initial,
   nameHint,
   people,
   submitLabel,
+  withoutPerson = false,
 }: {
   action: (previous: PlayerFormState, formData: FormData) => Promise<PlayerFormState>
   cancelHref: string
+  /** The countries to choose from, by name (`countryChoices`). */
+  countries: readonly CountryChoice[]
   initial: PlayerValues
   /** What a change of the name does, under the field of the family name. */
   nameHint?: string | undefined
   /** The persons to choose from. Without it the form has no list: it changes a player. */
   people?: readonly { id: number; label: string }[]
   submitLabel: string
+  /** The player has no person yet, so there is nobody to give a line or a country. */
+  withoutPerson?: boolean
 }) {
   const [state, formAction, pending] = useActionState(action, { errors: {}, values: initial })
   const { errors, values } = state
@@ -59,6 +72,8 @@ export function PlayerForm({
   const field = (name: PlayerFieldName) => ({ defaultValue: values[name], key: `${name}-${values[name]}`, name })
   const forNewPerson = choosing ? 'Alleen voor een nieuwe persoon. ' : ''
   const achternaamHint = choosing ? 'Alleen voor een nieuwe persoon, en dan verplicht.' : nameHint
+  // The form that adds does not know what a person from the list has, so empty changes nothing.
+  const keeps = people === undefined ? '' : ' Kies je een persoon die we al kennen? Onbekend laat staan wat hij heeft.'
 
   return (
     <Form action={formAction}>
@@ -133,6 +148,42 @@ export function PlayerForm({
         >
           <Input {...field('wikipedia')} autoComplete="off" />
         </Field>
+        {withoutPerson ? null : (
+          <>
+            <Field
+              error={errors.linie}
+              hint={`De linie van deze persoon, in elk seizoen.${keeps}`}
+              id="linie"
+              label="Linie"
+              required={false}
+            >
+              <Select {...field('linie')} width="natural">
+                <Select.Option value="">Onbekend</Select.Option>
+                {positionChoices.map((position) => (
+                  <Select.Option key={position.value} value={position.value}>
+                    {position.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+            <Field
+              error={errors.land}
+              hint={`Het land van deze persoon, in elk seizoen. De lijst staat op naam, met de landcode erachter.${keeps}`}
+              id="land"
+              label="Land"
+              required={false}
+            >
+              <Select {...field('land')} width="natural">
+                <Select.Option value="">Onbekend</Select.Option>
+                {countries.map((country) => (
+                  <Select.Option key={country.code} value={country.code}>
+                    {country.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+          </>
+        )}
       </Card>
       <Card aria-labelledby="seizoen-kop">
         <Heading id="seizoen-kop" level={2}>
@@ -147,7 +198,13 @@ export function PlayerForm({
         >
           <Input {...field('rugnummer')} autoComplete="off" inputMode="numeric" width="narrow" />
         </Field>
-        <Field error={errors.positie} id="positie" label="Positie" required={false}>
+        <Field
+          error={errors.positie}
+          hint="Alleen voor dit seizoen. Bij Onbekend geldt de linie van de persoon."
+          id="positie"
+          label="Positie"
+          required={false}
+        >
           <Select {...field('positie')} width="natural">
             <Select.Option value="">Onbekend</Select.Option>
             {positionChoices.map((position) => (

@@ -4210,3 +4210,46 @@
   De zin van `weinig` ("vooral wie scoorde of overkwam") klopt niet voor spelers die de redactie toevoegde.
   De kaart leest alleen de rij (_De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_): de fix zit in de beoordeling.
 - **Alternatieven:** de bestaande zin van `weinig` houden; Beheer laten falen als de rij niet lukt (een speler die de redactie niet kan toevoegen om een reden die haar niet raakt).
+
+## De kaart Selectie toont de positie en het land van het seizoen, en anders die van de persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** `listSeasonPlayers` geeft de positie van de rij van het seizoen, en anders de linie van de persoon (#1051).
+  Het land werkt op dezelfde manier: `players.country`, en anders `persons.country`.
+  Een speler zonder beide staat onder "Positie onbekend", zoals eerder, en een speler zonder land houdt een lege plek.
+  Het besluit over de gegevens zelf staat in `importer.md`, onder _Een persoon heeft een linie en een land, en een seizoen kan afwijken_.
+- **Waarom:** een speler zonder positie in een seizoen viel weg uit de lijst per positie, terwijl we zijn linie wel kenden.
+- **Alternatieven:** de linie van de persoon naar elke rij van een seizoen kopiëren (dezelfde gegevens op tientallen plekken, en een verbetering komt niet overal aan).
+
+## Het beheer zet de linie en het land van een persoon in het formulier van een speler
+
+- **Datum:** 10 november 2026
+- **Besluit:** het formulier van een speler heeft onder "Wie" de velden "Linie" en "Land", elk met de keuze "Onbekend" (#1051).
+  Een waarde die afwijkt van wat de persoon heeft, krijgt de bron `manual`, en de importer vervangt hem nooit.
+  Leegmaken haalt de waarde en de bron weg, zodat de importer hem bij de volgende run weer aanvult.
+  Een waarde die de redacteur niet verandert, houdt zijn bron.
+  De wijziging staat in het logboek van het beheer, in de regel van de speler (`player.edit` of `player.add`): "linie van de persoon: geen → verdediger".
+  "Positie" onder "In dit seizoen" blijft het veld voor een seizoen dat afwijkt.
+- **Eigen keuzes bij het bouwen:**
+  - **Toevoegen:** het formulier dat een speler toevoegt, weet niet wat een persoon uit de lijst al heeft.
+    "Onbekend" laat daar dus staan wat de persoon heeft, en alleen een gekozen waarde verandert iets.
+  - **Geen persoon:** een speler zonder persoon heeft de twee velden niet.
+    Krijgt hij in dezelfde keer een persoon, via een Wikipedia-pagina, dan houdt die persoon wat hij heeft.
+  - **Het land** is een gewone keuzelijst op de Nederlandse naam, met de landcode erachter: "Nederland (NL)".
+    De namen komen uit `Intl.DisplayNames` op de server, en de codes uit `@fansite/shared/countries`.
+    Een keuzelijst van de browser werkt met toetsenbord en schermlezer, en wie de eerste letters typt, vindt het land.
+  - **Samenvoegen:** voegt de importer twee personen samen, dan gaat een linie of land van de redactie voor op een van een andere bron.
+- **Waarom:** de redactie verbetert zo één keer wat voor elk seizoen geldt, op de plek waar ze de speler al aanpast.
+- **Alternatieven:** een eigen pagina per persoon (meer dan dit issue vraagt; de werklijst van #1053 komt daarvoor).
+  Een zoekveld met suggesties voor het land (vraagt JavaScript en eigen toetsenbordgedrag, voor een lijst die de browser al goed bedient).
+  Een bestand met Nederlandse landnamen in de repository (250 namen die de runtime al kent).
+
+## Acceptatie is voorlopig de leidende omgeving voor wat de redactie invult
+
+- **Datum:** 10 november 2026
+- **Besluit:** wat het beheer op acceptatie invult, komt in productie doordat productie eenmalig start met de database van acceptatie.
+  Er komt dus geen lijst in de repository voor wat de redactie invult, en geen uitvoer om over te nemen.
+  Het besluit geldt voor #1051, #1052 en #1053; de overdracht zelf hoort bij de lancering (#33).
+- **Waarom:** de redactie vult de linies en landen één keer in, op de omgeving die er nu is.
+- **Alternatieven:** lijsten in de repository (`personLines` en een lijst voor landen) waar elke omgeving ze uit leest.
+  Op productie opnieuw invullen.

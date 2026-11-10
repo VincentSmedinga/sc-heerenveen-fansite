@@ -1128,7 +1128,8 @@ describe('the health and the status', () => {
             !line.startsWith('Person names:') &&
             !line.startsWith('Persons from Wikidata:') &&
             !line.startsWith('  with a Q-number:') &&
-            !line.startsWith('  line: '),
+            !line.startsWith('  line: ') &&
+            !line.startsWith('  country: '),
         )
         .join('\n'),
     })

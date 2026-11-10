@@ -8,6 +8,8 @@ export const playerFieldNames = [
   'tussenvoegsel',
   'achternaam',
   'wikipedia',
+  'linie',
+  'land',
   'rugnummer',
   'positie',
 ] as const

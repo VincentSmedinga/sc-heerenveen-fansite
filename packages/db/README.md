@@ -806,19 +806,32 @@ Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `
 De importer leest van elke persoon wat Wikidata weet (#898; de regels staan in de [README van de importer](../../apps/importer/README.md), _De gegevens van de personen uit Wikidata_).
 `persons` heeft er acht kolommen voor, die leeg zijn tot de persoon is gelezen:
 
-| Kolom (`persons`)      | Betekenis                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `wikidata_id`          | Het Q-nummer van het item (`Q15943430`); uniek, leeg toegestaan                                                       |
-| `wikipedia_page_id`    | Het nummer van het Nederlandse artikel                                                                                |
-| `birth_date`           | De geboortedatum; bij een maand of een jaar de eerste van die maand of van dat jaar                                   |
-| `birth_date_precision` | `day`, `month` of `year`                                                                                              |
-| `birth_place_id`       | Het Q-nummer van de geboorteplaats, in `wikidata_items`                                                               |
-| `line`                 | De linie: `doelman`, `verdediger`, `middenvelder` of `aanvaller` (dezelfde lijst als `playerPositions`)               |
-| `line_source`          | Waar de linie vandaan komt: `wikidata`, `squad` (de selectielijsten) of `manual` (de lijst `personLines`)             |
-| `wikidata_read_at`     | Het moment waarop de importer de persoon las; leeg voor een persoon die nog niet is gelezen of wiens verzoek mislukte |
+| Kolom (`persons`)      | Betekenis                                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `wikidata_id`          | Het Q-nummer van het item (`Q15943430`); uniek, leeg toegestaan                                                         |
+| `wikipedia_page_id`    | Het nummer van het Nederlandse artikel                                                                                  |
+| `birth_date`           | De geboortedatum; bij een maand of een jaar de eerste van die maand of van dat jaar                                     |
+| `birth_date_precision` | `day`, `month` of `year`                                                                                                |
+| `birth_place_id`       | Het Q-nummer van de geboorteplaats, in `wikidata_items`                                                                 |
+| `line`                 | De linie: `doelman`, `verdediger`, `middenvelder` of `aanvaller` (dezelfde lijst als `playerPositions`)                 |
+| `line_source`          | Waar de linie vandaan komt: `wikidata`, `squad` (de selectielijsten) of `manual` (het beheer of de lijst `personLines`) |
+| `wikidata_read_at`     | Het moment waarop de importer de persoon las; leeg voor een persoon die nog niet is gelezen of wiens verzoek mislukte   |
 
 Een geboortedatum van een levende speler is een persoonsgegeven.
 Hij blijft in de database, en de site toont hem pas na een eigen besluit.
+
+Een persoon heeft ook een land (#1051, migratie `0065_add_country_of_persons`):
+
+| Kolom (`persons`) | Betekenis                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| `country`         | De landcode van twee letters in hoofdletters (`NL`); leeg voor een persoon van wie we het land niet kennen     |
+| `country_source`  | Waar het land vandaan komt: `manual` (het beheer), `wikidata`, `list`, `squad` of `old-site`; leeg zonder land |
+
+De linie en het land van een persoon zijn de standaard voor elk seizoen.
+Een rij van een seizoen kan afwijken: `players.position` en `players.country` gaan op de pagina van dat seizoen voor (`listSeasonPlayers`).
+De importer vult het land uit de eerste nationaliteit van Wikidata (`wikidata`); `list`, `squad` en `old-site` zijn voor de bronnen van #1052.
+De migratie voegt alleen de twee kolommen toe, verandert geen rij en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
+De codes die mogen, staan in `@fansite/shared/countries` (`countryCodes`): de 249 codes van ISO 3166-1 en `XK` voor Kosovo.
 
 Drie tabellen horen erbij:
 
@@ -827,7 +840,8 @@ Drie tabellen horen erbij:
 - `person_nationalities` en `person_positions` hebben `person_id`, `item_id` (een Q-nummer in `wikidata_items`) en `position`, de volgorde van Wikidata, vanaf 0.
   De sleutel is `person_id` met `position`, een persoon heeft een Q-nummer hoogstens één keer, en de rijen gaan weg met hun persoon.
 
-Functies in `@fansite/db/persons` voor de importer: `personsToRead`, `rememberWikidataId`, `storePersonData`, `storeWikidataLabel`, `knownWikidataLabels`, `personsByWikidataId`, `squadLines`, `applyManualLines` en `countPersonData`.
+Functies in `@fansite/db/persons` voor de importer: `personsToRead`, `rememberWikidataId`, `storePersonData`, `storeWikidataLabel`, `knownWikidataLabels`, `personsByWikidataId`, `squadLines`, `applyManualLines`, `refreshPersonLines`, `refreshPersonCountries` en `countPersonData`.
+Voor het beheer is er `setEditorsPersonFacts`, dat de linie en het land van een persoon zet met de bron `manual`, of weghaalt.
 De migratie `0052_add_wikidata_to_persons` voegt alleen toe en kan opnieuw draaien.
 Terugdraaien op de host: haal de foreign key `persons_birth_place_id_wikidata_items_id_fk`, de index `persons_wikidata_id_unique` en de acht kolommen weg, dan `person_nationalities`, `person_positions` en `wikidata_items`.
 De importer leest de personen dan opnieuw.

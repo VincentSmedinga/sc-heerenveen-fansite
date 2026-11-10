@@ -152,7 +152,8 @@ describe('readPersonData', () => {
       warnings: [],
     })
     expect(describePersonData(report)).toEqual([
-      'persons (Wikidata): 1 person read, 1 with a birth date, 1 with a nationality, 1 with a line (1 from Wikidata, 0 from the squad, 0 from the list), 0 left empty; 1 articles and 6 items asked',
+      'persons (Wikidata): 1 person read, 1 with a birth date, 1 with a nationality, 1 with a line (1 from Wikidata, 0 from the squad, 0 set by hand), 0 left empty; 1 articles and 6 items asked',
+      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 1 country from Wikidata',
     ])
   })
 
@@ -464,5 +465,212 @@ describe('readPersonData', () => {
 
     expect(asked(served.data)).toEqual([])
     expect(await rows('SELECT wikidata_read_at FROM persons')).toEqual([{ wikidata_read_at: null }])
+  })
+})
+
+describe('the line and the country of all persons, at every run (#1051)', () => {
+  const nobody = { data: {}, nl: {} }
+  const insertPlayer = (id: number, season: string, position: null | string, name: string) =>
+    database.pool.query('INSERT INTO players (season, name, search_term, position, person_id) VALUES (?, ?, ?, ?, ?)', [
+      season,
+      name,
+      name,
+      position,
+      id,
+    ])
+
+  /** A person that was read before, so the run asks nothing about him. */
+  async function addReadPerson(title: string, columns: Record<string, null | string> = {}) {
+    const names = ['wikipedia_page', 'wikidata_read_at', ...Object.keys(columns)]
+
+    await database.pool.query(`INSERT INTO persons (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`, [
+      title,
+      new Date('2026-11-01T10:00:00Z'),
+      ...Object.values(columns),
+    ])
+
+    const [row] = await rows('SELECT max(id) AS id FROM persons')
+
+    return row?.['id'] as number
+  }
+
+  async function addNationalities(personId: number, ...items: [id: string, label: string][]) {
+    for (const [position, [id, label]] of items.entries()) {
+      await database.pool.query('INSERT IGNORE INTO wikidata_items (id, label) VALUES (?, ?)', [id, label])
+      await database.pool.query('INSERT INTO person_nationalities (person_id, item_id, position) VALUES (?, ?, ?)', [
+        personId,
+        id,
+        position,
+      ])
+    }
+  }
+
+  it('gives a person without a line the position of a season row that was set later, with the source squad', async () => {
+    const id = await addReadPerson('Later Gezet')
+
+    await insertPlayer(id, '2003/04', null, 'Later Gezet')
+
+    const served = await serve(nobody.nl, nobody.data)
+
+    await read(served)
+
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([{ line: null, line_source: null }])
+
+    // The editors set the position of the row of that season.
+    await database.pool.query("UPDATE players SET position = 'verdediger', editors_fields = 'position'")
+
+    const report = await read(served)
+
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([{ line: 'verdediger', line_source: 'squad' }])
+    expect(report.linesAgain).toEqual({ cleared: 0, squad: 1, wikidata: 0 })
+    expect(describePersonData(report)).toEqual([
+      'persons (line and country): 1 line from the squad, 0 from Wikidata, 0 taken away; 0 countries from Wikidata',
+    ])
+    expect(asked(served.nl)).toEqual([])
+    expect(asked(served.data)).toEqual([])
+
+    // A second run changes nothing and says nothing.
+    expect(describePersonData(await read(served))).toEqual([])
+  })
+
+  it('follows the rows of a person with the line of the squad, and takes it away when no row has a position', async () => {
+    const id = await addReadPerson('Volgt De Rijen', { line: 'aanvaller', line_source: 'squad' })
+
+    await insertPlayer(id, '2003/04', 'middenvelder', 'a1')
+    await insertPlayer(id, '2004/05', 'middenvelder', 'a2')
+
+    const served = await serve(nobody.nl, nobody.data)
+
+    await read(served)
+
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([
+      { line: 'middenvelder', line_source: 'squad' },
+    ])
+
+    await database.pool.query('UPDATE players SET position = NULL')
+
+    expect((await read(served)).linesAgain).toEqual({ cleared: 1, squad: 0, wikidata: 0 })
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([{ line: null, line_source: null }])
+  })
+
+  it('leaves a line that was set by hand or came from Wikidata as it is', async () => {
+    const manual = await addReadPerson('Met De Hand', { line: 'doelman', line_source: 'manual' })
+    const wikidata = await addReadPerson('Van Wikidata', { line: 'verdediger', line_source: 'wikidata' })
+
+    await insertPlayer(manual, '2003/04', 'aanvaller', 'a1')
+    await insertPlayer(wikidata, '2003/04', 'aanvaller', 'a2')
+
+    const report = await read(await serve(nobody.nl, nobody.data))
+
+    expect(await rows('SELECT line, line_source FROM persons ORDER BY id')).toEqual([
+      { line: 'doelman', line_source: 'manual' },
+      { line: 'verdediger', line_source: 'wikidata' },
+    ])
+    expect(report.linesAgain).toEqual({ cleared: 0, squad: 0, wikidata: 0 })
+  })
+
+  it('fills a line that was taken away from the positions of Wikidata it kept, before the squad', async () => {
+    const id = await addReadPerson('Leeg Gemaakt')
+
+    await database.pool.query(
+      "INSERT INTO wikidata_items (id, label) VALUES ('Q9999999', 'rare positie'), ('Q201330', 'doelman')",
+    )
+    await database.pool.query(
+      "INSERT INTO person_positions (person_id, item_id, position) VALUES (?, 'Q9999999', 0), (?, 'Q201330', 1)",
+      [id, id],
+    )
+    await insertPlayer(id, '2003/04', 'aanvaller', 'a1')
+
+    const report = await read(await serve(nobody.nl, nobody.data))
+
+    expect(await rows('SELECT line, line_source FROM persons')).toEqual([{ line: 'doelman', line_source: 'wikidata' }])
+    expect(report.linesAgain).toEqual({ cleared: 0, squad: 0, wikidata: 1 })
+  })
+
+  it('keeps a line the editors set before the person was read', async () => {
+    await addPersons('Joost van Aken')
+    await database.pool.query("UPDATE persons SET line = 'aanvaller', line_source = 'manual'")
+
+    const report = await read(await serve(joost.wikipedia, joost.wikidata))
+
+    expect(await rows('SELECT line, line_source, wikidata_id FROM persons')).toEqual([
+      { line: 'aanvaller', line_source: 'manual', wikidata_id: 'Q15943430' },
+    ])
+    expect(report.lines).toEqual({ manual: 1, squad: 0, wikidata: 0 })
+  })
+
+  it('fills in the country from the first nationality, also for a person read before, and only once', async () => {
+    const dutch = await addReadPerson('Een Nederlander')
+    const dane = await addReadPerson('Een Deen')
+
+    await addNationalities(dutch, ['Q29999', 'Koninkrijk der Nederlanden'], ['Q155', 'Brazilië'])
+    await addNationalities(dane, ['Q756617', 'Koninkrijk Denemarken'])
+    await addReadPerson('Zonder Nationaliteit')
+
+    const served = await serve(nobody.nl, nobody.data)
+    const report = await read(served)
+
+    expect(await rows('SELECT wikipedia_page, country, country_source FROM persons ORDER BY id')).toEqual([
+      { country: 'NL', country_source: 'wikidata', wikipedia_page: 'Een Nederlander' },
+      { country: 'DK', country_source: 'wikidata', wikipedia_page: 'Een Deen' },
+      { country: null, country_source: null, wikipedia_page: 'Zonder Nationaliteit' },
+    ])
+    expect(report.countriesFilled).toBe(2)
+    expect(report.warnings).toEqual([])
+    expect(describePersonData(report)).toEqual([
+      'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 2 countries from Wikidata',
+    ])
+    expect(asked(served.data)).toEqual([])
+    expect((await read(served)).countriesFilled).toBe(0)
+  })
+
+  it('fills in the country of a person in the run that reads him', async () => {
+    await addPersons('Joost van Aken')
+
+    const report = await read(await serve(joost.wikipedia, joost.wikidata))
+
+    expect(await rows('SELECT country, country_source FROM persons')).toEqual([
+      { country: 'NL', country_source: 'wikidata' },
+    ])
+    expect(report.countriesFilled).toBe(1)
+  })
+
+  it('leaves a first nationality that is not in the list as a gap, with a warning and no guess', async () => {
+    const first = await addReadPerson('Uit Joegoslavië')
+    const second = await addReadPerson('Ook Uit Joegoslavië')
+
+    // The second nationality is in the list, and is no guess for the first.
+    await addNationalities(first, ['Q36704', 'Joegoslavië'], ['Q403', 'Servië'])
+    await addNationalities(second, ['Q36704', 'Joegoslavië'])
+
+    const report = await read(await serve(nobody.nl, nobody.data))
+
+    expect(await rows('SELECT country, country_source FROM persons ORDER BY id')).toEqual([
+      { country: null, country_source: null },
+      { country: null, country_source: null },
+    ])
+    expect(report.countriesFilled).toBe(0)
+    expect(report.warnings).toEqual([
+      'Persons: 2 persons have a first nationality that is not in the list of countries, so no country is filled in: Q36704 (Joegoslavië, 2)',
+    ])
+  })
+
+  it('never changes a country the editors set, and follows Wikidata for one it filled in itself', async () => {
+    const manual = await addReadPerson('Door De Redactie', { country: 'RS', country_source: 'manual' })
+    const old = await addReadPerson('Van De Oude Site', { country: 'BE', country_source: 'old-site' })
+    const ours = await addReadPerson('Van Wikidata', { country: 'BE', country_source: 'wikidata' })
+
+    for (const id of [manual, old, ours]) {
+      await addNationalities(id, ['Q29999', 'Koninkrijk der Nederlanden'])
+    }
+
+    const report = await read(await serve(nobody.nl, nobody.data))
+
+    expect(await rows('SELECT country, country_source FROM persons ORDER BY id')).toEqual([
+      { country: 'RS', country_source: 'manual' },
+      { country: 'BE', country_source: 'old-site' },
+      { country: 'NL', country_source: 'wikidata' },
+    ])
+    expect(report.countriesFilled).toBe(1)
   })
 })
