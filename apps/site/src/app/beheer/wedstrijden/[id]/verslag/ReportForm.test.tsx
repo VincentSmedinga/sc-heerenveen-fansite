@@ -2,8 +2,9 @@
 import { formationChoices } from '@fansite/shared/match-report'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { saveDraft } from '#src/beheer/report-draft'
 import {
   emptyRow,
   emptySide,
@@ -13,11 +14,12 @@ import {
   type Row,
 } from '#src/beheer/report-fields'
 
-import { ReportFields, ReportFormProvider } from './ReportForm'
+import { ReportDraftNotice, ReportFields, ReportFormProvider } from './ReportForm'
 
 afterEach(() => {
   // Vitest has no globals here, so Testing Library doesn't clean up by itself.
   cleanup()
+  localStorage.clear()
 })
 
 const squad = [1, 2, 3, 4, 5].map((id) => ({ id, name: `Speler ${id}`, shirtNumber: id }))
@@ -658,5 +660,153 @@ describe('the choices of the substitutions and the roles in the form of a report
     expect(select('wissel-wij-1-eruit').getAttribute('aria-describedby')).toBe(
       'eruit-hint-wij wissel-wij-1-eruit-error',
     )
+  })
+})
+
+describe('the input that the browser keeps for the form of a report', () => {
+  const withoutMatch = {
+    matchHref: '/beheer/wedstrijden/7',
+    opponent: 'Testclub',
+    series: null,
+    showDelay: 'binnen vijf minuten',
+    squad,
+  }
+  const choices = { ...withoutMatch, matchId: 7 }
+  const typed: ReportValues = { ...values, bron: 'Wedstrijdformulier' }
+  const keep = (draft: ReportValues = typed) => saveDraft(7, draft, values, Date.now())
+  const open = (more: { noMatch?: boolean; saved?: boolean } = {}) =>
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(initial)}
+        choices={more.noMatch === true ? withoutMatch : choices}
+        initial={initial}
+        title="Titel"
+      >
+        <ReportDraftNotice saved={more.saved} />
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const notice = () => document.getElementById('bewaarde-invoer') as HTMLElement
+  const bron = () => document.getElementById('bron') as HTMLInputElement
+  const button = (name: string) =>
+    [...document.querySelectorAll('button')].find((candidate) => candidate.textContent === name)
+
+  it('shows nothing when there is no input kept, and when it is the same as the server has', () => {
+    open()
+
+    expect(notice().textContent).toBe('')
+    expect(button('Herstel')).toBeUndefined()
+    cleanup()
+
+    localStorage.setItem('fansite-verslag-7', JSON.stringify({ savedAt: Date.now(), values }))
+    open()
+
+    expect(notice().textContent).toBe('')
+  })
+
+  it('keeps the input when a field is left, under the key of the match, and only when it changed', () => {
+    open()
+    fireEvent.change(bron(), { target: { value: 'Uitzending' } })
+
+    expect(localStorage.getItem('fansite-verslag-7')).toBeNull()
+
+    fireEvent.blur(bron())
+
+    const stored = JSON.parse(localStorage.getItem('fansite-verslag-7') ?? '{}') as {
+      savedAt: number
+      values: ReportValues
+    }
+
+    expect(stored.values.bron).toBe('Uitzending')
+    expect(typeof stored.savedAt).toBe('number')
+    expect(Object.keys(stored)).toEqual(['savedAt', 'values'])
+
+    fireEvent.blur(bron())
+
+    expect((JSON.parse(localStorage.getItem('fansite-verslag-7') ?? '{}') as { savedAt: number }).savedAt).toBe(
+      stored.savedAt,
+    )
+  })
+
+  it('keeps nothing for a screen without a match number', () => {
+    open({ noMatch: true })
+    fireEvent.change(bron(), { target: { value: 'Uitzending' } })
+    fireEvent.blur(bron())
+
+    expect(localStorage.length).toBe(0)
+  })
+
+  it('says it holds input that differs, as a status, with Herstel and Weggooien, and does not take the focus', () => {
+    keep()
+    open()
+
+    expect(notice().getAttribute('role')).toBe('status')
+    expect(notice().textContent).toContain('bewaarde invoer')
+    expect(button('Herstel')).toBeDefined()
+    expect(button('Weggooien')).toBeDefined()
+    expect(document.activeElement).toBe(document.body)
+    expect(bron().value).toBe('')
+  })
+
+  it('puts the input in the form with Herstel, and changes nothing before', () => {
+    keep()
+    open()
+
+    expect(bron().value).toBe('')
+
+    fireEvent.click(button('Herstel') as HTMLElement)
+
+    expect(bron().value).toBe('Wedstrijdformulier')
+    expect(notice().textContent).toContain('staat weer in het formulier')
+    expect(button('Herstel')).toBeUndefined()
+    expect(document.activeElement).toBe(notice())
+  })
+
+  it('takes the input away with Weggooien, and leaves the form as it is', () => {
+    keep()
+    open()
+    fireEvent.click(button('Weggooien') as HTMLElement)
+
+    expect(localStorage.getItem('fansite-verslag-7')).toBeNull()
+    expect(bron().value).toBe('')
+    expect(notice().textContent).toContain('weggegooid')
+    expect(document.activeElement).toBe(notice())
+  })
+
+  it('takes the input away on the page after a save that worked, and shows nothing', () => {
+    keep()
+    open({ saved: true })
+
+    expect(localStorage.getItem('fansite-verslag-7')).toBeNull()
+    expect(notice().textContent).toBe('')
+  })
+
+  it('works as it did when the text is broken or the storage is blocked', () => {
+    localStorage.setItem('fansite-verslag-7', 'geen json')
+
+    expect(() => open()).not.toThrow()
+    expect(notice().textContent).toBe('')
+    cleanup()
+
+    const blocked = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError')
+    })
+
+    expect(() => open()).not.toThrow()
+    expect(notice().textContent).toBe('')
+    expect(() => fireEvent.blur(bron())).not.toThrow()
+    blocked.mockRestore()
+  })
+
+  it('is not there without JavaScript: the notice draws an empty status and nothing else', () => {
+    keep()
+
+    const html = renderToStaticMarkup(
+      <ReportFormProvider action={() => Promise.resolve(initial)} choices={choices} initial={initial} title="Titel">
+        <ReportDraftNotice />
+      </ReportFormProvider>,
+    )
+
+    expect(html).not.toContain('Herstel')
   })
 })

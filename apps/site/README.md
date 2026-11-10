@@ -940,6 +940,11 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   Wie het zelf maakt, ziet een koppeling naar `/beheer` en komt bij de inlogpagina uit.
 - De rooktest controleert dat het HTML van geen enkele publieke pagina naar het beheer verwijst.
 
+Het formulier van een wedstrijdverslag bewaart zijn invoer ook in `localStorage`, onder de sleutel `fansite-verslag-<id van de wedstrijd>` (`src/beheer/report-draft.ts`), zodat een opslag die mislukt niets kost.
+Bij het verlaten van een veld staan de waarden van het formulier en het moment van bewaren erin, en niets meer.
+De sleutel gaat weg na een geslaagde opslag (`ReportDraftNotice`, op de pagina met `?gedaan=`), bij uitloggen (`AdminMarker` met `loggedOut`, op de inlogpagina na `?uitgelogd=1`) en na dertig dagen.
+Een sessie die verloopt haalt hem niet weg: daar is hij voor.
+
 - `requireRole` in `src/beheer/require-role.ts` is de ene controle van het beheer.
   Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve de pagina's en acties om in te loggen.
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.

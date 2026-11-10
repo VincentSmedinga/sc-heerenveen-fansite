@@ -685,3 +685,34 @@ for (const [name, javaScriptEnabled] of [
     })
   })
 }
+
+test.describe('the input of a match report that the browser keeps', () => {
+  test('comes back with Herstel after the page is opened again, and is gone after a save', async ({ page }) => {
+    const address = `/beheer/wedstrijden/${await playedMatchId()}/verslag`
+
+    await page.goto(address)
+    await page.getByLabel('Bron', { exact: true }).fill('bewaard in de browser')
+    await page.getByLabel('Bron', { exact: true }).blur()
+    await expect(page.getByText('bewaarde invoer')).toHaveCount(0)
+
+    // Opening the page again, as after a save that failed: nothing changes until a choice.
+    await page.goto(address)
+    await expect(page.getByRole('status').filter({ hasText: 'bewaarde invoer' })).toBeVisible()
+    await expect(page.getByLabel('Bron', { exact: true })).toHaveValue('')
+    await page.getByRole('button', { name: 'Herstel' }).click()
+    await expect(page.getByLabel('Bron', { exact: true })).toHaveValue('bewaard in de browser')
+
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+    await expect(page).toHaveURL(/gedaan=/u)
+    expect(
+      await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('fansite-verslag-'))),
+    ).toEqual([])
+
+    // Take the report away again, so the other tests start from a match without a report.
+    await page.goto(address)
+    await page.locator('summary', { hasText: 'Verslag weghalen' }).click()
+    await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
+    await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
+  })
+})

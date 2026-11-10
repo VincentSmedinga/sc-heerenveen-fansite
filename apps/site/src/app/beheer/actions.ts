@@ -23,5 +23,8 @@ export async function logOut() {
 
   ;(await cookies()).set(sessionCookieName, '', { ...sessionCookieOptions, maxAge: 0 })
 
-  redirect(loginPath)
+  // The word tells the login page that the editor chose to leave, so it also takes away the
+  // input the browser kept for the forms (see beheer/report-draft.ts). A session that ran out
+  // must not.
+  redirect(`${loginPath}?uitgelogd=1`)
 }

@@ -140,6 +140,14 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('Het teken bevat geen gegevens, gaat nergens heen en verandert alleen dat menu')
   })
 
+  it('says that the browser of that editor keeps the input of a match report on the device, until it is saved', () => {
+    const paragraph = html.match(/<p[^>]*>(Alleen een redacteur.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('bewaart ook de invoer van dat formulier op dit apparaat')
+    expect(paragraph).toContain('tot het verslag is opgeslagen, hij uitlogt of er dertig dagen voorbij zijn')
+    expect(paragraph).toContain('Die invoer gaat nergens heen.')
+  })
+
   it('says in paragraphs, not a list, what the counting, the logs, the theme, the cookie of the admin, email, other sites, questions and complaints are about', () => {
     const paragraphs = [...withoutIcons(plain).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 

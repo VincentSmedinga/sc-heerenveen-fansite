@@ -38,7 +38,7 @@ export default async function LoginPage({
     redirect('/beheer')
   }
 
-  const { fout } = await searchParams
+  const { fout, uitgelogd } = await searchParams
   const message = isMessage(fout) ? messages[fout] : undefined
   // Only a wrong address is an error of the field. A link that no longer works, or the rate
   // limit, is not about what is typed.
@@ -49,7 +49,7 @@ export default async function LoginPage({
     <>
       {/* Somebody without a session gets here. The layout may still hold the answer of an earlier
           page, after a soft navigation, so this page takes the mark away itself. */}
-      <AdminMarker loggedIn={false} />
+      <AdminMarker loggedIn={false} loggedOut={uitgelogd === '1'} />
       <Page.Main className={compact}>
         <Page.Cell>
           <Heading level={1}>Inloggen voor beheer</Heading>
