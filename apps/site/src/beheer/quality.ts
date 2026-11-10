@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { matchChanges, matches, matchGoals, matchReports } from '@fansite/db/schema'
+import { matchChanges, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
 import { and, asc, count, eq, gt, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 
 import { seasonSlug } from '../seasons'
@@ -25,6 +25,10 @@ export const workLists = [
 
 export const qualityPath = '/beheer/kwaliteit'
 
+// A goal of ours without a player: ours and not an own goal, or an own goal listed under the
+// opponent.
+const oursWithoutPlayer = and(isNull(matchGoals.playerId), sql`${matchGoals.ours} <> ${matchGoals.ownGoal}`)
+
 /**
  * The matches of a work list in a season, the oldest first:
  *
@@ -35,6 +39,8 @@ export const qualityPath = '/beheer/kwaliteit'
  *   editors or a difference between two sources that waits for a decision.
  *
  * `total` is how many goals or changes the match has in the list, and 1 in the first two.
+ * `names` is what `doelpunten-zonder-speler` knows of each goal that has a name, in the order
+ * of the goals, and empty in the other lists.
  */
 export async function listWork(db: Pick<Database, 'select'>, season: string, list: WorkList) {
   const totals = await totalsOf(db, season, list)
@@ -60,7 +66,35 @@ export async function listWork(db: Pick<Database, 'select'>, season: string, lis
     .where(inArray(matches.id, [...totals.keys()]))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
 
-  return found.map((match) => ({ ...match, total: totals.get(match.id) ?? 1 }))
+  const names = new Map<number, string[]>()
+
+  if (list === 'doelpunten-zonder-speler') {
+    const goals = await db
+      .select({ matchId: matchGoals.matchId, player: matchGoals.player })
+      .from(matchGoals)
+      .where(and(inArray(matchGoals.matchId, [...totals.keys()]), oursWithoutPlayer))
+      .orderBy(asc(matchGoals.id))
+
+    for (const goal of goals) {
+      const name = goal.player.trim()
+
+      if (name !== '') {
+        names.set(goal.matchId, [...(names.get(goal.matchId) ?? []), name])
+      }
+    }
+  }
+
+  return found.map((match) => ({ ...match, names: names.get(match.id) ?? [], total: totals.get(match.id) ?? 1 }))
+}
+
+/**
+ * Whether a season has a player at all. Without one, an editor has nobody to choose for a goal
+ * and adds the players first.
+ */
+export async function seasonHasPlayers(db: Pick<Database, 'select'>, season: string) {
+  const [found] = await db.select({ id: players.id }).from(players).where(eq(players.season, season)).limit(1)
+
+  return found !== undefined
 }
 
 /**
@@ -100,14 +134,7 @@ async function totalsOf(db: Pick<Database, 'select'>, season: string, list: Work
         .select({ id: matches.id, total: count() })
         .from(matchGoals)
         .innerJoin(matches, eq(matches.id, matchGoals.matchId))
-        // A goal of ours: ours and not an own goal, or an own goal listed under the opponent.
-        .where(
-          and(
-            eq(matches.season, season),
-            isNull(matchGoals.playerId),
-            sql`${matchGoals.ours} <> ${matchGoals.ownGoal}`,
-          ),
-        )
+        .where(and(eq(matches.season, season), oursWithoutPlayer))
         .groupBy(matches.id),
     'verslagen-bezig': () =>
       db

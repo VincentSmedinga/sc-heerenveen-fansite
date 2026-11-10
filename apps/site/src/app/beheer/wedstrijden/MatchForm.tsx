@@ -17,7 +17,17 @@ import {
   Select,
   Text,
 } from '@fansite/design-system'
-import { type ChangeEvent, createContext, type ReactNode, use, useActionState, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  type ChangeEvent,
+  createContext,
+  type ReactNode,
+  use,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import {
   addGoalId,
@@ -45,6 +55,11 @@ const ours = 'sc Heerenveen'
 
 /** The statuses, the kinds of goal and the squad, as the form words them. */
 export type MatchFormChoices = {
+  /**
+   * Where an editor adds a player the squad misses, for the season of the match (issue 1021).
+   * The address names the match, so the form of the player leads back to it.
+   */
+  addPlayer?: undefined | { href: string; season: string }
   goalKinds: readonly { label: string; value: string }[]
   /** Whether sc Heerenveen plays at home: clubs and scores follow the order of the match. */
   home: boolean
@@ -106,10 +121,32 @@ export function MatchErrorSummary() {
  * the scorer (see `scorerFormOf`). The field that does not ask stays in the page, hidden and
  * not sent, so a mistake does not wipe it. Without JavaScript the server shows the same after
  * each button, because it has the same rules.
+ *
+ * A player the squad misses is added in a new tab, so what is filled in here stays (issue
+ * 1021). When the editor comes back to this tab, the page asks the server for the squad again:
+ * the new player is in the list of every goal, and the fields keep what was typed.
  */
 export function MatchFields() {
   const { choices, formAction, state } = useMatchForm()
   const [live, setLive] = useState<LiveGoals>()
+  const router = useRouter()
+  const addingPlayer = useRef(false)
+
+  useEffect(() => {
+    const refresh = () => {
+      if (addingPlayer.current) {
+        addingPlayer.current = false
+        router.refresh()
+      }
+    }
+
+    window.addEventListener('focus', refresh)
+
+    return () => {
+      window.removeEventListener('focus', refresh)
+    }
+  }, [router])
+
   const { errors, values } = state
   const velden = values.velden
   // What the form said before the server answered is only good until the server answers.
@@ -431,6 +468,20 @@ export function MatchFields() {
             bij blessuretijd. Weet niemand de minuut, laat hem dan leeg. Schrijf de naam van een speler van de
             tegenstander zoals Wikipedia hem schrijft.
           </Text>
+          {choices.addPlayer === undefined ? null : (
+            <Text>
+              <Link
+                href={choices.addPlayer.href}
+                onClick={() => {
+                  addingPlayer.current = true
+                }}
+                target="_blank"
+              >
+                De speler staat er niet in? Voeg hem toe aan de selectie van {choices.addPlayer.season} (opent in een
+                nieuw tabblad)
+              </Link>
+            </Text>
+          )}
           {/* The end result changes the goals by itself, so a screen reader is told. */}
           <Text className="hf-visually-hidden" role="status">
             {current === undefined || current.count === values.doelpunten.length ? '' : describeCount(current.count)}

@@ -2,12 +2,20 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 import { firstCoverageSeason, seasonsBetween } from '@fansite/db/season-coverage'
-import { Breadcrumb, Card, DataTable, Heading, Page, Text } from '@fansite/design-system'
+import { Breadcrumb, Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { listPath as playersListPath } from '#src/app/beheer/spelers/paths'
 import { matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
-import { listWork, qualityPath, type WorkList, type WorkListMatch, workLists } from '#src/beheer/quality'
+import {
+  listWork,
+  qualityPath,
+  seasonHasPlayers,
+  type WorkList,
+  type WorkListMatch,
+  workLists,
+} from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { seasonFromSlug } from '#src/seasons'
@@ -62,8 +70,10 @@ const dayOf = (matchDate: string) => dayFormat.format(new Date(`${matchDate}T12:
 
 // A work list of the page Kwaliteit, for a beheerder: the matches of one season that miss
 // something, the oldest first. Each row leads to the match in the admin, a report that is not
-// finished to its report. An address that names no season since 1990/91 or no list says "niet
-// gevonden".
+// finished to its report. The list of the goals without a player leads to the goals of the
+// match and has the name each goal came with, and says so above the rows when the season has no
+// player to choose from (issue 1021). An address that names no season since 1990/91 or no list
+// says "niet gevonden".
 export default async function WorkListPage({ params }: Props) {
   await requireRole('beheerder')
 
@@ -80,8 +90,11 @@ export default async function WorkListPage({ params }: Props) {
   }
 
   const { intro, title, todo } = lists[list]
-  const found = await listWork(getDatabase().db, season, list)
+  const { db } = getDatabase()
+  const found = await listWork(db, season, list)
   const names = found.map(clubsOf)
+  const scorers = list === 'doelpunten-zonder-speler'
+  const withoutPlayers = scorers && found.length > 0 && !(await seasonHasPlayers(db, season))
 
   return (
     <Page.Main
@@ -111,18 +124,35 @@ export default async function WorkListPage({ params }: Props) {
           <Heading className="hf-visually-hidden" id="werklijst-kop" level={2}>
             Wedstrijden
           </Heading>
+          {withoutPlayers ? (
+            <Text>
+              Het seizoen {season} heeft nog geen enkele speler, dus je kunt bij deze doelpunten niemand kiezen. Voeg
+              eerst de spelers toe: <Link href={playersListPath(season)}>naar de spelers van {season}</Link>.
+            </Text>
+          ) : null}
           <DataTable
             appearance="text"
             caption={`${title} in het seizoen ${season}, de oudste wedstrijd bovenaan`}
-            columns={['Wedstrijd', 'Uitslag', 'Te doen']}
+            columns={
+              scorers
+                ? ['Wedstrijd', 'Uitslag', 'Naam bij het doelpunt', 'Te doen']
+                : ['Wedstrijd', 'Uitslag', 'Te doen']
+            }
             rows={found.map((match, index) => {
               const clubs = names[index] as string
 
               return {
-                cells: [scoreOf(match), todo(match.total)],
+                cells: scorers
+                  ? [scoreOf(match), goalNamesOf(match), todo(match.total)]
+                  : [scoreOf(match), todo(match.total)],
                 // A second meeting in the season gets its round, so every row has its own name.
                 header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
-                href: list === 'verslagen-bezig' ? reportPath(match.id) : matchPath(match.id),
+                href:
+                  list === 'verslagen-bezig'
+                    ? reportPath(match.id)
+                    : scorers
+                      ? `${matchPath(match.id)}#doelpunten`
+                      : matchPath(match.id),
                 secondary: `${dayOf(match.matchDate)} · ${match.competition}, ${match.round}`,
               }
             })}
@@ -135,6 +165,16 @@ export default async function WorkListPage({ params }: Props) {
 
 const clubsOf = (match: Pick<WorkListMatch, 'home' | 'opponent'>) =>
   match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
+
+/**
+ * The names the goals without a player came with, and how many came without one: "Onbekende
+ * Een, 1 zonder naam".
+ */
+function goalNamesOf(match: Pick<WorkListMatch, 'names' | 'total'>) {
+  const nameless = match.total - match.names.length
+
+  return [...match.names, ...(nameless > 0 ? [`${nameless} zonder naam`] : [])].join(', ')
+}
 
 /** The score in the order of the match, or that there is none. */
 function scoreOf(match: WorkListMatch) {

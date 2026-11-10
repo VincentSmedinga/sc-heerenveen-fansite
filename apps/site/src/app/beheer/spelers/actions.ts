@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import type { PlayerFormState } from '#src/beheer/player-fields'
 
 import { parseItemId } from '#src/beheer/items'
+import { findReturnMatch } from '#src/beheer/player-return'
 import {
   addPlayer,
   editPlayer,
@@ -17,6 +18,7 @@ import {
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
+import { matchPath } from '../wedstrijden/paths'
 import { listPath, playerPath, playersPath } from './paths'
 
 // The actions of the players. Only a beheerder keeps them, as with the matches. The season and
@@ -28,10 +30,13 @@ import { listPath, playerPath, playersPath } from './paths'
 /**
  * Adds a player to the squad of a season (issue 1020). A form that is wrong comes back with
  * the values kept and an error at each field, and one that works ends on the list of the
- * season. A season that has no match and is not the current one ends on the list with a notice.
+ * season. An editor who came from the form of a match (`matchId`, issue 1021) ends on that
+ * form again, where the player is in the list of the goals. A season that has no match and is
+ * not the current one ends on the list with a notice.
  */
 export async function submitAddPlayer(
   season: string,
+  matchId: number | undefined,
   _previous: PlayerFormState,
   formData: FormData,
 ): Promise<PlayerFormState> {
@@ -63,7 +68,10 @@ export async function submitAddPlayer(
     return { errors: outcome.errors, values }
   }
 
-  redirect(listPath(season, 'toegevoegd'))
+  // The number of the match is input from outside: only a match of this season counts.
+  const back = await findReturnMatch(db, matchId, season)
+
+  redirect(back === undefined ? listPath(season, 'toegevoegd') : matchPath(back.id, 'speler-toegevoegd'))
 }
 
 /**

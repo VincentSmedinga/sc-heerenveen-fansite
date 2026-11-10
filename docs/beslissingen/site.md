@@ -4160,7 +4160,38 @@
   Een speler met doelpunten hoort bij het seizoen: zijn vertrek uit de selectie leest de import.
 - **Gevolg:** wat de import doet met een speler die de redactie toevoegde of aanpaste, regelt #1022; tot dan kan een run een aangepast veld van een speler uit Wikipedia overschrijven.
   De link vanuit een doelpunt en vanuit de werklijst naar dit formulier komt met #1021.
+- **Later:** die link is er: zie _De weg naar een nieuwe speler begint bij de plek waar hij ontbreekt_ (9 november 2026) en _De link naar een nieuwe speler opent een nieuw tabblad_ (10 november 2026).
 - **Alternatieven:** een `datalist` bij een tekstveld (schermlezers lezen de suggesties niet overal voor).
   Elke persoon in één lijst (duizenden keuzes).
   Bij het aanpassen een speler naar de persoon van een andere pagina verplaatsen (een stille samenvoeging).
   Elke speler zonder persoon bij het aanpassen een persoon geven (dezelfde oude speler zou in elk seizoen een eigen persoon krijgen).
+
+## De weg naar een nieuwe speler begint bij de plek waar hij ontbreekt
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kiezer van de speler in het doelpunt en de werklijst "doelpunten zonder speler" van de pagina Kwaliteit leiden naar het formulier van een speler (#1021).
+  De redactie komt daarna terug bij de wedstrijd.
+- **Waarom:** de redactie merkt een ontbrekende speler op in de wedstrijd of in de lijst, niet op een pagina met alle spelers.
+- **Alternatieven:** een speler in het doelpunt zelf aanmaken (een formulier in een formulier, minder toegankelijk).
+
+## De link naar een nieuwe speler opent een nieuw tabblad
+
+- **Datum:** 10 november 2026
+- **Besluit:** de link "De speler staat er niet in? Voeg hem toe aan de selectie van `<seizoen>`" in de kaart Doelpunten van een wedstrijd opent `/beheer/spelers/nieuw` in een nieuw tabblad, en de naam van de link zegt dat (#1021).
+  - **De weg terug:** het adres heeft het nummer van de wedstrijd (`wedstrijd`).
+    Na het opslaan, en met "Annuleren", komt de redactie in dat tabblad op het formulier van die wedstrijd, met een melding.
+    Het nummer telt alleen als de wedstrijd bestaat en bij het seizoen van de speler hoort (`findReturnMatch` in `src/beheer/player-return.ts`); anders eindigt het formulier op de lijst van de spelers.
+  - **Het eerste tabblad** houdt wat de redactie al invulde.
+    Komt de redactie daar terug, dan vraagt de pagina de selectie opnieuw aan de server (`router.refresh`), en staat de nieuwe speler in de kiezer van elk doelpunt.
+    Zonder JavaScript gebeurt dat niet: de redactie gaat dan verder in het nieuwe tabblad.
+  - **De link staat één keer** in de kaart, onder de uitleg, en niet bij elk doelpunt.
+  - **De werklijst** leidt naar de kaart Doelpunten van de wedstrijd (`#doelpunten`) en toont in een eigen kolom de naam waarmee elk doelpunt binnenkwam.
+    Een seizoen zonder spelers krijgt een zin boven de rijen, met een link naar de spelers van dat seizoen.
+- **Waarom:** een doelpunt van ons zonder speler kan het formulier niet opslaan, dus eerst opslaan en dan naar de speler gaan werkt juist niet in het geval waar het om gaat.
+  Een nieuw tabblad laat het formulier staan zoals het is, ook zonder JavaScript.
+  Een link die een tabblad opent zonder dat te zeggen, verrast wie een schermlezer gebruikt.
+  Eén link is genoeg: de pagina gaat over één wedstrijd en één seizoen, en een link per doelpunt herhaalt hetzelfde adres.
+- **Alternatieven:** het formulier eerst opslaan (weigert op het doelpunt zonder speler, en vraagt een reden voor een half ingevuld formulier).
+  De invoer bewaren in `sessionStorage` en na terugkomst terugzetten (werkt alleen met JavaScript, en de invoer van een ander bezoek kan blijven hangen).
+  De invoer bewaren op de server als concept (een tabel erbij voor iets wat minuten leeft).
+  Een link bij elk doelpunt.
