@@ -275,7 +275,11 @@ describe('the report screen', () => {
   })
 
   it('does not tell anything for a word it does not know', async () => {
-    expect(await page(matchId, { gedaan: 'iets' })).not.toContain('class="hf-notice')
+    // The empty status of the input the browser keeps is there, with no text.
+    const html = await page(matchId, { gedaan: 'iets' })
+
+    expect(html).not.toMatch(/<p[^>]*hf-notice[^>]*><strong>/u)
+    expect(html).toMatch(/<p[^>]*id="bewaarde-invoer"[^>]*><\/p>/u)
   })
 
   it('has a sidebar with the save panel and a link back to the match', async () => {
