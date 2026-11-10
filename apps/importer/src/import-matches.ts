@@ -17,7 +17,7 @@ import {
 } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
-import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 import type { Judgement } from './classify-change.ts'
 import type { Fetcher } from './fetcher.ts'
@@ -626,26 +626,40 @@ export function unlinkedWarning(goals: LinkedGoal[]): string | undefined {
 }
 
 /**
- * Makes a player of the season of each scorer of ours who links to a page and whom no rule of
- * `playerLinker` finds among the players (#1024): the squad table of Wikipedia runs behind, and
- * the page says who he is. The player gets the source `doelpunten`, the page, the person of the
- * page and the name of the title, and is added to `squad`, so the goals of the run find him. A
- * goal without a link, or with a page that has no person yet, makes no player, and neither
- * does a scorer whose name or person another player of the season already has: such a goal
- * stays without a player and is in the warning. Gives the names of the players it made.
+ * Makes a player of the season of each scorer of ours whose stored goal links to a page and has
+ * no player (#1024): the squad table of Wikipedia runs behind, and the page says who he is. It
+ * looks at the goals in `match_goals` after the run has written them, so a goal of a change
+ * that waits, or of a page that is held whole, makes no player. Only the matches of Wikipedia
+ * count, and not those in `skip`. The player gets the source `doelpunten`, the page, the person
+ * of the page and the name of the title, and is added to `squad`. A goal without a link, or
+ * with a page that has no person yet, makes no player, and neither does a scorer whose name or
+ * person another player of the season already has: such a goal stays without a player. Then
+ * every stored goal of these matches that still has no player gets the player the rules of
+ * `playerLinker` find now, so a goal that names only his surname has him in the same run.
+ * Gives the names of the players it made.
  */
 async function adoptScorers(
-  db: Pick<Database, 'insert'>,
+  db: Pick<Database, 'insert' | 'select' | 'update'>,
   season: string,
   squad: Player[],
-  goals: (ReadGoal & { personId: null | number })[],
+  skip: ReadonlySet<number>,
 ): Promise<string[]> {
   const adopted: string[] = []
+  const goals = (
+    await db
+      .select({ goal: matchGoals })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+      .where(and(eq(matches.season, season), eq(matches.dataSource, 'wikipedia'), isNull(matchGoals.playerId)))
+      .orderBy(asc(matchGoals.id))
+  )
+    .map(({ goal }) => ({ ...goal, playerPage: goal.wikipediaPage }))
+    .filter((goal) => isGoalOfOurPlayer(goal) && !skip.has(goal.matchId))
 
   for (const goal of goals) {
     const { personId, playerPage } = goal
 
-    if (!isGoalOfOurPlayer(goal) || playerPage === null || personId === null || playerLinker(squad)(goal) !== null) {
+    if (playerPage === null || personId === null || playerLinker(squad)(goal) !== null) {
       continue
     }
 
@@ -679,6 +693,18 @@ async function adoptScorers(
       shirtNumber: null,
     })
     adopted.push(name)
+  }
+
+  if (adopted.length > 0) {
+    const link = playerLinker(squad)
+
+    for (const goal of goals) {
+      const playerId = link(goal)
+
+      if (playerId !== null) {
+        await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
+      }
+    }
   }
 
   return adopted
@@ -1214,29 +1240,6 @@ async function storeMatches(
   }
 
   const edits = await readEdits(db, season)
-  // The scorers of the matches this import may write become players first, so every goal of the
-  // run finds them. A season with matches of the old fansite has its players from there. A
-  // match with an entry of the editors is compared with the page as it is: its scorer becomes a
-  // player once the entry is gone, so a goal they entered by name stays the same goal as the
-  // one on the page (`judgeGoals`).
-  const adopted = seasonRows.some((row) => row.dataSource === 'oude-fansite')
-    ? []
-    : await adoptScorers(
-        db,
-        season,
-        squad,
-        found
-          .filter((match) => {
-            const stored = known.get(key(match))
-
-            return !otherSources.has(key(match)) && (stored === undefined || !edits.has(stored.id))
-          })
-          .flatMap((match) => (checkGoals(match) === undefined ? (match.goals ?? []) : []))
-          .map((goal) => ({
-            ...goal,
-            personId: goal.playerPage === null ? null : (personOf.get(goal.playerPage) ?? null),
-          })),
-      )
   const link = playerLinker(squad)
   // The parts the editors took over from another source (#974) stay as they decided.
   const takenOver = await readTakenOverParts(
@@ -1582,8 +1585,24 @@ async function storeMatches(
     }
   }
 
+  // A scorer with a page becomes a player once his goal is stored. A season with matches of the
+  // old fansite has its players from there. A match whose goals the editors entered is
+  // compared with the page as it is: its scorer becomes a player once the entry is gone, so a
+  // goal they entered by name stays the same goal as the one on the page (`judgeGoals`).
+  const adopted = seasonRows.some((row) => row.dataSource === 'oude-fansite')
+    ? []
+    : await adoptScorers(
+        db,
+        season,
+        squad,
+        new Set([...edits].flatMap(([matchId, edit]) => (edit.goalsEdited ? [matchId] : []))),
+      )
+  const linkNow = adopted.length === 0 ? link : playerLinker(squad)
   // In a season without players nobody can be linked, which is no news.
-  const unlinked = squad.length === 0 ? undefined : unlinkedWarning(linkedGoals)
+  const unlinked =
+    squad.length === 0
+      ? undefined
+      : unlinkedWarning(linkedGoals.map((goal) => ({ ...goal, playerId: goal.playerId ?? linkNow(goal) })))
 
   if (unlinked !== undefined) {
     warnings.push(unlinked)

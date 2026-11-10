@@ -1018,7 +1018,9 @@ Alleen een doelpunt van een speler van ons wordt gekoppeld: een doelpunt van sc 
 Een doelpunt van de tegenstander en een eigen doelpunt van een tegenstander krijgen geen speler, want de spelers van andere clubs staan niet in `players`.
 
 Vindt geen regel een speler, en linkt het doelpunt naar een pagina?
-Dan maakt de import de doelpuntenmaker eerst als speler van het seizoen (`adoptScorers` in [`src/import-matches.ts`](src/import-matches.ts)), want de tabel van de selectie op Wikipedia loopt soms achter.
+Dan maakt de import de doelpuntenmaker als speler van het seizoen zodra het doelpunt is opgeslagen (`adoptScorers` in [`src/import-matches.ts`](src/import-matches.ts)), want de tabel van de selectie op Wikipedia loopt soms achter.
+Het doelpunt krijgt hem in dezelfde run.
+Een doelpunt van een wijziging die nog wacht, maakt geen speler.
 De speler krijgt de bron `doelpunten`, de pagina van de link, de persoon van die pagina en als naam de titel zonder de toevoeging tussen haakjes.
 Het logboek zegt het in één regel:
 
@@ -1026,7 +1028,7 @@ Het logboek zegt het in één regel:
 Matches 2022/23: 1 player added from a goal: Pelle van Amersfoort
 ```
 
-Dat gebeurt niet in een seizoen met wedstrijden van de oude fansite, en niet voor een wedstrijd zolang de redactie er iets bij invulde.
+Dat gebeurt niet in een seizoen met wedstrijden van de oude fansite, en niet voor een wedstrijd zolang de redactie de doelpunten ervan invulde.
 Het gebeurt ook niet als een andere speler van het seizoen dezelfde naam of dezelfde persoon heeft.
 Staat de speler later in de tabel van de selectie, dan krijgt hij die rij met de bron `selectie`, en houdt hij zijn `id` en zijn doelpunten.
 Tot dan blijft hij in de selectie staan: hij stond nooit in de tabel, dus hij is er ook niet uit vertrokken.

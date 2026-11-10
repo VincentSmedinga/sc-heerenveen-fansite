@@ -103,6 +103,7 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
 
+/** Runs the match import at this moment against this server. */
 function importAt(server: TestServer, at: Date) {
   return importMatches(database.db, fetcherFor([server]), { clock: () => at, origin: server.origin })
 }
@@ -175,7 +176,6 @@ async function snapshot() {
   }
 }
 
-/** Runs the match import at this moment against this server. */
 /** The text of a page with the scorers of these surnames named without a link to a page. */
 function withoutLinks(text: string, surnames: string[]): string {
   return surnames.reduce(
@@ -3067,6 +3067,35 @@ describe('linking the goals to the players of the squad', () => {
 
       expect(report).toMatchObject({ kind: 'imported', season: '2026/27', warnings: [] })
       expect(await ofPelle()).toMatchObject([{ season: '2026/27', source: 'doelpunten' }])
+      expect(await linksOf('Speelronde 2')).toContainEqual([
+        'Van Amersfoort',
+        'Pelle van Amersfoort',
+        'Pelle van Amersfoort',
+      ])
+    })
+
+    it('is no player while the change that names him waits, and becomes one when the change is taken over', async () => {
+      await addPlayers(others)
+
+      const { pages, server } = await serve({}, { routes: articleRoutes([], { titles: ['Pelle van Amersfoort'] }) })
+
+      await importAt(server, first)
+
+      // Five days later the page gives the goal of Rivera to another scorer: that waits.
+      const days = (count: number) => new Date(first.getTime() + hours(24 * count))
+
+      pages.programme = linked
+
+      expect(await importAt(server, days(5))).toMatchObject({ kind: 'imported', matches: { held: 1, updated: 0 } })
+      expect(await ofPelle()).toEqual([])
+      expect(await linksOf('Speelronde 2')).toContainEqual(['Rivera', 'Maxence Rivera', 'Maxence Rivera'])
+
+      // The page keeps it for seven days, so the import takes it over, and he is a player.
+      const report = await importAt(server, days(13))
+
+      expect(report).toMatchObject({ kind: 'imported', matches: { held: 0, updated: 1 } })
+      expect(report.kind === 'imported' && report.persons).toContain('1 player added from a goal: Pelle van Amersfoort')
+      expect(await ofPelle()).toMatchObject([{ source: 'doelpunten' }])
       expect(await linksOf('Speelronde 2')).toContainEqual([
         'Van Amersfoort',
         'Pelle van Amersfoort',

@@ -317,6 +317,29 @@ describe('Wikipedia has the same', () => {
     ).toEqual([oyen?.id])
   })
 
+  it('makes a scorer with a page a player at once when the editors entered another part of the match (#1024)', async () => {
+    const { pages, server } = await serve()
+    const unlinked = (text: string) => text.replaceAll('[[Luca Oyen|Oyen]]', 'Oyen')
+
+    pages.programme = unlinked(original.programme)
+    pages.cup = unlinked(original.cup)
+    await importAt(server, first)
+    // The editors entered the stadium, not the goals: those follow the page.
+    await enter(roundOne, { stadium: 'Stadion van de redactie' }, ['facts'])
+    pages.programme = pages.programme.replace('Oyen {{goal|52}}', '[[Luca Oyen|Oyen]] {{goal|52}}')
+    await importAt(server, later(first, 2))
+
+    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+
+    expect(oyen).toMatchObject({ source: 'doelpunten', wikipediaPage: 'Luca Oyen' })
+    expect(
+      (await database.db.select().from(matchGoals).where(eq(matchGoals.wikipediaPage, 'Luca Oyen'))).map(
+        (goal) => goal.playerId,
+      ),
+    ).toEqual([oyen?.id])
+    expect(await edits()).toMatchObject([{ factsEdited: true, goalsEdited: false }])
+  })
+
   it('treats the result and the goals apart: the goals caught up, the result still differs', async () => {
     const { server } = await serve()
 

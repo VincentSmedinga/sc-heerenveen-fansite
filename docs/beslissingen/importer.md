@@ -3505,12 +3505,16 @@
     Hoort de pagina al bij een persoon, dan krijgt de speler die persoon.
     Heeft de pagina nog geen persoon, omdat Wikipedia niet antwoordde, dan wacht het doelpunt op een volgende run.
     Heeft een andere speler van het seizoen dezelfde persoon of dezelfde naam, dan komt er geen tweede rij en blijft het doelpunt een waarschuwing.
-  - **Wanneer:** vóór het koppelen van de doelpunten, in dezelfde transactie, bij de uurlijkse import en bij `import:season`.
-    Zo vindt elk doelpunt van de run hem, ook een doelpunt zonder link met alleen zijn achternaam.
-  - **Welke wedstrijden:** alleen de wedstrijden waarvan de import van Wikipedia de doelpunten mag schrijven.
+  - **Wanneer:** nadat de run de wedstrijden heeft geschreven, in dezelfde transactie, bij de uurlijkse import en bij `import:season`.
+    De import kijkt naar de doelpunten zoals ze dan in `match_goals` staan.
+    Een doelpunt van een wijziging die wacht, of van een pagina die als geheel wordt vastgehouden, maakt dus geen speler.
+    Hij komt er pas als de wijziging is overgenomen.
+    Daarna krijgt elk bewaard doelpunt zonder speler de speler die `playerLinker` nu vindt, ook een doelpunt met alleen zijn achternaam.
+  - **Welke wedstrijden:** alleen de wedstrijden met de bron `wikipedia`.
     Een seizoen met wedstrijden van de oude fansite doet niet mee: die spelers komen van de oude fansite.
-    Een wedstrijd met een invoer van de redactie doet niet mee zolang die invoer er is.
+    Een wedstrijd waarvan de redactie de doelpunten invulde (`goals_edited`), doet niet mee zolang die invoer er is.
     De import vergelijkt de invoer dan met de pagina zoals die is, en een doelpunt dat de redactie op naam invulde blijft hetzelfde doelpunt (`judgeGoals`).
+    Vulde de redactie alleen de aftrap, de uitslag of de gegevens in, dan doet de wedstrijd wel mee.
   - **Later in de selectie:** staat hij later in de tabel van de selectie, dan krijgt hij die rij en houdt hij zijn `id`.
     `storePlayers` in `import-squad.ts` en in `import-past-squad.ts` vinden hem op zijn pagina, zijn naam of zijn persoon (`scorersByPerson`), en de bron wordt de betere bron.
     Op de persoon zoeken ze alleen bij een rij met de bron `doelpunten`, voor een tabel die een andere titel van zijn pagina linkt.
@@ -3526,4 +3530,4 @@
   De selectie op Wikipedia aanvullen (een tabel met 27 kolommen die sinds ronde 4 stilstaat).
   Een toelichting op de kaart (meer tekst zonder dat de bezoeker er iets aan heeft).
   De naam van het doelpunt als naam van de speler (vaak alleen een achternaam, en dan staat er een halve naam op de kaart).
-  De speler maken bij elke wedstrijd apart, tijdens het koppelen (een eerder doelpunt zonder link kreeg hem dan pas bij de volgende run).
+  De speler maken vóór het oordeel over een wijziging (de eerste versie van deze wijziging; een link in een verdachte wijziging maakte dan al een speler, en de reviewer wees daarop).
