@@ -4151,6 +4151,8 @@
     Een speler zonder persoon en zonder pagina krijgt bij het aanpassen geen persoon.
   - **Uit de selectie halen** zet `in_squad` uit en laat de rij staan, na een bevestiging in een uitklapblok.
     Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel kan niet weg: de pagina toont dan geen knop, en zegt waarom.
+  - **De lijst** van een seizoen is een `DataTable` met tekst waarvan elke kolom behalve de naam kan inklappen.
+    Een cel zegt daarom in woorden wat ze bevat, zoals "Rugnummer 7" en "Positie onbekend".
   - **Het logboek** krijgt `player.add`, `player.edit` met wat er veranderde, of `player.remove`; een opslag die niets verandert, schrijft niets.
 - **Waarom:** een zoeklijst als gewone `Select` werkt zonder JavaScript en met elk hulpmiddel, en het designsysteem heeft geen zoekveld met suggesties.
   De seizoenen tot 2006 hebben geen rugnummers en vaak geen posities, dus die velden kunnen niet verplicht zijn.

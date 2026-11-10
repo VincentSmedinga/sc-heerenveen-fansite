@@ -51,7 +51,9 @@ const errors: Record<string, string> = {
 
 // The players of a season for a beheerder, to add one or to change one (issue 1020). The list
 // opens on the current season, and the season picker is a form with method GET, so the page
-// works without JavaScript. A player who left the squad says so in words.
+// works without JavaScript. A player who left the squad says so in words. Every column but the
+// name folds under the name where the table has no room, as on a phone, and its header is gone
+// then: so a cell says in words what it holds, such as "Rugnummer 7".
 export default async function PlayersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole('beheerder')
 
@@ -101,11 +103,17 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
           <DataTable
             appearance="text"
             caption={`Spelers in het seizoen ${season}`}
-            columns={['Speler', 'Rugnummer', 'Positie', 'Bron', 'Selectie']}
+            columns={[
+              'Speler',
+              { fold: true, name: 'Rugnummer' },
+              { fold: true, name: 'Positie' },
+              { fold: true, name: 'Bron' },
+              { fold: true, name: 'Selectie' },
+            ]}
             rows={rows.map((player) => ({
               cells: [
-                player.shirtNumber ?? 'Geen',
-                positionChoices.find((choice) => choice.value === player.position)?.label ?? 'Onbekend',
+                player.shirtNumber === null ? 'Geen rugnummer' : `Rugnummer ${player.shirtNumber}`,
+                positionChoices.find((choice) => choice.value === player.position)?.label ?? 'Positie onbekend',
                 player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : sourceLabels[player.source],
                 player.inSquad ? 'In de selectie' : 'Uit de selectie',
               ],

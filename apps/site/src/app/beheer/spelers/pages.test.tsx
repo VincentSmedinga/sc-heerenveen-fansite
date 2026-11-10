@@ -122,10 +122,11 @@ const playerForm = async (id: number | string, searchParams: Record<string, stri
 const idOf = async (name: string) =>
   (await database.db.select().from(players)).find((row) => row.name === name)?.id ?? 0
 
-/** The rows of the table of the list, as the texts of the row header and the cells. */
+/** The rows of the table of the list: the name in the row header and the texts of the cells. */
 const rowsOf = (html: string) =>
   [...html.matchAll(/<tr><th scope="row">(.*?)<\/th>(.*?)<\/tr>/g)].map(([, name, cells]) => [
-    (name ?? '').replaceAll(/<[^>]*>/g, ''),
+    // The row header also holds the line of the folded columns: the name is its link.
+    (/<a[^>]*>(.*?)<\/a>/u.exec(name ?? '')?.[1] ?? '').replaceAll(/<[^>]*>/g, ''),
     ...[...(cells ?? '').matchAll(/<td[^>]*>(.*?)<\/td>/g)].map(([, cell]) => (cell ?? '').replaceAll(/<[^>]*>/g, '')),
   ])
 
@@ -167,9 +168,9 @@ describe('the list of the players', () => {
     const html = await list({ seizoen: '2019-20' })
 
     expect(rowsOf(html)).toEqual([
-      ['Luca Oyen', '7', 'Aanvaller', 'Wikipedia: selectie', 'In de selectie'],
-      ['Pelle van Amersfoort', '14', 'Middenvelder', 'Redactie', 'In de selectie'],
-      ['Jan Vos', 'Geen', 'Onbekend', 'Verslag van de redactie', 'Uit de selectie'],
+      ['Luca Oyen', 'Rugnummer 7', 'Aanvaller', 'Wikipedia: selectie', 'In de selectie'],
+      ['Pelle van Amersfoort', 'Rugnummer 14', 'Middenvelder', 'Redactie', 'In de selectie'],
+      ['Jan Vos', 'Geen rugnummer', 'Positie onbekend', 'Verslag van de redactie', 'Uit de selectie'],
     ])
     expect(html).toContain(`href="/beheer/spelers/${pelleId}"`)
     expect(html).toContain('href="/beheer/spelers/nieuw?seizoen=2019-20"')
