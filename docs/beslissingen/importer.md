@@ -3782,3 +3782,14 @@
   `similarPersons` krijgt geen regel voor Đ en Dj: voor één naam is de lijst met titels genoeg.
 - **Waarom:** het is de titel op Wikipedia, waar de andere spelling naar doorverwijst, en het sluit aan bij de vier paren van 10 november 2026 (_Uğur Yıldırım is één persoon_).
 - **Alternatieven:** Djuričić laten staan (de persoon staat dan twee keer).
+
+## Een speler met de pagina van een andere titel krijgt de titel die blijft
+
+- **Datum:** 10 november 2026
+- **Besluit:** staat de pagina van een rij in `players` in `personTitleAliases` als andere titel, dan krijgt de rij de pagina, de naam en de zoekterm van de titel die blijft (#1036).
+  Heeft het seizoen al een rij met die pagina of die naam, dan worden de twee één rij (`mergePlayerInto`).
+  Het gebeurt aan het begin van elke import van wedstrijden of een selectie, in `mergeListedPersons`, en een tweede run verandert niets.
+- **Waarom:** #1038 voegde alleen personen samen.
+  Een doelpuntenmaker die Wikipedia onder de doorverwijzing linkt (`Filip Djuričić`) heeft al de persoon van de titel die blijft, want de personenlijst volgt de doorverwijzing.
+  Er was dus geen persoon om samen te voegen, en zijn rij van 2010/11 bleef de oude spelling houden.
+- **Alternatieven:** de rij alleen veranderen bij het maken in `adoptScorers` (een rij die al bestaat blijft dan fout).
