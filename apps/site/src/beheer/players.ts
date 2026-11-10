@@ -66,7 +66,10 @@ export type AdminPlayer = {
 }
 
 /** A player as the list of a season shows him. */
-export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'name' | 'position' | 'shirtNumber' | 'source'>
+export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'name' | 'position' | 'shirtNumber' | 'source'> & {
+  /** The line of his person, shown when the season has no position. Null for none. */
+  personLine: null | PlayerPosition
+}
 
 /**
  * What changing did. `unchanged` is a save that changes nothing, which writes no row. A save
@@ -147,11 +150,13 @@ export async function listAdminPlayers(db: Pick<Database, 'select'>, season: str
       id: players.id,
       inSquad: players.inSquad,
       name: players.name,
+      personLine: persons.line,
       position: players.position,
       shirtNumber: players.shirtNumber,
       source: players.source,
     })
     .from(players)
+    .leftJoin(persons, eq(players.personId, persons.id))
     .where(eq(players.season, season))
     .orderBy(
       asc(sql`${players.shirtNumber} is null`),

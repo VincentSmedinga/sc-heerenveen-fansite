@@ -4412,3 +4412,15 @@
 - **Waarom:** sc Heerenveen speelt vaak met bijna dezelfde elf als de wedstrijd ervoor, en de eerste wedstrijd van een seizoen heeft anders geen voorganger.
   Een knop die niets overschrijft kan geen werk kosten.
 - **Alternatieven:** alleen hetzelfde seizoen (de eerste wedstrijd blijft leeg); alles wat is ingevuld vervangen na een bevestiging (meer klikken en een kans op verlies); ook de wissels en kaarten overnemen (die verschillen elke wedstrijd).
+
+## De tabel met spelers in het beheer volgt dezelfde regel voor de positie als de pagina van een seizoen
+
+- **Datum:** 10 november 2026
+- **Besluit:** de kolom Positie in de tabel van de pagina Spelers in het beheer toont de positie van het seizoen, en anders de linie van de persoon, met "(linie van de persoon)" erachter (#1070).
+  Pas als beide ontbreken staat er "Positie onbekend".
+  `listAdminPlayers` geeft daarvoor de linie van de persoon mee (`personLine`).
+  Het formulier van een speler verandert niet.
+- **Waarom:** de redactie leest de tabel om te zien wat nog ontbreekt, en "Positie onbekend" bij een persoon met een linie wijst een gat aan dat er niet is.
+  De cel zegt waar de waarde vandaan komt, zodat een schermlezer en een lezer met een smal scherm het verschil horen.
+- **Alternatieven:** de linie zonder toevoeging tonen (kort, maar verbergt dat het seizoen niets heeft); een aparte kolom Linie (neemt op een telefoon een kolom extra in).
+- **Later:** vult aan op _De kaart Selectie toont de positie en het land van het seizoen, en anders die van de persoon_ (#1051), die alleen de pagina van een seizoen noemde.

@@ -16,7 +16,7 @@ import {
 
 import { compact } from '#src/beheer/density'
 import { positionChoices } from '#src/beheer/player-fields'
-import { listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
+import { type AdminPlayerRow, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
@@ -42,6 +42,20 @@ const sourceLabels: Record<PlayerSource, string> = {
   transfers: 'Wikipedia: transfers',
   verslag: 'Verslag van de redactie',
   wikidata: 'Wikidata',
+}
+
+const labelOf = (position: null | string) => positionChoices.find((choice) => choice.value === position)?.label
+
+/**
+ * The cell of the position: that of the season, and otherwise the line of the person, said in
+ * words, the rule of the page of a season on the site (`listSeasonPlayers`, issue 1051).
+ */
+function positionText({ personLine, position }: Pick<AdminPlayerRow, 'personLine' | 'position'>) {
+  const own = labelOf(position)
+  if (own !== undefined) return own
+  const line = labelOf(personLine)
+
+  return line === undefined ? 'Positie onbekend' : `${line} (linie van de persoon)`
 }
 
 const errors: Record<string, string> = {
@@ -117,7 +131,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
             rows={rows.map((player) => ({
               cells: [
                 player.shirtNumber === null ? 'Geen rugnummer' : `Rugnummer ${player.shirtNumber}`,
-                positionChoices.find((choice) => choice.value === player.position)?.label ?? 'Positie onbekend',
+                positionText(player),
                 player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : sourceLabels[player.source],
                 player.inSquad ? 'In de selectie' : 'Uit de selectie',
               ],
