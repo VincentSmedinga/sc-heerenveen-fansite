@@ -10,8 +10,8 @@
 // - `codeOnlyCountries`: no drawing, so `PlayerName` shows the two letters of the country in a
 //   frame of the size of a flag.
 //
-// The real drawings come from flag-icons 7.6.0 (https://github.com/lipis/flag-icons, MIT licence,
-// see `flag-icons-licence.txt` in this folder), format 4x3. To make them again, take
+// The real drawings come from flag-icons 7.6.0 (https://github.com/lipis/flag-icons, MIT
+// licence, see `flag-icons-licence.txt` in this folder), format 4x3. To make them again, take
 // `flags/4x3/<code>.svg` of the package. Put the shape that a `use` points to in the place of
 // the `use`, so no drawing has a `use`. Then run svgo 3 on it with `multipass`, the
 // `preset-default` with `removeViewBox` off, `floatPrecision: 0` in `cleanupNumericValues` and

@@ -39,9 +39,9 @@
    * The flag of the country, between the number and the name, with a thin line round it: a
    * white flag (Netherlands, Finland, Japan) would melt into the card without it. The line
    * reaches 3:1 against the surface of its card in light and in dark (player-name-css.test.ts).
-   * A player without a flag has an empty place of the same size, and a country without a drawing
-   * a frame of the same size with its code. The flag is a little lower than
-   * the top of the line, so it stands beside the letters.
+   * A player without a flag has an empty place of the same size, and a country without a
+   * drawing a frame of the same size with its code. The flag is a little lower than the top of
+   * the line, so it stands beside the letters.
    */
   .hf-player-name-flag {
     block-size: 0.9375rem;
