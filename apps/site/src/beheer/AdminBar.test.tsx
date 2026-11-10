@@ -39,6 +39,7 @@ describe('the bar of the admin', () => {
       ['/beheer/berichten', 'Berichten'],
       ['/beheer/artikelen', 'Artikelen'],
       ['/beheer/wedstrijden', 'Wedstrijden'],
+      ['/beheer/spelers', 'Spelers'],
       ['/beheer/stadions', 'Stadions'],
       ['/beheer/clubnamen', 'Clubnamen'],
       ['/beheer/kwaliteit', 'Kwaliteit'],

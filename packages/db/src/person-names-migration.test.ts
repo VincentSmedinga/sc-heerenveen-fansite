@@ -69,7 +69,8 @@ describe(`the migration ${migration}`, () => {
       },
     ])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'name_source'")).toMatchObject([
-      { Null: 'YES', Type: "enum('sort_key','guess','manual')" },
+      // The list starts with the three sources of this migration; later ones add to it.
+      { Null: 'YES', Type: expect.stringMatching(/^enum\('sort_key','guess','manual'[,)]/u) },
     ])
   })
 })
