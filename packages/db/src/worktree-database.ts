@@ -1,5 +1,6 @@
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
+import { acceptanceCopyDatabase } from './export-plan.ts'
 import { migrateDatabase } from './migrate.ts'
 import { seedMatches, seedSources, seedSquad } from './seed.ts'
 import { seedStaff } from './staff-seed.ts'
@@ -56,6 +57,12 @@ export async function ensureWorktreeDatabase(url: string, { seed = false }: { se
 /** The name of the database in `url`, or an error when it isn't one of a worktree. */
 export function worktreeDatabaseName(url: string) {
   const name = new URL(url).pathname.slice(1)
+
+  if (name === acceptanceCopyDatabase) {
+    throw new Error(
+      `The database "${name}" holds the copy of acceptance, not the data of a worktree, so this command leaves it alone.`,
+    )
+  }
 
   if (!/^fansite_[a-z0-9_]+$/.test(name)) {
     throw new Error(

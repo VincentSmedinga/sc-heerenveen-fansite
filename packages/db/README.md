@@ -40,6 +40,8 @@ Dezelfde opdracht geeft elke worktree een eigen blok poorten (zie de [README van
 - **Bekijken:** `pnpm worktree:env` laat de databasenaam en de poorten van de map zien.
 - **Weghalen:** `pnpm worktree:db:drop` haalt de database van de map weg.
   Het raakt alleen een naam die met `fansite_` begint, nooit `fansite` zelf, en doet niets in een map die geen worktree is.
+- **Niet `acc`:** een map die op de database `fansite_acc` zou uitkomen, weigert het script.
+  Die database heeft de kopie van acceptatie (zie _Back-ups_), en de tests en `pnpm worktree:db:drop` van een werkmap zouden haar leegmaken.
 - **Niet afleiden:** een gewone checkout, een map zonder worktree en CI houden `fansite`.
   Dat geldt ook als je zelf `DATABASE_URL` in de omgeving zet, of in `.env` een andere database dan `fansite` zet, zoals `fansite_496`.
   Met `WORKTREE_NAME` in de omgeving kies je een andere naam, en leeg zet je het af.
@@ -48,15 +50,16 @@ Dezelfde opdracht geeft elke worktree een eigen blok poorten (zie de [README van
 
 Draai ze vanuit de root van de repository.
 
-| Opdracht                | Wat het doet                                                                                                        |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `pnpm db:generate`      | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                               |
-| `pnpm db:migrate`       | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                              |
-| `pnpm db:seed`          | Zet de testbronnen, de echte bronnen met hun feeds en de hoofdtrainers erin; een tweede keer maakt het geen dubbele |
-| `pnpm db:backup`        | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)                |
-| `pnpm db:restore`       | Zet een dump terug in een lege database (zie _Back-ups_)                                                            |
-| `pnpm test`             | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                         |
-| `pnpm worktree:db:drop` | Haalt de database van deze worktree weg (zie _Een database per worktree_)                                           |
+| Opdracht                  | Wat het doet                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm db:generate`        | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                               |
+| `pnpm db:migrate`         | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                              |
+| `pnpm db:seed`            | Zet de testbronnen, de echte bronnen met hun feeds en de hoofdtrainers erin; een tweede keer maakt het geen dubbele |
+| `pnpm db:backup`          | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)                |
+| `pnpm db:restore`         | Zet een dump terug in een lege database (zie _Back-ups_)                                                            |
+| `pnpm db:pull-acceptance` | Zet een kopie van de database van acceptatie in `fansite_acc`, zonder persoonsgegevens (zie _Back-ups_)             |
+| `pnpm test`               | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                         |
+| `pnpm worktree:db:drop`   | Haalt de database van deze worktree weg (zie _Een database per worktree_)                                           |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
@@ -389,6 +392,14 @@ De dump bevat van `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessi
 Hoe het werkt, hoe je het op de host instelt, hoe je terugzet en wat het aan opslag kost, staat in [`docs/back-ups.md`](../../docs/back-ups.md).
 `BACKUP_FOLDER`, `BACKUP_KEEP_DAYS`, `MYSQLDUMP_COMMAND` en `MYSQL_COMMAND` staan in `.env.example`.
 De tests (`src/backup.test.ts`) geven de opdrachten kleine programma's in plaats van `mysqldump` en `mysql`, en hebben voor het terugzetten een MariaDB nodig.
+
+`pnpm db:pull-acceptance` zet een kopie van de database van acceptatie in de lokale database `fansite_acc` (`src/acceptance-copy.ts`).
+Alleen de projecteigenaar draait het: het haalt over SSH de uitvoer van `backup.mjs export` op en laadt die direct, zonder bestand.
+`src/export-plan.ts` zegt van elke tabel wat de export ermee doet: kopiëren, alleen de structuur, of welke kolom een verzonnen waarde krijgt.
+Voeg je een tabel toe aan het schema, zet haar dan ook in die lijst; `src/export.test.ts` faalt anders.
+De kopie heeft een tabel buiten het schema, `acceptance_copy`, met de tijd van de dump en van het laden.
+De instellingen `ACCEPTANCE_SSH_HOST`, `ACCEPTANCE_SSH_USER`, `ACCEPTANCE_SSH_KEY`, `ACCEPTANCE_APP_PATH` en `ACCEPTANCE_SSH_PORT` staan in `.env.example`.
+Hoe je de kopie maakt, bevraagt en de site erop start, staat in [`docs/back-ups.md`](../../docs/back-ups.md), onder _Een kopie van acceptatie op je eigen computer_.
 
 ## Het logboek van de import en `robots_txt`
 

@@ -88,6 +88,25 @@ it('exits with 1 and names the variable when the file has no BACKUP_FOLDER', asy
   expect(output).not.toContain('secret')
 }, 30_000)
 
+// `pnpm db:pull-acceptance` starts this on the host over SSH (see docs/back-ups.md). Nothing
+// listens on the port of the database in the file, so the export stops before it writes.
+it('knows the export, which asks for no BACKUP_FOLDER and writes its failure to stderr only', async () => {
+  const { code, stderr, stdout } = await promisify(execFile)(
+    process.execPath,
+    [`--env-file=${envFile}`, file, 'export'],
+    { cwd: folder, env: { PATH: process.env['PATH'] } },
+  ).then(
+    (result) => ({ code: 0, ...result }),
+    (error: { code: number; stderr: string; stdout: string }) => error,
+  )
+
+  expect(code).toBe(1)
+  expect(stdout).toBe('')
+  expect(stderr).toMatch(/^The export failed: /)
+  expect(stderr).not.toContain('BACKUP_FOLDER')
+  expect(stderr).not.toContain('secret')
+}, 30_000)
+
 it('exits with 2 and shows the usage when the command is wrong', async () => {
   expect(await run(['dump'])).toMatchObject({ code: 2, output: expect.stringContaining('Usage:') })
 }, 30_000)

@@ -17,6 +17,7 @@
     "db:backup": "pnpm --filter @fansite/db db:backup",
     "db:generate": "pnpm --filter @fansite/db db:generate",
     "db:migrate": "pnpm --filter @fansite/db db:migrate",
+    "db:pull-acceptance": "pnpm --filter @fansite/db db:pull-acceptance",
     "db:restore": "pnpm --filter @fansite/db db:restore",
     "db:seed": "pnpm --filter @fansite/db db:seed",
     "format": "prettier --write .",

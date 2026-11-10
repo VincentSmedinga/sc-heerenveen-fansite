@@ -531,6 +531,7 @@
   Of de poort laten kiezen door het systeem (poort 0); dan weet niemand welke poort een server heeft, en `.mcp.json` en de afspraken in `AGENTS.md` kunnen er niet naar verwijzen.
   Of niets doen en sessies laten wachten; dat is wat misging.
 - **Later:** een eigen server per werkmap, als de botsingen blijven; of de poorten laten kiezen door een bestand in de werkmap als twee namen vaak hetzelfde blok krijgen.
+- **Later:** sinds 10 november 2026 weigert het script een werkmap die op `fansite_acc` zou uitkomen: die database heeft de kopie van acceptatie; zie _De kopie heet `fansite_acc`, en geen werkmap mag die naam krijgen_ in `hosting-en-data.md`.
 
 ## De zware controles delen de machine
 

@@ -38,6 +38,22 @@ test('a normal checkout gets the ports and the database it always had', () => {
   })
 })
 
+test('a worktree that would get the database of the copy of acceptance is refused', () => {
+  for (const name of ['acc', 'ACC', '-acc-']) {
+    assert.throws(
+      () => derive({ folder: `/work/.claude/worktrees/${name}` }),
+      (error) => error instanceof WorktreeEnvError && /would get the database fansite_acc/.test(error.message),
+      name,
+    )
+  }
+
+  assert.throws(() => derive({ env: { WORKTREE_NAME: 'acc' } }), /fansite_acc/)
+  // Also without a database to derive: the folder would get it as soon as there is a .env.
+  assert.throws(() => derive({ databaseUrl: undefined, folder: '/work/.claude/worktrees/acc' }), /fansite_acc/)
+  assert.equal(derive({ folder: '/work/.claude/worktrees/acc-2' }).databaseName, 'fansite_acc_2')
+  assert.equal(derive({ folder: '/work/acc', linked: false }).slug, undefined)
+})
+
 test('CI gets the defaults too, also in a worktree', () => {
   assert.equal(derive({ env: { CI: 'true' } }).slug, undefined)
   assert.equal(derive({ env: { CI: 'true' } }).values['SITE_PORT'], '3000')

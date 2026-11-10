@@ -3,6 +3,7 @@
 De database heeft een back-up die we echt kunnen terugzetten.
 Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op vijf na.
 Dit bestand zegt wat dat doet, hoe de eigenaar het instelt, hoe je een dump terugzet en wat de dumps aan opslag kosten.
+Het zegt ook hoe de projecteigenaar een kopie van de database van acceptatie op zijn eigen computer zet, zonder persoonsgegevens.
 
 Een dump beschermt tegen een fout in een migratie of een verkeerde actie.
 Hij beschermt niet tegen het verlies van de host zelf: de dumps staan op dezelfde host als de database.
@@ -15,7 +16,8 @@ Dat is klein genoeg voor een dump (zie _Wat de dumps kosten_).
 
 Eén bestand doet het werk: `packages/db/backup.mjs` in de map van de app.
 `assemble` maakt het, en elke deploy zet het op de host, naast de migraties.
-Het bestand heeft twee opdrachten en geen `node_modules` nodig.
+Het bestand heeft drie opdrachten en geen `node_modules` nodig: `backup`, `restore` en `export`.
+De derde schrijft een dump zonder persoonsgegevens naar de standaarduitvoer en maakt geen bestand (zie _Een kopie van acceptatie op je eigen computer_).
 Het leest zijn instellingen uit de omgeving, op de host uit hetzelfde bestand als de importer.
 
 | Instelling          | Wat erin staat                                                                            |
@@ -194,6 +196,114 @@ Zet een dump terug in dezelfde database, dus nadat een migratie of een actie de 
 
 Op je eigen computer zet je een dump terug met `pnpm db:restore <bestand>`, in een lege database: maak er een met `docker compose exec mariadb mariadb -e 'CREATE DATABASE terugzetten'` en zet `DATABASE_URL` daarop.
 
+## Een kopie van acceptatie op je eigen computer
+
+Met één opdracht zet de projecteigenaar een kopie van de database van acceptatie in de lokale database `fansite_acc`.
+Een query op die kopie beantwoordt dan een vraag over de gegevens, zonder dat iemand pagina's leest.
+De kopie heeft geen persoonsgegevens en zegt zelf hoe oud ze is.
+
+```sh
+pnpm db:pull-acceptance
+```
+
+De opdracht start over SSH `backup.mjs export` op de host en geeft wat die schrijft direct aan de lokale database.
+De dump wordt nergens een bestand, niet op de host en niet op je computer.
+Alleen de projecteigenaar draait de opdracht: hij gebruikt de SSH-sleutel van de host, en agents hebben geen toegang tot de host.
+Agents bevragen de kopie alleen (zie _The copy of the acceptance database_ in `AGENTS.md`).
+
+### Wat er in de kopie staat
+
+`packages/db/src/export-plan.ts` zegt van elke tabel van het schema wat de export ermee doet.
+
+| Tabellen                                                                                                          | Wat de kopie krijgt                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts` | Alleen de structuur, zonder rijen                                                                      |
+| `admin_users`                                                                                                     | Elk account met het adres `beheerder-<id>@example.invalid`, en het echte nummer, de rol en de tijden   |
+| Alle andere tabellen, en `__drizzle_migrations`                                                                   | Alle rijen                                                                                             |
+| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                       | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC |
+
+De export leest het echte adres van een account niet: de query vraagt de database om het verzonnen adres.
+Wie wat deed, staat in `audit_log`, `articles`, `article_versions`, `match_edits` en `match_reports` als het nummer van een account, en dat nummer blijft kloppen.
+De export vraagt `mysqldump` om elke tabel bij naam.
+Heeft de database een tabel die niet in de lijst staat, of heeft `admin_users` een kolom die de lijst niet kent, dan stopt de export voordat hij iets schrijft.
+Een test vergelijkt de lijst met `packages/db/src/schema.ts`, zodat een nieuwe tabel al in CI opvalt.
+Het wachtwoord van de database staat ook hier in een optiebestand dat de opdracht na afloop weghaalt, en niet in de opdrachtregel of de uitvoer.
+
+Na het laden zet de opdracht één account in de kopie om lokaal mee in te loggen: `beheer@example.test`, met de rol `beheerder`.
+
+### Eenmalig instellen
+
+1. Zet deze instellingen in de `.env` in de root van de repository.
+   Git negeert dat bestand.
+   De waarden zijn die van de geheimen van de omgeving `acceptatie` (zie _Eenmalig instellen_, stap 6, in `acceptatieomgeving.md`); ze horen nergens in de repository, in een issue of in een pull request.
+
+   | Instelling            | Wat erin staat                                                                                 |
+   | --------------------- | ---------------------------------------------------------------------------------------------- |
+   | `ACCEPTANCE_SSH_HOST` | De hostnaam van de SSH-server, zoals in `SSH_HOST`                                             |
+   | `ACCEPTANCE_SSH_USER` | De gebruikersnaam voor SSH, zoals in `SSH_USER`                                                |
+   | `ACCEPTANCE_SSH_KEY`  | Het volledige pad van de privésleutel uit stap 4, zonder `~`                                   |
+   | `ACCEPTANCE_APP_PATH` | Het volledige pad van de map van de app op de host, zoals in `DEPLOY_PATH`                     |
+   | `ACCEPTANCE_SSH_PORT` | De poort van SSH; zonder waarde 26                                                             |
+   | `MYSQL_COMMAND`       | Het pad van een eigen `mysql` of `mariadb`; zonder waarde de client in de container van Docker |
+
+2. Start de lokale database: `docker compose up -d --wait`.
+   `DATABASE_URL` in `.env` moet naar die database op je eigen computer wijzen; de opdracht weigert een andere host dan `127.0.0.1` of `localhost`.
+3. Log één keer met de hand in op de host, als je dat op deze computer nog niet deed: `ssh -p 26 -i <sleutel> <gebruiker>@<host>`.
+   Zo kent je computer de sleutel van de host.
+   De opdracht stelt zelf geen vragen en vraagt geen wachtwoord: lukt het inloggen niet zonder, dan stopt hij.
+4. De host moet een deploy hebben gehad met de opdracht `export` erin.
+
+### Wat je ziet
+
+De opdracht zegt aan het eind hoe oud de kopie is:
+
+```text
+Copied the acceptance database into fansite_acc (55 tables).
+The dump was made on the host at 2026-11-10 16:39:14 UTC and loaded here at 2026-11-10 16:39:21 UTC.
+Log in on the copy as beheer@example.test.
+```
+
+Het aantal tabellen groeit mee met het schema.
+De opdracht maakt `fansite_acc` elke keer opnieuw, en raakt geen andere database aan: niet `fansite` en niet de database van een werkmap.
+De oude kopie blijft staan tot de host begint te sturen, dus een verkeerde sleutel kost je niets.
+Mislukt het halen of het laden daarna, dan haalt de opdracht de halve kopie weg, zegt hij op stderr waarom en stopt hij met code 1.
+
+### De kopie bevragen
+
+```sh
+docker compose exec -T mariadb mariadb fansite_acc -e 'SELECT dumped_at, loaded_at FROM acceptance_copy'
+```
+
+Zo lees je eerst hoe oud de kopie is, en daarna stel je je vraag op dezelfde manier.
+Geen werkmap krijgt de naam `fansite_acc`: `scripts/worktree-env.js` weigert een map die `acc` heet, en `pnpm worktree:db:drop` laat de kopie staan.
+
+### De site op de kopie
+
+```sh
+DATABASE_URL=mysql://root@127.0.0.1:3306/fansite_acc pnpm dev
+```
+
+Met een `DATABASE_URL` die je zelf zet, maakt `pnpm dev` geen database en zet het de seed er niet in.
+Dat doet het alleen voor de database van een werkmap.
+De site draait bij de start wel de migraties die de kopie nog niet had.
+Loopt je code voor op acceptatie, dan heeft de kopie daarna een nieuwer schema dan acceptatie; haal een nieuwe kopie als je weer het schema van acceptatie wilt.
+Draai `pnpm db:seed` niet op de kopie: dat zet de testbronnen erbij.
+
+Inloggen gaat op `/beheer/inloggen` met `beheer@example.test`.
+Lokaal verstuurt de site geen mail: de link en de code staan in de uitvoer van `pnpm dev`.
+
+### De proef
+
+**10 november 2026, lokaal, met verzonnen gegevens: gelukt.**
+De bron was een database met de 68 migraties, de seed, twee accounts met een verzonnen adres op `example.org`, een sessie, een inlogpoging en een zout.
+`backup.mjs export` draaide met `mariadb-dump` 10.11 uit de container van `docker compose`, en `pnpm db:pull-acceptance` laadde de uitvoer met `mariadb` uit dezelfde container.
+In plaats van `ssh` stond er een klein script dat de export lokaal start.
+De dump had 2080 regels, zonder een adres op `example.org` en zonder de sessie, de inlogpoging of het zout.
+De kopie had 55 tabellen, de 14 wedstrijden van de seed, alle 68 rijen van `__drizzle_migrations`, de twee accounts als `beheerder-1@example.invalid` en `beheerder-2@example.invalid`, het account `beheer@example.test` en de twee tijden.
+
+**Wat de proef niet bewijst:** dat het over SSH naar de echte host werkt, met de `mysqldump` van de host.
+Dat laat de eerste keer zien dat de projecteigenaar de opdracht draait.
+
 ## Wat de dumps kosten
 
 De gedeelde hosting heeft 10 GB opslag, samen met het forum.
@@ -261,3 +371,15 @@ De proef op de host van acceptatie volgt in het vervolgissue (#347).
   Er is geen bestand achtergebleven.
   Kijk met `df -h ~` hoeveel ruimte er is.
 - De map groeit niet: kijk in `~/fansite-back-up.log`, en daarna in DirectAdmin of de cronjob bestaat.
+
+Bij `pnpm db:pull-acceptance`:
+
+- `Environment variables are missing or invalid`: de melding noemt de instelling; zie _Eenmalig instellen_ bij de kopie.
+- `ssh stopped with code 255. It said: … Permission denied (publickey)`: `ACCEPTANCE_SSH_KEY` wijst niet naar de sleutel van de host, of de gebruiker klopt niet.
+- `… Host key verification failed`: log één keer met de hand in, zodat je computer de host kent.
+- `ssh stopped with code 2`, met de regels `Usage:` van `backup.mjs`: de host heeft nog een versie zonder `export`.
+  Wacht op de volgende deploy.
+- `The export failed: The database has a table the export does not know`: de database heeft een tabel die niet in `packages/db/src/export-plan.ts` staat.
+  Vraag een agent om de tabel in de lijst te zetten; tot dan komt er geen kopie.
+- `docker is not installed here` of `service "mariadb" is not running`: start Docker en draai `docker compose up -d --wait`.
+- `… has no table acceptance_copy`: je eigen client uit `MYSQL_COMMAND` laadde in een andere server dan die van `DATABASE_URL`.

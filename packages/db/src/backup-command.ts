@@ -3,7 +3,8 @@
 // docs/back-ups.md). It runs as soon as it loads, like the import command. It reads
 // DATABASE_URL and BACKUP_FOLDER from the environment, so on the host cron starts it with the
 // same file as the importer. A backup that keeps failing is mailed to ALERT_MAIL_TO (see
-// alerts.ts).
+// alerts.ts). `export` is the third command: it writes a dump without personal data to the
+// standard output, for `pnpm db:pull-acceptance` on the owner's computer (see export-plan.ts).
 import { recordBackupRun } from './alerts.ts'
 import { runBackupCommand } from './backup.ts'
 

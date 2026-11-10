@@ -1,5 +1,5 @@
 import { parseEnv } from '@fansite/shared/env'
-import { createConnection, type RowDataPacket } from 'mysql2/promise'
+import { createConnection, escape, escapeId, type RowDataPacket } from 'mysql2/promise'
 import { spawn } from 'node:child_process'
 import { createReadStream } from 'node:fs'
 import { mkdir, mkdtemp, open, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
@@ -11,6 +11,7 @@ import { createGunzip, createGzip } from 'node:zlib'
 import * as z from 'zod'
 
 import { databaseEnvSchema } from './env.ts'
+import { copiedTablesOutsideSchema, copyInfoTable, exportPlan } from './export-plan.ts'
 
 const day = 24 * 60 * 60 * 1000
 
@@ -55,9 +56,20 @@ export const backupEnvSchema = databaseEnvSchema.extend({
 
 export type BackupEnv = z.output<typeof backupEnvSchema>
 
+/** The variables `export` needs. It writes no file, so it asks for no folder. */
+export const exportEnvSchema = databaseEnvSchema.extend({
+  MYSQLDUMP_COMMAND: z.string().default('mysqldump'),
+})
+
+export type ExportEnv = z.output<typeof exportEnvSchema>
+
+/** The line the export ends with. `pnpm db:pull-acceptance` refuses a copy without it. */
+export const exportCompletionMarker = '-- Export completed'
+
 const usage = [
   'Usage:',
   '  backup            makes a dump of the database and removes the dumps that are too old',
+  '  export            writes a dump without personal data to the standard output',
   '  restore <file>    puts a dump back into an empty database',
 ].join('\n')
 
@@ -146,6 +158,61 @@ export function expiredBackups(names: readonly string[], database: string, keepD
   const cutoff = Math.floor(now.getTime() / 1000) * 1000 - keepDays * day
 
   return found.filter(({ partial, taken }) => taken < cutoff && (partial || taken !== newest)).map(({ name }) => name)
+}
+
+/**
+ * Writes a dump of the database in `DATABASE_URL` to `out`, for the copy of acceptance on the
+ * owner's computer: `pnpm db:pull-acceptance` starts it on the host over SSH and loads what it
+ * prints. It follows `exportPlan`: the tables that are copied with their rows, the tables that
+ * keep their structure only, and the rows of `admin_users` with a made-up address. The dump
+ * ends with a small table that holds the time of the dump (`now`, in UTC) and the line that
+ * says it is complete. Nothing is written to a file, except the option file with the login
+ * that the client reads, which is removed again (see `withOptionFile`).
+ *
+ * It stops before it writes anything when the database has a table or a column that
+ * `exportPlan` doesn't name, so nothing leaves the host that nobody looked at.
+ */
+export async function exportDump(env: ExportEnv, out: Writable, now = new Date()) {
+  const connection = readConnection(env.DATABASE_URL)
+  const { copy, replaced, structure } = await readExportPlan(env.DATABASE_URL)
+  const info = escapeId(copyInfoTable)
+  const closing = [
+    '',
+    '-- The rows with made-up values, and the time of this dump (UTC).',
+    ...replaced,
+    `CREATE TABLE ${info} (\`dumped_at\` datetime NOT NULL, \`loaded_at\` datetime DEFAULT NULL);`,
+    `INSERT INTO ${info} (\`dumped_at\`) VALUES (${escape(now.toISOString().slice(0, 19).replace('T', ' '))});`,
+    exportCompletionMarker,
+    '',
+  ].join('\n')
+
+  await withOptionFile(connection, async (optionFile) => {
+    const common = [
+      `--defaults-extra-file=${optionFile}`,
+      '--single-transaction',
+      '--skip-lock-tables',
+      '--skip-add-drop-table',
+      '--default-character-set=utf8mb4',
+      '--hex-blob',
+    ]
+
+    await pipeline(
+      async function* () {
+        // The tables are named one by one. Without a name `mysqldump` takes every table.
+        yield* dumpOutput(env.MYSQLDUMP_COMMAND, [
+          [...common, connection.database, ...copy],
+          [...common, '--no-data', connection.database, ...structure],
+        ])
+
+        yield closing
+      },
+      out,
+      // The standard output is not ours to close.
+      { end: false },
+    )
+  })
+
+  return { copied: copy.length, database: connection.database, structureOnly: structure.length }
 }
 
 /**
@@ -264,7 +331,8 @@ export async function restore(env: BackupEnv, file: string) {
  * Runs one of the backup commands and returns the exit code: 0 when it did what was asked, 1
  * when it failed (the message says why), and 2 when the command is wrong. `pnpm db:backup` and
  * `pnpm db:restore` run it locally, and the file that `assemble` makes of
- * `backup-command.ts` runs it on the host (see docs/back-ups.md).
+ * `backup-command.ts` runs it on the host (see docs/back-ups.md). `export` only runs on the
+ * host, started over SSH by `pnpm db:pull-acceptance`.
  *
  * `report` hears how a backup went, so the host can mail the owner about a backup that keeps
  * failing (see `alerts.ts`). It is not called for a restore or a wrong command, and what it
@@ -279,12 +347,25 @@ export async function runBackupCommand(
   const [command, file, ...rest] = args
 
   if (!(
-    (command === 'backup' && file === undefined) ||
+    ((command === 'backup' || command === 'export') && file === undefined) ||
     (command === 'restore' && file !== undefined && rest.length === 0)
   )) {
     console.error(usage)
 
     return 2
+  }
+
+  if (command === 'export') {
+    try {
+      // The dump is the only thing on the standard output: what is said, is said on stderr.
+      await exportDump(parseEnv(exportEnvSchema, source), process.stdout, now)
+
+      return 0
+    } catch (error) {
+      console.error(`The export failed: ${messageOf(error)}`)
+
+      return 1
+    }
   }
 
   try {
@@ -317,6 +398,63 @@ export async function runBackupCommand(
   }
 }
 
+/**
+ * Resolves when a program has stopped with code 0, and rejects with what it printed on stderr
+ * when it didn't start or stopped with another code. The password is never in that text: it is
+ * not on the command line, and the clients don't print it.
+ */
+export function watch(
+  child: ReturnType<typeof spawn>,
+  command: string,
+  howToFix = 'Set MYSQLDUMP_COMMAND or MYSQL_COMMAND to its full path.',
+) {
+  let stderr = ''
+
+  child.stderr?.on('data', (chunk: Buffer) => {
+    stderr = (stderr + chunk.toString()).slice(-2000)
+  })
+
+  return new Promise<void>((resolve, reject) => {
+    child.once('error', (error: NodeJS.ErrnoException) => {
+      reject(
+        new Error(
+          error.code === 'ENOENT'
+            ? `${command} is not installed here, or not on the path. ${howToFix}`
+            : `${command} could not start (${error.code ?? 'unknown error'}).`,
+        ),
+      )
+    })
+    child.once('close', (code, signal) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(
+          new Error(
+            `${command} stopped with ${signal ?? `code ${code}`}.${stderr === '' ? '' : ` It said:\n${stderr.trim()}`}`,
+          ),
+        )
+      }
+    })
+  })
+}
+
+/** Runs `use` with an option file that only this account can read, then removes the file. */
+export async function withOptionFile<Result>(
+  connection: ReturnType<typeof readConnection>,
+  use: (optionFile: string) => Promise<Result>,
+) {
+  const folder = await mkdtemp(path.join(tmpdir(), 'fansite-backup-'))
+  const optionFile = path.join(folder, 'client.cnf')
+
+  try {
+    await writeFile(optionFile, optionFileText(connection), { flag: 'wx', mode: 0o600 })
+
+    return await use(optionFile)
+  } finally {
+    await rm(folder, { force: true, recursive: true })
+  }
+}
+
 /** How many tables the database in the URL has. */
 async function countTables(url: string) {
   const connection = await createConnection({ uri: url })
@@ -333,36 +471,36 @@ async function countTables(url: string) {
 }
 
 /**
- * Runs `mysqldump` once for each list of arguments and writes what they print, one after the
- * other and compressed, to a new file that only this account can read. It fails when the
- * program can't start, stops with a code other than 0, or ends without the line that closes a
- * complete dump.
+ * Runs `mysqldump` once for each list of arguments and gives what they print, one after the
+ * other. It fails when the program can't start, stops with a code other than 0, or ends
+ * without the line that closes a complete dump.
  */
-async function dumpTo(file: Writable, command: string, passes: readonly (readonly string[])[]) {
-  async function* output() {
-    for (const args of passes) {
-      const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] })
-      const finished = watch(child, command)
-      let tail = ''
+async function* dumpOutput(command: string, passes: readonly (readonly string[])[]) {
+  for (const args of passes) {
+    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+    const finished = watch(child, command)
+    let tail = ''
 
-      // The loop below reads the output first. A failure is handled when it gets its turn.
-      finished.catch(() => {})
+    // The loop below reads the output first. A failure is handled when it gets its turn.
+    finished.catch(() => {})
 
-      for await (const chunk of child.stdout) {
-        tail = (tail + (chunk as Buffer).toString('latin1')).slice(-200)
+    for await (const chunk of child.stdout) {
+      tail = (tail + (chunk as Buffer).toString('latin1')).slice(-200)
 
-        yield chunk
-      }
+      yield chunk as Buffer
+    }
 
-      await finished
+    await finished
 
-      if (!tail.includes(completionMarker)) {
-        throw new Error(`${command} ended without the line that closes a dump, so the dump is not complete.`)
-      }
+    if (!tail.includes(completionMarker)) {
+      throw new Error(`${command} ended without the line that closes a dump, so the dump is not complete.`)
     }
   }
+}
 
-  await pipeline(output, createGzip(), file)
+/** Writes what the passes of `mysqldump` print, compressed, to a file. */
+async function dumpTo(file: Writable, command: string, passes: readonly (readonly string[])[]) {
+  await pipeline(() => dumpOutput(command, passes), createGzip(), file)
 }
 
 function escapeRegExp(text: string) {
@@ -406,59 +544,80 @@ async function prepareFolder(folder: string) {
   return resolved
 }
 
-function stampToIso(stamp: string) {
-  return `${stamp.slice(0, 13)}:${stamp.slice(13, 15)}:${stamp.slice(15)}`
-}
-
 /**
- * Resolves when a program has stopped with code 0, and rejects with what it printed on stderr
- * when it didn't start or stopped with another code. The password is never in that text: it is
- * not on the command line, and the clients don't print it.
+ * Reads what the export needs from the database: which tables it copies, which it takes
+ * without rows, and the `INSERT` lines for the tables with a made-up column. It throws when
+ * the database has a table or a column that `exportPlan` doesn't name.
  */
-function watch(child: ReturnType<typeof spawn>, command: string) {
-  let stderr = ''
-
-  child.stderr?.on('data', (chunk: Buffer) => {
-    stderr = (stderr + chunk.toString()).slice(-2000)
-  })
-
-  return new Promise<void>((resolve, reject) => {
-    child.once('error', (error: NodeJS.ErrnoException) => {
-      reject(
-        new Error(
-          error.code === 'ENOENT'
-            ? `${command} is not installed here, or not on the path. Set MYSQLDUMP_COMMAND or MYSQL_COMMAND to its full path.`
-            : `${command} could not start (${error.code ?? 'unknown error'}).`,
-        ),
-      )
-    })
-    child.once('close', (code, signal) => {
-      if (code === 0) {
-        resolve()
-      } else {
-        reject(
-          new Error(
-            `${command} stopped with ${signal ?? `code ${code}`}.${stderr === '' ? '' : ` It said:\n${stderr.trim()}`}`,
-          ),
-        )
-      }
-    })
-  })
-}
-
-/** Runs `use` with an option file that only this account can read, then removes the file. */
-async function withOptionFile<Result>(
-  connection: ReturnType<typeof readConnection>,
-  use: (optionFile: string) => Promise<Result>,
-) {
-  const folder = await mkdtemp(path.join(tmpdir(), 'fansite-backup-'))
-  const optionFile = path.join(folder, 'client.cnf')
+async function readExportPlan(url: string) {
+  // The times come back as the text the database holds, and that text goes into the dump.
+  const connection = await createConnection({ dateStrings: true, uri: url })
 
   try {
-    await writeFile(optionFile, optionFileText(connection), { flag: 'wx', mode: 0o600 })
+    const [tables] = await connection.query<RowDataPacket[]>(
+      'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY table_name',
+    )
+    const names = tables.map((row) => String(row['name']))
+    const outside: readonly string[] = copiedTablesOutsideSchema
+    const unknown = names.filter((name) => !Object.hasOwn(exportPlan, name) && !outside.includes(name))
 
-    return await use(optionFile)
+    if (unknown.length > 0) {
+      throw new Error(
+        `The database has ${unknown.length === 1 ? 'a table' : 'tables'} the export does not know: ${unknown.join(', ')}. ` +
+          'Say what the export does with it in packages/db/src/export-plan.ts.',
+      )
+    }
+
+    const copy = names.filter((name) => outside.includes(name) || exportPlan[name] === 'copy')
+    const structure = names.filter((name) => !copy.includes(name))
+    const replaced: string[] = []
+
+    if (copy.length === 0 || structure.length === 0) {
+      throw new Error('The database has no tables to export. Has it been migrated?')
+    }
+
+    for (const table of structure) {
+      const rule = exportPlan[table]
+
+      if (rule === undefined || typeof rule === 'string') {
+        continue
+      }
+
+      const [found] = await connection.query<RowDataPacket[]>(
+        'SELECT column_name AS name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? ORDER BY ordinal_position',
+        [table],
+      )
+      const columns = found.map((row) => String(row['name']))
+      const known = [...rule.keep, ...Object.keys(rule.replace)]
+      const strange = [...columns.filter((name) => !known.includes(name)), ...known.filter((n) => !columns.includes(n))]
+
+      if (strange.length > 0) {
+        throw new Error(
+          `The columns of ${table} are not the ones the export knows (${strange.join(', ')}). ` +
+            'Say what the export does with each in packages/db/src/export-plan.ts.',
+        )
+      }
+
+      // A column in `replace` is never read: the database answers with the made-up value.
+      const [rows] = await connection.query<RowDataPacket[]>(
+        `SELECT ${columns.map((name) => `${rule.replace[name] ?? escapeId(name)} AS ${escapeId(name)}`).join(', ')} ` +
+          `FROM ${escapeId(table)} ORDER BY 1`,
+      )
+
+      for (const row of rows) {
+        replaced.push(
+          `INSERT INTO ${escapeId(table)} (${columns.map((name) => escapeId(name)).join(', ')}) ` +
+            `VALUES (${columns.map((name) => escape(row[name])).join(', ')});`,
+        )
+      }
+    }
+
+    return { copy, replaced, structure }
   } finally {
-    await rm(folder, { force: true, recursive: true })
+    await connection.end()
   }
+}
+
+function stampToIso(stamp: string) {
+  return `${stamp.slice(0, 13)}:${stamp.slice(13, 15)}:${stamp.slice(15)}`
 }
