@@ -268,7 +268,7 @@ export const WithFlags = meta.story({
     docs: {
       description: {
         story:
-          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) houdt een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een speler uit een land zonder tekening (hier Kazachstan) toont de landcode in een kader van dezelfde grootte. Een vlag met veel wit, zoals die van Nederland, Finland en Japan, heeft een dunne rand.',
+          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) houdt een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een speler uit een land zonder tekening (hier Kazachstan) toont de landcode in een kader van dezelfde grootte. Elke vlag heeft een dunne rand in de kleur van de lijnen in de kaart, met een pixel wit tussen de rand en de tekening.',
       },
     },
   },
@@ -309,7 +309,8 @@ export const WithFlagsDark = meta.story({
   parameters: {
     docs: {
       description: {
-        story: 'In het donker haalt de rand om een witte vlag ook 3:1 tegen de kaart.',
+        story:
+          'In het donker heeft de rand de kleur van de lijnen in de donkere kaart, met een pixel wit om de tekening.',
       },
     },
   },
@@ -396,7 +397,8 @@ export const CountryCodeDark = meta.story({
   parameters: {
     docs: {
       description: {
-        story: 'In het donker haalt de landcode 4,5:1 en de rand 3:1 tegen de kaart.',
+        story:
+          'In het donker haalt de landcode 4,5:1 tegen de kaart, en de rand heeft de kleur van de lijnen in de kaart.',
       },
     },
   },

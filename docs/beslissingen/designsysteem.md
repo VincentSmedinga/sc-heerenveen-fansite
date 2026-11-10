@@ -3089,6 +3089,7 @@
 - **Alternatieven:** emoji-vlaggen; bestanden die de pagina opvraagt (een pad per vlag voor Storybook, de site en de host); alle vlaggen, ook de zware (ruim 500 kB).
 - **Later:** de vlaggen met veel details kunnen met de hand worden vereenvoudigd, in een eigen issue.
 - **Later:** de grens van 900 bytes en de lege plek voor een land zonder tekening zijn vervangen door de beslissing van 10 november 2026, "Elke speler met een land toont een vlag of de landcode".
+- **Later:** de rand van 3:1 (`--hf-card-line-graphic`) is vervangen door de rustige lijn van de kaart met een pixel wit eronder (10 november 2026, "De rand om een vlag heeft de kleur van de lijnen in de kaart, met een pixel wit eronder").
 
 ## Koppen op gewicht 700, een steilere schaal en een lichter menu
 
@@ -3182,3 +3183,14 @@
   Een vereenvoudigde vlag is niet de echte, en een code-kader is er voor ongeveer vijftig landen die we niet verwachten.
 - **Alternatieven:** alle echte tekeningen (1,5 MB); een limiet van 4.196 of 5.000 bytes (elke regel met zo'n speler wordt tot 4 kB zwaarder); de naam in plaats van de code (past niet in de kolom); een regel in het logboek naast de test.
 - **Later:** de beslissing van 9 november 2026 over de vlag bij een speler (alleen vlaggen van hoogstens 900 bytes, een zware vlag of een land zonder vlag krijgt een lege plek) wordt hiermee vervangen.
+
+## De rand om een vlag heeft de kleur van de lijnen in de kaart, met een pixel wit eronder
+
+- **Datum:** 10 november 2026
+- **Besluit:** een vlag en het kader met een landcode in `PlayerName` houden hun maat (1,25 rem bij 0,9375 rem, rand en pixel erbij), maar de rand is `--hf-card-line`, de rustige lijn van de kaart, zoals bij tabellen en lijsten.
+  Tussen de rand en de tekening van een vlag zit een pixel wit.
+- **Waarom:** het kader leek iets groter dan de vlaggen en viel op naast de lijnen van de rest van de kaart.
+  Met een pixel wit om de tekening hoeft de rand een witte vlag niet meer op te vangen.
+- **Nadeel:** de rand haalt geen 3:1 meer tegen de kaart.
+  De vlag zelf is er ook zonder zijn rand, door de kleuren en het witte randje.
+- **Later:** vervangt de rand van 3:1 (`--hf-card-line-graphic`) uit de beslissing van 9 november 2026 en het criterium van 3:1 voor het kader in #1071.
