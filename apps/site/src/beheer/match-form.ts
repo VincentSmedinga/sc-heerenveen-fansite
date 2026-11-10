@@ -75,8 +75,11 @@ export type MatchEntry = {
   >
 }
 
-/** A player of ours, as the form needs him. */
-export type SquadPlayer = { id: number; name: string; wikipediaPage: null | string }
+/**
+ * A player of ours, as the form needs him. `personId` is his person, which a goal he is chosen
+ * for gets too: a player the editors added may have no page to find the person by.
+ */
+export type SquadPlayer = { id: number; name: string; personId: null | number; wikipediaPage: null | string }
 
 /** The statuses as the form words them, and as the database has them. */
 export const statusChoices = [
@@ -360,6 +363,7 @@ export function validate(
         ours,
         ownGoal: kind === 'eigen',
         penalty: kind === 'strafschop',
+        personId: player?.personId ?? null,
         player: name,
         playerId: player?.id ?? null,
         stoppageMinutes: stoppage,

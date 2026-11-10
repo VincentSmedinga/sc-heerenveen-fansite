@@ -138,6 +138,9 @@ describe('recordAction', () => {
       'player.stats-differ',
       'player.stats-take-over',
       'player.stats-keep',
+      'player.add',
+      'player.edit',
+      'player.remove',
     ])
   })
 

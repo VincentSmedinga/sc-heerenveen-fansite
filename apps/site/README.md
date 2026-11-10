@@ -953,6 +953,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
+- `/beheer/spelers` is voor beheerders alleen: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is voor beheerders alleen: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/clubnamen` is voor beheerders alleen: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/kwaliteit` is voor beheerders alleen: wat we van elk seizoen weten en wat ontbreekt, met werklijsten (zie _De kwaliteit van de gegevens_).
@@ -1150,6 +1151,34 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 - `replaceClubNamePeriods` en `removeClubNamePeriods` uit `@fansite/db/club-name-periods` schrijven de lijst en `club-name.save` of `club-name.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
 - Een opslag staat binnen vijf minuten op de pagina van de club (de tijd die `getClubPage` zijn gegevens bewaart); de lijsten met wedstrijden volgen als de pagina's van het seizoen verversen.
 - `e2e/club-names.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
+
+### De spelers van een seizoen
+
+`/beheer/spelers` (`src/app/beheer/spelers`) is alleen voor beheerders: een moderator krijgt "niet gevonden" (#1020).
+Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hier voegt ze een speler toe die daar ontbreekt, of verbetert ze er een.
+
+- De lijst toont de spelers van een seizoen met rugnummer, positie, bron en of ze in de selectie staan, in woorden.
+  Ze opent op het lopende seizoen; de seizoenkiezer heeft elk seizoen met een wedstrijd (`listPlayerSeasons` in `src/beheer/players.ts`).
+- `/beheer/spelers/nieuw?seizoen=<seizoen>` voegt een speler toe.
+  Bovenaan staat een zoekformulier met methode GET (`q`): wat het vindt (`searchPersons`, hoogstens 25 personen), staat als lijst "Persoon" in het formulier, met "Een nieuwe persoon" als laatste keuze.
+  Elke keuze noemt de seizoenen van de persoon en, als die anders is dan de naam, de titel van zijn artikel.
+  Kiest de redactie een persoon die we kennen, dan blijft dat dezelfde persoon; anders vult ze voornaam, tussenvoegsel, achternaam en een Wikipedia-pagina in, die leeg mag blijven.
+  Rugnummer (1 tot en met 99) en positie mogen ook leeg blijven: de oude seizoenen hebben ze niet.
+- De speler krijgt de bron `redactie` in `players`, en een nieuwe persoon de bron `redactie` voor zijn naam.
+  Een Wikipedia-pagina die al bij een persoon hoort, maakt geen tweede persoon: de speler wordt die persoon.
+  De site vraagt Wikipedia niets: de titel geldt zoals de redactie hem invult.
+- Een persoon, een naam of een Wikipedia-pagina die het seizoen al heeft, wordt geweigerd met een zin bij het veld.
+  Elk veld toont zijn eigen fout, en de lijst van fouten krijgt de focus, ook bij een fout zonder veld.
+- `/beheer/spelers/<nummer>` past een speler aan (`PlayerForm.tsx`, hetzelfde formulier zonder de lijst van personen).
+  Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
+  Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
+  Een pagina die bij een andere persoon hoort, wordt geweigerd: twee personen samenvoegen doet het beheer hier niet.
+- Het uitklapblok "Uit de selectie halen" zet `in_squad` uit, met het moment; de rij blijft staan.
+  Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
+- `addPlayer`, `editPlayer` en `removePlayer` in `src/beheer/players.ts` schrijven de wijziging en `player.add`, `player.edit` of `player.remove` in het logboek, in één transactie, met het nummer van de speler.
+- De speler staat daarna in de kiezer van een doelpunt van dat seizoen en op de pagina Spelers, met dezelfde bronvermelding als de andere spelers.
+  Een doelpunt krijgt in het formulier van een wedstrijd de persoon van de gekozen speler (`personId` in `SquadPlayer`), zodat het ook zonder Wikipedia-pagina voor de persoon telt.
+  Wat de import doet met een speler die de redactie toevoegde of aanpaste, regelt #1022.
 
 ### De kwaliteit van de gegevens
 

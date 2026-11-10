@@ -438,6 +438,9 @@ export const auditActions = [
   'player.stats-differ',
   'player.stats-take-over',
   'player.stats-keep',
+  'player.add',
+  'player.edit',
+  'player.remove',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -471,7 +474,9 @@ export const auditDetailMaxLength = 1000
  * the admin when a report was saved as `klaar`. Since issue 974 such a difference is a row in
  * `player_stat_differences` and nothing writes this action any more. `player.stats-take-over`
  * and `player.stats-keep` are the decision of an editor about such a row, with the player in
- * `item_id`.
+ * `item_id`. `player.add`, `player.edit` and `player.remove` are a player the editors added to
+ * the squad of a season, changed or took out of it (issue 1020), with the player in `item_id`
+ * and what changed in `detail`.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -765,8 +770,11 @@ export type ClubPage = typeof clubPages.$inferSelect
 
 export type NewClubPage = typeof clubPages.$inferInsert
 
-/** Where the name of a person comes from: the sort key of the article, a guess or the list. */
-export const personNameSources = ['sort_key', 'guess', 'manual'] as const
+/**
+ * Where the name of a person comes from: the sort key of the article, a guess, the list of the
+ * importer, or the editors, who filled it in in the admin (`redactie`, issue 1020).
+ */
+export const personNameSources = ['sort_key', 'guess', 'manual', 'redactie'] as const
 
 export type PersonNameSource = (typeof personNameSources)[number]
 
@@ -821,11 +829,17 @@ export type WikidataItem = typeof wikidataItems.$inferSelect
  * title as it stands. `person_pages` keeps every title that leads to the person, and the
  * `person_id` of `match_goals` and `players` points here. A person who is deleted leaves them
  * without a person; the importer finds the person again by the title.
+ *
+ * A person the editors made in the admin for a player without an article has no
+ * `wikipedia_page` (issue 1020): his name, with the source `redactie`, is all there is. He has
+ * no row in `person_pages`, and the importer never asks Wikidata about him. He gets a title
+ * when the editors give his player one.
  */
 export const persons = mysqlTable('persons', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
-  wikipediaPage: articleTitle('wikipedia_page').notNull().unique(),
-  // The name, kept when the importer reads the article (#715). All five are empty until then.
+  wikipediaPage: articleTitle('wikipedia_page').unique(),
+  // The name, kept when the importer reads the article (#715), or filled in by the editors
+  // (#1020). All five are empty until then.
   // `name` is the title without the addition between brackets ("Joost van Aken"). `given_name`
   // is empty for a person with one name ("Dinho"), `family_name_prefix` for a name without
   // "van", "van der" and the like, and the three parts with a space between them give `name`.
@@ -1600,8 +1614,10 @@ export const playerNameMaxLength = 100
  * (a table with the whole squad), `statistieken` (a table of who played), `engels` (a squad or
  * transfers on the English Wikipedia), `transfers`, `doelpunten` and `wikidata`. `verslag` is a
  * player that the editors added in a match report because the squad of Wikipedia did not have
- * him yet (see `match_reports`). It says how complete a season is, so a page can tell when a
- * list may be missing players.
+ * him yet (see `match_reports`). `redactie` is a player the editors added to the squad of a
+ * season in the admin (issue 1020); it is the last one, so a season is never called after it
+ * while another source has players. It says how complete a season is, so a page can tell when
+ * a list may be missing players.
  */
 export const playerSources = [
   'selectie',
@@ -1611,6 +1627,7 @@ export const playerSources = [
   'doelpunten',
   'wikidata',
   'verslag',
+  'redactie',
 ] as const
 
 export type PlayerSource = (typeof playerSources)[number]

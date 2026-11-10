@@ -72,7 +72,7 @@ async function addMatch(matchDate: string): Promise<number> {
 async function addPerson(values: typeof persons.$inferInsert): Promise<number> {
   const [{ insertId }] = await database.db.insert(persons).values(values)
 
-  await database.db.insert(personPages).values({ page: values.wikipediaPage, personId: insertId })
+  await database.db.insert(personPages).values({ page: values.wikipediaPage ?? '', personId: insertId })
 
   return insertId
 }
@@ -411,6 +411,26 @@ describe('mergePersons', () => {
     expect(await personRows()).toMatchObject([
       { id: manual, name: 'Rob van den Berg', nameSource: 'manual', wikipediaPage: 'Robert van den Berg' },
       { id: guessed, name: null, nameSource: null, wikipediaPage: 'Jan Harm Schippers' },
+    ])
+  })
+
+  it('leaves a person of the editors without a title alone, and keeps a name of the editors', async () => {
+    // His name is an alias of the list, but he has no title, so the list does not find him.
+    const [{ insertId: untitled }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Schippers', name: schippers.aliases[0]!, nameSource: 'redactie' })
+    const named = await addPerson({
+      familyName: 'Berg',
+      name: 'Rob Berg',
+      nameSource: 'redactie',
+      wikipediaPage: 'Robert van der Berg',
+    })
+
+    await mergePersons(database.db, list)
+
+    expect(await personRows()).toMatchObject([
+      { id: untitled, name: schippers.aliases[0], nameSource: 'redactie', wikipediaPage: null },
+      { id: named, name: 'Rob Berg', nameSource: 'redactie', wikipediaPage: 'Robert van den Berg' },
     ])
   })
 

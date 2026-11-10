@@ -588,7 +588,7 @@ describe('reading again', () => {
       { name: 'Jan Harm Schippers', personId: before!.personId, wikipediaPage: 'Jan Harm Schippers' },
     ])
     expect(
-      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage.includes('Schippers')),
+      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage?.includes('Schippers')),
     ).toMatchObject([{ id: before!.personId, wikipediaPage: 'Jan Harm Schippers' }])
   })
 

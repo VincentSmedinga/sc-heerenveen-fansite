@@ -6,8 +6,9 @@ import { emptyFields, emptyGoal } from './match-fields'
 import { readButton, readValues, statusChoices, validate, valuesOf } from './match-form'
 
 const squad = [
-  { id: 11, name: 'Luca Oyen', wikipediaPage: 'Luca Oyen' },
-  { id: 12, name: 'Bernt Klaverboer', wikipediaPage: null },
+  { id: 11, name: 'Luca Oyen', personId: 31, wikipediaPage: 'Luca Oyen' },
+  // A player the editors added: a person, and no page to find him by.
+  { id: 12, name: 'Bernt Klaverboer', personId: 32, wikipediaPage: null },
 ]
 const league = { competition: 'Eredivisie', dataSource: 'wikipedia', opponent: 'N.E.C.', squad } as const
 const cup = { ...league, competition: 'KNVB Beker' } as const
@@ -143,6 +144,7 @@ describe('validate', () => {
         ours: true,
         ownGoal: false,
         penalty: false,
+        personId: 31,
         player: 'Luca Oyen',
         playerId: 11,
         stoppageMinutes: 1,
@@ -153,6 +155,7 @@ describe('validate', () => {
         ours: false,
         ownGoal: false,
         penalty: false,
+        personId: null,
         player: 'Sibbing',
         playerId: null,
         stoppageMinutes: null,
@@ -163,6 +166,7 @@ describe('validate', () => {
         ours: true,
         ownGoal: false,
         penalty: false,
+        personId: 32,
         player: 'Bernt Klaverboer',
         playerId: 12,
         stoppageMinutes: null,
@@ -331,8 +335,9 @@ describe('validate', () => {
 
     expect(checked.errors).toBeUndefined()
     expect(checked.entry?.goals).toMatchObject([
-      { ours: true, ownGoal: true, player: 'Sibbing', playerId: null },
-      { ours: false, ownGoal: true, player: 'Bernt Klaverboer', playerId: 12 },
+      { ours: true, ownGoal: true, personId: null, player: 'Sibbing', playerId: null },
+      // The goal gets the person of the chosen player, also of one without a page.
+      { ours: false, ownGoal: true, personId: 32, player: 'Bernt Klaverboer', playerId: 12, wikipediaPage: null },
     ])
     // A scorer of ours must be in the squad, and one of the opponent must be named.
     expect(validate(filled({}, [{ ...ours, speler: '99' }]), league).errors).toHaveProperty('doelpunt-1-speler')

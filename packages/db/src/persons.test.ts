@@ -6,9 +6,16 @@ import type { TestDatabase } from './test-database.ts'
 import {
   countPersonNames,
   createPersonBook,
+  findOrAddEditorsPerson,
+  givePersonPage,
+  joinNameParts,
   knownPersonPages,
   type PersonName,
+  personNamesBySource,
+  personsToRead,
   rememberedPersonArticles,
+  setEditorsName,
+  similarPersons,
   storePersonNames,
 } from './persons.ts'
 import { personPages, persons } from './schema.ts'
@@ -194,6 +201,130 @@ describe('the names of persons', () => {
     )
 
     expect(stored.guessed.map((one) => one.title)).toEqual(['Ramon Zomer'])
-    expect(await countPersonNames(database.db)).toEqual({ guess: 1, manual: 0, none: 1, sort_key: 0 })
+    expect(await countPersonNames(database.db)).toEqual({ guess: 1, manual: 0, none: 1, redactie: 0, sort_key: 0 })
+  })
+})
+
+describe('the persons of the editors', () => {
+  const pelle = { familyName: 'Amersfoort', familyNamePrefix: 'van', givenName: 'Pelle' }
+
+  it('makes a person without a title, with the name of the editors', async () => {
+    const made = await findOrAddEditorsPerson(database.db, { name: pelle, page: null })
+
+    expect(made.created).toBe(true)
+    expect(await database.db.select().from(persons)).toMatchObject([
+      {
+        familyName: 'Amersfoort',
+        familyNamePrefix: 'van',
+        givenName: 'Pelle',
+        id: made.id,
+        name: 'Pelle van Amersfoort',
+        nameSource: 'redactie',
+        wikipediaPage: null,
+      },
+    ])
+    expect(await pages()).toEqual([])
+  })
+
+  it('makes two persons without a title: the unique key lets more than one be empty', async () => {
+    const a = await findOrAddEditorsPerson(database.db, { name: pelle, page: null })
+    const b = await findOrAddEditorsPerson(database.db, { name: { ...pelle, givenName: 'Piet' }, page: null })
+
+    expect(b.id).not.toBe(a.id)
+  })
+
+  it('makes the person of a title once, remembers the title, and finds him the second time', async () => {
+    const first = await findOrAddEditorsPerson(database.db, { name: pelle, page: 'Pelle van Amersfoort' })
+    const second = await findOrAddEditorsPerson(database.db, {
+      name: { ...pelle, givenName: 'P.' },
+      page: 'Pelle van Amersfoort',
+    })
+
+    expect(first.created).toBe(true)
+    expect(second).toEqual({ created: false, id: first.id })
+    expect(await database.db.select().from(persons)).toMatchObject([
+      { name: 'Pelle van Amersfoort', nameSource: 'redactie', wikipediaPage: 'Pelle van Amersfoort' },
+    ])
+    expect(await pages()).toEqual([['Pelle van Amersfoort', first.id]])
+  })
+
+  it('finds the person of a title that redirects to him, and leaves the name he has', async () => {
+    const book = await createPersonBook(database.db, {
+      redirects: new Map([['Alfred Finnbogason', 'Alfreð Finnbogason']]),
+    })
+    const id = await book.resolve('Alfred Finnbogason')
+
+    await storePersonNames(
+      database.db,
+      new Map([
+        [
+          'Alfreð Finnbogason',
+          {
+            familyName: 'Finnbogason',
+            familyNamePrefix: null,
+            givenName: 'Alfreð',
+            name: 'Alfreð Finnbogason',
+            source: 'sort_key',
+          },
+        ],
+      ]),
+    )
+
+    expect(
+      await findOrAddEditorsPerson(database.db, {
+        name: { familyName: 'Finbogason', familyNamePrefix: null, givenName: 'Alfred' },
+        page: 'Alfred Finnbogason',
+      }),
+    ).toEqual({ created: false, id })
+    expect(await database.db.select().from(persons)).toMatchObject([
+      { name: 'Alfreð Finnbogason', nameSource: 'sort_key' },
+    ])
+  })
+
+  it('gives a person the title of his article and the name the editors changed', async () => {
+    const { id } = await findOrAddEditorsPerson(database.db, { name: pelle, page: null })
+
+    await givePersonPage(database.db, id, 'Pelle van Amersfoort')
+    await setEditorsName(database.db, id, { familyName: 'Dinho', familyNamePrefix: null, givenName: null })
+
+    expect(await database.db.select().from(persons)).toMatchObject([
+      {
+        familyNamePrefix: null,
+        givenName: null,
+        name: 'Dinho',
+        nameSource: 'redactie',
+        wikipediaPage: 'Pelle van Amersfoort',
+      },
+    ])
+    expect(await pages()).toEqual([['Pelle van Amersfoort', id]])
+    expect(joinNameParts({ familyName: 'Aken', familyNamePrefix: 'van', givenName: 'Joost' })).toBe('Joost van Aken')
+  })
+
+  it('keeps a person without a title out of what the importer reads by title', async () => {
+    await findOrAddEditorsPerson(database.db, { name: pelle, page: null })
+    await findOrAddEditorsPerson(database.db, { name: pelle, page: 'Luca Oyen' })
+
+    const book = await createPersonBook(database.db)
+
+    expect(await book.resolve('Pelle van Amersfoort')).toBeNull()
+    expect([...(await personNamesBySource(database.db))]).toEqual([['Luca Oyen', 'redactie']])
+    expect((await personsToRead(database.db, 10)).map((person) => person.wikipediaPage)).toEqual(['Luca Oyen'])
+    expect(await similarPersons(database.db)).toEqual([])
+    expect(await countPersonNames(database.db)).toEqual({ guess: 0, manual: 0, none: 0, redactie: 1, sort_key: 0 })
+  })
+
+  it('never lets the importer replace a name of the editors with a guess or a sort key', async () => {
+    await findOrAddEditorsPerson(database.db, { name: pelle, page: 'Pelle van Amersfoort' })
+    await storePersonNames(
+      database.db,
+      new Map([
+        [
+          'Pelle van Amersfoort',
+          { familyName: 'Amersfoort', familyNamePrefix: null, givenName: 'Pelle van', name: 'x', source: 'guess' },
+        ],
+      ]),
+    )
+
+    expect(await database.db.select().from(persons)).toMatchObject([{ givenName: 'Pelle', nameSource: 'redactie' }])
   })
 })

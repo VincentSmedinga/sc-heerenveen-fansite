@@ -60,6 +60,8 @@ export type SquadCompletenessInput = {
 export const sourceCeilings: Record<PlayerSource, number> = {
   doelpunten: 30,
   engels: 70,
+  // A player the editors added says as little about the whole squad as one from a report.
+  redactie: 30,
   selectie: 95,
   statistieken: 60,
   transfers: 40,

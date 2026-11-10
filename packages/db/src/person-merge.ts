@@ -258,22 +258,28 @@ async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Person): 
 }
 
 /** The order of the rows of one person in a season: the lowest is the row that stays. */
-function rank(row: Player, title: string): number {
-  return (row.wikipediaPage === title ? 0 : playerSources.length) + playerSources.indexOf(row.source)
+function rank(row: Player, title: null | string): number {
+  return (title !== null && row.wikipediaPage === title ? 0 : playerSources.length) + playerSources.indexOf(row.source)
 }
 
 /**
  * Makes the title lead to the person. The old title of a merged person must be remembered, or
- * the next import asks Wikipedia about it and makes the person again.
+ * the next import asks Wikipedia about it and makes the person again. A person the editors
+ * made without an article has no title to remember.
  */
-async function rememberPage(tx: MergeDatabase, page: string, personId: number) {
+async function rememberPage(tx: MergeDatabase, page: null | string, personId: number) {
+  if (page === null) {
+    return
+  }
+
   await tx.insert(personPages).values({ page, personId }).onDuplicateKeyUpdate({ set: { personId } })
 }
 
 /** Gives a person the title that stays, remembers it, and gives him the name of that title. */
 async function renamePerson(tx: MergeDatabase, person: Person, title: string, name: PersonName | undefined) {
   const named =
-    person.nameSource === 'manual'
+    // A name from the list or from the editors stays.
+    person.nameSource === 'manual' || person.nameSource === 'redactie'
       ? {}
       : {
           familyName: name?.familyName ?? null,

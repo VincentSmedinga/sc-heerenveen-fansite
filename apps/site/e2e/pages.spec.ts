@@ -8,6 +8,7 @@ import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
+import { squadPlayerId } from './players'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -257,6 +258,21 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/wedstrijden/999999/verslag', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag', status: 404 },
   { admin: 'moderator', path: '/beheer/wedstrijden', status: 404 },
+  // The players of a season (#1020): the list with its notices, the form that adds one with the
+  // search for a person we know, and the form of a player of the made-up squad (`{player}`).
+  { admin: 'beheerder', path: '/beheer/spelers', status: 200 },
+  { admin: 'beheerder', path: `/beheer/spelers?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers?gedaan=toegevoegd', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers?fout=weg', status: 200 },
+  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 200 },
+  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=e`, status: 200 },
+  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=bestaat+niet`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/{player}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/{player}?gedaan=opgeslagen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/spelers/999999', status: 404 },
+  { admin: 'moderator', path: '/beheer/spelers', status: 404 },
+  { admin: 'moderator', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 404 },
+  { admin: 'moderator', path: '/beheer/spelers/{player}', status: 404 },
   // The stadiums: the list of the clubs with its filter and search, a club with a list of its
   // own and a note (made up, see stadiums.ts), a club without one, and a club that is no club.
   { admin: 'beheerder', path: '/beheer/stadions', status: 200 },
@@ -333,6 +349,7 @@ async function withNumbers(path: string) {
         .replace('{liveReport}', path.includes('{liveReport}') ? await liveReportPath() : '{liveReport}')
         .replace('{liveMatch}', path.includes('{liveMatch}') ? String(await liveReportMatchId()) : '{liveMatch}')
         .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')
+        .replace('{player}', path.includes('{player}') ? String(await squadPlayerId()) : '{player}')
     : path
 }
 

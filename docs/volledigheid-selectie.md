@@ -28,6 +28,7 @@ De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één
 | `transfers`    | 40      | wie kwam of ging, niet wie bleef                  |
 | `doelpunten`   | 30      | wie scoorde                                       |
 | `verslag`      | 30      | wie het beheer uit een wedstrijdverslag toevoegde |
+| `redactie`     | 30      | wie de redactie in het beheer toevoegde           |
 
 De volgorde en het plafond van `selectie` leggen de tests vast.
 Een bron met meer spelers komt nooit boven zijn plafond.

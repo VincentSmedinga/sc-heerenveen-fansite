@@ -426,7 +426,7 @@ describe('importPastSquad', () => {
     expect(again).toMatchObject({ kind: 'imported', players: { added: 0, improved: 0 } })
     expect(await storedPlayers()).toEqual(before)
     expect(
-      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage.includes('Schippers')),
+      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage?.includes('Schippers')),
     ).toMatchObject([{ wikipediaPage: 'Jan Harm Schippers' }])
   })
 

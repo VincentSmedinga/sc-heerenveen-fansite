@@ -725,6 +725,21 @@ describe('the card Selectie on /spelers', () => {
     expect(linesOf(html)).toHaveLength(5)
   })
 
+  it('shows a player the editors added on the card, whatever the best source of the season is', async () => {
+    const added = { ...squadData.players[0]!, name: 'Redactie Speler', shirtNumber: 40, source: 'redactie' as const }
+
+    withSquad({ players: [...squadData.players, added] })
+
+    expect(linesOf(await render()).map(([, name]) => name)).toContain('Redactie Speler')
+
+    withSquad({
+      completeness: { bestSource: 'verslag', level: 'weinig', playerCount: 2 },
+      players: [{ ...squadData.players[1]!, source: 'verslag' }, added],
+    })
+
+    expect(linesOf(await render()).map(([, name]) => name)).toContain('Redactie Speler')
+  })
+
   it('has one list without headings of parts for a season in which nobody has a position', async () => {
     withSquad({
       completeness: { bestSource: 'statistieken', level: 'deels', playerCount: 3 },
