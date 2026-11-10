@@ -17,7 +17,7 @@ const meta = preview.meta({
     country: {
       control: 'text',
       description:
-        'Het land van de speler als landcode van twee letters, zoals `NL`. De vlag staat tussen het rugnummer en de naam, met de Nederlandse landnaam als tekst voor een schermlezer. `null`, of een land zonder vlag in onze set, is een speler zonder vlag in een lijst waar anderen er wel een hebben: een lege plek van dezelfde breedte. Laat hem weg in een lijst waar niemand een vlag heeft.',
+        'Het land van de speler als landcode van twee letters, zoals `NL`. De vlag staat tussen het rugnummer en de naam, met de Nederlandse landnaam als tekst voor een schermlezer. Een land zonder tekening toont de twee letters van het land in een kader van dezelfde grootte, met dezelfde landnaam voor een schermlezer. `null` is een speler zonder land in een lijst waar anderen er wel een hebben: een lege plek van dezelfde breedte. Laat hem weg in een lijst waar niemand een vlag heeft.',
     },
     givenName: {
       control: 'text',
@@ -42,7 +42,7 @@ const meta = preview.meta({
           'Voor een schermlezer en bij kopiëren is het één naam in één tekst; het gewicht is alleen voor het oog.',
           'Het gewicht staat op het component zelf, dus de naam ziet er overal hetzelfde uit.',
           'Met een rugnummer staat het nummer in een kolom voor de naam, en met een regel achter de naam staat daar meer over de speler.',
-          'Met een land staat er een klein vlagje tussen het nummer en de naam: een supporter ziet in één blik waar een speler vandaan komt, en een schermlezer leest de landnaam voor.',
+          'Met een land staat er een klein vlagje tussen het nummer en de naam, of de landcode als we geen vlag hebben: een supporter ziet in één blik waar een speler vandaan komt, en een schermlezer leest de landnaam voor.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -268,7 +268,7 @@ export const WithFlags = meta.story({
     docs: {
       description: {
         story:
-          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) en een speler uit een land waar we geen vlag voor hebben (hier Brazilië) houden een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een vlag met veel wit, zoals die van Nederland, Finland en Japan, heeft een dunne rand.',
+          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) houdt een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een speler uit een land zonder tekening (hier Kazachstan) toont de landcode in een kader van dezelfde grootte. Een vlag met veel wit, zoals die van Nederland, Finland en Japan, heeft een dunne rand.',
       },
     },
   },
@@ -288,7 +288,7 @@ export const WithFlags = meta.story({
           <PlayerName country={null} givenName="Testspeler" shirtNumber={21} surname="Vier" />
         </List.Item>
         <List.Item>
-          <PlayerName country="BR" givenName="Testspeler" shirtNumber={30} surname="Vijf" />
+          <PlayerName country="KZ" givenName="Testspeler" shirtNumber={30} surname="Vijf" />
         </List.Item>
         <List.Item>
           <PlayerName
@@ -328,13 +328,88 @@ export const WithFlagsDark = meta.story({
   ),
 })
 
+export const SimplifiedFlags = meta.story({
+  name: 'Een vereenvoudigde vlag',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "De echte vlag van sommige landen is te zwaar voor een lijst, door een wapen of fijne details. Zo'n land toont een vereenvoudigde vlag met de kleuren en de indeling van de echte, zonder wapen. De landnaam blijft het tekstalternatief.",
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName country="ES" givenName="Testspeler" shirtNumber={2} surname="Zes" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="BR" givenName="Testspeler" shirtNumber={7} surname="Zeven" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="RS" givenName="Testspeler" shirtNumber={11} surname="Acht" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="AR" givenName="Testspeler" shirtNumber={null} surname="Negen" />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})
+
+const codeFrameList = (
+  <div style={{ maxInlineSize: '16rem' }}>
+    <List role="list">
+      <List.Item>
+        <PlayerName country="KZ" givenName="Testspeler" shirtNumber={3} surname="Tien" />
+      </List.Item>
+      <List.Item>
+        <PlayerName country="MW" givenName="Testspeler" shirtNumber={14} surname="Elf" />
+      </List.Item>
+      <List.Item>
+        <PlayerName country="NL" givenName="Testspeler" shirtNumber={9} surname="Twaalf" />
+      </List.Item>
+      <List.Item>
+        <PlayerName country={null} givenName="Testspeler" shirtNumber={21} surname="Dertien" />
+      </List.Item>
+    </List>
+  </div>
+)
+
+export const CountryCode = meta.story({
+  name: 'Een land zonder tekening toont de landcode',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Heeft een land geen tekening, dan staat de landcode in een kader van dezelfde grootte als een vlag, met dezelfde rand. Een schermlezer leest de landnaam voor, niet de twee letters.',
+      },
+    },
+  },
+  render: () => codeFrameList,
+})
+
+export const CountryCodeDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'De landcode, donker',
+  parameters: {
+    docs: {
+      description: {
+        story: 'In het donker haalt de landcode 4,5:1 en de rand 3:1 tegen de kaart.',
+      },
+    },
+  },
+  render: () => codeFrameList,
+})
+
 export const AllFlags = meta.story({
   name: 'De landen die we hebben',
   parameters: {
     docs: {
       description: {
         story:
-          'Alle vlaggen van de set, bij een speler met de landcode als naam. Een schermlezer leest de landnaam voor. Een land dat hier niet staat, krijgt een lege plek.',
+          'Alle landen die we hebben, bij een speler met de landcode als naam: de echte vlag, een vereenvoudigde vlag of de landcode. Een schermlezer leest de landnaam voor. Een code die geen land is, krijgt een lege plek.',
       },
     },
   },

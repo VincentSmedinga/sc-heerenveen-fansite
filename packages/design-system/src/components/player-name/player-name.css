@@ -39,7 +39,8 @@
    * The flag of the country, between the number and the name, with a thin line round it: a
    * white flag (Netherlands, Finland, Japan) would melt into the card without it. The line
    * reaches 3:1 against the surface of its card in light and in dark (player-name-css.test.ts).
-   * A player without a flag has an empty place of the same size. The flag is a little lower than
+   * A player without a flag has an empty place of the same size, and a country without a drawing
+   * a frame of the same size with its code. The flag is a little lower than
    * the top of the line, so it stands beside the letters.
    */
   .hf-player-name-flag {
@@ -54,8 +55,25 @@
   }
 
   /* The empty place of a player without a flag has no line round it. */
-  span.hf-player-name-flag {
+  span.hf-player-name-flag:not(.hf-player-name-code) {
     border-color: transparent;
+  }
+
+  /*
+   * A country without a drawing shows its code of two letters in a frame of the size of a flag,
+   * with the same line round it. The letters are small, bold and in the colour of the text, so
+   * they read on the card in light and in dark (player-name-css.test.ts).
+   */
+  .hf-player-name-code {
+    align-items: center;
+    color: var(--hf-colour-text-default);
+    display: flex;
+    font-size: 0.625rem;
+    font-weight: var(--hf-name-font-weight);
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: 1;
+    overflow: hidden;
   }
 
   .hf-player-name-text {

@@ -3088,6 +3088,7 @@
   Een speler uit een land met een zware vlag krijgt geen vlag.
 - **Alternatieven:** emoji-vlaggen; bestanden die de pagina opvraagt (een pad per vlag voor Storybook, de site en de host); alle vlaggen, ook de zware (ruim 500 kB).
 - **Later:** de vlaggen met veel details kunnen met de hand worden vereenvoudigd, in een eigen issue.
+- **Later:** de grens van 900 bytes en de lege plek voor een land zonder tekening zijn vervangen door de beslissing van 10 november 2026, "Elke speler met een land toont een vlag of de landcode".
 
 ## Koppen op gewicht 700, een steilere schaal en een lichter menu
 
@@ -3159,3 +3160,25 @@
   Knoppen die hun kolom vullen, zijn op een telefoon een groot doel, en vier keuzes staan daar twee aan twee.
 - **Alternatieven:** de landen van onze personen bovenaan zetten zonder groep (de lijst begint dan halverwege zonder uitleg opnieuw bij de A).
   Knoppen naast elkaar laten staan zonder ruimte, zoals de browser ze zet (ze raken elkaar, en een vinger tikt snel mis).
+
+## Elke speler met een land toont een vlag of de landcode
+
+- **Datum:** 10 november 2026
+- **Besluit:** het limiet voor een echte vlag in `flags.ts` gaat van 900 naar 2.048 bytes, gemeten na het verkleinen met svgo (nauwkeurigheid 0), en een persoon met een land heeft nooit meer een lege plek (#1071).
+  - **Drie soorten land:** een echte vlag (`flagDrawings`, 176 landen, samen 90.546 bytes, de grootste 1.983), een vereenvoudigde vlag (`simplifiedFlags`, 23 landen, hoogstens 900 bytes) en alleen de landcode (`codeOnlyCountries`, 51 landen).
+    Een test controleert dat elk land van `countryCodes` precies één soort is en een Nederlandse naam heeft, en dat er niets staat voor een land dat niet in de lijst staat.
+  - **Vereenvoudigde vlag:** voor de landen met een zware vlag waar spelers vandaan komen (onder andere Spanje, Portugal, Kroatië, Servië, Brazilië, Argentinië en Kosovo) een eigen tekening met de kleuren en de indeling van de vlag, zonder wapen en zonder fijne details.
+    Het is niet de echte vlag; de alt-tekst blijft de landnaam.
+    Ook Albanië, Nieuw-Zeeland, Uruguay, Cyprus, Moldavië, Equatoriaal-Guinea, Guatemala en Paraguay hebben er een, omdat er personen van de kopie van acceptatie vandaan komen.
+  - **Alleen de landcode:** een land zonder tekening toont een kader van dezelfde grootte als de vlag, met dezelfde rand en de twee letters van het land in de kleur van de tekst (`hf-player-name-code`).
+    De landnaam is het tekstalternatief (`role="img"` met `aria-label`), zodat een schermlezer "Kazachstan" zegt en niet "KZ".
+    Een persoon zonder land (`null`) of een code die geen land is, houdt de lege plek.
+  - **Alle 250 landen** hebben een Nederlandse naam in `countryNames`.
+  - **Geen `use` in een tekening:** de vorm waar een `use` naar wijst, staat op zijn plaats in de tekening.
+    Daardoor werden negen vlaggen die eerst onder de grens vielen groter dan 2.048 bytes (onder andere Wit-Rusland en Venezuela), en hebben 176 landen een echte vlag, niet de ongeveer 185 uit het issue.
+- **Waarom:** een lege plek zegt niets, ook niet aan een schermlezer, en een vlag of een landcode zegt altijd het land.
+  Met 2.048 bytes blijft de set zonder wapens onder 100 kB, en komen de vlaggen van onder andere Irak, Polen en Costa Rica er echt in.
+- **Nadeel:** de set is ruim vijf keer groter dan eerder (ongeveer 96 kB in de bron).
+  Een vereenvoudigde vlag is niet de echte, en een code-kader is er voor ongeveer vijftig landen die we niet verwachten.
+- **Alternatieven:** alle echte tekeningen (1,5 MB); een limiet van 4.196 of 5.000 bytes (elke regel met zo'n speler wordt tot 4 kB zwaarder); de naam in plaats van de code (past niet in de kolom); een regel in het logboek naast de test.
+- **Later:** de beslissing van 9 november 2026 over de vlag bij een speler (alleen vlaggen van hoogstens 900 bytes, een zware vlag of een land zonder vlag krijgt een lege plek) wordt hiermee vervangen.

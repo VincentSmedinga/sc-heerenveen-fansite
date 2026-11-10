@@ -195,11 +195,34 @@ describe('PlayerName with a country', () => {
     expect(container.textContent).toBe('9 Jakob Trenskow')
   })
 
-  it('has the same empty place for a country without a flag here, and never a broken image', () => {
+  it('draws a simplified flag for a country whose real flag is too heavy, as an image like the others', () => {
     const { container } = render(<PlayerName country="BR" shirtNumber={9} surname="Dinho" />)
 
+    expect(screen.getByRole('img', { name: 'Brazilië' }).getAttribute('src')).toMatch(/^data:image\/svg\+xml,/u)
+    expect(container.querySelector('span.hf-player-name-flag')).toBeNull()
+  })
+
+  it('shows the code of a country without a drawing in a frame, with the name of the country as its text', () => {
+    const { container } = render(<PlayerName country="kz" shirtNumber={9} surname="Dinho" />)
+    const frame = screen.getByRole('img', { name: 'Kazachstan' })
+
+    expect(frame.tagName).toBe('SPAN')
+    expect(frame.className).toBe('hf-player-name-flag hf-player-name-code')
+    expect(frame.textContent).toBe('KZ')
     expect(container.querySelector('img')).toBeNull()
-    expect(container.querySelector('span.hf-player-name-flag')).not.toBeNull()
+    expect([...(container.firstElementChild?.children ?? [])].map((child) => child.className)).toEqual([
+      'hf-player-name-number',
+      'hf-player-name-flag hf-player-name-code',
+      'hf-player-name-text',
+    ])
+  })
+
+  it('has an empty place, and never a broken image, for a code that is not a country', () => {
+    const { container } = render(<PlayerName country="ZZ" shirtNumber={9} surname="Dinho" />)
+
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.queryByRole('img')).toBeNull()
+    expect(container.querySelector('span.hf-player-name-flag')?.childNodes).toHaveLength(0)
   })
 
   it('has no place for a flag, and the markup it had, without a country', () => {

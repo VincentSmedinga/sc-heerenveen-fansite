@@ -3902,6 +3902,7 @@
   Staat er wel iemand, dan krijgt een speler zonder land of zonder vlag in onze set een lege plek van dezelfde breedte.
 - **Waarom:** de namen van één deel blijven zo op één lijn, en een seizoen zonder landen (de tabellen van 1990/91 tot 2005/06) verandert niet.
 - **Alternatieven:** de plek altijd tonen (een lege kolom in een lijst zonder één land); de vlag overal waar een speler staat (veel componenten, en tegenstanders hebben geen land).
+- **Later:** een speler met een land zonder tekening krijgt geen lege plek meer, maar de landcode in een kader van dezelfde breedte (10 november 2026, #1071); alleen een speler zonder land houdt de lege plek.
 
 ## De plek per speelronde staat op Wedstrijden, onder de stand
 
