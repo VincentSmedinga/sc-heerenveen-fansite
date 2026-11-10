@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { formationChoices } from '@fansite/shared/match-report'
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { saveDraft } from '#src/beheer/report-draft'
+import { readDraftText, saveDraft } from '#src/beheer/report-draft'
 import {
   emptyRow,
   emptySide,
@@ -838,5 +838,119 @@ describe('the input that the browser keeps for the form of a report', () => {
     )
 
     expect(html).not.toContain('Herstel')
+  })
+})
+
+describe('the button for the line-up of the previous match in the form of a report', () => {
+  const choices = {
+    matchHref: '/beheer/wedstrijden/7',
+    matchId: 7,
+    opponent: 'Testclub',
+    previousLineUp: 'Vorige Tegenstander, 24 oktober 2026',
+    series: null,
+    showDelay: 'binnen vijf minuten',
+    squad,
+  }
+  const blank: ReportValues = {
+    ...values,
+    wij: { ...values.wij, speler: Array.from({ length: 11 }, (_nothing, index) => emptyRow('speler', index)) },
+  }
+  const filledIn: ReportValues = {
+    ...values,
+    formatie: { ...values.formatie, wij: { eigen: '', keuze: '4-3-3' } },
+    wij: { ...values.wij, speler: [row('1'), row('2'), row('3', 'bank')] },
+  }
+  const openWith = (
+    state: ReportFormState,
+    action: (previous: ReportFormState, formData: FormData) => Promise<ReportFormState> = () => Promise.resolve(state),
+    more: Partial<typeof choices> = {},
+  ) =>
+    render(
+      <ReportFormProvider action={action} choices={{ ...choices, ...more }} initial={state} title="Titel">
+        <ReportDraftNotice />
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const takeOver = () => [...document.querySelectorAll('button')].find((button) => button.value === 'opstelling-vorige')
+  const empty: ReportFormState = { errors: {}, values: blank, version: 0, warnings: {} }
+
+  it('is there with an empty line-up of ours, with a name that says what it does, and posts its own value', () => {
+    openWith(empty)
+
+    expect(takeOver()?.textContent).toBe('Opstelling van de vorige wedstrijd overnemen')
+    expect(takeOver()?.getAttribute('name')).toBe('knop')
+    expect(takeOver()?.getAttribute('type')).toBe('submit')
+    expect(takeOver()?.closest('form')?.id).toBe('verslag')
+  })
+
+  it('is not there when there is no previous match, or when something is filled in', () => {
+    const without = { ...choices, previousLineUp: undefined }
+
+    render(
+      <ReportFormProvider action={() => Promise.resolve(empty)} choices={without} initial={empty} title="Titel">
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    expect(takeOver()).toBeUndefined()
+    cleanup()
+
+    openWith({ ...empty, values: filledIn })
+
+    expect(takeOver()).toBeUndefined()
+  })
+
+  it('goes away as soon as the editor fills in a place of the line-up, so it never writes over anything', () => {
+    openWith(empty)
+    expect(takeOver()).toBeDefined()
+
+    fireEvent.change(document.getElementById('speler-wij-1-rugnummer') as HTMLInputElement, {
+      target: { value: '9' },
+    })
+
+    expect(takeOver()).toBeUndefined()
+  })
+
+  it('is only in the card of our side, and the status of the card is empty until the line-up is taken over', () => {
+    openWith(empty)
+
+    expect(document.querySelectorAll('button[value="opstelling-vorige"]')).toHaveLength(1)
+
+    const heading = document.getElementById('speler-wij') as HTMLElement
+    const notice = heading.closest('section, div')?.querySelector('[role="status"]')
+
+    expect(notice?.textContent ?? '').toBe('')
+  })
+
+  it('says which match the line-up came from, in a status in the card, and keeps it like typed input without a note', async () => {
+    const taken: ReportFormState = {
+      errors: {},
+      focus: 'speler-wij',
+      takenFrom: 'Vorige Tegenstander, 24 oktober 2026',
+      values: filledIn,
+      version: 1,
+      warnings: {},
+    }
+
+    openWith(empty, () => Promise.resolve(taken))
+    await act(async () => {
+      fireEvent.click(takeOver() as HTMLElement)
+    })
+
+    expect(document.body.textContent).toContain('Opstelling overgenomen van Vorige Tegenstander, 24 oktober 2026.')
+    expect(document.activeElement?.id).toBe('speler-wij')
+    expect(takeOver()).toBeUndefined()
+    // What the server put in the form is kept in the browser like typed input ...
+    expect(readDraftText(7)).not.toBeNull()
+    // ... and says nothing on this page: the note is about what was there when it opened.
+    expect(document.getElementById('bewaarde-invoer')?.textContent).toBe('')
+    expect(document.querySelector('button[type="button"]')).toBeNull()
+  })
+
+  it('shows the note the next time the page opens with that input, as for typed input', async () => {
+    saveDraft(7, filledIn, blank)
+    openWith(empty)
+
+    expect(document.getElementById('bewaarde-invoer')?.textContent).toContain('bewaarde invoer')
   })
 })

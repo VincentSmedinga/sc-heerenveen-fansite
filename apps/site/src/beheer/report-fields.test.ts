@@ -8,11 +8,13 @@ import {
   formationId,
   formationOwnId,
   formationValueOf,
+  isEmptyLineUp,
   isUntouchedRow,
   noFormation,
   otherFormation,
   playerChoices,
   playersOnPitch,
+  previousLineUpButtonValue,
   readReportButton,
   readReportValues,
   type ReportValues,
@@ -498,5 +500,33 @@ describe('playersOnPitch', () => {
     expect(pitch.has('5')).toBe(true)
     expect(pitch.has('6')).toBe(true)
     expect(pitch.has('7')).toBe(true)
+  })
+})
+
+describe('the button for the line-up of the previous match', () => {
+  const eleven = Array.from({ length: 11 }, (_nothing, index) => emptyRow('speler', index))
+
+  it('is read from the form, and is not a row button', () => {
+    expect(previousLineUpButtonValue).toBe('opstelling-vorige')
+    expect(readReportButton(form({ knop: 'opstelling-vorige' }))).toEqual({ kind: 'previous' })
+  })
+
+  it('sees the line-up as empty with untouched rows only, also on the bench from row 12, and without a formation', () => {
+    expect(isEmptyLineUp(values())).toBe(true)
+    expect(isEmptyLineUp(values({ wij: { ...emptySide(), speler: [...eleven, emptyRow('speler', 11)] } }))).toBe(true)
+  })
+
+  it('does not see it as empty with a row filled in, or a formation of either kind', () => {
+    const filled = eleven.map((row, index) => (index === 3 ? { ...row, naam: 'Verzonnen' } : row))
+
+    expect(isEmptyLineUp(values({ wij: { ...emptySide(), speler: filled } }))).toBe(false)
+    expect(isEmptyLineUp(values({ formatie: { wij: { eigen: '', keuze: '4-3-3' }, zij: noFormation() } }))).toBe(false)
+    expect(isEmptyLineUp(values({ formatie: { wij: { eigen: '4-4-2', keuze: '' }, zij: noFormation() } }))).toBe(false)
+  })
+
+  it('looks at our side only', () => {
+    const theirs = [{ ...emptyRow('speler'), naam: 'Verzonnen' }]
+
+    expect(isEmptyLineUp(values({ zij: { ...emptySide(), speler: theirs } }))).toBe(true)
   })
 })

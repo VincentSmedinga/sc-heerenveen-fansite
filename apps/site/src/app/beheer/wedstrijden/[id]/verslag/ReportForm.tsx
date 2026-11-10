@@ -47,6 +47,7 @@ import {
   formationOwnId,
   goalKindChoices,
   incidentKindChoices,
+  isEmptyLineUp,
   listId,
   otherFormation,
   otherPlayer,
@@ -54,6 +55,7 @@ import {
   playerLabel,
   playerOf,
   playersOnPitch,
+  previousLineUpButtonValue,
   readReportValues,
   removeButtonValue,
   type ReportFormState,
@@ -100,6 +102,11 @@ export type ReportChoices = {
    */
   preview?: ReportPreviewMatch
   /**
+   * The match whose line-up of ours the button can take over, as `Opponent, 3 november 2025`.
+   * Leave it out when there is none, and the button is not there.
+   */
+  previousLineUp?: string | undefined
+  /**
    * The result of the shoot-out of the match, from the form of the match: `null` when it has
    * none. The kicks of the series are only asked for with a result.
    */
@@ -110,6 +117,11 @@ export type ReportChoices = {
 }
 
 type ReportFormContext = {
+  /**
+   * The values the page opened with, which is what the server has. The input the browser keeps
+   * is kept when it differs from them, and not when the server answered a button with it.
+   */
+  baseline: ReportValues
   /** The row of an event that the last change was in, for the frame in the preview. */
   changed: ChangedRow | undefined
   choices: ReportChoices
@@ -154,7 +166,7 @@ const draftNoticeId = 'bewaarde-invoer'
  * Without JavaScript it draws nothing.
  */
 export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined }) {
-  const { choices, restore, state } = useReportForm()
+  const { baseline, choices, restore } = useReportForm()
   const matchId = choices.matchId
   const [handled, setHandled] = useState<'discarded' | 'restored'>()
   // What the browser held when the page opened: the note is about that, not about what the
@@ -174,7 +186,7 @@ export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined })
   )
   const text = shown ? opened : null
   const draft = useMemo(() => parseDraft(text), [text])
-  const differs = draft !== undefined && canonicalValues(draft.values) !== canonicalValues(state.values)
+  const differs = draft !== undefined && canonicalValues(draft.values) !== canonicalValues(baseline)
 
   useEffect(() => {
     if (savedAt !== undefined && matchId !== undefined) {
@@ -234,7 +246,7 @@ export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined })
  * the server makes them again after each button and each save.
  */
 export function ReportFields() {
-  const { choices, current, formAction, notice, onChange, restored, state } = useReportForm()
+  const { baseline, choices, current, formAction, notice, onChange, restored, state } = useReportForm()
   const { errors, warnings } = state
   // Whether the page is live in the browser: the server and a page without JavaScript say no.
   const live = useSyncExternalStore(
@@ -429,6 +441,17 @@ export function ReportFields() {
           ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie, of als de speler geen rugnummer had.'
           : 'Schrijf de naam van de speler zoals de bron hem schrijft. Het rugnummer mag leeg blijven. Een kant die niet af is, mag leeg blijven.',
         <>
+          {own ? (
+            <>
+              {/* Empty until the line-up was taken over, then it names the match. */}
+              <Notice>{state.takenFrom === undefined ? '' : `Opstelling overgenomen van ${state.takenFrom}.`}</Notice>
+              {choices.previousLineUp !== undefined && isEmptyLineUp(current) ? (
+                <Button appearance="soft" name="knop" type="submit" value={previousLineUpButtonValue}>
+                  Opstelling van de vorige wedstrijd overnemen
+                </Button>
+              ) : null}
+            </>
+          ) : null}
           <Text appearance="meta" id={roleHintId(side)}>
             Een team heeft één aanvoerder. Zodra een speler Basis en aanvoerder heeft, staat die keuze niet meer bij de
             anderen van {club(side)}.
@@ -684,7 +707,7 @@ export function ReportFields() {
       onBlur={(event) => {
         // Leaving a field keeps the input in the browser, so a save that fails costs nothing.
         if (choices.matchId !== undefined) {
-          saveDraft(choices.matchId, readReportValues(new FormData(event.currentTarget)), state.values)
+          saveDraft(choices.matchId, readReportValues(new FormData(event.currentTarget)), baseline)
         }
       }}
       onChange={(event) => onChange(event.currentTarget, event.target)}
@@ -793,6 +816,7 @@ export function ReportFormShell({
   title: string
 }) {
   const [restored, setRestored] = useState(0)
+  const [baseline] = useState(state.values)
   const [live, setLive] = useState<{
     changed: ChangedRow | undefined
     for: ReportFormState
@@ -801,6 +825,16 @@ export function ReportFormShell({
   }>()
   // What the form said before the server answered is only good until the server answers.
   const current = live?.for === state ? live.values : state.values
+
+  // What the server answers to a button is input that is not saved yet, such as a row that was
+  // added or the line-up of the previous match, so the browser keeps it like typed input. The
+  // note about input that was kept is about what was there when the page opened, so it does not
+  // show for this.
+  useEffect(() => {
+    if (state.version > 0 && choices.matchId !== undefined) {
+      saveDraft(choices.matchId, state.values, baseline)
+    }
+  }, [baseline, choices.matchId, state])
 
   // After a button the editor must land somewhere sensible. A save with errors goes to the list
   // of errors, and a row that is added or removed to the row that took its place. The page
@@ -826,6 +860,7 @@ export function ReportFormShell({
   return (
     <ReportFormContext
       value={{
+        baseline,
         changed: live?.for === state ? live.changed : undefined,
         choices,
         current,

@@ -493,3 +493,54 @@ describe('the report screen of a match that is being played', () => {
     expect(await page(matchId, { gedaan: 'al-afgelopen' })).toContain('Al afgelopen.</strong>')
   })
 })
+
+describe('the report screen and the button for the line-up of the previous match', () => {
+  async function previousWithLineUp() {
+    const [values] = await withClubs(database.db, [
+      {
+        ...played,
+        kickoffAt: new Date('2026-10-24T17:45:00Z'),
+        matchDate: '2026-10-24',
+        opponent: 'Vorige Tegenstander',
+        round: 'Speelronde 10',
+      },
+    ])
+    const [inserted] = await database.db.insert(matches).values(values!).$returningId()
+    const checked = checkReportForm(
+      { ...baseReport(squad, {}), status: 'bezig' },
+      {
+        match: {
+          extraTime: false,
+          goalsAgainst: 1,
+          goalsFor: 2,
+          opponent: 'Vorige Tegenstander',
+          penaltiesAgainst: null,
+          penaltiesFor: null,
+          status: 'played',
+        },
+        squad,
+      },
+    )
+
+    await saveReport(database.db, userId, inserted?.id ?? 0, checked.plan!)
+  }
+
+  it('has the button with an empty line-up when an earlier match has one, and no button without', async () => {
+    expect(await page(matchId)).not.toContain('Opstelling van de vorige wedstrijd overnemen')
+
+    await previousWithLineUp()
+
+    const html = await page(matchId)
+
+    expect(html).toContain('Opstelling van de vorige wedstrijd overnemen')
+    expect(html).toContain('value="opstelling-vorige"')
+    expect(html).toContain('form="verslag"')
+  })
+
+  it('does not have the button once this match has a report of its own with a line-up', async () => {
+    await previousWithLineUp()
+    await store({}, 'bezig')
+
+    expect(await page(matchId)).not.toContain('Opstelling van de vorige wedstrijd overnemen')
+  })
+})

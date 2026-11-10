@@ -5,6 +5,7 @@ import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { liveReportMatchId } from './live-report'
 import { matchId, playedMatchId } from './matches'
+import { addPreviousLineUp, lineUpNames, previousLabel } from './previous-lineup'
 
 // Writes an article in the admin from start to end, with the editor, as the beheerder of the
 // global setup: a draft that errors can't lose, the preview, publishing, saving a change, and
@@ -714,5 +715,63 @@ test.describe('the input of a match report that the browser keeps', () => {
     await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
     await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()
+  })
+})
+
+test.describe('the button for the line-up of the previous match', () => {
+  test('fills the line-up, says from which match, and keeps it like typed input', async ({ page }) => {
+    const { later, remove } = await addPreviousLineUp()
+
+    try {
+      const address = `/beheer/wedstrijden/${later}/verslag`
+      const takeOver = page.getByRole('button', { name: 'Opstelling van de vorige wedstrijd overnemen' })
+
+      await page.goto(address)
+      await expect(takeOver).toBeVisible()
+      await takeOver.click()
+
+      // The form is filled by the server: the focus is on the card, a status names the match,
+      // and the button is gone, so it can never write over what is there.
+      await expect(page.locator('#speler-wij-1-naam')).toHaveValue(lineUpNames[0] ?? '')
+      await expect(page.locator('#speler-wij-13-naam')).toHaveValue(lineUpNames[12] ?? '')
+      await expect(page.locator('#speler-wij-12-rol')).toHaveValue('bank')
+      await expect(page.locator('#formatie-wij')).toHaveValue('4-3-3')
+      await expect(page.locator('#speler-wij')).toBeFocused()
+      await expect(
+        page.getByRole('status').filter({ hasText: `Opstelling overgenomen van ${previousLabel}.` }),
+      ).toBeVisible()
+      await expect(takeOver).toHaveCount(0)
+      // What the server filled in is kept, and says nothing on this page.
+      await expect(page.getByRole('status').filter({ hasText: 'bewaarde invoer' })).toHaveCount(0)
+
+      // The page opened again: now the browser's input comes back with Herstel.
+      await page.goto(address)
+      await expect(page.getByRole('status').filter({ hasText: 'bewaarde invoer' })).toBeVisible()
+      await expect(page.locator('#speler-wij-1-naam')).toHaveValue('')
+      await page.getByRole('button', { name: 'Herstel' }).click()
+      await expect(page.locator('#speler-wij-1-naam')).toHaveValue(lineUpNames[0] ?? '')
+      await expect(takeOver).toHaveCount(0)
+    } finally {
+      await remove()
+    }
+  })
+
+  test.describe('without JavaScript', () => {
+    test.use({ javaScriptEnabled: false })
+
+    test('is a button of the form: the server fills the line-up and the form comes back with it', async ({ page }) => {
+      const { later, remove } = await addPreviousLineUp()
+
+      try {
+        await page.goto(`/beheer/wedstrijden/${later}/verslag`)
+        await page.getByRole('button', { name: 'Opstelling van de vorige wedstrijd overnemen' }).click()
+
+        await expect(page.locator('#speler-wij-1-naam')).toHaveValue(lineUpNames[0] ?? '')
+        await expect(page.getByRole('status').filter({ hasText: previousLabel })).toBeVisible()
+        await expect(page.getByRole('button', { name: 'Opstelling van de vorige wedstrijd overnemen' })).toHaveCount(0)
+      } finally {
+        await remove()
+      }
+    })
   })
 })

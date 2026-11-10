@@ -4386,3 +4386,28 @@
   Een melding met een keuze overschrijft niets wat de server heeft.
   Het gaat om de eigen invoer van een beheerder, op zijn eigen apparaat, in het beheer, dus de belofte aan bezoekers verandert niet.
 - **Alternatieven:** automatisch herstellen (kan stil verbergen wat de server heeft); bewaren op de server (een nieuwe tabel en een verzoek bij elke wijziging, meer dan nodig); bewaren bij elke toets (meer schrijven, zonder winst); de invoer ook bij een verlopen sessie weghalen, zoals het teken van het menu (dan is hij juist weg in het geval waarvoor hij er is).
+- **Later:** zie _De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling_ (10 november 2026): de browser vergelijkt met wat de pagina bij het openen van de server kreeg, en bewaart ook wat de server na een knop teruggeeft.
+
+## De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling
+
+- **Datum:** 10 november 2026
+- **Besluit:** een knop in het formulier van een wedstrijdverslag neemt de formatie en de rijen van onze opstelling over uit de meest recente eerdere wedstrijd met een opstelling, ook uit een ander seizoen, en alleen als onze opstelling nog leeg is (#1063).
+  - **De vorige wedstrijd:** de meest recente wedstrijd van sc Heerenveen vóór deze, op de datum van de aftrap, in elk seizoen en elke competitie, met een verslag waarin spelers van ons staan (`findPreviousLineUp`).
+    Op dezelfde dag telt een wedstrijd alleen met een eerdere aftrap.
+    Een wedstrijd zonder verslag of zonder opstelling wordt overgeslagen; de eerste wedstrijd van de reeks heeft geen voorganger, en dan is er geen knop.
+  - **Wat de knop overneemt:** de formatie van ons, en de rijen van onze spelers: de speler, het rugnummer zoals het in de rij staat en de rol (ook Bank en Basis en aanvoerder).
+    Wissels, doelpunten, kaarten, strafschoppen en de serie niet, en ook niets van de tegenstander.
+    Een speler die niet in de selectie van dit seizoen staat, komt terug als Andere speler met zijn naam.
+    De lezing is die van het formulier zelf (`valuesOfReport`), dus wat de knop invult is wat het formulier ook zou tonen bij die wedstrijd.
+  - **Een gewone knop van het formulier:** `knop=opstelling-vorige`, zoals Speler toevoegen.
+    Met en zonder JavaScript antwoordt de server met het formulier, na `findPreviousLineUp` op de wedstrijd die de server zelf kent; het formulier zegt alleen dat de knop is ingedrukt.
+  - **Schrijft nergens overheen:** de knop staat er alleen zolang geen rij van onze opstelling iets heeft en er geen formatie is (`isEmptyLineUp`, met de rol van de plaats als leeg, zie _De lijsten van het verslagformulier volgen de opstelling en staan op volgorde_).
+    Met JavaScript verdwijnt hij zodra de redacteur iets invult, en de server vult niets als de opstelling toch niet leeg is.
+  - **Na de knop:** de focus staat op de kop van de kaart Opstelling en bank van sc Heerenveen, en een regel met `role="status"` in die kaart zegt "Opstelling overgenomen van" de tegenstander en de datum.
+    De regel is er leeg voordat de knop is gebruikt.
+  - **De invoer in de browser:** wat de server na een knop teruggeeft, is invoer die nog niet is opgeslagen, dus de browser bewaart hem zoals getypte invoer (de beslissing over de invoer van het verslag in `localStorage`).
+    De melding Herstel en Weggooien gaat over wat er lag toen de pagina openging en vergelijkt met wat de pagina bij het openen van de server kreeg (`baseline`), niet met het laatste antwoord van de server.
+    Dat is een aanpassing van die beslissing: eerder vergeleek de browser met het laatste antwoord, en dan ging een bewaarde invoer na een knop of een geweigerde opslag weer weg.
+- **Waarom:** sc Heerenveen speelt vaak met bijna dezelfde elf als de wedstrijd ervoor, en de eerste wedstrijd van een seizoen heeft anders geen voorganger.
+  Een knop die niets overschrijft kan geen werk kosten.
+- **Alternatieven:** alleen hetzelfde seizoen (de eerste wedstrijd blijft leeg); alles wat is ingevuld vervangen na een bevestiging (meer klikken en een kans op verlies); ook de wissels en kaarten overnemen (die verschillen elke wedstrijd).
