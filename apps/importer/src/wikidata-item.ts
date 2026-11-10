@@ -59,6 +59,19 @@ export function readArticleInfo(html: string): 'missing' | ArticleInfo | null {
 }
 
 /**
+ * The title of the article on the Dutch Wikipedia that the item links to (`sitelinks.nlwiki`),
+ * or null when the item has none or the text is no item.
+ */
+export function readDutchTitle(text: string): null | string {
+  const entity = firstEntity(text)
+  const sitelinks = entity !== null && isRecord(entity['sitelinks']) ? entity['sitelinks'] : {}
+  const link = sitelinks['nlwiki']
+  const title = isRecord(link) && typeof link['title'] === 'string' ? link['title'].trim() : ''
+
+  return title === '' ? null : title
+}
+
+/**
  * Reads the item of Wikidata (`Special:EntityData/Q….json`): the birth date (`P569`), the birth
  * place (`P19`), the nationalities (`P27`) and the positions (`P413`). A statement with the
  * rank "deprecated" does not count, and when a property has statements with the rank

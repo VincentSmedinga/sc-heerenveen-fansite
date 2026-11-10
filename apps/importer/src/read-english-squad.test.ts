@@ -40,8 +40,9 @@ function seen(
   position: SeasonPlayer['position'],
   shirtNumber: null | number,
   country: null | string = null,
+  englishPage: null | string = name,
 ): SeasonPlayer {
-  return { appearances: null, country, goals: null, name, page: null, position, shirtNumber }
+  return { appearances: null, country, englishPage, goals: null, name, page: null, position, shirtNumber }
 }
 
 /** A page with a squad of the given templates. */
@@ -64,10 +65,10 @@ describe('readEnglishSquad', () => {
       seen('Warner Hahn', 'doelman', 1, 'NL'),
       seen('Daniel Høegh', 'verdediger', 3, 'DK'),
       seen('Michel Vlap', 'verdediger', 18, 'NL'),
-      seen('Yuki Kobayashi', 'middenvelder', 21, 'JP'),
-      seen('Jan Bekkema', 'doelman', 31, 'NL'),
+      seen('Yuki Kobayashi', 'middenvelder', 21, 'JP', 'Yuki Kobayashi (footballer, born 1992)'),
+      seen('Jan Bekkema', 'doelman', 31, 'NL', null),
       seen('Arbër Zeneli', 'middenvelder', null, 'XK'),
-      seen('Jan de Boer', 'doelman', null, 'NL'),
+      seen('Jan de Boer', 'doelman', null, 'NL', 'Jan de Boer (footballer, born 2000)'),
       seen('Nicolai Næss', 'verdediger', null, 'NO'),
     ])
   })
@@ -95,9 +96,9 @@ describe('readEnglishSquad', () => {
     expect(readPlayers(fixture('2020-21'))).toEqual([
       seen('Erwin Mulder', 'doelman', 1, 'NL'),
       seen('Jan Paul van Hecke', 'verdediger', 3, 'NL'),
-      seen('Joaquín Fernández', 'verdediger', 4, 'UY'),
+      seen('Joaquín Fernández', 'verdediger', 4, 'UY', 'Joaquín Fernández Pertusso'),
       seen('Henk Veerman', 'aanvaller', 9, 'NL'),
-      seen('Jaimy Kroesen', 'doelman', 24, 'NL'),
+      seen('Jaimy Kroesen', 'doelman', 24, 'NL', null),
       seen('Paweł Bochniewicz', 'verdediger', 25, 'PL'),
       seen('Runar Espejord', 'aanvaller', null, 'NO'),
     ])
@@ -108,7 +109,7 @@ describe('readEnglishSquad', () => {
       seen('Erwin Mulder', 'doelman', 1, 'NL'),
       seen('Filip Stevanović', 'aanvaller', 7, 'RS'),
       seen("Trustin van 't Loo", 'aanvaller', 37, 'NL'),
-      seen('Joaquín Fernández', 'verdediger', null, 'UY'),
+      seen('Joaquín Fernández', 'verdediger', null, 'UY', 'Joaquín Fernández (footballer, born 1999)'),
     ])
   })
 
@@ -119,10 +120,10 @@ describe('readEnglishSquad', () => {
       seen('Jordy de Wijs', 'verdediger', 3, 'NL'),
       seen('Sam Kersten', 'verdediger', 4, 'NL'),
       seen('Luuk Brouwers', 'middenvelder', 8, 'NL'),
-      seen('Hussein Ali', 'verdediger', 15, 'IQ'),
+      seen('Hussein Ali', 'verdediger', 15, 'IQ', 'Hussein Ali (footballer, born 2002)'),
       seen('Jacob Trenskow', 'aanvaller', 20, 'DK'),
       seen('Mateja Milovanović', 'verdediger', 27, 'RS'),
-      seen('Melle Witteveen', 'middenvelder', 32, 'NL'),
+      seen('Melle Witteveen', 'middenvelder', 32, 'NL', null),
       seen('Hristiyan Petrov', 'verdediger', null, null),
       seen('Dimitris Rallis', 'aanvaller', null, null),
     ])
@@ -154,7 +155,7 @@ describe('readEnglishSquad', () => {
       '|}',
     ].join('\n')
 
-    expect(readPlayers(text)).toEqual([seen('Kees Roos', 'aanvaller', null)])
+    expect(readPlayers(text)).toEqual([seen('Kees Roos', 'aanvaller', null, null, null)])
   })
 
   it('gives none for a page without a squad and without transfers', () => {

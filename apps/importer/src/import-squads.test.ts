@@ -20,6 +20,7 @@ import type { MergedPlayer } from './import-past-squad.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
 import { formatPastSquadReport, importPastSquad, mergePlayers } from './import-past-squad.ts'
+import { infoUrl, itemUrl } from './import-person-data.ts'
 import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
 import { englishSquadPage } from './read-english-squad.ts'
 import { squadPageTitle } from './read-squad.ts'
@@ -224,8 +225,10 @@ describe('mergePlayers', () => {
     expect(merged).toEqual([
       {
         country: null,
+        englishPage: null,
         name: 'Marten de Roon',
         page: 'Marten de Roon',
+        personId: null,
         position: 'middenvelder',
         shirtNumber: 15,
         source: 'selectie',
@@ -242,8 +245,10 @@ describe('mergePlayers', () => {
     expect(merged).toEqual([
       {
         country: null,
+        englishPage: null,
         name: 'Jakob Poulsen',
         page: 'Jakob Poulsen',
+        personId: null,
         position: 'middenvelder',
         shirtNumber: 8,
         source: 'selectie',
@@ -260,8 +265,10 @@ describe('mergePlayers', () => {
     expect(merged).toEqual([
       {
         country: null,
+        englishPage: null,
         name: 'Arbër Zeneli',
         page: 'Arbër Zeneli',
+        personId: null,
         position: 'middenvelder',
         shirtNumber: null,
         source: 'engels',
@@ -296,7 +303,16 @@ describe('mergePlayers', () => {
     const { players: merged } = mergePlayers([read('selectie', { name: 'Een Speler', shirtNumber: 120 })])
 
     expect(merged).toEqual([
-      { country: null, name: 'Een Speler', page: null, position: null, shirtNumber: null, source: 'selectie' },
+      {
+        country: null,
+        englishPage: null,
+        name: 'Een Speler',
+        page: null,
+        personId: null,
+        position: null,
+        shirtNumber: null,
+        source: 'selectie',
+      },
     ])
   })
 })
@@ -732,6 +748,177 @@ describe('importPastSquad', () => {
     )
     expect(rows.find((row) => row.name === 'Warner Hahn')).toMatchObject({ position: 'doelman', shirtNumber: 1 })
     expect(await database.db.select().from(wikipediaPages)).toMatchObject([{ kind: 'squad', title }])
+  })
+
+  describe('the persons of the English squad (issue 1043)', () => {
+    const englishTitle = englishSquadPage('2018/19') ?? ''
+    const page = [
+      '==Players==',
+      '===First-team squad===',
+      '{{Fs start}}',
+      '{{Fs player|no=1|nat=NED|pos=GK|name=[[Warner Hahn]]}}',
+      '{{Fs player|no=3|nat=DEN|pos=DF|name=[[Daniel Høegh]]}}',
+      '{{Fs player|no=21|nat=JAP|pos=MF|name=[[Yuki Kobayashi (footballer, born 1992)|Yuki Kobayashi]]}}',
+      '{{Fs end}}',
+    ].join('\n')
+    const info = (id: string) => reply(200, `<script>{"wgArticleId":77}</script> Special:EntityPage/${id}`)
+    const item = (id: string, dutch: null | string) =>
+      reply(
+        200,
+        JSON.stringify({
+          entities: { [id]: { id, sitelinks: dutch === null ? {} : { nlwiki: { title: dutch } } } },
+        }),
+      )
+
+    /** The three servers of a run: the English page, the Dutch articles and Wikidata. */
+    async function servers3(extraEnglish: Record<string, Handler> = {}, text = page) {
+      const english = await serve(
+        { [englishTitle]: text },
+        {
+          [infoUrl('', 'Daniel Høegh')]: info('Q1'),
+          [infoUrl('', 'Yuki Kobayashi (footballer, born 1992)')]: info('Q2'),
+          ...extraEnglish,
+        },
+      )
+      const dutch = await serve({}, { [pathOf('Daniel Høegh')]: reply(200, 'Een Deense verdediger.', wiki) })
+      const wikidata = await startServer({
+        '/robots.txt': reply(200, '', { 'Content-Type': 'text/plain' }),
+        [itemUrl('', 'Q1')]: item('Q1', 'Daniel Høegh'),
+        [itemUrl('', 'Q2')]: item('Q2', null),
+      })
+
+      servers.push(wikidata)
+
+      return { dutch, english, wikidata }
+    }
+
+    const run = ({ dutch, english, wikidata }: Awaited<ReturnType<typeof servers3>>) =>
+      importPastSquad(database.db, fetcherFor([dutch, english, wikidata]), '2018/19', {
+        clock: () => now,
+        englishOrigin: english.origin,
+        origin: dutch.origin,
+        pause: 0,
+        wikidata: wikidata.origin,
+      })
+
+    async function earlierHahn() {
+      const [{ id }] = (await database.db.insert(persons).values({ wikipediaPage: 'Warner Hahn' }).$returningId()) as [
+        { id: number },
+      ]
+
+      await database.db
+        .insert(players)
+        .values({ name: 'Warner Hahn', personId: id, searchTerm: 'Hahn', season: '2017/18' })
+
+      return id
+    }
+
+    it('finds a person by name, by the Dutch article, and under the English title, and a second run asks nothing', async () => {
+      const hahn = await earlierHahn()
+      const three = await servers3()
+      const report = await run(three)
+
+      expect(report).toMatchObject({ kind: 'imported' })
+
+      const rows = await storedPlayers('2018/19')
+      const person = async (id: null | number) =>
+        id === null ? null : (await database.db.select().from(persons).where(eq(persons.id, id)))[0]
+
+      // By name: no request for Warner Hahn.
+      expect(rows.find((row) => row.name === 'Warner Hahn')?.personId).toBe(hahn)
+      expect(pageRequests(three.english)).not.toContain(infoUrl('', 'Warner Hahn'))
+      // By the English link: the Dutch title of the item, and the row keeps no page.
+      const daniel = rows.find((row) => row.name === 'Daniel Høegh')
+
+      expect(await person(daniel?.personId ?? null)).toMatchObject({
+        englishTitle: false,
+        wikipediaPage: 'Daniel Høegh',
+      })
+      expect(daniel?.wikipediaPage).toBeNull()
+      // Without a Dutch article: a person under the English title, marked as such.
+      const yuki = rows.find((row) => row.name === 'Yuki Kobayashi')
+
+      expect(await person(yuki?.personId ?? null)).toMatchObject({
+        englishTitle: true,
+        wikipediaPage: 'Yuki Kobayashi (footballer, born 1992)',
+      })
+      expect(yuki?.wikipediaPage).toBeNull()
+
+      const before = await database.db.select().from(players)
+      const askedBefore = three.english.paths().length + three.wikidata.paths().length + three.dutch.paths().length
+      const again = await run(three)
+
+      expect(again).toMatchObject({ kind: 'imported', players: { added: 0, improved: 0, unchanged: 3 } })
+      // One request more for the English page itself, none for a title.
+      expect(three.english.paths().length + three.wikidata.paths().length + three.dutch.paths().length).toBe(
+        askedBefore + 2,
+      )
+      expect(await database.db.select().from(players)).toEqual(before)
+    })
+
+    it('never gives a player another person than he has', async () => {
+      const [{ id: other }] = (await database.db
+        .insert(persons)
+        .values({ wikipediaPage: 'Een ander' })
+        .$returningId()) as [{ id: number }]
+
+      await database.db
+        .insert(players)
+        .values({ name: 'Daniel Høegh', personId: other, searchTerm: 'Høegh', season: '2018/19' })
+      await run(await servers3())
+
+      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).toBe(other)
+    })
+
+    it('leaves a player alone whose page the editors set, also when the Dutch title is another one', async () => {
+      await database.db.insert(players).values({
+        editorsFields: ['wikipedia_page'],
+        name: 'Daniel Høegh',
+        searchTerm: 'Høegh',
+        season: '2018/19',
+        source: 'redactie',
+        wikipediaPage: 'Daniel Høegh (voetballer)',
+      })
+
+      const report = await run(await servers3())
+      const row = (await storedPlayers('2018/19')).find((one) => one.name === 'Daniel Høegh')
+
+      expect(report).toMatchObject({ kind: 'imported' })
+      expect(row).toMatchObject({
+        personId: null,
+        source: 'redactie',
+        wikipediaPage: 'Daniel Høegh (voetballer)',
+      })
+    })
+
+    it('leaves a player without a person when a request fails, warns, and fills him in the next run', async () => {
+      const broken = await servers3({ [infoUrl('', 'Daniel Høegh')]: reply(500, 'Kapot') })
+      const first = await run(broken)
+
+      expect(first.kind === 'imported' && first.warnings.join('\n')).toMatch(/1 English title could not be asked/u)
+      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).toBeNull()
+
+      await run(await servers3())
+
+      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).not.toBeNull()
+    })
+
+    it('stops asking after three failures in a row', async () => {
+      const failing = reply(500, 'Kapot')
+      const broken = await servers3(
+        {
+          [infoUrl('', 'Daniel Høegh')]: failing,
+          [infoUrl('', 'Nicolai Næss')]: info('Q3'),
+          [infoUrl('', 'Warner Hahn')]: failing,
+          [infoUrl('', 'Yuki Kobayashi (footballer, born 1992)')]: failing,
+        },
+        page.replace('{{Fs end}}', '{{Fs player|no=5|nat=NOR|pos=DF|name=[[Nicolai Næss]]}}\n{{Fs end}}'),
+      )
+
+      await run(broken)
+      // The fourth title is not asked.
+      expect(pageRequests(broken.english).filter((path) => path?.includes('action=info'))).toHaveLength(3)
+    })
   })
 
   it('leaves the person empty when a title cannot be asked, warns, and fills it in the next read', async () => {

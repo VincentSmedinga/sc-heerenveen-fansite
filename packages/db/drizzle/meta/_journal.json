@@ -442,6 +442,13 @@
       "when": 1794298573803,
       "tag": "0062_add_editors_fields_of_players",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "5",
+      "when": 1794308597283,
+      "tag": "0063_add_english_title_of_persons",
+      "breakpoints": true
     }
   ]
 }

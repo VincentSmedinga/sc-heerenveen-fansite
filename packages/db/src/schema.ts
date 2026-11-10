@@ -867,6 +867,9 @@ export const persons = mysqlTable('persons', {
   line: mysqlEnum('line', playerPositions),
   lineSource: mysqlEnum('line_source', personLineSources),
   wikidataReadAt: datetime('wikidata_read_at'),
+  // The title is that of the English Wikipedia: the player has no Dutch article (#1043). The
+  // importer never asks the Dutch Wikipedia or Wikidata about such a title.
+  englishTitle: boolean('english_title').notNull().default(false),
 })
 
 export type NewPerson = typeof persons.$inferInsert

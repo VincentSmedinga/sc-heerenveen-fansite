@@ -17,6 +17,7 @@ import {
   keepPlayerFieldDifferences,
 } from '@fansite/db/player-field-differences'
 import {
+  persons,
   playerNameMaxLength,
   players,
   playerSources,
@@ -24,14 +25,16 @@ import {
   wikipediaPageMaxLength,
   wikipediaPages,
 } from '@fansite/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
 import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import type { CompletenessTotals } from './store-completeness.ts'
 
+import { addEnglishOnly, findEnglishPersons } from './english-persons.ts'
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
+import { pauseBetweenRequests, wikidataOrigin } from './import-person-data.ts'
 import { editorsByPerson, scorersByPerson, storeChosenSpellings } from './import-squad.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
@@ -45,8 +48,12 @@ import { describeError, printable } from './text.ts'
 export type MergedPlayer = {
   /** The code of two letters of the flag, from the best list that shows one (`NL`). */
   country: null | string
+  /** The page of the English Wikipedia of the name, from the English reader (issue 1043). */
+  englishPage: null | string
   name: string
   page: null | string
+  /** The person found by name, before the store asks the person book (`findEnglishPersons`). */
+  personId: null | number
   position: null | PlayerPosition
   shirtNumber: null | number
   /** The best source of the lists that have him. */
@@ -141,7 +148,11 @@ export async function importPastSquad(
     clock = () => new Date(),
     englishOrigin = englishWikipediaOrigin,
     origin = wikipediaOrigin,
-  }: MatchImportOptions = {},
+    pause = pauseBetweenRequests,
+    // Without an address of its own, only the real Wikipedia is read together with the real
+    // Wikidata, so a test with its own Wikipedia reaches no real site.
+    wikidata = origin === wikipediaOrigin ? wikidataOrigin : null,
+  }: MatchImportOptions & { pause?: number; wikidata?: null | string } = {},
 ): Promise<PastSquadReport> {
   if (!isPastSeason(season, clock())) {
     return {
@@ -249,22 +260,38 @@ export async function importPastSquad(
 
   const mergedPersons = await mergeListedPersons(db)
   // Wikipedia is asked before the transaction: no request is made while rows are locked.
+  const english = await findEnglishPersons(db, fetcher, merged.players, {
+    englishOrigin,
+    pause,
+    wikidataOrigin: wikidata,
+  })
+  // An English title leads to the Dutch one, or is a person of its own (issue 1043).
+  const aliases = new Map([...aliasMap(personTitleAliases), ...english.aliases])
   const personLookup = await lookUpPersonPages(
     db,
     fetcher,
     origin,
-    merged.players.flatMap((player) => (player.page === null ? [] : [player.page])),
-    aliasMap(personTitleAliases),
+    merged.players.flatMap((player) => personTitleOf(player, english)),
+    aliases,
   )
+
+  addEnglishOnly(personLookup, english.englishOnly)
   const now = clock()
   const stored = await db.transaction(async (transaction) => {
     const personBook = await createPersonBook(transaction, {
-      aliases: aliasMap(personTitleAliases),
+      aliases,
       redirects: personLookup.redirects,
     })
     await storeChosenSpellings(transaction, season)
 
     const { differences, ...counts } = await storePlayers(transaction, season, merged.players, personBook)
+
+    if (english.englishOnly.size > 0) {
+      await transaction
+        .update(persons)
+        .set({ englishTitle: true })
+        .where(inArray(persons.wikipediaPage, [...english.englishOnly]))
+    }
 
     // What the lists say and the editors set otherwise waits for them, once (#1022).
     await keepPlayerFieldDifferences(transaction, season, differences, now)
@@ -287,10 +314,19 @@ export async function importPastSquad(
     countries: countriesOf(merged.players),
     kind: 'imported',
     pages: pagesRead.length,
-    persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
+    persons: [
+      ...describePersons(personLookup.asked, stored.persons, personNames.counts),
+      ...(english.asked === 0 ? [] : [`persons: ${english.asked} English requests asked`]),
+    ],
     players: stored.players,
     season,
-    warnings: [...warnings, ...mergedPersons, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
+    warnings: [
+      ...warnings,
+      ...mergedPersons,
+      ...english.warnings,
+      ...personLookup.warnings,
+      ...guessedNameWarnings(personNames.guessed),
+    ],
   }
 
   return await recorded(db, report, clock)
@@ -341,8 +377,10 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
 
         const entry: MergedPlayer = {
           country: player.country,
+          englishPage: player.englishPage ?? null,
           name: player.name,
           page: player.page,
+          personId: null,
           position: player.position,
           shirtNumber,
           source,
@@ -360,6 +398,7 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
       // The list that came first is the better one, so it only gets what it lacks.
       same.position ??= player.position
       same.country ??= player.country
+      same.englishPage ??= player.englishPage ?? null
       same.shirtNumber ??= shirtNumber
       if (same.page === null && player.page !== null && !byPage.has(nameKey(player.page))) {
         same.page = player.page
@@ -374,6 +413,33 @@ export function mergePlayers(reads: readonly ReadOfPage[]): { players: MergedPla
 /** How many of the players have a country. */
 function countriesOf(found: readonly { country: null | string }[]) {
   return { known: found.filter((player) => player.country !== null).length, total: found.length }
+}
+
+/** The person of a player by the title of `personTitleOf`, or null when there is none yet. */
+async function personOf(player: MergedPlayer, personBook: { resolve: (title: string) => Promise<null | number> }) {
+  const title = player.page ?? player.englishPage
+
+  return title === null ? null : await personBook.resolve(title)
+}
+
+/**
+ * The title that gives a player his person: his Dutch page, or else his English one when
+ * `findEnglishPersons` found a Dutch title or a person for it.
+ */
+function personTitleOf(
+  player: MergedPlayer,
+  english: { aliases: ReadonlyMap<string, string>; known: ReadonlySet<string> },
+): string[] {
+  if (player.page !== null) {
+    return [player.page]
+  }
+
+  // An English title nobody could answer for is not asked on the Dutch Wikipedia.
+  return player.personId === null &&
+    player.englishPage !== null &&
+    (english.aliases.has(player.englishPage) || english.known.has(player.englishPage))
+    ? [player.englishPage]
+    : []
 }
 
 /**
@@ -442,7 +508,7 @@ async function storePlayers(
   }
 
   for (const player of found) {
-    const personId = player.page === null ? null : await personBook.resolve(player.page)
+    const personId = player.personId ?? (await personOf(player, personBook))
     const before =
       (player.page === null ? undefined : byPage.get(nameKey(player.page))) ??
       byName.get(nameKey(player.name)) ??
