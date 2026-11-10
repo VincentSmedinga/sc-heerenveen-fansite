@@ -345,4 +345,23 @@ describe('deciding a difference', () => {
     expect(await differences()).toMatchObject([{ status: 'pending' }, { status: 'pending' }])
     expect(await database.db.select().from(auditLog)).toEqual([])
   })
+  it('says so when another player of the season is the person of the page already', async () => {
+    const [known] = await database.db.insert(persons).values({ wikipediaPage: 'Sanne Spits' }).$returningId()
+
+    await database.db.insert(personPages).values({ page: 'Sanne Spits (voetballer)', personId: known!.id })
+    await player({ name: 'S. Spits', personId: known!.id, wikipediaPage: 'Sanne Spits' })
+
+    const id = await player({ editorsFields: ['wikipedia_page'] })
+
+    await keepPlayerFieldDifferences(
+      database.db,
+      season,
+      [found(id, 'wikipedia_page', null, 'Sanne Spits (voetballer)')],
+      first,
+    )
+
+    expect(await decide((await differences())[0]!.id, 'take-over')).toBe('taken')
+    expect(await playerOf(id)).toMatchObject({ personId: null, wikipediaPage: null })
+    expect(await differences()).toMatchObject([{ status: 'pending' }])
+  })
 })

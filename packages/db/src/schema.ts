@@ -1637,6 +1637,24 @@ export const playerSources = [
 export type PlayerSource = (typeof playerSources)[number]
 
 /**
+ * The fields of a player the editors can set in the admin, and the importer then leaves alone
+ * (issue 1022): the name, the shirt number, the line and the page on Wikipedia.
+ */
+export const playerFields = ['name', 'shirt_number', 'position', 'wikipedia_page'] as const
+
+export type PlayerField = (typeof playerFields)[number]
+
+/**
+ * A `SET` of MariaDB over `playerFields`: the driver gives the names with a comma between
+ * them, and an empty text for none.
+ */
+const playerFieldSet = customType<{ data: PlayerField[]; driverData: string }>({
+  dataType: () => `set(${playerFields.map((field) => `'${field}'`).join(',')})`,
+  fromDriver: (value) => playerFields.filter((field) => value.split(',').includes(field)),
+  toDriver: (value) => playerFields.filter((field) => value.includes(field)).join(','),
+})
+
+/**
  * The squad of sc Heerenveen 1 (men), from the Dutch Wikipedia, one row per player and season.
  * The hourly importer reads the current season only: a good read updates the squad of the
  * season and never replaces it, so a player keeps his `id`, which the goals in `match_goals`
@@ -1668,24 +1686,6 @@ export type PlayerSource = (typeof playerSources)[number]
  * finds as a difference for the editors (`player_field_differences`). A player with the
  * source `redactie` stays in the squad when no list of Wikipedia has him.
  */
-/**
- * The fields of a player the editors can set in the admin, and the importer then leaves alone
- * (issue 1022): the name, the shirt number, the line and the page on Wikipedia.
- */
-export const playerFields = ['name', 'shirt_number', 'position', 'wikipedia_page'] as const
-
-export type PlayerField = (typeof playerFields)[number]
-
-/**
- * A `SET` of MariaDB over `playerFields`: the driver gives the names with a comma between
- * them, and an empty text for none.
- */
-const playerFieldSet = customType<{ data: PlayerField[]; driverData: string }>({
-  dataType: () => `set(${playerFields.map((field) => `'${field}'`).join(',')})`,
-  fromDriver: (value) => playerFields.filter((field) => value.split(',').includes(field)),
-  toDriver: (value) => playerFields.filter((field) => value.includes(field)).join(','),
-})
-
 export const players = mysqlTable(
   'players',
   {

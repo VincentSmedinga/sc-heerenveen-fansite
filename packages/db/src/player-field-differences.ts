@@ -14,8 +14,8 @@ import { personPages, persons, playerFieldDifferences, playerPositions, players 
 
 /**
  * What a decision came to: `done`; `not-waiting` when the difference was decided already or
- * does not exist; `taken` when another player of the season has the name or the page already,
- * so the value of the import cannot be written.
+ * does not exist; `taken` when another player of the season has the name, the page or the
+ * person of the page already, so the value of the import cannot be written.
  */
 export type FieldDecisionOutcome = 'done' | 'not-waiting' | 'taken'
 
@@ -287,7 +287,7 @@ function searchTermOf(name: string): string {
 
 /**
  * Gives the player the value of the import and takes the field off the list of the editors.
- * False when another player of the season has the name or the page.
+ * False when another player of the season has the name, the page or the person of the page.
  */
 async function takeOver(db: Writer, player: Player, difference: PlayerFieldDifference): Promise<boolean> {
   const value = difference.importValue
@@ -357,6 +357,20 @@ async function takeOver(db: Writer, player: Player, difference: PlayerFieldDiffe
           await givePersonPage(db, player.personId, value)
           personId = player.personId
         }
+      }
+
+      // The person of the page is a player of the season already, under another page or none.
+      if (
+        personId !== null &&
+        personId !== player.personId &&
+        (
+          await db
+            .select({ id: players.id })
+            .from(players)
+            .where(and(eq(players.season, player.season), ne(players.id, player.id), eq(players.personId, personId)))
+        ).length > 0
+      ) {
+        return false
       }
 
       await db.update(players).set({ editorsFields, personId, wikipediaPage: value }).where(eq(players.id, player.id))
