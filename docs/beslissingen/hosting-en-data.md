@@ -545,6 +545,7 @@
   Het voorvoegsel bij de achternaam bewaren (dan kan een lijst er niet op sorteren).
 - **Later:** zie _Wikidata is de bron voor de gegevens van een persoon_ in `importer.md`.
   De naam blijft uit de sorteersleutel komen; Wikidata is nu wel bereikbaar voor andere gegevens van een persoon.
+- **Later:** `name_source` kent sinds 10 november 2026 ook `redactie`, voor een naam die de redactie in het beheer invulde; zie _Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler_.
 
 ## Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie
 
