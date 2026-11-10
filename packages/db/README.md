@@ -528,6 +528,7 @@ De rijen van een seizoen worden in één keer vervangen, zoals de stand (zie de 
 De site leest ze met `listLeagueResults`, voor de stand over de laatste vijf wedstrijden op `/wedstrijden`.
 
 `player_list_titles` bewaart de titels van de links op de pagina "Lijst van spelers van sc Heerenveen (mannen)" (`title`) met het tijdstip van de laatste lezing (`read_at`).
+`country` is de landcode van de eerste vlag op de regel van de titel, of leeg (#1052).
 De lijst heeft geen seizoenen: ze toetst alleen namen (`playerListReport`), en geen speler of naam komt eruit.
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `europa-league` voor de pagina van de Engelse Wikipedia met de Europa League-wedstrijden van 2012/13, en `matches` voor een pagina met de wedstrijden van 2007/08 tot en met 2009/10; `squad` voor de selectie), de `language` (de taal van de Wikipedia waar de pagina staat, `nl` of `en` voor een pagina met wedstrijden), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
@@ -806,26 +807,26 @@ Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `
 De importer leest van elke persoon wat Wikidata weet (#898; de regels staan in de [README van de importer](../../apps/importer/README.md), _De gegevens van de personen uit Wikidata_).
 `persons` heeft er acht kolommen voor, die leeg zijn tot de persoon is gelezen:
 
-| Kolom (`persons`)      | Betekenis                                                                                                               |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `wikidata_id`          | Het Q-nummer van het item (`Q15943430`); uniek, leeg toegestaan                                                         |
-| `wikipedia_page_id`    | Het nummer van het Nederlandse artikel                                                                                  |
-| `birth_date`           | De geboortedatum; bij een maand of een jaar de eerste van die maand of van dat jaar                                     |
-| `birth_date_precision` | `day`, `month` of `year`                                                                                                |
-| `birth_place_id`       | Het Q-nummer van de geboorteplaats, in `wikidata_items`                                                                 |
-| `line`                 | De linie: `doelman`, `verdediger`, `middenvelder` of `aanvaller` (dezelfde lijst als `playerPositions`)                 |
-| `line_source`          | Waar de linie vandaan komt: `wikidata`, `squad` (de selectielijsten) of `manual` (het beheer of de lijst `personLines`) |
-| `wikidata_read_at`     | Het moment waarop de importer de persoon las; leeg voor een persoon die nog niet is gelezen of wiens verzoek mislukte   |
+| Kolom (`persons`)      | Betekenis                                                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wikidata_id`          | Het Q-nummer van het item (`Q15943430`); uniek, leeg toegestaan                                                                                       |
+| `wikipedia_page_id`    | Het nummer van het Nederlandse artikel                                                                                                                |
+| `birth_date`           | De geboortedatum; bij een maand of een jaar de eerste van die maand of van dat jaar                                                                   |
+| `birth_date_precision` | `day`, `month` of `year`                                                                                                                              |
+| `birth_place_id`       | Het Q-nummer van de geboorteplaats, in `wikidata_items`                                                                                               |
+| `line`                 | De linie: `doelman`, `verdediger`, `middenvelder` of `aanvaller` (dezelfde lijst als `playerPositions`)                                               |
+| `line_source`          | Waar de linie vandaan komt: `manual` (het beheer of de lijst `personLines`), `wikidata`, `old-site` (de oude fansite) of `squad` (de selectielijsten) |
+| `wikidata_read_at`     | Het moment waarop de importer de persoon las; leeg voor een persoon die nog niet is gelezen of wiens verzoek mislukte                                 |
 
 Een geboortedatum van een levende speler is een persoonsgegeven.
 Hij blijft in de database, en de site toont hem pas na een eigen besluit.
 
 Een persoon heeft ook een land (#1051, migratie `0065_add_country_of_persons`):
 
-| Kolom (`persons`) | Betekenis                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| `country`         | De landcode van twee letters in hoofdletters (`NL`); leeg voor een persoon van wie we het land niet kennen     |
-| `country_source`  | Waar het land vandaan komt: `manual` (het beheer), `wikidata`, `list`, `squad` of `old-site`; leeg zonder land |
+| Kolom (`persons`) | Betekenis                                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `country`         | De landcode van twee letters in hoofdletters (`NL`); leeg voor een persoon van wie we het land niet kennen                                                                                        |
+| `country_source`  | Waar het land vandaan komt, van sterk naar zwak: `manual` (het beheer), `wikidata`, `list` (de lijst van spelers), `old-site` (de oude fansite) of `squad` (de selectielijsten); leeg zonder land |
 
 De linie en het land van een persoon zijn de standaard voor elk seizoen.
 Een rij van een seizoen kan afwijken: `players.position` en `players.country` gaan op de pagina van dat seizoen voor (`listSeasonPlayers`).

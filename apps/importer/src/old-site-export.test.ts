@@ -82,9 +82,23 @@ const rows: OldSiteRows = {
     match('ajax.thuis', '9091', '1990-10-23 14:30:00'),
   ],
   players: [
-    { achternaam: 'Vonk', code: 'hans.vonk', linie: 1, tussenvoegsel: null, voornaam: 'Hans' },
-    { achternaam: 'Denneboom', code: 'romano.denneboom', linie: 0, tussenvoegsel: null, voornaam: 'Romano' },
-    { achternaam: 'Weij', code: 'rene.vanderweij', linie: 4, tussenvoegsel: 'van der', voornaam: 'René' },
+    { achternaam: 'Vonk', code: 'hans.vonk', linie: 1, nationaliteit: 'za', tussenvoegsel: null, voornaam: 'Hans' },
+    {
+      achternaam: 'Denneboom',
+      code: 'romano.denneboom',
+      linie: 0,
+      nationaliteit: '',
+      tussenvoegsel: null,
+      voornaam: 'Romano',
+    },
+    {
+      achternaam: 'Weij',
+      code: 'rene.vanderweij',
+      linie: 4,
+      nationaliteit: 'NL',
+      tussenvoegsel: 'van der',
+      voornaam: 'René',
+    },
   ],
   reports: [
     { scheidsrechter: 'Eric Braamhaar', toeschouwers: 4251, wsd_code: 'psv.thuis', wsd_seizoen: '9091' },
@@ -129,7 +143,7 @@ describe('buildOldSiteExport', () => {
       'psv',
     ])
     expect(JSON.parse(built.files.get('players.json') ?? '').players).toEqual([
-      { code: 'hans.vonk', firstName: 'Hans', infix: null, lastName: 'Vonk', line: 'doelman' },
+      { code: 'hans.vonk', country: 'ZA', firstName: 'Hans', infix: null, lastName: 'Vonk', line: 'doelman' },
     ])
   })
 

@@ -1087,6 +1087,9 @@ Een pagina die later een andere titel krijgt, ziet de import niet: de oude titel
 
 De import leest ook de pagina "Lijst van spelers van sc Heerenveen (mannen)" (`src/player-list.ts`), hoogstens eens per dag en in de run van de feeds, en bewaart de titels in `player_list_titles`.
 De lijst heeft geen seizoenen: ze maakt geen speler en verandert geen naam.
+Bij elke titel bewaart de import het land van de eerste vlag op de regel, zoals `NL` bij `{{NL-VLAG|15}}` (#1052).
+De persoon met precies die titel krijgt dat land, met de bron `list`, als hij geen land heeft of een land uit een zwakkere bron.
+Een eerste vlag die geen land is dat we kennen, geeft geen land en de regel `Player list: … a first flag that is no country we know, …` in het logboek.
 `pnpm run import:status` toont onder `Player list` hoeveel personen niet op de lijst staan, hoeveel titels van de lijst geen persoon van ons zijn en hoeveel titels alleen in een teken verschillen, met de eerste titels.
 De pagina Kwaliteit in het beheer toont hetzelfde.
 Een pagina die niet te lezen is, laat de titels zoals ze zijn en geeft de regel `Player list: not read, …` in het logboek.
@@ -1136,11 +1139,18 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
   Eerst uit de posities van Wikidata die we bewaren, anders uit zijn rijen van `players`.
   Zet de redactie later een positie op een rij van een seizoen, dan heeft de persoon na de volgende run die linie, met de bron `squad`.
   Een linie met de bron `manual` of `wikidata` blijft staan.
+  Een linie van de oude fansite (`old-site`, #1052) wijkt voor een positie van Wikidata en blijft anders staan, ook tegen de selectie in.
 - **Het land** (`persons.country`, #1051) komt bij elke run uit de eerste nationaliteit van de persoon, via de lijst `wikidataCountryCodes` in [`src/person-countries.ts`](src/person-countries.ts): het Q-nummer van een land naar zijn landcode van twee letters.
   De bron is dan `wikidata`.
-  Een land met een andere bron, zoals `manual` uit het beheer, verandert de run nooit.
+  Een land dat de redactie in het beheer zette (`manual`), verandert de run nooit.
+  Een land uit een zwakkere bron vervangt hij wel (#1052).
   Staat de eerste nationaliteit niet in de lijst, dan blijft het land leeg en waarschuwt de run met `Persons:` vooraan; de tweede nationaliteit is geen gok.
   Voeg een Q-nummer toe als de waarschuwing een land noemt dat een landcode heeft.
+- **Het land uit de andere bronnen** (#1052): daarna vult dezelfde run, zonder verzoek, het land uit de lijst van spelers en uit de selectielijsten.
+  De volgorde van sterk naar zwak is `manual`, `wikidata`, `list`, `old-site`, `squad`; een zwakkere bron vervangt nooit een sterkere.
+  De lijst geeft het land van de eerste vlag aan de persoon met precies die titel (`list`).
+  De selectie geeft een persoon zonder land het land dat het vaakst op zijn rijen in `players` staat (`squad`), en bij een gelijke stand dat van het laatste seizoen.
+  De bron `old-site` vult de import van de oude fansite (zie _De stap linie en land_).
   Een land dat niet meer bestaat, zoals Joegoslavië, kiest de redactie in het beheer.
 - **Een persoon zonder artikel of zonder item** blijft leeg zonder gok en is toch gelezen, dus de volgende run vraagt niets over hem.
   Heeft een andere persoon hetzelfde Q-nummer, dan houdt de eerste het en waarschuwt de run.
@@ -1151,8 +1161,8 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
 - **Het logboek** noemt per run hoeveel personen zijn gelezen, hoeveel een geboortedatum, nationaliteit en linie kregen (de linie per bron), hoeveel leeg bleven en hoeveel artikelen en items zijn opgevraagd:
 
 ```text
-persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a nationality, 170 with a line (120 from Wikidata, 50 from the squad, 0 set by hand), 3 left empty; 200 articles and 230 items asked
-persons (line and country): 31 lines from the squad, 0 from Wikidata, 0 taken away; 924 countries from Wikidata
+persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a nationality, 170 with a line (120 from Wikidata, 50 from the squad, 0 from the old fansite, 0 set by hand), 3 left empty; 200 articles and 230 items asked
+persons (line and country): 31 lines from the squad, 0 from Wikidata, 0 taken away; 924 countries from Wikidata, 12 from the list of players, 3 from the squad
 Persons: 2 persons have a first nationality that is not in the list of countries, so no country is filled in: Q36704 (Joegoslavië, 2)
 ```
 
@@ -2258,7 +2268,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er zeven stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen` en `selecties`.
+Nu zijn er acht stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `linie en land` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run
@@ -2338,6 +2348,7 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
 - De wissels volgen uit de minuut erin en de minuut eruit: een invaller vervangt een speler van zijn team die op dezelfde minuut eruit gaat.
 - Onze ploeg krijgt een formatie (`formation_ours`) als de volgorde van de elf beginspelers en hun linie het eens zijn (`deriveOldSiteFormation` in [`src/old-site-formation.ts`](src/old-site-formation.ts)).
   De linie staat per speler in `players.json` als `line` (`doelman`, `verdediger`, `middenvelder`, `aanvaller` of `null`), uit `speler.linie` van de oude database.
+  Het land staat er als `country` (twee hoofdletters of `null`), uit `speler.nationaliteit`, in de codes van de oude site.
   Het zijn 269 van de 566 verslagen; de rest blijft een lijst, en de tegenstander altijd.
   De pagina zegt onder het veld dat de formatie is afgeleid, zolang de redactie het verslag niet opsloeg.
 - Een kaart zonder minuut krijgt bij geel een lege minuut en bij rood de minuut waarop de speler eruit ging.
@@ -2366,6 +2377,37 @@ Hij koppelt alleen als het zeker is, en hergebruikt `createPersonBook`, dus tite
 - De bestanden hebben geen geboortedatum, dus er is er geen om te vergelijken met die van Wikidata.
   Een tweede run vraagt alleen nog naar de namen zonder persoon, en raakt geen rij met een andere bron dan `verslag`.
 - De tests vragen Wikipedia nooit: ze geven de stap eigen antwoorden (`titles` in `runOldSiteImport`) of gebruiken een webserver op deze computer.
+
+#### De stap linie en land
+
+De stap `linie en land` ([`src/old-site-person-facts.ts`](src/old-site-person-facts.ts)) geeft een persoon de linie en het land van zijn speler in de oude tabel (`line` en `country` in `players.json`, #1052).
+Hij vraagt niets en leest geen naam: de persoon is die van de rijen in `players` die de stap `spelers` voor de oude speler maakte of vond.
+
+- De linie komt op een persoon zonder linie, of met de linie van de selectie.
+  Het land komt op een persoon zonder land, of met het land van de selectie.
+  Beide krijgen de bron `old-site`.
+- Wat de redactie, Wikidata of (voor het land) de lijst van spelers zegt, blijft staan.
+  De import van de feeds vervangt een waarde van de oude fansite later door een sterkere bron, als die er komt.
+- Het land in het bestand is de code van de oude site, en de lijst `oldSiteCountryCodes` zegt welk land dat is: `CR` is Kroatië en `VS` de Verenigde Staten.
+  Een code die niet in de lijst staat, zoals `YU`, geeft geen land en een regel in het logboek.
+- Een oude speler zonder persoon slaat de stap over, en hij telt hem bij `skipped`, met de codes in een regel.
+  Dat geldt ook voor een oude speler wiens rijen twee personen hebben.
+- Het logboek zegt hoeveel linies en landen de stap invulde, en hoeveel personen daarna nog zonder zijn:
+
+  ```text
+  Old site, step linie en land: 0 new, 61 updated, 100 unchanged, 9 skipped
+    9 old players have no person, so nothing is filled in: …
+    the country of 1 old player is not one we know, so it is left empty: radoslav.samardzic (YU)
+    48 lines and 37 countries filled in from the old fansite
+    persons without a line: 81, without a country: 33
+  ```
+
+  De getallen in dit voorbeeld zijn verzonnen.
+
+- Een tweede run verandert niets.
+
+De andere twee bronnen van #1052, de lijst van spelers en de selectielijsten, vult de import van de feeds bij elke run (zie _De gegevens van de personen uit Wikidata_).
+`pnpm run import:status` toont per bron hoeveel personen er een linie en een land van hebben, en hoeveel zonder zijn.
 
 #### De stap selecties
 

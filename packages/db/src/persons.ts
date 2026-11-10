@@ -1,3 +1,4 @@
+import { isCountryCode } from '@fansite/shared/countries'
 import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
@@ -141,6 +142,21 @@ export const personTitleAliases: readonly PersonTitleAlias[] = [
   { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' },
 ]
 
+/** What `refreshPersonCountries` did: the persons that got a country, by its source. */
+export type PersonCountriesRefresh = {
+  /** From the first nationality of Wikidata. */
+  filled: number
+  /** From the first flag in the list of players. */
+  list: number
+  /** From the country that stands most often on the rows of the squad lists. */
+  squad: number
+  /** The first nationalities of Wikidata that are not in the list of countries. */
+  unknown: { id: string; label: string; persons: number }[]
+}
+
+/** A title of the list of players with the country of its first flag, or null. */
+export type PlayerListEntry = { country: null | string; title: string }
+
 /**
  * What the list of players of sc Heerenveen says about our persons (issue 1028). It is
  * information: nothing is made, changed or merged from it.
@@ -201,7 +217,7 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
     birthDate: 0,
     byLine: { aanvaller: 0, doelman: 0, middenvelder: 0, verdediger: 0 },
     countries: { list: 0, manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
-    lines: { manual: 0, squad: 0, wikidata: 0 },
+    lines: { manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
     nationality: 0,
     noCountry: 0,
     noLine: 0,
@@ -534,24 +550,34 @@ export async function playerListReport(
 }
 
 /**
- * Fills in the country of the persons (#1051) from their first nationality of Wikidata
- * (`person_nationalities`, position 0), through `codes`: the code of two letters by Q-number.
- * It looks at the persons without a country and at those whose country came from Wikidata, so
- * a country from another source, such as the one the editors set (`manual`), never changes. A
- * first nationality that is not in `codes` gives no country and no guess: the person keeps
- * what he has, and the item is in `unknown` with its label and how many persons have it. It
- * asks nothing, and a second run changes nothing.
+ * Fills in the country of the persons (#1051, #1052) from three sources, the strongest first.
+ * A stronger source replaces a weaker one and never the other way round; the country the
+ * editors set (`manual`) never changes, and the one of the old fansite (`old-site`, filled by
+ * the import of the old fansite) sits between the list and the squad.
+ *
+ * - Wikidata: the first nationality (`person_nationalities`, position 0), through `codes`: the
+ *   code of two letters by Q-number. A first nationality that is not in `codes` gives no
+ *   country and no guess: the item is in `unknown` with its label and how many persons have
+ *   it, and a weaker source may fill the person in.
+ * - The list of players: the country of the title of the person in `player_list_titles`. Only
+ *   the title of his article counts, never a name, so a namesake gets nothing.
+ * - The squad lists: the country that stands most often on his rows of `players`, and for a
+ *   tie the one of the latest season. Only for a person without a country, or with one of the
+ *   squad.
+ *
+ * It asks nothing, and a second run changes nothing.
  */
 export async function refreshPersonCountries(
   db: Pick<Database, 'select' | 'update'>,
   codes: ReadonlyMap<string, string>,
-): Promise<{ filled: number; unknown: { id: string; label: string; persons: number }[] }> {
+): Promise<PersonCountriesRefresh> {
   const rows = await db
     .select({
       country: persons.country,
       id: persons.id,
       itemId: personNationalities.itemId,
       label: wikidataItems.label,
+      source: persons.countrySource,
     })
     .from(persons)
     .innerJoin(
@@ -559,10 +585,10 @@ export async function refreshPersonCountries(
       and(eq(personNationalities.personId, persons.id), eq(personNationalities.position, 0)),
     )
     .innerJoin(wikidataItems, eq(wikidataItems.id, personNationalities.itemId))
-    .where(sql`${persons.countrySource} is null or ${persons.countrySource} = 'wikidata'`)
+    .where(sql`${persons.countrySource} is null or ${persons.countrySource} <> 'manual'`)
     .orderBy(asc(persons.id))
   const unknown = new Map<string, { id: string; label: string; persons: number }>()
-  let filled = 0
+  const report: PersonCountriesRefresh = { filled: 0, list: 0, squad: 0, unknown: [] }
 
   for (const row of rows) {
     const code = codes.get(row.itemId)
@@ -572,25 +598,74 @@ export async function refreshPersonCountries(
 
       item.persons++
       unknown.set(row.itemId, item)
-    } else if (row.country !== code) {
+    } else if (row.country !== code || row.source !== 'wikidata') {
       await db.update(persons).set({ country: code, countrySource: 'wikidata' }).where(eq(persons.id, row.id))
-      filled++
+      report.filled++
+    }
+  }
+  report.unknown = [...unknown.values()]
+
+  // A person whose first nationality is not in `codes` still has his old source here, so a
+  // country of Wikidata that was stored for him earlier stays: the list only fills what is
+  // empty or weaker than itself.
+  const listed = await db
+    .select({
+      country: persons.country,
+      id: persons.id,
+      listed: playerListTitles.country,
+      source: persons.countrySource,
+    })
+    .from(persons)
+    .innerJoin(playerListTitles, eq(playerListTitles.title, persons.wikipediaPage))
+    .where(
+      and(
+        isNotNull(playerListTitles.country),
+        sql`(${persons.countrySource} is null or ${persons.countrySource} in ('list', 'old-site', 'squad'))`,
+      ),
+    )
+    .orderBy(asc(persons.id))
+
+  for (const row of listed) {
+    if (row.listed !== null && isCountryCode(row.listed) && (row.country !== row.listed || row.source !== 'list')) {
+      await db.update(persons).set({ country: row.listed, countrySource: 'list' }).where(eq(persons.id, row.id))
+      report.list++
     }
   }
 
-  return { filled, unknown: [...unknown.values()] }
+  const weakest = await db
+    .select({ country: persons.country, id: persons.id })
+    .from(persons)
+    .where(sql`${persons.countrySource} is null or ${persons.countrySource} = 'squad'`)
+    .orderBy(asc(persons.id))
+  const fromSquad = await squadCountries(
+    db,
+    weakest.map((person) => person.id),
+  )
+
+  for (const person of weakest) {
+    const country = fromSquad.get(person.id)
+
+    if (country !== undefined && country !== person.country) {
+      await db.update(persons).set({ country, countrySource: 'squad' }).where(eq(persons.id, person.id))
+      report.squad++
+    }
+  }
+
+  return report
 }
 
 /**
  * Works out the line of the persons again (#1051) who have none, or whose line came from the
- * squad lists: a line the editors or our list set (`manual`) and a line from Wikidata stay as
- * they are. The line is the first position Wikidata gave the person (`person_positions`) that
- * `positionLines` knows, and else the one of his rows of `players` (`squadLines`), also when
- * the editors set the position of such a row. So a position that is filled in later gives the
- * person his line at the next import, and a line the editors took away is filled in again. A
- * person whose rows have no position any more loses the line of the squad. It asks nothing,
- * and a second run changes nothing. Returns how many persons got a line, by its source, and
- * how many lost theirs.
+ * squad lists or the old fansite: a line the editors or our list set (`manual`) and a line
+ * from Wikidata stay as they are. The line is the first position Wikidata gave the person
+ * (`person_positions`) that `positionLines` knows, and else the one of his rows of `players`
+ * (`squadLines`), also when the editors set the position of such a row. A line of the old
+ * fansite (`old-site`, #1052) is weaker than Wikidata and stronger than the squad: it makes
+ * way for a line of Wikidata and stays otherwise. So a position that is filled in later gives
+ * the person his line at the next import, and a line the editors took away is filled in
+ * again. A person whose rows have no position any more loses the line of the squad. It asks
+ * nothing, and a second run changes nothing. Returns how many persons got a line, by its
+ * source, and how many lost theirs.
  */
 export async function refreshPersonLines(
   db: Pick<Database, 'select' | 'update'>,
@@ -600,7 +675,7 @@ export async function refreshPersonLines(
   const people = await db
     .select({ id: persons.id, line: persons.line, lineSource: persons.lineSource })
     .from(persons)
-    .where(sql`${persons.lineSource} is null or ${persons.lineSource} = 'squad'`)
+    .where(sql`${persons.lineSource} is null or ${persons.lineSource} in ('squad', 'old-site')`)
     .orderBy(asc(persons.id))
 
   if (people.length === 0) {
@@ -625,6 +700,11 @@ export async function refreshPersonLines(
 
   for (const person of people) {
     const wikidata = fromWikidata.get(person.id)
+
+    if (wikidata === undefined && person.lineSource === 'old-site') {
+      continue
+    }
+
     const line = wikidata ?? fromSquad.get(person.id) ?? null
     const lineSource = line === null ? null : wikidata === undefined ? ('squad' as const) : ('wikidata' as const)
 
@@ -725,6 +805,53 @@ export async function similarPersons(
   return [...groups.values()]
     .filter((titles) => titles.length > 1)
     .filter((titles) => !differ.some((names) => titles.every((title) => names.includes(title))))
+}
+
+/**
+ * The country that the squad lists give a person (#1052): the one that stands most often on
+ * his rows of `players`, and for a tie the one of the latest season. A country that is not in
+ * the list of countries does not count, and a person with no row with a country is not in the
+ * map.
+ */
+export async function squadCountries(
+  db: Pick<Database, 'select'>,
+  personIds: readonly number[],
+): Promise<Map<number, string>> {
+  const countries = new Map<number, string>()
+
+  if (personIds.length === 0) {
+    return countries
+  }
+
+  const rows = await db
+    .select({
+      country: players.country,
+      n: sql<number>`count(*)`,
+      personId: players.personId,
+      season: sql<string>`max(${players.season})`,
+    })
+    .from(players)
+    .where(and(inArray(players.personId, [...personIds]), isNotNull(players.country)))
+    .groupBy(players.personId, players.country)
+  const best = new Map<number, { count: number; country: string; season: string }>()
+
+  for (const row of rows) {
+    if (row.personId === null || row.country === null || !isCountryCode(row.country)) {
+      continue
+    }
+
+    const count = Number(row.n)
+    const current = best.get(row.personId)
+
+    if (current === undefined || count > current.count || (count === current.count && row.season > current.season)) {
+      best.set(row.personId, { count, country: row.country, season: row.season })
+    }
+  }
+  for (const [id, { country }] of best) {
+    countries.set(id, country)
+  }
+
+  return countries
 }
 
 /**
@@ -860,19 +987,19 @@ export async function storePersonNames(
 }
 
 /**
- * Keeps the titles of the list as the import read them: a title that is new is added, one that
- * is gone is removed, and the time of the read goes on every title. A second read of the same
- * page changes no title.
+ * Keeps the titles of the list as the import read them, each with the country of its first
+ * flag (#1052): a title that is new is added, one that is gone is removed, and the time of the
+ * read and the country go on every title. A second read of the same page changes no title.
  */
 export async function storePlayerList(
   db: Pick<Database, 'delete' | 'insert' | 'select'>,
-  titles: readonly string[],
+  entries: readonly PlayerListEntry[],
   now: Date,
 ): Promise<{ added: number; removed: number }> {
   const known = new Set((await db.select().from(playerListTitles)).map((row) => row.title))
-  const wanted = new Set(titles)
+  const wanted = new Map(entries.map((entry) => [entry.title, entry.country] as const))
   const gone = [...known].filter((title) => !wanted.has(title))
-  const added = [...wanted].filter((title) => !known.has(title))
+  const added = [...wanted.keys()].filter((title) => !known.has(title))
 
   if (gone.length > 0) {
     await db.delete(playerListTitles).where(inArray(playerListTitles.title, gone))
@@ -880,8 +1007,8 @@ export async function storePlayerList(
   if (wanted.size > 0) {
     await db
       .insert(playerListTitles)
-      .values([...wanted].map((title) => ({ readAt: now, title })))
-      .onDuplicateKeyUpdate({ set: { readAt: now } })
+      .values([...wanted].map(([title, country]) => ({ country, readAt: now, title })))
+      .onDuplicateKeyUpdate({ set: { country: sql`values(\`country\`)`, readAt: now } })
   }
 
   return { added: added.length, removed: gone.length }

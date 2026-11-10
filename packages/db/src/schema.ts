@@ -791,17 +791,20 @@ export const playerPositions = ['doelman', 'verdediger', 'middenvelder', 'aanval
 export type PlayerPosition = (typeof playerPositions)[number]
 
 /**
- * Where the line of a person comes from: Wikidata, the squad lists of the seasons, or our own
- * list.
+ * Where the line of a person comes from, from strong to weak (#1052): the editors or our own
+ * list (`manual`), Wikidata, the table of players of the old fansite (`old-site`) and the squad
+ * lists of the seasons. A stronger source replaces a weaker one, never the other way round.
  */
-export const personLineSources = ['wikidata', 'squad', 'manual'] as const
+export const personLineSources = ['wikidata', 'squad', 'manual', 'old-site'] as const
 
 export type PersonLineSource = (typeof personLineSources)[number]
 
 /**
- * Where the country of a person comes from (#1051), from strong to weak: the editors in the
- * admin (`manual`), Wikidata, the list of players, the squad lists and the old fansite. The
- * importer fills `wikidata`; the last three are for the sources of #1052.
+ * Where the country of a person comes from (#1051), from strong to weak (#1052): the editors
+ * in the admin (`manual`), Wikidata, the flag in the list of players (`list`), the table of
+ * players of the old fansite (`old-site`) and the squad lists (`squad`). A stronger source
+ * replaces a weaker one, never the other way round. The order of the values in the column is
+ * that of #1051 and says nothing.
  */
 export const personCountrySources = ['manual', 'wikidata', 'list', 'squad', 'old-site'] as const
 
@@ -1439,9 +1442,11 @@ export type WikipediaPage = typeof wikipediaPages.$inferSelect
  * Dutch Wikipedia, as the last read of the import left them (issue 1028). The list has no
  * seasons, so it only checks names: `playerListReport` compares it with `persons`, and
  * nothing here makes a player or changes a name. `read_at` is the time of the last read that
- * found the title.
+ * found the title. `country` is the code of two letters of the first flag on the line of the
+ * title (#1052), or empty: `refreshPersonCountries` gives it to the person of that title.
  */
 export const playerListTitles = mysqlTable('player_list_titles', {
+  country: char('country', { length: 2 }),
   title: articleTitle('title').primaryKey(),
   readAt: datetime('read_at').notNull(),
 })

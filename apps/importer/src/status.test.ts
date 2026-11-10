@@ -123,9 +123,9 @@ describe('the overview', () => {
         'Player list: not read yet',
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
-        '  line: 0 from Wikidata, 0 from the squad, 0 set by hand, 0 without',
+        '  line: 0 from Wikidata, 0 from the old fansite, 0 from the squad, 0 set by hand, 0 without',
         '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
-        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the squad, 0 from the old fansite, 0 without',
+        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
         'Formations of match reports: no report has a line-up yet',
       ],
     })
@@ -202,9 +202,9 @@ describe('the overview', () => {
         'Player list: not read yet',
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
-        '  line: 0 from Wikidata, 0 from the squad, 0 set by hand, 0 without',
+        '  line: 0 from Wikidata, 0 from the old fansite, 0 from the squad, 0 set by hand, 0 without',
         '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
-        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the squad, 0 from the old fansite, 0 without',
+        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
         'Formations of match reports: no report has a line-up yet',
       ],
     })
@@ -286,13 +286,17 @@ describe('the overview', () => {
       "UPDATE persons SET country = 'NL', country_source = 'wikidata' WHERE wikipedia_page = 'A'",
     )
     await database.pool.query("UPDATE persons SET country = 'BE', country_source = 'manual' WHERE wikipedia_page = 'B'")
+    // The old fansite (#1052) is a source of its own, for the line and for the country.
+    await database.pool.query(
+      "UPDATE persons SET line = 'aanvaller', line_source = 'old-site', country = 'DK', country_source = 'old-site' WHERE wikipedia_page = 'C'",
+    )
 
     expect((await statusAt(start)).lines.slice(-6, -1)).toEqual([
       'Persons from Wikidata: 2 of 3 read, 1 to go',
       '  with a Q-number: 1, with a birth date: 1, with a nationality: 1',
-      '  line: 1 from Wikidata, 0 from the squad, 0 set by hand, 2 without',
-      '  persons per line: 1 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
-      '  country: 1 from Wikidata, 1 set by hand, 0 from the list of players, 0 from the squad, 0 from the old fansite, 1 without',
+      '  line: 1 from Wikidata, 1 from the old fansite, 0 from the squad, 0 set by hand, 1 without',
+      '  persons per line: 1 doelman, 0 verdediger, 0 middenvelder, 1 aanvaller',
+      '  country: 1 from Wikidata, 1 set by hand, 0 from the list of players, 1 from the old fansite, 0 from the squad, 0 without',
     ])
   })
 
@@ -319,7 +323,7 @@ describe('the overview', () => {
     )
 
     expect((await statusAt(start)).lines.slice(-4)).toEqual([
-      '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the squad, 0 from the old fansite, 0 without',
+      '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
       'Formations of match reports, by season, of the reports with a line-up:',
       '  2004/05: 2 with a line-up, 2 with a formation for us, 1 for the opponent',
       '  2003/04: 1 with a line-up, 0 with a formation for us, 0 for the opponent',

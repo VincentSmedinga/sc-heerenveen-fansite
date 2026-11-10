@@ -26,6 +26,7 @@ import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteLineups } from './old-site-lineups.ts'
 import { importOldSiteMatches } from './old-site-matches.ts'
+import { importOldSitePersonFacts } from './old-site-person-facts.ts'
 import { importOldSitePersons, type TitleLookup, wikipediaTitleLookup } from './old-site-persons.ts'
 import { importOldSitePlayers } from './old-site-players.ts'
 import { robotsStoreFor } from './robots-store.ts'
@@ -52,6 +53,7 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'doelpunten', run: (db, data) => importOldSiteGoals(db, data.matches, data.players) },
   { name: 'opstellingen', run: (db, data) => importOldSiteLineups(db, data.matches, data.players) },
   { name: 'personen', run: (db, _data, context) => importOldSitePersons(db, context.titles) },
+  { name: 'linie en land', run: (db, data) => importOldSitePersonFacts(db, data.matches, data.players) },
   { name: 'selecties', run: (db) => importOldSiteCompleteness(db, new Date()) },
 ]
 

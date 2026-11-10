@@ -67,6 +67,8 @@ export type PlayerRow = {
   code: string
   /** 1 doelman, 2 verdediger, 3 middenvelder, 4 aanvaller, 0 unknown. */
   linie: number
+  /** The country in two letters, in the codes of the old site; empty when it is not known. */
+  nationaliteit: string
   tussenvoegsel: null | string
   voornaam: string
 }
@@ -220,6 +222,13 @@ function lineupEntry(row: LineupRow): OldSiteLineupEntry {
 
 const linesByNumber: readonly (null | OldSiteLine)[] = [null, 'doelman', 'verdediger', 'middenvelder', 'aanvaller']
 
+/** The code of `speler.nationaliteit` in capitals, and null for anything but two letters. */
+function countryOf(nationaliteit: string): null | string {
+  const code = nationaliteit.trim().toUpperCase()
+
+  return /^[A-Z]{2}$/u.test(code) ? code : null
+}
+
 /** The line of `speler.linie`: 1 to 4, and null for 0 (not known) or anything else. */
 function lineOf(linie: number): null | OldSiteLine {
   return linesByNumber[linie] ?? null
@@ -335,6 +344,7 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
       ? [
           {
             code,
+            country: countryOf(player.nationaliteit),
             firstName: player.voornaam.trim(),
             infix: text(player.tussenvoegsel),
             lastName: player.achternaam.trim(),
