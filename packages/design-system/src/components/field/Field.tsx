@@ -68,7 +68,10 @@ export const Field = ({
 }: FieldProps) => {
   const hintId = `${id}-hint`
   const errorId = `${id}-error`
-  const describedBy = [hint ? hintId : undefined, error ? errorId : undefined].filter(Boolean).join(' ')
+  const child = Children.only(children)
+  // A description of the control itself, such as a hint shared by a table's fields, stays.
+  const own = (child.props as FieldControlProps)['aria-describedby']
+  const describedBy = [own, hint ? hintId : undefined, error ? errorId : undefined].filter(Boolean).join(' ')
 
   return (
     <div className={classNames('hf-field', className)} {...props}>
@@ -93,7 +96,7 @@ export const Field = ({
           </Text>
         ) : null}
       </div>
-      {cloneElement(Children.only(children), {
+      {cloneElement(child, {
         'aria-describedby': describedBy || undefined,
         'aria-invalid': error ? true : undefined,
         id,

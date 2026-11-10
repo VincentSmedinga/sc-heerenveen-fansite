@@ -243,7 +243,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     values[side].speler.forEach((row, index) => {
       const number = index + 1
 
-      if (isUntouchedRow('speler', row)) {
+      if (isUntouchedRow('speler', row, index)) {
         return
       }
 
@@ -445,8 +445,8 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
         return
       }
 
-      const out = point('wissel', side, number, 'eruit', row.eruit ?? '', side, true)
       const into = point('wissel', side, number, 'erin', row.erin ?? '', side, true)
+      const out = point('wissel', side, number, 'eruit', row.eruit ?? '', side, true)
       const time = moment('wissel', side, number, row)
 
       if (out !== undefined && into !== undefined && time !== undefined) {

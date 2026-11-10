@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { emptyRow, type ReportValues, type Row } from './report-fields'
+import { emptyRow, playersOnPitch, type ReportValues, type Row } from './report-fields'
 import { report as baseReport, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, errorOrder, type ReportMatch } from './report-form'
 
@@ -58,7 +58,7 @@ describe('checkReportForm', () => {
   })
 
   it('leaves out the rows that nobody touched, and keeps the numbers of the rows for the errors', () => {
-    const rows = [...report().wij.speler, emptyRow('speler'), { ...emptyRow('speler'), rugnummer: '77' }]
+    const rows = [...report().wij.speler, emptyRow('speler', 14), { ...emptyRow('speler', 15), rugnummer: '77' }]
     const checked = checkReportForm(report({ wij: { speler: rows } }), context)
 
     expect(checked.plan).toBeUndefined()
@@ -363,6 +363,54 @@ describe('checkReportForm', () => {
         'wissel-wij-1-erin',
         /Speler 2 komt binnen in minuut 60, maar zat niet op de bank/u,
       )
+    })
+
+    it('says the same as the list Eruit about who is on the pitch, also after a red card', () => {
+      const red = (soort: string, minuut: string) => ({ ...emptyRow('kaart'), minuut, soort, speler: '11' })
+      const cases: [string, ReportValues][] = [
+        ['the line-up', report({ wij: { wissel: [sub({ erin: '12', eruit: '5', minuut: '60' })] } })],
+        [
+          'a player who has left',
+          report({
+            wij: {
+              wissel: [sub({ erin: '12', eruit: '11', minuut: '60' }), sub({ erin: '13', eruit: '11', minuut: '70' })],
+            },
+          }),
+        ],
+        [
+          'a red card',
+          report({ wij: { kaart: [red('rood', '50')], wissel: [sub({ erin: '12', eruit: '11', minuut: '60' })] } }),
+        ],
+        [
+          'a yellow-red card',
+          report({
+            wij: { kaart: [red('geel-rood', '50')], wissel: [sub({ erin: '12', eruit: '11', minuut: '60' })] },
+          }),
+        ],
+        [
+          'a red card after the substitution',
+          report({ wij: { kaart: [red('rood', '70')], wissel: [sub({ erin: '12', eruit: '11', minuut: '60' })] } }),
+        ],
+        [
+          'a player from the bench',
+          report({
+            wij: {
+              wissel: [sub({ erin: '12', eruit: '11', minuut: '60' }), sub({ erin: '13', eruit: '12', minuut: '70' })],
+            },
+          }),
+        ],
+      ]
+
+      for (const [name, values] of cases) {
+        const checked = checkReportForm(values, context)
+
+        values.wij.wissel.forEach((row, index) => {
+          const message = checked.errors[`wissel-wij-${index + 1}-eruit`] ?? ''
+          const refused = message.includes('niet op het veld') || message.includes('twee keer eruit')
+
+          expect(playersOnPitch(values, 'wij', index).has(row.eruit ?? ''), `${name}, row ${index + 1}`).toBe(!refused)
+        })
+      }
     })
 
     it('does not store a player who goes off or comes on twice', () => {
