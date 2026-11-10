@@ -124,9 +124,13 @@ export async function pullAcceptanceCopy(
     remote.kill()
     remote.stdout.destroy()
 
+    // `connectToServer` wraps the error of the driver, which has the code.
+    const cause = error instanceof Error ? error.cause : undefined
+    const code = cause instanceof Error && 'code' in cause ? String(cause.code) : 'unknown error'
+
     throw new Error(
-      'Can not connect to the database server of DATABASE_URL on this computer. ' +
-        'Start it with `docker compose up -d --wait` and try again.',
+      `Can not connect to the database server of DATABASE_URL on this computer (${code}). ` +
+        'Is it running? Start it with `docker compose up -d --wait`. Otherwise check DATABASE_URL.',
       { cause: error },
     )
   })

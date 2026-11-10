@@ -296,7 +296,8 @@ describe('pullAcceptanceCopy', () => {
     await expect(
       pullAcceptanceCopy(env({ DATABASE_URL: 'mysql://root@127.0.0.1:1/fansite' }), now, { database, ssh: fakeSsh() }),
     ).rejects.toThrow(
-      'Can not connect to the database server of DATABASE_URL on this computer. Start it with `docker compose up -d --wait` and try again.',
+      'Can not connect to the database server of DATABASE_URL on this computer (ECONNREFUSED). ' +
+        'Is it running? Start it with `docker compose up -d --wait`. Otherwise check DATABASE_URL.',
     )
   })
 
