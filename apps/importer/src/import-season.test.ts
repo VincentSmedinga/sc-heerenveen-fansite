@@ -901,7 +901,7 @@ describe('a season that is over, read again', () => {
     ])
   })
 
-  it('takes the change over after seven days of the same page, when the command is run again', async () => {
+  it('keeps the change waiting after seven days of the same page, when the command is run again (#1025)', async () => {
     await runCommand(await serve(), past)
 
     const server = await serve({ last: edited })
@@ -914,12 +914,12 @@ describe('a season that is over, read again', () => {
       })
 
     await run(now)
-    await run(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
+    await run(new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000))
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
-      { kickoffAt: new Date('2025-08-09T18:30:00Z') },
+      { kickoffAt: new Date('2025-08-09T18:00:00Z') },
     ])
     expect(await database.db.select().from(matchChanges)).toMatchObject([
-      { resolution: 'stood', status: 'accepted', timesSeen: 1 },
+      { decidedAt: null, resolution: null, status: 'pending', timesSeen: 2 },
     ])
   })
 })
@@ -968,7 +968,7 @@ describe('the command that decides the changes', () => {
     expect(nameChange({ ...(change as MatchChange), round: 'Eerste\u001b[31m ronde' })).not.toContain('\u001b')
   })
 
-  it('lists the changes that wait, with the old and the new value and when they are taken over', async () => {
+  it('lists the changes that wait, with the old and the new value and that they wait for a person', async () => {
     expect(await decide()).toEqual({ code: 0, lines: ['No changes wait.'] })
 
     await held()
@@ -982,7 +982,7 @@ describe('the command that decides the changes', () => {
       expect.stringContaining('  now: home '),
       expect.stringContaining('  Wikipedia: home '),
       expect.stringMatching(
-        /^ {2}first seen .* UTC, last seen .* UTC, seen 1 time; taken over from .* UTC if it stays$/u,
+        /^ {2}first seen .* UTC, last seen .* UTC, seen 1 time; the season is over, so it waits until a person decides$/u,
       ),
     ])
   })

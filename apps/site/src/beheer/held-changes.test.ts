@@ -114,10 +114,18 @@ describe('describeWithoutDecision', () => {
     expect(describeWithoutDecision({ firstSeenAt, season: '2013/14' }, new Date('2026-11-05T10:00:00Z'))).toEqual({
       kind: 'stays',
     })
-    // The season turns on 1 July.
+    // The season turns on 1 July, also for the weekly read of July and August (#1025).
     expect(describeWithoutDecision({ firstSeenAt, season: '2025/26' }, new Date('2026-07-02T10:00:00Z'))).toEqual({
       kind: 'stays',
     })
+  })
+
+  it('says that nothing happens when the seven days end after the last day of the season', () => {
+    const june = new Date('2027-06-25T10:00:00Z')
+
+    expect(describeWithoutDecision({ firstSeenAt: june, season: '2026/27' }, new Date('2027-06-26T10:00:00Z'))).toEqual(
+      { kind: 'stays' },
+    )
   })
 })
 

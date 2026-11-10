@@ -2594,6 +2594,9 @@
   Daar werken de zeven dagen dus weer, en een wijziging die een week blijft staan neemt de import over.
   Voor elk ouder seizoen, en vanaf 1 september ook voor dit seizoen, blijft dit besluit gelden.
   Het scherm zegt in die twee maanden nog dat er zonder besluit niets verandert (`describeWithoutDecision`); dat is nog niet aangepast.
+- **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ in `importer.md` (10 november 2026): de lezing van elke week in juli en augustus neemt een wijziging die wacht niet meer over.
+  Dit besluit geldt dus weer voor elk seizoen dat voorbij is, en het scherm klopt ook in die twee maanden.
+  Het scherm zegt nu "Het seizoen is voorbij, dus de import neemt dit niet vanzelf over", want de import leest het seizoen in die maanden wel.
 
 ## Het scherm en het commando gebruiken dezelfde code voor het besluit, en het scherm toont wat de import bewaarde
 

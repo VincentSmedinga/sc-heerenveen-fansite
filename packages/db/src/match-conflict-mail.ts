@@ -12,7 +12,7 @@ import type { Database } from './client.ts'
 import type { Match, MatchChange } from './schema.ts'
 
 import { describeProblem, environmentNames, formatDateTime } from './alerts.ts'
-import { conflictStandsMs, partLabels, quietReasons } from './match-conflicts.ts'
+import { partLabels, quietReasons, takenOverAt } from './match-conflicts.ts'
 import { adminUsers, matchChanges, matches } from './schema.ts'
 
 /** How a run mails about the differences. A test gives its own mailer: nothing real is sent. */
@@ -61,10 +61,13 @@ export async function mailConflicts(db: Pick<Database, 'select' | 'update'>, opt
     const now = (options.clock ?? (() => new Date()))()
 
     for (const { change, kind, match } of waiting) {
-      const mail = compose(kind, change, match, {
-        address: siteOrigins[SITE_ENV],
-        environment: environmentNames[SITE_ENV],
-      })
+      const mail = compose(
+        kind,
+        change,
+        match,
+        { address: siteOrigins[SITE_ENV], environment: environmentNames[SITE_ENV] },
+        now,
+      )
       let sent = 0
 
       for (const to of recipients) {
@@ -88,13 +91,20 @@ export async function mailConflicts(db: Pick<Database, 'select' | 'update'>, opt
   }
 }
 
-function compose(kind: Kind, change: MatchChange, match: Match, context: { address: string; environment: string }) {
+function compose(
+  kind: Kind,
+  change: MatchChange,
+  match: Match,
+  context: { address: string; environment: string },
+  now: Date,
+) {
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
   const part = change.part === null ? '' : partLabels[change.part]
   const link = `${context.address}/beheer/wedstrijden/${match.id}`
   const values = [`Onze invoer: ${change.oldValue}`, `Wikipedia: ${change.newValue ?? 'niets'}`]
   const footer = ['', `Omgeving: ${context.environment} (${context.address}).`, '']
+  const takenOver = takenOverAt(change, now)
 
   if (kind === 'taken-over') {
     return {
@@ -119,7 +129,9 @@ function compose(kind: Kind, change: MatchChange, match: Match, context: { addre
       '',
       'Onze invoer blijft staan tot iemand beslist.',
       `Beslis op de pagina van de wedstrijd: ${link}`,
-      `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(new Date(change.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia die dan nog zegt.`,
+      takenOver === undefined
+        ? 'Het seizoen is voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.'
+        : `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(takenOver)}, als Wikipedia die dan nog zegt.`,
       ...footer,
     ].join('\n'),
   }

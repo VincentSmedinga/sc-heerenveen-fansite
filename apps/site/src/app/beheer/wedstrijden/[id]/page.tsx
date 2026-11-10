@@ -180,7 +180,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           </Notice>
         )}
         {differences.map((difference) => {
-          const words = differenceWords(difference, match)
+          const words = differenceWords(difference, match, now)
 
           return (
             <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
@@ -255,7 +255,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
                 {formatVersionTime(change.lastSeenAt)}.{' '}
                 {outcome.kind === 'taken-over'
                   ? `Zonder besluit neemt de import dit over op ${formatVersionTime(outcome.at)}, als Wikipedia dan nog hetzelfde zegt.`
-                  : 'De import leest dit seizoen niet meer. Zonder besluit blijft de huidige waarde staan.'}
+                  : 'Het seizoen is voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.'}
               </Text>
               {page === undefined ? null : (
                 <Text>

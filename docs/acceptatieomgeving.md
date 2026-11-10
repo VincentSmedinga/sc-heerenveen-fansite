@@ -158,14 +158,14 @@ Je hoeft er niets voor in te stellen: het gebeurt in dezelfde run als het lopend
   Draai je in die tijd zelf _Import season_ voor dat seizoen, dan leest cron het een uur later nog een keer en wacht daarna weer een week.
 - Het logboek `~/fansite-import.log` krijgt dan regels zoals `Matches 2026/27: 0 new, 0 updated, 38 unchanged, ...` en `Squad 2026/27: 0 new, 0 updated, 27 unchanged, 0 left the squad`.
   In de weken ertussen staat er niets over dat seizoen.
-- Een wijziging die iets overschrijft, wacht eerst zeven dagen (zie _Hoe betrouwbaar een wijziging is_ in de [README van de importer](../apps/importer/README.md)).
-  De lezing van een week later neemt haar over als Wikipedia dan nog hetzelfde zegt.
+- Een wijziging die iets overschrijft, wacht tot iemand beslist, in het beheer of met `pnpm run import:changes` (zie _Hoe betrouwbaar een wijziging is_ in de [README van de importer](../apps/importer/README.md)).
+  De import neemt haar in een seizoen dat voorbij is niet zelf over.
   Wat leeg was, wordt meteen ingevuld.
 - Faalt de lezing, dan is dat een waarschuwing in het logboek: `Matches 2026/27: warning, nothing changed and the last good copy stays: ...`.
   De run van het lopende seizoen gaat door, de exitcode verandert niet en er komt geen mail.
   De import probeert het een week later opnieuw.
   Vraagt Wikipedia om te wachten, dan probeert hij het na die tijd opnieuw.
-- De pauze is vijf minuten langer dan een week, zodat een wijziging die wacht altijd zeven dagen heeft gestaan.
+- De pauze is vijf minuten langer dan een week.
   De lezing schuift daardoor elke week één run van cron op.
 - Vanaf 1 september leest cron dat seizoen niet meer.
   Een latere verbetering haal je binnen met _Import season_ en _Import squads_.

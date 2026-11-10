@@ -1384,6 +1384,7 @@ Elke run die dezelfde nieuwe waarde op de pagina ziet, telt de wijziging mee (`t
 Daarna gebeurt een van deze dingen:
 
 - **Overgenomen** na zeven dagen van dezelfde waarde (`resolution` is `stood`), of als iemand hem accepteert (`person`).
+  De zeven dagen gelden alleen in het lopende seizoen: in een seizoen dat voorbij is wacht een wijziging tot iemand beslist (`takenOverAt`).
   De uitslag, de doelpunten of de wedstrijd zelf wordt dan zoals de pagina zegt, en `result_set_at` wordt dat moment.
 - **Afgewezen** als Wikipedia de oude waarde terugzet (`reverted`), als Wikipedia er weer iets anders van maakt (`replaced`: de zeven dagen beginnen dan opnieuw met de nieuwe waarde), of als iemand hem afwijst (`person`).
   Een wijziging die iemand afwees, komt niet terug zolang de pagina dezelfde waarde toont.
@@ -1426,6 +1427,7 @@ Matches 2026/27: warning, nothing changed and the last good copy stays: 7 matche
 De pagina blijft vastgehouden zolang die wijzigingen wachten.
 Elke run meldt dat opnieuw, en de mail over een import die blijft falen komt zoals bij elke fout.
 Zijn de wijzigingen besloten (`accept` of `reject`) of zeven dagen oud, dan gaat de rest van de pagina door.
+In een seizoen dat voorbij is tellen de zeven dagen niet, dus daar gaat de pagina pas door als iemand heeft beslist.
 Het invullen van wat leeg was telt niet mee: een uitslag die nieuw is, doelpuntenmakers erbij of een aanvangstijd die voor het eerst komt.
 Zo wacht de aankondiging van elf aanvangstijden in één keer niet.
 
@@ -1452,8 +1454,9 @@ Zulke wedstrijden zijn de verzonnen wedstrijden van de seed, en de eerste echte 
 
 Een afgelopen seizoen verandert niet meer, dus een wijziging daarin die iets overschrijft is verdacht.
 Wat leeg was invullen mag wel, zoals de stand na 90 minuten of doelpuntenmakers bij een wedstrijd die er geen had, en een nieuwe wedstrijd ook.
-De uurlijkse import leest een afgelopen seizoen niet, dus een wijziging daarin wacht tot iemand haar besluit, of tot `pnpm run import:season` het seizoen na zeven dagen weer leest en de pagina nog dezelfde waarde toont.
-In juli en augustus doet de uurlijkse import dat zelf voor het seizoen dat net voorbij is: de lezing van een week later neemt de wijziging over (zie _Het seizoen dat net voorbij is_).
+Een wijziging daarin wacht tot iemand haar besluit, in het beheer of met `pnpm run import:changes`.
+De import neemt haar nooit zelf over, ook niet na zeven dagen: niet met `pnpm run import:season` en niet met de lezing van elke week in juli en augustus (zie _Het seizoen dat net voorbij is_).
+Zet Wikipedia de oude waarde terug, dan vervalt ze.
 
 #### De stand en de selectie
 
@@ -1514,6 +1517,8 @@ Wat daarna gebeurt:
   `accept` neemt Wikipedia over voor dat onderdeel, `reject` houdt de invoer.
   Beide gebruiken `decideConflict` uit `packages/db/src/match-conflicts.ts`, en schrijven `match.take-over` of `match.keep` in het logboek, het commando zonder account.
 - **Beslist niemand** en staat dezelfde waarde zeven dagen op Wikipedia (de regel van _Een verdachte wijziging wacht_), dan neemt de import het onderdeel over (`resolution` is `stood`, `match.take-over` zonder account) en mailen de beheerders daarover.
+  Dat doet hij alleen in het lopende seizoen.
+  In een seizoen dat voorbij is blijft de invoer staan tot iemand beslist, en de mail en het beheer zeggen dat.
 - **Zet Wikipedia de waarde van de redactie terug**, dan vervalt de afwijking (`reverted`) en staat dat in het logboek (`match.caught-up`).
   Maakt Wikipedia er iets anders van, dan is de oude afwijking `replaced` en begint een nieuwe.
 
@@ -1713,7 +1718,8 @@ Zo komt een late verbetering op Wikipedia binnen zonder dat iemand `import:seaso
 - De pauze staat in `match_imports.retry_at` en `squad_imports.retry_at` van dat seizoen.
   Is die niet voorbij, dan vraagt de import niets en schrijft hij geen regel.
   Na een lezing die is opgeslagen of die faalt, zet hij de pauze op een week en vijf minuten (`rereadEveryMs`).
-  Zo heeft een wijziging die wacht bij de volgende lezing altijd zeven dagen gestaan, en schuift de lezing elke week één run van cron op.
+  De lezing schuift zo elke week één run van cron op.
+  Een wijziging die wacht neemt deze lezing niet over: dit seizoen is voorbij, dus ze wacht tot iemand beslist.
   Vraagt Wikipedia om te wachten of weigert robots.txt, dan blijft de kortere pauze van `healthAfter` staan, want er is niets gelezen.
 - De opdrachten `import:season` en `import:squad` kijken niet naar de pauze en zetten haar op een uur min een minuut.
   Na zo'n opdracht leest de uurlijkse import het seizoen dus een uur later nog eens, en wacht dan weer een week.

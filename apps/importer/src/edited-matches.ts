@@ -12,7 +12,8 @@
 //   that waits in `match_changes` (once, per part), and the beheerders are mailed about it
 //   (`mailConflicts`). A person decides in the admin or with `pnpm run import:changes`; when
 //   nobody does and Wikipedia says the same for seven days, the importer takes Wikipedia over
-//   and mails again. When Wikipedia puts the value of the editors back, the change lapses.
+//   and mails again, in the season that is on only (`hasStood`). When Wikipedia puts the value
+//   of the editors back, the change lapses.
 //
 // The parts without a marker follow Wikipedia as for any match, without the judgement of
 // `classify-change.ts`.
@@ -170,7 +171,7 @@ export async function importEditedMatch(
 
       if (pending?.newValue === found.wikipedia) {
         // The difference that waits is still on the page: see it again, and take Wikipedia over
-        // when it has stood for seven days and nobody decided.
+        // when it has stood for seven days in the season that is on and nobody decided.
         await db.update(matchChanges).set({ proposal }).where(eq(matchChanges.id, pending.id))
         await noteSeen(db, pending, now)
 

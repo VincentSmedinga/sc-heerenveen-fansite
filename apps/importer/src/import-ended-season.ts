@@ -19,11 +19,11 @@ import { formatSquadReport, importSquad } from './import-squad.ts'
 import { describeError } from './text.ts'
 
 /**
- * The pause between two reads of the season that has ended: a week and five minutes. A change
- * that overwrites something is taken over once it has stood for seven days (`hasStood`), and
- * cron starts each run a moment earlier or later. With a pause of a week or less, the next read
- * could come seconds before those seven days are over, and the change would wait a week more.
- * So the read moves on by one run of cron each week.
+ * The pause between two reads of the season that has ended: a week and five minutes, so the
+ * read moves on by one run of cron each week. The five minutes were there for the change that
+ * was taken over after seven days: with a pause of a week or less, the next read could come
+ * seconds before those days were over. Since issue 1025 a change of a season that is over is
+ * never taken over without a person (`hasStood`), so the margin decides nothing any more.
  */
 export const rereadEveryMs = 7 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
 
