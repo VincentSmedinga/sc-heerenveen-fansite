@@ -1,7 +1,7 @@
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, sources, squadCompleteness } from '@fansite/db/schema'
+import { feeds, persons, players, sources, squadCompleteness } from '@fansite/db/schema'
 import { seasonCoverageColumns } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -203,6 +203,28 @@ describe('the overview', () => {
         'Formations of match reports: no report has a line-up yet',
       ],
     })
+  })
+
+  it('names a player twice in a season that was not merged, and says nothing without one', async () => {
+    expect((await statusAt(start)).lines.join('\n')).not.toContain('Player twice')
+
+    const [a, b] = (await database.db
+      .insert(persons)
+      .values([{ wikipediaPage: 'Uğur Yıldırım (a)' }, { wikipediaPage: 'Uğur Yıldırım (b)' }])
+      .$returningId()) as [{ id: number }, { id: number }]
+
+    await database.db.insert(players).values([
+      { name: 'Uğur Yıldırım', personId: a.id, searchTerm: 'Yıldırım', season: '2004/05' },
+      { name: 'Ugur Yildirim', personId: b.id, searchTerm: 'Yildirim', season: '2004/05' },
+    ])
+
+    try {
+      expect((await statusAt(start)).lines).toContain(
+        'Player twice: Uğur Yıldırım (2004/05), not merged because the rows are of different persons, or one has no person and could be either',
+      )
+    } finally {
+      await database.pool.query('DELETE FROM players')
+    }
   })
 
   it('shows how many persons are read from Wikidata and what they have', async () => {
