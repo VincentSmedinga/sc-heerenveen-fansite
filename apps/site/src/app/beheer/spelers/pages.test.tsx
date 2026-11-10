@@ -4,6 +4,7 @@ import { withClubs } from '@fansite/db/clubs'
 import { adminUsers, matches, matchGoals, personPages, persons, players } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq, inArray } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -79,7 +80,6 @@ beforeEach(async () => {
     nameSource: 'sort_key',
     wikipediaPage: 'Luca Oyen',
   })
-
   await database.db.insert(personPages).values({ page: 'Luca Oyen', personId })
   await database.db.insert(players).values([
     {
@@ -179,6 +179,48 @@ describe('the list of the players', () => {
     expect(html).toContain('href="/beheer/spelers/nieuw?seizoen=2019-20"')
     expect(html).toContain('<caption')
     expect(html).toContain('Spelers in het seizoen 2019/20')
+  })
+
+  it('shows the position of the season, and otherwise the line of the person in words', async () => {
+    const other = season
+    const person = (name: string, line: 'doelman' | 'verdediger' | null) =>
+      database.db.insert(persons).values({ familyName: name, givenName: 'Test', line, name, nameSource: 'sort_key' })
+    const [{ insertId: both }] = await person('Beide', 'verdediger')
+    const [{ insertId: onlyPerson }] = await person('Persoon', 'doelman')
+    const [{ insertId: neither }] = await person('Geen', null)
+    const row = (name: string, personId: null | number, position: 'middenvelder' | null, searchTerm: string) => ({
+      name,
+      personId,
+      position,
+      searchTerm,
+      season: other,
+      source: 'selectie' as const,
+    })
+    await database.db
+      .insert(players)
+      .values([
+        row('Alleen seizoen', null, 'middenvelder', 'A'),
+        row('Alleen persoon', onlyPerson, null, 'B'),
+        row('Beide', both, 'middenvelder', 'C'),
+        row('Geen van beide', neither, null, 'D'),
+      ])
+
+    try {
+      expect(
+        rowsOf(await list({ seizoen: '2019-20' }))
+          .map(([name, , position]) => [name, position])
+          .filter(([name]) => /^(Alleen|Beide|Geen van)/u.test(name ?? '')),
+      ).toEqual([
+        ['Alleen seizoen', 'Middenvelder'],
+        ['Alleen persoon', 'Doelman (linie van de persoon)'],
+        ['Beide', 'Middenvelder'],
+        ['Geen van beide', 'Positie onbekend'],
+      ])
+    } finally {
+      await database.db.delete(players).where(inArray(players.personId, [both, onlyPerson, neither]))
+      await database.db.delete(players).where(eq(players.name, 'Alleen seizoen'))
+      await database.db.delete(persons).where(inArray(persons.id, [both, onlyPerson, neither]))
+    }
   })
 
   it('falls back to the current season for a season we do not have', async () => {
