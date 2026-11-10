@@ -1,9 +1,8 @@
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
 import { decodeProposal } from '@fansite/db/match-changes'
-import { conflictStandsMs } from '@fansite/db/match-conflicts'
+import { takenOverAt } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, describeEntryResult } from '@fansite/db/match-edits'
-import { seasonOf } from '@fansite/db/season'
 
 import type { HeldChange } from './match-entries'
 
@@ -72,14 +71,13 @@ export function describeHeldChange(
 /**
  * What happens to a held change when nobody decides, in a sentence. In the season that is on,
  * the import takes the change over after seven days if the page still says the same. In a
- * season that is over the import does not read the page any more, so nothing happens. The
- * weekly read of the season that has just ended, in July and August (#975), is not told here
- * yet.
+ * season that is over the import never takes a change over (issue 1025), also not in the weekly
+ * read of the season that has just ended, so nothing happens.
  */
 export function describeWithoutDecision(change: Pick<HeldChange, 'firstSeenAt' | 'season'>, now: Date): HeldOutcome {
-  return change.season < seasonOf(now)
-    ? { kind: 'stays' }
-    : { at: new Date(change.firstSeenAt.getTime() + conflictStandsMs), kind: 'taken-over' }
+  const at = takenOverAt(change, now)
+
+  return at === undefined ? { kind: 'stays' } : { at, kind: 'taken-over' }
 }
 
 /**

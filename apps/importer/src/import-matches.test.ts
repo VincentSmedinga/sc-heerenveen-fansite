@@ -559,7 +559,7 @@ describe('a match of another source that Wikipedia has differently', () => {
       },
     ])
 
-    expect(describeWaitingChange((await waiting())[0]!).join('\n')).toMatch(
+    expect(describeWaitingChange((await waiting())[0]!, first).join('\n')).toMatch(
       /\n {2}now: .*stadion Elders.*\n {2}wikipedia: .*\n.*it waits until a person decides$/u,
     )
 

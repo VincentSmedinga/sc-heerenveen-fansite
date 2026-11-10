@@ -1360,6 +1360,8 @@
   Het scherm en het commando gebruiken dezelfde code (`decideChange`), en een wijziging in een afgelopen seizoen neemt alleen een mens over.
 - **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ (9 november 2026): in juli en augustus leest de uurlijkse import het seizoen dat net voorbij is elke week.
   Een wijziging die daar wacht, neemt de lezing van een week later over als de pagina nog dezelfde waarde toont, zonder `pnpm run import:season`.
+- **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de zeven dagen gelden alleen nog in het lopende seizoen.
+  Een wijziging van een seizoen dat voorbij is wacht tot een mens besluit, ook bij `pnpm run import:season` en bij de lezing van elke week in juli en augustus.
 
 ## De invoer van de redactie staat in de gewone tabellen, met een markering
 
@@ -1638,6 +1640,8 @@
 - **Waarom:** de redactie weet vaak meer dan een anonieme bewerking op Wikipedia, maar kan zich ook vergissen, dus het verschil hoort bij een mens en niet bij toeval.
   De zeven dagen zorgen dat een vergeten afwijking niet eindeloos blijft staan.
 - **Alternatieven:** de invoer wint tot een mens hem weghaalt (een fout van de redactie blijft staan); Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); alleen een melding in het beheer zonder mail (een redacteur die niet kijkt, ziet het niet).
+- **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de import neemt Wikipedia na zeven dagen alleen nog over in het lopende seizoen.
+  In een seizoen dat voorbij is blijft de invoer staan tot een mens beslist.
 
 ## Een afwijking is een wachtende wijziging per onderdeel, en één functie beslist ze
 
@@ -1684,6 +1688,7 @@
 - **Nadeel:** wie een mail kreeg terwijl een andere beheerder hem niet kreeg, merkt dat niet; de afwijking staat wel in het beheer.
   Zonder één beheerder met een actief account gaat er niets uit, en de run zegt dat in het logboek.
 - **Alternatieven:** één mail naar `ALERT_MAIL_TO` (de eigenaar is niet altijd de redacteur die de wedstrijd invulde); één mail met alle beheerders in `To` (de adressen staan bij elkaar, en `sendMail` weigert het); de mail in de transactie van de import (een mail die faalt zou de wedstrijden terugdraaien); een mail bij elke run die de afwijking ziet (honderden mails voor één afwijking).
+- **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de mail over een afwijking in een seizoen dat voorbij is noemt geen dag meer, en zegt dat de import Wikipedia niet vanzelf overneemt.
 
 ## De import bewaart de uitslagen van alle clubs in de Eredivisie, in een tabel naast de stand
 
@@ -3470,6 +3475,9 @@
   De selectie lezen met `importPastSquad`, zoals het issue vraagt (de eerste versie van deze wijziging; de cijfers van de spelers komen dan niet mee, en de reviewer wees daarop).
   `squadSources` een regel geven voor 2026/27 en later (lost de pagina op, niet de cijfers).
   Een eigen cronjob of workflow met een schema (meer om in te stellen op de host, terwijl de uurlijkse run er al is).
+- **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de lezing van een week later neemt een wijziging die wacht niet meer over.
+  Wat leeg was, vult de lezing nog steeds meteen in; wat iets overschrijft, wacht tot een mens besluit.
+  De pauze blijft een week en vijf minuten (`rereadEveryMs`), maar de vijf minuten beslissen niets meer: ze waren er voor de zeven dagen van `hasStood`.
 
 ## Het controleverslag legt de competitie naast de kruistabellen van Wikipedia
 
@@ -3562,3 +3570,32 @@
   Een toelichting op de kaart (meer tekst zonder dat de bezoeker er iets aan heeft).
   De naam van het doelpunt als naam van de speler (vaak alleen een achternaam, en dan staat er een halve naam op de kaart).
   De speler maken vóór het oordeel over een wijziging (de eerste versie van deze wijziging; een link in een verdachte wijziging maakte dan al een speler, en de reviewer wees daarop).
+
+## In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie
+
+- **Datum:** 10 november 2026
+- **Besluit:** de regel dat de import na zeven dagen Wikipedia overneemt, geldt alleen voor het lopende seizoen (#1025).
+  In een seizoen dat voorbij is blijft de invoer van de redactie staan tot een persoon beslist, in het beheer of met `pnpm run import:changes`.
+  Wijzigingen die al wachten blijven wachten.
+  De projecteigenaar besloot dat op 10 november 2026; de punten hieronder zijn de keuzes bij het bouwen.
+  - **Welke wijzigingen:** elke wijziging die wacht in `match_changes`, dus een afwijking van de invoer van de redactie en ook een verdachte wijziging van een wedstrijd van Wikipedia.
+    Beide vallen onder dezelfde zeven dagen (`hasStood` in `apps/importer/src/match-changes.ts`), en het issue vraagt het voor "een wachtende wijziging".
+  - **Eén plek:** `takenOverAt` in `packages/db/src/match-conflicts.ts` geeft het moment waarop de import een wijziging overneemt, of niets als hij dat nooit doet.
+    De import, de mail over een afwijking, het beheer, `import:status` en `import:changes` vragen het daar, dus ze zeggen hetzelfde.
+  - **De grens:** een seizoen is voorbij vanaf 1 juli van het volgende, in UTC, zoals `seasonOf`.
+    Het seizoen van een wijziging staat in `match_changes.season`.
+    Eindigen de zeven dagen na 30 juni, dan neemt de import de wijziging ook niet over, en de teksten beloven dan geen dag.
+    De teksten zeggen daarom "voorbij of bijna voorbij": in de laatste week van juni loopt het seizoen nog.
+  - **Wat blijft:** een wijziging vervalt nog steeds als Wikipedia hetzelfde zegt als de invoer of de oude waarde terugzet.
+    Geen wijziging wordt aangenomen, afgewezen of gesloten omdat de regel verandert, en er is geen migratie.
+  - **Een pagina die als geheel wacht:** wachten er in een seizoen dat voorbij is meer dan zes wijzigingen, dan blijft de pagina vastgehouden tot iemand ze beslist.
+    De zeven dagen maakten haar daar eerder vanzelf weer vrij.
+  - **De teksten:** het beheer, de mail en de twee opdrachten zeggen bij een seizoen dat voorbij is dat de wijziging wacht tot iemand beslist.
+    Het scherm van een vastgehouden wijziging zei dat al, ook in juli en augustus; nu klopt dat weer.
+  - **De lezing van elke week:** de pauze van een week en vijf minuten blijft (`rereadEveryMs`).
+    De vijf minuten waren er voor de zeven dagen en beslissen nu niets meer; ze weghalen hoort niet bij dit issue.
+- **Waarom:** aan een oud seizoen werkt op Wikipedia bijna niemand meer, dus een verschil is daar eerder een fout van Wikipedia dan nieuws.
+- **Alternatieven:** de regel houden zoals hij is (een goede verbetering verdwijnt na een week).
+  Alle wachtende wijzigingen van afgelopen seizoenen eenmalig afwijzen (verliest werk dat nog bekeken moet worden).
+  De regel alleen veranderen voor de invoer van de redactie en een verdachte wijziging van Wikipedia zelf wel overnemen (twee regels voor dezelfde zeven dagen, en het scherm van zo'n wijziging zegt al dat er niets verandert).
+- **Nadeel:** een echte verbetering die Wikipedia na 30 juni doet en die iets overschrijft, komt alleen nog op de site als iemand haar aanneemt.

@@ -584,6 +584,33 @@ describe('a season that is over (import:season)', () => {
     expect(await log()).toMatchObject([{ action: 'match.differs' }])
     expect(await log()).toHaveLength(1)
   })
+
+  it('never takes Wikipedia over, also for a difference that waited already, until it lapses (#1025)', async () => {
+    const { pages, server } = await serve()
+    const pending = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
+    const readAt = (at: Date) =>
+      importPastSeason(database.db, fetcherFor([server]), '2026/27', { clock: () => at, origin: server.origin })
+
+    // The difference is first seen in the season itself, and waits when the season ends.
+    await importAt(server, first)
+    await enter(roundOne, { goalsAgainst: 1, goalsFor: 1, resultSetAt: first }, ['result'])
+    await importAt(server, later(first, 2))
+    expect(await pending()).toMatchObject([{ part: 'result', season: '2026/27', status: 'pending' }])
+
+    // The read of the season that is over, and one ten days later: the entry stays.
+    await readAt(over)
+    await readAt(later(over, 10 * 24))
+    expect(await row(roundOne)).toMatchObject({ goalsAgainst: 1, goalsFor: 1 })
+    expect((await edits()).map((edit) => edit.resultEdited)).toEqual([true])
+    expect(await pending()).toMatchObject([{ decidedAt: null, resolution: null, status: 'pending', timesSeen: 3 }])
+    expect((await log()).map((line) => line.action)).toEqual(['match.differs'])
+
+    // Wikipedia says the same as the entry: the difference lapses, as before.
+    Object.assign(pages, drawn(pages))
+    await readAt(later(over, 11 * 24))
+    expect(await pending()).toMatchObject([{ resolution: 'reverted', status: 'rejected' }])
+    expect(await edits()).toEqual([])
+  })
 })
 
 describe('a difference becomes a change that waits (issue 577)', () => {

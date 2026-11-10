@@ -913,7 +913,9 @@ describe('the match', () => {
       const { id } = await withHeldChange()
       const html = await form(id)
 
-      expect(html).toContain('De import leest dit seizoen niet meer. Zonder besluit blijft de huidige waarde staan.')
+      expect(html).toContain(
+        'Het seizoen is voorbij of bijna voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.',
+      )
       expect(html).not.toContain('Zonder besluit neemt de import dit over')
     })
 
@@ -922,7 +924,7 @@ describe('the match', () => {
       const html = await form(id)
 
       expect(html).toContain('Zonder besluit neemt de import dit over op 8 november 2026')
-      expect(html).not.toContain('De import leest dit seizoen niet meer')
+      expect(html).not.toContain('Het seizoen is voorbij')
     })
 
     it('links to the page of the season on Wikipedia, as a plain link', async () => {

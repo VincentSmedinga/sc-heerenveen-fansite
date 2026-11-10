@@ -143,7 +143,7 @@ export async function showStatus(
     await showSimilarPersons(db, write)
     await showPersonData(db, write)
     await showFormations(db, write)
-    await showWaitingChanges(db, write)
+    await showWaitingChanges(db, now, write)
     await showCoverage(db, now, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
@@ -380,10 +380,10 @@ async function showUnlinkedGoals(db: Database, season: string, write: (line: str
 /**
  * Shows the changes of a match that wait: what Wikipedia shows now against what the site shows,
  * and when the import takes the change over. They are information and no fault: the site shows
- * the old value until the change has stood for seven days or a person decides
- * (`pnpm run import:changes`). It says nothing when none wait.
+ * the old value until the change has stood for seven days in the season that is on, or a person
+ * decides (`pnpm run import:changes`). It says nothing when none wait.
  */
-async function showWaitingChanges(db: Database, write: (line: string) => void): Promise<void> {
+async function showWaitingChanges(db: Database, now: Date, write: (line: string) => void): Promise<void> {
   const waiting = await waitingChanges(db)
 
   if (waiting.length === 0) {
@@ -393,7 +393,7 @@ async function showWaitingChanges(db: Database, write: (line: string) => void): 
   write('')
   write(`Changes of matches that wait: ${waiting.length}`)
   for (const change of waiting) {
-    for (const line of describeWaitingChange(change)) {
+    for (const line of describeWaitingChange(change, now)) {
       write(`  ${line}`)
     }
   }

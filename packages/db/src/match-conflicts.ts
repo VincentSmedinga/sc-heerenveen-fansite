@@ -12,6 +12,7 @@ import type { Match, MatchChange, MatchDataSource, MatchPart } from './schema.ts
 import { recordAction } from './audit-log.ts'
 import { clearParts, insertGoals } from './match-edits.ts'
 import { matchChanges, matchEdits, matches, matchGoals } from './schema.ts'
+import { seasonOf } from './season.ts'
 
 /**
  * A decision about a difference. `take-over` makes the part what Wikipedia says and lets the
@@ -67,10 +68,23 @@ type Writer = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
 /**
  * How long a difference stays before the importer takes Wikipedia over, when nobody decides:
- * seven days, the rule of the changes that wait (issue 460). The importer, the mails and the
- * admin all read it here.
+ * seven days, the rule of the changes that wait (issue 460), in the season that is on
+ * (`takenOverAt`).
  */
 export const conflictStandsMs = 7 * 24 * 60 * 60 * 1000
+
+/**
+ * The moment from which the importer takes a change that waits over when nobody decides, or
+ * undefined when it never does. The rule of the seven days is for the season that is on only
+ * (issue 1025): in a season that is over, the change waits until a person decides. A season is
+ * over from 1 July of the next one (`seasonOf`), so a change whose seven days end after 30 June
+ * is never taken over either. The importer, the mails, the admin and the commands all ask here.
+ */
+export function takenOverAt(change: Pick<MatchChange, 'firstSeenAt' | 'season'>, now: Date): Date | undefined {
+  const at = new Date(change.firstSeenAt.getTime() + conflictStandsMs)
+
+  return change.season < seasonOf(now > at ? now : at) ? undefined : at
+}
 
 /**
  * Why the goals of a match of the old fansite wait as a change: the list of the files does not
