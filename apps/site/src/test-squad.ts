@@ -31,7 +31,7 @@ export const squadData: SeasonSquad = {
       source: 'selectie',
     },
     {
-      country: 'BR',
+      country: 'KZ',
       name: 'Proefman Drie',
       personFamilyName: 'Drie',
       personFamilyNamePrefix: null,

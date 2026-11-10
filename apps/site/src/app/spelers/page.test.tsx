@@ -586,7 +586,12 @@ describe('the card Selectie on /spelers', () => {
     [...card(html).matchAll(/<li>(.*?)<\/li>/gs)].map(([, line]) => {
       const number = /hf-player-name-number">(\d*)</.exec(line ?? '')?.[1] ?? ''
 
-      return [number, plain(line).slice(number.length).replace(/\s+/g, ' ').trim()]
+      // The code in the frame of a country without a drawing is the flag, not the name.
+      const text = plain(
+        (line ?? '').replace(/<span aria-label="[^"]*" class="hf-player-name-flag [^>]*>[^<]*<\/span>/u, ''),
+      )
+
+      return [number, text.slice(number.length).replace(/\s+/g, ' ').trim()]
     })
 
   const withSquad = (overrides: Partial<typeof squadData>) =>
@@ -643,11 +648,13 @@ describe('the card Selectie on /spelers', () => {
     expect(lines[0]).toMatch(/hf-player-name-number">1<\/span> <img [^>]*\/> <span class="hf-player-name-text">/u)
   })
 
-  it('gives a player without a flag an empty place, also when the country has no flag here', async () => {
+  it('gives a player without a country an empty place, and a country without a drawing its code', async () => {
     const html = card(await render())
 
-    // Proefman Drie is from Brazil, which has no flag in the set.
-    expect(html).toMatch(/hf-player-name-number">8<\/span> <span class="hf-player-name-flag"><\/span><span/)
+    // Proefman Drie is from Kazakhstan, which has no drawing in the set: the code in a frame.
+    expect(html).toMatch(
+      /hf-player-name-number">8<\/span> <span aria-label="Kazachstan" class="hf-player-name-flag hf-player-name-code" role="img">KZ<\/span> <span/u,
+    )
     // Testreserve Vijf has no country, among others who have one.
     expect(html).toMatch(/hf-player-name-number"><\/span><span class="hf-player-name-flag"><\/span><span/)
   })
