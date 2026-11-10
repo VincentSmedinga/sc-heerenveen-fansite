@@ -1080,7 +1080,7 @@ Matches 2026/27: warning, Persons: 1 group of persons look alike and are not mer
 
 `pnpm run import:status` toont het aantal groepen onder `Persons that look alike` en de aantallen namen per bron onder `Person names`.
 
-Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases`: de volgende import voegt ze samen.
+Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases` (ook in `packages/db/src/persons.ts`, voor de pagina Kwaliteit): de volgende import voegt ze samen.
 Zijn het twee mensen, zet ze dan in `personsWhoDiffer` in `packages/db/src/persons.ts`: de import, `import:status`, de pagina Kwaliteit en het controleverslag van de oude fansite melden de groep dan niet meer.
 Jordy Bruijn en Jordy Buijs staan daar.
 Een pagina die later een andere titel krijgt, ziet de import niet: de oude titel blijft in `person_pages` staan.
