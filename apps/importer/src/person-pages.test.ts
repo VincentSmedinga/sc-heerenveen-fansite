@@ -1,9 +1,9 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
-import { persons } from '@fansite/db/schema'
+import { clubs, matches, matchGoals, persons, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { asc } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
@@ -350,6 +350,72 @@ describe('mergeListedPersons', () => {
   })
 })
 
+describe('mergeListedPersons for Filip Đuričić', () => {
+  async function insertPerson(page: string) {
+    const [{ id }] = (await database.db.insert(persons).values({ wikipediaPage: page }).$returningId()) as [
+      { id: number },
+    ]
+
+    return id
+  }
+
+  async function insertGoal(personId: number, season: string, name: string) {
+    const [{ id: clubId }] = (await database.db
+      .insert(clubs)
+      .values({ name: `Club ${season}`, slug: `club-${season.replace('/', '-')}` })
+      .$returningId()) as [{ id: number }]
+    const [{ id: matchId }] = (await database.db
+      .insert(matches)
+      .values({
+        clubId,
+        competition: 'Eredivisie',
+        dateText: 'x',
+        home: true,
+        matchDate: `${season.slice(0, 4)}-09-01`,
+        opponent: 'Club',
+        round: `Speelronde ${season}`,
+        season,
+        status: 'scheduled',
+      })
+      .$returningId()) as [{ id: number }]
+
+    await database.db.insert(players).values({ name, personId, searchTerm: 'Đuričić', season, wikipediaPage: name })
+    await database.db.insert(matchGoals).values({ matchId, ours: true, personId, player: name })
+  }
+
+  afterEach(async () => {
+    await database.pool.query('DELETE FROM match_goals')
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM players')
+    await database.pool.query('DELETE FROM clubs')
+  })
+
+  it('points the goals, the players and the pages of both persons at the one that stays, and then says nothing', async () => {
+    const kept = await insertPerson('Filip Đuričić')
+    const gone = await insertPerson('Filip Djuričić')
+
+    await insertGoal(kept, '2011/12', 'Filip Đuričić')
+    await insertGoal(gone, '2010/11', 'Filip Djuričić')
+
+    expect(await mergeListedPersons(database.db)).toContain("Persons: 'Filip Djuričić' is merged into 'Filip Đuričić'")
+    expect(await database.db.select().from(persons)).toMatchObject([{ id: kept, wikipediaPage: 'Filip Đuričić' }])
+    expect((await database.db.select().from(matchGoals)).map((goal) => goal.personId)).toEqual([kept, kept])
+    expect((await database.db.select().from(players)).map((player) => player.personId)).toEqual([kept, kept])
+    expect(await database.db.select().from(players).where(eq(players.season, '2010/11'))).toHaveLength(1)
+    expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+
+  it('renames a person who is alone under the old spelling, without a second person', async () => {
+    const only = await insertPerson('Filip Djuričić')
+
+    await insertGoal(only, '2010/11', 'Filip Djuričić')
+
+    expect(await mergeListedPersons(database.db)).toContain("Persons: 'Filip Djuričić' is now 'Filip Đuričić'")
+    expect(await database.db.select().from(persons)).toMatchObject([{ id: only, wikipediaPage: 'Filip Đuričić' }])
+    expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+})
+
 describe('chosenSpelling', () => {
   it('gives a page and a name that the owner replaced the spelling that stays', () => {
     expect(chosenSpelling('Jan-Harm Schippers', 'Jan-Harm Schippers')).toEqual({
@@ -357,6 +423,7 @@ describe('chosenSpelling', () => {
       page: 'Jan Harm Schippers',
     })
     expect(chosenSpelling('Ugur Yıldırım', 'Uğur Yıldırım')).toEqual({ name: 'Uğur Yıldırım', page: 'Uğur Yıldırım' })
+    expect(chosenSpelling('Filip Djuričić', null)).toEqual({ name: 'Filip Đuričić', page: null })
     expect(chosenSpelling('Radoslav Samardzic', null)).toEqual({ name: 'Radoslav Samardžić', page: null })
     // The page is replaced, and a name the table shows in its own way stays.
     expect(chosenSpelling('R. van der Berg', 'Robert van der Berg')).toEqual({
