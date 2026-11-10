@@ -747,7 +747,7 @@ test.describe('the button for the line-up of the previous match', () => {
       // The page opened again: now the browser's input comes back with Herstel.
       await page.goto(address)
       await expect(page.getByRole('status').filter({ hasText: 'bewaarde invoer' })).toBeVisible()
-      await expect(page.locator('#speler-wij-1-naam')).toHaveCount(0)
+      await expect(page.locator('#speler-wij-1-naam')).toHaveValue('')
       await page.getByRole('button', { name: 'Herstel' }).click()
       await expect(page.locator('#speler-wij-1-naam')).toHaveValue(lineUpNames[0] ?? '')
       await expect(takeOver).toHaveCount(0)
