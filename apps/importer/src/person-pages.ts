@@ -257,13 +257,13 @@ export function planDoublePlayers(rows: readonly Player[]): {
   const left: DoublePlayer[] = []
   const rank = (row: Player) => (isOfEditors(row) ? 0 : playerSources.length) + playerSources.indexOf(row.source)
   const best = (group: Player[]) => group.toSorted((a, b) => rank(a) - rank(b) || a.id - b.id)
-  const bySeason = Map.groupBy(rows, (row) => row.season)
+  const bySeason = groupBy(rows, (row) => row.season)
 
   for (const [season, all] of bySeason) {
     let kept = all
 
     // The same person first, so that a person with two spellings is one row.
-    for (const group of Map.groupBy(
+    for (const group of groupBy(
       kept.filter((row) => row.personId !== null),
       (row) => row.personId,
     ).values()) {
@@ -273,9 +273,7 @@ export function planDoublePlayers(rows: readonly Player[]): {
       kept = kept.filter((row) => !gone.includes(row))
     }
 
-    for (const group of Map.groupBy(kept, (row) =>
-      nameKey(oldSiteNameCorrections.get(row.name) ?? row.name),
-    ).values()) {
+    for (const group of groupBy(kept, (row) => nameKey(oldSiteNameCorrections.get(row.name) ?? row.name)).values()) {
       if (group.length < 2) {
         continue
       }
@@ -371,6 +369,16 @@ async function chooseListedPlayerSpellings(
   }
 
   return lines
+}
+
+function groupBy<Key>(rows: readonly Player[], key: (row: Player) => Key): Map<Key, Player[]> {
+  const groups = new Map<Key, Player[]>()
+
+  for (const row of rows) {
+    groups.set(key(row), [...(groups.get(key(row)) ?? []), row])
+  }
+
+  return groups
 }
 
 /**
