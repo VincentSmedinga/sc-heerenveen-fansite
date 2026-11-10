@@ -20,11 +20,13 @@ export type { PersonTitleAlias }
  *
  * An other title that is a person of its own already is merged into the person of the title
  * that stays, at the start of every import of matches or of a squad (`mergeListedPersons`).
- * The owner decided these four on 10 November 2026 (issue 1027).
+ * The owner decided four on 10 November 2026 (issue 1027), and Filip Đuričić the same day
+ * (issue 1036).
  *
  * Example: `{ aliases: ['Jan Jansen (voetballer)'], title: 'Jan Jansen (voetballer, 1990)' }`.
  */
 export const personTitleAliases: readonly PersonTitleAlias[] = [
+  { aliases: ['Filip Djuričić'], title: 'Filip Đuričić' },
   { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
   { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
   { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },

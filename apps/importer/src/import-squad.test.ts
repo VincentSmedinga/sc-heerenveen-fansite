@@ -571,6 +571,28 @@ describe('reading again', () => {
     expect((again.kind === 'imported' ? again.warnings : []).filter((line) => line.includes('merged'))).toEqual([])
   })
 
+  it('merges Filip Djuričić into Filip Đuričić, and a second run changes nothing', async () => {
+    const { server } = await serve()
+    const [{ insertId: kept }] = await database.db.insert(persons).values({ wikipediaPage: 'Filip Đuričić' })
+    const [{ insertId: gone }] = await database.db.insert(persons).values({ wikipediaPage: 'Filip Djuričić' })
+
+    const report = await importAt(server, first)
+    const rows = await database.db.select().from(persons)
+
+    expect(report.kind === 'imported' ? report.warnings : []).toContain(
+      "Persons: 'Filip Djuričić' is merged into 'Filip Đuričić'",
+    )
+    expect(rows.map((row) => row.id)).toContain(kept)
+    expect(rows.map((row) => row.id)).not.toContain(gone)
+    expect(await database.db.select().from(personPages).where(eq(personPages.page, 'Filip Djuričić'))).toEqual([
+      { page: 'Filip Djuričić', personId: kept },
+    ])
+
+    const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect((again.kind === 'imported' ? again.warnings : []).filter((line) => line.includes('merged'))).toEqual([])
+  })
+
   it('keeps one row and the spelling that stays when the table writes the other title again', async () => {
     const { page, server } = await serve(original.replace('[[Luca Oyen]]', '[[Jan Harm Schippers]]'))
 

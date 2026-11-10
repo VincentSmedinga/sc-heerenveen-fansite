@@ -39,8 +39,9 @@ describe('the spellings of Wikipedia', () => {
     expect(cleanOldSiteName(typed)).toBe(article)
   })
 
-  it('has the four persons the owner decided as titles that are one person too', () => {
+  it('has the persons the owner decided as titles that are one person too', () => {
     expect(personTitleAliases).toEqual([
+      { aliases: ['Filip Djuričić'], title: 'Filip Đuričić' },
       { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
       { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
       { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },
