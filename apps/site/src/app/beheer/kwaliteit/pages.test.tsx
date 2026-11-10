@@ -73,6 +73,23 @@ describe('the page Kwaliteit', () => {
     await expect(QualityPage()).rejects.toThrow('redirect to /beheer/inloggen')
   })
 
+  it('says how many persons have no line or no country, with a link to their work list', async () => {
+    expect(renderToStaticMarkup(await QualityPage())).toContain('Elke persoon heeft een linie en een land.')
+
+    await database.db
+      .insert(persons)
+      .values([
+        { country: 'NL', name: 'Verzonnen Spits' },
+        { name: 'Bedachte Back' },
+        { country: 'DK', line: 'doelman', name: 'Proef de Keeper' },
+      ])
+
+    const html = renderToStaticMarkup(await QualityPage())
+
+    expect(html).toContain('2 personen hebben geen linie en 1 persoon heeft geen land.')
+    expect(html).toContain('<a href="/beheer/kwaliteit/personen">Vul de linie en het land aan</a>')
+  })
+
   it('is a table with a caption, a header for each column and a row for each season, the newest first', async () => {
     const html = renderToStaticMarkup(await QualityPage())
     const seasons = [...html.matchAll(/<tr><th scope="row">(\d{4}\/\d{2})/g)].map(([, season]) => season)

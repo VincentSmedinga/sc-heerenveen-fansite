@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 import type { RowDataPacket } from 'mysql2/promise'
 
 import { connect } from '@fansite/db/client'
+import { setEditorsPersonFacts } from '@fansite/db/persons'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -598,6 +599,25 @@ describe('the line and the country of all persons, at every run (#1051)', () => 
       { line: 'aanvaller', line_source: 'manual', wikidata_id: 'Q15943430' },
     ])
     expect(report.lines).toEqual({ manual: 1, 'old-site': 0, squad: 0, wikidata: 0 })
+  })
+
+  it('keeps the line and the country the editors chose on the work list, also in a second run', async () => {
+    await addPersons('Joost van Aken')
+
+    const id = Number((await rows('SELECT id FROM persons'))[0]?.['id'])
+
+    // What the work list of the admin does for a choice (issue 1053).
+    await setEditorsPersonFacts(database.db, id, { country: 'NO', line: 'aanvaller' })
+    await insertPlayer(id, '2003/04', 'doelman', 'a1')
+
+    const chosen = [{ country: 'NO', country_source: 'manual', line: 'aanvaller', line_source: 'manual' }]
+    const facts = () => rows('SELECT line, line_source, country, country_source FROM persons')
+
+    // Wikidata is a stronger source than the squad and the old fansite, and says a defender.
+    await read(await serve(joost.wikipedia, joost.wikidata))
+    expect(await facts()).toEqual(chosen)
+    await read(await serve(nobody.nl, nobody.data))
+    expect(await facts()).toEqual(chosen)
   })
 
   it('fills in the country from the first nationality, also for a person read before, and only once', async () => {

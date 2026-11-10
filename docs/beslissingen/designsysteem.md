@@ -3148,3 +3148,14 @@
 - **Waarom:** onderdelen die bijna hetzelfde zijn maar een eigen betekenis hebben, groeien uit elkaar.
   Een neutraal onderdeel houdt de opmaak op één plek.
 - **Alternatieven:** de CSS van `MatchHeader` kopiëren; een onderdeel met een naam uit de wedstrijdwereld.
+
+## Een Select kan groepen hebben, en een Form een rij knoppen
+
+- **Datum:** 10 november 2026
+- **Besluit:** `Select.Group` is het `optgroup`-element, voor een lange lijst met een deel waar mensen het meest uit kiezen.
+  `Form.Buttons` zet de knoppen van een formulier met meer dan één knop in even brede kolommen, zoveel als er passen, met de kleine ruimte ertussen.
+  De werklijst voor de linie en het land van personen in het beheer gebruikt beide (#1053).
+- **Waarom:** de sjablonen van de site bevatten geen HTML en hebben geen eigen CSS, dus een groep in een keuzelijst en ruimte tussen knoppen moeten uit het designsysteem komen.
+  Knoppen die hun kolom vullen, zijn op een telefoon een groot doel, en vier keuzes staan daar twee aan twee.
+- **Alternatieven:** de landen van onze personen bovenaan zetten zonder groep (de lijst begint dan halverwege zonder uitleg opnieuw bij de A).
+  Knoppen naast elkaar laten staan zonder ruimte, zoals de browser ze zet (ze raken elkaar, en een vinger tikt snel mis).

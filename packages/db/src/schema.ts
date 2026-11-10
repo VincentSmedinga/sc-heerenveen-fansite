@@ -443,6 +443,7 @@ export const auditActions = [
   'player.remove',
   'player.field-take-over',
   'player.field-keep',
+  'person.edit',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -480,7 +481,9 @@ export const auditDetailMaxLength = 1000
  * the squad of a season, changed or took out of it (issue 1020), with the player in `item_id`
  * and what changed in `detail`. `player.field-take-over` and `player.field-keep` are the
  * decision of an editor about a value of the import for a field the editors set (a row of
- * `player_field_differences`, issue 1022), with the player in `item_id`.
+ * `player_field_differences`, issue 1022), with the player in `item_id`. `person.edit` is a
+ * line or a country the editors gave a person on the work list of the admin (issue 1053), with
+ * the person in `item_id` and what changed in `detail`.
  */
 export const auditLog = mysqlTable(
   'audit_log',

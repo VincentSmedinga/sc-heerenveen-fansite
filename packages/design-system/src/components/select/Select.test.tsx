@@ -31,6 +31,27 @@ describe('Select', () => {
   })
 })
 
+describe('Select.Group', () => {
+  it('is a group with a name around its options', () => {
+    render(
+      <Select aria-label="Land">
+        <Select.Group label="Landen van onze spelers">
+          <Select.Option value="NL">Nederland (NL)</Select.Option>
+        </Select.Group>
+        <Select.Group label="Andere landen">
+          <Select.Option value="AD">Andorra (AD)</Select.Option>
+        </Select.Group>
+      </Select>,
+    )
+
+    const group = screen.getByRole('group', { name: 'Landen van onze spelers' })
+
+    expect(group.tagName).toBe('OPTGROUP')
+    expect(within(group).getAllByRole('option')).toHaveLength(1)
+    expect(screen.getAllByRole('option')).toHaveLength(2)
+  })
+})
+
 describe('Select.Option', () => {
   it('is an option of the list around it, with the attributes of an option', () => {
     render(

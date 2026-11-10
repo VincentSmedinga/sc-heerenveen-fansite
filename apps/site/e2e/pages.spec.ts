@@ -304,6 +304,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/kwaliteit', status: 200 },
   { admin: 'beheerder', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
+  // The persons without a line or a country (made up, see persons.ts): both lists, a part
+  // that does not exist, which shows the last one, and a list that is no list, which is the
+  // first.
+  { admin: 'beheerder', path: '/beheer/kwaliteit/personen', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=land&deel=9', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=onbekend', status: 200 },
+  { admin: 'moderator', path: '/beheer/kwaliteit/personen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.
   { admin: 'beheerder', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
