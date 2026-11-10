@@ -1419,6 +1419,18 @@ export type NewWikipediaPage = typeof wikipediaPages.$inferInsert
 
 export type WikipediaPage = typeof wikipediaPages.$inferSelect
 
+/**
+ * The titles of the links on the page "Lijst van spelers van sc Heerenveen (mannen)" of the
+ * Dutch Wikipedia, as the last read of the import left them (issue 1028). The list has no
+ * seasons, so it only checks names: `playerListReport` compares it with `persons`, and
+ * nothing here makes a player or changes a name. `read_at` is the time of the last read that
+ * found the title.
+ */
+export const playerListTitles = mysqlTable('player_list_titles', {
+  title: articleTitle('title').primaryKey(),
+  readAt: datetime('read_at').notNull(),
+})
+
 export const matchImportOutcomes = ['imported', 'error', 'blocked-by-robots', 'wait'] as const
 
 export type MatchImportOutcome = (typeof matchImportOutcomes)[number]

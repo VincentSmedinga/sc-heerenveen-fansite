@@ -449,6 +449,13 @@
       "when": 1794308597283,
       "tag": "0063_add_english_title_of_persons",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "5",
+      "when": 1794317463380,
+      "tag": "0064_add_player_list_titles",
+      "breakpoints": true
     }
   ]
 }

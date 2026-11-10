@@ -1,7 +1,7 @@
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, persons, players, sources, squadCompleteness } from '@fansite/db/schema'
+import { feeds, persons, playerListTitles, players, sources, squadCompleteness } from '@fansite/db/schema'
 import { seasonCoverageColumns } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -33,6 +33,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
   await database.pool.query('DELETE FROM import_runs')
+  await database.pool.query('DELETE FROM player_list_titles')
   await database.pool.query('DELETE FROM persons')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM clubs')
@@ -119,6 +120,7 @@ describe('the overview', () => {
         '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
+        'Player list: not read yet',
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
@@ -196,6 +198,7 @@ describe('the overview', () => {
         '',
         'Person names: 0 from a sort key, 0 guessed, 0 from the list, 0 without a name',
         'Persons that look alike: 0',
+        'Player list: not read yet',
         'Persons from Wikidata: 0 of 0 read, 0 to go',
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the squad, 0 from the list, 0 without',
@@ -203,6 +206,20 @@ describe('the overview', () => {
         'Formations of match reports: no report has a line-up yet',
       ],
     })
+  })
+
+  it('says which persons are not on the list of players and which titles of the list are no person of ours', async () => {
+    await database.db.insert(persons).values([{ wikipediaPage: 'Gerrit Abma' }, { wikipediaPage: 'Iemand Anders' }])
+    await database.db
+      .insert(playerListTitles)
+      .values(['Gerrit Abma', 'Luca Oyen'].map((title) => ({ readAt: new Date('2026-10-22T10:00:00Z'), title })))
+
+    const lines = (await statusAt(start)).lines
+
+    expect(lines).toContain('Player list: 2 titles, read 2026-10-22 10:00:00 UTC')
+    expect(lines).toContain('  persons not on the list: 1 (Iemand Anders)')
+    expect(lines).toContain('  titles on the list that are no person of ours: 1 (Luca Oyen)')
+    expect(lines).toContain('  titles that differ in a sign: 0')
   })
 
   it('names a player twice in a season that was not merged, and says nothing without one', async () => {

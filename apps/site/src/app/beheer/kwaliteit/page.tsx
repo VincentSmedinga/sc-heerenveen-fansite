@@ -1,7 +1,8 @@
+import type { PlayerListReport } from '@fansite/db/persons'
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { Metadata } from 'next'
 
-import { similarPersons } from '@fansite/db/persons'
+import { playerListReport, similarPersons } from '@fansite/db/persons'
 import { countWaitingFieldDifferences } from '@fansite/db/player-field-differences'
 import { countWaitingStatDifferences } from '@fansite/db/player-stat-differences'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
@@ -57,6 +58,7 @@ export default async function QualityPage() {
   const differing = await countWaitingStatDifferences(db)
   const edited = await countWaitingFieldDifferences(db)
   const alike = await similarPersons(db)
+  const list = await playerListReport(db)
 
   return (
     <Page.Main
@@ -125,6 +127,7 @@ export default async function QualityPage() {
           </>
         )}
       </Card>
+      <PlayerListCard report={list} />
     </Page.Main>
   )
 }
@@ -149,6 +152,59 @@ function matchesText(row: SeasonCoverage) {
     .map(([source, total]) => `${total} ${sourceWords[source as keyof typeof sourceWords]}`)
 
   return `${plural(row.matchesTotal, 'wedstrijd', 'wedstrijden')}, ${row.played} gespeeld (${sources.join(', ')})`
+}
+
+/**
+ * What the list of players of sc Heerenveen on Wikipedia says about our names. It is
+ * information: nothing is made, changed or merged from it.
+ */
+function PlayerListCard({ report }: { report: PlayerListReport }) {
+  const groups = [
+    {
+      empty: 'Elke persoon van ons staat op de lijst.',
+      text: 'Deze personen staan niet op de lijst van spelers van sc Heerenveen. Dat kan kloppen: de lijst is niet altijd compleet.',
+      titles: report.notOnList,
+    },
+    {
+      empty: 'Elke titel op de lijst is een persoon van ons.',
+      text: 'Deze titels staan op de lijst en zijn geen persoon van ons. Het kan een speler zijn die we nog niet hebben.',
+      titles: report.notOurs,
+    },
+    {
+      empty: 'Geen titel verschilt alleen in een teken.',
+      text: 'Deze titels verschillen alleen in een teken: onze titel en die van de lijst.',
+      titles: report.spelling.map(([ours, listed]) => sentenceList([ours, listed])),
+    },
+  ]
+
+  return (
+    <Card aria-labelledby="lijst-kop">
+      <Heading id="lijst-kop" level={2}>
+        Namen en de lijst van spelers
+      </Heading>
+      {report.read === 0 ? (
+        <Text>De lijst van spelers van sc Heerenveen is nog niet gelezen.</Text>
+      ) : (
+        groups.map(({ empty, text, titles }) =>
+          titles.length === 0 ? (
+            <Text key={empty}>{empty}</Text>
+          ) : (
+            <Fragment key={empty}>
+              <Text>
+                {text} Er zijn er {titles.length}.
+              </Text>
+              <List role="list">
+                {titles.slice(0, 20).map((title) => (
+                  <List.Item key={title}>{title}</List.Item>
+                ))}
+              </List>
+              {titles.length > 20 ? <Text>En nog {titles.length - 20}.</Text> : null}
+            </Fragment>
+          ),
+        )
+      )}
+    </Card>
+  )
 }
 
 /** Names in a sentence: "A en B", "A, B en C". */
