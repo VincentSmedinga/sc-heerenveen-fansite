@@ -3812,7 +3812,7 @@
 - **Datum:** 10 november 2026
 - **Besluit:** twee rijen van één seizoen in `players` zijn één speler als ze dezelfde persoon hebben, of dezelfde naam na `oldSiteNameCorrections` en `nameKey` (#1042).
   Twee rijen met dezelfde naam en twee verschillende personen blijven twee rijen, en een rij zonder persoon gaat niet naar één van meerdere personen.
-  De rij van de redactie blijft, daarna die van de bron die het hoogst staat in `playerSources`, daarna de oudste.
+  De rij van de redactie blijft, daarna die van de bron die het hoogst staat in `playerSources`, daarna die met de spelling die de eigenaar koos (`oldSiteNameCorrections`), daarna de oudste.
   `mergePlayerInto` verplaatst de doelpunten, de optredens en de aantallen, en `fillPlayerFrom` vult aan wat de rij mist, behalve wat de redactie zette.
   Het gebeurt aan het begin van elke import van wedstrijden of een selectie, in `mergeListedPersons`, en een tweede run verandert niets.
   `import:status` noemt per seizoen de spelers die nog dubbel zijn, met de reden; staat er niets dubbel, dan komt er geen regel.

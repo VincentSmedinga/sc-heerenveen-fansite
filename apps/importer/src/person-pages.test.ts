@@ -527,6 +527,24 @@ describe('a player twice in a season', () => {
     expect(await mergeListedPersons(database.db)).toEqual([])
   })
 
+  it.each([
+    ['transfers', 'Youssef El-Akchaoui', 'Youssef El Akchaoui', '2010/11'],
+    ['verslag', 'Ugur Yildirim', 'Uğur Yıldırım', '2004/05'],
+  ] as const)(
+    'merges two rows of the source %s, and the chosen spelling stays',
+    async (source, old, chosen, season) => {
+      // The row with the old spelling is the older one, and has a person; the other has none.
+      const id = await person(chosen)
+
+      await database.db.insert(players).values({ name: old, personId: id, searchTerm: 'X', season, source })
+      await database.db.insert(players).values({ name: chosen, searchTerm: 'X', season, source })
+
+      expect(await mergeListedPersons(database.db)).toEqual([`Players: ${old} (${season}) is merged into ${chosen}`])
+      expect(await database.db.select().from(players)).toMatchObject([{ name: chosen, personId: id }])
+      expect(await mergeListedPersons(database.db)).toEqual([])
+    },
+  )
+
   it('merges two rows of one person with different names', async () => {
     const id = await person('Uğur Yıldırım')
 

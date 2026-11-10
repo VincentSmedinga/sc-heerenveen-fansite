@@ -247,7 +247,8 @@ export async function mergeListedPersons(
  * and `nameKey`. Two rows with the same name and two different persons are two players, and a
  * row without a person is not given to one of several persons: they stay and are in `left`.
  * Of two rows the one the editors added or changed stays, then the one of the better source
- * (`playerSources`), then the older one. Pure: it reads `rows` and changes nothing.
+ * (`playerSources`), then the one with the spelling the owner chose, then the older one.
+ * Pure: it reads `rows` and changes nothing.
  */
 export function planDoublePlayers(rows: readonly Player[]): {
   left: DoublePlayer[]
@@ -256,7 +257,9 @@ export function planDoublePlayers(rows: readonly Player[]): {
   const merges: { gone: Player; stays: Player }[] = []
   const left: DoublePlayer[] = []
   const rank = (row: Player) => (isOfEditors(row) ? 0 : playerSources.length) + playerSources.indexOf(row.source)
-  const best = (group: Player[]) => group.toSorted((a, b) => rank(a) - rank(b) || a.id - b.id)
+  // At the same source the row with the spelling the owner chose stays, not the old one.
+  const old = (row: Player) => (oldSiteNameCorrections.has(row.name) ? 1 : 0)
+  const best = (group: Player[]) => group.toSorted((a, b) => rank(a) - rank(b) || old(a) - old(b) || a.id - b.id)
   const bySeason = groupBy(rows, (row) => row.season)
 
   for (const [season, all] of bySeason) {
