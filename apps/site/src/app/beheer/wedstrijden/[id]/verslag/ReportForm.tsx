@@ -12,13 +12,32 @@ import {
   type InputTableColumn,
   type InputTableRow,
   Link,
+  Notice,
   RadioGroup,
   Select,
   Text,
 } from '@fansite/design-system'
 import { formationChoices } from '@fansite/shared/match-report'
-import { createContext, type ReactNode, use, useActionState, useEffect, useState, useSyncExternalStore } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
+import {
+  canonicalValues,
+  clearDraft,
+  clearDraftAfterSave,
+  draftDueAfterSave,
+  parseDraft,
+  readDraftText,
+  saveDraft,
+} from '#src/beheer/report-draft'
 import {
   addButtonValue,
   cardKindChoices,
@@ -68,6 +87,11 @@ const formId = 'verslag'
 export type ReportChoices = {
   /** The address of the form of the match, where the result of the shoot-out is filled in. */
   matchHref: string
+  /**
+   * The number of the match, for the input the browser keeps (`report-draft.ts`). Leave it out
+   * for a screen that keeps nothing, such as the one that reads a pasted text.
+   */
+  matchId?: number
   /** The name of the opponent, as the headings have it. */
   opponent: string
   /**
@@ -96,6 +120,10 @@ type ReportFormContext = {
   notice: string
   onChange: (form: HTMLFormElement, target: EventTarget) => void
   pending: boolean
+  /** Puts values in the form, as the server's answer does after a button. */
+  restore: (values: ReportValues) => void
+  /** How often values were put in the form, so it is made anew with them. */
+  restored: number
   state: ReportFormState
   title: string
 }
@@ -114,6 +142,86 @@ export function ReportErrorSummary() {
   return <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} title={title} />
 }
 
+const draftNoticeId = 'bewaarde-invoer'
+
+/**
+ * The note above the form when the browser holds input that the server does not have, such as
+ * after a save that failed: Herstel puts it in the form, Weggooien takes it away, and nothing
+ * changes without one of the two. It is a status, so a screen reader reads it without the focus
+ * moving. The focus only moves, to the note, after a choice, since the button is gone then.
+ * With `savedAt` (the page after a save that worked, with the moment of that save) the input is
+ * taken away once for that save, and nothing shows until then.
+ * Without JavaScript it draws nothing.
+ */
+export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined }) {
+  const { choices, restore, state } = useReportForm()
+  const matchId = choices.matchId
+  const [handled, setHandled] = useState<'discarded' | 'restored'>()
+  // What the browser held when the page opened: the note is about that, not about what the
+  // editor types on this page (which is kept for the next time). It shows after hydrating, so
+  // the HTML of the server and the first render of the browser are the same.
+  const [opened] = useState(() =>
+    typeof window === 'undefined' ||
+    matchId === undefined ||
+    (savedAt !== undefined && draftDueAfterSave(matchId, savedAt))
+      ? null
+      : readDraftText(matchId),
+  )
+  const shown = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  )
+  const text = shown ? opened : null
+  const draft = useMemo(() => parseDraft(text), [text])
+  const differs = draft !== undefined && canonicalValues(draft.values) !== canonicalValues(state.values)
+
+  useEffect(() => {
+    if (savedAt !== undefined && matchId !== undefined) {
+      clearDraftAfterSave(matchId, savedAt)
+    }
+  }, [matchId, savedAt])
+
+  const choose = (choice: 'discarded' | 'restored') => {
+    if (draft !== undefined && matchId !== undefined) {
+      if (choice === 'restored') {
+        restore(draft.values)
+      } else {
+        clearDraft(matchId)
+      }
+
+      setHandled(choice)
+      document.getElementById(draftNoticeId)?.focus()
+    }
+  }
+  const message =
+    handled === 'restored'
+      ? 'De bewaarde invoer staat weer in het formulier. Sla het verslag op om hem te houden.'
+      : handled === 'discarded'
+        ? 'De bewaarde invoer is weggegooid.'
+        : differs
+          ? `Dit apparaat bewaarde invoer van ${new Date(draft.savedAt).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })} die niet is opgeslagen.`
+          : ''
+
+  return (
+    <>
+      <Notice id={draftNoticeId} tabIndex={-1}>
+        {message}
+      </Notice>
+      {handled === undefined && differs ? (
+        <>
+          <Button onClick={() => choose('restored')} type="button">
+            Herstel
+          </Button>{' '}
+          <Button appearance="soft" onClick={() => choose('discarded')} type="button">
+            Weggooien
+          </Button>
+        </>
+      ) : null}
+    </>
+  )
+}
+
 /**
  * The cards of the form: the data of the report, and for each team the line-up and the bench,
  * the substitutions, the goals, the cards, the missed penalties and the shoot-out. The first
@@ -126,7 +234,7 @@ export function ReportErrorSummary() {
  * the server makes them again after each button and each save.
  */
 export function ReportFields() {
-  const { choices, current, formAction, notice, onChange, state } = useReportForm()
+  const { choices, current, formAction, notice, onChange, restored, state } = useReportForm()
   const { errors, warnings } = state
   // Whether the page is live in the browser: the server and a page without JavaScript say no.
   const live = useSyncExternalStore(
@@ -572,7 +680,13 @@ export function ReportFields() {
     <Form
       action={formAction}
       id={formId}
-      key={state.version}
+      key={`${state.version}-${restored}`}
+      onBlur={(event) => {
+        // Leaving a field keeps the input in the browser, so a save that fails costs nothing.
+        if (choices.matchId !== undefined) {
+          saveDraft(choices.matchId, readReportValues(new FormData(event.currentTarget)), state.values)
+        }
+      }}
       onChange={(event) => onChange(event.currentTarget, event.target)}
     >
       {/* The first button decides what Enter does: it saves. It is not on the screen. */}
@@ -678,6 +792,7 @@ export function ReportFormShell({
   /** The title of the list of errors on the page as it opens. */
   title: string
 }) {
+  const [restored, setRestored] = useState(0)
   const [live, setLive] = useState<{
     changed: ChangedRow | undefined
     for: ReportFormState
@@ -752,6 +867,11 @@ export function ReportFormShell({
           })
         },
         pending,
+        restore: (restoredValues) => {
+          setLive({ changed: undefined, for: state, notice: '', values: restoredValues })
+          setRestored((count) => count + 1)
+        },
+        restored,
         // The headline of the errors is the one of the page as it opens, the plain one after.
         state,
         title: state.version === 0 ? title : 'Er is iets mis',

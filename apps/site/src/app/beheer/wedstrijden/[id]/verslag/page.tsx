@@ -17,7 +17,7 @@ import { describeShowDelay } from '#src/matches'
 
 import { submitRemoveReport, submitReport } from './actions'
 import { RemoveReportForm } from './RemoveReportForm'
-import { ReportErrorSummary, ReportFormProvider, ReportSavePanel } from './ReportForm'
+import { ReportDraftNotice, ReportErrorSummary, ReportFormProvider, ReportSavePanel } from './ReportForm'
 import { ReportWorkspace } from './ReportPreview'
 
 // Render on each request: the report changes with every entry and every import.
@@ -29,6 +29,9 @@ type Props = {
   params: Promise<{ id: string }>
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
+
+// The words of the address after a save that worked, so the input the browser kept is gone.
+const savedNotices = ['klaar', 'nog-niet-klaar', 'ongewijzigd', 'opgeslagen', 'weggehaald']
 
 /** What the last action says, by the word in the address. */
 const notices: Record<string, { text: string; title: string }> = {
@@ -89,6 +92,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
       action={submitReport.bind(null, match.id, reportBasis(report))}
       choices={{
         matchHref: matchPath(match.id),
+        matchId: match.id,
         opponent: match.opponent,
         preview: previewMatchOf(match, now),
         series: seriesOf(match),
@@ -135,6 +139,13 @@ export default async function ReportPage({ params, searchParams }: Props) {
         wide
       >
         <ReportErrorSummary />
+        <ReportDraftNotice
+          savedAt={
+            typeof gedaan === 'string' && savedNotices.includes(gedaan)
+              ? (report?.report.savedAt.getTime() ?? 0)
+              : undefined
+          }
+        />
         {notice === undefined ? null : (
           <Notice>
             <Strong>{notice.title}.</Strong> {notice.text}

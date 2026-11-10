@@ -300,6 +300,7 @@
 - **Waarom:** geen cookie, dus geen toestemming en niets naar de server, en een pagina die voor iedereen gelijk is, blijft te cachen. Het attribuut alleen zetten bij een keuze laat het gedrag voor wie niets koos gelijk aan dat van nu, en laat het script weinig beslissen.
 - **Gecontroleerd:** een e2e-test blokkeert de scripts van de app en ziet dat `public/theme.js` alleen al `data-theme` zet, en dat de keuze na vernieuwen blijft. axe slaagt met een keuze die afwijkt van het systeem, in beide richtingen.
 - **Alternatieven:** een functioneel cookie; dat laat de server het goede thema meteen tonen zonder script, maar maakt elke pagina per bezoeker anders en vraagt de privacyverklaring bij te werken (een vraag van #149). Of `data-theme` altijd zetten; dat laat het script meer beslissen en vraagt dat het script en de pagina's elkaar overal gelijk houden.
+- **Later:** zie _De invoer van het verslag staat in `localStorage`, met een knop om te herstellen_ (10 november 2026): `localStorage` dient er ook voor de eigen invoer van een beheerder, naast de themakeuze.
 
 ## De site test componenten met jsdom en Testing Library
 
@@ -1970,6 +1971,7 @@
   Een redacteur die in een andere browser inlogt, ziet het item daar pas na een bezoek aan het beheer.
 - **Gevolg:** het hoofdstuk Cookies op `/privacy` en de README van de site zeggen dat de browser van een redacteur dit teken bewaart.
 - **Alternatieven:** een tweede cookie dat bij elk verzoek meegaat (een tweede cookie naast het enige cookie van de site); een verzoek naar `/beheer` bij elke paginaweergave van elke bezoeker (extra verkeer voor iedereen, en het beheer ziet elk bezoek); het cookie van het beheer voor de hele site laten gelden (elke pagina wordt een pagina per bezoeker, en het geheim gaat bij elk verzoek mee).
+- **Later:** zie _De invoer van het verslag staat in `localStorage`, met een knop om te herstellen_ (10 november 2026): `localStorage` bewaart in het beheer ook de invoer van het formulier van een verslag, en de inlogpagina haalt die weg als de redacteur uitlogt.
 
 ## De kaart Stand heeft een schakelaar voor de stand over de laatste vijf wedstrijden
 
@@ -4354,3 +4356,33 @@
 - **Waarom:** de eigenaar vult het verslag in zoals de wedstrijd verliep, en een lijst met wie niet kan, kost tijd en geeft fouten pas na het opslaan.
   Op rugnummer zoeken sluit aan bij de selectie.
 - **Alternatieven:** sorteren op alleen naam (past niet bij hoe de selectie bekend is); kaarten niet meetellen bij Eruit (kleiner, maar dan blijft een speler in de lijst die niet meer op het veld kan staan); de keuze verbergen zonder de server te laten weigeren (zonder JavaScript zou dan niets meer worden gecontroleerd).
+
+## De invoer van het verslag staat in `localStorage`, met een knop om te herstellen
+
+- **Datum:** 10 november 2026
+- **Besluit:** het formulier van een wedstrijdverslag bewaart bij het verlaten van een veld alle waarden onder de sleutel `fansite-verslag-<id van de wedstrijd>` in `localStorage`, met het moment van bewaren (#1062).
+  Dit is de eerste keer dat er invoer van een formulier in staat; tot nu toe stonden er alleen de themakeuze (`fansite-theme`) en het teken van het menu (`fansite-beheer`).
+  - **Wat erin staat:** een JSON-tekst met `savedAt` (het moment, in milliseconden) en `values` (de velden van het formulier, zoals `readReportValues` ze leest), en niets meer: geen adres, geen naam van de redacteur en geen gegevens van bezoekers.
+    Er gaat geen verzoek weg.
+    De tekst wordt alleen geschreven als hij verschilt van wat er stond, en waarden die gelijk zijn aan wat de server heeft, zijn geen invoer: dan gaat de sleutel weg.
+  - **Wanneer hij weggaat:** na een geslaagde opslag, bij uitloggen en na dertig dagen.
+    Een geslaagde opslag gaat naar de pagina met `?gedaan=opgeslagen`, `nog-niet-klaar`, `klaar`, `ongewijzigd` of `weggehaald`, en daar haalt `ReportDraftNotice` de sleutel weg.
+    Dat gebeurt één keer per opslag: de browser onthoudt onder `fansite-verslag-<id>-opgeslagen` het moment van de opslag (`report.savedAt` van de server), zodat een pagina die opnieuw opent op hetzelfde adres invoer die daarna is getypt niet weghaalt.
+    Die tweede sleutel bevat alleen dat moment en gaat bij uitloggen met de andere weg.
+    Bij uitloggen leidt `logOut` naar `/beheer/inloggen?uitgelogd=1`, en `AdminMarker` haalt daar alle sleutels met `fansite-verslag-` weg, op dezelfde plek en op dezelfde manier als het teken van het menu.
+    Een sessie die verloopt, haalt de invoer niet weg: de inlogpagina zonder dat woord laat hem staan, want daar is hij voor.
+    Na dertig dagen haalt het lezen hem weg.
+  - **Bij het openen:** wijkt de bewaarde invoer af van wat de server heeft, dan staat boven het formulier een melding met `role="status"` en twee knoppen, Herstel en Weggooien.
+    Niets wordt stilletjes overschreven.
+    Herstel zet de waarden in het formulier, zoals de toestand van het formulier dat ook doet na een knop, en laat de sleutel staan tot de opslag.
+    Weggooien haalt de sleutel weg.
+    De melding steelt bij het openen de focus niet; na een keuze gaat de focus naar de melding, want de knop is dan weg.
+  - **Kapot of geblokkeerd:** is `localStorage` niet beschikbaar of de tekst kapot, dan werkt het formulier gewoon, zonder foutmelding; een kapotte tekst wordt weggehaald.
+  - **Zonder JavaScript** gebeurt er niets in de browser, en de server geeft de ingevulde waarden terug na een fout, zoals voorheen.
+  - **Alleen dit scherm:** het snelle scherm voor het bijhouden en het scherm voor geplakte tekst bewaren niets.
+  - **De privacyverklaring** noemt het bij het teken van het menu, en de README van de site beschrijft de sleutel.
+- **Waarom:** de server geeft de invoer alleen terug als hij antwoordt.
+  Een verbroken verbinding, een time-out of een verlopen sessie verliest hem.
+  Een melding met een keuze overschrijft niets wat de server heeft.
+  Het gaat om de eigen invoer van een beheerder, op zijn eigen apparaat, in het beheer, dus de belofte aan bezoekers verandert niet.
+- **Alternatieven:** automatisch herstellen (kan stil verbergen wat de server heeft); bewaren op de server (een nieuwe tabel en een verzoek bij elke wijziging, meer dan nodig); bewaren bij elke toets (meer schrijven, zonder winst); de invoer ook bij een verlopen sessie weghalen, zoals het teken van het menu (dan is hij juist weg in het geval waarvoor hij er is).

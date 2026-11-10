@@ -262,7 +262,7 @@ describe('logOut', () => {
 
     expect(await database.db.select().from(adminSessions)).toHaveLength(1)
 
-    expect(await redirectOf(() => logOut(), {})).toBe('/beheer/inloggen')
+    expect(await redirectOf(() => logOut(), {})).toBe('/beheer/inloggen?uitgelogd=1')
     expect(await database.db.select().from(adminSessions)).toEqual([])
     expect(set).toHaveBeenLastCalledWith(sessionCookieName, '', { ...sessionCookieOptions, maxAge: 0 })
 

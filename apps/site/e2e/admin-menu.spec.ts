@@ -90,7 +90,7 @@ test.describe('the item Beheer in the main menu', () => {
     await expect.poll(() => mark(page)).toBe('1')
 
     await page.getByRole('navigation', { name: 'Beheer' }).getByRole('button', { name: 'Uitloggen' }).click()
-    await expect(page).toHaveURL(/\/beheer\/inloggen$/)
+    await expect(page).toHaveURL(/\/beheer\/inloggen\?uitgelogd=1$/)
     await expect.poll(() => mark(page)).toBeNull()
     await expect(item(page)).toHaveCount(0)
 
