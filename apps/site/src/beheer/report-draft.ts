@@ -220,7 +220,6 @@ export function subscribeToDrafts(onChange: () => void) {
 }
 
 /** Whether a parsed value has the shape of the values of the form: texts in rows in lists. */
-/** Whether a parsed value has the shape of the values of the form: texts in rows in lists. */
 function isValues(value: unknown): value is ReportValues {
   const record = (item: unknown): item is Record<string, unknown> => typeof item === 'object' && item !== null
   const get = (item: Record<string, unknown>, key: string) => item[key]
