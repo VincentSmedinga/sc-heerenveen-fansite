@@ -98,7 +98,7 @@ describe('the work list of persons without a line', () => {
       'Opgeslagen: Verzonnen Spits, verdediger. Nog 78 personen zonder linie.',
     )
     expect(screen.getByRole('link', { name: 'Zonder linie (78)' })).toBeTruthy()
-    expect(document.activeElement?.textContent).toBe('Bedachte Back')
+    await waitFor(() => expect(document.activeElement?.textContent).toBe('Bedachte Back'))
   })
 
   it('puts an error at its own row with the focus on it, and leaves the other rows alone', async () => {
@@ -147,7 +147,7 @@ describe('the work list of persons without a line', () => {
     const link = await screen.findByRole('link', { name: 'Toon de volgende personen' })
 
     expect(link.getAttribute('href')).toBe(paths.linie)
-    expect(document.activeElement).toBe(screen.getByRole('status'))
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('status')))
   })
 })
 
