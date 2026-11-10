@@ -130,7 +130,7 @@ function compose(
       'Onze invoer blijft staan tot iemand beslist.',
       `Beslis op de pagina van de wedstrijd: ${link}`,
       takenOver === undefined
-        ? 'Het seizoen is voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.'
+        ? 'Het seizoen is voorbij of bijna voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.'
         : `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(takenOver)}, als Wikipedia die dan nog zegt.`,
       ...footer,
     ].join('\n'),

@@ -914,7 +914,7 @@ describe('the match', () => {
       const html = await form(id)
 
       expect(html).toContain(
-        'Het seizoen is voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.',
+        'Het seizoen is voorbij of bijna voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.',
       )
       expect(html).not.toContain('Zonder besluit neemt de import dit over')
     })

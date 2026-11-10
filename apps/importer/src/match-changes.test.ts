@@ -59,7 +59,7 @@ describe('the last line of a change that waits, in `import:status` and `import:c
 
   it('promises no take-over in a season that is over', () => {
     expect(describeWaitingChange(waiting('2025/26'), now).at(-1)).toMatch(
-      /seen 2 times; the season is over, so it waits until a person decides$/u,
+      /seen 2 times; the season is over or nearly over, so it waits until a person decides$/u,
     )
   })
 })

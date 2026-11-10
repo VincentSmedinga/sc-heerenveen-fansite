@@ -982,7 +982,7 @@ describe('the command that decides the changes', () => {
       expect.stringContaining('  now: home '),
       expect.stringContaining('  Wikipedia: home '),
       expect.stringMatching(
-        /^ {2}first seen .* UTC, last seen .* UTC, seen 1 time; the season is over, so it waits until a person decides$/u,
+        /^ {2}first seen .* UTC, last seen .* UTC, seen 1 time; the season is over or nearly over, so it waits until a person decides$/u,
       ),
     ])
   })

@@ -209,7 +209,7 @@ describe('the mail about a difference in a season that is over (issue 1025)', ()
     await run()
 
     expect(mails[0]?.text).toContain(
-      'Het seizoen is voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.',
+      'Het seizoen is voorbij of bijna voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.',
     )
     expect(mails[0]?.text).not.toContain('Beslist niemand')
   })

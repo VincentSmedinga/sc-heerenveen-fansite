@@ -3585,6 +3585,7 @@
   - **De grens:** een seizoen is voorbij vanaf 1 juli van het volgende, in UTC, zoals `seasonOf`.
     Het seizoen van een wijziging staat in `match_changes.season`.
     Eindigen de zeven dagen na 30 juni, dan neemt de import de wijziging ook niet over, en de teksten beloven dan geen dag.
+    De teksten zeggen daarom "voorbij of bijna voorbij": in de laatste week van juni loopt het seizoen nog.
   - **Wat blijft:** een wijziging vervalt nog steeds als Wikipedia hetzelfde zegt als de invoer of de oude waarde terugzet.
     Geen wijziging wordt aangenomen, afgewezen of gesloten omdat de regel verandert, en er is geen migratie.
   - **Een pagina die als geheel wacht:** wachten er in een seizoen dat voorbij is meer dan zes wijzigingen, dan blijft de pagina vastgehouden tot iemand ze beslist.

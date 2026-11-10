@@ -34,7 +34,7 @@ describe('the words of a difference', () => {
 
     expect(words).toMatchObject({
       keep: 'Houd onze invoer',
-      note: 'Onze invoer blijft staan tot je beslist. Het seizoen is voorbij, dus de import neemt Wikipedia niet vanzelf over.',
+      note: 'Onze invoer blijft staan tot je beslist. Het seizoen is voorbij of bijna voorbij, dus de import neemt Wikipedia niet vanzelf over.',
       takeOver: 'Neem Wikipedia over',
     })
   })

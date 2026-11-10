@@ -45,7 +45,7 @@ export function describeWaitingChange(change: MatchChange, now: Date): string[] 
     `${nameChange(change)}: ${printable(change.reason)}`,
     `  now: ${printable(change.oldValue)}`,
     `  Wikipedia: ${change.newValue === null ? 'the match is not on the page' : printable(change.newValue)}`,
-    `  ${seen}; ${takenOver === undefined ? 'the season is over, so it waits until a person decides' : `taken over from ${formatTime(takenOver)} if it stays`}`,
+    `  ${seen}; ${takenOver === undefined ? 'the season is over or nearly over, so it waits until a person decides' : `taken over from ${formatTime(takenOver)} if it stays`}`,
   ]
 }
 
