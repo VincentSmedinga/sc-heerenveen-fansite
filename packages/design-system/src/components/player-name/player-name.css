@@ -68,7 +68,7 @@
     align-items: center;
     color: var(--hf-colour-text-default);
     display: flex;
-    font-size: 0.625rem;
+    font-size: var(--hf-flag-code-font-size);
     font-weight: var(--hf-name-font-weight);
     justify-content: center;
     letter-spacing: 0;
