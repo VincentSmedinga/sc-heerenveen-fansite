@@ -130,6 +130,7 @@ Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
 De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
+De werklijst `/beheer/kwaliteit/personen` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
 Vanuit de root:
@@ -1226,6 +1227,16 @@ Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwa
 Elke afwijking heeft een formulier met een reden en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
 Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
+
+Onder de tabel staat een kaart met het aantal personen zonder linie en zonder land, en een link naar `/beheer/kwaliteit/personen` (`src/app/beheer/kwaliteit/personen`, #1053).
+Die pagina heeft twee lijsten, `?lijst=land` voor de tweede, elk in delen van 50 (`?deel=2`), de personen van de nieuwste seizoenen eerst.
+Een rij toont de naam, het eerste en het laatste seizoen en een link naar het artikel op Wikipedia.
+Voor de linie heeft ze vier knoppen, voor het land een keuzelijst met eerst de landen die onze personen al hebben, en een knop.
+De lijst is een onderdeel in de browser (`PersonWorkList.tsx`): een keuze slaat alleen die rij op (`submitPersonFact` in `actions.ts`), haalt haar uit de lijst en laat de andere rijen staan.
+Een regel boven de lijst zegt wat er is opgeslagen en hoeveel er nog zijn, en "Sla over" zet een persoon onderaan tot de pagina opnieuw laadt.
+`choosePersonFact` in `src/beheer/person-facts.ts` zet de waarde met de bron `manual`, die geen import vervangt, en schrijft `person.edit` in het logboek, in één transactie.
+Heeft de persoon de waarde intussen al, dan verandert er niets en staat dat als fout bij de rij.
+De knoppen en velden van de lijst zijn 44 pixels hoog, ook al is het beheer compact: de kaarten zetten het token `--hf-size-control` terug.
 
 Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).
 De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen de bron die je overneemt of houdt.

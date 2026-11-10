@@ -14,6 +14,7 @@ const meta = preview.meta({
           'Een lijst om één antwoord uit te kiezen. Zet het altijd in een `Field`, dat het zijn label geeft.',
           'Elke keuze is een `Select.Option`: het `option`-element, dat alleen in een `Select` werkt.',
           'De waarde van de gekozen keuze gaat mee met het formulier.',
+          'Heeft een lange lijst een deel waar mensen het meest uit kiezen, zet dat deel dan bovenaan in een `Select.Group` met een naam, en de rest in een tweede groep.',
           '',
           'Met `defaultValue` kies je het antwoord dat in het begin gekozen is.',
           'Wil je dat de bezoeker zelf kiest, zet dan als eerste een keuze zoals "Kies een onderwerp" met een lege `value`, en maak het veld verplicht.',
@@ -55,6 +56,27 @@ export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', ren
 export const Styled = meta.story({
   name: 'Met de opmaak van de site',
   render: () => render('hf-select-styled'),
+})
+
+export const Groups = meta.story({
+  name: 'Met groepen',
+  render: () => (
+    <Field id="land" label="Land">
+      <Select defaultValue="" name="land">
+        <Select.Option value="">Kies een land</Select.Option>
+        <Select.Group label="Landen van onze spelers">
+          <Select.Option value="DK">Denemarken (DK)</Select.Option>
+          <Select.Option value="NL">Nederland (NL)</Select.Option>
+          <Select.Option value="NO">Noorwegen (NO)</Select.Option>
+        </Select.Group>
+        <Select.Group label="Andere landen">
+          <Select.Option value="AD">Andorra (AD)</Select.Option>
+          <Select.Option value="BE">België (BE)</Select.Option>
+          <Select.Option value="ZW">Zimbabwe (ZW)</Select.Option>
+        </Select.Group>
+      </Select>
+    </Field>
+  ),
 })
 
 export const SmallLight = meta.story({

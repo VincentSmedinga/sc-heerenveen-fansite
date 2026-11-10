@@ -4253,3 +4253,37 @@
 - **Waarom:** de redactie vult de linies en landen één keer in, op de omgeving die er nu is.
 - **Alternatieven:** lijsten in de repository (`personLines` en een lijst voor landen) waar elke omgeving ze uit leest.
   Op productie opnieuw invullen.
+
+## Een werklijst in het beheer vult de linie en het land van personen aan
+
+- **Datum:** 10 november 2026
+- **Besluit:** de redactie vult de gaten in op `/beheer/kwaliteit/personen`, een pagina van het beheer, en niet in een gesprek met een agent (#1053).
+  De pagina heeft twee lijsten, de personen zonder linie en de personen zonder land, met bovenaan hoeveel er nog zijn.
+  Een rij heeft vier knoppen voor de linie, of een keuzelijst van landen met een knop, en slaat op bij een tik.
+  - **Opslaan bij de rij:** de lijst is een onderdeel in de browser, en elke rij heeft een eigen formulier.
+    Een keuze slaat alleen die rij op, haalt haar uit de lijst en laat de andere rijen staan zoals de redactie ze achterliet.
+    De pagina laadt daarbij niet opnieuw.
+    Een regel boven de lijst zegt wat er is opgeslagen en hoeveel er nog zijn, ook voor een schermlezer, en de focus gaat naar de volgende persoon.
+    Een fout staat bij de rij zelf en krijgt de focus.
+    Zonder JavaScript is een keuze een gewone POST, waarna de pagina de lijst van dat moment toont.
+  - **Alleen wat leeg is:** de lijst vult aan en verbetert niet.
+    Heeft de persoon de linie of het land intussen al, van een import of van een andere beheerder, dan verandert er niets en zegt de rij dat.
+    Verbeteren doet de redactie in het formulier van een speler.
+  - **Overslaan:** "Sla over" zet de persoon onderaan het deel van de lijst dat op het scherm staat.
+    Dat onthoudt alleen de browser: laadt de pagina opnieuw, dan staat de persoon weer op zijn plek.
+  - **Het land:** een keuzelijst van de browser met twee groepen, eerst de landen die onze personen al hebben en dan de andere, elk op naam met de landcode erachter.
+    Kiezen en opslaan zijn twee stappen: een lijst die bij elke keuze opslaat, slaat met het toetsenbord bij elke pijltjestoets op.
+  - **Volgorde en delen:** de personen van de nieuwste seizoenen staan eerst, daarna op naam, en wie in geen selectie staat komt laatst.
+    Een lijst van meer dan 50 personen staat in delen van 50, met een link naar het volgende deel.
+  - **Grote knoppen:** het beheer is compact, met knoppen en velden van 36 pixels hoog.
+    Deze lijst is voor een duim op een telefoon, dus de kaarten van de lijst zetten de hoogte terug op 44 pixels, met het token `--hf-size-control`.
+  - **Het logboek:** een keuze schrijft de nieuwe actie `person.edit`, met de persoon in `item_id` en de naam en de waarde in `detail`.
+    De migratie `0067_add_person_edit_action` voegt de actie toe.
+    De keuze krijgt de bron `manual` (`setEditorsPersonFacts`), die geen import vervangt.
+- **Waarom:** de lijst werkt op een telefoon, laat zien hoeveel er nog is, en het antwoord staat direct in de database, met een regel in het logboek.
+  Opslaan bij de rij houdt het tempo erin: bij 79 personen zonder linie is elke keer een nieuwe pagina te traag.
+- **Alternatieven:** een quiz in een chat (geen overzicht, en elk antwoord moet nog worden overgezet).
+  Alleen het formulier van een speler (te veel stappen per persoon).
+  Na elke keuze de pagina opnieuw laden (wist wat de redactie in een andere rij al koos).
+  De actie `player.edit` van een speler van de persoon gebruiken (een persoon zonder speler heeft er geen, en het logboek zou een speler noemen die niet veranderde).
+  Een zoekveld met suggesties voor het land (zie het besluit over het formulier van een speler hierboven).

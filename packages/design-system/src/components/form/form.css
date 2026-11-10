@@ -22,4 +22,15 @@
     display: grid;
     gap: var(--hf-space-xl);
   }
+
+  /*
+   * The buttons of a form with more than one: columns of the same width, as many as fit, with
+   * the small space between them. A button fills its column, so it is a large target, and four
+   * choices stand two by two on a phone.
+   */
+  .hf-form-buttons {
+    display: grid;
+    gap: var(--hf-space-s);
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
 }

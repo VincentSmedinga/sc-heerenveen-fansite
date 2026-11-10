@@ -10,6 +10,7 @@ import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/desig
 import { Fragment } from 'react'
 
 import { compact } from '#src/beheer/density'
+import { countPersonsWithout, personFactsPath } from '#src/beheer/person-facts'
 import {
   fieldDifferencesPath,
   statDifferencesPath,
@@ -59,6 +60,7 @@ export default async function QualityPage() {
   const edited = await countWaitingFieldDifferences(db)
   const alike = await similarPersons(db)
   const list = await playerListReport(db)
+  const without = await countPersonsWithout(db)
 
   return (
     <Page.Main
@@ -128,6 +130,20 @@ export default async function QualityPage() {
         )}
       </Card>
       <PlayerListCard report={list} />
+      <Card aria-labelledby="linie-en-land-kop">
+        <Heading id="linie-en-land-kop" level={2}>
+          Personen zonder linie of land
+        </Heading>
+        {without.linie + without.land === 0 ? (
+          <Text>Elke persoon heeft een linie en een land.</Text>
+        ) : (
+          <Text>
+            {plural(without.linie, 'persoon heeft', 'personen hebben')} geen linie en{' '}
+            {plural(without.land, 'persoon heeft', 'personen hebben')} geen land.{' '}
+            <Link href={personFactsPath}>Vul de linie en het land aan</Link>
+          </Text>
+        )}
+      </Card>
     </Page.Main>
   )
 }

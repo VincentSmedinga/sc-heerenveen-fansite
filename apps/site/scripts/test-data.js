@@ -5,8 +5,9 @@
 // `pnpm screenshots`. Run it after `pnpm db:migrate` and `pnpm db:seed`, and before you start
 // the site: the homepage keeps its headlines for five minutes. `--remove` takes them out again,
 // the season before this one only while all its matches are made up, and a list of stadiums
-// and a list of names of its own for SV Proefdorp. The database holds nothing else of them: it
-// is the one you develop with.
+// and a list of names of its own for SV Proefdorp, and made-up persons without a line or a
+// country for the work list of the admin. The database holds nothing else of them: it is the
+// one you develop with.
 //
 //   pnpm --filter site test-data
 //   pnpm --filter site test-data --remove
@@ -19,6 +20,7 @@ import { addFinalPlaces } from '../e2e/final-places.ts'
 import { addHeadlines } from '../e2e/headlines.ts'
 import { addHeldChange } from '../e2e/held-changes.ts'
 import { addOlderMeetings } from '../e2e/older-meetings.ts'
+import { addPersons } from '../e2e/persons.ts'
 import { addStadiums } from '../e2e/stadiums.ts'
 
 const remove = process.argv.includes('--remove')
@@ -36,6 +38,7 @@ for (const add of [
   addOlderMeetings,
   addStadiums,
   addClubNames,
+  addPersons,
 ]) {
   const removeAgain = await add()
 

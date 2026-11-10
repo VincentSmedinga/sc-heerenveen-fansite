@@ -25,6 +25,9 @@ const meta = preview.meta({
           'Het formulier verstuur je met `action` en `method`, of met een actie van de server.',
           'Een formulier dat gegevens verstuurt, gebruikt `method="post"`.',
           '',
+          'Heeft een formulier meer dan één knop, zet ze dan in een `Form.Buttons`: de knoppen staan naast elkaar in even brede kolommen, met ruimte ertussen, en onder elkaar waar ze niet passen.',
+          'Zo is elke knop een groot doel voor een vinger.',
+          '',
           'Een formulier van kaarten, zoals een wedstrijd in het beheer, zet de ruimte van de pagina tussen de kaarten.',
         ].join('\n'),
       },
@@ -67,5 +70,24 @@ const cards = () => (
     </Card>
   </Form>
 )
+
+export const Buttons = meta.story({
+  globals: { theme: 'light' },
+  name: 'Meer knoppen',
+  render: () => (
+    <Form onSubmit={(event) => event.preventDefault()}>
+      <Form.Buttons>
+        {['Doelman', 'Verdediger', 'Middenvelder', 'Aanvaller'].map((line) => (
+          <Button aria-label={`${line} voor Jan Voorbeeld`} key={line} type="submit">
+            {line}
+          </Button>
+        ))}
+        <Button appearance="soft" aria-label="Sla over: Jan Voorbeeld" type="button">
+          Sla over
+        </Button>
+      </Form.Buttons>
+    </Form>
+  ),
+})
 
 export const Cards = meta.story({ globals: { theme: 'light' }, name: 'Kaarten', render: cards })

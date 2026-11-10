@@ -13,4 +13,12 @@ describe('form.css', () => {
     expect(rule).toContain('gap: var(--hf-space-xl);')
     expect(css).not.toMatch(/(^|\n)\s*\.hf-form \{[^}]*display: grid/)
   })
+
+  it('puts the buttons of Form.Buttons in columns of one width with space between them', () => {
+    const rule = css.match(/\.hf-form-buttons \{([^}]*)\}/)?.[1] ?? ''
+
+    expect(rule).toContain('display: grid;')
+    expect(rule).toContain('gap: var(--hf-space-s);')
+    expect(rule).toContain('grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));')
+  })
 })

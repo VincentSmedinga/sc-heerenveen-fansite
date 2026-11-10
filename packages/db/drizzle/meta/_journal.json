@@ -470,6 +470,13 @@
       "when": 1794323614741,
       "tag": "0066_add_old_site_line_source",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "5",
+      "when": 1794325980161,
+      "tag": "0067_add_person_edit_action",
+      "breakpoints": true
     }
   ]
 }

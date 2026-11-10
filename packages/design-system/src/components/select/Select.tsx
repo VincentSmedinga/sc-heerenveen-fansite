@@ -9,6 +9,11 @@ import { type Size, sizeClassName } from '../size'
  */
 export const selectWidths = ['default', 'natural'] as const
 
+export type SelectGroupProps = Omit<ComponentPropsWithoutRef<'optgroup'>, 'label'> & {
+  /** The name of the group, which the list shows above its choices. */
+  label: string
+}
+
 export type SelectOptionProps = ComponentPropsWithoutRef<'option'>
 
 export type SelectProps = Omit<ComponentPropsWithoutRef<'select'>, 'size'> & {
@@ -25,6 +30,16 @@ export type SelectProps = Omit<ComponentPropsWithoutRef<'select'>, 'size'> & {
 }
 
 export type SelectWidth = (typeof selectWidths)[number]
+
+/**
+ * A group of choices in a Select with a name above them: an `optgroup` element, for a long list
+ * that has a part people choose most. It only works inside a Select, so it is written as
+ * Select.Group.
+ */
+const Group = (props: SelectGroupProps) => <optgroup {...props} />
+
+// The name in React's developer tools and in the code examples in Storybook.
+Group.displayName = 'Select.Group'
 
 /**
  * A choice in a Select: an `option` element. It only works inside a Select, so it is written as
@@ -46,4 +61,5 @@ export const Select = ({ className, size = 'default', width = 'default', ...prop
   />
 )
 
+Select.Group = Group
 Select.Option = Option

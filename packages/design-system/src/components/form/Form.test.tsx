@@ -26,3 +26,20 @@ describe('Form', () => {
     expect(container.firstElementChild?.getAttribute('method')).toBe('post')
   })
 })
+
+describe('Form.Buttons', () => {
+  it('is a group around the buttons of a form, with its own class', () => {
+    const { container } = render(
+      <Form>
+        <Form.Buttons className="extra" id="knoppen">
+          Knoppen
+        </Form.Buttons>
+      </Form>,
+    )
+    const buttons = container.querySelector('form > div')
+
+    expect(buttons?.className).toBe('hf-form-buttons extra')
+    expect(buttons?.id).toBe('knoppen')
+    expect(buttons?.textContent).toBe('Knoppen')
+  })
+})
