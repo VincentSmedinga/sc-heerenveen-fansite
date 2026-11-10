@@ -247,6 +247,12 @@ async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Person): 
     }
   }
 
+  // The line and the country are those of the person that stays, or of the other when he has
+  // none. One the editors set (`manual`) goes before one from another source (#1051).
+  const editorsOnly = (mine: null | string, theirs: null | string) => theirs === 'manual' && mine !== 'manual'
+  const lineFrom = kept.line === null || editorsOnly(kept.lineSource, other.lineSource) ? other : kept
+  const countryFrom = kept.country === null || editorsOnly(kept.countrySource, other.countrySource) ? other : kept
+
   // The other person goes first: the Q-number is unique, so two persons cannot have it at once.
   await tx.delete(persons).where(eq(persons.id, other.id))
   await tx
@@ -255,8 +261,10 @@ async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Person): 
       birthDate: kept.birthDate ?? other.birthDate,
       birthDatePrecision: kept.birthDate === null ? other.birthDatePrecision : kept.birthDatePrecision,
       birthPlaceId: kept.birthPlaceId ?? other.birthPlaceId,
-      line: kept.line ?? other.line,
-      lineSource: kept.line === null ? other.lineSource : kept.lineSource,
+      country: countryFrom.country,
+      countrySource: countryFrom.countrySource,
+      line: lineFrom.line,
+      lineSource: lineFrom.lineSource,
       wikidataId: kept.wikidataId ?? other.wikidataId,
       wikidataReadAt: kept.wikidataReadAt ?? other.wikidataReadAt,
       wikipediaPageId: kept.wikipediaPageId ?? other.wikipediaPageId,

@@ -5,7 +5,7 @@ import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne,
 import { alias } from 'drizzle-orm/mysql-core'
 
 import type { Database } from './client.ts'
-import type { Competition, MatchPageKind, StaffRole } from './schema.ts'
+import type { Competition, MatchPageKind, PlayerPosition, StaffRole } from './schema.ts'
 
 import { listClubNamePeriods, nameOnDay, withSeasonNames } from './club-name-periods.ts'
 import {
@@ -886,10 +886,11 @@ export async function listSeasonMatches(db: Database, season: string) {
 /**
  * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
  * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
- * `personFamilyName`, null while the importer has not read the article), the position (null
- * when the list the player comes from gives none), the shirt number (null when it gives none),
- * the country code of the flag in the table (`country`, null when it names none)
- * and the source of the row. Unlike `listSquad`, this also gives a player who left the squad:
+ * `personFamilyName`, null while the importer has not read the article), the position, the
+ * shirt number (null when the list the player comes from gives none), the country code of the
+ * flag (`country`) and the source of the row. The position and the country are those of the
+ * row of the season, and else the line and the country of the person (#1051); null when
+ * neither has one. Unlike `listSquad`, this also gives a player who left the squad:
  * he belongs to the season. The order is the shirt number, players without one last, then the
  * surname the search page looks for (`searchTerm`, so `van Aken` stands under the V) and the
  * name.
@@ -897,12 +898,12 @@ export async function listSeasonMatches(db: Database, season: string) {
 export function listSeasonPlayers(db: Database, season: string) {
   return db
     .select({
-      country: players.country,
+      country: sql<null | string>`coalesce(${players.country}, ${persons.country})`,
       name: players.name,
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
-      position: players.position,
+      position: sql<null | PlayerPosition>`coalesce(${players.position}, ${persons.line})`,
       searchTerm: players.searchTerm,
       shirtNumber: players.shirtNumber,
       source: players.source,

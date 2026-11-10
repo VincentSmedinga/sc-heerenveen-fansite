@@ -311,21 +311,25 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
 
 /**
  * Shows how many persons the importer has read from Wikidata, and what they have: the Q-number,
- * a birth date, a nationality and a line, by where the line came from. It is information and no
- * fault.
+ * a birth date, a nationality, a line and a country, by where the line and the country came
+ * from. It is information and no fault.
  */
 async function showPersonData(db: Database, write: (line: string) => void): Promise<void> {
   const counts = await countPersonData(db)
+  const { countries } = counts
 
   write(`Persons from Wikidata: ${counts.read} of ${counts.total} read, ${counts.total - counts.read} to go`)
   write(
     `  with a Q-number: ${counts.wikidataId}, with a birth date: ${counts.birthDate}, with a nationality: ${counts.nationality}`,
   )
   write(
-    `  line: ${counts.lines.wikidata} from Wikidata, ${counts.lines.squad} from the squad, ${counts.lines.manual} from the list, ${counts.noLine} without`,
+    `  line: ${counts.lines.wikidata} from Wikidata, ${counts.lines.squad} from the squad, ${counts.lines.manual} set by hand, ${counts.noLine} without`,
   )
   write(
     `  persons per line: ${counts.byLine.doelman} doelman, ${counts.byLine.verdediger} verdediger, ${counts.byLine.middenvelder} middenvelder, ${counts.byLine.aanvaller} aanvaller`,
+  )
+  write(
+    `  country: ${countries.wikidata} from Wikidata, ${countries.manual} set by hand, ${countries.list} from the list of players, ${countries.squad} from the squad, ${countries['old-site']} from the old fansite, ${counts.noCountry} without`,
   )
 }
 

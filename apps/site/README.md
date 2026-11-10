@@ -548,7 +548,8 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 
 `/spelers` is een onderdeel van het hoofdmenu, na Wedstrijden en voor het forum, op `/spelers` en `/spelers/<seizoen>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Spelers staat in het menu na Wedstrijden_).
 Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer, de vlag van het land en de naam (een `PlayerName` met `shirtNumber` en `country`, op een regel van `ShortFact` voor de lijntjes), zonder link, in een deel per positie.
-Het land komt uit `players.country` (#946); een speler zonder land of zonder vlag in het designsysteem krijgt een lege plek van dezelfde breedte, en een deel waarin niemand een land heeft, heeft geen plek voor een vlag.
+Het land komt uit `players.country` (#946), en anders uit `persons.country`; de positie komt uit `players.position`, en anders uit de linie van de persoon (`persons.line`, #1051).
+Een speler zonder land of zonder vlag in het designsysteem krijgt een lege plek van dezelfde breedte, en een deel waarin niemand een land heeft, heeft geen plek voor een vlag.
 Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
 Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
@@ -1175,6 +1176,14 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
   Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
   Een pagina die bij een andere persoon hoort, wordt geweigerd: twee personen samenvoegen doet het beheer hier niet.
+- Onder "Wie" staan "Linie" en "Land": de linie en het land van de persoon, in elk seizoen (#1051).
+  Beide zijn een keuzelijst met "Onbekend" als lege keuze; het land staat op naam met de landcode erachter (`countryChoices` in `src/beheer/countries.ts`).
+  Een waarde die afwijkt van wat de persoon heeft, krijgt de bron `manual`, en de import vervangt hem niet.
+  Leegmaken haalt de waarde en de bron weg, en de import vult hem bij de volgende run weer aan.
+  In het formulier dat een speler toevoegt, laat "Onbekend" staan wat een persoon uit de lijst al heeft.
+  Een speler zonder persoon heeft de twee velden niet.
+  "Positie" onder "In dit seizoen" is voor een seizoen dat afwijkt: bij "Onbekend" toont de site de linie van de persoon.
+  De wijziging staat in het logboek, in de regel van de speler.
 - Het uitklapblok "Uit de selectie halen" zet `in_squad` uit, met het moment; de rij blijft staan.
   Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
 - Wat de redactie zet, is daarna van de redactie (`players.editors_fields`, #1022): bij toevoegen de naam en elk ingevuld veld, bij aanpassen de velden die veranderden.

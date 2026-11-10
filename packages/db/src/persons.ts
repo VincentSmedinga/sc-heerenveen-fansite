@@ -5,6 +5,7 @@ import type { PersonTitleAlias } from './person-merge.ts'
 
 import {
   type BirthDatePrecision,
+  type PersonCountrySource,
   type PersonLineSource,
   type PersonNameSource,
   personNationalities,
@@ -32,7 +33,8 @@ export type PersonData = {
   birthDate: null | { date: string; precision: BirthDatePrecision }
   /** The Q-number of the birth place. Its label is in `wikidata_items`. */
   birthPlaceId: null | string
-  line: null | { line: PlayerPosition; source: PersonLineSource }
+  /** `keep` leaves the line as it is: the one the editors set. */
+  line: 'keep' | null | { line: PlayerPosition; source: PersonLineSource }
   /** The Q-numbers of the countries, in the order of Wikidata. */
   nationalityIds: readonly string[]
   /** The Q-numbers of the positions, in the order of Wikidata. */
@@ -49,9 +51,13 @@ export type PersonDataCounts = {
   birthDate: number
   /** With each line, whatever its source. */
   byLine: Record<PlayerPosition, number>
+  /** With a country, by where it came from. */
+  countries: Record<PersonCountrySource, number>
   lines: Record<PersonLineSource, number>
   /** With at least one nationality. */
   nationality: number
+  /** Without a country. */
+  noCountry: number
   /** Without a line. */
   noLine: number
   /** Read from Wikidata, or tried and found nothing. */
@@ -77,6 +83,8 @@ export type PersonNameCounts = Record<ImportedNameSource, number>
 /** A person the importer has not read from Wikidata yet, with what an earlier try left. */
 export type PersonToRead = {
   id: number
+  /** Where his line came from. `manual` is a line the importer leaves alone. */
+  lineSource: null | PersonLineSource
   /** The Q-number, when an earlier run found it but could not read the item. */
   wikidataId: null | string
   wikipediaPage: string
@@ -192,8 +200,10 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
   const counts: PersonDataCounts = {
     birthDate: 0,
     byLine: { aanvaller: 0, doelman: 0, middenvelder: 0, verdediger: 0 },
+    countries: { list: 0, manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
     lines: { manual: 0, squad: 0, wikidata: 0 },
     nationality: 0,
+    noCountry: 0,
     noLine: 0,
     read: 0,
     total: 0,
@@ -206,6 +216,7 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
   for (const row of await db
     .select({
       birthDate: persons.birthDate,
+      countrySource: persons.countrySource,
       id: persons.id,
       line: persons.line,
       lineSource: persons.lineSource,
@@ -219,6 +230,11 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
     counts.birthDate += row.birthDate === null ? 0 : 1
     counts.nationality += withNationality.has(row.id) ? 1 : 0
 
+    if (row.countrySource === null) {
+      counts.noCountry++
+    } else {
+      counts.countries[row.countrySource]++
+    }
     if (row.lineSource === null) {
       counts.noLine++
     } else {
@@ -435,6 +451,7 @@ export async function personsToRead(db: Pick<Database, 'select'>, limit: number)
   const rows = await db
     .select({
       id: persons.id,
+      lineSource: persons.lineSource,
       wikidataId: persons.wikidataId,
       wikipediaPage: persons.wikipediaPage,
       wikipediaPageId: persons.wikipediaPageId,
@@ -517,6 +534,112 @@ export async function playerListReport(
 }
 
 /**
+ * Fills in the country of the persons (#1051) from their first nationality of Wikidata
+ * (`person_nationalities`, position 0), through `codes`: the code of two letters by Q-number.
+ * It looks at the persons without a country and at those whose country came from Wikidata, so
+ * a country from another source, such as the one the editors set (`manual`), never changes. A
+ * first nationality that is not in `codes` gives no country and no guess: the person keeps
+ * what he has, and the item is in `unknown` with its label and how many persons have it. It
+ * asks nothing, and a second run changes nothing.
+ */
+export async function refreshPersonCountries(
+  db: Pick<Database, 'select' | 'update'>,
+  codes: ReadonlyMap<string, string>,
+): Promise<{ filled: number; unknown: { id: string; label: string; persons: number }[] }> {
+  const rows = await db
+    .select({
+      country: persons.country,
+      id: persons.id,
+      itemId: personNationalities.itemId,
+      label: wikidataItems.label,
+    })
+    .from(persons)
+    .innerJoin(
+      personNationalities,
+      and(eq(personNationalities.personId, persons.id), eq(personNationalities.position, 0)),
+    )
+    .innerJoin(wikidataItems, eq(wikidataItems.id, personNationalities.itemId))
+    .where(sql`${persons.countrySource} is null or ${persons.countrySource} = 'wikidata'`)
+    .orderBy(asc(persons.id))
+  const unknown = new Map<string, { id: string; label: string; persons: number }>()
+  let filled = 0
+
+  for (const row of rows) {
+    const code = codes.get(row.itemId)
+
+    if (code === undefined) {
+      const item = unknown.get(row.itemId) ?? { id: row.itemId, label: row.label, persons: 0 }
+
+      item.persons++
+      unknown.set(row.itemId, item)
+    } else if (row.country !== code) {
+      await db.update(persons).set({ country: code, countrySource: 'wikidata' }).where(eq(persons.id, row.id))
+      filled++
+    }
+  }
+
+  return { filled, unknown: [...unknown.values()] }
+}
+
+/**
+ * Works out the line of the persons again (#1051) who have none, or whose line came from the
+ * squad lists: a line the editors or our list set (`manual`) and a line from Wikidata stay as
+ * they are. The line is the first position Wikidata gave the person (`person_positions`) that
+ * `positionLines` knows, and else the one of his rows of `players` (`squadLines`), also when
+ * the editors set the position of such a row. So a position that is filled in later gives the
+ * person his line at the next import, and a line the editors took away is filled in again. A
+ * person whose rows have no position any more loses the line of the squad. It asks nothing,
+ * and a second run changes nothing. Returns how many persons got a line, by its source, and
+ * how many lost theirs.
+ */
+export async function refreshPersonLines(
+  db: Pick<Database, 'select' | 'update'>,
+  positionLines: ReadonlyMap<string, PlayerPosition>,
+): Promise<{ cleared: number; squad: number; wikidata: number }> {
+  const counts = { cleared: 0, squad: 0, wikidata: 0 }
+  const people = await db
+    .select({ id: persons.id, line: persons.line, lineSource: persons.lineSource })
+    .from(persons)
+    .where(sql`${persons.lineSource} is null or ${persons.lineSource} = 'squad'`)
+    .orderBy(asc(persons.id))
+
+  if (people.length === 0) {
+    return counts
+  }
+
+  const ids = people.map((person) => person.id)
+  const fromSquad = await squadLines(db, ids)
+  const fromWikidata = new Map<number, PlayerPosition>()
+
+  for (const row of await db
+    .select({ itemId: personPositions.itemId, personId: personPositions.personId })
+    .from(personPositions)
+    .where(inArray(personPositions.personId, ids))
+    .orderBy(asc(personPositions.personId), asc(personPositions.position))) {
+    const line = positionLines.get(row.itemId)
+
+    if (line !== undefined && !fromWikidata.has(row.personId)) {
+      fromWikidata.set(row.personId, line)
+    }
+  }
+
+  for (const person of people) {
+    const wikidata = fromWikidata.get(person.id)
+    const line = wikidata ?? fromSquad.get(person.id) ?? null
+    const lineSource = line === null ? null : wikidata === undefined ? ('squad' as const) : ('wikidata' as const)
+
+    if (line === person.line && lineSource === person.lineSource) {
+      continue
+    }
+
+    await db.update(persons).set({ line, lineSource }).where(eq(persons.id, person.id))
+    counts[lineSource ?? 'cleared']++
+  }
+
+  return counts
+}
+
+/**
  * The titles in `person_pages` with the article of their person (`Alfred Finnbogason` with
  * `Alfreð Finnbogason`), which is where a redirect to a remembered title ends.
  */
@@ -545,6 +668,32 @@ export async function rememberWikidataId(
 /** Puts the name the editors filled in on a person, with the source `redactie`. */
 export async function setEditorsName(db: Pick<Database, 'update'>, personId: number, name: EditorsName) {
   await db.update(persons).set(editorsNameColumns(name)).where(eq(persons.id, personId))
+}
+
+/**
+ * Sets the line and the country of a person as the editors chose them in the admin (#1051). A
+ * value gets the source `manual`, which the importer never replaces; null takes the value and
+ * its source away, so the importer fills it in again at its next run. A field that is left out
+ * stays as it is.
+ */
+export async function setEditorsPersonFacts(
+  db: Pick<Database, 'update'>,
+  personId: number,
+  facts: { country?: null | string; line?: null | PlayerPosition },
+): Promise<void> {
+  const { country, line } = facts
+
+  if (country === undefined && line === undefined) {
+    return
+  }
+
+  await db
+    .update(persons)
+    .set({
+      ...(country === undefined ? {} : { country, countrySource: country === null ? null : ('manual' as const) }),
+      ...(line === undefined ? {} : { line, lineSource: line === null ? null : ('manual' as const) }),
+    })
+    .where(eq(persons.id, personId))
 }
 
 /**
@@ -642,8 +791,7 @@ export async function storePersonData(
       birthDate: data.birthDate?.date ?? null,
       birthDatePrecision: data.birthDate?.precision ?? null,
       birthPlaceId: data.birthPlaceId,
-      line: data.line?.line ?? null,
-      lineSource: data.line?.source ?? null,
+      ...(data.line === 'keep' ? {} : { line: data.line?.line ?? null, lineSource: data.line?.source ?? null }),
       wikidataId: data.wikidataId,
       wikidataReadAt: readAt,
       wikipediaPageId: data.wikipediaPageId,

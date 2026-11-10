@@ -488,6 +488,49 @@ describe('listSeasonPlayers', () => {
       { personFamilyName: 'Aken', personFamilyNamePrefix: 'van', personGivenName: 'Joost' },
     ])
   })
+
+  it('gives the position and the country of the season, else those of the person, else none (#1051)', async () => {
+    const [{ insertId: defender }] = await database.db.insert(persons).values({
+      country: 'NL',
+      countrySource: 'wikidata',
+      line: 'verdediger',
+      lineSource: 'wikidata',
+      wikipediaPage: 'Een Verdediger (linie)',
+    })
+    const [{ insertId: unknown }] = await database.db.insert(persons).values({ wikipediaPage: 'Een Onbekende (linie)' })
+    const row = { season: '2026/27' }
+
+    await database.db.insert(players).values([
+      // Only the season.
+      { ...row, country: 'BE', name: 'Alleen Seizoen', personId: unknown, position: 'doelman', searchTerm: 'a' },
+      // Only the person.
+      { ...row, name: 'Alleen Persoon', personId: defender, searchTerm: 'b' },
+      // Neither, with a person and without one.
+      { ...row, name: 'Geen Van Beide', searchTerm: 'd' },
+      { ...row, name: 'Zonder Persoon', personId: null, searchTerm: 'e' },
+    ])
+    // Both: the season goes before the person. Another season, because a person is in a season
+    // once.
+    await database.db.insert(players).values({
+      country: 'SR',
+      name: 'Beide',
+      personId: defender,
+      position: 'aanvaller',
+      searchTerm: 'c',
+      season: '2025/26',
+    })
+
+    const facts = async (season: string) =>
+      (await listSeasonPlayers(database.db, season)).map(({ country, name, position }) => ({ country, name, position }))
+
+    expect(await facts('2026/27')).toEqual([
+      { country: 'BE', name: 'Alleen Seizoen', position: 'doelman' },
+      { country: 'NL', name: 'Alleen Persoon', position: 'verdediger' },
+      { country: null, name: 'Geen Van Beide', position: null },
+      { country: null, name: 'Zonder Persoon', position: null },
+    ])
+    expect(await facts('2025/26')).toEqual([{ country: 'SR', name: 'Beide', position: 'aanvaller' }])
+  })
 })
 
 describe('findSquadCompleteness', () => {

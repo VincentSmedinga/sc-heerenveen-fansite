@@ -3009,6 +3009,8 @@
 - **Waarom:** Wikidata zegt wat de speler is, de selectielijst vult de gaten voor onze eigen spelers, en een handmatige lijst herstelt fouten, zoals bij de namen.
   De negen posities in de lijst zijn gecontroleerd op hun label in Wikidata op 8 november 2026; een andere positie telt niet mee tot iemand hem toevoegt.
 - **Alternatieven:** alleen Wikidata (meer gaten); alleen de selectielijst (een veld van de rij van een seizoen, geen feit over de persoon).
+- **Later:** sinds 10 november 2026 bepaalt de importer de linie uit de selectielijst bij elke run opnieuw, en niet alleen bij de eerste lezing.
+  Ook het beheer zet de bron `manual`, naast `personLines` (#1051, zie _De linie van een persoon volgt de posities van zijn seizoenen_).
 
 ## De stand van acceptatie lezen kan met een actie die niets schrijft
 
@@ -3891,3 +3893,48 @@
 - **Waarom:** de lijst heeft geen seizoenen (alle spelers van alle tijden), dus ze past niet bij de plaats van een bron in de volgorde van bronnen; ze is wel een tweede bron voor een naam.
   `personTitleAliases` staat daarom, net als `personsWhoDiffer`, in het databasepakket: de pagina Kwaliteit leest hem ook.
 - **Alternatieven:** de lijst als bron voor spelers (kan niet zonder seizoenen); de lijst niet lezen (fouten in namen vind je dan alleen met de hand); de lijst bij elke run lezen (een verzoek per run voor een pagina die zelden verandert).
+
+## Een persoon heeft een linie en een land, en een seizoen kan afwijken
+
+- **Datum:** 10 november 2026
+- **Besluit:** de linie van een persoon is de standaard, en de positie van een seizoen (`players.position`) is een afwijking (#1051).
+  Een persoon heeft ook één land, als landcode van twee letters (`persons.country`), met een bron (`country_source`): `manual`, `wikidata`, `list`, `squad` of `old-site`.
+  Een seizoen toont zijn eigen positie of land als dat er is, en anders dat van de persoon.
+  De importer vult nu alleen de bron `wikidata`; `list`, `squad` en `old-site` zijn voor de bronnen van #1052.
+- **Waarom:** een speler heeft één linie en één land in zijn loopbaan, en een seizoen is alleen een uitzondering.
+  Zo vult één antwoord alle seizoenen.
+  De gaten die overblijven zijn aantallen van personen, niet van rijen.
+- **Alternatieven:** alles per seizoen laten (dezelfde gegevens tientallen keren invullen).
+  Alleen het land van de eerste nationaliteit van Wikidata tonen, zonder eigen veld (de redactie kan het dan niet verbeteren).
+
+## De linie van een persoon volgt de posities van zijn seizoenen
+
+- **Datum:** 10 november 2026
+- **Besluit:** de importer bepaalt bij elke run de linie opnieuw van elke persoon zonder linie of met de bron `squad`, ook als hij al gelezen is (`refreshPersonLines`, #1051).
+  De linie volgt dan de posities van zijn rijen in `players`, ook als de redactie zo'n positie zette.
+  De bronnen staan van sterk naar zwak: `manual` (het beheer of `personLines`), `wikidata`, `squad`.
+  Een linie met de bron `manual` of `wikidata` blijft staan.
+  Heeft geen rij van de persoon nog een positie, dan verliest hij de linie van de selectie.
+- **Waarom:** de selectie vulde alleen bij de eerste lezing, dus een positie die later kwam veranderde niets.
+- **Eigen keuze bij het bouwen:** voor een persoon zonder linie kijkt de stap eerst naar de posities van Wikidata die we bewaren (`person_positions`), en dan pas naar de selectie.
+  Maakt de redactie een linie leeg die van Wikidata kwam, dan komt dus die van Wikidata terug, zonder verzoek.
+  Een positie die later in `wikidataPositionLines` komt, werkt zo ook voor personen die al gelezen zijn.
+  Een linie die het beheer zette voordat de persoon gelezen is, blijft bij de eerste lezing staan.
+- **Alternatieven:** alleen de selectie gebruiken bij het aanvullen (een leeggemaakte linie krijgt dan een zwakkere bron dan hij had).
+
+## Het land komt uit de eerste nationaliteit van Wikidata, via een lijst op Q-nummer
+
+- **Datum:** 10 november 2026
+- **Besluit:** de importer vult `persons.country` bij elke run uit de eerste nationaliteit van de persoon (`person_nationalities`, plaats 0), via de lijst `wikidataCountryCodes` in `apps/importer/src/person-countries.ts` (`refreshPersonCountries`, #1051).
+  De lijst is elk item van Wikidata met een landcode van ISO 3166-1 die in gebruik is (`P297`, gelezen op 10 november 2026), en Kosovo (`XK`).
+  Twee items zonder zo'n code staan er met de hand bij: het land Nederland (`Q55`) en het Koninkrijk Denemarken (`Q756617`).
+  De stap kijkt naar personen zonder land en naar personen met de bron `wikidata`.
+  Een land met een andere bron, zoals `manual`, verandert hij nooit.
+  Een eerste nationaliteit die niet in de lijst staat, blijft een leemte: de run schrijft een waarschuwing met `Persons:` vooraan, met het Q-nummer, het label en het aantal personen.
+  De tweede nationaliteit is dan geen gok.
+- **Waarom:** een Q-nummer verandert niet als het label verandert, zoals bij `wikidataPositionLines`.
+  Een land dat niet meer bestaat, zoals Joegoslavië, heeft geen code die klopt; de redactie kiest dan het land.
+  De codes die mogen, staan in `@fansite/shared/countries`, zodat de importer en het beheer dezelfde lijst gebruiken.
+- **Alternatieven:** de landcode per persoon bij Wikidata opvragen (een verzoek per land erbij, en `P297` ontbreekt bij de koninkrijken).
+  Een korte lijst van de landen die we nu kennen (elke nieuwe speler uit een ander land is dan een leemte).
+  De tweede nationaliteit nemen als de eerste geen code heeft (een gok).

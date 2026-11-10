@@ -1131,6 +1131,17 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
   `personLines` wordt bij elke run toegepast, ook op personen die al gelezen zijn, en wordt nooit vervangen.
   Een positie die niet in `wikidataPositionLines` staat, zegt niets over de linie.
   Voeg hem toe als je ziet dat iemand daardoor zonder linie blijft.
+  Ook het beheer zet een linie met de bron `manual`, in het formulier van een speler.
+- **De linie opnieuw, bij elke run** (#1051): van elke persoon zonder linie of met de bron `squad` bepaalt de run de linie opnieuw, ook als hij al gelezen is.
+  Eerst uit de posities van Wikidata die we bewaren, anders uit zijn rijen van `players`.
+  Zet de redactie later een positie op een rij van een seizoen, dan heeft de persoon na de volgende run die linie, met de bron `squad`.
+  Een linie met de bron `manual` of `wikidata` blijft staan.
+- **Het land** (`persons.country`, #1051) komt bij elke run uit de eerste nationaliteit van de persoon, via de lijst `wikidataCountryCodes` in [`src/person-countries.ts`](src/person-countries.ts): het Q-nummer van een land naar zijn landcode van twee letters.
+  De bron is dan `wikidata`.
+  Een land met een andere bron, zoals `manual` uit het beheer, verandert de run nooit.
+  Staat de eerste nationaliteit niet in de lijst, dan blijft het land leeg en waarschuwt de run met `Persons:` vooraan; de tweede nationaliteit is geen gok.
+  Voeg een Q-nummer toe als de waarschuwing een land noemt dat een landcode heeft.
+  Een land dat niet meer bestaat, zoals Joegoslavië, kiest de redactie in het beheer.
 - **Een persoon zonder artikel of zonder item** blijft leeg zonder gok en is toch gelezen, dus de volgende run vraagt niets over hem.
   Heeft een andere persoon hetzelfde Q-nummer, dan houdt de eerste het en waarschuwt de run.
 - **Een verzoek dat mislukt** laat de persoon ongelezen en geeft een waarschuwing.
@@ -1140,11 +1151,15 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
 - **Het logboek** noemt per run hoeveel personen zijn gelezen, hoeveel een geboortedatum, nationaliteit en linie kregen (de linie per bron), hoeveel leeg bleven en hoeveel artikelen en items zijn opgevraagd:
 
 ```text
-persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a nationality, 170 with a line (120 from Wikidata, 50 from the squad, 0 from the list), 3 left empty; 200 articles and 230 items asked
+persons (Wikidata): 200 persons read, 188 with a birth date, 195 with a nationality, 170 with a line (120 from Wikidata, 50 from the squad, 0 set by hand), 3 left empty; 200 articles and 230 items asked
+persons (line and country): 31 lines from the squad, 0 from Wikidata, 0 taken away; 924 countries from Wikidata
+Persons: 2 persons have a first nationality that is not in the list of countries, so no country is filled in: Q36704 (Joegoslavië, 2)
 ```
 
-Een run zonder nieuwe personen schrijft niets en vraagt niets.
+De tweede regel staat er alleen als de run een linie of een land veranderde, en de derde zolang er zo'n nationaliteit is.
+Een run zonder nieuwe personen en zonder zo'n wijziging schrijft niets over de personen en vraagt niets.
 `pnpm run import:status` toont hoeveel personen zijn gelezen en wat ze hebben, en hoeveel personen er per linie zijn (`persons per line`).
+De regel `country` zegt hoeveel personen een land hebben, per bron, en hoeveel geen.
 Daaronder staat per seizoen hoeveel verslagen een opstelling van ons hebben en hoeveel daarvan een formatie voor ons en voor de tegenstander (`Formations of match reports`).
 Op acceptatie lees je dat zonder SSH met de workflow _Import old site_ en de keuze `status`: de uitvoer staat in de samenvatting van de run.
 

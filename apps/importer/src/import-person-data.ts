@@ -7,6 +7,8 @@ import {
   knownWikidataLabels,
   personsByWikidataId,
   personsToRead,
+  refreshPersonCountries,
+  refreshPersonLines,
   rememberWikidataId,
   squadLines,
   storePersonData,
@@ -15,7 +17,8 @@ import {
 
 import type { Fetcher } from './fetcher.ts'
 
-import { lineMap, personLines } from './person-lines.ts'
+import { wikidataCountryCodes } from './person-countries.ts'
+import { lineMap, personLines, wikidataPositionLines } from './person-lines.ts'
 import { mostFailuresInARow } from './person-pages.ts'
 import { printable } from './text.ts'
 import { lineOfPositions, readArticleInfo, readItem, readLabel } from './wikidata-item.ts'
@@ -34,6 +37,8 @@ export const pauseBetweenRequests = 250
 
 export type PersonDataOptions = {
   clock?: () => Date
+  /** The code of two letters of a country of Wikidata, by Q-number. A test gives its own. */
+  countryCodes?: ReadonlyMap<string, string>
   /** The most persons to read. */
   limit?: number
   /** The list of lines of our own. A test gives its own. */
@@ -52,12 +57,19 @@ export type PersonDataReport = {
   articlesAsked: number
   /** With a birth date. */
   birthDate: number
+  /** The persons that got their country from the first nationality of Wikidata this run. */
+  countriesFilled: number
   /** Persons without an article or without an item: read, with nothing from Wikidata. */
   empty: number
   /** The items of Wikidata it asked about: persons, countries, places and positions. */
   itemsAsked: number
   /** The persons that got a line, by where it came from. */
   lines: Record<PersonLineSource, number>
+  /**
+   * The persons whose line was worked out again this run, among all persons and not only those
+   * read: the ones that got a line from the squad or from Wikidata, and the ones that lost it.
+   */
+  linesAgain: { cleared: number; squad: number; wikidata: number }
   /** With at least one nationality. */
   nationality: number
   /** Persons read: stored, whatever they got. */
@@ -67,22 +79,31 @@ export type PersonDataReport = {
 }
 
 /**
- * The line for the log about the persons read from Wikidata. No line when the run read and
- * asked nothing, so a run with nothing new says nothing.
+ * The lines for the log about the persons: what the run read from Wikidata, and whose line or
+ * country it filled in again. No line for what did not happen, so a run with nothing new says
+ * nothing.
  */
 export function describePersonData(report: PersonDataReport): string[] {
-  const { lines } = report
+  const { lines, linesAgain } = report
+  const described: string[] = []
 
-  if (report.read === 0 && report.articlesAsked === 0 && report.itemsAsked === 0) {
-    return []
+  if (report.read > 0 || report.articlesAsked > 0 || report.itemsAsked > 0) {
+    const withLine = lines.wikidata + lines.squad + lines.manual
+    const person = report.read === 1 ? 'person' : 'persons'
+
+    described.push(
+      `persons (Wikidata): ${report.read} ${person} read, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
+    )
+  }
+  if (linesAgain.squad + linesAgain.wikidata + linesAgain.cleared + report.countriesFilled > 0) {
+    const { countriesFilled: countries } = report
+
+    described.push(
+      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata`,
+    )
   }
 
-  const withLine = lines.wikidata + lines.squad + lines.manual
-  const person = report.read === 1 ? 'person' : 'persons'
-
-  return [
-    `persons (Wikidata): ${report.read} ${person} read, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines.manual} from the list), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
-  ]
+  return described
 }
 
 /** The address of the page information of an article: its number and its item. */
@@ -110,8 +131,37 @@ export function itemUrl(origin: string, id: string): string {
  * marked read too, so the next run asks nothing about him. A request that fails leaves him
  * unread, with a warning, and the next run tries again (with the Q-number we have, so only the
  * item). A run reads at most `limit` persons. It never throws for a failed request.
+ *
+ * After that, every run works out two things again for all persons, without a request (#1051):
+ * the line of a person who has none or has the one of the squad (`refreshPersonLines`), and
+ * the country of a person from his first nationality (`refreshPersonCountries`). What the
+ * editors set stays. A first nationality that is not in the list of countries is a warning.
  */
 export async function readPersonData(
+  db: Database,
+  fetcher: Fetcher,
+  options: PersonDataOptions,
+): Promise<PersonDataReport> {
+  const report = await readUnreadPersons(db, fetcher, options)
+
+  report.linesAgain = await refreshPersonLines(db, wikidataPositionLines)
+
+  const { filled, unknown } = await refreshPersonCountries(db, options.countryCodes ?? wikidataCountryCodes)
+
+  report.countriesFilled = filled
+
+  if (unknown.length > 0) {
+    const persons = unknown.reduce((sum, item) => sum + item.persons, 0)
+
+    report.warnings.push(
+      `Persons: ${persons} ${persons === 1 ? 'person has' : 'persons have'} a first nationality that is not in the list of countries, so no country is filled in: ${unknown.map((item) => `${item.id} (${printable(item.label)}, ${item.persons})`).join(', ')}`,
+    )
+  }
+
+  return report
+}
+
+async function readUnreadPersons(
   db: Database,
   fetcher: Fetcher,
   {
@@ -126,9 +176,11 @@ export async function readPersonData(
   const report: PersonDataReport = {
     articlesAsked: 0,
     birthDate: 0,
+    countriesFilled: 0,
     empty: 0,
     itemsAsked: 0,
     lines: { manual: 0, squad: 0, wikidata: 0 },
+    linesAgain: { cleared: 0, squad: 0, wikidata: 0 },
     nationality: 0,
     read: 0,
     warnings: [],
@@ -384,10 +436,11 @@ export async function readPersonData(
 
   /**
    * Stores a person whole and counts him. His line is the one of our list, else the one of the
-   * positions on Wikidata, else the one of the squad lists, else none.
+   * positions on Wikidata, else the one of the squad lists, else none. A line the editors set
+   * in the admin before he was read stays as it is.
    */
   async function finish(
-    person: { id: number; wikipediaPage: string },
+    person: { id: number; lineSource: null | PersonLineSource; wikipediaPage: string },
     data: Omit<PersonData, 'line'>,
     positionLine: null | PlayerPosition = null,
   ): Promise<void> {
@@ -402,7 +455,9 @@ export async function readPersonData(
             ? { line: squad, source: 'squad' as const }
             : null
 
-    await db.transaction((transaction) => storePersonData(transaction, person.id, { ...data, line }, clock()))
+    const stored = manual === undefined && person.lineSource === 'manual' ? ('keep' as const) : line
+
+    await db.transaction((transaction) => storePersonData(transaction, person.id, { ...data, line: stored }, clock()))
     report.read++
 
     if (data.birthDate !== null) {
@@ -411,7 +466,9 @@ export async function readPersonData(
     if (data.nationalityIds.length > 0) {
       report.nationality++
     }
-    if (line !== null) {
+    if (stored === 'keep') {
+      report.lines.manual++
+    } else if (line !== null) {
       report.lines[line.source]++
     }
     if (data.wikidataId === null) {

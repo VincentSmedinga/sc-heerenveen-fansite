@@ -4,6 +4,7 @@ import { Breadcrumb, Button, Card, Field, Form, Heading, Input, Page, Text } fro
 import { redirect } from 'next/navigation'
 
 import { matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import { parseSearch, searchMaxLength } from '#src/beheer/items'
 import { emptyPlayerValues, newPersonChoice } from '#src/beheer/player-fields'
@@ -103,6 +104,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
       <PlayerForm
         action={submitAddPlayer.bind(null, season, back?.id)}
         cancelHref={back === undefined ? listPath(season) : matchPath(back.id)}
+        countries={countryChoices()}
         initial={{ ...emptyPlayerValues, persoon: first === undefined ? newPersonChoice : String(first.id) }}
         key={addPlayerPath(season, search, back?.id)}
         people={people}

@@ -799,6 +799,15 @@ export const personLineSources = ['wikidata', 'squad', 'manual'] as const
 export type PersonLineSource = (typeof personLineSources)[number]
 
 /**
+ * Where the country of a person comes from (#1051), from strong to weak: the editors in the
+ * admin (`manual`), Wikidata, the list of players, the squad lists and the old fansite. The
+ * importer fills `wikidata`; the last three are for the sources of #1052.
+ */
+export const personCountrySources = ['manual', 'wikidata', 'list', 'squad', 'old-site'] as const
+
+export type PersonCountrySource = (typeof personCountrySources)[number]
+
+/**
  * How exact a birth date is: a day, a month (the first of it is stored) or a year (1 January).
  */
 export const birthDatePrecisions = ['day', 'month', 'year'] as const
@@ -866,6 +875,12 @@ export const persons = mysqlTable('persons', {
   birthPlaceId: varchar('birth_place_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
   line: mysqlEnum('line', playerPositions),
   lineSource: mysqlEnum('line_source', personLineSources),
+  // The country of the person (#1051): the code of two letters in capitals (`NL`), and where
+  // it came from. Both are empty for a person whose country we do not know. A season can
+  // differ: `players.country` goes before it on the page of that season, as `players.position`
+  // goes before `line`.
+  country: char('country', { length: 2 }),
+  countrySource: mysqlEnum('country_source', personCountrySources),
   wikidataReadAt: datetime('wikidata_read_at'),
   // The title is that of the English Wikipedia: the player has no Dutch article (#1043). The
   // importer never asks the Dutch Wikipedia or Wikidata about such a title.

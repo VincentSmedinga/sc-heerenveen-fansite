@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Breadcrumb, Button, Disclosure, Form, Heading, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { findAdminPlayer, playerValuesOf } from '#src/beheer/players'
@@ -24,10 +25,10 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-// The form of one player of a season: his name, shirt number, line and Wikipedia page, and
-// below it the block that takes him out of the squad. A player with a goal or an appearance
-// belongs to the season, so he has no such block and the page says why. The page tells what the
-// last action did from the word in the address.
+// The form of one player of a season: his name, Wikipedia page, shirt number and position, and
+// the line and the country of his person. Below it is the block that takes him out of the
+// squad. A player with a goal or an appearance belongs to the season, so he has no such block
+// and the page says why. The page tells what the last action did from the word in the address.
 export default async function PlayerPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -85,10 +86,12 @@ export default async function PlayerPage({ params, searchParams }: Props) {
       <PlayerForm
         action={submitPlayer.bind(null, id)}
         cancelHref={listPath(player.season)}
+        countries={countryChoices()}
         initial={playerValuesOf(found)}
         key={`${id}-${gedaan ?? ''}`}
         nameHint={person === undefined ? undefined : 'Een andere naam geldt voor deze persoon in elk seizoen.'}
         submitLabel="Opslaan"
+        withoutPerson={person === undefined}
       />
       {!player.inSquad ? null : inUse ? (
         <Text>

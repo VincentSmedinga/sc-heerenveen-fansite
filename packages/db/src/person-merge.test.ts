@@ -231,6 +231,46 @@ describe('mergePersons', () => {
     expect(await personRows()).toHaveLength(1)
   })
 
+  it('keeps the line and the country the editors set, also on the person that goes (#1051)', async () => {
+    await addPerson({
+      country: 'NL',
+      countrySource: 'wikidata',
+      line: 'aanvaller',
+      lineSource: 'wikidata',
+      wikipediaPage: 'Uğur Yıldırım',
+    })
+    await addPerson({
+      country: 'TR',
+      countrySource: 'manual',
+      line: 'middenvelder',
+      lineSource: 'manual',
+      wikipediaPage: 'Ugur Yıldırım',
+    })
+    // The person that stays has a country of the editors, and the other one from Wikidata.
+    await addPerson({ country: 'RS', countrySource: 'manual', wikipediaPage: 'Radoslav Samardžić' })
+    await addPerson({
+      country: 'BA',
+      countrySource: 'wikidata',
+      line: 'doelman',
+      lineSource: 'squad',
+      wikipediaPage: 'Radoslav Samardzic',
+    })
+
+    await mergePersons(database.db, list)
+
+    expect(
+      (await personRows()).map(({ country, countrySource, line, lineSource }) => ({
+        country,
+        countrySource,
+        line,
+        lineSource,
+      })),
+    ).toEqual([
+      { country: 'TR', countrySource: 'manual', line: 'middenvelder', lineSource: 'manual' },
+      { country: 'RS', countrySource: 'manual', line: 'doelman', lineSource: 'squad' },
+    ])
+  })
+
   it('makes one row of the two rows of the person in a season, and loses no goal, line-up or number', async () => {
     const kept = await addPerson({ wikipediaPage: 'Jan Harm Schippers' })
     const other = await addPerson({ wikipediaPage: 'Jan-Harm Schippers' })
