@@ -49,7 +49,8 @@ export default async function PlayerPage({ params, searchParams }: Props) {
     opgeslagen: { text: `De speler is bewaard. Staat ${showDelay} op de site.`, title: 'Opgeslagen' },
     'was-al-weg': { text: 'Deze speler was al uit de selectie.', title: 'Niets veranderd' },
   }
-  const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
+  // Only a word the page knows: the address is input, and `__proto__` is no notice.
+  const notice = typeof gedaan === 'string' && Object.hasOwn(notices, gedaan) ? notices[gedaan] : undefined
 
   return (
     <Page.Main

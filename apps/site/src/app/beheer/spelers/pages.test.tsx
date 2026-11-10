@@ -195,6 +195,9 @@ describe('the list of the players', () => {
 
   it('says nothing for a word it does not know', async () => {
     expect(await list({ gedaan: '<script>' })).not.toContain('role="status"')
+    expect(await list({ fout: '__proto__' })).not.toContain('role="status"')
+    expect(await list({ gedaan: 'constructor' })).not.toContain('role="status"')
+    expect(await playerForm(pelleId, { gedaan: '__proto__' })).not.toContain('role="status"')
   })
 })
 

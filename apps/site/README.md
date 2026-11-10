@@ -1177,6 +1177,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
 - `addPlayer`, `editPlayer` en `removePlayer` in `src/beheer/players.ts` schrijven de wijziging en `player.add`, `player.edit` of `player.remove` in het logboek, in één transactie, met het nummer van de speler.
 - De speler staat daarna in de kiezer van een doelpunt van dat seizoen en op de pagina Spelers, met dezelfde bronvermelding als de andere spelers.
+  Een doelpunt krijgt in het formulier van een wedstrijd de persoon van de gekozen speler (`personId` in `SquadPlayer`), zodat het ook zonder Wikipedia-pagina voor de persoon telt.
   Wat de import doet met een speler die de redactie toevoegde of aanpaste, regelt #1022.
 
 ### De kwaliteit van de gegevens

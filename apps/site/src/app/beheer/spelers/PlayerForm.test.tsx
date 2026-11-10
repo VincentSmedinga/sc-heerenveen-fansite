@@ -78,7 +78,11 @@ describe('the form of a player', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Speler toevoegen' }))
 
     await waitFor(() => expect(document.activeElement?.id).toBe('fouten'))
-    expect(screen.getByText('De speler is niet opgeslagen. Probeer het nog eens.')).toBeTruthy()
+    // The link in the list leads to the line of the error itself.
+    expect(
+      screen.getByRole('link', { name: 'De speler is niet opgeslagen. Probeer het nog eens.' }).getAttribute('href'),
+    ).toBe('#algemeen')
+    expect(document.getElementById('algemeen')?.textContent).toContain('De speler is niet opgeslagen.')
   })
 
   it('puts the values of the answer back in the fields', async () => {

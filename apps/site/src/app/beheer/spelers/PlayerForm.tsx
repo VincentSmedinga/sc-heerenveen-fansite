@@ -20,7 +20,8 @@ const summaryId = 'fouten'
  * persoon" as its last choice; the fields of the name and the title are for a new person only,
  * so they are not required while there is a list. Every field has its own error, and the list
  * of errors gets the focus after a save that did not work, also an error that belongs to no
- * field (`algemeen`). It works without JavaScript: the server answers with the form again.
+ * field (`algemeen`), which has a line of its own above the fields. It works without
+ * JavaScript: the server answers with the form again.
  */
 export function PlayerForm({
   action,
@@ -62,6 +63,15 @@ export function PlayerForm({
   return (
     <Form action={formAction}>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
+      {/* An error without a field has a line of its own: its link in the list leads here. */}
+      {errors.algemeen === undefined ? null : (
+        <Text className="hf-field-error" id="algemeen" tabIndex={-1}>
+          <Text as="span" className="hf-visually-hidden">
+            Fout:
+          </Text>{' '}
+          {errors.algemeen}
+        </Text>
+      )}
       <Card aria-labelledby="wie-kop">
         <Heading id="wie-kop" level={2}>
           Wie

@@ -17,7 +17,7 @@ import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createAccount } from './accounts'
-import { findMatch } from './match-entries'
+import { findMatch, saveEntry } from './match-entries'
 import { emptyPlayerValues, type PlayerValues } from './player-fields'
 import {
   addPlayer,
@@ -331,7 +331,7 @@ describe('addPlayer', () => {
     const id = 'id' in outcome ? outcome.id : 0
 
     expect((await findMatch(database.db, matchId))?.squad).toEqual([
-      { id, name: 'Pelle van Amersfoort', wikipediaPage: null },
+      { id, name: 'Pelle van Amersfoort', personId: (await allPersons())[0]?.id, wikipediaPage: null },
     ])
     expect(await listSeasonPlayers(database.db, season)).toMatchObject([
       {
@@ -345,6 +345,63 @@ describe('addPlayer', () => {
       },
     ])
     expect(await listAdminPlayers(database.db, season)).toMatchObject([{ id, inSquad: true, source: 'redactie' }])
+  })
+})
+
+describe('a goal of a player the editors added', () => {
+  const entryWith = (goals: Parameters<typeof saveEntry>[3]['goals']): Parameters<typeof saveEntry>[3] => ({
+    facts: { attendance: null, note: null, referee: null, stadium: null },
+    goals,
+    kickoff: { dateText: null, kickoffAt: new Date('2019-09-01T12:30:00Z'), matchDate: '2019-09-01' },
+    result: {
+      afterNinetyAgainst: null,
+      afterNinetyFor: null,
+      extraTime: false,
+      goalsAgainst: 0,
+      goalsFor: 1,
+      penaltiesAgainst: null,
+      penaltiesFor: null,
+      status: 'played',
+    },
+  })
+
+  it('counts for his person, though he has no page, and keeps the person when the match is saved again', async () => {
+    await addPlayer(database.db, userId, season, entry())
+
+    const [chosen] = (await findMatch(database.db, matchId))?.squad ?? []
+    const [person] = await allPersons()
+    const goal = {
+      minute: 12,
+      ours: true,
+      ownGoal: false,
+      penalty: false,
+      player: chosen?.name ?? '',
+      playerId: chosen?.id ?? null,
+      stoppageMinutes: null,
+      wikipediaPage: null,
+    }
+
+    expect(chosen?.personId).toBe(person?.id)
+
+    // The form gives the goal the person of the chosen player (`validate` in match-form.ts).
+    await saveEntry(database.db, userId, matchId, entryWith([{ ...goal, personId: chosen?.personId ?? null }]), 'Krant')
+
+    expect(await database.db.select().from(matchGoals)).toMatchObject([{ personId: person?.id, playerId: chosen?.id }])
+
+    // A goal that was stored without a person gets the person of its player at the next save.
+    await database.db.update(matchGoals).set({ personId: null })
+    await saveEntry(
+      database.db,
+      userId,
+      matchId,
+      entryWith([
+        { ...goal, personId: chosen?.personId ?? null },
+        { ...goal, minute: 80, personId: chosen?.personId ?? null },
+      ]),
+      'Krant',
+    )
+
+    expect((await database.db.select().from(matchGoals)).map((row) => row.personId)).toEqual([person?.id, person?.id])
   })
 })
 

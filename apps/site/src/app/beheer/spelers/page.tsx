@@ -69,7 +69,10 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
     toegevoegd: `De speler staat in de selectie van ${season} en is te kiezen bij een doelpunt. Op de site staat hij ${describeShowDelay(season, now)}.`,
     weggehaald: `De speler is uit de selectie van ${season} gehaald. Hij blijft in de lijst van het seizoen staan.`,
   }
-  const notice = typeof fout === 'string' ? errors[fout] : typeof gedaan === 'string' ? notices[gedaan] : undefined
+  // Only a word the page knows: the address is input, and `__proto__` is no notice.
+  const known = (texts: Record<string, string>, word: string | string[] | undefined) =>
+    typeof word === 'string' && Object.hasOwn(texts, word) ? texts[word] : undefined
+  const notice = known(errors, fout) ?? known(notices, gedaan)
 
   return (
     <Page.Main

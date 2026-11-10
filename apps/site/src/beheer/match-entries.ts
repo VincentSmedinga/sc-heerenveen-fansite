@@ -195,7 +195,12 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     .innerJoin(adminUsers, eq(matchEdits.editedBy, adminUsers.id))
     .where(eq(matchEdits.matchId, id))
   const squad: SquadPlayer[] = await db
-    .select({ id: players.id, name: players.name, wikipediaPage: players.wikipediaPage })
+    .select({
+      id: players.id,
+      name: players.name,
+      personId: players.personId,
+      wikipediaPage: players.wikipediaPage,
+    })
     .from(players)
     .where(eq(players.season, match.season))
     .orderBy(asc(players.name))
@@ -635,7 +640,8 @@ function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
           ...goal,
           appearanceId: found.appearanceId,
           assistAppearanceId: found.assistAppearanceId,
-          personId: found.personId,
+          // The person the import stored, or else the person of the player the editor chose.
+          personId: found.personId ?? goal.personId ?? null,
           player: found.player,
           wikipediaPage: found.wikipediaPage,
         }
