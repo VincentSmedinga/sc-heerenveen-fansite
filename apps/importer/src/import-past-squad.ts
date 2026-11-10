@@ -27,7 +27,7 @@ import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
 import { scorersByPerson } from './import-squad.ts'
-import { aliasMap, personTitleAliases } from './person-names.ts'
+import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
@@ -232,6 +232,14 @@ export async function importPastSquad(
   const merged = mergePlayers(reads)
 
   warnings.push(...merged.warnings)
+
+  // As in `import-squad.ts`: a spelling the owner replaced becomes the one that stays.
+  for (const player of merged.players) {
+    const chosen = chosenSpelling(player.name, player.page)
+
+    player.name = chosen.name
+    player.page = chosen.page
+  }
 
   const mergedPersons = await mergeListedPersons(db)
   // Wikipedia is asked before the transaction: no request is made while rows are locked.

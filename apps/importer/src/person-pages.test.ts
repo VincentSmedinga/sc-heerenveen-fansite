@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { Handler, TestServer } from './test-server.ts'
 
 import { personNameOf } from './person-name.ts'
-import { aliasMap, personsWhoDiffer } from './person-names.ts'
+import { aliasMap, chosenSpelling, personsWhoDiffer } from './person-names.ts'
 import {
   describePersons,
   lookUpPersonPages,
@@ -347,5 +347,34 @@ describe('mergeListedPersons', () => {
     ])
     expect(await mergeListedPersons(database.db)).toEqual([])
     expect(await similarPersons(database.db)).toEqual([])
+  })
+})
+
+describe('chosenSpelling', () => {
+  it('gives a page and a name that the owner replaced the spelling that stays', () => {
+    expect(chosenSpelling('Jan-Harm Schippers', 'Jan-Harm Schippers')).toEqual({
+      name: 'Jan Harm Schippers',
+      page: 'Jan Harm Schippers',
+    })
+    expect(chosenSpelling('Ugur Yıldırım', 'Uğur Yıldırım')).toEqual({ name: 'Uğur Yıldırım', page: 'Uğur Yıldırım' })
+    expect(chosenSpelling('Radoslav Samardzic', null)).toEqual({ name: 'Radoslav Samardžić', page: null })
+    // The page is replaced, and a name the table shows in its own way stays.
+    expect(chosenSpelling('R. van der Berg', 'Robert van der Berg')).toEqual({
+      name: 'R. van der Berg',
+      page: 'Robert van den Berg',
+    })
+  })
+
+  it('leaves every other player as he is, also a namesake with an article of his own', () => {
+    expect(chosenSpelling('Luca Oyen', 'Luca Oyen')).toEqual({ name: 'Luca Oyen', page: 'Luca Oyen' })
+    expect(chosenSpelling('Jordy Buijs', null)).toEqual({ name: 'Jordy Buijs', page: null })
+    expect(chosenSpelling('Robert van der Berg', 'Robert van der Berg (hockeyer)')).toEqual({
+      name: 'Robert van der Berg',
+      page: 'Robert van der Berg (hockeyer)',
+    })
+    expect(chosenSpelling('Jan Jansen', 'Jan Jansen (a)', new Map([['Jan Jansen (a)', 'Jan Jansen (b)']]))).toEqual({
+      name: 'Jan Jansen',
+      page: 'Jan Jansen (b)',
+    })
   })
 })

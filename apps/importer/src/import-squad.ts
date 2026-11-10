@@ -14,7 +14,7 @@ import type { CompletenessTotals } from './store-completeness.ts'
 
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
-import { aliasMap, personTitleAliases } from './person-names.ts'
+import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
@@ -209,6 +209,15 @@ async function readAndStore(
 
   if (problems.length > 0) {
     return { kind: 'error', message: `${title}: ${problems.join('; ')}`, season }
+  }
+
+  // A player the table still writes in a spelling the owner replaced gets the one that stays,
+  // so he is the row of that spelling and no second row.
+  for (const player of read.players) {
+    const chosen = chosenSpelling(player.name, player.wikipediaPage)
+
+    player.name = chosen.name
+    player.wikipediaPage = chosen.page
   }
 
   const mergedPersons = await mergeListedPersons(db)

@@ -3675,6 +3675,11 @@
     Wat hij mist, neemt hij over van de andere.
     Hebben beide een Q-nummer, een artikel of een geboortedatum en verschillen die, dan blijft de eerste staan.
     De import geeft dan een waarschuwing met `Persons:` en beide titels, zodat de redactie ernaar kijkt.
+    Bij een Q-nummer of een artikel noemt de waarschuwing beide nummers.
+    Bij een geboortedatum zegt hij alleen dat de datums verschillen: een geboortedatum is een persoonsgegeven en hoort niet in het logboek.
+  - **Een tabel die de andere schrijfwijze nog schrijft:** de import van de selectie en van een vorige selectie zet de pagina en de naam eerst om in de schrijfwijze die blijft (`chosenSpelling`).
+    Zonder dat kreeg `Jan-Harm Schippers` een tweede rij naast `Jan Harm Schippers`, met dezelfde persoon, en kwam de oude schrijfwijze terug.
+    Een naam zonder link wordt ook omgezet; een naam met een link naar een ander artikel is een ander mens en blijft zoals hij is.
   - **Alleen de andere schrijfwijze bestaat:** de persoon krijgt de titel die blijft en houdt zijn `id`.
     Zijn naam wordt de naam die de import uit die titel afleidt, of die van de lijst `personNames`.
   - **De spelers van de oude fansite:** de stap `spelers` zet de naam om met `oldSiteNameCorrections` en voegt de oude rij samen met de nieuwe.

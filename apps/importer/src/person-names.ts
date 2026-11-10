@@ -1,6 +1,6 @@
 import type { PersonTitleAlias } from '@fansite/db/person-merge'
 
-import type { PersonNameEntry } from './person-name.ts'
+import { nameOfTitle, type PersonNameEntry } from './person-name.ts'
 
 // The names that look alike and are different people. The list is in the database package,
 // because the page Kwaliteit of the admin leaves them out too (`similarPersons`).
@@ -34,6 +34,29 @@ export const personTitleAliases: readonly PersonTitleAlias[] = [
 /** The map for `createPersonBook` and `lookUpPersonPages`: a title to the one that stays. */
 export function aliasMap(list: readonly PersonTitleAlias[]): Map<string, string> {
   return new Map(list.flatMap(({ aliases, title }) => aliases.map((alias) => [alias, title] as const)))
+}
+
+/**
+ * The name and the page of a player of a squad table, in the spelling that stays. A table of
+ * Wikipedia can keep linking or writing an other title of `personTitleAliases`; stored as it
+ * stands it would be a second row next to the player of the title that stays, and bring the
+ * old spelling back. A page that is an other title becomes the title that stays, and so does a
+ * name that is one, when it has no link or links to one of the two titles: a link to another
+ * article is another person. Anything else comes back as it is.
+ */
+export function chosenSpelling(
+  name: string,
+  page: null | string,
+  aliases: ReadonlyMap<string, string> = aliasMap(personTitleAliases),
+): { name: string; page: null | string } {
+  const ofPage = page === null ? undefined : aliases.get(page)
+  const ofName = [...aliases].find(([alias]) => nameOfTitle(alias) === name)?.[1]
+  const samePerson = page === null || page === ofName || ofPage === ofName
+
+  return {
+    name: ofName !== undefined && samePerson ? nameOfTitle(ofName) : name,
+    page: ofPage ?? page,
+  }
 }
 
 /**

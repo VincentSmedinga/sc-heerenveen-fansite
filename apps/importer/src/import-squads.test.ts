@@ -409,6 +409,27 @@ describe('importPastSquad', () => {
     expect(await storedPlayers()).toEqual(rows)
   })
 
+  it('keeps one row and the spelling that stays when a list writes a title the owner replaced', async () => {
+    const stays = await serve({ [squadPageTitle(season)]: twoLists.replaceAll('Marten de Roon', 'Jan Harm Schippers') })
+
+    await importAt(stays, season)
+
+    const before = await storedPlayers()
+
+    expect(before.filter((row) => row.name.includes('Schippers'))).toMatchObject([
+      { name: 'Jan Harm Schippers', wikipediaPage: 'Jan Harm Schippers' },
+    ])
+
+    const other = await serve({ [squadPageTitle(season)]: twoLists.replaceAll('Marten de Roon', 'Jan-Harm Schippers') })
+    const again = await importAt(other, season)
+
+    expect(again).toMatchObject({ kind: 'imported', players: { added: 0, improved: 0 } })
+    expect(await storedPlayers()).toEqual(before)
+    expect(
+      (await database.db.select().from(persons)).filter((row) => row.wikipediaPage.includes('Schippers')),
+    ).toMatchObject([{ wikipediaPage: 'Jan Harm Schippers' }])
+  })
+
   it('fills in a country that is empty, and keeps one that is there when the list is not better', async () => {
     const server = await serve({ [squadPageTitle(season)]: twoLists })
 

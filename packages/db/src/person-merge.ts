@@ -161,10 +161,12 @@ export async function mergePlayerInto(db: MergeDatabase, fromId: number, intoId:
 
 /** The warnings for what both persons have and differs: the one that stays keeps his own. */
 function differences(other: Person, kept: Person): string[] {
-  const both = (what: string, a: null | number | string, b: null | number | string) =>
+  // A date of birth is a personal datum, so the line says that the dates differ and not what
+  // they are; a Q-number and the number of an article are public and help to find the pages.
+  const both = (what: string, a: null | number | string, b: null | number | string, values = true) =>
     a !== null && b !== null && a !== b
       ? [
-          `Persons: '${kept.wikipediaPage}' and '${other.wikipediaPage}' are merged and have a different ${what} (${a} and ${b}); the first stays, check which is right`,
+          `Persons: '${kept.wikipediaPage}' and '${other.wikipediaPage}' are merged and have a different ${what}${values ? ` (${a} and ${b})` : ''}; the first stays, check which is right`,
         ]
       : []
 
@@ -174,7 +176,7 @@ function differences(other: Person, kept: Person): string[] {
     ...(kept.wikidataId !== null && other.wikidataId !== null
       ? []
       : both('article on Wikipedia', kept.wikipediaPageId, other.wikipediaPageId)),
-    ...both('date of birth', kept.birthDate, other.birthDate),
+    ...both('date of birth', kept.birthDate, other.birthDate, false),
   ]
 }
 

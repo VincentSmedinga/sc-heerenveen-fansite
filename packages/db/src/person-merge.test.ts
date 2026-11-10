@@ -39,7 +39,8 @@ beforeEach(async () => {
   }
 })
 
-// The four persons the owner decided on 10 November 2026, with the real characters.
+// The four persons the owner decided on 10 November 2026, with the real characters. Every date
+// of birth, Q-number and number of an article below is made up.
 const ugur = { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' }
 const samardzic = { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' }
 const schippers = { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' }
@@ -123,13 +124,13 @@ describe('mergePersons', () => {
       givenName: 'Uğur',
       name: 'Uğur Yıldırım',
       nameSource: 'sort_key',
-      wikidataId: 'Q2071468',
+      wikidataId: 'Q1000001',
       wikidataReadAt: new Date('2026-11-01T10:00:00Z'),
       wikipediaPage: 'Uğur Yıldırım',
       wikipediaPageId: 12345,
     })
     const other = await addPerson({
-      birthDate: '1982-05-08',
+      birthDate: '1900-01-01',
       birthDatePrecision: 'day',
       birthPlaceId: 'Q9920',
       line: 'aanvaller',
@@ -172,7 +173,7 @@ describe('mergePersons', () => {
     expect(first).toEqual({ merged: ["'Ugur Yıldırım' is merged into 'Uğur Yıldırım'"], warnings: [] })
     expect(await personRows()).toMatchObject([
       {
-        birthDate: '1982-05-08',
+        birthDate: '1900-01-01',
         birthDatePrecision: 'day',
         birthPlaceId: 'Q9920',
         id: kept,
@@ -180,7 +181,7 @@ describe('mergePersons', () => {
         lineSource: 'squad',
         name: 'Uğur Yıldırım',
         nameSource: 'sort_key',
-        wikidataId: 'Q2071468',
+        wikidataId: 'Q1000001',
         wikipediaPage: 'Uğur Yıldırım',
         wikipediaPageId: 12345,
       },
@@ -430,7 +431,7 @@ describe('mergePersons', () => {
 
   it('keeps the article and the date of birth of the title that stays, and warns when the other differs', async () => {
     const kept = await addPerson({
-      birthDate: '1975-03-01',
+      birthDate: '1900-01-01',
       birthDatePrecision: 'day',
       wikidataId: 'Q111',
       wikipediaPage: 'Robert van den Berg',
@@ -438,7 +439,7 @@ describe('mergePersons', () => {
     })
 
     await addPerson({
-      birthDate: '1976-01-01',
+      birthDate: '1901-01-01',
       birthDatePrecision: 'year',
       wikidataId: 'Q222',
       wikipediaPage: 'Robert van der Berg',
@@ -450,11 +451,11 @@ describe('mergePersons', () => {
     expect(merged).toEqual(["'Robert van der Berg' is merged into 'Robert van den Berg'"])
     expect(warnings).toEqual([
       "Persons: 'Robert van den Berg' and 'Robert van der Berg' are merged and have a different item on Wikidata (Q111 and Q222); the first stays, check which is right",
-      "Persons: 'Robert van den Berg' and 'Robert van der Berg' are merged and have a different date of birth (1975-03-01 and 1976-01-01); the first stays, check which is right",
+      "Persons: 'Robert van den Berg' and 'Robert van der Berg' are merged and have a different date of birth; the first stays, check which is right",
     ])
     expect(await personRows()).toMatchObject([
       {
-        birthDate: '1975-03-01',
+        birthDate: '1900-01-01',
         birthDatePrecision: 'day',
         id: kept,
         wikidataId: 'Q111',
