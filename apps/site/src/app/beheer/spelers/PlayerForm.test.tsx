@@ -148,4 +148,40 @@ describe('the form of a player', () => {
 
     await waitFor(() => expect((document.getElementById('voornaam') as HTMLInputElement).value).toBe('Pelle'))
   })
+
+  it('has the link to the page that merges two persons under the field of the page it refused', async () => {
+    show(
+      {
+        errors: { wikipedia: 'Deze pagina hoort bij een andere persoon: Nieuwe Naam.' },
+        merge: {
+          href: '/beheer/spelers/samenvoegen?met=2&persoon=1&speler=3',
+          label: 'Voeg Oude Naam samen met Nieuwe Naam',
+        },
+        values: emptyPlayerValues,
+      },
+      { submitLabel: 'Opslaan' },
+    )
+    expect(screen.queryByRole('link', { name: /samen met/u })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    const link = await screen.findByRole('link', { name: 'Voeg Oude Naam samen met Nieuwe Naam' })
+
+    expect(link.getAttribute('href')).toBe('/beheer/spelers/samenvoegen?met=2&persoon=1&speler=3')
+    expect(document.getElementById('wikipedia')?.getAttribute('aria-invalid')).toBe('true')
+    // The link comes after the field, before the next one.
+    expect(
+      document.getElementById('wikipedia')!.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('says what a Wikipedia page does for a player with a person, and for one without', () => {
+    const { unmount } = show({ errors: {}, values: emptyPlayerValues })
+
+    expect(screen.getByText(/Die krijgt de pagina alleen als de pagina nog bij niemand hoort/u)).toBeTruthy()
+    expect(screen.getByText(/Voeg de twee personen dan samen, onder Dezelfde persoon als/u)).toBeTruthy()
+    unmount()
+    show({ errors: {}, values: emptyPlayerValues }, { withoutPerson: true })
+    expect(screen.getByText(/Hoort de pagina al bij een persoon, dan wordt de speler die persoon/u)).toBeTruthy()
+    expect(screen.queryByText(/Dezelfde persoon als/u)).toBeNull()
+  })
 })

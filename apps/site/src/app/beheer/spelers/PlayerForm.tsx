@@ -23,7 +23,8 @@ const summaryId = 'fouten'
  * so they are not required while there is a list. Every field has its own error, and the list
  * of errors gets the focus after a save that did not work, also an error that belongs to no
  * field (`algemeen`), which has a line of its own above the fields. It works without
- * JavaScript: the server answers with the form again.
+ * JavaScript: the server answers with the form again. A Wikipedia page that belongs to another
+ * person is refused with a link under the field to the page that merges the two (issue 977).
  *
  * The line and the country are those of the person (#1051), in every season; the position
  * under "In dit seizoen" is for a season that differs. Both are lists of the browser itself,
@@ -54,7 +55,7 @@ export function PlayerForm({
   withoutPerson?: boolean
 }) {
   const [state, formAction, pending] = useActionState(action, { errors: {}, values: initial })
-  const { errors, values } = state
+  const { errors, merge, values } = state
   const choosing = people !== undefined && people.length > 0
   const summary = [...playerFieldNames, 'algemeen' as const].flatMap((id) => {
     const message = errors[id]
@@ -73,6 +74,11 @@ export function PlayerForm({
   const forNewPerson = choosing ? 'Alleen voor een nieuwe persoon. ' : ''
   const achternaamHint = choosing ? 'Alleen voor een nieuwe persoon, en dan verplicht.' : nameHint
   // The form that adds does not know what a person from the list has, so empty changes nothing.
+  // A player with a person keeps him: a page of another person is a merge, on its own page.
+  const pageHint =
+    people !== undefined || withoutPerson
+      ? 'Hoort de pagina al bij een persoon, dan wordt de speler die persoon.'
+      : 'Deze speler heeft al een persoon. Die krijgt de pagina alleen als de pagina nog bij niemand hoort. Hoort de pagina bij een andere persoon? Voeg de twee personen dan samen, onder Dezelfde persoon als.'
   const keeps = people === undefined ? '' : ' Kies je een persoon die we al kennen? Onbekend laat staan wat hij heeft.'
 
   return (
@@ -141,13 +147,19 @@ export function PlayerForm({
         <Field
           error={errors.wikipedia}
           hideOptional={choosing}
-          hint={`${forNewPerson}De titel van het artikel op de Nederlandse Wikipedia, precies zoals hij daar staat, zoals Pim Verbeek (voetballer, 1999). Geen adres. Hoort de pagina al bij een persoon, dan wordt de speler die persoon.`}
+          hint={`${forNewPerson}De titel van het artikel op de Nederlandse Wikipedia, precies zoals hij daar staat, zoals Pim Verbeek (voetballer, 1999). Geen adres. ${pageHint}`}
           id="wikipedia"
           label="Wikipedia-pagina"
           required={false}
         >
           <Input {...field('wikipedia')} autoComplete="off" />
         </Field>
+        {/* The way on from a page of another person: the page that merges the two. */}
+        {merge === undefined ? null : (
+          <Text>
+            <Link href={merge.href}>{merge.label}</Link>
+          </Text>
+        )}
         {withoutPerson ? null : (
           <>
             <Field

@@ -5,9 +5,10 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { mergeEditorsPersonInto, mergePersons } from './person-merge.ts'
+import { mergeChosenPersons, mergeEditorsPersonInto, mergePersons, planPersonMerge } from './person-merge.ts'
 import { createPersonBook, type PersonName } from './persons.ts'
 import {
+  auditLog,
   matchAppearances,
   matches,
   matchGoals,
@@ -652,5 +653,156 @@ describe('mergeEditorsPersonInto', () => {
     expect(await mergeEditorsPersonInto(database.db, 0, two)).toBe(false)
     expect(await mergeEditorsPersonInto(database.db, two, two)).toBe(false)
     expect(await personRows()).toHaveLength(2)
+  })
+})
+
+// A player who changed his name: one person under the old name with the squad of one season,
+// and one under the new name with the seasons after it. All of it is made up.
+describe('mergeChosenPersons', () => {
+  const t0 = new Date('2026-11-10T12:00:00Z')
+  const describePlan = () => 'what moved'
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM audit_log')
+  })
+
+  async function twoPersons() {
+    const old = await addPerson({
+      line: 'aanvaller',
+      lineSource: 'manual',
+      name: 'Oude Naam',
+      wikidataId: 'Q900001',
+      wikipediaPage: 'Oude Naam',
+    })
+    const renamed = await addPerson({
+      country: 'NL',
+      countrySource: 'wikidata',
+      line: 'middenvelder',
+      lineSource: 'wikidata',
+      name: 'Nieuwe Naam',
+      wikidataId: 'Q900002',
+      wikipediaPage: 'Nieuwe Naam',
+    })
+
+    await database.db.insert(personPages).values({ page: 'Oude Naam (voetballer)', personId: old })
+
+    return { old, renamed }
+  }
+
+  it('points everything at the person that stays, remembers the title and writes one row of the log', async () => {
+    const { old, renamed } = await twoPersons()
+    const first = await addPlayer({ name: 'Oude Naam', personId: old, season: '2003/04', wikipediaPage: 'Oude Naam' })
+    const later = await addPlayer({ name: 'Nieuwe Naam', personId: renamed, season: '2004/05' })
+    const matchId = await addMatch('2003-10-24')
+
+    await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
+    await database.db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Oude Naam', ours: true, playerId: first, starter: true })
+    await database.db.insert(matchGoals).values([
+      { matchId, minute: 10, ours: true, personId: old, player: 'Oude Naam', playerId: first },
+      { matchId, minute: 20, ours: true, personId: old, player: 'Oude Naam' },
+    ])
+
+    const plan = await mergeChosenPersons(
+      database.db,
+      { describe: describePlan, keptId: renamed, otherId: old, userId: null },
+      t0,
+    )
+
+    expect(plan).toMatchObject({
+      appearances: 1,
+      doubles: [],
+      editorsValues: 1,
+      goals: 2,
+      keptSeasons: ['2004/05'],
+      pages: ['Oude Naam', 'Oude Naam (voetballer)'],
+      rows: [{ id: first, name: 'Oude Naam', season: '2003/04' }],
+    })
+    // The line of the editors goes before that of Wikidata, the rest is of the one that stays.
+    expect(await personRows()).toMatchObject([
+      {
+        country: 'NL',
+        id: renamed,
+        line: 'aanvaller',
+        lineSource: 'manual',
+        name: 'Nieuwe Naam',
+        wikidataId: 'Q900002',
+        wikipediaPage: 'Nieuwe Naam',
+      },
+    ])
+    expect(await pageRows()).toEqual([
+      ['Nieuwe Naam', renamed],
+      ['Oude Naam', renamed],
+      ['Oude Naam (voetballer)', renamed],
+    ])
+    expect(await playerRows()).toMatchObject([
+      { id: first, personId: renamed, wikipediaPage: 'Oude Naam' },
+      { id: later, personId: renamed },
+    ])
+    expect(await goalRows()).toMatchObject([{ personId: renamed }, { personId: renamed }])
+    expect(await database.db.select().from(auditLog)).toMatchObject([
+      { action: 'person.merge', createdAt: t0, detail: 'what moved', itemId: renamed, userId: null },
+    ])
+
+    // The book of the importer finds the person that stays by the old title, and makes nobody.
+    const book = await createPersonBook(database.db)
+
+    expect(await book.resolve('Oude Naam')).toBe(renamed)
+    expect(book.counts).toEqual({ people: 0, titles: 0 })
+  })
+
+  it('makes the two rows of a season one row, and keeps the row of the editors', async () => {
+    const { old, renamed } = await twoPersons()
+    const ofImport = await addPlayer({ name: 'Nieuwe Naam', personId: renamed, season: '2004/05', shirtNumber: 9 })
+    const ofEditors = await addPlayer({
+      editorsFields: ['name'],
+      name: 'O. Naam',
+      personId: old,
+      season: '2004/05',
+    })
+
+    expect(await planPersonMerge(database.db, old, renamed)).toMatchObject({
+      doubles: [
+        { gone: { id: ofImport, name: 'Nieuwe Naam' }, season: '2004/05', stays: { id: ofEditors, name: 'O. Naam' } },
+      ],
+      editorsValues: 2,
+    })
+    // The plan changes nothing.
+    expect(await personRows()).toHaveLength(2)
+
+    await mergeChosenPersons(database.db, { describe: describePlan, keptId: renamed, otherId: old, userId: null })
+
+    expect(await playerRows()).toMatchObject([
+      { editorsFields: ['name'], id: ofEditors, name: 'O. Naam', personId: renamed, shirtNumber: 9 },
+    ])
+  })
+
+  it('keeps the name of the editors, and gives a person without a title the title of the other', async () => {
+    const [{ insertId: untitled }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Naam', givenName: 'Nieuwe', name: 'Nieuwe Naam', nameSource: 'redactie' })
+    const titled = await addPerson({ englishTitle: true, name: 'Oude Naam', wikipediaPage: 'Oude Naam' })
+
+    await mergeChosenPersons(database.db, { describe: describePlan, keptId: untitled, otherId: titled, userId: null })
+
+    expect(await personRows()).toMatchObject([
+      { englishTitle: true, id: untitled, name: 'Nieuwe Naam', nameSource: 'redactie', wikipediaPage: 'Oude Naam' },
+    ])
+    expect(await pageRows()).toEqual([['Oude Naam', untitled]])
+  })
+
+  it('does nothing for one person twice and for a person who is gone', async () => {
+    const { old, renamed } = await twoPersons()
+
+    expect(
+      await mergeChosenPersons(database.db, { describe: describePlan, keptId: old, otherId: old, userId: null }),
+    ).toBe('same')
+    expect(
+      await mergeChosenPersons(database.db, { describe: describePlan, keptId: renamed, otherId: 0, userId: null }),
+    ).toBe('missing')
+    expect(await planPersonMerge(database.db, old, 0)).toBe('missing')
+    expect(await personRows()).toHaveLength(2)
+    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 })

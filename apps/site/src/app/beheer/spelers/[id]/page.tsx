@@ -1,19 +1,35 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumb, Button, Disclosure, Form, Heading, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Disclosure,
+  Field,
+  Form,
+  Heading,
+  Input,
+  Notice,
+  Page,
+  Select,
+  Strong,
+  Tag,
+  Text,
+} from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
-import { parseItemId } from '#src/beheer/items'
-import { findAdminPlayer, playerValuesOf } from '#src/beheer/players'
+import { parseItemId, parseSearch, searchMaxLength } from '#src/beheer/items'
+import { findAdminPlayer, mostPersonChoices, playerValuesOf, searchPersons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
 import { submitPlayer, submitRemovePlayer } from '../actions'
-import { listPath } from '../paths'
+import { listPath, mergePagePath, playerPath } from '../paths'
 import { PlayerForm } from '../PlayerForm'
+import { FocusOnLoad } from './FocusOnLoad'
 
 // Render on each request: the player changes with every save and every import.
 export const dynamic = 'force-dynamic'
@@ -29,6 +45,10 @@ type Props = {
 // the line and the country of his person. Below it is the block that takes him out of the
 // squad. A player with a goal or an appearance belongs to the season, so he has no such block
 // and the page says why. The page tells what the last action did from the word in the address.
+// Between the two is "Dezelfde persoon als" (issue 977), for a player whose person is there
+// twice: a search with method GET (`zoek`), and the list of what it found, which leads to the
+// page that merges the two persons. Both are forms of their own, and work without JavaScript.
+// After a search the focus is on the list, or on the search field when nobody was found.
 export default async function PlayerPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -40,7 +60,9 @@ export default async function PlayerPage({ params, searchParams }: Props) {
   }
 
   const { appearances, goals, person, player } = found
-  const { gedaan } = await searchParams
+  const { gedaan, zoek } = await searchParams
+  const search = person === undefined ? '' : parseSearch(zoek)
+  const others = (await searchPersons(getDatabase().db, search)).filter((other) => other.id !== person?.id)
   const showDelay = describeShowDelay(player.season)
   const inUse = appearances > 0 || goals > 0
   const stays = `${player.name} heeft in ${player.season} doelpunten of wedstrijden op zijn naam. Hij hoort dus bij het seizoen en blijft in de selectie.`
@@ -48,6 +70,10 @@ export default async function PlayerPage({ params, searchParams }: Props) {
     blijft: { text: stays, title: 'Niet weggehaald' },
     ongewijzigd: { text: 'Je hebt niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' },
     opgeslagen: { text: `De speler is bewaard. Staat ${showDelay} op de site.`, title: 'Opgeslagen' },
+    samengevoegd: {
+      text: `De twee personen zijn één persoon. Staat ${showDelay} op de site.`,
+      title: 'Samengevoegd',
+    },
     'was-al-weg': { text: 'Deze speler was al uit de selectie.', title: 'Niets veranderd' },
   }
   // Only a word the page knows: the address is input, and `__proto__` is no notice.
@@ -93,6 +119,56 @@ export default async function PlayerPage({ params, searchParams }: Props) {
         submitLabel="Opslaan"
         withoutPerson={person === undefined}
       />
+      {person === undefined ? null : (
+        <Card aria-labelledby="zelfde-persoon-kop">
+          <Heading id="zelfde-persoon-kop" level={2}>
+            Dezelfde persoon als
+          </Heading>
+          <Text>
+            Staat deze speler er twee keer in, als twee personen? Dat gebeurt bij een speler die van naam veranderde.
+            Zoek de andere persoon en voeg de twee samen. Je leest eerst wat er dan gebeurt.
+          </Text>
+          <Form action={playerPath(id)} method="get">
+            <Field
+              hint="Een deel van de naam of van de titel van de Wikipedia-pagina."
+              id="zoek"
+              label="Zoek de andere persoon"
+              required={false}
+            >
+              <Input defaultValue={search} maxLength={searchMaxLength} name="zoek" type="search" />
+            </Field>
+            <Button appearance="soft" type="submit">
+              Zoeken
+            </Button>
+          </Form>
+          {/* The answer to a search gets the focus: the list, or the field to search again. */}
+          {search === '' ? null : <FocusOnLoad id={others.length === 0 ? 'zoek' : 'met'} />}
+          {search === '' ? null : others.length === 0 ? (
+            <Text>Geen andere persoon gevonden met “{search}”. Zoek op een ander deel van de naam.</Text>
+          ) : (
+            <Form action={mergePagePath} method="get">
+              <Input name="persoon" type="hidden" value={String(person.id)} />
+              <Input name="speler" type="hidden" value={String(id)} />
+              <Field
+                hint={`${others.length >= mostPersonChoices - 1 ? 'De eerste personen die we vonden; zoek preciezer als hij er niet bij staat. ' : ''}Bij elke persoon staan zijn seizoenen en zijn Wikipedia-pagina, zodat je twee personen met dezelfde naam uit elkaar houdt.`}
+                id="met"
+                label="Dezelfde persoon als"
+              >
+                <Select name="met">
+                  {others.map((other) => (
+                    <Select.Option key={other.id} value={String(other.id)}>
+                      {other.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Field>
+              <Button appearance="soft" type="submit">
+                Bekijk wat samenvoegen doet
+              </Button>
+            </Form>
+          )}
+        </Card>
+      )}
       {!player.inSquad ? null : inUse ? (
         <Text>
           <Strong>Uit de selectie halen kan niet.</Strong> {stays}

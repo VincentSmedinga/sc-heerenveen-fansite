@@ -2,6 +2,9 @@ import { seasonSlug } from '#src/seasons'
 
 export const playersPath = '/beheer/spelers'
 
+/** The page that merges two persons. */
+export const mergePagePath = `${playersPath}/samenvoegen`
+
 /**
  * The address of the form that adds a player to a season, with the search for a person we
  * know (`q`) and the match the editor comes from and goes back to after the save
@@ -35,6 +38,34 @@ export function listPath(season?: string, done?: string) {
   }
 
   return query.size === 0 ? playersPath : `${playersPath}?${query}`
+}
+
+/**
+ * The address of the page that merges two persons (issue 977): the person of the player the
+ * editor came from (`personId`), the other person (`withId`), which of the two stays (`keptId`,
+ * none for the default) and the player to go back to.
+ */
+export function mergePath({
+  keptId,
+  personId,
+  playerId,
+  withId,
+}: {
+  keptId?: number | undefined
+  personId: number
+  playerId?: number | undefined
+  withId: number
+}) {
+  const query = new URLSearchParams({ met: String(withId), persoon: String(personId) })
+
+  if (keptId !== undefined) {
+    query.set('blijft', String(keptId))
+  }
+  if (playerId !== undefined) {
+    query.set('speler', String(playerId))
+  }
+
+  return `${mergePagePath}?${query}`
 }
 
 /** The address of the form of a player, with what the last action left to say (`gedaan`). */

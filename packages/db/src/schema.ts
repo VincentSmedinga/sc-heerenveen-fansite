@@ -444,6 +444,7 @@ export const auditActions = [
   'player.field-take-over',
   'player.field-keep',
   'person.edit',
+  'person.merge',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -483,7 +484,9 @@ export const auditDetailMaxLength = 1000
  * decision of an editor about a value of the import for a field the editors set (a row of
  * `player_field_differences`, issue 1022), with the player in `item_id`. `person.edit` is a
  * line or a country the editors gave a person on the work list of the admin (issue 1053), with
- * the person in `item_id` and what changed in `detail`.
+ * the person in `item_id` and what changed in `detail`. `person.merge` is two persons the
+ * editors made one in the admin (issue 977), with the person that stays in `item_id`; `detail`
+ * names both persons, what moved and the values that went, so the merge can be undone by hand.
  */
 export const auditLog = mysqlTable(
   'audit_log',

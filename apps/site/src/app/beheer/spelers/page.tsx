@@ -66,6 +66,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const season = requested !== undefined && seasons.includes(requested) ? requested : current
   const rows = await listAdminPlayers(db, season)
   const notices: Record<string, string> = {
+    samengevoegd: 'De twee personen zijn één persoon.',
     toegevoegd: `De speler staat in de selectie van ${season} en is te kiezen bij een doelpunt. Op de site staat hij ${describeShowDelay(season, now)}.`,
     weggehaald: `De speler is uit de selectie van ${season} gehaald. Hij blijft in de lijst van het seizoen staan.`,
   }

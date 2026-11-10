@@ -13,6 +13,7 @@ import { addPlayer } from '#src/beheer/players'
 import PlayerPage, { metadata as playerMetadata } from './[id]/page'
 import AddPage, { metadata as addMetadata } from './nieuw/page'
 import ListPage, { metadata as listMetadata } from './page'
+import MergePage, { metadata as mergeMetadata } from './samenvoegen/page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
@@ -324,5 +325,139 @@ describe('the form of a player', () => {
   it('does not exist for a number no player has, or for something that is no number', async () => {
     await expect(playerForm(pelleId + 100)).rejects.toThrow('not found')
     await expect(playerForm('abc')).rejects.toThrow('not found')
+  })
+})
+
+describe('"Dezelfde persoon als" on the form of a player', () => {
+  it('has the search for the other person, and no list before a search', async () => {
+    const id = await idOf('Luca Oyen')
+    const html = await playerForm(id)
+
+    expect(html).toContain('Dezelfde persoon als</h2>')
+    expect(html).toContain(`action="/beheer/spelers/${id}" method="get"`)
+    expect(html).toContain('for="zoek"')
+    expect(html).not.toContain('id="met"')
+  })
+
+  it('lists the other persons the search found, with their seasons and page, and leads to the merge', async () => {
+    const id = await idOf('Luca Oyen')
+    const [luca, pelle] = await database.db.select().from(persons)
+    const html = await playerForm(id, { zoek: 'amersfoort' })
+
+    expect(html).toContain('action="/beheer/spelers/samenvoegen"')
+    expect(html).toContain(`type="hidden" name="persoon" value="${luca?.id}"`)
+    expect(html).toContain(`type="hidden" name="speler" value="${id}"`)
+    expect(html).toContain(
+      `<option value="${pelle?.id}">Pelle van Amersfoort (2019/20, geen Wikipedia-pagina)</option>`,
+    )
+    expect(html).toContain('Bekijk wat samenvoegen doet')
+  })
+
+  it('never lists the person of the player himself, and says so when nobody else is found', async () => {
+    const html = await playerForm(await idOf('Luca Oyen'), { zoek: 'oyen' })
+
+    expect(html).toContain('Geen andere persoon gevonden met “oyen”.')
+    expect(html).not.toContain('id="met"')
+  })
+
+  it('is not there for a player without a person', async () => {
+    expect(await playerForm(await idOf('Jan Vos'), { zoek: 'oyen' })).not.toContain('Dezelfde persoon als')
+  })
+
+  it('says that the two persons are one after a merge', async () => {
+    expect(await playerForm(pelleId, { gedaan: 'samengevoegd' })).toContain('De twee personen zijn één persoon.')
+  })
+})
+
+describe('the page that merges two persons', () => {
+  const mergePage = async (searchParams: Record<string, string>) =>
+    renderToStaticMarkup(await MergePage({ searchParams: Promise.resolve(searchParams) }))
+  const text = (html: string) => html.replaceAll(/<[^>]*>/g, '')
+  const pair = async () => {
+    const [luca, pelle] = await database.db.select().from(persons)
+
+    return { luca: luca?.id ?? 0, pelle: pelle?.id ?? 0 }
+  }
+
+  it('is not for search engines', () => {
+    expect(mergeMetadata.robots).toEqual({ follow: false, index: false })
+  })
+
+  it('puts the two persons next to each other in a table, and keeps the one with an article', async () => {
+    const { luca, pelle } = await pair()
+    const html = await mergePage({ met: String(luca), persoon: String(pelle), speler: String(pelleId) })
+
+    expect(html).toContain('<th scope="col">Blijft: Luca Oyen</th>')
+    expect(html).toContain('<th scope="col">Verdwijnt: Pelle van Amersfoort</th>')
+    expect(html).toMatch(/<th scope="row">Wikipedia-pagina<\/th><td[^>]*>Luca Oyen<\/td><td[^>]*>geen<\/td>/u)
+    expect(html).toMatch(/<th scope="row">Seizoenen<\/th><td[^>]*>2019\/20<\/td><td[^>]*>2019\/20<\/td>/u)
+    expect(text(html)).toContain(
+      'Naam: Pelle van Amersfoort blijft, want de redactie stelde die in bij Pelle van Amersfoort. Luca Oyen verdwijnt.',
+    )
+    expect(text(html)).toContain('Wikipedia-pagina: Luca Oyen blijft.')
+  })
+
+  it('says what moves in numbers, and names a season in which both have a row', async () => {
+    const { luca, pelle } = await pair()
+
+    await database.db
+      .insert(matchGoals)
+      .values({ matchId, minute: 12, ours: true, personId: pelle, player: 'Van Amersfoort', playerId: pelleId })
+
+    const html = text(await mergePage({ met: String(luca), persoon: String(pelle) }))
+
+    expect(html).toContain('1 doelpunt')
+    expect(html).toContain('1 spelersrij: Pelle van Amersfoort in 2019/20')
+    expect(html).toContain('0 wedstrijdoptredens in onze verslagen')
+    expect(html).toContain('0 titels van Wikipedia-pagina’s')
+    // The name, the shirt number and the position the editors set on his row, and his name.
+    expect(html).toContain('4 handmatige wijzigingen van de redactie')
+    expect(html).toContain('In 2019/20 hebben beide personen een rij.')
+    // The row of the editors stays.
+    expect(html).toContain('de rij van Luca Oyen gaat op in de rij van Pelle van Amersfoort.')
+  })
+
+  it('has one button that names both persons, a link that swaps them and a link back to the player', async () => {
+    const { luca, pelle } = await pair()
+    const html = await mergePage({ met: String(luca), persoon: String(pelle), speler: String(pelleId) })
+
+    expect(html.match(/<button/gu)).toHaveLength(1)
+    expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Voeg Pelle van Amersfoort samen met Luca Oyen<\/button>/u)
+    expect(html).toContain(
+      `href="/beheer/spelers/samenvoegen?met=${pelle}&amp;persoon=${luca}&amp;blijft=${pelle}&amp;speler=${pelleId}"`,
+    )
+    expect(html).toContain('Laat Pelle van Amersfoort blijven en Luca Oyen verdwijnen')
+    expect(html).toContain(`<a href="/beheer/spelers/${pelleId}"`)
+    expect(html).toContain('Terug naar Pelle van Amersfoort, zonder samen te voegen')
+  })
+
+  it('keeps the other person when the editor swapped them, with the name of the editors', async () => {
+    const { luca, pelle } = await pair()
+    const html = await mergePage({ blijft: String(pelle), met: String(luca), persoon: String(pelle) })
+
+    expect(html).toContain('<th scope="col">Blijft: Pelle van Amersfoort</th>')
+    expect(text(html)).toContain('Wikipedia-pagina: Luca Oyen komt van Luca Oyen en blijft.')
+    expect(html).toContain('Voeg Luca Oyen samen met Pelle van Amersfoort</button>')
+  })
+
+  it('changes nothing by being opened', async () => {
+    const { luca, pelle } = await pair()
+
+    await mergePage({ met: String(luca), persoon: String(pelle) })
+
+    expect(await database.db.select().from(persons)).toHaveLength(2)
+  })
+
+  it('says so, without a button, for one person twice, a person who is gone and an address without persons', async () => {
+    const { luca } = await pair()
+    const same = await mergePage({ met: String(luca), persoon: String(luca) })
+    const gone = await mergePage({ met: '999999', persoon: String(luca), speler: String(pelleId) })
+
+    expect(same).toContain('Je koos twee keer dezelfde persoon.')
+    expect(gone).toContain('Een van de twee personen bestaat niet meer.')
+    expect(gone).toContain(`<a href="/beheer/spelers/${pelleId}"`)
+    expect(await mergePage({})).toContain('Een van de twee personen bestaat niet meer.')
+    expect(await mergePage({ met: 'onzin', persoon: '__proto__' })).toContain('Samenvoegen kan niet.')
+    expect(same + gone).not.toContain('<button')
   })
 })

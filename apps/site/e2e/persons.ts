@@ -1,7 +1,7 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { persons, players } from '@fansite/db/schema'
-import { inArray } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
@@ -76,6 +76,36 @@ export async function addPersons() {
   }
 
   return remove
+}
+
+/**
+ * The numbers of two of the made-up persons, for the page that merges two persons (issue 977):
+ * one with a Wikipedia article and one without, who both have a row in 2003/04.
+ */
+export async function mergePair() {
+  const { DATABASE_URL } = databaseEnv()
+
+  if (!loopback.has(new URL(DATABASE_URL).hostname)) {
+    throw new Error('The checks of the persons only read a database on this computer.')
+  }
+
+  const { close, db } = connect(DATABASE_URL)
+
+  try {
+    const idOf = async (name: string) => {
+      const [row] = await db.select({ id: persons.id }).from(persons).where(eq(persons.name, name))
+
+      if (row === undefined) {
+        throw new Error(`There is no made-up person ${name} in the database. Did the global setup run?`)
+      }
+
+      return row.id
+    }
+
+    return { other: await idOf('Verzonnen Spits'), person: await idOf('Bedachte Back') }
+  } finally {
+    await close()
+  }
 }
 
 const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])

@@ -5,6 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId, statSeasonSlug } from './held-changes'
 import { cupReportMatchId, matchId, playedMatchId } from './matches'
+import { mergePair } from './persons'
 import { squadPlayerId } from './players'
 
 // Every screen of the admin on a phone (#618): 390 pixels wide, with touch. The pages are
@@ -33,6 +34,7 @@ const screens = [
   '/beheer/spelers',
   `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=e`,
   '/beheer/spelers/{player}',
+  '/beheer/spelers/samenvoegen?persoon={person}&met={otherPerson}',
   '/beheer/stadions',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
@@ -55,6 +57,8 @@ async function withNumbers(path: string) {
     .replace('{played}', path.includes('{played}') ? String(await playedMatchId()) : '')
     .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '')
     .replace('{player}', path.includes('{player}') ? String(await squadPlayerId()) : '')
+    .replace('{person}', path.includes('{person}') ? String((await mergePair()).person) : '')
+    .replace('{otherPerson}', path.includes('{otherPerson}') ? String((await mergePair()).other) : '')
 }
 
 test.use({ hasTouch: true, isMobile: true, viewport: { height: 780, width: 390 } })

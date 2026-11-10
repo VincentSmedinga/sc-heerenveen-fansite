@@ -11,7 +11,7 @@ import { emptyPlayerValues, type PlayerFormState, type PlayerValues } from '#src
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitAddPlayer, submitPlayer, submitRemovePlayer } from './actions'
+import { submitAddPlayer, submitMergePersons, submitPlayer, submitRemovePlayer } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -328,5 +328,79 @@ describe('submitRemovePlayer', () => {
     jar.clear()
     expect(await remove(id)).toEqual({ redirect: '/beheer/inloggen' })
     expect(await stored()).toMatchObject([{ inSquad: true }])
+  })
+})
+
+describe('submitMergePersons', () => {
+  const merge = (otherId: unknown, keptId: unknown, playerId?: unknown) =>
+    resultOf(() => submitMergePersons(otherId as number, keptId as number, playerId as number | undefined))
+
+  /** A made-up player with two persons: one of an earlier season, one of this season. */
+  async function twoPersons() {
+    const [{ insertId: old }] = await database.db.insert(persons).values({ name: 'Oude Naam' })
+    const [{ insertId: renamed }] = await database.db
+      .insert(persons)
+      .values({ name: 'Nieuwe Naam', wikipediaPage: 'Nieuwe Naam' })
+    const [{ insertId: first }] = await database.db
+      .insert(players)
+      .values({ name: 'Oude Naam', personId: old, searchTerm: 'Naam', season: '2018/19' })
+    const [{ insertId: later }] = await database.db
+      .insert(players)
+      .values({ name: 'Nieuwe Naam', personId: renamed, searchTerm: 'Naam', season })
+
+    return { first, later, old, renamed }
+  }
+
+  it('merges the two persons, writes the log and goes back to the player with a notice', async () => {
+    const { first, old, renamed } = await twoPersons()
+
+    expect(await merge(old, renamed, first)).toEqual({ redirect: `/beheer/spelers/${first}?gedaan=samengevoegd` })
+    expect(await database.db.select().from(persons)).toMatchObject([{ id: renamed }])
+    expect(await database.db.select().from(players).orderBy(asc(players.id))).toMatchObject([
+      { id: first, personId: renamed },
+      { personId: renamed },
+    ])
+    expect(await database.db.select().from(auditLog)).toMatchObject([
+      { action: 'person.merge', itemId: renamed, userId },
+    ])
+  })
+
+  it('goes to the row that stays when the row the editor came from went into it', async () => {
+    const { later, old, renamed } = await twoPersons()
+    const [{ insertId: double }] = await database.db
+      .insert(players)
+      .values({ name: 'Oude Naam', personId: old, searchTerm: 'Naam', season, source: 'doelpunten' })
+
+    expect(await merge(old, renamed, double)).toEqual({ redirect: `/beheer/spelers/${later}?gedaan=samengevoegd` })
+    expect(await database.db.select().from(players).where(eq(players.id, double))).toEqual([])
+  })
+
+  it('goes to the list without a player to go back to', async () => {
+    const { old, renamed } = await twoPersons()
+
+    expect(await merge(old, renamed)).toEqual({ redirect: '/beheer/spelers?gedaan=samengevoegd' })
+  })
+
+  it('changes nothing for one person twice or a person who is gone, and says so on the page of the merge', async () => {
+    const { first, old, renamed } = await twoPersons()
+
+    expect(await merge(old, old, first)).toEqual({
+      redirect: `/beheer/spelers/samenvoegen?met=${old}&persoon=${old}&speler=${first}`,
+    })
+    expect(await merge(999_999, renamed)).toEqual({
+      redirect: `/beheer/spelers/samenvoegen?met=${renamed}&persoon=999999`,
+    })
+    expect(await merge('onzin', renamed)).toEqual({ redirect: '/beheer/spelers?fout=weg' })
+    expect(await database.db.select().from(persons)).toHaveLength(2)
+    expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+
+  it('is not for a moderator', async () => {
+    const { old, renamed } = await twoPersons()
+
+    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+
+    await expect(merge(old, renamed)).rejects.toThrow('not found')
+    expect(await database.db.select().from(persons)).toHaveLength(2)
   })
 })

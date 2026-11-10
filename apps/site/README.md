@@ -1176,7 +1176,20 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 - `/beheer/spelers/<nummer>` past een speler aan (`PlayerForm.tsx`, hetzelfde formulier zonder de lijst van personen).
   Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
   Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
-  Een pagina die bij een andere persoon hoort, wordt geweigerd: twee personen samenvoegen doet het beheer hier niet.
+  Een pagina die bij een andere persoon hoort, wordt geweigerd, met onder het veld een link naar het samenvoegen van de twee personen.
+- Onder het formulier staat "Dezelfde persoon als", voor een speler die er als twee personen in staat, zoals na een naamswijziging (#977).
+  De redactie zoekt de andere persoon (`?zoek=`, een formulier met GET) en kiest hem uit een lijst met de seizoenen en de Wikipedia-pagina erbij.
+  Een speler zonder persoon heeft dit blok niet.
+- `/beheer/spelers/samenvoegen?persoon=<nummer>&met=<nummer>` (`samenvoegen/page.tsx`) is de bevestigingspagina, en de enige plek waar het beheer samenvoegt.
+  Hij toont de twee personen naast elkaar in een tabel, wat ze anders hebben en welke waarde blijft, en wat er verhuist in aantallen.
+  Een seizoen waarin beide een rij hebben, staat er apart: die twee rijen worden één.
+  De persoon met een artikel op de Nederlandse Wikipedia blijft, anders de oudste (`defaultKept`); een link wisselt de twee om (`&blijft=<nummer>`).
+  Er verandert niets tot de redactie op de knop drukt, en de tekst van de knop noemt beide personen: "Voeg X samen met Y".
+  Twee keer dezelfde persoon, of een persoon die al weg is, geeft een zin en geen knop.
+- `mergePersons` in `src/beheer/person-merge.ts` voegt samen met `mergeChosenPersons` uit `@fansite/db/person-merge`, de code waarmee ook de importer samenvoegt.
+  Het schrijft één regel `person.merge` in het logboek (`describeMerge`), in dezelfde transactie: beide personen met nummer, naam en titel, de spelersrijen en titels die verhuisden, de aantallen en de waarden die verdwenen.
+  Een samenvoeging ongedaan maken kan niet; met die regel draai je hem met de hand terug.
+  De titel van de persoon die verdwijnt blijft in `person_pages`, dus een volgende import vindt dezelfde persoon en maakt geen tweede.
 - Onder "Wie" staan "Linie" en "Land": de linie en het land van de persoon, in elk seizoen (#1051).
   Beide zijn een keuzelijst met "Onbekend" als lege keuze; het land staat op naam met de landcode erachter (`countryChoices` in `src/beheer/countries.ts`).
   Een waarde die afwijkt van wat de persoon heeft, krijgt de bron `manual`, en de import vervangt hem niet.

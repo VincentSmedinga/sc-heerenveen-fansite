@@ -477,6 +477,13 @@
       "when": 1794325980161,
       "tag": "0067_add_person_edit_action",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "5",
+      "when": 1794328429709,
+      "tag": "0068_add_person_merge_action",
+      "breakpoints": true
     }
   ]
 }
