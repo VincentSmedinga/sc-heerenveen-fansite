@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 
 import type { PlayerFormState } from '#src/beheer/player-fields'
 
+import { matchPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId } from '#src/beheer/items'
 import { findReturnMatch } from '#src/beheer/player-return'
 import {
@@ -18,7 +19,6 @@ import {
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { matchPath } from '../wedstrijden/paths'
 import { listPath, playerPath, playersPath } from './paths'
 
 // The actions of the players. Only a beheerder keeps them, as with the matches. The season and

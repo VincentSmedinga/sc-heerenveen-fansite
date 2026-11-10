@@ -4182,7 +4182,8 @@
     Na het opslaan, en met "Annuleren", komt de redactie in dat tabblad op het formulier van die wedstrijd, met een melding.
     Het nummer telt alleen als de wedstrijd bestaat en bij het seizoen van de speler hoort (`findReturnMatch` in `src/beheer/player-return.ts`); anders eindigt het formulier op de lijst van de spelers.
   - **Het eerste tabblad** houdt wat de redactie al invulde.
-    Komt de redactie daar terug, dan vraagt de pagina de selectie opnieuw aan de server (`router.refresh`), en staat de nieuwe speler in de kiezer van elk doelpunt.
+    Elke keer dat de redactie daar terugkomt, vraagt de pagina de selectie opnieuw aan de server (`router.refresh`).
+    De nieuwe speler staat dan in de kiezer van elk doelpunt.
     Zonder JavaScript gebeurt dat niet: de redactie gaat dan verder in het nieuwe tabblad.
   - **De link staat één keer** in de kaart, onder de uitleg, en niet bij elk doelpunt.
   - **De werklijst** leidt naar de kaart Doelpunten van de wedstrijd (`#doelpunten`) en toont in een eigen kolom de naam waarmee elk doelpunt binnenkwam.

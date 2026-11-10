@@ -123,8 +123,8 @@ export function MatchErrorSummary() {
  * each button, because it has the same rules.
  *
  * A player the squad misses is added in a new tab, so what is filled in here stays (issue
- * 1021). When the editor comes back to this tab, the page asks the server for the squad again:
- * the new player is in the list of every goal, and the fields keep what was typed.
+ * 1021). Each time the editor comes back to this tab, the page asks the server for the squad
+ * again: the new player is in the list of every goal, and the fields keep what was typed.
  */
 export function MatchFields() {
   const { choices, formAction, state } = useMatchForm()
@@ -134,8 +134,9 @@ export function MatchFields() {
 
   useEffect(() => {
     const refresh = () => {
+      // Every return after the link asks again: the editor may look back here before the
+      // player is saved in the other tab.
       if (addingPlayer.current) {
-        addingPlayer.current = false
         router.refresh()
       }
     }

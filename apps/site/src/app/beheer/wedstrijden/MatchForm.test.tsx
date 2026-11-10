@@ -210,7 +210,7 @@ describe('the way to a new player in the form of a match', () => {
     expect(link().getAttribute('target')).toBe('_blank')
   })
 
-  it('asks the server for the squad again when the editor comes back to the tab, and keeps what was typed', () => {
+  it('asks the server for the squad again each time the editor comes back to the tab, and keeps what was typed', () => {
     show(initial('1', '0'))
     type('doelpunt-1-minuut', '12')
 
@@ -222,9 +222,11 @@ describe('the way to a new player in the form of a match', () => {
     link().addEventListener('click', (event) => event.preventDefault())
     fireEvent.click(link())
     fireEvent.focus(window)
-    fireEvent.focus(window)
-
     expect(refresh).toHaveBeenCalledTimes(1)
+
+    // The editor may look back before the player is saved, so every later return asks again.
+    fireEvent.focus(window)
+    expect(refresh).toHaveBeenCalledTimes(2)
     expect((document.getElementById('doelpunt-1-minuut') as HTMLInputElement).value).toBe('12')
   })
 
