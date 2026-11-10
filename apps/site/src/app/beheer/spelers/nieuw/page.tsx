@@ -1,0 +1,104 @@
+import type { Metadata } from 'next'
+
+import { Breadcrumb, Button, Card, Field, Form, Heading, Input, Page, Text } from '@fansite/design-system'
+import { redirect } from 'next/navigation'
+
+import { compact } from '#src/beheer/density'
+import { parseSearch, searchMaxLength } from '#src/beheer/items'
+import { emptyPlayerValues, newPersonChoice } from '#src/beheer/player-fields'
+import { listPlayerSeasons, mostPersonChoices, searchPersons } from '#src/beheer/players'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+import { seasonFromSlug, seasonSlug } from '#src/seasons'
+
+import { submitAddPlayer } from '../actions'
+import { addPlayerPath, listPath, playersPath } from '../paths'
+import { PlayerForm } from '../PlayerForm'
+
+// Render on each request: the persons to choose from change with every import.
+export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Speler toevoegen' }
+
+type SearchParams = Record<string, string | string[] | undefined>
+
+// The form that adds a player to the squad of a season (issue 1020). The season comes from the
+// address and is one we have a match of. The search for a person we know is a form of its own
+// with method GET, above the form of the player: it works without JavaScript, and what it finds
+// is the list the editor chooses from. The player gets the source `redactie`.
+export default async function AddPlayerPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  await requireRole('beheerder')
+
+  const { db } = getDatabase()
+  const { q, seizoen } = await searchParams
+  const season = typeof seizoen === 'string' ? seasonFromSlug(seizoen) : undefined
+
+  if (season === undefined || !(await listPlayerSeasons(db)).includes(season)) {
+    redirect(`${playersPath}?fout=seizoen`)
+  }
+
+  const search = parseSearch(q)
+  const people = await searchPersons(db, search)
+  const [first] = people
+
+  return (
+    <Page.Main
+      className={compact}
+      intro={
+        <>
+          <Breadcrumb
+            current="Speler toevoegen"
+            items={[
+              { href: '/beheer', label: 'Beheer' },
+              { href: listPath(season), label: `Spelers ${season}` },
+            ]}
+            label="Kruimelpad"
+          />
+          <Heading level={1}>Speler toevoegen aan {season}</Heading>
+          <Text appearance="intro">
+            Voeg een speler toe die in de selectie van {season} ontbreekt. Zoek eerst of we de persoon al kennen uit een
+            ander seizoen. Staat hij er niet bij, dan maak je een nieuwe persoon.
+          </Text>
+        </>
+      }
+      wide
+    >
+      <Card aria-labelledby="zoek-kop">
+        <Heading id="zoek-kop" level={2}>
+          Kennen we hem al?
+        </Heading>
+        <Form action={`${playersPath}/nieuw`} method="get">
+          <Field
+            hint="Een deel van de naam. Zoek eerst: wat je hieronder al invulde, gaat bij het zoeken verloren."
+            id="zoek"
+            label="Zoek een persoon"
+            required={false}
+          >
+            <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
+          </Field>
+          {/* The button sends the season: the design system has no hidden field. */}
+          <Button appearance="soft" name="seizoen" type="submit" value={seasonSlug(season)}>
+            Zoeken
+          </Button>
+        </Form>
+        {search === '' ? null : (
+          <Text>
+            {people.length === 0
+              ? `Geen persoon gevonden met “${search}”. Maak hieronder een nieuwe persoon.`
+              : people.length === mostPersonChoices
+                ? `De eerste ${mostPersonChoices} personen met “${search}” staan in de lijst hieronder. Staat hij er niet bij? Zoek dan preciezer.`
+                : `${people.length === 1 ? '1 persoon' : `${people.length} personen`} met “${search}” in de lijst hieronder.`}
+          </Text>
+        )}
+      </Card>
+      <PlayerForm
+        action={submitAddPlayer.bind(null, season)}
+        cancelHref={listPath(season)}
+        initial={{ ...emptyPlayerValues, persoon: first === undefined ? newPersonChoice : String(first.id) }}
+        key={addPlayerPath(season, search)}
+        people={people}
+        submitLabel="Speler toevoegen"
+      />
+    </Page.Main>
+  )
+}

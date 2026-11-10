@@ -4120,3 +4120,45 @@
 - **Gevolg:** de rijkop van een tabel met tekst houdt in het designsysteem ruimte voor zeven tekens (`data-table.css`).
   Zonder die regel brak de tabel een seizoen als `2025/26` in tweeën, naast kolommen vol tekst.
 - **Alternatieven:** vier filters erbij in `/beheer/wedstrijden`; een tabel met getallen en afkortingen die opzij schuift; `similarPersons` in de site nog een keer schrijven.
+
+## Spelers voegt de redactie toe door een persoon te kiezen of te maken
+
+- **Datum:** 9 november 2026
+- **Besluit:** de redactie voegt een speler toe aan een seizoen door een bestaande persoon te kiezen of een nieuwe te maken, met voor- en achternaam, rugnummer, positie en een optionele Wikipedia-pagina (#1020).
+  Land, geboortegegevens en vertrek blijven bij de import.
+- **Waarom:** dezelfde persoon in meer seizoenen telt als één doelpuntenmaker (#716), en de import leest de rest.
+- **Alternatieven:** alleen bestaande personen (een speler zonder pagina zou onmogelijk zijn), of alleen een vrije naam per seizoen (geen persoon, dus een gesplitste doelpuntenmaker).
+
+## Een speler van de redactie is zichtbaar voor bezoekers, met de bron `redactie`
+
+- **Datum:** 9 november 2026
+- **Besluit:** hij staat in de selectie en bij de doelpuntenmakers, met de bron `redactie`, zoals een wedstrijd van de redactie (#999).
+  De pagina Spelers toont hem met dezelfde bronvermelding als de andere spelers: de bron staat in de gegevens, niet in een eigen regel op de pagina.
+- **Waarom:** een doelpunt zonder speler op de site is een gat dat we juist willen dichten.
+- **Alternatieven:** alleen in het beheer te kiezen, maar dan blijft de selectie onvolledig voor bezoekers.
+
+## Het formulier van een speler zoekt eerst een persoon, en weigert wat het niet veilig kan
+
+- **Datum:** 10 november 2026
+- **Besluit:** `/beheer/spelers/nieuw` heeft een zoekformulier met methode GET, en wat het vindt staat als `Select` "Persoon" in het formulier van de speler, met "Een nieuwe persoon" als laatste keuze (#1020).
+  - **Verplicht is alleen de achternaam** van een nieuwe persoon.
+    Voornaam, tussenvoegsel, Wikipedia-pagina, rugnummer en positie mogen leeg blijven.
+  - **De Wikipedia-pagina** is de titel van het artikel, zoals de redactie hem invult.
+    De site vraagt Wikipedia niets, en een adres in plaats van een titel wordt geweigerd.
+  - **Aanpassen:** een andere naam geldt ook voor de persoon, in elk seizoen.
+    Een pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel.
+    Een pagina van een andere persoon, en een andere pagina voor een persoon die er al een heeft, weigert het formulier.
+    Een speler zonder persoon en zonder pagina krijgt bij het aanpassen geen persoon.
+  - **Uit de selectie halen** zet `in_squad` uit en laat de rij staan, na een bevestiging in een uitklapblok.
+    Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel kan niet weg: de pagina toont dan geen knop, en zegt waarom.
+  - **Het logboek** krijgt `player.add`, `player.edit` met wat er veranderde, of `player.remove`; een opslag die niets verandert, schrijft niets.
+- **Waarom:** een zoeklijst als gewone `Select` werkt zonder JavaScript en met elk hulpmiddel, en het designsysteem heeft geen zoekveld met suggesties.
+  De seizoenen tot 2006 hebben geen rugnummers en vaak geen posities, dus die velden kunnen niet verplicht zijn.
+  Twee personen samenvoegen raakt doelpunten in elk seizoen en heeft een eigen issue (#1027).
+  Een speler met doelpunten hoort bij het seizoen: zijn vertrek uit de selectie leest de import.
+- **Gevolg:** wat de import doet met een speler die de redactie toevoegde of aanpaste, regelt #1022; tot dan kan een run een aangepast veld van een speler uit Wikipedia overschrijven.
+  De link vanuit een doelpunt en vanuit de werklijst naar dit formulier komt met #1021.
+- **Alternatieven:** een `datalist` bij een tekstveld (schermlezers lezen de suggesties niet overal voor).
+  Elke persoon in één lijst (duizenden keuzes).
+  Bij het aanpassen een speler naar de persoon van een andere pagina verplaatsen (een stille samenvoeging).
+  Elke speler zonder persoon bij het aanpassen een persoon geven (dezelfde oude speler zou in elk seizoen een eigen persoon krijgen).

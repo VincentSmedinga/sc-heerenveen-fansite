@@ -233,14 +233,14 @@ De importer beoordeelt elk bericht bij elke run opnieuw en overschrijft `relevan
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                                                                                                            |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                                                                                                               |
-| `action`     | Wat: `item.hide`, `item.show`, `item.approve`, `item.unapprove`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset`, `player.stats-differ`, `player.stats-take-over` of `player.stats-keep` |
-| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                                                                                                               |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`, `item.approve` en `item.unapprove`                                                                                                                                                                                                                                                                  |
-| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                                                                                                      |
+| Kolom        | Betekenis                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                                                                                                                                                                                                                                                                             |
+| `action`     | Wat: `item.hide`, `item.show`, `item.approve`, `item.unapprove`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up`, `match.differs`, `match.take-over`, `match.keep`, `stadium.save`, `stadium.reset`, `club-name.save`, `club-name.reset`, `player.stats-differ`, `player.stats-take-over`, `player.stats-keep`, `player.add`, `player.edit` of `player.remove` |
+| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel, bij een `match.`-actie welke wedstrijd en bij een `stadium.`- of `club-name.`-actie welke club; zonder foreign key, zodat de rij blijft                                                                                                                                                                                                                                             |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`, `item.approve` en `item.unapprove`                                                                                                                                                                                                                                                                                                                |
+| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna; voor `stadium.`- en `club-name.`-acties alleen de aantallen (hoogstens 1000 tekens)                                                                                                                                                                                                                                                                    |
 
 Alleen `recordAction` in `packages/db/src/audit-log.ts` schrijft erin, en alleen met `INSERT`.
 De site en de importer gebruiken dezelfde functie.
@@ -587,6 +587,8 @@ Er staat niets anders in: geen landnaam, leeftijd, contract of foto.
 Het land is alleen de landcode van de vlag in de tabel; de nationaliteiten van Wikidata staan in `person_nationalities`.
 De cijfers van een speler staan in `player_season_stats` (zie hieronder).
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
+De kolom `source` zegt uit welke lijst de rij komt (`playerSources` in `schema.ts`).
+De laatste waarde, `redactie`, is een speler die de redactie in het beheer aan de selectie van een seizoen toevoegde (#1020).
 
 De lijst met spelers op `/nieuws/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
 Alleen de rijen van het lopende seizoen horen erin, en alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in de tabel voor zijn doelpunten en staat niet in de lijst.
@@ -726,16 +728,17 @@ De importer vult hem aan het begin van de eerstvolgende run, voor elke club met 
 Elke speler die een doelpunt maakte of in de selectie stond, van ons en van de tegenstander, is een persoon met een eigen `id` dat nooit verandert (#714).
 Twee titels die op Wikipedia naar hetzelfde artikel verwijzen, zoals `Alfred Finnbogason` en `Alfreð Finnbogason`, zijn dezelfde persoon.
 Een speler zonder artikel (een rode link) is ook een persoon, met de titel zoals hij staat.
+Een persoon die de redactie in het beheer maakt voor een speler zonder artikel, heeft geen titel: alleen een naam (#1020).
 
-| Kolom (`persons`)    | Betekenis                                                                                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`                 | Het eigen nummer van de persoon                                                                                                                                                |
-| `wikipedia_page`     | De titel van het artikel na de doorverwijzingen, met de toevoeging tussen haakjes als die er is (`Johnny Jansen (1975)`); uniek, letter voor letter vergeleken (`utf8mb4_bin`) |
-| `name`               | De naam zoals de titel hem schrijft, zonder de toevoeging tussen haakjes (`Joost van Aken`); leeg tot de importer de naam leest                                                |
-| `given_name`         | De voornamen (`Joost`); leeg voor een persoon met één naam (`Dinho`) en voor een persoon zonder naam                                                                           |
-| `family_name_prefix` | Het voorvoegsel van de achternaam (`van`, `van der`); leeg zonder voorvoegsel                                                                                                  |
-| `family_name`        | De achternaam zonder voorvoegsel (`Aken`)                                                                                                                                      |
-| `name_source`        | Waar de naam vandaan komt: `sort_key` (de sorteersleutel van het artikel), `guess` (de import raadde) of `manual` (de lijst `personNames`); leeg zolang er geen naam is        |
+| Kolom (`persons`)    | Betekenis                                                                                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                 | Het eigen nummer van de persoon                                                                                                                                                                                                      |
+| `wikipedia_page`     | De titel van het artikel na de doorverwijzingen, met de toevoeging tussen haakjes als die er is (`Johnny Jansen (1975)`); uniek, letter voor letter vergeleken (`utf8mb4_bin`); leeg voor een persoon van de redactie zonder artikel |
+| `name`               | De naam zoals de titel hem schrijft, zonder de toevoeging tussen haakjes (`Joost van Aken`); leeg tot de importer de naam leest                                                                                                      |
+| `given_name`         | De voornamen (`Joost`); leeg voor een persoon met één naam (`Dinho`) en voor een persoon zonder naam                                                                                                                                 |
+| `family_name_prefix` | Het voorvoegsel van de achternaam (`van`, `van der`); leeg zonder voorvoegsel                                                                                                                                                        |
+| `family_name`        | De achternaam zonder voorvoegsel (`Aken`)                                                                                                                                                                                            |
+| `name_source`        | Waar de naam vandaan komt: `sort_key` (de sorteersleutel van het artikel), `guess` (de import raadde), `manual` (de lijst `personNames`) of `redactie` (ingevuld in het beheer); leeg zolang er geen naam is                         |
 
 | Kolom (`person_pages`) | Betekenis                                                                                            |
 | ---------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -758,8 +761,21 @@ De voornaam, het voorvoegsel en de achternaam geven samen `name`, met een spatie
 De regels voor het lezen van de naam staan in de [README van de importer](../../apps/importer/README.md), _De namen van de personen_.
 `personNamesBySource`, `storePersonNames` en `countPersonNames` in `@fansite/db/persons` horen erbij.
 
+Het beheer maakt en vindt een persoon met vier functies uit hetzelfde bestand (#1020):
+
+- `findOrAddEditorsPerson(db, { name, page })` geeft de persoon van een titel, gevonden of gemaakt door `createPersonBook`, of maakt zonder titel een persoon met alleen een naam.
+  Een persoon die ze maakt, en een persoon van de titel die nog geen naam had, krijgt de naam met de bron `redactie`.
+- `givePersonPage(db, personId, page)` geeft een persoon zonder titel de titel van zijn artikel, en zet die in `person_pages`.
+- `setEditorsName(db, personId, name)` zet de naam die de redactie invulde op een persoon, met de bron `redactie`.
+- `joinNameParts(name)` maakt van de delen van een naam de hele naam.
+
+Een persoon zonder titel komt niet voor in wat de importer per titel leest: `createPersonBook`, `personNamesBySource`, `personsToRead` en `similarPersons` slaan hem over.
+De importer vraagt Wikidata dus nooit naar hem.
+
 De migratie `0040_add_persons` voegt alleen toe en maakt de tabellen en de kolommen leeg; de importer vult ze bij zijn volgende run.
 De migratie `0041_add_person_names` voegt de vijf kolommen van de naam toe, ook leeg; terugdraaien kan door ze weg te halen.
+De migratie `0061_add_players_of_the_editors` laat `persons.wikipedia_page` leeg toe, en zet `redactie` in de lijsten van `players.source`, `squad_completeness.best_source` en `persons.name_source`, en drie acties in die van `audit_log.action` (#1020).
+Ze verruimt alleen en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
 Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `match_goals_person_id_persons_id_fk` en `players_person_id_persons_id_fk` weg, dan de kolommen `person_id` van `match_goals` en `players`, en dan `person_pages` en `persons`.
 
 ### De gegevens van Wikidata

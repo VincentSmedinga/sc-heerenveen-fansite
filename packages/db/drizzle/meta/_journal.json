@@ -428,6 +428,13 @@
       "when": 1794260603827,
       "tag": "0060_add_player_stat_differences",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "5",
+      "when": 1794294805625,
+      "tag": "0061_add_players_of_the_editors",
+      "breakpoints": true
     }
   ]
 }

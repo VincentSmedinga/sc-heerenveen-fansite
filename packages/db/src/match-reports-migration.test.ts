@@ -89,12 +89,13 @@ describe(`the migration ${migration}`, () => {
     }
   })
 
-  it('has the source verslag, last in the lists of the players and of the completeness of the squad', async () => {
+  it('has the source verslag, after the sources of the import, in the lists of the players and of the completeness', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
     const type = `enum(${playerSources.map((source) => `'${source}'`).join(',')})`
 
-    expect(playerSources.at(-1)).toBe('verslag')
+    // Since issue 1020 the players of the editors (`redactie`) come after it.
+    expect(playerSources.indexOf('verslag')).toBe(playerSources.indexOf('wikidata') + 1)
     expect(await rows("SHOW COLUMNS FROM players LIKE 'source'")).toMatchObject([{ Default: 'selectie', Type: type }])
     expect(await rows("SHOW COLUMNS FROM squad_completeness LIKE 'best_source'")).toMatchObject([{ Type: type }])
   })

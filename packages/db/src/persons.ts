@@ -15,6 +15,13 @@ import {
   wikidataItems,
 } from './schema.ts'
 
+/** The name of a person in parts, as the editors fill it in in the admin (issue 1020). */
+export type EditorsName = {
+  familyName: string
+  familyNamePrefix: null | string
+  givenName: null | string
+}
+
 /** What came of the book: the persons and the titles it added to the database. */
 export type PersonBookCounts = { people: number; titles: number }
 
@@ -59,11 +66,11 @@ export type PersonName = {
   givenName: null | string
   /** The parts with a space between them. */
   name: string
-  source: PersonNameSource
+  source: ImportedNameSource
 }
 
 /** How many names `storePersonNames` stored, by where they came from. */
-export type PersonNameCounts = Record<PersonNameSource, number>
+export type PersonNameCounts = Record<ImportedNameSource, number>
 
 /** A person the importer has not read from Wikidata yet, with what an earlier try left. */
 export type PersonToRead = {
@@ -73,6 +80,9 @@ export type PersonToRead = {
   wikipediaPage: string
   wikipediaPageId: null | number
 }
+
+/** The sources of a name the importer stores: every one but the editors' (`redactie`). */
+type ImportedNameSource = Exclude<PersonNameSource, 'redactie'>
 
 /** What the book of persons reads and writes through. */
 type PersonDatabase = Pick<Database, 'insert' | 'select'>
@@ -97,6 +107,11 @@ export async function applyManualLines(
   let changed = 0
 
   for (const row of rows) {
+    // A person without a title is never in the list, which is by title.
+    if (row.title === null) {
+      continue
+    }
+
     const line = lines.get(row.title)
 
     if (line !== undefined && (row.line !== line || row.lineSource !== 'manual')) {
@@ -153,9 +168,14 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
   return counts
 }
 
-/** How many persons have a name, by where it came from, and how many have none. */
-export async function countPersonNames(db: Pick<Database, 'select'>): Promise<PersonNameCounts & { none: number }> {
-  const counts = { guess: 0, manual: 0, none: 0, sort_key: 0 }
+/**
+ * How many persons with an article have a name, by where it came from (`redactie` is a name
+ * the editors filled in), and how many have none.
+ */
+export async function countPersonNames(
+  db: Pick<Database, 'select'>,
+): Promise<PersonNameCounts & { none: number; redactie: number }> {
+  const counts = { guess: 0, manual: 0, none: 0, redactie: 0, sort_key: 0 }
 
   for (const source of (await personNamesBySource(db)).values()) {
     counts[source ?? 'none']++
@@ -194,8 +214,11 @@ export async function createPersonBook(
   const byArticle = new Map<string, number>()
   const counts: PersonBookCounts = { people: 0, titles: 0 }
 
+  // A person of the editors without an article has no title, so no title leads to him.
   for (const row of await db.select().from(persons).orderBy(asc(persons.id))) {
-    byArticle.set(row.wikipediaPage, row.id)
+    if (row.wikipediaPage !== null) {
+      byArticle.set(row.wikipediaPage, row.id)
+    }
   }
   for (const row of await db.select().from(personPages)) {
     byPage.set(row.page, row.personId)
@@ -253,6 +276,57 @@ export async function createPersonBook(
 }
 
 /**
+ * Finds or makes the person of a player the editors add or change in the admin (issue 1020),
+ * writing through `db` (use the transaction of the change). With a title it is the person of
+ * that title, found or made by the book (`createPersonBook`), so a title that belongs to a
+ * person never makes a second one. The admin asks Wikipedia nothing: the title is taken as the
+ * title of the article. Without a title it makes a person who has only a name.
+ *
+ * A person it makes gets `name`, with the source `redactie`, and so does a person of the title
+ * who had no name yet. A person who had a name keeps it. `created` says whether the person is
+ * new.
+ */
+export async function findOrAddEditorsPerson(
+  db: PersonDatabase & Pick<Database, 'update'>,
+  { name, page }: { name: EditorsName; page: null | string },
+): Promise<{ created: boolean; id: number }> {
+  if (page === null) {
+    const [{ insertId }] = await db.insert(persons).values(editorsNameColumns(name))
+
+    return { created: true, id: insertId }
+  }
+
+  const book = await createPersonBook(db, { redirects: new Map([[page, page]]) })
+  const id = await book.resolve(page)
+
+  if (id === null) {
+    throw new Error('The book made no person for a title it was given')
+  }
+
+  const [person] = await db.select({ nameSource: persons.nameSource }).from(persons).where(eq(persons.id, id))
+
+  if (person?.nameSource === null) {
+    await setEditorsName(db, id, name)
+  }
+
+  return { created: book.counts.people > 0, id }
+}
+
+/**
+ * Gives a person without a title the title of his article, and remembers it in `person_pages`,
+ * as the book does for a person it makes. Only for a title that belongs to no person yet.
+ */
+export async function givePersonPage(db: Pick<Database, 'insert' | 'update'>, personId: number, page: string) {
+  await db.update(persons).set({ wikipediaPage: page }).where(eq(persons.id, personId))
+  await db.insert(personPages).values({ page, personId })
+}
+
+/** The parts of a name with a space between them, as `persons.name` holds them. */
+export function joinNameParts({ familyName, familyNamePrefix, givenName }: EditorsName): string {
+  return [givenName, familyNamePrefix, familyName].filter((part) => part !== null && part !== '').join(' ')
+}
+
+/**
  * Every title the database knows as the article of a person: the rows of `person_pages`, which
  * has the title of every article too. The importer asks Wikipedia about a title that is not
  * here, and about no other.
@@ -267,13 +341,15 @@ export async function knownWikidataLabels(db: Pick<Database, 'select'>): Promise
 }
 
 /**
- * Every person with the source of his name: null while he has none. The importer asks about
- * the articles of the persons without a name, and puts the names of its list on the rest.
+ * Every person with an article, by its title, with the source of his name: null while he has
+ * none. The importer asks about the articles of the persons without a name, and puts the names
+ * of its list on the rest. A person without a title is not in the map: his name is the
+ * editors'.
  */
 export async function personNamesBySource(db: Pick<Database, 'select'>): Promise<Map<string, null | PersonNameSource>> {
   const rows = await db.select({ page: persons.wikipediaPage, source: persons.nameSource }).from(persons)
 
-  return new Map(rows.map((row) => [row.page, row.source]))
+  return new Map(rows.flatMap((row) => (row.page === null ? [] : [[row.page, row.source] as const])))
 }
 
 /** The Q-numbers that persons have, with the title of the person, for the unique key. */
@@ -283,12 +359,15 @@ export async function personsByWikidataId(db: Pick<Database, 'select'>): Promise
     .from(persons)
     .where(isNotNull(persons.wikidataId))
 
-  return new Map(rows.flatMap((row) => (row.id === null ? [] : [[row.id, row.title] as const])))
+  return new Map(rows.flatMap((row) => (row.id === null || row.title === null ? [] : [[row.id, row.title] as const])))
 }
 
-/** The persons not read from Wikidata yet, the oldest first, at most `limit`. */
+/**
+ * The persons not read from Wikidata yet, the oldest first, at most `limit`. A person without a
+ * title has no article to ask about, so he is never one of them.
+ */
 export async function personsToRead(db: Pick<Database, 'select'>, limit: number): Promise<PersonToRead[]> {
-  return db
+  const rows = await db
     .select({
       id: persons.id,
       wikidataId: persons.wikidataId,
@@ -296,9 +375,11 @@ export async function personsToRead(db: Pick<Database, 'select'>, limit: number)
       wikipediaPageId: persons.wikipediaPageId,
     })
     .from(persons)
-    .where(isNull(persons.wikidataReadAt))
+    .where(and(isNull(persons.wikidataReadAt), isNotNull(persons.wikipediaPage)))
     .orderBy(asc(persons.id))
     .limit(limit)
+
+  return rows.flatMap((row) => (row.wikipediaPage === null ? [] : [{ ...row, wikipediaPage: row.wikipediaPage }]))
 }
 
 /**
@@ -311,7 +392,7 @@ export async function rememberedPersonArticles(db: Pick<Database, 'select'>): Pr
     .from(personPages)
     .innerJoin(persons, eq(persons.id, personPages.personId))
 
-  return new Map(rows.map((row) => [row.page, row.article]))
+  return new Map(rows.flatMap((row) => (row.article === null ? [] : [[row.page, row.article] as const])))
 }
 
 /**
@@ -327,6 +408,11 @@ export async function rememberWikidataId(
   await db.update(persons).set({ wikidataId, wikipediaPageId }).where(eq(persons.id, personId))
 }
 
+/** Puts the name the editors filled in on a person, with the source `redactie`. */
+export async function setEditorsName(db: Pick<Database, 'update'>, personId: number, name: EditorsName) {
+  await db.update(persons).set(editorsNameColumns(name)).where(eq(persons.id, personId))
+}
+
 /**
  * The persons whose titles are the same without accents, capitals, hyphens, spaces and
  * apostrophes, the addition between brackets included (`Johnny Jansen (1952)` and `(1975)` are
@@ -338,6 +424,11 @@ export async function similarPersons(db: Pick<Database, 'select'>): Promise<stri
   const groups = new Map<string, string[]>()
 
   for (const { wikipediaPage } of await db.select().from(persons).orderBy(asc(persons.id))) {
+    // The list compares titles, and a person of the editors without an article has none.
+    if (wikipediaPage === null) {
+      continue
+    }
+
     const key = normalisePersonTitle(wikipediaPage)
 
     groups.set(key, [...(groups.get(key) ?? []), wikipediaPage])
@@ -483,6 +574,10 @@ export async function storeWikidataLabel(db: Pick<Database, 'insert'>, id: strin
     .insert(wikidataItems)
     .values({ id, label })
     .onDuplicateKeyUpdate({ set: { id: sql`id` } })
+}
+
+function editorsNameColumns(name: EditorsName) {
+  return { ...name, name: joinNameParts(name), nameSource: 'redactie' as const }
 }
 
 /** A title as a computer compares it: no accents, capitals, hyphens, spaces or apostrophes. */

@@ -515,6 +515,7 @@
 - **Later:** de rij heeft sinds #715 ook een naam in delen; zie _De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij_ hieronder.
 - **Later:** zie _Een persoon krijgt het Q-nummer en het paginanummer van het Nederlandse artikel_.
   De titel blijft de sleutel voor de import; het Q-nummer staat er nu naast, omdat de `robots.txt` van Wikidata het item per persoon toelaat.
+- **Later:** een persoon die de redactie in het beheer maakt, mag sinds 10 november 2026 zonder titel bestaan; zie _Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler_.
 
 ## De voor- en achternaam komen uit de sorteersleutel van Wikipedia, en bij een gok staat dat erbij
 
@@ -565,6 +566,7 @@
   De positie verplicht houden en bij een transfer gokken (een gok is erger dan leeg).
 - **Later:** zie _Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam_: `playerSources` heeft sinds 7 november 2026 ook `verslag`.
 - **Later:** de oude wedstrijden (1990 tot 2007) maken sinds 8 november 2026 rijen met de bron `verslag` zonder rugnummer, positie, pagina en persoon; zie _Een oude speler is een rij in `players`, nog zonder persoon_.
+- **Later:** `playerSources` heeft sinds 10 november 2026 ook `redactie`, voor een speler die de redactie in het beheer toevoegt; zie _Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler_.
 - **Later:** `players` heeft sinds 9 november 2026 ook `country`, de landcode van twee letters van de vlag in de selectietabel (migratie `0054_add_player_country`); zie _Het land van een speler komt als landcode uit de vlag in de selectietabel_ in `importer.md`.
 - **Later:** de bron `doelpunten` krijgt sinds 10 november 2026 ook een doelpuntenmaker met een eigen pagina die de import van de wedstrijden als speler maakt; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ in `importer.md`.
 
@@ -695,6 +697,7 @@
 - **Waarom:** de selectie van Wikipedia loopt achter (zie de volledigheid van de selectie, #745), en een verslag mag daar niet op wachten.
   De tegenstander heeft elk seizoen dezelfde spelers niet, en we tonen geen pagina's of cijfers van hen.
 - **Later:** vult de beslissing _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ aan: `playerSources` heeft nu `verslag` als laatste bron.
+- **Later:** sinds 10 november 2026 staat `redactie` achter `verslag` in `playerSources`; zie _Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler_.
 - **Later:** `verslag` wint nog steeds nooit van een echte lijst, maar is sinds 9 november 2026 wel de beste bron van een seizoen zonder andere lijst: de import van de oude site bewaart dan een rij in `squad_completeness`, en de kaart Selectie toont die spelers met de zin dat ze uit de verslagen komen (#935); zie _De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen_ in `importer.md`.
 
 ## Wikipedia houdt de uitslag, het verslag houdt de rest
@@ -933,3 +936,28 @@
 - **Waarom:** een tussenstand in `matches` komt in elke lijst en elk cijfer, en de import van Wikipedia zou na elk doelpunt een verschil melden.
   De uitslag uit de doelpunten van het verslag is de eindstand die bezoekers meteen willen zien, en de import loopt uren tot dagen achter.
 - **Alternatieven:** de wedstrijd meteen op `played` zetten met een lopende uitslag; de eindstand zelf intikken in plaats van uit de doelpunten te nemen; een eigen kolom `live` of een eigen tabel voor een lopende stand (meer om bij te houden, en de import kent hem niet).
+
+## Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler
+
+- **Datum:** 10 november 2026
+- **Besluit:** `persons.wikipedia_page` mag leeg zijn, voor een persoon die de redactie in het beheer maakt voor een speler zonder artikel (#1020).
+  Zo'n persoon heeft alleen een naam, met `name_source` `redactie`, en geen rij in `person_pages`.
+  - **De bronnen:** `playerSources` krijgt `redactie`, achteraan de lijst, en `personNameSources` krijgt `redactie`.
+    De importer kiest als beste bron de eerste uit de lijst die spelers heeft, dus `redactie` wint nooit van een lijst van Wikipedia of van `verslag`.
+    Het plafond van `redactie` in `sourceCeilings` is 30, zoals dat van `verslag`.
+  - **De importer:** wat hij per titel leest, slaat een persoon zonder titel over: `createPersonBook`, `personNamesBySource`, `personsToRead` en `similarPersons`.
+    Hij vraagt Wikidata dus nooit naar zo'n persoon.
+  - **Eén weg naar een persoon:** het beheer maakt en vindt een persoon met `findOrAddEditorsPerson` in `@fansite/db/persons`, dat voor een titel `createPersonBook` gebruikt.
+    Een titel die al bij een persoon hoort, maakt dus geen tweede persoon.
+  - **Het logboek:** `audit_log.action` krijgt `player.add`, `player.edit` en `player.remove`, met het nummer van de speler in `item_id`.
+  - **De migratie:** `0061_add_players_of_the_editors` verruimt alleen en kan opnieuw draaien.
+    De unieke sleutel op `wikipedia_page` blijft: MariaDB laat onder zo'n sleutel meer dan één lege waarde toe.
+    Terugdraaien kan zolang geen rij een nieuwe waarde of een lege titel heeft; de opdrachten om dat te tellen staan bovenaan het bestand.
+- **Waarom:** de projecteigenaar besloot op 9 november 2026 dat de redactie een speler zonder pagina kan toevoegen, met een persoon eronder (#1020).
+  De titel was tot nu toe de sleutel van een persoon, en een speler zonder artikel heeft er geen.
+  Met `redactie` achteraan blijft de kaart Selectie doen wat ze deed: spelers uit de verslagen verbergt ze alleen als een betere bron het seizoen heeft.
+- **Nadeel:** code die een persoon bij zijn titel zoekt, moet een lege titel overslaan.
+  Vult de redactie een titel in die een doorverwijzing is, dan kan de importer later een tweede persoon maken voor het echte artikel; samenvoegen kan met #1027.
+- **Alternatieven:** de naam als titel bewaren, zoals bij een rode link (de importer zou bij Wikidata het artikel van een naamgenoot lezen).
+  Een eigen tabel voor personen van de redactie (twee soorten personen, en `players.person_id` zou naar twee tabellen moeten wijzen).
+  `redactie` vóór `verslag` in de lijst (een seizoen met spelers uit de verslagen en één speler van de redactie zou op de kaart alleen die ene tonen).
