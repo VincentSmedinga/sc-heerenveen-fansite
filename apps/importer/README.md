@@ -2320,10 +2320,19 @@ Spelers die een redacteur in het beheer aan een verslag toevoegt, hebben ook de 
 `pnpm --silent import:old-site --report` (op de host `import.mjs --old-site --report`) schrijft een verslag in Markdown, in het Nederlands, over wat de import niet kon vullen of niet vertrouwde ([`src/old-site-check.ts`](src/old-site-check.ts)).
 Het leest de bestanden en de database en schrijft niets in de database.
 Het neemt de lock van de import niet, want het leest alleen, en het kan niet samen met `--dry-run`.
+Voor de kruistabellen vraagt het de Nederlandse Wikipedia om één pagina per seizoen van de competitie, met de fetcher van de importer.
 
 - Een tabel per seizoen telt de wedstrijden in het bestand en in de database, de doelpunten die optellen, ontbreken of een deel zijn, de opstellingen, de verslagen `klaar` en `bezig`, de scheidsrechters, de toeschouwers, de cijfers en de wedstrijden zonder aanvangstijd.
 - Daarna komen de lijsten: wedstrijden die in het bestand maar niet in de database staan, en omgekeerd; rondes met een ander nummer; opmerkingen van de oude redacteuren; doelpunten die niet optellen; verslagen die `bezig` zijn, met de reden per regel; spelers van wie de code geen rij in de oude tabel had; kaarten die de import oversloeg of afleidde; doelpuntenmakers en assists zonder speler; nieuwe clubs en clubs die aan een bestaande zijn gekoppeld.
-- Het verslag rekent niets zelf uit.
+- Het hoofdstuk _Uitslagen naast de kruistabellen van Wikipedia_ heeft een deel per seizoen van 1990/91 tot en met 2006/07 ([`src/old-site-cross-tables.ts`](src/old-site-cross-tables.ts)).
+  `readCrossTable` in [`src/read-cross-table.ts`](src/read-cross-table.ts) leest de tabel onder het kopje _Uitslagen_ van `Eredivisie <seizoen>`, of van `Eerste divisie <seizoen>` voor 1991/92 en 1992/93.
+  Het deel noemt de wedstrijden van sc Heerenveen waarvan de uitslag in de database anders is, en de wedstrijden die in de tabel staan en niet in de database.
+  Het zoekt de wedstrijd op seizoen, competitie en club (`findMatchesByClub` in `@fansite/db/match-lookup`), en thuis en uit tellen mee.
+  De club vindt het met het artikel waar de rij naar linkt of met een naam die een van de tabellen voor dat artikel toont (`clubFinder` in [`src/old-site-clubs.ts`](src/old-site-clubs.ts)).
+  De datums vergelijkt het niet, want de kruistabel heeft er geen.
+  Is een pagina of een tabel niet te lezen, dan staat het seizoen er met de reden.
+  Het vraagt alleen de seizoenen waarvan de bestanden een competitiewedstrijd hebben, en het onthoudt robots.txt niet in de database.
+- Buiten dat hoofdstuk rekent het verslag niets zelf uit.
   Het vraagt het aan de stappen (`deriveOldSiteMatches`, `deriveOldSiteGoals`, `deriveOldSitePlayers`, `judgeStoredOldSiteMatch` en `findOldSiteClubs`), die hun meldingen als gegevens geven, en zet ze om in Nederlandse zinnen.
 - Het noemt namen zoals ze in de wedstrijd stonden, op de samengevoegde schrijfwijzen na (`oldSiteNameCorrections` in `src/old-site-names.ts`: de keuzes van de projecteigenaar en de schrijfwijze van Wikipedia).
   De lijst _Namen om te beslissen_ noemt de namen die op elkaar lijken en niet zijn samengevoegd.

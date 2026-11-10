@@ -1,0 +1,471 @@
+{{Infobox voetbal Nederland Eerste divisie
+| Seizoen               = 1992/93
+| Kampioen              = [[VVV-Venlo|VVV]]
+| Topscorer             = {{NL-VLAG|15}} [[Maurice Graef]] (29)
+| Gepromoveerd          = [[VVV-Venlo|VVV]]<br>[[sc Heerenveen]]<br>[[NAC Breda|NAC]]
+| Aantal clubs          = 18
+| Vorige editie         = Eerste divisie 1991/92
+| Volgende editie       = Eerste divisie 1993/94
+}}
+Het '''seizoen 1992/93 van de Nederlandse Eerste divisie''' had [[VVV-Venlo|VVV]] als kampioen. De club uit [[Venlo (stad)|Venlo]] promoveerde daarmee naar de [[Eredivisie (mannenvoetbal)|Eredivisie]]. Via de nacompetitie wisten ook [[sc Heerenveen]] en [[NAC Breda|NAC]] te promoveren.
+
+== Reguliere competitie ==
+===Deelnemende teams===
+<div style="font-size:90%; white-space:nowrap;clear:right">
+{{Positiekaart+|Nederland|caption=Eerste divisie 1992/93|width=400|float=right|places=
+{{Positiekaart~|Nederland|lat=52.056082|lon=4.290225|label=[[ADO Den Haag]]|position=right}}
+{{Positiekaart~|Nederland|lat=52.623889|lon=4.733333|label=[[AZ (voetbalclub)|AZ]]|position=top}}
+{{Positiekaart~|Nederland|lat=53.108611|lon=6.864444|label=[[SC Veendam|BV Veendam]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.955833|lon=6.309722|label=[[BV De Graafschap|De Graafschap]]|position=right}}
+{{Positiekaart~|Nederland|lat=51.411667|lon=5.479444|label=[[FC Eindhoven|Eindhoven]]|position=bottom}}
+{{Positiekaart~|Nederland|lat=52.774722|lon=6.945556|label=[[FC Emmen|Emmen]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.916944|lon=4.520556|label=[[SBV Excelsior|Excelsior]]|position=right}}
+{{Positiekaart~|Nederland|lat=52.517222|lon=6.120278|label=[[PEC Zwolle|FC Zwolle]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.486265|lon=5.680109|label=[[Helmond Sport]]|position=right}}
+{{Positiekaart~|Nederland|lat=52.344753|lon=6.686058|label=[[Heracles Almelo|Heracles '74]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.410278|lon=4.648889|label=[[HFC Haarlem]]|position=bottom}}
+{{Positiekaart~|Nederland|lat=51.582473|lon=4.767506|label=[[NAC Breda|NAC]]|position=left}}
+{{Positiekaart~|Nederland|lat=51.822500|lon=5.836667|label=[[N.E.C.]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.541799|lon=4.481690|label=[[RBC (voetbalclub)|RBC]]|position=left}}
+{{Positiekaart~|Nederland|lat=52.967587|lon=5.915018|label=[[sc Heerenveen]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.455000|lon=4.635000|label=[[Telstar (voetbalclub)|Telstar]]|position=left}}
+{{Positiekaart~|Nederland|lat=51.755057|lon=5.528164|label=[[TOP Oss|TOP]]|position=left}}
+{{Positiekaart~|Nederland|lat=51.351944|lon=6.179722|label=[[VVV-Venlo|VVV]]|position=bottom}}
+}}
+</div>
+
+{| class="wikitable sortable"
+! | Club
+!class="unsortable"| Plaats
+!class="unsortable"| Accommodatie
+! | Capaciteit
+! Trainer
+|-
+| [[ADO Den Haag]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Den Haag]]
+| [[Zuiderparkstadion]]
+| 11.000
+| {{NL-VLAG|15}} [[Nol de Ruiter]]
+|-
+| [[AZ (voetbalclub)|AZ]]
+| {{NL-vlag|Noord-Holland|geenlink}} [[Alkmaar]]
+| [[Alkmaarderhout (stadion)|Alkmaarderhout]]
+| 8.914
+| {{NL-VLAG|15}} [[Henk Wullems]]
+|-
+| [[SC Veendam|BV Veendam]]
+| {{NL-vlag|Groningen (provincie)|geenlink}} [[Veendam (plaats)|Veendam]]
+| [[Sportpark De Langeleegte|De Langeleegte]]
+| 13.000
+| {{NL-VLAG|15}} [[Theo Verlangen]]
+|-
+| [[BV De Graafschap|De Graafschap]]
+| {{NL-vlag|Gelderland|geenlink}} [[Doetinchem (stad)|Doetinchem]]
+| [[Stadion De Vijverberg|De Vijverberg]]
+| 12.500
+| {{NL-VLAG|15}} [[Simon Kistemaker]]
+|-
+| [[FC Eindhoven|Eindhoven]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Eindhoven]]
+| [[Jan Louwers Stadion|Aalsterweg]]
+| 27.000
+| {{NL-VLAG|15}} [[Piet Buter]]
+|-
+| [[FC Emmen|Emmen]]
+| {{NL-vlag|Drenthe|geenlink}} [[Emmen (Drenthe)|Emmen]]
+| [[Stadion Meerdijk|Meerdijk]]
+| 12.000
+| {{NL-VLAG|15}} [[René Notten]]
+|-
+| [[SBV Excelsior|Excelsior]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Rotterdam]]
+| [[Stadion Woudestein|Woudestein]]
+| 11.000
+| {{NL-VLAG|15}} [[Cor Pot]]
+|-
+| [[PEC Zwolle|FC Zwolle]]
+| {{NL-vlag|Overijssel|geenlink}} [[Zwolle]]
+| [[Oosterenkstadion]]
+| 15.000
+| {{NL-VLAG|15}} [[Ben Hendriks (voetballer)|Ben Hendriks]]
+|-
+| [[Helmond Sport]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Helmond]]
+| [[Stadion De Braak|De Braak]]
+| 4.200
+| {{NL-VLAG|15}} [[Henk Rayer]]<br>{{NL-VLAG|15}} [[Louis Coolen]] (a.i.)
+|-
+| [[Heracles Almelo|Heracles '74]]
+| {{NL-vlag|Overijssel|geenlink}} [[Almelo]]
+| [[Gemeentelijk Sportpark Bornsestraat|Bornsestraat]]
+| 8.000
+| {{NL-VLAG|15}} [[Ab Gritter]]
+|-
+| [[HFC Haarlem]]
+| {{NL-vlag|Noord-Holland|geenlink}} [[Haarlem]]
+| [[Haarlemstadion|Jan Gijzenkade]]
+| 2.250
+| {{NL-VLAG|15}} [[Hans van Doorneveld]]
+|-
+| [[NAC Breda|NAC]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Breda]]
+| [[NAC-stadion (Beatrixstraat)|Beatrixstraat]]
+| 12.000
+| {{NL-VLAG|15}} [[Piet de Visser (voetbaltrainer)|Piet de Visser]]
+|-
+| [[N.E.C.]]
+| {{NL-vlag|Gelderland|geenlink}} [[Nijmegen]]
+| [[Goffertstadion]]
+| 29.000
+| {{NL-VLAG|15}} [[Jan Pruijn]]
+|-
+| [[RBC (voetbalclub)|RBC]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Roosendaal]]
+| [[Sportpark De Luiten|De Luiten]]
+| 5.900
+| {{NL-VLAG|15}} [[Wally Jansen]]
+|-
+| [[sc Heerenveen]]
+| {{NL-vlag|Friesland|geenlink}} [[Heerenveen (plaats)|Heerenveen]]
+| [[Sportpark Noord|Abe Lenstra Stadion]]
+| 15.000
+| {{NL-VLAG|15}} [[Foppe de Haan]]
+|-
+| [[Telstar (voetbalclub)|Telstar]]
+| {{NL-vlag|Noord-Holland|geenlink}} [[Velsen]]-[[IJmuiden]]
+| [[Sportpark Schoonenberg|Schoonenberg]]
+| 18.000
+| {{NL-VLAG|15}} [[Niels Overweg]]
+|-
+| [[TOP Oss|TOP]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Oss]]
+| [[Frans Heesenstadion|TOP-stadion]]
+| 2.500
+| {{NL-VLAG|15}} [[Piet Schrijvers]]
+|-
+| [[VVV-Venlo|VVV]]
+| {{NL-vlag|Limburg|geenlink}} [[Venlo (stad)|Venlo]]
+| [[Stadion de Koel|De Koel]]
+| 20.000
+| {{NL-VLAG|15}} [[Henk Rayer]]<br>{{NL-VLAG|15}} [[Remy Reynierse]] (a.i.)<br>{{NL-VLAG|15}} [[Frans Körver]]
+|}
+
+=== Eindstand ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+! width="36" |{{afkorting|pos|positie}}
+! align="left" width="130" |club
+! width="31" |{{afkorting|gs|aantal gespeelde wedstrijden}}
+! width="26" |{{afkorting|w|aantal gewonnen wedstrijden}}
+! width="26" |{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+! width="26" |{{afkorting|v|aantal verloren wedstrijden}}
+! width="34" |{{afkorting|pnt|totaal punten}}
+! width="26" |{{afkorting|PA|Punten aftrek}}
+! width="31" |{{afkorting|dv|aantal gemaakte doelpunten}}
+! width="31" |{{afkorting|dt|aantal doelpunten tegen}}
+! width="31" |{{afkorting|ds|doelsaldo}}
+|- style="background:#C0F0C0;"
+| 1. || align="left" | [[VVV-Venlo|VVV]] || 34 || 24 || 2 || 8 || '''50''' || || 84 || 46 || 38
+|- style="background:#CCFFCC;"
+| 2. || align="left" | [[sc Heerenveen]] || 34 || 19 || 10 || 5 || '''48''' || || 85 || 48 || 37
+|- style="background:#CCFFCC;"
+| 3. || align="left" | [[NAC Breda|NAC]] || 34 || 19 || 7 || 8 || '''45''' || || 73 || 39 || 34
+|- style="background:#CCFFCC;"
+| 4. || align="left" | [[N.E.C.]] || 34 || 17 || 10 || 7 || '''44''' || || 62 || 39 || 23
+|- style="background:#CCFFCC;"
+| 5. || align="left" | [[BV De Graafschap|De Graafschap]] || 34 || 17 || 8 || 9 || '''42''' || || 58 || 50 || 8
+|-
+| 6. || align="left" | [[PEC Zwolle|FC Zwolle]] || 34 || 16 || 8 || 10 || '''40''' || || 55 || 38 || 17
+|-
+| 7. || align="left" | [[RBC (voetbalclub)|RBC]] || 34 || 17 || 5 || 12 || '''39''' || || 70 || 56 || 14
+|-
+| 8. || align="left" | [[ADO Den Haag]] || 34 || 15 || 8 || 11 || '''38''' || || 65 || 61 || 4
+|-
+| 9. || align="left" | [[FC Oss|TOP]] || 34 || 13 || 9 || 12 || '''35''' || || 49 || 49 || 0
+|-
+| 10. || align="left" | [[AZ (voetbalclub)|AZ]] || 34 || 11 || 10 || 13 || '''32''' || || 54 || 52 || 2
+|-
+| 11. || align="left" | [[HFC Haarlem|Haarlem]] || 34 || 12 || 8 || 14 || '''32''' || || 49 || 61 || -12
+|-
+| 12. || align="left" | [[FC Emmen|Emmen]] || 34 || 9 || 9 || 16 || '''27''' || || 44 || 66 || -22
+|-
+| 13. || align="left" | [[Helmond Sport]] || 34 || 8 || 10 || 16 || '''26''' || || 53 || 74 || -21
+|-
+| 14. || align="left" | [[SBV Excelsior|Excelsior]] || 34 || 7 || 10 || 17 || '''24''' || || 40 || 69 || -29
+|-
+| 15. || align="left" | [[FC Eindhoven|Eindhoven]] || 34 || 7 || 9 || 18 || '''23''' || || 40 || 59 || -19
+|-
+| 16. || align="left" | [[SC Veendam|BV Veendam]] || 34 || 6 || 10 || 18 || '''22''' || || 32 || 60 || -28
+|-
+| 17. || align="left" | [[Heracles Almelo|SC Heracles '74]] || 34 || 7 || 8 || 19 || '''22''' || || 29 || 58 || -29
+|-
+| 18. || align="left" | [[Telstar (voetbalclub)|Telstar]] || 34 || 8 || 7 || 19 || '''21''' || ''-2'' || 51 || 68 || -17
+|}
+
+====Legenda====
+{| class="wikitable"
+!Kleur
+!Kwalificatie voor
+|-
+| style="background:#C0F0C0;"|
+| <small>Promotie naar de [[Eredivisie 1993/94|Eredivisie]]</small>
+|-
+| style="background:#CCFFCC;"|
+| <small>Nacompetitie voor promotie naar de [[Eredivisie 1993/94|Eredivisie]]</small>
+|}
+
+=== Uitslagen ===
+{| cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center" class="wikitable"
+|-
+! width="120" |
+! width="30" |[[ADO Den Haag|DHA]]
+! width="30" |[[AZ (voetbalclub)|AZ]]
+! width="30" |[[FC Eindhoven|EVV]]
+! width="30" |[[FC Emmen|EMM]]
+! width="30" |[[SBV Excelsior|EXC]]
+! width="30" |[[BV De Graafschap|GRA]]
+! width="30" |[[HFC Haarlem|HFC]]
+! width="30" |[[sc Heerenveen|HEE]]
+! width="30" |[[Helmond Sport|HSP]]
+! width="30" |[[Heracles Almelo|HER]]
+! width="30" |[[NAC Breda|NAC]]
+! width="30" |[[N.E.C.|NEC]]
+! width="30" |[[RBC (voetbalclub)|RBC]]
+! width="30" |[[Telstar (voetbalclub)|TEL]]
+! width="30" |[[FC Oss|TOP]]
+! width="30" |[[SC Veendam|VEE]]
+! width="30" |[[VVV-Venlo|VVV]]
+! width="30" |[[PEC Zwolle|ZWO]]
+|-
+| align="right" |'''[[ADO Den Haag]]'''||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 3 – 4 ||bgcolor="#BBEBFF"| 3 – 3 ||bgcolor="#C0F0D0"| 5 – 1 ||bgcolor="#C0F0D0"| 5 – 0 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 3 – 2
+|-
+| align="right" |'''[[AZ (voetbalclub)|AZ]]'''||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#808080"| ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 0 – 1
+|-
+| align="right" |'''[[FC Eindhoven|Eindhoven]]'''||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#BBEBFF"| 4 – 4 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#FFCCCC"| 0 – 2
+|-
+| align="right" |'''[[FC Emmen|Emmen]]'''||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#808080"| ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#FFCCCC"| 1 – 2
+|-
+| align="right" |'''[[SBV Excelsior|Excelsior]]'''||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#808080"| ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 6 – 4 ||bgcolor="#FFCCCC"| 1 – 5 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#FFCCCC"| 0 – 3
+|-
+| align="right" |'''[[BV De Graafschap|De Graafschap]]'''||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#C0F0D0"| 4 – 3 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#C0F0D0"| 4 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#BBEBFF"| 4 – 4 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#C0F0D0"| 2 – 1
+|-
+| align="right" |'''[[HFC Haarlem|Haarlem]]'''||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#FFCCCC"| 1 – 5
+|-
+| align="right" |'''[[sc Heerenveen]]'''||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 8 – 3 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 5 – 0 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#FFCCCC"| 1 – 2
+|-
+| align="right" |'''[[Helmond Sport]]'''||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#C0F0D0"| 4 – 3 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 3 – 3 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#808080"| ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 1 – 5 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#FFCCCC"| 0 – 3
+|-
+| align="right" |'''[[Heracles Almelo|SC Heracles '74]]'''||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 4 – 2 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#BBEBFF"| 0 – 0
+|-
+| align="right" |'''[[NAC Breda|NAC]]'''||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 4 – 2 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 6 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#C0F0D0"| 8 – 0 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#C0F0D0"| 1 – 0
+|-
+| align="right" |'''[[N.E.C.]]'''||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 4 – 2 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#C0F0D0"| 6 – 0 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 2 – 2
+|-
+| align="right" |'''[[RBC (voetbalclub)|RBC]]'''||bgcolor="#C0F0D0"| 6 – 1 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#FFCCCC"| 2 – 5 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| {{nowrap|2 – 1*}} ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#C0F0D0"| 5 – 1 ||bgcolor="#C0F0D0"| 2 – 1
+|-
+| align="right" |'''[[Telstar (voetbalclub)|Telstar]]'''||bgcolor="#C0F0D0"| 4 – 2 ||bgcolor="#FFCCCC"| 2 – 4 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 3 – 3 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#BBEBFF"| 3 – 3 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#C0F0D0"| 6 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 1 – 2
+|-
+| align="right" |'''[[FC Oss|TOP]]'''||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#C0F0D0"| 6 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#FFCCCC"| 2 – 3 ||bgcolor="#FFCCCC"| 0 – 4 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 2 – 0
+|-
+| align="right" |'''[[SC Veendam|BV Veendam]]'''||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#BBEBFF"| 3 – 3 ||bgcolor="#FFCCCC"| 0 – 2 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#BBEBFF"| 4 – 4 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#BBEBFF"| 0 – 0
+|-
+| align="right" |'''[[VVV-Venlo|VVV]]'''||bgcolor="#C0F0D0"| 6 – 1 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#C0F0D0"| 6 – 0 ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 6 – 3 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#BBEBFF"| 2 – 2 ||bgcolor="#FFCCCC"| 1 – 4 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#C0F0D0"| 5 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#808080"| ||bgcolor="#BBEBFF"| 1 – 1
+|-
+| align="right" |'''[[PEC Zwolle|FC Zwolle]]'''||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#BBEBFF"| 0 – 0 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 4 – 0 ||bgcolor="#FFCCCC"| 0 – 3 ||bgcolor="#FFCCCC"| 0 – 1 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 3 – 2 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 1 – 3 ||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#C0F0D0"| 3 – 1 ||bgcolor="#C0F0D0"| 3 – 0 ||bgcolor="#BBEBFF"| 1 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#808080"|
+|}
+
+==Statistieken==
+===Topscorers===
+{| class="wikitable" style="width:40%; font-size:85%;"
+|- valign="top" 
+! align="center" | #
+! align="center" | Naam
+! align="center" | Club
+! align="center" | {{goal}}
+|-
+| 1. || {{NL-VLAG|15}} [[Maurice Graef]] || [[VVV-Venlo|VVV]] || 29
+|-
+| 2. || {{NL-VLAG|15}} [[Pierre van Hooijdonk]] || [[NAC Breda|NAC]] || 28
+|-
+| 3. || {{NL-VLAG|15}} [[John Lammers]] || [[NAC Breda|NAC]] || 24
+|-
+| rowspan="2" | 4. || {{NL-VLAG|15}} [[John Mutsaers]] || [[RBC (voetbalclub)|RBC]] || 21
+|-
+| {{NL-VLAG|15}} [[Erik Tammer]] || [[sc Heerenveen]] || 21
+|-
+| 6. || {{NL-VLAG|15}} [[Jerry Taihuttu]] || [[Helmond Sport]] || 16
+|-
+| || {{NG-VLAG|15}} [[Tijjani Babangida]] || [[VVV-Venlo|VVV]] || 16
+|-
+| 8. || {{NL-VLAG|15}} [[Robert van der Weert]] || [[TOP Oss|TOP]] || 15
+|-
+| || {{NL-VLAG|15}} [[Harry van der Laan (voetballer)|Harry van der Laan]] || [[ADO Den Haag]] || 15
+|-
+| || {{NL-VLAG|15}} [[Erik Regtop]] || [[sc Heerenveen]] || 15
+|}
+
+===Toeschouwers===
+{| class="wikitable sortable" style=" text-align:center; font-size:95%;" width="80%"
+! № || Club || Totaal || Duels || {{afkorting|Gem|Gemiddelde}} || {{afkorting|+/–|Ten opzichte van vorig seizoen}} || Record
+|-
+| 1 || [[sc Heerenveen]] || || 18 || 8.482 || +3,8% ||
+|-
+| 2 || [[NAC Breda|NAC]] || || 18 || 4.985 || +4,3% ||
+|-
+| 3 || [[VVV Venlo|VVV]] || || 18 || 4.167 || +4,9% ||
+|-
+| 4 || [[BV De Graafschap|De Graafschap]] || || 18 || 4.142 || –42,2% ||
+|-
+| 5 || [[N.E.C.]] || || 18 || 3.340 || +99,8% ||
+|-
+| 6 || [[AZ (voetbalclub)|AZ]] || || 18 || 3.299 || –8,7% ||
+|-
+| 7 || [[PEC Zwolle|FC Zwolle]] || || 18 || 2.870 || +67,1% ||
+|-
+| 8 || [[RBC (voetbalclub)|RBC]] || || 18 || 2.841 || +27,0% ||
+|-
+| 9 || [[SC Veendam|BV Veendam]] || || 18 || 2.230 || –9,9% ||
+|-
+| 10 || [[FC Emmen|Emmen]] || || 18 || 2.205 || +1,5% ||
+|-
+| 11 || [[TOP Oss|TOP]] || || 18 || 2.129 || +9,1% ||
+|-
+| 12 || [[FC Eindhoven|Eindhoven]] || || 18 || 2.071 || +28,3% ||
+|-
+| 13 || [[Telstar (voetbalclub)|Telstar]] || || 18 || 2.057 || –37,9% ||
+|-
+| 14 || [[Helmond Sport]] || || 18 || 1.759 || –4,5% ||
+|-
+| 15 || [[HFC Haarlem|Haarlem]] || || 18 || 1.750 || +13,3% ||
+|-
+| 16 || [[Heracles Almelo|SC Heracles '74]] || || 18 || 1.421 || –33,8% ||
+|-
+| 17 || [[ADO Den Haag]] || || 18 || 1.179 || –71,8% ||
+|-
+| 18 || [[SBV Excelsior|Excelsior]] || || 18 || 812 || +27,5% ||
+|-
+! colspan="2" | Totaal || 879.444 || 306 || 2.874 || +3,6% ||
+|}
+
+== Nacompetitie ==
+{{Zie hoofdartikel|Eerste divisie 1992/93 (nacompetitie)/Wedstrijden}}
+
+=== Groep A ===
+{{BeginKolommen}}
+
+==== Eindstand ====
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+! width="36" |{{afkorting|pos|positie}}
+! align="left" width="130" |club
+! width="31" |{{afkorting|gs|aantal gespeelde wedstrijden}}
+! width="26" |{{afkorting|w|aantal gewonnen wedstrijden}}
+! width="26" |{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+! width="26" |{{afkorting|v|aantal verloren wedstrijden}}
+! width="34" |{{afkorting|pnt|totaal punten}}
+! width="31" |{{afkorting|dv|aantal gemaakte doelpunten}}
+! width="31" |{{afkorting|dt|aantal doelpunten tegen}}
+! width="31" |{{afkorting|ds|doelsaldo}}
+|- style="background:#C0F0C0;"
+| 1. || align="left" | [[sc Heerenveen]] || 4 || 3 || 0 || 1 || '''6''' || 7 || 4 || 3
+|- style="background:#FF8888;"
+| 2. || align="left" | [[Fortuna Sittard]] || 4 || 2 || 0 || 2 || '''4''' || 8 || 4 || 4
+|-
+| 3. || align="left" | [[N.E.C.]] || 4 || 1 || 0 || 3 || '''2''' || 4 || 11 || -7
+|}
+
+{{NieuweKolom}}
+
+====Legenda====
+{| class="wikitable"
+!Kleur
+!Kwalificatie voor
+|-
+| style="background:#C0F0C0;"|
+| <small>Promotie naar de [[Eredivisie 1993/94|Eredivisie]]</small>
+|-
+| style="background:#FF8888;"|
+| <small>Degradatie naar de [[Eerste divisie 1993/94|Eerste divisie]]</small>
+|}
+
+{{EindeKolommen}}
+
+==== Uitslagen ====
+{| cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center" class="wikitable"
+|-
+! width="120" |
+! width="30" |[[Fortuna Sittard|FSI]]
+! width="30" |[[sc Heerenveen|HEE]]
+! width="30" |[[N.E.C.|NEC]]
+|-
+| align="right" |'''[[Fortuna Sittard]]'''||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 5 – 0
+|-
+| align="right" |'''[[sc Heerenveen]]'''||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 3 – 1
+|-
+| align="right" |'''[[N.E.C.]]'''||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#FFCCCC"| 1 – 2 ||bgcolor="#808080"|
+|}
+
+=== Groep B ===
+{{BeginKolommen}}
+
+==== Eindstand ====
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+! width="36" |{{afkorting|pos|positie}}
+! align="left" width="130" |club
+! width="31" |{{afkorting|gs|aantal gespeelde wedstrijden}}
+! width="26" |{{afkorting|w|aantal gewonnen wedstrijden}}
+! width="26" |{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+! width="26" |{{afkorting|v|aantal verloren wedstrijden}}
+! width="34" |{{afkorting|pnt|totaal punten}}
+! width="31" |{{afkorting|dv|aantal gemaakte doelpunten}}
+! width="31" |{{afkorting|dt|aantal doelpunten tegen}}
+! width="31" |{{afkorting|ds|doelsaldo}}
+|- style="background:#C0F0C0;"
+| 1. || align="left" | [[NAC Breda|NAC]] || 4 || 4 || 0 || 0 || '''8''' || 11 || 1 || 10
+|- style="background:#FF8888;"
+| 2. || align="left" | [[FC Den Bosch]] || 4 || 1 || 0 || 3 || '''2''' || 4 || 7 || -3
+|-
+| 3. || align="left" | [[BV De Graafschap|De Graafschap]] || 4 || 1 || 0 || 3 || '''2''' || 3 || 10 || -7
+|}
+
+{{NieuweKolom}}
+
+====Legenda====
+{| class="wikitable"
+!Kleur
+!Kwalificatie voor
+|-
+| style="background:#C0F0C0;"|
+| <small>Promotie naar de [[Eredivisie 1993/94|Eredivisie]]</small>
+|-
+| style="background:#FF8888;"|
+| <small>Degradatie naar de [[Eerste divisie 1993/94|Eerste divisie]]</small>
+|}
+
+{{EindeKolommen}}
+
+==== Uitslagen ====
+{| cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center" class="wikitable"
+|-
+! width="120" |
+! width="30" |[[FC Den Bosch|DBO]]
+! width="30" |[[BV De Graafschap|GRA]]
+! width="30" |[[NAC Breda|NAC]]
+|-
+| align="right" |'''[[FC Den Bosch]]'''||bgcolor="#808080"| ||bgcolor="#C0F0D0"| 4 – 1 ||bgcolor="#FFCCCC"| 0 – 3
+|-
+| align="right" |'''[[BV De Graafschap|De Graafschap]]'''||bgcolor="#C0F0D0"| 1 – 0 ||bgcolor="#808080"| ||bgcolor="#FFCCCC"| 0 – 4
+|-
+| align="right" |'''[[NAC Breda|NAC]]'''||bgcolor="#C0F0D0"| 2 – 0 ||bgcolor="#C0F0D0"| 2 – 1 ||bgcolor="#808080"|
+|}
+
+== Trivia ==
+* (*) Aanvankelijk zou Telstar met 23 punten op de 15de plaats eindigen. Het kreeg echter 2 punten in mindering, omdat een groot deel van de spelersgroep te ziek was om bij de wedstrijd tegen RBC op te komen dagen.
+
+{{Navigatie Eerste divisie 1992/93}}
+{{Navigatie voetbalseizoenen Nederland Eerste Divisie}}
+{{Appendix|2=
+* [http://www.rsssf.com/tablesn/ned93.html www.rsssf.com]
+{{References}}
+}}
+
+[[Categorie:Eerste divisie voetbal]]
+[[Categorie:Competitievoetbal 1992/93]]

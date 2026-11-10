@@ -2820,6 +2820,7 @@
 - **Alternatieven:** een tabel in de database met meldingen (de meldingen horen bij één run en verouderen).
   Het verslag zelf de afleidingen laten herhalen (twee kopieën die uit elkaar lopen).
 - **Later:** zie _Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen_ (8 november 2026): het verslag noemt de namen zoals ze in de wedstrijd stonden, op de schrijfwijzen in die lijst na, en het heeft een lijst _Namen om te beslissen_.
+- **Later:** zie _Het controleverslag legt de competitie naast de kruistabellen van Wikipedia_ (10 november 2026): het verslag vraagt Wikipedia om de kruistabellen en vergelijkt de uitslagen zelf, en schrijft nog steeds niets.
 
 ## Een kleine lijst in de importer voegt de schrijfwijzen van één speler van de oude fansite samen
 
@@ -3469,6 +3470,36 @@
   De selectie lezen met `importPastSquad`, zoals het issue vraagt (de eerste versie van deze wijziging; de cijfers van de spelers komen dan niet mee, en de reviewer wees daarop).
   `squadSources` een regel geven voor 2026/27 en later (lost de pagina op, niet de cijfers).
   Een eigen cronjob of workflow met een schema (meer om in te stellen op de host, terwijl de uurlijkse run er al is).
+
+## Het controleverslag legt de competitie naast de kruistabellen van Wikipedia
+
+- **Datum:** 10 november 2026
+- **Besluit:** het controleverslag van de oude fansite (`import:old-site --report`) vergelijkt de uitslagen van de competitie met de kruistabel op de pagina van het seizoen op de Nederlandse Wikipedia (#976).
+  Het schrijft niets: de redactie verbetert een wedstrijd in het beheer.
+  - Het vraagt alleen de pagina's van de seizoenen 1990/91 tot en met 2006/07 waarvan de bestanden een competitiewedstrijd hebben: `Eredivisie <seizoen>`, en `Eerste divisie <seizoen>` voor 1991/92 en 1992/93 (`crossTableSeasonsOf`).
+    Dat zijn zeventien verzoeken, met de fetcher van de importer en een pauze ertussen.
+  - De lezer neemt de eerste tabel onder het eerste kopje _Uitslagen_ (`readCrossTable` in `read-cross-table.ts`).
+    De pagina's van de Eerste divisie hebben daaronder nog tabellen van de nacompetitie, en die leest hij niet.
+    Past een rij niet bij de kolommen, of heeft een club een uitslag tegen zichzelf, dan is de tabel niet te lezen.
+  - Het verslag zoekt de wedstrijd op seizoen, competitie en club, wat de bron ook is, en kiest daarna op thuis of uit (`findMatchesByClub` in `@fansite/db/match-lookup`).
+    `findMatchByDate` van #968 kan dat niet, want die vraagt een datum en de kruistabel heeft er geen.
+  - De club vindt het met het artikel waar de rij naar linkt, met de naam in de rij, of met een naam die een andere tabel voor dat artikel toont (`clubFinder`).
+    Zo is `RBC` van 1992/93 de club `RBC Roosendaal` van 2000/01, want beide rijen linken naar `RBC (voetbalclub)`.
+    Vindt het geen club, dan staat de wedstrijd in het verslag met "geen club met die naam in de database".
+  - Per seizoen noemt het de wedstrijden waarvan de uitslag verschilt, en de wedstrijden die in de tabel staan en niet in de database.
+    Een seizoen waarvan de pagina of de tabel niet te lezen is, staat er met de reden, en het verslag gaat door met het volgende seizoen.
+  - De fetcher van het verslag onthoudt robots.txt in het geheugen en niet in `robots_txt`, zodat het verslag ook daar niets schrijft.
+- **Waarom:** de gegevens van de oude fansite hebben fouten die we niet zien, en de kruistabel is een tweede bron voor elke uitslag.
+  Een verslag is genoeg om te zien hoeveel er verschilt, voordat we er werk voor de redactie van maken.
+- **Alternatieven:** een wachtende wijziging per verschil in `match_changes` (kan na #974, in een eigen issue); de datums ook vergelijken (de kruistabel heeft ze niet); de pagina's van alle seizoenen vragen, ook als de bestanden er geen wedstrijd van hebben (de test van de opdracht zou dan Wikipedia vragen).
+
+## Het boek over 100 jaar sc Heerenveen is alleen een controle
+
+- **Datum:** 9 november 2026
+- **Besluit:** de projecteigenaar vraagt de uitgever van "100 jaar VV & SC Heerenveen" één keer om toestemming (#976).
+  Tot die er is, gebruiken we het boek alleen om te controleren, en niets eruit komt in de repository of de database.
+- **Waarom:** de rechten zijn niet vrij.
+- **Alternatieven:** het boek niet gebruiken; de cijfers overnemen zonder toestemming (mag niet).
 
 ## Wikipedia is de waarheid voor wat het heeft, het beheer verbetert, en de oude fansite blijft van ons
 
