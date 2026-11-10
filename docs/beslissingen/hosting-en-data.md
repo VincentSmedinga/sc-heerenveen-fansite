@@ -962,3 +962,60 @@
 - **Alternatieven:** de naam als titel bewaren, zoals bij een rode link (de importer zou bij Wikidata het artikel van een naamgenoot lezen).
   Een eigen tabel voor personen van de redactie (twee soorten personen, en `players.person_id` zou naar twee tabellen moeten wijzen).
   `redactie` vóór `verslag` in de lijst (een seizoen met spelers uit de verslagen en één speler van de redactie zou op de kaart alleen die ene tonen).
+
+## De kopie van acceptatie krijgt haar verzonnen adressen al op de host
+
+- **Datum:** 10 november 2026
+- **Besluit:** `backup.mjs export` stuurt een dump over SSH naar de lokale database, met verzonnen adressen in `admin_users` en zonder rijen in de tabellen met sessies, inloglinks, inlogpogingen, bezoekers en discussies.
+  - Een lijst in `packages/db/src/export-plan.ts` zegt van elke tabel van het schema wat de export ermee doet, en een test vergelijkt de lijst met het schema.
+  - De export vraagt `mysqldump` om elke tabel bij naam, en stopt als de database een tabel heeft die niet in de lijst staat of als `admin_users` een kolom heeft die de lijst niet kent.
+  - De rijen van `admin_users` schrijft de export zelf, uit een query die om het verzonnen adres vraagt; het echte adres leest hij niet.
+- **Waarom:** zo komt geen echt adres op de computer van de projecteigenaar, ook niet even.
+  Er is geen tussenbestand dat kan blijven liggen of per ongeluk in een commit of een screenshot belandt.
+  Een lijst van wat wel mee mag, faalt veilig: een tabel die niemand heeft bekeken, houdt de export tegen in plaats van dat ze meegaat.
+- **Alternatieven:** de laatste nachtelijke dump downloaden, laden, de adressen lokaal vervangen en het bestand weghalen.
+  Dat is eenvoudiger, maar de echte adressen staan dan even op de schijf.
+  Of een lijst van wat niet mee mag, zoals bij de nachtelijke dump (een nieuwe tabel met persoonsgegevens gaat dan mee tot iemand eraan denkt).
+
+## Alleen de projecteigenaar haalt de kopie op
+
+- **Datum:** 10 november 2026
+- **Besluit:** `pnpm db:pull-acceptance` draait de projecteigenaar.
+  Agents bevragen de kopie alleen, noemen haar leeftijd en vragen om een nieuwe als ze te oud is.
+- **Waarom:** de opdracht gebruikt de SSH-sleutel van de host, en agents hebben geen toegang tot de host.
+- **Alternatieven:** agents laten verversen; dat is sneller, maar geeft ze toegang tot de host.
+
+## De kopie heeft één verzonnen account om lokaal in te loggen
+
+- **Datum:** 10 november 2026
+- **Besluit:** de opdracht zet `beheer@example.test` met de rol `beheerder` in de kopie.
+- **Waarom:** dan kun je het beheer op echte gegevens bekijken zonder een echt adres.
+- **Alternatieven:** alleen query's, zonder inloggen; met `admin:create` zelf een account maken.
+
+## De kopie heet `fansite_acc`, en geen werkmap mag die naam krijgen
+
+- **Datum:** 10 november 2026
+- **Besluit:** de lokale database heet `fansite_acc`.
+  `scripts/worktree-env.js` weigert een werkmap die op die naam uitkomt, en `pnpm worktree:db:drop` laat haar staan.
+  De opdracht laadt alleen in `fansite_acc`, en alleen op een server op de eigen computer.
+- **Waarom:** de naam past bij de andere databases.
+  Een werkmap met de naam `acc` zou anders de kopie als testdatabase gebruiken en leegmaken.
+- **Alternatieven:** een naam buiten het voorvoegsel `fansite_`, zoals `acceptance_copy`.
+
+## De tijd van de kopie staat in de kopie zelf
+
+- **Datum:** 10 november 2026
+- **Besluit:** een kleine tabel buiten het schema van de site, `acceptance_copy`, bewaart de tijd van de dump en van het laden, in UTC, en de opdracht toont die.
+  De export schrijft de tabel als laatste, met daarna de regel `-- Export completed`; zonder die regel weigert de opdracht de kopie en haalt hij haar weg.
+- **Waarom:** elke sessie die de kopie bevraagt, leest dan hoe oud de gegevens zijn, zonder een bestand ernaast.
+  Een dump die halverwege stopt, mag niet op een hele kopie lijken.
+- **Alternatieven:** een bestand naast de repository; alleen de uitvoer van de opdracht.
+
+## De kopie laadt met de client uit de container van Docker
+
+- **Datum:** 10 november 2026
+- **Besluit:** `pnpm db:pull-acceptance` geeft de dump aan `mariadb` in de container van `docker compose`, tenzij `MYSQL_COMMAND` een eigen client noemt.
+  Daarna leest de opdracht de tabel `acceptance_copy` terug uit de database van `DATABASE_URL`, en stopt hij als die er niet is.
+- **Waarom:** de computer van de projecteigenaar heeft geen `mysql` of `mariadb`, en de container is er al voor de lokale database.
+  De controle achteraf vangt een client die in een andere server laadt.
+- **Alternatieven:** een client laten installeren (een stap meer voor één opdracht); de dump zelf in statements knippen en met `mysql2` laden (een eigen parser voor wat de client al kan).

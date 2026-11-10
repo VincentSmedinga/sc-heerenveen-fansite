@@ -65,6 +65,13 @@ export const blockCount = 500
 /** The name of the database a normal checkout and CI use. A worktree gets `fansite_<name>`. */
 export const defaultDatabase = 'fansite'
 
+/**
+ * The database with the copy of acceptance that `pnpm db:pull-acceptance` makes (see
+ * packages/db/src/export-plan.ts). A worktree never gets it: its tests and `drop` would empty
+ * the copy.
+ */
+export const acceptanceCopyDatabase = 'fansite_acc'
+
 const longestName = 32
 
 const hashOf = (text) => createHash('sha256').update(text).digest()
@@ -113,6 +120,14 @@ export function databaseUrlOf(url, slug) {
 export function deriveEnv({ databaseUrl, env, folder, linked }) {
   const worktree = worktreeNameOf({ env, folder, linked })
   const slug = slugOf(worktree)
+
+  if (slug !== undefined && `${defaultDatabase}_${slug}` === acceptanceCopyDatabase) {
+    throw new WorktreeEnvError(
+      `The worktree "${worktree}" would get the database ${acceptanceCopyDatabase}, which holds the copy of acceptance. ` +
+        'Give the folder another name, or set WORKTREE_NAME to one.',
+    )
+  }
+
   const ports = slug === undefined ? undefined : portsOf(worktree)
   const values = {}
   const derived = []

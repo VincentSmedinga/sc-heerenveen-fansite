@@ -31,6 +31,12 @@ describe('worktreeDatabaseName', () => {
     )
   })
 
+  it('leaves the copy of acceptance alone, although its name looks like one of a worktree', () => {
+    expect(() => worktreeDatabaseName('mysql://root@127.0.0.1:3306/fansite_acc')).toThrow(
+      /holds the copy of acceptance.*leaves it alone/,
+    )
+  })
+
   it('leaves fansite and other databases alone', () => {
     for (const name of ['fansite', 'mysql', 'other', 'fansite_', 'Fansite_x', 'fansite_a-b']) {
       expect(() => worktreeDatabaseName(`mysql://root@127.0.0.1:3306/${name}`), name).toThrow(/leaves it alone/)

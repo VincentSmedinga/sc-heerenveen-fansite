@@ -44,6 +44,7 @@
     "db:backup": "node --env-file-if-exists=../../.env src/backup-command.ts backup",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../../.env src/migrate.ts",
+    "db:pull-acceptance": "node --env-file-if-exists=../../.env src/acceptance-copy.ts",
     "db:restore": "node --env-file-if-exists=../../.env src/backup-command.ts restore",
     "db:seed": "node --env-file-if-exists=../../.env src/seed.ts",
     "test": "node ../../scripts/worktree-env.js run -- vitest run",

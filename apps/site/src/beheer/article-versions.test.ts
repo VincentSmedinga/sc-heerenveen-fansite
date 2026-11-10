@@ -255,12 +255,19 @@ describe('the versions are only added to', () => {
 
   // `article-body-migration.ts` is the exception: once, it rewrites the body of a version from
   // the old format into JSON. It changes nothing else of a version, and its own test shows it.
-  it('is touched by the schema, the one file that reads and writes it and the conversion of the text, and by no other code', () => {
+  // `export-plan.ts` only names the table, in the list of what the copy of acceptance takes
+  // along: it reads and writes nothing.
+  it('is touched by the schema, the one file that reads and writes it, the conversion of the text and the list of the export, and by no other code', () => {
     const touching = files
       .filter((file) => /\barticleVersions\b|\barticle_versions\b/u.test(readFileSync(file, 'utf8')))
       .map((file) => path.basename(file))
 
-    expect(touching.toSorted()).toEqual(['article-body-migration.ts', 'article-versions.ts', 'schema.ts'])
+    expect(touching.toSorted()).toEqual([
+      'article-body-migration.ts',
+      'article-versions.ts',
+      'export-plan.ts',
+      'schema.ts',
+    ])
   })
 
   it('only inserts: no update, delete, truncate or drop of article_versions anywhere', () => {

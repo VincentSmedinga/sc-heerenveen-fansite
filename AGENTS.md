@@ -402,7 +402,20 @@ The first run that needs the database makes it and runs the migrations (`pnpm de
 - If a port of your block is busy, the command stops and names the port and the worktree.
   It never picks another port.
 - Never drop or empty another worktree's database, and never stop another worktree's servers.
+- No worktree is called `acc`: its database would be `fansite_acc`, which holds the copy of acceptance, and the script refuses it.
 - `packages/db/README.md` has the details and the decision is in `docs/beslissingen/werkwijze.md`.
+
+## The copy of the acceptance database
+
+The owner's computer has a copy of the acceptance database in the local database `fansite_acc`, without personal data: the accounts have made-up addresses, and the tables with sessions, login links, login attempts, visitors and discussions are empty.
+`docs/back-ups.md` says what is in it, under _Een kopie van acceptatie op je eigen computer_.
+
+- Answer a question about the data of acceptance with a query on the copy, instead of reading pages: `docker compose exec -T mariadb mariadb fansite_acc -e '<query>'`.
+- Only read.
+  Never change, empty or drop `fansite_acc`, and don't point a test, the seed or an import at it.
+- Read the age of the copy first, `SELECT dumped_at, loaded_at FROM acceptance_copy` (UTC), and name it with your answer.
+- If the copy is missing or too old for the question, ask the owner for a new one.
+  Never run `pnpm db:pull-acceptance` yourself: it uses the owner's SSH key, and agents have no access to the host.
 
 ## The review folder
 
