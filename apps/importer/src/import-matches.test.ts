@@ -2971,6 +2971,45 @@ describe('linking the goals to the players of the squad', () => {
       ])
     })
 
+    it('makes no second row of a player of the editors with his page or his person, and gives him the goal (#1022)', async () => {
+      await addPlayers(others)
+
+      const ofEditors = {
+        editorsFields: ['name', 'shirt_number', 'wikipedia_page'] as ('name' | 'shirt_number' | 'wikipedia_page')[],
+        name: 'Pelle van A.',
+        searchTerm: 'van A.',
+        season: '2026/27',
+        shirtNumber: 14,
+        source: 'redactie' as const,
+        wikipediaPage: 'Pelle van Amersfoort',
+      }
+
+      await database.db.insert(players).values(ofEditors)
+
+      const { server } = await serve({ programme: linked })
+      const report = await importAt(server, first)
+
+      expect(report.kind === 'imported' && report.persons.join('\n')).not.toContain('added from a goal')
+      expect(await database.db.select().from(players)).toHaveLength(others.length + 1)
+      expect(await database.db.select().from(players).where(eq(players.source, 'redactie'))).toMatchObject([ofEditors])
+      expect(await linksOf('Speelronde 2')).toContainEqual(['Van Amersfoort', 'Pelle van A.', 'Pelle van Amersfoort'])
+
+      // By his person: the editors gave him another title of the same article.
+      const [person] = await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Pelle van Amersfoort'))
+
+      await database.db.insert(personPages).values({ page: 'P. van Amersfoort', personId: person!.id })
+      await database.db
+        .update(players)
+        .set({ wikipediaPage: 'P. van Amersfoort' })
+        .where(eq(players.source, 'redactie'))
+      await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(await database.db.select().from(players)).toHaveLength(others.length + 1)
+      expect(await database.db.select().from(players).where(eq(players.source, 'redactie'))).toMatchObject([
+        { ...ofEditors, personId: person!.id, wikipediaPage: 'P. van Amersfoort' },
+      ])
+    })
+
     it('stays a warning without a link to a page, and is no player', async () => {
       await addPlayers(others)
 

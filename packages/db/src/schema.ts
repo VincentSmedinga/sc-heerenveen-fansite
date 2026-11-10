@@ -441,6 +441,8 @@ export const auditActions = [
   'player.add',
   'player.edit',
   'player.remove',
+  'player.field-take-over',
+  'player.field-keep',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -476,7 +478,9 @@ export const auditDetailMaxLength = 1000
  * and `player.stats-keep` are the decision of an editor about such a row, with the player in
  * `item_id`. `player.add`, `player.edit` and `player.remove` are a player the editors added to
  * the squad of a season, changed or took out of it (issue 1020), with the player in `item_id`
- * and what changed in `detail`.
+ * and what changed in `detail`. `player.field-take-over` and `player.field-keep` are the
+ * decision of an editor about a value of the import for a field the editors set (a row of
+ * `player_field_differences`, issue 1022), with the player in `item_id`.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -1657,7 +1661,31 @@ export type PlayerSource = (typeof playerSources)[number]
  * code of two letters (`NL`) of the flag the selection table gives the player, empty when the
  * table names none. `person_id` is the
  * person (`persons`) of that page, which is the same for the same player in every season.
+ *
+ * `editors_fields` lists the fields the editors set in the admin (`playerFields`, issue 1022):
+ * of a player they added the name and every field they filled in, of a player they changed
+ * the fields they changed. The importer never writes such a field, and keeps another value it
+ * finds as a difference for the editors (`player_field_differences`). A player with the
+ * source `redactie` stays in the squad when no list of Wikipedia has him.
  */
+/**
+ * The fields of a player the editors can set in the admin, and the importer then leaves alone
+ * (issue 1022): the name, the shirt number, the line and the page on Wikipedia.
+ */
+export const playerFields = ['name', 'shirt_number', 'position', 'wikipedia_page'] as const
+
+export type PlayerField = (typeof playerFields)[number]
+
+/**
+ * A `SET` of MariaDB over `playerFields`: the driver gives the names with a comma between
+ * them, and an empty text for none.
+ */
+const playerFieldSet = customType<{ data: PlayerField[]; driverData: string }>({
+  dataType: () => `set(${playerFields.map((field) => `'${field}'`).join(',')})`,
+  fromDriver: (value) => playerFields.filter((field) => value.split(',').includes(field)),
+  toDriver: (value) => playerFields.filter((field) => value.includes(field)).join(','),
+})
+
 export const players = mysqlTable(
   'players',
   {
@@ -1673,6 +1701,9 @@ export const players = mysqlTable(
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     inSquad: boolean('in_squad').notNull().default(true),
     leftSquadAt: datetime('left_squad_at'),
+    editorsFields: playerFieldSet('editors_fields')
+      .notNull()
+      .default(sql`''`),
   },
   (table) => [
     unique('players_season_name_unique').on(table.season, table.name),
@@ -1781,6 +1812,48 @@ export const playerStatDifferences = mysqlTable(
 export type NewPlayerStatDifference = typeof playerStatDifferences.$inferInsert
 
 export type PlayerStatDifference = typeof playerStatDifferences.$inferSelect
+
+/**
+ * A value of the import for a field of a player that the editors set (`players.editors_fields`,
+ * issue 1022): the importer keeps it here instead of writing it, once for the same two values,
+ * and it waits (`pending`) until an editor decides or the difference is gone. `editors_value`
+ * is what the player has, empty for a field the editors left empty, and `import_value` what
+ * the import read: a name, a title, a line of `playerPositions` or a shirt number as text.
+ *
+ * An editor takes the value of the import over (`accepted`, `person`: the player gets it and
+ * the field is no longer the editors') or keeps their own (`rejected`, `person`). A difference
+ * a person rejected does not come back while both values stay the same. A difference that is
+ * gone closes itself as `rejected`, `reverted`, and one whose values changed as `rejected`,
+ * `replaced`, with a new row for the new values. Nothing is taken over after a number of days:
+ * the value of the editors stays until an editor decides. Times are UTC. A row goes with its
+ * player.
+ */
+export const playerFieldDifferences = mysqlTable(
+  'player_field_differences',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    playerId: int('player_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    field: mysqlEnum('field', playerFields).notNull(),
+    editorsValue: varchar('editors_value', { length: wikipediaPageMaxLength }),
+    importValue: varchar('import_value', { length: wikipediaPageMaxLength }).notNull(),
+    status: mysqlEnum('status', matchChangeStatuses).notNull(),
+    resolution: mysqlEnum('resolution', playerStatResolutions),
+    firstSeenAt: datetime('first_seen_at').notNull(),
+    lastSeenAt: datetime('last_seen_at').notNull(),
+    decidedAt: datetime('decided_at'),
+  },
+  (table) => [
+    index('player_field_differences_season_status_idx').on(table.season, table.status),
+    index('player_field_differences_player_idx').on(table.playerId),
+  ],
+)
+
+export type NewPlayerFieldDifference = typeof playerFieldDifferences.$inferInsert
+
+export type PlayerFieldDifference = typeof playerFieldDifferences.$inferSelect
 
 /** Where a match report stands: `bezig` is still being filled in, `klaar` passed the rules. */
 export const matchReportStatuses = ['bezig', 'klaar'] as const

@@ -22,6 +22,7 @@
     "./match-lookup": "./src/match-lookup.ts",
     "./match-reports": "./src/match-reports.ts",
     "./migration-check": "./src/migration-check.ts",
+    "./player-field-differences": "./src/player-field-differences.ts",
     "./player-stat-differences": "./src/player-stat-differences.ts",
     "./prepare": "./src/prepare.ts",
     "./person-merge": "./src/person-merge.ts",

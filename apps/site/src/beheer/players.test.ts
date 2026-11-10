@@ -206,6 +206,9 @@ describe('addPlayer', () => {
     })
     expect(await allPlayers()).toMatchObject([
       {
+        // The name and what the editor filled in are the editors' (#1022); the empty title
+        // is not.
+        editorsFields: ['name', 'shirt_number', 'position'],
         inSquad: true,
         name: 'Pelle van Amersfoort',
         personId: person?.id,
@@ -421,6 +424,8 @@ describe('editPlayer', () => {
       status: 'changed',
     })
     expect((await allPlayers())[0]).toMatchObject({ position: 'aanvaller', shirtNumber: null, source: 'redactie' })
+    // A field the editor emptied is still the editors'.
+    expect((await allPlayers())[0]?.editorsFields).toEqual(['name', 'shirt_number', 'position'])
     expect(await log()).toMatchObject([
       {
         action: 'player.edit',
@@ -456,6 +461,8 @@ describe('editPlayer', () => {
     )
 
     expect((await allPlayers())[0]).toMatchObject({
+      // Only what the editor changed is the editors' (#1022): the importer keeps the rest.
+      editorsFields: ['name'],
       name: 'Pelle Jan van Amersfoort',
       personId,
       searchTerm: 'van Amersfoort',

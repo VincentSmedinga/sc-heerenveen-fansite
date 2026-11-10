@@ -4,6 +4,7 @@ import { lockNameFor, withLock } from '@fansite/db/lock'
 import {
   personPages,
   persons,
+  playerFieldDifferences,
   players,
   playerSeasonStats,
   squadCompleteness,
@@ -523,6 +524,130 @@ describe('importPastSquad', () => {
     expect((await storedPlayers()).filter((row) => row.personId === personId)).toMatchObject([
       { id: before!.id, position: 'middenvelder', shirtNumber: 15, source: 'selectie' },
     ])
+  })
+
+  describe('what the editors set of a player (#1022)', () => {
+    const deRoon = async () => (await storedPlayers()).find((row) => row.wikipediaPage === 'Marten de Roon')
+    const waiting = () => database.db.select().from(playerFieldDifferences).orderBy(asc(playerFieldDifferences.id))
+
+    it('leaves the fields the editors set alone, keeps what a list says instead as a difference, once', async () => {
+      const server = await serve({ [squadPageTitle(season)]: twoLists })
+
+      // Known from a worse list, so the lists would improve the line and the number.
+      await database.db.insert(players).values({
+        editorsFields: ['name', 'position', 'shirt_number'],
+        name: 'M. de Roon',
+        position: 'verdediger',
+        searchTerm: 'de Roon',
+        season,
+        shirtNumber: 6,
+        source: 'transfers',
+        wikipediaPage: 'Marten de Roon',
+      })
+
+      const [before] = await storedPlayers()
+
+      await importAt(server, season)
+
+      expect(await deRoon()).toMatchObject({
+        id: before!.id,
+        name: 'M. de Roon',
+        position: 'verdediger',
+        shirtNumber: 6,
+        // What the editors did not set is still improved.
+        source: 'selectie',
+      })
+      expect(await waiting()).toMatchObject([
+        { editorsValue: 'M. de Roon', field: 'name', importValue: 'Marten de Roon', playerId: before!.id, season },
+        { editorsValue: '6', field: 'shirt_number', importValue: '15', status: 'pending' },
+        { editorsValue: 'verdediger', field: 'position', importValue: 'middenvelder', status: 'pending' },
+      ])
+
+      // A second read keeps no second row, and the difference that is gone closes itself.
+      await database.db.update(players).set({ shirtNumber: 15 }).where(eq(players.id, before!.id))
+      await importAt(server, season)
+
+      expect(await waiting()).toMatchObject([
+        { field: 'name', status: 'pending' },
+        { field: 'shirt_number', resolution: 'reverted', status: 'rejected' },
+        { field: 'position', status: 'pending' },
+      ])
+    })
+
+    it('merges the player of the lists into the player the editors added, by his page or his person', async () => {
+      const server = await serve({ [squadPageTitle(season)]: twoLists })
+      const [{ insertId: personId }] = await database.db.insert(persons).values({ wikipediaPage: 'Marten de Roon' })
+
+      await database.db.insert(personPages).values([
+        { page: 'Marten de Roon', personId },
+        { page: 'M. de Roon', personId },
+      ])
+      await database.db.insert(players).values([
+        // Found by his person: the lists link another title of his page.
+        {
+          editorsFields: ['name', 'wikipedia_page'],
+          name: 'M. de Roon',
+          personId,
+          searchTerm: 'de Roon',
+          season,
+          source: 'redactie',
+          wikipediaPage: 'M. de Roon',
+        },
+        // Found by his page, with a number of the editors.
+        {
+          editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
+          name: 'Kenny Otigba',
+          searchTerm: 'Otigba',
+          season,
+          shirtNumber: 44,
+          source: 'redactie',
+          wikipediaPage: 'Kenny Otigba',
+        },
+      ])
+
+      const before = await storedPlayers()
+      const total = (await importAt(server, season), await storedPlayers()).length
+      const rows = await storedPlayers()
+
+      // No second row of either, and the lists fill in what they lack.
+      expect(rows.filter((row) => row.personId === personId)).toMatchObject([
+        {
+          id: before.find((row) => row.name === 'M. de Roon')!.id,
+          name: 'M. de Roon',
+          position: 'middenvelder',
+          shirtNumber: 15,
+          source: 'redactie',
+          wikipediaPage: 'M. de Roon',
+        },
+      ])
+      expect(rows.filter((row) => row.name.includes('Otigba'))).toMatchObject([
+        { position: 'verdediger', shirtNumber: 44, source: 'redactie' },
+      ])
+      expect(rows.find((row) => row.name === 'Kenny Otigba')?.personId).not.toBeNull()
+      expect(await waiting()).toMatchObject([
+        { editorsValue: '44', field: 'shirt_number', importValue: '2' },
+        { editorsValue: 'M. de Roon', field: 'name', importValue: 'Marten de Roon' },
+        { editorsValue: 'M. de Roon', field: 'wikipedia_page', importValue: 'Marten de Roon' },
+      ])
+
+      // The next read adds nobody.
+      await importAt(server, season)
+      expect(await storedPlayers()).toHaveLength(total)
+    })
+
+    it('keeps a player the editors added whom no list has', async () => {
+      const server = await serve({ [squadPageTitle(season)]: twoLists })
+
+      await database.db
+        .insert(players)
+        .values({ editorsFields: ['name'], name: 'Sanne Spits', searchTerm: 'Spits', season, source: 'redactie' })
+      await importAt(server, season)
+
+      expect((await storedPlayers()).find((row) => row.name === 'Sanne Spits')).toMatchObject({
+        inSquad: true,
+        source: 'redactie',
+      })
+    })
   })
 
   it('does not replace a position or number with one of a worse list', async () => {

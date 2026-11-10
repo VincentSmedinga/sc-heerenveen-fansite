@@ -1,6 +1,13 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, auditLog, players, playerSeasonStats, playerStatDifferences } from '@fansite/db/schema'
+import {
+  adminUsers,
+  auditLog,
+  playerFieldDifferences,
+  players,
+  playerSeasonStats,
+  playerStatDifferences,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -9,7 +16,7 @@ import { createAccount } from '#src/beheer/accounts'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitStatDifference } from './actions'
+import { submitFieldDifference, submitStatDifference } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -169,5 +176,121 @@ describe('deciding a difference in the numbers of a player', () => {
 
     await expect(decide(differenceId, { besluit: 'houden', reden: 'Daarom' })).rejects.toThrow()
     expect(await differences()).toMatchObject([{ status: 'pending' }])
+  })
+})
+
+describe('deciding a difference between the editors and the import about a player', () => {
+  const fieldPage = '/beheer/kwaliteit/2026-27/spelersgegevens'
+  let fieldDifferenceId: number
+
+  beforeEach(async () => {
+    await database.db
+      .update(players)
+      .set({ editorsFields: ['shirt_number'], shirtNumber: 9 })
+      .where(eq(players.id, playerId))
+
+    const [difference] = await database.db
+      .insert(playerFieldDifferences)
+      .values({
+        editorsValue: '9',
+        field: 'shirt_number',
+        firstSeenAt: new Date('2026-11-10T10:00:00Z'),
+        importValue: '19',
+        lastSeenAt: new Date('2026-11-10T10:00:00Z'),
+        playerId,
+        season: '2026/27',
+        status: 'pending',
+      })
+      .$returningId()
+
+    fieldDifferenceId = difference?.id ?? 0
+  })
+
+  async function decideField(id: number | string, fields: Record<string, string>, season = '2026-27') {
+    const formData = new FormData()
+
+    for (const [name, value] of Object.entries(fields)) {
+      formData.set(name, value)
+    }
+
+    try {
+      return await submitFieldDifference(id as number, season, {}, formData)
+    } catch (error) {
+      if (error instanceof Redirect) {
+        return { redirect: error.url }
+      }
+
+      throw error
+    }
+  }
+
+  const player = async () => (await database.db.select().from(players))[0]
+  const fieldDifferences = () => database.db.select().from(playerFieldDifferences)
+
+  it('takes the value of the import over, with the reason and the account in the log', async () => {
+    expect(await decideField(fieldDifferenceId, { besluit: 'overnemen', reden: 'Wikipedia klopt' })).toEqual({
+      redirect: `${fieldPage}?gedaan=overgenomen`,
+    })
+    expect(await player()).toMatchObject({ editorsFields: [], shirtNumber: 19 })
+    expect(await fieldDifferences()).toMatchObject([{ resolution: 'person', status: 'accepted' }])
+    expect(await database.db.select().from(auditLog)).toMatchObject([
+      {
+        action: 'player.field-take-over',
+        detail: 'rugnummer 2026/27: redactie 9, import 19',
+        itemId: playerId,
+        reason: 'Wikipedia klopt',
+        userId,
+      },
+    ])
+  })
+
+  it('keeps the value of the editors', async () => {
+    expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Hij speelt met 9' })).toEqual({
+      redirect: `${fieldPage}?gedaan=gehouden`,
+    })
+    expect(await player()).toMatchObject({ editorsFields: ['shirt_number'], shirtNumber: 9 })
+    expect(await fieldDifferences()).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    expect(await database.db.select().from(auditLog)).toMatchObject([{ action: 'player.field-keep' }])
+  })
+
+  it('asks for a reason and a choice, and changes nothing without them', async () => {
+    expect(await decideField(fieldDifferenceId, { besluit: 'overnemen', reden: ' ' })).toEqual({
+      error: 'Schrijf waarom je dit beslist.',
+    })
+    expect(await decideField(fieldDifferenceId, { besluit: 'iets', reden: 'Daarom' })).toEqual({
+      error: 'Kies of je de import overneemt of de redactie houdt.',
+    })
+    expect(await fieldDifferences()).toMatchObject([{ status: 'pending' }])
+    expect(await player()).toMatchObject({ shirtNumber: 9 })
+  })
+
+  it('says so when the difference is decided already, is no number, or the name is taken', async () => {
+    await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Hij speelt met 9' })
+
+    expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Nog eens' })).toEqual({
+      redirect: `${fieldPage}?fout=besloten`,
+    })
+    expect(await decideField('abc', { besluit: 'houden', reden: 'Daarom' })).toEqual({
+      redirect: `${fieldPage}?fout=besloten`,
+    })
+    expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Daarom' }, 'geen-seizoen')).toEqual({
+      redirect: '/beheer/kwaliteit',
+    })
+
+    await database.db.insert(players).values({ name: 'Luuk Oyen', searchTerm: 'Oyen', season: '2026/27' })
+    await database.db
+      .update(playerFieldDifferences)
+      .set({ decidedAt: null, field: 'name', importValue: 'Luuk Oyen', resolution: null, status: 'pending' })
+    expect(await decideField(fieldDifferenceId, { besluit: 'overnemen', reden: 'Daarom' })).toEqual({
+      redirect: `${fieldPage}?fout=bezet`,
+    })
+    expect(await fieldDifferences()).toMatchObject([{ status: 'pending' }])
+  })
+
+  it('is for a beheerder only', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+
+    await expect(decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Daarom' })).rejects.toThrow()
+    expect(await fieldDifferences()).toMatchObject([{ status: 'pending' }])
   })
 })

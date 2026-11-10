@@ -3,7 +3,14 @@ import { readDatabaseEnv } from '@fansite/db/env'
 import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
 import { encodePartProposal, sourceDifferenceReasons } from '@fansite/db/match-conflicts'
 import { describeEntryFacts } from '@fansite/db/match-edits'
-import { matchChanges, matches, matchGoals, players, playerStatDifferences } from '@fansite/db/schema'
+import {
+  matchChanges,
+  matches,
+  matchGoals,
+  playerFieldDifferences,
+  players,
+  playerStatDifferences,
+} from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { and, asc, eq, or } from 'drizzle-orm'
 import path from 'node:path'
@@ -37,7 +44,8 @@ export const statSeasonSlug = () => seasonOf(new Date()).replace('/', '-')
  * one (see earlier-season.ts), and returns the function that takes it out again. The pages of
  * the admin show it on the match, in the list under "Wikipedia wacht" and on the start page.
  * The same match gets a made-up difference between two sources, and the first player of the
- * made-up squad a made-up difference in his goals, for the page of Kwaliteit that lists them.
+ * made-up squad a made-up difference in his goals, for the page of Kwaliteit that lists them,
+ * and a made-up shirt number of the import that differs from his own, for the page next to it.
  */
 export async function addHeldChange() {
   const { close, db } = connectToDatabase()
@@ -124,6 +132,16 @@ export async function addHeldChange() {
         status: 'pending',
         tableGoals: 1,
       })
+      await db.insert(playerFieldDifferences).values({
+        editorsValue: player.shirtNumber === null ? null : String(player.shirtNumber),
+        field: 'shirt_number',
+        firstSeenAt: statMarker,
+        importValue: '98',
+        lastSeenAt: new Date(),
+        playerId: player.id,
+        season: player.season,
+        status: 'pending',
+      })
     }
   } finally {
     await close()
@@ -178,4 +196,5 @@ function connectToDatabase() {
 async function removeMadeUp(db: ReturnType<typeof connectToDatabase>['db']) {
   await db.delete(matchChanges).where(or(eq(matchChanges.oldValue, marker), eq(matchChanges.changed, differenceMarker)))
   await db.delete(playerStatDifferences).where(eq(playerStatDifferences.firstSeenAt, statMarker))
+  await db.delete(playerFieldDifferences).where(eq(playerFieldDifferences.firstSeenAt, statMarker))
 }

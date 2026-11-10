@@ -189,6 +189,22 @@ describe('the names of persons', () => {
     expect(await rowOf('Joost van Aken')).toMatchObject({ givenName: 'Joost J.', nameSource: 'manual' })
   })
 
+  it('never replaces a name of the editors, not by a name from the list', async () => {
+    await database.db.insert(persons).values({
+      familyName: 'Aken',
+      givenName: 'Jo',
+      name: 'Jo Aken',
+      nameSource: 'redactie',
+      wikipediaPage: 'Joost van Aken',
+    })
+
+    const stored = await storePersonNames(database.db, new Map([['Joost van Aken', name('manual', 'Joost J.')]]))
+
+    expect(stored.counts).toEqual({ guess: 0, manual: 0, sort_key: 0 })
+    await storePersonNames(database.db, new Map([['Joost van Aken', name('sort_key')]]))
+    expect(await rowOf('Joost van Aken')).toMatchObject({ givenName: 'Jo', name: 'Jo Aken', nameSource: 'redactie' })
+  })
+
   it('reports the guesses, skips a title that is no person, and counts the names by source', async () => {
     await database.db.insert(persons).values([{ wikipediaPage: 'Ramon Zomer' }, { wikipediaPage: 'Luca Oyen' }])
 

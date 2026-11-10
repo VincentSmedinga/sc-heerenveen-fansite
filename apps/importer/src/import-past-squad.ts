@@ -9,7 +9,13 @@
 import type { Database } from '@fansite/db/client'
 import type { Player, PlayerPosition, PlayerSource } from '@fansite/db/schema'
 
+import { mergeEditorsPersonInto } from '@fansite/db/person-merge'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
+import {
+  type FoundFieldDifference,
+  holdEditorsFields,
+  keepPlayerFieldDifferences,
+} from '@fansite/db/player-field-differences'
 import {
   playerNameMaxLength,
   players,
@@ -26,7 +32,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
-import { scorersByPerson, storeChosenSpellings } from './import-squad.ts'
+import { editorsByPerson, scorersByPerson, storeChosenSpellings } from './import-squad.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
@@ -258,7 +264,10 @@ export async function importPastSquad(
     })
     await storeChosenSpellings(transaction, season)
 
-    const counts = await storePlayers(transaction, season, merged.players, personBook)
+    const { differences, ...counts } = await storePlayers(transaction, season, merged.players, personBook)
+
+    // What the lists say and the editors set otherwise waits for them, once (#1022).
+    await keepPlayerFieldDifferences(transaction, season, differences, now)
 
     for (const { title, version } of pagesRead) {
       const values = { kind: 'squad' as const, readAt: now, season, version }
@@ -400,9 +409,16 @@ async function recorded(db: Database, report: PastSquadReport, clock: () => Date
  * number of that list), when he lacked a position or a number that a list gives, and when he
  * lacked a page or a person. Nothing else of a known row changes, and a known player who is
  * unchanged costs no write.
+ *
+ * What the editors set stays (issue 1022), as in `import-squad.ts`. A player they added or
+ * changed is also known by his person. A field of `players.editors_fields` is never written,
+ * and every other value a list gives for it is in `differences`, also where the list would not
+ * have replaced it. A player with the source `redactie` keeps it: no list is better than the
+ * editors, and the lists fill in only what he lacks. A person the editors made without an
+ * article becomes the person of the page a list links.
  */
 async function storePlayers(
-  db: Pick<Database, 'insert' | 'select' | 'update'>,
+  db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   season: string,
   found: MergedPlayer[],
   personBook: { resolve: (title: string) => Promise<null | number> },
@@ -415,6 +431,8 @@ async function storePlayers(
   // A scorer the import of the matches made is also known by his person, as in
   // `import-squad.ts`.
   const scorerOfPerson = scorersByPerson(rows)
+  const editorsOfPerson = editorsByPerson(rows)
+  const differences: FoundFieldDifference[] = []
 
   for (const row of rows) {
     byName.set(nameKey(row.name), row)
@@ -428,7 +446,7 @@ async function storePlayers(
     const before =
       (player.page === null ? undefined : byPage.get(nameKey(player.page))) ??
       byName.get(nameKey(player.name)) ??
-      (personId === null ? undefined : scorerOfPerson.get(personId))
+      (personId === null ? undefined : (scorerOfPerson.get(personId) ?? editorsOfPerson.get(personId)))
 
     if (before === undefined) {
       const row = {
@@ -445,26 +463,46 @@ async function storePlayers(
       const [{ insertId }] = await db.insert(players).values(row)
 
       counts.added++
-      byName.set(nameKey(player.name), { ...row, id: insertId, inSquad: true, leftSquadAt: null })
+      const added = { ...row, editorsFields: [], id: insertId, inSquad: true, leftSquadAt: null }
+
+      byName.set(nameKey(player.name), added)
       if (player.page !== null) {
-        byPage.set(nameKey(player.page), { ...row, id: insertId, inSquad: true, leftSquadAt: null })
+        byPage.set(nameKey(player.page), added)
       }
 
       continue
     }
 
-    const better = rank(player.source) < rank(before.source)
+    // No list is better than the editors: their player keeps his source.
+    const better = before.source !== 'redactie' && rank(player.source) < rank(before.source)
+    const held = new Set(before.editorsFields)
     const changes: Partial<
       Pick<Player, 'country' | 'personId' | 'position' | 'shirtNumber' | 'source' | 'wikipediaPage'>
     > = {}
 
+    // What a list says about a field the editors set waits for them.
+    differences.push(
+      ...holdEditorsFields(before, {
+        name: player.name,
+        position: player.position,
+        shirtNumber: player.shirtNumber,
+        wikipediaPage: player.page,
+      }).differences,
+    )
+
     if (better) {
       changes.source = player.source
     }
-    if (player.position !== null && player.position !== before.position && (better || before.position === null)) {
+    if (
+      !held.has('position') &&
+      player.position !== null &&
+      player.position !== before.position &&
+      (better || before.position === null)
+    ) {
       changes.position = player.position
     }
     if (
+      !held.has('shirt_number') &&
       player.shirtNumber !== null &&
       player.shirtNumber !== before.shirtNumber &&
       (better || before.shirtNumber === null)
@@ -474,11 +512,32 @@ async function storePlayers(
     if (player.country !== null && player.country !== before.country && (better || before.country === null)) {
       changes.country = player.country
     }
-    if (before.wikipediaPage === null && player.page !== null && !byPage.has(nameKey(player.page))) {
+    if (
+      !held.has('wikipedia_page') &&
+      before.wikipediaPage === null &&
+      player.page !== null &&
+      !byPage.has(nameKey(player.page))
+    ) {
       changes.wikipediaPage = player.page
     }
-    if (before.personId === null && personId !== null) {
+    // With a page of the editors that is not the page of the list, the player stays without
+    // the person of that page.
+    if (
+      before.personId === null &&
+      personId !== null &&
+      !(held.has('wikipedia_page') && before.wikipediaPage !== player.page)
+    ) {
       changes.personId = personId
+    }
+    if (
+      before.personId !== null &&
+      personId !== null &&
+      before.personId !== personId &&
+      changes.wikipediaPage !== undefined &&
+      // A person the editors made without an article is the person of this page from now on.
+      (await mergeEditorsPersonInto(db, before.personId, personId))
+    ) {
+      before.personId = personId
     }
 
     if (Object.keys(changes).length === 0) {
@@ -498,7 +557,7 @@ async function storePlayers(
     }
   }
 
-  return counts
+  return { ...counts, differences }
 }
 
 /**

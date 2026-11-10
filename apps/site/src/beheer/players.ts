@@ -23,6 +23,7 @@ import {
   personPages,
   persons,
   type Player,
+  type PlayerField,
   playerNameMaxLength,
   type PlayerPosition,
   playerPositions,
@@ -102,7 +103,9 @@ class Refusal extends Error {
  * Adds a player to the squad of a season, with the source `redactie`. The person is the one
  * the editor chose, or the person of the title, or a new one (`findOrAddEditorsPerson`). A
  * person, a name or a title the season already has is refused. Writes `player.add`, so there is
- * no player without a row and no row without a player.
+ * no player without a row and no row without a player. The name and every field the editor
+ * filled in are the editors' from then on (`players.editors_fields`, issue 1022): the importer
+ * leaves them alone and fills in the rest.
  */
 export async function addPlayer(
   db: Database,
@@ -166,6 +169,12 @@ export async function addPlayer(
       }
 
       const [{ insertId }] = await transaction.insert(players).values({
+        editorsFields: [
+          'name',
+          ...(entry.shirtNumber === null ? [] : (['shirt_number'] as const)),
+          ...(entry.position === null ? [] : (['position'] as const)),
+          ...(page === null ? [] : (['wikipedia_page'] as const)),
+        ],
         name,
         personId,
         position: entry.position,
@@ -205,7 +214,9 @@ export async function addPlayer(
  * new title gives a person without one his title, and gives a player without a person the
  * person of the title; a title that belongs to another person is refused, because joining two
  * persons is not done here. The goals of a player who gets a person get it too. Writes
- * `player.edit` with what changed, and nothing for a save that changes nothing.
+ * `player.edit` with what changed, and nothing for a save that changes nothing. Each field that
+ * changed is the editors' from then on (`players.editors_fields`, issue 1022), so the importer
+ * leaves it alone.
  */
 export async function editPlayer(
   db: Database,
@@ -266,6 +277,12 @@ export async function editPlayer(
         })
       }
 
+      const edited: PlayerField[] = [
+        ...(renamed || name !== player.name ? (['name'] as const) : []),
+        ...(entry.shirtNumber === player.shirtNumber ? [] : (['shirt_number'] as const)),
+        ...(entry.position === player.position ? [] : (['position'] as const)),
+        ...(entry.page === player.wikipediaPage ? [] : (['wikipedia_page'] as const)),
+      ]
       const changes = [
         name === player.name ? undefined : `naam: ${player.name} → ${name}`,
         entry.shirtNumber === player.shirtNumber
@@ -292,6 +309,7 @@ export async function editPlayer(
       await transaction
         .update(players)
         .set({
+          editorsFields: [...new Set([...player.editorsFields, ...edited])],
           name,
           personId,
           position: entry.position,

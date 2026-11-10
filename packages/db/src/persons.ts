@@ -548,6 +548,7 @@ export async function storePersonData(
 /**
  * Stores the names, by the title of the article of the person. A person keeps the name he has,
  * except that a name from the list (`manual`) goes before every other and is never replaced.
+ * A name of the editors (`redactie`) is never replaced either, not by the list.
  * An article that is not in `persons` is skipped. Returns how many names it stored, by source,
  * and the titles whose name it guessed, so the run can warn about them.
  */
@@ -566,7 +567,8 @@ export async function storePersonNames(
 
     const had = current.get(title) ?? null
 
-    if (had === 'manual' || (had !== null && name.source !== 'manual')) {
+    // A name the editors filled in stays, also when the list has one (issue 1022).
+    if (had === 'manual' || had === 'redactie' || (had !== null && name.source !== 'manual')) {
       continue
     }
 

@@ -2,13 +2,20 @@ import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { Metadata } from 'next'
 
 import { similarPersons } from '@fansite/db/persons'
+import { countWaitingFieldDifferences } from '@fansite/db/player-field-differences'
 import { countWaitingStatDifferences } from '@fansite/db/player-stat-differences'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
 import { compact } from '#src/beheer/density'
-import { statDifferencesPath, waitingChangesBySeason, type WorkList, workListPath } from '#src/beheer/quality'
+import {
+  fieldDifferencesPath,
+  statDifferencesPath,
+  waitingChangesBySeason,
+  type WorkList,
+  workListPath,
+} from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -48,6 +55,7 @@ export default async function QualityPage() {
   const coverage = (await readSeasonCoverage(db)).reverse()
   const waiting = await waitingChangesBySeason(db)
   const differing = await countWaitingStatDifferences(db)
+  const edited = await countWaitingFieldDifferences(db)
   const alike = await similarPersons(db)
 
   return (
@@ -87,6 +95,7 @@ export default async function QualityPage() {
               row.reports === 0 ? 'Geen verslagen' : plural(row.reportsDone, 'verslag klaar', 'verslagen klaar'),
               <TodoCell
                 differing={differing.get(row.season) ?? 0}
+                edited={edited.get(row.season) ?? 0}
                 key="te-doen"
                 row={row}
                 waiting={waiting.get(row.season) ?? 0}
@@ -162,12 +171,23 @@ function squadText(row: SeasonCoverage) {
 
 /**
  * What an editor can do about a season, each as a link to its work list: the matches without
- * goals, the goals without a player, the reports that are not finished, the changes that wait
- * and the numbers of players that differ. A season without work says so.
+ * goals, the goals without a player, the reports that are not finished, the changes that wait,
+ * the numbers of players that differ and the fields of players where the import says something
+ * else than the editors. A season without work says so.
  */
-function TodoCell({ differing, row, waiting }: { differing: number; row: SeasonCoverage; waiting: number }) {
+function TodoCell({
+  differing,
+  edited,
+  row,
+  waiting,
+}: {
+  differing: number
+  edited: number
+  row: SeasonCoverage
+  waiting: number
+}) {
   const unfinished = row.reports - row.reportsDone
-  const work: { list: 'spelerscijfers' | WorkList; text: string; total: number }[] = [
+  const work: { list: 'spelerscijfers' | 'spelersgegevens' | WorkList; text: string; total: number }[] = [
     {
       list: 'zonder-doelpunten',
       text: plural(row.playedWithoutGoalList, 'wedstrijd zonder doelpunten', 'wedstrijden zonder doelpunten'),
@@ -189,6 +209,11 @@ function TodoCell({ differing, row, waiting }: { differing: number; row: SeasonC
       text: plural(differing, 'spelerscijfer verschilt', 'spelerscijfers verschillen'),
       total: differing,
     },
+    {
+      list: 'spelersgegevens',
+      text: plural(edited, 'spelersgegeven verschilt', 'spelersgegevens verschillen'),
+      total: edited,
+    },
   ]
   const links = work.filter(({ total }) => total > 0)
 
@@ -197,7 +222,15 @@ function TodoCell({ differing, row, waiting }: { differing: number; row: SeasonC
     : links.map(({ list, text }, index) => (
         <Fragment key={list}>
           {index === 0 ? null : ', '}
-          <Link href={list === 'spelerscijfers' ? statDifferencesPath(row.season) : workListPath(row.season, list)}>
+          <Link
+            href={
+              list === 'spelerscijfers'
+                ? statDifferencesPath(row.season)
+                : list === 'spelersgegevens'
+                  ? fieldDifferencesPath(row.season)
+                  : workListPath(row.season, list)
+            }
+          >
             {text}
             {/* The same words are in every row, so the name of the link says which season. */}
             <Text as="span" className="hf-visually-hidden">

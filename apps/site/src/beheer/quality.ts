@@ -26,6 +26,14 @@ export const workLists = [
 export const qualityPath = '/beheer/kwaliteit'
 
 /**
+ * The address of the page with the players of a season of whom the import read another value
+ * than the editors set: `/beheer/kwaliteit/2026-27/spelersgegevens`.
+ */
+export function fieldDifferencesPath(season: string) {
+  return `${qualityPath}/${seasonSlug(season)}/spelersgegevens`
+}
+
+/**
  * The matches of a work list in a season, the oldest first:
  *
  * - `zonder-doelpunten`: played, with goals in the result and no row in `match_goals`;

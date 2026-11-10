@@ -1175,6 +1175,8 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Een pagina die bij een andere persoon hoort, wordt geweigerd: twee personen samenvoegen doet het beheer hier niet.
 - Het uitklapblok "Uit de selectie halen" zet `in_squad` uit, met het moment; de rij blijft staan.
   Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
+- Wat de redactie zet, is daarna van de redactie (`players.editors_fields`, #1022): bij toevoegen de naam en elk ingevuld veld, bij aanpassen de velden die veranderden.
+  De import schrijft die velden niet meer, en een andere waarde van de import wacht op `/beheer/kwaliteit/<seizoen>/spelersgegevens`.
 - `addPlayer`, `editPlayer` en `removePlayer` in `src/beheer/players.ts` schrijven de wijziging en `player.add`, `player.edit` of `player.remove` in het logboek, in één transactie, met het nummer van de speler.
 - De speler staat daarna in de kiezer van een doelpunt van dat seizoen en op de pagina Spelers, met dezelfde bronvermelding als de andere spelers.
   Een doelpunt krijgt in het formulier van een wedstrijd de persoon van de gekozen speler (`personId` in `SquadPlayer`), zodat het ook zonder Wikipedia-pagina voor de persoon telt.
@@ -1205,6 +1207,12 @@ Verschillen de doelpunten van een speler in de selectietabel van die in de wedst
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`), met per verschil de speler, de competitie en de twee aantallen.
 Elk verschil heeft een formulier met een reden en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
+
+Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de kolom een koppeling "spelersgegevens verschillen" (#1022).
+Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwaliteit/[seizoen]/spelersgegevens`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
+Elke afwijking heeft een formulier met een reden en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
+Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
 
 Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).
 De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen de bron die je overneemt of houdt.
