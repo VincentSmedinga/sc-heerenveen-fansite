@@ -2330,12 +2330,16 @@ Wat een verslag wordt, rekent [`src/old-site-report.ts`](src/old-site-report.ts)
 #### De stap personen
 
 De stap `personen` ([`src/old-site-persons.ts`](src/old-site-persons.ts)) koppelt de spelers met de bron `verslag` en zonder persoon aan een persoon, een titel van de Nederlandse Wikipedia.
+Dezelfde functie, `linkPersonsByName`, geeft na het opslaan van een selectie ook de rijen van dat seizoen zonder pagina en zonder persoon een persoon (#1048), behalve rijen van de redactie en rijen die op een Engelse titel wachten.
 Hij koppelt alleen als het zeker is, en hergebruikt `createPersonBook`, dus titels en doorverwijzingen komen in `person_pages`.
 
 - Heeft een andere rij met dezelfde naam al een persoon, in een ander seizoen of met een andere bron, dan krijgt de speler die persoon, zonder verzoek.
 - Anders is de titel de naam.
   De stap vraagt de tekst van de pagina (`?action=raw`), volgt een doorverwijzing en koppelt alleen als het artikel in een categorie van voetballers staat.
-- Twijfel koppelt niets en komt als regel in het logboek: geen artikel, een doorverwijspagina, geen voetballer, of een verzoek dat niet kon.
+- Is er geen artikel onder de titel, dan krijgt de speler een persoon op de naam alleen: zonder titel, met de naam gesplitst volgens de regels voor namen, en dus zonder link naar Wikipedia.
+  Elke speler in de kaart Selectie heeft zo een persoon en een vette achternaam.
+- Twijfel koppelt niets en komt als regel in het logboek: een doorverwijspagina, geen voetballer, of een verzoek dat niet kon.
+  Zo'n rij komt in `personTitleAliases` of blijft staan, en `pnpm run import:status` noemt zijn naam bij "Players without a person".
   `--report` noemt de spelers die nog geen persoon hebben, onder _Spelers zonder persoon_.
 - De bestanden hebben geen geboortedatum, dus er is er geen om te vergelijken met die van Wikidata.
   Een tweede run vraagt alleen nog naar de namen zonder persoon, en raakt geen rij met een andere bron dan `verslag`.

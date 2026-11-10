@@ -3841,6 +3841,7 @@
   Zijn stap `personen` (`importOldSitePersons`) koppelt alleen als hij zeker is en meldt de rest als twijfel (een doorverwijspagina, een ontbrekend artikel, geen voetballer).
   Dat blijft zo en hoort bij een eigen issue.
 - **Alternatieven:** alleen de naamstap, maar dan blijven nieuwe spelers zonder persoon; een speler zonder Nederlands artikel zonder persoon laten.
+- **Later:** op 10 november 2026 (#1048) geldt de naam van één persoon ook voor een rij zonder enige link, en een rij zonder link krijgt een persoon via de naam als titel (zie _Een selectierij zonder link krijgt een persoon op naam_).
 
 ## De vier spelers die de projecteigenaar koos, staan onder zijn spelling
 
@@ -3856,3 +3857,23 @@
 - **Waarom:** de spelling die supporters het best kennen of de kortste, en voor Korneev de Engelse; de achternaam staat vet op de kaart en het blijft simpel (Gușatu, Nørregaard).
   De rij moet ook kloppen, want Beheer toont de naam van de rij en de site valt er alleen op terug.
 - **Alternatieven:** de spelling van de selectie van Wikipedia laten staan; de gekozen spelling als titel in `personTitleAliases` zetten (de titel is dan een doorverwijzing of bestaat niet, en elke import vraagt Wikipedia naar een titel waar de persoon niet onder staat); Leeroy Echteld; Mugur Radu als voornamen; Bo bij de achternaam.
+
+## Een selectierij zonder link krijgt een persoon op naam
+
+- **Datum:** 10 november 2026
+- **Besluit:** een rij van een seizoen dat voorbij is, zonder persoon en zonder pagina, krijgt een persoon via de naam (#1048).
+  `linkPersonsByName` in `src/old-site-persons.ts` is de stap `personen` van de oude fansite, nu voor elke rij zonder persoon van een seizoen: de import van een selectie draait hem na het opslaan voor dat seizoen, en `import:old-site` voor de rijen met de bron `verslag`.
+  De volgorde per naam: eerst de persoon die een andere rij met die naam al heeft, als die naam van één persoon is; dan de naam als titel van de Nederlandse Wikipedia.
+  Is dat artikel van een voetballer (de categorie van de tekst, zoals de stap altijd deed), dan is dat de persoon.
+  Is er geen artikel onder die titel, dan krijgt de speler een persoon op de naam alleen: zonder `wikipedia_page`, met de naam gesplitst volgens `personNameOf` en de bron `guess`.
+  Zo staat zijn achternaam vet in de kaart Selectie en is hij aan andere seizoenen te koppelen.
+  Zo'n persoon heeft geen titel, dus de site linkt niet naar Wikipedia, en de import vraagt voor hem niets aan Wikipedia of Wikidata.
+  Een doorverwijspagina, een artikel over iemand anders en een verzoek dat niet kon, koppelen niets en komen als waarschuwing `Persons:` in het logboek, met de reden: de regels kunnen dan niet zien of de speler onder een andere titel een artikel heeft.
+  Zo'n rij komt in `personTitleAliases` (als de titel bekend is) of blijft staan, en `import:status` noemt zijn naam.
+  Een rij met een Engelse link wacht op `findEnglishPersons`: staat zijn titel nog open (een verzoek mislukte, of de run stopte), dan krijgt hij geen persoon op naam.
+  Rijen van de redactie en rijen met een pagina blijven ongemoeid.
+  `import:status` noemt bij "Players without a person <seizoen>" nu ook de namen van de rijen.
+- **Waarom:** stap 1 van `findEnglishPersons` ziet alleen rijen met een Engelse link, dus een rij zonder enige link kreeg nooit de persoon van dezelfde naam uit een ander seizoen.
+  Elke speler in de kaart moet een persoon hebben, ook als hij geen artikel heeft, en niemand houdt een lijst bij.
+  Een persoon op naam kan geen verkeerde link geven, een naamgenoot met een artikel wel: daarom koppelt de naam alleen een artikel van een voetballer en laat hij twijfel staan.
+- **Alternatieven:** alles in `personTitleAliases` zetten (handwerk voor elke nieuwe speler); de rij laten staan en door de redactie in Beheer laten oplossen; de naam ook koppelen bij een doorverwijspagina (een voetballer onder `Naam (voetballer)` zou dan een tweede persoon krijgen).

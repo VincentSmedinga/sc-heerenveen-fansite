@@ -45,6 +45,12 @@ export type EnglishPersons = {
   englishOnly: Set<string>
   /** The English titles of the players that `person_pages` knows already. */
   known: Set<string>
+  /**
+   * The English titles that no answer was found for, because a request failed or the run
+   * stopped before it. Their players wait for the next run: the name must not make a person
+   * for them (issue 1048).
+   */
+  undecided: Set<string>
   warnings: string[]
 }
 
@@ -88,6 +94,7 @@ export async function findEnglishPersons(
     asked: 0,
     englishOnly: new Set(),
     known: new Set(),
+    undecided: new Set(),
     warnings: [],
   }
   const without = found.filter((player) => player.page === null && player.englishPage !== null)
@@ -123,6 +130,12 @@ export async function findEnglishPersons(
   }
 
   if (wikidataOrigin === null) {
+    for (const player of without) {
+      if (player.personId === null && !known.has(player.englishPage ?? '')) {
+        result.undecided.add(player.englishPage ?? '')
+      }
+    }
+
     return result
   }
 
@@ -134,6 +147,7 @@ export async function findEnglishPersons(
     ),
   ]
   const failed: string[] = []
+  const missing = new Set<string>()
   let failuresInARow = 0
   let stopped = false
 
@@ -210,6 +224,8 @@ export async function findEnglishPersons(
     }
     if (article === 'missing') {
       // No article even on the English Wikipedia: nothing to build a person on.
+      missing.add(title)
+
       continue
     }
     if (article.wikidataId === null) {
@@ -230,6 +246,12 @@ export async function findEnglishPersons(
       result.englishOnly.add(title)
     } else {
       result.aliases.set(title, dutch)
+    }
+  }
+
+  for (const title of titles) {
+    if (!result.aliases.has(title) && !result.englishOnly.has(title) && !missing.has(title)) {
+      result.undecided.add(title)
     }
   }
 

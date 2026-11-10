@@ -12,7 +12,7 @@ import {
   wikipediaPages,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { asc, eq } from 'drizzle-orm'
+import { asc, eq, isNotNull } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -730,22 +730,23 @@ describe('importPastSquad', () => {
     expect(await database.db.select().from(players)).toEqual([])
   })
 
-  it('stores a player without a page with no person and no request for a title', async () => {
+  it('gives a player without any link a person on his name, and leaves one with an English link to the next run', async () => {
     const title = englishSquadPage('2018/19') ?? ''
     const english = await serve({ [title]: fixture('wikipedia-english-squad-2018-19.wiki') })
     const dutch = await serve({})
     const report = await importAt(dutch, '2018/19', english)
 
-    expect(report).toMatchObject({ kind: 'imported', pages: 1, persons: [] })
+    expect(report).toMatchObject({ kind: 'imported', pages: 1 })
     expect(pageRequests(english)).toEqual([pathOf(title)])
-    expect(pageRequests(dutch)).toEqual([])
+    // Only the row without any link is asked for: the others wait for Wikidata.
+    expect(pageRequests(dutch)).toEqual([pathOf('Jan Bekkema')])
 
     const rows = await storedPlayers('2018/19')
 
     expect(rows.length).toBeGreaterThan(5)
-    expect(rows.every((row) => row.source === 'engels' && row.wikipediaPage === null && row.personId === null)).toBe(
-      true,
-    )
+    expect(rows.every((row) => row.source === 'engels' && row.wikipediaPage === null)).toBe(true)
+    expect(rows.filter((row) => row.personId !== null).map((row) => row.name)).toEqual(['Jan Bekkema'])
+    expect(await database.db.select().from(persons).where(isNotNull(persons.wikipediaPage))).toEqual([])
     expect(rows.find((row) => row.name === 'Warner Hahn')).toMatchObject({ position: 'doelman', shirtNumber: 1 })
     expect(await database.db.select().from(wikipediaPages)).toMatchObject([{ kind: 'squad', title }])
   })

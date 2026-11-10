@@ -244,7 +244,7 @@ describe('the overview', () => {
     try {
       const lines = (await statusAt(start)).lines
 
-      expect(lines).toContain('Players without a person 2018/19: 2 of 3')
+      expect(lines).toContain('Players without a person 2018/19: 2 of 3: Zonder Een, Zonder Twee')
       expect(lines.join('\n')).not.toContain('Players without a person 2020/21')
     } finally {
       await database.pool.query('DELETE FROM players')

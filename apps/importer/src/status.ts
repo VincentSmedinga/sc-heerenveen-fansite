@@ -21,7 +21,7 @@ import {
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { readSeasonCoverage, seasonCoverageColumns } from '@fansite/db/season-coverage'
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 
 import type { ImportOptions } from './import-feeds.ts'
 
@@ -329,9 +329,9 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
 }
 
 /**
- * Names each season that has rows of the squad without a person, as "N of M" (issue 1043): a
- * row without a person can't split its name or be tied to the player of other seasons. No line
- * for a season where every row has one.
+ * Names each season that has rows of the squad without a person, as "N of M" with the names of
+ * the rows (issues 1043 and 1048): a row without a person can't split its name or be tied to
+ * the player of other seasons. No line for a season where every row has one.
  */
 async function showPlayersWithoutPerson(db: Database, write: (line: string) => void): Promise<void> {
   const rows = await db
@@ -344,9 +344,17 @@ async function showPlayersWithoutPerson(db: Database, write: (line: string) => v
     .groupBy(players.season)
     .orderBy(desc(players.season))
 
+  const open = await db
+    .select({ name: players.name, season: players.season })
+    .from(players)
+    .where(isNull(players.personId))
+    .orderBy(asc(players.name))
+
   for (const { season, total, without } of rows) {
     if (Number(without) > 0) {
-      write(`Players without a person ${season}: ${Number(without)} of ${Number(total)}`)
+      const names = open.filter((row) => row.season === season).map((row) => printable(row.name))
+
+      write(`Players without a person ${season}: ${Number(without)} of ${Number(total)}: ${names.join(', ')}`)
     }
   }
 }
