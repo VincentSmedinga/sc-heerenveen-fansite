@@ -1,6 +1,8 @@
 import type { PersonTitleAlias } from '@fansite/db/person-merge'
 import type { PersonName } from '@fansite/db/persons'
 
+import { personTitleAliases } from '@fansite/db/persons'
+
 import { manualNames, nameOfTitle, type PersonNameEntry } from './person-name.ts'
 
 // The names that look alike and are different people. The list is in the database package,
@@ -8,37 +10,9 @@ import { manualNames, nameOfTitle, type PersonNameEntry } from './person-name.ts
 export { personsWhoDiffer } from '@fansite/db/persons'
 export type { PersonTitleAlias }
 
-/**
- * Two or more titles of Wikipedia that are one person while no redirect says so, each with the
- * title that stays and the other titles. The importer looks a title up here before it asks
- * Wikipedia: an other title is the person of the title that stays, and costs no request.
- *
- * `Persons:` in the log of the import warns when two persons look alike (`similarPersons`).
- * Add a person here only after you checked that it is one person: two players with the same
- * name are two persons, and their titles differ by the addition between brackets. Two who
- * look alike and are two people go in `personsWhoDiffer`. The redirects on Wikipedia join the
- * other titles we know of.
- *
- * An other title that is a person of its own already is merged into the person of the title
- * that stays, at the start of every import of matches or of a squad (`mergeListedPersons`).
- * The owner decided four on 10 November 2026 (issue 1027), and Filip Đuričić the same day
- * (issue 1036). The same day (issue 1045) he chose the spelling of four players that is no
- * title: Igor Korneev, Radu Gușatu, Arek Radomski and Hjalte Bo Nørregaard. The article stays
- * the title that stays and `personNames` gives the name; the other titles are redirects.
- *
- * Example: `{ aliases: ['Jan Jansen (voetballer)'], title: 'Jan Jansen (voetballer, 1990)' }`.
- */
-export const personTitleAliases: readonly PersonTitleAlias[] = [
-  { aliases: ['Arek Radomski'], title: 'Arkadiusz Radomski' },
-  { aliases: ['Filip Djuričić'], title: 'Filip Đuričić' },
-  { aliases: ['Hjalte Norregaard'], title: 'Hjalte Bo Nørregaard' },
-  { aliases: ['Igor Korneev'], title: 'Igor Kornejev' },
-  { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
-  { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
-  { aliases: ['Radu Gusatu'], title: 'Mugur Radu Gușatu' },
-  { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },
-  { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' },
-]
+// The titles that are one person, for the same reason: the page Kwaliteit leaves them out of
+// the check against the list of players (`playerListReport`). The explanation is there.
+export { personTitleAliases }
 
 /** The map for `createPersonBook` and `lookUpPersonPages`: a title to the one that stays. */
 export function aliasMap(list: readonly PersonTitleAlias[]): Map<string, string> {

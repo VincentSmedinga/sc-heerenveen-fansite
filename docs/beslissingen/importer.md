@@ -3877,3 +3877,17 @@
   Elke speler in de kaart moet een persoon hebben, ook als hij geen artikel heeft, en niemand houdt een lijst bij.
   Een persoon op naam kan geen verkeerde link geven, een naamgenoot met een artikel wel: daarom koppelt de naam alleen een artikel van een voetballer en laat hij twijfel staan.
 - **Alternatieven:** alles in `personTitleAliases` zetten (handwerk voor elke nieuwe speler); de rij laten staan en door de redactie in Beheer laten oplossen; de naam ook koppelen bij een doorverwijspagina (een voetballer onder `Naam (voetballer)` zou dan een tweede persoon krijgen).
+
+## De lijst van spelers van sc Heerenveen is een tweede getuige voor namen, geen bron
+
+- **Datum:** 10 november 2026
+- **Besluit:** de import leest de pagina "Lijst van spelers van sc Heerenveen (mannen)" van de Nederlandse Wikipedia (`importPlayerList`, #1028) om te melden welke personen niet op de lijst staan en welke titels op de lijst geen persoon van ons zijn, en om een schrijfwijze te toetsen.
+  Ze vult geen speler of seizoen en verandert geen naam.
+  Eén verzoek met `?action=raw`, via de fetcher met de regels van de andere lezers, hoogstens eens per dag, in de run van de feeds.
+  De titels staan in `player_list_titles`; een pagina die niet te lezen is of geen titels heeft, laat ze zoals ze zijn en geeft een regel `Player list: not read, …` in het logboek.
+  `playerListReport` vergelijkt ze met `persons.wikipedia_page`, op dezelfde manier als `similarPersons`: een titel die alleen in een teken verschilt, telt als dezelfde persoon en is een schrijfwijze die verschilt.
+  De titels van `personsWhoDiffer` en van `personTitleAliases` (de beslissingen van #1027) komen er niet in.
+  `pnpm run import:status` toont de aantallen en de eerste titels onder `Player list`, en de pagina Kwaliteit in het beheer toont ze naast de personen die op elkaar lijken.
+- **Waarom:** de lijst heeft geen seizoenen (alle spelers van alle tijden), dus ze past niet bij de plaats van een bron in de volgorde van bronnen; ze is wel een tweede bron voor een naam.
+  `personTitleAliases` staat daarom, net als `personsWhoDiffer`, in het databasepakket: de pagina Kwaliteit leest hem ook.
+- **Alternatieven:** de lijst als bron voor spelers (kan niet zonder seizoenen); de lijst niet lezen (fouten in namen vind je dan alleen met de hand); de lijst bij elke run lezen (een verzoek per run voor een pagina die zelden verandert).

@@ -1,6 +1,7 @@
-import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
+import type { PersonTitleAlias } from './person-merge.ts'
 
 import {
   type BirthDatePrecision,
@@ -10,6 +11,7 @@ import {
   personPages,
   personPositions,
   persons,
+  playerListTitles,
   type PlayerPosition,
   players,
   wikidataItems,
@@ -98,6 +100,53 @@ export const personsWhoDiffer: readonly (readonly string[])[] = [
   ['Jordy Bruijn', 'Jordy Buijs'],
   ['Ruud Kool', 'Ruud Knol'],
 ]
+
+/**
+ * Two or more titles of Wikipedia that are one person while no redirect says so, each with the
+ * title that stays and the other titles. The importer looks a title up here before it asks
+ * Wikipedia: an other title is the person of the title that stays, and costs no request.
+ *
+ * `Persons:` in the log of the import warns when two persons look alike (`similarPersons`).
+ * Add a person here only after you checked that it is one person: two players with the same
+ * name are two persons, and their titles differ by the addition between brackets. Two who
+ * look alike and are two people go in `personsWhoDiffer`. The redirects on Wikipedia join the
+ * other titles we know of.
+ *
+ * An other title that is a person of its own already is merged into the person of the title
+ * that stays, at the start of every import of matches or of a squad (`mergeListedPersons`).
+ * The owner decided four on 10 November 2026 (issue 1027), and Filip Đuričić the same day
+ * (issue 1036). The same day (issue 1045) he chose the spelling of four players that is no
+ * title: Igor Korneev, Radu Gușatu, Arek Radomski and Hjalte Bo Nørregaard. The article stays
+ * the title that stays and `personNames` gives the name; the other titles are redirects.
+ *
+ * Example: `{ aliases: ['Jan Jansen (voetballer)'], title: 'Jan Jansen (voetballer, 1990)' }`.
+ */
+export const personTitleAliases: readonly PersonTitleAlias[] = [
+  { aliases: ['Arek Radomski'], title: 'Arkadiusz Radomski' },
+  { aliases: ['Filip Djuričić'], title: 'Filip Đuričić' },
+  { aliases: ['Hjalte Norregaard'], title: 'Hjalte Bo Nørregaard' },
+  { aliases: ['Igor Korneev'], title: 'Igor Kornejev' },
+  { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
+  { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
+  { aliases: ['Radu Gusatu'], title: 'Mugur Radu Gușatu' },
+  { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },
+  { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' },
+]
+
+/**
+ * What the list of players of sc Heerenveen says about our persons (issue 1028). It is
+ * information: nothing is made, changed or merged from it.
+ */
+export type PlayerListReport = {
+  /** Persons of ours, by title, that are not on the list. */
+  notOnList: string[]
+  /** Titles of the list that are no person of ours. */
+  notOurs: string[]
+  /** How many titles the list has. 0 when the import has not read it. */
+  read: number
+  /** Pairs of our title and the title of the list that differ only in a sign. */
+  spelling: [string, string][]
+}
 
 /** What the book of persons reads and writes through. */
 type PersonDatabase = Pick<Database, 'insert' | 'select'>
@@ -398,6 +447,75 @@ export async function personsToRead(db: Pick<Database, 'select'>, limit: number)
   return rows.flatMap((row) => (row.wikipediaPage === null ? [] : [{ ...row, wikipediaPage: row.wikipediaPage }]))
 }
 
+/** When the list was read last, or null when never. */
+export async function playerListReadAt(db: Pick<Database, 'select'>): Promise<Date | null> {
+  const [row] = await db
+    .select({ readAt: playerListTitles.readAt })
+    .from(playerListTitles)
+    .orderBy(desc(playerListTitles.readAt))
+    .limit(1)
+
+  return row?.readAt ?? null
+}
+
+/**
+ * Compares the titles of our persons with the list of players. `decided` holds the titles the
+ * owner already decided on (`personsWhoDiffer` and `personTitleAliases`): they are in no
+ * group. A title that differs only in a sign counts as the same person
+ * (`normalisePersonTitle`, as in `similarPersons`) and comes back as a spelling that differs.
+ */
+export async function playerListReport(
+  db: Pick<Database, 'select'>,
+  decided: readonly string[] = decidedTitles(),
+): Promise<PlayerListReport> {
+  const skip = new Set(decided)
+  const list = (await db.select().from(playerListTitles).orderBy(asc(playerListTitles.title))).map((row) => row.title)
+  const ours = (await db.select().from(persons).orderBy(asc(persons.id)))
+    .map((row) => row.wikipediaPage)
+    .filter((title): title is string => title !== null)
+
+  if (list.length === 0) {
+    return { notOnList: [], notOurs: [], read: 0, spelling: [] }
+  }
+
+  const onList = new Set(list)
+  const ourKeys = new Map<string, string>()
+
+  for (const title of ours) {
+    if (!skip.has(title)) {
+      ourKeys.set(normalisePersonTitle(title), ourKeys.get(normalisePersonTitle(title)) ?? title)
+    }
+  }
+
+  const spelling: [string, string][] = []
+  const listKeys = new Set<string>()
+  const notOurs: string[] = []
+
+  for (const title of list) {
+    if (skip.has(title)) {
+      continue
+    }
+
+    const key = normalisePersonTitle(title)
+
+    listKeys.add(key)
+
+    const own = ourKeys.get(key)
+
+    if (own === undefined) {
+      notOurs.push(title)
+    } else if (own !== title) {
+      spelling.push([own, title])
+    }
+  }
+
+  const notOnList = ours.filter(
+    (title) => !skip.has(title) && !onList.has(title) && !listKeys.has(normalisePersonTitle(title)),
+  )
+
+  return { notOnList, notOurs, read: list.length, spelling }
+}
+
 /**
  * The titles in `person_pages` with the article of their person (`Alfred Finnbogason` with
  * `Alfreð Finnbogason`), which is where a redirect to a remembered title ends.
@@ -593,12 +711,45 @@ export async function storePersonNames(
   return { counts, guessed }
 }
 
+/**
+ * Keeps the titles of the list as the import read them: a title that is new is added, one that
+ * is gone is removed, and the time of the read goes on every title. A second read of the same
+ * page changes no title.
+ */
+export async function storePlayerList(
+  db: Pick<Database, 'delete' | 'insert' | 'select'>,
+  titles: readonly string[],
+  now: Date,
+): Promise<{ added: number; removed: number }> {
+  const known = new Set((await db.select().from(playerListTitles)).map((row) => row.title))
+  const wanted = new Set(titles)
+  const gone = [...known].filter((title) => !wanted.has(title))
+  const added = [...wanted].filter((title) => !known.has(title))
+
+  if (gone.length > 0) {
+    await db.delete(playerListTitles).where(inArray(playerListTitles.title, gone))
+  }
+  if (wanted.size > 0) {
+    await db
+      .insert(playerListTitles)
+      .values([...wanted].map((title) => ({ readAt: now, title })))
+      .onDuplicateKeyUpdate({ set: { readAt: now } })
+  }
+
+  return { added: added.length, removed: gone.length }
+}
+
 /** Keeps the label of an item. A label that is there stays: the importer asks once. */
 export async function storeWikidataLabel(db: Pick<Database, 'insert'>, id: string, label: string): Promise<void> {
   await db
     .insert(wikidataItems)
     .values({ id, label })
     .onDuplicateKeyUpdate({ set: { id: sql`id` } })
+}
+
+/** The titles of the decided groups: who differs, and the titles that are one person. */
+function decidedTitles(): string[] {
+  return [...personsWhoDiffer.flat(), ...personTitleAliases.flatMap(({ aliases, title }) => [title, ...aliases])]
 }
 
 function editorsNameColumns(name: EditorsName) {

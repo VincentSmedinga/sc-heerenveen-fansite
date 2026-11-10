@@ -11,6 +11,7 @@ import {
   personPages,
   persons,
   playerFieldDifferences,
+  playerListTitles,
   players,
   playerSeasonStats,
   playerStatDifferences,
@@ -1505,6 +1506,12 @@ describe('the import command', () => {
 
   async function run(wikipedia: TestServer, feed: TestServer) {
     const lines: string[] = []
+
+    // These tests are not about the list of players: it was read an hour ago.
+    await database.db
+      .insert(playerListTitles)
+      .values({ readAt: new Date(first.getTime() - 3600_000), title: 'Gerrit Abma' })
+      .onDuplicateKeyUpdate({ set: { readAt: new Date(first.getTime() - 3600_000) } })
     const code = await runImport(database.url, {
       clock: () => first,
       makeFetcher: (robots) => fetcherFor([feed, wikipedia], { robots }),

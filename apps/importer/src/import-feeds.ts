@@ -24,6 +24,7 @@ import { importEndedSeason } from './import-ended-season.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
+import { importPlayerList } from './player-list.ts'
 import {
   paywallCategoryFor,
   paywallNamespaceFor,
@@ -359,7 +360,11 @@ export async function runImport(
       // Before any season is read: the clubs are right whether or not a season can be read. A
       // failure is a warning and no reason to stop.
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
-      const clubLines = await repairKnownClubs(db, fetcher, origin, clock)
+      // The list of players is a check of names, read once a day and after the clubs.
+      const clubLines = [
+        ...(await repairKnownClubs(db, fetcher, origin, clock)),
+        ...(origin === null ? [] : await importPlayerList(db, fetcher, origin, clock)),
+      ]
       const [reports, wikipedia] = await Promise.allSettled([
         importFeeds(db, fetcher, { alerts, clock, runId, write }),
         origin === null

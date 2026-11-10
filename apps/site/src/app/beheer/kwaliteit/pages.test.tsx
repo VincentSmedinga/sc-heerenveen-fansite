@@ -1,6 +1,13 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { matchGoals, persons, playerFieldDifferences, players, playerStatDifferences } from '@fansite/db/schema'
+import {
+  matchGoals,
+  persons,
+  playerFieldDifferences,
+  playerListTitles,
+  players,
+  playerStatDifferences,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { and, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -39,6 +46,7 @@ beforeEach(async () => {
   requireRole.mockReset()
   requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
   await database.db.delete(persons)
+  await database.db.delete(playerListTitles)
   await database.db.delete(playerStatDifferences)
   await database.db.delete(playerFieldDifferences)
 })
@@ -113,6 +121,21 @@ describe('the page Kwaliteit', () => {
     expect(row).toContain('Geen verslagen')
     expect(row).toContain('Niets te doen')
     expect(row).not.toContain('<a ')
+  })
+
+  it('says what the list of players says about our names, and that it is not read yet', async () => {
+    expect(renderToStaticMarkup(await QualityPage())).toContain('nog niet gelezen')
+
+    await database.db.insert(persons).values([{ wikipediaPage: 'Gerrit Abma' }, { wikipediaPage: 'Iemand Anders' }])
+    await database.db
+      .insert(playerListTitles)
+      .values(['Gerrit Abma', 'Luca Oyen'].map((title) => ({ readAt: new Date(), title })))
+
+    const html = renderToStaticMarkup(await QualityPage())
+
+    expect(html).toContain('Iemand Anders')
+    expect(html).toContain('Luca Oyen')
+    expect(html).toContain('Geen titel verschilt alleen in een teken.')
   })
 
   it('lists the persons that look alike, and says so when there are none', async () => {

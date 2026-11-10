@@ -3,7 +3,7 @@ import type { MatchImport, WikipediaPage } from '@fansite/db/schema'
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 
 import { connect } from '@fansite/db/client'
-import { countPersonData, countPersonNames } from '@fansite/db/persons'
+import { countPersonData, countPersonNames, playerListReadAt, playerListReport } from '@fansite/db/persons'
 import {
   feeds,
   importRuns,
@@ -142,6 +142,7 @@ export async function showStatus(
 
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
+    await showPlayerList(db, write)
     await showDoublePlayers(db, write)
     await showPlayersWithoutPerson(db, write)
     await showPersonData(db, write)
@@ -325,6 +326,32 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
   )
   write(
     `  persons per line: ${counts.byLine.doelman} doelman, ${counts.byLine.verdediger} verdediger, ${counts.byLine.middenvelder} middenvelder, ${counts.byLine.aanvaller} aanvaller`,
+  )
+}
+
+/**
+ * Shows what the list of players of sc Heerenveen says about our persons (issue 1028): the
+ * persons that are not on it, the titles on it that are no person of ours, and the titles that
+ * differ only in a sign. It is information and no fault: nothing is made, changed or merged.
+ */
+async function showPlayerList(db: Database, write: (line: string) => void): Promise<void> {
+  const report = await playerListReport(db)
+  const readAt = await playerListReadAt(db)
+
+  if (readAt === null) {
+    write('Player list: not read yet')
+
+    return
+  }
+
+  const first = (titles: readonly string[]) =>
+    titles.length === 0 ? '' : ` (${printable(titles.slice(0, 5).join(', '))}${titles.length > 5 ? ', …' : ''})`
+
+  write(`Player list: ${report.read} titles, read ${formatTime(readAt)}`)
+  write(`  persons not on the list: ${report.notOnList.length}${first(report.notOnList)}`)
+  write(`  titles on the list that are no person of ours: ${report.notOurs.length}${first(report.notOurs)}`)
+  write(
+    `  titles that differ in a sign: ${report.spelling.length}${first(report.spelling.map(([ours, listed]) => `${ours} and ${listed}`))}`,
   )
 }
 
