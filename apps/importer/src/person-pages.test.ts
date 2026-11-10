@@ -405,6 +405,49 @@ describe('mergeListedPersons for Filip Đuričić', () => {
     expect(await mergeListedPersons(database.db)).toEqual([])
   })
 
+  it('gives the player of a scorer that Wikipedia links under the redirect the spelling that stays', async () => {
+    // The person book follows the redirect, so there is one person already, and only the row of
+    // the season in `players` still has the page and the name of the redirect.
+    const kept = await insertPerson('Filip Đuričić')
+
+    await insertGoal(kept, '2011/12', 'Filip Đuričić')
+    await insertGoal(kept, '2010/11', 'Filip Djuričić')
+
+    expect(await mergeListedPersons(database.db)).toEqual(['Players: Filip Djuričić (2010/11) is now Filip Đuričić'])
+    expect(
+      (await database.db.select().from(players).orderBy(asc(players.season))).map(
+        (row) => `${row.season} ${row.name} ${row.wikipediaPage} ${row.personId === kept}`,
+      ),
+    ).toEqual(['2010/11 Filip Đuričić Filip Đuričić true', '2011/12 Filip Đuričić Filip Đuričić true'])
+    expect((await database.db.select().from(matchGoals)).map((goal) => goal.personId)).toEqual([kept, kept])
+    expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+
+  it('merges the two rows of one season when the squad has the spelling that stays too', async () => {
+    const kept = await insertPerson('Filip Đuričić')
+
+    await insertGoal(kept, '2010/11', 'Filip Djuričić')
+
+    const [old] = await database.db.select().from(players)
+
+    await database.db.update(matchGoals).set({ playerId: old!.id })
+    await database.db.insert(players).values({
+      name: 'Filip Đuričić',
+      personId: kept,
+      searchTerm: 'Đuričić',
+      season: '2010/11',
+      wikipediaPage: 'Filip Đuričić',
+    })
+
+    expect(await mergeListedPersons(database.db)).toEqual([
+      'Players: Filip Djuričić (2010/11) is merged into Filip Đuričić',
+    ])
+    expect(await database.db.select().from(players)).toHaveLength(1)
+    expect((await database.db.select().from(matchGoals)).map((goal) => goal.playerId)).toEqual([
+      (await database.db.select().from(players))[0]!.id,
+    ])
+  })
+
   it('renames a person who is alone under the old spelling, without a second person', async () => {
     const only = await insertPerson('Filip Djuričić')
 

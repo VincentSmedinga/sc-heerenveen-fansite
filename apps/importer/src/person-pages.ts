@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { mergePersons } from '@fansite/db/person-merge'
+import { mergePersons, mergePlayerInto } from '@fansite/db/person-merge'
 import {
   knownPersonPages,
   type PersonName,
@@ -8,12 +8,15 @@ import {
   personNamesBySource,
   rememberedPersonArticles,
 } from '@fansite/db/persons'
+import { players } from '@fansite/db/schema'
+import { eq, inArray } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 
 import { lookUpTitles } from './club-pages.ts'
-import { fitsColumns, manualNames, personNameOf } from './person-name.ts'
+import { fitsColumns, manualNames, nameOfTitle, personNameOf } from './person-name.ts'
 import { personNames, type PersonTitleAlias, personTitleAliases } from './person-names.ts'
+import { nameKey, searchTerm } from './read-squad.ts'
 import { printable } from './text.ts'
 
 // The page Kwaliteit of the admin lists the same groups, so the function is in the database
@@ -219,8 +222,25 @@ export async function mergeListedPersons(
     }),
   )
   const { merged, warnings } = await mergePersons(db, list, names)
+  const spellings = await chooseListedPlayerSpellings(db, list)
 
-  return [...merged.map((line) => printable(`Persons: ${line}`)), ...warnings.map((line) => printable(line))]
+  return [
+    ...merged.map((line) => printable(`Persons: ${line}`)),
+    ...warnings.map((line) => printable(line)),
+    ...spellings.map((line) => printable(`Players: ${line}`)),
+  ]
+}
+
+/**
+ * The search term of a player whose row gets an other spelling of his name: the surname of the
+ * old name in the new spelling (`Samardžić`), or the new surname.
+ */
+export function renamedSearchTerm(row: { name: string; searchTerm: string }, name: string): string {
+  return name.length === row.name.length && nameKey(row.name).endsWith(nameKey(row.searchTerm))
+    ? name.slice(-row.searchTerm.length)
+    : nameKey(name).endsWith(` ${nameKey(row.searchTerm)}`)
+      ? row.searchTerm
+      : searchTerm(name)
 }
 
 /** The warning for `similarPersons`, or undefined when no persons look alike. */
@@ -235,4 +255,54 @@ export function similarPersonsWarning(groups: readonly (readonly string[])[]): s
     .join(', ')
 
   return `Persons: ${groups.length} ${groups.length === 1 ? 'group' : 'groups'} of persons look alike and are not merged: ${printable(shown)}${groups.length > 5 ? ', …' : ''}`
+}
+
+/**
+ * Gives a player whose page is an other title of the list the title that stays (issue 1036).
+ * A scorer that Wikipedia links under a redirect (`Filip Djuričić`) already has the person of
+ * the title that stays, because the person book follows the redirect, so `mergePersons` finds
+ * nothing to merge, but his row of the season keeps the page and the name of the redirect.
+ * The row gets the page, the name and the search term of the title that stays; when the season
+ * has a row with that page already, the two become one (`mergePlayerInto`). A page that is no
+ * other title costs one query, so a second run changes and says nothing.
+ */
+async function chooseListedPlayerSpellings(
+  db: Pick<Database, 'select' | 'transaction'>,
+  list: readonly PersonTitleAlias[],
+): Promise<string[]> {
+  const lines: string[] = []
+  const aliases = list.flatMap((entry) => entry.aliases)
+
+  if (aliases.length === 0) {
+    return lines
+  }
+
+  const rows = await db.select().from(players).where(inArray(players.wikipediaPage, aliases))
+
+  for (const { aliases: others, title } of list) {
+    for (const row of rows.filter((one) => one.wikipediaPage !== null && others.includes(one.wikipediaPage))) {
+      const name = nameOfTitle(title)
+
+      await db.transaction(async (tx) => {
+        const same = (await tx.select().from(players).where(eq(players.season, row.season))).find(
+          (one) => one.id !== row.id && (one.wikipediaPage === title || one.name === name),
+        )
+
+        if (same !== undefined) {
+          await mergePlayerInto(tx, row.id, same.id)
+          lines.push(`${row.name} (${row.season}) is merged into ${same.name}`)
+
+          return
+        }
+
+        await tx
+          .update(players)
+          .set({ name, searchTerm: renamedSearchTerm(row, name), wikipediaPage: title })
+          .where(eq(players.id, row.id))
+        lines.push(`${row.name} (${row.season}) is now ${name}`)
+      })
+    }
+  }
+
+  return lines
 }

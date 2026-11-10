@@ -22,8 +22,14 @@ import type { CompletenessTotals } from './store-completeness.ts'
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
 import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
-import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
-import { nameKey, readSquad, searchTerm, squadPageTitle } from './read-squad.ts'
+import {
+  describePersons,
+  guessedNameWarnings,
+  lookUpPersonPages,
+  mergeListedPersons,
+  renamedSearchTerm,
+} from './person-pages.ts'
+import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { describeChange, storeCompleteness } from './store-completeness.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -265,13 +271,7 @@ export async function storeChosenSpellings(
       gone.add(stays.id)
     }
     if (chosen.name !== row.name || chosen.page !== row.wikipediaPage) {
-      // The surname of the old name in the new spelling (`Samardžić`), or the new surname.
-      const term =
-        chosen.name.length === row.name.length && nameKey(row.name).endsWith(nameKey(row.searchTerm))
-          ? chosen.name.slice(-row.searchTerm.length)
-          : nameKey(chosen.name).endsWith(` ${nameKey(row.searchTerm)}`)
-            ? row.searchTerm
-            : searchTerm(chosen.name)
+      const term = renamedSearchTerm(row, chosen.name)
       // A page the row got from the one that went stays when the spelling names none.
       const page = chosen.page ?? row.wikipediaPage
 
