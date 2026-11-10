@@ -1057,7 +1057,10 @@ Daarvoor vraagt de import elke titel die nog niet in `person_pages` staat één 
   De volgende run probeert het opnieuw, en de run van het seizoen valt er niet door.
   Een `robots.txt` die weigert of een verzoek om te wachten stopt het vragen voor die run, en drie mislukte titels achter elkaar ook.
 - Een lijst `personTitleAliases` in [`src/person-names.ts`](src/person-names.ts), in de vorm van `clubFullNames`, zegt welke titels één persoon zijn als geen doorverwijzing het zegt.
-  Hij gaat voor het verzoek en begint leeg.
+  Hij gaat voor het verzoek.
+  Is een andere titel uit de lijst al een eigen persoon, dan voegt de import hem samen met de persoon van de titel die blijft (`mergeListedPersons`), aan het begin van de import van de wedstrijden en van een selectie.
+  Alles wat naar de persoon wijst gaat mee, en twee rijen van de persoon in `players` van één seizoen worden één rij (`mergePersons` in `@fansite/db/person-merge`).
+  De run meldt het één keer, als waarschuwing: `Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'`.
 - Een doelpunt in een seizoen dat voorbij is, krijgt zijn `person_id` zonder dat een wijziging wacht: een verschil alleen in de koppelingen telt als een aanvulling.
 
 Het logboek noemt het aantal titels dat is opgevraagd, alleen als dat meer dan nul is:
@@ -1066,7 +1069,7 @@ Het logboek noemt het aantal titels dat is opgevraagd, alleen als dat meer dan n
 Matches 2026/27: persons: 20 titles asked, 20 new persons, 20 titles remembered, 20 names stored (18 from a sort key, 2 guessed, 0 from the list)
 ```
 
-De import voegt geen personen samen op een gelijke naam.
+De import voegt geen personen samen op een gelijke naam, alleen de personen uit `personTitleAliases`.
 Zijn twee titels zonder accenten, hoofdletters, streepjes, spaties en apostrofs gelijk, de toevoeging tussen haakjes meegeteld (`Johnny Jansen (1952)` en `(1975)` dus niet), dan waarschuwt hij:
 
 ```text
@@ -1074,7 +1077,9 @@ Matches 2026/27: warning, Persons: 1 group of persons look alike and are not mer
 ```
 
 `pnpm run import:status` toont het aantal groepen onder `Persons that look alike` en de aantallen namen per bron onder `Person names`.
-Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases` en draai de import van de seizoenen opnieuw.
+Zijn het dezelfde mensen, zet de titels dan in `personTitleAliases`: de volgende import voegt ze samen.
+Zijn het twee mensen, zet ze dan in `personsWhoDiffer` in `packages/db/src/persons.ts`: de import, `import:status`, de pagina Kwaliteit en het controleverslag van de oude fansite melden de groep dan niet meer.
+Jordy Bruijn en Jordy Buijs staan daar.
 Een pagina die later een andere titel krijgt, ziet de import niet: de oude titel blijft in `person_pages` staan.
 
 ### De namen van de personen

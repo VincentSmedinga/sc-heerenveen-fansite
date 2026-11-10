@@ -2239,6 +2239,7 @@
   - **`personTitleAliases`** in `person-names.ts`, in de vorm van `clubFullNames`, zegt welke titels één persoon zijn als geen doorverwijzing het zegt.
     Het gaat voor het verzoek: een andere titel kost geen verzoek en is de persoon van de titel die blijft.
     De lijst begint leeg.
+    **Later:** sinds 10 november 2026 staan er vier personen in, en de import voegt ze samen als beide al bestaan; zie _De import voegt de personen samen die de projecteigenaar als één persoon aanwees_.
   - **Een doelpunt in een seizoen dat voorbij is** krijgt zijn `person_id` zonder een wijziging die wacht: een verschil alleen in de koppelingen (speler, pagina, persoon) is een aanvulling (`links` in `classify-change.ts`).
   - **Een doelpunt dat de redactie in het beheer bewaart** houdt het `person_id` dat de import bewaarde, als het doelpunt niet veranderde.
     Een doelpunt dat de redactie zelf toevoegt, krijgt geen `person_id` en telt dan op zijn speler of zijn titel, zoals nu.
@@ -2263,6 +2264,8 @@
   Een scherm voor een handvol gevallen kost meer dan het geeft, en de lijst in de code kan de Builder bijwerken zodra de waarschuwing iets laat zien.
 - **Alternatieven:** automatisch samenvoegen op een gelijke naam (fout bij twee spelers met dezelfde naam).
   Een lijst in het beheer (een scherm en een werkwijze voor enkele gevallen).
+- **Later:** sinds 10 november 2026 voegt de import de personen uit `personTitleAliases` wel samen, ook als beide al bestaan; zie _De import voegt de personen samen die de projecteigenaar als één persoon aanwees_.
+  Een lijst `personsWhoDiffer` noemt de namen die op elkaar lijken en twee mensen zijn; zie _Jordy Bruijn en Jordy Buijs zijn twee personen_.
 
 ## De import leest de naam van een persoon uit de sorteersleutel van zijn artikel
 
@@ -2832,6 +2835,7 @@
   - **Wat erin staat:** alleen wat de projecteigenaar per groep koos.
     Voor de tegenstanders zijn dat Dirk Kuijt, Jürgen Dirkx, Humphrey Rudge, Rahim Ouédraogo, Tomáš Galásek, Mark Luijpers, Marc Nygaard en Tommie van der Leegte; voor de spelers van ons staan ze onder het volgende kopje.
     Brian Tevreden en Brian Tevreden II zijn twee spelers, en Ruud Kool en Ruud Knol ook (`oldSiteDistinctNames`).
+    **Later:** die lijst heet sinds 10 november 2026 `personsWhoDiffer` en staat in `packages/db/src/persons.ts`; zie _Jordy Bruijn en Jordy Buijs zijn twee personen_.
   - **Ook de spelers van ons.**
     Een speler van ons komt uit de oude tabel `speler` of uit een code, en gaat door dezelfde lijst (`resolveOldSiteCode`).
     De lijst zet de schrijfwijze van de oude fansite om in de schrijfwijze van de selectie van Wikipedia: Gerrie Schaap, Ronny Venema, Ivan Tsvetkov, Ali El Khattabi en Henny Meijer.
@@ -2843,6 +2847,7 @@
     Het controleverslag (`docs/oude-wedstrijden-hiaten.md`) heeft een lijst _Namen om te beslissen_ met de namen die op elkaar lijken.
     Daarnaast heeft het een korte lijst _Namen op de spelerskaarten om te beslissen_ (`oldSiteSquadNamesToDecide`).
     Die noemt schrijfwijzen uit de selecties die nog niet beslist zijn.
+    **Later:** de projecteigenaar besliste de vier paren op 10 november 2026, en de lijst en het hoofdstuk zijn weg; zie de vijf beslissingen van die dag, vanaf _Uğur Yıldırım is één persoon_.
     Twee namen lijken op elkaar in een van deze drie gevallen:
     - ze zijn gelijk zonder hoofdletters, accenten, leestekens en `van`, `de`, `der` en `den`;
     - ze verschillen hoogstens twee letters, en beide zijn zeven tekens of langer;
@@ -2881,6 +2886,8 @@
     Heeft de andere rij die wedstrijd of die competitie al, dan blijft die zijn eigen gegevens houden, en gaat het gegeven van de verouderde rij weg met die rij.
     Het aantal samengevoegde rijen staat bij de gewijzigde rijen in het overzicht van de stap, met een regel per rij.
     Een tweede run vindt niets meer.
+    **Later:** sinds 10 november 2026 gaan ook de verschillen in de seizoenscijfers (`player_stat_differences`) mee, en het samenvoegen staat in `mergePlayerInto` in `@fansite/db/person-merge`.
+    Een eigen rij waarvan de oude naam alleen in accenten verschilt, krijgt de gekozen schrijfwijze; zie _De import voegt de personen samen die de projecteigenaar als één persoon aanwees_.
   - **Rijen van Wikipedia onder de oude schrijfwijze blijven staan:** bij Lee-Roy Echteld en Igor Kornejev is de rij van de selectie de verouderde, en de rij van de oude fansite de gekozen.
     Samenvoegen zou de gegevens van Wikipedia kwijtraken, en de selectie zet die rij elke run terug.
     De projecteigenaar hernoemt ze met de hand.
@@ -2933,6 +2940,7 @@
     De tweede persoon van de groep blijft zoals hij was, en een test controleert dat.
   - **Wat niet:** de vier paren op de spelerskaarten (_Namen op de spelerskaarten om te beslissen_) en wat na deze omzettingen nog op elkaar lijkt, blijven in het controleverslag staan.
     `Tom Van Mol` en `Tom de Mul` staan daar nog, omdat het twee spelers zijn.
+    **Later:** de vier paren op de spelerskaarten zijn op 10 november 2026 beslist, en dat hoofdstuk van het controleverslag is weg; zie de beslissingen van die dag, vanaf _Uğur Yıldırım is één persoon_.
   - **Gevolg:** twee assists die als "staat niet in de opstelling" leeg bleven (`Erik Kortchaguine` en `Gerry Senden`) krijgen nu hun speler, en staan niet meer onder _Assists zonder speler_ in het controleverslag.
 - **Waarom:** de projecteigenaar wil één schrijfwijze per persoon, en dit zijn de paren waarbij het artikel op Wikipedia de bedoelde persoon aanwijst.
 - **Alternatieven:** deze paren laten staan als namen om te beslissen (dezelfde persoon blijft op twee manieren in de tellingen staan); de drie groepen met een tweede persoon overslaan (de tikfout blijft dan een eigen speler).
@@ -3562,3 +3570,85 @@
   Een toelichting op de kaart (meer tekst zonder dat de bezoeker er iets aan heeft).
   De naam van het doelpunt als naam van de speler (vaak alleen een achternaam, en dan staat er een halve naam op de kaart).
   De speler maken vóór het oordeel over een wijziging (de eerste versie van deze wijziging; een link in een verdachte wijziging maakte dan al een speler, en de reviewer wees daarop).
+
+## Uğur Yıldırım is één persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** Ugur Yıldırım en Uğur Yıldırım zijn één persoon, en de schrijfwijze met de tekens blijft (#1027).
+  De titel `Ugur Yıldırım` staat in `personTitleAliases`, en de naam `Ugur Yildirim` van de oude fansite in `oldSiteNameCorrections`.
+- **Waarom:** het is de titel op Wikipedia.
+- **Alternatieven:** Ugur laten staan (de persoon staat dan twee keer).
+
+## Radoslav Samardžić is één persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** Samardžić en Samardzic zijn één persoon, en Radoslav Samardžić blijft (#1027).
+  De schrijfwijze zonder accenten staat in `personTitleAliases` en in `oldSiteNameCorrections`.
+- **Waarom:** het is de eigen schrijfwijze van de naam, en zo deden we het bij andere namen.
+- **Alternatieven:** zonder accent.
+
+## Jan Harm Schippers is één persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** Jan Harm Schippers en Jan-Harm Schippers zijn één persoon, en de schrijfwijze zonder streepje blijft (#1027).
+  De schrijfwijze met streepje staat in `personTitleAliases` en in `oldSiteNameCorrections`.
+- **Waarom:** de projecteigenaar koos de schrijfwijze van de selectie.
+- **Alternatieven:** met streepje.
+
+## Robert van den Berg is één persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** Robert van den Berg en Robert van der Berg zijn één persoon, en "van den" blijft (#1027).
+  "Van der" staat in `personTitleAliases` en in `oldSiteNameCorrections`.
+- **Waarom:** de projecteigenaar koos de schrijfwijze van de selectie.
+- **Alternatieven:** "van der".
+
+## Jordy Bruijn en Jordy Buijs zijn twee personen
+
+- **Datum:** 10 november 2026
+- **Besluit:** het zijn twee personen, Jordy Bruijn (1996) en Jordy Buijs (1988), die allebei voor ons speelden (#1027).
+  Ze worden nooit samengevoegd en niet meer als gelijkend gemeld, ook niet in de controle van de oude fansite.
+  Ze staan in de lijst `personsWhoDiffer`, samen met de paren die `oldSiteDistinctNames` had: Brian Tevreden en Brian Tevreden II, en Ruud Kool en Ruud Knol.
+  `similarPersons` laat een groep weg waarvan alle titels in één groep van die lijst staan.
+  Lijkt een derde persoon op hen, dan meldt de import de hele groep weer.
+  De lijst staat in `packages/db/src/persons.ts` en niet bij `personTitleAliases` in de importer.
+  De pagina Kwaliteit in het beheer leest hem ook, en de site gebruikt geen code van de importer.
+  `apps/importer/src/person-names.ts` geeft de lijst door, zodat de importer hem daar vindt.
+- **Waarom:** het zijn twee mensen met een verschillend geboortejaar, en samenvoegen op een gelijkende naam is een gok.
+- **Alternatieven:** de waarschuwing laten staan (ze blijven dan elke run in de lijst).
+  Een eigen lijst in de importer naast de lijst van de oude fansite (twee lijsten voor dezelfde vraag, en de pagina Kwaliteit kent ze niet).
+
+## De import voegt de personen samen die de projecteigenaar als één persoon aanwees
+
+- **Datum:** 10 november 2026
+- **Besluit:** staat een titel in `personTitleAliases` en is hij nog een eigen persoon, dan voegt de import hem samen met de persoon van de titel die blijft (#1027).
+  - **Wanneer:** aan het begin van de import van de wedstrijden, van de selectie en van een vorige selectie (`mergeListedPersons`), dus ook elk uur.
+    Er is geen losse opdracht.
+    Is er niets samen te voegen, dan kost het één query en meldt de run niets.
+  - **Wat meegaat:** de spelers en doelpunten (`players.person_id` en `match_goals.person_id`), de titels in `person_pages`, de nationaliteiten en de posities.
+    De oude titel blijft in `person_pages` staan.
+    Een latere import vindt de persoon daardoor terug en maakt geen tweede.
+  - **Twee rijen in één seizoen:** heeft de persoon daarna twee rijen in `players` van hetzelfde seizoen, dan worden ze één rij (`mergePlayerInto`, dat de stap `spelers` van de oude fansite ook gebruikt).
+    De rij met de titel die blijft als pagina gaat voor, dan de rij uit de betere bron, dan de oudste.
+    De doelpunten, de opstellingen, de seizoenscijfers en de verschillen in die cijfers gaan mee.
+    Wat de rij die blijft mist (positie, rugnummer, land, pagina), neemt hij over.
+    Hebben beide rijen cijfers voor dezelfde competitie en verschillen die, dan blijven de cijfers van de rij die blijft en waarschuwt de import.
+    Staan beide rijen in de opstelling van dezelfde wedstrijd, dan blijft de tweede regel in het verslag staan, zonder speler.
+  - **Wikidata:** het Q-nummer, het nummer van het artikel, de geboortedatum, de geboorteplaats en de linie zijn die van de persoon die blijft.
+    Wat hij mist, neemt hij over van de andere.
+    Hebben beide een Q-nummer, een artikel of een geboortedatum en verschillen die, dan blijft de eerste staan.
+    De import geeft dan een waarschuwing met `Persons:` en beide titels, zodat de redactie ernaar kijkt.
+  - **Alleen de andere schrijfwijze bestaat:** de persoon krijgt de titel die blijft en houdt zijn `id`.
+    Zijn naam wordt de naam die de import uit die titel afleidt, of die van de lijst `personNames`.
+  - **De spelers van de oude fansite:** de stap `spelers` zet de naam om met `oldSiteNameCorrections` en voegt de oude rij samen met de nieuwe.
+    Verschilt de oude naam alleen in accenten (`Radoslav Samardzic`), dan noemt de database het dezelfde naam (`utf8mb4_unicode_ci`) en kan er geen tweede rij komen.
+    De stap geeft die rij dan de gekozen schrijfwijze, als het zijn eigen rij is: bron `verslag`, geen pagina en geen persoon.
+    De zoekterm van een omgezette naam is de achternaam uit de oude tabel als de gekozen naam daarop eindigt (`Schippers`, niet `Harm Schippers`).
+  - **Het logboek:** één waarschuwing per persoon, zoals `Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'`, en alleen in de run die samenvoegt.
+- **Waarom:** de lijst voegde alleen titels samen die nog geen persoon waren, en deze vier bestonden al twee keer.
+  De titels van personen vergelijkt de database teken voor teken (`utf8mb4_bin`), dus `Ugur` en `Uğur` zijn daar twee personen.
+  Met de samenvoeging in de gewone import hoeft niemand op acceptatie of productie een opdracht te draaien.
+- **Alternatieven:** een migratie (kent de vier namen alleen op het moment van schrijven, en een volgend paar vraagt weer een migratie).
+  Een losse opdracht (iemand moet eraan denken, op elke omgeving).
+  De persoon die verdwijnt weghalen zonder om te zetten (`person_id` wordt dan leeg, en de doelpunten en spelers raken hun persoon kwijt).
+  De cijfers van twee rijen optellen (de twee rijen zijn dezelfde tabel van Wikipedia, dus dat telt dubbel).

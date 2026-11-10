@@ -15,7 +15,7 @@ import type { CompletenessTotals } from './store-completeness.ts'
 import { checkSquad } from './check-wikipedia.ts'
 import { healthAfter, wikipediaOrigin } from './import-matches.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
-import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
+import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, readSquad, squadPageTitle } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { describeChange, storeCompleteness } from './store-completeness.ts'
@@ -211,6 +211,7 @@ async function readAndStore(
     return { kind: 'error', message: `${title}: ${problems.join('; ')}`, season }
   }
 
+  const mergedPersons = await mergeListedPersons(db)
   // Wikipedia is asked before the transaction: no request is made while rows are locked.
   const personLookup = await lookUpPersonPages(
     db,
@@ -220,7 +221,7 @@ async function readAndStore(
     aliasMap(personTitleAliases),
   )
   const now = clock()
-  const warnings = [...read.warnings, ...personLookup.warnings]
+  const warnings = [...read.warnings, ...mergedPersons, ...personLookup.warnings]
   const counts = await db.transaction(async (transaction) => {
     const personBook = await createPersonBook(transaction, {
       aliases: aliasMap(personTitleAliases),

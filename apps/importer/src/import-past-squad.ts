@@ -28,7 +28,7 @@ import type { CompletenessTotals } from './store-completeness.ts'
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
 import { scorersByPerson } from './import-squad.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
-import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
+import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { squadSources } from './squad-sources.ts'
@@ -233,6 +233,7 @@ export async function importPastSquad(
 
   warnings.push(...merged.warnings)
 
+  const mergedPersons = await mergeListedPersons(db)
   // Wikipedia is asked before the transaction: no request is made while rows are locked.
   const personLookup = await lookUpPersonPages(
     db,
@@ -270,7 +271,7 @@ export async function importPastSquad(
     persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
     players: stored.players,
     season,
-    warnings: [...warnings, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
+    warnings: [...warnings, ...mergedPersons, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
   }
 
   return await recorded(db, report, clock)

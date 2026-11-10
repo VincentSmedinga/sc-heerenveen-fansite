@@ -54,6 +54,7 @@ import {
   describePersons,
   guessedNameWarnings,
   lookUpPersonPages,
+  mergeListedPersons,
   similarPersons,
   similarPersonsWarning,
 } from './person-pages.ts'
@@ -562,6 +563,7 @@ async function lookUpArticles(db: Database, fetcher: Fetcher, origin: string, se
     .select({ page: players.wikipediaPage })
     .from(players)
     .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
+  const mergedPersons = await mergeListedPersons(db)
   const personLookup = await lookUpPersonPages(
     db,
     fetcher,
@@ -574,6 +576,8 @@ async function lookUpArticles(db: Database, fetcher: Fetcher, origin: string, se
     ],
     aliasMap(personTitleAliases),
   )
+
+  personLookup.warnings.unshift(...mergedPersons)
 
   return { kind: 'found', lookup, personLookup } as const
 }

@@ -1182,6 +1182,7 @@ De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen d
 
 Onder de tabel staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
 De import waarschuwt voor dezelfde groepen en voegt ze niet samen.
+Een groep uit de lijst `personsWhoDiffer` staat er niet: dat zijn twee mensen, zoals Jordy Bruijn en Jordy Buijs.
 
 ### Het bezoek bekijken
 

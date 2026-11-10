@@ -3,8 +3,9 @@
 // lists, and never changes a name.
 import type { OldSiteData } from './old-site-file.ts'
 
-import { cleanOldSiteName, oldSiteDistinctNames } from './old-site-names.ts'
+import { cleanOldSiteName } from './old-site-names.ts'
 import { isOurCode, resolveOldSiteCode } from './old-site-players.ts'
+import { personsWhoDiffer } from './person-names.ts'
 
 /** A spelling of a name and how often the files use it. */
 export type OldSiteNameSpelling = { count: number; name: string }
@@ -100,7 +101,7 @@ export function findOldSiteNameClusters(counts: ReadonlyMap<string, number>): Ol
 
   return [...groups.values()]
     .filter((group) => group.length > 1)
-    .filter((group) => !oldSiteDistinctNames.some((same) => group.every((one) => same.includes(one.name))))
+    .filter((group) => !personsWhoDiffer.some((same) => group.every((one) => same.includes(one.name))))
     .map((group) => group.toSorted((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'nl')))
     .toSorted((a, b) => firstAlphabetically(a).localeCompare(firstAlphabetically(b), 'nl'))
 }

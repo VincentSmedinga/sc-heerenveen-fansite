@@ -546,6 +546,30 @@ describe('reading again', () => {
     ])
   })
 
+  it('merges the persons the owner said are one person at the start of a run, and says so once', async () => {
+    const { server } = await serve()
+    const [{ insertId: kept }] = await database.db.insert(persons).values({ wikipediaPage: 'Uğur Yıldırım' })
+
+    await database.db.insert(persons).values({ wikipediaPage: 'Ugur Yıldırım' })
+
+    const report = await importAt(server, first)
+    const titles = async () => (await database.db.select().from(persons)).map((row) => row.wikipediaPage)
+
+    expect(report.kind === 'imported' ? report.warnings : []).toContain(
+      "Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'",
+    )
+    expect(await titles()).toContain('Uğur Yıldırım')
+    expect(await titles()).not.toContain('Ugur Yıldırım')
+    expect(await database.db.select().from(personPages).where(eq(personPages.page, 'Ugur Yıldırım'))).toEqual([
+      { page: 'Ugur Yıldırım', personId: kept },
+    ])
+
+    const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(again.kind).toBe('imported')
+    expect((again.kind === 'imported' ? again.warnings : []).filter((line) => line.includes('merged'))).toEqual([])
+  })
+
   describe('a player the import of the matches made of a scorer (#1024)', () => {
     const scorer = { searchTerm: 'Klaverboer', season, source: 'doelpunten' as const }
 

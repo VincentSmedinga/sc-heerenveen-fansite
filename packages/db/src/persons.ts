@@ -74,6 +74,21 @@ export type PersonToRead = {
   wikipediaPageId: null | number
 }
 
+/**
+ * Names that look alike and are different people, as the owner decided: each group lists the
+ * titles of Wikipedia, or the names as the old fansite typed them. `similarPersons` leaves out
+ * a group whose titles are all in one group here, and so does the check report of the old
+ * fansite (`findOldSiteNameClusters`). They are never merged. The list is here, and not next
+ * to `personTitleAliases` in the importer, because the page Kwaliteit of the admin reads it
+ * too; the importer exports it from `person-names.ts`.
+ */
+export const personsWhoDiffer: readonly (readonly string[])[] = [
+  ['Brian Tevreden', 'Brian Tevreden II'],
+  // Jordy Bruijn (1996) and Jordy Buijs (1988) both played for sc Heerenveen.
+  ['Jordy Bruijn', 'Jordy Buijs'],
+  ['Ruud Kool', 'Ruud Knol'],
+]
+
 /** What the book of persons reads and writes through. */
 type PersonDatabase = Pick<Database, 'insert' | 'select'>
 
@@ -332,9 +347,14 @@ export async function rememberWikidataId(
  * apostrophes, the addition between brackets included (`Johnny Jansen (1952)` and `(1975)` are
  * not alike). Each group lists the titles of the persons, in the order of their `id`. The
  * import warns about them and merges nothing: two players can have the same name. Join them
- * with `personTitleAliases` when they are one person.
+ * with `personTitleAliases` when they are one person. A group whose titles are all in one
+ * group of `differ` (`personsWhoDiffer`) is left out: the owner said they are different
+ * people. A third title that looks like them brings the whole group back.
  */
-export async function similarPersons(db: Pick<Database, 'select'>): Promise<string[][]> {
+export async function similarPersons(
+  db: Pick<Database, 'select'>,
+  differ: readonly (readonly string[])[] = personsWhoDiffer,
+): Promise<string[][]> {
   const groups = new Map<string, string[]>()
 
   for (const { wikipediaPage } of await db.select().from(persons).orderBy(asc(persons.id))) {
@@ -343,7 +363,9 @@ export async function similarPersons(db: Pick<Database, 'select'>): Promise<stri
     groups.set(key, [...(groups.get(key) ?? []), wikipediaPage])
   }
 
-  return [...groups.values()].filter((titles) => titles.length > 1)
+  return [...groups.values()]
+    .filter((titles) => titles.length > 1)
+    .filter((titles) => !differ.some((names) => titles.every((title) => names.includes(title))))
 }
 
 /**

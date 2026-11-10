@@ -3,15 +3,17 @@ import type { TestDatabase } from '@fansite/db/test-database'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { persons } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { asc } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
 
 import { personNameOf } from './person-name.ts'
-import { aliasMap } from './person-names.ts'
+import { aliasMap, personsWhoDiffer } from './person-names.ts'
 import {
   describePersons,
   lookUpPersonPages,
+  mergeListedPersons,
   mostFailuresInARow,
   similarPersons,
   similarPersonsWarning,
@@ -227,6 +229,37 @@ describe('similarPersons', () => {
     expect(await similarPersons(database.db)).toEqual([['Daniël Jansen', "D'aniel Jan-sen"]])
   })
 
+  it('leaves out Jordy Bruijn and Jordy Buijs, and every group the owner said are different people', async () => {
+    await database.db
+      .insert(persons)
+      .values([
+        { wikipediaPage: 'Jordy Bruijn' },
+        { wikipediaPage: 'Jordy Buijs' },
+        { wikipediaPage: 'Daniël Jansen' },
+        { wikipediaPage: 'Daniel Jansen' },
+        { wikipediaPage: 'Luca Oyen' },
+        { wikipediaPage: 'Luca Oÿen' },
+      ])
+
+    // The list of the import: the two Jordys are never a group.
+    expect(personsWhoDiffer).toContainEqual(['Jordy Bruijn', 'Jordy Buijs'])
+    expect(await similarPersons(database.db)).toEqual([
+      ['Daniël Jansen', 'Daniel Jansen'],
+      ['Luca Oyen', 'Luca Oÿen'],
+    ])
+    // A group whose titles are all in one group of the list is left out, in any order.
+    expect(await similarPersons(database.db, [['Daniel Jansen', 'Daniël Jansen', 'Iemand Anders']])).toEqual([
+      ['Luca Oyen', 'Luca Oÿen'],
+    ])
+
+    // A third person who looks like them is not in the list, so the whole group is back.
+    await database.db.insert(persons).values({ wikipediaPage: 'Daniel Jan-sen' })
+    expect(await similarPersons(database.db, [['Daniel Jansen', 'Daniël Jansen']])).toEqual([
+      ['Daniël Jansen', 'Daniel Jansen', 'Daniel Jan-sen'],
+      ['Luca Oyen', 'Luca Oÿen'],
+    ])
+  })
+
   it('warns with Persons: in front, and says nothing when no persons look alike', () => {
     expect(similarPersonsWarning([])).toBeUndefined()
     expect(similarPersonsWarning([['Daniël Jansen', 'Daniel Jansen']])).toBe(
@@ -279,5 +312,40 @@ describe('the names that lookUpPersonPages finds', () => {
     expect(second).toEqual({ asked: 0, names: new Map(), redirects: new Map(), warnings: [] })
     expect(asked(server)).toHaveLength(1)
     expect((await storePersonNames(database.db, second.names)).counts).toEqual({ guess: 0, manual: 0, sort_key: 0 })
+  })
+})
+
+describe('mergeListedPersons', () => {
+  it('merges the persons of the list, names a renamed person after the title that stays, and then says nothing', async () => {
+    const [{ insertId: kept }] = await database.db.insert(persons).values({ wikipediaPage: 'Uğur Yıldırım' })
+
+    await database.db
+      .insert(persons)
+      .values([
+        { wikipediaPage: 'Ugur Yıldırım' },
+        { name: 'Robert van der Berg', nameSource: 'guess', wikipediaPage: 'Robert van der Berg' },
+        { wikipediaPage: 'Jordy Bruijn' },
+        { wikipediaPage: 'Jordy Buijs' },
+      ])
+
+    expect(await mergeListedPersons(database.db)).toEqual([
+      "Persons: 'Robert van der Berg' is now 'Robert van den Berg'",
+      "Persons: 'Ugur Yıldırım' is merged into 'Uğur Yıldırım'",
+    ])
+    expect(await database.db.select().from(persons).orderBy(asc(persons.id))).toMatchObject([
+      { id: kept, wikipediaPage: 'Uğur Yıldırım' },
+      {
+        familyName: 'Berg',
+        familyNamePrefix: 'van den',
+        givenName: 'Robert',
+        name: 'Robert van den Berg',
+        nameSource: 'guess',
+        wikipediaPage: 'Robert van den Berg',
+      },
+      { wikipediaPage: 'Jordy Bruijn' },
+      { wikipediaPage: 'Jordy Buijs' },
+    ])
+    expect(await mergeListedPersons(database.db)).toEqual([])
+    expect(await similarPersons(database.db)).toEqual([])
   })
 })
