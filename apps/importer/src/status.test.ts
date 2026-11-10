@@ -227,6 +227,30 @@ describe('the overview', () => {
     }
   })
 
+  it('says per season how many rows of the squad have no person, and nothing when all have one', async () => {
+    expect((await statusAt(start)).lines.join('\n')).not.toContain('Players without a person')
+
+    const [{ id }] = (await database.db.insert(persons).values({ wikipediaPage: 'Een Speler' }).$returningId()) as [
+      { id: number },
+    ]
+
+    await database.db.insert(players).values([
+      { name: 'Een Speler', personId: id, searchTerm: 'Speler', season: '2018/19' },
+      { name: 'Zonder Een', searchTerm: 'Een', season: '2018/19' },
+      { name: 'Zonder Twee', searchTerm: 'Twee', season: '2018/19' },
+      { name: 'Met Persoon', personId: id, searchTerm: 'Persoon', season: '2020/21' },
+    ])
+
+    try {
+      const lines = (await statusAt(start)).lines
+
+      expect(lines).toContain('Players without a person 2018/19: 2 of 3')
+      expect(lines.join('\n')).not.toContain('Players without a person 2020/21')
+    } finally {
+      await database.pool.query('DELETE FROM players')
+    }
+  })
+
   it('shows how many persons are read from Wikidata and what they have', async () => {
     await database.pool.query("INSERT INTO wikidata_items (id, label) VALUES ('Q29999', 'Nederland')")
     await database.pool.query(

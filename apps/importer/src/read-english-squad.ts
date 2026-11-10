@@ -36,7 +36,13 @@ import { dataCells, headerCells, nameKey, nameOf } from './read-squad.ts'
 import { clean, plain } from './read-wikipedia.ts'
 
 /** A player as a list or a table gives him, before the lists are put together. */
-type Found = { country: null | string; name: string; position: null | PlayerPosition; shirtNumber: null | number }
+type Found = {
+  country: null | string
+  englishPage: null | string
+  name: string
+  position: null | PlayerPosition
+  shirtNumber: null | number
+}
 
 /** A heading of the text: its level (`==` is 2), its title, and where its text runs. */
 type Heading = { end: number; level: number; start: number; title: string }
@@ -159,6 +165,17 @@ function columnsOf(header: string): { date: number; fee: number; player: number;
   }
 }
 
+/**
+ * The title of the English page the first link of a cell goes to (`Mark Uth` for
+ * `[[Mark Uth|Uth]]`), without a section, or null when the cell has no link. The link to a
+ * page of another kind (`File:`, `Category:`) is no player.
+ */
+function englishPageOf(cell: string): null | string {
+  const target = /\[\[([^\]|#]+)/u.exec(cell)?.[1]?.trim()
+
+  return target === undefined || target === '' || /^[a-z]+:/iu.test(target) ? null : target.replaceAll('_', ' ')
+}
+
 /** The headings of the text, with the text under each up to the next of its level. */
 function headingsOf(text: string): Heading[] {
   const found = [...text.matchAll(/^(={2,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)]
@@ -220,15 +237,16 @@ function nameOfTransfer(cell: string): string {
 function put(squad: Found[], transfers: Found[]): SeasonPlayer[] {
   const seen = new Map<string, SeasonPlayer>()
 
-  for (const { country, name, position, shirtNumber } of [...squad, ...transfers]) {
+  for (const { country, englishPage, name, position, shirtNumber } of [...squad, ...transfers]) {
     const key = nameKey(name)
     const known = seen.get(key)
 
     if (known === undefined) {
-      seen.set(key, { appearances: null, country, goals: null, name, page: null, position, shirtNumber })
+      seen.set(key, { appearances: null, country, englishPage, goals: null, name, page: null, position, shirtNumber })
     } else {
       known.position ??= position
       known.country ??= country
+      known.englishPage ??= englishPage
     }
   }
 
@@ -287,7 +305,13 @@ function readFsList(section: string, title: string, warnings: string[]): Found[]
     if (country.problem !== null) {
       warnings.push(countryWarning(name, country.problem))
     }
-    found.push({ country: country.country, name, position, shirtNumber })
+    found.push({
+      country: country.country,
+      englishPage: englishPageOf(parameters.get('name') ?? ''),
+      name,
+      position,
+      shirtNumber,
+    })
   }
 
   return found
@@ -361,7 +385,13 @@ function readTransferTable(table: string, arrivals: boolean, warnings: string[])
 
     const position = positions[lastArgument(cells[columns.position] ?? '').toLowerCase()] ?? null
 
-    players.push({ country: null, name, position, shirtNumber: null })
+    players.push({
+      country: null,
+      englishPage: englishPageOf(cells[columns.player] ?? ''),
+      name,
+      position,
+      shirtNumber: null,
+    })
   }
 
   return players

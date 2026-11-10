@@ -379,7 +379,8 @@ export async function personsByWikidataId(db: Pick<Database, 'select'>): Promise
 
 /**
  * The persons not read from Wikidata yet, the oldest first, at most `limit`. A person without a
- * title has no article to ask about, so he is never one of them.
+ * title has no article to ask about, and a person with a title of the English Wikipedia has
+ * none on the Dutch one, so neither is ever one of them.
  */
 export async function personsToRead(db: Pick<Database, 'select'>, limit: number): Promise<PersonToRead[]> {
   const rows = await db
@@ -390,7 +391,7 @@ export async function personsToRead(db: Pick<Database, 'select'>, limit: number)
       wikipediaPageId: persons.wikipediaPageId,
     })
     .from(persons)
-    .where(and(isNull(persons.wikidataReadAt), isNotNull(persons.wikipediaPage)))
+    .where(and(isNull(persons.wikidataReadAt), isNotNull(persons.wikipediaPage), eq(persons.englishTitle, false)))
     .orderBy(asc(persons.id))
     .limit(limit)
 

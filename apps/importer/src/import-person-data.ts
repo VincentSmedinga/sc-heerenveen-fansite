@@ -85,6 +85,19 @@ export function describePersonData(report: PersonDataReport): string[] {
   ]
 }
 
+/** The address of the page information of an article: its number and its item. */
+export function infoUrl(origin: string, title: string): string {
+  return `${origin}/wiki/${encodeURIComponent(title.replaceAll(' ', '_'))}?action=info`
+}
+
+/**
+ * The address of the item of Wikidata: the one file robots.txt allows under
+ * `Special:EntityData`.
+ */
+export function itemUrl(origin: string, id: string): string {
+  return `${origin}/wiki/Special:EntityData/${id}.json`
+}
+
 /**
  * Reads the persons that were not read yet: for each, the Q-number and the number of the
  * article from the page information on the Dutch Wikipedia, and then the item on Wikidata. The
@@ -405,17 +418,4 @@ export async function readPersonData(
       report.empty++
     }
   }
-}
-
-/** The address of the page information of an article: its number and its item. */
-function infoUrl(origin: string, title: string): string {
-  return `${origin}/wiki/${encodeURIComponent(title.replaceAll(' ', '_'))}?action=info`
-}
-
-/**
- * The address of the item of Wikidata: the one file robots.txt allows under
- * `Special:EntityData`.
- */
-function itemUrl(origin: string, id: string): string {
-  return `${origin}/wiki/Special:EntityData/${id}.json`
 }

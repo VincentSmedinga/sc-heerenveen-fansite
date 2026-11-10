@@ -2456,6 +2456,7 @@
   Een speler heeft binnen een seizoen één bron, dus geen dubbele namen met twee titels.
 - **Alternatieven:** alleen de Nederlandse Wikipedia (vijf seizoenen zonder spelers).
   De Engelse pagina ook waar de Nederlandse bestaat (twee titels per speler, en alleen Wikidata voegt ze samen).
+- **Later:** sinds 10 november 2026 krijgen deze spelers wel een persoon; zie _Een speler van de Engelse pagina krijgt zijn persoon in twee stappen_.
 
 ## De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg
 
@@ -3819,3 +3820,19 @@
 - **Waarom:** `mergeStaleOldSitePlayers` en `chooseListedPlayerSpellings` vinden alleen een rij zonder persoon of de paren van `personTitleAliases`.
   Een rij met een persoon naast een rij met de gekozen spelling bleef dus staan: Youssef El Akchaoui in 2010/11 en Uğur Yıldırım in 2004/05.
 - **Alternatieven:** alleen dezelfde persoon samenvoegen, maar dat mist El Akchaoui als één rij geen persoon heeft; het overlaten aan de pagina Kwaliteit in Beheer.
+
+## Een speler van de Engelse pagina krijgt zijn persoon in twee stappen
+
+- **Datum:** 10 november 2026
+- **Besluit:** een speler van de Engelse pagina zonder Nederlandse pagina krijgt zijn persoon in `findEnglishPersons` (#1043), in twee stappen.
+  Eerst op exacte naam (`nameKey`) bij een persoon die al op een rij van een ander seizoen staat, als die naam van één persoon is: dat kost geen verzoek.
+  Dan via de Engelse link van de speler, die de lezer in `englishPage` bewaart: de paginainformatie van de Engelse Wikipedia (`?action=info`) geeft het item van Wikidata, en het item (`Special:EntityData`) geeft de titel van het Nederlandse artikel (`sitelinks.nlwiki`).
+  Die titel gaat als alias van de Engelse titel naar `lookUpPersonPages` en het personenboek, zodat het bestaande personenboek de persoon vindt of maakt en de Engelse titel onthoudt in `person_pages`.
+  De rij zelf krijgt geen `wikipedia_page`, zodat de koppeling van doelpunten op naam (`playerLinker`) niet verandert.
+  Een speler zonder Nederlands artikel (geen item, of een item zonder `nlwiki`) krijgt een persoon onder de Engelse titel, met `persons.english_title`; de importer vraagt de Nederlandse Wikipedia en Wikidata nooit naar zo'n titel (`personsToRead`).
+  Een bestaande persoon van een rij wordt nooit vervangen door een andere.
+  De verzoeken volgen de regels van de personen: een verzoek per titel, de pauze, stoppen na drie fouten achter elkaar, en een titel in `person_pages` kost er geen.
+  `import:status` noemt per seizoen "Players without a person <seizoen>: N of M", en geen regel als het er nul zijn.
+- **Waarom:** de Nederlandse titel is de sleutel van de personen, en zonder persoon kan de kaart Selectie de naam niet splitsen en is de speler niet aan andere seizoenen te koppelen.
+  De Engelse Wikipedia geeft de Nederlandse titel alleen via Wikidata, omdat `?action=raw` geen taallinks heeft en `api.php` voor ons dicht staat in `robots.txt`.
+- **Alternatieven:** alleen de naamstap, maar dan blijven nieuwe spelers zonder persoon; een speler zonder Nederlands artikel zonder persoon laten.

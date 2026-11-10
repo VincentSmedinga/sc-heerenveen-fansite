@@ -13,6 +13,7 @@ import {
   matchImports,
   matchPageKinds,
   matchReports,
+  players,
   sources,
   squadCompleteness,
   squadImports,
@@ -142,6 +143,7 @@ export async function showStatus(
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
     await showDoublePlayers(db, write)
+    await showPlayersWithoutPerson(db, write)
     await showPersonData(db, write)
     await showFormations(db, write)
     await showWaitingChanges(db, now, write)
@@ -324,6 +326,29 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
   write(
     `  persons per line: ${counts.byLine.doelman} doelman, ${counts.byLine.verdediger} verdediger, ${counts.byLine.middenvelder} middenvelder, ${counts.byLine.aanvaller} aanvaller`,
   )
+}
+
+/**
+ * Names each season that has rows of the squad without a person, as "N of M" (issue 1043): a
+ * row without a person can't split its name or be tied to the player of other seasons. No line
+ * for a season where every row has one.
+ */
+async function showPlayersWithoutPerson(db: Database, write: (line: string) => void): Promise<void> {
+  const rows = await db
+    .select({
+      season: players.season,
+      total: sql<number>`count(*)`,
+      without: sql<number>`sum(${players.personId} is null)`,
+    })
+    .from(players)
+    .groupBy(players.season)
+    .orderBy(desc(players.season))
+
+  for (const { season, total, without } of rows) {
+    if (Number(without) > 0) {
+      write(`Players without a person ${season}: ${Number(without)} of ${Number(total)}`)
+    }
+  }
 }
 
 /**

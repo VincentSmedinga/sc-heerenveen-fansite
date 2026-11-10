@@ -1,0 +1,1 @@
+ALTER TABLE `persons` ADD `english_title` boolean DEFAULT false NOT NULL;

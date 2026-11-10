@@ -11,6 +11,11 @@ export type SeasonPlayer = {
   appearances: null | number
   /** The code of two letters of the flag the page shows (`NL`), or null when it shows none. */
   country: null | string
+  /**
+   * The page of the English Wikipedia the name links to (`Mark Uth`), for a reader of that
+   * Wikipedia; null elsewhere. Only the importer of the persons uses it (issue 1043).
+   */
+  englishPage?: null | string
   /** The goals of the player this season, all competitions the table gives added up. */
   goals: null | number
   /** The name as the page shows it, such as `Joost van Aken`. */
