@@ -8,6 +8,7 @@ import {
   matches,
   matchGoals,
   matchReports,
+  personPages,
   persons,
   players,
   playerSeasonStats,
@@ -543,6 +544,70 @@ describe('reading again', () => {
     expect(await database.db.select().from(players).where(eq(players.shirtNumber, 11))).toMatchObject([
       { name: 'Luca Öyen', searchTerm: 'Oyen' },
     ])
+  })
+
+  describe('a player the import of the matches made of a scorer (#1024)', () => {
+    const scorer = { searchTerm: 'Klaverboer', season, source: 'doelpunten' as const }
+
+    it('gets the row of the table when the table has him: the same id, the source selectie, no second row', async () => {
+      await database.db
+        .insert(players)
+        .values({ ...scorer, name: 'Bernt Klaverboer', wikipediaPage: 'Bernt Klaverboer' })
+
+      const [before] = await database.db.select().from(players)
+      const { server } = await serve()
+      const report = await importAt(server, first)
+
+      expect(report).toMatchObject({ kind: 'imported', players: { added: 24, left: 0, updated: 1 } })
+      expect(await database.db.select().from(players)).toHaveLength(25)
+      expect(await database.db.select().from(players).where(eq(players.id, before!.id))).toMatchObject([
+        { inSquad: true, name: 'Bernt Klaverboer', source: 'selectie' },
+      ])
+      expect((await database.db.select().from(players).where(eq(players.id, before!.id)))[0]?.position).not.toBeNull()
+      // The next read finds him unchanged.
+      expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({
+        players: { added: 0, unchanged: 25, updated: 0 },
+      })
+    })
+
+    it('is found by his person when the table links another title of his page', async () => {
+      const [{ insertId: personId }] = await database.db.insert(persons).values({ wikipediaPage: 'Bernt Klaverboer' })
+
+      await database.db.insert(personPages).values([
+        { page: 'Bernt Klaverboer', personId },
+        { page: 'B. Klaverboer', personId },
+      ])
+      await database.db
+        .insert(players)
+        .values({ ...scorer, name: 'B. Klaverboer', personId, wikipediaPage: 'B. Klaverboer' })
+
+      const [before] = await database.db.select().from(players)
+      const { server } = await serve()
+
+      expect(await importAt(server, first)).toMatchObject({ players: { added: 24, updated: 1 } })
+      expect(await database.db.select().from(players).where(eq(players.personId, personId))).toMatchObject([
+        { id: before!.id, name: 'Bernt Klaverboer', source: 'selectie', wikipediaPage: 'Bernt Klaverboer' },
+      ])
+    })
+
+    it('stays in the squad, with his source, while the table does not have him', async () => {
+      await database.db.insert(players).values({
+        ...scorer,
+        name: 'Pelle van Amersfoort',
+        searchTerm: 'van Amersfoort',
+        wikipediaPage: 'Pelle van Amersfoort',
+      })
+
+      const { server } = await serve()
+
+      expect(await importAt(server, first)).toMatchObject({ players: { added: 25, left: 0 } })
+      expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({
+        players: { left: 0, unchanged: 25 },
+      })
+      expect(await database.db.select().from(players).where(eq(players.name, 'Pelle van Amersfoort'))).toMatchObject([
+        { inSquad: true, leftSquadAt: null, source: 'doelpunten' },
+      ])
+    })
   })
 })
 
@@ -1135,17 +1200,23 @@ describe('the import command', () => {
       .filter((line) => !/: (new (club|name) |persons: )/u.test(line))
 
     expect(code).toBe(0)
-    expect(lines.slice(0, 6)).toEqual([
+    // The import of the matches made the ten scorers with a page players (#1024), and the squad
+    // table then gives each of them its row.
+    expect(lines.slice(0, 7)).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       expect.stringContaining('Matches 2026/27: 35 new'),
       expect.stringContaining('Matches 2026/27: league results of all clubs'),
-      expect.stringContaining('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad'),
+      expect.stringContaining('Matches 2026/27: 10 players added from a goal: Luca Oyen, '),
+      'Squad 2026/27: 15 new, 10 updated, 0 unchanged, 0 left the squad',
       'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
       'Squad 2026/27: countries of the players: 25 of 25 have one',
     ])
     // The goals of the made-up matches differ from the made-up table: a row for each, for the
     // editors, and no warning.
-    expect(lines).toHaveLength(7)
+    expect(lines).toHaveLength(8)
+    expect(new Set((await database.db.select().from(players)).map((player) => player.source))).toEqual(
+      new Set(['selectie']),
+    )
     expect((await database.db.select().from(playerStatDifferences)).length).toBeGreaterThan(0)
     expect(
       pageRequests(server)
@@ -1186,7 +1257,10 @@ describe('the import command', () => {
     expect(lines[1]).toContain('Matches 2026/27: 35 new')
     expect(lines[2]).toContain('Squad 2026/27: warning, nothing changed and the last good copy stays')
     expect(await database.db.select().from(matches)).toHaveLength(35)
-    expect(await database.db.select().from(players)).toEqual([])
+    // The only players are the scorers with a page, which the import of the matches made.
+    expect(new Set((await database.db.select().from(players)).map((player) => player.source))).toEqual(
+      new Set(['doelpunten']),
+    )
   })
 
   it('does not print a line for the squad when the hour is not over yet', async () => {

@@ -755,6 +755,33 @@ describe('the card Selectie on /spelers', () => {
     ).toBe('Doelmannen|Verdedigers|Positie onbekend')
   })
 
+  it('shows a player the import made of a scorer like every other, with no mark and no extra credit (#1024)', async () => {
+    const before = await render()
+
+    withSquad({
+      players: [
+        ...squadData.players,
+        {
+          ...squadData.players[0]!,
+          name: 'Pelle van Amersfoort',
+          position: null,
+          shirtNumber: null,
+          source: 'doelpunten',
+        },
+      ],
+    })
+
+    const html = await render()
+    const credit = (page: string) => page.match(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s)?.[0]
+
+    expect(linesOf(html).map(([, name]) => name)).toContain('Pelle van Amersfoort')
+    // His line has the markup of a line of another player without a number.
+    expect(card(html).match(/<li[^>]*>(?:(?!<\/li>).)*Pelle van Amersfoort.*?<\/li>/s)?.[0]).not.toMatch(
+      /doelpunt|bron|title=/iu,
+    )
+    expect(credit(html)).toBe(credit(before))
+  })
+
   it('shows the heading and the sentence and no part for a season with no squad', async () => {
     withSquad({ completeness: undefined, pages: [], players: [] })
 

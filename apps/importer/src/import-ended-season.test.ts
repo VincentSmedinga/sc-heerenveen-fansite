@@ -167,10 +167,13 @@ describe('the weekly read of the season that has just ended', () => {
     expect(lines).toContain(
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
     )
-    expect(lines).toContain('Squad 2025/26: 25 new, 0 updated, 0 unchanged, 0 left the squad')
+    // The matches come first: 18 scorers with a page become players (#1024), and the squad
+    // table of this test has 11 of them.
+    expect(lines.some((line) => line.startsWith('Matches 2025/26: 18 players added from a goal: '))).toBe(true)
+    expect(lines).toContain('Squad 2025/26: 14 new, 11 updated, 0 unchanged, 0 left the squad')
     expect(lines).toContain('Squad 2025/26: numbers of the players: 50 new, 0 updated, 0 unchanged')
     expect(await database.db.select().from(matches).where(eq(matches.season, season))).toHaveLength(38)
-    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(25)
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(32)
     expect(await healthOf(season)).toMatchObject({
       matches: { lastOutcome: 'imported', retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs) },
       squad: { lastOutcome: 'imported', retryAt: new Date(firstOfJuly.getTime() + rereadEveryMs) },
@@ -295,7 +298,8 @@ describe('the weekly read of the season that has just ended', () => {
 
     // A first good read of the current season replaces the made-up squad; this one does not.
     await rereadAt(await serve({ [season]: { pages: ended, squad } }), new Date(firstOfJuly.getTime() + rereadEveryMs))
-    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(26)
+    // The player from before, the 25 of the table, and the 7 scorers the table does not have.
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(33)
   })
 
   it('makes a warning of a page that fails a check, keeps the rows, and reads the squad anyway', async () => {

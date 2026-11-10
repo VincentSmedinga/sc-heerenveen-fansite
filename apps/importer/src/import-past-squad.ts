@@ -26,6 +26,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
+import { scorersByPerson } from './import-squad.ts'
 import { aliasMap, personTitleAliases } from './person-names.ts'
 import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
@@ -381,7 +382,8 @@ async function recorded(db: Database, report: PastSquadReport, clock: () => Date
 /**
  * Brings the players of the season in the database up to date with what the readers found,
  * and never removes one, so a player keeps his `id` and the goals that point to it. A player
- * is known by his page, or else by his name (`nameKey`). A player who is not known is added,
+ * is known by his page, or else by his name (`nameKey`), and a scorer the import of the matches
+ * made (the source `doelpunten`, #1024) also by his person. A player who is not known is added,
  * in the squad and with the best source, position and number the lists give. A known player
  * is improved when a better list has him than the one he has (the source, and the position and
  * number of that list), when he lacked a position or a number that a list gives, and when he
@@ -399,6 +401,9 @@ async function storePlayers(
   const byName = new Map<string, Player>()
   const counts = { added: 0, improved: 0, unchanged: 0 }
   const rank = (source: PlayerSource) => playerSources.indexOf(source)
+  // A scorer the import of the matches made is also known by his person, as in
+  // `import-squad.ts`.
+  const scorerOfPerson = scorersByPerson(rows)
 
   for (const row of rows) {
     byName.set(nameKey(row.name), row)
@@ -410,7 +415,9 @@ async function storePlayers(
   for (const player of found) {
     const personId = player.page === null ? null : await personBook.resolve(player.page)
     const before =
-      (player.page === null ? undefined : byPage.get(nameKey(player.page))) ?? byName.get(nameKey(player.name))
+      (player.page === null ? undefined : byPage.get(nameKey(player.page))) ??
+      byName.get(nameKey(player.name)) ??
+      (personId === null ? undefined : scorerOfPerson.get(personId))
 
     if (before === undefined) {
       const row = {

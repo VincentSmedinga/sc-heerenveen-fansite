@@ -5,7 +5,7 @@ import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { comparePlayerGoals } from '@fansite/db/player-stat-differences'
 import { players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { eq } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -148,6 +148,31 @@ export async function importSquad(
 }
 
 /**
+ * The players the import of the matches made of a scorer (the source `doelpunten`), by their
+ * person. A person with two such rows is left out: nothing says which row is meant.
+ */
+export function scorersByPerson(rows: readonly Player[]): Map<number, Player> {
+  const found = new Map<number, Player>()
+  const twice = new Set<number>()
+
+  for (const row of rows) {
+    if (row.source === 'doelpunten' && row.personId !== null) {
+      if (found.has(row.personId)) {
+        twice.add(row.personId)
+      }
+
+      found.set(row.personId, row)
+    }
+  }
+
+  for (const personId of twice) {
+    found.delete(personId)
+  }
+
+  return found
+}
+
+/**
  * Reads, checks and stores. A database failure throws; `importSquad` turns it into a report.
  */
 async function readAndStore(
@@ -202,9 +227,10 @@ async function readAndStore(
       redirects: personLookup.redirects,
     })
     // The first good read of a season replaces what the seed made up, and nothing else: a
-    // player from an earlier read stays. A goal of a made-up player loses its link.
+    // player from an earlier read stays, and so does a player the import of the matches made
+    // of a scorer (the source `doelpunten`). A goal of a made-up player loses its link.
     if (firstRead) {
-      await transaction.delete(players).where(eq(players.season, season))
+      await transaction.delete(players).where(and(eq(players.season, season), ne(players.source, 'doelpunten')))
     }
 
     const result = await storePlayers(transaction, season, read.players, now, personBook)
@@ -264,10 +290,14 @@ async function readAndStore(
  * Brings the squad of the season in the database up to date with the one we found, and never
  * replaces it, so a player keeps his `id` and the goals that point to it. A player is known by
  * the page his name links to, or else by his name, the way the database keeps names apart
- * (`nameKey`: a name that differs only in an accent is the same player). A player who is not
- * known is added. A known player is changed when his name, page, position, number or person
- * differ, and is put back in the squad if he had left. A player who is not in the table any
- * more is marked as no longer in the squad, with the moment, and stays. A player who is known
+ * (`nameKey`: a name that differs only in an accent is the same player). A player the import of
+ * the matches made of a scorer (the source `doelpunten`, #1024) is also known by his person,
+ * when the table links another title of his page: he gets the row of the table and the source
+ * `selectie`, so his goals keep their player. A player who is not known is added. A known
+ * player is changed when his name, page, position, number or person differ, and is put back in
+ * the squad if he had left. A player who is not in the table any more is marked as no longer
+ * in the squad, with the moment, and stays; a scorer who was never in the table has not left
+ * it, and stays as he is. A player who is known
  * keeps his search term, so a correction by hand survives the import. Rows of another season
  * are not touched.
  *
@@ -286,6 +316,7 @@ async function storePlayers(
   const rows = await db.select().from(players).where(eq(players.season, season))
   const byPage = new Map<string, Player>()
   const byName = new Map<string, Player>()
+  const scorerOfPerson = scorersByPerson(rows)
 
   for (const row of rows) {
     byName.set(nameKey(row.name), row)
@@ -300,11 +331,11 @@ async function storePlayers(
   const seen = new Set<number>()
 
   for (const player of found) {
+    const personId = player.wikipediaPage === null ? null : await personBook.resolve(player.wikipediaPage)
     const before =
       (player.wikipediaPage === null ? undefined : byPage.get(nameKey(player.wikipediaPage))) ??
-      byName.get(nameKey(player.name))
-
-    const personId = player.wikipediaPage === null ? null : await personBook.resolve(player.wikipediaPage)
+      byName.get(nameKey(player.name)) ??
+      (personId === null ? undefined : scorerOfPerson.get(personId))
 
     if (before === undefined) {
       counts.added++
@@ -326,6 +357,7 @@ async function storePlayers(
 
     if (
       before.inSquad &&
+      before.source !== 'doelpunten' &&
       before.name === player.name &&
       before.position === player.position &&
       before.shirtNumber === player.shirtNumber &&
@@ -346,6 +378,8 @@ async function storePlayers(
           personId: personId ?? before.personId,
           position: player.position,
           shirtNumber: player.shirtNumber,
+          // A scorer who is in the table now is a player of the table.
+          ...(before.source === 'doelpunten' ? { source: 'selectie' as const } : {}),
           wikipediaPage: player.wikipediaPage,
         })
         .where(eq(players.id, before.id))
@@ -353,7 +387,7 @@ async function storePlayers(
   }
 
   for (const row of rows) {
-    if (row.inSquad && !seen.has(row.id)) {
+    if (row.inSquad && row.source !== 'doelpunten' && !seen.has(row.id)) {
       counts.left++
       await db.update(players).set({ inSquad: false, leftSquadAt: now }).where(eq(players.id, row.id))
     }
