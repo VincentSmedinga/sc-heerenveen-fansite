@@ -1166,12 +1166,11 @@ function standingsRow(season: string, row: ReadStandingsRow, validOn: string) {
  * for its round. A match that differs is changed at once when the change is new information or
  * a correction of a few hours old (the correction gets a warning with the old and the new
  * result), and otherwise it waits: the match and its goals stay as they are, and the change is
- * kept in `match_changes` until it has stood for seven days, a person decides, or Wikipedia
- * puts the old value back. A match that is no longer on the page waits the same way. More
- * than six matches that overwrite what we have, in one run, look like an edit of the whole
- * page: then only their changes are kept and `heldAll` is true, so the caller leaves the rest
- * alone. Rows
- * of another season are not touched.
+ * kept in `match_changes` until it has stood for seven days in the season that is on
+ * (`hasStood`), a person decides, or Wikipedia puts the old value back. A match that is no
+ * longer on the page waits the same way. More than six matches that overwrite what we have, in
+ * one run, look like an edit of the whole page: then only their changes are kept and `heldAll`
+ * is true, so the caller leaves the rest alone. Rows of another season are not touched.
  *
  * The goals are linked to the players of the season as they are in the table now, so a goal
  * gets its player as soon as the squad has him, and a goal that is linked keeps its link until
@@ -1497,7 +1496,7 @@ async function storeMatches(
 
   const overwrites = entries.filter((entry) => entry.kind !== 'add' && entry.judgement.overwrites).length
   // The changes that waited already and are still on the page count: the page stays held until
-  // they are decided or have stood for seven days.
+  // they are decided or, in the season that is on, have stood for seven days.
   const heldAll = isMassChange(overwrites + waiting)
   const mass = overwrites + waiting
 

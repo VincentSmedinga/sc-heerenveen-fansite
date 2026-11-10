@@ -6,7 +6,7 @@ import type { Proposal } from '@fansite/db/match-changes'
 import type { Match, MatchChange, NewMatchChange } from '@fansite/db/schema'
 
 import { decideChange, encodeProposal } from '@fansite/db/match-changes'
-import { decideConflict } from '@fansite/db/match-conflicts'
+import { decideConflict, takenOverAt } from '@fansite/db/match-conflicts'
 import { matchChanges } from '@fansite/db/schema'
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm'
 
@@ -67,9 +67,15 @@ export async function decide(
   await db.update(matchChanges).set({ decidedAt: now, resolution, status }).where(eq(matchChanges.id, change.id))
 }
 
-/** Whether a waiting change has stood long enough to be taken over. */
+/**
+ * Whether a waiting change has stood long enough to be taken over: seven days, and only in the
+ * season that is on. A change of a season that is over waits until a person decides (issue
+ * 1025), also for the weekly read of the season that has just ended and for `import:season`.
+ */
 export function hasStood(change: MatchChange, now: Date): boolean {
-  return now.getTime() - change.firstSeenAt.getTime() >= reliability.suspiciousStands
+  const at = takenOverAt(change, now)
+
+  return at !== undefined && now.getTime() >= at.getTime()
 }
 
 /** Notes that the import saw the waiting change again, with the same value. */

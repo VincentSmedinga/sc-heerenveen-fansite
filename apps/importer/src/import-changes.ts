@@ -6,11 +6,10 @@ import type { MatchChange } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
-import { secondSourceOf } from '@fansite/db/match-conflicts'
+import { secondSourceOf, takenOverAt } from '@fansite/db/match-conflicts'
 
 import type { ImportOptions } from './import-feeds.ts'
 
-import { reliability } from './classify-change.ts'
 import { acceptChanges, rejectChanges, waitingChanges } from './match-changes.ts'
 import { formatTime, printable } from './text.ts'
 
@@ -25,10 +24,10 @@ export type ChangesRequest =
 
 /**
  * The lines that show a change that waits: the two values and when it is taken over, or that
- * it waits for a person.
+ * it waits for a person. A change of a season that is over is never taken over (`takenOverAt`).
  */
-export function describeWaitingChange(change: MatchChange): string[] {
-  const takenOver = new Date(change.firstSeenAt.getTime() + reliability.suspiciousStands)
+export function describeWaitingChange(change: MatchChange, now: Date): string[] {
+  const takenOver = takenOverAt(change, now)
   const second = secondSourceOf(change.reason)
   const seen = `first seen ${formatTime(change.firstSeenAt)}, last seen ${formatTime(change.lastSeenAt)}, seen ${change.timesSeen} ${change.timesSeen === 1 ? 'time' : 'times'}`
 
@@ -46,7 +45,7 @@ export function describeWaitingChange(change: MatchChange): string[] {
     `${nameChange(change)}: ${printable(change.reason)}`,
     `  now: ${printable(change.oldValue)}`,
     `  Wikipedia: ${change.newValue === null ? 'the match is not on the page' : printable(change.newValue)}`,
-    `  ${seen}; taken over from ${formatTime(takenOver)} if it stays`,
+    `  ${seen}; ${takenOver === undefined ? 'the season is over or nearly over, so it waits until a person decides' : `taken over from ${formatTime(takenOver)} if it stays`}`,
   ]
 }
 
@@ -110,7 +109,7 @@ export async function runChangesCommand(
 
       write(waiting.length === 0 ? 'No changes wait.' : `Changes that wait: ${waiting.length}`)
       for (const change of waiting) {
-        for (const line of describeWaitingChange(change)) {
+        for (const line of describeWaitingChange(change, clock())) {
           write(line)
         }
       }

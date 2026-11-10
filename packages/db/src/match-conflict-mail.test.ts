@@ -203,6 +203,18 @@ describe('the mail about a difference', () => {
   })
 })
 
+describe('the mail about a difference in a season that is over (issue 1025)', () => {
+  it('promises no take-over', async () => {
+    await waits({ season: '2025/26' })
+    await run()
+
+    expect(mails[0]?.text).toContain(
+      'Het seizoen is voorbij of bijna voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.',
+    )
+    expect(mails[0]?.text).not.toContain('Beslist niemand')
+  })
+})
+
 describe('the mail about Wikipedia taken over after seven days', () => {
   it('is sent once, when the importer took the value over', async () => {
     await waits({ decidedAt: seen, mailedAt: seen, resolution: 'stood', status: 'accepted' })

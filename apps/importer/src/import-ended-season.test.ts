@@ -192,8 +192,8 @@ describe('the weekly read of the season that has just ended', () => {
     expect(await rereadAt(server, new Date(firstOfJuly.getTime() + rereadEveryMs - 1))).toEqual([])
     expect(seasonRequests(server)).toHaveLength(asked)
 
-    // Not a week later either, to the second or some seconds early: seven days must be over
-    // for a change that waits, so the pause is some minutes more than a week.
+    // Not a week later either, to the second or some seconds early: the pause is some minutes
+    // more than a week.
     expect(await rereadAt(server, new Date(firstOfJuly.getTime() + week - 5000))).toEqual([])
     expect(await rereadAt(server, new Date(firstOfJuly.getTime() + week))).toEqual([])
     expect(seasonRequests(server)).toHaveLength(asked)
@@ -245,7 +245,7 @@ describe('the weekly read of the season that has just ended', () => {
     expect(server.requests).toHaveLength(asked)
   })
 
-  it('brings a correction in by itself: held in the first week, taken over in the next', async () => {
+  it('holds a correction until a person decides: held in the first week, and still in the next (#1025)', async () => {
     await rereadAt(await serve({ [season]: { pages: ended, squad } }), firstOfJuly)
 
     const server = await serve({ [season]: { pages: corrected, squad } })
@@ -254,12 +254,15 @@ describe('the weekly read of the season that has just ended', () => {
     expect(held.join('\n')).toContain(' 0 removed, 1 held;')
     expect(await database.db.select().from(matchChanges)).toMatchObject([{ season, status: 'pending' }])
 
-    await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * rereadEveryMs))
+    const again = await rereadAt(server, new Date(firstOfJuly.getTime() + 2 * rereadEveryMs))
 
+    expect(again.join('\n')).toContain(' 0 removed, 1 held;')
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
-      { kickoffAt: new Date('2025-08-09T18:30:00Z') },
+      { kickoffAt: new Date('2025-08-09T18:00:00Z') },
     ])
-    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'stood', status: 'accepted' }])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { resolution: null, season, status: 'pending', timesSeen: 2 },
+    ])
   })
 
   it('brings a number of a player in that the squad table had not counted yet', async () => {

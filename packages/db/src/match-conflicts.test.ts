@@ -11,6 +11,7 @@ import {
   describeConflict,
   encodePartProposal,
   oldSiteGoalsReason,
+  takenOverAt,
 } from './match-conflicts.ts'
 import { encodeGoals, encodeMatch } from './match-edits.ts'
 import { adminUsers, auditLog, matchChanges, matchEdits, matches, matchGoals } from './schema.ts'
@@ -270,5 +271,29 @@ describe('the line for the log', () => {
     expect(describeConflict({ ...values, reason: oldSiteGoalsReason })).toBe(
       "Doelpunten van de oude fansite: in de database: geen doelpunten; in de bestanden: 10' Jan Janssen",
     )
+  })
+})
+
+describe('the moment the importer takes a change over (issue 1025)', () => {
+  const seen = (firstSeenAt: string, season = '2026/27') => ({ firstSeenAt: new Date(firstSeenAt), season })
+
+  it('is seven days after the change was first seen, in the season that is on', () => {
+    const at = new Date('2026-11-09T10:00:00Z')
+
+    expect(takenOverAt(seen('2026-11-02T10:00:00Z'), new Date('2026-11-03T10:00:00Z'))).toEqual(at)
+    expect(takenOverAt(seen('2026-11-02T10:00:00Z'), new Date('2026-12-01T10:00:00Z'))).toEqual(at)
+    // The last moment of the season, 30 June.
+    expect(takenOverAt(seen('2027-06-23T23:59:59Z'), new Date('2027-06-24T10:00:00Z'))).toEqual(
+      new Date('2027-06-30T23:59:59Z'),
+    )
+  })
+
+  it('is never in a season that is over, which starts on 1 July', () => {
+    expect(takenOverAt(seen('2026-11-02T10:00:00Z', '2025/26'), new Date('2026-11-03T10:00:00Z'))).toBeUndefined()
+    expect(takenOverAt(seen('2026-11-02T10:00:00Z', '1999/00'), new Date('2026-11-03T10:00:00Z'))).toBeUndefined()
+    // It waited in the season, and the season ended.
+    expect(takenOverAt(seen('2027-06-01T10:00:00Z'), new Date('2027-07-01T00:00:00Z'))).toBeUndefined()
+    // The seven days end on 1 July, so they end in the next season.
+    expect(takenOverAt(seen('2027-06-24T00:00:00Z'), new Date('2027-06-25T10:00:00Z'))).toBeUndefined()
   })
 })
