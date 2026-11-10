@@ -36,7 +36,8 @@ Dezelfde opdracht geeft elke worktree een eigen blok poorten (zie de [README van
   `pnpm test:a11y` doet dat niet, net als in CI: de controles zetten hun eigen verzonnen gegevens erin.
 - **Gebruiken:** zet `DATABASE_URL` in `.env` op `fansite`, zoals `.env.example` het heeft.
   `pnpm test`, `pnpm --filter site smoke` en de andere opdrachten die erdoor lopen, gebruiken dan de database van de map.
-  `pnpm db:migrate`, `pnpm db:seed` en `pnpm import` gebruiken `DATABASE_URL` zoals die in `.env` staat, dus `fansite`: ze lopen niet door het script.
+  `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:restore`, `pnpm import`, `pnpm --filter site admin` en `pnpm --filter site test-data` lopen niet door dat script, en in een worktree weigeren ze daarom te starten als `DATABASE_URL` uit `.env` de database `fansite` is.
+  De melding noemt de database van de map en de opdracht die je in plaats daarvan draait: `node scripts/worktree-env.js run --database -- <opdracht>`.
 - **Bekijken:** `pnpm worktree:env` laat de databasenaam en de poorten van de map zien.
 - **Weghalen:** `pnpm worktree:db:drop` haalt de database van de map weg.
   Het raakt alleen een naam die met `fansite_` begint, nooit `fansite` zelf, en doet niets in een map die geen worktree is.

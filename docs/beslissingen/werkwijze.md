@@ -731,3 +731,19 @@
 - **Alternatieven:** de hele keten lokaal houden; dat is trager en geeft dezelfde uitkomst.
   Alle controles aan CI laten; dan mist de Builder de snelle fouten en de screenshots.
 - **Later:** dit beperkt _De zware controles delen de machine_ voor deze soort wijziging; de rest van die beslissing geldt nog.
+
+## Een opdracht in een worktree weigert de gedeelde database fansite
+
+- **Datum:** 10 november 2026
+- **Besluit:** in een worktree weigeren de opdrachten die naar de database schrijven maar niet door `scripts/worktree-env.js run` lopen, te starten als `DATABASE_URL` uit `.env` de database `fansite` is.
+  Het gaat om `pnpm db:migrate`, `db:seed`, `db:restore`, `pnpm import` met zijn varianten, `pnpm --filter site admin` en `test-data`.
+  Ze lopen nu door `scripts/worktree-env.js guard`.
+  De melding noemt de database van de map en de opdracht die je in plaats daarvan draait: `node scripts/worktree-env.js run --database -- <opdracht>`.
+  Een gewone checkout, CI, een map met een lege `WORKTREE_NAME` (de reviewmap), en een `DATABASE_URL` die je zelf in de omgeving zet, houden hun opdracht zoals hij was.
+  `pnpm db:pull-acceptance` en `pnpm db:backup` zijn niet bewaakt: de eerste schrijft `fansite_acc`, de tweede leest alleen.
+- **Waarom:** op 10 november 2026 draaiden drie Builders zo'n opdracht in een worktree en schreven in de gedeelde database `fansite`: een losse `pnpm db:migrate` en `pnpm --filter site test-data`.
+  Een afspraak in `AGENTS.md` bleek twee keer niet genoeg.
+  De bewaking kiest zelf geen database en haalt niets weg: ze weigert alleen.
+- **Alternatieven:** de afspraak scherper opschrijven; dat hielp niet.
+  Die opdrachten stilletjes de database van de map geven; dat is wat de projecteigenaar niet wil, omdat een opdracht dan een andere database raakt dan `.env` zegt.
+- **Later:** dit scherpt _Elke werkmap heeft een eigen database en eigen poorten_ aan: daar liepen deze opdrachten bewust niet door het script, en `.env` bleef gelden.

@@ -402,6 +402,7 @@ The first run that needs the database makes it and runs the migrations (`pnpm de
 - If a port of your block is busy, the command stops and names the port and the worktree.
   It never picks another port.
 - Never drop or empty another worktree's database, and never stop another worktree's servers.
+- In a worktree, the commands that write to the database but don't go through the wrapper (`pnpm db:migrate`, `db:seed`, `db:restore`, `pnpm import`, `pnpm --filter site admin` and `test-data`) refuse to start when `DATABASE_URL` is the shared `fansite`, and the message names the command to use instead: `node scripts/worktree-env.js run --database -- <command>`.
 - No worktree is called `acc`: its database would be `fansite_acc`, which holds the copy of acceptance, and the script refuses it.
 - `packages/db/README.md` has the details and the decision is in `docs/beslissingen/werkwijze.md`.
 

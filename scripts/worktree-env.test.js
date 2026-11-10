@@ -9,6 +9,7 @@ import {
   deriveEnv,
   fillPorts,
   firstPort,
+  guardMessage,
   parseArguments,
   portDefinitions,
   portsOf,
@@ -231,4 +232,53 @@ test('the message for a busy port names the port and the worktree', () => {
   assert.match(message, /"514-worktree-env"/)
   assert.match(message, /lsof -i :24002/)
   assert.match(message, /Nothing was started/)
+})
+
+const guard = (overrides = {}) =>
+  guardMessage({
+    command: 'pnpm --filter @fansite/db db:migrate',
+    databaseUrl: url,
+    env: {},
+    folder,
+    linked: true,
+    ...overrides,
+  })
+
+test('the guard refuses a command in a worktree that would write to fansite, and names the way out', () => {
+  const message = guard()
+
+  assert.match(message, /Not started: `pnpm --filter @fansite\/db db:migrate`/)
+  assert.match(message, /database `fansite`, which all worktrees share/)
+  assert.match(message, /"514-worktree-env" has a database of its own, `fansite_514_worktree_env`/)
+  assert.match(message, /node scripts\/worktree-env\.js run --database -- pnpm --filter @fansite\/db db:migrate/)
+})
+
+test('the guard lets a normal checkout, CI and a review folder start', () => {
+  assert.equal(guard({ linked: false }), undefined)
+  assert.equal(guard({ env: { CI: 'true' } }), undefined)
+  assert.equal(guard({ env: { WORKTREE_NAME: '' } }), undefined)
+})
+
+test('the guard lets a DATABASE_URL that is set start, also one for fansite itself', () => {
+  assert.equal(guard({ env: { DATABASE_URL: 'mysql://root@127.0.0.1:3306/fansite_other' } }), undefined)
+  assert.equal(guard({ env: { DATABASE_URL: url } }), undefined)
+})
+
+test('the guard lets a .env with another database, or none, start', () => {
+  assert.equal(guard({ databaseUrl: 'mysql://root@127.0.0.1:3306/fansite_496' }), undefined)
+  assert.equal(guard({ databaseUrl: undefined }), undefined)
+})
+
+test('the command of a wrapped run has the database of the worktree, so the guard lets it start', () => {
+  const { values } = derive()
+
+  assert.equal(guard({ env: { DATABASE_URL: values['DATABASE_URL'] } }), undefined)
+})
+
+test('guard needs a command after "--"', () => {
+  assert.deepEqual(parseArguments(['guard', '--', 'node', 'x.js']), { command: 'guard', run: ['node', 'x.js'] })
+
+  for (const argv of [['guard'], ['guard', '--'], ['guard', 'node']]) {
+    assert.throws(() => parseArguments(argv), WorktreeEnvError, argv.join(' '))
+  }
 })
