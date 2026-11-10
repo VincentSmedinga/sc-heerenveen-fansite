@@ -7,6 +7,9 @@
 //   node scripts/worktree-env.js                      shows what this folder gets
 //   node scripts/worktree-env.js run [--database [--seed]] [--ports a,b] -- <command> [...]
 //   node scripts/worktree-env.js drop                 drops the database of this worktree
+//   node scripts/worktree-env.js guard -- <command> [...]
+//                                                     refuses to start a command that writes to
+//                                                     the database `fansite` from a worktree
 //
 // `run` puts the values in the environment of the command. `{SITE_PORT}` and the other port
 // names in its arguments become the port, for a tool that wants it as an option. `--ports` is
@@ -16,6 +19,12 @@
 // folder that isn't a worktree and CI get the values they always had (3000, 6006, 3123, 3124,
 // 3125, 2525 and the database `fansite`), and a variable that is set already wins over the
 // derived one.
+//
+// `guard` is in front of the commands that write to the database but are not run through `run`,
+// such as `pnpm db:migrate`: in a worktree, with only the `fansite` of the .env, they would
+// write to the database that all worktrees share. It refuses with a message that names
+// the database of the worktree and the command to use instead. It never picks a database, and a
+// normal checkout, CI and a `DATABASE_URL` that is set already get their command unchanged.
 //
 // What decides something is a function without side effects, exported for the tests. What
 // touches the computer (files, ports, processes) is below that, and only runs when this file is
@@ -202,6 +211,33 @@ export function fillPorts(args, { env, values }) {
   )
 }
 
+/**
+ * The message when a command would write to the database `fansite` from a worktree, or nothing
+ * when it may start: not a worktree (or CI, or no name), a `DATABASE_URL` set in the
+ * environment (also one for another database), or an address in the .env that isn't the plain
+ * `fansite`. `databaseUrl` is the address in the .env in the root, if any.
+ */
+export function guardMessage({ command, databaseUrl, env, folder, linked }) {
+  const { slug, worktree } = deriveEnv({ databaseUrl, env, folder, linked })
+
+  if (slug === undefined || (env['DATABASE_URL'] ?? '') !== '' || databaseUrl === undefined) {
+    return undefined
+  }
+
+  const own = databaseUrlOf(databaseUrl, slug)
+
+  if (own === undefined) {
+    return undefined
+  }
+
+  return [
+    `Not started: \`${command}\` would write to the database \`${defaultDatabase}\`, which all worktrees share.`,
+    `The worktree "${worktree}" has a database of its own, \`${new URL(own).pathname.slice(1)}\`.`,
+    `Run it from the root of the worktree: node scripts/worktree-env.js run --database -- ${command}`,
+    `Or set DATABASE_URL yourself, for a command that is meant for another database.`,
+  ].join('\n')
+}
+
 /** Reads the arguments of the command line: which command, its options and what it runs. */
 export function parseArguments(argv) {
   const [command = 'show', ...rest] = argv
@@ -214,8 +250,16 @@ export function parseArguments(argv) {
     return { command }
   }
 
+  if (command === 'guard') {
+    if (rest[0] !== '--' || rest.length === 1) {
+      throw new WorktreeEnvError('Say what to guard after "--": node scripts/worktree-env.js guard -- <command>', 2)
+    }
+
+    return { command, run: rest.slice(1) }
+  }
+
   if (command !== 'run') {
-    throw new WorktreeEnvError(`Unknown command "${command}". Use show, run or drop.`, 2)
+    throw new WorktreeEnvError(`Unknown command "${command}". Use show, run, guard or drop.`, 2)
   }
 
   const separator = rest.indexOf('--')
@@ -326,6 +370,13 @@ export function worktreeNameOf({ env, folder, linked }) {
 /** The folder of the repository this file is in. */
 const root = path.resolve(import.meta.dirname, '..')
 
+/** The pnpm command that runs this script, from anywhere in the repository, for the message. */
+function commandOf(run) {
+  const { npm_lifecycle_event: script, npm_package_name: name } = process.env
+
+  return script === undefined || name === undefined ? run.join(' ') : `pnpm --filter ${name} ${script}`
+}
+
 /** Runs the helper of `packages/db` that makes or drops the database. */
 function databaseCommand(action, env, ...options) {
   const file = path.join(root, 'packages/db/src/worktree-database.ts')
@@ -387,6 +438,22 @@ async function main(argv) {
   })
   const childEnv = { ...env, ...derivation.values }
 
+  if (parsed.command === 'guard') {
+    const message = guardMessage({
+      command: commandOf(parsed.run),
+      databaseUrl: env['DATABASE_URL'] || databaseUrlFromFile(root),
+      env,
+      folder: root,
+      linked: isLinkedWorktree(root),
+    })
+
+    if (message !== undefined) {
+      throw new WorktreeEnvError(message)
+    }
+
+    return start(parsed.run, env)
+  }
+
   if (parsed.command === 'show') {
     console.log(describe(derivation))
 
@@ -418,7 +485,11 @@ async function main(argv) {
     databaseCommand('ensure', childEnv, ...(parsed.seed ? ['--seed'] : []))
   }
 
-  const [command, ...args] = fillPorts(parsed.run, { env, values: derivation.values })
+  return start(fillPorts(parsed.run, { env, values: derivation.values }), childEnv)
+}
+
+/** Starts the command and resolves with its exit code. */
+function start([command, ...args], childEnv) {
   const child = spawn(command, args, { env: childEnv, stdio: 'inherit' })
 
   for (const signal of ['SIGINT', 'SIGTERM']) {
