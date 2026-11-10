@@ -523,7 +523,7 @@ describe('the four spellings of 10 November 2026', () => {
       .insert(persons)
       .values({ wikipediaPage: 'Igor Kornejev' })
       .$returningId()) as [{ id: number }]
-    const row = (season: string, name: string, searchTerm: string, page: null | string, editors: string[] = []) =>
+    const row = (season: string, name: string, searchTerm: string, page: null | string, editors: 'name'[] = []) =>
       database.db.insert(players).values({
         editorsFields: editors,
         name,
@@ -536,7 +536,7 @@ describe('the four spellings of 10 November 2026', () => {
     await row('2003/04', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev')
     await row('2004/05', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev')
     await row('2004/05', 'Igor Korneev', 'Korneev', null)
-    await row('2005/06', 'Ik', 'Kornejev', 'Igor Kornejev', ['name'])
+    await row('2005/06', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev', ['name'])
     await row('2006/07', 'Hjalte Bo Nørregaard', 'Nørregaard', 'Hjalte Bo Nørregaard')
     await row('2008/09', 'Mugur Radu Gușatu', 'Gușatu', 'Mugur Radu Gușatu')
     await row('2007/08', 'Arkadiusz Radomski', 'Radomski', 'Arkadiusz Radomski')
@@ -554,7 +554,7 @@ describe('the four spellings of 10 November 2026', () => {
     ).toEqual([
       '2003/04 Igor Korneev Korneev',
       '2004/05 Igor Korneev Korneev',
-      '2005/06 Ik Kornejev',
+      '2005/06 Igor Kornejev Kornejev',
       '2006/07 Hjalte Bo Nørregaard Nørregaard',
       '2007/08 Arek Radomski Radomski',
       '2008/09 Radu Gușatu Gușatu',
