@@ -26,9 +26,9 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import type { CompletenessTotals } from './store-completeness.ts'
 
 import { englishWikipediaOrigin, healthAfter, isPastSeason, wikipediaOrigin } from './import-matches.ts'
-import { scorersByPerson } from './import-squad.ts'
-import { aliasMap, personTitleAliases } from './person-names.ts'
-import { describePersons, guessedNameWarnings, lookUpPersonPages } from './person-pages.ts'
+import { scorersByPerson, storeChosenSpellings } from './import-squad.ts'
+import { aliasMap, chosenSpelling, personTitleAliases } from './person-names.ts'
+import { describePersons, guessedNameWarnings, lookUpPersonPages, mergeListedPersons } from './person-pages.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 import { pageUrl } from './read-wikipedia.ts'
 import { squadSources } from './squad-sources.ts'
@@ -233,6 +233,15 @@ export async function importPastSquad(
 
   warnings.push(...merged.warnings)
 
+  // As in `import-squad.ts`: a spelling the owner replaced becomes the one that stays.
+  for (const player of merged.players) {
+    const chosen = chosenSpelling(player.name, player.page)
+
+    player.name = chosen.name
+    player.page = chosen.page
+  }
+
+  const mergedPersons = await mergeListedPersons(db)
   // Wikipedia is asked before the transaction: no request is made while rows are locked.
   const personLookup = await lookUpPersonPages(
     db,
@@ -247,6 +256,8 @@ export async function importPastSquad(
       aliases: aliasMap(personTitleAliases),
       redirects: personLookup.redirects,
     })
+    await storeChosenSpellings(transaction, season)
+
     const counts = await storePlayers(transaction, season, merged.players, personBook)
 
     for (const { title, version } of pagesRead) {
@@ -270,7 +281,7 @@ export async function importPastSquad(
     persons: describePersons(personLookup.asked, stored.persons, personNames.counts),
     players: stored.players,
     season,
-    warnings: [...warnings, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
+    warnings: [...warnings, ...mergedPersons, ...personLookup.warnings, ...guessedNameWarnings(personNames.guessed)],
   }
 
   return await recorded(db, report, clock)

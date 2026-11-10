@@ -320,8 +320,8 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
 
 /**
  * Shows how many groups of persons look alike (`similarPersons`), with their titles. It is
- * information and no fault: the import merges nothing, and a person joins a title with
- * `personTitleAliases`.
+ * information and no fault: the import merges none of these, and a person joins a title with
+ * `personTitleAliases` or says they are two people with `personsWhoDiffer`.
  */
 async function showSimilarPersons(db: Database, write: (line: string) => void): Promise<void> {
   const groups = await similarPersons(db)

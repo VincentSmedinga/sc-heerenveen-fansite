@@ -311,7 +311,7 @@ Daarnaast hebben 828 gele kaarten een lege minuut in het verslag, want de oude f
 - 1994/95, Eredivisie, 6 mei 1995, Go Ahead Eagles: André van Tuinen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 1995/96, Intertoto Cup, 2 augustus 1995, FC Girondins de Bordeaux: Arnold Oosterveer heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 1995/96, Eredivisie, 30 maart 1996, NAC Breda: Yassine Abdellaoui heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
-- 1995/96, Eredivisie, 28 april 1996, FC Volendam: Radoslav Samardzic heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
+- 1995/96, Eredivisie, 28 april 1996, FC Volendam: Radoslav Samardžić heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 1996/97, Eredivisie, 12 november 1996, De Graafschap: Raymond Victoria heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 1996/97, Eredivisie, 22 februari 1997, NAC Breda: Ole Tobiasen heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
 - 1996/97, Eredivisie, 22 maart 1997, PSV: Wim Jonk heeft een geel-rode kaart en geen gele kaart: de gele kaart is afgeleid, zonder minuut
@@ -401,17 +401,6 @@ Een groep kan ook uit twee mensen bestaan, zoals Michel Vonk en Michel Vorm.
 - X. Frijns (1) / X. Prins (1)
 - Zdenek Stanek (1) / Zdenìk Stanìk (1)
 - Zefilinho (1) / Zefilino (1)
-
-## Namen op de spelerskaarten om te beslissen
-
-Deze namen staan in de selectie van een seizoen, uit Wikipedia en uit de oude fansite, en horen misschien bij één persoon.
-De import laat ze zoals ze zijn, en de projecteigenaar beslist per groep.
-Jordy Bruijn en Jordy Buijs zijn waarschijnlijk twee mensen.
-
-- Radoslav Samardžić / Radoslav Samardzic
-- Jan Harm Schippers / Jan-Harm Schippers
-- Robert van den Berg / Robert van der Berg
-- Jordy Bruijn / Jordy Buijs
 
 ## Nieuwe clubs
 

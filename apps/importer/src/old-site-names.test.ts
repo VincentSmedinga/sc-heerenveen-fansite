@@ -6,8 +6,9 @@ import { readOldSiteData } from './old-site-file.ts'
 import { deriveOldSiteGoals, orderedOldSiteGoalEvents } from './old-site-goals.ts'
 import { deriveOldSiteMatches } from './old-site-matches.ts'
 import { countOldSiteNames, editDistance, findOldSiteNameClusters, nameClusterKey } from './old-site-name-clusters.ts'
-import { cleanOldSiteName, oldSiteDistinctNames, oldSiteNameCorrections } from './old-site-names.ts'
+import { cleanOldSiteName, oldSiteNameCorrections } from './old-site-names.ts'
 import { deriveOldSiteReport } from './old-site-report.ts'
+import { personsWhoDiffer, personTitleAliases } from './person-names.ts'
 
 describe('the spellings of Wikipedia', () => {
   it.each([
@@ -29,12 +30,45 @@ describe('the spellings of Wikipedia', () => {
     ['Bob Penders', 'Rob Penders'],
     ['Martin van Duren', 'Mart van Duren'],
     ['Tom van Mol', 'Tom Van Mol'],
+    // The four the owner decided on 10 November 2026 (issue 1027).
+    ['Ugur Yildirim', 'Uğur Yıldırım'],
+    ['Radoslav Samardzic', 'Radoslav Samardžić'],
+    ['Jan-Harm Schippers', 'Jan Harm Schippers'],
+    ['Robert van der Berg', 'Robert van den Berg'],
   ])('turns %s into %s', (typed, article) => {
     expect(cleanOldSiteName(typed)).toBe(article)
   })
 
-  it('has 156 corrections, so a removed pair fails here', () => {
-    expect(oldSiteNameCorrections.size).toBe(156)
+  it('has the four persons the owner decided as titles that are one person too', () => {
+    expect(personTitleAliases).toEqual([
+      { aliases: ['Jan-Harm Schippers'], title: 'Jan Harm Schippers' },
+      { aliases: ['Radoslav Samardzic'], title: 'Radoslav Samardžić' },
+      { aliases: ['Robert van der Berg'], title: 'Robert van den Berg' },
+      { aliases: ['Ugur Yıldırım'], title: 'Uğur Yıldırım' },
+    ])
+
+    // The title that stays is where the names of the old fansite end up, and is never changed.
+    for (const { aliases, title } of personTitleAliases) {
+      expect(cleanOldSiteName(title)).toBe(title)
+
+      for (const alias of aliases) {
+        expect(cleanOldSiteName(alias) === alias || cleanOldSiteName(alias) === title).toBe(true)
+      }
+    }
+  })
+
+  it('knows Jordy Bruijn and Jordy Buijs as two people, and never as one', () => {
+    expect(personsWhoDiffer).toContainEqual(['Jordy Bruijn', 'Jordy Buijs'])
+
+    const merged = personTitleAliases.flatMap(({ aliases, title }) => [title, ...aliases])
+
+    for (const name of personsWhoDiffer.flat()) {
+      expect(merged).not.toContain(name)
+    }
+  })
+
+  it('has 160 corrections, so a removed pair fails here', () => {
+    expect(oldSiteNameCorrections.size).toBe(160)
   })
 
   it('has no chain: no correction leads to a spelling that is corrected again', () => {
@@ -57,7 +91,7 @@ describe('the spellings of Wikipedia', () => {
     ]) {
       expect(cleanOldSiteName(name)).toBe(name)
     }
-    for (const group of oldSiteDistinctNames) {
+    for (const group of personsWhoDiffer) {
       for (const name of group) {
         expect(cleanOldSiteName(name)).toBe(name)
       }
@@ -283,7 +317,7 @@ describe('the names to decide', () => {
     )
 
     expect(clusters.map((group) => group.map((one) => one.name))).toEqual([['Jan Dijk', 'Jan Dik']])
-    expect(oldSiteDistinctNames).toContainEqual(['Ruud Kool', 'Ruud Knol'])
+    expect(personsWhoDiffer).toContainEqual(['Ruud Kool', 'Ruud Knol'])
   })
 
   it('lists the clusters of the files, without the ones that are decided', async () => {

@@ -1,5 +1,6 @@
-import { matchAppearances, matchGoals, playerNameMaxLength, players, playerSeasonStats } from '@fansite/db/schema'
-import { and, eq, inArray, notInArray } from 'drizzle-orm'
+import { mergePlayerInto } from '@fansite/db/person-merge'
+import { playerNameMaxLength, players } from '@fansite/db/schema'
+import { eq, inArray } from 'drizzle-orm'
 
 import type { OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
@@ -79,7 +80,10 @@ export function deriveOldSitePlayers(
  * files, for the season of the match, with the source `verslag` and without a shirt number, a
  * position, a Wikipedia page or a person. A row that exists for that season and name, from any
  * source, is used as it is and never changed. The step `personen` links them later (#967).
- * The one exception is a stale row of this step itself: see `mergeStaleOldSitePlayers`.
+ * The one exception is a stale row of this step itself: see `mergeStaleOldSitePlayers`, and a
+ * row whose old spelling the database calls the same name as the chosen one (`Radoslav
+ * Samardzic` and `Radoslav Samardžić`: the collation ignores accents), which gets the chosen
+ * spelling. That row has the source `verslag`, no page and no person too.
  */
 export async function importOldSitePlayers(
   db: OldSiteDatabase,
@@ -89,12 +93,12 @@ export async function importOldSitePlayers(
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const wanted = deriveOldSitePlayers(oldMatches, oldPlayers)
   const seasons = [...new Set(wanted.map((player) => player.season))]
-  const stored = new Set<string>()
+  const stored = new Map<string, typeof players.$inferSelect>()
   const fresh: (typeof players.$inferInsert)[] = []
 
   if (seasons.length > 0) {
     for (const row of await db.select().from(players).where(inArray(players.season, seasons))) {
-      stored.add(oldSitePlayerKey(row.season, row.name))
+      stored.set(oldSitePlayerKey(row.season, row.name), row)
     }
   }
 
@@ -109,8 +113,23 @@ export async function importOldSitePlayers(
         `${player.code} (${player.season}) has no row in the old table speler, so its name '${player.name}' comes from the code`,
       )
     }
-    if (stored.has(oldSitePlayerKey(player.season, player.name))) {
-      report.unchanged += 1
+
+    const row = stored.get(oldSitePlayerKey(player.season, player.name))
+
+    if (row !== undefined) {
+      if (
+        row.name !== player.name &&
+        oldSiteNameCorrections.get(row.name) === player.name &&
+        row.source === 'verslag' &&
+        row.wikipediaPage === null &&
+        row.personId === null
+      ) {
+        await db.update(players).set({ name: player.name, searchTerm: player.searchTerm }).where(eq(players.id, row.id))
+        report.changed += 1
+        report.lines.push(`${row.name} (${row.season}) is now ${player.name}`)
+      } else {
+        report.unchanged += 1
+      }
       continue
     }
     fresh.push({
@@ -193,16 +212,21 @@ export function resolveOldSiteCode(
   if (known !== undefined) {
     const name = oldSitePlayerName(known)
     const chosen = cleanOldSiteName(name)
+    const surname = [known.infix, known.lastName].filter((part) => part !== null && part !== '').join(' ')
 
     return {
       code,
       name: chosen,
       nameFromCode: false,
-      // A name the owner corrected has the surname of the chosen spelling (`El Khattabi`).
+      // A name the owner corrected has the surname of the chosen spelling (`El Khattabi`). When
+      // it still ends in the surname of the old table, accents aside, that part of it is the
+      // surname (`Schippers` of `Jan Harm Schippers`, `Samardžić`), not all but the first word.
       searchTerm:
         chosen === name
-          ? [known.infix, known.lastName].filter((part) => part !== null && part !== '').join(' ')
-          : searchTerm(chosen),
+          ? surname
+          : surname !== '' && nameKey(chosen).endsWith(` ${nameKey(surname)}`)
+            ? chosen.normalize('NFC').slice(-surname.normalize('NFC').length)
+            : searchTerm(chosen),
       season,
     }
   }
@@ -227,8 +251,8 @@ export function resolveOldSiteCode(
  * has the source `verslag`, nothing else but a name (no page, no person) and a name that is
  * exactly a key of `oldSiteNameCorrections` whose spelling has a row too. Whatever points to
  * it (goals, appearances, numbers of the season) is pointed to the other row, and the stale row
- * is removed. Other names, other sources and a row with a page or a person are never touched.
- * Returns the number of rows merged: a second run finds none.
+ * is removed (`mergePlayerInto`). Other names, other sources and a row with a page or a person
+ * are never touched. Returns the number of rows merged: a second run finds none.
  */
 async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly string[], lines: string[]) {
   if (seasons.length === 0) {
@@ -256,30 +280,7 @@ async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly s
     }
 
     await db.transaction(async (tx) => {
-      await tx.update(matchGoals).set({ playerId: target.id }).where(eq(matchGoals.playerId, stale.id))
-
-      // A match or a competition the other row has already keeps its own row: the stale one
-      // goes with the player (the appearance loses its link, the numbers are deleted).
-      const played = (await tx.select().from(matchAppearances).where(eq(matchAppearances.playerId, target.id))).map(
-        (row) => row.matchId,
-      )
-      const moveAppearances = and(
-        eq(matchAppearances.playerId, stale.id),
-        played.length === 0 ? undefined : notInArray(matchAppearances.matchId, played),
-      )
-
-      await tx.update(matchAppearances).set({ playerId: target.id }).where(moveAppearances)
-
-      const counted = (await tx.select().from(playerSeasonStats).where(eq(playerSeasonStats.playerId, target.id))).map(
-        (row) => row.competition,
-      )
-      const moveStats = and(
-        eq(playerSeasonStats.playerId, stale.id),
-        counted.length === 0 ? undefined : notInArray(playerSeasonStats.competition, counted),
-      )
-
-      await tx.update(playerSeasonStats).set({ playerId: target.id }).where(moveStats)
-      await tx.delete(players).where(eq(players.id, stale.id))
+      await mergePlayerInto(tx, stale.id, target.id)
     })
     merged += 1
     lines.push(`${stale.name} (${stale.season}) is merged into ${target.name}`)
