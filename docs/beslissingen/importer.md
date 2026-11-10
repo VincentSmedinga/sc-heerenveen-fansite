@@ -2852,6 +2852,7 @@
     Een speler van ons komt uit de oude tabel `speler` of uit een code, en gaat door dezelfde lijst (`resolveOldSiteCode`).
     De lijst zet de schrijfwijze van de oude fansite om in de schrijfwijze van de selectie van Wikipedia: Gerrie Schaap, Ronny Venema, Ivan Tsvetkov, Ali El Khattabi en Henny Meijer.
     Bij Leeroy Echteld en Igor Korneev is de oude schrijfwijze de gekozen, en de lijst zet de schrijfwijze van Wikipedia om (`Lee-Roy Echteld`, `Igor Kornejev`), voor het geval die als tekst in de bestanden staat.
+    **Later:** sinds 10 november 2026 blijft Lee-Roy Echteld (de spelling van Wikipedia) en zet de lijst `Leeroy Echteld` om in `Lee-Roy Echteld`; Igor Korneev blijft, en de lijst kent ook de spelling van Radu Gușatu, Arek Radomski en Hjalte Bo Nørregaard; zie _De vier spelers die de projecteigenaar koos, staan onder zijn spelling_.
     De stap `spelers` vindt zo de speler die er al staat (dezelfde naam in hetzelfde seizoen, uit welke bron ook) en maakt geen tweede.
     De import verwijdert of hernoemt nooit een rij die er al staat: wat er onder de oude schrijfwijze staat, regelt de projecteigenaar met de hand.
     **Later:** zie _De stap `spelers` voegt een verouderde rij samen met de speler van de gekozen schrijfwijze_ (8 november 2026): een rij die de stap zelf maakte onder de oude schrijfwijze wordt wel samengevoegd en weggehaald.
@@ -2903,6 +2904,7 @@
   - **Rijen van Wikipedia onder de oude schrijfwijze blijven staan:** bij Lee-Roy Echteld en Igor Kornejev is de rij van de selectie de verouderde, en de rij van de oude fansite de gekozen.
     Samenvoegen zou de gegevens van Wikipedia kwijtraken, en de selectie zet die rij elke run terug.
     De projecteigenaar hernoemt ze met de hand.
+    **Later:** voor Igor Kornejev en de drie andere spelers van 10 november 2026 doet de import dat zelf; zie _De vier spelers die de projecteigenaar koos, staan onder zijn spelling_.
 - **Waarom:** de import voegde alleen toe, dus een rij van vóór de lijst met schrijfwijzen bleef naast de goede staan en een speler stond twee keer op de selectie van een seizoen (acceptatie, `Ger Schaap` en `Gerrie Schaap`).
   De rij is door deze stap zelf gemaakt en bevat niets dan een naam, dus er gaat niets verloren.
 - **Alternatieven:** een eenmalige opdracht (het volgende geval, een nieuwe schrijfwijze in de lijst, vraagt weer om een opdracht); alle verouderde rijen samenvoegen, ook van Wikipedia (verlies van pagina, rugnummer en cijfers); niets doen en de projecteigenaar de rijen laten weghalen (de lijst is lang, en de fout komt bij elke nieuwe schrijfwijze terug).
@@ -3839,3 +3841,18 @@
   Zijn stap `personen` (`importOldSitePersons`) koppelt alleen als hij zeker is en meldt de rest als twijfel (een doorverwijspagina, een ontbrekend artikel, geen voetballer).
   Dat blijft zo en hoort bij een eigen issue.
 - **Alternatieven:** alleen de naamstap, maar dan blijven nieuwe spelers zonder persoon; een speler zonder Nederlands artikel zonder persoon laten.
+
+## De vier spelers die de projecteigenaar koos, staan onder zijn spelling
+
+- **Datum:** 10 november 2026
+- **Besluit:** de spelling van vier spelers is Igor Korneev, Radu Gușatu, Arek Radomski en Hjalte Bo Nørregaard (#1045).
+  Lee-Roy Echteld blijft zoals Wikipedia en de import hem hebben.
+  Geen van de eerste drie is een artikel op Wikipedia: `Igor Korneev` en `Arek Radomski` zijn doorverwijzingen naar `Igor Kornejev` en `Arkadiusz Radomski`, en `Radu Gușatu` bestaat niet (het artikel is `Mugur Radu Gușatu`).
+  Het artikel blijft dus de titel die blijft, en de naam komt uit `personNames`: Igor en Korneev, Radu en Gușatu, Arek en Radomski, Hjalte Bo en Nørregaard.
+  De doorverwijzingen staan als andere titel in `personTitleAliases`.
+  Die lijst geeft ook de naam van de rij: `chosenSpelling` en `listedName` zetten de naam van de titel of van een andere titel om in de naam van `personNames`, en `mergeListedPersons` geeft de rijen die de naam van het artikel nog hebben die naam (`chooseListedNames`), of voegt ze samen met de rij van de gekozen naam in hetzelfde seizoen.
+  Een naam die de redactie zette, en een naam die de tabel op een eigen manier schrijft (`R. van der Berg`), blijven staan.
+  `oldSiteNameCorrections` zet de schrijfwijzen van de oude fansite om in de gekozen spelling, en `Leeroy Echteld` in `Lee-Roy Echteld`.
+- **Waarom:** de spelling die supporters het best kennen of de kortste, en voor Korneev de Engelse; de achternaam staat vet op de kaart en het blijft simpel (Gușatu, Nørregaard).
+  De rij moet ook kloppen, want Beheer toont de naam van de rij en de site valt er alleen op terug.
+- **Alternatieven:** de spelling van de selectie van Wikipedia laten staan; de gekozen spelling als titel in `personTitleAliases` zetten (de titel is dan een doorverwijzing of bestaat niet, en elke import vraagt Wikipedia naar een titel waar de persoon niet onder staat); Leeroy Echteld; Mugur Radu als voornamen; Bo bij de achternaam.

@@ -8,8 +8,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
-import { personNameOf } from './person-name.ts'
-import { aliasMap, chosenSpelling, personsWhoDiffer } from './person-names.ts'
+import { manualNames, personNameOf } from './person-name.ts'
+import { aliasMap, chosenSpelling, personNames, personsWhoDiffer } from './person-names.ts'
 import {
   describePersons,
   doublePlayers,
@@ -460,6 +460,109 @@ describe('mergeListedPersons for Filip Đuričić', () => {
   })
 })
 
+describe('the four spellings of 10 November 2026', () => {
+  // The owner's spelling, the article that stays, and the titles the import can still bring.
+  const four = [
+    { chosen: 'Igor Korneev', family: 'Korneev', given: 'Igor', old: ['Igor Kornejev'], title: 'Igor Kornejev' },
+    {
+      chosen: 'Radu Gușatu',
+      family: 'Gușatu',
+      given: 'Radu',
+      old: ['Mugur Radu Gușatu', 'Radu Gusatu'],
+      title: 'Mugur Radu Gușatu',
+    },
+    {
+      chosen: 'Arek Radomski',
+      family: 'Radomski',
+      given: 'Arek',
+      old: ['Arkadiusz Radomski'],
+      title: 'Arkadiusz Radomski',
+    },
+    {
+      chosen: 'Hjalte Bo Nørregaard',
+      family: 'Nørregaard',
+      given: 'Hjalte Bo',
+      old: ['Hjalte Norregaard'],
+      title: 'Hjalte Bo Nørregaard',
+    },
+  ]
+
+  afterEach(async () => {
+    await database.pool.query('DELETE FROM players')
+    await database.pool.query('DELETE FROM persons')
+  })
+
+  it.each(four)('gives the person of $title the name $chosen and its parts', ({ chosen, family, given, title }) => {
+    expect(personNameOf(title, null, manualNames(personNames))).toMatchObject({
+      familyName: family,
+      givenName: given,
+      name: chosen,
+      source: 'manual',
+    })
+  })
+
+  it.each(four)('gives a table that writes the title or the old spelling of $chosen the chosen name', (one) => {
+    for (const written of [one.title, ...one.old]) {
+      expect(chosenSpelling(written, null).name).toBe(one.chosen)
+      expect(chosenSpelling(written, one.title)).toEqual({ name: one.chosen, page: one.title })
+    }
+    expect(chosenSpelling(one.chosen, null)).toEqual({ name: one.chosen, page: null })
+  })
+
+  it('leaves a name the table shows in its own way, and Lee-Roy Echteld, as they are', () => {
+    expect(chosenSpelling('Radomski', 'Arkadiusz Radomski')).toEqual({ name: 'Radomski', page: 'Arkadiusz Radomski' })
+    expect(chosenSpelling('Lee-Roy Echteld', null)).toEqual({ name: 'Lee-Roy Echteld', page: null })
+    expect(chosenSpelling('Lee-Roy Echteld', 'Lee-Roy Echteld')).toEqual({
+      name: 'Lee-Roy Echteld',
+      page: 'Lee-Roy Echteld',
+    })
+  })
+
+  it('renames the rows of a season that still have the name of the article, merges two rows of one season, and then says nothing', async () => {
+    const [{ id: person }] = (await database.db
+      .insert(persons)
+      .values({ wikipediaPage: 'Igor Kornejev' })
+      .$returningId()) as [{ id: number }]
+    const row = (season: string, name: string, searchTerm: string, page: null | string, editors: 'name'[] = []) =>
+      database.db.insert(players).values({
+        editorsFields: editors,
+        name,
+        personId: page === null ? null : person,
+        searchTerm,
+        season,
+        wikipediaPage: page,
+      })
+
+    await row('2003/04', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev')
+    await row('2004/05', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev')
+    await row('2004/05', 'Igor Korneev', 'Korneev', null)
+    await row('2005/06', 'Igor Kornejev', 'Kornejev', 'Igor Kornejev', ['name'])
+    await row('2006/07', 'Hjalte Bo Nørregaard', 'Nørregaard', 'Hjalte Bo Nørregaard')
+    await row('2008/09', 'Mugur Radu Gușatu', 'Gușatu', 'Mugur Radu Gușatu')
+    await row('2007/08', 'Arkadiusz Radomski', 'Radomski', 'Arkadiusz Radomski')
+
+    const lines = await mergeListedPersons(database.db)
+
+    expect(lines).toContain('Players: Igor Kornejev (2003/04) is now Igor Korneev')
+    expect(lines).toContain('Players: Mugur Radu Gușatu (2008/09) is now Radu Gușatu')
+    expect(lines).toContain('Players: Arkadiusz Radomski (2007/08) is now Arek Radomski')
+    expect(lines).not.toContain('Players: Hjalte Bo Nørregaard (2006/07) is now Hjalte Bo Nørregaard')
+    expect(
+      (await database.db.select().from(players).orderBy(asc(players.season), asc(players.id))).map(
+        (one) => `${one.season} ${one.name} ${one.searchTerm}`,
+      ),
+    ).toEqual([
+      '2003/04 Igor Korneev Korneev',
+      '2004/05 Igor Korneev Korneev',
+      '2005/06 Igor Kornejev Kornejev',
+      '2006/07 Hjalte Bo Nørregaard Nørregaard',
+      '2007/08 Arek Radomski Radomski',
+      '2008/09 Radu Gușatu Gușatu',
+    ])
+    expect(await mergeListedPersons(database.db)).toEqual([])
+  })
+})
+
 describe('a player twice in a season', () => {
   afterEach(async () => {
     await database.pool.query('DELETE FROM match_goals')
@@ -600,6 +703,7 @@ describe('chosenSpelling', () => {
     expect(chosenSpelling('Ugur Yıldırım', 'Uğur Yıldırım')).toEqual({ name: 'Uğur Yıldırım', page: 'Uğur Yıldırım' })
     expect(chosenSpelling('Filip Djuričić', null)).toEqual({ name: 'Filip Đuričić', page: null })
     expect(chosenSpelling('Radoslav Samardzic', null)).toEqual({ name: 'Radoslav Samardžić', page: null })
+    expect(chosenSpelling('Radu Gusatu', 'Radu Gusatu')).toEqual({ name: 'Radu Gușatu', page: 'Mugur Radu Gușatu' })
     // The page is replaced, and a name the table shows in its own way stays.
     expect(chosenSpelling('R. van der Berg', 'Robert van der Berg')).toEqual({
       name: 'R. van der Berg',

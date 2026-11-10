@@ -1097,7 +1097,8 @@ De import leest ze uit hetzelfde verzoek waarmee hij de titel opvraagt, dus een 
   Dat is `guess`, en het logboek schrijft er een waarschuwing met `Persons:` vooraan bij, met de titel en de uitkomst.
 - **De lijst `personNames`** in [`src/person-names.ts`](src/person-names.ts) zegt per titel de voornaam, het voorvoegsel en de achternaam.
   Hij gaat voor alles, geeft `manual` en wordt nooit vervangen.
-  Zet er een naam in nadat je de gok in het logboek hebt nagekeken.
+  Zet er een naam in nadat je de gok in het logboek hebt nagekeken, of als de projecteigenaar een spelling koos die geen titel is (`Igor Korneev`, voor het artikel `Igor Kornejev`).
+  De rij van een speler in `players` krijgt dezelfde naam (`listedName`, `chooseListedNames`); een naam die de redactie zette blijft.
 - **Een persoon zonder naam** krijgt hem bij de eerstvolgende import van een seizoen met zijn titel: de import vraagt zijn artikel nog één keer op.
   Een tweede run schrijft en vraagt niets.
 - **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en `pnpm run import:status` toont de aantallen per bron voor alle personen.
