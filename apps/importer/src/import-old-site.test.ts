@@ -97,11 +97,13 @@ describe('the command', () => {
       '  0 reports: 0 klaar, 0 bezig',
       'Old site, step personen: 0 new, 0 updated, 0 unchanged, 0 skipped',
       '  0 of 0 players without a person linked, 0 new persons, 0 left alone',
+      'Old site, step doelpunten tegen ons: 0 new, 0 updated, 0 unchanged, 0 skipped',
+      '  0 goals against us linked to a person (0 names), 0 links taken away, 0 unchanged',
       'Old site, step linie en land: 0 new, 0 updated, 0 unchanged, 0 skipped',
       '  0 lines and 0 countries filled in from the old fansite',
       '  persons without a line: 0, without a country: 0',
       'Old site, step selecties: 0 new, 0 updated, 0 unchanged, 0 skipped',
-      'Old site: 8 of 8 steps done.',
+      'Old site: 9 of 9 steps done.',
     ])
   })
 
@@ -123,11 +125,13 @@ describe('the command', () => {
         '  0 reports: 0 klaar, 0 bezig',
         'Old site, step personen: 0 new, 0 updated, 0 unchanged, 0 skipped',
         '  0 of 0 players without a person linked, 0 new persons, 0 left alone',
+        'Old site, step doelpunten tegen ons: 0 new, 0 updated, 0 unchanged, 0 skipped',
+        '  0 goals against us linked to a person (0 names), 0 links taken away, 0 unchanged',
         'Old site, step linie en land: 0 new, 0 updated, 0 unchanged, 0 skipped',
         '  0 lines and 0 countries filled in from the old fansite',
         '  persons without a line: 0, without a country: 0',
         'Old site, step selecties: 0 new, 0 updated, 0 unchanged, 0 skipped',
-        'Old site: 8 of 8 steps done.',
+        'Old site: 9 of 9 steps done.',
       ].join('\n'),
     )
     expect({
@@ -162,7 +166,7 @@ describe('the command', () => {
     ])
   })
 
-  it('has the steps clubs, matches, spelers, doelpunten, opstellingen, personen, linie en land and selecties, in that order', () => {
+  it('has the steps clubs, matches, spelers, doelpunten, opstellingen, personen, doelpunten tegen ons, linie en land and selecties, in that order', () => {
     expect(oldSiteSteps.map((step) => step.name)).toEqual([
       'clubs',
       'matches',
@@ -170,6 +174,7 @@ describe('the command', () => {
       'doelpunten',
       'opstellingen',
       'personen',
+      'doelpunten tegen ons',
       'linie en land',
       'selecties',
     ])
@@ -181,7 +186,7 @@ describe('the command', () => {
 
     expect(code).toBe(0)
     expect(text).toContain('Old site, step clubs: 1 new, 1 updated, 1 unchanged, 0 skipped')
-    expect(text).toContain('Dry run, nothing is written. Old site: 8 of 8 steps done.')
+    expect(text).toContain('Dry run, nothing is written. Old site: 9 of 9 steps done.')
     expect(await clubCount()).toBe(before)
     expect(await database.db.select().from(clubNames)).toEqual([])
   })
@@ -455,7 +460,7 @@ describe('the files in the repository', () => {
     expect(second.text).toContain('Old site, step doelpunten: 0 new, 0 updated, 1763 unchanged, 67 skipped')
     expect(first.text).toContain('Old site, step opstellingen: 566 new, 0 updated, 0 unchanged, 0 skipped')
     expect(second.text).toContain('Old site, step opstellingen: 0 new, 0 updated, 566 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site: 8 of 8 steps done.')
+    expect(second.text).toContain('Old site: 9 of 9 steps done.')
     expect(ids.size).toBe(oldClubs.length)
     // The two clubs the test started with are among them, so a club is one row, not two.
     expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
@@ -527,7 +532,7 @@ describe('the bundle', () => {
 
       expect(dry.stdout).toContain('Old site, step clubs:')
       expect(dry.stdout).toContain('Old site, step personen: 0 new')
-      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 8 of 8 steps done.')
+      expect(dry.stdout).toContain('Dry run, nothing is written. Old site: 9 of 9 steps done.')
       const report = await node('--old-site', '--report')
 
       expect(report.stdout).toContain('# Oude wedstrijden: wat ontbreekt of niet klopt')

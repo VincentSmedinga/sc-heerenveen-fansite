@@ -29,6 +29,7 @@ import { describeWaitingChange } from './import-changes.ts'
 import { isUnhealthy } from './import-matches.ts'
 import { isGoalOfOurPlayer } from './link-players.ts'
 import { waitingChanges } from './match-changes.ts'
+import { opponentGoalReport } from './old-site-opponent-goals.ts'
 import { doublePlayers, similarPersons } from './person-pages.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime, printable } from './text.ts'
@@ -146,6 +147,7 @@ export async function showStatus(
     await showDoublePlayers(db, write)
     await showPlayersWithoutPerson(db, write)
     await showPersonData(db, write)
+    await showOpponentGoals(db, write)
     await showFormations(db, write)
     await showWaitingChanges(db, now, write)
     await showCoverage(db, now, write)
@@ -307,6 +309,28 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
   }
 
   return unhealthy
+}
+
+/**
+ * Shows the goals against us in the old seasons that got a person (#1054): by season how many
+ * did and how many have a name that fits more than one person, then each linked name with the
+ * seasons it scored against us and played for us, for the owner to read in one go. A namesake
+ * goes in `opponentGoalNamesakes`. It is information and no fault.
+ */
+async function showOpponentGoals(db: Database, write: (line: string) => void): Promise<void> {
+  const report = await opponentGoalReport(db)
+
+  if (report.seasons.length === 0) {
+    return
+  }
+
+  write('Goals against us linked to a person (old seasons):')
+  for (const { ambiguous, linked, season } of report.seasons) {
+    write(`  ${season}: ${linked} linked, ${ambiguous} with a name that fits more than one person`)
+  }
+  for (const { against, for: forUs, name } of report.names) {
+    write(`  ${printable(name)}: against us ${against.join(', ')}; for us ${forUs.join(', ') || 'none'}`)
+  }
 }
 
 /**
