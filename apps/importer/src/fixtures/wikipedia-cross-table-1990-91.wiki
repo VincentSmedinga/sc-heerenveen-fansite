@@ -1,0 +1,336 @@
+{{Infobox voetbal Nederland Eredivisie
+| Seizoen               = 1990/91
+| Kampioen              = [[PSV (voetbalclub)|PSV]]
+| Topscorer             = {{NL-VLAG|15}} [[Dennis Bergkamp]] (25)<br>{{BR-VLAG|15}} [[Romário de Souza Faria|Romario]] (25)
+| Gedegradeerd          = [[sc Heerenveen]]<br />[[N.E.C.]]
+| Aantal clubs          = 18
+| Degradatie naar       = [[Eerste divisie (voetbal Nederland)|Eerste divisie]]
+| Europese kwalificatie = [[Europacup I (voetbal)|Europacup I]] 1x, [[Europacup II (voetbal)|Europacup II]] 1x, [[UEFA Cup]] 3x
+| Vorige editie         = Eredivisie 1989/90
+| Volgende editie       = Eredivisie 1991/92
+}}
+Het seizoen '''1990/91 van de [[Nederland]]se [[Eredivisie (mannenvoetbal)|Eredivisie]]''' was het 35ste seizoen waarin onder de [[KNVB]]-vlag een professionele Eredivisie werd gevoetbald. De officiële naam was voor het eerst ''PTT-telecompetitie''.
+
+In het voorgaande jaar waren [[HFC Haarlem|FC Haarlem]] en [[FC Den Bosch|BVV Den Bosch]] gedegradeerd. Hiervoor in de plaats kwamen [[SVV (voetbalclub)|SVV]] en debutant [[sc Heerenveen]].
+
+[[PSV (voetbalclub)|PSV]] werd landskampioen. [[N.E.C.]] en [[sc Heerenveen]] degradeerden naar de [[Eerste divisie (voetbal Nederland)|Eerste Divisie]].
+
+==Teams==
+<div style="font-size:90%; white-space:nowrap;clear:right">
+{{Positiekaart+|Nederland|caption=Eredivisie 1990/91|width=400|float=right|places=
+{{Positiekaart~|Nederland|lat=52.056082|lon=4.290225|label=[[ADO Den Haag|FC Den Haag]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.344444|lon=4.950000|label=[[AFC Ajax|Ajax]]|position=right}}
+{{Positiekaart~|Nederland|lat=53.226944|lon=6.580278|label=[[FC Groningen]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.206389|lon=6.902500|label=[[FC Twente]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.078333|lon=5.145833|label=[[FC Utrecht]]|position=top}}
+{{Positiekaart~|Nederland|lat=52.494444|lon=5.066389|label=[[FC Volendam]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.006389|lon=5.876944|label=[[Fortuna Sittard|Fortuna]]|position=top}}
+{{Positiekaart~|Nederland|lat=50.857500|lon=5.717778|label=[[MVV Maastricht|MVV]]|position=bottom}}
+{{Positiekaart~|Nederland|lat=51.822500|lon=5.836667|label=[[N.E.C.]]|position=bottom}}
+{{Positiekaart~|Nederland|lat=51.441667|lon=5.466944|label=[[PSV (voetbalclub)|PSV]]|position=right}}
+{{Positiekaart~|Nederland|lat=51.686944|lon=5.088611|label=[[RKC Waalwijk|RKC]]|position=top}}
+{{Positiekaart~|Nederland|lat=50.860833|lon=6.038611|label=[[Roda JC Kerkrade|Roda JC]]|position=right}}
+{{Positiekaart~|Nederland|lat=51.916667|lon=4.500000|label=Rotterdam|position=bottom}}
+{{Positiekaart~|Nederland|lat=52.967587|lon=5.915018|label=[[sc Heerenveen]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.995833|lon=5.933056|label=[[SBV Vitesse|Vitesse]]|position=top}}
+{{Positiekaart~|Nederland|lat=51.542778|lon=5.066944|label=[[Willem II (voetbalclub)|Willem II]]|position=left}}
+}}
+{{Positiekaart+|Rotterdam|caption=Voetbalclubs uit Rotterdam|width=400|float=right|places=
+{{Positiekaart~|Rotterdam|lat=51.893603|lon=4.522933|label=[[Feyenoord]]|position=bottom}}
+{{Positiekaart~|Rotterdam|lat=51.919444|lon=4.433333|label=[[Sparta Rotterdam]]|position=right}}
+{{Positiekaart~|Rotterdam|lat=51.920984|lon=4.372621|label=[[SVV (voetbalclub)|SVV]]|position=top}}
+}}
+</div>
+
+{| class="wikitable sortable" 
+! | Club
+!class="unsortable"| Plaats
+!class="unsortable"| Accommodatie
+! | Capaciteit
+! Trainer
+|-
+| [[ADO Den Haag|FC Den Haag]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Den Haag]]
+| [[Zuiderparkstadion]]
+| 11.000
+| {{NL-VLAG|15}} [[Co Adriaanse]]
+|-
+| [[AFC Ajax|Ajax]]
+| {{NL-vlag|Noord-Holland|geenlink}} [[Amsterdam]]
+| [[Stadion De Meer|De Meer]]
+| 19.500
+| {{NL-VLAG|15}} [[Leo Beenhakker]]
+|-
+| [[FC Groningen]]
+| {{NL-vlag|Groningen (provincie)|geenlink}} [[Groningen (stad)|Groningen]]
+| [[Stadion Oosterpark|Oosterpark]]
+| 21.000
+| {{NL-VLAG|15}} [[Hans Westerhof]]
+|-
+| [[FC Twente]]
+| {{NL-vlag|Overijssel|geenlink}} [[Enschede]]
+| [[Stadion Het Diekman|Het Diekman]]
+| 18.000
+| {{NL-VLAG|15}} [[Theo Vonk]]
+|-
+| [[FC Utrecht]]
+| {{NL-vlag|Utrecht|geenlink}} [[Utrecht (stad)|Utrecht]]
+| [[Stadion Galgenwaard|Galgenwaard]]
+| 23.000
+| {{NL-VLAG|15}} [[Ab Fafié]]
+|-
+| [[FC Volendam]]
+| {{NL-vlag|Noord-Holland|geenlink}} [[Volendam]]
+| [[Volendam Stadion]]
+| 15.000
+| {{NL-VLAG|15}} [[Leo Steegman]]
+|-
+| [[Feyenoord]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Rotterdam]]
+| [[Stadion Feijenoord]]
+| 65.000
+| {{SE-VLAG|15}} [[Gunder Bengtsson]]<br>{{NL-VLAG|15}} [[Wim Jansen (voetballer)|Wim Jansen]] (a.i.)
+|-
+| [[Fortuna Sittard]]
+| {{NL-vlag|Limburg|geenlink}} [[Sittard]]
+| [[De Baandert (stadion)|De Baandert]]
+| 20.000
+| {{NL-VLAG|15}} [[Han Berger]]
+|-
+| [[MVV Maastricht|MVV]]
+| {{NL-vlag|Limburg|geenlink}} [[Maastricht]]
+| [[Stadion De Geusselt|Geusselt]]
+| 11.000
+| {{NL-VLAG|15}} [[Sef Vergoossen]]
+|-
+| [[N.E.C.]]
+| {{NL-vlag|Gelderland|geenlink}} [[Nijmegen]]
+| [[Goffertstadion]]
+| 29.000
+| {{NL-VLAG|15}} [[Leen Looijen]]
+|-
+| [[PSV (voetbalclub)|PSV]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Eindhoven]]
+| [[Philips Stadion]]
+| 26.500
+| {{EN-VLAG|15}} [[Bobby Robson]]
+|-
+| [[RKC Waalwijk|RKC]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Waalwijk (stad)|Waalwijk]]
+| [[Sportpark Olympia]]
+| 6.200
+| {{NL-VLAG|15}} [[Leo van Veen]]
+|-
+| [[Roda JC Kerkrade|Roda JC]]
+| {{NL-vlag|Limburg|geenlink}} [[Kerkrade (plaats)|Kerkrade]]
+| [[Gemeentelijk Sportpark Kaalheide|Kaalheide]]
+| 25.000
+| {{NL-VLAG|15}} [[Jan Reker]]
+|-
+| [[sc Heerenveen]]
+| {{NL-vlag|Friesland|geenlink}}  [[Heerenveen (plaats)|Heerenveen]]
+| [[Sportpark Noord|Abe Lenstra Stadion]]
+| 15.000
+| {{DE-VLAG|15}} [[Fritz Korbach]]
+|-
+| [[Sparta Rotterdam]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Rotterdam]]
+| [[Spartastadion Het Kasteel|Het Kasteel]]
+| 13.500
+| {{NL-VLAG|15}} [[Hans van Doorneveld]]
+|-
+| [[SVV (voetbalclub)|SVV]]
+| {{NL-vlag|Zuid-Holland|geenlink}} [[Rotterdam]]
+| [[Stadion Feijenoord]]
+| 65.000
+| {{NL-VLAG|15}} [[Dick Advocaat]]
+|-
+| [[SBV Vitesse|Vitesse]]
+| {{NL-vlag|Gelderland|geenlink}} [[Arnhem]]
+| [[Nieuw-Monnikenhuize]]
+| 10.000
+| {{NL-VLAG|15}} [[Bert Jacobs (voetballer)|Bert Jacobs]]
+|-
+| [[Willem II (voetbalclub)|Willem II]]
+| {{NL-vlag|Noord-Brabant|geenlink}} [[Tilburg]]
+| [[Koning Willem II Stadion|Gemeentelijk Sportpark]]
+| 25.000
+| {{NL-VLAG|15}} [[Adrie Koster]]
+|}
+
+* SVV speelde de thuiswedstrijden in [[Stadion Feijenoord]] in Rotterdam, omdat het eigen [[Sportpark Harga]] werd afgekeurd door de KNVB voor het spelen van eredivisiewedstrijden.
+
+== Eindstand ==
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+!width=36|{{afkorting|pos|positie}}
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. ||align=left| [[PSV (voetbalclub)|PSV]] || 34 || 23 || 7 || 4 || '''53''' || 84 || 28 || 56
+|- style="background:#81BEF7;"
+| 2. ||align=left| [[AFC Ajax|Ajax]] || 34 || 22 || 9 || 3 || '''53''' || 75 || 21 || 54
+|- style="background:#81BEF7;"
+| 3. ||align=left| [[FC Groningen]] || 34 || 18 || 10 || 6 || '''46''' || 62 || 38 || 24
+|- style="background:#81BEF7;"
+| 4. ||align=left| [[FC Utrecht]] || 34 || 16 || 10 || 8 || '''42''' || 42 || 29 || 13
+|-
+| 5. ||align=left| [[SBV Vitesse|Vitesse]] || 34 || 11 || 15 || 8 || '''37''' || 39 || 32 || 7
+|-
+| 6. ||align=left| [[FC Twente]] || 34 || 13 || 10 || 11 || '''36''' || 58 || 48 || 10
+|-
+| 7. ||align=left| [[RKC Waalwijk|RKC]] || 34 || 11 || 13 || 10 || '''35''' || 51 || 49 || 2
+|- style="background:#EEE8AA;"
+| 8. ||align=left| [[Feyenoord]] || 34 || 8 || 16 || 10 || '''32''' || 39 || 40 || -1
+|-
+| 9. ||align=left| [[FC Volendam]] || 34 || 10 || 12 || 12 || '''32''' || 37 || 45 || -8
+|-
+| 10. ||align=left| [[Roda JC Kerkrade|Roda JC]] || 34 || 12 || 7 || 15 || '''31''' || 40 || 53 || -13
+|-
+| 11. ||align=left| [[Willem II (voetbalclub)|Willem II]] || 34 || 13 || 4 || 17 || '''30''' || 53 || 50 || 3
+|-
+| 12. ||align=left| [[Fortuna Sittard]] || 34 || 9 || 12 || 13 || '''30''' || 33 || 47 || -14
+|-
+| 13. ||align=left| [[Sparta Rotterdam]] || 34 || 7 || 15 || 12 || '''29''' || 40 || 57 || -17
+|-
+| 14. ||align=left| [[ADO Den Haag|FC Den Haag]] || 34 || 10 || 8 || 16 || '''28''' || 40 || 60 || -20
+|-
+| 15. ||align=left| [[MVV Maastricht|MVV]] || 34 || 9 || 9 || 16 || '''27''' || 38 || 56 || -18
+|- style="background:#FFCCCC;"
+| 16. ||align=left| [[SVV (voetbalclub)|SVV]] || 34 || 8 || 8 || 18 || '''24''' || 31 || 52 || -21
+|- style="background:#FF8888;"
+| 17. ||align=left| [[sc Heerenveen]] || 34 || 9 || 6 || 19 || '''24''' || 41 || 63 || -22
+|- style="background:#FF8888;"
+| 18. ||align=left| [[N.E.C.]] || 34 || 6 || 11 || 17 || '''23''' || 27 || 62 || -35
+|}
+
+===Legenda===
+{| class="wikitable"
+!Kleur
+!Kwalificatie voor
+|-
+| style="background:#ACE1AF;"|
+| <small>Landskampioen, [[Europacup I 1991/92|Europacup I]]</small>
+|-
+| style="background:#81BEF7;"|
+| <small>[[UEFA Cup 1991/92|UEFA Cup]]</small>
+|-
+| style="background:#EEE8AA;"|
+| <small>[[KNVB beker 1990/91|KNVB Beker]] winnaar, [[Europacup II 1991/92|Europacup II]]</small>
+|-
+| style="background:#FFCCCC;"|
+| <small>Nacompetitie tegen degradatie naar de [[Eerste divisie 1991/92|Eerste divisie]]</small>
+|-
+| style="background:#FF8888;"|
+| <small>Degradatie naar de [[Eerste divisie 1991/92|Eerste divisie]]</small>
+|}
+
+=== Uitslagen ===
+{{Zie hoofdartikel|Eredivisie 1990/91/Wedstrijden}}
+
+{| cellspacing="0" cellpadding="3" style="background-color: #EEEEEE; font-size: 90%; text-align: center" class="wikitable"
+|-
+! width=180|Thuis (beneden) / Uit (rechts)
+! width=35|[[AFC Ajax|AJA]]
+! width=35|[[Feyenoord|FEY]]
+! width=35|[[Fortuna Sittard|FSI]]
+! width=35|[[FC Groningen|GRO]]
+! width=35|[[ADO Den Haag|DHA]]
+! width=35|[[sc Heerenveen|HEE]]
+! width=35|[[MVV Maastricht|MVV]]
+! width=35|[[N.E.C.|NEC]]
+! width=35|[[PSV (voetbalclub)|PSV]]
+! width=35|[[RKC Waalwijk|RKC]]
+! width=35|[[Roda JC Kerkrade|RJC]]
+! width=35|[[Sparta Rotterdam|SPA]]
+! width=35|[[SVV (voetbalclub)|SVV]]
+! width=35|[[FC Twente|TWE]]
+! width=35|[[FC Utrecht|UTR]]
+! width=35|[[SBV Vitesse|VIT]]
+! width=35|[[FC Volendam|VOL]]
+! width=35|[[Willem II (voetbalclub)|WIL]]
+|-
+|align=right|'''[[AFC Ajax|Ajax]]'''||bgcolor="#999999"| ||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|5 – 0||bgcolor="#C0F0D0"|4 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|7 – 0||bgcolor="#C0F0D0"|3 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|3 – 1
+|-
+|align=right|'''[[Feyenoord]]'''||bgcolor="#FFCCCC"|0 – 4||bgcolor="#999999"| ||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|6 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|4 – 3||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|2 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|3 – 0||bgcolor="#FFCCCC"|0 – 1
+|-
+|align=right|'''[[Fortuna Sittard]]'''||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 2||bgcolor="#999999"| ||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 1||bgcolor="#FFCCCC"|0 – 3||bgcolor="#FFCCCC"|0 – 2||bgcolor="#FFCCCC"|0 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|0 – 2||bgcolor="#FFCCCC"|0 – 4||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0
+|-
+|align=right|'''[[FC Groningen]]'''||bgcolor="#FFCCCC"|1 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 1||bgcolor="#999999"| ||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|4 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|4 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|4 – 1
+|-
+|align=right|'''[[ADO Den Haag|FC Den Haag]]'''||bgcolor="#FFCCCC"|0 – 1||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#999999"| ||bgcolor="#C0F0D0"|3 – 2||bgcolor="#C0F0D0"|5 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|1 – 5||bgcolor="#C0F0D0"|3 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|1 – 3||bgcolor="#C0F0D0"|1 – 0
+|-
+|align=right|'''[[sc Heerenveen]]'''||bgcolor="#FFCCCC"|1 – 4||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|4 – 2||bgcolor="#C0F0D0"|3 – 0||bgcolor="#999999"| ||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|0 – 3||bgcolor="#C0F0D0"|4 – 1||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|2 – 1||bgcolor="#FFCCCC"|0 – 1||bgcolor="#FFCCCC"|0 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#FFCCCC"|1 – 3||bgcolor="#C0F0D0"|2 – 1
+|-
+|align=right|'''[[MVV Maastricht|MVV]]'''||bgcolor="#FFCCCC"|1 – 4||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#999999"| ||bgcolor="#FFCCCC"|1 – 2||bgcolor="#BBEBFF"|3 – 3||bgcolor="#FFCCCC"|0 – 1||bgcolor="#FFCCCC"|1 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 1
+|-
+|align=right|'''[[N.E.C.]]'''||bgcolor="#FFCCCC"|0 – 5||bgcolor="#C0F0D0"|2 – 1||bgcolor="#FFCCCC"|0 – 2||bgcolor="#FFCCCC"|0 – 3||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#999999"| ||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#FFCCCC"|1 – 3||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|0 – 2||bgcolor="#FFCCCC"|1 – 2||bgcolor="#FFCCCC"|0 – 2
+|-
+|align=right|'''[[PSV (voetbalclub)|PSV]]'''||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|6 – 0||bgcolor="#C0F0D0"|5 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|4 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#999999"| ||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|6 – 1||bgcolor="#C0F0D0"|3 – 2||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|5 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|3 – 0
+|-
+|align=right|'''[[RKC Waalwijk|RKC]]'''||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|5 – 2||bgcolor="#C0F0D0"|3 – 2||bgcolor="#C0F0D0"|3 – 0||bgcolor="#FFCCCC"|0 – 3||bgcolor="#999999"| ||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|4 – 2||bgcolor="#C0F0D0"|4 – 1||bgcolor="#BBEBFF"|6 – 6||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|2 – 0
+|-
+|align=right|'''[[Roda JC Kerkrade|Roda JC]]'''||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|5 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#FFCCCC"|1 – 3||bgcolor="#C0F0D0"|1 – 0||bgcolor="#999999"| ||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|1 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#FFCCCC"|1 – 2||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|1 – 0
+|-
+|align=right|'''[[Sparta Rotterdam]]'''||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|2 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|3 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#999999"| ||bgcolor="#C0F0D0"|5 – 3||bgcolor="#FFCCCC"|1 – 3||bgcolor="#C0F0D0"|4 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|2 – 0
+|-
+|align=right|'''[[SVV (voetbalclub)|SVV]]'''||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#FFCCCC"|0 – 1||bgcolor="#C0F0D0"|4 – 2||bgcolor="#FFCCCC"|1 – 2||bgcolor="#FFCCCC"|1 – 4||bgcolor="#C0F0D0"|1 – 0||bgcolor="#FFCCCC"|0 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|3 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#999999"| ||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|1 – 0||bgcolor="#BBEBFF"|0 – 0
+|-
+|align=right|'''[[FC Twente]]'''||bgcolor="#FFCCCC"|0 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|4 – 2||bgcolor="#C0F0D0"|2 – 1||bgcolor="#BBEBFF"|3 – 3||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|5 – 0||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|4 – 1||bgcolor="#FFCCCC"|0 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#999999"| ||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0
+|-
+|align=right|'''[[FC Utrecht]]'''||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|4 – 0||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|4 – 1||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#999999"| ||bgcolor="#BBEBFF"|1 – 1||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|1 – 0
+|-
+|align=right|'''[[SBV Vitesse|Vitesse]]'''||bgcolor="#FFCCCC"|1 – 3||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|2 – 3||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|0 – 0||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|1 – 1||bgcolor="#FFCCCC"|1 – 3||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|3 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#C0F0D0"|1 – 0||bgcolor="#999999"| ||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|2 – 0
+|-
+|align=right|'''[[FC Volendam]]'''||bgcolor="#FFCCCC"|0 – 3||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|2 – 1||bgcolor="#BBEBFF"|2 – 2||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|1 – 1||bgcolor="#BBEBFF"|2 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#FFCCCC"|0 – 2||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|2 – 0||bgcolor="#BBEBFF"|2 – 2||bgcolor="#C0F0D0"|2 – 1||bgcolor="#C0F0D0"|3 – 1||bgcolor="#FFCCCC"|0 – 1||bgcolor="#C0F0D0"|2 – 1||bgcolor="#999999"| ||bgcolor="#BBEBFF"|0 – 0
+|-
+|align=right|'''[[Willem II (voetbalclub)|Willem II]]'''||bgcolor="#C0F0D0"|3 – 2||bgcolor="#C0F0D0"|3 – 2||bgcolor="#C0F0D0"|3 – 2||bgcolor="#FFCCCC"|1 – 2||bgcolor="#C0F0D0"|5 – 0||bgcolor="#C0F0D0"|5 – 2||bgcolor="#FFCCCC"|0 – 1||bgcolor="#BBEBFF"|2 – 2||bgcolor="#FFCCCC"|0 – 2||bgcolor="#C0F0D0"|4 – 2||bgcolor="#C0F0D0"|2 – 0||bgcolor="#C0F0D0"|6 – 1||bgcolor="#C0F0D0"|6 – 0||bgcolor="#C0F0D0"|2 – 1||bgcolor="#FFCCCC"|0 – 2||bgcolor="#BBEBFF"|0 – 0||bgcolor="#C0F0D0"|4 – 1||bgcolor="#999999"| 
+|}
+
+==Topscorers==
+{| class="wikitable"
+|- valign=top
+! align=center | #
+! align=center | Naam
+! align=center | Club
+! align=center | {{goal}}
+|- valign=top
+| rowspan=2| {{0}}1. || {{BR-VLAG|15}} [[Romário de Souza Faria|Romário]] || [[PSV (voetbalclub)|PSV]] || 25
+|- valign=top
+| {{NL-VLAG|15}} [[Dennis Bergkamp]] || [[AFC Ajax|Ajax]] || 25
+|- valign=top
+| {{0}}3. || {{US-VLAG|15}} [[Earnest Stewart]] || [[Willem II (voetbalclub)|Willem II]] || 17
+|- valign=top
+| rowspan=2| {{0}}4. || {{NL-VLAG|15}} [[Juul Ellerman]] || [[PSV (voetbalclub)|PSV]] || 16
+|- valign=top
+| {{DK-VLAG|15}} [[Claus Nielsen]] || [[FC Twente]] || 16
+|- valign=top
+| {{0}}6. || {{NL-VLAG|15}} [[Martin van Geel]] || [[Willem II (voetbalclub)|Willem II]] || 15
+|- valign=top
+| rowspan=2| {{0}}7. || {{MK-VLAG|15}} [[Milko Ðurovski]] || [[FC Groningen]] || 14
+|- valign=top
+| {{NL-VLAG|15}} [[Marco Boogers]] || [[RKC Waalwijk|RKC]] || 14
+|- valign=top
+| rowspan=2| {{0}}9. || {{NL-VLAG|15}} [[Stefan Pettersson]] || [[AFC Ajax|Ajax]] || 13
+|- valign=top
+| {{NL-VLAG|15}} [[Peter Houtman]] || [[Sparta Rotterdam]] || 13
+|}
+
+== Toeschouwers ==
+* Naar de 306 wedstrijden in de reguliere competitie kwamen totaal 2.669.500 mensen kijken, een gemiddeld toeschouwersaantal van 8.724 per wedstrijd.
+
+== Externe links ==
+* [http://www.eredivisie.nl Eredivisie]
+* [http://www.knvb.nl KNVB]
+
+{{Navigatie Eredivisie 1990/91}}
+{{Navigatie voetbalseizoenen Nederland}}
+
+[[Categorie:Eredivisie (mannenvoetbal)]]
+[[Categorie:Competitievoetbal 1990/91]]

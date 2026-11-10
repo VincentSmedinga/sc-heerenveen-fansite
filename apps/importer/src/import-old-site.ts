@@ -16,11 +16,12 @@ import { existsSync } from 'node:fs'
 import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteContext, OldSiteDatabase, OldSiteStep, OldSiteStepReport } from './old-site-step.ts'
 
-import { createFetcher } from './fetcher.ts'
+import { createFetcher, type Fetcher } from './fetcher.ts'
 import { wikipediaOrigin } from './import-matches.ts'
 import { buildOldSiteCheck, formatOldSiteCheck } from './old-site-check.ts'
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { importOldSiteCompleteness } from './old-site-completeness.ts'
+import { compareCrossTables, crossTableSeasonsOf, fetchCrossTables } from './old-site-cross-tables.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteLineups } from './old-site-lineups.ts'
@@ -68,8 +69,14 @@ export type OldSiteImportOptions = {
 }
 
 export type OldSiteReportOptions = {
+  /** Gets the pages with the cross tables. By default the fetcher of the import. */
+  fetcher?: Fetcher
   /** The folder with the files, by default the one next to `import.mjs`. */
   folder?: string | URL
+  /** Where the pages are. By default the Dutch Wikipedia. */
+  origin?: string
+  /** The wait between two requests, in milliseconds. */
+  pause?: number
   /** The day on the report, as `2026-11-08`. By default today in Amsterdam. */
   today?: string
   /** Where the report goes. */
@@ -167,12 +174,19 @@ export async function runOldSiteImport(
 /**
  * The check report (#880): reads the files and the database and writes the report as Markdown.
  * It writes nothing to the database, takes no lock (it only reads) and does not run the steps.
+ * For each season of a league in the files it asks Wikipedia for the page with the cross table
+ * (#976). Its fetcher keeps robots.txt in memory and not in the database, so the report still
+ * writes nothing, and files without a league match ask for nothing. A page that fails is a
+ * season without a comparison in the report, never a failed report.
  * Returns the exit code: 0 when the report is written, 1 when the files can't be used.
  */
 export async function runOldSiteReport(
   databaseUrl: string,
   {
+    fetcher,
     folder = defaultOldSiteFolder(),
+    origin = wikipediaOrigin,
+    pause,
     today = amsterdamToday(),
     write = (text) => process.stdout.write(text),
   }: OldSiteReportOptions = {},
@@ -190,7 +204,10 @@ export async function runOldSiteReport(
   const { close, db } = connect(databaseUrl)
 
   try {
-    write(formatOldSiteCheck(await buildOldSiteCheck(db, data), today))
+    const seasons = crossTableSeasonsOf(data)
+    const pages = seasons.length === 0 ? [] : await fetchCrossTables(fetcher ?? createFetcher(), origin, seasons, pause)
+
+    write(formatOldSiteCheck(await buildOldSiteCheck(db, data), today, await compareCrossTables(db, pages)))
 
     return 0
   } finally {
