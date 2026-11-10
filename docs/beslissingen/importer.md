@@ -3772,3 +3772,13 @@
   De redactie koos de speler bewust, dus haar rij is de rij die blijft.
 - **Alternatieven:** de rij van de import houden en de velden van de redactie erheen kopiëren (de doelpunten en het verslag van de redactie wijzen dan naar een rij die verdwijnt).
   Op een naam die erop lijkt samenvoegen (twee spelers met bijna dezelfde naam bestaan, zie _Jordy Bruijn en Jordy Buijs zijn twee personen_).
+
+## Filip Đuričić is één persoon
+
+- **Datum:** 10 november 2026
+- **Besluit:** Filip Djuričić en Filip Đuričić zijn één persoon, en de schrijfwijze Filip Đuričić blijft (#1036).
+  De titel `Filip Djuričić` staat in `personTitleAliases`.
+  De oude fansite heeft geen van beide schrijfwijzen als naam, dus `oldSiteNameCorrections` krijgt er geen.
+  `similarPersons` krijgt geen regel voor Đ en Dj: voor één naam is de lijst met titels genoeg.
+- **Waarom:** het is de titel op Wikipedia, waar de andere spelling naar doorverwijst, en het sluit aan bij de vier paren van 10 november 2026 (_Uğur Yıldırım is één persoon_).
+- **Alternatieven:** Djuričić laten staan (de persoon staat dan twee keer).
