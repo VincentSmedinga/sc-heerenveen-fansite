@@ -274,6 +274,32 @@ describe('pullAcceptanceCopy', () => {
     expect(await exists(database)).toBe(false)
   })
 
+  it('stops the host and does not hang when the client stops before a large dump is in', async () => {
+    const large = path.join(work, `large-${counter}.sql`)
+
+    // Far more than a pipe holds, so the host waits for a reader that is gone.
+    writeFileSync(large, `${'-- a line of a made-up dump that nobody reads\n'.repeat(100_000)}${completeDump}`)
+
+    const waitingHost = program('ssh', [`exec cat "${large}"`])
+    const failing = program('mysql', ['echo "ERROR 1064 near line 1" >&2', 'exit 1'])
+
+    await expect(
+      pullAcceptanceCopy(env({ MYSQL_COMMAND: failing }), now, { database, ssh: waitingHost }),
+    ).rejects.toThrow(/mysql-\d+ stopped with code 1\. It said:\nERROR 1064 near line 1/)
+    await expect(
+      pullAcceptanceCopy(env({ MYSQL_COMMAND: path.join(work, 'no-client') }), now, { database, ssh: waitingHost }),
+    ).rejects.toThrow(/no-client is not installed here, or not on the path\. Set MYSQL_COMMAND to its full path\./)
+    expect(await exists(database)).toBe(false)
+  }, 10_000)
+
+  it('says how to start the database when the server of DATABASE_URL is not there', async () => {
+    await expect(
+      pullAcceptanceCopy(env({ DATABASE_URL: 'mysql://root@127.0.0.1:1/fansite' }), now, { database, ssh: fakeSsh() }),
+    ).rejects.toThrow(
+      'Can not connect to the database server of DATABASE_URL on this computer. Start it with `docker compose up -d --wait` and try again.',
+    )
+  })
+
   it('says so when the client loaded somewhere else than the database of DATABASE_URL', async () => {
     const elsewhere = program('mysql', ['cat > /dev/null'])
 

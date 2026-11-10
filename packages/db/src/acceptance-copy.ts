@@ -122,8 +122,13 @@ export async function pullAcceptanceCopy(
 
   const server = await connectToServer(env.DATABASE_URL).catch((error: unknown) => {
     remote.kill()
+    remote.stdout.destroy()
 
-    throw error
+    throw new Error(
+      'Can not connect to the database server of DATABASE_URL on this computer. ' +
+        'Start it with `docker compose up -d --wait` and try again.',
+      { cause: error },
+    )
   })
 
   try {
@@ -142,14 +147,33 @@ export async function pullAcceptanceCopy(
 
     const load = async (command: string, args: string[], howToFix: string, cwd?: string) => {
       const client = spawn(command, args, { cwd, stdio: ['pipe', 'ignore', 'pipe'] })
-      const [sent, loaded, piped] = await Promise.allSettled([
-        remoteDone,
-        watch(client, command, howToFix),
-        pipeline(received, client.stdin),
-      ])
+      const loaded = watch(client, command, howToFix)
+      const piped = pipeline(received, client.stdin)
+      let hostStopped = false
+      let stoppedByUs = false
+      // A client that stops early reads no more, and then the host would wait for ever with a
+      // dump nobody takes. So the host is stopped as soon as the client or the pipe fails.
+      const stopHost = () => {
+        if (!hostStopped) {
+          stoppedByUs = true
+          remote.kill()
+          // What it sent and nobody read would keep it from closing.
+          remote.stdout.destroy()
+        }
+      }
 
-      // The host comes first: when it stops, the client and the pipe fail because of it.
-      for (const result of [sent, loaded, piped]) {
+      remoteDone.then(
+        () => (hostStopped = true),
+        () => (hostStopped = true),
+      )
+      loaded.catch(stopHost)
+      piped.catch(stopHost)
+
+      const [sent, ended, pipe] = await Promise.allSettled([remoteDone, loaded, piped])
+
+      // A host that failed by itself comes first: the client and the pipe fail because of it.
+      // A host that we stopped says nothing useful: then the client says what went wrong.
+      for (const result of stoppedByUs ? [ended, pipe, sent] : [sent, ended, pipe]) {
         if (result.status === 'rejected') throw result.reason
       }
     }
@@ -197,6 +221,7 @@ export async function pullAcceptanceCopy(
     return { database, dumpedAt, loadedAt, tables: Number(counted[0]?.['total'] ?? 0) }
   } catch (error) {
     remote.kill()
+    remote.stdout.destroy()
     await server.query('DROP DATABASE IF EXISTS ??', [database]).catch(() => {})
 
     throw error
