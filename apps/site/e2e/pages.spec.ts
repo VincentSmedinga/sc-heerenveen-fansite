@@ -309,6 +309,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/spelerscijfers', status: 404 },
   { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 404 },
+  // The players of whom the import says something else than the editors: the same seasons.
+  { admin: 'beheerder', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelersgegevens`, status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 200 },
+  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/spelersgegevens', status: 404 },
+  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 404 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
   { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
   { admin: 'moderator', path: '/beheer/kwaliteit', status: 404 },

@@ -40,6 +40,7 @@ const screens = [
   '/beheer/kwaliteit',
   `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`,
   `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`,
+  `/beheer/kwaliteit/${statSeasonSlug()}/spelersgegevens`,
   '/beheer/bezoek',
 ]
 

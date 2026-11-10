@@ -1,12 +1,18 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
-import { mergePlayerInto } from '@fansite/db/person-merge'
+import { fillPlayerFrom, mergeEditorsPersonInto, mergePlayerInto } from '@fansite/db/person-merge'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
+import {
+  type FoundFieldDifference,
+  holdEditorsFields,
+  isOfEditors,
+  keepPlayerFieldDifferences,
+} from '@fansite/db/player-field-differences'
 import { comparePlayerGoals } from '@fansite/db/player-stat-differences'
 import { players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq, notInArray, sql } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -60,6 +66,32 @@ export type SquadReport =
       season: string
       url: string
     }
+
+/**
+ * The players the editors added or changed (issue 1022), by their person: the import finds such
+ * a player by his person too, so a list that names him under another title or name makes no
+ * second row. A person with two such rows is left out: nothing says which row is meant.
+ */
+export function editorsByPerson(rows: readonly Player[]): Map<number, Player> {
+  const found = new Map<number, Player>()
+  const twice = new Set<number>()
+
+  for (const row of rows) {
+    if (isOfEditors(row) && row.personId !== null) {
+      if (found.has(row.personId)) {
+        twice.add(row.personId)
+      }
+
+      found.set(row.personId, row)
+    }
+  }
+
+  for (const personId of twice) {
+    found.delete(personId)
+  }
+
+  return found
+}
 
 /** Writes a report as a line of text. */
 export function formatSquadReport(report: SquadReport): string {
@@ -180,6 +212,10 @@ export function scorersByPerson(rows: readonly Player[]): Map<number, Player> {
  * its `id`; when the season has a row in the spelling that stays already, the other is merged
  * into it (`mergePlayerInto`). The search term follows when it was the surname of the old
  * name. Returns how many rows changed: a second run finds none. Use the transaction.
+ *
+ * A name or a page the editors set stays as they wrote it (issue 1022): only the other of the
+ * two changes. A row of the editors is still merged with the row in the spelling that stays,
+ * and then the row of the editors is the one that stays, with what the other had and it lacked.
  */
 export async function storeChosenSpellings(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -190,21 +226,45 @@ export async function storeChosenSpellings(
   let changed = 0
 
   for (const row of rows) {
-    const chosen = chosenSpelling(row.name, row.wikipediaPage)
-
-    if (chosen.name === row.name && chosen.page === row.wikipediaPage) {
+    if (gone.has(row.id)) {
       continue
     }
 
+    const spelling = chosenSpelling(row.name, row.wikipediaPage)
+
+    if (spelling.name === row.name && spelling.page === row.wikipediaPage) {
+      continue
+    }
+
+    // What the editors set stays as they wrote it.
+    const chosen = {
+      name: row.editorsFields.includes('name') ? row.name : spelling.name,
+      page: row.editorsFields.includes('wikipedia_page') ? row.wikipediaPage : spelling.page,
+    }
     const stays = rows.find(
       (one) =>
         one.id !== row.id &&
         !gone.has(one.id) &&
-        (nameKey(one.name) === nameKey(chosen.name) ||
-          (chosen.page !== null && one.wikipediaPage !== null && nameKey(one.wikipediaPage) === nameKey(chosen.page))),
+        (nameKey(one.name) === nameKey(spelling.name) ||
+          (spelling.page !== null &&
+            one.wikipediaPage !== null &&
+            nameKey(one.wikipediaPage) === nameKey(spelling.page))),
     )
 
-    if (stays === undefined) {
+    if (stays !== undefined && !(isOfEditors(row) && !isOfEditors(stays))) {
+      await mergePlayerInto(db, row.id, stays.id)
+      gone.add(row.id)
+      changed++
+
+      continue
+    }
+    if (stays !== undefined) {
+      // A row of the editors stays, and the row in the spelling that stays is merged into it.
+      await mergePlayerInto(db, stays.id, row.id)
+      await fillPlayerFrom(db, row, stays)
+      gone.add(stays.id)
+    }
+    if (chosen.name !== row.name || chosen.page !== row.wikipediaPage) {
       // The surname of the old name in the new spelling (`Samardžić`), or the new surname.
       const term =
         chosen.name.length === row.name.length && nameKey(row.name).endsWith(nameKey(row.searchTerm))
@@ -212,16 +272,17 @@ export async function storeChosenSpellings(
           : nameKey(chosen.name).endsWith(` ${nameKey(row.searchTerm)}`)
             ? row.searchTerm
             : searchTerm(chosen.name)
+      // A page the row got from the one that went stays when the spelling names none.
+      const page = chosen.page ?? row.wikipediaPage
 
       await db
         .update(players)
-        .set({ name: chosen.name, searchTerm: term, wikipediaPage: chosen.page })
+        .set({ name: chosen.name, searchTerm: term, wikipediaPage: page })
         .where(eq(players.id, row.id))
       row.name = chosen.name
-      row.wikipediaPage = chosen.page
-    } else {
-      await mergePlayerInto(db, row.id, stays.id)
-      gone.add(row.id)
+      row.wikipediaPage = page
+    } else if (stays === undefined) {
+      continue
     }
 
     changed++
@@ -296,15 +357,27 @@ async function readAndStore(
     })
     // The first good read of a season replaces what the seed made up, and nothing else: a
     // player from an earlier read stays, and so does a player the import of the matches made
-    // of a scorer (the source `doelpunten`). A goal of a made-up player loses its link.
+    // of a scorer (the source `doelpunten`). A goal of a made-up player loses its link. A
+    // player the editors added or changed stays too.
     if (firstRead) {
-      await transaction.delete(players).where(and(eq(players.season, season), ne(players.source, 'doelpunten')))
+      await transaction
+        .delete(players)
+        .where(
+          and(
+            eq(players.season, season),
+            notInArray(players.source, ['doelpunten', 'redactie']),
+            sql`${players.editorsFields} = ''`,
+          ),
+        )
     }
 
     await storeChosenSpellings(transaction, season)
 
     const result = await storePlayers(transaction, season, read.players, now, personBook)
     const stats = await storeStats(transaction, season, read.players, result.ids, now)
+
+    // What the table says and the editors set otherwise waits for them, once (#1022).
+    await keepPlayerFieldDifferences(transaction, season, result.differences, now)
 
     warnings.push(...stats.warnings)
 
@@ -371,13 +444,21 @@ async function readAndStore(
  * keeps his search term, so a correction by hand survives the import. Rows of another season
  * are not touched.
  *
+ * What the editors set stays (issue 1022). A player they added or changed is also known by his
+ * person, so the table makes no second row of him, and the table fills in what he lacks. A
+ * field of `players.editors_fields` is never written: another value of the table is in
+ * `differences`, for `keepPlayerFieldDifferences`. With a page of the editors that differs from
+ * the table the player keeps his person too. A person the editors made without an article
+ * becomes the person of the page the table links (`mergeEditorsPersonInto`). A player with the
+ * source `redactie` keeps it, and stays in the squad when the table does not have him.
+ *
  * `left` counts the players who left the squad in this read, not those who were gone already.
  * `ids` gives the row of each player found, or null for one that could not be placed: a row can
  * be claimed by one player of the table only, and a second one that would land on it is left
  * out, so two players never write to the same row.
  */
 async function storePlayers(
-  db: Pick<Database, 'insert' | 'select' | 'update'>,
+  db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   season: string,
   found: ReadPlayer[],
   now: Date,
@@ -387,6 +468,7 @@ async function storePlayers(
   const byPage = new Map<string, Player>()
   const byName = new Map<string, Player>()
   const scorerOfPerson = scorersByPerson(rows)
+  const editorsOfPerson = editorsByPerson(rows)
 
   for (const row of rows) {
     byName.set(nameKey(row.name), row)
@@ -397,6 +479,7 @@ async function storePlayers(
   }
 
   const counts = { added: 0, left: 0, unchanged: 0, updated: 0 }
+  const differences: FoundFieldDifference[] = []
   const ids = new Map<ReadPlayer, null | number>()
   const seen = new Set<number>()
 
@@ -405,7 +488,7 @@ async function storePlayers(
     const before =
       (player.wikipediaPage === null ? undefined : byPage.get(nameKey(player.wikipediaPage))) ??
       byName.get(nameKey(player.name)) ??
-      (personId === null ? undefined : scorerOfPerson.get(personId))
+      (personId === null ? undefined : (scorerOfPerson.get(personId) ?? editorsOfPerson.get(personId)))
 
     if (before === undefined) {
       counts.added++
@@ -425,15 +508,35 @@ async function storePlayers(
     seen.add(before.id)
     ids.set(player, before.id)
 
+    // The fields the editors set stay as they are, and what the table says instead waits.
+    const held = holdEditorsFields(before, {
+      name: player.name,
+      position: player.position,
+      shirtNumber: player.shirtNumber,
+      wikipediaPage: player.wikipediaPage,
+    })
+    const wanted = { ...held.allowed, name: held.allowed.name ?? before.name }
+    // The person belongs to the page: a page of the editors that is not the page of the table
+    // keeps the person it had.
+    const ownPage = before.editorsFields.includes('wikipedia_page') && before.wikipediaPage !== player.wikipediaPage
+    const wantedPerson = ownPage ? before.personId : (personId ?? before.personId)
+
+    differences.push(...held.differences)
+
+    if (before.personId !== null && wantedPerson !== null && before.personId !== wantedPerson) {
+      // A person the editors made without an article is the person of this page from now on.
+      await mergeEditorsPersonInto(db, before.personId, wantedPerson)
+    }
+
     if (
       before.inSquad &&
       before.source !== 'doelpunten' &&
-      before.name === player.name &&
-      before.position === player.position &&
-      before.shirtNumber === player.shirtNumber &&
+      before.name === wanted.name &&
+      before.position === wanted.position &&
+      before.shirtNumber === wanted.shirtNumber &&
       before.country === player.country &&
-      before.wikipediaPage === player.wikipediaPage &&
-      (personId === null || before.personId === personId)
+      before.wikipediaPage === wanted.wikipediaPage &&
+      before.personId === wantedPerson
     ) {
       counts.unchanged++
     } else {
@@ -444,26 +547,27 @@ async function storePlayers(
           country: player.country,
           inSquad: true,
           leftSquadAt: null,
-          name: player.name,
-          personId: personId ?? before.personId,
-          position: player.position,
-          shirtNumber: player.shirtNumber,
+          name: wanted.name,
+          personId: wantedPerson,
+          position: wanted.position,
+          shirtNumber: wanted.shirtNumber,
           // A scorer who is in the table now is a player of the table.
           ...(before.source === 'doelpunten' ? { source: 'selectie' as const } : {}),
-          wikipediaPage: player.wikipediaPage,
+          wikipediaPage: wanted.wikipediaPage,
         })
         .where(eq(players.id, before.id))
     }
   }
 
   for (const row of rows) {
-    if (row.inSquad && row.source !== 'doelpunten' && !seen.has(row.id)) {
+    // A player the editors added stays in the squad when the table does not have him.
+    if (row.inSquad && row.source !== 'doelpunten' && row.source !== 'redactie' && !seen.has(row.id)) {
       counts.left++
       await db.update(players).set({ inSquad: false, leftSquadAt: now }).where(eq(players.id, row.id))
     }
   }
 
-  return { counts, ids }
+  return { counts, differences, ids }
 }
 
 /**

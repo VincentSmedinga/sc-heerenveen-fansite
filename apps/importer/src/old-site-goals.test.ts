@@ -470,6 +470,38 @@ describe('the steps spelers and doelpunten', () => {
     expect((await goalRows()).filter((row) => row.ours).map((row) => row.playerId)).toEqual([rows[0]!.id, rows[0]!.id])
   })
 
+  it('uses a player the editors added or changed as he is, and makes no second row (#1022)', async () => {
+    const venema = { firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
+    const list = [{ code: 'ronnie.venema', ...venema }]
+    const match = oldMatch({
+      events: [goal(10, 'ronnie.venema'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ronnie.venema')],
+    })
+    const ofEditors = {
+      editorsFields: ['name', 'shirt_number'] as ('name' | 'shirt_number')[],
+      name: 'Ronny Venema',
+      searchTerm: 'Venema',
+      season: '2001/02',
+      shirtNumber: 9,
+      source: 'redactie' as const,
+    }
+
+    await database.db.insert(players).values(ofEditors)
+    await importOldSiteClubs(database.db, oldClubs)
+    await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+
+    expect(await importOldSitePlayers(database.db, [match], list)).toMatchObject({
+      changed: 0,
+      created: 0,
+      unchanged: 1,
+    })
+    expect(await playerRows()).toMatchObject([ofEditors])
+
+    await importOldSiteGoals(database.db, [match], list)
+    const [row] = await playerRows()
+
+    expect((await goalRows()).filter((one) => one.ours).map((one) => one.playerId)).toEqual([row!.id, row!.id])
+  })
+
   it('merges a stale row of the step into the player the corrections chose, and only that row', async () => {
     const venema = { code: 'ronnie.venema', firstName: 'Ronnie', infix: null, lastName: 'Venema', line: null }
     const meijer = { code: 'hennie.meijer', firstName: 'Hennie', infix: null, lastName: 'Meijer', line: null }

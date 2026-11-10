@@ -690,6 +690,7 @@ async function adoptScorers(
     squad.push({
       ...row,
       country: null,
+      editorsFields: [],
       id: insertId,
       inSquad: true,
       leftSquadAt: null,

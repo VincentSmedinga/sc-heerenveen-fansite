@@ -141,6 +141,8 @@ describe('recordAction', () => {
       'player.add',
       'player.edit',
       'player.remove',
+      'player.field-take-over',
+      'player.field-keep',
     ])
   })
 

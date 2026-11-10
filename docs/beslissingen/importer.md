@@ -895,6 +895,7 @@
 - **Later:** zie _De selectie van eerdere seizoenen komt in een eerste versie met gaten, en een tweede lezing haalt niemand weg_.
   Sinds 6 november 2026 lezen `import:squad` en `import:squads` de selectie van eerdere seizoenen, uit dezelfde Nederlandse Wikipedia en met dezelfde fetcher, controle op `robots.txt` en licentie.
 - **Later:** sinds 9 november 2026 bewaren we ook de landcode van de vlag (`players.country`); zie _Het land van een speler komt als landcode uit de vlag in de selectietabel_.
+- **Later:** sinds 10 november 2026 kan de redactie een speler toevoegen of aanpassen, en dat blijft staan als de tabel iets anders zegt; zie _Wat de redactie van een speler zette, schrijft de import niet over_.
 
 ## De zoekterm is de achternaam, als eigen kolom
 
@@ -949,6 +950,7 @@
 - **Later:** een speler met de bron `doelpunten` stond nooit in de tabel van de selectie en krijgt sinds 10 november 2026 dus ook niet "niet meer in de selectie".
   Staat hij later wel in de tabel, dan houdt hij zijn `id` en wordt zijn bron `selectie`.
   Zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_.
+- **Later:** de import werkt sinds 10 november 2026 een veld dat de redactie zette niet meer bij, en een speler met de bron `redactie` krijgt niet "niet meer in de selectie"; zie _Wat de redactie van een speler zette, schrijft de import niet over_.
 
 ## De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -983,6 +985,7 @@
 - **Alternatieven:** de verzonnen spelers laten staan (rommel in de tabel en kans op een verkeerde koppeling); de verzonnen spelers een eigen seizoen geven (de pagina's tonen dan niets in het lopende seizoen, zoals bij de verzonnen wedstrijden).
 - **Later:** de eerste goede lezing laat sinds 10 november 2026 de spelers met de bron `doelpunten` staan: de import van de wedstrijden maakte ze, niet de seed.
   Zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_.
+- **Later:** de eerste goede lezing laat sinds 10 november 2026 ook de spelers staan die de redactie toevoegde of aanpaste; zie _Wat de redactie van een speler zette, schrijft de import niet over_.
 
 ## Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie
 
@@ -2298,6 +2301,7 @@
 - **Alternatieven:** de naam bij het tonen raden (de huidige fout); Wikidata (de `robots.txt` weert ons); de sleutel laten gelden zonder te controleren of hij op de titel past (een foute sleutel geeft dan een foute naam zonder dat iemand het ziet).
 - **Later:** zie _Wikidata is de bron voor de gegevens van een persoon_.
   Wikidata is bereikbaar voor het item van een persoon, maar de naam in delen blijft uit de sorteersleutel komen: het item heeft geen voornaam en achternaam in de vorm die we bewaren.
+- **Later:** een naam die de redactie invulde (`redactie`) vervangt de import sinds 10 november 2026 nooit, ook niet met een naam uit de lijst; zie _Wat de redactie van een speler zette, schrijft de import niet over_.
 
 ## Een gestaakte wedstrijd met een officiële einduitslag is een uitzondering voor één wedstrijd
 
@@ -2489,6 +2493,7 @@
   Een seizoen met een falende lezer toch half opslaan (verworpen: zie hierboven).
 - **Later:** dit vervangt het uitgangspunt van _Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie_ dat een eerder seizoen geen selectie heeft.
 - **Later:** zie _Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen_ (9 november 2026): de uurlijkse import leest de selectie van het seizoen dat net voorbij is in juli en augustus zelf, één keer per week, met de lezer van het lopende seizoen en niet met deze opdrachten.
+- **Later:** een tweede lezing verbetert sinds 10 november 2026 geen veld dat de redactie zette, en geen lijst is beter dan de bron `redactie`; zie _Wat de redactie van een speler zette, schrijft de import niet over_.
 
 ## De volledigheid van een selectie is een kans die rust op de bron, met een plafond per bron
 
@@ -3698,3 +3703,72 @@
   Een losse opdracht (iemand moet eraan denken, op elke omgeving).
   De persoon die verdwijnt weghalen zonder om te zetten (`person_id` wordt dan leeg, en de doelpunten en spelers raken hun persoon kwijt).
   De cijfers van twee rijen optellen (de twee rijen zijn dezelfde tabel van Wikipedia, dus dat telt dubbel).
+- **Later:** van twee rijen van één seizoen blijft sinds 10 november 2026 eerst de rij van de redactie, en een naam van de redactie gaat mee naar de persoon die blijft; zie _Een speler van de redactie en een speler van de import worden één rij_.
+  Een rij met een naam of pagina van de redactie houdt die bij `storeChosenSpellings`.
+
+## De redactie wint, de import stelt voor
+
+- **Datum:** 9 november 2026
+- **Besluit:** velden die de redactie zette blijven staan, en een andere waarde van de import wordt een wachtende wijziging voor de redactie (#1022).
+- **Waarom:** een correctie die bij de volgende run verdwijnt, kost de redactie dezelfde moeite twee keer.
+  Een stille overschrijving ziet niemand.
+- **Alternatieven:** de import overschrijft (bewerkingen verdwijnen).
+  Een speler van de redactie is gesloten voor de import (de import kan er geen gegevens meer aan toevoegen).
+
+## Wat de redactie van een speler zette, schrijft de import niet over
+
+- **Datum:** 10 november 2026
+- **Besluit:** `players.editors_fields` zegt welke velden van een speler van de redactie zijn: de naam, het rugnummer, de positie en de Wikipedia-pagina (#1022, migratie `0062_add_editors_fields_of_players`).
+  - **Wie zet het:** het beheer.
+    Bij een speler die de redactie toevoegt, zijn dat de naam en elk veld dat is ingevuld.
+    Bij een speler die de redactie aanpast, zijn dat de velden die veranderden, ook een veld dat de redactie leegmaakte.
+    De migratie zet het voor wat de redactie sinds #1020 al deed, uit de bron `redactie` en de regels `player.edit` van het logboek.
+  - **Wat de import doet:** hij schrijft zo'n veld nooit, en vult de andere velden aan zoals altijd.
+    Dat geldt voor de import van de selectie, van een vorige selectie en voor `storeChosenSpellings`.
+    Een speler met de bron `redactie` houdt die bron, blijft in de selectie als geen lijst hem heeft, en overleeft de eerste goede lezing.
+    De import van de doelpuntenmakers (#1024) en de stap `spelers` van de oude fansite veranderden een bestaande rij al niet; tests houden dat zo.
+    De stap `personen` raakt alleen rijen met de bron `verslag`.
+  - **De naam van de persoon:** een naam met de bron `redactie` vervangt de import nooit, ook niet met een naam uit de lijst `personNames`.
+  - **Een afwijking:** leest de import een andere waarde voor zo'n veld, dan wordt dat een rij in `player_field_differences`: de speler, het seizoen, het veld, de waarde van de redactie en die van de import.
+    Elke run vergelijkt alle spelers van het seizoen die hij las (`holdEditorsFields`) en bewaart het resultaat in dezelfde transactie als de selectie (`keepPlayerFieldDifferences` in `@fansite/db/player-field-differences`).
+    Dezelfde afwijking komt er één keer, een afwijking met andere waarden vervangt de oude, en een afwijking die weg is sluit zichzelf.
+    Een veld dat een lijst niet geeft, zegt niets en is dus geen afwijking.
+    Bij een vorige selectie telt elke andere waarde van een lijst, ook als die lijst het veld anders niet had vervangen.
+  - **Beslissen:** in het beheer, op `/beheer/kwaliteit/<seizoen>/spelersgegevens`, naast de spelerscijfers, met een reden en een regel in het logboek (`player.field-take-over` of `player.field-keep`).
+    Overnemen geeft de speler de waarde van de import, en het veld is dan niet meer van de redactie.
+    Houden laat de speler zoals hij is, en dezelfde afwijking komt niet terug zolang beide waarden gelijk blijven.
+    Heeft een andere speler van het seizoen de naam of de pagina al, dan weigert het beheer het overnemen.
+  - **Een naam overnemen:** de rij krijgt de naam en de achternaam als zoekterm.
+    Had de persoon een naam van de redactie, dan krijgt hij de naam van de import zonder delen en zonder bron, zodat de import hem later de naam van zijn artikel kan geven.
+  - **Een pagina overnemen:** de speler krijgt de persoon van die pagina als we die kennen.
+    Een persoon van de redactie zonder pagina krijgt de pagina.
+    Anders is de speler zonder persoon tot de volgende import de persoon van de pagina vindt.
+- **Waarom:** `players.source` en `persons.name_source` zeggen alleen wie de rij of de naam maakte, niet welk veld de redactie later veranderde.
+  Zonder een merkteken per veld moet de import kiezen tussen alles overschrijven en niets meer aanvullen.
+  Een eigen tabel past bij _Een verschil in de cijfers van een speler staat in een eigen tabel_: `match_changes` hoort bij een wedstrijd, met een deel en een voorstel als JSON, en een speler heeft geen wedstrijd.
+  De regel van zeven dagen geldt hier niet: het issue zegt dat de waarde van de redactie blijft tot de redactie beslist.
+- **Alternatieven:** `match_changes` gebruiken (vraagt een wedstrijd, en zijn regel van zeven dagen neemt Wikipedia vanzelf over).
+  Vier kolommen met ja of nee in plaats van één lijst (vier keer dezelfde kolom, en een vijfde veld vraagt weer een kolom).
+  De velden afleiden uit het logboek bij elke run (traag, en het logboek is tekst voor mensen).
+  De waarde van Wikipedia bewaren naast die van de redactie, zoals `table_goals` (dan volgt de import Wikipedia weer zodra de tabel verandert, en beslist de redactie niets).
+  Een lege waarde van een lijst als afwijking tellen (de lijsten van eerdere seizoenen hebben vaak geen rugnummer, dus dat geeft bij elke speler een wijziging).
+
+## Een speler van de redactie en een speler van de import worden één rij
+
+- **Datum:** 10 november 2026
+- **Besluit:** vindt de import in een seizoen de speler die de redactie toevoegde of aanpaste, dan schrijft hij naar die rij en maakt hij geen tweede (#1022).
+  - **Hoe hij hem vindt:** op de pagina, dan op de naam, en dan op de persoon (`editorsByPerson`), zoals bij een doelpuntenmaker (#1024).
+    De persoon vangt een lijst op die een andere titel van hetzelfde artikel linkt.
+  - **Wat blijft:** de rij van de redactie, met zijn `id`, zijn bron en de velden van de redactie.
+    De import vult aan wat leeg is: het land, de positie, het rugnummer, de pagina en de persoon.
+    Wijkt de pagina van de lijst af van een pagina van de redactie, dan houdt de speler ook zijn persoon.
+  - **Een persoon zonder artikel:** maakte de redactie een persoon zonder pagina, en linkt de lijst voor die speler wel een pagina, dan wordt hij de persoon van die pagina (`mergeEditorsPersonInto`).
+    De naam van de redactie gaat mee, en Wikidata vult daarna de geboortegegevens aan.
+  - **Twee rijen van één persoon:** bij het samenvoegen van personen (#1027) en van schrijfwijzen blijft de rij van de redactie, en de andere rij gaat erin op.
+    Een naam van de redactie op de persoon die verdwijnt, gaat naar de persoon die blijft.
+  - **Wat niet samengaat:** een speler van de redactie zonder pagina en zonder persoon van een artikel, met een andere naam dan de lijst.
+    Niets zegt dan dat het dezelfde mens is, en de import raadt niet.
+- **Waarom:** twee rijen voor één speler geven twee regels op de pagina Spelers, en doelpunten die over de twee verdeeld raken.
+  De redactie koos de speler bewust, dus haar rij is de rij die blijft.
+- **Alternatieven:** de rij van de import houden en de velden van de redactie erheen kopiëren (de doelpunten en het verslag van de redactie wijzen dan naar een rij die verdwijnt).
+  Op een naam die erop lijkt samenvoegen (twee spelers met bijna dezelfde naam bestaan, zie _Jordy Bruijn en Jordy Buijs zijn twee personen_).

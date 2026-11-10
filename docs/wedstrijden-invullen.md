@@ -133,6 +133,20 @@ Schrijf een reden, en kies:
 
 Klopt een wedstrijd of een verslag niet, verbeter dan die: het verschil verdwijnt daarna vanzelf.
 
+## Spelersgegevens die verschillen
+
+Wat je in het beheer van een speler invult of aanpast, blijft staan: de naam, het rugnummer, de positie en de Wikipedia-pagina.
+De import schrijft die velden daarna niet meer.
+Leest hij op Wikipedia iets anders, dan staat op `/beheer/kwaliteit` bij het seizoen "spelersgegevens verschillen".
+De pagina erachter noemt de speler, het veld, jouw waarde en die van de import.
+Schrijf een reden, en kies:
+
+- **Neem de import over:** de speler krijgt de waarde van de import, en de import houdt dat veld weer bij.
+- **Houd de redactie:** de speler blijft zoals je hem invulde.
+  Dit verschil komt niet terug zolang beide waarden gelijk blijven.
+
+Pas je de speler zelf aan tot hij gelijk is aan Wikipedia, dan verdwijnt het verschil bij de volgende import vanzelf.
+
 ## Een vastgehouden wijziging beslissen
 
 De import houdt soms een wijziging van Wikipedia vast, omdat hij verdacht lijkt.

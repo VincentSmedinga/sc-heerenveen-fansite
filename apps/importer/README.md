@@ -2068,6 +2068,26 @@ Het is geen waarschuwing meer en er komt geen regel in het logboek van het behee
   Zolang de tabel dat nog zegt, laat de import het aantal van de redactie staan; zegt de tabel iets anders, dan geldt de tabel weer.
 - Een verschil dat een mens afwees, komt niet terug zolang de twee aantallen gelijk blijven.
 
+### Een speler die de redactie toevoegde of aanpaste
+
+De redactie kan in het beheer een speler toevoegen en de naam, het rugnummer, de positie en de Wikipedia-pagina van een speler aanpassen (#1020).
+`players.editors_fields` zegt welke van die velden van de redactie zijn, en de import schrijft ze nooit (#1022).
+Dat geldt voor de import van de selectie (`import-squad.ts`), van een vorige selectie (`import-past-squad.ts`) en voor `storeChosenSpellings`.
+
+- De andere velden vult de import aan zoals altijd: het land, en een positie, rugnummer, pagina of persoon die leeg is.
+- Leest de import een andere waarde voor een veld van de redactie, dan komt er een rij in `player_field_differences` met de speler, het seizoen, het veld en de twee waarden (`keepPlayerFieldDifferences` in `@fansite/db/player-field-differences`).
+  Dezelfde afwijking komt er één keer, een afwijking met andere waarden vervangt de oude (`replaced`), en een afwijking die weg is sluit zichzelf (`reverted`).
+  Een veld dat een lijst niet geeft, is geen afwijking.
+- De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelersgegevens`.
+  Neemt ze de waarde van de import over, dan is het veld niet meer van de redactie en houdt de import het weer bij.
+  Houdt ze haar eigen waarde, dan komt dezelfde afwijking niet terug zolang beide waarden gelijk blijven.
+- De import vindt een speler van de redactie op zijn pagina, zijn naam of zijn persoon (`editorsByPerson`), en maakt dan geen tweede rij.
+  De rij van de redactie blijft, met haar `id` en haar bron.
+- Een speler met de bron `redactie` blijft in de selectie als geen lijst hem heeft, en de eerste goede lezing haalt hem niet weg.
+- Maakte de redactie een persoon zonder artikel, en linkt een lijst voor die speler een pagina, dan wordt hij de persoon van die pagina, met de naam van de redactie (`mergeEditorsPersonInto`).
+- Een naam van een persoon met de bron `redactie` vervangt de import nooit.
+- De import van de doelpuntenmakers en de stap `spelers` van de oude fansite gebruiken een speler van de redactie zoals hij is.
+
 De vergelijking stopt niets: lukt ze niet, dan is dat een waarschuwing en blijft de selectie staan.
 Is er in het seizoen nog geen wedstrijd gespeeld, dan is er niets om mee te vergelijken en zegt de controle niets.
 Bij de allereerste run op een lege database geeft de controle rijen voor wie al scoorde.

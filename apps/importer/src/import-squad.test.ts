@@ -10,6 +10,7 @@ import {
   matchReports,
   personPages,
   persons,
+  playerFieldDifferences,
   players,
   playerSeasonStats,
   playerStatDifferences,
@@ -684,6 +685,207 @@ describe('reading again', () => {
         { inSquad: true, leftSquadAt: null, source: 'doelpunten' },
       ])
     })
+  })
+})
+
+describe('what the editors set of a player (#1022)', () => {
+  const later = new Date(first.getTime() + hours(1))
+  const evenLater = new Date(first.getTime() + hours(2))
+  const klaverboer = async () =>
+    (await database.db.select().from(players).where(eq(players.wikipediaPage, 'Bernt Klaverboer')))[0]!
+  const waiting = () =>
+    database.db
+      .select()
+      .from(playerFieldDifferences)
+      .orderBy(asc(playerFieldDifferences.field), asc(playerFieldDifferences.id))
+
+  it('leaves the fields the editors set alone, and still writes the others', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await klaverboer()
+
+    // The editors gave him another name, number and line. The table then changes his flag.
+    await database.db
+      .update(players)
+      .set({
+        editorsFields: ['name', 'shirt_number', 'position'],
+        name: 'Bernt K.',
+        position: 'aanvaller',
+        shirtNumber: 1,
+      })
+      .where(eq(players.id, before.id))
+    page.squad = original.replace(
+      '{{NL-VLAG}}|| align="left" |[[Bernt Klaverboer]]',
+      '{{BE-VLAG}}|| align="left" |[[Bernt Klaverboer]]',
+    )
+
+    expect(await importAt(server, later)).toMatchObject({ players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
+    expect(await klaverboer()).toMatchObject({
+      country: 'BE',
+      editorsFields: ['name', 'shirt_number', 'position'],
+      id: before.id,
+      name: 'Bernt K.',
+      position: 'aanvaller',
+      shirtNumber: 1,
+      source: 'selectie',
+    })
+    // The next read finds him unchanged, and writes nothing.
+    expect(await importAt(server, evenLater)).toMatchObject({ players: { unchanged: 25, updated: 0 } })
+    expect(await database.db.select().from(players)).toHaveLength(25)
+  })
+
+  it('keeps what the table says instead as a difference that waits, once, and closes one that is gone', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await klaverboer()
+
+    await database.db
+      .update(players)
+      .set({
+        editorsFields: ['name', 'shirt_number', 'position'],
+        name: 'Bernt K.',
+        position: 'aanvaller',
+        shirtNumber: 1,
+      })
+      .where(eq(players.id, before.id))
+    await importAt(server, later)
+
+    expect(await waiting()).toMatchObject([
+      { editorsValue: 'Bernt K.', field: 'name', importValue: 'Bernt Klaverboer', playerId: before.id, season },
+      { editorsValue: '1', field: 'shirt_number', importValue: '22', status: 'pending' },
+      { editorsValue: 'aanvaller', field: 'position', firstSeenAt: later, importValue: 'doelman', lastSeenAt: later },
+    ])
+
+    // The editors make the number that of the table: that difference closes itself, and the
+    // other two are seen again and not kept twice.
+    await database.db.update(players).set({ shirtNumber: 22 }).where(eq(players.id, before.id))
+    await importAt(server, evenLater)
+
+    expect(await waiting()).toMatchObject([
+      { field: 'name', firstSeenAt: later, lastSeenAt: evenLater, status: 'pending' },
+      { decidedAt: evenLater, field: 'shirt_number', resolution: 'reverted', status: 'rejected' },
+      { field: 'position', firstSeenAt: later, lastSeenAt: evenLater, status: 'pending' },
+    ])
+    expect(await klaverboer()).toMatchObject({ name: 'Bernt K.', position: 'aanvaller', shirtNumber: 22 })
+  })
+
+  it('keeps a player the editors added in the squad when the table does not have him, also in the first read', async () => {
+    await database.db
+      .insert(players)
+      .values([
+        ...madeUpSquad(first),
+        { editorsFields: ['name'], name: 'Sanne Spits', searchTerm: 'Spits', season, source: 'redactie' },
+      ])
+
+    const { server } = await serve()
+
+    expect(await importAt(server, first)).toMatchObject({ players: { added: 25, left: 0 } })
+    expect(await importAt(server, later)).toMatchObject({ players: { left: 0, unchanged: 25 } })
+    expect(await database.db.select().from(players)).toHaveLength(26)
+    expect(await database.db.select().from(players).where(eq(players.name, 'Sanne Spits'))).toMatchObject([
+      { inSquad: true, leftSquadAt: null, source: 'redactie' },
+    ])
+  })
+
+  it('merges the player of the table into the player of the editors with the same page, and fills in what he lacks', async () => {
+    await database.db.insert(players).values({
+      editorsFields: ['name', 'wikipedia_page'],
+      name: 'Bernt K.',
+      searchTerm: 'K.',
+      season,
+      source: 'redactie',
+      wikipediaPage: 'Bernt Klaverboer',
+    })
+
+    const [before] = await database.db.select().from(players)
+    const { server } = await serve()
+
+    expect(await importAt(server, first)).toMatchObject({ players: { added: 24, left: 0, updated: 1 } })
+    expect(await database.db.select().from(players)).toHaveLength(25)
+
+    const after = await klaverboer()
+
+    expect(after).toMatchObject({
+      country: 'NL',
+      id: before!.id,
+      name: 'Bernt K.',
+      position: 'doelman',
+      shirtNumber: 22,
+      source: 'redactie',
+    })
+    expect(after.personId).not.toBeNull()
+    // The numbers of the table are his.
+    expect(
+      await database.db.select().from(playerSeasonStats).where(eq(playerSeasonStats.playerId, after.id)),
+    ).not.toEqual([])
+    expect(await waiting()).toMatchObject([
+      { editorsValue: 'Bernt K.', field: 'name', importValue: 'Bernt Klaverboer' },
+    ])
+  })
+
+  it('finds a player of the editors by his person when the table links another title, and keeps their page', async () => {
+    const [{ insertId: personId }] = await database.db.insert(persons).values({ wikipediaPage: 'Bernt Klaverboer' })
+
+    await database.db.insert(personPages).values([
+      { page: 'Bernt Klaverboer', personId },
+      { page: 'B. Klaverboer', personId },
+    ])
+    await database.db.insert(players).values({
+      editorsFields: ['name', 'wikipedia_page'],
+      name: 'B. Klaverboer',
+      personId,
+      searchTerm: 'Klaverboer',
+      season,
+      source: 'redactie',
+      wikipediaPage: 'B. Klaverboer',
+    })
+
+    const [before] = await database.db.select().from(players)
+    const { server } = await serve()
+
+    expect(await importAt(server, first)).toMatchObject({ players: { added: 24, updated: 1 } })
+    expect(await database.db.select().from(players).where(eq(players.personId, personId))).toMatchObject([
+      { id: before!.id, name: 'B. Klaverboer', shirtNumber: 22, wikipediaPage: 'B. Klaverboer' },
+    ])
+    expect(await waiting()).toMatchObject([
+      { editorsValue: 'B. Klaverboer', field: 'name', importValue: 'Bernt Klaverboer' },
+      { editorsValue: 'B. Klaverboer', field: 'wikipedia_page', importValue: 'Bernt Klaverboer' },
+    ])
+  })
+
+  it('makes a person the editors made without an article the person of the page the table links', async () => {
+    const [{ insertId: untitled }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Klaverboer', givenName: 'Bernt', name: 'Bernt Klaverboer', nameSource: 'redactie' })
+
+    await database.db.insert(players).values({
+      editorsFields: ['name'],
+      name: 'Bernt Klaverboer',
+      personId: untitled,
+      searchTerm: 'Klaverboer',
+      season,
+      source: 'redactie',
+    })
+
+    const [before] = await database.db.select().from(players)
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const after = await klaverboer()
+
+    expect(after).toMatchObject({ id: before!.id, source: 'redactie' })
+    expect(await database.db.select().from(persons).where(eq(persons.id, untitled))).toEqual([])
+    // The name of the editors stays on the person of the page, also after the names are read.
+    expect(await database.db.select().from(persons).where(eq(persons.id, after.personId!))).toMatchObject([
+      { familyName: 'Klaverboer', name: 'Bernt Klaverboer', nameSource: 'redactie', wikipediaPage: 'Bernt Klaverboer' },
+    ])
+    expect(await waiting()).toEqual([])
+    expect(await importAt(server, later)).toMatchObject({ players: { added: 0, unchanged: 25, updated: 0 } })
   })
 })
 
@@ -1471,6 +1673,94 @@ describe('storeChosenSpellings', () => {
     expect(await storeChosenSpellings(database.db, season)).toBe(1)
     expect(await rows()).toEqual(['Robert van den Berg | van den Berg | null'])
     expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ goals: 1, playerId: stays }])
+    expect(await storeChosenSpellings(database.db, season)).toBe(0)
+  })
+
+  it('leaves a name and a page the editors set as they wrote them (#1022)', async () => {
+    await database.db.insert(players).values([
+      {
+        editorsFields: ['name', 'wikipedia_page'],
+        name: 'Jan-Harm Schippers',
+        searchTerm: 'Schippers',
+        season,
+        wikipediaPage: 'Jan-Harm Schippers',
+      },
+      // Only the name is theirs: the page gets the title that stays.
+      {
+        editorsFields: ['name'],
+        name: 'Robert van der Berg',
+        searchTerm: 'van der Berg',
+        season,
+        wikipediaPage: 'Robert van der Berg',
+      },
+    ])
+
+    expect(await storeChosenSpellings(database.db, season)).toBe(1)
+    expect(await rows()).toEqual([
+      'Jan-Harm Schippers | Schippers | Jan-Harm Schippers',
+      'Robert van der Berg | van der Berg | Robert van den Berg',
+    ])
+    expect(await storeChosenSpellings(database.db, season)).toBe(0)
+  })
+
+  it('keeps the row of the editors when the season has both spellings, and merges the other into it (#1022)', async () => {
+    const [{ insertId: other }] = await database.db.insert(players).values({
+      country: 'NL',
+      name: 'Robert van den Berg',
+      position: 'verdediger',
+      searchTerm: 'van den Berg',
+      season,
+    })
+    const [{ insertId: ofEditors }] = await database.db.insert(players).values({
+      editorsFields: ['shirt_number'],
+      name: 'Robert van der Berg',
+      searchTerm: 'van der Berg',
+      season,
+      shirtNumber: 4,
+      source: 'redactie',
+    })
+
+    await database.db.insert(playerSeasonStats).values({
+      appearances: 3,
+      assists: 0,
+      competition: 'Eredivisie',
+      goals: 1,
+      playerId: other,
+      season,
+    })
+
+    expect(await storeChosenSpellings(database.db, season)).toBe(1)
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toMatchObject([
+      {
+        country: 'NL',
+        id: ofEditors,
+        name: 'Robert van den Berg',
+        position: 'verdediger',
+        shirtNumber: 4,
+        source: 'redactie',
+      },
+    ])
+    expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ goals: 1, playerId: ofEditors }])
+    expect(await storeChosenSpellings(database.db, season)).toBe(0)
+  })
+
+  it('merges the row of the spelling that stays into a row whose name the editors set, and keeps their name (#1022)', async () => {
+    const [{ insertId: ofEditors }] = await database.db.insert(players).values({
+      editorsFields: ['name'],
+      name: 'Robert van der Berg',
+      searchTerm: 'van der Berg',
+      season,
+      source: 'redactie',
+    })
+
+    await database.db
+      .insert(players)
+      .values({ name: 'Robert van den Berg', searchTerm: 'van den Berg', season, shirtNumber: 4 })
+
+    expect(await storeChosenSpellings(database.db, season)).toBe(1)
+    expect(await database.db.select().from(players).where(eq(players.season, season))).toMatchObject([
+      { id: ofEditors, name: 'Robert van der Berg', searchTerm: 'van der Berg', shirtNumber: 4 },
+    ])
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
 })

@@ -5,7 +5,7 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { mergePersons } from './person-merge.ts'
+import { mergeEditorsPersonInto, mergePersons } from './person-merge.ts'
 import { createPersonBook, type PersonName } from './persons.ts'
 import {
   matchAppearances,
@@ -517,5 +517,100 @@ describe('mergePersons', () => {
     expect(await mergePersons(database.db, [])).toEqual({ merged: [], warnings: [] })
     expect((await personRows()).map((row) => row.wikipediaPage)).toEqual(['Jordy Bruijn', 'Jordy Buijs'])
     expect(await database.db.select().from(persons).where(eq(persons.wikipediaPage, 'Jordy Bruijn'))).toHaveLength(1)
+  })
+
+  it('keeps the row of the editors of the two rows of a season, with what they set, and fills in the rest', async () => {
+    const kept = await addPerson({ wikipediaPage: schippers.title })
+    const other = await addPerson({
+      familyName: 'Schippers',
+      name: 'J.H. Schippers',
+      nameSource: 'redactie',
+      wikipediaPage: schippers.aliases[0]!,
+    })
+    // The row of the table has the title that stays and the better source, and still goes.
+    const ofTable = await addPlayer({
+      country: 'NL',
+      name: 'Jan Harm Schippers',
+      personId: kept,
+      position: 'aanvaller',
+      season: '2004/05',
+      shirtNumber: 11,
+      source: 'selectie',
+      wikipediaPage: schippers.title,
+    })
+    const ofEditors = await addPlayer({
+      editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
+      name: 'J.H. Schippers',
+      personId: other,
+      season: '2004/05',
+      shirtNumber: 7,
+      source: 'redactie',
+      wikipediaPage: schippers.aliases[0]!,
+    })
+
+    await mergePersons(database.db, list)
+
+    expect(await playerRows()).toMatchObject([
+      {
+        country: 'NL',
+        editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
+        id: ofEditors,
+        name: 'J.H. Schippers',
+        personId: kept,
+        position: 'aanvaller',
+        shirtNumber: 7,
+        source: 'redactie',
+        wikipediaPage: schippers.aliases[0],
+      },
+    ])
+    expect(await playerRows()).not.toMatchObject([{ id: ofTable }])
+    // The name the editors gave the person that went is the name of the person that stays.
+    expect(await personRows()).toMatchObject([
+      {
+        familyName: 'Schippers',
+        id: kept,
+        name: 'J.H. Schippers',
+        nameSource: 'redactie',
+        wikipediaPage: schippers.title,
+      },
+    ])
+  })
+})
+
+describe('mergeEditorsPersonInto', () => {
+  it('makes a person of the editors without an article the person of the article, with their name', async () => {
+    const [{ insertId: untitled }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Spits', givenName: 'Sanne', name: 'Sanne Spits', nameSource: 'redactie' })
+    const titled = await addPerson({ birthDate: '1999-01-02', name: 'S. Spits', wikipediaPage: 'Sanne Spits (1999)' })
+    const player = await addPlayer({ name: 'Sanne Spits', personId: untitled, season: '2004/05', source: 'redactie' })
+    const earlier = await addPlayer({ name: 'Sanne Spits', personId: untitled, season: '2003/04', source: 'redactie' })
+
+    expect(await mergeEditorsPersonInto(database.db, untitled, titled)).toBe(true)
+    expect(await personRows()).toMatchObject([
+      {
+        birthDate: '1999-01-02',
+        familyName: 'Spits',
+        givenName: 'Sanne',
+        id: titled,
+        name: 'Sanne Spits',
+        nameSource: 'redactie',
+        wikipediaPage: 'Sanne Spits (1999)',
+      },
+    ])
+    expect(await playerRows()).toMatchObject([
+      { id: player, personId: titled },
+      { id: earlier, personId: titled },
+    ])
+  })
+
+  it('leaves a person with an article of his own alone, and a person who is gone', async () => {
+    const one = await addPerson({ wikipediaPage: 'Sanne Spits' })
+    const two = await addPerson({ wikipediaPage: 'Sanne Spits (1999)' })
+
+    expect(await mergeEditorsPersonInto(database.db, one, two)).toBe(false)
+    expect(await mergeEditorsPersonInto(database.db, 0, two)).toBe(false)
+    expect(await mergeEditorsPersonInto(database.db, two, two)).toBe(false)
+    expect(await personRows()).toHaveLength(2)
   })
 })

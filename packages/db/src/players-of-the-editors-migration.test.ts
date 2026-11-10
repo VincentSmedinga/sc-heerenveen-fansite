@@ -109,7 +109,9 @@ describe(`the migration ${migration}`, () => {
   it('has the three actions of a player in the log of the admin', async () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    expect(auditActions.slice(-3)).toEqual(['player.add', 'player.edit', 'player.remove'])
+    const first = auditActions.indexOf('player.add')
+
+    expect(auditActions.slice(first, first + 3)).toEqual(['player.add', 'player.edit', 'player.remove'])
     expect(await rows("SHOW COLUMNS FROM audit_log LIKE 'action'")).toMatchObject([{ Type: list(auditActions) }])
   })
 })

@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { matchGoals, persons, players, playerStatDifferences } from '@fansite/db/schema'
+import { matchGoals, persons, playerFieldDifferences, players, playerStatDifferences } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { and, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -10,6 +10,7 @@ import { addQualitySeason } from '#src/beheer/quality-fixtures'
 
 import WorkListPage, { metadata as listMetadata } from './[seizoen]/[lijst]/page'
 import StatDifferencesPage, { metadata as statMetadata } from './[seizoen]/spelerscijfers/page'
+import FieldDifferencesPage, { metadata as fieldMetadata } from './[seizoen]/spelersgegevens/page'
 import QualityPage, { metadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
@@ -39,6 +40,7 @@ beforeEach(async () => {
   requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
   await database.db.delete(persons)
   await database.db.delete(playerStatDifferences)
+  await database.db.delete(playerFieldDifferences)
 })
 
 const workList = async (seizoen: string, lijst: string) =>
@@ -291,5 +293,88 @@ describe('the players whose numbers differ', () => {
 
   it.each(['1989-90', '2999-00', 'geen-seizoen'])('does not exist for the season %s', async (seizoen) => {
     await expect(statDifferences(seizoen)).rejects.toThrow('not found')
+  })
+})
+
+describe('the page with the fields of players where the import says something else than the editors', () => {
+  const fieldDifferences = async (seizoen: string, query: Record<string, string> = {}) =>
+    renderToStaticMarkup(
+      await FieldDifferencesPage({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve(query) }),
+    )
+
+  /** The editors gave Sanne Spits number 9 in 2005/06, and the import read 19. */
+  async function addDifference(values: Partial<typeof playerFieldDifferences.$inferInsert> = {}) {
+    const [player] = await database.db.select().from(players)
+
+    await database.db.insert(playerFieldDifferences).values({
+      editorsValue: '9',
+      field: 'shirt_number',
+      firstSeenAt: new Date('2026-11-10T10:00:00Z'),
+      importValue: '19',
+      lastSeenAt: new Date('2026-11-10T10:00:00Z'),
+      playerId: player!.id,
+      season: '2005/06',
+      status: 'pending',
+      ...values,
+    })
+  }
+
+  it('is for a beheerder only, and stays out of search engines', async () => {
+    await fieldDifferences('2005-06')
+
+    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(fieldMetadata.robots).toEqual({ follow: false, index: false })
+  })
+
+  it('has a link on the page Kwaliteit in a season with a difference, and none without', async () => {
+    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).not.toContain('spelersgegeven')
+
+    await addDifference()
+
+    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).toContain(
+      'href="/beheer/kwaliteit/2005-06/spelersgegevens">1 spelersgegeven verschilt<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    )
+  })
+
+  it('shows the player, the season, the field and both values, with a form to decide', async () => {
+    await addDifference()
+    await addDifference({ editorsValue: null, field: 'wikipedia_page', importValue: 'Sanne Spits (voetballer)' })
+
+    const html = await fieldDifferences('2005-06')
+    const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map(
+      ([, name, text]) => [text, name],
+    )
+
+    expect(html).toContain('Spelersgegevens die verschillen in 2005/06</h1>')
+    expect(html).toContain('Sanne Spits: rugnummer</h2>')
+    expect(html).toContain('Redactie: 9')
+    expect(html).toContain('Import: 19')
+    expect(html).toContain('Sanne Spits: Wikipedia-pagina</h2>')
+    expect(html).toContain('Redactie: leeg')
+    expect(html).toContain('Import: Sanne Spits (voetballer)')
+    expect(buttons).toEqual([
+      ['Neem de import over', 'Neem de import over: het rugnummer van Sanne Spits'],
+      ['Houd de redactie', 'Houd de redactie: het rugnummer van Sanne Spits'],
+      ['Neem de import over', 'Neem de import over: de Wikipedia-pagina van Sanne Spits'],
+      ['Houd de redactie', 'Houd de redactie: de Wikipedia-pagina van Sanne Spits'],
+    ])
+  })
+
+  it('leaves out a difference that is decided', async () => {
+    await addDifference({ resolution: 'person', status: 'rejected' })
+
+    expect(await fieldDifferences('2005-06')).not.toContain('Sanne Spits')
+  })
+
+  it('says so when nothing differs, and says what the last decision did', async () => {
+    const html = await fieldDifferences('2005-06', { gedaan: 'overgenomen' })
+
+    expect(html).toContain('Er zijn geen spelersgegevens die verschillen in het seizoen 2005/06.')
+    expect(html).toContain('<strong>Overgenomen.</strong>')
+    expect(await fieldDifferences('2005-06', { fout: 'bezet' })).toContain('Een andere speler van dit seizoen')
+  })
+
+  it.each(['1989-90', '2999-00', 'geen-seizoen'])('does not exist for the season %s', async (seizoen) => {
+    await expect(fieldDifferences(seizoen)).rejects.toThrow('not found')
   })
 })
