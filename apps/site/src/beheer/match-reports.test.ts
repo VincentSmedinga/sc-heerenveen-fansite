@@ -31,6 +31,7 @@ import { createAccount } from './accounts'
 import { findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entries'
 import {
   contextOf,
+  findPreviousLineUp,
   findReportScreen,
   finishMatch,
   listReportsToCheck,
@@ -39,7 +40,15 @@ import {
   saveReport,
   valuesOfReport,
 } from './match-reports'
-import { emptyRow, otherPlayer, type ReportSquadPlayer, type ReportValues, type Row } from './report-fields'
+import {
+  emptyRow,
+  emptySide,
+  noFormation,
+  otherPlayer,
+  type ReportSquadPlayer,
+  type ReportValues,
+  type Row,
+} from './report-fields'
 import { report as baseReport, card, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, type ReportPlan } from './report-form'
 
@@ -1023,5 +1032,137 @@ describe('the match with a report', () => {
 
     // Nothing else is left to take away: the goals belong to the report.
     expect(await undoEntry(database.db, userId, matchId, 'Nog een keer', t1)).toBe('none')
+  })
+})
+
+describe('findPreviousLineUp', () => {
+  /** A match of another date, with an opponent that tells which one it is. */
+  async function addMatch(more: Partial<Omit<NewMatch, 'clubId'>> & { matchDate: string }) {
+    const base = {
+      ...played,
+      goalsAgainst: 0,
+      goalsFor: 0,
+      kickoffAt: new Date(`${more.matchDate}T15:00:00Z`),
+      round: `Speelronde ${more.opponent}`,
+      ...more,
+    }
+    const [values] = await withClubs(database.db, [base])
+    const [inserted] = await database.db.insert(matches).values(values!).$returningId()
+
+    return { id: inserted?.id ?? 0, row: base }
+  }
+
+  /** A line-up of ours with made-up names, typed as players who are not in the squad. */
+  const named = (prefix: string): Row[] =>
+    Array.from({ length: 13 }, (_nothing, index) => ({
+      ...emptyRow('speler', index),
+      keuze: otherPlayer,
+      naam: `${prefix} ${index + 1}`,
+      rol: index === 0 ? 'aanvoerder' : index < 11 ? 'basis' : 'bank',
+      rugnummer: String(index + 1),
+    }))
+
+  /** Saves a report with this line-up for a match, as the form would. */
+  async function lineUp(match: Awaited<ReturnType<typeof addMatch>>, speler: Row[], formation = '4-3-3') {
+    const values: ReportValues = {
+      bron: '',
+      formatie: { wij: { eigen: '', keuze: formation }, zij: noFormation() },
+      status: 'bezig',
+      tegenstander: 'nee',
+      wij: { ...emptySide(), speler },
+      zij: emptySide(),
+    }
+    const found = checkReportForm(values, {
+      match: { ...match.row, extraTime: false, penaltiesAgainst: null, penaltiesFor: null } as never,
+      squad,
+    })
+
+    expect(found.plan).toBeDefined()
+    await saveReport(database.db, userId, match.id, found.plan as ReportPlan, t0)
+  }
+
+  const here = () => ({ id: matchId, kickoffAt: played.kickoffAt ?? null, matchDate: played.matchDate })
+
+  it('takes the most recent earlier match with a line-up, over seasons, and skips one without', async () => {
+    const earlier = await addMatch({ matchDate: '2026-08-01', opponent: 'Eerste Tegenstander', season: '2026/27' })
+    const lastSeason = await addMatch({ matchDate: '2025-09-14', opponent: 'Oude Tegenstander', season: '2025/26' })
+    const withoutReport = await addMatch({ matchDate: '2026-10-10', opponent: 'Zonder Verslag', season: '2026/27' })
+    const afterwards = await addMatch({ matchDate: '2026-11-20', opponent: 'Latere Tegenstander', season: '2026/27' })
+
+    await lineUp(lastSeason, named('Vorig'))
+    await lineUp(afterwards, named('Later'))
+
+    const found = await findPreviousLineUp(database.db, here(), squad)
+
+    expect(withoutReport.id).toBeGreaterThan(0)
+    expect(found?.label).toBe('Oude Tegenstander, 14 september 2025')
+    expect(found?.formatie).toEqual({ eigen: '', keuze: '4-3-3' })
+    expect(found?.speler).toHaveLength(13)
+
+    await lineUp(earlier, named('Eerder'), '4-4-2')
+
+    expect((await findPreviousLineUp(database.db, here(), squad))?.label).toBe('Eerste Tegenstander, 1 augustus 2026')
+    expect((await findPreviousLineUp(database.db, here(), squad))?.formatie.keuze).toBe('4-4-2')
+  })
+
+  it('has nothing for the first match, and for a match where only later ones have a line-up', async () => {
+    const afterwards = await addMatch({ matchDate: '2026-11-20', opponent: 'Latere Tegenstander', season: '2026/27' })
+
+    await lineUp(afterwards, named('Later'))
+
+    expect(await findPreviousLineUp(database.db, here(), squad)).toBeUndefined()
+  })
+
+  it('does not take a match of the same day unless its kick-off is earlier', async () => {
+    const sameDay = await addMatch({
+      kickoffAt: new Date('2026-10-31T12:00:00Z'),
+      matchDate: '2026-10-31',
+      opponent: 'Eerder Die Dag',
+      season: '2026/27',
+    })
+    const later = await addMatch({
+      kickoffAt: new Date('2026-10-31T20:00:00Z'),
+      matchDate: '2026-10-31',
+      opponent: 'Later Die Dag',
+      season: '2026/27',
+    })
+
+    await lineUp(sameDay, named('Vroeg'))
+    await lineUp(later, named('Laat'))
+
+    expect((await findPreviousLineUp(database.db, here(), squad))?.label).toBe('Eerder Die Dag, 31 oktober 2026')
+  })
+
+  it('gives a player who is not in the squad back as Andere speler, with his name and number and his role', async () => {
+    const previous = await addMatch({ matchDate: '2026-09-01', opponent: 'Eerste Tegenstander', season: '2026/27' })
+
+    await lineUp(previous, named('Gast'))
+
+    const found = await findPreviousLineUp(database.db, here(), squad)
+
+    expect(found?.speler[0]).toEqual({
+      keuze: otherPlayer,
+      naam: 'Gast 1',
+      rol: 'aanvoerder',
+      rugnummer: '1',
+    })
+    expect(found?.speler.map((row) => row.rol)).toEqual(['aanvoerder', ...Array(10).fill('basis'), 'bank', 'bank'])
+  })
+
+  it('gives a player of the squad back as a choice from the squad, and takes nothing but the line-up', async () => {
+    const previous = await addMatch({ matchDate: '2026-09-01', opponent: 'Eerste Tegenstander', season: '2026/27' })
+    const rows = squad.slice(0, 11).map((player, index) => ({
+      ...emptyRow('speler', index),
+      keuze: String(player.id),
+      rol: index === 0 ? 'aanvoerder' : 'basis',
+    }))
+
+    await lineUp(previous, rows)
+
+    const found = await findPreviousLineUp(database.db, here(), squad)
+
+    expect(found?.speler.map((row) => row.keuze)).toEqual(squad.slice(0, 11).map((player) => String(player.id)))
+    expect(found?.speler.every((row) => row.naam === '')).toBe(true)
+    expect(Object.keys(found ?? {}).toSorted()).toEqual(['formatie', 'label', 'speler'])
   })
 })

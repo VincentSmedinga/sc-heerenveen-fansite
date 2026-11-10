@@ -54,6 +54,11 @@ export type ReportFormState = {
   errors: ReportErrors
   /** The `id` of the element that gets the focus, such as the first field of a new row. */
   focus?: string
+  /**
+   * Which match the line-up of ours was taken from, as `Opponent, 3 november 2025`, after the
+   * button that does that. The next answer of the server has none.
+   */
+  takenFrom?: string
   values: ReportValues
   /** Changes with every answer of the server, so the form is made anew and shows the values. */
   version: number
@@ -144,8 +149,12 @@ export const noFormation = (): FormationValue => ({ eigen: '', keuze: '' })
 /** What a button of the form asks for. */
 export type ReportButton =
   | { kind: 'add'; row: RowKind; side: Side }
+  | { kind: 'previous' }
   | { kind: 'remove'; number: number; row: RowKind; side: Side }
   | { kind: 'save' }
+
+/** The value of the button that takes over the line-up of the previous match. */
+export const previousLineUpButtonValue = 'opstelling-vorige'
 
 /** The `id` of the button that adds a row to a list. */
 export function addButtonValue(kind: RowKind, side: Side) {
@@ -200,6 +209,20 @@ export function formationValueOf(stored: null | string): FormationValue {
     : { eigen: stored, keuze: otherFormation }
 }
 
+/**
+ * Whether the line-up of ours is still empty: no row with anything in it, and no formation.
+ * Only then the button for the previous match is there, so it never writes over anything.
+ */
+export function isEmptyLineUp(values: ReportValues): boolean {
+  const formation = values.formatie.wij
+
+  return (
+    formation.keuze === '' &&
+    formation.eigen === '' &&
+    values.wij.speler.every((row, index) => isUntouchedRow('speler', row, index))
+  )
+}
+
 /** Whether nothing was filled in for a row: every field is as a new row has it. */
 export function isUntouchedRow(kind: RowKind, row: Row, index = 0): boolean {
   const empty = emptyRow(kind, index)
@@ -239,7 +262,7 @@ export const rowNames: Record<RowKind, string> = {
  */
 export function applyReportButton(
   values: ReportValues,
-  button: Exclude<ReportButton, { kind: 'save' }>,
+  button: Exclude<ReportButton, { kind: 'previous' } | { kind: 'save' }>,
 ): { focus: string; values: ReportValues } {
   const next: ReportValues = { ...values, wij: { ...values.wij }, zij: { ...values.zij } }
   const { row, side } = button
@@ -437,6 +460,10 @@ export function readReportButton(formData: FormData): ReportButton {
 
   if (typeof knop !== 'string') {
     return { kind: 'save' }
+  }
+
+  if (knop === previousLineUpButtonValue) {
+    return { kind: 'previous' }
   }
 
   const found = /^(speler|wissel|doelpunt|kaart|strafschop|serie)-(wij|zij)-(toevoegen|weghalen-(\d{1,3}))$/u.exec(knop)

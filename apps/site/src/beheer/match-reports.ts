@@ -28,7 +28,7 @@ import {
   matchSubstitutions,
   players,
 } from '@fansite/db/schema'
-import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { createHash } from 'node:crypto'
 
 import type { ReportContext, ReportPlan } from './report-form'
@@ -98,6 +98,61 @@ export function appearancePlaces(stored: Pick<StoredMatchReport, 'appearances'>)
 /** The context the checks need for a screen. */
 export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): ReportContext {
   return { match: screen.match, squad: screen.squad }
+}
+
+/**
+ * The line-up of ours in the previous match, for the button that takes it over: the most recent
+ * match before this one, by the date of the kick-off and in any season and competition, that
+ * has a report with players of ours. On the same day it only counts when its kick-off is
+ * earlier. `undefined` when there is none. `label` says which match it was, as the notice does:
+ * `Opponent, 3 november 2025`. The squad is the one of this match's season, so a player not
+ * in it comes back as Andere speler with his name.
+ */
+export async function findPreviousLineUp(
+  db: Pick<Database, 'select'>,
+  match: Pick<Match, 'id' | 'kickoffAt' | 'matchDate'>,
+  squad: readonly ReportSquadPlayer[],
+): Promise<undefined | { formatie: ReportValues['formatie']['wij']; label: string; speler: Row[] }> {
+  const earlier = or(
+    lt(matches.matchDate, match.matchDate),
+    match.kickoffAt === null
+      ? undefined
+      : and(
+          eq(matches.matchDate, match.matchDate),
+          isNotNull(matches.kickoffAt),
+          lt(matches.kickoffAt, match.kickoffAt),
+        ),
+  )
+  const [previous] = await db
+    .select({ id: matches.id, matchDate: matches.matchDate, opponent: matches.opponent })
+    .from(matches)
+    .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+    .where(
+      and(
+        earlier,
+        inArray(
+          matches.id,
+          db.select({ id: matchAppearances.matchId }).from(matchAppearances).where(eq(matchAppearances.ours, true)),
+        ),
+      ),
+    )
+    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+    .limit(1)
+
+  const stored = previous === undefined ? undefined : await readMatchReport(db, previous.id)
+
+  if (previous === undefined || stored === undefined) {
+    return undefined
+  }
+
+  // The form's own reading of a stored report: our rows and formation, nothing else.
+  const values = valuesOfReport(stored, [], squad)
+  const date = new Date(`${previous.matchDate}T12:00:00Z`).toLocaleDateString('nl-NL', {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  })
+
+  return { formatie: values.formatie.wij, label: `${previous.opponent}, ${date}`, speler: values.wij.speler }
 }
 
 /**

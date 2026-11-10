@@ -8,7 +8,14 @@ import { notFound } from 'next/navigation'
 import { finishPath, livePath, matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
-import { contextOf, findReportScreen, reportBasis, seriesOf, valuesOfReport } from '#src/beheer/match-reports'
+import {
+  contextOf,
+  findPreviousLineUp,
+  findReportScreen,
+  reportBasis,
+  seriesOf,
+  valuesOfReport,
+} from '#src/beheer/match-reports'
 import { checkReportForm } from '#src/beheer/report-form'
 import { previewMatchOf } from '#src/beheer/report-preview-match'
 import { requireRole } from '#src/beheer/require-role'
@@ -81,6 +88,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
   const values = valuesOfReport(report, goals, squad)
+  const previousLineUp = await findPreviousLineUp(getDatabase().db, match, squad)
   // A report that is stored is judged again, so what is wrong shows. A new one has nothing
   // to say yet.
   const checked = report === undefined ? undefined : checkReportForm(values, contextOf(screen))
@@ -95,6 +103,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
         matchId: match.id,
         opponent: match.opponent,
         preview: previewMatchOf(match, now),
+        previousLineUp: previousLineUp?.label,
         series: seriesOf(match),
         showDelay: describeShowDelay(match.season),
         squad,

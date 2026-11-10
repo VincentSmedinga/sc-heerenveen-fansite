@@ -4,8 +4,22 @@ import { redirect } from 'next/navigation'
 
 import { matchesPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId, parseReason } from '#src/beheer/items'
-import { contextOf, findReportScreen, finishMatch, removeReport, saveReport } from '#src/beheer/match-reports'
-import { applyReportButton, readReportButton, readReportValues, type ReportFormState } from '#src/beheer/report-fields'
+import {
+  contextOf,
+  findPreviousLineUp,
+  findReportScreen,
+  finishMatch,
+  removeReport,
+  saveReport,
+} from '#src/beheer/match-reports'
+import {
+  applyReportButton,
+  isEmptyLineUp,
+  listId,
+  readReportButton,
+  readReportValues,
+  type ReportFormState,
+} from '#src/beheer/report-fields'
 import { checkReportForm } from '#src/beheer/report-form'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -87,6 +101,29 @@ export async function submitReport(
   const values = readReportValues(formData)
   const button = readReportButton(formData)
   const version = previous.version + 1
+
+  if (button.kind === 'previous') {
+    // The line-up of the previous match goes in only while ours is empty, so nothing is written
+    // over. The match is looked up again here: the form only says that the button was pressed.
+    const previous = isEmptyLineUp(values) ? await findPreviousLineUp(db, screen.match, screen.squad) : undefined
+
+    if (previous === undefined) {
+      return { errors: {}, values, version, warnings: {} }
+    }
+
+    return {
+      errors: {},
+      focus: listId('speler', 'wij'),
+      takenFrom: previous.label,
+      values: {
+        ...values,
+        formatie: { ...values.formatie, wij: previous.formatie },
+        wij: { ...values.wij, speler: previous.speler },
+      },
+      version,
+      warnings: {},
+    }
+  }
 
   if (button.kind !== 'save') {
     const moved = applyReportButton(values, button)
