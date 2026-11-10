@@ -728,6 +728,16 @@ describe('the input that the browser keeps for the form of a report', () => {
     )
   })
 
+  it('says nothing about the input it keeps while the editor types on the same page', () => {
+    open()
+    fireEvent.change(bron(), { target: { value: 'Uitzending' } })
+    fireEvent.blur(bron())
+
+    expect(localStorage.getItem('fansite-verslag-7')).not.toBeNull()
+    expect(notice().textContent).toBe('')
+    expect(button('Herstel')).toBeUndefined()
+  })
+
   it('keeps nothing for a screen without a match number', () => {
     open({ noMatch: true })
     fireEvent.change(bron(), { target: { value: 'Uitzending' } })

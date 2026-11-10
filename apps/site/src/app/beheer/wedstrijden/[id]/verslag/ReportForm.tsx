@@ -37,7 +37,6 @@ import {
   parseDraft,
   readDraftText,
   saveDraft,
-  subscribeToDrafts,
 } from '#src/beheer/report-draft'
 import {
   addButtonValue,
@@ -158,14 +157,22 @@ export function ReportDraftNotice({ savedAt }: { savedAt?: number | undefined })
   const { choices, restore, state } = useReportForm()
   const matchId = choices.matchId
   const [handled, setHandled] = useState<'discarded' | 'restored'>()
-  const text = useSyncExternalStore(
-    subscribeToDrafts,
-    () =>
-      matchId === undefined || (savedAt !== undefined && draftDueAfterSave(matchId, savedAt))
-        ? null
-        : readDraftText(matchId),
-    () => null,
+  // What the browser held when the page opened: the note is about that, not about what the
+  // editor types on this page (which is kept for the next time). It shows after hydrating, so
+  // the HTML of the server and the first render of the browser are the same.
+  const [opened] = useState(() =>
+    typeof window === 'undefined' ||
+    matchId === undefined ||
+    (savedAt !== undefined && draftDueAfterSave(matchId, savedAt))
+      ? null
+      : readDraftText(matchId),
   )
+  const shown = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  )
+  const text = shown ? opened : null
   const draft = useMemo(() => parseDraft(text), [text])
   const differs = draft !== undefined && canonicalValues(draft.values) !== canonicalValues(state.values)
 

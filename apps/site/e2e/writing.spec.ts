@@ -705,7 +705,7 @@ test.describe('the input of a match report that the browser keeps', () => {
     await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
     await expect(page).toHaveURL(/gedaan=/u)
     expect(
-      await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('fansite-verslag-'))),
+      await page.evaluate(() => Object.keys(localStorage).filter((key) => /^fansite-verslag-\d+$/u.test(key))),
     ).toEqual([])
 
     // Take the report away again, so the other tests start from a match without a report.

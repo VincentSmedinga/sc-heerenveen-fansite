@@ -17,9 +17,6 @@ export const draftKeyPrefix = 'fansite-verslag-'
 /** How long a draft is kept, in milliseconds: thirty days. */
 export const draftLifetime = 30 * 24 * 60 * 60 * 1000
 
-/** The event that tells the form in the same tab that its draft changed. */
-export const draftEvent = 'fansite-verslag-change'
-
 export type ReportDraft = { savedAt: number; values: ReportValues }
 
 /** The key of the draft of a match. */
@@ -68,8 +65,6 @@ export function clearAllDrafts(storage?: Storage) {
   } catch {
     // Storage can be blocked.
   }
-
-  tell()
 }
 
 /** Takes away the draft of a match. */
@@ -79,8 +74,6 @@ export function clearDraft(matchId: number, storage?: Storage) {
   } catch {
     // Storage can be blocked.
   }
-
-  tell()
 }
 
 /** Takes the draft away after the save at `savedAt`, once, and remembers that it did. */
@@ -185,7 +178,6 @@ export function saveDraft(
     if (canonicalValues(values) === canonicalValues(server)) {
       if (store.getItem(draftKey(matchId)) !== null) {
         store.removeItem(draftKey(matchId))
-        tell()
       }
 
       return
@@ -196,26 +188,8 @@ export function saveDraft(
     }
 
     store.setItem(draftKey(matchId), JSON.stringify({ savedAt: now, values } satisfies ReportDraft))
-    tell()
   } catch {
     // Storage can be blocked or full: the form works without it.
-  }
-}
-
-/** For `useSyncExternalStore`: calls `onChange` when a draft changes here or in another tab. */
-export function subscribeToDrafts(onChange: () => void) {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === null || event.key.startsWith(draftKeyPrefix)) {
-      onChange()
-    }
-  }
-
-  window.addEventListener(draftEvent, onChange)
-  window.addEventListener('storage', onStorage)
-
-  return () => {
-    window.removeEventListener(draftEvent, onChange)
-    window.removeEventListener('storage', onStorage)
   }
 }
 
@@ -258,13 +232,4 @@ function isValues(value: unknown): value is ReportValues {
       })
     )
   })
-}
-
-/** Tells the form in this tab that a draft changed. */
-function tell() {
-  try {
-    window.dispatchEvent(new Event(draftEvent))
-  } catch {
-    // No window (a test of the storage alone).
-  }
 }
