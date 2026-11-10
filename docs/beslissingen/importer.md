@@ -3806,3 +3806,16 @@
   Voor 2025/26 bestaat geen pagina op Wikipedia (#1037), dus er was nooit een rij, en de kaart verborg 18 bekende spelers.
   Elke lezing, omdat een seizoen dat zijn spelers kreeg vóór deze regel anders pas een rij krijgt bij de volgende speler uit een doelpunt.
 - **Alternatieven:** de kaart laat spelers ook zonder rij zien (twee plekken die beslissen); de code in de importer laten en Beheer de importer laten aanroepen (een app die een andere app importeert).
+
+## Twee rijen van één speler in een seizoen worden één rij
+
+- **Datum:** 10 november 2026
+- **Besluit:** twee rijen van één seizoen in `players` zijn één speler als ze dezelfde persoon hebben, of dezelfde naam na `oldSiteNameCorrections` en `nameKey` (#1042).
+  Twee rijen met dezelfde naam en twee verschillende personen blijven twee rijen, en een rij zonder persoon gaat niet naar één van meerdere personen.
+  De rij van de redactie blijft, daarna die van de bron die het hoogst staat in `playerSources`, daarna de oudste.
+  `mergePlayerInto` verplaatst de doelpunten, de optredens en de aantallen, en `fillPlayerFrom` vult aan wat de rij mist, behalve wat de redactie zette.
+  Het gebeurt aan het begin van elke import van wedstrijden of een selectie, in `mergeListedPersons`, en een tweede run verandert niets.
+  `import:status` noemt per seizoen de spelers die nog dubbel zijn, met de reden; staat er niets dubbel, dan komt er geen regel.
+- **Waarom:** `mergeStaleOldSitePlayers` en `chooseListedPlayerSpellings` vinden alleen een rij zonder persoon of de paren van `personTitleAliases`.
+  Een rij met een persoon naast een rij met de gekozen spelling bleef dus staan: Youssef El Akchaoui in 2010/11 en Uğur Yıldırım in 2004/05.
+- **Alternatieven:** alleen dezelfde persoon samenvoegen, maar dat mist El Akchaoui als één rij geen persoon heeft; het overlaten aan de pagina Kwaliteit in Beheer.

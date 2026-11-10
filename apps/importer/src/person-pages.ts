@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { mergePersons, mergePlayerInto } from '@fansite/db/person-merge'
+import { fillPlayerFrom, mergePersons, mergePlayerInto } from '@fansite/db/person-merge'
 import {
   knownPersonPages,
   type PersonName,
@@ -8,12 +8,14 @@ import {
   personNamesBySource,
   rememberedPersonArticles,
 } from '@fansite/db/persons'
-import { players } from '@fansite/db/schema'
+import { isOfEditors } from '@fansite/db/player-field-differences'
+import { type Player, players, playerSources } from '@fansite/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 
 import { lookUpTitles } from './club-pages.ts'
+import { oldSiteNameCorrections } from './old-site-names.ts'
 import { fitsColumns, manualNames, nameOfTitle, personNameOf } from './person-name.ts'
 import { personNames, type PersonTitleAlias, personTitleAliases } from './person-names.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
@@ -25,6 +27,9 @@ export { similarPersons } from '@fansite/db/persons'
 
 /** The most requests in a row that may fail before the import stops asking for this run. */
 export const mostFailuresInARow = 3
+
+/** A player that is in a season twice and stays so, with the reason. */
+export type DoublePlayer = { name: string; reason: string; season: string }
 
 /** What came of asking Wikipedia about the titles of persons. */
 export type PersonLookup = {
@@ -69,6 +74,11 @@ export function describePersons(
             ? ''
             : `, ${plural(named, 'name')} stored (${names.sort_key} from a sort key, ${names.guess} guessed, ${names.manual} from the list)`),
       ]
+}
+
+/** The players that are in a season twice and that the import did not merge, with why. */
+export async function doublePlayers(db: Pick<Database, 'select'>): Promise<DoublePlayer[]> {
+  return planDoublePlayers(await db.select().from(players)).left
 }
 
 /** The warnings of a run for the names it guessed: the title and what came of it. */
@@ -222,13 +232,69 @@ export async function mergeListedPersons(
     }),
   )
   const { merged, warnings } = await mergePersons(db, list, names)
-  const spellings = await chooseListedPlayerSpellings(db, list)
+  const spellings = [...(await chooseListedPlayerSpellings(db, list)), ...(await mergeDoublePlayers(db))]
 
   return [
     ...merged.map((line) => printable(`Persons: ${line}`)),
     ...warnings.map((line) => printable(line)),
     ...spellings.map((line) => printable(`Players: ${line}`)),
   ]
+}
+
+/**
+ * Plans which rows of `players` are one player twice in a season (issue 1042). Two rows are
+ * one player when they have the same person, or the same name after `oldSiteNameCorrections`
+ * and `nameKey`. Two rows with the same name and two different persons are two players, and a
+ * row without a person is not given to one of several persons: they stay and are in `left`.
+ * Of two rows the one the editors added or changed stays, then the one of the better source
+ * (`playerSources`), then the older one. Pure: it reads `rows` and changes nothing.
+ */
+export function planDoublePlayers(rows: readonly Player[]): {
+  left: DoublePlayer[]
+  merges: { gone: Player; stays: Player }[]
+} {
+  const merges: { gone: Player; stays: Player }[] = []
+  const left: DoublePlayer[] = []
+  const rank = (row: Player) => (isOfEditors(row) ? 0 : playerSources.length) + playerSources.indexOf(row.source)
+  const best = (group: Player[]) => group.toSorted((a, b) => rank(a) - rank(b) || a.id - b.id)
+  const bySeason = Map.groupBy(rows, (row) => row.season)
+
+  for (const [season, all] of bySeason) {
+    let kept = all
+
+    // The same person first, so that a person with two spellings is one row.
+    for (const group of Map.groupBy(
+      kept.filter((row) => row.personId !== null),
+      (row) => row.personId,
+    ).values()) {
+      const [stays, ...gone] = best(group)
+
+      merges.push(...gone.map((row) => ({ gone: row, stays: stays! })))
+      kept = kept.filter((row) => !gone.includes(row))
+    }
+
+    for (const group of Map.groupBy(kept, (row) =>
+      nameKey(oldSiteNameCorrections.get(row.name) ?? row.name),
+    ).values()) {
+      if (group.length < 2) {
+        continue
+      }
+
+      const [stays, ...gone] = best(group)
+
+      if (new Set(group.flatMap((row) => (row.personId === null ? [] : [row.personId]))).size > 1) {
+        left.push({
+          name: stays!.name,
+          reason: 'the rows are of different persons, or one has no person and could be either',
+          season,
+        })
+        continue
+      }
+      merges.push(...gone.map((row) => ({ gone: row, stays: stays! })))
+    }
+  }
+
+  return { left, merges }
 }
 
 /**
@@ -302,6 +368,27 @@ async function chooseListedPlayerSpellings(
         lines.push(`${row.name} (${row.season}) is now ${name}`)
       })
     }
+  }
+
+  return lines
+}
+
+/**
+ * Makes two rows of one player in a season one (`planDoublePlayers`), with `mergePlayerInto`:
+ * the goals, the appearances and the numbers go to the row that stays, and what that row lacks
+ * (the page, the person, the shirt number) comes from the other, except what the editors set.
+ * Returns a line for each row merged; a second run finds none.
+ */
+async function mergeDoublePlayers(db: Pick<Database, 'select' | 'transaction'>): Promise<string[]> {
+  const { merges } = planDoublePlayers(await db.select().from(players))
+  const lines: string[] = []
+
+  for (const { gone, stays } of merges) {
+    await db.transaction(async (tx) => {
+      await mergePlayerInto(tx, gone.id, stays.id)
+      await fillPlayerFrom(tx, stays, gone)
+    })
+    lines.push(`${gone.name} (${gone.season}) is merged into ${stays.name}`)
   }
 
   return lines

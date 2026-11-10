@@ -28,7 +28,7 @@ import { describeWaitingChange } from './import-changes.ts'
 import { isUnhealthy } from './import-matches.ts'
 import { isGoalOfOurPlayer } from './link-players.ts'
 import { waitingChanges } from './match-changes.ts'
-import { similarPersons } from './person-pages.ts'
+import { doublePlayers, similarPersons } from './person-pages.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime, printable } from './text.ts'
 
@@ -141,6 +141,7 @@ export async function showStatus(
 
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
+    await showDoublePlayers(db, write)
     await showPersonData(db, write)
     await showFormations(db, write)
     await showWaitingChanges(db, now, write)
@@ -192,6 +193,13 @@ async function showCoverage(db: Database, now: Date, write: (line: string) => vo
   write('Coverage per season:')
   for (const line of coverageTable(await readSeasonCoverage(db, now))) {
     write(`  ${line}`)
+  }
+}
+
+/** Names each player twice in a season that was not merged, and why. No line when none. */
+async function showDoublePlayers(db: Database, write: (line: string) => void): Promise<void> {
+  for (const { name, reason, season } of await doublePlayers(db)) {
+    write(`Player twice: ${printable(name)} (${season}), not merged because ${reason}`)
   }
 }
 
