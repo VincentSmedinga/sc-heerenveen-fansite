@@ -31,7 +31,7 @@ export const sharedPlaces = (positions: readonly number[]): boolean[] =>
  * with this cell (the standings, the top scorers and a DataTable with places), so a shared
  * place looks the same everywhere. The ellipsis of a gap row in a DataTable, for a spell away,
  * is another sign for another thing: it stands in the row header, never in this column.
- * It is in the column of the places: the same width and alignment, in light and dark.
+ * It is in the column of the places: the same width, the ellipsis centred, in light and dark.
  */
 export const PlaceCell = ({ className, position, shared = false, ...props }: PlaceCellProps) => (
   <td {...props} className={classNames('hf-numeric', 'hf-rank', shared && 'hf-rank-shared', className)}>
