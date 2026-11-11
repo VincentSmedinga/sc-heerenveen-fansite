@@ -249,6 +249,31 @@ export const Links = meta.story({
   ),
 })
 
+const seasonColumns = [tableColumns.played, tableColumns.started, tableColumns.goals, tableColumns.assists]
+
+export const SeasonsWithTotal = meta.story({
+  name: 'Seizoenen met een totaal',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="seizoenen-kop">
+        <Heading id="seizoenen-kop" level={2}>
+          Per seizoen
+        </Heading>
+        <DataTable
+          caption="De cijfers van een speler per seizoen, het nieuwste seizoen eerst, met het totaal onderaan"
+          columns={['Seizoen', ...seasonColumns]}
+          rows={[
+            { aside: 'nr. 35', cells: [28, 24, 9, 4], header: '2025/26', href: '/spelers/2025-26' },
+            { cells: [30, 26, 12, '–'], header: '2024/25', href: '/spelers/2024-25' },
+            { cells: [58, 50, 21, 4], header: 'Totaal', total: true },
+          ]}
+        />
+        <Text appearance="meta">{tableLegend(seasonColumns)}.</Text>
+      </Card>
+    </div>
+  ),
+})
+
 export const NamesWithPeriods = meta.story({
   name: 'Namen met een tweede regel op een telefoon',
   render: () => (

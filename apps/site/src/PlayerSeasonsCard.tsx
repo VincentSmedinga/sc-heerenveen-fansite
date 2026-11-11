@@ -84,7 +84,7 @@ export function PlayerSeasonsCard({
   }
 
   return (
-    <Card aria-labelledby={playerSeasonsCardId} surface="soft">
+    <Card aria-labelledby={playerSeasonsCardId}>
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
@@ -94,8 +94,8 @@ export function PlayerSeasonsCard({
         rows={table.rows.map((row) => ({
           cells: row.cells,
           header: row.header,
-          ...(row.season === undefined ? {} : { href: address(row.season) }),
-          ...(row.shirtNumber === undefined ? {} : { secondary: `nr. ${row.shirtNumber}` }),
+          ...(row.season === undefined ? { total: true } : { href: address(row.season) }),
+          ...(row.shirtNumber === undefined ? {} : { aside: `nr. ${row.shirtNumber}` }),
         }))}
       />
       <Text appearance="meta">

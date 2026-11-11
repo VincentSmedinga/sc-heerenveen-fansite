@@ -52,7 +52,8 @@ describe('the table Per seizoen', () => {
     ])
     expect(html.indexOf('2004/05')).toBeLessThan(html.indexOf('2003/04'))
     expect(html).toContain('<a href="/spelers/2004-05">2004/05</a>')
-    expect(html).toContain('nr. 35')
+    expect(html).toContain('<span class="hf-data-table-aside">nr. 35</span>')
+    expect(html).toContain('<tr class="hf-data-table-total"><th scope="row">Totaal</th>')
     expect(html).toMatch(
       /<th scope="row">Totaal<\/th><td class="hf-numeric">60<\/td><td class="hf-numeric">56<\/td><td class="hf-numeric">10<\/td><td class="hf-numeric">2<\/td>/,
     )

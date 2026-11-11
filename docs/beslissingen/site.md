@@ -4509,12 +4509,18 @@
 - **Datum:** 11 november 2026
 - **Besluit:** `apps/site/src/player-seasons.ts` rekent voor een persoon per seizoen alle cijfers uit die de pagina van een speler toont (#1082), en elk blok van die pagina leest ze daar: de tabel Per seizoen, de kerngetallen, de loopbaan, de grafieken en de zijkolom.
   Geen blok heeft een eigen vraag aan de database voor een getal dat hier staat.
-  - **De bron per seizoen** voor wedstrijden, basis, assists en kaarten, in deze volgorde: (1) de opstellingen, als elke gespeelde wedstrijd van het seizoen een verslag heeft dat `klaar` is; (2) anders de tabel van Wikipedia (`player_season_stats`), als die een rij heeft, met alleen de wedstrijden en assists van de competities van die tabel; (3) anders de opstellingen die er zijn, met de zin "Uit 8 van de 41 wedstrijden van dit seizoen hebben we een opstelling."; (4) anders niets. De module geeft de bron per seizoen mee (`source`), samen met het aantal gespeelde wedstrijden en het aantal met een verslag.
-  - **Doelpunten** tellen altijd uit `match_goals`: `ours = 1`, `own_goal = 0`, en bij de persoon via `person_id`, `player_id` of `appearance_id`, in één vraag met `or`, zodat elk doelpunt één keer telt. Per competitie staan ze ook in `goalsByCompetition`. Een seizoen zonder bron en zonder doelpunt heeft er geen cijfer voor: we weten het niet, en het is geen nul.
+  - **De bron per seizoen** voor wedstrijden, basis, assists en kaarten, in deze volgorde: (1) de opstellingen, als elke gespeelde wedstrijd van het seizoen een verslag heeft dat `klaar` is; (2) anders de tabel van Wikipedia (`player_season_stats`), als die een rij heeft, met alleen de wedstrijden en assists van de competities van die tabel; (3) anders de opstellingen die er zijn, met de zin "Uit 8 van de 41 wedstrijden van dit seizoen hebben we een opstelling."; (4) anders niets.
+    De module geeft de bron per seizoen mee (`source`), samen met het aantal gespeelde wedstrijden en het aantal met een verslag.
+  - **Doelpunten** tellen altijd uit `match_goals`: `ours = 1`, `own_goal = 0`, en bij de persoon via `person_id`, `player_id` of `appearance_id`, in één vraag met `or`, zodat elk doelpunt één keer telt.
+    Per competitie staan ze ook in `goalsByCompetition`.
+    Een seizoen zonder bron en zonder doelpunt heeft er geen cijfer voor: we weten het niet, en het is geen nul.
   - **Assists** zijn de doelpunten (zonder eigen doelpunten) waarvan `assist_appearance_id` bij een opstelling van hem hoort; een geel-rode kaart telt als een gele en een rode.
-  - **De nul en de tegendoelpunten** van een doelman tellen alleen wedstrijden waarin hij in de basis stond en niet werd gewisseld, en geen rode of geel-rode kaart kreeg, omdat hij dan niet van begin tot eind speelde. Een tegendoelpunt is een doelpunt van de eindstand van de wedstrijd, met verlenging.
-  - **Een getal dat we niet hebben** is `undefined` in de module en een streepje in de tabel, nooit een nul. Het totaal telt alleen de seizoenen met een cijfer, en de zin onder de tabel zegt dat als het niet elk seizoen is.
-- **Waarom:** vijf blokken tonen dezelfde getallen, en twee manieren om ze te tellen geven vroeg of laat twee uitkomsten. De bronnen verschillen per seizoen sterk (de opstellingen van 1992/93 tot en met 2005/06, daarna alleen verslagen, en de tabel van Wikipedia voor het huidige seizoen), dus de regel moet op één plek staan.
+  - **De nul en de tegendoelpunten** van een doelman tellen alleen wedstrijden waarin hij in de basis stond en niet werd gewisseld, en geen rode of geel-rode kaart kreeg, omdat hij dan niet van begin tot eind speelde.
+    Een tegendoelpunt is een doelpunt van de eindstand van de wedstrijd, met verlenging.
+  - **Een getal dat we niet hebben** is `undefined` in de module en een streepje in de tabel, nooit een nul.
+    Het totaal telt alleen de seizoenen met een cijfer, en de zin onder de tabel zegt dat als het niet elk seizoen is.
+- **Waarom:** vijf blokken tonen dezelfde getallen, en twee manieren om ze te tellen geven vroeg of laat twee uitkomsten.
+  De bronnen verschillen per seizoen sterk (de opstellingen van 1992/93 tot en met 2005/06, daarna alleen verslagen, en de tabel van Wikipedia voor het huidige seizoen), dus de regel moet op één plek staan.
 - **Alternatieven:** elk blok telt zelf uit de database (dubbel werk en verschillende uitkomsten); de tabel van Wikipedia eerst (het lijkt compleet, maar telt alleen twee competities en heeft geen basis en kaarten).
 
 ## De tabel Per seizoen heeft kolommen naar de linie van de speler
@@ -4523,9 +4529,12 @@
 - **Besluit:** een doelman heeft G gespeeld, N nul, T tegendoelpunten en Y geel; iedereen anders heeft G gespeeld, B basis, D doelpunten en A assists (#1082).
   Een kolom zonder één cijfer in welk seizoen dan ook valt weg.
   De rijen zijn de seizoenen, het nieuwste bovenaan, en onderaan staat Totaal.
-  De eerste cel is het seizoen als link naar de pagina Spelers van dat seizoen, met het rugnummer eronder.
+  De eerste cel is het seizoen als link naar de pagina Spelers van dat seizoen, met het rugnummer erachter.
   Onder de tabel staan de letters met hun woorden en de zinnen over een streepje, de bron en het totaal.
-  - **De nieuwe letters** komen in `tableColumns`: `N` voor nul (`cleanSheets`) en `T` voor tegendoelpunten (`conceded`). Ze waren vrij: `G`, `D`, `A`, `B`, `I`, `M`, `P`, `R`, `V`, `W` en `Y` zijn al vergeven.
-  - **De kaart** gebruikt `DataTable` met de rijkop als link en het rugnummer als tweede regel (`secondary`); er is geen nieuw component.
-- **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul. Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
+  - **De nieuwe letters** komen in `tableColumns`: `N` voor nul (`cleanSheets`) en `T` voor tegendoelpunten (`conceded`).
+    Ze waren vrij: `G`, `D`, `A`, `B`, `I`, `M`, `P`, `R`, `V`, `W` en `Y` zijn al vergeven.
+  - **De kaart** is een gewone witte kaart met `DataTable`: de rijkop is de link, het rugnummer staat erachter op dezelfde regel (`aside`) en de rij Totaal is vet op de markeringskleur met een zwaardere lijn erboven (`total`).
+    Beide zijn nieuw in `DataTable`; er is geen nieuw component.
+- **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul.
+  Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
 - **Alternatieven:** één tabel met alle kolommen (te breed op een telefoon); de kolommen van de tabel Alle spelers (die hebben minuten, en die hebben we niet).

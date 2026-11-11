@@ -82,7 +82,7 @@ export const TableRows = ({
 }) => (
   <tbody>
     {rows.map((row) => (
-      <tr key={row.header}>
+      <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
         {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
         <th scope="row">
           {row.marker}
@@ -91,6 +91,7 @@ export const TableRows = ({
           ) : (
             <Link href={row.href}>{row.display ?? row.header}</Link>
           )}
+          {row.aside === undefined ? null : <span className="hf-data-table-aside">{row.aside}</span>}
           {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
           {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
         </th>

@@ -2126,7 +2126,8 @@
   DV, DT en DS komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont, en geen tabel doet dat nu.
   De rest blijft: één lijst, `tableLegend`, de woorden winst, gelijk en verlies.
 - **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): `D/W` is de uitzondering op één letter per kolom, en de test legt G, D en P vast als de letters met twee woorden.
-- **Later:** zie _De tabel Per seizoen heeft kolommen naar de linie van de speler_ in `site.md` (11 november 2026): `tableColumns` heeft ook N nul en T tegendoelpunten, voor de tabel van een doelman. Het blijft één letter per kolom, en N en T waren vrij.
+- **Later:** zie _De tabel Per seizoen heeft kolommen naar de linie van de speler_ in `site.md` (11 november 2026): `tableColumns` heeft ook N nul en T tegendoelpunten, voor de tabel van een doelman.
+  Het blijft één letter per kolom, en N en T waren vrij.
 
 ## Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 
@@ -3214,3 +3215,11 @@
   Op een telefoon staan ze twee aan twee, vanaf een breder scherm naast elkaar.
 - **Waarom:** een kop per getal zou de kopstructuur van de pagina van een speler vullen met cijfers, en een lijst zegt hoeveel getallen er zijn.
 - **Alternatieven:** `DescriptionList` (dan leest de schermlezer term en omschrijving los van elkaar, en het getal is niet groot); een tegel per getal (`Tile` is een link naar een andere pagina).
+
+## `DataTable` heeft een rij Totaal en woorden achter de rijkop
+
+- **Datum:** 11 november 2026
+- **Besluit:** een rij van `DataTable` kan `total: true` hebben, en dan is ze vet op de markeringskleur met een zwaardere lijn erboven, en `aside` zet woorden in secundaire tekst achter de rijkop op dezelfde regel, zoals het rugnummer achter een seizoen (#1082).
+  `secondary` blijft de regel onder de rijkop.
+- **Waarom:** de tabel Per seizoen moet de som zichtbaar scheiden van de seizoenen die ze optelt, en het rugnummer hoort bij het seizoen zonder de rij hoger te maken.
+- **Alternatieven:** het totaal als aparte tabel of als gewone rij (niet te onderscheiden); het rugnummer als tweede regel met `secondary` (elke rij wordt twee regels hoog).
