@@ -747,3 +747,23 @@
 - **Alternatieven:** de afspraak scherper opschrijven; dat hielp niet.
   Die opdrachten stilletjes de database van de map geven; dat is wat de projecteigenaar niet wil, omdat een opdracht dan een andere database raakt dan `.env` zegt.
 - **Later:** dit scherpt _Elke werkmap heeft een eigen database en eigen poorten_ aan: daar liepen deze opdrachten bewust niet door het script, en `.env` bleef gelden.
+
+## Een Builder en een Reviewer kennen het ontwerp waar ze aan werken
+
+- **Datum:** 11 november 2026
+- **Besluit:** de skills zorgen dat het ontwerp bij de Builder en de Reviewer komt (#1135).
+  - **`specify`:** komt een issue uit een ontwerp, dan schrijft de Specifier het uiterlijk precies in het issue: de opbouw, de vlakken en kaarten, wat groot of vet is, de volgorde en de indeling op een telefoon en een breed scherm.
+    De Reviewer toetst aan de woorden van het issue en ziet het ontwerp nooit, dus wat er niet staat, wordt niet nagekeken.
+    Het privécanvas wordt nergens in het issue gelinkt of genoemd.
+  - **`weekly-coordination`:** de briefing van een Builder voor werk met een ontwerp noemt het canvas, het bord en de gekozen rij, en zegt dat het ontwerp wint van de woorden van het issue waar het om het uiterlijk gaat.
+    Een briefing is niet openbaar, dus daar hoort het canvas; het issue en de pull request noemen het nooit.
+    De Builder meldt het meteen als hij het ontwerp niet kan lezen.
+  - **`builder-workflow` en `pr-screenshots`:** de Builder leest het ontwerp voordat hij bouwt, maakt schermafbeeldingen die naast het ontwerp te leggen zijn (de maten en de toestand van het bord), en meldt elk verschil met het ontwerp aan de Coördinator.
+  - **Drie kleinere regels:** voeg `origin/main` nog één keer samen vlak voordat je de pull request opent, want een conflict houdt CI tegen en bijna elke pull request botste die dag in `docs/beslissingen/`.
+    Stop je eigen server met zijn procesnummer, nooit met een opdracht die op naam of pad zoekt, zoals `pkill -f`, want die kan de server van een andere worktree stoppen.
+    Verandert een Builder de opmaak na het verslag van de Reviewer, dan loopt de tweede ronde ook over die wijziging.
+  - **`AGENTS.md`:** verwijst bij de rollen en bij de schermafbeeldingen naar de skills, zonder de regels te herhalen.
+- **Waarom:** op 11 november 2026 bouwde een Builder `KeyFigures` (#1080) uit de woorden van het issue alleen, want het ontwerp stond op een privécanvas dat de briefing niet noemde.
+  Het resultaat week zichtbaar af van het ontwerp (de gekozen opbouw had een kaart per getal) en moest opnieuw.
+  Dezelfde dag vielen een conflict in `docs/beslissingen/`, een server van een andere worktree die met `pkill -f` werd gestopt en een wijziging van de opmaak na het verslag van de Reviewer op, die een regel in een skill had voorkomen.
+- **Alternatieven:** het canvas in het issue linken (het issue is openbaar, en het canvas is privé); de Reviewer het ontwerp laten zien (hij leest de code en de woorden, en zijn verslag moet voor iedereen kloppen met het issue); de regels in `AGENTS.md` herhalen (een skill wijst naar de regels en voegt stappen toe).
