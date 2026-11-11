@@ -45,6 +45,8 @@ describe('the form of a player', () => {
       'Linie',
       'Land',
       'Rugnummer',
+      'Vorig rugnummer',
+      'Nieuw nummer vanaf',
       'Positie',
     ]) {
       expect(screen.getAllByLabelText(new RegExp(`^${label}`, 'u')).length).toBeGreaterThan(0)
@@ -64,6 +66,60 @@ describe('the form of a player', () => {
     expect((document.getElementById('land') as HTMLSelectElement).options[2]?.value).toBe('NL')
     expect(screen.getByRole('button', { name: 'Speler toevoegen' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Annuleren' }).getAttribute('href')).toBe('/beheer/spelers')
+  })
+
+  it('shows an error at the field of the previous number and at the field of the day, each with its own text', async () => {
+    show({
+      errors: { rugnummervanaf: 'Vul in vanaf welke dag het rugnummer geldt.', vorigrugnummer: 'Vul het nummer in.' },
+      values: emptyPlayerValues,
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Speler toevoegen' }))
+    await waitFor(() => expect(document.activeElement?.id).toBe('fouten'))
+
+    for (const id of ['vorigrugnummer', 'rugnummervanaf']) {
+      expect(document.getElementById(id)?.getAttribute('aria-invalid')).toBe('true')
+    }
+
+    expect(document.getElementById('rugnummervanaf')?.getAttribute('type')).toBe('date')
+    expect(screen.getAllByText('Vul in vanaf welke dag het rugnummer geldt.').length).toBeGreaterThan(0)
+  })
+
+  it('starts with the number the chosen person had the season before, and follows the choice (#1076)', () => {
+    const withNumbers = [
+      { id: 7, label: 'Pelle van Amersfoort (2018/19)', suggestion: { number: 21, season: '2018/19' } },
+      { id: 9, label: 'Piet Amersfoort (2019/20)', suggestion: { number: 4, season: '2018/19' } },
+      { id: 11, label: 'Jan Zonder (2018/19)' },
+    ]
+
+    show({ errors: {}, values: { ...emptyPlayerValues, persoon: '7', rugnummer: '21' } }, { people: withNumbers })
+
+    const number = document.getElementById('rugnummer') as HTMLInputElement
+    const choose = (value: string) =>
+      fireEvent.change(document.getElementById('persoon') as HTMLSelectElement, { target: { value } })
+
+    expect(number.value).toBe('21')
+    expect(screen.getByText(/Rugnummer in 2018\/19\./u)).toBeTruthy()
+    choose('9')
+    expect(number.value).toBe('4')
+    choose('11')
+    expect(number.value).toBe('')
+    expect(screen.queryByText(/Rugnummer in 2018\/19\./u)).toBeNull()
+  })
+
+  it('keeps a number the editor typed when he chooses another person', () => {
+    const withNumbers = [
+      { id: 7, label: 'Pelle van Amersfoort (2018/19)', suggestion: { number: 21, season: '2018/19' } },
+      { id: 9, label: 'Piet Amersfoort (2019/20)', suggestion: { number: 4, season: '2018/19' } },
+    ]
+
+    show({ errors: {}, values: { ...emptyPlayerValues, persoon: '7', rugnummer: '21' } }, { people: withNumbers })
+
+    const number = document.getElementById('rugnummer') as HTMLInputElement
+
+    fireEvent.change(number, { target: { value: '33' } })
+    fireEvent.change(document.getElementById('persoon') as HTMLSelectElement, { target: { value: '9' } })
+    expect(number.value).toBe('33')
   })
 
   it('opens with the line and the country of the person, and says what they are for', () => {

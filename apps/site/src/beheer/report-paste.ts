@@ -284,7 +284,11 @@ export function readPastedReport(
       row.naam = name
     } else {
       // Ours: the number in the squad first, then the whole name, then the surname.
-      const byNumber = number === null ? [] : squad.filter((player) => player.shirtNumber === number)
+      const withNumber = number === null ? [] : squad.filter((player) => player.shirtNumber === number)
+      // Two players of the season with one number, one who left and one who is in the squad:
+      // the one in the squad is the one meant, as if he were the only hit (issue 1076).
+      const inSquad = withNumber.filter((player) => player.inSquad === true)
+      const byNumber = withNumber.length > 1 && inSquad.length === 1 ? inSquad : withNumber
       const mine = squad.map((player, index) => ({
         index,
         name: player.name,

@@ -72,6 +72,11 @@ export type ReportFormState = {
 /** A player of ours in the squad of the season, as the form needs him. */
 export type ReportSquadPlayer = {
   id: number
+  /**
+   * Whether he is still in the squad. Left out where it is not known, such as in a test. A
+   * pasted number that two players of the season have goes to the one who is (issue 1076).
+   */
+  inSquad?: boolean
   name: string
   /** The surname the search page looks for (`players.search_term`), such as `van Aken`. */
   searchTerm?: string

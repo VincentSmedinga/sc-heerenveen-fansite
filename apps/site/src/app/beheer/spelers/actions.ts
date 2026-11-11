@@ -169,7 +169,7 @@ export async function submitPlayer(
     return {
       errors: outcome.errors,
       ...(merge === undefined ? {} : { merge: { href: mergePath({ ...merge, playerId: id }), label: merge.label } }),
-      values,
+      values: { ...values, ...outcome.values },
     }
   }
 

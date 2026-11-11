@@ -72,11 +72,15 @@ type MergeDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
  */
 export async function fillPlayerFrom(db: Pick<Database, 'update'>, stays: Player, gone: Player): Promise<void> {
   const held = new Set(stays.editorsFields)
+  // The previous number and its day belong to the number they came with (issue 1076).
+  const takesNumber = !held.has('shirt_number') && stays.shirtNumber === null && gone.shirtNumber !== null
   const filled = {
     country: stays.country ?? gone.country,
     personId: stays.personId ?? gone.personId,
     position: held.has('position') ? stays.position : (stays.position ?? gone.position),
+    previousShirtNumber: takesNumber ? gone.previousShirtNumber : stays.previousShirtNumber,
     shirtNumber: held.has('shirt_number') ? stays.shirtNumber : (stays.shirtNumber ?? gone.shirtNumber),
+    shirtNumberFrom: takesNumber ? gone.shirtNumberFrom : stays.shirtNumberFrom,
     wikipediaPage: held.has('wikipedia_page') ? stays.wikipediaPage : (stays.wikipediaPage ?? gone.wikipediaPage),
   }
 

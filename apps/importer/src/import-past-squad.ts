@@ -546,7 +546,15 @@ async function storePlayers(
       const [{ insertId }] = await db.insert(players).values(row)
 
       counts.added++
-      const added = { ...row, editorsFields: [], id: insertId, inSquad: true, leftSquadAt: null }
+      const added = {
+        ...row,
+        editorsFields: [],
+        id: insertId,
+        inSquad: true,
+        leftSquadAt: null,
+        previousShirtNumber: null,
+        shirtNumberFrom: null,
+      }
 
       byName.set(nameKey(player.name), added)
       if (player.page !== null) {

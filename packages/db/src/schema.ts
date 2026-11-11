@@ -1737,7 +1737,11 @@ const playerFieldSet = customType<{ data: PlayerField[]; driverData: string }>({
  * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
  * it is under. `position` is empty for a player from a list that gives none, such as a transfer
  * or a goal, and `source` says which kind of list the row comes from (see `playerSources`).
- * `shirt_number` is empty for a player without one. `search_term` is the name
+ * `shirt_number` is empty for a player without one. `previous_shirt_number` and
+ * `shirt_number_from` are the number the player had before it changed in the season and the
+ * day from which `shirt_number` counts: both set or both empty, set by the editors only, and
+ * left alone by the importer (issue 1076). A match before that day was played with the
+ * previous number. `search_term` is the name
  * without the first given name, the surname the search page looks for (`van Aken`). It is its
  * own column so one player can be corrected: the importer fills it for a new player and leaves
  * it alone for a known one. `wikipedia_page` is the page the table links to, such as `Luca
@@ -1762,6 +1766,8 @@ export const players = mysqlTable(
     position: mysqlEnum('position', playerPositions),
     source: mysqlEnum('source', playerSources).notNull().default('selectie'),
     shirtNumber: int('shirt_number', { unsigned: true }),
+    previousShirtNumber: int('previous_shirt_number', { unsigned: true }),
+    shirtNumberFrom: date('shirt_number_from', { mode: 'string' }),
     country: char('country', { length: 2 }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
@@ -1777,6 +1783,14 @@ export const players = mysqlTable(
     unique('players_season_wikipedia_page_unique').on(table.season, table.wikipediaPage),
     check('players_left_squad_at_only_when_gone', sql`${table.inSquad} = 0 or ${table.leftSquadAt} is null`),
     check('players_shirt_number_range', sql`${table.shirtNumber} is null or ${table.shirtNumber} between 1 and 99`),
+    check(
+      'players_previous_shirt_number_range',
+      sql`${table.previousShirtNumber} is null or ${table.previousShirtNumber} between 1 and 99`,
+    ),
+    check(
+      'players_shirt_number_change_complete',
+      sql`(${table.previousShirtNumber} is null) = (${table.shirtNumberFrom} is null)`,
+    ),
   ],
 )
 

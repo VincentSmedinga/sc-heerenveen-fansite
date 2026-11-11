@@ -91,7 +91,7 @@ export async function addLiveEvent(
       }
 
       const goals = await readGoals(transaction, matchId)
-      const squad = await readSquad(transaction, match.season)
+      const squad = await readSquad(transaction, match.season, match.matchDate)
       const values = valuesOfReport(stored, goals, squad)
       const places = appearancePlaces(stored)
       const errors: ReportErrors = {}
@@ -339,7 +339,7 @@ export async function removeLiveEvent(
         )
       }
 
-      const squad = await readSquad(transaction, match.season)
+      const squad = await readSquad(transaction, match.season, match.matchDate)
       const after = await readMatchReport(transaction, matchId)
       const goalsAfter = await readGoals(transaction, matchId)
       const errors = checkReportForm(valuesOfReport(after, goalsAfter, squad), contextOf({ match, squad })).errors

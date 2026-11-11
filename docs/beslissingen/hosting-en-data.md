@@ -1020,3 +1020,14 @@
 - **Waarom:** de computer van de projecteigenaar heeft geen `mysql` of `mariadb`, en de container is er al voor de lokale database.
   De controle achteraf vangt een client die in een andere server laadt.
 - **Alternatieven:** een client laten installeren (een stap meer voor één opdracht); de dump zelf in statements knippen en met `mysql2` laden (een eigen parser voor wat de client al kan).
+
+## Het vorige rugnummer en de dag van de wissel zijn twee kolommen met een controle
+
+- **Datum:** 11 november 2026
+- **Besluit:** migratie `0070_add_previous_shirt_number` voegt `players.previous_shirt_number` en `players.shirt_number_from` toe (#1076).
+  Beide zijn leeg voor elke rij die er al is.
+  Een controle in de database eist dat ze allebei ingevuld of allebei leeg zijn, en dat het vorige nummer van 1 tot en met 99 is.
+  De migratie voegt alleen toe en kan opnieuw draaien (`IF NOT EXISTS`).
+- **Waarom:** een nummer zonder dag, of een dag zonder nummer, zegt niets, en de database is de laatste plek waar dat kan worden tegengehouden.
+  Een bestaande database met gegevens verandert niet: geen rij krijgt een waarde.
+- **Alternatieven:** de paring alleen in het formulier controleren (de importer en de seed omzeilen het); een eigen tabel met nummers per periode (zie _De selectie onthoudt één vorig rugnummer met de datum van de wissel_ in `site.md`).

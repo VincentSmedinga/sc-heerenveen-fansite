@@ -191,7 +191,7 @@ export async function findReportScreen(db: Pick<Database, 'select'>, id: number,
     goals: await db.select().from(matchGoals).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id)),
     match,
     report: await readMatchReport(db, id),
-    squad: await readSquad(db, match.season),
+    squad: await readSquad(db, match.season, match.matchDate),
   }
 }
 
@@ -386,20 +386,39 @@ export async function markGoalsEdited(
   }
 }
 
-/** The squad of a season, as the report needs it: the numbers and the pages of the players. */
-export async function readSquad(db: Pick<Database, 'select'>, season: string): Promise<SquadRow[]> {
-  return db
+/**
+ * The squad of a season, as the report needs it: the numbers and the pages of the players.
+ * With the day of the match, a player whose number changed in the season
+ * (`previous_shirt_number` and `shirt_number_from`, issue 1076) has the number he wore that
+ * day: the previous one before the day from which the new one counts, the current one on and
+ * after it. The list is in the order of those numbers, players without one last.
+ */
+export async function readSquad(db: Pick<Database, 'select'>, season: string, matchDate?: string): Promise<SquadRow[]> {
+  const rows = await db
     .select({
       id: players.id,
+      inSquad: players.inSquad,
       name: players.name,
       personId: players.personId,
+      previousShirtNumber: players.previousShirtNumber,
       searchTerm: players.searchTerm,
       shirtNumber: players.shirtNumber,
+      shirtNumberFrom: players.shirtNumberFrom,
       wikipediaPage: players.wikipediaPage,
     })
     .from(players)
     .where(eq(players.season, season))
-    .orderBy(asc(players.shirtNumber), asc(players.name))
+
+  return rows
+    .map(({ previousShirtNumber, shirtNumberFrom, ...row }) => ({
+      ...row,
+      shirtNumber: shirtNumberOn(matchDate, { previousShirtNumber, shirtNumber: row.shirtNumber, shirtNumberFrom }),
+    }))
+    .sort(
+      (a, b) =>
+        (a.shirtNumber ?? Number.POSITIVE_INFINITY) - (b.shirtNumber ?? Number.POSITIVE_INFINITY) ||
+        (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+    )
 }
 
 /**
@@ -516,7 +535,7 @@ export async function saveReport(
       return { status: 'not-played' } as const
     }
 
-    const squad = await readSquad(transaction, match.season)
+    const squad = await readSquad(transaction, match.season, match.matchDate)
     const known = plan.appearances.map((player) =>
       player.ours
         ? squad.find((row) =>
@@ -712,6 +731,23 @@ export function seriesOf(match: Pick<Match, 'penaltiesAgainst' | 'penaltiesFor'>
   return match.penaltiesFor === null || match.penaltiesAgainst === null
     ? null
     : { against: match.penaltiesAgainst, for: match.penaltiesFor }
+}
+
+/**
+ * The number a player wore on a day: his previous number before the day from which the current
+ * one counts, and the current one on that day and after it, and always when the day is not
+ * known or the player has no previous number.
+ */
+export function shirtNumberOn(
+  day: string | undefined,
+  player: { previousShirtNumber: null | number; shirtNumber: null | number; shirtNumberFrom: null | string },
+): null | number {
+  return day !== undefined &&
+    player.previousShirtNumber !== null &&
+    player.shirtNumberFrom !== null &&
+    day < player.shirtNumberFrom
+    ? player.previousShirtNumber
+    : player.shirtNumber
 }
 
 /**
