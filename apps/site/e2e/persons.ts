@@ -174,9 +174,17 @@ async function addGoals(db: ReturnType<typeof connect>['db']) {
     player: forwardGoalName,
   })
 
-  await db
-    .insert(matchGoals)
-    .values([goal(first.id, 12, true), goal(second.id, 34, true), goal(other.id, 77, true), goal(last.id, 5, false)])
+  await db.insert(matchGoals).values([
+    goal(first.id, 12, true),
+    goal(second.id, 34, true),
+    goal(other.id, 77, true),
+    goal(last.id, 5, false),
+    // More goals in other matches, so the charts of the page (#1085) have enough to draw.
+    ...rest
+      .filter((match) => match.id !== other.id && match.id !== last.id)
+      .slice(0, 4)
+      .map((match, index) => goal(match.id, [8, 52, 61, 88][index] ?? 45, true)),
+  ])
 }
 
 /**
