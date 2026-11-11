@@ -2000,7 +2000,6 @@ describe('the matches and the table of a season', () => {
           minute: 10,
           ours: true,
           personId: lucaPerson,
-          personSlug: null,
           player: 'Oyen',
           playerId: oyen,
           wikipediaPage: 'Luca Oyen',
@@ -2012,11 +2011,12 @@ describe('the matches and the table of a season', () => {
           minute: 30,
           ours: false,
           personId: opponentPerson,
-          personSlug: null,
           player: 'Van Aken',
           wikipediaPage: 'Joost van Aken',
         },
       ])
+
+      await database.db.update(persons).set({ slug: 'luca-oyen' }).where(eq(persons.id, lucaPerson))
 
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 
@@ -2035,6 +2035,8 @@ describe('the matches and the table of a season', () => {
         ['Kemper', null, null, null, null, null],
         ['Van Aken', null, opponentPerson, 'Joost', 'van', 'Aken'],
       ])
+      // The address name of the person goes with the goal: only a person who has one gives it.
+      expect(cup?.goals.map((goal) => goal.personSlug)).toEqual(['luca-oyen', null, null, null])
     })
 
     it('gives only the season it is asked for', async () => {
