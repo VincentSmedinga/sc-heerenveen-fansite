@@ -452,7 +452,7 @@ export function validatePlayer(
   const deathYear = /^\d{4}$/u.test(values.overleden) ? Number(values.overleden) : null
 
   if (values.overleden !== '' && (deathYear === null || deathYear < 1850 || deathYear > now.getFullYear())) {
-    errors.overleden = 'Vul een jaar in met vier cijfers, zoals 2020, of laat het veld leeg.'
+    errors.overleden = `Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met ${now.getFullYear()}, of laat het veld leeg.`
   }
   if (Object.keys(errors).length > 0) {
     return { errors }

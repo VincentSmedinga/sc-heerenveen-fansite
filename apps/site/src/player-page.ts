@@ -33,10 +33,11 @@ export type PlayerPage = {
   country: string | undefined
   /**
    * The year of death, from Wikidata or the editors (#1147). Never the full date. With it the
-   * line shows "Herten, 1950–2020" and no age.
+   * line shows "Herten, 1950–2020" and no age, and without a year of birth "overleden in 2020",
+   * with a place of birth "geboren in Herten, overleden in 2020".
    */
   deathYear: string | undefined
-  /** Whether the editors set his name, line or country themselves. */
+  /** Whether the editors set his name, line, country or year of death themselves. */
   edited: boolean
   /** The line, as `playerPositions` names it. */
   line: PlayerPosition | undefined

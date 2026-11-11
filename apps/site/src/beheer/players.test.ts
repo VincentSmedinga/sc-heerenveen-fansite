@@ -172,7 +172,7 @@ describe('validatePlayer', () => {
 
     for (const overleden of ['20', 'twintig', '2027', '1800', '2020-01-01']) {
       expect(entryOf(overleden).errors?.overleden).toBe(
-        'Vul een jaar in met vier cijfers, zoals 2020, of laat het veld leeg.',
+        'Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met 2026, of laat het veld leeg.',
       )
     }
   })

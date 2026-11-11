@@ -251,9 +251,17 @@ function PlayerFacts({ page }: { page: PlayerPage }) {
       : page.deathYear === undefined
         ? page.birthYear
         : `${page.birthYear}–${page.deathYear}`
-  const born = page.bornLongAgo
-    ? `geboren in ${page.birthYear}`
-    : [page.birthPlace, years].filter((part) => part !== undefined).join(', ')
+  // Without a year of birth the place cannot stand next to the years: "Herten, overleden in
+  // 2020" would read as the place of death. The words are the same for everyone.
+  const diedOnly =
+    page.birthYear === undefined && page.deathYear !== undefined
+      ? `${page.birthPlace === undefined ? '' : `geboren in ${page.birthPlace}, `}overleden in ${page.deathYear}`
+      : undefined
+  const born =
+    diedOnly ??
+    (page.bornLongAgo
+      ? `geboren in ${page.birthYear}`
+      : [page.birthPlace, years].filter((part) => part !== undefined).join(', '))
   const spoken =
     page.deathYear === undefined || page.birthYear === undefined
       ? undefined

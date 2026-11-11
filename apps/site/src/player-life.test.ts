@@ -15,6 +15,22 @@ describe('lifeOf: the line under the name of a player (#1147)', () => {
     ).toEqual({ age: undefined, birthPlace: 'Herten', birthYear: '1950', bornLongAgo: false, deathYear: '2020' })
   })
 
+  it('keeps the year of death of a player without a year of birth, with no age', () => {
+    const noYear = { ...day, birthDate: null, birthDatePrecision: null, deathDate: '2020-01-01' }
+
+    expect(lifeOf(noYear, { birthPlace: 'Herten', inCurrentSeason: true, today })).toEqual({
+      age: undefined,
+      birthPlace: 'Herten',
+      birthYear: undefined,
+      bornLongAgo: false,
+      deathYear: '2020',
+    })
+    expect(lifeOf(noYear, { birthPlace: undefined, inCurrentSeason: false, today })).toMatchObject({
+      birthPlace: undefined,
+      deathYear: '2020',
+    })
+  })
+
   it('shows place, year and age for a player in the current season', () => {
     expect(lifeOf(day, { birthPlace: 'Herten', inCurrentSeason: true, today })).toMatchObject({
       age: 28,

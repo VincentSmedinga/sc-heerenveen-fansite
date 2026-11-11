@@ -226,6 +226,23 @@ describe('the page of a player', () => {
     expect(html).not.toMatch(/jaar<\/p>|in memoriam/iu)
   })
 
+  it('shows only the year of death of a player without a year of birth, with the place as "geboren in"', async () => {
+    const died = { age: undefined, birthYear: undefined, deathYear: '2020' }
+
+    expect(await render({ ...died, birthPlace: undefined, country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Overleden in 2020</p>',
+    )
+    expect(await render({ ...died, birthPlace: 'Herten', country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Geboren in Herten, overleden in 2020</p>',
+    )
+    // The line under the name has no dash, no age and no place next to the year of death.
+    const html = await render({ ...died, birthPlace: 'Herten' })
+    const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
+
+    expect(line).toMatch(/ · geboren in Herten, overleden in 2020$/u)
+    expect(line).not.toMatch(/–|jaar/u)
+  })
+
   it('says only "geboren in" for a player born over a hundred years ago without a death', async () => {
     const html = await render({ age: undefined, birthYear: '1920', bornLongAgo: true })
 

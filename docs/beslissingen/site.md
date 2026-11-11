@@ -4961,8 +4961,11 @@
 - **Datum:** 11 november 2026
 - **Besluit:** een overleden speler toont "plaats, geboortejaar–sterfjaar" onder de naam, zonder leeftijd: "Herten, 1950–2020" (#1147).
   `lifeOf` in `apps/site/src/player-page.ts` bouwt de regel, en `today` en of de speler in het lopende seizoen staat komen als argument binnen.
-  Het zijn vier gevallen, in deze volgorde:
+  Het zijn vier gevallen, in deze volgorde (het eerste heeft twee vormen):
   - **Een jaar van overlijden en een geboortejaar:** plaats, jaren en geen leeftijd.
+  - **Een jaar van overlijden zonder geboortejaar** (aangevuld op verzoek van de projecteigenaar, 12 november 2026): "overleden in 2020", en met een bekende geboorteplaats "geboren in Herten, overleden in 2020".
+    Nooit "Herten, overleden in 2020": dat leest als de plaats van overlijden.
+    Er staat geen streepje en geen leeftijd, en een schermlezer hoort dezelfde woorden.
   - **Geen sterfdatum en een geboortejaar van meer dan honderd jaar geleden:** alleen "geboren in 1920", zonder plaats en leeftijd.
   - **Geen sterfdatum, een geboortedatum op de dag, en een rij in het lopende seizoen of een lezing van Wikidata van de laatste 60 dagen:** plaats, jaar en leeftijd, zoals eerder.
   - **Alles daarbuiten**, een oud-speler zonder recente lezing of een geboortedatum die alleen het jaar kent: plaats en jaar, zonder leeftijd.
