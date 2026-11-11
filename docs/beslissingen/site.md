@@ -4403,7 +4403,8 @@
   - **De vorige wedstrijd:** de meest recente wedstrijd van sc Heerenveen vóór deze, op de datum van de aftrap, in elk seizoen en elke competitie, met een verslag waarin spelers van ons staan (`findPreviousLineUp`).
     Op dezelfde dag telt een wedstrijd alleen met een eerdere aftrap.
     Een wedstrijd zonder verslag of zonder opstelling wordt overgeslagen; de eerste wedstrijd van de reeks heeft geen voorganger, en dan is er geen knop.
-  - **Wat de knop overneemt:** de formatie van ons, en de rijen van onze spelers: de speler, het rugnummer zoals het in de rij staat en de rol (ook Bank en Basis en aanvoerder).
+  - **Wat de knop overneemt:** de formatie van ons, en de rijen van onze spelers: de speler, het rugnummer en de rol (ook Bank en Basis en aanvoerder).
+    Het rugnummer is dat van de dag van deze wedstrijd, niet dat van de vorige (zie _Een overgenomen opstelling krijgt de rugnummers van de dag van de wedstrijd_, 11 november 2026).
     Wissels, doelpunten, kaarten, strafschoppen en de serie niet, en ook niets van de tegenstander.
     Een speler die niet in de selectie van dit seizoen staat, komt terug als Andere speler met zijn naam.
     De lezing is die van het formulier zelf (`valuesOfReport`), dus wat de knop invult is wat het formulier ook zou tonen bij die wedstrijd.
@@ -4810,3 +4811,22 @@
   Plakken van een opstelling kiest bij twee spelers met het nummer die ene speler die nog in de selectie zit, en laat de redacteur kiezen als een naam daar niet bij past of meer spelers in de selectie het nummer hebben.
 - **Waarom:** een nummer gaat soms over van een vertrokken speler naar een nieuwe, en een redacteur verandert twee spelers na elkaar.
 - **Alternatieven:** het formulier weigert een nummer dat een speler van de selectie al heeft.
+
+## Een overgenomen opstelling krijgt de rugnummers van de dag van de wedstrijd, en een afwijkend nummer wordt gemeld
+
+- **Datum:** 11 november 2026
+- **Besluit:** de knop die de opstelling van de vorige wedstrijd overneemt, geeft elke speler uit de selectie het rugnummer dat op de dag van deze wedstrijd geldt, niet het nummer uit de vorige wedstrijd, en het formulier meldt een nummer dat daarvan afwijkt (#1122).
+  - **Eén plek die het nummer van een dag zegt:** `shirtNumberOn` in `apps/site/src/beheer/match-reports.ts`, met de kolommen `previous_shirt_number` en `shirt_number_from` uit _De selectie onthoudt één vorig rugnummer met de datum van de wissel_.
+    `readSquad` past hem toe op de selectie, en zowel `findPreviousLineUp` als de controle van het formulier gebruiken die selectie, dus er is geen tweede regel.
+  - **Het overnemen:** een speler uit de selectie met een nummer op die dag krijgt dat nummer in zijn rij.
+    Een speler zonder nummer in de selectie houdt het nummer van de vorige wedstrijd, en een speler die niet in de selectie staat komt terug als Andere speler, zoals eerst.
+  - **De melding:** staat bij een rij van onze kant een speler uit de selectie met een ingevuld rugnummer dat niet het nummer van de dag is, dan staat er een melding bij dat veld, zoals "rugnummer 7, maar Jan Testspeler draagt op 31 oktober 2026 nummer 9".
+    De melding zegt ook dat het veld leeg mag blijven voor dat nummer.
+    `checkReportForm` geeft hem bij de waarschuwingen (`warnings`) onder het veld van de rij (`speler-wij-3-rugnummer`), dus opslaan blijft mogelijk.
+    Een leeg veld, een speler zonder nummer in de selectie, een speler die met zijn naam is getypt en een speler van de tegenstander krijgen geen melding.
+  - **Toegankelijk:** de melding is tekst met "Let op:" voor een schermlezer, staat in de kaart van de opstelling vóór de tabel en verwijst naar het veld, en het veld wijst met `aria-describedby` naar de melding.
+    Na een antwoord van de server zonder fout gaat de focus naar de eerste melding, en met een fout naar de lijst met fouten, zoals eerst.
+    De pagina die opent, neemt de focus niet.
+  - **De invoer in de browser:** een overgenomen opstelling met de rugnummers van de dag wordt bewaard zoals getypte invoer en komt terug met Herstel na het herladen van de pagina.
+- **Waarom:** krijgt een speler tijdens het seizoen een ander rugnummer, dan stond hij in de eerste wedstrijd daarna met zijn oude nummer in het verslag, zonder waarschuwing.
+- **Alternatieven:** het nummer weglaten bij het overnemen, zodat het veld leeg is en de selectie het zegt (dan ziet de redacteur het nummer niet meer in het formulier); een afwijkend nummer weigeren (een wedstrijd kan echt met een ander nummer zijn gespeeld).

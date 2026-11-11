@@ -13,6 +13,7 @@ import { checkMatchReport, formationChoices, formationProblem } from '@fansite/s
 
 import {
   cardKindChoices,
+  dayInWords,
   type FieldName,
   formationId,
   formationOwnId,
@@ -74,7 +75,7 @@ export type ReportContext = {
 /** The match, as far as the checks need it. */
 export type ReportMatch = Pick<
   Match,
-  'extraTime' | 'goalsAgainst' | 'goalsFor' | 'opponent' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'
+  'extraTime' | 'goalsAgainst' | 'goalsFor' | 'matchDate' | 'opponent' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'
 >
 
 /**
@@ -192,6 +193,10 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     failRow(...args)
   }
 
+  // What is not wrong but worth a look, by field: a number that is not the one the player
+  // wears on the day of the match (`readSquad`, issue 1122). It never stops a save.
+  const fieldNotices: Record<string, string[]> = {}
+
   const status = statusChoices.find((choice) => choice.value === values.status)?.value
 
   if (status === undefined) {
@@ -292,6 +297,14 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
           failed = true
         } else {
           shirtNumber = typed
+
+          if (chosen?.shirtNumber !== undefined && chosen.shirtNumber !== null && chosen.shirtNumber !== typed) {
+            const id = rowFieldId('speler', side, number, 'rugnummer')
+
+            fieldNotices[id] = [
+              `${where('speler', side, number)}: rugnummer ${typed}, maar ${chosen.name} draagt op ${dayInWords(context.match.matchDate)} nummer ${chosen.shirtNumber}. Laat het veld leeg voor dat nummer.`,
+            ]
+          }
         }
       }
 
@@ -572,7 +585,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
   }
 
   if (parseFailed) {
-    return { errors, plan: undefined, warnings: {} }
+    return { errors, plan: undefined, warnings: { ...fieldNotices } }
   }
 
   // The events in the order of the clock, and for the same moment as they were typed. The
@@ -660,7 +673,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     fail(id, message)
   }
 
-  const warnings: Record<string, string[]> = {}
+  const warnings: Record<string, string[]> = { ...fieldNotices }
 
   for (const issue of checked.warnings) {
     const [id, message] = placeIssue(issue, placesOf, where, true)

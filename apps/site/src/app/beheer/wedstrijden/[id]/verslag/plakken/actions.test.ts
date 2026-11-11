@@ -367,6 +367,7 @@ describe('submitPaste for a match that has a report', () => {
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,
+        matchDate: '2026-10-31',
         opponent: 'N.E.C.',
         penaltiesAgainst: null,
         penaltiesFor: null,
