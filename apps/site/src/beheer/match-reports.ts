@@ -417,7 +417,7 @@ export async function readSquad(db: Pick<Database, 'select'>, season: string, ma
     .sort(
       (a, b) =>
         (a.shirtNumber ?? Number.POSITIVE_INFINITY) - (b.shirtNumber ?? Number.POSITIVE_INFINITY) ||
-        (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+        a.name.localeCompare(b.name, 'nl'),
     )
 }
 

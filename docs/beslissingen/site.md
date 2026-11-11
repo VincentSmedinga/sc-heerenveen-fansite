@@ -4725,6 +4725,7 @@
   - **De importer** leest en schrijft de twee kolommen niet.
     Voegen we twee personen samen en vult de rij die blijft haar nummer van de andere rij, dan gaan het vorige nummer en de dag mee.
   - **De kaart Selectie** en de tabel Spelers in Beheer tonen het huidige nummer.
+  - **De volgorde van de keuzelijst** is die van het nummer van de dag, met spelers zonder nummer achteraan en gelijke nummers op naam (Nederlandse volgorde).
 - **Waarom:** een verslag dat na de wissel wordt geschreven, kreeg het nieuwe nummer zonder waarschuwing.
   Eén vorig nummer dekt de gevallen die we kennen, met twee kolommen en zonder dat andere code het nummer anders leest.
   Elke dag tussen twee wedstrijden werkt, en de dag blijft kloppen als een wedstrijd verschuift.

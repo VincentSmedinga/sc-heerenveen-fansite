@@ -54,6 +54,7 @@ import {
 } from './report-fields'
 import { report as baseReport, card, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, type ReportPlan } from './report-form'
+import { readPastedReport } from './report-paste'
 
 const noFacts = { attendance: null, note: null, referee: null, stadium: null }
 
@@ -1240,6 +1241,21 @@ describe('the number a player wore on the day of a match (#1076)', () => {
         (row) => row.shirtNumber,
       ),
     ).toEqual([29])
+  })
+
+  it('finds the player in a pasted line-up on his previous number before the day, and not on his current one', async () => {
+    await changeNumber()
+
+    const idOfNine = (await database.db.select().from(players).where(eq(players.name, 'Speler 9')))[0]?.id
+    const before = await readSquad(database.db, '2026/27', '2026-10-31')
+    const after = await readSquad(database.db, '2026/27', '2026-11-14')
+
+    // Before the day he is number 29: the old number finds him, and number 9 finds nobody.
+    expect(readPastedReport('Opstelling\n29', before).values.wij.speler[0]).toMatchObject({ keuze: String(idOfNine) })
+    expect(readPastedReport('Opstelling\n9', before).values.wij.speler[0]).toMatchObject({ keuze: '' })
+    // From the day on, it is the other way round.
+    expect(readPastedReport('Opstelling\n9', after).values.wij.speler[0]).toMatchObject({ keuze: String(idOfNine) })
+    expect(readPastedReport('Opstelling\n29', after).values.wij.speler[0]).toMatchObject({ keuze: '' })
   })
 
   it('leaves the squad as it is for a player without a previous number', async () => {
