@@ -322,6 +322,22 @@ describe('the page of a player', () => {
     expect(aside).toContain('>Doelpunten per competitie<')
   })
 
+  it('has the charts in the side column as soft cards, after the competitions and before the credit, and not in the main column', async () => {
+    const html = await render()
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
+    const aside = html.slice(html.indexOf('<aside'))
+    const soft = (id: string) => `hf-card-soft" aria-labelledby="${id}"`
+    const places = ['per-competitie', 'grafiek-per-seizoen'].map((id) => {
+      expect(aside).toContain(soft(id))
+      expect(main).not.toContain(`aria-labelledby="${id}"`)
+
+      return aside.indexOf(`aria-labelledby="${id}"`)
+    })
+
+    expect(places).toEqual([...places].sort((a, b) => a - b))
+    expect(aside.indexOf('aria-labelledby="grafiek-per-seizoen"')).toBeLessThan(aside.indexOf('Bron: Wikipedia'))
+  })
+
   it('leaves the cards of the side column out when what they read fails, and keeps the credit', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
