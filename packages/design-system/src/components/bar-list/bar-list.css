@@ -22,6 +22,26 @@
     padding-block: var(--hf-space-xs);
   }
 
+  .hf-bar-list-wide .hf-bar-list-row {
+    grid-template-columns: 8em minmax(0, 1fr) 2em;
+  }
+
+  /*
+   * Rows, and parts of the text next to a list, that only a wide or only a narrow screen shows,
+   * so a phone gets a shorter list.
+   */
+  @media (width < 52rem) {
+    .hf-bar-list-wide-only {
+      display: none;
+    }
+  }
+
+  @media (width >= 52rem) {
+    .hf-bar-list-narrow-only {
+      display: none;
+    }
+  }
+
   .hf-bar-list-label {
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;

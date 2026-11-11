@@ -1312,6 +1312,31 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(playerHtml, /1990-03-14|14 maart 1990/)
     assert.match(playerHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
 
+    // The overview of all players (#1138), by name and by country: each its own address with
+    // Spelers as the current part of the menu, the made-up player from the seed under his
+    // letter, and no mark that keeps a search engine away.
+    for (const [path, view] of [
+      ['/spelers/overzicht', 'Op naam'],
+      ['/spelers/overzicht/land', 'Op land'],
+    ]) {
+      const overview = await fetch(`${origin}${path}`)
+      const overviewHtml = await overview.text()
+      assert.equal(overview.status, 200, path)
+      assert.match(overviewHtml, /<h1[^>]*>Alle spelers<\/h1>/, path)
+      assert.match(
+        overviewHtml,
+        /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/,
+        path,
+      )
+      assert.match(
+        overviewHtml,
+        new RegExp(`<a aria-current="page"[^>]*href="${path.replaceAll('/', '\\/')}"[^>]*>.*?${view}`),
+        path,
+      )
+      assert.match(overviewHtml, /Wouter|Proefman/, path)
+      assert.doesNotMatch(overviewHtml, /noindex/, path)
+    }
+
     const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)

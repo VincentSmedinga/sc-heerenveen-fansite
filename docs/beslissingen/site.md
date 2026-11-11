@@ -4851,3 +4851,41 @@
   - **De invoer in de browser:** een overgenomen opstelling met de rugnummers van de dag wordt bewaard zoals getypte invoer en komt terug met Herstel na het herladen van de pagina.
 - **Waarom:** krijgt een speler tijdens het seizoen een ander rugnummer, dan stond hij in de eerste wedstrijd daarna met zijn oude nummer in het verslag, zonder waarschuwing.
 - **Alternatieven:** het nummer weglaten bij het overnemen, zodat het veld leeg is en de selectie het zegt (dan ziet de redacteur het nummer niet meer in het formulier); een afwijkend nummer weigeren (een wedstrijd kan echt met een ander nummer zijn gespeeld).
+
+## Het overzicht van alle spelers staat op `/spelers/overzicht` en `/spelers/overzicht/land`, met `overzicht` als gereserveerd adres
+
+- **Datum:** 11 november 2026
+- **Besluit:** het overzicht van alle spelers staat op `/spelers/overzicht` (op naam) en `/spelers/overzicht/land` (op land), en `overzicht` is een gereserveerd adres voor spelers (#1138).
+  - **Gereserveerd:** `reservedPlayerSlugs` in `packages/db/src/person-slugs.ts` heeft `kies` en `overzicht`, en `isPlayerSlug` leest die lijst, zodat geen persoon `overzicht` als slug krijgt.
+    Een test controleert dat.
+  - **Geen aparte vorm met een vraagteken:** elke weergave is een eigen pagina met een eigen adres, in de sitemap en niet `noindex`.
+    De pagina leest de gegevens op elk verzoek (`force-dynamic`) en toont de foutpagina zonder database.
+  - **Een link, geen menu-item:** `/spelers` heeft in de titelrij een link "Alle spelers"; het hoofdmenu wijst op beide pagina's Spelers aan.
+- **Waarom:** de pagina van een speler en van een seizoen delen het ene dynamische deel `/spelers/<…>` (zie het commentaar in `app/spelers/[seizoen]/page.tsx`).
+  Een vaste map wint, maar dan mag geen speler dat adres als naam hebben.
+  Elke weergave heeft een eigen adres, zodat je er een kunt delen en het zonder JavaScript werkt.
+- **Alternatieven:** `/spelers/alle` of `/spelers?weergave=land` (een vraagteken in het adres is geen eigen pagina en vergt een tweede pad); `/overzicht/spelers` (buiten het onderdeel Spelers).
+
+## De lijst van alle spelers staat op achternaam zonder voorvoegsel, met alleen naam, linie en jaren
+
+- **Datum:** 11 november 2026
+- **Besluit:** de lijst op naam is gesorteerd op achternaam zonder voorvoegsel, dan voornaam, en gegroepeerd onder de beginletter met de regels van `foldLetters`.
+  Het overzicht toont per speler alleen de naam, de linie en de jaren (#1138).
+  - **Sorteren:** `sortPlayers` in `apps/site/src/players-overview.ts` vergelijkt de gevouwen achternaam en dan de gevouwen voornaam met `Intl.Collator('nl')`.
+    Đuričić staat onder D, Ødegaard onder O, Čmovš onder C en Þórisson onder T, zoals hun adres (`slugLetters`).
+    Een persoon zonder opgeslagen naamdelen krijgt zijn naam als tekst gesplitst (`splitPersonName`).
+  - **De jaren:** een periode van één seizoen is dat seizoen ("2024/25"), een langere periode het eerste jaar tot het jaar waarin het laatste seizoen eindigt ("2013–2017"), en een periode die het huidige seizoen bevat eindigt op "sinds 2024".
+    Een gat in de loopbaan geeft twee periodes (`periodsOf`).
+  - **Het totaal en het jaar:** het aantal spelers en het eerste jaar komen uit de gegevens: een persoon telt mee als hij een rij in `players` heeft.
+  - **Een component voor de rij:** `PlayerList` in het designsysteem is de lijst met rijen (achternaam vet, dan de voornaam, daaronder de regel met de jaren), in één kolom en vanaf 52 rem in twee.
+    `BarList` heeft er `wide` bij, voor namen van landen, en `wideOnly`, voor rijen die een telefoon niet toont.
+- **Waarom:** supporters zoeken een achternaam zonder "van" of "de", en hetzelfde vouwen van letters maakt het adres en de sortering gelijk.
+  Een rij met alleen die drie dingen blijft kort genoeg voor ruim vierhonderd namen.
+- **Alternatieven:** sorteren op de naam zoals hij geschreven wordt (Joost van Aken onder J of V); een loopbaanbalk, land en doelpunten in elke rij (te zwaar voor een lijst waarin je zoekt).
+
+## "Op nummer" staat pas in de keuze als de pagina er is
+
+- **Datum:** 11 november 2026
+- **Besluit:** "Op nummer" komt later in een eigen issue en staat niet in de keuze tot die er is (#1138).
+- **Waarom:** een keuze zonder pagina erachter is een dode link, en het rugnummer vraagt eigen gegevens.
+- **Alternatieven:** de keuze nu al tonen, uitgeschakeld.
