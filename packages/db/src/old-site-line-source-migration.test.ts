@@ -65,8 +65,16 @@ describe(`the migration ${migration}`, () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    // A later migration adds `slug`, which stays empty here (#1079).
-    expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(before.map((row) => ({ ...row, slug: null })))
+    // Later migrations add `slug` (#1079) and the date of death (#1147), which stay empty here.
+    expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(
+      before.map((row) => ({
+        ...row,
+        death_date: null,
+        death_date_precision: null,
+        death_date_source: null,
+        slug: null,
+      })),
+    )
     expect(await rows('SELECT title, country FROM player_list_titles')).toEqual([
       { country: null, title: 'Van Wikidata' },
     ])
