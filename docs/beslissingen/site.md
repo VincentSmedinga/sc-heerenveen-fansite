@@ -4738,7 +4738,7 @@
   - **Fouten:** "Kies een reden." staat bij de lijst, "Schrijf een reden bij Anders." en de fout voor een tekst van meer dan 300 tekens staan bij het veld "Toelichting".
     Na een fout bij "Anders" staat die keuze nog gekozen (`&keuze=anders` in het adres) en is het veld open.
     De getypte tekst staat niet in het adres.
-  - **Opgeruimd scherm:** de pagina Berichten is breder (`wide`), het formulier van een bericht en het zoekformulier staan op één regel (`Form` met `inline`, in het designsysteem) die pas breekt waar geen ruimte is, de knop om een goedkeuring terug te nemen heet "Herstellen" (de toegankelijke naam blijft de lange), en het zoekveld staat voor de knop.
+  - **Opgeruimd scherm:** de pagina Berichten is breder (`wide`), het formulier van een bericht en het zoekformulier staan op één regel (`Form` met `inline`, in het designsysteem) die pas breekt waar geen ruimte is, de knop om een goedkeuring terug te nemen heet "Herstellen" (de toegankelijke naam begint met "Herstellen" en zegt verder wat er gebeurt), en het zoekveld staat voor de knop.
   - **Paginering:** de lijst toont 50 berichten per pagina met `Pagination` en `?pagina=` in het adres.
     Groep, zoekopdracht en het vakje blijven staan, een pagina voorbij de laatste toont de laatste en een waarde die geen getal is de eerste.
     De tekst boven de lijst zegt hoeveel berichten het er zijn en welke pagina je ziet.

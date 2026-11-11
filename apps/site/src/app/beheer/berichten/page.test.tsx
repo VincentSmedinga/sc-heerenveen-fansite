@@ -172,7 +172,7 @@ describe('the list', () => {
     expect(html).toContain('Kop twijfel')
     expect(html).toContain('door een moderator op de site gezet')
     expect(html).toContain('door jelle@example.org')
-    expect(hasButton(html, 'Terug naar het oordeel van het filter: Kop twijfel', 'Herstellen')).toBe(true)
+    expect(hasButton(html, 'Herstellen, terug naar het oordeel van het filter: Kop twijfel', 'Herstellen')).toBe(true)
     expect(hasButton(html, 'Verberg: Kop twijfel', 'Verberg')).toBe(true)
     expect(html).not.toContain('aria-label="Op de site zetten:')
     expect(text(await render({ toon: 'niet-op-de-site' }))).not.toContain('Kop twijfel')

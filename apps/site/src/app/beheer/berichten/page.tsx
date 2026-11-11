@@ -331,7 +331,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                       <Form action={submitUnapprove.bind(null, item.id, view)}>
                         <Button
                           appearance="soft"
-                          aria-label={`Terug naar het oordeel van het filter: ${item.title}`}
+                          aria-label={`Herstellen, terug naar het oordeel van het filter: ${item.title}`}
                           type="submit"
                         >
                           Herstellen
