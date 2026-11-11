@@ -150,3 +150,58 @@ function keyOf(homeClub: string, awayClub: string): string {
 function listed(names: string[]): string {
   return `${names.slice(0, mostClubsListed).join(', ')}${names.length > mostClubsListed ? ', …' : ''}`
 }
+
+/** The affixes of a club name that do not tell clubs apart: "FC Twente" is "Twente". */
+const clubNameAffixes = new Set(['afc', 'fc', 'sbv', 'sc', 'sv', 'vv'])
+
+/** A row of `league_results` as `withOpponentPreviousDay` needs it. */
+export type ResultDay = { awayClub: string; homeClub: string; playedOn: string }
+
+/**
+ * The day of the previous league match of the opponent of each match: the last result of the
+ * season in which the club played, on a day before the match. The names in `results` are the
+ * ones of the table (`standings.club`) and the opponent is as `matches.opponent` has it, so the
+ * two are compared by `clubSpellings`. Null when the results have no match of the club before
+ * the day, such as at the start of the season, or when the name is not found. Days are
+ * `YYYY-MM-DD`
+ * days in Dutch time, so they compare as text.
+ */
+export function withOpponentPreviousDay<T extends { matchDate: string; opponent: string }>(
+  matches: readonly T[],
+  results: readonly ResultDay[],
+): (T & { opponentPreviousDay: null | string })[] {
+  const days = results.map((result) => ({
+    day: result.playedOn,
+    spellings: [clubSpellings(result.homeClub), clubSpellings(result.awayClub)],
+  }))
+
+  return matches.map((match) => {
+    const wanted = clubSpellings(match.opponent)
+    const found = days
+      .filter(
+        (result) =>
+          result.day < match.matchDate &&
+          result.spellings.some((spellings) => [...spellings].some((spelling) => wanted.has(spelling))),
+      )
+      .map((result) => result.day)
+      .sort()
+
+    return { ...match, opponentPreviousDay: found.at(-1) ?? null }
+  })
+}
+
+/**
+ * The spellings of a club name that two lists compare it by: the name in lower case with only
+ * letters and digits ("N.E.C." and "NEC" are "nec"), the same without a prefix or suffix of
+ * `clubNameAffixes`, and the full name of `club-names.ts`. Two names are one club when they
+ * share a spelling.
+ */
+function clubSpellings(name: string): Set<string> {
+  const plain = (text: string) => text.normalize('NFD').replaceAll(/\p{M}/gu, '').toLowerCase()
+  const words = plain(clubKey(name))
+    .split(/[^a-z0-9]+/u)
+    .filter(Boolean)
+  const bare = words.filter((word) => !clubNameAffixes.has(word))
+
+  return new Set([words.join(''), bare.join('')].filter((spelling) => spelling !== ''))
+}

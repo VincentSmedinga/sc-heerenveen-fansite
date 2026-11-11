@@ -329,13 +329,17 @@ De tests staan in [`src/store-item-clubs.test.ts`](src/store-item-clubs.test.ts)
 
 Een bericht over de tegenstander rond een wedstrijd tegen ons is ook nieuws over sc Heerenveen, ook als de kop de club niet noemt: "ADO beleeft frustrerende avond".
 Een kop noemt een club, en sc Heerenveen speelt in het lopende seizoen een wedstrijd tegen die club.
-Dan is de kop `relevant` van 3 dagen voor tot en met 3 dagen na die wedstrijd.
+Dan is de kop `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden (zie _Het venster_) tot en met 3 dagen na die wedstrijd.
 Noemt de kop ook een andere profclub uit de lijst, dan telt hij niet.
 Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
-- **Het venster:** de datum van de wedstrijd min 3 dagen tot en met plus 3 dagen.
-  Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet.
-  Na de wedstrijd telt een bericht tot en met de 3e dag, en een bericht van 4 dagen erna niet.
+- **Het venster:** het opent de dag na de latere van twee wedstrijden: onze vorige gespeelde wedstrijd van dit seizoen (ook een bekerwedstrijd) en de vorige competitiewedstrijd van de tegenstander (`league_results`).
+  Dan staat het nieuws over hun vorige wedstrijd er niet meer in, en de aanloop naar onze wedstrijd wel.
+  Het opent nooit later dan `opponentDaysBefore` (3) dagen voor de wedstrijd, dus het is nooit smaller dan een venster van 3 dagen, en nooit eerder dan `opponentDaysBeforeMost` (10) dagen ervoor, zodat een winterstop geen maand algemeen nieuws doorlaat.
+  Is een van de twee vorige wedstrijden niet bekend (het begin van het seizoen, een naam die niet te koppelen is), dan opent het 3 dagen voor de wedstrijd.
+  Een bericht van de openingsdag telt, een bericht van de dag ervoor niet.
+  Na de wedstrijd telt een bericht tot en met de 3e dag (`opponentDaysAfter`), en een bericht van 4 dagen erna niet.
+  Een wedstrijd in het midden van de week laat twee vensters overlappen: een bericht telt als het in een van de vensters valt.
   Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`).
   Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
 - **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
@@ -344,7 +348,8 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
   Speelt een club twee keer tegen ons, dan heeft elke wedstrijd zijn eigen venster.
   Alleen de tegenstander van die wedstrijd telt: een club die we pas over een maand treffen, doet nu niets.
 - **Hoe het werkt:** `judgeRelevance` leest zelf niets uit de database.
-  `importFeeds` leest de wedstrijden van het seizoen één keer per run, en `opponentsAround` (in `src/relevance.ts`) kiest bij elk bericht de tegenstanders van de wedstrijden binnen het venster.
+  `importFeeds` leest de wedstrijden van het seizoen één keer per run, samen met de resultaten van de competitie van dat seizoen: `withOpponentPreviousDay` (`src/league-results.ts`) zet bij elke wedstrijd de dag van de vorige competitiewedstrijd van de tegenstander, waarbij de naam in `league_results` en die in `matches.opponent` als één club tellen als ze op de spelling na gelijk zijn (hoofdletters, punten, FC en SC, `club-names.ts`).
+  `opponentsAround` (in `src/relevance.ts`) kiest bij elk bericht de tegenstanders van de wedstrijden binnen het venster.
   Die namen gaan als tweede argument naar `judgeRelevance`.
   Zonder wedstrijden werkt het filter als eerst.
   Een wedstrijd die de Wikipedia-import in dezelfde run bewaart, telt vanaf de volgende run.
@@ -548,7 +553,7 @@ Rijnmond is een bron met de feed `https://www.rijnmond.nl/rss/sport.xml`, het sp
 De feed is RSS 2.0, met 50 berichten en tijden in GMT, en heeft geen betaalmuur; de adapter leest hem zonder aanpassing.
 Het regionieuws van Rijnmond staat niet in het register (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
 Bijna geen kop gaat over sc Heerenveen: de feed gaat vooral over Feyenoord, en verder over Sparta en Excelsior.
-De seed zet de feed op `club`, en de bron telt door de regel van de tegenstander: een kop over Feyenoord, Sparta of Excelsior is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen die club (zie _Het relevantiefilter_).
+De seed zet de feed op `club`, en de bron telt door de regel van de tegenstander: een kop over Feyenoord, Sparta of Excelsior is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen die club (zie _Het relevantiefilter_).
 "Sparta Praag" is een andere club dan Sparta Rotterdam: de zinnen in `namesakeClubs` in [`src/relevance-terms.ts`](src/relevance-terms.ts) laat de regel eerst weg.
 Een run van 1 november 2026 bewaarde alle 50 berichten, en het filter vond er 0 `relevant`, 0 `doubtful` en 50 `irrelevant`, want er was geen wedstrijd tegen een Rotterdamse club in de buurt.
 Elk bericht heeft een beschrijving, een auteur en een afbeelding; de adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
@@ -561,7 +566,7 @@ RTV Noord is een bron met de feed `https://www.rtvnoord.nl/rss/sport.xml`, het s
 OOG Groningen, de lokale omroep van de stad, heeft twee feeds: `https://www.oogtv.nl/tag/sc-heerenveen/feed/` en `https://www.oogtv.nl/tag/fc-groningen/feed/`.
 Alle drie zijn RSS 2.0 met tijden in GMT of `+0000`, en geen heeft een betaalmuur; de adapter leest ze zonder aanpassing, op één regel na: de links van OOG hebben `utm_`-tags, en `parseLink` in [`src/read-feed.ts`](src/read-feed.ts) haalt ze van elke link af.
 De feed van sc Heerenveen van OOG gaat helemaal over de club en staat als gewone feed in de seed.
-De sportfeed van RTV Noord en de feed van FC Groningen van OOG gaan vooral over FC Groningen; de seed zet ze op `club`, en ze tellen door de regel van de tegenstander: een kop over FC Groningen is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen hen (zie _Het relevantiefilter_).
+De sportfeed van RTV Noord en de feed van FC Groningen van OOG gaan vooral over FC Groningen; de seed zet ze op `club`, en ze tellen door de regel van de tegenstander: een kop over FC Groningen is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen hen (zie _Het relevantiefilter_).
 Een kop over schaatsen in Heerenveen krijgt de waarde `doubtful` en wordt dus niet getoond.
 Het Dagblad van het Noorden staat niet in het register: zijn feeds geven een 403 (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
 Een run van 9 november 2026 bewaarde 50 berichten van RTV Noord (0 `relevant`, 50 `irrelevant`), 10 van de feed van sc Heerenveen van OOG (10 `relevant`) en 10 van de feed van FC Groningen van OOG (10 `irrelevant`), want er was geen wedstrijd tegen FC Groningen in de buurt.
