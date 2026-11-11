@@ -3,7 +3,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { countArchiveItems, listArchivePage, listRecentItems } from '@fansite/db/queries'
-import { adminUsers, feeds, importResults, itemClubs, items, matches, sources } from '@fansite/db/schema'
+import { adminUsers, feeds, importResults, itemClubs, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
@@ -41,6 +41,7 @@ beforeEach(async () => {
   // After the sources: an item that is hidden refers to the account of the moderator.
   await database.pool.query('DELETE FROM admin_users')
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM league_results')
 })
 
 afterEach(async () => {
@@ -700,6 +701,75 @@ describe('the relevance filter and the matches of the season', () => {
     await importAll()
 
     expect(await relevanceByKey()).toEqual({ ado: 'relevant', oud: 'irrelevant', ver: 'irrelevant' })
+  })
+
+  it('opens the window the day after both previous matches, from the results of the league (#1008)', async () => {
+    const server = await serve(
+      feedWith(
+        entry('vroeg', { pubDate: 'Thu, 15 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+        entry('laat', { pubDate: 'Fri, 16 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+      ),
+    )
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    // Our previous match was played on the 4th, theirs on the 14th, and we play on the 21st:
+    // the day after is the 15th, but the window opens at the earliest 5 days before, on the
+    // 16th (not 3 days before, on the 18th).
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          goalsAgainst: 0,
+          goalsFor: 1,
+          home: true,
+          kickoffAt: new Date('2026-10-04T14:30:00Z'),
+          matchDate: '2026-10-04',
+          opponent: 'N.E.C.',
+          round: 'Speelronde 11',
+          season: '2026/27',
+          status: 'played',
+        },
+      ]),
+    )
+    await addMatch('ADO Den Haag', '2026-10-21', '2026/27', 'Speelronde 12')
+    await database.db.insert(leagueResults).values([
+      {
+        awayClub: 'ADO Den Haag',
+        awayGoals: 1,
+        homeClub: 'Fortuna Sittard',
+        homeGoals: 0,
+        playedOn: '2026-10-14',
+        round: 11,
+        season: '2026/27',
+      },
+      {
+        awayClub: 'ADO Den Haag',
+        awayGoals: 1,
+        homeClub: 'Sparta Rotterdam',
+        homeGoals: 0,
+        playedOn: '2025-10-14',
+        round: 11,
+        season: '2025/26',
+      },
+    ])
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ laat: 'relevant', vroeg: 'irrelevant' })
+  })
+
+  it('opens the window 3 days before the match when the results have no previous match of the opponent', async () => {
+    const server = await serve(
+      feedWith(
+        entry('vroeg', { pubDate: 'Sat, 17 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+        entry('laat', { pubDate: 'Sun, 18 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+      ),
+    )
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    await addMatch('ADO Den Haag', '2026-10-21', '2026/27', 'Speelronde 12')
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ laat: 'relevant', vroeg: 'irrelevant' })
   })
 
   it('does not use a match of an earlier season, although the table holds it', async () => {
