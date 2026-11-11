@@ -55,7 +55,7 @@ describe('clubSlug', () => {
   it('writes the letters of the list of slugLetters like the address of a player does', () => {
     for (const [letter, written] of Object.entries(slugLetters)) {
       expect(clubSlug(`Club ${letter}`)).toBe(`club-${written}`)
-      expect(personSlug(`Club ${letter}`, 'NL')).toBe(`club-${written === 'dj' ? 'dj' : written}`)
+      expect(personSlug(`Club ${letter}`, 'NL')).toBe(`club-${written}`)
     }
   })
 
