@@ -1,8 +1,9 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { persons, personSlugs, players, playerSeasonStats } from '@fansite/db/schema'
-import { and, eq, inArray } from 'drizzle-orm'
+import { matches, matchGoals, persons, personSlugs, players, playerSeasonStats } from '@fansite/db/schema'
+import { seasonOf } from '@fansite/db/season'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
@@ -39,6 +40,7 @@ export async function addPersons() {
     try {
       const names = people.map(({ name }) => name)
 
+      await db.delete(matchGoals).where(eq(matchGoals.player, forwardGoalName))
       await db.delete(players).where(inArray(players.name, names))
       await db.delete(persons).where(inArray(persons.name, names))
     } finally {
@@ -88,6 +90,7 @@ export async function addPersons() {
     }
 
     await addFigures(db)
+    await addGoals(db)
     // The site gives the addresses when it starts, before these persons were there.
     await updatePlayerAddresses(db)
   } finally {
@@ -123,6 +126,57 @@ async function addFigures(db: ReturnType<typeof connect>['db']) {
       .insert(playerSeasonStats)
       .values({ ...figures, competition: 'Eredivisie', playerId: row.id, season: '2002/03' })
   }
+}
+
+/** The name the made-up goals of the forward carry, so they can be taken out again. */
+const forwardGoalName = 'Verzonnen Aanvaller (doelpunt)'
+
+/**
+ * Goals of the forward in the matches of the season before the current one (the made-up season
+ * of `earlier-season.ts`, which is in before the persons), so the side column of his page
+ * (#1086) has its cards to check: two goals against one club and one against another, and one
+ * goal against us. Nothing is added when that season has no matches, as in a development
+ * database without the made-up season.
+ */
+async function addGoals(db: ReturnType<typeof connect>['db']) {
+  const now = new Date()
+  // The season of `earlierSeason()` in earlier-season.ts, which this file does not import.
+  const season = seasonOf(new Date(Date.UTC(now.getUTCFullYear() - 1, now.getUTCMonth(), now.getUTCDate())))
+  const played = await db
+    .select({ clubId: matches.clubId, competition: matches.competition, id: matches.id })
+    .from(matches)
+    .where(and(eq(matches.season, season), eq(matches.status, 'played')))
+    .orderBy(asc(matches.clubId), asc(matches.id))
+  const [person] = await db.select({ id: persons.id }).from(persons).where(eq(persons.name, 'Verzonnen Aanvaller'))
+  // The first club with two played matches, and two other matches against other clubs.
+  const twice = played.find((match) => played.filter((other) => other.clubId === match.clubId).length >= 2)
+  const [first, second] = played.filter((match) => match.clubId === twice?.clubId)
+  const rest = played.filter((match) => match.clubId !== twice?.clubId)
+  const [other, last] = [rest.find((match) => match.clubId !== rest.at(-1)?.clubId), rest.at(-1)]
+
+  if (
+    person === undefined ||
+    first === undefined ||
+    second === undefined ||
+    other === undefined ||
+    last === undefined
+  ) {
+    return
+  }
+
+  await db.insert(players).values({ name: 'Verzonnen Aanvaller', personId: person.id, searchTerm: 'aanvaller', season })
+
+  const goal = (matchId: number, minute: number, ours: boolean) => ({
+    matchId,
+    minute,
+    ours,
+    personId: person.id,
+    player: forwardGoalName,
+  })
+
+  await db
+    .insert(matchGoals)
+    .values([goal(first.id, 12, true), goal(second.id, 34, true), goal(other.id, 77, true), goal(last.id, 5, false)])
 }
 
 /**

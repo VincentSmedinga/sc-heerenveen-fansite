@@ -38,6 +38,20 @@ export const Default = meta.story({
   ),
 })
 
+export const WithNote = meta.story({
+  name: 'Met een regel erboven',
+  render: () => (
+    <Card surface="soft">
+      <Heading level={2}>Tegen ons</Heading>
+      <FigureList>
+        <FigureList.Item figure="5′" note="8 mei 1997">
+          <Link href="#">Roda JC – sc Heerenveen 4–2</Link>
+        </FigureList.Item>
+      </FigureList>
+    </Card>
+  ),
+})
+
 export const Ranked = meta.story({
   name: 'Genummerd, met links',
   render: () => (

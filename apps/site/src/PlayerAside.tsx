@@ -114,8 +114,12 @@ export function PlayerAside({
               const title = matchTitle(goal.match, true)
 
               return (
-                <FigureList.Item figure={minuteText(goal) ?? ''} key={`${goal.match.id}-${goal.minute ?? 'x'}`}>
-                  {dayText(goal.match.matchDate)} · {href === undefined ? title : <Link href={href}>{title}</Link>}
+                <FigureList.Item
+                  figure={minuteText(goal) ?? ''}
+                  key={`${goal.match.id}-${goal.minute ?? 'x'}`}
+                  note={dayText(goal.match.matchDate)}
+                >
+                  {href === undefined ? title : <Link href={href}>{title}</Link>}
                 </FigureList.Item>
               )
             })}

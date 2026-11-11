@@ -104,9 +104,9 @@ describe('the side column of a player', () => {
 
   it('shows a goal against us with the date, the match and the minute, as plain text without a page', () => {
     expect(render(full)).toContain(
-      '8 mei 1997 · <a href="/wedstrijden/2002-03/wedstrijd-2">sc Heerenveen – Roda Test 1–3</a>',
+      '8 mei 1997</span><a href="/wedstrijden/2002-03/wedstrijd-2">sc Heerenveen – Roda Test 1–3</a>',
     )
-    expect(render(full, false)).toContain('8 mei 1997 · sc Heerenveen – Roda Test 1–3')
+    expect(render(full, false)).toContain('8 mei 1997</span>sc Heerenveen – Roda Test 1–3')
     expect(render(full)).toContain('5′')
   })
 

@@ -21,6 +21,12 @@
     overflow-wrap: anywhere;
   }
 
+  .hf-figure-list-note {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-size: var(--hf-meta-font-size);
+  }
+
   .hf-figure-list-figure {
     flex: none;
     font-variant-numeric: tabular-nums;

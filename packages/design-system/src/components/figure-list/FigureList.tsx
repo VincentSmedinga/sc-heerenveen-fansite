@@ -7,6 +7,8 @@ export type FigureListItemProps = ComponentPropsWithoutRef<'li'> & {
   children: ReactNode
   /** The number that belongs to it, at the end of the row, such as `12`. */
   figure: ReactNode
+  /** A small quiet line above the name, such as the day of a match. */
+  note?: ReactNode
 }
 
 export type FigureListProps = ComponentPropsWithoutRef<'ol'> & {
@@ -19,9 +21,12 @@ export type FigureListProps = ComponentPropsWithoutRef<'ol'> & {
  * works inside a FigureList, so it is written as FigureList.Item. A screen reader reads the
  * name and then the number.
  */
-const Item = ({ children, className, figure, ...props }: FigureListItemProps) => (
+const Item = ({ children, className, figure, note, ...props }: FigureListItemProps) => (
   <li className={classNames('hf-figure-list-item', className)} {...props}>
-    <span className="hf-figure-list-name">{children}</span>
+    <span className="hf-figure-list-name">
+      {note === undefined ? null : <span className="hf-figure-list-note">{note}</span>}
+      {children}
+    </span>
     <span className="hf-figure-list-figure">{figure}</span>
   </li>
 )
