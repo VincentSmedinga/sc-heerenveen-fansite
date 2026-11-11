@@ -11,6 +11,7 @@ import type {
 } from './dataTableTypes'
 
 import { Link } from '../link/Link'
+import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
 
@@ -79,51 +80,59 @@ export const TableRows = ({
   rows: readonly DataTableRow[]
   /** Whether a row shows its `position`: not in a table that sorts, which has no `#` header. */
   withPosition?: boolean
-}) => (
-  <tbody>
-    {rows.map((row, rowIndex) =>
-      row.gap === true ? (
-        <tr className="hf-data-table-gap" key={`gap-${rowIndex}`}>
-          <th scope="row">
-            <span aria-hidden="true">⋮</span>
-            <span className="hf-visually-hidden">{row.header}</span>
-          </th>
-          {columns.slice(1).map((column) => (
-            <td key={column.name} />
-          ))}
-        </tr>
-      ) : (
-        <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
-          {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
-          <th scope="row">
-            {row.marker}
-            {row.href === undefined ? (
-              (row.display ?? row.header)
-            ) : (
-              <Link href={row.href}>{row.display ?? row.header}</Link>
+}) => {
+  // A gap row, or a row without a place, ends the places before it: the row after it starts
+  // with a number, whatever place it has.
+  const sharedRows = sharedPlaces(rows.map((row, index) => (row.gap === true ? -index : (row.position ?? -index))))
+
+  return (
+    <tbody>
+      {rows.map((row, rowIndex) =>
+        row.gap === true ? (
+          <tr className="hf-data-table-gap" key={`gap-${rowIndex}`}>
+            <th scope="row">
+              <span aria-hidden="true">⋮</span>
+              <span className="hf-visually-hidden">{row.header}</span>
+            </th>
+            {columns.slice(1).map((column) => (
+              <td key={column.name} />
+            ))}
+          </tr>
+        ) : (
+          <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
+            {!withPosition || row.position === undefined ? null : (
+              <PlaceCell position={row.position} shared={sharedRows[rowIndex] === true} />
             )}
-            {row.aside === undefined ? null : (
-              <>
-                {' '}
-                <span className="hf-data-table-aside">{row.aside}</span>
-              </>
-            )}
-            {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
-            {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
-          </th>
-          {row.cells.map((cell, index) => (
-            <td
-              className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
-              key={columns[index + 1]?.name ?? index}
-            >
-              {textOf(cell)}
-            </td>
-          ))}
-        </tr>
-      ),
-    )}
-  </tbody>
-)
+            <th scope="row">
+              {row.marker}
+              {row.href === undefined ? (
+                (row.display ?? row.header)
+              ) : (
+                <Link href={row.href}>{row.display ?? row.header}</Link>
+              )}
+              {row.aside === undefined ? null : (
+                <>
+                  {' '}
+                  <span className="hf-data-table-aside">{row.aside}</span>
+                </>
+              )}
+              {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
+              {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+            </th>
+            {row.cells.map((cell, index) => (
+              <td
+                className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
+                key={columns[index + 1]?.name ?? index}
+              >
+                {textOf(cell)}
+              </td>
+            ))}
+          </tr>
+        ),
+      )}
+    </tbody>
+  )
+}
 
 const textOfNode = (cell: ReactNode) => (typeof cell === 'number' ? numberFormat.format(cell) : cell)
 
