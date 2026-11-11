@@ -415,26 +415,28 @@ test('an old address of a player answers 308 with the address of now', async ({ 
   expect(response.headers()['location']).toBe(playerPages.player)
 })
 
-// The table Per seizoen follows the line of the player (#1082): a goalkeeper has the clean
-// sheets and the goals against, a forward the line-ups, the goals and the assists. The season
-// without figures is a row of dashes and has its sentence.
-test('the table Per seizoen has the columns of the line of the player', async ({ page }) => {
-  const headers = async (path: string) => {
-    await page.goto(path)
+// The table Per seizoen has a column for each figure that a season has (#1082): the made-up
+// goalkeeper and forward have the table of Wikipedia for 2002/03 and nothing for 2001/02, which
+// is a row of dashes with its sentence. The columns by line are tested without a browser.
+test('the table Per seizoen has the columns of the figures that we have, and a dash for a season without', async ({
+  page,
+}) => {
+  await page.goto(playerPages.forward)
 
-    const table = page.getByRole('table', { name: /per seizoen/ })
+  const table = page.getByRole('table', { name: /per seizoen/ })
 
-    return { table, texts: await table.locator('thead th').allTextContents() }
-  }
-  const keeper = await headers(playerPages.goalkeeper)
-
-  expect(keeper.texts).toEqual(['Seizoen', 'Ggespeeld', 'Nnul', 'Ttegendoelpunten', 'Ygeel'])
-  await expect(keeper.table.getByRole('row', { name: /Totaal/ })).toContainText('2')
+  expect(await table.locator('thead th').allTextContents()).toEqual(['Seizoen', 'Ggespeeld', 'Ddoelpunten', 'Aassists'])
+  await expect(table.getByRole('row', { name: /2002\/03/ })).toContainText('28')
+  await expect(table.getByRole('row', { name: /2001\/02/ })).toContainText('–')
+  await expect(table.getByRole('row', { name: /Totaal/ })).toContainText('28')
   await expect(page.getByText('Een streepje: van dat seizoen hebben we geen opstellingen.')).toBeVisible()
+  await expect(page.getByText(/tabel van Wikipedia, die alleen de competities van die tabel telt/)).toBeVisible()
 
-  const forward = await headers(playerPages.forward)
-
-  expect(forward.texts).toEqual(['Seizoen', 'Ggespeeld', 'Bbasis', 'Ddoelpunten', 'Aassists'])
-  await expect(forward.table.getByRole('row', { name: /2002\/03/ })).toContainText('2')
-  await expect(forward.table.getByRole('row', { name: /2001\/02/ })).toContainText('–')
+  await page.goto(playerPages.goalkeeper)
+  expect(
+    await page
+      .getByRole('table', { name: /per seizoen/ })
+      .locator('thead th')
+      .allTextContents(),
+  ).toEqual(['Seizoen', 'Ggespeeld'])
 })

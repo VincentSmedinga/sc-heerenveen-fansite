@@ -1,17 +1,7 @@
 import { connect } from '@fansite/db/client'
-import { withClubs } from '@fansite/db/clubs'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import {
-  matchAppearances,
-  matchCards,
-  matches,
-  matchGoals,
-  matchReports,
-  persons,
-  personSlugs,
-  players,
-} from '@fansite/db/schema'
+import { persons, personSlugs, players, playerSeasonStats } from '@fansite/db/schema'
 import { and, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -49,7 +39,6 @@ export async function addPersons() {
     try {
       const names = people.map(({ name }) => name)
 
-      await db.delete(matches).where(eq(matches.opponent, figuresOpponent))
       await db.delete(players).where(inArray(players.name, names))
       await db.delete(persons).where(inArray(persons.name, names))
     } finally {
@@ -108,18 +97,21 @@ export async function addPersons() {
   return remove
 }
 
-const figuresOpponent = 'Cijfers AZ'
-
 /**
- * Two played matches of 2002/03 with a report and line-ups, in which the goalkeeper and the
- * forward play, so their pages have a table Per seizoen with figures from the line-ups (#1082):
- * the forward scores in both and gives an assist in one, the goalkeeper keeps one clean sheet
- * and gets a card, and 2001/02 has nothing, so it is a row of dashes.
+ * The table of Wikipedia for 2002/03 for the goalkeeper and the forward, so their pages have a
+ * table Per seizoen with figures (#1082). It adds no match, and so no season to the pickers of
+ * the site; 2001/02 has nothing, so it is a row of dashes. The lines of the match reports are
+ * tested with a database in `player-seasons-database.test.ts`.
  */
 async function addFigures(db: ReturnType<typeof connect>['db']) {
-  const named = async (name: string) => {
+  const stats = [
+    { appearances: 30, assists: 0, goals: 0, name: 'Verzonnen Doelman' },
+    { appearances: 28, assists: 5, goals: 11, name: 'Verzonnen Aanvaller' },
+  ]
+
+  for (const { name, ...figures } of stats) {
     const [row] = await db
-      .select({ id: players.id, personId: players.personId })
+      .select({ id: players.id })
       .from(players)
       .where(and(eq(players.name, name), eq(players.season, '2002/03')))
 
@@ -127,55 +119,9 @@ async function addFigures(db: ReturnType<typeof connect>['db']) {
       throw new Error(`There is no made-up player ${name} in 2002/03.`)
     }
 
-    return row
-  }
-  const keeper = await named('Verzonnen Doelman')
-  const forward = await named('Verzonnen Aanvaller')
-
-  for (const [index, goalsAgainst] of [0, 2].entries()) {
-    const day = `2002-09-${String(index + 1).padStart(2, '0')}`
-    const [{ insertId: matchId }] = await db.insert(matches).values(
-      await withClubs(db, [
-        {
-          competition: 'Eredivisie' as const,
-          goalsAgainst,
-          goalsFor: 1,
-          home: true,
-          kickoffAt: new Date(`${day}T12:30:00Z`),
-          matchDate: day,
-          opponent: figuresOpponent,
-          round: `Speelronde ${index + 90}`,
-          season: '2002/03',
-          status: 'played' as const,
-        },
-      ]),
-    )
-
-    await db.insert(matchReports).values({ matchId, status: 'klaar' })
-
-    const [{ insertId: keeperAppearance }] = await db
-      .insert(matchAppearances)
-      .values({ matchId, name: 'Verzonnen Doelman', ours: true, playerId: keeper.id, shirtNumber: 1, starter: true })
-    const [{ insertId: forwardAppearance }] = await db.insert(matchAppearances).values({
-      matchId,
-      name: 'Verzonnen Aanvaller',
-      ours: true,
-      playerId: forward.id,
-      shirtNumber: 9,
-      starter: true,
-    })
-
-    await db.insert(matchGoals).values({
-      appearanceId: forwardAppearance,
-      assistAppearanceId: index === 0 ? keeperAppearance : null,
-      matchId,
-      ours: true,
-      player: 'Aanvaller',
-    })
-
-    if (index === 1) {
-      await db.insert(matchCards).values({ appearanceId: keeperAppearance, kind: 'geel', matchId, ours: true })
-    }
+    await db
+      .insert(playerSeasonStats)
+      .values({ ...figures, competition: 'Eredivisie', playerId: row.id, season: '2002/03' })
   }
 }
 
