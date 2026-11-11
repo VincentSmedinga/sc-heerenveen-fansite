@@ -20,6 +20,10 @@ describe('the line round a flag in player-name.css', () => {
     expect(rule(String.raw`\.hf-player-name-flag`)).not.toContain('padding')
   })
 
+  it('keeps the rule of the plain link away from the link with a flag, so that one stays a row', () => {
+    expect(css).toContain('.hf-player-name > a:not(.hf-player-name-link) {')
+  })
+
   it('makes only the flag and the name a link, not the empty place beside them', () => {
     const body = rule(String.raw`\.hf-player-name-link`)
 

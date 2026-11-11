@@ -17,7 +17,7 @@
    * The link is a target of at least 24 pixels high, also in a line of small letters, so it is
    * as easy to hit as the text around it. It stays in the line and breaks at the spaces.
    */
-  .hf-player-name > a {
+  .hf-player-name > a:not(.hf-player-name-link) {
     display: inline-block;
     min-block-size: 1.5rem;
   }
