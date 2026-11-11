@@ -682,16 +682,16 @@ describe('the match', () => {
         ([, name, text]) => [text, name],
       )
 
-      expect(headings(html)).toContain('h2 De oude fansite wijkt af: uitslag')
+      expect(headings(html)).toContain('h2 De sc Heerenveen Fansite wijkt af: uitslag')
       expect(html).toContain('Wikipedia: sc Heerenveen 2–0 N.E.C.')
-      expect(html).toContain('De oude fansite: sc Heerenveen 1–1 N.E.C.')
+      expect(html).toContain('De sc Heerenveen Fansite: sc Heerenveen 1–1 N.E.C.')
       expect(html).toContain('De import neemt hier niets vanzelf over.')
       expect(html).not.toContain('Onze invoer: sc Heerenveen')
       expect(buttons).toEqual(
         expect.arrayContaining([
           [
-            'Neem de oude fansite over',
-            expect.stringMatching(/^Neem de oude fansite over: de uitslag van Speelronde 11/),
+            'Neem de sc Heerenveen Fansite over',
+            expect.stringMatching(/^Neem de sc Heerenveen Fansite over: de uitslag van Speelronde 11/),
           ],
           ['Houd Wikipedia', expect.stringMatching(/^Houd Wikipedia: de uitslag van Speelronde 11/)],
         ]),

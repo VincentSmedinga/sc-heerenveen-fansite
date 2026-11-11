@@ -29,7 +29,7 @@ export type MergeView = 'missing' | 'same' | PersonMergePlan
 /** What is in a field without a value. */
 export const none = 'geen'
 
-const lineSources = { manual: 'redactie', 'old-site': 'oude fansite', squad: 'selectie', wikidata: 'Wikidata' }
+const lineSources = { manual: 'redactie', 'old-site': 'sc Heerenveen Fansite', squad: 'selectie', wikidata: 'Wikidata' }
 const countrySources = { ...lineSources, list: 'spelerslijst' }
 
 type Facts = Pick<

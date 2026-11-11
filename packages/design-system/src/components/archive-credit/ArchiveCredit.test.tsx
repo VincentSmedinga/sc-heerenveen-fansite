@@ -8,13 +8,13 @@ describe('ArchiveCredit', () => {
     const { container } = render(<ArchiveCredit />)
 
     expect(container.firstElementChild?.tagName).toBe('P')
-    expect(container.textContent).toBe('Bron: het archief van de oude sc Heerenveen Fansite')
+    expect(container.textContent).toBe('Bron: sc Heerenveen Fansite')
   })
 
   it('takes another lead, as the strip under the image of a card does', () => {
     const { container } = render(<ArchiveCredit lead="Gegevens van" />)
 
-    expect(container.textContent).toBe('Gegevens van het archief van de oude sc Heerenveen Fansite')
+    expect(container.textContent).toBe('Gegevens van sc Heerenveen Fansite')
   })
 
   it('has no link, because the archive is ours and has no page to name', () => {

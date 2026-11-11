@@ -227,14 +227,14 @@ describe('the page of a player', () => {
   it('ends with the full credit of Wikipedia with his article, and the archive for a season up to 2006/07', async () => {
     const html = await render()
 
-    expect(html).toContain('Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite')
+    expect(html).toContain('Bron: Wikipedia en sc Heerenveen Fansite')
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Jan_de_Vries_(voetballer)"')
     expect(html).toContain('Onze spelersgegevens zijn ook CC BY-SA 4.0.')
     expect(await render({ seasons: ['2007/08'] })).not.toContain('archief')
   })
 
   it('names the sources there are for a player without an article', async () => {
-    expect(await render({ wikipedia: undefined })).toContain('Bron: het archief van de oude sc Heerenveen Fansite')
+    expect(await render({ wikipedia: undefined })).toContain('Bron: sc Heerenveen Fansite')
     expect(await render({ seasons: ['2025/26'], wikipedia: undefined })).toContain(
       '<p class="hf-meta">Bron: onze redactie.</p>',
     )

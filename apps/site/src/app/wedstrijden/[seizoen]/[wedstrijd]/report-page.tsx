@@ -2,6 +2,7 @@ import type { ReportedMatch } from '@fansite/db/match-reports'
 import type { Metadata } from 'next'
 
 import { phaseOf } from '@fansite/db/match-reports'
+import { oldSiteReportSource } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Card, Contents, Link, type MatchHeaderFact, MatchNeighbours, Page, Text, Time } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
@@ -273,7 +274,7 @@ function ReportCredit({
     <>
       <Card as="div" surface="transparent">
         <Text appearance="meta">
-          {`De opstelling, de wissels, de kaarten en de assists komen uit onze eigen administratie${source === null ? '' : `, naar ${source}`}.`}
+          {`De opstelling, de wissels, de kaarten en de assists komen van de sc Heerenveen Fansite${source === null || source === oldSiteReportSource ? '' : `, naar ${source}`}.`}
         </Text>
       </Card>
       {reported.match.attendance !== null && reported.match.attendance > 0 && (

@@ -3040,3 +3040,15 @@
 - **Waarom:** het streepje is korter en de regels hebben weinig ruimte.
   De verborgen tekst houdt de zin goed hoorbaar.
 - **Alternatieven:** "t/m" houden; alleen het streepje zonder verborgen tekst (een schermlezer slaat het over of zegt "streepje").
+
+## Onze eigen gegevens heten overal sc Heerenveen Fansite
+
+- **Datum:** 11 november 2026
+- **Besluit:** waar een bezoeker of een redacteur in Beheer onze eigen gegevens als bron leest, heet die bron "sc Heerenveen Fansite", zonder "oud", "het archief van" of "eigen administratie" (#1102).
+  De bronvermelding is "Bron: sc Heerenveen Fansite", of "Bron: Wikipedia en sc Heerenveen Fansite" naast Wikipedia, en in een zin "van de sc Heerenveen Fansite".
+  Een verslag met de bron `Oude fansite` in de database noemt onder de opstelling alleen "komen van de sc Heerenveen Fansite", zonder "naar Oude fansite" erachter.
+  Namen in de code, de tabellen en de waarde `Oude fansite` in `match_reports.source` veranderen niet.
+- **Waarom:** de fansite is één site, van 1997 tot nu, en de gegevens van 1990 tot 2007 zijn van ons.
+  Drie namen ("het archief van de oude sc Heerenveen Fansite", "eigen administratie", "Oude fansite") voor dezelfde bron lazen als drie bronnen.
+- **Alternatieven:** "Archief sc Heerenveen Fansite" (zegt niet dat het onze eigen gegevens zijn); de opgeslagen waarde `Oude fansite` ook veranderen (dan moet elke bewaarde rij mee, en de import herkent zijn eigen verslagen aan die waarde).
+- **Later:** vervangt de naam "het archief van de oude sc Heerenveen Fansite" uit de beslissingen over de bronvermelding van wedstrijden en de tekst "eigen administratie" onder een verslag.

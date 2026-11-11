@@ -463,7 +463,7 @@ describe('submitConflict', () => {
     expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 3, status: 'played' })
 
     await database.db.update(matchChanges).set({ decidedAt: null, resolution: null, status: 'pending' })
-    expect(await decide(id, { besluit: 'houden', reden: 'De oude fansite klopt' })).toEqual({
+    expect(await decide(id, { besluit: 'houden', reden: 'De sc Heerenveen Fansite klopt' })).toEqual({
       redirect: `/beheer/wedstrijden/${matchId}?gedaan=bron-gehouden`,
     })
   })

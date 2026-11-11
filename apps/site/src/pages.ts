@@ -34,7 +34,7 @@ export const pages = [
   },
   {
     description:
-      'Alle clubs waar sc Heerenveen tegen speelde, met hoe vaak we wonnen en verloren, en de bronnen erbij: Wikipedia en het archief van de oude fansite.',
+      'Alle clubs waar sc Heerenveen tegen speelde, met hoe vaak we wonnen en verloren, en de bronnen erbij: Wikipedia en de sc Heerenveen Fansite.',
     path: '/tegenstanders',
   },
   {

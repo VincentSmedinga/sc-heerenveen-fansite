@@ -312,6 +312,6 @@ describe('the line for the log', () => {
         part: 'kickoff',
         reason: sourceDifferenceReasons['oude-fansite'],
       }),
-    ).toBe('Aftrap: in de database: 1 september 2001; de oude fansite: 2 september 2001')
+    ).toBe('Aftrap: in de database: 1 september 2001; de sc Heerenveen Fansite: 2 september 2001')
   })
 })

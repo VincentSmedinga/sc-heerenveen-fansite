@@ -33,7 +33,7 @@ export const seasonSourceOf = (
 /** The source as a sentence names it, such as in the description of a page. */
 export const sourceName = (source: MatchSource) =>
   source === 'archive'
-    ? 'het archief van de oude sc Heerenveen Fansite'
+    ? 'de sc Heerenveen Fansite'
     : source === 'both'
-      ? 'de Nederlandse Wikipedia en het archief van de oude sc Heerenveen Fansite'
+      ? 'de Nederlandse Wikipedia en de sc Heerenveen Fansite'
       : 'de Nederlandse Wikipedia'

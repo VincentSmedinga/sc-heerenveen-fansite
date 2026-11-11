@@ -211,7 +211,7 @@ describe('the page /tegenstanders', () => {
 
     const html = await render()
 
-    expect(html).toContain('<summary>Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite</summary>')
+    expect(html).toContain('<summary>Bron: Wikipedia en sc Heerenveen Fansite</summary>')
   })
 
   it('credits the archive alone when no season has a page of Wikipedia', async () => {
@@ -220,7 +220,7 @@ describe('the page /tegenstanders', () => {
 
     const html = await render()
 
-    expect(html).toContain('Bron: het archief van de oude sc Heerenveen Fansite')
+    expect(html).toContain('Bron: sc Heerenveen Fansite')
     expect(html).not.toContain('Bron: Wikipedia')
   })
 

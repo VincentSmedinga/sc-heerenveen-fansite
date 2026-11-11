@@ -10,7 +10,7 @@ import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPla
 // are `klaar`, say how many of the played matches that is, and credit our own administration.
 
 /** The credit under the image of a card, and in the card: where the figures come from. */
-const ownRecords = 'Bron: eigen administratie'
+const ownRecords = 'Bron: sc Heerenveen Fansite'
 
 /** The credit for the image of a card. */
 const credit = <Text appearance="meta">{ownRecords}</Text>
