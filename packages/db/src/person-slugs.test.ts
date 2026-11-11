@@ -14,6 +14,7 @@ import {
   updatePlayerAddresses,
 } from './person-slugs.ts'
 import { persons, personSlugs, players } from './schema.ts'
+import { madeUpSquad } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -101,6 +102,18 @@ describe('personSlug', () => {
     expect(lostLetters('Jan de Vries')).toEqual([])
     expect(lostLetters('Ångström Çelik')).toEqual([])
     expect(lostLetters('Ǥerard 山田')).toEqual(['ǥ', '山', '田'])
+  })
+})
+
+describe('the names of the made-up squad of the seed', () => {
+  it('lose no letter in their address (#1113), so a new letter is noticed', () => {
+    const names = madeUpSquad(new Date('2026-11-11T12:00:00Z')).map(({ name }) => name)
+
+    expect(names.length).toBeGreaterThan(0)
+
+    for (const name of names) {
+      expect(lostLetters(name), name).toEqual([])
+    }
   })
 })
 
