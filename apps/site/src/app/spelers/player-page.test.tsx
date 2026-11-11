@@ -360,11 +360,9 @@ describe('the page of a player', () => {
     expect(await render({ seasons: ['2007/08'] })).not.toContain('archief')
   })
 
-  it('names the sources there are for a player without an article', async () => {
-    expect(await render({ wikipedia: undefined })).toContain('Bron: sc Heerenveen Fansite')
-    expect(await render({ seasons: ['2025/26'], wikipedia: undefined })).toContain(
-      '<p class="hf-meta">Bron: onze redactie.</p>',
-    )
+  it('has no credit for a player without an article, whose data is all ours', async () => {
+    expect(await render({ wikipedia: undefined })).not.toContain('Bron: ')
+    expect(await render({ seasons: ['2025/26'], wikipedia: undefined })).not.toContain('Bron: ')
     const unread = await render({ readAt: undefined, seasons: ['2025/26'] })
 
     expect(unread).toContain('href="https://nl.wikipedia.org/wiki/Jan_de_Vries_(voetballer)"')

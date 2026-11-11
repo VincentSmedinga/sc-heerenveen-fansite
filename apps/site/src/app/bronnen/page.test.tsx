@@ -52,6 +52,7 @@ describe('the page Onze bronnen', () => {
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuws">Nieuws</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="wedstrijden-en-spelers">Wedstrijden, standen en spelers</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="voorstellen">Mis je een bron?</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitgever">Ben je zelf een bron?</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuwsbrief-lc">Abonneer je op de nieuwsbrief van de LC!</h2>',
@@ -72,13 +73,14 @@ describe('the page Onze bronnen', () => {
       ([, content]) => content ?? '',
     )
 
-    expect(links).toHaveLength(3)
+    // Three sources, and the licence in the card Wedstrijden, standen en spelers.
+    expect(links).toHaveLength(4)
     for (const content of links) {
       expect(content).toMatch(/<span class="hf-icon-tail">[^<]*<svg aria-hidden="true" class="hf-icon"/)
       expect(content).toContain('<path d="M9.5 2.5h4v4"></path>')
     }
     // The other three icons are the envelopes in two cards and the icon of the newsletter link.
-    expect(html.match(/<svg /g)).toHaveLength(6)
+    expect(html.match(/<svg /g)).toHaveLength(7)
   })
 
   it('invites visitors to subscribe to the newsletter of the LC, with the icon for a link to another site behind the link', async () => {
@@ -122,7 +124,7 @@ describe('the page Onze bronnen', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
     )
   })
 
@@ -132,7 +134,7 @@ describe('the page Onze bronnen', () => {
     const html = await render()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
-    expect(cards).toHaveLength(5)
+    expect(cards).toHaveLength(6)
     expect(cards[0]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="nieuws">Nieuws</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
     expect(cards[1]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>')
@@ -158,10 +160,32 @@ describe('the page Onze bronnen', () => {
     expect(headingAnchors(await renderRaw())).toEqual([
       ['nieuws', 'Nieuws'],
       ['podcasts', 'Podcasts'],
+      ['wedstrijden-en-spelers', 'Wedstrijden, standen en spelers'],
       ['voorstellen', 'Mis je een bron?'],
       ['uitgever', 'Ben je zelf een bron?'],
       ['nieuwsbrief-lc', 'Abonneer je op de nieuwsbrief van de LC!'],
     ])
+  })
+
+  it('says in a card of its own where the matches, standings and players come from, with the licence', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = withoutIcons(await render())
+    const card = html.match(/<section[^>]*aria-labelledby="wedstrijden-en-spelers".*?<\/section>/)?.[0] ?? ''
+
+    expect(card).toContain('Wedstrijden, standen en spelers</h2>')
+    expect(card).toContain(
+      'Uitslagen, doelpunten, standen en gegevens van spelers komen van Wikipedia, vooral de Nederlandse en soms de Engelse. Enkele gegevens van spelers komen van Wikidata (CC0).',
+    )
+    expect(card).toContain(
+      'Wikipedia is geschreven door vrijwilligers. Hun namen staan in de geschiedenis van elk artikel. We lezen de artikelen hoogstens één keer per uur.',
+    )
+    expect(card).toContain(
+      'met de opstellingen, wissels, kaarten en assists van wedstrijden van 1990 tot 2007, en met wat onze redactie zelf invulde of verbeterde.',
+    )
+    expect(card).toContain(
+      '<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.nl">CC BY-SA 4.0</a>. Je mag ze delen en bewerken als je Wikipedia en ons noemt, zegt dat je ze bewerkte en dezelfde licentie houdt.',
+    )
   })
 
   it('shows a source without a description with its link only', async () => {
@@ -196,7 +220,7 @@ describe('the page Onze bronnen', () => {
     const html = await render()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
-    expect(cards).toHaveLength(4)
+    expect(cards).toHaveLength(5)
     expect(cards[0]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="forum">Forum</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(1)
     expect(html).not.toContain('Dit zijn de bronnen')
@@ -209,8 +233,10 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html).toContain('<p class="hf-intro"><b>We hebben nog geen bronnen.')
-    // The div for the cards stays empty, which page.css leaves out.
-    expect(html).toContain('</div><div class="hf-page-cells"></div></main>')
+    // The card for matches and players has nothing to do with the register, so it stays.
+    expect(html).toContain(
+      '<div class="hf-page-cells"><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">',
+    )
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('id="nieuws"')
     expect(html).not.toContain('<ul')

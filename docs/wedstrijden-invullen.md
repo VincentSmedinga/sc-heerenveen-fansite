@@ -71,7 +71,7 @@ Een wedstrijd uit een import kun je niet verwijderen.
 
 De waarden die je invult, op de plekken waar de waarden van Wikipedia staan.
 "Gegevens nog niet beschikbaar" verdwijnt bij een wedstrijd met uitslag.
-Zolang minstens één wedstrijd van de redactie is, staat onder de bronvermelding van Wikipedia: "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast."
+Zolang minstens één wedstrijd van de redactie is, staat in de uitklap van de bronvermelding van Wikipedia: "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast."
 
 ## Wat de import doet
 

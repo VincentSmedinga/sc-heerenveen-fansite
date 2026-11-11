@@ -7,30 +7,16 @@ import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPla
 
 // The cards of the page Spelers with the figures of the match reports (#832): the lists of the
 // assists and the minutes, and the table of all the players. They count only the reports that
-// are `klaar`, say how many of the played matches that is, and credit the sc Heerenveen
-// Fansite.
-
-/** The credit under the image of a card, and in the card: where the figures come from. */
-const ownRecords = 'Bron: sc Heerenveen Fansite'
-
-/** The credit for the image of a card. */
-const credit = <Text appearance="meta">{ownRecords}</Text>
+// are `klaar`, say how many of the played matches that is, and name no source: they are our
+// own data.
 
 /** The competitions the figures count, for the caption of a table. */
 const competitionWords = (competition: CompetitionChoice) =>
   competition === 'league' ? 'de Eredivisie' : 'alle competities'
 
-/** What the figures rest on and where they come from: two lines under the content of a card. */
+/** What the figures rest on: the line under the content of a card. */
 function Footing({ figures }: { figures: Pick<ReportFigures, 'known' | 'played'> }) {
-  return (
-    <>
-      <Text appearance="meta">{basedOnSentence(figures)}</Text>
-      {/* The image has its own credit under it, so the card's line is not copied into it. */}
-      <Text appearance="meta" data-hf-card-share-skip="">
-        {ownRecords}
-      </Text>
-    </>
-  )
+  return <Text appearance="meta">{basedOnSentence(figures)}</Text>
 }
 
 const rankings = {
@@ -71,10 +57,7 @@ export function AllPlayersCard({
   seasonOnImage?: string | undefined
 }) {
   return (
-    <Card
-      aria-labelledby="alle-spelers"
-      shareable={figures.players.length > 0 ? { season: seasonOnImage, source: credit } : undefined}
-    >
+    <Card aria-labelledby="alle-spelers" shareable={figures.players.length > 0 ? { season: seasonOnImage } : undefined}>
       <Heading anchor id="alle-spelers" level={2}>
         Alle spelers
       </Heading>
@@ -121,11 +104,7 @@ export function RankingCard({
   const everybody = rankedPlaces(figures.players, figure, false).rows.length
 
   return (
-    <Card
-      aria-labelledby={words.anchor}
-      shareable={total > 0 ? { season: seasonOnImage, source: credit } : undefined}
-      surface="soft"
-    >
+    <Card aria-labelledby={words.anchor} shareable={total > 0 ? { season: seasonOnImage } : undefined} surface="soft">
       <Heading anchor id={words.anchor} level={2}>
         {words.heading}
       </Heading>

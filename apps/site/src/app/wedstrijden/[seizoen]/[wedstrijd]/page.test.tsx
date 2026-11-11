@@ -87,7 +87,7 @@ describe('the page of a match', () => {
       'Opstelling',
       'Wissels sc Heerenveen',
       'Verloop Eerste helft',
-      'De opstelling, de wissels',
+      'Bron: het wedstrijdformulier.',
     ].map((part) => text.indexOf(part))
 
     expect(order.every((place) => place >= 0)).toBe(true)
@@ -354,7 +354,7 @@ describe('the page of a match', () => {
     expect(text).toContain('Gestopt: Frank Dummydijk')
     expect(text).toContain('Naast: Thijs Idzenga')
     expect(text.indexOf('Strafschoppenserie')).toBeGreaterThan(text.indexOf('Verloop Eerste helft'))
-    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('komen van de sc Heerenveen Fansite'))
+    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('Bron: het wedstrijdformulier.'))
   })
 
   it('has the line in the header and no card for a shoot-out of which only the result is known', async () => {
@@ -444,35 +444,37 @@ describe('the page of a match', () => {
     expect(html).not.toContain('undefined')
   })
 
-  it('links back to the matches of the season, and credits Wikipedia and our own records', async () => {
+  it('links back to the matches of the season, and credits Wikipedia and a source outside us', async () => {
     const html = await render()
     const text = plain(html)
 
     expect(html).toContain('href="/wedstrijden"')
     expect(text).toContain('Wedstrijden 2026/27')
-    expect(text).toContain(
-      'De opstelling, de wissels, de kaarten en de assists komen van de sc Heerenveen Fansite, naar het wedstrijdformulier.',
-    )
+    expect(text).toContain('Bron: het wedstrijdformulier.')
+    expect(text).not.toContain('komen van de sc Heerenveen Fansite')
     expect(text).toContain('Wikipedia')
     expect(text).toContain('CC BY-SA 4.0')
   })
 
-  it('names no source for the records when the report has none', async () => {
+  it('names no source for the records when the report has none: they are ours', async () => {
     const reported = reportedMatch()
 
     reported.stored.report.source = null
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
-    expect(plain(await render())).toContain('komen van de sc Heerenveen Fansite.')
+    expect(plain(await render())).not.toContain('sc Heerenveen Fansite')
   })
 
-  it('does not name the sc Heerenveen Fansite twice when the report comes from it', async () => {
+  it('names no source when the report comes from the old fansite: that is ours too', async () => {
     const reported = reportedMatch()
 
     reported.stored.report.source = oldSiteReportSource
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
-    expect(plain(await render())).toContain('komen van de sc Heerenveen Fansite.')
+    const text = plain(await render())
+
+    expect(text).not.toContain('Bron: sc Heerenveen Fansite')
+    expect(text).not.toContain('komen van de sc Heerenveen Fansite')
   })
 
   it('loads nothing from another domain', async () => {

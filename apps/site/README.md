@@ -376,10 +376,13 @@ Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzicht
 Ze staat dicht, op elke pagina en voor elk aantal pagina's: een `details` met een `summary` die "Bron: Wikipedia" zegt, zonder link.
 Eén klik laat de licentie zien, een link naar elke pagina van Wikipedia die de import las, de tijd van de laatste keer lezen en de zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
 De bron is dus zonder klik te zien (principe 4 van de Redactie), en de rest is één klik verder.
-Wedstrijden uit de gegevens van de sc Heerenveen Fansite zelf (1990 tot 2007, `data_source = 'oude-fansite'`) hebben een eigen bronvermelding.
+Een pagina heeft één bronvermelding van wedstrijd- en spelersgegevens: die uitklap, en op de homepage de korte regel (#1120).
+Wedstrijden uit de gegevens van de sc Heerenveen Fansite zelf (1990 tot 2007, `data_source = 'oude-fansite'`) zijn onze eigen gegevens.
 `sourceOf` (`src/match-sources.ts`) leest de bron van de wedstrijden op de pagina of de kaart: Wikipedia, het archief of allebei.
-Het archief alleen geeft `ArchiveCredit`, één regel zonder uitklap: "Bron: sc Heerenveen Fansite".
-Allebei geeft `WikipediaCredit` met `archive`, dat beide noemt.
+Het archief alleen geeft geen bronvermelding, ook niet in de afbeelding van een kaart.
+Allebei geeft `WikipediaCredit` met `archive`, dat beide noemt en in de uitklap zegt dat oudere wedstrijden van de sc Heerenveen Fansite komen.
+De zinnen over onze eigen gegevens (`edited`, en `wikidata` voor de pagina Spelers) staan in de uitklap, niet eronder.
+Onze bronnen heeft er de kaart "Wedstrijden, standen en spelers" voor (anker `wedstrijden-en-spelers`), zonder lijst van artikelen: die staan in de uitklap van elke pagina.
 Een pagina met pagina's van Wikipedia (voor de stand) noemt Wikipedia altijd.
 De lijst van de tegenstanders noemt de bronnen van alle wedstrijden in de database (`getMatchSource`).
 Een gespeelde wedstrijd toont alleen de dag, ook zonder aftrap in de database, dus een wedstrijd uit het archief heeft nooit "tijd nog niet bekend" of een weekend.
@@ -542,7 +545,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   De woorden voor de bezoeker staan in de constante `noteworthy`.
   De kaart staat niet in de balk "Op deze pagina:" en volgt de keuze van de competitie.
 
-De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.
+De bronvermelding (`SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.
 `pnpm test:a11y` gebruikt dezelfde verzonnen wedstrijden en stand van de seed.
 
 ### De spelers
@@ -1074,7 +1077,7 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 - Elke invoer en elk weghalen vraagt een reden.
   Een invoer zonder verschil, en "weghalen" zonder invoer, schrijven niets.
 - Een wijziging van Wikipedia die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
-- Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) onder die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
+- Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) in de uitklap van die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
   De vlag komt uit `hasEditedMatches` en is zo vers als de gegevens van het seizoen.
 
 ### Het verslag van een wedstrijd invullen

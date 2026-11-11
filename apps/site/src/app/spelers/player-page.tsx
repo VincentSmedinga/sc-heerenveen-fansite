@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 import {
-  ArchiveCredit,
   Card,
   CountryName,
   countryName,
@@ -213,16 +212,19 @@ function periodsText(periods: readonly { first: string; last: string }[]) {
 /**
  * The credit: Wikipedia with his article and the licence of our data, with the
  * sc Heerenveen Fansite when he played a season up to 2006/07. For a player whose article was
- * not read yet the time of reading falls away; a player of the editors without an article gets
- * the sc Heerenveen Fansite or the editors.
+ * not read yet the time of reading falls away. A player without an article has only our own
+ * data, so there is no credit.
  */
 function PlayerCredit({ page }: { page: PlayerPage }) {
   const archive = page.seasons.some((season) => season <= lastArchiveSeason)
   const { readAt, wikipedia } = page
-  let credit: ReactNode
 
-  if (wikipedia !== undefined) {
-    credit = (
+  if (wikipedia === undefined) {
+    return null
+  }
+
+  return (
+    <Card as="div" surface="transparent">
       <WikipediaCredit
         archive={archive}
         data="spelersgegevens"
@@ -230,16 +232,6 @@ function PlayerCredit({ page }: { page: PlayerPage }) {
         pages={[{ href: wikipediaUrl(wikipedia.title, wikipedia.language), name: wikipedia.title }]}
         {...(readAt === undefined ? {} : { readAt: formatReadAt(readAt), readAtDateTime: readAt.toISOString() })}
       />
-    )
-  } else if (archive) {
-    credit = <ArchiveCredit />
-  } else {
-    credit = <Text appearance="meta">Bron: onze redactie.</Text>
-  }
-
-  return (
-    <Card as="div" surface="transparent">
-      {credit}
     </Card>
   )
 }

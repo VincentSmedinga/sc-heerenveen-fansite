@@ -792,7 +792,7 @@ describe('the page /wedstrijden', () => {
     expect(stand).toContain('style="--hf-bar-share:16.67"')
   })
 
-  it('says under the credit that the editors entered some of the data, only while that is so', async () => {
+  it('says in the fold of the credit that the editors entered some of the data, only while that is so', async () => {
     const sentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
 
     expect(await render()).not.toContain(sentence)
@@ -801,8 +801,12 @@ describe('the page /wedstrijden', () => {
 
     const html = await render()
 
-    expect(html).toContain(`<p class="hf-meta hf-wikipedia-credit-edited">${sentence}</p>`)
-    expect(html.indexOf(sentence)).toBeGreaterThan(html.indexOf('<summary>Bron: Wikipedia</summary>'))
+    expect(html).toContain(sentence)
+    expect(html.indexOf(sentence)).toBeGreaterThan(html.indexOf('<summary>Bron: Wikipedia'))
+    expect(html.indexOf(sentence)).toBeLessThan(html.indexOf('</details>', html.indexOf(sentence)))
+    expect(html.lastIndexOf('<details', html.indexOf(sentence))).toBeGreaterThan(
+      html.lastIndexOf('</details>', html.indexOf(sentence)),
+    )
   })
 
   it('has one credit under the page, for the three pages, with the time of the last reading', async () => {

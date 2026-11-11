@@ -24,7 +24,7 @@ export const matchPageAnchors: readonly string[] = ['verloop', 'opstelling']
 
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
-  '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
+  '/bronnen': ['nieuws', 'podcasts', 'forum', 'wedstrijden-en-spelers', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
   // The nine cards with figures moved to /cijfers (#483), and Hoe vaak welke uitslag followed
   // (#774). Their anchors on /wedstrijden are gone on purpose, without a redirect: a link to
   // one of them breaks. The card Doelpuntenmakers left /cijfers for /spelers alone (#774), so

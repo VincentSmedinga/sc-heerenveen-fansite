@@ -1991,6 +1991,8 @@
   De naam uit de kop houdt de tekst op één plek.
   Een knop zonder JavaScript doet niets, en een knop die er pas na het laden staat verschuift de kop niet.
 - **Alternatieven:** een boolean `shareable` met de bron als aparte eigenschap (een kaart kan dan zonder bron delen); een aparte component `ShareButton` die de pagina zelf in de kaart zet (de pagina moet dan zelf de kaart vinden en kiezen waar de knop komt).
+- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): `source` is niet meer verplicht.
+  Een kaart die alleen onze eigen gegevens telt, laat hem weg, en de afbeelding heeft dan geen strook met een bron.
 
 ## Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"
 
@@ -2890,6 +2892,7 @@
   Dat de site een eigen gegevensbron heeft, mag niet betekenen dat hij andermans werk kopieert.
 - **Alternatieven:** niets overtypen en wachten tot een bron de gegevens geeft (de minuten, de opstelling en de kaarten bestaan nergens in een vorm die we mogen overnemen); de verslagen van journalisten samenvatten (het werk van een ander, en de lezer gaat dan niet naar de journalist).
 - **Later:** dit werkt principe 4 (altijd de bron vermelden) uit voor gegevens die we zelf bijhouden: de bron is dan "eigen administratie", met de bron van het verslag erachter.
+- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): onder een verslag staat niet meer dat de opstelling van ons komt, alleen "Bron: <naam>." als het verslag een bron buiten ons heeft.
 
 ## Een strafschop heet strafschop of str., nooit pen. of penalty
 
@@ -3052,3 +3055,25 @@
   Drie namen ("het archief van de oude sc Heerenveen Fansite", "eigen administratie", "Oude fansite") voor dezelfde bron lazen als drie bronnen.
 - **Alternatieven:** "Archief sc Heerenveen Fansite" (zegt niet dat het onze eigen gegevens zijn); de opgeslagen waarde `Oude fansite` ook veranderen (dan moet elke bewaarde rij mee, en de import herkent zijn eigen verslagen aan die waarde).
 - **Later:** vervangt de naam "het archief van de oude sc Heerenveen Fansite" uit de beslissingen over de bronvermelding van wedstrijden en de tekst "eigen administratie" onder een verslag.
+
+## Een pagina met gegevens van Wikipedia heeft één bronvermelding
+
+- **Datum:** 11 november 2026
+- **Besluit:** een pagina met gegevens van Wikipedia heeft één bronvermelding van wedstrijd- en spelersgegevens: de uitklap van `WikipediaCredit`, en op home de korte regel in de kaart Stand (#1120).
+  De regel erboven noemt de bronnen bij naam ("Bron: Wikipedia", of "Bron: Wikipedia en sc Heerenveen Fansite").
+  In de uitklap staan de licentie, een link per artikel, de tijd van het lezen en de zinnen over onze eigen gegevens: dat ze ook CC BY-SA 4.0 zijn, dat oudere wedstrijden van de sc Heerenveen Fansite komen, dat de redactie gegevens invulde of aanpaste (`edited`) en dat enkele spelers van Wikidata komen (`wikidata`, CC0).
+  Elke andere vermelding op dezelfde pagina is weg, en een pagina waarvan alle gegevens van onszelf zijn, heeft geen bronvermelding.
+  De afbeelding van een kaart (deelknop) houdt zijn strook voor wat van Wikipedia komt, want een afbeelding verlaat de site zonder pagina.
+  Een kaart met alleen eigen gegevens heeft geen strook, en `source` van `shareable` is niet meer verplicht.
+  `ArchiveCredit` bestaat niet meer.
+  Onder een verslag staat alleen "Bron: <naam>." als het verslag een bron buiten ons heeft, zoals een krant, en "Bron: onze redactie." op de pagina van een speler is weg.
+  Bij meer dan tien artikelen staan de artikelen van een seizoen op één regel ("2024/25: Eredivisie, KNVB Beker"), zodat de lijst niet langer wordt dan de pagina.
+  De link houdt zijn volledige naam voor een schermlezer.
+  Onze bronnen heeft de kaart "Wedstrijden, standen en spelers" (anker `wedstrijden-en-spelers`), en Over ons linkt ernaartoe.
+- **Waarom:** de projecteigenaar wil de uitklap met de korte regel houden.
+  De licentie (CC BY-SA 4.0) vraagt een redelijke vermelding met link, de maker, de licentie en de melding dat we bewerkten (art. 3(a)), en de uitklap doet dat al, één keer per pagina.
+  Een tweede vermelding op dezelfde pagina voegt niets toe, en eigen gegevens hebben geen vermelding nodig.
+  Dit is een lezing van de licentie en geen juridisch advies.
+- **Alternatieven:** één korte regel zonder uitklap (korter, maar de projecteigenaar koos de uitklap); alleen een link naar Onze bronnen in de voet (te mager als zichtbare vermelding).
+- **Later:** vervangt in _Onze eigen gegevens heten overal sc Heerenveen Fansite_ (11 november 2026) de bronvermelding "Bron: sc Heerenveen Fansite" voor pagina's met alleen eigen gegevens: die is weg, de naam blijft in de regel "Wikipedia en sc Heerenveen Fansite" en in de uitklap.
+  De zin die de redactie zelf invulde, staat in de uitklap in plaats van eronder (zie _Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde_ in `importer.md`).

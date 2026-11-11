@@ -3,8 +3,6 @@
  * styles are in index.css, which the site imports as well.
  */
 
-export { ArchiveCredit } from './components/archive-credit/ArchiveCredit'
-export type { ArchiveCreditProps } from './components/archive-credit/ArchiveCredit'
 export { ArticleCard } from './components/article-card/ArticleCard'
 export type { ArticleCardProps } from './components/article-card/ArticleCard'
 export { Article } from './components/article/Article'

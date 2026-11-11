@@ -214,14 +214,13 @@ describe('the page /tegenstanders', () => {
     expect(html).toContain('<summary>Bron: Wikipedia en sc Heerenveen Fansite</summary>')
   })
 
-  it('credits the archive alone when no season has a page of Wikipedia', async () => {
+  it('has no credit when the matches are all ours and no season has a page of Wikipedia', async () => {
     vi.mocked(getMatchSource).mockResolvedValue('archive')
     vi.mocked(getSourcePages).mockResolvedValue([])
 
     const html = await render()
 
-    expect(html).toContain('Bron: sc Heerenveen Fansite')
-    expect(html).not.toContain('Bron: Wikipedia')
+    expect(html).not.toContain('Bron: ')
   })
 
   it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the sidebar', async () => {
