@@ -49,7 +49,8 @@
    * drawing, with no space between them. The line is the darker line of the card the name
    * stands in, so it holds the flag on a light or a dark surface.
    * A player without a flag has an empty place of the same size, and a country without a drawing
-   * a frame of the same size with its code. The flag is a little lower than the top of the line, so it stands beside the letters.
+   * a frame of the same size with its code.
+   * The flag is a little lower than the top of the line, so it stands beside the letters.
    */
   .hf-player-name-flag {
     block-size: 0.9375rem;
