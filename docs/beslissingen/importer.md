@@ -3005,6 +3005,7 @@
 - **Waarom:** de regel is eenvoudig, de gegevens zijn er dan als de site ooit een tegenstander toont, en de eerste ronde is ongeveer 1.400 verzoeken voor ongeveer 680 personen, plus de labels.
   Een persoon wordt één keer gelezen; opnieuw lezen is een eigen issue.
 - **Alternatieven:** alleen personen met een rij in `players` van ons (minder verzoeken).
+- **Later:** zie _Een persoon zonder sterfdatum wordt elke 30 dagen opnieuw gelezen_ (11 november 2026, #1147): een persoon zonder sterfdatum wordt opnieuw gelezen.
 
 ## De linie komt uit een lijst van ons, anders uit Wikidata, anders uit de selectielijst
 
@@ -4092,4 +4093,4 @@
   - **Het logboek** noemt het aantal opnieuw gelezen personen: `persons (Wikidata): 3 persons read (3 read again), …`, en niets over een persoon.
 - **Waarom:** dat zijn ongeveer 16 verzoeken per dag bij 467 personen, met de bestaande fetcher, en een sterfdatum is binnen een maand zichtbaar.
 - **Alternatieven:** elke 90 dagen (een sterfdatum duurt tot drie maanden); alleen een persoon zonder Q-nummer opnieuw lezen (een latere dood komt dan nooit binnen).
-- **Later:** vervangt "een persoon wordt één keer gelezen" uit _Wikidata is de bron voor de gegevens van een persoon_ (8 november 2026).
+- **Later:** vervangt "een persoon wordt één keer gelezen" uit _De stap geldt voor alle personen, ook tegenstanders_ (8 november 2026).
