@@ -138,7 +138,14 @@ describe('reading the seasons of a person', () => {
       .values({ appearanceInId: other, appearanceOutId: out, matchId: first, minute: 60, ours: true })
 
     expect((await readPlayerSeasonFacts(personId)).appearances).toEqual([
-      expect.objectContaining({ goalsAgainst: 0, red: false, season: '2003/04', starter: true, substituted: true }),
+      expect.objectContaining({
+        cameOn: false,
+        goalsAgainst: 0,
+        red: false,
+        season: '2003/04',
+        starter: true,
+        substituted: true,
+      }),
     ])
     expect(await readPlayerSeasonFacts(personId + 1000)).toEqual({
       appearances: [],
@@ -148,5 +155,29 @@ describe('reading the seasons of a person', () => {
       players: [],
       tables: [],
     })
+  })
+
+  it('has a substitute who came on as played and one who stayed on the bench as not', async () => {
+    const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Bank' })
+    const [{ insertId: playerId }] = await database.db
+      .insert(players)
+      .values({ name: 'Verzonnen Bank', personId, searchTerm: 'bank', season: '2003/04' })
+    const first = await match('2003/04', 1, 0)
+    const second = await match('2003/04', 2, 0)
+    const benched = await appear(first, playerId, 12, false)
+    const cameOn = await appear(second, playerId, 12, false)
+    const [{ insertId: out }] = await database.db
+      .insert(matchAppearances)
+      .values({ matchId: second, name: 'Basisspeler', ours: true, shirtNumber: 5, starter: true })
+
+    await database.db
+      .insert(matchSubstitutions)
+      .values({ appearanceInId: cameOn, appearanceOutId: out, matchId: second, minute: 70, ours: true })
+
+    const facts = await readPlayerSeasonFacts(personId)
+
+    expect(facts.appearances.map(({ cameOn: came }) => came).sort()).toEqual([false, true])
+    expect(benched).not.toBe(cameOn)
+    expect(playerSeasonsOf(facts)[0]).toMatchObject({ played: 1, source: 'lineups' })
   })
 })
