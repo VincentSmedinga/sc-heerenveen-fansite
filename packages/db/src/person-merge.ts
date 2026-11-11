@@ -13,6 +13,7 @@ import {
   personPages,
   personPositions,
   persons,
+  personSlugs,
   type Player,
   players,
   playerSeasonStats,
@@ -192,7 +193,8 @@ export async function mergeEditorsPersonInto(db: MergeDatabase, fromId: number, 
 
 /**
  * Moves everything of `other` to `kept` and removes `other`: whatever points to the other
- * person points to the one that stays, his title is remembered in `person_pages`, the person
+ * person points to the one that stays, his title is remembered in `person_pages`, his slugs go
+ * to the person that stays in `person_slugs`, the person
  * that stays gets `mergedPersonValues`, and two rows of one season become one. Returns the
  * warnings. Use the transaction of the step.
  */
@@ -203,6 +205,8 @@ export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Pe
   await tx.update(players).set({ personId: kept.id }).where(eq(players.personId, other.id))
   await tx.update(matchGoals).set({ personId: kept.id }).where(eq(matchGoals.personId, other.id))
   await tx.update(personPages).set({ personId: kept.id }).where(eq(personPages.personId, other.id))
+  // The addresses of the page of the other person lead to the one that stays (#1079).
+  await tx.update(personSlugs).set({ personId: kept.id }).where(eq(personSlugs.personId, other.id))
   await rememberPage(tx, other.wikipediaPage, kept.id)
 
   for (const table of [personNationalities, personPositions]) {
@@ -222,7 +226,12 @@ export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Pe
   // The other person goes first: the Q-number and the title are unique, so two persons cannot
   // have them at once.
   await tx.delete(persons).where(eq(persons.id, other.id))
-  await tx.update(persons).set(values).where(eq(persons.id, kept.id))
+  // A person that stays without a page of his own takes the address of the other, so it keeps
+  // working until `updatePlayerAddresses` gives him the slug of his name.
+  await tx
+    .update(persons)
+    .set({ ...values, slug: kept.slug ?? other.slug })
+    .where(eq(persons.id, kept.id))
 
   const rows = await tx.select().from(players).where(eq(players.personId, kept.id)).orderBy(asc(players.id))
 

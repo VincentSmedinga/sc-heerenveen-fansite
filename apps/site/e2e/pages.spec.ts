@@ -8,7 +8,7 @@ import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
 import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
-import { mergePair } from './persons'
+import { mergePair, playerPages } from './persons'
 import { squadPlayerId } from './players'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -97,6 +97,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/spelers/kies', status: 200 },
   { path: '/spelers/2099-00', status: 404 },
   { path: '/spelers/onzin', status: 404 },
+  // The page of a made-up player and a person in no squad of ours (see persons.ts). An old
+  // address of the player has a test of its own, below.
+  { path: playerPages.player, status: 200 },
+  { path: playerPages.opponent, status: 404 },
   // The page Tegenstanders, a sub-page of Wedstrijden: the list, a club met in the league
   // (Testdorp FC), one with two names of its stadium (Voorbeeld United) and one met in the cup
   // only (FC Maquette, who is not in the list with the choice Eredivisie and has a sentence on
@@ -398,3 +402,12 @@ for (const { admin, path, status } of pages) {
     })
   }
 }
+
+// An old address of a player leads to his page of now, for good (#1079): the browser follows
+// the 308, so the request asks without following it.
+test('an old address of a player answers 308 with the address of now', async ({ request }) => {
+  const response = await request.get(playerPages.old, { maxRedirects: 0 })
+
+  expect(response.status()).toBe(308)
+  expect(response.headers()['location']).toBe(playerPages.player)
+})

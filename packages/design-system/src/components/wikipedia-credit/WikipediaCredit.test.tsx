@@ -24,6 +24,15 @@ describe('WikipediaCredit', () => {
     )
   })
 
+  it('leaves out the time of reading when it is not known, and keeps the rest', () => {
+    const { container } = render(<WikipediaCredit data="spelersgegevens" pages={[standings]} />)
+
+    expect(container.textContent).toBe(
+      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Onze spelersgegevens zijn ook CC BY-SA 4.0.',
+    )
+    expect(container.querySelector('time')).toBeNull()
+  })
+
   it('is a closed details with a summary that says "Bron: Wikipedia" and holds no link', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
     const details = container.firstElementChild as HTMLDetailsElement

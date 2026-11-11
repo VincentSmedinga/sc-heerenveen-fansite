@@ -1608,8 +1608,9 @@ describe('the import command', () => {
       'Squad 2026/27: countries of the players: 25 of 25 have one',
     ])
     // The goals of the made-up matches differ from the made-up table: a row for each, for the
-    // editors, and no warning.
-    expect(lines).toHaveLength(8)
+    // editors, and no warning. The last line gives the players the address of their page.
+    expect(lines).toHaveLength(9)
+    expect(lines.at(-1)).toBe('Player addresses: 25 new')
     expect(new Set((await database.db.select().from(players)).map((player) => player.source))).toEqual(
       new Set(['selectie']),
     )
@@ -1638,8 +1639,9 @@ describe('the import command', () => {
       'Squad 2026/27: persons: 25 titles asked, 25 new persons, 25 titles remembered, 25 names stored (25 from a sort key, 0 guessed, 0 from the list)',
     )
     expect(lines[6]).toBe('Completeness 2026/27: 95% compleet, 25 players, new')
+    expect(lines[7]).toBe('Player addresses: 25 new')
     // No match was played in the database, so there is nothing to compare the goals with.
-    expect(lines).toHaveLength(7)
+    expect(lines).toHaveLength(8)
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

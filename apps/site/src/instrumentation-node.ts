@@ -41,7 +41,7 @@ export async function prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV }: ReturnT
   const seeded = SITE_ENV !== 'local'
 
   try {
-    await prepareDatabase({ migrationsFolder: migrationsFolder(), seed: SITE_ENV, url: DATABASE_URL })
+    await prepareDatabase({ addresses: true, migrationsFolder: migrationsFolder(), seed: SITE_ENV, url: DATABASE_URL })
     console.log(`The database is up to date${seeded ? ', with the real sources from the seed' : ''}.`)
   } catch (error) {
     console.error(

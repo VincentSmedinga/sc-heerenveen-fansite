@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
+import { updatePlayerAddresses } from '@fansite/db/person-slugs'
 import { listSeasonPlayers } from '@fansite/db/queries'
 import {
   adminUsers,
@@ -9,6 +10,7 @@ import {
   matchGoals,
   personPages,
   persons,
+  personSlugs,
   players,
   playerSeasonStats,
   squadCompleteness,
@@ -33,6 +35,13 @@ import {
   searchPersons,
   validatePlayer,
 } from './players'
+
+// The real function, with a spy, so a test can make it fail once.
+vi.mock('@fansite/db/person-slugs', async (importOriginal) => {
+  const original = await importOriginal<{ updatePlayerAddresses: typeof updatePlayerAddresses }>()
+
+  return { ...original, updatePlayerAddresses: vi.fn(original.updatePlayerAddresses) }
+})
 
 let database: TestDatabase
 let userId: number
@@ -459,6 +468,48 @@ describe('a goal of a player the editors added', () => {
     )
 
     expect((await database.db.select().from(matchGoals)).map((row) => row.personId)).toEqual([person?.id, person?.id])
+  })
+})
+
+describe('the address of the page of a player (#1079)', () => {
+  const slugs = async () =>
+    (await database.db.select().from(personSlugs).orderBy(asc(personSlugs.slug))).map((row) => row.slug)
+
+  it('gives a player the editors add the address of his name', async () => {
+    await addPlayer(database.db, userId, season, entry(), t0)
+
+    expect((await allPersons()).map((person) => person.slug)).toEqual(['pelle-van-amersfoort'])
+    expect(await slugs()).toEqual(['pelle-van-amersfoort'])
+  })
+
+  it('gives a new name a new address, and keeps the old one', async () => {
+    const outcome = await addPlayer(database.db, userId, season, entry(), t0)
+    const id = 'id' in outcome ? outcome.id : 0
+
+    await editPlayer(
+      database.db,
+      userId,
+      id,
+      entry({ name: { familyName: 'Amersfoort', familyNamePrefix: 'van', givenName: 'Pieter' } }),
+      t0,
+    )
+
+    expect((await allPersons()).map((person) => person.slug)).toEqual(['pieter-van-amersfoort'])
+    expect(await slugs()).toEqual(['pelle-van-amersfoort', 'pieter-van-amersfoort'])
+  })
+
+  it('keeps the player when the addresses cannot be updated, and says so in the log', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    vi.mocked(updatePlayerAddresses).mockRejectedValueOnce(new Error('connect ECONNREFUSED'))
+
+    expect(await addPlayer(database.db, userId, season, entry(), t0)).toMatchObject({ status: 'added' })
+    expect(await allPlayers()).toHaveLength(1)
+    expect(warn).toHaveBeenCalledWith(
+      'Could not update the addresses of the players after a change of a player',
+      expect.any(Error),
+    )
+    warn.mockRestore()
   })
 })
 

@@ -3194,3 +3194,13 @@
 - **Nadeel:** de rand haalt geen 3:1 meer tegen de kaart.
   De vlag zelf is er ook zonder zijn rand, door de kleuren en het witte randje.
 - **Later:** vervangt de rand van 3:1 (`--hf-card-line-graphic`) uit de beslissing van 9 november 2026 en het criterium van 3:1 voor het kader in #1071.
+
+## Een land in een zin heeft een eigen component, en de bron van Wikipedia mag zonder leestijd
+
+- **Datum:** 11 november 2026
+- **Besluit:** `CountryName` toont een land in een regel tekst: de vlag als versiering en de Nederlandse naam ernaast (#1079).
+  De vlag en het kader met de code zijn die van `PlayerName`, dus ze zien er hetzelfde uit.
+  `WikipediaCredit` in de volledige vorm mag zonder `readAt` en `readAtDateTime`: dan valt de zin "Laatst gelezen op …" weg, en de link en de licentie blijven.
+- **Waarom:** `PlayerName` met alleen een land is een rij van een lijst, geen woord in een zin: de regel onder de naam van een speler brak er in drie stukken door.
+  Een speler met een artikel dat de importer nog niet las, of nooit leest (een Engelse titel), moet toch de link naar zijn artikel en de licentie krijgen.
+- **Alternatieven:** `PlayerName` een vorm in de regel geven (één component met twee rollen); de korte credit zonder link voor een speler zonder leestijd (dan ontbreekt de licentie).

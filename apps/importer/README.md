@@ -95,6 +95,8 @@ De query met zijn waarden staat er niet in.
 Elke run haalt de runs weg die ouder zijn dan 30 dagen, met hun rijen in `import_results`.
 De run gooit ook het zout en de kenmerken van de bezoekers van eerdere dagen weg (`removeVisitorData`, zie _De tabellen voor het tellen van bezoeken_ in de [README van de database](../../packages/db/README.md)), zodat ze ook op een dag zonder bezoekers verdwijnen.
 Mislukt dat, dan staat er één regel `Visitor data: warning, not removed: …` in de uitvoer en gaat de import door.
+Aan het eind van de run krijgt elke speler van onze club het adres van zijn pagina (`updatePlayerAddresses`, #1079): een nieuwe speler een nieuw adres, en een speler met een nieuwe naam een nieuw adres naast het oude.
+Krijgt een speler een adres, dan staat er `Player addresses: 3 new`; mislukt het, dan staat er `Player addresses: warning, not updated: …` en gaat de import door.
 
 ### De gezondheid
 

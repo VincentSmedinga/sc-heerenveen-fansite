@@ -26,6 +26,7 @@
     "./player-stat-differences": "./src/player-stat-differences.ts",
     "./prepare": "./src/prepare.ts",
     "./person-merge": "./src/person-merge.ts",
+    "./person-slugs": "./src/person-slugs.ts",
     "./persons": "./src/persons.ts",
     "./queries": "./src/queries.ts",
     "./schema": "./src/schema.ts",

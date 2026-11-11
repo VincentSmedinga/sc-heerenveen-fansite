@@ -814,6 +814,27 @@ Ze zet `editors_fields` voor wat de redactie sinds #1020 deed: bij een speler me
 Ze kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
 Terugdraaien op de host kan zonder gegevens te verliezen: haal de foreign keys `match_goals_person_id_persons_id_fk` en `players_person_id_persons_id_fk` weg, dan de kolommen `person_id` van `match_goals` en `players`, en dan `person_pages` en `persons`.
 
+### De adressen van de pagina's van spelers
+
+Elke persoon met een rij in `players` heeft een pagina op `/spelers/<slug>` (#1079).
+`persons.slug` is de naam in het adres van nu, en de tabel `person_slugs` bewaart elke naam die hij ooit had, die van nu erbij:
+
+| Kolom (`person_slugs`) | Betekenis                                                                 |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `slug`                 | Een naam in het adres, zoals `jan-de-vries`; de sleutel van de rij: uniek |
+| `person_id`            | De persoon van die naam; de rij gaat weg met haar persoon                 |
+
+`@fansite/db/person-slugs` heeft de functies:
+
+- `updatePlayerAddresses(db)` geeft elke persoon met een rij in `players` de naam van zijn naam, en bewaart hem; ze doet niets als alles klopt.
+  De site roept haar aan als hij start (`prepareDatabase` met `addresses: true`), de importer na elke import van elk uur, en het beheer na een speler die erbij komt, verandert of samengaat.
+- `findPlayerBySlug(db, slug)` geeft de persoon van een naam van nu of van vroeger, met zijn naam van nu, of niets voor een persoon zonder rij in `players`.
+- `playerSlugs(db)` geeft de namen van nu, voor de sitemap.
+
+Bij het samenvoegen gaan de namen van de persoon die verdwijnt mee naar de persoon die blijft (`mergePersonInto`).
+De regels staan in `docs/beslissingen/site.md`, onder _De namen in het adres van een speler staan in een eigen tabel, en één functie houdt ze bij_.
+De migratie `0069_add_person_slugs` voegt alleen toe en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
+
 ### De gegevens van Wikidata
 
 De importer leest van elke persoon wat Wikidata weet (#898; de regels staan in de [README van de importer](../../apps/importer/README.md), _De gegevens van de personen uit Wikidata_).

@@ -484,6 +484,13 @@
       "when": 1794328429709,
       "tag": "0068_add_person_merge_action",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "5",
+      "when": 1794381755797,
+      "tag": "0069_add_person_slugs",
+      "breakpoints": true
     }
   ]
 }

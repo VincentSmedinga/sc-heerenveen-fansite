@@ -9,7 +9,7 @@ import type { Person } from '@fansite/db/schema'
 
 import { mergeChosenPersons, type PersonMergePlan, planPersonMerge } from '@fansite/db/person-merge'
 
-import { refreshCompleteness } from './players'
+import { refreshCompleteness, refreshPlayerAddresses } from './players'
 
 /** A value both persons have a say in, as the confirmation page and the log name it. */
 export type MergeDifference = {
@@ -142,6 +142,7 @@ export async function mergePersons(
     for (const season of new Set(outcome.doubles.map((double) => double.season))) {
       await refreshCompleteness(db, season, now)
     }
+    await refreshPlayerAddresses(db)
   }
 
   return outcome

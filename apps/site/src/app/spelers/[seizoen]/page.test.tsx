@@ -29,6 +29,12 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
   getSeasonSquad: vi.fn(),
 }))
 
+// A name of nobody: the page of a player (#1079) has tests of its own, in player-page.test.tsx.
+vi.mock('#src/player-page', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadPlayerPage: vi.fn(async () => ({ kind: 'unknown' })),
+}))
+
 // The afternoon of Friday 23 October 2026 in the Netherlands, in the season 2026/27.
 const now = new Date('2026-10-23T13:40:00Z')
 
@@ -115,7 +121,7 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
 
   describe('an address that is no page', () => {
     it.each(['2025-27', '2025-2026', '2025/26', 'seizoen', '25-26', '2025-26x', 'kies2'])(
-      'is "niet gevonden" for %s, without asking for data',
+      'is "niet gevonden" for %s, without asking for data of a season or a player of that name',
       async (seizoen) => {
         expect(await digestOf(render(seizoen))).toContain('404')
         expect(getMatchData).not.toHaveBeenCalled()

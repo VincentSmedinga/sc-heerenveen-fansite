@@ -4,15 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pages } from '../pages'
 import sitemap from './sitemap'
 
-const { getAllReportAddresses, getClubRecords, getPublishedArticles } = vi.hoisted(() => ({
+const { getAllReportAddresses, getClubRecords, getPlayerSlugs, getPublishedArticles } = vi.hoisted(() => ({
   getAllReportAddresses: vi.fn(),
   getClubRecords: vi.fn(),
+  getPlayerSlugs: vi.fn(),
   getPublishedArticles: vi.fn(),
 }))
 
 vi.mock('../articles', () => ({ getPublishedArticles }))
 vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/tegenstanders' }))
 vi.mock('../report-data', () => ({ getAllReportAddresses }))
+vi.mock('../player-page', () => ({ getPlayerSlugs, playerAddress: (slug: string) => `/spelers/${slug}` }))
 
 // The pages that are not in the sitemap on purpose, as paths such as '/beheer'. A new page.tsx
 // that isn't in the list of pages in pages.ts must be named here, so a new page doesn't forget
@@ -58,7 +60,8 @@ const notInSitemap: string[] = [
   '/tegenstanders/[club]',
   // The statistics of a season that is over: only the current season, /cijfers, is listed.
   '/cijfers/[seizoen]',
-  // The same for the players of a season that is over: only /spelers is listed.
+  // The same for the players of a season that is over: only /spelers is listed. The same route
+  // is the page of each player, which the sitemap lists from the database.
   '/spelers/[seizoen]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.
   '/wedstrijden/[seizoen]',
@@ -87,6 +90,8 @@ beforeEach(() => {
   getClubRecords.mockResolvedValue([])
   getAllReportAddresses.mockReset()
   getAllReportAddresses.mockResolvedValue([])
+  getPlayerSlugs.mockReset()
+  getPlayerSlugs.mockResolvedValue([])
 })
 
 afterEach(() => {
@@ -144,6 +149,28 @@ describe('sitemap', () => {
       { url: 'https://sc.heerenveen.org/wedstrijden/2026-27/2026-10-24-testdorp-fc' },
       { url: 'https://sc.heerenveen.org/wedstrijden/2025-26/2025-11-01-fc-twente' },
     ])
+  })
+
+  it('lists the page of each player of ours, at his address of now', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    getPlayerSlugs.mockResolvedValue(['jan-de-vries', 'jan-jansen-1975'])
+
+    expect((await sitemap()).slice(pages.length)).toEqual([
+      { url: 'https://sc.heerenveen.org/spelers/jan-de-vries' },
+      { url: 'https://sc.heerenveen.org/spelers/jan-jansen-1975' },
+    ])
+  })
+
+  it('still lists the pages, and says why in the log, when the database cannot give the players', async () => {
+    vi.stubEnv('SITE_ENV', 'local')
+    getPlayerSlugs.mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:3306'))
+
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `http://localhost:3000${path}` })))
+    expect(error).toHaveBeenCalledWith(
+      'Could not read the players for the sitemap: connect ECONNREFUSED 127.0.0.1:3306',
+    )
   })
 
   it('still lists the pages, and says why in the log, when the database cannot give the matches', async () => {
