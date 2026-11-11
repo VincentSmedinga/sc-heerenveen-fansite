@@ -28,4 +28,21 @@ describe('PlayerList', () => {
     expect(screen.queryByRole('link', { name: 'Dinho' })).toBeNull()
     expect(screen.getByText('Dinho').tagName).toBe('STRONG')
   })
+
+  it('shows the given name first, as one name, when the order is given-first', () => {
+    render(
+      <PlayerList
+        order="given-first"
+        players={[
+          { facts: 'Doelman · 2019/20', href: '/spelers/joost-van-aken', key: '1', rest: 'Joost', surname: 'van Aken' },
+        ]}
+      />,
+    )
+
+    const link = screen.getByRole('link', { name: 'Joost van Aken' })
+
+    expect(link.getAttribute('href')).toBe('/spelers/joost-van-aken')
+    expect(link.querySelector('strong')).toBeNull()
+    expect(screen.getByText('Doelman · 2019/20')).toBeTruthy()
+  })
 })

@@ -33,6 +33,7 @@ const countedPaths: ReadonlySet<string> = new Set([
   ...pages.map(({ path }) => path),
   '/contact/verstuurd',
   '/nieuws/zoeken',
+  '/spelers/zoeken',
 ])
 
 const articlePath = /^\/redactie\/([^/]+)$/u

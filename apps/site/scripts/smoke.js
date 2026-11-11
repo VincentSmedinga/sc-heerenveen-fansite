@@ -1337,6 +1337,27 @@ await withEmptyDatabase((database) =>
       assert.doesNotMatch(overviewHtml, /noindex/, path)
     }
 
+    // The search for a player (#1130): the form without a search, the made-up player with a
+    // part of his name (and without an accent), no player for an unknown name, and the error at
+    // the field for a word that is too short. The page keeps search engines away.
+    const searchBase = `${origin}/spelers/zoeken`
+    const searchHtml = await (await fetch(searchBase)).text()
+    assert.match(searchHtml, /<h1[^>]*>Zoeken naar een speler<\/h1>/)
+    assert.match(searchHtml, /noindex/)
+    assert.match(searchHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+
+    for (const q of ['proefm', 'Wouter+Próefman']) {
+      const found = await fetch(`${searchBase}?q=${q}`)
+      const foundHtml = await found.text()
+      assert.equal(found.status, 200, q)
+      assert.match(foundHtml, /1 speler voor /, q)
+      assert.match(foundHtml, /href="\/spelers\/wouter-proefman"/, q)
+    }
+
+    const nobody = await (await fetch(`${searchBase}?q=bestaat+echt+niet`)).text()
+    assert.match(nobody, /Geen spelers voor bestaat echt niet/)
+    assert.match(await (await fetch(`${searchBase}?q=a`)).text(), /Schrijf woorden van minstens 2 tekens\./)
+
     const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)

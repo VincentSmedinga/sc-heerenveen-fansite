@@ -488,6 +488,7 @@ describe('the season picker on /spelers', () => {
 
   it('has a link to the overview of all players in the title row', async () => {
     expect(await render()).toMatch(/<a href="\/spelers\/overzicht">Alle spelers<\/a>/)
+    expect(await render()).toMatch(/<a href="\/spelers\/zoeken">Zoek een speler<\/a>/)
   })
 
   it('keeps the image as it was, without a season on it', async () => {

@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, de wedstrijden en het forum, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/cijfers` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, de wedstrijden en het forum, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/cijfers` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/spelers/zoeken` om een speler op zijn naam te zoeken, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
@@ -857,6 +857,16 @@ De server bewaart de lijst vijf minuten, een zoekopdracht niet.
 
 `pnpm test:a11y` toetst `/nieuws/zoeken` zonder vraag, met een vraag, met meer dan tien resultaten, zonder resultaten en met een vraag die niet mag.
 De lijst met spelers staat er alleen op als de database de verzonnen selectie van `pnpm db:seed` heeft (`madeUpSquad`).
+
+### Zoeken naar een speler
+
+`/spelers/zoeken` zoekt een speler op zijn naam (#1130), los van het zoeken in het nieuws; `/spelers` heeft er in de titelrij de link "Zoek een speler" naartoe, en het hoofdmenu wijst Spelers aan.
+`parseSearch` en het formulier (`SearchForm`) zijn die van het nieuws, met de grenzen van daar.
+De zoekopdracht is `searchPlayers` in `packages/db/src/person-slugs.ts`: elk woord moet een deel zijn van het adres van een persoon of van een oud adres, met de letterregels van het adres, dus "Džeko" en "Dzeko" vinden dezelfde speler.
+De pagina toont hoogstens tien spelers op achternaam, met de zin dat het er tien van de N zijn als er meer passen, en elk resultaat is een `PlayerList` met `order="given-first"`: de naam als link en daaronder de linie en de seizoenen ("2019/20 – 2023/24").
+De pagina leest op elk verzoek, toont de foutpagina in de HTML zonder database en logt de reden en niet de vraag.
+De teller van het bezoek telt `/spelers/zoeken` zonder de vraag; de pagina is `noindex` en staat niet in de sitemap.
+`pnpm test:a11y` toetst hem zonder vraag, met een vraag, zonder resultaat en met een vraag die niet mag.
 
 ## De bronnen
 

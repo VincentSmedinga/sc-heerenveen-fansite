@@ -48,16 +48,29 @@ export function SearchCard({
  * The form of the page: a label, the field and the button, which loads the page again with the
  * search in the address (method GET), so it works without JavaScript and the address can be
  * shared. Under a search that doesn't meet the limits the field says what is wrong. The text is
- * what the visitor wrote, trimmed, and nothing else is kept of it.
+ * what the visitor wrote, trimmed, and nothing else is kept of it. The players' search
+ * (#1130) is the same form with its own address and words.
  */
-export function SearchForm({ error, text }: { error?: string | undefined; text: string }) {
+export function SearchForm({
+  action = '/nieuws/zoeken',
+  ariaLabel = 'Zoeken in onze koppen',
+  error,
+  label = 'Zoeken',
+  text,
+}: {
+  action?: string
+  ariaLabel?: string
+  error?: string | undefined
+  label?: string
+  text: string
+}) {
   return (
-    <Form action="/nieuws/zoeken" aria-label="Zoeken in onze koppen" method="get" role="search">
+    <Form action={action} aria-label={ariaLabel} method="get" role="search">
       <Field
         error={error}
         hint="Alle woorden moeten erin staan. Een deel van een woord is genoeg."
         id="zoek"
-        label="Zoeken"
+        label={label}
       >
         <Input autoComplete="off" defaultValue={text} maxLength={maxQueryLength} name="q" type="search" />
       </Field>

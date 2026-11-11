@@ -12,6 +12,7 @@ import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { choiceFor, getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { playerSearchPath } from '#src/player-search'
 import { overviewPath } from '#src/players-overview'
 import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
@@ -111,6 +112,9 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
             />
             <Link href={overviewPath} icon="arrow-right">
               Alle spelers
+            </Link>
+            <Link href={playerSearchPath} icon="arrow-right">
+              Zoek een speler
             </Link>
           </Page.Title>
         }

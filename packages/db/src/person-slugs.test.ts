@@ -10,6 +10,7 @@ import {
   lostLetters,
   personSlug,
   playerSlugs,
+  searchPlayers,
   slugLetters,
   updatePlayerAddresses,
 } from './person-slugs.ts'
@@ -122,6 +123,7 @@ describe('isPlayerSlug', () => {
     expect(isPlayerSlug('jan-de-vries')).toBe(true)
     expect(isPlayerSlug('kies')).toBe(false)
     expect(isPlayerSlug('overzicht')).toBe(false)
+    expect(isPlayerSlug('zoeken')).toBe(false)
     expect(isPlayerSlug('2025-26')).toBe(false)
     expect(isPlayerSlug('Jan')).toBe(false)
   })
@@ -289,5 +291,96 @@ describe('a merge of two persons', () => {
     expect(await slugOf(taken)).toBe('dang-van')
     expect(await slugOf(id)).toBe('dang-van-1990')
     expect(await slugOf(other)).toBe('djang-van')
+  })
+})
+
+describe('searchPlayers', () => {
+  // Every person is made up. `slug` is what the page gives him; `old` are his old addresses.
+  async function addFound(
+    name: string,
+    slug: null | string,
+    { family = null as null | string, given = null as null | string, old = [] as string[], seasons = ['2020/21'] } = {},
+  ) {
+    const [inserted] = await database.db
+      .insert(persons)
+      .values({ familyName: family, givenName: given, line: 'doelman', name, slug })
+      .$returningId()
+    const id = inserted!.id
+
+    for (const season of seasons) {
+      await database.db.insert(players).values({ name, personId: id, searchTerm: 'x', season })
+    }
+    for (const address of old) {
+      await database.db.insert(personSlugs).values({ personId: id, slug: address })
+    }
+
+    return id
+  }
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM person_slugs')
+  })
+
+  it('finds a person by a part of a word, by each word alone and by two words', async () => {
+    await addFound('Joost van Aken', 'joost-van-aken', { family: 'Aken', given: 'Joost' })
+    await addFound('Piet Jansen', 'piet-jansen', { family: 'Jansen', given: 'Piet' })
+
+    const names = async (words: string[]) =>
+      (await searchPlayers(database.db, { words })).players.map((player) => player.slug)
+
+    expect(await names(['aken'])).toEqual(['joost-van-aken'])
+    expect(await names(['joo'])).toEqual(['joost-van-aken'])
+    expect(await names(['joost', 'aken'])).toEqual(['joost-van-aken'])
+    expect(await names(['aken', 'joost'])).toEqual(['joost-van-aken'])
+    expect(await names(['joost', 'jansen'])).toEqual([])
+  })
+
+  it('finds a name with and without accents, a đ as dj and as d, and a loose accent', async () => {
+    await addFound('Edin Džeko', 'edin-dzeko')
+    await addFound('Dinh Đức', 'dinh-duc')
+    await addFound('Luka Đuričić', 'luka-djuricic')
+
+    const slugs = async (word: string) =>
+      (await searchPlayers(database.db, { words: [word] })).players.map((player) => player.slug)
+
+    expect(await slugs('Dzeko')).toEqual(['edin-dzeko'])
+    expect(await slugs('Džeko')).toEqual(['edin-dzeko'])
+    expect(await slugs('Dz\u030Ceko')).toEqual(['edin-dzeko'])
+    expect(await slugs('Đuričić')).toEqual(['luka-djuricic'])
+    expect(await slugs('Đức')).toEqual(['dinh-duc'])
+  })
+
+  it('finds a person by an old address', async () => {
+    await addFound('Jan Nieuwenaam', 'jan-nieuwenaam', { old: ['jan-oudenaam'] })
+
+    expect((await searchPlayers(database.db, { words: ['oudenaam'] })).players).toHaveLength(1)
+  })
+
+  it('leaves out a person without a slug, and treats % _ | and a lone dash as plain text', async () => {
+    await addFound('Zonder Pagina', null)
+    await addFound('Met Pagina', 'met-pagina')
+
+    expect((await searchPlayers(database.db, { words: ['pagina'] })).total).toBe(1)
+    for (const word of ['%%', '__', '||', '--']) {
+      expect(await searchPlayers(database.db, { words: [word] })).toEqual({ players: [], total: 0 })
+    }
+  })
+
+  it('puts them in order by family name and gives ten of all of them, with their line and seasons', async () => {
+    for (let index = 0; index < 12; index += 1) {
+      const letter = String.fromCodePoint(97 + index)
+
+      await addFound(`Test ${letter}`, `test-${letter}`, {
+        family: letter.toUpperCase(),
+        given: 'Test',
+        seasons: ['2021/22', '2019/20'],
+      })
+    }
+
+    const { players: found, total } = await searchPlayers(database.db, { words: ['test'] })
+
+    expect(total).toBe(12)
+    expect(found.map((player) => player.familyName)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
+    expect(found[0]).toMatchObject({ line: 'doelman', seasons: ['2019/20', '2021/22'] })
   })
 })
