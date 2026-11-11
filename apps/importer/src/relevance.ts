@@ -146,7 +146,7 @@ export type MatchDay = {
  * (`opponentPreviousDay`). So the news about the match they just played is not in it, and the
  * build-up to ours is. It opens never later than `opponentDaysBefore` days before the match, so
  * it is never narrower than a plain window of that length, and never earlier than
- * `opponentDaysBeforeMost` days before it, so a winter break does not let a month of general
+ * `opponentDaysBeforeMost` days before it, so a winter break does not let a week of general
  * news through. When one of the two previous matches is not known, it opens
  * `opponentDaysBefore` days before. It closes `opponentDaysAfter` days after the match. A club
  * that plays us twice has two matches and so two windows, and a midweek match makes two windows

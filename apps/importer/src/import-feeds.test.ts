@@ -712,8 +712,9 @@ describe('the relevance filter and the matches of the season', () => {
     )
 
     await addFeed(`${server.origin}/rss/`, { filter: 'club' })
-    // Our previous match was played on the 4th, theirs on the 15th, and we play on the 21st:
-    // the window opens on the 16th, 5 days before, not 3 days before the match, on the 18th.
+    // Our previous match was played on the 4th, theirs on the 14th, and we play on the 21st:
+    // the day after is the 15th, but the window opens at the earliest 5 days before, on the
+    // 16th (not 3 days before, on the 18th).
     await database.db.insert(matches).values(
       await withClubs(database.db, [
         {
@@ -737,7 +738,7 @@ describe('the relevance filter and the matches of the season', () => {
         awayGoals: 1,
         homeClub: 'Fortuna Sittard',
         homeGoals: 0,
-        playedOn: '2026-10-15',
+        playedOn: '2026-10-14',
         round: 11,
         season: '2026/27',
       },
@@ -746,7 +747,7 @@ describe('the relevance filter and the matches of the season', () => {
         awayGoals: 1,
         homeClub: 'Sparta Rotterdam',
         homeGoals: 0,
-        playedOn: '2025-10-15',
+        playedOn: '2025-10-14',
         round: 11,
         season: '2025/26',
       },

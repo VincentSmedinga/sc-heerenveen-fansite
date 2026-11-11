@@ -1208,7 +1208,7 @@
   Het filter zelf de database laten lezen (dan is het niet meer zuiver en zijn de tests trager).
 - **Later:** zie _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_: het venster is 3 dagen voor en 3 dagen na de wedstrijd, en een kop met een tweede profclub telt niet.
   De rest blijft: het filter blijft zuiver, alleen het lopende seizoen telt, de dagen zijn Nederlandse dagen en `otherClubGroups` legt het verband met de namen.
-- **Later:** zie _Het nieuws over de tegenstander is zichtbaar vanaf de dag nadat beide clubs hun vorige wedstrijd speelden_ (11 november 2026): het venster ervoor is niet meer 3 dagen maar opent na de vorige wedstrijden, tussen 3 en 10 dagen voor de wedstrijd.
+- **Later:** zie _Het nieuws over de tegenstander is zichtbaar vanaf de dag nadat beide clubs hun vorige wedstrijd speelden_ (11 november 2026): het venster ervoor is niet meer 3 dagen maar opent na de vorige wedstrijden, tussen 3 en 5 dagen voor de wedstrijd.
 
 ## Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt
 

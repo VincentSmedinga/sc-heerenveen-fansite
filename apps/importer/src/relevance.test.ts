@@ -805,10 +805,11 @@ describe('the opponent of a match', () => {
     })
 
     it('counts a cup match of ours as the previous match', () => {
-      const matches = [{ ...ours('2026-11-17'), opponent: 'De Treffers' }, groningen('2026-11-08')]
+      // The cup match on the 16th opens it on the 17th; without it, 3 days before is the 18th.
+      const matches = [{ ...ours('2026-11-16'), opponent: 'De Treffers' }, groningen('2026-11-08')]
 
-      expect(about('2026-11-18', matches)).toBe('relevant')
-      expect(about('2026-11-17', matches)).toBe('irrelevant')
+      expect(about('2026-11-17', matches)).toBe('relevant')
+      expect(about('2026-11-16', matches)).toBe('irrelevant')
     })
 
     it('does not count a headline about the previous match of the opponent, before the window opens', () => {
