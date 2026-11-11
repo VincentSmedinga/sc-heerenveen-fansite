@@ -61,6 +61,20 @@ describe('the table Per seizoen', () => {
     )
   })
 
+  it('has a row with a sign between two spells, read as "niet bij sc Heerenveen", and none between seasons that follow', () => {
+    const html = render([season('2009/10'), season('2008/09'), season('2004/05'), season('2003/04'), season('2000/01')])
+    const gap =
+      '<tr class="hf-data-table-gap"><th scope="row"><span aria-hidden="true">⋮</span><span class="hf-visually-hidden">niet bij sc Heerenveen</span></th>'
+
+    expect(html.split(gap)).toHaveLength(3)
+    expect(html.indexOf('2008/09')).toBeLessThan(html.indexOf(gap))
+    expect(html.indexOf(gap)).toBeLessThan(html.indexOf('2004/05'))
+    // The total counts the five seasons only, and is still the last row.
+    expect(html).toMatch(/<th scope="row">Totaal<\/th><td class="hf-numeric">150<\/td>/)
+    expect(html.lastIndexOf('hf-data-table-gap')).toBeLessThan(html.indexOf('hf-data-table-total'))
+    expect(render([season('2004/05'), season('2003/04')])).not.toContain('hf-data-table-gap')
+  })
+
   it('has G, N, T and Y for a goalkeeper, and not the matches he started or his goals', () => {
     const keeper = { assists: undefined, cleanSheets: 9, conceded: 30, goals: 0, started: 30 }
     const html = render([season('2004/05', keeper)], true)

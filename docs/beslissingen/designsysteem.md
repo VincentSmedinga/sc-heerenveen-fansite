@@ -3259,3 +3259,23 @@
   Met de ruimte om de vlag leek de rand los van de tekening.
 - **Alternatieven:** de link `inline-block` laten en alleen de naam een link maken (de vlag hoort bij de naam); de rand in de kleur van de lijn van de kaart houden (te vaag om de vlag).
 - **Later:** vervangt de pixel wit en de rustige lijn uit de beslissing "De rand om een vlag heeft de kleur van de lijnen in de kaart, met een pixel wit eronder".
+
+## Vier kerngetallen staan altijd twee aan twee, drie nooit drie plus één
+
+- **Datum:** 11 november 2026
+- **Besluit:** `KeyFigures` zet vier getallen op elke breedte in twee kolommen (`hf-key-figures-four`, #1099).
+  Twee of drie getallen delen de rij als ze passen en lopen anders door: drie worden twee plus één.
+  Drie plus één komt dus niet voor.
+- **Waarom:** vier naast elkaar op een breed scherm werden op een middelbare breedte drie plus één, en dat oogt scheef.
+  De projecteigenaar zag het op acceptatie.
+- **Alternatieven:** vier naast elkaar tot een grens en dan twee aan twee (de grens is een keuze van de pagina, niet van het component); een raster van drie kolommen (dan staat er één alleen).
+- **Later:** vervangt "vier naast elkaar op een breed scherm" uit de beslissing "Elk kerngetal staat in een eigen kaart, en de kaarten wrappen", en "vanaf een breder scherm naast elkaar" uit "Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot".
+
+## `DataTable` heeft een rij voor een onderbreking
+
+- **Datum:** 11 november 2026
+- **Besluit:** een rij van `DataTable` kan `gap` zijn (#1099): een verticaal beletselteken (⋮) in de rijkop en lege cellen.
+  Een schermlezer slaat het teken over en leest `header`, zoals "niet bij sc Heerenveen".
+  De kop van zo'n rij hoeft niet uniek te zijn, en een tabel met een onderbreking kan niet sorteren.
+- **Waarom:** de tabel Per seizoen van een speler moet laten zien dat hij tussen twee periodes weg was, zonder dat het teken voorgelezen wordt.
+- **Alternatieven:** de rij met `marker` en `note` maken (de kop is dan zichtbaar en moet uniek zijn); een rij met een kop "weg" (zegt niet waarvan).

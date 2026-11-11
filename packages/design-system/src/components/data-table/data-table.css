@@ -14,6 +14,14 @@
 }
 
 @layer hf.components {
+  /* An interruption between spells: the ellipsis is quiet, and its row has no figures. */
+  .hf-data-table .hf-data-table-gap th {
+    color: var(--hf-colour-text-secondary);
+    font-weight: var(--hf-body-font-weight);
+  }
+}
+
+@layer hf.components {
   /*
    * The header of a sortable column is a button that looks like its text: no fill and no
    * border, the colour and weight of the header, underlined so it reads as something to press.

@@ -81,35 +81,47 @@ export const TableRows = ({
   withPosition?: boolean
 }) => (
   <tbody>
-    {rows.map((row) => (
-      <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
-        {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
-        <th scope="row">
-          {row.marker}
-          {row.href === undefined ? (
-            (row.display ?? row.header)
-          ) : (
-            <Link href={row.href}>{row.display ?? row.header}</Link>
-          )}
-          {row.aside === undefined ? null : (
-            <>
-              {' '}
-              <span className="hf-data-table-aside">{row.aside}</span>
-            </>
-          )}
-          {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
-          {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
-        </th>
-        {row.cells.map((cell, index) => (
-          <td
-            className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
-            key={columns[index + 1]?.name ?? index}
-          >
-            {textOf(cell)}
-          </td>
-        ))}
-      </tr>
-    ))}
+    {rows.map((row, rowIndex) =>
+      row.gap === true ? (
+        <tr className="hf-data-table-gap" key={`gap-${rowIndex}`}>
+          <th scope="row">
+            <span aria-hidden="true">⋮</span>
+            <span className="hf-visually-hidden">{row.header}</span>
+          </th>
+          {columns.slice(1).map((column) => (
+            <td key={column.name} />
+          ))}
+        </tr>
+      ) : (
+        <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
+          {!withPosition || row.position === undefined ? null : <td className="hf-numeric hf-rank">{row.position}</td>}
+          <th scope="row">
+            {row.marker}
+            {row.href === undefined ? (
+              (row.display ?? row.header)
+            ) : (
+              <Link href={row.href}>{row.display ?? row.header}</Link>
+            )}
+            {row.aside === undefined ? null : (
+              <>
+                {' '}
+                <span className="hf-data-table-aside">{row.aside}</span>
+              </>
+            )}
+            {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
+            {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+          </th>
+          {row.cells.map((cell, index) => (
+            <td
+              className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
+              key={columns[index + 1]?.name ?? index}
+            >
+              {textOf(cell)}
+            </td>
+          ))}
+        </tr>
+      ),
+    )}
   </tbody>
 )
 

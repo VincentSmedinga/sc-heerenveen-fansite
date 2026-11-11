@@ -58,6 +58,14 @@ export type DataTableRow = {
    * the words matters. `header` stays the plain text of the row and its key.
    */
   display?: ReactNode
+  /**
+   * Makes this row an interruption in the rows, such as the seasons a player was not with the
+   * club between two spells: a vertical ellipsis (⋮) in the row header and empty cells. The
+   * sign is hidden from a screen reader, which reads `header` instead, such as `niet bij sc
+   * Heerenveen`. The header of such a row need not be unique. It is for a table that is not
+   * sortable, and `cells` stay empty.
+   */
+  gap?: boolean
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
   header: string
   /**

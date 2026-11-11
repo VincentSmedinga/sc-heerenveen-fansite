@@ -1,8 +1,8 @@
 /*
  * A row of key figures, each in a card of its own: the number large and heavy, the word below
- * it and then the line that says what it counts. The cards share the width and wrap to the next
- * line when they do not fit, so four stand side by side on a wide screen and two by two on a
- * phone.
+ * it and then the line that says what it counts. Two or three cards share the width and wrap to
+ * the next line when they do not fit, so three become two and one. Four stand two by two at
+ * every width, so a row never has three and one.
  */
 
 @layer hf.components {
@@ -13,6 +13,12 @@
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* Four figures: two columns at every width, so the row is never three and one. */
+  .hf-key-figures-four {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   /* A card without its own element: the surface, border and corners are those of .hf-card. */

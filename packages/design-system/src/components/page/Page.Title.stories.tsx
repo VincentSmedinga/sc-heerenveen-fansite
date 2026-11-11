@@ -53,7 +53,7 @@ export const Wrapped = meta.story({
   render: () => (
     <Page.Title wrapped="start">
       <Heading level={1}>Voornaam Achternaam</Heading>
-      <Text appearance="meta">Aanvaller · Nederland · geboren in 1974 in Emmen</Text>
+      <Text appearance="meta">Aanvaller · Nederland · Emmen, 1974 · 52 jaar</Text>
     </Page.Title>
   ),
 })

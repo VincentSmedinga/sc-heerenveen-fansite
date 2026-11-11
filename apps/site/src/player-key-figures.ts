@@ -6,13 +6,16 @@ import type { PlayerSeason } from './player-seasons'
 /** The figures a player can have in the row, in the words of the page. */
 type FigureId = 'assists' | 'cleanSheets' | 'concededPerMatch' | 'goals' | 'matches' | 'seasons'
 
-/** The figures of each line in the order the row shows them (#1083); `none` has no line. */
+/**
+ * The figures of each line in the order the row shows them (#1083, #1099): the seasons and the
+ * matches first. `none` has no line.
+ */
 const figuresByLine: Record<'none' | NonNullable<PlayerPage['line']>, readonly FigureId[]> = {
-  aanvaller: ['goals', 'seasons', 'matches', 'assists'],
-  doelman: ['matches', 'cleanSheets', 'concededPerMatch', 'seasons'],
-  middenvelder: ['matches', 'goals', 'assists', 'seasons'],
-  none: ['seasons', 'goals', 'matches'],
-  verdediger: ['matches', 'cleanSheets', 'goals', 'seasons'],
+  aanvaller: ['seasons', 'matches', 'goals', 'assists'],
+  doelman: ['seasons', 'matches', 'cleanSheets', 'concededPerMatch'],
+  middenvelder: ['seasons', 'matches', 'goals', 'assists'],
+  none: ['seasons', 'matches', 'goals', 'assists'],
+  verdediger: ['seasons', 'matches', 'cleanSheets', 'goals'],
 }
 
 /** A number in Dutch: with a decimal comma, and the decimals only where there are some. */
