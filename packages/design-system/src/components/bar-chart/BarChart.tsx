@@ -47,7 +47,16 @@ export type BarChartAxisLabel = {
 
 /** One bar: how high it is, on the scale of the chart, and the tone that gives its colour. */
 export type BarChartBar = {
-  tone: ChartTone
+  /**
+   * A short text above the bar, such as its number. It is part of the picture, so it is hidden
+   * from a screen reader like the chart: give the numbers as text next to the chart as well.
+   */
+  label?: string
+  /**
+   * The tone that gives the colour of the bar. `plain` is the blue of a bar that only counts
+   * something, with no good or bad in it.
+   */
+  tone: 'plain' | ChartTone
   /** From 0 to `max`. Higher is clamped, lower is 0. */
   value: number
 }
@@ -211,7 +220,11 @@ export const BarChart = ({
     <div
       {...props}
       aria-hidden="true"
-      className={classNames('hf-bar-chart', className)}
+      className={classNames(
+        'hf-bar-chart',
+        bars.some((bar) => bar?.label !== undefined) && 'hf-bar-chart-labelled',
+        className,
+      )}
       style={{ ...style, '--hf-bar-chart-slots': slots } as CSSProperties}
     >
       <div className="hf-bar-chart-frame">
@@ -257,7 +270,9 @@ export const BarChart = ({
                       bar.value <= 0 && 'hf-bar-chart-stub',
                     )}
                     style={{ '--hf-bar-chart-share': percentOf(bar.value, max) } as CSSProperties}
-                  />
+                  >
+                    {bar.label === undefined ? null : <span className="hf-bar-chart-bar-label">{bar.label}</span>}
+                  </span>
                 )}
               </div>
             ))}

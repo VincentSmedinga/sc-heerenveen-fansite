@@ -222,6 +222,10 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
         name: '--hf-colour-chart-line-edge',
         use: 'Rand om die lijn, die haar losmaakt van de staafjes: wit in licht, de kleur van de kaart in donker',
       },
+      {
+        name: '--hf-colour-chart-bar',
+        use: 'Staaf die iets telt op een kaart, zoals doelpunten per seizoen, op het spoor van de pagina',
+      },
       { name: '--hf-colour-border-input', use: 'Rand van invoervelden' },
       { name: '--hf-colour-border-button-soft', use: 'Rand van de zachte knop' },
       { name: '--hf-colour-border-highlight', use: 'Rand van een label met nadruk' },

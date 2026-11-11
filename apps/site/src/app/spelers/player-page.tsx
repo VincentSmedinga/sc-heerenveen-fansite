@@ -22,10 +22,12 @@ import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
 import { type CareerMomentChoice, careerMoments } from '#src/player-career'
+import { goalQuartersOf, playerRecordOf, seasonBarsOf } from '#src/player-charts'
 import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
 import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
+import { PlayerQuartersCard, PlayerRecordCard, PlayerSeasonBarsCard } from '#src/PlayerChartsCards'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
 import { getReportAddresses } from '#src/report-data'
 import { playersPath } from '#src/season-page'
@@ -66,9 +68,10 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
  * The page of a player of our club (#1079): a link back to Spelers, his name as the heading
  * (`PlayerName`) with one line beside it, under it on a phone: his line, country and year and
  * place of birth. Then the key figures of his line (#1083), the table Per seizoen (#1082), his
- * career (#1084) and the credit. An old address leads to the address of now (308), and
- * an address of nobody, or of a player of an opponent, is "niet gevonden". The blocks of #1082
- * to #1086 come between the seasons and the credit; the credit moves to the sidebar with #1086.
+ * career (#1084), the charts (#1085) and the credit. An old address leads to the address of
+ * now (308), and an address of nobody, or of a player of an opponent, is "niet gevonden". The
+ * blocks of #1082 to #1086 come between the seasons and the credit; the credit moves to the
+ * sidebar with #1086.
  */
 export async function PlayerPageView({ slug }: { slug: string }) {
   const loaded = await loadPlayerPage(slug)
@@ -88,6 +91,9 @@ export async function PlayerPageView({ slug }: { slug: string }) {
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
   const current = seasonOf(new Date())
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
+  const seasonBars = seasons === undefined ? undefined : seasonBarsOf(seasons, page.line)
+  const goalQuarters = seasons === undefined ? undefined : goalQuartersOf(seasons)
+  const record = seasons === undefined ? undefined : playerRecordOf(seasons, page.line === 'doelman')
 
   return (
     <Page.Main
@@ -125,6 +131,21 @@ export async function PlayerPageView({ slug }: { slug: string }) {
       {seasons === undefined || career === undefined ? null : (
         <Page.Cell>
           <PlayerCareerCard options={career} seasons={seasons} />
+        </Page.Cell>
+      )}
+      {seasonBars === undefined ? null : (
+        <Page.Cell>
+          <PlayerSeasonBarsCard address={(season) => seasonAddress(playersPath, season, current)} bars={seasonBars} />
+        </Page.Cell>
+      )}
+      {goalQuarters === undefined ? null : (
+        <Page.Cell>
+          <PlayerQuartersCard quarters={goalQuarters} />
+        </Page.Cell>
+      )}
+      {record === undefined ? null : (
+        <Page.Cell>
+          <PlayerRecordCard record={record} />
         </Page.Cell>
       )}
       <PlayerCredit page={page} />
