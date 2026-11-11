@@ -168,7 +168,7 @@ export async function updatePlayerAddresses(db: SlugDatabase): Promise<number> {
  * else, also a person whose country we do not know, it is "dj".
  */
 function foldedName(name: string, country: null | string | undefined): string {
-  const letters = { ...slugLetters, đ: country === vietnam ? 'd' : 'dj' }
+  const letters: Record<string, string> = { ...slugLetters, đ: country === vietnam ? 'd' : 'dj' }
 
   return name
     .normalize('NFKD')
