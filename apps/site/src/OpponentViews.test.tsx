@@ -212,6 +212,7 @@ describe('LastWinCard', () => {
     { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
     { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
     { days: null, lastWin: null, name: 'Nooit FC', slug: 'nooit-fc' },
+    { days: null, lastWin: null, name: 'Zonder Pagina', slug: null },
   ]
 
   it('shows the clubs in the order given, with the day, the days and the links keeping the choice', () => {
@@ -230,15 +231,17 @@ describe('LastWinCard', () => {
       'Laatste overwinning',
       'Dagen geleden',
     ])
-    expect(names()).toEqual(['FC Twente', 'Ajax', 'Nooit FC'])
+    expect(names()).toEqual(['FC Twente', 'Ajax', 'Nooit FC', 'Zonder Pagina'])
     expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
       '/tegenstanders/fc-twente?competitie=eredivisie',
       '/tegenstanders/ajax?competitie=eredivisie',
       '/tegenstanders/nooit-fc?competitie=eredivisie',
     ])
+    // A club without a page is a row header that is no link.
+    expect(screen.getByRole('rowheader', { name: 'Zonder Pagina' }).querySelector('a')).toBeNull()
     expect(screen.getByText('21 april 2019').getAttribute('datetime')).toBe('2019-04-21')
     expect(screen.getByText('2.762')).toBeTruthy()
-    expect(screen.getByText('Nog nooit gewonnen')).toBeTruthy()
+    expect(screen.getAllByText('Nog nooit gewonnen')).toHaveLength(2)
     // The bar is as long as the days are of the longest wait, and a club never beaten has none.
     const bars = [...container.querySelectorAll('.hf-bar')]
 

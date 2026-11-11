@@ -1151,14 +1151,18 @@ describe('lastWinsOf', () => {
     expect(lastWinsOf([], clubs, '2026-11-12')).toBeUndefined()
   })
 
-  it('leaves out a club of the table that has no page', () => {
+  it('keeps a club of the table that has no page, last and without a slug', () => {
     const rows = [
       { club: 'Ajax', season: '2026/27' },
       { club: 'FC Twente', season: '2026/27' },
       { club: 'Onbekend', season: '2026/27' },
     ]
 
-    expect(lastWinsOf(rows, clubs, '2026-11-12')?.map((place) => place.name)).toEqual(['FC Twente', 'Ajax'])
+    expect(lastWinsOf(rows, clubs, '2026-11-12')).toEqual([
+      { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
+      { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
+      { days: null, lastWin: null, name: 'Onbekend', slug: null },
+    ])
   })
 })
 

@@ -640,6 +640,7 @@ Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clu
 De kaart volgt de schakelaar niet, maar haar links houden de keuze.
 Het is een `DataTable` met tekst: de datum staat in een `<time>`, het aantal dagen volgt het getal, en een `Bar` naast de datum is zo lang als de dagen van de langste wachttijd.
 Een club die we nog nooit versloegen, staat onderaan met "Nog nooit gewonnen" en zonder balk.
+Dat geldt ook voor een club van de stand zonder eigen pagina, die we nooit troffen of die de stand anders schrijft: ze staat er zonder link.
 De dagen tellen kalenderdagen tot vandaag in Nederland en worden bij elke vertoning berekend, niet in de cache bewaard.
 Zonder twee clubs naast sc Heerenveen is er geen kaart.
 

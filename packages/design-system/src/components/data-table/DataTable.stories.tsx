@@ -514,10 +514,10 @@ export const TextTable = meta.story({
   ),
 })
 
-const waits: [club: string, date: string, days: number][] = [
-  ['FC Voorbeeld', '21 april 2019', 2760],
-  ['Proefstad SV', '9 februari 2022', 1740],
-  ['Teststad Boys', '3 oktober 2026', 38],
+const waits: [club: string, date: string, day: string, days: number][] = [
+  ['FC Voorbeeld', '21 april 2019', '2019-04-21', 2760],
+  ['Proefstad SV', '9 februari 2022', '2022-02-09', 1740],
+  ['Teststad Boys', '3 oktober 2026', '2026-10-03', 38],
 ]
 
 export const TextTableWithBars = meta.story({
@@ -540,10 +540,10 @@ export const TextTableWithBars = meta.story({
           appearance="text"
           caption="De clubs van Testcompetitie, van de langste tijd sinds onze laatste overwinning tot de kortste"
           columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
-          rows={waits.map(([club, date, days]) => ({
+          rows={waits.map(([club, date, day, days]) => ({
             cells: [
               <>
-                <Time dateTime="2026-01-01">{date}</Time>
+                <Time dateTime={day}>{date}</Time>
                 <Bar share={(days / 2760) * 100} />
               </>,
               days,

@@ -635,7 +635,8 @@ export type LastWinPlace = {
   /** The day of the last win, as `2019-04-21`, or null for a club we never beat. */
   lastWin: null | string
   name: string
-  slug: string
+  /** The address part of the page of the club, or null for a club that has no page. */
+  slug: null | string
 }
 
 /** How many clubs besides sc Heerenveen the card "Laatste overwinning" needs. */
@@ -671,7 +672,8 @@ export async function getLastWinPlaces(today: string): Promise<LastWinPlace[] | 
  * `listClubLastWins`), and the calendar days from it to `today`, a day in Dutch time such as
  * `2026-11-12` (see `dutchDay`). The longest wait is first, and clubs with the same day are in
  * the order of their names. A club we never beat is last, with no day. A club of the table that
- * has no page of its own is left out, because it has nothing to link to. With fewer than
+ * has no page of its own, because we never played it or the table spells it another way, is
+ * there as well, as a club we never beat and without a link. With fewer than
  * `lastWinMinimum` clubs, or no table, the result is undefined: no card. The days are not kept
  * anywhere, so they are right after midnight.
  */
@@ -682,6 +684,7 @@ export function lastWinsOf(
 ): LastWinPlace[] | undefined {
   const newest = table.reduce((latest, row) => (row.season > latest ? row.season : latest), '')
   const places: LastWinPlace[] = []
+  const unlinked = new Set<string>()
 
   for (const row of table) {
     const key = normaliseClubName(row.club)
@@ -689,12 +692,16 @@ export function lastWinsOf(
       [candidate.name, ...candidate.otherNames].some((name) => normaliseClubName(name) === key),
     )
 
-    if (
-      row.season === newest &&
-      key !== oursKey &&
-      club !== undefined &&
-      !places.some((place) => place.slug === club.slug)
-    ) {
+    if (row.season !== newest || key === oursKey) {
+      continue
+    }
+
+    if (club === undefined) {
+      if (!unlinked.has(key)) {
+        unlinked.add(key)
+        places.push({ days: null, lastWin: null, name: row.club, slug: null })
+      }
+    } else if (!places.some((place) => place.slug === club.slug)) {
       places.push({
         days: club.lastWin === null ? null : daysBetween(club.lastWin, today),
         lastWin: club.lastWin,

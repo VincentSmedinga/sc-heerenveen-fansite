@@ -755,7 +755,7 @@ export function LastWinCard({
                     place.days,
                   ],
             header: place.name,
-            href: `${address}/${place.slug}${query}`,
+            ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
           }))}
         />
       </BarPlace>
