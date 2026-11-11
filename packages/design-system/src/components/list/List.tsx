@@ -22,6 +22,13 @@ export type ListProps =
 
 type LooseProps = {
   /**
+   * The items in two columns, one after the other with CSS multi-column: the first half down
+   * the first column, then the rest down the second. The order in the code stays the order of
+   * reading, for a screen reader and a keyboard. Use it for short items, such as a name and a
+   * number.
+   */
+  columns?: boolean
+  /**
    * A loose list, as Markdown calls it: there is space between the items, with or
    * without a paragraph in them.
    */
@@ -46,14 +53,34 @@ Item.displayName = 'List.Item'
 /** A list of List.Item elements, bulleted or numbered. list.css gives it its look. */
 export const List = (props: ListProps) => {
   if (props.as === 'ol') {
-    const { as: Element, className, loose, plain, ...rest } = props
+    const { as: Element, className, columns, loose, plain, ...rest } = props
 
-    return <Element className={classNames(loose && 'hf-list-loose', plain && 'hf-list-plain', className)} {...rest} />
+    return (
+      <Element
+        className={classNames(
+          loose && 'hf-list-loose',
+          plain && 'hf-list-plain',
+          columns && 'hf-list-columns',
+          className,
+        )}
+        {...rest}
+      />
+    )
   }
 
-  const { as: Element = 'ul', className, loose, plain, ...rest } = props
+  const { as: Element = 'ul', className, columns, loose, plain, ...rest } = props
 
-  return <Element className={classNames(loose && 'hf-list-loose', plain && 'hf-list-plain', className)} {...rest} />
+  return (
+    <Element
+      className={classNames(
+        loose && 'hf-list-loose',
+        plain && 'hf-list-plain',
+        columns && 'hf-list-columns',
+        className,
+      )}
+      {...rest}
+    />
+  )
 }
 
 List.Item = Item

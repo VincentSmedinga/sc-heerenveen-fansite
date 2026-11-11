@@ -95,8 +95,8 @@ export default async function PlayerSearchPage({ searchParams }: { searchParams:
         {found !== undefined && search.kind === 'valid' && (
           <>
             <Heading id="resultaten" level={2}>
-              {found.total === 0 ? 'Geen spelers' : `${found.total} ${found.total === 1 ? 'speler' : 'spelers'}`} voor{' '}
-              {search.text}
+              {found.total === 0 ? 'Geen spelers' : `${found.total} ${found.total === 1 ? 'speler' : 'spelers'}`} voor ‘
+              {search.text}’
             </Heading>
             {found.total === 0 ? (
               <Text>

@@ -486,9 +486,11 @@ describe('the season picker on /spelers', () => {
     expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Toon<\/button>/)
   })
 
-  it('has a link to the overview of all players in the title row', async () => {
-    expect(await render()).toMatch(/<a href="\/spelers\/overzicht">Alle spelers<\/a>/)
-    expect(await render()).toMatch(/<a href="\/spelers\/zoeken">Zoek een speler<\/a>/)
+  it('has no links to the overview and the search in the title row: the bar under the menu has them', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('>Alle spelers</a>')
+    expect(html).not.toContain('>Zoek een speler</a>')
   })
 
   it('keeps the image as it was, without a season on it', async () => {

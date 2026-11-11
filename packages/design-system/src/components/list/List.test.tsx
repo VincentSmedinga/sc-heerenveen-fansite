@@ -146,4 +146,17 @@ describe('List.Item', () => {
     expect(container.firstElementChild?.hasAttribute('plain')).toBe(false)
     expect(container.firstElementChild?.getAttribute('role')).toBe('list')
   })
+
+  it('is a list in two columns when columns, and the items keep their order', () => {
+    const { container } = render(
+      <List columns plain role="list">
+        <List.Item>Een</List.Item>
+        <List.Item>Twee</List.Item>
+      </List>,
+    )
+
+    expect(container.firstElementChild?.className).toBe('hf-list-plain hf-list-columns')
+    expect(container.firstElementChild?.hasAttribute('columns')).toBe(false)
+    expect([...container.querySelectorAll('li')].map((item) => item.textContent)).toEqual(['Een', 'Twee'])
+  })
 })

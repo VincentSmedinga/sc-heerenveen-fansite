@@ -80,7 +80,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
             label="Zoek een persoon"
             required={false}
           >
-            <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
+            <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
           </Field>
           {/* The button sends the season, and a hidden field the match to go back to. */}
           {back === undefined ? null : <Input name="wedstrijd" type="hidden" value={String(back.id)} />}

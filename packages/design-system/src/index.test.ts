@@ -13,6 +13,7 @@ const components = [
   'Body',
   'Button',
   'Card',
+  'CardColumns',
   'DataTable',
   'Disclosure',
   'DiscussionItem',

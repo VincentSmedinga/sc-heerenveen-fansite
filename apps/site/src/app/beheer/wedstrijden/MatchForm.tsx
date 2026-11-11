@@ -424,7 +424,7 @@ export function MatchFields() {
           <Input {...field('scheidsrechter')} autoComplete="off" />
         </Field>
         <Field error={errors.stadion} hideOptional id="stadion" label="Stadion" required={false}>
-          <Input {...field('stadion')} autoComplete="off" />
+          <Input {...field('stadion')} autoComplete="off" autoCorrect="off" />
         </Field>
         <Field
           error={errors.opmerking}

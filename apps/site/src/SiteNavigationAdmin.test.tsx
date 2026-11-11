@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { saveAdminMarker } from './admin-marker'
 import { SiteNavigation } from './SiteNavigation'
 
-vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/spelers') }))
+vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/bronnen') }))
 
 // The item Beheer of the main menu depends on the mark in localStorage, which only the browser
 // has. The tests of the menu itself render on the server (SiteNavigation.test.tsx); these need

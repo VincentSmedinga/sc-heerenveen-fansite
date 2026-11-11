@@ -8,6 +8,7 @@
   "exports": {
     "./article-document": "./src/article-document.ts",
     "./contact-email": "./src/contact-email.ts",
+    "./continents": "./src/continents.ts",
     "./countries": "./src/countries.ts",
     "./env": "./src/env.ts",
     "./mail": "./src/mail.ts",

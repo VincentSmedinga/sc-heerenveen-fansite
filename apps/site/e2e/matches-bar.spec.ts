@@ -65,12 +65,15 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
     await expect(page).toHaveURL(new RegExp(`/cijfers/${slug}$`))
   })
 
-  test('marks Spelers as the only current item on /spelers, with no bar under the menu', async ({ page }) => {
+  test('marks Spelers as the only current item on /spelers, with the bar of Spelers under the menu', async ({
+    page,
+  }) => {
     await page.goto('/spelers?competitie=eredivisie')
 
     await expect(menu(page).locator('[aria-current]')).toHaveCount(1)
     await expect(bar(page, 'Spelers')).toHaveAttribute('aria-current', 'page')
-    await expect(menu(page).locator('.hf-navigation-bar')).toHaveCount(0)
+    await expect(menu(page).locator('.hf-navigation-bar').getByRole('link')).toHaveText(['Overzicht', 'Zoeken'])
+    await expect(menu(page).getByRole('link', { name: 'Cijfers' })).toHaveCount(0)
   })
 })
 

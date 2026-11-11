@@ -860,7 +860,7 @@ De lijst met spelers staat er alleen op als de database de verzonnen selectie va
 
 ### Zoeken naar een speler
 
-`/spelers/zoeken` zoekt een speler op zijn naam (#1130), los van het zoeken in het nieuws; `/spelers` heeft er in de titelrij de link "Zoek een speler" naartoe, en het hoofdmenu wijst Spelers aan.
+`/spelers/zoeken` zoekt een speler op zijn naam (#1130), los van het zoeken in het nieuws; het submenu van Spelers heeft er het item "Zoeken" naartoe, en het hoofdmenu wijst Spelers aan.
 `parseSearch` en het formulier (`SearchForm`) zijn die van het nieuws, met de grenzen van daar.
 De zoekopdracht is `searchPlayers` in `packages/db/src/person-slugs.ts`: elk woord moet een deel zijn van het adres van een persoon of van een oud adres, met de letterregels van het adres, dus "Džeko" en "Dzeko" vinden dezelfde speler.
 De pagina toont hoogstens tien spelers op achternaam, met de zin dat het er tien van de N zijn als er meer passen, en elk resultaat is een `PlayerList` met `order="given-first"`: de naam als link en daaronder de linie en de seizoenen ("2019/20 – 2023/24").

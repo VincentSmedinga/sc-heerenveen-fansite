@@ -13,6 +13,11 @@ const meta = preview.meta({
         'Het element: een opsomming of een genummerde lijst. Alleen een genummerde lijst heeft `start` en `reversed`.',
       options: listElements,
     },
+    columns: {
+      control: 'boolean',
+      description:
+        'De items in twee kolommen, na elkaar: eerst de eerste helft naar beneden, dan de rest. De leesvolgorde blijft die van de code.',
+    },
     loose: {
       control: 'boolean',
       description: 'Een ruime lijst, zoals Markdown die kent: elk item heeft ruimte onder zich.',
@@ -68,6 +73,20 @@ export const Plain = meta.story({
       <List.Item>Nieuws over sc Heerenveen uit de media</List.Item>
       <List.Item>De nieuwste discussies op het forum</List.Item>
       <List.Item>De stand en de uitslagen</List.Item>
+    </List>
+  ),
+})
+
+export const Columns = meta.story({
+  name: 'In twee kolommen',
+  render: () => (
+    <List columns plain role="list">
+      <List.Item>Europa 12</List.Item>
+      <List.Item>Afrika 5</List.Item>
+      <List.Item>Azië 2</List.Item>
+      <List.Item>Noord-Amerika 1</List.Item>
+      <List.Item>Zuid-Amerika 0</List.Item>
+      <List.Item>Oceanië 0</List.Item>
     </List>
   ),
 })

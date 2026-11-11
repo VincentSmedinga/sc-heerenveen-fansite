@@ -72,7 +72,14 @@ export function SearchForm({
         id="zoek"
         label={label}
       >
-        <Input autoComplete="off" defaultValue={text} maxLength={maxQueryLength} name="q" type="search" />
+        <Input
+          autoComplete="off"
+          autoCorrect="off"
+          defaultValue={text}
+          maxLength={maxQueryLength}
+          name="q"
+          type="search"
+        />
       </Field>
       <Button type="submit">Zoek</Button>
     </Form>

@@ -116,7 +116,7 @@ export function AddMatchForm({
           label="Naam van een nieuwe club"
           required={false}
         >
-          <Input {...field('nieuwe-club')} autoComplete="off" />
+          <Input {...field('nieuwe-club')} autoComplete="off" autoCorrect="off" />
         </Field>
         <RadioGroup
           error={errors.thuis}

@@ -132,7 +132,7 @@ export default async function PlayerPage({ params, searchParams }: Props) {
               label="Zoek de andere persoon"
               required={false}
             >
-              <Input defaultValue={search} maxLength={searchMaxLength} name="zoek" type="search" />
+              <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="zoek" type="search" />
             </Field>
             <Button appearance="soft" type="submit">
               Zoeken

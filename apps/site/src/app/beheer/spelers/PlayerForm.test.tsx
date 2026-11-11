@@ -34,6 +34,18 @@ const show = (answer: PlayerFormState, more: Partial<Parameters<typeof PlayerFor
   )
 
 describe('the form of a player', () => {
+  it('turns the correction of the browser off in the name fields and the Wikipedia field, and the capital in the prefix', () => {
+    show({ errors: {}, values: emptyPlayerValues })
+
+    const field = (name: string) => document.querySelector(`[name="${name}"]`)
+
+    for (const name of ['voornaam', 'tussenvoegsel', 'achternaam', 'wikipedia']) {
+      expect(field(name)?.getAttribute('autocorrect')).toBe('off')
+    }
+
+    expect(field('tussenvoegsel')?.getAttribute('autocapitalize')).toBe('off')
+  })
+
   it('has a field for each thing of the player, each with its label', () => {
     show({ errors: {}, values: emptyPlayerValues })
 

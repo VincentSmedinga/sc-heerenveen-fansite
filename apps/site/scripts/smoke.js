@@ -1323,11 +1323,13 @@ await withEmptyDatabase((database) =>
       const overviewHtml = await overview.text()
       assert.equal(overview.status, 200, path)
       assert.match(overviewHtml, /<h1[^>]*>Alle spelers<\/h1>/, path)
+      // The item Spelers holds the sub-page Overzicht, which is the current page (#1141).
       assert.match(
         overviewHtml,
-        /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/,
+        /<a aria-current="true" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/,
         path,
       )
+      assert.match(overviewHtml, /<a aria-current="page"[^>]*href="\/spelers\/overzicht"[^>]*>Overzicht</, path)
       assert.match(
         overviewHtml,
         new RegExp(`<a aria-current="page"[^>]*href="${path.replaceAll('/', '\\/')}"[^>]*>.*?${view}`),
@@ -1344,7 +1346,8 @@ await withEmptyDatabase((database) =>
     const searchHtml = await (await fetch(searchBase)).text()
     assert.match(searchHtml, /<h1[^>]*>Zoeken naar een speler<\/h1>/)
     assert.match(searchHtml, /noindex/)
-    assert.match(searchHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+    assert.match(searchHtml, /<a aria-current="true" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+    assert.match(searchHtml, /<a aria-current="page"[^>]*href="\/spelers\/zoeken"[^>]*>Zoeken</)
 
     for (const q of ['proefm', 'Wouter+Próefman']) {
       const found = await fetch(`${searchBase}?q=${q}`)
@@ -1355,17 +1358,24 @@ await withEmptyDatabase((database) =>
     }
 
     const nobody = await (await fetch(`${searchBase}?q=bestaat+echt+niet`)).text()
-    assert.match(nobody, />Geen spelers(<!-- -->)? voor(<!-- -->)? (<!-- -->)?bestaat echt niet/)
+    assert.match(nobody.replaceAll('<!-- -->', ''), />Geen spelers voor ‘bestaat echt niet’</)
     assert.match(await (await fetch(`${searchBase}?q=a`)).text(), /Schrijf woorden van minstens 2 tekens\./)
 
     const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)
     assert.match(playersHtml, /<h1[^>]*>Spelers<\/h1>/)
-    // Spelers is an item of the main menu, the current page, and has no bar under the menu.
-    assert.match(playersHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+    // Spelers is an item of the main menu, the current page, with the bar of Overzicht and
+    // Zoeken under the menu (#1141), and neither of them is the current page.
+    assert.match(
+      playersHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a><div class="hf-navigation-bar">.*?href="\/spelers\/overzicht">Overzicht<\/a>.*?href="\/spelers\/zoeken">Zoeken<\/a>/s,
+    )
     assert.doesNotMatch(playersHtml, /aria-current="true"/)
-    assert.doesNotMatch(playersHtml, /hf-navigation-bar/)
+    assert.doesNotMatch(
+      playersHtml,
+      /class="hf-navigation-sublink" aria-current|aria-current="page" class="hf-navigation-sublink"/,
+    )
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       // The seed makes up one match report that is klaar, so the three cards with its figures

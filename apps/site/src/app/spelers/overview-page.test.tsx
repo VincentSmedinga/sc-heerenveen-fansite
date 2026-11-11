@@ -57,6 +57,15 @@ describe('the overview by name', () => {
     expect(html).toContain('1 speler')
   })
 
+  it('puts the letters in one grid in the order A, B, D, and the credit in the sidebar beside it', async () => {
+    const html = await render('naam')
+    const columns = html.slice(html.indexOf('hf-card-columns-grid'), html.indexOf('</main>'))
+
+    expect([...columns.matchAll(/<h2[^>]*id="letter-(\w)"/g)].map(([, letter]) => letter)).toEqual(['a', 'b', 'd'])
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('Bron: Wikipedia'))
+    expect(html.slice(html.indexOf('<aside'))).toContain('Bron: Wikipedia')
+  })
+
   it('links a player who has a page and shows the surname bold, then the given name with the prefix', async () => {
     const html = await render('naam')
 
@@ -74,7 +83,7 @@ describe('the overview by name', () => {
 })
 
 describe('the overview by country', () => {
-  it('has a bar card with a link to each country, the card Uit het noorden and a section for each country', async () => {
+  it('has a bar card with a link to each country, the card Ze komen uit het noorden and a section for each country', async () => {
     const html = await render('land')
 
     expect(html).toContain('per land van de speler.')
@@ -86,6 +95,34 @@ describe('the overview by country', () => {
       'land-zweden',
     ])
     expect(html).toContain('2 spelers uit Denemarken en Zweden.')
+  })
+
+  it('names the card of the north Ze komen uit het noorden, and the anchor follows the title', async () => {
+    const html = await render('land')
+
+    expect(html).toMatch(/<h2[^>]*id="ze-komen-uit-het-noorden"[^>]*>Ze komen uit het noorden</)
+    expect(html).toContain('aria-labelledby="ze-komen-uit-het-noorden"')
+    expect(html).not.toContain('"uit-het-noorden"')
+  })
+
+  it('has a card with the continents under the north, most players first, with 0 for an empty one', async () => {
+    const html = await render('land')
+    const card = html.slice(html.indexOf('id="werelddelen"'))
+    const items = [...card.matchAll(/<li[^>]*>(.*?)<\/li>/g)].map(([, item]) => item?.replace(/<[^>]+>/g, ''))
+
+    expect(html.indexOf('id="ze-komen-uit-het-noorden"')).toBeLessThan(html.indexOf('id="werelddelen"'))
+    expect(items).toEqual(['Europa 3', 'Afrika 0', 'Azië 0', 'Noord-Amerika 0', 'Oceanië 0', 'Zuid-Amerika 0'])
+    expect(html).toContain('hf-list-columns')
+    expect(html).not.toContain('niet bekend')
+  })
+
+  it('says how many players have no known country, in a line under the continents', async () => {
+    vi.mocked(getPlayersOverview).mockResolvedValue(overviewOf([row(1, 'Aken', { country: 'JP' }), row(2, 'Berg')]))
+
+    const html = await render('land')
+
+    expect(html).toContain('Van 1 speler is het land niet bekend.')
+    expect(html).toMatch(/Azië <strong>1<\/strong>/)
   })
 })
 

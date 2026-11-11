@@ -1,0 +1,43 @@
+/*
+ * Cards in one or two columns. The width that counts is the one of the place they stand in, not
+ * of the screen: from 28rem there are two columns, each a little under half. The base is a grid
+ * with a pair of cards on each row, so the order of the code is the order of reading. A browser
+ * that knows grid lanes lets each card go to the shortest column, so the gaps under the shorter
+ * card of a pair are gone.
+ */
+
+@layer hf.components {
+  /* The container is measured by what is in it, so the grid is one level down. */
+  .hf-card-columns {
+    container-name: hf-card-columns;
+    container-type: inline-size;
+  }
+
+  .hf-card-columns-grid {
+    align-items: start;
+    display: grid;
+    gap: var(--hf-space-xl);
+    grid-template-columns: minmax(0, 1fr);
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  /* A list of players has two columns on a wide screen, but a card here is half as wide. */
+  .hf-card-columns-grid .hf-player-list {
+    columns: 1;
+  }
+
+  @container hf-card-columns (width >= 28rem) {
+    .hf-card-columns-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @supports (display: grid-lanes) {
+      .hf-card-columns-grid {
+        display: grid-lanes;
+      }
+    }
+  }
+}

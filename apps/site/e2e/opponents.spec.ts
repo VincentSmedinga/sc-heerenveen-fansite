@@ -421,10 +421,12 @@ test.describe('the bar of Wedstrijden', () => {
     await expect(bar.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
   })
 
-  test('is gone on Spelers', async ({ page }) => {
+  test('has the links of Spelers instead on Spelers', async ({ page }) => {
     await page.goto('/spelers')
 
-    await expect(page.getByRole('navigation', { name: 'Hoofdmenu' }).locator('.hf-navigation-bar')).toHaveCount(0)
+    const links = page.getByRole('navigation', { name: 'Hoofdmenu' }).locator('.hf-navigation-bar').getByRole('link')
+
+    await expect(links).toHaveText(['Overzicht', 'Zoeken'])
   })
 })
 

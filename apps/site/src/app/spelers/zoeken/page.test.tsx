@@ -69,7 +69,7 @@ describe('the page Zoeken naar een speler', () => {
     const html = await render({ q: 'ak' })
 
     expect(findPlayers).toHaveBeenCalledWith(['ak'])
-    expect(html).toContain('<h2 class="hf-heading-2" id="resultaten">2 spelers voor ak</h2>')
+    expect(html).toContain('<h2 class="hf-heading-2" id="resultaten">2 spelers voor ‘ak’</h2>')
     expect(html).toContain('href="/spelers/joost-van-aken"')
     expect(html).toContain('Verdediger · 2019/20 – 2023/24')
     expect(html).toMatch(/aria-labelledby="resultaten"[^>]*role="list"|role="list"[^>]*aria-labelledby="resultaten"/u)
@@ -79,10 +79,25 @@ describe('the page Zoeken naar een speler', () => {
     expect(html).not.toContain('Dit zijn')
   })
 
+  it('keeps the search term escaped inside the curly quotes', async () => {
+    vi.mocked(findPlayers).mockResolvedValue({ players: [], total: 0 })
+
+    const html = await render({ q: '<b>x</b>' })
+
+    expect(html).toContain('>Geen spelers voor ‘&lt;b&gt;x&lt;/b&gt;’<')
+    expect(html).not.toContain('<b>x</b>')
+  })
+
+  it('turns the correction of the browser off in the search field, so a surname is not changed', async () => {
+    expect(await render({})).toMatch(
+      /<input[^>]*autoCorrect="off"[^>]*name="q"|<input[^>]*name="q"[^>]*autoCorrect="off"/u,
+    )
+  })
+
   it('says "1 speler" for one', async () => {
     vi.mocked(findPlayers).mockResolvedValue({ players: [aken], total: 1 })
 
-    expect(await render({ q: 'aken' })).toContain('>1 speler voor aken<')
+    expect(await render({ q: 'aken' })).toContain('>1 speler voor ‘aken’<')
   })
 
   it('says how many there are when more than ten fit', async () => {
@@ -101,7 +116,7 @@ describe('the page Zoeken naar een speler', () => {
 
     const html = await render({ q: 'bestaatniet' })
 
-    expect(html).toContain('>Geen spelers voor bestaatniet<')
+    expect(html).toContain('>Geen spelers voor ‘bestaatniet’<')
     expect(html).toContain('Daar hebben we geen speler onder gevonden.')
     expect(html).toContain('href="/spelers"')
   })

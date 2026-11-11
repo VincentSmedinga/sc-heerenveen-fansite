@@ -4862,6 +4862,7 @@
   - **Geen aparte vorm met een vraagteken:** elke weergave is een eigen pagina met een eigen adres, in de sitemap en niet `noindex`.
     De pagina leest de gegevens op elk verzoek (`force-dynamic`) en toont de foutpagina zonder database.
   - **Een link, geen menu-item:** `/spelers` heeft in de titelrij een link "Alle spelers"; het hoofdmenu wijst op beide pagina's Spelers aan.
+    **Later:** vervangen door het item "Overzicht" in het submenu van Spelers (#1141), zie "Het submenu van Spelers heeft twee items".
 - **Waarom:** de pagina van een speler en van een seizoen delen het ene dynamische deel `/spelers/<…>` (zie het commentaar in `app/spelers/[seizoen]/page.tsx`).
   Een vaste map wint, maar dan mag geen speler dat adres als naam hebben.
   Elke weergave heeft een eigen adres, zodat je er een kunt delen en het zonder JavaScript werkt.
@@ -4903,8 +4904,53 @@
   - **Het resultaat:** hoogstens tien spelers op achternaam en dan voornaam, met de naam als link en daaronder de linie en de seizoenen ("2019/20 – 2023/24").
     Het is `PlayerList` met `order="given-first"`, zodat de naam leest als `PlayerName` en niet als "Aken, Joost van".
   - **De link:** een tweede link in de titelrij van `/spelers`, naast "Alle spelers"; geen zoekveld in het menu of de kop.
+    **Later:** vervangen door het item "Zoeken" in het submenu van Spelers (#1141); de titelrij van `/spelers` heeft geen links meer.
 - **Waarom:** nieuws en spelers hebben al elk hun eigen onderdeel in het menu, en twee losse pagina's houden formulier en resultaten eenvoudig.
   Een speler heeft geen datum en een andere vorm dan een bericht, dus ze in één lijst mengen vraagt om regels voor de volgorde en de soort.
   Dezelfde letterregels als het adres zorgen dat "Džeko" en "Dzeko" dezelfde speler vinden, en de oude adressen vinden de oude naam.
 - **Alternatieven:** één zoekpagina voor de hele site op `/zoeken`, met de spelers boven het nieuws in één lijst; een zoekveld op `/spelers` zelf; een zoekindex of FULLTEXT (de lijst is klein); alleen zoeken op het begin van de achternaam.
 - **Nadeel:** een bezoeker moet weten dat spelers een eigen zoekpagina hebben; een zoekvraag naar een speler op `/nieuws/zoeken` vindt alleen koppen.
+
+## Het submenu van Spelers heeft twee items
+
+- **Datum:** 11 november 2026
+- **Besluit:** onder het hoofdmenu van Spelers staat een submenu met "Overzicht" (`/spelers/overzicht`, ook `/spelers/overzicht/land`) en "Zoeken" (`/spelers/zoeken`) (#1141).
+  Op `/spelers` en op de pagina van een seizoen is geen van beide de huidige pagina.
+  - **Hetzelfde onderdeel als Nieuws en Wedstrijden:** de items staan als `subitems` van Spelers in `SiteNavigation`, en `currentOf` wijst de huidige pagina aan.
+    Een slot `@subnav` is niet nodig, omdat de links vast zijn: het slot bestaat voor de keuze van competitie in het adres van Wedstrijden.
+  - **De titelrij:** de links "Alle spelers" en "Zoek een speler" zijn uit de titelrij van `/spelers` weg.
+- **Waarom:** het hoofdmenu is al de weg naar `/spelers`, en twee links in de titelrij waren de enige plek waar je de andere pagina's vond.
+- **Alternatieven:** een eerste item "Seizoen" of "Selectie"; een slot `@subnav` voor Spelers, met dezelfde vaste links.
+
+## De bronvermelding van Wikipedia blijft in de zijkolom van het overzicht
+
+- **Datum:** 11 november 2026
+- **Besluit:** `WikipediaCredit` staat op `/spelers/overzicht` en `/spelers/overzicht/land` in de zijkolom, ook nu het overzicht op naam twee kolommen heeft (#1141).
+- **Waarom:** de projecteigenaar wil de vermelding altijd in de zijkolom.
+- **Alternatieven:** een regel onderaan de pagina, zoals het eerste issue (#1138) vroeg.
+- **Later:** vervangt de regel onderaan de pagina uit #1138.
+
+## Een werelddeel komt uit een vaste tabel van landcodes
+
+- **Datum:** 11 november 2026
+- **Besluit:** één vaste tabel in `packages/shared` (`continents.ts`), één werelddeel per land van `countryCodes`, en de kaart "Per werelddeel" op `/spelers/overzicht/land` telt daarmee de spelers (#1141).
+  - **UEFA:** een land dat in twee werelddelen ligt hoort bij het werelddeel van zijn voetbalbond: Turkije, Rusland, Cyprus, Georgië, Armenië, Azerbeidzjan, Kazachstan en Israël zijn Europa.
+    Midden-Amerika en het Caribisch gebied horen bij Noord-Amerika.
+  - **Onbewoond:** Antarctica en Heard en McDonaldeilanden zijn Oceanië, Bouvet en de Franse Zuidelijke Gebieden zijn Afrika, Zuid-Georgia is Zuid-Amerika, omdat het er zes moeten zijn.
+  - **Onbekend:** een speler zonder land telt in geen werelddeel, en een regel onder de lijst zegt hoeveel dat er zijn.
+  - **De lijst:** aflopend op aantal, bij gelijk aantal op naam, een werelddeel zonder spelers met 0, in twee kolommen (`List` met `columns`).
+  - **De test:** elke landcode die de pagina kent staat in de tabel, en geen code staat er twee keer.
+  - **De kaart "Ze komen uit het noorden":** de titel was "Uit het noorden", en het anker volgt de titel: `ze-komen-uit-het-noorden`, zonder oud anker ernaast.
+- **Waarom:** we bewaren alleen een land per persoon, en een tabel van circa 250 codes is kleiner dan een nieuwe kolom in de database.
+- **Alternatieven:** een werelddeel uit Wikidata halen; een land in twee werelddelen laten meetellen.
+
+## Automatische correctie staat uit bij zoekvelden, namen, adressen en codes
+
+- **Datum:** 11 november 2026
+- **Besluit:** `autoCorrect="off"` staat op de zoekvelden van de site en van Beheer, op de namen van spelers, clubs en stadions in Beheer, op het veld voor een Wikipedia-pagina en op het e-mailadres en de code bij het inloggen; `autoCapitalize="off"` er ook bij waar een hoofdletter fout is (#1141).
+  - **Aan het zoekveld:** `/nieuws/zoeken`, `/spelers/zoeken` (gedeeld in `SearchForm`) en de zoekvelden van Berichten, Clubnamen, Stadions, het zoeken van een speler en van een persoon.
+  - **Namen:** voornaam, tussenvoegsel (ook `autoCapitalize`) en achternaam van een speler, de naam van een club (Clubnamen en "nieuwe club" bij een wedstrijd) en van een stadion (Stadions en het stadion bij een wedstrijd), en het veld Wikipedia-pagina.
+  - **Inloggen:** het e-mailadres en de code, beide met `autoCapitalize="off"`.
+  - **Aan gelaten:** lopende tekst, zoals de titel, de intro en de toelichting van een artikel, de toelichting bij het verbergen van een bericht, en de velden van het contactformulier en van een wedstrijd die hier niet staan.
+- **Waarom:** de browser verbetert een achternaam of een zoekterm tot een woord dat er niet staat; bij een artikeltekst helpt verbeteren juist.
+- **Alternatieven:** overal uit; alleen op het zoekveld van de spelers.
