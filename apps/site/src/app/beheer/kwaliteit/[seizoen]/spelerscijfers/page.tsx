@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { listWaitingStatDifferences, statSourceLabels } from '@fansite/db/player-stat-differences'
 import { seasonOf } from '@fansite/db/season'
 import { firstCoverageSeason, seasonsBetween } from '@fansite/db/season-coverage'
-import { Breadcrumb, Card, Heading, List, Notice, Page, Strong, Text } from '@fansite/design-system'
+import { Card, Heading, Link, List, Notice, Page, Strong, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { submitStatDifference } from '#src/app/beheer/kwaliteit/actions'
@@ -73,14 +73,11 @@ export default async function StatDifferencesPage({ params, searchParams }: Prop
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current={title}
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: qualityPath, label: 'Kwaliteit' },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={qualityPath} icon="arrow-left">
+              Terug naar de kwaliteit van de gegevens
+            </Link>
+          </Text>
           <Heading level={1}>
             {title} in {season}
           </Heading>

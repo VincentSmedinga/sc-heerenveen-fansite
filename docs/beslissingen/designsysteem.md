@@ -1897,6 +1897,7 @@
 - **Waarom:** `Breadcrumb` is een eigen onderdeel en geen uitvoering van `Navigation`, want de laatste pagina is geen link en `Navigation` maakt van elk item een link.
   Het teken met randen is gekozen boven `content: '›'`: een teken in CSS leest een schermlezer soms voor, en de variant `content: '›' / ''` is nog niet Baseline 'widely available'.
 - **Alternatieven:** een uitvoering van `Navigation` (past niet: zie boven); een teken in de HTML met `aria-hidden` (het blijft kopieerbare tekst); een teken met `content` (zie boven).
+- **Later:** `Breadcrumb` is weg uit het designsysteem (#1142, zie het besluit onderaan dit bestand).
 
 ## Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem
 
@@ -2667,6 +2668,7 @@
   - **Volgen `--hf-card-line`:** de scheiding tussen rijen en de `hr` (`base/table.css`, `base/elements.css`), `record-table`, `input-table`, `news-item`, `discussion-item`, `match`, `short-match`, de hulplijnen en de ring zonder waarden van `bar-chart` en `donut-chart`.
   - **Volgen `--hf-card-line-strong`:** `Disclosure`, `Notice`, het formulier voor een link in de editor en `fieldset`.
   - **Volgen `--hf-card-line-graphic`:** de grond van `bar-chart`, de geleider van `donut-chart`, de pijlen van `breadcrumb` en de balk van een `blockquote`.
+    **Later:** `Breadcrumb` is weg (#1142), dus de pijlen van `breadcrumb` zijn er niet meer.
   - **Blijven vast:** de randen van invoervelden, selects en tekstvakken (`--hf-colour-border-input`), de focusrand, de randen van de zachte knop en van een Tag met nadruk, de foutmeldingen, de balk van de huidige rij in `standings-table`, `pre` en `code`, de gegevens van grafieken (balken, lijn, schijven en hun omlijning), onderstrepingen en opsommingstekens.
   - **Kleur:** de reeks zand krijgt de stappen 400 en 500 (even licht als grijs 400 en 500).
     Rollen: `line-darker-surface[-strong|-soft|-warm]` en `line-graphic-surface[-strong|-soft|-warm]`.
@@ -3334,3 +3336,14 @@
 - **Waarom:** in één blik zie je wie een plaats deelt, en het nummer herhalen maakt het lijken alsof er meer verschillende plaatsen zijn.
   Eén cel houdt de lijsten gelijk.
 - **Alternatieven:** het nummer overal herhalen (de lijst leest als een telling); "=4" of "gedeeld 4" zichtbaar (breder en rommeliger in een smalle kolom); elke tabel zijn eigen code laten houden (zo liepen ze uiteen).
+
+## Het designsysteem heeft geen kruimelpad meer, en een pagina onder een lijst heeft een link terug
+
+- **Datum:** 11 november 2026
+- **Besluit:** `Breadcrumb` verdwijnt uit het designsysteem (#1142): het onderdeel, de export, de CSS, de story en de tests.
+  Een pagina die onder een lijst hangt, krijgt bovenaan een link terug met `Link` en het teken `arrow-left`, zoals "Terug naar Wedstrijden".
+  Een lijst en een pagina onder het menu krijgen niets: het menu is er.
+  - **Beheer:** de pagina's onder Clubnamen, Stadions, Spelers en Wedstrijden wijzen naar hun lijst, de pagina's van het verslag naar de wedstrijd of het verslag, en de pagina's van de kwaliteit naar de kwaliteit van de gegevens.
+  - **Geen nieuw onderdeel:** de link terug is gewoon `Link`.
+- **Waarom:** het kruimelpad deed op ondiepe pagina's niet meer dan het menu, en een link terug is voor diepe pagina's kleiner en duidelijker.
+- **Alternatieven:** het onderdeel houden en niet gebruiken; een link terug op elke pagina.

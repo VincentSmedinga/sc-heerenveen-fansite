@@ -1,7 +1,7 @@
 import type { PersonMergePlan } from '@fansite/db/person-merge'
 import type { Metadata } from 'next'
 
-import { Breadcrumb, Card, DataTable, Heading, Link, List, Page, Strong, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, List, Page, Strong, Text } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
@@ -52,16 +52,6 @@ export default async function MergePersonsPage({ searchParams }: Props) {
     from === undefined
       ? { href: listPath(), label: 'Terug naar de spelers' }
       : { href: playerPath(from.player.id), label: `Terug naar ${from.player.name}` }
-  const crumbs = [
-    { href: '/beheer', label: 'Beheer' },
-    ...(from === undefined
-      ? [{ href: listPath(), label: 'Spelers' }]
-      : [
-          { href: listPath(from.player.season), label: `Spelers ${from.player.season}` },
-          { href: playerPath(from.player.id), label: from.player.name },
-        ]),
-  ]
-
   const plan = view === 'missing' || view === 'same' ? undefined : view
   const [keptName, otherName] = plan === undefined ? [] : personLabels(plan.kept, plan.other)
 
@@ -70,7 +60,6 @@ export default async function MergePersonsPage({ searchParams }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb current="Personen samenvoegen" items={crumbs} label="Kruimelpad" />
           <Heading level={1}>Personen samenvoegen</Heading>
           {plan === undefined ? null : (
             <Text appearance="intro">

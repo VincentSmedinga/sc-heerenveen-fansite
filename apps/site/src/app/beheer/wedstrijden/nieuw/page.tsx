@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { competitions } from '@fansite/db/schema'
-import { Breadcrumb, Heading, Page, Text } from '@fansite/design-system'
+import { Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
 import { listClubChoices } from '#src/beheer/match-additions'
@@ -31,14 +31,11 @@ export default async function AddMatchPage() {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current="Wedstrijd toevoegen"
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: matchesPath, label: 'Wedstrijden' },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={matchesPath} icon="arrow-left">
+              Terug naar Wedstrijden
+            </Link>
+          </Text>
           <Heading level={1}>Wedstrijd toevoegen</Heading>
           <Text appearance="intro">
             Voeg een wedstrijd toe die geen bron heeft die de import kan lezen, zoals een wedstrijd uit een

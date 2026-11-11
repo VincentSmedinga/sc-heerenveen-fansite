@@ -115,7 +115,8 @@ describe('the screen Tekst plakken', () => {
 
     expect(headings(html, 1)).toEqual(['Verslag plakken: sc Heerenveen - N.E.C.'])
     expect(headings(html, 2)).toEqual(['Tekst plakken', 'Het formaat'])
-    expect(html).toContain('aria-label="Kruimelpad"')
+    expect(html).not.toContain('Kruimelpad')
+    expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar het verslag')
     expect(html).toContain(`href="/beheer/wedstrijden/${matchId}/verslag"`)
     expect(html).toContain('Annuleren')
   })

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 import { firstCoverageSeason, seasonsBetween } from '@fansite/db/season-coverage'
-import { Breadcrumb, Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { listPath as playersListPath } from '#src/app/beheer/spelers/paths'
@@ -101,14 +101,11 @@ export default async function WorkListPage({ params }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current={title}
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: qualityPath, label: 'Kwaliteit' },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={qualityPath} icon="arrow-left">
+              Terug naar de kwaliteit van de gegevens
+            </Link>
+          </Text>
           <Heading level={1}>
             {title} in {season}
           </Heading>

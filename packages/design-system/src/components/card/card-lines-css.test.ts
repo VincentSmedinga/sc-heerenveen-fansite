@@ -112,7 +112,6 @@ describe('the parts that draw their lines with the lines of the card', () => {
     ['components/bar-chart/bar-chart.css', '--hf-card-line,', 'the lines across a bar chart'],
     ['components/bar-chart/bar-chart.css', '--hf-card-line-graphic,', 'the ground of a bar chart'],
     ['components/donut-chart/donut-chart.css', '--hf-card-line-graphic,', 'the leader of a donut chart'],
-    ['components/breadcrumb/breadcrumb.css', '--hf-card-line-graphic,', 'the arrows of a breadcrumb'],
     ['components/disclosure/disclosure.css', '--hf-card-line-strong,', 'a disclosure'],
     ['components/notice/notice.css', '--hf-card-line-strong,', 'a notice'],
     ['components/rich-text-editor/rich-text-editor.css', '--hf-card-line-strong,', 'the form for a link in the editor'],

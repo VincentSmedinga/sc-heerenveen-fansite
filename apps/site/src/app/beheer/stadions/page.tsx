@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import {
-  Breadcrumb,
   Button,
   Card,
   DataTable,
@@ -58,7 +57,6 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
       className={compact}
       intro={
         <>
-          <Breadcrumb current="Stadions" items={[{ href: '/beheer', label: 'Beheer' }]} label="Kruimelpad" />
           <Heading level={1}>Stadions</Heading>
           <Text appearance="intro">
             De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion. Geef een club hier een

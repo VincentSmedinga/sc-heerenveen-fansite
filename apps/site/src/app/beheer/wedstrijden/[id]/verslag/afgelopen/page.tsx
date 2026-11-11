@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
-import { Breadcrumb, Heading, Page, Text } from '@fansite/design-system'
+import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound, redirect } from 'next/navigation'
 
-import { matchesPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { findReportScreen } from '#src/beheer/match-reports'
@@ -49,16 +49,11 @@ export default async function FinishMatchPage({ params }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current="Wedstrijd afgelopen"
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: matchesPath, label: 'Wedstrijden' },
-              { href: matchPath(id), label: clubs },
-              { href: reportPath(id), label: 'Verslag' },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={reportPath(id)} icon="arrow-left">
+              Terug naar het verslag
+            </Link>
+          </Text>
           <Heading level={1}>Wedstrijd afgelopen: {clubs}</Heading>
           <Text appearance="meta">
             {match.competition}, {match.round} · {describeEntryKickoff(match)}
