@@ -59,6 +59,7 @@
 @import url('./base/elements.css');
 @import url('./components/list/list.css');
 @import url('./components/description-list/description-list.css');
+@import url('./components/figure-list/figure-list.css');
 @import url('./components/key-figures/key-figures.css');
 @import url('./components/career-timeline/career-timeline.css');
 @import url('./components/icon/icon.css');

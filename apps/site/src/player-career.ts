@@ -108,14 +108,14 @@ export function careerMoments(seasons: readonly PlayerSeason[]): Map<string, Car
 const dayFormat = new Intl.DateTimeFormat('nl-NL', { dateStyle: 'long', timeZone: 'UTC' })
 
 /** A day as words: `10 april 2004`. */
-const dayText = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`))
+export const dayText = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`))
 
 /** Words as a list in Dutch: "a", "a en b", "a, b en c". */
-const listText = (words: readonly string[]) =>
+export const listText = (words: readonly string[]) =>
   words.length < 2 ? (words[0] ?? '') : `${words.slice(0, -1).join(', ')} en ${words.at(-1)}`
 
 /** The minute of a goal with its added time, such as `25′` or `90+2′`. */
-const minuteText = ({ minute, stoppage }: CareerGoal) =>
+export const minuteText = ({ minute, stoppage }: CareerGoal) =>
   minute === undefined ? undefined : `${minute}${stoppage === undefined ? '' : `+${stoppage}`}′`
 
 const countWords: Record<number, string> = { 2: 'twee', 4: 'vier', 5: 'vijf', 6: 'zes', 7: 'zeven', 8: 'acht' }

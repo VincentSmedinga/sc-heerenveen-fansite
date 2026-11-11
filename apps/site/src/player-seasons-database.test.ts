@@ -81,6 +81,14 @@ describe('reading the seasons of a person', () => {
     const fourth = await match('2003/04', 4, 1, 'geen')
     const inFirst = await appear(first, playerId, 9)
     const inSecond = await appear(second, playerId, 9)
+    // A team-mate with a page of his own, who gave him an assist in the first match.
+    const [{ insertId: mateId }] = await database.db
+      .insert(persons)
+      .values({ name: 'Verzonnen Maat', slug: 'verzonnen-maat' })
+    const [{ insertId: matePlayerId }] = await database.db
+      .insert(players)
+      .values({ name: 'Verzonnen Maat', personId: mateId, searchTerm: 'maat', season: '2003/04' })
+    const mateInFirst = await appear(first, matePlayerId, 8)
 
     await appear(third, playerId, 9)
 
@@ -88,7 +96,7 @@ describe('reading the seasons of a person', () => {
 
     await database.db.insert(matchGoals).values([
       // The three ways to him, and a goal that has all three: each counts once.
-      { ...ours, matchId: first, personId },
+      { ...ours, assistAppearanceId: mateInFirst, matchId: first, personId },
       { ...ours, matchId: first, playerId },
       { ...ours, appearanceId: inFirst, matchId: first },
       { ...ours, appearanceId: inSecond, matchId: second, personId, playerId },
@@ -118,6 +126,12 @@ describe('reading the seasons of a person', () => {
     expect(facts.appearances[0]?.match).toMatchObject({ opponent: expect.any(String), season: '2003/04' })
     expect(facts.goals).toHaveLength(4)
     expect(facts.assists).toHaveLength(1)
+    // The assists of his goals, with the page of the player who gave it; and the goal he scored
+    // against us, which belongs to the match as ours.
+    expect(facts.assistGivers).toEqual([{ name: 'Speler 8', slug: 'verzonnen-maat' }])
+    expect(facts.againstUs).toEqual([
+      expect.objectContaining({ match: expect.objectContaining({ clubSlug: expect.any(String), id: second }) }),
+    ])
     expect(facts.tables).toEqual([{ appearances: 30, assists: 4, season: '2003/04' }])
     expect(playerSeasonsOf(facts)[0]).toMatchObject({ goals: 4, source: 'wikipedia' })
   })
