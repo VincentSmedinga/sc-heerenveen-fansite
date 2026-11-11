@@ -4981,7 +4981,7 @@
 ## Een jaar van overlijden dat de redactie invult, gaat voor Wikidata
 
 - **Datum:** 11 november 2026
-- **Besluit:** het formulier van een speler in Beheer heeft het veld "Jaar van overlijden" (#1147), met een zichtbaar label en een eigen foutmelding ("Vul een jaar in met vier cijfers, zoals 2020, of laat het veld leeg.").
+- **Besluit:** het formulier van een speler in Beheer heeft het veld "Jaar van overlijden" (#1147), met een zichtbaar label en een eigen foutmelding ("Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met 2026, of laat het veld leeg.").
   Het jaar moet vier cijfers zijn, niet voor 1850 en niet later dan dit jaar.
   - **De bron `manual`:** zoals bij de linie en het land (#1051) krijgt de persoon `death_date_source = 'manual'`, en de importer overschrijft hem nooit.
   - **Leegmaken:** de redactie kan het veld leegmaken, en dan geldt weer Wikidata: de persoon krijgt `wikidata_read_at` leeg en de importer leest hem bij de volgende run opnieuw.
