@@ -3067,6 +3067,8 @@
   Een kaart met alleen eigen gegevens heeft geen strook, en `source` van `shareable` is niet meer verplicht.
   `ArchiveCredit` bestaat niet meer.
   Onder een verslag staat alleen "Bron: <naam>." als het verslag een bron buiten ons heeft, zoals een krant, en "Bron: onze redactie." op de pagina van een speler is weg.
+  Bij meer dan tien artikelen staan de artikelen van een seizoen op één regel ("2024/25: Eredivisie, KNVB Beker"), zodat de lijst niet langer wordt dan de pagina.
+  De link houdt zijn volledige naam voor een schermlezer.
   Onze bronnen heeft de kaart "Wedstrijden, standen en spelers" (anker `wedstrijden-en-spelers`), en Over ons linkt ernaartoe.
 - **Waarom:** de projecteigenaar wil de uitklap met de korte regel houden.
   De licentie (CC BY-SA 4.0) vraagt een redelijke vermelding met link, de maker, de licentie en de melding dat we bewerkten (art. 3(a)), en de uitklap doet dat al, één keer per pagina.

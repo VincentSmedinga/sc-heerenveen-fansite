@@ -12,9 +12,13 @@ const archiveName = 'sc Heerenveen Fansite'
 const editedSentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
 
 /** The licence of Wikipedia and of our own match data. */
+/** What the fold says before the link to Wikidata. */
 const wikidataSentence = 'Enkele spelers komen van'
 
 const licenceHref = 'https://creativecommons.org/licenses/by-sa/4.0/deed.nl'
+
+/** Above this many pages the list gathers the pages of a season on one line. */
+const groupFrom = 10
 
 export type WikipediaCreditPage = {
   /** The address of the page on Wikipedia. */
@@ -91,6 +95,26 @@ type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentProps
 }
 
 /**
+ * The pages grouped by the season their name ends with, in the order of the first page of each
+ * season: `Eredivisie 2024/25` and `KNVB Beker 2024/25` become `2024/25` with `Eredivisie` and
+ * `KNVB Beker`. It is undefined when a name has no season to end with, so the list stays flat.
+ */
+function bySeason(pages: readonly WikipediaCreditPage[]) {
+  const seasons = new Map<string, { label: string; page: WikipediaCreditPage }[]>()
+
+  for (const page of pages) {
+    const [, label, season] = /^(.*\S) (\d{4}\/\d{2})$/u.exec(page.name) ?? []
+
+    if (label === undefined || season === undefined) {
+      return undefined
+    }
+    seasons.set(season, [...(seasons.get(season) ?? []), { label, page }])
+  }
+
+  return [...seasons]
+}
+
+/**
  * The credit for data from Wikipedia. The full form is a `details` that is closed: it says
  * "Bron: Wikipedia", and one click or press shows the licence (CC BY-SA 4.0), a link to each
  * page the data comes from, the time of the last reading when it is known, and a sentence that
@@ -136,12 +160,26 @@ export const WikipediaCredit = ({
       </summary>
       <p>
         Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
-        {pages.map((page, index) => (
-          <span key={page.href}>
-            {index > 0 ? ', ' : ''}
-            <Link href={page.href}>{page.name}</Link>
+        {(pages.length > groupFrom ? bySeason(pages) : undefined)?.map(([season, group], index) => (
+          <span key={season}>
+            {index > 0 ? '; ' : ''}
+            {season}:{' '}
+            {group.map(({ label, page }, position) => (
+              <span key={page.href}>
+                {position > 0 ? ', ' : ''}
+                <Link aria-label={page.name} href={page.href}>
+                  {label}
+                </Link>
+              </span>
+            ))}
           </span>
-        ))}
+        )) ??
+          pages.map((page, index) => (
+            <span key={page.href}>
+              {index > 0 ? ', ' : ''}
+              <Link href={page.href}>{page.name}</Link>
+            </span>
+          ))}
         .
         {readAt === undefined ? null : (
           <>

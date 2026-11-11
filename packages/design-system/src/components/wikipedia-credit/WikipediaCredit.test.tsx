@@ -114,6 +114,30 @@ describe('WikipediaCredit', () => {
     expect(container.firstElementChild?.id).toBe('bron')
   })
 
+  it('gathers the pages of a season on one line above ten pages, each link keeping its full name', () => {
+    const season = (start: number) => `${start}/${String(start + 1).slice(-2)}`
+    const pages = Array.from({ length: 6 }, (_, index) => season(2020 + index)).flatMap((name) => [
+      { href: `https://nl.wikipedia.org/wiki/E_${name}`, name: `Eredivisie ${name}` },
+      { href: `https://nl.wikipedia.org/wiki/K_${name}`, name: `KNVB Beker ${name}` },
+    ])
+    const { container } = render(<WikipediaCredit {...props} pages={[pages[0]!, ...pages.slice(1)]} />)
+    const text = container.querySelector('details p')?.textContent ?? ''
+
+    expect(text).toContain('Pagina’s: 2020/21: Eredivisie, KNVB Beker; 2021/22: Eredivisie, KNVB Beker;')
+    expect(screen.getAllByRole('link', { name: 'KNVB Beker 2025/26' })).toHaveLength(1)
+    expect(container.querySelectorAll('details p a')).toHaveLength(13)
+  })
+
+  it('keeps a flat list for ten pages or fewer, and for names without a season', () => {
+    const flat = Array.from({ length: 11 }, (_, index) => ({
+      href: `https://nl.wikipedia.org/wiki/P${index}`,
+      name: `Pagina ${index}`,
+    }))
+    const { container } = render(<WikipediaCredit {...props} pages={[flat[0]!, ...flat.slice(1)]} />)
+
+    expect(container.querySelector('details p')?.textContent).toContain('Pagina 0, Pagina 1, Pagina 2')
+  })
+
   it('says in the fold that the editors entered some of the data, and only then', () => {
     const { container, rerender } = render(<WikipediaCredit {...props} pages={[standings]} />)
 

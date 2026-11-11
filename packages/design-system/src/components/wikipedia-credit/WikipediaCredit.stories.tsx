@@ -26,6 +26,7 @@ const meta = preview.meta({
           '',
           "- `pages` zijn de pagina's van Wikipedia waar de gegevens vandaan komen, minstens één.",
           '  Elke pagina heeft een `name` voor de link en een `href`.',
+          '  Bij meer dan tien pagina\'s die op een seizoen eindigen, staan de pagina\'s van één seizoen op één regel, zoals "2024/25: Eredivisie, KNVB Beker".',
           '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
           '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
           '- `archive` noemt ook de sc Heerenveen Fansite, voor een pagina met wedstrijden van Wikipedia en van de sc Heerenveen Fansite.',
