@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
@@ -363,46 +363,6 @@ test.describe('the bar under the header of /cijfers', () => {
   })
 })
 
-/**
- * Clicks a link of the bar under the header and waits until the address has its hash and the
- * row of the bar has stopped moving. A click makes its link the current one, and the row then
- * scrolls smoothly to put that link first. A click in the next 100 milliseconds finds the links
- * moving under the pointer: the mouse goes down on one link and up on the row, which is no
- * click, and the address stays on the hash before. A test clicks faster than a visitor does.
- * The link that was clicked tells when the row is still, and not a fixed time: it keeps its
- * place for five frames in a row.
- */
-async function follow(page: Page, name: string, hash: string) {
-  const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
-  const link = bar.getByRole('link', { name })
-
-  await link.click()
-  await expect(page).toHaveURL(new RegExp(`#${hash}$`))
-  await expect(link).toHaveAttribute('aria-current', 'location')
-  await link.evaluate(
-    (element) =>
-      new Promise<void>((resolve) => {
-        let still = 0
-        let left = element.getBoundingClientRect().left
-
-        const frame = () => {
-          const now = element.getBoundingClientRect().left
-
-          still = now === left ? still + 1 : 0
-          left = now
-
-          if (still >= 5) {
-            resolve()
-          } else {
-            requestAnimationFrame(frame)
-          }
-        }
-
-        requestAnimationFrame(frame)
-      }),
-  )
-}
-
 // The page Spelers has four cards and, for a season with a match report that is klaar (the seed
 // makes up one for the current season), three more, so its bar has seven links or four. It is
 // gone from 52rem on, like the other bars, because the cards then sit in the main column and
@@ -417,16 +377,50 @@ test.describe('the bar under the header of /spelers', () => {
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
       await expect(bar.getByRole('link')).toHaveCount(7)
-      await follow(page, 'Selectie', 'selectie')
-      await follow(page, 'Alle spelers', 'alle-spelers')
-      await follow(page, 'Doelpuntenmakers', 'doelpuntenmakers')
-      await follow(page, 'Sinds 1990/91', 'sinds-1990-91')
-      await follow(page, 'Bijzondere doelpunten', 'bijzondere-doelpunten')
-      await follow(page, 'Assists', 'assists')
-      await follow(page, 'Minuten', 'minuten')
+      await bar.getByRole('link', { name: 'Selectie' }).click()
+      await expect(page).toHaveURL(/#selectie$/)
+      await bar.getByRole('link', { name: 'Alle spelers' }).click()
+      await expect(page).toHaveURL(/#alle-spelers$/)
+      await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
+      await expect(page).toHaveURL(/#doelpuntenmakers$/)
+      await bar.getByRole('link', { name: 'Sinds 1990/91' }).click()
+      await expect(page).toHaveURL(/#sinds-1990-91$/)
+      await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
+      await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
+      await bar.getByRole('link', { name: 'Assists' }).click()
+      await expect(page).toHaveURL(/#assists$/)
+      await bar.getByRole('link', { name: 'Minuten' }).click()
+      await expect(page).toHaveURL(/#minuten$/)
       expect(await checkPage(page)).toEqual([])
     })
   }
+
+  test('brings every click on a link in the bar to the page, also right after another', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/spelers')
+
+    const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+
+    // Forwards, then back and forth: each click follows the one before without a pause, while
+    // the row of the bar is still scrolling the link of that click to its start.
+    for (const [name, hash] of [
+      ['Selectie', 'selectie'],
+      ['Alle spelers', 'alle-spelers'],
+      ['Doelpuntenmakers', 'doelpuntenmakers'],
+      ['Sinds 1990/91', 'sinds-1990-91'],
+      ['Bijzondere doelpunten', 'bijzondere-doelpunten'],
+      ['Assists', 'assists'],
+      ['Minuten', 'minuten'],
+      ['Assists', 'assists'],
+      ['Sinds 1990/91', 'sinds-1990-91'],
+      ['Selectie', 'selectie'],
+      ['Minuten', 'minuten'],
+      ['Alle spelers', 'alle-spelers'],
+    ] as const) {
+      await bar.getByRole('link', { name }).click()
+      await expect(page).toHaveURL(new RegExp(`#${hash}$`))
+    }
+  })
 
   test('is gone, also for a screen reader, from 52rem on, and is there one pixel under it', async ({ page }) => {
     for (const [width, bar] of [

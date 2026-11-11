@@ -419,6 +419,65 @@ describe('the row of followPage', () => {
     expect(scrollTo).toHaveBeenCalledTimes(1)
   })
 
+  describe('a press that the row or the page moves away from', () => {
+    /** A press and a release of a pointer, as the browser sends them, at a place. */
+    const press = (
+      down: HTMLElement,
+      up: HTMLElement,
+      options: { pointerType?: string; upAt?: [number, number] } = {},
+    ) => {
+      const event = (type: string, x: number, y: number) =>
+        Object.assign(new Event(type, { bubbles: true }), {
+          button: 0,
+          clientX: x,
+          clientY: y,
+          pointerType: options.pointerType ?? 'mouse',
+        })
+
+      down.dispatchEvent(event('pointerdown', 40, 20))
+      up.dispatchEvent(event('pointerup', ...(options.upAt ?? [40, 20])))
+    }
+
+    it('counts as a click on the link when the mouse or a pen comes up at the same place on something else', () => {
+      for (const pointerType of ['mouse', 'pen']) {
+        const { link } = setUp()
+        const click = vi.spyOn(link('uitslagen'), 'click')
+
+        press(link('uitslagen'), document.body, { pointerType })
+
+        expect(click).toHaveBeenCalledOnce()
+      }
+    })
+
+    it('is no click when the pointer comes up on the same link, as the browser sends that click itself', () => {
+      const { link } = setUp()
+      const click = vi.spyOn(link('uitslagen'), 'click')
+
+      press(link('uitslagen'), link('uitslagen'))
+
+      expect(click).not.toHaveBeenCalled()
+    })
+
+    it('is no click when the pointer was dragged to another place, or was a finger', () => {
+      const { link } = setUp()
+      const click = vi.spyOn(link('uitslagen'), 'click')
+
+      press(link('uitslagen'), document.body, { upAt: [60, 20] })
+      press(link('uitslagen'), document.body, { pointerType: 'touch' })
+
+      expect(click).not.toHaveBeenCalled()
+    })
+
+    it('is no click when the press was not on a link', () => {
+      const { link, row } = setUp()
+      const click = vi.spyOn(link('uitslagen'), 'click')
+
+      press(row, document.body)
+
+      expect(click).not.toHaveBeenCalled()
+    })
+  })
+
   it('does not scroll the row when the finger lifts and the current link did not change', () => {
     const { row, scrollTo } = setUp()
 

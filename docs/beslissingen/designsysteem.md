@@ -3300,6 +3300,23 @@
 - **Waarom:** de tabel Per seizoen van een speler moet laten zien dat hij tussen twee periodes weg was, zonder dat het teken voorgelezen wordt.
 - **Alternatieven:** de rij met `marker` en `note` maken (de kop is dan zichtbaar en moet uniek zijn); een rij met een kop "weg" (zegt niet waarvan).
 
+## Een klik op een link in de balk komt altijd aan
+
+- **Datum:** 11 november 2026
+- **Besluit:** `followPage` laat een druk met de muis of een pen op een link van de balk "Op deze pagina:" die op dezelfde plek eindigt, maar op iets anders, tellen als een klik op die link (#1126).
+  Bij het indrukken onthoudt het de link en de plek; komt de aanwijzer binnen een pixel van die plek omhoog en niet op die link, dan roept het `click()` van die link aan.
+  Een vinger, een andere knop dan de eerste en een aanwijzer die onderweg is verplaatst, tellen niet: dat is een tik met zijn eigen regels (`onTouch`) of een sleep.
+  - **Waarom het zo kon misgaan:** na een klik schuift de pagina zacht naar de kop en de rij zacht naar de link, en een tweede klik binnen die beweging zag de link onder de aanwijzer wegschuiven (of de balk, als die nog niet plakt).
+    De muis ging neer op de link en kwam omhoog op het vlak ernaast, en dan stuurt de browser geen klik: het adres bleef bij de vorige link en er gebeurde niets.
+    Het is gemeten in Google Chrome met 12 testprocessen naast elkaar: 4 mislukkingen in 300 reeksen van klikken voor de wijziging, en 0 in 600 erna.
+  - **Wat niet werkte:** de beweging stoppen bij het indrukken, met een `scrollTo` naar de plek waar de rij en de pagina nu zijn.
+    Dat stopt een beweging die loopt, maar niet een die net begint: er bleven 2 mislukkingen in 300 en 4 in 600 reeksen.
+    Dat een beweging van de pagina te laat stopt, is niet te voorkomen, dus de klik volgt de druk, niet de beweging.
+  - **Wat gelijk blijft:** de rij schuift nog steeds niet terwijl een vinger erop ligt of een link de focus van het toetsenbord heeft, en onder `prefers-reduced-motion` springt hij.
+    De balk brengt de huidige link nog in beeld als de pagina zelf scrolt.
+- **Waarom:** een klik die soms niet aankomt, is slechter dan een beweging die iets minder rustig is, en alleen de klik zelf is zeker.
+- **Alternatieven:** de rij niet laten schuiven zolang de aanwijzer erboven staat (de balk volgt de pagina dan niet meer bij het scrollen met het wiel, en de pagina beweegt nog); de beweging van de pagina uitzetten (de bezoeker ziet dan een sprong in plaats van een rustige beweging).
+
 ## Een gedeelde plaats in een ranglijst toont het nummer één keer en daarna een beletselteken
 
 - **Datum:** 11 november 2026

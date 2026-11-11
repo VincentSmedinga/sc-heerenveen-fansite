@@ -106,6 +106,12 @@ for (const { admin, after, anchor, bar, from, group, path, to } of switches) {
       const status = choices.locator('xpath=following-sibling::p[@role="status"]')
       const title = await page.title()
       const content = await contentOf(page)
+
+      // The menu marks the page the visitor is on. The item Beheer is added by script after
+      // hydrating (see SiteNavigation), so on /beheer/berichten the menu has no mark until
+      // then, and a baseline taken before it would differ from the menu after the click.
+      await expect(menu(page).locator('[aria-current]').first()).toBeAttached()
+
       const currents = await currentsOfMenu(page)
       const canonical = await page
         .locator('link[rel="canonical"]')
