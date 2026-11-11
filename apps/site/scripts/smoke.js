@@ -1326,7 +1326,7 @@ await withEmptyDatabase((database) =>
         '#selectie',
         '#alle-spelers',
         '#doelpuntenmakers',
-        '#alle-tijden',
+        '#sinds-1990-91',
         '#bijzondere-doelpunten',
         '#assists',
         '#minuten',
@@ -1370,13 +1370,13 @@ await withEmptyDatabase((database) =>
     assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
     assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
     assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
-    // The card Alle tijden is under Doelpuntenmakers, soft, with a button for an image. It says
+    // The card Sinds … is under Doelpuntenmakers, soft, with a button for an image. It says
     // from which season it counts, and it counts the made-up season with the cup.
-    const allTimeCard = /<section[^>]*aria-labelledby="alle-tijden">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
-    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="alle-tijden"'))
-    assert.ok(playersHtml.indexOf('id="alle-tijden"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
+    const allTimeCard = /<section[^>]*aria-labelledby="sinds-1990-91">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="sinds-1990-91"'))
+    assert.ok(playersHtml.indexOf('id="sinds-1990-91"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
     assert.match(allTimeCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
-    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ''), /Sinds \d{4}\/\d{2}\./)
+    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ''), /Sinds \d{4}\/\d{2}/)
     assert.match(
       allTimeCard,
       /<caption class="hf-visually-hidden">De top 10 van de doelpuntenmakers van sc Heerenveen sinds /,

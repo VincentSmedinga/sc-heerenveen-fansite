@@ -47,8 +47,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
-  // list, the only place it is (#774). The old anchor topscorers comes along. The card
-  // Alle tijden (#780) follows it, and the card Bijzondere doelpunten (#403) is under that. The
+  // list, the only place it is (#774). The old anchor topscorers comes along. The card Sinds
+  // 1990/91 (#780) follows it, and the card Bijzondere doelpunten (#403) is under that. The
   // cards Alle spelers, Assists and Minuten (#832) are there for a season with a match report
   // that is klaar, which the made-up season has.
   '/spelers': [
@@ -56,7 +56,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'alle-spelers',
     'doelpuntenmakers',
     'topscorers',
-    'alle-tijden',
+    'sinds-1990-91',
     'bijzondere-doelpunten',
     'assists',
     'minuten',
