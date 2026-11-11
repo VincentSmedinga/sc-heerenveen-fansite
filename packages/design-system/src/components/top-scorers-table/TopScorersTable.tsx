@@ -13,6 +13,8 @@ export type TopScorersTablePlayer = {
    * writes it, because it knows the matches. Only shown with `showGoalsPerMatch`.
    */
   goalsPerMatch?: string | undefined
+  /** The page of the player: his name is then a link (see `PlayerName`). */
+  href?: string | undefined
   /** What tells the player from the others, such as his id: the first is the key of the row. */
   id: number | string
   /** The surname of the player, in the stronger weight (see `PlayerName`). */
@@ -137,7 +139,7 @@ export const TopScorersTable = ({
               <th scope="row">
                 {row.players.map((player, place) => (
                   <Fragment key={player.id}>
-                    <PlayerName givenName={player.givenName} surname={player.surname} />
+                    <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
                     {place === row.players.length - 1 ? null : ', '}
                   </Fragment>
                 ))}

@@ -23,6 +23,11 @@ const meta = preview.meta({
       control: 'text',
       description: 'De voornaam, in het gewone gewicht. Laat hem weg bij een speler met één naam.',
     },
+    href: {
+      control: 'text',
+      description:
+        'De pagina van de speler. Met een adres is de hele naam één link, met de vlag erin als versiering, zodat de link alleen de naam als naam heeft. Het rugnummer blijft buiten de link. Laat hem weg bij een speler zonder pagina: de naam is dan gewone tekst.',
+    },
     shirtNumber: {
       control: 'number',
       description:
@@ -92,6 +97,57 @@ export const InLink = meta.story({
         <Link href="#van-aken">
           <PlayerName givenName="Joost" surname="van Aken" />
         </Link>
+      </List.Item>
+    </List>
+  ),
+})
+
+export const AsLink = meta.story({
+  name: 'Als link naar de pagina van de speler',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Met `href` is de hele naam één link, ook met rugnummer en vlag: de vlag staat in de link als versiering en het rugnummer ernaast. Een speler zonder pagina blijft gewone tekst.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName givenName="Testspeler" href="#een" surname="Een" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="NL" givenName="Testspeler" href="#twee" shirtNumber={4} surname="van Twee" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="KZ" givenName="Testspeler" href="#drie" shirtNumber={30} surname="Drie" />
+        </List.Item>
+        <List.Item>
+          <PlayerName
+            country="DK"
+            givenName="Jan van der Voorbeeldstraat"
+            href="#lang"
+            shirtNumber={39}
+            surname="Proefmans-Van Nepperveldhuizen"
+          />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="NL" givenName="Testspeler" shirtNumber={7} surname="Zonder pagina" />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})
+
+export const AsLinkDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Als link, donker',
+  render: () => (
+    <List role="list">
+      <List.Item>
+        <PlayerName country="NL" givenName="Testspeler" href="#twee" shirtNumber={4} surname="van Twee" />
       </List.Item>
     </List>
   ),

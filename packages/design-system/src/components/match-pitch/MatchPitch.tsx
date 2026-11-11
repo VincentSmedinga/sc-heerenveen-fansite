@@ -67,6 +67,7 @@ function Roster({ headingLevel, team }: { headingLevel: Exclude<HeadingLevel, 1>
           <li key={player.shirtNumber ?? `no-number-${index}`}>
             <PlayerName
               givenName={player.name.givenName}
+              href={player.name.href}
               shirtNumber={numbered ? player.shirtNumber : undefined}
               surname={player.name.surname}
             >

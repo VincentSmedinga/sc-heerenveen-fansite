@@ -5,6 +5,7 @@ import { oldSiteReportSource } from '@fansite/db/schema'
 
 import type { MatchPageData } from './match-page'
 
+import { playerHref } from './player-address'
 import { type NameParts, personNameParts } from './player-name'
 
 // What the page of a match shows, taken from a report that has passed the rules: the plain data
@@ -109,6 +110,12 @@ export function matchPageDataOf(
  * no parts of, is one name in the normal weight: nothing is guessed.
  */
 export function nameOfPlayer(name: string, known: ReportedPlayerName | undefined): MatchPlayerName {
+  const href = playerHref(known?.slug)
+
+  return { ...partsOfPlayer(name, known), ...(href === undefined ? {} : { href }) }
+}
+
+function partsOfPlayer(name: string, known: ReportedPlayerName | undefined): MatchPlayerName {
   if (known === undefined) {
     return { givenName: name, surname: '' }
   }

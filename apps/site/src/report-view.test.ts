@@ -12,21 +12,28 @@ describe('nameOfPlayer', () => {
         familyNamePrefix: 'ten',
         givenName: 'Ruben',
         searchTerm: 'ten Hove',
+        slug: null,
       }),
     ).toEqual({ givenName: 'Ruben', surname: 'ten Hove' })
   })
 
   it('takes the search term as the surname when there is no person, and the rest as the given name', () => {
-    const known = { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'van der Kooi' }
+    const known = { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'van der Kooi', slug: null }
 
     expect(nameOfPlayer('Jurre van der Kooi', known)).toEqual({ givenName: 'Jurre', surname: 'van der Kooi' })
-    expect(nameOfPlayer('Dinho', { ...known, searchTerm: 'Dinho' })).toEqual({ surname: 'Dinho' })
+    expect(nameOfPlayer('Dinho', { ...known, searchTerm: 'Dinho', slug: null })).toEqual({ surname: 'Dinho' })
   })
 
   it('shows a name it can not split, and the name of an opponent, as one name in the normal weight', () => {
     expect(nameOfPlayer('Jan Bank', undefined)).toEqual({ givenName: 'Jan Bank', surname: '' })
     expect(
-      nameOfPlayer('Jan Bank', { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Vos' }),
+      nameOfPlayer('Jan Bank', {
+        familyName: null,
+        familyNamePrefix: null,
+        givenName: null,
+        searchTerm: 'Vos',
+        slug: null,
+      }),
     ).toEqual({ givenName: 'Jan Bank', surname: '' })
   })
 })
@@ -43,8 +50,8 @@ describe('matchPageDataOf', () => {
   })
 
   it('names the players in two parts, for ours from what the importer kept and for the opponent as one name', () => {
-    expect(data.players[0]?.name).toEqual({ givenName: 'Tjerk', surname: 'Brandsma' })
-    expect(data.players[3]?.name).toEqual({ givenName: 'Ruben', surname: 'ten Hove' })
+    expect(data.players[0]?.name).toEqual({ givenName: 'Tjerk', href: '/spelers/tjerk-brandsma', surname: 'Brandsma' })
+    expect(data.players[3]?.name).toEqual({ givenName: 'Ruben', href: '/spelers/ruben-ten-hove', surname: 'ten Hove' })
     expect(data.players.find((player) => player.id === 103)?.name).toEqual({
       givenName: 'Dirk Proefland',
       surname: '',

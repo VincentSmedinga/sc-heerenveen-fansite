@@ -23,6 +23,12 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
   /** The given name, in the normal weight. Leave it out for a player known by one name. */
   givenName?: string | undefined
   /**
+   * The page of the player. With an address the whole name is one link, and the flag stands in
+   * the link as decoration, so the link is named by the name alone. The shirt number stays
+   * outside it. Leave it out for a player without a page: the name is plain text.
+   */
+  href?: string | undefined
+  /**
    * The shirt number, in a column before the name. `null` is a player without one in a list
    * where others have one: the column stays empty, so the names of the lines still start at the
    * same place. Leave it out in a list where nobody has a number, and the name has no column.
@@ -58,6 +64,7 @@ export const PlayerName = ({
   className,
   country,
   givenName,
+  href,
   shirtNumber,
   surname,
   ...props
@@ -83,13 +90,38 @@ export const PlayerName = ({
   if (shirtNumber === undefined && country === undefined) {
     return (
       <span {...props} className={classNames('hf-player-name', className)}>
-        {name}
+        {href === undefined ? name : <a href={href}>{name}</a>}
       </span>
     )
   }
 
   const address = country === undefined || country === null ? undefined : flagAddress(country)
   const label = country === undefined || country === null ? undefined : countryName(country)
+
+  const decorative = href !== undefined
+  const flag =
+    country === undefined ? null : address === undefined ? (
+      country !== null && label !== undefined && isCodeOnly(country) ? (
+        <>
+          <span
+            aria-hidden={decorative ? true : undefined}
+            aria-label={decorative ? undefined : label}
+            className="hf-player-name-flag hf-player-name-code"
+            role={decorative ? undefined : 'img'}
+          >
+            {country.toUpperCase()}
+          </span>
+          {decorative ? null : ' '}
+        </>
+      ) : (
+        <span className="hf-player-name-flag" />
+      )
+    ) : (
+      <>
+        <img alt={decorative ? '' : label} className="hf-player-name-flag" height={15} src={address} width={20} />
+        {decorative ? null : ' '}
+      </>
+    )
 
   return (
     <span {...props} className={classNames('hf-player-name', 'hf-player-name-numbered', className)}>
@@ -99,22 +131,17 @@ export const PlayerName = ({
           {shirtNumber === null ? null : ' '}
         </>
       )}
-      {country === undefined ? null : address === undefined ? (
-        country !== null && label !== undefined && isCodeOnly(country) ? (
-          <>
-            <span aria-label={label} className="hf-player-name-flag hf-player-name-code" role="img">
-              {country.toUpperCase()}
-            </span>{' '}
-          </>
-        ) : (
-          <span className="hf-player-name-flag" />
-        )
-      ) : (
+      {href === undefined ? (
         <>
-          <img alt={label} className="hf-player-name-flag" height={15} src={address} width={20} />{' '}
+          {flag}
+          <span className="hf-player-name-text">{name}</span>
         </>
+      ) : (
+        <a className="hf-player-name-link" href={href}>
+          {flag}
+          <span className="hf-player-name-text">{name}</span>
+        </a>
       )}
-      <span className="hf-player-name-text">{name}</span>
     </span>
   )
 }

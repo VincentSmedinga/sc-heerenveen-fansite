@@ -32,6 +32,7 @@ const goal = (minute: number, extra: Partial<PublicMatch['goals'][number]> = {})
   personFamilyNamePrefix: null,
   personGivenName: null,
   personId: null,
+  personSlug: null,
   player: 'Proefman',
   playerId: null,
   playerPage: null,

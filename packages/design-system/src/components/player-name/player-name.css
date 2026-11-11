@@ -80,6 +80,17 @@
     overflow: hidden;
   }
 
+  /*
+   * With an address the flag and the name are one link. It is the row of flag and name the
+   * numbered name already is, so a long name still goes on under the name.
+   */
+  .hf-player-name-link {
+    column-gap: var(--hf-space-s);
+    display: flex;
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
   .hf-player-name-text {
     flex: 1 1 0;
     min-inline-size: 0;

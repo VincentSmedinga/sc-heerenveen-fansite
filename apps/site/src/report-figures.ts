@@ -1,6 +1,7 @@
 import type { PlayerReportStats } from '@fansite/db/match-reports'
 import type { PlayerFiguresRow, TopScorersTableRow } from '@fansite/design-system'
 
+import { playerHref } from './player-address'
 import { personNameParts, personSortName } from './player-name'
 
 // What the cards of the page Spelers work out from the match reports (#832): the lists of the
@@ -55,6 +56,7 @@ export function figureRows(players: readonly PlayerReportStats[]): PlayerFigures
       substituted: stats.substitutions,
       yellow: stats.yellowCards + stats.yellowRedCards,
       ...nameOf(stats),
+      ...hrefOf(stats),
     }))
 }
 
@@ -75,7 +77,7 @@ export function rankedPlaces(
 
   for (const stats of counted) {
     const position = counted.findIndex((other) => other[figure] === stats[figure]) + 1
-    const player = { id: stats.playerId, ...nameOf(stats) }
+    const player = { id: stats.playerId, ...nameOf(stats), ...hrefOf(stats) }
     const last = rows.at(-1)
 
     if (top && position > reportPlaces) {
@@ -94,6 +96,13 @@ export function rankedPlaces(
 /** Players by name: the family name without its prefix, then the whole name. */
 function byName(a: PlayerReportStats, b: PlayerReportStats) {
   return sortNameOf(a).localeCompare(sortNameOf(b), 'nl') || a.name.localeCompare(b.name, 'nl')
+}
+
+/** The page of a player of the reports, when his person has one. */
+function hrefOf(stats: PlayerReportStats) {
+  const href = playerHref(stats.personSlug)
+
+  return href === undefined ? {} : { href }
 }
 
 /** A player's name in the two parts `PlayerName` shows: his person's, else the whole name. */

@@ -46,6 +46,11 @@ export type MatchHeaderProps = MatchHeaderBase & {
 /** A goal in the list of scorers under a club. */
 export type MatchHeaderScorer = {
   /**
+   * The page of the player when he has one. The name is then a link; the minute and the marks
+   * stay outside it.
+   */
+  href?: string | undefined
+  /**
    * The minute on the clock: 45 for "45+2". Empty when nobody knows it: the list then has the
    * name alone.
    */
@@ -114,30 +119,31 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
               <span className="hf-visually-hidden">; </span>
             </>
           ) : null}
-          <span aria-hidden="true" className="hf-match-header-scorer">
-            {scorer.player}
-            {minuteOf(scorer)}
-            {scorer.ownGoal === true ? (
-              <>
-                {' '}
-                (<abbr title="eigen doelpunt">e.d.</abbr>)
-              </>
-            ) : null}
-            {scorer.penalty === true ? (
-              <>
-                {' '}
-                (<abbr title="strafschop">str.</abbr>)
-              </>
-            ) : null}
-          </span>
-          <span className="hf-visually-hidden">
-            {scorer.player}
-            {scorer.minute === null ? '' : `, minuut ${scorer.minute}`}
-            {scorer.minute === null || scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
-              ? ''
-              : ` plus ${scorer.stoppageMinutes}`}
-            {scorer.ownGoal === true ? ', eigen doelpunt' : ''}
-            {scorer.penalty === true ? ', strafschop' : ''}
+          <span className="hf-match-header-scorer">
+            {scorer.href === undefined ? scorer.player : <a href={scorer.href}>{scorer.player}</a>}
+            <span aria-hidden="true">
+              {minuteOf(scorer)}
+              {scorer.ownGoal === true ? (
+                <>
+                  {' '}
+                  (<abbr title="eigen doelpunt">e.d.</abbr>)
+                </>
+              ) : null}
+              {scorer.penalty === true ? (
+                <>
+                  {' '}
+                  (<abbr title="strafschop">str.</abbr>)
+                </>
+              ) : null}
+            </span>
+            <span className="hf-visually-hidden">
+              {scorer.minute === null ? '' : `, minuut ${scorer.minute}`}
+              {scorer.minute === null || scorer.stoppageMinutes === null || scorer.stoppageMinutes === undefined
+                ? ''
+                : ` plus ${scorer.stoppageMinutes}`}
+              {scorer.ownGoal === true ? ', eigen doelpunt' : ''}
+              {scorer.penalty === true ? ', strafschop' : ''}
+            </span>
           </span>
         </span>
       ))}

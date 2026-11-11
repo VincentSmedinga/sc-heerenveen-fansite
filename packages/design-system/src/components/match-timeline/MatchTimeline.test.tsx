@@ -259,4 +259,34 @@ describe('MatchTimeline', () => {
       expect(goal!.textContent).not.toMatch(/minuut|null/iu)
     })
   })
+
+  it('makes a name with a page a link, in the goal, the assist and the substitution, and no other', () => {
+    const { container } = render(
+      <MatchTimeline
+        events={[
+          {
+            assist: { givenName: 'Thijs', href: '/spelers/thijs-idzenga', surname: 'Idzenga' },
+            kind: 'goal',
+            minute: 12,
+            ours: true,
+            player: { givenName: 'Rick', href: '/spelers/rick-demo', surname: 'Demo' },
+            team: 'sc Heerenveen',
+          },
+          {
+            kind: 'goal',
+            minute: 30,
+            ours: false,
+            player: name('Dummydijk', 'Frank'),
+            team: 'Testdorp FC',
+          },
+        ]}
+        headingLevel={3}
+      />,
+    )
+
+    expect([...container.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual([
+      '/spelers/rick-demo',
+      '/spelers/thijs-idzenga',
+    ])
+  })
 })

@@ -242,4 +242,38 @@ describe('PlayerName with a country', () => {
     expect(container.querySelector('.hf-player-name-number')).toBeNull()
     expect(container.textContent?.trim()).toBe('Dinho')
   })
+
+  describe('with an address', () => {
+    it('makes the whole name one link, named by the name alone', () => {
+      render(<PlayerName givenName="Jakob" href="/spelers/jakob-trenskow" surname="Trenskow" />)
+
+      const link = screen.getByRole('link', { name: 'Jakob Trenskow' })
+
+      expect(link.getAttribute('href')).toBe('/spelers/jakob-trenskow')
+    })
+
+    it('has the flag in the link as decoration and the shirt number outside it', () => {
+      const { container } = render(
+        <PlayerName country="NL" givenName="Jakob" href="/spelers/jakob-trenskow" shirtNumber={9} surname="Trenskow" />,
+      )
+      const link = screen.getByRole('link', { name: 'Jakob Trenskow' })
+
+      expect(link.querySelector('img')?.getAttribute('alt')).toBe('')
+      expect(link.textContent).toBe('Jakob Trenskow')
+      expect(container.querySelector('.hf-player-name-number')?.closest('a')).toBeNull()
+    })
+
+    it('hides the code of a country without a drawing from a screen reader inside the link', () => {
+      render(<PlayerName country="KZ" givenName="Jakob" href="#x" surname="Trenskow" />)
+
+      expect(screen.getByRole('link', { name: 'Jakob Trenskow' })).toBeTruthy()
+      expect(screen.queryByRole('img')).toBeNull()
+    })
+
+    it('is plain text without one', () => {
+      render(<PlayerName givenName="Jakob" surname="Trenskow" />)
+
+      expect(screen.queryByRole('link')).toBeNull()
+    })
+  })
 })

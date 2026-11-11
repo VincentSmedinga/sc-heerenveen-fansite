@@ -22,6 +22,7 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   personFamilyNamePrefix: null,
   personGivenName: null,
   personId: null,
+  personSlug: null,
   player,
   playerId: null,
   playerPage: null,

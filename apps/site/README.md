@@ -548,7 +548,7 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 ### De spelers
 
 `/spelers` is een onderdeel van het hoofdmenu, na Wedstrijden en voor het forum, op `/spelers` en `/spelers/<seizoen>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Spelers staat in het menu na Wedstrijden_).
-Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer, de vlag van het land en de naam (een `PlayerName` met `shirtNumber` en `country`, op een regel van `ShortFact` voor de lijntjes), zonder link, in een deel per positie.
+Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer, de vlag van het land en de naam (een `PlayerName` met `shirtNumber` en `country`, op een regel van `ShortFact` voor de lijntjes), met de hele naam als link naar de pagina van de speler als die er is (`href` van `PlayerName`, het adres uit `playerHref` in `src/player-address.ts`) en anders gewone tekst, in een deel per positie.
 Het land komt uit `players.country` (#946), en anders uit `persons.country`; de positie komt uit `players.position`, en anders uit de linie van de persoon (`persons.line`, #1051).
 De tabel van de pagina Spelers in het beheer volgt dezelfde regel (#1070): de linie van de persoon staat er als "Aanvaller (linie van de persoon)".
 Een speler met een land zonder tekening in het designsysteem toont de landcode in een kader van dezelfde breedte, een speler zonder land krijgt een lege plek, en een deel waarin niemand een land heeft, heeft geen plek voor een vlag.

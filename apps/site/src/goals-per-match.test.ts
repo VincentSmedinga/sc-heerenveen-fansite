@@ -15,6 +15,7 @@ const goal = (player: string, playerId: null | number, options: Partial<Goal> = 
   personFamilyNamePrefix: null,
   personGivenName: null,
   personId: null,
+  personSlug: null,
   player,
   playerId,
   playerPage: null,

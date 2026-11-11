@@ -271,13 +271,18 @@ const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlaye
   data.goals
     .filter((goal) => goal.ours === ours && byId.has(goal.playerId))
     .toSorted(byClock)
-    .map((goal): MatchHeaderScorer => ({
-      minute: goal.minute,
-      ownGoal: goal.ownGoal,
-      penalty: goal.penalty,
-      player: shortName(byId.get(goal.playerId)?.name ?? { surname: '' }),
-      stoppageMinutes: goal.stoppageMinutes,
-    }))
+    .map((goal): MatchHeaderScorer => {
+      const name = byId.get(goal.playerId)?.name ?? { surname: '' }
+
+      return {
+        ...(name.href === undefined ? {} : { href: name.href }),
+        minute: goal.minute,
+        ownGoal: goal.ownGoal,
+        penalty: goal.penalty,
+        player: shortName(name),
+        stoppageMinutes: goal.stoppageMinutes,
+      }
+    })
 
 /** Without added time `undefined`, as the components have it. */
 const added = (stoppageMinutes: null | number) => (stoppageMinutes === null ? undefined : stoppageMinutes)

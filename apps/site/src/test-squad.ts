@@ -6,7 +6,7 @@ import type { SeasonSquad } from './season-squad'
  * the Dutch Wikipedia the list was read from. Read it next to `test-matches.ts`.
  */
 
-const noName = { personFamilyName: null, personFamilyNamePrefix: null, personGivenName: null }
+const noName = { personFamilyName: null, personFamilyNamePrefix: null, personGivenName: null, personSlug: null }
 
 export const squadData: SeasonSquad = {
   completeness: { bestSource: 'selectie', level: 'compleet', playerCount: 5 },
@@ -36,6 +36,7 @@ export const squadData: SeasonSquad = {
       personFamilyName: 'Drie',
       personFamilyNamePrefix: null,
       personGivenName: 'Proefman',
+      personSlug: null,
       position: 'middenvelder',
       searchTerm: 'Drie',
       shirtNumber: 8,

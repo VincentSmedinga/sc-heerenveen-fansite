@@ -54,6 +54,7 @@ const goal = (minute: number, player: string, more: Partial<PublicClubMatch['goa
   personFamilyNamePrefix: null,
   personGivenName: null,
   personId: null,
+  personSlug: null,
   player,
   playerId: null,
   playerPage: null,

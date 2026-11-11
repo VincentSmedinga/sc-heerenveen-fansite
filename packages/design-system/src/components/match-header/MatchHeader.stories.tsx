@@ -77,6 +77,38 @@ export const Default = meta.story({
   name: 'Een wedstrijd van 90 minuten',
 })
 
+const scorersWithPages = {
+  facts,
+  goalsAgainst: 1,
+  goalsFor: 2,
+  home: true,
+  opponent: 'Testdorp FC',
+  scorersAgainst: [{ minute: 80, player: 'Dummydijk' }],
+  scorersFor: [
+    { href: '#hoekstra', minute: 12, player: 'Hoekstra' },
+    { href: '#wiersma', minute: 58, penalty: true, player: 'Wiersma' },
+  ],
+}
+
+export const ScorersWithPages = meta.story({
+  args: scorersWithPages,
+  name: 'Doelpuntenmakers van ons met een pagina zijn een link',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een speler van ons met een pagina heeft `href`: zijn naam is een link, de minuut en het merkje staan erbuiten. Een speler van de tegenstander blijft gewone tekst.',
+      },
+    },
+  },
+})
+
+export const ScorersWithPagesDark = meta.story({
+  args: scorersWithPages,
+  globals: { theme: 'dark' },
+  name: 'Doelpuntenmakers met een pagina, donker',
+})
+
 export const AfterExtraTime = meta.story({
   args: {
     afterNinetyAgainst: 1,

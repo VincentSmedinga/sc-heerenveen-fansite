@@ -10,6 +10,11 @@ import { halfOf, type MatchHalf, matchHalves } from './halves'
 export type MatchPlayerName = {
   /** The given name. Leave it out for a player known by one name. */
   givenName?: string | undefined
+  /**
+   * The page of the player when he has one: the name is then a link. A player of the opponent,
+   * or a name without a person, has none and stays plain text.
+   */
+  href?: string | undefined
   /** The surname. Empty for a name that cannot be split: it is then in `givenName`. */
   surname: string
 }
@@ -109,7 +114,9 @@ const blockNames: Record<MatchHalf, string> = {
   unknown: 'Minuut onbekend',
 }
 
-const Name = ({ name }: { name: MatchPlayerName }) => <PlayerName givenName={name.givenName} surname={name.surname} />
+const Name = ({ name }: { name: MatchPlayerName }) => (
+  <PlayerName givenName={name.givenName} href={name.href} surname={name.surname} />
+)
 
 function iconKind(event: MatchTimelineEvent): MatchEventIconKind {
   if (event.kind === 'goal') {

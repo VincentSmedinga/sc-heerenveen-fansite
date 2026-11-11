@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { MatchHeader, type MatchHeaderProps } from './MatchHeader'
@@ -17,6 +17,24 @@ const props: MatchHeaderProps = {
 
 const names = (container: HTMLElement) =>
   [...container.querySelectorAll('.hf-match-header-name')].map((name) => name.textContent)
+
+/** What the eye reads of an element: the text without what is for a screen reader only. */
+const seen = (element: Element) => {
+  const copy = element.cloneNode(true) as Element
+
+  copy.querySelectorAll('.hf-visually-hidden').forEach((part) => part.remove())
+
+  return copy.textContent
+}
+
+/** What a screen reader reads of an element: the text without what is hidden from it. */
+const heard = (element: Element) => {
+  const copy = element.cloneNode(true) as Element
+
+  copy.querySelectorAll('[aria-hidden]').forEach((part) => part.remove())
+
+  return copy.textContent
+}
 
 const text = (container: HTMLElement, selector: string) => container.querySelector(selector)?.textContent
 
@@ -55,13 +73,10 @@ describe('MatchHeader', () => {
         scorersFor={[{ minute: null, ownGoal: true, player: 'Demo' }]}
       />,
     )
-    const seen = [...container.querySelectorAll('.hf-match-header-scorer')].map((scorer) => scorer.textContent)
-    const heard = [...container.querySelectorAll('.hf-match-header-scorers .hf-visually-hidden')]
-      .map((scorer) => scorer.textContent)
-      .filter((scorer) => !scorer.startsWith('Doelpunten'))
+    const scorers = [...container.querySelectorAll('.hf-match-header-scorer')]
 
-    expect(seen).toEqual(['Demo (e.d.)', 'Dummydijk'])
-    expect(heard).toEqual(['Demo, eigen doelpunt', 'Dummydijk'])
+    expect(scorers.map((scorer) => seen(scorer))).toEqual(['Demo (e.d.)', 'Dummydijk'])
+    expect(scorers.map((scorer) => heard(scorer))).toEqual(['Demo, eigen doelpunt', 'Dummydijk'])
   })
 
   it('shows the goals of each club beside its name, for a narrow place', () => {
@@ -154,13 +169,12 @@ describe('MatchHeader', () => {
     )
     const lists = [...container.querySelectorAll('.hf-match-header-scorers')]
 
-    expect(lists.map((list) => list.querySelector('[aria-hidden]')?.textContent)).toEqual([
+    expect(lists.map((list) => seen(list.querySelector('.hf-match-header-scorer')!))).toEqual([
       'Hoekstra 12’',
       'Wiersma 80’',
     ])
-    expect([...lists[0]!.querySelectorAll('[aria-hidden]')].map((part) => part.textContent)).toEqual([
+    expect([...lists[0]!.querySelectorAll('.hf-match-header-scorer')].map((part) => seen(part))).toEqual([
       'Hoekstra 12’',
-      ' · ',
       'Demo 45+2’',
     ])
   })
@@ -177,15 +191,33 @@ describe('MatchHeader', () => {
     )
     const list = container.querySelector('.hf-match-header-scorers')!
 
-    expect(list.textContent).toContain('Wiersma 58’ (str.)')
-    expect(list.textContent).toContain('Proefveld 70’ (e.d.)')
+    expect(seen(list)).toContain('Wiersma 58’ (str.)')
+    expect(seen(list)).toContain('Proefveld 70’ (e.d.)')
     expect([...list.querySelectorAll('abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
       'strafschop',
       'eigen doelpunt',
     ])
-    expect(list.textContent).toContain('Wiersma, minuut 58, strafschop')
-    expect(list.textContent).toContain('Proefveld, minuut 70, eigen doelpunt')
+    expect(heard(list)).toContain('Wiersma, minuut 58, strafschop')
+    expect(heard(list)).toContain('Proefveld, minuut 70, eigen doelpunt')
     expect(list.textContent).toContain('Doelpunten sc Heerenveen: ')
+  })
+
+  it('makes the name of a scorer with a page a link, and leaves the minute and the marks outside it', () => {
+    render(
+      <MatchHeader
+        {...props}
+        scorersFor={[
+          { href: '/spelers/wiersma', minute: 58, penalty: true, player: 'Wiersma' },
+          { minute: 70, player: 'Proefveld' },
+        ]}
+      />,
+    )
+
+    const link = screen.getByRole('link', { name: 'Wiersma' })
+
+    expect(link.getAttribute('href')).toBe('/spelers/wiersma')
+    expect(link.textContent).toBe('Wiersma')
+    expect(screen.getAllByRole('link')).toHaveLength(1)
   })
 
   it('shows no line of scorers for a club without goals or without a list', () => {

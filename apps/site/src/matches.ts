@@ -31,6 +31,7 @@ import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
 import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
+import { playerHref } from './player-address'
 import { type NameParts, personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
 
 /** The name of our own club in the table. */
@@ -467,6 +468,8 @@ export type Streaks = {
  */
 export type TopScorer = NameParts & {
   goals: number
+  /** The page of the player (see `goalHref`), absent when he has none. */
+  href?: string | undefined
   id: string
   player: string
   position: number
@@ -1370,6 +1373,8 @@ export type AttendanceSlot<T extends AttendanceMatch = PublicMatch> = {
 
 /** A player who scored three or more goals in a match, or two, and how often it happened. */
 export type MultiGoalScorer = NameParts & {
+  /** The page of the player (see `goalHref`). */
+  href?: string | undefined
   /** What tells the player from the others, as in `TopScorer`. */
   id: string
   player: string
@@ -1439,18 +1444,28 @@ export function keyOf(goal: ScorerGoal): string {
  * the importer kept of the person. A goal without a person (no article, or not looked up yet)
  * has only the name of the match page, which `splitPersonName` splits.
  */
-export function scorerLine(goal: ScorerGoal): NameParts & { player: string } {
+export function scorerLine(goal: ScorerGoal): NameParts & { href?: string | undefined; player: string } {
   const parts = personNameParts(goal)
+  const href = goalHref(goal)
 
   if (parts === undefined) {
-    return { player: goal.player, ...splitPersonName(goal.player) }
+    return { player: goal.player, ...splitPersonName(goal.player), ...(href === undefined ? {} : { href }) }
   }
 
   return {
     player: [parts.givenName, parts.surname].filter((part) => part !== undefined && part !== '').join(' '),
     ...parts,
+    ...(href === undefined ? {} : { href }),
   }
 }
+
+/**
+ * The page of the player of a goal of sc Heerenveen: only one of our own goals has one, as only
+ * one of our players has a page. A goal of the opponent, and a goal without a person with a
+ * page, has none, so the name stays plain text.
+ */
+export const goalHref = (goal: Pick<ScorerGoal, 'ours' | 'personSlug'>) =>
+  goal.ours ? playerHref(goal.personSlug) : undefined
 
 /**
  * The scorers per place, for the short forms of the table, so players with the same goals share
