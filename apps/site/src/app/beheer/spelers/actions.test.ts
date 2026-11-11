@@ -1,7 +1,16 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, auditLog, matches, matchGoals, persons, players } from '@fansite/db/schema'
+import {
+  adminUsers,
+  auditLog,
+  matchAppearances,
+  matches,
+  matchGoals,
+  matchReports,
+  persons,
+  players,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -268,6 +277,26 @@ describe('submitPlayer', () => {
       values: { rugnummer: 'tien' },
     })
     expect(await stored()).toMatchObject([{ shirtNumber: 14 }])
+  })
+
+  it('asks for the day when the number of a player in a saved line-up changes, and fills in the old number (#1076)', async () => {
+    const id = await firstId()
+
+    await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
+    await database.db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Pelle van Amersfoort', ours: true, playerId: id, shirtNumber: 14, starter: true })
+
+    expect(await edit(id, form({ rugnummer: '9' }))).toMatchObject({
+      errors: { rugnummervanaf: expect.stringContaining('Vul in vanaf welke dag') as string },
+      values: { rugnummer: '9', rugnummervanaf: '', vorigrugnummer: '14' },
+    })
+    expect(await stored()).toMatchObject([{ previousShirtNumber: null, shirtNumber: 14 }])
+    // With the day, the number changes and the old one is kept.
+    expect(await edit(id, form({ rugnummer: '9', rugnummervanaf: '2019-10-01', vorigrugnummer: '14' }))).toEqual({
+      redirect: `/beheer/spelers/${id}?gedaan=opgeslagen`,
+    })
+    expect(await stored()).toMatchObject([{ previousShirtNumber: 14, shirtNumber: 9, shirtNumberFrom: '2019-10-01' }])
   })
 
   it('ends on the list with a notice for a player that does not exist', async () => {

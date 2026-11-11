@@ -48,3 +48,24 @@ export const Default = meta.story({
     </div>
   ),
 })
+
+export const OnSoftCard = meta.story({
+  args: {
+    rows: [
+      { label: <Link href="#">2002/03</Link>, value: 5 },
+      { label: <Link href="#">2003/04</Link>, value: 19 },
+      { label: <Link href="#">2007/08</Link>, value: 6 },
+    ],
+  },
+  name: 'Op een zacht vlak, in de zijkolom',
+  render: (args) => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="balken-zacht" surface="soft">
+        <Heading id="balken-zacht" level={2}>
+          Doelpunten per seizoen
+        </Heading>
+        <BarList {...args} />
+      </Card>
+    </div>
+  ),
+})

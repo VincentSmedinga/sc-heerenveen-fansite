@@ -696,7 +696,9 @@ async function adoptScorers(
       inSquad: true,
       leftSquadAt: null,
       position: null,
+      previousShirtNumber: null,
       shirtNumber: null,
+      shirtNumberFrom: null,
     })
     adopted.push(name)
   }

@@ -78,13 +78,22 @@ export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'name' | 'position'
  * form can lead to the page that merges them (issue 977).
  */
 export type EditPlayerOutcome =
-  { errors: PlayerErrors; merge?: MergeOffer; status: 'refused' } | { status: 'changed' | 'missing' | 'unchanged' }
+  | { errors: PlayerErrors; merge?: MergeOffer; status: 'refused'; values?: Partial<PlayerValues> }
+  | { status: 'changed' | 'missing' | 'unchanged' }
 
 /** The two persons a refused save says may be one: that of the player and that of the page. */
 export type MergeOffer = { label: string; personId: number; withId: number }
 
 /** A person to choose from, with what tells two persons of one name apart. */
-export type PersonChoice = { id: number; label: string }
+export type PersonChoice = {
+  id: number
+  label: string
+  /**
+   * The number he had in the season before the one he is added to, when no player who is still
+   * in the squad of that season has it: the form of a new player starts with it (issue 1076).
+   */
+  suggestion?: { number: number; season: string }
+}
 
 /** What an editor entered, understood and in the shape of the tables. */
 export type PlayerEntry = {
@@ -102,7 +111,11 @@ export type PlayerEntry = {
   /** The person the editor chose from the list. Null for a new one, and in the edit form. */
   personId: null | number
   position: null | PlayerPosition
+  /** The number he wore before it changed in the season, with `shirtNumberFrom`. Null: none. */
+  previousShirtNumber: null | number
   shirtNumber: null | number
+  /** The day from which `shirtNumber` counts, as `2026-10-15`. Null for none. */
+  shirtNumberFrom: null | string
 }
 
 /**
@@ -120,12 +133,37 @@ type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
 class Refusal extends Error {
   errors: PlayerErrors
   merge: MergeOffer | undefined
+  /** Values the form shows when it comes back, such as the old number a save asks a day for. */
+  values: Partial<PlayerValues> | undefined
 
-  constructor(errors: PlayerErrors, merge?: MergeOffer) {
+  constructor(errors: PlayerErrors, merge?: MergeOffer, values?: Partial<PlayerValues>) {
     super('The player is refused')
     this.errors = errors
     this.merge = merge
+    this.values = values
   }
+}
+
+/**
+ * The numbers that two or more players who are still in the squad have, by number, with the
+ * names. A player who left, and a previous number, do not count (issue 1076). Saving is not
+ * refused for it: an editor changes two players one after the other.
+ */
+export function doubleShirtNumbers(
+  rows: readonly Pick<AdminPlayerRow, 'inSquad' | 'name' | 'shirtNumber'>[],
+): { names: string[]; number: number }[] {
+  const byNumber = new Map<number, string[]>()
+
+  for (const row of rows) {
+    if (row.inSquad && row.shirtNumber !== null) {
+      byNumber.set(row.shirtNumber, [...(byNumber.get(row.shirtNumber) ?? []), row.name])
+    }
+  }
+
+  return [...byNumber]
+    .filter(([, names]) => names.length > 1)
+    .map(([number, names]) => ({ names, number }))
+    .sort((a, b) => a.number - b.number)
 }
 
 /** The player with this number, with his person and what holds him in the squad. */
@@ -190,6 +228,8 @@ export function playerValuesOf({ person, player }: Pick<AdminPlayer, 'person' | 
     linie: person?.line ?? '',
     positie: player.position ?? '',
     rugnummer: player.shirtNumber === null ? '' : String(player.shirtNumber),
+    rugnummervanaf: player.shirtNumberFrom ?? '',
+    vorigrugnummer: player.previousShirtNumber === null ? '' : String(player.previousShirtNumber),
     wikipedia: player.wikipediaPage ?? '',
   }
 }
@@ -215,9 +255,15 @@ export function readPlayerValues(formData: FormData): PlayerValues {
  * capitals and accents make no difference, and the words may be anywhere. At most
  * `mostPersonChoices`, by name. Each says in which seasons the person is a player and, when it
  * differs from the name, the title of the article, so two persons of one name can be told
- * apart. An empty search finds nobody.
+ * apart. An empty search finds nobody. With `forSeason`, the season a player is added to, each
+ * person who had a number in the season before gets it as a `suggestion`, unless a player who
+ * is still in the squad of `forSeason` has that number (issue 1076).
  */
-export async function searchPersons(db: Pick<Database, 'select'>, search: string): Promise<PersonChoice[]> {
+export async function searchPersons(
+  db: Pick<Database, 'select'>,
+  search: string,
+  forSeason?: string,
+): Promise<PersonChoice[]> {
   const words = plain(search).split(' ').filter(Boolean)
 
   if (words.length === 0) {
@@ -246,6 +292,7 @@ export async function searchPersons(db: Pick<Database, 'select'>, search: string
     )
     .groupBy(players.personId)
   const seasonsOf = new Map(seasons.map((row) => [row.personId, row]))
+  const suggestions = forSeason === undefined ? new Map() : await suggestionsFor(db, found, forSeason)
 
   return found.map((person) => {
     const played = seasonsOf.get(person.id)
@@ -262,7 +309,13 @@ export async function searchPersons(db: Pick<Database, 'select'>, search: string
           : `Wikipedia: ${person.page}`,
     ].filter((detail) => detail !== undefined)
 
-    return { id: person.id, label: `${person.shown} (${details.join(', ')})` }
+    const suggestion = suggestions.get(person.id)
+
+    return {
+      id: person.id,
+      label: `${person.shown} (${details.join(', ')})`,
+      ...(suggestion === undefined ? {} : { suggestion }),
+    }
   })
 }
 
@@ -334,6 +387,35 @@ export function validatePlayer(
     }
   }
 
+  let previousShirtNumber: null | number = null
+
+  if (values.vorigrugnummer !== '') {
+    if (!/^[1-9]\d?$/u.test(values.vorigrugnummer)) {
+      errors.vorigrugnummer = 'Vul een getal van 1 tot en met 99 in, of laat het veld leeg.'
+    } else if (Number(values.vorigrugnummer) === shirtNumber) {
+      errors.vorigrugnummer = 'Het vorige rugnummer is gelijk aan het rugnummer. Vul het nummer in dat hij eerst droeg.'
+    } else {
+      previousShirtNumber = Number(values.vorigrugnummer)
+    }
+  }
+
+  let shirtNumberFrom: null | string = null
+
+  if (values.rugnummervanaf !== '') {
+    if (isDay(values.rugnummervanaf)) {
+      shirtNumberFrom = values.rugnummervanaf
+    } else {
+      errors.rugnummervanaf = 'Vul een datum in, zoals 2026-10-15, of laat het veld leeg.'
+    }
+  }
+
+  // The two belong together: one without the other says nothing.
+  if (values.vorigrugnummer !== '' && values.rugnummervanaf === '') {
+    errors.rugnummervanaf = 'Vul in vanaf welke dag het rugnummer geldt, of maak het vorige rugnummer leeg.'
+  } else if (values.vorigrugnummer === '' && values.rugnummervanaf !== '' && errors.rugnummervanaf === undefined) {
+    errors.vorigrugnummer = 'Vul het rugnummer in dat hij eerst droeg, of maak de datum leeg.'
+  }
+
   const position = playerPositions.find((choice) => choice === values.positie) ?? null
 
   if (values.positie !== '' && position === null) {
@@ -368,7 +450,9 @@ export function validatePlayer(
       page,
       personId,
       position,
+      previousShirtNumber,
       shirtNumber,
+      shirtNumberFrom,
     },
   }
 }
@@ -405,6 +489,19 @@ async function findPerson(db: Pick<Database, 'select'>, id: number) {
     .where(eq(persons.id, id))
 
   return person
+}
+
+/** A calendar day as `2026-10-15`, one that exists. */
+function isDay(text: string) {
+  const found = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(text)
+
+  if (found === null || Number(found[1]) < 1900) {
+    return false
+  }
+
+  const moment = new Date(`${text}T00:00:00Z`)
+
+  return !Number.isNaN(moment.getTime()) && moment.toISOString().startsWith(text)
 }
 
 /**
@@ -481,6 +578,13 @@ async function personOfNewPage(
   await givePersonPage(transaction, person.id, entry.page)
 
   return person.id
+}
+
+/** The season before a season: `2026/27` is preceded by `2025/26`. */
+function seasonBefore(season: string) {
+  const year = Number(season.slice(0, 4)) - 1
+
+  return `${year}/${String(year + 1).slice(2)}`
 }
 
 /**
@@ -564,9 +668,11 @@ async function storePlayer(
         name,
         personId,
         position: entry.position,
+        previousShirtNumber: entry.previousShirtNumber,
         searchTerm: searchTermOf(person, name),
         season,
         shirtNumber: entry.shirtNumber,
+        shirtNumberFrom: entry.shirtNumberFrom,
         source: 'redactie',
         wikipediaPage: page,
       })
@@ -590,7 +696,7 @@ async function storePlayer(
         transaction,
         {
           action: 'player.add',
-          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}${personChanges}`,
+          detail: `Toegevoegd: ${name}, ${season}, rugnummer: ${entry.shirtNumber ?? 'geen'}${entry.previousShirtNumber === null ? '' : `, vorig rugnummer: ${entry.previousShirtNumber} tot ${entry.shirtNumberFrom}`}, positie: ${entry.position ?? 'onbekend'}, Wikipedia: ${page ?? 'geen'}, persoon ${personId}${created ? ' (nieuw)' : ''}${personChanges}`,
           itemId: insertId,
           userId,
         },
@@ -682,6 +788,30 @@ async function storePlayerEdit(
         })
       }
 
+      // A number that changes for a player who is in a saved line-up with his old number: the
+      // old number is kept with the day the new one counts from, and the day is asked for.
+      if (
+        entry.shirtNumber !== player.shirtNumber &&
+        player.shirtNumber !== null &&
+        entry.previousShirtNumber === null &&
+        entry.shirtNumberFrom === null
+      ) {
+        const [held] = await transaction
+          .select({ n: count() })
+          .from(matchAppearances)
+          .where(and(eq(matchAppearances.playerId, id), eq(matchAppearances.shirtNumber, player.shirtNumber)))
+
+        if ((held?.n ?? 0) > 0) {
+          throw new Refusal(
+            {
+              rugnummervanaf: `${player.name} staat met rugnummer ${player.shirtNumber} in een opgeslagen opstelling. Vul in vanaf welke dag het nieuwe rugnummer geldt, zodat die wedstrijden het oude nummer houden.`,
+            },
+            undefined,
+            { vorigrugnummer: String(player.shirtNumber) },
+          )
+        }
+      }
+
       // The line and the country of the person the form showed, where they differ.
       const shown = person !== undefined && personId === person.id ? person : undefined
       const facts =
@@ -703,6 +833,9 @@ async function storePlayerEdit(
         entry.shirtNumber === player.shirtNumber
           ? undefined
           : `rugnummer: ${player.shirtNumber ?? 'geen'} → ${entry.shirtNumber ?? 'geen'}`,
+        entry.previousShirtNumber === player.previousShirtNumber && entry.shirtNumberFrom === player.shirtNumberFrom
+          ? undefined
+          : `vorig rugnummer: ${player.previousShirtNumber ?? 'geen'} tot ${player.shirtNumberFrom ?? 'geen'} → ${entry.previousShirtNumber ?? 'geen'} tot ${entry.shirtNumberFrom ?? 'geen'}`,
         entry.position === player.position
           ? undefined
           : `positie: ${player.position ?? 'onbekend'} → ${entry.position ?? 'onbekend'}`,
@@ -737,8 +870,10 @@ async function storePlayerEdit(
           name,
           personId,
           position: entry.position,
+          previousShirtNumber: entry.previousShirtNumber,
           searchTerm: renamed ? searchTermOf(entry.name, name) : player.searchTerm,
           shirtNumber: entry.shirtNumber,
+          shirtNumberFrom: entry.shirtNumberFrom,
           wikipediaPage: entry.page,
         })
         .where(eq(players.id, id))
@@ -765,7 +900,12 @@ async function storePlayerEdit(
     })
   } catch (error) {
     if (error instanceof Refusal) {
-      return { errors: error.errors, status: 'refused', ...(error.merge === undefined ? {} : { merge: error.merge }) }
+      return {
+        errors: error.errors,
+        status: 'refused',
+        ...(error.merge === undefined ? {} : { merge: error.merge }),
+        ...(error.values === undefined ? {} : { values: error.values }),
+      }
     }
 
     throw error
@@ -813,6 +953,46 @@ async function storePlayerRemoval(
 
     return 'done'
   })
+}
+
+/**
+ * The number each person had in the season before `season`, when nobody still in the squad of
+ * `season` has it.
+ */
+async function suggestionsFor(
+  db: Pick<Database, 'select'>,
+  found: readonly { id: number }[],
+  season: string,
+): Promise<Map<number, { number: number; season: string }>> {
+  const before = seasonBefore(season)
+  const [earlier, taken] = await Promise.all([
+    db
+      .select({ number: players.shirtNumber, personId: players.personId })
+      .from(players)
+      .where(
+        and(
+          eq(players.season, before),
+          inArray(
+            players.personId,
+            found.map((person) => person.id),
+          ),
+        ),
+      ),
+    db
+      .select({ number: players.shirtNumber })
+      .from(players)
+      .where(and(eq(players.season, season), eq(players.inSquad, true))),
+  ])
+  const used = new Set(taken.map((row) => row.number))
+  const suggested = new Map<number, { number: number; season: string }>()
+
+  for (const row of earlier) {
+    if (row.personId !== null && row.number !== null && !used.has(row.number)) {
+      suggested.set(row.personId, { number: row.number, season: before })
+    }
+  }
+
+  return suggested
 }
 
 const plain = (text: string) =>

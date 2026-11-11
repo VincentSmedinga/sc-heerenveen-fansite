@@ -397,6 +397,21 @@ describe('reading again', () => {
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
 
+  it('leaves the previous shirt number and the day of the editors alone when the table changes a player (#1076)', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    await database.pool.query(
+      "UPDATE players SET previous_shirt_number = 77, shirt_number_from = '2026-10-01' WHERE name = 'Bernt Klaverboer'",
+    )
+    page.squad = original.replace('[[Bernt Klaverboer]]', '[[Bernt Klaverboer|Bernt Klaverboer-Jansen]]')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(await database.db.select().from(players).where(eq(players.wikipediaPage, 'Bernt Klaverboer'))).toMatchObject(
+      [{ name: 'Bernt Klaverboer-Jansen', previousShirtNumber: 77, shirtNumberFrom: '2026-10-01' }],
+    )
+  })
+
   it('does not mark a player who is gone again, and does not move the moment he left', async () => {
     const { page, server } = await serve()
 

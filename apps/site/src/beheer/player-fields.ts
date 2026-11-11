@@ -11,6 +11,8 @@ export const playerFieldNames = [
   'linie',
   'land',
   'rugnummer',
+  'vorigrugnummer',
+  'rugnummervanaf',
   'positie',
 ] as const
 

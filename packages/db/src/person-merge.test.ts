@@ -5,7 +5,13 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { mergeChosenPersons, mergeEditorsPersonInto, mergePersons, planPersonMerge } from './person-merge.ts'
+import {
+  fillPlayerFrom,
+  mergeChosenPersons,
+  mergeEditorsPersonInto,
+  mergePersons,
+  planPersonMerge,
+} from './person-merge.ts'
 import { createPersonBook, type PersonName } from './persons.ts'
 import {
   auditLog,
@@ -804,5 +810,53 @@ describe('mergeChosenPersons', () => {
     expect(await planPersonMerge(database.db, old, 0)).toBe('missing')
     expect(await personRows()).toHaveLength(2)
     expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+})
+
+describe('fillPlayerFrom (#1076)', () => {
+  const rowOf = async (id: number) => (await database.db.select().from(players).where(eq(players.id, id)))[0]!
+
+  it('takes the previous number and its day along with the number it fills in', async () => {
+    const stays = await addPlayer({ name: 'Testspeler Blijft', season: '2004/05' })
+    const gone = await addPlayer({
+      name: 'Testspeler Weg',
+      previousShirtNumber: 29,
+      season: '2004/05',
+      shirtNumber: 9,
+      shirtNumberFrom: '2004-10-01',
+    })
+
+    await fillPlayerFrom(database.db, await rowOf(stays), await rowOf(gone))
+
+    expect(await rowOf(stays)).toMatchObject({
+      previousShirtNumber: 29,
+      shirtNumber: 9,
+      shirtNumberFrom: '2004-10-01',
+    })
+  })
+
+  it('keeps its own previous number and day when it has a number already', async () => {
+    const stays = await addPlayer({
+      name: 'Testspeler Blijft',
+      previousShirtNumber: 3,
+      season: '2004/05',
+      shirtNumber: 4,
+      shirtNumberFrom: '2004-11-01',
+    })
+    const gone = await addPlayer({
+      name: 'Testspeler Weg',
+      previousShirtNumber: 29,
+      season: '2004/05',
+      shirtNumber: 9,
+      shirtNumberFrom: '2004-10-01',
+    })
+
+    await fillPlayerFrom(database.db, await rowOf(stays), await rowOf(gone))
+
+    expect(await rowOf(stays)).toMatchObject({
+      previousShirtNumber: 3,
+      shirtNumber: 4,
+      shirtNumberFrom: '2004-11-01',
+    })
   })
 })

@@ -163,24 +163,21 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
             <PlayerCareerCard options={career} seasons={seasons} />
           </Page.Cell>
         )}
-        {seasonBars === undefined ? null : (
-          <Page.Cell>
-            <PlayerSeasonBarsCard address={(season) => seasonAddress(playersPath, season, current)} bars={seasonBars} />
-          </Page.Cell>
-        )}
-        {goalQuarters === undefined ? null : (
-          <Page.Cell>
-            <PlayerQuartersCard quarters={goalQuarters} />
-          </Page.Cell>
-        )}
-        {record === undefined ? null : (
-          <Page.Cell>
-            <PlayerRecordCard record={record} />
-          </Page.Cell>
-        )}
       </Page.Main>
       <PlayerAsideColumn
         aside={aside}
+        charts={
+          <>
+            {seasonBars === undefined ? null : (
+              <PlayerSeasonBarsCard
+                address={(season) => seasonAddress(playersPath, season, current)}
+                bars={seasonBars}
+              />
+            )}
+            {goalQuarters === undefined ? null : <PlayerQuartersCard quarters={goalQuarters} />}
+            {record === undefined ? null : <PlayerRecordCard record={record} />}
+          </>
+        }
         credit={<PlayerCredit page={page} />}
         matchHref={({ competition, round, season }) => asideAddresses.get(season)?.get(`${competition}|${round}`)}
       />

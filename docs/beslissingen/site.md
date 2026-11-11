@@ -3265,6 +3265,7 @@
 - **Alternatieven:** alleen de selectie (een verslag wacht dan op Wikipedia); elke speler als losse naam (dan kan het verslag geen cijfers per speler geven).
 - **Later:** zie _De bank kiest uit wie niet in de basis staat_ (7 november 2026): een speler staat in het verslag één keer, in de basis of op de bank, en de keuzelijst van elke plek houdt daar rekening mee.
 - **Later:** zie _Een rugnummer mag ontbreken_ in `hosting-en-data.md` (8 november 2026): een speler van de tegenstander is een naam, met of zonder rugnummer, en het rugnummer van een speler van ons mag leeg blijven zonder dat de selectie er een geeft.
+- **Later:** zie _De selectie onthoudt één vorig rugnummer met de datum van de wissel_ (11 november 2026): het standaardnummer in de keuzelijst en bij het plakken hangt af van de dag van de wedstrijd.
 
 ## "Klaar" kan alleen zonder fouten, en een verslag dat later niet meer klopt, krijgt "Controleer"
 
@@ -4625,6 +4626,7 @@
     De balken hebben het blauw van het ontwerp, op een spoor in de kleur van de pagina: het token `--hf-colour-chart-bar` (blauw 500 in licht, 400 in donker, 3:1 tegen de kaart) en de toon `plain` van `BarChart` en `BarList`.
     Het getal van een kwartier staat boven zijn staaf (`label` van `BarChartBar`), de naam eronder; een schermlezer krijgt dezelfde getallen als verborgen tekst.
 - **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
+- **Later:** zie _De grafieken van een speler staan in de zijkolom, in zachte kaarten_ (11 november 2026): de kaarten staan niet meer onder de loopbaan, en het spoor van een balk heeft op een zacht vlak de tint van het spoor van de schakelaar.
 - **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; de getallen als zichtbare regel onder de grafiek; het groen van een winst voor de balken (het ontwerp heeft blauw, en groen betekent winst).
 
 ## Een wedstrijd telt voor een speler alleen als hij op het veld stond
@@ -4706,6 +4708,21 @@
   We beginnen klein: alleen de tabel.
 - **Alternatieven:** de hele pagina de keuze laten volgen (kan later); de keuze onthouden (vraagt een besluit over opslag); voor een seizoen uit Wikipedia de cijfers van alle wedstrijden tonen met een waarschuwing (twee betekenissen in één tabel).
 
+## De grafieken van een speler staan in de zijkolom, in zachte kaarten
+
+- **Datum:** 11 november 2026
+- **Besluit:** de kaarten met grafieken staan in de zijkolom van de pagina van een speler, op het zachte vlak van de andere kaarten daar (#1117).
+  - **Volgorde:** Per competitie, dan de balken per seizoen, de doelpunten per kwartier en de uitslagen, dan Vaakst raak tegen, Meer cijfers en Tegen ons, en onderaan de bronvermelding.
+    De cijfers per competitie en per seizoen horen bij elkaar en de grafieken lezen als een vervolg erop; de rest zijn feiten over wedstrijden.
+    `PlayerAside` krijgt de kaarten als `charts` en zet ze na de competities.
+  - **Kleur:** de balken (`--hf-colour-chart-bar`) halen 4,3:1 op het zachte vlak in licht en 5,3:1 in donker, en de delen van de uitslagen 3,2:1 of meer in licht (winst 3,2:1, gelijk 3,8:1, verlies 4,1:1) en 4,4:1 of meer in donker, dus 3:1 voor een balk.
+    Alleen het spoor veranderde: in de kleur van de pagina is het op het zachte vlak in licht nauwelijks te zien (1,06:1) en warm op blauw.
+    `Card` zet voor een zacht vlak de eigenschap `--hf-card-track` op de bestaande tint van het spoor van de schakelaar (`--hf-colour-background-track`), en `BarList` neemt die over; zonder die eigenschap blijft het spoor de kleur van de pagina.
+    Er is geen nieuw token.
+  - **Breedte:** `BarList` geeft de naam 4,5em en het getal 2em, en laat de balk de rest; een naam breekt af waar nodig, dus er scrolt niets zijwaarts op 320 pixels.
+- **Waarom:** de grafieken horen bij de andere cijfers, en de hoofdkolom blijft voor de tabel en de loopbaan.
+- **Alternatieven:** de grafieken in de hoofdkolom houden, op het witte vlak (de eerste keuze, #1085); een eigen token voor het spoor op een zacht vlak (de tint van het spoor van de schakelaar past al); de grafieken onderaan de zijkolom (de uitslagen staan dan ver van de cijfers per competitie).
+
 ## Het adres van een speler schrijft letters zonder los accent uit
 
 - **Datum:** 11 november 2026
@@ -4746,3 +4763,50 @@
   De kolom bewaart al tekst, dus er is geen migratie en geen tweede soort reden om te tonen.
   Een drukke periode maakte berichten onbereikbaar met alleen de nieuwste 50.
 - **Alternatieven:** een sleutel voor de reden in een aparte kolom (een migratie en twee soorten redenen); het veld "Toelichting" altijd zichtbaar (werkt zonder JavaScript, maar de pagina blijft rommelig); de grens van 50 verhogen (blijft een grens, en een lange lijst is traag).
+
+## Een rugnummer hoort bij een speler in een seizoen, niet bij de persoon
+
+- **Datum:** 11 november 2026
+- **Besluit:** het rugnummer blijft op de regel van de selectie (`players.shirt_number`) en krijgt geen waarde op de persoon met een afwijking per seizoen, zoals de linie in #1051 (#1076).
+  Het nummer van een wedstrijd staat in de opstelling (`match_appearances.shirt_number`), en een opgeslagen verslag houdt zijn nummers.
+- **Waarom:** een linie geldt altijd, een nummer geldt voor een periode en mag op elk moment maar één speler van de selectie hebben.
+- **Alternatieven:** een nummer op de persoon met een afwijking per seizoen.
+
+## De selectie onthoudt één vorig rugnummer met de datum van de wissel
+
+- **Datum:** 11 november 2026
+- **Besluit:** de regel van de selectie krijgt `previous_shirt_number` en `shirt_number_from`, beide leeg tenzij een redacteur ze invult, en alleen samen (migratie `0070_add_previous_shirt_number`, met een controle in de database) (#1076).
+  - **Een wedstrijd voor die dag** gebruikt het vorige nummer en een wedstrijd op of na die dag het huidige.
+    `readSquad` in `apps/site/src/beheer/match-reports.ts` zegt het nummer van de dag, en het formulier van een verslag, de keuzelijsten, het opslaan, het plakken en het live verslag gebruiken dat nummer.
+  - **Het formulier van een speler** heeft "Vorig rugnummer" en "Nieuw nummer vanaf", elk met een eigen foutmelding.
+    Verandert een redacteur het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling van dat seizoen staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag bij Nieuw nummer vanaf.
+  - **De importer** leest en schrijft de twee kolommen niet.
+    Voegen we twee personen samen en vult de rij die blijft haar nummer van de andere rij, dan gaan het vorige nummer en de dag mee.
+  - **De kaart Selectie** en de tabel Spelers in Beheer tonen het huidige nummer.
+  - **De volgorde van de keuzelijst** is die van het nummer van de dag, met spelers zonder nummer achteraan en gelijke nummers op naam (Nederlandse volgorde).
+- **Waarom:** een verslag dat na de wissel wordt geschreven, kreeg het nieuwe nummer zonder waarschuwing.
+  Eén vorig nummer dekt de gevallen die we kennen, met twee kolommen en zonder dat andere code het nummer anders leest.
+  Elke dag tussen twee wedstrijden werkt, en de dag blijft kloppen als een wedstrijd verschuift.
+  Wikipedia kent de dag van een wissel niet.
+- **Alternatieven:** de wissel als keuze van een wedstrijd; een tabel met perioden voor meer wissels per seizoen; een importer die zelf het oude nummer bewaart met de dag van de import.
+- **Later:** vervangt "Het nummer van een wedstrijd staat in de opstelling, niet in een periode met een datum" uit het issue: er komt toch een begindatum, maar alleen voor één wissel per seizoen en alleen voor het standaardnummer.
+
+## Het rugnummer van vorig seizoen is een voorstel in het formulier, geen opgeslagen waarde
+
+- **Datum:** 11 november 2026
+- **Besluit:** het formulier dat een persoon aan een seizoen toevoegt, vult het nummer van het seizoen ervoor in als geen speler die nog in de selectie van het nieuwe seizoen zit, dat nummer heeft (#1076).
+  De hint zegt waar het vandaan komt, "Rugnummer in 2025/26.", en kiest de redacteur een andere persoon uit de lijst, dan volgt het nummer, tenzij hij het zelf typte.
+  Zonder JavaScript staat het nummer van de persoon die als eerste is gekozen erin.
+  Er wordt niets als voorstel opgeslagen, en eerdere seizoenen worden niet aangevuld.
+- **Waarom:** 77% van de spelers houdt zijn nummer van het ene seizoen op het volgende, en Wikipedia geeft een nieuwe selectie zelf nummers.
+  In de geschiedenis kunnen maar 67 regels een nummer van het jaar ervoor krijgen, en 13 daarvan botsen met een nummer dat dat seizoen al bestaat.
+- **Alternatieven:** lege regels vullen met een gemarkeerd voorstel dat een redacteur bevestigt, met een nieuwe kolom en een regel in de importer.
+
+## Een dubbel rugnummer is een melding, geen weigering
+
+- **Datum:** 11 november 2026
+- **Besluit:** de pagina Spelers meldt twee of meer spelers in de selectie met hetzelfde nummer, met het nummer en de namen, in een `Notice` voor de tabel (#1076).
+  Een vertrokken speler en een vorig nummer tellen niet mee, en opslaan wordt niet geweigerd.
+  Plakken van een opstelling kiest bij twee spelers met het nummer die ene speler die nog in de selectie zit, en laat de redacteur kiezen als een naam daar niet bij past of meer spelers in de selectie het nummer hebben.
+- **Waarom:** een nummer gaat soms over van een vertrokken speler naar een nieuwe, en een redacteur verandert twee spelers na elkaar.
+- **Alternatieven:** het formulier weigert een nummer dat een speler van de selectie al heeft.

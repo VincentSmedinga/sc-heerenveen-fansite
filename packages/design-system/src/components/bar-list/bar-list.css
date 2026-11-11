@@ -2,7 +2,8 @@
  * A list of lying bars: the name, the bar and the number in one row. The name has the room it
  * needs, the number sits at the end, and the bar takes what is left, so it never makes the
  * card wider on a narrow screen. The fill is the blue of a bar (the tone `plain` of chart.css) on
- * a track in the colour of the page, and it reaches 3:1 on the card in light and in dark.
+ * a track in the colour of the page, or the tint of the track of a switch on a soft card, and it
+ * reaches 3:1 on the card in light and in dark.
  */
 
 @layer hf.components {
@@ -33,7 +34,7 @@
   }
 
   .hf-bar-list-track {
-    background-color: var(--hf-colour-background-page);
+    background-color: var(--hf-card-track, var(--hf-colour-background-page));
     block-size: 1.25rem;
     border-radius: 0.1875rem;
     display: block;

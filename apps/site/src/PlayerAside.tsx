@@ -18,16 +18,19 @@ export const playerAsideIds = {
 
 /**
  * The side column of the page of a player (#1086): the goals or matches by competition, the
- * clubs he scored against most, more figures, the goals against us, and the credit at the
- * bottom. A card with nothing to show is left out. `matchHref` gives the page of a match, or
- * `undefined` for a match that has none, which is then plain text.
+ * three charts (#1117), the clubs he scored against most, more figures, the goals against us,
+ * and the credit at the bottom. A card with nothing to show is left out. `matchHref` gives the
+ * page of a match, or `undefined` for a match that has none, which is then plain text.
  */
 export function PlayerAside({
   aside,
+  charts,
   credit,
   matchHref,
 }: {
   aside: PlayerAsideData
+  /** The cards with charts (`PlayerChartsCards`), which come after the competitions. */
+  charts?: ReactNode
   credit: ReactNode
   matchHref: (match: CareerMatch) => string | undefined
 }) {
@@ -52,6 +55,7 @@ export function PlayerAside({
           </FigureList>
         </Card>
       )}
+      {charts}
       {opponents.length === 0 ? null : (
         <Card aria-labelledby={playerAsideIds.opponents} surface="soft">
           <Heading id={playerAsideIds.opponents} level={2}>

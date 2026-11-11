@@ -69,6 +69,7 @@
     --hf-card-line: var(--hf-colour-border-surface-soft);
     --hf-card-line-strong: var(--hf-colour-line-darker-surface-soft);
     --hf-card-line-graphic: var(--hf-colour-line-graphic-surface-soft);
+    --hf-card-track: var(--hf-colour-background-track);
   }
 
   .hf-card-warm {

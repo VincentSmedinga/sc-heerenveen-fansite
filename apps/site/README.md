@@ -1169,12 +1169,16 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hier voegt ze een speler toe die daar ontbreekt, of verbetert ze er een.
 
 - De lijst toont de spelers van een seizoen met rugnummer, positie, bron en of ze in de selectie staan, in woorden.
+  Hebben twee of meer spelers die nog in de selectie staan hetzelfde nummer, dan zegt een `Notice` boven de tabel welk nummer en van wie (`doubleShirtNumbers`, #1076).
+  Een vertrokken speler en een vorig nummer tellen niet mee, en opslaan wordt niet geweigerd.
   Ze opent op het lopende seizoen; de seizoenkiezer heeft elk seizoen met een wedstrijd (`listPlayerSeasons` in `src/beheer/players.ts`).
 - `/beheer/spelers/nieuw?seizoen=<seizoen>` voegt een speler toe.
   Bovenaan staat een zoekformulier met methode GET (`q`): wat het vindt (`searchPersons`, hoogstens 25 personen), staat als lijst "Persoon" in het formulier, met "Een nieuwe persoon" als laatste keuze.
   Elke keuze noemt de seizoenen van de persoon en, als die anders is dan de naam, de titel van zijn artikel.
   Kiest de redactie een persoon die we kennen, dan blijft dat dezelfde persoon; anders vult ze voornaam, tussenvoegsel, achternaam en een Wikipedia-pagina in, die leeg mag blijven.
   Rugnummer (1 tot en met 99) en positie mogen ook leeg blijven: de oude seizoenen hebben ze niet.
+  Voor een persoon die in het seizoen ervoor een nummer had, staat dat nummer er al in, met de hint "Rugnummer in 2025/26.", tenzij een speler die nog in de selectie zit het heeft (`suggestion` van `searchPersons`, #1076).
+  `PlayerForm` volgt de keuze in de lijst, en laat een nummer dat de redactie typte staan.
   Met `wedstrijd=<nummer>` in het adres komt de redactie na het opslaan, en met "Annuleren", terug op het formulier van die wedstrijd (#1021).
   De kaart Doelpunten van een wedstrijd heeft de link met dat adres, die een nieuw tabblad opent, zodat het formulier van de wedstrijd zijn invoer houdt.
 - De speler krijgt de bron `redactie` in `players`, en een nieuwe persoon de bron `redactie` voor zijn naam.
@@ -1186,6 +1190,9 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
   Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
   Een pagina die bij een andere persoon hoort, wordt geweigerd, met onder het veld een link naar het samenvoegen van de twee personen.
+- Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
+  Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
+  `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.
 - Onder het formulier staat "Dezelfde persoon als", voor een speler die er als twee personen in staat, zoals na een naamswijziging (#977).
   De redactie zoekt de andere persoon (`?zoek=`, een formulier met GET) en kiest hem uit een lijst met de seizoenen en de Wikipedia-pagina erbij.
   Een speler zonder persoon heeft dit blok niet.
