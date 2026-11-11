@@ -25,6 +25,13 @@ export { Button, buttonAppearances, buttonIcons, buttonTypes } from './component
 export type { ButtonAppearance, ButtonIcon, ButtonProps, ButtonType } from './components/button/Button'
 export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
+export { CareerTimeline } from './components/career-timeline/CareerTimeline'
+export type {
+  CareerMoment,
+  CareerPeriod,
+  CareerSeason,
+  CareerTimelineProps,
+} from './components/career-timeline/CareerTimeline'
 export { chartTones } from './components/chart/tones'
 export type { ChartTone } from './components/chart/tones'
 export { monotonePath, movingAverage, runningAverage } from './components/chart/trend'
