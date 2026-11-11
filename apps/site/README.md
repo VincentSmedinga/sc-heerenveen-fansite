@@ -1193,6 +1193,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
   Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
   `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.
+  De knop die de vorige opstelling overneemt, geeft elke speler uit de selectie het nummer van de dag van deze wedstrijd, en het formulier meldt bij een rij een ingevuld rugnummer dat daarvan afwijkt (`checkReportForm`, bij de waarschuwingen onder het veld van de rij; opslaan blijft mogelijk; #1122).
 - Onder het formulier staat "Dezelfde persoon als", voor een speler die er als twee personen in staat, zoals na een naamswijziging (#977).
   De redactie zoekt de andere persoon (`?zoek=`, een formulier met GET) en kiest hem uit een lijst met de seizoenen en de Wikipedia-pagina erbij.
   Een speler zonder persoon heeft dit blok niet.

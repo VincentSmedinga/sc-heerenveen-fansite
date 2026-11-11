@@ -1126,6 +1126,68 @@ describe('findPreviousLineUp', () => {
     expect((await findPreviousLineUp(database.db, here(), squad))?.formatie.keuze).toBe('4-4-2')
   })
 
+  describe('the numbers of the day of this match (#1122)', () => {
+    /** Our players as the form has them: chosen from the squad, with the number they wore. */
+    const ownRows = (wore: (player: ReportSquadPlayer) => string): Row[] =>
+      squad.slice(0, 13).map((player, index) => ({
+        ...emptyRow('speler', index),
+        keuze: String(player.id),
+        rol: index === 0 ? 'aanvoerder' : index < 11 ? 'basis' : 'bank',
+        rugnummer: wore(player),
+      }))
+    const numberOf = (rows: Row[] | undefined, name: string) =>
+      rows?.find((row) => row.keuze === String(squad.find((player) => player.name === name)?.id))?.rugnummer
+
+    /** The previous match: Speler 9 wore 29 in it, and the others their numbers. */
+    async function previousWithOldNumber() {
+      const previous = await addMatch({ matchDate: '2026-08-01', opponent: 'Eerste Tegenstander', season: '2026/27' })
+
+      await lineUp(
+        previous,
+        ownRows((player) => (player.name === 'Speler 9' ? '29' : String(player.shirtNumber))),
+      )
+      await database.db.update(players).set({ shirtNumber: 9 }).where(eq(players.name, 'Speler 9'))
+    }
+
+    it('gives a player the number of the squad on the day of this match, not the one of the previous match', async () => {
+      await previousWithOldNumber()
+      // Speler 9 has had number 9 since 1 October, and this match is on 31 October.
+      await database.pool.query(
+        "UPDATE players SET previous_shirt_number = 29, shirt_number_from = '2026-10-01' WHERE name = 'Speler 9'",
+      )
+
+      const found = await findPreviousLineUp(database.db, here(), await readSquad(database.db, '2026/27', '2026-10-31'))
+
+      expect(numberOf(found?.speler, 'Speler 9')).toBe('9')
+      expect(numberOf(found?.speler, 'Speler 1')).toBe('1')
+    })
+
+    it('keeps the old number for a match before the day from which the new one counts', async () => {
+      await previousWithOldNumber()
+      // The new number counts from 1 December: on 31 October he still wears 29.
+      await database.pool.query(
+        "UPDATE players SET previous_shirt_number = 29, shirt_number_from = '2026-12-01' WHERE name = 'Speler 9'",
+      )
+
+      const found = await findPreviousLineUp(database.db, here(), await readSquad(database.db, '2026/27', '2026-10-31'))
+
+      expect(numberOf(found?.speler, 'Speler 9')).toBe('29')
+    })
+
+    it('keeps the number of the previous match for a player the squad gives no number', async () => {
+      const previous = await addMatch({ matchDate: '2026-08-01', opponent: 'Eerste Tegenstander', season: '2026/27' })
+
+      await lineUp(previous, [...ownRows((player) => String(player.shirtNumber)).slice(0, 12), named('Gast')[12]!])
+      await database.pool.query("UPDATE players SET shirt_number = NULL WHERE name = 'Speler 2'")
+
+      const found = await findPreviousLineUp(database.db, here(), await readSquad(database.db, '2026/27', '2026-10-31'))
+
+      expect(numberOf(found?.speler, 'Speler 2')).toBe('2')
+      // The player the report added to the squad has his number from it.
+      expect(found?.speler.at(-1)?.rugnummer).toBe('13')
+    })
+  })
+
   it('has nothing for the first match, and for a match where only later ones have a line-up', async () => {
     const afterwards = await addMatch({ matchDate: '2026-11-20', opponent: 'Latere Tegenstander', season: '2026/27' })
 

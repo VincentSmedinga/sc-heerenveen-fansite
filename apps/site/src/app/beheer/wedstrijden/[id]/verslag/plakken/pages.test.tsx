@@ -146,6 +146,7 @@ describe('the screen Tekst plakken', () => {
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,
+        matchDate: '2026-10-31',
         opponent: 'N.E.C.',
         penaltiesAgainst: null,
         penaltiesFor: null,

@@ -9,6 +9,7 @@ const match: ReportMatch = {
   extraTime: false,
   goalsAgainst: 1,
   goalsFor: 2,
+  matchDate: '2026-10-31',
   opponent: 'N.E.C.',
   penaltiesAgainst: null,
   penaltiesFor: null,
@@ -597,6 +598,66 @@ describe('checkReportForm', () => {
 
       expect(checked.warnings['wissel-wij']).toEqual([expect.stringContaining('wisselt 6 keer')])
     })
+  })
+})
+
+describe('checkReportForm for a shirt number that is not the one of the day (#1122)', () => {
+  /** The first player typed with this number, where the squad gives him 1 (Speler 1). */
+  const withNumber = (rugnummer: string) => {
+    const base = report()
+
+    return report({ wij: { speler: [{ ...base.wij.speler[0]!, rugnummer }, ...base.wij.speler.slice(1)] } })
+  }
+
+  /** The ids of the notices of fields: the shirt number of a row. */
+  const noticesOf = (checked: ReturnType<typeof checkReportForm>) =>
+    Object.keys(checked.warnings).filter((id) => id.endsWith('-rugnummer'))
+
+  it('says at the field that the number differs from the one the player wears on the day, and still stores', () => {
+    const checked = checkReportForm(withNumber('77'), context)
+
+    expect(checked.warnings['speler-wij-1-rugnummer']).toEqual([
+      'Speler 1 van sc Heerenveen: rugnummer 77, maar Speler 1 draagt op 31 oktober 2026 nummer 1. Laat het veld leeg voor dat nummer.',
+    ])
+    expect(checked.errors).toEqual({})
+    expect(checked.plan?.appearances[0]).toMatchObject({ shirtNumber: 77 })
+  })
+
+  it('says nothing when the number is the one of the day, when the field is empty, and for another team', () => {
+    expect(noticesOf(checkReportForm(withNumber('1'), context))).toEqual([])
+    expect(noticesOf(checkReportForm(withNumber(''), context))).toEqual([])
+
+    const base = report()
+    const opponent = { ...emptyRow('speler'), naam: 'Tegenstander Een', rugnummer: '77' }
+
+    expect(noticesOf(checkReportForm({ ...base, zij: { ...base.zij, speler: [opponent] } }, context))).toEqual([])
+  })
+
+  it('says nothing for a player the squad gives no number, and for a player who is typed by name', () => {
+    const noNumber = {
+      match,
+      squad: squad.map((player, index) => (index === 0 ? { ...player, shirtNumber: null } : player)),
+    }
+
+    expect(noticesOf(checkReportForm(withNumber('77'), noNumber))).toEqual([])
+
+    const base = report()
+    const typedByName = { ...emptyRow('speler'), keuze: 'andere', naam: 'Andere Speler', rugnummer: '77' }
+
+    expect(
+      noticesOf(
+        checkReportForm({ ...base, wij: { ...base.wij, speler: [typedByName, ...base.wij.speler.slice(1)] } }, context),
+      ),
+    ).toEqual([])
+  })
+
+  it('keeps the notice when another field of the row cannot be read, so the report is not stored', () => {
+    const base = report()
+    const row = { ...base.wij.speler[0]!, rol: 'onbekend', rugnummer: '77' }
+    const checked = checkReportForm(report({ wij: { speler: [row, ...base.wij.speler.slice(1)] } }), context)
+
+    expect(checked.plan).toBeUndefined()
+    expect(noticesOf(checked)).toEqual(['speler-wij-1-rugnummer'])
   })
 })
 

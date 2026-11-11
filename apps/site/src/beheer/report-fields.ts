@@ -100,6 +100,11 @@ export type Row = Partial<Record<FieldName, string>>
 
 export type SideRows = Record<RowKind, Row[]>
 
+/** A day as the editors read it in a sentence, `3 november 2025`. */
+export function dayInWords(day: string) {
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString('nl-NL', { dateStyle: 'long', timeZone: 'UTC' })
+}
+
 /** The choices of a field, as the form words them and the database has them. */
 export const roleChoices = [
   { label: 'Basis', value: 'basis' },
