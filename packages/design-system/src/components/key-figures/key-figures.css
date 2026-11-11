@@ -17,13 +17,17 @@
 
   /* A card without its own element: the surface, border and corners are those of .hf-card. */
   .hf-key-figure {
-    display: flex;
     flex: 1 1 9.375rem;
-    flex-direction: column;
-    gap: var(--hf-space-xs);
     min-inline-size: 0;
     overflow-wrap: anywhere;
     padding: calc(var(--hf-space-m) * 0.75) var(--hf-space-m);
+  }
+
+  /* The parts are in an element of their own, so the flow of the card sets no space between them. */
+  .hf-key-figure-parts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-xs);
   }
 
   .hf-key-figure-number {

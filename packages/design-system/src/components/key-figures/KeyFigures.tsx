@@ -28,9 +28,11 @@ export const KeyFigures = ({ className, figures, ...props }: KeyFiguresProps) =>
   <ul {...props} className={classNames('hf-key-figures', className)} role="list">
     {figures.map(({ figure, label, note }) => (
       <li className="hf-card hf-key-figure" key={`${figure} ${label}`}>
-        <span className="hf-key-figure-number">{figure}</span> <span className="hf-key-figure-label">{label}</span>
-        <span className="hf-key-figure-stop">, </span>
-        <span className="hf-key-figure-note">{note}</span>
+        <div className="hf-key-figure-parts">
+          <span className="hf-key-figure-number">{figure}</span> <span className="hf-key-figure-label">{label}</span>
+          <span className="hf-key-figure-stop">, </span>
+          <span className="hf-key-figure-note">{note}</span>
+        </div>
       </li>
     ))}
   </ul>
