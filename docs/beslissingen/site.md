@@ -4634,3 +4634,21 @@
 - **Waarom:** een speler op de bank heeft de wedstrijd niet gespeeld, en een eerste of laatste wedstrijd waarin hij niet op het veld stond is onjuist.
 - **Alternatieven:** de bank meetellen zoals eerst (te hoog); alleen de basis tellen (invallers missen).
 - **Buiten dit besluit:** de selectie en Cijfers tellen niet op deze plek.
+
+## De zijkolom van de pagina van een speler
+
+- **Datum:** 11 november 2026
+- **Besluit:** de pagina van een speler heeft een zijkolom, "Meer cijfers over deze speler", met kaarten op de blauwe ondergrond van het ontwerp, en onderaan de bronvermelding.
+  Een kaart zonder inhoud valt weg (#1086).
+  - **Doelpunten per competitie** (een doelman: wedstrijden per competitie, uit de opstellingen), **Vaakst raak tegen** (hoogstens vier clubs met minstens twee doelpunten, elk een link naar de club), **Meer cijfers** (zijn eerste doelpunt voor ons, wie hem het vaakst een assist gaf met minstens twee, en zijn Europese wedstrijden) en **Tegen ons**.
+  - **Wie hem het vaakst bediende:** staan er twee bovenaan met evenveel assists, dan noemen we niemand, want "het vaakst" is dan niet waar.
+  - **Europese wedstrijden** komen uit de opstellingen.
+    Hebben niet alle seizoenen opstellingen, dan zegt de regel dat erbij.
+    De Champions League telt de voorrondes ervan mee.
+  - **Tegen ons:** de zin zegt "voor hij hier kwam" als alle doelpunten in een seizoen voor zijn eerste bij ons vielen, "nadat hij hier wegging" als ze na zijn laatste vielen, en anders "tegen sc Heerenveen".
+    Het gaat om doelpunten waarbij `match_goals.person_id` zijn persoon is en `ours` onwaar.
+  - **De gegevens** komen uit dezelfde leesronde als de seizoenen: `readPlayerSeasonFacts` heeft er `assistGivers` en `againstUs` bij, en `loadPlayerSeasonFacts` deelt de lezing per verzoek.
+    `apps/site/src/player-aside.ts` rekent de kaarten uit.
+  - **Nieuw in het designsysteem:** `FigureList` (namen met een getal aan het eind van de regel) en `stacked` bij `DescriptionList`.
+- **Waarom:** een supporter ziet zo in een oogopslag waar en tegen wie een speler scoorde, zonder dat de tabel en de loopbaan iets herhalen.
+- **Alternatieven:** de bron in de hoofdkolom laten (het ontwerp zet hem onderaan de zijkolom); bij gelijke assists de eerste noemen (onjuist); een tweede leesronde voor de zijkolom (dubbel werk).

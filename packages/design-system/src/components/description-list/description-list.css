@@ -21,4 +21,19 @@
     font-weight: var(--hf-headline-font-weight);
     margin-inline-start: 0;
   }
+
+  /* One pair on each row, with a line between the pairs. */
+  .hf-description-list-stacked {
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hf-description-list-stacked > div {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-description-list-stacked dd {
+    overflow-wrap: anywhere;
+  }
 }
