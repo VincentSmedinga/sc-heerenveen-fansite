@@ -19,6 +19,7 @@ This skill is the order and the choices.
 ## 2. Choose what to show
 
 - **Widths:** a phone (390) and a small desktop (900), and only the widths that show the change.
+- **A design:** when the work comes from a design, make the images at the sizes and in the state of the design's board, so they can be laid next to it.
 - **Before and after**, side by side, only when the change is a difference.
   Make the "before" from a build of `origin/main` the same way.
 - **Light** by default.
@@ -50,7 +51,8 @@ A story id looks like `componenten-pagina-page-footer--light`.
 
 The PNGs land in `screenshots/`, which Git ignores.
 **Open every image and look at it** before you use it: the right page, no error page, no real names, nothing cut off.
-Stop the servers you started, by port (`lsof -t -iTCP:<port> -sTCP:LISTEN`): the standalone site renames its process, so `pkill -f server.js` misses it.
+Stop the servers you started by their process number: the one you got when you started it, or `lsof -t -iTCP:<port> -sTCP:LISTEN` on your own port, since the standalone site renames its process.
+Never use a command that looks for a name or a path, such as `pkill -f server.js`: it can stop the server of another worktree.
 Remove the test data again if you put it in your development database: `pnpm --filter site test-data --remove`.
 
 ## 4. Put them on `pr-screenshots`

@@ -140,6 +140,7 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
   - Nothing about the look, such as colours, cards, type or layout; light and dark is something a visitor can use, so it may have a line; nothing about error pages or other edge cases; nothing obvious, such as "nieuwste bovenaan".
 - Starts each Builder in its own session with a short brief, and a Reviewer when no Builder is there to start it.
   The brief names the issue, what is special about it and the pitfalls, and says to follow `builder-workflow`; it doesn't repeat the rules that are written down.
+  For work from a design, it also names the canvas, the board and the row, and says that the design wins on the look (see `weekly-coordination`).
   Doesn't build or review itself.
   If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.
   It builds itself only when there is no other way, and says so.
@@ -155,6 +156,7 @@ A session of its own for the owner and one issue.
 The Coordinator starts it as soon as the owner asks for a new issue or for one to be specified.
 It creates a new issue with the milestone and labels that fit, puts it on the board as "Te doen", and tells the owner where it is.
 It follows the `specify` skill: it reads the issue, the code and the decisions once, asks in rounds with a recommendation for each question, writes the issue after the owner approves (the criteria, the "Beslissingen" and the closing line), and ends.
+When the issue comes from a design, it writes the look into the issue in words, and never links or names the private canvas (see `specify`).
 It never builds.
 Once the issue has the owner's approval and nothing else is open, it writes its short summary and then archives its own session as its last step; the app tells the Coordinator that its turn has ended.
 If the issue has to be split, it creates the new issues with the same milestone and labels.
@@ -167,6 +169,7 @@ The skills in `.claude/skills/` hold the order of the steps: `builder-workflow` 
 `pr-screenshots`, `write-story`, `record-decision` and `write-dutch` cover the screenshots, a component with its stories, a decision, and public text.
 The rules stay in this file and in `CONTRIBUTING.md`; a skill points to them and adds the steps that were missed before.
 
+- Reads the design first when the brief names one, and reports each difference with it to the Coordinator (see `builder-workflow`).
 - Writes the code, with tests, and stories for anything visible.
 - Adds the decisions from the issue, and its own, to the file of its section in `docs/beslissingen/`.
 - Works quietly and cheaply (see _Working efficiently_): checks in the foreground, each run once, no background monitors, no turn that only waits, and one message when the owner or the Coordinator has to decide something.
@@ -194,6 +197,7 @@ The Reviewer:
   The heavy checks run in CI, so it takes their result from there instead of running them a third time (see _Heavy checks_ below).
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
+- Judges the look against the words of the issue, because it never sees the design (see `specify`).
 - Changes nothing: no edits, commits, pushes or approvals.
 - Runs each check once, in the foreground, and starts no monitors.
 - Writes a report with three sections: code and security; accessibility; editorial and source policy.
@@ -319,6 +323,7 @@ How to make them:
    It takes only a build on this computer.
    A path starts with a slash (`/nieuws/podcasts`); anything else is the id of a story (`componenten-pagina-page-footer--light`).
    Look at the images before you use them.
+   Stop a server you started by its process number, never with `pkill -f` or another command that looks for a name or a path (see `pr-screenshots`).
 
 Where they go: the branch `pr-screenshots` holds only a `README.md` and one folder per pull request, `pr-<number>/`.
 It is never merged and never deleted, and the folders of merged pull requests stay, because closed descriptions point to them.

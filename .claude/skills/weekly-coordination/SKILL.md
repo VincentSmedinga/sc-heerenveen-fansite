@@ -126,7 +126,11 @@ The brief for the Builder carries what went wrong before:
 - tick the boxes of the issue for what the pull request delivers (twice skipped);
 - if the owner asks for something the issue doesn't cover, tell the Coordinator at once, so the issue gets an "Aangevuld op verzoek van de projecteigenaar: …; goedgekeurd door de projecteigenaar op <datum>." line before the review;
 - push and open the pull request through `as-claude`, with the owner as reviewer (see `builder-workflow`);
-- bodies and comments on GitHub as flowing paragraphs.
+- bodies and comments on GitHub as flowing paragraphs;
+- for work that comes from a design: the canvas, the board and the row that was chosen, and that the design wins over the words of the issue where they differ on the look.
+  The brief is not public, so it is the one place that names the canvas: never the issue or the pull request.
+  The Builder must say at once if it can't read the design.
+  Without it, a Builder builds from the words alone and the work needs a second pass (`KeyFigures`, #1080).
 
 You start at most two issues at a time, each with its own Builder.
 When you patch an issue, read the body just before you write it: Builders tick boxes in the same body, and an old copy overwrites theirs.

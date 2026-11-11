@@ -74,6 +74,10 @@ Do all of this when you create an issue, so it is complete from the first minute
   If it touches what we import or show from others, include the editorial principles from the Redactie chapter.
 - Name what is left out when someone is likely to expect it: "Niet in dit issue: …".
 - Keep the owner's own words where they work.
+- If the issue comes from a design, write the look into the issue, exactly: the structure, the surfaces and cards, what is large or bold, the order, and the layout on a phone and on a wide screen.
+  The Reviewer judges against the words of the issue and never sees the design, so what the issue doesn't say is not checked.
+  Never link or name the private canvas in the issue: the issue is public.
+  The canvas goes in the brief to the Builder (see `weekly-coordination`).
 
 ## 4. Split an issue that is too big
 
