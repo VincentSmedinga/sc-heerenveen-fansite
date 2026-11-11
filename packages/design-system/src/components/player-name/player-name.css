@@ -45,21 +45,20 @@
   }
 
   /*
-   * The flag of the country, between the number and the name, with a thin line round it and a
-   * pixel of white between the line and the drawing. The line is the quiet line of the card the
-   * name stands in, like the lines of tables and lists. A player without a flag has an empty
+   * The flag of the country, between the number and the name, with a thin line tight round the
+   * drawing, with no space between them. The line is the darker line of the card the name
+   * stands in, so it holds the flag on a light or a dark surface. A player without a flag has an empty
    * place of the same size, and a country without a drawing a frame of the same size with its
    * code. The flag is a little lower than the top of the line, so it stands beside the letters.
    */
   .hf-player-name-flag {
     block-size: 0.9375rem;
-    border: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    border: 1px solid var(--hf-card-line-strong, var(--hf-colour-line-darker-surface));
     box-sizing: border-box;
     display: block;
     flex: none;
     inline-size: 1.25rem;
     inset-block-start: 0.3em;
-    padding: 1px;
     position: relative;
   }
 
@@ -90,19 +89,21 @@
   }
 
   /*
-   * With an address the flag and the name are one link. It is the row of flag and name the
-   * numbered name already is, so a long name still goes on under the name.
+   * With an address the flag and the name are one link. It is as wide as its content and no
+   * wider, so the empty place beside the name is not a link, and a long name still goes on under
+   * the name, beside the flag.
    */
   .hf-player-name-link {
+    align-self: flex-start;
     column-gap: var(--hf-space-s);
-    display: flex;
-    flex: 1 1 0;
+    display: inline-flex;
+    flex: 0 1 auto;
     min-block-size: 1.5rem;
     min-inline-size: 0;
   }
 
   .hf-player-name-text {
-    flex: 1 1 0;
+    flex: 0 1 auto;
     min-inline-size: 0;
   }
 

@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 const css = readFileSync(join(import.meta.dirname, 'match-neighbours.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
 
 describe('match-neighbours.css', () => {
-  it('puts the two links next to each other from 40 rem and under each other below it', () => {
-    expect(css).toMatch(/@container hf-match-neighbours \(min-width: 40rem\) \{\s*grid-template-columns: 1fr 1fr/u)
+  it('puts the two links next to each other from 30 rem and under each other below it', () => {
+    expect(css).toMatch(/@container hf-match-neighbours \(min-width: 30rem\) \{\s*grid-template-columns: 1fr 1fr/u)
     expect(css).toMatch(/\.hf-match-neighbours-list \{\s*display: grid/u)
   })
 

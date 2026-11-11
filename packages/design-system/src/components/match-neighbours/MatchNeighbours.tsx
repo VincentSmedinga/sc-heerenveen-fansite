@@ -131,7 +131,7 @@ function Side({ match, side }: { match: MatchNeighbour | undefined; side: 'next'
  * or "Volgende wedstrijd: " before the club. A match with a result shows it from our side in
  * the colour of the outcome (the words "Gewonnen", "Gelijkspel" or "Verloren" follow it for a
  * screen reader); a match that is not played shows its day, "Live", "Uitgesteld" or
- * "Geannuleerd". A match without a page is plain text. From 40 rem of room the two stand next
+ * "Geannuleerd". A match without a page is plain text. From 30 rem of room the two stand next
  * to each other, the previous at the left and the next at the right, and below it they stand
  * under each other.
  */

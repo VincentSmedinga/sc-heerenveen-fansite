@@ -3248,3 +3248,14 @@
 - **Waarom:** een tijdlijn van periodes en seizoenen is een lijst met koppen, die een schermlezer kan overslaan en de bezoeker kan scannen.
   Welke seizoenen een gat vormen, weet alleen de pagina, dus die geeft de tekst mee.
 - **Alternatieven:** een tabel met een rij per seizoen (dan verdwijnen de periodes en de gaten, en op een telefoon past hij niet); de gaten uit de seizoenen afleiden in het component (dat kent de seizoenen van de club niet).
+
+## Een gelinkte spelersnaam blijft bij zijn vlag, en de vlag zit strak in een donkerdere rand
+
+- **Datum:** 11 november 2026
+- **Besluit:** de link van `PlayerName` is zo breed als de vlag en de naam samen (`inline-flex`, niet `flex: 1`), dus alleen die twee zijn klikbaar en de naam breekt naast de vlag.
+  De vlag heeft geen ruimte meer tussen de tekening en de rand, en de rand is `--hf-card-line-strong`, de donkerdere lijn van de kaart.
+  De lijst van `MatchNeighbours` zet de twee wedstrijden naast elkaar vanaf 30 rem breed van de kaart in plaats van 40 rem (#1100).
+- **Waarom:** de link vulde de hele cel, en de naam liet bij aanwijzen een streep zien naast een lege ruimte.
+  Met de ruimte om de vlag leek de rand los van de tekening.
+- **Alternatieven:** de link `inline-block` laten en alleen de naam een link maken (de vlag hoort bij de naam); de rand in de kleur van de lijn van de kaart houden (te vaag om de vlag).
+- **Later:** vervangt de pixel wit en de rustige lijn uit de beslissing "De rand om een vlag heeft de kleur van de lijnen in de kaart, met een pixel wit eronder".

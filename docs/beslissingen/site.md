@@ -3708,6 +3708,7 @@
   - Een wedstrijd zonder uitslag toont de datum in de korte vorm van de lijsten (zonder tijd), of "Live", "Uitgesteld" of "Geannuleerd", zonder kleur.
   - Een wedstrijd zonder pagina staat als tekst zonder link in dezelfde opbouw.
   - Onder 40 rem breed staan de links onder elkaar, daarboven naast elkaar met de volgende wedstrijd rechts.
+  - **Later:** 11 november 2026 (#1100): de grens ligt op 30 rem breed van de kaart, zodat de twee wedstrijden ook in een smalle kolom naast elkaar staan.
 - **Waarom:** een supporter wil het seizoen doorlezen zonder terug te gaan naar de lijst, en een link die een wedstrijd overslaat, zegt niet dat er een wedstrijd mist.
   Kleur is nooit het enige teken, en de woorden zijn die van de kop van de wedstrijd.
 - **Alternatieven:** alleen wedstrijden met een pagina (dan lijkt een wedstrijd te ontbreken); alleen de stand voorlezen (kleur is dan het enige teken); altijd naast elkaar (lange clubnamen breken slecht in twee smalle kolommen).
