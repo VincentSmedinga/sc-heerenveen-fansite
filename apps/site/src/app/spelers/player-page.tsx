@@ -5,6 +5,7 @@ import {
   ArchiveCredit,
   Breadcrumb,
   Card,
+  CountryName,
   countryName,
   Heading,
   Link,
@@ -152,24 +153,17 @@ function PlayerCredit({ page }: { page: PlayerPage }) {
 }
 
 /**
- * One line under the name: the line, the flag with the country in words, and the year and place
- * of birth. A part we do not know is left out with its separator. The flag is decoration: the
- * country stands next to it in words, so a screen reader skips the flag.
+ * One line under the name: the line, the flag with the country in words (`CountryName`), and
+ * the year and place of birth. A part we do not know is left out with its separator.
  */
 function PlayerFacts({ page }: { page: PlayerPage }) {
-  const country = page.country === undefined ? undefined : countryName(page.country)
   const born = [
     page.birthYear === undefined ? undefined : `in ${page.birthYear}`,
     page.birthPlace === undefined ? undefined : `in ${page.birthPlace}`,
   ].filter((part) => part !== undefined)
   const parts: ReactNode[] = [
     lineName(page.line),
-    country === undefined || page.country === undefined ? undefined : (
-      <>
-        <PlayerName aria-hidden country={page.country} surname="" />
-        {country}
-      </>
-    ),
+    page.country === undefined ? undefined : <CountryName country={page.country} />,
     born.length === 0 ? undefined : `geboren ${born.join(' ')}`,
   ].filter((part) => part !== undefined)
 

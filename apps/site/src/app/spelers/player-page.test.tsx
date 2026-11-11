@@ -68,8 +68,9 @@ describe('the page of a player', () => {
     const html = await render()
     const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
 
-    expect(line).toMatch(/^Aanvaller · <span aria-hidden="true" class="hf-player-name [^"]*">.*?<img alt="Nederland"/s)
-    expect(line).toMatch(/<\/span>Nederland · geboren in 1974 in Emmen$/s)
+    expect(line).toMatch(
+      /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · geboren in 1974 in Emmen$/s,
+    )
   })
 
   it('leaves out what we do not know, with its separator', async () => {
@@ -77,7 +78,7 @@ describe('the page of a player', () => {
       '<p class="hf-meta">Geboren in 1974</p>',
     )
     expect(await render({ birthPlace: undefined, birthYear: undefined })).toMatch(
-      /<p class="hf-meta">Aanvaller · .*?Nederland<\/p>/s,
+      /<p class="hf-meta">Aanvaller · <span class="hf-country-name">.*?Nederland<\/span><\/p>/s,
     )
     expect(
       await render({ birthPlace: undefined, birthYear: undefined, country: undefined, line: undefined }),

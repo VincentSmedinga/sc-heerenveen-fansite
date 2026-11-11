@@ -32,6 +32,8 @@ export type { TrendCurve } from './components/chart/trend'
 export { CheckboxGroup } from './components/checkbox-group/CheckboxGroup'
 export type { CheckboxGroupOption, CheckboxGroupProps } from './components/checkbox-group/CheckboxGroup'
 export { Contents } from './components/contents/Contents'
+export { CountryName } from './components/country-name/CountryName'
+export type { CountryNameProps } from './components/country-name/CountryName'
 export { DataTable } from './components/data-table/DataTable'
 export type {
   DataTableCell,
