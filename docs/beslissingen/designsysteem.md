@@ -3224,3 +3224,16 @@
   De losse getallen in één vlak waren vlakker en leken niet op dat ontwerp.
 - **Alternatieven:** `Card` als element van de lijst (de kaart kan geen `li` zijn); één vast raster van twee kolommen (dat wordt één rij op een breed scherm, en een getal als "1,26" past dan niet naast een tweede op een smalle kolom).
 - **Later:** vervangt de lijst zonder kaarten en het vaste raster uit de beslissing hierboven, "Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot".
+
+## Een loopbaan is een lijst van periodes met een lijst seizoenen, en een gat is een regel van de pagina
+
+- **Datum:** 11 november 2026
+- **Besluit:** `CareerTimeline` (#1081) zet de periodes van een speler, de nieuwste eerst, in een lijst met de jaren als kop.
+  Elke periode heeft een lijst seizoenen met de link naar het seizoen als kop, en een seizoen kan een rugnummer, "Dit seizoen", de competities, een moment en een opmerking hebben.
+  De tekst van een gat staat bij de periode erboven (`gap`) en de pagina schrijft hem.
+  De lijn en de ringen zijn CSS, niet in de markup, zodat een schermlezer alleen de lijst leest.
+  Een gat is een gestippeld stuk van de lijn met de tekst ernaast, en een moment staat op het warme vlak.
+  De pagina kiest het niveau van de kop van een periode (2 of 3), en de seizoenen staan een niveau lager.
+- **Waarom:** een tijdlijn van periodes en seizoenen is een lijst met koppen, die een schermlezer kan overslaan en de bezoeker kan scannen.
+  Welke seizoenen een gat vormen, weet alleen de pagina, dus die geeft de tekst mee.
+- **Alternatieven:** een tabel met een rij per seizoen (dan verdwijnen de periodes en de gaten, en op een telefoon past hij niet); de gaten uit de seizoenen afleiden in het component (dat kent de seizoenen van de club niet).
