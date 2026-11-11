@@ -4601,3 +4601,14 @@
 - **Waarom:** de tabel geeft de getallen, de loopbaan het verhaal.
   Een supporter ziet zo wanneer een speler er was, met welk nummer en wat hij meemaakte, en we beweren niets over een eerste of laatste wedstrijd waarvan we de opstellingen niet hebben.
 - **Alternatieven:** het aantal wedstrijden en doelpunten per seizoen in de loopbaan herhalen (staat in de tabel); een moment voor elke wedstrijd waarin hij scoorde, en mijlpalen als zijn 100e wedstrijd (niet in dit issue).
+
+## Een wedstrijd telt voor een speler alleen als hij op het veld stond
+
+- **Datum:** 11 november 2026
+- **Besluit:** op de pagina van een speler telt een wedstrijd als gespeeld als hij in de basis stond of inviel (hij is de speler die erin komt bij een wissel van het rapport).
+  Een wissel die niet inviel telt niet mee (#1096).
+  `playerSeasonsOf` in `apps/site/src/player-seasons.ts` telt dit op één plek: `played`, `lineupMatches` en dus de kerngetallen, de rij Totaal, de tegendoelpunten per wedstrijd en de eerste en de laatste wedstrijd in de loopbaan lezen het daar.
+  Een seizoen met de cijfers uit de tabel van Wikipedia verandert niet.
+- **Waarom:** een speler op de bank heeft de wedstrijd niet gespeeld, en een eerste of laatste wedstrijd waarin hij niet op het veld stond is onjuist.
+- **Alternatieven:** de bank meetellen zoals eerst (te hoog); alleen de basis tellen (invallers missen).
+- **Buiten dit besluit:** de selectie en Cijfers tellen niet op deze plek.
