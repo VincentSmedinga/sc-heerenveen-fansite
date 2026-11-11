@@ -56,7 +56,7 @@ Bij elke bron staat of de voorwaarden daar iets over zeggen.
 
 - **Nemen:** de berichten in de feed gaan (bijna) allemaal over sc Heerenveen en `robots.txt` laat ons de feed lezen.
   Een feed die ook over andere onderwerpen gaat, nemen we met het relevantiefilter (`club`, #74): de import beoordeelt elke kop, en de site toont alleen wat over de club gaat.
-  Het filter heeft daarvoor ook de wedstrijden van het lopende seizoen nodig: een kop over de tegenstander is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden (hoogstens 10 en minstens 3 dagen voor de wedstrijd) tot 3 dagen na de wedstrijd (#315, #1008).
+  Het filter heeft daarvoor ook de wedstrijden van het lopende seizoen nodig: een kop over de tegenstander is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden (3 tot 5 dagen voor de wedstrijd) tot 3 dagen na de wedstrijd (#315, #1008).
   Dat staat dan bij de bron.
 - **Nemen na het relevantiefilter (#74):** een brede feed met regelmatig berichten over de club, die ook over andere onderwerpen gaat.
   Het filter is er nu.

@@ -706,14 +706,14 @@ describe('the relevance filter and the matches of the season', () => {
   it('opens the window the day after both previous matches, from the results of the league (#1008)', async () => {
     const server = await serve(
       feedWith(
-        entry('vroeg', { pubDate: 'Sun, 11 Oct 2026 12:00:00 GMT', title: adoHeadline }),
-        entry('laat', { pubDate: 'Mon, 12 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+        entry('vroeg', { pubDate: 'Thu, 15 Oct 2026 12:00:00 GMT', title: adoHeadline }),
+        entry('laat', { pubDate: 'Fri, 16 Oct 2026 12:00:00 GMT', title: adoHeadline }),
       ),
     )
 
     await addFeed(`${server.origin}/rss/`, { filter: 'club' })
-    // Our previous match was played on the 4th, theirs on the 11th, and we play on the 21st:
-    // the window opens on the 12th, and not 3 days before the match, on the 18th.
+    // Our previous match was played on the 4th, theirs on the 15th, and we play on the 21st:
+    // the window opens on the 16th, 5 days before, not 3 days before the match, on the 18th.
     await database.db.insert(matches).values(
       await withClubs(database.db, [
         {
@@ -737,7 +737,7 @@ describe('the relevance filter and the matches of the season', () => {
         awayGoals: 1,
         homeClub: 'Fortuna Sittard',
         homeGoals: 0,
-        playedOn: '2026-10-11',
+        playedOn: '2026-10-15',
         round: 11,
         season: '2026/27',
       },
@@ -746,7 +746,7 @@ describe('the relevance filter and the matches of the season', () => {
         awayGoals: 1,
         homeClub: 'Sparta Rotterdam',
         homeGoals: 0,
-        playedOn: '2025-10-11',
+        playedOn: '2025-10-15',
         round: 11,
         season: '2025/26',
       },

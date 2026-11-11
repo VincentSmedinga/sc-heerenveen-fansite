@@ -117,7 +117,7 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
 export const opponentDaysBefore = 3
 
 /** How many days before a match the window of an item about the opponent opens at most. */
-export const opponentDaysBeforeMost = 10
+export const opponentDaysBeforeMost = 5
 
 /** How many days after a match an item about the opponent is `relevant`. */
 export const opponentDaysAfter = 3

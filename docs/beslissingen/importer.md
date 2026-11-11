@@ -4058,8 +4058,10 @@
 - **Besluit:** het venster van de regel over de tegenstander opent de dag na de latere van twee wedstrijden, onze vorige wedstrijd en de vorige competitiewedstrijd van de tegenstander, en sluit 3 dagen na de wedstrijd (#1008).
   - **Nooit smaller dan 3 dagen:** het opent niet later dan 3 dagen voor de wedstrijd (`opponentDaysBefore`).
     Vrijdag tot zondag geeft dus geen gat.
-    Het venster kan wel breder worden: speelden beide clubs de zaterdag ervoor, dan opent het op de zondag, 6 dagen voor de wedstrijd.
-  - **Nooit breder dan 10 dagen:** het opent niet eerder dan 10 dagen voor de wedstrijd (`opponentDaysBeforeMost`), zodat een winterstop of het begin van een seizoen geen maand algemeen nieuws over de tegenstander doorlaat.
+    Het venster kan wel breder worden: speelden beide clubs de zaterdag ervoor, dan opent het 5 dagen voor de wedstrijd.
+  - **Nooit breder dan 5 dagen:** het opent niet eerder dan 5 dagen voor de wedstrijd (`opponentDaysBeforeMost`), in elk geval, ook na een lange pauze.
+    De projecteigenaar koos dat op 11 november 2026: 5 dagen is de aanloop van een speelweek, en een winterstop of het begin van een seizoen laat zo geen week algemeen nieuws over de tegenstander door.
+    Een eerste versie had 10 dagen, en dan gaf een week van zaterdag tot zaterdag 6 dagen en een lange pauze 10.
   - **Onze vorige wedstrijd:** de laatste wedstrijd in `matches` van dit seizoen die gespeeld is of nog gepland staat en voor de wedstrijd ligt, ook een bekerwedstrijd.
     Een wedstrijd die nog gepland staat telt mee, want op de dag van de import is dat de echte vorige wedstrijd: het nieuws van de dagen ervoor gaat over die wedstrijd.
     Een uitgestelde of geannuleerde wedstrijd telt niet.
@@ -4071,5 +4073,5 @@
   - **De rest blijft:** een kop met een tweede profclub telt niet, alleen het lopende seizoen telt en de dagen zijn Nederlandse dagen.
 - **Waarom:** een wedstrijd die laat komt, bijvoorbeeld door een interlandperiode, miste de aanloop: het nieuws van de dagen ervoor viel buiten het venster van 3 dagen.
   Vanaf de dag na hun vorige wedstrijd gaat het nieuws over de tegenstander niet meer over die wedstrijd maar over de onze.
-- **Alternatieven:** een langer plafond voor een derby (één regel voor elke club blijft eenvoudig en toetsbaar); de vorige wedstrijd van de tegenstander in elke competitie zoeken (beker en Europa staan niet in de database); het venster altijd 10 dagen maken (dan komt een week algemeen nieuws door).
+- **Alternatieven:** een langer plafond voor een derby (één regel voor elke club blijft eenvoudig en toetsbaar); de vorige wedstrijd van de tegenstander in elke competitie zoeken (beker en Europa staan niet in de database); het venster 10 dagen als plafond geven (de eerste versie: dat gaf in een gewone week van zaterdag tot zaterdag 6 dagen); het venster altijd 10 dagen maken (dan komt een week algemeen nieuws door).
 - **Later:** vervangt het venster van 3 dagen voor de wedstrijd uit _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_ (30 oktober 2026) en uit de eerdere beslissing van 26 oktober 2026 (#315).

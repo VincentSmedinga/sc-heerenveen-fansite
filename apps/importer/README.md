@@ -335,7 +335,7 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
 - **Het venster:** het opent de dag na de latere van twee wedstrijden: onze vorige wedstrijd van dit seizoen, gespeeld of nog gepland (ook een bekerwedstrijd) en de vorige competitiewedstrijd van de tegenstander (`league_results`).
   Dan staat het nieuws over hun vorige wedstrijd er niet meer in, en de aanloop naar onze wedstrijd wel.
-  Het opent nooit later dan `opponentDaysBefore` (3) dagen voor de wedstrijd, dus het is nooit smaller dan een venster van 3 dagen, en nooit eerder dan `opponentDaysBeforeMost` (10) dagen ervoor, zodat een winterstop geen maand algemeen nieuws doorlaat.
+  Het opent nooit later dan `opponentDaysBefore` (3) dagen voor de wedstrijd, dus het is nooit smaller dan een venster van 3 dagen, en nooit eerder dan `opponentDaysBeforeMost` (5) dagen ervoor, zodat een winterstop geen week algemeen nieuws doorlaat.
   Is een van de twee vorige wedstrijden niet bekend (het begin van het seizoen, een naam die niet te koppelen is), dan opent het 3 dagen voor de wedstrijd.
   Een bericht van de openingsdag telt, een bericht van de dag ervoor niet.
   Na de wedstrijd telt een bericht tot en met de 3e dag (`opponentDaysAfter`), en een bericht van 4 dagen erna niet.
