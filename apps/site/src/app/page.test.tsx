@@ -1071,7 +1071,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       previousMeeting: { dataSource: 'oude-fansite', goalsAgainst: 4, goalsFor: 1, matchDate: '2005-03-05' },
     })
 
-    expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia en de sc Heerenveen Fansite')
+    expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia en sc Heerenveen Fansite')
   })
 
   it('shows the credit with a programme and no table', async () => {

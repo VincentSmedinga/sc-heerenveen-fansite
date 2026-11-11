@@ -63,7 +63,7 @@ const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFi
 // time of the last reading in the fold. A page that counts across all seasons also names the
 // archive of the old fansite, because the made-up matches of the seed include some of its own.
 const closedWikipediaCredit =
-  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia(?: en de sc Heerenveen Fansite)?<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia(?: en sc Heerenveen Fansite)?<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
 
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.

@@ -41,11 +41,9 @@ describe('the credit under the image of a card', () => {
     expect(textOf(imageCredit(true)?.source)).toBe('Gegevens van Wikipedia')
     expect(textOf(imageCredit(true, undefined, [{ dataSource: 'wikipedia' }])?.source)).toBe('Gegevens van Wikipedia')
     expect(textOf(imageCredit(true, undefined, [{ dataSource: 'oude-fansite' }])?.source)).toBe(
-      'Gegevens van de sc Heerenveen Fansite',
+      'Gegevens van sc Heerenveen Fansite',
     )
-    expect(textOf(imageCredit(true, undefined, 'both')?.source)).toBe(
-      'Gegevens van Wikipedia en de sc Heerenveen Fansite',
-    )
+    expect(textOf(imageCredit(true, undefined, 'both')?.source)).toBe('Gegevens van Wikipedia en sc Heerenveen Fansite')
   })
 })
 
