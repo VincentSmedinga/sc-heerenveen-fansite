@@ -46,4 +46,14 @@ describe('DescriptionList', () => {
     expect(container.querySelector('#feiten')?.className).toBe('hf-description-list extra')
     expect(container.querySelector('#paar > dt')?.textContent).toBe('Ronde')
   })
+
+  it('has the pairs under each other when it is stacked', () => {
+    const { container } = render(
+      <DescriptionList stacked>
+        <DescriptionList.Item term="Eerste doelpunt">4 februari 2003</DescriptionList.Item>
+      </DescriptionList>,
+    )
+
+    expect(container.querySelector('dl.hf-description-list-stacked')).not.toBeNull()
+  })
 })

@@ -2877,7 +2877,7 @@
 
 - **Datum:** 6 november 2026
 - **Besluit:** een kaart "Alle tijden" met de eerste tien plaatsen, over alle seizoenen, per persoon, die de schakelaar volgt (#780).
-  **Later:** sinds #1101 (11 november 2026) heet de kaart "Sinds 1990/91" en staat het beginseizoen in de kop, niet meer in de intro; het anker is nu `#sinds-1990-91`: een anker volgt de titel, ook als die verandert, want een oude link brengt een bezoeker nog steeds op de juiste pagina.
+  **Later:** sinds #1101 (11 november 2026) heet de kaart "Sinds 1990/91" en staat het beginseizoen vast in de kop (net als in de balk "Op deze pagina:"), niet meer in de intro; het anker is nu `#sinds-1990-91`: een anker volgt de titel, ook als die verandert, want een oude link brengt een bezoeker nog steeds op de juiste pagina.
   - **Plek:** zacht vlak in de zijkolom van Spelers, direct onder Doelpuntenmakers, met een item "Alle tijden" in de balk "Op deze pagina:" en het anker `#alle-tijden`.
   - **Telling:** `topScorersOf` over de wedstrijden van alle seizoenen, in één query (`listAllMatchGoals`), een uur bewaard.
     Het seizoen van de kiezer verandert de kaart niet.
@@ -3709,6 +3709,7 @@
   - Een wedstrijd zonder uitslag toont de datum in de korte vorm van de lijsten (zonder tijd), of "Live", "Uitgesteld" of "Geannuleerd", zonder kleur.
   - Een wedstrijd zonder pagina staat als tekst zonder link in dezelfde opbouw.
   - Onder 40 rem breed staan de links onder elkaar, daarboven naast elkaar met de volgende wedstrijd rechts.
+  - **Later:** 11 november 2026 (#1100): de grens ligt op 30 rem breed van de kaart, zodat de twee wedstrijden ook in een smalle kolom naast elkaar staan.
 - **Waarom:** een supporter wil het seizoen doorlezen zonder terug te gaan naar de lijst, en een link die een wedstrijd overslaat, zegt niet dat er een wedstrijd mist.
   Kleur is nooit het enige teken, en de woorden zijn die van de kop van de wedstrijd.
 - **Alternatieven:** alleen wedstrijden met een pagina (dan lijkt een wedstrijd te ontbreken); alleen de stand voorlezen (kleur is dan het enige teken); altijd naast elkaar (lange clubnamen breken slecht in twee smalle kolommen).
@@ -4648,3 +4649,21 @@
   - **De gegevens blijven zoals ze zijn:** de doelpunten zelf houden hun lege `person_id` (zie #918).
 - **Waarom:** op acceptatie hadden 1019 van de 2074 doelpunten van ons alleen een rij van de selectie, zodat dezelfde speler soms meer rijen kreeg, zonder link.
 - **Alternatieven:** de doelpunten in de database herstellen (een zaak van de importer, een eigen issue); de links van alle kaarten houden (druk, en de selectie noemt al alle spelers).
+
+## De zijkolom van de pagina van een speler
+
+- **Datum:** 11 november 2026
+- **Besluit:** de pagina van een speler heeft een zijkolom, "Meer cijfers over deze speler", met kaarten op de blauwe ondergrond van het ontwerp, en onderaan de bronvermelding.
+  Een kaart zonder inhoud valt weg (#1086).
+  - **Doelpunten per competitie** (een doelman: wedstrijden per competitie, uit de opstellingen), **Vaakst raak tegen** (hoogstens vier clubs met minstens twee doelpunten, elk een link naar de club), **Meer cijfers** (zijn eerste doelpunt voor ons, wie hem het vaakst een assist gaf met minstens twee, en zijn Europese wedstrijden) en **Tegen ons**.
+  - **Wie hem het vaakst bediende:** staan er twee bovenaan met evenveel assists, dan noemen we niemand, want "het vaakst" is dan niet waar.
+  - **Europese wedstrijden** komen uit de opstellingen.
+    Hebben niet alle seizoenen opstellingen, dan zegt de regel dat erbij.
+    De Champions League telt de voorrondes ervan mee.
+  - **Tegen ons:** de zin zegt "voor hij hier kwam" als alle doelpunten in een seizoen voor zijn eerste bij ons vielen, "nadat hij hier wegging" als ze na zijn laatste vielen, en anders "tegen sc Heerenveen".
+    Het gaat om doelpunten waarbij `match_goals.person_id` zijn persoon is en `ours` onwaar.
+  - **De gegevens** komen uit dezelfde leesronde als de seizoenen: `readPlayerSeasonFacts` heeft er `assistGivers` en `againstUs` bij, en `loadPlayerSeasonFacts` deelt de lezing per verzoek.
+    `apps/site/src/player-aside.ts` rekent de kaarten uit.
+  - **Nieuw in het designsysteem:** `FigureList` (namen met een getal aan het eind van de regel) en `stacked` bij `DescriptionList`.
+- **Waarom:** een supporter ziet zo in een oogopslag waar en tegen wie een speler scoorde, zonder dat de tabel en de loopbaan iets herhalen.
+- **Alternatieven:** de bron in de hoofdkolom laten (het ontwerp zet hem onderaan de zijkolom); bij gelijke assists de eerste noemen (onjuist); een tweede leesronde voor de zijkolom (dubbel werk).

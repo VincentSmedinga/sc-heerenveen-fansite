@@ -1458,7 +1458,7 @@ export function AllTimeScorersCard({
       surface="soft"
     >
       <Heading anchor id="sinds-1990-91" level={2}>
-        Sinds {since ?? '1990/91'}
+        Sinds 1990/91
       </Heading>
       {scorers.length === 0 || since === undefined ? (
         <Text>We hebben nog geen doelpuntenmakers van eerdere seizoenen. Kijk straks nog eens.</Text>

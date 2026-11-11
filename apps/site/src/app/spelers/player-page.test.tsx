@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { loadPlayerPage, periodsOf, type PlayerPage, playerPageOf } from '#src/player-page'
-import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { loadPlayerSeasonFacts, loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
 import { getReportAddresses } from '#src/report-data'
 import { withoutIcons } from '#src/without-icons'
 
@@ -15,7 +15,7 @@ vi.mock('#src/player-page', async (importOriginal) => ({
   loadPlayerPage: vi.fn(),
 }))
 
-vi.mock('#src/player-seasons', () => ({ loadPlayerSeasons: vi.fn() }))
+vi.mock('#src/player-seasons', () => ({ loadPlayerSeasonFacts: vi.fn(), loadPlayerSeasons: vi.fn() }))
 
 vi.mock('#src/report-data', () => ({ getReportAddresses: vi.fn() }))
 
@@ -70,6 +70,14 @@ const digestOf = async (promise: Promise<unknown>) =>
 
 beforeEach(() => {
   vi.mocked(loadPlayerSeasons).mockResolvedValue([madeUpSeason])
+  vi.mocked(loadPlayerSeasonFacts).mockResolvedValue({
+    appearances: [],
+    assists: [],
+    goals: [],
+    matchCounts: [],
+    players: [],
+    tables: [],
+  })
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(new Date('2026-10-23T13:40:00Z'))
   vi.stubEnv('SITE_ENV', 'production')
@@ -222,6 +230,30 @@ describe('the page of a player', () => {
     expect(html).toContain('Testclub – sc Heerenveen 2–1')
     expect(html).not.toContain('href="/wedstrijden')
     expect(html).toContain('10 april 2004 · eerste doelpunt')
+  })
+
+  it('has the side column beside the main column, with the credit at the bottom of it and not in the main column', async () => {
+    const html = await render()
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
+    const aside = html.slice(html.indexOf('<aside'))
+
+    expect(aside).toContain('aria-label="Meer cijfers over deze speler"')
+    expect(main).not.toContain('Bron: Wikipedia')
+    expect(aside).toContain('Bron: Wikipedia')
+    expect(aside).toContain('>Doelpunten per competitie<')
+  })
+
+  it('leaves the cards of the side column out when what they read fails, and keeps the credit', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(loadPlayerSeasons).mockRejectedValue(new Error('connect ECONNREFUSED'))
+    vi.mocked(loadPlayerSeasonFacts).mockRejectedValue(new Error('connect ECONNREFUSED'))
+
+    const html = await render()
+
+    expect(html).not.toContain('Doelpunten per competitie')
+    expect(html).toContain('Bron: Wikipedia')
+    error.mockRestore()
   })
 
   it('ends with the full credit of Wikipedia with his article, and the archive for a season up to 2006/07', async () => {

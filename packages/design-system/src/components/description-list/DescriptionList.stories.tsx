@@ -41,3 +41,15 @@ export const TwoFacts = meta.story({
     </DescriptionList>
   ),
 })
+
+export const Stacked = meta.story({
+  name: 'Onder elkaar, voor een zijkolom',
+  render: () => (
+    <DescriptionList stacked>
+      <DescriptionList.Item term="Eerste doelpunt">
+        4 februari 2003, uit bij Stormvogels Telstar (1–3)
+      </DescriptionList.Item>
+      <DescriptionList.Item term="Vaakst bediend door">Richard Knopper, 3 assists</DescriptionList.Item>
+    </DescriptionList>
+  ),
+})

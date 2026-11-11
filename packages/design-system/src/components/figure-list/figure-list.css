@@ -1,0 +1,35 @@
+/* A list of names with a number each: the name on the left, the number in bold on the right. */
+
+@layer hf.components {
+  .hf-figure-list {
+    list-style: none;
+    margin-block: 0;
+    padding-inline-start: 0;
+  }
+
+  .hf-figure-list-item {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    column-gap: var(--hf-space-s);
+    display: flex;
+    justify-content: space-between;
+    padding-block: var(--hf-space-s);
+  }
+
+  /* A long name wraps, and an unbroken one does too, so the row never scrolls sideways. */
+  .hf-figure-list-name {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-figure-list-note {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-figure-list-figure {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-headline-font-weight);
+  }
+}
