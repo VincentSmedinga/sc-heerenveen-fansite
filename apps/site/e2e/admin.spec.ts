@@ -37,16 +37,31 @@ for (const [name, javaScriptEnabled, title] of [
         .getByRole('button', { name: `Verberg: ${title}` })
         .click()
       await expect(page.getByRole('heading', { name: 'Er is iets mis' })).toBeVisible()
-      await expect(itemOf(page, title).getByText('Schrijf een reden')).toBeVisible()
-      await expect(itemOf(page, title).getByLabel('Reden')).toHaveAttribute('aria-invalid', 'true')
+      await expect(itemOf(page, title).getByText('Kies een reden.')).toBeVisible()
+      await expect(itemOf(page, title).getByLabel('Reden', { exact: false }).first()).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
       if (javaScriptEnabled) {
         // axe is a script that runs in the page, so it can't check a page without JavaScript.
+        expect(await checkPage(page)).toEqual([])
+
+        // Anders opens the text field, and without a text the error is at that field, with
+        // Anders still chosen and the field open.
+        await itemOf(page, title).getByRole('combobox').selectOption({ label: 'Anders' })
+        await expect(itemOf(page, title).getByLabel('Toelichting')).toBeVisible()
+        await itemOf(page, title)
+          .getByRole('button', { name: `Verberg: ${title}` })
+          .click()
+        await expect(itemOf(page, title).getByText('Schrijf een reden bij Anders.')).toBeVisible()
+        await expect(itemOf(page, title).getByLabel('Toelichting')).toHaveAttribute('aria-invalid', 'true')
+        await expect(itemOf(page, title).getByRole('combobox')).toHaveValue('anders')
         expect(await checkPage(page)).toEqual([])
       }
 
       // With a reason: the item is hidden, the page says when it is gone from the site, and the
       // search is kept. The item leaves the group on the site, so it is not in the list now.
-      await itemOf(page, title).getByLabel('Reden').fill('Fout in het bericht')
+      await itemOf(page, title).getByRole('combobox').selectOption({ label: 'Fout in het bericht' })
       await itemOf(page, title)
         .getByRole('button', { name: `Verberg: ${title}` })
         .click()

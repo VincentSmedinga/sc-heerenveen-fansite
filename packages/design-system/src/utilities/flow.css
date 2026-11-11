@@ -26,7 +26,8 @@
  * last child comes last, and the container is in :where(), so it adds no specificity.
  *
  * A flow container is an ordinary block, not a grid or a flex container: there a margin adds
- * to the gap. So a form of cards, which is a grid, is not one (see form.css). A component that
+ * to the gap. So a form of cards, which is a grid, is not one, and neither is a form on one
+ * line, which is a flex container (see form.css). A component that
  * is a card itself, such as a tile, keeps the space between its own parts with a utility class
  * on the part, or with its parts in an element of their own.
  */
@@ -39,7 +40,7 @@
     .hf-article,
     .hf-disclosure-content,
     .hf-flow,
-    .hf-form:not(:has(> .hf-card))
+    .hf-form:not(:has(> .hf-card), .hf-form-inline)
   ) {
     > * {
       margin-block: 0 var(--hf-space-m);

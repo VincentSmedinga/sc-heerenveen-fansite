@@ -3,15 +3,8 @@
 import { adminRoles } from '@fansite/db/schema'
 import { redirect } from 'next/navigation'
 
-import {
-  approveItem,
-  hideItem,
-  parseItemId,
-  parseReason,
-  parseSearch,
-  showItem,
-  unapproveItem,
-} from '#src/beheer/items'
+import { otherReasonKey, parseHideReason } from '#src/beheer/hide-reasons'
+import { approveItem, hideItem, parseItemId, parsePage, parseSearch, showItem, unapproveItem } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -42,8 +35,10 @@ export async function submitApprove(itemId: number, view: ListView) {
 }
 
 /**
- * Hides an item with the reason from the form. Without a reason, or with one that is too long,
- * nothing happens and the list shows the error at the item. The item is gone from the site
+ * Hides an item with the reason from the form: a choice from the list of reasons, and for
+ * "Anders" the text of the editor (see `parseHideReason`). Without a choice, with "Anders" and
+ * no text, or with a text that is too long, nothing happens and the list shows the error at
+ * the item, with "Anders" still chosen. The item is gone from the site
  * within five minutes (see `src/headlines.ts` and `src/podcasts.ts`).
  */
 export async function submitHide(itemId: number, view: ListView, formData: FormData) {
@@ -55,10 +50,17 @@ export async function submitHide(itemId: number, view: ListView, formData: FormD
     redirect(itemsPath(list, { fout: 'weg' }))
   }
 
-  const reason = parseReason(formData.get('reden'))
+  const choice = formData.get('reden')
+  const reason = parseHideReason(choice, formData.get('toelichting'))
 
   if ('error' in reason) {
-    redirect(itemsPath(list, { bericht: id, fout: reason.error === 'leeg' ? 'reden-leeg' : 'reden-lang' }))
+    redirect(
+      itemsPath(list, {
+        bericht: id,
+        fout: `reden-${reason.error}`,
+        ...(choice === otherReasonKey ? { keuze: otherReasonKey } : {}),
+      }),
+    )
   }
 
   const outcome = await hideItem(getDatabase().db, userId, id, reason.reason)
@@ -96,13 +98,17 @@ export async function submitUnapprove(itemId: number, view: ListView) {
   redirect(outcome === 'missing' ? itemsPath(list, { fout: 'weg' }) : itemsPath(list, { teruggezet: id }))
 }
 
-/** What the list shows, checked again: a group that is none becomes `on-site`. */
+/**
+ * What the list shows, checked again: a group that is none becomes `on-site`, and a page that
+ * is no number the first.
+ */
 function cleanView(view: ListView): ListView {
   const group = view?.group === 'not-on-site' ? 'not-on-site' : 'on-site'
 
   return {
     editorsOnly: group === 'not-on-site' && view?.editorsOnly === true,
     group,
+    page: parsePage(String(view?.page)),
     search: parseSearch(view?.search),
   }
 }

@@ -8,6 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createAccount } from './accounts'
 import {
   approveItem,
+  countItems,
   findItem,
   hideItem,
   type ItemFilter,
@@ -152,6 +153,19 @@ describe('listItems', () => {
     expect(others).toHaveLength(50)
     expect(others[0]).toBe('Kop x54')
     expect(others.at(-1)).toBe('Kop x5')
+  })
+
+  it('gives the next page from an offset, and counts every item of a group for the pages', async () => {
+    for (let number = 0; number < listLength + 5; number++) {
+      await addItem(database, ids, `k${number}`, { publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)) })
+    }
+
+    const second = (await listItems(database.db, '', { now, offset: listLength })).map((item) => item.title)
+
+    expect(second).toEqual(['Kop k4', 'Kop k3', 'Kop k2', 'Kop k1', 'Kop k0'])
+    expect(await countItems(database.db, '', { now })).toBe(listLength + 5)
+    expect(await countItems(database.db, 'k1', { now })).toBe((await listItems(database.db, 'k1', { now })).length)
+    expect(await countItems(database.db, '', { ...offSite(), now })).toBe(0)
   })
 
   it('gives the source, the headline, the link, the time, the paywall and who hid it, and no key', async () => {

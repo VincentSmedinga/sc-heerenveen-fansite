@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { ItemRelevance } from '@fansite/db/schema'
 import type { Metadata } from 'next'
 
-import { adminRoles, hiddenReasonMaxLength } from '@fansite/db/schema'
+import { adminRoles } from '@fansite/db/schema'
 import {
   Button,
   Card,
@@ -16,11 +16,14 @@ import {
   List,
   NewsItem,
   Page,
+  Pagination,
   Text,
 } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
+import { type HideReasonError, hideReasonErrors, otherReasonKey } from '#src/beheer/hide-reasons'
 import {
+  countItems,
   findItem,
   type ItemGroup,
   listItems,
@@ -29,6 +32,7 @@ import {
   parseEditorsOnly,
   parseGroup,
   parseItemId,
+  parsePage,
   parseSearch,
   searchMaxLength,
 } from '#src/beheer/items'
@@ -38,6 +42,7 @@ import { dateTimeOf, formatNewsTime } from '#src/news'
 import { SwitchLinks } from '#src/SwitchLinks'
 
 import { submitApprove, submitHide, submitShow, submitUnapprove } from './actions'
+import { HideForm } from './HideForm'
 import { itemsPath, type ListView } from './paths'
 
 // Render on each request: who is logged in and which items are hidden are not known when the
@@ -48,11 +53,15 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-/** What the address says went wrong with the last action. Anything else is no error. */
+/**
+ * What the address says went wrong with the last action: `reden-kies`, `reden-anders` or
+ * `reden-lang`: a `HideReasonError` with `reden-` before it. Anything else is no error.
+ */
 const fieldErrors = {
-  'reden-lang': `Schrijf een kortere reden, van hoogstens ${hiddenReasonMaxLength} tekens.`,
-  'reden-leeg': 'Schrijf een reden, bijvoorbeeld “Fout in het bericht”.',
-} as const
+  'reden-anders': hideReasonErrors.anders,
+  'reden-kies': hideReasonErrors.kies,
+  'reden-lang': hideReasonErrors.lang,
+} as const satisfies Record<`reden-${HideReasonError}`, string>
 
 const isFieldError = (value: string | string[] | undefined): value is keyof typeof fieldErrors =>
   typeof value === 'string' && Object.hasOwn(fieldErrors, value)
@@ -75,20 +84,23 @@ function groupWords({ editorsOnly, group }: Pick<ListView, 'editorsOnly' | 'grou
   return plural ? 'die niet op de site staan' : 'dat niet op de site staat'
 }
 
-/** The line above the list: what it holds, and which group and search it is of. */
-function listSummary(view: ListView, count: number) {
-  const { search } = view
+/**
+ * The line above the list: how many items it holds in all, which group and search it is of,
+ * and, when there is more than a page, the page.
+ */
+function listSummary(view: ListView, total: number, pages: number) {
+  const { page, search } = view
   const quoted = search === '' ? '' : ` met “${search}”`
 
-  if (count === 0) {
+  if (total === 0) {
     return search === ''
       ? `Er zijn geen berichten ${groupWords(view, true)}.`
       : `Geen berichten gevonden${quoted} ${groupWords(view, true)}.`
   }
 
-  const number = count === listLength ? `De nieuwste ${listLength}` : count
+  const which = pages > 1 ? ` Je ziet pagina ${page} van ${pages}.` : ''
 
-  return `${number} ${count === 1 ? 'bericht' : 'berichten'} ${groupWords(view, count !== 1)}${quoted}.`
+  return `${total} ${total === 1 ? 'bericht' : 'berichten'} ${groupWords(view, total !== 1)}${quoted}.${which}`
 }
 
 /** The notice after an action: its heading and what happens to the item on the site. */
@@ -124,14 +136,30 @@ const relevanceDetails = {
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole(...adminRoles)
 
-  const { bericht, fout, getoond, opgenomen, q: rawSearch, redactie, teruggezet, toon, verborgen } = await searchParams
+  const {
+    bericht,
+    fout,
+    getoond,
+    keuze,
+    opgenomen,
+    pagina,
+    q: rawSearch,
+    redactie,
+    teruggezet,
+    toon,
+    verborgen,
+  } = await searchParams
   const search = parseSearch(rawSearch)
   const group: ItemGroup = parseGroup(toon)
   const editorsOnly = parseEditorsOnly(redactie, group)
-  const view: ListView = { editorsOnly, group, search }
   const { db } = getDatabase()
   const now = new Date()
-  const found = await listItems(db, search, { editorsOnly, group, now })
+  // A page beyond the last shows the last one.
+  const total = await countItems(db, search, { editorsOnly, group, now })
+  const pages = Math.max(1, Math.ceil(total / listLength))
+  const page = Math.min(parsePage(pagina), pages)
+  const view: ListView = { editorsOnly, group, page, search }
+  const found = await listItems(db, search, { editorsOnly, group, now, offset: (page - 1) * listLength })
 
   const failedId = parseItemId(bericht)
   const fieldError = isFieldError(fout) ? fieldErrors[fout] : undefined
@@ -158,19 +186,19 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             minuten niet meer op de site, en de import zet het niet terug.
           </Text>
           <Text>
-            Schrijf bij de reden kort wat er mis is, in hoogstens {hiddenReasonMaxLength} tekens. Bijvoorbeeld “Fout in
-            het bericht”, “Past niet bij de site” of “Op verzoek van de bron”.
+            Kies bij het verbergen de reden uit de lijst. Past geen enkele reden, kies dan Anders en schrijf kort wat er
+            mis is.
           </Text>
           <SwitchLinks
             label="Welke berichten"
             options={[
               {
-                href: itemsPath({ ...view, editorsOnly: false, group: 'on-site' }),
+                href: itemsPath({ ...view, editorsOnly: false, group: 'on-site', page: 1 }),
                 label: 'Op de site',
                 value: 'on-site',
               },
               {
-                href: itemsPath({ ...view, group: 'not-on-site' }),
+                href: itemsPath({ ...view, group: 'not-on-site', page: 1 }),
                 label: 'Niet op de site',
                 value: 'not-on-site',
               },
@@ -178,13 +206,12 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             size="small"
             value={group}
           />
-          <Form action="/beheer/berichten" method="get">
+          <Form action="/beheer/berichten" inline method="get">
             <Field hint="Een deel van de kop of van de link." id="zoek" label="Zoeken" required={false}>
               <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
             </Field>
             {group === 'not-on-site' ? (
               <CheckboxGroup
-                className="hf-space-end-s"
                 legend="Filter"
                 name="redactie"
                 options={[{ label: 'Alleen door de redactie verborgen', value: '1' }]}
@@ -202,11 +229,12 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           </Form>
         </>
       }
+      wide
     >
       <ErrorSummary
         errors={
           fieldError !== undefined && failedItem !== undefined
-            ? [{ id: `reden-${failedItem.id}`, message: fieldError }]
+            ? [{ id: failedFieldId(failedItem.id, fout), message: fieldError }]
             : []
         }
         id={summaryId}
@@ -240,7 +268,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
       ) : null}
       <Card as="div">
         <Text appearance="meta">
-          {listSummary(view, found.length)}
+          {listSummary(view, total, pages)}
           {search === '' ? null : (
             <>
               {' '}
@@ -276,25 +304,16 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                     time={formatNewsTime(item.publishedAt, now)}
                   />
                   {canHide ? (
-                    <Form action={submitHide.bind(null, item.id, view)}>
-                      <Field
-                        error={error}
-                        id={`reden-${item.id}`}
-                        label={
-                          <>
-                            Reden{' '}
-                            <Text as="span" className="hf-visually-hidden">
-                              om “{item.title}” te verbergen
-                            </Text>
-                          </>
-                        }
-                      >
-                        <Input autoComplete="off" maxLength={hiddenReasonMaxLength} name="reden" />
-                      </Field>
-                      <Button aria-label={`Verberg: ${item.title}`} type="submit">
-                        Verberg
-                      </Button>
-                    </Form>
+                    <HideForm
+                      action={submitHide.bind(null, item.id, view)}
+                      chosen={error === undefined || keuze !== otherReasonKey ? undefined : otherReasonKey}
+                      errors={{
+                        choice: fout === 'reden-kies' ? error : undefined,
+                        note: fout === 'reden-kies' ? undefined : error,
+                      }}
+                      itemId={item.id}
+                      title={item.title}
+                    />
                   ) : null}
                   {canApprove ? (
                     <Form action={submitApprove.bind(null, item.id, view)}>
@@ -312,10 +331,10 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                       <Form action={submitUnapprove.bind(null, item.id, view)}>
                         <Button
                           appearance="soft"
-                          aria-label={`Terug naar het oordeel van het filter: ${item.title}`}
+                          aria-label={`Herstellen, terug naar het oordeel van het filter: ${item.title}`}
                           type="submit"
                         >
-                          Terug naar het oordeel van het filter
+                          Herstellen
                         </Button>
                       </Form>
                     </>
@@ -339,11 +358,28 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           </List>
         )}
       </Card>
+      {pages === 1 ? null : (
+        <Pagination
+          current={page}
+          label="Pagina’s van de lijst"
+          nextHref={page < pages ? itemsPath({ ...view, page: page + 1 }) : undefined}
+          previousHref={page > 1 ? itemsPath({ ...view, page: page - 1 }) : undefined}
+          total={pages}
+        />
+      )}
       <Text>
         <Link href="/beheer">Terug naar het beheer</Link>
       </Text>
     </Page.Main>
   )
+}
+
+/**
+ * The id of the field that has the error, which the summary links to: the list of reasons for
+ * no choice, and the text field for "Anders" without a text or with one that is too long.
+ */
+function failedFieldId(itemId: number, error: string | string[] | undefined) {
+  return error === 'reden-kies' ? `reden-${itemId}` : `toelichting-${itemId}`
 }
 
 /**

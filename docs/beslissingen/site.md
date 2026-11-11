@@ -4743,6 +4743,27 @@
 - **Alternatieven:** đ altijd een d (het Servische Đuričić wordt dan "duricic", wat een supporter niet zo schrijft); de Vietnamese naam aan de letters herkennen (een Vietnamese naam heeft veel letters met een accent, maar dat zegt niets zeker); het adres de letter laten houden (een adres met niet-ASCII-tekens is slecht te delen).
 - **Later:** vervangt de regel "zonder accenten" uit "De pagina van een speler staat op `/spelers/<naam>`, en een oude naam leidt door" voor letters zonder los accent; de rest van die beslissing geldt nog.
 
+## Een redacteur kiest de reden om een bericht te verbergen uit een lijst
+
+- **Datum:** 11 november 2026 (besloten op 9 november 2026, gebouwd in #1013)
+- **Besluit:** bij het verbergen van een bericht kiest een redacteur de reden uit een lijst (`hideReasons` in `apps/site/src/beheer/hide-reasons.ts`, de enige plek): "Fout in het bericht", "Past niet bij de site", "Op verzoek van de bron" en "Dubbel bericht", en "Anders" met een eigen tekst.
+  - **Bewaard als tekst:** een vaste reden bewaart haar tekst in `hidden_reason`, zonder schemawijziging, zodat oude en nieuwe redenen in dezelfde vorm in het logboek en op de pagina staan.
+    De server controleert de keuze opnieuw: een sleutel die niet in de lijst staat is "geen keuze".
+  - **"Anders" vraagt JavaScript:** het veld "Toelichting" staat verborgen tot "Anders" gekozen is (`HideForm`).
+    Zonder JavaScript werken alleen de vaste redenen.
+    Dat is aanvaard, omdat een paar mensen het Beheer gebruiken.
+  - **Fouten:** "Kies een reden." staat bij de lijst, "Schrijf een reden bij Anders." en de fout voor een tekst van meer dan 300 tekens staan bij het veld "Toelichting".
+    Na een fout bij "Anders" staat die keuze nog gekozen (`&keuze=anders` in het adres) en is het veld open.
+    De getypte tekst staat niet in het adres.
+  - **Opgeruimd scherm:** de pagina Berichten is breder (`wide`), het formulier van een bericht en het zoekformulier staan op één regel (`Form` met `inline`, in het designsysteem) die pas breekt waar geen ruimte is, de knop om een goedkeuring terug te nemen heet "Herstellen" (de toegankelijke naam begint met "Herstellen" en zegt verder wat er gebeurt), en het zoekveld staat voor de knop.
+  - **Paginering:** de lijst toont 50 berichten per pagina met `Pagination` en `?pagina=` in het adres.
+    Groep, zoekopdracht en het vakje blijven staan, een pagina voorbij de laatste toont de laatste en een waarde die geen getal is de eerste.
+    De tekst boven de lijst zegt hoeveel berichten het er zijn en welke pagina je ziet.
+- **Waarom:** kiezen gaat sneller dan typen en houdt de redenen gelijk.
+  De kolom bewaart al tekst, dus er is geen migratie en geen tweede soort reden om te tonen.
+  Een drukke periode maakte berichten onbereikbaar met alleen de nieuwste 50.
+- **Alternatieven:** een sleutel voor de reden in een aparte kolom (een migratie en twee soorten redenen); het veld "Toelichting" altijd zichtbaar (werkt zonder JavaScript, maar de pagina blijft rommelig); de grens van 50 verhogen (blijft een grens, en een lange lijst is traag).
+
 ## Een rugnummer hoort bij een speler in een seizoen, niet bij de persoon
 
 - **Datum:** 11 november 2026

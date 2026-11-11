@@ -988,16 +988,19 @@ Met JavaScript wisselt een gewone klik de pagina zonder haar opnieuw te laden (z
 "Op de site" is de standaard en heeft niets in het adres, "Niet op de site" is `?toon=niet-op-de-site`, en een andere waarde valt terug op de standaard.
 Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden of door een moderator op de site gezet (zie _Een bericht op de site zetten_), en al gepubliceerd.
 `isShown` in `@fansite/db/queries` is strenger voor de bezoeker (een bron die uitstaat, en een verhaal dat de site samenvouwt), dus een bericht dat hier "op de site" staat, kan voor een bezoeker ontbreken.
-De lijst telt per groep de nieuwste 50 berichten, en de tekst erboven zegt welke groep het is.
+De lijst toont per groep de berichten van de nieuwste eerst, 50 op een pagina, met `Pagination` en `?pagina=<nummer>` in het adres (`listItems` en `countItems`).
+Groep, zoekopdracht en het vakje blijven bij het bladeren staan, een pagina ver voorbij de laatste toont de laatste, en de tekst erboven zegt hoeveel berichten het er zijn en welke pagina je ziet.
 Onder de schakelaar staat een zoekveld: een formulier met `method="get"` dat `?q=` vult en op een deel van de kop of van de link zoekt, zonder letters- of hoofdlettergevoeligheid en zonder dat `%` of `_` een patroon zijn (`listItems`).
 Onder "Niet op de site" staat daarin ook het vakje "Alleen door de redactie verborgen" (`?redactie=1`), dat alleen de berichten toont die een redacteur verborg; zonder het vakje staan er ook de twijfelgevallen en de berichten die niet over de club gaan.
 De knop "Zoeken" past de zoekopdracht en het vakje samen toe, en de knop stuurt de groep mee (`name="toon"` op de knop, want het designsysteem heeft geen verborgen veld).
-Bij elk bericht dat op de site kan staan staat een veld voor de reden en de knop "Verberg"; een bericht dat de import niet op de site zet, heeft geen formulier, want verbergen doet daar niets.
+Bij elk bericht dat op de site kan staan staat een regel met de lijst "Reden", het veld "Toelichting" en de knop "Verberg" (`HideForm`; de regel breekt pas waar geen ruimte is); een bericht dat de import niet op de site zet, heeft geen formulier, want verbergen doet daar niets.
 Bij een verborgen bericht staat wie het verborg ("Verborgen op … door …"), de reden en de knop "Toon weer".
 Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze werken zonder JavaScript.
 
-- De reden is verplicht en hoogstens 300 tekens.
-  Een reden zonder tekst of te lang laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-leeg&bericht=<nummer>`, zoals het inloggen met `?fout=` doet).
+- De reden is een keuze uit de lijst van `hideReasons` in `src/beheer/hide-reasons.ts`, of "Anders" met een tekst van hoogstens 300 tekens.
+  Het veld "Toelichting" staat verborgen tot "Anders" gekozen is, en dat vraagt JavaScript; de vaste redenen werken er ook zonder.
+  Een vaste reden bewaart haar tekst in `hidden_reason`.
+  Geen keuze, "Anders" zonder tekst of een tekst die te lang is laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-kies`, `reden-anders` of `reden-lang`, met `&bericht=<nummer>`, en `&keuze=anders` om "Anders" gekozen te laten).
 - Verbergen en tonen eindigen op dezelfde groep, hetzelfde vakje en dezelfde zoekopdracht als waar je vandaan kwam (`itemsPath` in `paths.ts`), dus het bericht staat daarna in de andere groep.
 - Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
   Dat is waar, want de homepage, `/nieuws` en `/nieuws/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.

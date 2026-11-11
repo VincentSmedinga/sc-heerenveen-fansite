@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAccount } from '#src/beheer/accounts'
-import { approveItem, hideItem } from '#src/beheer/items'
+import { approveItem, hideItem, listLength } from '#src/beheer/items'
 import { addItem, addSource } from '#src/beheer/test-items'
 
 import ItemsPage, { metadata } from './page'
@@ -74,12 +74,11 @@ describe('the page', () => {
     await expect(render()).rejects.toThrow('redirect to /beheer/inloggen')
   })
 
-  it('has one h1, names the three examples of a reason, and says when the item is gone from the site', async () => {
+  it('has one h1, points to the list of reasons, and says when the item is gone from the site', async () => {
     const html = await render()
 
     expect(headings(html)).toEqual(['h1 Berichten'])
-    expect(html).toContain('“Fout in het bericht”, “Past niet bij de site” of “Op verzoek van de bron”')
-    expect(html).toContain('hoogstens 300 tekens')
+    expect(html).toContain('Kies bij het verbergen de reden uit de lijst.')
     expect(html).toContain('binnen vijf minuten niet meer op de site')
     expect(html).toContain('Er zijn geen berichten op de site.')
   })
@@ -115,7 +114,7 @@ describe('the list', () => {
     expect(html).toContain('2 berichten op de site.')
   })
 
-  it('gives each item that is shown a field for the reason and a button Verberg that names the item', async () => {
+  it('gives each item that is shown a list of reasons, a text field for Anders and a button Verberg', async () => {
     const id = await addItem(database, ids, 'een')
     const html = await render()
 
@@ -123,10 +122,18 @@ describe('the list', () => {
     // The hidden part of the label says which item the field is for, so a screen reader hears
     // it between 50 fields.
     expect(html).toMatch(new RegExp(`for="reden-${id}"[^>]*>Reden.*om “Kop een” te verbergen`))
-    expect(html).toMatch(new RegExp(`<input[^>]*id="reden-${id}"`))
-    expect(html).toMatch(/<input[^>]*name="reden"/)
-    expect(html).toMatch(/<input[^>]*maxLength="300"/)
-    expect(html).toMatch(/<input[^>]*required/)
+    expect(html).toMatch(new RegExp(`<select[^>]*id="reden-${id}"`))
+    expect(html).toMatch(/<select[^>]*name="reden"/)
+    // No reason is chosen: the first choice is empty, and the list ends with Anders.
+    expect(html).toMatch(/<option value="" selected="">Kies een reden<\/option>/)
+    expect(html).toMatch(
+      /<option value="fout">Fout in het bericht<\/option><option value="past-niet">Past niet bij de site<\/option><option value="bron">Op verzoek van de bron<\/option><option value="dubbel">Dubbel bericht<\/option><option value="anders">Anders<\/option>/,
+    )
+    // The text field is there but hidden until Anders is chosen, with a label of its own.
+    expect(html).toMatch(new RegExp(`<div[^>]*hidden=""[^>]*>.*for="toelichting-${id}"[^>]*>Toelichting`))
+    expect(html).toMatch(
+      /<input[^>]*name="toelichting"[^>]*maxLength="300"|<input[^>]*maxLength="300"[^>]*name="toelichting"/,
+    )
     expect(hasButton(html, 'Verberg: Kop een', 'Verberg')).toBe(true)
     expect(buttons(html)).toHaveLength(1)
   })
@@ -165,9 +172,7 @@ describe('the list', () => {
     expect(html).toContain('Kop twijfel')
     expect(html).toContain('door een moderator op de site gezet')
     expect(html).toContain('door jelle@example.org')
-    expect(
-      hasButton(html, 'Terug naar het oordeel van het filter: Kop twijfel', 'Terug naar het oordeel van het filter'),
-    ).toBe(true)
+    expect(hasButton(html, 'Herstellen, terug naar het oordeel van het filter: Kop twijfel', 'Herstellen')).toBe(true)
     expect(hasButton(html, 'Verberg: Kop twijfel', 'Verberg')).toBe(true)
     expect(html).not.toContain('aria-label="Op de site zetten:')
     expect(text(await render({ toon: 'niet-op-de-site' }))).not.toContain('Kop twijfel')
@@ -257,7 +262,7 @@ describe('the list', () => {
     expect(html).toContain('Reden &lt;i&gt;schuin&lt;/i&gt;')
   })
 
-  it('shows the 50 newest and says so', async () => {
+  it('shows the 50 newest of the first page and says how many there are', async () => {
     for (let number = 0; number < 55; number++) {
       await addItem(database, ids, `k${number}`, { publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)) })
     }
@@ -265,7 +270,7 @@ describe('the list', () => {
     const html = await render()
 
     expect(html.match(/<li>/g)).toHaveLength(50)
-    expect(html).toContain('De nieuwste 50 berichten op de site.')
+    expect(html).toContain('55 berichten op de site. Je ziet pagina 1 van 2.')
   })
 })
 
@@ -329,7 +334,7 @@ describe('the switch', () => {
     )
   })
 
-  it('counts the length of the list per group: the newest 50 that are not on the site', async () => {
+  it('pages the list per group: 50 of the 55 that are not on the site', async () => {
     for (let number = 0; number < 55; number++) {
       await addItem(database, ids, `k${number}`, {
         publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)),
@@ -340,7 +345,7 @@ describe('the switch', () => {
     const html = await render({ toon: 'niet-op-de-site' })
 
     expect(html.match(/<li>/g)).toHaveLength(50)
-    expect(html).toContain('De nieuwste 50 berichten die niet op de site staan.')
+    expect(html).toContain('55 berichten die niet op de site staan. Je ziet pagina 1 van 2.')
   })
 })
 
@@ -431,34 +436,119 @@ describe('the search', () => {
   })
 })
 
+describe('the pages of the list', () => {
+  const fill = async (count: number) => {
+    for (let number = 0; number < count; number++) {
+      await addItem(database, ids, `p${number}`, { publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)) })
+    }
+  }
+
+  it('shows no pagination for a list of one page', async () => {
+    await fill(3)
+
+    const html = await render()
+
+    expect(html).not.toContain('Pagina ')
+    expect(html).toContain('3 berichten op de site.')
+  })
+
+  it('shows the first page of fifty with the count, the page and a link to the next', async () => {
+    await fill(listLength + 5)
+
+    const html = await render()
+
+    expect(html).toContain(`${listLength + 5} berichten op de site. Je ziet pagina 1 van 2.`)
+    expect(html).toContain('Kop p54')
+    expect(html).not.toContain('Kop p4<')
+    expect(html).toMatch(/<nav[^>]*aria-label="Pagina’s van de lijst"/)
+    expect(html).toContain('href="/beheer/berichten?pagina=2"')
+    expect(html).not.toContain('Vorige')
+  })
+
+  it('shows the second page, and a link back that leaves the page out', async () => {
+    await fill(listLength + 5)
+
+    const html = await render({ pagina: '2' })
+
+    expect(html).toContain('Je ziet pagina 2 van 2.')
+    expect(html).toContain('Kop p4<')
+    expect(html).not.toContain('Kop p54')
+    expect(html).toContain('href="/beheer/berichten"')
+    expect(html).not.toContain('Volgende')
+  })
+
+  it('shows the last page for a page that is too far, and the first for one that is no number', async () => {
+    await fill(listLength + 5)
+
+    expect(await render({ pagina: '99' })).toContain('Je ziet pagina 2 van 2.')
+    expect(await render({ pagina: 'abc' })).toContain('Je ziet pagina 1 van 2.')
+    expect(await render({ pagina: ['2', '1'] })).toContain('Je ziet pagina 1 van 2.')
+  })
+
+  it('keeps the group, the search and the box of what editors hid when it turns the page', async () => {
+    for (let number = 0; number < listLength + 5; number++) {
+      await addItem(database, ids, `v${number}`, {
+        hiddenAt: new Date('2026-10-22T08:00:00Z'),
+        hiddenReason: 'Fout',
+        publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)),
+      })
+    }
+
+    const html = await render({ q: 'Kop', redactie: '1', toon: 'niet-op-de-site' })
+
+    expect(html).toContain('href="/beheer/berichten?q=Kop&amp;toon=niet-op-de-site&amp;redactie=1&amp;pagina=2"')
+  })
+})
+
 describe('what the last action left', () => {
   it('shows the error in the summary and at the field of the item', async () => {
     const id = await addItem(database, ids, 'een')
-    const html = await render({ bericht: String(id), fout: 'reden-leeg' })
-    const message = 'Schrijf een reden, bijvoorbeeld “Fout in het bericht”.'
+    const html = await render({ bericht: String(id), fout: 'reden-kies' })
+    const message = 'Kies een reden.'
 
     expect(headings(html)).toEqual(['h1 Berichten', 'h2 Er is iets mis'])
     expect(html).toContain(`<a href="#reden-${id}">${message}</a>`)
     expect(html).toMatch(
       new RegExp(
-        `<input[^>]*id="reden-${id}"[^>]*aria-invalid="true"|<input[^>]*aria-invalid="true"[^>]*id="reden-${id}"`,
+        `<select[^>]*id="reden-${id}"[^>]*aria-invalid="true"|<select[^>]*aria-invalid="true"[^>]*id="reden-${id}"`,
       ),
     )
+    expect(html).toMatch(new RegExp(`aria-describedby="reden-${id}-error"`))
     expect(html.split(message)).toHaveLength(3)
   })
 
-  it('shows the error of a reason that is too long', async () => {
+  it('shows the error of Anders without a text at the text field, with Anders still chosen and the field open', async () => {
     const id = await addItem(database, ids, 'een')
+    const html = await render({ bericht: String(id), fout: 'reden-anders', keuze: 'anders' })
 
-    expect(await render({ bericht: String(id), fout: 'reden-lang' })).toContain(
-      'Schrijf een kortere reden, van hoogstens 300 tekens.',
+    expect(html).toContain(`<a href="#toelichting-${id}">Schrijf een reden bij Anders.</a>`)
+    expect(html).toMatch(/<option value="anders" selected="">Anders<\/option>/)
+    expect(html).toMatch(
+      new RegExp(
+        `<input[^>]*id="toelichting-${id}"[^>]*aria-invalid="true"|<input[^>]*aria-invalid="true"[^>]*id="toelichting-${id}"`,
+      ),
     )
+    expect(html).not.toMatch(new RegExp(`<div[^>]*hidden=""[^>]*><div[^>]*><label[^>]*for="toelichting-${id}"`))
+  })
+
+  it('shows the error of a reason that is too long at the text field', async () => {
+    const id = await addItem(database, ids, 'een')
+    const html = await render({ bericht: String(id), fout: 'reden-lang', keuze: 'anders' })
+
+    expect(html).toContain(`<a href="#toelichting-${id}">Schrijf een kortere reden, van hoogstens 300 tekens.</a>`)
+  })
+
+  it('keeps the explanation to the list: it names no examples of its own', async () => {
+    const html = await render()
+
+    expect(html).toContain('Kies bij het verbergen de reden uit de lijst.')
+    expect(html).not.toContain('“Past niet bij de site” of')
   })
 
   it('tells an error about an item that is not in the list as a notice without a link', async () => {
     await addItem(database, ids, 'een')
 
-    const html = await render({ bericht: '99999', fout: 'reden-leeg' })
+    const html = await render({ bericht: '99999', fout: 'reden-kies' })
 
     expect(html).toContain('Het verbergen is niet gelukt')
     expect(html).not.toContain('href="#reden-')

@@ -18,6 +18,12 @@ describe('Form', () => {
     expect(container.firstElementChild?.hasAttribute('novalidate')).toBe(false)
   })
 
+  it('puts its fields on one line with inline', () => {
+    const { container } = render(<Form inline />)
+
+    expect(container.firstElementChild?.className).toBe('hf-form hf-form-inline')
+  })
+
   it('keeps the other attributes next to its class', () => {
     const { container } = render(<Form action="/contact" className="extra" method="post" />)
 

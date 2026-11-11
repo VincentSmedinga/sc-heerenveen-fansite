@@ -14,6 +14,13 @@ describe('form.css', () => {
     expect(css).not.toMatch(/(^|\n)\s*\.hf-form \{[^}]*display: grid/)
   })
 
+  it('puts the fields of an inline form on one line that breaks where there is no room', () => {
+    const rule = css.match(/\.hf-form-inline \{([^}]*)\}/)?.[1] ?? ''
+
+    expect(rule).toContain('display: flex;')
+    expect(rule).toContain('flex-wrap: wrap;')
+  })
+
   it('puts the buttons of Form.Buttons in columns of one width with space between them', () => {
     const rule = css.match(/\.hf-form-buttons \{([^}]*)\}/)?.[1] ?? ''
 

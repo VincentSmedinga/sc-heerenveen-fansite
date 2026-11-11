@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { adminUsers, hiddenReasonMaxLength, items, sources } from '@fansite/db/schema'
-import { and, desc, eq, isNotNull, isNull, lte, ne, not, or, sql } from 'drizzle-orm'
+import { and, count, desc, eq, isNotNull, isNull, lte, ne, not, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/mysql-core'
 
 import { recordAction } from './audit-log'
@@ -9,7 +9,7 @@ import { recordAction } from './audit-log'
 // Hiding, showing and approving items in the admin: the list a moderator searches, and the
 // changes. A change and its row in the log of the admin are one transaction.
 
-/** How many items the list shows. */
+/** How many items a page of the list shows. */
 export const listLength = 50
 
 /** The most characters of a search. A longer one is cut off. */
@@ -78,6 +78,8 @@ export type ItemFilter = {
   group?: ItemGroup
   /** When it is: an item is not on the site before its publication time. */
   now?: Date
+  /** How many items come before the page: `(page - 1) * listLength`. */
+  offset?: number
 }
 
 /**
@@ -102,6 +104,17 @@ export async function approveItem(db: Database, userId: number, id: number, now 
   })
 }
 
+/** How many items the list holds in all, for the pages: the same filter as `listItems`. */
+export async function countItems(
+  db: Pick<Database, 'select'>,
+  search: string,
+  { editorsOnly = false, group = 'on-site', now = new Date() }: ItemFilter = {},
+) {
+  const [row] = await db.select({ total: count() }).from(items).where(listFilter(search, { editorsOnly, group, now }))
+
+  return row?.total ?? 0
+}
+
 /**
  * The condition that makes an item "on the site" for the list: no moderator hid it, the
  * importer found it `relevant` or a moderator approved it, and it is published already. Every
@@ -117,7 +130,8 @@ export function isOnSite(now: Date) {
 }
 
 /**
- * The newest `listLength` items of a group, from every source, newest first. Under `on-site`
+ * The items of a page of a group, `listLength` of them from `offset`, from every source, newest
+ * first. Under `on-site`
  * (the default) these are the items of `isOnSite`. Under `not-on-site` they are all the others,
  * of which `editorsOnly` keeps the ones a moderator hid (the importer keeps `doubtful` and
  * `irrelevant` items too, and an item can have a time to come). Each has the email address of
@@ -128,10 +142,9 @@ export function isOnSite(now: Date) {
 export function listItems(
   db: Pick<Database, 'select'>,
   search: string,
-  { editorsOnly = false, group = 'on-site', now = new Date() }: ItemFilter = {},
+  { editorsOnly = false, group = 'on-site', now = new Date(), offset = 0 }: ItemFilter = {},
 ) {
   const approver = alias(adminUsers, 'approver')
-  const pattern = `%${search.replaceAll(/[%_|]/gu, '|$&')}%`
 
   return db
     .select({
@@ -152,17 +165,10 @@ export function listItems(
     .innerJoin(sources, eq(items.sourceId, sources.id))
     .leftJoin(adminUsers, eq(items.hiddenBy, adminUsers.id))
     .leftJoin(approver, eq(items.approvedBy, approver.id))
-    .where(
-      and(
-        group === 'on-site' ? isOnSite(now) : not(isOnSite(now)),
-        group === 'not-on-site' && editorsOnly ? isNotNull(items.hiddenAt) : undefined,
-        search === ''
-          ? undefined
-          : or(sql`${items.title} like ${pattern} escape '|'`, sql`${items.url} like ${pattern} escape '|'`),
-      ),
-    )
+    .where(listFilter(search, { editorsOnly, group, now }))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(listLength)
+    .offset(offset)
 }
 
 /**
@@ -190,6 +196,15 @@ export function parseItemId(value: unknown) {
   const id = typeof value === 'string' && /^[1-9]\d{0,9}$/u.test(value) ? Number(value) : value
 
   return typeof id === 'number' && Number.isSafeInteger(id) && id >= 1 && id <= 4_294_967_295 ? id : undefined
+}
+
+/**
+ * The page of the list from the address: `pagina=3` is 3, and anything else, such as no value,
+ * `0`, `abc` or two values, is the first page. A page beyond the last is the page's job: it
+ * shows the last one.
+ */
+export function parsePage(value: string | string[] | undefined) {
+  return typeof value === 'string' && /^[1-9]\d{0,3}$/u.test(value) ? Number(value) : 1
 }
 
 /**
@@ -260,4 +275,17 @@ export async function unapproveItem(db: Database, userId: number, id: number, no
 
     return (await findItem(transaction, id)) === undefined ? 'missing' : 'unchanged'
   })
+}
+
+/** The items of a group that have the search in their headline or link, in any case. */
+function listFilter(search: string, { editorsOnly, group, now }: Required<Omit<ItemFilter, 'offset'>>) {
+  const pattern = `%${search.replaceAll(/[%_|]/gu, '|$&')}%`
+
+  return and(
+    group === 'on-site' ? isOnSite(now) : not(isOnSite(now)),
+    group === 'not-on-site' && editorsOnly ? isNotNull(items.hiddenAt) : undefined,
+    search === ''
+      ? undefined
+      : or(sql`${items.title} like ${pattern} escape '|'`, sql`${items.url} like ${pattern} escape '|'`),
+  )
 }
