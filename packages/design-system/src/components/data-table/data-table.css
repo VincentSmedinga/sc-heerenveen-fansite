@@ -140,7 +140,7 @@
     background-color: var(--hf-colour-background-highlight);
     border-block-start: 2px solid var(--hf-colour-marker-graphic);
     color: var(--hf-colour-text-highlight);
-    font-weight: var(--hf-label-font-weight);
+    font-weight: var(--hf-figure-font-weight);
   }
 
   /* The second line of a row header, in either table, is secondary text under the header or its link. */
