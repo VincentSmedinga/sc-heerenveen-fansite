@@ -4661,13 +4661,15 @@
   - **De leeftijd** rekent `ageOf` in `apps/site/src/player-page.ts` uit de volledige geboortedatum, op de dag van nu in Nederland.
     Kennen we alleen het jaar of de maand (`birth_date_precision` is niet `day`), dan valt de leeftijd weg.
     De volledige datum blijft in die module en staat nergens op de pagina.
-  - **Een overleden speler** hoort geen leeftijd te krijgen, maar we hebben geen datum van overlijden: het schema en de import van Wikidata (`P570`) kennen er geen.
-    Zolang een eigen issue dat niet toevoegt, krijgt een overleden speler nu nog wel een leeftijd.
+  - **Alleen een speler in de selectie van dit seizoen** krijgt een leeftijd.
+    We hebben geen datum van overlijden: het schema en de import van Wikidata (`P570`) kennen er geen, en een leeftijd bij een overleden speler is erger dan geen leeftijd.
+    `playerPageOf` vraagt daarom alleen een leeftijd voor een speler met een rij in het seizoen van nu (`seasonOf`); een oud-speler houdt zijn plaats en jaar: "Herten, 2003".
+    De projecteigenaar besloot dit op 11 november 2026; een eigen issue onderzoekt de datum van overlijden.
   - **De volgorde van de kerngetallen:** aanvaller, middenvelder en speler zonder linie: seizoenen, wedstrijden, doelpunten, assists; verdediger: seizoenen, wedstrijden, keer de nul met hem in de basis, doelpunten; doelman: seizoenen, wedstrijden, keer de nul, tegendoelpunten per wedstrijd.
   - **De tabel Per seizoen** heeft tussen twee periodes een rij met een verticaal beletselteken, die een schermlezer leest als "niet bij sc Heerenveen".
     De rij Totaal en de volgorde veranderen niet.
 - **Waarom:** de regel was lang, en een supporter wil weten hoe oud een speler is, niet de datum.
   Seizoenen en wedstrijden zeggen bij elke linie het eerst wat een speler voor de club deed.
   Een onderbreking laat zien dat een speler tussendoor weg was.
-- **Alternatieven:** de leeftijd uit het jaar rekenen (kan een jaar fout zijn); de leeftijd weglaten (de projecteigenaar wil hem); een speler ouder dan honderd jaar als overleden zien (een gok).
+- **Alternatieven:** de leeftijd uit het jaar rekenen (kan een jaar fout zijn); de leeftijd weglaten (de projecteigenaar wil hem); een speler ouder dan honderd jaar als overleden zien (een gok); nu een datum van overlijden toevoegen aan het schema en de import (te groot voor dit issue).
 - **Later:** vervangt "geboren in 1974 in Emmen" uit "De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum" en de volgorde per linie en de regel met het geboortejaar uit "De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen".

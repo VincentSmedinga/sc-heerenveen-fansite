@@ -2,6 +2,7 @@ import type { Person, PlayerPosition } from '@fansite/db/schema'
 
 import { findPlayerBySlug, playerSlugs } from '@fansite/db/person-slugs'
 import { players, wikidataItems } from '@fansite/db/schema'
+import { seasonOf } from '@fansite/db/season'
 import { asc, desc, eq } from 'drizzle-orm'
 import { cache } from 'react'
 
@@ -144,7 +145,9 @@ export function playerPageOf(
   })
 
   return {
-    age: ageOf(person, today),
+    // We hold no date of death, so only a player in the squad of the current season, who is
+    // alive, gets an age (#1099).
+    age: rows.some((row) => row.season === seasonOf(today)) ? ageOf(person, today) : undefined,
     birthPlace,
     birthYear: person.birthDate?.slice(0, 4),
     country: person.country ?? undefined,
@@ -173,7 +176,8 @@ const dayFormat = new Intl.DateTimeFormat('en-CA', {
 /**
  * His age in whole years on a day in the Netherlands, from his full date of birth. A birth date
  * that Wikidata only knows by month or by year gives no age, and nor does a person without one.
- * We keep no date of death, so the age of a player who has died is not left out here (#1099).
+ * It does not know whether he is alive: `playerPageOf` only asks for the age of a player in the
+ * squad of the current season (#1099).
  */
 export function ageOf(person: Pick<Person, 'birthDate' | 'birthDatePrecision'>, today: Date): number | undefined {
   const { birthDate, birthDatePrecision } = person

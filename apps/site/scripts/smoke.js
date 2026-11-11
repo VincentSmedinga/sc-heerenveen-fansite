@@ -1297,8 +1297,8 @@ await withEmptyDatabase((database) =>
     // The page Spelers has the card Selectie with the squad of the season in the main column,
     // and the card with everybody who scored in the sidebar, which is the card that stood on
     // the page Cijfers before it got the top 5. Spelers is an item of the menu.
-    // The page of a player (#1079): his name as the heading, his year and age and never the
-    // whole date, and Spelers as the current part of the menu.
+    // The page of a player (#1079): his name as the heading, his year and never the whole
+    // date, and Spelers as the current part of the menu.
     await addProefmanPage(database)
 
     const playerPage = await fetch(`${origin}/spelers/wouter-proefman`)
@@ -1309,8 +1309,9 @@ await withEmptyDatabase((database) =>
       /<h1[^>]*><span class="hf-player-name"><span class="hf-player-name-given">Wouter<\/span> <span class="hf-player-name-surname">Proefman<\/span><\/span><\/h1>/,
     )
     assert.match(playerHtml, /<title>Wouter Proefman – Spelers – sc Heerenveen Fansite<\/title>/)
-    // React puts a comment between text parts that follow each other in the page.
-    assert.match(playerHtml, /1990(?:<!-- -->)? · (?:<!-- -->)?\d+ jaar/)
+    // A player from an earlier season has his year and no age: we hold no date of death.
+    assert.match(playerHtml, /1990<\/p>/)
+    assert.doesNotMatch(playerHtml, /\d+ jaar/)
     assert.doesNotMatch(playerHtml, /1990-03-14|14 maart 1990/)
     assert.match(playerHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
 

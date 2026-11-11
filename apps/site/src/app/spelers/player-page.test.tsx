@@ -363,7 +363,8 @@ describe('playerPageOf', () => {
   })
 
   it('works out the age from the whole date, on the day of the birthday and the day before', () => {
-    const rows = [{ name: 'Jan de Vries', season: '2004/05' }]
+    // In May the current season is 2025/26.
+    const rows = [{ name: 'Jan de Vries', season: '2025/26' }]
 
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T10:00:00Z')).age).toBe(51)
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-06T10:00:00Z')).age).toBe(52)
@@ -371,8 +372,36 @@ describe('playerPageOf', () => {
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T22:30:00Z')).age).toBe(52)
   })
 
+  it('gives an age only to a player in the squad of the current season, as we hold no date of death', () => {
+    const today = new Date('2026-11-11T10:00:00Z')
+
+    expect(playerPageOf(person, [{ name: 'Jan de Vries', season: '2026/27' }], 'Emmen', today).age).toBe(52)
+    expect(
+      playerPageOf(
+        person,
+        [
+          { name: 'Jan de Vries', season: '2026/27' },
+          { name: 'Jan de Vries', season: '2003/04' },
+        ],
+        'Emmen',
+        today,
+      ).age,
+    ).toBe(52)
+    // A former player keeps his place and year of birth, but has no age.
+    const former = playerPageOf(person, [{ name: 'Jan de Vries', season: '2025/26' }], 'Emmen', today)
+
+    expect(former.age).toBeUndefined()
+    expect(former.birthYear).toBe('1974')
+    expect(former.birthPlace).toBe('Emmen')
+    // The season turns over on 1 July: before it the squad of 2025/26 is the current one.
+    expect(
+      playerPageOf(person, [{ name: 'Jan de Vries', season: '2025/26' }], 'Emmen', new Date('2026-06-20T10:00:00Z'))
+        .age,
+    ).toBe(52)
+  })
+
   it('has no age without the whole date, only the year or the month', () => {
-    const rows = [{ name: 'Jan de Vries', season: '2004/05' }]
+    const rows = [{ name: 'Jan de Vries', season: '2026/27' }]
 
     expect(playerPageOf({ ...person, birthDatePrecision: 'year' }, rows, 'Emmen').age).toBeUndefined()
     expect(playerPageOf({ ...person, birthDatePrecision: 'month' }, rows, 'Emmen').age).toBeUndefined()
