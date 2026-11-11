@@ -3213,3 +3213,15 @@
   Op een telefoon staan ze twee aan twee, vanaf een breder scherm naast elkaar.
 - **Waarom:** een kop per getal zou de kopstructuur van de pagina van een speler vullen met cijfers, en een lijst zegt hoeveel getallen er zijn.
 - **Alternatieven:** `DescriptionList` (dan leest de schermlezer term en omschrijving los van elkaar, en het getal is niet groot); een tegel per getal (`Tile` is een link naar een andere pagina).
+
+## Een loopbaan is een lijst van periodes met een lijst seizoenen, en een gat is een regel van de pagina
+
+- **Datum:** 11 november 2026
+- **Besluit:** `CareerTimeline` (#1081) zet de periodes van een speler, de nieuwste eerst, in een lijst met de jaren als kop.
+  Elke periode heeft een lijst seizoenen met de link naar het seizoen als kop, en een seizoen kan een rugnummer, "Dit seizoen", de competities, een moment en een opmerking hebben.
+  De tekst van een gat staat bij de periode erboven (`gap`) en de pagina schrijft hem.
+  De lijn en de punten zijn CSS, niet in de markup, zodat een schermlezer alleen de lijst leest.
+  De pagina kiest het niveau van de kop van een periode (2 of 3), en de seizoenen staan een niveau lager.
+- **Waarom:** een tijdlijn van periodes en seizoenen is een lijst met koppen, die een schermlezer kan overslaan en de bezoeker kan scannen.
+  Welke seizoenen een gat vormen, weet alleen de pagina, dus die geeft de tekst mee.
+- **Alternatieven:** een tabel met een rij per seizoen (dan verdwijnen de periodes en de gaten, en op een telefoon past hij niet); de gaten uit de seizoenen afleiden in het component (dat kent de seizoenen van de club niet).

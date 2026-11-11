@@ -1,0 +1,89 @@
+/*
+ * The career of a player: a line down the left with a dot at each season, newest first. The line
+ * and the dots are drawn here and carry no meaning, so they are not in the markup.
+ */
+
+@layer hf.components {
+  .hf-career,
+  .hf-career-seasons {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hf-career {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-l);
+  }
+
+  .hf-career-period {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-s);
+    min-inline-size: 0;
+  }
+
+  .hf-career-seasons {
+    border-inline-start: 2px solid var(--hf-colour-border-default);
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-m);
+    margin-inline-start: var(--hf-space-xs);
+  }
+
+  .hf-career-season {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-xs);
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    padding-inline-start: var(--hf-space-m);
+    position: relative;
+  }
+
+  /* The dot sits on the line, level with the heading of the season. */
+  .hf-career-season::before {
+    background: var(--hf-colour-border-default);
+    block-size: 0.75rem;
+    border-radius: 50%;
+    content: '';
+    inline-size: 0.75rem;
+    inset-block-start: 0.5rem;
+    inset-inline-start: -0.4375rem;
+    position: absolute;
+  }
+
+  .hf-career-meta,
+  .hf-career-competitions,
+  .hf-career-moment,
+  .hf-career-remark,
+  .hf-career-gap {
+    margin: 0;
+  }
+
+  .hf-career-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-xs) var(--hf-space-s);
+  }
+
+  .hf-career-moment {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hf-career-moment-note,
+  .hf-career-remark,
+  .hf-career-gap {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-body-line-height);
+  }
+
+  .hf-career-gap {
+    font-style: italic;
+    padding-inline-start: var(--hf-space-m);
+  }
+}
