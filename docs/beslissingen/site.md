@@ -4538,3 +4538,20 @@
 - **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul.
   Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
 - **Alternatieven:** één tabel met alle kolommen (te breed op een telefoon); de kolommen van de tabel Alle spelers (die hebben minuten, en die hebben we niet).
+
+## De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen
+
+- **Datum:** 11 november 2026
+- **Besluit:** de kop van de pagina van een speler volgt het ontwerp (#1083).
+  De naam staat links en de regel met linie, land en geboortejaar rechts ervan; op een telefoon staat die regel onder de naam, links.
+  Boven de naam staat de link "← Spelers" naar `/spelers`, in plaats van een kruimelpad.
+  Onder de kop staan drie of vier kerngetallen (`KeyFigures`) naar de linie van de speler, met de getallen uit `apps/site/src/player-seasons.ts`.
+  - **De volgorde per linie:** aanvaller: doelpunten, seizoenen, wedstrijden, assists; middenvelder: wedstrijden, doelpunten, assists, seizoenen; verdediger: wedstrijden, keer de nul met hem in de basis, doelpunten, seizoenen; doelman: wedstrijden, keer de nul, tegendoelpunten per wedstrijd, seizoenen; zonder linie: seizoenen, doelpunten, wedstrijden.
+  - **Een getal dat we van geen enkel seizoen hebben** valt weg, en de rij verschijnt alleen met minstens twee getallen.
+    De regel onder een getal zegt wat het telt: "in alle competities", "in 2 van de 6 seizoenen", "tussen 2002 en 2012" of dat de tabel van Wikipedia niet alle competities telt.
+  - **De geboorte** blijft het jaar en de plaats, nooit de volledige datum, ook al toont het ontwerp een datum.
+  - **`Page.Title` kreeg `wrapped="start"`:** wat naast de kop staat, komt dan onder de kop aan de linkerkant, zoals een regel tekst die bij de naam hoort.
+- **Waarom:** een kruimelpad is technisch, neemt ruimte in en gaat uit van een lineaire route door de site, terwijl de site van inhoud naar inhoud leest.
+  Een link terug is genoeg, en een latere overzichtspagina van alle spelers kan het doel van die link worden.
+  Een supporter wil in één blik zien wat een speler voor de club betekende: een aanvaller meet je aan zijn doelpunten, een doelman aan zijn wedstrijden en de nul.
+- **Alternatieven:** het kruimelpad houden (#1079); de regel altijd rechts laten staan, ook onder de naam (het ontwerp zet hem links); een datum van geboorte tonen (te persoonlijk, en we hebben vaak alleen het jaar).

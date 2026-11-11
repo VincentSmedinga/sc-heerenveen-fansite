@@ -385,6 +385,18 @@ describe('Page.Title', () => {
     expect([...title.children].map((child) => child.tagName)).toEqual(['H1', 'FORM'])
   })
 
+  it('has the class that keeps what wraps on the left for wrapped="start", and not otherwise', () => {
+    render(
+      <>
+        <Page.Title data-testid="start" wrapped="start" />
+        <Page.Title data-testid="end" />
+      </>,
+    )
+
+    expect(screen.getByTestId('start').className).toBe('hf-page-title hf-page-title-start')
+    expect(screen.getByTestId('end').className).toBe('hf-page-title')
+  })
+
   it('is in the introduction of the Page.Main like any other content', () => {
     render(
       <Page.Body>
