@@ -115,13 +115,16 @@
     --hf-figure-large-font-size: 1.5rem;
 
     /* The number in a row of key figures */
-    --hf-key-figure-font-size: 2.5rem;
+    --hf-key-figure-font-size: 3.25rem;
 
     /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
     /* The figures people look up: a score, the key figure of a table, a mark in a row, a donut */
     --hf-figure-font-weight: 700;
+
+    /* The number in a row of key figures, a step lighter than the wordmark */
+    --hf-key-figure-font-weight: 800;
 
     /* The name of something: the label and the legend of a form, th and dt */
     --hf-name-font-weight: 600;
