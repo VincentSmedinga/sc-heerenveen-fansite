@@ -29,7 +29,7 @@ export function HideForm({ action, chosen, errors, itemId, title }: Props) {
   const other = choice === otherReasonKey
 
   return (
-    <Form action={action} inline>
+    <Form action={action} className="hf-space-end-m" inline>
       <Field
         error={errors.choice}
         id={`reden-${itemId}`}
@@ -42,7 +42,7 @@ export function HideForm({ action, chosen, errors, itemId, title }: Props) {
           </>
         }
       >
-        <Select name="reden" onChange={(event) => setChoice(event.target.value)} value={choice}>
+        <Select name="reden" onChange={(event) => setChoice(event.target.value)} value={choice} width="natural">
           <Select.Option value="">Kies een reden</Select.Option>
           {hideReasons.map(({ key, text }) => (
             <Select.Option key={key} value={key}>
