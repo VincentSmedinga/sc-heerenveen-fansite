@@ -1,6 +1,6 @@
 /*
- * The career of a player: a line down the left with a dot at each season, newest first. The line
- * and the dots are drawn here and carry no meaning, so they are not in the markup.
+ * The career of a player: a line down the left with a dot at each season, newest first.
+ * The line and the dots are drawn here and carry no meaning, so they are not in the markup.
  */
 
 @layer hf.components {
