@@ -114,7 +114,7 @@ describe('the page /spelers', () => {
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="alle-tijden"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#alle-tijden">Alle tijden</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="alle-tijden"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#alle-tijden">Sinds 1990/91</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
     expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
@@ -856,7 +856,30 @@ describe('the card Selectie on /spelers', () => {
   })
 })
 
-describe('the card Alle tijden on /spelers', () => {
+describe('the links to a player on /spelers', () => {
+  const withSlug = (matches: PublicMatch[]) =>
+    matches.map((match) => ({
+      ...match,
+      goals: match.goals.map((goal) => ({ ...goal, personId: 1, personSlug: 'speler-a' })),
+    }))
+
+  it('are in the card Selectie and the card Sinds 1990/91, and not in the card Doelpuntenmakers', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: withSlug(scorers([2])) })
+    vi.mocked(getAllTimeMatches).mockResolvedValue(
+      withSlug(scorers([3])).map((match) => ({ ...match, season: '2010/11' })),
+    )
+
+    const html = await render()
+    const section = (id: string) =>
+      new RegExp(`<section [^>]*aria-labelledby="${id}">.*?</section>`, 's').exec(html)?.[0] ?? ''
+
+    expect(plain(section('doelpuntenmakers'))).toContain('Speler A')
+    expect(section('doelpuntenmakers')).not.toContain('href="/spelers/speler-a"')
+    expect(section('alle-tijden')).toContain('href="/spelers/speler-a"')
+  })
+})
+
+describe('the card Sinds 1990/91 on /spelers', () => {
   const allTimeCard = (html: string) =>
     /<section [^>]*aria-labelledby="alle-tijden">.*?<\/section>/s.exec(html)?.[0] ?? ''
 
@@ -877,12 +900,12 @@ describe('the card Alle tijden on /spelers', () => {
     expect(html.match(/data-hf-card-share/g)).toHaveLength(3)
   })
 
-  it('says from which season it counts, and that all players scored when ten places show them all', async () => {
+  it('says from which season it counts in its title, and that all players scored when ten places show them all', async () => {
     vi.mocked(getAllTimeMatches).mockResolvedValue(history([3, 2]))
 
     const card = allTimeCard(await render())
 
-    expect(plain(card)).toContain('Sinds 2010/11.')
+    expect(plain(card)).toContain('Sinds 2010/11')
     expect(plain(card)).toContain('2 spelers hebben gescoord')
     expect(rowsOf(card)).toEqual([
       ['1', 'Speler A', '3'],

@@ -2039,6 +2039,36 @@ describe('the matches and the table of a season', () => {
       expect(cup?.goals.map((goal) => goal.personSlug)).toEqual(['luca-oyen', null, null, null])
     })
 
+    it('gives a goal of ours that has only a squad row the person of that row', async () => {
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+
+      const [cupMatch] = await database.db
+        .select({ id: matches.id })
+        .from(matches)
+        .where(eq(matches.round, 'Kwartfinale'))
+      const id = cupMatch?.id ?? 0
+      const [{ insertId: person }] = await database.db
+        .insert(persons)
+        .values({ familyName: 'Oyen', givenName: 'Luca', name: 'Luca Oyen', slug: 'luca-oyen' })
+      const [{ insertId: squadRow }] = await database.db.insert(players).values({
+        name: 'Luca Oyen',
+        personId: person,
+        position: 'aanvaller',
+        searchTerm: 'Oyen',
+        season: '2026/27',
+      })
+
+      await database.db
+        .insert(matchGoals)
+        .values({ matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: squadRow })
+
+      const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
+
+      expect(cup?.goals.map((goal) => [goal.personId, goal.personGivenName, goal.personSlug])).toEqual([
+        [person, 'Luca', 'luca-oyen'],
+      ])
+    })
+
     it('gives only the season it is asked for', async () => {
       await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
       await database.db

@@ -834,7 +834,9 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * linked). The player may have left the squad since. `playerPage` is the title of the player's
  * Wikipedia page as the table of the match links it, whether or not the goal is linked to a
  * player, and null when the table does not link the name. `personId` is the person behind the
- * goal, ours or an opponent's, with the name the importer kept of him in `personGivenName`,
+ * goal, ours or an opponent's (for a goal of ours without one, the person of the squad row it
+ * is linked to: about half of the goals have only that row, one per season, so one person would
+ * be many rows), with the name the importer kept of him in `personGivenName`,
  * `personFamilyNamePrefix` and `personFamilyName` (each null while the importer has not read
  * the article, and all null for a goal without a person, such as a title that was not looked
  * up). `personSlug` is the address name of his page (`persons.slug`), null for a person who has
@@ -1183,7 +1185,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
-      personId: matchGoals.personId,
+      personId: sql<null | number>`coalesce(${matchGoals.personId}, ${players.personId})`,
       personSlug: persons.slug,
       player: matchGoals.player,
       playerId: matchGoals.playerId,
@@ -1193,7 +1195,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
     .from(matchGoals)
     .innerJoin(matches, eq(matchGoals.matchId, matches.id))
     .leftJoin(players, eq(matchGoals.playerId, players.id))
-    .leftJoin(persons, eq(matchGoals.personId, persons.id))
+    .leftJoin(persons, eq(persons.id, sql`coalesce(${matchGoals.personId}, ${players.personId})`))
     // The goals of a match that is still being played are those of its report: they are on the
     // page of the match and in no list, figure or table (#906).
     .where(and(eq(matches.status, 'played'), where))

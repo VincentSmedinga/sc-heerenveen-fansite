@@ -19,11 +19,11 @@ describe('statisticsShortcuts', () => {
 })
 
 describe('playersShortcuts', () => {
-  it('has four links, to the cards Selectie, Doelpuntenmakers, Alle tijden and Bijzondere doelpunten, in the order of the page', () => {
+  it('has four links, to the cards Selectie, Doelpuntenmakers, Sinds 1990/91 and Bijzondere doelpunten, in the order of the page', () => {
     expect(playersShortcuts).toEqual([
       { href: '#selectie', label: 'Selectie' },
       { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-      { href: '#alle-tijden', label: 'Alle tijden' },
+      { href: '#alle-tijden', label: 'Sinds 1990/91' },
       { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
     ])
   })

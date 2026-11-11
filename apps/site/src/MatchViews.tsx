@@ -1435,11 +1435,11 @@ const onePlayerPlace = (scorer: TopScorer, goalsPerMatch?: string): ScorerPlace 
 })
 
 /**
- * The card Alle tijden of the page Spelers, under Doelpuntenmakers: the first ten places of the
- * goal scorers over every season we have, per person, as the card of a season counts them. It
- * says from which season it counts ("sinds 2010/11"), so "alle tijden" never promises more than
- * we have, and the line under the heading says how many players scored when the list is cut.
- * The card is soft and in the sidebar, and has the button for an image like the other cards.
+ * The card "Sinds 1990/91" of the page Spelers, under Doelpuntenmakers: the first ten places of
+ * the goal scorers over every season we have, per person, as the card of a season counts them.
+ * It says from which season it counts in its title, so it never promises more than we have, and
+ * the line under the heading says how many players scored when the list is cut. The card is
+ * soft and in the sidebar, and has the button for an image like the other cards.
  */
 export function AllTimeScorersCard({
   competition,
@@ -1454,14 +1454,13 @@ export function AllTimeScorersCard({
   return (
     <Card aria-labelledby="alle-tijden" shareable={imageCredit(scorers.length > 0, undefined, matches)} surface="soft">
       <Heading anchor id="alle-tijden" level={2}>
-        Alle tijden
+        Sinds {since ?? '1990/91'}
       </Heading>
       {scorers.length === 0 || since === undefined ? (
         <Text>We hebben nog geen doelpuntenmakers van eerdere seizoenen. Kijk straks nog eens.</Text>
       ) : (
         <>
           <Text>
-            Sinds {since}.{' '}
             {scorers.length < total
               ? `De top ${allTimePlaces} van ${total} spelers die scoorden`
               : total === 1
