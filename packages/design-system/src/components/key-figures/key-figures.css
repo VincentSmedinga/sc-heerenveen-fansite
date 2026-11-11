@@ -1,51 +1,52 @@
 /*
- * A row of key figures: the number large, the word and the line below it in the size of the
- * text or smaller. Two by two on a phone, side by side from the width where four fit.
+ * A row of key figures, each in a card of its own: the number large and heavy, the word below it
+ * and then the line that says what it counts. The cards share the width and wrap to the next
+ * line when they do not fit, so four stand side by side on a wide screen and two by two on a
+ * phone.
  */
 
 @layer hf.components {
   .hf-key-figures {
-    display: grid;
-    gap: var(--hf-space-m) var(--hf-space-l);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-m);
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  @media (width >= 40rem) {
-    .hf-key-figures {
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(0, 1fr);
-      grid-template-columns: none;
-    }
-  }
-
+  /* A card without its own element: the surface, border and corners are those of .hf-card. */
   .hf-key-figure {
     display: flex;
+    flex: 1 1 9.375rem;
     flex-direction: column;
     gap: var(--hf-space-xs);
     min-inline-size: 0;
     overflow-wrap: anywhere;
+    padding: calc(var(--hf-space-m) * 0.75) var(--hf-space-m);
   }
 
   .hf-key-figure-number {
     color: var(--hf-colour-text-heading);
+    display: block;
     font-family: var(--hf-font-family-display);
     font-size: var(--hf-key-figure-font-size);
     font-stretch: 125%;
-    font-weight: var(--hf-figure-font-weight);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-key-figure-font-weight);
     line-height: 1;
   }
 
   .hf-key-figure-label {
+    display: block;
     font-size: var(--hf-body-font-size);
-    font-weight: var(--hf-headline-font-weight);
+    font-weight: var(--hf-name-font-weight);
     line-height: var(--hf-body-line-height);
   }
 
   .hf-key-figure-note {
     color: var(--hf-colour-text-secondary);
+    display: block;
     font-size: var(--hf-meta-font-size);
     line-height: var(--hf-body-line-height);
   }

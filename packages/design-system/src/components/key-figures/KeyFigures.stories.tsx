@@ -1,7 +1,6 @@
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
-import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { KeyFigures } from './KeyFigures'
 
@@ -19,7 +18,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een rij kerngetallen zet twee tot vier grote getallen bovenaan een pagina, zoals bij een speler, zodat de bezoeker in één blik ziet waar het over gaat.',
-          'Elk getal heeft een woord en een korte regel die zegt wat het telt.',
+          'Elk getal staat in een eigen kaart, met een woord en een korte regel die zegt wat het telt.',
           'De rij is een lijst: een schermlezer zegt hoeveel getallen er zijn en leest elk getal als één zin, zoals "52 doelpunten, in alle competities".',
           'Kies hem voor getallen die de pagina openen; voor feiten in een lijst onder elkaar is `ShortFact` er.',
         ].join('\n'),
@@ -31,13 +30,12 @@ const meta = preview.meta({
   title: 'Patronen/KeyFigures',
 })
 
-const inCard = (children: React.ReactNode, id: string) => (
-  <Card aria-labelledby={id} surface="soft">
-    <Heading id={id} level={2}>
-      Testspeler Een
-    </Heading>
+// The figures stand on the page, under the name of the player, each in a card of its own.
+const onPage = (children: React.ReactNode) => (
+  <div className="hf-flow">
+    <Heading level={1}>Testspeler Een</Heading>
     {children}
-  </Card>
+  </div>
 )
 
 export const Default = meta.story({
@@ -48,13 +46,13 @@ export const Default = meta.story({
     ],
   },
   name: 'Een rij van twee',
-  render: (args) => inCard(<KeyFigures {...args} />, 'kerngetallen-twee'),
+  render: (args) => onPage(<KeyFigures {...args} />),
 })
 
 export const Three = meta.story({
   name: 'Een rij van drie',
   render: () =>
-    inCard(
+    onPage(
       <KeyFigures
         figures={[
           { figure: '315', label: 'wedstrijden', note: 'voor Testclub' },
@@ -62,14 +60,13 @@ export const Three = meta.story({
           { figure: '103', label: 'keer de nul', note: 'in 1 op de 3 wedstrijden' },
         ]}
       />,
-      'kerngetallen-drie',
     ),
 })
 
 export const Four = meta.story({
   name: 'Een rij van vier',
   render: () =>
-    inCard(
+    onPage(
       <KeyFigures
         figures={[
           { figure: '315', label: 'wedstrijden', note: 'voor Testclub' },
@@ -78,6 +75,5 @@ export const Four = meta.story({
           { figure: '103', label: 'keer de nul', note: 'in 1 op de 3 wedstrijden' },
         ]}
       />,
-      'kerngetallen-vier',
     ),
 })

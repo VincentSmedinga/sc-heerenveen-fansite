@@ -33,6 +33,14 @@ describe('KeyFigures', () => {
     expect(screen.queryByRole('heading')).toBeNull()
   })
 
+  it('puts each figure in a card of its own', () => {
+    render(<KeyFigures figures={figures} />)
+
+    for (const item of screen.getAllByRole('listitem')) {
+      expect(item.classList.contains('hf-card')).toBe(true)
+    }
+  })
+
   it('passes other props on', () => {
     const { container } = render(<KeyFigures figures={figures} id="kerngetallen" />)
 

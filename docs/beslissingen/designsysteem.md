@@ -3213,3 +3213,14 @@
   Op een telefoon staan ze twee aan twee, vanaf een breder scherm naast elkaar.
 - **Waarom:** een kop per getal zou de kopstructuur van de pagina van een speler vullen met cijfers, en een lijst zegt hoeveel getallen er zijn.
 - **Alternatieven:** `DescriptionList` (dan leest de schermlezer term en omschrijving los van elkaar, en het getal is niet groot); een tegel per getal (`Tile` is een link naar een andere pagina).
+
+## Elk kerngetal staat in een eigen kaart, en de kaarten wrappen
+
+- **Datum:** 11 november 2026
+- **Besluit:** in `KeyFigures` (#1080) staat elk getal in een eigen kaart: een `li` met de klasse `hf-card`, dus het vlak, de rand en de hoeken van `Card`, met minder binnenruimte.
+  De kaarten delen de breedte en lopen door naar een volgende regel als ze niet passen: vier naast elkaar op een breed scherm, op een telefoon twee aan twee.
+  Het getal is groter en vetter (`--hf-key-figure-font-size` en `--hf-key-figure-font-weight`, 900 zoals de wordmerk, omdat 800 geen gewicht van de site is) en heeft cijfers van gelijke breedte; het woord heeft het gewicht van een naam en de regel is klein en rustig.
+- **Waarom:** het ontwerp toont kerngetallen als losse kaarten.
+  De losse getallen in één vlak waren vlakker en leken niet op dat ontwerp.
+- **Alternatieven:** `Card` als element van de lijst (de kaart kan geen `li` zijn); één vast raster van twee kolommen (dat wordt één rij op een breed scherm, en een getal als "1,26" past dan niet naast een tweede op een smalle kolom).
+- **Later:** vervangt de lijst zonder kaarten en het vaste raster uit de beslissing hierboven, "Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot".
