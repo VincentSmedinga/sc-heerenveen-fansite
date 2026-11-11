@@ -56,7 +56,7 @@ Bij elke bron staat of de voorwaarden daar iets over zeggen.
 
 - **Nemen:** de berichten in de feed gaan (bijna) allemaal over sc Heerenveen en `robots.txt` laat ons de feed lezen.
   Een feed die ook over andere onderwerpen gaat, nemen we met het relevantiefilter (`club`, #74): de import beoordeelt elke kop, en de site toont alleen wat over de club gaat.
-  Het filter heeft daarvoor ook de wedstrijden van het lopende seizoen nodig: een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd (#315).
+  Het filter heeft daarvoor ook de wedstrijden van het lopende seizoen nodig: een kop over de tegenstander is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden (3 tot 5 dagen voor de wedstrijd) tot 3 dagen na de wedstrijd (#315, #1008).
   Dat staat dan bij de bron.
 - **Nemen na het relevantiefilter (#74):** een brede feed met regelmatig berichten over de club, die ook over andere onderwerpen gaat.
   Het filter is er nu.
@@ -433,7 +433,7 @@ De feed van het regionieuws blijft afgewezen (zie onder).
     Op 1 november 2026 was het nieuwste bericht van 31 oktober 2026 en het oudste van 18 oktober 2026.
   - Over sc Heerenveen: geen enkel bericht in de kop.
     Van de 50 koppen noemen er 32 Feyenoord, vier Sparta, vier Excelsior en twee Ajax.
-    Daarom gaat deze bron niet om de club zelf, maar om de Rotterdamse tegenstanders: een kop over Feyenoord, Sparta of Excelsior telt als `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen die club (#315), en op de andere dagen niet.
+    Daarom gaat deze bron niet om de club zelf, maar om de Rotterdamse tegenstanders: een kop over Feyenoord, Sparta of Excelsior telt als `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen die club (#315), en op de andere dagen niet.
     Een kop over twee clubs tegelijk, zoals een Rotterdamse derby, is een andere wedstrijd en telt niet.
     "Sparta Praag" is een andere club dan Sparta Rotterdam en telt niet (`namesakeClubs` in `apps/importer/src/relevance-terms.ts`).
   - Betaalmuur: nee; de feed geeft er geen teken van.
@@ -472,7 +472,7 @@ Die feed blijft afgewezen en staat niet in het register.
     Op 9 november 2026 was het nieuwste bericht van 9 november 2026 en het oudste van 18 oktober 2026.
   - Over sc Heerenveen: geen enkele kop; drie intro's noemen Heerenveen, alle drie over het schaatsen (Thialf).
     De berichten over FC Groningen (de podcast De Koffiecorner, de uitslagen) staan er wel in.
-    Daarom gaat deze bron niet om de club zelf, maar om de tegenstander: een kop over FC Groningen telt als `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen hen (#315), en op de andere dagen niet.
+    Daarom gaat deze bron niet om de club zelf, maar om de tegenstander: een kop over FC Groningen telt als `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen hen (#315), en op de andere dagen niet.
     Een kop over schaatsen in Heerenveen is niet `relevant`: het filter geeft hem de waarde `doubtful`, die niet getoond wordt.
   - Betaalmuur: nee; de feed geeft er geen teken van.
   - Het filter, in een run van 9 november 2026: van de 50 berichten bewaarde de import er 50 en sloeg er 0 over; 0 kregen de waarde `relevant`, 0 `doubtful` en 50 `irrelevant`.
@@ -502,7 +502,7 @@ Al in het register (#1004), met twee feeds.
   - Een run van 9 november 2026 bewaarde 10 berichten en sloeg er 0 over; alle 10 kregen de waarde `relevant`.
 - **Feed van FC Groningen die we nemen, met het filter `club`:** `https://www.oogtv.nl/tag/fc-groningen/feed/`
   - Werkt: ja, 10 berichten van 30 oktober tot 8 november 2026.
-  - Het filter werkt zoals bij RTV Noord: een kop over FC Groningen is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen hen.
+  - Het filter werkt zoals bij RTV Noord: een kop over FC Groningen is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen hen.
   - Een run van 9 november 2026 bewaarde 10 berichten en sloeg er 0 over; 0 kregen de waarde `relevant`, 0 `doubtful` en 10 `irrelevant`, want er was geen wedstrijd tegen FC Groningen in de buurt.
 - **Feed die we niet nemen:** `https://www.oogtv.nl/feed/`, de hoofdfeed.
   Hij heeft 10 berichten en geen enkel met Heerenveen in de kop.

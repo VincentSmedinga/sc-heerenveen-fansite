@@ -8,7 +8,7 @@ import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { mailConflicts } from '@fansite/db/match-conflict-mail'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
+import { discussions, feeds, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
 import { and, asc, eq, inArray, isNull, like, sql } from 'drizzle-orm'
@@ -25,6 +25,7 @@ import { importEndedSeason } from './import-ended-season.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
+import { withOpponentPreviousDay } from './league-results.ts'
 import { importPlayerList } from './player-list.ts'
 import {
   paywallCategoryFor,
@@ -612,15 +613,24 @@ async function importWikipedia(
 }
 
 /**
- * The day, the opponent and the status of every match of a season. Only the current season:
- * the table holds earlier seasons too (`pnpm import:season`), and a match of last year says
- * nothing about who we play this week.
+ * The day, the opponent and the status of every match of a season, and for each the day of the
+ * previous league match of the opponent (`league_results`, see `withOpponentPreviousDay`). Only
+ * the current season: the table holds earlier seasons too (`pnpm import:season`), and a
+ * match of last year says nothing about who we play this week.
  */
-function listSeasonMatches(db: Database, season: string): Promise<MatchDay[]> {
-  return db
-    .select({ matchDate: matches.matchDate, opponent: matches.opponent, status: matches.status })
-    .from(matches)
-    .where(eq(matches.season, season))
+async function listSeasonMatches(db: Database, season: string): Promise<MatchDay[]> {
+  const [rows, results] = await Promise.all([
+    db
+      .select({ matchDate: matches.matchDate, opponent: matches.opponent, status: matches.status })
+      .from(matches)
+      .where(eq(matches.season, season)),
+    db
+      .select({ awayClub: leagueResults.awayClub, homeClub: leagueResults.homeClub, playedOn: leagueResults.playedOn })
+      .from(leagueResults)
+      .where(eq(leagueResults.season, season)),
+  ])
+
+  return withOpponentPreviousDay(rows, results)
 }
 
 /** Tells the alerts how the import of a season went, if it asked Wikipedia. */

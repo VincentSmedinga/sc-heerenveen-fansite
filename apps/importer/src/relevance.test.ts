@@ -666,6 +666,175 @@ describe('the opponent of a match', () => {
     })
   })
 
+  describe('the window that opens after both previous matches (#1008)', () => {
+    // We play FC Groningen on Saturday 21 November 2026, after a break for the national teams.
+    const day = '2026-11-21'
+    const groningen = (opponentPreviousDay: null | string | undefined) => ({
+      ...match('FC Groningen', day),
+      ...(opponentPreviousDay === undefined ? {} : { opponentPreviousDay }),
+    })
+    const ours = (matchDate: string, status: MatchDay['status'] = 'played') => match('Ajax', matchDate, status)
+    /** The headline of the day, at noon in Dutch time. */
+    const about = (publishedDay: string, matches: MatchDay[]) =>
+      judgeAt('FC Groningen maakt zich op', `${publishedDay}T12:00:00+01:00`, matches)
+
+    it('is the same as before in a normal week: the previous matches are less than 3 days ahead', () => {
+      // We played on Wednesday the 18th, they on Sunday the 15th: the window would open on the
+      // 19th, but it never opens later than 3 days before the match.
+      const matches = [ours('2026-11-18'), groningen('2026-11-15')]
+
+      expect(about('2026-11-18', matches)).toBe('relevant')
+      expect(about('2026-11-17', matches)).toBe('irrelevant')
+    })
+
+    it('opens the day after the later of the two previous matches, when that is within 5 days', () => {
+      // We played on the 12th, they on the 16th: it opens on the 17th, 4 days before.
+      const matches = [ours('2026-11-12'), groningen('2026-11-16')]
+
+      expect(about('2026-11-17', matches)).toBe('relevant')
+      expect(about('2026-11-16', matches)).toBe('irrelevant')
+      expect(about('2026-11-21', matches)).toBe('relevant')
+    })
+
+    it('opens the day after our match when ours is the later one', () => {
+      const matches = [ours('2026-11-16'), groningen('2026-11-10')]
+
+      expect(about('2026-11-17', matches)).toBe('relevant')
+      expect(about('2026-11-16', matches)).toBe('irrelevant')
+    })
+
+    it('opens at the earliest 5 days before the match, after a break of more than 5 days', () => {
+      // Both played on 1 November: the day after is 20 days before, but it opens on the 16th.
+      const matches = [ours('2026-11-01'), groningen('2026-11-01')]
+
+      expect(about('2026-11-16', matches)).toBe('relevant')
+      expect(about('2026-11-15', matches)).toBe('irrelevant')
+    })
+
+    it('opens 5 days before, not 6, after the day after the previous matches is 6 days before', () => {
+      // We played on the 14th, they on the 13th: the day after is the 15th, 6 days before.
+      const matches = [ours('2026-11-14'), groningen('2026-11-13')]
+
+      expect(about('2026-11-16', matches)).toBe('relevant')
+      expect(about('2026-11-15', matches)).toBe('irrelevant')
+    })
+
+    it('leaves no gap from Friday to Sunday: it opens 3 days before a Sunday match', () => {
+      // They play on Friday 20 November, we play on Sunday the 22nd: it opens on the 19th.
+      const matches = [
+        ours('2026-11-15'),
+        { ...match('FC Groningen', '2026-11-22'), opponentPreviousDay: '2026-11-20' },
+      ]
+
+      expect(about('2026-11-19', matches)).toBe('relevant')
+      expect(about('2026-11-18', matches)).toBe('irrelevant')
+      expect(about('2026-11-22', matches)).toBe('relevant')
+    })
+
+    it('closes 3 days after the match, as before', () => {
+      const matches = [ours('2026-11-10'), groningen('2026-11-10')]
+
+      expect(about('2026-11-24', matches)).toBe('relevant')
+      expect(about('2026-11-25', matches)).toBe('irrelevant')
+    })
+
+    it('counts the day in Dutch time at the edge of the window', () => {
+      const matches = [ours('2026-11-12'), groningen('2026-11-16')]
+
+      // 00:30 on the 17th in the Netherlands is 23:30 UTC on the 16th.
+      expect(judgeAt('FC Groningen maakt zich op', '2026-11-16T23:30:00Z', matches)).toBe('relevant')
+      // 23:30 on the 16th in the Netherlands is 22:30 UTC.
+      expect(judgeAt('FC Groningen maakt zich op', '2026-11-16T22:30:00Z', matches)).toBe('irrelevant')
+    })
+
+    it('opens 3 days before when the previous match of the opponent is not known', () => {
+      for (const known of [null, undefined]) {
+        const matches = [ours('2026-11-10'), groningen(known)]
+
+        expect(about('2026-11-18', matches)).toBe('relevant')
+        expect(about('2026-11-17', matches)).toBe('irrelevant')
+      }
+    })
+
+    it('opens 3 days before when we have no previous match, at the start of the season', () => {
+      const matches = [groningen('2026-11-10')]
+
+      expect(about('2026-11-18', matches)).toBe('relevant')
+      expect(about('2026-11-17', matches)).toBe('irrelevant')
+    })
+
+    it('counts a planned match of ours as the previous match, and not one that was postponed or cancelled', () => {
+      // The match of the 10th was played and the one of the 17th is planned: the 17th is the
+      // previous one, so the window opens on the 18th. The postponed and the cancelled match
+      // count for nothing.
+      const matches = [
+        ours('2026-11-10'),
+        ours('2026-11-19', 'postponed'),
+        ours('2026-11-20', 'cancelled'),
+        ours('2026-11-17', 'scheduled'),
+        groningen('2026-11-08'),
+      ]
+      const withoutPlanned = matches.filter(
+        (candidate) => candidate.opponent !== 'Ajax' || candidate.status !== 'scheduled',
+      )
+
+      expect(about('2026-11-17', matches)).toBe('irrelevant')
+      expect(about('2026-11-18', matches)).toBe('relevant')
+      // Without the planned match the previous one is the 10th, and it opens on the 16th.
+      expect(about('2026-11-16', withoutPlanned)).toBe('relevant')
+      expect(about('2026-11-15', withoutPlanned)).toBe('irrelevant')
+    })
+
+    it('does not open the window before a match of ours in between, as at the time of the import', () => {
+      // We played on 7 November and play on 14 and 21 November, against Groningen on the 21st.
+      // On the 12th the match of the 14th is not played yet, and the news of those days is
+      // about that match.
+      const matches = [ours('2026-11-07'), ours('2026-11-14', 'scheduled'), groningen('2026-11-08')]
+
+      expect(about('2026-11-12', matches)).toBe('irrelevant')
+      expect(about('2026-11-15', matches)).toBe('irrelevant')
+      expect(about('2026-11-16', matches)).toBe('relevant')
+    })
+
+    it('opens 5 days before after a week from Saturday to Saturday', () => {
+      // We played on Saturday the 14th, they on Sunday the 15th: the window opens on the 16th.
+      const matches = [ours('2026-11-14'), groningen('2026-11-15')]
+
+      expect(about('2026-11-16', matches)).toBe('relevant')
+      expect(about('2026-11-15', matches)).toBe('irrelevant')
+    })
+
+    it('counts a cup match of ours as the previous match', () => {
+      // The cup match on the 16th opens it on the 17th; without it, 3 days before is the 18th.
+      const matches = [{ ...ours('2026-11-16'), opponent: 'De Treffers' }, groningen('2026-11-08')]
+
+      expect(about('2026-11-17', matches)).toBe('relevant')
+      expect(about('2026-11-16', matches)).toBe('irrelevant')
+    })
+
+    it('does not count a headline about the previous match of the opponent, before the window opens', () => {
+      // They played on the 15th: the news of that day and before is about that match.
+      const matches = [ours('2026-11-08'), groningen('2026-11-15')]
+
+      expect(about('2026-11-14', matches)).toBe('irrelevant')
+      expect(about('2026-11-15', matches)).toBe('irrelevant')
+      expect(about('2026-11-16', matches)).toBe('relevant')
+    })
+
+    it('lets two windows overlap for a match in midweek, and counts an item in either one', () => {
+      // Saturday the 21st against Groningen, Wednesday the 25th against Twente (a cup match).
+      const matches = [
+        ours('2026-11-14'),
+        groningen('2026-11-15'),
+        { ...match('FC Twente', '2026-11-25'), opponentPreviousDay: '2026-11-22' },
+      ]
+
+      expect(opponentsAround(new Date('2026-11-23T12:00:00+01:00'), matches)).toEqual(['FC Groningen', 'FC Twente'])
+      expect(about('2026-11-23', matches)).toBe('relevant')
+      expect(judgeAt('FC Twente maakt zich op', '2026-11-23T12:00:00+01:00', matches)).toBe('relevant')
+    })
+  })
+
   describe('finds the opponent from the name in matches', () => {
     it.each([
       ['N.E.C.', 'N.E.C. verrast in Nijmegen', 'relevant'],
