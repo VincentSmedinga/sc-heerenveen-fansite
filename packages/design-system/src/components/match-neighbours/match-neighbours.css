@@ -17,7 +17,7 @@
     margin: 0;
     padding: 0;
 
-    @container hf-match-neighbours (min-width: 40rem) {
+    @container hf-match-neighbours (min-width: 30rem) {
       grid-template-columns: 1fr 1fr;
     }
   }
@@ -30,7 +30,7 @@
 
   /* "Volgende" stands at the right, also when "Vorige" is not there. */
   .hf-match-neighbours-item[data-side='next'] {
-    @container hf-match-neighbours (min-width: 40rem) {
+    @container hf-match-neighbours (min-width: 30rem) {
       grid-column: 2;
       text-align: end;
     }

@@ -108,7 +108,7 @@ export const AsLink = meta.story({
     docs: {
       description: {
         story:
-          'Met `href` is de hele naam één link, ook met rugnummer en vlag: de vlag staat in de link als versiering en het rugnummer ernaast. Een speler zonder pagina blijft gewone tekst.',
+          'Met `href` zijn de vlag en de naam samen één link, ook met rugnummer: de vlag staat in de link als versiering en het rugnummer ernaast. Alleen de vlag en de naam zijn klikbaar, niet de lege ruimte ernaast, en de naam breekt naast de vlag. Een speler zonder pagina blijft gewone tekst.',
       },
     },
   },
@@ -324,7 +324,7 @@ export const WithFlags = meta.story({
     docs: {
       description: {
         story:
-          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) houdt een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een speler uit een land zonder tekening (hier Kazachstan) toont de landcode in een kader van dezelfde grootte. Elke vlag heeft een dunne rand in de kleur van de lijnen in de kaart, met een pixel wit tussen de rand en de tekening.',
+          'De vlag staat tussen het rugnummer en de naam, in een kolom van vaste breedte. Een speler zonder bekend land (`null`) houdt een lege plek van dezelfde breedte, zodat de namen op één lijn blijven. Een speler uit een land zonder tekening (hier Kazachstan) toont de landcode in een kader van dezelfde grootte. Elke vlag heeft een dunne rand in de donkerdere lijn van de kaart, strak om de tekening.',
       },
     },
   },
@@ -365,8 +365,7 @@ export const WithFlagsDark = meta.story({
   parameters: {
     docs: {
       description: {
-        story:
-          'In het donker heeft de rand de kleur van de lijnen in de donkere kaart, met een pixel wit om de tekening.',
+        story: 'In het donker heeft de rand de donkerdere lijn van de donkere kaart, strak om de tekening.',
       },
     },
   },
