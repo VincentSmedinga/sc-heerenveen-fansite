@@ -327,7 +327,7 @@ for (const [name, javaScriptEnabled] of [
 
       await page.goto(address)
       await expect(page.getByRole('heading', { level: 1 })).toContainText(' - ')
-      await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Terug naar Wedstrijden' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
 
       // A result of 0-1 asks for one goal.
@@ -427,7 +427,7 @@ for (const [name, javaScriptEnabled] of [
 
       await page.goto(address)
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Verslag: ')
-      await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Terug naar de wedstrijd' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Gegevens' })).toBeVisible()
       await expect(page.locator('summary', { hasText: 'Verslag weghalen' })).toHaveCount(0)
 

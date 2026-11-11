@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumb, Button, Card, Field, Form, Heading, Input, Page, Text } from '@fansite/design-system'
+import { Button, Card, Field, Form, Heading, Input, Link, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
 import { matchPath } from '#src/app/beheer/wedstrijden/paths'
@@ -52,14 +52,11 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current="Speler toevoegen"
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: listPath(season), label: `Spelers ${season}` },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={listPath(season)} icon="arrow-left">
+              Terug naar Spelers
+            </Link>
+          </Text>
           <Heading level={1}>Speler toevoegen aan {season}</Heading>
           <Text appearance="intro">
             Voeg een speler toe die in de selectie van {season} ontbreekt. Zoek eerst of we de persoon al kennen uit een

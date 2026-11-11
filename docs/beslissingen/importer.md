@@ -1793,6 +1793,7 @@
   Een doelpunt van één rij neemt 60 pixels in plaats van een scherm.
 - **Hoe:** de teksten komen uit het ontwerp (het Artifact "Wedstrijden in het beheer"), korter waar het kon.
   De onderdelen zijn die van #594, #595 en #599: `Tag`, `Notice`, `Disclosure`, `Breadcrumb`, de gevaarlijke `Button`, `Page.Main` met `wide`, `FieldGroup`, `InputTable`, `DataTable` met `appearance="text"` en de dichtheid `hf-density-compact`.
+  **Later:** `Breadcrumb` is uit het designsysteem weg (#1142), en een pagina onder een lijst heeft een link terug met `Link`.
 - **Gevolg:** de lijst heeft vijf kolommen als de tabel breed genoeg is (wedstrijd, datum, competitie, uitslag en status), en drie op een telefoon.
   Daarvoor kreeg `DataTable` een kolom die kan opvouwen (zie _Een kolom van een tabel met tekst kan opvouwen onder de rijkop_).
   De wedstrijd is de eerste kolom, want de rijkop is altijd de eerste.

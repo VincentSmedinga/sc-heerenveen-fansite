@@ -11,7 +11,6 @@ const components = [
   'ArticleCard',
   'BarChart',
   'Body',
-  'Breadcrumb',
   'Button',
   'Card',
   'DataTable',

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumb, Card, Heading, Link, Page, PlayerList, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Page, PlayerList, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
 import { reviewBranch } from '#src/env'
@@ -77,7 +77,6 @@ export default async function PlayerSearchPage({ searchParams }: { searchParams:
     <Page.Main
       intro={
         <Page.Cell>
-          <Breadcrumb current="Zoeken" items={[{ href: playersPath, label: 'Spelers' }]} label="Kruimelpad" />
           <Page.Title>
             <Heading level={1}>Zoeken naar een speler</Heading>
           </Page.Title>

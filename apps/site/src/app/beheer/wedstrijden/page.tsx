@@ -2,19 +2,7 @@ import type { Metadata } from 'next'
 
 import { listMatchSeasons } from '@fansite/db/queries'
 import { seasonOf } from '@fansite/db/season'
-import {
-  Breadcrumb,
-  Card,
-  DataTable,
-  Filter,
-  Heading,
-  Link,
-  Notice,
-  Page,
-  SeasonPicker,
-  Tag,
-  Text,
-} from '@fansite/design-system'
+import { Card, DataTable, Filter, Heading, Link, Notice, Page, SeasonPicker, Tag, Text } from '@fansite/design-system'
 
 import type { AdminMatchRow } from '#src/beheer/match-entries'
 
@@ -87,7 +75,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       className={compact}
       intro={
         <>
-          <Breadcrumb current="Wedstrijden" items={[{ href: '/beheer', label: 'Beheer' }]} label="Kruimelpad" />
           <Page.Title>
             <Heading level={1}>Wedstrijden</Heading>
             <SeasonPicker

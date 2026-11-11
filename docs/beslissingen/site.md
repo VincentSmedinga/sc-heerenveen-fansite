@@ -3849,6 +3849,7 @@
   - Geel-rood is geen keuze meer: een tweede gele kaart voor een speler die er precies één heeft, wordt een kaart `geel-rood`, en de bevestiging zegt "Geel-rode kaart opgeslagen".
     Het volledige formulier, plakken, de importer en de wedstrijdpagina houden geel-rood zoals het was.
   - De knoppen om op te slaan hebben het icoon `save`, de Disclosure van "Haal weg" herhaalt de vraag niet en het kruimelpad vervalt voor de balk "Op deze pagina:" onder de beheerbalk (de slot `@shortcuts`).
+    **Later:** het kruimelpad is nergens meer (#1142).
   - Na "Haal weg" met JavaScript gaat de focus naar de kop Gebeurtenissen.
 - **Waarom:** redacteuren gebruiken het scherm vaak, kennen de woorden en hebben op een telefoon weinig ruimte.
   Wat de regels toch al eisen, zoals een geel-rode kaart na precies één gele, hoeft niemand te kiezen.

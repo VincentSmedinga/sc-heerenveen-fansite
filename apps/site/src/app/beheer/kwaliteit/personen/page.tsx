@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Breadcrumb, Heading, Page, Pagination, Text } from '@fansite/design-system'
+import { Heading, Link, Page, Pagination, Text } from '@fansite/design-system'
 
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
@@ -54,14 +54,11 @@ export default async function PersonFactsPage({ searchParams }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current={title}
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: qualityPath, label: 'Kwaliteit' },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={qualityPath} icon="arrow-left">
+              Terug naar de kwaliteit van de gegevens
+            </Link>
+          </Text>
           <Heading level={1}>{title}</Heading>
           <Text appearance="intro">
             Van deze personen weten we de linie of het land niet. Kies het hier: een keuze is meteen opgeslagen, en de

@@ -331,14 +331,13 @@ describe('the list', () => {
     expect(html).toContain('action="/beheer/wedstrijden"')
   })
 
-  it('has a breadcrumb and no link back at the bottom', async () => {
+  it('has no breadcrumb and no link back', async () => {
     await addMatch()
 
     const html = await list()
 
-    expect(html).toContain('aria-label="Kruimelpad"')
-    expect(html).toContain('<a class="hf-navigation-link" href="/beheer">Beheer</a>')
-    expect(html).not.toContain('Terug naar het beheer')
+    expect(html).not.toContain('Kruimelpad')
+    expect(html).not.toContain('Terug naar')
   })
 
   it('says that there are no matches in a season without any', async () => {
@@ -402,12 +401,12 @@ describe('the match', () => {
     expect(headings(away)).toContain('h1 N.E.C. - sc Heerenveen')
   })
 
-  it('has a breadcrumb, tags for what the editors changed and what is missing, and a sticky sidebar', async () => {
+  it('has a link back to Wedstrijden, tags for what the editors changed and what is missing, and a sticky sidebar', async () => {
     const id = await addMatch()
     const html = await form(id)
 
-    expect(html).toContain('aria-label="Kruimelpad"')
-    expect(html).toContain('<span aria-current="page" class="hf-breadcrumb-current">sc Heerenveen - N.E.C.</span>')
+    expect(html).not.toContain('Kruimelpad')
+    expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar Wedstrijden')
     expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
     expect(html).toContain('hf-page-sidebar hf-page-sidebar-sticky')

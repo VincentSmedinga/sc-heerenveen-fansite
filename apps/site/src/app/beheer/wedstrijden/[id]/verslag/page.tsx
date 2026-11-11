@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
 import { phaseOf } from '@fansite/db/match-reports'
-import { Breadcrumb, Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { finishPath, livePath, matchesPath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
+import { finishPath, livePath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import {
@@ -116,15 +116,11 @@ export default async function ReportPage({ params, searchParams }: Props) {
         className={compact}
         intro={
           <>
-            <Breadcrumb
-              current="Verslag"
-              items={[
-                { href: '/beheer', label: 'Beheer' },
-                { href: matchesPath, label: 'Wedstrijden' },
-                { href: matchPath(match.id), label: clubs },
-              ]}
-              label="Kruimelpad"
-            />
+            <Text>
+              <Link href={matchPath(match.id)} icon="arrow-left">
+                Terug naar de wedstrijd
+              </Link>
+            </Text>
             <Heading level={1}>Verslag: {clubs}</Heading>
             <Text appearance="meta">
               {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}

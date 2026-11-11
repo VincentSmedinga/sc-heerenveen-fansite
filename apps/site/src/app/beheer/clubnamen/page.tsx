@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import {
-  Breadcrumb,
   Button,
   Card,
   DataTable,
@@ -58,7 +57,6 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
       className={compact}
       intro={
         <>
-          <Breadcrumb current="Clubnamen" items={[{ href: '/beheer', label: 'Beheer' }]} label="Kruimelpad" />
           <Heading level={1}>Clubnamen</Heading>
           <Text appearance="intro">
             De pagina van een club zegt "Eerder" met de namen die de club droeg, als je hier de lijst invult. Een club

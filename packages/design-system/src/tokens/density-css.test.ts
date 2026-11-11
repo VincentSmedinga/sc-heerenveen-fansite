@@ -117,8 +117,8 @@ describe('the components and the density', () => {
     }
   })
 
-  // The made-up addresses in the examples and tests of a component, such as the trail of a
-  // breadcrumb, are no knowledge of the admin.
+  // The made-up addresses in the examples and tests of a component are no knowledge of the
+  // admin.
   it('does not know where the density is used', () => {
     const code = all.filter(
       (file) =>

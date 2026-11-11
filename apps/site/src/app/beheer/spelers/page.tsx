@@ -1,18 +1,7 @@
 import type { PlayerSource } from '@fansite/db/schema'
 import type { Metadata } from 'next'
 
-import {
-  Breadcrumb,
-  Card,
-  DataTable,
-  Heading,
-  Link,
-  Notice,
-  Page,
-  SeasonPicker,
-  Tag,
-  Text,
-} from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Notice, Page, SeasonPicker, Tag, Text } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
 import { positionChoices } from '#src/beheer/player-fields'
@@ -95,7 +84,6 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
       className={compact}
       intro={
         <>
-          <Breadcrumb current="Spelers" items={[{ href: '/beheer', label: 'Beheer' }]} label="Kruimelpad" />
           <Page.Title>
             <Heading level={1}>Spelers</Heading>
             <SeasonPicker action={playersPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />

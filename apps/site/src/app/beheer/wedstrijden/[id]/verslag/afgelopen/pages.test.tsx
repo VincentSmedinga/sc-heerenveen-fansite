@@ -80,7 +80,7 @@ describe('the screen "Wedstrijd afgelopen"', () => {
     expect(metadata.robots).toEqual({ follow: false, index: false })
   })
 
-  it('has one h1 with the clubs, the way back in the breadcrumb, and a card with the question', async () => {
+  it('has one h1 with the clubs, a link back to the report, and a card with the question', async () => {
     const html = await page(matchId)
 
     expect(html.match(/<h1[^>]*>(.*?)<\/h1>/u)?.[1]).toBe('Wedstrijd afgelopen: N.E.C. - sc Heerenveen')

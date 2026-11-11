@@ -142,7 +142,7 @@ describe('the screen "Verslag bijhouden"', () => {
     expect(html).toMatch(/<h2[^>]*id="gebeurtenissen-kop"[^>]*tabindex="-1"/iu)
   })
 
-  it('has no breadcrumb, the bar of the admin and the jumps are in the slot', async () => {
+  it('has no breadcrumb or link back, the bar of the admin and the jumps are in the slot', async () => {
     await addReport()
 
     const html = await page(matchId)

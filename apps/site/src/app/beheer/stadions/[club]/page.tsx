@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 import {
-  Breadcrumb,
   Button,
   Card,
   Disclosure,
@@ -75,14 +74,11 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
         className={compact}
         intro={
           <>
-            <Breadcrumb
-              current={club.name}
-              items={[
-                { href: '/beheer', label: 'Beheer' },
-                { href: stadiumsPath, label: 'Stadions' },
-              ]}
-              label="Kruimelpad"
-            />
+            <Text>
+              <Link href={stadiumsPath} icon="arrow-left">
+                Terug naar Stadions
+              </Link>
+            </Text>
             <Heading level={1}>{club.name}</Heading>
             <Text>
               {own.length > 0 ? <Tag tone="highlight">Eigen lijst</Tag> : <Tag>Wikipedia</Tag>}{' '}

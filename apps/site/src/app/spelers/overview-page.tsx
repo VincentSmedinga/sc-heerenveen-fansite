@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { seasonOf } from '@fansite/db/season'
 import {
   BarList,
-  Breadcrumb,
   Card,
   Heading,
   Link,
@@ -152,7 +151,6 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
       <Page.Main
         intro={
           <Page.Cell>
-            <Breadcrumb current="Overzicht" items={[{ href: playersPath, label: 'Spelers' }]} label="Kruimelpad" />
             <Page.Title>
               <Heading level={1}>Alle spelers</Heading>
             </Page.Title>

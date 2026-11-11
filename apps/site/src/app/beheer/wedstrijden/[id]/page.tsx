@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
 import { mayHaveReport } from '@fansite/db/match-reports'
-import { Breadcrumb, Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
+import { Card, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { addPlayerPath } from '#src/app/beheer/spelers/paths'
@@ -153,14 +153,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
         className={compact}
         intro={
           <>
-            <Breadcrumb
-              current={clubs}
-              items={[
-                { href: '/beheer', label: 'Beheer' },
-                { href: matchesPath, label: 'Wedstrijden' },
-              ]}
-              label="Kruimelpad"
-            />
+            <Text>
+              <Link href={matchesPath} icon="arrow-left">
+                Terug naar Wedstrijden
+              </Link>
+            </Text>
             <Heading level={1}>{clubs}</Heading>
             <Text appearance="meta">
               {match.competition}, {match.round} · {describeEntryKickoff(match)}

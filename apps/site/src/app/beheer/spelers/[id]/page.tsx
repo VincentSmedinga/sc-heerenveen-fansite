@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import {
-  Breadcrumb,
   Button,
   Card,
   Disclosure,
@@ -9,6 +8,7 @@ import {
   Form,
   Heading,
   Input,
+  Link,
   Notice,
   Page,
   Select,
@@ -84,14 +84,11 @@ export default async function PlayerPage({ params, searchParams }: Props) {
       className={compact}
       intro={
         <>
-          <Breadcrumb
-            current={player.name}
-            items={[
-              { href: '/beheer', label: 'Beheer' },
-              { href: listPath(player.season), label: `Spelers ${player.season}` },
-            ]}
-            label="Kruimelpad"
-          />
+          <Text>
+            <Link href={listPath(player.season)} icon="arrow-left">
+              Terug naar Spelers
+            </Link>
+          </Text>
           <Heading level={1}>{player.name}</Heading>
           <Text>
             {player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : <Tag>Import</Tag>} Speler in het
