@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { loadPlayerPage, periodsOf, type PlayerPage, playerPageOf } from '#src/player-page'
+import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
 import { withoutIcons } from '#src/without-icons'
 
 import { playerMetadata, PlayerPageView } from './player-page'
@@ -12,6 +13,26 @@ vi.mock('#src/player-page', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   loadPlayerPage: vi.fn(),
 }))
+
+vi.mock('#src/player-seasons', () => ({ loadPlayerSeasons: vi.fn() }))
+
+// A made-up season of the player.
+const madeUpSeason: PlayerSeason = {
+  assists: 2,
+  cleanSheets: undefined,
+  conceded: undefined,
+  goals: 5,
+  goalsByCompetition: { Eredivisie: 5 },
+  matchesInSeason: 34,
+  played: 30,
+  red: 0,
+  reportedMatches: 34,
+  season: '2003/04',
+  shirtNumber: 9,
+  source: 'lineups',
+  started: 25,
+  yellow: 3,
+}
 
 // A made-up player of ours.
 const player: PlayerPage = {
@@ -43,6 +64,7 @@ const digestOf = async (promise: Promise<unknown>) =>
   )
 
 beforeEach(() => {
+  vi.mocked(loadPlayerSeasons).mockResolvedValue([madeUpSeason])
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(new Date('2026-10-23T13:40:00Z'))
   vi.stubEnv('SITE_ENV', 'production')
@@ -55,6 +77,22 @@ afterEach(() => {
 })
 
 describe('the page of a player', () => {
+  it('has the table Per seizoen under the seasons, and leaves it out when the seasons cannot be read', async () => {
+    expect(await render()).toMatch(/<h2[^>]*>Per seizoen<\/h2><table/)
+    expect(loadPlayerSeasons).toHaveBeenCalledWith(7)
+
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(loadPlayerSeasons).mockRejectedValue(new Error('connect ECONNREFUSED'))
+
+    const html = await render()
+
+    expect(html).not.toContain('Per seizoen')
+    expect(html).toContain('Bij sc Heerenveen')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
+    error.mockRestore()
+  })
+
   it('has a breadcrumb to Spelers and his name as the heading, in parts', async () => {
     const html = await render()
 
@@ -80,6 +118,8 @@ describe('the page of a player', () => {
     expect(await render({ birthPlace: undefined, birthYear: undefined })).toMatch(
       /<p class="hf-meta">Aanvaller · <span class="hf-country-name">.*?Nederland<\/span><\/p>/s,
     )
+    // The legend of the table is a line of its own, so the table is left out here.
+    vi.mocked(loadPlayerSeasons).mockResolvedValue([])
     expect(
       await render({ birthPlace: undefined, birthYear: undefined, country: undefined, line: undefined }),
     ).not.toContain('class="hf-meta">')

@@ -71,10 +71,10 @@ describe('the font weights in the CSS of the components', () => {
     }
   })
 
-  it('adds no weight that the site did not have: 400 to 700, and 900 for the wordmark', () => {
+  it('adds no weight beyond 400 to 700, 800 for the key figures and 900 for the wordmark', () => {
     const values = [...read('tokens/typography.css').matchAll(/-font-weight: (\d{3});/g)].map(([, weight]) => weight)
 
-    expect(new Set(values)).toEqual(new Set(['400', '500', '600', '700', '900']))
+    expect(new Set(values)).toEqual(new Set(['400', '500', '600', '700', '800', '900']))
   })
 })
 
@@ -121,7 +121,7 @@ const weightRules = (css: string): WeightRule[] => {
 
 const token = (name: string) => `var(--hf-${name}-font-weight)`
 const header = /(^|[\s,>])th\b/
-const heaviest = /hf-key|tfoot|^caption|hf-bar-legend/
+const heaviest = /hf-key|hf-data-table-total|tfoot|^caption|hf-bar-legend/
 
 describe('the font weights in the CSS of tables', () => {
   const rules = tableFiles.flatMap((file) => weightRules(read(file)).map((rule) => ({ ...rule, file })))

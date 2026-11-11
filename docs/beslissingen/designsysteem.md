@@ -2126,6 +2126,8 @@
   DV, DT en DS komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont, en geen tabel doet dat nu.
   De rest blijft: één lijst, `tableLegend`, de woorden winst, gelijk en verlies.
 - **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): `D/W` is de uitzondering op één letter per kolom, en de test legt G, D en P vast als de letters met twee woorden.
+- **Later:** zie _De tabel Per seizoen heeft kolommen naar de linie van de speler_ in `site.md` (11 november 2026): `tableColumns` heeft ook N nul en T tegendoelpunten, voor de tabel van een doelman.
+  Het blijft één letter per kolom, en N en T waren vrij.
 
 ## Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 
@@ -3219,11 +3221,20 @@
 - **Datum:** 11 november 2026
 - **Besluit:** in `KeyFigures` (#1080) staat elk getal in een eigen kaart: een `li` met de klasse `hf-card`, dus het vlak, de rand en de hoeken van `Card`, met minder binnenruimte.
   De kaarten delen de breedte en lopen door naar een volgende regel als ze niet passen: vier naast elkaar op een breed scherm, op een telefoon twee aan twee.
-  Het getal is groter en vetter (`--hf-key-figure-font-size` en `--hf-key-figure-font-weight`, 900 zoals het wordmerk, omdat 800 geen gewicht van de site is) en heeft cijfers van gelijke breedte; het woord heeft het gewicht van een naam en de regel is klein en rustig.
+  Het getal is groter en vetter (`--hf-key-figure-font-size` en `--hf-key-figure-font-weight`, 800 zoals in het ontwerp, een gewicht dat `weight-css.test.ts` daarom toestaat) en heeft cijfers van gelijke breedte; het woord heeft het gewicht van een naam en de regel is klein en rustig.
 - **Waarom:** het ontwerp toont kerngetallen als losse kaarten.
   De losse getallen in één vlak waren vlakker en leken niet op dat ontwerp.
 - **Alternatieven:** `Card` als element van de lijst (de kaart kan geen `li` zijn); één vast raster van twee kolommen (dat wordt één rij op een breed scherm, en een getal als "1,26" past dan niet naast een tweede op een smalle kolom).
 - **Later:** vervangt de lijst zonder kaarten en het vaste raster uit de beslissing hierboven, "Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot".
+  Het gewicht 800 komt erbij naast de gewichten 400 tot 700 en 900 uit de beslissing over de gewichten per bedoeling; `weight-css.test.ts` staat het toe, en het lettertype heeft het gewicht al.
+
+## `DataTable` heeft een rij Totaal en woorden achter de rijkop
+
+- **Datum:** 11 november 2026
+- **Besluit:** een rij van `DataTable` kan `total: true` hebben, en dan is ze vet op de markeringskleur met een zwaardere lijn erboven, en `aside` zet woorden in secundaire tekst achter de rijkop op dezelfde regel, zoals het rugnummer achter een seizoen (#1082).
+  `secondary` blijft de regel onder de rijkop.
+- **Waarom:** de tabel Per seizoen moet de som zichtbaar scheiden van de seizoenen die ze optelt, en het rugnummer hoort bij het seizoen zonder de rij hoger te maken.
+- **Alternatieven:** het totaal als aparte tabel of als gewone rij (niet te onderscheiden); het rugnummer als tweede regel met `secondary` (elke rij wordt twee regels hoog).
 
 ## Een loopbaan is een lijst van periodes met een lijst seizoenen, en een gat is een regel van de pagina
 

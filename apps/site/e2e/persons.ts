@@ -1,8 +1,8 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { persons, personSlugs, players } from '@fansite/db/schema'
-import { eq, inArray } from 'drizzle-orm'
+import { persons, personSlugs, players, playerSeasonStats } from '@fansite/db/schema'
+import { and, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
@@ -19,6 +19,10 @@ const people = [
   { country: 'NL', line: null, name: 'Proef de Keeper', page: null, seasons: ['2002/03'] },
   { country: null, line: 'middenvelder', name: 'Nep van der Middenveld', page: null, seasons: ['2001/02', '2002/03'] },
   { country: null, line: null, name: 'Test Zonder Selectie', page: null, seasons: [] },
+  // A goalkeeper and a forward with figures (see playerFigures): complete, so the lists of the
+  // admin that look for a missing line or country do not hold them.
+  { country: 'NL', line: 'doelman', name: 'Verzonnen Doelman', page: null, seasons: ['2001/02', '2002/03'] },
+  { country: 'NL', line: 'aanvaller', name: 'Verzonnen Aanvaller', page: null, seasons: ['2001/02', '2002/03'] },
 ] as const
 
 /** Puts the persons and their players in and returns the function that takes them out. */
@@ -83,6 +87,7 @@ export async function addPersons() {
       }
     }
 
+    await addFigures(db)
     // The site gives the addresses when it starts, before these persons were there.
     await updatePlayerAddresses(db)
   } finally {
@@ -93,10 +98,40 @@ export async function addPersons() {
 }
 
 /**
+ * The table of Wikipedia for 2002/03 for the goalkeeper and the forward, so their pages have a
+ * table Per seizoen with figures (#1082). It adds no match, and so no season to the pickers of
+ * the site; 2001/02 has nothing, so it is a row of dashes. The lines of the match reports are
+ * tested with a database in `player-seasons-database.test.ts`.
+ */
+async function addFigures(db: ReturnType<typeof connect>['db']) {
+  const stats = [
+    { appearances: 30, assists: 0, goals: 0, name: 'Verzonnen Doelman' },
+    { appearances: 28, assists: 5, goals: 11, name: 'Verzonnen Aanvaller' },
+  ]
+
+  for (const { name, ...figures } of stats) {
+    const [row] = await db
+      .select({ id: players.id })
+      .from(players)
+      .where(and(eq(players.name, name), eq(players.season, '2002/03')))
+
+    if (row === undefined) {
+      throw new Error(`There is no made-up player ${name} in 2002/03.`)
+    }
+
+    await db
+      .insert(playerSeasonStats)
+      .values({ ...figures, competition: 'Eredivisie', playerId: row.id, season: '2002/03' })
+  }
+}
+
+/**
  * The pages of the made-up players (#1079): the page of a player of ours, an old address of
  * his, and the address of a person in no squad of ours, which is "niet gevonden".
  */
 export const playerPages = {
+  forward: '/spelers/verzonnen-aanvaller',
+  goalkeeper: '/spelers/verzonnen-doelman',
   old: '/spelers/proef-keeper',
   opponent: '/spelers/test-zonder-selectie',
   player: '/spelers/proef-de-keeper',

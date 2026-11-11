@@ -12,6 +12,8 @@ describe('tableColumns', () => {
       ),
     ).toEqual({
       assists: 'A assists',
+      cleanSheets: 'N nul',
+      conceded: 'T tegendoelpunten',
       drawn: 'G gelijk',
       goalDifference: 'D doelsaldo',
       goals: 'D doelpunten',

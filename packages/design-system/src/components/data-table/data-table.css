@@ -121,6 +121,27 @@
     min-inline-size: 7ch;
   }
 
+  /*
+   * Words after the row header on its line, such as the shirt number: secondary text. The
+   * markup has a space before them, so a screen reader hears two words.
+   */
+  .hf-data-table .hf-data-table-aside {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  /*
+   * The total row: bold on the highlight fill, with a heavier line above it in the colour of
+   * the markers, so the sum stands apart from the rows it adds up.
+   */
+  .hf-data-table .hf-data-table-total :is(th, td) {
+    background-color: var(--hf-colour-background-highlight);
+    border-block-start: 2px solid var(--hf-colour-marker-graphic);
+    color: var(--hf-colour-text-highlight);
+    font-weight: var(--hf-figure-font-weight);
+  }
+
   /* The second line of a row header, in either table, is secondary text under the header or its link. */
   .hf-data-table .hf-data-table-secondary {
     color: var(--hf-colour-text-secondary);
