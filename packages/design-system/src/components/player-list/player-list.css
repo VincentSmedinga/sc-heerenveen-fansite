@@ -1,0 +1,34 @@
+/*
+ * A list of players: the name, and under it a quiet line with the years. A row never breaks
+ * across the two columns of a wide screen.
+ */
+
+@layer hf.components {
+  .hf-player-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hf-player-list-row {
+    break-inside: avoid;
+    display: grid;
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-player-list-surname {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-player-list-facts {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  @media (width >= 52rem) {
+    .hf-player-list {
+      column-gap: var(--hf-space-xl);
+      columns: 2;
+    }
+  }
+}

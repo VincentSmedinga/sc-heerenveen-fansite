@@ -30,11 +30,17 @@ export async function findPlayerBySlug(db: Pick<Database, 'select'>, slug: strin
 }
 
 /**
+ * The addresses below `/spelers` that are pages of their own, so no player has one as slug:
+ * the form that chooses a season (`kies`) and the overview of all players (`overzicht`, #1138).
+ */
+export const reservedPlayerSlugs: readonly string[] = ['kies', 'overzicht']
+
+/**
  * Whether a slug can be the address of a player: `/spelers/kies` is the form that chooses a
  * season, and `/spelers/2025-26` is a season, so a slug is never one of those.
  */
 export function isPlayerSlug(slug: string): boolean {
-  return /^[a-z0-9]+(-[a-z0-9]+)*$/u.test(slug) && slug !== 'kies' && !/^\d{4}-\d{2}$/u.test(slug)
+  return /^[a-z0-9]+(-[a-z0-9]+)*$/u.test(slug) && !reservedPlayerSlugs.includes(slug) && !/^\d{4}-\d{2}$/u.test(slug)
 }
 
 /** The country of a Vietnamese person: his đ is a d, as in Đức, where "dj" would be wrong. */
@@ -76,7 +82,8 @@ export async function playerSlugs(db: Pick<Database, 'select'>): Promise<string[
  * - A person keeps his slug of now while it still fits his name, so an address does not move
  *   because another person came.
  * - Otherwise he gets the first of his name, his name with his year of birth, and his name with
- *   his number that no other person has, now or before, and that is no season and not `kies`.
+ *   his number that no other person has, now or before, and that is no season and no
+ *   reserved address (`reservedPlayerSlugs`).
  *   The persons go by number, so of two persons with one name the lower number gets the name.
  *
  * It changes nothing when everything fits, so it can run as often as it likes: when the site

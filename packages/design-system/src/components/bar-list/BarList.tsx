@@ -6,6 +6,8 @@ import { classNames } from '../classNames'
 export type BarListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> & {
   /** The rows, the first on top: a bar is as long as the share of its number in the largest. */
   rows: readonly BarListRow[]
+  /** Room for a name in words, such as a country, instead of a season. */
+  wide?: boolean
 }
 
 /** One row of a bar list: what it is about, as a name or a link, and its number. */
@@ -14,6 +16,8 @@ export type BarListRow = {
   label: ReactNode
   /** The number the bar is as long as, and the number the row shows as text. */
   value: number
+  /** The row is only there on a wide screen, so a narrow one gets a shorter list. */
+  wideOnly?: boolean
 }
 
 /**
@@ -23,13 +27,13 @@ export type BarListRow = {
  * the largest number, from the same start, so the rows can be compared. bar-list.css gives the
  * look.
  */
-export const BarList = ({ className, rows, ...props }: BarListProps) => {
+export const BarList = ({ className, rows, wide = false, ...props }: BarListProps) => {
   const shares = sharesOf(rows.map(({ value }) => value))
 
   return (
-    <ul {...props} className={classNames('hf-bar-list', className)} role="list">
-      {rows.map(({ label, value }, index) => (
-        <li className="hf-bar-list-row" key={index}>
+    <ul {...props} className={classNames('hf-bar-list', wide && 'hf-bar-list-wide', className)} role="list">
+      {rows.map(({ label, value, wideOnly }, index) => (
+        <li className={classNames('hf-bar-list-row', wideOnly && 'hf-bar-list-wide-only')} key={index}>
           <span className="hf-bar-list-label">{label}</span>
           <span aria-hidden="true" className="hf-bar-list-track">
             <span

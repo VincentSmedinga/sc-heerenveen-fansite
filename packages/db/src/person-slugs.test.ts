@@ -121,6 +121,7 @@ describe('isPlayerSlug', () => {
   it('refuses kies and anything that looks like a season', () => {
     expect(isPlayerSlug('jan-de-vries')).toBe(true)
     expect(isPlayerSlug('kies')).toBe(false)
+    expect(isPlayerSlug('overzicht')).toBe(false)
     expect(isPlayerSlug('2025-26')).toBe(false)
     expect(isPlayerSlug('Jan')).toBe(false)
   })
@@ -171,6 +172,14 @@ describe('updatePlayerAddresses', () => {
     await updatePlayerAddresses(database.db)
 
     expect(await slugOf(kies)).toBe(`kies-${kies}`)
+  })
+
+  it('never gives the address overzicht, which is the overview of all players (#1138)', async () => {
+    const overzicht = await addPerson('Overzicht')
+
+    await updatePlayerAddresses(database.db)
+
+    expect(await slugOf(overzicht)).toBe(`overzicht-${overzicht}`)
   })
 
   it('keeps the old slug when the name changes, and it leads to the person', async () => {

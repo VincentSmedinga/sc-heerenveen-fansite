@@ -95,6 +95,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/spelers/kies?seizoen=onzin', status: 200 },
   { path: '/spelers/kies', status: 200 },
+  // The overview of all players, by name and by country (#1138).
+  { path: '/spelers/overzicht', status: 200 },
+  { path: '/spelers/overzicht/land', status: 200 },
   { path: '/spelers/2099-00', status: 404 },
   { path: '/spelers/onzin', status: 404 },
   // The page of a made-up player and a person in no squad of ours (see persons.ts). An old

@@ -34,6 +34,16 @@ export const pages = [
   },
   {
     description:
+      'Alle spelers die ooit in de selectie van sc Heerenveen stonden, op achternaam, met hun linie en jaren. Bron: Wikipedia en sc Heerenveen Fansite.',
+    path: '/spelers/overzicht',
+  },
+  {
+    description:
+      'Alle spelers die ooit in de selectie van sc Heerenveen stonden, per land, met hun linie en jaren. Bron: Wikipedia en sc Heerenveen Fansite.',
+    path: '/spelers/overzicht/land',
+  },
+  {
+    description:
       'Alle clubs waar sc Heerenveen tegen speelde, met hoe vaak we wonnen en verloren, en de bronnen erbij: Wikipedia en de sc Heerenveen Fansite.',
     path: '/tegenstanders',
   },
