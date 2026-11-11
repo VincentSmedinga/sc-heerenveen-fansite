@@ -208,7 +208,7 @@ describe('the page /cijfers', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!--hf-bar-share:[\d.]+"|--hf-segmented-thumb-name:hf-segmented-thumb-[a-z-]+;--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-segmented-option-name:hf-segmented-option-[a-z-]+-\d"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
+      / style="(?!--hf-bar-share:[\d.]+"|--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
     )
   })
 
@@ -1672,10 +1672,10 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
     const league = await render(eredivisie)
 
     expect(switchOf(all)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-cijfers;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/cijfers" style="--hf-segmented-option-name:hf-segmented-option-cijfers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/cijfers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-cijfers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(switchOf(league)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-cijfers;--hf-segmented-count:2;--hf-segmented-index:1"><a href="/cijfers" style="--hf-segmented-option-name:hf-segmented-option-cijfers-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/cijfers?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-cijfers-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(all.match(/aria-current/g)).toHaveLength(1)
   })

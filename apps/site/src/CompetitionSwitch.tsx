@@ -6,19 +6,9 @@ import { SwitchLinks } from './SwitchLinks'
 
 /**
  * The two links of the switch, for a page that knows itself whether there is anything to
- * choose, such as the pages of the opponents, which count the matches of every season. `place`
- * names where the switch stands, for the slide between pages (see `SegmentedLinks`): a page
- * picks a place of its own, so the thumb does not fly from one page to another.
+ * choose, such as the pages of the opponents, which count the matches of every season.
  */
-export function CompetitionLinks({
-  address,
-  competition,
-  place,
-}: {
-  address: string
-  competition: CompetitionChoice
-  place: string
-}) {
+export function CompetitionLinks({ address, competition }: { address: string; competition: CompetitionChoice }) {
   return (
     <SwitchLinks
       label="Welke wedstrijden"
@@ -26,7 +16,6 @@ export function CompetitionLinks({
         { href: address, label: 'Alle wedstrijden', value: 'all' },
         { href: `${address}${competitionQuery('league')}`, label: 'Eredivisie', value: 'league' },
       ]}
-      place={place}
       size="small"
       value={competition}
     />
@@ -45,16 +34,12 @@ export function CompetitionSwitch({
   address,
   competition,
   matches,
-  place,
 }: {
   address: string
   competition: CompetitionChoice
   matches: PublicMatch[]
-  place: string
 }) {
-  return hasPlayedExtraMatch(matches) ? (
-    <CompetitionLinks address={address} competition={competition} place={place} />
-  ) : null
+  return hasPlayedExtraMatch(matches) ? <CompetitionLinks address={address} competition={competition} /> : null
 }
 
 /** What the season picker sends with the season to keep the choice (see `SeasonPicker`). */

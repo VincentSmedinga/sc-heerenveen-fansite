@@ -1062,8 +1062,8 @@ describe('the switch of the card Stand, between the whole season and the latest 
     const card = await stand()
 
     expect(card).toContain('aria-label="Welke stand"')
-    expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand" style="')
-    expect(card).toContain('<a href="/wedstrijden?stand=laatste-5#stand" style="')
+    expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand"><span')
+    expect(card).toContain('<a href="/wedstrijden?stand=laatste-5#stand"><span')
     expect(card).toContain('Hele seizoen')
     expect(card).toContain('Laatste 5')
     expect(card.indexOf('Welke stand')).toBeLessThan(card.indexOf('<table'))
@@ -1077,7 +1077,7 @@ describe('the switch of the card Stand, between the whole season and the latest 
     expect(card).toContain(
       '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 11 oktober 2026</caption>',
     )
-    expect(card).toContain('<a aria-current="page" href="/wedstrijden?stand=laatste-5#stand" style="')
+    expect(card).toContain('<a aria-current="page" href="/wedstrijden?stand=laatste-5#stand"><span')
     // Heerenveen has 3 + 3 + 1 points in three matches, the other two one point in two matches.
     const rows = [...card.matchAll(/<tr[^>]*><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row">([^<]+)/g)]
 
@@ -1095,7 +1095,7 @@ describe('the switch of the card Stand, between the whole season and the latest 
       const card = await stand({ stand: value })
 
       expect(card).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
-      expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand" style="')
+      expect(card).toContain('<a aria-current="page" href="/wedstrijden#stand"><span')
     }
   })
 

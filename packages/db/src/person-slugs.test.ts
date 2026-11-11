@@ -4,8 +4,17 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { TestDatabase } from './test-database.ts'
 
 import { mergeChosenPersons } from './person-merge.ts'
-import { findPlayerBySlug, isPlayerSlug, personSlug, playerSlugs, updatePlayerAddresses } from './person-slugs.ts'
+import {
+  findPlayerBySlug,
+  isPlayerSlug,
+  lostLetters,
+  personSlug,
+  playerSlugs,
+  slugLetters,
+  updatePlayerAddresses,
+} from './person-slugs.ts'
 import { persons, personSlugs, players } from './schema.ts'
+import { madeUpSquad } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -62,6 +71,49 @@ describe('personSlug', () => {
     expect(personSlug("Jan-Harm O'Neill")).toBe('jan-harm-oneill')
     expect(personSlug('Ståle Sørensen')).toBe('stale-sorensen')
     expect(personSlug('…')).toBe('')
+  })
+
+  it.each([
+    ['đ', 'Đuričić', 'djuricic'],
+    ['ø', 'Øyvind Ølsen', 'oyvind-olsen'],
+    ['ł', 'Łukasz Łoś', 'lukasz-los'],
+    ['ð', 'Ðorđe Alfreð', 'dordje-alfred'],
+    ['þ', 'Þór Þorsteinn', 'thor-thorsteinn'],
+    ['æ', 'Æbeltoft Bjærre', 'aebeltoft-bjaerre'],
+    ['œ', 'Œuvre Cœur', 'oeuvre-coeur'],
+    ['ß', 'Weiß Strauß', 'weiss-strauss'],
+    ['ı', 'Yıldız Iğdır', 'yildiz-igdir'],
+  ])('writes out the letter %s, in capitals too (%s)', (letter, name, slug) => {
+    expect(letter in slugLetters).toBe(true)
+    expect(personSlug(name)).toBe(slug)
+    expect(lostLetters(name)).toEqual([])
+  })
+
+  it('writes the đ of a Vietnamese person as a d, and as dj for another or an unknown country', () => {
+    expect(personSlug('Đặng Văn Lâm', 'VN')).toBe('dang-van-lam')
+    expect(personSlug('Đặng Văn Lâm')).toBe('djang-van-lam')
+    expect(personSlug('Đặng Văn Lâm', null)).toBe('djang-van-lam')
+    expect(personSlug('Đuričić', 'RS')).toBe('djuricic')
+    // Only the đ depends on the country.
+    expect(personSlug('Ðorđe Æ', 'VN')).toBe('dorde-ae')
+  })
+
+  it('knows a letter that gives nothing, so a name never loses one unnoticed', () => {
+    expect(lostLetters('Jan de Vries')).toEqual([])
+    expect(lostLetters('Ångström Çelik')).toEqual([])
+    expect(lostLetters('Ǥerard 山田')).toEqual(['ǥ', '山', '田'])
+  })
+})
+
+describe('the names of the made-up squad of the seed', () => {
+  it('lose no letter in their address (#1113), so a new letter is noticed', () => {
+    const names = madeUpSquad(new Date('2026-11-11T12:00:00Z')).map(({ name }) => name)
+
+    expect(names.length).toBeGreaterThan(0)
+
+    for (const name of names) {
+      expect(lostLetters(name), name).toEqual([])
+    }
   })
 })
 
@@ -201,5 +253,32 @@ describe('a merge of two persons', () => {
     await updatePlayerAddresses(database.db)
 
     expect((await findPlayerBySlug(database.db, 'johannes-de-vries'))?.slug).toBe('jan-de-vries')
+  })
+
+  it('gives a person whose address changes the new address, and keeps the old one as a redirect', async () => {
+    const id = await addPerson('Đuričić Test')
+
+    // The address the old code gave: the capital đ was lost.
+    await database.db.update(persons).set({ slug: 'uricic-test' }).where(eq(persons.id, id))
+    await database.db.insert(personSlugs).values({ personId: id, slug: 'uricic-test' })
+
+    expect(await updatePlayerAddresses(database.db)).toBe(1)
+    expect(await slugOf(id)).toBe('djuricic-test')
+    expect(await slugsOf(id)).toEqual(['djuricic-test', 'uricic-test'])
+    expect((await findPlayerBySlug(database.db, 'uricic-test'))?.slug).toBe('djuricic-test')
+    expect(await updatePlayerAddresses(database.db)).toBe(0)
+  })
+
+  it('uses his country: a Vietnamese đ is a d, and a new address that is taken gets his year of birth', async () => {
+    const taken = await addPerson('Dang Van')
+    const id = await addPerson('Đang Van', { birthDate: '1990-01-01', season: '2005/06' })
+    const other = await addPerson('Đang Van', { season: '2006/07' })
+
+    await database.db.update(persons).set({ country: 'VN' }).where(eq(persons.id, id))
+    await updatePlayerAddresses(database.db)
+
+    expect(await slugOf(taken)).toBe('dang-van')
+    expect(await slugOf(id)).toBe('dang-van-1990')
+    expect(await slugOf(other)).toBe('djang-van')
   })
 })

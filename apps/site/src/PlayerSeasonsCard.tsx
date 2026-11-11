@@ -115,9 +115,7 @@ export function PlayerSeasonsCard({
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
-      {playerAddress === undefined ? null : (
-        <CompetitionLinks address={playerAddress} competition={competition} place="speler" />
-      )}
+      {playerAddress === undefined ? null : <CompetitionLinks address={playerAddress} competition={competition} />}
       <DataTable
         caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'league' ? 'alleen de Eredivisie, ' : ''}het nieuwste seizoen eerst, met het totaal onderaan`}
         columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}
