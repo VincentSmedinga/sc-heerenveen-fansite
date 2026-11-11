@@ -182,6 +182,8 @@ export type {
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'
+export { PlaceCell, sharedPlaces } from './components/place-cell/PlaceCell'
+export type { PlaceCellProps } from './components/place-cell/PlaceCell'
 export { PlayerFiguresTable } from './components/player-figures-table/PlayerFiguresTable'
 export type { PlayerFiguresRow, PlayerFiguresTableProps } from './components/player-figures-table/PlayerFiguresTable'
 export { countryName } from './components/player-name/flags'

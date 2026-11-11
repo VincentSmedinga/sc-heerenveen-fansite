@@ -45,8 +45,8 @@ const plain = (html: string | undefined) => (html ?? '').replaceAll(/<[^>]*>/g, 
 
 /** The rows of the table of scorers: the place, the player and the goals. */
 const rowsOf = (html: string) =>
-  [...html.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g)].map(
-    ([, position, player, goals]) => [position, plain(player), goals],
+  [...html.matchAll(/<tr><td[^>]*>(\d+|<span.+?<\/span>)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g)].map(
+    ([, position, player, goals]) => [plain(position ?? ''), plain(player), goals],
   )
 
 /** The first match that was played, in which the goals of the made-up players are scored. */
@@ -186,7 +186,8 @@ describe('the page /spelers', () => {
     expect(rowsOf(await render())).toEqual([
       ['1', 'Proefman', '2'],
       ['2', 'Kopie', '1'],
-      ['2', 'Nepper', '1'],
+      // The second of a shared place shows the sign, and a screen reader hears the place.
+      ['⋮gedeeld 2', 'Nepper', '1'],
     ])
     expect(await render()).toContain('<p>3 spelers hebben gescoord</p>')
   })
@@ -200,11 +201,18 @@ describe('the page /spelers', () => {
     const html = await render()
 
     expect(rowsOf(html)).toHaveLength(14)
-    expect(
-      rowsOf(html)
-        .slice(8)
-        .every(([position]) => position === '9'),
-    ).toBe(true)
+    expect(rowsOf(html).map(([position]) => position)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      ...Array.from({ length: 5 }, () => '⋮gedeeld 9'),
+    ])
     expect(html).toContain('<p>14 spelers hebben gescoord</p>')
     expect(html).not.toContain('De top 5')
   })

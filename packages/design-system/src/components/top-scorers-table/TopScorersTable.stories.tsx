@@ -21,6 +21,7 @@ const meta = preview.meta({
           'Spelers met evenveel doelpunten hebben dezelfde plaats.',
           "Een korte lijst, zoals de top 5, voegt ze samen: spelers met evenveel doelpunten delen één rij, met de namen achter elkaar gescheiden door komma's, en een lange lijst met alle spelers houdt een rij per speler.",
           'De doelpunten in een gedeelde rij gelden voor elke speler, en een naam breekt nooit midden in de naam.',
+          'In een lijst met een rij per speler toont alleen de eerste rij van een gedeelde plaats het nummer, en de volgende rijen een verticaal beletselteken (⋮); een schermlezer hoort daar "gedeeld 2" (zie `PlaceCell`).',
           'Het aantal doelpunten is het kerngetal en dus vet, want daarop is de lijst gesorteerd.',
           'De getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',

@@ -3299,3 +3299,21 @@
   De kop van zo'n rij hoeft niet uniek te zijn, en een tabel met een onderbreking kan niet sorteren.
 - **Waarom:** de tabel Per seizoen van een speler moet laten zien dat hij tussen twee periodes weg was, zonder dat het teken voorgelezen wordt.
 - **Alternatieven:** de rij met `marker` en `note` maken (de kop is dan zichtbaar en moet uniek zijn); een rij met een kop "weg" (zegt niet waarvan).
+
+## Een gedeelde plaats in een ranglijst toont het nummer één keer en daarna een beletselteken
+
+- **Datum:** 11 november 2026
+- **Besluit:** in een ranglijst met een rij per speler of club toont alleen de eerste rij van een plaats het nummer, en elke volgende rij met dezelfde plaats een verticaal beletselteken (⋮) op die plek: 4, ⋮, ⋮, ⋮, 8 (#1127).
+  Dat gebeurt op één plek, `PlaceCell` in `packages/design-system/src/components/place-cell/`, met `sharedPlaces` dat uit de plaatsen van de rijen zegt welke rij een plaats deelt.
+  `TopScorersTable`, `StandingsTable` en `DataTable` met `position` gebruiken ze, dus een gedeelde plaats ziet er overal hetzelfde uit.
+  - **Schermlezer:** de cel zegt bij een gedeelde rij "gedeeld 4" en nooit het teken (`aria-hidden`).
+  - **Eerste rij:** de eerste rij van een tabel toont altijd het nummer, dus een lijst die op een tweede kaart of pagina doorloopt, begint met een nummer.
+    Een `gap`-rij in een `DataTable` stopt het delen: de rij erna begint met een nummer.
+  - **Twee tekens, twee betekenissen:** het beletselteken van een `gap`-rij (een tijd weg, #1099) staat in de rijkop, dat van een gedeelde plaats in de kolom van de plaatsen.
+    We voegen ze niet samen.
+  - **Korte lijsten:** een lijst van de beste N plaatsen voegt spelers met evenveel doelpunten samen in één rij (`scorersByPlace`), met het nummer één keer; zo geeft N plaatsen N rijen.
+    Dat verandert niet.
+  - **Zonder gedeelde plaatsen:** de lijsten die naar punten rangschikken (de stand, de clubs met de meeste en de minste punten per wedstrijd) en de plaatsen per ronde of seizoen hebben bij het maken één plaats per rij, dus ze tonen nooit het teken, maar ze gebruiken dezelfde cel.
+- **Waarom:** in één blik zie je wie een plaats deelt, en het nummer herhalen maakt het lijken alsof er meer verschillende plaatsen zijn.
+  Eén cel houdt de lijsten gelijk.
+- **Alternatieven:** het nummer overal herhalen (de lijst leest als een telling); "=4" of "gedeeld 4" zichtbaar (breder en rommeliger in een smalle kolom); elke tabel zijn eigen code laten houden (zo liepen ze uiteen).

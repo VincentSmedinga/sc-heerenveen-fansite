@@ -51,8 +51,25 @@ describe('TopScorersTable', () => {
 
     expect(cells(/Proefman/u)).toEqual(['1', '8'])
     expect(cells(/Nepper/u)).toEqual(['2', '4'])
-    expect(cells(/Testvoort/u)).toEqual(['2', '4'])
+    // The second player of a place shows the sign and says the place to a screen reader.
+    expect(cells(/Testvoort/u)).toEqual(['⋮gedeeld 2', '4'])
     expect(cells(/Demo/u)).toEqual(['4', '1'])
+  })
+
+  it('shows the place once and a sign on the rows that share it, which a screen reader hears as the place', () => {
+    const { container } = render(<TopScorersTable {...props} />)
+    const places = [...container.querySelectorAll('tbody tr > td:first-child')]
+
+    expect(places.map((cell) => cell.textContent)).toEqual(['1', '2', '⋮gedeeld 2', '4'])
+    expect(places[2]?.querySelector('[aria-hidden="true"]')?.textContent).toBe('⋮')
+    expect(places[2]?.querySelector('.hf-visually-hidden')?.textContent).toBe('gedeeld 2')
+    expect(places[0]?.querySelector('[aria-hidden="true"]')).toBeNull()
+  })
+
+  it('starts with a number, also when the list carries on from another table', () => {
+    const { container } = render(<TopScorersTable {...props} rows={props.rows.slice(2)} />)
+
+    expect(container.querySelector('tbody tr > td:first-child')?.textContent).toBe('2')
   })
 
   it('shows a row for every player it gets, however long the list is', () => {
@@ -255,7 +272,7 @@ describe('TopScorersTable', () => {
         'Joris Testvoort',
       ])
       expect(row(/Gerrit Nepper/)).toEqual(['2', '4', '0,17'])
-      expect(row(/Joris Testvoort/)).toEqual(['2', '4', '0,50'])
+      expect(row(/Joris Testvoort/)).toEqual(['⋮gedeeld 2', '4', '0,50'])
     })
 
     it('keeps the bars a share of the top scorer', () => {

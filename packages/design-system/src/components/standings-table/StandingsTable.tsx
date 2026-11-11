@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
+import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
 import { tableColumns } from '../table-columns'
 
 /** The name of our own club, whose row stands out. */
@@ -81,6 +82,7 @@ export function pointsShares(rows: StandingsTableRow[]): null | number[] {
  */
 export const StandingsTable = ({ caption, className, columns: set = 'all', rows, ...props }: StandingsTableProps) => {
   const shares = set === 'all' ? pointsShares(rows) : null
+  const shared = sharedPlaces(rows.map((row) => row.position))
   const deductions = rows.filter((row) => (row.pointsDeducted ?? 0) > 0)
 
   return (
@@ -113,7 +115,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
         <tbody>
           {rows.map((row, index) => (
             <tr className={row.club === ourClub ? 'hf-highlight hf-standings-table-own' : undefined} key={row.position}>
-              <td className="hf-numeric hf-rank">{row.position}</td>
+              <PlaceCell position={row.position} shared={shared[index]!} />
               <th scope="row">
                 {row.club}
                 {row.club === ourClub ? <span className="hf-visually-hidden"> (onze club)</span> : null}
