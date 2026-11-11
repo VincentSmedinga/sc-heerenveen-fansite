@@ -128,6 +128,29 @@ export const Default = meta.story({
   ),
 })
 
+export const Labelled = meta.story({
+  name: 'Met het getal boven elke staaf, in het blauw van een telling',
+  render: () => (
+    <div style={{ maxInlineSize: '24rem' }}>
+      <Card aria-labelledby="kwartier-kop">
+        <Heading id="kwartier-kop" level={2}>
+          Wanneer hij scoort
+        </Heading>
+        <BarChart
+          axis={{
+            labels: ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90'].map((text, index) => ({
+              at: index + 0.5,
+              text,
+            })),
+          }}
+          bars={[7, 3, 2, 3, 5, 6].map((value) => ({ label: String(value), tone: 'plain', value }))}
+          max={7}
+        />
+      </Card>
+    </div>
+  ),
+})
+
 export const OtherChart = meta.story({
   name: 'Dezelfde onderdelen, andere grafiek: doelpunten per wedstrijd',
   render: () => <GoalsCard />,

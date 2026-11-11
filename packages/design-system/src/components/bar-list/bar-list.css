@@ -1,0 +1,56 @@
+/*
+ * A list of lying bars: the name, the bar and the number in one row. The name has the room it
+ * needs, the number sits at the end, and the bar takes what is left, so it never makes the
+ * card wider on a narrow screen. The fill is the blue of a bar (the tone `plain` of chart.css) on
+ * a track in the colour of the page, and it reaches 3:1 on the card in light and in dark.
+ */
+
+@layer hf.components {
+  .hf-bar-list {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hf-bar-list-row {
+    align-items: center;
+    column-gap: var(--hf-space-m);
+    display: grid;
+    grid-template-columns: 4.5em minmax(0, 1fr) 2em;
+    padding-block: var(--hf-space-xs);
+  }
+
+  .hf-bar-list-label {
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-bar-list-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-label-font-weight);
+    text-align: end;
+  }
+
+  .hf-bar-list-track {
+    background-color: var(--hf-colour-background-page);
+    block-size: 1.25rem;
+    border-radius: 0.1875rem;
+    display: block;
+  }
+
+  .hf-bar-list-fill {
+    background-color: color-mix(in srgb, var(--hf-chart-colour) var(--hf-chart-strength), transparent);
+    block-size: 100%;
+    border-radius: 0.1875rem;
+    display: block;
+    inline-size: calc(var(--hf-bar-list-share) * 1%);
+  }
+
+  /* In forced colours a background colour is replaced, unless it is a system colour. */
+  @media (forced-colors: active) {
+    .hf-bar-list-fill {
+      background-color: CanvasText;
+    }
+  }
+}
