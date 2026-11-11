@@ -23,11 +23,12 @@ export function PlayerQuartersCard({ quarters: goals }: { quarters: GoalQuarters
       <Text appearance="meta">Doelpunten per kwartier.</Text>
       <BarChart
         axis={{ labels: quarters.map((text, index) => ({ at: index + 0.5, text: joined(text) })) }}
-        bars={goals.counts.map((value) => ({ tone: 'positive', value }))}
+        bars={goals.counts.map((value) => ({ label: String(value), tone: 'plain', value }))}
         max={max}
-        ticks={[0, max]}
       />
-      <Text>{quarters.map((quarter, index) => `${joined(quarter)}:\u00A0${goals.counts[index]}`).join(' · ')}</Text>
+      <Text className="hf-visually-hidden">
+        {quarters.map((quarter, index) => `${joined(quarter)}:\u00A0${goals.counts[index]}`).join(' · ')}
+      </Text>
       {goals.unknown > 0 && (
         <Text appearance="meta">{`Van ${goals.unknown} van de ${goals.total} kennen we de minuut niet.`}</Text>
       )}

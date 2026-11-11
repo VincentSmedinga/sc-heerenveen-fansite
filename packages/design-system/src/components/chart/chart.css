@@ -21,6 +21,12 @@
     --hf-chart-strength: 80%;
   }
 
+  /* A bar that only counts something: the blue of a bar, in full, as it reaches 3:1 by itself. */
+  .hf-chart-tone-plain {
+    --hf-chart-colour: var(--hf-colour-chart-bar);
+    --hf-chart-strength: 100%;
+  }
+
   .hf-chart-tone-negative {
     --hf-chart-colour: var(--hf-colour-outcome-loss);
     --hf-chart-strength: 70%;

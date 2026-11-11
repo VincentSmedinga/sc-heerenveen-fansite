@@ -4618,9 +4618,10 @@
   - **De tekst:** een balk is versiering en verborgen voor een schermlezer.
     De getallen staan als tekst: in de lijst per seizoen, als regel onder de kwartieren en als zin bij de uitslagen.
   - **Onderdelen:** `BarList` (liggende balken met naam en getal) en `OutcomeBar` (drie delen) zijn nieuw in het designsysteem; de kwartieren zijn een `BarChart`.
-    De balken hebben de toon van de andere balken, het groen van een winst op 70%, dat 3:1 haalt in licht en donker.
+    De balken hebben het blauw van het ontwerp, op een spoor in de kleur van de pagina: het token `--hf-colour-chart-bar` (blauw 500 in licht, 400 in donker, 3:1 tegen de kaart) en de toon `plain` van `BarChart` en `BarList`.
+    Het getal van een kwartier staat boven zijn staaf (`label` van `BarChartBar`), de naam eronder; een schermlezer krijgt dezelfde getallen als verborgen tekst.
 - **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
-- **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; een eigen kleur voor de balken (een tweede kleur die niets betekent).
+- **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; de getallen als zichtbare regel onder de grafiek; het groen van een winst voor de balken (het ontwerp heeft blauw, en groen betekent winst).
 
 ## Een wedstrijd telt voor een speler alleen als hij op het veld stond
 

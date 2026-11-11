@@ -312,4 +312,21 @@ describe('BarChart.Trend', () => {
     expect(container.querySelector('.hf-bar-chart-trend-dot')).toBeNull()
     expect(container.querySelector('.hf-bar-chart-trend-line')?.getAttribute('d')).toBe('')
   })
+
+  it('puts the label of a bar above it, and gives a chart with labels room above the plot', () => {
+    const { container } = render(
+      <BarChart
+        bars={[
+          { label: '7', tone: 'plain', value: 7 },
+          { tone: 'plain', value: 3 },
+        ]}
+        max={7}
+      />,
+    )
+
+    expect(container.querySelectorAll('.hf-bar-chart-bar-label')).toHaveLength(1)
+    expect(container.querySelector('.hf-bar-chart-bar-label')?.textContent).toBe('7')
+    expect(container.querySelector('.hf-bar-chart')?.className).toContain('hf-bar-chart-labelled')
+    expect(container.querySelector('.hf-chart-tone-plain')).not.toBeNull()
+  })
 })

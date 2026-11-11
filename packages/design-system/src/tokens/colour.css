@@ -340,6 +340,13 @@
     --hf-colour-chart-line-edge: light-dark(var(--hf-colour-white), var(--hf-colour-blue-800));
 
     /*
+     * The bars that count something on a card: blue-500 in light (4.9:1 on white) and blue-400
+     * in dark (5.4:1 on the card), so a bar reaches 3:1 on its surface. The track behind a bar
+     * is the colour of the page. The colours of a result stay in the tones of a chart.
+     */
+    --hf-colour-chart-bar: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-400));
+
+    /*
      * Lines between rows and the horizontal rule outside a card, the same values as the surface
      * border. Inside a card they take the border of that card (--hf-card-line), so this is what
      * they are where no card is.
@@ -453,6 +460,7 @@
       --hf-colour-border-chart-slice: var(--hf-colour-white);
       --hf-colour-chart-line: var(--hf-colour-blue-900);
       --hf-colour-chart-line-edge: var(--hf-colour-white);
+      --hf-colour-chart-bar: var(--hf-colour-blue-500);
       --hf-colour-border-default: var(--hf-colour-grey-200);
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-border-button-soft: var(--hf-colour-blue-500);

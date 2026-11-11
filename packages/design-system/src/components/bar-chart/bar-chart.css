@@ -91,6 +91,27 @@
     block-size: calc(var(--hf-bar-chart-share) * 1%);
     border-start-end-radius: 0.125rem;
     border-start-start-radius: 0.125rem;
+    position: relative;
+  }
+
+  /*
+   * The text above a bar, such as its number: centred over the bar, sitting on its top. A chart
+   * with such texts has a line of room above the plot, so the text of the tallest bar stays in
+   * the chart.
+   */
+  .hf-bar-chart-labelled {
+    padding-block-start: var(--hf-space-l);
+  }
+
+  .hf-bar-chart-bar-label {
+    color: var(--hf-colour-text-default);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-label-font-weight);
+    inset-block-end: 100%;
+    inset-inline: 0;
+    line-height: 1.5rem;
+    position: absolute;
+    text-align: center;
   }
 
   /* A value of 0 is a small bar on the ground, so it is not taken for a place with no bar. */
