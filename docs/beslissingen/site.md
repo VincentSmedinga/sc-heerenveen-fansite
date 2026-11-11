@@ -4661,8 +4661,8 @@
   - **De leeftijd** rekent `ageOf` in `apps/site/src/player-page.ts` uit de volledige geboortedatum, op de dag van nu in Nederland.
     Kennen we alleen het jaar of de maand (`birth_date_precision` is niet `day`), dan valt de leeftijd weg.
     De volledige datum blijft in die module en staat nergens op de pagina.
-  - **Een overleden speler** krijgt geen leeftijd, maar we hebben geen datum van overlijden: het schema en de import van Wikidata (`P570`) kennen er geen.
-    Tot een issue dat toevoegt, staat er dus ook een leeftijd bij een speler die overleden is.
+  - **Een overleden speler** hoort geen leeftijd te krijgen, maar we hebben geen datum van overlijden: het schema en de import van Wikidata (`P570`) kennen er geen.
+    Zolang een eigen issue dat niet toevoegt, krijgt een overleden speler nu nog wel een leeftijd.
   - **De volgorde van de kerngetallen:** aanvaller, middenvelder en speler zonder linie: seizoenen, wedstrijden, doelpunten, assists; verdediger: seizoenen, wedstrijden, keer de nul met hem in de basis, doelpunten; doelman: seizoenen, wedstrijden, keer de nul, tegendoelpunten per wedstrijd.
   - **De tabel Per seizoen** heeft tussen twee periodes een rij met een verticaal beletselteken, die een schermlezer leest als "niet bij sc Heerenveen".
     De rij Totaal en de volgorde veranderen niet.
