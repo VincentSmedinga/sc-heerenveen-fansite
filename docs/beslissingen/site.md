@@ -4601,3 +4601,23 @@
 - **Waarom:** de tabel geeft de getallen, de loopbaan het verhaal.
   Een supporter ziet zo wanneer een speler er was, met welk nummer en wat hij meemaakte, en we beweren niets over een eerste of laatste wedstrijd waarvan we de opstellingen niet hebben.
 - **Alternatieven:** het aantal wedstrijden en doelpunten per seizoen in de loopbaan herhalen (staat in de tabel); een moment voor elke wedstrijd waarin hij scoorde, en mijlpalen als zijn 100e wedstrijd (niet in dit issue).
+
+## De pagina van een speler heeft tot drie kleine grafieken, en een grafiek met te weinig te zeggen ontbreekt
+
+- **Datum:** 11 november 2026
+- **Besluit:** onder de loopbaan staan tot drie kaarten (#1085): een balk per seizoen, zijn doelpunten per kwartier en de uitslagen met hem in het veld.
+  - **Per seizoen:** een aanvaller, een middenvelder en een speler zonder linie krijgen "Doelpunten per seizoen", alleen met minstens 5 doelpunten.
+    Een verdediger krijgt "Wedstrijden per seizoen" en een doelman "De nul per seizoen", alleen met getallen uit minstens twee seizoenen.
+    Een seizoen zonder getal staat er niet in; het oudste staat bovenaan.
+    De wedstrijden zijn die van de tabel Per seizoen, dus een plek op de bank telt mee.
+  - **Per kwartier:** minstens 5 doelpunten met een minuut.
+    Een doelpunt in de blessuretijd heeft als minuut de laatste van de helft en telt bij het kwartier ervoor; een doelpunt na de 90e minuut (verlenging) valt weg.
+    Een zin zegt van hoeveel doelpunten we de minuut niet kennen.
+  - **Uitslagen:** de wedstrijden uit de opstellingen, dezelfde als `lineupMatches`, geteld met `resultOf`, dus een winst op strafschoppen is een winst.
+    `CareerMatch` heeft daarvoor de serie (`penaltiesFor`, `penaltiesAgainst`), uit dezelfde leesronde.
+  - **De tekst:** een balk is versiering en verborgen voor een schermlezer.
+    De getallen staan als tekst: in de lijst per seizoen, als regel onder de kwartieren en als zin bij de uitslagen.
+  - **Onderdelen:** `BarList` (liggende balken met naam en getal) en `OutcomeBar` (drie delen) zijn nieuw in het designsysteem; de kwartieren zijn een `BarChart`.
+    De balken hebben de toon van de andere balken, het groen van een winst op 70%, dat 3:1 haalt in licht en donker.
+- **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
+- **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; een eigen kleur voor de balken (een tweede kleur die niets betekent).

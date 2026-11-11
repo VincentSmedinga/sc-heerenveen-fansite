@@ -34,6 +34,9 @@ export type CareerMatch = {
   /** The day of the match, such as `2004-04-10`. */
   matchDate: string
   opponent: string
+  /** The penalty series, when the match had one: it decides the result (see `resultOf`). */
+  penaltiesAgainst?: number
+  penaltiesFor?: number
   round: string
   season: string
 }
@@ -231,6 +234,8 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     matchDate: matches.matchDate,
     matchId: matches.id,
     opponent: matches.opponent,
+    penaltiesAgainst: matches.penaltiesAgainst,
+    penaltiesFor: matches.penaltiesFor,
     round: matches.round,
     season: matches.season,
   }
@@ -329,6 +334,8 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     matchDate: string
     matchId: number
     opponent: string
+    penaltiesAgainst: null | number
+    penaltiesFor: null | number
     round: string
     season: string
   }): CareerMatch => ({
@@ -339,6 +346,9 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     id: row.matchId,
     matchDate: row.matchDate,
     opponent: row.opponent,
+    ...(row.penaltiesFor === null || row.penaltiesAgainst === null
+      ? {}
+      : { penaltiesAgainst: row.penaltiesAgainst, penaltiesFor: row.penaltiesFor }),
     round: row.round,
     season: row.season,
   })

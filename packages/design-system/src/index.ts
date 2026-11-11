@@ -17,6 +17,8 @@ export type {
   BarChartProps,
   BarChartTrendProps,
 } from './components/bar-chart/BarChart'
+export { BarList } from './components/bar-list/BarList'
+export type { BarListProps, BarListRow } from './components/bar-list/BarList'
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
 export { Breadcrumb } from './components/breadcrumb/Breadcrumb'
@@ -160,6 +162,8 @@ export { NewsItem } from './components/news-item/NewsItem'
 export type { NewsItemProps } from './components/news-item/NewsItem'
 export { Notice } from './components/notice/Notice'
 export type { NoticeProps } from './components/notice/Notice'
+export { OutcomeBar } from './components/outcome-bar/OutcomeBar'
+export type { OutcomeBarProps } from './components/outcome-bar/OutcomeBar'
 export { Page } from './components/page/Page'
 export type {
   PageBodyProps,
