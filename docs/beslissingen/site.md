@@ -4626,6 +4626,7 @@
     De balken hebben het blauw van het ontwerp, op een spoor in de kleur van de pagina: het token `--hf-colour-chart-bar` (blauw 500 in licht, 400 in donker, 3:1 tegen de kaart) en de toon `plain` van `BarChart` en `BarList`.
     Het getal van een kwartier staat boven zijn staaf (`label` van `BarChartBar`), de naam eronder; een schermlezer krijgt dezelfde getallen als verborgen tekst.
 - **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
+- **Later:** zie _De grafieken van een speler staan in de zijkolom, in zachte kaarten_ (11 november 2026): de kaarten staan niet meer onder de loopbaan, en het spoor van een balk heeft op een zacht vlak de tint van het spoor van de schakelaar.
 - **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; de getallen als zichtbare regel onder de grafiek; het groen van een winst voor de balken (het ontwerp heeft blauw, en groen betekent winst).
 
 ## Een wedstrijd telt voor een speler alleen als hij op het veld stond
@@ -4706,6 +4707,21 @@
   Een streepje is eerlijker dan een getal dat meerdere competities telt.
   We beginnen klein: alleen de tabel.
 - **Alternatieven:** de hele pagina de keuze laten volgen (kan later); de keuze onthouden (vraagt een besluit over opslag); voor een seizoen uit Wikipedia de cijfers van alle wedstrijden tonen met een waarschuwing (twee betekenissen in één tabel).
+
+## De grafieken van een speler staan in de zijkolom, in zachte kaarten
+
+- **Datum:** 11 november 2026
+- **Besluit:** de kaarten met grafieken staan in de zijkolom van de pagina van een speler, op het zachte vlak van de andere kaarten daar (#1117).
+  - **Volgorde:** Per competitie, dan de balken per seizoen, de doelpunten per kwartier en de uitslagen, dan Vaakst raak tegen, Meer cijfers en Tegen ons, en onderaan de bronvermelding.
+    De cijfers per competitie en per seizoen horen bij elkaar en de grafieken lezen als een vervolg erop; de rest zijn feiten over wedstrijden.
+    `PlayerAside` krijgt de kaarten als `charts` en zet ze na de competities.
+  - **Kleur:** de balken (`--hf-colour-chart-bar`) halen 4,3:1 op het zachte vlak in licht en 5,3:1 in donker, en de delen van de uitslagen 3,2:1 of meer in licht (winst 3,2:1, gelijk 3,8:1, verlies 4,1:1) en 4,4:1 of meer in donker, dus 3:1 voor een balk.
+    Alleen het spoor veranderde: in de kleur van de pagina is het op het zachte vlak in licht nauwelijks te zien (1,06:1) en warm op blauw.
+    `Card` zet voor een zacht vlak de eigenschap `--hf-card-track` op de bestaande tint van het spoor van de schakelaar (`--hf-colour-background-track`), en `BarList` neemt die over; zonder die eigenschap blijft het spoor de kleur van de pagina.
+    Er is geen nieuw token.
+  - **Breedte:** `BarList` geeft de naam 4,5em en het getal 2em, en laat de balk de rest; een naam breekt af waar nodig, dus er scrolt niets zijwaarts op 320 pixels.
+- **Waarom:** de grafieken horen bij de andere cijfers, en de hoofdkolom blijft voor de tabel en de loopbaan.
+- **Alternatieven:** de grafieken in de hoofdkolom houden, op het witte vlak (de eerste keuze, #1085); een eigen token voor het spoor op een zacht vlak (de tint van het spoor van de schakelaar past al); de grafieken onderaan de zijkolom (de uitslagen staan dan ver van de cijfers per competitie).
 
 ## Het adres van een speler schrijft letters zonder los accent uit
 

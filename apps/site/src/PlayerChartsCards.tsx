@@ -16,7 +16,7 @@ export function PlayerQuartersCard({ quarters: goals }: { quarters: GoalQuarters
   const max = Math.max(1, ...goals.counts)
 
   return (
-    <Card aria-labelledby={ids.quarters}>
+    <Card aria-labelledby={ids.quarters} surface="soft">
       <Heading id={ids.quarters} level={2}>
         Wanneer hij scoort
       </Heading>
@@ -43,7 +43,7 @@ export function PlayerQuartersCard({ quarters: goals }: { quarters: GoalQuarters
  */
 export function PlayerRecordCard({ record }: { record: PlayerRecord }) {
   return (
-    <Card aria-labelledby={ids.record}>
+    <Card aria-labelledby={ids.record} surface="soft">
       <Heading id={ids.record} level={2}>
         {record.title}
       </Heading>
@@ -71,7 +71,7 @@ export function PlayerSeasonBarsCard({
   bars: SeasonBars
 }) {
   return (
-    <Card aria-labelledby={ids.seasons}>
+    <Card aria-labelledby={ids.seasons} surface="soft">
       <Heading id={ids.seasons} level={2}>
         {bars.title}
       </Heading>
