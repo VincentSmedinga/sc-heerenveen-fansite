@@ -24,8 +24,18 @@ export type PlayerPage = {
   birthPlace: string | undefined
   /** The year of birth. The full date is a personal datum and never leaves this module. */
   birthYear: string | undefined
+  /**
+   * Whether he was born more than a hundred years ago and has no date of death: the line then
+   * says only "geboren in 1920", with no place and no age (#1147).
+   */
+  bornLongAgo: boolean
   /** The country as a code of two letters (`NL`). */
   country: string | undefined
+  /**
+   * The year of death, from Wikidata or the editors (#1147). Never the full date. With it the
+   * line shows "Herten, 1950–2020" and no age.
+   */
+  deathYear: string | undefined
   /** Whether the editors set his name, line or country themselves. */
   edited: boolean
   /** The line, as `playerPositions` names it. */
@@ -145,11 +155,7 @@ export function playerPageOf(
   })
 
   return {
-    // We hold no date of death, so only a player in the squad of the current season, who is
-    // alive, gets an age (#1099).
-    age: rows.some((row) => row.season === seasonOf(today)) ? ageOf(person, today) : undefined,
-    birthPlace,
-    birthYear: person.birthDate?.slice(0, 4),
+    ...lifeOf(person, { birthPlace, inCurrentSeason: rows.some((row) => row.season === seasonOf(today)), today }),
     country: person.country ?? undefined,
     edited: person.nameSource === 'redactie' || person.lineSource === 'manual' || person.countrySource === 'manual',
     line: person.line ?? undefined,
@@ -163,6 +169,48 @@ export function playerPageOf(
       person.wikipediaPage === null
         ? undefined
         : { language: person.englishTitle ? 'en' : 'nl', title: person.wikipediaPage },
+  }
+}
+
+/** How many days after a reading of Wikidata we trust that a player without a death lives. */
+const trustedDays = 60
+
+/**
+ * What the line under the name of a player shows of his life (#1147), the four cases in the
+ * order they are tried:
+ *
+ * 1. A date of death: place, birth year and death year, and no age.
+ * 2. Born more than a hundred years ago, without a date of death: only "geboren in …".
+ * 3. A full birth date, and he is in a squad of the current season or Wikidata was read in the
+ *    last 60 days: place, year and age.
+ * 4. Anything else, an old player without a recent reading or a birth date that is only a year:
+ *    place and year, no age.
+ *
+ * `today` and whether he is in the current season come in, so a test needs no clock.
+ */
+export function lifeOf(
+  person: Pick<Person, 'birthDate' | 'birthDatePrecision' | 'deathDate' | 'wikidataReadAt'>,
+  { birthPlace, inCurrentSeason, today }: { birthPlace: string | undefined; inCurrentSeason: boolean; today: Date },
+): Pick<PlayerPage, 'age' | 'birthPlace' | 'birthYear' | 'bornLongAgo' | 'deathYear'> {
+  const birthYear = person.birthDate?.slice(0, 4)
+  const deathYear = person.deathDate?.slice(0, 4)
+
+  if (deathYear !== undefined) {
+    return { age: undefined, birthPlace, birthYear, bornLongAgo: false, deathYear }
+  }
+  if (birthYear !== undefined && Number(birthYear) <= Number(dayFormat.format(today).slice(0, 4)) - 100) {
+    return { age: undefined, birthPlace, birthYear, bornLongAgo: true, deathYear: undefined }
+  }
+
+  const recent =
+    person.wikidataReadAt !== null && today.getTime() - person.wikidataReadAt.getTime() <= trustedDays * 86_400_000
+
+  return {
+    age: inCurrentSeason || recent ? ageOf(person, today) : undefined,
+    birthPlace,
+    birthYear,
+    bornLongAgo: false,
+    deathYear: undefined,
   }
 }
 

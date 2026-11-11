@@ -12,6 +12,8 @@ export type ArticleInfo = {
 /** What the importer takes from the item of a person on Wikidata. */
 export type WikidataItem = {
   birth: null | { date: string; precision: BirthDatePrecision }
+  /** The date of death (`P570`), read by the rules of the birth date. */
+  death: null | { date: string; precision: BirthDatePrecision }
   /** The Q-number of the item itself. */
   id: string
   /** The Dutch label, else the English one, else null. */
@@ -72,7 +74,8 @@ export function readDutchTitle(text: string): null | string {
 }
 
 /**
- * Reads the item of Wikidata (`Special:EntityData/Q….json`): the birth date (`P569`), the birth
+ * Reads the item of Wikidata (`Special:EntityData/Q….json`): the birth date (`P569`), the date
+ * of death (`P570`, with the same rules), the birth
  * place (`P19`), the nationalities (`P27`) and the positions (`P413`). A statement with the
  * rank "deprecated" does not count, and when a property has statements with the rank
  * "preferred", only those count. A date coarser than a year is left out. Returns null for a
@@ -88,7 +91,8 @@ export function readItem(text: string): null | WikidataItem {
   const claims = isRecord(entity['claims']) ? entity['claims'] : {}
 
   return {
-    birth: birthOf(statementsOf(claims, 'P569')),
+    birth: dateOf(statementsOf(claims, 'P569')),
+    death: dateOf(statementsOf(claims, 'P570')),
     id: entity['id'],
     label: labelOf(entity),
     nationalityIds: itemIdsOf(statementsOf(claims, 'P27')),
@@ -104,7 +108,7 @@ export function readLabel(text: string): null | string {
   return entity === null ? null : labelOf(entity)
 }
 
-function birthOf(statements: Statement[]): WikidataItem['birth'] {
+function dateOf(statements: Statement[]): WikidataItem['birth'] {
   for (const { value } of statements) {
     if (!isRecord(value) || typeof value['time'] !== 'string' || typeof value['precision'] !== 'number') {
       continue

@@ -243,12 +243,38 @@ function PlayerCredit({ page }: { page: PlayerPage }) {
  */
 function PlayerFacts({ page }: { page: PlayerPage }) {
   // "Herten, 2003 · 22 jaar": the place and the year together, then the age. The full date of
-  // birth is never shown.
-  const born = [page.birthPlace, page.birthYear].filter((part) => part !== undefined).join(', ')
+  // birth is never shown. A death is plain: "Herten, 1950–2020", and a screen reader hears
+  // the words and not the dash (#1147).
+  const years =
+    page.birthYear === undefined
+      ? undefined
+      : page.deathYear === undefined
+        ? page.birthYear
+        : `${page.birthYear}–${page.deathYear}`
+  const born = page.bornLongAgo
+    ? `geboren in ${page.birthYear}`
+    : [page.birthPlace, years].filter((part) => part !== undefined).join(', ')
+  const spoken =
+    page.deathYear === undefined || page.birthYear === undefined
+      ? undefined
+      : [page.birthPlace, `geboren in ${page.birthYear}`, `overleden in ${page.deathYear}`]
+          .filter((part) => part !== undefined)
+          .join(', ')
   const parts: ReactNode[] = [
     lineName(page.line),
     page.country === undefined ? undefined : <CountryName country={page.country} />,
-    born === '' ? undefined : born,
+    born === '' ? undefined : spoken === undefined ? (
+      born
+    ) : (
+      <>
+        <Text aria-hidden="true" as="span">
+          {born}
+        </Text>
+        <Text as="span" className="hf-visually-hidden">
+          {spoken}
+        </Text>
+      </>
+    ),
     page.birthYear === undefined || page.age === undefined ? undefined : `${page.age} jaar`,
   ].filter((part) => part !== undefined)
 

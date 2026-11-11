@@ -214,6 +214,15 @@ export function PlayerForm({
                 ))}
               </Select>
             </Field>
+            <Field
+              error={errors.overleden}
+              hint={`Het jaar van overlijden, met vier cijfers. Een jaar dat je hier invult, gaat voor Wikidata. Maak je het leeg, dan geldt weer Wikidata.${keeps}`}
+              id="overleden"
+              label="Jaar van overlijden"
+              required={false}
+            >
+              <Input {...field('overleden')} autoComplete="off" inputMode="numeric" width="narrow" />
+            </Field>
           </>
         )}
       </Card>

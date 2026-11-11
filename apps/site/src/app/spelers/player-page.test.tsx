@@ -48,7 +48,9 @@ const player: PlayerPage = {
   age: 52,
   birthPlace: 'Emmen',
   birthYear: '1974',
+  bornLongAgo: false,
   country: 'NL',
+  deathYear: undefined,
   edited: false,
   line: 'aanvaller',
   name: 'Jan de Vries',
@@ -214,6 +216,21 @@ describe('the page of a player', () => {
     expect(line).toMatch(
       /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
     )
+  })
+
+  it('shows the years of a player who has died, and a screen reader hears the words and not the dash', async () => {
+    const html = await render({ age: undefined, birthPlace: 'Herten', birthYear: '1950', deathYear: '2020' })
+
+    expect(html).toContain('<span aria-hidden="true">Herten, 1950–2020</span>')
+    expect(html).toContain('<span class="hf-visually-hidden">Herten, geboren in 1950, overleden in 2020</span>')
+    expect(html).not.toMatch(/jaar<\/p>|in memoriam/iu)
+  })
+
+  it('says only "geboren in" for a player born over a hundred years ago without a death', async () => {
+    const html = await render({ age: undefined, birthYear: '1920', bornLongAgo: true })
+
+    expect(html).toContain('geboren in 1920')
+    expect(html).not.toContain('Emmen, 1920')
   })
 
   it('leaves out what we do not know, with its separator', async () => {

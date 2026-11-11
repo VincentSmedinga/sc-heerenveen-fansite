@@ -150,6 +150,8 @@ export function mergedPersonValues(other: Person, kept: Person) {
   const editorsOnly = (mine: null | string, theirs: null | string) => theirs === 'manual' && mine !== 'manual'
   const lineFrom = kept.line === null || editorsOnly(kept.lineSource, other.lineSource) ? other : kept
   const countryFrom = kept.country === null || editorsOnly(kept.countrySource, other.countrySource) ? other : kept
+  // A year of death the editors set (#1147) goes before one of Wikidata, like a line does.
+  const deathFrom = kept.deathDate === null || editorsOnly(kept.deathDateSource, other.deathDateSource) ? other : kept
   const nameFrom = other.nameSource === 'redactie' && kept.nameSource !== 'redactie' ? other : kept
   // The importer always keeps the person with the title; the editors can keep one without.
   const pageFrom = kept.wikipediaPage === null ? other : kept
@@ -160,6 +162,9 @@ export function mergedPersonValues(other: Person, kept: Person) {
     birthPlaceId: kept.birthPlaceId ?? other.birthPlaceId,
     country: countryFrom.country,
     countrySource: countryFrom.countrySource,
+    deathDate: deathFrom.deathDate,
+    deathDatePrecision: deathFrom.deathDatePrecision,
+    deathDateSource: deathFrom.deathDateSource,
     englishTitle: pageFrom.englishTitle,
     familyName: nameFrom.familyName,
     familyNamePrefix: nameFrom.familyNamePrefix,

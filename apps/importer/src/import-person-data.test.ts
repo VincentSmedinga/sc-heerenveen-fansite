@@ -470,6 +470,128 @@ describe('readPersonData', () => {
   })
 })
 
+describe('reading persons again (#1147)', () => {
+  const day = 86_400_000
+  const readAt = (daysAgo: number) =>
+    new Date(now.getTime() - daysAgo * day).toISOString().slice(0, 19).replace('T', ' ')
+
+  async function addRead(title: string, daysAgo: number, extra = '') {
+    await database.pool.query(
+      `INSERT INTO persons (wikipedia_page, wikidata_id, wikidata_read_at ${extra === '' ? '' : ', ' + extra.split('=')[0]}) VALUES (?, ?, ? ${extra === '' ? '' : ', ' + extra.split('=')[1]})`,
+      [title, `Q${title.length}${daysAgo}`, readAt(daysAgo)],
+    )
+  }
+
+  const served = () =>
+    serve(
+      { ...infoRoute('Zevenentwintig', 1, 'Q1'), ...infoRoute('Eenendertig', 2, 'Q2') },
+      {
+        ...itemRoute('Q1', {}),
+        ...itemRoute('Q2', { death: [{ precision: 9, time: '+2020-00-00T00:00:00Z' }] }),
+        ...itemRoute('Q131', { death: [{ precision: 11, time: '+2019-05-06T00:00:00Z' }] }),
+        ...itemRoute('Q1029', {}),
+      },
+    )
+
+  it('reads a person of 31 days again and not one of 29 days', async () => {
+    await addRead('Negenentwintig', 29)
+    await addRead('Eenendertig', 31)
+    await database.pool.query("UPDATE persons SET wikidata_id = 'Q2' WHERE wikipedia_page = 'Eenendertig'")
+
+    const server = await served()
+    const report = await read(server)
+
+    expect(report.read).toBe(1)
+    expect(report.reread).toBe(1)
+    expect(asked(server.data)).toEqual(['/wiki/Special:EntityData/Q2.json'])
+    expect(asked(server.nl)).toEqual([])
+  })
+
+  it('keeps a date of death that shows up later, with its precision and source', async () => {
+    await addRead('Eenendertig', 31)
+    await database.pool.query("UPDATE persons SET wikidata_id = 'Q2' WHERE wikipedia_page = 'Eenendertig'")
+    await read(await served())
+
+    expect(
+      await rows(
+        "SELECT DATE_FORMAT(death_date, '%Y-%m-%d') AS death_date, death_date_precision, death_date_source FROM persons",
+      ),
+    ).toEqual([{ death_date: '2020-01-01', death_date_precision: 'year', death_date_source: 'wikidata' }])
+  })
+
+  it('does not read a person with a date of death again', async () => {
+    await addRead('Overleden', 90, "death_date='2020-01-01'")
+
+    const server = await served()
+
+    expect((await read(server)).read).toBe(0)
+    expect(asked(server.data)).toEqual([])
+  })
+
+  it('reads a person without a Q-number again by his article', async () => {
+    await database.pool.query('INSERT INTO persons (wikipedia_page, wikidata_read_at) VALUES (?, ?)', [
+      'Zevenentwintig',
+      readAt(40),
+    ])
+
+    const server = await served()
+
+    expect((await read(server)).reread).toBe(1)
+    expect(asked(server.nl)).toHaveLength(1)
+    expect(await rows('SELECT wikidata_id FROM persons')).toEqual([{ wikidata_id: 'Q1' }])
+  })
+
+  it('reads the oldest reading first, within the limit', async () => {
+    await addRead('Eenendertig', 31)
+    await addRead('Oudste', 100)
+    await database.pool.query("UPDATE persons SET wikidata_id = 'Q2' WHERE wikipedia_page = 'Eenendertig'")
+    await database.pool.query("UPDATE persons SET wikidata_id = 'Q1' WHERE wikipedia_page = 'Oudste'")
+
+    const server = await served()
+
+    expect((await read(server, { limit: 1 })).read).toBe(1)
+    expect(asked(server.data)).toEqual(['/wiki/Special:EntityData/Q1.json'])
+  })
+
+  it('never replaces the year of the editors, and a second run reads nobody', async () => {
+    await addRead('Eenendertig', 31, "death_date_source='manual'")
+    await database.pool.query(
+      "UPDATE persons SET wikidata_id = 'Q2', death_date = NULL, death_date_source = 'manual' WHERE wikipedia_page = 'Eenendertig'",
+    )
+    await read(await served())
+
+    expect(await rows('SELECT death_date, death_date_source FROM persons')).toEqual([
+      { death_date: null, death_date_source: 'manual' },
+    ])
+  })
+
+  it('gives Wikidata back when the editors clear their year', async () => {
+    await addPersons('Eenendertig')
+    await setEditorsPersonFacts(connection.db, (await rows('SELECT id FROM persons'))[0]?.['id'], { deathYear: 2018 })
+    expect(await rows('SELECT death_date_source FROM persons')).toEqual([{ death_date_source: 'manual' }])
+
+    const server = await served()
+
+    await read(server)
+    expect(await rows('SELECT YEAR(death_date) AS y FROM persons')).toEqual([{ y: 2018 }])
+    await setEditorsPersonFacts(connection.db, (await rows('SELECT id FROM persons'))[0]?.['id'], { deathYear: null })
+    await read(server)
+    expect(await rows('SELECT YEAR(death_date) AS y, death_date_source FROM persons')).toEqual([
+      { death_date_source: 'wikidata', y: 2020 },
+    ])
+  })
+
+  it('names the number of persons read again in the log and nothing personal', async () => {
+    await addRead('Eenendertig', 31)
+    await database.pool.query("UPDATE persons SET wikidata_id = 'Q2' WHERE wikipedia_page = 'Eenendertig'")
+
+    const report = await read(await served())
+
+    expect(describePersonData(report)[0]).toMatch(/^persons \(Wikidata\): 1 person read \(1 read again\), /u)
+    expect(describePersonData(report).join(' ')).not.toMatch(/Eenendertig|2020/u)
+  })
+})
+
 describe('the line and the country of all persons, at every run (#1051)', () => {
   const nobody = { data: {}, nl: {} }
   const insertPlayer = (id: number, season: string, position: null | string, name: string) =>

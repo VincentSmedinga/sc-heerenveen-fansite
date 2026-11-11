@@ -10,6 +10,7 @@ export const playerFieldNames = [
   'wikipedia',
   'linie',
   'land',
+  'overleden',
   'rugnummer',
   'vorigrugnummer',
   'rugnummervanaf',

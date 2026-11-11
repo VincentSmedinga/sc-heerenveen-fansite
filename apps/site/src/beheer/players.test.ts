@@ -104,6 +104,7 @@ const filled = (overrides: Partial<PlayerValues> = {}): PlayerValues => ({
 
 const entry = (overrides: Partial<PlayerEntry> = {}): PlayerEntry => ({
   country: null,
+  deathYear: null,
   line: null,
   name: { familyName: 'Amersfoort', familyNamePrefix: 'van', givenName: 'Pelle' },
   page: null,
@@ -160,6 +161,20 @@ describe('validatePlayer', () => {
       validatePlayer({ ...emptyPlayerValues, land: 'XK', linie: 'doelman', persoon: '7' }, 'add').entry,
     ).toMatchObject({ country: 'XK', line: 'doelman', name: null, personId: 7 })
     expect(validatePlayer(filled(), 'edit').entry).toMatchObject({ country: null, line: null })
+  })
+
+  it('understands the year of death, and refuses a year that is no year or lies ahead (#1147)', () => {
+    const now = new Date('2026-11-12T12:00:00Z')
+    const entryOf = (overleden: string) => validatePlayer(filled({ overleden }), 'edit', now)
+
+    expect(entryOf('2020').entry).toMatchObject({ deathYear: 2020 })
+    expect(entryOf('').entry).toMatchObject({ deathYear: null })
+
+    for (const overleden of ['20', 'twintig', '2027', '1800', '2020-01-01']) {
+      expect(entryOf(overleden).errors?.overleden).toBe(
+        'Vul een jaar in met vier cijfers, zoals 2020, of laat het veld leeg.',
+      )
+    }
   })
 
   it('gives each field that is wrong its own error', () => {
@@ -580,6 +595,23 @@ describe('editPlayer', () => {
     expect(await editPlayer(database.db, userId, id, entry({ country: 'NL', line: 'verdediger' }), t0)).toEqual({
       status: 'unchanged',
     })
+  })
+
+  it('sets the year of death by hand, which the importer never replaces, and takes it away again (#1147)', async () => {
+    const id = await added()
+
+    expect(await editPlayer(database.db, userId, id, entry({ deathYear: 2018 }), t0)).toEqual({ status: 'changed' })
+    expect((await allPersons())[0]).toMatchObject({
+      deathDate: '2018-01-01',
+      deathDatePrecision: 'year',
+      deathDateSource: 'manual',
+    })
+    expect(await log()).toMatchObject([
+      { detail: 'Aangepast: Pelle van Amersfoort, 2019/20. jaar van overlijden van de persoon: geen → 2018' },
+    ])
+    expect(await editPlayer(database.db, userId, id, entry({ deathYear: 2018 }), t0)).toEqual({ status: 'unchanged' })
+    expect(await editPlayer(database.db, userId, id, entry({ deathYear: null }), t0)).toEqual({ status: 'changed' })
+    expect((await allPersons())[0]).toMatchObject({ deathDate: null, deathDateSource: null, wikidataReadAt: null })
   })
 
   it('takes a line and a country away with their source, so the importer fills them in again', async () => {
