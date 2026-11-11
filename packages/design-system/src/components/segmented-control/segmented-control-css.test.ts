@@ -163,3 +163,10 @@ describe('the change of the choice', () => {
     expect(css).not.toMatch(/@keyframes|animation:/)
   })
 })
+
+describe('the space below a switch in a card', () => {
+  it('comes from the flow of the card: the switch sets no margin of its own', () => {
+    expect(css).not.toMatch(/\.hf-card > \.hf-segmented-control/u)
+    expect(css).not.toMatch(/margin-block/u)
+  })
+})

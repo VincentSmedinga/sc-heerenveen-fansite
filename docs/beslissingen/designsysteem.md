@@ -1763,9 +1763,9 @@
 - **Later:** zie _De baan van de schakelaar is een doorzichtige tint_: de baan is niet meer grijs-200 en blauw-800, maar een doorzichtige tint, en de rand en de letters halen hun verhouding over elk vlak.
   De vorm, de maten, de beweging en de knop blijven zoals ze zijn.
 - **Later:** zie _De overgang van de schakelaar heeft een naam per plek_ (2 november 2026): de namen `hf-segmented-thumb` en `hf-segmented-option-1` tot en met `-4` zijn weg, en de zin "Eén schakelaar per pagina" geldt niet meer.
-- **Later:** zie _De schakelaar gebruikt geen overgang tussen pagina's_ (11 november 2026): `@view-transition` en `view-transition-name` zijn weg uit `segmented-control.css`, en een link zonder JavaScript laadt de pagina met de knop al bij de nieuwe keuze.
   De knop en de keuzes krijgen hun naam van de plek die de pagina aan `SegmentedLinks` geeft, en een pagina mag meer dan één schakelaar hebben als elke een eigen plek heeft.
   Een schakelaar zonder plek doet niet meer mee aan de overgang, ook niet als hij met knoppen werkt.
+- **Later:** zie _De schakelaar gebruikt geen overgang tussen pagina's_ (11 november 2026): `@view-transition` en `view-transition-name` zijn weg uit `segmented-control.css`, en een link zonder JavaScript laadt de pagina met de knop al bij de nieuwe keuze.
 
 ## De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
 
