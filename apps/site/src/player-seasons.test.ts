@@ -6,6 +6,7 @@ const none: PlayerSeasonFacts = { appearances: [], assists: [], goals: [], match
 
 /** A made-up appearance in a line-up. */
 const appearance = (season: string, extra: Partial<SeasonAppearance> = {}): SeasonAppearance => ({
+  cameOn: false,
   goalsAgainst: 1,
   match: matchOf(season),
   red: false,
@@ -57,7 +58,7 @@ describe('the seasons of a player', () => {
       ...none,
       appearances: [
         appearance('2003/04', { yellow: true }),
-        appearance('2003/04', { red: true, starter: false, yellow: true }),
+        appearance('2003/04', { cameOn: true, red: true, starter: false, yellow: true }),
         appearance('2003/04'),
       ],
       assists: [{ season: '2003/04' }],
@@ -98,7 +99,7 @@ describe('the seasons of a player', () => {
   it('counts the line-ups there are when a season has a few and no table, and says how many', () => {
     const [season] = playerSeasonsOf({
       ...none,
-      appearances: [appearance('2007/08'), appearance('2007/08', { starter: false })],
+      appearances: [appearance('2007/08'), appearance('2007/08', { cameOn: true, starter: false })],
       matchCounts: [{ played: 41, reported: 8, season: '2007/08' }],
       players: [{ season: '2007/08', shirtNumber: null }],
     })
@@ -134,7 +135,7 @@ describe('the seasons of a player', () => {
         appearance('2003/04', { goalsAgainst: 2 }),
         // Substituted, on the bench and sent off: none of these three counts.
         appearance('2003/04', { goalsAgainst: 0, substituted: true }),
-        appearance('2003/04', { goalsAgainst: 0, starter: false }),
+        appearance('2003/04', { cameOn: true, goalsAgainst: 0, starter: false }),
         appearance('2003/04', { goalsAgainst: 0, red: true }),
       ],
       matchCounts: [{ played: 5, reported: 5, season: '2003/04' }],
@@ -142,5 +143,22 @@ describe('the seasons of a player', () => {
     })
 
     expect(season).toMatchObject({ cleanSheets: 1, conceded: 2, played: 5 })
+  })
+
+  it('counts a substitute who came on as played, and one who stayed on the bench as not', () => {
+    const [season] = playerSeasonsOf({
+      ...none,
+      appearances: [
+        appearance('2003/04', { match: matchOf('2003/04', 1), starter: false }),
+        appearance('2003/04', { cameOn: true, match: matchOf('2003/04', 2), starter: false }),
+        appearance('2003/04', { match: matchOf('2003/04', 3) }),
+      ],
+      matchCounts: [{ played: 3, reported: 3, season: '2003/04' }],
+      players: [{ season: '2003/04', shirtNumber: 1 }],
+    })
+
+    expect(season).toMatchObject({ played: 2, started: 1 })
+    // The career never starts or ends on a match he only sat on the bench in.
+    expect(season?.lineupMatches.map(({ id }) => id)).toEqual([2, 3])
   })
 })

@@ -4609,7 +4609,7 @@
   - **Per seizoen:** een aanvaller, een middenvelder en een speler zonder linie krijgen "Doelpunten per seizoen", alleen met minstens 5 doelpunten.
     Een verdediger krijgt "Wedstrijden per seizoen" en een doelman "De nul per seizoen", alleen met getallen uit minstens twee seizoenen.
     Een seizoen zonder getal staat er niet in; het oudste staat bovenaan.
-    De wedstrijden zijn die van de tabel Per seizoen, dus een plek op de bank telt mee.
+    De wedstrijden zijn die van de tabel Per seizoen (`played`).
   - **Per kwartier:** minstens 5 doelpunten met een minuut.
     Een doelpunt in de blessuretijd heeft als minuut de laatste van de helft en telt bij het kwartier ervoor; een doelpunt na de 90e minuut (verlenging) valt weg.
     Een zin zegt van hoeveel doelpunten we de minuut niet kennen.
@@ -4621,3 +4621,14 @@
     De balken hebben de toon van de andere balken, het groen van een winst op 70%, dat 3:1 haalt in licht en donker.
 - **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
 - **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; een eigen kleur voor de balken (een tweede kleur die niets betekent).
+
+## Een wedstrijd telt voor een speler alleen als hij op het veld stond
+
+- **Datum:** 11 november 2026
+- **Besluit:** op de pagina van een speler telt een wedstrijd als gespeeld als hij in de basis stond of inviel (hij is de speler die erin komt bij een wissel van het rapport).
+  Een wissel die niet inviel telt niet mee (#1096).
+  `playerSeasonsOf` in `apps/site/src/player-seasons.ts` telt dit op één plek: `played`, `lineupMatches` en dus de kerngetallen, de rij Totaal, de tegendoelpunten per wedstrijd en de eerste en de laatste wedstrijd in de loopbaan lezen het daar.
+  Een seizoen met de cijfers uit de tabel van Wikipedia verandert niet.
+- **Waarom:** een speler op de bank heeft de wedstrijd niet gespeeld, en een eerste of laatste wedstrijd waarin hij niet op het veld stond is onjuist.
+- **Alternatieven:** de bank meetellen zoals eerst (te hoog); alleen de basis tellen (invallers missen).
+- **Buiten dit besluit:** de selectie en Cijfers tellen niet op deze plek.

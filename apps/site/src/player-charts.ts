@@ -66,7 +66,7 @@ export function goalQuartersOf(seasons: readonly PlayerSeason[]): GoalQuarters |
 }
 
 /**
- * The results of the matches he was in, from the line-ups (a place on the bench too, as the
+ * The results of the matches he played, from the line-ups (in the line-up or came on, as the
  * table Per seizoen counts them). A match decided on penalties is a win or a loss
  * (`resultOf`). A player without a line-up has no card.
  */
@@ -91,7 +91,7 @@ export function playerRecordOf(seasons: readonly PlayerSeason[], goalkeeper: boo
 /**
  * The bars per season, the oldest first. An attacker, a midfielder and a player without a line
  * get his goals, when there are 5 or more in all. A defender gets the matches he played (as the
- * table Per seizoen counts them, a place on the bench too) and a goalkeeper the clean sheets,
+ * table Per seizoen counts them) and a goalkeeper the clean sheets,
  * both only with numbers from at least two seasons. A season without a number is left out.
  */
 export function seasonBarsOf(seasons: readonly PlayerSeason[], line: PlayerPage['line']): SeasonBars | undefined {
