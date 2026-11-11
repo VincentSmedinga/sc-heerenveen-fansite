@@ -4057,10 +4057,12 @@
 - **Datum:** 11 november 2026
 - **Besluit:** het venster van de regel over de tegenstander opent de dag na de latere van twee wedstrijden, onze vorige wedstrijd en de vorige competitiewedstrijd van de tegenstander, en sluit 3 dagen na de wedstrijd (#1008).
   - **Nooit smaller dan 3 dagen:** het opent niet later dan 3 dagen voor de wedstrijd (`opponentDaysBefore`).
-    Vrijdag tot zondag geeft dus geen gat, en een normale week blijft zoals ze was.
+    Vrijdag tot zondag geeft dus geen gat.
+    Het venster kan wel breder worden: speelden beide clubs de zaterdag ervoor, dan opent het op de zondag, 6 dagen voor de wedstrijd.
   - **Nooit breder dan 10 dagen:** het opent niet eerder dan 10 dagen voor de wedstrijd (`opponentDaysBeforeMost`), zodat een winterstop of het begin van een seizoen geen maand algemeen nieuws over de tegenstander doorlaat.
-  - **Onze vorige wedstrijd:** de laatste wedstrijd in `matches` van dit seizoen die gespeeld is en voor de wedstrijd ligt, ook een bekerwedstrijd.
-    Een uitgestelde, geannuleerde of nog niet gespeelde wedstrijd telt niet.
+  - **Onze vorige wedstrijd:** de laatste wedstrijd in `matches` van dit seizoen die gespeeld is of nog gepland staat en voor de wedstrijd ligt, ook een bekerwedstrijd.
+    Een wedstrijd die nog gepland staat telt mee, want op de dag van de import is dat de echte vorige wedstrijd: het nieuws van de dagen ervoor gaat over die wedstrijd.
+    Een uitgestelde of geannuleerde wedstrijd telt niet.
   - **Vorige wedstrijd van de tegenstander:** de laatste rij in `league_results` van dit seizoen met de club als thuis- of uitclub en een dag voor onze wedstrijd.
     De namen in die tabel staan zoals `standings.club` ze schrijft, `withOpponentPreviousDay` in `apps/importer/src/league-results.ts` koppelt ze aan `matches.opponent`: hoofdletters, punten, FC, SC, SV, SBV, VV en AFC tellen niet mee, en `club-names.ts` geeft de volledige naam.
     Een beker- of Europese wedstrijd van de tegenstander staat er niet in en telt dus niet mee.

@@ -141,29 +141,30 @@ export type MatchDay = {
 
 /**
  * The opponents of the matches whose window an item was published in. The window of a match
- * opens on the day after the later of two matches, our previous match (played, any competition,
- * this season) and the previous league match of the opponent (`opponentPreviousDay`), so the
- * news about the match they just played is not in it and the build-up to ours is. It opens
- * never later than `opponentDaysBefore` days before the match, so it is never narrower than a
- * plain window of that length, and never earlier than `opponentDaysBeforeMost` days before it,
- * so a winter break does not let a month of general news through. When one of the two previous
- * matches is not known, it opens `opponentDaysBefore` days before. It closes
- * `opponentDaysAfter`
- * days after the match. A club that plays us twice has two matches and so two windows, and a
- * midweek match makes two windows overlap: an item in one of them counts. All days are counted
- * in Dutch time, so an item at half past midnight on the night the clocks go back is on the day
- * the reader saw it. Returns the names as `matches.opponent` has them, for the second argument
- * of `judgeRelevance`.
+ * opens on the day after the later of two matches: our previous match (played or still planned,
+ * any competition, this season) and the previous league match of the opponent
+ * (`opponentPreviousDay`). So the news about the match they just played is not in it, and the
+ * build-up to ours is. It opens never later than `opponentDaysBefore` days before the match, so
+ * it is never narrower than a plain window of that length, and never earlier than
+ * `opponentDaysBeforeMost` days before it, so a winter break does not let a month of general
+ * news through. When one of the two previous matches is not known, it opens
+ * `opponentDaysBefore` days before. It closes `opponentDaysAfter` days after the match. A club
+ * that plays us twice has two matches and so two windows, and a midweek match makes two windows
+ * overlap: an item in one of them counts. All days are counted in Dutch time, so an item at
+ * half past midnight on the night the clocks go back is on the day the reader saw it. Returns
+ * the names as `matches.opponent` has them, for the second argument of `judgeRelevance`.
  */
 export function opponentsAround(publishedAt: Date, matches: readonly MatchDay[]): string[] {
   const published = dayNumber(dutchDay.format(publishedAt))
-  const playedDays = matches.filter((match) => match.status === 'played').map((match) => dayNumber(match.matchDate))
+  const ourDays = matches
+    .filter((match) => match.status === 'played' || match.status === 'scheduled')
+    .map((match) => dayNumber(match.matchDate))
 
   return matches
     .filter((match) => match.status !== 'postponed' && match.status !== 'cancelled')
     .filter((match) => {
       const matchDay = dayNumber(match.matchDate)
-      const ours = Math.max(...playedDays.filter((day) => day < matchDay), Number.NEGATIVE_INFINITY)
+      const ours = Math.max(...ourDays.filter((day) => day < matchDay), Number.NEGATIVE_INFINITY)
       const theirs =
         match.opponentPreviousDay === undefined || match.opponentPreviousDay === null
           ? Number.NEGATIVE_INFINITY

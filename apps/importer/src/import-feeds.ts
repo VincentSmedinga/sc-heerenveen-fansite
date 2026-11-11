@@ -616,8 +616,7 @@ async function importWikipedia(
  * The day, the opponent and the status of every match of a season, and for each the day of the
  * previous league match of the opponent (`league_results`, see `withOpponentPreviousDay`). Only
  * the current season: the table holds earlier seasons too (`pnpm import:season`), and a
- * match of
- * last year says nothing about who we play this week.
+ * match of last year says nothing about who we play this week.
  */
 async function listSeasonMatches(db: Database, season: string): Promise<MatchDay[]> {
   const [rows, results] = await Promise.all([

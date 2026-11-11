@@ -163,8 +163,7 @@ export type ResultDay = { awayClub: string; homeClub: string; playedOn: string }
  * ones of the table (`standings.club`) and the opponent is as `matches.opponent` has it, so the
  * two are compared by `clubSpellings`. Null when the results have no match of the club before
  * the day, such as at the start of the season, or when the name is not found. Days are
- * `YYYY-MM-DD`
- * days in Dutch time, so they compare as text.
+ * `YYYY-MM-DD` days in Dutch time, so they compare as text.
  */
 export function withOpponentPreviousDay<T extends { matchDate: string; opponent: string }>(
   matches: readonly T[],

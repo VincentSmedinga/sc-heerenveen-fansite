@@ -333,7 +333,7 @@ Dan is de kop `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd spe
 Noemt de kop ook een andere profclub uit de lijst, dan telt hij niet.
 Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
-- **Het venster:** het opent de dag na de latere van twee wedstrijden: onze vorige gespeelde wedstrijd van dit seizoen (ook een bekerwedstrijd) en de vorige competitiewedstrijd van de tegenstander (`league_results`).
+- **Het venster:** het opent de dag na de latere van twee wedstrijden: onze vorige wedstrijd van dit seizoen, gespeeld of nog gepland (ook een bekerwedstrijd) en de vorige competitiewedstrijd van de tegenstander (`league_results`).
   Dan staat het nieuws over hun vorige wedstrijd er niet meer in, en de aanloop naar onze wedstrijd wel.
   Het opent nooit later dan `opponentDaysBefore` (3) dagen voor de wedstrijd, dus het is nooit smaller dan een venster van 3 dagen, en nooit eerder dan `opponentDaysBeforeMost` (10) dagen ervoor, zodat een winterstop geen maand algemeen nieuws doorlaat.
   Is een van de twee vorige wedstrijden niet bekend (het begin van het seizoen, een naam die niet te koppelen is), dan opent het 3 dagen voor de wedstrijd.
