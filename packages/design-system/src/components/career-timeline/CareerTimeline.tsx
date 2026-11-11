@@ -56,7 +56,7 @@ export type CareerTimelineProps = Omit<ComponentPropsWithoutRef<'ol'>, 'children
 /**
  * The career of a player at the club, from period to period and from season to season, with a
  * gap between two periods in a line of its own. Periods and seasons are lists with a heading
- * each, so a screen reader reads the timeline as a list. The line and the dots are decoration
+ * each, so a screen reader reads the timeline as a list. The line and the rings are decoration
  * that career-timeline.css draws, and a screen reader doesn't see them. An empty part leaves no
  * empty line.
  */
