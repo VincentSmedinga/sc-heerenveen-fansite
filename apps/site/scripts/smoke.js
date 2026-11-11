@@ -1350,12 +1350,12 @@ await withEmptyDatabase((database) =>
       const found = await fetch(`${searchBase}?q=${q}`)
       const foundHtml = await found.text()
       assert.equal(found.status, 200, q)
-      assert.match(foundHtml, /1 speler voor /, q)
+      assert.match(foundHtml, />1 speler(<!-- -->)? voor/, q)
       assert.match(foundHtml, /href="\/spelers\/wouter-proefman"/, q)
     }
 
     const nobody = await (await fetch(`${searchBase}?q=bestaat+echt+niet`)).text()
-    assert.match(nobody, /Geen spelers voor bestaat echt niet/)
+    assert.match(nobody, />Geen spelers(<!-- -->)? voor(<!-- -->)? (<!-- -->)?bestaat echt niet/)
     assert.match(await (await fetch(`${searchBase}?q=a`)).text(), /Schrijf woorden van minstens 2 tekens\./)
 
     const playersPage = await fetch(`${origin}/spelers`)
