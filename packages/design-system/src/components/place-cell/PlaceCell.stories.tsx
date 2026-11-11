@@ -34,27 +34,36 @@ const players = [
   { givenName: 'Luuk', id: 6, surname: 'Maquette' },
 ] as const
 
-const ranking = () => (
+const ranking = (offset = 0) => (
   <TopScorersTable
     caption="Doelpuntenmakers van een verzonnen seizoen"
     rows={[
-      { goals: 8, players: [players[0]], position: 1 },
-      { goals: 4, players: [players[1]], position: 2 },
-      { goals: 4, players: [players[2]], position: 2 },
-      { goals: 4, players: [players[3]], position: 2 },
-      { goals: 2, players: [players[4]], position: 5 },
-      { goals: 1, players: [players[5]], position: 6 },
+      { goals: 8, players: [players[0]], position: 1 + offset },
+      { goals: 4, players: [players[1]], position: 2 + offset },
+      { goals: 4, players: [players[2]], position: 2 + offset },
+      { goals: 4, players: [players[3]], position: 2 + offset },
+      { goals: 2, players: [players[4]], position: 5 + offset },
+      { goals: 1, players: [players[5]], position: 6 + offset },
     ]}
     showGoalsPerMatch={false}
   />
 )
 
-export const SharedPlaces = meta.story({ globals: { theme: 'light' }, name: 'Gedeelde plaatsen', render: ranking })
+export const SharedPlaces = meta.story({
+  globals: { theme: 'light' },
+  name: 'Gedeelde plaatsen',
+  render: () => ranking(),
+})
 
 export const SharedPlacesDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Gedeelde plaatsen, donker',
-  render: ranking,
+  render: () => ranking(),
+})
+
+export const TwoDigitPlaces = meta.story({
+  name: 'Nummers van twee cijfers',
+  render: () => ranking(8),
 })
 
 export const InADataTable = meta.story({

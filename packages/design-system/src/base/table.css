@@ -67,6 +67,11 @@
     color: var(--hf-colour-marker-text);
   }
 
+  /* The ellipsis of a shared place stands in the middle of the column, the numbers stay at the end. */
+  .hf-rank-shared {
+    text-align: center;
+  }
+
   .hf-highlight {
     background-color: var(--hf-colour-background-highlight);
     color: var(--hf-colour-text-highlight);
