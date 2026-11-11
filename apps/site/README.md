@@ -376,9 +376,9 @@ Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzicht
 Ze staat dicht, op elke pagina en voor elk aantal pagina's: een `details` met een `summary` die "Bron: Wikipedia" zegt, zonder link.
 Eén klik laat de licentie zien, een link naar elke pagina van Wikipedia die de import las, de tijd van de laatste keer lezen en de zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
 De bron is dus zonder klik te zien (principe 4 van de Redactie), en de rest is één klik verder.
-Wedstrijden uit het archief van de oude fansite (1990 tot 2007, `data_source = 'oude-fansite'`) hebben een eigen bronvermelding.
+Wedstrijden uit de gegevens van de sc Heerenveen Fansite zelf (1990 tot 2007, `data_source = 'oude-fansite'`) hebben een eigen bronvermelding.
 `sourceOf` (`src/match-sources.ts`) leest de bron van de wedstrijden op de pagina of de kaart: Wikipedia, het archief of allebei.
-Het archief alleen geeft `ArchiveCredit`, één regel zonder uitklap: "Bron: het archief van de oude sc Heerenveen Fansite".
+Het archief alleen geeft `ArchiveCredit`, één regel zonder uitklap: "Bron: sc Heerenveen Fansite".
 Allebei geeft `WikipediaCredit` met `archive`, dat beide noemt.
 Een pagina met pagina's van Wikipedia (voor de stand) noemt Wikipedia altijd.
 De lijst van de tegenstanders noemt de bronnen van alle wedstrijden in de database (`getMatchSource`).
@@ -390,7 +390,7 @@ De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de 
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden, stand en uitslagen van alle clubs van de seed (`madeUpMatches`, `madeUpTable` en `madeUpLeagueResults`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
-Drie verzonnen wedstrijden van de oude fansite (`madeUpOldMatches`, in 1992/93, 1996/97 en 2004/05) laten de nieuwe competities, een dag zonder tijd en de bronvermelding van het archief zien.
+Drie verzonnen wedstrijden van de sc Heerenveen Fansite (`madeUpOldMatches`, in 1992/93, 1996/97 en 2004/05) laten de nieuwe competities, een dag zonder tijd en de bronvermelding van het archief zien.
 Voor de pagina van Testdorp FC zet ze er drie oudere wedstrijden bij (`e2e/older-meetings.ts`).
 Die club heeft dan vijf gespeelde wedstrijden en zijn pagina toont de rij "Laatste wedstrijden".
 De andere clubs hebben er minder en hebben geen rij.

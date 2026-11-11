@@ -191,10 +191,10 @@ function periodsText(periods: readonly { first: string; last: string }[]) {
 }
 
 /**
- * The credit: Wikipedia with his article and the licence of our data, with the archive of the
- * old fansite when he played a season up to 2006/07. For a player whose article was not read
- * yet the time of reading falls away; a player of the editors without an article gets the
- * archive or the editors.
+ * The credit: Wikipedia with his article and the licence of our data, with the
+ * sc Heerenveen Fansite when he played a season up to 2006/07. For a player whose article was
+ * not read yet the time of reading falls away; a player of the editors without an article gets
+ * the sc Heerenveen Fansite or the editors.
  */
 function PlayerCredit({ page }: { page: PlayerPage }) {
   const archive = page.seasons.some((season) => season <= lastArchiveSeason)

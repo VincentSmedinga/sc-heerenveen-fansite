@@ -63,7 +63,7 @@ const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFi
 // time of the last reading in the fold. A page that counts across all seasons also names the
 // archive of the old fansite, because the made-up matches of the seed include some of its own.
 const closedWikipediaCredit =
-  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia(?: en het archief van de oude sc Heerenveen Fansite)?<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia(?: en sc Heerenveen Fansite)?<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
 
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.
@@ -1069,20 +1069,17 @@ await withEmptyDatabase((database) =>
     // archive of the old fansite and not Wikipedia, which has nothing of that season.
     const oldSeasonHtml = await (await fetch(`${origin}/wedstrijden/1992-93`)).text()
     assert.match(oldSeasonHtml, /<h2[^>]*id="uitslagen-eerste-divisie">/)
-    assert.match(oldSeasonHtml, /content="[^"]*met de bron erbij: het archief van de oude sc Heerenveen Fansite\./)
+    assert.match(oldSeasonHtml, /content="[^"]*met de bron erbij: de sc Heerenveen Fansite\./)
     assert.match(oldSeasonHtml, /<time dateTime="1992-11-21">za 21 nov 1992<\/time>/)
     assert.doesNotMatch(oldSeasonHtml, /1992-11-21T|tijd nog niet|weekend/i)
-    assert.match(
-      oldSeasonHtml,
-      /<p class="hf-meta hf-archive-credit">Bron: het archief van de oude sc Heerenveen Fansite<\/p>/,
-    )
+    assert.match(oldSeasonHtml, /<p class="hf-meta hf-archive-credit">Bron: sc Heerenveen Fansite<\/p>/)
     assert.doesNotMatch(oldSeasonHtml, /Bron: Wikipedia|hf-wikipedia-credit/)
 
     // A match of the old fansite with a kick-off is a played match: it shows the day too.
     const uefaSeasonHtml = await (await fetch(`${origin}/wedstrijden/2004-05`)).text()
     assert.match(uefaSeasonHtml, /<h2[^>]*id="uitslagen-uefa-cup">/)
     assert.match(uefaSeasonHtml, /<time dateTime="2004-09-16">do 16 sep 2004<\/time>/)
-    assert.match(uefaSeasonHtml, /Bron: het archief van de oude sc Heerenveen Fansite/)
+    assert.match(uefaSeasonHtml, /Bron: sc Heerenveen Fansite/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
     // One credit for the two cards, under the table: the card Wedstrijden has none of its own.
@@ -1336,7 +1333,7 @@ await withEmptyDatabase((database) =>
       ],
     )
     assert.match(playersHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
-    assert.match(playersHtml, /Bron: eigen administratie/)
+    assert.match(playersHtml, /Bron: sc Heerenveen Fansite/)
     // The made-up squad is whole: the sentence says so, the four positions are parts of the
     // card in the order of the goal to the front, and the shirt number comes before the name.
     const squadCard = /<section[^>]*aria-labelledby="selectie">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''

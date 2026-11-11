@@ -61,9 +61,9 @@ describe('the words of a difference', () => {
       ),
     ).toEqual({
       heading: 'Wikipedia wijkt af: gegevens',
-      keep: 'Houd de oude fansite',
-      note: 'De wedstrijd komt van de oude fansite, en die waarde blijft staan tot je beslist. De import neemt hier niets vanzelf over.',
-      ours: 'De oude fansite',
+      keep: 'Houd de sc Heerenveen Fansite',
+      note: 'De wedstrijd komt van de sc Heerenveen Fansite, en die waarde blijft staan tot je beslist. De import neemt hier niets vanzelf over.',
+      ours: 'De sc Heerenveen Fansite',
       takeOver: 'Neem Wikipedia over',
       theirs: 'Wikipedia',
     })
@@ -77,10 +77,10 @@ describe('the words of a difference', () => {
         now,
       ),
     ).toMatchObject({
-      heading: 'De oude fansite wijkt af: aftrap',
+      heading: 'De sc Heerenveen Fansite wijkt af: aftrap',
       keep: 'Houd onze invoer',
       ours: 'Onze invoer',
-      takeOver: 'Neem de oude fansite over',
+      takeOver: 'Neem de sc Heerenveen Fansite over',
     })
   })
 })

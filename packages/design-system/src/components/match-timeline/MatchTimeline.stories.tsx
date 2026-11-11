@@ -222,7 +222,7 @@ export const WithoutMinute = meta.story({
     docs: {
       description: {
         story:
-          "De oude fansite kende niet van elke gebeurtenis de minuut. Zo'n gebeurtenis staat onder de andere, in een blok Minuut onbekend, met een streepje in plaats van een minuut dat een schermlezer overslaat.",
+          "Van sommige gebeurtenissen kennen we de minuut niet. Zo'n gebeurtenis staat onder de andere, in een blok Minuut onbekend, met een streepje in plaats van een minuut dat een schermlezer overslaat.",
       },
     },
   },

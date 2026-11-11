@@ -31,7 +31,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
 
 /** Where the matches came from, in the words of a sentence: "34 van Wikipedia". */
 const sourceWords: Record<keyof SeasonCoverage['matchesBySource'], string> = {
-  'oude-fansite': 'van de oude fansite',
+  'oude-fansite': 'van de sc Heerenveen Fansite',
   redactie: 'van de redactie',
   wikipedia: 'van Wikipedia',
 }

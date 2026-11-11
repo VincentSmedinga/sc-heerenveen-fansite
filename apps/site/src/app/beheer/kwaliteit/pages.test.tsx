@@ -111,7 +111,7 @@ describe('the page Kwaliteit', () => {
   it('says in words what a season has, with a link to each work list that has work', async () => {
     const row = rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')
 
-    expect(row).toContain('6 wedstrijden, 6 gespeeld (6 van de oude fansite)')
+    expect(row).toContain('6 wedstrijden, 6 gespeeld (6 van de sc Heerenveen Fansite)')
     expect(row).toContain(
       'href="/beheer/kwaliteit/2005-06/zonder-doelpunten">1 wedstrijd zonder doelpunten<span class="hf-visually-hidden"> in 2005/06</span></a>',
     )

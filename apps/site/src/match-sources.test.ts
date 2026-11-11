@@ -35,7 +35,7 @@ describe('seasonSourceOf', () => {
 describe('sourceName', () => {
   it('names the source in a sentence', () => {
     expect(sourceName('wikipedia')).toBe('de Nederlandse Wikipedia')
-    expect(sourceName('archive')).toBe('het archief van de oude sc Heerenveen Fansite')
-    expect(sourceName('both')).toBe('de Nederlandse Wikipedia en het archief van de oude sc Heerenveen Fansite')
+    expect(sourceName('archive')).toBe('de sc Heerenveen Fansite')
+    expect(sourceName('both')).toBe('de Nederlandse Wikipedia en de sc Heerenveen Fansite')
   })
 })

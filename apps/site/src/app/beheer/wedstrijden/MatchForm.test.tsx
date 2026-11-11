@@ -101,9 +101,7 @@ describe('the time of the form of a match', () => {
   it('says that the time may stay empty for a match from the archive of the old fansite', () => {
     rendered(true)
 
-    expect(document.body.textContent).toContain(
-      'Staat de tijd niet in het archief van de oude fansite? Laat hem dan leeg.',
-    )
+    expect(document.body.textContent).toContain('Staat de tijd niet bij de sc Heerenveen Fansite? Laat hem dan leeg.')
   })
 
   it('says nothing about it for any other match', () => {

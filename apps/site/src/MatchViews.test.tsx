@@ -41,11 +41,9 @@ describe('the credit under the image of a card', () => {
     expect(textOf(imageCredit(true)?.source)).toBe('Gegevens van Wikipedia')
     expect(textOf(imageCredit(true, undefined, [{ dataSource: 'wikipedia' }])?.source)).toBe('Gegevens van Wikipedia')
     expect(textOf(imageCredit(true, undefined, [{ dataSource: 'oude-fansite' }])?.source)).toBe(
-      'Gegevens van het archief van de oude sc Heerenveen Fansite',
+      'Gegevens van sc Heerenveen Fansite',
     )
-    expect(textOf(imageCredit(true, undefined, 'both')?.source)).toBe(
-      'Gegevens van Wikipedia en het archief van de oude sc Heerenveen Fansite',
-    )
+    expect(textOf(imageCredit(true, undefined, 'both')?.source)).toBe('Gegevens van Wikipedia en sc Heerenveen Fansite')
   })
 })
 
@@ -57,20 +55,16 @@ describe('SourceCredit', () => {
     const html = renderToStaticMarkup(<SourceCredit edited={false} pages={[]} season="1996/97" source="archive" />)
 
     expect(textOf(<SourceCredit edited={false} pages={[]} season="1996/97" source="archive" />)).toBe(
-      'Bron: het archief van de oude sc Heerenveen Fansite',
+      'Bron: sc Heerenveen Fansite',
     )
     expect(html).not.toContain('<details')
     expect(html).not.toContain('Wikipedia')
   })
 
   it('names Wikipedia and the archive when the matches come from both, or a page of Wikipedia was read', () => {
-    expect(credit({ pages: [page], source: 'both' })).toContain(
-      'Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite',
-    )
+    expect(credit({ pages: [page], source: 'both' })).toContain('Bron: Wikipedia en sc Heerenveen Fansite')
     // The league table comes from Wikipedia, so it is named even when all matches are old.
-    expect(credit({ pages: [page], source: 'archive' })).toContain(
-      'Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite',
-    )
+    expect(credit({ pages: [page], source: 'archive' })).toContain('Bron: Wikipedia en sc Heerenveen Fansite')
   })
 
   it('names Wikipedia alone when the matches come from it, as it always did', () => {
@@ -105,13 +99,11 @@ describe('OpponentsCredit', () => {
     textOf(<OpponentsCredit edited={false} pages={[]} seasons={['1996/97']} {...props} />)
 
   it('names the archive alone when no season has a page of Wikipedia', () => {
-    expect(credit({ source: 'archive' })).toBe('Bron: het archief van de oude sc Heerenveen Fansite')
+    expect(credit({ source: 'archive' })).toBe('Bron: sc Heerenveen Fansite')
   })
 
   it('names both when seasons have a page of Wikipedia and some matches are old', () => {
-    expect(credit({ pages: [seasonPage], source: 'both' })).toContain(
-      'Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite',
-    )
+    expect(credit({ pages: [seasonPage], source: 'both' })).toContain('Bron: Wikipedia en sc Heerenveen Fansite')
   })
 
   it('is nothing for Wikipedia without a page', () => {
