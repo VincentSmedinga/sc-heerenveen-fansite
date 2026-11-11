@@ -4690,6 +4690,22 @@
 - **Alternatieven:** de leeftijd uit het jaar rekenen (kan een jaar fout zijn); de leeftijd weglaten (de projecteigenaar wil hem); een speler ouder dan honderd jaar als overleden zien (een gok); nu een datum van overlijden toevoegen aan het schema en de import (te groot voor dit issue).
 - **Later:** vervangt "geboren in 1974 in Emmen" uit "De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum" en de volgorde per linie en de regel met het geboortejaar uit "De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen".
 
+## De kaart Per seizoen van een speler laat kiezen tussen alle wedstrijden en de Eredivisie
+
+- **Datum:** 11 november 2026
+- **Besluit:** de kaart "Per seizoen" op de pagina van een speler heeft onder de kop de schakelaar "Welke wedstrijden" van `CompetitionLinks`, met "Alle wedstrijden" en "Eredivisie" (#1103).
+  De keuze staat in het adres als `?competitie=eredivisie` (`parseCompetition`); een andere waarde is "niet gevonden".
+  - **Alleen de tabel volgt:** de kerngetallen, de loopbaan, de grafieken en de zijkolom tellen alle wedstrijden.
+    `playerSeasonsOf(facts, 'Eredivisie')` telt de opstellingen, de doelpunten en de assists van wedstrijden in de Eredivisie, uit dezelfde gegevens als de rest; de gegevens van een assist hebben daarvoor de competitie van hun wedstrijd.
+    "Gespeeld" blijft de ene definitie van #1096.
+  - **Een seizoen uit de tabel van Wikipedia** kent geen verdeling per competitie: onder "Eredivisie" tonen wedstrijden, in de basis en assists daar een streepje, en een zin zegt voor welke seizoenen dat is.
+    De doelpunten blijven staan, want die kennen we per competitie.
+  - **De schakelaar staat er alleen** als de speler buiten de Eredivisie speelde of scoorde (`playedBesidesEredivisie`); anders blijft `?competitie=eredivisie` werken met dezelfde tabel.
+- **Waarom:** een supporter wil soms alleen de Eredivisie-cijfers zien, en de site heeft die keuze al op `/cijfers` en bij de tegenstanders.
+  Een streepje is eerlijker dan een getal dat meerdere competities telt.
+  We beginnen klein: alleen de tabel.
+- **Alternatieven:** de hele pagina de keuze laten volgen (kan later); de keuze onthouden (vraagt een besluit over opslag); voor een seizoen uit Wikipedia de cijfers van alle wedstrijden tonen met een waarschuwing (twee betekenissen in één tabel).
+
 ## Een rugnummer hoort bij een speler in een seizoen, niet bij de persoon
 
 - **Datum:** 11 november 2026

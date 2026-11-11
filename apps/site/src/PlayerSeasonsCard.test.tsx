@@ -143,4 +143,28 @@ describe('the table Per seizoen', () => {
     )
     expect(html).toContain('Uit 8 van de 41 wedstrijden van 2007/08 hebben we een opstelling.')
   })
+
+  it('says under the Eredivisie that a season of Wikipedia has no split, with a dash and no zero', () => {
+    const html = withoutIcons(
+      renderToStaticMarkup(
+        <PlayerSeasonsCard
+          address={(value) => `/spelers/${value.replace('/', '-')}`}
+          competition="league"
+          goalkeeper={false}
+          name="Test Speler"
+          playerAddress="/spelers/test-speler"
+          seasons={[
+            season('2004/05', { assists: undefined, played: undefined, source: 'wikipedia', started: undefined }),
+            season('2003/04'),
+          ]}
+        />,
+      ),
+    )
+
+    expect(html).toContain('Welke wedstrijden')
+    expect(html).toContain('alleen de Eredivisie, ')
+    expect(html).toContain('Voor 2004/05 kennen we de cijfers niet per competitie.')
+    expect(html).not.toContain('geen opstellingen')
+    expect(html).toContain('–')
+  })
 })

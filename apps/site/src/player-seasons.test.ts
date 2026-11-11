@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { type CareerMatch, type PlayerSeasonFacts, playerSeasonsOf, type SeasonAppearance } from './player-seasons'
+import {
+  type CareerMatch,
+  playedBesidesEredivisie,
+  type PlayerSeasonFacts,
+  playerSeasonsOf,
+  type SeasonAppearance,
+} from './player-seasons'
 
 const none: PlayerSeasonFacts = { appearances: [], assists: [], goals: [], matchCounts: [], players: [], tables: [] }
 
@@ -160,5 +166,34 @@ describe('the seasons of a player', () => {
     expect(season).toMatchObject({ played: 2, started: 1 })
     // The career never starts or ends on a match he only sat on the bench in.
     expect(season?.lineupMatches.map(({ id }) => id)).toEqual([2, 3])
+  })
+
+  it('counts only the Eredivisie when asked, and leaves what a table of Wikipedia fills out', () => {
+    const cup = (id: number) => ({ ...matchOf('2003/04', id), competition: 'KNVB Beker' as const })
+    const facts: PlayerSeasonFacts = {
+      ...none,
+      appearances: [appearance('2003/04'), appearance('2003/04', { match: cup(2) })],
+      assists: [
+        { competition: 'Eredivisie', season: '2003/04' },
+        { competition: 'KNVB Beker', season: '2003/04' },
+      ],
+      goals: [goal('2003/04'), goal('2003/04', 'KNVB Beker')],
+      matchCounts: [
+        { played: 2, reported: 2, season: '2003/04' },
+        { played: 34, reported: 0, season: '2004/05' },
+      ],
+      players: [
+        { season: '2003/04', shirtNumber: 9 },
+        { season: '2004/05', shirtNumber: 9 },
+      ],
+      tables: [{ appearances: 30, assists: 6, season: '2004/05' }],
+    }
+    const [wikipedia, lineups] = playerSeasonsOf(facts, 'Eredivisie')
+
+    expect(lineups).toMatchObject({ assists: 1, goals: 1, played: 1, started: 1 })
+    expect(wikipedia).toMatchObject({ assists: undefined, goals: 0, played: undefined, source: 'wikipedia' })
+    expect(playerSeasonsOf(facts)[0]).toMatchObject({ assists: 6, played: 30 })
+    expect(playedBesidesEredivisie(facts)).toBe(true)
+    expect(playedBesidesEredivisie({ ...facts, appearances: [], goals: [goal('2003/04')] })).toBe(false)
   })
 })
