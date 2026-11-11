@@ -16,7 +16,7 @@ import {
 
 import { compact } from '#src/beheer/density'
 import { positionChoices } from '#src/beheer/player-fields'
-import { type AdminPlayerRow, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
+import { type AdminPlayerRow, doubleShirtNumbers, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
@@ -79,6 +79,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const requested = typeof seizoen === 'string' ? seasonFromSlug(seizoen) : undefined
   const season = requested !== undefined && seasons.includes(requested) ? requested : current
   const rows = await listAdminPlayers(db, season)
+  const doubles = doubleShirtNumbers(rows)
   const notices: Record<string, string> = {
     samengevoegd: 'De twee personen zijn één persoon.',
     toegevoegd: `De speler staat in de selectie van ${season} en is te kiezen bij een doelpunt. Op de site staat hij ${describeShowDelay(season, now)}.`,
@@ -111,6 +112,13 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
       wide
     >
       {notice === undefined ? null : <Notice>{notice}</Notice>}
+      {doubles.length === 0 ? null : (
+        <Notice>
+          Dubbel rugnummer in de selectie van {season}:{' '}
+          {doubles.map((double) => `${double.number} (${double.names.join(', ')})`).join('; ')}. Controleer of een van
+          hen een ander nummer heeft gekregen.
+        </Notice>
+      )}
       {rows.length === 0 ? (
         <Text>Er zijn nog geen spelers in het seizoen {season}.</Text>
       ) : (

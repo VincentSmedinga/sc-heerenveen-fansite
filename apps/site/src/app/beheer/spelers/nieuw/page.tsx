@@ -44,7 +44,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
 
   const search = parseSearch(q)
   const back = await findReturnMatch(db, wedstrijd, season)
-  const people = await searchPersons(db, search)
+  const people = await searchPersons(db, search, season)
   const [first] = people
 
   return (
@@ -105,7 +105,11 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
         action={submitAddPlayer.bind(null, season, back?.id)}
         cancelHref={back === undefined ? listPath(season) : matchPath(back.id)}
         countries={countryChoices()}
-        initial={{ ...emptyPlayerValues, persoon: first === undefined ? newPersonChoice : String(first.id) }}
+        initial={{
+          ...emptyPlayerValues,
+          persoon: first === undefined ? newPersonChoice : String(first.id),
+          rugnummer: first?.suggestion === undefined ? '' : String(first.suggestion.number),
+        }}
         key={addPlayerPath(season, search, back?.id)}
         people={people}
         submitLabel="Speler toevoegen"

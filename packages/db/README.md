@@ -585,18 +585,22 @@ De importer werkt de selectie van het lopende seizoen bij elke goede lezing bij 
 Hij vervangt haar niet, want de doelpunten in `match_goals` verwijzen naar de `id` van een speler: die blijft gelijk, ook als de speler de selectie verlaat.
 Een naam komt in een seizoen één keer voor, en een pagina ook.
 
-| Kolom            | Betekenis                                                                                                                                          |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `season`         | Het seizoen, zoals `2026/27`                                                                                                                       |
-| `name`           | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                                                           |
-| `position`       | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                                                             |
-| `shirt_number`   | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                                                                  |
-| `country`        | De landcode van twee letters van de vlag in de tabel, zoals `NL`; leeg als de tabel er geen noemt                                                  |
-| `search_term`    | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                                                                    |
-| `wikipedia_page` | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link                                        |
-| `person_id`      | De persoon in `persons` van die pagina; leeg zonder pagina of als de pagina nog niet is opgevraagd (zie _De tabellen `persons` en `person_pages`_) |
-| `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`                                                    |
-| `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                                                        |
+| Kolom                                        | Betekenis                                                                                                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `season`                                     | Het seizoen, zoals `2026/27`                                                                                                                                                       |
+| `name`                                       | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                                                                                           |
+| `position`                                   | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                                                                                             |
+| `shirt_number`                               | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                                                                                                  |
+| `previous_shirt_number`, `shirt_number_from` | Het nummer dat de speler eerst droeg en de dag vanaf wanneer `shirt_number` geldt (#1076): allebei ingevuld of allebei leeg, alleen door de redactie, en de importer laat ze staan |
+| `country`                                    | De landcode van twee letters van de vlag in de tabel, zoals `NL`; leeg als de tabel er geen noemt                                                                                  |
+| `search_term`                                | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                                                                                                    |
+| `wikipedia_page`                             | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link                                                                        |
+| `person_id`                                  | De persoon in `persons` van die pagina; leeg zonder pagina of als de pagina nog niet is opgevraagd (zie _De tabellen `persons` en `person_pages`_)                                 |
+| `in_squad`                                   | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`                                                                                    |
+| `left_squad_at`                              | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                                                                                        |
+
+De migratie `0070_add_previous_shirt_number` voegt de twee kolommen en hun controles toe aan de rijen die er al zijn, die ze leeg houden.
+Ze kan opnieuw draaien; de migratie zegt hoe je haar op de host terugdraait.
 
 Er staat niets anders in: geen landnaam, leeftijd, contract of foto.
 Het land is alleen de landcode van de vlag in de tabel; de nationaliteiten van Wikidata staan in `person_nationalities`.

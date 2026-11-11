@@ -581,3 +581,38 @@ describe('the formation', () => {
     expect(result.values.formatie.wij.keuze).toBe('')
   })
 })
+
+describe('a number that two players of the season have (#1076)', () => {
+  const twins: ReportSquadPlayer[] = [
+    { id: 50, inSquad: false, name: 'Testspeler Vertrokken', searchTerm: 'Vertrokken', shirtNumber: 5 },
+    { id: 51, inSquad: true, name: 'Testspeler Huidige', searchTerm: 'Huidige', shirtNumber: 5 },
+  ]
+
+  it('chooses the one who is in the squad, as for one hit', () => {
+    const result = readPastedReport('Opstelling\n5', twins)
+
+    expect(result.values.wij.speler[0]).toMatchObject({ keuze: '51', rugnummer: '5' })
+    expect(result.choices).toEqual([])
+  })
+
+  it('chooses him for a name that fits him too, and lets the editor choose for a name that does not', () => {
+    expect(readPastedReport('Opstelling\n5 Huidige', twins).values.wij.speler[0]).toMatchObject({ keuze: '51' })
+
+    const other = readPastedReport('Opstelling\n5 Vertrokken', twins)
+
+    expect(other.values.wij.speler[0]).toMatchObject({ keuze: '' })
+    expect(other.choices).toHaveLength(1)
+  })
+
+  it('lets the editor choose when two players of the squad have the number, or none of them is in it', () => {
+    const bothIn = twins.map((player) => ({ ...player, inSquad: true }))
+    const bothOut = twins.map((player) => ({ ...player, inSquad: false }))
+
+    for (const squadOfTwo of [bothIn, bothOut]) {
+      const result = readPastedReport('Opstelling\n5', squadOfTwo)
+
+      expect(result.values.wij.speler[0]).toMatchObject({ keuze: '' })
+      expect(result.choices).toHaveLength(1)
+    }
+  })
+})

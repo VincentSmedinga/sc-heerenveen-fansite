@@ -36,9 +36,11 @@ import {
   findReportScreen,
   finishMatch,
   listReportsToCheck,
+  readSquad,
   removeReport,
   reportReason,
   saveReport,
+  shirtNumberOn,
   valuesOfReport,
 } from './match-reports'
 import {
@@ -52,6 +54,7 @@ import {
 } from './report-fields'
 import { report as baseReport, card, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, type ReportPlan } from './report-form'
+import { readPastedReport } from './report-paste'
 
 const noFacts = { attendance: null, note: null, referee: null, stadium: null }
 
@@ -1182,5 +1185,82 @@ describe('findPreviousLineUp', () => {
     expect(found?.speler.map((row) => row.keuze)).toEqual(squad.slice(0, 11).map((player) => String(player.id)))
     expect(found?.speler.every((row) => row.naam === '')).toBe(true)
     expect(Object.keys(found ?? {}).toSorted()).toEqual(['formatie', 'label', 'speler'])
+  })
+})
+
+describe('the number a player wore on the day of a match (#1076)', () => {
+  /** Speler 9 wore 29 until 14 November, and 9 from then on. */
+  const changeNumber = () =>
+    database.pool.query(
+      "UPDATE players SET previous_shirt_number = 29, shirt_number_from = '2026-11-14' WHERE name = 'Speler 9'",
+    )
+  const numberOfNine = (rows: readonly { name: string; shirtNumber: null | number }[]) =>
+    rows.find((row) => row.name === 'Speler 9')?.shirtNumber
+
+  it('works out the number from the day: the previous one before it, the current one on and after it', () => {
+    const player = { previousShirtNumber: 29, shirtNumber: 9, shirtNumberFrom: '2026-11-14' }
+
+    expect(shirtNumberOn('2026-11-13', player)).toBe(29)
+    expect(shirtNumberOn('2026-11-14', player)).toBe(9)
+    expect(shirtNumberOn('2026-12-01', player)).toBe(9)
+    expect(shirtNumberOn(undefined, player)).toBe(9)
+    expect(shirtNumberOn('2026-01-01', { previousShirtNumber: null, shirtNumber: 9, shirtNumberFrom: null })).toBe(9)
+  })
+
+  it('gives the squad the previous number for a match before the day, in the order of the numbers', async () => {
+    await changeNumber()
+
+    const before = await readSquad(database.db, '2026/27', '2026-10-31')
+    const after = await readSquad(database.db, '2026/27', '2026-11-14')
+
+    expect(numberOfNine(before)).toBe(29)
+    expect(before.at(-1)?.name).toBe('Speler 9')
+    expect(numberOfNine(after)).toBe(9)
+    expect(numberOfNine(await readSquad(database.db, '2026/27'))).toBe(9)
+  })
+
+  it('shows the screen of a match before the day with the previous number, and saves the report with it', async () => {
+    await changeNumber()
+
+    const screen = (await findReportScreen(database.db, matchId))!
+
+    expect(numberOfNine(screen.squad)).toBe(29)
+
+    const found = checkReportForm(baseReport(screen.squad, {}), { match: seen, squad: screen.squad })
+
+    expect(found.errors).toEqual({})
+    await saveReport(database.db, userId, matchId, found.plan as ReportPlan, t0)
+
+    const stored = await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Speler 9'))
+
+    expect(stored.map((row) => row.shirtNumber)).toEqual([29])
+    // The report keeps its numbers when the number of the squad changes again.
+    await database.pool.query("UPDATE players SET shirt_number = 5 WHERE name = 'Speler 9'")
+    expect(
+      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Speler 9'))).map(
+        (row) => row.shirtNumber,
+      ),
+    ).toEqual([29])
+  })
+
+  it('finds the player in a pasted line-up on his previous number before the day, and not on his current one', async () => {
+    await changeNumber()
+
+    const idOfNine = (await database.db.select().from(players).where(eq(players.name, 'Speler 9')))[0]?.id
+    const before = await readSquad(database.db, '2026/27', '2026-10-31')
+    const after = await readSquad(database.db, '2026/27', '2026-11-14')
+
+    // Before the day he is number 29: the old number finds him, and number 9 finds nobody.
+    expect(readPastedReport('Opstelling\n29', before).values.wij.speler[0]).toMatchObject({ keuze: String(idOfNine) })
+    expect(readPastedReport('Opstelling\n9', before).values.wij.speler[0]).toMatchObject({ keuze: '' })
+    // From the day on, it is the other way round.
+    expect(readPastedReport('Opstelling\n9', after).values.wij.speler[0]).toMatchObject({ keuze: String(idOfNine) })
+    expect(readPastedReport('Opstelling\n29', after).values.wij.speler[0]).toMatchObject({ keuze: '' })
+  })
+
+  it('leaves the squad as it is for a player without a previous number', async () => {
+    const rows = await readSquad(database.db, '2026/27', '2026-10-31')
+
+    expect(rows.map((row) => row.shirtNumber)).toEqual(Array.from({ length: 14 }, (_nothing, index) => index + 1))
   })
 })

@@ -108,7 +108,9 @@ beforeEach(async () => {
     page: null,
     personId: null,
     position: 'middenvelder',
+    previousShirtNumber: null,
     shirtNumber: 14,
+    shirtNumberFrom: null,
   })
 
   pelleId = 'id' in added ? added.id : 0
@@ -179,6 +181,49 @@ describe('the list of the players', () => {
     expect(html).toContain('href="/beheer/spelers/nieuw?seizoen=2019-20"')
     expect(html).toContain('<caption')
     expect(html).toContain('Spelers in het seizoen 2019/20')
+  })
+
+  it('says nothing about a number that only one player in the squad has', async () => {
+    expect(await list({ seizoen: '2019-20' })).not.toContain('Dubbel rugnummer')
+  })
+
+  it('says which number two players in the squad share, with their names, before the table', async () => {
+    await database.db.insert(players).values({
+      name: 'Testspeler Dubbel',
+      searchTerm: 'Dubbel',
+      season,
+      shirtNumber: 7,
+      source: 'redactie',
+    })
+
+    const html = (await list({ seizoen: '2019-20' })).replaceAll('<!-- -->', '')
+
+    expect(html).toContain('Dubbel rugnummer in de selectie van 2019/20: 7 (Testspeler Dubbel, Luca Oyen).')
+    expect(html).toMatch(/role="status"[^>]*>Dubbel rugnummer/u)
+    expect(html.indexOf('Dubbel rugnummer')).toBeLessThan(html.indexOf('<table'))
+  })
+
+  it('does not count a player who left, or a previous number', async () => {
+    await database.db.insert(players).values([
+      {
+        inSquad: false,
+        leftSquadAt: new Date('2019-12-01T00:00:00Z'),
+        name: 'Testspeler Weg',
+        searchTerm: 'Weg',
+        season,
+        shirtNumber: 7,
+      },
+      {
+        name: 'Testspeler Eerder',
+        previousShirtNumber: 7,
+        searchTerm: 'Eerder',
+        season,
+        shirtNumber: 9,
+        shirtNumberFrom: '2019-10-01',
+      },
+    ])
+
+    expect(await list({ seizoen: '2019-20' })).not.toContain('Dubbel rugnummer')
   })
 
   it('shows the position of the season, and otherwise the line of the person in words', async () => {
@@ -295,6 +340,46 @@ describe('the form that adds a player', () => {
     expect(valueOf(html, 'zoek')).toContain('value="oyen"')
   })
 
+  it('starts with the number the first person had the season before, and says where it comes from', async () => {
+    const [{ insertId }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Voorstel', givenName: 'Testspeler', name: 'Testspeler Voorstel', nameSource: 'sort_key' })
+
+    await database.db.insert(players).values({
+      name: 'Testspeler Voorstel',
+      personId: insertId,
+      searchTerm: 'Voorstel',
+      season: '2018/19',
+      shirtNumber: 21,
+      source: 'selectie',
+    })
+
+    const html = await addForm({ q: 'voorstel', seizoen: '2019-20' })
+
+    expect(valueOf(html, 'rugnummer')).toContain('value="21"')
+    expect(html).toContain('Rugnummer in 2018/19.')
+  })
+
+  it('starts empty when a player in the squad has the number the person had', async () => {
+    const [{ insertId }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Voorstel', givenName: 'Testspeler', name: 'Testspeler Voorstel', nameSource: 'sort_key' })
+
+    await database.db.insert(players).values({
+      name: 'Testspeler Voorstel',
+      personId: insertId,
+      searchTerm: 'Voorstel',
+      season: '2018/19',
+      shirtNumber: 7,
+      source: 'selectie',
+    })
+
+    const html = await addForm({ q: 'voorstel', seizoen: '2019-20' })
+
+    expect(valueOf(html, 'rugnummer')).not.toContain('value="7"')
+    expect(html).not.toContain('Rugnummer in 2018/19.')
+  })
+
   it('says so when the search finds nobody, and keeps the form of a new person', async () => {
     const html = await addForm({ q: 'niemand', seizoen: '2019-20' })
 
@@ -318,6 +403,8 @@ describe('the form of a player', () => {
     expect(valueOf(html, 'wikipedia')).toContain('value="Luca Oyen"')
     expect(valueOf(html, 'rugnummer')).toContain('value="7"')
     expect(html).toMatch(/<option value="aanvaller" selected="">Aanvaller<\/option>/u)
+    expect(valueOf(html, 'vorigrugnummer')).not.toMatch(/value="[^"]/u)
+    expect(valueOf(html, 'rugnummervanaf')).toContain('type="date"')
     expect(html).toContain('Een andere naam geldt voor deze persoon in elk seizoen.')
     expect(html).toContain('Import')
     expect(html).not.toContain('id="persoon"')

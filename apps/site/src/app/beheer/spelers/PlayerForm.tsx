@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Link, Select, Text } from '@fansite/design-system'
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 
 import type { CountryChoice } from '#src/beheer/countries'
 
@@ -49,7 +49,7 @@ export function PlayerForm({
   /** What a change of the name does, under the field of the family name. */
   nameHint?: string | undefined
   /** The persons to choose from. Without it the form has no list: it changes a player. */
-  people?: readonly { id: number; label: string }[]
+  people?: readonly { id: number; label: string; suggestion?: { number: number; season: string } }[]
   submitLabel: string
   /** The player has no person yet, so there is nobody to give a line or a country. */
   withoutPerson?: boolean
@@ -57,6 +57,9 @@ export function PlayerForm({
   const [state, formAction, pending] = useActionState(action, { errors: {}, values: initial })
   const { errors, merge, values } = state
   const choosing = people !== undefined && people.length > 0
+  const [chosenId, setChosenId] = useState(values.persoon)
+  // The number the person had in the season before, for a person from the list (issue 1076).
+  const suggestion = people?.find((person) => String(person.id) === chosenId)?.suggestion
   const summary = [...playerFieldNames, 'algemeen' as const].flatMap((id) => {
     const message = errors[id]
 
@@ -104,7 +107,24 @@ export function PlayerForm({
             id="persoon"
             label="Persoon"
           >
-            <Select {...field('persoon')}>
+            <Select
+              {...field('persoon')}
+              onChange={(event) => {
+                const next = people.find((person) => String(person.id) === event.target.value)?.suggestion
+                const input = document.getElementById('rugnummer')
+
+                // The number the form offered is replaced by the one of the new person, but a
+                // number the editor typed stays.
+                if (
+                  input instanceof HTMLInputElement &&
+                  (input.value === '' || input.value === String(suggestion?.number))
+                ) {
+                  input.value = next === undefined ? '' : String(next.number)
+                }
+
+                setChosenId(event.target.value)
+              }}
+            >
               {people.map((person) => (
                 <Select.Option key={person.id} value={String(person.id)}>
                   {person.label}
@@ -203,12 +223,30 @@ export function PlayerForm({
         </Heading>
         <Field
           error={errors.rugnummer}
-          hint="Een getal van 1 tot en met 99."
+          hint={`Een getal van 1 tot en met 99.${suggestion === undefined ? '' : ` Rugnummer in ${suggestion.season}.`}`}
           id="rugnummer"
           label="Rugnummer"
           required={false}
         >
           <Input {...field('rugnummer')} autoComplete="off" inputMode="numeric" width="narrow" />
+        </Field>
+        <Field
+          error={errors.vorigrugnummer}
+          hint="Het nummer dat hij in dit seizoen eerst droeg, als het nummer hierboven later is veranderd. Laat leeg als het nummer niet veranderde."
+          id="vorigrugnummer"
+          label="Vorig rugnummer"
+          required={false}
+        >
+          <Input {...field('vorigrugnummer')} autoComplete="off" inputMode="numeric" width="narrow" />
+        </Field>
+        <Field
+          error={errors.rugnummervanaf}
+          hint="De dag waarop het rugnummer hierboven begon te gelden. Wedstrijden voor die dag houden het vorige rugnummer."
+          id="rugnummervanaf"
+          label="Nieuw nummer vanaf"
+          required={false}
+        >
+          <Input {...field('rugnummervanaf')} type="date" width="natural" />
         </Field>
         <Field
           error={errors.positie}

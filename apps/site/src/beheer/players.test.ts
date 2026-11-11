@@ -6,8 +6,10 @@ import { listSeasonPlayers } from '@fansite/db/queries'
 import {
   adminUsers,
   auditLog,
+  matchAppearances,
   matches,
   matchGoals,
+  matchReports,
   personPages,
   persons,
   personSlugs,
@@ -107,7 +109,9 @@ const entry = (overrides: Partial<PlayerEntry> = {}): PlayerEntry => ({
   page: null,
   personId: null,
   position: 'middenvelder',
+  previousShirtNumber: null,
   shirtNumber: 14,
+  shirtNumberFrom: null,
   ...overrides,
 })
 
@@ -939,5 +943,166 @@ describe('the lists', () => {
       'Luca Oyen',
       'Zonder Nummer',
     ])
+  })
+})
+
+describe('the shirt number that changes in a season (#1076)', () => {
+  const added = async (overrides: Partial<PlayerEntry> = {}) => {
+    const outcome = await addPlayer(database.db, userId, season, entry(overrides), t0)
+
+    await database.pool.query('DELETE FROM audit_log')
+
+    return 'id' in outcome ? outcome.id : 0
+  }
+
+  /** A saved line-up of the match with the player in it, with the number he wore. */
+  const lineUp = async (playerId: number, shirtNumber: number) => {
+    await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
+    await database.db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Pelle van Amersfoort', ours: true, playerId, shirtNumber, starter: true })
+  }
+
+  it('understands the previous number and the day, and wants both or neither', () => {
+    expect(validatePlayer(filled({ rugnummervanaf: '2026-10-15', vorigrugnummer: '7' }), 'edit').entry).toMatchObject({
+      previousShirtNumber: 7,
+      shirtNumber: 14,
+      shirtNumberFrom: '2026-10-15',
+    })
+    expect(validatePlayer(filled(), 'edit').entry).toMatchObject({ previousShirtNumber: null, shirtNumberFrom: null })
+    expect(validatePlayer(filled({ vorigrugnummer: '7' }), 'edit').errors).toEqual({
+      rugnummervanaf: 'Vul in vanaf welke dag het rugnummer geldt, of maak het vorige rugnummer leeg.',
+    })
+    expect(validatePlayer(filled({ rugnummervanaf: '2026-10-15' }), 'edit').errors).toEqual({
+      vorigrugnummer: 'Vul het rugnummer in dat hij eerst droeg, of maak de datum leeg.',
+    })
+  })
+
+  it('gives each wrong field its own error: a number outside 1 to 99, a day that does not exist, the same number', () => {
+    expect(validatePlayer(filled({ rugnummervanaf: '2026-10-15', vorigrugnummer: '100' }), 'edit').errors).toEqual({
+      vorigrugnummer: 'Vul een getal van 1 tot en met 99 in, of laat het veld leeg.',
+    })
+    expect(validatePlayer(filled({ rugnummervanaf: '2026-02-30', vorigrugnummer: '7' }), 'edit').errors).toMatchObject({
+      rugnummervanaf: 'Vul een datum in, zoals 2026-10-15, of laat het veld leeg.',
+    })
+    expect(validatePlayer(filled({ rugnummervanaf: '2026-10-15', vorigrugnummer: '14' }), 'edit').errors).toEqual({
+      vorigrugnummer: 'Het vorige rugnummer is gelijk aan het rugnummer. Vul het nummer in dat hij eerst droeg.',
+    })
+  })
+
+  it('saves the previous number and the day, writes them in the log, and opens the form with them', async () => {
+    const id = await added()
+
+    expect(
+      await editPlayer(
+        database.db,
+        userId,
+        id,
+        entry({ previousShirtNumber: 7, shirtNumber: 14, shirtNumberFrom: '2019-09-15' }),
+        t0,
+      ),
+    ).toEqual({ status: 'changed' })
+    expect((await allPlayers())[0]).toMatchObject({ previousShirtNumber: 7, shirtNumberFrom: '2019-09-15' })
+    expect((await log())[0]?.detail).toContain('vorig rugnummer: geen tot geen → 7 tot 2019-09-15')
+
+    const found = await findAdminPlayer(database.db, id)
+
+    expect(found === undefined ? {} : playerValuesOf(found)).toMatchObject({
+      rugnummervanaf: '2019-09-15',
+      vorigrugnummer: '7',
+    })
+  })
+
+  it('asks for the day when the number of a player in a saved line-up changes, and offers the old number', async () => {
+    const id = await added()
+
+    await lineUp(id, 14)
+
+    expect(await editPlayer(database.db, userId, id, entry({ shirtNumber: 9 }), t0)).toEqual({
+      errors: {
+        rugnummervanaf: expect.stringContaining('Vul in vanaf welke dag het nieuwe rugnummer geldt') as string,
+      },
+      status: 'refused',
+      values: { vorigrugnummer: '14' },
+    })
+    expect((await allPlayers())[0]?.shirtNumber).toBe(14)
+    // With the old number and the day the save works.
+    expect(
+      await editPlayer(
+        database.db,
+        userId,
+        id,
+        entry({ previousShirtNumber: 14, shirtNumber: 9, shirtNumberFrom: '2019-10-01' }),
+        t0,
+      ),
+    ).toEqual({ status: 'changed' })
+    expect((await allPlayers())[0]).toMatchObject({
+      previousShirtNumber: 14,
+      shirtNumber: 9,
+      shirtNumberFrom: '2019-10-01',
+    })
+  })
+
+  it('changes the number as before for a player who is in no saved line-up', async () => {
+    const id = await added()
+
+    expect(await editPlayer(database.db, userId, id, entry({ shirtNumber: 9 }), t0)).toEqual({ status: 'changed' })
+    expect((await allPlayers())[0]).toMatchObject({ previousShirtNumber: null, shirtNumber: 9, shirtNumberFrom: null })
+  })
+
+  it('does not ask for a day for a line-up with another number than the old one', async () => {
+    const id = await added()
+
+    await lineUp(id, 3)
+
+    expect(await editPlayer(database.db, userId, id, entry({ shirtNumber: 9 }), t0)).toEqual({ status: 'changed' })
+  })
+})
+
+describe('the number of the season before, as a suggestion (#1076)', () => {
+  /** The person of a known player of 2018/19 with a number, and nobody of 2019/20 yet. */
+  const withNumber = async (number: null | number) => {
+    const personId = await knownPerson()
+
+    await database.pool.query('UPDATE players SET shirt_number = ? WHERE person_id = ?', [number, personId])
+
+    return personId
+  }
+
+  it('offers the number a person had the season before', async () => {
+    const personId = await withNumber(7)
+
+    expect(await searchPersons(database.db, 'amersfoort', season)).toEqual([
+      { id: personId, label: 'Pelle van Amersfoort (2018/19)', suggestion: { number: 7, season: '2018/19' } },
+    ])
+    // Without the season there is no suggestion.
+    expect((await searchPersons(database.db, 'amersfoort'))[0]).not.toHaveProperty('suggestion')
+  })
+
+  it('offers nothing for a person without a number or one who was not there the season before', async () => {
+    await withNumber(null)
+    expect((await searchPersons(database.db, 'amersfoort', season))[0]).not.toHaveProperty('suggestion')
+    expect((await searchPersons(database.db, 'amersfoort', '2021/22'))[0]).not.toHaveProperty('suggestion')
+  })
+
+  it('offers nothing when a player who is in the squad has the number, and offers it when he has left', async () => {
+    await withNumber(7)
+    await addPlayer(
+      database.db,
+      userId,
+      season,
+      entry({ name: { familyName: 'Vos', familyNamePrefix: null, givenName: 'Jan' }, shirtNumber: 7 }),
+      t0,
+    )
+
+    expect((await searchPersons(database.db, 'amersfoort', season))[0]).not.toHaveProperty('suggestion')
+
+    await database.pool.query(
+      "UPDATE players SET in_squad = 0, left_squad_at = '2026-10-01 00:00:00' WHERE name = 'Jan Vos'",
+    )
+
+    expect((await searchPersons(database.db, 'amersfoort', season))[0]).toMatchObject({
+      suggestion: { number: 7, season: '2018/19' },
+    })
   })
 })
