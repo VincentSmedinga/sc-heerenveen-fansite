@@ -33,7 +33,7 @@ export const BarList = ({ className, rows, ...props }: BarListProps) => {
           <span className="hf-bar-list-label">{label}</span>
           <span aria-hidden="true" className="hf-bar-list-track">
             <span
-              className="hf-bar-list-fill"
+              className="hf-bar-list-fill hf-chart-tone-plain"
               style={{ '--hf-bar-list-share': shares?.[index] ?? 0 } as CSSProperties}
             />
           </span>

@@ -29,6 +29,7 @@ describe('BarList', () => {
     )
     const fills = [...container.querySelectorAll<HTMLElement>('.hf-bar-list-fill')]
 
+    expect(fills.every((fill) => fill.classList.contains('hf-chart-tone-plain'))).toBe(true)
     expect(fills.map((fill) => fill.style.getPropertyValue('--hf-bar-list-share'))).toEqual(['100', '50'])
   })
 })
