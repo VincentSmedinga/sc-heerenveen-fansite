@@ -20,4 +20,10 @@ export const clubFullNames: readonly ClubFullName[] = [
   // The old fansite calls the club of 2006/07 `Vitória Setúbal FC`; Wikipedia has the matches
   // of 2008/09 against the same club.
   { aliases: ['Vitória Setúbal FC'], name: 'Vitória Setúbal' },
+  // Clubs without other spellings, listed so the run gives them the address of their name:
+  // their slug was made when `clubSlug` lost the ø and the æ (#1121), and a club keeps its slug
+  // otherwise. Only the repair at the start of a run reads these two lines; the lookup is the
+  // same as for any club.
+  { aliases: [], name: 'Lillestrøm SK' },
+  { aliases: [], name: 'Næstved IF' },
 ]

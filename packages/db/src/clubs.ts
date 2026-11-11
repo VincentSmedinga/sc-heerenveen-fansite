@@ -4,6 +4,7 @@ import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
 
 import { clubNames, clubPages, clubs, matches } from './schema.ts'
+import { foldLetters } from './slug-letters.ts'
 
 /**
  * Slugs the pages of the site use themselves, under the address of the clubs. A club never
@@ -59,14 +60,12 @@ type RepairDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 /**
  * The slug a name gives before it is checked against the slugs that exist: lowercase letters,
  * digits and single hyphens, without the accents, dots and apostrophes (`N.E.C.` gives `nec`
- * and `Be Quick '28` gives `be-quick-28`), at most 70 characters. A name that has none of those
- * gives `club`.
+ * and `Be Quick '28` gives `be-quick-28`), with the letters that have no loose accent written
+ * out (`Lillestrøm SK` gives `lillestrom-sk`, see `slugLetters`), at most 70 characters. A
+ * name that has none of those gives `club`.
  */
 export function clubSlug(name: string): string {
-  const slug = name
-    .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
+  const slug = foldLetters(name)
     .replace(/[.'’]/gu, '')
     .replace(/[^a-z0-9]+/gu, '-')
     .replace(/^-+|-+$/gu, '')
