@@ -114,7 +114,7 @@ describe('the page /spelers', () => {
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="alle-tijden"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#alle-tijden">Sinds 1990/91</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="sinds-1990-91"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#sinds-1990-91">Sinds 1990/91</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
     expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
@@ -875,13 +875,13 @@ describe('the links to a player on /spelers', () => {
 
     expect(plain(section('doelpuntenmakers'))).toContain('Speler A')
     expect(section('doelpuntenmakers')).not.toContain('href="/spelers/speler-a"')
-    expect(section('alle-tijden')).toContain('href="/spelers/speler-a"')
+    expect(section('sinds-1990-91')).toContain('href="/spelers/speler-a"')
   })
 })
 
 describe('the card Sinds 1990/91 on /spelers', () => {
   const allTimeCard = (html: string) =>
-    /<section [^>]*aria-labelledby="alle-tijden">.*?<\/section>/s.exec(html)?.[0] ?? ''
+    /<section [^>]*aria-labelledby="sinds-1990-91">.*?<\/section>/s.exec(html)?.[0] ?? ''
 
   /** Matches of an earlier season in which each player scored the given number of goals. */
   const history = (counts: number[], competition: PublicMatch['competition'] = 'Eredivisie') => [
@@ -894,9 +894,11 @@ describe('the card Sinds 1990/91 on /spelers', () => {
     const html = await render()
     const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
 
-    expect(sidebar).toContain('<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="alle-tijden">')
-    expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="alle-tijden"'))
-    expect(sidebar.indexOf('id="alle-tijden"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(sidebar).toContain(
+      '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="sinds-1990-91">',
+    )
+    expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="sinds-1990-91"'))
+    expect(sidebar.indexOf('id="sinds-1990-91"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
     expect(html.match(/data-hf-card-share/g)).toHaveLength(3)
   })
 
@@ -963,7 +965,7 @@ describe('the card Sinds 1990/91 on /spelers', () => {
 
     const html = await render()
 
-    expect(html).not.toContain('id="alle-tijden"')
+    expect(html).not.toContain('id="sinds-1990-91"')
     expect(html).toContain('id="doelpuntenmakers"')
   })
 })

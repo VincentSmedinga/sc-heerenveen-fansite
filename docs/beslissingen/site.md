@@ -2877,7 +2877,7 @@
 
 - **Datum:** 6 november 2026
 - **Besluit:** een kaart "Alle tijden" met de eerste tien plaatsen, over alle seizoenen, per persoon, die de schakelaar volgt (#780).
-  **Later:** sinds #1101 (11 november 2026) heet de kaart "Sinds 1990/91" en staat het beginseizoen in de kop, niet meer in de intro; het anker `#alle-tijden` bleef.
+  **Later:** sinds #1101 (11 november 2026) heet de kaart "Sinds 1990/91" en staat het beginseizoen in de kop, niet meer in de intro; het anker is nu `#sinds-1990-91`: een anker volgt de titel, ook als die verandert, want een oude link brengt een bezoeker nog steeds op de juiste pagina.
   - **Plek:** zacht vlak in de zijkolom van Spelers, direct onder Doelpuntenmakers, met een item "Alle tijden" in de balk "Op deze pagina:" en het anker `#alle-tijden`.
   - **Telling:** `topScorersOf` over de wedstrijden van alle seizoenen, in één query (`listAllMatchGoals`), een uur bewaard.
     Het seizoen van de kiezer verandert de kaart niet.

@@ -35,7 +35,7 @@ export const statisticsShortcuts = [
 export const playersShortcuts = [
   { href: '#selectie', label: 'Selectie' },
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-  { href: '#alle-tijden', label: 'Sinds 1990/91' },
+  { href: '#sinds-1990-91', label: 'Sinds 1990/91' },
   { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
 ] as const
 

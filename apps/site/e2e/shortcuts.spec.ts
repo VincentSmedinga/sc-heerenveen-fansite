@@ -384,7 +384,7 @@ test.describe('the bar under the header of /spelers', () => {
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
       await bar.getByRole('link', { name: 'Sinds 1990/91' }).click()
-      await expect(page).toHaveURL(/#alle-tijden$/)
+      await expect(page).toHaveURL(/#sinds-1990-91$/)
       await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
       await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
       await bar.getByRole('link', { name: 'Assists' }).click()

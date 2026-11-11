@@ -56,7 +56,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'alle-spelers',
     'doelpuntenmakers',
     'topscorers',
-    'alle-tijden',
+    'sinds-1990-91',
     'bijzondere-doelpunten',
     'assists',
     'minuten',

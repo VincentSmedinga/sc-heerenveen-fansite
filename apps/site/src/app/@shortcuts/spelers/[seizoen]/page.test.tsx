@@ -85,7 +85,7 @@ describe('the links to the cards with the figures of the match reports, in an ea
       ['#selectie', 'Selectie'],
       ['#alle-spelers', 'Alle spelers'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#alle-tijden', 'Sinds 1990/91'],
+      ['#sinds-1990-91', 'Sinds 1990/91'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],

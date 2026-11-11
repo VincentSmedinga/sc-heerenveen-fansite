@@ -581,7 +581,7 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Zonder doelpunten staat er een zin in plaats van een tabel.
 
 De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-De kaart Sinds 1990/91 (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#alle-tijden`, staat onder Doelpuntenmakers op het zachte vlak.
+De kaart Sinds 1990/91 (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#sinds-1990-91`, staat onder Doelpuntenmakers op het zachte vlak.
 Ze toont de eerste tien plaatsen van de doelpuntenmakers over alle seizoenen, per persoon, met `TopScorersTable`: spelers met gelijk aantal doelpunten delen een rij, en de plaats van de tiende hoort bij alle rijen ervan.
 De telling is `allTimeScorersOf` in `src/matches.ts`, dus `topScorersOf` over de wedstrijden van alle seizoenen (`getAllTimeMatches`, één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard).
 De kaart heet "Sinds 1990/91", naar het eerste seizoen met wedstrijden, en zegt hoeveel spelers er scoorden als de lijst is afgekapt.

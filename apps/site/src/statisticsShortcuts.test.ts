@@ -23,7 +23,7 @@ describe('playersShortcuts', () => {
     expect(playersShortcuts).toEqual([
       { href: '#selectie', label: 'Selectie' },
       { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-      { href: '#alle-tijden', label: 'Sinds 1990/91' },
+      { href: '#sinds-1990-91', label: 'Sinds 1990/91' },
       { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
     ])
   })
@@ -45,7 +45,7 @@ describe('playersShortcutsFor', () => {
       '#selectie',
       '#alle-spelers',
       '#doelpuntenmakers',
-      '#alle-tijden',
+      '#sinds-1990-91',
       '#bijzondere-doelpunten',
       '#assists',
       '#minuten',

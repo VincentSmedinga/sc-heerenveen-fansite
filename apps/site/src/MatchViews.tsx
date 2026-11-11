@@ -1452,8 +1452,12 @@ export function AllTimeScorersCard({
   const { known, played } = scorersCoverage(matches, competition)
 
   return (
-    <Card aria-labelledby="alle-tijden" shareable={imageCredit(scorers.length > 0, undefined, matches)} surface="soft">
-      <Heading anchor id="alle-tijden" level={2}>
+    <Card
+      aria-labelledby="sinds-1990-91"
+      shareable={imageCredit(scorers.length > 0, undefined, matches)}
+      surface="soft"
+    >
+      <Heading anchor id="sinds-1990-91" level={2}>
         Sinds {since ?? '1990/91'}
       </Heading>
       {scorers.length === 0 || since === undefined ? (
