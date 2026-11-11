@@ -6,10 +6,12 @@ import { normaliseClubName } from '@fansite/db/clubs'
 import {
   findClubBySlug,
   listAllWikipediaPages,
+  listClubLastWins,
   listClubMatches,
   listClubNews,
   listClubRecords,
   listStandingsPlaces,
+  type PublicClubLastWin,
   type PublicClubMatch,
   type PublicClubRecord,
   type PublicSeasonWikipediaPage,
@@ -624,6 +626,27 @@ export function clubPlacesOf(
 
 const standingsPlaces = cacheFor(period, () => listStandingsPlaces(getDatabase().db))
 
+const clubLastWins = cacheFor(period, () => listClubLastWins(getDatabase().db))
+
+/** One club on the card "Laatste overwinning": the last win, and how long ago. */
+export type LastWinPlace = {
+  /** Calendar days from the day of the win to today, or null for a club we never beat. */
+  days: null | number
+  /** The day of the last win, as `2019-04-21`, or null for a club we never beat. */
+  lastWin: null | string
+  name: string
+  slug: string
+}
+
+/** How many clubs besides sc Heerenveen the card "Laatste overwinning" needs. */
+export const lastWinMinimum = 2
+
+const oursKey = normaliseClubName('sc Heerenveen')
+
+/** The whole days from one calendar day (`2019-04-21`) to another, in the order given. */
+export const daysBetween = (from: string, to: string) =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000)
+
 /**
  * The club with that address part and its matches, or undefined for a slug that no club has.
  * The slug is checked against the clubs that have a match before it is used as a key, because
@@ -633,6 +656,65 @@ export async function getClubPage(slug: string): Promise<ClubPage | undefined> {
   const known = await getClubRecords('all')
 
   return known.some((record) => record.slug === slug) ? clubPages(slug) : undefined
+}
+
+/** The places of the card "Laatste overwinning": the table and the last wins are cached. */
+export async function getLastWinPlaces(today: string): Promise<LastWinPlace[] | undefined> {
+  const [table, clubs] = await Promise.all([standingsPlaces(), clubLastWins()])
+
+  return lastWinsOf(table, clubs, today)
+}
+
+/**
+ * The clubs of the newest season in the table, without sc Heerenveen, for the card "Laatste
+ * overwinning": the day of our last win in the Eredivisie against each (`clubs`, see
+ * `listClubLastWins`), and the calendar days from it to `today`, a day in Dutch time such as
+ * `2026-11-12` (see `dutchDay`). The longest wait is first, and clubs with the same day are in
+ * the order of their names. A club we never beat is last, with no day. A club of the table that
+ * has no page of its own is left out, because it has nothing to link to. With fewer than
+ * `lastWinMinimum` clubs, or no table, the result is undefined: no card. The days are not kept
+ * anywhere, so they are right after midnight.
+ */
+export function lastWinsOf(
+  table: readonly { club: string; season: string }[],
+  clubs: readonly Pick<PublicClubLastWin, 'lastWin' | 'name' | 'otherNames' | 'slug'>[],
+  today: string,
+): LastWinPlace[] | undefined {
+  const newest = table.reduce((latest, row) => (row.season > latest ? row.season : latest), '')
+  const places: LastWinPlace[] = []
+
+  for (const row of table) {
+    const key = normaliseClubName(row.club)
+    const club = clubs.find((candidate) =>
+      [candidate.name, ...candidate.otherNames].some((name) => normaliseClubName(name) === key),
+    )
+
+    if (
+      row.season === newest &&
+      key !== oursKey &&
+      club !== undefined &&
+      !places.some((place) => place.slug === club.slug)
+    ) {
+      places.push({
+        days: club.lastWin === null ? null : daysBetween(club.lastWin, today),
+        lastWin: club.lastWin,
+        name: club.name,
+        slug: club.slug,
+      })
+    }
+  }
+
+  if (places.length < lastWinMinimum) {
+    return undefined
+  }
+
+  return places.toSorted((a, b) => {
+    if (a.lastWin === null || b.lastWin === null) {
+      return (a.lastWin === null ? 1 : 0) - (b.lastWin === null ? 1 : 0) || a.name.localeCompare(b.name, 'nl')
+    }
+
+    return a.lastWin.localeCompare(b.lastWin) || a.name.localeCompare(b.name, 'nl')
+  })
 }
 
 /** How many headlines the card "Nieuws over <club>" shows at most. */

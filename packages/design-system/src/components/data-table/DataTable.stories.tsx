@@ -2,11 +2,13 @@ import { expect, userEvent } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
+import { Bar, BarPlace } from '../bar/Bar'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { PlayerName } from '../player-name/PlayerName'
 import { signedNumber, tableColumns, tableLegend } from '../table-columns'
 import { Text } from '../text/Text'
+import { Time } from '../time/Time'
 import { DataTable, type DataTableProps, type DataTableRow, type DataTableTextRow } from './DataTable'
 
 // Made-up clubs, so the table has enough rows to look for the extremes.
@@ -508,6 +510,50 @@ export const TextTable = meta.story({
         columns={['Wedstrijd', 'Uitslag', 'Status']}
         rows={matches}
       />
+    </Card>
+  ),
+})
+
+const waits: [club: string, date: string, days: number][] = [
+  ['FC Voorbeeld', '21 april 2019', 2760],
+  ['Proefstad SV', '9 februari 2022', 1740],
+  ['Teststad Boys', '3 oktober 2026', 38],
+]
+
+export const TextTableWithBars = meta.story({
+  name: 'Tabel met tekst en balken',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een cel van een tabel met tekst kan een `Bar` naast de tekst hebben. Zet de tabel in een `BarPlace` en geef hem `hf-bar-table`, zoals de andere tabellen met balken doen. De balk is versiering en verborgen voor een schermlezer.',
+      },
+    },
+  },
+  render: () => (
+    <Card aria-labelledby="balken-kop" style={{ maxInlineSize: '24rem' }}>
+      <Heading id="balken-kop" level={2}>
+        Laatste overwinning
+      </Heading>
+      <BarPlace>
+        <DataTable
+          appearance="text"
+          caption="De clubs van Testcompetitie, van de langste tijd sinds onze laatste overwinning tot de kortste"
+          className="hf-bar-table"
+          columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
+          rows={waits.map(([club, date, days]) => ({
+            cells: [
+              <>
+                <Time dateTime="2026-01-01">{date}</Time>
+                <Bar share={(days / 2760) * 100} />
+              </>,
+              days,
+            ],
+            header: club,
+            href: '#club',
+          }))}
+        />
+      </BarPlace>
     </Card>
   ),
 })

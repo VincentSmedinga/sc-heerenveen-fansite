@@ -4954,3 +4954,16 @@
   - **Aan gelaten:** lopende tekst, zoals de titel, de intro en de toelichting van een artikel, de toelichting bij het verbergen van een bericht, en de velden van het contactformulier en van een wedstrijd die hier niet staan.
 - **Waarom:** de browser verbetert een achternaam of een zoekterm tot een woord dat er niet staat; bij een artikeltekst helpt verbeteren juist.
 - **Alternatieven:** overal uit; alleen op het zoekveld van de spelers.
+
+## De kaart "Laatste overwinning" telt alleen de Eredivisie en de dagen bij het tonen
+
+- **Datum:** 9 november 2026
+- **Besluit:** de zijkolom van Tegenstanders heeft onder "Het moeilijkst" de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning tot de kortste (#989).
+  - **Welke winst:** de laatste wedstrijd in de Eredivisie met meer doelpunten voor dan tegen (`listClubLastWins` in `packages/db`), los van de schakelaar. Beker en strafschoppen tellen niet.
+  - **Volgorde:** de oudste datum bovenaan, dezelfde datum op naam (`localeCompare` met `nl`), een club die we nog nooit versloegen onderaan met "Nog nooit gewonnen" en zonder balk.
+  - **De dagen:** kalenderdagen tot vandaag naar de datum in Nederland (`lastWinsOf` en `dutchDay`), bij elke vertoning berekend en niet in de cache bewaard. Een uitslag zonder tijd telt als de speeldag, en een wedstrijd van vandaag toont 0 dagen.
+  - **De balk:** de bestaande `Bar` naast de datum, als deel van de langste wachttijd. Het designsysteem exporteert daarvoor `Bar` en `sharesOf`; de tabel is een `DataTable` met tekst in een `hf-bar-place`, met `hf-bar-table`, en `DataTable` zelf is niet veranderd.
+  - **Geen kaart:** met minder dan twee clubs naast sc Heerenveen, of zonder stand, en een club van de stand zonder eigen pagina blijft weg.
+  - **Mijlpaal:** E4 – Tegenstanders en clubs.
+- **Waarom:** er is geen nieuwe gegevensbron nodig, de kaart volgt het seizoen vanzelf en geen club valt zomaar weg. De dagen in de cache zouden na middernacht niet kloppen.
+- **Alternatieven:** clubs met een wedstrijd dit seizoen; alle competities of de schakelaar volgen; een nieuwe optie op `DataTable` voor een balk.
