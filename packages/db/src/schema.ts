@@ -788,10 +788,10 @@ export const personNameSources = ['sort_key', 'guess', 'manual', 'redactie'] as 
 
 export type PersonNameSource = (typeof personNameSources)[number]
 
-/** The most characters the columns with the name of a person hold. */
 /** The longest slug of the address of a player's page (`/spelers/<slug>`). */
 export const personSlugLength = 100
 
+/** The most characters the columns with the name of a person hold. */
 export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
 
 /** The four lines of a player, and the lines of a person too (`persons.line`). */

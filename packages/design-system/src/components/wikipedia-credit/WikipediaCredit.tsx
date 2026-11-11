@@ -20,38 +20,45 @@ export type WikipediaCreditPage = {
 }
 
 export type WikipediaCreditProps =
-  | (WikipediaCreditBaseProps<'details'> & {
-      /**
-       * Whether some of the matches come from the archive of the old fansite as well. The
-       * summary then names both, "Bron: Wikipedia en het archief van de oude sc Heerenveen
-       * Fansite", and the fold says that the older matches are from the archive.
-       */
-      archive?: boolean
-      compact?: false
-      /**
-       * What our own data from these pages is called in the last sentence, "Onze
-       * wedstrijdgegevens zijn ook CC BY-SA 4.0." Without it, it is `wedstrijdgegevens`. A
-       * page with other data, such as the squad, gives the plural of its own word,
-       * `selectiegegevens`.
-       */
-      data?: string
-      /**
-       * Whether our own editors filled in or corrected some of the data themselves. The full
-       * form then says so under the credit, "Enkele gegevens heeft onze redactie zelf ingevuld
-       * of aangepast.", visible without opening it.
-       */
-      edited?: boolean
-      lead?: never
-      /** The Wikipedia pages the data comes from, at least one. */
-      pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
-      /**
-       * The last time the pages were read, as a visitor reads it, in Dutch time, such as `25
-       * oktober 2026 om 14:05`. The component knows no time zone.
-       */
-      readAt: string
-      /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
-      readAtDateTime: string
-    })
+  | (WikipediaCreditBaseProps<'details'> &
+      (
+        | {
+            /**
+             * The last time the pages were read, as a visitor reads it, in Dutch time, such as
+             * `25 oktober 2026 om 14:05`. The component knows no time zone. Leave both out when
+             * the time is not known, such as for a player whose article was not read yet: the
+             * sentence about the reading then falls away.
+             */
+            readAt: string
+            /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
+            readAtDateTime: string
+          }
+        | { readAt?: never; readAtDateTime?: never }
+      ) & {
+        /**
+         * Whether some of the matches come from the archive of the old fansite as well. The
+         * summary then names both, "Bron: Wikipedia en het archief van de oude sc Heerenveen
+         * Fansite", and the fold says that the older matches are from the archive.
+         */
+        archive?: boolean
+        compact?: false
+        /**
+         * What our own data from these pages is called in the last sentence, "Onze
+         * wedstrijdgegevens zijn ook CC BY-SA 4.0." Without it, it is `wedstrijdgegevens`. A
+         * page with other data, such as the squad, gives the plural of its own word,
+         * `selectiegegevens`.
+         */
+        data?: string
+        /**
+         * Whether our own editors filled in or corrected some of the data themselves. The full
+         * form then says so under the credit, "Enkele gegevens heeft onze redactie zelf ingevuld
+         * of aangepast.", visible without opening it.
+         */
+        edited?: boolean
+        lead?: never
+        /** The Wikipedia pages the data comes from, at least one. */
+        pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
+      })
   | (WikipediaCreditBaseProps<'p'> & {
       /** Whether some of the matches come from the archive of the old fansite as well. */
       archive?: boolean
@@ -77,11 +84,12 @@ type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentProps
 /**
  * The credit for data from Wikipedia. The full form is a `details` that is closed: it says
  * "Bron: Wikipedia", and one click or press shows the licence (CC BY-SA 4.0), a link to each
- * page the data comes from, the time of the last reading, and a sentence that our own data
- * from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is closed for one
- * page as well as for fifty, so there is one form to learn and a long list, such as that of
- * the opponents, does not make the credit longer than the page. The short form (`compact`)
- * says only "Bron: Wikipedia", for a small card on a page that has the full form elsewhere.
+ * page the data comes from, the time of the last reading when it is known, and a sentence that
+ * our own data from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is
+ * closed for one page as well as for fifty, so there is one form to learn and a long list,
+ * such as that of the opponents, does not make the credit longer than the page. The short form
+ * (`compact`) says only "Bron: Wikipedia", for a small card on a page that has the full form
+ * elsewhere.
  * It is principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a component so
  * that a page with Wikipedia data can't leave it out. The link to a page names the page, which
  * is the credit to its authors: their names are one click away in the history of the article.
@@ -125,7 +133,14 @@ export const WikipediaCredit = ({
               <Link href={page.href}>{page.name}</Link>
             </span>
           ))}
-          . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
+          .
+          {readAt === undefined ? null : (
+            <>
+              {' '}
+              Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>.
+            </>
+          )}{' '}
+          Onze {data} zijn ook CC BY-SA 4.0.
           {archive ? ` Oudere wedstrijden komen uit ${archiveName}.` : ''}
         </p>
       </details>

@@ -1,7 +1,8 @@
 import type { Person } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, auditLog, personPages, persons, players, squadCompleteness } from '@fansite/db/schema'
+import { updatePlayerAddresses } from '@fansite/db/person-slugs'
+import { adminUsers, auditLog, personPages, persons, personSlugs, players, squadCompleteness } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -207,6 +208,19 @@ describe('mergePersons', () => {
 
     expect(detail.indexOf('Verdwenen:')).toBeLessThan(detail.indexOf('Verhuisd:'))
     expect(detail.indexOf('Verdwenen:')).toBeGreaterThan(0)
+  })
+
+  it('leads the address of the person that goes to the page of the person that stays (#1079)', async () => {
+    await updatePlayerAddresses(database.db)
+    await mergePersons(database.db, userId, { keptId: renamed, otherId: old }, t0)
+
+    const slugs = await database.db.select().from(personSlugs).orderBy(asc(personSlugs.slug))
+
+    expect(slugs).toEqual([
+      { personId: renamed, slug: 'nieuwe-naam' },
+      { personId: renamed, slug: 'oude-naam' },
+    ])
+    expect((await database.db.select().from(persons)).map((row) => row.slug)).toEqual(['nieuwe-naam'])
   })
 
   it('writes nothing for one person twice or a person who is gone', async () => {

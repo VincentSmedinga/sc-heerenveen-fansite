@@ -108,7 +108,11 @@ describe('the page of a player', () => {
     expect(await render({ seasons: ['2025/26'], wikipedia: undefined })).toContain(
       '<p class="hf-meta">Bron: onze redactie.</p>',
     )
-    expect(await render({ readAt: undefined, seasons: ['2025/26'] })).toContain('Bron: Wikipedia')
+    const unread = await render({ readAt: undefined, seasons: ['2025/26'] })
+
+    expect(unread).toContain('href="https://nl.wikipedia.org/wiki/Jan_de_Vries_(voetballer)"')
+    expect(unread).toContain('Onze spelersgegevens zijn ook CC BY-SA 4.0.')
+    expect(unread).not.toContain('Laatst gelezen')
   })
 
   it('has no photo and no request to another domain', async () => {
@@ -147,7 +151,7 @@ describe('the page of a player', () => {
 
     expect(metadata.title).toBe('Jan de Vries – Spelers')
     expect(metadata.description).toBe(
-      'Jan de Vries, aanvaller uit Nederland, speelde bij sc Heerenveen van 2002/03 tot en met 2003/04 en in 2007/08. Met de bron erbij.',
+      'Jan de Vries, aanvaller uit Nederland. Bij sc Heerenveen van 2002/03 tot en met 2003/04 en in 2007/08. Met de bron erbij.',
     )
     expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/spelers/jan-de-vries')
   })

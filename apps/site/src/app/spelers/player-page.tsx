@@ -50,7 +50,7 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
     .join(' ')
 
   return seasonPageMetadata(playersPath, playerAddress(page.slug), {
-    description: `${page.name}${who === '' ? '' : `, ${who},`} speelde bij sc Heerenveen ${periodsText(periods)}. Met de bron erbij.`,
+    description: `${page.name}${who === '' ? '' : `, ${who}`}. Bij sc Heerenveen ${periodsText(periods)}. Met de bron erbij.`,
     title: `${page.name} – Spelers`,
   })
 }
@@ -117,28 +117,25 @@ function periodsText(periods: readonly { first: string; last: string }[]) {
 
 /**
  * The credit: Wikipedia with his article and the licence of our data, with the archive of the
- * old fansite when he played a season up to 2006/07. A player whose article was not read yet
- * gets the short form, and a player of the editors without an article the archive or the
- * editors.
+ * old fansite when he played a season up to 2006/07. For a player whose article was not read
+ * yet the time of reading falls away; a player of the editors without an article gets the
+ * archive or the editors.
  */
 function PlayerCredit({ page }: { page: PlayerPage }) {
   const archive = page.seasons.some((season) => season <= lastArchiveSeason)
   const { readAt, wikipedia } = page
   let credit: ReactNode
 
-  if (wikipedia !== undefined && readAt !== undefined) {
+  if (wikipedia !== undefined) {
     credit = (
       <WikipediaCredit
         archive={archive}
         data="spelersgegevens"
         edited={page.edited}
         pages={[{ href: wikipediaUrl(wikipedia.title, wikipedia.language), name: wikipedia.title }]}
-        readAt={formatReadAt(readAt)}
-        readAtDateTime={readAt.toISOString()}
+        {...(readAt === undefined ? {} : { readAt: formatReadAt(readAt), readAtDateTime: readAt.toISOString() })}
       />
     )
-  } else if (wikipedia !== undefined) {
-    credit = <WikipediaCredit archive={archive} compact />
   } else if (archive) {
     credit = <ArchiveCredit />
   } else {
