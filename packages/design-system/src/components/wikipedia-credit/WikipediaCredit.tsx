@@ -11,10 +11,10 @@ const archiveName = 'sc Heerenveen Fansite'
 /** What the fold says when the editors entered some of the data. */
 const editedSentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
 
-/** The licence of Wikipedia and of our own match data. */
 /** What the fold says before the link to Wikidata. */
 const wikidataSentence = 'Enkele spelers komen van'
 
+/** The licence of Wikipedia and of our own match data. */
 const licenceHref = 'https://creativecommons.org/licenses/by-sa/4.0/deed.nl'
 
 /** Above this many pages the list gathers the pages of a season on one line. */
