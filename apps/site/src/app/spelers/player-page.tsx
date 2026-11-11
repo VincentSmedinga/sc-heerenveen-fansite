@@ -17,6 +17,7 @@ import {
 import { notFound, permanentRedirect } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
 
+import { competitionParam, parseCompetition } from '#src/competition'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
@@ -26,13 +27,19 @@ import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { goalQuartersOf, playerRecordOf, seasonBarsOf } from '#src/player-charts'
 import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
-import { loadPlayerSeasonFacts, loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import {
+  loadPlayerSeasonFacts,
+  loadPlayerSeasons,
+  playedBesidesEredivisie,
+  type PlayerSeason,
+  playerSeasonsOf,
+} from '#src/player-seasons'
 import { PlayerAside as PlayerAsideColumn } from '#src/PlayerAside'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerQuartersCard, PlayerRecordCard, PlayerSeasonBarsCard } from '#src/PlayerChartsCards'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
 import { getReportAddresses } from '#src/report-data'
-import { playersPath } from '#src/season-page'
+import { playersPath, type SearchParams } from '#src/season-page'
 import { seasonAddress } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
@@ -75,7 +82,13 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
  * blocks of #1082 to #1085 come between the seasons and the end of the column. The side column
  * (#1086) has more figures and, at the bottom, the credit.
  */
-export async function PlayerPageView({ slug }: { slug: string }) {
+export async function PlayerPageView({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
+  const competition = parseCompetition((await searchParams)[competitionParam])
+
+  if (competition === undefined) {
+    notFound()
+  }
+
   const loaded = await loadPlayerPage(slug)
 
   if (loaded.kind === 'unknown') {
@@ -90,10 +103,16 @@ export async function PlayerPageView({ slug }: { slug: string }) {
 
   const { page } = loaded
   const seasons = await readSeasons(page)
+  // The table Per seizoen alone follows the choice (#1103); a page with nothing to choose
+  // counts the same under both.
+  const facts = seasons === undefined ? undefined : await readFacts(page)
+  const tableSeasons =
+    competition === 'league' && facts !== undefined && playedBesidesEredivisie(facts)
+      ? playerSeasonsOf(facts, 'Eredivisie')
+      : seasons
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
   const current = seasonOf(new Date())
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
-  const facts = seasons === undefined ? undefined : await readFacts(page)
   const aside = playerAsideOf(seasons ?? [], facts ?? {}, page.line === 'doelman')
   const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
@@ -129,9 +148,13 @@ export async function PlayerPageView({ slug }: { slug: string }) {
           <Page.Cell>
             <PlayerSeasonsCard
               address={(season) => seasonAddress(playersPath, season, current)}
+              competition={competition}
               goalkeeper={page.line === 'doelman'}
               name={page.name}
-              seasons={seasons}
+              playerAddress={
+                facts !== undefined && playedBesidesEredivisie(facts) ? playerAddress(page.slug) : undefined
+              }
+              seasons={tableSeasons ?? seasons}
             />
           </Page.Cell>
         )}

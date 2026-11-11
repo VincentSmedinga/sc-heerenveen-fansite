@@ -15,7 +15,11 @@ vi.mock('#src/player-page', async (importOriginal) => ({
   loadPlayerPage: vi.fn(),
 }))
 
-vi.mock('#src/player-seasons', () => ({ loadPlayerSeasonFacts: vi.fn(), loadPlayerSeasons: vi.fn() }))
+vi.mock('#src/player-seasons', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadPlayerSeasonFacts: vi.fn(),
+  loadPlayerSeasons: vi.fn(),
+}))
 
 vi.mock('#src/report-data', () => ({ getReportAddresses: vi.fn() }))
 
@@ -56,10 +60,12 @@ const player: PlayerPage = {
   wikipedia: { language: 'nl', title: 'Jan de Vries (voetballer)' },
 }
 
-const render = async (page: Partial<PlayerPage> = {}) => {
+const render = async (page: Partial<PlayerPage> = {}, searchParams: Record<string, string> = {}) => {
   vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'found', page: { ...player, ...page } })
 
-  return withoutIcons(renderToStaticMarkup(await PlayerPageView({ slug: 'jan-de-vries' })))
+  return withoutIcons(
+    renderToStaticMarkup(await PlayerPageView({ searchParams: Promise.resolve(searchParams), slug: 'jan-de-vries' })),
+  )
 }
 
 /** The digest of the error that `notFound()` and `redirect()` throw, which Next.js answers. */
@@ -88,6 +94,72 @@ afterEach(() => {
   vi.useRealTimers()
   vi.mocked(loadPlayerPage).mockReset()
   vi.unstubAllEnvs()
+})
+
+/** Made-up facts of a player with a goal and a match in the cup and in the Eredivisie. */
+const matchOf = (id: number, competition: 'Eredivisie' | 'KNVB Beker') => ({
+  competition,
+  goalsAgainst: 0,
+  goalsFor: 1,
+  home: true,
+  id,
+  matchDate: `2003-10-${10 + id}`,
+  opponent: 'Testclub',
+  round: String(id),
+  season: '2003/04',
+})
+const cupFacts = {
+  appearances: [matchOf(1, 'Eredivisie'), matchOf(2, 'KNVB Beker')].map((match) => ({
+    cameOn: false,
+    goalsAgainst: 0,
+    match,
+    red: false,
+    season: '2003/04',
+    starter: true,
+    substituted: false,
+    yellow: false,
+  })),
+  assists: [],
+  goals: [matchOf(1, 'Eredivisie'), matchOf(2, 'KNVB Beker')].map((match) => ({
+    competition: match.competition,
+    match,
+    minute: 10,
+    season: '2003/04',
+    stoppage: null,
+  })),
+  matchCounts: [{ played: 2, reported: 2, season: '2003/04' }],
+  players: [{ season: '2003/04', shirtNumber: 9 }],
+  tables: [],
+}
+
+describe('the switch of the table Per seizoen', () => {
+  it('is there for a player who played or scored outside the Eredivisie, and then only the table follows it', async () => {
+    vi.mocked(loadPlayerSeasonFacts).mockResolvedValue(cupFacts)
+
+    const all = await render()
+    const league = await render({}, { competitie: 'eredivisie' })
+
+    expect(all).toContain('Welke wedstrijden')
+    expect(all).not.toContain('alleen de Eredivisie, het nieuwste')
+    expect(league).toContain('per seizoen bij sc Heerenveen, alleen de Eredivisie, het nieuwste')
+    expect(league).toMatch(/<h2[^>]*>Per seizoen<\/h2>/)
+  })
+
+  it('is left out when nothing was played outside the Eredivisie, and the choice still works', async () => {
+    const html = await render({}, { competitie: 'eredivisie' })
+
+    expect(html).not.toContain('Welke wedstrijden')
+    expect(html).toContain('Per seizoen')
+  })
+
+  it('is the page "niet gevonden" for a value that is not known', async () => {
+    const digest = await render({}, { competitie: 'beker' }).then(
+      () => undefined,
+      (error: unknown) => (error as { digest?: string }).digest,
+    )
+
+    expect(digest).toContain('404')
+  })
 })
 
 describe('the page of a player', () => {
@@ -294,7 +366,7 @@ describe('the page of a player', () => {
   it('leads an old address to the address of now, for good', async () => {
     vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'moved', slug: 'johannes-de-vries' })
 
-    const digest = await digestOf(PlayerPageView({ slug: 'jan-de-vries' }))
+    const digest = await digestOf(PlayerPageView({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' }))
 
     expect(digest).toContain('/spelers/johannes-de-vries;308')
   })
@@ -302,15 +374,15 @@ describe('the page of a player', () => {
   it('is "niet gevonden" for nobody, or a player of an opponent', async () => {
     vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'unknown' })
 
-    expect(await digestOf(PlayerPageView({ slug: 'niemand' }))).toContain('404')
+    expect(await digestOf(PlayerPageView({ searchParams: Promise.resolve({}), slug: 'niemand' }))).toContain('404')
   })
 
   it('shows the error page when the database cannot be read', async () => {
     vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'error', reason: 'connect ECONNREFUSED' })
 
-    expect(renderToStaticMarkup(await PlayerPageView({ slug: 'jan-de-vries' }))).toContain(
-      'href="/spelers/jan-de-vries"',
-    )
+    expect(
+      renderToStaticMarkup(await PlayerPageView({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
+    ).toContain('href="/spelers/jan-de-vries"')
   })
 
   it('has a title and a description without the date of birth', async () => {

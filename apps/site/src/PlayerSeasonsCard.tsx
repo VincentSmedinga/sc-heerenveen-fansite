@@ -1,7 +1,9 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
+import type { CompetitionChoice } from './competition'
 import type { PlayerSeason } from './player-seasons'
 
+import { CompetitionLinks } from './CompetitionSwitch'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
@@ -86,14 +88,20 @@ const seasonsText = (seasons: readonly string[]) =>
  */
 export function PlayerSeasonsCard({
   address,
+  competition = 'all',
   goalkeeper,
   name,
+  playerAddress,
   seasons,
 }: {
   /** The address of the page Spelers of a season, such as `/spelers/2025-26`. */
   address: (season: string) => string
+  /** The matches the table counts (#1103): all of them, or the Eredivisie alone. */
+  competition?: CompetitionChoice
   goalkeeper: boolean
   name: string
+  /** The address of his page, for the switch; without it there is nothing to choose. */
+  playerAddress?: string | undefined
   seasons: readonly PlayerSeason[]
 }) {
   const table = playerSeasonsTable(seasons, goalkeeper)
@@ -107,8 +115,11 @@ export function PlayerSeasonsCard({
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
+      {playerAddress === undefined ? null : (
+        <CompetitionLinks address={playerAddress} competition={competition} place="speler" />
+      )}
       <DataTable
-        caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, het nieuwste seizoen eerst, met het totaal onderaan`}
+        caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'league' ? 'alleen de Eredivisie, ' : ''}het nieuwste seizoen eerst, met het totaal onderaan`}
         columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}
         rows={table.rows.map((row) => ({
           cells: row.cells,
@@ -119,7 +130,10 @@ export function PlayerSeasonsCard({
         }))}
       />
       <Text appearance="meta">
-        {[`${tableLegend(table.columns)}.`, ...playerSeasonsNotes(seasons, table, goalkeeper)].join(' ')}
+        {[
+          `${tableLegend(table.columns)}.`,
+          ...playerSeasonsNotes(seasons, table, goalkeeper, competition === 'league'),
+        ].join(' ')}
       </Text>
     </Card>
   )
@@ -133,11 +147,15 @@ export function playerSeasonsNotes(
   seasons: readonly PlayerSeason[],
   table: PlayerSeasonsTable,
   goalkeeper: boolean,
+  league = false,
 ): string[] {
   const notes: string[] = []
   const shown = table.columns.map(({ id }) => id)
-  const hasDash = seasons.some((season) => shown.some((id) => season[id] === undefined))
   const wikipedia = seasons.filter((season) => season.source === 'wikipedia').map(({ season }) => season)
+  // Under the Eredivisie a season of the Wikipedia table has dashes, for the reason below.
+  const hasDash = seasons.some(
+    (season) => !(league && season.source === 'wikipedia') && shown.some((id) => season[id] === undefined),
+  )
 
   if (goalkeeper) {
     notes.push('Nul en tegendoelpunten tellen alleen de wedstrijden die hij van begin tot eind speelde.')
@@ -145,7 +163,9 @@ export function playerSeasonsNotes(
   if (hasDash) {
     notes.push('Een streepje: van dat seizoen hebben we geen opstellingen.')
   }
-  if (wikipedia.length > 0) {
+  if (league && wikipedia.length > 0) {
+    notes.push(`Voor ${seasonsText(wikipedia)} kennen we de cijfers niet per competitie.`)
+  } else if (wikipedia.length > 0) {
     notes.push(
       `In ${seasonsText(wikipedia)} komen de cijfers uit de tabel van Wikipedia, die alleen de competities van die tabel telt.`,
     )
