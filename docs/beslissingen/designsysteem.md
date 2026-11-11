@@ -2126,6 +2126,7 @@
   DV, DT en DS komen alleen als een tabel de doelpunten voor, tegen en het saldo tegelijk toont, en geen tabel doet dat nu.
   De rest blijft: één lijst, `tableLegend`, de woorden winst, gelijk en verlies.
 - **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): `D/W` is de uitzondering op één letter per kolom, en de test legt G, D en P vast als de letters met twee woorden.
+- **Later:** zie _De tabel Per seizoen heeft kolommen naar de linie van de speler_ in `site.md` (11 november 2026): `tableColumns` heeft ook N nul en T tegendoelpunten, voor de tabel van een doelman. Het blijft één letter per kolom, en N en T waren vrij.
 
 ## Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 

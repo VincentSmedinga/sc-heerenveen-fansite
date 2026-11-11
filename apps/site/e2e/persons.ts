@@ -1,8 +1,18 @@
 import { connect } from '@fansite/db/client'
+import { withClubs } from '@fansite/db/clubs'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { persons, personSlugs, players } from '@fansite/db/schema'
-import { eq, inArray } from 'drizzle-orm'
+import {
+  matchAppearances,
+  matchCards,
+  matches,
+  matchGoals,
+  matchReports,
+  persons,
+  personSlugs,
+  players,
+} from '@fansite/db/schema'
+import { and, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
@@ -19,6 +29,10 @@ const people = [
   { country: 'NL', line: null, name: 'Proef de Keeper', page: null, seasons: ['2002/03'] },
   { country: null, line: 'middenvelder', name: 'Nep van der Middenveld', page: null, seasons: ['2001/02', '2002/03'] },
   { country: null, line: null, name: 'Test Zonder Selectie', page: null, seasons: [] },
+  // A goalkeeper and a forward with figures (see playerFigures): complete, so the lists of the
+  // admin that look for a missing line or country do not hold them.
+  { country: 'NL', line: 'doelman', name: 'Verzonnen Doelman', page: null, seasons: ['2001/02', '2002/03'] },
+  { country: 'NL', line: 'aanvaller', name: 'Verzonnen Aanvaller', page: null, seasons: ['2001/02', '2002/03'] },
 ] as const
 
 /** Puts the persons and their players in and returns the function that takes them out. */
@@ -35,6 +49,7 @@ export async function addPersons() {
     try {
       const names = people.map(({ name }) => name)
 
+      await db.delete(matches).where(eq(matches.opponent, figuresOpponent))
       await db.delete(players).where(inArray(players.name, names))
       await db.delete(persons).where(inArray(persons.name, names))
     } finally {
@@ -83,6 +98,7 @@ export async function addPersons() {
       }
     }
 
+    await addFigures(db)
     // The site gives the addresses when it starts, before these persons were there.
     await updatePlayerAddresses(db)
   } finally {
@@ -92,11 +108,84 @@ export async function addPersons() {
   return remove
 }
 
+const figuresOpponent = 'Cijfers AZ'
+
+/**
+ * Two played matches of 2002/03 with a report and line-ups, in which the goalkeeper and the
+ * forward play, so their pages have a table Per seizoen with figures from the line-ups (#1082):
+ * the forward scores in both and gives an assist in one, the goalkeeper keeps one clean sheet
+ * and gets a card, and 2001/02 has nothing, so it is a row of dashes.
+ */
+async function addFigures(db: ReturnType<typeof connect>['db']) {
+  const named = async (name: string) => {
+    const [row] = await db
+      .select({ id: players.id, personId: players.personId })
+      .from(players)
+      .where(and(eq(players.name, name), eq(players.season, '2002/03')))
+
+    if (row === undefined) {
+      throw new Error(`There is no made-up player ${name} in 2002/03.`)
+    }
+
+    return row
+  }
+  const keeper = await named('Verzonnen Doelman')
+  const forward = await named('Verzonnen Aanvaller')
+
+  for (const [index, goalsAgainst] of [0, 2].entries()) {
+    const day = `2002-09-${String(index + 1).padStart(2, '0')}`
+    const [{ insertId: matchId }] = await db.insert(matches).values(
+      await withClubs(db, [
+        {
+          competition: 'Eredivisie' as const,
+          goalsAgainst,
+          goalsFor: 1,
+          home: true,
+          kickoffAt: new Date(`${day}T12:30:00Z`),
+          matchDate: day,
+          opponent: figuresOpponent,
+          round: `Speelronde ${index + 90}`,
+          season: '2002/03',
+          status: 'played' as const,
+        },
+      ]),
+    )
+
+    await db.insert(matchReports).values({ matchId, status: 'klaar' })
+
+    const [{ insertId: keeperAppearance }] = await db
+      .insert(matchAppearances)
+      .values({ matchId, name: 'Verzonnen Doelman', ours: true, playerId: keeper.id, shirtNumber: 1, starter: true })
+    const [{ insertId: forwardAppearance }] = await db.insert(matchAppearances).values({
+      matchId,
+      name: 'Verzonnen Aanvaller',
+      ours: true,
+      playerId: forward.id,
+      shirtNumber: 9,
+      starter: true,
+    })
+
+    await db.insert(matchGoals).values({
+      appearanceId: forwardAppearance,
+      assistAppearanceId: index === 0 ? keeperAppearance : null,
+      matchId,
+      ours: true,
+      player: 'Aanvaller',
+    })
+
+    if (index === 1) {
+      await db.insert(matchCards).values({ appearanceId: keeperAppearance, kind: 'geel', matchId, ours: true })
+    }
+  }
+}
+
 /**
  * The pages of the made-up players (#1079): the page of a player of ours, an old address of
  * his, and the address of a person in no squad of ours, which is "niet gevonden".
  */
 export const playerPages = {
+  forward: '/spelers/verzonnen-aanvaller',
+  goalkeeper: '/spelers/verzonnen-doelman',
   old: '/spelers/proef-keeper',
   opponent: '/spelers/test-zonder-selectie',
   player: '/spelers/proef-de-keeper',

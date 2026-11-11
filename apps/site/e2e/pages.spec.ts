@@ -101,6 +101,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // address of the player has a test of its own, below.
   { path: playerPages.player, status: 200 },
   { path: playerPages.opponent, status: 404 },
+  // A made-up goalkeeper and a made-up forward, with the table Per seizoen (#1082).
+  { path: playerPages.goalkeeper, status: 200 },
+  { path: playerPages.forward, status: 200 },
   // The page Tegenstanders, a sub-page of Wedstrijden: the list, a club met in the league
   // (Testdorp FC), one with two names of its stadium (Voorbeeld United) and one met in the cup
   // only (FC Maquette, who is not in the list with the choice Eredivisie and has a sentence on
@@ -410,4 +413,28 @@ test('an old address of a player answers 308 with the address of now', async ({ 
 
   expect(response.status()).toBe(308)
   expect(response.headers()['location']).toBe(playerPages.player)
+})
+
+// The table Per seizoen follows the line of the player (#1082): a goalkeeper has the clean
+// sheets and the goals against, a forward the line-ups, the goals and the assists. The season
+// without figures is a row of dashes and has its sentence.
+test('the table Per seizoen has the columns of the line of the player', async ({ page }) => {
+  const headers = async (path: string) => {
+    await page.goto(path)
+
+    const table = page.getByRole('table', { name: /per seizoen/ })
+
+    return { table, texts: await table.locator('thead th').allTextContents() }
+  }
+  const keeper = await headers(playerPages.goalkeeper)
+
+  expect(keeper.texts).toEqual(['Seizoen', 'Ggespeeld', 'Nnul', 'Ttegendoelpunten', 'Ygeel'])
+  await expect(keeper.table.getByRole('row', { name: /Totaal/ })).toContainText('2')
+  await expect(page.getByText('Een streepje: van dat seizoen hebben we geen opstellingen.')).toBeVisible()
+
+  const forward = await headers(playerPages.forward)
+
+  expect(forward.texts).toEqual(['Seizoen', 'Ggespeeld', 'Bbasis', 'Ddoelpunten', 'Aassists'])
+  await expect(forward.table.getByRole('row', { name: /2002\/03/ })).toContainText('2')
+  await expect(forward.table.getByRole('row', { name: /2001\/02/ })).toContainText('–')
 })
