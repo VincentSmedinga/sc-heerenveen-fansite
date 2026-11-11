@@ -25,8 +25,8 @@ export const Bar = ({ share }: { share: number }) => (
 
 /**
  * The place of a table with bars that is not one of the tables of the design system, such as
- * a `DataTable` with text whose cells hold a `Bar` (give the table `hf-bar-table`). The bars
- * query the width of this place, so they go where the place is too narrow for them.
+ * a `DataTable` with text whose cells hold a `Bar`. The bars query the width of this place,
+ * so they go where the place is too narrow for them.
  */
 export const BarPlace = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
   <div {...props} className={classNames('hf-bar-place', className)} />

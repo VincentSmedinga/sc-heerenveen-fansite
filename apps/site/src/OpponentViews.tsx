@@ -742,7 +742,6 @@ export function LastWinCard({
         <DataTable
           appearance="text"
           caption="De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste"
-          className="hf-bar-table"
           columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
           rows={places.map((place, index) => ({
             cells:

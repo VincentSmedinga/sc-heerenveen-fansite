@@ -526,7 +526,7 @@ export const TextTableWithBars = meta.story({
     docs: {
       description: {
         story:
-          'Een cel van een tabel met tekst kan een `Bar` naast de tekst hebben. Zet de tabel in een `BarPlace` en geef hem `hf-bar-table`, zoals de andere tabellen met balken doen. De balk is versiering en verborgen voor een schermlezer.',
+          'Een cel van een tabel met tekst kan een `Bar` naast de tekst hebben. Zet de tabel in een `BarPlace`: de balk verdwijnt daar waar de plaats te smal voor hem is. De balk is versiering en verborgen voor een schermlezer.',
       },
     },
   },
@@ -539,7 +539,6 @@ export const TextTableWithBars = meta.story({
         <DataTable
           appearance="text"
           caption="De clubs van Testcompetitie, van de langste tijd sinds onze laatste overwinning tot de kortste"
-          className="hf-bar-table"
           columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
           rows={waits.map(([club, date, days]) => ({
             cells: [
