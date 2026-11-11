@@ -368,6 +368,10 @@ describe('the title row in page.css', () => {
   it('keeps the control at the end of the row, beside the heading and under it', () => {
     expect(rule).toMatch(/> :not\(:first-child\)\s*\{\s*margin-inline-start: auto;/)
   })
+
+  it('lets wrapped="start" keep the control on the left when it wraps', () => {
+    expect(css).toMatch(/&\.hf-page-title-start > :not\(:first-child\)\s*\{\s*margin-inline-start: 0;/)
+  })
 })
 
 describe('the wide page in page.css', () => {

@@ -84,7 +84,14 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   wide?: boolean
 }
 
-export type PageTitleProps = ComponentPropsWithoutRef<'div'>
+export type PageTitleProps = ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Where what is beside the heading goes when it does not fit there: `end` (the default) keeps
+   * it on the right under the heading, `start` puts it under the heading on the left, as a line
+   * of text that belongs to the name, such as the line, country and year of birth of a player.
+   */
+  wrapped?: 'end' | 'start'
+}
 
 export type PageTopLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
   /**
@@ -219,10 +226,11 @@ const Cell = ({ className, ...props }: PageCellProps) => (
  * The title row of a page, for the `intro` of a Page.Main: the heading of the page and, beside
  * it, one control that belongs to the whole page, such as the SeasonPicker. The control sits at
  * the end of the row, on the right. Where the two do not fit side by side the control goes
- * under the heading and stays on the right. A row with the heading alone is the heading.
+ * under the heading and stays on the right, or, with `wrapped="start"`, on the left. A row with
+ * the heading alone is the heading.
  */
-const Title = ({ className, ...props }: PageTitleProps) => (
-  <div className={classNames('hf-page-title', className)} {...props} />
+const Title = ({ className, wrapped = 'end', ...props }: PageTitleProps) => (
+  <div className={classNames('hf-page-title', wrapped === 'start' && 'hf-page-title-start', className)} {...props} />
 )
 
 /**
