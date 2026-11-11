@@ -35,7 +35,7 @@ function render(pathname: string, matchesBar?: ReactNode) {
 
 describe('SiteNavigation', () => {
   it('links to the news, the matches, the players and the forum, in a navigation named Hoofdmenu', () => {
-    const html = render('/spelers')
+    const html = render('/')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
     expect(
@@ -52,7 +52,7 @@ describe('SiteNavigation', () => {
   })
 
   it('draws the icon for a link to another site at the forum only, hidden from screen readers', () => {
-    const html = render('/spelers')
+    const html = render('/')
     const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
 
     expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, true])
@@ -144,15 +144,29 @@ describe('SiteNavigation', () => {
   )
 
   it.each(['/spelers', '/spelers/2025-26'])(
-    'marks Spelers as the current page on %s, and not Wedstrijden, with no bar',
+    'marks Spelers as the current page on %s, with the bar Overzicht and Zoeken and none of them current',
     (path) => {
       const html = render(path)
 
       expect(currentLinks(html)).toEqual(['Spelers'])
       expect(linksWith(html, 'true')).toEqual([])
-      expect(html).not.toContain('hf-navigation-bar')
+      expect(barLinks(html)).toEqual([
+        ['/spelers/overzicht', 'Overzicht'],
+        ['/spelers/zoeken', 'Zoeken'],
+      ])
     },
   )
+
+  it.each([
+    ['/spelers/overzicht', 'Overzicht'],
+    ['/spelers/overzicht/land', 'Overzicht'],
+    ['/spelers/zoeken', 'Zoeken'],
+  ])('marks %s as the current sub-page %s, and Spelers as the item that holds it', (path, label) => {
+    const html = render(path)
+
+    expect(currentLinks(html)).toEqual([label])
+    expect(linksWith(html, 'true')).toEqual(['Spelers'])
+  })
 
   it('has exactly one item with aria-current on every page of the menu', () => {
     for (const path of ['/nieuws', '/wedstrijden', '/cijfers', '/tegenstanders', '/spelers', '/spelers/2025-26']) {

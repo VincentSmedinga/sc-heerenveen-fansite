@@ -41,7 +41,14 @@ export default async function SentPage({
                 id="code"
                 label="Code uit de mail"
               >
-                <Input autoComplete="one-time-code" inputMode="numeric" name="code" spellCheck={false} />
+                <Input
+                  autoCapitalize="off"
+                  autoComplete="one-time-code"
+                  autoCorrect="off"
+                  inputMode="numeric"
+                  name="code"
+                  spellCheck={false}
+                />
               </Field>
               <Button type="submit">Inloggen met code</Button>
             </Form>

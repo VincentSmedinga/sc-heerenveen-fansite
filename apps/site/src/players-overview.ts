@@ -207,7 +207,7 @@ export function countryAnchor(group: Pick<CountryGroup, 'name'>): string {
     .replace(/^-+|-+$/gu, '')}`
 }
 
-/** The five countries of the card `Uit het noorden`, in the order the sentence names them. */
+/** The five countries of the card `Ze komen uit het noorden`, in the order of its sentence. */
 export const northernCountries = ['DK', 'SE', 'NO', 'IS', 'FI'] as const
 
 /**

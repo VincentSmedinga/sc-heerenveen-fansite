@@ -81,7 +81,9 @@ export function StadiumForm({
     return {
       fields: [
         {
-          control: <Input autoComplete="off" defaultValue={row.naam} key={row.naam} name={id('naam')} />,
+          control: (
+            <Input autoComplete="off" autoCorrect="off" defaultValue={row.naam} key={row.naam} name={id('naam')} />
+          ),
           error: errors[id('naam')],
           id: id('naam'),
         },

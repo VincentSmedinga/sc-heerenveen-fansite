@@ -5,14 +5,18 @@ import { seasonOf } from '@fansite/db/season'
 import {
   BarList,
   Card,
+  CardColumns,
   Heading,
   Link,
+  List,
   Page,
   PlayerList,
   SegmentedLinks,
+  Strong,
   Text,
   WikipediaCredit,
 } from '@fansite/design-system'
+import { countByContinent } from '@fansite/shared/continents'
 import { Fragment } from 'react'
 
 import { reviewBranch } from '#src/env'
@@ -167,8 +171,9 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
         }
       >
         {view === 'land' && <CountriesCard groups={countries} />}
-        {view === 'naam'
-          ? byLetter(players).map(({ letter, players: group }) => (
+        {view === 'naam' ? (
+          <CardColumns>
+            {byLetter(players).map(({ letter, players: group }) => (
               <Section
                 anchor={letterAnchor(letter)}
                 count={group.length}
@@ -177,25 +182,57 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
               >
                 <Rows current={current} players={group} />
               </Section>
-            ))
-          : countries.map((group) => (
-              <Section
-                anchor={countryAnchor(group)}
-                count={group.players.length}
-                key={countryAnchor(group)}
-                title={group.name}
-              >
-                <Rows current={current} players={group.players} />
-              </Section>
             ))}
+          </CardColumns>
+        ) : (
+          countries.map((group) => (
+            <Section
+              anchor={countryAnchor(group)}
+              count={group.players.length}
+              key={countryAnchor(group)}
+              title={group.name}
+            >
+              <Rows current={current} players={group.players} />
+            </Section>
+          ))
+        )}
       </Page.Main>
-      <Page.Sidebar aria-label={view === 'land' ? 'Uit het noorden en de bron' : 'De bron'}>
+      <Page.Sidebar aria-label={view === 'land' ? 'Het noorden, de werelddelen en de bron' : 'De bron'}>
         {view === 'land' && <NorthCard groups={countries} />}
+        {view === 'land' && <ContinentsCard players={players} />}
         <Card as="div" surface="transparent">
           <WikipediaCredit archive compact />
         </Card>
       </Page.Sidebar>
     </>
+  )
+}
+
+/**
+ * The card with the six continents and how many players each has, the most first. A player
+ * without a known country is in no continent: a line under the list says how many there are.
+ */
+function ContinentsCard({ players }: { players: readonly OverviewPlayer[] }) {
+  const { counts, unknown } = countByContinent(players.map((player) => player.country))
+
+  return (
+    <Card aria-labelledby="werelddelen">
+      <Heading id="werelddelen" level={2}>
+        Per werelddeel
+      </Heading>
+      <List columns plain role="list">
+        {counts.map(({ continent, count, name }) => (
+          <List.Item key={continent}>
+            {name} <Strong>{count}</Strong>
+          </List.Item>
+        ))}
+      </List>
+      {unknown > 0 && (
+        <Text appearance="meta">
+          Van {unknown === 1 ? '1 speler is' : `${unknown} spelers is`} het land niet bekend.
+        </Text>
+      )}
+    </Card>
   )
 }
 
@@ -242,7 +279,7 @@ function CountriesCard({ groups }: { groups: readonly CountryGroup[] }) {
   )
 }
 
-/** The card Uit het noorden: how many players came from the five countries of the north. */
+/** The card Ze komen uit het noorden: the players from the five countries of the north. */
 function NorthCard({ groups }: { groups: readonly CountryGroup[] }) {
   const north = northernCountries.flatMap((code) => groups.filter((group) => group.country === code))
   const total = north.reduce((sum, group) => sum + group.players.length, 0)
@@ -254,9 +291,9 @@ function NorthCard({ groups }: { groups: readonly CountryGroup[] }) {
   const names = north.map((group) => group.name)
 
   return (
-    <Card aria-labelledby="uit-het-noorden" surface="soft">
-      <Heading id="uit-het-noorden" level={2}>
-        Uit het noorden
+    <Card aria-labelledby="ze-komen-uit-het-noorden" surface="soft">
+      <Heading id="ze-komen-uit-het-noorden" level={2}>
+        Ze komen uit het noorden
       </Heading>
       <Text>
         {total} spelers uit {names.length < 2 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`}.

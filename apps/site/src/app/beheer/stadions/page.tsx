@@ -64,7 +64,7 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
           </Text>
           <Form action={stadiumsPath} method="get">
             <Field hint="Een deel van de naam van de club." id="zoek" label="Zoeken" required={false}>
-              <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
+              <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
             </Field>
             {/* The button sends the filter: the design system has no hidden field. */}
             <Button

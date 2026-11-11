@@ -67,3 +67,15 @@
     padding-inline-start: 0;
   }
 }
+
+/* A list in two columns: the items follow each other down the first column and then the second. */
+@layer hf.components {
+  .hf-list-columns {
+    column-count: 2;
+    column-gap: var(--hf-space-l);
+
+    > li {
+      break-inside: avoid;
+    }
+  }
+}

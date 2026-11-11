@@ -142,7 +142,7 @@ export function PlayerForm({
           label="Voornaam"
           required={false}
         >
-          <Input {...field('voornaam')} autoComplete="off" />
+          <Input {...field('voornaam')} autoComplete="off" autoCorrect="off" />
         </Field>
         <Field
           error={errors.tussenvoegsel}
@@ -152,7 +152,7 @@ export function PlayerForm({
           label="Tussenvoegsel"
           required={false}
         >
-          <Input {...field('tussenvoegsel')} autoComplete="off" width="narrow" />
+          <Input {...field('tussenvoegsel')} autoCapitalize="off" autoComplete="off" autoCorrect="off" width="narrow" />
         </Field>
         <Field
           error={errors.achternaam}
@@ -162,7 +162,7 @@ export function PlayerForm({
           label="Achternaam"
           required={!choosing}
         >
-          <Input {...field('achternaam')} autoComplete="off" />
+          <Input {...field('achternaam')} autoComplete="off" autoCorrect="off" />
         </Field>
         <Field
           error={errors.wikipedia}
@@ -172,7 +172,7 @@ export function PlayerForm({
           label="Wikipedia-pagina"
           required={false}
         >
-          <Input {...field('wikipedia')} autoComplete="off" />
+          <Input {...field('wikipedia')} autoComplete="off" autoCorrect="off" />
         </Field>
         {/* The way on from a page of another person: the page that merges the two. */}
         {merge === undefined ? null : (

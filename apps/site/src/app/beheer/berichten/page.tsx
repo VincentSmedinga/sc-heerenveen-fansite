@@ -208,7 +208,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           />
           <Form action="/beheer/berichten" inline method="get">
             <Field hint="Een deel van de kop of van de link." id="zoek" label="Zoeken" required={false}>
-              <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
+              <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
             </Field>
             {group === 'not-on-site' ? (
               <CheckboxGroup

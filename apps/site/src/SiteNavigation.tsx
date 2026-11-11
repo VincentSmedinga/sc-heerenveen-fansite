@@ -31,6 +31,17 @@ const matchesPath = '/wedstrijden'
 
 const playersPath = '/spelers'
 
+// The sub-pages of Spelers: the overview of all players (by name, and by country below it) and
+// the search. The page of a season has none of them as its current page.
+const playersOverviewPath = `${playersPath}/overzicht`
+
+const playersSearchPath = `${playersPath}/zoeken`
+
+const playersSubitems = [
+  { href: playersOverviewPath, label: 'Overzicht' },
+  { href: playersSearchPath, label: 'Zoeken' },
+]
+
 const seasonPages = [playersPath, statisticsPath, matchesPath]
 
 const newsPath = '/nieuws'
@@ -47,7 +58,7 @@ const adminPath = '/beheer'
 const items: MenuItem[] = [
   { href: newsPath, label: 'Nieuws', subitems: newsSubitems },
   { href: matchesPath, label: 'Wedstrijden', subitems: matchesSubitems },
-  { href: playersPath, label: 'Spelers' },
+  { href: playersPath, label: 'Spelers', subitems: playersSubitems },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
 
@@ -65,7 +76,8 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
  * the page and every page below it, such as the season, and a sub-page of its own:
  * Cijfers, with the page of each season below it (`/cijfers/2025-26`), and Tegenstanders,
  * with the page of each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page
- * and the page of each season below it (`/spelers/2025-26`). A path that belongs to no item,
+ * and the page of each season below it (`/spelers/2025-26`), and two sub-pages: the overview
+ * (with the page by country below it) and the search. A path that belongs to no item,
  * such as /bronnen, the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
@@ -89,6 +101,14 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === '/wedstrijden' || pathname.startsWith('/wedstrijden/')) {
     return { item: '/wedstrijden' }
+  }
+
+  if (pathname === playersOverviewPath || pathname.startsWith(`${playersOverviewPath}/`)) {
+    return { item: playersPath, subitem: playersOverviewPath }
+  }
+
+  if (pathname === playersSearchPath) {
+    return { item: playersPath, subitem: playersSearchPath }
   }
 
   if (pathname === playersPath || pathname.startsWith(`${playersPath}/`)) {

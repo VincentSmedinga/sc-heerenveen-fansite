@@ -60,7 +60,14 @@ export default async function LoginPage({
           <ErrorSummary errors={error === undefined ? [] : [{ id: 'e-mail', message: error }]} level={2} />
           <Form action={requestLoginLink}>
             <Field error={error} hint="De link werkt 15 minuten en één keer." id="e-mail" label="E-mailadres">
-              <Input autoComplete="email" name="email" spellCheck={false} type="email" />
+              <Input
+                autoCapitalize="off"
+                autoComplete="email"
+                autoCorrect="off"
+                name="email"
+                spellCheck={false}
+                type="email"
+              />
             </Field>
             <Button type="submit">Stuur me een link</Button>
           </Form>

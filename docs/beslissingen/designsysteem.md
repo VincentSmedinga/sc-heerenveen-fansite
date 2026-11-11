@@ -3347,3 +3347,17 @@
   - **Geen nieuw onderdeel:** de link terug is gewoon `Link`.
 - **Waarom:** het kruimelpad deed op ondiepe pagina's niet meer dan het menu, en een link terug is voor diepe pagina's kleiner en duidelijker.
 - **Alternatieven:** het onderdeel houden en niet gebruiken; een link terug op elke pagina.
+
+## `CardColumns` zet kaarten in een raster met paren, en grid lanes maakt het beter
+
+- **Datum:** 11 november 2026
+- **Besluit:** `CardColumns` zet kaarten in twee kolommen als de plaats waarin ze staan 28 rem breed is, en anders onder elkaar (#1141).
+  De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.
+  - **De basis:** een raster met een paar kaarten op elke rij, zodat toetsenbord en schermlezer alfabetisch blijven lezen en de ankers werken.
+    De breedte is die van de plaats (een container query), niet van het scherm, want de hoofdkolom is op 900 pixels maar half zo breed als het scherm.
+  - **De verbetering:** achter `@supports (display: grid-lanes)` wordt de container `display: grid-lanes` met dezelfde twee kolommen, en gaat elke kaart naar de kortste kolom, zodat de gaten onder de kortere kaart van een paar verdwijnen.
+    De volgorde in de code blijft A, B, C, maar de letters wisselen dan niet meer strikt af.
+  - **Gecontroleerd:** de basis in Chrome 156 (waar grid lanes niet aan staat), grid lanes in Safari 26.6.2 met dezelfde CSS.
+  - **Een lijst in twee kolommen:** `List` heeft `columns`, met CSS multi-column, voor korte regels zoals een werelddeel en zijn aantal; de volgorde in de code blijft de leesvolgorde.
+- **Waarom:** grid lanes haalt de gaten weg waar de browser het kent, en wie het niet kent ziet nog altijd een goede pagina.
+- **Alternatieven:** twee losse kolommen (een andere volgorde in de code, en de rechterkolom wordt zo'n 45 procent langer); één kolom; een script dat de kolommen vult.
