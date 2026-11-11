@@ -59,6 +59,25 @@ describe('DataTable', () => {
     expect(screen.getByRole('cell', { name: 'n.v.t.' })).toBeTruthy()
   })
 
+  it('puts words after the row header on its line, and marks the total row', () => {
+    const { container } = render(
+      <DataTable
+        caption="Seizoenen"
+        columns={['Seizoen', 'Wedstrijden']}
+        rows={[
+          { aside: 'nr. 35', cells: [28], header: '2025/26' },
+          { cells: [28], header: 'Totaal', total: true },
+        ]}
+      />,
+    )
+    const [season, total] = [...container.querySelectorAll('tbody tr')] as HTMLElement[]
+
+    expect(season?.querySelector('th .hf-data-table-aside')?.textContent).toBe('nr. 35')
+    expect(season?.querySelector('th')?.textContent).toBe('2025/26 nr. 35')
+    expect(season?.className).toBe('')
+    expect(total?.className).toBe('hf-data-table-total')
+  })
+
   it('shows an abbreviation as the column header and gives a screen reader the whole word', () => {
     render(
       <DataTable

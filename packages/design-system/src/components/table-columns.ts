@@ -28,9 +28,15 @@ export type TableColumn = {
  * `B` basis (the line-ups), `I` invallers (the times he came on), `M` minuten, `D` doelpunten,
  * `A` assists, `Y` geel and `R` rood. `G` is taken for gelijk and gespeeld, so the yellow
  * cards have `Y`; a yellow-red card counts as a yellow and a red card.
+ *
+ * The table of a goalkeeper on the page of a player has `N` nul (the matches in which he
+ * kept a clean sheet) and `T` tegendoelpunten (the goals he conceded), both over the matches
+ * he played from start to end. `N` and `T` were free, and `G` and `D` are taken.
  */
 export const tableColumns = {
   assists: { abbreviation: 'A', name: 'assists' },
+  cleanSheets: { abbreviation: 'N', name: 'nul' },
+  conceded: { abbreviation: 'T', name: 'tegendoelpunten' },
   drawn: { abbreviation: 'G', name: 'gelijk' },
   goalDifference: { abbreviation: 'D', name: 'doelsaldo' },
   goals: { abbreviation: 'D', name: 'doelpunten' },

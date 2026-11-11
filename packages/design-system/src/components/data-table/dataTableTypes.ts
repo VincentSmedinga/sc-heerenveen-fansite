@@ -42,6 +42,12 @@ export type DataTableColumn = {
 
 export type DataTableRow = {
   /**
+   * Words after the row header on the same line, in secondary text, such as the shirt number
+   * after a season (`nr. 35`). A screen reader reads them as part of the row header. Keep them
+   * short: on a phone they wrap under the header. Use `secondary` for a line of its own.
+   */
+  aside?: string
+  /**
    * The numbers of the row, one for each column after the first. A number is written the Dutch
    * way, with a point between the thousands. Text is shown as it is. A cell as `{ sortValue,
    * text }` shows `text` and sorts on `sortValue`.
@@ -82,6 +88,12 @@ export type DataTableRow = {
    * screen reader reads it as part of the row header.
    */
   secondary?: string
+  /**
+   * Makes this row the total of the table: bold, with a fill and a heavier line above it, for
+   * the last row, such as `Totaal` under the seasons. A table has at most one, and it is not
+   * sortable: a sorted table moves the row.
+   */
+  total?: boolean
 }
 
 /** A column of a table with text, given as an object when it can fold. */

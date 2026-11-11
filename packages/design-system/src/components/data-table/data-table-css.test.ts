@@ -16,6 +16,12 @@ describe('data-table.css', () => {
     expect(css).toMatch(/\.hf-data-table \.hf-data-table-secondary \{[^}]*display: block;/u)
   })
 
+  it('fills the total row and puts a heavier line above it', () => {
+    expect(css).toMatch(
+      /\.hf-data-table-total :is\(th, td\) \{[^}]*background-color:[^}]*border-block-start: 2px solid/u,
+    )
+  })
+
   it('folds a column under 44rem of the table itself, and not of the window', () => {
     expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container-type: inline-size;/u)
 

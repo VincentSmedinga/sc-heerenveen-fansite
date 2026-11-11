@@ -18,9 +18,12 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
 
 import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
+import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
 import { playersPath } from '#src/season-page'
 import { seasonAddress } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -77,6 +80,7 @@ export async function PlayerPageView({ slug }: { slug: string }) {
   }
 
   const { page } = loaded
+  const seasons = await readSeasons(page)
 
   return (
     <Page.Main
@@ -93,6 +97,16 @@ export async function PlayerPageView({ slug }: { slug: string }) {
       <Page.Cell>
         <PlayerSeasons seasons={page.seasons} />
       </Page.Cell>
+      {seasons === undefined ? null : (
+        <Page.Cell>
+          <PlayerSeasonsCard
+            address={(season) => seasonAddress(playersPath, season, seasonOf(new Date()))}
+            goalkeeper={page.line === 'doelman'}
+            name={page.name}
+            seasons={seasons}
+          />
+        </Page.Cell>
+      )}
       <PlayerCredit page={page} />
     </Page.Main>
   )
@@ -215,4 +229,15 @@ function PlayerSeasons({ seasons }: { seasons: readonly string[] }) {
       .
     </Text>
   )
+}
+
+/** The figures per season, or undefined when they could not be read (the error is logged). */
+async function readSeasons(page: PlayerPage): Promise<PlayerSeason[] | undefined> {
+  try {
+    return await loadPlayerSeasons(page.personId)
+  } catch (error) {
+    console.error(`Could not read the seasons of a player for ${playerAddress(page.slug)}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }

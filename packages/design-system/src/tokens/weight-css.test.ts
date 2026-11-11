@@ -121,7 +121,7 @@ const weightRules = (css: string): WeightRule[] => {
 
 const token = (name: string) => `var(--hf-${name}-font-weight)`
 const header = /(^|[\s,>])th\b/
-const heaviest = /hf-key|tfoot|^caption|hf-bar-legend/
+const heaviest = /hf-key|hf-data-table-total|tfoot|^caption|hf-bar-legend/
 
 describe('the font weights in the CSS of tables', () => {
   const rules = tableFiles.flatMap((file) => weightRules(read(file)).map((rule) => ({ ...rule, file })))
