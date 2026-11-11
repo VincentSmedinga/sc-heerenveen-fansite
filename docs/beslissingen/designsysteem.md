@@ -3204,3 +3204,12 @@
 - **Waarom:** `PlayerName` met alleen een land is een rij van een lijst, geen woord in een zin: de regel onder de naam van een speler brak er in drie stukken door.
   Een speler met een artikel dat de importer nog niet las, of nooit leest (een Engelse titel), moet toch de link naar zijn artikel en de licentie krijgen.
 - **Alternatieven:** `PlayerName` een vorm in de regel geven (één component met twee rollen); de korte credit zonder link voor een speler zonder leestijd (dan ontbreekt de licentie).
+
+## Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot
+
+- **Datum:** 11 november 2026
+- **Besluit:** `KeyFigures` (#1080) zet twee tot vier getallen in een lijst, elk met het getal, een woord en een korte regel.
+  Het getal is gewone tekst in een grote letter, geen kop, en een onzichtbare komma tussen het woord en de regel laat een schermlezer elk getal als één zin lezen: "52 doelpunten, in alle competities".
+  Op een telefoon staan ze twee aan twee, vanaf een breder scherm naast elkaar.
+- **Waarom:** een kop per getal zou de kopstructuur van de pagina van een speler vullen met cijfers, en een lijst zegt hoeveel getallen er zijn.
+- **Alternatieven:** `DescriptionList` (dan leest de schermlezer term en omschrijving los van elkaar, en het getal is niet groot); een tegel per getal (`Tile` is een link naar een andere pagina).

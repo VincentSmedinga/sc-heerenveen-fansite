@@ -1,0 +1,61 @@
+/*
+ * A row of key figures: the number large, the word and the line below it in the size of the
+ * text or smaller. Two by two on a phone, side by side from the width where four fit.
+ */
+
+@layer hf.components {
+  .hf-key-figures {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-l);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (width >= 40rem) {
+    .hf-key-figures {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-template-columns: none;
+    }
+  }
+
+  .hf-key-figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-xs);
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-key-figure-number {
+    color: var(--hf-colour-text-heading);
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-key-figure-font-size);
+    font-stretch: 125%;
+    font-weight: var(--hf-figure-font-weight);
+    line-height: 1;
+  }
+
+  .hf-key-figure-label {
+    font-size: var(--hf-body-font-size);
+    font-weight: var(--hf-headline-font-weight);
+    line-height: var(--hf-body-line-height);
+  }
+
+  .hf-key-figure-note {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-body-line-height);
+  }
+
+  /* The comma that joins the word and the line for a screen reader, out of sight. */
+  .hf-key-figure-stop {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+  }
+}
