@@ -73,6 +73,7 @@ describe('DataTable', () => {
     const [season, total] = [...container.querySelectorAll('tbody tr')] as HTMLElement[]
 
     expect(season?.querySelector('th .hf-data-table-aside')?.textContent).toBe('nr. 35')
+    expect(season?.querySelector('th')?.textContent).toBe('2025/26 nr. 35')
     expect(season?.className).toBe('')
     expect(total?.className).toBe('hf-data-table-total')
   })

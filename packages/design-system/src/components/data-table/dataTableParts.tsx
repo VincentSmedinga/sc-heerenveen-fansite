@@ -91,7 +91,12 @@ export const TableRows = ({
           ) : (
             <Link href={row.href}>{row.display ?? row.header}</Link>
           )}
-          {row.aside === undefined ? null : <span className="hf-data-table-aside">{row.aside}</span>}
+          {row.aside === undefined ? null : (
+            <>
+              {' '}
+              <span className="hf-data-table-aside">{row.aside}</span>
+            </>
+          )}
           {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
           {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
         </th>

@@ -122,14 +122,13 @@
   }
 
   /*
-   * Words after the row header on its line, such as the shirt number: secondary text, a space
-   * after the header (the space is in the CSS, so the markup has none to collapse).
+   * Words after the row header on its line, such as the shirt number: secondary text. The
+   * markup has a space before them, so a screen reader hears two words.
    */
   .hf-data-table .hf-data-table-aside {
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
     font-weight: var(--hf-body-font-weight);
-    margin-inline-start: var(--hf-space-xs);
   }
 
   /*
