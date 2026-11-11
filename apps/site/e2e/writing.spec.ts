@@ -112,6 +112,10 @@ test.describe('with JavaScript', () => {
     await expect(page).toHaveURL(/\/beheer\/artikelen\/nieuw\??$/u)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuw artikel')
     await expect(page.getByLabel('Auteur', { exact: true })).toHaveValue('de redactie')
+    // The server sends the form with its fields, but the address only follows the title once
+    // React has hydrated the form. A title typed before that leaves the address empty. The
+    // toolbar of the editor is drawn by script, so it is there once the page is ready.
+    await expect(page.getByRole('toolbar', { name: 'Opmaak' })).toBeVisible()
 
     // An empty intro and a text that is too long: the errors are in the summary and at the
     // fields, the summary has the focus, and everything that was typed is still there.
