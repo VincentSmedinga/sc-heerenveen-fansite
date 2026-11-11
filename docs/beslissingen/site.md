@@ -4812,6 +4812,24 @@
 - **Waarom:** een nummer gaat soms over van een vertrokken speler naar een nieuwe, en een redacteur verandert twee spelers na elkaar.
 - **Alternatieven:** het formulier weigert een nummer dat een speler van de selectie al heeft.
 
+## Het adres van een club schrijft letters zonder los accent uit, zonder doorverwijzing van het oude adres
+
+- **Datum:** 11 november 2026
+- **Besluit:** `clubSlug` in `packages/db/src/clubs.ts` schrijft de letters uit dezelfde lijst uit als het adres van een speler (`slugLetters` in `packages/db/src/slug-letters.ts`, de ene plek voor beide, #1121): ø wordt o, æ wordt ae, enzovoort.
+  De uitzondering voor een Vietnamese đ blijft bij personen, want een club heeft geen land.
+  - **De twee clubs:** op de kopie van acceptatie van 10 november 2026 veranderen er twee van de 118, zonder botsing: `lillestr-m-sk` wordt `lillestrom-sk` en `n-stved-if` wordt `naestved-if`.
+    Een club houdt zijn adres als zijn naam verandert, dus de lijst `clubFullNames` in `apps/importer/src/club-names.ts` noemt ze (zonder andere schrijfwijzen), en `repairClubs` zet bij de volgende run van de import het adres van de naam.
+    Een test laat zien dat `repairClubs` zo het adres van een bestaande club verandert, en dat het het oude laat staan als een andere club het nieuwe heeft.
+  - **Geen doorverwijzing:** het oude adres van een club leidt niet door.
+    Een club heeft zijn adres in één kolom (`clubs.slug`) en geen tabel met oude adressen, zoals `person_slugs` voor spelers.
+    Doorverwijzen vraagt dus een migratie en een tabel, en het adres van een club zit ook in de adressen van wedstrijdverslagen.
+    Het oude adres geeft "niet gevonden".
+  - **Een nieuwe letter:** een test controleert de namen van de verzonnen wedstrijden van de seed en van de lijst `clubFullNames`, en faalt als een naam een letter verliest.
+- **Waarom:** een club met een ø of æ in zijn naam verloor die letter, en kreeg een adres als `n-stved-if`.
+  Het gaat om twee clubs met elk één wedstrijd en geen verslag, en de site is nog niet gelanceerd en acceptatie wordt niet geïndexeerd, dus er is geen link van buiten die zou breken.
+  Een tabel met doorverwijzingen voor twee adressen is het niet waard.
+- **Alternatieven:** een tabel `club_slugs` met doorverwijzing, zoals bij spelers (een migratie voor twee adressen); alleen de nieuwe clubs het goede adres geven en de twee laten staan (de twee houden dan hun fout).
+
 ## Een overgenomen opstelling krijgt de rugnummers van de dag van de wedstrijd, en een afwijkend nummer wordt gemeld
 
 - **Datum:** 11 november 2026
