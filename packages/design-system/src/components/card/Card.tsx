@@ -23,12 +23,13 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**
    * Gives the card a round button at the top right that makes an image of it, with the logo,
    * the address of the site, the day and `source` under it, and shares or downloads it.
-   * `source` is the credit of the data in the card: it is required, so an image never leaves
-   * the card without the name of where its facts come from. The button is named after the
-   * first heading of the card and shows only with JavaScript. The card needs that heading as
-   * its first child. A part of the card that is not for the image, such as a line that holds
-   * for a while, takes the attribute `data-hf-card-share-skip`. Without `shareable` the card is
-   * as it was.
+   * `source` is the credit of the data in the card that comes from elsewhere, such as
+   * Wikipedia: an image leaves the site without a page around it, so it carries the name of
+   * where its facts come from. A card that counts only our own data leaves it out. The button
+   * is named after the first heading of the card and shows only with JavaScript. The card
+   * needs that heading as its first child. A part of the card that is not for the image, such
+   * as a line that holds for a while, takes the attribute `data-hf-card-share-skip`. Without
+   * `shareable` the card is as it was.
    */
   shareable?: CardShareProps | undefined
   /**

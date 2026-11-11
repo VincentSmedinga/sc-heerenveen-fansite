@@ -109,6 +109,7 @@ describe('the page Over ons', () => {
       ['/contact', 'Contact'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['/privacy', 'Privacy'],
+      ['/bronnen#wedstrijden-en-spelers', 'Nederlandse Wikipedia'],
       ['/contact', 'Contact'],
     ])
   })

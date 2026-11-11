@@ -32,8 +32,11 @@ export type CardShareProps = {
    * says which season it shows. Leave it out for the current season.
    */
   season?: string | undefined
-  /** The credit of the data in the card, which goes under the image. */
-  source: ReactNode
+  /**
+   * The credit of the data in the card, which goes under the image. Leave it out for a card
+   * that counts only our own data: that needs no credit.
+   */
+  source?: ReactNode
 }
 
 /**
@@ -138,7 +141,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
                     {season === undefined ? '' : `Seizoen ${season} · `}
                     {window.location.host} · {imageDay(today)}
                   </Text>
-                  <div className="hf-card-share-credit">{source}</div>
+                  {source === undefined ? null : <div className="hf-card-share-credit">{source}</div>}
                 </div>
               </footer>
             </div>

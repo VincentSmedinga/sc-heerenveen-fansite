@@ -1,15 +1,19 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
-import { archiveName } from '../archive-credit/ArchiveCredit'
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { Time } from '../time/Time'
 
-/** What the credit says under itself when the editors entered some of the data. */
+/** How the credits name the sc Heerenveen Fansite, our own data, the same way each time. */
+const archiveName = 'sc Heerenveen Fansite'
+
+/** What the fold says when the editors entered some of the data. */
 const editedSentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
 
 /** The licence of Wikipedia and of our own match data. */
+const wikidataSentence = 'Enkele spelers komen van'
+
 const licenceHref = 'https://creativecommons.org/licenses/by-sa/4.0/deed.nl'
 
 export type WikipediaCreditPage = {
@@ -51,13 +55,17 @@ export type WikipediaCreditProps =
         data?: string
         /**
          * Whether our own editors filled in or corrected some of the data themselves. The
-         * full form then says so under the credit, "Enkele gegevens heeft onze redactie zelf
-         * ingevuld of aangepast.", visible without opening it.
+         * fold then says so, "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast."
          */
         edited?: boolean
         lead?: never
         /** The Wikipedia pages the data comes from, at least one. */
         pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
+        /**
+         * Whether some of the players come from Wikidata, for the page Spelers. The fold then
+         * says so, with the licence (CC0), which asks for no credit.
+         */
+        wikidata?: boolean
       })
   | (WikipediaCreditBaseProps<'p'> & {
       /** Whether some of the matches come from the sc Heerenveen Fansite as well. */
@@ -74,6 +82,7 @@ export type WikipediaCreditProps =
       pages?: never
       readAt?: never
       readAtDateTime?: never
+      wikidata?: never
     })
 
 type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentPropsWithoutRef<Tag>, 'children'> & {
@@ -106,6 +115,7 @@ export const WikipediaCredit = ({
   pages,
   readAt,
   readAtDateTime,
+  wikidata = false,
   ...props
 }: WikipediaCreditProps) =>
   compact ? (
@@ -116,34 +126,38 @@ export const WikipediaCredit = ({
       {`${lead} Wikipedia${archive ? ` en ${archiveName}` : ''}`}
     </p>
   ) : (
-    <>
-      <details
-        {...(props as ComponentPropsWithoutRef<'details'>)}
-        className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
-      >
-        <summary>
-          {`Bron: Wikipedia${archive ? ` en ${archiveName}` : ''}`}
-          <Icon name="arrow-down" />
-        </summary>
-        <p>
-          Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
-          {pages.map((page, index) => (
-            <span key={page.href}>
-              {index > 0 ? ', ' : ''}
-              <Link href={page.href}>{page.name}</Link>
-            </span>
-          ))}
-          .
-          {readAt === undefined ? null : (
-            <>
-              {' '}
-              Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>.
-            </>
-          )}{' '}
-          Onze {data} zijn ook CC BY-SA 4.0.
-          {archive ? ` Oudere wedstrijden komen van de ${archiveName}.` : ''}
-        </p>
-      </details>
-      {edited ? <p className="hf-meta hf-wikipedia-credit-edited">{editedSentence}</p> : null}
-    </>
+    <details
+      {...(props as ComponentPropsWithoutRef<'details'>)}
+      className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
+    >
+      <summary>
+        {`Bron: Wikipedia${archive ? ` en ${archiveName}` : ''}`}
+        <Icon name="arrow-down" />
+      </summary>
+      <p>
+        Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
+        {pages.map((page, index) => (
+          <span key={page.href}>
+            {index > 0 ? ', ' : ''}
+            <Link href={page.href}>{page.name}</Link>
+          </span>
+        ))}
+        .
+        {readAt === undefined ? null : (
+          <>
+            {' '}
+            Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>.
+          </>
+        )}{' '}
+        Onze {data} zijn ook CC BY-SA 4.0.
+        {archive ? ` Oudere wedstrijden komen van de ${archiveName}.` : ''}
+        {edited ? ` ${editedSentence}` : ''}
+        {wikidata ? (
+          <>
+            {' '}
+            {wikidataSentence} <Link href="https://www.wikidata.org/">Wikidata</Link> (CC0).
+          </>
+        ) : null}
+      </p>
+    </details>
   )

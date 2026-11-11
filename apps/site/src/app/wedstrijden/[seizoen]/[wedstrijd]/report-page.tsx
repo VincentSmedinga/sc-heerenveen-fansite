@@ -258,7 +258,7 @@ function liveStopAt({ kickoffAt, matchDate }: ReportedMatch['match']) {
   return (kickoffAt ?? new Date(`${matchDate}T00:00:00Z`)).getTime() + liveDuration
 }
 
-/** The credit under the page: Wikipedia for what it has, and our own records for the rest. */
+/** The credit under the page: the source of the report when it is not ours, and Wikipedia. */
 function ReportCredit({
   data,
   editorSources,
@@ -272,11 +272,11 @@ function ReportCredit({
 
   return (
     <>
-      <Card as="div" surface="transparent">
-        <Text appearance="meta">
-          {`De opstelling, de wissels, de kaarten en de assists komen van de sc Heerenveen Fansite${source === null || source === oldSiteReportSource ? '' : `, naar ${source}`}.`}
-        </Text>
-      </Card>
+      {source === null || source === oldSiteReportSource ? null : (
+        <Card as="div" surface="transparent">
+          <Text appearance="meta">{`Bron: ${source}.`}</Text>
+        </Card>
+      )}
       {reported.match.attendance !== null && reported.match.attendance > 0 && (
         <Card as="div" surface="transparent">
           <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>

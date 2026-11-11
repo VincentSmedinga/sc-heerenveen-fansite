@@ -114,19 +114,30 @@ describe('WikipediaCredit', () => {
     expect(container.firstElementChild?.id).toBe('bron')
   })
 
-  it('says under the credit that the editors entered some of the data, outside the fold, and only then', () => {
+  it('says in the fold that the editors entered some of the data, and only then', () => {
     const { container, rerender } = render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(container.textContent).not.toContain('onze redactie')
 
     rerender(<WikipediaCredit {...props} edited pages={[standings]} />)
 
-    const note = screen.getByText('Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.')
+    expect(container.querySelector('details p')?.textContent).toContain(
+      'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.',
+    )
+    expect(container.children).toHaveLength(1)
+  })
 
-    expect(note.tagName).toBe('P')
-    expect(note.closest('details')).toBeNull()
-    expect(container.firstElementChild?.tagName).toBe('DETAILS')
-    expect(container.lastElementChild).toBe(note)
+  it('says in the fold that some players come from Wikidata, with the licence, and only then', () => {
+    const { container, rerender } = render(<WikipediaCredit {...props} pages={[standings]} />)
+
+    expect(container.textContent).not.toContain('Wikidata')
+
+    rerender(<WikipediaCredit {...props} pages={[standings]} wikidata />)
+
+    const link = screen.getByRole('link', { name: 'Wikidata' })
+
+    expect(link.getAttribute('href')).toBe('https://www.wikidata.org/')
+    expect(container.querySelector('details p')?.textContent).toContain('Enkele spelers komen van Wikidata (CC0).')
   })
 
   it('says only "Bron: Wikipedia" in the short form, with no link and no time', () => {

@@ -79,9 +79,10 @@ export default function AboutPage() {
             Wedstrijden en stand
           </Heading>
           <Text>
-            Uitslagen, doelpunten en stand komen van de Nederlandse Wikipedia (CC BY-SA 4.0). We lezen haar hoogstens
-            één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft, soms anders dan
-            bij de club.
+            Uitslagen, doelpunten en stand komen van de{' '}
+            <Link href="/bronnen#wedstrijden-en-spelers">Nederlandse Wikipedia</Link> (CC BY-SA 4.0). We lezen haar
+            hoogstens één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft, soms
+            anders dan bij de club.
           </Text>
           <Heading appearance={4} level={3}>
             Forum en podcasts

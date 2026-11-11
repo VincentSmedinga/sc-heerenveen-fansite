@@ -2,7 +2,6 @@ import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } fro
 
 import { competitions } from '@fansite/db/schema'
 import {
-  ArchiveCredit,
   BarChart,
   Card,
   DataTable,
@@ -587,11 +586,7 @@ export function OpponentsCredit({
   const [first, ...rest] = credited
 
   if (first === undefined) {
-    return source === 'wikipedia' ? null : (
-      <Card as="div" surface="transparent">
-        <ArchiveCredit />
-      </Card>
-    )
+    return null
   }
 
   const readAt = new Date(Math.max(...credited.map((page) => page.readAt.getTime())))

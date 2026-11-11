@@ -182,6 +182,28 @@ describe('a click on the button', () => {
     })
   })
 
+  it('makes the image without a credit strip for a card that has no source', async () => {
+    let credit: Element | null | undefined
+
+    vi.mocked(makeCardImage).mockImplementation((element) => {
+      credit = element.closest('.hf-card-share-stage')?.querySelector('.hf-card-share-credit')
+
+      return Promise.resolve(png)
+    })
+    render(
+      <Card aria-labelledby="stand" shareable={{}}>
+        <Heading id="stand" level={2}>
+          Stand
+        </Heading>
+      </Card>,
+    )
+
+    fireEvent.click(button())
+    await waitFor(() => expect(deliverImage).toHaveBeenCalledOnce())
+
+    expect(credit).toBeNull()
+  })
+
   it('puts the stage out of sight of everyone, and takes it away when the image is done', async () => {
     let offscreen: Element | null | undefined
 

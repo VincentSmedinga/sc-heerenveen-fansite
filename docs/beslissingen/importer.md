@@ -1487,6 +1487,7 @@
 - **Nadeel:** de zin staat bij alle wedstrijden, ook als de invoer één andere wedstrijd betreft, want de vlag geldt voor de hele site.
   De stand komt van Wikipedia en verandert niet mee: hij loopt achter tot Wikipedia de uitslag heeft.
 - **Alternatieven:** een zin bij de wedstrijd zelf (een extra regel in elke lijst, en `Match` en `ShortMatch` moeten hem kennen); de zin in de uitklap (een bezoeker ziet hem alleen als hij openklapt); de zin ook op de korte vorm (een lange zin in een kleine kaart op home).
+- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): de zin staat in de uitklap in plaats van eronder, en "nergens anders" geldt niet meer voor de korte vorm.
 
 ## Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel
 

@@ -90,24 +90,23 @@ describe('the cards with the figures of the match reports on /spelers', () => {
     expect(playersShortcutsFor(true).map(({ href }) => href)).toEqual(ids)
   })
 
-  it('says how many of the played matches each card rests on, and that the figures are our own administration', async () => {
+  it('says how many of the played matches each card rests on, and names no source: the figures are our own', async () => {
     const html = await render()
 
     for (const id of ['alle-spelers', 'assists', 'minuten']) {
       const card = cardOf(html, id)
 
       expect(plain(card)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
-      expect(plain(card)).toContain('Bron: sc Heerenveen Fansite')
+      expect(plain(card)).not.toContain('Bron: ')
     }
   })
 
-  it('has a button for an image on each card, with the credit under the image and not in the copy of the card', async () => {
+  it('has a button for an image on each card', async () => {
     const html = await render()
 
     for (const id of ['alle-spelers', 'assists', 'minuten']) {
       expect(cardOf(html, id)).toMatch(/hf-card-shareable/)
     }
-    expect(html).toContain('data-hf-card-share-skip=""')
   })
 
   it('has the top five of the assists with level players on one place, and says how many players gave one', async () => {
@@ -165,7 +164,7 @@ describe('the cards with the figures of the match reports on /spelers', () => {
       expect(html).not.toContain(`id="${id}"`)
     }
     expect(html).not.toContain('Op basis van')
-    expect(html).not.toContain('Bron: sc Heerenveen Fansite')
+    expect(html).not.toContain('sc Heerenveen Fansite')
   })
 
   it('keeps the cards for the other choice of the switch when one competition has no report, and says it rests on none', async () => {

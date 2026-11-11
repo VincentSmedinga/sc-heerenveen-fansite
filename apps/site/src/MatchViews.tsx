@@ -10,7 +10,6 @@ import type { FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
 import {
-  ArchiveCredit,
   averagesOf,
   BarChart,
   Button,
@@ -95,24 +94,22 @@ import { isEnglishPage, squadPageName } from './season-squad'
 import { meetingOutcomeOf, meetingScoreOf } from './upcoming-match'
 
 /**
- * The short credit of a small card for the source of its matches: Wikipedia, the archive of the
- * old fansite, or both. `lead` is what stands before the name instead of `Bron:`.
+ * The short credit of a small card for the source of its matches: Wikipedia, or Wikipedia and
+ * the old fansite. `lead` is what stands before the name instead of `Bron:`. It is nothing for
+ * matches that are all ours: our own data needs no credit.
  */
 export function CompactCredit({ lead, source }: { lead?: string; source: MatchSource }) {
   const leadProps = lead === undefined ? {} : { lead }
 
-  return source === 'archive' ? (
-    <ArchiveCredit {...leadProps} />
-  ) : (
-    <WikipediaCredit archive={source === 'both'} compact {...leadProps} />
-  )
+  return source === 'archive' ? null : <WikipediaCredit archive={source === 'both'} compact {...leadProps} />
 }
 
 /**
  * What the button for an image of a statistics card puts under the image: the credit of
- * where the facts come from, as the cards of the homepage give it: Wikipedia, or the archive
- * of the old fansite for the matches that come from it (`matches` are the matches the card
- * counts; without them it is Wikipedia). It is a function, so a card that has no facts yet has
+ * where the facts come from, as the cards of the homepage give it: Wikipedia, and the old
+ * fansite next to it (`matches` are the matches the card counts; without them it is
+ * Wikipedia). A card that counts only matches of the old fansite has no credit: that is our
+ * own data. It is a function, so a card that has no facts yet has
  * no button. A card of a season that is over also gets the season (`2025/26`), which goes under
  * the image and into the name of the file.
  */
@@ -120,15 +117,13 @@ export const imageCredit = (
   hasFacts: boolean,
   season?: string,
   matches: MatchSource | readonly Pick<PublicMatch, 'dataSource'>[] = 'wikipedia',
-) =>
-  hasFacts
-    ? {
-        season,
-        source: (
-          <CompactCredit lead="Gegevens van" source={typeof matches === 'string' ? matches : sourceOf(matches)} />
-        ),
-      }
+) => {
+  const source = typeof matches === 'string' ? matches : sourceOf(matches)
+
+  return hasFacts
+    ? { season, source: source === 'archive' ? undefined : <CompactCredit lead="Gegevens van" source={source} /> }
     : undefined
+}
 
 /**
  * The line under a card with statistics that says how many matches it is based on: all the
@@ -1187,11 +1182,7 @@ export function SourceCredit({
   const [first, ...rest] = credited
 
   if (first === undefined) {
-    return source === 'wikipedia' ? null : (
-      <Card as="div" surface="transparent">
-        <ArchiveCredit />
-      </Card>
-    )
+    return null
   }
 
   const readAt = new Date(Math.max(...credited.map((page) => page.readAt.getTime())))
@@ -1205,12 +1196,8 @@ export function SourceCredit({
         pages={[first, ...rest]}
         readAt={formatReadAt(readAt)}
         readAtDateTime={readAt.toISOString()}
+        wikidata={squad?.wikidata === true}
       />
-      {squad?.wikidata === true && (
-        <Text appearance="meta">
-          Enkele spelers komen van <Link href="https://www.wikidata.org/">Wikidata</Link> (CC0).
-        </Text>
-      )}
     </Card>
   )
 }

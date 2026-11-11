@@ -17,8 +17,9 @@ const meta = preview.meta({
           '',
           'Een kleine kaart op een pagina die de volledige vorm elders heeft, gebruikt de korte vorm: `compact` zegt alleen "Bron: Wikipedia", zonder uitklap.',
           '',
-          'Heeft onze redactie een deel van de gegevens zelf ingevuld of aangepast, dan zet `edited` onder de bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast."',
-          'Die zin staat buiten de uitklap, dus een bezoeker ziet hem zonder iets te openen.',
+          'Heeft onze redactie een deel van de gegevens zelf ingevuld of aangepast, dan zet `edited` de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." in de uitklap.',
+          'Een pagina krijgt zo één bronvermelding: wat er verder over onze eigen gegevens te zeggen is, staat in de uitklap en niet eronder.',
+          'Een pagina waarvan alle gegevens van onszelf zijn, heeft geen bronvermelding.',
           '',
           'Het is een component, zodat een pagina met gegevens van Wikipedia er niet omheen kan.',
           'Zet het onder het blok of de pagina met de gegevens.',
@@ -28,8 +29,8 @@ const meta = preview.meta({
           '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
           '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
           '- `archive` noemt ook de sc Heerenveen Fansite, voor een pagina met wedstrijden van Wikipedia en van de sc Heerenveen Fansite.',
-          '  Een pagina met alleen oude wedstrijden gebruikt `ArchiveCredit`.',
-          '- `edited` zet de zin van de redactie onder de bronvermelding; alleen de volledige vorm heeft hem.',
+          '- `edited` zet de zin van de redactie in de uitklap; alleen de volledige vorm heeft hem.',
+          '- `wikidata` zegt in de uitklap dat enkele spelers van Wikidata komen (CC0), voor de pagina Spelers.',
           '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
           '  `readAtDateTime` is dezelfde tijd voor machines.',
           '- `open` laat de uitklap open staan, voor een voorbeeld; op een pagina blijft hij dicht.',
@@ -111,10 +112,10 @@ export const ManyPagesOpen = meta.story({
 })
 
 export const Edited = meta.story({
-  name: 'Met een zin dat de redactie gegevens zelf invulde, dicht',
+  name: 'Met een zin dat de redactie gegevens zelf invulde, open',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} edited pages={[standings]} />
+      <WikipediaCredit {...readAt} edited open pages={[standings]} />
     </div>
   ),
 })
@@ -138,6 +139,15 @@ export const Squad = meta.story({
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <WikipediaCredit {...readAt} data="selectiegegevens" open pages={[squad]} />
+    </div>
+  ),
+})
+
+export const WithWikidata = meta.story({
+  name: 'Met Wikidata, open',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <WikipediaCredit {...readAt} data="selectiegegevens" open pages={[squad]} wikidata />
     </div>
   ),
 })

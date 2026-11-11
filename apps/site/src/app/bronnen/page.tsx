@@ -77,6 +77,31 @@ export default async function SourcesPage() {
             </List>
           </Card>
         ))}
+        <Card aria-labelledby="wedstrijden-en-spelers">
+          <Heading anchor id="wedstrijden-en-spelers" level={2}>
+            Wedstrijden, standen en spelers
+          </Heading>
+          <Text>
+            Uitslagen, doelpunten, standen en gegevens van spelers komen van Wikipedia, vooral de Nederlandse en soms de
+            Engelse. Enkele gegevens van spelers komen van Wikidata (CC0).
+          </Text>
+          <Text>
+            Wikipedia is geschreven door vrijwilligers. Hun namen staan in de geschiedenis van elk artikel. We lezen de
+            artikelen hoogstens één keer per uur.
+          </Text>
+          <Text>
+            We namen de gegevens over, ordenden ze en vulden ze aan: met de opstellingen, wissels, kaarten en assists
+            van wedstrijden van 1990 tot 2007, en met wat onze redactie zelf invulde of verbeterde.
+          </Text>
+          <Text>
+            Onze gegevens hebben dezelfde licentie als die van Wikipedia:{' '}
+            <Link href="https://creativecommons.org/licenses/by-sa/4.0/deed.nl" icon="external-link">
+              CC BY-SA 4.0
+            </Link>
+            . Je mag ze delen en bewerken als je Wikipedia en ons noemt, zegt dat je ze bewerkte en dezelfde licentie
+            houdt.
+          </Text>
+        </Card>
       </Page.Main>
       <Page.Sidebar aria-label="Meer over bronnen" split>
         <Card aria-labelledby="voorstellen" surface="soft">
