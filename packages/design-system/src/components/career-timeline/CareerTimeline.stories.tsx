@@ -37,7 +37,7 @@ const meta = preview.meta({
 })
 
 const inCard = (children: React.ReactNode) => (
-  <Card aria-labelledby="loopbaan-titel" surface="soft">
+  <Card aria-labelledby="loopbaan-titel">
     <Heading id="loopbaan-titel" level={2}>
       Testspeler Een
     </Heading>

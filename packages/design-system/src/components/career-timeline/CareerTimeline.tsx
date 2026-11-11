@@ -64,19 +64,19 @@ export const CareerTimeline = ({ className, level, periods, ...props }: CareerTi
   <ol {...props} className={classNames('hf-career', className)}>
     {periods.map(({ gap, seasons, years }) => (
       <li className="hf-career-period" key={years}>
-        <Heading level={level}>{years}</Heading>
+        <Heading appearance={3} level={level}>
+          {years}
+        </Heading>
         <ol className="hf-career-seasons">
           {seasons.map(({ competitions, current, href, moment, number, remark, season }) => (
             <li className="hf-career-season" key={season}>
-              <Heading appearance={4} level={(level + 1) as 3 | 4}>
-                <Link href={href}>{season}</Link>
-              </Heading>
-              {number === undefined && !current ? null : (
-                <p className="hf-career-meta">
-                  {number === undefined ? null : <span>rugnummer {number}</span>}
-                  {current ? <Tag tone="highlight">Dit seizoen</Tag> : null}
-                </p>
-              )}
+              <div className="hf-career-head">
+                <Heading className="hf-career-season-heading" level={(level + 1) as 3 | 4}>
+                  <Link href={href}>{season}</Link>
+                </Heading>
+                {number === undefined ? null : <span className="hf-career-number">rugnummer {number}</span>}
+                {current ? <Tag tone="highlight">Dit seizoen</Tag> : null}
+              </div>
               {competitions === undefined ? null : <p className="hf-career-competitions">{competitions}</p>}
               {moment === undefined ? null : (
                 <p className="hf-career-moment">
