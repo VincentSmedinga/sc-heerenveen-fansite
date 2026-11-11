@@ -91,9 +91,9 @@ export type PersonToRead = {
   id: number
   /** Where his line came from. `manual` is a line the importer leaves alone. */
   lineSource: null | PersonLineSource
-  /** The Q-number, when an earlier run found it but could not read the item. */
   /** When the item was read last, or null when he was never read. */
   readAt: Date | null
+  /** The Q-number, when an earlier run found it but could not read the item. */
   wikidataId: null | string
   wikipediaPage: string
   wikipediaPageId: null | number

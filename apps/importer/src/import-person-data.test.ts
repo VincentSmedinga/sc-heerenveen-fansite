@@ -554,14 +554,15 @@ describe('reading persons again (#1147)', () => {
   })
 
   it('never replaces the year of the editors, and a second run reads nobody', async () => {
-    await addRead('Eenendertig', 31, "death_date_source='manual'")
-    await database.pool.query(
-      "UPDATE persons SET wikidata_id = 'Q2', death_date = NULL, death_date_source = 'manual' WHERE wikipedia_page = 'Eenendertig'",
-    )
-    await read(await served())
+    await addPersons('Eenendertig')
+    await setEditorsPersonFacts(connection.db, (await rows('SELECT id FROM persons'))[0]?.['id'], { deathYear: 2018 })
 
-    expect(await rows('SELECT death_date, death_date_source FROM persons')).toEqual([
-      { death_date: null, death_date_source: 'manual' },
+    const server = await served()
+
+    expect((await read(server)).read).toBe(1)
+    expect((await read(server)).read).toBe(0)
+    expect(await rows('SELECT YEAR(death_date) AS year, death_date_source FROM persons')).toEqual([
+      { death_date_source: 'manual', year: 2018 },
     ])
   })
 

@@ -55,7 +55,13 @@ describe('lifeOf: the line under the name of a player (#1147)', () => {
     ).toMatchObject({ age: undefined, bornLongAgo: true, deathYear: undefined })
     expect(
       lifeOf(
-        { ...day, birthDate: '1927-01-01', birthDatePrecision: 'year' },
+        { ...day, birthDate: '1925-01-01', birthDatePrecision: 'year' },
+        { birthPlace: 'Herten', inCurrentSeason: false, today },
+      ).bornLongAgo,
+    ).toBe(true)
+    expect(
+      lifeOf(
+        { ...day, birthDate: '1926-01-01', birthDatePrecision: 'year' },
         { birthPlace: 'Herten', inCurrentSeason: false, today },
       ).bornLongAgo,
     ).toBe(false)

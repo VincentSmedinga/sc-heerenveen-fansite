@@ -216,7 +216,7 @@ export function PlayerForm({
             </Field>
             <Field
               error={errors.overleden}
-              hint={`Het jaar van overlijden, met vier cijfers. Een jaar dat je hier invult, gaat voor Wikidata. Maak je het leeg, dan geldt weer Wikidata.${keeps}`}
+              hint={`Het jaar van overlijden, met vier cijfers. Een jaar dat je hier invult, gaat voor Wikidata. ${people === undefined ? ' Maak je het leeg, dan geldt weer Wikidata.' : ' Kies je een persoon die we al kennen? Leeg laat staan wat hij heeft.'}`}
               id="overleden"
               label="Jaar van overlijden"
               required={false}

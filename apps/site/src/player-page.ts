@@ -157,7 +157,11 @@ export function playerPageOf(
   return {
     ...lifeOf(person, { birthPlace, inCurrentSeason: rows.some((row) => row.season === seasonOf(today)), today }),
     country: person.country ?? undefined,
-    edited: person.nameSource === 'redactie' || person.lineSource === 'manual' || person.countrySource === 'manual',
+    edited:
+      person.nameSource === 'redactie' ||
+      person.lineSource === 'manual' ||
+      person.countrySource === 'manual' ||
+      person.deathDateSource === 'manual',
     line: person.line ?? undefined,
     name,
     nameParts: parts ?? splitPersonName(name),
@@ -198,7 +202,7 @@ export function lifeOf(
   if (deathYear !== undefined) {
     return { age: undefined, birthPlace, birthYear, bornLongAgo: false, deathYear }
   }
-  if (birthYear !== undefined && Number(birthYear) <= Number(dayFormat.format(today).slice(0, 4)) - 100) {
+  if (birthYear !== undefined && Number(birthYear) < Number(dayFormat.format(today).slice(0, 4)) - 100) {
     return { age: undefined, birthPlace, birthYear, bornLongAgo: true, deathYear: undefined }
   }
 
@@ -224,8 +228,8 @@ const dayFormat = new Intl.DateTimeFormat('en-CA', {
 /**
  * His age in whole years on a day in the Netherlands, from his full date of birth. A birth date
  * that Wikidata only knows by month or by year gives no age, and nor does a person without one.
- * It does not know whether he is alive: `playerPageOf` only asks for the age of a player in the
- * squad of the current season (#1099).
+ * It does not know whether he is alive: `lifeOf` decides whether the age is shown (#1099,
+ * #1147).
  */
 export function ageOf(person: Pick<Person, 'birthDate' | 'birthDatePrecision'>, today: Date): number | undefined {
   const { birthDate, birthDatePrecision } = person

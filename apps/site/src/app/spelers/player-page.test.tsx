@@ -475,7 +475,7 @@ describe('playerPageOf', () => {
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T22:30:00Z')).age).toBe(52)
   })
 
-  it('gives an age only to a player in the squad of the current season, as we hold no date of death', () => {
+  it('gives an age to a player in the squad of the current season and to one read recently', () => {
     const today = new Date('2026-11-11T10:00:00Z')
 
     expect(playerPageOf(person, [{ name: 'Jan de Vries', season: '2026/27' }], 'Emmen', today).age).toBe(52)

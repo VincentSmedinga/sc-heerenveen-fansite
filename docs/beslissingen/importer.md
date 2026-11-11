@@ -4094,3 +4094,13 @@
 - **Waarom:** dat zijn ongeveer 16 verzoeken per dag bij 467 personen, met de bestaande fetcher, en een sterfdatum is binnen een maand zichtbaar.
 - **Alternatieven:** elke 90 dagen (een sterfdatum duurt tot drie maanden); alleen een persoon zonder Q-nummer opnieuw lezen (een latere dood komt dan nooit binnen).
 - **Later:** vervangt "een persoon wordt één keer gelezen" uit _De stap geldt voor alle personen, ook tegenstanders_ (8 november 2026).
+
+## Wikidata is de enige bron voor een sterfdatum, aangevuld met de redactie
+
+- **Datum:** 11 november 2026
+- **Besluit:** Wikidata (`P570`) is de enige bron voor een sterfdatum, aangevuld met een jaar van overlijden dat de redactie in Beheer invult voor een speler zonder artikel (#1147).
+  Bij een verschil wint de redactie.
+  Alle gegevens en de pagina zitten in één pull request, want het is één gegevensstroom van ongeveer zeven kleine onderdelen.
+- **Waarom:** het onderzoek (#1110) vond bij 417 spelers met een Wikidata-item geen sterfdatum op Wikipedia die Wikidata mist.
+  Wikidata is CC0, dus er komt geen bronvermelding bij, en de redactie weet het beter dan een bron voor spelers zonder item.
+- **Alternatieven:** ook Wikipedia lezen (CC BY-SA, veel code, niets extra); Wikidata laten winnen (een fout in Wikidata zou een correctie van de redactie wissen); twee pull requests, eerst de gegevens en dan de pagina.
