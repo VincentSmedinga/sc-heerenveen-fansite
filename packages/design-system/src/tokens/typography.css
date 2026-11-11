@@ -114,6 +114,9 @@
     /* The total in the hole of a donut */
     --hf-figure-large-font-size: 1.5rem;
 
+    /* The number in a row of key figures */
+    --hf-key-figure-font-size: 2.5rem;
+
     /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
