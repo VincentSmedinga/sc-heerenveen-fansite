@@ -4705,3 +4705,23 @@
   Een streepje is eerlijker dan een getal dat meerdere competities telt.
   We beginnen klein: alleen de tabel.
 - **Alternatieven:** de hele pagina de keuze laten volgen (kan later); de keuze onthouden (vraagt een besluit over opslag); voor een seizoen uit Wikipedia de cijfers van alle wedstrijden tonen met een waarschuwing (twee betekenissen in één tabel).
+
+## Het adres van een speler schrijft letters zonder los accent uit
+
+- **Datum:** 11 november 2026
+- **Besluit:** `personSlug` in `packages/db/src/person-slugs.ts` schrijft de letters die `normalize('NFKD')` niet in een letter en een accent splitst uit voordat de accenten eraf gaan, in kleine letters en hoofdletters (#1113).
+  De lijst staat op één plek, `slugLetters`: æ wordt ae, ð wordt d, đ wordt dj, ı wordt i, ł wordt l, œ wordt oe, ø wordt o, ß wordt ss en þ wordt th.
+  - **Vietnamese namen:** bij een Vietnamese naam is đ een d, want "dj" is daar fout (Đức is "duc").
+    We herkennen die aan het land van de persoon: `persons.country` is `VN`.
+    Een persoon zonder bekend land, of met een ander land, krijgt dj.
+    Alleen de đ hangt van het land af.
+  - **Geen letter verliezen:** `lostLetters(naam)` geeft de letters van een naam die niets in het adres opleveren.
+    Een test controleert de namen van de verzonnen personen, zodat een nieuwe letter buiten de lijst opvalt.
+  - **Oude adressen:** `updatePlayerAddresses` schrijft het nieuwe adres bij de eerste start na de uitrol, en het oude blijft in `person_slugs` staan en leidt door met 308, zoals voor elke andere oude naam (#1079).
+    Een migratie is niet nodig.
+    Botst het nieuwe adres met een bestaand adres, dan gelden de regels van #1079: geboortejaar erachter, of het nummer.
+- **Waarom:** een naam die met een Đ of Ø begon, verloor zijn eerste letter in het adres (de hoofdletter viel buiten de omzetting), en letters als æ en þ verdwenen helemaal.
+  Dat is fout voor wie het adres leest en slecht voor zoekmachines.
+  Voor đ kozen we dj, omdat dat is hoe een supporter de naam schrijft, behalve waar dat fout is.
+- **Alternatieven:** đ altijd een d (het Servische Đuričić wordt dan "duricic", wat een supporter niet zo schrijft); de Vietnamese naam aan de letters herkennen (een Vietnamese naam heeft veel letters met een accent, maar dat zegt niets zeker); het adres de letter laten houden (een adres met niet-ASCII-tekens is slecht te delen).
+- **Later:** vervangt de regel "zonder accenten" uit "De pagina van een speler staat op `/spelers/<naam>`, en een oude naam leidt door" voor letters zonder los accent; de rest van die beslissing geldt nog.
