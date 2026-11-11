@@ -63,7 +63,9 @@ const targetOf = (doc: Document, link: HTMLAnchorElement) => {
  *
  * The visitor decides. The row does not scroll while a finger is on it, or while a link in it
  * has the focus of the keyboard; it scrolls once they are gone, if the current link changed in
- * the meantime. A click on a link makes that link the current one, until the visitor scrolls
+ * the meantime. A press of a mouse or a pen on a link that ends at the same place on something
+ * else, because the row or the page moved under it, still counts as a click on that link. A
+ * click on a link makes that link the current one, until the visitor scrolls
  * again, so the bar does not run along the cards that a long jump passes. The row scrolls
  * smoothly, and at once for someone who asked for less motion.
  */
@@ -247,6 +249,39 @@ export function followPage(row: HTMLElement, win: typeof globalThis & Window = w
       }
     }
 
+    // The page and the row are still moving after a click: the page scrolls smoothly to the
+    // heading, and the row to the link of that click. A second click aims at a link that moves
+    // on under the pointer, or at a bar that is not stuck yet: the button goes down on the link
+    // and up on what is beside it or under it, and the browser sends no click, so nothing
+    // happens. A scroll that is running cannot be stopped in time, as it may only just have
+    // started. So the press is followed through: a mouse or a pen that goes down on a link and
+    // comes up at the same place, on something else, has clicked that link. Anything else is no
+    // click: a finger has its own way (onTouch), and a pointer that moved in between was
+    // dragged.
+    let pressed: undefined | { link: HTMLAnchorElement; x: number; y: number }
+
+    const onPress = (event: PointerEvent) => {
+      const link = event.pointerType === 'touch' || event.button !== 0 ? null : (event.target as Element).closest('a')
+
+      pressed = link === null || !row.contains(link) ? undefined : { link, x: event.clientX, y: event.clientY }
+    }
+
+    const onRelease = (event: PointerEvent) => {
+      const press = pressed
+
+      pressed = undefined
+
+      if (
+        press !== undefined &&
+        event.button === 0 &&
+        Math.abs(event.clientX - press.x) <= 1 &&
+        Math.abs(event.clientY - press.y) <= 1 &&
+        (event.target as Element).closest('a') !== press.link
+      ) {
+        press.link.click()
+      }
+    }
+
     const onFocusOut = () => {
       // The focus has not moved yet while focusout is sent.
       win.setTimeout(() => {
@@ -258,6 +293,8 @@ export function followPage(row: HTMLElement, win: typeof globalThis & Window = w
 
     observe()
     onScroll()
+    row.addEventListener('pointerdown', onPress, { capture: true })
+    win.addEventListener('pointerup', onRelease, { capture: true })
     row.addEventListener('click', onClick)
     row.addEventListener('touchstart', onTouch, { passive: true })
     row.addEventListener('touchend', onTouch, { passive: true })
@@ -276,6 +313,8 @@ export function followPage(row: HTMLElement, win: typeof globalThis & Window = w
       }
 
       win.cancelAnimationFrame(frame)
+      row.removeEventListener('pointerdown', onPress, { capture: true })
+      win.removeEventListener('pointerup', onRelease, { capture: true })
       row.removeEventListener('click', onClick)
       row.removeEventListener('touchstart', onTouch)
       row.removeEventListener('touchend', onTouch)

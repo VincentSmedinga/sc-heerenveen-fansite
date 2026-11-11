@@ -1182,6 +1182,7 @@
   Ze heeft een eigen rol, `--hf-colour-accent-shortcuts`: rood-600 in licht (4,77:1 op de balk) en rood-400 in donker (5,34:1).
   Het rood van de header, `--hf-colour-accent-on-header`, haalt op de zandkleurige balk maar 2,43:1.
   Vanaf 56 rem is de balk `display: none` en luistert de component niet naar het scrollen.
+- **Later:** zie _Een klik op een link in de balk komt altijd aan_ in `designsysteem.md` (11 november 2026): een druk en een loslaten op dezelfde plek tellen als een klik op die link, ook als de rij of de pagina onder de aanwijzer wegschuift.
 - **Alternatieven:** de huidige link vet maken (de link wordt breder en de rij verspringt).
   Een rij die niet meescrolt (de huidige link kan buiten beeld zijn).
   CSS met `scroll-target-group` en `:target-current` (geen JavaScript, maar alleen Chrome kent het nu).
