@@ -34,6 +34,7 @@ import { createHash } from 'node:crypto'
 import type { ReportContext, ReportPlan } from './report-form'
 
 import {
+  dayInWords,
   emptyRow,
   emptySide,
   formationValueOf,
@@ -166,12 +167,19 @@ export async function findPreviousLineUp(
 
   // The form's own reading of a stored report: our rows and formation, nothing else.
   const values = valuesOfReport(stored, [], squad)
-  const date = new Date(`${previous.matchDate}T12:00:00Z`).toLocaleDateString('nl-NL', {
-    dateStyle: 'long',
-    timeZone: 'UTC',
+  const date = dayInWords(previous.matchDate)
+
+  // The numbers are those of the day of this match, from the squad (`readSquad`,
+  // `shirtNumberOn`), not the ones the previous match had: a player whose number changed in
+  // between gets the number he wears on this day. A player of the squad without a number, and
+  // one who is not in the squad, keep what the previous match had.
+  const speler = values.wij.speler.map((row) => {
+    const own = squad.find((player) => String(player.id) === row.keuze)
+
+    return own === undefined || own.shirtNumber === null ? row : { ...row, rugnummer: String(own.shirtNumber) }
   })
 
-  return { formatie: values.formatie.wij, label: `${previous.opponent}, ${date}`, speler: values.wij.speler }
+  return { formatie: values.formatie.wij, label: `${previous.opponent}, ${date}`, speler }
 }
 
 /**

@@ -154,6 +154,14 @@ export function ReportErrorSummary() {
   return <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} title={title} />
 }
 
+/** The `id` of the notice of a field, which the field points to with `aria-describedby`. */
+const noticeId = (fieldId: string) => `${fieldId}-melding`
+
+/** The notices of the fields of one list, as `[id, sentences]`, in the order of the rows. */
+function fieldNoticesOf(warnings: Record<string, string[]>, kind: RowKind, side: Side) {
+  return Object.entries(warnings).filter(([id]) => id.startsWith(`${kind}-${side}-`) && /-\d+-[a-z]+$/u.test(id))
+}
+
 const draftNoticeId = 'bewaarde-invoer'
 
 /**
@@ -279,6 +287,11 @@ export function ReportFields() {
   const text = (kind: RowKind, side: Side, number: number, field: FieldName, row: Row, narrow = false) => ({
     control: (
       <Input
+        aria-describedby={
+          warnings[rowFieldId(kind, side, number, field)] === undefined
+            ? undefined
+            : noticeId(rowFieldId(kind, side, number, field))
+        }
         autoComplete="off"
         defaultValue={row[field] ?? ''}
         inputMode={narrow ? 'numeric' : undefined}
@@ -396,6 +409,16 @@ export function ReportFields() {
         {listTitles[kind]} van {club(side)}
       </Heading>
       <Text appearance="meta">{hint}</Text>
+      {fieldNoticesOf(warnings, kind, side).map(([id, messages]) =>
+        messages.map((message) => (
+          <Text id={noticeId(id)} key={id} tabIndex={-1}>
+            <Text as="span" className="hf-visually-hidden">
+              Let op:
+            </Text>{' '}
+            <Link href={`#${id}`}>{message}</Link>
+          </Text>
+        )),
+      )}
       {(warnings[listId(kind, side)] ?? []).map((warning) => (
         <Text key={warning}>
           <Text as="span" className="hf-visually-hidden">
@@ -844,7 +867,12 @@ export function ReportFormShell({
       return
     }
 
-    const target = state.focus ?? (Object.keys(state.errors).length > 0 ? summaryId : undefined)
+    // Notices of fields, such as a shirt number that is not the one of the day, come after the
+    // errors: without an error the focus goes to the first notice, so it is read.
+    const firstNotice = Object.keys(state.warnings).find((id) => /^speler-(?:wij|zij)-\d+-[a-z]+$/u.test(id))
+    const target =
+      state.focus ??
+      (Object.keys(state.errors).length > 0 ? summaryId : firstNotice === undefined ? undefined : noticeId(firstNotice))
 
     if (target !== undefined) {
       // The list of the kicks is gone when its last row was removed from a match without a

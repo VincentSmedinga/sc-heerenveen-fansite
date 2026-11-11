@@ -84,7 +84,9 @@ export type DataTableRow = {
    */
   note?: string
   /**
-   * The place of the row in a ranking, from 1. A table in which a row has one gets a column
+   * The place of the row in a ranking, from 1. Rows with the same place in a row share it: the
+   * first shows the number and the rows after it a vertical ellipsis, which a screen reader
+   * hears as "gedeeld 4" (see `PlaceCell`). A table in which a row has one gets a column
    * before the row headers, with the header `#` (`plaats` for a screen reader), and the rows
    * are in the order of the ranking, so give a place to every row or to none. It is for a
    * table that is not sortable: a sorted table keeps the places it was given, which would no

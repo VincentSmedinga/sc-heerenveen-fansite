@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { formationChoices } from '@fansite/shared/match-report'
-import { act, cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -14,7 +14,7 @@ import {
   type Row,
 } from '#src/beheer/report-fields'
 
-import { ReportDraftNotice, ReportFields, ReportFormProvider } from './ReportForm'
+import { ReportDraftNotice, ReportErrorSummary, ReportFields, ReportFormProvider } from './ReportForm'
 
 afterEach(() => {
   // Vitest has no globals here, so Testing Library doesn't clean up by itself.
@@ -505,6 +505,120 @@ describe('the shoot-out in the form of a report', () => {
     expect(document.getElementById('serie-wij-1-speler-error')?.textContent ?? document.body.textContent).toContain(
       'schiet twee keer',
     )
+  })
+})
+
+describe('the notice at a shirt number that is not the one of the day (#1122)', () => {
+  const id = 'speler-wij-1-rugnummer'
+  const message = 'Speler 1 van sc Heerenveen: rugnummer 7, maar Speler 1 draagt op 31 oktober 2026 nummer 1.'
+  const typedNumber: ReportValues = {
+    ...values,
+    wij: { ...values.wij, speler: [{ ...row('1'), rugnummer: '7' }, ...values.wij.speler.slice(1)] },
+  }
+  const showWith = (state: ReportFormState, answer: ReportFormState = state) =>
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(answer)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportErrorSummary />
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+  it('shows the notice with the field, read for a screen reader, and ties the field to it', () => {
+    showWith({ errors: {}, values: typedNumber, version: 0, warnings: { [id]: [message] } })
+
+    const notice = document.getElementById(`${id}-melding`) as HTMLElement
+    const field = document.getElementById(id) as HTMLInputElement
+
+    expect(notice.textContent).toBe(`Let op: ${message}`)
+    expect(notice.querySelector('.hf-visually-hidden')?.textContent).toBe('Let op:')
+    expect(field.getAttribute('aria-describedby')).toContain(`${id}-melding`)
+    expect(field.getAttribute('aria-invalid')).toBeNull()
+    // It leads to the field, and it comes before the table in the card of the line-up.
+    expect(notice.querySelector('a')?.getAttribute('href')).toBe(`#${id}`)
+    expect(notice.compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('shows nothing for a field without a notice', () => {
+    showWith({ errors: {}, values: typedNumber, version: 0, warnings: {} })
+
+    expect(document.getElementById(`${id}-melding`)).toBeNull()
+    expect(document.getElementById(id)?.getAttribute('aria-describedby')).toBeNull()
+  })
+
+  it('does not take the focus on the page as it opens', () => {
+    showWith({ errors: {}, values: typedNumber, version: 0, warnings: { [id]: [message] } })
+
+    expect(document.activeElement).toBe(document.body)
+  })
+
+  it('gives the focus to the first notice after an answer of the server without an error', async () => {
+    const answer: ReportFormState = { errors: {}, values: typedNumber, version: 1, warnings: { [id]: [message] } }
+
+    showWith({ errors: {}, values, version: 0, warnings: {} }, answer)
+    fireEvent.click(
+      [...document.querySelectorAll('button')].find((candidate) => /toevoegen$/u.test(candidate.textContent))!,
+    )
+
+    await waitFor(() => expect(document.activeElement?.id).toBe(`${id}-melding`))
+  })
+
+  it('gives the focus to the list of errors when there is an error as well', async () => {
+    const answer: ReportFormState = {
+      errors: { bron: 'Vul de bron in.' },
+      values: typedNumber,
+      version: 1,
+      warnings: { [id]: [message] },
+    }
+
+    showWith({ errors: {}, values, version: 0, warnings: {} }, answer)
+    fireEvent.click(
+      [...document.querySelectorAll('button')].find((candidate) => /toevoegen$/u.test(candidate.textContent))!,
+    )
+
+    await waitFor(() => expect(document.activeElement?.id).toBe('fouten'))
+    expect(document.getElementById(`${id}-melding`)).not.toBeNull()
+  })
+
+  it('keeps a copied line-up with corrected numbers in the input the browser keeps, and puts it back with Herstel', () => {
+    const corrected: ReportValues = {
+      ...values,
+      wij: { ...values.wij, speler: [{ ...row('1'), rugnummer: '9' }, ...values.wij.speler.slice(1)] },
+    }
+
+    saveDraft(7, corrected, values, Date.now())
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(initial)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          matchId: 7,
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={initial}
+        title="Titel"
+      >
+        <ReportDraftNotice savedAt={undefined} />
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    expect((document.getElementById(id) as HTMLInputElement).value).toBe('')
+    fireEvent.click([...document.querySelectorAll('button')].find((candidate) => candidate.textContent === 'Herstel')!)
+    expect((document.getElementById(id) as HTMLInputElement).value).toBe('9')
   })
 })
 

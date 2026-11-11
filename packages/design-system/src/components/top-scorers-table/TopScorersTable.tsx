@@ -2,6 +2,7 @@ import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
+import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
 import { PlayerName } from '../player-name/PlayerName'
 import { type TableColumn, tableColumns, tableLegend } from '../table-columns'
 
@@ -102,6 +103,7 @@ export const TopScorersTable = ({
 }: TopScorersTableProps) => {
   const rows = showGoalsPerMatch ? onePlayerPerRow(placedRows) : placedRows
   const shares = sharesOf(rows.map((row) => row.goals))
+  const shared = sharedPlaces(rows.map((row) => row.position))
 
   return (
     <div {...props} className={classNames('hf-top-scorers hf-bar-place', className)}>
@@ -135,7 +137,7 @@ export const TopScorersTable = ({
         <tbody>
           {rows.map((row, index) => (
             <tr key={row.players[0].id}>
-              <td className="hf-numeric hf-rank">{row.position}</td>
+              <PlaceCell position={row.position} shared={shared[index]!} />
               <th scope="row">
                 {row.players.map((player, place) => (
                   <Fragment key={player.id}>

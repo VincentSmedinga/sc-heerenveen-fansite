@@ -402,6 +402,42 @@ describe('DataTable.Group', () => {
       )
     })
 
+    it('shows the number once for a shared place and a sign on the rows after it, heard as the place', () => {
+      render(
+        <DataTable
+          {...ranked}
+          rows={[
+            { cells: ['2,50', 6], header: 'Testclub', position: 1 },
+            { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
+            { cells: ['2,00', 5], header: 'SV Proefdorp', position: 2 },
+            { cells: ['2,00', 5], header: 'Maquette United', position: 2 },
+            { cells: ['1,00', 4], header: 'Oefenstad FC', position: 5 },
+          ]}
+        />,
+      )
+
+      const places = [...document.querySelectorAll('tbody td.hf-rank')]
+
+      expect(places.map((cell) => cell.textContent)).toEqual(['1', '2', '⋮gedeeld 2', '⋮gedeeld 2', '5'])
+      expect(places[2]?.querySelector('[aria-hidden="true"]')?.textContent).toBe('⋮')
+    })
+
+    it('starts the places again after a row for a time away, which has its own sign in the row header', () => {
+      render(
+        <DataTable
+          {...ranked}
+          rows={[
+            { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
+            { cells: [], gap: true, header: 'niet bij ons' },
+            { cells: ['2,00', 5], header: 'SV Proefdorp', position: 2 },
+          ]}
+        />,
+      )
+
+      expect([...document.querySelectorAll('tbody td.hf-rank')].map((cell) => cell.textContent)).toEqual(['2', '2'])
+      expect(document.querySelectorAll('tbody tr.hf-data-table-gap th [aria-hidden="true"]')).toHaveLength(1)
+    })
+
     it('has no such column when no row has a position', () => {
       render(<DataTable {...props} />)
 
