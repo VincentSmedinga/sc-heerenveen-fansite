@@ -4,14 +4,15 @@ import { eq } from 'drizzle-orm'
 // keeps of it in `match_changes`, and the decision about it. The importer records a difference
 // and takes Wikipedia over after seven days; an editor decides in the admin; and the command
 // `import:changes` decides too. All of them call `decideConflict`, so the same decision has the
-// same outcome wherever it is made.
+// same outcome wherever it is made. The goals of a match with a report are never taken over
+// from Wikipedia (issue 1077): they are the report's, which links them to the line-up.
 import type { Database } from './client.ts'
 import type { FactsFields, GoalSnapshot, KickoffFields, ResultFields } from './match-edits.ts'
 import type { Match, MatchChange, MatchDataSource, MatchPart } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
 import { clearParts, insertGoals } from './match-edits.ts'
-import { matchChanges, matchEdits, matches, matchGoals } from './schema.ts'
+import { matchChanges, matchEdits, matches, matchGoals, matchReports } from './schema.ts'
 import { seasonOf } from './season.ts'
 
 /**
@@ -30,9 +31,10 @@ export type ConflictDecision = {
 /**
  * What a decision came to: `done`; `not-waiting` when the difference was decided already or
  * does not exist; `gone` when its match is gone; `no-proposal` when the difference has nothing
- * to take over.
+ * to take over; `report` when Wikipedia's goals were asked for a match with a report, which is
+ * refused.
  */
-export type ConflictOutcome = 'done' | 'gone' | 'no-proposal' | 'not-waiting'
+export type ConflictOutcome = 'done' | 'gone' | 'no-proposal' | 'not-waiting' | 'report'
 
 /** What the importer proposes for a part: that part of the match as Wikipedia has it. */
 export type PartProposal =
@@ -140,7 +142,9 @@ export const partLabels: Record<MatchPart, string> = {
  * over writes that part of the match, clears its marker in `match_edits` (the row goes when
  * no part is left) and writes `match.take-over`; keeping the entry writes `match.keep`. Either
  * way the change is decided. The decision is one transaction with its log line, so there is no
- * decision without a line and no line without a decision.
+ * decision without a line and no line without a decision. Taking Wikipedia's goals over for a
+ * match with a report is refused (`report`), and the change keeps waiting: Wikipedia's goals
+ * have no link to the line-up and no assist, so the editors change the report or keep it.
  */
 export async function decideConflict(
   db: Writer,
@@ -167,6 +171,10 @@ export async function decideConflict(
   }
 
   if (decision.kind === 'take-over') {
+    if (part === 'goals' && !quietReasons.includes(change.reason) && (await hasReport(db, match.id))) {
+      return 'report'
+    }
+
     const proposal = decodePartProposal(change.proposal)
 
     if (proposal === undefined || proposal.part !== part) {
@@ -345,4 +353,15 @@ async function applyPart(db: Writer, matchId: number, proposal: PartProposal, no
       ...(proposal.status === 'played' ? {} : { attendance: null }),
     })
     .where(eq(matches.id, matchId))
+}
+
+/** Whether the match has a report, bezig or klaar. */
+async function hasReport(db: Pick<Database, 'select'>, matchId: number): Promise<boolean> {
+  const found = await db
+    .select({ id: matchReports.matchId })
+    .from(matchReports)
+    .where(eq(matchReports.matchId, matchId))
+    .limit(1)
+
+  return found.length > 0
 }

@@ -10,6 +10,7 @@ import {
   matchEdits,
   matches,
   matchGoals,
+  matchReports,
   type NewMatch,
   players,
 } from '@fansite/db/schema'
@@ -480,6 +481,27 @@ describe('submitConflict', () => {
       action: 'match.keep',
       reason: 'Wij zagen de uitslag zelf',
       userId,
+    })
+  })
+
+  it('refuses to take the goals of Wikipedia over for a match with a report, and says to change the report (#1077)', async () => {
+    const id = await waiting()
+    const [match] = await database.db.select().from(matches)
+
+    await database.db.insert(matchReports).values({ matchId, savedBy: userId, status: 'klaar' })
+    await database.db
+      .update(matchChanges)
+      .set({ part: 'goals', proposal: encodePartProposal('goals', { goals: [], match: match! }) })
+
+    const before = await database.db.select().from(matchGoals)
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Wikipedia heeft de bron' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=van-het-verslag`,
+    })
+    expect(await database.db.select().from(matchGoals)).toEqual(before)
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+    expect(await decide(id, { besluit: 'houden', reden: 'Het verslag klopt' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=gehouden`,
     })
   })
 

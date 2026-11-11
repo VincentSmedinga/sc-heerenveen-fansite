@@ -6,6 +6,7 @@ import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-sys
 
 import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
+import { countReportsToCheck } from '#src/beheer/match-reports'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -37,6 +38,9 @@ export default async function AdminPage() {
   const { seasons: heldSeasons, total: held } = beheerder ? await countHeldChanges(db) : { seasons: [], total: 0 }
   const heldSeason = heldSeasons.includes(current) ? current : heldSeasons[0]
   const withoutResult = beheerder ? await countMatchesWithoutResult(db, current, now) : 0
+  // The reports that were klaar and are no longer right, which the list shows as "Klopt niet".
+  const { seasons: wrongSeasons, total: wrong } = beheerder ? await countReportsToCheck(db) : { seasons: [], total: 0 }
+  const wrongSeason = wrongSeasons.includes(current) ? current : wrongSeasons[0]
   const todo: TodoItem[] = []
 
   if (waiting > 0) {
@@ -55,6 +59,13 @@ export default async function AdminPage() {
     todo.push({
       href: matchesPath,
       text: plural(withoutResult, 'wedstrijd zonder uitslag', 'wedstrijden zonder uitslag'),
+    })
+  }
+
+  if (wrong > 0) {
+    todo.push({
+      href: wrongSeason === undefined ? matchesPath : listPath(wrongSeason, 'alles'),
+      text: plural(wrong, 'verslag klopt niet', 'verslagen kloppen niet'),
     })
   }
 

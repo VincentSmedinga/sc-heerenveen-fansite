@@ -101,6 +101,25 @@ export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): Report
 }
 
 /**
+ * The reports the editors saved as `klaar` that are no longer right, in all seasons: how many,
+ * and the seasons they are in, the newest first. The start page tells the number and links to
+ * a season in the list, so a report that lost something is seen without opening the list
+ * (issue 1077). A report the import of the old fansite made and nobody saved is not counted:
+ * there are hundreds, and each check reads the whole report.
+ */
+export async function countReportsToCheck(db: Pick<Database, 'select'>): Promise<{ seasons: string[]; total: number }> {
+  const saved = await db
+    .select({ id: matchReports.matchId, reportStatus: matchReports.status, season: matches.season })
+    .from(matchReports)
+    .innerJoin(matches, eq(matchReports.matchId, matches.id))
+    .where(and(eq(matchReports.status, 'klaar'), isNotNull(matchReports.savedBy)))
+  const wrong = await listReportsToCheck(db, saved)
+  const seasons = new Set(saved.filter((row) => wrong.has(row.id)).map((row) => row.season))
+
+  return { seasons: [...seasons].sort().reverse(), total: wrong.size }
+}
+
+/**
  * The line-up of ours in the previous match, for the button that takes it over: the most recent
  * match before this one, by the date of the kick-off and in any season and competition, that
  * has a report with players of ours. On the same day it only counts when its kick-off is

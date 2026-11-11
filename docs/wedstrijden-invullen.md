@@ -104,6 +104,10 @@ Schrijf bij "Reden" waarom je beslist, en kies:
 Het besluit komt in het logboek, met wie en waarom.
 Beslist niemand, dan neemt de import het onderdeel over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
 De beheerders krijgen daarover een mail.
+
+De doelpunten van een wedstrijd met een verslag zijn een uitzondering: ze zijn van het verslag.
+"Neem Wikipedia over" verandert daar niets, en de import neemt ze ook na zeven dagen niet over.
+Heeft Wikipedia gelijk, pas dan het verslag aan; anders kies je "Houd onze invoer".
 Dat geldt alleen in het lopende seizoen: in een seizoen dat voorbij is blijft jullie invoer staan tot iemand beslist.
 Zet Wikipedia zelf de waarde van de redactie terug, dan vervalt de afwijking.
 

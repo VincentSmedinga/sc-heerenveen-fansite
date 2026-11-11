@@ -13,14 +13,14 @@ import type { Match, MatchChange } from './schema.ts'
 
 import { describeProblem, environmentNames, formatDateTime } from './alerts.ts'
 import { partLabels, quietReasons, takenOverAt } from './match-conflicts.ts'
-import { adminUsers, matchChanges, matches } from './schema.ts'
+import { adminUsers, matchChanges, matches, matchReports } from './schema.ts'
 
 /** How a run mails about the differences. A test gives its own mailer: nothing real is sent. */
 export type ConflictMailOptions = Pick<AlertOptions, 'clock' | 'env' | 'send' | 'write'>
 
 type Kind = 'difference' | 'taken-over'
 
-type Waiting = { change: MatchChange; kind: Kind; match: Match }
+type Waiting = { change: MatchChange; hasReport: boolean; kind: Kind; match: Match }
 
 /**
  * Mails the beheerders about the differences that have not been mailed yet, and records that it
@@ -60,13 +60,14 @@ export async function mailConflicts(db: Pick<Database, 'select' | 'update'>, opt
     const { SITE_ENV } = readMailEnv(env)
     const now = (options.clock ?? (() => new Date()))()
 
-    for (const { change, kind, match } of waiting) {
+    for (const { change, hasReport, kind, match } of waiting) {
       const mail = compose(
         kind,
         change,
         match,
         { address: siteOrigins[SITE_ENV], environment: environmentNames[SITE_ENV] },
         now,
+        hasReport,
       )
       let sent = 0
 
@@ -97,6 +98,7 @@ function compose(
   match: Match,
   context: { address: string; environment: string },
   now: Date,
+  hasReport: boolean,
 ) {
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
@@ -129,9 +131,12 @@ function compose(
       '',
       'Onze invoer blijft staan tot iemand beslist.',
       `Beslis op de pagina van de wedstrijd: ${link}`,
-      takenOver === undefined
-        ? 'Het seizoen is voorbij of bijna voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.'
-        : `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(takenOver)}, als Wikipedia die dan nog zegt.`,
+      // The goals of a match with a report are the report's (issue 1077).
+      hasReport && change.part === 'goals'
+        ? 'De doelpunten zijn van het verslag, dus de import neemt de waarde van Wikipedia nooit over. Heeft Wikipedia gelijk? Pas dan het verslag aan.'
+        : takenOver === undefined
+          ? 'Het seizoen is voorbij of bijna voorbij, dus de import neemt de waarde van Wikipedia niet vanzelf over.'
+          : `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(takenOver)}, als Wikipedia die dan nog zegt.`,
       ...footer,
     ].join('\n'),
   }
@@ -140,9 +145,10 @@ function compose(
 /** The differences nobody was mailed about yet, oldest first. */
 async function unmailed(db: Pick<Database, 'select'>): Promise<Waiting[]> {
   const rows = await db
-    .select({ change: matchChanges, match: matches })
+    .select({ change: matchChanges, match: matches, reportOf: matchReports.matchId })
     .from(matchChanges)
     .innerJoin(matches, eq(matchChanges.matchId, matches.id))
+    .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
     .where(
       and(
         isNotNull(matchChanges.part),
@@ -161,8 +167,9 @@ async function unmailed(db: Pick<Database, 'select'>): Promise<Waiting[]> {
     )
     .orderBy(asc(matchChanges.id))
 
-  return rows.map(({ change, match }) => ({
+  return rows.map(({ change, match, reportOf }) => ({
     change,
+    hasReport: reportOf !== null,
     kind: change.status === 'pending' ? 'difference' : 'taken-over',
     match,
   }))

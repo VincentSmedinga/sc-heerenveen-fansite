@@ -3244,6 +3244,8 @@
 - **Alternatieven:** een reden bij elke keer opslaan (zoals de rest van het beheer), wat bij tientallen keren per seizoen vervelend is voor wat een gewone invoer is.
 - **Later:** vult _De invoer van de redactie staat in de gewone tabellen, met een markering_ in `importer.md` aan: ook een verslag zet `goals_edited`, en de import houdt de spelers (`appearance_id`) van de doelpunten vast zolang de markering staat.
 - **Later:** zie _Een wedstrijd die nog wordt gespeeld heeft een pagina met "Live" en een knop voor het einde_ (8 november 2026): een wedstrijd met een verslag is gespeeld, of wordt nog gespeeld (`scheduled`) en blijft dat tot de knop "Wedstrijd afgelopen" of de import hem een uitslag geeft; andere statussen kan het formulier nog niet zetten zolang het verslag er is.
+- **Later:** zie _De doelpunten van een wedstrijd met een verslag zijn van het verslag_ in `importer.md` (11 november 2026): Wikipedia neemt de doelpunten van een wedstrijd met een verslag nooit meer over, niet door een beheerder en niet na zeven dagen.
+  De startpagina van het beheer telt de verslagen die niet meer kloppen.
 
 ## Een speler kies je uit de selectie van het seizoen, of je voegt hem toe
 

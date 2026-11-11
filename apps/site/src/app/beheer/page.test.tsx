@@ -10,6 +10,7 @@ import AdminPage, { metadata as adminMetadata } from './page'
 const {
   countHeldChanges,
   countMatchesWithoutResult,
+  countReportsToCheck,
   countWaitingDifferences,
   findSession,
   loginLinkWorks,
@@ -18,6 +19,7 @@ const {
 } = vi.hoisted(() => ({
   countHeldChanges: vi.fn(),
   countMatchesWithoutResult: vi.fn(),
+  countReportsToCheck: vi.fn(),
   countWaitingDifferences: vi.fn(),
   findSession: vi.fn(),
   loginLinkWorks: vi.fn(),
@@ -31,6 +33,7 @@ vi.mock('#src/beheer/match-entries', () => ({
   countMatchesWithoutResult,
   countWaitingDifferences,
 }))
+vi.mock('#src/beheer/match-reports', () => ({ countReportsToCheck }))
 vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
@@ -44,6 +47,8 @@ beforeEach(() => {
   countHeldChanges.mockResolvedValue({ seasons: [], total: 0 })
   countMatchesWithoutResult.mockReset()
   countMatchesWithoutResult.mockResolvedValue(0)
+  countReportsToCheck.mockReset()
+  countReportsToCheck.mockResolvedValue({ seasons: [], total: 0 })
   countWaitingDifferences.mockReset()
   countWaitingDifferences.mockResolvedValue({ seasons: [], total: 0 })
   findSession.mockReset()
@@ -208,6 +213,28 @@ describe('the admin', () => {
     countMatchesWithoutResult.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('zonder uitslag')
     expect(countMatchesWithoutResult).not.toHaveBeenCalled()
+  })
+
+  it('tells a beheerder how many reports that were klaar are no longer right, with a link to the list (#1077)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('klop')
+
+    const slug = currentSeason.replace('/', '-')
+
+    countReportsToCheck.mockResolvedValue({ seasons: [currentSeason, '2024/25'], total: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).toContain(
+      `<a href="/beheer/wedstrijden?seizoen=${slug}&amp;tonen=alles">1 verslag klopt niet</a>`,
+    )
+
+    countReportsToCheck.mockResolvedValue({ seasons: ['2024/25', '2023/24'], total: 2 })
+    expect(renderToStaticMarkup(await AdminPage())).toContain(
+      '<a href="/beheer/wedstrijden?seizoen=2024-25&amp;tonen=alles">2 verslagen kloppen niet</a>',
+    )
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    countReportsToCheck.mockClear()
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('klop')
+    expect(countReportsToCheck).not.toHaveBeenCalled()
   })
 
   it('lists the lines of the card one under the other, the differences first', async () => {

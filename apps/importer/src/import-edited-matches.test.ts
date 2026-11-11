@@ -1038,7 +1038,7 @@ describe('a match that is being played (issue 906)', () => {
     expect(await log()).toEqual([])
   })
 
-  it('stops being live when the import is first: the result follows Wikipedia, and the same goals catch up', async () => {
+  it("stops being live when the import is first: the result follows Wikipedia, and the goals stay the report's (#1077)", async () => {
     const { pages, server } = await serve()
 
     await importAt(server, first)
@@ -1047,8 +1047,8 @@ describe('a match that is being played (issue 906)', () => {
     await importAt(server, afterMatch)
 
     expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
-    expect(await edits()).toEqual([])
-    expect((await log()).map((line) => line.action)).toEqual(['match.caught-up'])
+    expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: false }])
+    expect(await log()).toEqual([])
     expect(await database.db.select().from(matchReports)).toMatchObject([{ status: 'bezig' }])
   })
 
@@ -1088,8 +1088,9 @@ describe('a match that is being played (issue 906)', () => {
     await importAt(server, later(afterMatch, 2))
 
     expect(await row(roundEleven)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
-    expect(await edits()).toEqual([])
-    expect((await log()).map((line) => line.action)).toEqual(['match.caught-up', 'match.caught-up'])
+    // The result caught up; the goals are the report's and keep their marker (#1077).
+    expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: false }])
+    expect((await log()).map((line) => line.action)).toEqual(['match.caught-up'])
   })
 
   it('keeps the result of the button and says so once when Wikipedia has another result later', async () => {
@@ -1111,4 +1112,218 @@ describe('a match that is being played (issue 906)', () => {
     )
     expect(await edits()).toMatchObject([{ resultEdited: true }])
   })
+})
+
+describe('a match with a report (issue 1077)', () => {
+  const days = (count: number) => count * 24 * hours(1)
+  const changes = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
+
+  /**
+   * Round 1 gets a report as the admin saves it: the goal of Oyen points to his place in the
+   * line-up and has an assist. With `marked` the goals are marked as the editors'; without it
+   * the marker is gone, as after an import that cleared it. Wikipedia has the goal in minute
+   * 52.
+   */
+  async function saveReport({ marked, minute = 52 }: { marked: boolean; minute?: number }) {
+    const matchId = (await row(roundOne))?.id ?? 0
+
+    await database.db.insert(matchReports).values({ matchId, savedBy: adminId, status: 'klaar' })
+
+    const [scorer, passer] = await database.db
+      .insert(matchAppearances)
+      .values([
+        { matchId, name: 'Oyen', ours: true, shirtNumber: 9, starter: true },
+        { matchId, name: 'Klaverboer', ours: true, shirtNumber: 7, starter: true },
+      ])
+      .$returningId()
+
+    if (marked) {
+      await enter(roundOne, {}, ['goals'], [{ minute, ours: true, player: 'Oyen' }])
+    }
+
+    await database.db
+      .update(matchGoals)
+      .set({ appearanceId: scorer?.id ?? 0, assistAppearanceId: passer?.id ?? 0, minute })
+      .where(eq(matchGoals.matchId, matchId))
+
+    return { links: { appearanceId: scorer?.id, assistAppearanceId: passer?.id }, matchId }
+  }
+
+  const storedGoals = (matchId: number) => database.db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId))
+
+  it('keeps the link to the line-up, the assist and the marker when Wikipedia has the same goal', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const { links, matchId } = await saveReport({ marked: true })
+
+    await importAt(server, later(first, 2))
+    await importAt(server, later(first, 3))
+
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 52, player: 'Oyen' }])
+    expect(await edits()).toMatchObject([{ goalsEdited: true, matchId }])
+    expect(await log()).toEqual([])
+    expect(await changes()).toEqual([])
+  })
+
+  it('keeps the link and the assist of a report whose marker is gone', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const { links, matchId } = await saveReport({ marked: false })
+
+    // The same goals with a link are not the goals of Wikipedia, which would be written again.
+    await importAt(server, later(first, 2))
+    await importAt(server, later(first, 3))
+
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 52 }])
+    expect(await log()).toEqual([])
+    expect(await changes()).toEqual([])
+  })
+
+  it('keeps a difference as a change that waits, once, also without a marker', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const { links, matchId } = await saveReport({ marked: false, minute: 53 })
+    const report = await importAt(server, later(first, 2))
+
+    await importAt(server, later(first, 3))
+
+    expect(report.kind === 'imported' ? report.warnings : []).toEqual([
+      expect.stringContaining("in the goals: ours 53' Oyen, Wikipedia 52' Oyen"),
+    ])
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 53 }])
+    expect(await changes()).toMatchObject([{ matchId, part: 'goals', status: 'pending', timesSeen: 2 }])
+    expect((await log()).map((line) => line.action)).toEqual(['match.differs'])
+
+    // An editor keeps the report, and the import does not ask again.
+    await database.db.transaction(async (transaction) => {
+      const [change] = await transaction.select().from(matchChanges)
+
+      await decideConflict(
+        transaction,
+        change?.id ?? 0,
+        { kind: 'keep', reason: 'Het verslag klopt', resolution: 'person', userId: adminId },
+        later(first, 4),
+      )
+    })
+    await importAt(server, later(first, 5))
+
+    expect(await changes()).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    expect((await log()).map((line) => line.action)).toEqual(['match.differs', 'match.keep'])
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 53 }])
+  })
+
+  it.each([true, false])('never takes a difference over after seven days (marker: %s)', async (marked) => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const { links, matchId } = await saveReport({ marked, minute: 53 })
+
+    await importAt(server, later(first, 2))
+    await importAt(server, new Date(later(first, 2).getTime() + days(7)))
+    await importAt(server, new Date(later(first, 2).getTime() + days(30)))
+
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 53 }])
+    expect(await changes()).toMatchObject([{ part: 'goals', status: 'pending' }])
+    expect(await edits()).toMatchObject(marked ? [{ goalsEdited: true }] : [])
+    expect((await log()).filter((line) => line.action === 'match.take-over')).toEqual([])
+  })
+
+  it("mails that the goals are the report's and are never taken over", async () => {
+    const { server } = await serve()
+    const mails: AlertMail[] = []
+    const run = (at: Date) =>
+      runImport(database.url, {
+        alerts: {
+          env: {
+            MAIL_FROM: 'fansite@example.org',
+            SITE_ENV: 'acceptance',
+            SMTP_HOST: 'mail.example.org',
+            SMTP_PASSWORD: 'geheim',
+            SMTP_PORT: '465',
+            SMTP_USER: 'fansite@example.org',
+          },
+          send: (mail) => Promise.resolve(void mails.push(mail)),
+        },
+        clock: () => at,
+        makeFetcher: (robots) => fetcherFor([server], { robots }),
+        wikipediaOrigin: server.origin,
+        write: () => {},
+      })
+
+    await run(first)
+    await saveReport({ marked: true, minute: 53 })
+    await run(later(first, 2))
+
+    expect(mails).toHaveLength(1)
+    expect(mails[0]?.text).toContain('De doelpunten zijn van het verslag')
+    expect(mails[0]?.text).not.toContain('Beslist niemand')
+  })
+
+  it('lets a change that waits lapse when Wikipedia gets the goals of the report', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+
+    const { links, matchId } = await saveReport({ marked: true, minute: 53 })
+
+    await importAt(server, later(first, 2))
+    pages.programme = pages.programme.replace('{{goal|52}}', '{{goal|53}}')
+    await importAt(server, later(first, 3))
+
+    expect(await changes()).toMatchObject([{ resolution: 'reverted', status: 'rejected' }])
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 53 }])
+    expect(await edits()).toMatchObject([{ goalsEdited: true }])
+    expect((await log()).map((line) => line.action)).toEqual(['match.differs'])
+  })
+
+  it.each(['command', 'admin'] as const)(
+    'refuses to take Wikipedia over for the goals when the %s asks, and keeping the report still works',
+    async (route) => {
+      const { server } = await serve()
+
+      await importAt(server, first)
+
+      const { links, matchId } = await saveReport({ marked: true, minute: 53 })
+
+      await importAt(server, later(first, 2))
+
+      const [change] = await changes()
+      const decide = (kind: 'keep' | 'take-over') =>
+        database.db.transaction((transaction) =>
+          decideConflict(
+            transaction,
+            change?.id ?? 0,
+            { kind, reason: 'Beslist', resolution: 'person', userId: adminId },
+            later(first, 3),
+          ),
+        )
+
+      if (route === 'command') {
+        const lines: string[] = []
+
+        expect(
+          await runChangesCommand(database.url, ['accept', String(change?.id)], {
+            clock: () => later(first, 3),
+            write: (line) => lines.push(line),
+          }),
+        ).toBe(1)
+        expect(lines.join('\n')).toContain('the match has a report')
+      } else {
+        expect(await decide('take-over')).toBe('report')
+      }
+
+      expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 53 }])
+      expect(await changes()).toMatchObject([{ status: 'pending' }])
+      expect(await edits()).toMatchObject([{ goalsEdited: true }])
+      expect(await decide('keep')).toBe('done')
+      expect(await changes()).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    },
+  )
 })

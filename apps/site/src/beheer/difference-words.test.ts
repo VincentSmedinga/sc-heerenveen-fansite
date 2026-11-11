@@ -25,6 +25,19 @@ describe('the words of a difference', () => {
     })
   })
 
+  it('promises no take-over for the goals of a match with a report, and points to the report (#1077)', () => {
+    const difference = { firstSeenAt, reason: 'wijkt af van de invoer van de redactie', season }
+    const goals = differenceWords({ ...difference, part: 'goals' }, { dataSource: 'wikipedia' }, now, true)
+
+    expect(goals.note).toBe(
+      'De doelpunten zijn van het verslag en blijven staan. De import neemt Wikipedia hier nooit over. Heeft Wikipedia gelijk? Pas dan het verslag aan.',
+    )
+    // The other parts of the match are not the report's.
+    expect(differenceWords({ ...difference, part: 'result' }, { dataSource: 'wikipedia' }, now, true).note).toMatch(
+      /Beslist niemand, .* 9 nov/,
+    )
+  })
+
   it('promises no take-over for a difference with an entry in a season that is over (#1025)', () => {
     const words = differenceWords(
       { firstSeenAt, part: 'result', reason: 'wijkt af van de invoer van de redactie', season: '2025/26' },

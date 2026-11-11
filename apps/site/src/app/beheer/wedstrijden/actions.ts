@@ -123,7 +123,9 @@ export async function submitConflict(
         )
       : outcome === 'no-proposal'
         ? matchPath(difference.matchId, 'niet-gelukt')
-        : `${matchesPath}?fout=besloten`,
+        : outcome === 'report'
+          ? matchPath(difference.matchId, 'van-het-verslag')
+          : `${matchesPath}?fout=besloten`,
   )
 }
 

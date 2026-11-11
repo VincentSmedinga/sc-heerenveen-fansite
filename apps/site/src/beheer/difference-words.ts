@@ -31,6 +31,7 @@ export function differenceWords(
   difference: Pick<MatchChange, 'firstSeenAt' | 'reason' | 'season'> & { part: NonNullable<MatchChange['part']> },
   match: Pick<Match, 'dataSource'>,
   now: Date,
+  hasReport = false,
 ): DifferenceWords {
   const second = secondSourceOf(difference.reason)
   const takenOver = takenOverAt(difference, now)
@@ -40,9 +41,11 @@ export function differenceWords(
       heading: `Wikipedia wijkt af: ${partLabels[difference.part]}`,
       keep: 'Houd onze invoer',
       note:
-        takenOver === undefined
-          ? 'Onze invoer blijft staan tot je beslist. Het seizoen is voorbij of bijna voorbij, dus de import neemt Wikipedia niet vanzelf over.'
-          : `Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op ${formatVersionTime(takenOver)}, als Wikipedia dan nog hetzelfde zegt.`,
+        hasReport && difference.part === 'goals'
+          ? 'De doelpunten zijn van het verslag en blijven staan. De import neemt Wikipedia hier nooit over. Heeft Wikipedia gelijk? Pas dan het verslag aan.'
+          : takenOver === undefined
+            ? 'Onze invoer blijft staan tot je beslist. Het seizoen is voorbij of bijna voorbij, dus de import neemt Wikipedia niet vanzelf over.'
+            : `Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op ${formatVersionTime(takenOver)}, als Wikipedia dan nog hetzelfde zegt.`,
       ours: 'Onze invoer',
       takeOver: 'Neem Wikipedia over',
       theirs: 'Wikipedia',

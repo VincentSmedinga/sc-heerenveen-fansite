@@ -36,7 +36,7 @@ import {
 } from './classify-change.ts'
 import { clubFullNames } from './club-names.ts'
 import { lookUpClubPages, repairClubPagesFromWikipedia } from './club-pages.ts'
-import { importEditedMatch, mergeEntry, readEdits } from './edited-matches.ts'
+import { importEditedMatch, mergeEntry, readEdits, readReported } from './edited-matches.ts'
 import { matchClubNames, playedWarning, storeResults } from './league-results.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import {
@@ -1245,6 +1245,8 @@ async function storeMatches(
   }
 
   const edits = await readEdits(db, season)
+  // The goals of a match with a report are the report's, with or without a marker (#1077).
+  const reported = await readReported(db, season)
   const link = playerLinker(squad)
   // The parts the editors took over from another source (#974) stay as they decided.
   const takenOver = await readTakenOverParts(
@@ -1343,13 +1345,16 @@ async function storeMatches(
       ...(held.includes('result') ? { home: before.home } : {}),
     })
 
-    if (edit !== undefined) {
-      // The editors filled in a part of this match: see `edited-matches.ts`. What stays theirs
-      // stays, and the rest follows the page without the judgement of `classify-change.ts`.
+    const hasReport = reported.has(before.id)
+
+    if (edit !== undefined || hasReport) {
+      // The editors filled in a part of this match, or it has a report: see
+      // `edited-matches.ts`. What stays theirs stays, and the rest follows the page without the
+      // judgement of `classify-change.ts`.
       const stored = storedGoals.get(before.id) ?? []
       const outcome = await importEditedMatch(
         db,
-        { before, edit, storedGoals: stored, wikipedia: match, wikipediaGoals: scorers.goals },
+        { before, edit, hasReport, storedGoals: stored, wikipedia: match, wikipediaGoals: scorers.goals },
         now,
       )
       const merged = mergeKept(outcome.keep)
@@ -1448,8 +1453,9 @@ async function storeMatches(
       continue
     }
 
-    if (edits.has(row.id)) {
-      // A match the editors filled in stays, whether the page still has it or not.
+    if (edits.has(row.id) || reported.has(row.id)) {
+      // A match the editors filled in or wrote a report of stays, whether the page still has it
+      // or not.
       counts.unchanged++
       continue
     }
@@ -1600,7 +1606,7 @@ async function storeMatches(
         db,
         season,
         squad,
-        new Set([...edits].flatMap(([matchId, edit]) => (edit.goalsEdited ? [matchId] : []))),
+        new Set([...reported, ...[...edits].flatMap(([matchId, edit]) => (edit.goalsEdited ? [matchId] : []))]),
       )
 
   // A season whose players come from goals has no page of the squad to rate it, so the rating
