@@ -72,6 +72,7 @@ describe('readItem', () => {
   it('reads a complete item', () => {
     expect(readItem(complete)).toEqual({
       birth: { date: '1994-05-13', precision: 'day' },
+      death: null,
       id: 'Q15943430',
       label: 'Joost van Aken',
       nationalityIds: ['Q29999'],
@@ -103,6 +104,23 @@ describe('readItem', () => {
 
     expect(item?.birth).toBeNull()
     expect(item?.nationalityIds).toEqual(['Q29999'])
+  })
+
+  it('reads a date of death on the day, on the month and on the year', () => {
+    const death = (precision: number, time: string) => readItem(itemJson('Q1', { death: [{ precision, time }] }))?.death
+
+    expect(death(11, '+2020-03-14T00:00:00Z')).toEqual({ date: '2020-03-14', precision: 'day' })
+    expect(death(10, '+2020-03-00T00:00:00Z')).toEqual({ date: '2020-03-01', precision: 'month' })
+    expect(death(9, '+2020-00-00T00:00:00Z')).toEqual({ date: '2020-01-01', precision: 'year' })
+  })
+
+  it('leaves the date of death empty for a date coarser than a year, a deprecated one, and no statement', () => {
+    expect(readItem(itemJson('Q1', { death: [{ precision: 8, time: '+2020-00-00T00:00:00Z' }] }))?.death).toBeNull()
+    expect(
+      readItem(itemJson('Q1', { death: [{ precision: 11, rank: 'deprecated', time: '+2020-03-14T00:00:00Z' }] }))
+        ?.death,
+    ).toBeNull()
+    expect(readItem(itemJson('Q1', {}))?.death).toBeNull()
   })
 
   it('reads every nationality in the order of Wikidata, without a repeat', () => {

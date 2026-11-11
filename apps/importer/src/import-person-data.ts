@@ -1,5 +1,5 @@
 import type { Database } from '@fansite/db/client'
-import type { PersonData } from '@fansite/db/persons'
+import type { PersonData, PersonToRead } from '@fansite/db/persons'
 import type { PersonLineSource, PlayerPosition } from '@fansite/db/schema'
 
 import {
@@ -31,6 +31,12 @@ export const wikidataOrigin = 'https://www.wikidata.org'
  * short.
  */
 export const mostPersonsPerRun = 200
+
+/**
+ * A person without a date of death is read again when his last reading is this many days old,
+ * so a death shows within a month (#1147).
+ */
+export const rereadAfterDays = 30
 
 /** The wait between two requests, in milliseconds, to leave the servers alone. */
 export const pauseBetweenRequests = 250
@@ -78,6 +84,8 @@ export type PersonDataReport = {
   nationality: number
   /** Persons read: stored, whatever they got. */
   read: number
+  /** Of those, persons read before that had no date of death yet (#1147). */
+  reread: number
   /** The lines for the warnings, each starting with `Persons:`. */
   warnings: string[]
 }
@@ -94,9 +102,10 @@ export function describePersonData(report: PersonDataReport): string[] {
   if (report.read > 0 || report.articlesAsked > 0 || report.itemsAsked > 0) {
     const withLine = lines.wikidata + lines.squad + lines.manual + lines['old-site']
     const person = report.read === 1 ? 'person' : 'persons'
+    const again = report.reread > 0 ? ` (${report.reread} read again)` : ''
 
     described.push(
-      `persons (Wikidata): ${report.read} ${person} read, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines['old-site']} from the old fansite, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
+      `persons (Wikidata): ${report.read} ${person} read${again}, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines['old-site']} from the old fansite, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
     )
   }
   const { countriesFilled: countries, countriesFromList: fromList, countriesFromSquad: fromSquad } = report
@@ -195,13 +204,14 @@ async function readUnreadPersons(
     linesAgain: { cleared: 0, squad: 0, wikidata: 0 },
     nationality: 0,
     read: 0,
+    reread: 0,
     warnings: [],
   }
 
   // A list of our own goes before everything, also for a person that was read earlier.
   await applyManualLines(db, lines)
 
-  const todo = await personsToRead(db, limit)
+  const todo = await personsToRead(db, limit, new Date(clock().getTime() - rereadAfterDays * 86_400_000))
 
   if (todo.length === 0) {
     return report
@@ -435,6 +445,7 @@ async function readUnreadPersons(
         wikipediaPageId: pageId,
       },
       lineOfPositions(item.positionIds),
+      item.death,
     )
   }
 
@@ -453,9 +464,10 @@ async function readUnreadPersons(
    * as it is.
    */
   async function finish(
-    person: { id: number; lineSource: null | PersonLineSource; wikipediaPage: string },
-    data: Omit<PersonData, 'line'>,
+    person: PersonToRead,
+    data: Omit<PersonData, 'deathDate' | 'line'>,
     positionLine: null | PlayerPosition = null,
+    death: PersonData['deathDate'] = null,
   ): Promise<void> {
     const manual = lines.get(person.wikipediaPage)
     const squad = fromSquad.get(person.id)
@@ -475,8 +487,19 @@ async function readUnreadPersons(
         : null
     const stored = kept === null ? line : ('keep' as const)
 
-    await db.transaction((transaction) => storePersonData(transaction, person.id, { ...data, line: stored }, clock()))
+    await db.transaction((transaction) =>
+      storePersonData(
+        transaction,
+        person.id,
+        { ...data, deathDate: person.deathDateSource === 'manual' ? 'keep' : death, line: stored },
+        clock(),
+      ),
+    )
     report.read++
+
+    if (person.readAt !== null) {
+      report.reread++
+    }
 
     if (data.birthDate !== null) {
       report.birthDate++

@@ -48,7 +48,9 @@ const player: PlayerPage = {
   age: 52,
   birthPlace: 'Emmen',
   birthYear: '1974',
+  bornLongAgo: false,
   country: 'NL',
+  deathYear: undefined,
   edited: false,
   line: 'aanvaller',
   name: 'Jan de Vries',
@@ -214,6 +216,38 @@ describe('the page of a player', () => {
     expect(line).toMatch(
       /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
     )
+  })
+
+  it('shows the years of a player who has died, and a screen reader hears the words and not the dash', async () => {
+    const html = await render({ age: undefined, birthPlace: 'Herten', birthYear: '1950', deathYear: '2020' })
+
+    expect(html).toContain('<span aria-hidden="true">Herten, 1950–2020</span>')
+    expect(html).toContain('<span class="hf-visually-hidden">Herten, geboren in 1950, overleden in 2020</span>')
+    expect(html).not.toMatch(/jaar<\/p>|in memoriam/iu)
+  })
+
+  it('shows only the year of death of a player without a year of birth, with the place as "geboren in"', async () => {
+    const died = { age: undefined, birthYear: undefined, deathYear: '2020' }
+
+    expect(await render({ ...died, birthPlace: undefined, country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Overleden in 2020</p>',
+    )
+    expect(await render({ ...died, birthPlace: 'Herten', country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Geboren in Herten, overleden in 2020</p>',
+    )
+    // The line under the name has no dash, no age and no place next to the year of death.
+    const html = await render({ ...died, birthPlace: 'Herten' })
+    const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
+
+    expect(line).toMatch(/ · geboren in Herten, overleden in 2020$/u)
+    expect(line).not.toMatch(/–|jaar/u)
+  })
+
+  it('says only "geboren in" for a player born over a hundred years ago without a death', async () => {
+    const html = await render({ age: undefined, birthYear: '1920', bornLongAgo: true })
+
+    expect(html).toContain('geboren in 1920')
+    expect(html).not.toContain('Emmen, 1920')
   })
 
   it('leaves out what we do not know, with its separator', async () => {
@@ -458,7 +492,7 @@ describe('playerPageOf', () => {
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T22:30:00Z')).age).toBe(52)
   })
 
-  it('gives an age only to a player in the squad of the current season, as we hold no date of death', () => {
+  it('gives an age to a player in the squad of the current season and to one read recently', () => {
     const today = new Date('2026-11-11T10:00:00Z')
 
     expect(playerPageOf(person, [{ name: 'Jan de Vries', season: '2026/27' }], 'Emmen', today).age).toBe(52)

@@ -4696,6 +4696,7 @@
   Een onderbreking laat zien dat een speler tussendoor weg was.
 - **Alternatieven:** de leeftijd uit het jaar rekenen (kan een jaar fout zijn); de leeftijd weglaten (de projecteigenaar wil hem); een speler ouder dan honderd jaar als overleden zien (een gok); nu een datum van overlijden toevoegen aan het schema en de import (te groot voor dit issue).
 - **Later:** vervangt "geboren in 1974 in Emmen" uit "De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum" en de volgorde per linie en de regel met het geboortejaar uit "De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen".
+- **Later:** zie _De regel onder de naam van een overleden speler toont de jaren, zonder leeftijd_ (11 november 2026, #1147): we hebben nu wel een datum van overlijden, en een leeftijd staat er alleen in het lopende seizoen of na een lezing van Wikidata van de laatste 60 dagen.
 
 ## De kaart Per seizoen van een speler laat kiezen tussen alle wedstrijden en de Eredivisie
 
@@ -4954,6 +4955,41 @@
   - **Aan gelaten:** lopende tekst, zoals de titel, de intro en de toelichting van een artikel, de toelichting bij het verbergen van een bericht, en de velden van het contactformulier en van een wedstrijd die hier niet staan.
 - **Waarom:** de browser verbetert een achternaam of een zoekterm tot een woord dat er niet staat; bij een artikeltekst helpt verbeteren juist.
 - **Alternatieven:** overal uit; alleen op het zoekveld van de spelers.
+
+## De regel onder de naam van een overleden speler toont de jaren, zonder leeftijd
+
+- **Datum:** 11 november 2026
+- **Besluit:** een overleden speler toont "plaats, geboortejaar–sterfjaar" onder de naam, zonder leeftijd: "Herten, 1950–2020" (#1147).
+  `lifeOf` in `apps/site/src/player-page.ts` bouwt de regel, en `today` en of de speler in het lopende seizoen staat komen als argument binnen.
+  Het zijn vier gevallen, in deze volgorde (het eerste heeft twee vormen):
+  - **Een jaar van overlijden en een geboortejaar:** plaats, jaren en geen leeftijd.
+  - **Een jaar van overlijden zonder geboortejaar** (aangevuld op verzoek van de projecteigenaar, 12 november 2026): "overleden in 2020", en met een bekende geboorteplaats "geboren in Herten, overleden in 2020".
+    Nooit "Herten, overleden in 2020": dat leest als de plaats van overlijden.
+    Er staat geen streepje en geen leeftijd, en een schermlezer hoort dezelfde woorden.
+  - **Geen sterfdatum en een geboortejaar van meer dan honderd jaar geleden:** alleen "geboren in 1920", zonder plaats en leeftijd.
+  - **Geen sterfdatum, een geboortedatum op de dag, en een rij in het lopende seizoen of een lezing van Wikidata van de laatste 60 dagen:** plaats, jaar en leeftijd, zoals eerder.
+  - **Alles daarbuiten**, een oud-speler zonder recente lezing of een geboortedatum die alleen het jaar kent: plaats en jaar, zonder leeftijd.
+  - **Een schermlezer** hoort "geboren in 1950, overleden in 2020".
+    De zichtbare tekst met het streepje is voor een schermlezer verborgen (`aria-hidden`), en een tekst met de woorden is alleen voor hem zichtbaar.
+  - **Kaal en feitelijk:** de pagina toont geen volledige sterfdatum, geen leeftijd bij overlijden en geen woorden als "in memoriam".
+    Het overzicht, de selectiepagina en het zoeken tonen niets nieuws.
+- **Waarom:** de leeftijd bij overlijden is een tweede getal dat een supporter niets toevoegt boven de jaren, en we tonen geen leeftijd van iemand van wie we niet weten of hij nog leeft.
+  Wikidata ververst elke persoon zonder sterfdatum binnen een maand, dus 60 dagen is een lezing die nog als vers geldt.
+- **Alternatieven:** een leeftijd bij overlijden tonen; de volledige datum tonen; een markering in lijsten (meer werk en meer visuele verandering).
+- **Later:** vervangt de regel "alleen een speler in de selectie van dit seizoen krijgt een leeftijd" uit _De regel onder de naam is plaats, jaar en leeftijd, en de kerngetallen beginnen met seizoenen en wedstrijden_ (11 november 2026).
+
+## Een jaar van overlijden dat de redactie invult, gaat voor Wikidata
+
+- **Datum:** 11 november 2026
+- **Besluit:** het formulier van een speler in Beheer heeft het veld "Jaar van overlijden" (#1147), met een zichtbaar label en een eigen foutmelding ("Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met 2026, of laat het veld leeg.").
+  Het jaar moet vier cijfers zijn, niet voor 1850 en niet later dan dit jaar.
+  - **De bron `manual`:** zoals bij de linie en het land (#1051) krijgt de persoon `death_date_source = 'manual'`, en de importer overschrijft hem nooit.
+  - **Leegmaken:** de redactie kan het veld leegmaken, en dan geldt weer Wikidata: de persoon krijgt `wikidata_read_at` leeg en de importer leest hem bij de volgende run opnieuw.
+  - **Bij een speler met een jaar van Wikidata** toont het veld dat jaar.
+    Een ongewijzigd veld verandert niets en maakt het jaar niet `manual`.
+  - **Het logboek** schrijft "jaar van overlijden van de persoon: geen → 2018".
+- **Waarom:** de redactie weet het beter dan een bron voor een speler zonder artikel, en een fout in Wikidata mag een correctie van de redactie niet wissen.
+- **Alternatieven:** Wikidata laten winnen (een fout in Wikidata wist een correctie); een volledige datum laten invullen (we tonen alleen het jaar).
 
 ## De kaart "Laatste overwinning" telt alleen de Eredivisie en de dagen bij het tonen
 

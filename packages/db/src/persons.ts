@@ -1,11 +1,12 @@
 import { isCountryCode } from '@fansite/shared/countries'
-import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PersonTitleAlias } from './person-merge.ts'
 
 import {
   type BirthDatePrecision,
+  type DeathDateSource,
   type PersonCountrySource,
   type PersonLineSource,
   type PersonNameSource,
@@ -34,6 +35,8 @@ export type PersonData = {
   birthDate: null | { date: string; precision: BirthDatePrecision }
   /** The Q-number of the birth place. Its label is in `wikidata_items`. */
   birthPlaceId: null | string
+  /** The date of death of Wikidata. `keep`, or leaving it out, leaves what is there. */
+  deathDate?: 'keep' | null | { date: string; precision: BirthDatePrecision }
   /** `keep` leaves the line as it is: the one the editors set. */
   line: 'keep' | null | { line: PlayerPosition; source: PersonLineSource }
   /** The Q-numbers of the countries, in the order of Wikidata. */
@@ -83,9 +86,13 @@ export type PersonNameCounts = Record<ImportedNameSource, number>
 
 /** A person the importer has not read from Wikidata yet, with what an earlier try left. */
 export type PersonToRead = {
+  /** Where his date of death came from. `manual` is a year the importer leaves alone. */
+  deathDateSource: DeathDateSource | null
   id: number
   /** Where his line came from. `manual` is a line the importer leaves alone. */
   lineSource: null | PersonLineSource
+  /** When the item was read last, or null when he was never read. */
+  readAt: Date | null
   /** The Q-number, when an earlier run found it but could not read the item. */
   wikidataId: null | string
   wikipediaPage: string
@@ -471,22 +478,36 @@ export async function personsByWikidataId(db: Pick<Database, 'select'>): Promise
 }
 
 /**
- * The persons not read from Wikidata yet, the oldest first, at most `limit`. A person without a
- * title has no article to ask about, and a person with a title of the English Wikipedia has
- * none on the Dutch one, so neither is ever one of them.
+ * The persons to read from Wikidata: the ones not read yet, then the ones without a date of
+ * death that were last read at or before `rereadBefore` (#1147), the oldest reading first, at
+ * most `limit`. A person with a date of death, or with a year of the editors, is not read
+ * again. A person without a title has no article to ask about, and a person with a title of
+ * the English Wikipedia has none on the Dutch one, so neither is ever one of them.
  */
-export async function personsToRead(db: Pick<Database, 'select'>, limit: number): Promise<PersonToRead[]> {
+export async function personsToRead(
+  db: Pick<Database, 'select'>,
+  limit: number,
+  rereadBefore: Date,
+): Promise<PersonToRead[]> {
   const rows = await db
     .select({
+      deathDateSource: persons.deathDateSource,
       id: persons.id,
       lineSource: persons.lineSource,
+      readAt: persons.wikidataReadAt,
       wikidataId: persons.wikidataId,
       wikipediaPage: persons.wikipediaPage,
       wikipediaPageId: persons.wikipediaPageId,
     })
     .from(persons)
-    .where(and(isNull(persons.wikidataReadAt), isNotNull(persons.wikipediaPage), eq(persons.englishTitle, false)))
-    .orderBy(asc(persons.id))
+    .where(
+      and(
+        or(isNull(persons.wikidataReadAt), and(isNull(persons.deathDate), lte(persons.wikidataReadAt, rereadBefore))),
+        isNotNull(persons.wikipediaPage),
+        eq(persons.englishTitle, false),
+      ),
+    )
+    .orderBy(asc(persons.wikidataReadAt), asc(persons.id))
     .limit(limit)
 
   return rows.flatMap((row) => (row.wikipediaPage === null ? [] : [{ ...row, wikipediaPage: row.wikipediaPage }]))
@@ -771,11 +792,11 @@ export async function setEditorsName(db: Pick<Database, 'update'>, personId: num
 export async function setEditorsPersonFacts(
   db: Pick<Database, 'update'>,
   personId: number,
-  facts: { country?: null | string; line?: null | PlayerPosition },
+  facts: { country?: null | string; deathYear?: null | number; line?: null | PlayerPosition },
 ): Promise<void> {
-  const { country, line } = facts
+  const { country, deathYear, line } = facts
 
-  if (country === undefined && line === undefined) {
+  if (country === undefined && line === undefined && deathYear === undefined) {
     return
   }
 
@@ -784,6 +805,17 @@ export async function setEditorsPersonFacts(
     .set({
       ...(country === undefined ? {} : { country, countrySource: country === null ? null : ('manual' as const) }),
       ...(line === undefined ? {} : { line, lineSource: line === null ? null : ('manual' as const) }),
+      // A year of the editors (#1147). Taking it away leaves nothing of Wikidata to fall back
+      // on, so the person is read again at the next run.
+      ...(deathYear === undefined
+        ? {}
+        : deathYear === null
+          ? { deathDate: null, deathDatePrecision: null, deathDateSource: null, wikidataReadAt: null }
+          : {
+              deathDate: `${String(deathYear).padStart(4, '0')}-01-01`,
+              deathDatePrecision: 'year' as const,
+              deathDateSource: 'manual' as const,
+            }),
     })
     .where(eq(persons.id, personId))
 }
@@ -930,6 +962,13 @@ export async function storePersonData(
       birthDate: data.birthDate?.date ?? null,
       birthDatePrecision: data.birthDate?.precision ?? null,
       birthPlaceId: data.birthPlaceId,
+      ...(data.deathDate === 'keep' || data.deathDate === undefined
+        ? {}
+        : {
+            deathDate: data.deathDate?.date ?? null,
+            deathDatePrecision: data.deathDate?.precision ?? null,
+            deathDateSource: data.deathDate === null ? null : ('wikidata' as const),
+          }),
       ...(data.line === 'keep' ? {} : { line: data.line?.line ?? null, lineSource: data.line?.source ?? null }),
       wikidataId: data.wikidataId,
       wikidataReadAt: readAt,
