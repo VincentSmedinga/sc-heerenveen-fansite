@@ -184,4 +184,25 @@ describe('MatchSubstitutes', () => {
       container.querySelectorAll('.hf-match-substitutes-group > .hf-match-substitutes-columns > .hf-match-substitutes'),
     ).toHaveLength(2)
   })
+
+  it('makes the line of a substitute with a page one link, named by the sentence, and no other', () => {
+    const { container } = render(
+      <MatchSubstitutes
+        headingLevel={3}
+        ours
+        substitutes={[
+          { ...kuipers, name: { ...kuipers.name, href: '/spelers/sven-kuipers' } },
+          { ...kuipers, name: name('Zonder', 'Pagina'), shirtNumber: 3 },
+        ]}
+        team="sc Heerenveen"
+      />,
+    )
+    const links = container.querySelectorAll('a')
+
+    expect(links).toHaveLength(1)
+    expect(links[0]?.getAttribute('href')).toBe('/spelers/sven-kuipers')
+    expect(links[0]?.querySelector('.hf-visually-hidden')?.textContent).toBe(substituteSentence(kuipers))
+    // Nothing focusable stands inside the hidden drawing.
+    expect(container.querySelector('[aria-hidden] a')).toBeNull()
+  })
 })

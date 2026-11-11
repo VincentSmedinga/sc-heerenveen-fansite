@@ -30,6 +30,8 @@ test.describe('the links between the pages of a season', () => {
         // The addresses of the picker and of Tegenstanders start with the same words, but are
         // not pages of a season.
         .filter((target) => !target.endsWith('/kies') && !target.startsWith('/tegenstanders'))
+        // The page of a player is `/spelers/<name>`: a name, not a season (#1087).
+        .filter((target) => !/^\/spelers\/(?!\d{4}-\d{2}$)/u.test(target))
 
       // The menu alone links to two other pages of a season, so the walk cannot pass by finding
       // nothing.

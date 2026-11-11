@@ -92,8 +92,7 @@ export async function getPlayerSlugs(): Promise<string[]> {
   return playerSlugs(getDatabase().db)
 }
 
-/** The address of the page of a player. */
-export const playerAddress = (slug: string) => `/spelers/${slug}`
+export { playerAddress } from './player-address'
 
 /**
  * The seasons as periods of seasons that follow each other: `2002/03` and `2003/04` are one

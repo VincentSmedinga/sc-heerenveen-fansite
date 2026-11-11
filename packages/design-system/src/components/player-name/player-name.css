@@ -13,6 +13,15 @@
     font-weight: var(--hf-body-font-weight);
   }
 
+  /*
+   * The link is a target of at least 24 pixels high, also in a line of small letters, so it is
+   * as easy to hit as the text around it. It stays in the line and breaks at the spaces.
+   */
+  .hf-player-name > a {
+    display: inline-block;
+    min-block-size: 1.5rem;
+  }
+
   .hf-player-name-surname {
     font-weight: var(--hf-name-font-weight);
   }
@@ -78,6 +87,18 @@
     letter-spacing: 0;
     line-height: 1;
     overflow: hidden;
+  }
+
+  /*
+   * With an address the flag and the name are one link. It is the row of flag and name the
+   * numbered name already is, so a long name still goes on under the name.
+   */
+  .hf-player-name-link {
+    column-gap: var(--hf-space-s);
+    display: flex;
+    flex: 1 1 0;
+    min-block-size: 1.5rem;
+    min-inline-size: 0;
   }
 
   .hf-player-name-text {

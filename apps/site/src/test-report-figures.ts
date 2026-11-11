@@ -12,6 +12,7 @@ const none = {
   personFamilyName: null,
   personFamilyNamePrefix: null,
   personGivenName: null,
+  personSlug: null,
   redCards: 0,
   starts: 0,
   substitutions: 0,

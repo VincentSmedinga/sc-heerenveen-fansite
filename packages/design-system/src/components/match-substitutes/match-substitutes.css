@@ -47,6 +47,29 @@
     min-inline-size: 0;
   }
 
+  /*
+   * A line with a page of the player is one link, the whole line, so the target is as big as
+   * the line. Only the name shows it is a link: it has the colour of a link and its underline,
+   * and the small line under it keeps its own colour and none.
+   */
+  .hf-match-substitutes-link {
+    color: inherit;
+    display: block;
+    text-decoration: none;
+
+    & .hf-player-name {
+      color: var(--hf-colour-text-link);
+      text-decoration: underline;
+      text-decoration-thickness: 0.0625em;
+      text-underline-offset: 0.15em;
+    }
+
+    &:hover .hf-player-name {
+      color: var(--hf-colour-text-link-hover);
+      text-decoration-thickness: 0.125em;
+    }
+  }
+
   /* The small line under the name: the icon "erin", the minute, "voor <name>" and a goal. */
   .hf-match-substitutes-detail {
     color: var(--hf-colour-text-secondary);

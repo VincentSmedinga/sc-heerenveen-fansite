@@ -9,6 +9,7 @@ import {
   cleanSheetsOf,
   describeShowDelay,
   extremesOf,
+  goalHref,
   goalsPerQuarter,
   goalsWithInitials,
   homeAwayOf,
@@ -25,6 +26,7 @@ import {
   resultsOfSeason,
   resultsPerCompetition,
   scoreCountsOf,
+  scorerLine,
   scorersByPlace,
   scorersCoverage,
   standingsAround,
@@ -549,6 +551,7 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   personFamilyNamePrefix: null,
   personGivenName: null,
   personId: null,
+  personSlug: null,
   player,
   playerId: null,
   playerPage: null,
@@ -2672,5 +2675,24 @@ describe('placePerRoundOf', () => {
     const places = placePerRoundOf([...round(1), ...round(2)], table)
 
     expect(places?.filter((place) => place !== null)).toHaveLength(2)
+  })
+})
+
+describe('goalHref and scorerLine', () => {
+  const person = { personFamilyName: 'Proefman', personGivenName: 'Piet', personId: 4 }
+
+  it('gives a goal of ours by a person with a page the address of his page', () => {
+    expect(scorerLine(goal('Proefman', { ...person, personSlug: 'piet-proefman' })).href).toBe('/spelers/piet-proefman')
+  })
+
+  it('gives no address to a goal of the opponent, or to a person without a page', () => {
+    expect(goalHref(goal('Voorbeeld', { ours: false, personSlug: 'piet-proefman' }))).toBeUndefined()
+    expect(scorerLine(goal('Proefman', { ...person, personSlug: null }))).not.toHaveProperty('href')
+  })
+
+  it('keeps the address in the list of scorers', () => {
+    const matches = [played([goal('Proefman', { ...person, personSlug: 'piet-proefman' })])]
+
+    expect(topScorersOf(matches)[0]?.href).toBe('/spelers/piet-proefman')
   })
 })

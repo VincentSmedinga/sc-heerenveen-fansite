@@ -310,4 +310,23 @@ describe('TopScorersTable', () => {
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('M minuten')
     expect(container.querySelector('abbr[title="Minuten"]')).toBeTruthy()
   })
+
+  it('makes the name of a player with a page a link, and leaves the others as text', () => {
+    render(
+      <TopScorersTable
+        {...props}
+        rows={[
+          {
+            goals: 2,
+            players: [{ givenName: 'Wouter', href: '/spelers/wouter-proefman', id: 1, surname: 'Proefman' }],
+            position: 1,
+          },
+          { goals: 1, players: [{ givenName: 'Gerrit', id: 2, surname: 'Nepper' }], position: 2 },
+        ]}
+      />,
+    )
+
+    expect(screen.getByRole('link', { name: 'Wouter Proefman' }).getAttribute('href')).toBe('/spelers/wouter-proefman')
+    expect(screen.getAllByRole('link')).toHaveLength(1)
+  })
 })

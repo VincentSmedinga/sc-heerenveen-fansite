@@ -40,3 +40,22 @@ describe('the sentence under the pitch about a formation that was derived', () =
     expect(pageOf({ savedBy: null, source: null })).not.toContain(derived)
   })
 })
+
+describe('the links to the pages of players on the page of a match', () => {
+  const html = renderToStaticMarkup(<MatchPageCards data={matchPageDataOf(reportedMatch(), [], true)} />)
+  const links = [...html.matchAll(/<a [^>]*href="(\/spelers\/[^"]+)"/g)].map((match) => match[1])
+
+  it('links a player of ours who has a page, in the course of the match and in the list under the pitch', () => {
+    expect(links).toContain('/spelers/tjerk-brandsma')
+    expect(links).toContain('/spelers/ruben-ten-hove')
+    expect(html).toMatch(
+      /<a [^>]*href="\/spelers\/tjerk-brandsma"[^>]*>(<img [^>]*>)?<span[^>]*>(<span class="hf-player-name-given">)?Tjerk/,
+    )
+  })
+
+  it('leaves a player of the opponent and a player of ours without a page as plain text', () => {
+    expect(new Set(links)).toEqual(new Set(['/spelers/ruben-ten-hove', '/spelers/tjerk-brandsma']))
+    expect(html).toContain('Dirk Proefland')
+    expect(html).not.toMatch(/<a [^>]*>[^<]*Dirk Proefland/)
+  })
+})

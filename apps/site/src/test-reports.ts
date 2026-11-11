@@ -85,10 +85,22 @@ function appearances(): MatchAppearance[] {
  * does not.
  */
 const names: ReportedMatch['names'] = new Map([
-  [1, { familyName: 'Brandsma', familyNamePrefix: null, givenName: 'Tjerk', searchTerm: 'Brandsma' }],
-  [4, { familyName: 'Hove', familyNamePrefix: 'ten', givenName: 'Ruben', searchTerm: 'ten Hove' }],
-  [9, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Demo' }],
-  [10, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Idzenga' }],
+  [
+    1,
+    {
+      familyName: 'Brandsma',
+      familyNamePrefix: null,
+      givenName: 'Tjerk',
+      searchTerm: 'Brandsma',
+      slug: 'tjerk-brandsma',
+    },
+  ],
+  [
+    4,
+    { familyName: 'Hove', familyNamePrefix: 'ten', givenName: 'Ruben', searchTerm: 'ten Hove', slug: 'ruben-ten-hove' },
+  ],
+  [9, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Demo', slug: null }],
+  [10, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Idzenga', slug: null }],
 ])
 
 /** The report: a copy each time, so a test can change what it wants. */

@@ -144,6 +144,39 @@ export const AddedTime = meta.story({
   name: 'Een wissel in de blessuretijd',
 })
 
+export const WithPages = meta.story({
+  args: {
+    headingLevel: 3,
+    ours: true,
+    substitutes: [
+      {
+        minute: 62,
+        minutesPlayed: 28,
+        name: { ...name('Nepper', 'Gerrit'), href: '#nepper' },
+        playerOut: name('Idzenga', 'Thijs'),
+        shirtNumber: 14,
+      },
+      {
+        minute: 75,
+        minutesPlayed: 15,
+        name: name('Kuipers', 'Sven'),
+        playerOut: name('Dijkstra', 'Lars'),
+        shirtNumber: 17,
+      },
+    ],
+    team: 'sc Heerenveen',
+  },
+  name: 'Een wissel met een pagina is een link',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een wissel van ons met een pagina heeft `href` in zijn naam: de naam is een link. De ander blijft gewone tekst.',
+      },
+    },
+  },
+})
+
 export const BothTeams = meta.story({
   args: { headingLevel: 3, ours: true, substitutes: ours, team: 'sc Heerenveen' },
   name: 'De twee teams naast elkaar',

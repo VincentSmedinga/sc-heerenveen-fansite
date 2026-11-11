@@ -137,7 +137,13 @@ export function previewDataOf(
           name,
           chosen === undefined
             ? undefined
-            : { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: chosen.searchTerm ?? null },
+            : {
+                familyName: null,
+                familyNamePrefix: null,
+                givenName: null,
+                searchTerm: chosen.searchTerm ?? null,
+                slug: null,
+              },
         ),
         ours: side === 'wij',
         shirtNumber,

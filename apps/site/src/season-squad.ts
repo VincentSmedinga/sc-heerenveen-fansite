@@ -2,6 +2,7 @@ import { findSquadCompleteness, listSeasonPlayers, listSquadPages, type PublicSe
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
+import { playerHref } from './player-address'
 import { type NameParts, personNameParts } from './player-name'
 
 /**
@@ -30,6 +31,8 @@ export type SquadPlayer = NameParts & {
    * Undefined: nobody in the part has one.
    */
   country: null | string | undefined
+  /** The page of the player (see `playerHref`): absent for a player who has none. */
+  href?: string | undefined
   /** Tells the lines apart: the name as the importer kept it, which is unique in a season. */
   key: string
   /** Null: no number, where others have one. Undefined: nobody in the part has a number. */
@@ -164,10 +167,15 @@ function linesOf(players: PublicSeasonPlayer[]): SquadPlayer[] {
   const numbered = players.some((player) => player.shirtNumber !== null)
   const flagged = players.some((player) => player.country !== null)
 
-  return players.map((player) => ({
-    country: flagged ? player.country : undefined,
-    key: player.name,
-    shirtNumber: numbered ? player.shirtNumber : undefined,
-    ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),
-  }))
+  return players.map((player) => {
+    const href = playerHref(player.personSlug)
+
+    return {
+      country: flagged ? player.country : undefined,
+      ...(href === undefined ? {} : { href }),
+      key: player.name,
+      shirtNumber: numbered ? player.shirtNumber : undefined,
+      ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),
+    }
+  })
 }

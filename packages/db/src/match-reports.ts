@@ -58,6 +58,8 @@ export type PlayerReportStats = {
   personFamilyName: null | string
   personFamilyNamePrefix: null | string
   personGivenName: null | string
+  /** The address name of the person (`persons.slug`): null while he has no page. */
+  personSlug: null | string
   playerId: number
   redCards: number
   starts: number
@@ -91,6 +93,8 @@ export type ReportedPlayerName = {
   familyNamePrefix: null | string
   givenName: null | string
   searchTerm: null | string
+  /** The address name of the person (`persons.slug`): null while he has no page. */
+  slug: null | string
 }
 
 /** A player whose goals in a competition differ between the reports and the squad table. */
@@ -407,6 +411,7 @@ export async function readPlayerReportStats(
           personFamilyName: null,
           personFamilyNamePrefix: null,
           personGivenName: null,
+          personSlug: null,
           playerId: appearance.playerId,
           redCards: 0,
           starts: 0,
@@ -474,6 +479,7 @@ export async function readPlayerReportStats(
             familyNamePrefix: persons.familyNamePrefix,
             givenName: persons.givenName,
             id: players.id,
+            slug: persons.slug,
           })
           .from(players)
           .innerJoin(persons, eq(players.personId, persons.id))
@@ -486,6 +492,7 @@ export async function readPlayerReportStats(
       found.personFamilyName = person.familyName
       found.personFamilyNamePrefix = person.familyNamePrefix
       found.personGivenName = person.givenName
+      found.personSlug = person.slug
     }
   }
 
@@ -576,6 +583,7 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
       givenName: persons.givenName,
       id: players.id,
       searchTerm: players.searchTerm,
+      slug: persons.slug,
     })
     .from(players)
     .leftJoin(persons, eq(persons.id, players.personId))
@@ -591,6 +599,7 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
         familyNamePrefix: row.familyNamePrefix,
         givenName: row.givenName,
         searchTerm: row.searchTerm,
+        slug: row.slug,
       })
     }
   }

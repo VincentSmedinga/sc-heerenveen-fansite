@@ -460,6 +460,7 @@ describe('listSeasonPlayers', () => {
       personFamilyName: null,
       personFamilyNamePrefix: null,
       personGivenName: null,
+      personSlug: null,
       position: 'doelman',
       searchTerm: 'Keeper',
       shirtNumber: 1,

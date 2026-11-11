@@ -2621,6 +2621,7 @@
   De kaart Doelpuntenmakers gaat naar de zijkolom, op het zachte vlak, met Bijzondere doelpunten en de bronvermelding.
   De schakelaar voor de competitie gaat mee naar de zijkolom.
   De selectie toont het rugnummer en de naam, zonder link, en ook spelers die de selectie verlieten.
+  **Later:** sinds #1087 (11 november 2026) is de naam van een speler met een pagina een link (zie _De naam van een speler van ons linkt naar zijn pagina_).
   - **De kaart:** `SeasonSquadCard` in `src/SeasonSquadCard.tsx` heeft een kop van niveau 2 met het anker `#selectie`, de zin, en een kop van niveau 3 en een lijst per positie: Doelmannen, Verdedigers, Middenvelders en Aanvallers.
     Een positie zonder spelers blijft weg.
     Een speler zonder positie, tussen spelers mét positie, staat in een laatste deel "Positie onbekend".
@@ -4538,6 +4539,26 @@
 - **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul.
   Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
 - **Alternatieven:** één tabel met alle kolommen (te breed op een telefoon); de kolommen van de tabel Alle spelers (die hebben minuten, en die hebben we niet).
+
+## De naam van een speler van ons linkt naar zijn pagina, op de plekken waar hij als naam staat
+
+- **Datum:** 11 november 2026
+- **Besluit:** de naam van een speler van ons met een pagina is een link naar `/spelers/<naam>` op de kaart Selectie, in de lijsten met doelpuntenmakers en de bijzondere doelpunten op Spelers, in de kaart Doelpuntenmakers op de pagina van een club, en op de pagina van een wedstrijd (de kop, het verloop, de strafschoppenserie, de lijst onder het veld en de wissels) (#1087).
+  Een speler van de tegenstander en een naam zonder persoon of zonder pagina blijft gewone tekst.
+  - **Eén functie:** het adres komt uit `playerAddress` in `src/player-address.ts`, van `persons.slug`; `playerHref` geeft niets bij een persoon zonder naam in het adres.
+    Een doelpunt van de tegenstander krijgt nooit een adres (`goalHref`), ook niet van een speler die ooit bij ons speelde.
+  - **De hele naam is één link,** met de vlag erin als versiering (`alt=""`) en het rugnummer ernaast.
+    Zo heet de link de naam en niet "Nederland Jan Jansen".
+    `PlayerName` heeft daarvoor `href`.
+  - **Het veld zelf heeft geen links:** de schijven op het veld zijn een tekening die voor een schermlezer verborgen is, op een gekleurde ondergrond.
+    De lijst onder het veld noemt dezelfde spelers met een link.
+  - **De wissels** zijn één link om de hele regel, omdat de tekening verborgen is voor een schermlezer en een link in verborgen tekst niet kan: de link heet de zin die een schermlezer anders hoort.
+    Alleen de naam heeft de kleur en de streep van een link.
+  - **De kop van een wedstrijd** heeft de naam als link, en de minuut en het merkje erachter buiten de link.
+    Een schermlezer hoort de naam één keer.
+- **Waarom:** een pagina die je niet kunt vinden, helpt niemand.
+  Alleen onze spelers hebben een pagina (zie _Alleen onze eigen spelers hebben een pagina_).
+- **Alternatieven:** de vlag buiten de link (de vlag is dan een apart doel dat nergens heen gaat); de schijf op het veld als link (de kleur van een link haalt het contrast op het gras niet); een link in elke regel van de wissels (een link in verborgen tekst).
 
 ## De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen
 

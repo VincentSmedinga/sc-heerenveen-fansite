@@ -92,10 +92,10 @@ function MultiGoalFact({ players }: { players: MultiGoalScorer[] }) {
 
   return (
     <ShortFact>
-      {players.map(({ givenName, id, surname, times }, index) => (
+      {players.map(({ givenName, href, id, surname, times }, index) => (
         <Fragment key={id}>
           {index > 0 && ', '}
-          <PlayerName givenName={givenName} surname={surname} />
+          <PlayerName givenName={givenName} href={href} surname={surname} />
           {times > 1 && ` ${times}×`}
         </Fragment>
       ))}

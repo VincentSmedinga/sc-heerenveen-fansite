@@ -11,6 +11,8 @@ export type PlayerFiguresRow = {
   givenName?: string | undefined
   /** The goals he scored, without own goals. */
   goals: number
+  /** The page of the player: his name is then a link (see `PlayerName`). */
+  href?: string | undefined
   /** What tells the player from the others, such as his id: it is the key of the row. */
   id: number | string
   /** The minutes he played. */
@@ -87,7 +89,7 @@ export const PlayerFiguresTable = ({ caption, className, rows, ...props }: Playe
         {rows.map((row) => (
           <tr key={row.id}>
             <th scope="row">
-              <PlayerName givenName={row.givenName} surname={row.surname} />
+              <PlayerName givenName={row.givenName} href={row.href} surname={row.surname} />
             </th>
             {columns.map(({ id }) => (
               <td className={classNames('hf-numeric', id === 'minutes' && 'hf-key')} key={id}>

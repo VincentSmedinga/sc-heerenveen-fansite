@@ -1889,6 +1889,7 @@ describe('the matches and the table of a season', () => {
           personFamilyNamePrefix: null,
           personGivenName: null,
           personId: null,
+          personSlug: null,
           player: 'Vroeg',
           playerId: null,
           playerPage: null,
@@ -1903,6 +1904,7 @@ describe('the matches and the table of a season', () => {
           personFamilyNamePrefix: null,
           personGivenName: null,
           personId: null,
+          personSlug: null,
           player: 'Voor rust',
           playerId: null,
           playerPage: null,
@@ -1917,6 +1919,7 @@ describe('the matches and the table of a season', () => {
           personFamilyNamePrefix: null,
           personGivenName: null,
           personId: null,
+          personSlug: null,
           player: 'Blessuretijd',
           playerId: null,
           playerPage: null,
@@ -1931,6 +1934,7 @@ describe('the matches and the table of a season', () => {
           personFamilyNamePrefix: null,
           personGivenName: null,
           personId: null,
+          personSlug: null,
           player: 'Na rust',
           playerId: null,
           playerPage: null,
@@ -1945,6 +1949,7 @@ describe('the matches and the table of a season', () => {
           personFamilyNamePrefix: null,
           personGivenName: null,
           personId: null,
+          personSlug: null,
           player: 'Late',
           playerId: null,
           playerPage: null,
@@ -2011,6 +2016,8 @@ describe('the matches and the table of a season', () => {
         },
       ])
 
+      await database.db.update(persons).set({ slug: 'luca-oyen' }).where(eq(persons.id, lucaPerson))
+
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 
       expect(
@@ -2028,6 +2035,8 @@ describe('the matches and the table of a season', () => {
         ['Kemper', null, null, null, null, null],
         ['Van Aken', null, opponentPerson, 'Joost', 'van', 'Aken'],
       ])
+      // The address name of the person goes with the goal: only a person who has one gives it.
+      expect(cup?.goals.map((goal) => goal.personSlug)).toEqual(['luca-oyen', null, null, null])
     })
 
     it('gives only the season it is asked for', async () => {

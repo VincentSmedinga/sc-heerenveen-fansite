@@ -837,10 +837,11 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * goal, ours or an opponent's, with the name the importer kept of him in `personGivenName`,
  * `personFamilyNamePrefix` and `personFamilyName` (each null while the importer has not read
  * the article, and all null for a goal without a person, such as a title that was not looked
- * up). The moment the importer saw a result stays internal. Only the season that is asked for
- * is read: the pages show the current season alone. `opponent` is the name the club had on the
- * day of the match when the club has a list of names of its own (`club_name_periods`), and
- * otherwise the spelling of Wikipedia.
+ * up). `personSlug` is the address name of his page (`persons.slug`), null for a person who has
+ * none: a player of the opponent who never played for us. The moment the importer saw a result
+ * stays internal. Only the season that is asked for is read: the pages show the current season
+ * alone. `opponent` is the name the club had on the day of the match when the club has a list
+ * of names of its own (`club_name_periods`), and otherwise the spelling of Wikipedia.
  */
 export async function listSeasonMatches(db: Database, season: string) {
   const rows = await db
@@ -887,7 +888,8 @@ export async function listSeasonMatches(db: Database, season: string) {
  * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
  * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
  * `personFamilyName`, null while the importer has not read the article), the position, the
- * shirt number (null when the list the player comes from gives none), the country code of the
+ * shirt number (null when the list the player comes from gives none), `personSlug` (the address
+ * name of his page, null while he has none), the country code of the
  * flag (`country`) and the source of the row. The position and the country are those of the
  * row of the season, and else the line and the country of the person (#1051); null when
  * neither has one. Unlike `listSquad`, this also gives a player who left the squad:
@@ -903,6 +905,7 @@ export function listSeasonPlayers(db: Database, season: string) {
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
+      personSlug: persons.slug,
       position: sql<null | PlayerPosition>`coalesce(${players.position}, ${persons.line})`,
       searchTerm: players.searchTerm,
       shirtNumber: players.shirtNumber,
@@ -1181,6 +1184,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
       personId: matchGoals.personId,
+      personSlug: persons.slug,
       player: matchGoals.player,
       playerId: matchGoals.playerId,
       playerPage: matchGoals.wikipediaPage,
@@ -1213,6 +1217,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
         personFamilyNamePrefix: goal.personFamilyNamePrefix,
         personGivenName: goal.personGivenName,
         personId: goal.personId,
+        personSlug: goal.personSlug,
         player: goal.player,
         playerId: goal.playerId,
         playerPage: goal.playerPage,

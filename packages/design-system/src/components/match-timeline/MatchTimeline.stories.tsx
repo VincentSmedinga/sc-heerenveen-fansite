@@ -3,7 +3,7 @@ import preview from '#.storybook/preview'
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
-import { MatchTimeline, type MatchTimelineEvent } from './MatchTimeline'
+import { MatchTimeline, type MatchTimelineEvent, type MatchTimelineProps } from './MatchTimeline'
 
 const meta = preview.meta({
   argTypes: {
@@ -71,6 +71,51 @@ const regularTime: MatchTimelineEvent[] = [
 export const Default = meta.story({
   args: { events: regularTime, extraTime: false, headingLevel: 3 },
   name: 'Een wedstrijd van 90 minuten',
+})
+
+const withPage = (surname: string, givenName: string, href: string) => ({ ...name(surname, givenName), href })
+
+const withPages: MatchTimelineProps = {
+  events: [
+    {
+      assist: withPage('Nepper', 'Gerrit', '#nepper'),
+      kind: 'goal',
+      minute: 12,
+      ours: true,
+      player: withPage('Hoekstra', 'Wouter', '#hoekstra'),
+      team: ours,
+    },
+    { kind: 'goal', minute: 40, ours: false, player: name('Dummydijk', 'Frank'), team: theirs },
+    {
+      kind: 'substitution',
+      minute: 60,
+      ours: true,
+      playerIn: withPage('Nepper', 'Gerrit', '#nepper'),
+      playerOut: name('Idzenga', 'Thijs'),
+      team: ours,
+    },
+  ],
+  extraTime: false,
+  headingLevel: 3,
+}
+
+export const WithPages = meta.story({
+  args: withPages,
+  name: 'Een speler van ons met een pagina is een link',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een speler met `href` heeft een naam die een link is: de scorer, de assist en wie erin komt. Een speler van de tegenstander, of een naam zonder pagina, blijft gewone tekst.',
+      },
+    },
+  },
+})
+
+export const WithPagesDark = meta.story({
+  args: withPages,
+  globals: { theme: 'dark' },
+  name: 'Een speler met een pagina, donker',
 })
 
 export const ExtraTime = meta.story({

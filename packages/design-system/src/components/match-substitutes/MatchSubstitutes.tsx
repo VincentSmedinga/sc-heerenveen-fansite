@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 import { Heading, type HeadingLevel } from '../heading/Heading'
@@ -77,6 +77,21 @@ export function substituteSentence(substitute: MatchSubstitute): string {
 }
 
 /**
+ * The line of a substitute, one link to the page of the player when he has one. The drawing is
+ * hidden from a screen reader, so the link is named by the sentence beside it; a link on the
+ * name in the drawing would be a link inside what is hidden. The name in it is underlined and
+ * in the colour of a link (match-substitutes.css), the rest of the line is not.
+ */
+const Line = ({ children, href }: { children: ReactNode; href: string | undefined }) =>
+  href === undefined ? (
+    children
+  ) : (
+    <a className="hf-match-substitutes-link" href={href}>
+      {children}
+    </a>
+  )
+
+/**
  * The substitutes of one team who came on, under a heading "Wissels <team>". Each has a
  * disc with the shirt number and a ring that starts at the minute he came on (the same as
  * on the pitch, without the quiet track under it), his name, and under that in small
@@ -110,36 +125,38 @@ export const MatchSubstitutes = ({
         <ul aria-label={`Wissels ${team}`} className="hf-match-substitutes-list" role="list">
           {ordered.map((substitute, index) => (
             <li key={substitute.shirtNumber ?? `no-number-${index}`}>
-              <span className="hf-visually-hidden">{substituteSentence(substitute)}</span>
-              <span aria-hidden="true" className="hf-match-substitutes-line">
-                <PlayerDisc
-                  arc={pitchRingArc(
-                    {
-                      minutesFrom: substitute.minute,
-                      minutesPlayed: substitute.minutesPlayed,
-                      name: substitute.name,
-                      shirtNumber: substitute.shirtNumber,
-                    },
-                    extraTime,
-                  )}
-                  ours={ours}
-                  shirtNumber={substitute.shirtNumber}
-                />
-                <span className="hf-match-substitutes-text">
-                  <PlayerName givenName={substitute.name.givenName} surname={substitute.name.surname} />
-                  <span className="hf-match-substitutes-detail">
-                    <MatchEventIcon kind="in" /> {pitchMinute(substitute.minute, substitute.stoppageMinutes)} voor{' '}
-                    {fullName(substitute.playerOut)}
-                    {substitute.goals?.map((goal, goalIndex) => (
-                      <span key={`${goal.minute ?? 'unknown'}-${goal.stoppageMinutes ?? 0}-${goalIndex}`}>
-                        {' '}
-                        · <MatchEventIcon kind={goal.ownGoal === true ? 'own-goal' : 'goal'} />{' '}
-                        {pitchMinute(goal.minute, goal.stoppageMinutes)}
-                      </span>
-                    ))}
+              <Line href={substitute.name.href}>
+                <span className="hf-visually-hidden">{substituteSentence(substitute)}</span>
+                <span aria-hidden="true" className="hf-match-substitutes-line">
+                  <PlayerDisc
+                    arc={pitchRingArc(
+                      {
+                        minutesFrom: substitute.minute,
+                        minutesPlayed: substitute.minutesPlayed,
+                        name: substitute.name,
+                        shirtNumber: substitute.shirtNumber,
+                      },
+                      extraTime,
+                    )}
+                    ours={ours}
+                    shirtNumber={substitute.shirtNumber}
+                  />
+                  <span className="hf-match-substitutes-text">
+                    <PlayerName givenName={substitute.name.givenName} surname={substitute.name.surname} />
+                    <span className="hf-match-substitutes-detail">
+                      <MatchEventIcon kind="in" /> {pitchMinute(substitute.minute, substitute.stoppageMinutes)} voor{' '}
+                      {fullName(substitute.playerOut)}
+                      {substitute.goals?.map((goal, goalIndex) => (
+                        <span key={`${goal.minute ?? 'unknown'}-${goal.stoppageMinutes ?? 0}-${goalIndex}`}>
+                          {' '}
+                          · <MatchEventIcon kind={goal.ownGoal === true ? 'own-goal' : 'goal'} />{' '}
+                          {pitchMinute(goal.minute, goal.stoppageMinutes)}
+                        </span>
+                      ))}
+                    </span>
                   </span>
                 </span>
-              </span>
+              </Line>
             </li>
           ))}
         </ul>

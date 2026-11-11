@@ -144,6 +144,7 @@ describe('the cards with results of an earlier season, one for each competition'
     personFamilyNamePrefix: null,
     personGivenName: null,
     personId: null,
+    personSlug: null,
     player: 'Proefman',
     playerId: null,
     playerPage: null,
