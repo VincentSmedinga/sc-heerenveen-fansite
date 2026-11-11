@@ -24,7 +24,7 @@
     }
   }
 
-  /* A list of players has two columns of its own on a wide screen, but a card here is only half. */
+  /* A list of players has two columns on a wide screen, but a card here is half as wide. */
   .hf-card-columns-grid .hf-player-list {
     columns: 1;
   }

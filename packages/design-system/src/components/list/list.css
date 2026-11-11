@@ -68,7 +68,7 @@
   }
 }
 
-/* A list in two columns: the items follow each other down the first column and then the second. */
+/* A list in two columns: the items go down the first column and then down the second. */
 @layer hf.components {
   .hf-list-columns {
     column-count: 2;
