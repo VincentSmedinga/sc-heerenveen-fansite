@@ -41,6 +41,7 @@ const madeUpSeason: PlayerSeason = {
 
 // A made-up player of ours.
 const player: PlayerPage = {
+  age: 52,
   birthPlace: 'Emmen',
   birthYear: '1974',
   country: 'NL',
@@ -134,18 +135,24 @@ describe('the page of a player', () => {
     error.mockRestore()
   })
 
-  it('has one line with the line, the flag as decoration with the country in words, and the year and place of birth', async () => {
+  it('has one line with the line, the flag as decoration with the country in words, and the place, year and age', async () => {
     const html = await render()
     const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
 
     expect(line).toMatch(
-      /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · geboren in 1974 in Emmen$/s,
+      /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
     )
   })
 
   it('leaves out what we do not know, with its separator', async () => {
     expect(await render({ birthPlace: undefined, country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">Geboren in 1974</p>',
+      '<p class="hf-meta">1974 · 52 jaar</p>',
+    )
+    expect(await render({ age: undefined, country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Emmen, 1974</p>',
+    )
+    expect(await render({ birthYear: undefined, country: undefined, line: undefined })).toContain(
+      '<p class="hf-meta">Emmen</p>',
     )
     expect(await render({ birthPlace: undefined, birthYear: undefined })).toMatch(
       /<p class="hf-meta">Aanvaller · <span class="hf-country-name">.*?Nederland<\/span><\/p>/s,
@@ -353,6 +360,24 @@ describe('playerPageOf', () => {
 
     expect(page.birthYear).toBe('1974')
     expect(JSON.stringify(page)).not.toContain('1974-05-06')
+  })
+
+  it('works out the age from the whole date, on the day of the birthday and the day before', () => {
+    const rows = [{ name: 'Jan de Vries', season: '2004/05' }]
+
+    expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T10:00:00Z')).age).toBe(51)
+    expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-06T10:00:00Z')).age).toBe(52)
+    // Just after midnight in the Netherlands it is already the next day.
+    expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T22:30:00Z')).age).toBe(52)
+  })
+
+  it('has no age without the whole date, only the year or the month', () => {
+    const rows = [{ name: 'Jan de Vries', season: '2004/05' }]
+
+    expect(playerPageOf({ ...person, birthDatePrecision: 'year' }, rows, 'Emmen').age).toBeUndefined()
+    expect(playerPageOf({ ...person, birthDatePrecision: 'month' }, rows, 'Emmen').age).toBeUndefined()
+    expect(playerPageOf({ ...person, birthDate: null, birthDatePrecision: null }, rows, 'Emmen').age).toBeUndefined()
+    expect(playerPageOf({ ...person, birthDatePrecision: 'year' }, rows, 'Emmen').birthYear).toBe('1974')
   })
 
   it('takes the name of his newest row while the person has none', () => {

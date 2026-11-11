@@ -14,6 +14,11 @@ import { type NameParts, personNameParts, splitPersonName } from './player-name'
  * (#1082 to #1086) add their own data next to this; the head and the credit read only this.
  */
 export type PlayerPage = {
+  /**
+   * His age in whole years, worked out from the full date of birth, which never leaves this
+   * module. `undefined` when we do not have the full date (only the year or the month).
+   */
+  age: number | undefined
   /** The place of birth, as Wikidata names it. */
   birthPlace: string | undefined
   /** The year of birth. The full date is a personal datum and never leaves this module. */
@@ -129,6 +134,7 @@ export function playerPageOf(
   person: Person,
   rows: readonly { name: string; season: string }[],
   birthPlace: string | undefined,
+  today = new Date(),
 ): PlayerPage {
   const name = person.name ?? rows[0]?.name ?? ''
   const parts = personNameParts({
@@ -138,6 +144,7 @@ export function playerPageOf(
   })
 
   return {
+    age: ageOf(person, today),
     birthPlace,
     birthYear: person.birthDate?.slice(0, 4),
     country: person.country ?? undefined,
@@ -154,4 +161,38 @@ export function playerPageOf(
         ? undefined
         : { language: person.englishTitle ? 'en' : 'nl', title: person.wikipediaPage },
   }
+}
+
+const dayFormat = new Intl.DateTimeFormat('en-CA', {
+  day: '2-digit',
+  month: '2-digit',
+  timeZone: 'Europe/Amsterdam',
+  year: 'numeric',
+})
+
+/**
+ * His age in whole years on a day in the Netherlands, from his full date of birth. A birth date
+ * that Wikidata only knows by month or by year gives no age, and nor does a person without one.
+ * We keep no date of death, so the age of a player who has died is not left out here (#1099).
+ */
+export function ageOf(person: Pick<Person, 'birthDate' | 'birthDatePrecision'>, today: Date): number | undefined {
+  const { birthDate, birthDatePrecision } = person
+
+  if (birthDate === null || birthDatePrecision !== 'day') {
+    return undefined
+  }
+
+  const [year, month, day] = birthDate.split('-').map(Number)
+  const [nowYear, nowMonth, nowDay] = dayFormat.format(today).split('-').map(Number)
+
+  if (year === undefined || month === undefined || day === undefined) {
+    return undefined
+  }
+  if (nowYear === undefined || nowMonth === undefined || nowDay === undefined) {
+    return undefined
+  }
+
+  const age = nowYear - year - (nowMonth < month || (nowMonth === month && nowDay < day) ? 1 : 0)
+
+  return age < 0 ? undefined : age
 }

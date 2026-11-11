@@ -274,6 +274,29 @@ export const SeasonsWithTotal = meta.story({
   ),
 })
 
+export const SeasonsWithGap = meta.story({
+  name: 'Seizoenen met een onderbreking',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="onderbreking-kop">
+        <Heading id="onderbreking-kop" level={2}>
+          Per seizoen
+        </Heading>
+        <DataTable
+          caption="De cijfers van een speler per seizoen, het nieuwste seizoen eerst, met het totaal onderaan"
+          columns={['Seizoen', ...seasonColumns]}
+          rows={[
+            { cells: [28, 24, 9, 4], header: '2025/26', href: '/spelers/2025-26' },
+            { cells: [], gap: true, header: 'niet bij sc Heerenveen' },
+            { cells: [30, 26, 12, '–'], header: '2022/23', href: '/spelers/2022-23' },
+            { cells: [58, 50, 21, 4], header: 'Totaal', total: true },
+          ]}
+        />
+      </Card>
+    </div>
+  ),
+})
+
 export const NamesWithPeriods = meta.story({
   name: 'Namen met een tweede regel op een telefoon',
   render: () => (

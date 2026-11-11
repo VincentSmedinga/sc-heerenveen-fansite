@@ -46,4 +46,15 @@ describe('KeyFigures', () => {
 
     expect(container.querySelector('ul#kerngetallen')).not.toBeNull()
   })
+
+  it('puts four figures in two columns, whatever the width, and two or three in the row that wraps', () => {
+    const four = [...figures, { figure: '3', label: 'seizoenen', note: 'tussen 2002 en 2005' }]
+    const { container, rerender } = render(<KeyFigures figures={four} />)
+
+    expect(container.querySelector('ul.hf-key-figures-four')).not.toBeNull()
+
+    rerender(<KeyFigures figures={figures} />)
+
+    expect(container.querySelector('ul.hf-key-figures-four')).toBeNull()
+  })
 })

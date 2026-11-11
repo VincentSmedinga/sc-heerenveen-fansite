@@ -4652,3 +4652,22 @@
   - **Nieuw in het designsysteem:** `FigureList` (namen met een getal aan het eind van de regel) en `stacked` bij `DescriptionList`.
 - **Waarom:** een supporter ziet zo in een oogopslag waar en tegen wie een speler scoorde, zonder dat de tabel en de loopbaan iets herhalen.
 - **Alternatieven:** de bron in de hoofdkolom laten (het ontwerp zet hem onderaan de zijkolom); bij gelijke assists de eerste noemen (onjuist); een tweede leesronde voor de zijkolom (dubbel werk).
+
+## De regel onder de naam is plaats, jaar en leeftijd, en de kerngetallen beginnen met seizoenen en wedstrijden
+
+- **Datum:** 11 november 2026
+- **Besluit:** de regel onder de naam van een speler toont "Herten, 2003 · 22 jaar" (#1099).
+  Zonder plaats staat er "2003 · 22 jaar", zonder jaar alleen de plaats, en zonder beide valt dit deel weg.
+  - **De leeftijd** rekent `ageOf` in `apps/site/src/player-page.ts` uit de volledige geboortedatum, op de dag van nu in Nederland.
+    Kennen we alleen het jaar of de maand (`birth_date_precision` is niet `day`), dan valt de leeftijd weg.
+    De volledige datum blijft in die module en staat nergens op de pagina.
+  - **Een overleden speler** krijgt geen leeftijd, maar we hebben geen datum van overlijden: het schema en de import van Wikidata (`P570`) kennen er geen.
+    Tot een issue dat toevoegt, staat er dus ook een leeftijd bij een speler die overleden is.
+  - **De volgorde van de kerngetallen:** aanvaller, middenvelder en speler zonder linie: seizoenen, wedstrijden, doelpunten, assists; verdediger: seizoenen, wedstrijden, keer de nul met hem in de basis, doelpunten; doelman: seizoenen, wedstrijden, keer de nul, tegendoelpunten per wedstrijd.
+  - **De tabel Per seizoen** heeft tussen twee periodes een rij met een verticaal beletselteken, die een schermlezer leest als "niet bij sc Heerenveen".
+    De rij Totaal en de volgorde veranderen niet.
+- **Waarom:** de regel was lang, en een supporter wil weten hoe oud een speler is, niet de datum.
+  Seizoenen en wedstrijden zeggen bij elke linie het eerst wat een speler voor de club deed.
+  Een onderbreking laat zien dat een speler tussendoor weg was.
+- **Alternatieven:** de leeftijd uit het jaar rekenen (kan een jaar fout zijn); de leeftijd weglaten (de projecteigenaar wil hem); een speler ouder dan honderd jaar als overleden zien (een gok).
+- **Later:** vervangt "geboren in 1974 in Emmen" uit "De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum" en de volgorde per linie en de regel met het geboortejaar uit "De pagina van een speler begint met een link terug naar Spelers en met zijn kerngetallen".

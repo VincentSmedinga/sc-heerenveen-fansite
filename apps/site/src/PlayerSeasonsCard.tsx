@@ -2,6 +2,8 @@ import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fans
 
 import type { PlayerSeason } from './player-seasons'
 
+import { nextSeason } from './player-page'
+
 /** The figures a column can show, each a field of `PlayerSeason`. */
 type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'played' | 'started' | 'yellow'
 
@@ -14,6 +16,9 @@ const fieldColumns: readonly FigureId[] = ['played', 'started', 'goals', 'assist
 /** The id of the card, for the heading that names it. */
 export const playerSeasonsCardId = 'per-seizoen'
 
+/** What a screen reader reads for the row between two spells, in place of the sign. */
+const gapHeader = 'niet bij sc Heerenveen'
+
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
 const dash = '–'
 
@@ -24,7 +29,13 @@ export type PlayerSeasonsTable = {
   /** Whether a column adds up every season: the total is then complete. */
   complete: Record<FigureId, boolean>
   /** The seasons, the newest first, and the total. A figure we do not have is a dash. */
-  rows: { cells: (number | string)[]; header: string; season?: string; shirtNumber?: number }[]
+  rows: {
+    cells: (number | string)[]
+    gap?: true
+    header: string
+    season?: string
+    shirtNumber?: number
+  }[]
 }
 
 /**
@@ -43,12 +54,20 @@ export function playerSeasonsTable(seasons: readonly PlayerSeason[], goalkeeper:
       wanted.map((id) => [id, seasons.every((season) => season[id] !== undefined)]),
     ) as Record<FigureId, boolean>,
     rows: [
-      ...seasons.map((season) => ({
-        cells: ids.map((id) => season[id] ?? dash),
-        header: season.season,
-        season: season.season,
-        ...(season.shirtNumber === undefined ? {} : { shirtNumber: season.shirtNumber }),
-      })),
+      ...seasons.flatMap((season, index) => {
+        const older = seasons[index + 1]
+        const row = {
+          cells: ids.map((id) => season[id] ?? dash),
+          header: season.season,
+          season: season.season,
+          ...(season.shirtNumber === undefined ? {} : { shirtNumber: season.shirtNumber }),
+        }
+
+        // A season that does not follow the one before it (they run newest first): he was away.
+        return older !== undefined && nextSeason(older.season) !== season.season
+          ? [row, { cells: [], gap: true as const, header: gapHeader }]
+          : [row]
+      }),
       { cells: ids.map((id) => totals(id)), header: 'Totaal' },
     ],
   }
@@ -93,8 +112,9 @@ export function PlayerSeasonsCard({
         columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}
         rows={table.rows.map((row) => ({
           cells: row.cells,
+          ...(row.gap === true ? { gap: true } : {}),
           header: row.header,
-          ...(row.season === undefined ? { total: true } : { href: address(row.season) }),
+          ...(row.season === undefined ? (row.gap === true ? {} : { total: true }) : { href: address(row.season) }),
           ...(row.shirtNumber === undefined ? {} : { aside: `nr. ${row.shirtNumber}` }),
         }))}
       />
