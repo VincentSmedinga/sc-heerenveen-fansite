@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
+import { PlayerName } from '../player-name/PlayerName'
 
 /** One player of a PlayerList. */
 export type PlayerListItem = {
@@ -11,13 +12,22 @@ export type PlayerListItem = {
   href?: string | undefined
   /** Tells the players apart. */
   key: string
-  /** The given name with the prefix behind it, such as `Joost van`. Absent for one name. */
+  /**
+   * The given name with the prefix behind it, such as `Joost van`. Absent for one name. With
+   * `order` `given-first` it is the given name alone and the surname has the prefix.
+   */
   rest?: string | undefined
   /** The family name, in the stronger weight. */
   surname: string
 }
 
 export type PlayerListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> & {
+  /**
+   * How a name reads. `surname-first` is `Aken, Joost van`, for a list put in order by family
+   * name. `given-first` is `Joost van Aken` (`PlayerName`), for a list of results. Defaults to
+   * `surname-first`.
+   */
+  order?: 'given-first' | 'surname-first' | undefined
   /** The players, in the order they are read. */
   players: readonly PlayerListItem[]
 }
@@ -29,15 +39,18 @@ export type PlayerListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> &
  * narrow screen the rows stand in one column; on a wide one in two, read from top to bottom.
  * player-list.css gives the look.
  */
-export const PlayerList = ({ className, players, ...props }: PlayerListProps) => (
+export const PlayerList = ({ className, order = 'surname-first', players, ...props }: PlayerListProps) => (
   <ul {...props} className={classNames('hf-player-list', className)} role="list">
     {players.map(({ facts, href, key, rest, surname }) => {
-      const name = (
-        <>
-          <strong className="hf-player-list-surname">{surname}</strong>
-          {rest === undefined || rest === '' ? null : `, ${rest}`}
-        </>
-      )
+      const name =
+        order === 'given-first' ? (
+          <PlayerName givenName={rest} surname={surname} />
+        ) : (
+          <>
+            <strong className="hf-player-list-surname">{surname}</strong>
+            {rest === undefined || rest === '' ? null : `, ${rest}`}
+          </>
+        )
 
       return (
         <li className="hf-player-list-row" key={key}>

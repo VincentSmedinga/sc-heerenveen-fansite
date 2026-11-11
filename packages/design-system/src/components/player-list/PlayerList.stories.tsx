@@ -14,7 +14,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een lijst met spelers voor een lange pagina: de achternaam vet, dan de voornaam, en eronder in kleine letters wat we van zijn tijd bij ons weten.',
+          'Een lijst met spelers voor een lange pagina: de achternaam vet, dan de voornaam (of met `order` de voornaam eerst, voor zoekresultaten), en eronder in kleine letters wat we van zijn tijd bij ons weten.',
           'Een speler zonder pagina is gewone tekst. Zet de lijst onder een kop van niveau 2 die zegt wat de lijst groepeert.',
         ].join('\n'),
       },
@@ -39,6 +39,26 @@ export const Default = meta.story({
     <Card aria-labelledby="spelers-lijst">
       <Heading id="spelers-lijst" level={2}>
         A
+      </Heading>
+      <PlayerList {...args} />
+    </Card>
+  ),
+})
+
+export const GivenNameFirst = meta.story({
+  args: {
+    order: 'given-first',
+    players: [
+      { facts: 'Verdediger · 2013/14 – 2022/23', href: '#', key: 'a', rest: 'Joost', surname: 'van Aken' },
+      { facts: 'Aanvaller · 2024/25', href: '#', key: 'b', rest: 'Alfreð', surname: 'Finnbogason' },
+      { facts: '2009/10', key: 'c', surname: 'Dinho' },
+    ],
+  },
+  name: 'Voornaam eerst, voor zoekresultaten',
+  render: (args) => (
+    <Card aria-labelledby="spelers-resultaten">
+      <Heading id="spelers-resultaten" level={2}>
+        3 spelers voor „an”
       </Heading>
       <PlayerList {...args} />
     </Card>

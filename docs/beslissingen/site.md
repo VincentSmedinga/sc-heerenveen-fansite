@@ -4889,3 +4889,21 @@
 - **Besluit:** "Op nummer" komt later in een eigen issue en staat niet in de keuze tot die er is (#1138).
 - **Waarom:** een keuze zonder pagina erachter is een dode link, en het rugnummer vraagt eigen gegevens.
 - **Alternatieven:** de keuze nu al tonen, uitgeschakeld.
+
+## Spelers hebben een eigen zoekpagina, `/spelers/zoeken`
+
+- **Datum:** 11 november 2026
+- **Besluit:** spelers hebben een eigen zoekpagina, `/spelers/zoeken`, los van het zoeken in het nieuws (#1130).
+  Een speler zoekt op zijn naam en op zijn oude namen, met de letterregels van het adres.
+  Het adres `zoeken` is voor spelers gereserveerd, zoals `kies` en `overzicht` (`reservedPlayerSlugs`).
+  - **Zoeken:** elk woord wordt geschreven zoals een adres (`foldLetters`, streepjes als scheiding) en moet een deel zijn van `persons.slug` of van een rij in `person_slugs`; een `đ` zoekt als `dj` en als `d`.
+    Een woord zonder letter of cijfer vindt niemand.
+    De grenzen en de tekst zijn die van het nieuws (`parseSearch`, gedeeld).
+  - **Het resultaat:** hoogstens tien spelers op achternaam en dan voornaam, met de naam als link en daaronder de linie en de seizoenen ("2019/20 – 2023/24").
+    Het is `PlayerList` met `order="given-first"`, zodat de naam leest als `PlayerName` en niet als "Aken, Joost van".
+  - **De link:** een tweede link in de titelrij van `/spelers`, naast "Alle spelers"; geen zoekveld in het menu of de kop.
+- **Waarom:** nieuws en spelers hebben al elk hun eigen onderdeel in het menu, en twee losse pagina's houden formulier en resultaten eenvoudig.
+  Een speler heeft geen datum en een andere vorm dan een bericht, dus ze in één lijst mengen vraagt om regels voor de volgorde en de soort.
+  Dezelfde letterregels als het adres zorgen dat "Džeko" en "Dzeko" dezelfde speler vinden, en de oude adressen vinden de oude naam.
+- **Alternatieven:** één zoekpagina voor de hele site op `/zoeken`, met de spelers boven het nieuws in één lijst; een zoekveld op `/spelers` zelf; een zoekindex of FULLTEXT (de lijst is klein); alleen zoeken op het begin van de achternaam.
+- **Nadeel:** een bezoeker moet weten dat spelers een eigen zoekpagina hebben; een zoekvraag naar een speler op `/nieuws/zoeken` vindt alleen koppen.
