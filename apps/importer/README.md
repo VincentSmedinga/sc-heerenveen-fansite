@@ -1196,7 +1196,7 @@ De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/d
 3. Heeft de wedstrijd geen artikel, dan zoekt de import de club op naam, ook tussen de andere namen (`club_names`).
    Hoofdletters, accenten en leestekens tellen niet mee: `N.E.C.` en `NEC` zijn dezelfde naam.
    Is er geen, dan maakt hij een nieuwe club zonder artikel.
-4. De slug van een nieuwe club komt van de naam, zonder accenten, punten en apostrofs (`N.E.C.` geeft `nec`, `Be Quick '28` geeft `be-quick-28`).
+4. De slug van een nieuwe club komt van de naam, zonder accenten, punten en apostrofs, met letters zonder los accent uitgeschreven (`N.E.C.` geeft `nec`, `Be Quick '28` geeft `be-quick-28`, `Lillestrøm SK` geeft `lillestrom-sk`).
    Heeft een andere club de slug al, dan komt er `-2` achter, dan `-3`, enzovoort.
    `kies` is nooit een slug, want de site gebruikt `kies` zelf in een adres, zoals `/cijfers/kies`.
    Een club houdt zijn slug, ook als zijn naam verandert.

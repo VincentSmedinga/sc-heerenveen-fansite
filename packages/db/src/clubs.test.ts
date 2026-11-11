@@ -15,7 +15,10 @@ import {
   unrememberedClubPages,
   withClubs,
 } from './clubs.ts'
+import { personSlug } from './person-slugs.ts'
 import { clubNames, clubPages, clubs, matches } from './schema.ts'
+import { madeUpMatches, madeUpOldMatches } from './seed.ts'
+import { lostLetters, slugLetters } from './slug-letters.ts'
 import { createTestDatabase } from './test-database.ts'
 
 describe('normaliseClubName', () => {
@@ -41,9 +44,30 @@ describe('clubSlug', () => {
     ['Telstar (voetbalclub)', 'telstar-voetbalclub'],
     ['VVV-Venlo', 'vvv-venlo'],
     ['FC Zürich', 'fc-zurich'],
+    ['Lillestrøm SK', 'lillestrom-sk'],
+    ['Næstved IF', 'naestved-if'],
+    ['Øster Æ Þór Łódź', 'oster-ae-thor-lodz'],
     ['???', 'club'],
   ])('writes %s as %s', (name, slug) => {
     expect(clubSlug(name)).toBe(slug)
+  })
+
+  it('writes the letters of the list of slugLetters like the address of a player does', () => {
+    for (const [letter, written] of Object.entries(slugLetters)) {
+      expect(clubSlug(`Club ${letter}`)).toBe(`club-${written}`)
+      expect(personSlug(`Club ${letter}`, 'NL')).toBe(`club-${written}`)
+    }
+  })
+
+  it('loses no letter of the opponents of the made-up matches of the seed', () => {
+    const now = new Date('2026-11-11T12:00:00Z')
+    const names = [...madeUpMatches(now), ...madeUpOldMatches()].map(({ opponent }) => opponent)
+
+    expect(names.length).toBeGreaterThan(0)
+
+    for (const name of names) {
+      expect(lostLetters(name), name).toEqual([])
+    }
   })
 
   it('stays within 70 characters and does not end in a hyphen', () => {
@@ -387,6 +411,41 @@ describe('the full names of clubs', () => {
         "club 'Excelsior' is now called 'Excelsior Rotterdam'",
         "slug of club 'Excelsior Rotterdam' is now 'excelsior-rotterdam'",
         "new name 'SBV Excelsior' for club 'Excelsior Rotterdam'",
+      ])
+    })
+
+    it('gives an existing club the address of its name when the list names it, and keeps the old address nowhere', async () => {
+      // The address the code made while it lost the ø (#1121).
+      const old = await club('Lillestrøm SK', 'lillestr-m-sk', { seasons: ['2010/11'] })
+      const other = await club('Næstved IF', 'n-stved-if', { seasons: ['2010/11'] })
+      const events = await database.db.transaction((transaction) =>
+        repairClubs(transaction, [
+          { aliases: [], name: 'Lillestrøm SK' },
+          { aliases: [], name: 'Næstved IF' },
+        ]),
+      )
+
+      expect(await database.db.select().from(clubs).orderBy(clubs.id)).toMatchObject([
+        { id: old, slug: 'lillestrom-sk' },
+        { id: other, slug: 'naestved-if' },
+      ])
+      expect(events).toEqual([
+        "slug of club 'Lillestrøm SK' is now 'lillestrom-sk'",
+        "slug of club 'Næstved IF' is now 'naestved-if'",
+      ])
+      expect(await database.db.select().from(matches).where(eq(matches.clubId, old))).toHaveLength(1)
+    })
+
+    it('keeps the address of a club that another club has, and says so', async () => {
+      await club('Lillestrøm SK', 'lillestr-m-sk')
+      await club('Andere club', 'lillestrom-sk')
+
+      const events = await database.db.transaction((transaction) =>
+        repairClubs(transaction, [{ aliases: [], name: 'Lillestrøm SK' }]),
+      )
+
+      expect(events).toEqual([
+        "slug 'lillestrom-sk' belongs to another club, club 'Lillestrøm SK' keeps 'lillestr-m-sk'",
       ])
     })
 
