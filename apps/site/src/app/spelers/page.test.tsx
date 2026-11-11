@@ -907,7 +907,7 @@ describe('the card Sinds 1990/91 on /spelers', () => {
 
     const card = allTimeCard(await render())
 
-    expect(plain(card)).toContain('Sinds 2010/11')
+    expect(plain(card)).toContain('Sinds 1990/91')
     expect(plain(card)).toContain('2 spelers hebben gescoord')
     expect(rowsOf(card)).toEqual([
       ['1', 'Speler A', '3'],
