@@ -109,8 +109,15 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
   return named || surnames.size > 0 ? 'doubtful' : 'irrelevant'
 }
 
-/** How many days before a match an item about the opponent is `relevant`. */
+/**
+ * How many days before a match the window of an item about the opponent opens at the latest:
+ * it opens on the day after both clubs played their previous match, but never later than this
+ * and, without that match, exactly this many days before.
+ */
 export const opponentDaysBefore = 3
+
+/** How many days before a match the window of an item about the opponent opens at most. */
+export const opponentDaysBeforeMost = 5
 
 /** How many days after a match an item about the opponent is `relevant`. */
 export const opponentDaysAfter = 3
@@ -121,27 +128,56 @@ export type MatchDay = {
   matchDate: string
   /** The opponent as `matches.opponent` has it. */
   opponent: string
+  /**
+   * The day of the previous league match of the opponent before this match, in Dutch time,
+   * from `league_results`. Null or left out when it is not known (the start of the season, a
+   * club the results do not have under this name): the window then opens `opponentDaysBefore`
+   * days before.
+   */
+  opponentPreviousDay?: null | string
   /** A match that was `postponed` or is `cancelled` has no new date and counts for nothing. */
   status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
 }
 
 /**
- * The opponents of the matches from `opponentDaysBefore` days after the day an item was
- * published to `opponentDaysAfter` days before it: a match 3 days ahead and one 3 days back
- * count, one 4 days ahead and one 4 days back do not. Both days are counted in Dutch time, so
- * an item at half past midnight on the night the clocks go back is on the day the reader saw
- * it. A club that plays us twice has two matches and so two windows. Returns the names as
- * `matches.opponent` has them, for the second argument of `judgeRelevance`.
+ * The opponents of the matches whose window an item was published in. The window of a match
+ * opens on the day after the later of two matches: our previous match (played or still planned,
+ * any competition, this season) and the previous league match of the opponent
+ * (`opponentPreviousDay`). So the news about the match they just played is not in it, and the
+ * build-up to ours is. It opens never later than `opponentDaysBefore` days before the match, so
+ * it is never narrower than a plain window of that length, and never earlier than
+ * `opponentDaysBeforeMost` days before it, so a winter break does not let a week of general
+ * news through. When one of the two previous matches is not known, it opens
+ * `opponentDaysBefore` days before. It closes `opponentDaysAfter` days after the match. A club
+ * that plays us twice has two matches and so two windows, and a midweek match makes two windows
+ * overlap: an item in one of them counts. All days are counted in Dutch time, so an item at
+ * half past midnight on the night the clocks go back is on the day the reader saw it. Returns
+ * the names as `matches.opponent` has them, for the second argument of `judgeRelevance`.
  */
 export function opponentsAround(publishedAt: Date, matches: readonly MatchDay[]): string[] {
   const published = dayNumber(dutchDay.format(publishedAt))
+  const ourDays = matches
+    .filter((match) => match.status === 'played' || match.status === 'scheduled')
+    .map((match) => dayNumber(match.matchDate))
 
   return matches
     .filter((match) => match.status !== 'postponed' && match.status !== 'cancelled')
     .filter((match) => {
-      const daysAfterMatch = published - dayNumber(match.matchDate)
+      const matchDay = dayNumber(match.matchDate)
+      const ours = Math.max(...ourDays.filter((day) => day < matchDay), Number.NEGATIVE_INFINITY)
+      const theirs =
+        match.opponentPreviousDay === undefined || match.opponentPreviousDay === null
+          ? Number.NEGATIVE_INFINITY
+          : dayNumber(match.opponentPreviousDay)
+      const opens =
+        Number.isFinite(ours) && Number.isFinite(theirs)
+          ? Math.max(
+              Math.min(Math.max(ours, theirs) + 1, matchDay - opponentDaysBefore),
+              matchDay - opponentDaysBeforeMost,
+            )
+          : matchDay - opponentDaysBefore
 
-      return daysAfterMatch >= -opponentDaysBefore && daysAfterMatch <= opponentDaysAfter
+      return published >= opens && published <= matchDay + opponentDaysAfter
     })
     .map((match) => match.opponent)
 }

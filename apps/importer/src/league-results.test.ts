@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ReadResult } from './read-wikipedia.ts'
 
-import { matchClubNames, playedWarning } from './league-results.ts'
+import { matchClubNames, playedWarning, withOpponentPreviousDay } from './league-results.ts'
 import { readLeagueResults, readStandings } from './read-wikipedia.ts'
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
@@ -152,5 +152,57 @@ describe('the abandoned match of Cambuur and Go Ahead Eagles (#736)', () => {
     expect(playedWarning(matchClubNames(results, table).results, table, [])).toBe(
       'league results: the results do not agree with the table: Go Ahead Eagles 0 results against 1 played, SC Cambuur 1 results against 2 played',
     )
+  })
+})
+
+describe('the previous league match of the opponent of a match (#1008)', () => {
+  const results = [
+    { awayClub: 'FC Groningen', homeClub: 'N.E.C.', playedOn: '2026-11-08' },
+    { awayClub: 'sc Heerenveen', homeClub: 'FC Twente', playedOn: '2026-11-09' },
+    { awayClub: 'Excelsior Rotterdam', homeClub: 'FC Groningen', playedOn: '2026-11-15' },
+    { awayClub: 'FC Groningen', homeClub: 'Sparta Rotterdam', playedOn: '2026-11-22' },
+  ]
+  const on = (opponent: string, matchDate: string) =>
+    withOpponentPreviousDay([{ matchDate, opponent }], results)[0]?.opponentPreviousDay
+
+  it('is the last match of the club before the day of the match, at home or away', () => {
+    expect(on('FC Groningen', '2026-11-21')).toBe('2026-11-15')
+    expect(on('FC Groningen', '2026-11-14')).toBe('2026-11-08')
+    expect(on('FC Groningen', '2026-11-30')).toBe('2026-11-22')
+  })
+
+  it('does not count a match on the day of the match or after it', () => {
+    expect(on('FC Groningen', '2026-11-15')).toBe('2026-11-08')
+    expect(on('FC Groningen', '2026-11-08')).toBeNull()
+  })
+
+  it('is null for a club that has played no match before, or that the results do not have', () => {
+    expect(on('FC Twente', '2026-11-09')).toBeNull()
+    expect(on('Quick Boys', '2026-11-30')).toBeNull()
+    expect(withOpponentPreviousDay([{ matchDate: '2026-11-21', opponent: 'FC Groningen' }], [])[0]).toMatchObject({
+      opponentPreviousDay: null,
+    })
+  })
+
+  it('finds the club under another spelling of the name, as the table and the matches differ', () => {
+    expect(on('Groningen', '2026-11-21')).toBe('2026-11-15')
+    expect(on('N.E.C.', '2026-11-21')).toBe('2026-11-08')
+    expect(on('NEC', '2026-11-21')).toBe('2026-11-08')
+    expect(on('Excelsior', '2026-11-21')).toBe('2026-11-15')
+    expect(on('SBV Excelsior', '2026-11-21')).toBe('2026-11-15')
+  })
+
+  it('keeps another club with a similar name apart', () => {
+    expect(on('Excelsior Maassluis', '2026-11-21')).toBeNull()
+    expect(on('Sparta Rotterdam', '2026-11-30')).toBe('2026-11-22')
+    expect(on('Sparta Rotterdam', '2026-11-21')).toBeNull()
+  })
+
+  it('keeps the other fields of the match', () => {
+    expect(
+      withOpponentPreviousDay([{ matchDate: '2026-11-21', opponent: 'FC Groningen', status: 'played' }], results),
+    ).toEqual([
+      { matchDate: '2026-11-21', opponent: 'FC Groningen', opponentPreviousDay: '2026-11-15', status: 'played' },
+    ])
   })
 })
