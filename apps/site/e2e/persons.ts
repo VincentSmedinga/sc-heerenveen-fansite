@@ -23,7 +23,14 @@ const people = [
   // A goalkeeper and a forward with figures (see playerFigures): complete, so the lists of the
   // admin that look for a missing line or country do not hold them.
   { country: 'NL', line: 'doelman', name: 'Verzonnen Doelman', page: null, seasons: ['2001/02', '2002/03'] },
-  { country: 'NL', line: 'aanvaller', name: 'Verzonnen Aanvaller', page: null, seasons: ['2001/02', '2002/03'] },
+  {
+    birthDate: '1999-06-15',
+    country: 'NL',
+    line: 'aanvaller',
+    name: 'Verzonnen Aanvaller',
+    page: null,
+    seasons: ['2001/02', '2002/03'],
+  },
 ] as const
 
 /** Puts the persons and their players in and returns the function that takes them out. */
@@ -54,10 +61,14 @@ export async function addPersons() {
   const { close, db } = connect(DATABASE_URL)
 
   try {
-    for (const { country, line, name, page, seasons } of people) {
+    for (const entry of people) {
+      const { country, line, name, page, seasons } = entry
+      const birthDate = 'birthDate' in entry ? entry.birthDate : undefined
+
       const [person] = await db
         .insert(persons)
         .values({
+          ...(birthDate === undefined ? {} : { birthDate, birthDatePrecision: 'day' as const }),
           country,
           countrySource: country === null ? null : 'manual',
           line,

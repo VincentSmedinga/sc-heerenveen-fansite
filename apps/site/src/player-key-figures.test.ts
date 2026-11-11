@@ -28,13 +28,13 @@ const text = (figures: ReturnType<typeof playerKeyFigures>) =>
   figures.map(({ figure, label, note }) => `${figure} ${label}, ${note}`)
 
 describe('the key figures of a player', () => {
-  it('has the goals, seasons, matches and assists of a forward, in that order', () => {
+  it('has the seasons, matches, goals and assists of a forward, in that order', () => {
     const seasons = [season('2003/04', { goals: 19 }), season('2002/03', { goals: 5 })]
 
     expect(text(playerKeyFigures(seasons, 'aanvaller'))).toEqual([
-      '24 doelpunten, in alle competities',
       '2 seizoenen, tussen 2002 en 2004',
       '60 wedstrijden, in alle competities',
+      '24 doelpunten, in alle competities',
       '2 assists, in alle competities',
     ])
   })
@@ -46,8 +46,8 @@ describe('the key figures of a player', () => {
     ]
 
     expect(text(playerKeyFigures(seasons, 'aanvaller'))).toEqual([
-      '8 doelpunten, in alle competities',
       '2 seizoenen, tussen 2003 en 2010',
+      '8 doelpunten, in alle competities',
     ])
   })
 
@@ -57,59 +57,63 @@ describe('the key figures of a player', () => {
     expect(text(playerKeyFigures(seasons, 'aanvaller'))).toContain('30 wedstrijden, in 1 van de 2 seizoenen')
   })
 
-  it('has the matches, clean sheets, goals against per match with a comma and seasons of a goalkeeper', () => {
+  it('has the seasons, matches, clean sheets and goals against per match of a goalkeeper', () => {
     const seasons = [
       season('2003/04', { cleanSheets: 18, conceded: 41, played: 43 }),
       season('2002/03', { cleanSheets: 7, conceded: 61, played: 38 }),
     ]
 
     expect(text(playerKeyFigures(seasons, 'doelman'))).toEqual([
+      '2 seizoenen, tussen 2002 en 2004',
       '81 wedstrijden, in alle competities',
       '25 keer de nul, in alle competities',
       '1,26 tegendoelpunten, per wedstrijd, in alle competities',
-      '2 seizoenen, tussen 2002 en 2004',
     ])
   })
 
-  it('has the matches, clean sheets with him in the line-up, goals and seasons of a defender', () => {
+  it('has the seasons, matches, clean sheets with him in the line-up and goals of a defender', () => {
     const seasons = [season('2001/02', { cleanSheets: 17 })]
 
     expect(text(playerKeyFigures(seasons, 'verdediger'))).toEqual([
+      '1 seizoen, in 2001/02',
       '30 wedstrijden, in alle competities',
       '17 keer de nul, met hem in de basis, in alle competities',
       '4 doelpunten, in alle competities',
-      '1 seizoen, in 2001/02',
     ])
   })
 
-  it('has the matches, goals, assists and seasons of a midfielder', () => {
+  it('has the seasons, matches, goals and assists of a midfielder', () => {
     expect(text(playerKeyFigures([season('2001/02')], 'middenvelder')).map((line) => line.split(' ')[1])).toEqual([
+      'seizoen,',
       'wedstrijden,',
       'doelpunten,',
       'assist,',
-      'seizoen,',
     ])
   })
 
   it('says that the table of Wikipedia leaves competitions out', () => {
     const seasons = [season('2026/27', { played: 7, source: 'wikipedia' })]
 
-    expect(text(playerKeyFigures(seasons, 'middenvelder'))[0]).toBe(
+    expect(text(playerKeyFigures(seasons, 'middenvelder'))[1]).toBe(
       '7 wedstrijden, uit de tabel van Wikipedia, niet alle competities',
     )
   })
 
-  it('has the seasons, goals and matches of a player without a line', () => {
+  it('has the seasons, matches, goals and assists of a player without a line', () => {
     expect(text(playerKeyFigures([season('2001/02')], undefined))).toEqual([
       '1 seizoen, in 2001/02',
-      '4 doelpunten, in alle competities',
       '30 wedstrijden, in alle competities',
+      '4 doelpunten, in alle competities',
+      '1 assist, in alle competities',
     ])
   })
 
   it('shows no row when fewer than two figures are known', () => {
     expect(
-      playerKeyFigures([season('2001/02', { goals: undefined, played: undefined, source: 'none' })], undefined),
+      playerKeyFigures(
+        [season('2001/02', { assists: undefined, goals: undefined, played: undefined, source: 'none' })],
+        undefined,
+      ),
     ).toEqual([])
   })
 })

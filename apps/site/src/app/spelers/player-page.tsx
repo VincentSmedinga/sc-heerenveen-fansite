@@ -226,24 +226,25 @@ function PlayerCredit({ page }: { page: PlayerPage }) {
 
 /**
  * One line under the name: the line, the flag with the country in words (`CountryName`), and
- * the year and place of birth. A part we do not know is left out with its separator.
+ * the place, year and age: "Herten, 2003 · 22 jaar". A part we do not know is left out with
+ * its separator.
  */
 function PlayerFacts({ page }: { page: PlayerPage }) {
-  const born = [
-    page.birthYear === undefined ? undefined : `in ${page.birthYear}`,
-    page.birthPlace === undefined ? undefined : `in ${page.birthPlace}`,
-  ].filter((part) => part !== undefined)
+  // "Herten, 2003 · 22 jaar": the place and the year together, then the age. The full date of
+  // birth is never shown.
+  const born = [page.birthPlace, page.birthYear].filter((part) => part !== undefined).join(', ')
   const parts: ReactNode[] = [
     lineName(page.line),
     page.country === undefined ? undefined : <CountryName country={page.country} />,
-    born.length === 0 ? undefined : `geboren ${born.join(' ')}`,
+    born === '' ? undefined : born,
+    page.birthYear === undefined || page.age === undefined ? undefined : `${page.age} jaar`,
   ].filter((part) => part !== undefined)
 
   if (parts.length === 0) {
     return null
   }
 
-  // Only the first part starts with a capital: "Geboren in 1974" when it is the only one.
+  // Only the first part starts with a capital: "Aanvaller" or, alone, the place.
   if (typeof parts[0] === 'string') {
     parts[0] = `${parts[0].charAt(0).toUpperCase()}${parts[0].slice(1)}`
   }

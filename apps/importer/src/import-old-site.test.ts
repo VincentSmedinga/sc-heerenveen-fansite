@@ -441,6 +441,9 @@ describe('the check report command', () => {
   })
 })
 
+// The limit of the test that imports all the real files and writes the check report.
+const realImportTimeout = 120_000
+
 describe('the files in the repository', () => {
   it('makes a club of every club of the old fansite, finds them all again, and a second run changes nothing', async () => {
     const { clubs: oldClubs } = await readOldSiteData(oldSiteDataFolder)
@@ -467,40 +470,50 @@ describe('the files in the repository', () => {
     expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'sc-cambuur'))).toHaveLength(1)
   })
 
-  it('writes a check report of the real import with the numbers of the steps, and writes nothing', async () => {
-    await run({ folder: oldSiteDataFolder })
+  // This test imports all the real files (671 matches, 566 line-ups) and then reads them back
+  // for the report. On a fast computer that takes about 6 seconds: 4 for the import, of which
+  // the step opstellingen is 2.3 because it stores each match in its own queries, and 2.4 for
+  // the report. A CI runner is three to five times slower and runs other test files next to
+  // it, so it took 18 to 32 seconds against the limit of 30. The work is not repeated
+  // anywhere, so it gets its own limit and the other tests keep 30 seconds.
+  it(
+    'writes a check report of the real import with the numbers of the steps, and writes nothing',
+    async () => {
+      await run({ folder: oldSiteDataFolder })
 
-    const before = await rowCounts()
-    const chunks: string[] = []
-    const asked: string[] = []
-    const code = await runOldSiteReport(database.url, {
-      // The real files have league matches, so the report asks for pages: never the real
-      // Wikipedia in a test. Every page is missing here.
-      fetcher: {
-        fetch: async (url) => {
-          asked.push(String(url))
+      const before = await rowCounts()
+      const chunks: string[] = []
+      const asked: string[] = []
+      const code = await runOldSiteReport(database.url, {
+        // The real files have league matches, so the report asks for pages: never the real
+        // Wikipedia in a test. Every page is missing here.
+        fetcher: {
+          fetch: async (url) => {
+            asked.push(String(url))
 
-          return { kind: 'error', message: 'HTTP 404', reason: 'http-status', status: 404, url: String(url) }
+            return { kind: 'error', message: 'HTTP 404', reason: 'http-status', status: 404, url: String(url) }
+          },
         },
-      },
-      folder: oldSiteDataFolder,
-      pause: 0,
-      today: '2026-11-08',
-      write: (text) => chunks.push(text),
-    })
-    const text = chunks.join('')
+        folder: oldSiteDataFolder,
+        pause: 0,
+        today: '2026-11-08',
+        write: (text) => chunks.push(text),
+      })
+      const text = chunks.join('')
 
-    expect(code).toBe(0)
-    // One page for each of the seventeen seasons, and a season without a page has the reason.
-    expect(asked).toHaveLength(17)
-    expect(asked).toContain('https://nl.wikipedia.org/wiki/Eerste_divisie_1992/93?action=raw')
-    expect(text).toContain('De kruistabel is niet te lezen: de pagina Eredivisie 1990/91 bestaat niet.')
-    // 671 matches, 566 reports with a line-up, 505 klaar and 61 bezig, as the steps say.
-    expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 505 | 61 |')
-    expect(text).toContain('## Doelpunten die niet optellen')
-    expect(text).toContain('## Spelers zonder persoon')
-    expect(await rowCounts()).toEqual(before)
-  })
+      expect(code).toBe(0)
+      // One page for each of the seventeen seasons, and a season without a page has the reason.
+      expect(asked).toHaveLength(17)
+      expect(asked).toContain('https://nl.wikipedia.org/wiki/Eerste_divisie_1992/93?action=raw')
+      expect(text).toContain('De kruistabel is niet te lezen: de pagina Eredivisie 1990/91 bestaat niet.')
+      // 671 matches, 566 reports with a line-up, 505 klaar and 61 bezig, as the steps say.
+      expect(text).toContain('| Totaal | 671 | 671 | 604 | 65 | 2 | 566 | 505 | 61 |')
+      expect(text).toContain('## Doelpunten die niet optellen')
+      expect(text).toContain('## Spelers zonder persoon')
+      expect(await rowCounts()).toEqual(before)
+    },
+    realImportTimeout,
+  )
 
   it('finds the files next to the repository when there is no folder next to the bundle', () => {
     expect(defaultOldSiteFolder().href).toBe(oldSiteDataFolder.href)

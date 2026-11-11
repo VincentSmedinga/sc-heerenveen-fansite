@@ -78,6 +78,27 @@ describe('DataTable', () => {
     expect(total?.className).toBe('hf-data-table-total')
   })
 
+  it('shows a gap as a sign that a screen reader reads as the words of its header', () => {
+    const { container } = render(
+      <DataTable
+        caption="Seizoenen"
+        columns={['Seizoen', 'Wedstrijden']}
+        rows={[
+          { cells: [28], header: '2025/26' },
+          { cells: [], gap: true, header: 'niet bij sc Heerenveen' },
+          { cells: [], gap: true, header: 'niet bij sc Heerenveen' },
+          { cells: [30], header: '2020/21' },
+        ]}
+      />,
+    )
+    const gaps = [...container.querySelectorAll('tbody tr.hf-data-table-gap')]
+
+    expect(gaps).toHaveLength(2)
+    expect(gaps[0]?.querySelector('th [aria-hidden="true"]')?.textContent).toBe('⋮')
+    expect(gaps[0]?.querySelector('th .hf-visually-hidden')?.textContent).toBe('niet bij sc Heerenveen')
+    expect(gaps[0]?.querySelectorAll('td')).toHaveLength(1)
+  })
+
   it('shows an abbreviation as the column header and gives a screen reader the whole word', () => {
     render(
       <DataTable

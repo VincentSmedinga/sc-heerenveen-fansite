@@ -64,7 +64,7 @@ export const Three = meta.story({
 })
 
 export const Four = meta.story({
-  name: 'Een rij van vier',
+  name: 'Een rij van vier, twee aan twee',
   render: () =>
     onPage(
       <KeyFigures
