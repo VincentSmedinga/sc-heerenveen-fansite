@@ -450,8 +450,7 @@ export async function listArticleLines(db: Database, until: Date, limit: number,
  * (from `findClubBySlug`). With `competition` only the matches of that competition are given;
  * without it all of them. A club with no match, or none in that competition, gives an empty
  * list. `opponent` is the name the club had on the day of the match when the club has a list of
- * names of its own (`club_name_periods`), and otherwise the spelling of
- * Wikipedia.
+ * names of its own (`club_name_periods`), and otherwise the spelling of Wikipedia.
  */
 export async function listClubMatches(db: Database, club: number, { competition }: { competition?: Competition } = {}) {
   const where = and(
