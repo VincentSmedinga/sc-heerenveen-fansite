@@ -22,12 +22,12 @@ export function PlayerQuartersCard({ quarters: goals }: { quarters: GoalQuarters
       </Heading>
       <Text appearance="meta">Doelpunten per kwartier.</Text>
       <BarChart
-        axis={{ labels: quarters.map((text, index) => ({ at: index + 0.5, text })) }}
+        axis={{ labels: quarters.map((text, index) => ({ at: index + 0.5, text: joined(text) })) }}
         bars={goals.counts.map((value) => ({ tone: 'positive', value }))}
         max={max}
         ticks={[0, max]}
       />
-      <Text>{quarters.map((quarter, index) => `${quarter}: ${goals.counts[index]}`).join(' · ')}</Text>
+      <Text>{quarters.map((quarter, index) => `${joined(quarter)}:\u00A0${goals.counts[index]}`).join(' · ')}</Text>
       {goals.unknown > 0 && (
         <Text appearance="meta">{`Van ${goals.unknown} van de ${goals.total} kennen we de minuut niet.`}</Text>
       )}
@@ -52,6 +52,9 @@ export function PlayerRecordCard({ record }: { record: PlayerRecord }) {
     </Card>
   )
 }
+
+/** A range that does not break after its dash: a narrow phone would put "90" alone. */
+const joined = (range: string) => range.replace('–', '–\u2060')
 
 /**
  * The card with a bar per season (#1085): the oldest season on top, the number beside the bar,

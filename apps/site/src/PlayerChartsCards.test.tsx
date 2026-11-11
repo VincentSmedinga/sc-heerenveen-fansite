@@ -25,7 +25,9 @@ describe('PlayerChartsCards', () => {
       renderToStaticMarkup(<PlayerQuartersCard quarters={{ counts: [12, 10, 10, 6, 5, 7], total: 52, unknown: 2 }} />),
     )
 
-    expect(html).toContain('1–15: 12 · 16–30: 10 · 31–45: 10 · 46–60: 6 · 61–75: 5 · 76–90: 7')
+    expect(html.replaceAll(/\u2060/gu, '').replaceAll('\u00A0', ' ')).toContain(
+      '1–15: 12 · 16–30: 10 · 31–45: 10 · 46–60: 6 · 61–75: 5 · 76–90: 7',
+    )
     expect(html).toContain('Van 2 van de 52 kennen we de minuut niet.')
   })
 
