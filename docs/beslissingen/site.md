@@ -4576,3 +4576,28 @@
   Een link terug is genoeg, en een latere overzichtspagina van alle spelers kan het doel van die link worden.
   Een supporter wil in één blik zien wat een speler voor de club betekende: een aanvaller meet je aan zijn doelpunten, een doelman aan zijn wedstrijden en de nul.
 - **Alternatieven:** het kruimelpad houden (#1079); de regel altijd rechts laten staan, ook onder de naam (het ontwerp zet hem links); een datum van geboorte tonen (te persoonlijk, en we hebben vaak alleen het jaar).
+
+## De loopbaan van een speler heeft periodes, gaten en één moment per seizoen
+
+- **Datum:** 11 november 2026
+- **Besluit:** onder de tabel Per seizoen staat de kaart "Loopbaan bij sc Heerenveen" met `CareerTimeline` (#1084).
+  Seizoenen die op elkaar volgen zijn een periode met de jaren als kop ("2007–2010", of "2024–nu" met het lopende seizoen), en de seizoenen ertussen zijn een regel "2004/05 tot en met 2006/07: niet in de selectie".
+  Een seizoen heeft zijn rugnummer, "Dit seizoen" als het loopt, de competities waarin hij scoorde met het aantal en hoogstens één moment.
+  De getallen van een seizoen staan in de tabel en worden in de loopbaan niet herhaald.
+  Boven de lijst zegt een zin van hoeveel seizoenen we de opstellingen hebben.
+  - **Opstellingen:** een seizoen heeft ze als elke gespeelde wedstrijd van dat seizoen een rapport heeft (`source` is `lineups`).
+    Een seizoen zonder enig rapport zegt "Geen opstellingen van dit seizoen."; een seizoen met een deel zegt dat nog niet alle wedstrijden op de site staan.
+  - **Het moment** is het eerste dat bestaat van: zijn eerste wedstrijd, zijn eerste doelpunt, een wedstrijd met drie of meer doelpunten van hem (de meeste, bij gelijk de eerste), een wedstrijd met twee, zijn laatste doelpunt, zijn laatste wedstrijd.
+    De eerste en de laatste wedstrijd tellen alleen als we de opstellingen hebben van dat seizoen en van elk seizoen ervoor (de eerste) of erna (de laatste), want anders weten we niet of het de eerste of de laatste was.
+    De eerste en de laatste staan voor zijn hele loopbaan en horen dus bij één seizoen.
+    De seizoenen worden van het oudste af gedaan, en een wedstrijd is het moment van hoogstens één seizoen.
+  - **De link** gaat naar de pagina van de wedstrijd als die er is (`getReportAddresses`).
+    Zonder pagina is het moment gewone tekst met de wedstrijd en de uitslag.
+    `CareerMoment.href` is daarom optioneel.
+  - **De regel** noemt de minuten die we hebben ("hattrick: 25′, 30′ en 32′"); een minuut die we niet weten valt weg.
+  - **De gegevens** komen uit `loadPlayerSeasons`: `PlayerSeason` heeft er `goalMoments` en `lineupMatches` bij, uit dezelfde leesronde.
+    `apps/site/src/player-career.ts` kiest de momenten en maakt de periodes.
+  - **De zin "Bij sc Heerenveen in …"** uit #1079 is weg: de loopbaan zegt hetzelfde.
+- **Waarom:** de tabel geeft de getallen, de loopbaan het verhaal.
+  Een supporter ziet zo wanneer een speler er was, met welk nummer en wat hij meemaakte, en we beweren niets over een eerste of laatste wedstrijd waarvan we de opstellingen niet hebben.
+- **Alternatieven:** het aantal wedstrijden en doelpunten per seizoen in de loopbaan herhalen (staat in de tabel); een moment voor elke wedstrijd waarin hij scoorde, en mijlpalen als zijn 100e wedstrijd (niet in dit issue).

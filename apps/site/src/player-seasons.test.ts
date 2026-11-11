@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { type PlayerSeasonFacts, playerSeasonsOf, type SeasonAppearance } from './player-seasons'
+import { type CareerMatch, type PlayerSeasonFacts, playerSeasonsOf, type SeasonAppearance } from './player-seasons'
 
 const none: PlayerSeasonFacts = { appearances: [], assists: [], goals: [], matchCounts: [], players: [], tables: [] }
 
 /** A made-up appearance in a line-up. */
 const appearance = (season: string, extra: Partial<SeasonAppearance> = {}): SeasonAppearance => ({
   goalsAgainst: 1,
+  match: matchOf(season),
   red: false,
   season,
   starter: true,
@@ -15,7 +16,25 @@ const appearance = (season: string, extra: Partial<SeasonAppearance> = {}): Seas
   ...extra,
 })
 
-const goal = (season: string, competition: 'Eredivisie' | 'KNVB Beker' = 'Eredivisie') => ({ competition, season })
+const matchOf = (season: string, id = 1): CareerMatch => ({
+  competition: 'Eredivisie',
+  goalsAgainst: 1,
+  goalsFor: 2,
+  home: true,
+  id,
+  matchDate: `${season.slice(0, 4)}-10-10`,
+  opponent: 'Testclub',
+  round: '1',
+  season,
+})
+
+const goal = (season: string, competition: 'Eredivisie' | 'KNVB Beker' = 'Eredivisie') => ({
+  competition,
+  match: matchOf(season),
+  minute: 25,
+  season,
+  stoppage: null,
+})
 
 describe('the seasons of a player', () => {
   it('has the newest season first and the shirt number of the season', () => {

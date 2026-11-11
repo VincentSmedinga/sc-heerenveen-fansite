@@ -112,9 +112,10 @@ describe('reading the seasons of a person', () => {
     expect(facts.matchCounts).toEqual([{ played: 4, reported: 2, season: '2003/04' }])
     // The appearance in the report that is bezig is left out.
     expect(facts.appearances).toEqual([
-      { goalsAgainst: 0, red: true, season: '2003/04', starter: true, substituted: false, yellow: true },
-      { goalsAgainst: 2, red: false, season: '2003/04', starter: true, substituted: false, yellow: false },
+      expect.objectContaining({ goalsAgainst: 0, red: true, season: '2003/04', starter: true, yellow: true }),
+      expect.objectContaining({ goalsAgainst: 2, red: false, season: '2003/04', starter: true, yellow: false }),
     ])
+    expect(facts.appearances[0]?.match).toMatchObject({ opponent: expect.any(String), season: '2003/04' })
     expect(facts.goals).toHaveLength(4)
     expect(facts.assists).toHaveLength(1)
     expect(facts.tables).toEqual([{ appearances: 30, assists: 4, season: '2003/04' }])
@@ -137,7 +138,7 @@ describe('reading the seasons of a person', () => {
       .values({ appearanceInId: other, appearanceOutId: out, matchId: first, minute: 60, ours: true })
 
     expect((await readPlayerSeasonFacts(personId)).appearances).toEqual([
-      { goalsAgainst: 0, red: false, season: '2003/04', starter: true, substituted: true, yellow: false },
+      expect.objectContaining({ goalsAgainst: 0, red: false, season: '2003/04', starter: true, substituted: true }),
     ])
     expect(await readPlayerSeasonFacts(personId + 1000)).toEqual({
       appearances: [],

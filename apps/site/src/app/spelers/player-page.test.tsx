@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { loadPlayerPage, periodsOf, type PlayerPage, playerPageOf } from '#src/player-page'
 import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { getReportAddresses } from '#src/report-data'
 import { withoutIcons } from '#src/without-icons'
 
 import { playerMetadata, PlayerPageView } from './player-page'
@@ -16,13 +17,17 @@ vi.mock('#src/player-page', async (importOriginal) => ({
 
 vi.mock('#src/player-seasons', () => ({ loadPlayerSeasons: vi.fn() }))
 
+vi.mock('#src/report-data', () => ({ getReportAddresses: vi.fn() }))
+
 // A made-up season of the player.
 const madeUpSeason: PlayerSeason = {
   assists: 2,
   cleanSheets: undefined,
   conceded: undefined,
+  goalMoments: [],
   goals: 5,
   goalsByCompetition: { Eredivisie: 5 },
+  lineupMatches: [],
   matchesInSeason: 34,
   played: 30,
   red: 0,
@@ -88,7 +93,7 @@ describe('the page of a player', () => {
     const html = await render()
 
     expect(html).not.toContain('Per seizoen')
-    expect(html).toContain('Bij sc Heerenveen')
+    expect(html).not.toContain('Loopbaan')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
     error.mockRestore()
   })
@@ -144,13 +149,79 @@ describe('the page of a player', () => {
     ).not.toContain('class="hf-meta">')
   })
 
-  it('names his seasons as periods, each season a link to its page Spelers', async () => {
-    expect(await render()).toContain(
-      '<p>Bij sc Heerenveen van <a href="/spelers/2002-03">2002/03</a> tot en met <a href="/spelers/2003-04">2003/04</a> en in <a href="/spelers/2007-08">2007/08</a>.</p>',
+  it('has the career under the table, with the periods, a gap and a moment that links to its match', async () => {
+    const match = {
+      competition: 'Eredivisie',
+      goalsAgainst: 1,
+      goalsFor: 3,
+      home: true,
+      id: 11,
+      matchDate: '2004-04-10',
+      opponent: 'Testclub',
+      round: '30',
+      season: '2003/04',
+    } as const
+
+    vi.mocked(loadPlayerSeasons).mockResolvedValue([
+      { ...madeUpSeason, season: '2007/08', shirtNumber: undefined },
+      {
+        ...madeUpSeason,
+        goalMoments: [
+          {
+            match: { ...match, id: 10, matchDate: '2003-09-01', round: '29', season: '2002/03' },
+            minute: 3,
+            stoppage: undefined,
+          },
+        ],
+        season: '2002/03',
+      },
+      {
+        ...madeUpSeason,
+        goalMoments: [
+          { match, minute: 25, stoppage: undefined },
+          { match, minute: 30, stoppage: undefined },
+          { match, minute: 32, stoppage: undefined },
+        ],
+        lineupMatches: [],
+      },
+    ])
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['Eredivisie|30', '/wedstrijden/2003-04/2004-04-10-testclub']]),
     )
-    expect(await render({ seasons: ['2026/27'] })).toContain(
-      '<p>Bij sc Heerenveen in <a href="/spelers">2026/27</a>.</p>',
-    )
+
+    const html = await render()
+
+    expect(html).toMatch(/<h2[^>]*>Per seizoen<\/h2><table.*<h2[^>]*>Loopbaan bij sc Heerenveen<\/h2>/u)
+    expect(html).toContain('Van alle 3 seizoenen hebben we de opstellingen.')
+    expect(html).toContain('2004/05 tot en met 2006/07: niet in de selectie')
+    expect(html).toContain('<a href="/wedstrijden/2003-04/2004-04-10-testclub">sc Heerenveen – Testclub</a>')
+    expect(html).toContain('10 april 2004 · hattrick: 25′, 30′ en 32′')
+    expect(html).not.toContain('Bij sc Heerenveen van')
+  })
+
+  it('shows a moment without a page as plain text with the score', async () => {
+    const match = {
+      competition: 'Eredivisie',
+      goalsAgainst: 2,
+      goalsFor: 1,
+      home: false,
+      id: 12,
+      matchDate: '2004-04-10',
+      opponent: 'Testclub',
+      round: '31',
+      season: '2003/04',
+    } as const
+
+    vi.mocked(loadPlayerSeasons).mockResolvedValue([
+      { ...madeUpSeason, goalMoments: [{ match, minute: undefined, stoppage: undefined }] },
+    ])
+    vi.mocked(getReportAddresses).mockResolvedValue(new Map())
+
+    const html = await render()
+
+    expect(html).toContain('Testclub – sc Heerenveen 2–1')
+    expect(html).not.toContain('href="/wedstrijden')
+    expect(html).toContain('10 april 2004 · eerste doelpunt')
   })
 
   it('ends with the full credit of Wikipedia with his article, and the archive for a season up to 2006/07', async () => {

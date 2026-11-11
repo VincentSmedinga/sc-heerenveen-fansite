@@ -15,6 +15,29 @@ import { cache } from 'react'
 
 import { getDatabase } from './database'
 
+/** A goal he scored for us: the match, and the minute when we know it. */
+export type CareerGoal = {
+  match: CareerMatch
+  minute: number | undefined
+  /** The minutes of added time after `minute`, when we know them. */
+  stoppage: number | undefined
+}
+
+/** A played match as the career names it: enough to find its page and to say what happened. */
+export type CareerMatch = {
+  competition: Competition
+  goalsAgainst: number
+  goalsFor: number
+  /** Whether we played at home. */
+  home: boolean
+  id: number
+  /** The day of the match, such as `2004-04-10`. */
+  matchDate: string
+  opponent: string
+  round: string
+  season: string
+}
+
 /**
  * What the site knows of one season of a player. A figure we do not have is `undefined` and
  * never 0: a block shows it as a dash. Every block of the page of a player reads these (the
@@ -28,10 +51,14 @@ export type PlayerSeason = {
   cleanSheets: number | undefined
   /** The goals he conceded in the matches in which he played from start to end. */
   conceded: number | undefined
+  /** His goals for us in the season, the first first, with the match and the minute. */
+  goalMoments: readonly CareerGoal[]
   /** The goals he scored for us, without own goals: `undefined` when we know nothing of it. */
   goals: number | undefined
   /** The goals he scored for us in each competition, the competitions without one left out. */
   goalsByCompetition: Partial<Record<Competition, number>>
+  /** The matches in which he was in a line-up or on the bench, the first first. */
+  lineupMatches: readonly CareerMatch[]
   /** The matches played in the season, all competitions, as the line-ups are compared with. */
   matchesInSeason: number
   /** The matches in which he was, also as a substitute. */
@@ -58,7 +85,13 @@ export type PlayerSeasonFacts = {
   /** The goals he gave an assist for, in the reports (`assist_appearance_id`), by season. */
   assists: readonly { season: string }[]
   /** His goals for us, without own goals: each goal once, whichever way it belongs to him. */
-  goals: readonly { competition: Competition; season: string }[]
+  goals: readonly {
+    competition: Competition
+    match: CareerMatch
+    minute: null | number
+    season: string
+    stoppage: null | number
+  }[]
   /** The played matches of the seasons he has a row in, and how many have a report. */
   matchCounts: readonly { played: number; reported: number; season: string }[]
   /** His rows in `players`: the season and the shirt number. */
@@ -71,6 +104,8 @@ export type PlayerSeasonFacts = {
 export type SeasonAppearance = {
   /** The goals the opponent scored in the match (the final score, with extra time). */
   goalsAgainst: number
+  /** The match. */
+  match: CareerMatch
   /** Whether he got a red card or a yellow-red card. */
   red: boolean
   season: string
@@ -130,6 +165,8 @@ export function playerSeasonsOf(facts: PlayerSeasonFacts): PlayerSeason[] {
     const sum = (rows: readonly SeasonAppearance[], pick: (row: SeasonAppearance) => boolean) =>
       rows.filter(pick).length
     const goalsByCompetition: Partial<Record<Competition, number>> = {}
+    const byDay = (first: { id: number; matchDate: string }, second: { id: number; matchDate: string }) =>
+      first.matchDate.localeCompare(second.matchDate) || first.id - second.id
 
     for (const { competition } of goals) {
       goalsByCompetition[competition] = (goalsByCompetition[competition] ?? 0) + 1
@@ -146,8 +183,12 @@ export function playerSeasonsOf(facts: PlayerSeasonFacts): PlayerSeason[] {
       conceded: fromLineups
         ? wholeMatches.reduce((total, appearance) => total + appearance.goalsAgainst, 0)
         : undefined,
+      goalMoments: goals
+        .map((goal) => ({ match: goal.match, minute: goal.minute ?? undefined, stoppage: goal.stoppage ?? undefined }))
+        .sort((first, second) => byDay(first.match, second.match) || (first.minute ?? 0) - (second.minute ?? 0)),
       goals: source === 'none' && goals.length === 0 ? undefined : goals.length,
       goalsByCompetition,
+      lineupMatches: lineups.map(({ match }) => match).sort(byDay),
       matchesInSeason,
       played: fromLineups ? lineups.length : table?.appearances,
       red: fromLineups ? sum(lineups, (appearance) => appearance.red) : undefined,
@@ -182,14 +223,20 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
   const playerIds = rows.map((row) => row.id)
   const seasons = [...new Set(rows.map((row) => row.season))]
   const played = and(eq(matches.status, 'played'), inArray(matches.season, seasons))
+  const matchColumns = {
+    competition: matches.competition,
+    goalsAgainst: matches.goalsAgainst,
+    goalsFor: matches.goalsFor,
+    home: matches.home,
+    matchDate: matches.matchDate,
+    matchId: matches.id,
+    opponent: matches.opponent,
+    round: matches.round,
+    season: matches.season,
+  }
   const [appearances, cards, substitutions, goals, assists, playedCounts, reportedCounts, tables] = await Promise.all([
     db
-      .select({
-        goalsAgainst: matches.goalsAgainst,
-        id: matchAppearances.id,
-        season: matches.season,
-        starter: matchAppearances.starter,
-      })
+      .select({ ...matchColumns, id: matchAppearances.id, starter: matchAppearances.starter })
       .from(matchAppearances)
       .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
       .innerJoin(matchReports, eq(matchReports.matchId, matchAppearances.matchId))
@@ -205,7 +252,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
       .innerJoin(matchAppearances, eq(matchAppearances.id, matchSubstitutions.appearanceOutId))
       .where(inArray(matchAppearances.playerId, playerIds)),
     db
-      .select({ competition: matches.competition, season: matches.season })
+      .select({ ...matchColumns, minute: matchGoals.minute, stoppage: matchGoals.stoppageMinutes })
       .from(matchGoals)
       .innerJoin(matches, eq(matches.id, matchGoals.matchId))
       .where(
@@ -274,12 +321,35 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     })
   }
 
+  const matchOf = (row: {
+    competition: Competition
+    goalsAgainst: null | number
+    goalsFor: null | number
+    home: boolean
+    matchDate: string
+    matchId: number
+    opponent: string
+    round: string
+    season: string
+  }): CareerMatch => ({
+    competition: row.competition,
+    goalsAgainst: row.goalsAgainst ?? 0,
+    goalsFor: row.goalsFor ?? 0,
+    home: row.home,
+    id: row.matchId,
+    matchDate: row.matchDate,
+    opponent: row.opponent,
+    round: row.round,
+    season: row.season,
+  })
+
   return {
     appearances: appearances.map((appearance) => {
       const kinds = cardsOf(appearance.id)
 
       return {
         goalsAgainst: appearance.goalsAgainst ?? 0,
+        match: matchOf(appearance),
         red: kinds.includes('rood') || kinds.includes('geel-rood'),
         season: appearance.season,
         starter: appearance.starter,
@@ -288,7 +358,13 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
       }
     }),
     assists,
-    goals,
+    goals: goals.map((goal) => ({
+      competition: goal.competition,
+      match: matchOf(goal),
+      minute: goal.minute,
+      season: goal.season,
+      stoppage: goal.stoppage,
+    })),
     matchCounts: playedCounts.map(({ played: total, season }) => ({
       played: total,
       reported: reportedCounts.find((row) => row.season === season)?.reported ?? 0,
