@@ -4720,4 +4720,4 @@
     Er is geen nieuw token.
   - **Breedte:** `BarList` geeft de naam 4,5em en het getal 2em, en laat de balk de rest; een naam breekt af waar nodig, dus er scrolt niets zijwaarts op 320 pixels.
 - **Waarom:** de grafieken horen bij de andere cijfers, en de hoofdkolom blijft voor de tabel en de loopbaan.
-- **Alternatieven:** de grafieken in de hoofdkolom houden, op het witte vlak (de eerste keuze, #1085); een eigen token voor het spoor op een zacht vlak (het tint van het spoor van de schakelaar past al); de grafieken onderaan de zijkolom (de uitslagen staan dan ver van de cijfers per competitie).
+- **Alternatieven:** de grafieken in de hoofdkolom houden, op het witte vlak (de eerste keuze, #1085); een eigen token voor het spoor op een zacht vlak (de tint van het spoor van de schakelaar past al); de grafieken onderaan de zijkolom (de uitslagen staan dan ver van de cijfers per competitie).
