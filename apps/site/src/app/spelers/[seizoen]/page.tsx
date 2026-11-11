@@ -40,5 +40,5 @@ export default async function SeasonPlayersPage({
 
   return isSeasonAddress(part)
     ? PlayersPage({ searchParams, season: seasonOfAddress(part, playersPath) })
-    : PlayerPageView({ slug: part })
+    : PlayerPageView({ searchParams, slug: part })
 }

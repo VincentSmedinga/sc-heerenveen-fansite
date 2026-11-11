@@ -101,7 +101,7 @@ export type PlayerSeasonFacts = {
    */
   assistGivers?: readonly { name: string; slug: null | string }[]
   /** The goals he gave an assist for, in the reports (`assist_appearance_id`), by season. */
-  assists: readonly { season: string }[]
+  assists: readonly { competition?: Competition; season: string }[]
   /** His goals for us, without own goals: each goal once, whichever way it belongs to him. */
   goals: readonly {
     competition: Competition
@@ -152,13 +152,25 @@ export type SeasonAppearance = {
 export type SeasonSource = 'lineups' | 'none' | 'some-lineups' | 'wikipedia'
 
 /**
+ * Whether he played or scored outside the Eredivisie: only then is there anything to choose
+ * (#1103). The line-ups and the goals tell, whatever the source of a season.
+ */
+export function playedBesidesEredivisie(facts: PlayerSeasonFacts): boolean {
+  return (
+    facts.appearances.some(({ cameOn, match, starter }) => (starter || cameOn) && match.competition !== 'Eredivisie') ||
+    facts.goals.some(({ competition }) => competition !== 'Eredivisie')
+  )
+}
+
+/**
  * The seasons of a person, the newest first, from what was read. The source of each season
  * follows #785. A clean sheet and a goal conceded count only the matches in which he was in
  * the line-up and was not substituted; a red card ends a match too, so such a match does not
  * count either. A season with no figure at all (no line-up, no table, no goal) has dashes
  * only: with no source the goals are unknown, not nil.
  */
-export function playerSeasonsOf(facts: PlayerSeasonFacts): PlayerSeason[] {
+export function playerSeasonsOf(allFacts: PlayerSeasonFacts, only?: Competition): PlayerSeason[] {
+  const facts = only === undefined ? allFacts : inCompetition(allFacts, only)
   const seasons = [...new Set(facts.players.map((row) => row.season))].sort().reverse()
 
   return seasons.map((season) => {
@@ -197,7 +209,9 @@ export function playerSeasonsOf(facts: PlayerSeasonFacts): PlayerSeason[] {
     return {
       assists:
         source === 'wikipedia'
-          ? table?.assists
+          ? only === undefined
+            ? table?.assists
+            : undefined
           : fromLineups
             ? facts.assists.filter((assist) => assist.season === season).length
             : undefined,
@@ -212,7 +226,7 @@ export function playerSeasonsOf(facts: PlayerSeasonFacts): PlayerSeason[] {
       goalsByCompetition,
       lineupMatches: onPitch.map(({ match }) => match).sort(byDay),
       matchesInSeason,
-      played: fromLineups ? onPitch.length : table?.appearances,
+      played: fromLineups ? onPitch.length : only === undefined ? table?.appearances : undefined,
       red: fromLineups ? sum(lineups, (appearance) => appearance.red) : undefined,
       reportedMatches,
       season,
@@ -313,7 +327,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
       .innerJoin(clubs, eq(clubs.id, matches.clubId))
       .where(and(inArray(matches.season, seasons), eq(matchGoals.ours, true), eq(matchGoals.ownGoal, false), hisGoal)),
     db
-      .select({ season: matches.season })
+      .select({ competition: matches.competition, season: matches.season })
       .from(matchGoals)
       .innerJoin(matches, eq(matches.id, matchGoals.matchId))
       .where(
@@ -447,6 +461,19 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     })),
     players: rows.map(({ season, shirtNumber }) => ({ season, shirtNumber })),
     tables: [...tableSeasons.values()],
+  }
+}
+
+/**
+ * What was read, kept to the matches of one competition (#1103). The table of Wikipedia has no
+ * split by competition: `playerSeasonsOf` leaves what it fills out for a season that has it.
+ */
+function inCompetition(facts: PlayerSeasonFacts, only: Competition): PlayerSeasonFacts {
+  return {
+    ...facts,
+    appearances: facts.appearances.filter(({ match }) => match.competition === only),
+    assists: facts.assists.filter((assist) => assist.competition === only),
+    goals: facts.goals.filter((goal) => goal.competition === only),
   }
 }
 
