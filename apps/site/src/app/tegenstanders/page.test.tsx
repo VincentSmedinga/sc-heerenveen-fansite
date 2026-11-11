@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
-import { getClubRecords, getSourcePages } from '#src/opponents'
+import { getClubRecords, getLastWinPlaces, getSourcePages } from '#src/opponents'
 import { allRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -32,6 +32,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubRecords: vi.fn(),
+  getLastWinPlaces: vi.fn(),
   getSourcePages: vi.fn(),
 }))
 
@@ -44,6 +45,8 @@ beforeEach(() => {
   vi.mocked(getClubRecords).mockImplementation((choice) =>
     Promise.resolve(choice === 'league' ? leagueRecords : allRecords),
   )
+  vi.mocked(getLastWinPlaces).mockReset()
+  vi.mocked(getLastWinPlaces).mockResolvedValue(undefined)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getEditedMatches).mockResolvedValue(false)
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
@@ -90,6 +93,24 @@ describe('the page /tegenstanders', () => {
       'Alle tegenstanders',
       'Gemiddeld resultaat',
     ])
+  })
+
+  it('has the card Laatste overwinning after the top 10 and before the credit, when there are places', async () => {
+    vi.mocked(getLastWinPlaces).mockResolvedValue([
+      { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
+      { days: null, lastWin: null, name: 'Ajax', slug: 'ajax' },
+    ])
+
+    const html = await render({ competitie: 'eredivisie' })
+
+    expect(html.indexOf('id="gemiddeld-resultaat"')).toBeLessThan(html.indexOf('id="laatste-overwinning"'))
+    expect(html.indexOf('id="laatste-overwinning"')).toBeLessThan(html.indexOf('Wikipedia'))
+    expect(html).toContain('href="/tegenstanders/fc-twente?competitie=eredivisie"')
+    expect(html).toContain('Nog nooit gewonnen')
+  })
+
+  it('has no card Laatste overwinning without places', async () => {
+    expect(await render()).not.toContain('laatste-overwinning')
   })
 
   it('lists every club A to Z, each name a link to its page, with the figures of the record', async () => {
