@@ -11,6 +11,8 @@ import { reply } from './test-server.ts'
 
 export type TestItem = {
   birth?: TimeStatement[]
+  /** The date of death (`P570`). */
+  death?: TimeStatement[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
   labels?: { en?: string; nl?: string }
   nationalities?: (ItemStatement | string)[]
@@ -62,14 +64,21 @@ export function itemJson(id: string, item: TestItem = {}): string {
     })
   const claims: Record<string, unknown> = {}
 
-  if (item.birth !== undefined) {
-    claims['P569'] = item.birth.map(({ precision, rank = 'normal', time }) => ({
+  for (const [property, statements] of [
+    ['P569', item.birth],
+    ['P570', item.death],
+  ] as const) {
+    if (statements === undefined) {
+      continue
+    }
+
+    claims[property] = statements.map(({ precision, rank = 'normal', time }) => ({
       mainsnak: {
         datavalue: {
           type: 'time',
           value: { calendarmodel: 'http://www.wikidata.org/entity/Q1985727', precision, time },
         },
-        property: 'P569',
+        property,
         snaktype: 'value',
       },
       rank,

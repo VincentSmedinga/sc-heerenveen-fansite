@@ -846,7 +846,7 @@ De migratie `0069_add_person_slugs` voegt alleen toe en kan opnieuw draaien; hoe
 ### De gegevens van Wikidata
 
 De importer leest van elke persoon wat Wikidata weet (#898; de regels staan in de [README van de importer](../../apps/importer/README.md), _De gegevens van de personen uit Wikidata_).
-`persons` heeft er acht kolommen voor, die leeg zijn tot de persoon is gelezen:
+`persons` heeft er acht kolommen voor, die leeg zijn tot de persoon is gelezen, en drie voor een sterfdatum (#1147, hieronder):
 
 | Kolom (`persons`)      | Betekenis                                                                                                                                             |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -858,6 +858,17 @@ De importer leest van elke persoon wat Wikidata weet (#898; de regels staan in d
 | `line`                 | De linie: `doelman`, `verdediger`, `middenvelder` of `aanvaller` (dezelfde lijst als `playerPositions`)                                               |
 | `line_source`          | Waar de linie vandaan komt: `manual` (het beheer of de lijst `personLines`), `wikidata`, `old-site` (de oude fansite) of `squad` (de selectielijsten) |
 | `wikidata_read_at`     | Het moment waarop de importer de persoon las; leeg voor een persoon die nog niet is gelezen of wiens verzoek mislukte                                 |
+
+De sterfdatum (#1147, migratie `0071_add_death_date_to_persons`) heeft drie kolommen, leeg voor een persoon zonder:
+
+| Kolom (`persons`)      | Betekenis                                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `death_date`           | De sterfdatum van Wikidata (`P570`), of het eerste van het jaar dat de redactie invulde; zoals `birth_date`            |
+| `death_date_precision` | `day`, `month` of `year`                                                                                               |
+| `death_date_source`    | `wikidata`, of `manual` voor een jaar van de redactie, dat de importer nooit vervangt; leeg maken geeft Wikidata terug |
+
+`personsToRead(db, limit, rereadBefore)` geeft eerst de personen die nog nooit zijn gelezen en dan die zonder sterfdatum wiens laatste lezing op of voor `rereadBefore` ligt, de oudste eerst.
+De site toont alleen het jaar.
 
 Een geboortedatum van een levende speler is een persoonsgegeven.
 Hij blijft in de database, en de site toont hem pas na een eigen besluit.
@@ -895,6 +906,7 @@ Dat geldt ook voor de titel: blijft een persoon zonder Wikipedia-pagina, dan kri
 `mergeChosenPersons` voegt twee personen samen die de redactie koos en schrijft `person.merge` in het logboek, in één transactie.
 De migratie `0068_add_person_merge_action` voegt die actie toe aan de lijst van `audit_log.action`.
 De migratie `0052_add_wikidata_to_persons` voegt alleen toe en kan opnieuw draaien.
+De migratie `0071_add_death_date_to_persons` doet dat ook; terugdraaien kan met `ALTER TABLE persons DROP COLUMN death_date_source, DROP COLUMN death_date_precision, DROP COLUMN death_date`.
 Terugdraaien op de host: haal de foreign key `persons_birth_place_id_wikidata_items_id_fk`, de index `persons_wikidata_id_unique` en de acht kolommen weg, dan `person_nationalities`, `person_positions` en `wikidata_items`.
 De importer leest de personen dan opnieuw.
 

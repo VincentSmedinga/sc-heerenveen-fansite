@@ -324,7 +324,9 @@ describe('the persons of the editors', () => {
 
     expect(await book.resolve('Pelle van Amersfoort')).toBeNull()
     expect([...(await personNamesBySource(database.db))]).toEqual([['Luca Oyen', 'redactie']])
-    expect((await personsToRead(database.db, 10)).map((person) => person.wikipediaPage)).toEqual(['Luca Oyen'])
+    expect((await personsToRead(database.db, 10, new Date())).map((person) => person.wikipediaPage)).toEqual([
+      'Luca Oyen',
+    ])
     expect(await similarPersons(database.db)).toEqual([])
     expect(await countPersonNames(database.db)).toEqual({ guess: 0, manual: 0, none: 0, redactie: 1, sort_key: 0 })
   })

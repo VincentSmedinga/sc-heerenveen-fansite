@@ -60,7 +60,15 @@ export type AdminPlayer = {
   person:
     | Pick<
         Person,
-        'country' | 'familyName' | 'familyNamePrefix' | 'givenName' | 'id' | 'line' | 'name' | 'wikipediaPage'
+        | 'country'
+        | 'deathDate'
+        | 'familyName'
+        | 'familyNamePrefix'
+        | 'givenName'
+        | 'id'
+        | 'line'
+        | 'name'
+        | 'wikipediaPage'
       >
     | undefined
   player: Player
@@ -102,6 +110,11 @@ export type PlayerEntry = {
    * player then takes the country away, and the form that adds one leaves the person as he is.
    */
   country: null | string
+  /**
+   * The year of death of the person (#1147). Null for none, as for `country`: the form that
+   * changes a player then takes the year away, and the form that adds one leaves it as it is.
+   */
+  deathYear: null | number
   /** The line of the person. Null as for `country`. */
   line: null | PlayerPosition
   /** The name in parts. Null when the editor chose a person we know, who has his own. */
@@ -226,6 +239,7 @@ export function playerValuesOf({ person, player }: Pick<AdminPlayer, 'person' | 
     ...nameValuesOf(player, person),
     land: person?.country ?? '',
     linie: person?.line ?? '',
+    overleden: person?.deathDate === undefined || person.deathDate === null ? '' : person.deathDate.slice(0, 4),
     positie: player.position ?? '',
     rugnummer: player.shirtNumber === null ? '' : String(player.shirtNumber),
     rugnummervanaf: player.shirtNumberFrom ?? '',
@@ -327,6 +341,7 @@ export async function searchPersons(
 export function validatePlayer(
   values: PlayerValues,
   mode: 'add' | 'edit',
+  now = new Date(),
 ): { entry: PlayerEntry; errors?: undefined } | { entry?: undefined; errors: PlayerErrors } {
   const errors: PlayerErrors = {}
   const chosen = mode === 'add' && values.persoon !== newPersonChoice && values.persoon !== ''
@@ -432,6 +447,13 @@ export function validatePlayer(
   if (values.land !== '' && country === null) {
     errors.land = 'Kies een land uit de lijst, of kies Onbekend.'
   }
+
+  // The year of death the editors know better than Wikidata (#1147): four digits, not ahead.
+  const deathYear = /^\d{4}$/u.test(values.overleden) ? Number(values.overleden) : null
+
+  if (values.overleden !== '' && (deathYear === null || deathYear < 1850 || deathYear > now.getFullYear())) {
+    errors.overleden = `Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met ${now.getFullYear()}, of laat het veld leeg.`
+  }
   if (Object.keys(errors).length > 0) {
     return { errors }
   }
@@ -439,6 +461,7 @@ export function validatePlayer(
   return {
     entry: {
       country,
+      deathYear,
       line,
       name: chosen
         ? null
@@ -477,6 +500,7 @@ async function findPerson(db: Pick<Database, 'select'>, id: number) {
   const [person] = await db
     .select({
       country: persons.country,
+      deathDate: persons.deathDate,
       familyName: persons.familyName,
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
@@ -680,6 +704,9 @@ async function storePlayer(
       const facts = {
         ...(entry.country === null || entry.country === person.country ? {} : { country: entry.country }),
         ...(entry.line === null || entry.line === person.line ? {} : { line: entry.line }),
+        ...(entry.deathYear === null || entry.deathYear === yearOf(person.deathDate)
+          ? {}
+          : { deathYear: entry.deathYear }),
       }
 
       await setEditorsPersonFacts(transaction, personId, facts)
@@ -687,6 +714,9 @@ async function storePlayer(
       const personChanges = [
         facts.line === undefined ? undefined : `linie van de persoon: ${person.line ?? 'geen'} → ${facts.line}`,
         facts.country === undefined ? undefined : `land van de persoon: ${person.country ?? 'geen'} → ${facts.country}`,
+        facts.deathYear === undefined
+          ? undefined
+          : `jaar van overlijden van de persoon: ${yearOf(person.deathDate) ?? 'geen'} → ${facts.deathYear}`,
       ]
         .filter((change) => change !== undefined)
         .map((change) => `, ${change}`)
@@ -820,6 +850,7 @@ async function storePlayerEdit(
           : {
               ...(entry.country === shown.country ? {} : { country: entry.country }),
               ...(entry.line === shown.line ? {} : { line: entry.line }),
+              ...(entry.deathYear === yearOf(shown.deathDate) ? {} : { deathYear: entry.deathYear }),
             }
 
       const edited: PlayerField[] = [
@@ -851,6 +882,9 @@ async function storePlayerEdit(
         facts.country === undefined
           ? undefined
           : `land van de persoon: ${shown?.country ?? 'geen'} → ${facts.country ?? 'geen'}`,
+        facts.deathYear === undefined
+          ? undefined
+          : `jaar van overlijden van de persoon: ${yearOf(shown?.deathDate) ?? 'geen'} → ${facts.deathYear ?? 'geen'}`,
       ].filter((change) => change !== undefined)
 
       if (changes.length === 0) {
@@ -993,6 +1027,11 @@ async function suggestionsFor(
   }
 
   return suggested
+}
+
+/** The year of a date as `2020-01-01`, or null for none. */
+function yearOf(date: null | string | undefined): null | number {
+  return date === undefined || date === null ? null : Number(date.slice(0, 4))
 }
 
 const plain = (text: string) =>

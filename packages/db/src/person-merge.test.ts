@@ -278,6 +278,41 @@ describe('mergePersons', () => {
     ])
   })
 
+  it('keeps a year of death the editors set, and fills a missing one from the other person (#1147)', async () => {
+    await addPerson({
+      deathDate: '2020-01-01',
+      deathDatePrecision: 'year',
+      deathDateSource: 'wikidata',
+      wikipediaPage: 'Uğur Yıldırım',
+    })
+    await addPerson({
+      deathDate: '2018-01-01',
+      deathDatePrecision: 'year',
+      deathDateSource: 'manual',
+      wikipediaPage: 'Ugur Yıldırım',
+    })
+    await addPerson({ wikipediaPage: 'Radoslav Samardžić' })
+    await addPerson({
+      deathDate: '2019-05-06',
+      deathDatePrecision: 'day',
+      deathDateSource: 'wikidata',
+      wikipediaPage: 'Radoslav Samardzic',
+    })
+
+    await mergePersons(database.db, list)
+
+    expect(
+      (await personRows()).map(({ deathDate, deathDatePrecision, deathDateSource }) => ({
+        deathDate,
+        deathDatePrecision,
+        deathDateSource,
+      })),
+    ).toEqual([
+      { deathDate: '2018-01-01', deathDatePrecision: 'year', deathDateSource: 'manual' },
+      { deathDate: '2019-05-06', deathDatePrecision: 'day', deathDateSource: 'wikidata' },
+    ])
+  })
+
   it('makes one row of the two rows of the person in a season, and loses no goal, line-up or number', async () => {
     const kept = await addPerson({ wikipediaPage: 'Jan Harm Schippers' })
     const other = await addPerson({ wikipediaPage: 'Jan-Harm Schippers' })

@@ -498,6 +498,13 @@
       "when": 1794399955191,
       "tag": "0070_add_previous_shirt_number",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "5",
+      "when": 1794435563022,
+      "tag": "0071_add_death_date_to_persons",
+      "breakpoints": true
     }
   ]
 }

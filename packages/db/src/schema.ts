@@ -826,6 +826,14 @@ export const birthDatePrecisions = ['day', 'month', 'year'] as const
 
 export type BirthDatePrecision = (typeof birthDatePrecisions)[number]
 
+/**
+ * Where the date of death of a person came from (#1147): `wikidata` from `P570`, `manual` a
+ * year the editors filled in. The importer never replaces `manual`.
+ */
+export const deathDateSources = ['wikidata', 'manual'] as const
+
+export type DeathDateSource = (typeof deathDateSources)[number]
+
 /** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
 export const wikidataLimits = { id: 20, label: 255 }
 
@@ -885,6 +893,13 @@ export const persons = mysqlTable('persons', {
   birthDate: date('birth_date', { mode: 'string' }),
   birthDatePrecision: mysqlEnum('birth_date_precision', birthDatePrecisions),
   birthPlaceId: varchar('birth_place_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
+  // The date of death (#1147), as `birth_date` is kept: a day, or the first of the month or of
+  // the year when `death_date_precision` says that is all we know. All three are empty for a
+  // person without one. The site shows the year only. The editors fill in a year with the
+  // source `manual`; the importer never replaces it.
+  deathDate: date('death_date', { mode: 'string' }),
+  deathDatePrecision: mysqlEnum('death_date_precision', birthDatePrecisions),
+  deathDateSource: mysqlEnum('death_date_source', deathDateSources),
   line: mysqlEnum('line', playerPositions),
   lineSource: mysqlEnum('line_source', personLineSources),
   // The country of the person (#1051): the code of two letters in capitals (`NL`), and where

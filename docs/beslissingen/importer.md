@@ -3005,6 +3005,7 @@
 - **Waarom:** de regel is eenvoudig, de gegevens zijn er dan als de site ooit een tegenstander toont, en de eerste ronde is ongeveer 1.400 verzoeken voor ongeveer 680 personen, plus de labels.
   Een persoon wordt één keer gelezen; opnieuw lezen is een eigen issue.
 - **Alternatieven:** alleen personen met een rij in `players` van ons (minder verzoeken).
+- **Later:** zie _Een persoon zonder sterfdatum wordt elke 30 dagen opnieuw gelezen_ (11 november 2026, #1147): een persoon zonder sterfdatum wordt opnieuw gelezen.
 
 ## De linie komt uit een lijst van ons, anders uit Wikidata, anders uit de selectielijst
 
@@ -4077,3 +4078,29 @@
   Vanaf de dag na hun vorige wedstrijd gaat het nieuws over de tegenstander niet meer over die wedstrijd maar over de onze.
 - **Alternatieven:** een langer plafond voor een derby (één regel voor elke club blijft eenvoudig en toetsbaar); de vorige wedstrijd van de tegenstander in elke competitie zoeken (beker en Europa staan niet in de database); het venster 10 dagen als plafond geven (de eerste versie: dat gaf in een gewone week van zaterdag tot zaterdag 6 dagen); het venster altijd 10 dagen maken (dan komt een week algemeen nieuws door).
 - **Later:** vervangt het venster van 3 dagen voor de wedstrijd uit _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_ (30 oktober 2026) en uit de eerdere beslissing van 26 oktober 2026 (#315).
+
+## Een persoon zonder sterfdatum wordt elke 30 dagen opnieuw gelezen
+
+- **Datum:** 11 november 2026
+- **Besluit:** de importer leest `P570` (de sterfdatum) uit het item, met dezelfde regels als `P569`, en bewaart hem in `persons.death_date` met de precisie in `death_date_precision` en de bron in `death_date_source` (#1147).
+  - **De rang en de precisie:** een uitspraak met de rang "deprecated" telt niet, en een datum grover dan een jaar blijft leeg.
+  - **Opnieuw lezen:** een persoon zonder sterfdatum wordt opnieuw gelezen als zijn laatste lezing 30 dagen of langer geleden is (`rereadAfterDays`), de oudste lezing eerst, binnen dezelfde 200 per run.
+    Een persoon die nog nooit is gelezen gaat voor.
+    Een persoon die bij de eerste lezing geen Q-nummer had, wordt ook opnieuw bekeken, met de pagina-informatie van zijn artikel.
+    Een lezing van 29 dagen geleden telt niet en een van 31 dagen wel.
+  - **Niets nieuws:** de nieuwe lezing gebruikt dezelfde fetcher, `robots.txt`-controle en vergrendeling, en vraagt alleen `Special:EntityData` en, zoals eerder, de pagina-informatie.
+  - **Een jaar van de redactie** (`manual`) vervangt de importer nooit, en zo'n persoon wordt niet opnieuw gelezen zolang het jaar er staat.
+  - **Het logboek** noemt het aantal opnieuw gelezen personen: `persons (Wikidata): 3 persons read (3 read again), …`, en niets over een persoon.
+- **Waarom:** dat zijn ongeveer 16 verzoeken per dag bij 467 personen, met de bestaande fetcher, en een sterfdatum is binnen een maand zichtbaar.
+- **Alternatieven:** elke 90 dagen (een sterfdatum duurt tot drie maanden); alleen een persoon zonder Q-nummer opnieuw lezen (een latere dood komt dan nooit binnen).
+- **Later:** vervangt "een persoon wordt één keer gelezen" uit _De stap geldt voor alle personen, ook tegenstanders_ (8 november 2026).
+
+## Wikidata is de enige bron voor een sterfdatum, aangevuld met de redactie
+
+- **Datum:** 11 november 2026
+- **Besluit:** Wikidata (`P570`) is de enige bron voor een sterfdatum, aangevuld met een jaar van overlijden dat de redactie in Beheer invult voor een speler zonder artikel (#1147).
+  Bij een verschil wint de redactie.
+  Alle gegevens en de pagina zitten in één pull request, want het is één gegevensstroom van ongeveer zeven kleine onderdelen.
+- **Waarom:** het onderzoek (#1110) vond bij 417 spelers met een Wikidata-item geen sterfdatum op Wikipedia die Wikidata mist.
+  Wikidata is CC0, dus er komt geen bronvermelding bij, en de redactie weet het beter dan een bron voor spelers zonder item.
+- **Alternatieven:** ook Wikipedia lezen (CC BY-SA, veel code, niets extra); Wikidata laten winnen (een fout in Wikidata zou een correctie van de redactie wissen); twee pull requests, eerst de gegevens en dan de pagina.
