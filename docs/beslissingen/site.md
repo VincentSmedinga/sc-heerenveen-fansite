@@ -4426,3 +4426,80 @@
   De cel zegt waar de waarde vandaan komt, zodat een schermlezer en een lezer met een smal scherm het verschil horen.
 - **Alternatieven:** de linie zonder toevoeging tonen (kort, maar verbergt dat het seizoen niets heeft); een aparte kolom Linie (neemt op een telefoon een kolom extra in).
 - **Later:** vult aan op _De kaart Selectie toont de positie en het land van het seizoen, en anders die van de persoon_ (#1051), die alleen de pagina van een seizoen noemde.
+
+## De pagina van een speler staat op `/spelers/<naam>`, en een oude naam leidt door
+
+- **Datum:** 11 november 2026
+- **Besluit:** het adres is de naam van de persoon in kleine letters, zonder accenten en met streepjes, zoals `/spelers/jan-de-vries` (#1079).
+  Elke naam die een persoon ooit had, blijft bewaard en leidt door naar zijn adres van nu.
+  Bij het samenvoegen van twee personen gaan de namen van de persoon die verdwijnt mee naar de persoon die blijft, zoals de titels in `person_pages`.
+  Krijgen twee personen dezelfde naam, dan krijgt de tweede zijn geboortejaar erachter, of zonder geboortejaar zijn nummer.
+- **Waarom:** een adres met alleen de naam is te lezen en te raden, net als de adressen van wedstrijden en clubs.
+  Een speler kan van naam veranderen en twee personen kunnen in Beheer samengaan (#977); een link van elders moet dan blijven werken.
+- **Alternatieven:** de naam met het vaste nummer van de persoon, zoals `/spelers/jan-de-vries-75` (eenvoudiger, maar minder mooi); alleen het nummer (niet te lezen).
+
+## Alleen onze eigen spelers hebben een pagina
+
+- **Datum:** 11 november 2026
+- **Besluit:** een persoon heeft een pagina als hij in minstens één selectie van sc Heerenveen stond (#1079).
+  Een speler van een tegenstander die alleen tegen ons scoorde, heeft geen pagina, en zijn naam blijft gewone tekst.
+  Wie tegen ons scoorde en ook bij ons speelde, ziet die doelpunten in het blok Tegen ons op zijn eigen pagina.
+- **Waarom:** de site gaat over onze club.
+  Een pagina met alleen een paar doelpunten tegen ons zegt weinig, en het zijn er meer dan van onze eigen spelers (528 tegen 467 op acceptatie).
+- **Alternatieven:** een pagina voor iedereen met een doelpunt in onze wedstrijden.
+
+## De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum
+
+- **Datum:** 11 november 2026
+- **Besluit:** onder de naam staat "geboren in 1974 in Emmen" (#1079).
+  De volledige geboortedatum uit `persons.birth_date` blijft in de database en staat niet op de site, ook niet in de broncode of de metadata.
+  Zonder jaar of plaats valt dat deel weg.
+- **Waarom:** de geboortedatum van een levende speler is een persoonsgegeven (zie het commentaar bij `persons` in het schema).
+  Het jaar is genoeg voor een supporter, en de volledige datum staat een klik verder op Wikipedia.
+- **Alternatieven:** de volledige datum en plaats; geen van beide.
+
+## Geen foto van een speler
+
+- **Datum:** 11 november 2026
+- **Besluit:** de pagina van een speler heeft geen foto en geen plek voor een foto (#1079).
+- **Waarom:** we hebben van geen enkele bron toestemming voor foto's van spelers.
+  Een foto van Wikimedia zou een verzoek naar een ander domein zijn, of een eigen kopie met een eigen licentie vragen.
+- **Alternatieven:** een foto van Wikimedia Commons met de naam van de maker (een eigen issue als we dat ooit willen).
+
+## De pagina van een speler noemt zijn bronnen in de zijkolom
+
+- **Datum:** 11 november 2026
+- **Besluit:** de zijkolom eindigt met `WikipediaCredit` in de volledige vorm, met een link naar het artikel van de speler en de zin dat onze spelersgegevens ook CC BY-SA 4.0 zijn (#1079).
+  Komen gegevens van de speler uit het archief van de oude fansite, dan noemt de credit dat archief ook.
+  Een speler zonder artikel op Wikipedia (een speler van de redactie) krijgt alleen de bronnen die hij heeft.
+  Tot #1086 de zijkolom brengt, staat de credit onderaan de hoofdkolom.
+- **Waarom:** principe 4 van de Redactie: altijd de bron vermelden.
+  Naam, geboortejaar, plaats, land en linie komen van Wikipedia en Wikidata, de wedstrijden voor 2007 uit het archief.
+- **Alternatieven:** een credit per blok (te veel herhaling).
+
+## De getallen van een speler staan in de tabel Per seizoen, niet nog een keer in de loopbaan
+
+- **Datum:** 11 november 2026
+- **Besluit:** de loopbaan toont per seizoen het rugnummer, de competities waarin hij scoorde en één moment, maar niet de wedstrijden en doelpunten van dat seizoen (#785).
+  Die staan in de tabel erboven.
+- **Waarom:** het gekozen ontwerp combineert de cijfers van de ene variant met het verhaal van de andere, en twee keer hetzelfde getal maakt de pagina lang.
+- **Alternatieven:** de getallen ook in de loopbaan.
+
+## De namen in het adres van een speler staan in een eigen tabel, en één functie houdt ze bij
+
+- **Datum:** 11 november 2026
+- **Besluit:** `persons.slug` is de naam in het adres van nu, en `person_slugs` bewaart elke naam die een persoon ooit had, die van nu erbij (#1079).
+  Eén functie, `updatePlayerAddresses` in `@fansite/db/person-slugs`, geeft elke persoon met een rij in `players` zijn naam in het adres.
+  Ze draait als de site start, na elke import van elk uur en nadat de redactie in Beheer een speler toevoegt, wijzigt of twee personen samenvoegt.
+  - **De naam:** `persons.name`, of zonder die naam de naam van zijn nieuwste rij in `players`.
+  - **Stabiel:** een persoon houdt zijn naam van nu zolang die bij zijn naam past, ook als er later een persoon met dezelfde naam komt.
+  - **Botsing:** het lagere nummer krijgt de naam; daarna de naam met het geboortejaar, en dan de naam met het nummer.
+    Een naam die een andere persoon ooit had, krijgt niemand anders, zodat een oud adres nooit naar een andere speler leidt.
+  - **Nooit:** `kies` en een naam die op een seizoen lijkt, zoals `2025-26`.
+  - **Samenvoegen:** `mergePersonInto` zet de namen van de persoon die verdwijnt op de persoon die blijft, in dezelfde transactie.
+    Had de persoon die blijft nog geen adres, dan krijgt hij dat van de ander tot de functie weer draait.
+  - **Een oud adres** antwoordt met 308 en het adres van nu.
+- **Waarom:** een naam in het adres hangt af van de andere personen, dus hij moet bewaard worden en kan niet bij elk verzoek worden uitgerekend.
+  Eén functie die niets doet als alles klopt, is eenvoudiger dan elke plek die een naam of een speler verandert, apart te laten schrijven.
+  Een import met de hand, zoals van een eerder seizoen, laat het over aan de import van het volgende uur.
+- **Alternatieven:** alleen een tabel met een kolom "huidig" (de naam van nu is dan een zoekvraag in plaats van een kolom); de naam bij elk schrijven in het beheer en de importer bijwerken (veel plekken, en een vergeten plek maakt een speler zonder adres).

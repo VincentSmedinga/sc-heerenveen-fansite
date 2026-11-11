@@ -34,6 +34,7 @@ describe('prepareDatabaseOnStart', () => {
       await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: siteEnv })
 
       expect(prepareDatabase).toHaveBeenCalledExactlyOnceWith({
+        addresses: true,
         migrationsFolder: migrationsFolder(),
         seed: siteEnv,
         url: DATABASE_URL,

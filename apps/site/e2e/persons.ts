@@ -1,6 +1,7 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { persons, players } from '@fansite/db/schema'
+import { updatePlayerAddresses } from '@fansite/db/person-slugs'
+import { persons, personSlugs, players } from '@fansite/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -70,12 +71,35 @@ export async function addPersons() {
           })),
         )
       }
+      // An old address of a player of ours, and an address of a person in no squad, as a
+      // player of an opponent who was ours once would have (see playerPages).
+      if (person !== undefined && name === 'Proef de Keeper') {
+        await db.insert(personSlugs).values({ personId: person.id, slug: playerPages.old.slice('/spelers/'.length) })
+      }
+      if (person !== undefined && name === 'Test Zonder Selectie') {
+        await db
+          .insert(personSlugs)
+          .values({ personId: person.id, slug: playerPages.opponent.slice('/spelers/'.length) })
+      }
     }
+
+    // The site gives the addresses when it starts, before these persons were there.
+    await updatePlayerAddresses(db)
   } finally {
     await close()
   }
 
   return remove
+}
+
+/**
+ * The pages of the made-up players (#1079): the page of a player of ours, an old address of
+ * his, and the address of a person in no squad of ours, which is "niet gevonden".
+ */
+export const playerPages = {
+  old: '/spelers/proef-keeper',
+  opponent: '/spelers/test-zonder-selectie',
+  player: '/spelers/proef-de-keeper',
 }
 
 /**

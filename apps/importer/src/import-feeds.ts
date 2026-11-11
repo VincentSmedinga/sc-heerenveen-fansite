@@ -7,6 +7,7 @@ import { recordRun } from '@fansite/db/alerts'
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { mailConflicts } from '@fansite/db/match-conflict-mail'
+import { updatePlayerAddresses } from '@fansite/db/person-slugs'
 import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
@@ -381,9 +382,16 @@ export async function runImport(
         wikidata: wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata,
       })
 
+      // After every step that makes or renames a person: the addresses of the players' pages
+      // follow (#1079). A failure is a warning, not a failed import.
+      const addresses = await updatePlayerAddresses(db).then(
+        (count) => (count === 0 ? [] : [`Player addresses: ${count} new`]),
+        (error: unknown) => [`Player addresses: warning, not updated: ${describeError(error)}`],
+      )
+
       await finishRun(db, runId, clock())
 
-      return { clubLines, personLines, reports, wikipedia }
+      return { clubLines, personLines: [...personLines, ...addresses], reports, wikipedia }
     })
 
     if (!run.ran) {

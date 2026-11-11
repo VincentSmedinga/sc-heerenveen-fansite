@@ -916,6 +916,7 @@
   De datum van een levende speler is een persoonsgegeven: hij blijft in de database en de site toont hem pas na een eigen besluit.
 - **Waarom:** Wikidata kent bij oudere spelers soms alleen het jaar, en 1 januari zou een verzonnen dag zijn.
 - **Alternatieven:** een jaarkolom naast de datum.
+- **Later:** sinds 11 november 2026 toont de pagina van een speler alleen het geboortejaar (#1079); zie _De pagina toont het geboortejaar en de geboorteplaats, niet de geboortedatum_ in `site.md`.
 
 ## Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is
 

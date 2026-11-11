@@ -3,10 +3,17 @@ import { migrate } from 'drizzle-orm/mysql2/migrator'
 import { migrateArticleBodies } from './article-body-migration.ts'
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
+import { updatePlayerAddresses } from './person-slugs.ts'
 import { removeTestSources, seedMatches, seedRealSources, seedSquad } from './seed.ts'
 import { seedStaff } from './staff-seed.ts'
 
 export type PrepareOptions = {
+  /**
+   * Whether to give the players the addresses of their pages after the migrations
+   * (`updatePlayerAddresses`, #1079). The site does; a test of an older migration can't, as its
+   * schema has no slugs yet.
+   */
+  addresses?: boolean
   /** How many seconds to wait for a process that is preparing the same database. */
   lockSeconds?: number
   /** The folder with the migrations: the SQL files and `meta/_journal.json`. */
@@ -24,7 +31,8 @@ export type PrepareOptions = {
 
 /**
  * Brings the database up to date: runs the migrations it hasn't had yet, puts the text of the
- * articles that still have the old format into JSON and, when asked, puts the real sources in
+ * articles that still have the old format into JSON, gives the players the addresses of their
+ * pages when asked (`addresses`) and, when asked, puts the real sources in
  * the register and the head coaches in `staff` (see `PrepareOptions`). The test sources are
  * for local development and the tests only; acceptance removes the ones it had. The site calls
  * this when it starts. A lock in the database (`GET_LOCK`) makes two
@@ -39,7 +47,13 @@ export type PrepareOptions = {
  * It takes the folder with the migrations from the caller. A bundled build can't tell where the
  * files are, so the site says where it put them.
  */
-export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed, url }: PrepareOptions) {
+export async function prepareDatabase({
+  addresses = false,
+  lockSeconds = 30,
+  migrationsFolder,
+  seed,
+  url,
+}: PrepareOptions) {
   const { close, db, pool } = connect(url)
   const lockName = lockNameFor(url, 'migrate')
 
@@ -47,6 +61,10 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
     const { ran } = await withLock(pool, lockName, lockSeconds, async () => {
       await migrate(db, { migrationsFolder })
       await migrateArticleBodies(db)
+
+      if (addresses) {
+        await updatePlayerAddresses(db)
+      }
 
       if (seed === 'acceptance' || seed === 'production') {
         await seedRealSources(db)

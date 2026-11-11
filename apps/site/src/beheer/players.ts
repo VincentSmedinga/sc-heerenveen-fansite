@@ -7,6 +7,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { recordAction } from '@fansite/db/audit-log'
+import { updatePlayerAddresses } from '@fansite/db/person-slugs'
 import {
   type EditorsName,
   findOrAddEditorsPerson,
@@ -834,6 +835,7 @@ export async function addPlayer(
 
   if (outcome.status === 'added') {
     await refreshCompleteness(db, season, now)
+    await refreshPlayerAddresses(db)
   }
 
   return outcome
@@ -855,6 +857,7 @@ export async function editPlayer(
     if (player !== undefined) {
       await refreshCompleteness(db, player.season, now)
     }
+    await refreshPlayerAddresses(db)
   }
 
   return outcome
@@ -871,6 +874,19 @@ export async function refreshCompleteness(db: Database, season: string, now: Dat
     await storeCompleteness(db, season, undefined, now)
   } catch (error) {
     console.warn(`Could not work out the completeness of ${season} after a change of a player`, error)
+  }
+}
+
+/**
+ * Gives the players the addresses of their pages after the editors added, changed or merged one
+ * (#1079): a new player gets a page and a new name a new address. The change of the player
+ * stays when this fails: it logs a warning, and the next import does it.
+ */
+export async function refreshPlayerAddresses(db: Database): Promise<void> {
+  try {
+    await updatePlayerAddresses(db)
+  } catch (error) {
+    console.warn('Could not update the addresses of the players after a change of a player', error)
   }
 }
 

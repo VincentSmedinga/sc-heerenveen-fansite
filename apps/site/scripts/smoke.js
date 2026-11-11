@@ -168,6 +168,29 @@ async function addProefdorpStadiums(database) {
 }
 
 /**
+ * Gives the made-up scorer Wouter Proefman a person with a row in the squad of last season and
+ * the address of his page, as the site gives it when it starts (see `updatePlayerAddresses`),
+ * so the check can open the page of a player (#1079).
+ */
+async function addProefmanPage(database) {
+  const { close, pool } = connect(database)
+
+  try {
+    const [{ insertId }] = await pool.query(
+      "INSERT INTO persons (name, given_name, family_name, line, country, birth_date, birth_date_precision, slug) VALUES ('Wouter Proefman', 'Wouter', 'Proefman', 'aanvaller', 'NL', '1990-03-14', 'day', 'wouter-proefman')",
+    )
+
+    await pool.query("INSERT INTO person_slugs (slug, person_id) VALUES ('wouter-proefman', ?)", [insertId])
+    await pool.query(
+      "INSERT INTO players (season, name, search_term, person_id) VALUES (?, 'Wouter Proefman', 'proefman', ?)",
+      [seasonsAgo(1), insertId],
+    )
+  } finally {
+    await close()
+  }
+}
+
+/**
  * Gives Testdorp FC four more played home matches in the Eredivisie, one to four years ago, so
  * with the one of the seed it has the five that the card Doelpuntenmakers needs. Three of them
  * have scorers and the fourth has a score without scorers, so the count line shows.
@@ -642,11 +665,12 @@ async function checkSitemap(siteOrigin, { clubs: hasClubs }) {
   const listed = pages.map(({ path }) => `${siteOrigin}${path}`)
   assert.deepEqual(locations.slice(0, listed.length), listed)
   // Then the page of each club the made-up matches have, then the page of each match that has
-  // a report that is klaar, and nothing else.
+  // a report that is klaar, then the page of each player with an address, and nothing else.
   const rest = locations.slice(listed.length)
   const clubs = rest.filter((location) => location.startsWith(`${siteOrigin}/tegenstanders/`))
   const reports = rest.filter((location) => location.startsWith(`${siteOrigin}/wedstrijden/`))
-  assert.equal(rest.length, clubs.length + reports.length)
+  const players = rest.filter((location) => /\/spelers\/[a-z0-9-]+$/u.test(location))
+  assert.equal(rest.length, clubs.length + reports.length + players.length)
   assert.equal(
     clubs.includes(`${siteOrigin}/tegenstanders/testdorp-fc`),
     hasClubs,
@@ -1273,6 +1297,22 @@ await withEmptyDatabase((database) =>
     // The page Spelers has the card Selectie with the squad of the season in the main column,
     // and the card with everybody who scored in the sidebar, which is the card that stood on
     // the page Cijfers before it got the top 5. Spelers is an item of the menu.
+    // The page of a player (#1079): his name as the heading, his year of birth and never the
+    // whole date, and Spelers as the current part of the menu.
+    await addProefmanPage(database)
+
+    const playerPage = await fetch(`${origin}/spelers/wouter-proefman`)
+    const playerHtml = await playerPage.text()
+    assert.equal(playerPage.status, 200)
+    assert.match(
+      playerHtml,
+      /<h1[^>]*><span class="hf-player-name"><span class="hf-player-name-given">Wouter<\/span> <span class="hf-player-name-surname">Proefman<\/span><\/span><\/h1>/,
+    )
+    assert.match(playerHtml, /<title>Wouter Proefman – Spelers – sc Heerenveen Fansite<\/title>/)
+    assert.match(playerHtml, /geboren in 1990/)
+    assert.doesNotMatch(playerHtml, /1990-03-14|14 maart 1990/)
+    assert.match(playerHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
+
     const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)

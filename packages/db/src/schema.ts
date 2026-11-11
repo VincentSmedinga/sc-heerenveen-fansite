@@ -789,6 +789,9 @@ export const personNameSources = ['sort_key', 'guess', 'manual', 'redactie'] as 
 export type PersonNameSource = (typeof personNameSources)[number]
 
 /** The most characters the columns with the name of a person hold. */
+/** The longest slug of the address of a player's page (`/spelers/<slug>`). */
+export const personSlugLength = 100
+
 export const personNameLimits = { familyName: 150, familyNamePrefix: 30, givenName: 100, name: 255 }
 
 /** The four lines of a player, and the lines of a person too (`persons.line`). */
@@ -894,6 +897,10 @@ export const persons = mysqlTable('persons', {
   // The title is that of the English Wikipedia: the player has no Dutch article (#1043). The
   // importer never asks the Dutch Wikipedia or Wikidata about such a title.
   englishTitle: boolean('english_title').notNull().default(false),
+  // The name of the address of his page, `/spelers/<slug>` (#1079): set by
+  // `updatePlayerAddresses` for a person with a row in `players`, empty for every other. Every
+  // slug he ever had, this one among them, is in `person_slugs`.
+  slug: varchar('slug', { length: personSlugLength }).unique(),
 })
 
 export type NewPerson = typeof persons.$inferInsert
@@ -917,6 +924,25 @@ export const personPages = mysqlTable('person_pages', {
 export type NewPersonPage = typeof personPages.$inferInsert
 
 export type PersonPage = typeof personPages.$inferSelect
+
+/**
+ * Every name the address of the page of a person ever had (#1079): his slug of now and the old
+ * ones, so an old address leads to the page of now. A slug belongs to one person, so it is the
+ * primary key. A merge moves the slugs of the person that goes to the one that stays, and the
+ * rows go with their person.
+ */
+export const personSlugs = mysqlTable(
+  'person_slugs',
+  {
+    slug: varchar('slug', { length: personSlugLength }).primaryKey(),
+    personId: int('person_id', { unsigned: true })
+      .notNull()
+      .references(() => persons.id, { onDelete: 'cascade' }),
+  },
+  (table) => [check('person_slugs_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`)],
+)
+
+export type PersonSlug = typeof personSlugs.$inferSelect
 
 /**
  * The nationalities of a person (`P27` on Wikidata), in the order Wikidata lists them:

@@ -1,0 +1,227 @@
+import type { Metadata } from 'next'
+
+import { seasonOf } from '@fansite/db/season'
+import {
+  ArchiveCredit,
+  Breadcrumb,
+  Card,
+  countryName,
+  Heading,
+  Link,
+  Page,
+  PlayerName,
+  Text,
+  WikipediaCredit,
+} from '@fansite/design-system'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { Fragment, type ReactNode } from 'react'
+
+import { reviewBranch } from '#src/env'
+import { formatReadAt, wikipediaUrl } from '#src/match-format'
+import { seasonPageMetadata } from '#src/metadata'
+import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
+import { playersPath } from '#src/season-page'
+import { seasonAddress } from '#src/seasons'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
+
+/**
+ * The title and description of the page of a player. The description has his line, country
+ * and seasons, and never his date of birth. An unknown player has none: the page is "niet
+ * gevonden".
+ */
+export async function playerMetadata(slug: string): Promise<Metadata> {
+  const loaded = await loadPlayerPage(slug)
+
+  // A page that failed answers 200, so noindex keeps search engines from keeping it.
+  if (loaded.kind === 'error') {
+    return { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
+  }
+  if (loaded.kind !== 'found') {
+    return {}
+  }
+
+  const { page } = loaded
+  const periods = periodsOf(page.seasons)
+  const country = page.country === undefined ? undefined : countryName(page.country)
+  const who = [page.line, country === undefined ? undefined : `uit ${country}`]
+    .filter((part) => part !== undefined)
+    .join(' ')
+
+  return seasonPageMetadata(playersPath, playerAddress(page.slug), {
+    description: `${page.name}${who === '' ? '' : `, ${who},`} speelde bij sc Heerenveen ${periodsText(periods)}. Met de bron erbij.`,
+    title: `${page.name} – Spelers`,
+  })
+}
+
+/**
+ * The page of a player of our club (#1079): a breadcrumb back to Spelers, his name as the
+ * heading in the parts `PlayerName` shows, one line with his line, country and year and place
+ * of birth, the seasons he played with us as links to their pages, and the credit. An old
+ * address leads to the address of now (308), and an address of nobody, or of a player of an
+ * opponent, is "niet gevonden". The blocks of #1082 to #1086 come between the seasons and the
+ * credit; the credit moves to the sidebar with #1086.
+ */
+export async function PlayerPageView({ slug }: { slug: string }) {
+  const loaded = await loadPlayerPage(slug)
+
+  if (loaded.kind === 'unknown') {
+    notFound()
+  }
+  if (loaded.kind === 'moved') {
+    permanentRedirect(playerAddress(loaded.slug))
+  }
+  if (loaded.kind === 'error') {
+    return <ServerError retryHref={playerAddress(slug)} />
+  }
+
+  const { page } = loaded
+
+  return (
+    <Page.Main
+      intro={
+        <Page.Cell>
+          <Breadcrumb current={page.name} items={[{ href: playersPath, label: 'Spelers' }]} label="Kruimelpad" />
+          <Heading level={1}>
+            <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
+          </Heading>
+          <PlayerFacts page={page} />
+        </Page.Cell>
+      }
+    >
+      <Page.Cell>
+        <PlayerSeasons seasons={page.seasons} />
+      </Page.Cell>
+      <PlayerCredit page={page} />
+    </Page.Main>
+  )
+}
+
+/** The line of a player as a word with a capital, such as `Aanvaller`. */
+function lineName(line: PlayerPage['line']) {
+  return line === undefined ? undefined : `${line.charAt(0).toUpperCase()}${line.slice(1)}`
+}
+
+/** Words as a list in Dutch: "a", "a en b", "a, b en c". */
+function listText(words: readonly string[]) {
+  return words.length < 2 ? (words[0] ?? '') : `${words.slice(0, -1).join(', ')} en ${words.at(-1)}`
+}
+
+/** The seasons in words: "in 2004/05", "van 2002/03 tot en met 2003/04 en in 2007/08". */
+function periodsText(periods: readonly { first: string; last: string }[]) {
+  return listText(
+    periods.map(({ first, last }) => (first === last ? `in ${first}` : `van ${first} tot en met ${last}`)),
+  )
+}
+
+/**
+ * The credit: Wikipedia with his article and the licence of our data, with the archive of the
+ * old fansite when he played a season up to 2006/07. A player whose article was not read yet
+ * gets the short form, and a player of the editors without an article the archive or the
+ * editors.
+ */
+function PlayerCredit({ page }: { page: PlayerPage }) {
+  const archive = page.seasons.some((season) => season <= lastArchiveSeason)
+  const { readAt, wikipedia } = page
+  let credit: ReactNode
+
+  if (wikipedia !== undefined && readAt !== undefined) {
+    credit = (
+      <WikipediaCredit
+        archive={archive}
+        data="spelersgegevens"
+        edited={page.edited}
+        pages={[{ href: wikipediaUrl(wikipedia.title, wikipedia.language), name: wikipedia.title }]}
+        readAt={formatReadAt(readAt)}
+        readAtDateTime={readAt.toISOString()}
+      />
+    )
+  } else if (wikipedia !== undefined) {
+    credit = <WikipediaCredit archive={archive} compact />
+  } else if (archive) {
+    credit = <ArchiveCredit />
+  } else {
+    credit = <Text appearance="meta">Bron: onze redactie.</Text>
+  }
+
+  return (
+    <Card as="div" surface="transparent">
+      {credit}
+    </Card>
+  )
+}
+
+/**
+ * One line under the name: the line, the flag with the country in words, and the year and place
+ * of birth. A part we do not know is left out with its separator. The flag is decoration: the
+ * country stands next to it in words, so a screen reader skips the flag.
+ */
+function PlayerFacts({ page }: { page: PlayerPage }) {
+  const country = page.country === undefined ? undefined : countryName(page.country)
+  const born = [
+    page.birthYear === undefined ? undefined : `in ${page.birthYear}`,
+    page.birthPlace === undefined ? undefined : `in ${page.birthPlace}`,
+  ].filter((part) => part !== undefined)
+  const parts: ReactNode[] = [
+    lineName(page.line),
+    country === undefined || page.country === undefined ? undefined : (
+      <>
+        <PlayerName aria-hidden country={page.country} surname="" />
+        {country}
+      </>
+    ),
+    born.length === 0 ? undefined : `geboren ${born.join(' ')}`,
+  ].filter((part) => part !== undefined)
+
+  if (parts.length === 0) {
+    return null
+  }
+
+  // Only the first part starts with a capital: "Geboren in 1974" when it is the only one.
+  if (typeof parts[0] === 'string') {
+    parts[0] = `${parts[0].charAt(0).toUpperCase()}${parts[0].slice(1)}`
+  }
+
+  return (
+    <Text appearance="meta">
+      {parts.map((part, index) => (
+        <Fragment key={index}>
+          {index > 0 && ' · '}
+          {part}
+        </Fragment>
+      ))}
+    </Text>
+  )
+}
+
+/**
+ * The seasons with us as one sentence, each season a link to its page Spelers: "Bij sc
+ * Heerenveen van 2002/03 tot en met 2003/04 en in 2007/08." #1084 may take it out when the
+ * career comes.
+ */
+function PlayerSeasons({ seasons }: { seasons: readonly string[] }) {
+  const current = seasonOf(new Date())
+  const link = (season: string) => <Link href={seasonAddress(playersPath, season, current)}>{season}</Link>
+  const periods = periodsOf(seasons).map(({ first, last }) =>
+    first === last ? (
+      <>in {link(first)}</>
+    ) : (
+      <>
+        van {link(first)} tot en met {link(last)}
+      </>
+    ),
+  )
+
+  return (
+    <Text>
+      Bij sc Heerenveen{' '}
+      {periods.map((period, index) => (
+        <Fragment key={index}>
+          {index === 0 ? '' : index === periods.length - 1 ? ' en ' : ', '}
+          {period}
+        </Fragment>
+      ))}
+      .
+    </Text>
+  )
+}
