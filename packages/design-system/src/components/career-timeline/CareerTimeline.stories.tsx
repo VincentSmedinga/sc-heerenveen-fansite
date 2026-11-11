@@ -133,6 +133,29 @@ export const WithGaps = meta.story({
     ),
 })
 
+export const MomentWithoutPage = meta.story({
+  name: 'Een moment zonder pagina van de wedstrijd',
+  render: () =>
+    inCard(
+      <CareerTimeline
+        level={3}
+        periods={[
+          {
+            seasons: [
+              {
+                competitions: 'Eredivisie 2',
+                href: '#2003-04',
+                moment: { note: '10 april 2004 · hattrick: 25′, 30′ en 32′', title: 'Testclub – Testteam 3–1' },
+                season: '2003/04',
+              },
+            ],
+            years: '2003–2004',
+          },
+        ]}
+      />,
+    ),
+})
+
 export const OnlySeason = meta.story({
   name: 'Een seizoen met alleen het seizoen',
   render: () =>

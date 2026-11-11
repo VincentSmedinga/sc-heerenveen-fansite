@@ -58,6 +58,30 @@ describe('CareerTimeline', () => {
     expect(container.querySelector('.hf-career-gap')).toBeNull()
   })
 
+  it('shows a moment without a page as plain text, not as a link', () => {
+    const { container } = render(
+      <CareerTimeline
+        level={2}
+        periods={[
+          {
+            seasons: [
+              {
+                href: '#2003-04',
+                moment: { note: '10 april 2004 · eerste doelpunt', title: 'Testclub – Testteam 2–1' },
+                season: '2003/04',
+              },
+            ],
+            years: '2003–2004',
+          },
+        ]}
+      />,
+    )
+    const moment = container.querySelector('.hf-career-moment')
+
+    expect(moment?.querySelector('a')).toBeNull()
+    expect(moment?.textContent).toContain('Testclub – Testteam 2–1')
+  })
+
   it('writes no decoration in the markup, so a screen reader reads only the list', () => {
     const { container } = render(<CareerTimeline level={2} periods={periods} />)
 

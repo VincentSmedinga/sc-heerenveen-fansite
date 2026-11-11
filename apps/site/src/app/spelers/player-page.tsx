@@ -21,10 +21,13 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
+import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
 import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
+import { getReportAddresses } from '#src/report-data'
 import { playersPath } from '#src/season-page'
 import { seasonAddress } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -62,8 +65,8 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
 /**
  * The page of a player of our club (#1079): a link back to Spelers, his name as the heading
  * (`PlayerName`) with one line beside it, under it on a phone: his line, country and year and
- * place of birth. Then the key figures of his line (#1083), the seasons he played with us as
- * links to their pages, and the credit. An old address leads to the address of now (308), and
+ * place of birth. Then the key figures of his line (#1083), the table Per seizoen (#1082), his
+ * career (#1084) and the credit. An old address leads to the address of now (308), and
  * an address of nobody, or of a player of an opponent, is "niet gevonden". The blocks of #1082
  * to #1086 come between the seasons and the credit; the credit moves to the sidebar with #1086.
  */
@@ -83,6 +86,8 @@ export async function PlayerPageView({ slug }: { slug: string }) {
   const { page } = loaded
   const seasons = await readSeasons(page)
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
+  const current = seasonOf(new Date())
+  const career = seasons === undefined ? undefined : await readCareer(seasons, current)
 
   return (
     <Page.Main
@@ -107,17 +112,19 @@ export async function PlayerPageView({ slug }: { slug: string }) {
           <KeyFigures aria-label="Kerngetallen" figures={keyFigures} />
         </Page.Cell>
       )}
-      <Page.Cell>
-        <PlayerSeasons seasons={page.seasons} />
-      </Page.Cell>
       {seasons === undefined ? null : (
         <Page.Cell>
           <PlayerSeasonsCard
-            address={(season) => seasonAddress(playersPath, season, seasonOf(new Date()))}
+            address={(season) => seasonAddress(playersPath, season, current)}
             goalkeeper={page.line === 'doelman'}
             name={page.name}
             seasons={seasons}
           />
+        </Page.Cell>
+      )}
+      {seasons === undefined || career === undefined ? null : (
+        <Page.Cell>
+          <PlayerCareerCard options={career} seasons={seasons} />
         </Page.Cell>
       )}
       <PlayerCredit page={page} />
@@ -213,35 +220,31 @@ function PlayerFacts({ page }: { page: PlayerPage }) {
 }
 
 /**
- * The seasons with us as one sentence, each season a link to its page Spelers: "Bij sc
- * Heerenveen van 2002/03 tot en met 2003/04 en in 2007/08." #1084 may take it out when the
- * career comes.
+ * What the career needs: the moment of each season, and the address of the page of the match
+ * where it has one. A season whose matches could not be read has moments without a link, so
+ * the career still shows (the error is logged).
  */
-function PlayerSeasons({ seasons }: { seasons: readonly string[] }) {
-  const current = seasonOf(new Date())
-  const link = (season: string) => <Link href={seasonAddress(playersPath, season, current)}>{season}</Link>
-  const periods = periodsOf(seasons).map(({ first, last }) =>
-    first === last ? (
-      <>in {link(first)}</>
-    ) : (
-      <>
-        van {link(first)} tot en met {link(last)}
-      </>
-    ),
+async function readCareer(seasons: readonly PlayerSeason[], current: string) {
+  const moments = careerMoments(seasons)
+  const addresses = new Map<string, ReadonlyMap<string, string>>()
+
+  await Promise.all(
+    [...moments.keys()].map(async (season) => {
+      try {
+        addresses.set(season, await getReportAddresses(season))
+      } catch (error) {
+        console.error(`Could not read the matches of ${season} for the career of a player: ${reasonOf(error)}`)
+      }
+    }),
   )
 
-  return (
-    <Text>
-      Bij sc Heerenveen{' '}
-      {periods.map((period, index) => (
-        <Fragment key={index}>
-          {index === 0 ? '' : index === periods.length - 1 ? ' en ' : ', '}
-          {period}
-        </Fragment>
-      ))}
-      .
-    </Text>
-  )
+  return {
+    current,
+    matchHref: ({ competition, round, season }: CareerMomentChoice['match']) =>
+      addresses.get(season)?.get(`${competition}|${round}`),
+    moments,
+    seasonHref: (season: string) => seasonAddress(playersPath, season, current),
+  }
 }
 
 /** The figures per season, or undefined when they could not be read (the error is logged). */

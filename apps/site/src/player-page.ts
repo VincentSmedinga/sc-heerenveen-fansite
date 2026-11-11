@@ -95,6 +95,13 @@ export async function getPlayerSlugs(): Promise<string[]> {
 /** The address of the page of a player. */
 export const playerAddress = (slug: string) => `/spelers/${slug}`
 
+/** The season after a season: `2003/04` after `2002/03`, `2000/01` after `1999/00`. */
+export function nextSeason(season: string): string {
+  const start = Number(season.slice(0, 4)) + 1
+
+  return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
+}
+
 /**
  * The seasons as periods of seasons that follow each other: `2002/03` and `2003/04` are one
  * period, and a season without a row between two is a gap.
@@ -148,11 +155,4 @@ export function playerPageOf(
         ? undefined
         : { language: person.englishTitle ? 'en' : 'nl', title: person.wikipediaPage },
   }
-}
-
-/** The season after a season: `2003/04` after `2002/03`, `2000/01` after `1999/00`. */
-function nextSeason(season: string): string {
-  const start = Number(season.slice(0, 4)) + 1
-
-  return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
 }

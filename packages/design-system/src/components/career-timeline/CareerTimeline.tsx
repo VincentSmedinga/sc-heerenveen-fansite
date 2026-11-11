@@ -7,8 +7,11 @@ import { Tag } from '../tag/Tag'
 
 /** A moment of a season: a link to a match, and a line below it. */
 export type CareerMoment = {
-  /** Where the match is. */
-  href: string
+  /**
+   * Where the match is. Leave it out for a match without a page: the title is then plain text,
+   * and the page puts the score in it.
+   */
+  href?: string
   /** The line below the link, such as `10 april 2004 · hattrick in zeven minuten`. */
   note: string
   /** The name of the match, such as `Testclub – Testteam`. It is the text of the link. */
@@ -80,7 +83,11 @@ export const CareerTimeline = ({ className, level, periods, ...props }: CareerTi
               {competitions === undefined ? null : <p className="hf-career-competitions">{competitions}</p>}
               {moment === undefined ? null : (
                 <p className="hf-career-moment">
-                  <Link href={moment.href}>{moment.title}</Link>
+                  {moment.href === undefined ? (
+                    <span className="hf-career-moment-title">{moment.title}</span>
+                  ) : (
+                    <Link href={moment.href}>{moment.title}</Link>
+                  )}
                   <span className="hf-career-moment-note">{moment.note}</span>
                 </p>
               )}

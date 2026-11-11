@@ -98,7 +98,8 @@
     padding: var(--hf-space-s) var(--hf-space-m);
   }
 
-  .hf-career-moment a {
+  .hf-career-moment a,
+  .hf-career-moment-title {
     font-weight: var(--hf-headline-font-weight);
   }
 
