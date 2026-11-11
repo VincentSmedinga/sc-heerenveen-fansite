@@ -1309,7 +1309,8 @@ await withEmptyDatabase((database) =>
       /<h1[^>]*><span class="hf-player-name"><span class="hf-player-name-given">Wouter<\/span> <span class="hf-player-name-surname">Proefman<\/span><\/span><\/h1>/,
     )
     assert.match(playerHtml, /<title>Wouter Proefman – Spelers – sc Heerenveen Fansite<\/title>/)
-    assert.match(playerHtml, /1990 · \d+ jaar/)
+    // React puts a comment between text parts that follow each other in the page.
+    assert.match(playerHtml, /1990(?:<!-- -->)? · (?:<!-- -->)?\d+ jaar/)
     assert.doesNotMatch(playerHtml, /1990-03-14|14 maart 1990/)
     assert.match(playerHtml, /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
 
