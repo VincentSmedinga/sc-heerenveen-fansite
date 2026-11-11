@@ -24,6 +24,11 @@
     }
   }
 
+  /* A list of players has two columns of its own on a wide screen, but a card here is only half. */
+  .hf-card-columns-grid .hf-player-list {
+    columns: 1;
+  }
+
   @container hf-card-columns (width >= 28rem) {
     .hf-card-columns-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
