@@ -48,9 +48,9 @@
   }
 
   /*
-   * A line with a page of the player is one link, the whole line, so the target is as big as the
-   * line. Only the name shows it is a link: it has the colour of a link and its underline, and
-   * the small line under it keeps its own colour and none.
+   * A line with a page of the player is one link, the whole line, so the target is as big as
+   * the line. Only the name shows it is a link: it has the colour of a link and its underline,
+   * and the small line under it keeps its own colour and none.
    */
   .hf-match-substitutes-link {
     color: inherit;
