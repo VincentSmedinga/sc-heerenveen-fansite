@@ -2049,23 +2049,23 @@ describe('the matches and the table of a season', () => {
       const id = cupMatch?.id ?? 0
       const [{ insertId: person }] = await database.db
         .insert(persons)
-        .values({ familyName: 'Oyen', givenName: 'Luca', name: 'Luca Oyen', slug: 'luca-oyen' })
+        .values({ familyName: 'Dijk', givenName: 'Sven', name: 'Sven Dijk', slug: 'sven-dijk' })
       const [{ insertId: squadRow }] = await database.db.insert(players).values({
-        name: 'Luca Oyen',
+        name: 'Sven Dijk',
         personId: person,
         position: 'aanvaller',
-        searchTerm: 'Oyen',
+        searchTerm: 'Dijk',
         season: '2026/27',
       })
 
       await database.db
         .insert(matchGoals)
-        .values({ matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: squadRow })
+        .values({ matchId: id, minute: 10, ours: true, player: 'Dijk', playerId: squadRow })
 
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 
       expect(cup?.goals.map((goal) => [goal.personId, goal.personGivenName, goal.personSlug])).toEqual([
-        [person, 'Luca', 'luca-oyen'],
+        [person, 'Sven', 'sven-dijk'],
       ])
     })
 
