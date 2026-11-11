@@ -31,6 +31,22 @@ describe('PlayerChartsCards', () => {
     expect(html).toContain('Van 2 van de 52 kennen we de minuut niet.')
   })
 
+  it('puts every card on the soft surface of the side column', () => {
+    const cards = [
+      <PlayerSeasonBarsCard
+        address={() => '#'}
+        bars={{ kind: 'goals', rows: [{ season: '2003/04', value: 19 }], title: 'Doelpunten per seizoen' }}
+        key="seasons"
+      />,
+      <PlayerQuartersCard key="quarters" quarters={{ counts: [1, 1, 1, 1, 1, 0], total: 5, unknown: 0 }} />,
+      <PlayerRecordCard key="record" record={{ draws: 1, losses: 1, title: 'Uitslagen', wins: 2 }} />,
+    ]
+
+    for (const card of cards) {
+      expect(renderToStaticMarkup(card)).toMatch(/^<section class="hf-card hf-card-soft"/)
+    }
+  })
+
   it('leaves the sentence about the minute out when every goal has one', () => {
     const html = renderToStaticMarkup(
       <PlayerQuartersCard quarters={{ counts: [1, 1, 1, 1, 1, 0], total: 5, unknown: 0 }} />,
