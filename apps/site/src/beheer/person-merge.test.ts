@@ -4,7 +4,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
 import { adminUsers, auditLog, personPages, persons, personSlugs, players, squadCompleteness } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { asc } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createAccount } from './accounts'
@@ -210,13 +210,13 @@ describe('mergePersons', () => {
     expect(detail.indexOf('Verdwenen:')).toBeGreaterThan(0)
   })
 
-  it('leads the address of the person that goes to the page of the person that stays (#1079)', async () => {
+  it('leads the address of the person that goes to the person that stays, who gets the address of his own name (#1079)', async () => {
+    // The person that stays has no row of his own yet, so he has no address before the merge.
+    await database.db.delete(players).where(eq(players.personId, renamed))
     await updatePlayerAddresses(database.db)
     await mergePersons(database.db, userId, { keptId: renamed, otherId: old }, t0)
 
-    const slugs = await database.db.select().from(personSlugs).orderBy(asc(personSlugs.slug))
-
-    expect(slugs).toEqual([
+    expect(await database.db.select().from(personSlugs).orderBy(asc(personSlugs.slug))).toEqual([
       { personId: renamed, slug: 'nieuwe-naam' },
       { personId: renamed, slug: 'oude-naam' },
     ])
