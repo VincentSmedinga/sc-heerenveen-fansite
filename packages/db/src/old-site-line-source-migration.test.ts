@@ -65,7 +65,8 @@ describe(`the migration ${migration}`, () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(before)
+    // A later migration adds `slug`, which stays empty here (#1079).
+    expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(before.map((row) => ({ ...row, slug: null })))
     expect(await rows('SELECT title, country FROM player_list_titles')).toEqual([
       { country: null, title: 'Van Wikidata' },
     ])

@@ -2625,6 +2625,8 @@ describe('the import command', () => {
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
       'Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed',
       expect.stringMatching(/^Matches 2026\/27: 10 players added from a goal: Luca Oyen, /u),
+      // The ten players get the address of their page (#1079).
+      'Player addresses: 10 new',
     ])
     expect(await database.db.select().from(items)).toHaveLength(1)
   })

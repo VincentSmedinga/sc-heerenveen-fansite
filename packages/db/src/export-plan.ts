@@ -83,6 +83,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   person_nationalities: 'copy',
   person_pages: 'copy',
   person_positions: 'copy',
+  person_slugs: 'copy',
   persons: 'copy',
   player_field_differences: 'copy',
   player_list_titles: 'copy',
