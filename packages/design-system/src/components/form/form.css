@@ -24,6 +24,20 @@
   }
 
   /*
+   * A form on one line, such as a label, a list and a button: the fields and the button stand
+   * side by side, on the bottom line, and the line breaks only when there is no more room. It
+   * is as wide as its place, and the fields keep their own widths. It has the space of a line
+   * under it, so what follows does not touch it.
+   */
+  .hf-form-inline {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-s) var(--hf-space-m);
+    max-inline-size: none;
+  }
+
+  /*
    * The buttons of a form with more than one: columns of the same width, as many as fit, with
    * the small space between them. A button fills its column, so it is a large target, and four
    * choices stand two by two on a phone.

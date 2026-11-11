@@ -81,15 +81,12 @@ async function redirectOf(action: () => Promise<void>) {
 const onSite = (search: string, overrides: Partial<ListView> = {}): ListView => ({
   editorsOnly: false,
   group: 'on-site',
+  page: 1,
   search,
   ...overrides,
 })
 
-const hide = (
-  id: unknown,
-  view: ListView | string,
-  fields: Record<string, string> = { reden: 'Fout in het bericht' },
-) => {
+const hide = (id: unknown, view: ListView | string, fields: Record<string, string> = { reden: 'fout' }) => {
   const formData = new FormData()
 
   for (const [name, value] of Object.entries(fields)) {
@@ -130,7 +127,7 @@ describe('submitHide', () => {
   })
 
   it('takes the account from the session and never from the form', async () => {
-    await hide(itemId, '', { email: 'ander@example.org', hiddenBy: '999', reden: 'Fout in het bericht', userId: '999' })
+    await hide(itemId, '', { email: 'ander@example.org', hiddenBy: '999', reden: 'fout', userId: '999' })
 
     expect((await stored())?.hiddenBy).toBe(userId)
     expect((await database.db.select().from(auditLog))[0]?.userId).toBe(userId)
@@ -141,38 +138,73 @@ describe('submitHide', () => {
   })
 
   it.each([
-    ['no reason', {}, 'reden-leeg'],
-    ['an empty reason', { reden: '' }, 'reden-leeg'],
-    ['a reason of spaces', { reden: '   ' }, 'reden-leeg'],
-    ['a reason of 301 characters', { reden: 'x'.repeat(301) }, 'reden-lang'],
-  ])('refuses %s, hides nothing, writes nothing and shows the error at the item', async (_name, fields, error) => {
-    expect(await hide(itemId, '', fields)).toBe(`/beheer/berichten?bericht=${itemId}&fout=${error}`)
-    expect((await stored())?.hiddenAt).toBeNull()
-    expect(await database.db.select().from(auditLog)).toEqual([])
+    ['past-niet', 'Past niet bij de site'],
+    ['bron', 'Op verzoek van de bron'],
+    ['dubbel', 'Dubbel bericht'],
+  ])('keeps the text of the fixed reason %s, and ignores the text field', async (key, text) => {
+    await hide(itemId, '', { reden: key, toelichting: 'Dit telt niet mee' })
+
+    expect(await stored()).toMatchObject({ hiddenReason: text })
+    expect(await database.db.select().from(auditLog)).toMatchObject([{ action: 'item.hide', reason: text }])
   })
 
+  it('keeps the text of the editor for Anders, as one line', async () => {
+    await hide(itemId, '', { reden: 'anders', toelichting: '  Staat\n  twee keer  ' })
+
+    expect(await stored()).toMatchObject({ hiddenReason: 'Staat twee keer' })
+  })
+
+  it.each([
+    ['no choice', {}, 'reden-kies', ''],
+    ['an empty choice', { reden: '' }, 'reden-kies', ''],
+    ['a choice that is not in the list', { reden: 'iets-anders' }, 'reden-kies', ''],
+    ['the text of a reason in place of its key', { reden: 'Fout in het bericht' }, 'reden-kies', ''],
+    ['Anders without a text', { reden: 'anders' }, 'reden-anders', '&keuze=anders'],
+    ['Anders with spaces', { reden: 'anders', toelichting: '   ' }, 'reden-anders', '&keuze=anders'],
+    [
+      'Anders with a text of 301 characters',
+      { reden: 'anders', toelichting: 'x'.repeat(301) },
+      'reden-lang',
+      '&keuze=anders',
+    ],
+  ])(
+    'refuses %s, hides nothing, writes nothing and shows the error at the item',
+    async (_name, fields, error, keep) => {
+      expect(await hide(itemId, '', fields)).toBe(`/beheer/berichten?bericht=${itemId}&fout=${error}${keep}`)
+      expect((await stored())?.hiddenAt).toBeNull()
+      expect(await database.db.select().from(auditLog)).toEqual([])
+    },
+  )
+
   it('keeps the group, the box and the search on the way back', async () => {
-    const view: ListView = { editorsOnly: true, group: 'not-on-site', search: 'wint van' }
+    const view: ListView = { editorsOnly: true, group: 'not-on-site', page: 1, search: 'wint van' }
 
     expect(await hide(itemId, view)).toBe(
       `/beheer/berichten?q=wint+van&toon=niet-op-de-site&redactie=1&verborgen=${itemId}`,
     )
     expect(await hide(itemId, { ...view, editorsOnly: false }, { reden: '' })).toBe(
-      `/beheer/berichten?q=wint+van&toon=niet-op-de-site&bericht=${itemId}&fout=reden-leeg`,
+      `/beheer/berichten?q=wint+van&toon=niet-op-de-site&bericht=${itemId}&fout=reden-kies`,
+    )
+  })
+
+  it('keeps the page on the way back, and checks it', async () => {
+    expect(await hide(itemId, { ...onSite(''), page: 3 })).toBe(`/beheer/berichten?pagina=3&verborgen=${itemId}`)
+    expect(await hide(itemId, { ...onSite(''), page: 'x' } as unknown as ListView, { reden: '' })).toBe(
+      `/beheer/berichten?bericht=${itemId}&fout=reden-kies`,
     )
   })
 
   it('checks the group and the box it is given, which come from outside', async () => {
     const view = { editorsOnly: true, group: 'alles', search: 'x' } as unknown as ListView
 
-    expect(await hide(itemId, view, { reden: '' })).toBe(`/beheer/berichten?q=x&bericht=${itemId}&fout=reden-leeg`)
+    expect(await hide(itemId, view, { reden: '' })).toBe(`/beheer/berichten?q=x&bericht=${itemId}&fout=reden-kies`)
     expect(await hide(itemId, { editorsOnly: 'ja', group: 'not-on-site', search: 'x' } as unknown as ListView)).toBe(
       `/beheer/berichten?q=x&toon=niet-op-de-site&verborgen=${itemId}`,
     )
   })
 
   it('keeps the search when it refuses', async () => {
-    expect(await hide(itemId, 'wint', { reden: '' })).toBe(`/beheer/berichten?q=wint&bericht=${itemId}&fout=reden-leeg`)
+    expect(await hide(itemId, 'wint', { reden: '' })).toBe(`/beheer/berichten?q=wint&bericht=${itemId}&fout=reden-kies`)
   })
 
   it.each([0, -1, 1.5, '1e3', 'abc', undefined, null, {}])('refuses %j as an item', async (id) => {
@@ -186,10 +218,10 @@ describe('submitHide', () => {
   })
 
   it('is done once for an item that is hidden already: the first reason stays and the log has one row', async () => {
-    await hide(itemId, '', { reden: 'Eerste reden' })
+    await hide(itemId, '', { reden: 'fout' })
 
-    expect(await hide(itemId, '', { reden: 'Tweede reden' })).toBe(`/beheer/berichten?verborgen=${itemId}`)
-    expect((await stored())?.hiddenReason).toBe('Eerste reden')
+    expect(await hide(itemId, '', { reden: 'dubbel' })).toBe(`/beheer/berichten?verborgen=${itemId}`)
+    expect((await stored())?.hiddenReason).toBe('Fout in het bericht')
     expect(await database.db.select().from(auditLog)).toHaveLength(1)
   })
 
@@ -233,7 +265,7 @@ describe('submitShow', () => {
   it('keeps the group, the box and the search on the way back', async () => {
     await hide(itemId, '')
 
-    expect(await show(itemId, { editorsOnly: true, group: 'not-on-site', search: 'wint' })).toBe(
+    expect(await show(itemId, { editorsOnly: true, group: 'not-on-site', page: 1, search: 'wint' })).toBe(
       `/beheer/berichten?q=wint&toon=niet-op-de-site&redactie=1&getoond=${itemId}`,
     )
   })
