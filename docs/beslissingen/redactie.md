@@ -1991,7 +1991,8 @@
   De naam uit de kop houdt de tekst op één plek.
   Een knop zonder JavaScript doet niets, en een knop die er pas na het laden staat verschuift de kop niet.
 - **Alternatieven:** een boolean `shareable` met de bron als aparte eigenschap (een kaart kan dan zonder bron delen); een aparte component `ShareButton` die de pagina zelf in de kaart zet (de pagina moet dan zelf de kaart vinden en kiezen waar de knop komt).
-- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): `source` is niet meer verplicht. Een kaart die alleen onze eigen gegevens telt, laat hem weg, en de afbeelding heeft dan geen strook met een bron.
+- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): `source` is niet meer verplicht.
+  Een kaart die alleen onze eigen gegevens telt, laat hem weg, en de afbeelding heeft dan geen strook met een bron.
 
 ## Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"
 

@@ -3626,7 +3626,8 @@
 - **Waarom:** de redactieregel is dat we de bron altijd noemen (principe 4 van de Redactie), en de oude gegevens zijn van het project zelf, niet van Wikipedia.
   Een oude wedstrijd met "Bron: Wikipedia" erbij zou onwaar zijn.
 - **Alternatieven:** één algemene bronregel voor de hele site (zegt niet wat waar vandaan komt); de Eerste divisie als "de competitie" van haar seizoen laten tellen bij de keuze Eredivisie (het label van de schakelaar zou per seizoen moeten wisselen en elke kaart met "Eredivisie" in de tekst ook); de bron van het archief achter een uitklap met een link (er is niets om heen te linken); een datum als "21 november 1992" in `date_text` (zie _De wedstrijden van de oude fansite komen in `matches`_ in `hosting-en-data.md`).
-- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): `ArchiveCredit` is weg. Een pagina of kaart met alleen wedstrijden van de sc Heerenveen Fansite heeft geen bronvermelding, en bij allebei noemt de uitklap van `WikipediaCredit` nog steeds beide.
+- **Later:** zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_ (`redactie.md`, 11 november 2026): `ArchiveCredit` is weg.
+  Een pagina of kaart met alleen wedstrijden van de sc Heerenveen Fansite heeft geen bronvermelding, en bij allebei noemt de uitklap van `WikipediaCredit` nog steeds beide.
 
 ## Een afgeleide formatie wordt als zodanig getoond
 
