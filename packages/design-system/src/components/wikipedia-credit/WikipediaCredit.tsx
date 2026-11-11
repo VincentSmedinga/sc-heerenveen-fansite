@@ -50,9 +50,9 @@ export type WikipediaCreditProps =
          */
         data?: string
         /**
-         * Whether our own editors filled in or corrected some of the data themselves. The full
-         * form then says so under the credit, "Enkele gegevens heeft onze redactie zelf ingevuld
-         * of aangepast.", visible without opening it.
+         * Whether our own editors filled in or corrected some of the data themselves. The
+         * full form then says so under the credit, "Enkele gegevens heeft onze redactie zelf
+         * ingevuld of aangepast.", visible without opening it.
          */
         edited?: boolean
         lead?: never
