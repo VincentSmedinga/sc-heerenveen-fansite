@@ -33,6 +33,9 @@ const people = [
   },
 ] as const
 
+/** The names of the persons, for the test that no letter of a name is lost in an address. */
+export const madeUpPersonNames: readonly string[] = people.map(({ name }) => name)
+
 /** Puts the persons and their players in and returns the function that takes them out. */
 export async function addPersons() {
   const { DATABASE_URL } = databaseEnv()
