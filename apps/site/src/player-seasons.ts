@@ -1,12 +1,14 @@
 import type { Competition } from '@fansite/db/schema'
 
 import {
+  clubs,
   matchAppearances,
   matchCards,
   matches,
   matchGoals,
   matchReports,
   matchSubstitutions,
+  persons,
   players,
   playerSeasonStats,
 } from '@fansite/db/schema'
@@ -25,6 +27,8 @@ export type CareerGoal = {
 
 /** A played match as the career names it: enough to find its page and to say what happened. */
 export type CareerMatch = {
+  /** The slug of the club of the opponent: its page is `/tegenstanders/<slug>`. */
+  clubSlug?: string
   competition: Competition
   goalsAgainst: number
   goalsFor: number
@@ -81,7 +85,18 @@ export type PlayerSeason = {
 
 /** What is read from the database for one person (see `readPlayerSeasonFacts`). */
 export type PlayerSeasonFacts = {
+  /** Goals he scored against us, for a club of his own or after leaving: the match is ours. */
+  againstUs?: readonly {
+    match: CareerMatch
+    minute: null | number
+    stoppage: null | number
+  }[]
   appearances: readonly SeasonAppearance[]
+  /**
+   * Who gave him an assist: one row for each goal of his with a known assist, with the name in
+   * the report and the slug of the page of the player when he has one (`persons.slug`).
+   */
+  assistGivers?: readonly { name: string; slug: null | string }[]
   /** The goals he gave an assist for, in the reports (`assist_appearance_id`), by season. */
   assists: readonly { season: string }[]
   /** His goals for us, without own goals: each goal once, whichever way it belongs to him. */
@@ -228,6 +243,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
   const seasons = [...new Set(rows.map((row) => row.season))]
   const played = and(eq(matches.status, 'played'), inArray(matches.season, seasons))
   const matchColumns = {
+    clubSlug: clubs.slug,
     competition: matches.competition,
     goalsAgainst: matches.goalsAgainst,
     goalsFor: matches.goalsFor,
@@ -238,84 +254,113 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     round: matches.round,
     season: matches.season,
   }
-  const [appearances, cards, substitutions, cameOn, goals, assists, playedCounts, reportedCounts, tables] =
-    await Promise.all([
+  // The goals belong to him by `person_id`, by `player_id` or by `appearance_id`.
+  const hisGoal = or(
+    eq(matchGoals.personId, personId),
+    inArray(matchGoals.playerId, playerIds),
+    inArray(
+      matchGoals.appearanceId,
       db
-        .select({ ...matchColumns, id: matchAppearances.id, starter: matchAppearances.starter })
+        .select({ id: matchAppearances.id })
         .from(matchAppearances)
-        .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
-        .innerJoin(matchReports, eq(matchReports.matchId, matchAppearances.matchId))
-        .where(and(played, eq(matchReports.status, 'klaar'), inArray(matchAppearances.playerId, playerIds))),
-      db
-        .select({ appearanceId: matchCards.appearanceId, kind: matchCards.kind })
-        .from(matchCards)
-        .innerJoin(matchAppearances, eq(matchAppearances.id, matchCards.appearanceId))
         .where(inArray(matchAppearances.playerId, playerIds)),
-      db
-        .select({ appearanceId: matchSubstitutions.appearanceOutId })
-        .from(matchSubstitutions)
-        .innerJoin(matchAppearances, eq(matchAppearances.id, matchSubstitutions.appearanceOutId))
-        .where(inArray(matchAppearances.playerId, playerIds)),
-      db
-        .select({ appearanceId: matchSubstitutions.appearanceInId })
-        .from(matchSubstitutions)
-        .innerJoin(matchAppearances, eq(matchAppearances.id, matchSubstitutions.appearanceInId))
-        .where(inArray(matchAppearances.playerId, playerIds)),
-      db
-        .select({ ...matchColumns, minute: matchGoals.minute, stoppage: matchGoals.stoppageMinutes })
-        .from(matchGoals)
-        .innerJoin(matches, eq(matches.id, matchGoals.matchId))
-        .where(
-          and(
-            inArray(matches.season, seasons),
-            eq(matchGoals.ours, true),
-            eq(matchGoals.ownGoal, false),
-            or(
-              eq(matchGoals.personId, personId),
-              inArray(matchGoals.playerId, playerIds),
-              inArray(
-                matchGoals.appearanceId,
-                db
-                  .select({ id: matchAppearances.id })
-                  .from(matchAppearances)
-                  .where(inArray(matchAppearances.playerId, playerIds)),
-              ),
-            ),
+    ),
+  )
+  const [
+    appearances,
+    cards,
+    substitutions,
+    cameOn,
+    goals,
+    assists,
+    playedCounts,
+    reportedCounts,
+    tables,
+    assistGivers,
+    againstUs,
+  ] = await Promise.all([
+    db
+      .select({ ...matchColumns, id: matchAppearances.id, starter: matchAppearances.starter })
+      .from(matchAppearances)
+      .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
+      .innerJoin(clubs, eq(clubs.id, matches.clubId))
+      .innerJoin(matchReports, eq(matchReports.matchId, matchAppearances.matchId))
+      .where(and(played, eq(matchReports.status, 'klaar'), inArray(matchAppearances.playerId, playerIds))),
+    db
+      .select({ appearanceId: matchCards.appearanceId, kind: matchCards.kind })
+      .from(matchCards)
+      .innerJoin(matchAppearances, eq(matchAppearances.id, matchCards.appearanceId))
+      .where(inArray(matchAppearances.playerId, playerIds)),
+    db
+      .select({ appearanceId: matchSubstitutions.appearanceOutId })
+      .from(matchSubstitutions)
+      .innerJoin(matchAppearances, eq(matchAppearances.id, matchSubstitutions.appearanceOutId))
+      .where(inArray(matchAppearances.playerId, playerIds)),
+    db
+      .select({ appearanceId: matchSubstitutions.appearanceInId })
+      .from(matchSubstitutions)
+      .innerJoin(matchAppearances, eq(matchAppearances.id, matchSubstitutions.appearanceInId))
+      .where(inArray(matchAppearances.playerId, playerIds)),
+    db
+      .select({ ...matchColumns, minute: matchGoals.minute, stoppage: matchGoals.stoppageMinutes })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matches.id, matchGoals.matchId))
+      .innerJoin(clubs, eq(clubs.id, matches.clubId))
+      .where(and(inArray(matches.season, seasons), eq(matchGoals.ours, true), eq(matchGoals.ownGoal, false), hisGoal)),
+    db
+      .select({ season: matches.season })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matches.id, matchGoals.matchId))
+      .where(
+        and(
+          inArray(matches.season, seasons),
+          eq(matchGoals.ownGoal, false),
+          inArray(
+            matchGoals.assistAppearanceId,
+            db
+              .select({ id: matchAppearances.id })
+              .from(matchAppearances)
+              .where(inArray(matchAppearances.playerId, playerIds)),
           ),
         ),
-      db
-        .select({ season: matches.season })
-        .from(matchGoals)
-        .innerJoin(matches, eq(matches.id, matchGoals.matchId))
-        .where(
-          and(
-            inArray(matches.season, seasons),
-            eq(matchGoals.ownGoal, false),
-            inArray(
-              matchGoals.assistAppearanceId,
-              db
-                .select({ id: matchAppearances.id })
-                .from(matchAppearances)
-                .where(inArray(matchAppearances.playerId, playerIds)),
-            ),
-          ),
+      ),
+    db.select({ played: count(), season: matches.season }).from(matches).where(played).groupBy(matches.season),
+    db
+      .select({ reported: countDistinct(matches.id), season: matches.season })
+      .from(matches)
+      .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+      .where(and(played, eq(matchReports.status, 'klaar')))
+      .groupBy(matches.season),
+    db
+      .select({
+        appearances: playerSeasonStats.appearances,
+        assists: playerSeasonStats.assists,
+        season: playerSeasonStats.season,
+      })
+      .from(playerSeasonStats)
+      .where(inArray(playerSeasonStats.playerId, playerIds)),
+    db
+      .select({ name: matchAppearances.name, slug: persons.slug })
+      .from(matchGoals)
+      .innerJoin(matchAppearances, eq(matchAppearances.id, matchGoals.assistAppearanceId))
+      .leftJoin(players, eq(players.id, matchAppearances.playerId))
+      .leftJoin(persons, eq(persons.id, players.personId))
+      .where(and(eq(matchGoals.ours, true), eq(matchGoals.ownGoal, false), hisGoal)),
+    // A goal against us is a goal of his that is not ours; the match is ours, so its score is.
+    db
+      .select({ ...matchColumns, minute: matchGoals.minute, stoppage: matchGoals.stoppageMinutes })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matches.id, matchGoals.matchId))
+      .innerJoin(clubs, eq(clubs.id, matches.clubId))
+      .where(
+        and(
+          eq(matches.status, 'played'),
+          eq(matchGoals.ours, false),
+          eq(matchGoals.ownGoal, false),
+          eq(matchGoals.personId, personId),
         ),
-      db.select({ played: count(), season: matches.season }).from(matches).where(played).groupBy(matches.season),
-      db
-        .select({ reported: countDistinct(matches.id), season: matches.season })
-        .from(matches)
-        .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
-        .where(and(played, eq(matchReports.status, 'klaar')))
-        .groupBy(matches.season),
-      db
-        .select({
-          appearances: playerSeasonStats.appearances,
-          assists: playerSeasonStats.assists,
-          season: playerSeasonStats.season,
-        })
-        .from(playerSeasonStats)
-        .where(inArray(playerSeasonStats.playerId, playerIds)),
-    ])
+      ),
+  ])
   const cardsOf = (id: number) => cards.filter((card) => card.appearanceId === id).map((card) => card.kind)
   const wentOff = new Set(substitutions.map((row) => row.appearanceId))
   const cameOnIds = new Set(cameOn.map((row) => row.appearanceId))
@@ -333,6 +378,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
   }
 
   const matchOf = (row: {
+    clubSlug: string
     competition: Competition
     goalsAgainst: null | number
     goalsFor: null | number
@@ -343,6 +389,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
     round: string
     season: string
   }): CareerMatch => ({
+    clubSlug: row.clubSlug,
     competition: row.competition,
     goalsAgainst: row.goalsAgainst ?? 0,
     goalsFor: row.goalsFor ?? 0,
@@ -355,6 +402,11 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
   })
 
   return {
+    againstUs: againstUs.map((goal) => ({
+      match: matchOf(goal),
+      minute: goal.minute,
+      stoppage: goal.stoppage,
+    })),
     appearances: appearances.map((appearance) => {
       const kinds = cardsOf(appearance.id)
 
@@ -369,6 +421,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
         yellow: kinds.includes('geel') || kinds.includes('geel-rood'),
       }
     }),
+    assistGivers,
     assists,
     goals: goals.map((goal) => ({
       competition: goal.competition,
@@ -393,5 +446,13 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
  * block that asks logs it and leaves itself out.
  */
 export const loadPlayerSeasons = cache(async (personId: number): Promise<PlayerSeason[]> => {
-  return playerSeasonsOf(await readPlayerSeasonFacts(personId))
+  return playerSeasonsOf(await loadPlayerSeasonFacts(personId))
+})
+
+/**
+ * What was read for a person, once per request: the seasons and the side column of his page
+ * (#1086) are worked out from the same reading.
+ */
+export const loadPlayerSeasonFacts = cache((personId: number): Promise<PlayerSeasonFacts> => {
+  return readPlayerSeasonFacts(personId)
 })

@@ -21,10 +21,12 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
+import { type PlayerAside, playerAsideOf } from '#src/player-aside'
 import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
-import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { loadPlayerSeasonFacts, loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
+import { PlayerAside as PlayerAsideColumn } from '#src/PlayerAside'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
 import { getReportAddresses } from '#src/report-data'
@@ -68,7 +70,8 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
  * place of birth. Then the key figures of his line (#1083), the table Per seizoen (#1082), his
  * career (#1084) and the credit. An old address leads to the address of now (308), and
  * an address of nobody, or of a player of an opponent, is "niet gevonden". The blocks of #1082
- * to #1086 come between the seasons and the credit; the credit moves to the sidebar with #1086.
+ * to #1085 come between the seasons and the end of the column. The side column (#1086) has more
+ * figures and, at the bottom, the credit.
  */
 export async function PlayerPageView({ slug }: { slug: string }) {
   const loaded = await loadPlayerPage(slug)
@@ -88,48 +91,65 @@ export async function PlayerPageView({ slug }: { slug: string }) {
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
   const current = seasonOf(new Date())
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
+  const facts = seasons === undefined ? undefined : await readFacts(page)
+  const aside = playerAsideOf(seasons ?? [], facts ?? {}, page.line === 'doelman')
+  const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
   return (
-    <Page.Main
-      intro={
-        <Page.Cell>
-          <Text>
-            <Link href={playersPath} icon="arrow-left">
-              Spelers
-            </Link>
-          </Text>
-          <Page.Title wrapped="start">
-            <Heading level={1}>
-              <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
-            </Heading>
-            <PlayerFacts page={page} />
-          </Page.Title>
-        </Page.Cell>
-      }
-    >
-      {keyFigures.length === 0 ? null : (
-        <Page.Cell>
-          <KeyFigures aria-label="Kerngetallen" figures={keyFigures} />
-        </Page.Cell>
-      )}
-      {seasons === undefined ? null : (
-        <Page.Cell>
-          <PlayerSeasonsCard
-            address={(season) => seasonAddress(playersPath, season, current)}
-            goalkeeper={page.line === 'doelman'}
-            name={page.name}
-            seasons={seasons}
-          />
-        </Page.Cell>
-      )}
-      {seasons === undefined || career === undefined ? null : (
-        <Page.Cell>
-          <PlayerCareerCard options={career} seasons={seasons} />
-        </Page.Cell>
-      )}
-      <PlayerCredit page={page} />
-    </Page.Main>
+    <>
+      <Page.Main
+        intro={
+          <Page.Cell>
+            <Text>
+              <Link href={playersPath} icon="arrow-left">
+                Spelers
+              </Link>
+            </Text>
+            <Page.Title wrapped="start">
+              <Heading level={1}>
+                <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
+              </Heading>
+              <PlayerFacts page={page} />
+            </Page.Title>
+          </Page.Cell>
+        }
+      >
+        {keyFigures.length === 0 ? null : (
+          <Page.Cell>
+            <KeyFigures aria-label="Kerngetallen" figures={keyFigures} />
+          </Page.Cell>
+        )}
+        {seasons === undefined ? null : (
+          <Page.Cell>
+            <PlayerSeasonsCard
+              address={(season) => seasonAddress(playersPath, season, current)}
+              goalkeeper={page.line === 'doelman'}
+              name={page.name}
+              seasons={seasons}
+            />
+          </Page.Cell>
+        )}
+        {seasons === undefined || career === undefined ? null : (
+          <Page.Cell>
+            <PlayerCareerCard options={career} seasons={seasons} />
+          </Page.Cell>
+        )}
+      </Page.Main>
+      <PlayerAsideColumn
+        aside={aside}
+        credit={<PlayerCredit page={page} />}
+        matchHref={({ competition, round, season }) => asideAddresses.get(season)?.get(`${competition}|${round}`)}
+      />
+    </>
   )
+}
+
+/** The seasons of the matches the side column shows. */
+function asideSeasons({ against, firstGoal }: PlayerAside) {
+  return [
+    ...(firstGoal === undefined ? [] : [firstGoal.match.season]),
+    ...(against?.goals.map((goal) => goal.match.season) ?? []),
+  ]
 }
 
 /** The line of a player as a word with a capital, such as `Aanvaller`. */
@@ -226,17 +246,7 @@ function PlayerFacts({ page }: { page: PlayerPage }) {
  */
 async function readCareer(seasons: readonly PlayerSeason[], current: string) {
   const moments = careerMoments(seasons)
-  const addresses = new Map<string, ReadonlyMap<string, string>>()
-
-  await Promise.all(
-    [...moments.keys()].map(async (season) => {
-      try {
-        addresses.set(season, await getReportAddresses(season))
-      } catch (error) {
-        console.error(`Could not read the matches of ${season} for the career of a player: ${reasonOf(error)}`)
-      }
-    }),
-  )
+  const addresses = await readMatchAddresses(moments.keys())
 
   return {
     current,
@@ -245,6 +255,37 @@ async function readCareer(seasons: readonly PlayerSeason[], current: string) {
     moments,
     seasonHref: (season: string) => seasonAddress(playersPath, season, current),
   }
+}
+
+/** What the side column reads besides the seasons, or undefined when that failed (logged). */
+async function readFacts(page: PlayerPage) {
+  try {
+    return await loadPlayerSeasonFacts(page.personId)
+  } catch (error) {
+    console.error(`Could not read the side column of a player for ${playerAddress(page.slug)}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The addresses of the matches of some seasons, by season. A season whose matches could not be
+ * read has none, so its matches show without a link (the error is logged).
+ */
+async function readMatchAddresses(seasons: Iterable<string>) {
+  const addresses = new Map<string, ReadonlyMap<string, string>>()
+
+  await Promise.all(
+    [...new Set(seasons)].map(async (season) => {
+      try {
+        addresses.set(season, await getReportAddresses(season))
+      } catch (error) {
+        console.error(`Could not read the matches of ${season} for the page of a player: ${reasonOf(error)}`)
+      }
+    }),
+  )
+
+  return addresses
 }
 
 /** The figures per season, or undefined when they could not be read (the error is logged). */
