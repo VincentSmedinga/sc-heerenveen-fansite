@@ -3,11 +3,11 @@ import type { Metadata } from 'next'
 import { seasonOf } from '@fansite/db/season'
 import {
   ArchiveCredit,
-  Breadcrumb,
   Card,
   CountryName,
   countryName,
   Heading,
+  KeyFigures,
   Link,
   Page,
   PlayerName,
@@ -21,6 +21,7 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
+import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
 import { loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
@@ -59,12 +60,12 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
 }
 
 /**
- * The page of a player of our club (#1079): a breadcrumb back to Spelers, his name as the
- * heading in the parts `PlayerName` shows, one line with his line, country and year and place
- * of birth, the seasons he played with us as links to their pages, and the credit. An old
- * address leads to the address of now (308), and an address of nobody, or of a player of an
- * opponent, is "niet gevonden". The blocks of #1082 to #1086 come between the seasons and the
- * credit; the credit moves to the sidebar with #1086.
+ * The page of a player of our club (#1079): a link back to Spelers, his name as the heading
+ * (`PlayerName`) with one line beside it, under it on a phone: his line, country and year and
+ * place of birth. Then the key figures of his line (#1083), the seasons he played with us as
+ * links to their pages, and the credit. An old address leads to the address of now (308), and
+ * an address of nobody, or of a player of an opponent, is "niet gevonden". The blocks of #1082
+ * to #1086 come between the seasons and the credit; the credit moves to the sidebar with #1086.
  */
 export async function PlayerPageView({ slug }: { slug: string }) {
   const loaded = await loadPlayerPage(slug)
@@ -81,19 +82,31 @@ export async function PlayerPageView({ slug }: { slug: string }) {
 
   const { page } = loaded
   const seasons = await readSeasons(page)
+  const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
 
   return (
     <Page.Main
       intro={
         <Page.Cell>
-          <Breadcrumb current={page.name} items={[{ href: playersPath, label: 'Spelers' }]} label="Kruimelpad" />
-          <Heading level={1}>
-            <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
-          </Heading>
-          <PlayerFacts page={page} />
+          <Text>
+            <Link href={playersPath} icon="arrow-left">
+              Spelers
+            </Link>
+          </Text>
+          <Page.Title wrapped="start">
+            <Heading level={1}>
+              <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
+            </Heading>
+            <PlayerFacts page={page} />
+          </Page.Title>
         </Page.Cell>
       }
     >
+      {keyFigures.length === 0 ? null : (
+        <Page.Cell>
+          <KeyFigures aria-label="Kerngetallen" figures={keyFigures} />
+        </Page.Cell>
+      )}
       <Page.Cell>
         <PlayerSeasons seasons={page.seasons} />
       </Page.Cell>

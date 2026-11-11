@@ -344,6 +344,11 @@
     > :not(:first-child) {
       margin-inline-start: auto;
     }
+
+    /* With wrapped="start" what is beside the heading wraps under it on the left. */
+    &.hf-page-title-start > :not(:first-child) {
+      margin-inline-start: 0;
+    }
   }
 
   /*

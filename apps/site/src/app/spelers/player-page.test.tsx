@@ -93,13 +93,32 @@ describe('the page of a player', () => {
     error.mockRestore()
   })
 
-  it('has a breadcrumb to Spelers and his name as the heading, in parts', async () => {
+  it('has a link back to Spelers above his name, no breadcrumb, and his name as the heading, in parts', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<nav aria-label="Kruimelpad".*?href="\/spelers">Spelers<\/a>.*?Jan de Vries/s)
+    expect(html).not.toContain('Kruimelpad')
+    expect(html).toMatch(/<a href="\/spelers">Spelers<\/a>.*?<div class="hf-page-title hf-page-title-start"><h1/s)
     expect(html).toContain(
       '<h1 class="hf-heading-1"><span class="hf-player-name"><span class="hf-player-name-given">Jan</span> <span class="hf-player-name-surname">de Vries</span></span></h1>',
     )
+  })
+
+  it('opens with the key figures of his line, before the table Per seizoen', async () => {
+    const html = await render()
+
+    expect(html).toMatch(
+      /aria-label="Kerngetallen".*?5<\/span> <span class="hf-key-figure-label">doelpunten.*?Per seizoen/s,
+    )
+    expect(html).toContain('in alle competities')
+  })
+
+  it('has no row of key figures when the seasons could not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(loadPlayerSeasons).mockRejectedValueOnce(new Error('connect ECONNREFUSED'))
+    const html = await render()
+
+    expect(html).not.toContain('Kerngetallen')
+    error.mockRestore()
   })
 
   it('has one line with the line, the flag as decoration with the country in words, and the year and place of birth', async () => {

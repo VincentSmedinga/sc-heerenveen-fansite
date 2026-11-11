@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { Heading } from '../heading/Heading'
 import { SeasonPicker } from '../season-picker/SeasonPicker'
+import { Text } from '../text/Text'
 import { Page } from './Page'
 
 const options = [
@@ -21,6 +22,7 @@ const meta = preview.meta({
           '',
           'De bediening staat rechts naast de kop, aan het einde van de kolom.',
           'Passen ze niet naast elkaar, dan staat de bediening onder de kop, ook rechts.',
+          'Met `wrapped="start"` staat wat naast de kop staat links onder de kop, zoals een regel tekst die bij de naam hoort.',
         ].join('\n'),
       },
     },
@@ -44,6 +46,17 @@ const render = () => (
 )
 
 export const Default = meta.story({ name: 'Kop met een seizoenskiezer', render })
+
+export const Wrapped = meta.story({
+  globals: { viewport: { value: 'mobile1' } },
+  name: 'Regel onder de naam, links (smal)',
+  render: () => (
+    <Page.Title wrapped="start">
+      <Heading level={1}>Voornaam Achternaam</Heading>
+      <Text appearance="meta">Aanvaller · Nederland · geboren in 1974 in Emmen</Text>
+    </Page.Title>
+  ),
+})
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
