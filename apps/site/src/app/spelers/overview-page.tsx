@@ -190,15 +190,13 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
                 <Rows current={current} players={group.players} />
               </Section>
             ))}
+      </Page.Main>
+      <Page.Sidebar aria-label={view === 'land' ? 'Uit het noorden en de bron' : 'De bron'}>
+        {view === 'land' && <NorthCard groups={countries} />}
         <Card as="div" surface="transparent">
           <WikipediaCredit archive compact />
         </Card>
-      </Page.Main>
-      {view === 'land' && (
-        <Page.Sidebar aria-label="Uit het noorden">
-          <NorthCard groups={countries} />
-        </Page.Sidebar>
-      )}
+      </Page.Sidebar>
     </>
   )
 }
