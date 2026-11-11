@@ -600,6 +600,7 @@ describe('the numbers of the players from the reports', () => {
     personFamilyName: null,
     personFamilyNamePrefix: null,
     personGivenName: null,
+    personSlug: null,
     redCards: 0,
     starts: 0,
     substitutions: 0,
@@ -712,7 +713,13 @@ describe('the numbers of the players from the reports', () => {
     await appearance(matchId, { name: 'Joost van Aken', playerId: inserted!.id, shirtNumber: 4 })
 
     expect(await readPlayerReportStats(database.db, season)).toMatchObject([
-      { personFamilyName: 'Aken', personFamilyNamePrefix: 'van', personGivenName: 'Joost', playerId: inserted!.id },
+      {
+        personFamilyName: 'Aken',
+        personFamilyNamePrefix: 'van',
+        personGivenName: 'Joost',
+        personSlug: null,
+        playerId: inserted!.id,
+      },
     ])
   })
 
@@ -1108,7 +1115,7 @@ describe('the matches with a report that is klaar', () => {
     expect(found?.clubSlug).toBe('testdorp-fc')
     expect(found?.stored.appearances.map((row) => row.name)).toEqual(['Luca Oyen', 'Gijs Test'])
     expect([...(found?.names.values() ?? [])]).toEqual([
-      { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Oyen' },
+      { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Oyen', slug: null },
     ])
   })
 
