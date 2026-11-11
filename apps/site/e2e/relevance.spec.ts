@@ -83,7 +83,7 @@ test.describe('an item that a moderator approves', () => {
     await expect(itemOf().getByText(/door .+@.+\./)).toBeVisible()
 
     await itemOf()
-      .getByRole('button', { name: `Terug naar het oordeel van het filter: ${title}` })
+      .getByRole('button', { name: `Herstellen, terug naar het oordeel van het filter: ${title}` })
       .click()
 
     await expect(page.getByRole('heading', { name: 'Terug naar het oordeel van het filter' })).toBeVisible()

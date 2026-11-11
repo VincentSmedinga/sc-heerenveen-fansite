@@ -28,6 +28,8 @@ const meta = preview.meta({
           'Heeft een formulier meer dan één knop, zet ze dan in een `Form.Buttons`: de knoppen staan naast elkaar in even brede kolommen, met ruimte ertussen, en onder elkaar waar ze niet passen.',
           'Zo is elke knop een groot doel voor een vinger.',
           '',
+          'Met `inline` staan de velden en de knop op één regel, zoals een zoekveld met zijn knop; de regel breekt pas waar geen ruimte meer is.',
+          '',
           'Een formulier van kaarten, zoals een wedstrijd in het beheer, zet de ruimte van de pagina tussen de kaarten.',
         ].join('\n'),
       },
@@ -91,3 +93,15 @@ export const Buttons = meta.story({
 })
 
 export const Cards = meta.story({ globals: { theme: 'light' }, name: 'Kaarten', render: cards })
+
+export const OneLine = meta.story({
+  name: 'Op één regel',
+  render: () => (
+    <Form inline onSubmit={(event) => event.preventDefault()}>
+      <Field id="zoek" label="Zoeken" required={false}>
+        <Input name="q" type="search" />
+      </Field>
+      <Button type="submit">Zoeken</Button>
+    </Form>
+  ),
+})

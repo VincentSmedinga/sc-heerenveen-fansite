@@ -4,7 +4,13 @@ import { classNames } from '../classNames'
 
 export type FormButtonsProps = ComponentPropsWithoutRef<'div'>
 
-export type FormProps = ComponentPropsWithoutRef<'form'>
+export type FormProps = ComponentPropsWithoutRef<'form'> & {
+  /**
+   * Puts the fields and the button on one line, such as a search field with its button. The
+   * line breaks only where there is no room. Without it, they stand under each other.
+   */
+  inline?: boolean
+}
 
 /**
  * The buttons of a form that has more than one: columns of the same width with space between
@@ -24,8 +30,8 @@ Buttons.displayName = 'Form.Buttons'
  * words, where the browser shows a bubble in its own language that the screen reader may not
  * read out. Pass `noValidate={false}` to get the validation of the browser back.
  */
-export const Form = ({ className, noValidate = true, ...props }: FormProps) => (
-  <form className={classNames('hf-form', className)} noValidate={noValidate} {...props} />
+export const Form = ({ className, inline = false, noValidate = true, ...props }: FormProps) => (
+  <form className={classNames('hf-form', inline && 'hf-form-inline', className)} noValidate={noValidate} {...props} />
 )
 
 Form.Buttons = Buttons

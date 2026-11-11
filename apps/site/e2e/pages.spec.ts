@@ -202,6 +202,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/berichten?toon=niet-op-de-site&redactie=1', status: 200 },
   { admin: 'moderator', path: '/beheer/berichten?toon=niet-op-de-site&q=Verzonnen', status: 200 },
   { admin: 'moderator', path: '/beheer/berichten?fout=weg', status: 200 },
+  { admin: 'moderator', path: '/beheer/berichten?pagina=2', status: 200 },
+  { admin: 'moderator', path: '/beheer/berichten?pagina=abc', status: 200 },
+  { admin: 'moderator', path: '/beheer/berichten?fout=reden-anders&keuze=anders', status: 200 },
   { admin: 'beheerder', path: '/beheer', status: 200 },
   // The articles are for a beheerder: the list, the form for a new one, the form of a draft and
   // of an article that is published (with its versions), the notice after an action, and the

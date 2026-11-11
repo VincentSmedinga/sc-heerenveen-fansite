@@ -441,34 +441,39 @@ describe('the check report command', () => {
   })
 })
 
-// The limit of the test that imports all the real files and writes the check report.
+// The limit of the tests that import all the real files: one runs the import twice, and one
+// writes the check report.
 const realImportTimeout = 120_000
 
 describe('the files in the repository', () => {
-  it('makes a club of every club of the old fansite, finds them all again, and a second run changes nothing', async () => {
-    const { clubs: oldClubs } = await readOldSiteData(oldSiteDataFolder)
-    const first = await run({ folder: oldSiteDataFolder })
-    const second = await run({ folder: oldSiteDataFolder })
-    const ids = await oldSiteClubIds(database.db, oldClubs)
+  it(
+    'makes a club of every club of the old fansite, finds them all again, and a second run changes nothing',
+    async () => {
+      const { clubs: oldClubs } = await readOldSiteData(oldSiteDataFolder)
+      const first = await run({ folder: oldSiteDataFolder })
+      const second = await run({ folder: oldSiteDataFolder })
+      const ids = await oldSiteClubIds(database.db, oldClubs)
 
-    expect(oldClubs).toHaveLength(91)
-    expect(first.code).toBe(0)
-    expect(first.text).toMatch(/^Old site, step clubs: \d+ new, \d+ updated, \d+ unchanged, 0 skipped/u)
-    expect(second.text).toContain(`Old site, step clubs: 0 new, 0 updated, ${oldClubs.length} unchanged, 0 skipped`)
-    expect(first.text).toContain('Old site, step matches: 671 new, 0 updated, 0 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site, step matches: 0 new, 0 updated, 671 unchanged, 0 skipped')
-    expect(first.text).toContain('Old site, step spelers: 426 new, 0 updated, 0 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site, step spelers: 0 new, 0 updated, 426 unchanged, 0 skipped')
-    expect(first.text).toContain('Old site, step doelpunten: 1763 new, 0 updated, 0 unchanged, 67 skipped')
-    expect(second.text).toContain('Old site, step doelpunten: 0 new, 0 updated, 1763 unchanged, 67 skipped')
-    expect(first.text).toContain('Old site, step opstellingen: 566 new, 0 updated, 0 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site, step opstellingen: 0 new, 0 updated, 566 unchanged, 0 skipped')
-    expect(second.text).toContain('Old site: 9 of 9 steps done.')
-    expect(ids.size).toBe(oldClubs.length)
-    // The two clubs the test started with are among them, so a club is one row, not two.
-    expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
-    expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'sc-cambuur'))).toHaveLength(1)
-  })
+      expect(oldClubs).toHaveLength(91)
+      expect(first.code).toBe(0)
+      expect(first.text).toMatch(/^Old site, step clubs: \d+ new, \d+ updated, \d+ unchanged, 0 skipped/u)
+      expect(second.text).toContain(`Old site, step clubs: 0 new, 0 updated, ${oldClubs.length} unchanged, 0 skipped`)
+      expect(first.text).toContain('Old site, step matches: 671 new, 0 updated, 0 unchanged, 0 skipped')
+      expect(second.text).toContain('Old site, step matches: 0 new, 0 updated, 671 unchanged, 0 skipped')
+      expect(first.text).toContain('Old site, step spelers: 426 new, 0 updated, 0 unchanged, 0 skipped')
+      expect(second.text).toContain('Old site, step spelers: 0 new, 0 updated, 426 unchanged, 0 skipped')
+      expect(first.text).toContain('Old site, step doelpunten: 1763 new, 0 updated, 0 unchanged, 67 skipped')
+      expect(second.text).toContain('Old site, step doelpunten: 0 new, 0 updated, 1763 unchanged, 67 skipped')
+      expect(first.text).toContain('Old site, step opstellingen: 566 new, 0 updated, 0 unchanged, 0 skipped')
+      expect(second.text).toContain('Old site, step opstellingen: 0 new, 0 updated, 566 unchanged, 0 skipped')
+      expect(second.text).toContain('Old site: 9 of 9 steps done.')
+      expect(ids.size).toBe(oldClubs.length)
+      // The two clubs the test started with are among them, so a club is one row, not two.
+      expect((await database.db.select().from(clubs)).length).toBeLessThan(oldClubs.length + 2)
+      expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'sc-cambuur'))).toHaveLength(1)
+    },
+    realImportTimeout,
+  )
 
   // This test imports all the real files (671 matches, 566 line-ups) and then reads them back
   // for the report. On a fast computer that takes about 6 seconds: 4 for the import, of which
