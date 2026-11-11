@@ -31,6 +31,7 @@ import { createAccount } from './accounts'
 import { findMatch, listAdminMatches, saveEntry, undoEntry } from './match-entries'
 import {
   contextOf,
+  countReportsToCheck,
   findPreviousLineUp,
   findReportScreen,
   finishMatch,
@@ -943,11 +944,28 @@ describe('the list', () => {
     })
     expect([...(await listReportsToCheck(database.db, [{ id: matchId, reportStatus: 'klaar' }]))]).toEqual([matchId])
     expect((await database.db.select().from(matchReports))[0]?.status).toBe('klaar')
+    // The start page counts it (#1077), and not a report nobody saved, as the old fansite's.
+    expect(await countReportsToCheck(database.db)).toEqual({ seasons: ['2026/27'], total: 1 })
+    await database.db.update(matchReports).set({ savedBy: null })
+    expect(await countReportsToCheck(database.db)).toEqual({ seasons: [], total: 0 })
+    await database.db.update(matchReports).set({ savedBy: userId })
 
     // A report that is bezig is never "to check".
     await database.db.update(matchReports).set({ status: 'bezig' })
 
     expect([...(await listReportsToCheck(database.db, [{ id: matchId, reportStatus: 'bezig' }]))]).toEqual([])
+    expect(await countReportsToCheck(database.db)).toEqual({ seasons: [], total: 0 })
+  })
+
+  it('counts a report whose goal lost its link to the line-up, as after an import that replaced it (#1077)', async () => {
+    await wikipediaGoals()
+    await save(report())
+
+    expect(await countReportsToCheck(database.db)).toEqual({ seasons: [], total: 0 })
+
+    await database.db.update(matchGoals).set({ appearanceId: null, assistAppearanceId: null })
+
+    expect(await countReportsToCheck(database.db)).toEqual({ seasons: ['2026/27'], total: 1 })
   })
 
   it('has no report for a match without one', async () => {

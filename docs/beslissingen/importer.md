@@ -1427,6 +1427,8 @@
 - **Alternatieven:** Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); het verschil meteen als wachtende wijziging vastleggen (dat is #577, om #272 in één pull request te houden); het verschil bij elke run opnieuw schrijven (honderden regels voor één afwijking).
 - **Later:** zie _Een afwijking van Wikipedia komt bij een redacteur, die beslist_ en _Een afwijking is een wachtende wijziging per onderdeel, en één functie beslist ze_: het verschil wordt ook een wachtende wijziging, de beheerders krijgen een mail en een redacteur beslist, of de import neemt Wikipedia over na zeven dagen.
   Wat blijft: de invoer blijft staan, het verschil staat één keer in het logboek en in de waarschuwing, en `match_edits.reported_*` houdt dat bij.
+- **Later:** zie _De doelpunten van een wedstrijd met een verslag zijn van het verslag_ (11 november 2026): punt 2 geldt niet voor de doelpunten van een wedstrijd met een verslag.
+  Heeft Wikipedia daar hetzelfde, dan blijft de markering staan en schrijft de import geen `match.caught-up`.
 
 ## Het logboek van het beheer heeft ook regels van de import, zonder account
 
@@ -1645,6 +1647,7 @@
 - **Alternatieven:** de invoer wint tot een mens hem weghaalt (een fout van de redactie blijft staan); Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); alleen een melding in het beheer zonder mail (een redacteur die niet kijkt, ziet het niet).
 - **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de import neemt Wikipedia na zeven dagen alleen nog over in het lopende seizoen.
   In een seizoen dat voorbij is blijft de invoer staan tot een mens beslist.
+- **Later:** zie _De doelpunten van een wedstrijd met een verslag zijn van het verslag_ (11 november 2026): de import neemt de doelpunten van een wedstrijd met een verslag nooit over, ook niet na zeven dagen, en een redacteur kan er alleen de invoer houden.
 
 ## Een afwijking is een wachtende wijziging per onderdeel, en één functie beslist ze
 
@@ -4009,3 +4012,40 @@
 - **Eigen keuze bij het bouwen:** de stap loopt na `personen`, zodat de personen van deze run er al zijn.
   Een doelpunt in een wedstrijd waarvan de redactie de doelpunten invulde of het verslag bewaarde, blijft zoals het is, net als bij de andere stappen.
 - **Alternatieven:** ook `wikipedia_page` invullen zoals vanaf 2007/08 (kan later, als de lijst met naamgenoten is nagekeken); alleen koppelen bij een unieke naam in beide richtingen (koppelt vrijwel niets).
+
+## De doelpunten van een wedstrijd met een verslag zijn van het verslag
+
+- **Datum:** 11 november 2026
+- **Besluit:** de import van Wikipedia schrijft de doelpunten van een wedstrijd met een verslag nooit (#1077).
+  Een wedstrijd heeft een verslag als hij een rij in `match_reports` heeft, bezig of klaar.
+  Dat hangt af van het verslag, niet van de markering `goals_edited` in `match_edits`.
+  Een afwijking wacht als wijziging; alleen "onze invoer houden" kan, of de beheerder past het verslag aan.
+  De projecteigenaar besloot dat op 11 november 2026; de punten hieronder zijn de keuzes bij het bouwen.
+  - **Hetzelfde op Wikipedia:** de import doet niets.
+    De markering blijft staan en er komt geen `match.caught-up` voor de doelpunten.
+    Een wijziging die wachtte, vervalt (`reverted`).
+  - **Iets anders op Wikipedia:** de afwijking wacht in `match_changes`, met `match.differs` in het logboek en een mail, zoals bij elke invoer.
+    De import neemt haar nooit over, ook niet na zeven dagen.
+    De mail en de pagina van de wedstrijd beloven daarom geen dag van overname, en zeggen dat je het verslag aanpast.
+  - **Zonder markering:** een wedstrijd met een verslag en zonder rij in `match_edits` gaat dezelfde weg (`importEditedMatch` met `hasReport`).
+    De import zet de markering niet terug: `match_edits.edited_by` moet een account zijn, en de import heeft er geen.
+    Omdat er dan geen `reported_goals` is, vraagt de import aan `match_changes` of de afwijking al is gemeld.
+  - **Beslissen:** `decideConflict` weigert "Wikipedia overnemen" voor de doelpunten van een wedstrijd met een verslag, met de uitkomst `report`.
+    De wijziging blijft wachten.
+    Het beheer zegt dan dat je het verslag aanpast, en `pnpm run import:changes accept` meldt hetzelfde en eindigt met code 1.
+    De doelpunten van de oude fansite die niet optellen (`oldSiteGoalsReason`) vallen hier niet onder: dat is geen voorstel van Wikipedia.
+  - **Een wedstrijd die van de pagina verdwijnt:** een wedstrijd met een verslag blijft staan, zoals een wedstrijd met een invoer.
+    Anders zou de import het verslag met de wedstrijd weghalen.
+  - **Doelpuntenmakers:** de import maakt geen speler van een doelpunt in een wedstrijd met een verslag, zoals bij een wedstrijd met doelpunten van de redactie.
+  - **De startpagina van het beheer:** de kaart "Te doen" telt de verslagen die `klaar` zijn en niet meer kloppen, met een koppeling naar de lijst van het seizoen (`countReportsToCheck`).
+    Alleen verslagen die een redacteur opsloeg (`match_reports.saved_by`) tellen mee.
+    De ruim vijfhonderd verslagen van de oude fansite die niemand opsloeg, zouden de pagina bij elk bezoek duizenden vragen aan de database kosten.
+- **Waarom:** een verslag koppelt elk doelpunt aan de opstelling en een assist, en Wikipedia heeft die niet.
+  Wikipedia overnemen gooit dus altijd werk weg dat nergens anders staat.
+  Een controle op het verslag zelf houdt ook stand als een markering ooit weg is.
+- **Alternatieven:** de markering laten staan zolang er een verslag is (een tweede regel naast de markering, en een verslag zonder markering blijft kwetsbaar).
+  In de vergelijking ook de koppeling en de assist tellen (Wikipedia heeft ze nooit, dus dat is "verschilt", en dan neemt de import na zeven dagen toch over).
+  Bij overnemen de koppelingen bewaren van doelpunten die gelijk blijven (ingewikkeld, en een beheerder kan het verslag zelf aanpassen).
+- **Nadeel:** de koppelingen en assists die de import al weghaalde, komen niet terug: ze staan nergens meer.
+  De beheerder kiest de maker en de assist van die verslagen opnieuw.
+  Een wijziging van een hele wedstrijd die al wachtte voordat het verslag er was (een rij zonder `part`), kan een beheerder nog overnemen, en die schrijft de doelpunten wel.

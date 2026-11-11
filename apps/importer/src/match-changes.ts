@@ -234,5 +234,11 @@ async function decideWaiting(
       return { change, message: 'the change has no proposal to apply', ok: false }
     case 'not-waiting':
       return { change, message: 'the change does not wait any more', ok: false }
+    case 'report':
+      return {
+        change,
+        message: "the match has a report, and its goals are the report's: change the report, or reject the change",
+        ok: false,
+      }
   }
 }

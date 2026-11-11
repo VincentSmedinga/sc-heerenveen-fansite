@@ -1543,6 +1543,14 @@ Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`
 - De onderdelen zonder markering volgen Wikipedia zoals bij elke wedstrijd, zonder de beoordeling van _Hoe betrouwbaar een wijziging is_.
   De wedstrijd telt niet mee voor de grens van zes wedstrijden in een run, en blijft staan als hij van de pagina verdwijnt.
 - Een wijziging die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
+- De doelpunten van een wedstrijd met een verslag (een rij in `match_reports`, bezig of klaar) zijn van het verslag, met of zonder markering (#1077).
+  Een verslag koppelt elk doelpunt aan de opstelling en aan een assist, en Wikipedia heeft die niet.
+  De import schrijft die doelpunten daarom nooit.
+  Heeft Wikipedia hetzelfde, dan gebeurt er niets: de markering blijft staan en er komt geen `match.caught-up`.
+  Heeft Wikipedia iets anders, dan wacht de afwijking zoals hieronder, maar de import neemt haar nooit over, ook niet na zeven dagen.
+  `decideConflict` weigert "Wikipedia overnemen" voor die doelpunten: `pnpm run import:changes accept` meldt `the match has a report` en eindigt met code 1.
+  Een beheerder houdt de invoer (`reject`) of past het verslag aan.
+  De wedstrijd blijft ook staan als hij van de pagina verdwijnt.
 
 #### Een afwijking met de invoer van de redactie
 

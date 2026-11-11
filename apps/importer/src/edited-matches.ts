@@ -17,6 +17,16 @@
 //
 // The parts without a marker follow Wikipedia as for any match, without the judgement of
 // `classify-change.ts`.
+//
+// The goals of a match with a report (a row in `match_reports`, bezig or klaar) are the
+// report's, with or without a marker (issue 1077): a report links each goal to the line-up and
+// to an assist, and Wikipedia has neither. So the import never writes them:
+//
+// - Wikipedia has the same goals: nothing happens. The marker stays and no `match.caught-up` is
+//   written. A change that waited lapses.
+// - Wikipedia has other goals: the difference waits as a change, with the line in the log and
+//   the mail, and it is never taken over after seven days. Only a person decides, and only to
+//   keep the report (`decideConflict` refuses the other way); the editors change the report.
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
@@ -36,7 +46,7 @@ import {
   type MatchPart,
   type ResultFields,
 } from '@fansite/db/match-edits'
-import { matchChanges, matchEdits, matches } from '@fansite/db/schema'
+import { matchChanges, matchEdits, matches, matchReports } from '@fansite/db/schema'
 import { and, eq, inArray, isNotNull, notInArray } from 'drizzle-orm'
 
 import type { LinkedGoal } from './match-changes.ts'
@@ -58,22 +68,26 @@ const partNames: Record<MatchPart, { dutch: string; english: string }> = {
 }
 
 /**
- * Handles one match with an entry: judges its four parts, writes what the log and the warning
- * need and clears the markers of the parts Wikipedia caught up with. The caller makes the match
- * the entry where a marker stays and Wikipedia where there is none (`mergeEntry`). It returns
- * the parts that stay the entry's, and the warnings for the import.
+ * Handles one match with an entry or a report: judges its four parts, writes what the log and
+ * the warning need and clears the markers of the parts Wikipedia caught up with. The caller
+ * makes the match the entry where a marker stays and Wikipedia where there is none
+ * (`mergeEntry`). It returns the parts that stay the entry's, and the warnings for the import.
+ * With `hasReport` the goals are judged and kept whatever the marker says, and `edit` may be
+ * missing.
  */
 export async function importEditedMatch(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   {
     before,
     edit,
+    hasReport,
     storedGoals,
     wikipedia,
     wikipediaGoals,
   }: {
     before: Match
-    edit: MatchEdit
+    edit: MatchEdit | undefined
+    hasReport: boolean
     storedGoals: MatchGoal[]
     wikipedia: ReadMatch
     wikipediaGoals: LinkedGoal[]
@@ -84,31 +98,34 @@ export async function importEditedMatch(
   const goalsOfWikipedia: GoalFields[] = wikipediaGoals.map((goal) => ({ ...goal }))
   const judged: Partial<Record<MatchPart, { entry: string; verdict: Verdict; wikipedia: string }>> = {}
 
-  if (edit.kickoffEdited) {
+  if (edit?.kickoffEdited) {
     judged.kickoff = {
       entry: describeEntryKickoff(before),
       verdict: judgeKickoff(before, wikipedia),
       wikipedia: describeEntryKickoff(wikipedia),
     }
   }
-  if (edit.resultEdited) {
+  if (edit?.resultEdited) {
     judged.result = {
       entry: describeEntryResult(before),
       verdict: judgeResult(before, wikipedia),
       wikipedia: describeEntryResult({ ...wikipedia, opponent: before.opponent }),
     }
   }
-  if (edit.factsEdited) {
+  if (edit?.factsEdited) {
     judged.facts = {
       entry: describeEntryFacts(before),
       verdict: judgeFacts(before, wikipedia),
       wikipedia: describeEntryFacts(wikipedia),
     }
   }
-  if (edit.goalsEdited) {
+  if (edit?.goalsEdited || hasReport) {
+    const verdict = judgeGoals(storedGoals, goalsOfWikipedia)
+
     judged.goals = {
       entry: describeEntryGoals(storedGoals),
-      verdict: judgeGoals(storedGoals, goalsOfWikipedia),
+      // The goals of a report never follow Wikipedia, so the same goals are no news either.
+      verdict: hasReport && verdict === 'same' ? 'nothing' : verdict,
       wikipedia: describeEntryGoals(goalsOfWikipedia),
     }
   }
@@ -140,12 +157,17 @@ export async function importEditedMatch(
       continue
     }
 
-    const previous = {
-      facts: edit.reportedFacts,
-      goals: edit.reportedGoals,
-      kickoff: edit.reportedKickoff,
-      result: edit.reportedResult,
-    }[part]
+    const previous =
+      edit === undefined
+        ? null
+        : {
+            facts: edit.reportedFacts,
+            goals: edit.reportedGoals,
+            kickoff: edit.reportedKickoff,
+            result: edit.reportedResult,
+          }[part]
+    // The goals of a report are never taken over by the import.
+    const ofReport = part === 'goals' && hasReport
     const pending = waiting.get(part)
 
     if (found.verdict === 'same') {
@@ -176,6 +198,7 @@ export async function importEditedMatch(
         await noteSeen(db, pending, now)
 
         if (
+          !ofReport &&
           hasStood(pending, now) &&
           (await decideConflict(
             db,
@@ -197,7 +220,11 @@ export async function importEditedMatch(
       if (pending !== undefined) {
         await decide(db, pending, 'rejected', 'replaced', now)
       }
-      if (previous !== found.wikipedia) {
+      // Without a row in `match_edits` nothing remembers what was reported, so the changes do.
+      const said =
+        edit === undefined ? await hasDecided(db, before.id, part, found.wikipedia) : previous === found.wikipedia
+
+      if (!said) {
         reported[part] = found.wikipedia
         await recordAction(
           db,
@@ -233,7 +260,7 @@ export async function importEditedMatch(
 
   // The reported values are written before the markers go, because clearing the last marker
   // removes the row.
-  if (Object.keys(reported).length > 0) {
+  if (edit !== undefined && Object.keys(reported).length > 0) {
     await db
       .update(matchEdits)
       .set({
@@ -242,18 +269,21 @@ export async function importEditedMatch(
         ...('kickoff' in reported ? { reportedKickoff: reported.kickoff } : {}),
         ...('result' in reported ? { reportedResult: reported.result } : {}),
       })
-      .where(eq(matchEdits.matchId, edit.matchId))
+      .where(eq(matchEdits.matchId, before.id))
   }
   if (caughtUp.length > 0) {
     // Taking a part over cleared its marker already, so read the row as it is now.
-    const [current] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, edit.matchId))
+    const [current] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, before.id))
 
     if (current !== undefined) {
       await clearParts(db, current, caughtUp)
     }
   }
 
-  return { keep: markedParts(edit).filter((part) => !caughtUp.includes(part) && !takenOver.includes(part)), warnings }
+  const marked = edit === undefined ? [] : markedParts(edit)
+  const kept: MatchPart[] = hasReport && !marked.includes('goals') ? [...marked, 'goals'] : marked
+
+  return { keep: kept.filter((part) => !caughtUp.includes(part) && !takenOver.includes(part)), warnings }
 }
 
 /**
@@ -364,6 +394,17 @@ export async function readEdits(db: Pick<Database, 'select'>, season: string): P
   return new Map(
     (await db.select().from(matchEdits).where(inArray(matchEdits.matchId, ids))).map((edit) => [edit.matchId, edit]),
   )
+}
+
+/** The matches of this season that have a report, bezig or klaar. */
+export async function readReported(db: Pick<Database, 'select'>, season: string): Promise<Set<number>> {
+  const rows = await db
+    .select({ id: matchReports.matchId })
+    .from(matchReports)
+    .innerJoin(matches, eq(matchReports.matchId, matches.id))
+    .where(eq(matches.season, season))
+
+  return new Set(rows.map((row) => row.id))
 }
 
 function capital(text: string): string {

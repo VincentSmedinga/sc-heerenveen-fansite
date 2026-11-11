@@ -73,6 +73,10 @@ const notices: Record<string, { text: string; title: string }> = {
     text: 'De wedstrijd is toegevoegd. Vul hieronder de doelpunten en de gegevens in, en maak daarna het verslag.',
     title: 'Toegevoegd',
   },
+  'van-het-verslag': {
+    text: 'Er is niets veranderd: de doelpunten van deze wedstrijd zijn van het verslag. Heeft Wikipedia gelijk? Pas dan het verslag aan. Anders houd je onze invoer.',
+    title: 'Niet overgenomen',
+  },
   weggehaald: {
     text: 'De wedstrijd is teruggezet naar wat er stond voor de eerste invoer. De import leest bij de volgende keer weer wat Wikipedia zegt.',
     title: 'Invoer weggehaald',
@@ -186,7 +190,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           </Notice>
         )}
         {differences.map((difference) => {
-          const words = differenceWords(difference, match, now)
+          const words = differenceWords(difference, match, now, hasReport)
 
           return (
             <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
