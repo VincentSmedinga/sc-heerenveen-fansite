@@ -1,6 +1,6 @@
 /*
- * A row of key figures, each in a card of its own: the number large and heavy, the word below it
- * and then the line that says what it counts. The cards share the width and wrap to the next
+ * A row of key figures, each in a card of its own: the number large and heavy, the word below
+ * it and then the line that says what it counts. The cards share the width and wrap to the next
  * line when they do not fit, so four stand side by side on a wide screen and two by two on a
  * phone.
  */
@@ -23,7 +23,7 @@
     padding: calc(var(--hf-space-m) * 0.75) var(--hf-space-m);
   }
 
-  /* The parts are in an element of their own, so the flow of the card sets no space between them. */
+  /* The parts have an element of their own, so the flow of the card adds no space to them. */
   .hf-key-figure-parts {
     display: flex;
     flex-direction: column;
