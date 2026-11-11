@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
 
 import type { Size } from '../size'
 
@@ -19,13 +19,6 @@ export type SegmentedLinksProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
   label: string
   /** The links, in order. */
   options: readonly SegmentedLinksOption[]
-  /**
-   * Where the switch stands on the page, as a word the page picks, such as `stand`. Between two
-   * pages the thumb only slides from a switch with the same place to one with the same place,
-   * so the place must differ for switches that are not the same one. Letters, digits and
-   * hyphens only. Without a place the switch does not take part in the slide.
-   */
-  place?: string
   /** `default` is the standard size. `small` is lower, for a switch next to the content. */
   size?: Size
   /** The value of the option the page shows now. */
@@ -39,15 +32,12 @@ export type SegmentedLinksProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
  * it, so it shows without colour. It holds no state: the page gives the value and the
  * addresses, and without script a press loads the page of that option; a page that wants to
  * change the choice in the browser takes the click on the group (`onClick`) and gives the new
- * value. With a `place`, the thumb and the
- * options get names for the slide between two pages (see segmented-control.css): the names
- * belong to the place, so only a switch in the same place on the next page is the same element.
+ * value.
  */
 export const SegmentedLinks = ({
   className,
   label,
   options,
-  place,
   size = 'default',
   style,
   value,
@@ -61,9 +51,7 @@ export const SegmentedLinks = ({
     options.map((option) => option.value),
     value,
     size,
-    place === undefined
-      ? style
-      : ({ ...style, '--hf-segmented-thumb-name': `hf-segmented-thumb-${place}` } as CSSProperties),
+    style,
   )
 
   return (
@@ -75,17 +63,8 @@ export const SegmentedLinks = ({
       role="group"
       style={groupStyle}
     >
-      {options.map((option, index) => (
-        <a
-          aria-current={option.value === value ? 'page' : undefined}
-          href={option.href}
-          key={option.value}
-          style={
-            place === undefined
-              ? undefined
-              : ({ '--hf-segmented-option-name': `hf-segmented-option-${place}-${index + 1}` } as CSSProperties)
-          }
-        >
+      {options.map((option) => (
+        <a aria-current={option.value === value ? 'page' : undefined} href={option.href} key={option.value}>
           <SegmentedLabel text={option.label}>{option.label}</SegmentedLabel>
         </a>
       ))}

@@ -115,7 +115,6 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           address={seasonAddress(playersPath, season, seasonOf(new Date()))}
           competition={competition}
           matches={data.matches}
-          place="spelers"
         />
         <SeasonSquadCard squad={squad} />
         {figures?.seasonHasReports === true && (

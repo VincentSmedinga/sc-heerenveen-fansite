@@ -18,10 +18,6 @@ const union = (values: readonly string[]) => ({ type: { summary: values.map((val
 
 const meta = preview.meta({
   argTypes: {
-    place: {
-      control: 'text',
-      description: 'De plek van de schakelaar op de pagina, voor de overgang tussen pagina’s.',
-    },
     size: {
       control: 'radio',
       description: 'De maat van de schakelaar.',
@@ -56,7 +52,7 @@ const meta = preview.meta({
 })
 
 export const Default = meta.story({
-  args: { label: 'Welke wedstrijden', options, place: 'wedstrijden', size: 'default', value: 'all' },
+  args: { label: 'Welke wedstrijden', options, size: 'default', value: 'all' },
   name: 'Een keuze in het adres',
 })
 

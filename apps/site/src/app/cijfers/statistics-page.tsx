@@ -132,7 +132,7 @@ export async function StatisticsPage({
         <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <MatchFlowCard matches={data.matches} season={imageSeason} />
-        <CompetitionSwitch address={address} competition={competition} matches={data.matches} place="cijfers" />
+        <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
         <NoteworthyCard

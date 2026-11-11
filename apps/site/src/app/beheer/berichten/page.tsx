@@ -175,7 +175,6 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                 value: 'not-on-site',
               },
             ]}
-            place="berichten"
             size="small"
             value={group}
           />

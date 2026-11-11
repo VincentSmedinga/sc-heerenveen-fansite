@@ -1765,6 +1765,7 @@
 - **Later:** zie _De overgang van de schakelaar heeft een naam per plek_ (2 november 2026): de namen `hf-segmented-thumb` en `hf-segmented-option-1` tot en met `-4` zijn weg, en de zin "Eén schakelaar per pagina" geldt niet meer.
   De knop en de keuzes krijgen hun naam van de plek die de pagina aan `SegmentedLinks` geeft, en een pagina mag meer dan één schakelaar hebben als elke een eigen plek heeft.
   Een schakelaar zonder plek doet niet meer mee aan de overgang, ook niet als hij met knoppen werkt.
+- **Later:** zie _De schakelaar gebruikt geen overgang tussen pagina's_ (11 november 2026): `@view-transition` en `view-transition-name` zijn weg uit `segmented-control.css`, en een link zonder JavaScript laadt de pagina met de knop al bij de nieuwe keuze.
 
 ## De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
 
@@ -2316,6 +2317,7 @@
 - **Alternatieven:** de overgang laten beginnen op de nieuwe pagina, met de knop op de oude keuze (de nieuwe pagina kent de oude keuze alleen met een script in `pageswap` en `pagereveal`, dat we in #500 uitsloten, en het laat ook bij een wissel tussen verschillende schakelaars iets schuiven).
   `view-transition-name` alleen op de knop en niet op de letters (de letters liggen dan onder de knop).
   De overgang met een script uitzetten voor schakelaars op een andere plek (meer code, werkt niet zonder script).
+- **Later:** zie _De schakelaar gebruikt geen overgang tussen pagina's_ (11 november 2026): de eigenschap `place` en de namen zijn weg.
 
 ## Onderdelen en formulieren zetten geen verticale witruimte naar buiten
 
@@ -3259,6 +3261,24 @@
   Met de ruimte om de vlag leek de rand los van de tekening.
 - **Alternatieven:** de link `inline-block` laten en alleen de naam een link maken (de vlag hoort bij de naam); de rand in de kleur van de lijn van de kaart houden (te vaag om de vlag).
 - **Later:** vervangt de pixel wit en de rustige lijn uit de beslissing "De rand om een vlag heeft de kleur van de lijnen in de kaart, met een pixel wit eronder".
+
+## De schakelaar gebruikt geen overgang tussen pagina's
+
+- **Datum:** 11 november 2026
+- **Besluit:** `SegmentedControl` en `SegmentedLinks` gebruiken geen view transition meer (#1111).
+  `@view-transition`, `view-transition-name` en alle `::view-transition-*` zijn weg uit `segmented-control.css`.
+  De eigenschap `place` van `SegmentedLinks` en `CompetitionSwitch`, en de custom properties `--hf-segmented-thumb-name` en `--hf-segmented-option-name` zijn weg, net als `apps/site/e2e/segmented-places.spec.ts`.
+  - **De beweging blijft de bestaande:** de knop schuift met een overgang op `translate` in `--hf-motion-duration-medium` en `--hf-motion-ease-change`, en de letters gaan in dezelfde tijd van gewoon naar dik.
+    Met `prefers-reduced-motion: reduce` zijn die duren 0 seconden, dus de knop springt.
+    Op de site schuift hij bij elke klik, met JavaScript, omdat de wissel de waarde in dezelfde pagina verandert (zie _Welke stand, Welke wedstrijden en Welke berichten voelen sneller_ in `site.md`).
+  - **Zonder JavaScript:** een link laadt een nieuwe pagina, en die staat meteen goed, met de knop bij de nieuwe keuze.
+    Er is geen animatie die bij het laden van een pagina start, dus geen flits en geen sprong.
+    De overgang tussen documenten ging mis als de pagina laadde of naar boven scrolde.
+  - **Tests:** de vier tests in `segmented-control-css.test.ts` die de view transition toetsten, zijn vervangen door drie die eisen dat er geen view transition en geen `@keyframes` of `animation` in staat en dat de knop met de bewegingstokens schuift.
+    De test van `SegmentedLinks` voor de namen en `segmented-places.spec.ts` vervallen met de eigenschap `place`.
+- **Waarom:** een overgang die niet altijd werkt, is slechter dan een eenvoudige die het wel doet.
+  De stylelint-uitzondering voor een 'newly available' functie verdwijnt ook.
+- **Alternatieven:** een fade van de knop bij het laden van een pagina (een animatie bij elke pagina, ook als de keuze niet verandert, dus een flits); de overgang met `pageswap` en `pagereveal` repareren (JavaScript op elke pagina, en dezelfde kwetsbaarheid bij laden en scrollen).
 
 ## Vier kerngetallen staan altijd twee aan twee, drie nooit drie plus één
 

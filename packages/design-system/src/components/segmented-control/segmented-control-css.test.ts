@@ -149,33 +149,18 @@ describe('the sizes of the segmented control', () => {
   })
 })
 
-describe('the slide between two pages', () => {
-  const transitions = css.slice(css.indexOf('@supports (view-transition-name: none)'))
-
-  it('joins the pages only without a wish for reduced motion', () => {
-    expect(transitions).toMatch(
-      /@media \(prefers-reduced-motion: no-preference\) \{\s*@view-transition \{\s*navigation: auto;\s*\}\s*\}/,
-    )
-    expect(css.match(/@view-transition/g)).toHaveLength(1)
+describe('the change of the choice', () => {
+  it('uses no view transition between pages, which breaks when a page loads or scrolls up', () => {
+    expect(css).not.toMatch(/view-transition|@view-transition/)
   })
 
-  it('names the thumb and the options from the place of the switch, so the labels stay over the thumb, and leaves the rest of the page as it is', () => {
-    expect(transitions).toContain('view-transition-name: var(--hf-segmented-thumb-name, none);')
-    expect(transitions).toContain('view-transition-name: var(--hf-segmented-option-name, none);')
-    expect(transitions).not.toMatch(/view-transition-name: hf-/)
-    expect(transitions).toMatch(
-      /::view-transition-group\(root\),\s*::view-transition-old\(root\),\s*::view-transition-new\(root\) \{\s*animation: none;/,
-    )
+  it('slides the thumb with the duration and the curve of the motion tokens, which are 0s with reduced motion', () => {
+    expect(thumb).toContain('transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);')
+    expect(css).not.toContain('prefers-reduced-motion: no-preference')
   })
 
-  it('shows a name that only one of the two pages has at once, without a fade', () => {
-    expect(transitions).toMatch(/::view-transition-old\(\*\):only-child \{\s*display: none;/)
-    expect(transitions).toMatch(/::view-transition-new\(\*\):only-child \{\s*animation: none;/)
-  })
-
-  it('moves everything it names with the duration and the curve of the motion tokens', () => {
-    expect(transitions).toContain('animation-duration: var(--hf-motion-duration-medium);')
-    expect(transitions).toContain('animation-timing-function: var(--hf-motion-ease-change);')
+  it('has no animation that would run when a page loads', () => {
+    expect(css).not.toMatch(/@keyframes|animation:/)
   })
 })
 
