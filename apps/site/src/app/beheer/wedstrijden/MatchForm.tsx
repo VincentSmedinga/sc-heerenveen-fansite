@@ -336,7 +336,7 @@ export function MatchFields() {
             error={errors['aftrap-tijd']}
             hideOptional
             {...(choices.timeOptional
-              ? { hint: 'Staat de tijd niet in het archief van de oude fansite? Laat hem dan leeg.' }
+              ? { hint: 'Staat de tijd niet bij de sc Heerenveen Fansite? Laat hem dan leeg.' }
               : {})}
             id="aftrap-tijd"
             label="Tijd"

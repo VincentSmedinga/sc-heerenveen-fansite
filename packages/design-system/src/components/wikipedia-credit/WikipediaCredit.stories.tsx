@@ -27,7 +27,7 @@ const meta = preview.meta({
           '  Elke pagina heeft een `name` voor de link en een `href`.',
           '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
           '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
-          '- `archive` noemt ook het archief van de oude sc Heerenveen Fansite, voor een pagina met wedstrijden van Wikipedia en uit het archief.',
+          '- `archive` noemt ook de sc Heerenveen Fansite, voor een pagina met wedstrijden van Wikipedia en van de sc Heerenveen Fansite.',
           '  Een pagina met alleen oude wedstrijden gebruikt `ArchiveCredit`.',
           '- `edited` zet de zin van de redactie onder de bronvermelding; alleen de volledige vorm heeft hem.',
           '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
@@ -143,7 +143,7 @@ export const Squad = meta.story({
 })
 
 export const WithArchive = meta.story({
-  name: 'Met het archief van de oude fansite, open',
+  name: 'Met de sc Heerenveen Fansite, open',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <WikipediaCredit {...readAt} archive open pages={[standings]} />
@@ -152,7 +152,7 @@ export const WithArchive = meta.story({
 })
 
 export const CompactWithArchive = meta.story({
-  name: 'Korte vorm, met het archief van de oude fansite',
+  name: 'Korte vorm, met de sc Heerenveen Fansite',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <WikipediaCredit archive compact />

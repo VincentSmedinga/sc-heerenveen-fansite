@@ -93,7 +93,7 @@ export function takenOverAt(change: Pick<MatchChange, 'firstSeenAt' | 'season'>,
  * add up to the score of the match (issue 973). It is no difference with Wikipedia, so nobody
  * is mailed about it and the importer never takes it over by itself.
  */
-export const oldSiteGoalsReason = 'de doelpunten van de oude fansite tellen niet op tot de uitslag'
+export const oldSiteGoalsReason = 'de doelpunten van de sc Heerenveen Fansite tellen niet op tot de uitslag'
 
 /**
  * Why a field of a match waits as a change: a second source says something else than the
@@ -102,7 +102,7 @@ export const oldSiteGoalsReason = 'de doelpunten van de oude fansite tellen niet
  * itself.
  */
 export const sourceDifferenceReasons = {
-  'oude-fansite': 'de oude fansite zegt iets anders dan de bron van de wedstrijd',
+  'oude-fansite': 'de sc Heerenveen Fansite zegt iets anders dan de bron van de wedstrijd',
   wikipedia: 'Wikipedia zegt iets anders dan de bron van de wedstrijd',
 } as const
 
@@ -111,7 +111,7 @@ export type SecondSource = keyof typeof sourceDifferenceReasons
 
 /** The sources of a match in the words of a sentence. */
 export const sourceLabels: Record<MatchDataSource, string> = {
-  'oude-fansite': 'de oude fansite',
+  'oude-fansite': 'de sc Heerenveen Fansite',
   redactie: 'de redactie',
   wikipedia: 'Wikipedia',
 }
@@ -242,7 +242,7 @@ export function describeConflict(change: Pick<MatchChange, 'newValue' | 'oldValu
   const name = change.part === null ? '' : partLabels[change.part]
 
   if (change.reason === oldSiteGoalsReason) {
-    return `Doelpunten van de oude fansite: in de database: ${change.oldValue}; in de bestanden: ${change.newValue ?? 'niets'}`
+    return `Doelpunten van de sc Heerenveen Fansite: in de database: ${change.oldValue}; in de bestanden: ${change.newValue ?? 'niets'}`
   }
 
   const second = secondSourceOf(change.reason)

@@ -36,7 +36,7 @@ afterEach(() => {
 const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
 
 describe('the bar of /spelers', () => {
-  it('is a navigation named Op deze pagina:, with four links: to the cards Selectie, Doelpuntenmakers, Alle tijden and Bijzondere doelpunten', async () => {
+  it('is a navigation named Op deze pagina:, with four links: to the cards Selectie, Doelpuntenmakers, Sinds 1990/91 and Bijzondere doelpunten', async () => {
     const html = await render()
 
     expect(html).toContain('Op deze pagina:')
@@ -45,7 +45,7 @@ describe('the bar of /spelers', () => {
     ).toEqual([
       ['#selectie', 'Selectie'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#alle-tijden', 'Alle tijden'],
+      ['#sinds-1990-91', 'Sinds 1990/91'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(playersShortcuts).toHaveLength(4)
@@ -103,7 +103,7 @@ describe('the links to the cards with the figures of the match reports, in the c
       ['#selectie', 'Selectie'],
       ['#alle-spelers', 'Alle spelers'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#alle-tijden', 'Alle tijden'],
+      ['#sinds-1990-91', 'Sinds 1990/91'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],

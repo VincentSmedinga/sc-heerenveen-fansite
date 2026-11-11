@@ -376,9 +376,9 @@ Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzicht
 Ze staat dicht, op elke pagina en voor elk aantal pagina's: een `details` met een `summary` die "Bron: Wikipedia" zegt, zonder link.
 Eén klik laat de licentie zien, een link naar elke pagina van Wikipedia die de import las, de tijd van de laatste keer lezen en de zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
 De bron is dus zonder klik te zien (principe 4 van de Redactie), en de rest is één klik verder.
-Wedstrijden uit het archief van de oude fansite (1990 tot 2007, `data_source = 'oude-fansite'`) hebben een eigen bronvermelding.
+Wedstrijden uit de gegevens van de sc Heerenveen Fansite zelf (1990 tot 2007, `data_source = 'oude-fansite'`) hebben een eigen bronvermelding.
 `sourceOf` (`src/match-sources.ts`) leest de bron van de wedstrijden op de pagina of de kaart: Wikipedia, het archief of allebei.
-Het archief alleen geeft `ArchiveCredit`, één regel zonder uitklap: "Bron: het archief van de oude sc Heerenveen Fansite".
+Het archief alleen geeft `ArchiveCredit`, één regel zonder uitklap: "Bron: sc Heerenveen Fansite".
 Allebei geeft `WikipediaCredit` met `archive`, dat beide noemt.
 Een pagina met pagina's van Wikipedia (voor de stand) noemt Wikipedia altijd.
 De lijst van de tegenstanders noemt de bronnen van alle wedstrijden in de database (`getMatchSource`).
@@ -390,7 +390,7 @@ De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de 
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden, stand en uitslagen van alle clubs van de seed (`madeUpMatches`, `madeUpTable` en `madeUpLeagueResults`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
-Drie verzonnen wedstrijden van de oude fansite (`madeUpOldMatches`, in 1992/93, 1996/97 en 2004/05) laten de nieuwe competities, een dag zonder tijd en de bronvermelding van het archief zien.
+Drie verzonnen wedstrijden van de sc Heerenveen Fansite (`madeUpOldMatches`, in 1992/93, 1996/97 en 2004/05) laten de nieuwe competities, een dag zonder tijd en de bronvermelding van het archief zien.
 Voor de pagina van Testdorp FC zet ze er drie oudere wedstrijden bij (`e2e/older-meetings.ts`).
 Die club heeft dan vijf gespeelde wedstrijden en zijn pagina toont de rij "Laatste wedstrijden".
 De andere clubs hebben er minder en hebben geen rij.
@@ -563,7 +563,7 @@ De kaart heeft een kolom D/W, de doelpunten per wedstrijd, alleen als voor elke 
 `goalsPerMatchOf` in `src/goals-per-match.ts` beslist dat, zonder database, uit de wedstrijden en de optredens van het seizoen (`listSeasonPlayerStats`, via `getSeasonPlayerStats` in `src/season-player-stats.ts`).
 De regel: elke gespeelde wedstrijd die de kaart telt is van de Eredivisie of de KNVB Beker (bij Alle wedstrijden dus niet in een seizoen met een gespeelde wedstrijd van de play-offs of van Europa), elke speler heeft minstens één optreden in die competities, en zijn doelpunten in de selectietabel zijn die van de kaart.
 De cijfers zijn er alleen voor een paar seizoenen, dus de kolom ook.
-Ook Alle tijden en de kaart op de pagina van een club hebben de kolom niet.
+Ook Sinds 1990/91 en de kaart op de pagina van een club hebben de kolom niet.
 De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`topFiveOf` in `src/matches.ts`, met spelers met evenveel doelpunten op één rij).
 
 - **De lijst:** `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
@@ -581,10 +581,10 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Zonder doelpunten staat er een zin in plaats van een tabel.
 
 De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-De kaart Alle tijden (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#alle-tijden`, staat onder Doelpuntenmakers op het zachte vlak.
+De kaart Sinds 1990/91 (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#sinds-1990-91`, staat onder Doelpuntenmakers op het zachte vlak.
 Ze toont de eerste tien plaatsen van de doelpuntenmakers over alle seizoenen, per persoon, met `TopScorersTable`: spelers met gelijk aantal doelpunten delen een rij, en de plaats van de tiende hoort bij alle rijen ervan.
 De telling is `allTimeScorersOf` in `src/matches.ts`, dus `topScorersOf` over de wedstrijden van alle seizoenen (`getAllTimeMatches`, één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard).
-De kaart zegt "Sinds 2010/11", het eerste seizoen met wedstrijden, en hoeveel spelers er scoorden als de lijst is afgekapt.
+De kaart heet "Sinds 1990/91", naar het eerste seizoen met wedstrijden, en zegt hoeveel spelers er scoorden als de lijst is afgekapt.
 Ze volgt de schakelaar, maar niet het seizoen van de kiezer.
 Kan de database niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
@@ -736,7 +736,7 @@ De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd o
 De play-offs voor de Conference League en de Europa League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Alle tijden (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Sinds 1990/91 (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
 Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`), zodat de schakelaar direct boven de eerste kaart staat die hem volgt.
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.

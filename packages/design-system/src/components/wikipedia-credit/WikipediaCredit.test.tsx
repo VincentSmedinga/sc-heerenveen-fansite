@@ -170,22 +170,20 @@ describe('WikipediaCredit', () => {
   it('names the archive of the old fansite next to Wikipedia when it is asked to', () => {
     const { container } = render(<WikipediaCredit {...props} archive pages={[standings]} />)
 
-    expect(container.querySelector('summary')?.textContent).toBe(
-      'Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite',
-    )
+    expect(container.querySelector('summary')?.textContent).toBe('Bron: Wikipedia en sc Heerenveen Fansite')
     expect(container.querySelector('details p')?.textContent).toContain(
-      'Oudere wedstrijden komen uit het archief van de oude sc Heerenveen Fansite.',
+      'Oudere wedstrijden komen van de sc Heerenveen Fansite.',
     )
   })
 
   it('names the archive in the short form too, after any lead', () => {
     const { container, rerender } = render(<WikipediaCredit archive compact />)
 
-    expect(container.textContent).toBe('Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite')
+    expect(container.textContent).toBe('Bron: Wikipedia en sc Heerenveen Fansite')
 
     rerender(<WikipediaCredit archive compact lead="Gegevens van" />)
 
-    expect(container.textContent).toBe('Gegevens van Wikipedia en het archief van de oude sc Heerenveen Fansite')
+    expect(container.textContent).toBe('Gegevens van Wikipedia en sc Heerenveen Fansite')
   })
 
   it('says nothing about the archive without it', () => {

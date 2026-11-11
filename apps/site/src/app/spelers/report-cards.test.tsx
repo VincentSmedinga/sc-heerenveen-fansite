@@ -97,7 +97,7 @@ describe('the cards with the figures of the match reports on /spelers', () => {
       const card = cardOf(html, id)
 
       expect(plain(card)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
-      expect(plain(card)).toContain('Bron: eigen administratie')
+      expect(plain(card)).toContain('Bron: sc Heerenveen Fansite')
     }
   })
 
@@ -165,7 +165,7 @@ describe('the cards with the figures of the match reports on /spelers', () => {
       expect(html).not.toContain(`id="${id}"`)
     }
     expect(html).not.toContain('Op basis van')
-    expect(html).not.toContain('eigen administratie')
+    expect(html).not.toContain('Bron: sc Heerenveen Fansite')
   })
 
   it('keeps the cards for the other choice of the switch when one competition has no report, and says it rests on none', async () => {

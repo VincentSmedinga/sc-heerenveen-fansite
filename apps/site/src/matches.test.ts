@@ -891,6 +891,15 @@ describe('allTimeScorersOf', () => {
     ])
   })
 
+  it('gives a person with squad rows in two seasons one row, with the link to his page', () => {
+    const { scorers } = allTimeScorersOf([
+      inSeason('2010/11', [person(1, 'Dijk', { personSlug: 'pier-dijk', playerId: 10 })]),
+      inSeason('2011/12', [person(1, 'Dijk', { personSlug: 'pier-dijk', playerId: 20 })]),
+    ])
+
+    expect(scorers.map((item) => [item.id, item.goals, item.href])).toEqual([['person:1', 2, '/spelers/pier-dijk']])
+  })
+
   it('counts a goal without a person for its name, a penalty for the player, and an own goal for nobody', () => {
     const { scorers, total } = allTimeScorersOf([
       inSeason('2012/13', [

@@ -269,7 +269,7 @@ describe('the line for the log', () => {
 
   it('names the database and the files for the kept goals of the old fansite', () => {
     expect(describeConflict({ ...values, reason: oldSiteGoalsReason })).toBe(
-      "Doelpunten van de oude fansite: in de database: geen doelpunten; in de bestanden: 10' Jan Janssen",
+      "Doelpunten van de sc Heerenveen Fansite: in de database: geen doelpunten; in de bestanden: 10' Jan Janssen",
     )
   })
 })

@@ -2877,6 +2877,7 @@
 
 - **Datum:** 6 november 2026
 - **Besluit:** een kaart "Alle tijden" met de eerste tien plaatsen, over alle seizoenen, per persoon, die de schakelaar volgt (#780).
+  **Later:** sinds #1101 (11 november 2026) heet de kaart "Sinds 1990/91" en staat het beginseizoen vast in de kop (net als in de balk "Op deze pagina:"), niet meer in de intro; het anker is nu `#sinds-1990-91`: een anker volgt de titel, ook als die verandert, want een oude link brengt een bezoeker nog steeds op de juiste pagina.
   - **Plek:** zacht vlak in de zijkolom van Spelers, direct onder Doelpuntenmakers, met een item "Alle tijden" in de balk "Op deze pagina:" en het anker `#alle-tijden`.
   - **Telling:** `topScorersOf` over de wedstrijden van alle seizoenen, in één query (`listAllMatchGoals`), een uur bewaard.
     Het seizoen van de kiezer verandert de kaart niet.
@@ -4546,6 +4547,7 @@
 - **Datum:** 11 november 2026
 - **Besluit:** de naam van een speler van ons met een pagina is een link naar `/spelers/<naam>` op de kaart Selectie, in de lijsten met doelpuntenmakers en de bijzondere doelpunten op Spelers, in de kaart Doelpuntenmakers op de pagina van een club, en op de pagina van een wedstrijd (de kop, het verloop, de strafschoppenserie, de lijst onder het veld en de wissels) (#1087).
   Een speler van de tegenstander en een naam zonder persoon of zonder pagina blijft gewone tekst.
+  **Later:** sinds #1101 (11 november 2026) linkt op Spelers alleen de kaart Selectie en de kaart "Sinds 1990/91"; de andere kaarten tonen de naam zonder link (zie _Op Spelers linkt alleen de selectie, en een doelpuntenmaker is één rij_).
   - **Eén functie:** het adres komt uit `playerAddress` in `src/player-address.ts`, van `persons.slug`; `playerHref` geeft niets bij een persoon zonder naam in het adres.
     Een doelpunt van de tegenstander krijgt nooit een adres (`goalHref`), ook niet van een speler die ooit bij ons speelde.
   - **De hele naam is één link,** met de vlag erin als versiering (`alt=""`) en het rugnummer ernaast.
@@ -4634,6 +4636,19 @@
 - **Waarom:** een speler op de bank heeft de wedstrijd niet gespeeld, en een eerste of laatste wedstrijd waarin hij niet op het veld stond is onjuist.
 - **Alternatieven:** de bank meetellen zoals eerst (te hoog); alleen de basis tellen (invallers missen).
 - **Buiten dit besluit:** de selectie en Cijfers tellen niet op deze plek.
+
+## Op Spelers linkt alleen de selectie, en een doelpuntenmaker is één rij
+
+- **Datum:** 11 november 2026
+- **Besluit:** op `/spelers` en `/spelers/<seizoen>` linkt alleen de kaart Selectie naar de pagina van een speler, en de kaart "Sinds 1990/91" (eerder "Alle tijden"), omdat zijn spelers meestal niet in de selectie van dat seizoen staan (#1101).
+  De andere kaarten tonen de naam zonder link.
+  `PlayersPage` haalt daarvoor `personSlug` uit de doelpunten en de cijfers van de rapporten voordat die de kaarten bereiken.
+  - **Eén rij per persoon:** een doelpunt van ons zonder persoon, maar met een rij van de selectie die er wel een heeft, telt voor die persoon.
+    `withGoals` in `packages/db/src/queries.ts` neemt dan `players.person_id` over, ook voor de naam en het adres van de pagina.
+    Zo wordt een speler met een rij in meer seizoenen niet meer één rij per seizoen, en heeft hij zijn link.
+  - **De gegevens blijven zoals ze zijn:** de doelpunten zelf houden hun lege `person_id` (zie #918).
+- **Waarom:** op acceptatie hadden 1019 van de 2074 doelpunten van ons alleen een rij van de selectie, zodat dezelfde speler soms meer rijen kreeg, zonder link.
+- **Alternatieven:** de doelpunten in de database herstellen (een zaak van de importer, een eigen issue); de links van alle kaarten houden (druk, en de selectie noemt al alle spelers).
 
 ## De zijkolom van de pagina van een speler
 

@@ -1,3 +1,4 @@
+import { oldSiteReportSource } from '@fansite/db/schema'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -353,7 +354,7 @@ describe('the page of a match', () => {
     expect(text).toContain('Gestopt: Frank Dummydijk')
     expect(text).toContain('Naast: Thijs Idzenga')
     expect(text.indexOf('Strafschoppenserie')).toBeGreaterThan(text.indexOf('Verloop Eerste helft'))
-    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('komen uit onze eigen administratie'))
+    expect(text.indexOf('Strafschoppenserie')).toBeLessThan(text.indexOf('komen van de sc Heerenveen Fansite'))
   })
 
   it('has the line in the header and no card for a shoot-out of which only the result is known', async () => {
@@ -450,7 +451,7 @@ describe('the page of a match', () => {
     expect(html).toContain('href="/wedstrijden"')
     expect(text).toContain('Wedstrijden 2026/27')
     expect(text).toContain(
-      'De opstelling, de wissels, de kaarten en de assists komen uit onze eigen administratie, naar het wedstrijdformulier.',
+      'De opstelling, de wissels, de kaarten en de assists komen van de sc Heerenveen Fansite, naar het wedstrijdformulier.',
     )
     expect(text).toContain('Wikipedia')
     expect(text).toContain('CC BY-SA 4.0')
@@ -462,7 +463,16 @@ describe('the page of a match', () => {
     reported.stored.report.source = null
     vi.mocked(getPublicReport).mockResolvedValue(reported)
 
-    expect(plain(await render())).toContain('komen uit onze eigen administratie.')
+    expect(plain(await render())).toContain('komen van de sc Heerenveen Fansite.')
+  })
+
+  it('does not name the sc Heerenveen Fansite twice when the report comes from it', async () => {
+    const reported = reportedMatch()
+
+    reported.stored.report.source = oldSiteReportSource
+    vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+    expect(plain(await render())).toContain('komen van de sc Heerenveen Fansite.')
   })
 
   it('loads nothing from another domain', async () => {

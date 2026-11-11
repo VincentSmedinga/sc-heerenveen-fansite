@@ -7,10 +7,11 @@ import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPla
 
 // The cards of the page Spelers with the figures of the match reports (#832): the lists of the
 // assists and the minutes, and the table of all the players. They count only the reports that
-// are `klaar`, say how many of the played matches that is, and credit our own administration.
+// are `klaar`, say how many of the played matches that is, and credit the sc Heerenveen
+// Fansite.
 
 /** The credit under the image of a card, and in the card: where the figures come from. */
-const ownRecords = 'Bron: eigen administratie'
+const ownRecords = 'Bron: sc Heerenveen Fansite'
 
 /** The credit for the image of a card. */
 const credit = <Text appearance="meta">{ownRecords}</Text>

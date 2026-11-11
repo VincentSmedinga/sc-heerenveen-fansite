@@ -115,7 +115,7 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 ## Een verschil tussen twee bronnen beslissen
 
-Soms zeggen twee bronnen iets anders over dezelfde wedstrijd, zoals de oude fansite en Wikipedia over de uitslag.
+Soms zeggen twee bronnen iets anders over dezelfde wedstrijd, zoals de sc Heerenveen Fansite en Wikipedia over de uitslag.
 De wedstrijd houdt dan de waarde van de bron waar hij van komt, en het verschil wacht op een besluit.
 Je vindt zo'n wedstrijd op `/beheer/kwaliteit`, onder "wijzigingen wachten" bij het seizoen.
 

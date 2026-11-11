@@ -36,9 +36,9 @@ export type WikipediaCreditProps =
         | { readAt?: never; readAtDateTime?: never }
       ) & {
         /**
-         * Whether some of the matches come from the archive of the old fansite as well. The
-         * summary then names both, "Bron: Wikipedia en het archief van de oude sc Heerenveen
-         * Fansite", and the fold says that the older matches are from the archive.
+         * Whether some of the matches come from the sc Heerenveen Fansite as well. The
+         * summary then names both, "Bron: Wikipedia en sc Heerenveen Fansite", and the fold
+         * says that the older matches are from the sc Heerenveen Fansite.
          */
         archive?: boolean
         compact?: false
@@ -60,7 +60,7 @@ export type WikipediaCreditProps =
         pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
       })
   | (WikipediaCreditBaseProps<'p'> & {
-      /** Whether some of the matches come from the archive of the old fansite as well. */
+      /** Whether some of the matches come from the sc Heerenveen Fansite as well. */
       archive?: boolean
       /** The short form, "Bron: Wikipedia", for a small card. It takes `lead` and `archive`. */
       compact: true
@@ -141,7 +141,7 @@ export const WikipediaCredit = ({
             </>
           )}{' '}
           Onze {data} zijn ook CC BY-SA 4.0.
-          {archive ? ` Oudere wedstrijden komen uit ${archiveName}.` : ''}
+          {archive ? ` Oudere wedstrijden komen van de ${archiveName}.` : ''}
         </p>
       </details>
       {edited ? <p className="hf-meta hf-wikipedia-credit-edited">{editedSentence}</p> : null}

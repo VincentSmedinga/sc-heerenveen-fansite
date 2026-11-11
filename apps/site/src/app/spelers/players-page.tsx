@@ -59,9 +59,9 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * so the squad comes first there. The switch between all matches and the Eredivisie is the
  * first cell of the main column, as on every page that has it, and changes only the cards with
  * goals. The sidebar has the card
- * Doelpuntenmakers (every player who scored), the card Alle tijden (the first ten places of the
- * scorers of every season, which does not change with the season of the picker) and the card
- * Bijzondere doelpunten (hattricks, penalties and own goals), all soft, and ends with the
+ * Doelpuntenmakers (every player who scored), the card Sinds 1990/91 (the first ten places of
+ * the scorers of every season, which does not change with the season of the picker) and the
+ * card Bijzondere doelpunten (hattricks, penalties and own goals), all soft, and ends with the
  * credit, as on Cijfers. A season that is over has the cards with goals put the season on their
  * image. A season that has no matches in the database is the page "niet gevonden". The cards
  * with goals count all the matches or, with `?competitie=eredivisie`, the Eredivisie alone, as
@@ -90,7 +90,9 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
   const allTime = await loadAllTime()
   const stats = await loadStats(season)
   const figures = await loadFigures(season, competition)
-  const { data, seasons } = loaded
+  const { seasons } = loaded
+  // Only the card Selectie and the card Sinds 1990/91 link to a player: the others name him.
+  const data = { ...loaded.data, matches: loaded.data.matches.map(withoutLinks) }
   const current = season === seasonOf(new Date())
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
 
@@ -119,7 +121,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
         {figures?.seasonHasReports === true && (
           <AllPlayersCard
             competition={competition}
-            figures={figures}
+            figures={unlinked(figures)}
             season={season}
             seasonOnImage={current ? undefined : season}
           />
@@ -144,14 +146,14 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
             <RankingCard
               competition={competition}
               figure="assists"
-              figures={figures}
+              figures={unlinked(figures)}
               season={season}
               seasonOnImage={current ? undefined : season}
             />
             <RankingCard
               competition={competition}
               figure="minutes"
-              figures={figures}
+              figures={unlinked(figures)}
               season={season}
               seasonOnImage={current ? undefined : season}
             />
@@ -172,7 +174,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
 }
 
 /**
- * Every match of every season with its goals, for the card Alle tijden, or undefined when it
+ * Every match of every season with its goals, for the card Sinds 1990/91, or undefined when it
  * could not be read (the error is logged). The card is left out then: the rest of the page
  * doesn't need it.
  */
@@ -225,3 +227,13 @@ async function loadStats(season: string) {
     return undefined
   }
 }
+
+/** A match with its goals as names only: no goal has the page of a player behind it. */
+const withoutLinks = <T extends { goals: { personSlug: null | string }[] }>(match: T): T => ({
+  ...match,
+  goals: match.goals.map((goal) => ({ ...goal, personSlug: null })),
+})
+
+/** The figures of the reports with the players as names only. */
+const unlinked = <T extends undefined | { players: { personSlug: null | string }[] }>(figures: T): T =>
+  figures === undefined ? figures : { ...figures, players: figures.players.map((p) => ({ ...p, personSlug: null })) }
