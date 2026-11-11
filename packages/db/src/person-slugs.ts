@@ -37,20 +37,44 @@ export function isPlayerSlug(slug: string): boolean {
 }
 
 /**
+ * The letters without a loose accent, which `normalize('NFKD')` leaves as they are (#1113),
+ * and what they give in an address. The list is here and nowhere else; `lostLetters` fails a
+ * test when a name has a letter that is neither in this list nor an ASCII letter with accents.
+ */
+export const slugLetters: Readonly<Record<string, string>> = {
+  æ: 'ae',
+  đ: 'dj',
+  ð: 'd',
+  ı: 'i',
+  ł: 'l',
+  ø: 'o',
+  œ: 'oe',
+  ß: 'ss',
+  þ: 'th',
+}
+
+const slugLetterPattern = new RegExp(`[${Object.keys(slugLetters).join('')}]`, 'gu')
+
+/** The country of a Vietnamese person: his đ is a d, as in Đức, where "dj" would be wrong. */
+const vietnam = 'VN'
+
+/**
+ * The letters of a name that give nothing in an address, so a name does not lose one without us
+ * noticing (#1113): a letter that is not ASCII after the accents and the letters of
+ * `slugLetters` are dealt with. Empty for a name that keeps all its letters.
+ */
+export function lostLetters(name: string): string[] {
+  return [...foldedName(name, null)].filter((letter) => /\p{L}/u.test(letter) && !/[a-z]/u.test(letter))
+}
+
+/**
  * The slug a name gives before it is checked against the slugs that exist: lowercase letters,
  * digits and single hyphens, without the accents, dots and apostrophes (`Jan de Vries` gives
- * `jan-de-vries`). An empty result is `''`, which is never a slug.
+ * `jan-de-vries`). Letters without a loose accent are written out (see `slugLetters`). An empty
+ * result is `''`, which is never a slug.
  */
-export function personSlug(name: string): string {
-  return name
-    .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
-    .replace(/[ðđ]/gu, 'd')
-    .replace(/ø/gu, 'o')
-    .replace(/ł/gu, 'l')
-    .replace(/ı/gu, 'i')
-    .replace(/ß/gu, 'ss')
-    .toLowerCase()
+export function personSlug(name: string, country?: null | string): string {
+  return foldedName(name, country)
     .replace(/[.'’]/gu, '')
     .replace(/[^a-z0-9]+/gu, '-')
     .replace(/^-+|-+$/gu, '')
@@ -88,6 +112,7 @@ export async function updatePlayerAddresses(db: SlugDatabase): Promise<number> {
   const rows = await db
     .select({
       birthDate: persons.birthDate,
+      country: persons.country,
       current: persons.slug,
       id: persons.id,
       name: persons.name,
@@ -108,7 +133,7 @@ export async function updatePlayerAddresses(db: SlugDatabase): Promise<number> {
 
     seen.add(row.id)
 
-    const base = personSlug(row.name ?? row.playerName)
+    const base = personSlug(row.name ?? row.playerName, row.country)
     const year = row.birthDate?.slice(0, 4)
     const candidates = [
       base,
@@ -134,6 +159,22 @@ export async function updatePlayerAddresses(db: SlugDatabase): Promise<number> {
   }
 
   return changed
+}
+
+/**
+ * The name in lowercase, without accents and with the letters of `slugLetters` written out: the
+ * part of `personSlug` that decides what a letter gives. `country` is the code of
+ * the country of the person (`persons.country`): for a Vietnamese đ is "d", and for everyone
+ * else, also a person whose country we do not know, it is "dj".
+ */
+function foldedName(name: string, country: null | string | undefined): string {
+  const letters: Record<string, string> = { ...slugLetters, đ: country === vietnam ? 'd' : 'dj' }
+
+  return name
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(slugLetterPattern, (letter) => letters[letter] ?? letter)
 }
 
 /** Whether the person has a row in `players`: only those have a page. */
