@@ -223,7 +223,7 @@ Een gewone klik met de linkermuisknop (of Enter) zet de waarde van de schakelaar
 Terwijl de pagina laadt, staat `aria-busy="true"` op de groep, en daarna zegt de regel met `role="status"` naast de groep wat er gekozen is: "Laatste 5 gekozen".
 Valt de wissel weg, dan staat de schakelaar weer op de waarde van de pagina.
 Een klik met Ctrl, Cmd, Shift of Alt, met een andere muisknop of op een link met `target` of `download` laat `SwitchLinks` aan de link.
-Zonder JavaScript zijn het echte links met `aria-current="page"`, en de overgang tussen pagina's blijft zoals hij was.
+Zonder JavaScript zijn het echte links met `aria-current="page"`, en de nieuwe pagina laadt met de knop al bij de nieuwe keuze, zonder overgang.
 
 Het onderdeel gebruikt `useRouter` en niet `next/link`: de site heeft geen `next/link` (een test in `src/visits.test.ts` controleert dat).
 De router vraagt de gegevens van de pagina zonder `Accept: text/html`, en alleen een aanvraag die om HTML vraagt telt als paginaweergave (`visitOf` in `src/visits.ts`).

@@ -158,7 +158,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
           </Page.Title>
         }
       >
-        {hasCup && <CompetitionLinks address={opponentsPath} competition={competition} place="tegenstanders" />}
+        {hasCup && <CompetitionLinks address={opponentsPath} competition={competition} />}
         <ClubsCard
           address={opponentsPath}
           choice={competition}
@@ -273,9 +273,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           </Page.Cell>
         }
       >
-        {hasCup && (
-          <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} place="tegenstander" />
-        )}
+        {hasCup && <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} />}
         {meetings.length === 0 && upcoming.length === 0 ? (
           <Text>{noneYet}</Text>
         ) : (

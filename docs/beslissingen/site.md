@@ -2515,6 +2515,7 @@
   - **De knop schuift met de bestaande CSS-overgang** op `translate` van `segmented-control.css` (0 seconden bij verminderde beweging), niet met een overgang tussen documenten.
     Dat werkt in elke browser, ook in Firefox.
     `@view-transition` blijft voor de terugval zonder JavaScript.
+    **Later:** sinds #1111 (11 november 2026) is die terugval weg: zonder JavaScript laadt de pagina met de knop al bij de nieuwe keuze.
   - **Tijdens het laden** schuift alleen de knop en staat `aria-busy="true"` op de groep.
     De oude inhoud blijft staan tot de nieuwe er is, zonder schemering en zonder draaiend teken.
     Valt de wissel weg of mislukt hij, dan staat de schakelaar weer op de waarde van de pagina (`useOptimistic` in een overgang).
