@@ -133,6 +133,26 @@ export function metricsOf(report, address) {
   }
 }
 
+/** How often a failed measurement is tried again (Lighthouse sometimes loses its trace). */
+export const maxRetries = 2
+
+/**
+ * Starts a measurement with `attempt()`, which returns the exit status of the CLI, and tries
+ * it again after a failure, at most `retries` times. It returns the last status and how often
+ * it retried, so a failure that keeps coming back still fails the run.
+ */
+export function measureWithRetries(attempt, retries = maxRetries) {
+  let status = attempt()
+  let retried = 0
+
+  while (status !== 0 && retried < retries) {
+    retried++
+    status = attempt()
+  }
+
+  return { retried, status }
+}
+
 /** The limit of a size: the baseline of the measurement of #798 plus the margin, rounded up. */
 export function sizeLimit(baseline, marginPercent) {
   return Math.ceil(baseline * (1 + marginPercent / 100) * 10) / 10
@@ -255,21 +275,31 @@ function measure() {
     for (let run = 1; run <= config.runsPerPage; run++) {
       for (const [index, page] of config.pages.entries()) {
         const outputPath = join(reportsDir, fileName(index, device, run))
-        const result = spawnSync(
-          'npx',
-          cliArguments({
-            address: config.address,
-            chrome: '--headless=new --no-sandbox',
-            device,
-            outputPath,
-            path: page.path,
-            version: config.cliVersion,
-          }),
-          { stdio: ['ignore', 'inherit', 'inherit'] },
+        const where = `${config.address}${page.path} (${device}, run ${run})`
+        const { retried, status } = measureWithRetries(
+          () =>
+            spawnSync(
+              'npx',
+              cliArguments({
+                address: config.address,
+                chrome: '--headless=new --no-sandbox',
+                device,
+                outputPath,
+                path: page.path,
+                version: config.cliVersion,
+              }),
+              { stdio: ['ignore', 'inherit', 'inherit'] },
+            ).status,
         )
 
-        if (result.status !== 0) {
-          console.error(`::error::Lighthouse faalde op ${config.address}${page.path} (${device}, run ${run})`)
+        if (retried > 0) {
+          console.log(
+            `::warning::Lighthouse probeerde ${where} ${retried} keer opnieuw${status === 0 ? '' : ' zonder succes'}`,
+          )
+        }
+
+        if (status !== 0) {
+          console.error(`::error::Lighthouse faalde op ${where}`)
           process.exit(1)
         }
       }
