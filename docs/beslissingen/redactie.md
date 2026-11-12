@@ -193,7 +193,8 @@
   Of `Page.Body` als de `main`; dan staat de `aside` in de `main`.
   Of een onderdeel `Page.Intro`, met een tweede onderdeel om de cellen; dan schrijft elke pagina die twee zelf.
   Of een vaste marge boven de zijbalk; die klopt niet meer bij een langere inleiding of als je inzoomt.
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `intro`, de subgrid en `Page.Sidebar` bestaan niet meer. De kop is een cel met het gebied `head`, en wat naast de hoofdinhoud staat is een `Page.Section`.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `intro`, de subgrid en `Page.Sidebar` bestaan niet meer.
+  De kop is een cel met het gebied `head`, en wat naast de hoofdinhoud staat is een `Page.Section`.
 
 ## We tonen de schermnaam van de laatste reageerder, als gewone tekst
 

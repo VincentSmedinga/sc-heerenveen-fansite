@@ -446,7 +446,8 @@
   Het token `--hf-content-max-width` zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 24 rem breed.
 - **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
   De hoofdkolom is weer 36 rem, en de kolom van de pagina 64 rem.
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Page.Body is het raster, met een hoofdkolom en een zijbalk
 
@@ -496,7 +497,8 @@
 - **Later:** zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_ (2 november 2026).
   De ruimte in een `Page.Cell` komt nu van de stroom in `utilities/flow.css`, die elk kind ruimte onder zich geeft en het laatste geen; de regel voor het eerste en het laatste kind in `page.css` is weg.
   De ruimte tussen de cellen blijft de `gap` van `Page.Body`.
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -649,7 +651,8 @@
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem.
 - **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte naast het woordmerk is 0,5 rem, dus de hang van het schild is 3,9875 rem en het logo hangt vanaf 74 rem buiten de kolom (was 4,2375 rem en 74,5 rem).
   De ruimten van 2 rem en 4 rem zijn nu `--hf-space-xl` en tweemaal die stap: de "eerste aanzet voor de tokens voor ruimte" is de reeks geworden.
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
 
@@ -682,7 +685,8 @@
   Een pagina kan met `narrow` op de `Page.Sidebar` een hoofdkolom van 46 rem en een zijbalk van 16 rem kiezen.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem is er dus 48 rem voor de sporen, en niet meer 52 rem.
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -1026,7 +1030,8 @@
   De regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen, want dat is nu de standaard; `wide` maakt de zijbalk alleen nog breder, met dezelfde sporen als eerst: 38, 2 en 24 rem voor een gewone zijbalk en 31, 2 en 31 rem voor een brede.
   De zijbalk staat nog na de hoofdkolom in de bron, zonder `order`, en de benoemde gebieden voor een pagina met een inleiding blijven gelden.
 - **Alternatieven:** de verdeling in twee kolommen helemaal weghalen (`/bronnen` verliest iets wat goed werkte); de verdeling als standaard laten en per pagina afzetten, zoals met `wide` (elke nieuwe pagina met lijsten moet eraan denken).
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur
 
@@ -1534,7 +1539,8 @@
   Een lagere grens met smallere kolommen van 18 tot 20 rem (knijpt tabellen en kaarten).
   Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
-- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
+  De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een keuzelijst krijgt de opmaak van de site met `appearance: base-select`, binnen `@supports`, te beginnen bij de seizoenskiezer
 
