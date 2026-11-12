@@ -36,6 +36,7 @@ import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
+import { adminFailure } from './failure'
 import { checkCountry, checkDeathYear, checkLine, checkName, checkPage } from './person-checks'
 import { personLabels } from './person-labels'
 import {
@@ -1045,7 +1046,7 @@ export async function refreshCompleteness(db: Database, season: string, now: Dat
   try {
     await storeCompleteness(db, season, undefined, now)
   } catch (error) {
-    console.warn(`Could not work out the completeness of ${season} after a change of a player`, error)
+    console.warn(adminFailure(`work out the completeness of ${season} after a change of a player`, error))
   }
 }
 
@@ -1058,7 +1059,7 @@ export async function refreshPlayerAddresses(db: Database): Promise<void> {
   try {
     await updatePlayerAddresses(db)
   } catch (error) {
-    console.warn('Could not update the addresses of the players after a change of a player', error)
+    console.warn(adminFailure('update the addresses of the players after a change of a player', error))
   }
 }
 

@@ -6,6 +6,7 @@ import type { PersonFormState } from '#src/beheer/person-fields'
 
 import { mergePath, playersPath } from '#src/app/beheer/spelers/paths'
 import { backPathOf } from '#src/app/beheer/wedstrijden/paths'
+import { adminFailure } from '#src/beheer/failure'
 import { parseItemId } from '#src/beheer/items'
 import { birthDateText } from '#src/beheer/person-checks'
 import { isPersonPart } from '#src/beheer/person-fields'
@@ -62,7 +63,7 @@ export async function submitPerson(
   try {
     outcome = await editPerson(db, userId, id, checked.entry)
   } catch (error) {
-    console.error(`Could not change a person: ${error instanceof Error ? error.message : String(error)}`)
+    console.error(adminFailure(`change person ${id}`, error))
 
     return { errors: { algemeen: 'De persoon is niet opgeslagen. Probeer het nog eens.' }, values }
   }
