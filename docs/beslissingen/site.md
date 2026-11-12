@@ -2357,6 +2357,7 @@
     Een club met een eigen lijst heeft de kaart ook als de wedstrijden geen stadion noemen en ook met de keuze Eredivisie als we hem alleen in de beker troffen; de zijkolom is er dan ook zonder gespeelde wedstrijden.
   - **Het scherm:** `/beheer/stadions` toont de clubs waarvan we wedstrijden hebben, met het label "Eigen lijst", het filter Alles of Eigen lijst en zoeken op de naam.
     `/beheer/stadions/<club>` is de brede pagina met een zijbalk, zoals een wedstrijd: het formulier met de regels in de hoofdkolom, en in de zijbalk "Opslaan", wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
+    **Later:** sinds 12 november 2026 heeft het formulier van een wedstrijd geen zijbalk meer (#1162); het stadion houdt de zijne.
     "Overnemen" vult het formulier en slaat niets op; "Terug naar Wikipedia" haalt de hele lijst weg, ook de toelichtingen, na een bevestiging.
     Voor dezelfde rollen als de wedstrijden: alleen een beheerder.
   - **Geen reden:** een opslag of een "Terug naar Wikipedia" vraagt geen reden, anders dan een wedstrijd.

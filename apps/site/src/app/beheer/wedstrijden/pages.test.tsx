@@ -1106,6 +1106,7 @@ describe('the parts of the form of a match (#1162)', () => {
 
     await expect(partForm(id, 'verslag')).rejects.toThrow('not found')
     await expect(partForm(id, 'iets')).rejects.toThrow('not found')
+    await expect(partForm(id, 'constructor')).rejects.toThrow('not found')
     await expect(partForm(id, 'wijzigingen')).rejects.toThrow('not found')
   })
 

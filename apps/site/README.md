@@ -1234,7 +1234,7 @@ Hier geeft de redactie een club een eigen lijst van namen, met een start en een 
 
 - De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Eigen lijst" bij clubs die er een hebben, het filter Alles of Eigen lijst en zoeken op een deel van de naam.
   Het zoeken is een formulier met `GET`, dus het werkt zonder JavaScript (`searchClubs` in `src/beheer/stadiums.ts`).
-- `/beheer/stadions/<club>` is de brede pagina met een zijbalk, zoals een wedstrijd.
+- `/beheer/stadions/<club>` is de brede pagina met een zijbalk.
   De hoofdkolom heeft het formulier (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
   Een naam begint met een seizoen (`2019/20`, telt als 1 juli van dat jaar) of met een dag, niet met allebei, en alleen de eerste naam mag zonder start; de starts lopen op, en de naam ervoor eindigt waar de volgende begint.
   De toelichting is gewone tekst van hoogstens 200 tekens, in eigen woorden, en noemt de bron als die niet Wikipedia is.

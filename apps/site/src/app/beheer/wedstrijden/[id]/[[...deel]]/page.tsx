@@ -438,5 +438,5 @@ function partOf(deel: string[] | undefined): MatchPagePart | null | undefined {
 
   const [name] = deel
 
-  return deel.length === 1 && name !== undefined && name in pageLabels ? (name as MatchPagePart) : null
+  return deel.length === 1 && name !== undefined && Object.hasOwn(pageLabels, name) ? (name as MatchPagePart) : null
 }
