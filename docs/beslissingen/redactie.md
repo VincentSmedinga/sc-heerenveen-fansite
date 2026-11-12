@@ -3084,3 +3084,4 @@
 - **Besluit:** de kaart "Laatste overwinning" op Tegenstanders toont alleen een clubnaam, een datum en een aantal dagen uit onze eigen wedstrijdlijst, en heeft geen vermelding van een bron: de uitklap van `WikipediaCredit` onderaan de zijkolom dekt haar, en er komt geen verzoek naar een derde bij (#989).
 - **Waarom:** de gegevens komen uit de wedstrijden die we van Wikipedia lezen, en een pagina heeft één bronvermelding (zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_).
 - **Alternatieven:** een regel onder de kaart zoals "Het moeilijkst" die had.
+- **Later:** 12 november 2026 (#1152): de kaart toont de datum niet meer, alleen een clubnaam en een aantal dagen.

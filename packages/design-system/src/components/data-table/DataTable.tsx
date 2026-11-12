@@ -91,7 +91,10 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
           <tr>
             {textColumns.map((column) => (
               <th
-                className={column.fold === true ? 'hf-data-table-fold-column' : undefined}
+                className={classNames(
+                  column.fold === true && 'hf-data-table-fold-column',
+                  column.bar === true && 'hf-numeric',
+                )}
                 key={column.name}
                 scope="col"
               >

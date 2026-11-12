@@ -22,7 +22,6 @@ import {
   tableColumns,
   tableLegend,
   Text,
-  Time,
   WikipediaCredit,
 } from '@fansite/design-system'
 
@@ -711,10 +710,10 @@ export function HardestCard({
 /**
  * The card Laatste overwinning under Het moeilijkst: the clubs of the Eredivisie now, the one
  * we have not beaten for the longest time first (see `lastWinsOf`), on the soft surface. The
- * table has the club as a link, the day of our last win in the Eredivisie and the calendar days
- * since, and a `Bar` next to the day, as long as the days are of the longest wait. The bar is
- * decoration: a screen reader reads the day and the days. A club we never beat says so in place
- * of the day and the days, and has no bar. The card does not follow the switch of the page,
+ * table has the club as a link and the calendar days since our last win in the Eredivisie,
+ * aligned to the end, with a `Bar` after the days, as long as the days are of the longest wait.
+ * The bar is decoration: a screen reader reads the days. A club we never beat says so in place
+ * of the days, and has no bar. The card does not follow the switch of the page,
  * which is why the caption says the Eredivisie, but its links keep the choice (`address` and
  * `query`). Without `places` there is no card.
  */
@@ -743,17 +742,16 @@ export function LastWinCard({
         <DataTable
           appearance="text"
           caption="De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste"
-          columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
+          columns={['Club', { bar: true, name: 'Dagen geleden' }]}
           rows={places.map((place, index) => ({
             cells:
-              place.lastWin === null
-                ? ['Nog nooit gewonnen', '']
+              place.days === null
+                ? ['Nog nooit gewonnen']
                 : [
                     <>
-                      <Time dateTime={place.lastWin}>{formatTableDay(place.lastWin)}</Time>
+                      {place.days.toLocaleString('nl-NL')}
                       {shares === null ? null : <Bar share={shares[index] ?? 0} />}
                     </>,
-                    place.days,
                   ],
             header: place.name,
             ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
