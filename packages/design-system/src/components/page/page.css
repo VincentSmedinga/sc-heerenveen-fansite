@@ -231,6 +231,16 @@
   }
 
   /*
+   * A wide page without a sidebar, such as a table in the admin, has nothing for the second track, so the main takes
+   * the whole width of the body, up to the width of a wide page, and not only the 58rem of the main beside a sidebar.
+   */
+  @media (width >= 52rem) {
+    .hf-page-body:has(> .hf-page-main-wide):not(:has(> .hf-page-sidebar)) {
+      grid-template-columns: minmax(24rem, 1fr);
+    }
+  }
+
+  /*
    * A column is a grid of one track, its own, so its cells stack under each other, each as tall as its content, and not
    * on the rows of the other column. That is why a plain grid is enough here: a subgrid would put the cells of both
    * columns on the same rows. Only a main with an introduction is a subgrid, and then in two rows only (see below).

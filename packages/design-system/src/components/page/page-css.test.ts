@@ -388,7 +388,7 @@ describe('the wide page in page.css', () => {
   })
 
   it('sets the columns of the wide page once, inside the media query, so a phone sees no difference', () => {
-    expect(css.match(/\.hf-page-body:has\(> \.hf-page-main-wide\)/g)).toHaveLength(2)
+    expect(css.match(/\.hf-page-body:has\(> \.hf-page-main-wide\)(?!:not)/g)).toHaveLength(2)
     expect(rule(String.raw`\.hf-page-body:has\(> \.hf-page-main-wide\)`)).not.toContain('grid-template-columns')
   })
 
@@ -418,5 +418,13 @@ describe('the sticky sidebar in page.css', () => {
   it('scrolls on its own when it is taller than the window, so every part of it can be reached', () => {
     expect(rule).toContain('overflow-y: auto;')
     expect(rule).toMatch(/max-block-size: calc\(100dvh - 2 \* var\(--hf-space-m\)\);/)
+  })
+})
+
+describe('a wide page without a sidebar in page.css', () => {
+  it('lets the main fill the body in one track, so no track is kept for a sidebar that is not there', () => {
+    expect(css).toMatch(
+      /\.hf-page-body:has\(> \.hf-page-main-wide\):not\(:has\(> \.hf-page-sidebar\)\)\s*\{\s*grid-template-columns: minmax\(24rem, 1fr\);/,
+    )
   })
 })
