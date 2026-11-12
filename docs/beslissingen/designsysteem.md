@@ -3428,3 +3428,19 @@
 - **Waarom:** de body hield ook zonder zijbalk een tweede spoor vrij, en de tabel van de kwaliteit gebruikte bij 900 px maar de helft van de breedte.
 - **Alternatieven:** een eigen klasse op de pagina in de site, die elke brede pagina zonder zijbalk opnieuw zou moeten kiezen.
   Elke brede pagina volle breedte geven, ook met een zijbalk: dan past de zijbalk er niet naast.
+
+## Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop
+
+- **Datum:** 12 november 2026
+- **Besluit:** `Page.Main` met `areas` is een raster met benoemde gebieden, naast de oude opbouw, die blijft werken tot #1182 haar weghaalt (#206, #1179).
+  - **Een raster per pagina:** de pagina zegt welke gebieden ze heeft op een smal en op een breed scherm, en welke verdeling van de kolommen ze kiest, en elke cel noemt zijn gebied met `area`.
+  - **`main` is het raster:** de cellen van de zijkolom zijn secties met een naam (`Page.Section`, een landmark `region`) binnen `main`, geen `aside` ernaast.
+  - **De volgorde in de bron is de volgorde op een telefoon:** het brede raster zet cellen alleen opzij. Er is geen `order` en geen nieuwe regel met `:has()`.
+  - **Wat de pagina's gelijk houdt:** de verdelingen komen uit vier tokens in `layout.css` (`--hf-page-columns-side`, `-equal`, `-narrow-side` en `-start-side`), er is één grens bij 52 rem, de ruimte tussen cellen is overal 2 rem en de rijen staan in een vaste volgorde: de kop, de werkbalk, de inhoud en de bronvermelding.
+  - **Een werkbalk onder de kop:** `Page.Toolbar` is een rij over de hele breedte die op een telefoon omslaat en niet plakt, zonder `role="toolbar"` en zonder landmark.
+    Een pagina zonder werkbalk laat de rij weg, dus er is geen lege ruimte.
+  - **De hoofdinhoud loopt door:** de hoofdinhoud is één gebied dat over de rijen van de zijkolom loopt, de laatste rij van het brede raster neemt de resterende hoogte (`--hf-page-rows-wide`), en kaarten die alleen onder elkaar staan gaan samen in één `Page.Section` die zelf een raster met eigen rijen is.
+  - **Eigenschappen in `style`:** `Page.Main` zet de gebieden, de rijen en de verdeling als custom properties in zijn `style`, en `page.css` heeft één regel voor een smal scherm en één vanaf 52 rem. `apps/site` heeft geen eigen CSS en de Content Security Policy staat `style` in de opmaak al toe.
+  - **De grens van 52 rem blijft een getal in `page.css`:** een media query kan geen custom property lezen. `page-css.test.ts` controleert dat.
+- **Waarom:** de zes vaste verdelingen en de regels met `:has()` groeiden per pagina, en een cel uit de zijkolom kon op een telefoon nooit vóór de hoofdinhoud staan zonder `order`, dat de volgorde van het toetsenbord breekt (2.4.3).
+- **Alternatieven:** een algemeen rastercomponent met kolommen en `span` (meer API voor weinig winst); de huidige varianten uitbreiden met een eigenschap per cel; `order`; een stap die de CSS uit de tokens maakt (een extra gereedschap dat geen issue vraagt).
