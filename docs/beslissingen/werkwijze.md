@@ -767,3 +767,16 @@
   Het resultaat week zichtbaar af van het ontwerp (de gekozen opbouw had een kaart per getal) en moest opnieuw.
   Dezelfde dag vielen een conflict in `docs/beslissingen/`, een server van een andere worktree die met `pkill -f` werd gestopt en een wijziging van de opmaak na het verslag van de Reviewer op, die een regel in een skill had voorkomen.
 - **Alternatieven:** het canvas in het issue linken (het issue is openbaar, en het canvas is privé); de Reviewer het ontwerp laten zien (hij leest de code en de woorden, en zijn verslag moet voor iedereen kloppen met het issue); de regels in `AGENTS.md` herhalen (een skill wijst naar de regels en voegt stappen toe).
+
+## Een mislukte Lighthouse-meting krijgt hoogstens twee nieuwe pogingen
+
+- **Datum:** 12 november 2026
+- **Besluit:** `scripts/lighthouse.js` probeert een meting die faalt opnieuw, hoogstens twee keer extra (#1174).
+  Het script kijkt alleen naar de afsluitstatus van de Lighthouse-CLI, dus elke fout van de CLI telt.
+  Komt de fout elke keer terug, dan faalt de run zoals voorheen.
+  Het logboek meldt hoe vaak een meting opnieuw is geprobeerd.
+- **Waarom:** in vijf van de zes runs tot en met 12 november 2026 faalde één meting met `NO_NAVSTART`, elke keer op een andere pagina, en Lighthouse raadt zelf aan opnieuw te draaien.
+  Een run die elke dag rood is door ruis, laat een echte achteruitgang verdwijnen.
+- **Alternatieven:** de hele run opnieuw laten draaien; dat kost veel meer machinetijd.
+  Fouten van Lighthouse negeren; een echt probleem blijft dan onzichtbaar.
+- **Later:** dit vult _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_ aan, voor een meting die faalt door een fout van Lighthouse zelf.

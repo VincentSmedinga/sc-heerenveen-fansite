@@ -11,6 +11,7 @@ import {
   extraHeaders,
   fixedProblems,
   historyLength,
+  measureWithRetries,
   medianRun,
   metricsOf,
   recentRuns,
@@ -325,4 +326,34 @@ test('the reports and the metrics are kept for 30 days, also when a check failed
 
 test('the workflow measures nothing but our own address from the configuration', () => {
   assert.doesNotMatch(workflow, /https?:\/\/(?!acc\.sc\.heerenveen\.org|github\.com)/)
+})
+
+test('a measurement that fails once is tried again and passes, and the run says it retried', () => {
+  const statuses = [1, 0]
+
+  assert.deepEqual(
+    measureWithRetries(() => statuses.shift()),
+    { retried: 1, status: 0 },
+  )
+})
+
+test('a measurement that keeps failing is tried again twice and then fails', () => {
+  let calls = 0
+
+  assert.deepEqual(
+    measureWithRetries(() => {
+      calls++
+
+      return 1
+    }),
+    { retried: 2, status: 1 },
+  )
+  assert.equal(calls, 3)
+})
+
+test('a measurement that passes at once is not retried', () => {
+  assert.deepEqual(
+    measureWithRetries(() => 0),
+    { retried: 0, status: 0 },
+  )
 })
