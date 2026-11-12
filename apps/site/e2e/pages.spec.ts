@@ -346,6 +346,18 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'author', path: '/beheer/spelers', status: 404 },
   { admin: 'author', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 404 },
   { admin: 'author', path: '/beheer/spelers/{player}', status: 404 },
+  // The form of a person in parts (issue 1164): the whole form, each part, a notice, and an
+  // unknown part, a name of an object and an unknown person.
+  { admin: 'editor', path: '/beheer/personen/{person}', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}/naam', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}/leven', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}/land', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}/linie', status: 200 },
+  { admin: 'editor', path: '/beheer/personen/{person}/geboorte', status: 404 },
+  { admin: 'editor', path: '/beheer/personen/{person}/constructor', status: 404 },
+  { admin: 'editor', path: '/beheer/personen/999999', status: 404 },
+  { admin: 'author', path: '/beheer/personen/{person}', status: 404 },
   // The stadiums: the list of the clubs with its filter and search, a club with a list of its
   // own and a note (made up, see stadiums.ts), a club without one, and a club that is no club.
   { admin: 'editor', path: '/beheer/stadions', status: 200 },

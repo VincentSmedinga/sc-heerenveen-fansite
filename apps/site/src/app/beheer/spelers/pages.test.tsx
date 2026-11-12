@@ -395,6 +395,21 @@ describe('the form that adds a player', () => {
 })
 
 describe('the form of a player', () => {
+  it('leads under Wie to the form of his person, with the way back to the player (issue 1164)', async () => {
+    const id = await idOf('Luca Oyen')
+    const [player] = await database.db.select().from(players).where(eq(players.id, id))
+    const html = await playerForm(id)
+
+    expect(html).toMatch(/id="wie-kop"[^>]*>Wie<\/h2>.*Persoon bewerken/su)
+    expect(html).toContain(
+      `href="/beheer/personen/${player?.personId}?terug=%2Fbeheer%2Fspelers%2F${id}">Persoon bewerken</a>`,
+    )
+  })
+
+  it('has no link to a person for a player without one', async () => {
+    expect(await playerForm(await idOf('Jan Vos'))).not.toContain('Persoon bewerken')
+  })
+
   it('opens with the name of his person in parts, his number, line and page', async () => {
     const html = await playerForm(await idOf('Luca Oyen'))
 

@@ -21,7 +21,6 @@ import {
   matchAppearances,
   matchGoals,
   type Person,
-  personNameLimits,
   personPages,
   persons,
   type Player,
@@ -31,14 +30,13 @@ import {
   playerPositions,
   players,
   playerSeasonStats,
-  wikipediaPageMaxLength,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { storeCompleteness } from '@fansite/db/store-completeness'
-import { isCountryCode } from '@fansite/shared/countries'
 import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
+import { checkCountry, checkDeathYear, checkLine, checkName, checkPage } from './person-checks'
 import { personLabels } from './person-labels'
 import {
   emptyPlayerValues,
@@ -229,6 +227,34 @@ export async function listPlayerSeasons(db: Database, now = new Date()): Promise
 }
 
 /**
+ * The name in the three fields of the form: that of the person, or the name of the row split.
+ * The words of the surname that start with a small letter (`van der`) are the prefix.
+ */
+export function nameValuesOf(
+  player: Pick<Player, 'name'>,
+  person: Pick<Person, 'familyName' | 'familyNamePrefix' | 'givenName'> | undefined,
+): Pick<PlayerValues, 'achternaam' | 'tussenvoegsel' | 'voornaam'> {
+  if (person !== undefined && person.familyName !== null) {
+    return {
+      achternaam: person.familyName,
+      tussenvoegsel: person.familyNamePrefix ?? '',
+      voornaam: person.givenName ?? '',
+    }
+  }
+
+  const { givenName = '', surname } = splitPersonName(player.name)
+  const words = (surname === '' ? player.name : surname).split(' ')
+  const prefix = words.slice(0, -1).findIndex((word) => !/^['’]?\p{Ll}/u.test(word))
+  const prefixWords = prefix === -1 ? words.length - 1 : prefix
+
+  return {
+    achternaam: words.slice(prefixWords).join(' '),
+    tussenvoegsel: words.slice(0, prefixWords).join(' '),
+    voornaam: surname === '' ? '' : givenName,
+  }
+}
+
+/**
  * The values the form of a player opens with. The name in parts is the name of his person, and
  * for a player without one, or whose person has no name yet, the name of the row split as well
  * as it can be: the editor reads it before saving.
@@ -347,6 +373,7 @@ export function validatePlayer(
   const chosen = mode === 'add' && values.persoon !== newPersonChoice && values.persoon !== ''
   const personId = chosen && /^[1-9]\d{0,9}$/u.test(values.persoon) ? Number(values.persoon) : null
   let page: null | string = null
+  let name: EditorsName | null = null
 
   if (chosen) {
     if (personId === null) {
@@ -359,37 +386,8 @@ export function validatePlayer(
       }
     }
   } else {
-    const tooLong = (field: 'achternaam' | 'tussenvoegsel' | 'voornaam', most: number) => {
-      if ([...values[field]].length > most) {
-        errors[field] = `Schrijf hoogstens ${most} tekens.`
-      }
-    }
-
-    if (values.achternaam === '') {
-      errors.achternaam = 'Vul de achternaam in. Heeft de speler één naam, zoals Dinho? Vul die dan hier in.'
-    }
-
-    tooLong('voornaam', personNameLimits.givenName)
-    tooLong('tussenvoegsel', personNameLimits.familyNamePrefix)
-    tooLong('achternaam', personNameLimits.familyName)
-
-    const whole = [values.voornaam, values.tussenvoegsel, values.achternaam].filter(Boolean).join(' ')
-
-    if (errors.achternaam === undefined && [...whole].length > playerNameMaxLength) {
-      errors.achternaam = `De hele naam is langer dan ${playerNameMaxLength} tekens. Kort hem in.`
-    }
-
-    const title = values.wikipedia.replaceAll('_', ' ').replaceAll(/\s+/gu, ' ').trim()
-
-    if (/:\/\/|^www\./iu.test(title)) {
-      errors.wikipedia = 'Vul de titel van het artikel in, niet het adres. Zoals Pelle van Amersfoort.'
-    } else if (/[#<>[\]{}|]/u.test(title)) {
-      errors.wikipedia = 'Een titel heeft geen #, <, >, [, ], {, } of |. Vul de titel van het artikel in.'
-    } else if ([...title].length > wikipediaPageMaxLength) {
-      errors.wikipedia = `Schrijf hoogstens ${wikipediaPageMaxLength} tekens.`
-    } else if (title !== '') {
-      page = title
-    }
+    name = checkName(values, errors)
+    page = checkPage(values.wikipedia, errors)
   }
 
   let shirtNumber: null | number = null
@@ -437,23 +435,12 @@ export function validatePlayer(
     errors.positie = 'Kies een positie uit de lijst.'
   }
 
-  // The line and the country of the person, for a person we know and for a new one alike.
-  const line = playerPositions.find((choice) => choice === values.linie) ?? null
-  const country = isCountryCode(values.land) ? values.land : null
+  // The line and the country of the person, for a person we know and for a new one alike, and
+  // the year of death the editors know better than Wikidata (#1147).
+  const line = checkLine(values.linie, errors)
+  const country = checkCountry(values.land, errors)
+  const deathYear = checkDeathYear(values.overleden, errors, now)
 
-  if (values.linie !== '' && line === null) {
-    errors.linie = 'Kies een linie uit de lijst, of kies Onbekend.'
-  }
-  if (values.land !== '' && country === null) {
-    errors.land = 'Kies een land uit de lijst, of kies Onbekend.'
-  }
-
-  // The year of death the editors know better than Wikidata (#1147): four digits, not ahead.
-  const deathYear = /^\d{4}$/u.test(values.overleden) ? Number(values.overleden) : null
-
-  if (values.overleden !== '' && (deathYear === null || deathYear < 1850 || deathYear > now.getFullYear())) {
-    errors.overleden = `Vul een jaar van overlijden in met vier cijfers, van 1850 tot en met ${now.getFullYear()}, of laat het veld leeg.`
-  }
   if (Object.keys(errors).length > 0) {
     return { errors }
   }
@@ -463,13 +450,7 @@ export function validatePlayer(
       country,
       deathYear,
       line,
-      name: chosen
-        ? null
-        : {
-            familyName: values.achternaam,
-            familyNamePrefix: values.tussenvoegsel === '' ? null : values.tussenvoegsel,
-            givenName: values.voornaam === '' ? null : values.voornaam,
-          },
+      name,
       page,
       personId,
       position,
@@ -526,34 +507,6 @@ function isDay(text: string) {
   const moment = new Date(`${text}T00:00:00Z`)
 
   return !Number.isNaN(moment.getTime()) && moment.toISOString().startsWith(text)
-}
-
-/**
- * The name in the three fields of the form: that of the person, or the name of the row split.
- * The words of the surname that start with a small letter (`van der`) are the prefix.
- */
-function nameValuesOf(
-  player: Pick<Player, 'name'>,
-  person: Pick<Person, 'familyName' | 'familyNamePrefix' | 'givenName'> | undefined,
-): Pick<PlayerValues, 'achternaam' | 'tussenvoegsel' | 'voornaam'> {
-  if (person !== undefined && person.familyName !== null) {
-    return {
-      achternaam: person.familyName,
-      tussenvoegsel: person.familyNamePrefix ?? '',
-      voornaam: person.givenName ?? '',
-    }
-  }
-
-  const { givenName = '', surname } = splitPersonName(player.name)
-  const words = (surname === '' ? player.name : surname).split(' ')
-  const prefix = words.slice(0, -1).findIndex((word) => !/^['’]?\p{Ll}/u.test(word))
-  const prefixWords = prefix === -1 ? words.length - 1 : prefix
-
-  return {
-    achternaam: words.slice(prefixWords).join(' '),
-    tussenvoegsel: words.slice(0, prefixWords).join(' '),
-    voornaam: surname === '' ? '' : givenName,
-  }
 }
 
 /**
@@ -1130,19 +1083,11 @@ export async function removePlayer(
 }
 
 /**
- * The name of the row of a player of this person: the name of the person, or, while the
- * importer has not read his article, its title without the addition between brackets.
- */
-function playerNameOf(person: Pick<Person, 'name' | 'wikipediaPage'>) {
-  return person.name ?? (person.wikipediaPage ?? '').replace(/\s*\([^)]*\)$/u, '')
-}
-
-/**
  * The surname the search page looks for (`van Aken`): the prefix and the family name, or for a
  * person without a name in parts the name without its first word, as the importer works it
  * out.
  */
-function searchTermOf(name: Pick<Person, 'familyName' | 'familyNamePrefix'>, whole: string) {
+export function searchTermOf(name: Pick<Person, 'familyName' | 'familyNamePrefix'>, whole: string) {
   if (name.familyName !== null) {
     return [name.familyNamePrefix, name.familyName].filter(Boolean).join(' ')
   }
@@ -1150,6 +1095,14 @@ function searchTermOf(name: Pick<Person, 'familyName' | 'familyNamePrefix'>, who
   const words = whole.split(' ').filter(Boolean)
 
   return words.length < 2 ? words.join(' ') : words.slice(1).join(' ')
+}
+
+/**
+ * The name of the row of a player of this person: the name of the person, or, while the
+ * importer has not read his article, its title without the addition between brackets.
+ */
+function playerNameOf(person: Pick<Person, 'name' | 'wikipediaPage'>) {
+  return person.name ?? (person.wikipediaPage ?? '').replace(/\s*\([^)]*\)$/u, '')
 }
 
 /** What holds a player in the squad: his goals, and where he played. */

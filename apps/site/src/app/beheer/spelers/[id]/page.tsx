@@ -18,6 +18,7 @@ import {
 } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { personPath } from '#src/app/beheer/personen/paths'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import { parseItemId, parseSearch, searchMaxLength } from '#src/beheer/items'
@@ -113,6 +114,7 @@ export default async function PlayerPage({ params, searchParams }: Props) {
         initial={playerValuesOf(found)}
         key={`${id}-${gedaan ?? ''}`}
         nameHint={person === undefined ? undefined : 'Een andere naam geldt voor deze persoon in elk seizoen.'}
+        personHref={person === undefined ? undefined : personPath(person.id, { back: playerPath(id) })}
         submitLabel="Opslaan"
         withoutPerson={person === undefined}
       />

@@ -37,6 +37,7 @@ const notInSitemap: string[] = [
   '/beheer/wedstrijden/[id]/verslag/afgelopen',
   '/beheer/wedstrijden/[id]/verslag/live',
   '/beheer/wedstrijden/[id]/verslag/plakken',
+  '/beheer/personen/[id]/[[...deel]]',
   '/beheer/spelers',
   '/beheer/spelers/nieuw',
   '/beheer/spelers/[id]',
