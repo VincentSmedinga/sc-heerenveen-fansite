@@ -35,9 +35,11 @@ export function RemoveMatchForm({
       <Form action={formAction}>
         <Field
           error={state.error}
+          hideOptional
           hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="verwijderen-reden"
           label="Reden om de wedstrijd te verwijderen"
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

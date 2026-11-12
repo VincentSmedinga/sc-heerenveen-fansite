@@ -35,9 +35,11 @@ export function RemoveEntryForm({
       <Form action={formAction}>
         <Field
           error={state.error}
+          hideOptional
           hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="weghalen-reden"
           label="Reden om de invoer weg te halen"
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

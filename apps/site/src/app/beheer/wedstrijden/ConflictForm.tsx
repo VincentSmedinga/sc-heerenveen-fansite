@@ -51,9 +51,11 @@ export function ConflictForm({
       <Form action={formAction}>
         <Field
           error={state.error}
+          hideOptional
           hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id={reasonId}
           label={`Reden voor je besluit over ${part}`}
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

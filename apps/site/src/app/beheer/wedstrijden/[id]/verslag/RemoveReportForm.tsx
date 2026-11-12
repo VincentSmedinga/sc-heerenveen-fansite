@@ -35,9 +35,11 @@ export function RemoveReportForm({
       <Form action={formAction}>
         <Field
           error={state.error}
+          hideOptional
           hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="verslag-weghalen-reden"
           label="Reden om het verslag weg te halen"
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

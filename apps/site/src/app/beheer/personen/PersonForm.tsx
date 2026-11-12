@@ -141,9 +141,11 @@ export function PersonForm({
         </Heading>
         <Field
           error={errors.reden}
+          hideOptional
           hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="reden"
           label="Reden"
+          required={false}
         >
           <Input {...field('reden')} autoComplete="off" />
         </Field>
